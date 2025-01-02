@@ -34,6 +34,12 @@
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
 
+  networking.extraHosts =
+  ''
+    127.0.0.1 local.estrategia-sandbox.com.br
+  '';
+
+
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "pt_BR.UTF-8";
     LC_IDENTIFICATION = "pt_BR.UTF-8";
