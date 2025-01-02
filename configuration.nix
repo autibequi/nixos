@@ -252,16 +252,13 @@ environment.sessionVariables = {
         <dead_acute> <c> : "ç"
       '';
 
+    dconf.settings = {
+      "org/gnome/desktop/peripherals/mouse" = { natural-scroll = true; };
+      "org/gnome/mutter" = {
+        experimental-features = ["scale-monitor-framebuffer"];
+      };
+    };
+
   };
 
-  programs.dconf = {
-      enable = true;
-      profiles.user.databases = [{
-        settings = with lib.gvariant; {
-            "org/gnome/mutter" = {
-            experimental-features = ["scale-monitor-framebuffer"];
-            };
-        };
-      }];
-    };
 }
