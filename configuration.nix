@@ -9,6 +9,7 @@
     [ # Include the results of the hardware scan.
       <home-manager/nixos> 
       ./hardware-configuration.nix
+      ./packages.nix
     ];
 
 
@@ -110,80 +111,20 @@ environment.sessionVariables = {
   virtualisation.docker.enable = true;
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [
-    # warp?
 
-    # essentials
-    vim
-    wget
-    git
-    zsh
-    unixtools.whereis
-    mission-center
-
-    # Stuff
-    steam
-    obsidian
-
-    # Tools
-    dbeaver-bin
-    insomnia
-    podman
-
-    # Work/Estrategia
-    cloudflare-warp
-    chromium
-    python314
-    poetry
-    nodejs_23
-    vscode
-    gradle
-    go
-    terraform
-
-    # Flutter
-    flutter
-    android-studio
-    android-tools
-    dart
-
-    # Flatpaks
-    flatpak
-
-    # Utils
-    gnumake
-    coreutils-full
-    atuin
-    httpie
-
-    # Gnome Stuff
-    desktop-file-utils
-
-    # Extensions
-    gnomeExtensions.just-perfection
-    gnomeExtensions.caffeine
-    gnomeExtensions.forge
-    gnomeExtensions.pano
-    gnomeExtensions.appindicator
-    gnomeExtensions.gsconnect
-    gnomeExtensions.blur-my-shell
-    
-    # ai shit
-    github-copilot-cli
-  ];
 
   fonts = {
   fontconfig.enable = true;
   enableDefaultFonts = true;
   fonts = with pkgs; [
-    noto-fonts
-    noto-fonts-cjk-sans
-    noto-fonts-emoji
-    liberation_ttf
-    fira-code
-    fira-code-symbols
-  ];
-};
+      noto-fonts
+      noto-fonts-cjk-sans
+      noto-fonts-emoji
+      liberation_ttf
+      fira-code
+      fira-code-symbols
+    ];
+  };
 
   services.gnome.gnome-browser-connector.enable = true;
 
@@ -256,6 +197,12 @@ environment.sessionVariables = {
       "org/gnome/desktop/peripherals/mouse" = { natural-scroll = true; };
       "org/gnome/mutter" = {
         experimental-features = ["scale-monitor-framebuffer"];
+      };
+      "org/gnome/shell/extensions/GPU_profile_selector" = {
+        rtd3 = true;
+        force-composition-pipeline = true;
+        coolbits = true;
+        force-topbar-view = false;
       };
     };
 
