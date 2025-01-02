@@ -48,7 +48,6 @@
         gnumake
         coreutils-full
         atuin
-        httpie
 
         # Gnome Stuff
         desktop-file-utils
@@ -68,6 +67,11 @@
         #NVIDIA?
         gnomeExtensions.gpu-profile-selector
 
-        
+
+
+        # TODO:Test
+        nushell
+        pueue
+        starship
     ];
 }

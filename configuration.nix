@@ -155,6 +155,20 @@ environment.sessionVariables = {
   xdg.portal.enable = true;
   xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
 
+  programs.starship = {
+      enable = true;
+      # Configuration written to ~/.config/starship.toml
+      settings = {
+        # add_newline = false;
+
+        # character = {
+        #   success_symbol = "[➜](bold green)";
+        #   error_symbol = "[➜](bold red)";
+        # };
+
+        # package.disabled = true;
+      };
+    };
 
   systemd.services.flatpak-repo = {
     wantedBy = [ "multi-user.target" ];
@@ -174,7 +188,7 @@ environment.sessionVariables = {
   #     };
   #   }];
   # };
-
+  programs.direnv.enable = true;
   programs.zsh.enable = true;
   programs.zsh.enableCompletion = true;
   programs.zsh.autosuggestions.enable = true;
