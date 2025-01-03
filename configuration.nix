@@ -7,7 +7,7 @@
 {
   imports =
     [ # Include the results of the hardware scan.
-      <home-manager/nixos> 
+      <home-manager/nixos>
       ./hardware-configuration.nix
       ./packages.nix
     ];
@@ -120,16 +120,16 @@ environment.sessionVariables = {
 
 
   fonts = {
-  fontconfig.enable = true;
-  enableDefaultFonts = true;
-  fonts = with pkgs; [
-      noto-fonts
-      noto-fonts-cjk-sans
-      noto-fonts-emoji
-      liberation_ttf
-      fira-code
-      fira-code-symbols
-    ];
+    fontconfig.enable = true;
+    enableDefaultFonts = true;
+    fonts = with pkgs; [
+        noto-fonts
+        noto-fonts-cjk-sans
+        noto-fonts-emoji
+        liberation_ttf
+        fira-code
+        fira-code-symbols
+        ];
   };
 
   services.gnome.gnome-browser-connector.enable = true;

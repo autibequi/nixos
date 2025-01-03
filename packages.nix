@@ -73,5 +73,6 @@
         nushell
         pueue
         starship
+        zed-editor
     ];
 }
