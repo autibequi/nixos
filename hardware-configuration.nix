@@ -7,24 +7,26 @@
 
   imports =
     [
-      <nixos-hardware/asus/zephyrus/ga402x/nvidia>
       (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
-  # Nix
+  # Plataform
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
   # Basics
+  hardware.nvidia.open = false;
   hardware.pulseaudio.enable = false;
   hardware.graphics.enable = true;
   hardware.graphics.enable32Bit = true;
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
-  # Boot
+  # InitRD
   boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "usbhid" "usb_storage" "uas" "sd_mod" "rtsx_pci_sdmmc" ];
   boot.initrd.kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_drm" "nvidia_uvm" ];
+
+  # Kernel
+  boot.kernelPackages = pkgs.linuxPackages_latest; 
   boot.kernelModules = [ "nvidia" "kvm-amd" "amdgpu" ];
-  boot.extraModulePackages = [ ];
   boot.kernelParams = [ "nvidia-drm.fbdev=1" ];
 
   # Video
