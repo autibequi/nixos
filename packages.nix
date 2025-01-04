@@ -56,12 +56,13 @@
         gnomeExtensions.appindicator
         gnomeExtensions.gsconnect
         gnomeExtensions.blur-my-shell
+        gnomeExtensions.auto-power-profile        
+        #NVIDIA?
+        gnomeExtensions.gpu-profile-selector      
+        gnomeExtensions.battery-health-charging
         
         # ai shit
         github-copilot-cli
-
-        #NVIDIA?
-        gnomeExtensions.gpu-profile-selector
 
         # TODO:Test
         nushell

@@ -7,6 +7,7 @@
 
   imports =
     [
+      <nixos-hardware/asus/zephyrus/ga402x/nvidia>
       (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
@@ -17,20 +18,19 @@
   # Basics
   hardware.pulseaudio.enable = false;
   hardware.graphics.enable = true;
-  hardware.graphics.enable32Bit = true;
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
   # InitRD
   boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "usbhid" "usb_storage" "uas" "sd_mod" "rtsx_pci_sdmmc" ];
-  boot.initrd.kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_drm" "nvidia_uvm" ];
+  boot.initrd.kernelModules = [ ];
 
   # Kernel
   boot.kernelPackages = pkgs.linuxPackages_latest; 
-  boot.kernelModules = [ "nvidia" "kvm-amd" "amdgpu" ];
-  boot.kernelParams = [ "nvidia-drm.fbdev=1" ];
+  boot.kernelModules = [ "kvm-amd" "amdgpu" ];
+  boot.kernelParams = [ ];
 
   # Video
-  services.xserver.videoDrivers = [ "nvidia" "amdgpu" ];
+  services.xserver.videoDrivers = [ "amdgpu" ];
 
   # Filesystems
   fileSystems."/" =
@@ -85,8 +85,8 @@
         enableOffloadCmd = true;
       };
 
-      amdgpuBusId = "PCI:0:65:0";
-      nvidiaBusId = "PCI:0:01:0";
+      amdgpuBusId = lib.mkDefault "PCI:0:65:0";
+      nvidiaBusId = lib.mkDefault "PCI:0:01:0";
     };
   };
 }
