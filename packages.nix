@@ -2,13 +2,9 @@
 
 {
     environment.systemPackages = with pkgs; [
-        # warp?
-
         # essentials
         vim
         wget
-        git
-        zsh
         unixtools.whereis
         mission-center
         pciutils

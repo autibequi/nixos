@@ -13,11 +13,6 @@
 
   hardware.nvidia.prime.nvidiaBusId = lib.mkDefault "PCI:0:1:0";
 
-  hardware.opengl = lib.mkDefault {
-    enable = true;
-    driSupport32Bit = true;
-  };
-
   hardware.nvidia = {
     modesetting.enable = true;
     nvidiaPersistenced = true;
@@ -36,6 +31,7 @@
   boot.kernelParams = [ "nvidia-drm.fbdev=1" ];
 
   hardware.graphics.enable = true;
+  hardware.graphics.enable32Bit = true;
 
 
   fileSystems."/" =
