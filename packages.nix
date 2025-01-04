@@ -63,8 +63,6 @@
         #NVIDIA?
         gnomeExtensions.gpu-profile-selector
 
-
-
         # TODO:Test
         nushell
         pueue
