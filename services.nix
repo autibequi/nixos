@@ -2,11 +2,20 @@
 
 {
     services = {
+        # Cloudflare
+        cloudflare-warp.enable = true;
+
         # Services
         printing.enable = false;
         gnome.gnome-browser-connector.enable = true;
-        cloudflare-warp.enable = true;
         flatpak.enable = true;
+
+        pipewire = {
+            enable = true;
+            alsa.enable = true;
+            alsa.support32Bit = true;
+            pulse.enable = true;
+        };
     };
 
     # Flatpak Repo

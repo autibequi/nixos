@@ -42,11 +42,14 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Networking
-  networking.hostName = "nixos"; # Define your hostname.
-  networking.networkmanager.enable = true;
-  networking.extraHosts = ''
-    127.0.0.1 local.estrategia-sandbox.com.br
-  '';
+  networking = {
+    hostName = "nomad"; # Define your hostname.
+    useDHCP = lib.mkDefault true;
+    networkmanager.enable = true;
+    extraHosts = ''
+      127.0.0.1 local.estrategia-sandbox.com.br
+    '';
+  };
 
   # Time and Locale
   time.timeZone = "America/Sao_Paulo";
@@ -71,15 +74,8 @@
     layout = "us";
     variant = "altgr-intl";
   };
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-  };
   
   # Sound
-  hardware.pulseaudio.enable = false;
   security.rtkit.enable = true;
 
   # User Accounts

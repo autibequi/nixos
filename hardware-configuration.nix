@@ -11,29 +11,26 @@
       (modulesPath + "/installer/scan/not-detected.nix")
     ];
 
-  hardware.nvidia.prime.nvidiaBusId = lib.mkDefault "PCI:0:1:0";
+  # Nix
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
-  hardware.nvidia = {
-    modesetting.enable = true;
-    nvidiaPersistenced = true;
-    powerManagement.enable = false;
-    open = false;
-    nvidiaSettings = true;
-    package = config.boot.kernelPackages.nvidiaPackages.stable; #tried both production and stable
-  };
+  # Basics
+  hardware.pulseaudio.enable = false;
+  hardware.graphics.enable = true;
+  hardware.graphics.enable32Bit = true;
+  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
+  # Boot
   boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "usbhid" "usb_storage" "uas" "sd_mod" "rtsx_pci_sdmmc" ];
   boot.initrd.kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_drm" "nvidia_uvm" ];
   boot.kernelModules = [ "nvidia" "kvm-amd" "amdgpu" ];
-  services.xserver.videoDrivers = [ "nvidia" "amdgpu" ];
   boot.extraModulePackages = [ ];
-
   boot.kernelParams = [ "nvidia-drm.fbdev=1" ];
 
-  hardware.graphics.enable = true;
-  hardware.graphics.enable32Bit = true;
+  # Video
+  services.xserver.videoDrivers = [ "nvidia" "amdgpu" ];
 
-
+  # Filesystems
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
       fsType = "ext4";
@@ -48,19 +45,6 @@
   swapDevices =
     [ { device = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; }
     ];
-
-  # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
-  # (the default) this is the recommended approach. When using systemd-networkd it's
-  # still possible to use this option, but it's recommended to use it in conjunction
-  # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
-  networking.useDHCP = lib.mkDefault true;
-  # networking.interfaces.wlp2s0.useDHCP = lib.mkDefault true;
-
-  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-  
-
-
 }
 
 
