@@ -12,7 +12,13 @@
       ./packages.nix
     ];
 
+  nix.gc = {
+    automatic = true;
+    randomizedDelaySec = "14m";
+    options = "--delete-older-than 10d";
+  };
 
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;

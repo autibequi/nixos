@@ -4,11 +4,28 @@
 { config, lib, pkgs, modulesPath, ... }:
 
 {
+
   imports =
     [
-      (modulesPath + "/installer/scan/not-detected.nix")
       <nixos-hardware/asus/zephyrus/ga402x/nvidia>
+      (modulesPath + "/installer/scan/not-detected.nix")
     ];
+
+  hardware.nvidia.prime.nvidiaBusId = lib.mkDefault "PCI:0:1:0";
+
+  hardware.opengl = lib.mkDefault {
+    enable = true;
+    driSupport32Bit = true;
+  };
+
+  hardware.nvidia = {
+    modesetting.enable = true;
+    nvidiaPersistenced = true;
+    powerManagement.enable = false;
+    open = false;
+    nvidiaSettings = true;
+    package = config.boot.kernelPackages.nvidiaPackages.stable; #tried both production and stable
+  };
 
   boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "usbhid" "usb_storage" "uas" "sd_mod" "rtsx_pci_sdmmc" ];
   boot.initrd.kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_drm" "nvidia_uvm" ];
@@ -19,10 +36,6 @@
   boot.kernelParams = [ "nvidia-drm.fbdev=1" ];
 
   hardware.graphics.enable = true;
-
-  hardware.nvidia = {
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
-  };
 
 
   fileSystems."/" =
@@ -50,6 +63,8 @@
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
   
+
+
 }
 
 
