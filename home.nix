@@ -10,6 +10,15 @@ in
   # Home Manager
   home-manager.users."pedrinho" = { lib, ... }: {
     home.stateVersion = "24.11";
+
+    # Git
+    programs.git = {
+        enable = true;
+        userName  = "Pedro Correa";
+        userEmail = "pedro.correa@estrategia.com";
+    };
+
+    # Gnome Basic Crap
     dconf.settings = {
       "org/gnome/desktop/peripherals/mouse" = { natural-scroll = true; };
       "org/gnome/mutter" = {
@@ -23,10 +32,16 @@ in
       };
     };
 
-    programs.git = {
-        enable = true;
-        userName  = "Pedro Correa";
-        userEmail = "pedro.correa@estrategia.com";
-    };
+    # Gnome Cecidilha Fix
+    home.file.".XCompose".text = ''
+      # I shouldnt need to do this, but I do...
+      #https://github.com/NixOS/nixpkgs/issues/239415
+      include "%L"
+
+      <dead_acute> <C> : "Ç"
+      <dead_acute> <c> : "ç"
+    '';
   };
+
+
 }

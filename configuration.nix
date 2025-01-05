@@ -14,6 +14,10 @@
       ./services.nix
     ];
 
+  
+  # Security
+  security.rtkit.enable = true;
+
   # NIXOS STUFF
   # Garbage Collection
   nix.gc = {
@@ -25,13 +29,11 @@
   # Unholy packages
   nixpkgs.config.allowUnfree = true;
 
-
   # Environment Variables
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
     ELECTRON_OZONE_PLATFORM_HINT = "wayland";
   };
-
 
   # System State Version
   system.stateVersion = "24.11";
@@ -43,7 +45,7 @@
 
   # Networking
   networking = {
-    hostName = "nomad"; # Define your hostname.
+    hostName = "nomad"; 
     useDHCP = lib.mkDefault true;
     networkmanager.enable = true;
     extraHosts = ''
@@ -72,11 +74,8 @@
   services.xserver.desktopManager.gnome.enable = true;
   services.xserver.xkb = {
     layout = "us";
-    variant = "altgr-intl";
+    variant = "alt-intl";
   };
-  
-  # Sound
-  security.rtkit.enable = true;
 
   # User Accounts
   users.users.pedrinho = {
@@ -94,7 +93,9 @@
 
   # Programs
   programs = {
-    firefox.enable = true;
+    firefox = {
+      enable = true;
+    };
     adb.enable = true;
     direnv.enable = true;
     zsh = {
@@ -128,6 +129,4 @@
 
   # Docker
   virtualisation.docker.enable = true;
-
-
 }
