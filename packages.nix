@@ -47,6 +47,7 @@
 
         # Gnome Stuff
         desktop-file-utils
+        gnome-extension-manager
 
         # Extensions
         gnomeExtensions.just-perfection
@@ -60,7 +61,6 @@
         #NVIDIA?
         gnomeExtensions.gpu-profile-selector      
         gnomeExtensions.battery-health-charging
-        
         # ai shit
         github-copilot-cli
 
