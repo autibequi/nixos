@@ -156,6 +156,5 @@
     pkgs.gnome-usage
     pkgs.simple-scan
     pkgs.gnome-software
-    pkgs.gnome-extensions-app
   ];
 }
