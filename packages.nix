@@ -72,6 +72,9 @@
         pueue
         starship
         zed-editor
+
+        # hacking stuff
+        dig
     ];
 
     # Gnome Debloat

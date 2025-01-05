@@ -32,6 +32,18 @@
   # Video
   services.xserver.videoDrivers = [ "amdgpu" ];
 
+  # TODO: Try Next Reset
+  # LUKS FullDiskEncryption
+  # boot.initrd.luks.devices = {
+  #   luksroot = {
+  #       device = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
+  #       allowDiscards = true;
+  #       keyFileSize = 4096;
+  #       # pinning to /dev/disk/by-id/usbkey works
+  #       keyFile = "/dev/sdb";
+  #   };
+  # };
+
   # Filesystems
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";

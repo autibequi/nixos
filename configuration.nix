@@ -12,6 +12,7 @@
       ./packages.nix
       ./home.nix
       ./services.nix
+      # ./howdy.nix
     ];
 
   
