@@ -61,6 +61,8 @@
         #NVIDIA?
         gnomeExtensions.gpu-profile-selector      
         gnomeExtensions.battery-health-charging
+        gnomeExtensions.vertical-workspaces
+
         # ai shit
         github-copilot-cli
 
