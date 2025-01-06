@@ -3,9 +3,20 @@ let
   home-manager = builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-24.11.tar.gz";
 in
 {
-    imports = [
-        (import "${home-manager}/nixos")
+  imports = [
+    (import "${home-manager}/nixos")
+  ];
+
+  # User Accounts
+  users.users.pedrinho = {
+    isNormalUser = true;
+    description = "pedrinho";
+    extraGroups = [ "networkmanager" "wheel" "docker" "adbusers" ];
+    packages = with pkgs; [
+      # Thunderbird
     ];
+    shell = pkgs.zsh;
+  };
 
   # Home Manager
   home-manager.users."pedrinho" = { lib, ... }: {

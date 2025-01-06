@@ -12,15 +12,13 @@
       ./packages.nix
       ./home.nix
       ./services.nix
+      ./programs.nix
       # ./howdy.nix
     ];
 
   
   # Security
   security.rtkit.enable = true;
-
-  # Disable Printing services
-  services.printing.enable = false;
 
   # NIXOS STUFF
   # Garbage Collection
@@ -72,7 +70,7 @@
     LC_TIME = "pt_BR.UTF-8";
   };
 
-  # X11 and Desktop Environment
+  # Desktop Environment
   services.xserver.enable = true;
   services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome.enable = true;
@@ -81,35 +79,8 @@
     variant = "alt-intl";
   };
 
-  # User Accounts
-  users.users.pedrinho = {
-    isNormalUser = true;
-    description = "pedrinho";
-    extraGroups = [ "networkmanager" "wheel" "docker" "adbusers" ];
-    packages = with pkgs; [
-      # Thunderbird
-    ];
-    shell = pkgs.zsh;
-  };
-
   # Systemd Packages
   systemd.packages = with pkgs; [ cloudflare-warp ];
-
-  # Programs
-  programs = {
-    firefox = {
-      enable = true;
-    };
-    adb.enable = true;
-    direnv.enable = true;
-    zsh = {
-      enable = true;
-      enableCompletion = true;
-      autosuggestions.enable = true;
-      syntaxHighlighting.enable = true;
-    };
-    starship.enable = true;
-  };
 
   # Fonts
   fonts = {
