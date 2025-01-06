@@ -49,10 +49,13 @@
   networking = {
     hostName = "nomad"; 
     useDHCP = lib.mkDefault true;
-    networkmanager.enable = true;
     extraHosts = ''
       127.0.0.1 local.estrategia-sandbox.com.br
     '';
+
+    networkmanager = {
+      enable = true;
+    };
   };
 
   # Time and Locale

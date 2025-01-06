@@ -59,10 +59,10 @@
         gnomeExtensions.gsconnect
         gnomeExtensions.blur-my-shell
         gnomeExtensions.auto-power-profile        
-        #NVIDIA?
-        gnomeExtensions.gpu-profile-selector      
+ 
         gnomeExtensions.battery-health-charging
         gnomeExtensions.vertical-workspaces
+        gnomeExtensions.tiling-shell
 
         # ai shit
         github-copilot-cli
@@ -75,6 +75,9 @@
 
         # hacking stuff
         dig
+
+        # work
+        openvpn3
     ];
 
     # Gnome Debloat
@@ -101,5 +104,8 @@
         pkgs.simple-scan
         pkgs.gnome-console
         pkgs.gnome-software
+        pkgs.gnome-connections
+        pkgs.gnome-text-editor
+        pkgs.gnome-font-viewer
     ];
 }
