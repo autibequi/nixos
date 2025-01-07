@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 
 { 
   # Programs
@@ -6,6 +6,7 @@
     firefox = {
       enable = true;
     };
+
     adb.enable = true;
     direnv.enable = true;
     zsh = {

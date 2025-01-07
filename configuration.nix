@@ -13,6 +13,7 @@
       ./home.nix
       ./services.nix
       ./programs.nix
+      ./logiops.nix
       # ./howdy.nix
     ];
 

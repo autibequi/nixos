@@ -75,10 +75,11 @@
 
         # hacking stuff
         dig
-
-        # work
-        openvpn3
+        awscli2
+        openvpn
     ];
+
+    programs.openvpn3.enable = true;
 
     # Gnome Debloat
     # Exclude Core Apps From Being Installed.
