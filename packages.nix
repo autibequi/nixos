@@ -77,9 +77,15 @@
         dig
         awscli2
         openvpn
+
+        k9s # kubernets cli
+        kubectl
     ];
 
     programs.openvpn3.enable = true;
+
+    programs.neovim.enable = true;
+    programs.neovim.defaultEditor = true;
 
     # Gnome Debloat
     # Exclude Core Apps From Being Installed.

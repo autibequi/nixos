@@ -34,6 +34,7 @@
 
   # Environment Variables
   environment.sessionVariables = {
+    GTK_IM_MODULE = "cedilla";
     NIXOS_OZONE_WL = "1";
     ELECTRON_OZONE_PLATFORM_HINT = "wayland";
   };
