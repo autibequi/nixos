@@ -13,9 +13,6 @@
         steam
         obsidian
 
-        # Flatpaks
-        flatpak
-
         # Utils
         gnumake
         coreutils-full
