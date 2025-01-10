@@ -16,7 +16,7 @@
     };
 
     # Logitech drivers
-    # services.solaar.enable = true;
+    services.solaar.enable = true;
 
     # Flatpak Repo
     systemd.services.flatpak-repo = {
