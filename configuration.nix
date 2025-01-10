@@ -14,7 +14,7 @@
       ./home.nix
       ./services.nix
       ./programs.nix
-      # ./work.nix
+      ./work.nix
       # ./howdy.nix
     ];
 

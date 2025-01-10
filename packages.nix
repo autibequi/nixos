@@ -46,6 +46,9 @@
         pueue
         starship
         zed-editor
+
+        #cliiiiiii
+        btop
     ];
 
     programs.openvpn3.enable = true;
