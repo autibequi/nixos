@@ -7,7 +7,6 @@
 
   imports =
     [
-      <nixos-hardware/asus/zephyrus/ga402x/nvidia>
       (modulesPath + "/installer/scan/not-detected.nix")
     ];
 

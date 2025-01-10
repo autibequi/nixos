@@ -13,30 +13,6 @@
         steam
         obsidian
 
-        # Tools
-        dbeaver-bin
-        insomnia
-        podman
-
-        # Work/Estrategia
-        cloudflare-warp
-        chromium
-        python314
-        poetry
-        vscode
-        gradle
-        go
-        terraform
-
-        # Node
-        nodejs_23
-
-        # Flutter
-        flutter
-        android-studio
-        android-tools
-        dart
-
         # Flatpaks
         flatpak
 
@@ -63,23 +39,13 @@
         gnomeExtensions.battery-health-charging
         gnomeExtensions.vertical-workspaces
         gnomeExtensions.tiling-shell
-
-        # ai shit
-        github-copilot-cli
-
+        gnomeExtensions.night-theme-switcher
+        
         # TODO:Test
         nushell
         pueue
         starship
         zed-editor
-
-        # hacking stuff
-        dig
-        awscli2
-        openvpn
-
-        k9s # kubernets cli
-        kubectl
     ];
 
     programs.openvpn3.enable = true;

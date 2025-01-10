@@ -5,7 +5,8 @@
 { config, pkgs, lib, ... } :
 
 {
-
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
@@ -13,7 +14,7 @@
       ./home.nix
       ./services.nix
       ./programs.nix
-      ./logiops.nix
+      # ./work.nix
       # ./howdy.nix
     ];
 

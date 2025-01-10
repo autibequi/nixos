@@ -15,6 +15,9 @@
         };
     };
 
+    # Logitech drivers
+    # services.solaar.enable = true;
+
     # Flatpak Repo
     systemd.services.flatpak-repo = {
         wantedBy = [ "multi-user.target" ];
