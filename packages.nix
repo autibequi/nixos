@@ -35,6 +35,7 @@
         gnomeExtensions.gsconnect
         gnomeExtensions.blur-my-shell
         gnomeExtensions.auto-power-profile        
+        gnomeExtensions.tiling-assistant        
  
         gnomeExtensions.battery-health-charging
         gnomeExtensions.vertical-workspaces
@@ -48,7 +49,8 @@
         zed-editor
 
         #cliiiiiii
-        btop
+        btop   # better top
+        nvitop # nvidia top
     ];
 
     programs.openvpn3.enable = true;
