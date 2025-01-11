@@ -38,7 +38,9 @@
         gnomeExtensions.vertical-workspaces
         gnomeExtensions.tiling-shell
         gnomeExtensions.night-theme-switcher
-        
+        gnomeExtensions.battery-time
+        gnomeExtensions.upower-battery
+
         # TODO:Test
         nushell
         pueue
