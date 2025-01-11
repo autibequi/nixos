@@ -46,9 +46,6 @@
 
         #cliiiiiii
         btop   # better top
-
-        # AIII
-        open-webui
     ];
 
     programs.openvpn3.enable = true;
