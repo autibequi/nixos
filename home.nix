@@ -1,12 +1,5 @@
-{ config, pkgs, ... }:
-let
-  home-manager = builtins.fetchTarball "https://github.com/nix-community/home-manager/archive/release-24.11.tar.gz";
-in
+{ config, pkgs, home-manager, ... }:
 {
-  imports = [
-    (import "${home-manager}/nixos")
-  ];
-
   # User Accounts
   users.users.pedrinho = {
     isNormalUser = true;

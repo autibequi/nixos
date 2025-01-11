@@ -11,7 +11,7 @@
     };
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager/release-24.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -25,6 +25,11 @@
       modules = [
           nixos-hardware.nixosModules.asus-zephyrus-ga402x-nvidia
           solaar.nixosModules.default
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+          }
         ./configuration.nix
       ];
     };
