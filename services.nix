@@ -20,4 +20,10 @@
 
     # Logitech drivers
     services.solaar.enable = true;
+
+    # AIIIIIIIIIII
+    services.ollama = {
+        enable = true;
+        acceleration = "cuda";
+    };
 }

@@ -66,7 +66,7 @@
     # Power Management
     powerManagement.enable = true;
     powerManagement.finegrained = true;
-
+    
     # RTX 4060 G402
     open = true;
     prime = {

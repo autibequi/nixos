@@ -26,14 +26,11 @@
         # Extensions
         gnomeExtensions.just-perfection
         gnomeExtensions.caffeine
-        gnomeExtensions.forge
         gnomeExtensions.pano
         gnomeExtensions.appindicator
         gnomeExtensions.gsconnect
-        gnomeExtensions.blur-my-shell
         gnomeExtensions.auto-power-profile        
         gnomeExtensions.tiling-assistant        
- 
         gnomeExtensions.battery-health-charging
         gnomeExtensions.vertical-workspaces
         gnomeExtensions.tiling-shell
@@ -49,6 +46,9 @@
 
         #cliiiiiii
         btop   # better top
+
+        # AIII
+        open-webui
     ];
 
     programs.openvpn3.enable = true;

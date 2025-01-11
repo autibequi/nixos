@@ -43,6 +43,9 @@
   # System State Version
   system.stateVersion = "24.11";
 
+  # ower management
+  powerManagement.powertop.enable = true;
+
   # Bootloader
   boot.loader.systemd-boot.enable = true;
   boot.loader.systemd-boot.configurationLimit = 10;
