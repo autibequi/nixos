@@ -49,7 +49,6 @@
 
         #cliiiiiii
         btop   # better top
-        nvitop # nvidia top
     ];
 
     programs.openvpn3.enable = true;

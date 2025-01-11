@@ -18,7 +18,6 @@
   hardware.pulseaudio.enable = false;
   hardware.graphics.enable = true;
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-
   # InitRD
   boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "usbhid" "usb_storage" "uas" "sd_mod" "rtsx_pci_sdmmc" ];
   boot.initrd.kernelModules = [ ];
@@ -61,10 +60,9 @@
 
   hardware.nvidia = {
     package = config.boot.kernelPackages.nvidiaPackages.latest;
-
-    # Modesetting is required.
-    modesetting.enable = true;
-
+    modesetting.enable = true; # Modesetting is required.
+    nvidiaSettings = false;
+    
     # Power Management
     powerManagement.enable = true;
     powerManagement.finegrained = true;
