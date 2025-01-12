@@ -28,12 +28,6 @@
       "org/gnome/mutter" = {
         experimental-features = ["scale-monitor-framebuffer"];
       };
-      "org/gnome/shell/extensions/GPU_profile_selector" = {
-        rtd3 = true;
-        force-composition-pipeline = true;
-        coolbits = true;
-        force-topbar-view = false;
-      };
     };
 
     home.file = {

@@ -7,7 +7,6 @@
 
         # Services
         printing.enable = false;
-        gnome.gnome-browser-connector.enable = true;
         # flatpak.enable = true;
 
         pipewire = {
