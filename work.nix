@@ -46,6 +46,6 @@
         graphviz
 
         # kafka go
-        libgcc
+        gcc
     ];
 }
