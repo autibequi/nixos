@@ -26,6 +26,7 @@
 
         #cliiiiiii
         btop   # better top
+        lsof
     ];
 
     programs.openvpn3.enable = true;
