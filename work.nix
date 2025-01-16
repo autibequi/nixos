@@ -1,5 +1,11 @@
 { config, pkgs, lib, ... } :
 {
+
+      # Environment Variables
+    environment.sessionVariables = {
+        CGO_ENABLED=1; # kafka
+    };
+
     environment.systemPackages = with pkgs; [
         # Tools
         dbeaver-bin
@@ -38,5 +44,8 @@
 
         #golang pprof
         graphviz
+
+        # kafka go
+        libgcc
     ];
 }
