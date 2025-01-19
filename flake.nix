@@ -2,6 +2,7 @@
   description = "A very basic flake";
 
   inputs = {
+    nixpkgs.follows = "nixos-cosmic/nixpkgs-stable"; # NOTE: change "nixpkgs" to "nixpkgs-stable" to use stable NixOS release
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
     solaar = {
       url = "https://flakehub.com/f/Svenum/Solaar-Flake/*.tar.gz"; # For latest stable version
