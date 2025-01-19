@@ -12,7 +12,8 @@
       ./programs.nix
       ./work.nix
       ./ai.nix
-      ./gnome.nix
+      # ./gnome.nix
+      ./cosmic.nix
       # ./howdy.nix
     ];
 
@@ -75,14 +76,6 @@
     LC_PAPER = "pt_BR.UTF-8";
     LC_TELEPHONE = "pt_BR.UTF-8";
     LC_TIME = "pt_BR.UTF-8";
-  };
-
-  # Desktop Environment
-  services.xserver.enable = true;
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.xkb = {
-    layout = "us";
-    variant = "alt-intl";
   };
 
   # Systemd Packages

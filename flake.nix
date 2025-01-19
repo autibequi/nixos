@@ -9,6 +9,7 @@
       # url = "github:Svenum/Solaar-Flake/main"; # Uncomment line for latest unstable version
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixos-cosmic.url = "github:lilyinstarlight/nixos-cosmic";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     home-manager = {
       url = "github:nix-community/home-manager/release-24.11";
@@ -16,7 +17,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, solaar, nixos-hardware, home-manager, ... }: {
+  outputs = { self, nixpkgs, solaar, nixos-hardware, home-manager,  nixos-cosmic, ... }: {
     packages.x86_64-linux.hello = nixpkgs.legacyPackages.x86_64-linux.hello;
     packages.x86_64-linux.default = self.packages.x86_64-linux.hello;
 
@@ -30,6 +31,13 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
           }
+          {
+            nix.settings = {
+              substituters = [ "https://cosmic.cachix.org/" ];
+              trusted-public-keys = [ "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE=" ];
+            };
+          }
+          nixos-cosmic.nixosModules.default
         ./configuration.nix
       ];
     };
