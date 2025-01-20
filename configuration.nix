@@ -12,6 +12,7 @@
       ./programs.nix
       ./work.nix
       ./gnome.nix
+      ./kernel.nix
       # ./ai.nix
       # ./cosmic.nix
       # ./howdy.nix
