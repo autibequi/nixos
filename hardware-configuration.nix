@@ -24,7 +24,7 @@
 
   # Kernel
   # Optional: Enable CachyOS binary cache
-  boot.kernelPackages = pkgs.linuxPackages_latest; 
+  boot.kernelPackages = pkgs.linuxPackages_cachyos; 
   boot.kernelModules = [ "nvidia" "kvm-amd" "amdgpu" ];
   boot.kernelParams = [ ];
 
