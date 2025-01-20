@@ -12,13 +12,14 @@
     };
     nixos-cosmic.url = "github:lilyinstarlight/nixos-cosmic";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     home-manager = {
       url = "github:nix-community/home-manager/release-24.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { self, nixpkgs, solaar, nixos-hardware, home-manager,  nixos-cosmic, ... }: {
+  outputs = { self, nixpkgs, solaar, nixos-hardware, home-manager,  nixos-cosmic, chaotic, ... }: {
     packages.x86_64-linux.hello = nixpkgs.legacyPackages.x86_64-linux.hello;
     packages.x86_64-linux.default = self.packages.x86_64-linux.hello;
 
@@ -28,6 +29,11 @@
           nixos-hardware.nixosModules.asus-zephyrus-ga402x-nvidia
           solaar.nixosModules.default
           home-manager.nixosModules.home-manager
+          nixos-cosmic.nixosModules.default
+          # CachyOS Kernel
+          chaotic.nixosModules.nyx-cache
+          chaotic.nixosModules.nyx-overlay
+          chaotic.nixosModules.nyx-registry
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
@@ -38,7 +44,6 @@
               trusted-public-keys = [ "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE=" ];
             };
           }
-          nixos-cosmic.nixosModules.default
         ./configuration.nix
       ];
     };

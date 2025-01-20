@@ -11,8 +11,8 @@
       ./services.nix
       ./programs.nix
       ./work.nix
-      ./ai.nix
       ./gnome.nix
+      # ./ai.nix
       # ./cosmic.nix
       # ./howdy.nix
     ];

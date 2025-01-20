@@ -25,6 +25,11 @@
     # Gnome Basic Crap
     dconf.settings = {
       "org/gnome/desktop/peripherals/mouse" = { natural-scroll = true; };
+      "org/gnome/desktop/wm/keybindings" = {
+        switch-to-workspace-left = ["<Super>a"];
+        switch-to-workspace-right = ["<Super>d"];
+        close = ["<Primary><Shift>q"];
+      };
       "org/gnome/mutter" = {
         experimental-features = ["scale-monitor-framebuffer"];
       };

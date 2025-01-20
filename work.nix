@@ -15,7 +15,7 @@
         # Work/Estrategia
         cloudflare-warp
         chromium
-        python314
+        # python314
         poetry
         vscode
         gradle
@@ -23,7 +23,7 @@
         terraform
 
         # Node
-        nodejs_23
+        # nodejs_23
 
         # Flutter
         flutter
