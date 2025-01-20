@@ -4,9 +4,7 @@
   # Kernel
   boot.kernelPackages = pkgs.linuxPackages_cachyos; 
   boot.kernelModules = [ "nvidia" "kvm-amd" "amdgpu" ];
-  boot.kernelParams = [
-    "sched_ext_ops_helper=off"
-  ];
+  boot.kernelParams = [ ];
 
   #CACHYOS KERNEL: by default uses scx_rustland scheduler
   services.scx.enable = true; 
