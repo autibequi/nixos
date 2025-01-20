@@ -2,23 +2,28 @@
   description = "A very basic flake";
 
   inputs = {
-    nixpkgs.follows = "nixos-cosmic/nixpkgs-stable"; # NOTE: change "nixpkgs" to "nixpkgs-stable" to use stable NixOS release
+    # Nix
+    nixpkgs.follows = "nixos-cosmic/nixpkgs-stable";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
-    solaar = {
-      url = "https://flakehub.com/f/Svenum/Solaar-Flake/*.tar.gz"; # For latest stable version
-      #url = "https://flakehub.com/f/Svenum/Solaar-Flake/0.1.1.tar.gz" # uncomment line for solaar version 1.1.13
-      # url = "github:Svenum/Solaar-Flake/main"; # Uncomment line for latest unstable version
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    nixos-cosmic.url = "github:lilyinstarlight/nixos-cosmic";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+
+    # Others
+    nixos-cosmic.url = "github:lilyinstarlight/nixos-cosmic";
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
+    
+    # Others with inputs
     home-manager = {
       url = "github:nix-community/home-manager/release-24.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    solaar = {
+      url = "https://flakehub.com/f/Svenum/Solaar-Flake/*.tar.gz";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
+  # Outputs
+  # This is the default output, which is a set of attributes.
   outputs = { self, nixpkgs, solaar, nixos-hardware, home-manager,  nixos-cosmic, chaotic, ... }: {
     packages.x86_64-linux.hello = nixpkgs.legacyPackages.x86_64-linux.hello;
     packages.x86_64-linux.default = self.packages.x86_64-linux.hello;
