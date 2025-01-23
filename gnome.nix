@@ -38,6 +38,7 @@
     gnomeExtensions.bluetooth-battery
     gnomeExtensions.quick-settings-audio-panel
     gnomeExtensions.wtmb-window-thumbnails
+    gnomeExtensions.battery-time
   ];
 
   # Gnome Debloat
@@ -99,7 +100,7 @@
         experimental-features = ["scale-monitor-framebuffer"];
       };
       "org/gnome/settings-daemon/plugins/sound" = {
-        volume-step = 2;
+        volume-step = 1;
       };
     };
 
