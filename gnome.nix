@@ -35,6 +35,9 @@
     gnomeExtensions.night-theme-switcher
     gnomeExtensions.battery-time
     gnomeExtensions.upower-battery
+    gnomeExtensions.bluetooth-battery
+    gnomeExtensions.quick-settings-audio-panel
+    gnomeExtensions.wtmb-window-thumbnails
   ];
 
   # Gnome Debloat
@@ -65,4 +68,51 @@
     pkgs.gnome-text-editor
     pkgs.gnome-font-viewer
   ];
+  
+  # nixpkgs.config.allowAliases = false;
+  # nixpkgs.overlays = [
+  #   # GNOME 46: triple-buffering-v4-46
+  #   (final: prev: {
+  #     mutter = prev.mutter.overrideAttrs (old: {
+  #       src = pkgs.fetchFromGitLab  {
+  #         domain = "gitlab.gnome.org";
+  #         owner = "vanvugt";
+  #         repo = "mutter";
+  #         rev = "triple-buffering-v4-46";
+  #         hash = "sha256-C2VfW3ThPEZ37YkX7ejlyumLnWa9oij333d5c4yfZxc=";
+  #       };
+  #     });
+  #   })
+  # ];
+
+    # Home Manager
+  home-manager.users."pedrinho" = { lib, ... }: {
+    # Gnome Basic Crap
+    dconf.settings = {
+      "org/gnome/desktop/peripherals/mouse" = { natural-scroll = true; };
+      # "org/gnome/desktop/wm/keybindings" = {
+      #   switch-to-workspace-left = ["<Super>a"];
+      #   switch-to-workspace-right = ["<Super>d"];
+      #   close = ["<Primary><Shift>q"];
+      # };
+      "org/gnome/mutter" = {
+        experimental-features = ["scale-monitor-framebuffer"];
+      };
+      "org/gnome/settings-daemon/plugins/sound" = {
+        volume-step = 2;
+      };
+    };
+
+    home.file = {
+      # Gnome Cecidilha Fix
+      ".XCompose".text = ''
+        # I shouldn't need to do this, but I do...
+        # https://github.com/NixOS/nixpkgs/issues/239415
+        include "%L"
+
+        <dead_acute> <C> : "Ç"
+        <dead_acute> <c> : "ç"
+      '';
+    };
+  };
 }
