@@ -19,7 +19,7 @@
     # Gnome Stuff
     desktop-file-utils
     gnome-extension-manager
-    blackbox-terminal # due to gnome-terminal being removed
+    ghostty # due to gnome-terminal being removed
 
     # Extensions
     gnomeExtensions.just-perfection

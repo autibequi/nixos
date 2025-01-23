@@ -8,6 +8,7 @@
 
   #CACHYOS KERNEL: by default uses scx_rustland scheduler
   services.scx.enable = true; 
+  services.scx.scheduler = "scx_lavd";
 
   # InitRD
   boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "usbhid" "usb_storage" "uas" "sd_mod" "rtsx_pci_sdmmc" ];
