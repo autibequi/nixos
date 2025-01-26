@@ -6,6 +6,9 @@
         CGO_ENABLED=1; # kafka
     };
 
+    # Systemd Packages
+    systemd.packages = with pkgs; [ cloudflare-warp ];
+
     environment.systemPackages = with pkgs; [
         # Tools
         dbeaver-bin

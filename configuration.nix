@@ -64,8 +64,10 @@
     };
   };
 
+  # Fix windows dualboot time
+  time.timeZone = "UTC";  
+
   # Time and Locale
-  time.timeZone = "America/Sao_Paulo";
   i18n.defaultLocale = "en_US.UTF-8";
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "pt_BR.UTF-8";
@@ -78,9 +80,6 @@
     LC_TELEPHONE = "pt_BR.UTF-8";
     LC_TIME = "pt_BR.UTF-8";
   };
-
-  # Systemd Packages
-  systemd.packages = with pkgs; [ cloudflare-warp ];
 
   # Fonts
   fonts = {
