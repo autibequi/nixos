@@ -47,5 +47,12 @@
 
         # kafka go
         gcc
+
+        # video stuff
+        vlc
+        ffmpeg
+        mediainfo
+        untrunc-anthwlock
+        gpac
     ];
 }
