@@ -13,6 +13,7 @@
       ./work.nix
       ./gnome.nix
       ./kernel.nix
+      ./battery.nix
       # ./ai.nix
       # ./cosmic.nix
       # ./howdy.nix
