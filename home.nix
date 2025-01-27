@@ -13,7 +13,7 @@
 
   # Home Manager
   home-manager.users."pedrinho" = { lib, ... }: {
-    home.stateVersion = "24.11";
+    home.stateVersion = "25.05";
 
     # Git
     programs.git = {

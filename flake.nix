@@ -4,7 +4,7 @@
   inputs = {
     # Nix
     nixpkgs.follows = "nixos-cosmic/nixpkgs-stable";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
     # Others
@@ -16,7 +16,7 @@
 
     # Others with inputs
     home-manager = {
-      url = "github:nix-community/home-manager/release-24.11";
+      url = "github:nix-community/home-manager/release";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     solaar = {
