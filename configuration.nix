@@ -11,12 +11,15 @@
       ./services.nix
       ./programs.nix
       ./work.nix
-      ./gnome.nix
       ./kernel.nix
       ./battery.nix
       # ./ai.nix
-      # ./cosmic.nix
       # ./howdy.nix
+
+      # DE Picker (pick one)
+      # ./kde.nix
+      ./desktop-enviroments/gnome.nix
+      # ./desktop-enviroments/cosmic.nix
     ];
 
   

@@ -2,17 +2,21 @@
 
 {
   # Desktop Environment
-  services.xserver.enable = true;
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
-  services.xserver.xkb = {
-    layout = "us";
-    variant = "alt-intl";
-  };
+  services = {
+    xserver = {
+      enable = true;
+      displayManager.gdm.enable = true;
+      desktopManager.gnome.enable = true;
+      xkb = {
+        layout = "us";
+        variant = "alt-intl";
+      };
+    };
 
-  services.gnome = {
-    gnome-browser-connector.enable = true;
-    gnome-remote-desktop.enable = false;
+    gnome = {
+      gnome-browser-connector.enable = true;
+      gnome-remote-desktop.enable = false;
+    };
   };
 
   environment.systemPackages = with pkgs; [
@@ -70,23 +74,8 @@
     pkgs.gnome-font-viewer
   ];
   
-  # nixpkgs.config.allowAliases = false;
-  # nixpkgs.overlays = [
-  #   # GNOME 46: triple-buffering-v4-46
-  #   (final: prev: {
-  #     mutter = prev.mutter.overrideAttrs (old: {
-  #       src = pkgs.fetchFromGitLab  {
-  #         domain = "gitlab.gnome.org";
-  #         owner = "vanvugt";
-  #         repo = "mutter";
-  #         rev = "triple-buffering-v4-46";
-  #         hash = "sha256-C2VfW3ThPEZ37YkX7ejlyumLnWa9oij333d5c4yfZxc=";
-  #       };
-  #     });
-  #   })
-  # ];
 
-    # Home Manager
+  # Home Manager Gnome Modifications
   home-manager.users."pedrinho" = { lib, ... }: {
     # Gnome Basic Crap
     dconf.settings = {
