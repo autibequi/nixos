@@ -49,8 +49,8 @@
 
   swapDevices =
     [ 
-      { device = "/dev/disk/by-uuid/0319478f-63cc-4fde-9804-523687d223ee"; } # g14 laptop
-      { device = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; priority = -1; } # nomad usb stick
+      { device = "/dev/disk/by-uuid/0319478f-63cc-4fde-9804-523687d223ee"; priority = 10; } # g14 laptop
+      { device = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; priority = 00; } # nomad usb stick
     ];
 
   hardware.nvidia = {
