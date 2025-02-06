@@ -1,9 +1,6 @@
 { config, pkgs, ... }:
 
 {
-  # Better scheduling for CPU cycles - thanks System76!!!
-  services.system76-scheduler.settings.cfsProfiles.enable = true;
-
   # Enable TLP (better than gnomes internal power manager)
   services.tlp = {
     enable = true;
@@ -18,6 +15,10 @@
   # Disable GNOMEs power management
   services.power-profiles-daemon.enable = false;
 
-  # Enable powertop
-  powerManagement.powertop.enable = true;
+  # Not so sure anymore
+  # # Better scheduling for CPU cycles - thanks System76!!!
+  # services.system76-scheduler.settings.cfsProfiles.enable = true;
+
+  # # Enable powertop
+  # powerManagement.powertop.enable = true;
 }

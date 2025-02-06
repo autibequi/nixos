@@ -18,9 +18,8 @@
   hardware.pulseaudio.enable = false;
   hardware.graphics.enable = true;
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-  # InitRD
-
-  # Video
+  
+  # X11 and Wayland
   services.xserver.videoDrivers = [ "nvidia" "amdgpu" ];
 
   # TODO: Try Next Reset
