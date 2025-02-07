@@ -7,7 +7,6 @@
 
         # Services
         printing.enable = false;
-        # flatpak.enable = true;
 
         pipewire = {
             enable = true;
