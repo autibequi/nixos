@@ -12,7 +12,7 @@
       ./programs.nix
       ./work.nix
       ./kernel.nix
-      ./battery.nix
+      # ./battery.nix
       # ./ai.nix
       # ./howdy.nix
 
