@@ -53,7 +53,7 @@
     ];
 
   hardware.nvidia = {
-    package = config.boot.kernelPackages.nvidiaPackages.latest;
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
     modesetting.enable = true; # Modesetting is required.
     nvidiaSettings = false;
     
