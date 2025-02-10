@@ -89,7 +89,7 @@
         experimental-features = ["scale-monitor-framebuffer"];
       };
       "org/gnome/settings-daemon/plugins/sound" = {
-        volume-step = 1;
+        volume-step = 0.1;
       };
     };
 
