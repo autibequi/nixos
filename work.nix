@@ -52,10 +52,6 @@
         gcc
 
         # video stuff
-        vlc
         ffmpeg
-        mediainfo
-        untrunc-anthwlock
-        gpac
     ];
 }
