@@ -43,7 +43,6 @@
     gnomeExtensions.quick-settings-audio-panel
     gnomeExtensions.wtmb-window-thumbnails
     gnomeExtensions.battery-time
-    gnomeExtensions.brightness-control-using-ddcutil
   ];
 
   # Gnome Debloat
