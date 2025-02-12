@@ -43,6 +43,7 @@
     gnomeExtensions.quick-settings-audio-panel
     gnomeExtensions.wtmb-window-thumbnails
     gnomeExtensions.battery-time
+    gnomeExtensions.brightness-control-using-ddcutil
   ];
 
   # Gnome Debloat
@@ -68,7 +69,6 @@
     pkgs.gnome-usage
     pkgs.simple-scan
     pkgs.gnome-console
-    pkgs.gnome-software
     pkgs.gnome-connections
     pkgs.gnome-text-editor
     pkgs.gnome-font-viewer

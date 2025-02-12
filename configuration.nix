@@ -66,6 +66,7 @@
     hostName = "nomad"; 
     useDHCP = lib.mkDefault true;
     extraHosts = ''
+    127.0.0.1 local.estrategia-sandbox.com.br 
     '';
 
     networkmanager = {
