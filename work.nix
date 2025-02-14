@@ -27,6 +27,7 @@
 
         # Node
         nodejs
+        nodePackages.eslint
 
         # Flutter
         flutter
