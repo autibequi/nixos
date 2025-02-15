@@ -27,6 +27,8 @@
         #cliiiiiii
         btop   # better top
         lsof
+
+        vivaldi
     ];
 
     programs.openvpn3.enable = true;

@@ -17,7 +17,7 @@
       # ./howdy.nix
 
       # DE Picker (pick one)
-      # ./kde.nix
+      # ./desktop-enviroments/kde.nix
       ./desktop-enviroments/gnome.nix
       # ./desktop-enviroments/cosmic.nix
 
