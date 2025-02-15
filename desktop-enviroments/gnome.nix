@@ -3,9 +3,19 @@
 {
   # Desktop Environment
   services = {
+
     xserver = {
       enable = true;
-      displayManager.gdm.enable = true;
+      displayManager.gdm = {
+        enable = true;
+        wayland = true;
+      };
+      # displayManager.sddm.enable = true;
+      # displayManager.lightdm = {
+      #   enable = true;
+      #   greeters.gtk.enable = true;
+      # };
+
       desktopManager.gnome.enable = true;
       xkb = {
         layout = "us";
@@ -19,11 +29,16 @@
     };
   };
 
+
   environment.systemPackages = with pkgs; [
     # Gnome Stuff
     desktop-file-utils
     gnome-extension-manager
     ghostty # due to gnome-terminal being removed
+
+    # Icon Theme
+    pkgs.adwaita-icon-theme
+    pkgs.gnome-tweaks
 
     # Extensions
     gnomeExtensions.just-perfection
@@ -74,21 +89,23 @@
   ];
   
 
+  # programs.dconf.enable = true;
+  
   # Home Manager Gnome Modifications
   home-manager.users."pedrinho" = { lib, ... }: {
     # Gnome Basic Crap
-    dconf.settings = {
-      "org/gnome/desktop/peripherals/mouse" = { natural-scroll = true; };
-      # "org/gnome/desktop/wm/keybindings" = {
-      #   switch-to-workspace-left = ["<Super>a"];
-      #   switch-to-workspace-right = ["<Super>d"];
-      #   close = ["<Primary><Shift>q"];
-      # };
-      "org/gnome/mutter" = {
-        experimental-features = ["scale-monitor-framebuffer"];
-      };
-      "org/gnome/settings-daemon/plugins/sound" = {
-        volume-step = 0.1;
+    dconf = {
+      enable = true;
+      settings = {
+        "org/gnome/desktop/peripherals/mouse" = { 
+          natural-scroll = true; 
+        };
+        "org/gnome/mutter" = {
+          experimental-features = ["scale-monitor-framebuffer"];
+        };
+        "org/gnome/settings-daemon/plugins/sound" = {
+          volume-step = 0.1;
+        };
       };
     };
 
