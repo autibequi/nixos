@@ -29,6 +29,7 @@
         lsof
 
         vivaldi
+        vlc
     ];
 
     programs.openvpn3.enable = true;
