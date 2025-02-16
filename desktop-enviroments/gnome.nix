@@ -101,7 +101,7 @@
           natural-scroll = true; 
         };
         "org/gnome/mutter" = {
-          experimental-features = ["scale-monitor-framebuffer"];
+            experimental-features = [ "scale-monitor-framebuffer" "variable-refresh-rate" ];
         };
         "org/gnome/settings-daemon/plugins/sound" = {
           volume-step = 0.1;
