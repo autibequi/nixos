@@ -14,6 +14,9 @@
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   nixpkgs.config.cudaSupport = true;
 
+  # non free firmware
+  hardware.enableAllFirmware = true; 
+
   # Basics
   hardware.pulseaudio.enable = false;
   hardware.graphics.enable = true;

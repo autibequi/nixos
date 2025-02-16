@@ -13,6 +13,11 @@
         };
     };
 
+    # Audio
+    hardware.pulseaudio.extraConfig = "
+        load-module module-switch-on-connect
+    ";
+
     # Logitech drivers
     services.solaar.enable = true;
 }
