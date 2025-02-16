@@ -20,4 +20,13 @@
 
     # Logitech drivers
     services.solaar.enable = true;
+
+    # Bluetooth MPRIS
+    # services.mpris-proxy.enable = true; # after 25.05 home-manager
+    systemd.user.services.mpris-proxy = {
+        description = "Mpris proxy";
+        after = [ "network.target" "sound.target" ];
+        wantedBy = [ "default.target" ];
+        serviceConfig.ExecStart = "${pkgs.bluez}/bin/mpris-proxy";
+    };
 }
