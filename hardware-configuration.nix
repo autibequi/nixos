@@ -52,8 +52,18 @@
       { device = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; priority = 00; } # nomad usb stick
     ];
 
+  # Beta drivers
+  # due to missmatch from driver and tooling
+  hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
+    version = "570.86.16"; # use new 570 drivers
+    sha256_64bit = "sha256-RWPqS7ZUJH9JEAWlfHLGdqrNlavhaR1xMyzs8lJhy9U=";
+    openSha256 = "sha256-DuVNA63+pJ8IB7Tw2gM4HbwlOh1bcDg2AN2mbEU9VPE=";
+    settingsSha256 = "sha256-9rtqh64TyhDF5fFAYiWl3oDHzKJqyOW3abpcf2iNRT8=";
+    usePersistenced = false;
+  };
+
   hardware.nvidia = {
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    # package = config.boot.kernelPackages.nvidiaPackages.latest;
     modesetting.enable = true; # Modesetting is required.
     nvidiaSettings = false;
     
@@ -62,7 +72,7 @@
     powerManagement.finegrained = true;
     
     # RTX 4060 G402
-    open = true;
+    open = false;
     prime = {
       offload.enable = true;
       reverseSync.enable = true;
