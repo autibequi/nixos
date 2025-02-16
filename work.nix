@@ -54,5 +54,8 @@
 
         # video stuff
         ffmpeg
+
+        #log stuf
+        lnav
     ];
 }

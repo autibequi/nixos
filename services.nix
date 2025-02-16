@@ -12,7 +12,7 @@
             enable = true;
         };
     };
-        
+
     # Logitech drivers
     services.solaar.enable = true;
 }

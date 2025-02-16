@@ -11,7 +11,6 @@
     "usbcore.autosuspend=-1" 
     "nvidia-drm.modeset=1" 
   ];
-  boot.extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];
 
   # Userland Scheduler 
   # Cachyos uses scx_rustland scheduler by default
