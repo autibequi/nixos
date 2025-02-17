@@ -30,6 +30,7 @@
 
         vivaldi
         vlc
+        brave
     ];
 
     programs.openvpn3.enable = true;
