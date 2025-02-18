@@ -31,6 +31,9 @@
         vivaldi
         vlc
         brave
+
+        # yaaaar
+        stremio
     ];
 
     programs.openvpn3.enable = true;

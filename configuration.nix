@@ -48,6 +48,9 @@
     MOZ_ENABLE_WAYLAND = "1";
     OZONE_PLATFORM = "wayland";
     ELECTRON_OZONE_PLATFORM_HINT = "wayland";
+
+    # QT Scaling for Stremio
+    QT_AUTO_SCREEN_SCALE_FACTOR="1";
   };
 
   # System State Version
@@ -58,7 +61,7 @@
 
   # Bootloader
   boot.loader.systemd-boot.enable = true;
-  boot.loader.systemd-boot.configurationLimit = 10;
+  boot.loader.systemd-boot.configurationLimit = 20;
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Networking
@@ -66,7 +69,7 @@
     hostName = "nomad"; 
     useDHCP = lib.mkDefault true;
     extraHosts = ''
-    127.0.0.1 local.estrategia-sandbox.com.br 
+      127.0.0.1 local.estrategia-sandbox.com.br 
     '';
 
     networkmanager = {
