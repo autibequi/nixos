@@ -17,6 +17,24 @@
   services.scx.scheduler = "scx_lavd";
 
   # InitRD
-  boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "usbhid" "usb_storage" "uas" "sd_mod" "rtsx_pci_sdmmc" "xhci_hcd" "usb_storage" "typec" "typec_ucsi" ];
-  boot.initrd.kernelModules = [ ];
+  boot.initrd.kernelModules = [ "uhci_hcd" ];
+  boot.initrd.availableKernelModules = [ 
+    "nvme" 
+    "xhci_pci" 
+    "usbhid" 
+    "usb_storage" 
+    "uas" 
+    "sd_mod" 
+    "rtsx_pci_sdmmc" 
+    "xhci_hcd" 
+    "usb_storage" 
+    "typec" 
+    "typec_ucsi" 
+    "usb_storage" 
+    "ehci_pci" 
+    "xhci_pci" 
+    "ahci" 
+    "sd_mod" 
+    "ext4" 
+  ];
 }
