@@ -4,24 +4,28 @@
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   
   imports =
-    [ # Include the results of the hardware scan.
+    [ # Core
       ./hardware-configuration.nix
-      ./packages.nix
+      ./kernel.nix
       ./home.nix
       ./services.nix
       ./programs.nix
-      ./work.nix
-      ./kernel.nix
-      # ./battery.nix
-      # ./ai.nix
-      # ./howdy.nix
 
-      # DE Picker (pick one)
+      # DE Picker
       # ./desktop-enviroments/kde.nix
       ./desktop-enviroments/gnome.nix
       # ./desktop-enviroments/cosmic.nix
 
-      ./flatpak.nix
+      # Optionals
+      ./work.nix
+
+      # Testing :|
+      # ./howdy.nix
+      # ./ai.nix # heeeavy
+
+      # Failed :(
+      # ./flatpak.nix
+      # ./battery.nix
     ];
 
   
