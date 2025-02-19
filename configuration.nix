@@ -10,6 +10,7 @@
       ./home.nix
       ./services.nix
       ./programs.nix
+      ./packages.nix
 
       # DE Picker
       # ./desktop-enviroments/kde.nix
