@@ -12,6 +12,7 @@
         # Stuff
         steam
         obsidian
+        stremio
 
         # Utils
         gnumake
@@ -28,17 +29,9 @@
         btop   # better top
         lsof
 
+        # browsers
         vivaldi
-        vlc
         brave
-
-        # yaaaar
-        stremio
+        chromium
     ];
-
-    programs.openvpn3.enable = true;
-
-    programs.neovim.enable = true;
-    programs.neovim.defaultEditor = true;
-
 }

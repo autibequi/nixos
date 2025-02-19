@@ -16,10 +16,9 @@
       syntaxHighlighting.enable = true;
     };
     starship.enable = true;
-
-    chromium.extensions = [
-      pkgs.chromium-extensions.dark-reader
-      pkgs.chromium-extensions.protonpass
-    ];
+    neovim = {
+      enable = true;
+      defaultEditor = true;
+    };
   };
 }

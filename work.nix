@@ -14,16 +14,28 @@
         dbeaver-bin
         insomnia
         podman
-
-        # Work/Estrategia
-        cloudflare-warp
-        chromium
-        python3
-        poetry
-        vscode
-        gradle
-        go
+        postgresql
         terraform
+
+        # clitools
+        dig
+        awscli2
+        k9s # kubernets cli
+        kubectl
+
+        # vpn
+        openvpn
+        cloudflare-warp
+
+        # editors
+        vscode
+        
+        # python
+        python312
+        python312Packages.magic
+        poetry
+        pyenv
+        file # libmagic - intraupload
 
         # Node
         nodejs
@@ -33,29 +45,29 @@
         flutter
         android-studio
         android-tools
+        gradle
         dart
 
-        # ai shit
-        github-copilot-cli
-
-        # hacking stuff
-        dig
-        awscli2
-        openvpn
-
-        k9s # kubernets cli
-        kubectl
-
-        #golang pprof
-        graphviz
-
-        # kafka go
-        gcc
+        # golang
+        go
+        graphviz #golang pprof
+        gcc # kafka go
 
         # video stuff
         ffmpeg
+        vlc
 
-        #log stuf
-        lnav
+        # TESTING:
+        github-copilot-cli
     ];
+
+    # TESTING: Dynamic Libraries
+    environment.variables = {
+        LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
+            pkgs.file
+        ];
+    };
+
+    # Services
+    programs.openvpn3.enable = true;
 }

@@ -42,6 +42,7 @@
   # Environment Variables
   environment.sessionVariables = {
     GTK_IM_MODULE = "cedilla";
+    QT_IM_MODULE = "cedilla";
 
     # Wayland Growth Pains
     NIXOS_OZONE_WL = "1";

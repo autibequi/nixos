@@ -6,9 +6,8 @@
   boot.kernelPackages = pkgs.linuxPackages_cachyos; 
   boot.kernelModules = [ "nvidia" "amdgpu" ];
   boot.kernelParams = [ 
-    "processor.max_cstate=5"  # Prevents deep sleep states from causing hangs
     "amd_pstate=active" 
-    "usbcore.autosuspend=-1" 
+    "usbcore.autosuspend=-1" # keeps usb-c dock alive
     "nvidia-drm.modeset=1" 
   ];
 

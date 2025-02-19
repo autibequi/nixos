@@ -10,11 +10,6 @@
         enable = true;
         wayland = true;
       };
-      # displayManager.sddm.enable = true;
-      # displayManager.lightdm = {
-      #   enable = true;
-      #   greeters.gtk.enable = true;
-      # };
 
       desktopManager.gnome.enable = true;
       xkb = {
@@ -108,18 +103,6 @@
           volume-step = 0.1;
         };
       };
-    };
-
-    home.file = {
-      # Gnome Cecidilha Fix
-      ".XCompose".text = ''
-        # I shouldn't need to do this, but I do...
-        # https://github.com/NixOS/nixpkgs/issues/239415
-        include "%L"
-
-        <dead_acute> <C> : "Ç"
-        <dead_acute> <c> : "ç"
-      '';
     };
   };
 }
