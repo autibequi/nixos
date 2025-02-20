@@ -1,0 +1,11 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "NixOS Rebuild Switch",
+            "type": "f5anything",
+            "request": "launch",
+            "command": "sudo nixos-rebuild switch",
+        }
+    ]
+}
