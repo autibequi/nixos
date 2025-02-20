@@ -77,7 +77,7 @@
     nvidiaSettings = false;
     
     # Power Management
-    # powerManagement.enable = true;
+    powerManagement.enable = true;
     # powerManagement.finegrained = true;
     
     # RTX 4060 G402

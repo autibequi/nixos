@@ -1,35 +1,6 @@
 { config, pkgs, lib, ... } :
 
 {
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-  
-  imports =
-    [ 
-      # Core
-      ./hardware-configuration.nix
-      ./kernel.nix
-      ./home.nix
-      ./services.nix
-      ./programs.nix
-      ./packages.nix
-
-      # DE Picker
-      # ./desktop-enviroments/kde.nix
-      ./desktop-enviroments/gnome.nix
-      # ./desktop-enviroments/cosmic.nix
-
-      # Optionals
-      ./work.nix
-
-      # Testing :|
-      # ./howdy.nix
-      # ./ai.nix # heeeavy
-
-      # Failed :(
-      # ./flatpak.nix
-      # ./battery.nix
-    ];
-
   # System State Version
   system.stateVersion = "25.05";
 
@@ -43,6 +14,39 @@
 
   # Unholy packages
   nixpkgs.config.allowUnfree = true;
+
+  # NixOs stock power management
+  powerManagement.enable = true;
+
+  # Experimental Features
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+  imports =
+    [ 
+      # Core
+      ./hardware-configuration.nix
+      ./kernel.nix
+      ./home.nix
+      ./services.nix
+      ./programs.nix
+      ./packages.nix
+
+      # DE Picker
+      ./desktop-enviroments/gnome.nix
+      # ./desktop-enviroments/cosmic.nix
+      # ./desktop-enviroments/kde.nix
+
+      # Optionals
+      ./work.nix
+
+      # Testing :|
+      # ./howdy.nix
+      # ./ai.nix # heeeavy
+
+      # Failed :(
+      # ./flatpak.nix
+      # ./battery.nix
+    ];
 
   # Environment Variables
   environment.sessionVariables = {
