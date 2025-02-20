@@ -24,12 +24,10 @@
     };
   };
 
-
   environment.systemPackages = with pkgs; [
     # Gnome Stuff
     desktop-file-utils
     gnome-extension-manager
-    ghostty # due to gnome-terminal being removed
 
     # Icon Theme
     pkgs.adwaita-icon-theme
@@ -77,15 +75,12 @@
     pkgs.gnome-logs
     pkgs.gnome-usage
     pkgs.simple-scan
-    pkgs.gnome-console
     pkgs.gnome-connections
     pkgs.gnome-text-editor
     pkgs.gnome-font-viewer
   ];
   
 
-  # programs.dconf.enable = true;
-  
   # Home Manager Gnome Modifications
   home-manager.users."pedrinho" = { lib, ... }: {
     # Gnome Basic Crap

@@ -3,21 +3,23 @@
 {
     environment.systemPackages = with pkgs; [
         # essentials
-        vim
-        wget
         unixtools.whereis
-        mission-center
+        coreutils-full
         pciutils
+        gnumake
+
+        # cli tools
+        btop   # better top
+        lsof
+        atuin  # fancy history
+
+        # utils
+        mission-center
 
         # Stuff
         steam
         obsidian
         stremio
-
-        # Utils
-        gnumake
-        coreutils-full
-        atuin
 
         # TODO:Test
         nushell
@@ -25,13 +27,9 @@
         starship
         zed-editor
 
-        #cliiiiiii
-        btop   # better top
-        lsof
-
-        # browsers
-        vivaldi
-        brave
-        chromium
+        # browsers 😒
+        vivaldi  # for work
+        brave    # for moi
+        chromium # for testing
     ];
 }
