@@ -41,11 +41,11 @@
 
       # Testing :|
       # ./howdy.nix
-      # ./ai.nix # heeeavy
 
-      # Failed :(
-      # ./flatpak.nix
+      # Freezer
       # ./battery.nix
+      # ./flatpak.nix
+      # ./ai.nix # heeeavy
     ];
 
   # Environment Variables
