@@ -22,6 +22,11 @@
   hardware.graphics.enable = true;
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
   
+  # Bootloader
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.systemd-boot.configurationLimit = 20;
+  boot.loader.efi.canTouchEfiVariables = true;
+
   # X11 and Wayland
   services.xserver.videoDrivers = [ "nvidia" "amdgpu" ];
 

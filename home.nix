@@ -5,9 +5,6 @@
     isNormalUser = true;
     description = "pedrinho";
     extraGroups = [ "networkmanager" "wheel" "docker" "adbusers" ];
-    packages = with pkgs; [
-      # Thunderbird
-    ];
     shell = pkgs.zsh;
   };
 
