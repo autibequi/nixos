@@ -8,6 +8,9 @@
         pciutils
         gnumake
 
+        # office suite
+        onlyoffice-bin
+
         # cli tools
         btop   # better top
         lsof
@@ -20,6 +23,7 @@
         steam
         obsidian
         stremio
+        sidequest
 
         # TODO:Test
         nushell

@@ -16,6 +16,9 @@
     # Logitech drivers
     services.solaar.enable = true;
 
+    # bluetoot
+    services.blueman.enable = true;
+
     # Bluetooth MPRIS Control
     # services.mpris-proxy.enable = true;
 }
