@@ -67,6 +67,11 @@
             pkgs.file
         ];
     };
+    
+    # Gambiarra pra rodar as coisas do jeito não nix
+    # mostly vscode extensions.
+    programs.nix-ld.enable = true;
+    programs.nix-ld.package = pkgs.nix-ld-rs;
 
     # Services
     programs.openvpn3.enable = true;
