@@ -1,11 +1,8 @@
 { config, pkgs, lib, ... } :
 
 {
+    # Services
     services = {
-        # Cloudflare
-        cloudflare-warp.enable = true;
-
-        # Services
         printing.enable = false;
 
         pipewire = {

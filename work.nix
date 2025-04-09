@@ -6,9 +6,11 @@
         CGO_ENABLED=1; # kafka
     };
 
-    # Systemd Packages
-    systemd.packages = with pkgs; [ cloudflare-warp ];
+    services = {
+        cloudflare-warp.enable = true;
+    };
 
+    # Systemd Packages
     environment.systemPackages = with pkgs; [
         # Tools
         dbeaver-bin
@@ -25,7 +27,6 @@
 
         # vpn
         openvpn
-        cloudflare-warp
 
         # editors
         vscode
