@@ -30,6 +30,8 @@
         pueue
         starship
         zed-editor
+        ghostty
+        alacritty
 
         # browsers 😒
         vivaldi  # for work
