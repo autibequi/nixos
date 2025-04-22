@@ -33,7 +33,6 @@
         
         # python
         python312
-        python312Packages.magic
         poetry
         pyenv
         file # libmagic - intraupload
@@ -56,7 +55,6 @@
 
         # video stuff
         ffmpeg
-        vlc
 
         # TESTING:
         github-copilot-cli

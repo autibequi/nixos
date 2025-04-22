@@ -32,6 +32,13 @@
         zed-editor
         ghostty
         alacritty
+        code-cursor
+
+        #media
+        mpv
+        
+        # 3d
+        cura
 
         # browsers 😒
         vivaldi  # for work
