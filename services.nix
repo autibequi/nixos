@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... } :
 
 {
-    # Services
+    # services
     services = {
         printing.enable = false;
 
@@ -10,11 +10,14 @@
         };
     };
 
-    # Logitech drivers
+    # logitech drivers
     services.solaar.enable = true;
 
-    # bluetoot
+    # bluetooth
     services.blueman.enable = true;
+
+    # flatpak
+    services.flatpak.enable = true;
 
     # Bluetooth MPRIS Control
     # services.mpris-proxy.enable = true;
