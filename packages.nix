@@ -38,11 +38,13 @@
         mpv
         
         # 3d
-        cura
+        # cura-appimage
 
         # browsers 😒
         vivaldi  # for work
         brave    # for moi
         chromium # for testing
+
+        deskreen
     ];
 }
