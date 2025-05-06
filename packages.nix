@@ -7,13 +7,13 @@
         coreutils-full
         pciutils
         gnumake
+        lsof
 
         # office suite
         onlyoffice-bin
 
         # cli tools
         btop   # better top
-        lsof
         atuin  # fancy history
 
         # utils
@@ -22,29 +22,39 @@
         # Stuff
         steam
         obsidian
-        stremio
-        sidequest
+        stremio 
+        sidequest # for oculus sideloading
 
-        # TODO:Test
-        nushell
-        pueue
-        starship
-        zed-editor
-        ghostty
-        alacritty
-        code-cursor
-
-        #media
+        # media
         mpv
-        
-        # 3d
-        # cura-appimage
 
         # browsers 😒
         vivaldi  # for work
         brave    # for moi
         chromium # for testing
 
-        deskreen
+        # TESTING GROUND!
+        # Nothing below this line is sacred
+        # ---------------------------------
+
+        deskreen # for remote screen sharing
+        komorebi # for animated wallpapers
+
+        # shells
+        nushell
+        fish
+
+        # cli utils
+        pueue
+
+        # terminals
+        ghostty
+        alacritty
+
+        # IDEs
+        zed-editor
+
+        # 3D Printing
+        # cura # not working due python (using flatpak)
     ];
 }

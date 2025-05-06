@@ -59,6 +59,7 @@
         # TESTING:
         github-copilot-cli
         devbox
+        code-cursor
     ];
 
     # TESTING: Dynamic Libraries
