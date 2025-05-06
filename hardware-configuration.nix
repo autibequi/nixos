@@ -77,11 +77,12 @@
     nvidiaSettings = false;
     
     # Power Management
-    # powerManagement.enable = true;
-    # powerManagement.finegrained = true;
+    powerManagement.enable = true;
+    powerManagement.finegrained = true;
     
-    # RTX 4060 G402
-    open = true;
+    # RTX 4060 not compatible yet
+    # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus
+    open = false;
     prime = {
       offload.enable = true;
       reverseSync.enable = false;
