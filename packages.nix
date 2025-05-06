@@ -43,6 +43,7 @@
         # shells
         nushell
         fish
+        starship
 
         # cli utils
         pueue
