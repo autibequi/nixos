@@ -3,8 +3,8 @@
 {
     environment.systemPackages = with pkgs; [
         # essentials
+        uutils-coreutils
         unixtools.whereis
-        coreutils-full
         pciutils
         gnumake
         lsof
@@ -14,8 +14,19 @@
 
         # cli tools
         btop-rocm   # better top with amd support
+        rocmPackages.rocm-smi
         atuin       # fancy cli history
         pueue       # task manager
+        fzf         # fuzzy finder
+        ripgrep     # better grep
+        fd          # better find
+        bat         # better cat
+        eza         # better ls
+        dust        # better du
+        procs       # better ps
+        broot       # better tree
+        zoxide      # better cd
+        
 
         # shells
         nushell
