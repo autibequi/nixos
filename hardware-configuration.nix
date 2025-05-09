@@ -18,7 +18,7 @@
   hardware.enableAllFirmware = true; 
 
   # Basics
-  hardware.pulseaudio.enable = false;
+  service.pulseaudio.enable = false;
   hardware.graphics.enable = true;
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
   
@@ -75,7 +75,7 @@
   hardware.nvidia = {
     modesetting.enable = true; # Modesetting is required.
     nvidiaSettings = false;
-    
+
     # Power Management
     powerManagement.enable = true;
     powerManagement.finegrained = true;
@@ -85,7 +85,7 @@
     open = false;
     prime = {
       offload.enable = true;
-      reverseSync.enable = false;
+      reverseSync.enable = true;
       
       amdgpuBusId = lib.mkDefault "PCI:65:0:0";
       nvidiaBusId = lib.mkDefault "PCI:1:0:0";
