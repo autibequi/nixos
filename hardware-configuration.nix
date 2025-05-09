@@ -18,7 +18,7 @@
   hardware.enableAllFirmware = true; 
 
   # Basics
-  service.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
   hardware.graphics.enable = true;
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
   
