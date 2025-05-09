@@ -13,20 +13,31 @@
         onlyoffice-bin
 
         # cli tools
-        btop   # better top
-        atuin  # fancy history
+        btop-rocm   # better top with amd support
+        atuin       # fancy cli history
+        pueue       # task manager
+
+        # shells
+        nushell
+        fish
+        starship
+
+        # terminals
+        ghostty
+        alacritty
 
         # utils
         mission-center
-
-        # Stuff
-        steam
         obsidian
-        stremio 
+        yt-dlp
+
+        # Games
+        steam
         sidequest # for oculus sideloading
 
         # media
         mpv
+        stremio 
 
         # browsers 😒
         vivaldi  # for work
@@ -36,21 +47,7 @@
         # TESTING GROUND!
         # Nothing below this line is sacred
         # ---------------------------------
-
-        deskreen # for remote screen sharing
-        komorebi # for animated wallpapers
-
-        # shells
-        nushell
-        fish
-        starship
-
-        # cli utils
-        pueue
-
-        # terminals
-        ghostty
-        alacritty
+        deskreen # for wireless screen mirroring
 
         # IDEs
         zed-editor
@@ -58,4 +55,6 @@
         # 3D Printing
         # cura # not working due python (using flatpak)
     ];
+
+    
 }
