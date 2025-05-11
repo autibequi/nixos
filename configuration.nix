@@ -23,7 +23,7 @@
 
   imports =
     [ 
-      # Binaries
+    # Binaries
       ./binaries.nix
       
       # Core

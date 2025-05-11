@@ -1,11 +1,8 @@
 {
-  nix.binaryCaches = [
-    "https://aseipp-nix-cache.global.ssl.fastly.net"
-  ];
-
   nix = {
     settings = {
       substituters = [
+        "https://aseipp-nix-cache.global.ssl.fastly.net"
         "https://chaotic-nyx.cachix.org/"
         "https://nix-community.cachix.org"
         "https://cache.nixos.org/"
