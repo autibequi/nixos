@@ -2,10 +2,17 @@
   description = "A very basic flake";
 
   inputs = {
-    # Nix
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    # Nix Channels
+    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/staging";
 
+    # Hardware URL
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+  };
+
+  # Non Nixos Sources
+  inputs = {
     # Others
     # nixos-cosmic.url = "github:lilyinstarlight/nixos-cosmic";
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
@@ -13,11 +20,13 @@
     # Interactive SystemD
     isd.url = "github:isd-project/isd";
 
-    # Others with inputs
+    # Home Manager
     home-manager = {
       url = "github:nix-community/home-manager/release-24.11"; 
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Logitech Solaar
     solaar = {
       url = "https://flakehub.com/f/Svenum/Solaar-Flake/*.tar.gz";
       inputs.nixpkgs.follows = "nixpkgs";
