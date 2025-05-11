@@ -5,7 +5,8 @@
     # Nix Channels
     # nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     # nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
-    nixpkgs.url = "github:NixOS/nixpkgs/staging";
+    # nixpkgs.url = "github:NixOS/nixpkgs/staging";
+    nixpkgs.url = "github:NixOS/nixpkgs/staging-next";
 
     # Hardware URL
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";

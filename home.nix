@@ -1,5 +1,7 @@
 { config, pkgs, home-manager, ... }:
 {
+
+
   # User Accounts
   users.users.pedrinho = {
     isNormalUser = true;
@@ -11,6 +13,9 @@
   # Home Manager
   home-manager.users."pedrinho" = { lib, ... }: {
     home.stateVersion = "25.05";
+    
+    # Disable annoying different nix/home version while migrating
+    home.enableNixpkgsReleaseCheck = false;
 
     # Git
     programs.git = {
