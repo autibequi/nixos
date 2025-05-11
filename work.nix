@@ -14,10 +14,13 @@
     environment.systemPackages = with pkgs; [
         # Tools
         dbeaver-bin
-        insomnia
         podman
         postgresql
         terraform
+
+        # REST Clients
+        cartero
+        insomnia
 
         # clitools
         dig
