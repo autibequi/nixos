@@ -1,7 +1,5 @@
 { config, pkgs, home-manager, ... }:
 {
-
-
   # User Accounts
   users.users.pedrinho = {
     isNormalUser = true;
