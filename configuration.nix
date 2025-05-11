@@ -58,8 +58,8 @@
     # MOZ_ENABLE_WAYLAND = "1";
     # OZONE_PLATFORM = "wayland";
     # ELECTRON_OZONE_PLATFORM_HINT = "wayland";
-    __NV_PRIME_RENDER_OFFLOAD=1; 
-    __GLX_VENDOR_LIBRARY_NAME="nvidia";
+    # __NV_PRIME_RENDER_OFFLOAD=1; 
+    # __GLX_VENDOR_LIBRARY_NAME="nvidia";
     # QT Scaling for Stremio
     QT_AUTO_SCREEN_SCALE_FACTOR="1";
   };
