@@ -1,9 +1,6 @@
 { config, pkgs, lib, ... } :
 
 {
-  # fastly v2
-  nix.binaryCaches = [ "https://aseipp-nix-cache.global.ssl.fastly.net" ];
-
   # System State Version
   system.stateVersion = "25.05";
 
@@ -26,6 +23,9 @@
 
   imports =
     [ 
+      # Binaries
+      ./binaries.nix
+      
       # Core
       ./hardware-configuration.nix
       ./kernel.nix
