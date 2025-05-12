@@ -19,10 +19,16 @@
         defaultNetwork.settings.dns_enabled = true;
     };
 
+
     environment.systemPackages = with pkgs; [
         dive # look into docker image layers
         podman-tui # status of containers in the terminal
-        docker-compose
+        podman-compose
     ];
 
+    # Ensure Podman uses docker.io as the default registry
+    environment.etc."containers/registries.conf".text = lib.mkForce ''
+        [registries.search]
+        registries = ['docker.io']
+    '';
 }
