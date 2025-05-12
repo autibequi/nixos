@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... } :
 {
 
-      # Environment Variables
+    # Environment Variables
     environment.sessionVariables = {
         CGO_ENABLED=1; # kafka
     };

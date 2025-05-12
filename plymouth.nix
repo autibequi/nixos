@@ -13,6 +13,11 @@
           selected_themes = [ "abstract_ring_alt" "dragon" "connect" ];
         })
       ];
+      extraConfig = ''
+        [Daemon]
+        UseSimpledrm=1 
+        DeviceScale=2
+      '';
     };
 
     # Enable "Silent boot"
@@ -21,7 +26,8 @@
     kernelParams = [
       "boot.shell_on_fail"
       "udev.log_priority=3"
-      "rd.systemd.show_status=auto"
+      "rd.systemd.show_status=auto" 
+      "plymouth.use-simpledrm" # usa simpledrm para melhor desempenho
     ];
     # Hide the OS choice for bootloaders.
     # It's still possible to open the bootloader list by pressing any key

@@ -23,7 +23,7 @@
   # Habilitar Garbage Collector automático
   nix.gc = {
     automatic = true;
-    options = "--delete-older-than 10d";
+    options = "--delete-generations-old 20";
   };
 
   # Habilitar o uso de todos os núcleos disponíveis
