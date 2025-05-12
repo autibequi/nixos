@@ -8,6 +8,7 @@
   boot.kernelParams = [ 
     "usbcore.autosuspend=-1" # keeps usb-c dock alive
     "btusb.enable_autosuspend=0" # keeps bluetooth alive
+    "amdgpu.dcdebugmask=0x10" # refresh issues https://gitlab.gnome.org/GNOME/mutter/-/issues/3299
   ];
 
   # Userland Scheduler 
