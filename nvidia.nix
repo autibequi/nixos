@@ -1,6 +1,6 @@
 { config, pkgs, lib, ... } :
 {
-  # Manual nvidia driver setup. Get latest here. IDK easier way
+  # Configuração manual do driver NVIDIA com a versão mais recente
   # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/os-specific/linux/nvidia-x11/default.nix
   hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
       version = "575.51.02";
@@ -12,20 +12,31 @@
     };
 
   hardware.nvidia = {
-    modesetting.enable = true; # Modesetting is required.
-    nvidiaSettings = false;
-    powerManagement.enable = true;
-    powerManagement.finegrained = true;
+    modesetting.enable = true; # Necessário para o funcionamento correto
+    nvidiaSettings = true; # Habilitado para permitir configurações avançadas
+    powerManagement = {
+      enable = true; # Gerenciamento de energia básico
+      finegrained = true; # Controle granular de energia para melhor eficiência
+    };
     
-    # RTX 4060 not compatible yet
+    # RTX 4060 ainda não é compatível com drivers open source
     # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus
     open = false;
+    
+    # Configuração DynamicPower para melhorar autonomia da bateria
+    dynamicBoost.enable = true;
+    
+    # Configuração PRIME para laptop híbrido G14
     prime = {
-      offload.enable = true;
-      # reverseSync.enable = true;
+      offload.enable = true; # Modo offload para economia de energia
+      sync.enable = false; # Desativado para evitar consumo constante da GPU
       
+      # Configuração de barramento otimizada para G14 com RTX 4060
       amdgpuBusId = lib.mkDefault "PCI:65:0:0";
       nvidiaBusId = lib.mkDefault "PCI:1:0:0";
     };
+    
+    # Otimizações para jogos e aplicações gráficas
+    nvidiaPersistenced = true; # Mantém o daemon NVIDIA persistente para melhor desempenho
   };
 }
