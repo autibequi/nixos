@@ -45,18 +45,22 @@
       modules = [
         # Currenct Laptop Flake
         nixos-hardware.nixosModules.asus-zephyrus-ga402x-nvidia
+
         # Logitech Solaar
         solaar.nixosModules.default
+        
         # CachyOS Kernel
         chaotic.nixosModules.nyx-cache
         chaotic.nixosModules.nyx-overlay
         chaotic.nixosModules.nyx-registry
+        
         # home-manager
         home-manager.nixosModules.home-manager
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
         }
+        
         # Cosmic
         # nixos-cosmic.nixosModules.default
         # {
@@ -65,10 +69,12 @@
         #     trusted-public-keys = [ "cosmic.cachix.org-1:Dya9IyXD4xdBehWjrkPv6rtxpmMdRel02smYzA85dPE=" ];
         #   };
         # }
+        
         # Interactive SystemD
         {
           environment.systemPackages = [ inputs.isd.packages.x86_64-linux.default ];
         }
+        
         # Mine
         ./configuration.nix
       ];
