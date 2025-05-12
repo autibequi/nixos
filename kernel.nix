@@ -10,21 +10,27 @@
     "btusb.enable_autosuspend=0" # keeps bluetooth alive
     "amdgpu.dcdebugmask=0x10" # refresh issues https://gitlab.gnome.org/GNOME/mutter/-/issues/3299
 
-    # Otimizações para desenvolvimento web
+    # Otimizações de Performance
     "mitigations=off" # melhora desempenho desativando mitigações de segurança
     "nowatchdog" # desativa o watchdog para melhorar desempenho
-    "quiet" # reduz mensagens de boot
-    "loglevel=3" # limita logs do kernel
-    "fastboot" # acelera o processo de boot
-    "noatime" # desativa atualização de timestamps de acesso
-    "rd.systemd.show_status=false" # desativa mensagens de status do systemd durante boot
-    "rd.udev.log_level=3" # reduz logs do udev
     "systemd.unified_cgroup_hierarchy=1" # usa cgroups v2 para melhor desempenho
     "preempt=full" # habilita preempção completa para melhor responsividade
     "threadirqs" # usa threads para IRQs melhorando responsividade
     "iomem=relaxed" # melhora acesso à memória para aplicações de desenvolvimento
     "pcie_aspm=off" # desativa economia de energia PCIe para melhor desempenho
-    "compress=lz4" # força compressão lz4 no initramfs
+    "intel_iommu=on" # habilita IOMMU para melhor desempenho em virtualização
+    "amd_iommu=on" # habilita IOMMU para melhor desempenho em virtualização
+    "noapic" # desativa APIC para melhor desempenho
+    "noirqbalance" # desativa balanceamento de IRQs para melhor desempenho
+
+    # Melhora Boot time
+    "rd.systemd.show_status=false" # desativa mensagens de status do systemd durante boot
+    "rd.udev.log_level=3" # reduz logs do udev
+    "noatime" # desativa atualização de timestamps de acesso
+    "loglevel=3" # limita logs do kernel
+    "fastboot" # acelera o processo de boot
+    "quiet" # reduz mensagens de boot
+    "splash" # habilita splash screen
   ];
 
   # Otimizações de kernel para desenvolvimento web
@@ -45,13 +51,10 @@
     "net.core.somaxconn" = 4096; # aumenta conexões simultâneas para servidores de desenvolvimento
     "net.ipv4.tcp_max_syn_backlog" = 8192; # melhora desempenho para múltiplas conexões HTTP
     "net.ipv4.ip_local_port_range" = "1024 65535"; # amplia range de portas para desenvolvimento
-    "zswap.enabled"=1; # habilita zswap para melhor desempenho
-    "zswap.compressor"="lz4"; # usa lz4 como compressor para zswap
   };
 
-  # Configurar compressão initrd para lz4
+  # Configurar compressão
   # boot.initrd.compressor = "lz4";
-
 
   # Userland Scheduler 
   # scx_rusty - responsive under load
@@ -69,12 +72,10 @@
     "typec" 
     "typec_ucsi" 
     "ext4" 
-    "lz4"
   ];
 
 
   # Configure initramfs modules
-  boot.initrd.kernelModules = [ "lz4" ];
   boot.loader.systemd-boot.editor = false; # Disable boot editor
   boot.loader.timeout = 0; # Reduce timeout
 
