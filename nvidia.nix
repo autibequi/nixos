@@ -39,4 +39,7 @@
     # Otimizações para jogos e aplicações gráficas
     nvidiaPersistenced = true; # Mantém o daemon NVIDIA persistente para melhor desempenho
   };
+
+  # Permite podman usar o driver NVIDIA
+  hardware.nvidia-container-toolkit.enable = true; 
 }
