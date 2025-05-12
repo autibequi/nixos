@@ -66,11 +66,11 @@
     ];
 
     # TESTING: Dynamic Libraries
-    environment.variables = {
-        LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
-            pkgs.file
-        ];
-    };
+    # environment.variables = {
+    #     LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
+    #         pkgs.file
+    #     ];
+    # };
     
     # Gambiarra pra rodar as coisas do jeito não nix
     # mostly vscode extensions.
