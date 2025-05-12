@@ -77,6 +77,9 @@
     sbc
     bluez-tools # Ferramentas adicionais para diagnóstico
     bluez-alsa # Suporte ALSA para Bluetooth
+
+    pavucontrol # Interface gráfica para ajustar configurações de áudio
+    helvum # Interface gráfica para ajustar configurações de áudio
   ];
 
   # Parâmetros do kernel para melhor desempenho Bluetooth
