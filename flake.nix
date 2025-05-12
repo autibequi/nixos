@@ -15,11 +15,12 @@
     isd.url = "github:isd-project/isd"; # Interactive SystemD
     home-manager.url = "github:nix-community/home-manager/release-24.11";  # Home Manager
     solaar.url = "https://flakehub.com/f/Svenum/Solaar-Flake/*.tar.gz"; # Logitech Solaar
+    nixpkgs-howdy.url = "github:NixOS/nixpkgs/pull/216245/head";
   };
 
   # Outputs
   # This is the default output, which is a set of attributes.
-  outputs = { self, nixpkgs, solaar, nixos-hardware, home-manager, chaotic, nixos-cosmic, ... }@inputs: {
+  outputs = { self, nixpkgs, solaar, nixos-hardware, home-manager, chaotic, nixos-cosmic, nixpkgs-howdy, ... }@inputs: {
     packages.x86_64-linux.hello = nixpkgs.legacyPackages.x86_64-linux.hello;
     packages.x86_64-linux.default = self.packages.x86_64-linux.hello;
 
@@ -36,7 +37,7 @@
         chaotic.nixosModules.nyx-cache
         chaotic.nixosModules.nyx-overlay
         chaotic.nixosModules.nyx-registry
-        
+
         # Cosmic
         nixos-cosmic.nixosModules.default
 
@@ -46,7 +47,6 @@
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
         }
-
         
         # Interactive SystemD
         {

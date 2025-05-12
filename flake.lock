@@ -376,6 +376,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-howdy": {
+      "locked": {
+        "lastModified": 1731849838,
+        "narHash": "sha256-E8pXX7ih1MTOPZKoOb95FRLS2xCR39Yt855JbZ6G6AM=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "463e5acd9c205f53c07515ddd5de2fb3385e17b7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "pull/216245/head",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs-stable": {
       "locked": {
         "lastModified": 1746810718,
@@ -533,6 +549,7 @@
           "nixos-cosmic",
           "nixpkgs"
         ],
+        "nixpkgs-howdy": "nixpkgs-howdy",
         "solaar": "solaar"
       }
     },
