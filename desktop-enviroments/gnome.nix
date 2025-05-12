@@ -95,7 +95,6 @@
         };
         "org/gnome/mutter" = {
             experimental-features = [ "scale-monitor-framebuffer" "variable-refresh-rate" ];
-            # experimental-features = "[ 'scale-monitor-framebuffer', 'variable-refresh-rate' ]";
         };
         "org/gnome/settings-daemon/plugins/sound" = {
           volume-step = 0.1;
