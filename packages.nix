@@ -15,6 +15,8 @@
         # cli tools
         btop-rocm   # better top with amd support
         rocmPackages.rocm-smi
+
+        # better cli
         atuin       # fancy cli history
         pueue       # task manager
         fzf         # fuzzy finder
@@ -67,5 +69,24 @@
         # cura # not working due python (using flatpak)
     ];
 
-    
+    programs.zsh = {
+        shellAliases = {
+            history = "atuin";
+            tasks = "pueue";
+            find = "fzf";
+            grep = "rg"; # ripgrep
+            findf = "fd";
+            cat = "bat";
+            ls = "eza -la";
+            du = "dust";
+            ps = "procs";
+            tree = "broot";
+            cd = "z";
+        };
+
+        # Init some of those alias
+        shellInit = ''
+            eval "$(zoxide init zsh)"
+        '';
+    };
 }

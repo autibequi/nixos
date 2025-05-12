@@ -60,37 +60,6 @@
       # { device = "/dev/disk/by-uuid/0319478f-63cc-4fde-9804-523687d223ee"; priority = 10; options = [ "x-systemd.device-timeout=1ms" ]; } # optional g14 laptop swap
       { device = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; priority = 00; } # nomad usb stick
     ];
-
-    # Manual nvidia driver setup. Get latest here. IDK easier way
-    # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/os-specific/linux/nvidia-x11/default.nix
-    hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
-        version = "575.51.02";
-        sha256_64bit = "sha256-XZ0N8ISmoAC8p28DrGHk/YN1rJsInJ2dZNL8O+Tuaa0=";
-        sha256_aarch64 = "sha256-NNeQU9sPfH1sq3d5RUq1MWT6+7mTo1SpVfzabYSVMVI=";
-        openSha256 = "sha256-NQg+QDm9Gt+5bapbUO96UFsPnz1hG1dtEwT/g/vKHkw=";
-        settingsSha256 = "sha256-6n9mVkEL39wJj5FB1HBml7TTJhNAhS/j5hqpNGFQE4w=";
-        persistencedSha256 = "sha256-dgmco+clEIY8bedxHC4wp+fH5JavTzyI1BI8BxoeJJI=";
-      };
-
-  hardware.nvidia = {
-    modesetting.enable = true; # Modesetting is required.
-    nvidiaSettings = false;
-
-    # Power Management
-    powerManagement.enable = true;
-    powerManagement.finegrained = true;
-    
-    # RTX 4060 not compatible yet
-    # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus
-    open = false;
-    prime = {
-      offload.enable = true;
-      reverseSync.enable = true;
-      
-      amdgpuBusId = lib.mkDefault "PCI:65:0:0";
-      nvidiaBusId = lib.mkDefault "PCI:1:0:0";
-    };
-  };
 }
 
 

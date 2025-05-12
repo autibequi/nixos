@@ -33,6 +33,10 @@
       ./services.nix
       ./programs.nix
       ./packages.nix
+      ./nvidia.nix
+
+      # Bonus
+      ./plymouth.nix
 
       # DE Picker
       ./desktop-enviroments/gnome.nix
