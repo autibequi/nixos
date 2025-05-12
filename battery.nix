@@ -1,6 +1,9 @@
 { config, pkgs, ... }:
 
 {
+  # NixOs stock power management
+  powerManagement.enable = true;
+  
   # Melhor agendamento para ciclos de CPU - graças ao System76!!!
   services.system76-scheduler.settings.cfsProfiles.enable = true;
 

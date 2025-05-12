@@ -79,4 +79,8 @@
 
     # Services
     programs.openvpn3.enable = true;
+
+    networking.extraHosts = ''
+        127.0.0.1 local.estrategia-sandbox.com.br
+    '';
 }

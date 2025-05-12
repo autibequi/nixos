@@ -9,6 +9,8 @@
     "usbcore.autosuspend=-1" # keeps usb-c dock alive
     "btusb.enable_autosuspend=0" # keeps bluetooth alive
     "amdgpu.dcdebugmask=0x10" # refresh issues https://gitlab.gnome.org/GNOME/mutter/-/issues/3299
+
+    # Otimizações para desenvolvimento web
     "mitigations=off" # melhora desempenho desativando mitigações de segurança
     "nowatchdog" # desativa o watchdog para melhorar desempenho
     "quiet" # reduz mensagens de boot
@@ -20,9 +22,11 @@
     "systemd.unified_cgroup_hierarchy=1" # usa cgroups v2 para melhor desempenho
     "preempt=full" # habilita preempção completa para melhor responsividade
     "threadirqs" # usa threads para IRQs melhorando responsividade
+    "iomem=relaxed" # melhora acesso à memória para aplicações de desenvolvimento
+    "pcie_aspm=off" # desativa economia de energia PCIe para melhor desempenho
   ];
 
-  # Otimizações de kernel
+  # Otimizações de kernel para desenvolvimento web
   boot.kernel.sysctl = {
     "vm.swappiness" = 1; # reduz drasticamente uso de swap para melhor responsividade
     "vm.vfs_cache_pressure" = 50; # melhora cache de sistema de arquivos
@@ -36,6 +40,10 @@
     "kernel.sched_latency_ns" = 4000000; # reduz latência do escalonador
     "kernel.sched_min_granularity_ns" = 500000; # ajusta granularidade mínima
     "kernel.sched_wakeup_granularity_ns" = 50000; # melhora responsividade em wakeups
+    "fs.inotify.max_user_watches" = 524288; # aumenta limite de watches para ferramentas de desenvolvimento
+    "net.core.somaxconn" = 4096; # aumenta conexões simultâneas para servidores de desenvolvimento
+    "net.ipv4.tcp_max_syn_backlog" = 8192; # melhora desempenho para múltiplas conexões HTTP
+    "net.ipv4.ip_local_port_range" = "1024 65535"; # amplia range de portas para desenvolvimento
   };
 
   # Userland Scheduler 
@@ -68,13 +76,13 @@
   
   # Configuração de I/O Scheduler para melhor responsividade
   services.udev.extraRules = ''
-    # Usar scheduler BFQ para discos mecânicos e none para SSDs
-    ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
-    ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="none"
-    ACTION=="add|change", KERNEL=="nvme[0-9]n[0-9]", ATTR{queue/scheduler}="none"
+    # Aumentar limites para dispositivos de entrada para melhor experiência de desenvolvimento
+    KERNEL=="event*", SUBSYSTEM=="input", RUN+="${pkgs.kmod}/bin/modprobe -a uinput"
   '';
   
   # Acelerar boot desabilitando serviços não essenciais
   systemd.services.NetworkManager-wait-online.enable = false;
   systemd.services.systemd-udev-settle.enable = false;
+
+
 }

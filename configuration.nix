@@ -4,27 +4,10 @@
   # System State Version
   system.stateVersion = "25.05";
 
-  # NIXOS STUFF
-  # Garbage Collection
-  nix.gc = {
-    automatic = true;
-    randomizedDelaySec = "14m";
-    options = "--delete-older-than 10d";
-  };
-
-  # Unholy packages
-  nixpkgs.config.allowUnfree = true;
-
-  # NixOs stock power management
-  powerManagement.enable = true;
-
-  # Experimental Features
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
   imports =
     [ 
-    # Binaries
-      ./binaries.nix
+      # Nix Configuations
+      ./nix.nix
       
       # Core
       ./hardware-configuration.nix
@@ -56,30 +39,10 @@
       # ./ai.nix # heeeavy
     ];
 
-  # Environment Variables
-  environment.sessionVariables = {
-    GTK_IM_MODULE = "cedilla";
-    QT_IM_MODULE = "cedilla";
-
-    # Wayland Growth Pains
-    # NIXOS_OZONE_WL = "1";
-    # MOZ_ENABLE_WAYLAND = "1";
-    # OZONE_PLATFORM = "wayland";
-    # ELECTRON_OZONE_PLATFORM_HINT = "wayland";
-    # __NV_PRIME_RENDER_OFFLOAD=1; 
-    # __GLX_VENDOR_LIBRARY_NAME="nvidia";
-    # QT Scaling for Stremio
-    QT_AUTO_SCREEN_SCALE_FACTOR="1";
-  };
-
   # Networking
   networking = {
     hostName = "nomad"; 
     useDHCP = lib.mkDefault true;
-    extraHosts = ''
-      127.0.0.1 local.estrategia-sandbox.com.br 
-    '';
-
     networkmanager = {
       enable = true;
     };
@@ -123,7 +86,4 @@
   # XDG Portal
   xdg.portal.enable = true;
   xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-
-  # Docker
-  virtualisation.docker.enable = true;
 }
