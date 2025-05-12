@@ -32,7 +32,6 @@
 
         # shells
         nushell
-        fish
         starship
 
         # terminals
@@ -45,7 +44,6 @@
         yt-dlp
 
         # Games
-        steam
         sidequest # for oculus sideloading
 
         # media
@@ -87,6 +85,7 @@
         # Init some of those alias
         shellInit = ''
             eval "$(zoxide init zsh)"
+            eval "$(atuin init zsh)"
         '';
     };
 }

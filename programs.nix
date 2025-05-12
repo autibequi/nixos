@@ -19,6 +19,13 @@
     neovim = {
       enable = true;
       defaultEditor = true;
+      vimAlias = true;
+      viAlias = true;
+    };
+    steam = {
+      enable = true;
+      steamRuntime = true;
+      openFirewall = true;
     };
   };
 }
