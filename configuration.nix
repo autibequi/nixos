@@ -34,6 +34,7 @@
       ./programs.nix
       ./packages.nix
       ./nvidia.nix
+      ./bluetooth.nix
 
       # Bonus
       ./plymouth.nix

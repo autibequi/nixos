@@ -7,6 +7,7 @@
   boot.kernelModules = [ "nvidia" "amdgpu" ];
   boot.kernelParams = [ 
     "usbcore.autosuspend=-1" # keeps usb-c dock alive
+    "btusb.enable_autosuspend=0" # keeps bluetooth alive
   ];
 
   # Userland Scheduler 
