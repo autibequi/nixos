@@ -19,6 +19,30 @@
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
+    wireplumber.enable = true;
+    wireplumber.extraConfig."10-bluez" = {
+      "monitor.bluez.properties" = {
+        "bluez5.roles" = [
+          "hfp_hf"
+          "hfp_ag"
+
+          "a2dp_sink"
+          "a2dp_source"
+          "bap_sink"
+          "bap_source"
+    
+          "hsp_hs"
+          "hsp_ag"
+        ];
+        "bluez5.auto-connect" = [ "a2dp_sink" ];
+      };
+    };
+    
+    wireplumber.extraConfig."11-bluetooth-policy" = {
+      "wireplumber.settings" = {
+        "bluetooth.autoswitch-to-headset-profile" = true;
+      };
+    };
   };
 
   # Environment variables for Bluetooth optimization

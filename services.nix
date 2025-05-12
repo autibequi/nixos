@@ -18,7 +18,4 @@
 
     # flatpak
     services.flatpak.enable = true;
-
-    # Bluetooth MPRIS Control
-    # services.mpris-proxy.enable = true;
 }
