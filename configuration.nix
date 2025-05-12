@@ -51,7 +51,7 @@
       # ./howdy.nix
 
       # Freezer
-      # ./battery.nix
+      ./battery.nix
       # ./flatpak.nix
       # ./ai.nix # heeeavy
     ];
