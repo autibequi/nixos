@@ -49,8 +49,9 @@
     "zswap.compressor"="lz4"; # usa lz4 como compressor para zswap
   };
 
-  # Set initrd compression to lz4
-  boot.initrd.compressor = "lz4";
+  # Configurar compressão initrd para lz4
+  # boot.initrd.compressor = "lz4";
+
 
   # Userland Scheduler 
   # scx_rusty - responsive under load
@@ -72,7 +73,7 @@
   ];
 
 
-  # Configure initramfs compmodulesression and modules
+  # Configure initramfs modules
   boot.initrd.kernelModules = [ "lz4" ];
   boot.loader.systemd-boot.editor = false; # Disable boot editor
   boot.loader.timeout = 0; # Reduce timeout
