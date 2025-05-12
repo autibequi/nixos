@@ -27,14 +27,13 @@
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Habilitar Garbage Collector automático
-  gc = {
+  nix.gc = {
     automatic = true;
-    enable = true;
     options = "--delete-older-than 10d";
   };
 
   # Habilitar o uso de todos os núcleos disponíveis
-  settings = {
+  nix.settings = {
     max-jobs = "auto";
     cores = 0; # usar todos os cores disponíveis
     sandbox = true;

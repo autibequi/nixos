@@ -15,5 +15,5 @@
         enable = true;
         dockerCompat = true;
         enableNvidia = true;
-    }
+    };
 }

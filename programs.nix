@@ -18,14 +18,13 @@
     starship.enable = true;
     neovim = {
       enable = true;
-      defaultEditor = true;
+      defaultEsditor = true;
       vimAlias = true;
       viAlias = true;
     };
     steam = {
       enable = true;
-      steamRuntime = true;
-      openFirewall = true;
+      remotePlay.openFirewall = true;
     };
   };
 }
