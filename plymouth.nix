@@ -1,4 +1,6 @@
 { pkgs, ... }: {
+
+
   boot = {
 
     plymouth = {

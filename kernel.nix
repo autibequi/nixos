@@ -61,14 +61,18 @@
     "typec_ucsi" 
     "ext4" 
   ];
-  
+
+  boot.loader.systemd-boot.editor = false; # Disable boot editor
+  boot.loader.timeout = 0; # Reduce timeout
+
   # Habilitar suporte a compressão zram para melhor desempenho
-  zramSwap = {
-    enable = true;
-    algorithm = "zstd";
-    memoryPercent = 75; # aumentado para reduzir paginação em disco
-    priority = 100; # prioridade máxima para zram
-  };
+  # Not necessario because lots of ram
+  # zramSwap = {
+  #   enable = true;
+  #   algorithm = "zstd";
+  #   memoryPercent = 75; # aumentado para reduzir paginação em disco
+  #   priority = 100; # prioridade máxima para zram
+  # };
 
   # Otimização de I/O
   services.fstrim.enable = true; # trim periódico para SSDs
