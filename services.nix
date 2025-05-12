@@ -10,6 +10,10 @@
     # flatpak
     services.flatpak.enable = true;
 
-    # Docker
-    virtualisation.docker.enable = true;
+    # Docker/Podman
+    virtualisation.podman = {
+        enable = true;
+        dockerCompat = true;
+        enableNvidia = true;
+    }
 }
