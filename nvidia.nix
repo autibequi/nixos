@@ -13,7 +13,7 @@
 
   hardware.nvidia = {
     modesetting.enable = true; # Necessário para o funcionamento correto
-    nvidiaSettings = true; # Habilitado para permitir configurações avançadas
+    nvidiaSettings = false; # Habilitado para permitir configurações avançadas
     powerManagement = {
       enable = true; # Gerenciamento de energia básico
       finegrained = true; # Controle granular de energia para melhor eficiência
