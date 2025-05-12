@@ -13,7 +13,8 @@
 
   # Userland Scheduler 
   services.scx.enable = true; 
-  services.scx.scheduler = "scx_simple";
+  # services.scx.scheduler = "scx_simple";
+  services.scx.scheduler = "scx_flash";
 
   # InitRD
   boot.initrd.availableKernelModules = [ 
