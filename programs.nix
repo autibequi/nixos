@@ -18,7 +18,7 @@
     starship.enable = true;
     neovim = {
       enable = true;
-      defaultEsditor = true;
+      defaultEditor = true;
       vimAlias = true;
       viAlias = true;
     };
