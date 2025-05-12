@@ -22,9 +22,6 @@
     };
   };
 
-  # Habilitar serviço blueman para interface gráfica
-  services.blueman.enable = true;
-
   # Configuração PipeWire otimizada
   services.pipewire = {
     enable = true;
