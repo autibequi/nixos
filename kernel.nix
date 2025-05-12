@@ -12,7 +12,6 @@
   ];
 
   # Userland Scheduler 
-  # Cachyos uses scx_rustland scheduler by default
   services.scx.enable = true; 
   services.scx.scheduler = "scx_simple";
 
