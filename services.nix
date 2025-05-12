@@ -12,6 +12,10 @@
 
     # Enable Docker
     virtualisation.docker.enable = true;
+
+    # Preload common apps for snappier experience
+    services.preload.enable = true;
+
     
     # Podman (not working yet)
     # virtualisation.podman = {
