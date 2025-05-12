@@ -51,6 +51,9 @@
     gnomeExtensions.quick-settings-audio-panel
     gnomeExtensions.wtmb-window-thumbnails
     gnomeExtensions.battery-time
+    gnomeExtensions.blur-my-shell
+    gnomeExtensions.vitals
+    gnomeExtensions.media-controls
   ];
 
   # Gnome Debloat
