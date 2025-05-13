@@ -30,7 +30,6 @@
 
 
   boot.blacklistedKernelModules = [ 
-    "usb_storage" 
   ];
 
   # Configurar compressão
@@ -48,6 +47,7 @@
     "usbhid" 
     "uas" 
     "xhci_hcd"
+    "usb_storage" 
     "xhci_pci" 
     "typec" 
     "typec_ucsi" 
