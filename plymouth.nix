@@ -11,9 +11,18 @@
         })
       ];
     };
-
-    # Enable "Silent boot"
-    consoleLogLevel = 3;
+    
+    # Silent boot flags
     loader.timeout = 0;
+    consoleLogLevel = 0;
+    initrd.verbose = false;
+    kernelParams = [
+      "plymouth.use-simpledrm" # usa simpledrm para melhor desempenho
+      "udev.log_priority=3"
+
+      "loglevel=3" # limita logs do kernel
+      "quiet" # reduz mensagens de boot
+      "splash" # habilita splash screen
+    ];
   };
 }

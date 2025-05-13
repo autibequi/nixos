@@ -16,12 +16,8 @@
     "threadirqs" # usa threads para IRQs melhorando responsividade
 
     # Melhora Boot time
-    "loglevel=3" # limita logs do kernel
     "fastboot" # acelera o processo de boot
-    "quiet" # reduz mensagens de boot
-    "splash" # habilita splash screen
   ];
-
 
   # Configurar compressão
   # boot.initrd.compressor = "lz4";
@@ -43,10 +39,6 @@
     "typec_ucsi" 
     "ext4" 
   ];
-
-  # Configure initramfs modules
-  boot.loader.systemd-boot.editor = false; # Disable boot editor
-  boot.loader.timeout = 0; # Reduce timeout
 
   # Otimização de I/O
   services.fstrim.enable = true; # trim periódico para SSDs
