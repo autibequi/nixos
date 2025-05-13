@@ -3,7 +3,6 @@
     plymouth = {
       enable = true;
       theme = "dragon";
-      logo = ""; # no logo
       themePackages = with pkgs; [
         # By default we would install all themes
         # https://github.com/NixOS/nixpkgs/blob/nixos-24.11/pkgs/by-name/ad/adi1090x-plymouth-themes/shas.nix
