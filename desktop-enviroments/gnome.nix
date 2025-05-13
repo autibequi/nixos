@@ -41,7 +41,6 @@
     gnomeExtensions.gsconnect
     gnomeExtensions.auto-power-profile        
     gnomeExtensions.tiling-assistant        
-    gnomeExtensions.battery-health-charging
     gnomeExtensions.vertical-workspaces
     gnomeExtensions.tiling-shell
     gnomeExtensions.night-theme-switcher
