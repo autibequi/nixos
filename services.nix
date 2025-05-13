@@ -16,7 +16,18 @@
     # Preload common apps for snappier experience
     services.preload.enable = true;
 
-    
+    # LACT Daemon
+    # lact is a daemon that allows you to control the AMD GPU power states
+    systemd.services.lact = {
+        description = "AMDGPU Control Daemon";
+        after = ["multi-user.target"];
+        wantedBy = ["multi-user.target"];
+        serviceConfig = {
+            ExecStart = "${pkgs.lact}/bin/lact daemon";
+        };
+        enable = true;
+    };
+
     # Podman (not working yet)
     # virtualisation.podman = {
     #     enable = true;

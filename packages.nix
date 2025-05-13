@@ -42,6 +42,7 @@
         mission-center
         # obsidian
         yt-dlp
+        lact
 
         # Games
         sidequest # for oculus sideloading
