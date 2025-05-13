@@ -20,7 +20,8 @@
   ];
 
   # Configurar compressão
-  # boot.initrd.compressor = "lz4";
+  boot.initrd.compressor = "lzop"; # try lz4 later
+  boot.initrd.compressorArgs = [ "-9" ]; # max compression
 
   # Userland Scheduler 
   # scx_rusty - responsive under load
