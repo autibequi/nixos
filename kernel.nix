@@ -28,18 +28,6 @@
     "fastboot" # acelera o processo de boot
   ];
 
-  boot.kernel.sysctl = {
-    "vm.dirty_expire_centisecs" = 1000;
-    "vm.dirty_writeback_centisecs" = 100;
-    "kernel.numa_balancing" = 0;
-    "kernel.sched_autogroup" = 0;
-    "kernel.sched_rr_timeslice_ms" = 1;
-    "kernel.sched_migration_cost_ns" = 500000;
-    "kernel.sched_latency_ns" = 10000000;
-    "kernel.sched_min_granularity_ns" = 1000000;
-    "kernel.sched_wakeup_granularity_ns" = 2000000;
-  };
-
   # Configurar compressão
   boot.initrd.compressor = "lzop";
 
@@ -71,9 +59,6 @@
   
   # Otimizações de Memória
   boot.kernel.sysctl = {
-    "vm.swappiness" = 10;
-    "vm.vfs_cache_pressure" = 50;
-    "vm.dirty_ratio" = 10;
-    "vm.dirty_background_ratio" = 5;
+    "vm.swappiness" = 90;         # define a quantidade de memória swap a ser usada
   };
 }
