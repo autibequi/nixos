@@ -54,6 +54,7 @@
     gnomeExtensions.blur-my-shell
     gnomeExtensions.vitals
     gnomeExtensions.media-controls
+    gnomeExtensions.window-gestures
   ];
 
   # Gnome Debloat

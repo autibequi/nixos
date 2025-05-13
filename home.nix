@@ -32,6 +32,10 @@
         userEmail = "pedro.correa@estrategia.com";
     };
 
+    home.pointerCursor.package = pkgs.banana-cursor;
+    home.pointerCursor.name = "Banana";
+    home.pointerCursor.size = 24;
+
     home.file = {
       #avatar
       ".face".source = ./assets/avatar.png;

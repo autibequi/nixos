@@ -40,7 +40,7 @@
 
         # utils
         mission-center
-        obsidian
+        # obsidian
         yt-dlp
 
         # Games
