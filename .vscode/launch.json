@@ -5,19 +5,7 @@
             "name": "NixOS Rebuild Switch",
             "type": "f5anything",
             "request": "launch",
-            "command": "sudo nixos-rebuild switch",
-        },
-        {
-            "name": "NixOS Rebuild Test",
-            "type": "f5anything",
-            "request": "launch",
-            "command": "sudo nixos-rebuild test"
-        },
-        {
-            "name": "Nix Flake Update",
-            "type": "f5anything",
-            "request": "launch",
-            "command": "nix flake update"
+            "command": "nh os switch /etc/nixos"
         }
     ]
 }

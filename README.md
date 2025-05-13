@@ -10,3 +10,9 @@ Add to config files and run:
 ```sh
 sudo nixos-rebuild switch
 ```
+
+# nh manual
+
+```sh 
+nh os switch /etc/nixos
+```
