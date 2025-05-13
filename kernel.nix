@@ -38,9 +38,18 @@
   services.scx.scheduler = "scx_rusty"; 
 
   boot.kernelModules = [
+    # Remove if nothing happens
+    "nvme" 
+    "usbhid" 
+    "xhci_hcd" 
+    "xhci_pci" 
+    "typec" 
+    "typec_ucsi" 
+    "ext4"
+
     # for external nvme usb-c case
     "uas"
-    "usb_storage" 
+    "usb_storage"
     "usbcore"
     "nvme"
     "nvme_core"
@@ -60,8 +69,8 @@
     "ext4"
 
     # for external nvme usb-c case
-    "usb_storage" 
     "uas"
+    "usb_storage"
     "usbcore"
     "nvme"
     "nvme_core"

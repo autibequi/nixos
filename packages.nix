@@ -9,6 +9,7 @@
         gnumake
         lsof
         usbutils
+        lnav
 
         # office suite
         onlyoffice-bin

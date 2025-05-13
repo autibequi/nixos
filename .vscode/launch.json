@@ -6,6 +6,13 @@
             "type": "f5anything",
             "request": "launch",
             "command": "nh os switch /etc/nixos"
+        },
+        {
+            "name": "NixOS Clean All (keep 3, no GC)",
+            "type": "f5anything",
+            "request": "launch",
+            "command": "nh clean all --keep 3 --nogc"
         }
+
     ]
 }
