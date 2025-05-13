@@ -6,10 +6,8 @@
 
   imports =
     [ 
-      # Nix Configuations
-      ./nix.nix
-      
       # Core
+      ./nix.nix
       ./hardware-configuration.nix
       ./kernel.nix
       ./home.nix
@@ -19,8 +17,6 @@
       ./nvidia.nix
       ./bluetooth.nix
       ./battery.nix
-
-      # Bonus
       ./plymouth.nix
 
       # DE Picker
@@ -31,10 +27,8 @@
       # Optionals
       ./work.nix
 
-      # Testing :|
+      # Testing
       # ./howdy.nix
-
-      # Freezer
       # ./flatpak.nix
       # ./ai.nix # heeeavy
     ];
