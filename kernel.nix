@@ -51,6 +51,11 @@
     "uas"
     "usb_storage" 
     "usbcore"
+    "nvme"
+    "nvme_core"
+    "scsi_mod"
+    "sd_mod"
+    "block"
   ];
 
   # Acelerar boot desabilitando serviços não essenciais
