@@ -28,10 +28,6 @@
     "fastboot" # acelera o processo de boot
   ];
 
-
-  boot.blacklistedKernelModules = [ 
-  ];
-
   # Configurar compressão
   boot.initrd.compressor = "lzop";
 
@@ -45,13 +41,16 @@
   boot.initrd.availableKernelModules = [ 
     "nvme" 
     "usbhid" 
-    "uas" 
-    "xhci_hcd"
-    "usb_storage" 
+    "xhci_hcd" 
     "xhci_pci" 
     "typec" 
     "typec_ucsi" 
-    "ext4" 
+    "ext4"
+
+    # for external nvme usb-c case
+    "uas"
+    "usb_storage" 
+    "usbcore"
   ];
 
   # Acelerar boot desabilitando serviços não essenciais
