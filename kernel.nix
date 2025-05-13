@@ -38,8 +38,9 @@
   services.scx.scheduler = "scx_rusty"; 
 
   boot.kernelModules = [
-    "usb_storage" # for external nvme usb-c case
+    # for external nvme usb-c case
     "uas"
+    "usb_storage" 
     "usbcore"
     "nvme"
     "nvme_core"
