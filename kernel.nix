@@ -37,6 +37,17 @@
   services.scx.enable = true; 
   services.scx.scheduler = "scx_rusty"; 
 
+  boot.kernelModules = [
+    "usb_storage" # for external nvme usb-c case
+    "uas"
+    "usbcore"
+    "nvme"
+    "nvme_core"
+    "scsi_mod"
+    "sd_mod"
+  ];
+
+
   # # InitRD
   boot.initrd.availableKernelModules = [ 
     "nvme" 
@@ -48,8 +59,8 @@
     "ext4"
 
     # for external nvme usb-c case
-    "uas"
     "usb_storage" 
+    "uas"
     "usbcore"
     "nvme"
     "nvme_core"
