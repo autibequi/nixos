@@ -3,7 +3,7 @@
 {
   # Kernel
   boot.kernelPackages = pkgs.linuxPackages_cachyos; 
-  boot.kernelModules = [ "nvidia" "amdgpu" ];
+
   boot.kernelParams = [ 
     # those actually do something
     "usbcore.autosuspend=-1" # keeps usb-c dock alive
@@ -26,18 +26,11 @@
 
     # Melhora Boot time
     "fastboot" # acelera o processo de boot
+  ];
 
-    # Otimizações específicas para AMD
-    "amd_pstate=active" # ativa o driver de energia AMD P-State para melhor eficiência
-    "amd_pstate.shared_mem=1" # habilita memória compartilhada para o driver P-State
-    "amd_pstate.epp_policy=performance" # define política de energia para performance
-    "pcie_aspm=off" # desativa ASPM para melhor desempenho em GPUs AMD
-    "amdgpu.ppfeaturemask=0xffffffff" # habilita todos os recursos da GPU AMD
-    "amdgpu.dc=1" # habilita display core para melhor suporte a monitores
-    "amdgpu.asynccompute=1" # habilita computação assíncrona
-    "amdgpu.vm_fragment_size=9" # otimiza tamanho de fragmento de memória virtual
-    "amd_iommu=on" # habilita IOMMU para melhor isolamento de dispositivos
-    "iommu=pt" # modo passthrough para IOMMU (melhor desempenho)
+
+  boot.blacklistedKernelModules = [ 
+    "usb_storage" 
   ];
 
   # Configurar compressão
@@ -53,9 +46,9 @@
   boot.initrd.availableKernelModules = [ 
     "nvme" 
     "usbhid" 
-    "usb_storage" 
     "uas" 
-    "xhci_hcd" 
+    "xhci_hcd"
+    "xhci_pci" 
     "typec" 
     "typec_ucsi" 
     "ext4" 

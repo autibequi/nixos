@@ -8,6 +8,7 @@
         pciutils
         gnumake
         lsof
+        usbutils
 
         # office suite
         onlyoffice-bin
