@@ -17,7 +17,8 @@
     consoleLogLevel = 0;
     initrd.verbose = false;
     kernelParams = [
-      "plymouth.use-simpledrm" # usa simpledrm para melhor desempenho
+      "plymouth.use-simpledrm=1" # usa simpledrm para melhor desempenho
+      "plymouth.force-scale=2"
       "udev.log_priority=3"
 
       "loglevel=3" # limita logs do kernel
