@@ -18,6 +18,7 @@
       ./packages.nix
       ./nvidia.nix
       ./bluetooth.nix
+      ./battery.nix
 
       # Bonus
       ./plymouth.nix
@@ -34,7 +35,6 @@
       # ./howdy.nix
 
       # Freezer
-      ./battery.nix
       # ./flatpak.nix
       # ./ai.nix # heeeavy
     ];

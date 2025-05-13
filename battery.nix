@@ -7,11 +7,6 @@
   # Melhor agendamento para ciclos de CPU - graças ao System76!!!
   services.system76-scheduler.settings.cfsProfiles.enable = true;
 
-  # Habilitar powertop para análise e otimização de energia
-  powerManagement = {
-    powertop.enable = true;
-  };
-
   # Reduzir o uso de energia da rede quando na bateria
   networking.networkmanager = {
     wifi.powersave = true;

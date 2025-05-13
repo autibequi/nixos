@@ -3,15 +3,16 @@
     plymouth = {
       enable = true;
       theme = "dragon";
+      logo = ""; # no logo
       themePackages = with pkgs; [
         # By default we would install all themes
         # https://github.com/NixOS/nixpkgs/blob/nixos-24.11/pkgs/by-name/ad/adi1090x-plymouth-themes/shas.nix
         (adi1090x-plymouth-themes.override {
-          selected_themes = [ "abstract_ring_alt" "dragon" "connect" ];
+          selected_themes = [ "dragon" ];
         })
       ];
     };
-    
+
     # Silent boot flags
     loader.timeout = 0;
     consoleLogLevel = 0;
