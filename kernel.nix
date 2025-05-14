@@ -6,6 +6,7 @@
 
   boot.kernelParams = [ 
     # those actually do something
+    "fastboot" # faster boot
     "usbcore.autosuspend=-1" # keeps usb-c dock alive
     "btusb.enable_autosuspend=0" # keeps bluetooth alive
     "amdgpu.dcdebugmask=0x10" # refresh issues https://gitlab.gnome.org/GNOME/mutter/-/issues/3299\
@@ -16,7 +17,7 @@
     # idProduct          0x0583 JMS583Gen 2 to PCIe Gen3x2 Bridge
     "usb-storage.quirks=0x152d:0x0583:u"
 
-    # debug
+    # Debug
     "loglevel=7" # verbose
     "debug" # verbose
   ];

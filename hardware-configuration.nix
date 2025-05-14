@@ -4,28 +4,20 @@
 { config, lib, pkgs, modulesPath, ... }:
 
 {
-
-  imports =
-    [
-      (modulesPath + "/installer/scan/not-detected.nix")
-    ];
-
-  # Plataform
-  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-  nixpkgs.config.cudaSupport = true;
-
-  # non free firmware
-  hardware.enableAllFirmware = true; 
+  # Use this to override the hardware-configuration.nix file
+  imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
   # Basics
   services.pulseaudio.enable = false;
+  hardware.enableAllFirmware = true; 
   hardware.graphics.enable = true;
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
   
   # Bootloader
   boot.kernelModules = [ "nvidia" "amdgpu"  ];
   boot.loader.systemd-boot.enable = true;
-  boot.loader.systemd-boot.configurationLimit = 20;
+  boot.loader.systemd-boot.configurationLimit = 100;
   boot.loader.efi.canTouchEfiVariables = true;
 
   # X11 and Wayland
@@ -43,20 +35,22 @@
   #   };
   # };
 
-  # Filesystems
-  fileSystems."/" =
-    { device = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
+  # Root
+  fileSystems."/" = { 
+      device = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
       fsType = "ext4";
       neededForBoot = true;
-options = [ "noatime" "nodiratime" "discard" "defaults" "commit=60" "barrier=0" "data=writeback" ];
+      options = [ "noatime" "nodiratime" "discard" "defaults" "commit=60" "barrier=0" "data=writeback" ];
     };
 
-  fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/6B74-DC9D";
+  # Boot
+  fileSystems."/boot" = { 
+      device = "/dev/disk/by-uuid/6B74-DC9D";
       fsType = "vfat";
       options = [ "fmask=0077" "dmask=0077" ];
     };
 
+  # Swap
   swapDevices =
     [ 
       # kinda works but takes a lot to boot before systemd

@@ -43,8 +43,6 @@
   # Permite podman usar o driver NVIDIA
   hardware.nvidia-container-toolkit.enable = true; 
 
-  # nvidia-powerd disable auto-restart when no NVIDIA GPU is detected
-  systemd.services.nvidia-powerd = {
-    serviceConfig.Restart = lib.mkForce "no";
-  };
+  # Permite o uso do CUDA
+  nixpkgs.config.cudaSupport = true;
 }
