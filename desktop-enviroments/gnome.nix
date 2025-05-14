@@ -54,6 +54,8 @@
     gnomeExtensions.vitals
     gnomeExtensions.media-controls
     gnomeExtensions.window-gestures
+    gnomeExtensions.mouse-tail
+    gnomeExtensions.wiggle
   ];
 
   # Gnome Debloat
