@@ -15,11 +15,12 @@
     home-manager.url = "github:nix-community/home-manager/release-24.11";  # Home Manager
     solaar.url = "https://flakehub.com/f/Svenum/Solaar-Flake/*.tar.gz"; # Logitech Solaar
     nixpkgs-howdy.url = "github:NixOS/nixpkgs/pull/216245/head";
+    nix-alien.url = "github:thiagokokada/nix-alien";
   };
 
   # Outputs
   # This is the default output, which is a set of attributes.
-  outputs = { self, nixpkgs, solaar, nixos-hardware, home-manager, chaotic, nixos-cosmic, nixpkgs-howdy, ... }@inputs: {
+  outputs = { self, nixpkgs, solaar, nixos-hardware, home-manager, chaotic, nixos-cosmic, nixpkgs-howdy, nix-alien, ... }@inputs: {
     packages.x86_64-linux.hello = nixpkgs.legacyPackages.x86_64-linux.hello;
     packages.x86_64-linux.default = self.packages.x86_64-linux.hello;
 
@@ -39,6 +40,18 @@
 
         # Cosmic
         nixos-cosmic.nixosModules.default
+
+        # NixAlien
+        ({ self, ... }: {
+          nixpkgs.overlays = [
+            self.inputs.nix-alien.overlays.default
+          ];
+          environment.systemPackages = with pkgs; [
+            nix-alien
+          ];
+          # Optional, needed for `nix-alien-ld`
+          programs.nix-ld.enable = true;
+        })
 
         # home-manager
         home-manager.nixosModules.home-manager

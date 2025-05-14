@@ -25,7 +25,6 @@
       # ./desktop-enviroments/kde.nix
 
       # Optionals
-      ./alien.nix
       ./work.nix
 
       # Testing
