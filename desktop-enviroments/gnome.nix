@@ -40,16 +40,11 @@
     gnomeExtensions.appindicator
     gnomeExtensions.gsconnect
     gnomeExtensions.auto-power-profile        
-    gnomeExtensions.tiling-assistant        
-    gnomeExtensions.vertical-workspaces
     gnomeExtensions.tiling-shell
     gnomeExtensions.night-theme-switcher
     gnomeExtensions.battery-time
     gnomeExtensions.upower-battery
-    gnomeExtensions.bluetooth-battery
     gnomeExtensions.quick-settings-audio-panel
-    gnomeExtensions.wtmb-window-thumbnails
-    gnomeExtensions.battery-time
     gnomeExtensions.blur-my-shell
     gnomeExtensions.vitals
     gnomeExtensions.media-controls
