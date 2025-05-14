@@ -51,6 +51,7 @@
     gnomeExtensions.window-gestures
     gnomeExtensions.mouse-tail
     gnomeExtensions.wiggle
+    gnomeExtensions.hide-cursor
   ];
 
   # Gnome Debloat

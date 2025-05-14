@@ -67,6 +67,7 @@
 
         # asthetics?
         banana-cursor
+        apple-cursor
     ];
 
     # TESTING: Dynamic Libraries
