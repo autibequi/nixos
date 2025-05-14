@@ -29,10 +29,5 @@
       enable = true;
       remotePlay.openFirewall = true;
     };
-  };
-
-  # CHECK LATER
-  # https://github.com/SenchoPens/base16.nix
-  # https://github.com/danth/stylix
-    
+  }; 
 }

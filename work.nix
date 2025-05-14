@@ -4,6 +4,7 @@
     # Environment Variables
     environment.sessionVariables = {
         CGO_ENABLED=1; # kafka
+        GOPRIVATE="github.com/estrategiahq/*";
     };
 
     services = {
