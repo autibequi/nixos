@@ -42,7 +42,7 @@
       ".face".source = ./assets/avatar.png;
   
       # dotfiles
-      ".config/ghosty/config".source = ./dotfiles/ghostty;
+      ".config/ghosty/config".source = ./dotfiles/ghostty.conf;
     };
   };
 
