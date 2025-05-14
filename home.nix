@@ -33,12 +33,8 @@
         userEmail = "pedro.correa@estrategia.com";
     };
 
-    home.pointerCursor.package = pkgs.banana-cursor;
-    home.pointerCursor.name = "Banana";
-    home.pointerCursor.size = 24;
     home.file = {
       ".face".source = ./assets/avatar.png; # avatar
-      ".icons/banana.svg".source = ./assets/banana.svg; # banana cursor
     };
 
     # dotfiles
