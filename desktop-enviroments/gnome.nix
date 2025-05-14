@@ -102,6 +102,10 @@
         "org/gnome/desktop/applications/terminal" = {
           exec = "${pkgs.ghostty}/bin/ghostty";
         };
+        "org/gnome/desktop/interface" = {
+            cursor-size = 40;
+            cursor-theme = "banana";
+        };
       };
     };
   };

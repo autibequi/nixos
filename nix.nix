@@ -25,22 +25,11 @@
       "anyrun.cachix.org-1:pqBobmOjI7nKlsUMV25u9QHa9btJK65/C8vnO3p346s="
     ];
 
-    # Otimizações de Performance
-    builders-use-substitutes = true;
-    keep-derivations = false;
-    keep-outputs = false;
-    warn-dirty = false;
-    log-lines = 50;
-    build-poll-interval = 0;
-    gc-keep-derivations = false;
-    gc-keep-outputs = false;
-    min-free = 536870912; # 512MB
-    max-free = 1073741824; # 1GB
+    # Enable experimental features
+    experimental-features = [ "nix-command" "flakes" ];
   };
 
-  # Experimental Features
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
+  # NH Tool
   programs.nh = {
     enable = true;
     clean.enable = true;
