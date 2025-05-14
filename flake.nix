@@ -16,12 +16,12 @@
     solaar.url = "https://flakehub.com/f/Svenum/Solaar-Flake/*.tar.gz"; # Logitech Solaar
     nixpkgs-howdy.url = "github:NixOS/nixpkgs/pull/216245/head";
     nix-alien.url = "github:thiagokokada/nix-alien";
-    # stylix.url = "github:danth/stylix";
+    stylix.url = "github:danth/stylix";
   };
 
   # Outputs
   # This is the default output, which is a set of attributes.
-  outputs = { self, nixpkgs, solaar, nixos-hardware, home-manager, chaotic, nixos-cosmic, nixpkgs-howdy, nix-alien, ... }@inputs: {
+  outputs = { self, nixpkgs, solaar, nixos-hardware, home-manager, chaotic, nixos-cosmic, nixpkgs-howdy, nix-alien, stylix, ... }@inputs: {
     packages.x86_64-linux.hello = nixpkgs.legacyPackages.x86_64-linux.hello;
     packages.x86_64-linux.default = self.packages.x86_64-linux.hello;
 
