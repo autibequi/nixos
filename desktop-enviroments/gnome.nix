@@ -53,6 +53,7 @@
     gnomeExtensions.wiggle
     gnomeExtensions.hide-cursor
     gnomeExtensions.emoji-copy
+    gnomeExtensions.burn-my-windows
   ];
 
   # Gnome Debloat
@@ -106,6 +107,20 @@
             cursor-theme = "banana";
         };
       };
+
     };
+ 
+    # Set glitch effect to Burn My Windows
+    home.file."~/.config/gnome-shell/extensions/burn-my-windows/profiles/1747253129691946.conf".text = ''
+      [burn-my-windows-profile]
+      fire-enable-effect=false
+      pixel-wipe-enable-effect=false
+      glitch-enable-effect=true
+      glitch-animation-time=300
+      glitch-scale=1.00
+      glitch-speed=1.00
+      glitch-color='rgb(42,167,189)'
+      glitch-strength=1.00
+    '';
   };
 }
