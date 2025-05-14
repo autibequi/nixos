@@ -30,7 +30,7 @@
         procs       # better ps
         broot       # better tree
         zoxide      # better cd
-        
+        tealdeer    # better tldr
 
         # shells
         nushell
@@ -83,6 +83,7 @@
             ps = "procs";
             tree = "broot";
             cd = "z";
+            man = "tldr";
         };
 
         # Init some of those alias

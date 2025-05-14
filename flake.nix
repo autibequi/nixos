@@ -42,11 +42,8 @@
         nixos-cosmic.nixosModules.default
 
         # NixAlien
-        ({ self, ... }: {
-          nixpkgs.overlays = [
-            self.inputs.nix-alien.overlays.default
-          ];
-          environment.systemPackages = with pkgs; [
+        ({ self, system, ... }: {
+          environment.systemPackages = with self.inputs.nix-alien.packages.${system}; [
             nix-alien
           ];
           # Optional, needed for `nix-alien-ld`
