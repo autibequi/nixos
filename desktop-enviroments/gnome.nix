@@ -52,6 +52,7 @@
     gnomeExtensions.mouse-tail
     gnomeExtensions.wiggle
     gnomeExtensions.hide-cursor
+    gnomeExtensions.emoji-copy
   ];
 
   # Gnome Debloat
