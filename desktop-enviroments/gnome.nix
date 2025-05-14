@@ -99,6 +99,9 @@
         "org/gnome/settings-daemon/plugins/sound" = {
           volume-step = 0.1;
         };
+        "org/gnome/desktop/applications/terminal" = {
+          exec = "${pkgs.ghostty}/bin/ghostty";
+        };
       };
     };
   };

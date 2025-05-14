@@ -16,6 +16,7 @@
     solaar.url = "https://flakehub.com/f/Svenum/Solaar-Flake/*.tar.gz"; # Logitech Solaar
     nixpkgs-howdy.url = "github:NixOS/nixpkgs/pull/216245/head";
     nix-alien.url = "github:thiagokokada/nix-alien";
+    # stylix.url = "github:danth/stylix";
   };
 
   # Outputs
@@ -40,6 +41,9 @@
 
         # Cosmic
         nixos-cosmic.nixosModules.default
+
+        # Stylix
+        # stylix.nixosModules.stylix
 
         # NixAlien
         ({ self, system, ... }: {
