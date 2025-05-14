@@ -32,7 +32,12 @@
         userName  = "Pedro Correa";
         userEmail = "pedro.correa@estrategia.com";
     };
-
+    # Banana cursor theme
+    home.pointerCursor = {
+      name = "Banana";
+      package = pkgs.banana-cursor;
+      size = 40;
+    };
     home.file = {
       ".face".source = ./assets/avatar.png; # avatar
     };
