@@ -36,12 +36,13 @@
     home.pointerCursor.package = pkgs.banana-cursor;
     home.pointerCursor.name = "Banana";
     home.pointerCursor.size = 24;
-
     home.file = {
-      #avatar
-      ".face".source = ./assets/avatar.png;
-  
-      # dotfiles
+      ".face".source = ./assets/avatar.png; # avatar
+      ".icons/banana.svg".source = ./assets/banana.svg; # banana cursor
+    };
+
+    # dotfiles
+    home.file = {
       ".config/ghosty/config".source = ./dotfiles/ghostty.conf;
     };
   };
