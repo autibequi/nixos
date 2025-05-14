@@ -47,6 +47,8 @@
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
       fsType = "ext4";
+      neededForBoot = true;
+options = [ "noatime" "nodiratime" "discard" "defaults" "commit=60" "barrier=0" "data=writeback" ];
     };
 
   fileSystems."/boot" =

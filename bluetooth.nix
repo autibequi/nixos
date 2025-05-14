@@ -78,34 +78,4 @@
     pavucontrol # Interface gráfica para ajustar configurações de áudio
     helvum # Interface gráfica para ajustar configurações de áudio
   ];
-
-  # Parâmetros do kernel para melhor desempenho Bluetooth
-  boot.kernelParams = [
-    "btusb.enable_autosuspend=n"
-    "btusb.enable_autosuspend_for_controller=n"
-    "bluetooth.disable_ertm=1" # Desativa ERTM para melhor compatibilidade
-  ];
-
-  # Desativar autosuspend do Bluetooth e configurações adicionais
-  services.udev.extraRules = ''
-    # Manter dispositivos Bluetooth sempre ligados
-    ACTION=="add", SUBSYSTEM=="bluetooth", ATTR{power/control}="on"
-    
-    # Prioridade para dispositivos Bluetooth USB
-    ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="*", ATTRS{idProduct}=="*", TAG+="uaccess", TAG+="udev-acl"
-    
-    # Reiniciar controladores Bluetooth problemáticos
-    ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="0cf3", ATTRS{idProduct}=="*", RUN+="${pkgs.kmod}/bin/modprobe -r btusb", RUN+="${pkgs.kmod}/bin/modprobe btusb"
-  '';
-
-  # Habilitar serviço de reinicialização automática do Bluetooth em caso de falha
-  systemd.services.bluetooth-restart = {
-    description = "Reiniciar serviço Bluetooth em caso de falha";
-    after = [ "bluetooth.service" ];
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = "${pkgs.bash}/bin/bash -c 'systemctl --no-block restart bluetooth.service'";
-    };
-  };
 }

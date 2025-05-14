@@ -8,24 +8,17 @@
     # those actually do something
     "usbcore.autosuspend=-1" # keeps usb-c dock alive
     "btusb.enable_autosuspend=0" # keeps bluetooth alive
-    "amdgpu.dcdebugmask=0x10" # refresh issues https://gitlab.gnome.org/GNOME/mutter/-/issues/3299
+    "amdgpu.dcdebugmask=0x10" # refresh issues https://gitlab.gnome.org/GNOME/mutter/-/issues/3299\
 
-    # Otimizações de Performance
-    "mitigations=off" # melhora desempenho desativando mitigações de segurança
-    "preempt=full" # habilita preempção completa para melhor responsividade
-    "threadirqs" # usa threads para IRQs melhorando responsividade
-    "nohz_full" # reduz interrupções do timer
-    "rcu_nocbs" # reduz overhead do RCU
-    "processor.max_cstate=1" # limita estados de energia do processador
-    "intel_idle.max_cstate=1" # limita estados de energia do processador Intel
-    "idle=poll" # reduz latência de wakeup
-    "nowatchdog" # desativa watchdog timer
-    "nmi_watchdog=0" # desativa NMI watchdog
-    "quiet" # reduz mensagens de boot
-    "loglevel=3" # reduz nível de log
+    # Current NVME Case Controller
+    # this garantees high speed mode
+    # idVendor           0x152d JMicron Technology Corp. / JMicron USA Technology Corp.
+    # idProduct          0x0583 JMS583Gen 2 to PCIe Gen3x2 Bridge
+    "usb-storage.quirks=0x152d:0x0583:u"
 
-    # Melhora Boot time
-    "fastboot" # acelera o processo de boot
+    # debug
+    "loglevel=7" # verbose
+    "debug" # verbose
   ];
 
   # Configurar compressão
@@ -38,7 +31,7 @@
   services.scx.scheduler = "scx_rusty"; 
 
   boot.kernelModules = [
-    # Remove if nothing happens
+    #hhhmmmm
     "nvme" 
     "usbhid" 
     "xhci_hcd" 
@@ -49,7 +42,6 @@
 
     # for external nvme usb-c case
     "uas"
-    "usb_storage"
     "usbcore"
     "nvme"
     "nvme_core"
@@ -57,20 +49,18 @@
     "sd_mod"
   ];
 
-
   # # InitRD
   boot.initrd.availableKernelModules = [ 
     "nvme" 
     "usbhid" 
     "xhci_hcd" 
-    "xhci_pci" 
+    "xhci_pci"
     "typec" 
     "typec_ucsi" 
     "ext4"
 
     # for external nvme usb-c case
     "uas"
-    "usb_storage"
     "usbcore"
     "nvme"
     "nvme_core"
