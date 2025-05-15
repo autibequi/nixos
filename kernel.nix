@@ -23,7 +23,8 @@
   ];
 
   # Configurar compressão
-  boot.initrd.compressor = "lzop";
+  boot.initrd.compressor = "lzop"; # lz4 is faster than zstd
+  boot.initrd.compressorArgs = [ "-9" ]; # -9 is the best compression level
 
   # Userland Scheduler 
   # scx_rusty - responsive under load
@@ -43,6 +44,7 @@
 
     # for external nvme usb-c case
     "uas"
+    "usb_storage"
     "usbcore"
     "nvme"
     "nvme_core"
@@ -62,6 +64,7 @@
 
     # for external nvme usb-c case
     "uas"
+    "usb_storage"
     "usbcore"
     "nvme"
     "nvme_core"
