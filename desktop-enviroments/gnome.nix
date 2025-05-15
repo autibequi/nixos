@@ -106,21 +106,14 @@
             cursor-size = 40;
             cursor-theme = "banana";
         };
+        "org/gnome/gnome-panel/layout" = {
+          bottom-panel = true;
+        };
       };
 
     };
  
     # Set glitch effect to Burn My Windows
-    home.file."~/.config/gnome-shell/extensions/burn-my-windows/profiles/1747253129691946.conf".text = ''
-      [burn-my-windows-profile]
-      fire-enable-effect=false
-      pixel-wipe-enable-effect=false
-      glitch-enable-effect=true
-      glitch-animation-time=300
-      glitch-scale=1.00
-      glitch-speed=1.00
-      glitch-color='rgb(42,167,189)'
-      glitch-strength=1.00
-    '';
+    home.file."~/.config/gnome-shell/extensions/burn-my-windows/profiles/1747253129691946.conf".source = ../dotfiles/gnome-extensions/burn-my-windows.conf;
   };
 }

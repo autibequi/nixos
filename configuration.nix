@@ -72,9 +72,9 @@
   };
 
   fonts.fontconfig.defaultFonts = {
-    monospace = [ "FiraCode Nerd Font Mono" "Fira Code" "Liberation Mono" "Noto Sans Mono" ];
-    sansSerif = [ "Noto Sans" "Liberation Sans" "Fira Sans" ];
-    serif = [ "Noto Serif" "Liberation Serif" "Fira Serif" ];
+    monospace = [ "FiraCode Nerd Font Mono Bold" "Fira Code Bold" "Liberation Mono Bold" "Noto Sans Mono Bold" ];
+    sansSerif = [ "Noto Sans Bold" "Liberation Sans Bold" "Fira Sans Bold" ];
+    serif = [ "Noto Serif Bold" "Liberation Serif Bold" "Fira Serif Bold" ];
   };
 
   # XDG Portal
