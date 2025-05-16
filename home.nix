@@ -42,6 +42,7 @@
       ".face".source = ./assets/avatar.png; # avatar
     };
 
+    # TODO: Not beeing copied
     # dotfiles
     home.file = {
       ".config/ghosty/config".source = ./dotfiles/ghostty.conf;
