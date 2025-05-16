@@ -45,6 +45,7 @@
     # dotfiles
     home.file = {
       ".config/ghosty/config".source = ./dotfiles/ghostty.conf;
+      ".config/atuin/config.toml".source = ./dotfiles/atuin.conf;
     };
   };
 

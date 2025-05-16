@@ -18,15 +18,14 @@
     "loglevel=7" # verbose
     "debug" # verbose
 
-    "usbcore.usbfs_memory_mb=1024" # increase USB memory allocation
+    # Force UAS for external NVME USB-C case; this garantees high speed mode | lsusb -t:
+    # idVendor           0x152d JMicron Technology Corp. / JMicron USA Technology Corp.
+    # idProduct          0x0583 JMS583Gen 2 to PCIe Gen3x2 Bridge
+    "usb-storage.quirks=0x152d:0x0583:i"
+    
+    # increase USB memory allocation
+    "usbcore.usbfs_memory_mb=2048" # 512MB is default, 2048MB is the maximum
   ];
-
-  # Force UAS for external NVME USB-C case; this garantees high speed mode | lsusb -t:
-  # idVendor           0x152d JMicron Technology Corp. / JMicron USA Technology Corp.
-  # idProduct          0x0583 JMS583Gen 2 to PCIe Gen3x2 Bridge
-  boot.extraModprobeConfig = ''
-    options usb-storage quirks=152d:0583:i # <idVendor>:<idProduct>:<quirk> | quirk= I/U
-  '';
 
   # Configurar compressão
   boot.initrd.compressor = "lzop"; # lz4 is faster than zstd
@@ -38,6 +37,7 @@
   services.scx.enable = true; 
   services.scx.scheduler = "scx_rusty"; 
 
+  # TODO: clean up modules
   boot.kernelModules = [
     # maybe
     "usbhid" 
@@ -57,7 +57,8 @@
     "sd_mod"
   ];
 
-  # # InitRD
+  # TODO: clean up initrd modules
+  # InitRD
   boot.initrd.availableKernelModules = [ 
     # maybe?
     "usbhid" 

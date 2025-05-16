@@ -38,7 +38,7 @@
   # Root
   fileSystems."/" = { 
       device = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
-      fsType = "ext4"; # testar zfs com lz4 no proximo setup
+      fsType = "ext4"; # TODO: testar zfs com lz4 no proximo setup
       neededForBoot = true;
       options = [ "noatime" "nodiratime" "discard" "data=writeback" "barrier=0" ];
     };
@@ -53,10 +53,9 @@
   # Swap
   swapDevices =
     [ 
-      # kinda works but takes a lot to boot before systemd
-      { device = "/dev/disk/by-uuid/0319478f-63cc-4fde-9804-523687d223ee"; priority = 10; options = [ "x-systemd.device-timeout=1ms" ]; } # optional g14 laptop swap
-      { device = "/dev/disk/by-uuid/0319478f-63cc-4fde-9804-523687d223ee"; priority = 10; options = [ "x-systemd.device-timeout=1ms" ]; } # desktop pc
-      { device = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; priority = 00; } # nomad usb stick
+      # TODO: fix, kinda worksbut takes a lot of time to boot until it times out
+      # { device = "/dev/disk/by-uuid/0319478f-63cc-4fde-9804-523687d223ee"; priority = 10; options = [ "x-systemd.device-timeout=1ms" "nofail" ]; } # optional g14 laptop swap
+      { device = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; options = [  "x-systemd.device-timeout=1" "nofail" ]; } # nomad usb stick
     ];
 }
 
