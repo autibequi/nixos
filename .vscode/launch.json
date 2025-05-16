@@ -17,7 +17,7 @@
             "name": "Repair Packages",
             "type": "f5anything",
             "request": "launch",
-            "command": "nix-store --verify"
+            "command": "nix-store --verify --check-contents"
         },
         {
             "name": "Nix Collect Garbage (Delete Old)",

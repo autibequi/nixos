@@ -19,6 +19,9 @@
     shell = pkgs.zsh;
   };
 
+  # avoid file colisions
+  home-manager.backupFileExtension = "hm-backup";
+
   # Home Manager
   home-manager.users."pedrinho" = { lib, ... }: {
     home.stateVersion = "25.05";

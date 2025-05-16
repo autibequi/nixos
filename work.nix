@@ -7,14 +7,10 @@
         GOPRIVATE="github.com/estrategiahq/*";
     };
 
-    services = {
-        cloudflare-warp.enable = true;
-    };
+
 
     # Systemd Packages
     environment.systemPackages = with pkgs; [
-        cloudflare-warp
-
         # Tools
         dbeaver-bin
         podman
@@ -90,18 +86,23 @@
     networking.extraHosts = ''
         127.0.0.1 local.estrategia-sandbox.com.br
     '';
+    
+    # Cloudflare Warp
+    services.cloudflare-warp.enable = true;
 
     # TODO: check if fixed
-    # Manually create the systemd service for warp taskbar (dunno why)
-    systemd.services.warp-taskbar = {
-        description = "Cloudflare Warp Taskbar";
-        wantedBy = [ "multi-user.target" ];
-        after = [ "network.target" ];
+    # creates a custom systemd service for the warp taskbar since it stopped working
+    systemd.user.services.warp-taskbar-custom = {
+        description = "Cloudflare Zero Trust Client Taskbar";
+        requires = [ "dbus.socket" ];
+        after = [ "dbus.socket" ];
+        bindsTo = [ "graphical-session.target" ];
+        wantedBy = [ "default.target" ];
         serviceConfig = {
-        ExecStart = "${pkgs.cloudflare-warp}/bin/warp-taskbar";
-        Restart = "always";
-        RestartSec = 5;
-        User = "root";
+            Type = "simple";
+            ExecStart = "${pkgs.cloudflare-warp}/bin/warp-taskbar";
+            Restart = "always";
+            BindReadOnlyPaths = "${pkgs.cloudflare-warp}:/usr:";
         };
     };
 }
