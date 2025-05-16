@@ -2,13 +2,13 @@
 
 {
   # NixOs stock power management
-  powerManagement.enable = true;
-  
-  # Habilitar powertop para análise e otimização de energia
-  powerManagement.powertop.enable = true;
+  powerManagement = {
+    powertop.enable = true; # Habilitar powertop para análise e otimização de energia
 
-  # Melhor agendamento para ciclos de CPU - graças ao System76!!!
-  services.system76-scheduler.settings.cfsProfiles.enable = true;
+    # Since running from external NVME, we need to set the correct policy
+    # this wont save battery but may help nvme heat
+    scsiLinkPolicy = "min_power"; # default is "max_performance"
+  };
 
   # Reduzir o uso de energia da rede quando na bateria
   networking.networkmanager = {
