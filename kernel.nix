@@ -8,23 +8,12 @@
     # those actually do something
     "fastboot" # faster boot
     "usbcore.autosuspend=-1" # keeps usb-c dock alive
-    "btusb.enable_autosuspend=0" # keeps bluetooth alive
     "amdgpu.dcdebugmask=0x10" # refresh issues https://gitlab.gnome.org/GNOME/mutter/-/issues/3299\
-
-    # turn off usb lights?
-    "usbcore.blinkenlights=0" # turn off usb lights
-
-    # Debug
-    "loglevel=7" # verbose
-    "debug" # verbose
 
     # Force UAS for external NVME USB-C case; this garantees high speed mode | lsusb -t:
     # idVendor           0x152d JMicron Technology Corp. / JMicron USA Technology Corp.
     # idProduct          0x0583 JMS583Gen 2 to PCIe Gen3x2 Bridge
     "usb-storage.quirks=0x152d:0x0583:i"
-    
-    # increase USB memory allocation
-    "usbcore.usbfs_memory_mb=2048" # 512MB is default, 2048MB is the maximum
   ];
 
   # Configurar compressão
