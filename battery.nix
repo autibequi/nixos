@@ -7,14 +7,11 @@
 
     # Since running from external NVME, we need to set the correct policy
     # this wont save battery but may help nvme heat
-    scsiLinkPolicy = "min_power"; # default is "max_performance"
+    scsiLinkPolicy = "med_power_with_dipm"; # default is "max_performance"
   };
 
-  # Reduzir o uso de energia da rede quando na bateria
-  networking.networkmanager = {
-    wifi.powersave = true;
-    ethernet.macAddress = "preserve";  # Preservar endereço MAC para economizar energia
-  };
+  # Habilitar modo de economia de energia para Wi-Fi
+  networking.networkmanager.wifi.powersave = true; 
   
   # Habilitar thermald para controle térmico
   services.thermald.enable = true;
