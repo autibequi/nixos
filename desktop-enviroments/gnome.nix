@@ -29,31 +29,45 @@
     desktop-file-utils
     gnome-extension-manager
 
-    # Icon Theme
-    pkgs.adwaita-icon-theme
+    # Utils
     pkgs.gnome-tweaks
 
+    # Icon Theme
+    pkgs.adwaita-icon-theme
+
     # Extensions
-    gnomeExtensions.just-perfection
+    # Productivity Extensions
     gnomeExtensions.caffeine
     gnomeExtensions.pano
-    gnomeExtensions.appindicator
     gnomeExtensions.gsconnect
-    gnomeExtensions.auto-power-profile        
-    gnomeExtensions.tiling-shell
+    gnomeExtensions.auto-power-profile
     gnomeExtensions.night-theme-switcher
+    gnomeExtensions.quick-settings-audio-panel
+
+    # Battery and Power Extensions
     gnomeExtensions.battery-time
     gnomeExtensions.upower-battery
-    gnomeExtensions.quick-settings-audio-panel
-    gnomeExtensions.blur-my-shell
-    gnomeExtensions.vitals
-    gnomeExtensions.media-controls
+
+    # Window Management Extensions
+    gnomeExtensions.tiling-shell
     gnomeExtensions.window-gestures
+    gnomeExtensions.wtmb-window-thumbnails
+    gnomeExtensions.window-centering
+
+    # Visual and UI Enhancements
+    gnomeExtensions.blur-my-shell
+    gnomeExtensions.burn-my-windows
     gnomeExtensions.mouse-tail
     gnomeExtensions.wiggle
     gnomeExtensions.hide-cursor
     gnomeExtensions.emoji-copy
-    gnomeExtensions.burn-my-windows
+    gnomeExtensions.open-bar
+
+    # System and Utility Extensions
+    gnomeExtensions.vitals
+    gnomeExtensions.media-controls
+    gnomeExtensions.appindicator
+    gnomeExtensions.restart-to
   ];
 
   # Gnome Debloat
