@@ -14,16 +14,16 @@
             "command": "nh clean all --keep 3 --nogc"
         },
         {
-            "name": "Create Check Store File",
+            "name": "Repair Packages",
             "type": "f5anything",
             "request": "launch",
-            "command": "nix-store --verify --check-contents > broken-paths.txt"
+            "command": "nix-store --verify"
         },
         {
-            "name": "Repair Broken Paths from File",
+            "name": "Nix Collect Garbage (Delete Old)",
             "type": "f5anything",
             "request": "launch",
-            "command": "while read -r path; do nix-store --repair-path \"$path\"; done < broken-paths.txt"
+            "command": "nix-collect-garbage --delete-old"
         }
     ]
 }

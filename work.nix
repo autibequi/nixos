@@ -13,6 +13,8 @@
 
     # Systemd Packages
     environment.systemPackages = with pkgs; [
+        cloudflare-warp
+
         # Tools
         dbeaver-bin
         podman
@@ -88,4 +90,18 @@
     networking.extraHosts = ''
         127.0.0.1 local.estrategia-sandbox.com.br
     '';
+
+    # TODO: check if fixed
+    # Manually create the systemd service for warp taskbar (dunno why)
+    systemd.services.warp-taskbar = {
+        description = "Cloudflare Warp Taskbar";
+        wantedBy = [ "multi-user.target" ];
+        after = [ "network.target" ];
+        serviceConfig = {
+        ExecStart = "${pkgs.cloudflare-warp}/bin/warp-taskbar";
+        Restart = "always";
+        RestartSec = 5;
+        User = "root";
+        };
+    };
 }
