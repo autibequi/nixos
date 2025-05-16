@@ -12,7 +12,12 @@
             "type": "f5anything",
             "request": "launch",
             "command": "nh clean all --keep 3 --nogc"
+        },
+        {
+            "name": "Check Installed Packages",
+            "type": "f5anything",
+            "request": "launch",
+            "command": "nix-store --verify --check-contents && nix-store --repair"
         }
-
     ]
 }
