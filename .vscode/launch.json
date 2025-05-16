@@ -14,10 +14,16 @@
             "command": "nh clean all --keep 3 --nogc"
         },
         {
-            "name": "Check Installed Packages",
+            "name": "Create Check Store File",
             "type": "f5anything",
             "request": "launch",
-            "command": "nix-store --verify --check-contents && nix-store --repair"
+            "command": "nix-store --verify --check-contents > broken-paths.txt"
+        },
+        {
+            "name": "Repair Broken Paths from File",
+            "type": "f5anything",
+            "request": "launch",
+            "command": "while read -r path; do nix-store --repair-path \"$path\"; done < broken-paths.txt"
         }
     ]
 }

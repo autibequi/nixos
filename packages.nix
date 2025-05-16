@@ -69,6 +69,9 @@
         # gaming
         mangohud
 
+        # stuff
+        blanket
+
         # 3D Printing
         # cura # not working due python (using flatpak)
     ];
@@ -77,9 +80,9 @@
         shellAliases = {
             history = "atuin";
             tasks = "pueue";
-            find = "fzf";
             grep = "rg"; # ripgrep
             findf = "fd";
+            f = "fzf";
             cat = "bat";
             ls = "eza -la";
             du = "dust";

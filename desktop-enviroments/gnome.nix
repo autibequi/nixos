@@ -52,7 +52,6 @@
     gnomeExtensions.tiling-shell
     gnomeExtensions.window-gestures
     gnomeExtensions.wtmb-window-thumbnails
-    gnomeExtensions.window-centering
 
     # Visual and UI Enhancements
     gnomeExtensions.blur-my-shell
@@ -68,6 +67,8 @@
     gnomeExtensions.media-controls
     gnomeExtensions.appindicator
     gnomeExtensions.restart-to
+    gnomeExtensions.fuzzy-app-search
+    gnomeExtensions.gnome-40-ui-improvements
   ];
 
   # Gnome Debloat
