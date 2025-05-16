@@ -11,16 +11,22 @@
     "btusb.enable_autosuspend=0" # keeps bluetooth alive
     "amdgpu.dcdebugmask=0x10" # refresh issues https://gitlab.gnome.org/GNOME/mutter/-/issues/3299\
 
-    # Current NVME Case Controller
-    # this garantees high speed mode
-    # idVendor           0x152d JMicron Technology Corp. / JMicron USA Technology Corp.
-    # idProduct          0x0583 JMS583Gen 2 to PCIe Gen3x2 Bridge
-    "usb-storage.quirks=0x152d:0x0583:u"
+    # turn off usb lights?
+    "usbcore.blinkenlights=0" # turn off usb lights
 
     # Debug
     "loglevel=7" # verbose
     "debug" # verbose
+
+    "usbcore.usbfs_memory_mb=1024" # increase USB memory allocation
   ];
+
+  # Force UAS for external NVME USB-C case; this garantees high speed mode | lsusb -t:
+  # idVendor           0x152d JMicron Technology Corp. / JMicron USA Technology Corp.
+  # idProduct          0x0583 JMS583Gen 2 to PCIe Gen3x2 Bridge
+  boot.extraModprobeConfig = ''
+    options usb-storage quirks=152d:0583:i # <idVendor>:<idProduct>:<quirk> | quirk= I/U
+  '';
 
   # Configurar compressão
   boot.initrd.compressor = "lzop"; # lz4 is faster than zstd
@@ -33,8 +39,7 @@
   services.scx.scheduler = "scx_rusty"; 
 
   boot.kernelModules = [
-    #hhhmmmm
-    "nvme" 
+    # maybe
     "usbhid" 
     "xhci_hcd" 
     "xhci_pci" 
@@ -54,7 +59,7 @@
 
   # # InitRD
   boot.initrd.availableKernelModules = [ 
-    "nvme" 
+    # maybe?
     "usbhid" 
     "xhci_hcd" 
     "xhci_pci"

@@ -3,11 +3,12 @@
 {
   # NixOs stock power management
   powerManagement = {
-    powertop.enable = true; # Habilitar powertop para análise e otimização de energia
+    # Habilitar powertop para análise e otimização de energia
+    powertop.enable = true;
 
-    # Since running from external NVME, we need to set the correct policy
-    # this wont save battery but may help nvme heat
-    scsiLinkPolicy = "med_power_with_dipm"; # default is "max_performance"
+    # Devido ao uso de SSDs NVMe, o modo de energia "med_power_with_dipm" é mais adequado
+    # poupando o disco para maior desempenho a longo prazo devido a heating e permitindo sleep.
+    scsiLinkPolicy = "med_power_with_dipm"; 
   };
 
   # Habilitar modo de economia de energia para Wi-Fi

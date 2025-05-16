@@ -40,7 +40,7 @@
       device = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
       fsType = "ext4"; # testar zfs com lz4 no proximo setup
       neededForBoot = true;
-      options = [ "noatime" "nodiratime" "discard" "defaults" "commit=60" "barrier=0" "data=writeback" ];
+      options = [ "noatime" "nodiratime" "discard" "data=writeback" "barrier=0" ];
     };
 
   # Boot
