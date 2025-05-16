@@ -66,6 +66,9 @@
         # IDEs
         zed-editor
 
+        # gaming
+        mangohud
+
         # 3D Printing
         # cura # not working due python (using flatpak)
     ];
