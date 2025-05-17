@@ -7,7 +7,7 @@
   ];
 
   # Enable Gnome
-  service.desktopManager.gnome.enable = true; # Ativação base do Gnome
+  services.xserver.desktopManager.gnome.enable = true; # Ativação base do Gnome
 
   services = {
     xserver = {
