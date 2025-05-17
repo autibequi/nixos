@@ -128,8 +128,19 @@
         "org/gnome/desktop/wm/preferences" = {
           focus-mode = "sloppy";
         };
-      };
+        "org/gnome/desktop/wm/keybindings" = {
+          # Mover entre workspaces com Super + a/d
+          "switch-to-workspace-left" = ["<Super>a"];
+          "switch-to-workspace-right" = ["<Super>d"];
 
+          # Mover janela entre workspaces com Alt + a/d
+          "move-to-workspace-left" = ["<Alt>a"];
+          "move-to-workspace-right" = ["<Alt>d"];
+
+          # Toggle overview com Super + w
+          "toggle-overview" = ["<Super>w"];
+        };
+      };
     };
 
   # Set glitch effect to Burn My Windows
