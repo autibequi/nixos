@@ -14,9 +14,7 @@
   # Hardware
   hardware = {
     enableAllFirmware = true; 
-    amdgpu.amdvlk.enable = true;
     amdgpu.initrd.enable = true; # Fix low resolution on boot
-    admgpu.amdvlk.support32Bit.enable = true; 
 
     graphics = {
       enable = true;
