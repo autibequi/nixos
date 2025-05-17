@@ -16,6 +16,28 @@
       enableCompletion = true;
       autosuggestions.enable = true;
       syntaxHighlighting.enable = true;
+
+      shellAliases = {
+        history = "atuin";
+        tasks = "pueue";
+        grep = "rg"; # ripgrep
+        findf = "fd";
+        f = "fzf";
+        cat = "bat";
+        ls = "eza -la";
+        du = "dust";
+        ps = "procs";
+        tree = "broot";
+        cd = "z";
+        man = "tldr";
+      };
+
+      # Init some of those alias
+      shellInit = ''
+        eval "$(zoxide init zsh)"
+        eval "$(atuin init zsh)"
+        eval "$(starship init zsh)"
+      '';
     };
     
     neovim = {
