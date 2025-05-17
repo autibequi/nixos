@@ -61,6 +61,7 @@
     gnomeExtensions.hide-cursor
     gnomeExtensions.emoji-copy
     gnomeExtensions.open-bar
+    gnomeExtensions.window-desaturation
 
     # System and Utility Extensions
     gnomeExtensions.vitals
