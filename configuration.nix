@@ -10,7 +10,7 @@
       ./nix.nix
 
       # Core
-      ./core/hardware-configuration.nix
+      ./core/hardware.nix
       ./core/kernel.nix
       ./core/home.nix
       ./core/services.nix
