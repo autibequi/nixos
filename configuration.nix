@@ -14,10 +14,12 @@
       ./services.nix
       ./programs.nix
       ./packages.nix
-      ./nvidia.nix
-      ./bluetooth.nix
-      ./battery.nix
-      ./plymouth.nix
+
+      # Modules
+      ./modules/battery.nix
+      ./modules/bluetooth.nix
+      ./modules/nvidia.nix
+      ./modules/plymouth.nix
 
       # DE Picker
       ./desktop-envs/gnome/de.nix
@@ -28,9 +30,9 @@
       ./work.nix
 
       # Testing
-      # ./howdy.nix
-      # ./flatpak.nix
-      # ./ai.nix # heeeavy
+      # ./modules/howdy.nix
+      # ./modules/flatpak.nix
+      # ./modules/ai.nix # heeeavy
     ];
 
   # Networking
