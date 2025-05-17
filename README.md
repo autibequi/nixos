@@ -16,3 +16,9 @@ sudo nixos-rebuild switch
 ```sh 
 nh os switch /etc/nixos
 ```
+
+# cant pull or edit folder
+
+```
+    sudo chown -R $USER /etx/nixos
+```
