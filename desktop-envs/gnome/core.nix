@@ -45,8 +45,7 @@
   environment.shellInit = ''
     reset-gnome-extensions() {
       gsettings set org.gnome.shell disable-user-extensions true
-      sleep 1
-      notify-send 'Gnome Reseted'
+      notify-send --expire-time=500 --icon=gnome-shell 'Gnome Reseted'
       gsettings set org.gnome.shell disable-user-extensions false
     }
   '';

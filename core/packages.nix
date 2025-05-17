@@ -10,6 +10,7 @@
         lsof
         usbutils
         lnav
+        neofetch
 
         # cli tools
         yt-dlp
