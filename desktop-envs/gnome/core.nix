@@ -45,8 +45,8 @@
   environment.shellInit = ''
     reset-gnome-extensions() {
       gsettings set org.gnome.shell disable-user-extensions true
-      notify-send --expire-time=500 --icon=gnome-shell 'Gnome Reseted'
       gsettings set org.gnome.shell disable-user-extensions false
+      notify-send --expire-time=100 --icon=user-trash-full-symbolic --app-name='Gambiarra Manager' 'Extensões do GNOME reiniciadas' 'Deve ter voltado a funcionar ai, chefe!'
     }
   '';
 } 
