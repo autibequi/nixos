@@ -124,6 +124,9 @@
         "org/gnome/gnome-panel/layout" = {
           bottom-panel = true;
         };
+        "org/gnome/desktop/wm/preferences" = {
+          focus-mode = "sloppy";
+        };
       };
 
     };
