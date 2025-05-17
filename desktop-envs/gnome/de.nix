@@ -1,6 +1,10 @@
 { config, pkgs, lib, ... } :
 
 {
+  imports = [
+    ../aesthetics.nix
+  ];
+
   # Desktop Environment
   services = {
 
@@ -129,10 +133,10 @@
     };
 
   # Set glitch effect to Burn My Windows
-    home.file."~/.config/gnome-shell/extensions/burn-my-windows/profiles/1747253129691946.conf".source = ../dotfiles/gnome-extensions/burn-my-windows.conf;
+    home.file."~/.config/gnome-shell/extensions/burn-my-windows/profiles/1747253129691946.conf".source = ../desktop-envs/gnome/extensions-configs/burn-my-windows.conf;
   };
 
-  # Restart Extensions becausem gnome go slow
+  # Restart Extensions 'cos gnome stuff 💅
   powerManagement.resumeCommands = 
   ''
     gsettings set org.gnome.shell disable-user-extensions true

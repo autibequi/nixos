@@ -62,10 +62,6 @@
         github-copilot-cli
         devbox
         code-cursor
-
-        # asthetics?
-        banana-cursor
-        apple-cursor
     ];
 
     # TESTING: Dynamic Libraries

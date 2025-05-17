@@ -20,9 +20,9 @@
       ./plymouth.nix
 
       # DE Picker
-      ./desktop-enviroments/gnome.nix
-      # ./desktop-enviroments/cosmic.nix
-      # ./desktop-enviroments/kde.nix
+      ./desktop-envs/gnome/de.nix
+      # ./desktop-envs/cosmic.nix
+      # ./desktop-envs/kde.nix
 
       # Optionals
       ./work.nix

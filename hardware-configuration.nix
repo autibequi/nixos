@@ -7,6 +7,7 @@
   # curent setup g14
   services.asusd.enable = true;
   programs.rog-control-center.enable = true;
+  services.supergfxd.enable = true;
 
   # Use this to override the hardware-configuration.nix file
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
