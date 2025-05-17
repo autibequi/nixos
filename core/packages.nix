@@ -59,5 +59,6 @@
         # TESTING!
         mangohud
         blanket
+        themechanger
     ];
 }

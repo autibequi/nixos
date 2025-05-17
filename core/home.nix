@@ -35,6 +35,17 @@
         userName  = "Pedro Correa";
         userEmail = "pedro.correa@estrategia.com";
     };
+
+    home.packages = with pkgs; [
+      papirus-icon-theme
+    ];
+
+    gtk = {
+      enable = true;
+      theme.name = "Adwaita";
+      iconTheme.name = "Papirus";
+    };
+
     # Banana cursor theme
     home.pointerCursor = {
       name = "Banana";
