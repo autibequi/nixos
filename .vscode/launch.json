@@ -24,6 +24,12 @@
             "type": "f5anything",
             "request": "launch",
             "command": "nix-collect-garbage --delete-old"
+        },
+        {
+            "name": "Test Fastfetch Config",
+            "type": "f5anything",
+            "request": "launch",
+            "command": "fastfetch --config dotfiles/fastfetch.jsonc"
         }
     ]
 }
