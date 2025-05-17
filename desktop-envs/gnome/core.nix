@@ -40,4 +40,14 @@
     gsettings set org.gnome.shell disable-user-extensions true
     gsettings set org.gnome.shell disable-user-extensions false
   '';
+
+  # Global shell function for resetting GNOME extensions
+  environment.shellInit = ''
+    reset-gnome-extensions() {
+      gsettings set org.gnome.shell disable-user-extensions true
+      sleep 1
+      notify-send 'Gnome Reseted'
+      gsettings set org.gnome.shell disable-user-extensions false
+    }
+  '';
 } 

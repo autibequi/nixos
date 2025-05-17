@@ -2,10 +2,6 @@
 {
   home-manager.users."pedrinho" = { pkgs, lib, ... }:
   {
-    home.shellAliases = {
-      reset-gnome-extensions = "gsettings set org.gnome.shell disable-user-extensions true && sleep 1 && notify-send 'Gnome Reseted' && gsettings set org.gnome.shell disable-user-extensions false";
-    };
-
     dconf = {
       enable = true;
       settings = {
