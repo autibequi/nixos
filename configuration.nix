@@ -6,14 +6,16 @@
 
   imports =
     [ 
-      # Core
+      # Substituters ans stuff
       ./nix.nix
-      ./hardware-configuration.nix
-      ./kernel.nix
-      ./home.nix
-      ./services.nix
-      ./programs.nix
-      ./packages.nix
+
+      # Core
+      ./core/hardware-configuration.nix
+      ./core/kernel.nix
+      ./core/home.nix
+      ./core/services.nix
+      ./core/programs.nix
+      ./core/packages.nix
 
       # Modules
       ./modules/battery.nix
@@ -21,15 +23,15 @@
       ./modules/nvidia.nix
       ./modules/plymouth.nix
 
+      # Optional Modules
+      ./modules/work.nix
+
       # DE Picker
       ./desktop-envs/gnome/de.nix
       # ./desktop-envs/cosmic.nix
       # ./desktop-envs/kde.nix
 
-      # Optionals
-      ./work.nix
-
-      # Testing
+      # Testing Modules
       # ./modules/howdy.nix
       # ./modules/flatpak.nix
       # ./modules/ai.nix # heeeavy

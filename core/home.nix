@@ -42,14 +42,14 @@
       size = 40;
     };
     home.file = {
-      ".face".source = ./assets/avatar.png; # avatar
+      ".face".source = ../assets/avatar.png; # avatar
     };
 
     # TODO: Not beeing copied
     # dotfiles
     home.file = {
-      ".config/ghosty/config".source = ./dotfiles/ghostty.conf;
-      ".config/atuin/config.toml".source = ./dotfiles/atuin.conf;
+      ".config/ghosty/config".source = ../dotfiles/ghostty.conf;
+      ".config/atuin/config.toml".source = ../dotfiles/atuin.conf;
     };
   };
 
