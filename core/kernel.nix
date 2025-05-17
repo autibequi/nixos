@@ -76,7 +76,9 @@
   services.fstrim.interval = "weekly";
   
   # Otimizações de Memória
+  # Como nos dois setupts temos 48gb e 64gb de ram usamos o
+  # minimo possivel pra poupar uso do disco
   boot.kernel.sysctl = {
-    "vm.swappiness" = 90;         # define a quantidade de memória swap a ser usada
+    "vm.swappiness" = 10;
   };
 }
