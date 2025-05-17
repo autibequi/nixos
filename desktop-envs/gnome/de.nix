@@ -133,7 +133,7 @@
     };
 
   # Set glitch effect to Burn My Windows
-    home.file."~/.config/gnome-shell/extensions/burn-my-windows/profiles/1747253129691946.conf".source = ../desktop-envs/gnome/extensions-configs/burn-my-windows.conf;
+    home.file."~/.config/gnome-shell/extensions/burn-my-windows/profiles/1747253129691946.conf".source = ../../desktop-envs/gnome/extensions-configs/burn-my-windows.conf;
   };
 
   # Restart Extensions 'cos gnome stuff 💅
