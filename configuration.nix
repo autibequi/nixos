@@ -27,7 +27,7 @@
       ./modules/work.nix
 
       # DE Picker
-      ./desktop-envs/gnome/de.nix
+      ./desktop-envs/gnome/core.nix
       # ./desktop-envs/cosmic.nix
       # ./desktop-envs/kde.nix
 
