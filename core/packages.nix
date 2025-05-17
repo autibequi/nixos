@@ -15,6 +15,8 @@
         yt-dlp
         btop-rocm   # better top with amd support
         rocmPackages.rocm-smi
+        libnotify # cli notifications
+        jq          # json parser
 
         # better cli
         atuin       # fancy cli history

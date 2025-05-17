@@ -28,6 +28,9 @@
     
     # Configuração PRIME para laptop híbrido G14
     prime = {
+      # TODO: Seria bem legal para melhorar a performace quand conectando um monitor 4k externo
+      # Porem atualmente simplesmente trava depois de um tempo. Imagino que arrume rapido.
+      # reverseSync.enable = true; # Sincronização reversa para melhorar desempenho
       offload.enable = true; # Modo offload para economia de energia
       sync.enable = false; # Desativado para evitar consumo constante da GPU
       
