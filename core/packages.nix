@@ -74,6 +74,12 @@
 
         # 3D Printing
         # cura # not working due python (using flatpak)
+
+        # Cursor themes for aesthetics
+        banana-cursor
+        apple-cursor
+        bibata-cursors
+        oreo-cursors-plus
     ];
 
     programs.zsh = {

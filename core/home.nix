@@ -52,7 +52,4 @@
       ".config/atuin/config.toml".source = ../dotfiles/atuin.conf;
     };
   };
-
-  # not working due unstable channel
-  # stylix.enable = true;
 }

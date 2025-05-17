@@ -1,10 +1,6 @@
 { config, pkgs, lib, ... } :
 
 {
-  imports = [
-    ../aesthetics.nix
-  ];
-
   # Desktop Environment
   services = {
 
