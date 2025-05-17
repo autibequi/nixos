@@ -2,6 +2,12 @@
 {
   home-manager.users."pedrinho" = { pkgs, lib, ... }:
   {
+    gtk = {
+      enable = true;
+      theme.name = "Adwaita";
+      iconTheme.name = "Papirus";
+    };
+    
     dconf = {
       enable = true;
       settings = {

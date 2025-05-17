@@ -54,10 +54,14 @@
         # cura # not working due python (using flatpak)
 
         # Aesthetics
+        # Cursors
         banana-cursor
         apple-cursor
         bibata-cursors
         oreo-cursors-plus
+
+        # Icons
+        papirus-icon-theme
 
         # TESTING!
         mangohud

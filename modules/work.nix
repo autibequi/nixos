@@ -7,8 +7,6 @@
         GOPRIVATE="github.com/estrategiahq/*";
     };
 
-
-
     # Systemd Packages
     environment.systemPackages = with pkgs; [
         # Tools
@@ -104,6 +102,14 @@
             ExecStart = "${pkgs.cloudflare-warp}/bin/warp-taskbar";
             Restart = "always";
             BindReadOnlyPaths = "${pkgs.cloudflare-warp}:/usr:";
+        };
+    };
+
+    home-manager.users."pedrinho" = { pkgs, ... }: {
+        programs.git = {
+            enable = true;
+            userName  = "Pedro Correa";
+            userEmail = "pedro.correa@estrategia.com";
         };
     };
 }
