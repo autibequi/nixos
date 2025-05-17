@@ -22,7 +22,6 @@
         tasks = "pueue";
         grep = "rg"; # ripgrep
         findf = "fd";
-        f = "fzf";
         cat = "bat";
         ls = "eza -la";
         du = "dust";
@@ -30,6 +29,8 @@
         tree = "broot";
         cd = "z";
         man = "tldr";
+        f = "fzf";
+        ff = "fastfetch";
       };
 
       # Init some of those alias
