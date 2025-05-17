@@ -11,10 +11,8 @@
         usbutils
         lnav
 
-        # office suite
-        onlyoffice-bin
-
         # cli tools
+        yt-dlp
         btop-rocm   # better top with amd support
         rocmPackages.rocm-smi
 
@@ -40,46 +38,27 @@
         ghostty
         alacritty
 
-        # utils
-        mission-center
-        # obsidian
-        yt-dlp
-        lact
-
-        # Games
-        sidequest # for oculus sideloading
-
-        # media
+        # apps
         mpv
+        onlyoffice-bin
+        brave
+        mission-center
+        sidequest # for oculus sideloading
+        lact
         stremio 
-
-        # browsers 😒
-        vivaldi  # for work
-        brave    # for moi
-        chromium # for testing
-
-        # TESTING GROUND!
-        # Nothing below this line is sacred
-        # ---------------------------------
-        deskreen # for wireless screen mirroring
-
-        # IDEs
-        zed-editor
-
-        # gaming
-        mangohud
-
-        # stuff
-        blanket
-
+        # obsidian
         # 3D Printing
         # cura # not working due python (using flatpak)
 
-        # Cursor themes for aesthetics
+        # Aesthetics
         banana-cursor
         apple-cursor
         bibata-cursors
         oreo-cursors-plus
+
+        # TESTING!
+        mangohud
+        blanket
     ];
 
     programs.zsh = {

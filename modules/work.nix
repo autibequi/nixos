@@ -58,10 +58,15 @@
         # video stuff
         ffmpeg
 
+        # work browser
+        vivaldi
+        chromium
+
         # TESTING:
         github-copilot-cli
         devbox
         code-cursor
+        zed-editor
     ];
 
     # TESTING: Dynamic Libraries
