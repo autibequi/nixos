@@ -70,6 +70,8 @@
     gnomeExtensions.restart-to
     gnomeExtensions.fuzzy-app-search
     gnomeExtensions.gnome-40-ui-improvements
+    gnomeExtensions.custom-command-toggle
+    gnomeExtensions.advanced-alttab-window-switcher
   ];
 
   # Gnome Debloat
@@ -144,7 +146,8 @@
     };
 
   # Set glitch effect to Burn My Windows
-    home.file."~/.config/gnome-shell/extensions/burn-my-windows/profiles/1747253129691946.conf".source = ../../desktop-envs/gnome/extensions-configs/burn-my-windows.conf;
+    home.file."~/.config/gnome-shell/extensions/burn-my-windows/profiles/1747253129691946.conf".source = ./extensions-configs/burn-my-windows.conf;
+    home.file."~/toggle.ini".source = ./extensions-configs/custom-toggle.conf;
   };
 
   # Restart Extensions 'cos gnome stuff 💅
