@@ -5,7 +5,7 @@
             "name": "NixOS Rebuild Switch",
             "type": "f5anything",
             "request": "launch",
-            "command": "nh os switch /etc/nixos"
+            "command": "nh os switch ."
         },
         {
             "name": "NixOS Clean All (keep 3, no GC)",
@@ -29,7 +29,7 @@
             "name": "Test Fastfetch Config",
             "type": "f5anything",
             "request": "launch",
-            "command": "fastfetch --config dotfiles/fastfetch.jsonc"
+            "command": "fastfetch --config ./dotfiles/fastfetch_small.jsonc"
         }
     ]
 }
