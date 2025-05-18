@@ -49,6 +49,6 @@
       notify-send --expire-time=0 -e --icon=user-trash-full-symbolic --app-name='Gambiarra Manager' 'Extensões do GNOME reiniciadas' 'Deve ter voltado a funcionar ai, chefe!'
     }
 
-    fastfetch
+    fastfetch -c /etc/nixos/dotfiles/fastfetch.jsonc
   '';
 } 

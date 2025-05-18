@@ -22,7 +22,7 @@
       # dotfiles
       ".config/ghosty/config".source = ../dotfiles/ghostty.conf;
       ".config/atuin/config.toml".source = ../dotfiles/atuin.conf;
-      ".config/fastfetch/config.jsonc".source = ../dotfiles/fastfetch.jsonc;
+      # ".config/fastfetch/config.jsonc".source = ../dotfiles/fastfetch.jsonc;
     };
   };
 }
