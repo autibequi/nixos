@@ -34,6 +34,9 @@
         "org/gnome/desktop/wm/preferences" = {
           focus-mode = "sloppy";
         };
+        "org/gnome/desktop/interface" = {
+          enable-animations = false;
+        };
 
         # Atalhos de teclado solicitados
         "org/gnome/desktop/wm/keybindings" = {

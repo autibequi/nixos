@@ -37,14 +37,6 @@
       # ./modules/ai.nix # heeeavy
     ];
 
-  # Security
-  security.sudo = {
-    enable = true;
-    extraConfig = ''
-      Defaults !no_new_priv
-    '';
-  };
-
   # Environment Variables
   environment.sessionVariables = {
     # Wayland Pains
