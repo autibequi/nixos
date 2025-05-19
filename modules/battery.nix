@@ -35,6 +35,12 @@
       
       # Outras configurações (mantidas)
       WIFI_PWR_ON_BAT = "on";
+
+      # Desabilitar o watchdog do kernel
+      NMI_WATCHDOG = 0;
+
+      MEM_SLEEP_ON_AC = "s2idle";
+      MEM_SLEEP_ON_BAT = "deep";
     };
   };
 

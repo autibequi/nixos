@@ -36,6 +36,7 @@
     "typec" 
     "typec_ucsi" 
     "ext4"
+    "acpi_call"
 
     # for external nvme usb-c case
     "uas"
