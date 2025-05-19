@@ -27,17 +27,32 @@
       RADEON_POWER_PROFILE_ON_BAT = "low";
       RADEON_DPM_STATE_ON_AC = "performance";
       RADEON_DPM_STATE_ON_BAT = "battery";
-      AMDGPU_ABM_LEVEL_ON_AC = 0;
-      AMDGPU_ABM_LEVEL_ON_BAT = 4;
       
-      # Outras configurações (mantidas)
-      WIFI_PWR_ON_BAT = "on";
-
       # Desabilitar o watchdog do kernel
       NMI_WATCHDOG = 0;
 
       MEM_SLEEP_ON_AC = "s2idle";
       MEM_SLEEP_ON_BAT = "deep";
+
+      # ASPM Runtime
+      RUNTIME_PM_ON_AC = "on";
+      RUNTIME_PM_ON_BAT = "auto";
+
+      #ASPM
+      PCIE_ASPM_ON_AC = "performance";
+      PCIE_ASPM_ON_BAT = "powersupersave";
+
+      #USB
+      USB_AUTOSUSPEND = 1;
+      USB_SUSPEND_RESUME_DELAY = 2;
+
+      #Bluetooth
+      BLUETOOTH_PM_PROTOCOL_OFF_BAT = "h4";
+      BLUETOOTH_PM_PROTOCOL_ON_AC = "h4";
+
+      #Wifi
+      WIFI_PWR_ON_AC = "off";
+      WIFI_PWR_ON_BAT = "on";
     };
   };
 }

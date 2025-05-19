@@ -2,7 +2,7 @@
 
 {
   imports = [
-    # ./tlp.nix # importe para não usar o power-profile-daemon do gnome
+    ./tlp.nix # importe para não usar o power-profile-daemon do gnome
   ];
 
   # NixOs stock power management
@@ -17,6 +17,9 @@
     AllowHibernation=no
   '';
 
-  # Kernel parameters
-  boot.kernelParams = [ "mem_sleep_default=deep" ];
+  boot.kernelParams = [ 
+    "amd_pstate=guided" 
+    "pcie_aspm.policy=powersupersave"
+    "pcie_aspm=force"
+  ];
 }
