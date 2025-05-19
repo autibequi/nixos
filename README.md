@@ -29,7 +29,7 @@ me have bad memories
 ## Gnome
 Mostly overwritten config are just to move the windows between screens and locating myself in worksapces without having to move my hand much.
 
-Mostly workspace actions are <super> + something and windows actions are <super><alt> + something usually WASD
+Mostly workspace actions are <super> + something and windows actions are <super><alt> + something usually WASD.
 
 ### Moving Workspaces
 ```
