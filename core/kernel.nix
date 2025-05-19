@@ -23,9 +23,9 @@
   
   # Userland Scheduler 
   # scx_rusty - responsive under load
-  # scx_lavd - low latency
+  # scx_lavd - better battery life???
   services.scx.enable = true; 
-  services.scx.scheduler = "scx_rusty"; 
+  services.scx.scheduler = "scx_lavd"; 
 
   # TODO: clean up modules
   boot.kernelModules = [
