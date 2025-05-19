@@ -46,8 +46,9 @@
       WIFI_PWR_ON_BAT = "on";
       
       # Enable display panel Adaptive Backlight Modulation (ABM).:
-      AMDGPU_ABM_LEVEL_ON_AC = 0;
-      AMDGPU_ABM_LEVEL_ON_BAT = 4;
+      # Makes image blurrier, not sure if saves battery
+      # AMDGPU_ABM_LEVEL_ON_AC = 0;
+      # AMDGPU_ABM_LEVEL_ON_BAT = 4; # 0-4
     };
   };
 }

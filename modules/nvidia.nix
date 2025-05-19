@@ -38,9 +38,6 @@
       amdgpuBusId = lib.mkDefault "PCI:65:0:0";
       nvidiaBusId = lib.mkDefault "PCI:1:0:0";
     };
-    
-    # Otimizações para jogos e aplicações gráficas
-    nvidiaPersistenced = false; # Mantém o daemon NVIDIA persistente para melhor desempenho
   };
 
   # Permite podman usar o driver NVIDIA
