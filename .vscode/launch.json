@@ -30,6 +30,12 @@
             "type": "f5anything",
             "request": "launch",
             "command": "fastfetch --config ./dotfiles/fastfetch_small.jsonc"
+        },
+        {
+        "name": "NixOS Rebuild Switch (Update)",
+        "type": "f5anything",
+        "request": "launch",
+        "command": "nh os switch --update ."
         }
     ]
 }
