@@ -19,7 +19,7 @@
 
   boot.kernelParams = [ 
     "amd_pstate=guided" 
-    "pcie_aspm.policy=powersupersave"
+    "pcie_aspm.policy=powersave"
     "pcie_aspm=force"
   ];
 }

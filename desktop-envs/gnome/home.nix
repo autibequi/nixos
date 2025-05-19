@@ -49,12 +49,16 @@
         "org/gnome/desktop/wm/keybindings" = {
           "switch-to-workspace-left" = ["<Super>a"];
           "switch-to-workspace-right" = ["<Super>d"];
-          "move-to-workspace-left" = ["<Super><Alt>a"];
-          "move-to-workspace-right" = ["<Super><Alt>d"];
-          "close" = ["<Super>q"];
+          "move-to-workspace-left" = ["<Super>q"];
+          "move-to-workspace-right" = ["<Super>e"];
+          "close" = ["<Super>Delete"];
         };
         "org/gnome/shell/keybindings" = {
-          "toggle-overview" = ["<Super>w"];
+          "toggle-overview" = ["<Super>z"];
+        };
+        "org/gnome/shell/keybindings" = {
+            "toggle-message-tray" = ["<Super>x"];
+          "toggle-application-menu" = ["<Super>c"];
         };
       };
     };

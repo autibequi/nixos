@@ -12,6 +12,9 @@
         lnav
         fastfetch
 
+        # GPU
+        lact
+        
         # libs
         lz4
 
@@ -50,7 +53,6 @@
         brave
         mission-center
         sidequest # for oculus sideloading
-        lact
         stremio 
         obsidian
         # cura
