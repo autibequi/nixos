@@ -17,24 +17,22 @@
       ./core/programs.nix
       ./core/packages.nix
 
-      # Modules
+      # Extra
       ./modules/battery.nix
       ./modules/bluetooth.nix
       ./modules/nvidia.nix
       ./modules/plymouth.nix
+      # ./modules/howdy.nix
+      # ./modules/flatpak.nix
+      # ./modules/ai.nix
 
-      # Optional Modules
+      # Work 
       ./modules/work.nix
 
-      # DE Picker
+      # Desktop Environments
       ./desktop-envs/gnome/core.nix
       # ./desktop-envs/cosmic.nix
       # ./desktop-envs/kde.nix
-
-      # Testing Modules
-      # ./modules/howdy.nix
-      # ./modules/flatpak.nix
-      # ./modules/ai.nix # heeeavy
     ];
 
   # Environment Variables
