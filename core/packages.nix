@@ -12,6 +12,9 @@
         lnav
         fastfetch
 
+        # libs
+        lz4
+
         # cli tools
         yt-dlp
         btop-rocm   # better top with amd support

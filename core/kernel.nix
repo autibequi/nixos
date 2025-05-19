@@ -16,10 +16,11 @@
     "usb-storage.quirks=0x152d:0x0583:i"
   ];
 
-  # Configurar compressão
-  boot.initrd.compressor = "lzop"; # lz4 is faster than zstd
-  boot.initrd.compressorArgs = [ "-9" ]; # -9 is the best compression level
-
+  # Configurar compressão.
+  # https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/kernel/initrd-compressor-meta.nix
+  boot.initrd.compressor = "lzop"; # TODO: lz4 should be faster
+  boot.initrd.compressorArgs = [ "--fast" ];
+  
   # Userland Scheduler 
   # scx_rusty - responsive under load
   # scx_lavd - low latency
