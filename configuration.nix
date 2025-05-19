@@ -24,7 +24,7 @@
       ./modules/plymouth.nix
       # ./modules/howdy.nix
       # ./modules/flatpak.nix
-      # ./modules/ai.nix
+      ./modules/ai.nix
 
       # Work 
       ./modules/work.nix
