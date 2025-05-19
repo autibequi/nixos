@@ -52,9 +52,8 @@
         sidequest # for oculus sideloading
         lact
         stremio 
-        # obsidian
-        # 3D Printing
-        # cura # not working due python (using flatpak)
+        obsidian
+        # cura
 
         # Aesthetics
         # Cursors
@@ -62,7 +61,6 @@
         apple-cursor
         bibata-cursors
         oreo-cursors-plus
-
         # Icons
         papirus-icon-theme
 
