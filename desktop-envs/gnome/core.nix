@@ -33,6 +33,9 @@
     pkgs.gnome-tweaks
   ];
 
+  # terminal swap (since gnome-terminal is hardcoded as the default terminal)
+  environment.etc."gnome-console".source = "${pkgs.ghostty}/bin/ghostty";
+
   # Power
   # Restart Extensions 'cos gnome stuff 💅
   powerManagement.resumeCommands =
