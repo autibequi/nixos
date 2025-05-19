@@ -38,16 +38,20 @@
           enable-animations = false;
         };
 
+        # Custom terminal configurations
+        # Configurações para terminal padrão
+        "org/gnome/desktop/default-applications/terminal" = {
+          exec = "${pkgs.ghostty}/bin/ghostty";
+          exec-arg = "";
+        };
+
         # Atalhos de teclado solicitados
         "org/gnome/desktop/wm/keybindings" = {
           "switch-to-workspace-left" = ["<Super>a"];
           "switch-to-workspace-right" = ["<Super>d"];
-          "switch-to-workspace-up" = ["disabled"];
-          "switch-to-workspace-down" = ["disabled"];
-          "move-to-workspace-left" = ["<Alt>a"];
-          "move-to-workspace-right" = ["<Alt>d"];
-          "move-to-workspace-up" = ["disabled"];
-          "move-to-workspace-down" = ["disabled"];
+          "move-to-workspace-left" = ["<Super><Alt>a"];
+          "move-to-workspace-right" = ["<Super><Alt>d"];
+          "close" = ["<Super>q"];
         };
         "org/gnome/shell/keybindings" = {
           "toggle-overview" = ["<Super>w"];
