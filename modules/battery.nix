@@ -11,15 +11,8 @@
   # System76 scheduler
   services.system76-scheduler.settings.cfsProfiles.enable = true;
 
-  # Battery power management
-  systemd.sleep.extraConfig = ''
-    AllowSuspend=yes
-    AllowHibernation=no
-  '';
-
   boot.kernelParams = [ 
-    "amd_pstate=guided" 
-    "pcie_aspm.policy=powersave"
-    "pcie_aspm=force"
+    "pcie_aspm=force" # Força o ASPM (Active State Power Management) do PCIe para reduzir o consumo de energia dos dispositivos PCIe quando ocioso
+    "pcie_port_pm=on" # Habilita gerenciamento de energia para portas PCIe, reduzindo consumo quando não em uso
   ];
 }

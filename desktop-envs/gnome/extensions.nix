@@ -6,7 +6,7 @@
     gnomeExtensions.caffeine
     gnomeExtensions.pano
     gnomeExtensions.gsconnect
-    gnomeExtensions.auto-power-profile
+    # gnomeExtensions.auto-power-profile # using tlp.nix instead
     gnomeExtensions.night-theme-switcher
     gnomeExtensions.quick-settings-audio-panel
 
@@ -22,8 +22,6 @@
     # Visual and UI Enhancements
     gnomeExtensions.blur-my-shell
     gnomeExtensions.burn-my-windows
-    gnomeExtensions.mouse-tail
-    gnomeExtensions.wiggle
     gnomeExtensions.hide-cursor
     gnomeExtensions.emoji-copy
     gnomeExtensions.open-bar
@@ -33,11 +31,14 @@
     gnomeExtensions.vitals
     gnomeExtensions.media-controls
     gnomeExtensions.appindicator
-    gnomeExtensions.restart-to
     gnomeExtensions.fuzzy-app-search
     gnomeExtensions.gnome-40-ui-improvements
     gnomeExtensions.advanced-alttab-window-switcher
     gnomeExtensions.custom-command-toggle
+
+    # super cool but nukes battery life due to GPU usage on idle
+    # gnomeExtensions.mouse-tail
+    # gnomeExtensions.wiggle
   ];
 
   # Config Moving
