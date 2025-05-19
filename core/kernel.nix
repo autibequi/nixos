@@ -19,7 +19,7 @@
   # Configurar compressão.
   # https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/kernel/initrd-compressor-meta.nix
   boot.initrd.compressor = "lzop"; # TODO: lz4 should be faster
-  boot.initrd.compressorArgs = [ "--fast" ];
+  boot.initrd.compressorArgs = [ "--best" ];
   
   # Userland Scheduler 
   # scx_rusty - responsive under load

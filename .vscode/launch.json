@@ -29,7 +29,7 @@
             "name": "Test Fastfetch Config",
             "type": "f5anything",
             "request": "launch",
-            "command": "fastfetch --config ./dotfiles/fastfetch_small.jsonc"
+            "command": "fastfetch --config ./dotfiles/fastfetch.jsonc"
         },
         {
         "name": "NixOS Rebuild Switch (Update)",

@@ -2,7 +2,6 @@
 {
   environment.gnome.excludePackages = with pkgs.gnome; [
     pkgs.gnome-terminal
-    pkgs.gnome-console
     pkgs.epiphany
     pkgs.gedit
     pkgs.totem
