@@ -52,6 +52,8 @@
           "move-to-workspace-left" = ["<Super>q"];
           "move-to-workspace-right" = ["<Super>e"];
           "close" = ["<Super>Delete"];
+          "maximize" = ["<Super>w"];
+          "minimize" = ["<Super>s"];
         };
         "org/gnome/shell/keybindings" = {
           "toggle-overview" = ["<Super>z"];

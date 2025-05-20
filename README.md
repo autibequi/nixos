@@ -1,9 +1,9 @@
-*# nix-config
+# nix-config
 i have no ideia what i'm doing...
 
 update: i have SOME ideia now
 
-## Installing stuff
+# Instalação
 
 Add to config files and run:
 
@@ -17,49 +17,62 @@ sudo nixos-rebuild switch
 nh os switch /etc/nixos
 ```
 
-# cant pull or edit folder
-
-```
-sudo chown -R $USER /etx/nixos
-```
-
-# Manual
-me have bad memories
-
-## Gnome
+# Gnome
 Mostly overwritten config are just to move the windows between screens and locating myself in worksapces without having to move my hand much.
 
 Mostly workspace actions are <super> + something and windows actions are <super><alt> + something usually WASD.
 
-### Moving Workspaces
+## Moving Around
 ```
 <super> a = move workspace left
 <super> d = move workspace right
-<super> w = overview
-<super> s = Panel Menu
+<super> w = maximize
+<super> s = minimize
+<super> q/e - move window to left/right workspaces
+<super> x - show notifications
+<super> c - show menu
+<super> z = overview
+<super> tab = fill all tiles // tilling assistante ext
 ```
 
-### Moving Windows
+## Misc
 ```
-<alt> a/d - move window to left/right workspaces
-```
-
-### Misc
-```
-<super><shift>t = toggle dark/light mode
+<Alt> F3 = Resetar extensões do Gnome
+<super><shift> t = toggle dark/light mode
 ```
 
-### Extensions
-#### Tilling Assistant
+# Dotfiles
+Esta seção documenta os arquivos de configuração (`dotfiles`) utilizados no ambiente, explicando brevemente cada um e destacando as configurações personalizadas.
+
+## Ghostty (`dotfiles/ghostty.conf`)
+Configuração para o terminal Ghostty, incluindo atalhos de teclado personalizados:
+
 ```
-<alt><shift> tab = fill all tiles
-<alt><shift> a/d = move window to tile slots
-<alt><shift> w = maximize
+<ctrl><shift> a/s/d/w = Dividir painel
+<ctrl><shift> t = Nova aba
+<ctrl><shift> n = Nova janela
 ```
 
-## Ghostty Manual
+## Fastfetch (`dotfiles/fastfetch.jsonc`)
+Configuração para a ferramenta de informações do sistema Fastfetch. A configuração atual exibe as seguintes informações:
+
 ```
-<ctr><shift> asdw = split detelas
-<ctrl><shit> t = nova tab
-<ctrl><shit> n = nova janela
+  ▗▄   ▗▄ ▄▖      OS: NixOS 25.11 (Xantusia)
+ ▄▄🬸█▄▄▄🬸█▛ ▃     Shell: zsh 5.9
+   ▟▛    ▜▃▟🬕     DE: GNOME 48.1
+🬋🬋🬫█      █🬛🬋🬋    CPU: AMD Ryzen 9 7940HS 16 with threads @ 4.00 GHz
+ 🬷▛🮃▙    ▟▛       GPU: GeForce RTX 4060 Max-Q / Mobile
+ 🮃 ▟█🬴▀▀▀█🬴▀▀     GPU: AMD Radeon 780M
+  ▝▀ ▀▘   ▀▘      RAM: 46.36 GiB/13%
+                  UPTIME: 69d 4h 20m 
 ```
+
+## Atuin (`dotfiles/atuin.conf`)
+Atuin é uma ferramenta de histórico de comandos que sincroniza e criptografa seu histórico entre dispositivos.
+
+
+### Comandos Básicos:
+- `<ctrl>r` - Busca no histórico
+- `atuin sync` - Sincroniza histórico entre dispositivos
+- `atuin import` - Importa histórico do bash/zsh
+- `atuin stats` - Mostra estatísticas de uso
