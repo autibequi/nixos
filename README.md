@@ -29,11 +29,11 @@ Mostly overwritten config are just to move the windows between screens and locat
 <super> c - menu
 <super> z = overview
 
-<super> delete = kill window
-<super> esc = toggle dark/light mode
+<super> esc = kill window
 
-<super> delete = Resetar extensões do Gnome // custom toggle ext
+<super> f3 = toggle dark/light mode // night theme switcher ext
 <super> tab = fill all tiles // tilling ext
+<super> delete = reseta extensões do gnome // custom toggle ext
 ```
 
 # Dotfiles

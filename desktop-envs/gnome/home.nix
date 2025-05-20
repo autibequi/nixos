@@ -59,7 +59,6 @@
           "toggle-overview" = ["<Super>z"];
           "toggle-message-tray" = ["<Super>x"];
           "toggle-application-menu" = ["<Super>c"];
-          "toggle-dark-theme" = ["<Super>space"];
         };
         "org/gnome/settings-daemon/plugins/media-keys" = {
           "play" = ["<Super>space"];
