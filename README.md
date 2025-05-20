@@ -20,9 +20,6 @@ nh os switch /etc/nixos
 # Gnome
 Mostly overwritten config are just to move the windows between screens and locating myself in worksapces without having to move my hand much.
 
-Mostly workspace actions are <super> + something and windows actions are <super><alt> + something usually WASD.
-
-## Moving Around
 ```
 <super> a/d = move workspace left/right
 <super> w/s = maximize/minimize
@@ -33,17 +30,13 @@ Mostly workspace actions are <super> + something and windows actions are <super>
 <super> z = overview
 
 <super> delete = kill window
-<super>esc = toggle dark/light mode
-```
+<super> esc = toggle dark/light mode
 
-Non Gnome Shortcuts
-```
-<Alt> F3 = Resetar extensões do Gnome
+<super> delete = Resetar extensões do Gnome // custom toggle ext
 <super> tab = fill all tiles // tilling ext
 ```
 
 # Dotfiles
-Esta seção documenta os arquivos de configuração (`dotfiles`) utilizados no ambiente, explicando brevemente cada um e destacando as configurações personalizadas.
 
 ## Ghostty (`dotfiles/ghostty.conf`)
 Configuração para o terminal Ghostty, incluindo atalhos de teclado personalizados:
