@@ -15,15 +15,13 @@
         # GPU
         lact
         
-        # libs
-        lz4
-
         # cli tools
         yt-dlp
         btop-rocm   # better top with amd support
         rocmPackages.rocm-smi
         libnotify # cli notifications
         jq          # json parser
+        lz4         # compression
 
         # better cli
         atuin       # fancy cli history
@@ -63,6 +61,7 @@
         apple-cursor
         bibata-cursors
         oreo-cursors-plus
+        
         # Icons
         papirus-icon-theme
 

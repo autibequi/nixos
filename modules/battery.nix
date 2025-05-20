@@ -18,5 +18,5 @@
   ];
 
   # Melhora consumo idle da GPU nvidia
-  hardware.nvidia.nvidiaPersistenced = true; # Mantém o daemon NVIDIA persistente para melhor desempenho
+  hardware.nvidia.nvidiaPersistenced = false; 
 }

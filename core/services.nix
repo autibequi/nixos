@@ -16,6 +16,9 @@
     # Preload common apps for snappier experience
     services.preload.enable = true;
 
+    # CPU Power Management
+    services.cpupower-gui.enable = true;
+
     # LACT Daemon
     # lact is a daemon that allows you to control the AMD GPU power states
     systemd.services.lact = {

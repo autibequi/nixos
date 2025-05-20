@@ -17,7 +17,7 @@
       CPU_BOOST_ON_BAT = 0; 
 
       CPU_DRIVER_OPMODE_ON_AC = "active";
-      CPU_DRIVER_OPMODE_ON_BAT = "active";
+      CPU_DRIVER_OPMODE_ON_BAT = "guided";
 
       # Desabilitar o watchdog do kernel
       NMI_WATCHDOG = 0;
@@ -43,8 +43,8 @@
       
       # Enable display panel Adaptive Backlight Modulation (ABM).:
       # Makes image blurrier, not sure if saves battery
-      # AMDGPU_ABM_LEVEL_ON_AC = 0;
-      # AMDGPU_ABM_LEVEL_ON_BAT = 4; # 0-4
+      AMDGPU_ABM_LEVEL_ON_AC = 0;
+      AMDGPU_ABM_LEVEL_ON_BAT = 4; # 0-4
     };
   };
 }
