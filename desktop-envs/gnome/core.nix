@@ -23,7 +23,6 @@
     };
   };
 
-
   environment.systemPackages = with pkgs; [
     # Gnome Stuff
     desktop-file-utils
@@ -36,22 +35,6 @@
   # terminal swap (since gnome-terminal is hardcoded as the default terminal)
   environment.etc."gnome-console".source = "${pkgs.ghostty}/bin/ghostty";
 
-  # Power
-  # Restart Extensions 'cos gnome stuff 💅
-  powerManagement.resumeCommands =
-  ''
-    gsettings set org.gnome.shell disable-user-extensions true
-    gsettings set org.gnome.shell disable-user-extensions false
-  '';
-
-  # Global shell function for resetting GNOME extensions
-  environment.shellInit = ''
-    reset-gnome-extensions() {
-      gsettings set org.gnome.shell disable-user-extensions true
-      gsettings set org.gnome.shell disable-user-extensions false
-      notify-send --expire-time=0 -e --icon=user-trash-full-symbolic --app-name='Gambiarra Manager' 'Extensões do GNOME reiniciadas' 'Deve ter voltado a funcionar ai, chefe!'
-    }
-
-    fastfetch
-  '';
+  # Global shell initialization commands, sourcing the external script
+  environment.shellInit = builtins.readFile ../../dotfiles/init.sh;
 } 

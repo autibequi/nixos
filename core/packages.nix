@@ -11,6 +11,7 @@
         usbutils
         lnav
         fastfetch
+        pv
 
         # GPU
         lact
