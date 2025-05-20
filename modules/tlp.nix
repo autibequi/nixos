@@ -12,13 +12,15 @@
 
       # AC (conectado à energia)
       # cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors
+      CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
       ENERGY_PERF_POLICY_ON_AC = "performance";
-      CPU_SCALING_GOVERNOR_ON_AC = "performance";
+      CPU_SCALING_GOVERNOR_ON_AC = "schedutil";
       CPU_BOOST_ON_AC = 1; 
       CPU_MIN_PERF_ON_AC=0;
       CPU_MAX_PERF_ON_AC=100;
 
       # Battery (na bateria)
+      CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
       ENERGY_PERF_POLICY_ON_BAT = "power";
       CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
       CPU_BOOST_ON_BAT = 0; # pode ser util devido a scx_lavd que agrupa as threads em poucos cores??
@@ -42,10 +44,6 @@
       # plataform
       PLATFORM_PROFILE_ON_AC = "performance";
       PLATFORM_PROFILE_ON_BAT = "low-power";
-
-      # CPU Energy Policy
-      CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
-      CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
 
       # ASPM
       PCIE_ASPM_ON_AC = "performance";
