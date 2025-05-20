@@ -52,8 +52,8 @@
       PCIE_ASPM_ON_BAT = "powersupersave";
 
       # USB
-      USB_AUTOSUSPEND = 1;
-      USB_SUSPEND_RESUME_DELAY = 2;
+      # USB_AUTOSUSPEND = 1;
+      # USB_SUSPEND_RESUME_DELAY = 2;
 
       # Wifi
       WIFI_PWR_ON_AC = "off";
