@@ -20,6 +20,7 @@ nh os switch /etc/nixos
 # Gnome
 Mostly overwritten config are just to move the windows between screens and locating myself in worksapces without having to move my hand much.
 
+## Shortcuts
 ```
 <super> a/d = move workspace left/right
 <super> w/s = maximize/minimize
@@ -35,6 +36,20 @@ Mostly overwritten config are just to move the windows between screens and locat
 <super> f3 = toggle dark/light mode // night theme switcher ext
 <super> tab = fill all tiles // tilling ext
 <super> delete = reseta extensões do gnome // custom toggle ext
+```
+
+# Trackpad Gesture
+Windows (3 finger)
+```
+<3 up> = Abrir visão geral (overview)
+<3 down> = Minimizar janela
+<3 left/right> = Navegar para trás/frente
+```
+
+Workspace (4 finger)
+```
+<4 up> = Maximizar janela
+<4 left/right> = Mover para workspace à esquerda/direit
 ```
 
 # Dotfiles
