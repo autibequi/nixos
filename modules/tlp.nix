@@ -7,7 +7,7 @@
   services.tlp = {
     enable = true;
     settings = {
-      # powersave on battery
+      # powersave on battery for nvme case
       SATA_LINKPWR_ON_BAT = "med_power_with_dipm";
 
       # AC (conectado à energia)
@@ -23,11 +23,9 @@
 
       # CPU Driver
       CPU_DRIVER_OPMODE_ON_AC = "active";
-      CPU_DRIVER_OPMODE_ON_BAT = "active";
+      CPU_DRIVER_OPMODE_ON_BAT = "passive";
 
       # Desabilitar o watchdog do kernel
-      NMI_WATCHDOG = 0;
-
       MEM_SLEEP_ON_AC = "s2idle";
       MEM_SLEEP_ON_BAT = "deep";
 
@@ -43,22 +41,22 @@
       CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
       CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
 
-      #ASPM
+      # ASPM
       PCIE_ASPM_ON_AC = "performance";
       PCIE_ASPM_ON_BAT = "powersupersave";
 
-      #USB
+      # USB
       USB_AUTOSUSPEND = 1;
       USB_SUSPEND_RESUME_DELAY = 2;
 
-      #Wifi
+      # Wifi
       WIFI_PWR_ON_AC = "off";
       WIFI_PWR_ON_BAT = "on";
       
-      # Enable display panel Adaptive Backlight Modulation (ABM).:
-      # Makes image blurrier, not sure if saves battery
-      AMDGPU_ABM_LEVEL_ON_AC = 0;
-      AMDGPU_ABM_LEVEL_ON_BAT = 4; # 0-4
+      # Enable display panel Adaptive Backlight Modulation (ABM).
+      # not sure if save battery but makes image blew out:
+      # AMDGPU_ABM_LEVEL_ON_AC = 0;
+      # AMDGPU_ABM_LEVEL_ON_BAT = 4; # 0-4
     };
   };
 }
