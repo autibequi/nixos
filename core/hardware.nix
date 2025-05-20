@@ -9,7 +9,12 @@
   # curent setup g14
   programs.rog-control-center.enable = true;
   services.supergfxd.enable = true;
-  services.asusd.enable = true;
+  services = {
+      asusd = {
+        enable = true;
+        enableUserService = true;
+      };
+  };  
 
   # Hardware
   hardware = {
