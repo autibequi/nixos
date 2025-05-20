@@ -39,6 +39,10 @@
       PLATFORM_PROFILE_ON_AC = "performance";
       PLATFORM_PROFILE_ON_BAT = "low-power";
 
+      # CPU Energy Policy
+      CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
+      CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+
       #ASPM
       PCIE_ASPM_ON_AC = "performance";
       PCIE_ASPM_ON_BAT = "powersupersave";
