@@ -6,13 +6,9 @@
     gnomeExtensions.caffeine
     gnomeExtensions.pano
     gnomeExtensions.gsconnect
-    # gnomeExtensions.auto-power-profile # using tlp.nix instead
     gnomeExtensions.night-theme-switcher
     gnomeExtensions.quick-settings-audio-panel
-
-    # Battery and Power Extensions
-    gnomeExtensions.battery-time
-    gnomeExtensions.upower-battery
+    # gnomeExtensions.auto-power-profile # using tlp.nix instead for now
 
     # Window Management Extensions
     gnomeExtensions.tiling-shell
@@ -35,6 +31,7 @@
     gnomeExtensions.gnome-40-ui-improvements
     gnomeExtensions.advanced-alttab-window-switcher
     gnomeExtensions.custom-command-toggle
+    gnomeExtensions.upower-battery
 
     # super cool but nukes battery life due to GPU usage on idle
     # gnomeExtensions.mouse-tail

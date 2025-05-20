@@ -65,6 +65,11 @@
           "next" = ["<Super>Right"];
           "previous" = ["<Super>Left"];
         };
+        # Other apps
+        # Vitals
+        "org/gnome/shell/extensions/vitals" = {
+          hot-sensors = ["_memory_usage_" "_processor_usage_" "_battery_rate_" "_battery_time_left_" "_temperature_acpi_thermal zone_"];
+        };
       };
     };
   };
