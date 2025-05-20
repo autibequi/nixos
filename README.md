@@ -24,21 +24,22 @@ Mostly workspace actions are <super> + something and windows actions are <super>
 
 ## Moving Around
 ```
-<super> a = move workspace left
-<super> d = move workspace right
-<super> w = maximize
-<super> s = minimize
+<super> a/d = move workspace left/right
+<super> w/s = maximize/minimize
 <super> q/e - move window to left/right workspaces
-<super> x - show notifications
-<super> c - show menu
+
+<super> x - notifications
+<super> c - menu
 <super> z = overview
-<super> tab = fill all tiles // tilling assistante ext
+
+<super> delete = kill window
+<super>esc = toggle dark/light mode
 ```
 
-## Misc
+Non Gnome Shortcuts
 ```
 <Alt> F3 = Resetar extensões do Gnome
-<super><shift> t = toggle dark/light mode
+<super> tab = fill all tiles // tilling ext
 ```
 
 # Dotfiles

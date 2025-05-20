@@ -51,7 +51,7 @@
           "switch-to-workspace-right" = ["<Super>d"];
           "move-to-workspace-left" = ["<Super>q"];
           "move-to-workspace-right" = ["<Super>e"];
-          "close" = ["<Super>Delete"];
+          "close" = ["<Super>Escape"];
           "maximize" = ["<Super>w"];
           "minimize" = ["<Super>s"];
         };
@@ -59,7 +59,7 @@
           "toggle-overview" = ["<Super>z"];
           "toggle-message-tray" = ["<Super>x"];
           "toggle-application-menu" = ["<Super>c"];
-          "toggle-dark-theme" = ["<Super>b"];
+          "toggle-dark-theme" = ["<Super>space"];
         };
         "org/gnome/settings-daemon/plugins/media-keys" = {
           "play" = ["<Super>space"];
