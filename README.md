@@ -31,6 +31,7 @@ Mostly overwritten config are just to move the windows between screens and locat
 
 <super> esc = kill window
 
+<super> t - PIP any windows // WTBM ext
 <super> f3 = toggle dark/light mode // night theme switcher ext
 <super> tab = fill all tiles // tilling ext
 <super> delete = reseta extensões do gnome // custom toggle ext

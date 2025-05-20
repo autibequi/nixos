@@ -7,6 +7,9 @@
   services.tlp = {
     enable = true;
     settings = {
+      # powersave on battery
+      SATA_LINKPWR_ON_BAT = "med_power_with_dipm";
+
       # AC (conectado à energia)
       # cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors
       CPU_SCALING_GOVERNOR_ON_AC = "schedutil";
