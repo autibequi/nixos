@@ -23,6 +23,11 @@
           natural-scroll = true;
         };
         
+        # Mutter e Gerenciamento de Janelas
+        "org/gnome/mutter" = {
+          experimental-features = [ "scale-monitor-framebuffer" "variable-refresh-rate" ];
+        };
+        
         "org/gnome/desktop/wm/preferences" = {
           focus-mode = "sloppy"; # sloppy (hover focus), smart (click focus), click, none
         };
@@ -50,7 +55,7 @@
         # Extensões
         # Vitals
         "org/gnome/shell/extensions/vitals" = {
-          hot-sensors = ["_processor_usage_" "_memory_usage_" "_battery_rate_" "_battery_time_left_" "_temperature_acpi_thermal zone_"];
+          hot-sensors = ["_memory_usage_" "_processor_usage_" "_battery_rate_" "_battery_time_left_" "_temperature_acpi_thermal zone_"];
         };
       };
     };
