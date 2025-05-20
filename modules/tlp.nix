@@ -24,7 +24,7 @@
       # CPU Driver
       # must be passive/guided for userland schedulers
       # but active is better for battery life
-      CPU_DRIVER_OPMODE_ON_AC = "active";
+      CPU_DRIVER_OPMODE_ON_AC = "passive";
       CPU_DRIVER_OPMODE_ON_BAT = "active"; 
 
       # Desabilitar o watchdog do kernel
