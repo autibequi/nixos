@@ -26,6 +26,9 @@
   # scx_lavd - better battery life???
   services.scx.enable = true; 
   services.scx.scheduler = "scx_lavd"; 
+  services.scx.extraArgs = [
+    "--autopower"
+  ];
 
   # TODO: clean up modules
   boot.kernelModules = [

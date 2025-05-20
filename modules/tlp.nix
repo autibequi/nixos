@@ -17,7 +17,7 @@
       CPU_BOOST_ON_BAT = 0; 
 
       CPU_DRIVER_OPMODE_ON_AC = "active";
-      CPU_DRIVER_OPMODE_ON_BAT = "active";
+      CPU_DRIVER_OPMODE_ON_BAT = "passive"; # must be passive for scx_lavd
 
       # Power policy
       CPU_ENERGY_PERF_POLICY_ON_BAT = "power"; 

@@ -55,10 +55,14 @@
         };
         "org/gnome/shell/keybindings" = {
           "toggle-overview" = ["<Super>z"];
-        };
-        "org/gnome/shell/keybindings" = {
-            "toggle-message-tray" = ["<Super>x"];
+          "toggle-message-tray" = ["<Super>x"];
           "toggle-application-menu" = ["<Super>c"];
+          "toggle-dark-theme" = ["<Super>b"];
+        };
+        "org/gnome/settings-daemon/plugins/media-keys" = {
+          "play" = ["<Super>space"];
+          "next" = ["<Super>Right"];
+          "previous" = ["<Super>Left"];
         };
       };
     };
