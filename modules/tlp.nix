@@ -17,7 +17,7 @@
       CPU_BOOST_ON_BAT = 1; 
 
       CPU_DRIVER_OPMODE_ON_AC = "active";
-      CPU_DRIVER_OPMODE_ON_BAT = "active"; # must be passive for scx_lavd
+      CPU_DRIVER_OPMODE_ON_BAT = "active";
 
       # Desabilitar o watchdog do kernel
       NMI_WATCHDOG = 0;
