@@ -2,7 +2,8 @@
 
 {
   imports = [
-    ./tlp.nix # importe para não usar o power-profile-daemon do gnome
+    # doubles battery life on g14 2023
+    ./tlp.nix 
   ];
 
   # NixOs stock power management
