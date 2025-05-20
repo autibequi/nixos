@@ -27,7 +27,7 @@
   # scx_lavd - better battery life???
   # will only be used on AC because of CPU_DRIVER_OPMODE_ON_BAT = "active" on battery
   services.scx.scheduler = "scx_lavd"; 
-  services.scx.extraArgs = [ "--performance" ]; 
+  services.scx.extraArgs = [ "--autopower" ]; 
 
   # TODO: clean up modules
   boot.kernelModules = [
