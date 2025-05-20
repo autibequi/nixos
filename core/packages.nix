@@ -40,10 +40,8 @@
         # shells
         nushell
         starship
-
-        # terminals
-        ghostty
-        alacritty
+        fish
+        ghostty # terminals
 
         # apps
         mpv

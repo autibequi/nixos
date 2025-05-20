@@ -22,8 +22,10 @@
       CPU_BOOST_ON_BAT = 0; 
 
       # CPU Driver
+      # must be passive/guided for userland schedulers
+      # but active is better for battery life
       CPU_DRIVER_OPMODE_ON_AC = "active";
-      CPU_DRIVER_OPMODE_ON_BAT = "passive"; # must be passive for userland schedulers
+      CPU_DRIVER_OPMODE_ON_BAT = "active"; 
 
       # Desabilitar o watchdog do kernel
       MEM_SLEEP_ON_AC = "s2idle";
