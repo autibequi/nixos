@@ -22,13 +22,11 @@
   boot.initrd.compressorArgs = [ "--best" ];
   
   # Userland Scheduler 
+  services.scx.enable = true; 
   # scx_rusty - responsive under load
   # scx_lavd - better battery life???
-  services.scx.enable = true; 
   services.scx.scheduler = "scx_lavd"; 
-  services.scx.extraArgs = [
-    "--autopower"
-  ];
+  services.scx.extraArgs = [ "--powersave" ];
 
   # TODO: clean up modules
   boot.kernelModules = [
