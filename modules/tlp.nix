@@ -14,10 +14,10 @@
 
       # Battery (na bateria)
       CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
-      CPU_BOOST_ON_BAT = 0; 
+      CPU_BOOST_ON_BAT = 1; 
 
       CPU_DRIVER_OPMODE_ON_AC = "active";
-      CPU_DRIVER_OPMODE_ON_BAT = "guided"; # must be passive for scx_lavd
+      CPU_DRIVER_OPMODE_ON_BAT = "active"; # must be passive for scx_lavd
 
       # Desabilitar o watchdog do kernel
       NMI_WATCHDOG = 0;
