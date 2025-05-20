@@ -9,14 +9,14 @@
     settings = {
       # AC (conectado à energia)
       # cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors
-      CPU_SCALING_GOVERNOR_ON_AC = "schedutil";
+      CPU_SCALING_GOVERNOR_ON_AC = "performance";
       CPU_BOOST_ON_AC = 1; 
 
       # Battery (na bateria)
-      CPU_SCALING_GOVERNOR_ON_BAT = "schedutil";
+      CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
       CPU_BOOST_ON_BAT = 0; 
 
-      CPU_DRIVER_OPMODE_ON_AC = "active";
+      CPU_DRIVER_OPMODE_ON_AC = "guided";
       CPU_DRIVER_OPMODE_ON_BAT = "guided";
 
       # Desabilitar o watchdog do kernel

@@ -26,7 +26,7 @@
   # scx_rusty - responsive under load
   # scx_lavd - better battery life???
   services.scx.scheduler = "scx_lavd"; 
-  services.scx.extraArgs = [ "--powersave" ];
+  services.scx.extraArgs = [ "--autopilot" ];
 
   # TODO: clean up modules
   boot.kernelModules = [
