@@ -13,8 +13,9 @@
     # Enable Docker
     virtualisation.docker.enable = true;
 
-    # Preload common apps for snappier experience
-    services.preload.enable = true;
+    # Preload common apps for snappier experience 
+    # doesnt seems to do nothing at all
+    # services.preload.enable = true;
 
     # CPU Power Management
     services.cpupower-gui.enable = true;
