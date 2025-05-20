@@ -13,7 +13,7 @@
       # AC (conectado à energia)
       # cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors
       ENERGY_PERF_POLICY_ON_AC = "performance";
-      CPU_SCALING_GOVERNOR_ON_AC = "schedutil";
+      CPU_SCALING_GOVERNOR_ON_AC = "performance";
       CPU_BOOST_ON_AC = 1; 
 
       # Battery (na bateria)
@@ -23,7 +23,7 @@
 
       # CPU Driver
       CPU_DRIVER_OPMODE_ON_AC = "active";
-      CPU_DRIVER_OPMODE_ON_BAT = "passive";
+      CPU_DRIVER_OPMODE_ON_BAT = "passive"; # must be passive for userland schedulers
 
       # Desabilitar o watchdog do kernel
       MEM_SLEEP_ON_AC = "s2idle";
