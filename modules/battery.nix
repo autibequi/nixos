@@ -14,4 +14,7 @@
 
   # Melhora consumo idle da GPU nvidia
   hardware.nvidia.nvidiaPersistenced = false;
+
+  # AMD EPP
+  services.auto-epp.enable = true;
 }

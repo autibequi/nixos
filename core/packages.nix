@@ -13,13 +13,13 @@
         fastfetch
         pv
 
-        # GPU
+        # AMD
         lact
-        
+        rocmPackages.rocm-smi
+
         # cli tools
         yt-dlp
         btop-rocm   # better top with amd support
-        rocmPackages.rocm-smi
         libnotify # cli notifications
         jq          # json parser
         lz4         # compression
