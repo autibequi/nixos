@@ -37,7 +37,7 @@
         broot       # better tree
         zoxide      # better cd
         tealdeer    # better tldr
-        wl-clipboard-rs # clipboard
+        wl-clipboard # clipboard
 
         # shells
         nushell

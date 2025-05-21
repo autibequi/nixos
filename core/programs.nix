@@ -32,6 +32,7 @@
         f = "fzf";
         ff = "fastfetch";
         clip = "wl-copy";
+        clipb = "wl-paste";
       };
 
       # Init some of those alias
