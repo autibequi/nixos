@@ -64,6 +64,7 @@
         github-copilot-cli
         devbox
         pkgs.code-cursor
+        # TODO: try to make this work to use nixGLNvidiaBumblebee and improve performance
         # (pkgs.nixgl.auto.nixGLDefault pkgs.code-cursor)
         zed-editor
     ];
