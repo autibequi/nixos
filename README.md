@@ -1,7 +1,20 @@
-# nix-config
+## NixOS Config
+
 i have no ideia what i'm doing...
 
 update: i have SOME ideia now
+
+### Estrutura Principal
+- `configuration.nix` - Arquivo principal de configuração
+- `flake.nix` - Gerenciamento de dependências e configuração do sistema
+- `nix.nix` - Configurações específicas do Nix (substituidores, etc.)
+
+### Diretórios
+- `/core/` - Configurações essenciais (hardware, kernel, serviços, etc.)
+- `/modules/` - Módulos opcionais (bluetooth, nvidia, plymouth, etc.)
+- `/desktop-envs/` - Ambientes de desktop (GNOME, KDE, Cosmic)
+- `/assets/` - Arquivos de mídia, temas, ícones e outros recursos visuais
+- `/dotfiles` - Arquivos de configuração pessoais para programas e ferramentas
 
 # Instalação
 
@@ -22,12 +35,12 @@ Mostly overwritten config are just to move the windows between screens and locat
 
 ## Dump Extension Configurations
 
-```
+```sh
 dconf dump / > dconf.dump
 ```
 
 ## Shortcuts
-```
+```md
 <super> a/d = move workspace left/right
 <super> w/s = maximize/minimize
 <super> q/e - move window to left/right workspaces
@@ -45,8 +58,14 @@ dconf dump / > dconf.dump
 ```
 
 # Trackpad Gesture
+App (2 fingers)
+```
+<2 up/down/left/right> = scrolling
+```
+
 Windows (3 finger)
 ```
+<3 tap> = Pastte Clipboard
 <3 up> = Abrir visão geral (overview)
 <3 down> = Minimizar janela
 <3 left/right> = Navegar para trás/frente
