@@ -5,7 +5,7 @@
   system.stateVersion = "25.05";
 
   imports =
-    [ 
+    [
       # Substituters ans stuff
       ./nix.nix
 
@@ -26,7 +26,7 @@
       # ./modules/flatpak.nix
       # ./modules/ai.nix
 
-      # Work 
+      # Work
       ./modules/work.nix
 
       # Desktop Environments
@@ -56,7 +56,7 @@
 
   # Networking
   networking = {
-    hostName = "nomad"; 
+    hostName = "nomad";
     useDHCP = lib.mkDefault true;
     networkmanager = {
       enable = true;

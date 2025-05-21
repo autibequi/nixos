@@ -30,7 +30,7 @@
 
         # editors
         vscode
-        
+
         # python
         python312
         poetry
@@ -63,7 +63,8 @@
         # TESTING:
         github-copilot-cli
         devbox
-        code-cursor
+        pkgs.code-cursor
+        # (config.lib.nixGL.wrap pkgs.code-cursor)
         zed-editor
     ];
 
@@ -73,7 +74,7 @@
     #         pkgs.file
     #     ];
     # };
-    
+
     # Gambiarra pra rodar as coisas do jeito não nix
     # mostly vscode extensions.
     programs.nix-ld.enable = true;
@@ -85,7 +86,7 @@
     networking.extraHosts = ''
         127.0.0.1 local.estrategia-sandbox.com.br
     '';
-    
+
     # Cloudflare Warp
     services.cloudflare-warp.enable = true;
 

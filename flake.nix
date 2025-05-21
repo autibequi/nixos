@@ -6,7 +6,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     # nixpkgs.url = "github:NixOS/nixpkgs/staging";
     # nixpkgs.url = "github:NixOS/nixpkgs/staging-next";
-    
+
     # Other Inputs
     nixos-hardware.url = "github:NixOS/nixos-hardware/master"; # Hardware
     nixos-cosmic.url = "github:lilyinstarlight/nixos-cosmic";
@@ -17,11 +17,12 @@
     nixpkgs-howdy.url = "github:NixOS/nixpkgs/pull/216245/head";
     nix-alien.url = "github:thiagokokada/nix-alien";
     stylix.url = "github:danth/stylix";
+    nixgl.url = "github:nix-community/nixGL";
   };
 
   # Outputs
   # This is the default output, which is a set of attributes.
-  outputs = { self, nixpkgs, solaar, nixos-hardware, home-manager, chaotic, nixos-cosmic, nix-alien, stylix, ... }@inputs: {
+  outputs = { self, nixpkgs, solaar, nixos-hardware, home-manager, chaotic, nixos-cosmic, nix-alien, stylix, nixgl, ... }@inputs: {
     packages.x86_64-linux.hello = nixpkgs.legacyPackages.x86_64-linux.hello;
     packages.x86_64-linux.default = self.packages.x86_64-linux.hello;
 
@@ -33,7 +34,7 @@
 
         # Logitech Solaar
         solaar.nixosModules.default
-        
+
         # CachyOS Kernel
         chaotic.nixosModules.nyx-cache
         chaotic.nixosModules.nyx-overlay
@@ -41,6 +42,11 @@
 
         # Cosmic
         nixos-cosmic.nixosModules.default
+
+        # NixGL Overlay
+        {
+          nixpkgs.overlays = [ nixgl.overlay ];
+        }
 
         # Stylix
         # stylix.nixosModules.stylix
@@ -59,13 +65,17 @@
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
+          # Add this inside home configuration block (without this it won't work):
+          home-manager.extraSpecialArgs = {
+            nixgl = nixgl;
+          };
         }
-        
+
         # Interactive SystemD
         {
           environment.systemPackages = [ inputs.isd.packages.x86_64-linux.default ];
         }
-        
+
         # Mine
         ./configuration.nix
       ];
