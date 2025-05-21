@@ -8,7 +8,7 @@
     gnomeExtensions.gsconnect
     gnomeExtensions.night-theme-switcher
     gnomeExtensions.quick-settings-audio-panel
-    # gnomeExtensions.auto-power-profile # using tlp.nix instead for now
+    gnomeExtensions.auto-power-profile
 
     # Window Management Extensions
     gnomeExtensions.tiling-shell
