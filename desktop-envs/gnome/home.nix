@@ -7,7 +7,7 @@
       theme.name = "Adwaita";
       iconTheme.name = "Papirus";
     };
-    
+
     dconf = {
       enable = true;
       settings = {
@@ -17,21 +17,21 @@
           cursor-theme = "banana";
           enable-animations = false;
         };
-        
+
         # Mouse e Periféricos
         "org/gnome/desktop/peripherals/mouse" = {
           natural-scroll = true;
         };
-        
+
         # Mutter e Gerenciamento de Janelas
         "org/gnome/mutter" = {
           experimental-features = [ "scale-monitor-framebuffer" "variable-refresh-rate" ];
         };
-        
+
         "org/gnome/desktop/wm/preferences" = {
           focus-mode = "sloppy"; # sloppy (hover focus), smart (click focus), click, none
         };
-        
+
         # Keybindings
         "org/gnome/desktop/wm/keybindings" = {
           # Workspace Management
@@ -45,13 +45,13 @@
           "maximize" = ["<Super>w"];
           "minimize" = ["<Super>s"];
         };
-        
+
         "org/gnome/shell/keybindings" = {
           "toggle-overview" = ["<Super>z"];
           "toggle-message-tray" = ["<Super>x"];
           "toggle-application-menu" = ["<Super>c"];
         };
-        
+
         # Extensões
         # Vitals
         "org/gnome/shell/extensions/vitals" = {
@@ -84,7 +84,7 @@
           move-window-left = ["<Shift><Super>a"];
           move-window-right = ["<Shift><Super>d"];
           move-window-up = ["<Shift><Super>w"];
-          span-multiple-tiles-activation-key = ["1"];
+          span-multiple-tiles-activation-key = ["0"];
           span-window-all-tiles = ["<Super>Tab"];
           tile-preview-animation-time = 50;
           tiling-system-activation-key = ["2"];
