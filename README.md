@@ -20,6 +20,12 @@ nh os switch /etc/nixos
 # Gnome
 Mostly overwritten config are just to move the windows between screens and locating myself in worksapces without having to move my hand much.
 
+## Dump Extension Configurations
+
+```
+dconf dump / > dconf.dump
+```
+
 ## Shortcuts
 ```
 <super> a/d = move workspace left/right
@@ -86,3 +92,4 @@ Atuin é uma ferramenta de histórico de comandos que sincroniza e criptografa s
 - `atuin sync` - Sincroniza histórico entre dispositivos
 - `atuin import` - Importa histórico do bash/zsh
 - `atuin stats` - Mostra estatísticas de uso
+  

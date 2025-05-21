@@ -41,7 +41,7 @@
   # Config Moving
   home-manager.users."pedrinho" = { pkgs, lib, ... }:
   {
-    home.file."~/.config/gnome-shell/extensions/burn-my-windows/profiles/1747253129691946.conf".source = ./extensions-configs/burn-my-windows.conf;
+    home.file."~/.config/gnome-shell/extensions/burn-my-windows/profiles/pedrinho.profile.conf".source = ./extensions-configs/burn-my-windows.conf;
     home.file."~/toggle.ini".source = ./extensions-configs/custom-toggle.conf;
   };
 }

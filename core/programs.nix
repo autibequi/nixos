@@ -31,6 +31,7 @@
         man = "tldr";
         f = "fzf";
         ff = "fastfetch";
+        clip = "wl-copy";
       };
 
       # Init some of those alias
