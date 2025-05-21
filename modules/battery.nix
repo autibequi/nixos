@@ -3,7 +3,7 @@
 {
   imports = [
     # doubles battery life on g14 2023
-    ./tlp.nix 
+    # ./tlp.nix 
   ];
 
   # NixOs stock power management
@@ -15,6 +15,7 @@
   boot.kernelParams = [ 
     "pcie_aspm=force" # Força o ASPM (Active State Power Management) do PCIe para reduzir o consumo de energia dos dispositivos PCIe quando ocioso
     "pcie_port_pm=on" # Habilita gerenciamento de energia para portas PCIe, reduzindo consumo quando não em uso
+    "amd_pstate=active"
   ];
 
   # Melhora consumo idle da GPU nvidia
