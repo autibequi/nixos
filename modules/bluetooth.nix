@@ -16,20 +16,13 @@
         MultiProfile = "multiple";
         AutoEnable = true;
       };
-      Policy = {
-        AutoEnable = true;
-      };
     };
   };
 
   # Configuração PipeWire otimizada
   services.pipewire = {
     enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
     jack.enable = true; # Adicionar suporte JACK para aplicativos profissionais
-    wireplumber.enable = true;
     
     # Configuração avançada para Bluetooth
     wireplumber.extraConfig."10-bluez" = {
@@ -46,8 +39,6 @@
         ];
         "bluez5.auto-connect" = [ "a2dp_sink" "hfp_ag" ];
         "bluez5.codecs" = [ "sbc_xq" "aac" "ldac" "aptx" "aptx_hd" "faststream" ];
-        "bluez5.msbc-support" = true;
-        "bluez5.sbc-xq-support" = true;
       };
     };
     
@@ -59,23 +50,15 @@
     };
   };
 
-  # Variáveis de ambiente otimizadas para áudio Bluetooth
-  environment.sessionVariables = {
-    PIPEWIRE_RATE = "48000"; # Taxa de amostragem mais alta para melhor qualidade
-    PIPEWIRE_QUANTUM = "256/48000"; # Latência reduzida
-    PIPEWIRE_LATENCY = "256/48000"; # Latência reduzida
-    PIPEWIRE_LINK_PASSIVE = "true"; # Melhora a estabilidade
-  };
 
   # Pacotes adicionais para suporte a codecs
   environment.systemPackages = with pkgs; [
     ldacbt
     libfreeaptx
     sbc
-    bluez-tools # Ferramentas adicionais para diagnóstico
-    bluez-alsa # Suporte ALSA para Bluetooth
-
-    pavucontrol # Interface gráfica para ajustar configurações de áudio
-    helvum # Interface gráfica para ajustar configurações de áudio
+    fdk-aac 
+    bluez-tools 
+    pavucontrol
+    helvum 
   ];
 }
