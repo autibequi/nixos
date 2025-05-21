@@ -64,7 +64,7 @@
         github-copilot-cli
         devbox
         pkgs.code-cursor
-        # (config.lib.nixGL.wrap pkgs.code-cursor)
+        # (pkgs.nixgl.auto.nixGLDefault pkgs.code-cursor)
         zed-editor
     ];
 

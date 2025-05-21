@@ -28,6 +28,7 @@
 
     nixosConfigurations.nomad = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
+      specialArgs = { inherit inputs; }; # Pass all inputs to modules
       modules = [
         # Currenct Laptop Flake
         nixos-hardware.nixosModules.asus-zephyrus-ga402x-nvidia
@@ -42,11 +43,6 @@
 
         # Cosmic
         nixos-cosmic.nixosModules.default
-
-        # NixGL Overlay
-        {
-          nixpkgs.overlays = [ nixgl.overlay ];
-        }
 
         # Stylix
         # stylix.nixosModules.stylix
