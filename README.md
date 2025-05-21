@@ -26,7 +26,7 @@ sudo nixos-rebuild switch
 
 # nh manual
 
-```sh 
+```sh
 nh os switch /etc/nixos
 ```
 
@@ -51,8 +51,11 @@ dconf dump / > dconf.dump
 
 <super> esc = kill window
 
+<super> p = monitor picker
+
+<super> . = emoji picker // emoji ext
 <super> t - PIP any windows // WTBM ext
-<super> f3 = toggle dark/light mode // night theme switcher ext
+<super> b = toggle dark/light mode // night theme switcher ext
 <super> tab = fill all tiles // tilling ext
 <super> delete = reseta extensões do gnome // custom toggle ext
 ```
@@ -99,7 +102,7 @@ Configuração para a ferramenta de informações do sistema Fastfetch. A config
  🬷▛🮃▙    ▟▛       GPU: GeForce RTX 4060 Max-Q / Mobile
  🮃 ▟█🬴▀▀▀█🬴▀▀     GPU: AMD Radeon 780M
   ▝▀ ▀▘   ▀▘      RAM: 46.36 GiB/13%
-                  UPTIME: 69d 4h 20m 
+                  UPTIME: 69d 4h 20m
 ```
 
 ## Atuin (`dotfiles/atuin.conf`)
@@ -111,4 +114,4 @@ Atuin é uma ferramenta de histórico de comandos que sincroniza e criptografa s
 - `atuin sync` - Sincroniza histórico entre dispositivos
 - `atuin import` - Importa histórico do bash/zsh
 - `atuin stats` - Mostra estatísticas de uso
-  
+
