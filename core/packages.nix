@@ -68,6 +68,8 @@
         # TESTING!
         mangohud
         blanket
-        piper-tts
+        # openai-whisper-cpp
+        # whisper-cpp
+        # whisper-cpp-vulkan # Voice-To-Text - for blurt gnome extension
     ];
 }
