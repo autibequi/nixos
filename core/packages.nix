@@ -51,7 +51,7 @@
         brave
         mission-center
         sidequest # for oculus sideloading
-        stremio 
+        stremio
         obsidian
         # cura
 
@@ -61,12 +61,13 @@
         apple-cursor
         bibata-cursors
         oreo-cursors-plus
-        
+
         # Icons
         papirus-icon-theme
 
         # TESTING!
         mangohud
         blanket
+        piper-tts
     ];
 }
