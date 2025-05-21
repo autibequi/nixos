@@ -29,7 +29,7 @@
         tree = "broot";
         cd = "z";
         man = "tldr";
-        f = "fzf";
+        f = "fzf --wrap";
         ff = "fastfetch";
         clip = "wl-copy";
         clipb = "wl-paste";

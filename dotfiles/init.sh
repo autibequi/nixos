@@ -10,8 +10,6 @@ reset-gnome-extensions() {
     'Deve ter voltado a funcionar ai, chefe!'
 }
 
-fastfetch 
-
 convert_video() {
   local input_file="$1"
   local output_file="converted_$(basename "${input_file%.*}").mp4"
