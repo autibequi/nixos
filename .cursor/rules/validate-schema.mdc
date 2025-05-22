@@ -1,0 +1,8 @@
+---
+description:
+globs: *.nix
+alwaysApply: false
+---
+Always tests changes with `nh os test .` if you change a `.nix` file
+
+It's fast and free, so try to use it ever small change made.
