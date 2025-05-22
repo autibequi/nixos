@@ -3,10 +3,6 @@
 {
   # Programs
   programs = {
-    # firefox = {
-    #   enable = true;
-    # };
-
     adb.enable = true;
     direnv.enable = true;
     starship.enable = true;

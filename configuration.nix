@@ -16,7 +16,7 @@
       ./core/services.nix
       ./core/programs.nix
       ./core/packages.nix
-      ./core/zsh.nix
+      ./core/shell.nix
 
       # Extra
       ./modules/battery.nix

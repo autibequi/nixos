@@ -37,4 +37,4 @@
 
   # Global shell initialization commands, sourcing the external script
   environment.shellInit = builtins.readFile ../../dotfiles/init.sh;
-} 
+}
