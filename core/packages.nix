@@ -35,7 +35,6 @@
         dust        # better du
         procs       # better ps
         broot       # better tree
-        zoxide      # better cd
         tealdeer    # better tldr
         wl-clipboard # clipboard
 
