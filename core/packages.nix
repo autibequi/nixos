@@ -10,7 +10,10 @@
         sidequest # for oculus sideloading
         stremio
         obsidian
+        blanket
         # cura
+        # ventoy-full-qt
+
 
         # Aesthetics
         # Cursors
@@ -23,8 +26,9 @@
         papirus-icon-theme
 
         # TESTING!
-        mangohud
-        blanket
+        # webcamoid
+        # obs-studio
+
         # openai-whisper-cpp
         # whisper-cpp
         # whisper-cpp-vulkan # Voice-To-Text - for blurt gnome extension
