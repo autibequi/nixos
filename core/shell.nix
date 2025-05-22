@@ -55,6 +55,9 @@
 
     shellInit = ''
       eval "$(zoxide init zsh)"
+      eval "$(atuin init zsh)"
+      eval "$(pueue completion zsh)"
+      eval "$(starship init zsh)a"
     '';
   };
 
