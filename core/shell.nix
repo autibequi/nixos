@@ -52,6 +52,10 @@
       clip = "wl-copy";
       clipb = "wl-paste";
     };
+
+    shellInit = ''
+      eval "$(zoxide init zsh)"
+    '';
   };
 
 
