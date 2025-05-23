@@ -3,7 +3,9 @@
 {
   services.flatpak.enable = true;
 
-  environment.systemPackages = with pkgs; [
-    flatpak
-  ];
+  # # Flatpak packages to install
+  # services.flatpak.packages = [
+  #   "com.github.tenderowl.frog"
+  #   "io.github.kelvinnovais.Kasasa"
+  # ];
 }

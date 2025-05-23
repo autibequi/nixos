@@ -4,7 +4,7 @@
   home-manager.backupFileExtension = "hm-backup";
 
   # it's a me, pedrinho! o-ho!
-  home-manager.users."pedrinho" = { lib, ... }: {
+  home-manager.users."pedrinho" = { lib, pkgs, ... }: {
     home.stateVersion = "25.05";
     home.enableNixpkgsReleaseCheck = false;
 
@@ -13,7 +13,6 @@
       name = "Banana";
       size = 40;
     };
-
 
     home.file = {
       # avatar
