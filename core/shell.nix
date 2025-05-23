@@ -84,6 +84,8 @@
     libnotify # cli notifications
     jq          # json parser
     lz4         # compression
+    figlet      # ascii art
+    toilet      # ascii art
 
     # better cli
     atuin       # fancy cli history
