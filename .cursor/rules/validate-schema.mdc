@@ -1,8 +1,8 @@
 ---
 description:
-globs: *.nix
-alwaysApply: false
+globs:
+alwaysApply: true
 ---
-Always tests changes with `nh os test .` if you change a `.nix` file
+Always tests changes with `nh os test .` if you need to check if your change is valid.
 
 It's fast and free, so try to use it ever small change made.

@@ -25,10 +25,14 @@
         # Icons
         papirus-icon-theme
 
-        # TESTING!
+
+        # Testing!
         # webcamoid
+        # Testing!
         # obs-studio
 
+        # AI
+        windsurf
         # openai-whisper-cpp
         # whisper-cpp
         # whisper-cpp-vulkan # Voice-To-Text - for blurt gnome extension

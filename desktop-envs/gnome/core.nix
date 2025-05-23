@@ -6,9 +6,6 @@
     ./home.nix
   ];
 
-  # Enable Gnome
-  services.xserver.desktopManager.gnome.enable = true; # Ativação base do Gnome
-
   services = {
     xserver = {
       enable = true;

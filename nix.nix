@@ -1,5 +1,8 @@
 { config, pkgs, lib, inputs, ... } : {
 
+  # Install LIX
+  nix.package = pkgs.lix;
+
   # Unholy packages
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.allowImpure = true;
