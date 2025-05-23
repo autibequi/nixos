@@ -8,6 +8,13 @@
     home.stateVersion = "25.05";
     home.enableNixpkgsReleaseCheck = false;
 
+    home.pointerCursor = {
+      package = pkgs.banana-cursor;
+      name = "banana";
+      size = 40;
+    };
+
+
     home.file = {
       # avatar
       ".face".source = ../assets/avatar.png;

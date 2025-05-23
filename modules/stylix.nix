@@ -2,11 +2,12 @@
 
 {
   stylix = {
-    targets.plymouth.enable = false;
+    # Toggle because easier
+    enable = false;
+    autoEnable = false;
 
-    enable = true;
-    autoEnable = true;
-    polarity = "dark";
+
+    targets.plymouth.enable = false;
     cursor = {
       package = pkgs.banana-cursor;
       name = "banana";
