@@ -2,6 +2,8 @@
 
 {
   stylix = {
+    targets.plymouth.enable = false;
+
     enable = true;
     autoEnable = true;
     polarity = "dark";
