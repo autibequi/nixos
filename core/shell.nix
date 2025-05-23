@@ -73,6 +73,13 @@
     fastfetch
     pv
 
+    # TESTING: shells
+    # nushell
+    # fish
+
+    # zsh
+    starship
+
     # Terminal
     ghostty
     # allacritty
@@ -128,10 +135,5 @@
     mask        # better make
     mprocs      # better docker-compose
     # present-term # better reveal.js
-
-    # TESTING: shells
-    nushell
-    starship
-    fish
   ];
 }
