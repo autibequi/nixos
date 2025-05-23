@@ -22,9 +22,6 @@
       "command-not-found"
       "extract"
       "fzf"
-      "history"
-      "history-substring-search"
-      "sudo"
       "zoxide"
     ];
 
@@ -56,7 +53,7 @@
     shellInit = ''
       eval "$(zoxide init zsh)"
       eval "$(atuin init zsh)"
-      eval "$(starship init zsh)a"
+      eval "$(starship init zsh)"
     '';
   };
 
