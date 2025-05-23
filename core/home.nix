@@ -8,13 +8,6 @@
     home.stateVersion = "25.05";
     home.enableNixpkgsReleaseCheck = false;
 
-    # Banana cursor theme
-    home.pointerCursor = {
-      name = "Banana";
-      package = pkgs.banana-cursor;
-      size = 40;
-    };
-
     home.file = {
       # avatar
       ".face".source = ../assets/avatar.png;
