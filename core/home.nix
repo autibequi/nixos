@@ -10,7 +10,7 @@
 
     home.pointerCursor = {
       package = pkgs.banana-cursor;
-      name = "banana";
+      name = "Banana";
       size = 40;
     };
 
