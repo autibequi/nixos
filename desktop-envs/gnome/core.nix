@@ -8,6 +8,7 @@
 
   services = {
     xserver = {
+      desktopManager.gnome.enable = true;
       enable = true;
       displayManager.gdm = {
         enable = true;
