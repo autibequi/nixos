@@ -48,6 +48,8 @@
       ff = "fastfetch";
       clip = "wl-copy";
       clipb = "wl-paste";
+
+      wiki = "wikiti";
     };
 
     shellInit = ''
@@ -70,6 +72,10 @@
     lnav
     fastfetch
     pv
+
+    # Terminal
+    ghostty
+    # allacritty
 
     # AMD
     lact
@@ -99,10 +105,33 @@
     tealdeer    # better tldr
     wl-clipboard # clipboard
 
-    # shells
+    gping # ping with a graph
+    gitui
+    hyperfine # command-line benchmarking tool
+    jless # json viewer
+
+    # TESTING: rust cli tools
+    xh          # better curl
+    zellij      # better tmux
+    yazi        # better ranger
+    helix       # better vim
+    bacon       # better cargo
+    cargo-info  # better cargo info
+    fselect     # better find
+    ncspot      # better spotify
+    rusty-man   # better man
+    # git-delta   # better git diff
+    ripgrep-all # better ripgrep
+    tokei       # better wc
+    wiki-tui    # better wikipedia // wikiti is rust
+    just        # better make
+    mask        # better make
+    mprocs      # better docker-compose
+    # present-term # better reveal.js
+
+    # TESTING: shells
     nushell
     starship
     fish
-    ghostty # terminals
   ];
 }
