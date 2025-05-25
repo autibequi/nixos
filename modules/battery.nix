@@ -2,8 +2,8 @@
 
 {
   imports = [
-    # doubles battery life on g14 2023
-    # ./tlp.nix 
+    # Too much trouble, pstate does the same with better perf
+    # ./tlp.nix
   ];
 
   # NixOs stock power management
@@ -15,6 +15,12 @@
   # Melhora consumo idle da GPU nvidia
   hardware.nvidia.nvidiaPersistenced = false;
 
-  # AMD EPP
+  # AMD EPP to change the power profile so pstate can change
   services.auto-epp.enable = true;
+
+  # Suspend then Hibernate after 1h
+  systemd.sleep.extraConfig = ''
+    HibernateDelaySec=1h
+    SuspendState=mem
+  '';
 }
