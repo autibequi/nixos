@@ -76,21 +76,22 @@
       { device = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; } # nomad usb stick
     ];
 
+  # TODO: fix, kinda worksbut takes a lot of time to boot until it times out
   # Hibernate Configuration
-  boot.resumeDevice = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; # Use the same as one of the swapDevices
+  # boot.resumeDevice = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; # Use the same as one of the swapDevices
 
-  services.logind = {
-    lidSwitch = "suspend-then-hibernate";
-    powerKey = "hibernate";
-    powerKeyLongPress = "poweroff";
-  };
+  # services.logind = {
+  #   lidSwitch = "suspend-then-hibernate";
+  #   powerKey = "hibernate";
+  #   powerKeyLongPress = "poweroff";
+  # };
 
-  # Define time delay for hibernation
-  systemd.sleep.extraConfig = ''
-    HibernateDelaySec=1m
-    SuspendState=mem
-  '';
+  # # Define time delay for hibernation
+  # systemd.sleep.extraConfig = ''
+  #   HibernateDelaySec=1m
+  #   SuspendState=mem
+  # '';
 
-  # Define kernel parameters for hibernation
-  boot.kernelParams = ["mem_sleep_default=deep"];
+  # # Define kernel parameters for hibernation
+  # boot.kernelParams = ["mem_sleep_default=deep"];
 }
