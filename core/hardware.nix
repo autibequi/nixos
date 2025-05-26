@@ -60,8 +60,9 @@
       options = [ "noatime" "nodiratime" "discard" "data=writeback" "barrier=0" ];
     };
 
-  # Resume Device - apontando para o swap ativo em /dev/sda3
-  boot.resumeDevice = "/dev/sda3";
+  # HIBERNATE CONFIG
+  boot.kernelParams = [ "resume=/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593" "button.lid_init_state=open"  ];
+  boot.resumeDevice = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593";
 
   # Boot
   fileSystems."/boot" = {
@@ -70,22 +71,14 @@
       options = [ "fmask=0077" "dmask=0077" ];
     };
 
-  # Swap - usando o dispositivo principal que já está ativo
-  swapDevices = [
-    { device = "/dev/sda3"; }
-  ];
-
-    # TODO: systemd mount
-    # systemd.services.optionalSwap = {
-    #   description = "Enable optional swap if device is present";
-    #   wantedBy = [ "multi-user.target" ];
-    #   script = ''
-    #     if [ -e /dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593 ]; then
-    #       swapon /dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593
-    #     fi
-    #   '';
-    #   serviceConfig.Type = "oneshot";
-    # };
+  # Swap
+  # Will try to mount on Stage 1
+  swapDevices =
+    [
+      # TODO: fix, kinda worksbut takes a lot of time to boot until it times out
+      # { device = "/dev/disk/by-uuid/0319478f-63cc-4fde-9804-523687d223ee"; priority = 10; options = [ "x-systemd.device-timeout=1ms" "nofail" ]; } # optional g14 laptop swap
+      { device = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; options = [  "x-systemd.device-timeout=1" "nofail" ]; } # nomad usb stick
+    ];
 }
 
 
