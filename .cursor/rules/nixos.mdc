@@ -1,10 +1,6 @@
 ---
 description: Configuração NixOS para o Asus G14 com RTX 4060 - Setup Híbrido AMD/NVIDIA
 globs:
-  - "*.nix"
-  - "**/*.nix"
-  - "flake.lock"
-  - "flake.nix"
 alwaysApply: true
 ---
 
@@ -31,11 +27,13 @@ alwaysApply: true
 - `nh os switch .` - Aplica configuração
 - `nh os boot .` - Aplica na próxima inicialização
 
-## RESTRIÇÕES DO SANDBOX
+## RESTRIÇÕES DO CURSOR AI - SANDBOX
 ⚠️ **NUNCA use sudo** - todos os comandos sudo falharão no sandbox
-⚠️ Use sempre `poetry run` ou containers para evitar conflitos
+⚠️ Use sempre containers como `poetry run` ou containers para evitar conflitos
 
 ## MÓDULOS PRINCIPAIS
 - `core/kernel.nix` - Configurações de kernel e boot
 - `modules/nvidia.nix` - Driver NVIDIA e configuração PRIME
 - `modules/hibernation.nix` - Configuração otimizada de hibernação
+
+Depois de solucionado o problema crie um arquivo em tmp/report/ com um markdown contendo um relatorio do que foi feito na session

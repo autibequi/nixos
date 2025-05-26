@@ -1,6 +1,0 @@
----
-description:
-globs:
-alwaysApply: true
----
-Depois de solucionado o problema crie um arquivo em tmp/report/ com um markdown contendo um relatorio do que foi feito na session
