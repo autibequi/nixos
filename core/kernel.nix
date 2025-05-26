@@ -27,8 +27,8 @@
 
   # Configurar compressão.
   # https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/kernel/initrd-compressor-meta.nix
-  boot.initrd.compressor = "lz4"; # Trocado de lzop para lz4 (potencialmente mais rápido)
-  boot.initrd.compressorArgs = [ "-l" "-9" ]; # Args para lz4hc (high compression)
+  boot.initrd.compressor = "lzop"; # Voltando para lzop (mais estável)
+  boot.initrd.compressorArgs = [ "-9" ]; # Args para lzop (high compression)
 
   # Userland Scheduler
   services.scx.enable = true;
