@@ -15,17 +15,17 @@
     modesetting.enable = true; # Necessário para o funcionamento correto
     nvidiaSettings = false; # Habilitado para permitir configurações avançadas
     powerManagement = {
-      enable = true; # Gerenciamento de energia básico
-      finegrained = true; # Controle granular de energia para melhor eficiência
+      enable = false; # DESABILITADO - conflita com hibernação
+      finegrained = false; # DESABILITADO - conflita com hibernação
     };
-    
+
     # RTX 4060 ainda não é compatível com drivers open source
     # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus
     open = false;
-    
-    # Configuração DynamicPower para melhorar autonomia da bateria
-    dynamicBoost.enable = true;
-    
+
+    # DESABILITADO - DynamicPower causa travamentos na hibernação
+    # dynamicBoost.enable = true;
+
     # Configuração PRIME para laptop híbrido G14
     prime = {
       # TODO: Seria bem legal para melhorar a performace quand conectando um monitor 4k externo
@@ -33,7 +33,7 @@
       # reverseSync.enable = true; # Sincronização reversa para melhorar desempenho
       offload.enable = true; # Modo offload para economia de energia
       sync.enable = false; # Desativado para evitar consumo constante da GPU
-      
+
       # Configuração de barramento otimizada para G14 com RTX 4060
       amdgpuBusId = lib.mkDefault "PCI:65:0:0";
       nvidiaBusId = lib.mkDefault "PCI:1:0:0";
@@ -41,7 +41,7 @@
   };
 
   # Permite podman usar o driver NVIDIA
-  hardware.nvidia-container-toolkit.enable = true; 
+  hardware.nvidia-container-toolkit.enable = true;
 
   # Permite o uso do CUDA
   nixpkgs.config.cudaSupport = true;

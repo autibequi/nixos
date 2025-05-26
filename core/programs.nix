@@ -8,10 +8,6 @@
     starship.enable = true;
     starship.transientPrompt.enable = true;
     starship.settings = {
-      format = ''
-        [┌───────────────────>](bold green)
-        [│](bold green)$directory$rust$package
-        [└─>](bold green) '';
     };
 
     neovim = {
