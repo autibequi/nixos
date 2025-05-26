@@ -1,26 +1,10 @@
 ---
-description: Configuração NixOS para o Asus G14 com RTX 4060 - Setup Híbrido AMD/NVIDIA
+description: NixOS Rules
 globs:
 alwaysApply: true
 ---
 
-# 🔥 SETUP NIXOS - ASUS G14 RTX 4060
-
-## HARDWARE SPECS
-- **Laptop**: ASUS ROG Zephyrus G14 (2024)
-- **CPU**: AMD Ryzen 9 8945HS (amd_pstate=guided)
-- **GPU Híbrida**:
-  - AMD Radeon 780M (iGPU) - PCI:65:0:0
-  - NVIDIA RTX 4060 Mobile (dGPU) - PCI:1:0:0
-- **Storage**: NVME externo via USB-C case (JMicron JMS583)
-- **Kernel**: CachyOS (linuxPackages_cachyos)
-
-## CONFIGURAÇÕES CRÍTICAS
-- **Hibernação**: Configurada com suspend-then-hibernate
-- **NVIDIA**: Driver proprietário 575.51.02 (offload mode)
-- **Power Management**: NVIDIA PM desabilitado (conflita com hibernação)
-- **USB-C**: Dock mantido ativo (usbcore.autosuspend=-1)
-- **Scheduler**: scx_lavd com autopower
+# SETUP NIXOS
 
 ## COMANDOS DISPONÍVEIS
 - `nh os test .` - Testa configuração sem aplicar
@@ -30,12 +14,16 @@ alwaysApply: true
 - `nh os switch .` - Aplica configuração porem não funciona em sandbox do cursor, use sempre `nh os test .`
 
 ## RESTRIÇÕES DO CURSOR AI - SANDBOX
-⚠️ **NUNCA use sudo** - todos os comandos sudo falharão no sandbox
-⚠️ Use sempre containers como `poetry run` ou containers para evitar conflitos
+- NUNCA use sudo - todos os comandos sudo falharão no sandbox
+- Use sempre containers como `poetry run` ou containers para evitar conflitos
 
 ## MÓDULOS PRINCIPAIS
-- `core/kernel.nix` - Configurações de kernel e boot
-- `modules/nvidia.nix` - Driver NVIDIA e configuração PRIME
-- `modules/hibernation.nix` - Configuração otimizada de hibernação
+- `/core/` - Configurações essenciais do sistema (hardware, kernel, serviços base)
+- `/modules/` - Módulos opcionais (bluetooth, nvidia, plymouth, battery, etc.)
+- `/desktop-envs/` - Ambientes de desktop (GNOME, KDE, Cosmic)
+- `/assets/` - Recursos visuais (temas, ícones, wallpapers, cursors)
+- `/scripts/` - Scripts de automação e utilitários do sistema
+- `/tmp/` - Arquivos temporários e relatórios de sessão
 
-Depois de solucionado o problema crie um arquivo em tmp/report/ com um markdown contendo um relatorio do que foi feito na session
+## ARTEFATOS
+- Sempre que valido crie um relatorio do problema solucionado na pasta tmp
