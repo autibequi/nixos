@@ -60,10 +60,6 @@
       options = [ "noatime" "nodiratime" "discard" "data=writeback" "barrier=0" ];
     };
 
-  # HIBERNATE CONFIG
-  boot.kernelParams = [ "resume=/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593" "button.lid_init_state=open"  ];
-  boot.resumeDevice = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593";
-
   # Boot
   fileSystems."/boot" = {
       device = "/dev/disk/by-uuid/6B74-DC9D";
