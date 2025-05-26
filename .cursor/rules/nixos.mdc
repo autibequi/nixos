@@ -1,0 +1,41 @@
+---
+description: Configuração NixOS para o Asus G14 com RTX 4060 - Setup Híbrido AMD/NVIDIA
+globs:
+  - "*.nix"
+  - "**/*.nix"
+  - "flake.lock"
+  - "flake.nix"
+alwaysApply: true
+---
+
+# 🔥 SETUP NIXOS - ASUS G14 RTX 4060
+
+## HARDWARE SPECS
+- **Laptop**: ASUS ROG Zephyrus G14 (2024)
+- **CPU**: AMD Ryzen 9 8945HS (amd_pstate=guided)
+- **GPU Híbrida**:
+  - AMD Radeon 780M (iGPU) - PCI:65:0:0
+  - NVIDIA RTX 4060 Mobile (dGPU) - PCI:1:0:0
+- **Storage**: NVME externo via USB-C case (JMicron JMS583)
+- **Kernel**: CachyOS (linuxPackages_cachyos)
+
+## CONFIGURAÇÕES CRÍTICAS
+- **Hibernação**: Configurada com suspend-then-hibernate
+- **NVIDIA**: Driver proprietário 575.51.02 (offload mode)
+- **Power Management**: NVIDIA PM desabilitado (conflita com hibernação)
+- **USB-C**: Dock mantido ativo (usbcore.autosuspend=-1)
+- **Scheduler**: scx_lavd com autopower
+
+## COMANDOS DISPONÍVEIS
+- `nh os test .` - Testa configuração sem aplicar
+- `nh os switch .` - Aplica configuração
+- `nh os boot .` - Aplica na próxima inicialização
+
+## RESTRIÇÕES DO SANDBOX
+⚠️ **NUNCA use sudo** - todos os comandos sudo falharão no sandbox
+⚠️ Use sempre `poetry run` ou containers para evitar conflitos
+
+## MÓDULOS PRINCIPAIS
+- `core/kernel.nix` - Configurações de kernel e boot
+- `modules/nvidia.nix` - Driver NVIDIA e configuração PRIME
+- `modules/hibernation.nix` - Configuração otimizada de hibernação
