@@ -15,8 +15,8 @@
     modesetting.enable = true; # Necessário para o funcionamento correto
     nvidiaSettings = false; # Habilitado para permitir configurações avançadas
     powerManagement = {
-      enable = true; # DESABILITADO - conflita com hibernação
-      finegrained = true; # DESABILITADO - conflita com hibernação
+      enable = false; # DESABILITADO - conflita com hibernação
+      finegrained = false; # DESABILITADO - conflita com hibernação
     };
 
     # RTX 4060 ainda não é compatível com drivers open source

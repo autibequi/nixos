@@ -24,8 +24,10 @@ alwaysApply: true
 
 ## COMANDOS DISPONÍVEIS
 - `nh os test .` - Testa configuração sem aplicar
-- `nh os switch .` - Aplica configuração
 - `nh os boot .` - Aplica na próxima inicialização
+
+## COMANDOS INDISPONIVEIS
+- `nh os switch .` - Aplica configuração porem não funciona em sandbox do cursor, use sempre `nh os test .`
 
 ## RESTRIÇÕES DO CURSOR AI - SANDBOX
 ⚠️ **NUNCA use sudo** - todos os comandos sudo falharão no sandbox

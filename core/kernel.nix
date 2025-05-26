@@ -2,7 +2,10 @@
 
 {
   # Kernel
-  boot.kernelPackages = pkgs.linuxPackages_cachyos;
+  # TODO: there is a regression issue with cachyos
+  # that breaks hibernation 😔
+  # boot.kernelPackages = pkgs.linuxPackages_cachyos;
+  boot.kernelPackages = pkgs.linuxPackages_6_12;
 
   # SystemD no InitRD para hibernação moderna
   boot.initrd.systemd.enable = true;
@@ -19,7 +22,7 @@
     # Force UAS for external NVME USB-C case; this garantees high speed mode | lsusb -t:
     # idVendor           0x152d JMicron Technology Corp. / JMicron USA Technology Corp.
     # idProduct          0x0583 JMS583Gen 2 to PCIe Gen3x2 Bridge
-    "usb-storage.quirks=0x152d:0x0583:i"
+    "usb-storage.quirks=0x152d:0x0583:u"
 
     # Força o uso do p-state ativo para o processador AMD
     "amd_pstate=guided"

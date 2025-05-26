@@ -87,7 +87,7 @@
 
   # Define time delay for hibernation
   systemd.sleep.extraConfig = ''
-    HibernateDelaySec=30m
+    HibernateDelaySec=1m
     SuspendState=mem
   '';
 
