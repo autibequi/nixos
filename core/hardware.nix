@@ -73,8 +73,24 @@
     [
       # TODO: fix, kinda worksbut takes a lot of time to boot until it times out
       # { device = "/dev/disk/by-uuid/0319478f-63cc-4fde-9804-523687d223ee"; priority = 10; options = [ "x-systemd.device-timeout=1ms" "nofail" ]; } # optional g14 laptop swap
-      { device = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; options = [  "x-systemd.device-timeout=1" "nofail" ]; } # nomad usb stick
+      { device = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; } # nomad usb stick
     ];
+
+  # Hibernate Configuration
+  boot.resumeDevice = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; # Use the same as one of the swapDevices
+
+  services.logind = {
+    lidSwitch = "suspend-then-hibernate";
+    powerKey = "hibernate";
+    powerKeyLongPress = "poweroff";
+  };
+
+  # Define time delay for hibernation
+  systemd.sleep.extraConfig = ''
+    HibernateDelaySec=30m
+    SuspendState=mem
+  '';
+
+  # Define kernel parameters for hibernation
+  boot.kernelParams = ["mem_sleep_default=deep"];
 }
-
-
