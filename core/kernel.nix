@@ -2,9 +2,15 @@
 
 {
   # Kernel
-  boot.kernelPackages = pkgs.linuxPackages_cachyos; 
+  boot.kernelPackages = pkgs.linuxPackages_cachyos;
 
-  boot.kernelParams = [ 
+  # SystemD no InitRD para hibernação moderna
+  boot.initrd.systemd.enable = true;
+
+  # Permitir hibernação (desabilita proteção de kernel image)
+  security.protectKernelImage = false;
+
+  boot.kernelParams = [
     # those actually do something
     "fastboot" # faster boot
     "usbcore.autosuspend=-1" # keeps usb-c dock alive
@@ -16,30 +22,30 @@
     "usb-storage.quirks=0x152d:0x0583:i"
 
     # Força o uso do p-state ativo para o processador AMD
-    "amd_pstate=guided" 
+    "amd_pstate=guided"
   ];
 
   # Configurar compressão.
   # https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/kernel/initrd-compressor-meta.nix
   boot.initrd.compressor = "lzop"; # TODO: lz4 should be faster
   boot.initrd.compressorArgs = [ "--best" ];
-  
-  # Userland Scheduler 
-  services.scx.enable = true; 
+
+  # Userland Scheduler
+  services.scx.enable = true;
   # scx_rusty - responsive under load
   # scx_lavd - better battery life???
   # will only be used on AC because of CPU_DRIVER_OPMODE_ON_BAT = "active" on battery
-  services.scx.scheduler = "scx_lavd"; 
-  services.scx.extraArgs = [ "--autopower" ]; 
+  services.scx.scheduler = "scx_lavd";
+  services.scx.extraArgs = [ "--autopower" ];
 
   # TODO: clean up modules
   boot.kernelModules = [
     # maybe
-    "usbhid" 
-    "xhci_hcd" 
-    "xhci_pci" 
-    "typec" 
-    "typec_ucsi" 
+    "usbhid"
+    "xhci_hcd"
+    "xhci_pci"
+    "typec"
+    "typec_ucsi"
     "ext4"
     "acpi_call"
 
@@ -55,13 +61,13 @@
 
   # TODO: clean up initrd modules
   # InitRD
-  boot.initrd.availableKernelModules = [ 
+  boot.initrd.availableKernelModules = [
     # maybe?
-    "usbhid" 
-    "xhci_hcd" 
+    "usbhid"
+    "xhci_hcd"
     "xhci_pci"
-    "typec" 
-    "typec_ucsi" 
+    "typec"
+    "typec_ucsi"
     "ext4"
 
     # for external nvme usb-c case
@@ -81,7 +87,7 @@
   # Otimizações de I/O
   services.fstrim.enable = true;
   services.fstrim.interval = "weekly";
-  
+
   # Otimizações de Memória
   # Como nos dois setupts temos 48gb e 64gb de ram usamos o
   # minimo possivel pra poupar uso do disco

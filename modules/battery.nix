@@ -18,9 +18,19 @@
   # AMD EPP to change the power profile so pstate can change
   services.auto-epp.enable = true;
 
-  # Suspend then Hibernate after 1h
+  # Hibernação e suspend configurações
+  services.logind = {
+    lidSwitch = "suspend-then-hibernate";
+    lidSwitchExternalPower = "suspend-then-hibernate";
+  };
+
+  # Configurações de sleep para suspend-then-hibernate
   systemd.sleep.extraConfig = ''
-    HibernateDelaySec=1h
+    HibernateDelaySec=20min
     SuspendState=mem
+    HibernateMode=platform
   '';
+
+  # Configurações de kernel para deep sleep
+  boot.kernelParams = ["mem_sleep_default=deep"];
 }

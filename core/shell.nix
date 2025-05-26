@@ -75,7 +75,7 @@
 
     # TESTING: shells
     # nushell
-    # fish
+    fish
 
     # zsh
     starship
