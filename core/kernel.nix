@@ -27,8 +27,8 @@
 
   # Configurar compressão.
   # https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/kernel/initrd-compressor-meta.nix
-  boot.initrd.compressor = "lzop"; # TODO: lz4 should be faster
-  boot.initrd.compressorArgs = [ "--best" ];
+  boot.initrd.compressor = "lz4"; # Trocado de lzop para lz4 (potencialmente mais rápido)
+  boot.initrd.compressorArgs = [ "-l" "-9" ]; # Args para lz4hc (high compression)
 
   # Userland Scheduler
   services.scx.enable = true;
@@ -47,7 +47,7 @@
     "typec"
     "typec_ucsi"
     "ext4"
-    "acpi_call"
+    "acpi_call" # Mantido, pode ser útil para power management específico de hardware
 
     # for external nvme usb-c case
     "uas"
@@ -60,7 +60,7 @@
   ];
 
   # TODO: clean up initrd modules
-  # InitRD
+  # InitRD - Módulos essenciais para boot e resume, especialmente com root em NVMe externo
   boot.initrd.availableKernelModules = [
     # maybe?
     "usbhid"
@@ -92,6 +92,6 @@
   # Como nos dois setupts temos 48gb e 64gb de ram usamos o
   # minimo possivel pra poupar uso do disco
   boot.kernel.sysctl = {
-    "vm.swappiness" = 10;
+    "vm.swappiness" = 10; # Mantido, baixo swappiness é ok
   };
 }
