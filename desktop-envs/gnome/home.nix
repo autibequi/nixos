@@ -50,6 +50,19 @@
           "toggle-message-tray" = ["<Super>x"];
           "toggle-application-menu" = ["<Super>c"];
         };
+
+        # Custom Keybindings
+        "org/gnome/settings-daemon/plugins/media-keys" = {
+          custom-keybindings = [
+            "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
+          ];
+        };
+
+        "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
+          name = "Open Zed in NixOS Project";
+          command = "sh -c 'cd ~/projects/nixos && cursor .'";
+          binding = "<Super>comma";
+        };
       };
     };
   };

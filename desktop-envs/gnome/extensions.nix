@@ -57,6 +57,10 @@
         duration-timer-list = [1800 3600 28800];
         use-custom-duration = true;
         user-enabled = true;
+        enable-fullscreen = true;
+        indicator-position = 0;
+        show-indicator = "only-active";
+        screen-blank = "never";
       };
 
       # Pano
@@ -66,6 +70,12 @@
         send-notification-on-copy = false;
         session-only-mode = true;
         sync-primary = false;
+      };
+
+      # Auto Power Profile
+      "org/gnome/shell/extensions/auto-power-profile" = {
+        bat = "power-saver";
+        threshold = 100;
       };
 
       # Tilingshell
