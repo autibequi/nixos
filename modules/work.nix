@@ -33,6 +33,7 @@
 
         # python
         python312
+        pipx
         poetry
         pyenv
         file # libmagic - intraupload

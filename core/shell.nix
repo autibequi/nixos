@@ -82,6 +82,7 @@
 
     # Terminal
     ghostty
+    warp-terminal
     # allacritty
 
     # AMD

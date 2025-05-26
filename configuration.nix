@@ -47,6 +47,9 @@
     QT_AUTO_SCREEN_SCALE_FACTOR="1";
   };
 
+  # Add local bin to PATH
+  environment.localBinInPath = true;
+
   # User Accounts
   users.users.pedrinho = {
     isNormalUser = true;
