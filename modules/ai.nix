@@ -1,15 +1,13 @@
-{ config, pkgs, lib, ... } :
-{
-  # CUDA
-  services.ollama = {
-    enable = true;
-    acceleration = "cuda";
-  };
+# AI Configurations for NixOS
 
-  # Packages
-  environment.systemPackages = with pkgs; [
+{ config, pkgs, inputs, ... }:
+
+{
+  # Enable AI tools from nixified-ai flake
+  environment.systemPackages = with inputs.nixified-ai.packages.${pkgs.system}; [
+    comfyui-nvidia  # ComfyUI with NVIDIA support
   ];
 
-  # WebUI (heavy build)
-  services.open-webui.enable = true;
+  # Additional configurations for ComfyUI models and custom nodes can be added here
+  # For now, we'll assume models are downloaded or configured by the user post-installation
 }

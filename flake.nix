@@ -18,6 +18,9 @@
     nix-alien.url = "github:thiagokokada/nix-alien";
     stylix.url = "github:danth/stylix";
     nixgl.url = "github:nix-community/nixGL";
+    nixified-ai = {
+      url = "github:nixified-ai/flake";
+    };
   };
 
   # Outputs

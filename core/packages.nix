@@ -13,6 +13,7 @@
         blanket
         # cura
         # ventoy-full-qt
+        flameshot
 
 
         # Aesthetics

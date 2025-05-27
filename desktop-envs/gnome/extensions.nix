@@ -9,6 +9,7 @@
     gnomeExtensions.night-theme-switcher
     gnomeExtensions.quick-settings-audio-panel
     gnomeExtensions.auto-power-profile
+    gnomeExtensions.battery-health-charging
 
     # Window Management Extensions
     gnomeExtensions.tiling-shell
