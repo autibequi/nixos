@@ -6,6 +6,12 @@ alwaysApply: true
 
 # SETUP NIXOS
 
+## Instruções
+- Sempre procure na arvore de arquivos por modulos relacionados ao problema
+- Considere que o usuario esta numa distro NixOS, usando gnome.
+- Considere que o usuario esta usando um laptop com processador AMD e placa de video NVIDIA.
+- Sempre rode os comandos de  teste no final das modificações para validar
+
 ## COMANDOS DISPONÍVEIS
 - `nh os test .` - Testa configuração sem aplicar
 - `nh os boot .` - Aplica na próxima inicialização

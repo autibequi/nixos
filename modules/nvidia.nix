@@ -12,19 +12,16 @@
     };
 
   hardware.nvidia = {
-    modesetting.enable = true; # Necessário para o funcionamento correto
-    nvidiaSettings = false; # Habilitado para permitir configurações avançadas
+    modesetting.enable = true;
+    nvidiaSettings = false;
     powerManagement = {
-      enable = false; # DESABILITADO - conflita com hibernação
-      finegrained = false; # DESABILITADO - conflita com hibernação
+      enable = true;
+      finegrained = true;
     };
 
     # RTX 4060 ainda não é compatível com drivers open source
     # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus
     open = true;
-
-    # DESABILITADO - DynamicPower causa travamentos na hibernação
-    # dynamicBoost.enable = true;
 
     # Configuração PRIME para laptop híbrido G14
     prime = {

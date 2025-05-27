@@ -2,10 +2,7 @@
 
 {
   # Kernel
-  # TODO: there is a regression issue with cachyos
-  # that breaks hibernation 😔
-  # boot.kernelPackages = pkgs.linuxPackages_cachyos;
-  boot.kernelPackages = pkgs.linuxPackages_6_12;
+  boot.kernelPackages = pkgs.linuxPackages_cachyos;
 
   # SystemD no InitRD para hibernação moderna
   boot.initrd.systemd.enable = true;
