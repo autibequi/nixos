@@ -36,7 +36,6 @@
   boot.loader.systemd-boot.configurationLimit = 100;
   boot.loader.efi.canTouchEfiVariables = true;
 
-
   # X11 and Wayland
   services.xserver.videoDrivers = [ "nvidia" "amdgpu" ];
 
@@ -76,22 +75,23 @@
       { device = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; } # nomad usb stick
     ];
 
-  # TODO: fix, kinda worksbut takes a lot of time to boot until it times out
   # Hibernate Configuration
-  # boot.resumeDevice = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; # Use the same as one of the swapDevices
+  # Ensure this UUID matches your active and reliable swap device from swapDevices.
+  boot.resumeDevice = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593";
 
-  # services.logind = {
-  #   lidSwitch = "suspend-then-hibernate";
-  #   powerKey = "hibernate";
-  #   powerKeyLongPress = "poweroff";
-  # };
+  services.logind = {
+    lidSwitch = "suspend-then-hibernate";
+    powerKey = "hibernate";  # Hibernate on short power key press
+    powerKeyLongPress = "poweroff"; # Standard long press behavior
+    # Suspend-then-hibernate can be configured later if basic hibernate works.
+  };
 
-  # # Define time delay for hibernation
-  # systemd.sleep.extraConfig = ''
-  #   HibernateDelaySec=1m
-  #   SuspendState=mem
-  # '';
+  # Define time delay for hibernation (can be enabled later)
+  systemd.sleep.extraConfig = ''
+    HibernateDelaySec=1m
+    SuspendState=mem
+  '';
 
-  # # Define kernel parameters for hibernation
-  # boot.kernelParams = ["mem_sleep_default=deep"];
+  # # Define kernel parameters for hibernation (moved higher for clarity)
+  boot.kernelParams = ["mem_sleep_default=deep"];
 }
