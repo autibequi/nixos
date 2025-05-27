@@ -26,7 +26,7 @@
       ./modules/stylix.nix
       # ./modules/howdy.nix
       # ./modules/flatpak.nix
-      ./modules/ai.nix
+      # ./modules/ai.nix
 
       # Work
       ./modules/work.nix
@@ -105,7 +105,4 @@
   # XDG Portal
   xdg.portal.enable = true;
   xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
-
-  nix.settings.trusted-substituters = ["https://ai.cachix.org"];
-  nix.settings.trusted-public-keys = ["ai.cachix.org-1:N9dzRK+alWwoKXQlnn0H6aUx0lU/mspIoz8hMvGvbbc="];
 }
