@@ -1,0 +1,141 @@
+{
+  "assistant": {
+    "default_model": {
+      "provider": "copilot_chat",
+      "model": "gpt-4o"
+    },
+    "version": "2"
+  },
+  "ui_font_size": 16,
+  "buffer_font_size": 16,
+  "theme": {
+    "mode": "system",
+    "light": "Default Light+",
+    "dark": "Kimbie Dark"
+  },
+  "keybindings": [],
+  "ui": {
+    "activity_bar_position": "left",
+    "smooth_scrolling": true,
+    "linked_editing": true,
+    "project_panel": {
+      "dock_position": "left",
+      "default_width": 280
+    },
+    "modal": true
+  },
+  "editor": {
+    "cursor_style": "block",
+    "cursor_blinking": "smooth",
+    "font_ligatures": true,
+    "render_whitespace": "boundary",
+    "rulers": [80, 100, 120],
+    "format_on_save": "on",
+    "show_copilot_suggestions": true,
+    "show_inlay_hints": true,
+    "preferred_line_length": 100,
+    "tab_size": 2,
+    "soft_tabs": true,
+    "hard_tabs": false,
+    "detect_indentation": true,
+    "ensure_final_newline_on_save": true
+  },
+  "files": {
+    "trim_trailing_whitespace": true,
+    "auto_save": "onWindowChange",
+    "associations": {
+      "*.vue": "vue"
+    }
+  },
+  "window": {
+    "zoom_level": 0.8,
+    "title": "${activeEditorLong} ${separator} ${rootName}"
+  },
+  "languages": {
+    "Go": {
+      "format_on_save": "on",
+      "formatter": "language_server",
+      "code_actions_on_format": {
+        "source.organizeImports": true
+      },
+      "enable_language_server": true,
+      "inlay_hints": {
+        "enabled": true,
+        "show_parameter_names": true,
+        "show_type_hints": true
+      }
+    },
+    "JavaScript": {
+      "format_on_save": "on",
+      "formatter": "language_server",
+      "tab_size": 2,
+      "soft_tabs": true,
+      "preferred_line_length": 100,
+      "enable_language_server": true,
+      "inlay_hints": {
+        "enabled": true,
+        "show_parameter_names": true,
+        "show_type_hints": true
+      }
+    },
+    "TypeScript": {
+      "format_on_save": "on",
+      "formatter": "language_server",
+      "tab_size": 2,
+      "soft_tabs": true,
+      "preferred_line_length": 100,
+      "enable_language_server": true,
+      "inlay_hints": {
+        "enabled": true,
+        "show_parameter_names": true,
+        "show_type_hints": true
+      }
+    },
+    "Vue": {
+      "format_on_save": "on",
+      "formatter": "language_server",
+      "tab_size": 2,
+      "soft_tabs": true,
+      "preferred_line_length": 100,
+      "enable_language_server": true
+    },
+    "json": {
+      "format_on_save": "on",
+      "formatter": "language_server"
+    },
+    "markdown": {
+      "format_on_save": "off"
+    }
+  },
+  "lsp": {
+    "gopls": {
+      "path": "gopls"
+    },
+    "typescript-language-server": {
+      "path": "typescript-language-server",
+      "arguments": ["--stdio"]
+    },
+    "vue-language-server": {
+      "path": "vue-language-server",
+      "arguments": ["--stdio"]
+    },
+    "eslint": {
+        "path": "eslint_d",
+        "arguments": ["--stdin", "--stdin-filename"]
+    },
+    "prettier": {
+        "path": "prettier",
+        "arguments": ["--stdin-filepath"]
+    }
+  },
+  "terminal": {
+    "shell": "zsh",
+    "font_family": "monospace",
+    "font_size": 14,
+    "option_as_meta": true,
+    "copy_on_select": true
+  },
+  "experimental.theme_overrides": {
+    "activity_bar.item_background_active": "#FF000050"
+  }
+}

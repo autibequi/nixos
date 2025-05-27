@@ -61,7 +61,7 @@
 
         "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
           name = "Open Zed in NixOS Project";
-          command = "sh -c 'cd ~/projects/nixos && cursor .'";
+          command = "sh -c 'cd ~/projects/nixos && zeditor .'";
           binding = "<Super>comma";
         };
       };
