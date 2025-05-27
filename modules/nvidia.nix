@@ -19,9 +19,7 @@
       finegrained = true;
     };
 
-    # RTX 4060 ainda não é compatível com drivers open source
-    # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus
-    open = true;
+    open = true; # Best compatibility with RTX 4060 mobile Q-Max
 
     # Configuração PRIME para laptop híbrido G14
     prime = {
