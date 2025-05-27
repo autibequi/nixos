@@ -49,6 +49,7 @@
           "toggle-overview" = ["<Super>z"];
           "toggle-message-tray" = ["<Super>x"];
           "toggle-application-menu" = ["<Super>c"];
+          "show-screenshot-ui" = ["<Super>u"];
         };
 
         # Custom Keybindings
