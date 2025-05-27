@@ -132,6 +132,23 @@
         show-control-icons=false;
       };
 
+      # Night Theme Switcher
+      "org/gnome/shell/extensions/night-theme-switcher" = {
+        # Wallpaper configuration
+        wallpaper-light = "/home/pedrinho/.wallpapers/the-death-of-socrates.jpg";
+        wallpaper-dark = "/home/pedrinho/.wallpapers/the-wild-hunt-of-odin.jpg";
+
+        # Theme switching settings
+        enable = true;
+        time-source = "location";
+        manual-time-source = false;
+        ondemand-button = true;
+
+        # Automatic switching based on sunset/sunrise
+        auto-enable = true;
+        schedule = true;
+      };
+
       # Advanced Alt Tab Window Switcher
       "org/gnome/shell/extensions/advanced-alt-tab-window-switcher" = {
         alt-tab-mode = "window";

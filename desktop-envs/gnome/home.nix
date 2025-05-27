@@ -14,7 +14,7 @@
         "org/gnome/desktop/interface" = {
           cursor-size = 40;
           cursor-theme = "banana";
-          enable-animations = false;
+          enable-animations = true;
         };
 
         # Mouse e Periféricos
