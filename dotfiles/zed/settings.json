@@ -11,6 +11,11 @@
     },
     "version": "2"
   },
+  "auto_install_extensions": {
+    "nix": true,
+    "golang": true,
+    "python": true
+  },
   "agent_font_size": 23,
   "active_pane_modifiers": {
     "inactive_opacity": 0.2
@@ -158,7 +163,9 @@
   },
   "load_direnv": "direct",
   "outline_panel": {
-    "dock": "right"
+    "auto_reveal_entries": true,
+    "dock": "right",
+    "auto_fold_dirs": true
   },
   "prettier": {
     "allowed": true
@@ -166,7 +173,7 @@
   "project_panel": {
     "auto_fold_dirs": true,
     "entry_spacing": "standard",
-    "hide_gitignore": true,
+    "hide_gitignore": false,
     "indent_size": 30,
     "show_diagnostics": "all"
   },
@@ -206,7 +213,7 @@
   "ui_font_features": {
     "ligatures": true
   },
-  "ui_font_size": 21,
+  "ui_font_size": 17,
   "unstable.ui_density": "compact",
   "use_smartcase_search": true,
   "editor": {
