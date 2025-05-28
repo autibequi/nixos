@@ -1,33 +1,28 @@
 {
-  "base_keymap": "VSCode",
-  "vim_mode": true,
-  "agent": {
-    "default_model": {
-      "provider": "copilot_chat",
-      "model": "gpt-4o"
-    },
-    "version": "2"
-  },
-  "ui_font_size": 21,
-  "buffer_font_size": 18,
+  // === Theme Settings ===
+  // NOTE: Zed does not support separate overrides for light/dark modes.
+  // Because of this, I can't use light mode with custom overrides.
   "theme": {
     "mode": "system",
-    "light": "Gruvbox Dark Soft",
-    "dark": "Ayu Dark"
+    "light": "Tokyo Night",
+    "dark": "Tokyo Night"
   },
-  "keybindings": [],
-  "format_on_save": "on",
-  "formatter": "language_server",
-  "ui": {
-    "activity_bar_position": "left",
-    "smooth_scrolling": true,
-    "linked_editing": true,
-    "project_panel": {
-      "dock_position": "left",
-      "default_width": 280
-    },
-    "modal": true
+  "experimental.theme_overrides": {
+    "background.appearance": "blurred",
+    "background": "#1a1b26aa",
+    "title_bar.background": "#1a1b26df",
+    "toolbar.background": "#41486844",
+    "tab_bar.background": "#41486833",
+    "tab.inactive_background": "#41486800",
+    "tab.active_background": "#7aa2f711",
+    "panel.background": "#41486844",
+    "editor.background": "#1a1b264f",
+    "status_bar.background": "#7dcfffcc"
   },
+  "icon_theme": "Catppuccin Mocha",
+  // === Font & UI ===
+  "ui_font_size": 21,
+  "buffer_font_size": 18,
   "editor": {
     "cursor_style": "block",
     "cursor_blinking": "smooth",
@@ -48,6 +43,32 @@
     "detect_indentation": true,
     "ensure_final_newline_on_save": true
   },
+  "ui": {
+    "activity_bar_position": "left",
+    "smooth_scrolling": true,
+    "linked_editing": true,
+    "project_panel": {
+      "dock_position": "left",
+      "default_width": 280
+    },
+    "modal": true
+  },
+  // === Terminal ===
+  "terminal": {
+    "shell": "system",
+    "font_family": "Fira Code",
+    "font_size": 14,
+    "option_as_meta": true,
+    "copy_on_select": true
+  },
+  // === Keybindings ===
+  "keybindings": [
+    {
+      "key": "ctrl+`",
+      "command": "toggle_terminal_panel"
+    }
+  ],
+  // === File Handling ===
   "files": {
     "trim_trailing_whitespace": true,
     "auto_save": "onWindowChange",
@@ -55,6 +76,10 @@
       "*.vue": "vue"
     }
   },
+  // === Formatting ===
+  "format_on_save": "on",
+  "formatter": "language_server",
+  // === Language Settings ===
   "languages": {
     "Go": {
       "format_on_save": "on",
@@ -118,7 +143,7 @@
       ],
       "formatter": {
         "external": {
-          "command": "nixfmt", // or "nixfmt"
+          "command": "nixfmt",
           "arguments": [
             "--quiet",
             "--"
@@ -127,6 +152,7 @@
       }
     }
   },
+  // === LSP Configuration ===
   "lsp": {
     "gopls": {
       "path": "gopls"
@@ -157,14 +183,20 @@
       ]
     }
   },
-  "terminal": {
-    "shell": "system",
-    "font_family": "Fira Code",
-    "font_size": 14,
-    "option_as_meta": true,
-    "copy_on_select": true
+  // === Copilot & Agent ===
+  "agent": {
+    "inline_assistant_model": {
+      "provider": "copilot_chat",
+      "model": "gpt-4.1"
+    },
+    "always_allow_tool_actions": true,
+    "default_model": {
+      "provider": "copilot_chat",
+      "model": "gpt-4.1"
+    },
+    "version": "2"
   },
-  "experimental.theme_overrides": {
-    "activity_bar.item_background_active": "#FF000050"
+  "features": {
+    "edit_prediction_provider": "copilot"
   }
 }

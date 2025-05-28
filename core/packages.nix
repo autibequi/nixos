@@ -18,7 +18,7 @@
     # Coding
     # Nix formating
     nil
-    fixd
+    nixd
     nixfmt-rfc-style
 
     # Aesthetics
