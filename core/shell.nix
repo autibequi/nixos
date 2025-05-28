@@ -25,8 +25,13 @@
       "zoxide"
     ];
 
-    syntaxHighlighting.highlighters =
-      [ "main" "brackets" "pattern" "line" "cursor" ];
+    syntaxHighlighting.highlighters = [
+      "main"
+      "brackets"
+      "pattern"
+      "line"
+      "cursor"
+    ];
 
     shellAliases = {
       history = "atuin";
@@ -43,6 +48,7 @@
       ff = "fastfetch";
       clip = "wl-copy";
       clipb = "wl-paste";
+      z = "zeditor";
 
       wiki = "wikiti";
     };
