@@ -1,4 +1,10 @@
-{ config, lib, pkgs, modulesPath, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  modulesPath,
+  ...
+}:
 {
   # Use this to override the hardware-configuration.nix file
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
@@ -10,10 +16,10 @@
   programs.rog-control-center.enable = true;
   services.supergfxd.enable = true;
   services = {
-      asusd = {
-        enable = true;
-        enableUserService = true;
-      };
+    asusd = {
+      enable = true;
+      enableUserService = true;
+    };
   };
 
   # Hardware
@@ -31,13 +37,19 @@
   };
 
   # Bootloader
-  boot.kernelModules = [ "nvidia" "amdgpu"  ];
+  boot.kernelModules = [
+    "nvidia"
+    "amdgpu"
+  ];
   boot.loader.systemd-boot.enable = true;
   boot.loader.systemd-boot.configurationLimit = 100;
   boot.loader.efi.canTouchEfiVariables = true;
 
   # X11 and Wayland
-  services.xserver.videoDrivers = [ "nvidia" "amdgpu" ];
+  services.xserver.videoDrivers = [
+    "nvidia"
+    "amdgpu"
+  ];
 
   # TODO: Try Next Reset
   # LUKS FullDiskEncryption
@@ -53,35 +65,44 @@
 
   # Root
   fileSystems."/" = {
-      device = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
-      fsType = "ext4"; # TODO: testar zfs com lz4 no proximo setup
-      neededForBoot = true;
-      options = [ "noatime" "nodiratime" "discard" "data=writeback" "barrier=0" ];
-    };
+    device = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
+    fsType = "ext4"; # TODO: testar zfs com lz4 no proximo setup
+    neededForBoot = true;
+    options = [
+      "noatime"
+      "nodiratime"
+      "discard"
+      "data=writeback"
+      "barrier=0"
+    ];
+  };
 
   # Boot
   fileSystems."/boot" = {
-      device = "/dev/disk/by-uuid/6B74-DC9D";
-      fsType = "vfat";
-      options = [ "fmask=0077" "dmask=0077" ];
-    };
+    device = "/dev/disk/by-uuid/6B74-DC9D";
+    fsType = "vfat";
+    options = [
+      "fmask=0077"
+      "dmask=0077"
+    ];
+  };
 
   # Swap
   # Will try to mount on Stage 1
-  swapDevices =
-    [
-      # TODO: fix, kinda worksbut takes a lot of time to boot until it times out
-      # { device = "/dev/disk/by-uuid/0319478f-63cc-4fde-9804-523687d223ee"; priority = 10; options = [ "x-systemd.device-timeout=1ms" "nofail" ]; } # optional g14 laptop swap
-      { device = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; } # nomad usb stick
-    ];
+  swapDevices = [
+    # TODO: fix, kinda worksbut takes a lot of time to boot until it times out
+    # { device = "/dev/disk/by-uuid/0319478f-63cc-4fde-9804-523687d223ee"; priority = 10; options = [ "x-systemd.device-timeout=1ms" "nofail" ]; } # optional g14 laptop swap
+    { device = "/swapfile"; }
+    # { device = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; } # nomad usb stick
+  ];
 
   # Hibernate Configuration
-  # Ensure this UUID matches your active and reliable swap device from swapDevices.
-  boot.resumeDevice = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593";
+  # Usar swapfile local para resume
+  boot.resumeDevice = "/swapfile";
 
   services.logind = {
     lidSwitch = "suspend-then-hibernate";
-    powerKey = "hibernate";  # Hibernate on short power key press
+    powerKey = "hibernate"; # Hibernate on short power key press
     powerKeyLongPress = "poweroff"; # Standard long press behavior
     # Suspend-then-hibernate can be configured later if basic hibernate works.
   };
@@ -93,5 +114,5 @@
   '';
 
   # # Define kernel parameters for hibernation (moved higher for clarity)
-  boot.kernelParams = ["mem_sleep_default=deep"];
+  boot.kernelParams = [ "mem_sleep_default=deep" ];
 }
