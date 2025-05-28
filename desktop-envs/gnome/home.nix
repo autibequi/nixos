@@ -1,6 +1,6 @@
-{ pkgs, lib, ... }:
+{ ... }:
 {
-  home-manager.users."pedrinho" = { pkgs, lib, ... }:
+  home-manager.users."pedrinho" = { ... }:
   {
     gtk = {
       enable = true;

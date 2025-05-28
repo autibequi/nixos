@@ -6,12 +6,12 @@
     },
     "version": "2"
   },
-  "ui_font_size": 16,
-  "buffer_font_size": 16,
+  "ui_font_size": 21,
+  "buffer_font_size": 18,
   "theme": {
     "mode": "system",
-    "light": "Default Light+",
-    "dark": "Kimbie Dark"
+    "light": "Gruvbox Dark Soft",
+    "dark": "Ayu Dark"
   },
   "keybindings": [],
   "ui": {
@@ -120,17 +120,17 @@
       "arguments": ["--stdio"]
     },
     "eslint": {
-        "path": "eslint_d",
-        "arguments": ["--stdin", "--stdin-filename"]
+      "path": "eslint_d",
+      "arguments": ["--stdin", "--stdin-filename"]
     },
     "prettier": {
-        "path": "prettier",
-        "arguments": ["--stdin-filepath"]
+      "path": "prettier",
+      "arguments": ["--stdin-filepath"]
     }
   },
   "terminal": {
-    "shell": "zsh",
-    "font_family": "monospace",
+    "shell": "system",
+    "font_family": "Fira Code",
     "font_size": 14,
     "option_as_meta": true,
     "copy_on_select": true
