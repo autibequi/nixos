@@ -1,8 +1,12 @@
-{ config, lib, pkgs, modulesPath, ... }:
+{
+  pkgs,
+  ...
+}:
 
 {
   # Kernel
-  boot.kernelPackages = pkgs.linuxPackages_cachyos;
+  boot.kernelPackages = pkgs.linuxPackages_6_14;
+  # pkgs.linuxPackages_cachyos; # breaks nvidia
 
   # SystemD no InitRD para hibernação moderna
   boot.initrd.systemd.enable = true;
