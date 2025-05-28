@@ -24,10 +24,10 @@
         ".config/ghosty/config".source = ../dotfiles/ghostty.conf;
         ".config/atuin/config.toml".source = ../dotfiles/atuin.conf;
         ".config/fastfetch/config.jsonc".source = ../dotfiles/fastfetch.jsonc;
-        ".config/zed/" = {
-          source = ../dotfiles/zed;
-          recursive = true;
-        };
+
+        # Zed doesnt like it and throws ReadOnly issue
+        # ".config/zed/keymap.json".source = ../dotfiles/zed/keymap.json;
+        # ".config/zed/settings.json".source = ../dotfiles/zed/settings.json;
 
         # wallpapers
         ".wallpapers/the-death-of-socrates.jpg".source = ../assets/wallpapers/the-death-of-socrates.jpg;
