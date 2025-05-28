@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{  pkgs,  ... }:
 {
   imports = [
     ./debloat.nix
@@ -28,6 +28,9 @@
 
     # Utils
     pkgs.gnome-tweaks
+
+    # Terminal
+    whitesur-gtk-theme
   ];
 
   # terminal swap (since gnome-terminal is hardcoded as the default terminal)
