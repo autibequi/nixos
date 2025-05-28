@@ -1,10 +1,9 @@
-{ config, pkgs, home-manager, ... }:
-{
+{ ... }: {
   # avoid file colisions
-  home-manager.backupFileExtension = "hm-backup";
+  home-manager.backupFileExtension = "backup";
 
   # it's a me, pedrinho! o-ho!
-  home-manager.users."pedrinho" = { lib, pkgs, ... }: {
+  home-manager.users."pedrinho" = { pkgs, ... }: {
     home.stateVersion = "25.05";
     home.enableNixpkgsReleaseCheck = false;
 
@@ -24,8 +23,10 @@
       ".config/fastfetch/config.jsonc".source = ../dotfiles/fastfetch.jsonc;
 
       # wallpapers
-      ".wallpapers/the-death-of-socrates.jpg".source = ../assets/wallpapers/the-death-of-socrates.jpg;
-      ".wallpapers/the-wild-hunt-of-odin.jpg".source = ../assets/wallpapers/the-wild-hunt-of-odin.jpg;
+      ".wallpapers/the-death-of-socrates.jpg".source =
+        ../assets/wallpapers/the-death-of-socrates.jpg;
+      ".wallpapers/the-wild-hunt-of-odin.jpg".source =
+        ../assets/wallpapers/the-wild-hunt-of-odin.jpg;
     };
   };
 }

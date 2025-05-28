@@ -2,7 +2,5 @@
 
 pkgs.mkShell {
   buildInputs = [
-    pkgs.nil
-    pkgs.nixd
   ];
 }

@@ -1,5 +1,7 @@
 {
-  "assistant": {
+  "base_keymap": "VSCode",
+  "vim_mode": true,
+  "agent": {
     "default_model": {
       "provider": "copilot_chat",
       "model": "gpt-4o"
@@ -14,6 +16,8 @@
     "dark": "Ayu Dark"
   },
   "keybindings": [],
+  "format_on_save": "on",
+  "formatter": "language_server",
   "ui": {
     "activity_bar_position": "left",
     "smooth_scrolling": true,
@@ -29,7 +33,11 @@
     "cursor_blinking": "smooth",
     "font_ligatures": true,
     "render_whitespace": "boundary",
-    "rulers": [80, 100, 120],
+    "rulers": [
+      80,
+      100,
+      120
+    ],
     "format_on_save": "on",
     "show_copilot_suggestions": true,
     "show_inlay_hints": true,
@@ -46,10 +54,6 @@
     "associations": {
       "*.vue": "vue"
     }
-  },
-  "window": {
-    "zoom_level": 0.8,
-    "title": "${activeEditorLong} ${separator} ${rootName}"
   },
   "languages": {
     "Go": {
@@ -105,6 +109,22 @@
     },
     "markdown": {
       "format_on_save": "off"
+    },
+    "Nix": {
+      "format_on_save": "on",
+      "language_servers": [
+        "nixd",
+        "!nil"
+      ],
+      "formatter": {
+        "external": {
+          "command": "nixfmt", // or "nixfmt"
+          "arguments": [
+            "--quiet",
+            "--"
+          ]
+        }
+      }
     }
   },
   "lsp": {
@@ -113,19 +133,28 @@
     },
     "typescript-language-server": {
       "path": "typescript-language-server",
-      "arguments": ["--stdio"]
+      "arguments": [
+        "--stdio"
+      ]
     },
     "vue-language-server": {
       "path": "vue-language-server",
-      "arguments": ["--stdio"]
+      "arguments": [
+        "--stdio"
+      ]
     },
     "eslint": {
       "path": "eslint_d",
-      "arguments": ["--stdin", "--stdin-filename"]
+      "arguments": [
+        "--stdin",
+        "--stdin-filename"
+      ]
     },
     "prettier": {
       "path": "prettier",
-      "arguments": ["--stdin-filepath"]
+      "arguments": [
+        "--stdin-filepath"
+      ]
     }
   },
   "terminal": {

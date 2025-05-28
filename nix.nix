@@ -1,4 +1,4 @@
-{ config, pkgs, lib, inputs, ... } : {
+{ pkgs, lib, inputs, ... }: {
 
   # Install LIX
   nix.package = pkgs.lix;
@@ -8,7 +8,8 @@
   nixpkgs.config.allowImpure = true;
 
   # Apply nixGL overlay here, ensuring allowImpure is set on pkgs
-  nixpkgs.overlays = lib.mkIf (inputs ? nixgl && inputs.nixgl ? overlay) [ inputs.nixgl.overlay ];
+  nixpkgs.overlays = lib.mkIf (inputs ? nixgl && inputs.nixgl ? overlay)
+    [ inputs.nixgl.overlay ];
 
   # Configuração do Nix
   # Habilitar o uso de substitutos de cache
