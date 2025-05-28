@@ -62,12 +62,7 @@
     "copy_on_select": true
   },
   // === Keybindings ===
-  "keybindings": [
-    {
-      "key": "ctrl+`",
-      "command": "toggle_terminal_panel"
-    }
-  ],
+  "keybindings": [],
   // === File Handling ===
   "files": {
     "trim_trailing_whitespace": true,

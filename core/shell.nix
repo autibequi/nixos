@@ -25,13 +25,8 @@
       "zoxide"
     ];
 
-    syntaxHighlighting.highlighters = [
-      "main"
-      "brackets"
-      "pattern"
-      "line"
-      "cursor"
-    ];
+    syntaxHighlighting.highlighters =
+      [ "main" "brackets" "pattern" "line" "cursor" ];
 
     shellAliases = {
       history = "atuin";
@@ -58,8 +53,6 @@
       eval "$(starship init zsh)"
     '';
   };
-
-
 
   environment.systemPackages = with pkgs; [
     # essentials
@@ -91,26 +84,33 @@
 
     # cli tools
     yt-dlp
-    btop-rocm   # better top with amd support
+    btop-rocm # better top with amd support
     libnotify # cli notifications
-    jq          # json parser
-    lz4         # compression
-    figlet      # ascii art
-    toilet      # ascii art
+    jq # json parser
+    lz4 # compression
+
+    # Silly
+    figlet # ascii art
+    toilet # ascii art
+    cowsay # ascii art
+    lolcat # rainbow text
+    sl # steam locomotive
+    cmatrix # matrix effect
+    fortune # random quotes
 
     # better cli
-    atuin       # fancy cli history
-    pueue       # task manager
-    fzf         # fuzzy finder
-    ripgrep     # better grep
-    fd          # better find
-    bat         # better cat
-    eza         # better ls
-    dust        # better du
-    procs       # better ps
-    broot       # better tree
-    zoxide      # better cd
-    tealdeer    # better tldr
+    atuin # fancy cli history
+    pueue # task manager
+    fzf # fuzzy finder
+    ripgrep # better grep
+    fd # better find
+    bat # better cat
+    eza # better ls
+    dust # better du
+    procs # better ps
+    broot # better tree
+    zoxide # better cd
+    tealdeer # better tldr
     wl-clipboard # clipboard
 
     gping # ping with a graph
@@ -119,22 +119,22 @@
     jless # json viewer
 
     # TESTING: rust cli tools
-    xh          # better curl
-    zellij      # better tmux
-    yazi        # better ranger
-    helix       # better vim
-    bacon       # better cargo
-    cargo-info  # better cargo info
-    fselect     # better find
-    ncspot      # better spotify
-    rusty-man   # better man
+    xh # better curl
+    zellij # better tmux
+    yazi # better ranger
+    helix # better vim
+    bacon # better cargo
+    cargo-info # better cargo info
+    fselect # better find
+    ncspot # better spotify
+    rusty-man # better man
     # git-delta   # better git diff
     ripgrep-all # better ripgrep
-    tokei       # better wc
-    wiki-tui    # better wikipedia // wikiti is rust
-    just        # better make
-    mask        # better make
-    mprocs      # better docker-compose
+    tokei # better wc
+    wiki-tui # better wikipedia // wikiti is rust
+    just # better make
+    mask # better make
+    mprocs # better docker-compose
     # present-term # better reveal.js
   ];
 }
