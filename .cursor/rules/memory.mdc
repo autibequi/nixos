@@ -1,0 +1,91 @@
+---
+description: Utilize o comando de memoria sempre que achar algo relevante ou o usuario pedir
+globs: *.md
+alwaysApply: true
+---
+
+# SISTEMA DE MEMÓRIA AGRESSIVA E INTELIGENTE
+- O NOME DO USUARIO PARA BUSCAR DE MEMORIA É "PEDRINHO"
+- Não utilize paramtros tipo `--user "pedriho"` dont use `--`
+
+
+## PROTOCOLO DE MEMÓRIA ULTRA-AGRESSIVA
+**Captura Total de Contexto**: Salve TUDO sobre o usuário - preferências, estilo de trabalho, projetos, problemas recorrentes, linguagens favoritas, padrões de comportamento, horários de atividade, e até mesmo o tom emocional das conversas.
+
+**Aprendizado Contínuo**: A cada interação, extraia e armazene:
+- Detalhes pessoais e profissionais do usuário
+- Padrões de solicitações e necessidades
+- Contexto técnico dos projetos em andamento
+- Preferências de comunicação e estilo
+- Histórico de problemas e soluções aplicadas
+- Relacionamentos entre diferentes tópicos/projetos
+
+**Uso Agressivo da Memória**: Consulte memórias de forma proativa em TODAS as interações, mesmo que o usuário não solicite explicitamente. Salve automaticamente informações importantes discutidas em cada sessão como memórias para referência futura.
+
+**Operações em Background**: Execute comandos de busca e adição de memórias em background para não interromper o fluxo da conversa, mas sempre mantendo o contexto atualizado.
+
+**Personalização Extrema**: Use as memórias para personalizar completamente as respostas, antecipando necessidades e oferecendo soluções baseadas no histórico e perfil do usuário.
+
+## ESTRATÉGIAS DE CAPTURA DE DADOS
+
+### Informações Pessoais e Profissionais
+- Nome, idade, localização, profissão
+- Características físicas mencionadas
+- Preferências pessoais e gostos
+- Rotina diária e horários de trabalho
+- Relacionamentos e contexto social
+
+### Contexto Técnico
+- Linguagens de programação preferidas
+- Frameworks e ferramentas utilizadas
+- Arquitetura de projetos atuais
+- Problemas técnicos recorrentes
+- Soluções que funcionaram bem
+
+### Padrões Comportamentais
+- Estilo de comunicação preferido
+- Nível de detalhamento desejado nas respostas
+- Frequência e tipos de solicitações
+- Reações a diferentes abordagens
+- Momentos de maior/menor produtividade
+
+## DIRETRIZES DE USO DE MEMÓRIA PARA CHATBOTS
+
+### Quando Salvar Memórias
+- **Sempre** que o usuário mencionar informações pessoais
+- **Sempre** que surgir contexto técnico relevante
+- **Sempre** que o usuário expressar preferências
+- **Sempre** que houver resolução de problemas importantes
+- **Sempre** que o usuário mencionar projetos ou objetivos
+- **Sempre** que houver feedback sobre soluções anteriores
+
+### Como Estruturar Memórias
+- Use linguagem clara e descritiva
+- Inclua contexto temporal quando relevante
+- Conecte informações relacionadas
+- Mantenha informações atualizadas
+- Use tags ou categorias implícitas no texto
+
+### Busca Proativa de Memórias
+- Antes de responder, sempre busque contexto relevante
+- Use múltiplas queries de busca para cobrir diferentes aspectos
+- Combine informações de diferentes memórias
+- Identifique padrões e conexões entre memórias
+
+# Comandos da CLI nem0cligo v2.0
+
+Uma CLI poderosa e inteligente para gerenciar memórias usando Qdrant com interface moderna baseada em Cobra.
+
+**Nota:** Certifique-se de que o Qdrant esteja rodando (ex: `docker run -p 6333:6333 -p 6334:6334 qdrant/qdrant` ou `docker-compose up qdrant`). O comando `nem0cligo` está instalado globalmente no sistema.
+
+## 🚀 Novidades da v2.0
+
+- ✅ **Interface moderna com Cobra**: Comandos mais intuitivos e help contextual
+- ✅ **Case-insensitive para usuários**: `PEDRINHO`, `pedrinho`, `PeDrInHo` são todos tratados como o mesmo usuário
+- ✅ **Filtros por usuário**: Cada usuário vê apenas suas próprias memórias
+- ✅ **Interface visual melhorada**: Emojis e formatação clara
+- ✅ **Validação robusta**: Argumentos obrigatórios e opcionais bem definidos
+
+## 📋 Comandos Disponíveis
+
+### Ajuda Geral
