@@ -42,7 +42,6 @@
     "amdgpu"
   ];
   boot.loader.systemd-boot.enable = true;
-  boot.loader.systemd-boot.configurationLimit = 100;
   boot.loader.efi.canTouchEfiVariables = true;
 
   # X11 and Wayland
@@ -87,12 +86,18 @@
     ];
   };
 
-  # Swap
-  # Will try to mount on Stage 1
+  # Swap - Will try to mount on Stage 1
+  # TODO: fix, kinda worksbut takes a lot of time to boot until it times out
   swapDevices = [
-    # TODO: fix, kinda worksbut takes a lot of time to boot until it times out
-    # { device = "/dev/disk/by-uuid/0319478f-63cc-4fde-9804-523687d223ee"; priority = 10; options = [ "x-systemd.device-timeout=1ms" "nofail" ]; } # optional g14 laptop swap
-    # { device = "/swapfile"; }
+    # optional g14 internal laptop swap
+    # {
+    #   device = "/dev/disk/by-uuid/0319478f-63cc-4fde-9804-523687d223ee";
+    #   priority = 10;
+    #   options = [
+    #     "x-systemd.device-timeout=1ms"
+    #     "nofail"
+    #   ];
+    # }
     { device = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; } # nomad usb stick
   ];
 
