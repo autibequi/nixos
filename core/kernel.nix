@@ -84,10 +84,6 @@
     "sd_mod"
   ];
 
-  # Acelerar boot desabilitando serviços não essenciais
-  systemd.services.NetworkManager-wait-online.enable = false;
-  systemd.services.systemd-udev-settle.enable = false;
-
   # Otimizações de I/O
   services.fstrim.enable = true;
   services.fstrim.interval = "weekly";

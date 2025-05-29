@@ -85,7 +85,6 @@
     # allacritty
 
     # AMD
-    lact
     rocmPackages.rocm-smi
 
     # cli tools

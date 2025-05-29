@@ -13,7 +13,7 @@
   services.system76-scheduler.settings.cfsProfiles.enable = true;
 
   # Melhora consumo idle da GPU nvidia
-  hardware.nvidia.nvidiaPersistenced = false;
+  hardware.nvidia.nvidiaPersistenced = true;
 
   # AMD EPP to change the power profile so pstate can change
   services.auto-epp.enable = true;
