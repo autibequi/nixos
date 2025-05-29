@@ -15,3 +15,15 @@ Para processos não relacionados a codigo, use o processo abaixo:
 3 - após finalizar mova para tmp/done/nome-do-processo.md
 4 - sempre verifique por processos não acabados e pergunte ao usuario se ele deseja continuar.
 5 - use esse arquivo como memoria até a finalização. considere que multiplas LLMs podem modificar o arquivo
+
+## Templates
+
+### DIALOG TEMPLATE:
+
+┏━ {question} ━━━━
+{description}
+
+> {option1}
+> {option2}
+> { ... }
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
