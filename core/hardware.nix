@@ -100,23 +100,4 @@
     # }
     { device = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; } # nomad usb stick
   ];
-
-  # Hibernate Configuration - FIXED!
-  # Para swapfile, precisamos usar o dispositivo root
-  boot.resumeDevice = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
-
-  services.logind = {
-    lidSwitch = "hibernate"; # Hibernação direta no fechar da tampa
-    powerKey = "hibernate"; # Hibernate on short power key press
-    powerKeyLongPress = "poweroff"; # Standard long press behavior
-    # Removido suspend-then-hibernate que estava causando problemas
-  };
-
-  # Removido systemd.sleep.extraConfig que estava conflitando
-  # Configurações hibernação serão controladas pelo kernel
-
-  # Kernel parameters para hibernação - FIXED!
-  boot.kernelParams = [
-    "mem_sleep_default=deep"
-  ];
 }
