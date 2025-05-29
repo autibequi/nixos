@@ -44,6 +44,17 @@
     "thumb": "always",
     "thumb_border": "full"
   },
+  "diagnostics": {
+    "button": true,
+    "include_warnings": true,
+    "inline": {
+      "enabled": true,
+      "update_debounce_ms": 150,
+      "padding": 4,
+      "min_column": 0,
+      "max_severity": "info"
+    }
+  },
   "base_keymap": "VSCode",
   "auto_install_extensions": {
     "nix": true,
@@ -77,7 +88,7 @@
     "dock": "left",
     "format_dap_log_messages": true,
     "log_dap_communications": true,
-    "save_breakpoints": true,
+    "save_breakpoints": true
   },
   "debuggers": [],
   "experimental.theme_overrides": {
@@ -103,7 +114,7 @@
     "sort_by_path": true,
     "status_style": "icon"
   },
-  "icon_theme": "Catppuccin Mocha",
+  "icon_theme": "VSCode Icons (Dark)",
   "keybindings": [],
   "languages": {
     "Go": {

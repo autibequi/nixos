@@ -1,2 +1,6 @@
+# agent
 tmp/
 result/
+
+# nixos
+.direnv
