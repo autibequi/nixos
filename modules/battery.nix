@@ -22,6 +22,11 @@
     powerKeyLongPress = "poweroff";
   };
 
+  systemd.sleep.extraConfig = ''
+    HibernateOnACPower=true
+    HibernateDelaySec=30
+  '';
+
   # Kernel parameters para hibernação - FIXED!
   boot.kernelParams = [
     "mem_sleep_default=deep"
