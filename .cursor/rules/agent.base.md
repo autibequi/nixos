@@ -1,0 +1,17 @@
+---
+description: Base Agent
+globs:
+alwaysApply: true
+---
+
+# Base Agent
+
+## Proesso não codigo
+
+Para processos não relacionados a codigo, use o processo abaixo:
+
+1 - crie uma pasta em tmp/running/nome-do-processo.md
+2 - modifique esse arquivo com o que for necessario pedido pelo usuario
+3 - após finalizar mova para tmp/done/nome-do-processo.md
+4 - sempre verifique por processos não acabados e pergunte ao usuario se ele deseja continuar.
+5 - use esse arquivo como memoria até a finalização. considere que multiplas LLMs podem modificar o arquivo

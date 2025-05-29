@@ -36,6 +36,15 @@
     # Testing!
     # obs-studio
 
+    # Rust
+    cargo
+    rustc
+    rustup
+    rust-analyzer
+    rustfmt
+    clippy
+    rust-analyzer
+
     # AI
     windsurf
     # openai-whisper-cpp
