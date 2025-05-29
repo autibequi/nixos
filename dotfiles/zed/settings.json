@@ -1,21 +1,69 @@
 {
+  "context_servers": {
+    "mcp-server-github": {
+      "settings": {
+        "github_personal_access_token": "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"
+      }
+    }
+  },
   "agent": {
+    "default_profile": "write",
+    "profiles": {
+      "nixos": {
+        "name": "NixOs Specialist",
+        "tools": {
+          "ls": true,
+          "pwd": true,
+          "cat": true,
+          "echo": true,
+          "rm": true,
+          "mkdir": true,
+          "touch": true,
+          "cp": true,
+          "mv": true,
+          "nh": true
+        },
+        "enable_all_context_servers": true,
+        "context_servers": {
+          "nixos": {
+            "tools": {
+              "nixd": true,
+              "nh": true
+            }
+          }
+        }
+      }
+    },
     "always_allow_tool_actions": true,
     "default_model": {
-      "model": "gpt-4.1",
+      "model": "gpt-4o",
       "provider": "copilot_chat"
     },
     "inline_assistant_model": {
-      "model": "gpt-4.1",
+      "model": "gpt-4o",
       "provider": "copilot_chat"
     },
     "version": "2"
   },
+  "minimap": {
+    "current_line_highlight": "all",
+    "show": "always",
+    "thumb": "always",
+    "thumb_border": "full"
+  },
+  "base_keymap": "VSCode",
   "auto_install_extensions": {
     "nix": true,
     "golang": true,
-    "python": true
+    "python": true,
+    "LOG": true,
+    "GraphQL": true,
+    "Python": true,
+    "NGINX": true,
+    "SCSS": true,
+    "XML": true
   },
+  "soft_wrap": "editor_width",
   "agent_font_size": 23,
   "active_pane_modifiers": {
     "inactive_opacity": 0.2
@@ -25,16 +73,26 @@
   "collaboration_panel": {
     "button": false
   },
+  "when_closing_with_no_tabs": "close_window",
+  "preview_tabs": {
+    "enable_preview_from_code_navigation": true,
+    "enable_preview_from_file_finder": true,
+    "enabled": true
+  },
   "debugger": {
     "button": true,
-    "dock": "left"
+    "dock": "left",
+    "format_dap_log_messages": true,
+    "log_dap_communications": true,
+    "save_breakpoints": true,
   },
   "debuggers": [],
   "experimental.theme_overrides": {
-    "background": "#1a1b26aa",
-    "background.appearance": "blurred",
-    "panel.background": "#41486844"
+    // "background": "#00000999",
+    // "editor.background": "#41486844",
+    // "panel.background": "#00000999"
   },
+  "buffer_line_height": "standard",
   "features": {
     "edit_prediction_provider": "copilot"
   },
@@ -47,15 +105,10 @@
   },
   "format_on_save": "on",
   "formatter": "language_server",
-  "git": {
-    "hunk_style": "unstaged_hollow"
-  },
   "git_panel": {
     "button": true,
-    "default_width": 500,
-    "fallback_branch_name": "opsie",
     "sort_by_path": true,
-    "status_style": "label_color"
+    "status_style": "icon"
   },
   "icon_theme": "Catppuccin Mocha",
   "keybindings": [],
@@ -83,7 +136,6 @@
         "show_type_hints": true
       },
       "preferred_line_length": 100,
-      "soft_tabs": true,
       "tab_size": 2
     },
     "TypeScript": {
@@ -96,7 +148,6 @@
         "show_type_hints": true
       },
       "preferred_line_length": 100,
-      "soft_tabs": true,
       "tab_size": 2
     },
     "Vue": {
@@ -104,7 +155,6 @@
       "format_on_save": "on",
       "formatter": "language_server",
       "preferred_line_length": 100,
-      "soft_tabs": true,
       "tab_size": 2
     },
     "json": {
@@ -192,17 +242,21 @@
     "file_icons": true,
     "git_status": true
   },
+  "ui_font_family": "Fira Code Symbol",
+  "ui_font_weight": 600,
+  "buffer_font_weight": 500,
+  "buffer_font_family": "Fira Code Symbol",
   "terminal": {
     "copy_on_select": true,
     "dock": "bottom",
-    "font_family": "Fira Code",
+    "font_family": "Cantarell",
     "font_size": 19,
-    "option_as_meta": true,
+    "font_weight": 500,
     "shell": "system"
   },
   "theme": {
     "dark": "Tokyo Night",
-    "light": "Tokyo Night",
+    "light": "Tokyo Night Light",
     "mode": "system"
   },
   "title_bar": {
@@ -210,11 +264,8 @@
     "show_onboarding_banner": true,
     "show_user_picture": true
   },
-  "ui_font_features": {
-    "ligatures": true
-  },
   "ui_font_size": 17,
-  "unstable.ui_density": "compact",
+  "unstable.ui_density": "comfortable",
   "use_smartcase_search": true,
   "editor": {
     "cursor_blinking": "smooth",
@@ -226,11 +277,6 @@
     "hard_tabs": false,
     "preferred_line_length": 100,
     "render_whitespace": "boundary",
-    "rulers": [
-      80,
-      100,
-      120
-    ],
     "show_copilot_suggestions": true,
     "show_inlay_hints": true,
     "soft_tabs": true,

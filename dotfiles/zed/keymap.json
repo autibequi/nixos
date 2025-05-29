@@ -12,6 +12,7 @@
       "ctrl-alt-n": "agent::NewThread",
       "ctrl-alt-l": "agent::Chat",
       "ctrl-`": "workspace::ToggleBottomDock",
+      "ctrl-shift-r": "projects::OpenRecent"
     }
   },
   {
