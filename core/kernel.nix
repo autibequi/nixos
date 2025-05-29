@@ -17,7 +17,6 @@
   boot.kernelParams = [
     # those actually do something
     "fastboot" # faster boot
-    "usbcore.autosuspend=-1" # keeps usb-c dock alive
     "amdgpu.dcdebugmask=0x10" # refresh issues https://gitlab.gnome.org/GNOME/mutter/-/issues/3299\
 
     # Force UAS for external NVME USB-C case; this garantees high speed mode | lsusb -t:
