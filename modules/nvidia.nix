@@ -10,8 +10,8 @@
     modesetting.enable = true;
     nvidiaSettings = false;
     powerManagement = {
-      enable = false;
-      finegrained = false;
+      enable = true;
+      finegrained = true;
     };
 
     open = true; # Best compatibility with RTX 4060 mobile Q-Max

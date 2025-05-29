@@ -9,11 +9,8 @@
   # NixOs stock power management
   powerManagement.powertop.enable = true;
 
-  # System76 scheduler
-  services.system76-scheduler.settings.cfsProfiles.enable = true;
-
   # Melhora consumo idle da GPU nvidia
-  hardware.nvidia.nvidiaPersistenced = true;
+  hardware.nvidia.nvidiaPersistenced = false;
 
   # AMD EPP to change the power profile so pstate can change
   services.auto-epp.enable = true;
@@ -31,7 +28,6 @@
   # Delay hibernate
   systemd.sleep.extraConfig = ''
     HibernateDelaySec=30m
-    SuspendState=mem
   '';
 
   # Kernel parameters para hibernação - FIXED!
