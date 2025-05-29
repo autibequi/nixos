@@ -1,4 +1,4 @@
-{ ... }:
+{ config, ... }:
 {
   # avoid file colisions
   home-manager.backupFileExtension = "backup";
@@ -25,9 +25,11 @@
         ".config/atuin/config.toml".source = ../dotfiles/atuin.conf;
         ".config/fastfetch/config.jsonc".source = ../dotfiles/fastfetch.jsonc;
 
-        # Zed doesnt like it and throws ReadOnly issue
-        # ".config/zed/keymap.json".source = ../dotfiles/zed/keymap.json;
-        # ".config/zed/settings.json".source = ../dotfiles/zed/settings.json;
+        # Zed
+        # ".config/zed" = {
+        #   source = "~/projects/nixos/dotfiles/zed";
+        #   recursive = true;
+        # };
 
         # wallpapers
         ".wallpapers/the-death-of-socrates.jpg".source = ../assets/wallpapers/the-death-of-socrates.jpg;
