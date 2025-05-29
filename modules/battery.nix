@@ -17,15 +17,10 @@
   boot.resumeDevice = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
 
   services.logind = {
-    lidSwitch = "suspend-then-hibernate";
+    lidSwitch = "hibernate";
     powerKey = "hibernate";
     powerKeyLongPress = "poweroff";
   };
-
-  # Delay hibernate
-  systemd.sleep.extraConfig = ''
-    HibernateDelaySec=30m
-  '';
 
   # Kernel parameters para hibernação - FIXED!
   boot.kernelParams = [
