@@ -1,11 +1,4 @@
 {
-  "context_servers": {
-    "mcp-server-github": {
-      "settings": {
-        "github_personal_access_token": "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"
-      }
-    }
-  },
   "agent": {
     "default_profile": "write",
     "profiles": {
