@@ -5,8 +5,9 @@
 
 {
   # Kernel
-  # boot.kernelPackages = pkgs.linuxPackages_6_14;
-  boot.kernelPackages = pkgs.linuxPackages_cachyos; # breaks nvidia??
+  # use this when nvidia breaks due to latest kernel
+  boot.kernelPackages = pkgs.linuxPackages_cachyos-hardened;
+  # boot.kernelPackages = pkgs.linuxPackages_cachyos;
 
   # SystemD no InitRD para hibernação moderna
   boot.initrd.systemd.enable = true;
@@ -38,6 +39,7 @@
   # will only be used on AC because of CPU_DRIVER_OPMODE_ON_BAT = "active" on battery
   services.scx.scheduler = "scx_lavd";
   services.scx.extraArgs = [ "--powersave" ];
+  services.scx.package = pkgs.scx_git.full; # latest updates
 
   # TODO: clean up moduless
   boot.kernelModules = [

@@ -72,7 +72,7 @@ alwaysApply: true
 - Combine informações de diferentes memórias
 - Identifique padrões e conexões entre memórias
 
-# Comandos da CLI nem0cligo v2.0
+# Comandos da CLI nemo v2.0
 
 Uma CLI poderosa e inteligente para gerenciar memórias usando Qdrant com interface moderna baseada em Cobra.
 
