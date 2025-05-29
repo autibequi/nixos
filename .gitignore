@@ -4,3 +4,6 @@ result/
 
 # nixos
 .direnv
+
+# misc
+.opencode/
