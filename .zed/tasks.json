@@ -22,5 +22,13 @@
     "options": {
       "cwd": "${workspaceFolder}"
     }
+  },
+  {
+    "label": "Update",
+    "command": "nh os switch --update .",
+    "type": "shell",
+    "options": {
+      "cwd": "${workspaceFolder}"
+    }
   }
 ]

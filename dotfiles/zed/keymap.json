@@ -12,6 +12,7 @@
       "ctrl-alt-l": "agent::NewThread",
       "ctrl-`": "workspace::ToggleBottomDock",
       "ctrl-shift-r": "projects::OpenRecent",
+      "ctrl-alt-n": "agent::NewThread",
       "f5": "task::Spawn"
     }
   },
@@ -19,6 +20,7 @@
     "context": "Editor",
     "bindings": {
       "ctrl-alt-l": "agent::Chat",
+      "ctrl-alt-n": "agent::NewThread"
     }
   }
 ]

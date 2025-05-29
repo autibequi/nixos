@@ -21,6 +21,10 @@
     nixd
     nixfmt-rfc-style
 
+    # Editor
+    # zed-editor
+    zed-editor-fhs
+
     # Aesthetics
     # Cursors
     banana-cursor
