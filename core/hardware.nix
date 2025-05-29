@@ -38,7 +38,6 @@
 
   # Bootloader
   boot.kernelModules = [
-    "nvidia"
     "amdgpu"
   ];
   boot.loader.systemd-boot.enable = true;
@@ -46,7 +45,6 @@
 
   # X11 and Wayland
   services.xserver.videoDrivers = [
-    "nvidia"
     "amdgpu"
   ];
 
