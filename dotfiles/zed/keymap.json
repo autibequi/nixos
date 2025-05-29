@@ -9,14 +9,16 @@
   {
     "context": "Workspace",
     "bindings": {
-      "ctrl-alt-n": "agent::NewThread",
-      "ctrl-alt-l": "agent::Chat",
+      "ctrl-alt-l": "agent::NewThread",
       "ctrl-`": "workspace::ToggleBottomDock",
-      "ctrl-shift-r": "projects::OpenRecent"
+      "ctrl-shift-r": "projects::OpenRecent",
+      "f5": "task::Spawn"
     }
   },
   {
     "context": "Editor",
-    "bindings": {}
+    "bindings": {
+      "ctrl-alt-l": "agent::Chat",
+    }
   }
 ]

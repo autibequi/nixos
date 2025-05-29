@@ -3,7 +3,7 @@
     "default_profile": "write",
     "profiles": {
       "nixos": {
-        "name": "NixOs Specialist",
+        "name"ke: "NixOs Specialist",
         "tools": {
           "ls": true,
           "pwd": true,
@@ -246,10 +246,10 @@
     "file_icons": true,
     "git_status": true
   },
-  "ui_font_family": "Fira Code Symbol",
+  "ui_font_family": "Fira Code",
   "ui_font_weight": 600,
   "buffer_font_weight": 500,
-  "buffer_font_family": "Fira Code Symbol",
+  "buffer_font_family": "Fira Code",
   "terminal": {
     "copy_on_select": true,
     "dock": "bottom",
@@ -278,7 +278,7 @@
     "ensure_final_newline_on_save": true,
     "font_ligatures": true,
     "format_on_save": "on",
-    "hard_tabs": false,
+    "hard_tabs": true,
     "preferred_line_length": 100,
     "render_whitespace": "boundary",
     "show_copilot_suggestions": true,

@@ -1,0 +1,20 @@
+[
+  {
+    "label": "Nixos Test",
+    "name": "Nixos Test",
+    "command": "nh os test .",
+    "type": "shell",
+    "options": {
+      "cwd": "${workspaceFolder}"
+    }
+  },
+  {
+    "label": "Switch Command",
+    "name": "Switch Command",
+    "command": "nh os switch .",
+    "type": "shell",
+    "options": {
+      "cwd": "${workspaceFolder}"
+    }
+  }
+]

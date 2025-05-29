@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   # Habilitar Bluetooth com configurações avançadas
@@ -8,12 +8,15 @@
     powerOnBoot = true; # Liga o Bluetooth automaticamente na inicialização
     settings = {
       General = {
-        Enable = "Source,Sink,Media,Socket";
+        Enable = "Media,Socket";
         Experimental = true;
         FastConnectable = true;
         JustWorksRepairing = "always";
-        MultiProfile = "off";
+        MultiProfile = "on";
         AutoEnable = true;
+        AutoConnect = true;
+        ReconnectAttempts = 5;
+        LogLevel = "debug";
       };
     };
   };
@@ -21,6 +24,8 @@
   services.pipewire = {
     enable = true;
     jack.enable = true;
+    alsa.enable = true;
+    wireplumber.enable = true;
   };
 
   # Pacotes adicionais para suporte a codecs
@@ -28,8 +33,8 @@
     ldacbt
     libfreeaptx
     sbc
-    bluez-tools 
+    bluez-tools
     pavucontrol
-    helvum 
+    helvum
   ];
 }
