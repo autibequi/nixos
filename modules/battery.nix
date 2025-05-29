@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ ... }:
 
 {
   imports = [
@@ -8,9 +8,6 @@
 
   # NixOs stock power management
   powerManagement.powertop.enable = true;
-
-  # Melhora consumo idle da GPU nvidia
-  hardware.nvidia.nvidiaPersistenced = false;
 
   # AMD EPP to change the power profile so pstate can change
   services.auto-epp.enable = true;
