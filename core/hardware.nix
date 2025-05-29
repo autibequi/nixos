@@ -92,27 +92,26 @@
   swapDevices = [
     # TODO: fix, kinda worksbut takes a lot of time to boot until it times out
     # { device = "/dev/disk/by-uuid/0319478f-63cc-4fde-9804-523687d223ee"; priority = 10; options = [ "x-systemd.device-timeout=1ms" "nofail" ]; } # optional g14 laptop swap
-    { device = "/swapfile"; }
-    # { device = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; } # nomad usb stick
+    # { device = "/swapfile"; }
+    { device = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; } # nomad usb stick
   ];
 
-  # Hibernate Configuration
-  # Usar swapfile local para resume
-  boot.resumeDevice = "/swapfile";
+  # Hibernate Configuration - FIXED!
+  # Para swapfile, precisamos usar o dispositivo root
+  boot.resumeDevice = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
 
   services.logind = {
-    lidSwitch = "suspend-then-hibernate";
+    lidSwitch = "hibernate"; # Hibernação direta no fechar da tampa
     powerKey = "hibernate"; # Hibernate on short power key press
     powerKeyLongPress = "poweroff"; # Standard long press behavior
-    # Suspend-then-hibernate can be configured later if basic hibernate works.
+    # Removido suspend-then-hibernate que estava causando problemas
   };
 
-  # Define time delay for hibernation (can be enabled later)
-  systemd.sleep.extraConfig = ''
-    HibernateDelaySec=1m
-    SuspendState=mem
-  '';
+  # Removido systemd.sleep.extraConfig que estava conflitando
+  # Configurações hibernação serão controladas pelo kernel
 
-  # # Define kernel parameters for hibernation (moved higher for clarity)
-  boot.kernelParams = [ "mem_sleep_default=deep" ];
+  # Kernel parameters para hibernação - FIXED!
+  boot.kernelParams = [
+    "mem_sleep_default=deep"
+  ];
 }
