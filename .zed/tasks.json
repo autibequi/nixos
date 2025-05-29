@@ -1,7 +1,8 @@
 [
   {
-    "label": "Test Schema",
+    "label": "Test",
     "command": "nh os test .",
+    "show_summary": false,
     "type": "shell",
     "options": {
       "cwd": "${workspaceFolder}"
@@ -10,22 +11,34 @@
   {
     "label": "Build & Switch",
     "command": "nh os switch .",
+    "show_summary": false,
     "type": "shell",
     "options": {
       "cwd": "${workspaceFolder}"
     }
   },
   {
-    "label": "Clean Bboot Entries",
+    "label": "Clean Boot",
     "command": "nh clean all --keep 3 --nogc",
+    "show_summary": false,
     "type": "shell",
     "options": {
       "cwd": "${workspaceFolder}"
     }
   },
   {
-    "label": "Update",
+    "label": "Clean All",
+    "command": "nh clean all --keep 3 --nogc",
+    "show_summary": false,
+    "type": "shell",
+    "options": {
+      "cwd": "${workspaceFolder}"
+    }
+  },
+  {
+    "label": "Update Channels",
     "command": "nh os switch --update .",
+    "show_summary": false,
     "type": "shell",
     "options": {
       "cwd": "${workspaceFolder}"
