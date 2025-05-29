@@ -1,12 +1,17 @@
-{ config, pkgs, lib, ... } :
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 {
   hardware.nvidia = {
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    package = config.boot.kernelPackages.nvidiaPackages.beta;
     modesetting.enable = true;
     nvidiaSettings = false;
     powerManagement = {
-      enable = true;
-      finegrained = true;
+      enable = false;
+      finegrained = false;
     };
 
     open = true; # Best compatibility with RTX 4060 mobile Q-Max

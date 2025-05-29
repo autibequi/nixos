@@ -5,8 +5,8 @@
 
 {
   # Kernel
-  boot.kernelPackages = pkgs.linuxPackages_6_14;
-  # boot.kernelPackages = pkgs.linuxPackages_cachyos; # breaks nvidia??
+  # boot.kernelPackages = pkgs.linuxPackages_6_14;
+  boot.kernelPackages = pkgs.linuxPackages_cachyos; # breaks nvidia??
 
   # SystemD no InitRD para hibernação moderna
   boot.initrd.systemd.enable = true;
