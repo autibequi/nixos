@@ -22,8 +22,8 @@
     nixfmt-rfc-style
 
     # Editor
-    # zed-editor
-    zed-editor-fhs
+    zed-editor
+    # zed-editor-fhs # correcter but no sudo on terminal
 
     # Aesthetics
     # Cursors

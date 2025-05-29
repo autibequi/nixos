@@ -6,7 +6,7 @@
 {
   # Kernel
   boot.kernelPackages = pkgs.linuxPackages_6_14;
-  # pkgs.linuxPackages_cachyos; # breaks nvidia
+  # boot.kernelPackages = pkgs.linuxPackages_cachyos; # breaks nvidia??
 
   # SystemD no InitRD para hibernação moderna
   boot.initrd.systemd.enable = true;
@@ -26,7 +26,7 @@
     "usb-storage.quirks=0x152d:0x0583:u"
 
     # Força o uso do p-state ativo para o processador AMD
-    "amd_pstate=guided"
+    "amd_pstate=active"
   ];
 
   # Configurar compressão.

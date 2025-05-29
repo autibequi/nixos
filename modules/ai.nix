@@ -1,11 +1,15 @@
 # AI Configurations for NixOS
 
-{ config, pkgs, inputs, ... }:
+{
+  pkgs,
+  inputs,
+  ...
+}:
 
 {
   # Enable AI tools from nixified-ai flake
   environment.systemPackages = with inputs.nixified-ai.packages.${pkgs.system}; [
-    comfyui-nvidia  # ComfyUI with NVIDIA support
+    comfyui-nvidia # ComfyUI with NVIDIA support
   ];
 
   # # Open WebUI for local LLM interface
