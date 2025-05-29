@@ -1,41 +1,45 @@
-{ config, pkgs, lib, ... } :
+{
+  pkgs,
+  lib,
+  ...
+}:
 
 {
   # System State Version
   system.stateVersion = "25.05";
 
-  imports =
-    [
-      # Substituters ans stuff
-      ./nix.nix
+  imports = [
+    # Substituters ans stuff
+    ./nix.nix
 
-      # Core
-      ./core/hardware.nix
-      ./core/kernel.nix
-      ./core/home.nix
-      ./core/services.nix
-      ./core/programs.nix
-      ./core/packages.nix
-      ./core/shell.nix
+    # Core
+    ./core/hardware.nix
+    ./core/kernel.nix
+    ./core/home.nix
+    ./core/services.nix
+    ./core/programs.nix
+    ./core/packages.nix
+    ./core/shell.nix
 
-      # Extra
-      ./modules/battery.nix
-      ./modules/bluetooth.nix
-      ./modules/nvidia.nix
-      ./modules/plymouth.nix
-      ./modules/stylix.nix
-      # ./modules/howdy.nix
-      # ./modules/flatpak.nix
-      # ./modules/ai.nix
+    # Extra
+    ./modules/battery.nix
+    ./modules/bluetooth.nix
+    ./modules/nvidia.nix
+    ./modules/amd.nix
+    ./modules/plymouth.nix
+    ./modules/stylix.nix
+    # ./modules/howdy.nix
+    # ./modules/flatpak.nix
+    # ./modules/ai.nix
 
-      # Work
-      ./modules/work.nix
+    # Work
+    ./modules/work.nix
 
-      # Desktop Environments
-      ./desktop-envs/gnome/core.nix
-      # ./desktop-envs/cosmic.nix
-      # ./desktop-envs/kde.nix
-    ];
+    # Desktop Environments
+    ./desktop-envs/gnome/core.nix
+    # ./desktop-envs/cosmic.nix
+    # ./desktop-envs/kde.nix
+  ];
 
   # Environment Variables
   environment.sessionVariables = {
@@ -44,7 +48,7 @@
     MOZ_ENABLE_WAYLAND = "1";
     OZONE_PLATFORM = "wayland";
     ELECTRON_OZONE_PLATFORM_HINT = "wayland";
-    QT_AUTO_SCREEN_SCALE_FACTOR="1";
+    QT_AUTO_SCREEN_SCALE_FACTOR = "1";
   };
 
   # Add local bin to PATH
@@ -54,7 +58,12 @@
   users.users.pedrinho = {
     isNormalUser = true;
     description = "pedrinho";
-    extraGroups = [ "networkmanager" "wheel" "docker" "adbusers" ];
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+      "docker"
+      "adbusers"
+    ];
     shell = pkgs.zsh;
   };
 
@@ -97,9 +106,22 @@
   };
 
   fonts.fontconfig.defaultFonts = {
-    monospace = [ "FiraCode Nerd Font Mono Bold" "Fira Code Bold" "Liberation Mono Bold" "Noto Sans Mono Bold" ];
-    sansSerif = [ "Noto Sans Bold" "Liberation Sans Bold" "Fira Sans Bold" ];
-    serif = [ "Noto Serif Bold" "Liberation Serif Bold" "Fira Serif Bold" ];
+    monospace = [
+      "FiraCode Nerd Font Mono Bold"
+      "Fira Code Bold"
+      "Liberation Mono Bold"
+      "Noto Sans Mono Bold"
+    ];
+    sansSerif = [
+      "Noto Sans Bold"
+      "Liberation Sans Bold"
+      "Fira Sans Bold"
+    ];
+    serif = [
+      "Noto Serif Bold"
+      "Liberation Serif Bold"
+      "Fira Serif Bold"
+    ];
   };
 
   # XDG Portal
