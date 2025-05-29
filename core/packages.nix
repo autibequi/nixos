@@ -51,6 +51,7 @@
 
     # AI
     windsurf
+    aider-chat-full
     # openai-whisper-cpp
     # whisper-cpp
     # whisper-cpp-vulkan # Voice-To-Text - for blurt gnome extension

@@ -5,9 +5,7 @@
 
 {
   # Kernel
-  # use this when nvidia breaks due to latest kernel
-  boot.kernelPackages = pkgs.linuxPackages_6_14;
-  # boot.kernelPackages = pkgs.linuxPackages_cachyos;
+  boot.kernelPackages = pkgs.linuxPackages_cachyos;
 
   # SystemD no InitRD para hibernação moderna
   boot.initrd.systemd.enable = true;
