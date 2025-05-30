@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  pkgs,
   modulesPath,
   ...
 }:
@@ -25,14 +24,9 @@
   # Hardware
   hardware = {
     enableAllFirmware = true;
-    amdgpu.initrd.enable = true; # Fix low resolution on boot
 
-    graphics = {
-      enable = true;
-      extraPackages = with pkgs; [
-        libvdpau-va-gl # Ponte VDPAU para VA-API (útil para compatibilidade)
-      ];
-    };
+    # AMD
+    amdgpu.initrd.enable = true; # Fix low resolution on boot
     cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
   };
 
@@ -66,12 +60,11 @@
     fsType = "ext4"; # TODO: testar zfs com lz4 no proximo setup
     neededForBoot = true;
     options = [
+      "defaults"
       "noatime"
-      "nodiratime"
       "discard"
-      "data=writeback"
-      "barrier=0"
     ];
+
   };
 
   # Boot

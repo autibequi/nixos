@@ -1,6 +1,20 @@
 { pkgs, ... }:
 {
-  environment.gnome.excludePackages = with pkgs.gnome; [
+
+  environment.systemPackages = with pkgs; [
+    # Gnome Stuff
+    desktop-file-utils
+    gnome-extension-manager # Ferramenta para gerenciar extensões
+
+    # Utils
+    pkgs.gnome-tweaks
+    pkgs.gnome-power-manager
+
+    # Terminal
+    whitesur-gtk-theme
+  ];
+
+  environment.gnome.excludePackages = [
     pkgs.gnome-terminal
     pkgs.epiphany
     pkgs.gedit
@@ -25,4 +39,4 @@
     pkgs.gnome-text-editor
     pkgs.gnome-font-viewer
   ];
-} 
+}

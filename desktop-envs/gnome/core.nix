@@ -1,7 +1,7 @@
-{  pkgs,  ... }:
+{ pkgs, ... }:
 {
   imports = [
-    ./debloat.nix
+    ./packages.nix
     ./extensions.nix
     ./home.nix
   ];
@@ -20,18 +20,6 @@
       };
     };
   };
-
-  environment.systemPackages = with pkgs; [
-    # Gnome Stuff
-    desktop-file-utils
-    gnome-extension-manager # Ferramenta para gerenciar extensões
-
-    # Utils
-    pkgs.gnome-tweaks
-
-    # Terminal
-    whitesur-gtk-theme
-  ];
 
   # terminal swap (since gnome-terminal is hardcoded as the default terminal)
   environment.etc."gnome-console".source = "${pkgs.ghostty}/bin/ghostty";
