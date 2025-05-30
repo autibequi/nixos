@@ -71,6 +71,7 @@
     lnav
     fastfetch
     pv
+    jujutsu
 
     # TESTING: shells
     # nushell
