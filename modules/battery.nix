@@ -6,6 +6,9 @@
     # ./tlp.nix
   ];
 
+  # Tweak CFS latency parameters when going on/off battery
+  services.system76-scheduler.settings.cfsProfiles.enable = true;
+
   # NixOs stock power management
   powerManagement.powertop.enable = true;
 
