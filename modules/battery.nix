@@ -34,4 +34,7 @@
   boot.kernelParams = [
     "mem_sleep_default=deep"
   ];
+
+  # I/O Scheduler
+  hardware.block.defaultScheduler = "kyber";
 }

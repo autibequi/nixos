@@ -89,7 +89,7 @@
         # Auto Power Profile
         "org/gnome/shell/extensions/auto-power-profile" = {
           bat = "power-saver";
-          ac = "balanced";
+          ac = "power-saver";
           threshold = 100;
         };
 

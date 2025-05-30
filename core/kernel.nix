@@ -37,9 +37,11 @@
 
   # Userland Scheduler
   services.scx.enable = true;
+  services.scx.package = pkgs.scx_git.full; # latest updates
+
+  # lavd:
   services.scx.scheduler = "scx_lavd";
   services.scx.extraArgs = [ "--autopower" ];
-  services.scx.package = pkgs.scx_git.full; # latest updates
 
   # TODO: clean up moduless
   boot.kernelModules = [
