@@ -17,6 +17,10 @@
     "fastboot"
     "amdgpu.dcdebugmask=0x10" # refresh issues https://gitlab.gnome.org/GNOME/mutter/-/issues/3299\
 
+    "amdgpu.aspm=1" # Enable ASPM for AMD GPUs
+    "amdgpu.ppfeaturemask=0xffffffff" # Enable all power management features for AMD GPUs
+    "amdgpu.dpm=1" # Enable Dynamic Power Management for AMD GPUs
+
     # Force UAS for external NVME USB-C case; this garantees high speed mode | lsusb -t:
     # idVendor           0x152d JMicron Technology Corp. / JMicron USA Technology Corp.
     # idProduct          0x0583 JMS583Gen 2 to PCIe Gen3x2 Bridge
