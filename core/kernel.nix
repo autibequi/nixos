@@ -24,7 +24,9 @@
     # Force UAS for external NVME USB-C case; this garantees high speed mode | lsusb -t:
     # idVendor           0x152d JMicron Technology Corp. / JMicron USA Technology Corp.
     # idProduct          0x0583 JMS583Gen 2 to PCIe Gen3x2 Bridge
-    "usb-storage.quirks=0x152d:0x0583:u"
+    # i - usb-storage disasbled
+    # u - enable (slow mode)
+    "usb-storage.quirks=0x152d:0x0583:i"
 
     # Força o uso do p-state ativo para o processador AMD
     "amd_pstate=guided"
