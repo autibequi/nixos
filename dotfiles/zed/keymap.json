@@ -9,17 +9,20 @@
   {
     "context": "Workspace",
     "bindings": {
-      "ctrl-alt-l": "agent::NewThread",
+      // panels
       "ctrl-`": "workspace::ToggleBottomDock",
+      // AI Agents
+      "ctrl-alt-l": "agent::NewThread",
       "ctrl-shift-r": "projects::OpenRecent",
       "ctrl-alt-n": "agent::NewThread",
+      "ctrl-alt-/": "agent::CyclePreviousInlineAssist",
+      // tasks
       "f5": "task::Spawn"
     }
   },
   {
     "context": "Editor",
     "bindings": {
-      "ctrl-alt-l": "agent::Chat",
       "ctrl-alt-n": "agent::NewThread"
     }
   }

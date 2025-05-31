@@ -24,7 +24,7 @@
     # Extra
     ./modules/battery.nix
     ./modules/bluetooth.nix
-    ./modules/nvidia.nix
+    # ./modules/nvidia.nix
     ./modules/plymouth.nix
     ./modules/stylix.nix
     # ./modules/howdy.nix

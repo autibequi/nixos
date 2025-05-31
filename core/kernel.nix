@@ -5,7 +5,7 @@
 
 {
   # Kernel
-  boot.kernelPackages = pkgs.linuxPackages_6_14; # change to latest after nvidia wakeup and work
+  boot.kernelPackages = pkgs.linuxPackages_cachyos; # change to latest after nvidia wakeup and work
 
   # SystemD no InitRD para hibernação moderna
   boot.initrd.systemd.enable = true;
