@@ -22,7 +22,8 @@
     nixfmt-rfc-style
 
     # Editor
-    zed-editor
+    # zed-editor  # wrongest
+    zed-editor_git # latest git build
     # zed-editor-fhs # correcter but no sudo on terminal
 
     # Aesthetics
