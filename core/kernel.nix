@@ -29,7 +29,8 @@
     "usb-storage.quirks=0x152d:0x0583:i"
 
     # Força o uso do p-state ativo para o processador AMD
-    "amd_pstate=guided"
+    # active so epp modes will work
+    "amd_pstate=active"
   ];
 
   # Configurar compressão.
