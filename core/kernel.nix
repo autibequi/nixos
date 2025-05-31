@@ -40,8 +40,7 @@
   # Userland Scheduler
   services.scx.enable = true;
   services.scx.package = pkgs.scx_git.full; # latest updates
-
-  # lavd:
+  powerManagement.cpuFreqGovernor = "schedutil"; # needed for scx
   services.scx.scheduler = "scx_lavd";
   services.scx.extraArgs = [ "--autopower" ];
 
