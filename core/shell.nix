@@ -48,7 +48,7 @@
       ff = "fastfetch";
       clip = "wl-copy";
       clipb = "wl-paste";
-      zd = "zeditor";
+      zed = "zeditor";
 
       wiki = "wikiti";
     };
