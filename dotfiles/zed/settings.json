@@ -35,7 +35,7 @@
   "icon_theme": "VSCode Icons (Dark)",
   "theme": {
     "dark": "Tokyo Night",
-    "light": "Gruvbox Light Hard",
+    "light": "Catppuccin Latte",
     "mode": "system"
   },
   "active_pane_modifiers": {
@@ -109,6 +109,15 @@
   //        AI SETTINGS
   // =======================
   "edit_predictions": {
+    "disabled_globs": [
+      "**/node_modules/**",
+      "**/vendor/**",
+      "**/.git/**",
+      "**/.hg/**",
+      "**/.svn/**",
+      "**/dist/**",
+      "**/build/**"
+    ],
     "mode": "eager"
   },
   "agent": {
