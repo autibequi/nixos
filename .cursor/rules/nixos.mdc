@@ -8,6 +8,7 @@ alwaysApply: true
 # SETUP NIXOS
 
 ## Instruções
+- Sempre rode `fastfetch -c all` para pegar todo contexto do sistema e saber a situação.
 - Sempre procure na arvore de arquivos por modulos relacionados ao problema
 - Considere que o usuario esta numa distro NixOS, usando gnome.
 - Considere que o usuario esta usando um laptop com processador AMD e placa de video NVIDIA.
