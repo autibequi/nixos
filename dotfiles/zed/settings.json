@@ -64,7 +64,13 @@
     "show_copilot_suggestions": true,
     "show_inlay_hints": true,
     "soft_tabs": true,
-    "tab_size": 2
+    "tab_size": 2,
+    "completions": {
+      "enabled": true,
+      "show_snippets": true,
+      "show_suggestions": true,
+      "show_tooltips": true
+    }
   },
   "soft_wrap": "editor_width",
   "buffer_font_size": 18,
@@ -101,11 +107,6 @@
   "tabs": {
     "file_icons": true,
     "git_status": true
-  },
-  "theme": {
-    "dark": "Tokyo Night",
-    "light": "Tokyo Night Storm",
-    "mode": "system"
   },
   "title_bar": {
     "show_branch_icon": true,
@@ -231,11 +232,10 @@
     // "editor.background": "#41486844",
     // "panel.background": "#00000999"
   },
-  // =======================
-  //      PRETTIER SETTINGS
-  // =======================
-  "prettier": {
-    "allowed": true
+  "theme": {
+    "dark": "Tokyo Night",
+    "light": "Gruvbox Light Hard",
+    "mode": "system"
   },
   // =======================
   //      LANGUAGE SETTINGS
@@ -258,10 +258,6 @@
       ]
     }
   },
-  // =======================
-  //      LSP SETTINGS
-  // =======================
-  "lsp": {},
   // =======================
   //      MISC SETTINGS
   // =======================
