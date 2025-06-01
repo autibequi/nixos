@@ -1,9 +1,115 @@
 {
   // =======================
+  //      EDITOR SETTINGS
+  // =======================
+  "editor": {
+    "cursor_blinking": "smooth",
+    "cursor_style": "block",
+    "font_ligatures": true,
+    "format_on_save": "on",
+    "hard_tabs": true,
+    "preferred_line_length": 100,
+    "render_whitespace": "boundary",
+    "show_copilot_suggestions": true,
+    "show_inlay_hints": true,
+    "soft_tabs": true,
+    "tab_size": 2
+  },
+  "soft_wrap": "editor_width",
+  "format_on_save": "on",
+  "formatter": "language_server",
+  // =======================
+  //      FONT SETTINGS
+  // =======================
+  "buffer_font_size": 18,
+  "buffer_font_weight": 500,
+  "buffer_font_family": "Fira Code",
+  "agent_font_size": 15,
+  "ui_font_family": "Fira Code",
+  "ui_font_weight": 600,
+  "ui_font_size": 17,
+  // =======================
+  //      UI SETTINGS
+  // =======================
+  "unstable.ui_density": "comfortable",
+  "icon_theme": "VSCode Icons (Dark)",
+  "theme": {
+    "dark": "Tokyo Night",
+    "light": "Gruvbox Light Hard",
+    "mode": "system"
+  },
+  "active_pane_modifiers": {
+    "inactive_opacity": 0.2
+  },
+  "bottom_dock_layout": "left_aligned",
+  "collaboration_panel": {
+    "button": false
+  },
+  "when_closing_with_no_tabs": "close_window",
+  "preview_tabs": {
+    "enable_preview_from_code_navigation": true,
+    "enable_preview_from_file_finder": true,
+    "enabled": true
+  },
+  "tab_bar": {
+    "show_nav_history_buttons": false,
+    "show_tab_bar_buttons": false
+  },
+  "minimap": {
+    "current_line_highlight": "all",
+    "show": "always",
+    "thumb": "always",
+    "thumb_border": "full"
+  },
+  "indent_guides": {
+    "coloring": "indent_aware"
+  },
+  "scroll_sensitivity": 2,
+  // =======================
+  //      FILE SETTINGS
+  // =======================
+  "files": {
+    "associations": {
+      "*.vue": "vue"
+    },
+    "auto_save": "onWindowChange"
+  },
+  "auto_install_extensions": {
+    "nix": true,
+    "golang": true,
+    "python": true,
+    "LOG": true,
+    "GraphQL": true,
+    "NGINX": true,
+    "SCSS": true,
+    "XML": true
+  },
+  // =======================
+  //      LANGUAGE SETTINGS
+  // =======================
+  "languages": {
+    "Nix": {
+      "format_on_save": "on",
+      "formatter": {
+        "external": {
+          "arguments": [
+            "--quiet",
+            "--"
+          ],
+          "command": "nixfmt"
+        }
+      },
+      "language_servers": [
+        "nixd",
+        "!nil"
+      ]
+    }
+  },
+  // =======================
   //        AI SETTINGS
   // =======================
   "edit_predictions": {
-    "mode": "eager" // aggressive
+    "mode": "eager"
   },
   "agent": {
     "default_model": {
@@ -49,115 +155,23 @@
   },
   "show_edit_predictions": true,
   // =======================
-  //      EDITOR SETTINGS
+  //      PANEL SETTINGS
   // =======================
-  "editor": {
-    "cursor_blinking": "smooth",
-    "cursor_style": "block",
-    "detect_indentation": true,
-    "ensure_final_newline_on_save": true,
-    "font_ligatures": true,
-    "format_on_save": "on",
-    "hard_tabs": true,
-    "preferred_line_length": 100,
-    "render_whitespace": "boundary",
-    "show_copilot_suggestions": true,
-    "show_inlay_hints": true,
-    "soft_tabs": true,
-    "tab_size": 2,
-    "completions": {
-      "enabled": true,
-      "show_snippets": true,
-      "show_suggestions": true,
-      "show_tooltips": true
-    }
+  "outline_panel": {
+    "auto_reveal_entries": true,
+    "dock": "right",
+    "auto_fold_dirs": true
   },
-  "soft_wrap": "editor_width",
-  "buffer_font_size": 18,
-  "buffer_font_weight": 500,
-  "buffer_font_family": "Fira Code",
-  "buffer_line_height": "standard",
-  "agent_font_size": 15,
-  "ui_font_family": "Fira Code",
-  "ui_font_weight": 600,
-  "ui_font_size": 17,
-  "unstable.ui_density": "comfortable",
-  // =======================
-  //      UI SETTINGS
-  // =======================
-  "active_pane_modifiers": {
-    "inactive_opacity": 0.2
+  "project_panel": {
+    "hide_gitignore": false,
+    "indent_size": 30,
+    "show_diagnostics": "all"
   },
-  "bottom_dock_layout": "left_aligned",
-  "collaboration_panel": {
-    "button": false
-  },
-  "when_closing_with_no_tabs": "close_window",
-  "preview_tabs": {
-    "enable_preview_from_code_navigation": true,
-    "enable_preview_from_file_finder": true,
-    "enabled": true
-  },
-  "icon_theme": "VSCode Icons (Dark)",
-  "tab_bar": {
-    "show": true,
-    "show_nav_history_buttons": false,
-    "show_tab_bar_buttons": false
-  },
-  "tabs": {
-    "file_icons": true,
-    "git_status": true
-  },
-  "title_bar": {
-    "show_branch_icon": true,
-    "show_onboarding_banner": true,
-    "show_user_picture": true
-  },
-  "minimap": {
-    "current_line_highlight": "all",
-    "show": "always",
-    "thumb": "always",
-    "thumb_border": "full"
-  },
-  "indent_guides": {
-    "enabled": true,
-    "coloring": "indent_aware"
-  },
-  // "relative_line_numbers": true,
-  "scroll_sensitivity": 2,
-  // =======================
-  //      FILE SETTINGS
-  // =======================
-  "files": {
-    "associations": {
-      "*.vue": "vue"
-    },
-    "auto_save": "onWindowChange",
-    "trim_trailing_whitespace": true
-  },
-  "auto_install_extensions": {
-    "nix": true,
-    "golang": true,
-    "python": true,
-    "LOG": true,
-    "GraphQL": true,
-    "NGINX": true,
-    "SCSS": true,
-    "XML": true
-  },
-  // =======================
-  //      FORMATTER SETTINGS
-  // =======================
-  "format_on_save": "on",
-  "formatter": "language_server",
   // =======================
   //      DIAGNOSTICS
   // =======================
   "diagnostics": {
-    "button": true,
-    "include_warnings": true,
     "inline": {
-      "enabled": true,
       "update_debounce_ms": 150,
       "padding": 4,
       "min_column": 0,
@@ -174,7 +188,6 @@
     }
   },
   "git_panel": {
-    "button": true,
     "sort_by_path": true,
     "status_style": "icon"
   },
@@ -183,84 +196,45 @@
   // =======================
   "terminal": {
     "copy_on_select": true,
-    "dock": "bottom",
     "font_family": "Cantarell",
     "font_size": 19,
-    "font_weight": 500,
-    "shell": "system"
-  },
-  // =======================
-  //      PANEL SETTINGS
-  // =======================
-  "outline_panel": {
-    "auto_reveal_entries": true,
-    "dock": "right",
-    "auto_fold_dirs": true
-  },
-  "project_panel": {
-    "auto_fold_dirs": true,
-    "entry_spacing": "standard",
-    "hide_gitignore": false,
-    "indent_size": 30,
-    "show_diagnostics": "all"
+    "font_weight": 500
   },
   // =======================
   //      SEARCH SETTINGS
   // =======================
   "search": {
-    "case_sensitive": false,
     "include_ignored": true
   },
-  // SmartSearch: if true, search will be case-insensitive unless uppercase letters are used in the search term.
-  "use_smartcase_search": true,
   // =======================
   //      DEBUGGER SETTINGS
   // =======================
   "debugger": {
-    "button": true,
     "dock": "left",
     "format_dap_log_messages": true,
     "log_dap_communications": true,
     "save_breakpoints": true
   },
-  "debuggers": [],
-  // =======================
-  //      EXPERIMENTAL
-  // =======================
-  "experimental.theme_overrides": {
-    // "background": "#00000999",
-    // "editor.background": "#41486844",
-    // "panel.background": "#00000999"
-  },
-  "theme": {
-    "dark": "Tokyo Night",
-    "light": "Gruvbox Light Hard",
-    "mode": "system"
-  },
-  // =======================
-  //      LANGUAGE SETTINGS
-  // =======================
-  "languages": {
-    "Nix": {
-      "format_on_save": "on",
-      "formatter": {
-        "external": {
-          "arguments": [
-            "--quiet",
-            "--"
-          ],
-          "command": "nixfmt"
-        }
-      },
-      "language_servers": [
-        "nixd",
-        "!nil"
-      ]
-    }
-  },
   // =======================
   //      MISC SETTINGS
   // =======================
   "load_direnv": "direct",
-  "keybindings": []
+  "prettier": {
+    "printWidth": 80,
+    "tabWidth": 2,
+    "useTabs": false,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "all",
+    "bracketSpacing": true,
+    "jsxBracketSameLine": false,
+    "arrowParens": "avoid",
+    "proseWrap": "preserve",
+    "endOfLine": "lf"
+  },
+  "inlay_hints": {
+    "typeHints": true,
+    "parameterHints": true,
+    "chainingHints": true
+  }
 }
