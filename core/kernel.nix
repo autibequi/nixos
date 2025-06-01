@@ -50,6 +50,17 @@
     "typec_ucsi"
     "ext4"
     "acpi_call" # Mantido, pode ser útil para power management específico de hardware
+    "ucsi_acpi"
+
+    # asus
+    "asus_nb_wmi"
+    "asus_wmi"
+
+    # Testing
+    "amd_energy"
+    "amd_pmf"
+    "pcie_aspm=force"
+    "bbswitch" # for dGPU power management
 
     # for external nvme usb-c case
     "uas"
