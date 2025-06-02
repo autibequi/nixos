@@ -40,6 +40,9 @@
     # ./desktop-envs/kde.nix
   ];
 
+  # DesktopEnv Niri (remove other?):
+  # programs.niri.enable = true;
+
   # Environment Variables
   environment.sessionVariables = {
     # Wayland Pains

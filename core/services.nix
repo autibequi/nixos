@@ -19,4 +19,7 @@
 
   # Preload common apps for snappier experience
   services.preload.enable = true;
+
+  # fwupd
+  services.fwupd.enable = true;
 }
