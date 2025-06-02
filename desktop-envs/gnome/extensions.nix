@@ -34,6 +34,7 @@
     gnomeExtensions.advanced-alttab-window-switcher
     gnomeExtensions.custom-command-toggle
     gnomeExtensions.upower-battery
+    gnomeExtensions.battery-time-3
 
     # super cool but nukes battery life due to GPU usage on idle
     # gnomeExtensions.mouse-tail
@@ -55,8 +56,8 @@
           hot-sensors = [
             "_processor_usage_"
             "_memory_usage_"
+            "_average_temperature_"
             "_battery_rate_"
-            "_battery_time_left_"
           ];
         };
 

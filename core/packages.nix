@@ -14,6 +14,7 @@
     # cura
     # ventoy-full-qt
     flameshot
+    retroarchFull
 
     # Coding
     # Nix formating
