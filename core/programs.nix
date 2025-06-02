@@ -10,6 +10,10 @@
     starship.settings = {
     };
 
+    firefox = {
+      enable = true;
+    };
+
     neovim = {
       enable = true;
       defaultEditor = true;

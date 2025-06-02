@@ -9,63 +9,52 @@
 
   # Systemd Packages
   environment.systemPackages = with pkgs; [
-    # Tools
-    dbeaver-bin
-    podman
-    postgresql
-    terraform
+    # --- Testing ---
+    github-copilot-cli
 
-    # REST Clients
+    # --- CLI ---
+    dig
+    awscli2
+    k9s # kubernets frontend
+    kubectl
+    devbox
+    terraform
+    postgresql # for dbeaver dumps
+    ffmpeg  # video stuff
+    openvpn # bastion access
+
+    # --- APPS  ---
+    dbeaver-bin
+    chromium # work browser
+    vscode
+    code-cursor
     cartero
     insomnia
 
-    # clitools
-    dig
-    awscli2
-    k9s # kubernets cli
-    kubectl
-
-    # vpn
-    openvpn
-
-    # editors
-    vscode
-
-    # python
+    # --- Python ---
     python312
     pipx
     poetry
     pyenv
     file # libmagic - intraupload
 
-    # Node
+    # --- JS, ick! ---
     nodejs
     nodePackages.eslint
 
-    # Flutter
+    # --- Flutter ---
     flutter
     android-studio
     android-tools
     gradle
     dart
 
-    # golang
+    # --- Golang ---
     go
-    graphviz # golang pprof
-    gcc # kafka go
     delve
+    graphviz
+    gcc # because kafka fsr
 
-    # video stuff
-    ffmpeg
-
-    # work browser
-    vivaldi
-    chromium
-
-    # TESTING:
-    github-copilot-cli
-    devbox
-    pkgs.code-cursor
   ];
 
   # TESTING: Dynamic Libraries
@@ -107,7 +96,7 @@
   };
 
   home-manager.users."pedrinho" =
-    { pkgs, ... }:
+    { ... }:
     {
       programs.git = {
         enable = true;

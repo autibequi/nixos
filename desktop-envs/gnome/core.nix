@@ -7,17 +7,10 @@
   ];
 
   services = {
-    xserver = {
-      desktopManager.gnome.enable = true;
+    desktopManager.gnome.enable = true;
+    displayManager.gdm = {
       enable = true;
-      displayManager.gdm = {
-        enable = true;
-        wayland = true;
-      };
-      xkb = {
-        layout = "us";
-        variant = "alt-intl";
-      };
+      wayland = true;
     };
   };
 
