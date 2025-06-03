@@ -73,6 +73,7 @@
     fastfetch
     pv
     jujutsu
+    wget
 
     # TESTING: shells
     # nushell
