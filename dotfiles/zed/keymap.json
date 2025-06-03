@@ -7,6 +7,8 @@
 // from the command palette.
 [
   {
+    // Equivalente a Raiz
+    // https://zed.dev/docs/key-bindings#contexts
     "context": "Workspace",
     "bindings": {
       // panels
@@ -17,13 +19,18 @@
       "ctrl-alt-n": "agent::NewThread",
       "ctrl-alt-/": "agent::CyclePreviousInlineAssist",
       // tasks
-      "f5": "task::Spawn"
+      "f5": "task::Spawn",
+      // Quick  Toggle Panels
+      "ctrl-shift-a": "workspace::ToggleLeftDock",
+      "ctrl-shift-d": "workspace::ToggleRightDock",
+      "ctrl-shift-s": "workspace::ToggleBottomDock"
     }
   },
   {
     "context": "Editor",
     "bindings": {
-      "ctrl-alt-n": "agent::NewThread"
+      "ctrl-shift-l": "agent::NewThread",
+      "ctrl-k": "assistant::InlineAssist"
     }
   }
 ]

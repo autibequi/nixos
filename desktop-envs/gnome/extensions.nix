@@ -55,9 +55,8 @@
           hot-sensors = [
             "_processor_usage_"
             "_memory_usage_"
-            "_average_temperature_"
-            "_battery_timeleft_"
             "_battery_rate_"
+            "_battery_time_left_"
           ];
         };
 

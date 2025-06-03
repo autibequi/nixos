@@ -15,9 +15,64 @@
     "soft_tabs": true,
     "tab_size": 2
   },
+  "vim_mode": false,
+  "vim": {
+    "cursor_shape": {
+      "insert": "bar",
+      "normal": "block",
+      "replace": "hollow",
+      "visual": "underline"
+    }
+  },
+  "auto_indent_on_paste": true,
+  "scroll_beyond_last_line": "vertical_scroll_margin",
+  "autoscroll_on_clicks": true,
+  "fast_scroll_sensitivity": 5,
+  "scroll_sensitivity": 2,
+  "redact_private_values": false,
+  "private_files": [
+    // List of private files to exclude from search, version control, etc.
+    ".env",
+    ".env.local",
+    ".env.*.local",
+    "secrets.json",
+    "private.key"
+  ],
   "soft_wrap": "editor_width",
   "format_on_save": "on",
   "formatter": "language_server",
+  // =========================
+  //     TOOLBAR SETTINGS
+  // =========================
+  "toolbar": {
+    "agent_review": false,
+    "breadcrumbs": true,
+    "code_actions": false,
+    "code_navigation": false,
+    "edit_predictions": false,
+    "quick_actions": false,
+    "selections_menu": false,
+  },
+  "tabs": {
+    "file_icons": true,
+    "git_status": true,
+    "show_diagnostics": "all",
+  },
+  "show_wrap_guides": true,
+  "scrollbar": {
+    "show": "never"
+  },
+  "slash_commands": {
+    "cargo_workspace": {
+      "enabled": true
+    },
+    "docs": {
+      "enabled": true
+    }
+  },
+  "title_bar": {
+    "show_branch_icon": true,
+  },
   // =======================
   //      FONT SETTINGS
   // =======================
@@ -64,7 +119,6 @@
   "indent_guides": {
     "coloring": "indent_aware"
   },
-  "scroll_sensitivity": 2,
   // =======================
   //      FILE SETTINGS
   // =======================
