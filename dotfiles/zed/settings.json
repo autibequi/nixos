@@ -51,12 +51,12 @@
     "code_navigation": false,
     "edit_predictions": false,
     "quick_actions": false,
-    "selections_menu": false,
+    "selections_menu": false
   },
   "tabs": {
     "file_icons": true,
     "git_status": true,
-    "show_diagnostics": "all",
+    "show_diagnostics": "all"
   },
   "show_wrap_guides": true,
   "scrollbar": {
@@ -71,7 +71,7 @@
     }
   },
   "title_bar": {
-    "show_branch_icon": true,
+    "show_branch_icon": true
   },
   // =======================
   //      FONT SETTINGS

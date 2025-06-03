@@ -66,9 +66,9 @@
 
           # NixAlien
           (
-            { self, system, ... }:
+            { ... }:
             {
-              environment.systemPackages = with self.inputs.nix-alien.packages.${system}; [
+              environment.systemPackages = [
                 nix-alien
               ];
               # Optional, needed for `nix-alien-ld`
