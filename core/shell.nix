@@ -61,7 +61,8 @@
   };
 
   environment.systemPackages = with pkgs; [
-    # essentials
+    # SysAdmin
+    powertop # power management
     uutils-coreutils
     unixtools.whereis
     pciutils
