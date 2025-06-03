@@ -34,5 +34,35 @@ alwaysApply: true
 - `/scripts/` - Scripts de automação e utilitários do sistema
 - `/tmp/` - Arquivos temporários e relatórios de sessão
 
+## ONDE MODIFICAR
+### Desktop Environments
+- `desktop-envs/gnome/extensions.nix` para extensões e configurações (via dconf) do GNOME
+- `desktop-envs/gnome/extensions-config/` para configurações de extensões do GNOME com arquivos dedicados
+- `desktop-envs/gnome/core.nix` para configurações principais do GNOME
+- `desktop-envs/gnome/packages.nix` para pacotes do GNOME
+- `desktop-envs/gnome/home.nix` para configurações de home-manager especificas pro gnome
+
+### Modules
+- `modules/nvidia.nix` para configurações da NVIDIA
+- `modules/bluetooth.nix` para configurações de Bluetooth
+- `modules/plymouth.nix` para configurações do Plymouth
+- `modules/battery.nix` para configurações de bateria
+- `modules/work.nix` para configurações de trabalho e produtividade
+- `dotfiles/` para arquivos de configuração pessoal (bash, zsh, vim, etc.)
+
+### Core
+- `configuration.nix` para configurações gerais do NixOS
+- `nix.nix` para configurações do Nix
+- `core/hardware.nix` para configurações de hardware
+- `core/kernel.nix` para configurações do kernel
+- `core/services.nix` para serviços essenciais do sistema
+- `core/kernel.nix` para configurações do kernel
+- `core/packages.nix` para pacotes essenciais do sistema
+- `core/shell.nix` para configurações de shell
+- `core/programas.nix` para programas essenciais do sistema
+
+## Tips
+- Se for procurar alguma configuração especifica faça um find/search/fd buscando em todos os arquivos para ganhar velocidade
+
 ## ARTEFATOS
 - Sempre que valido crie um relatorio do problema solucionado na pasta tmp
