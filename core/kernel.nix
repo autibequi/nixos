@@ -55,7 +55,7 @@
     # asus
     "asus_nb_wmi"
     "asus_wmi"
-
+    "bbswitch" 
     # Testing
     "amd_energy"
     "amd_pmf"
