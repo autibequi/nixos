@@ -20,7 +20,7 @@
     devbox
     terraform
     postgresql # for dbeaver dumps
-    ffmpeg  # video stuff
+    ffmpeg # video stuff
     openvpn # bastion access
 
     # --- APPS  ---
@@ -74,6 +74,9 @@
 
   networking.extraHosts = ''
     127.0.0.1 local.estrategia-sandbox.com.br
+    127.0.0.1 concursos.local.estrategia.com
+    127.0.0.1 oab.local.estrategia.com
+    127.0.0.1 carreiras-juridicas.local.estrategia.com
   '';
 
   # Cloudflare Warp

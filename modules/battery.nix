@@ -33,5 +33,9 @@
   # Kernel parameters para hibernação - FIXED!
   boot.kernelParams = [
     "mem_sleep_default=deep"
+
+    "pcie_aspm=force"
+    "nvme.noacpi=1"
+    "nvme_core.default_ps_max_latency_us=5500"
   ];
 }
