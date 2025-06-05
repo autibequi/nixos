@@ -19,8 +19,9 @@
   },
   {
     "label": "Clean Boot",
-    "command": "nh clean all --keep 3 --nogc",
+    "command": "nh clean all --keep 7 --nogc",
     "show_summary": false,
+    "hide": "on_success",
     "type": "shell",
     "options": {
       "cwd": "${workspaceFolder}"
@@ -28,8 +29,9 @@
   },
   {
     "label": "Clean All",
-    "command": "nh clean all --keep 3 --nogc",
+    "command": "nh clean all --keep 7 --nogc",
     "show_summary": false,
+    "hide": "on_success",
     "type": "shell",
     "options": {
       "cwd": "${workspaceFolder}"
