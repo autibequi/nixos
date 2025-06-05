@@ -18,7 +18,7 @@
     }
   },
   {
-    "label": "Clean Boot",
+    "label": "Clean Bootentries (Keep 7)",
     "command": "nh clean all --keep 7 --nogc",
     "show_summary": false,
     "hide": "on_success",
@@ -28,8 +28,8 @@
     }
   },
   {
-    "label": "Clean All",
-    "command": "nh clean all --keep 7 --nogc",
+    "label": "Clean Store",
+    "command": "nh clean all --keep 7",
     "show_summary": false,
     "hide": "on_success",
     "type": "shell",
@@ -38,7 +38,7 @@
     }
   },
   {
-    "label": "Update Channels",
+    "label": "Update",
     "command": "nh os switch --update .",
     "show_summary": false,
     "type": "shell",

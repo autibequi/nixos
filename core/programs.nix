@@ -12,6 +12,7 @@
 
     firefox = {
       enable = true;
+      languagePacks = [ "pt-BR" ];
     };
 
     neovim = {
