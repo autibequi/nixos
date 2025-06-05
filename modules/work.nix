@@ -10,7 +10,7 @@
   # Systemd Packages
   environment.systemPackages = with pkgs; [
     # --- Testing ---
-    github-copilot-cli
+    gh-copilot
 
     # --- CLI ---
     dig

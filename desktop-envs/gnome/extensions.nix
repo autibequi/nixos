@@ -56,7 +56,6 @@
             "_processor_usage_"
             "_memory_usage_"
             "_battery_rate_"
-            "_battery_time_left_"
           ];
         };
 

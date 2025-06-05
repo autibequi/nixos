@@ -5,6 +5,19 @@
   ...
 }:
 {
+  # End of Day Update
+  # https://nixos.wiki/wiki/Automatic_system_upgrades
+  system.autoUpgrade = {
+    enable = true;
+    flake = inputs.self.outPath;
+    flags = [
+      "--update-input"
+      "nixpkgs"
+      "-L" # print build logs
+    ];
+    dates = "18:00";
+    randomizedDelaySec = "45min";
+  };
 
   # Install LIX
   nix.package = pkgs.lix;
