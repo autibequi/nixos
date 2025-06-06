@@ -51,12 +51,12 @@
     "code_navigation": false,
     "edit_predictions": false,
     "quick_actions": false,
-    "selections_menu": false
+    "selections_menu": false,
   },
   "tabs": {
     "file_icons": true,
     "git_status": true,
-    "show_diagnostics": "all"
+    "show_diagnostics": "all",
   },
   "show_wrap_guides": true,
   "scrollbar": {
@@ -71,18 +71,18 @@
     }
   },
   "title_bar": {
-    "show_branch_icon": true
+    "show_branch_icon": true,
   },
   // =======================
   //      FONT SETTINGS
   // =======================
   "buffer_font_size": 18,
-  "buffer_font_weight": 500,
-  "buffer_font_family": "Fira Code",
-  "agent_font_size": 15,
-  "ui_font_family": "Fira Code",
+  "buffer_font_weight": 600,
+  "buffer_font_family": "JetBrainsMonoNL Nerd Font Mono",
+  "ui_font_family": "JetBrainsMonoNL Nerd Font Mono",
   "ui_font_weight": 600,
-  "ui_font_size": 17,
+  "ui_font_size": 18,
+  "agent_font_size": 18,
   // =======================
   //      UI SETTINGS
   // =======================
@@ -90,7 +90,7 @@
   "icon_theme": "VSCode Icons (Dark)",
   "theme": {
     "dark": "Tokyo Night",
-    "light": "Catppuccin Latte",
+    "light": "Hex Solarized Light Theme",
     "mode": "system"
   },
   "active_pane_modifiers": {

@@ -3,7 +3,7 @@
   # Fonts
   fonts = {
     fontconfig.enable = true;
-    enableDefaultPackages = true;
+    enableDefaultPackages = false;
     packages = with pkgs; [
       # nerd-fonts
       nerd-fonts.fira-code

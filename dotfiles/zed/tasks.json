@@ -1,0 +1,34 @@
+[
+  {
+    // Task to run the current Go file using Zed
+    "label": "Run Current Go File",
+    "type": "zed-task",
+    "command": "go",
+    "args": [
+      "run",
+      "${fileBasename}"
+    ],
+    "group": "Execute Single File",
+    "presentation": {
+      "reveal": "always"
+    },
+    "tags": [
+      "run file"
+    ]
+  },
+  {
+    // Task to run the current Python file using Zed
+    "label": "Run Current Python File",
+    "command": "python",
+    "args": [
+      "${fileBasename}"
+    ],
+    "group": "Execute Single File",
+    "presentation": {
+      "reveal": "always"
+    },
+    "tags": [
+      "run file"
+    ]
+  },
+]

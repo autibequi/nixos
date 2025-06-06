@@ -4,6 +4,10 @@
     "command": "nh os test .",
     "show_summary": false,
     "type": "shell",
+    "group": "Schema Tools",
+    "tags": [
+      "schema"
+    ],
     "options": {
       "cwd": "${workspaceFolder}"
     }
@@ -13,6 +17,21 @@
     "command": "nh os switch .",
     "show_summary": false,
     "type": "shell",
+    "tags": [
+      "schema"
+    ],
+    "options": {
+      "cwd": "${workspaceFolder}"
+    }
+  },
+  {
+    "label": "Update",
+    "command": "nh os switch --update .",
+    "show_summary": false,
+    "type": "shell",
+    "tags": [
+      "schema"
+    ],
     "options": {
       "cwd": "${workspaceFolder}"
     }
@@ -23,6 +42,9 @@
     "show_summary": false,
     "hide": "on_success",
     "type": "shell",
+    "tags": [
+      "maintenance"
+    ],
     "options": {
       "cwd": "${workspaceFolder}"
     }
@@ -33,15 +55,9 @@
     "show_summary": false,
     "hide": "on_success",
     "type": "shell",
-    "options": {
-      "cwd": "${workspaceFolder}"
-    }
-  },
-  {
-    "label": "Update",
-    "command": "nh os switch --update .",
-    "show_summary": false,
-    "type": "shell",
+    "tags": [
+      "maintenance"
+    ],
     "options": {
       "cwd": "${workspaceFolder}"
     }
