@@ -5,7 +5,7 @@
     fontconfig.enable = true;
     enableDefaultPackages = true;
     packages = with pkgs; [
-      nerd-fonts
+      # nerd-fonts
       nerd-fonts.fira-code
       nerd-fonts.jetbrains-mono
     ];

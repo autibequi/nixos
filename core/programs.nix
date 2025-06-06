@@ -11,9 +11,8 @@
     };
 
     firefox = {
-      package = pkgs.firefox-beta-unwrapped;
       enable = true;
-      languagePacks = [ "pt-BR" ];
+      package = pkgs.firefox-beta;
     };
 
     neovim = {
