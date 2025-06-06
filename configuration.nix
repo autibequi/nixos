@@ -20,6 +20,7 @@
     ./core/programs.nix
     ./core/packages.nix
     ./core/shell.nix
+    ./core/fonts.nix
 
     # Extra
     ./modules/battery.nix
@@ -90,39 +91,6 @@
     LC_PAPER = "pt_BR.UTF-8";
     LC_TELEPHONE = "pt_BR.UTF-8";
     LC_TIME = "pt_BR.UTF-8";
-  };
-
-  # Fonts
-  fonts = {
-    fontconfig.enable = true;
-    enableDefaultPackages = true;
-    packages = with pkgs; [
-      noto-fonts
-      noto-fonts-cjk-sans
-      noto-fonts-emoji
-      liberation_ttf
-      fira-code
-      fira-code-symbols
-    ];
-  };
-
-  fonts.fontconfig.defaultFonts = {
-    monospace = [
-      "FiraCode Nerd Font Mono Bold"
-      "Fira Code Bold"
-      "Liberation Mono Bold"
-      "Noto Sans Mono Bold"
-    ];
-    sansSerif = [
-      "Noto Sans Bold"
-      "Liberation Sans Bold"
-      "Fira Sans Bold"
-    ];
-    serif = [
-      "Noto Serif Bold"
-      "Liberation Serif Bold"
-      "Fira Serif Bold"
-    ];
   };
 
   # XDG Portal
