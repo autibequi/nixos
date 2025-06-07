@@ -52,8 +52,6 @@
     rustup
     rust-analyzer
     rustfmt
-    clippy
-    rust-analyzer
 
     # AI
     windsurf

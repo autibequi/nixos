@@ -74,7 +74,7 @@
     }
   },
   "title_bar": {
-    "show_branch_icon": true
+    "show_branch_icon": true,
   },
   // =======================
   //      FONT SETTINGS
@@ -230,7 +230,7 @@
   "project_panel": {
     "hide_gitignore": true,
     "indent_size": 30,
-    "show_diagnostics": "all"
+    "show_diagnostics": "all",
   },
   "git_panel": {
     "sort_by_path": true,
@@ -245,27 +245,39 @@
   // =======================
   "diagnostics": {
     "inline": {
-      "update_debounce_ms": 150,
+      "update_debounce_ms": 50,
+      "enabled": true,
       "padding": 4,
       "min_column": 0,
-      "max_severity": "info"
-    }
+      "max_severity": "hint",
+    },
+    "cargo": {
+      "fetch_cargo_diagnostics": true,
+    },
+    "include_warnings": true,
+    "button": true,
   },
+  "format_on_save": "on",
+  "formatter": "language_server",
+  "line_indicator_format": "long",
   // =======================
   //      GIT SETTINGS
   // =======================
   "git": {
     "git_gutter": "tracked_files",
     "inline_blame": {
-      "enabled": true
-    }
+      "enabled": true,
+      "delay_ms": 500,
+      "show_commit_summary": true
+    },
+    "hunk_style": "unstaged_hollow"
   },
   // =======================
   //      TERMINAL SETTINGS
   // =======================
   "terminal": {
     "copy_on_select": true,
-    "font_family": "Cantarell",
+    "font_family": "JetBrainsMonoNL Nerd Font Mono",
     "font_size": 19,
     "font_weight": 500
   },
@@ -291,10 +303,10 @@
   "prettier": {
     "printWidth": 80,
     "tabWidth": 2,
-    "useTabs": false,
+    "useTabs": true,
     "semi": true,
     "singleQuote": true,
-    "trailingComma": "all",
+    "trailingComma": "true",
     "bracketSpacing": true,
     "jsxBracketSameLine": false,
     "arrowParens": "avoid",

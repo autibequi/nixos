@@ -91,6 +91,7 @@
     pv
     jujutsu
     wget
+    clippy
 
     # TESTING: shells
     # nushell
