@@ -101,7 +101,7 @@
           move-window-right = [ "<Shift><Super>d" ];
           move-window-up = [ "<Shift><Super>w" ];
           span-multiple-tiles-activation-key = [ "0" ];
-          span-window-all-tiles = [ "<Super>Tab" ];
+          # span-window-all-tiles = [ "<Super>Tab" ];
           tile-preview-animation-time = 50;
           tiling-system-activation-key = [ "2" ];
           top-edge-maximize = true;

@@ -45,7 +45,7 @@
 
             # Window Management
             "close" = [ "<Super>Escape" ];
-            "maximize" = [ "<Super>w" ];
+            "maximize" = [ "<Super>tab" ];
             "minimize" = [ "<Super>s" ];
           };
 
