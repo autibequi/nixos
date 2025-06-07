@@ -52,10 +52,6 @@
     "acpi_call" # Mantido, pode ser útil para power management específico de hardware
     "ucsi_acpi"
 
-    # asus
-    "asus_nb_wmi"
-    "asus_wmi"
-    "bbswitch"
     # Testing
     "amd_energy"
     "amd_pmf"

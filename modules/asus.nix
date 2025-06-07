@@ -18,4 +18,10 @@
       };
     };
   };
+
+  boot.kernelModules = [
+    "asus_nb_wmi"
+    "asus_wmi"
+    "bbswitch"
+  ];
 }
