@@ -20,17 +20,23 @@
       "ctrl-alt-/": "agent::CyclePreviousInlineAssist",
       // tasks
       "f5": "task::Spawn",
-      // Quick  Toggle Panels
       "ctrl-shift-a": "workspace::ToggleLeftDock",
       "ctrl-shift-d": "workspace::ToggleRightDock",
-      "ctrl-shift-s": "workspace::ToggleBottomDock"
+      "ctrl-shift-s": "workspace::ToggleBottomDock",
+      "ctrl-alt-t": "workspace::NewCenterTerminal"
     }
   },
   {
     "context": "Editor",
     "bindings": {
       "ctrl-shift-l": "agent::NewThread",
-      "ctrl-k": "assistant::InlineAssist"
+      "ctrl-k": "assistant::InlineAssist",
+      "ctrl-alt-t": "workspace::NewCenterTerminal"
     }
-  }
+  },
+  {
+    // Switch between opened files
+    "context": "Editor",
+    "bindings": {}
+  },
 ]

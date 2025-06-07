@@ -104,7 +104,7 @@
   "preview_tabs": {
     "enable_preview_from_code_navigation": true,
     "enable_preview_from_file_finder": true,
-    "enabled": true
+    "enabled": true,
   },
   "tab_bar": {
     "show": false,
@@ -116,10 +116,13 @@
     "current_line_highlight": "all",
     "show": "always",
     "thumb": "always",
-    "thumb_border": "full"
+    "thumb_border": "none",
   },
   "indent_guides": {
-    "coloring": "indent_aware"
+    "coloring": "indent_aware",
+    "enabled": true,
+    "active_line_width": 4,
+    "line_width": 2,
   },
   // =======================
   //      FILE SETTINGS
@@ -144,6 +147,9 @@
   //      LANGUAGE SETTINGS
   // =======================
   "languages": {
+    "JsonC": {
+      "format_on_save": "on",
+    },
     "Nix": {
       "format_on_save": "on",
       "formatter": {
@@ -159,7 +165,7 @@
         "nixd",
         "!nil"
       ]
-    }
+    },
   },
   // =======================
   //        AI SETTINGS
@@ -272,6 +278,9 @@
     },
     "hunk_style": "unstaged_hollow"
   },
+  "message_editor": {
+    "auto_replace_emoji_shortcode": true
+  },
   // =======================
   //      TERMINAL SETTINGS
   // =======================
@@ -309,7 +318,6 @@
     "trailingComma": "true",
     "bracketSpacing": true,
     "jsxBracketSameLine": false,
-    "arrowParens": "avoid",
     "proseWrap": "preserve",
     "endOfLine": "lf"
   },
