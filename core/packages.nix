@@ -16,6 +16,9 @@
     flameshot
     retroarchFull
 
+    #  LSP for markdonw?
+    markdown-oxide
+
     # Coding
     # Nix formating
     nil

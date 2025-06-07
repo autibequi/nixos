@@ -9,9 +9,6 @@
     # Utils
     pkgs.gnome-tweaks
     pkgs.gnome-power-manager
-
-    # Terminal
-    whitesur-gtk-theme
   ];
 
   environment.gnome.excludePackages = [
@@ -23,12 +20,10 @@
     pkgs.geary
     pkgs.gnome-calendar
     pkgs.gnome-contacts
-    pkgs.gnome-maps
     pkgs.gnome-music
     pkgs.gnome-photos
     pkgs.gnome-tour
     pkgs.evince
-    pkgs.gnome-weather
     pkgs.gnome-clocks
     pkgs.gnome-characters
     pkgs.gnome-sound-recorder
