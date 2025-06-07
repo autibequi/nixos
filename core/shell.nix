@@ -62,7 +62,7 @@
       justrun() {
         local cmd="$1"
         shift
-        nix shell --impure "nixpkgs#$cmd" -c "$cmd" "$@"
+        NIXPKGS_ALLOW_UNFREE=1 nix shell --impure "nixpkgs#$cmd" -c "$cmd" "$@"
       }
 
       addshell() {
