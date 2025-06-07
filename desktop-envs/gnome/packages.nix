@@ -7,31 +7,31 @@
     gnome-extension-manager # Ferramenta para gerenciar extensões
 
     # Utils
-    pkgs.gnome-tweaks
-    pkgs.gnome-power-manager
+    gnome-tweaks
+    gnome-power-manager
   ];
 
-  environment.gnome.excludePackages = [
-    pkgs.gnome-terminal
-    pkgs.epiphany
-    pkgs.gedit
-    pkgs.totem
-    pkgs.yelp
-    pkgs.geary
-    pkgs.gnome-calendar
-    pkgs.gnome-contacts
-    pkgs.gnome-music
-    pkgs.gnome-photos
-    pkgs.gnome-tour
-    pkgs.evince
-    pkgs.gnome-clocks
-    pkgs.gnome-characters
-    pkgs.gnome-sound-recorder
-    pkgs.gnome-logs
-    pkgs.gnome-usage
-    pkgs.simple-scan
-    pkgs.gnome-connections
-    pkgs.gnome-text-editor
-    pkgs.gnome-font-viewer
+  environment.gnome.excludePackages = with pkgs; [
+    gnome-terminal
+    epiphany
+    gedit
+    totem
+    yelp
+    geary
+    gnome-calendar
+    gnome-contacts
+    gnome-music
+    gnome-photos
+    gnome-tour
+    evince
+    gnome-clocks
+    gnome-characters
+    gnome-sound-recorder
+    gnome-logs
+    gnome-usage
+    simple-scan
+    gnome-connections
+    gnome-text-editor
+    gnome-font-viewer
   ];
 }

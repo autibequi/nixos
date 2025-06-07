@@ -11,6 +11,7 @@
     stremio
     obsidian
     blanket
+    papers # for reading academic papers
     # cura
     # ventoy-full-qt
     flameshot
