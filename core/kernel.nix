@@ -25,7 +25,7 @@
 
     # Força o uso do p-state ativo para o processador AMD
     # active so epp modes will work
-    "amd_pstate=active"
+    "amd_pstate=guided"
   ];
 
   # Configurar compressão.
@@ -55,7 +55,7 @@
     # asus
     "asus_nb_wmi"
     "asus_wmi"
-    "bbswitch" 
+    "bbswitch"
     # Testing
     "amd_energy"
     "amd_pmf"

@@ -23,6 +23,7 @@
     ./core/fonts.nix
 
     # Extra
+    ./modules/asus.nix
     ./modules/battery.nix
     ./modules/bluetooth.nix
     ./modules/nvidia.nix

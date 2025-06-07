@@ -11,17 +11,6 @@
   # are we ARM yet?
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
-  # curent setup g14
-  programs.rog-control-center.enable = true;
-  programs.rog-control-center.autoStart = true;
-  services.supergfxd.enable = true;
-  services = {
-    asusd = {
-      enable = true;
-      enableUserService = true;
-    };
-  };
-
   # Hardware
   hardware = {
     enableAllFirmware = true;
