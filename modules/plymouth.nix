@@ -1,8 +1,9 @@
-{ pkgs, ... }: {
+{ pkgs, lib, ... }:
+{
   boot = {
     plymouth = {
       enable = true;
-      theme = "dragon";
+      theme = lib.mkDefault "dragon"; # Define "dragon" como padrão
       themePackages = with pkgs; [
         # By default we would install all themes
         # https://github.com/NixOS/nixpkgs/blob/nixos-24.11/pkgs/by-name/ad/adi1090x-plymouth-themes/shas.nix
@@ -12,17 +13,15 @@
       ];
     };
 
-    # Silent boot flags
     loader.timeout = 0;
     consoleLogLevel = 0;
     initrd.verbose = false;
     kernelParams = [
-      "plymouth.use-simpledrm=1" # usa simpledrm para melhor desempenho
+      "plymouth.use-simpledrm=1"
       "udev.log_priority=3"
-
-      "loglevel=3" # limita logs do kernel
-      "quiet" # reduz mensagens de boot
-      "splash" # habilita splash screen
+      "loglevel=3"
+      "quiet"
+      "splash"
     ];
   };
 }

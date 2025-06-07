@@ -62,7 +62,7 @@
           nixos-cosmic.nixosModules.default
 
           # Stylix
-          stylix.nixosModules.stylix
+          # stylix.nixosModules.stylix
 
           # NixAlien
           (

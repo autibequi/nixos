@@ -27,7 +27,6 @@
     ./modules/bluetooth.nix
     ./modules/nvidia.nix
     ./modules/plymouth.nix
-    ./modules/stylix.nix
     # ./modules/howdy.nix
     # ./modules/flatpak.nix
     # ./modules/ai.nix
