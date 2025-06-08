@@ -147,7 +147,7 @@
   //      LANGUAGE SETTINGS
   // =======================
   "languages": {
-    "JsonC": {
+    "jsonc": {
       "format_on_save": "on",
     },
     "Nix": {
@@ -244,7 +244,11 @@
   },
   "collaboration_panel": {
     "button": true,
-    "dock": "left"
+    "dock": "right"
+  },
+  "chat_panel": {
+    "button": "always",
+    "dock": "right"
   },
   // =======================
   //      DIAGNOSTICS
