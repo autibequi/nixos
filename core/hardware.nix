@@ -1,5 +1,4 @@
 {
-  config,
   lib,
   modulesPath,
   ...
@@ -12,50 +11,21 @@
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
   # Hardware
+  # Stallman would be very sad with me...
   hardware = {
     enableAllFirmware = true;
-
-    # AMD
-    amdgpu.initrd.enable = true; # Fix low resolution on boot
-    cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+    enableAllHardware = true;
+    enableRedistributableFirmware = true;
+    amdgpu.initrd.enable = true;
+    cpu.amd.updateMicrocode = true;
   };
 
   # Bootloader
-  boot.kernelModules = [
-    "amdgpu"
-  ];
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # X11 and Wayland
-  services.xserver.videoDrivers = [
-    "amdgpu"
-  ];
-
-  # TODO: Try Next Reset
-  # LUKS FullDiskEncryption
-  # boot.initrd.luks.devices = {
-  #   luksroot = {
-  #       device = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
-  #       allowDiscards = true;
-  #       keyFileSize = 4096;
-  #       # pinning to /dev/disk/by-id/usbkey works
-  #       keyFile = "/dev/sdb";
-  #   };
-  # };
-
-  # Root
-  fileSystems."/" = {
-    device = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
-    fsType = "ext4"; # TODO: testar zfs com lz4 no proximo setup
-    neededForBoot = true;
-    options = [
-      "defaults"
-      "noatime"
-      "discard"
-    ];
-
-  };
+  # Graphical Driver List
+  services.xserver.videoDrivers = [ "amdgpu" ];
 
   # Boot
   fileSystems."/boot" = {
@@ -67,18 +37,36 @@
     ];
   };
 
+  # Root
+  fileSystems."/" = {
+    device = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
+    fsType = "ext4"; # TODO: testar zfs com lz4 no proximo setup
+    neededForBoot = true;
+    options = [
+      "defaults"
+      "noatime"
+      "discard"
+    ];
+  };
+
+  # Hibernation
+  # Check modules/battery.nix for more hibernation config
+  boot.resumeDevice = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
+
   # Swap - Will try to mount on Stage 1
-  # TODO: fix, kinda worksbut takes a lot of time to boot until it times out
   swapDevices = [
-    # optional g14 internal laptop swap
-    # {
-    #   device = "/dev/disk/by-uuid/0319478f-63cc-4fde-9804-523687d223ee";
-    #   priority = 10;
-    #   options = [
-    #     "x-systemd.device-timeout=1ms"
-    #     "nofail"
-    #   ];
-    # }
     { device = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; } # nomad usb stick
   ];
+
+  # TODO: FULL DISK ENCRYPTION
+  # LUKS FullDiskEncryption
+  # boot.initrd.luks.devices = {
+  #   luksroot = {
+  #       device = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
+  #       allowDiscards = true;
+  #       keyFileSize = 4096;
+  #       # pinning to /dev/disk/by-id/usbkey works
+  #       keyFile = "/dev/sdb";
+  #   };
+  # };
 }

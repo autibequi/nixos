@@ -19,10 +19,6 @@
   # AMD EPP to change the power profile so pstate can change
   services.auto-epp.enable = true;
 
-  # Hibernation
-  # NVME case swap partition
-  boot.resumeDevice = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
-
   services.logind = {
     lidSwitch = "hibernate";
     powerKey = "hibernate";
@@ -31,19 +27,11 @@
 
   systemd.sleep.extraConfig = ''
     HibernateOnACPower=true
-    HibernateDelaySec=30
+    HibernateDelaySec=10m
+    SuspendState=mem
   '';
 
-  # pm automatico pra nvidia
-  boot.extraModprobeConfig = ''
-    options pci power_control=auto
-  '';
-
-  # Kernel parameters para hibernação - FIXED!
   boot.kernelParams = [
     "mem_sleep_default=deep"
-
-    "pcie_aspm=force"
-    "nvme.noacpi=1"
   ];
 }

@@ -66,6 +66,9 @@
     "nvme_core"
     "scsi_mod"
     "sd_mod"
+
+    # AMD (optional)
+    "amdgpu"
   ];
 
   # TODO: clean up initrd modules

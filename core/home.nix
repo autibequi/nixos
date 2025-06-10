@@ -1,4 +1,4 @@
-{ config, ... }:
+{ ... }:
 {
   # avoid file colisions
   home-manager.backupFileExtension = "backup";
