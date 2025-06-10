@@ -21,7 +21,7 @@
     zed-editor_git # latest git build
 
     # Ganes
-    retroarchFull
+    # retroarchFull
 
     # Terminal
     ghostty
