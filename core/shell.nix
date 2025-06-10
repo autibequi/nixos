@@ -78,42 +78,49 @@
   };
 
   environment.systemPackages = with pkgs; [
-    # SysAdmin
-    powertop # power management
+    # basic (why i had to install those)
     uutils-coreutils
     unixtools.whereis
     pciutils
     gnumake
     lsof
     usbutils
+    wget
+    git
+
+    # Utils
+    # ----------------------
     lnav
     fastfetch
     pv
-    jujutsu
-    wget
     clippy
+    starship # zsh kit
+    rocmPackages.rocm-smi # amd basics for btop
 
-    # TESTING: shells
-    # nushell
-    fish
+    # Coding
+    # ---------------
+    # Nix formating
+    nil
+    nixd
+    nixfmt-rfc-style
 
-    # zsh
-    starship
+    # Markdown LSP
+    markdown-oxide
 
-    # Terminal
-    ghostty
-    warp-terminal
-    # allacritty
+    # Rust
+    cargo
+    rustc
+    rustup
+    rust-analyzer
+    rustfmt
 
-    # AMD
-    rocmPackages.rocm-smi
+    # Misc
+    jujutsu # git based replacement (confusing)
 
     # cli tools
-    yt-dlp
     btop-rocm # better top with amd support
     libnotify # cli notifications
     jq # json parser
-    lz4 # compression
 
     # Silly
     figlet # ascii art

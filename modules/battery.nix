@@ -1,6 +1,10 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
+  environment.systemPackages = with pkgs; [
+    powertop # power management
+  ];
+
   imports = [
     # Too much trouble, pstate does the same with better perf
     # ./tlp.nix
@@ -31,7 +35,7 @@
   '';
 
   # pm automatico pra nvidia
-  boot.extraModprobeConfig = '' 
+  boot.extraModprobeConfig = ''
     options pci power_control=auto
   '';
 

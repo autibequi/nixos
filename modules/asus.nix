@@ -13,9 +13,6 @@
     };
     supergfxd = {
       enable = true;
-      settings = {
-        mode = "integrated";
-      };
     };
   };
 
