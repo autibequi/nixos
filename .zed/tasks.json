@@ -61,5 +61,14 @@
     "options": {
       "cwd": "${workspaceFolder}"
     }
+  },
+  {
+    "label": "Verify Nix Store",
+    "command": "nix-store --verify --check-contents",
+    "show_summary": false,
+    "type": "shell",
+    "tags": [
+      "maintenance"
+    ]
   }
 ]
