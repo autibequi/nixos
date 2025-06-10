@@ -20,12 +20,13 @@ convert_video() {
   fi
 
   # Usa pv para mostrar o progresso e ffmpeg com aceleração CUDA para converter o vídeo
-  pv "$input_file" | ffmpeg \
-    -hwaccel cuda \
-    -hwaccel_output_format cuda \
-    -i pipe:0 \
-    -c:v h264_nvenc -preset fast \
-    -c:a aac -strict experimental -b:a 192k \
+  ffmpeg \
+    -hwaccel vaapi \
+    -vaapi_device /dev/dri/renderD128 \
+    -i "$input_file" \
+    -vf 'format=nv12,hwupload' \
+    -c:v h264_vaapi \
+    -c:a aac -b:a 192k \
     -loglevel error \
     "$output_file"
 
@@ -36,4 +37,3 @@ convert_video() {
     return 1
   fi
 }
-
