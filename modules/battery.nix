@@ -27,8 +27,7 @@
 
   systemd.sleep.extraConfig = ''
     HibernateOnACPower=true
-    HibernateDelaySec=10m
-    SuspendState=mem
+    HibernateDelaySec=10s
   '';
 
   boot.kernelParams = [
