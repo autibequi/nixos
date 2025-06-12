@@ -9,11 +9,14 @@
   system.stateVersion = "25.05";
 
   imports = [
+    # Installation:
+    # It's your only job:
+    ./hardware.nix
+
     # Substituters ans stuff
     ./nix.nix
 
     # Core
-    ./core/hardware.nix
     ./core/kernel.nix
     ./core/home.nix
     ./core/services.nix
@@ -44,6 +47,16 @@
   # DesktopEnv Niri (remove other?):
   # programs.niri.enable = true;
 
+  # are we ARM yet?
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+
+  # Graphical Driver List
+  services.xserver.videoDrivers = [ "amdgpu" ];
+
+  # Bootloader
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+
   # Environment Variables
   environment.sessionVariables = {
     # Wayland Pains
@@ -52,6 +65,16 @@
     OZONE_PLATFORM = "wayland";
     ELECTRON_OZONE_PLATFORM_HINT = "wayland";
     QT_AUTO_SCREEN_SCALE_FACTOR = "1";
+  };
+
+  # Hardware
+  # Stallman would be very sad with me...
+  hardware = {
+    enableAllFirmware = true;
+    enableAllHardware = true;
+    enableRedistributableFirmware = true;
+    amdgpu.initrd.enable = true;
+    cpu.amd.updateMicrocode = true;
   };
 
   # Add local bin to PATH

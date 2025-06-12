@@ -38,3 +38,8 @@ nh os switch /etc/nixos
 
 Q: High wattage consumption without CPU or GPU usage:
 A: nvidia went crazy, go to `sudo powertop` and turn on the tweaks
+
+
+## Fresh Install
+
+Após a instalação, o usuário só precisa preencher os dados de [`hardware.nix`](./core/hardware.nix).
