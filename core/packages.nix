@@ -33,5 +33,10 @@
     # should be working
     # cura
     # ventoy-full-qt
+
+    # ---------------
+    # Checking out
+    openrgb_git
+    evil-helix_git
   ];
 }
