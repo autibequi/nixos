@@ -18,11 +18,10 @@
     papirus-icon-theme # Icons
 
     # ZED EDITOR
-    # # latest git build
-    # zed-editor_git
-    zed-editor-fhs_git # nixer version
+    zed-editor_git # can sudo
+    # zed-editor-fhs_git # cant sudo
 
-    # Ganes
+    # Games
     # retroarchFull
 
     # Terminal
