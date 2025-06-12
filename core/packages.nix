@@ -17,8 +17,10 @@
     apple-cursor # to when my boss regret beeing okay
     papirus-icon-theme # Icons
 
-    # Text Editor
-    zed-editor_git # latest git build
+    # ZED EDITOR
+    # # latest git build
+    # zed-editor_git
+    zed-editor-fhs_git # nixer version
 
     # Ganes
     # retroarchFull

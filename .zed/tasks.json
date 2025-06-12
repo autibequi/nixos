@@ -30,7 +30,7 @@
     "show_summary": false,
     "type": "shell",
     "tags": [
-      "schema"
+      "maintenance"
     ],
     "options": {
       "cwd": "${workspaceFolder}"
@@ -68,7 +68,8 @@
     "show_summary": false,
     "type": "shell",
     "tags": [
-      "maintenance"
+      "maintenance",
+      "store"
     ]
   }
 ]
