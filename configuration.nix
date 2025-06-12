@@ -57,6 +57,9 @@
   # Add local bin to PATH
   environment.localBinInPath = true;
 
+  # Groups
+  users.groups.podman = { };
+
   # User Accounts
   users.users.pedrinho = {
     isNormalUser = true;
@@ -65,6 +68,7 @@
       "networkmanager"
       "wheel"
       "adbusers"
+      "podman"
     ];
     shell = pkgs.zsh;
   };

@@ -27,6 +27,12 @@
     # Força o uso do p-state ativo para o processador AMD
     # active so epp modes will work
     "amd_pstate=guided"
+
+    # ChatGPT said those are crazy but also maybe good for perf
+    "elevator=bfq"
+    "scsi_mod.use_blk_mq=1"
+    "dm_mod.use_blk_mq=1"
+    "mq-deadline.nr_requests=128"
   ];
 
   # Configurar compressão.
@@ -43,6 +49,7 @@
 
   # TODO: clean up moduless
   boot.kernelModules = [
+    "bfq" # kinda needed for scx
     # maybe
     "usbhid"
     "xhci_hcd"
