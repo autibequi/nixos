@@ -40,12 +40,17 @@
 
     # Desktop Environments
     ./desktop-envs/gnome/core.nix
-    # ./desktop-envs/cosmic.nix
+    ./desktop-envs/cosmic.nix
     # ./desktop-envs/kde.nix
   ];
 
   # DesktopEnv Niri (remove other?):
   # programs.niri.enable = true;
+
+  services.xserver.xkb = {
+    layout = "us";
+    variant = "alt-intl";
+  };
 
   # are we ARM yet?
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
