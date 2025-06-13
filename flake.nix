@@ -9,7 +9,6 @@
 
     # Other Inputs
     nixos-hardware.url = "github:NixOS/nixos-hardware/master"; # Hardware
-    nixos-cosmic.url = "github:lilyinstarlight/nixos-cosmic";
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     isd.url = "github:isd-project/isd"; # Interactive SystemD
     home-manager.url = "github:nix-community/home-manager/release-25.05"; # Home Manager
@@ -33,7 +32,6 @@
       nixos-hardware,
       home-manager,
       chaotic,
-      nixos-cosmic,
       nix-alien,
       stylix,
       nixgl,
@@ -57,9 +55,6 @@
           chaotic.nixosModules.nyx-cache
           chaotic.nixosModules.nyx-overlay
           chaotic.nixosModules.nyx-registry
-
-          # Cosmic
-          nixos-cosmic.nixosModules.default
 
           # Stylix
           # stylix.nixosModules.stylix
