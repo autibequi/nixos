@@ -13,13 +13,15 @@ i have no ideia what i'm doing...
 
 ## Instalation
 
-From fresh install, get the `/boot`, `/` and `swap` partition UUIDs. Hibernation and Swap configuration are optional.
+From fresh install, get the `/boot`, `/` and `swap` partition UUIDs from the auto generated file.
 
 ```sh
 cat /etc/nixos/configuration.nix
 ```
 
-Then, change the values in `configuration.nix` to match your partitions.
+Clone this repository then change the values in `configuration.nix` the extracted UUIds.
+
+Hibernation and Swap configuration are optional.
 
 After that run the following command to switch to the new configuration:
 
@@ -27,8 +29,15 @@ After that run the following command to switch to the new configuration:
 sudo nixos-rebuild switch --flake .#nomad
 ```
 
+Make a little pray and reboot your system.
+
+```sh
+reboot
+```
+
 ## Tricks
 ```
 Q: High wattage consumption without CPU or GPU usage:
-A: Nvidia prob went crazy, go to `sudo powertop` and turn on the tweaks.
+A: Nvi
+dia prob went crazy, go to `sudo powertop` and turn on the tweaks.
 ```
