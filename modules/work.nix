@@ -27,7 +27,6 @@
     dbeaver-bin
     chromium # work browser
     vscode
-    code-cursor
     cartero
     insomnia
 

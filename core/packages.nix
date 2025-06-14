@@ -11,6 +11,8 @@
     flameshot # PrintScreens
     obsidian # Md Notes
     mpv # media/shoes/chocolate player
+    foliate # ePub reader
+    fragments # torrent client
 
     # Aesthetics
     banana-cursor # my boss saw it, it okay

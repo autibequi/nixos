@@ -19,6 +19,7 @@
     ./core/fonts.nix
 
     # Extra
+    ./modules/ai.nix
     ./modules/asus.nix
     ./modules/battery.nix
     ./modules/bluetooth.nix
@@ -26,7 +27,6 @@
     ./modules/plymouth.nix
     # ./modules/howdy.nix
     # ./modules/flatpak.nix
-    # ./modules/ai.nix
     ./modules/work.nix
 
     # Desktop Environments
