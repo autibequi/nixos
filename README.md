@@ -1,45 +1,34 @@
-## NixOS Config
+# NixOS
 
 i have no ideia what i'm doing...
 
-update: i have SOME ideia now
+- [Documentação do Gnome](./modules/gnome/README.md)
+- [Dotfile Docs](./dotfiles/README.md)
 
-### Other Docs
-[Documentação do Gnome](./desktop-envs/gnome/README.md)
-[Dotfile Docs](./dotfiles/README.md)
-
-### Estrutura Principal
-- `configuration.nix` - Arquivo principal de configuração
-- `flake.nix` - Gerenciamento de dependências e configuração do sistema
-- `nix.nix` - Configurações específicas do Nix (substituidores, etc.)
-
-### Diretórios
+## Dirs
 - `/core/` - Configurações essenciais (hardware, kernel, serviços, etc.)
-- `/modules/` - Módulos opcionais (bluetooth, nvidia, plymouth, etc.)
-- `/desktop-envs/` - Ambientes de desktop (GNOME, KDE, Cosmic)
+- `/modules/` - Módulos (gnome, cosmic, bluetooth, nvidia, plymouth, etc.)
 - `/assets/` - Arquivos de mídia, temas, ícones e outros recursos visuais
 - `/dotfiles` - Arquivos de configuração pessoais para programas e ferramentas
 
-# Instalação
+## Instalation
 
-Add to config files and run:
-
-```sh
-sudo nixos-rebuild switch
-```
-
-# nh manual
+From fresh install, get the `/boot`, `/` and `swap` partition UUIDs. Hibernation and Swap configuration are optional.
 
 ```sh
-nh os switch /etc/nixos
+cat /etc/nixos/configuration.nix
 ```
 
-## Throubleshouting
+Then, change the values in `configuration.nix` to match your partitions.
 
+After that run the following command to switch to the new configuration:
+
+```sh
+sudo nixos-rebuild switch --flake .#nomad
+```
+
+## Tricks
+```
 Q: High wattage consumption without CPU or GPU usage:
-A: nvidia went crazy, go to `sudo powertop` and turn on the tweaks
-
-
-## Fresh Install
-
-Após a instalação, o usuário só precisa preencher os dados de [`hardware.nix`](./core/hardware.nix).
+A: Nvidia prob went crazy, go to `sudo powertop` and turn on the tweaks.
+```
