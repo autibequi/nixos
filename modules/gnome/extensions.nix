@@ -152,19 +152,16 @@
 
         # Night Theme Switcher
         "org/gnome/shell/extensions/night-theme-switcher" = {
-          # Wallpaper configuration
           wallpaper-light = "/home/pedrinho/.wallpapers/the-death-of-socrates.jpg";
           wallpaper-dark = "/home/pedrinho/.wallpapers/the-wild-hunt-of-odin.jpg";
-
-          # Theme switching settings
-          enable = true;
-          time-source = "location";
-          manual-time-source = false;
-          ondemand-button = true;
-
-          # Automatic switching based on sunset/sunrise
           auto-enable = true;
           schedule = true;
+        };
+
+        # Night Theme Switcher (dconf direct)
+        "org/gnome/shell/extensions/nightthemeswitcher/time" = {
+          manual-schedule = true;
+          nightthemeswitcher-ondemand-keybinding = [ "<Super>b" ];
         };
 
         # Advanced Alt Tab Window Switcher
