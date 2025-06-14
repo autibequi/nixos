@@ -38,7 +38,9 @@ convert_video() {
   fi
 }
 
-fuck() {
-
+# Run anything
+justrun() {
+  local cmd="$1"
+  shift
+  NIXPKGS_ALLOW_UNFREE=1 nix shell --impure "nixpkgs#$cmd" -c "$cmd" "$@"
 }
-

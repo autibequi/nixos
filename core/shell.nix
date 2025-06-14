@@ -54,26 +54,9 @@
     };
 
     shellInit = ''
+      eval "$(starship init zsh)"
       eval "$(zoxide init zsh)"
       eval "$(atuin init zsh)"
-      eval "$(starship init zsh)"
-
-      # Run anything
-      justrun() {
-        local cmd="$1"
-        shift
-        NIXPKGS_ALLOW_UNFREE=1 nix shell --impure "nixpkgs#$cmd" -c "$cmd" "$@"
-      }
-
-      addshell() {
-        for pkg in "$@"; do
-          if NIXPKGS_ALLOW_UNFREE=1 nix-shell -p $pkg; then
-            echo "✅ Available: $pkg"
-          else
-            echo "❌ Failed: $pkg" >&2
-          fi
-        done
-      }
     '';
   };
 
