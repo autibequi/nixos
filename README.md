@@ -1,6 +1,6 @@
 # NixOS
 
-i have no ideia what i'm doing...
+i STILL have no ideia what i'm doing...
 
 - [Documentação do Gnome](./modules/gnome/README.md)
 - [Dotfile Docs](./dotfiles/README.md)

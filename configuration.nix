@@ -2,6 +2,14 @@
   ...
 }:
 
+# Instalation
+# Just setup the root, boot and swap partitions
+# If you dont want swap or hibernation, just comment out the swapDevices and boot.resumeDevice
+let
+  swapDiskUUID = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593";
+  bootDiskUUID = "/dev/disk/by-uuid/6B74-DC9D";
+  rootDiskUUID = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
+in
 {
   # System State Version
   system.stateVersion = "25.05";
@@ -35,12 +43,10 @@
     # ./modules/kde.nix
   ];
 
-  # Instalatio
-  # Just setup the root, boot and swap partitions
   # Hibenration and swap are optional and can be commented out
   # Enable and configure the rest of the sistem in the modules
   fileSystems."/boot" = {
-    device = "/dev/disk/by-uuid/6B74-DC9D";
+    device = bootDiskUUID;
     fsType = "vfat";
     options = [
       "fmask=0077"
@@ -49,7 +55,7 @@
   };
 
   fileSystems."/" = {
-    device = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
+    device = rootDiskUUID;
     fsType = "ext4"; # TODO: testar zfs com lz4 no proximo setup
     neededForBoot = true;
     options = [
@@ -60,10 +66,8 @@
   };
 
   # Hibernation
-  boot.resumeDevice = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
+  boot.resumeDevice = swapDiskUUID;
 
   # Swap
-  swapDevices = [
-    { device = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; }
-  ];
+  swapDevices = [ { device = swapDiskUUID; } ];
 }
