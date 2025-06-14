@@ -1,6 +1,4 @@
 {
-  pkgs,
-  lib,
   ...
 }:
 
@@ -9,14 +7,9 @@
   system.stateVersion = "25.05";
 
   imports = [
-    # Installation:
-    # It's your only job:
-    ./hardware.nix
-
-    # Substituters ans stuff
-    ./nix.nix
-
     # Core
+    ./core/nix.nix
+    ./core/core.nix
     ./core/kernel.nix
     ./core/home.nix
     ./core/services.nix
@@ -44,88 +37,35 @@
     # ./desktop-envs/kde.nix
   ];
 
-  # DesktopEnv Niri (remove other?):
-  # programs.niri.enable = true;
-
-  services.xserver.xkb = {
-    layout = "us";
-    variant = "alt-intl";
-  };
-
-  # are we ARM yet?
-  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-
-  # Graphical Driver List
-  services.xserver.videoDrivers = [ "amdgpu" ];
-
-  # Bootloader
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
-  # Environment Variables
-  environment.sessionVariables = {
-    # Wayland Pains
-    NIXOS_OZONE_WL = "1";
-    MOZ_ENABLE_WAYLAND = "1";
-    OZONE_PLATFORM = "wayland";
-    ELECTRON_OZONE_PLATFORM_HINT = "wayland";
-    QT_AUTO_SCREEN_SCALE_FACTOR = "1";
-  };
-
-  # Hardware
-  # Stallman would be very sad with me...
-  hardware = {
-    enableAllFirmware = true;
-    enableAllHardware = true;
-    enableRedistributableFirmware = true;
-    amdgpu.initrd.enable = true;
-    cpu.amd.updateMicrocode = true;
-  };
-
-  # Add local bin to PATH
-  environment.localBinInPath = true;
-
-  # Groups
-  users.groups.podman = { };
-
-  # User Accounts
-  users.users.pedrinho = {
-    isNormalUser = true;
-    description = "pedrinho";
-    extraGroups = [
-      "networkmanager"
-      "wheel"
-      "adbusers"
-      "podman"
+  # Instalatio
+  # Just setup the root, boot and swap partitions
+  # Hibenration and swap are optional and can be commented out
+  # Enable and configure the rest of the sistem in the modules
+  fileSystems."/boot" = {
+    device = "/dev/disk/by-uuid/6B74-DC9D";
+    fsType = "vfat";
+    options = [
+      "fmask=0077"
+      "dmask=0077"
     ];
-    shell = pkgs.zsh;
   };
 
-  # Networking
-  networking = {
-    hostName = "nomad";
-    useDHCP = lib.mkDefault true;
-    networkmanager = {
-      enable = true;
-    };
+  fileSystems."/" = {
+    device = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
+    fsType = "ext4"; # TODO: testar zfs com lz4 no proximo setup
+    neededForBoot = true;
+    options = [
+      "defaults"
+      "noatime"
+      "discard"
+    ];
   };
 
-  # Time and Locale
-  time.timeZone = "America/Sao_Paulo";
-  i18n.defaultLocale = "en_US.UTF-8";
-  i18n.extraLocaleSettings = {
-    LC_ADDRESS = "pt_BR.UTF-8";
-    LC_IDENTIFICATION = "pt_BR.UTF-8";
-    LC_MEASUREMENT = "pt_BR.UTF-8";
-    LC_MONETARY = "pt_BR.UTF-8";
-    LC_NAME = "pt_BR.UTF-8";
-    LC_NUMERIC = "pt_BR.UTF-8";
-    LC_PAPER = "pt_BR.UTF-8";
-    LC_TELEPHONE = "pt_BR.UTF-8";
-    LC_TIME = "pt_BR.UTF-8";
-  };
+  # Hibernation
+  boot.resumeDevice = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
 
-  # XDG Portal
-  xdg.portal.enable = true;
-  xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+  # Swap
+  swapDevices = [
+    { device = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593"; }
+  ];
 }
