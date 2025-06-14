@@ -27,8 +27,6 @@
     # ./modules/howdy.nix
     # ./modules/flatpak.nix
     # ./modules/ai.nix
-
-    # Work
     ./modules/work.nix
 
     # Desktop Environments
