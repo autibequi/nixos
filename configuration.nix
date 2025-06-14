@@ -30,9 +30,9 @@
     ./modules/work.nix
 
     # Desktop Environments
-    ./desktop-envs/gnome/core.nix
-    ./desktop-envs/cosmic.nix
-    # ./desktop-envs/kde.nix
+    ./modules/gnome/core.nix
+    ./modules/cosmic.nix
+    # ./modules/kde.nix
   ];
 
   # Instalatio
