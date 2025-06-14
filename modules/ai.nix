@@ -6,9 +6,9 @@
   ...
 }:
 {
-  environment.systemPackages = with inputs.nixified-ai.packages.${pkgs.system}; [
+  environment.systemPackages = with pkgs; [
     # Enable AI tools from nixified-ai flake
-    comfyui-nvidia # ComfyUI with NVIDIA support
+    # comfyui-nvidia # ComfyUI with NVIDIA support
     lmstudio # LM Studio for local LLMs
 
     # AI Core
