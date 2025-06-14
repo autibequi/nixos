@@ -38,9 +38,16 @@ convert_video() {
   fi
 }
 
-# Run anything
+# Try to run a command directly, fallback to nix-shell if not available
 justrun() {
   local cmd="$1"
   shift
-  NIXPKGS_ALLOW_UNFREE=1 nix shell --impure "nixpkgs#$cmd" -c "$cmd" "$@"
+  if command -v "$cmd" >/dev/null 2>&1; then
+    "$cmd" "$@"
+  else
+    echo "📦 Comando '$cmd' não encontrado, instalando temporariamente..."
+    # Usar pv para mostrar progresso da instalação
+    echo "🚀 Executando '$cmd'..."
+    NIXPKGS_ALLOW_UNFREE=1 nix-shell -p "$cmd" --run "$cmd $*"
+  fi
 }
