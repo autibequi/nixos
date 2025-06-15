@@ -1,4 +1,4 @@
-#!/run/current-system/sw/bin/bash
+#!/bin/bash
 
 reset-gnome-extensions() {
   gsettings set org.gnome.shell disable-user-extensions true

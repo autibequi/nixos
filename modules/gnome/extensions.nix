@@ -168,6 +168,21 @@
         "org/gnome/shell/extensions/advanced-alt-tab-window-switcher" = {
           alt-tab-mode = "window";
         };
+
+        # Custom Command Toggles:
+        # Reset Gnome Button
+        # This extension is used to reset Gnome settings to default
+        "org/gnome/shell/extensions/custom-command-toggle" = {
+          buttonclick1-setting = 1;
+          closemenu1-setting = true;
+          entryrow1-setting = "reset-gnome-extensions";
+          entryrow2-setting = "reset-gnome-extensions";
+          entryrow3-setting = "Reset Gnome";
+          entryrow4-setting = "trash-bin";
+          initialtogglestate1-setting = 1;
+          keybinding1-setting = [ "<Super>Delete" ];
+          togglestate1-setting = false;
+        };
       };
     };
 }

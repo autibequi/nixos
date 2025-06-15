@@ -4,6 +4,9 @@
   ...
 }:
 {
+  # Global shell initialization commands, sourcing the external script
+  environment.shellInit = builtins.readFile ../dotfiles/init.sh;
+
   services.xserver.xkb = {
     layout = "us";
     variant = "alt-intl";
@@ -45,6 +48,8 @@
   # Groups
   users.groups.podman = { };
 
+  users.defaultUserShell = pkgs.zsh;
+
   # User Accounts
   users.users.pedrinho = {
     isNormalUser = true;
@@ -55,7 +60,6 @@
       "adbusers"
       "podman"
     ];
-    shell = pkgs.zsh;
   };
 
   # Networking

@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ ... }:
 {
   imports = [
     ./packages.nix
@@ -12,12 +12,6 @@
       wayland = true;
     };
   };
-
-  # terminal swap (since gnome-terminal is hardcoded as the default terminal)
-  environment.etc."gnome-console".source = "${pkgs.ghostty}/bin/ghostty";
-
-  # Global shell initialization commands, sourcing the external script
-  environment.shellInit = builtins.readFile ../../dotfiles/init.sh;
 
   home-manager.users."pedrinho" =
     { ... }:
@@ -53,7 +47,7 @@
             focus-mode = "sloppy"; # sloppy (hover focus), smart (click focus), click, none
           };
 
-          # Keybindings
+          # Window Managment Keybindings
           "org/gnome/desktop/wm/keybindings" = {
             # Workspace Management
             "switch-to-workspace-left" = [ "<Super>a" ];
@@ -67,6 +61,7 @@
             "minimize" = [ "<Super>s" ];
           };
 
+          # Shell Keybindings
           "org/gnome/shell/keybindings" = {
             "toggle-overview" = [ "<Super>z" ];
             "toggle-message-tray" = [ "<Super>x" ];
@@ -74,12 +69,14 @@
             "show-screenshot-ui" = [ "<Super>u" ];
           };
 
+          # Custom Shortcuts Installation
           "org/gnome/settings-daemon/plugins/media-keys" = {
             custom-keybindings = [
               "/org/gnome/settings-daemon/plugins/media-keys/custom0/"
             ];
           };
 
+          # Custom Keybinding for Zed Editor
           "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
             name = "Open Zed in NixOS Project";
             command = "sh -c 'cd ~/projects/nixos && zeditor .'";
