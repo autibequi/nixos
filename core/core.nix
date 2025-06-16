@@ -60,6 +60,7 @@
       "adbusers"
       "podman"
     ];
+    shell = pkgs.zsh;
   };
 
   # Networking

@@ -56,6 +56,8 @@
             "_processor_usage_"
             "_memory_usage_"
             "_battery_rate_"
+            "_gpu#0_utilization_"
+            "_gpu#1_utilization_"
           ];
         };
 
