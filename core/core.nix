@@ -52,10 +52,8 @@
     isNormalUser = true;
     description = "pedrinho";
     extraGroups = [
-      "networkmanager"
       "wheel"
       "adbusers"
-      "podman"
     ];
     shell = pkgs.zsh;
   };
