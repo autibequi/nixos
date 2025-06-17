@@ -13,6 +13,7 @@
     mpv # media/shoes/chocolate player
     foliate # ePub reader
     fragments # torrent client
+    discord # chattery
 
     # Aesthetics
     banana-cursor # my boss saw it, it okay

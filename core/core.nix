@@ -45,9 +45,6 @@
   # Add local bin to PATH
   environment.localBinInPath = true;
 
-  # Groups
-  users.groups.podman = { };
-
   users.defaultUserShell = pkgs.zsh;
 
   # User Accounts

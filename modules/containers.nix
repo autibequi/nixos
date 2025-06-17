@@ -4,24 +4,9 @@
 }:
 
 {
-  # Disable Evil Printer
-  services.printing.enable = false;
+  # Groups
+  users.groups.podman = { };
 
-  # logitech drivers
-  services.solaar.enable = true;
-
-  # flatpak
-  services.flatpak.enable = true;
-
-  # Preload common apps for snappier experience
-  services.preload.enable = true;
-
-  # fwupd
-  services.fwupd.enable = true;
-
-  # --------------
-  # Virtualization
-  # --------------
   virtualisation.containers.enable = true;
   virtualisation = {
     podman = {
