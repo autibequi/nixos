@@ -31,7 +31,7 @@ in
     ./modules/asus.nix
     ./modules/battery.nix
     ./modules/bluetooth.nix
-    ./modules/containers.nix
+    # ./modules/podman.nix
     ./modules/nvidia.nix
     ./modules/plymouth.nix
     # ./modules/howdy.nix

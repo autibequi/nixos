@@ -21,18 +21,12 @@
     # idVendor           0x152d JMicron Technology Corp. / JMicron USA Technology Corp.
     # idProduct          0x0583 JMS583Gen 2 to PCIe Gen3x2 Bridge
     # i - usb-storage disasbled
-    # u - enable (slow mode)
-    "usb-storage.quirks=0x152d:0x0583:i"
+    # u - enable (faster)(this flat is a headache but works i guess)
+    "usb-storage.quirks=0x152d:0x0583:u"
 
     # Força o uso do p-state ativo para o processador AMD
     # active so epp modes will work
     "amd_pstate=guided"
-
-    # ChatGPT said those are crazy but also maybe good for perf
-
-    "scsi_mod.use_blk_mq=1"
-    "dm_mod.use_blk_mq=1"
-    "mq-deadline.nr_requests=128"
   ];
 
   # Configurar compressão.

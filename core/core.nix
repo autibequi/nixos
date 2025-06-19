@@ -54,6 +54,7 @@
     extraGroups = [
       "wheel"
       "adbusers"
+      "docker"
     ];
     shell = pkgs.zsh;
   };
@@ -61,10 +62,7 @@
   # Networking
   networking = {
     hostName = "nomad";
-    useDHCP = lib.mkDefault true;
-    networkmanager = {
-      enable = true;
-    };
+    networkmanager.enable = true;
   };
 
   # Time and Locale
