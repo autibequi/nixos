@@ -114,6 +114,9 @@
     cmatrix # matrix effect
     fortune # random quotes
 
+    # snippet manager
+    pet
+
     # better cli
     atuin # fancy cli history
     pueue # task manager
