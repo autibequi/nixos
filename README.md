@@ -64,3 +64,9 @@ dia prob went crazy, go to `sudo powertop` and turn on the tweaks.
 Q: How update flakes
 nix --extra-experimental-features 'nix-command flakes' flake update
 ```
+
+## SSHKey to pull/push changes
+
+```
+ssh-keygen -t ed25519 -C "your_email@example.com"
+```
