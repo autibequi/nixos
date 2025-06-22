@@ -3,6 +3,13 @@
 }:
 
 {
+  # sunshine
+  services.sunshine.enable = true;
+  # TODO: add steam later
+  # services.sunshine.applications.apps = [
+
+  # ];
+
   # Disable Evil Printer
   services.printing.enable = false;
 

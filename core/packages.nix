@@ -21,7 +21,8 @@
     papirus-icon-theme # Icons
 
     # ZED EDITOR
-    zed-editor_git # can sudo
+    zed-editor
+    # zed-editor_git # can sudo
     # zed-editor-fhs_git # cant sudo
 
     # Games
@@ -38,7 +39,7 @@
 
     # ---------------
     # Checking out
-    openrgb_git
-    evil-helix_git
+    # openrgb_git
+    # evil-helix_git
   ];
 }

@@ -62,7 +62,7 @@
 
   environment.systemPackages = with pkgs; [
     # basic (why i had to install those)
-    uutils-coreutils
+    # uutils-coreutils # broken
     unixtools.whereis
     pciutils
     gnumake
