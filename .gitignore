@@ -11,3 +11,4 @@ result/
 
 # lock configuration.nix file
 configuration.nix
+setup.nix
