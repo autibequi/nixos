@@ -7,8 +7,8 @@
 {
   environment.systemPackages = with pkgs; [
     # Enable AI tools from nixified-ai flake
-    # comfyui-nvidia # ComfyUI with NVIDIA support
     lmstudio # LM Studio for local LLMs
+    jan
 
     # AI Core
     windsurf
