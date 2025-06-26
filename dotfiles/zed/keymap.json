@@ -31,7 +31,8 @@
     "bindings": {
       "ctrl-shift-l": "agent::NewThread",
       "ctrl-k": "assistant::InlineAssist",
-      "ctrl-alt-t": "workspace::NewCenterTerminal"
+      "ctrl-alt-t": "workspace::NewCenterTerminal",
+      "ctrl-left": "editor::AcceptPartialCopilotSuggestion"
     }
   },
   {
