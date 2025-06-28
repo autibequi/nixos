@@ -20,14 +20,15 @@
   services.auto-epp.enable = true;
 
   services.logind = {
-    lidSwitch = "hibernate";
+    lidSwitch = "suspend-then-hibernate";
     powerKey = "hibernate";
     powerKeyLongPress = "poweroff";
   };
 
   systemd.sleep.extraConfig = ''
     HibernateOnACPower=true
-    HibernateDelaySec=120s
+    HibernateDelaySec=30m
+    SuspendState=mem
   '';
 
   boot.kernelParams = [
