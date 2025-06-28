@@ -14,10 +14,11 @@
     ./core/programs.nix
     ./core/packages.nix
     ./core/shell.nix
-    ./core/fonts.nix
-    ./modules/plymouth.nix
-    ./core/kernel.nix
-    ./modules/nvidia.nix
+    # ./modules/battery.nix
+    # ./modules/plymouth.nix
+    # ./core/fonts.nix
+    # ./core/kernel.nix
+    # ./modules/nvidia.nix
 
     # Desktop Environments
     ./modules/gnome/core.nix
@@ -25,9 +26,8 @@
     # ./modules/kde.nixs
 
     # Extra
-    ./modules/ai.nix
-    ./modules/asus.nix
-    ./modules/battery.nix
+    # ./modules/ai.nix
+    # ./modules/asus.nix
     # ./modules/bluetooth.nix
     # ./modules/podman.nix
     # ./modules/howdy.nix
