@@ -96,14 +96,4 @@
       BindReadOnlyPaths = "${pkgs.cloudflare-warp}:/usr:";
     };
   };
-
-  home-manager.users."pedrinho" =
-    { ... }:
-    {
-      programs.git = {
-        enable = true;
-        userName = "Pedro Correa";
-        userEmail = "pedro.correa@estrategia.com";
-      };
-    };
 }

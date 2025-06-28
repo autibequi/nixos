@@ -10,6 +10,12 @@
       home.stateVersion = "25.05";
       home.enableNixpkgsReleaseCheck = false;
 
+      programs.git = {
+        enable = true;
+        userName = "Pedro Correa";
+        userEmail = "pedro@autibequi.com";
+      };
+
       home.pointerCursor = {
         package = pkgs.banana-cursor;
         name = "Banana";

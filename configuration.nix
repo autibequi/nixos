@@ -9,15 +9,47 @@
 # This file is locked by .gitinore wont be commitable to avoid conflits.
 # Use setup.nix to enable ore disable packages
 let
-  swapDiskUUID = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593";
-  bootDiskUUID = "/dev/disk/by-uuid/6B74-DC9D";
-  rootDiskUUID = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
+  bootDiskUUID = "/dev/disk/by-uuid/1F53-9115";
+  rootDiskUUID = "/dev/disk/by-uuid/ee52cc58-f10d-4979-8244-4386302649c5";
+  swapDiskUUID = "/dev/disk/by-uuid/17e5c565-c90c-4233-92c6-bb86adfed306";
 in
 {
+  system.stateVersion = "25.11";
+
   # Importa Setup do Usuario
   imports = [
-    ./setup.nix
+    # Core
+    ./core/nix.nix
+    ./core/core.nix
+    ./core/home.nix
+    ./core/services.nix
+    ./core/programs.nix
+    ./core/packages.nix
+    ./core/shell.nix
+    # ./core/fonts.nix
+    # ./modules/plymouth.nix
+    # ./core/kernel.nix
+    # ./modules/nvidia.nix
+
+    # Desktop Environments
+    ./modules/gnome/core.nix
+    # ./modules/cosmic.nix
+    # ./modules/kde.nixs
+
+    # Extra
+    # ./modules/ai.nix
+    # ./modules/asus.nix
+    # ./modules/battery.nix
+    # ./modules/bluetooth.nix
+    # ./modules/podman.nix
+    # ./modules/howdy.nix
+    # ./modules/flatpak.nix
+    # ./modules/work.nix
   ];
+
+  # --------------------------------
+  # The rest is puremapping boilerplate
+  # --------------------------------
 
   # Hibenration and swap are optional and can be commented out
   # Enable and configure the rest of the sistem in the modules
