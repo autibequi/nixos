@@ -51,3 +51,21 @@ justrun() {
     NIXPKGS_ALLOW_UNFREE=1 nix-shell -p "$cmd" --run "$cmd $*"
   fi
 }
+
+# ZSH HOOK
+command_not_found_handler() {
+    # Ask for confirmation
+    echo -n "O comando não foi encontrado. Instalar com nix-shell e tentar novamente? [y/N] "
+    read reply
+    if [[ "$reply" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+      # Attempt to run the command using nix-shell
+      NIXPKGS_ALLOW_UNFREE=1 nix-shell -p "$1" --run "$*" 2>/dev/null || {
+        echo "Falha ao executar '$1' com nix-shell. Verifique se o pacote existe."
+        return 127
+      }
+    else
+      # If the user declines, print the original error message
+      echo "zsh: command not found: $1"
+      return 127
+    fi
+}
