@@ -25,6 +25,9 @@
     # zed-editor_git # can sudo
     # zed-editor-fhs_git # cant sudo
 
+    # BROWSER
+    chromium # work browser
+
     # Games
     # retroarchFull
 
@@ -41,5 +44,8 @@
     # Checking out
     # openrgb_git
     # evil-helix_git
+
+    # Window Manager
+    niri
   ];
 }
