@@ -5,13 +5,21 @@
     ./extensions.nix
   ];
 
-  services = {
-    desktopManager.gnome.enable = true;
-    displayManager.gdm = {
-      enable = true;
-      wayland = true;
-    };
+  # Will break next release
+  services.xserver.desktopManager.gnome.enable = true;
+  services.xserver.displayManager.gdm = {
+    enable = true;
+    wayland = true;
   };
+
+  # Next Release
+  # services = {
+  #   desktopManager.gnome.enable = true;
+  #   displayManager.gdm = {
+  #     enable = true;
+  #     wayland = true;
+  #   };
+  # };
 
   home-manager.users."pedrinho" =
     { ... }:
