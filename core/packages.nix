@@ -47,5 +47,8 @@
 
     # Window Manager
     niri
+
+    # node
+    pnpm
   ];
 }
