@@ -25,6 +25,9 @@
     # zed-editor_git # can sudo
     # zed-editor-fhs_git # cant sudo
 
+    # BROWSER
+    chromium # work browser
+
     # Games
     # retroarchFull
 

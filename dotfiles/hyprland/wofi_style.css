@@ -1,0 +1,46 @@
+* {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 14px;
+}
+
+window {
+  margin: 50px;
+  border: 2px solid #333;
+  border-radius: 10px;
+  background-color: #222;
+}
+
+#input {
+  margin: 5px;
+  border: none;
+  color: #fff;
+  background-color: #333;
+}
+
+#inner-box {
+  margin: 5px;
+  border: none;
+  background-color: #222;
+}
+
+#outer-box {
+  margin: 5px;
+  border: none;
+  background-color: #222;
+}
+
+#scroll {
+  margin: 5px;
+  border: none;
+  background-color: #222;
+}
+
+#text {
+  margin: 5px;
+  border: none;
+  color: #fff;
+}
+
+#entry:selected {
+  background-color: #444;
+}
