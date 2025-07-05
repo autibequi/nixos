@@ -50,5 +50,6 @@
 
     # node
     pnpm
+    nodejs
   ];
 }

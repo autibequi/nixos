@@ -51,6 +51,8 @@
       zed = "zeditor";
 
       wiki = "wikiti";
+
+      npm = "pnpm";
     };
 
     shellInit = ''
