@@ -45,7 +45,6 @@
     grim
     slurp
     wl-clipboard
-    lxqt.polkit-agent
     bibata-cursors
     swayidle
     cliphist
@@ -104,8 +103,7 @@
     # Waybar configuration
     programs.waybar = {
       enable = true;
-      # settings = builtins.fromJSON (builtins.readFile ../dotfiles/hyprland/waybar.conf);
-      # style = builtins.readFile ../dotfiles/hyprland/waybar.css;
+      style = builtins.readFile ../dotfiles/hyprland/waybar.css;
     };
 
     programs.wofi = {
