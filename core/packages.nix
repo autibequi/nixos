@@ -41,5 +41,11 @@
     # Checking out
     # openrgb_git
     # evil-helix_git
+
+    # ISO
+    ventoy-full-qt
+  ];
+  permittedInsecurePackages = [
+    "ventoy-qt5-1.1.05"
   ];
 }
