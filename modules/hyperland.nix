@@ -45,6 +45,10 @@
     grim
     slurp
     wl-clipboard
+    lxqt.polkit-agent
+    bibata-cursors
+    swayidle
+    cliphist
 
     # Fonts
     noto-fonts
@@ -102,6 +106,11 @@
       enable = true;
       # settings = builtins.fromJSON (builtins.readFile ../dotfiles/hyprland/waybar.conf);
       # style = builtins.readFile ../dotfiles/hyprland/waybar.css;
+    };
+
+    programs.wofi = {
+      enable = true;
+      # style = builtins.readFile ./../../dotfiles/hyprland/wofi_style.css;
     };
 
     # Create a simple solid color wallpaper script
