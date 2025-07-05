@@ -100,8 +100,8 @@
     # Waybar configuration
     programs.waybar = {
       enable = true;
-      settings = builtins.fromJSON (builtins.readFile ../dotfiles/hyprland/waybar.conf);
-      style = builtins.readFile ../dotfiles/hyprland/waybar.css;
+      # settings = builtins.fromJSON (builtins.readFile ../dotfiles/hyprland/waybar.conf);
+      # style = builtins.readFile ../dotfiles/hyprland/waybar.css;
     };
 
     # Create a simple solid color wallpaper script
