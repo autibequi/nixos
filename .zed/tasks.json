@@ -60,7 +60,7 @@
     "tags": ["maintenance", "store"]
   },
   {
-    "label": "Archive Nix Flakes",
+    "label": "Update Nix LSP",
     "command": "nix flake archive --all",
     "show_summary": false,
     "type": "shell",

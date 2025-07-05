@@ -35,6 +35,7 @@
     alacritty # Terminal
     dunst # Notifications
     grim # Screenshots
+    swappy # Screen editing
     slurp # Screen selection
     wl-clipboard # Clipboard management
     swaylock-effects # Screen lock
@@ -44,6 +45,11 @@
     pavucontrol # Audio control
     brightnessctl # Screen brightness
     playerctl # Media control
+
+    nwg-displays # Display management
+    swayidle
+    swaylock
+    swaylock-effects
   ];
 
   # XDG Desktop Portal
@@ -118,23 +124,12 @@
     };
 
     # Developer-focused scripts
-    home.file.".config/hypr/dev_refresh.sh" = {
+    home.file.".config/hypr/refresh_de.sh" = {
       text = ''
         #!/bin/bash
         # Refresh developer tools quickly
         pkill waybar && waybar &
         notify-send "Dev tools refreshed"
-      '';
-      executable = true;
-    };
-
-    # Screenshot script for quick captures
-    home.file.".config/hypr/screenshot.sh" = {
-      text = ''
-        #!/bin/bash
-        # Quick screenshot to clipboard
-        grim -g "$(slurp)" - | wl-copy
-        notify-send "Screenshot copied to clipboard"
       '';
       executable = true;
     };
