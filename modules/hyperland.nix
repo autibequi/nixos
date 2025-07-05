@@ -84,121 +84,8 @@
     # Waybar - Focus on useful information only
     programs.waybar = {
       enable = true;
-      settings = {
-        mainBar = {
-          layer = "top";
-          position = "top";
-          height = 30;
-          spacing = 4;
-          modules-left = [
-            "hyprland/workspaces"
-            "hyprland/window"
-          ];
-          modules-center = [ "clock" ];
-          modules-right = [
-            "pulseaudio"
-            "network"
-            "battery"
-            "cpu"
-            "memory"
-            "tray"
-          ];
-
-          "hyprland/workspaces" = {
-            disable-scroll = true;
-            all-outputs = true;
-            format = "{icon}";
-            format-icons = {
-              "1" = "🌐";
-              "2" = "💬";
-              "3" = "🧪";
-              "4" = "💻";
-              "5" = "🤖";
-              "6" = "🎨";
-              urgent = "❗";
-              focused = "●";
-              default = "○";
-            };
-          };
-
-          "hyprland/window" = {
-            format = "{title}";
-            max-length = 50;
-            separate-outputs = true;
-          };
-
-          clock = {
-            format = "{:%d %H:%M}";
-            tooltip-format = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
-            format-alt = "{:%Y-%m-%d}";
-          };
-
-          cpu = {
-            format = "CPU {usage}%";
-            tooltip = false;
-            interval = 10;
-          };
-
-          memory = {
-            format = "RAM {used:0.1f}G";
-            tooltip = false;
-            interval = 10;
-          };
-
-          battery = {
-            states = {
-              warning = 30;
-              critical = 15;
-            };
-            format = "{capacity}% {icon}";
-            format-charging = "{capacity}% ⚡";
-            format-plugged = "{capacity}% 🔌";
-            format-alt = "{time} {icon}";
-            format-icons = [
-              "🪫"
-              "🔋"
-              "🔋"
-              "🔋"
-              "🔋"
-            ];
-          };
-
-          network = {
-            format-wifi = "{essid} 📶";
-            format-ethernet = "ETH 🌐";
-            tooltip-format = "{ifname} via {gwaddr}";
-            format-linked = "{ifname} (No IP)";
-            format-disconnected = "Disconnected ⚠";
-            format-alt = "{ifname}: {ipaddr}/{cidr}";
-          };
-
-          pulseaudio = {
-            format = "{volume}% {icon}";
-            format-bluetooth = "{volume}% {icon} 🔵";
-            format-bluetooth-muted = "🔇 {icon} 🔵";
-            format-muted = "🔇";
-            format-icons = {
-              headphone = "🎧";
-              hands-free = "🎧";
-              headset = "🎧";
-              phone = "📞";
-              portable = "🔊";
-              car = "🚗";
-              default = [
-                "🔈"
-                "🔉"
-                "🔊"
-              ];
-            };
-            on-click = "pavucontrol";
-          };
-
-          tray = {
-            spacing = 10;
-          };
-        };
-      };
-      style = builtins.readFile ../dotfiles/hyprland/waybar.css;
+      # settings.main = builtins.readFile ../dotfiles/hyprland/waybar.json;
+      # style = ../dotfiles/hyprland/waybar.css;
     };
 
     # Wofi - Fuzzy finder for applications (never search with eyes)
@@ -221,6 +108,13 @@
         image_size = 40;
         gtk_dark = true;
       };
+    };
+
+    home.file = {
+      # ".config/hypr/hyprlock.conf".source = ./hypr/hyprlock.conf;
+      # ".config/hypr/hyprshade.toml".source = ./hypr/hyprshade.toml;
+      ".config/waybar".source = ../dotfiles/hyprland/waybar.json;
+      # ".config/waybar/style.css".source = ../dotfiles/hyprland/waybar.css;
     };
 
     # Developer-focused scripts
@@ -248,4 +142,5 @@
     # Main Hyprland configuration with developer focus
     home.file.".config/hypr/hyprland.conf".source = ../dotfiles/hyprland/hyprland.conf;
   };
+
 }
