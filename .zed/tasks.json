@@ -5,9 +5,7 @@
     "show_summary": false,
     "type": "shell",
     "group": "Schema Tools",
-    "tags": [
-      "schema"
-    ],
+    "tags": ["schema"],
     "options": {
       "cwd": "${workspaceFolder}"
     }
@@ -17,9 +15,7 @@
     "command": "nh os switch .",
     "show_summary": false,
     "type": "shell",
-    "tags": [
-      "schema"
-    ],
+    "tags": ["schema"],
     "options": {
       "cwd": "${workspaceFolder}"
     }
@@ -29,9 +25,7 @@
     "command": "nh os switch --update .",
     "show_summary": false,
     "type": "shell",
-    "tags": [
-      "maintenance"
-    ],
+    "tags": ["maintenance"],
     "options": {
       "cwd": "${workspaceFolder}"
     }
@@ -42,9 +36,7 @@
     "show_summary": false,
     "hide": "on_success",
     "type": "shell",
-    "tags": [
-      "maintenance"
-    ],
+    "tags": ["maintenance"],
     "options": {
       "cwd": "${workspaceFolder}"
     }
@@ -55,9 +47,7 @@
     "show_summary": false,
     "hide": "on_success",
     "type": "shell",
-    "tags": [
-      "maintenance"
-    ],
+    "tags": ["maintenance"],
     "options": {
       "cwd": "${workspaceFolder}"
     }
@@ -67,9 +57,13 @@
     "command": "nix-store --verify --check-contents",
     "show_summary": false,
     "type": "shell",
-    "tags": [
-      "maintenance",
-      "store"
-    ]
+    "tags": ["maintenance", "store"]
+  },
+  {
+    "label": "Archive Nix Flakes",
+    "command": "nix flake archive --all",
+    "show_summary": false,
+    "type": "shell",
+    "tags": ["maintenance", "flake"]
   }
 ]
