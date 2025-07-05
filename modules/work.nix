@@ -38,7 +38,7 @@
     file # libmagic - intraupload
 
     # --- JS, ick! ---
-    nodejs
+    nodejs_24
     nodePackages.eslint
 
     # --- Flutter ---
@@ -76,6 +76,8 @@
     127.0.0.1 concursos.local.estrategia.com
     127.0.0.1 oab.local.estrategia.com
     127.0.0.1 carreiras-juridicas.local.estrategia.com
+
+    127.0.0.1 redis
   '';
 
   # Cloudflare Warp

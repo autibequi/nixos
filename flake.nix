@@ -2,8 +2,8 @@
   description = "A very basic flake";
   inputs = {
     # Nix Channels
-    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     # nixpkgs.url = "github:NixOS/nixpkgs/staging";
     # nixpkgs.url = "github:NixOS/nixpkgs/staging-next";
 
