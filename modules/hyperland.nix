@@ -95,35 +95,35 @@
   # Hyprland config
   home-manager.users."pedrinho" = {
     # Dunst - Notification Daemon
-    services.dunst.configFile = (builtins.path { path = ../../dotfiles/hyprland/dunst.conf; });
+    services.dunst.configFile = ../dotfiles/hyprland/dunst.conf;
 
     # Waybar configuration
     programs.waybar = {
       enable = true;
-      settings = builtins.fromJSON (builtins.readFile (builtins.path { path = ../../dotfiles/hyprland/waybar.conf; }));
-      style = builtins.readFile (builtins.path { path = ../../dotfiles/hyprland/waybar.css; });
+      settings = builtins.fromJSON (builtins.readFile ../dotfiles/hyprland/waybar.conf);
+      style = builtins.readFile ../dotfiles/hyprland/waybar.css;
     };
 
     # Create a simple solid color wallpaper script
     home.file.".config/hypr/set_wallpaper.sh" = {
-      source = (builtins.path { path = ../../dotfiles/hyprland/set_wallpaper.sh; });
+      source = ../dotfiles/hyprland/set_wallpaper.sh;
       executable = true;
     };
 
     # Create debug startup script
     home.file.".config/hypr/debug_start.sh" = {
-      source = (builtins.path { path = ../../dotfiles/hyprland/debug_start.sh; });
+      source = ../dotfiles/hyprland/debug_start.sh;
       executable = true;
     };
 
     # Hyprpaper configuration for wallpaper
     home.file.".config/hypr/hyprpaper.conf" = {
-      source = (builtins.path { path = ../../dotfiles/hyprland/hyprpaper.conf; });
+      source = ../dotfiles/hyprland/hyprpaper.conf;
     };
 
     # Main Hyprland configuration
     home.file.".config/hypr/hyprland.conf" = {
-      source = (builtins.path { path = ../../dotfiles/hyprland/hyprland.conf; });
+      source = ../dotfiles/hyprland/hyprland.conf;
     };
   };
 }
