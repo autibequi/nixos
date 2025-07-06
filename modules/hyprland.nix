@@ -121,7 +121,7 @@
     home.file = {
       ".config/hypr/hyprlock.conf".source = ./hypr/hyprlock.conf;
       ".config/hypr/hyprshade.toml".source = ./hypr/hyprshade.toml;
-      ".config/waybar/config.jsonc".source = ../dotfiles/hyprland/waybar.json;
+      ".config/waybar/config.jsonc".source = ../dotfiles/hyprland/waybar.jsonc;
       ".config/waybar/style.css".source = ../dotfiles/hyprland/waybar.css;
     };
 
