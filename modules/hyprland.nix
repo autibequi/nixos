@@ -1,6 +1,8 @@
 { pkgs, ... }:
 
 {
+  services.displayManager.ly.enable = true;
+
   # Hyprland - Window Manager focused on developer experience
   programs.hyprland = {
     enable = true;
