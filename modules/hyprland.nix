@@ -141,6 +141,7 @@
 
     # Main Hyprland configuration with developer focus
     home.file.".config/hypr/hyprland.conf".source = ../dotfiles/hyprland/hyprland.conf;
+    home.file.".config/hypr/toggle-theme.sh".source = ../dotfiles/hyprland/toggle-theme.sh;
   };
 
 }
