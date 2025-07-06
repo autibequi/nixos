@@ -1,7 +1,7 @@
 {
   "layer": "bottom",
   "position": "bottom",
-  "height": 18,
+  "height": 20,
   "spacing": 1,
   "margin": 0,
   "modules-left": ["custom/weather", "hyprland/workspaces", "hyprland/mode"],
