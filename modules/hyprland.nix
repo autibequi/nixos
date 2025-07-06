@@ -71,6 +71,8 @@
       font-awesome
       nerd-fonts.jetbrains-mono
       nerd-fonts.iosevka
+
+      hyprshade
     ];
     fontconfig.defaultFonts = {
       serif = [ "Noto Serif" ];
@@ -90,9 +92,9 @@
     # Waybar - Focus on useful information only
     programs.waybar = {
       enable = true;
-      # settings.main = builtins.readFile ../dotfiles/hyprland/waybar.json;
-      # style = ../dotfiles/hyprland/waybar.css;
     };
+
+    programs.hyprlock.enable = true;
 
     # Wofi - Fuzzy finder for applications (never search with eyes)
     programs.wofi = {
@@ -120,7 +122,7 @@
       # ".config/hypr/hyprlock.conf".source = ./hypr/hyprlock.conf;
       # ".config/hypr/hyprshade.toml".source = ./hypr/hyprshade.toml;
       ".config/waybar/config.jsonc".source = ../dotfiles/hyprland/waybar.json;
-      # ".config/waybar/style.css".source = ../dotfiles/hyprland/waybar.css;
+      ".config/waybar/style.css".source = ../dotfiles/hyprland/waybar.css;
     };
 
     # Developer-focused scripts
