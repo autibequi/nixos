@@ -127,6 +127,7 @@
       ".config/hypr/hyprshade.toml".source = ../dotfiles/hyprland/hyprshade.toml;
       ".config/waybar/config.jsonc".source = ../dotfiles/hyprland/waybar.jsonc;
       ".config/waybar/style.css".source = ../dotfiles/hyprland/waybar.css;
+      ".config/hypr/hypridle.conf".source = ../dotfiles/hyprland/hypridle.conf;
     };
 
     # Developer-focused scripts
