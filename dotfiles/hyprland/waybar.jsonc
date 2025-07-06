@@ -1,17 +1,13 @@
 {
   "layer": "bottom",
   "position": "bottom",
-  "height": 20,
+  "height": 18,
   "spacing": 1,
   "margin": 0,
-  "modules-left": [
-    "custom/weather", // "custom/quote",
-    "hyprland/workspaces",
-    "hyprland/mode"
-  ],
-  "modules-center": [], //battery   //disk     // uptime      //updates        // systray
+  "modules-left": ["custom/weather", "hyprland/workspaces", "hyprland/mode"],
+  "modules-center": ["custom/playerctl"],
   "modules-right": [
-    "clock",
+    "idle_inhibitor",
     "pulseaudio",
     "backlight",
     "network",
@@ -19,38 +15,32 @@
     "memory",
     "temperature",
     "battery",
-    // "disk",
-    // "custom/uptime",
-    // "custom/updates",
-    "tray",
+    "clock",
   ],
 
   "hyprland/workspaces": {
     "disable-scroll": true,
     "all-outputs": true,
-    "format": "{name}",
+    "format": "{icon} {name}",
     "format-icons": {
-      "1": "󰖟",
-      "2": "",
-      "3": "",
-      "4": "󰭹",
-      "5": "󰕧",
-      "6": "",
-      "7": "",
-      "8": "󰣇",
-      "9": "",
-      "10": "",
+      "1": "󰊯",
+      "2": "",
+      "3": "Z",
+      "4": "",
+      "5": "",
+      "6": "",
+      "7": "",
+      "8": "",
+      "9": "",
+      "10": "",
     },
-    "persistent_workspaces": {
-      "1": [],
-      "2": [],
-      "3": [],
-      "4": [],
-      "5": [],
+    "window-rewrite-default": "",
+    "window-rewrite": {
+      "class<.*>": "$class",
     },
   },
 
-  "sway/mode": {
+  "hyprland/mode": {
     "format": "<span style=\"italic\">{}</span>",
   },
 
@@ -82,7 +72,7 @@
     "format": "󰚰 {}",
     "exec": "checkupdates | wc -l",
     "interval": 3600,
-    "on-click": "kitty -e sudo pacman -Syu",
+    "on-click": "alacritty -e sudo pacman -Syu",
     "signal": 8,
   },
 
@@ -132,20 +122,20 @@
     "format": "󰘚 {usage}%",
     "tooltip": true,
     "interval": 1,
-    "on-click": "kitty -e htop",
+    "on-click": "alacritty -e htop",
   },
 
   "memory": {
     "format": "󰍛 {}%",
     "interval": 1,
-    "on-click": "kitty -e htop",
+    "on-click": "alacritty -e htop",
   },
 
   "temperature": {
     "critical-threshold": 80,
     "format": "{icon} {temperatureC}°C",
     "format-icons": ["󱃃", "󰔏", "󱃂"],
-    "on-click": "kitty -e s-tui",
+    "on-click": "alacritty -e s-tui",
   },
 
   "battery": {
@@ -154,10 +144,10 @@
       "warning": 30,
       "critical": 15,
     },
-    "format": "{icon} {capacity}%",
+    "format": "{icon} {time}",
     "format-charging": "󰂄 {capacity}%",
     "format-plugged": "󰚥 {capacity}%",
-    "format-alt": "{icon} {time}",
+    "format-alt": "{icon} {capacity}%",
     "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
   },
 
@@ -168,7 +158,7 @@
     "format-disconnected": "󰖪 Disconnected",
     "format-alt": "{ifname}: {ipaddr}/{cidr}",
     "tooltip-format": "{ifname}: {ipaddr}",
-    "on-click": "kitty -e nmtui",
+    "on-click": "alacritty -e nmtui",
   },
 
   "pulseaudio": {
@@ -202,7 +192,7 @@
     "interval": 30,
     "format": "󰋊 {percentage_used}%",
     "path": "/",
-    "on-click": "kitty -e gdu /",
+    "on-click": "alacritty -e gdu /",
   },
 
   "tray": {
@@ -210,4 +200,3 @@
     "spacing": 5,
   },
 }
-s
