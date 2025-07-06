@@ -1,6 +1,8 @@
 { pkgs, ... }:
 
 {
+  services.displayManager.ly.enable = true;
+
   # Hyprland - Window Manager focused on developer experience
   programs.hyprland = {
     enable = true;
@@ -58,6 +60,7 @@
     extraPortals = [
       pkgs.xdg-desktop-portal-hyprland
       pkgs.xdg-desktop-portal-wlr
+      pkgs.xdg-desktop-portal
     ];
     config.common.default = "*";
   };
@@ -71,6 +74,8 @@
       font-awesome
       nerd-fonts.jetbrains-mono
       nerd-fonts.iosevka
+
+      hyprshade
     ];
     fontconfig.defaultFonts = {
       serif = [ "Noto Serif" ];
@@ -90,9 +95,9 @@
     # Waybar - Focus on useful information only
     programs.waybar = {
       enable = true;
-      # settings.main = builtins.readFile ../dotfiles/hyprland/waybar.json;
-      # style = ../dotfiles/hyprland/waybar.css;
     };
+
+    programs.hyprlock.enable = true;
 
     # Wofi - Fuzzy finder for applications (never search with eyes)
     programs.wofi = {
@@ -102,7 +107,7 @@
         height = 400;
         location = "center";
         show = "drun";
-        prompt = "Search...";
+        prompt = "What the hell do you want...";
         filter_rate = 100;
         allow_markup = true;
         no_actions = true;
@@ -117,10 +122,10 @@
     };
 
     home.file = {
-      # ".config/hypr/hyprlock.conf".source = ./hypr/hyprlock.conf;
-      # ".config/hypr/hyprshade.toml".source = ./hypr/hyprshade.toml;
-      ".config/waybar/config.jsonc".source = ../dotfiles/hyprland/waybar.json;
-      # ".config/waybar/style.css".source = ../dotfiles/hyprland/waybar.css;
+      ".config/hypr/hyprlock.conf".source = ../dotfiles/hyprland/hyprlock.conf;
+      ".config/hypr/hyprshade.toml".source = ../dotfiles/hyprland/hyprshade.toml;
+      ".config/waybar/config.jsonc".source = ../dotfiles/hyprland/waybar.jsonc;
+      ".config/waybar/style.css".source = ../dotfiles/hyprland/waybar.css;
     };
 
     # Developer-focused scripts

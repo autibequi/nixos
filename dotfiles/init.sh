@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Start Hyprland if running on tty1 after logging
+[[ $(tty) == /dev/tty1 ]]&&exec Hyprland
+
 reset-gnome-extensions() {
   gsettings set org.gnome.shell disable-user-extensions true
   gsettings set org.gnome.shell disable-user-extensions false
