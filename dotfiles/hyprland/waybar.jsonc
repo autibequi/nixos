@@ -15,8 +15,21 @@
     "memory",
     "temperature",
     "battery",
+    "power-profiles-daemon",
     "clock",
   ],
+
+  "power-profiles-daemon": {
+    "format": "{icon}",
+    "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
+    "tooltip": true,
+    "format-icons": {
+      "default": "",
+      "performance": "",
+      "balanced": "",
+      "power-saver": "",
+    },
+  },
 
   "hyprland/workspaces": {
     "disable-scroll": true,
@@ -122,20 +135,17 @@
     "format": "󰘚 {usage}%",
     "tooltip": true,
     "interval": 1,
-    "on-click": "alacritty -e htop",
   },
 
   "memory": {
     "format": "󰍛 {}%",
     "interval": 1,
-    "on-click": "alacritty -e htop",
   },
 
   "temperature": {
     "critical-threshold": 80,
     "format": "{icon} {temperatureC}°C",
     "format-icons": ["󱃃", "󰔏", "󱃂"],
-    "on-click": "alacritty -e s-tui",
   },
 
   "battery": {
@@ -156,7 +166,6 @@
     "format-ethernet": "󰈀 {ifname}",
     "format-linked": "󰈀 {ifname} (No IP)",
     "format-disconnected": "󰖪 Disconnected",
-    "format-alt": "{ifname}: {ipaddr}/{cidr}",
     "tooltip-format": "{ifname}: {ipaddr}",
     "on-click": "alacritty -e nmtui",
   },
