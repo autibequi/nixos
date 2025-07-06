@@ -60,6 +60,7 @@
     extraPortals = [
       pkgs.xdg-desktop-portal-hyprland
       pkgs.xdg-desktop-portal-wlr
+      pkgs.xdg-desktop-portal
     ];
     config.common.default = "*";
   };
@@ -106,7 +107,7 @@
         height = 400;
         location = "center";
         show = "drun";
-        prompt = "Search...";
+        prompt = "What the hell do you want...";
         filter_rate = 100;
         allow_markup = true;
         no_actions = true;
