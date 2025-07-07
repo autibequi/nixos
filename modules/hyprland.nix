@@ -52,6 +52,8 @@
     playerctl # Media control
 
     nwg-displays # Display management
+
+    anyrun
   ];
 
   # XDG Desktop Portal
