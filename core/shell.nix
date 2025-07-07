@@ -159,5 +159,10 @@
     mask # better make
     mprocs # better docker-compose
     # present-term # better reveal.js
+    #
+    #
+
+    # node ieks
+    pnpm
   ];
 }

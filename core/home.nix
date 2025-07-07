@@ -17,6 +17,8 @@
       };
 
       home.pointerCursor = {
+        gtk.enable = true;
+        x11.enable = true;
         package = pkgs.apple-cursor;
         name = "MacOS-White";
         size = 40;
