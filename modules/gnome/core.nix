@@ -35,7 +35,7 @@
           # Interface e Aparência
           "org/gnome/desktop/interface" = {
             cursor-size = 40;
-            cursor-theme = "apple-cursor";
+            cursor-theme = "MacOs-White";
             enable-animations = false;
           };
 
