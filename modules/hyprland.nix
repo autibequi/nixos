@@ -1,7 +1,7 @@
 { pkgs, ... }:
 
 {
-  services.displayManager.ly.enable = true;
+  # services.displayManager.ly.enable = true;
 
   # Hyprland - Window Manager focused on developer experience
   programs.hyprland = {
@@ -63,7 +63,6 @@
     enable = true;
     extraPortals = [
       pkgs.xdg-desktop-portal-hyprland
-      pkgs.xdg-desktop-portal-wlr
       pkgs.xdg-desktop-portal
     ];
     config.common.default = "*";
