@@ -35,7 +35,7 @@
           # Interface e Aparência
           "org/gnome/desktop/interface" = {
             cursor-size = 40;
-            cursor-theme = "banana";
+            cursor-theme = "apple-cursor";
             enable-animations = false;
           };
 

@@ -83,7 +83,7 @@
     "interval": 3600,
     "format": "{}",
     "tooltip": true,
-  },
+  },``
   "custom/quote": {
     "format": "󰚛 {}",
     "interval": 3600,
