@@ -40,8 +40,10 @@
     swappy # Screen editing
     slurp # Screen selection
     wl-clipboard # Clipboard management
-    swaylock-effects # Screen lock
     hypridle
+    hyprshade
+    fuzzel
+    walker
 
     # Essential utilities only
     libnotify # Notification support
@@ -50,9 +52,6 @@
     playerctl # Media control
 
     nwg-displays # Display management
-    swayidle
-    swaylock
-    swaylock-effects
   ];
 
   # XDG Desktop Portal
