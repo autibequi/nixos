@@ -46,6 +46,7 @@
     walker
     onagre
     swww
+    bluetuith
 
     # Essential utilities only
     libnotify # Notification support

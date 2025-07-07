@@ -296,11 +296,11 @@ window#waybar {
     margin: 0 2px;
 }
 
-#tray > .passive {
+#tray>.passive {
     -gtk-icon-effect: dim;
 }
 
-#tray > .needs-attention {
+#tray>.needs-attention {
     -gtk-icon-effect: highlight;
     color: @red;
     border-bottom-color: @red;
@@ -327,5 +327,11 @@ window#waybar {
 #power-profiles-daemon.power-saver {
     color: @green;
     border-bottom-color: @green;
+    min-width: 20px;
+}
+
+#bluetooth {
+    color: @blue;
+    border-bottom-color: @blue;
     min-width: 20px;
 }

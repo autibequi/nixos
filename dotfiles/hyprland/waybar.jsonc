@@ -11,8 +11,12 @@
     "hyprland/window",
     "hyprland/active-workspace",
   ],
-  "modules-center": ["custom/playerctl"],
+  "modules-center": [
+    "custom/playerctl"
+  ],
   "modules-right": [
+    "bluetooth",
+    "power-profiles-daemon",
     "idle_inhibitor",
     "pulseaudio",
     "backlight",
@@ -21,7 +25,6 @@
     "memory",
     "temperature",
     "battery",
-    "power-profiles-daemon",
     "clock",
   ],
   "hyprland/window": {
@@ -43,7 +46,6 @@
       "power-saver": "",
     },
   },
-
   "hyprland/workspaces": {
     "disable-scroll": true,
     "all-outputs": true,
@@ -65,11 +67,9 @@
       "class<.*>": "$class",
     },
   },
-
   "hyprland/mode": {
     "format": "<span style=\"italic\">{}</span>",
   },
-
   "custom/playerctl": {
     "format": " 󰐊 {}",
     "return-type": "json",
@@ -78,14 +78,12 @@
     "on-click": "playerctl play-pause",
     "on-click-right": "playerctl next",
   },
-
   "custom/weather": {
     "exec": "curl 'https://wttr.in/?format=1'",
     "interval": 3600,
     "format": "{}",
     "tooltip": true,
   },
-
   "custom/quote": {
     "format": "󰚛 {}",
     "interval": 3600,
@@ -93,7 +91,6 @@
     "on-click": "fortune | yad --text-info --width=400 --height=200 --title='Fortune'",
     "tooltip": true,
   },
-
   "custom/updates": {
     "format": "󰚰 {}",
     "exec": "checkupdates | wc -l",
@@ -101,13 +98,11 @@
     "on-click": "alacritty -e sudo pacman -Syu",
     "signal": 8,
   },
-
   "custom/uptime": {
     "format": "󰔟 {}",
     "exec": "uptime -p | sed 's/up //; s/ days/d/; s/ hours/h/; s/ minutes/m/'",
     "interval": 60,
   },
-
   "idle_inhibitor": {
     "format": "{icon}",
     "format-icons": {
@@ -116,7 +111,6 @@
     },
     "tooltip": true,
   },
-
   "clock": {
     "format": "󰥔 {:%H:%M}",
     "format-alt": "󰃮 {:%Y-%m-%d}",
@@ -143,24 +137,24 @@
       "on-scroll-down": "shift_down",
     },
   },
-
   "cpu": {
     "format": "󰘚 {usage}%",
     "tooltip": true,
     "interval": 1,
   },
-
   "memory": {
     "format": "󰍛 {}%",
     "interval": 1,
   },
-
   "temperature": {
     "critical-threshold": 80,
     "format": "{icon} {temperatureC}°C",
-    "format-icons": ["󱃃", "󰔏", "󱃂"],
+    "format-icons": [
+      "󱃃",
+      "󰔏",
+      "󱃂"
+    ],
   },
-
   "battery": {
     "states": {
       "good": 95,
@@ -170,9 +164,20 @@
     "format": "{icon} {time}",
     "format-charging": "󰂄 {capacity}% {time}",
     "format-plugged": "󰚥 {capacity}%",
-    "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+    "format-icons": [
+      "󰂎",
+      "󰁺",
+      "󰁻",
+      "󰁼",
+      "󰁽",
+      "󰁾",
+      "󰁿",
+      "󰂀",
+      "󰂁",
+      "󰂂",
+      "󰁹"
+    ],
   },
-
   "network": {
     "format-wifi": "󰖩 {essid} ({signalStrength}%)",
     "format-ethernet": "󰈀 {ifname}",
@@ -181,7 +186,17 @@
     "tooltip-format": "{ifname}: {ipaddr}",
     "on-click": "alacritty -e nmtui",
   },
-
+  "bluetooth": {
+    "format": " {status}",
+    "format-connected": " {device_alias}",
+    "format-connected-battery": " {device_alias} {device_battery_percentage}%",
+    // "format-device-preference": [ "device1", "device2" ], // preference list deciding the displayed device
+    "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
+    "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
+    "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
+    "tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t{device_battery_percentage}%",
+    "on-click": "alacritty -e bluetuith",
+  },
   "pulseaudio": {
     "format": "{icon} {volume}%",
     "format-bluetooth": "󰂰 {volume}%",
@@ -194,28 +209,33 @@
       "phone": "󰏲",
       "portable": "󰄝",
       "car": "󰄋",
-      "default": ["󰕿", "󰖀", "󰕾"],
+      "default": [
+        "󰕿",
+        "󰖀",
+        "󰕾"
+      ],
     },
     "on-click": "pavucontrol",
     "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
     "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +2%",
     "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -2%",
   },
-
   "backlight": {
     "format": "{icon} {percent}%",
-    "format-icons": ["󰃞", "󰃟", "󰃠"],
+    "format-icons": [
+      "󰃞",
+      "󰃟",
+      "󰃠"
+    ],
     "on-scroll-up": "brightnessctl set +5%",
     "on-scroll-down": "brightnessctl set 5%-",
   },
-
   "disk": {
     "interval": 30,
     "format": "󰋊 {percentage_used}%",
     "path": "/",
     "on-click": "alacritty -e gdu /",
   },
-
   "tray": {
     "icon-size": 18,
     "spacing": 5,
