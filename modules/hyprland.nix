@@ -149,5 +149,4 @@
     home.file.".config/hypr/hibernate.sh".source = ../dotfiles/hyprland/hibernate.sh;
     home.file.".config/hypr/toggle-theme.sh".source = ../dotfiles/hyprland/toggle-theme.sh;
   };
-
 }
