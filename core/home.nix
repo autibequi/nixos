@@ -17,8 +17,8 @@
       };
 
       home.pointerCursor = {
-        package = pkgs.banana-cursor;
-        name = "Banana";
+        package = pkgs.apple-cursor;
+        name = "MacOS-White";
         size = 40;
       };
 

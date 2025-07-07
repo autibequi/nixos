@@ -32,13 +32,6 @@
       dconf = {
         enable = true;
         settings = {
-          # Interface e Aparência
-          "org/gnome/desktop/interface" = {
-            cursor-size = 40;
-            cursor-theme = "MacOs-White";
-            enable-animations = false;
-          };
-
           # Mouse e Periféricos
           "org/gnome/desktop/peripherals/mouse" = {
             natural-scroll = true;

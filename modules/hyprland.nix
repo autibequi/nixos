@@ -10,15 +10,6 @@
     xwayland.enable = true;
   };
 
-  # Environment Variables - Keep defaults where possible
-  environment.sessionVariables = {
-    # Only essential variables for Hyprland
-    NIXOS_OZONE_WL = "1";
-    XDG_CURRENT_DESKTOP = "Hyprland";
-    XDG_SESSION_TYPE = "wayland";
-    XDG_SESSION_DESKTOP = "Hyprland";
-  };
-
   # Audio support
   services.pulseaudio.enable = false;
   security.rtkit.enable = true;
