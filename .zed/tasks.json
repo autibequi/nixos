@@ -65,5 +65,12 @@
     "show_summary": false,
     "type": "shell",
     "tags": ["maintenance", "flake"]
+  },
+  {
+    "label": "Get UUIDs",
+    "command": "cat /etc/nixos/hardware-configuration.nix | grep -B 1 dev",
+    "show_summary": false,
+    "type": "shell",
+    "tags": ["system"]
   }
 ]
