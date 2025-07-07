@@ -44,6 +44,8 @@
     hyprshade
     fuzzel
     walker
+    onagre
+    swww
 
     # Essential utilities only
     libnotify # Notification support
