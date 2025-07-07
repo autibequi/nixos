@@ -7,10 +7,10 @@
 
   # Will break next release
   services.xserver.desktopManager.gnome.enable = true;
-  # services.xserver.displayManager.gdm = {
-  #   enable = true;
-  #   wayland = true;
-  # };
+  services.xserver.displayManager.gdm = {
+    enable = true;
+    wayland = true;
+  };
 
   # Next Release
   # services = {
