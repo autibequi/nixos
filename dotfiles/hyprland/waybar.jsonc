@@ -37,7 +37,7 @@
     "format": "{class}",
     "max-length": 20,
     "rewrite": {
-      "^(?!.*\\S).*": "Finder",
+      "^(?!.*\\S).*": "¯\\_(ツ)_\/¯",
     },
   },
   "power-profiles-daemon": {
