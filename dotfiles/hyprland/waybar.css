@@ -329,3 +329,8 @@ window#waybar {
     border-bottom-color: @green;
     min-width: 20px;
 }
+
+#tray {
+    color: @green;
+    border-bottom-color: @white;
+}

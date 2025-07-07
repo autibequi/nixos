@@ -13,6 +13,7 @@
   ],
   "modules-center": ["custom/playerctl"],
   "modules-right": [
+    "power-profiles-daemon",
     "idle_inhibitor",
     "pulseaudio",
     "backlight",
@@ -21,9 +22,16 @@
     "memory",
     "temperature",
     "battery",
-    "power-profiles-daemon",
     "clock",
+    "tray",
   ],
+  "tray": {
+    "icon-size": 19,
+    "spacing": 5,
+    "icons": {
+      "blueman": "bluetooth",
+    },
+  },
   "hyprland/window": {
     "format": "{class}",
     "max-length": 20,
