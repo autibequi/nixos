@@ -4,7 +4,13 @@
   "height": 20,
   "spacing": 1,
   "margin": 0,
-  "modules-left": ["custom/weather", "hyprland/workspaces", "hyprland/mode"],
+  "modules-left": [
+    "custom/weather",
+    "hyprland/workspaces",
+    "hyprland/mode",
+    "hyprland/window",
+    "hyprland/active-workspace",
+  ],
   "modules-center": ["custom/playerctl"],
   "modules-right": [
     "idle_inhibitor",
@@ -18,13 +24,20 @@
     "power-profiles-daemon",
     "clock",
   ],
-
+  "hyprland/window": {
+    "format": "{class}",
+    "max-length": 20,
+    "rewrite": {
+      "^(?!.*\\S).*": "Finder",
+    },
+  },
   "power-profiles-daemon": {
     "format": "{icon}",
     "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
     "tooltip": true,
+    "expand": true,
     "format-icons": {
-      "default": "",
+      "default": "",
       "performance": "",
       "balanced": "",
       "power-saver": "",
@@ -155,9 +168,8 @@
       "critical": 15,
     },
     "format": "{icon} {time}",
-    "format-charging": "󰂄 {capacity}%",
+    "format-charging": "󰂄 {capacity}% {time}",
     "format-plugged": "󰚥 {capacity}%",
-    "format-alt": "{icon} {capacity}%",
     "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
   },
 
