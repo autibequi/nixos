@@ -47,9 +47,9 @@
     # evil-helix_git
 
     # ISO
-    ventoy-full-qt
+    # ventoy-full-qt
   ];
-  permittedInsecurePackages = [
-    "ventoy-qt5-1.1.05"
-  ];
+  # permittedInsecurePackages = [
+  #   "ventoy-qt5-1.1.05"
+  # ];
 }
