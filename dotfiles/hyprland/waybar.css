@@ -334,3 +334,9 @@ window#waybar {
     color: @green;
     border-bottom-color: @white;
 }
+
+#bluetooth {
+    color: @blue;
+    border-bottom-color: @blue;
+    min-width: 20px;
+}

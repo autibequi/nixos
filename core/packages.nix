@@ -46,11 +46,10 @@
     # openrgb_git
     # evil-helix_git
 
-    # Window Manager
-    niri
-
-    # node
-    pnpm
-    nodejs
+    # ISO
+    # ventoy-full-qt
   ];
+  # permittedInsecurePackages = [
+  #   "ventoy-qt5-1.1.05"
+  # ];
 }

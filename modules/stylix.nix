@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 {
   stylix = {
@@ -6,13 +11,7 @@
     enable = false;
     autoEnable = false;
 
-
     targets.plymouth.enable = false;
-    cursor = {
-      package = pkgs.banana-cursor;
-      name = "banana";
-      size = 40;
-    };
     base16Scheme = "${pkgs.base16-schemes}/share/themes/dracula.yaml";
     fonts = {
       serif = {

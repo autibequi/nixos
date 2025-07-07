@@ -14,10 +14,14 @@
     ./core/programs.nix
     ./core/packages.nix
     ./core/shell.nix
-    # ./modules/battery.nix
+    ./modules/battery.nix
+    # ./modules/bluetooth.nix
     # ./modules/plymouth.nix
     # ./core/fonts.nix
     # ./core/kernel.nix
+
+    # Hardware specific
+    ./modules/asus.nix
     # ./modules/nvidia.nix
 
     # Desktop Environments
@@ -38,16 +42,16 @@
   # Instalation
   options.diskUUIDs = {
     boot = lib.mkOption {
-      description = "UUID of the boot partition";
-      default = "/dev/disk/by-uuid/1F53-9115";
+      description = "Boot partition";
+      default = "/dev/disk/by-uuid/6B74-DC9D";
     };
     root = lib.mkOption {
-      description = "UUID of the root partition";
-      default = "/dev/disk/by-uuid/ee52cc58-f10d-4979-8244-4386302649c5";
+      description = "Toot partition";
+      default = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
     };
     swap = lib.mkOption {
-      description = "UUID of the swap partition";
-      default = "/dev/disk/by-uuid/17e5c565-c90c-4233-92c6-bb86adfed306";
+      description = "Swap partition";
+      default = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593";
     };
   };
 }

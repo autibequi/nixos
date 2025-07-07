@@ -7,10 +7,10 @@
 
   # Will break next release
   services.xserver.desktopManager.gnome.enable = true;
-  # services.xserver.displayManager.gdm = {
-  #   enable = true;
-  #   wayland = true;
-  # };
+  services.xserver.displayManager.gdm = {
+    enable = true;
+    wayland = true;
+  };
 
   # Next Release
   # services = {
@@ -32,13 +32,6 @@
       dconf = {
         enable = true;
         settings = {
-          # Interface e Aparência
-          "org/gnome/desktop/interface" = {
-            cursor-size = 40;
-            cursor-theme = "banana";
-            enable-animations = false;
-          };
-
           # Mouse e Periféricos
           "org/gnome/desktop/peripherals/mouse" = {
             natural-scroll = true;
