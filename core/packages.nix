@@ -2,6 +2,7 @@
 
 {
   environment.systemPackages = with pkgs; [
+    killall
     # apps
     onlyoffice-bin # office space apps
     sidequest # for oculus sideloading

@@ -1,7 +1,7 @@
 { pkgs, ... }:
 
 {
-  services.displayManager.ly.enable = true;
+  # services.displayManager.ly.enable = true;
 
   # Hyprland - Window Manager focused on developer experience
   programs.hyprland = {
@@ -40,7 +40,12 @@
     swappy # Screen editing
     slurp # Screen selection
     wl-clipboard # Clipboard management
-    swaylock-effects # Screen lock
+    hypridle
+    hyprshade
+    fuzzel
+    walker
+    onagre
+    swww
 
     # Essential utilities only
     libnotify # Notification support
@@ -49,9 +54,8 @@
     playerctl # Media control
 
     nwg-displays # Display management
-    swayidle
-    swaylock
-    swaylock-effects
+
+    anyrun
   ];
 
   # XDG Desktop Portal
@@ -59,7 +63,6 @@
     enable = true;
     extraPortals = [
       pkgs.xdg-desktop-portal-hyprland
-      pkgs.xdg-desktop-portal-wlr
       pkgs.xdg-desktop-portal
     ];
     config.common.default = "*";
@@ -126,6 +129,7 @@
       ".config/hypr/hyprshade.toml".source = ../dotfiles/hyprland/hyprshade.toml;
       ".config/waybar/config.jsonc".source = ../dotfiles/hyprland/waybar.jsonc;
       ".config/waybar/style.css".source = ../dotfiles/hyprland/waybar.css;
+      ".config/hypr/hypridle.conf".source = ../dotfiles/hyprland/hypridle.conf;
     };
 
     # Developer-focused scripts
@@ -141,6 +145,7 @@
 
     # Main Hyprland configuration with developer focus
     home.file.".config/hypr/hyprland.conf".source = ../dotfiles/hyprland/hyprland.conf;
+    home.file.".config/hypr/hibernate.sh".source = ../dotfiles/hyprland/hibernate.sh;
+    home.file.".config/hypr/toggle-theme.sh".source = ../dotfiles/hyprland/toggle-theme.sh;
   };
-
 }

@@ -68,7 +68,7 @@
 @define-color mpd-color @magenta;
 @define-color weather-color @magenta;
 @define-color playerctl-color @magenta;
-@define-color clock-color @blue;
+@define-color clock-color @white;
 @define-color cpu-color @green;
 @define-color memory-color @magenta;
 @define-color temperature-color @yellow;
@@ -94,7 +94,7 @@
     border: none;
     border-radius: 0;
     font-family: "Iosevka Nerd Font";
-    font-size: 14px;
+    font-size: 12px;
     min-height: 0;
 }
 
@@ -304,4 +304,28 @@ window#waybar {
     -gtk-icon-effect: highlight;
     color: @red;
     border-bottom-color: @red;
+}
+
+#power-profiles-daemon {
+    color: @cyan;
+    border-bottom-color: @cyan;
+    min-width: 20px;
+}
+
+#power-profiles-daemon.performance {
+    color: @red;
+    border-bottom-color: @red;
+    min-width: 20px;
+}
+
+#power-profiles-daemon.balanced {
+    color: @yellow;
+    border-bottom-color: @yellow;
+    min-width: 20px;
+}
+
+#power-profiles-daemon.power-saver {
+    color: @green;
+    border-bottom-color: @green;
+    min-width: 20px;
 }
