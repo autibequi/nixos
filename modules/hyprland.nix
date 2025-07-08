@@ -40,6 +40,7 @@
     swww
     bluetuith
     ncpamixer
+    tesseract
     # quickshell
     # qt6.qt5compat
 
