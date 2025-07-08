@@ -39,8 +39,8 @@
     onagre
     swww
     bluetuith
-    quickshell
-    qt6.qt5compat
+    # quickshell
+    # qt6.qt5compat
 
     # Essential utilities only
     libnotify # Notification support
