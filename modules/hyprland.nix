@@ -39,6 +39,7 @@
     onagre
     swww
     bluetuith
+    ncpamixer
     # quickshell
     # qt6.qt5compat
 

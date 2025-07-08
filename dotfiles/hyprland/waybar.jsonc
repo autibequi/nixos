@@ -11,7 +11,10 @@
     "hyprland/window",
     "hyprland/active-workspace",
   ],
-  "modules-center": ["custom/playerctl", "custom/quotes"],
+  "modules-center": [
+    "custom/playerctl",
+    "custom/quotes"
+  ],
   "modules-right": [
     "bluetooth",
     "power-profiles-daemon",
@@ -56,14 +59,18 @@
     "disable-scroll": true,
     "all-outputs": true,
     "format": "{icon}",
+    "show-special": true,
     "format-icons": {
+      "default": "○",
+      "active": "●",
+      "special": "✧", // A unique icon for special workspaces
       "1": "󰊯",
       "2": "",
-      "3": "",
-      "4": "",
-      "5": "",
-      "6": " ",
-      "7": "",
+      "3": "",
+      "4": "",
+      "5": "[]",
+      "6": "[]",
+      "7": "Z",
       "8": "󱚢",
       "9": "",
       "10": "",
@@ -155,7 +162,11 @@
   "temperature": {
     "critical-threshold": 80,
     "format": "{icon} {temperatureC}°C",
-    "format-icons": ["󱃃", "󰔏", "󱃂"],
+    "format-icons": [
+      "󱃃",
+      "󰔏",
+      "󱃂"
+    ],
   },
   "battery": {
     "states": {
@@ -166,7 +177,19 @@
     "format": "{icon} {time}",
     "format-charging": "󰂄 {capacity}% {time}",
     "format-plugged": "󰚥 {capacity}%",
-    "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+    "format-icons": [
+      "󰂎",
+      "󰁺",
+      "󰁻",
+      "󰁼",
+      "󰁽",
+      "󰁾",
+      "󰁿",
+      "󰂀",
+      "󰂁",
+      "󰂂",
+      "󰁹"
+    ],
   },
   "network": {
     "format-wifi": "󰖩 {essid} ({signalStrength}%)",
@@ -188,7 +211,7 @@
     "on-click": "alacritty -e bluetuith",
   },
   "pulseaudio": {
-    "format": "{icon} {volume}%",
+    "format": "{} {icon} {volume}%",
     "format-bluetooth": "󰂰 {volume}%",
     "format-bluetooth-muted": "󰂲 {icon}",
     "format-muted": "󰝟",
@@ -199,16 +222,24 @@
       "phone": "󰏲",
       "portable": "󰄝",
       "car": "󰄋",
-      "default": ["󰕿", "󰖀", "󰕾"],
+      "default": [
+        "󰕿",
+        "󰖀",
+        "󰕾"
+      ],
     },
-    "on-click": "pavucontrol",
+    "on-click": "ncpamixer",
     "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
     "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +2%",
     "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -2%",
   },
   "backlight": {
     "format": "{icon} {percent}%",
-    "format-icons": ["󰃞", "󰃟", "󰃠"],
+    "format-icons": [
+      "󰃞",
+      "󰃟",
+      "󰃠"
+    ],
     "on-scroll-up": "brightnessctl set +5%",
     "on-scroll-down": "brightnessctl set 5%-",
   },
