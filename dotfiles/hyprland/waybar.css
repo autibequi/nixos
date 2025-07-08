@@ -197,6 +197,7 @@ window#waybar {
 #cpu {
     color: @cpu-color;
     border-bottom-color: @cpu-color;
+    min-width: 20px;
 }
 
 #memory {
@@ -333,6 +334,7 @@ window#waybar {
 #tray {
     color: @green;
     border-bottom-color: @white;
+    min-width: 0px;
 }
 
 #bluetooth {

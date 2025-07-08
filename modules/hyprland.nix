@@ -8,6 +8,9 @@
     xwayland.enable = true;
   };
 
+  # Power management daemon
+  services.power-profiles-daemon.enable = true;
+
   # Audio support
   services.pulseaudio.enable = false;
   security.rtkit.enable = true;
@@ -36,6 +39,8 @@
     onagre
     swww
     bluetuith
+    quickshell
+    qt6.qt5compat
 
     # Essential utilities only
     libnotify # Notification support

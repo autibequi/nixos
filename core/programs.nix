@@ -10,10 +10,10 @@
     starship.settings = {
     };
 
-    firefox = {
-      enable = true;
-      package = pkgs.firefox-beta;
-    };
+    # firefox = {
+    #   enable = true;
+    #   package = pkgs.firefox-beta;
+    # };
 
     neovim = {
       enable = true;
