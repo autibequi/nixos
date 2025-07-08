@@ -11,7 +11,7 @@
     "hyprland/window",
     "hyprland/active-workspace",
   ],
-  "modules-center": ["custom/playerctl"],
+  "modules-center": ["custom/playerctl", "custom/quotes"],
   "modules-right": [
     "bluetooth",
     "power-profiles-daemon",
