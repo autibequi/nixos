@@ -12,3 +12,6 @@ result/
 # lock configuration.nix file
 configuration.nix
 setup.nix
+
+# dont care to lock, me is maverick
+flake.lock
