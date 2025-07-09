@@ -7,7 +7,7 @@
     xwayland.enable = true;
   };
 
-  services.power-profiles-daemon.enable = true;
+  # services.power-profiles-daemon.enable = true;
 
   # aparently i need gnome just to toggle my theme
   services.xserver.desktopManager.gnome.enable = true;

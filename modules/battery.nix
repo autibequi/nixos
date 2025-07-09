@@ -7,7 +7,7 @@
 
   imports = [
     # Too much trouble, pstate does the same with better perf
-    # ./tlp.nix
+    ./tlp.nix
   ];
 
   # Tweak CFS latency parameters when going on/off battery
