@@ -1,5 +1,83 @@
+# 📁 Dotfiles
 
-# Dotfiles
+Configurações personalizadas para o sistema NixOS do Pedrinho.
+
+## 🚀 Setup Automático
+
+Para configurar todos os dotfiles automaticamente, execute:
+
+```bash
+cd dotfiles
+./setup-symlinks.sh
+```
+
+Este script criará symlinks para todas as configurações necessárias.
+
+## 📋 Estrutura
+
+### 🎯 Diretórios de Configuração
+- **`hypr/`** - Configurações do Hyprland (window manager)
+- **`waybar/`** - Configurações da barra de status
+- **`fuzzel/`** - Configurações do launcher de aplicações
+- **`zed/`** - Configurações do editor Zed
+
+### 📄 Arquivos de Configuração
+- **`atuin.conf`** - Configuração do Atuin (histórico de comandos)
+- **`fastfetch.jsonc`** - Configuração do Fastfetch (info do sistema)
+- **`ghostty.conf`** - Configuração do terminal Ghostty
+- **`vscode.json`** - Configurações do VS Code
+
+## 🔧 Configurações Específicas
+
+### Hyprland
+- Configuração otimizada para desenvolvimento
+- Atalhos personalizados para produtividade
+- Temas e aparência customizada
+
+### Waybar
+- Barra de status minimalista
+- Informações essenciais do sistema
+- Integração com Hyprland
+
+### Fuzzel
+- Launcher rápido e eficiente
+- Busca fuzzy para aplicações
+- Interface limpa e moderna
+
+### Zed
+- Editor moderno e rápido
+- Configurações otimizadas para desenvolvimento
+- Atalhos personalizados
+
+## 🛠️ Manutenção
+
+### Adicionando Novas Configurações
+1. Adicione o arquivo/diretório na pasta `dotfiles/`
+2. Atualize o script `setup-symlinks.sh` com o novo item
+3. Execute o script para criar o symlink
+
+### Removendo Configurações
+1. Remova o item do script `setup-symlinks.sh`
+2. Delete o symlink manualmente se necessário
+3. Remova o arquivo/diretório da pasta `dotfiles/`
+
+## 📝 Notas
+
+- Todos os symlinks apontam para `~/.config/`
+- O script faz backup automático de arquivos existentes
+- Configurações são versionadas no Git
+- Compatível com NixOS e home-manager
+
+## 🔄 Atualizações
+
+Para atualizar as configurações após mudanças:
+
+```bash
+cd dotfiles
+./setup-symlinks.sh
+```
+
+Isso recriará todos os symlinks com as configurações mais recentes.
 
 ## Ghostty (`dotfiles/ghostty.conf`)
 Configuração para o terminal Ghostty, incluindo atalhos de teclado personalizados:
