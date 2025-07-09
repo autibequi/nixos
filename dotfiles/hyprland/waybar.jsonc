@@ -11,10 +11,7 @@
     "hyprland/window",
     "hyprland/active-workspace",
   ],
-  "modules-center": [
-    "custom/playerctl",
-    "custom/quotes"
-  ],
+  "modules-center": ["custom/playerctl", "custom/quotes"],
   "modules-right": [
     "bluetooth",
     "power-profiles-daemon",
@@ -24,7 +21,6 @@
     "network",
     "cpu",
     "memory",
-    "temperature",
     "battery",
     "clock",
     "tray",
@@ -47,7 +43,6 @@
     "format": "{icon}",
     "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
     "tooltip": true,
-    "expand": true,
     "format-icons": {
       "default": "",
       "performance": "",
@@ -58,12 +53,9 @@
   "hyprland/workspaces": {
     "disable-scroll": true,
     "all-outputs": true,
-    "format": "{icon}",
-    "show-special": true,
+    "format": "{icon} {name}",
+    "show-special": false,
     "format-icons": {
-      "default": "○",
-      "active": "●",
-      "special": "✧", // A unique icon for special workspaces
       "1": "󰊯",
       "2": "",
       "3": "",
@@ -153,7 +145,7 @@
   "cpu": {
     "format": "󰘚 {usage}%",
     "tooltip": true,
-    "interval": 1,
+    "interval": 10,
   },
   "memory": {
     "format": "󰍛 {}%",
@@ -162,11 +154,7 @@
   "temperature": {
     "critical-threshold": 80,
     "format": "{icon} {temperatureC}°C",
-    "format-icons": [
-      "󱃃",
-      "󰔏",
-      "󱃂"
-    ],
+    "format-icons": ["󱃃", "󰔏", "󱃂"],
   },
   "battery": {
     "states": {
@@ -175,21 +163,9 @@
       "critical": 15,
     },
     "format": "{icon} {time}",
-    "format-charging": "󰂄 {capacity}% {time}",
+    "format-charging": "{time} 󰂄 {capacity}% ",
     "format-plugged": "󰚥 {capacity}%",
-    "format-icons": [
-      "󰂎",
-      "󰁺",
-      "󰁻",
-      "󰁼",
-      "󰁽",
-      "󰁾",
-      "󰁿",
-      "󰂀",
-      "󰂁",
-      "󰂂",
-      "󰁹"
-    ],
+    "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
   },
   "network": {
     "format-wifi": "󰖩 {essid} ({signalStrength}%)",
@@ -211,7 +187,7 @@
     "on-click": "alacritty -e bluetuith",
   },
   "pulseaudio": {
-    "format": "{icon} {desc} {volume}%",
+    "format": "{icon} {volume}%",
     "format-bluetooth": "󰂰 {volume}%",
     "format-bluetooth-muted": "󰂲 {icon}",
     "format-muted": "󰝟",
@@ -222,11 +198,7 @@
       "phone": "󰏲",
       "portable": "󰄝",
       "car": "󰄋",
-      "default": [
-        "󰕿",
-        "󰖀",
-        "󰕾"
-      ],
+      "default": ["󰕿", "󰖀", "󰕾"],
     },
     "on-click": "alacritty -e ncpamixer",
     "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
@@ -235,11 +207,7 @@
   },
   "backlight": {
     "format": "{icon} {percent}%",
-    "format-icons": [
-      "󰃞",
-      "󰃟",
-      "󰃠"
-    ],
+    "format-icons": ["󰃞", "󰃟", "󰃠"],
     "on-scroll-up": "brightnessctl set +5%",
     "on-scroll-down": "brightnessctl set 5%-",
   },
@@ -248,9 +216,5 @@
     "format": "󰋊 {percentage_used}%",
     "path": "/",
     "on-click": "alacritty -e gdu /",
-  },
-  "tray": {
-    "icon-size": 18,
-    "spacing": 5,
   },
 }
