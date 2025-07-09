@@ -164,5 +164,6 @@
 
     # node ieks
     pnpm
+    nodejs
   ];
 }
