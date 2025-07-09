@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Garante acesso ao DBus da sessão para o gsettings funcionar via Hyprland
+export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
+export XDG_RUNTIME_DIR="/run/user/$(id -u)"
+
 # Hyperland cant read directly from gsettings for whatever reason
 state_file="/tmp/theme"
 
@@ -25,4 +29,3 @@ else
     swww img ~/.wallpapers/dark.jpg
     echo "dark" > "$state_file"
 fi
-
