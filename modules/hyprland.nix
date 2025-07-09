@@ -122,11 +122,11 @@
     };
 
     home.file = {
-      ".config/hypr/hyprlock.conf".source = ../dotfiles/hyprland/hyprlock.conf;
-      ".config/hypr/hyprshade.toml".source = ../dotfiles/hyprland/hyprshade.toml;
-      ".config/hypr/hypridle.conf".source = ../dotfiles/hyprland/hypridle.conf;
+      ".config/hypr/hyprlock.conf".source = ../dotfiles/hypr/hyprlock.conf;
+      ".config/hypr/hyprshade.toml".source = ../dotfiles/hypr/hyprshade.toml;
+      ".config/hypr/hypridle.conf".source = ../dotfiles/hypr/hypridle.conf;
       ".config/waybar/config.jsonc".source = ../dotfiles/waybar/waybar.jsonc;
-      ".config/waybar/style.css".source = ../dotfiles/waybar /waybar.css;
+      ".config/waybar/style.css".source = ../dotfiles/waybar/waybar.css;
       ".config/fuzzel/fuzzel.ini".source = ../dotfiles/fuzzel/fuzzel.ini;
     };
 
