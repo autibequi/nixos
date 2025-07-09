@@ -127,6 +127,7 @@
       ".config/waybar/config.jsonc".source = ../dotfiles/hyprland/waybar.jsonc;
       ".config/waybar/style.css".source = ../dotfiles/hyprland/waybar.css;
       ".config/hypr/hypridle.conf".source = ../dotfiles/hyprland/hypridle.conf;
+      ".config/fuzzel/fuzzel.ini".source = ../dotfiles/hyprland/fuzzel.ini;
     };
 
     # Developer-focused scripts
