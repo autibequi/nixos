@@ -9,7 +9,7 @@
 
   services.power-profiles-daemon.enable = true;
 
-  # aparently i need gnome just to toggle my theme 
+  # aparently i need gnome just to toggle my theme
   services.xserver.desktopManager.gnome.enable = true;
 
   environment.systemPackages = with pkgs; [
@@ -36,9 +36,6 @@
     glib
     gsettings-desktop-schemas
     dconf
-    
-    # quickshell
-    # qt6.qt5compat
 
     # Essential utilities only
     libnotify # Notification support
