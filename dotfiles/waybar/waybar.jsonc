@@ -13,7 +13,6 @@
   ],
   "modules-center": [
     "custom/playerctl",
-    "custom/quotes"
   ],
   "modules-right": [
     "hyprland/mode",
@@ -94,7 +93,8 @@
     "tooltip": true,
   },
   "custom/quotes": {
-    "format": "󰚛 {}",
+    "format": "󰚛",
+    "tooltip-format": "{}",
     "interval": 3600,
     "exec": "fortune -s",
     "on-click": "fortune | yad --text-info --width=400 --height=200 --title='Fortune'",
