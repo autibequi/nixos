@@ -22,7 +22,7 @@
     "network",
     "cpu",
     "memory",
-    "tlp",
+    "custom/tlp",
     "power-profiles-daemon",
     "battery",
     "clock",
@@ -159,16 +159,13 @@
     "tooltip": true,
     "interval": 10,
   },
-  "tlp": {
-    "format": "{icon} {status}",
-    "format-icons": {
-      "enabled": "󰂄",
-      "disabled": "󰂃",
-      "error": ""
-    },
-    "tooltip-format": "<b>TLP</b>\nStatus: {status}\nBattery: {bat}\nAC: {ac}\nMode: {mode}",
-    "tooltip": true,
-    "interval": 5
+  "custom/tlp": {
+    "exec": "bash ~/.config/waybar/tlp-status.sh",
+    "format": "{}",
+    "return-type": "json",
+    "interval": 10,
+    "on-click": "alacritty -e tlp-stat -s",
+    "on-click-right": "alacritty -e sudo tlp start",
   },
   "memory": {
     "format": "󰍛 {}%",

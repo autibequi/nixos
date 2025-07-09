@@ -85,6 +85,9 @@
       ".config/waybar/config.jsonc".source = ../dotfiles/waybar/waybar.jsonc;
       ".config/waybar/style.css".source = ../dotfiles/waybar/waybar.css;
       ".config/waybar/restart.sh".source = ../dotfiles/waybar/restart.sh;
+
+      # scripts
+      ".config/waybar/tlp-status.sh".source = ../dotfiles/waybar/tlp-status.sh;
     };
   };
 }
