@@ -23,5 +23,6 @@ else
     gsettings set org.gnome.desktop.interface gtk-theme adw-gtk3-dark
     echo "Switched to dark theme"
     swww img ~/.wallpapers/dark.jpg
+    echo "dark" > "$state_file"
 fi
 
