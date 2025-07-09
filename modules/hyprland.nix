@@ -142,8 +142,8 @@
     };
 
     # Main Hyprland configuration with developer focus
-    # home.file.".config/hypr/hyprland.conf".source = ../dotfiles/hyprland/hyprland.conf;
-    # home.file.".config/hypr/hibernate.sh".source = ../dotfiles/hyprland/hibernate.sh;
-    # home.file.".config/hypr/toggle-theme.sh".source = ../dotfiles/hyprland/toggle-theme.sh;
+    home.file.".config/hypr/hyprland.conf".source = ../dotfiles/hypr/hyprland.conf;
+    home.file.".config/hypr/hibernate.sh".source = ../dotfiles/hypr/hibernate.sh;
+    home.file.".config/hypr/toggle-theme.sh".source = ../dotfiles/hypr/toggle-theme.sh;
   };
 }
