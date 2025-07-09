@@ -15,27 +15,28 @@
     ./core/packages.nix
     ./core/shell.nix
     ./modules/battery.nix
-    # ./modules/bluetooth.nix
-    # ./modules/plymouth.nix
-    # ./core/fonts.nix
-    # ./core/kernel.nix
+    ./modules/bluetooth.nix
+    ./modules/plymouth.nix
+    ./core/fonts.nix
+    ./core/kernel.nix
 
     # Hardware specific
     ./modules/asus.nix
     # ./modules/nvidia.nix
 
     # Desktop Environments
-    ./modules/gnome/core.nix
+    ./modules/hyprland.nix
+    # ./modules/gnome/core.nix
     # ./modules/cosmic.nix
     # ./modules/kde.nixs
 
     # Extra
-    # ./modules/ai.nix
-    # ./modules/asus.nix
-    # ./modules/bluetooth.nix
+    ./modules/ai.nix
+    ./modules/asus.nix
+    ./modules/bluetooth.nix
     # ./modules/podman.nix
     # ./modules/howdy.nix
-    # ./modules/flatpak.nix
+    ./modules/flatpak.nix
     # ./modules/work.nix
   ];
 
