@@ -88,6 +88,7 @@
 
       # scripts
       ".config/waybar/tlp-status.sh".source = ../dotfiles/waybar/tlp-status.sh;
+      ".config/waybar/tlp-toggle.sh".source = ../dotfiles/waybar/tlp-toggle.sh;
     };
   };
 }

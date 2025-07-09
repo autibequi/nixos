@@ -164,8 +164,8 @@
     "format": "{}",
     "return-type": "json",
     "interval": 10,
-    "on-click": "alacritty -e tlp-stat -s",
-    "on-click-right": "alacritty -e sudo tlp start",
+    "on-click": "bash ~/.config/waybar/tlp-toggle.sh",
+    "on-click-right": "alacritty -e tlp-stat -s",
   },
   "memory": {
     "format": "󰍛 {}%",
