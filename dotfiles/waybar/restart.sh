@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 kill $(pgrep waybar -d " ") > /dev/null || true 
 
