@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # Get current theme
 current_theme=$(gsettings get org.gnome.desktop.interface color-scheme)
 

@@ -41,6 +41,7 @@
     bluetuith
     ncpamixer
     tesseract
+    satty
     # quickshell
     # qt6.qt5compat
 
