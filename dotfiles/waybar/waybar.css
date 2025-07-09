@@ -1,4 +1,3 @@
-
 /*Colorschemes, there are Gruvbox, Tokyo Night, and Everforest by default. The way it works is whichever colorscheme section is defined last will be used. Here everforest is last, but put any one you want to use as the last one.*/
 
 /* Tokyo Night */
@@ -94,8 +93,8 @@
     /* Base styling for all modules */
     border: none;
     border-radius: 0;
-    font-family: "Iosevka Nerd Font";
-    font-size: 12px;
+    font-family: "FiraCode Nerd Font";
+    font-size: 20px;
     min-height: 0;
 }
 
@@ -128,7 +127,7 @@ window#waybar {
     margin: 5px;
 }
 
-#tray > .active {
+#tray>.active {
     background-color: @background-light;
     color: @textcolor2;
     padding: 0px 10px;
@@ -307,11 +306,11 @@ window#waybar {
     margin: 0 2px;
 }
 
-#tray > .passive {
+#tray>.passive {
     -gtk-icon-effect: dim;
 }
 
-#tray > .needs-attention {
+#tray>.needs-attention {
     -gtk-icon-effect: highlight;
     color: @red;
     border-bottom-color: @red;
