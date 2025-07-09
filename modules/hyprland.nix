@@ -29,6 +29,9 @@
     ncpamixer
     tesseract
     satty
+
+    glib
+
     # quickshell
     # qt6.qt5compat
 
@@ -54,7 +57,6 @@
     config.common.default = "*";
   };
 
-
   # Hyprland config
   home-manager.users."pedrinho" = {
     # Dunst - Minimal notification setup
@@ -69,10 +71,10 @@
       ".config/hypr/hyprshade.toml".source = ../dotfiles/hypr/hyprshade.toml;
       ".config/hypr/hypridle.conf".source = ../dotfiles/hypr/hypridle.conf;
       ".config/hypr/hyprland.conf".source = ../dotfiles/hypr/hyprland.conf;
-      
+
       # Fuzzel
       ".config/fuzzel/fuzzel.ini".source = ../dotfiles/fuzzel/fuzzel.ini;
-    
+
       # Darkmode
       ".config/hypr/toggle-theme.sh".source = ../dotfiles/hypr/toggle-theme.sh;
 
