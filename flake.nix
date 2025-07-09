@@ -13,10 +13,10 @@
     isd.url = "github:isd-project/isd"; # Interactive SystemD
     home-manager.url = "github:nix-community/home-manager/release-25.05"; # Home Manager
     solaar.url = "https://flakehub.com/f/Svenum/Solaar-Flake/*.tar.gz"; # Logitech Solaar
-    nixpkgs-howdy.url = "github:NixOS/nixpkgs/pull/216245/head";
-    nix-alien.url = "github:thiagokokada/nix-alien";
-    stylix.url = "github:danth/stylix";
-    nixgl.url = "github:nix-community/nixGL";
+    # nixpkgs-howdy.url = "github:NixOS/nixpkgs/pull/216245/head";
+    # nix-alien.url = "github:thiagokokada/nix-alien";
+    # stylix.url = "github:danth/stylix";
+    # nixgl.url = "github:nix-community/nixGL";
     nixified-ai = {
       url = "github:nixified-ai/flake";
     };
@@ -32,9 +32,9 @@
       nixos-hardware,
       home-manager,
       chaotic,
-      nix-alien,
-      stylix,
-      nixgl,
+      # nix-alien,
+      # stylix,
+      # nixgl,
       ...
     }@inputs:
     {
@@ -60,16 +60,16 @@
           # stylix.nixosModules.stylix
 
           # NixAlien
-          (
-            { ... }:
-            {
-              environment.systemPackages = [
-                nix-alien
-              ];
-              # Optional, needed for `nix-alien-ld`
-              programs.nix-ld.enable = true;
-            }
-          )
+          # (
+          #   { ... }:
+          #   {
+          #     environment.systemPackages = [
+          #       nix-alien
+          #     ];
+          #     # Optional, needed for `nix-alien-ld`
+          #     programs.nix-ld.enable = true;
+          #   }
+          # )
 
           # home-manager
           home-manager.nixosModules.home-manager
@@ -77,9 +77,9 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             # Add this inside home configuration block (without this it won't work):
-            home-manager.extraSpecialArgs = {
-              nixgl = nixgl;
-            };
+            # home-manager.extraSpecialArgs = {
+            #   nixgl = nixgl;
+            # };
           }
 
           # Interactive SystemD
