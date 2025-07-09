@@ -17,6 +17,7 @@
     "idle_inhibitor",
     "bluetooth",
     "pulseaudio",
+    "pipewire",
     "backlight",
     "network",
     "cpu",
@@ -26,6 +27,26 @@
     "clock",
     "tray",
   ],
+  "pipewire": {
+    "format": "{icon}",
+    "format-source": "{icon} {source_name}",
+    "format-source-muted": " {source_name}",
+    "format-sink": " {volume}%",
+    "format-sink-muted": "",
+    "format-icons": {
+      "source": {
+        "default": "",
+        "jack": "",
+        "alsa": ""
+      },
+      "sink": "",
+      "sink-muted": "",
+      "source-muted": "",
+      "screen": "Screen",
+      "video": "󰄄 Video"
+    },
+    "tooltip": true
+  },
   "tray": {
     "icon-size": 19,
     "spacing": 5,
