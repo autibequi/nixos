@@ -29,8 +29,8 @@
         ".face".source = ../assets/avatar.png;
 
         # wallpapers
-        ".wallpapers/the-death-of-socrates.jpg".source = ../assets/wallpapers/the-death-of-socrates.jpg;
-        ".wallpapers/the-wild-hunt-of-odin.jpg".source = ../assets/wallpapers/the-wild-hunt-of-odin.jpg;
+        ".wallpapers/light.jpg".source = ../assets/wallpapers/the-death-of-socrates.jpg;
+        ".wallpapers/dark.jpg".source = ../assets/wallpapers/the-wild-hunt-of-odin.jpg;
       };
     };
 }
