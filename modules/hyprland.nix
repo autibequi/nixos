@@ -69,7 +69,6 @@
       ".config/hypr/hyprshade.toml".source = ../dotfiles/hypr/hyprshade.toml;
       ".config/hypr/hypridle.conf".source = ../dotfiles/hypr/hypridle.conf;
       ".config/hypr/hyprland.conf".source = ../dotfiles/hypr/hyprland.conf;
-      ".config/hypr/hibernate.sh".source = ../dotfiles/hypr/hibernate.sh;
       
       # Fuzzel
       ".config/fuzzel/fuzzel.ini".source = ../dotfiles/fuzzel/fuzzel.ini;
