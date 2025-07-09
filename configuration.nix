@@ -21,7 +21,10 @@
     ./modules/plymouth.nix
     ./modules/flatpak.nix
     ./modules/ai.nix
+    ./modules/hibernate.nix
     # ./modules/podman.nix
+    # ./modules/tlp.nix
+    # ./modules/battery.nix
 
     # Hardware specific
     ./modules/asus.nix
