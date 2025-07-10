@@ -7,10 +7,10 @@
     xwayland.enable = true;
   };
 
-  # services.power-profiles-daemon.enable = true;
-
   # aparently i need gnome just to toggle my theme
+  # But i dont need pp daemon. managed by battery.nix module
   services.xserver.desktopManager.gnome.enable = true;
+  services.power-profiles-daemon.enable = false;
 
   environment.systemPackages = with pkgs; [
     # Core Hyprland tools for navigation and productivity
