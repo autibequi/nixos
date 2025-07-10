@@ -6,6 +6,7 @@ let
   desiredFlatpaks = [
     "app.zen_browser.zen"
     "com.github.tenderowl.frog"
+    # "com.vivaldi.Vivaldi"
   ];
 in
 {
