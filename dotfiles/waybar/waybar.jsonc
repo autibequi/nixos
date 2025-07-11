@@ -14,8 +14,8 @@
     "custom/playerctl",
   ],
   "modules-right": [
-    "bluetooth",
     "pulseaudio",
+    "bluetooth",
     "pipewire",
     "backlight",
     "cpu",
