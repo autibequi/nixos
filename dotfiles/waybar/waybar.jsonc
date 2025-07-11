@@ -14,17 +14,17 @@
     "custom/playerctl",
   ],
   "modules-right": [
-    "idle_inhibitor",
     "bluetooth",
     "pulseaudio",
     "pipewire",
     "backlight",
-    "network",
     "cpu",
     "memory",
-    "custom/tlp",
+    "network",
+    // "custom/tlp",
     "power-profiles-daemon",
     "battery",
+    "idle_inhibitor",
     "clock",
     "tray",
   ],
@@ -204,7 +204,7 @@
     ],
   },
   "network": {
-    "format-wifi": "󰖩 {essid} ({signalStrength}%)",
+    "format-wifi": "󰖩 {signalStrength}% {essid}",
     "format-ethernet": "󰈀 {ifname}",
     "format-linked": "󰈀 {ifname} (No IP)",
     "format-disconnected": "󰖪 Disconnected",
@@ -212,7 +212,7 @@
     "on-click": "alacritty -e nmtui",
   },
   "bluetooth": {
-    "format": " {status}",
+    "format": "",
     "format-connected": " {device_alias}",
     "format-connected-battery": " {device_alias} {device_battery_percentage}%",
     // "format-device-preference": [ "device1", "device2" ], // preference list deciding the displayed device
