@@ -1,10 +1,6 @@
-{ pkgs, ... }:
+{ ... }:
 
 {
-  environment.systemPackages = with pkgs; [
-    powertop # power management
-  ];
-
   # Tweak CFS latency parameters when going on/off battery
   services.system76-scheduler.settings.cfsProfiles.enable = true;
 
