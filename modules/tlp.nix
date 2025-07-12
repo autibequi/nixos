@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ ... }:
 
 {
   # Desabilitar power-profiles-daemon para evitar conflitos com o TLP
@@ -7,15 +7,12 @@
   services.tlp = {
     enable = true;
     settings = {
-      # powersave on battery for nvme case
-      SATA_LINKPWR_ON_BAT = "med_power_with_dipm";
-
       # AC (conectado à energia)
       # cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors
       CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
       ENERGY_PERF_POLICY_ON_AC = "performance";
       CPU_SCALING_GOVERNOR_ON_AC = "schedutil";
-      CPU_BOOST_ON_AC = 1; 
+      CPU_BOOST_ON_AC = 1;
 
       # Battery (na bateria)
       CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
@@ -27,7 +24,7 @@
       # must be passive/guided for userland schedulers
       # but active is better for battery life
       CPU_DRIVER_OPMODE_ON_AC = "guided";
-      CPU_DRIVER_OPMODE_ON_BAT = "active"; 
+      CPU_DRIVER_OPMODE_ON_BAT = "guided";
 
       # Desabilitar o watchdog do kernel
       MEM_SLEEP_ON_AC = "s2idle";
@@ -45,18 +42,9 @@
       PCIE_ASPM_ON_AC = "performance";
       PCIE_ASPM_ON_BAT = "powersupersave";
 
-      # USB
-      # USB_AUTOSUSPEND = 1;
-      # USB_SUSPEND_RESUME_DELAY = 2;
-
       # Wifi
-      WIFI_PWR_ON_AC = "off";
+      WIFI_PWR_ON_AC = "on";
       WIFI_PWR_ON_BAT = "on";
-      
-      # Enable display panel Adaptive Backlight Modulation (ABM).
-      # not sure if save battery but makes image blew out:
-      # AMDGPU_ABM_LEVEL_ON_AC = 0;
-      # AMDGPU_ABM_LEVEL_ON_BAT = 4; # 0-4
     };
   };
 }
