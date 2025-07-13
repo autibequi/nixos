@@ -17,10 +17,10 @@
     package = config.boot.kernelPackages.nvidiaPackages.beta;
     modesetting.enable = true;
     nvidiaSettings = false;
-    nvidiaPersistenced = true;
+    nvidiaPersistenced = false;
     powerManagement = {
       enable = true;
-      finegrained = false;
+      finegrained = true;
     };
 
     open = true; # Best compatibility with RTX 4060 mobile Q-Max
