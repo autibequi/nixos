@@ -31,6 +31,9 @@
     vivaldi
     vivaldi-ffmpeg-codecs
 
+    # benchmark
+    geekbench
+
     # Games
     # retroarchFull
 
