@@ -52,7 +52,7 @@
 
       wiki = "wikiti";
 
-      npm = "pnpm";
+      # npm = "pnpm";
     };
 
     shellInit = ''
@@ -165,5 +165,9 @@
     # node ieks
     pnpm
     nodejs
+
+    # Media
+    mpv
+    yt-dlp
   ];
 }
