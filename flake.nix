@@ -13,20 +13,7 @@
     isd.url = "github:isd-project/isd"; # Interactive SystemD
     home-manager.url = "github:nix-community/home-manager/release-25.05"; # Home Manager
     solaar.url = "https://flakehub.com/f/Svenum/Solaar-Flake/*.tar.gz"; # Logitech Solaar
-    # nixpkgs-howdy.url = "github:NixOS/nixpkgs/pull/216245/head";
-    # nix-alien.url = "github:thiagokokada/nix-alien";
-    # stylix.url = "github:danth/stylix";
-    # nixgl.url = "github:nix-community/nixGL";
-    nixified-ai = {
-      url = "github:nixified-ai/flake";
-    };
-
-    # Hyprland and hyprland plugin: hyprexpo
-    hyprland.url = "github:hyprwm/Hyprland";
-    hyprland-plugins = {
-      url = "github:hyprwm/hyprland-plugins";
-      inputs.hyprland.follows = "hyprland";
-    };
+    nixified-ai.url = "github:nixified-ai/flake"; # Nixified AI
   };
 
   # Outputs
@@ -38,8 +25,7 @@
       nixos-hardware,
       home-manager,
       chaotic,
-      # nix-alien,
-      # nixgl,
+      # nixified-ai,
       ...
     }@inputs:
     {
@@ -61,28 +47,16 @@
           chaotic.nixosModules.nyx-overlay
           chaotic.nixosModules.nyx-registry
 
-          # NixAlien
-          # (
-          #   { ... }:
-          #   {
-          #     environment.systemPackages = [
-          #       nix-alien
-          #     ];
-          #     # Optional, needed for `nix-alien-ld`
-          #     programs.nix-ld.enable = true;
-          #   }
-          # )
-
           # home-manager
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            # Add this inside home configuration block (without this it won't work):
-            # home-manager.extraSpecialArgs = {
-            #   nixgl = nixgl;
-            # };
           }
+
+          # Nixified AI
+          # nixified-ai.nixosModules.default
+
           # Mine
           ./configuration.nix
         ];

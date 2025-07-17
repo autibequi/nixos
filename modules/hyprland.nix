@@ -47,7 +47,6 @@
     hyprlock
     waybar
     anyrun
-    hyprlandPlugins.hyprexpo
   ];
 
   # XDG Desktop Portal

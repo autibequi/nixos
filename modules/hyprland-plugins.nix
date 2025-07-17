@@ -1,10 +1,10 @@
 { lib, pkgs, inputs, ... }:
 with lib; let
-  hyprPluginPkgs = inputs.hyprland-plugins.packages.${pkgs.system};
   hypr-plugin-dir = pkgs.symlinkJoin {
     name = "hyrpland-plugins";
-    paths = with hyprPluginPkgs; [
+    paths = with pkgs.hyprlandPlugins; [
       hyprexpo
+      hyprspace
     ];
   };
 in
