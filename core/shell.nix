@@ -162,6 +162,8 @@
     #
     #
 
+    isd
+
     # node ieks
     pnpm
     nodejs

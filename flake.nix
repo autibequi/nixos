@@ -23,12 +23,10 @@
 
     # Hyprland and hyprland plugin: hyprexpo
     hyprland.url = "github:hyprwm/Hyprland";
-    hyprexpo = {
+    hyprland-plugins = {
       url = "github:hyprwm/hyprland-plugins";
-      inputs.hyprland.follows = "hyprland"; # IMPORTANT
+      inputs.hyprland.follows = "hyprland";
     };
-    # Exemplo de plugin customizado:
-    # plugin_name.url = "github:usuario/plugin-repo";
   };
 
   # Outputs
@@ -40,9 +38,7 @@
       nixos-hardware,
       home-manager,
       chaotic,
-      hyprexpo,
       # nix-alien,
-      # stylix,
       # nixgl,
       ...
     }@inputs:
@@ -64,9 +60,6 @@
           chaotic.nixosModules.nyx-cache
           chaotic.nixosModules.nyx-overlay
           chaotic.nixosModules.nyx-registry
-
-          # Stylix
-          # stylix.nixosModules.stylix
 
           # NixAlien
           # (
@@ -90,21 +83,6 @@
             #   nixgl = nixgl;
             # };
           }
-
-          # Interactive SystemD
-          {
-            environment.systemPackages = [ inputs.isd.packages.x86_64-linux.default ];
-          }
-
-          # Exemplo de configuração de plugin Hyprland:
-          {
-            wayland.windowManager.hyprland = {
-              plugins = [
-                hyprexpo
-              ];
-            };
-          }
-
           # Mine
           ./configuration.nix
         ];

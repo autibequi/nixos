@@ -70,3 +70,8 @@ nix --extra-experimental-features 'nix-command flakes' flake update
 ```
 ssh-keygen -t ed25519 -C "your_email@example.com"
 ```
+## Validade Store
+
+```sh
+sudo nix-channel --update && sudo nixos-rebuild switch && nix-store --verify --check-contents $(nix-store -qR $(which warp-taskbar))
+```
