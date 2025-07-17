@@ -20,10 +20,18 @@
     nixified-ai = {
       url = "github:nixified-ai/flake";
     };
+
+    # Hyprland and hyprland plugin: hyprexpo
+    hyprland.url = "github:hyprwm/Hyprland";
+    hyprexpo = {
+      url = "github:hyprwm/hyprland-plugins";
+      inputs.hyprland.follows = "hyprland"; # IMPORTANT
+    };
+    # Exemplo de plugin customizado:
+    # plugin_name.url = "github:usuario/plugin-repo";
   };
 
   # Outputs
-  # This is the default output, which is a set of attributes.
   outputs =
     {
       self,
@@ -32,6 +40,7 @@
       nixos-hardware,
       home-manager,
       chaotic,
+      hyprexpo,
       # nix-alien,
       # stylix,
       # nixgl,
@@ -85,6 +94,15 @@
           # Interactive SystemD
           {
             environment.systemPackages = [ inputs.isd.packages.x86_64-linux.default ];
+          }
+
+          # Exemplo de configuração de plugin Hyprland:
+          {
+            wayland.windowManager.hyprland = {
+              plugins = [
+                hyprexpo
+              ];
+            };
           }
 
           # Mine

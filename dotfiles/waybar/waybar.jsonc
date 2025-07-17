@@ -5,7 +5,7 @@
   "spacing": 1,
   "margin": 0,
   "modules-left": [
-    "custom/weather",
+    // "custom/weather",
     "hyprland/workspaces",
     "hyprland/window",
     "hyprland/active-workspace",
@@ -101,7 +101,7 @@
   "custom/playerctl": {
     "format": " 󰐊 {}",
     "return-type": "json",
-    "max-length": 40,
+    "max-length": 20,
     "exec": "playerctl -a metadata --format '{\"text\": \"{{artist}} - {{markup_escape(title)}}\", \"tooltip\": \"{{playerName}} : {{artist}} - {{markup_escape(title)}}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}' -F",
     "on-click": "playerctl play-pause",
     "on-click-right": "playerctl next",

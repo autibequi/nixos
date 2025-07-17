@@ -15,6 +15,8 @@
     code-cursor
     opencode
 
+    llm # access large language models
+
     # Local Whisper
     # openai-whisper-cpp
     # whisper-cpp
