@@ -16,7 +16,6 @@
   security.protectKernelImage = false;
 
   boot.kernelParams = [
-    "usbcore.autosuspend=-1"
     "amdgpu.dcdebugmask=0x10" # refresh issues https://gitlab.gnome.org/GNOME/mutter/-/issues/3299\
     # Force UAS for external NVME USB-C case; this garantees high speed mode | lsusb -t:
     # idVendor           0x152d JMicron Technology Corp. / JMicron USA Technology Corp.
