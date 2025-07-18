@@ -5,12 +5,15 @@ with lib; let
     paths = with pkgs.hyprlandPlugins; [
       hyprexpo
       hyprspace
+      # hyprscrolling
+      # hyprtrails
+      # hyprfocus
     ];
   };
 in
 {
   environment.sessionVariables = { HYPR_PLUGIN_DIR = hypr-plugin-dir; };
-  
+
   programs.hyprland = {
     enable = true;
     package = pkgs.hyprland;
