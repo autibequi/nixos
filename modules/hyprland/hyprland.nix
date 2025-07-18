@@ -78,31 +78,30 @@ in
     # Dunst - Minimal notification setup
     services.dunst = {
       enable = true;
-      configFile = ../dotfiles/hyprland/dunst.conf;
+      configFile = ./dotfiles/hypr/dunst.conf;
     };
 
     home.file = {
       # Hyperbasic
-      ".config/hypr/hyprlock.conf".source = ../dotfiles/hypr/hyprlock.conf;
-      ".config/hypr/hyprshade.toml".source = ../dotfiles/hypr/hyprshade.toml;
-      ".config/hypr/hypridle.conf".source = ../dotfiles/hypr/hypridle.conf;
-      ".config/hypr/hyprland.conf".source = ../dotfiles/hypr/hyprland.conf;
+      ".config/hypr/hyprlock.conf".source = ./dotfiles/hypr/hyprlock.conf;
+      ".config/hypr/hyprshade.toml".source = ./dotfiles/hypr/hyprshade.toml;
+      ".config/hypr/hypridle.conf".source = ./dotfiles/hypr/hypridle.conf;
+      ".config/hypr/hyprland.conf".source = ./dotfiles/hypr/hyprland.conf;
 
       # Fuzzel
-      ".config/fuzzel/fuzzel.ini".source = ../dotfiles/fuzzel/fuzzel.ini;
+      ".config/fuzzel/fuzzel.ini".source = ./dotfiles/fuzzel/fuzzel.ini;
 
       # Darkmode
-      ".config/hypr/toggle-theme.sh".source = ../dotfiles/hypr/toggle-theme.sh;
+      ".config/hypr/toggle-theme.sh".source = ./dotfiles/hypr/toggle-theme.sh;
 
       # Waybar
-      ".config/waybar/config.jsonc".source = ../dotfiles/waybar/waybar.jsonc;
-      ".config/waybar/style.css".source = ../dotfiles/waybar/waybar.css;
-      ".config/waybar/restart.sh".source = ../dotfiles/waybar/restart.sh;
+      ".config/waybar/config.jsonc".source = ./dotfiles/waybar/waybar.jsonc;
+      ".config/waybar/style.css".source = ./dotfiles/waybar/waybar.css;
+      ".config/waybar/restart.sh".source = ./dotfiles/waybar/restart.sh;
 
       # scripts
-      ".config/waybar/tlp-status.sh".source = ../dotfiles/waybar/tlp-status.sh;
-      ".config/waybar/tlp-toggle.sh".source = ../dotfiles/waybar/tlp-toggle.sh;
+      ".config/waybar/tlp-status.sh".source = ./dotfiles/waybar/tlp-status.sh;
+      ".config/waybar/tlp-toggle.sh".source = ./dotfiles/waybar/tlp-toggle.sh;
     };
   };
 }
-

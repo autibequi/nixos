@@ -17,3 +17,5 @@ setup.nix
 # dont care to lock, me is maverick
 flake.lock
 boot.nix
+
+result/
