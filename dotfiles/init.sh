@@ -3,6 +3,8 @@
 # Start Hyprland if running on tty1 after logging
 [[ $(tty) == /dev/tty1 ]] && exec Hyprland>/dev/null 2>&1
 
+[[ $(tty) == /dev/tty2 ]] && exec steam-gamescope
+
 reset-gnome-extensions() {
   gsettings set org.gnome.shell disable-user-extensions true
   gsettings set org.gnome.shell disable-user-extensions false
