@@ -18,4 +18,5 @@ setup.nix
 flake.lock
 boot.nix
 
-result/
+result/**
+result/*
