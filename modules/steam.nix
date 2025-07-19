@@ -2,6 +2,11 @@
   # Wiki: 
   # https://nixos.wiki/wiki/Steam
 
+  environment.variables = {
+    # This forces Steam and other GTK apps to scale by a factor of 2 (200%)
+    GDK_SCALE = "1.6";
+  };
+
   programs = {
     gamescope = {
       enable = true;
