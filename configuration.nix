@@ -5,7 +5,7 @@
 {
   # Importa Setup do Usuario
   imports = [
-    # Core
+    # Core Modules
     ./core/nix.nix
     ./core/hardware.nix
     ./core/core.nix
@@ -16,21 +16,28 @@
     ./core/fonts.nix
     ./core/shell.nix
     ./core/kernel.nix
+
+    # Stable Modules
     ./modules/battery.nix
     ./modules/bluetooth.nix
     ./modules/plymouth.nix
-    ./modules/flatpak.nix
     ./modules/ai.nix
     ./modules/hibernate.nix
+    ./modules/tlp.nix
+    ./modules/battery.nix
+    ./modules/steam.nix
     # ./modules/podman.nix
-    # ./modules/tlp.nix
-    # ./modules/battery.nix
 
-    # Hardware specific
-    ./modules/asus.nix
-    # ./modules/nvidia.nix
+    # Custom Modules
+    # Packages not well supported yet by nixpkgs
+    ./modules/custom/flatpak.nix
+    # ./modules/custom/howdy.nix
 
-    # Desktop Environments
+    # Hardware
+    #./modules/asus.nix
+    #./modules/nvidia.nix
+
+    # Desktop Enviroments
     ./modules/hyprland/hyprland.nix
     # ./modules/gnome/core.nix
     # ./modules/cosmic.nix
