@@ -12,7 +12,6 @@
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     isd.url = "github:isd-project/isd"; # Interactive SystemD
     home-manager.url = "github:nix-community/home-manager/release-25.05"; # Home Manager
-    solaar.url = "https://flakehub.com/f/Svenum/Solaar-Flake/*.tar.gz"; # Logitech Solaar
     nixified-ai.url = "github:nixified-ai/flake"; # Nixified AI
   };
 
@@ -21,7 +20,6 @@
     {
       self,
       nixpkgs,
-      solaar,
       nixos-hardware,
       home-manager,
       chaotic,
@@ -38,9 +36,6 @@
         modules = [
           # Currenct Laptop Flake
           nixos-hardware.nixosModules.asus-zephyrus-ga402x-nvidia
-
-          # Logitech Solaar
-          solaar.nixosModules.default
 
           # CachyOS Kernel
           chaotic.nixosModules.nyx-cache
