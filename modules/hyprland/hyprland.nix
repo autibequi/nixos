@@ -5,6 +5,7 @@ with lib; let
     paths = with pkgs.hyprlandPlugins; [
       hyprexpo
       hyprspace
+      hyprwinwrap
       # hyprscrolling
       # hyprtrails
       # hyprfocus
