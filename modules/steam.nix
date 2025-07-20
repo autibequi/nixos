@@ -8,6 +8,12 @@
     GDK_SCALE = "1.6";
   };
 
+  # Adiciona MangoHud e MangoJuice para overlay e monitoramento em jogos Steam
+  environment.systemPackages = with pkgs; [
+    mangohud
+    mangojuice
+  ];
+
   programs = {
     gamescope = {
       enable = true;

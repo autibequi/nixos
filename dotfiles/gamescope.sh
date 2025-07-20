@@ -8,6 +8,11 @@ gamescopeArgs=(
     --mangoapp # performance overlay
     --rt
     --steam
+    # --filter=fsr
+    # --scaler=auto
+    # --expose-wayland
+    # --backend=wayland
+    # --framerate-limit=120
 )
 steamArgs=(
     -pipewire-dmabuf
