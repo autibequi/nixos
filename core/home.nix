@@ -33,6 +33,9 @@
         # MPV configuration
         ".config/mpv/mpv.conf".source = ../dotfiles/mpv.conf;
         ".config/mpv/input.conf".source = ../dotfiles/input.conf;
+
+        # Gamescope configuration
+        ".config/gamescope.sh".source = ../dotfiles/gamescope.sh;
       };
     };
 }

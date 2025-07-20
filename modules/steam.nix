@@ -1,3 +1,4 @@
+{ pkgs, ... }:
 {
   # Wiki: 
   # https://nixos.wiki/wiki/Steam
@@ -21,6 +22,10 @@
       localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
     };
   };
+
+  # Java support for Steam
+  programs.java.enable = true; 
+  # programs.steam.package = pkgs.steam.override { withJava = true; };
 
   # Enable Xbox controller support
   # hardware.xone.enable = true; 
