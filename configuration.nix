@@ -23,18 +23,15 @@
     ./modules/plymouth.nix
     ./modules/ai.nix
     ./modules/hibernate.nix
-    ./modules/tlp.nix
-    ./modules/battery.nix
     ./modules/steam.nix
-    # ./modules/podman.nix
+    ./modules/podman.nix
 
-    # Custom Modules
-    # Packages not well supported yet by nixpkgs
-    ./modules/custom/flatpak.nix
-    # ./modules/custom/howdy.nix
+    # Laptop Modules
+    # ./modules/tlp.nix
+    # ./modules/battery.nix
 
     # Hardware
-    #./modules/asus.nix
+    # ./modules/asus.nix
     #./modules/nvidia.nix
 
     # Desktop Enviroments
@@ -43,7 +40,11 @@
     # ./modules/cosmic.nix
     # ./modules/kde.nixs
 
-    # Extra
+    # Custom Modules (Packages not well supported yet by nixpkgs)
+    ./modules/custom/flatpak.nix
+    # ./modules/custom/howdy.nix
+
+    # Other Modules
     # ./modules/work.nix
   ];
 
