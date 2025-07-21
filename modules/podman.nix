@@ -36,6 +36,9 @@
     };
   };
 
+  # Cria o grupo podman
+  users.groups.podman = {};
+
   # Configuração de usuário para podman rootless
   users.users."pedrinho" = {
     isNormalUser = true;
@@ -53,16 +56,6 @@
         count = 65536;
       }
     ];
-  };
-
-  # Garante que os arquivos /etc/subuid e /etc/subgid sejam criados corretamente
-  environment.etc = {
-    "subuid".text = ''
-      pedrinho:100000:65536
-    '';
-    "subgid".text = ''
-      pedrinho:100000:65536
-    '';
   };
 
   # Ferramentas úteis para desenvolvimento com containers
