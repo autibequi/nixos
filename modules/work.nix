@@ -54,6 +54,8 @@
     graphviz
     gcc # because kafka fsr
 
+    # --- Warp ---
+    wgcf
   ];
 
   # TESTING: Dynamic Libraries
@@ -82,20 +84,4 @@
 
   # Cloudflare Warp
   services.cloudflare-warp.enable = true;
-
-  # TODO: check if fixed
-  # creates a custom systemd service for the warp taskbar since it stopped working
-  systemd.user.services.warp-taskbar-custom = {
-    description = "Cloudflare Zero Trust Client Taskbar";
-    requires = [ "dbus.socket" ];
-    after = [ "dbus.socket" ];
-    bindsTo = [ "graphical-session.target" ];
-    wantedBy = [ "default.target" ];
-    serviceConfig = {
-      Type = "simple";
-      ExecStart = "${pkgs.cloudflare-warp}/bin/warp-taskbar";
-      Restart = "always";
-      BindReadOnlyPaths = "${pkgs.cloudflare-warp}:/usr:";
-    };
-  };
 }
