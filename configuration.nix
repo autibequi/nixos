@@ -18,7 +18,6 @@
     ./core/kernel.nix
 
     # Stable Modules
-    ./modules/battery.nix
     ./modules/bluetooth.nix
     ./modules/plymouth.nix
     ./modules/ai.nix
