@@ -123,18 +123,16 @@ window#waybar {
 #idle_inhibitor,
 #tray {
     background-color: transparent;
-    min-width: 30px;
+    min-width: 20px;
     margin: 5px;
 }
 
 #tray>.active {
-    background-color: @background-light;
+    background-color: transparent;
     color: @textcolor2;
-    padding: 0px 10px;
-    opacity: 0.7;
-    border-radius: 10px;
-    border-top: 0.5px solid @bordercolor;
-    border-bottom: 2px solid @bordercolor
+    opacity: 1;
+    border-radius: 0;
+    border: none;
 }
 
 /* Workspaces styling */
