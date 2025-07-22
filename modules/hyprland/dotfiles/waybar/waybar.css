@@ -139,10 +139,10 @@ window#waybar {
 
 /* Workspaces styling */
 #workspaces button {
-    padding: 0 5px;
+    padding: 0 10px;
     background-color: transparent;
     color: @workspaces-color;
-    margin: 0;
+    margin: 5px;
 }
 
 #workspaces button:hover {

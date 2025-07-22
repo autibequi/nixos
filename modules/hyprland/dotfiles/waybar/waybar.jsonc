@@ -76,7 +76,7 @@
   "hyprland/workspaces": {
     "disable-scroll": true,
     "all-outputs": true,
-    "show-special": true,
+    "show-special": false,
     "format": "{name}:{windows}",
     "window-rewrite-default": "",
     "window-rewrite": {
