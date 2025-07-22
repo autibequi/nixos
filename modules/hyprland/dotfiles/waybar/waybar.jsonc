@@ -13,8 +13,8 @@
     "custom/playerctl"
   ],
   "modules-right": [
-    "pulseaudio",
     "bluetooth",
+    "pulseaudio",
     "pipewire",
     "backlight",
     "cpu",
@@ -219,11 +219,11 @@
     ]
   },
   "network": {
-    "format-wifi": "󰖩 {signalStrength}% {essid}",
+    "format-wifi": "󰖩 {signalStrength}%",
     "format-ethernet": "󰈀 {ifname}",
     "format-linked": "󰈀 {ifname} (No IP)",
     "format-disconnected": "󰖪 Disconnected",
-    "tooltip-format": "{ifname}: {ipaddr}",
+    "tooltip-format": "󰖩 {essid} : {ifname}: {ipaddr}",
     "on-click": "alacritty -e nmtui"
   },
   "bluetooth": {
