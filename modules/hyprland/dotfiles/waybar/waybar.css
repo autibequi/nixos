@@ -137,16 +137,6 @@ window#waybar {
     border: none;
 }
 
-#window {
-    background: transparent;
-    color: @foreground;
-    font-weight: 600;
-    padding-left: 10px;
-    padding-right: 10px;
-    min-width: 40px;
-    border-radius: 4px;
-}
-
 /* Workspaces styling */
 #workspaces button {
     padding-left: 5px;

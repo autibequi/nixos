@@ -6,11 +6,11 @@
   "margin": 0,
   "modules-left": [
     // "custom/weather",
-    "hyprland/workspaces",
-    // "hyprland/window",
+    "hyprland/workspaces"
+    // "hyprland/window"
   ],
   "modules-center": [
-    "custom/playerctl",
+    "custom/playerctl"
   ],
   "modules-right": [
     "pulseaudio",
@@ -25,7 +25,7 @@
     "battery",
     "tray",
     "idle_inhibitor",
-    "clock",
+    "clock"
   ],
   "pipewire": {
     "format": "{icon}",
@@ -51,15 +51,15 @@
     "icon-size": 19,
     "spacing": 5,
     "icons": {
-      "blueman": "bluetooth",
-    },
+      "blueman": "bluetooth"
+    }
   },
   "hyprland/window": {
     "format": "{class}",
     "max-length": 20,
     "rewrite": {
-      "^(?!.*\\S).*": "¯\\_(ツ)_\/¯",
-    },
+      "^(?!.*\\S).*": "¯\\_(ツ)_\/¯"
+    }
   },
   "power-profiles-daemon": {
     "format": "{icon}",
@@ -69,8 +69,8 @@
       "default": "",
       "performance": "",
       "balanced": "",
-      "power-saver": "",
-    },
+      "power-saver": ""
+    }
   },
   "hyprland/workspaces": {
     "disable-scroll": true,
@@ -93,7 +93,7 @@
         "org.gnome.Nautilus": "",
         "zed": "Z",
         "streamio": "",
-        "insomnia": "",
+        "insomnia": ""
     },
     "format-icons": {
       "1": "󰊯",
@@ -105,11 +105,11 @@
       "7": "Z",
       "8": "󱚢",
       "9": "",
-      "10": "",
-    },
+      "10": ""
+    }
   },
   "hyprland/mode": {
-    "format": "<span style=\"italic\">{}</span>",
+    "format": "<span style=\"italic\">{}</span>"
   },
   "custom/playerctl": {
     "format": " 󰐊 {}",
@@ -117,7 +117,7 @@
     "max-length": 20,
     "exec": "playerctl -a metadata --format '{\"text\": \"{{artist}} - {{markup_escape(title)}}\", \"tooltip\": \"{{playerName}} : {{artist}} - {{markup_escape(title)}}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}' -F",
     "on-click": "playerctl play-pause",
-    "on-click-right": "playerctl next",
+    "on-click-right": "playerctl next"
   },
   "custom/weather": {
     "exec": "curl 'https://wttr.in/?format=1'",
@@ -125,7 +125,7 @@
     "format": "{}",
     "tooltip": true,
     // Exibe previsão detalhada ao clicar no clima
-    "on-click": "curl 'https://wttr.in/?format=3' | yad --text-info --width=400 --height=200 --title='Previsão Detalhada'",
+    "on-click": "curl 'https://wttr.in/?format=3' | yad --text-info --width=400 --height=200 --title='Previsão Detalhada'"
   },
   "custom/quotes": {
     "format": "󰚛",
@@ -133,15 +133,15 @@
     "interval": 3600,
     "exec": "fortune -s",
     "on-click": "fortune | yad --text-info --width=400 --height=200 --title='Fortune'",
-    "tooltip": true,
+    "tooltip": true
   },
   "idle_inhibitor": {
     "format": "{icon}",
     "format-icons": {
       "activated": "󰈈",
-      "deactivated": "󰈉",
+      "deactivated": "󰈉"
     },
-    "tooltip": true,
+    "tooltip": true
   },
   "clock": {
     "format": "󰥔 {:%H:%M}",
@@ -158,21 +158,21 @@
         "days": "<span color='#e67e80'>{}</span>",
         "weeks": "<span color='#a7c080'><b>W{}</b></span>",
         "weekdays": "<span color='#7fbbb3'><b>{}</b></span>",
-        "today": "<span color='#dbbc7f'><b><u>{}</u></b></span>",
-      },
+        "today": "<span color='#dbbc7f'><b><u>{}</u></b></span>"
+      }
     },
     "actions": {
       "on-click-right": "mode",
       "on-click-forward": "tz_up",
       "on-click-backward": "tz_down",
       "on-scroll-up": "shift_up",
-      "on-scroll-down": "shift_down",
-    },
+      "on-scroll-down": "shift_down"
+    }
   },
   "cpu": {
-    "format": "󰘚 {usage}%",
+    "format": "󰍛 {usage}%",
     "tooltip": true,
-    "interval": 10,
+    "interval": 10
   },
   "custom/tlp": {
     "exec": "bash ~/.config/waybar/tlp-status.sh",
@@ -180,11 +180,11 @@
     "return-type": "json",
     "interval": 10,
     "on-click": "bash ~/.config/waybar/tlp-toggle.sh",
-    "on-click-right": "alacritty -e tlp-stat -s",
+    "on-click-right": "alacritty -e tlp-stat -s"
   },
   "memory": {
-    "format": "󰍛 {}%",
-    "interval": 1,
+    "format": "󰘚 {}%",
+    "interval": 1
   },
   "temperature": {
     "critical-threshold": 80,
@@ -193,13 +193,13 @@
       "󱃃",
       "󰔏",
       "󱃂"
-    ],
+    ]
   },
   "battery": {
     "states": {
       "good": 95,
       "warning": 30,
-      "critical": 15,
+      "critical": 15
     },
     "format": "{capacity}% {icon} {time}",
     "format-charging": "{capacity}% 󰂄 {time}",
@@ -216,7 +216,7 @@
       "󰂁",
       "󰂂",
       "󰁹"
-    ],
+    ]
   },
   "network": {
     "format-wifi": "󰖩 {signalStrength}% {essid}",
@@ -224,7 +224,7 @@
     "format-linked": "󰈀 {ifname} (No IP)",
     "format-disconnected": "󰖪 Disconnected",
     "tooltip-format": "{ifname}: {ipaddr}",
-    "on-click": "alacritty -e nmtui",
+    "on-click": "alacritty -e nmtui"
   },
   "bluetooth": {
     "format": "",
@@ -235,7 +235,7 @@
     "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
     "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
     "tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t{device_battery_percentage}%",
-    "on-click": "alacritty -e bluetuith",
+    "on-click": "alacritty -e bluetuith"
   },
   "pulseaudio": {
     "format": "{icon} {volume}%",
@@ -253,12 +253,12 @@
         "󰕿",
         "󰖀",
         "󰕾"
-      ],
+      ]
     },
     "on-click": "alacritty -e ncpamixer",
     "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
     "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +2%",
-    "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -2%",
+    "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -2%"
   },
   "backlight": {
     "format": "{icon} {percent}%",
@@ -268,12 +268,12 @@
       "󰃠"
     ],
     "on-scroll-up": "brightnessctl set +5%",
-    "on-scroll-down": "brightnessctl set 5%-",
+    "on-scroll-down": "brightnessctl set 5%-"
   },
   "disk": {
     "interval": 30,
     "format": "󰋊 {percentage_used}%",
     "path": "/",
-    "on-click": "alacritty -e gdu /",
-  },
+    "on-click": "alacritty -e gdu /"
+  }
 }
