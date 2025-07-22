@@ -7,8 +7,6 @@
   "modules-left": [
     // "custom/weather",
     "hyprland/workspaces",
-    "hyprland/window",
-    "hyprland/active-workspace",
   ],
   "modules-center": [
     "custom/playerctl",
@@ -77,7 +75,7 @@
     "disable-scroll": true,
     "all-outputs": true,
     "show-special": false,
-    "format": "{name} {windows}",
+    "format": "{name}::{windows}",
     "window-rewrite-default": "",
     "window-rewrite": {
         "firefox": "",
@@ -124,6 +122,8 @@
     "interval": 3600,
     "format": "{}",
     "tooltip": true,
+    // Exibe previsão detalhada ao clicar no clima
+    "on-click": "curl 'https://wttr.in/?format=3' | yad --text-info --width=400 --height=200 --title='Previsão Detalhada'",
   },
   "custom/quotes": {
     "format": "󰚛",
