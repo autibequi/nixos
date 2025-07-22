@@ -142,7 +142,7 @@ window#waybar {
     padding: 0 10px;
     background-color: transparent;
     color: @workspaces-color;
-    margin: 5px;
+    margin: 1px;
 }
 
 #workspaces button:hover {
