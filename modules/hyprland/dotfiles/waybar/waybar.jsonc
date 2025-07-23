@@ -92,20 +92,8 @@
         "Alacritty": "",
         "org.gnome.Nautilus": "",
         "zed": "Z",
-        "streamio": "",
+        "stremio": "",
         "insomnia": ""
-    },
-    "format-icons": {
-      "1": "󰊯",
-      "2": "",
-      "3": "",
-      "4": "",
-      "5": " ",
-      "6": " ",
-      "7": "Z",
-      "8": "󱚢",
-      "9": "",
-      "10": ""
     }
   },
   "hyprland/mode": {
