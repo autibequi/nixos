@@ -74,6 +74,7 @@
     usbutils
     wget
     git
+    busybox
 
     # Utils
     # ----------------------
