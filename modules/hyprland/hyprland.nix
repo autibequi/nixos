@@ -84,10 +84,10 @@ in
 
     home.file = {
       # Hyperbasic
-      ".config/hypr/hyprlock.conf".source = ./dotfiles/hypr/hyprlock.conf;
-      ".config/hypr/hyprshade.toml".source = ./dotfiles/hypr/hyprshade.toml;
-      ".config/hypr/hypridle.conf".source = ./dotfiles/hypr/hypridle.conf;
-      ".config/hypr/hyprland.conf".source = ./dotfiles/hypr/hyprland.conf;
+      ".config/hypr/hyprlock.conf".source = ./dotfiles/hypr/lock.conf;
+      ".config/hypr/hyprshade.toml".source = ./dotfiles/hypr/shade.toml;
+      ".config/hypr/hypridle.conf".source = ./dotfiles/hypr/idle.conf;
+      ".config/hypr/hyprland.conf".source = ./dotfiles/hypr/land.conf;
 
       # Fuzzel
       ".config/fuzzel/fuzzel.ini".source = ./dotfiles/fuzzel/fuzzel.ini;
