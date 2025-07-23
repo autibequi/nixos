@@ -20,14 +20,14 @@
       "FiraCode Nerd Font"
     ];
     sansSerif = [
-      "JetBrainsMono Nerd Font"
+      "Noto Sans"
       "Noto Color Emoji"
-      "FiraCode Nerd Font"
+      "DejaVu Sans"
     ];
     serif = [
-      "JetBrainsMono Nerd Font"
+      "Noto Serif"
       "Noto Color Emoji"
-      "FiraCode Nerd Font"
+      "DejaVu Serif"
     ];
   };
 }
