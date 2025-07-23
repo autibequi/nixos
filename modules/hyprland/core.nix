@@ -2,17 +2,21 @@
 with lib; let
   hypr-plugin-dir = pkgs.symlinkJoin {
     name = "hyrpland-plugins";
-    paths = with pkgs.hyprlandPlugins; [
+    paths = (with pkgs.hyprlandPlugins; [
       hyprexpo
       hyprspace
       hyprwinwrap
       # hyprscrolling
       # hyprtrails
       # hyprfocus
+    ]) ++ [
+      inputs.hyprtasking.packages.${pkgs.system}.hyprtasking
     ];
   };
 in
 {
+  services.hypridle.enable = true;
+
   environment.sessionVariables = { HYPR_PLUGIN_DIR = hypr-plugin-dir; };
 
   programs.hyprland = {
@@ -27,6 +31,8 @@ in
   services.power-profiles-daemon.enable = false;
 
   environment.systemPackages = with pkgs; [
+
+
     # Core Hyprland tools for navigation and productivity
     waybar # Status bar with useful info
     wofi # App launcher (fuzzy finding)
