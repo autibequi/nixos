@@ -56,6 +56,8 @@
 
     # --- Warp ---
     wgcf
+
+    jetbrains.datagrip
   ];
 
   # TESTING: Dynamic Libraries
