@@ -1,10 +1,12 @@
 {
-  lib,
   ...
 }:
 {
   # Importa Setup do Usuario
   imports = [
+    # Hardware Configurations
+    ./hardware.nix
+
     # Core Modules
     ./core/nix.nix
     ./core/hardware.nix
@@ -46,20 +48,4 @@
     # Other Modules
     # ./modules/work.nix
   ];
-
-  # Instalation
-  options.diskUUIDs = {
-    boot = lib.mkOption {
-      description = "Boot partition";
-      default = "/dev/disk/by-uuid/";
-    };
-    root = lib.mkOption {
-      description = "Toot partition";
-      default = "/dev/disk/by-uuid/";
-    };
-    swap = lib.mkOption {
-      description = "Swap partition";
-      default = "/dev/disk/by-uuid/";
-    };
-  };
 }

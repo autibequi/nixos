@@ -15,9 +15,14 @@
       "nixpkgs"
       "-L" # print build logs
     ];
-    dates = "18:00";
-    randomizedDelaySec = "45min";
+    dates = "16:00";
+    randomizedDelaySec = "15min";
   };
+
+  # Gambiarra pra rodar as coisas do jeito não nix
+  # mostly vscode extensions.
+  programs.nix-ld.enable = true;
+  programs.nix-ld.package = pkgs.nix-ld-rs;
 
   # Install LIX
   nix.package = pkgs.lix;
