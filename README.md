@@ -75,3 +75,20 @@ ssh-keygen -t ed25519 -C "your_email@example.com"
 ```sh
 sudo nix-channel --update && sudo nixos-rebuild switch && nix-store --verify --check-contents $(nix-store -qR $(which warp-taskbar))
 ```
+
+## Worktree control (for hardware.nix template)
+
+Skip
+```sh
+git update-index --skip-worktree <file>
+```
+Unskip
+```sh
+git update-index --no-skip-worktree <file>
+```
+
+## Get UUIDs from hardware-configuration.nix
+
+```sh
+cat /etc/nixos/hardware-configuration.nix | grep -B 3 "device ="
+```

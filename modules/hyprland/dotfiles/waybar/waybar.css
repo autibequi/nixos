@@ -62,6 +62,8 @@
 @define-color workspaces-focused-fg @cyan;
 @define-color workspaces-urgent-bg @red;
 @define-color workspaces-urgent-fg @black;
+@define-color workspaces-current-bg @cyan;
+@define-color workspaces-current-fg @black;
 
 /* Text and border colors for modules */
 @define-color mode-color @orange;
@@ -123,26 +125,26 @@ window#waybar {
 #idle_inhibitor,
 #tray {
     background-color: transparent;
-    min-width: 30px;
+    min-width: 20px;
     margin: 5px;
 }
 
 #tray>.active {
-    background-color: @background-light;
+    background-color: transparent;
     color: @textcolor2;
-    padding: 0px 10px;
-    opacity: 0.7;
-    border-radius: 10px;
-    border-top: 0.5px solid @bordercolor;
-    border-bottom: 2px solid @bordercolor
+    opacity: 1;
+    border-radius: 0;
+    border: none;
 }
 
 /* Workspaces styling */
 #workspaces button {
-    padding: 0 5px;
+    padding-left: 5px;
+    padding-right: 10px;
     background-color: transparent;
     color: @workspaces-color;
-    margin: 0;
+    margin: 0px;
+    margin-left: 2px;
 }
 
 #workspaces button:hover {
@@ -154,6 +156,14 @@ window#waybar {
     box-shadow: inset 0 -2px @workspaces-focused-fg;
     color: @workspaces-color;
     font-weight: 900;
+}
+
+/* Mark the current workspace */
+#workspaces button.active {
+    background-color: @workspaces-current-bg;
+    color: @workspaces-current-fg;
+    border-radius: 4px;
+    font-weight: bold;
 }
 
 #workspaces button.urgent {
@@ -181,6 +191,7 @@ window#waybar {
 #custom-weather {
     color: @weather-color;
     border-bottom-color: @weather-color;
+    font-family: sans-serif;
 }
 
 #custom-playerctl {

@@ -13,6 +13,13 @@
     isd.url = "github:isd-project/isd"; # Interactive SystemD
     home-manager.url = "github:nix-community/home-manager/release-25.05"; # Home Manager
     nixified-ai.url = "github:nixified-ai/flake"; # Nixified AI
+
+    hyprland.url = "github:hyprwm/Hyprland/v0.49.0";
+
+    hyprtasking = {
+      url = "github:raybbian/hyprtasking";
+      inputs.hyprland.follows = "hyprland";
+    };
   };
 
   # Outputs

@@ -2,17 +2,21 @@
 with lib; let
   hypr-plugin-dir = pkgs.symlinkJoin {
     name = "hyrpland-plugins";
-    paths = with pkgs.hyprlandPlugins; [
+    paths = (with pkgs.hyprlandPlugins; [
       hyprexpo
       hyprspace
       hyprwinwrap
       # hyprscrolling
       # hyprtrails
       # hyprfocus
+    ]) ++ [
+      inputs.hyprtasking.packages.${pkgs.system}.hyprtasking
     ];
   };
 in
 {
+  services.hypridle.enable = true;
+
   environment.sessionVariables = { HYPR_PLUGIN_DIR = hypr-plugin-dir; };
 
   programs.hyprland = {
@@ -27,6 +31,8 @@ in
   services.power-profiles-daemon.enable = false;
 
   environment.systemPackages = with pkgs; [
+
+
     # Core Hyprland tools for navigation and productivity
     waybar # Status bar with useful info
     wofi # App launcher (fuzzy finding)
@@ -84,10 +90,10 @@ in
 
     home.file = {
       # Hyperbasic
-      ".config/hypr/hyprlock.conf".source = ./dotfiles/hypr/hyprlock.conf;
-      ".config/hypr/hyprshade.toml".source = ./dotfiles/hypr/hyprshade.toml;
-      ".config/hypr/hypridle.conf".source = ./dotfiles/hypr/hypridle.conf;
-      ".config/hypr/hyprland.conf".source = ./dotfiles/hypr/hyprland.conf;
+      ".config/hypr/hyprlock.conf".source = ./dotfiles/hypr/lock.conf;
+      ".config/hypr/hyprshade.toml".source = ./dotfiles/hypr/shade.toml;
+      ".config/hypr/hypridle.conf".source = ./dotfiles/hypr/idle.conf;
+      ".config/hypr/hyprland.conf".source = ./dotfiles/hypr/land.conf;
 
       # Fuzzel
       ".config/fuzzel/fuzzel.ini".source = ./dotfiles/fuzzel/fuzzel.ini;

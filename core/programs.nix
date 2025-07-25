@@ -15,4 +15,7 @@
       viAlias = true;
     };
   };
+
+  # Waydroid
+  virtualisation.waydroid.enable = true;
 }

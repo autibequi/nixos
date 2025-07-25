@@ -43,9 +43,7 @@
       du = "dust";
       ps = "procs";
       tree = "broot";
-      cd = "z";
       f = "fzf --wrap";
-      ff = "fastfetch";
       clip = "wl-copy";
       clipb = "wl-paste";
       zed = "zeditor";
@@ -74,6 +72,7 @@
     usbutils
     wget
     git
+    busybox
 
     # Utils
     # ----------------------

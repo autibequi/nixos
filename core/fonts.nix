@@ -16,18 +16,15 @@
   fonts.fontconfig.defaultFonts = {
     monospace = [
       "JetBrainsMono Nerd Font"
-      "Noto Color Emoji"
       "FiraCode Nerd Font"
     ];
     sansSerif = [
-      "JetBrainsMono Nerd Font"
-      "Noto Color Emoji"
-      "FiraCode Nerd Font"
+      "Noto Sans"
+      "DejaVu Sans"
     ];
     serif = [
-      "JetBrainsMono Nerd Font"
-      "Noto Color Emoji"
-      "FiraCode Nerd Font"
+      "Noto Serif"
+      "DejaVu Serif"
     ];
   };
 }
