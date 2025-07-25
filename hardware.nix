@@ -4,7 +4,7 @@
 #
 # cat /etc/nixos/hardware-configuration.nix | grep -B 3 "device ="
 #
-{ lib }:
+{ lib, ... }:
 {
   options.diskUUIDs = {
     boot = lib.mkOption {
