@@ -33,7 +33,7 @@
 
     # Hardware
     # ./modules/asus.nix
-    #./modules/nvidia.nix
+    # ./modules/nvidia.nix
 
     # Desktop Enviroments
     ./modules/hyprland/core.nix
