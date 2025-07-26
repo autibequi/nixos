@@ -170,5 +170,9 @@
     # Media
     mpv
     yt-dlp
+
+    # org
+    # taskwarrior3
+    # taskwarrior-tui
   ];
 }
