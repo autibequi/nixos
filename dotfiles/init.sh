@@ -56,3 +56,8 @@ justrun() {
     NIXPKGS_ALLOW_UNFREE=1 nix-shell -p "$cmd" --run "$cmd $*"
   fi
 }
+
+disk_benchmark() {
+  dd if=/dev/zero of=/tmp/test.img bs=1M count=1024 status=progress
+  rm -f /tmp/test.img
+}
