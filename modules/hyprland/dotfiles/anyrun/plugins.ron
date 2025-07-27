@@ -1,0 +1,80 @@
+(
+    applications: ApplicationsConfig(
+        max_entries: Some(6),
+        fuzzy: Some(true),
+        desktop_actions: Some(true),
+        use_gtk_theme: Some(false),
+        terminal: Some("alacritty"),
+    ),
+    symbols: SymbolsConfig(
+        symbols: {
+            "calc": "🧮",
+            "wiki": "📚",
+            "translate": "🌐",
+            "search": "🔍",
+            "files": "📁",
+            "terminal": "💻",
+            "browser": "🌍",
+            "settings": "⚙️",
+            "steam": "🚂",
+            "game": "🎮",
+            "music": "🎵",
+            "video": "🎬",
+            "code": "💻",
+            "system": "🔧",
+            "network": "🌐",
+            "power": "⚡",
+        },
+    ),
+    translate: TranslateConfig(
+        engines: Some([Google, LibreTranslate]),
+        fuzzy: Some(true),
+        max_entries: Some(3),
+    ),
+    websearch: WebsearchConfig(
+        engines: Some([
+            (name: "google", prefix: "g", url: "https://google.com/search?q={}", description: "🔍 Search on Google"),
+            (name: "youtube", prefix: "yt", url: "https://youtube.com/results?search_query={}", description: "📺 Search on YouTube"),
+            (name: "github", prefix: "gh", url: "https://github.com/search?q={}", description: "🐙 Search on GitHub"),
+            (name: "stackoverflow", prefix: "so", url: "https://stackoverflow.com/search?q={}", description: "💻 Search on Stack Overflow"),
+            (name: "wikipedia", prefix: "wiki", url: "https://en.wikipedia.org/wiki/{}", description: "📚 Search on Wikipedia"),
+            (name: "archwiki", prefix: "arch", url: "https://wiki.archlinux.org/index.php?search={}", description: "🐧 Search on Arch Wiki"),
+            (name: "nixos", prefix: "nix", url: "https://search.nixos.org/packages?query={}", description: "❄️ Search on NixOS"),
+            (name: "steamdb", prefix: "steam", url: "https://steamdb.info/search/?q={}", description: "🚂 Search on SteamDB"),
+        ]),
+        fuzzy: Some(true),
+        max_entries: Some(4),
+    ),
+    rink: RinkConfig(
+        max_entries: Some(3),
+        fuzzy: Some(true),
+    ),
+    dictionary: DictionaryConfig(
+        max_entries: Some(3),
+        fuzzy: Some(true),
+    ),
+    shell: ShellConfig(
+        shell: Some("zsh"),
+        fuzzy: Some(true),
+        max_entries: Some(4),
+    ),
+    files: FilesConfig(
+        max_entries: Some(5),
+        fuzzy: Some(true),
+        min_score: Some(0.3),
+        gitignore: Some(true),
+        hidden: Some(false),
+    ),
+    kdeconnect: KDEConnectConfig(
+        max_entries: Some(3),
+        fuzzy: Some(true),
+    ),
+    randr: RandrConfig(
+        max_entries: Some(3),
+        fuzzy: Some(true),
+    ),
+    xdgportals: XdgPortalsConfig(
+        max_entries: Some(3),
+        fuzzy: Some(true),
+    ),
+)

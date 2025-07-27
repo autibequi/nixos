@@ -100,8 +100,7 @@ in
       ".config/fuzzel/fuzzel.ini".source = ./dotfiles/fuzzel/fuzzel.ini;
 
       # Anyrun
-      ".config/anyrun/config.ron".source = ./dotfiles/anyrun/config.ron;
-      ".config/anyrun/style.css".source = ./dotfiles/anyrun/style.css;
+      ".config/anyrun".source = ./dotfiles/anyrun;
 
       # Darkmode
       ".config/hypr/toggle-theme.sh".source = ./dotfiles/hypr/toggle-theme.sh;

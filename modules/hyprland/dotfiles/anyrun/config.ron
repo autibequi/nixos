@@ -6,10 +6,10 @@ Config(
   // The horizontal position, adjusted so that Relative(0.5) always centers the runner
   x: Fraction(0.5),
 
-  // The vertical position, works the same as `x`
-  y: Absolute(0),
+  // The vertical position, works the same as `x` - center vertically
+  y: Fraction(0.5),
 
-  // The width of the runner
+  // The width of the runner - dracula wide
   width: Absolute(800),
 
   // The minimum height of the runner, the runner will expand to fit all the entries
@@ -19,7 +19,7 @@ Config(
   hide_icons: false,
 
   // ignore exclusive zones, f.e. Waybar
-  ignore_exclusive_zones: false,
+  ignore_exclusive_zones: true,
 
   // Layer shell layer: Background, Bottom, Top, Overlay
   layer: Overlay,
@@ -28,13 +28,13 @@ Config(
   hide_plugin_info: false,
 
   // Close window when a click outside the main box is received
-  close_on_click: false,
+  close_on_click: true,
 
   // Show search results immediately when Anyrun starts
-  show_results_immediately: false,
+  show_results_immediately: true,
 
   // Limit amount of entries shown in total
-  max_entries: None,
+  max_entries: Some(8),
 
   // List of plugins to be loaded by default, can be specified with a relative path to be loaded from the
   // `<anyrun config dir>/plugins` directory or with an absolute path to just load the file the path points to.
@@ -42,6 +42,5 @@ Config(
     "libapplications.so",
     "libsymbols.so",
     "libshell.so",
-    "libtranslate.so",
   ],
 )
