@@ -12,12 +12,8 @@ Config(
     max_entries: Some(8),
     plugins: [
         "libapplications.so",
-        "libsymbols.so",
         "libshell.so",
         "libwebsearch.so",
         "librink.so",
-        "libtranslate.so",
-        "libdictionary.so",
-        "librandr.so",
     ],
 )
