@@ -9,10 +9,7 @@
 
 /* ===== MAIN WINDOW ===== */
 #window {
-    background: rgba(40, 42, 54, 0.95);
-    border: 2px solid #bd93f9;
-    border-radius: 20px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    background: rgba(40, 42, 54, 0.85);
     margin: 20px;
 }
 
