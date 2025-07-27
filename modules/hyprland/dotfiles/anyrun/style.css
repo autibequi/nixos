@@ -1,0 +1,107 @@
+* {
+    all: unset;
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 1.3rem;
+}
+
+#window {
+    background: rgba(0, 0, 0, 0.8);
+    color: #ffffff;
+    border: 2px solid #e6c700;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px;
+    box-shadow: 0 0 20px rgba(230, 199, 0, 0.3);
+}
+
+#entry {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 10px 0;
+    color: #ffffff;
+    font-size: 1.4rem;
+}
+
+#entry:focus {
+    background: rgba(230, 199, 0, 0.2);
+    border: 2px solid #e6c700;
+    box-shadow: 0 0 10px rgba(230, 199, 0, 0.5);
+}
+
+#text {
+    color: #ffffff;
+    margin-left: 10px;
+}
+
+#list {
+    background: transparent;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+#element {
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 2px 0;
+    color: #ffffff;
+}
+
+#element:selected {
+    background: rgba(230, 199, 0, 0.3);
+    border: 1px solid #e6c700;
+    color: #ffffff;
+}
+
+#element:selected #text {
+    color: #ffffff;
+    font-weight: bold;
+}
+
+#element:selected #description {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+#description {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.1rem;
+    margin-left: 10px;
+}
+
+#plugin {
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    padding: 8px;
+    margin: 2px 0;
+}
+
+#plugin:selected {
+    background: rgba(230, 199, 0, 0.2);
+    border: 1px solid #e6c700;
+}
+
+#plugin:selected #text {
+    color: #ffffff;
+    font-weight: bold;
+}
+
+#scroll {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin: 10px 0;
+}
+
+#scroll slider {
+    background: rgba(230, 199, 0, 0.5);
+    border-radius: 10px;
+    min-height: 20px;
+}
+
+#scroll trough {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
