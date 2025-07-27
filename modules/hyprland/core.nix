@@ -17,7 +17,10 @@ in
 {
   services.hypridle.enable = true;
 
-  environment.sessionVariables = { HYPR_PLUGIN_DIR = hypr-plugin-dir; };
+  environment.sessionVariables = {
+    HYPR_PLUGIN_DIR = hypr-plugin-dir;
+    ANYRUN_PLUGIN_DIR = "${pkgs.anyrun}/lib";
+  };
 
   programs.hyprland = {
     enable = true;
