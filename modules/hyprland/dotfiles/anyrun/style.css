@@ -2,15 +2,11 @@
     all: unset;
     font-family: "Fira Code", monospace;
     font-size: 1.2rem;
+    color: #f8f8f2;
 }
 
 #window {
     background: #282a36;
-    color: #f8f8f2;
-    border: 2px solid #bd93f9;
-    border-radius: 20px;
-    padding: 30px;
-    margin: 30px;
 }
 
 #entry {
@@ -29,7 +25,7 @@
 }
 
 #list {
-    background: transparent;
+    background: #282a36; /* Fundo para lista, melhora contraste */
     margin-top: 20px;
 }
 
@@ -60,4 +56,5 @@
     color: #6272a4;
     font-size: 1.0rem;
     margin-left: 15px;
+    background: #282a36; /* Fundo para descrição, melhora leitura */
 }
