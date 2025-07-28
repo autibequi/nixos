@@ -5,6 +5,7 @@
   "spacing": 1,
   "margin": 0,
   "modules-left": [
+    "idle_inhibitor",
     // "custom/weather",
     "hyprland/workspaces"
     // "hyprland/window"
@@ -25,7 +26,6 @@
     "battery",
     "tray",
     "clock",
-    "idle_inhibitor"
   ],
   "pipewire": {
     "format": "{icon}",
@@ -102,7 +102,7 @@
   "custom/playerctl": {
     "format": " 󰐊 {}",
     "return-type": "json",
-    "expand": true,
+    "max-length": 50,
     "exec": "playerctl -a metadata --format '{\"text\": \"{{artist}} - {{markup_escape(title)}}\", \"tooltip\": \"{{playerName}} : {{artist}} - {{markup_escape(title)}}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}' -F",
     "on-click": "playerctl play-pause",
     "on-click-right": "playerctl next"

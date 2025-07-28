@@ -45,7 +45,7 @@
     border: none;
     border-radius: 0;
     font-family: "FiraCode Nerd Font";
-    font-size: 20px;
+    font-size: 15px;
     min-height: 0;
 }
 
@@ -93,7 +93,6 @@ window#waybar {
     background-color: transparent;
     color: @workspaces-color;
     margin: 0px;
-    margin-left: 2px;
 }
 
 #workspaces button:hover {
@@ -250,13 +249,16 @@ window#waybar {
 }
 
 #idle_inhibitor {
+    margin: 0px;
     color: @idle-inhibitor-color;
     border-bottom-color: transparent;
+    min-width: 23px;
 }
 
 #idle_inhibitor.activated {
-    color: @idle-inhibitor-active-color;
-    border-bottom-color: @idle-inhibitor-active-color;
+    color: @background;
+    background-color: @foreground;
+    border-bottom-color: @background;
 }
 
 #tray {
