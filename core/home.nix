@@ -16,12 +16,6 @@
         userEmail = "pedro@autibequi.com";
       };
 
-      home.pointerCursor = {
-        package = pkgs.banana-cursor;
-        name = "Banana";
-        size = 80;
-      };
-
       home.file = {
         # avatar
         ".face".source = ../assets/avatar.png;

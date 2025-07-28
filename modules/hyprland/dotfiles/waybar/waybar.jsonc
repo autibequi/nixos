@@ -24,8 +24,8 @@
     "power-profiles-daemon",
     "battery",
     "tray",
-    "idle_inhibitor",
-    "clock"
+    "clock",
+    "idle_inhibitor"
   ],
   "pipewire": {
     "format": "{icon}",
