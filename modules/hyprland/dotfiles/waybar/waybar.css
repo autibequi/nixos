@@ -1,51 +1,44 @@
-/* OLED Black Colorscheme - for true black backgrounds on OLED displays */
+/* OLED Black Monochrome Colorscheme - for true black backgrounds on OLED displays */
 @define-color background #000000;
 @define-color background-light #181818;
 @define-color foreground #ffffff;
 @define-color black #000000;
-@define-color red #ff5555;
-@define-color green #50fa7b;
-@define-color yellow #f1fa8c;
-@define-color blue #bd93f9;
-@define-color magenta #ff79c6;
-@define-color cyan #8be9fd;
-@define-color white #f8f8f2;
-@define-color orange #ffb86c;
+@define-color white #ffffff;
 
-/* Module-specific colors */
+/* Monochrome module colors */
 @define-color workspaces-color @foreground;
-@define-color workspaces-focused-bg @green;
-@define-color workspaces-focused-fg @cyan;
-@define-color workspaces-urgent-bg @red;
+@define-color workspaces-focused-bg @white;
+@define-color workspaces-focused-fg @black;
+@define-color workspaces-urgent-bg @white;
 @define-color workspaces-urgent-fg @black;
-@define-color workspaces-current-bg @cyan;
+@define-color workspaces-current-bg @white;
 @define-color workspaces-current-fg @black;
 
-/* Text and border colors for modules */
-@define-color mode-color @orange;
-@define-color mpd-color @magenta;
-@define-color weather-color @magenta;
-@define-color playerctl-color @magenta;
+/* Text and border colors for modules (monochrome) */
+@define-color mode-color @white;
+@define-color mpd-color @white;
+@define-color weather-color @white;
+@define-color playerctl-color @white;
 @define-color clock-color @white;
-@define-color cpu-color @green;
-@define-color memory-color @magenta;
-@define-color temperature-color @yellow;
-@define-color temperature-critical-color @red;
-@define-color battery-color @cyan;
-@define-color battery-charging-color @green;
-@define-color battery-warning-color @yellow;
-@define-color battery-critical-color @red;
-@define-color network-color @blue;
-@define-color network-disconnected-color @red;
-@define-color pulseaudio-color @orange;
-@define-color pulseaudio-muted-color @red;
-@define-color backlight-color @yellow;
-@define-color disk-color @cyan;
-@define-color uptime-color @green;
-@define-color updates-color @orange;
-@define-color quote-color @green;
+@define-color cpu-color @white;
+@define-color memory-color @white;
+@define-color temperature-color @white;
+@define-color temperature-critical-color @white;
+@define-color battery-color @white;
+@define-color battery-charging-color @white;
+@define-color battery-warning-color @white;
+@define-color battery-critical-color @white;
+@define-color network-color @white;
+@define-color network-disconnected-color @white;
+@define-color pulseaudio-color @white;
+@define-color pulseaudio-muted-color @white;
+@define-color backlight-color @white;
+@define-color disk-color @white;
+@define-color uptime-color @white;
+@define-color updates-color @white;
+@define-color quote-color @white;
 @define-color idle-inhibitor-color @foreground;
-@define-color idle-inhibitor-active-color @red;
+@define-color idle-inhibitor-active-color @white;
 
 * {
     /* Base styling for all modules */
@@ -87,7 +80,7 @@ window#waybar {
 
 #tray>.active {
     background-color: transparent;
-    color: @textcolor2;
+    color: @foreground;
     opacity: 1;
     border-radius: 0;
     border: none;
@@ -155,13 +148,13 @@ window#waybar {
 }
 
 #custom-playerctl.Playing {
-    color: @cyan;
-    border-bottom-color: @cyan;
+    color: @white;
+    border-bottom-color: @white;
 }
 
 #custom-playerctl.Paused {
-    color: @orange;
-    border-bottom-color: @orange;
+    color: @foreground;
+    border-bottom-color: @foreground;
 }
 
 #clock {
@@ -270,6 +263,9 @@ window#waybar {
     background-color: transparent;
     padding: 0 10px;
     margin: 0 2px;
+    color: @foreground;
+    border-bottom-color: @white;
+    min-width: 0px;
 }
 
 #tray>.passive {
@@ -278,43 +274,37 @@ window#waybar {
 
 #tray>.needs-attention {
     -gtk-icon-effect: highlight;
-    color: @red;
-    border-bottom-color: @red;
+    color: @white;
+    border-bottom-color: @white;
 }
 
 #power-profiles-daemon {
-    color: @cyan;
-    border-bottom-color: @cyan;
+    color: @white;
+    border-bottom-color: @white;
     min-width: 20px;
 }
 
 #power-profiles-daemon.performance {
-    color: @red;
-    border-bottom-color: @red;
+    color: @white;
+    border-bottom-color: @white;
     min-width: 20px;
 }
 
 #power-profiles-daemon.balanced {
-    color: @yellow;
-    border-bottom-color: @yellow;
+    color: @white;
+    border-bottom-color: @white;
     min-width: 20px;
 }
 
 #power-profiles-daemon.power-saver {
-    color: @green;
-    border-bottom-color: @green;
+    color: @white;
+    border-bottom-color: @white;
     min-width: 20px;
 }
 
-#tray {
-    color: @green;
-    border-bottom-color: @white;
-    min-width: 0px;
-}
-
 #bluetooth {
-    color: @blue;
-    border-bottom-color: @blue;
+    color: @white;
+    border-bottom-color: @white;
     min-width: 20px;
 }
 
