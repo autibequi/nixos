@@ -76,7 +76,7 @@
     "disable-scroll": true,
     "all-outputs": true,
     "show-special": false,
-    "format": "{name}::{windows}",
+    "format": "{name}⦚{windows}",
     "window-rewrite-default": "",
     "window-rewrite": {
         "firefox": "",
