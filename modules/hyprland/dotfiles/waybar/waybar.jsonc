@@ -14,7 +14,6 @@
     "custom/playerctl"
   ],
   "modules-right": [
-    "bluetooth",
     "pulseaudio",
     "pipewire",
     "backlight",
@@ -24,6 +23,7 @@
     // "custom/tlp",
     "power-profiles-daemon",
     "battery",
+    "bluetooth",
     "tray",
     "clock",
   ],
