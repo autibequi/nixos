@@ -310,3 +310,11 @@ window#waybar {
     min-width: 20px;
 }
 
+#bluetooth.connected {
+    /* Inverte as cores foreground e background quando o bluetooth está conectado */
+    color: @background;
+    background-color: @foreground;
+    border-bottom-color: @foreground;
+}
+
+
