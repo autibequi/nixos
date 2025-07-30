@@ -7,6 +7,8 @@ with lib; let
       hyprspace
       hyprwinwrap
       hypr-dynamic-cursors
+      hyprspace
+      hyprsplit
       # hyprscrolling
       # hyprtrails
       # hyprfocus
