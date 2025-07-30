@@ -31,8 +31,8 @@
 
     # Work Browser
     chromium
-    vivaldi
-    vivaldi-ffmpeg-codecs
+    # vivaldi
+    # vivaldi-ffmpeg-codecs
 
     # benchmark
     geekbench
