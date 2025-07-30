@@ -31,5 +31,23 @@
         # Gamescope configuration
         ".config/gamescope.sh".source = ../dotfiles/gamescope.sh;
       };
+
+        xdg.desktopEntries."gemini-app" = {
+          name = "Gemini (App)";
+          comment = "Google Gemini como aplicativo web";
+          exec = "${pkgs.chromium}/bin/chromium --app=https://gemini.google.com";
+          icon = "google-chrome";
+          type = "Application";
+          categories = [ "Network" "WebBrowser" ];
+        };
+
+        xdg.desktopEntries."calendar-app" = {
+          name = "Google Calendar (App)";
+          comment = "Google Calendar como aplicativo web";
+          exec = "${pkgs.chromium}/bin/chromium --app=https://calendar.google.com";
+          icon = "google-chrome";
+          type = "Application";
+          categories = [ "Network" "WebBrowser" ];
+        };
     };
 }
