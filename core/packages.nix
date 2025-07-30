@@ -31,8 +31,15 @@
 
     # Work Browser
     chromium
-    vivaldi
-    vivaldi-ffmpeg-codecs
+    # vivaldi
+    # vivaldi-ffmpeg-codecs
+
+    # Cursor
+    banana-cursor
+    apple-cursor
+
+    # Icons
+    papirus-icon-theme
 
     # benchmark
     geekbench

@@ -7,11 +7,13 @@
   "modules-left": [
     "idle_inhibitor",
     // "custom/weather",
-    "hyprland/workspaces"
+    "hyprland/workspaces",
+    "custom/playerctl"
     // "hyprland/window"
   ],
   "modules-center": [
-    "custom/playerctl"
+    "clock",
+    "battery",
   ],
   "modules-right": [
     "pulseaudio",
@@ -22,10 +24,8 @@
     "network",
     // "custom/tlp",
     "power-profiles-daemon",
-    "battery",
     "bluetooth",
     "tray",
-    "clock",
   ],
   "pipewire": {
     "format": "{icon}",
@@ -132,7 +132,8 @@
     "tooltip": true
   },
   "clock": {
-    "format": "󰥔 {:%H:%M}",
+    "format": "󰥔 {:%H:%M:%S}",
+    "interval": 1,
     "format-alt": "󰃮 {:%Y-%m-%d}",
     "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
     "calendar": {
@@ -189,21 +190,22 @@
       "warning": 30,
       "critical": 15
     },
-    "format": "{capacity}% {icon} {time}",
-    "format-charging": "{capacity}% 󰂄 {time}",
+    "format-time": "{H}:{m}",
+    "format": "{icon} {time}",
+    "format-charging": "󰂄 {capacity}%",
     "format-plugged": "󰚥 {capacity}%",
     "format-icons": [
-      "󰂎",
-      "󰁺",
-      "󰁻",
-      "󰁼",
-      "󰁽",
-      "󰁾",
-      "󰁿",
-      "󰂀",
-      "󰂁",
-      "󰂂",
-      "󰁹"
+      "e󰂎",
+      "E󰁺",
+      "⅕ 󰁻",
+      "⅓ 󰁼",
+      "⅖ 󰁽",
+      "½ 󰁾",
+      "⅗ 󰁿",
+      "⅘ 󰂀",
+      "⅘ 󰂁",
+      "f 󰂂",
+      "F 󰁹"
     ]
   },
   "network": {
