@@ -24,8 +24,8 @@
     "network",
     // "custom/tlp",
     "power-profiles-daemon",
-    "bluetooth",
     "tray",
+    "bluetooth",
   ],
   "pipewire": {
     "format": "{icon}",
