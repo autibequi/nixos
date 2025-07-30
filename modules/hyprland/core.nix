@@ -6,6 +6,7 @@ with lib; let
       hyprexpo
       hyprspace
       hyprwinwrap
+      hypr-dynamic-cursors
       # hyprscrolling
       # hyprtrails
       # hyprfocus
