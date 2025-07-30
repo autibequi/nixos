@@ -14,6 +14,10 @@
       vimAlias = true;
       viAlias = true;
     };
+
+    firefox = {
+      enable = true;
+    };
   };
 
   # Waydroid

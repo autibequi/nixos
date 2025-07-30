@@ -49,5 +49,33 @@
           type = "Application";
           categories = [ "Network" "WebBrowser" ];
         };
+
+        xdg.desktopEntries."chat-app" = {
+          name = "Google Chat (App)";
+          comment = "Google Chat como aplicativo web";
+          exec = "${pkgs.chromium}/bin/chromium --app=https://chat.google.com";
+          icon = "google-chrome";
+          type = "Application";
+          categories = [ "Network" "WebBrowser" ];
+        };
+
+        # Corrige erro de caractere reservado no campo Exec (desktop spec)
+        xdg.desktopEntries."obsidian-work" = {
+          name = "Obsidian (Work)";
+          comment = "Obsidian como aplicativo web";
+          exec = "xdg-open \"obsidian://open?vault=Work\"";
+          icon = "obsidian";
+          type = "Application";
+          categories = [ "Office" "TextEditor" ];
+        };
+
+        xdg.desktopEntries."obsidian-personal" = {
+          name = "Journal (Obsidian)";
+          comment = "Obsidian como aplicativo web";
+          exec = "xdg-open \"obsidian://open?vault=books\"";
+          icon = "obsidian";
+          type = "Application";
+          categories = [ "Office" "TextEditor" ];
+        };
     };
 }
