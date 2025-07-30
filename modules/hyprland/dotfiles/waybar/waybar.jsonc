@@ -191,21 +191,21 @@
       "critical": 15
     },
     "format-time": "{H}:{m}",
-    "format": "{icon}{time}",
+    "format": "{icon} {time}",
     "format-charging": "󰂄 {capacity}%",
     "format-plugged": "󰚥 {capacity}%",
     "format-icons": [
       "e󰂎",
       "E󰁺",
-      "⅕󰁻",
-      "⅓󰁼",
-      "⅖󰁽",
-      "½󰁾",
-      "⅗󰁿",
-      "⅘󰂀",
-      "⅘󰂁",
-      "f󰂂",
-      "F󰁹"
+      "⅕ 󰁻",
+      "⅓ 󰁼",
+      "⅖ 󰁽",
+      "½ 󰁾",
+      "⅗ 󰁿",
+      "⅘ 󰂀",
+      "⅘ 󰂁",
+      "f 󰂂",
+      "F 󰁹"
     ]
   },
   "network": {
