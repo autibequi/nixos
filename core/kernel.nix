@@ -16,6 +16,7 @@
   security.protectKernelImage = false;
 
   boot.kernelParams = [
+    "usbcore.autosuspend=-1" # Disable USB auto suspend
     # refresh issues https://gitlab.gnome.org/GNOME/mutter/-/issues/3299\
     "amdgpu.dcdebugmask=0x10"
 
