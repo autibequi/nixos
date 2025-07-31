@@ -75,9 +75,15 @@
   "hyprland/workspaces": {
     "disable-scroll": true,
     "all-outputs": true,
-    "show-special": false,
+    "show-special": true,
     "format": "{name}⦚{windows}",
     "window-rewrite-default": "",
+    "format-icons": {
+      "special:": "",
+      "special:comms": "",
+      "special:scratch": "",
+      "special:context": ""
+    },
     "window-rewrite": {
         "firefox": "",
         "app.zen_browser.zen": "",
