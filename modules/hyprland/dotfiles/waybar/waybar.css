@@ -30,11 +30,11 @@
 @define-color ws-text @main-text;
 @define-color ws-active-bg @color-white;
 @define-color ws-active-text @color-black;
-@define-color ws-urgent-bg @color-red;
-@define-color ws-urgent-text @color-white;
+@define-color ws-urgent-bg @color-black;
+@define-color ws-urgent-text @color-red;
 @define-color ws-special-text @color-yellow;
 @define-color ws-special-active-text @color-black;
-@define-color ws-special-hover-text @color-green;
+@define-color ws-special-hover-text @color-black;
 
 /*========================================================*
  *                  MODULE COLORS                        *

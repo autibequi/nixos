@@ -131,6 +131,10 @@ in
       ".config/waybar/tlp-toggle.sh".source = ./dotfiles/waybar/tlp-toggle.sh;
       ".config/hypr/escape-workspaces.sh".source = ./dotfiles/hypr/escape-workspaces.sh;
       ".config/hypr/switch-special-workspace.sh".source = ./dotfiles/hypr/switch-special-workspace.sh;
+
+      # Shaders
+      ".config/hypr/shaders".source = ./shaders;
+      ".config/hypr/shaders".recursive = true;
     };
   };
 }
