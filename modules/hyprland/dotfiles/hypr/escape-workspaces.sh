@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-
 ACTIVE_SPECIAL_WORKSPACE=$(hyprctl monitors -j | jq -r '.[] | .specialWorkspace.name')
 
 echo "ACTIVE_SPECIAL_WORKSPACE: $ACTIVE_SPECIAL_WORKSPACE"
 
 if [[ "$ACTIVE_SPECIAL_WORKSPACE" =~ ^special:.*$ ]]; then
-    echo "Toggling special workspace: $ACTIVE_SPECIAL_WORKSPACE"
-    hyprctl dispatch togglespecialworkspace "$ACTIVE_SPECIAL_WORKSPACE"
+    # good old hack is simple and works
+    hyprctl dispatch togglespecialworkspace "bye!"
+    hyprctl dispatch togglespecialworkspace "bye!"
 else
     echo "No special workspace found"
 fi
