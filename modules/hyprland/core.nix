@@ -1,20 +1,28 @@
-{ lib, pkgs, inputs, ... }:
-with lib; let
+{
+  lib,
+  pkgs,
+  inputs,
+  ...
+}:
+with lib;
+let
   hypr-plugin-dir = pkgs.symlinkJoin {
     name = "hyrpland-plugins";
-    paths = (with pkgs.hyprlandPlugins; [
-      hyprexpo
-      hyprspace
-      hyprwinwrap
-      hypr-dynamic-cursors
-      hyprspace
-      hyprsplit
-      # hyprscrolling
-      # hyprtrails
-      # hyprfocus
-    ]) ++ [
-      inputs.hyprtasking.packages.${pkgs.system}.hyprtasking
-    ];
+    paths =
+      (with pkgs.hyprlandPlugins; [
+        hyprexpo
+        hyprspace
+        hyprwinwrap
+        hypr-dynamic-cursors
+        hyprspace
+        hyprsplit
+        # hyprscrolling
+        # hyprtrails
+        # hyprfocus
+      ])
+      ++ [
+        inputs.hyprtasking.packages.${pkgs.system}.hyprtasking
+      ];
   };
 in
 {
@@ -37,7 +45,6 @@ in
   services.power-profiles-daemon.enable = false;
 
   environment.systemPackages = with pkgs; [
-
 
     # Core Hyprland tools for navigation and productivity
     waybar # Status bar with useful info
@@ -122,6 +129,7 @@ in
       ".config/waybar/tlp-status.sh".source = ./dotfiles/waybar/tlp-status.sh;
       ".config/waybar/tlp-toggle.sh".source = ./dotfiles/waybar/tlp-toggle.sh;
       ".config/hypr/escape-workspaces.sh".source = ./dotfiles/hypr/escape-workspaces.sh;
+      ".config/hypr/switch-special-workspace.sh".source = ./dotfiles/hypr/switch-special-workspace.sh;
     };
   };
 }
