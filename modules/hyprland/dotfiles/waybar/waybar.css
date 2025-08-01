@@ -33,8 +33,9 @@
 @define-color ws-urgent-bg @color-black;
 @define-color ws-urgent-text @color-red;
 @define-color ws-special-text @color-yellow;
-@define-color ws-special-active-text @color-black;
-@define-color ws-special-hover-text @color-black;
+@define-color ws-special-active-bg @color-black;
+@define-color ws-special-active-text @color-green;
+@define-color ws-special-hover-text @color-green;
 
 /*========================================================*
  *                  MODULE COLORS                        *
@@ -116,6 +117,7 @@ window#waybar {
     color: @ws-text;
     margin: 0px;
 }
+
 #workspaces button:hover {
     color: @color-black;
     text-shadow:
@@ -124,30 +126,38 @@ window#waybar {
         0 0 12px #18180099,
         0 2px 0 #000000cc;
 }
+
 #workspaces button.focused {
     box-shadow: inset 0 -2px @ws-active-text;
     color: @ws-text;
     font-weight: 900;
 }
+
 #workspaces button.active {
     background-color: @ws-active-bg;
     color: @ws-active-text;
     font-weight: bold;
 }
+
 #workspaces button.urgent {
     color: @ws-urgent-text;
     background-color: @ws-urgent-bg;
 }
+
 #workspaces button.special {
     color: @ws-special-text;
     text-shadow: 0 0 6px @ws-special-text;
 }
+
 #workspaces button.active.special {
     color: @ws-special-active-text;
+    background-color: @ws-special-active-bg;
     text-shadow: 0 0 6px @ws-special-active-text;
 }
+
 #workspaces button.special:hover {
     color: @ws-special-hover-text;
+    background-color: @ws-special-active-bg;
     text-shadow: 0 0 6px @ws-special-hover-text;
 }
 
@@ -158,112 +168,138 @@ window#waybar {
     color: @mode-text;
     border-bottom-color: @mode-text;
 }
+
 #mpd {
     color: @mpd-text;
     border-bottom-color: @mpd-text;
 }
+
 #mpd.disconnected,
 #mpd.stopped {
     color: @main-text;
     border-bottom-color: transparent;
 }
+
 #custom-weather {
     color: @weather-text;
     border-bottom-color: @weather-text;
     font-family: sans-serif;
 }
+
 #custom-playerctl {
     color: @playerctl-text;
     border-bottom-color: @playerctl-text;
 }
+
 #custom-playerctl.Playing {
     color: @color-white;
     border-bottom-color: @color-white;
 }
+
 #custom-playerctl.Paused {
     color: @main-text;
     border-bottom-color: @main-text;
 }
+
 #clock {
     color: @clock-text;
     border-bottom-color: @clock-text;
 }
+
 #cpu {
     color: @cpu-text;
     border-bottom-color: @cpu-text;
     min-width: 20px;
 }
+
 #memory {
     color: @memory-text;
     border-bottom-color: @memory-text;
 }
+
 #temperature {
     color: @temp-text;
     border-bottom-color: @temp-text;
 }
+
 #temperature.critical {
     color: @temp-critical-text;
     border-bottom-color: @temp-critical-text;
 }
+
 #battery {
     color: @battery-text;
     border-bottom-color: @battery-text;
 }
+
 #battery.charging,
 #battery.plugged {
     color: @battery-charging-text;
     border-bottom-color: @battery-charging-text;
 }
+
 #battery.warning:not(.charging) {
     color: @battery-warning-text;
     border-bottom-color: @battery-warning-text;
 }
+
 #battery.critical:not(.charging) {
     color: @battery-critical-text;
     border-bottom-color: @battery-critical-text;
 }
+
 #network {
     color: @network-text;
     border-bottom-color: @network-text;
 }
+
 #network.disconnected {
     color: @network-disconnected-text;
     border-bottom-color: @network-disconnected-text;
 }
+
 #pulseaudio {
     color: @audio-text;
     border-bottom-color: @audio-text;
 }
+
 #pulseaudio.muted {
     color: @audio-muted-text;
     border-bottom-color: @audio-muted-text;
 }
+
 #backlight {
     color: @backlight-text;
     border-bottom-color: @backlight-text;
 }
+
 #disk {
     color: @disk-text;
     border-bottom-color: @disk-text;
 }
+
 #custom-uptime {
     color: @uptime-text;
     border-bottom-color: @uptime-text;
 }
+
 #custom-updates {
     color: @updates-text;
     border-bottom-color: @updates-text;
 }
+
 #custom-quote {
     color: @quote-text;
     border-bottom-color: @quote-text;
 }
+
 #idle_inhibitor {
     margin: 0px;
     color: @idle-inhibitor-text;
     border-bottom-color: transparent;
     min-width: 23px;
 }
+
 #idle_inhibitor.activated {
     color: @main-bg;
     background-color: @main-text;
@@ -278,6 +314,7 @@ window#waybar {
     border-bottom-color: @color-white;
     min-width: 20px;
 }
+
 #bluetooth.connected {
     color: @main-bg;
     background-color: @main-text;
@@ -296,17 +333,20 @@ window#waybar {
     border-bottom-color: @color-white;
     min-width: 0px;
 }
-#tray > .active {
+
+#tray>.active {
     background-color: transparent;
     color: @main-text;
     opacity: 1;
     border-radius: 0;
     border: none;
 }
-#tray > .passive {
+
+#tray>.passive {
     -gtk-icon-effect: dim;
 }
-#tray > .needs-attention {
+
+#tray>.needs-attention {
     -gtk-icon-effect: highlight;
     color: @color-white;
     border-bottom-color: @color-white;
