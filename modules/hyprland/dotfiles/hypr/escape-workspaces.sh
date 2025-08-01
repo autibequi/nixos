@@ -9,6 +9,7 @@ echo "workspace_number: $workspace_number"
 if [[ "$ACTIVE_SPECIAL_WORKSPACE" =~ ^special:.*$ ]]; then
     # remove special:
     clean_name=$(echo "$ACTIVE_SPECIAL_WORKSPACE" | sed 's/^special://')
+    echo "clean_name: $clean_name"
     hyprctl dispatch togglespecialworkspace "$clean_name"
 fi
 

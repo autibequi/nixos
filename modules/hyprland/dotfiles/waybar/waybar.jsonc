@@ -13,7 +13,7 @@
   ],
   "modules-center": [
     "clock",
-    "battery",
+    "battery"
   ],
   "modules-right": [
     "pulseaudio",
@@ -25,7 +25,7 @@
     // "custom/tlp",
     "power-profiles-daemon",
     "tray",
-    "bluetooth",
+    "bluetooth"
   ],
   "pipewire": {
     "format": "{icon}",
@@ -76,7 +76,7 @@
     "disable-scroll": true,
     "all-outputs": true,
     "show-special": true,
-    "format": "{name}⦚{windows}",
+    "format": "{name}:{windows}",
     "window-rewrite-default": "",
     "format-icons": {
       "special:": "",
@@ -87,20 +87,20 @@
       "F5": "",
     },
     "window-rewrite": {
-        "firefox": "",
-        "app.zen_browser.zen": "",
-        "zen": "",
-        "chromium": "",
-        "chrome": "",
-        "dbeaver": "",
-        "code": "󰨞",
-        "cursor": "󰨞" ,
-        "obsidian": "",
-        "Alacritty": "",
-        "org.gnome.Nautilus": "",
-        "zed": "Z",
-        "stremio": "󰎞",
-        "insomnia": " "
+      "firefox": "🦊",
+      "app.zen_browser.zen": "🦊",
+      "zen": "🦊",
+      "chromium": "",
+      "chrome": "",
+      "dbeaver": "d🦫",
+      "code": "󰨞",
+      "cursor": "󰨞",
+      "obsidian": "",
+      "Alacritty": "",
+      "org.gnome.Nautilus": "",
+      "zed": "Z",
+      "stremio": "🍿",
+      "insomnia": ""
     }
   },
   "hyprland/mode": {

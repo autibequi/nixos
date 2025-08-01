@@ -44,10 +44,12 @@
     /* Base styling for all modules */
     border: none;
     border-radius: 0;
-    font-family: "FiraCode Nerd Font";
+    font-family: "JetBrainsMono Nerd Font";
     font-size: 15px;
     min-height: 0;
 }
+
+
 
 window#waybar {
     background-color: @background;
@@ -73,6 +75,8 @@ window#waybar {
 #custom-quote,
 #idle_inhibitor,
 #tray {
+    margin: 0 2px;
+    padding: 0 2px;
     background-color: transparent;
 }
 
@@ -332,5 +336,3 @@ window#waybar {
     background-color: @foreground;
     border-bottom-color: @foreground;
 }
-
-
