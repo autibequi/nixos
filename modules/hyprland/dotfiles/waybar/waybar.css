@@ -127,14 +127,9 @@ window#waybar {
 
 /* Workspaces: destaque para workspaces especiais (ex: F1, F2...) */
 #workspaces button.special {
-    /* CRT EFFECT - menos glow, mais destaque OLED, sem glow de fundo */
-    background-color: #181800;
     color: #ffe761;
     text-shadow:
-        0 0 1px #ffe761,
-        0 0 2px #ffe761;
-    /* Removido box-shadow para eliminar glow de fundo */
-    font-weight: bold;
+        0 0 6px #ffe761;
 }
 
 

@@ -82,7 +82,7 @@
       "F1": "",
       "F2": "󰎞", // Opções para context: Obsidian, Obsidian+Tab, outros
       "F3": "",
-      "F4": "",
+      "special:F4": "",
       "F5": "",
     },
     "window-rewrite": {
