@@ -80,9 +80,11 @@
     "window-rewrite-default": "",
     "format-icons": {
       "special:": "",
-      "special:comms": "",
-      "special:scratch": "",
-      "special:context": ""
+      "F1": "",
+      "F2": "󰎞", // Opções para context: Obsidian, Obsidian+Tab, outros
+      "F3": "",
+      "F4": "",
+      "F5": "",
     },
     "window-rewrite": {
         "firefox": "",
@@ -90,16 +92,15 @@
         "zen": "",
         "chromium": "",
         "chrome": "",
-        "DBeaver": "",
-        "Code": "󰨞",
+        "dbeaver": "",
+        "code": "󰨞",
         "cursor": "󰨞" ,
-        "Obsidian": "󰎞",
-        "obsidian": "󰎞",
+        "obsidian": "",
         "Alacritty": "",
-        "org.gnome.Nautilus": "",
+        "org.gnome.Nautilus": " ",
         "zed": "Z",
-        "stremio": "",
-        "insomnia": ""
+        "stremio": "󰎞",
+        "insomnia": " "
     }
   },
   "hyprland/mode": {
@@ -132,8 +133,8 @@
   "idle_inhibitor": {
     "format": "{icon}",
     "format-icons": {
-      "activated": "󰈈",
-      "deactivated": "󰈉"
+      "activated": "󰈈 ",
+      "deactivated": "󰈉 "
     },
     "tooltip": true
   },

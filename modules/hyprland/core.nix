@@ -121,6 +121,7 @@ in
       # scripts
       ".config/waybar/tlp-status.sh".source = ./dotfiles/waybar/tlp-status.sh;
       ".config/waybar/tlp-toggle.sh".source = ./dotfiles/waybar/tlp-toggle.sh;
+      ".config/hypr/escape-workspaces.sh".source = ./dotfiles/hypr/escape-workspaces.sh;
     };
   };
 }

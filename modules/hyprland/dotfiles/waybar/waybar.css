@@ -74,8 +74,6 @@ window#waybar {
 #idle_inhibitor,
 #tray {
     background-color: transparent;
-    min-width: 20px;
-    margin: 5px;
 }
 
 #tray>.active {
