@@ -2,6 +2,8 @@
 
 {
   environment.systemPackages = with pkgs; [
+    proton-pass
+
     killall
     # apps
     onlyoffice-bin # office space apps
@@ -20,7 +22,7 @@
     banana-cursor # my boss saw it, it okay
     apple-cursor # to when my boss regret beeing okay
     papirus-icon-theme # Icons
-    
+
     # hardawre
     solaar
 
