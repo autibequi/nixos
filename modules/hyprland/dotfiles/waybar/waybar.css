@@ -4,13 +4,15 @@
 @define-color foreground #ffffff;
 @define-color black #000000;
 @define-color white #ffffff;
+@define-color red #ff0000;
+@define-color yellow #ffe761;
 
 /* Monochrome module colors */
 @define-color workspaces-color @foreground;
 @define-color workspaces-focused-bg @white;
 @define-color workspaces-focused-fg @black;
-@define-color workspaces-urgent-bg @white;
-@define-color workspaces-urgent-fg @black;
+@define-color workspaces-urgent-bg @red;
+@define-color workspaces-urgent-fg @white;
 @define-color workspaces-current-bg @white;
 @define-color workspaces-current-fg @black;
 
@@ -122,16 +124,30 @@ window#waybar {
 }
 
 #workspaces button.urgent {
-    color: red;
+    color: @workspaces-urgent-fg;
+    background-color: @workspaces-urgent-bg;
 }
 
 /* Workspaces: destaque para workspaces especiais (ex: F1, F2...) */
 #workspaces button.special {
-    color: #ffe761;
+    color: @yellow;
     text-shadow:
-        0 0 6px #ffe761;
+        0 0 6px @yellow
 }
 
+/* Workspaces: active special workspace - fonte preta forçada */
+#workspaces button.active.special {
+    color: @black;
+    text-shadow:
+        0 0 6px @black;
+}
+
+/* Workspaces: active special workspace - fonte preta forçada */
+#workspaces button.special:hover {
+    color: @black;
+    text-shadow:
+        0 0 6px @black;
+}
 
 /* Module-specific styling */
 #mode {
