@@ -7,6 +7,8 @@ if [[ "$ACTIVE_SPECIAL_WORKSPACE" =~ ^special:.*$ ]]; then
     # good old hack is simple and works
     hyprctl dispatch togglespecialworkspace "bye!"
     hyprctl dispatch togglespecialworkspace "bye!"
+
 else
+    # Envia um evento de tecla ESC para o bus do Hyprland (simula pressionar ESC)
     echo "No special workspace found"
 fi
