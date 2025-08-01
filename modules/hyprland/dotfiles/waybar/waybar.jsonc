@@ -5,15 +5,15 @@
   "spacing": 1,
   "margin": 0,
   "modules-left": [
+    "custom/weather",
     "idle_inhibitor",
-    // "custom/weather",
     "hyprland/workspaces",
-    "custom/playerctl"
     // "hyprland/window"
   ],
   "modules-center": [
     "clock",
-    "battery"
+    "battery",
+    "custom/playerctl"
   ],
   "modules-right": [
     "pulseaudio",

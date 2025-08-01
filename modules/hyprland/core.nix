@@ -81,6 +81,7 @@ in
     hyprlock
     waybar
     anyrun
+    cliphist # Clipboard history manager
   ];
 
   # XDG Desktop Portal
