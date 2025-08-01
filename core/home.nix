@@ -59,6 +59,15 @@
           categories = [ "Network" "WebBrowser" ];
         };
 
+        xdg.desktopEntries."gmail-app" = {
+          name = "Gmail (App)";
+          comment = "Gmail como aplicativo web";
+          exec = "${pkgs.chromium}/bin/chromium --app=https://mail.google.com";
+          icon = "google-chrome";
+          type = "Application";
+          categories = [ "Network" "Email" "WebBrowser" ];
+        };
+
         # Corrige erro de caractere reservado no campo Exec (desktop spec)
         xdg.desktopEntries."obsidian-work" = {
           name = "Obsidian (Work)";

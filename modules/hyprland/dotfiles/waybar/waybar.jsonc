@@ -2,13 +2,11 @@
   "layer": "bottom",
   "position": "bottom",
   "height": 30,
-  "spacing": 1,
+  "spacing": 0,
   "margin": 0,
   "modules-left": [
-    "custom/weather",
     "idle_inhibitor",
-    "hyprland/workspaces",
-    // "hyprland/window"
+    "hyprland/workspaces"
   ],
   "modules-center": [
     "clock",
@@ -26,6 +24,7 @@
     "power-profiles-daemon",
     "tray",
     "bluetooth"
+    // "custom/weather"
   ],
   "pipewire": {
     "format": "{icon}",
