@@ -8,6 +8,7 @@ gamescopeArgs=(
     --mangoapp # performance overlay
     --rt
     --steam
+    -O HDMI-A-1 eDP-1
     # --filter=fsr
     # --scaler=auto
     # --expose-wayland
@@ -25,7 +26,7 @@ mangoConfig=(
     vram
 )
 mangoVars=(
-    MANGOHUD=1
+    MANGOHUD=0
     MANGOHUD_CONFIG="$(IFS=,; echo "${mangoConfig[*]}")"
 )
 
