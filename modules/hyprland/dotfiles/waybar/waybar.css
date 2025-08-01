@@ -94,8 +94,14 @@ window#waybar {
 }
 
 #workspaces button:hover {
-    background: @background-light;
-    box-shadow: inherit;
+    /* Efeito CRT: amarelo vibrante, linhas simuladas e glow */
+    color: black;
+    /* Glow escuro: sombra azul escura intensa e leve contorno */
+    text-shadow:
+        0 1px 0 #181800cc,
+        0 0 4px #0a0a40cc,
+        0 0 12px #18180099,
+        0 2px 0 #000000cc;
 }
 
 #workspaces button.focused {
@@ -115,6 +121,19 @@ window#waybar {
     background-color: @workspaces-urgent-bg;
     color: @workspaces-urgent-fg;
 }
+
+/* Workspaces: destaque para workspaces especiais (ex: F1, F2...) */
+#workspaces button.special {
+    /* CRT EFFECT - menos glow, mais destaque OLED, sem glow de fundo */
+    background-color: #181800;
+    color: #ffe761;
+    text-shadow:
+        0 0 1px #ffe761,
+        0 0 2px #ffe761;
+    /* Removido box-shadow para eliminar glow de fundo */
+    font-weight: bold;
+}
+
 
 /* Module-specific styling */
 #mode {
