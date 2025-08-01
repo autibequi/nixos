@@ -118,8 +118,7 @@ window#waybar {
 }
 
 #workspaces button.urgent {
-    background-color: @workspaces-urgent-bg;
-    color: @workspaces-urgent-fg;
+    color: red;
 }
 
 /* Workspaces: destaque para workspaces especiais (ex: F1, F2...) */
