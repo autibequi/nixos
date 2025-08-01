@@ -20,11 +20,9 @@
     "cpu",
     "memory",
     "network",
-    // "custom/tlp",
     "power-profiles-daemon",
     "tray",
     "bluetooth"
-    // "custom/weather"
   ],
   "pipewire": {
     "format": "{icon}",
@@ -53,13 +51,6 @@
       "blueman": "bluetooth"
     }
   },
-  "hyprland/window": {
-    "format": "{class}",
-    "max-length": 20,
-    "rewrite": {
-      "^(?!.*\\S).*": "¯\\_(ツ)_\/¯"
-    }
-  },
   "power-profiles-daemon": {
     "format": "{icon}",
     "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
@@ -80,10 +71,10 @@
     "format-icons": {
       "special:": "",
       "F1": "",
-      "F2": "󰎞", // Opções para context: Obsidian, Obsidian+Tab, outros
+      "F2": "󰎞",
       "F3": "",
       "special:F4": "",
-      "F5": "",
+      "F5": ""
     },
     "window-rewrite": {
       "firefox": "",
@@ -102,9 +93,6 @@
       "insomnia": ""
     }
   },
-  "hyprland/mode": {
-    "format": "<span style=\"italic\">{}</span>"
-  },
   "custom/playerctl": {
     "format": " 󰐊 {}",
     "return-type": "json",
@@ -112,22 +100,6 @@
     "exec": "playerctl -a metadata --format '{\"text\": \" {{markup_escape(title)}}[by]{{artist}}\", \"tooltip\": \"{{artist}}::::{{markup_escape(title)}}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}' -F",
     "on-click": "playerctl play-pause",
     "on-click-right": "playerctl next"
-  },
-  "custom/weather": {
-    "exec": "curl 'https://wttr.in/?format=1'",
-    "interval": 3600,
-    "format": "{}",
-    "tooltip": true,
-    // Exibe previsão detalhada ao clicar no clima
-    "on-click": "curl 'https://wttr.in/?format=3' | yad --text-info --width=400 --height=200 --title='Previsão Detalhada'"
-  },
-  "custom/quotes": {
-    "format": "󰚛",
-    "tooltip-format": "{}",
-    "interval": 3600,
-    "exec": "fortune -s",
-    "on-click": "fortune | yad --text-info --width=400 --height=200 --title='Fortune'",
-    "tooltip": true
   },
   "idle_inhibitor": {
     "format": "{icon}",
@@ -169,26 +141,9 @@
     "tooltip": true,
     "interval": 10
   },
-  "custom/tlp": {
-    "exec": "bash ~/.config/waybar/tlp-status.sh",
-    "format": "{}",
-    "return-type": "json",
-    "interval": 10,
-    "on-click": "bash ~/.config/waybar/tlp-toggle.sh",
-    "on-click-right": "alacritty -e tlp-stat -s"
-  },
   "memory": {
     "format": "󰘚 {}%",
     "interval": 1
-  },
-  "temperature": {
-    "critical-threshold": 80,
-    "format": "{icon} {temperatureC}°C",
-    "format-icons": [
-      "󱃃",
-      "󰔏",
-      "󱃂"
-    ]
   },
   "battery": {
     "states": {
@@ -226,7 +181,6 @@
     "format": "",
     "format-connected": " {device_alias}",
     "format-connected-battery": " {device_alias} {device_battery_percentage}%",
-    // "format-device-preference": [ "device1", "device2" ], // preference list deciding the displayed device
     "tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
     "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
     "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
@@ -265,11 +219,5 @@
     ],
     "on-scroll-up": "brightnessctl set +5%",
     "on-scroll-down": "brightnessctl set 5%-"
-  },
-  "disk": {
-    "interval": 30,
-    "format": "󰋊 {percentage_used}%",
-    "path": "/",
-    "on-click": "alacritty -e gdu /"
   }
 }
