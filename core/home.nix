@@ -24,12 +24,8 @@
         ".wallpapers/light.jpg".source = ../assets/wallpapers/the-death-of-socrates.jpg;
         ".wallpapers/dark.jpg".source = ../assets/wallpapers/the-wild-hunt-of-odin.jpg;
 
-        # MPV configuration
-        ".config/mpv/mpv.conf".source = ../dotfiles/mpv.conf;
-        ".config/mpv/input.conf".source = ../dotfiles/input.conf;
-
         # Gamescope configuration
-        ".config/gamescope.sh".source = ../dotfiles/gamescope.sh;
+        ".config/gamescope.sh".source = ../scripts/gamescope.sh;
       };
 
         xdg.desktopEntries."gemini-app" = {

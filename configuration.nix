@@ -36,7 +36,7 @@
     ./modules/nvidia.nix
 
     # Desktop Enviroments
-    ./modules/hyprland/core.nix
+    ./modules/hyprland.nix
     # ./modules/gnome/core.nix
     # ./modules/cosmic.nix
     # ./modules/kde.nixs
