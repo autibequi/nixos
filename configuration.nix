@@ -18,34 +18,16 @@
     ./core/fonts.nix
     ./core/shell.nix
     ./core/kernel.nix
+    ./core/hibernate.nix
 
     # Stable Modules
     ./modules/bluetooth.nix
     ./modules/plymouth.nix
     ./modules/ai.nix
-    ./modules/hibernate.nix
     ./modules/steam.nix
     ./modules/podman.nix
 
-    # Laptop Modules
-    # ./modules/tlp.nix
-    # ./modules/battery.nix
-
-    # Hardware
-    ./modules/asus.nix
-    ./modules/nvidia.nix
-
-    # Desktop Enviroments
-    ./modules/hyprland.nix
-    # ./modules/gnome/core.nix
-    # ./modules/cosmic.nix
-    # ./modules/kde.nixs
-
-    # Custom Modules (Packages not well supported yet by nixpkgs)
-    ./modules/custom/flatpak.nix
-    # ./modules/custom/howdy.nix
-
-    # Other Modules
-    # ./modules/work.nix
+    # Custom Modules
+    ./modules/flatpak.nix
   ];
 }
