@@ -9,3 +9,6 @@ unlock-hardware:
 
 get-ids:
 	cat /etc/nixos/hardware-configuration.nix | grep -B 3 "device ="
+
+switch: unlock-hardware lock-hardware
+	nh os switch .
