@@ -28,8 +28,8 @@
     ./modules/podman.nix
 
     # Laptop Modules
-    ./modules/tlp.nix
-    ./modules/battery.nix
+    # ./modules/tlp.nix
+    # ./modules/battery.nix
 
     # Hardware
     ./modules/asus.nix
