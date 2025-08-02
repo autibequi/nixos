@@ -1,0 +1,353 @@
+/*
+  ██████╗ ███████╗██████╗      ██████╗ ██████╗ ███████╗
+  ██╔══██╗██╔════╝██╔══██╗    ██╔═══██╗██╔══██╗██╔════╝
+  ██████╔╝█████╗  ██████╔╝    ██║   ██║██████╔╝███████╗
+  ██╔═══╝ ██╔══╝  ██╔══██╗    ██║   ██║██╔═══╝ ╚════██║
+  ██║     ███████╗██║  ██║    ╚██████╔╝██║     ███████║
+  ╚═╝     ╚══════╝╚═╝  ╚═╝     ╚═════╝ ╚═╝     ╚══════╝
+        OLED Black Monochrome Colorscheme
+        for true black backgrounds on OLED displays
+*/
+
+/*========================================================*
+ *                   BASE PALETTE                        *
+ *========================================================*/
+@define-color color-black #000000;
+@define-color color-white #ffffff;
+@define-color color-red #ff0000;
+@define-color color-yellow #ffe761;
+@define-color color-green #008000;
+
+/*========================================================*
+ *                   GLOBAL COLORS                       *
+ *========================================================*/
+@define-color main-bg @color-black;
+@define-color main-text @color-white;
+
+/*========================================================*
+ *                 WORKSPACE COLORS                      *
+ *========================================================*/
+@define-color ws-text @main-text;
+@define-color ws-active-bg @color-white;
+@define-color ws-active-text @color-black;
+@define-color ws-urgent-bg @color-black;
+@define-color ws-urgent-text @color-red;
+@define-color ws-special-text @color-yellow;
+@define-color ws-special-active-bg @color-black;
+@define-color ws-special-active-text @color-green;
+@define-color ws-special-hover-text @color-green;
+
+/*========================================================*
+ *                  MODULE COLORS                        *
+ *========================================================*/
+@define-color mode-text @color-white;
+@define-color mpd-text @color-white;
+@define-color weather-text @color-white;
+@define-color playerctl-text @color-white;
+@define-color clock-text @color-white;
+@define-color cpu-text @color-white;
+@define-color memory-text @color-white;
+@define-color temp-text @color-white;
+@define-color temp-critical-text @color-white;
+@define-color battery-text @color-white;
+@define-color battery-charging-text @color-white;
+@define-color battery-warning-text @color-white;
+@define-color battery-critical-text @color-white;
+@define-color network-text @color-white;
+@define-color network-disconnected-text @color-white;
+@define-color audio-text @color-white;
+@define-color audio-muted-text @color-white;
+@define-color backlight-text @color-white;
+@define-color disk-text @color-white;
+@define-color uptime-text @color-white;
+@define-color updates-text @color-white;
+@define-color quote-text @color-white;
+@define-color idle-inhibitor-text @main-text;
+@define-color idle-inhibitor-active-text @color-white;
+
+/*========================================================*
+ *                  GENERAL STYLES                       *
+ *========================================================*/
+* {
+    border: none;
+    border-radius: 0;
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 15px;
+    min-height: 0;
+}
+
+window#waybar {
+    background-color: @main-bg;
+    color: @main-text;
+}
+
+/*========================================================*
+ *             MODULE CONTAINER STYLES                   *
+ *========================================================*/
+#mode,
+#mpd,
+#custom-weather,
+#custom-playerctl,
+#clock,
+#cpu,
+#memory,
+#temperature,
+#battery,
+#network,
+#pulseaudio,
+#backlight,
+#disk,
+#custom-uptime,
+#custom-updates,
+#custom-quote,
+#idle_inhibitor,
+#tray {
+    margin: 0 2px;
+    padding: 0 2px;
+    background-color: transparent;
+}
+
+/*========================================================*
+*                     WORKSPACES                        *
+*========================================================*/
+#workspaces button {
+    padding-left: 5px;
+    padding-right: 10px;
+    background-color: transparent;
+    color: @ws-text;
+    margin: 0px;
+}
+
+#workspaces button:hover {
+    color: @color-black;
+    text-shadow:
+        0 1px 0 #181800cc,
+        0 0 4px #0a0a40cc,
+        0 0 12px #18180099,
+        0 2px 0 #000000cc;
+}
+
+#workspaces button.focused {
+    box-shadow: inset 0 -2px @ws-active-text;
+    color: @ws-text;
+    font-weight: 900;
+}
+
+#workspaces button.active {
+    background-color: @ws-active-bg;
+    color: @ws-active-text;
+    font-weight: bold;
+}
+
+#workspaces button.urgent {
+    color: @ws-urgent-text;
+    background-color: @ws-urgent-bg;
+}
+
+#workspaces button.special {
+    color: @ws-special-text;
+    text-shadow: 0 0 6px @ws-special-text;
+}
+
+#workspaces button.active.special {
+    color: @ws-special-active-text;
+    background-color: @ws-special-active-bg;
+    text-shadow: 0 0 6px @ws-special-active-text;
+}
+
+#workspaces button.special:hover {
+    color: @ws-special-hover-text;
+    background-color: @ws-special-active-bg;
+    text-shadow: 0 0 6px @ws-special-hover-text;
+}
+
+/*========================================================*
+*                   MODULE STYLES                       *
+*========================================================*/
+#mode {
+    color: @mode-text;
+    border-bottom-color: @mode-text;
+}
+
+#mpd {
+    color: @mpd-text;
+    border-bottom-color: @mpd-text;
+}
+
+#mpd.disconnected,
+#mpd.stopped {
+    color: @main-text;
+    border-bottom-color: transparent;
+}
+
+#custom-weather {
+    color: @weather-text;
+    border-bottom-color: @weather-text;
+    font-family: sans-serif;
+}
+
+#custom-playerctl {
+    color: @playerctl-text;
+    border-bottom-color: @playerctl-text;
+}
+
+#custom-playerctl.Playing {
+    color: @color-white;
+    border-bottom-color: @color-white;
+}
+
+#custom-playerctl.Paused {
+    color: @main-text;
+    border-bottom-color: @main-text;
+}
+
+#clock {
+    color: @clock-text;
+    border-bottom-color: @clock-text;
+}
+
+#cpu {
+    color: @cpu-text;
+    border-bottom-color: @cpu-text;
+    min-width: 20px;
+}
+
+#memory {
+    color: @memory-text;
+    border-bottom-color: @memory-text;
+}
+
+#temperature {
+    color: @temp-text;
+    border-bottom-color: @temp-text;
+}
+
+#temperature.critical {
+    color: @temp-critical-text;
+    border-bottom-color: @temp-critical-text;
+}
+
+#battery {
+    color: @battery-text;
+    border-bottom-color: @battery-text;
+}
+
+#battery.charging,
+#battery.plugged {
+    color: @battery-charging-text;
+    border-bottom-color: @battery-charging-text;
+}
+
+#battery.warning:not(.charging) {
+    color: @battery-warning-text;
+    border-bottom-color: @battery-warning-text;
+}
+
+#battery.critical:not(.charging) {
+    color: @battery-critical-text;
+    border-bottom-color: @battery-critical-text;
+}
+
+#network {
+    color: @network-text;
+    border-bottom-color: @network-text;
+}
+
+#network.disconnected {
+    color: @network-disconnected-text;
+    border-bottom-color: @network-disconnected-text;
+}
+
+#pulseaudio {
+    color: @audio-text;
+    border-bottom-color: @audio-text;
+}
+
+#pulseaudio.muted {
+    color: @audio-muted-text;
+    border-bottom-color: @audio-muted-text;
+}
+
+#backlight {
+    color: @backlight-text;
+    border-bottom-color: @backlight-text;
+}
+
+#disk {
+    color: @disk-text;
+    border-bottom-color: @disk-text;
+}
+
+#custom-uptime {
+    color: @uptime-text;
+    border-bottom-color: @uptime-text;
+}
+
+#custom-updates {
+    color: @updates-text;
+    border-bottom-color: @updates-text;
+}
+
+#custom-quote {
+    color: @quote-text;
+    border-bottom-color: @quote-text;
+}
+
+#idle_inhibitor {
+    margin: 0px;
+    color: @idle-inhibitor-text;
+    border-bottom-color: transparent;
+    min-width: 23px;
+}
+
+#idle_inhibitor.activated {
+    color: @main-bg;
+    background-color: @main-text;
+    border-bottom-color: @main-bg;
+}
+
+/*========================================================*
+ *                     BLUETOOTH                         *
+ *========================================================*/
+#bluetooth {
+    color: @color-white;
+    border-bottom-color: @color-white;
+    min-width: 20px;
+}
+
+#bluetooth.connected {
+    color: @main-bg;
+    background-color: @main-text;
+    border-bottom-color: @main-text;
+}
+
+
+/*========================================================*
+ *                        TRAY                           *
+ *========================================================*/
+#tray {
+    background-color: transparent;
+    padding: 0 10px;
+    margin: 0 2px;
+    color: @main-text;
+    border-bottom-color: @color-white;
+    min-width: 0px;
+}
+
+#tray>.active {
+    background-color: transparent;
+    color: @main-text;
+    opacity: 1;
+    border-radius: 0;
+    border: none;
+}
+
+#tray>.passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray>.needs-attention {
+    -gtk-icon-effect: highlight;
+    color: @color-white;
+    border-bottom-color: @color-white;
+}

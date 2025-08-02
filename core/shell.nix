@@ -47,6 +47,7 @@
       clip = "wl-copy";
       clipb = "wl-paste";
       zed = "zeditor";
+      stow = "stow --target=$HOME";
 
       wiki = "wikiti";
 
