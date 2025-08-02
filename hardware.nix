@@ -6,6 +6,28 @@
 #
 { lib, ... }:
 {
+  imports = [
+    # Hardware Specific
+    # ./modules/asus.nix
+    # ./modules/nvidia.nix
+
+    # Laptop Modules
+    # ./modules/tlp.nix
+    # ./modules/battery.nix
+
+    # Desktop Enviroments
+    ./modules/hyprland.nix
+    # ./modules/gnome/core.nix
+    # ./modules/cosmic.nix
+    # ./modules/kde.nixs
+
+    # Other Modules
+    # ./modules/work.nix
+
+    # Testing
+    # ./modules/howdy.nix
+  ];
+
   options.diskUUIDs = {
     boot = lib.mkOption {
       description = "Boot partition";
