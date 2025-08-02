@@ -6,3 +6,6 @@ lock-hardware:
 
 unlock-hardware:
 	git update-index --no-skip-worktree hardware.nix
+
+get-ids:
+	cat /etc/nixos/hardware-configuration.nix | grep -B 3 "device ="
