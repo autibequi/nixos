@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Start Hyprland if running on tty1 after logging
-[[ $(tty) == /dev/tty1 ]] && exec Hyprland>/dev/null 2>&1
+[[ $(tty) == /dev/tty1 ]] && exec ~/.config/hypr/init.sh
 
 [[ $(tty) == /dev/tty2 ]] && exec ~/.config/gamescope.sh
 

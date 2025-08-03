@@ -17,3 +17,5 @@ escape_workspace() {
     # move para o workspace passado como argumento
     hyprctl dispatch workspace "$workspace_number"
 }
+
+notify-send "Hello, World!"
