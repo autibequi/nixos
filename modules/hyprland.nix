@@ -45,6 +45,7 @@ in
   services.power-profiles-daemon.enable = false;
 
   environment.systemPackages = with pkgs; [
+    hyprpicker
 
     # Core Hyprland tools for navigation and productivity
     waybar # Status bar with useful info

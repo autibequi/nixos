@@ -49,3 +49,9 @@ waybar_refresh() {
     pkill waybar && waybar &
     notify-send "Waybar refreshed"
 }
+
+hypr_reload() {
+    waybar_refresh
+    hyprctl reloadr
+    notify-send "Hyprland reloaded"
+}
