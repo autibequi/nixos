@@ -60,6 +60,7 @@
       eval "$(atuin init zsh)"
 
       source ~/secrets.sh
+      source ~/.config/hypr/hyprutils.sh
     '';
   };
 
