@@ -2,6 +2,14 @@
   // =======================
   //      EDITOR SETTINGS
   // =======================
+  "context_servers": {
+    "mcp-server-exa-search": {
+      "source": "extension",
+      "settings": {
+        "exa_api_key": "424a7abb-be03-4474-9a0f-7241b80191ee"
+      }
+    }
+  },
   "centered_layout": {
     "left_padding": 10,
     "right_padding": 0
@@ -180,19 +188,19 @@
       "**/dist/**",
       "**/build/**"
     ],
-    "mode": "eager"
+    "mode": "subtle"
   },
   "agent": {
     "play_sound_when_agent_done": true,
     "default_model": {
-      "provider": "lmstudio",
-      "model": "qwen/qwen3-4b"
+      "provider": "google",
+      "model": "gemini-2.0-flash-thinking-exp"
     },
     "inline_assistant_model": {
-      "provider": "lmstudio",
-      "model": "google/gemma-3-12b"
+      "provider": "zed.dev",
+      "model": "claude-3-7-sonnet"
     },
-    "default_profile": "pai-mei",
+    "default_profile": "write",
     "profiles": {
       "pai-mei": {
         "name": "Pai Mei",
