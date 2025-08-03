@@ -30,6 +30,7 @@
     OZONE_PLATFORM = "wayland";
     ELECTRON_OZONE_PLATFORM_HINT = "wayland";
     QT_AUTO_SCREEN_SCALE_FACTOR = "1";
+    _JAVA_AWT_WM_NONREPARENTING = 1;
   };
 
   # Hardware
