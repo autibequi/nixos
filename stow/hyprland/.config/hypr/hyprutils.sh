@@ -39,7 +39,6 @@ toggle_theme() {
 
 waybar_refresh() {
     pkill waybar && waybar &
-    notify-send "Waybar refreshed"
 }
 
 hypr_reload() {
