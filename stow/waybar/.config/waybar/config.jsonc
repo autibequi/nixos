@@ -66,15 +66,15 @@
     "disable-scroll": true,
     "all-outputs": true,
     "show-special": true,
-    "format": "{name}:{windows}",
+    "format": "{icon}:{windows}",
     "window-rewrite-default": "",
     "format-icons": {
       "special:": "",
-      "F1": "",
-      "F2": "󰎞",
-      "F3": "",
-      "special:F4": "",
-      "F5": ""
+      "F1": "com",
+      "F2": "ctx",
+      "F3": "doc",
+      "F4": "call",
+      "F5": "music"
     },
     "window-rewrite": {
       "firefox": "",
