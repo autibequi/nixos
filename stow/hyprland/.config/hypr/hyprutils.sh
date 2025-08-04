@@ -1,23 +1,20 @@
 #!/bin/sh
-
-mkdir -p /tmp/hyprutils
-
 workspace_switch() {
     requested_workspace="$1"
     current_workspace=$(hyprctl workspaces -j | jq -r '.[] | select(.focused == true) | .name')
 
     # Save workspace special or normal in different files
     if [[ "$requested_workspace" =~ ^special:.*$ ]]; then
-        echo "$requested_workspace" | sed 's/special://' > /tmp/hyprutils/special_workspace
+        echo "$requested_workspace" | sed 's/special://' > ~/.cache/hyprland/hyprutils_special_workspace
     else
-        echo "$requested_workspace" > /tmp/hyprutils/normal_workspace
+        echo "$requested_workspace" > ~/.cache/hyprland/hyprutils_normal_workspace
     fi
 
     # Finally Switch
     if [[ "$requested_workspace" =~ ^special:.*$ ]]; then
         # Função para alternar para um workspace especial e registrar o último workspace especial acessado
         withoutSpecialWorkspace=$(echo "$requested_workspace" | sed 's/special://')
-        echo "$withoutSpecialWorkspace" > /tmp/hyprutils/special_workspace
+        echo "$withoutSpecialWorkspace" > ~/.cache/hyprland/hyprutils_special_workspace
         hyprctl dispatch togglespecialworkspace "$withoutSpecialWorkspace"
     else
         # move para o workspace passado como argumento
@@ -26,7 +23,7 @@ workspace_switch() {
 }
 
 escape(){
-    hyprctl dispatch togglespecialworkspace $(cat /tmp/hyprutils/special_workspace)
+    hyprctl dispatch togglespecialworkspace $(cat ~/.cache/hyprland/hyprutils_special_workspace)
 }
 
 toggle_theme() {

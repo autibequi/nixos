@@ -21,7 +21,7 @@ let
         # hyprfocus
       ])
       ++ [
-        inputs.hyprtasking.packages.${pkgs.system}.hyprtasking
+        # inputs.hyprtasking.packages.${pkgs.system}.hyprtasking
       ];
   };
 in
@@ -46,6 +46,7 @@ in
 
   environment.systemPackages = with pkgs; [
     hyprpicker
+    hyprpolkitagent
 
     # Core Hyprland tools for navigation and productivity
     waybar # Status bar with useful info
