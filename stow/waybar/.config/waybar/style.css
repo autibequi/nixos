@@ -17,6 +17,7 @@
 @define-color color-red #ff0000;
 @define-color color-yellow #ffe761;
 @define-color color-green #008000;
+@define-color color-blue #0c4abf;
 
 /*========================================================*
  *                   GLOBAL COLORS                       *
@@ -310,6 +311,7 @@ window#waybar {
  *                     BLUETOOTH                         *
  *========================================================*/
 #bluetooth {
+    font-weight: bold;
     color: @color-white;
     border-bottom-color: @color-white;
     min-width: 20px;
@@ -318,7 +320,7 @@ window#waybar {
 
 #bluetooth.connected {
     color: @main-bg;
-    background-color: @main-text;
+    background-color: @color-blue;
     border-bottom-color: @main-text;
 }
 
