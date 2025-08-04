@@ -1,6 +1,6 @@
 #!/bin/sh
 
-escape_workspace() {
+workspace_switch() {
     # Função para sair de um workspace especial e ir para o workspace desejado
     local workspace_number="$1"
     local active_special_workspace
@@ -8,23 +8,22 @@ escape_workspace() {
     echo "ACTIVE_SPECIAL_WORKSPACE: $active_special_workspace"
     echo "workspace_number: $workspace_number"
 
-    if [[ "$active_special_workspace" =~ ^special:.*$ ]]; then
-        # remove o prefixo special:
-        local clean_name
-        clean_name=$(echo "$active_special_workspace" | sed 's/^special://')
-        echo "clean_name: $clean_name"
-        hyprctl dispatch togglespecialworkspace "$clean_name"
-    fi
 
-    # move para o workspace passado como argumento
-    hyprctl dispatch workspace "$workspace_number"
+    if [[ "$workspace_number" =~ ^special:.*$ ]]; then
+        # Função para alternar para um workspace especial e registrar o último workspace especial acessado
+        withoutSpecialWorkspace=$(echo "$workspace_number" | sed 's/special://')
+        notify-send "Switching to workspace $workspace_number"
+        echo "$withoutSpecialWorkspace" > /tmp/last_special_workspace
+        hyprctl dispatch togglespecialworkspace "$withoutSpecialWorkspace"
+    else
+        notify-send "Workspace Switch" "Switching to workspace $workspace_number"
+        # move para o workspace passado como argumento
+        hyprctl dispatch workspace "$workspace_number"
+    fi
 }
 
-switch_special_workspace() {
-    # Função para alternar para um workspace especial e registrar o último workspace especial acessado
-    local workspace_number="$1"
-    echo "$workspace_number" > /tmp/last_special_workspace
-    hyprctl dispatch togglespecialworkspace "$workspace_number"
+escape(){
+    hyprctl dispatch togglespecialworkspace $(cat /tmp/last_special_workspace)
 }
 
 toggle_theme() {
