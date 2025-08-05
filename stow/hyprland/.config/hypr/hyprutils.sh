@@ -45,7 +45,7 @@ toggle_theme() {
 }
 
 waybar_refresh() {
-    pkill waybar && waybar &
+    pkill waybar && waybar
 }
 
 hypr_reload() {
