@@ -8,17 +8,17 @@
     ./hardware.nix
 
     # Core Modules
-    ./core/nix.nix
-    ./core/hardware.nix
-    ./core/core.nix
-    ./core/home.nix
-    ./core/services.nix
-    ./core/programs.nix
-    ./core/packages.nix
-    ./core/fonts.nix
-    ./core/shell.nix
-    ./core/kernel.nix
-    ./core/hibernate.nix
+    ./modules/core/nix.nix
+    ./modules/core/hardware.nix
+    ./modules/core/core.nix
+    ./modules/core/home.nix
+    ./modules/core/services.nix
+    ./modules/core/programs.nix
+    ./modules/core/packages.nix
+    ./modules/core/fonts.nix
+    ./modules/core/shell.nix
+    ./modules/core/kernel.nix
+    ./modules/core/hibernate.nix
 
     # Stable Modules
     ./modules/bluetooth.nix
