@@ -5,7 +5,7 @@
 }:
 {
   # Global shell initialization commands, sourcing the external script
-  environment.shellInit = builtins.readFile ../scripts/init.sh;
+  environment.shellInit = builtins.readFile ../../scripts/init.sh;
 
   services.xserver.xkb = {
     layout = "us";

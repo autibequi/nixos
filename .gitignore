@@ -11,7 +11,7 @@ result/
 
 # lock configuration.nix file
 configuration.nix
-hardware.nix
+/hardware.nix
 setup.nix
 
 # dont care to lock, me is maverick

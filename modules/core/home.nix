@@ -18,69 +18,88 @@
 
       home.file = {
         # avatar
-        ".face".source = ../assets/avatar.png;
+        ".face".source = ../../assets/avatar.png;
 
         # wallpapers
-        ".wallpapers/light.jpg".source = ../assets/wallpapers/the-death-of-socrates.jpg;
-        ".wallpapers/dark.jpg".source = ../assets/wallpapers/the-wild-hunt-of-odin.jpg;
+        ".wallpapers/light.jpg".source = ../../assets/wallpapers/the-death-of-socrates.jpg;
+        ".wallpapers/dark.jpg".source = ../../assets/wallpapers/the-wild-hunt-of-odin.jpg;
 
         # Gamescope configuration
-        ".config/gamescope.sh".source = ../scripts/gamescope.sh;
+        ".config/gamescope.sh".source = ../../scripts/gamescope.sh;
       };
 
-        xdg.desktopEntries."gemini-app" = {
-          name = "Gemini (App)";
-          comment = "Google Gemini como aplicativo web";
-          exec = "${pkgs.chromium}/bin/chromium --app=https://gemini.google.com";
-          icon = "google-chrome";
-          type = "Application";
-          categories = [ "Network" "WebBrowser" ];
-        };
+      xdg.desktopEntries."gemini-app" = {
+        name = "Gemini (App)";
+        comment = "Google Gemini como aplicativo web";
+        exec = "${pkgs.chromium}/bin/chromium --app=https://gemini.google.com";
+        icon = "google-chrome";
+        type = "Application";
+        categories = [
+          "Network"
+          "WebBrowser"
+        ];
+      };
 
-        xdg.desktopEntries."calendar-app" = {
-          name = "Google Calendar (App)";
-          comment = "Google Calendar como aplicativo web";
-          exec = "${pkgs.chromium}/bin/chromium --app=https://calendar.google.com";
-          icon = "google-chrome";
-          type = "Application";
-          categories = [ "Network" "WebBrowser" ];
-        };
+      xdg.desktopEntries."calendar-app" = {
+        name = "Google Calendar (App)";
+        comment = "Google Calendar como aplicativo web";
+        exec = "${pkgs.chromium}/bin/chromium --app=https://calendar.google.com";
+        icon = "google-chrome";
+        type = "Application";
+        categories = [
+          "Network"
+          "WebBrowser"
+        ];
+      };
 
-        xdg.desktopEntries."chat-app" = {
-          name = "Google Chat (App)";
-          comment = "Google Chat como aplicativo web";
-          exec = "${pkgs.chromium}/bin/chromium --app=https://chat.google.com";
-          icon = "google-chrome";
-          type = "Application";
-          categories = [ "Network" "WebBrowser" ];
-        };
+      xdg.desktopEntries."chat-app" = {
+        name = "Google Chat (App)";
+        comment = "Google Chat como aplicativo web";
+        exec = "${pkgs.chromium}/bin/chromium --app=https://chat.google.com";
+        icon = "google-chrome";
+        type = "Application";
+        categories = [
+          "Network"
+          "WebBrowser"
+        ];
+      };
 
-        xdg.desktopEntries."gmail-app" = {
-          name = "Gmail (App)";
-          comment = "Gmail como aplicativo web";
-          exec = "${pkgs.chromium}/bin/chromium --app=https://mail.google.com";
-          icon = "google-chrome";
-          type = "Application";
-          categories = [ "Network" "Email" "WebBrowser" ];
-        };
+      xdg.desktopEntries."gmail-app" = {
+        name = "Gmail (App)";
+        comment = "Gmail como aplicativo web";
+        exec = "${pkgs.chromium}/bin/chromium --app=https://mail.google.com";
+        icon = "google-chrome";
+        type = "Application";
+        categories = [
+          "Network"
+          "Email"
+          "WebBrowser"
+        ];
+      };
 
-        # Corrige erro de caractere reservado no campo Exec (desktop spec)
-        xdg.desktopEntries."obsidian-work" = {
-          name = "Obsidian (Work)";
-          comment = "Obsidian como aplicativo web";
-          exec = "xdg-open \"obsidian://open?vault=Work\"";
-          icon = "obsidian";
-          type = "Application";
-          categories = [ "Office" "TextEditor" ];
-        };
+      # Corrige erro de caractere reservado no campo Exec (desktop spec)
+      xdg.desktopEntries."obsidian-work" = {
+        name = "Obsidian (Work)";
+        comment = "Obsidian como aplicativo web";
+        exec = "xdg-open \"obsidian://open?vault=Work\"";
+        icon = "obsidian";
+        type = "Application";
+        categories = [
+          "Office"
+          "TextEditor"
+        ];
+      };
 
-        xdg.desktopEntries."obsidian-personal" = {
-          name = "Journal (Obsidian)";
-          comment = "Obsidian como aplicativo web";
-          exec = "xdg-open \"obsidian://open?vault=books\"";
-          icon = "obsidian";
-          type = "Application";
-          categories = [ "Office" "TextEditor" ];
-        };
+      xdg.desktopEntries."obsidian-personal" = {
+        name = "Journal (Obsidian)";
+        comment = "Obsidian como aplicativo web";
+        exec = "xdg-open \"obsidian://open?vault=books\"";
+        icon = "obsidian";
+        type = "Application";
+        categories = [
+          "Office"
+          "TextEditor"
+        ];
+      };
     };
 }
