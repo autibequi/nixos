@@ -1,4 +1,4 @@
-//modified version of [this shader](https://github.com/wessles/GLSL-CRT/blob/master/shader.frag)
+// Versão C-compliant do shader CRT, baseada em https://github.com/wessles/GLSL-CRT/blob/master/shader.frag
 
 precision mediump float;
 varying vec2 v_texcoord;
@@ -7,58 +7,54 @@ uniform sampler2D tex;
 const vec3 VIB_RGB_BALANCE = vec3(1.0, 1.0, 1.0);
 const float VIB_VIBRANCE = 0.40;
 
-
-const vec3 VIB_coeffVibrance = VIB_RGB_BALANCE * -VIB_VIBRANCE;
-
 void main() {
-	vec2 tc = vec2(v_texcoord.x, v_texcoord.y);
+    vec2 tc = vec2(v_texcoord.x, v_texcoord.y);
 
-	// Distance from the center
-	float dx = abs(0.5-tc.x);
-	float dy = abs(0.5-tc.y);
+    // Distância do centro
+    float dx = abs(0.5 - tc.x);
+    float dy = abs(0.5 - tc.y);
 
-	// Square it to smooth the edges
-	dx *= dx;
-	dy *= dy;
+    // Suaviza as bordas
+    dx = dx * dx;
+    dy = dy * dy;
 
-	tc.x -= 0.5;
-	tc.x *= 1.0 + (dy * 0.05);
-	tc.x += 0.5;
+    tc.x = tc.x - 0.5;
+    tc.x = tc.x * (1.0 + (dy * 0.05));
+    tc.x = tc.x + 0.5;
 
-	tc.y -= 0.5;
-	tc.y *= 1.0 + (dx * 0.18);
-	tc.y += 0.5;
+    tc.y = tc.y - 0.5;
+    tc.y = tc.y * (1.0 + (dx * 0.18));
+    tc.y = tc.y + 0.5;
 
-	// Get texel, and add in scanline if need be
-	vec4 cta = texture2D(tex, vec2(tc.x, tc.y));
+    // Pega texel e adiciona scanline
+    vec4 cta = texture2D(tex, vec2(tc.x, tc.y));
+    cta.rgb = cta.rgb + (sin(tc.y * 1250.0) * 0.02);
 
-	cta.rgb += sin(tc.y * 1250.0) * 0.02;
-
-	// Cutoff
-	if(tc.y > 1.0 || tc.x < 0.0 || tc.x > 1.0 || tc.y < 0.0)
-		cta = vec4(0.0);
-
+    // Cutoff
+    if (tc.y > 1.0 || tc.x < 0.0 || tc.x > 1.0 || tc.y < 0.0) {
+        cta = vec4(0.0, 0.0, 0.0, 0.0);
+    }
 
     // RGB
-    vec3 color = vec3(cta[0], cta[1], cta[2]);
+    vec3 color = vec3(cta.r, cta.g, cta.b);
 
-
-    // vec3 VIB_coefLuma = vec3(0.333333, 0.333334, 0.333333); // was for `if VIB_LUMA == 1`
-    vec3 VIB_coefLuma = vec3(0.212656, 0.715158, 0.072186); // try both and see which one looks nicer.
+    // Coeficientes de luminância
+    vec3 VIB_coefLuma = vec3(0.212656, 0.715158, 0.072186);
 
     float luma = dot(VIB_coefLuma, color);
 
-    float max_color = max(color[0], max(color[1], color[2]));
-    float min_color = min(color[0], min(color[1], color[2]));
+    float max_color = max(color.r, max(color.g, color.b));
+    float min_color = min(color.r, min(color.g, color.b));
 
     float color_saturation = max_color - min_color;
 
-    vec3 p_col = vec3(vec3(vec3(vec3(sign(VIB_coeffVibrance) * color_saturation) - 1.0) * VIB_coeffVibrance) + 1.0);
+    vec3 VIB_coeffVibrance = VIB_RGB_BALANCE * -VIB_VIBRANCE;
+    vec3 p_col = (sign(VIB_coeffVibrance) * color_saturation - 1.0) * VIB_coeffVibrance + 1.0;
 
-    cta[0] = mix(luma, color[0], p_col[0]);
-    cta[1] = mix(luma, color[1], p_col[1]);
-    cta[2] = mix(luma, color[2], p_col[2]);
+    cta.r = mix(luma, color.r, p_col.r);
+    cta.g = mix(luma, color.g, p_col.g);
+    cta.b = mix(luma, color.b, p_col.b);
 
-	// Apply
-	gl_FragColor = cta;
+    // Aplica resultado
+    gl_FragColor = cta;
 }
