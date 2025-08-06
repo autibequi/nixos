@@ -14,7 +14,7 @@
     home-manager.url = "github:nix-community/home-manager/release-25.05"; # Home Manager
     nixified-ai.url = "github:nixified-ai/flake"; # Nixified AI
 
-    hyprland.url = "github:hyprwm/Hyprland/v0.49.0";
+    hyprland.url = "github:hyprwm/Hyprland";
 
     hyprtasking = {
       url = "github:raybbian/hyprtasking";
