@@ -9,7 +9,7 @@ let
   hypr-plugin-dir = pkgs.symlinkJoin {
     name = "hyrpland-plugins";
     paths =
-      (with pkgs.unstable.hyprlandPlugins; [
+      (with pkgs.hyprlandPlugins; [
         hyprexpo
         hyprspace
         hyprwinwrap
@@ -35,7 +35,7 @@ in
 
   programs.hyprland = {
     enable = true;
-    package = pkgs.unstable.hyprland;
+    package = pkgs.hyprland;
     xwayland.enable = true;
   };
 
@@ -58,7 +58,7 @@ in
     slurp # Screen selection
     wl-clipboard # Clipboard management
     hypridle
-    unstable.hyprshade
+    hyprshade
     fuzzel
     anyrun
     walker
