@@ -24,9 +24,6 @@
     apple-cursor # to when my boss regret beeing okay
     papirus-icon-theme # Icons
 
-    # hardawre
-    solaar
-
     # ZED EDITOR
     zed-editor
     # zed-editor_git # can sudo
