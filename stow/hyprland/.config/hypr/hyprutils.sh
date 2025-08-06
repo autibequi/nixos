@@ -22,7 +22,7 @@ workspace_switch() {
     fi
 }
 
-escape(){
+toggle_last_special_workspace(){
     hyprctl dispatch togglespecialworkspace $(cat ~/.cache/hyprland/hyprutils_special_workspace)
 }
 
