@@ -3,7 +3,7 @@
   inputs = {
     # Nix Channels
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
-    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     # nixpkgs.url = "github:NixOS/nixpkgs/staging";
     # nixpkgs.url = "github:NixOS/nixpkgs/staging-next";
 
@@ -27,6 +27,7 @@
     {
       self,
       nixpkgs,
+      nixpkgs-unstable,
       nixos-hardware,
       home-manager,
       chaotic,
@@ -48,6 +49,15 @@
           chaotic.nixosModules.nyx-cache
           chaotic.nixosModules.nyx-overlay
           chaotic.nixosModules.nyx-registry
+
+          # Unstable channel
+          {
+            nixpkgs.overlays = [
+              (self: super: {
+                unstable = nixpkgs-unstable.legacyPackages.x86_64-linux;
+              })
+            ];
+          }
 
           # home-manager
           home-manager.nixosModules.home-manager

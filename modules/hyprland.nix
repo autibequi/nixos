@@ -9,7 +9,7 @@ let
   hypr-plugin-dir = pkgs.symlinkJoin {
     name = "hyrpland-plugins";
     paths =
-      (with pkgs.hyprlandPlugins; [
+      (with pkgs.unstable.hyprlandPlugins; [
         hyprexpo
         hyprspace
         hyprwinwrap
@@ -35,7 +35,7 @@ in
 
   programs.hyprland = {
     enable = true;
-    package = pkgs.hyprland;
+    package = pkgs.unstable.hyprland;
     xwayland.enable = true;
   };
 
@@ -58,7 +58,7 @@ in
     slurp # Screen selection
     wl-clipboard # Clipboard management
     hypridle
-    hyprshade
+    unstable.hyprshade
     fuzzel
     anyrun
     walker
@@ -87,11 +87,12 @@ in
   ];
 
   # XDG Desktop Portal
+  # Corrige conflito de symlink duplicado do xdg-desktop-portal-hyprland
   xdg.portal = {
     enable = true;
+    # Remova o portal duplicado para evitar erro de symlink
     extraPortals = [
       pkgs.xdg-desktop-portal
-      pkgs.xdg-desktop-portal-hyprland
       pkgs.xdg-desktop-portal-gtk
       pkgs.xdg-desktop-portal-wlr
     ];
