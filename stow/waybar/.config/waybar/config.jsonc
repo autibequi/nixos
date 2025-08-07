@@ -69,12 +69,12 @@
     "format": "{icon}:{windows}",
     "window-rewrite-default": "",
     "format-icons": {
-      "special:": "",
       "F1": "com",
-      "F2": "ctx",
-      "F3": "doc",
+      "F2": "doc",
+      "F3": "ctx",
       "F4": "call",
-      "F5": "music"
+      "F5": "⌐■_■",
+      "F6": "ʕ •ᴥ•ʔ"
     },
     "window-rewrite": {
       "firefox": "",

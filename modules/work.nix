@@ -75,8 +75,11 @@
     127.0.0.1 concursos.local.estrategia.com
     127.0.0.1 oab.local.estrategia.com
     127.0.0.1 carreiras-juridicas.local.estrategia.com
+    127.0.0.1 medicina.local.estrategia.com
+    127.0.0.1 vestibulares.local.estrategia.com
 
     127.0.0.1 redis
+    127.0.0.1 postgres
   '';
 
   # Cloudflare Warp
