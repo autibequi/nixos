@@ -284,5 +284,6 @@
     "makefile.configureOnOpen": true,
     "window.commandCenter": true,
     "workbench.experimental.share.enabled": true,
-    "window.menuBarVisibility": "compact"
+    "window.menuBarVisibility": "compact",
+    "git.confirmSync": false
   }
