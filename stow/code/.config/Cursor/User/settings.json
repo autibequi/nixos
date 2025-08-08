@@ -1,15 +1,16 @@
 {
     //*=== TELEMETRY ===*/
-    "telemetry.enableCrashReporter": false,
-    "telemetry.enableTelemetry": false,
     "workbench.enableExperiments": false,
     //*=== WORKBENCH ===*/
-    "workbench.colorTheme": "Quiet Light",
+    "window.autoDetectColorScheme": true,
+    "window.titleBarStyle": "custom",
+   "window.customTitleBarVisibility": "auto",
+    "workbench.preferredLightColorTheme": "Default Light Modern",
+    "workbench.preferredDarkColorTheme": "Default Dark+",
     "workbench.startupEditor": "newUntitledFile",
     "workbench.iconTheme": "vscode-great-icons",
     "workbench.statusBar.visible": true,
     "window.openFilesInNewWindow": "off",
-    "window.menuBarVisibility": "toggle",
     "window.zoomLevel": 0,
     "breadcrumbs.enabled": true,
     //*=== EDITOR - FORMATTERS ===*/
@@ -280,5 +281,8 @@
     ],
     "workbench.activityBar.location": "hidden",
     "editor.guides.indentation": true,
-    "makefile.configureOnOpen": true
+    "makefile.configureOnOpen": true,
+    "window.commandCenter": true,
+    "workbench.experimental.share.enabled": true,
+    "window.menuBarVisibility": "compact"
   }

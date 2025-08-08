@@ -33,6 +33,16 @@
 	{
 		"key": "ctrl+j",
 		"command": "-workbench.action.togglePanel"
-	}
+	},
+    {
+        "key": "ctrl+f12",
+        "command": "-editor.action.goToImplementation",
+        "when": "editorHasImplementationProvider && editorTextFocus && !isInEmbeddedEditor"
+    },
+    {
+        "key": "alt+tab",
+        "command": "editor.action.acceptCursorTabSuggestion",
+        "when": "cpp.shouldAcceptTab"
+    }
 ]
 
