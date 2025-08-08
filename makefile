@@ -8,3 +8,6 @@ reload:
 
 switch:
 	nh os switch .
+
+update:
+  nh os switch --update .

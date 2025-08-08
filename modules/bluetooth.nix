@@ -1,27 +1,23 @@
-{ ... }:
 {
-  # Habilitar Bluetooth com configurações avançadas
   hardware.bluetooth = {
     enable = true;
-    powerOnBoot = true; # Liga o Bluetooth automaticamente na inicialização
+    powerOnBoot = true;
     settings = {
       General = {
-        Enable = "Media,Socket";
-        Experimental = true;
-        FastConnectable = true;
-        JustWorksRepairing = "always";
         MultiProfile = "on";
+        Experimental = true;
         AutoEnable = true;
-        AutoConnect = true;
-        ReconnectAttempts = 5;
       };
     };
   };
 
-  services.pipewire = {
+ services.pipewire = {
     enable = true;
-    jack.enable = true;
     alsa.enable = true;
+    pulse.enable = true; 
+    jack.enable = true;
     wireplumber.enable = true;
   };
+
+  services.blueman.enable = true;
 }
