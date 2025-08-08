@@ -69,6 +69,7 @@
     "format": "{icon}:{windows}",
     "window-rewrite-default": "",
     "format-icons": {
+      "esc": "ai",
       "F1": "com",
       "F2": "doc",
       "F3": "ctx",
