@@ -1,0 +1,78 @@
+[user]
+	email = pedro.correa@estrategia.com
+	name = Pedro Correa
+
+[core]
+	editor = nvim --wait
+	pager = less -F -X
+	excludesfile = ~/.config/git/gitignore_global
+	autocrlf = input
+
+[push]
+	default = simple
+	autoSetupRemote = true
+
+[pull]
+	ff = only
+
+[fetch]
+	prune = true
+
+[alias]
+	# Basic status and staging
+	s        = status -s
+	st       = status
+	a        = add .
+	aa       = add -A
+	ap       = add -p
+
+	# Committing
+	ci       = commit -m
+	ca       = commit -am
+	amend    = commit --amend --no-edit
+
+	# Branching and Checking out
+	co       = checkout
+	cb       = checkout -b
+	br       = branch
+	brd      = branch -d
+
+	# History and Logging
+	# The "log" alias is a classic. It provides a much more useful graph view.
+	log      = log --graph --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(auto)%d%C(reset)'
+	last     = log -1 HEAD
+	hist     = log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short
+
+	# Reverting and Resetting
+	undo     = reset --soft HEAD~1
+	unstage  = reset HEAD --
+
+[color]
+	ui = auto
+
+[diff]
+	colorMoved = default
+
+
+[url "ssh://git@github.com/"]
+	insteadOf = https://github.com/
+
+[url "git@github.com:"]
+	insteadOf = https://github.com/
+
+[credential]
+	helper = manager
+
+[diff]
+    tool = vscode
+[difftool "vscode"]
+    cmd = "code --wait --diff $LOCAL $REMOTE"
+
+[merge]
+    ff = true
+    tool = vscode
+
+[mergetool "vscode"]
+    cmd = "code --wait $MERGED"
+
+
