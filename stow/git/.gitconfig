@@ -13,7 +13,7 @@
 	autoSetupRemote = true
 
 [pull]
-	ff = only
+	ff = false
 
 [fetch]
 	prune = true
@@ -65,14 +65,13 @@
 
 [diff]
     tool = vscode
+
 [difftool "vscode"]
     cmd = "code --wait --diff $LOCAL $REMOTE"
 
 [merge]
-    ff = true
-    tool = vscode
+	ff = false
+	tool = vscode
 
 [mergetool "vscode"]
     cmd = "code --wait $MERGED"
-
-
