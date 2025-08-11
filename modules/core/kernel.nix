@@ -30,6 +30,10 @@
     # Força o uso do p-state ativo para o processador AMD
     # active so epp modes will work
     "amd_pstate=guided"
+    "bgrt_disable"
+    "mitigations=off"
+    "iommu=pt"
+    "libahci.ignore_sss=1" # Disable AHCI SSS (Serial ATA Status and Status Change)
   ];
 
   # Configurar compressão.
