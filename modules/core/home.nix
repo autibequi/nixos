@@ -31,7 +31,7 @@
       xdg.desktopEntries."gemini-app" = {
         name = "Gemini (App)";
         comment = "Google Gemini como aplicativo web";
-        exec = "${pkgs.chromium}/bin/chromium --app=https://gemini.google.com";
+        exec = "${pkgs.google-chrome}/bin/chromium --app=https://gemini.google.com";
         icon = "google-chrome";
         type = "Application";
         categories = [
@@ -43,7 +43,7 @@
       xdg.desktopEntries."calendar-app" = {
         name = "Google Calendar (App)";
         comment = "Google Calendar como aplicativo web";
-        exec = "${pkgs.chromium}/bin/chromium --app=https://calendar.google.com";
+        exec = "${pkgs.google-chrome}/bin/chromium --app=https://calendar.google.com";
         icon = "google-chrome";
         type = "Application";
         categories = [
@@ -55,7 +55,7 @@
       xdg.desktopEntries."chat-app" = {
         name = "Google Chat (App)";
         comment = "Google Chat como aplicativo web";
-        exec = "${pkgs.chromium}/bin/chromium --app=https://chat.google.com";
+        exec = "${pkgs.google-chrome}/bin/chromium --app=https://chat.google.com";
         icon = "google-chrome";
         type = "Application";
         categories = [
@@ -67,12 +67,38 @@
       xdg.desktopEntries."gmail-app" = {
         name = "Gmail (App)";
         comment = "Gmail como aplicativo web";
-        exec = "${pkgs.chromium}/bin/chromium --app=https://mail.google.com";
+        exec = "${pkgs.google-chrome}/bin/chromium --app=https://mail.google.com";
         icon = "google-chrome";
         type = "Application";
         categories = [
           "Network"
           "Email"
+          "WebBrowser"
+        ];
+      };
+
+      xdg.desktopEntries."youtube-app" = {
+        name = "YouTube (App)";
+        comment = "YouTube como aplicativo web";
+        exec = "${pkgs.chromium}/bin/chromium --app=https://www.youtube.com";
+        icon = "youtube";
+        type = "Application";
+        categories = [
+          "AudioVideo"
+          "Video"
+          "WebBrowser"
+        ];
+      };
+
+      xdg.desktopEntries."youtube-music-app" = {
+        name = "YouTube Music (App)";
+        comment = "YouTube Music como aplicativo web";
+        exec = "${pkgs.chromium}/bin/chromium --app=https://music.youtube.com";
+        icon = "youtube-music";
+        type = "Application";
+        categories = [
+          "AudioVideo"
+          "Audio"
           "WebBrowser"
         ];
       };
