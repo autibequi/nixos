@@ -31,6 +31,8 @@
 
     # Work Browser
     chromium
+    google-chrome
+
     # vivaldi
     # vivaldi-ffmpeg-codecs
 
