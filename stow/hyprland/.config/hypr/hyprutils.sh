@@ -45,7 +45,8 @@ toggle_theme() {
 }
 
 waybar_refresh() {
-    pkill waybar && waybar
+    pkill waybar 2>/dev/null
+    waybar --config ~/.config/waybar/config.jsonc --style ~/.config/waybar/style.css &
 }
 
 hypr_reload() {
