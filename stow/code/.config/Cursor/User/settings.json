@@ -1,7 +1,6 @@
 {
   // === TELEMETRY ===
   "workbench.enableExperiments": false,
-
   // === WORKBENCH UI ===
   "workbench.iconTheme": "vscode-great-icons",
   "workbench.preferredLightColorTheme": "Default Light Modern",
@@ -14,7 +13,6 @@
   "workbench.panel.defaultLocation": "bottom",
   "workbench.sideBar.location": "left",
   "workbench.experimental.share.enabled": true,
-
   "window.autoDetectColorScheme": true,
   "window.titleBarStyle": "custom",
   "window.customTitleBarVisibility": "auto",
@@ -22,9 +20,7 @@
   "window.zoomLevel": 0,
   "window.commandCenter": true,
   "window.menuBarVisibility": "compact",
-
   "breadcrumbs.enabled": true,
-
   // === EDITOR ===
   "editor.fontFamily": "'Fira Code Medium', 'Fira Code', hack, 'Droid Sans Mono', 'Courier New', monospace",
   "editor.fontLigatures": true,
@@ -46,11 +42,12 @@
   "editor.matchBrackets": "always",
   "editor.maxTokenizationLineLength": 30000,
   "editor.formatOnSave": true,
-  "editor.rulers": [80],
+  "editor.rulers": [
+    80
+  ],
   "editor.wordWrap": "on",
   "editor.wrappingIndent": "same",
   "editor.guides.indentation": true,
-
   // === FORMATTERS ===
   "[javascript]": {
     "editor.formatOnSave": false
@@ -83,7 +80,6 @@
     }
   },
   "[python]": {},
-
   // === FILES & SEARCH ===
   "files.autoSave": "off",
   "files.insertFinalNewline": true,
@@ -132,7 +128,6 @@
     "*.postcss": "postcss",
     "*.js": "javascriptreact"
   },
-
   // === HTML / CSS / MARKDOWN / EMMET ===
   "html-css-class-completion.enableEmmetSupport": true,
   "html.format.endWithNewline": true,
@@ -140,7 +135,9 @@
   "css.lint.importStatement": "warning",
   "markdown.preview.fontSize": 17,
   "emmet.triggerExpansionOnTab": true,
-  "emmet.excludeLanguages": ["markdown"],
+  "emmet.excludeLanguages": [
+    "markdown"
+  ],
   "emmet.includeLanguages": {
     "vue-html": "html",
     "javascript": [
@@ -152,7 +149,6 @@
       "babel"
     ]
   },
-
   // === INTELLICODE / PATH INTELLISENSE ===
   "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
   "path-intellisense.mappings": {
@@ -160,7 +156,6 @@
       "/": "${workspaceRoot}"
     }
   },
-
   // === LANGUAGES ===
   // Python
   // "python.jediEnabled": false,
@@ -168,21 +163,17 @@
   // "php.validate.executablePath": "<php-path>",
   // Elixir/Erlang
   // "elixir.useElixirSense": false,
-
   // JS / TS
   "typescript.updateImportsOnFileMove.enabled": "always",
   "javascript.updateImportsOnFileMove.enabled": "always",
-
   // Vue
   "vetur.format.styleInitialIndent": true,
-
   // === PRETTIER ===
   "prettier.htmlWhitespaceSensitivity": "css",
   "prettier.arrowParens": "always",
   "prettier.singleQuote": true,
   "prettier.printWidth": 85,
   "prettier.semi": true,
-
   // === LIVE SERVER ===
   "liveServer.settings.donotShowInfoMsg": true,
   "liveServer.settings.port": 6550,
@@ -199,7 +190,6 @@
     "**/*.scss",
     "**/*.sass"
   ],
-
   // === SHELL / TERMINAL ===
   "shellcheck.disableVersionCheck": true,
   "shellcheck.executablePath": "/usr/bin/shellcheck",
@@ -210,7 +200,6 @@
   "terminal.integrated.cwd": "",
   "explorer.confirmDragAndDrop": false,
   "explorer.confirmDelete": false,
-
   // === VIM ===
   "vim.neovimPath": "/usr/bin/nvim",
   "vim.enableNeovim": true,
@@ -222,25 +211,38 @@
   "vim.highlightedyank.enable": true,
   "vim.insertModeKeyBindings": [
     {
-      "before": ["j", "k"],
-      "after": ["<Esc>"]
+      "before": [
+        "j",
+        "k"
+      ],
+      "after": [
+        "<Esc>"
+      ]
     }
   ],
   "vim.normalModeKeyBindingsNonRecursive": [
     {
-      "before": ["<leader>", "m"],
-      "commands": ["bookmarks.toggle"]
+      "before": [
+        "<leader>",
+        "m"
+      ],
+      "commands": [
+        "bookmarks.toggle"
+      ]
     },
     {
-      "before": ["<leader>", "b"],
-      "commands": ["bookmarks.list"]
+      "before": [
+        "<leader>",
+        "b"
+      ],
+      "commands": [
+        "bookmarks.list"
+      ]
     }
   ],
-
   // === GIT ===
   "git.path": "/usr/bin/git",
   "git.confirmSync": false,
-
   // === CSPELL ===
   "cSpell.language": "en",
   "cSpell.userWords": [
@@ -282,7 +284,5 @@
     "vue",
     "yml"
   ],
-
-  // === MISC ===
   "makefile.configureOnOpen": true
 }
