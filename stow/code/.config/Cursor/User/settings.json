@@ -42,9 +42,7 @@
   "editor.matchBrackets": "always",
   "editor.maxTokenizationLineLength": 30000,
   "editor.formatOnSave": true,
-  "editor.rulers": [
-    80
-  ],
+  "editor.rulers": [80],
   "editor.wordWrap": "on",
   "editor.wrappingIndent": "same",
   "editor.guides.indentation": true,
@@ -135,9 +133,7 @@
   "css.lint.importStatement": "warning",
   "markdown.preview.fontSize": 17,
   "emmet.triggerExpansionOnTab": true,
-  "emmet.excludeLanguages": [
-    "markdown"
-  ],
+  "emmet.excludeLanguages": ["markdown"],
   "emmet.includeLanguages": {
     "vue-html": "html",
     "javascript": [
@@ -211,33 +207,18 @@
   "vim.highlightedyank.enable": true,
   "vim.insertModeKeyBindings": [
     {
-      "before": [
-        "j",
-        "k"
-      ],
-      "after": [
-        "<Esc>"
-      ]
+      "before": ["j", "k"],
+      "after": ["<Esc>"]
     }
   ],
   "vim.normalModeKeyBindingsNonRecursive": [
     {
-      "before": [
-        "<leader>",
-        "m"
-      ],
-      "commands": [
-        "bookmarks.toggle"
-      ]
+      "before": ["<leader>", "m"],
+      "commands": ["bookmarks.toggle"]
     },
     {
-      "before": [
-        "<leader>",
-        "b"
-      ],
-      "commands": [
-        "bookmarks.list"
-      ]
+      "before": ["<leader>", "b"],
+      "commands": ["bookmarks.list"]
     }
   ],
   // === GIT ===
@@ -284,5 +265,11 @@
     "vue",
     "yml"
   ],
-  "makefile.configureOnOpen": true
+  "makefile.configureOnOpen": true,
+  "cursor.composer.shouldChimeAfterChatFinishes": true,
+  "cursor.composer.shouldAllowCustomModes": true,
+  "cursor.composer.shouldAutoAcceptDiffs": false,
+  "cursor.cmdk.useThemedDiffBackground2": false,
+  "cursor.chat.terminalShowHoverHint": false,
+  "cursor.windowSwitcher.sidebarHoverCollapsed": true
 }
