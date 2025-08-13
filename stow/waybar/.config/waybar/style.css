@@ -72,7 +72,7 @@
 * {
     border: none;
     border-radius: 0;
-    font-family: "JetBrainsMono Nerd Font";
+    font-family: 'JetBrainsMono Nerd Font';
     font-size: 15px;
     min-height: 0;
 }
@@ -121,10 +121,7 @@ window#waybar {
 
 #workspaces button:hover {
     color: @color-black;
-    text-shadow:
-        0 1px 0 #181800cc,
-        0 0 4px #0a0a40cc,
-        0 0 12px #18180099,
+    text-shadow: 0 1px 0 #181800cc, 0 0 4px #0a0a40cc, 0 0 12px #18180099,
         0 2px 0 #000000cc;
 }
 
@@ -177,8 +174,9 @@ window#waybar {
 
 #mpd.disconnected,
 #mpd.stopped {
-    color: @main-text;
-    border-bottom-color: transparent;
+    color: @color-black;
+    background-color: @main-text;
+    border-bottom-color: @main-text;
 }
 
 #custom-weather {
@@ -188,18 +186,20 @@ window#waybar {
 }
 
 #custom-playerctl {
+    padding-left: 10px;
+    padding-right: 10px;
     color: @playerctl-text;
     border-bottom-color: @playerctl-text;
 }
 
 #custom-playerctl.Playing {
-    color: @color-white;
-    border-bottom-color: @color-white;
+    color: @color-black;
+    background-color: @color-white;
 }
 
 #custom-playerctl.Paused {
-    color: @main-text;
-    border-bottom-color: @main-text;
+    color: @color-white;
+    background-color: @color-black;
 }
 
 #clock {
@@ -315,7 +315,7 @@ window#waybar {
     color: @color-white;
     border-bottom-color: @color-white;
     min-width: 20px;
-    padding: 5px
+    padding: 5px;
 }
 
 #bluetooth.connected {
@@ -323,7 +323,6 @@ window#waybar {
     background-color: @color-blue;
     border-bottom-color: @main-text;
 }
-
 
 /*========================================================*
  *                        TRAY                           *
