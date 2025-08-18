@@ -39,7 +39,9 @@
       "power-saver": ""
     }
   },
+
   "hyprland/workspaces": {
+    "interval": 1,
     "disable-scroll": true,
     "all-outputs": true,
     "show-special": true,
@@ -54,6 +56,13 @@
       "F5": "⌐■_■",
       "F6": "ʕ■ᴥ■ʔ"
     },
+    "workspace-taskbar": {
+      "format": "{icon} {title}",
+      "format-icons": {
+        "default": " "
+      },
+      "tooltip": true
+    },
     "window-rewrite": {
       "title<(.*[$%#] *)?([hb]|nv)top.*>": "btop",
       "title<(.* - )?(.[0-9]+. )?YouTube Music.*>": "",
@@ -64,7 +73,6 @@
       "firefox": "",
       "app.zen_browser.zen": "",
       "zen": "",
-      "chromium": "🌐",
       "chrome": "",
       "dbeaver": "🦫",
       "code": "󰨞",
@@ -75,9 +83,7 @@
       "org.gnome.Nautilus": "",
       "zed": "",
       "stremio": "🍿",
-      "insomnia": "",
-      "proton-pass": "🔑",
-      "(.*) YouTube Music": "󰎆"
+      "insomnia": ""
     }
   },
   "custom/playerctl": {
