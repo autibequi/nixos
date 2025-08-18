@@ -4,7 +4,10 @@
   "height": 32,
   "spacing": 0,
   "margin": 0,
-  "modules-left": ["idle_inhibitor", "hyprland/workspaces"],
+  "modules-left": [
+    "idle_inhibitor",
+    "hyprland/workspaces"
+  ],
   "modules-center": [
     "clock",
     "battery"
@@ -39,7 +42,6 @@
       "power-saver": ""
     }
   },
-
   "hyprland/workspaces": {
     "interval": 1,
     "disable-scroll": true,
@@ -91,7 +93,7 @@
     "tooltip": true,
     "return-type": "json",
     "max-length": 40,
-    "exec": "playerctl -a metadata --format '{\"text\": \"{{markup_escape(title)}}\", \"tooltip\": \"{{artist}}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}' -F",
+    "exec": "playerctl -a metadata --format '{\"text\": \"{{markup_escape(title)}} 🪗 {{artist}}\", \"tooltip\": \"{{markup_escape(title)}} | {{artist}}\", \"alt\": \"{{status}}\", \"class\": \"{{status}}\"}' -F",
     "on-click": "playerctl play-pause",
     "on-click-right": "playerctl next"
   },
@@ -193,7 +195,11 @@
       "phone": "󰏲",
       "portable": "󰄝",
       "car": "󰄋",
-      "default": ["󰕿", "󰖀", "󰕾"]
+      "default": [
+        "󰕿",
+        "󰖀",
+        "󰕾"
+      ]
     },
     "on-click": "alacritty -e ncpamixer",
     "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
@@ -202,7 +208,11 @@
   },
   "backlight": {
     "format": "{icon} {percent}%",
-    "format-icons": ["󰃞", "󰃟", "󰃠"],
+    "format-icons": [
+      "󰃞",
+      "󰃟",
+      "󰃠"
+    ],
     "on-scroll-up": "brightnessctl set +5%",
     "on-scroll-down": "brightnessctl set 5%-"
   }
