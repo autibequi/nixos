@@ -6,8 +6,8 @@
 {
   # Kernel
   # If broken plz change to linuxPackages_x_xx until nvidia update their drivers
-  # boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.kernelPackages = pkgs.linuxPackages_cachyos-lto;
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # boot.kernelPackages = pkgs.linuxPackages_cachyos-lto;
 
   # SystemD no InitRD para hibernação moderna
   boot.initrd.systemd.enable = true;

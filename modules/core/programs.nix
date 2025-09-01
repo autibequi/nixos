@@ -22,4 +22,10 @@
 
   # Waydroid
   virtualisation.waydroid.enable = true;
+  
+  environment.systemPackages = with pkgs; [
+    python3Packages.pyclip
+    wl-clipboard-rs
+    waydroid-helper
+  ];
 }
