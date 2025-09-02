@@ -56,6 +56,7 @@
       "wheel"
       "adbusers"
       "docker"
+      "hidraw"
     ];
     shell = pkgs.zsh;
   };
