@@ -77,21 +77,4 @@
 
   # Cloudflare Warp
   services.cloudflare-warp.enable = true;
-
-  systemd.user.services.warp-taskbar = {
-    description = "Cloudflare WARP taskbar";
-    after = [ "graphical-session.target" ];
-    wantedBy = [ "graphical-session.target" ];
-    serviceConfig = {
-      Type = "simple";
-      ExecStart = "${pkgs.cloudflare-warp}/bin/warp-taskbar";
-      Restart = "on-failure";
-      RestartSec = 5;
-      Environment = [
-        "DISPLAY=:0"
-        "WAYLAND_DISPLAY=wayland-0"
-        "XDG_SESSION_TYPE=wayland"
-      ];
-    };
-  };
 }
