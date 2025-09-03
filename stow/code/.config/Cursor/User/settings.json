@@ -5,7 +5,6 @@
   "workbench.preferredDarkColorTheme": "Default Dark+",
   "workbench.statusBar.visible": true,
   "workbench.activityBar.location": "hidden",
-  "workbench.startupEditor": "none",
   "workbench.startupEditor.showTabs": false,
   "workbench.tips.enabled": false,
   "workbench.panel.defaultLocation": "bottom",
@@ -39,9 +38,7 @@
   "editor.matchBrackets": "always",
   "editor.maxTokenizationLineLength": 30000,
   "editor.formatOnSave": true,
-  "editor.rulers": [
-    80
-  ],
+  "editor.rulers": [80],
   "editor.wordWrap": "on",
   "editor.wrappingIndent": "same",
   "editor.guides.indentation": true,
@@ -129,9 +126,7 @@
   "css.lint.importStatement": "warning",
   "markdown.preview.fontSize": 17,
   "emmet.triggerExpansionOnTab": true,
-  "emmet.excludeLanguages": [
-    "markdown"
-  ],
+  "emmet.excludeLanguages": ["markdown"],
   "emmet.includeLanguages": {
     "vue-html": "html",
     "javascript": [
@@ -191,33 +186,18 @@
   "vim.highlightedyank.enable": true,
   "vim.insertModeKeyBindings": [
     {
-      "before": [
-        "j",
-        "k"
-      ],
-      "after": [
-        "<Esc>"
-      ]
+      "before": ["j", "k"],
+      "after": ["<Esc>"]
     }
   ],
   "vim.normalModeKeyBindingsNonRecursive": [
     {
-      "before": [
-        "<leader>",
-        "m"
-      ],
-      "commands": [
-        "bookmarks.toggle"
-      ]
+      "before": ["<leader>", "m"],
+      "commands": ["bookmarks.toggle"]
     },
     {
-      "before": [
-        "<leader>",
-        "b"
-      ],
-      "commands": [
-        "bookmarks.list"
-      ]
+      "before": ["<leader>", "b"],
+      "commands": ["bookmarks.list"]
     }
   ],
   "git.path": "/usr/bin/git",

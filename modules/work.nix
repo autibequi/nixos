@@ -60,13 +60,6 @@
     jetbrains.datagrip
   ];
 
-  # TESTING: Dynamic Libraries
-  # environment.variables = {
-  #     LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
-  #         pkgs.file
-  #     ];
-  # };
-
   # Services
   programs.openvpn3.enable = true;
 

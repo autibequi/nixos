@@ -21,8 +21,18 @@
 
   # Gambiarra pra rodar as coisas do jeito não nix
   # mostly vscode extensions.
-  programs.nix-ld.enable = true;
-  programs.nix-ld.package = pkgs.nix-ld-rs;
+  programs.nix-ld = {
+    enable = true;
+    package = pkgs.nix-ld-rs;
+    libraries = with pkgs; [
+      stdenv.cc.cc.lib
+    ];
+  };
+
+  # Adiciona a lib ao LD_LIBRARY_PATH para facilitar uso em ambientes Python/Poetry
+  environment.sessionVariables.LD_LIBRARY_PATH = lib.mkAfter [
+    "${pkgs.stdenv.cc.cc.lib}/lib"
+  ];
 
   # Install LIX
   nix.package = pkgs.lix;
