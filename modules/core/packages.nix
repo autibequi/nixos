@@ -5,6 +5,7 @@
     proton-pass
     stow
     rofimoji
+    rofi-top
     # rofi-wayland
     rofi-wayland-unwrapped
     rofi-emoji-wayland
