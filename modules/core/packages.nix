@@ -4,8 +4,11 @@
   environment.systemPackages = with pkgs; [
     proton-pass
     stow
-    wofi-emoji
-,
+    rofimoji
+    # rofi-wayland
+    rofi-wayland-unwrapped
+    rofi-emoji-wayland
+    
     killall
     # apps
     onlyoffice-bin # office space apps
