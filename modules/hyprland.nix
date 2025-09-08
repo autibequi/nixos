@@ -69,6 +69,9 @@ in
     tesseract
     satty
 
+    # hyprcursor
+    rose-pine-hyprcursor
+
     glib
     gsettings-desktop-schemas
     dconf
