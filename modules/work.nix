@@ -58,6 +58,9 @@
     wgcf
 
     jetbrains.datagrip
+
+    # Git
+    meld
   ];
 
   # Services

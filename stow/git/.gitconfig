@@ -3,7 +3,7 @@
 	name = Pedro Correa
 
 [core]
-	editor = nvim --wait
+	editor = nvim
 	pager = less -F -X
 	excludesfile = ~/.config/git/gitignore_global
 	autocrlf = input
@@ -63,15 +63,15 @@
 [credential]
 	helper = manager
 
-[diff]
-    tool = vscode
-
-[difftool "vscode"]
-    cmd = "code --wait --diff $LOCAL $REMOTE"
-
 [merge]
-	ff = false
-	tool = vscode
+	ff = true
+	tool = meld
 
-[mergetool "vscode"]
-    cmd = "code --wait $MERGED"
+[diff]
+    tool = meld
+		
+[difftool]
+    prompt = false
+
+[difftool "meld"]
+    cmd = meld "$LOCAL" "$REMOTE"
