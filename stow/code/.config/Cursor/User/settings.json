@@ -249,5 +249,6 @@
   "cursor.cmdk.useThemedDiffBackground2": false,
   "cursor.chat.terminalShowHoverHint": false,
   "cursor.windowSwitcher.sidebarHoverCollapsed": true,
-  "python.languageServer": "None"
+  "python.languageServer": "None",
+  "eslint.format.enable": true
 }
