@@ -1,4 +1,7 @@
 {
+  // --------------------------------------------------------------------------
+  // Workbench UI & Appearance
+  // --------------------------------------------------------------------------
   "workbench.enableExperiments": false,
   "workbench.iconTheme": "vscode-great-icons",
   "workbench.preferredLightColorTheme": "Default Light Modern",
@@ -13,11 +16,15 @@
   "window.autoDetectColorScheme": true,
   "window.titleBarStyle": "custom",
   "window.customTitleBarVisibility": "auto",
-  "window.openFilesInNewWindow": "off",
+  "window.openFilesInNewWindow": "on",
   "window.zoomLevel": 0,
   "window.commandCenter": true,
-  "window.menuBarVisibility": "compact",
+  "window.menuBarVisibility": "hidden",
   "breadcrumbs.enabled": true,
+
+  // --------------------------------------------------------------------------
+  // Editor Appearance & Behavior
+  // --------------------------------------------------------------------------
   "editor.fontFamily": "'Fira Code Medium', 'Fira Code', hack, 'Droid Sans Mono', 'Courier New', monospace",
   "editor.fontLigatures": true,
   "editor.fontSize": 20,
@@ -37,19 +44,26 @@
   "editor.minimap.enabled": false,
   "editor.matchBrackets": "always",
   "editor.maxTokenizationLineLength": 30000,
-  "editor.formatOnSave": true,
   "editor.rulers": [80],
   "editor.wordWrap": "on",
   "editor.wrappingIndent": "same",
   "editor.guides.indentation": true,
+  "editor.formatOnSave": true,
+
+  // --------------------------------------------------------------------------
+  // Language Specific Editor Settings
+  // --------------------------------------------------------------------------
   "[javascript]": {
-    "editor.formatOnSave": false
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[javascriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
   "[typescriptreact]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[json]": {
     "editor.defaultFormatter": "vscode.json-language-features"
@@ -70,9 +84,22 @@
       "comments": "on",
       "strings": "on",
       "other": "on"
-    }
+    },
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "[python]": {},
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.python"
+  },
+  "[go]": {
+    "editor.defaultFormatter": "golang.go"
+  },
+  "gopls": {
+    "build.directoryFilters": ["-**/mocks"]
+  },
+
+  // --------------------------------------------------------------------------
+  // File Management
+  // --------------------------------------------------------------------------
   "files.autoSave": "off",
   "files.insertFinalNewline": true,
   "files.exclude": {
@@ -95,14 +122,18 @@
     "**/.idea/**": true,
     "**/.vscode": true,
     "env*": true,
-    "*.sublime-*": true
+    "*.sublime-*": true,
+    "**/mocks": true,
+    "**/mock": true
   },
   "search.exclude": {
     "**/.idea/**": true,
     "**/node_modules": true,
     "**/bower_components": true,
     "**/tmp": true,
-    "**/.git": true
+    "**/.git": true,
+    "**/mocks": true,
+    "**/mock": true
   },
   "files.associations": {
     "*.html": "html",
@@ -118,8 +149,13 @@
     "*.postcssrc": "json",
     "*.eslintrc": "json",
     "*.postcss": "postcss",
-    "*.js": "javascriptreact"
+    "*.js": "javascriptreact",
+    "jsonc": "json"
   },
+
+  // --------------------------------------------------------------------------
+  // HTML, CSS, Markdown, Emmet, and Related Extensions
+  // --------------------------------------------------------------------------
   "html-css-class-completion.enableEmmetSupport": true,
   "html.format.endWithNewline": true,
   "css.lint.compatibleVendorPrefixes": "warning",
@@ -138,35 +174,36 @@
       "babel"
     ]
   },
+
+  // --------------------------------------------------------------------------
+  // IntelliSense & Path Mappings
+  // --------------------------------------------------------------------------
   "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
   "path-intellisense.mappings": {
     "path-intellisense.mappings": {
       "/": "${workspaceRoot}"
     }
   },
+
+  // --------------------------------------------------------------------------
+  // TypeScript & JavaScript
+  // --------------------------------------------------------------------------
   "typescript.updateImportsOnFileMove.enabled": "always",
   "javascript.updateImportsOnFileMove.enabled": "always",
+
+  // --------------------------------------------------------------------------
+  // Formatting Tools
+  // --------------------------------------------------------------------------
   "vetur.format.styleInitialIndent": true,
   "prettier.htmlWhitespaceSensitivity": "css",
   "prettier.arrowParens": "always",
   "prettier.singleQuote": true,
   "prettier.printWidth": 85,
   "prettier.semi": true,
-  "liveServer.settings.donotShowInfoMsg": true,
-  "liveServer.settings.port": 6550,
-  "liveServer.settings.root": "/",
-  "liveServer.settings.CustomBrowser": "firefox:PrivateMode",
-  "liveServer.settings.NoBrowser": false,
-  "liveServer.settings.ignoreFiles": [
-    "node_modules/**",
-    "bower_components/**",
-    ".idea/**",
-    ".git/**",
-    ".vscode/**",
-    "**/*.iml",
-    "**/*.scss",
-    "**/*.sass"
-  ],
+
+  // --------------------------------------------------------------------------
+  // Shell & Terminal
+  // --------------------------------------------------------------------------
   "shellcheck.disableVersionCheck": true,
   "shellcheck.executablePath": "/usr/bin/shellcheck",
   "terminal.integrated.shell.linux": "/usr/bin/bash",
@@ -174,8 +211,16 @@
   "terminal.integrated.shellArgs.osx": [],
   "terminal.integrated.scrollback": 800,
   "terminal.integrated.cwd": "",
+
+  // --------------------------------------------------------------------------
+  // File Explorer
+  // --------------------------------------------------------------------------
   "explorer.confirmDragAndDrop": false,
   "explorer.confirmDelete": false,
+
+  // --------------------------------------------------------------------------
+  // Vim Extension
+  // --------------------------------------------------------------------------
   "vim.neovimPath": "/usr/bin/nvim",
   "vim.enableNeovim": true,
   "vim.leader": "<space>",
@@ -200,8 +245,16 @@
       "commands": ["bookmarks.list"]
     }
   ],
+
+  // --------------------------------------------------------------------------
+  // Git
+  // --------------------------------------------------------------------------
   "git.path": "/usr/bin/git",
   "git.confirmSync": false,
+
+  // --------------------------------------------------------------------------
+  // Spell Checking
+  // --------------------------------------------------------------------------
   "cSpell.language": "en",
   "cSpell.userWords": [
     "Helvetica",
@@ -242,13 +295,19 @@
     "vue",
     "yml"
   ],
+
+  // --------------------------------------------------------------------------
+  // Build Tools & Miscellaneous
+  // --------------------------------------------------------------------------
   "makefile.configureOnOpen": true,
+
+  // --------------------------------------------------------------------------
+  // Cursor Extension
+  // --------------------------------------------------------------------------
   "cursor.composer.shouldChimeAfterChatFinishes": true,
   "cursor.composer.shouldAllowCustomModes": true,
   "cursor.composer.shouldAutoAcceptDiffs": false,
   "cursor.cmdk.useThemedDiffBackground2": false,
   "cursor.chat.terminalShowHoverHint": false,
-  "cursor.windowSwitcher.sidebarHoverCollapsed": true,
-  "python.languageServer": "None",
-  "eslint.format.enable": true
+  "cursor.windowSwitcher.sidebarHoverCollapsed": true
 }

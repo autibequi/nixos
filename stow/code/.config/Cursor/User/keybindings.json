@@ -1,48 +1,73 @@
-// Place your key bindings in this file to override the defaults
 [
-	{
-		"key": "ctrl+enter",
-		"command": "aipopup.action.modal.generate",
-		"when": "editorFocus && !composerBarIsVisible"
-	},
-	{
-		"key": "ctrl+k",
-		"command": "-aipopup.action.modal.generate",
-		"when": "editorFocus && !composerBarIsVisible"
-	},
-	{
-		"key": "ctrl+shift+a",
-		"command": "workbench.action.toggleSidebarVisibility"
-	},
-	{
-		"key": "ctrl+b",
-		"command": "-workbench.action.toggleSidebarVisibility"
-	},
-	{
-		"key": "ctrl+shift+d",
-		"command": "workbench.action.toggleAuxiliaryBar"
-	},
-	{
-		"key": "ctrl+alt+b",
-		"command": "-workbench.action.toggleAuxiliaryBar"
-	},
-	{
-		"key": "ctrl+shift+s",
-		"command": "workbench.action.togglePanel"
-	},
-	{
-		"key": "ctrl+j",
-		"command": "-workbench.action.togglePanel"
-	},
-    {
-        "key": "ctrl+f12",
-        "command": "-editor.action.goToImplementation",
-        "when": "editorHasImplementationProvider && editorTextFocus && !isInEmbeddedEditor"
-    },
-    {
-        "key": "alt+tab",
-        "command": "editor.action.acceptCursorTabSuggestion",
-        "when": "cpp.shouldAcceptTab"
-    }
-]
+  // ===== Sidebar =====
+  {
+    "key": "ctrl+shift+a",
+    "command": "workbench.action.toggleSidebarVisibility"
+  },
+  {
+    "key": "ctrl+b",
+    "command": "-workbench.action.toggleSidebarVisibility"
+  },
 
+  // ===== Auxiliary Bar =====
+  {
+    "key": "ctrl+shift+d",
+    "command": "workbench.action.toggleAuxiliaryBar"
+  },
+  {
+    "key": "ctrl+alt+b",
+    "command": "-workbench.action.toggleAuxiliaryBar"
+  },
+
+  // ===== Painel Inferior =====
+  {
+    "key": "ctrl+shift+s",
+    "command": "workbench.action.togglePanel"
+  },
+  {
+    "key": "ctrl+j",
+    "command": "-workbench.action.togglePanel"
+  },
+
+  // ===== Navegação de Código =====
+  {
+    "key": "alt+shift+d",
+    "command": "editor.action.goToImplementation",
+    "when": "editorHasImplementationProvider && editorTextFocus && !isInEmbeddedEditor"
+  },
+  {
+    "key": "alt+d",
+    "command": "editor.action.revealDefinition",
+    "when": "editorHasDefinitionProvider && editorTextFocus && !isInEmbeddedEditor"
+  },
+
+  // ===== AI  =====
+  {
+    "key": "alt+tab",
+    "command": "editor.action.acceptCursorTabSuggestion",
+    "when": "cpp.shouldAcceptTab"
+  },
+  {
+    "key": "tab",
+    "command": "-editor.action.acceptCursorTabSuggestion",
+    "when": "cpp.shouldAcceptTab"
+  },
+
+  // AI Popup
+  {
+    "key": "ctrl+enter",
+    "command": "aipopup.action.modal.generate",
+    "when": "editorFocus && !composerBarIsVisible"
+  },
+  {
+    "key": "ctrl+k",
+    "command": "-aipopup.action.modal.generate",
+    "when": "editorFocus && !composerBarIsVisible"
+  },
+
+  // just tab 💅
+  {
+    "key": "tab",
+    "command": "tab"
+  }
+]
