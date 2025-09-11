@@ -2,15 +2,15 @@
   // --------------------------------------------------------------------------
   // Workbench UI & Appearance
   // --------------------------------------------------------------------------
-  "workbench.enableExperiments": false,
+  "workbench.enableExperiments": true,
   "workbench.iconTheme": "vscode-great-icons",
   "workbench.preferredLightColorTheme": "Default Light Modern",
   "workbench.preferredDarkColorTheme": "Default Dark+",
   "workbench.statusBar.visible": true,
-  "workbench.activityBar.location": "hidden",
+  "workbench.activityBar.location": "default",
   "workbench.startupEditor.showTabs": false,
   "workbench.tips.enabled": false,
-  "workbench.panel.defaultLocation": "bottom",
+  "workbench.panel.defaultLocation": "top",
   "workbench.sideBar.location": "left",
   "workbench.experimental.share.enabled": true,
   "window.autoDetectColorScheme": true,
