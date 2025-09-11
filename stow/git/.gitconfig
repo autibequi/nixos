@@ -54,6 +54,17 @@
 		git checkout -; \
 	}; f"
 
+	pop-diff = "!f() { \
+	  files=$(git diff --name-only --diff-filter=AM \"$1..$2\"); \
+	  if [ -z \"$files\" ]; then \
+	    echo \"No new or modified files found.\"; \
+	  else \
+	    echo \"Checking out:\"; \
+	    echo \"$files\"; \
+	    git checkout \"$2\" -- $files; \
+	  fi; \
+	}; f"
+
 [color]
 	ui = auto
 
