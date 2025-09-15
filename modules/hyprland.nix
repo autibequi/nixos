@@ -9,13 +9,13 @@ let
   hypr-plugin-dir = pkgs.symlinkJoin {
     name = "hyrpland-plugins";
     paths =
-      (with pkgs.unstable.hyprlandPlugins; [
+      (with pkgs.hyprlandPlugins; [
         hyprexpo
-        hyprspace
         hyprwinwrap
         hypr-dynamic-cursors
-        hyprspace
         hyprsplit
+
+        # hyprspace
         # hyprscrolling
         # hyprtrails
         # hyprfocus
@@ -35,7 +35,7 @@ in
 
   programs.hyprland = {
     enable = true;
-    package = pkgs.unstable.hyprland;
+    package = pkgs.hyprland;
     xwayland.enable = true;
   };
 

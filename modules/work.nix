@@ -74,6 +74,8 @@
     127.0.0.1 medicina.local.estrategia.com
     127.0.0.1 vestibulares.local.estrategia.com
 
+    127.0.0.1 local.estrategia.com
+
     127.0.0.1 redis
     127.0.0.1 postgres
   '';
