@@ -309,5 +309,10 @@
   "cursor.composer.shouldAutoAcceptDiffs": false,
   "cursor.cmdk.useThemedDiffBackground2": false,
   "cursor.chat.terminalShowHoverHint": false,
-  "cursor.windowSwitcher.sidebarHoverCollapsed": true
+  "cursor.windowSwitcher.sidebarHoverCollapsed": true,
+  "diffEditor.renderSideBySide": false,
+  "workbench.editor.showTabs": "none",
+  "editor.stickyScroll.enabled": false,
+  "git.autofetch": true,
+  "go.toolsManagement.autoUpdate": true
 }
