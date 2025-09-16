@@ -3,10 +3,6 @@
     "nixos": {
       "command": "nix",
       "args": ["run", "github:utensils/mcp-nixos", "--"]
-    },
-    "obsidian": {
-      "command": "nix",
-      "args": ["run", "github:MarkusPfundstein/mcp-obsidian⁠", "--"]
     }
   }
 }
