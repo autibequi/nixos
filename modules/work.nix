@@ -61,6 +61,9 @@
 
     # Git
     meld
+
+    # --- Zip ---
+    zip
   ];
 
   # Services
