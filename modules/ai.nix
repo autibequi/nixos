@@ -2,6 +2,8 @@
 
 {
   pkgs,
+  lib,
+  pkgs-unstable,
   ...
 }:
 {
@@ -12,7 +14,7 @@
 
     # AI Core
     windsurf
-    code-cursor
+    pkgs-unstable.code-cursor
     opencode
 
     llm # access large language models

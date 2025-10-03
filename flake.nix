@@ -34,14 +34,24 @@
       # nixified-ai,
       ...
     }@inputs:
+      let
+      system = "x86_64-linux";
+      # Configure the unstable channel to allow unfree packages
+      pkgs-unstable = import nixpkgs-unstable {
+        inherit system;
+        config.allowUnfree = true;
+      };
+    in
     {
-      packages.x86_64-linux.hello = nixpkgs.legacyPackages.x86_64-linux.hello;
-      packages.x86_64-linux.default = self.packages.x86_64-linux.hello;
-
       nixosConfigurations.nomad = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = { inherit inputs; }; # Pass all inputs to modules
+        specialArgs = { inherit inputs pkgs-unstable; }; # Pass all inputs to modules
         modules = [
+          {
+            nixpkgs.config.allowUnfree = true;
+            nixpkgs.config.allowInsecure = true;
+          }
+
           # Currenct Laptop Flake
           nixos-hardware.nixosModules.asus-zephyrus-ga402x-nvidia
 
@@ -49,15 +59,6 @@
           chaotic.nixosModules.nyx-cache
           chaotic.nixosModules.nyx-overlay
           chaotic.nixosModules.nyx-registry
-
-          # Unstable channel
-          {
-            nixpkgs.overlays = [
-              (self: super: {
-                unstable = nixpkgs-unstable.legacyPackages.x86_64-linux;
-              })
-            ];
-          }
 
           # home-manager
           home-manager.nixosModules.home-manager
