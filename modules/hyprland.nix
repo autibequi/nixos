@@ -31,10 +31,6 @@ in
   environment.sessionVariables = {
     HYPR_PLUGIN_DIR = hypr-plugin-dir;
     ANYRUN_PLUGIN_DIR = "${pkgs.anyrun}/lib";
-
-    SWWW_TRANSITION_STEP=100;
-    SWWW_TRANSITION="random";
-    SWWW_TRANSITION_FPS=120;
   };
 
   programs.hyprland = {

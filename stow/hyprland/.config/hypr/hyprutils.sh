@@ -34,13 +34,13 @@ toggle_theme() {
     if [ "$current_state" = "'prefer-dark'" ]; then
         gsettings set org.gnome.desktop.interface color-scheme prefer-light
         gsettings set org.gnome.desktop.interface gtk-theme adw-gtk3
-        swww img ~/.wallpapers/light.jpg --transition-fps 120 --transition-step 200
         notify-send -t 500 "Theme changed to light"
+        swww img ~/assets/livewallpapers/gundam.gif --transition-type random
     else
         gsettings set org.gnome.desktop.interface color-scheme prefer-dark
         gsettings set org.gnome.desktop.interface gtk-theme adw-gtk3-dark
-        swww img ~/.wallpapers/dark.jpg --transition-fps 120 --transition-step 200
         notify-send -t 500 "Theme changed to dark"
+        swww img ~/assets/livewallpapers/gundam2.gif --transition-type random
     fi
 }
 
