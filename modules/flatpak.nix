@@ -6,7 +6,6 @@ let
   desiredFlatpaks = [
     "app.zen_browser.zen"
     "com.usebottles.bottles"
-    "io.github.jeffshee.Hidamari"
     # "com.github.tenderowl.frog"
     # "com.vivaldi.Vivaldi"
   ];
