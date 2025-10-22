@@ -5,6 +5,8 @@ let
   # 1. Declare the Flatpaks you *want* on your system
   desiredFlatpaks = [
     "app.zen_browser.zen"
+    "com.usebottles.bottles"
+    "io.github.jeffshee.Hidamari"
     # "com.github.tenderowl.frog"
     # "com.vivaldi.Vivaldi"
   ];

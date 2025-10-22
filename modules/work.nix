@@ -36,6 +36,7 @@
     poetry
     pyenv
     file # libmagic - intraupload
+    uv
 
     # --- JS, ick! ---
     nodejs_24

@@ -289,5 +289,9 @@
   "workbench.editor.showTabs": "none",
   "editor.stickyScroll.enabled": false,
   "git.autofetch": true,
-  "go.toolsManagement.autoUpdate": true
+  "go.toolsManagement.autoUpdate": true,
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "python.languageServer": "None"
 }
