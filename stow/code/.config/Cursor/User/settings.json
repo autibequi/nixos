@@ -293,5 +293,6 @@
   "[json]": {
     "editor.defaultFormatter": "vscode.json-language-features"
   },
-  "python.languageServer": "None"
+  "python.languageServer": "None",
+  "notebook.output.textLineLimit": 100
 }

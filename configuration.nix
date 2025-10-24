@@ -29,5 +29,6 @@
 
     # Custom Modules
     ./modules/flatpak.nix
+    ./modules/winapps.nix
   ];
 }
