@@ -25,6 +25,11 @@
       url = "github:winapps-org/winapps";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    winboat = {
+      url = "github:TibixDev/winboat";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   # Outputs
@@ -36,6 +41,7 @@
       nixos-hardware,
       home-manager,
       chaotic,
+      winboat,
       # nixified-ai,
       ...
     }@inputs:
