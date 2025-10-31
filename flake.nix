@@ -21,15 +21,10 @@
       inputs.hyprland.follows = "hyprland";
     };
 
-    winapps = {
-      url = "github:winapps-org/winapps";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    winboat = {
-      url = "github:TibixDev/winboat";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # winboat = {
+    #   url = "github:TibixDev/winboat";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
   };
 
   # Outputs
@@ -41,7 +36,7 @@
       nixos-hardware,
       home-manager,
       chaotic,
-      winboat,
+      # winboat,
       # nixified-ai,
       ...
     }@inputs:

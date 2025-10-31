@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, pkgs-unstable, ... }:
 {
 
   # Environment Variables
@@ -65,6 +65,10 @@
 
     # --- Zip ---
     zip
+
+    # --- MCP Servers ---
+    github-mcp-server # GitHub integration
+    pkgs-unstable.mcp-k8s-go # Kubernetes integration (Go)
   ];
 
   # Services

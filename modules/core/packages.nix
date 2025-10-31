@@ -72,8 +72,8 @@
     # ventoy-full-qt
 
     # Windows Nomopoly Mitigations:
-    inputs.winboat.packages.${pkgs.system}.winboat
-    freerdp3 # Required by WinBoat for RDP connections
+    # inputs.winboat.packages.${pkgs.system}.winboat
+    # freerdp3 # Required by WinBoat for RDP connections
   ];
   # permittedInsecurePackages = [
   #   "ventoy-qt5-1.1.05"
