@@ -8,6 +8,10 @@
         "--"
       ]
     },
+    "estrategia-remoto": {
+      "type": "http",
+      "url": "https://coruja-ai.estrategia-sandbox.com.br/mcp"
+    },
     "filesystem": {
       "command": "npx",
       "args": [
