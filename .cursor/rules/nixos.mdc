@@ -60,9 +60,3 @@ alwaysApply: true
 - `core/packages.nix` para pacotes essenciais do sistema
 - `core/shell.nix` para configurações de shell
 - `core/programas.nix` para programas essenciais do sistema
-
-## Tips
-- Se for procurar alguma configuração especifica faça um find/search/fd buscando em todos os arquivos para ganhar velocidade
-
-## ARTEFATOS
-- Sempre que valido crie um relatorio do problema solucionado na pasta tmp
