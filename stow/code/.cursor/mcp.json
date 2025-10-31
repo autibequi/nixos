@@ -34,13 +34,6 @@
     "k8s": {
       "command": "mcp-k8s-go"
     },
-    "fetch": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-fetch"
-      ]
-    },
     "memory": {
       "command": "npx",
       "args": [
@@ -53,13 +46,6 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-puppeteer"
-      ]
-    },
-    "everything": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-everything"
       ]
     },
     "git": {
