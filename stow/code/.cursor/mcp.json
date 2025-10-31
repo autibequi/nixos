@@ -52,21 +52,15 @@
         "@modelcontextprotocol/server-puppeteer"
       ]
     },
-    "git": {
+    "fetch": {
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-git",
-        "--repository",
-        "/home/pedrinho/projects"
-      ]
-    },
-    "time": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-time"
-      ]
+        "mcp-fetch-server"
+      ], 
+      "env": {
+        "DEFAULT_LIMIT": "50000"
+      }
     }
   }
 }
