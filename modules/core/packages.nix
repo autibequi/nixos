@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 
 {
   environment.systemPackages = with pkgs; [
@@ -70,6 +70,9 @@
 
     # ISO
     # ventoy-full-qt
+
+    # Windows Nomopoly Mitigations:
+    inputs.winboat.packages.${pkgs.system}.winboat
   ];
   # permittedInsecurePackages = [
   #   "ventoy-qt5-1.1.05"
