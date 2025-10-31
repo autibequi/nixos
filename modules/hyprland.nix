@@ -88,17 +88,5 @@ in
     anyrun
     cliphist # Clipboard history manager
   ];
-
-  # XDG Desktop Portal
-  # Corrige conflito de symlink duplicado do xdg-desktop-portal-hyprland
-  xdg.portal = {
-    enable = true;
-    # Remova o portal duplicado para evitar erro de symlink
-    extraPortals = [
-      pkgs.xdg-desktop-portal
-      pkgs.xdg-desktop-portal-gtk
-      pkgs.xdg-desktop-portal-wlr
-    ];
-  };
 }
 
