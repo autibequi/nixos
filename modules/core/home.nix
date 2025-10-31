@@ -19,6 +19,16 @@
       home.file = {
         # Gamescope configuration
         ".config/gamescope.sh".source = ../../scripts/gamescope.sh;
+
+        # xdg-desktop-portal-hyprland configuration
+        # Fixes double pop-up when screen sharing (Google Meet/Chrome)
+        ".config/hypr/xdph.conf".text = ''
+          screencopy {
+            # Enables "Allow a restore token" checkbox by default
+            # This helps reduce double prompts for screen sharing
+            allow_token_by_default = true
+          }
+        '';
       };
 
       xdg.desktopEntries."gemini-app" = {
