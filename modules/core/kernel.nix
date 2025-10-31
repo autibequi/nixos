@@ -50,6 +50,9 @@
 
   # TODO: clean up moduless
   boot.kernelModules = [
+    # AMD
+    "kvm-amd" 
+    
     # maybe
     "usbhid"
     "xhci_hcd"
