@@ -2,12 +2,20 @@
   "mcpServers": {
     "nixos": {
       "command": "nix",
-      "args": ["run", "github:utensils/mcp-nixos", "--"]
+      "args": [
+        "run",
+        "github:utensils/mcp-nixos",
+        "--"
+      ]
     },
     "github": {
-      "command": "github-mcp-server",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
       "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
       }
     },
     "filesystem": {
@@ -23,15 +31,6 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-sequential-thinking"
-      ]
-    },
-    "sqlite": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sqlite",
-        "--db-path",
-        "/home/pedrinho/projects"
       ]
     },
     "postgres": {

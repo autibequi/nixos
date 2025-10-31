@@ -67,7 +67,6 @@
     zip
 
     # --- MCP Servers ---
-    github-mcp-server # GitHub integration
     pkgs-unstable.mcp-k8s-go # Kubernetes integration (Go)
   ];
 
