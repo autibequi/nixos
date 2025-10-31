@@ -42,7 +42,7 @@
   # Configuração de usuário para podman rootless
   users.users."pedrinho" = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" "podman" ];
+    extraGroups = [ "wheel" "networkmanager" "podman" "docker" ];
     # Configuração automática de subUIDs/subGIDs (NixOS gerencia automaticamente)
     subUidRanges = [
       {
