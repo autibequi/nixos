@@ -10,6 +10,7 @@
     # Hardware Specific
     # ./modules/asus.nix
     # ./modules/nvidia.nix
+    ./modules/logitech-mouse.nix
 
     # Laptop Modules
     # ./modules/tlp.nix

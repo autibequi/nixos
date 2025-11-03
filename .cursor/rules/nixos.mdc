@@ -1,62 +1,283 @@
 ---
-description: NixOS Rules
+description: NixOS Configuration Rules - MCP Enhanced
 globs:
-- *.nix
+- "*.nix"
+- "flake.lock"
+- "*.conf"
 alwaysApply: true
 ---
 
-# SETUP NIXOS
+# NIXOS CONFIGURATION ASSISTANT
 
-## Instruções
-- Sempre rode `fastfetch -c all` para pegar todo contexto do sistema e saber a situação.
-- Sempre procure na arvore de arquivos por modulos relacionados ao problema
-- Considere que o usuario esta numa distro NixOS, usando gnome.
-- Considere que o usuario esta usando um laptop com processador AMD e placa de video NVIDIA.
-- Sempre rode os comandos de `nh os test .` para validar as modificações
+## 🎯 CONTEXTO DO SISTEMA
+- **Distro**: NixOS 25.05 (stable) + nixos-unstable (selective packages)
+- **Hardware**: ASUS Zephyrus GA402X
+  - CPU: AMD Ryzen (configurações em `modules/core/hardware.nix`)
+  - GPU: NVIDIA (configurações em `modules/nvidia.nix`)
+- **Desktop**: GNOME (primary) + outros DEs opcionais
+- **Boot Manager**: systemd-boot
+- **Flake-based**: Sim (`flake.nix` é a fonte da verdade)
 
-## COMANDOS DISPONÍVEIS
-- `nh os test .` - Testa configuração sem aplicar
-- `nh os boot .` - Aplica na próxima inicialização
+## 🔧 FERRAMENTAS MCP DISPONÍVEIS
 
-## COMANDOS INDISPONIVEIS
-- `nh os switch .` - Aplica configuração porem não funciona em sandbox do cursor, use sempre `nh os test .`
+### Busca e Documentação
+- **mcp_nixos_nixos_search**: Buscar pacotes, opções, programas no NixOS
+- **mcp_nixos_nixos_info**: Info detalhada sobre pacote/opção específica
+- **mcp_nixos_nixos_channels**: Listar canais NixOS disponíveis
+- **mcp_nixos_nixos_stats**: Estatísticas do repositório NixOS
 
-## RESTRIÇÕES DO CURSOR AI - SANDBOX
-- Sempre verifique a documentação do nixOS para verificar se o parametro é valido, voce tem o LSP do nixd disponivel
-- NUNCA use sudo - todos os comandos sudo falharão no sandbox
-- Use sempre containers como `poetry run` ou containers para evitar conflitos
+### Home Manager
+- **mcp_nixos_home_manager_search**: Buscar opções de configuração do Home Manager
+- **mcp_nixos_home_manager_info**: Info detalhada sobre opção do Home Manager
+- **mcp_nixos_home_manager_stats**: Estatísticas do Home Manager
+- **mcp_nixos_home_manager_options_by_prefix**: Listar opções por prefixo (ex: `programs.git`)
 
-## MÓDULOS PRINCIPAIS
-- `/core/` - Configurações essenciais do sistema (hardware, kernel, serviços base)
-- `/modules/` - Módulos opcionais (bluetooth, nvidia, plymouth, battery, etc.)
-- `/desktop-envs/` - Ambientes de desktop (GNOME, KDE, Cosmic)
-- `/assets/` - Recursos visuais (temas, ícones, wallpapers, cursors)
-- `/scripts/` - Scripts de automação e utilitários do sistema
-- `/tmp/` - Arquivos temporários e relatórios de sessão
+### Flakes e Versões
+- **mcp_nixos_nixos_flakes_search**: Buscar flakes da comunidade
+- **mcp_nixos_nixhub_package_versions**: Histórico de versões de pacotes
+- **mcp_nixos_nixhub_find_version**: Encontrar commit hash de versão específica
 
-## ONDE MODIFICAR
-### Desktop Environments
-- `desktop-envs/gnome/extensions.nix` para extensões e configurações (via dconf) do GNOME
-- `desktop-envs/gnome/extensions-config/` para configurações de extensões do GNOME com arquivos dedicados
-- `desktop-envs/gnome/core.nix` para configurações principais do GNOME
-- `desktop-envs/gnome/packages.nix` para pacotes do GNOME
-- `desktop-envs/gnome/home.nix` para configurações de home-manager especificas pro gnome
+## 🚀 WORKFLOW RECOMENDADO
 
-### Modules
-- `modules/nvidia.nix` para configurações da NVIDIA
-- `modules/bluetooth.nix` para configurações de Bluetooth
-- `modules/plymouth.nix` para configurações do Plymouth
-- `modules/battery.nix` para configurações de bateria
-- `modules/work.nix` para configurações de trabalho e produtividade
-- `dotfiles/` para arquivos de configuração pessoal (bash, zsh, vim, etc.)
+### Ao Adicionar/Modificar Pacotes
+1. **Buscar pacote**: `mcp_nixos_nixos_search` com query descritiva
+2. **Verificar opções**: `mcp_nixos_nixos_info` para ver configurações disponíveis
+3. **Checar versão específica**: Se precisar de versão antiga, usar `mcp_nixos_nixhub_package_versions`
+4. **Adicionar ao arquivo certo**: Ver seção "ESTRUTURA DE ARQUIVOS"
+5. **Testar**: `nh os test .` (OBRIGATÓRIO antes de commit)
 
-### Core
-- `configuration.nix` para configurações gerais do NixOS
-- `nix.nix` para configurações do Nix
-- `core/hardware.nix` para configurações de hardware
-- `core/kernel.nix` para configurações do kernel
-- `core/services.nix` para serviços essenciais do sistema
-- `core/kernel.nix` para configurações do kernel
-- `core/packages.nix` para pacotes essenciais do sistema
-- `core/shell.nix` para configurações de shell
-- `core/programas.nix` para programas essenciais do sistema
+### Ao Configurar Home Manager
+1. **Buscar opção**: `mcp_nixos_home_manager_search` com query
+2. **Ver detalhes**: `mcp_nixos_home_manager_info` para tipo e valores aceitos
+3. **Explorar categoria**: `mcp_nixos_home_manager_options_by_prefix` se quiser ver todas opções de um programa
+4. **Adicionar em**: `modules/core/home.nix` ou módulo específico do DE
+
+### Ao Resolver Problemas
+1. **Verificar sistema**: `fastfetch -c all` para contexto completo
+2. **Buscar opção relacionada**: Usar MCP search para encontrar configuração relevante
+3. **Ler documentação inline**: MCP info retorna descrição e exemplos
+4. **Consultar nixpkgs**: LSP do nixd está disponível para autocompletar
+
+## 📁 ESTRUTURA DE ARQUIVOS
+
+### Arquivos Raiz
+- `flake.nix` - Definição de inputs, outputs e configuração do sistema
+- `flake.lock` - Lock de versões (não editar manualmente)
+- `configuration.nix` - Entry point, importa todos os módulos
+- `hardware.nix` - Hardware scan gerado pelo nixos-generate-config
+
+### Core Modules (`modules/core/`)
+Configurações essenciais que sempre carregam:
+- `nix.nix` - Configurações do Nix daemon (experimental features, substituters)
+- `hardware.nix` - Hardware genérico (OpenGL, firmware, drivers base)
+- `core.nix` - Sistema base (timezone, locale, usuários, networking)
+- `home.nix` - Home Manager configuration
+- `services.nix` - Serviços essenciais do sistema
+- `programs.nix` - Programas habilitados via nixpkgs programs.*
+- `packages.nix` - Pacotes essenciais do sistema
+- `fonts.nix` - Fontes do sistema
+- `shell.nix` - Configuração de shell (zsh, bash)
+- `kernel.nix` - Parâmetros e módulos do kernel
+- `hibernate.nix` - Configurações de hibernação/suspend
+
+### Optional Modules (`modules/`)
+Módulos opcionais ativados por import em `configuration.nix`:
+- `bluetooth.nix` - Bluetooth stack (bluez)
+- `plymouth.nix` - Boot splash screen
+- `nvidia.nix` - Driver NVIDIA (proprietary)
+- `ai.nix` - Ferramentas de AI/ML (nixified-ai)
+- `steam.nix` - Steam + gamescope
+- `podman.nix` - Podman containers
+- `docker.nix` - Docker (alternativa ao Podman, comentado por padrão)
+- `flatpak.nix` - Flatpak support
+- `work.nix` - Ferramentas de trabalho/produtividade
+- `battery.nix` - Otimizações de bateria (TLP)
+- `logitech-mouse.nix` - Configurações de mouse Logitech
+
+### Desktop Environments (`modules/gnome/`, etc)
+Nota: A estrutura atual mostra `modules/gnome/` mas pode ter outros DEs:
+- `gnome/core.nix` - Configuração principal do GNOME
+- `gnome/extensions.nix` - GNOME Shell extensions + dconf settings
+- `gnome/extensions-configs/` - Arquivos de configuração dedicados por extensão
+- `gnome/packages.nix` - Pacotes específicos do GNOME
+- `gnome/home.nix` - Home Manager configs específicas do GNOME
+
+### Assets e Dotfiles
+- `assets/wallpapers/` - Wallpapers do sistema
+- `stow/` - Dotfiles gerenciados via GNU Stow
+  - `ghostty/`, `git/`, `hyprland/`, `waybar/`, `zed/`, etc
+- `scripts/` - Scripts de automação
+
+### Temporários
+- `tmp/done/` - Processos/sessões concluídas
+- `tmp/running/` - Processos em andamento (criar se necessário)
+
+## ⚙️ COMANDOS E PRÁTICAS
+
+### Build e Test
+```bash
+# SEMPRE usar para validar (não precisa de sudo, funciona no sandbox)
+nh os test .
+
+# Aplicar na próxima reinicialização (usar após test passar)
+nh os boot .
+
+# Ver o que mudou entre gerações
+nix store diff-closures /nix/var/nix/profiles/system-{OLDGEN,NEWGEN}-link
+
+# Limpar gerações antigas
+nix-collect-garbage --delete-older-than 7d
+```
+
+### Flake Management
+```bash
+# Atualizar todos os inputs
+nix flake update
+
+# Atualizar input específico
+nix flake lock --update-input nixpkgs
+
+# Ver metadata do flake
+nix flake metadata
+
+# Ver outputs disponíveis
+nix flake show
+```
+
+### Debugging
+```bash
+# Avaliar expressão Nix
+nix eval .#nixosConfigurations.nomad.config.OPTION
+
+# Ver trace completo de build
+nix build .#nixosConfigurations.nomad.config.system.build.toplevel --show-trace
+
+# Verificar opções aplicadas
+nixos-option OPTION_PATH
+```
+
+### Busca no Sistema
+```bash
+# Buscar qual pacote fornece um arquivo
+nix-locate --whole-name '/bin/PROGRAM'
+
+# Ver dependências de um pacote
+nix-store -q --tree /nix/store/HASH-PACKAGE
+```
+
+## 🚫 RESTRIÇÕES DO SANDBOX CURSOR
+
+### NUNCA Fazer
+- ❌ Usar `sudo` - todos comandos sudo falham no sandbox
+- ❌ Usar `nh os switch .` - não funciona em sandbox, usar `nh os test .`
+- ❌ Editar `flake.lock` manualmente
+- ❌ Adicionar pacotes que conflitem com sistema base
+- ❌ Usar `nixos-rebuild` diretamente (usar `nh` wrapper)
+
+### SEMPRE Fazer
+- ✅ Validar com `nh os test .` antes de commit
+- ✅ Usar MCP tools para buscar pacotes/opções ANTES de adicionar
+- ✅ Verificar se opção existe com `mcp_nixos_nixos_info`
+- ✅ Consultar Home Manager options com MCP antes de configurar
+- ✅ Usar containers/nix-shell quando precisar de ambiente isolado
+- ✅ Buscar na árvore de módulos por configurações similares existentes
+
+## 🎨 DECISÕES DE DESIGN
+
+### Onde Adicionar Cada Coisa
+
+#### Novo Pacote Global
+- **CLI essencial**: `modules/core/packages.nix`
+- **GUI/Desktop**: `modules/gnome/packages.nix` (ou DE apropriado)
+- **Dev tool**: Criar `modules/dev.nix` ou adicionar em `work.nix`
+- **Gaming**: `modules/steam.nix` ou criar `modules/gaming.nix`
+
+#### Nova Configuração de Programa
+- **System-wide**: `modules/core/programs.nix` (usando `programs.*`)
+- **Per-user**: `modules/core/home.nix` (usando Home Manager)
+- **DE-specific**: No módulo do respectivo DE
+
+#### Novo Serviço
+- **Essencial**: `modules/core/services.nix`
+- **Opcional**: Criar módulo dedicado em `modules/NOME.nix`
+
+#### Hardware Específico
+- **Generic hardware**: `modules/core/hardware.nix`
+- **Device-specific**: Criar módulo em `modules/DEVICE.nix` (ex: `logitech-mouse.nix`)
+- **Hardware scan**: `hardware.nix` (raiz)
+
+## 🔍 TROUBLESHOOTING COMUM
+
+### Build Falha
+1. Verificar sintaxe: LSP do nixd geralmente indica
+2. Testar expressão isolada: `nix eval .#EXPR --show-trace`
+3. Buscar opção no MCP: Pode ter mudado de nome entre versões
+4. Ver logs completos: `nh os test . --verbose`
+
+### Opção Não Existe
+1. Buscar com MCP search (pode ter nome diferente)
+2. Verificar se está no canal certo (25.05 vs unstable)
+3. Checar se precisa de overlay ou pacote unstable
+4. Ver histórico: `mcp_nixos_nixhub_package_versions` para versões antigas
+
+### Performance Issues
+1. Otimizar builds: `nix.settings.max-jobs`, `cores`
+2. Limpar cache: `nix-collect-garbage -d`
+3. Verificar substituers: `modules/core/nix.nix`
+
+### Conflitos de Pacotes
+1. Usar `nixpkgs-unstable` overlay para pacotes específicos
+2. Criar override com `pkgs.PACKAGE.overrideAttrs`
+3. Pin versão específica com `mcp_nixos_nixhub_find_version`
+
+## 📚 RECURSOS EXTERNOS
+
+### Documentação
+- NixOS Options: https://search.nixos.org/options (ou usar MCP!)
+- Home Manager: https://nix-community.github.io/home-manager/options.xhtml (ou usar MCP!)
+- Nixpkgs Manual: https://nixos.org/manual/nixpkgs/stable/
+
+### Inputs do Flake
+- `nixpkgs` (25.05): Stable channel
+- `nixpkgs-unstable`: Para pacotes bleeding-edge
+- `chaotic`: CachyOS kernel e cache
+- `home-manager`: Configurações per-user
+- `nixos-hardware`: Profiles para hardware específico
+- `nixified-ai`: AI/ML tooling
+
+## 💡 DICAS DE EFICIÊNCIA
+
+### Antes de Modificar
+1. **Sempre use MCP search primeiro** - economiza tempo procurando manualmente
+2. **Leia a árvore de módulos** - configuração similar pode já existir
+3. **Verifique imports** no `configuration.nix` - módulo pode estar desabilitado
+
+### Durante Modificação
+1. **LSP está disponível** - aproveite autocompletar do nixd
+2. **Mantenha consistência** - siga padrão dos arquivos existentes
+3. **Comente código complexo** - Nix pode ser obscuro
+
+### Após Modificação
+1. **Test SEMPRE** - `nh os test .` antes de commit
+2. **Commit pequeno** - uma funcionalidade por vez
+3. **Descreva o que fez** - commits descritivos ajudam no rollback
+
+## 🤖 PAPEL DO ASSISTENTE
+
+Quando o usuário pedir para:
+- **Adicionar pacote**: Buscar no MCP, verificar opções, adicionar no arquivo certo
+- **Configurar programa**: Buscar opções no MCP Home Manager, aplicar em home.nix
+- **Resolver problema**: Buscar configuração relacionada, propor solução testada
+- **Otimizar sistema**: Analisar módulos, sugerir melhorias baseadas em MCP info
+- **Atualizar pacote**: Usar nixhub MCP para encontrar versões/commits
+
+**Sempre ser proativo**:
+- Sugerir melhorias além do pedido
+- Avisar sobre possíveis conflitos
+- Recomendar validação com `nh os test .`
+- Explicar decisões de forma técnica mas acessível (usuário é expert)
+
+---
+
+*Assistente MCP-Enhanced para NixOS - Versão 2.0*
+*Sistema: nomad (ASUS Zephyrus GA402X) - NixOS 25.05*
