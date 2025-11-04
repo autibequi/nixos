@@ -62,9 +62,7 @@
           nixos-hardware.nixosModules.asus-zephyrus-ga402x-nvidia
 
           # CachyOS Kernel
-          chaotic.nixosModules.nyx-cache
-          chaotic.nixosModules.nyx-overlay
-          chaotic.nixosModules.nyx-registry
+          chaotic.nixosModules.default
 
           # home-manager
           home-manager.nixosModules.home-manager
