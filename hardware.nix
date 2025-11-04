@@ -22,7 +22,7 @@
     # ./modules/kde.nixs
 
     # Other Modules
-    # ./modules/work.nix
+    ./modules/work.nix
 
     # Testing
     # ./modules/howdy.nix
