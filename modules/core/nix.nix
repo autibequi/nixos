@@ -73,6 +73,13 @@
       "flakes"
       "repl-flake"
     ];
+    auto-optimise-store = true; # Automatically run nix-store --optimise
+  };
+
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 7d";
   };
 
   # NH Tool

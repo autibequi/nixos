@@ -17,8 +17,8 @@
 
   boot.kernelParams = [
     "usbcore.autosuspend=-1" # Disable USB auto suspend
-    # refresh issues https://gitlab.gnome.org/GNOME/mutter/-/issues/3299\
-    "amdgpu.dcdebugmask=0x10"
+    # refresh issues https://gitlab.gnome.org/GNOME/mutter/-/issues/3299\ (Mutter bug, not relevant for Hyprland)
+    # "amdgpu.dcdebugmask=0x10"
 
     # Force UAS for external NVME USB-C case; this garantees high speed mode | lsusb -t:
     # idVendor           0x152d JMicron Technology Corp. / JMicron USA Technology Corp.
@@ -38,8 +38,8 @@
 
   # Configurar compressão.
   # https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/kernel/initrd-compressor-meta.nix
-  boot.initrd.compressor = "lzop"; # Voltando para lzop (mais estável)
-  boot.initrd.compressorArgs = [ "-9" ]; # Args para lzop (high compression)
+  boot.initrd.compressor = "zstd"; # zstd is faster for decompression
+  boot.initrd.compressorArgs = [ "-19" ]; # Max compression for zstd
 
   # Userland Scheduler
   services.scx.enable = true;
@@ -67,7 +67,7 @@
     "amd_energy"
     "amd_pmf"
     "pcie_aspm=force"
-    "bbswitch" # for dGPU power management
+    # "bbswitch" # Obsolete with modern nvidia driver power management
 
     # for external nvme usb-c case
     "uas"
