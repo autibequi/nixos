@@ -13,7 +13,7 @@
 	autoSetupRemote = true
 
 [pull]
-	ff = false
+	ff = only
 
 [fetch]
 	prune = true
@@ -81,7 +81,7 @@
 	helper = manager
 
 [merge]
-	ff = false
+	ff = true
 	tool = meld
 
 [diff]
