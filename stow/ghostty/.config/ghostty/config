@@ -33,7 +33,6 @@ clipboard-paste-protection = true
 clipboard-trim-trailing-spaces = true
 clipboard-paste-bracketed-safe = true
 title-report = true
-copy-on-select = false
 
 click-repeat-interval = 1000
 
