@@ -53,7 +53,7 @@ in
     wofi # App launcher (fuzzy finding)
     alacritty # Terminal
     # dunst # Notifications
-    swaynotificationcenter
+    SwayNotificationCenter
     grim # Screenshots
     swappy # Screen editing
     slurp # Screen selection
