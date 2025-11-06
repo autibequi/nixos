@@ -87,10 +87,10 @@ END {
     esac
 
     # Format for Rofi: "Action « Key"
-    printf '%s\n<span color="#888888" size="small">    %s</span>' "$pretty_key" "$pretty_action"
+    printf '%s\n<span color="#888888" size="small">%s    </span>' "$pretty_action" "$pretty_key" 
 
 done | \
 # Sort alphabetically by the Action
 sort | \
 # Pipe to Rofi
-rofi -dmenu -i -p "Keybinds" -width 60 -markup
+rofi -dmenu -i -p "Keybinds" -width 60 -markup-rows -markup 
