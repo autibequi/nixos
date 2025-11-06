@@ -53,6 +53,10 @@ waybar_refresh() {
     bongocat --config ~/.config/bongocat/bongocat.conf
 }
 
+clipboard_history() {
+    cliphist list | rofi -dmenu -i -p "Clipboard History" -markup-rows | cliphist decode | wl-copy
+}
+
 hypr_reload() {
     waybar_refresh
     hyprctl reloadr

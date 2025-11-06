@@ -1,7 +1,7 @@
 * {
     background-color: #24273a;
     text-color: #cad3f5;
-    font: "FiraCode Nerd Font 12";
+    font: "FiraCode Nerd Font 15";
 }
 
 window {
