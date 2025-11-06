@@ -52,7 +52,8 @@ in
     waybar # Status bar with useful info
     wofi # App launcher (fuzzy finding)
     alacritty # Terminal
-    dunst # Notifications
+    # dunst # Notifications
+    SwayNotificationCenter
     grim # Screenshots
     swappy # Screen editing
     slurp # Screen selection
