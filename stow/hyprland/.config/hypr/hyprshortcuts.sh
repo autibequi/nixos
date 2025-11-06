@@ -1,6 +1,7 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-# This script parses the output of `hyprctl binds` and displays it in Rofi.
+# This script parses the output of `hyprctl binds`, displays it in Rofi,
+# and executes the selected command.
 # It handles the verbose, multi-line format from recent hyprctl versions.
 
 # Function to decode the modifier mask from a number to a human-readable string.
@@ -25,34 +26,15 @@ decode_modmask() {
     printf "%s" "${mods%+}"
 }
 
-# Use awk to parse the block-style output of `hyprctl binds` into a
-# machine-friendly, semicolon-separated format. This makes it easy to read
-# in the shell loop below.
-# Output format: MODMASK;KEY;DISPATCHER;ARG
-hyprctl binds | awk '
-BEGIN { OFS=";" }
-# A line starting with "bind" marks a new record.
-# When we see one, we print the previously accumulated record.
-/^bind(e|m|l)?/ {
-    if (key != "") print modmask, key, dispatcher, arg
-    # Reset variables for the new record
-    modmask="0"; key=""; dispatcher=""; arg=""
-}
-# Extract values for each field
-/^\s+modmask:/ { modmask = $2 }
-/^\s+key:/ { key = $2 }
-/^\s+dispatcher:/ { dispatcher = $2 }
-/^\s+arg:/ {
-    # Capture everything after "arg: " to handle args with spaces
-    match($0, /^\s+arg: (.*)/, arr)
-    arg = arr[1]
-}
-# After processing all lines, print the last accumulated record.
-END {
-    if (key != "") print modmask, key, dispatcher, arg
-}
-' | while IFS=';' read -r modmask key dispatcher arg; do
+# Associative array to map the display string to the command to execute
+declare -A binds_map
 
+# An array to hold the lines to be displayed in Rofi, for sorting purposes.
+declare -a display_lines=()
+
+# The awk script to parse hyprctl output remains the same.
+# We redirect its output to the while loop.
+while IFS=';' read -r modmask key dispatcher arg; do
     # Skip empty keys, which can happen with mouse binds without a clear key name.
     if [ -z "$key" ]; then
         continue
@@ -69,12 +51,9 @@ END {
     fi
 
     # Make the action part pretty and more descriptive for Rofi.
-    # This can be easily customized to change how actions are displayed.
     case "$dispatcher" in
         "exec")
-            # Check if the command is a special workspace switch
             if echo "$arg" | grep -q "workspace_switch"; then
-                # Extract workspace name from the argument
                 ws_name=$(echo "$arg" | sed -n 's/.*workspace_switch \(.*\)/\1/p')
                 pretty_action="Go to W: $ws_name"
             else
@@ -92,18 +71,59 @@ END {
         "movewindow")        pretty_action="Move Window: $arg" ;;
         "resizeactive")      pretty_action="Resize: $arg" ;;
         "mouse")             pretty_action="Mouse Action: $arg" ;;
-        *)                   pretty_action="$dispatcher $arg" ;; # Catch-all
+        *)                   pretty_action="$dispatcher $arg" ;;
     esac
 
-    # Format for Rofi: "Keybinding                        Action"
-    # We use printf with a fixed-width format string to ensure the action column is aligned.
-    # This requires a monospaced font to be configured in Rofi.
-    printf '%s	<span>%-25s</span> %s\n' "$pretty_action" "$pretty_key" "$pretty_action"
+    # Construct the command to be executed when a line is selected.
+    local cmd
+    if [[ "$dispatcher" == "exec" ]]; then
+        cmd="$arg"
+    else
+        cmd="hyprctl dispatch $dispatcher $arg"
+    fi
 
-done | \
-# Sort alphabetically by the action
-sort | \
-# Remove the sort key
-cut -f2- | \
-# Pipe to Rofi
-rofi -dmenu -i -p "Shortcuts" -width 150 -markup-rows
+    # The string to be displayed in Rofi for this binding.
+    display_str=$(printf '<span>%-25s</span> %s' "$pretty_key" "$pretty_action")
+
+    # We use the pretty_action as the sort key.
+    # We store "sort_key<TAB>display_string<TAB>command" for later processing.
+    display_lines+=("$(printf '%s\t%s\t%s' "$pretty_action" "$display_str" "$cmd")")
+
+done < <(hyprctl binds | awk '
+BEGIN { OFS=";" }
+/^bind(e|m|l)?/ {
+    if (key != "") print modmask, key, dispatcher, arg
+    modmask="0"; key=""; dispatcher=""; arg=""
+}
+/^\s+modmask:/ { modmask = $2 }
+/^\s+key:/ { key = $2 }
+/^\s+dispatcher:/ { dispatcher = $2 }
+/^\s+arg:/ {
+    match($0, /^\s+arg: (.*)/, arr)
+    arg = arr[1]
+}
+END {
+    if (key != "") print modmask, key, dispatcher, arg
+}
+')
+
+# Prepare the input for Rofi and populate the map.
+# We sort the lines by the sort_key (first column).
+rofi_input=""
+while IFS=$'\t' read -r sort_key display_str cmd; do
+    rofi_input+="${display_str}\n"
+    binds_map["$display_str"]="$cmd"
+done < <(printf "%s\n" "${display_lines[@]}" | sort)
+
+# Launch Rofi. It will display the list of shortcuts.
+selection=$(echo -en "$rofi_input" | rofi -dmenu -i -p "Shortcuts" -width 150 -markup-rows)
+
+# If the user selected an item, execute the corresponding command.
+if [ -n "$selection" ]; then
+    command="${binds_map["$selection"]}"
+    if [ -n "$command" ]; then
+        # Use eval to correctly handle complex shell commands (like those with '&&' or ';').
+        # Run in the background so Rofi closes instantly.
+        eval "$command" &
+    fi
+fi
