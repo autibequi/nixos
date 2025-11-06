@@ -71,7 +71,16 @@ END {
     # Make the action part pretty and more descriptive for Rofi.
     # This can be easily customized to change how actions are displayed.
     case "$dispatcher" in
-        "exec")              pretty_action="Run: $arg" ;;
+        "exec")
+            # Check if the command is a special workspace switch
+            if echo "$arg" | grep -q "workspace_switch"; then
+                # Extract workspace name from the argument
+                ws_name=$(echo "$arg" | sed -n 's/.*workspace_switch \(.*\)/\1/p')
+                pretty_action="Go to W: $ws_name"
+            else
+                pretty_action="Run: $arg"
+            fi
+            ;;
         "killactive")        pretty_action="Close Window" ;;
         "exit")              pretty_action="Exit Hyprland" ;;
         "togglefloating")    pretty_action="Toggle Float" ;;
@@ -97,4 +106,4 @@ sort | \
 # Remove the sort key
 cut -f2- | \
 # Pipe to Rofi
-rofi -dmenu -i -p "Shortcuts" -markup-rows
+rofi -dmenu -i -p "Shortcuts" -width 150 -markup-rows
