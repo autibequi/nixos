@@ -89,10 +89,12 @@ END {
     # Format for Rofi: "Keybinding                        Action"
     # We use printf with a fixed-width format string to ensure the action column is aligned.
     # This requires a monospaced font to be configured in Rofi.
-    printf '<span>%-25s</span> %s\n' "$pretty_key"  "$pretty_action" 
+    printf '%s	<span>%-25s</span> %s\n' "$pretty_action" "$pretty_key" "$pretty_action"
 
 done | \
-# Sort alphabetically by the keybinding
+# Sort alphabetically by the action
 sort | \
+# Remove the sort key
+cut -f2- | \
 # Pipe to Rofi
 rofi -dmenu -i -p "Shortcuts" -markup-rows
