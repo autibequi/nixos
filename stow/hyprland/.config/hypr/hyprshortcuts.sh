@@ -86,11 +86,13 @@ END {
         *)                   pretty_action="$dispatcher $arg" ;; # Catch-all
     esac
 
-    # Format for Rofi: "Action « Key"
-    printf '%s\n<span color="#888888" size="small">%s    </span>' "$pretty_action" "$pretty_key" 
+    # Format for Rofi: "Keybinding                        Action"
+    # We use printf with a fixed-width format string to ensure the action column is aligned.
+    # This requires a monospaced font to be configured in Rofi.
+    printf '<span>%-25s</span> %s\n' "$pretty_key"  "$pretty_action" 
 
 done | \
-# Sort alphabetically by the Action
+# Sort alphabetically by the keybinding
 sort | \
 # Pipe to Rofi
-rofi -dmenu -i -p "Keybinds" -width 60 -markup-rows -markup 
+rofi -dmenu -i -p "Shortcuts" -markup-rows

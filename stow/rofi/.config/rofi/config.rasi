@@ -1,0 +1,10 @@
+configuration {
+    modi: "drun";
+    show-icons: true;
+    icon-theme: "Papirus";
+    drun-display-format: "{icon} {name}";
+    font: "FiraCode Nerd Font 12";
+    display-drun: "Applications";
+}
+
+@theme "theme.rasi"

@@ -1,0 +1,58 @@
+* {
+    background-color: #24273a;
+    text-color: #cad3f5;
+    font: "FiraCode Nerd Font 12";
+}
+
+window {
+    width: 60%;
+    border-radius: 10px;
+    background-color: #24273a;
+    padding: 10px;
+}
+
+mainbox {
+    children: [inputbar, listview];
+    spacing: 15px;
+}
+
+inputbar {
+    children: [prompt, entry];
+    background-color: #363a4f;
+    padding: 10px;
+    border-radius: 1px;
+}
+
+prompt {
+    text-color: #eed49f;
+}
+
+entry {
+    placeholder: "Type to filter";
+    placeholder-color: #8087a2;
+}
+
+listview {
+    lines: 10;
+    columns: 1;
+    layout: vertical;
+}
+
+element {
+    padding: 5px;
+    border-radius: 5px;
+}
+
+element-text {
+    vertical-align: 0.5;
+}
+
+element-icon {
+    size: 24px;
+    padding: 0 10px 0 0;
+}
+
+element.selected {
+    background-color: #8aadf4;
+    text-color: #24273a;
+}
