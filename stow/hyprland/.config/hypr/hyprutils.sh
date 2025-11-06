@@ -50,7 +50,7 @@ waybar_refresh() {
     waybar --config ~/.config/waybar/config.jsonc --style ~/.config/waybar/style.css &
     # reload bongocat
     pkill bongocat 2>/dev/null
-    bongocat --config ~/.config/bongocat/bongocat.conf --watch-config
+    bongocat --config ~/.config/bongocat/bongocat.conf
 }
 
 hypr_reload() {
