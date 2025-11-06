@@ -57,6 +57,7 @@
       "adbusers"
       "docker"
       "hidraw"
+      "input"
     ];
     shell = pkgs.zsh;
   };
