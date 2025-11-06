@@ -11,10 +11,12 @@ decode_modmask() {
     # Bitwise checks for each modifier mask value.
     # These values are standard for Hyprland.
     # 64: Super (Windows key)
+    # 32: Mod3 (e.g., Caps Lock as Hyper)
     # 8:  Alt
     # 4:  Ctrl
     # 1:  Shift
     if [ $((mask & 64)) -ne 0 ]; then mods="${mods}Super+"; fi
+    if [ $((mask & 32)) -ne 0 ]; then mods="${mods}Mod3+"; fi
     if [ $((mask & 8)) -ne 0 ]; then mods="${mods}Alt+"; fi
     if [ $((mask & 4)) -ne 0 ]; then mods="${mods}Ctrl+"; fi
     if [ $((mask & 1)) -ne 0 ]; then mods="${mods}Shift+"; fi
@@ -85,10 +87,10 @@ END {
     esac
 
     # Format for Rofi: "Action « Key"
-    echo "$pretty_key ::: $pretty_action"
+    printf '%s\n<span color="#888888" size="small">    %s</span>' "$pretty_key" "$pretty_action"
 
 done | \
 # Sort alphabetically by the Action
 sort | \
 # Pipe to Rofi
-rofi -dmenu -i -p "Keybinds" -width 60
+rofi -dmenu -i -p "Keybinds" -width 60 -markup
