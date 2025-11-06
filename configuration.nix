@@ -30,5 +30,6 @@
 
     # Custom Modules
     ./modules/flatpak.nix
+    ./modules/bongocat.nix
   ];
 }
