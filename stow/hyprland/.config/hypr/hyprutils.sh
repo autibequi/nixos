@@ -49,7 +49,7 @@ waybar_refresh() {
     pkill waybar 2>/dev/null
     waybar --config ~/.config/waybar/config.jsonc --style ~/.config/waybar/style.css &
     # reload bongocat
-    pkill bongocat 2>/dev/null
+    pkill bongocat 2>/dev/null 
     bongocat --config ~/.config/bongocat/bongocat.conf
 }
 
