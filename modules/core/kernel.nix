@@ -6,7 +6,7 @@
 {
   # Kernel
   # If broken plz change to linuxPackages_x_xx until nvidia update their drivers
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages_zen;
   # boot.kernelPackages = pkgs.linuxPackages_cachyos-lto;
 
   # SystemD no InitRD para hibernação moderna
@@ -33,8 +33,20 @@
     "bgrt_disable"
     "mitigations=off"
     "iommu=pt"
+    "preempt=full" # Preemptive scheduling for better responsiveness
     "libahci.ignore_sss=1" # Disable AHCI SSS (Serial ATA Status and Status Change)
+    "scsi_mod.use_blk_mq=1" # Habilita o Multi-Queue Block Layer (necessário para os novos schedulers)
   ];
+
+  # Otimiza o uso da RAM para cache e swap
+  # Devido ao setup dentro de um NVME externo
+  boot.kernel.sysctl = {
+    "vm.swappiness" = 10;
+    "vm.vfs_cache_pressure" = 50;
+  };
+
+  # Otimiza o uso do disco para melhor performance
+  fileSystems."/".options = [ "defaults" "noatime" ];
 
   # Configurar compressão.
   # https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/kernel/initrd-compressor-meta.nix
@@ -103,11 +115,4 @@
   # Otimizações de I/O
   services.fstrim.enable = true;
   services.fstrim.interval = "weekly";
-
-  # Otimizações de Memória
-  # Como nos dois setupts temos 48gb e 64gb de ram usamos o
-  # minimo possivel pra poupar uso do disco
-  boot.kernel.sysctl = {
-    "vm.swappiness" = 10; # Mantido, baixo swappiness é ok
-  };
 }
