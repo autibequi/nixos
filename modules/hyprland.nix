@@ -65,6 +65,7 @@ in
     walker
     onagre
     swww
+    mpvpaper
     bluetuith
     ncpamixer
     tesseract
