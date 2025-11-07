@@ -32,7 +32,7 @@
     papirus-icon-theme # Icons
 
     # ZED EDITOR
-    pkgs-unstable.zed-editor-fhs_
+    pkgs-unstable.zed-editor-fhs
 
     # Work Browser
     chromium
