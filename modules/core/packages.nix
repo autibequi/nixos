@@ -32,9 +32,7 @@
     papirus-icon-theme # Icons
 
     # ZED EDITOR
-    zed-editor
-    # zed-editor_git # can sudo
-    # zed-editor-fhs_git # cant sudo
+    pkgs-unstable.zed-editor-fhs_
 
     # Work Browser
     chromium

@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, pkgs-unstable, ... }:
 
 {
   programs.zsh = {
@@ -48,6 +48,7 @@
       clipb = "wl-paste";
       zed = "zeditor";
       stow = "stow --target=$HOME";
+      please = "sudo !!";
 
       wiki = "wikiti";
 
