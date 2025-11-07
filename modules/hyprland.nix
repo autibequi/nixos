@@ -66,6 +66,7 @@ in
     onagre
     swww
     mpvpaper
+    waytrogen
     bluetuith
     ncpamixer
     tesseract
