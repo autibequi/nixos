@@ -12,7 +12,7 @@
     # ./modules/nvidia.nix
 
     # Laptop Modules
-    ./modules/tlp.nix
+    # ./modules/tlp.nix
     ./modules/battery.nix
 
     # Desktop Enviroments

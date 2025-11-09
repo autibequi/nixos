@@ -9,4 +9,7 @@
 
   # AMD EPP to change the power profile so pstate can change
   services.auto-epp.enable = true;
+
+  # Power Profiles Daemon (tlp too complicated?)
+  services.power-profiles-daemon.enable = true;
 }
