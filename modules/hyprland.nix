@@ -31,6 +31,8 @@ in
   environment.sessionVariables = {
     HYPR_PLUGIN_DIR = hypr-plugin-dir;
     ANYRUN_PLUGIN_DIR = "${pkgs.anyrun}/lib";
+    # Garantir que schemas sejam encontradas
+    XDG_DATA_DIRS = "$XDG_DATA_DIRS:${pkgs.gsettings-desktop-schemas}/share:${pkgs.gtk3}/share";
   };
 
   programs.hyprland = {
@@ -38,6 +40,9 @@ in
     package = pkgs.hyprland;
     xwayland.enable = true;
   };
+
+  # Habilitar serviço para compilar schemas
+  programs.dconf.enable = true;
 
   environment.systemPackages = with pkgs; [
     hyprpicker
@@ -73,9 +78,11 @@ in
     # Dark/Light Theme Toggle via gnome crap
     glib
     gsettings-desktop-schemas
-    dconf
-    
-    # gtk confy
+    dconf-editor # Para debug e edição manual
+    gtk3 # Garantir lib GTK3 disponível
+    gtk4 # Opcional, se usar apps GTK4
+
+    # gtk utils
     nautilus
 
     # Essential utilities only
@@ -89,4 +96,3 @@ in
     cliphist # Clipboard history manager
   ];
 }
-

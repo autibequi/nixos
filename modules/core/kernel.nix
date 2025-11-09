@@ -29,7 +29,8 @@
 
     # Força o uso do p-state ativo para o processador AMD
     # active so epp modes will work
-    "amd_pstate=guided"
+    # "amd_pstate=guided" # best
+    "amd_pstate=active"
     "bgrt_disable"
     "mitigations=off"
     "iommu=pt"
@@ -57,7 +58,7 @@
   # Userland Scheduler
   services.scx.enable = true;
   # services.scx.package = pkgs.scx_git.full; # latest updates
-  powerManagement.cpuFreqGovernor = "schedutil"; # needed for scx
+  # powerManagement.cpuFreqGovernor = "schedutil"; # needed for scx
   services.scx.scheduler = "scx_lavd";
   services.scx.extraArgs = [ "--autopower" ];
 
