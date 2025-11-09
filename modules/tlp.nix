@@ -34,17 +34,17 @@
       RUNTIME_PM_ON_AC = "on";
       RUNTIME_PM_ON_BAT = "auto";
 
+      # NVME Power Management (Recomendado para SSDs NVMe)
+      NVME_POWER_SAVING_ON_AC = 0; # Desabilitar
+      NVME_POWER_SAVING_ON_BAT = 1; # Habilitar
+
       # plataform
       PLATFORM_PROFILE_ON_AC = "performance";
       PLATFORM_PROFILE_ON_BAT = "low-power";
 
       # ASPM
       PCIE_ASPM_ON_AC = "performance";
-      PCIE_ASPM_ON_BAT = "powersupersave";
-
-      # Wifi
-      WIFI_PWR_ON_AC = "on";
-      WIFI_PWR_ON_BAT = "on";
+      PCIE_ASPM_ON_BAT = "powersave";
     };
   };
 }
