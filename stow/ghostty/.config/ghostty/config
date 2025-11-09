@@ -22,7 +22,7 @@ window-inherit-working-directory = true
 window-save-state = always
 window-padding-x = 10
 window-padding-y = 10
-window-vsync = false
+window-vsync = true
 window-inherit-font-size = false
 window-step-resize = true
 
@@ -69,9 +69,10 @@ font-size = 14
 
 # Efeitos de Transparência - Wallpaper-only background effect
 # Note: Para efeito só do wallpaper, configure Blur My Shell extension
-background-opacity = 0.90
+# Desabilitar transparência para economizar bateria (compositor usa menos GPU)
+background-opacity = 1.0
 background-blur-radius = 0
-unfocused-split-opacity = 0.30
+unfocused-split-opacity = 0.70
 bold-is-bright=true
 
 # Dark purple Dracula-inspired colors
