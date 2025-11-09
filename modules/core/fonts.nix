@@ -7,6 +7,8 @@
     packages = with pkgs; [
       nerd-fonts.jetbrains-mono
       nerd-fonts.fira-code
+      noto-fonts
+      noto-fonts-cjk-compact
       noto-fonts-emoji
     ];
   };
@@ -20,10 +22,12 @@
     ];
     sansSerif = [
       "Noto Sans"
+      "Noto Sans CJK SC"
       "DejaVu Sans"
     ];
     serif = [
       "Noto Serif"
+      "Noto Serif CJK SC"
       "DejaVu Serif"
     ];
   };
