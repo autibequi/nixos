@@ -16,7 +16,7 @@
   security.protectKernelImage = false;
 
   boot.kernelParams = [
-    "usbcore.autosuspend=-1" # Disable USB auto suspend
+    "usbcore.autosuspend=2" # Habilita o auto-suspend de USBs para economizar energia (estava desabilitado)
     # refresh issues https://gitlab.gnome.org/GNOME/mutter/-/issues/3299\ (Mutter bug, not relevant for Hyprland)
     # "amdgpu.dcdebugmask=0x10"
 
@@ -36,6 +36,7 @@
     "preempt=full" # Preemptive scheduling for better responsiveness
     "libahci.ignore_sss=1" # Disable AHCI SSS (Serial ATA Status and Status Change)
     "scsi_mod.use_blk_mq=1" # Habilita o Multi-Queue Block Layer (necessário para os novos schedulers)
+    "pcie_aspm=force" # Força o gerenciamento de energia do PCIe para economia máxima
   ];
 
   # Otimiza o uso da RAM para cache e swap
@@ -78,7 +79,7 @@
     # Testing
     "amd_energy"
     "amd_pmf"
-    "pcie_aspm=force"
+    # "pcie_aspm=force" # Movido para kernelParams para correta aplicação
     # "bbswitch" # Obsolete with modern nvidia driver power management
 
     # for external nvme usb-c case

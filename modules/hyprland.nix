@@ -39,11 +39,6 @@ in
     xwayland.enable = true;
   };
 
-  # aparently i need gnome just to toggle my theme
-  # But i dont need pp daemon. managed by battery.nix module
-  services.xserver.desktopManager.gnome.enable = true;
-  services.power-profiles-daemon.enable = false;
-
   environment.systemPackages = with pkgs; [
     hyprpicker
     hyprpolkitagent
@@ -75,9 +70,13 @@ in
     # hyprcursor
     rose-pine-hyprcursor
 
+    # Dark/Light Theme Toggle via gnome crap
     glib
     gsettings-desktop-schemas
     dconf
+    
+    # gtk confy
+    nautilus
 
     # Essential utilities only
     libnotify # Notification support
@@ -87,8 +86,6 @@ in
 
     nwg-displays # Display management
     hyprlock
-    waybar
-    anyrun
     cliphist # Clipboard history manager
   ];
 }

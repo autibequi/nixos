@@ -8,12 +8,12 @@
 {
   imports = [
     # Hardware Specific
-    # ./modules/asus.nix
+    ./modules/asus.nix
     # ./modules/nvidia.nix
 
     # Laptop Modules
-    # ./modules/tlp.nix
-    # ./modules/battery.nix
+    ./modules/tlp.nix
+    ./modules/battery.nix
 
     # Desktop Enviroments
     ./modules/hyprland.nix
