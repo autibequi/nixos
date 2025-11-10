@@ -19,7 +19,7 @@
   security.protectKernelImage = false;
 
   boot.kernelParams = [
-    "usbcore.autosuspend=2" # Habilita o auto-suspend de USBs para economizar energia (estava desabilitado)
+    "usbcore.autosuspend=1" # Habilita o auto-suspend de USBs para economizar energia (estava desabilitado)
     # refresh issues https://gitlab.gnome.org/GNOME/mutter/-/issues/3299\ (Mutter bug, not relevant for Hyprland)
     # "amdgpu.dcdebugmask=0x10"
 
@@ -37,14 +37,13 @@
     "bgrt_disable"
     "mitigations=off"
     "iommu=pt"
-    "preempt=full" # Preemptive scheduling for better responsiveness
+    # "preempt=full" # Preemptive scheduling for better responsiveness
     "libahci.ignore_sss=1" # Disable AHCI SSS (Serial ATA Status and Status Change)
     "scsi_mod.use_blk_mq=1" # Habilita o Multi-Queue Block Layer (necessário para os novos schedulers)
     "pcie_aspm=force" # Força o gerenciamento de energia do PCIe para economia máxima
   ];
 
-  # Otimiza o uso da RAM para cache e swap
-  # Devido ao setup dentro de um NVME externo
+  # Otimiza o uso da RAM e I/O para economia de energia
   boot.kernel.sysctl = {
     "vm.swappiness" = 10;
     "vm.vfs_cache_pressure" = 50;
@@ -58,63 +57,69 @@
   boot.initrd.compressor = "zstd"; # zstd is faster for decompression
   boot.initrd.compressorArgs = [ "-19" ]; # Max compression for zstd
 
-  # Userland Scheduler
-  services.scx.enable = true;
+  # Userland Scheduler (Otimizado para Bateria)
+  # services.scx.enable = true;
   # services.scx.package = pkgs.scx_git.full; # latest updates
-  # powerManagement.cpuFreqGovernor = "schedutil"; # needed for scx
-  # services.scx.scheduler = "scx_lavd";
-  # services.scx.extraArgs = [ "--autopower" ];
+  # powerManagement.cpuFreqGovernor = "schedutil"; # needed for scx (ideal for power saving)
+  # services.scx.scheduler = "scx_lavd"; # Low-latency Application-aware Virtual Deadline
+  # services.scx.extraArgs = [ 
+  #   "--autopower" # Auto power-saving mode
+  # ];
 
-  # TODO: clean up moduless
+  # Módulos do Kernel (Otimizados e Limpos)
   boot.kernelModules = [
-    # AMD
+    # ═══ Virtualização ═══
     "kvm-amd" 
     
-    # maybe
+    # ═══ AMD Power Management ═══
+    "amd_pstate" # Driver de p-state moderno (necessário para amd_pstate=guided)
+    "amd_energy" # Monitoramento de energia AMD
+    "amd_pmf" # Platform Management Framework (laptop power features)
+    
+    # ═══ ACPI & Power Management ═══
+    "acpi_call" # Chamadas ACPI customizadas (power management avançado)
+    
+    # ═══ USB & Type-C ═══
     "usbhid"
     "xhci_hcd"
     "xhci_pci"
     "typec"
     "typec_ucsi"
-    "ext4"
-    "acpi_call" # Mantido, pode ser útil para power management específico de hardware
     "ucsi_acpi"
 
-    # Testing
-    "amd_energy"
-    "amd_pmf"
-    # "pcie_aspm=force" # Movido para kernelParams para correta aplicação
-    # "bbswitch" # Obsolete with modern nvidia driver power management
-
-    # for external nvme usb-c case
-    "uas"
+    # ═══ Storage (External NVMe USB-C) ═══
+    "uas" # USB Attached SCSI
     "usb_storage"
     "usbcore"
     "nvme"
     "nvme_core"
     "scsi_mod"
     "sd_mod"
+    "ext4"
   ];
 
-  # TODO: clean up initrd modules
-  # InitRD - Módulos essenciais para boot e resume, especialmente com root em NVMe externo
+  # InitRD - Módulos essenciais para boot e resume (NVMe externo via USB-C)
   boot.initrd.availableKernelModules = [
-    # maybe?
+    # ═══ USB Controllers ═══
     "usbhid"
     "xhci_hcd"
     "xhci_pci"
+    
+    # ═══ USB Type-C ═══
     "typec"
     "typec_ucsi"
-    "ext4"
 
-    # for external nvme usb-c case
-    "uas"
+    # ═══ Storage Drivers ═══
+    "uas" # USB Attached SCSI (crítico para NVMe USB-C)
     "usb_storage"
     "usbcore"
     "nvme"
     "nvme_core"
     "scsi_mod"
     "sd_mod"
+    
+    # ═══ Filesystem ═══
+    "ext4"
   ];
 
   # Otimizações de I/O
