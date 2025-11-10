@@ -7,7 +7,7 @@
   # Kernel
   # If broken plz change to linuxPackages_x_xx until nvidia update their drivers
   boot.kernelPackages = pkgs.linuxPackages_zen;
-  # boot.kernelPackages = pkgs.linuxPackages_cachyos-lto;
+  # boot.kernelPackages = pkgs.linuxPackages_cachyos; # broken :(
 
   # SystemD no InitRD para hibernação moderna
   boot.initrd.systemd.enable = true;
@@ -29,8 +29,8 @@
 
     # Força o uso do p-state ativo para o processador AMD
     # active so epp modes will work
-    # "amd_pstate=guided" # best
-    "amd_pstate=active"
+    "amd_pstate=guided" # best
+    # "amd_pstate=active" # defautl
     "bgrt_disable"
     "mitigations=off"
     "iommu=pt"
@@ -59,8 +59,8 @@
   services.scx.enable = true;
   # services.scx.package = pkgs.scx_git.full; # latest updates
   # powerManagement.cpuFreqGovernor = "schedutil"; # needed for scx
-  services.scx.scheduler = "scx_lavd";
-  services.scx.extraArgs = [ "--autopower" ];
+  # services.scx.scheduler = "scx_lavd";
+  # services.scx.extraArgs = [ "--autopower" ];
 
   # TODO: clean up moduless
   boot.kernelModules = [
