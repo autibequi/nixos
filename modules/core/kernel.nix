@@ -58,9 +58,8 @@
   boot.initrd.compressorArgs = [ "-19" ]; # Max compression for zstd
 
   # Userland Scheduler (Otimizado para Bateria)
-  # services.scx.enable = true;
-  # services.scx.package = pkgs.scx_git.full; # latest updates
-  # powerManagement.cpuFreqGovernor = "schedutil"; # needed for scx (ideal for power saving)
+  services.scx.enable = true;
+  powerManagement.cpuFreqGovernor = "schedutil"; # needed for scx (ideal for power saving)
   # services.scx.scheduler = "scx_lavd"; # Low-latency Application-aware Virtual Deadline
   # services.scx.extraArgs = [ 
   #   "--autopower" # Auto power-saving mode
