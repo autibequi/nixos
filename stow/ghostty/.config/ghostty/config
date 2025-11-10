@@ -107,12 +107,3 @@ keybind = ctrl+h=goto_split:left
 keybind = ctrl+j=goto_split:down
 keybind = ctrl+k=goto_split:up
 keybind = ctrl+l=goto_split:right
-
-# =============================================================================
-# Quick Terminal (macos only :/)
-# =============================================================================
-keybind = global:ctrl+space=toggle_quick_terminal
-quick-terminal-position=top
-quick-terminal-screen=main
-quick-terminal-animation-duration=0.3
-quick-terminal-autohide=true
