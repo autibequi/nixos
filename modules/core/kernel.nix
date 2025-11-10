@@ -1,13 +1,16 @@
 {
   pkgs,
+  lib,
   ...
 }:
-
 {
-  # Kernel
-  # If broken plz change to linuxPackages_x_xx until nvidia update their drivers
-  boot.kernelPackages = pkgs.linuxPackages_zen;
-  # boot.kernelPackages = pkgs.linuxPackages_cachyos; # broken :(
+  # Zen Kernel (fallback 'cos cachyos too edgy)
+  # boot.kernelPackages = pkgs.linuxPackages_zen;
+
+  # CachyOS Kernel (With weird workaround)
+  # https://github.com/chaotic-cx/nyx/issues/1158
+  system.modulesTree = [ (lib.getOutput "modules" pkgs.linuxPackages_cachyos.kernel) ];
+  boot.kernelPackages = pkgs.linuxPackages_cachyos;
 
   # SystemD no InitRD para hibernação moderna
   boot.initrd.systemd.enable = true;
