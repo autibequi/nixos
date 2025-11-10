@@ -57,6 +57,7 @@ in
     grim # Screenshots
     swappy # Screen editing
     slurp # Screen selection
+    swayimg # Image viewer for Wayland
     wl-clipboard # Clipboard management
     hypridle
     hyprshade
@@ -82,9 +83,6 @@ in
     gtk3 # Garantir lib GTK3 disponível
     gtk4 # Opcional, se usar apps GTK4
 
-    # gtk utils
-    nautilus
-
     # Essential utilities only
     libnotify # Notification support
     pavucontrol # Audio control
@@ -94,5 +92,9 @@ in
     nwg-displays # Display management
     hyprlock
     cliphist # Clipboard history manager
+
+    # File managers
+    yazi # better ranger
+    nautilus # file manager
   ];
 }
