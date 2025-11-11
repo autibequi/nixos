@@ -96,25 +96,22 @@ toggle_theme() {
         echo "light" > "$theme_state_file"
         apply_gtk_theme "adw-gtk3" "prefer-light"
         
-        # Hyprland borders (opcional - descomente se quiser)
-        # hyprctl keyword general:col.active_border "rgb(e0e0e0)"
-        
         notify-send -t 500 "Theme changed to light ☀️"
-        swww img ~/assets/livewallpapers/gundam.gif --transition-type random
+        swww img ~/assets/livewallpapers/gundam.gif \
+            --transition-type fade \
+            --transition-fps 60 \
+            --transition-duration 0.3
     else
         # Mudar para dark
         echo "dark" > "$theme_state_file"
         apply_gtk_theme "adw-gtk3-dark" "prefer-dark"
         
-        # Hyprland borders (opcional - descomente se quiser)
-        # hyprctl keyword general:col.active_border "rgb(2e2e2e)"
-        
         notify-send -t 500 "Theme changed to dark 🌙"
-        swww img ~/assets/livewallpapers/gundam2.gif --transition-type random
+s        swww img ~/assets/livewallpapers/gundam2.gif \
+            --transition-type fade \
+            --transition-fps 60 \
+            --transition-duration 0.3
     fi
-    
-    # Recarregar Waybar para aplicar tema
-    waybar_refresh
 }
 
 waybar_refresh() {
