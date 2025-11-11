@@ -60,10 +60,10 @@
   # Userland Scheduler (Otimizado para Bateria)
   services.scx.enable = true;
   powerManagement.cpuFreqGovernor = "schedutil"; # needed for scx (ideal for power saving)
-  # services.scx.scheduler = "scx_lavd"; # Low-latency Application-aware Virtual Deadline
-  # services.scx.extraArgs = [ 
-  #   "--autopower" # Auto power-saving mode
-  # ];
+  services.scx.scheduler = "scx_lavd"; # Low-latency Application-aware Virtual Deadline
+  services.scx.extraArgs = [ 
+    "--autopower"
+  ];
 
   # Módulos do Kernel (Otimizados e Limpos)
   boot.kernelModules = [
