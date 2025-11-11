@@ -2,6 +2,7 @@
   lib,
   pkgs,
   inputs,
+  pkgs-unstable,
   ...
 }:
 with lib;
@@ -9,7 +10,7 @@ let
   hypr-plugin-dir = pkgs.symlinkJoin {
     name = "hyrpland-plugins";
     paths =
-      (with pkgs.hyprlandPlugins; [
+      (with pkgs-unstable.hyprlandPlugins; [
         hyprexpo
         hyprwinwrap
         hypr-dynamic-cursors
@@ -35,7 +36,7 @@ in
 
   programs.hyprland = {
     enable = true;
-    package = pkgs.hyprland;
+    package = pkgs-unstable.hyprland;
     xwayland.enable = true;
   };
 
