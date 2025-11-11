@@ -48,9 +48,11 @@ waybar_refresh() {
     # reload waybar
     pkill waybar 2>/dev/null
     waybar --config ~/.config/waybar/config.jsonc --style ~/.config/waybar/style.css &
-    # reload bongocat
+    # reload bongocat (only if AC is plugged in)
     pkill bongocat 2>/dev/null 
-    bongocat --config ~/.config/bongocat/bongocat.conf
+    if [ -f /sys/class/power_supply/ADP0/online ] && [ "$(cat /sys/class/power_supply/ADP0/online)" = "1" ]; then
+        bongocat --config ~/.config/bongocat/bongocat.conf
+    fi
 }
 
 clipboard_history() {
