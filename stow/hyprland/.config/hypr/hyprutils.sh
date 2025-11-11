@@ -26,22 +26,95 @@ toggle_last_special_workspace(){
     hyprctl dispatch togglespecialworkspace $(cat ~/.cache/hyprland/hyprutils_special_workspace)
 }
 
-toggle_theme() {
-    # Alterna entre tema claro e escuro do GNOME e troca o wallpaper
-    local current_state
-    current_state=$(gsettings get org.gnome.desktop.interface color-scheme)
+apply_gtk_theme() {
+    local gtk_theme="$1"
+    local color_scheme="$2"
+    
+    # 1. Criar arquivos de configuração GTK3
+    mkdir -p "$HOME/.config/gtk-3.0"
+    cat > "$HOME/.config/gtk-3.0/settings.ini" << EOF
+[Settings]
+gtk-theme-name=$gtk_theme
+gtk-application-prefer-dark-theme=$([ "$color_scheme" = "prefer-dark" ] && echo "1" || echo "0")
+gtk-icon-theme-name=Adwaita
+gtk-font-name=Sans 10
+gtk-cursor-theme-name=Adwaita
+gtk-cursor-theme-size=24
+gtk-enable-animations=true
+EOF
 
-    if [ "$current_state" = "'prefer-dark'" ]; then
-        # gsettings set org.gnome.desktop.interface gtk-theme adw-gtk3
-        gsettings set org.gnome.desktop.interface color-scheme prefer-light
-        notify-send -t 500 "Theme changed to light"
+    # 2. Criar arquivos de configuração GTK4
+    mkdir -p "$HOME/.config/gtk-4.0"
+    cat > "$HOME/.config/gtk-4.0/settings.ini" << EOF
+[Settings]
+gtk-theme-name=$gtk_theme
+gtk-application-prefer-dark-theme=$([ "$color_scheme" = "prefer-dark" ] && echo "1" || echo "0")
+gtk-icon-theme-name=Adwaita
+gtk-font-name=Sans 10
+gtk-cursor-theme-name=Adwaita
+gtk-cursor-theme-size=24
+gtk-enable-animations=true
+EOF
+
+    # 3. Tentar aplicar via gsettings (se schemas estiverem instalados)
+    if command -v gsettings &> /dev/null; then
+        gsettings set org.gnome.desktop.interface gtk-theme "$gtk_theme" 2>/dev/null || true
+        gsettings set org.gnome.desktop.interface color-scheme "$color_scheme" 2>/dev/null || true
+    fi
+    
+    # 4. Tentar via dconf direto (mais robusto)
+    if command -v dconf &> /dev/null; then
+        dconf write /org/gnome/desktop/interface/gtk-theme "'$gtk_theme'" 2>/dev/null || true
+        dconf write /org/gnome/desktop/interface/color-scheme "'$color_scheme'" 2>/dev/null || true
+    fi
+    
+    # 5. Exportar variáveis de ambiente para novas aplicações
+    export GTK_THEME="$gtk_theme"
+    
+    # 6. Notificar todas as aplicações GTK rodando (via XSETTINGS)
+    # Isso faz apps existentes recarregarem o tema
+    killall -SIGHUP xsettingsd 2>/dev/null || true
+}
+
+toggle_theme() {
+    # Alterna entre tema claro e escuro (Hyprland-native, não depende do GNOME)
+    local theme_state_file="$HOME/.cache/hyprland/hyprutils_theme_state"
+    local current_theme
+    
+    # Criar diretório se não existir
+    mkdir -p "$HOME/.cache/hyprland"
+    
+    # Ler tema atual (default: dark)
+    if [ -f "$theme_state_file" ]; then
+        current_theme=$(cat "$theme_state_file")
+    else
+        current_theme="dark"
+    fi
+    
+    if [ "$current_theme" = "dark" ]; then
+        # Mudar para light
+        echo "light" > "$theme_state_file"
+        apply_gtk_theme "adw-gtk3" "prefer-light"
+        
+        # Hyprland borders (opcional - descomente se quiser)
+        # hyprctl keyword general:col.active_border "rgb(e0e0e0)"
+        
+        notify-send -t 500 "Theme changed to light ☀️"
         swww img ~/assets/livewallpapers/gundam.gif --transition-type random
     else
-        # gsettings set org.gnome.desktop.interface gtk-theme adw-gtk3-dark
-        dconf write /org/gnome/desktop/interface/color-scheme "'prefer-dark'"
-        notify-send -t 500 "Theme changed to dark"
+        # Mudar para dark
+        echo "dark" > "$theme_state_file"
+        apply_gtk_theme "adw-gtk3-dark" "prefer-dark"
+        
+        # Hyprland borders (opcional - descomente se quiser)
+        # hyprctl keyword general:col.active_border "rgb(2e2e2e)"
+        
+        notify-send -t 500 "Theme changed to dark 🌙"
         swww img ~/assets/livewallpapers/gundam2.gif --transition-type random
     fi
+    
+    # Recarregar Waybar para aplicar tema
+    waybar_refresh
 }
 
 waybar_refresh() {

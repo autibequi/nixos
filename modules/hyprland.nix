@@ -31,8 +31,6 @@ in
   environment.sessionVariables = {
     HYPR_PLUGIN_DIR = hypr-plugin-dir;
     ANYRUN_PLUGIN_DIR = "${pkgs.anyrun}/lib";
-    # Garantir que schemas sejam encontradas
-    XDG_DATA_DIRS = "$XDG_DATA_DIRS:${pkgs.gsettings-desktop-schemas}/share:${pkgs.gtk3}/share";
   };
 
   programs.hyprland = {
@@ -40,6 +38,7 @@ in
     package = pkgs.hyprland;
     xwayland.enable = true;
   };
+
 
   # Habilitar serviço para compilar schemas
   programs.dconf.enable = true;
