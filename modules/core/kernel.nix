@@ -28,7 +28,7 @@
     # idProduct          0x0583 JMS583Gen 2 to PCIe Gen3x2 Bridge
     # i - usb-storage disasbled
     # u - enable (faster)(this flat is a headache but works i guess)
-    # "usb-storage.quirks=0x152d:0x0583:u"
+    "usb-storage.quirks=0x152d:0x0583:u"
 
     # Força o uso do p-state ativo para o processador AMD
     # active so epp modes will work
