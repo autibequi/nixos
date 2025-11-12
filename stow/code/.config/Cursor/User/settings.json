@@ -19,7 +19,6 @@
   "window.openFilesInNewWindow": "on",
   "window.zoomLevel": 0,
   "window.commandCenter": true,
-  "window.menuBarVisibility": "hidden",
   "breadcrumbs.enabled": true,
 
   // --------------------------------------------------------------------------
