@@ -38,6 +38,8 @@
     chromium
     google-chrome
 
+    krita
+
     # vivaldi
     # vivaldi-ffmpeg-codecs
 

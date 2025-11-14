@@ -20,8 +20,12 @@
 
   boot.kernelParams = [
     "usbcore.autosuspend=0" # Habilita o auto-suspend de USBs para economizar energia (estava desabilitado)
-    # refresh issues https://gitlab.gnome.org/GNOME/mutter/-/issues/3299\ (Mutter bug, not relevant for Hyprland)
-    # "amdgpu.dcdebugmask=0x10"
+    "amdgpu.dcdebugmask=0x10" # Debug mask for amdgpu
+
+    "amd_pstate=guided" # best, active is good too dunno
+    "bgrt_disable"
+    "mitigations=off"
+    "preempt=full" # Preemptive scheduling for better responsiveness
 
     # Force UAS for external NVME USB-C case; this garantees high speed mode | lsusb -t:
     # idVendor           0x152d JMicron Technology Corp. / JMicron USA Technology Corp.
@@ -29,18 +33,6 @@
     # i - usb-storage disasbled
     # u - enable (faster)(this flat is a headache but works i guess)
     # "usb-storage.quirks=0x152d:0x0583:u"
-
-    # Força o uso do p-state ativo para o processador AMD
-    # active so epp modes will work
-    "amd_pstate=guided" # best
-    # "amd_pstate=active" # defautl
-    "bgrt_disable"
-    "mitigations=off"
-    "iommu=pt"
-    # "preempt=full" # Preemptive scheduling for better responsiveness
-    "libahci.ignore_sss=1" # Disable AHCI SSS (Serial ATA Status and Status Change)
-    "scsi_mod.use_blk_mq=1" # Habilita o Multi-Queue Block Layer (necessário para os novos schedulers)
-    "pcie_aspm=force" # Força o gerenciamento de energia do PCIe para economia máxima
   ];
 
   # Otimiza o uso da RAM e I/O para economia de energia
