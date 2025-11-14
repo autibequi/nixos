@@ -19,6 +19,9 @@
 
     llm # access large language models
 
+    # AI Image Upscaler
+    upscayl
+
     # Local Whisper
     # openai-whisper-cpp
     # whisper-cpp
