@@ -19,7 +19,7 @@
   security.protectKernelImage = false;
 
   boot.kernelParams = [
-    "usbcore.autosuspend=1" # Habilita o auto-suspend de USBs para economizar energia (estava desabilitado)
+    "usbcore.autosuspend=0" # Habilita o auto-suspend de USBs para economizar energia (estava desabilitado)
     # refresh issues https://gitlab.gnome.org/GNOME/mutter/-/issues/3299\ (Mutter bug, not relevant for Hyprland)
     # "amdgpu.dcdebugmask=0x10"
 

@@ -39,7 +39,7 @@
       grep = "rg"; # ripgrep
       findf = "fd";
       cat = "bat";
-      ls = "eza -la";
+      ls = "lsd -la";
       du = "dust";
       ps = "procs";
       tree = "broot";
@@ -130,7 +130,7 @@
     ripgrep # better grep
     fd # better find
     bat # better cat
-    eza # better ls
+    lsd # better ls
     dust # better du
     procs # better ps
     broot # better tree
