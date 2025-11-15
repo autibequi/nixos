@@ -195,8 +195,6 @@
   // --------------------------------------------------------------------------
   // Vim Extension
   // --------------------------------------------------------------------------
-  "vim.neovimPath": "/usr/bin/nvim",
-  "vim.enableNeovim": true,
   "vim.leader": "<space>",
   "vim.easymotion": true,
   "vim.sneak": true,

@@ -8,13 +8,6 @@
     starship.enable = true;
     starship.transientPrompt.enable = true;
 
-    neovim = {
-      enable = true;
-      defaultEditor = true;
-      vimAlias = true;
-      viAlias = true;
-    };
-
     firefox = {
       enable = true;
     };

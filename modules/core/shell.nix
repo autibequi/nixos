@@ -49,6 +49,8 @@
       zed = "zeditor";
       stow = "stow --target=$HOME";
       please = "sudo !!";
+      vim = "hx";
+      vi = "hx";
 
       wiki = "wikiti";
 

@@ -28,15 +28,6 @@
     "soft_tabs": true,
     "tab_size": 2
   },
-  "vim_mode": false,
-  "vim": {
-    "cursor_shape": {
-      "insert": "bar",
-      "normal": "block",
-      "replace": "hollow",
-      "visual": "underline"
-    }
-  },
   "auto_indent_on_paste": true,
   "scroll_beyond_last_line": "vertical_scroll_margin",
   "autoscroll_on_clicks": true,

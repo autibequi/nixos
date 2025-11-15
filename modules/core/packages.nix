@@ -37,11 +37,10 @@
     # Work Browser
     chromium
     google-chrome
+    servo # rust browser
 
+    # art
     krita
-
-    # vivaldi
-    # vivaldi-ffmpeg-codecs
 
     # Cursor
     banana-cursor
@@ -61,7 +60,7 @@
     # warp-terminal
     # allacritty
 
-    # should be working
+    # should be working (but its not)
     # cura
     # ventoy-full-qt
 

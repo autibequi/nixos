@@ -61,8 +61,8 @@
   # Ferramentas úteis para desenvolvimento com containers
   environment.systemPackages = with pkgs; [
     podman-desktop
-    dive # inspecionar camadas de imagens docker
-    podman-tui # status de containers no terminal
-    podman-compose # iniciar grupo de containers para desenvolvimento
+    dive 
+    podman-tui 
+    podman-compose 
   ];
 }
