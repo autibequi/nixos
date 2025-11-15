@@ -15,7 +15,7 @@ i STILL have no ideia what i'm doing...
 
 You will need GIT and a text editor, run with nix without installing first:
 ```
-nix-shell -p vim git
+nix-shell -p helix git
 ```
 
 From fresh install, get the `/boot`, `/` and `swap` partition UUIDs from the auto generated file.
