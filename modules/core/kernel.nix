@@ -5,12 +5,12 @@
 }:
 {
   # Zen Kernel (fallback 'cos cachyos too edgy)
-  # boot.kernelPackages = pkgs.linuxPackages_zen;
+  boot.kernelPackages = pkgs.linuxPackages_zen;
 
   # CachyOS Kernel (With weird workaround)
   # https://github.com/chaotic-cx/nyx/issues/1158
-  system.modulesTree = [ (lib.getOutput "modules" pkgs.linuxPackages_cachyos.kernel) ];
-  boot.kernelPackages = pkgs.linuxPackages_cachyos;
+  # system.modulesTree = [ (lib.getOutput "modules" pkgs.linuxPackages_cachyos.kernel) ];
+  # boot.kernelPackages = pkgs.linuxPackages_cachyos;
 
   # SystemD no InitRD para hibernação moderna
   boot.initrd.systemd.enable = true;
@@ -80,6 +80,7 @@
     "typec"
     "typec_ucsi"
     "ucsi_acpi"
+    "usbcore"
 
     # ═══ Storage (External NVMe USB-C) ═══
     "uas" # USB Attached SCSI
