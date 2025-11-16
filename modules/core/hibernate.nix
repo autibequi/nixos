@@ -17,4 +17,10 @@
   boot.kernelParams = [
     "mem_sleep_default=deep"
   ];
+
+  # TTY Sleep
+  services.logind.extraConfig = ''
+    IdleAction=suspend
+    IdleActionSec=15min
+  '';
 }

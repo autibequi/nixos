@@ -19,12 +19,15 @@
   security.protectKernelImage = false;
 
   boot.kernelParams = [
-    "usbcore.autosuspend=0" # Habilita o auto-suspend de USBs para economizar energia (estava desabilitado)
-    "amdgpu.dcdebugmask=0x10" # Debug mask for amdgpu
+    # USB
+    "usbcore.autosuspend=0"
+    
+    # AMD Specifics
+    "amdgpu.dcdebugmask=0x10"
+    "amd_pstate=guided" # best, active is good too
 
-    "amd_pstate=guided" # best, active is good too dunno
-    "bgrt_disable"
-    "mitigations=off"
+    "bgrt_disable" # disable boot logo
+    "mitigations=off" # unsecure
     "preempt=full" # Preemptive scheduling for better responsiveness
 
     # Force UAS for external NVME USB-C case; this garantees high speed mode | lsusb -t:
