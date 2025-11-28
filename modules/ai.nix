@@ -4,12 +4,13 @@
   pkgs,
   lib,
   pkgs-unstable,
+  inputs,
   ...
 }:
 {
   environment.systemPackages = with pkgs; [
-    # 🎨 Stable Diffusion / ComfyUI
-    # Executar: nix run github:nixified-ai/flake#comfyui-nvidia
+    # 🎨 ComfyUI (NVIDIA)
+    inputs.nixified-ai.packages.x86_64-linux.comfyui-nvidia
 
     # 🤖 LLM Local
     lmstudio
