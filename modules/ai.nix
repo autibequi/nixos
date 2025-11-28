@@ -8,23 +8,20 @@
 }:
 {
   environment.systemPackages = with pkgs; [
-    # Enable AI tools from nixified-ai flake
-    lmstudio # LM Studio for local LLMs
+    # 🎨 Stable Diffusion / ComfyUI
+    # Executar: nix run github:nixified-ai/flake#comfyui-nvidia
+
+    # 🤖 LLM Local
+    lmstudio
     jan
 
-    # AI Core
+    # 💻 AI IDEs
     windsurf
     pkgs-unstable.code-cursor
     opencode
 
-    llm # access large language models
-
-    # AI Image Upscaler
+    # 🛠️ Utilities
+    llm
     upscayl
-
-    # Local Whisper
-    # openai-whisper-cpp
-    # whisper-cpp
-    # whisper-cpp-vulkan # Voice-To-Text - for blurt gnome extension
   ];
 }

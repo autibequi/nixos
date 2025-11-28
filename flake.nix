@@ -36,8 +36,7 @@
       nixos-hardware,
       home-manager,
       chaotic,
-      # winboat,
-      # nixified-ai,
+      nixified-ai,
       ...
     }@inputs:
       let
@@ -51,7 +50,7 @@
     {
       nixosConfigurations.nomad = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = { inherit inputs pkgs-unstable; }; # Pass all inputs to modules
+        specialArgs = { inherit inputs pkgs-unstable; };
         modules = [
           {
             nixpkgs.config.allowUnfree = true;
@@ -71,8 +70,8 @@
             home-manager.useUserPackages = true;
           }
 
-          # Nixified AI
-          # nixified-ai.nixosModules.default
+          # Nixified AI - ComfyUI + Stable Diffusion
+          nixified-ai.nixosModules.comfyui
 
           # Mine
           ./configuration.nix

@@ -57,6 +57,10 @@
       "https://chaotic-nyx.cachix.org/"
       "https://hyprland.cachix.org"
       "https://anyrun.cachix.org"
+      # Nixified AI - ComfyUI/Stable Diffusion
+      "https://ai.cachix.org"
+      "https://cuda-maintainers.cachix.org"
+      "https://numtide.cachix.org"
     ];
 
     trusted-public-keys = [
@@ -65,6 +69,10 @@
       "chaotic-nyx.cachix.org-1:HfnXSw4pj95iI/n17rIDy40agHj12WfF+Gqk6SonIT8"
       "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
       "anyrun.cachix.org-1:pqBobmOjI7nKlsUMV25u9QHa9btJK65/C8vnO3p346s="
+      # Nixified AI - ComfyUI/Stable Diffusion
+      "ai.cachix.org-1:N9dzRK+alWwoKXQlnn0H6aUx0lU/mspIoz8hMvGvbbc="
+      "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
+      "numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE="
     ];
 
     # Enable experimental features
