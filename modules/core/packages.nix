@@ -51,6 +51,7 @@
 
     # benchmark
     geekbench
+    nvtopPackages.amd # AMD GPU monitoring
 
     # Games
     # retroarchFull
