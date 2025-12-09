@@ -19,15 +19,15 @@
     ./modules/core/shell.nix
     ./modules/core/kernel.nix
     ./modules/core/hibernate.nix
-    ./modules/nvidia.nix
+    # ./modules/nvidia.nix
 
     # Stable Modules
     ./modules/bluetooth.nix
     ./modules/plymouth.nix
     ./modules/ai.nix
     ./modules/steam.nix
-    ./modules/podman.nix
-    # ./modules/docker.nix
+    # ./modules/podman.nix
+    ./modules/docker.nix
 
     # Custom Modules
     ./modules/flatpak.nix

@@ -40,7 +40,7 @@
     servo # rust browser
 
     # art
-    krita
+    # krita
 
     # Cursor
     banana-cursor

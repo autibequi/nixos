@@ -7,10 +7,6 @@
     direnv.enable = true;
     starship.enable = true;
     starship.transientPrompt.enable = true;
-
-    firefox = {
-      enable = true;
-    };
   };
 
   # Waydroid
