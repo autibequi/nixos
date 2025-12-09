@@ -48,16 +48,20 @@
 
   users.defaultUserShell = pkgs.zsh;
 
+  users.groups.docker = { }; #
+
   # User Accounts
   users.users.pedrinho = {
     isNormalUser = true;
     description = "pedrinho";
     extraGroups = [
-      "wheel"
       "adbusers"
       "docker"
       "hidraw"
       "input"
+      "networkmanager"
+      "podman"
+      "wheel"
     ];
     shell = pkgs.zsh;
   };
