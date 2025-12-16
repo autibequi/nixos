@@ -1,10 +1,10 @@
 { pkgs, ... }:
 
 {
+  
   # ═══════════════════════════════════════════════════════════════════════════════
   # QEMU/KVM + Virt-Manager - Virtualização Completa para Windows
   # ═══════════════════════════════════════════════════════════════════════════════
-
   virtualisation.libvirtd = {
     enable = true;
     
@@ -22,13 +22,19 @@
       swtpm.enable = true;
     };
     
-    # Hook para gerenciamento de recursos (GPU passthrough futuro)
-    onBoot = "ignore";
+    # Inicia redes/VMs marcadas como autostart no boot
+    onBoot = "start";
     onShutdown = "shutdown";
+    
+    # Permite bridge de rede para VMs
+    allowedBridges = [ "virbr0" ];
   };
 
   # Virt-Manager GUI (forma correta de habilitar)
   programs.virt-manager.enable = true;
+
+  # Spice VDAgentd para suporte a clipboard e mouse/keyboard
+  services.spice-vdagentd.enable = true;
 
   # Dconf para virt-manager salvar configurações
   programs.dconf.enable = true;
