@@ -5,7 +5,7 @@
 
   services.power-profiles-daemon.enable = true;
 
-  powerManagement.powertop.enable = true;
+  # powerManagement.powertop.enable = true;
   
   services.thermald.enable = true;
   
