@@ -44,8 +44,8 @@
 
     # --- Flutter ---
     flutter
-    android-studio
-    android-tools
+    # android-studio
+    # android-tools
     gradle
     dart
 
