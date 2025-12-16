@@ -91,7 +91,7 @@
   "unstable.ui_density": "comfortable",
   "icon_theme": "VSCode Icons (Dark)",
   "theme": {
-    "dark": "Tokyo Night",
+    "dark": "Dracula",
     "light": "Hex Solarized Light Theme",
     "mode": "system"
   },
