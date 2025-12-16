@@ -5,7 +5,7 @@
 }:
 {
   # Zen Kernel (fallback 'cos cachyos too edgy)
-  # boot.kernelPackages = pkgs.linuxPackages_zen;
+  boot.kernelPackages = pkgs.linuxPackages_zen;
 
   # CachyOS Kernel (With weird workaround)
   # https://github.com/chaotic-cx/nyx/issues/1158

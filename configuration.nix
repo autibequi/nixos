@@ -31,5 +31,6 @@
 
     # Custom Modules
     ./modules/flatpak.nix
+    ./modules/virt.nix
   ];
 }
