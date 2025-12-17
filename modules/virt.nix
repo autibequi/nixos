@@ -61,4 +61,23 @@
 
   # Networking bridge para VMs
   networking.firewall.trustedInterfaces = [ "virbr0" ];
+
+  # Autostart da rede 'default' - roda após libvirtd iniciar
+  systemd.services.libvirt-default-network = {
+    description = "Start libvirt default network";
+    after = [ "libvirtd.service" ];
+    requires = [ "libvirtd.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      # Aguarda socket ficar disponível
+      sleep 2
+      # Marca como autostart (persiste) e inicia
+      ${pkgs.libvirt}/bin/virsh net-autostart default 2>/dev/null || true
+      ${pkgs.libvirt}/bin/virsh net-start default 2>/dev/null || true
+    '';
+  };
 }
