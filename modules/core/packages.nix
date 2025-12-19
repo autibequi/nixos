@@ -55,6 +55,7 @@
 
     # Games
     # retroarchFull
+    godot
 
     # Terminal
     ghostty
