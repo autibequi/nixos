@@ -16,7 +16,6 @@
     appimage-run # Wrapper to run AppImages on NixOS
     onlyoffice-bin # office space apps
     sidequest # for oculus sideloading
-    stremio # yaaaaaaaarh
     blanket # Noise
     papers # PDFS
     flameshot # PrintScreens

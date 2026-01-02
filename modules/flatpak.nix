@@ -8,6 +8,7 @@ let
     "com.usebottles.bottles"
     "io.github.seadve.Kooha"
     "net.nokyan.Resources"
+    "com.stremio.Stremio"
     # "com.github.tenderowl.frog"
     # "com.vivaldi.Vivaldi"
   ];
