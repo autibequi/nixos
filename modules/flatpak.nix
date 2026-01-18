@@ -9,6 +9,7 @@ let
     "io.github.seadve.Kooha"
     "net.nokyan.Resources"
     "com.stremio.Stremio"
+    "io.github.qwersyk.Newelle"
     # "com.github.tenderowl.frog"
     # "com.vivaldi.Vivaldi"
   ];

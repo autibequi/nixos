@@ -12,6 +12,7 @@
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     isd.url = "github:isd-project/isd"; # Interactive SystemD
     home-manager.url = "github:nix-community/home-manager/release-25.05"; # Home Manager
+    voxtype.url = "github:peteonrails/voxtype";
     nixified-ai.url = "github:nixified-ai/flake"; # Nixified AI
 
     hyprland.url = "github:hyprwm/Hyprland";
@@ -37,6 +38,7 @@
       home-manager,
       chaotic,
       nixified-ai,
+      voxtype,
       ...
     }@inputs:
       let
@@ -72,6 +74,9 @@
 
           # Nixified AI - ComfyUI + Stable Diffusion
           nixified-ai.nixosModules.comfyui
+
+          # Voxtype
+          voxtype.nixosModules.default
 
           # Mine
           ./configuration.nix

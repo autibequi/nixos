@@ -77,6 +77,9 @@
     # inputs.winboat.packages.${pkgs.system}.winboat
     # freerdp3 # Required by WinBoat for RDP connections
 
+    # voxtype-vulkan-unwrapped
+    # inputs.voxtype.packages.${pkgs.system}.vulkan
+
     # Fun
     pkgs-unstable.wayland-bongocat
   ];
