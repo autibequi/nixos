@@ -4,7 +4,7 @@
 
 {
   # sunshine
-  services.sunshine.enable = true;
+  # services.sunshine.enable = true;
   # TODO: add steam later
   # services.sunshine.applications.apps = [
 

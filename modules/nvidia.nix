@@ -31,7 +31,7 @@
       # Porem atualmente simplesmente trava depois de um tempo. Imagino que arrume rapido.
       # reverseSync.enable = true; # Sincronização reversa para melhorar desempenho
       offload.enable = true; # Modo offload para economia de energia
-      sync.enable = false; # Desativado para evitar consumo constante da GPU
+      sync.enable = true; # Desativado para evitar consumo constante da GPU
 
       # Configuração de barramento otimizada para G14 com RTX 4060
       amdgpuBusId = lib.mkDefault "PCI:65:0:0";

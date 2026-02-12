@@ -27,7 +27,7 @@ let
   };
 in
 {
-  services.hypridle.enable = true;
+  # services.hypridle.enable = true;
 
   environment.sessionVariables = {
     HYPR_PLUGIN_DIR = hypr-plugin-dir;

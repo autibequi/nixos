@@ -68,6 +68,7 @@
     "editor.defaultFormatter": "golang.go"
   },
   "gopls": {
+    "gopls.path": "/run/current-system/sw/bin/gopls",
     "build.directoryFilters": ["-**/mocks"]
   },
 
@@ -283,13 +284,14 @@
   "cursor.chat.terminalShowHoverHint": false,
   "cursor.windowSwitcher.sidebarHoverCollapsed": true,
   "diffEditor.renderSideBySide": false,
-  "workbench.editor.showTabs": "none",
   "editor.stickyScroll.enabled": false,
   "git.autofetch": true,
-  "go.toolsManagement.autoUpdate": true,
   "[json]": {
     "editor.defaultFormatter": "vscode.json-language-features"
   },
   "python.languageServer": "None",
-  "notebook.output.textLineLimit": 100
+  "notebook.output.textLineLimit": 100,
+  "go.alternateTools": {
+    "gopls": "/run/current-system/sw/bin/gopls"
+  },
 }

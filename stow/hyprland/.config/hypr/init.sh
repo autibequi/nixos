@@ -1,3 +1,3 @@
 #!/bin/sh
 
-hyprland
+start-hyprland

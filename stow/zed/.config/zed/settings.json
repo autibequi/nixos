@@ -2,6 +2,7 @@
   // =======================
   //      EDITOR SETTINGS
   // =======================
+  "hard_tabs": false,
   "context_servers": {
     "mcp-server-exa-search": {
       "source": "extension",
@@ -91,12 +92,9 @@
   "unstable.ui_density": "comfortable",
   "icon_theme": "VSCode Icons (Dark)",
   "theme": {
-    "dark": "Dracula",
-    "light": "Hex Solarized Light Theme",
-    "mode": "system"
-  },
-  "active_pane_modifiers": {
-    "inactive_opacity": 0.2
+    "mode": "system",
+    "light": "Dracula Light (Alucard)",
+    "dark": "Dracula Solid"
   },
   "bottom_dock_layout": "left_aligned",
   "when_closing_with_no_tabs": "close_window",
@@ -106,7 +104,7 @@
     "enabled": true,
   },
   "tab_bar": {
-    "show": false,
+    "show": true,
     "show_nav_history_buttons": false,
     "show_tab_bar_buttons": false
   },
@@ -179,13 +177,14 @@
       "**/dist/**",
       "**/build/**"
     ],
-    "mode": "subtle"
+    "mode": "eager"
   },
   "agent": {
+    "show_turn_stats": true,
     "play_sound_when_agent_done": true,
     "default_model": {
-      "provider": "google",
-      "model": "gemini-2.0-flash-thinking-exp"
+      "provider": "copilot_chat",
+      "model": "claude-haiku-4.5"
     },
     "inline_assistant_model": {
       "provider": "zed.dev",

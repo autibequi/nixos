@@ -4,8 +4,11 @@
   ...
 }:
 {
+  # Default Kernel (from NixOS)
+  # boot.kernelPackages = pkgs.linuxPackages_stable;
+
   # Zen Kernel (fallback 'cos cachyos too edgy)
-  boot.kernelPackages = pkgs.linuxPackages_zen;
+  # boot.kernelPackages = pkgs.linuxPackages_zen;
 
   # CachyOS Kernel (With weird workaround)
   # https://github.com/chaotic-cx/nyx/issues/1158
@@ -25,6 +28,9 @@
     # AMD Specifics
     "amdgpu.dcdebugmask=0x10"
     "amd_pstate=guided" # best, active is good too
+
+    # NVIDIA DRM - fbdev=1 melhora suporte HDMI 2.0 no Wayland (4K@60Hz)
+    "nvidia-drm.fbdev=1"
 
     "bgrt_disable" # disable boot logo
     "mitigations=off" # unsecure

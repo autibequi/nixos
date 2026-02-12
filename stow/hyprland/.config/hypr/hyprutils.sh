@@ -107,7 +107,7 @@ toggle_theme() {
         apply_gtk_theme "adw-gtk3-dark" "prefer-dark"
         
         notify-send -t 500 "Theme changed to dark 🌙"
-s        swww img ~/assets/livewallpapers/gundam2.gif \
+        swww img ~/assets/livewallpapers/gundam2.gif \
             --transition-type fade \
             --transition-fps 60 \
             --transition-duration 0.3

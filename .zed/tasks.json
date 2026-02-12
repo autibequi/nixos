@@ -72,5 +72,12 @@
     "show_summary": false,
     "type": "shell",
     "tags": ["system"]
+  },
+  {
+    "label": "Collect Nix Garbage",
+    "command": "nix-collect-garbage -d",
+    "show_summary": false,
+    "type": "shell",
+    "tags": ["maintenance", "store"]
   }
 ]

@@ -51,6 +51,8 @@
 
     # --- Golang ---
     go
+    gopls
+    gotools
     delve
     graphviz
     gcc # because kafka fsr
