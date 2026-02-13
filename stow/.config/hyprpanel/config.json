@@ -1,0 +1,130 @@
+{
+  "bar.layouts": {
+    "0": {
+      "left": ["dashboard", "workspaces"],
+      "middle": ["clock", "battery"],
+      "right": ["volume", "media", "cpu", "ram", "network", "systray", "bluetooth", "notifications"]
+    }
+  },
+
+  "bar.launcher.autoDetectIcon": true,
+  "bar.scrollSpeed": 2,
+
+  "bar.workspaces.show_icons": false,
+  "bar.workspaces.showWsIcons": false,
+  "bar.workspaces.showApplicationIcons": true,
+  "bar.workspaces.applicationIconMap": {
+    "firefox": "",
+    "[zZ]en": "",
+    "title:YouTube Music": "",
+    "title:YouTube": "",
+    "chrome": "",
+    "chromium": "",
+    "title:Meet": "",
+    "title:Chat": "󰍡",
+    "title:JIRA": "󰌃",
+    "title:Obsidian": "",
+    "title:books - Obsidian": "",
+    "[dD]beav": "🦫",
+    "code": "󰨞",
+    "cursor": "󰨞",
+    "obsidian": "",
+    "[aA]lacritty": "",
+    "ghostty": "󰆍",
+    "org.gnome.[nN]autilus": "",
+    "zed": "",
+    "stremio": "🍿",
+    "insomnia": "",
+    "class:^steam_app_.*": "󰮯",
+    "title:.*Steam.*": ""
+  },
+
+  "bar.volume.label": true,
+  "bar.network.label": false,
+  "bar.bluetooth.label": false,
+  "bar.media.show_active_only": true,
+  "bar.media.truncation_size": 40,
+  "bar.notifications.show_total": true,
+
+  "menus.clock.time.military": true,
+  "menus.clock.time.hideSeconds": false,
+  "menus.clock.weather.unit": "metric",
+  "menus.clock.weather.key": "",
+  "menus.clock.weather.location": "São Paulo",
+
+  "menus.dashboard.directories.enabled": false,
+  "menus.dashboard.stats.enable_gpu": true,
+  "menus.dashboard.powermenu.avatar.name": "pedrinho",
+  "menus.dashboard.shortcuts.left.shortcut1.command": "ghostty",
+  "menus.dashboard.shortcuts.left.shortcut1.tooltip": "Terminal",
+  "menus.dashboard.shortcuts.left.shortcut1.icon": "󰆍",
+  "menus.dashboard.shortcuts.left.shortcut2.command": "nautilus",
+  "menus.dashboard.shortcuts.left.shortcut2.tooltip": "Files",
+  "menus.dashboard.shortcuts.left.shortcut2.icon": "",
+
+  "notifications.position": "top right",
+  "notifications.timeout": 7000,
+  "notifications.monitor": 0,
+
+  "theme.bar.location": "bottom",
+  "theme.bar.transparent": false,
+  "theme.bar.floating": false,
+  "theme.bar.opacity": 100,
+  "theme.bar.background": "#000000",
+  "theme.bar.border_radius": "0px",
+  "theme.bar.margin_top": "0px",
+  "theme.bar.margin_bottom": "0px",
+  "theme.bar.margin_sides": "0px",
+  "theme.bar.outer_spacing": "0px",
+
+  "theme.bar.buttons.style": "default",
+  "theme.bar.buttons.background": "#000000",
+  "theme.bar.buttons.text": "#ffffff",
+  "theme.bar.buttons.icon": "#ffffff",
+  "theme.bar.buttons.hover": "#1a1a1a",
+  "theme.bar.buttons.padding_x": "2px",
+  "theme.bar.buttons.padding_y": "0px",
+  "theme.bar.buttons.radius": "0px",
+  "theme.bar.buttons.y_margins": "0px",
+  "theme.bar.buttons.spacing": "0px",
+
+  "theme.bar.buttons.workspaces.active": "#ffffff",
+  "theme.bar.buttons.workspaces.occupied": "#888888",
+  "theme.bar.buttons.workspaces.available": "#444444",
+  "theme.bar.buttons.workspaces.hover": "#ffffff",
+
+  "theme.bar.buttons.clock.text": "#ffffff",
+  "theme.bar.buttons.clock.icon": "#ffffff",
+  "theme.bar.buttons.clock.background": "#000000",
+
+  "theme.bar.buttons.battery.text": "#ffffff",
+  "theme.bar.buttons.battery.icon": "#ffffff",
+  "theme.bar.buttons.battery.background": "#000000",
+
+  "theme.bar.buttons.volume.text": "#ffffff",
+  "theme.bar.buttons.volume.icon": "#ffffff",
+  "theme.bar.buttons.volume.background": "#000000",
+
+  "theme.bar.buttons.network.text": "#ffffff",
+  "theme.bar.buttons.network.icon": "#ffffff",
+  "theme.bar.buttons.network.background": "#000000",
+
+  "theme.bar.buttons.bluetooth.text": "#ffffff",
+  "theme.bar.buttons.bluetooth.icon": "#ffffff",
+  "theme.bar.buttons.bluetooth.background": "#000000",
+
+  "theme.bar.buttons.systray.background": "#000000",
+
+  "theme.bar.buttons.notifications.text": "#ffffff",
+  "theme.bar.buttons.notifications.icon": "#ffffff",
+  "theme.bar.buttons.notifications.background": "#000000",
+
+  "theme.font.name": "JetBrainsMono Nerd Font",
+  "theme.font.size": "15px",
+
+  "theme.osd.enable": true,
+  "theme.osd.orientation": "horizontal",
+  "theme.osd.location": "bottom",
+
+  "wallpaper.enable": false
+}
