@@ -1,0 +1,30 @@
+# --- Window Settings ---
+[window]
+padding = { x = 10, y = 10 }
+dynamic_padding = true
+opacity = 0.9 # Set transparency (0.0 to 1.0)
+blur = true    # Enable background blur (if supported by your OS)
+
+# --- Font Settings ---
+[font]
+size = 12.0
+
+[font.normal]
+family = "JetBrainsMono Nerd Font" # Use a Nerd Font for icons
+style = "Regular"
+
+# --- Performance & Scrolling ---
+[scrolling]
+history = 100000 # Limit scrollback to save memory
+multiplier = 3  # Faster scrolling
+
+[selection]
+save_to_clipboard = true # Auto-copy on select
+
+# --- Keybindings ---
+[keyboard]
+bindings = [
+    { key = "Return", mods = "Control|Shift", action = "SpawnNewInstance" },
+    { key = "V", mods = "Control|Shift", action = "Paste" },
+    { key = "C", mods = "Control|Shift", action = "Copy" }
+]
