@@ -23,21 +23,14 @@
       "ctrl-shift-a": "workspace::ToggleLeftDock",
       "ctrl-shift-d": "workspace::ToggleRightDock",
       "ctrl-shift-s": "workspace::ToggleBottomDock",
-      "ctrl-alt-t": "workspace::NewCenterTerminal"
+      "ctrl-alt-t": "workspace::NewCenterTerminal",
+      "ctrl-mouse1": "editor::GoToImplementation",
     }
   },
   {
     "context": "Editor",
     "bindings": {
       "ctrl-shift-l": "agent::NewThread",
-      "ctrl-k": "assistant::InlineAssist",
-      "ctrl-alt-t": "workspace::NewCenterTerminal",
-      "ctrl-left": "editor::AcceptPartialCopilotSuggestion"
     }
-  },
-  {
-    // Switch between opened files
-    "context": "Editor",
-    "bindings": {}
   },
 ]

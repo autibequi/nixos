@@ -5,6 +5,16 @@
   // ╚══════════════════════════════════════════════════════════════╝
   // ─── KEYMAP ────────────────────────────────────────────────────
   // Use VS Code keybindings as the base (Ctrl+P, Ctrl+Shift+P, etc.)
+  "audio": {
+    "experimental.auto_microphone_volume": true,
+    "experimental.rodio_audio": true
+  },
+  "calls": {
+    "mute_on_join": true
+  },
+  "use_system_prompts": false,
+  "double_click_in_multibuffer": "open",
+  "lsp_document_colors": "background",
   "vim_mode": false,
   "active_pane_modifiers": {
     "inactive_opacity": 0.5,
@@ -31,10 +41,10 @@
   "theme": {
     "mode": "system",
     "light": "Dracula Light (Alucard)",
-    "dark": "Dracula Solid",
+    "dark": "Dracula",
   },
   "icon_theme": "VSCode Great Icons Theme",
-  "unstable.ui_density": "comfortable",
+  "unstable.ui_density": "compact",
   // Fade unused/unreachable code (like VS Code's "editor.showUnused")
   "unnecessary_code_fade": 0.5,
   // ─── EDITOR CORE ───────────────────────────────────────────────
@@ -85,11 +95,12 @@
   // ─── INLAY HINTS ───────────────────────────────────────────────
   // Like VS Code's "editor.inlayHints.enabled"
   "inlay_hints": {
+    "show_value_hints": true,
     "enabled": true,
-    "show_type_hints": true,
-    "show_parameter_hints": true,
+    "show_type_hints": false,
+    "show_parameter_hints": false,
     "show_other_hints": true,
-    "show_background": false,
+    "show_background": true,
   },
   // ─── GUTTER ────────────────────────────────────────────────────
   "gutter": {
@@ -112,7 +123,7 @@
     "show": "never",
     "cursors": true,
     "git_diff": true,
-    "search_results": true,
+    "search_results": false,
     "selected_text": true,
     "diagnostics": "all",
   },
@@ -152,6 +163,7 @@
   },
   // ─── TITLE BAR ─────────────────────────────────────────────────
   "title_bar": {
+    "show_menus": false,
     "show_branch_icon": true,
     "show_branch_name": true,
     "show_project_items": true,
@@ -159,8 +171,9 @@
   // ─── PANELS ────────────────────────────────────────────────────
   // File explorer (like VS Code's Explorer sidebar)
   "project_panel": {
+    "entry_spacing": "standard",
     "sort_mode": "directories_first",
-    "hide_root": true,
+    "hide_root": false,
     "dock": "left",
     "hide_gitignore": false,
     "indent_size": 30,
@@ -168,7 +181,12 @@
   },
   // Outline/symbols (like VS Code's Outline view)
   "outline_panel": {
-    "auto_reveal_entries": true,
+    "default_width": 600.0,
+    "file_icons": true,
+    "folder_icons": true,
+    "git_status": true,
+    "indent_size": 20.0,
+    "auto_reveal_entries": false,
     "auto_fold_dirs": true,
     "dock": "right",
   },
@@ -179,7 +197,7 @@
     "status_style": "icon",
   },
   "collaboration_panel": {
-    "button": true,
+    "button": false,
     "dock": "right",
   },
   // ─── DIAGNOSTICS ───────────────────────────────────────────────
@@ -207,11 +225,10 @@
       "show_commit_summary": true,
     },
     "hunk_style": "unstaged_hollow",
-    ""
   },
   // ─── SEARCH ────────────────────────────────────────────────────
   "search": {
-    "include_ignored": true,
+    "include_ignored": false,
   },
   "use_smartcase_search": true,
   "file_scan_exclusions": [
@@ -222,6 +239,10 @@
     "**/.turbo",
     "**/dist",
     "**/build",
+    "**/coverage",
+    "*.svg",
+    "**/static",
+    "**/public"
   ],
   // ─── TERMINAL ──────────────────────────────────────────────────
   // Like VS Code's integrated terminal
@@ -241,7 +262,7 @@
   // ─── AI & EDIT PREDICTIONS ─────────────────────────────────────
   // Copilot + Agent (like VS Code's Copilot / Cursor AI)
   "features": {
-    "edit_prediction_provider": "copilot",
+    "edit_prediction_provider": "zed",
   },
   "edit_predictions": {
     "mode": "eager",
@@ -253,9 +274,11 @@
       "**/.svn/**",
       "**/dist/**",
       "**/build/**",
+      "**/coverage/**"
     ],
   },
   "agent": {
+    "use_modifier_to_send": true,
     "favorite_models": [
       {
         "provider": "zed.dev",
@@ -274,7 +297,7 @@
     },
     "inline_assistant_model": {
       "provider": "zed.dev",
-      "model": "gemini-2.5-flash",
+      "model": "claude-sonnet-4-5",
     },
     "default_profile": "write",
     "always_allow_tool_actions": true,
