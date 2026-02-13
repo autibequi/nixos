@@ -17,6 +17,8 @@ workspace_switch() {
         echo "$withoutSpecialWorkspace" > ~/.cache/hyprland/hyprutils_special_workspace
         hyprctl dispatch togglespecialworkspace "$withoutSpecialWorkspace"
     else
+        # Oculta special workspace ativo antes de trocar
+        hide_active_special_workspaces
         # move para o workspace passado como argumento
         hyprctl dispatch workspace "$requested_workspace"
     fi
@@ -24,6 +26,34 @@ workspace_switch() {
 
 toggle_last_special_workspace(){
     hyprctl dispatch togglespecialworkspace $(cat ~/.cache/hyprland/hyprutils_special_workspace)
+}
+
+hide_active_special_workspaces(){
+    # Fecha o special workspace visível no monitor focado
+    active=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .specialWorkspace.name')
+    if [ -n "$active" ] && [ "$active" != "" ]; then
+        name="${active#special:}"
+        if [ -n "$name" ]; then
+            hyprctl dispatch togglespecialworkspace "$name"
+        fi
+    fi
+}
+
+toggle_or_hide_special_workspace(){
+    # Se tem special workspace ativo → esconde
+    # Se não tem → reabre o último usado
+    active=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .specialWorkspace.name')
+    if [ -n "$active" ] && [ "$active" != "" ]; then
+        name="${active#special:}"
+        if [ -n "$name" ]; then
+            hyprctl dispatch togglespecialworkspace "$name"
+        fi
+    else
+        last=$(cat ~/.cache/hyprland/hyprutils_special_workspace 2>/dev/null)
+        if [ -n "$last" ]; then
+            hyprctl dispatch togglespecialworkspace "$last"
+        fi
+    fi
 }
 
 apply_gtk_theme() {
