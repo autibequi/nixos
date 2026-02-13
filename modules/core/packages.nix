@@ -9,7 +9,7 @@
     # rofi-wayland
     rofi-wayland-unwrapped
     rofi-emoji-wayland
-    
+
     killall
     # apps
     fuse # Required for AppImage support (libfuse.so.2)
@@ -30,8 +30,9 @@
     apple-cursor # to when my boss regret beeing okay
     papirus-icon-theme # Icons
 
-    # ZED EDITOR
-    pkgs-unstable.zed-editor-fhs
+    # ZED EDITOR (nightly via flake)
+    # inputs.zed.packages.${pkgs.system}.default
+    pkgs-unstable.zed-editor
 
     # Work Browser
     chromium

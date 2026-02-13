@@ -95,6 +95,7 @@
   // ─── INLAY HINTS ───────────────────────────────────────────────
   // Like VS Code's "editor.inlayHints.enabled"
   "inlay_hints": {
+    "edit_debounce_ms": 100,
     "show_value_hints": true,
     "enabled": true,
     "show_type_hints": false,
@@ -205,7 +206,7 @@
   "diagnostics": {
     "inline": {
       "enabled": true,
-      "update_debounce_ms": 50,
+      "update_debounce_ms": 250,
       "padding": 4,
       "min_column": 0,
       "max_severity": "hint",

@@ -15,6 +15,8 @@
     voxtype.url = "github:peteonrails/voxtype";
     nixified-ai.url = "github:nixified-ai/flake"; # Nixified AI
 
+    zed.url = "github:zed-industries/zed";
+
     hyprland.url = "github:hyprwm/Hyprland";
 
     hyprtasking = {
@@ -39,6 +41,7 @@
       chaotic,
       nixified-ai,
       voxtype,
+      zed,
       ...
     }@inputs:
       let
