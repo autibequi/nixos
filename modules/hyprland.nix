@@ -2,7 +2,7 @@
   lib,
   pkgs,
   inputs,
-  pkgs-unstable,
+  # pkgs-unstable,
   ...
 }:
 with lib;
@@ -16,13 +16,13 @@ let
         hypr-dynamic-cursors
         hyprsplit
 
-        # hyprspace
-        # hyprscrolling
+        hyprspace
+        hyprscrolling
         # hyprtrails
         # hyprfocus
       ])
       ++ [
-        # inputs.hyprtasking.packages.${pkgs.system}.hyprtasking
+        inputs.hyprtasking.packages.${pkgs.system}.hyprtasking
       ];
   };
 in
@@ -36,13 +36,22 @@ in
 
   programs.hyprland = {
     enable = true;
-    package = pkgs-unstable.hyprland;
+    package = pkgs.hyprland;
     xwayland.enable = true;
   };
 
 
   # Habilitar serviço para compilar schemas
   programs.dconf.enable = true;
+
+  # HyprPanel via Home Manager (substitui waybar + swaynotificationcenter)
+  # Config gerenciado via stow: stow/.config/hyprpanel/config.json
+  home-manager.users."pedrinho" = {
+    programs.hyprpanel = {
+      enable = true;
+      systemd.enable = true;
+    };
+  };
 
   environment.systemPackages = with pkgs; [
     hyprpicker
