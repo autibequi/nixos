@@ -53,7 +53,7 @@
   "cursor_shape": "bar",
   "hide_mouse": "on_typing",
   // Line numbers (like VS Code's "editor.lineNumbers")
-  "relative_line_numbers": "wrapped",
+  "relative_line_numbers": "disabled",
   "current_line_highlight": "all",
   "selection_highlight": true,
   // Indentation
@@ -100,7 +100,7 @@
     "enabled": true,
     "show_type_hints": false,
     "show_parameter_hints": false,
-    "show_other_hints": true,
+    "show_other_hints": false,
     "show_background": true,
   },
   // ─── GUTTER ────────────────────────────────────────────────────
@@ -144,7 +144,7 @@
   },
   "tab_bar": {
     "show": true,
-    "show_pinned_tabs_in_separate_row": false,
+    "show_pinned_tabs_in_separate_row": true,
     "show_nav_history_buttons": false,
     "show_tab_bar_buttons": false,
   },
@@ -159,7 +159,7 @@
     "breadcrumbs": true,
     "agent_review": true,
     "code_actions": true,
-    "quick_actions": false,
+    "quick_actions": true,
     "selections_menu": false,
   },
   // ─── TITLE BAR ─────────────────────────────────────────────────
@@ -229,7 +229,7 @@
   },
   // ─── SEARCH ────────────────────────────────────────────────────
   "search": {
-    "include_ignored": false,
+    "include_ignored": true,
   },
   "use_smartcase_search": true,
   "file_scan_exclusions": [
@@ -309,7 +309,7 @@
     },
   },
   // ─── PRIVACY & SECURITY ────────────────────────────────────────
-  "redact_private_values": true,
+  "redact_private_values": false,
   "private_files": [
     "**/.env*",
     "**/*.pem",
