@@ -41,7 +41,7 @@
   "theme": {
     "mode": "system",
     "light": "Dracula Light (Alucard)",
-    "dark": "Dracula",
+    "dark": "GitHub Dark",
   },
   "icon_theme": "VSCode Great Icons Theme",
   "unstable.ui_density": "compact",

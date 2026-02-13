@@ -6,11 +6,11 @@
   "workbench.iconTheme": "vscode-great-icons",
   "workbench.preferredLightColorTheme": "Default Light Modern",
   "workbench.preferredDarkColorTheme": "Default Dark+",
-  "workbench.statusBar.visible": true,
-  "workbench.activityBar.location": "default",
+  "workbench.activityBar.location": "hidden",
   "workbench.startupEditor.showTabs": false,
   "workbench.tips.enabled": false,
   "workbench.panel.defaultLocation": "top",
+  "workbench.panel.defaultVisibility": "hidden",
   "workbench.sideBar.location": "left",
   "workbench.experimental.share.enabled": true,
   "window.autoDetectColorScheme": true,
@@ -20,7 +20,7 @@
   "window.zoomLevel": 0,
   "window.commandCenter": true,
   "breadcrumbs.enabled": true,
-
+  "workbench.statusBar.visible": false,
   // --------------------------------------------------------------------------
   // Editor Appearance & Behavior
   // --------------------------------------------------------------------------
@@ -43,11 +43,12 @@
   "editor.minimap.enabled": false,
   "editor.matchBrackets": "always",
   "editor.maxTokenizationLineLength": 30000,
-  "editor.rulers": [80],
+  "editor.rulers": [
+    80
+  ],
   "editor.wordWrap": "on",
   "editor.wrappingIndent": "same",
   "editor.guides.indentation": true,
-
   // --------------------------------------------------------------------------
   // Language Specific Editor Settings
   // --------------------------------------------------------------------------
@@ -69,9 +70,10 @@
   },
   "gopls": {
     "gopls.path": "/run/current-system/sw/bin/gopls",
-    "build.directoryFilters": ["-**/mocks"]
+    "build.directoryFilters": [
+      "-**/mocks"
+    ]
   },
-
   // --------------------------------------------------------------------------
   // File Management
   // --------------------------------------------------------------------------
@@ -127,7 +129,6 @@
     "*.js": "javascriptreact",
     "jsonc": "json"
   },
-
   // --------------------------------------------------------------------------
   // HTML, CSS, Markdown, Emmet, and Related Extensions
   // --------------------------------------------------------------------------
@@ -137,7 +138,9 @@
   "css.lint.importStatement": "warning",
   "markdown.preview.fontSize": 17,
   "emmet.triggerExpansionOnTab": true,
-  "emmet.excludeLanguages": ["markdown"],
+  "emmet.excludeLanguages": [
+    "markdown"
+  ],
   "emmet.includeLanguages": {
     "vue-html": "html",
     "javascript": [
@@ -149,7 +152,6 @@
       "babel"
     ]
   },
-
   // --------------------------------------------------------------------------
   // IntelliSense & Path Mappings
   // --------------------------------------------------------------------------
@@ -159,13 +161,11 @@
       "/": "${workspaceRoot}"
     }
   },
-
   // --------------------------------------------------------------------------
   // TypeScript & JavaScript
   // --------------------------------------------------------------------------
   "typescript.updateImportsOnFileMove.enabled": "always",
   "javascript.updateImportsOnFileMove.enabled": "always",
-
   // --------------------------------------------------------------------------
   // Formatting Tools
   // --------------------------------------------------------------------------
@@ -175,7 +175,6 @@
   "prettier.singleQuote": true,
   "prettier.printWidth": 85,
   "prettier.semi": true,
-
   // --------------------------------------------------------------------------
   // Shell & Terminal
   // --------------------------------------------------------------------------
@@ -186,13 +185,11 @@
   "terminal.integrated.shellArgs.osx": [],
   "terminal.integrated.scrollback": 800,
   "terminal.integrated.cwd": "",
-
   // --------------------------------------------------------------------------
   // File Explorer
   // --------------------------------------------------------------------------
   "explorer.confirmDragAndDrop": false,
   "explorer.confirmDelete": false,
-
   // --------------------------------------------------------------------------
   // Vim Extension
   // --------------------------------------------------------------------------
@@ -204,27 +201,40 @@
   "vim.highlightedyank.enable": true,
   "vim.insertModeKeyBindings": [
     {
-      "before": ["j", "k"],
-      "after": ["<Esc>"]
+      "before": [
+        "j",
+        "k"
+      ],
+      "after": [
+        "<Esc>"
+      ]
     }
   ],
   "vim.normalModeKeyBindingsNonRecursive": [
     {
-      "before": ["<leader>", "m"],
-      "commands": ["bookmarks.toggle"]
+      "before": [
+        "<leader>",
+        "m"
+      ],
+      "commands": [
+        "bookmarks.toggle"
+      ]
     },
     {
-      "before": ["<leader>", "b"],
-      "commands": ["bookmarks.list"]
+      "before": [
+        "<leader>",
+        "b"
+      ],
+      "commands": [
+        "bookmarks.list"
+      ]
     }
   ],
-
   // --------------------------------------------------------------------------
   // Git
   // --------------------------------------------------------------------------
   "git.path": "/usr/bin/git",
   "git.confirmSync": false,
-
   // --------------------------------------------------------------------------
   // Spell Checking
   // --------------------------------------------------------------------------
@@ -268,12 +278,10 @@
     "vue",
     "yml"
   ],
-
   // --------------------------------------------------------------------------
   // Build Tools & Miscellaneous
   // --------------------------------------------------------------------------
   "makefile.configureOnOpen": true,
-
   // --------------------------------------------------------------------------
   // Cursor Extension
   // --------------------------------------------------------------------------
