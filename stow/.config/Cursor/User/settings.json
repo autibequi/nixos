@@ -20,7 +20,6 @@
   "window.zoomLevel": 0,
   "window.commandCenter": true,
   "breadcrumbs.enabled": true,
-  "workbench.statusBar.visible": false,
   // --------------------------------------------------------------------------
   // Editor Appearance & Behavior
   // --------------------------------------------------------------------------

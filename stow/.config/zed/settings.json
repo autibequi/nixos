@@ -179,6 +179,9 @@
     "hide_gitignore": false,
     "indent_size": 30,
     "show_diagnostics": "all",
+    "indent_guides": {
+      "show": "never"
+    }
   },
   // Outline/symbols (like VS Code's Outline view)
   "outline_panel": {
