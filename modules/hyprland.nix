@@ -44,6 +44,11 @@ in
   # Habilitar serviço para compilar schemas
   programs.dconf.enable = true;
 
+  # GNOME Keyring - gerenciamento de secrets/senhas/SSH keys
+  services.gnome.gnome-keyring.enable = true;
+  security.pam.services.hyprlock.enableGnomeKeyring = true;
+  security.pam.services.login.enableGnomeKeyring = true;
+
   # HyprPanel via Home Manager (substitui waybar + swaynotificationcenter)
   # Config gerenciado via stow: stow/.config/hyprpanel/config.json
   home-manager.users."pedrinho" = {
