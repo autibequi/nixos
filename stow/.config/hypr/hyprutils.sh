@@ -143,7 +143,7 @@ toggle_theme() {
         apply_gtk_theme "adw-gtk3" "prefer-light"
 
         notify-send -t 500 "Theme changed to light ☀️"
-        swww img ~/assets/livewallpapers/gundam.gif \
+        swww img ~/assets/wallpapers/the-death-of-socrates.jpg \
             --transition-type fade \
             --transition-fps 60 \
             --transition-duration 0.3
@@ -153,7 +153,7 @@ toggle_theme() {
         apply_gtk_theme "adw-gtk3-dark" "prefer-dark"
 
         notify-send -t 500 "Theme changed to dark 🌙"
-        swww img ~/assets/livewallpapers/gundam2.gif \
+        swww img ~/assets/wallpapers/the-wild-hunt-of-odin.jpg \
             --transition-type fade \
             --transition-fps 60 \
             --transition-duration 0.3
