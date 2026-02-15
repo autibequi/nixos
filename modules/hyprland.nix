@@ -2,7 +2,7 @@
   lib,
   pkgs,
   inputs,
-  # pkgs-unstable,
+  pkgs-unstable,
   ...
 }:
 with lib;
@@ -36,7 +36,7 @@ in
 
   programs.hyprland = {
     enable = true;
-    package = pkgs.hyprland;
+    package = pkgs-unstable.hyprland;
     xwayland.enable = true;
   };
 

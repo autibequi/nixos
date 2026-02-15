@@ -1,14 +1,12 @@
 { pkgs, ... }:
 
 {
-  services.auto-epp.enable = true;
-
   services.power-profiles-daemon.enable = true;
 
   # powerManagement.powertop.enable = true;
-  
+
   services.thermald.enable = true;
-  
+
   services.upower = {
     enable = true;
     percentageLow = 15;

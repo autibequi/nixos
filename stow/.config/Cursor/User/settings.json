@@ -286,7 +286,6 @@
   "cursor.composer.shouldChimeAfterChatFinishes": true,
   "cursor.composer.shouldAllowCustomModes": true,
   "cursor.composer.shouldAutoAcceptDiffs": false,
-  "cursor.cmdk.useThemedDiffBackground2": false,
   "cursor.chat.terminalShowHoverHint": false,
   "cursor.windowSwitcher.sidebarHoverCollapsed": true,
   "diffEditor.renderSideBySide": false,
@@ -302,4 +301,5 @@
   },
   "workbench.preferredDarkColorTheme": "Solarized Dark",
   "workbench.colorTheme": "Solarized Light",
+  "cursor.composer.textSizeScale": 1.15,
 }
