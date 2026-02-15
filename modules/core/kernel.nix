@@ -12,8 +12,8 @@
 
   # CachyOS Kernel (With weird workaround)
   # https://github.com/chaotic-cx/nyx/issues/1158
-  # system.modulesTree = [ (lib.getOutput "modules" pkgs.linuxPackages_cachyos.kernel) ];
-  # boot.kernelPackages = pkgs.linuxPackages_cachyos;
+  system.modulesTree = [ (lib.getOutput "modules" pkgs.linuxPackages_cachyos.kernel) ];
+  boot.kernelPackages = pkgs.linuxPackages_cachyos;
 
   # SystemD no InitRD para hibernação moderna
   boot.initrd.systemd.enable = true;
