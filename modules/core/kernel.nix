@@ -22,6 +22,9 @@
   security.protectKernelImage = false;
 
   boot.kernelParams = [
+    "fastboot"
+    "quiet"
+    "tsc=reliable"
     # USB
     "usbcore.autosuspend=-1"
 
