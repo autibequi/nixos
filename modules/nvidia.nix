@@ -18,9 +18,10 @@
     modesetting.enable = true;
     nvidiaSettings = false;
     nvidiaPersistenced = false;
+    # finegrained=false reduz tela preta / wake quebrado após suspend/hibernate
     powerManagement = {
       enable = true;
-      finegrained = true;
+      finegrained = false;
     };
 
     open = true; # Best compatibility with RTX 4060 mobile Q-Max

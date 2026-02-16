@@ -4,7 +4,8 @@
   # TLP (tlp.nix) desliga o PPD quando ativo; sem TLP, PPD fica ativo
   services.power-profiles-daemon.enable = lib.mkDefault true;
 
-  # powerManagement.powertop.enable = true;
+  # Powertop: ferramenta de análise + ajustes de runtime (USB, PCIe, etc.)
+  powerManagement.powertop.enable = true;
 
   services.thermald.enable = true;
 
