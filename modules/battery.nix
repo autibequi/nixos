@@ -1,7 +1,8 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
-  services.power-profiles-daemon.enable = true;
+  # TLP (tlp.nix) desliga o PPD quando ativo; sem TLP, PPD fica ativo
+  services.power-profiles-daemon.enable = lib.mkDefault true;
 
   # powerManagement.powertop.enable = true;
 

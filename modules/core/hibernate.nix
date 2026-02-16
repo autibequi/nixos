@@ -2,25 +2,31 @@
 
 {
   # Configurações de hibernação e gerenciamento de energia
+  # ASUS Zephyrus GA402X: firmware só suporta s2idle (Modern Standby), não S3 deep sleep
   services.logind = {
     lidSwitch = "suspend-then-hibernate";
+    lidSwitchExternalPower = "suspend-then-hibernate";
+    lidSwitchDocked = "ignore";
     powerKey = "hibernate";
     powerKeyLongPress = "poweroff";
   };
 
   systemd.sleep.extraConfig = ''
-    HibernateOnACPower=true
-    HibernateDelaySec=30m
-    SuspendState=mem
+    AllowSuspend=yes
+    AllowHibernation=yes
+    AllowSuspendThenHibernate=yes
+    SuspendState=freeze
+    HibernateDelaySec=15m
   '';
 
+  # s2idle é o único estado disponível nesse hardware — não forçar deep
   boot.kernelParams = [
-    "mem_sleep_default=deep"
+    "mem_sleep_default=s2idle"
   ];
 
   # TTY Sleep
   services.logind.extraConfig = ''
-    IdleAction=suspend
+    IdleAction=suspend-then-hibernate
     IdleActionSec=15min
   '';
 }

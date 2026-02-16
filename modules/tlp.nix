@@ -1,8 +1,8 @@
-{ ... }:
+{ lib, ... }:
 
 {
-  # Desabilitar power-profiles-daemon para evitar conflitos com o TLP
-  services.power-profiles-daemon.enable = false;
+  # TLP e PPD não devem rodar juntos; TLP assume controle
+  services.power-profiles-daemon.enable = lib.mkForce false;
 
   services.tlp = {
     enable = true;
@@ -26,9 +26,9 @@
       CPU_DRIVER_OPMODE_ON_AC = "guided";
       CPU_DRIVER_OPMODE_ON_BAT = "guided";
 
-      # Desabilitar o watchdog do kernel
+      # GA402X só suporta s2idle (Modern Standby), não S3 deep
       MEM_SLEEP_ON_AC = "s2idle";
-      MEM_SLEEP_ON_BAT = "deep";
+      MEM_SLEEP_ON_BAT = "s2idle";
 
       # ASPM Runtime
       RUNTIME_PM_ON_AC = "on";

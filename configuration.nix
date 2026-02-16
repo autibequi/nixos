@@ -20,6 +20,7 @@
     ./modules/core/kernel.nix
     ./modules/core/hibernate.nix
     ./modules/nvidia.nix
+    ./modules/battery.nix
 
     # Stable Modules
     ./modules/bluetooth.nix
