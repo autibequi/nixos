@@ -24,7 +24,7 @@
   boot.kernelParams = [
     "fastboot"
     "quiet"
-    "tsc=reliable"
+
     # USB
     "usbcore.autosuspend=-1"
 
@@ -36,15 +36,10 @@
     "nvidia-drm.fbdev=1"
 
     "bgrt_disable" # disable boot logo
-    # "mitigations=off" # unsecure
     # "preempt=full" # Preemptive scheduling for better responsiveness
 
-    # Force UAS for external NVME USB-C case; this garantees high speed mode | lsusb -t:
-    # idVendor           0x152d JMicron Technology Corp. / JMicron USA Technology Corp.
-    # idProduct          0x0583 JMS583Gen 2 to PCIe Gen3x2 Bridge
-    # i - usb-storage disasbled
-    # u - enable (faster)(this flat is a headache but works i guess)
-    # "usb-storage.quirks=0x152d:0x0583:u"
+    # experimental
+    "tsc=reliable"
   ];
 
   # Otimiza o uso da RAM e I/O para economia de energia
@@ -61,72 +56,13 @@
   boot.initrd.compressor = "zstd"; # zstd is faster for decompression
   boot.initrd.compressorArgs = [ "-19" ]; # Max compression for zstd
 
-  # Userland Scheduler (Otimizado para Bateria)
-  services.scx.enable = true;
+  # Userland Scheduler
+  services.scx.enable = false;
   powerManagement.cpuFreqGovernor = "schedutil"; # needed for scx (ideal for power saving)
-  services.scx.scheduler = "scx_lavd"; # Low-latency Application-aware Virtual Deadline
-  services.scx.extraArgs = [
-    "--autopower"
-  ];
-  # for --autopower option
+  services.scx.scheduler = "scx_rusty"; # Low-latency Application-aware Virtual Deadline
+
+  # AMD Power Management Indication
   services.auto-epp.enable = true;
-
-  # Módulos do Kernel (Otimizados e Limpos)
-  boot.kernelModules = [
-    # ═══ Virtualização ═══
-    "kvm-amd"
-
-    # ═══ AMD Power Management ═══
-    "amd_pstate" # Driver de p-state moderno (necessário para amd_pstate=guided)
-    "amd_energy" # Monitoramento de energia AMD
-    "amd_pmf" # Platform Management Framework (laptop power features)
-
-    # ═══ ACPI & Power Management ═══
-    "acpi_call" # Chamadas ACPI customizadas (power management avançado)
-
-    # ═══ USB & Type-C ═══
-    "usbhid"
-    "xhci_hcd"
-    "xhci_pci"
-    "typec"
-    "typec_ucsi"
-    "ucsi_acpi"
-    "usbcore"
-
-    # ═══ Storage (External NVMe USB-C) ═══
-    "uas" # USB Attached SCSI
-    "usb_storage"
-    "usbcore"
-    "nvme"
-    "nvme_core"
-    "scsi_mod"
-    "sd_mod"
-    "ext4"
-  ];
-
-  # InitRD - Módulos essenciais para boot e resume (NVMe externo via USB-C)
-  boot.initrd.availableKernelModules = [
-    # ═══ USB Controllers ═══
-    "usbhid"
-    "xhci_hcd"
-    "xhci_pci"
-
-    # ═══ USB Type-C ═══
-    "typec"
-    "typec_ucsi"
-
-    # ═══ Storage Drivers ═══
-    "uas" # USB Attached SCSI (crítico para NVMe USB-C)
-    "usb_storage"
-    "usbcore"
-    "nvme"
-    "nvme_core"
-    "scsi_mod"
-    "sd_mod"
-
-    # ═══ Filesystem ═══
-    "ext4"
-  ];
 
   # Otimizações de I/O
   services.fstrim.enable = true;
