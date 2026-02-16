@@ -9,7 +9,7 @@
   imports = [
     # Hardware Specific
     ./modules/asus.nix
-    # ./modules/nvidia.nix
+    ./modules/nvidia.nix
 
     # Laptop Modules
     # ./modules/tlp.nix

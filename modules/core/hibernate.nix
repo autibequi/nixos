@@ -6,7 +6,7 @@
   services.logind = {
     lidSwitch = "suspend-then-hibernate";
     lidSwitchExternalPower = "suspend-then-hibernate";
-    lidSwitchDocked = "ignore";
+    lidSwitchDocked = "suspend-then-hibernate";
     powerKey = "hibernate";
     powerKeyLongPress = "poweroff";
   };

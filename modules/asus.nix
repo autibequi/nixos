@@ -17,11 +17,11 @@
   };
 
   services.supergfxd.settings = {
-    mode = "Hybrid";
+    mode = "Integrated";
     vfio_enable = false;
     vfio_save = false;
     always_reboot = false;
-    no_logind = false;
+    no_logind = true;
     logout_timeout_s = 180;
     hotplug_type = "None";
   };
