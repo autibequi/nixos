@@ -19,12 +19,12 @@
       "ctrl-alt-n": "agent::NewThread",
       "ctrl-alt-/": "agent::CyclePreviousInlineAssist",
       // tasks
-      "f5": "task::Spawn",
-      "ctrl-shift-a": "workspace::ToggleLeftDock",
-      "ctrl-shift-d": "workspace::ToggleRightDock",
-      "ctrl-shift-s": "workspace::ToggleBottomDock",
+      "ctrl-alt-a": "workspace::ToggleLeftDock",
+      "ctrl-alt-d": "workspace::ToggleRightDock",
+      "ctrl-alt-s": "workspace::ToggleBottomDock",
       "ctrl-alt-t": "workspace::NewCenterTerminal",
-      "ctrl-alt-left": "project_panel::CollapseAllEntries"
+      "ctrl-alt-left": "project_panel::CollapseAllEntries",
+      "ctrl-shift-d": ""
     }
   },
   {
@@ -33,5 +33,5 @@
       "ctrl-shift-l": "agent::NewThread",
       // "ctrl-mouse1": "editor::GoToImplementation",
     }
-  },
+  }
 ]

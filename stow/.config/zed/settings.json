@@ -5,6 +5,9 @@
   // ╚══════════════════════════════════════════════════════════════╝
   // ─── KEYMAP ────────────────────────────────────────────────────
   // Use VS Code keybindings as the base (Ctrl+P, Ctrl+Shift+P, etc.)
+  "file_finder": {
+    "include_ignored": "smart"
+  },
   "audio": {
     "experimental.auto_microphone_volume": true,
     "experimental.rodio_audio": true
@@ -32,7 +35,7 @@
   },
   // UI font
   "ui_font_family": "JetBrainsMonoNL Nerd Font Propo",
-  "ui_font_size": 20.0,
+  "ui_font_size": 15.0,
   "ui_font_weight": 600,
   // Agent panel font
   "agent_buffer_font_size": 15.0,
@@ -196,8 +199,8 @@
   },
   // Source control panel
   "git_panel": {
-    "tree_view": false,
-    "sort_by_path": false,
+    "tree_view": true,
+    "sort_by_path": true,
     "status_style": "icon",
   },
   "collaboration_panel": {
