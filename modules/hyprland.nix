@@ -10,7 +10,7 @@ let
   hypr-plugin-dir = pkgs.symlinkJoin {
     name = "hyrpland-plugins";
     paths =
-      (with pkgs.hyprlandPlugins; [
+      (with pkgs-unstable.hyprlandPlugins; [
         hyprexpo
         hypr-dynamic-cursors
         # hyprfocus
@@ -36,7 +36,7 @@ in
 
   programs.hyprland = {
     enable = true;
-    package = pkgs.hyprland;
+    package = pkgs-unstable.hyprland;
     xwayland.enable = true;
   };
 

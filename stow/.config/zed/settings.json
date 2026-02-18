@@ -199,7 +199,7 @@
   },
   // Source control panel
   "git_panel": {
-    "tree_view": true,
+    "tree_view": false,
     "sort_by_path": true,
     "status_style": "icon",
   },

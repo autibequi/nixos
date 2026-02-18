@@ -48,11 +48,16 @@
     ];
   };
 
-  # # Adiciona a lib ao LD_LIBRARY_PATH para facilitar uso em ambientes Python/Poetry
-  # environment.sessionVariables.LD_LIBRARY_PATH = lib.mkAfter [
-  #   (lib.mkBefore (builtins.getEnv "LD_LIBRARY_PATH"))
-  #   "${pkgs.stdenv.cc.cc.lib}/lib"
-  # ];
+  # Adiciona a lib ao LD_LIBRARY_PATH para facilitar uso em ambientes Python/Poetry
+  environment.sessionVariables = {
+    # LD_LIBRARY_PATH = lib.mkAfter [
+    #   (lib.mkBefore (builtins.getEnv "LD_LIBRARY_PATH"))
+    #   "${pkgs.stdenv.cc.cc.lib}/lib"
+    # ];
+
+    # XKB configuration path for xkbcommon
+    XKB_CONFIG_ROOT = "${pkgs.xorg.xkeyboardconfig}/share/X11/xkb";
+  };
 
   # Install LIX
   nix.package = pkgs.lix;
