@@ -22,7 +22,7 @@ let
         # hyprscrolling
       ])
       ++ [
-        inputs.hyprtasking.packages.${pkgs.system}.hyprtasking
+        # inputs.hyprtasking.packages.${pkgs.system}.hyprtasking
       ];
   };
 in
