@@ -193,21 +193,8 @@ window#waybar {
 }
 
 #custom-playerctl.Playing {
-    animation: playerctl-blink 1s linear infinite;
-}
-
-@keyframes playerctl-blink {
-    0% {
-        color: @color-yellow;
-    }
-
-    50% {
-        text-shadow: 0 0 6px @ws-special-text;
-    }
-
-    100% {
-        color: @color-yellow;
-    }
+    color: @color-yellow;
+    text-shadow: 0 0 6px @ws-special-text;
 }
 
 #custom-playerctl.Paused {
