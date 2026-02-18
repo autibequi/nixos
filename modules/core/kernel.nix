@@ -57,9 +57,9 @@
   boot.initrd.compressorArgs = [ "-19" ]; # Max compression for zstd
 
   # Userland Scheduler
-  services.scx.enable = false;
+  services.scx.enable = true;
   powerManagement.cpuFreqGovernor = "schedutil"; # needed for scx (ideal for power saving)
-  services.scx.scheduler = "scx_rusty"; # Low-latency Application-aware Virtual Deadline
+  services.scx.scheduler = "scx_lavd"; # Low-latency Application-aware Virtual Deadline
 
   # AMD Power Management Indication
   services.auto-epp.enable = true;
