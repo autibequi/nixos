@@ -121,6 +121,7 @@ window#waybar {
 
 #workspaces button:hover {
     color: @color-black;
+    background-color: @color-white;
     text-shadow: 0 1px 0 #181800cc, 0 0 4px #0a0a40cc, 0 0 12px #18180099,
         0 2px 0 #000000cc;
 }
@@ -193,12 +194,12 @@ window#waybar {
 }
 
 #custom-playerctl.Playing {
-    color: @color-yellow;
-    text-shadow: 0 0 6px @ws-special-text;
+    color: @color-green;
+    text-shadow: 0 0 6px @color-green;
 }
 
 #custom-playerctl.Paused {
-    color: @color-white;
+    color: @color-yellow;
     background-color: @color-black;
 }
 
