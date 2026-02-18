@@ -20,15 +20,12 @@
   };
 
   # Gambiarra pra rodar as coisas do jeito não nix
-  # mostly vscode extensions.
+  # Por enquanto Zeditor Preview
   programs.nix-ld = {
     enable = true;
     package = pkgs.nix-ld-rs;
     libraries = with pkgs; [
-      # O que estava faltando:
       alsa-lib
-
-      # Dependências comuns para editores e apps modernos
       stdenv.cc.cc
       zlib
       fuse3
@@ -44,17 +41,17 @@
       xorg.libXcursor
       xorg.libXrandr
       xorg.libXi
-      # Adicione outras se o Zed reclamar de falta de .so
+
+      # Vulkan support
+      vulkan-loader
+      vulkan-validation-layers
+
+      # XKB support
+      xorg.xkeyboardconfig
     ];
   };
 
-  # Adiciona a lib ao LD_LIBRARY_PATH para facilitar uso em ambientes Python/Poetry
   environment.sessionVariables = {
-    # LD_LIBRARY_PATH = lib.mkAfter [
-    #   (lib.mkBefore (builtins.getEnv "LD_LIBRARY_PATH"))
-    #   "${pkgs.stdenv.cc.cc.lib}/lib"
-    # ];
-
     # XKB configuration path for xkbcommon
     XKB_CONFIG_ROOT = "${pkgs.xorg.xkeyboardconfig}/share/X11/xkb";
   };
