@@ -32,7 +32,7 @@
 
     # ZED EDITOR (nightly via flake)
     # inputs.zed.packages.${pkgs.system}.default
-    pkgs-unstable.zed-editor
+    pkgs.zed-editor
 
     # Work Browser
     chromium
