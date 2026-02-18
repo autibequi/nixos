@@ -10,11 +10,11 @@ let
   hypr-plugin-dir = pkgs.symlinkJoin {
     name = "hyrpland-plugins";
     paths =
-      (with pkgs-unstable.hyprlandPlugins; [
+      (with pkgs.hyprlandPlugins; [
         hyprexpo
         hypr-dynamic-cursors
-        hyprfocus
-        hyprtrails
+        # hyprfocus
+        # hyprtrails
         # hyprwinwrap
         # hyprsplit
 
@@ -36,7 +36,7 @@ in
 
   programs.hyprland = {
     enable = true;
-    package = pkgs-unstable.hyprland;
+    package = pkgs.hyprland;
     xwayland.enable = true;
   };
 
@@ -69,6 +69,7 @@ in
     # dunst # Notifications
     swaynotificationcenter # Notifications
     grim # Screenshots
+    hyprshot # Screenshots
     swappy # Screen editing
     slurp # Screen selection
     swayimg # Image viewer for Wayland
