@@ -10,16 +10,16 @@ let
   hypr-plugin-dir = pkgs.symlinkJoin {
     name = "hyrpland-plugins";
     paths =
-      (with pkgs.hyprlandPlugins; [
+      (with pkgs-unstable.hyprlandPlugins; [
         hyprexpo
-        hyprwinwrap
         hypr-dynamic-cursors
-        hyprsplit
+        hyprfocus
+        hyprtrails
+        # hyprwinwrap
+        # hyprsplit
 
-        hyprspace
-        hyprscrolling
-        # hyprtrails
-        # hyprfocus
+        # hyprspace
+        # hyprscrolling
       ])
       ++ [
         inputs.hyprtasking.packages.${pkgs.system}.hyprtasking

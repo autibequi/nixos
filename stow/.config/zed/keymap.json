@@ -24,12 +24,6 @@
       "ctrl-alt-s": "workspace::ToggleBottomDock",
       "ctrl-alt-t": "workspace::NewCenterTerminal",
       "ctrl-alt-left": "project_panel::CollapseAllEntries",
-      "ctrl-shift-d": ""
-    }
-  },
-  {
-    "context": "Editor",
-    "bindings": {
       "ctrl-shift-l": "agent::NewThread",
       // "ctrl-mouse1": "editor::GoToImplementation",
     }

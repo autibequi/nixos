@@ -25,7 +25,26 @@
     enable = true;
     package = pkgs.nix-ld-rs;
     libraries = with pkgs; [
-      stdenv.cc.cc.lib
+      # O que estava faltando:
+      alsa-lib
+
+      # Dependências comuns para editores e apps modernos
+      stdenv.cc.cc
+      zlib
+      fuse3
+      icu
+      nss
+      openssl
+      curl
+      expat
+      libGL
+      libxkbcommon
+      wayland
+      xorg.libX11
+      xorg.libXcursor
+      xorg.libXrandr
+      xorg.libXi
+      # Adicione outras se o Zed reclamar de falta de .so
     ];
   };
 
