@@ -13,6 +13,12 @@
     "nvidia"
   ];
 
+  # Workaround conhecido: resume de hibernate com NVIDIA (tela preta/travando)
+  # https://discourse.nixos.org/t/psa-for-those-with-hibernation-issues-on-nvidia/61834
+  boot.extraModprobeConfig = ''
+    options nvidia_modeset vblank_sem_control=0
+  '';
+
   hardware.nvidia = {
     package = config.boot.kernelPackages.nvidiaPackages.beta;
     modesetting.enable = true;

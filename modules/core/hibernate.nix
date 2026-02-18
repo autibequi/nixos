@@ -20,6 +20,8 @@
     SuspendState=freeze
     # Delay maior = mais resumos a partir de suspend (mais estável) que de hibernate
     HibernateDelaySec=30m
+    # Tempo após resume antes de subir userspace (NVIDIA/ACPI precisam reinicializar)
+    ResumeDelaySec=5
   '';
 
   # s2idle + params que ajudam wake em ASUS/NVIDIA (evitam re-suspend e EC travando)

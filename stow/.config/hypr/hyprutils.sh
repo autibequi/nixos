@@ -175,6 +175,19 @@ clipboard_history() {
     cliphist list | rofi -dmenu -i -p "Clipboard History" -markup-rows | cliphist decode | wl-copy
 }
 
+print_screen_with_notes() {
+    mkdir -p ~/Pictures/printscreens
+    hyprshot -m region --raw | satty -f - --early-exit --fullscreen --copy-command wl-copy --init-tool highlight --annotation-size-factor 0.5 --output-filename ~/Pictures/printscreens/$(date +%Y%m%d_%H%M%S).png
+}
+
+print_screen_to_clipboard() {
+    hyprshot -m region -o ~/Pictures/Screenshots
+}
+
+tesseract_region() {
+    hyprshot -m region --raw | tesseract stdin stdout -l eng | wl-copy
+}
+
 hypr_reload() {
     waybar_refresh
     hyprctl reloadr
