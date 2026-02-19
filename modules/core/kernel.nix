@@ -30,7 +30,7 @@
 
     # AMD Specifics
     "amdgpu.dcdebugmask=0x10"
-    "amd_pstate=active" # best, active is good too
+    "amd_pstate=guided" # active/guided/passive
 
     # NVIDIA DRM - fbdev=1 melhora suporte HDMI 2.0 no Wayland (4K@60Hz)
     "nvidia-drm.fbdev=1"
@@ -59,7 +59,8 @@
   # Userland Scheduler
   services.scx.enable = true;
   powerManagement.cpuFreqGovernor = "schedutil"; # needed for scx (ideal for power saving)
-  services.scx.scheduler = "scx_lavd"; # Low-latency Application-aware Virtual Deadline
+  services.scx.scheduler = "scx_rustland"; # Better battery life with power-efficiency focus
+  # services.scx.extraArgs = [ "--autopower" ]; # Automatic power management
 
   # AMD Power Management Indication
   services.auto-epp.enable = true;
