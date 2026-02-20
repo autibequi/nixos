@@ -24,22 +24,11 @@
   boot.kernelParams = [
     "fastboot"
     "quiet"
+    "bgrt_disable"
+    "amd_pstate=active" # active/guided/passive - active é muito mais rápido e responsivo
 
     # USB: autosuspend 2s economiza bateria (se algum device der problema, volte -1)
     "usbcore.autosuspend=-1"
-
-    # AMD Specifics
-    # "amdgpu.dcdebugmask=0x10"
-    "amd_pstate=active" # active/guided/passive - active é muito mais rápido e responsivo
-
-    # NVIDIA DRM - fbdev=1 melhora suporte HDMI 2.0 no Wayland (4K@60Hz)
-    "nvidia-drm.fbdev=1"
-
-    "bgrt_disable" # disable boot logo
-    # "preempt=full" # Preemptive scheduling for better responsiveness
-
-    # experimental
-    "tsc=reliable"
   ];
 
   # Otimiza o uso da RAM e I/O para economia de energia
@@ -59,8 +48,7 @@
   # Userland Scheduler
   services.scx.enable = true;
   powerManagement.cpuFreqGovernor = "schedutil"; # needed for scx (ideal for power saving)
-  services.scx.scheduler = "scx_lavd"; # LAVD é incrivelmente rápido e focado em snappiness/gaming
-  # services.scx.extraArgs = [ "--autopower" ]; # Automatic power management
+  services.scx.scheduler = "scx_rusty"; # scx_rusty é mais lento, mas é mais preciso e estável
 
   # AMD Power Management Indication
   services.auto-epp.enable = true;
