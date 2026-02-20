@@ -61,6 +61,7 @@ in
   environment.systemPackages = with pkgs; [
     hyprpicker
     hyprpolkitagent
+    cheese
 
     # Core Hyprland tools for navigation and productivity
     waybar # Status bar with useful info
