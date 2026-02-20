@@ -21,10 +21,9 @@
       CPU_BOOST_ON_BAT = 0; # pode ser util devido a scx_lavd que agrupa as threads em poucos cores??
 
       # CPU Driver
-      # must be passive/guided for userland schedulers
-      # but active is better for battery life
-      CPU_DRIVER_OPMODE_ON_AC = "guided";
-      CPU_DRIVER_OPMODE_ON_BAT = "guided";
+      # active is best for snappiness and works well with lavd
+      CPU_DRIVER_OPMODE_ON_AC = "active";
+      CPU_DRIVER_OPMODE_ON_BAT = "active";
 
       # GA402X só suporta s2idle (Modern Standby), não S3 deep
       MEM_SLEEP_ON_AC = "s2idle";

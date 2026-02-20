@@ -118,7 +118,7 @@
   };
 
   nix.gc = {
-    automatic = false;
+    automatic = true;
     dates = "weekly";
     options = "--delete-older-than 7d";
   };
@@ -126,8 +126,5 @@
   # NH Tool
   programs.nh = {
     enable = true;
-    clean.enable = true;
-    clean.extraArgs = "--keep 10";
-    flake = "/etc/nixos";
   };
 }

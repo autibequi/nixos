@@ -24,10 +24,10 @@
     modesetting.enable = true;
     nvidiaSettings = false;
     nvidiaPersistenced = false;
-    # finegrained=false reduz tela preta / wake quebrado após suspend/hibernate
+    # finegrained=true é obrigatório para desligar a GPU (D3cold) quando não estiver em uso
     powerManagement = {
       enable = true;
-      finegrained = false;
+      finegrained = true;
     };
 
     open = true; # Best compatibility with RTX 4060 mobile Q-Max
@@ -38,6 +38,7 @@
       # Porem atualmente simplesmente trava depois de um tempo. Imagino que arrume rapido.
       # reverseSync.enable = true; # Sincronização reversa para melhorar desempenho
       offload.enable = true; # Modo offload para economia de energia
+      offload.enableOffloadCmd = true; # Permite rodar apps na GPU via `nvidia-offload`
       sync.enable = false; # Desativado para evitar consumo constante da GPU
 
       # Configuração de barramento otimizada para G14 com RTX 4060

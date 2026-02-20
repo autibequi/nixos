@@ -29,8 +29,8 @@
     "usbcore.autosuspend=-1"
 
     # AMD Specifics
-    "amdgpu.dcdebugmask=0x10"
-    "amd_pstate=guided" # active/guided/passive
+    # "amdgpu.dcdebugmask=0x10"
+    "amd_pstate=active" # active/guided/passive - active é muito mais rápido e responsivo
 
     # NVIDIA DRM - fbdev=1 melhora suporte HDMI 2.0 no Wayland (4K@60Hz)
     "nvidia-drm.fbdev=1"
@@ -59,7 +59,7 @@
   # Userland Scheduler
   services.scx.enable = true;
   powerManagement.cpuFreqGovernor = "schedutil"; # needed for scx (ideal for power saving)
-  services.scx.scheduler = "scx_rustland"; # Better battery life with power-efficiency focus
+  services.scx.scheduler = "scx_lavd"; # LAVD é incrivelmente rápido e focado em snappiness/gaming
   # services.scx.extraArgs = [ "--autopower" ]; # Automatic power management
 
   # AMD Power Management Indication

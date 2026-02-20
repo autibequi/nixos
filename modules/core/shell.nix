@@ -59,12 +59,15 @@
     };
 
     shellInit = ''
-      eval "$(starship init zsh)"
-      eval "$(zoxide init zsh)"
-      eval "$(atuin init zsh)"
+      # Skip utils in a dumb terminal
+      if [ "$TERM" != "dumb" ]; then
+        eval "$(starship init zsh)"
+        eval "$(zoxide init zsh)"
+        eval "$(atuin init zsh)"
 
-      source ~/secrets.sh
-      source ~/.config/hypr/hyprutils.sh
+        source ~/secrets.sh
+        source ~/.config/hypr/hyprutils.sh
+      fi
     '';
   };
 
