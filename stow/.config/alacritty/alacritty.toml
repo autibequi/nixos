@@ -5,7 +5,7 @@
 
 # --- General ---
 [general]
-import = ["~/.config/alacritty/light-theme.toml"]
+import = ["~/.config/alacritty/dark-theme.toml"]
 live_config_reload = true
 ipc_socket = true
 
