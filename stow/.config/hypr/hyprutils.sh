@@ -125,6 +125,7 @@ EOF
 toggle_theme() {
     # Alterna entre tema claro e escuro (Hyprland-native, não depende do GNOME)
     local theme_state_file="$HOME/.cache/hyprland/hyprutils_theme_state"
+    local alacritty_config="$HOME/.config/alacritty/alacritty.toml"
     local current_theme
 
     # Criar diretório se não existir
@@ -142,6 +143,11 @@ toggle_theme() {
         echo "light" > "$theme_state_file"
         apply_gtk_theme "adw-gtk3" "prefer-light"
 
+        # Trocar tema do Alacritty para light
+        if [ -f "$alacritty_config" ]; then
+            sed -i 's|import = \["~/.config/alacritty/dark-theme.toml"\]|import = ["~/.config/alacritty/light-theme.toml"]|g' "$alacritty_config"
+        fi
+
         notify-send -t 500 "Theme changed to light ☀️"
         swww img ~/assets/wallpapers/the-death-of-socrates.jpg \
             --transition-type fade \
@@ -151,6 +157,11 @@ toggle_theme() {
         # Mudar para dark
         echo "dark" > "$theme_state_file"
         apply_gtk_theme "adw-gtk3-dark" "prefer-dark"
+
+        # Trocar tema do Alacritty para dark
+        if [ -f "$alacritty_config" ]; then
+            sed -i 's|import = \["~/.config/alacritty/light-theme.toml"\]|import = ["~/.config/alacritty/dark-theme.toml"]|g' "$alacritty_config"
+        fi
 
         notify-send -t 500 "Theme changed to dark 🌙"
         swww img ~/assets/wallpapers/the-wild-hunt-of-odin.jpg \
