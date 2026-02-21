@@ -48,7 +48,7 @@
   # Userland Scheduler
   services.scx.enable = true;
   powerManagement.cpuFreqGovernor = "schedutil"; # needed for scx (ideal for power saving)
-  services.scx.scheduler = "scx_rusty"; # scx_rusty é mais lento, mas é mais preciso e estável
+  services.scx.scheduler = "scx_bpfland"; # scx_rusty é mais lento, mas é mais preciso e estável
 
   # AMD Power Management Indication
   services.auto-epp.enable = true;
