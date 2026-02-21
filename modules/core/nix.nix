@@ -56,9 +56,6 @@
     XKB_CONFIG_ROOT = "${pkgs.xorg.xkeyboardconfig}/share/X11/xkb";
   };
 
-  # Install LIX
-  nix.package = pkgs.lix;
-
   # Unholy packages
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.allowImpure = true;
@@ -112,7 +109,6 @@
     experimental-features = [
       "nix-command"
       "flakes"
-      "repl-flake"
     ];
     auto-optimise-store = true; # Automatically run nix-store --optimise
   };
