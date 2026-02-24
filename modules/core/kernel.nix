@@ -31,10 +31,16 @@
     "usbcore.autosuspend=-1"
   ];
 
-  # Otimiza o uso da RAM e I/O para economia de energia
+  # Desabilita swap durante uso normal (apenas para hibernação)
+  # swappiness=0 evita uso do swap exceto em emergências (OOM)
+  # Isso mantém tudo na RAM e evita I/O desnecessário no HD externo
   boot.kernel.sysctl = {
-    "vm.swappiness" = 10;
+    "vm.swappiness" = 0; # 0 = nunca usar swap, exceto para hibernação
     "vm.vfs_cache_pressure" = 50;
+
+    # Otimizações adicionais para manter tudo em RAM
+    "vm.dirty_ratio" = 10; # Limita % de RAM usada para cache de escrita
+    "vm.dirty_background_ratio" = 5; # Inicia flush de cache mais cedo
   };
 
   # Otimiza o uso do disco para melhor performance
