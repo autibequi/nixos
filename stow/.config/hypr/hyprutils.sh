@@ -183,7 +183,16 @@ waybar_refresh() {
 }
 
 clipboard_history() {
-    cliphist list | rofi -dmenu -i -p "Clipboard History" -markup-rows | cliphist decode | wl-copy
+    # Display clipboard history with preview pane in floating terminal
+    # Step 1: Launch alacritty as a floating popup window
+    # Step 2: Run fzf with side preview panel inside terminal
+    # Step 3: Decode selected entry and copy to clipboard
+
+    alacritty --class="clipboard-history-popup,clipboard-history-popup" \
+              --title="Clipboard History" \
+              -o window.dimensions.columns=120 \
+              -o window.dimensions.lines=30 \
+              -e sh -c 'cliphist list | fzf --preview "echo {} | cliphist decode" --preview-window=right:50%:wrap --layout=reverse --prompt="Clipboard History: " --bind "enter:execute(echo {} | cliphist decode | wl-copy)+abort"'
 }
 
 print_screen_with_notes() {
