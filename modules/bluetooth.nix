@@ -1,7 +1,7 @@
 {
   hardware.bluetooth = {
     enable = true;
-    powerOnBoot = true;
+    powerOnBoot = false;
     settings = {
       General = {
         MultiProfile = "on";
@@ -11,10 +11,10 @@
     };
   };
 
- services.pipewire = {
+  services.pipewire = {
     enable = true;
     alsa.enable = true;
-    pulse.enable = true; 
+    pulse.enable = true;
     jack.enable = true;
     wireplumber.enable = true;
   };

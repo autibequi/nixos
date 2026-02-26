@@ -19,6 +19,9 @@
     ./modules/core/kernel.nix
     ./modules/core/hibernate.nix
 
+    # Greeter
+    ./modules/greetd.nix
+
     # Stable Modules
     ./modules/bluetooth.nix
     ./modules/plymouth.nix
