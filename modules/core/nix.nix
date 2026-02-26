@@ -111,6 +111,15 @@
       "flakes"
     ];
     auto-optimise-store = true; # Automatically run nix-store --optimise
+
+    # Builds paralelos: "auto" usa todos os cores disponíveis.
+    # Com 46GB RAM e CPU AMD multi-core, builds de Rust/Go/Flutter ficam
+    # significativamente mais rápidos sem risco de OOM.
+    max-jobs = "auto";
+
+    # Cores por job: 0 = usa todos os cores disponíveis por job individual.
+    # Complementa max-jobs para compiladores que paralelizam internamente (LLVM, GCC).
+    cores = 0;
   };
 
   nix.gc = {

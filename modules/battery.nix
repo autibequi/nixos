@@ -1,13 +1,6 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, ... }:
 
 {
-  # Power Profiles Daemon (PPD) - gerencia perfis de energia
-  # Nota: Pode conflitar com auto-epp, mas funciona bem em conjunto se configurado corretamente
-  # Desabilite se preferir usar apenas TLP (mais agressivo)
-  services.power-profiles-daemon.enable = lib.mkDefault true;
-
-  # Powertop: análise + auto-tune (aplica otimizações automáticas)
-  powerManagement.powertop.enable = true;
 
   # UPower: monitora bateria e define ações em níveis críticos
   services.upower = {
@@ -26,9 +19,15 @@
 
   # Ajustes adicionais de energia via sysctl
   boot.kernel.sysctl = {
-    # Controle de writeback (reduz writes em disco)
-    "vm.dirty_writeback_centisecs" = 1500; # 15 segundos (padrão: 5s)
-    "vm.laptop_mode" = 5; # Ativa laptop mode (agrupa I/O)
+    # dirty_writeback em 10s é um bom meio-termo para NVMe:
+    # reduz wakeups de writeback sem causar stalls longos de 15s.
+    # (padrão do kernel: 5s; laptop_mode antigo chegava a 15s — ruim para SSDs)
+    "vm.dirty_writeback_centisecs" = 1000; # 10 segundos
+
+    # laptop_mode É UM MECANISMO DOS ANOS 2000 PARA HDDs.
+    # Em NVMe causa stalls de I/O agrupados (até dirty_writeback_centisecs),
+    # tornando o sistema claramente menos responsivo. NUNCA use com SSD/NVMe.
+    "vm.laptop_mode" = 0;
   };
 
   # Ambiente para aplicações (algumas respeitam essas variáveis)

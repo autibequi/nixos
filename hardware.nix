@@ -45,7 +45,9 @@
       options = [
         "defaults"
         "noatime"
-        "discard"
+        # "discard" removido: continuous TRIM adiciona latência em cada delete.
+        # fstrim semanal (kernel.nix) é o modo correto para NVMe — menos overhead,
+        # mesmo benefício de saúde para o SSD.
       ];
     };
 

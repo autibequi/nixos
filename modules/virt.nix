@@ -22,8 +22,11 @@
       swtpm.enable = true;
     };
 
-    # Inicia redes/VMs marcadas como autostart no boot
-    onBoot = "start";
+    # "ignore" = libvirtd não bloqueia o boot para iniciar VMs/redes.
+    # O serviço sobe via socket activation (libvirtd.socket) apenas quando
+    # algo realmente o usa — remove ~200ms do critical chain de boot.
+    # VMs com autostart ainda sobem, mas em paralelo, fora do caminho crítico.
+    onBoot = "ignore";
     onShutdown = "shutdown";
 
     # Permite bridge de rede para VMs
