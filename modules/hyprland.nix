@@ -100,6 +100,9 @@ in
     gtk4 # Opcional, se usar apps GTK4
     adw-gtk3 # Tema Adwaita para GTK3 (suporta light/dark)
 
+    # Gnome Oldies
+    gnome-disk-utility
+
     # Essential utilities only
     libnotify # Notification support
     pavucontrol # Audio control
