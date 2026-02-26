@@ -8,7 +8,7 @@
   "session": {
     "trust_all_worktrees": true
   },
-  "agent_buffer_font_size": 10.0,
+  "agent_buffer_font_size": 14.0,
   "agent_servers": {
     "kimi": {
       "type": "registry"
@@ -35,19 +35,19 @@
   // ─── FONTS ─────────────────────────────────────────────────────
   // Editor (buffer) font
   "buffer_font_family": "JetBrainsMonoNL Nerd Font Mono",
-  "buffer_font_size": 8.0,
+  "buffer_font_size": 14.0,
   "buffer_font_weight": 600,
-  "buffer_line_height": "standard",
+  "buffer_line_height": "comfortable",
   "buffer_font_features": {
     "calt": true,
     "liga": true,
   },
   // UI font
   "ui_font_family": "JetBrainsMonoNL Nerd Font Propo",
-  "ui_font_size": 10.0,
+  "ui_font_size": 14.0,
   "ui_font_weight": 600,
   // Agent panel font
-  "agent_ui_font_size": 10.0,
+  "agent_ui_font_size": 14.0,
   // ─── THEME & APPEARANCE ────────────────────────────────────────
   "theme": {
     "mode": "system",
@@ -177,13 +177,6 @@
     "quick_actions": true,
     "selections_menu": false,
   },
-  // ─── TITLE BAR ─────────────────────────────────────────────────
-  "title_bar": {
-    "show_menus": false,
-    "show_branch_icon": true,
-    "show_branch_name": true,
-    "show_project_items": true,
-  },
   // ─── PANELS ────────────────────────────────────────────────────
   // File explorer (like VS Code's Explorer sidebar)
   "project_panel": {
@@ -268,7 +261,7 @@
   "terminal": {
     "copy_on_select": true,
     "font_family": "JetBrainsMonoNL Nerd Font Mono",
-    "font_size": 8.0,
+    "font_size": 10.0,
     "font_weight": 500,
   },
   // ─── DEBUGGER ──────────────────────────────────────────────────
