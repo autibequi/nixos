@@ -13,6 +13,9 @@
     "bindings": {
       // panels
       "ctrl-`": "workspace::ToggleBottomDock",
+      "ctrl-shift-a": "workspace::ToggleLeftDock",
+      "ctrl-shift-s": "workspace::ToggleBottomDock",
+      "ctrl-shift-d": "workspace::ToggleRightDock",
       // AI Agents
       "ctrl-alt-l": "agent::NewThread",
       "ctrl-shift-r": "projects::OpenRecent",
@@ -26,6 +29,14 @@
       "ctrl-alt-left": "project_panel::CollapseAllEntries",
       "ctrl-shift-l": "agent::NewThread",
       // "ctrl-mouse1": "editor::GoToImplementation",
+    }
+  },
+  {
+    "context": "Terminal",
+    "bindings": {
+      "ctrl-shift-a": "workspace::ToggleLeftDock",
+      "ctrl-shift-s": "workspace::ToggleBottomDock",
+      "ctrl-shift-d": "workspace::ToggleRightDock"
     }
   }
 ]
