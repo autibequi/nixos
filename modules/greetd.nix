@@ -8,23 +8,13 @@
           ${pkgs.greetd.tuigreet}/bin/tuigreet \
             --time \
             --remember \
-            --remember-user-session \
-            --sessions ${config.services.displayManager.sessionData.desktops}/share/wayland-sessions:${config.services.displayManager.sessionData.desktops}/share/xsessions \
-            --greeting "bem vindo, pedrinho"
+            --remember-session \
+            --sessions ${config.services.displayManager.sessionData.desktops}/share/wayland-sessions \
+            --xsessions ${config.services.displayManager.sessionData.desktops}/share/xsessions \
+            --greeting "AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"
         '';
         user = "greeter";
       };
     };
-  };
-
-  # Evita mensagens de erro no TTY antes do greeter iniciar
-  systemd.services.greetd.serviceConfig = {
-    Type = "idle";
-    StandardInput = "tty";
-    StandardOutput = "tty";
-    StandardError = "journal";
-    TTYReset = true;
-    TTYVHangup = true;
-    TTYVTDisallocate = true;
   };
 }
