@@ -28,7 +28,13 @@
     "amd_pstate=active" # active/guided/passive - active é muito mais rápido e responsivo
 
     # USB: autosuspend 2s economiza bateria (se algum device der problema, volte -1)
-    "usbcore.autosuspend=-1"
+    # "usbcore.autosuspend=-1"
+
+    # Crazy Experimental
+    "iommu=pt"
+    "nvidia.NVreg_DynamicPowerManagement=0x02"
+    "nvidia-drm.fbdev=1"
+    "nvidia-drm.modeset=1"
   ];
 
   boot.kernel.sysctl = {
