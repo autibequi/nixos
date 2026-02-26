@@ -305,8 +305,10 @@
     "show_turn_stats": true,
     "play_sound_when_agent_done": true,
     "default_model": {
+      "effort": "low",
+      "enable_thinking": false,
       "provider": "zed.dev",
-      "model": "claude-sonnet-4-5",
+      "model": "claude-sonnet-4-6",
     },
     "inline_assistant_model": {
       "provider": "zed.dev",
