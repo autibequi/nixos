@@ -9,7 +9,6 @@
 
     # Core Modules
     ./modules/core/nix.nix
-    ./modules/core/hardware.nix
     ./modules/core/core.nix
     ./modules/core/home.nix
     ./modules/core/services.nix

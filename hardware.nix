@@ -1,10 +1,10 @@
 # Instalation
-# Create a copy of this file name hardware.nix with such inside:
-# In a fresh start this info can be retrieve by:
+# Create a copy of this file named hardware.nix with the content below.
+# In a fresh start the UUIDs can be retrieved with:
 #
-# cat /etc/nixos/hardware-configuration.nix | grep -B 3 "device ="
+#   cat /etc/nixos/hardware-configuration.nix | grep -B 3 "device ="
 #
-{ lib, ... }:
+{ ... }:
 {
   imports = [
     # Hardware Specific
@@ -28,18 +28,31 @@
     # ./modules/howdy.nix
   ];
 
-  options.diskUUIDs = {
-    boot = lib.mkOption {
-      description = "Boot partition";
-      default = "/dev/disk/by-uuid/6B74-DC9D";
+  config = {
+    fileSystems."/boot" = {
+      device = "/dev/disk/by-uuid/1F53-9115";
+      fsType = "vfat";
+      options = [
+        "fmask=0077"
+        "dmask=0077"
+      ];
     };
-    root = lib.mkOption {
-      description = "Root partition";
-      default = "/dev/disk/by-uuid/4265d4f9-7f7b-4ebf-a3b4-a3406c3c0955";
+
+    fileSystems."/" = {
+      device = "/dev/disk/by-uuid/ee52cc58-f10d-4979-8244-4386302649c5";
+      fsType = "ext4"; # TODO: testar zfs com lz4 no proximo setup
+      neededForBoot = true;
+      options = [
+        "defaults"
+        "noatime"
+        "discard"
+      ];
     };
-    swap = lib.mkOption {
-      description = "Swap partition";
-      default = "/dev/disk/by-uuid/c824afe8-bf19-4f7f-9876-5fcff8c93593";
-    };
+
+    # Hibernation
+    boot.resumeDevice = "/dev/disk/by-uuid/17e5c565-c90c-4233-92c6-bb86adfed306";
+
+    # Swap
+    swapDevices = [ { device = "/dev/disk/by-uuid/17e5c565-c90c-4233-92c6-bb86adfed306"; } ];
   };
 }
