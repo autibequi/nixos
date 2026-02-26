@@ -35,7 +35,7 @@
   // ─── FONTS ─────────────────────────────────────────────────────
   // Editor (buffer) font
   "buffer_font_family": "JetBrainsMonoNL Nerd Font Mono",
-  "buffer_font_size": 14.0,
+  "buffer_font_size": 8.0,
   "buffer_font_weight": 600,
   "buffer_line_height": "standard",
   "buffer_font_features": {
@@ -51,10 +51,14 @@
   // ─── THEME & APPEARANCE ────────────────────────────────────────
   "theme": {
     "mode": "system",
-    "light": "Dracula Light (Alucard)",
-    "dark": "GitHub Dark",
+    "light": "macOS Classic Light",
+    "dark": "macOS Classic Dark"
   },
-  "icon_theme": "VSCode Great Icons Theme",
+  "icon_theme": {
+    "mode": "system",
+    "light": "VSCode Icons for Zed (Dark Angular)",
+    "dark": "VSCode Icons for Zed (Dark Angular)"
+  },
   "unstable.ui_density": "compact",
   // Fade unused/unreachable code (like VS Code's "editor.showUnused")
   "unnecessary_code_fade": 0.5,
@@ -188,7 +192,7 @@
     "hide_root": false,
     "dock": "left",
     "hide_gitignore": false,
-    "indent_size": 30,
+    "indent_size": 10,
     "show_diagnostics": "all",
     "indent_guides": {
       "show": "never"
@@ -207,7 +211,7 @@
   },
   // Source control panel
   "git_panel": {
-    "tree_view": false,
+    "tree_view": true,
     "sort_by_path": true,
     "status_style": "icon",
   },
@@ -264,7 +268,7 @@
   "terminal": {
     "copy_on_select": true,
     "font_family": "JetBrainsMonoNL Nerd Font Mono",
-    "font_size": 18.0,
+    "font_size": 8.0,
     "font_weight": 500,
   },
   // ─── DEBUGGER ──────────────────────────────────────────────────
