@@ -1,0 +1,86 @@
+# ╔══════════════════════════════════════════════════════════╗
+# ║           pedrinho.theme — btop++ custom theme          ║
+# ║      OLED black · vibrant accents · deep dark vibes     ║
+# ╚══════════════════════════════════════════════════════════╝
+#
+# Palette inspired by the alacritty deep dark theme:
+#   bg      #0a0e14   fg      #e6e6e6
+#   cyan    #00d4ff   green   #50fa7b
+#   magenta #ff79c6   yellow  #ffb454
+#   red     #ff6b6b   blue    #33e0ff
+
+# ─── Main background & text ──────────────────────────────────
+theme[main_bg]="#0a0e14"
+theme[main_fg]="#e6e6e6"
+
+# ─── Title & header labels ───────────────────────────────────
+theme[title]="#00d4ff"
+theme[hi_fg]="#00d4ff"
+
+# ─── Selected item highlight ─────────────────────────────────
+theme[selected_bg]="#1a1f29"
+theme[selected_fg]="#00d4ff"
+
+# ─── Inactive / dimmed text ──────────────────────────────────
+theme[inactive_fg]="#4a5568"
+
+# ─── Box borders ─────────────────────────────────────────────
+theme[proc_misc]="#4a5568"
+
+# ─── CPU box ─────────────────────────────────────────────────
+theme[cpu_box]="#1a1f29"
+theme[cpu_start]="#00d4ff"
+theme[cpu_mid]="#50fa7b"
+theme[cpu_end]="#ff79c6"
+
+# ─── Memory box ──────────────────────────────────────────────
+theme[mem_box]="#1a1f29"
+theme[mem_start]="#50fa7b"
+theme[mem_mid]="#ffb454"
+theme[mem_end]="#ff6b6b"
+
+# ─── Swap ────────────────────────────────────────────────────
+theme[swap_start]="#33e0ff"
+theme[swap_mid]="#ff79c6"
+theme[swap_end]="#ff6b6b"
+
+# ─── Disk / IO ───────────────────────────────────────────────
+theme[div_line]="#1a1f29"
+theme[meter_bg]="#1a1f29"
+
+# ─── Network box ─────────────────────────────────────────────
+theme[net_box]="#1a1f29"
+theme[download_start]="#50fa7b"
+theme[download_mid]="#00d4ff"
+theme[download_end]="#33e0ff"
+theme[upload_start]="#ff79c6"
+theme[upload_mid]="#ffb454"
+theme[upload_end]="#ff6b6b"
+
+# ─── Process box ─────────────────────────────────────────────
+theme[proc_box]="#1a1f29"
+theme[proc_start]="#00d4ff"
+theme[proc_mid]="#50fa7b"
+theme[proc_end]="#ff79c6"
+
+theme[proc_color]="#00d4ff"
+theme[proc_gradient]="true"
+
+# ─── Graph colors ────────────────────────────────────────────
+theme[graph_text]="#4a5568"
+theme[graph_bg]="#0f131a"
+
+# ─── Temperature ─────────────────────────────────────────────
+theme[temp_start]="#50fa7b"
+theme[temp_mid]="#ffb454"
+theme[temp_end]="#ff6b6b"
+
+# ─── Process list banner (paused / following) ────────────────
+theme[proc_pause_bg]="#1a1f29"
+theme[proc_follow_bg]="#1a1f29"
+theme[proc_banner_bg]="#0f131a"
+theme[proc_banner_fg]="#ffb454"
+
+# ─── Followed process highlight ──────────────────────────────
+theme[followed_bg]="#1a1f29"
+theme[followed_fg]="#50fa7b"
