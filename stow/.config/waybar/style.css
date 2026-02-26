@@ -18,6 +18,7 @@
 @define-color color-yellow #ffe761;
 @define-color color-green #008000;
 @define-color color-blue #0c4abf;
+@define-color color-orange #ff8c00;
 
 /*========================================================*
  *                   GLOBAL COLORS                       *
@@ -194,12 +195,12 @@ window#waybar {
 }
 
 #custom-playerctl.Playing {
-    color: @color-green;
-    text-shadow: 0 0 6px @color-green;
+    color: @color-yellow;
+    text-shadow: 0 0 6px @color-yellow;
 }
 
 #custom-playerctl.Paused {
-    color: @color-yellow;
+    color: @color-orange;
     background-color: @color-black;
 }
 
