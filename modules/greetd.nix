@@ -2,6 +2,8 @@
 {
   services.greetd = {
     enable = true;
+    # Não exibir erros/warnings no TTY antes do greeter carregar
+    vt = 7;
     settings = {
       default_session = {
         command = ''

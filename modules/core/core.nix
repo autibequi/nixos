@@ -4,6 +4,9 @@
   ...
 }:
 {
+  # Define a versão do sistema para evitar avisos de "outdated channel"
+  system.stateVersion = "25.05";
+
   # Global shell initialization commands, sourcing the external script
   # environment.shellInit = builtins.readFile ../../scripts/init.sh;
 

@@ -14,14 +14,37 @@
     };
 
     loader.timeout = 0;
+
+    # Silencia completamente os logs do kernel no console
     consoleLogLevel = 0;
+
+    # Desativa mensagens verbosas do initrd
     initrd.verbose = false;
+
     kernelParams = [
-      "plymouth.use-simpledrm=1"
-      "udev.log_priority=3"
-      "loglevel=3"
+      # Boot silencioso
       "quiet"
       "splash"
+      "loglevel=0"
+
+      # Suprime completamente logs do udev/systemd no console
+      "udev.log_priority=3"
+      "rd.udev.log_priority=3"
+
+      # Desativa o cursor piscante que aparece antes do Plymouth
+      "vt.global_cursor_default=0"
+
+      # Suprime mensagens do Plymouth antes do DRM estar pronto
+      "plymouth.use-simpledrm=1"
+
+      # Desativa BGRT (logo OEM da BIOS que pode vazar)
+      "bgrt_disable"
     ];
+  };
+
+  # Garantir que o Plymouth receba o sinal de quit corretamente
+  # antes do greeter aparecer, evitando flicker de terminal
+  systemd.services."plymouth-quit" = {
+    before = [ "greetd.service" ];
   };
 }
