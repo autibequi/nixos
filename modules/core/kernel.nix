@@ -31,16 +31,20 @@
     "usbcore.autosuspend=-1"
   ];
 
-  # Desabilita swap durante uso normal (apenas para hibernação)
-  # swappiness=0 evita uso do swap exceto em emergências (OOM)
-  # Isso mantém tudo na RAM e evita I/O desnecessário no HD externo
   boot.kernel.sysctl = {
-    "vm.swappiness" = 0; # 0 = nunca usar swap, exceto para hibernação
+    # NVMe interno é rápido o suficiente para se beneficiar de swappiness moderado.
+    # 10-20 significa que o kernel só começa a usar swap quando a RAM fica escassa,
+    # mas ainda permite que páginas frias sejam movidas proativamente.
+    "vm.swappiness" = 10;
+
+    # Pressão de cache padrão: 100 seria agressivo demais para um SSD rápido.
+    # 50 mantém um bom equilíbrio entre reutilizar cache e liberar memória.
     "vm.vfs_cache_pressure" = 50;
 
-    # Otimizações adicionais para manter tudo em RAM
-    "vm.dirty_ratio" = 10; # Limita % de RAM usada para cache de escrita
-    "vm.dirty_background_ratio" = 5; # Inicia flush de cache mais cedo
+    # NVMe interno aguenta rajadas de escrita muito bem.
+    # Limites mais generosos reduzem stalls de CPU por flush prematuro.
+    "vm.dirty_ratio" = 20;           # flush forçado ao atingir 20% da RAM
+    "vm.dirty_background_ratio" = 10; # flush em background começa aos 10%
   };
 
   # Otimiza o uso do disco para melhor performance
@@ -48,8 +52,10 @@
 
   # Configurar compressão.
   # https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/kernel/initrd-compressor-meta.nix
-  boot.initrd.compressor = "zstd"; # zstd is faster for decompression
-  boot.initrd.compressorArgs = [ "-19" ]; # Max compression for zstd
+  # zstd -3: descompressão rápida em NVMe interno (~2x mais rápido que -19),
+  # o delta de tamanho é insignificante quando a leitura não é o gargalo.
+  boot.initrd.compressor = "zstd";
+  boot.initrd.compressorArgs = [ "-3" ];
 
   # Userland Scheduler
   services.scx.enable = true;
@@ -59,7 +65,7 @@
   # AMD Power Management Indication
   services.auto-epp.enable = true;
 
-  # Otimizações de I/O
+  # TRIM periódico para saúde do NVMe interno
   services.fstrim.enable = true;
   services.fstrim.interval = "weekly";
 }
