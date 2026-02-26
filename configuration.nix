@@ -18,6 +18,7 @@
     ./modules/core/shell.nix
     ./modules/core/kernel.nix
     ./modules/core/hibernate.nix
+    ./modules/logiops.nix
 
     # Greeter
     ./modules/greetd.nix
