@@ -4,7 +4,10 @@
   "height": 32,
   "spacing": 0,
   "margin": 0,
-  "modules-left": ["idle_inhibitor", "hyprland/workspaces"],
+  "modules-left": [
+    "idle_inhibitor",
+    "hyprland/workspaces"
+  ],
   "modules-center": [
     "clock",
     "battery"
@@ -47,13 +50,8 @@
     "format": "{icon}:{windows}",
     "window-rewrite-default": " ",
     "format-icons": {
-      "esc": "bleh",
-      "F1": "com",
-      "F2": "doc",
-      "F3": "ctx",
-      "F4": "call",
-      "F5": "⌐■_■",
-      "F6": "ʕ■ᴥ■ʔ"
+      "obsidian": "⌐■_■",
+      "nixsearch": "ʕ■ᴥ■ʔ"
     },
     "workspace-taskbar": {
       "format": "{icon} {title}",
@@ -77,12 +75,13 @@
       "code": "󰨞",
       "cursor": "󰨞",
       "obsidian": "",
-      "Alacritty": "",
+      "Alacritty": "󰆍",
       "ghostty": "󰆍",
       "org.gnome.Nautilus": "",
       "zed": "",
       "stremio": "🍿",
       "insomnia": "",
+      "yaak-app": "📠",
       "class<^steam_app_.*>": "󰮯",
       "title<.*Steam.*>": ""
     }
@@ -194,7 +193,11 @@
       "phone": "󰏲",
       "portable": "󰄝",
       "car": "󰄋",
-      "default": ["󰕿", "󰖀", "󰕾"]
+      "default": [
+        "󰕿",
+        "󰖀",
+        "󰕾"
+      ]
     },
     "on-click": "alacritty -e ncpamixer",
     "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
@@ -203,7 +206,11 @@
   },
   "backlight": {
     "format": "{icon} {percent}%",
-    "format-icons": ["󰃞", "󰃟", "󰃠"],
+    "format-icons": [
+      "󰃞",
+      "󰃟",
+      "󰃠"
+    ],
     "on-scroll-up": "brightnessctl set +5%",
     "on-scroll-down": "brightnessctl set 5%-"
   }
