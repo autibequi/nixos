@@ -67,6 +67,7 @@
 
         source ~/secrets.sh
         source ~/.config/hypr/hyprutils.sh
+        source ~/.config/zsh/functions.sh
       fi
     '';
   };
