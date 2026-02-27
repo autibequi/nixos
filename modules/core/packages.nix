@@ -43,6 +43,8 @@
     google-chrome
     servo # rust browser
     inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
+    vivaldi
+    vivaldi-ffmpeg-codecs
 
     # art
     # krita
