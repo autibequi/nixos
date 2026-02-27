@@ -28,8 +28,8 @@
     # ./modules/plymouth.nix # Its so fast now that its not needed :(
     ./modules/ai.nix
     ./modules/steam.nix
-    # ./modules/podman.nix
-    ./modules/docker.nix
+    ./modules/podman.nix
+    # ./modules/docker.nix
 
     # Custom Modules
     ./modules/flatpak.nix
