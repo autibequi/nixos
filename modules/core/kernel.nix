@@ -37,6 +37,12 @@
     "nmi_watchdog=0"
 
     "iommu=pt"
+
+    # NVMe: APST desligado = disco em PS0 (máx. desempenho). Sem isso throughput cai.
+    "nvme_core.default_ps_max_latency_us=0"
+    # PCIe ASPM (L1) pode limitar throughput do NVMe; off = link sempre L0.
+    "pcie_aspm=off"
+
     "nvidia.NVreg_DynamicPowerManagement=0x02"
     "nvidia-drm.fbdev=1"
     "nvidia-drm.modeset=1"
@@ -110,4 +116,10 @@
   # TRIM periódico para saúde do NVMe interno
   services.fstrim.enable = true;
   services.fstrim.interval = "weekly";
+
+  # NVMe já faz scheduling interno; mq-deadline adiciona latência sem ganho.
+  # Forçar "none" iguala ao comportamento típico no Windows e melhora throughput.
+  services.udev.extraRules = ''
+    SUBSYSTEM=="block", ACTION=="add|change", KERNEL=="nvme[0-9]*", ATTR{queue/scheduler}="none"
+  '';
 }

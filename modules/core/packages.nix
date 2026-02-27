@@ -51,6 +51,7 @@
 
     # benchmark
     geekbench
+    fio # I/O benchmark (CrystalDiskMark-style sequential)
     nvtopPackages.amd # AMD GPU monitoring
 
     # Games
