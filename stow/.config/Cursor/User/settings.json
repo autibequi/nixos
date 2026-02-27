@@ -304,4 +304,5 @@
   "update.showReleaseNotes": false,
   "update.mode": "none",
   "workbench.preferredDarkColorTheme": "Cursor Dark Midnight",
+  "debug.toolBarLocation": "commandCenter",
 }
