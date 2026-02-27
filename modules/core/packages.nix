@@ -13,7 +13,6 @@
     killall
     # apps
     fuse # Required for AppImage support (libfuse.so.2)
-    appimage-run # Wrapper to run AppImages on NixOS
     onlyoffice-bin # office space apps
     sidequest # for oculus sideloading
     blanket # Noise

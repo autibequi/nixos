@@ -157,4 +157,8 @@
   programs.nh = {
     enable = true;
   };
+
+  # AppImage Suport
+  programs.appimage.enable = true;
+  programs.appimage.binfmt = true;
 }
