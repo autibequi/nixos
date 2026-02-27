@@ -47,7 +47,7 @@
     "org.gnome.[nN]autilus": "",
     "zed": "",
     "stremio": "🍿",
-    "insomnia": "",
+    "title:.*Yaak.*": "🤙",
     "class:^steam_app_.*": "󰮯",
     "title:.*Steam.*": ""
   },
