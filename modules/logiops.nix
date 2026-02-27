@@ -15,7 +15,7 @@
     after = [ "multi-user.target" ];
     serviceConfig = {
       Type = "simple";
-      ExecStart = "${pkgs.logiops}/bin/logid";
+      ExecStart = "${pkgs.logiops}/bin/logid -c /etc/logid.cfg";
       Restart = "on-failure";
     };
   };
