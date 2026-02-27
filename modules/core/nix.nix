@@ -5,6 +5,8 @@
   ...
 }:
 {
+  system.nixos.label = "PedrinhOS";
+
   # End of Day Update
   # https://nixos.wiki/wiki/Automatic_system_upgrades
   system.autoUpgrade = {
