@@ -2,7 +2,7 @@
   description = "A very basic flake";
   inputs = {
     # Nix Channels
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     # nixpkgs.url = "github:NixOS/nixpkgs/staging";
     # nixpkgs.url = "github:NixOS/nixpkgs/staging-next";
@@ -11,7 +11,7 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware/master"; # Hardware
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     isd.url = "github:isd-project/isd"; # Interactive SystemD
-    home-manager.url = "github:nix-community/home-manager/release-25.05"; # Home Manager
+    home-manager.url = "github:nix-community/home-manager/release-25.11"; # Home Manager
     voxtype.url = "github:peteonrails/voxtype";
     nixified-ai.url = "github:nixified-ai/flake"; # Nixified AI
 

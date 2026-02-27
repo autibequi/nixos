@@ -8,16 +8,9 @@
   virtualisation.libvirtd = {
     enable = true;
 
-    # QEMU com suporte UEFI (OVMF) - essencial para Windows 11
+    # QEMU (25.11: OVMF vem por padrão, submodule removido)
     qemu = {
       package = pkgs.qemu_kvm;
-
-      # UEFI Firmware para VMs (Windows 11 exige)
-      ovmf = {
-        enable = true;
-        packages = [ pkgs.OVMFFull.fd ];
-      };
-
       # TPM virtual (Windows 11 exige)
       swtpm.enable = true;
     };
@@ -55,7 +48,7 @@
     virtiofsd        # Compartilhamento de pastas host<->guest
 
     # ═══ Windows Guest Tools ═══
-    win-virtio       # Drivers VirtIO para Windows (ISO)
+    virtio-win       # Drivers VirtIO para Windows (ISO)
     win-spice        # SPICE guest tools para Windows
 
     # ═══ Extras ═══

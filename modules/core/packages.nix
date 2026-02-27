@@ -7,13 +7,13 @@
     rofimoji
     rofi-top
     # rofi-wayland
-    rofi-wayland-unwrapped
-    rofi-emoji-wayland
+    rofi-unwrapped
+    rofi-emoji  
 
     killall
     # apps
     fuse # Required for AppImage support (libfuse.so.2)
-    onlyoffice-bin # office space apps
+    onlyoffice-desktopeditors # office space apps
     sidequest # for oculus sideloading
     blanket # Noise
     papers # PDFS

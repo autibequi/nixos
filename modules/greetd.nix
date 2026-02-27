@@ -2,12 +2,11 @@
 {
   services.greetd = {
     enable = true;
-    # Não exibir erros/warnings no TTY antes do greeter carregar
-    vt = 7;
+    # VT fixado em VT1 no 25.11; opção services.greetd.vt removida
     settings = {
       default_session = {
         command = ''
-          ${pkgs.greetd.tuigreet}/bin/tuigreet \
+          ${pkgs.tuigreet}/bin/tuigreet \
             --time \
             --remember \
             --remember-session \

@@ -17,7 +17,7 @@
 
       # Noto fonts
       noto-fonts
-      noto-fonts-emoji
+      noto-fonts-color-emoji
 
       # CJK Fonts
       # source-han-serif

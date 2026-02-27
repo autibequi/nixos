@@ -12,8 +12,10 @@
 
       programs.git = {
         enable = true;
-        userName = "Pedro Correa";
-        userEmail = "pedro@autibequi.com";
+        settings.user = {
+          name = "Pedro Correa";
+          email = "pedro@autibequi.com";
+        };
       };
 
       home.file = {

@@ -25,7 +25,7 @@
   # Por enquanto Zeditor Preview
   programs.nix-ld = {
     enable = true;
-    package = pkgs.nix-ld-rs;
+    package = pkgs.nix-ld;  # 25.11: nix-ld-rs renamed to nix-ld
     libraries = with pkgs; [
       alsa-lib
       stdenv.cc.cc

@@ -5,12 +5,15 @@
   # ASUS Zephyrus GA402X: firmware só suporta s2idle (Modern Standby), não S3 deep sleep
   # NVIDIA + s2idle: wake quebrado/tela preta é comum; finegrained=false no nvidia.nix ajuda
 
-  services.logind = {
-    lidSwitch = "suspend-then-hibernate";
-    lidSwitchExternalPower = "suspend-then-hibernate";
-    lidSwitchDocked = "suspend-then-hibernate";
-    powerKey = "hibernate";
-    powerKeyLongPress = "poweroff";
+  # 25.11: opções top-level e extraConfig removidas; tudo em settings.Login
+  services.logind.settings.Login = {
+    HandleLidSwitch = "suspend-then-hibernate";
+    HandleLidSwitchExternalPower = "suspend-then-hibernate";
+    HandleLidSwitchDocked = "suspend-then-hibernate";
+    HandlePowerKey = "hibernate";
+    HandlePowerKeyLongPress = "poweroff";
+    IdleAction = "suspend-then-hibernate";
+    IdleActionSec = "10min";
   };
 
   systemd.sleep.extraConfig = ''
@@ -32,10 +35,4 @@
     "no_console_suspend"
   ];
 
-  # TTY Sleep (se ainda acordar quebrado, troque IdleAction para "suspend")
-  services.logind.extraConfig = ''
-    HandleLidSwitchDocked=suspend-then-hibernate
-    IdleAction=suspend-then-hibernate
-    IdleActionSec=10min
-  '';
 }
