@@ -83,6 +83,9 @@
 
     # Fun
     pkgs-unstable.wayland-bongocat
+    
+    # Compression
+    lz4
   ];
   # permittedInsecurePackages = [
   #   "ventoy-qt5-1.1.05"

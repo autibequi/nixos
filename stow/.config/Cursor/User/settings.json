@@ -4,7 +4,6 @@
   // --------------------------------------------------------------------------
   "workbench.enableExperiments": true,
   "workbench.iconTheme": "vscode-great-icons",
-  "workbench.preferredLightColorTheme": "Default Light Modern",
   "workbench.activityBar.location": "hidden",
   "workbench.startupEditor.showTabs": false,
   "workbench.tips.enabled": false,
@@ -299,7 +298,10 @@
   "go.alternateTools": {
     "gopls": "/run/current-system/sw/bin/gopls"
   },
-  "workbench.preferredDarkColorTheme": "Solarized Dark",
   "workbench.colorTheme": "Solarized Light",
   "cursor.composer.textSizeScale": 1.15,
+  "extensions.autoCheckUpdates": false,
+  "update.showReleaseNotes": false,
+  "update.mode": "none",
+  "workbench.preferredDarkColorTheme": "Cursor Dark Midnight",
 }

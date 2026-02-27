@@ -25,41 +25,33 @@
   # Permitir hibernação (desabilita proteção de kernel image)
   security.protectKernelImage = false;
 
+  # disable TPM
+  boot.initrd.systemd.tpm2.enable = false;
+  systemd.tpm2.enable = false;
+
   boot.kernelParams = [
+    # Logs
     "fastboot"
     "quiet"
     "loglevel=0"
     "bgrt_disable"
-    # udev: só erros no console (3 = err)
+
     "udev.log_priority=3"
     "rd.udev.log_priority=3"
-    # initrd/systemd: sem status rodando no console
     "rd.systemd.show_status=false"
-    # systemd no sistema principal: menos logs até o greeter
     "systemd.log_level=err"
-    # Cursor piscante desligado no VT
     "vt.global_cursor_default=0"
-    "amd_pstate=active" # active/guided/passive - active é muito mais rápido e responsivo
 
     # USB autosuspend: 2s suspende devices USB ociosos, economizando bateria.
-    # -1 desabilita completamente — ruim para autonomia de laptop.
-    # Se algum periférico travar ou desconectar sozinho, volte para -1.
     "usbcore.autosuspend=2"
 
-    # Desabilita o NMI watchdog — em desktop/laptop não há utilidade prática
-    # e ele acorda a CPU periodicamente, gerando wakeups desnecessários.
-    "nmi_watchdog=0"
-
-    "iommu=pt"
-
-    # NVMe: APST desligado = disco em PS0 (máx. desempenho). Sem isso throughput cai.
-    "nvme_core.default_ps_max_latency_us=0"
-    # PCIe ASPM (L1) pode limitar throughput do NVMe; off = link sempre L0.
-    "pcie_aspm=off"
-
+    # Nvidia
     "nvidia.NVreg_DynamicPowerManagement=0x02"
     "nvidia-drm.fbdev=1"
     "nvidia-drm.modeset=1"
+
+    # AMD
+    "amd_pstate=active" # active/guided/passive - active é muito mais rápido e responsivo
   ];
 
   boot.kernel.sysctl = {
