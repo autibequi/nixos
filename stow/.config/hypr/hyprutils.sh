@@ -53,23 +53,8 @@ hide_active_special_workspaces(){
 }
 
 toggle_or_hide_special_workspace(){
-    local monitor
-    monitor=$(_focused_monitor)
-
-    # Se tem special workspace ativo neste monitor → esconde
-    # Se não tem → reabre o último usado neste monitor
-    active=$(hyprctl monitors -j | jq -r ".[] | select(.name == \"$monitor\") | .specialWorkspace.name")
-    if [ -n "$active" ] && [ "$active" != "" ]; then
-        name="${active#special:}"
-        if [ -n "$name" ]; then
-            hyprctl dispatch togglespecialworkspace "$name"
-        fi
-    else
-        last=$(cat "$(_special_ws_file "$monitor")" 2>/dev/null)
-        if [ -n "$last" ]; then
-            hyprctl dispatch togglespecialworkspace "$last"
-        fi
-    fi
+    # Super: apenas oculta o special workspace atual (sem reabrir ao pressionar de novo)
+    hide_active_special_workspaces
 }
 
 apply_gtk_theme() {
