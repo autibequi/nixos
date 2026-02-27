@@ -1,5 +1,28 @@
 { pkgs, pkgs-unstable, ... }:
 
+let
+  sharedAliases = {
+    history = "atuin";
+    tasks = "pueue";
+    grep = "rg";
+    findf = "fd";
+    cat = "bat";
+    ls = "lsd -la";
+    du = "dust";
+    ps = "procs";
+    tree = "broot";
+    f = "fzf --wrap";
+    clip = "wl-copy";
+    clipb = "wl-paste";
+    zed = "zeditor";
+    stow = "stow --target=$HOME";
+    dotfiles = "stow --target=$HOME --dir=$HOME/projects/nixos stow";
+    please = "sudo !!";
+    vim = "hx";
+    vi = "hx";
+    wiki = "wikiti";
+  };
+in
 {
   programs.zsh = {
     enable = true;
@@ -33,33 +56,9 @@
       "cursor"
     ];
 
-    shellAliases = {
-      history = "atuin";
-      tasks = "pueue";
-      grep = "rg"; # ripgrep
-      findf = "fd";
-      cat = "bat";
-      ls = "lsd -la";
-      du = "dust";
-      ps = "procs";
-      tree = "broot";
-      f = "fzf --wrap";
-      clip = "wl-copy";
-      clipb = "wl-paste";
-      zed = "zeditor";
-      stow = "stow --target=$HOME";
-      dotfiles = "stow --target=$HOME --dir=$HOME/projects/nixos stow";
-      please = "sudo !!";
-      vim = "hx";
-      vi = "hx";
-
-      wiki = "wikiti";
-
-      # npm = "pnpm";
-    };
+    shellAliases = sharedAliases;
 
     shellInit = ''
-      # Skip utils in a dumb terminal
       if [ "$TERM" != "dumb" ]; then
         eval "$(starship init zsh)"
         eval "$(zoxide init zsh)"
@@ -69,6 +68,19 @@
         source ~/.config/hypr/hyprutils.sh
         source ~/.config/zsh/functions.sh
       fi
+    '';
+  };
+
+  programs.fish = {
+    enable = true;
+    shellAliases = sharedAliases;
+
+    shellInit = ''
+      if test "$TERM" != "dumb"
+        starship init fish | source
+        zoxide init fish | source
+        atuin init fish | source
+      end
     '';
   };
 
