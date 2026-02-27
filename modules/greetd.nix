@@ -13,7 +13,8 @@
             --remember-session \
             --sessions ${config.services.displayManager.sessionData.desktops}/share/wayland-sessions \
             --xsessions ${config.services.displayManager.sessionData.desktops}/share/xsessions \
-            --greeting "AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH"
+            --greeting "It's time to viiiiiibe code, babyyyyyyy!" \
+            --greet-align center
         '';
         user = "greeter";
       };
