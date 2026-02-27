@@ -4,12 +4,12 @@ let
   grep = pkgs.gnugrep;
   # 1. Declare the Flatpaks you *want* on your system
   desiredFlatpaks = [
-    "app.zen_browser.zen"
-    "com.usebottles.bottles"
-    "io.github.seadve.Kooha"
-    "net.nokyan.Resources"
+    # Zen Browser: via flake em modules/core/packages.nix
+    # "com.usebottles.bottles"
+    # "io.github.seadve.Kooha"
+    # "net.nokyan.Resources"
     "com.stremio.Stremio"
-    "io.github.qwersyk.Newelle"
+    # "io.github.qwersyk.Newelle"
     # "com.github.tenderowl.frog"
     # "com.vivaldi.Vivaldi"
   ];

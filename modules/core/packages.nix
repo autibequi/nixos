@@ -1,4 +1,9 @@
-{ pkgs, inputs, pkgs-unstable, ... }:
+{
+  pkgs,
+  inputs,
+  pkgs-unstable,
+  ...
+}:
 
 {
   environment.systemPackages = with pkgs; [
@@ -8,7 +13,7 @@
     rofi-top
     # rofi-wayland
     rofi-unwrapped
-    rofi-emoji  
+    rofi-emoji
 
     killall
     # apps
@@ -37,6 +42,7 @@
     chromium
     google-chrome
     servo # rust browser
+    inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
 
     # art
     # krita
@@ -51,7 +57,7 @@
     # benchmark
     geekbench
     fio # I/O benchmark (CrystalDiskMark-style sequential)
-    nvtopPackages.amd # AMD GPU monitoring
+    nvtopPackages.full # AMD GPU monitoring
 
     # Games
     # retroarchFull
@@ -83,7 +89,7 @@
 
     # Fun
     pkgs-unstable.wayland-bongocat
-    
+
     # Compression
     lz4
   ];
