@@ -18,8 +18,8 @@
       "ctrl-shift-d": "workspace::ToggleRightDock",
       // AI Agents
       "ctrl-alt-l": "agent::NewThread",
-      "ctrl-shift-p": "file_finder::Toggle",
-      "ctrl-p": "command_palette::Toggle",
+      "ctrl-shift-p": "command_palette::Toggle",
+      "ctrl-p": "file_finder::Toggle",
       "ctrl-u": "outline::Toggle",
       "ctrl-shift-u": "outline_panel::Toggle",
       "ctrl-shift-r": "projects::OpenRecent",
