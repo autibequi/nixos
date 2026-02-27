@@ -48,6 +48,31 @@
 
       # XKB support
       xorg.xkeyboardconfig
+
+      # Yaak
+      fontconfig
+      fribidi
+      xorg.libxcb
+      harfbuzz
+      libgbm
+      libdrm
+      libgpg-error
+      e2fsprogs
+      webkitgtk_4_1
+      gtk3
+      glib
+      libsoup_3
+      gmp
+      openssl
+      freetype
+      fontconfig
+      harfbuzz
+      fribidi
+      xorg.libxcb
+      libgbm
+      libdrm
+      libgpg-error
+      e2fsprogs
     ];
   };
 
