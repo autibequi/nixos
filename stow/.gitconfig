@@ -65,6 +65,10 @@
 	  fi; \
 	}; f"
 
+	stash-unstaged = "!f() { \
+	    git stash push --keep-index -u \
+	}; f"
+
 [color]
 	ui = auto
 
@@ -86,7 +90,7 @@
 
 [diff]
     tool = meld
-		
+
 [difftool]
     prompt = false
 
