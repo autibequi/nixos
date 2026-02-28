@@ -41,8 +41,8 @@
     # Work Browser
     chromium
     google-chrome
-    servo # rust browser
-    inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
+    # servo # rust browser
+    # inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
     vivaldi
     vivaldi-ffmpeg-codecs
 
