@@ -78,7 +78,7 @@
     # Checking out
     # openrgb_git
     # evil-helix_git
-
+    tailscale
     # ISO
     # ventoy-full-qt
 

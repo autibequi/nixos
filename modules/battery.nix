@@ -3,8 +3,10 @@
 {
 
   # UPower: monitora bateria e define ações em níveis críticos
+  # ignoreLid = true: upower não reage à tampa; logind (hibernate.nix) trata lid close.
   services.upower = {
     enable = true;
+    ignoreLid = true;
     percentageLow = 15;
     percentageCritical = 5;
     percentageAction = 3;
