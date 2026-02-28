@@ -59,6 +59,7 @@ in
   };
 
   environment.systemPackages = with pkgs; [
+    zenity
     hyprpicker
     hyprpolkitagent
     cheese

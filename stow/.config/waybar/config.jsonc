@@ -67,6 +67,7 @@
       "title<(.*)(JIRA)(.*)>": "󰌃",
       "title<(.*)(Meet)(.*)>": "",
       "firefox": "",
+      "vivaldi": "🌐",
       "app.zen_browser.zen": "",
       "zen": "",
       "chrome": "",

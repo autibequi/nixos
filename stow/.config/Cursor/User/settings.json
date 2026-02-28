@@ -305,4 +305,7 @@
   "update.mode": "none",
   "workbench.preferredDarkColorTheme": "Cursor Dark Midnight",
   "debug.toolBarLocation": "commandCenter",
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
+  "editor.formatOnType": true,
 }
