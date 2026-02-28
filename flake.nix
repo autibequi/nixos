@@ -17,7 +17,7 @@
 
     zed.url = "github:zed-industries/zed";
 
-    hyprland.url = "github:hyprwm/Hyprland";
+    hyprland.url = "github:hyprwm/Hyprland/v0.54.0";
 
     hyprtasking = {
       url = "github:raybbian/hyprtasking";
@@ -56,11 +56,13 @@
         inherit system;
         config.allowUnfree = true;
       };
+
+      hyprland-git = inputs.hyprland.packages.${system};
     in
     {
       nixosConfigurations.nomad = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = { inherit inputs pkgs-unstable; };
+        specialArgs = { inherit inputs pkgs-unstable hyprland-git; };
         modules = [
           {
             nixpkgs.config.allowUnfree = true;

@@ -1,5 +1,10 @@
 #!/bin/sh
 
+init() {
+    waybar_refresh
+    dark_theme
+}
+
 # Returns the focused monitor name (e.g. eDP-1, HDMI-A-1, DP-2)
 _focused_monitor() {
     hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .name'

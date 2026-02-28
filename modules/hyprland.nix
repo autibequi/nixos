@@ -2,11 +2,13 @@
   lib,
   pkgs,
   inputs,
+  hyprland-git,
   pkgs-unstable,
   ...
 }:
 with lib;
 let
+  # Hyprland Plugins
   hypr-plugin-dir = pkgs.symlinkJoin {
     name = "hyrpland-plugins";
     paths =
@@ -15,11 +17,7 @@ let
         hypr-dynamic-cursors
         # hyprfocus
         # hyprtrails
-        # hyprwinwrap
-        # hyprsplit
-
         # hyprspace
-        # hyprscrolling
       ])
       ++ [
         # inputs.hyprtasking.packages.${pkgs.system}.hyprtasking
@@ -27,19 +25,16 @@ let
   };
 in
 {
-  # services.hypridle.enable = true;
-
-  environment.sessionVariables = {
-    HYPR_PLUGIN_DIR = hypr-plugin-dir;
-    ANYRUN_PLUGIN_DIR = "${pkgs.anyrun}/lib";
-  };
-
   programs.hyprland = {
     enable = true;
-    package = pkgs-unstable.hyprland;
+    package = hyprland-git.hyprland;
     xwayland.enable = true;
   };
 
+  # Environment Variables
+  environment.sessionVariables = {
+    HYPR_PLUGIN_DIR = hypr-plugin-dir;
+  };
 
   # Habilitar serviço para compilar schemas
   programs.dconf.enable = true;
@@ -49,14 +44,8 @@ in
   security.pam.services.hyprlock.enableGnomeKeyring = true;
   security.pam.services.login.enableGnomeKeyring = true;
 
-  # HyprPanel via Home Manager (substitui waybar + swaynotificationcenter)
-  # Config gerenciado via stow: stow/.config/hyprpanel/config.json
-  home-manager.users."pedrinho" = {
-    programs.hyprpanel = {
-      enable = true;
-      systemd.enable = true;
-    };
-  };
+  # HyprIdle
+  services.hypridle.enable = true;
 
   environment.systemPackages = with pkgs; [
     zenity
@@ -76,7 +65,6 @@ in
     slurp # Screen selection
     swayimg # Image viewer for Wayland
     wl-clipboard # Clipboard management
-    hypridle
     hyprshade
     fuzzel
     anyrun
