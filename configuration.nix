@@ -10,7 +10,6 @@
     # Core Modules
     ./modules/core/nix.nix
     ./modules/core/core.nix
-    ./modules/core/home.nix
     ./modules/core/services.nix
     ./modules/core/programs.nix
     ./modules/core/packages.nix
@@ -43,8 +42,11 @@
     # Other Modules
     ./modules/work.nix
     ./modules/virt.nix
+
+    # Legacy Modules
     # ./modules/tlp.nix
     # ./modules/docker.nix
     # ./modules/flatpak.nix
+    # ./modules/core/home.nix # using stow instead
   ];
 }

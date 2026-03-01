@@ -10,10 +10,6 @@
       home.stateVersion = "25.11";
       home.enableNixpkgsReleaseCheck = false;
 
-      programs.git = {
-        enable = true;
-      };
-
       # Corrige erro de caractere reservado no campo Exec (desktop spec)
       xdg.desktopEntries."obsidian-work" = {
         name = "Obsidian (Work)";
