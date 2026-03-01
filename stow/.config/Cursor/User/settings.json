@@ -308,4 +308,8 @@
   "editor.formatOnPaste": true,
   "editor.formatOnSave": true,
   "editor.formatOnType": true,
+  "workbench.editor.restoreViewState": false,
+  "workbench.startupEditor": "welcomePage",
+  "extensions.experimental.deferredStartupFinishedActivation": true,
+  "window.restoreWindows": "none",
 }
