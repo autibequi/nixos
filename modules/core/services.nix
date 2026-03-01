@@ -9,6 +9,10 @@
   # Disable Evil Printer
   services.printing.enable = false;
 
+  # UPower: battery/power info via DBus. Chrome e outros apps chamam org.freedesktop.UPower;
+  # sem o serviço, falha "ServiceUnknown: The name is not activatable" e pode bloquear no launch.
+  services.upower.enable = true;
+
   # fwupd
   services.fwupd.enable = true;
 
