@@ -28,7 +28,7 @@
     foliate # ePub reader
     fragments # torrent client
     discord # chattery
-    stremio # streaming
+    # pkgs-unstable.stremio # streaming
 
     # Aesthetics
     banana-cursor # my boss saw it, it okay
