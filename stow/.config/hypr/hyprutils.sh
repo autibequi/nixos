@@ -134,7 +134,7 @@ toggle_theme() {
         fi
 
         notify-send -t 500 "Theme changed to light ☀️"
-        swww img ~/assets/wallpapers/the-death-of-socrates.jpg \
+        uwsm app -- swww img ~/assets/wallpapers/the-death-of-socrates.jpg \
             --transition-type fade \
             --transition-fps 60 \
             --transition-duration 0.3
@@ -149,7 +149,7 @@ toggle_theme() {
         fi
 
         notify-send -t 500 "Theme changed to dark 🌙"
-        swww img ~/assets/wallpapers/the-wild-hunt-of-odin.jpg \
+        uwsm app -- swww img ~/assets/wallpapers/the-wild-hunt-of-odin.jpg \
             --transition-type fade \
             --transition-fps 60 \
             --transition-duration 0.3
@@ -159,11 +159,11 @@ toggle_theme() {
 waybar_refresh() {
     # reload waybar
     pkill waybar 2>/dev/null
-    waybar --config ~/.config/waybar/config.jsonc --style ~/.config/waybar/style.css &
+    uwsm app -- waybar --config ~/.config/waybar/config.jsonc --style ~/.config/waybar/style.css &
     # reload bongocat (only if AC is plugged in)
     pkill bongocat 2>/dev/null
     if [ -f /sys/class/power_supply/ADP0/online ] && [ "$(cat /sys/class/power_supply/ADP0/online)" = "1" ]; then
-        bongocat --config ~/.config/bongocat/bongocat.conf
+        uwsm app -- bongocat --config ~/.config/bongocat/bongocat.conf
     fi
 }
 
@@ -186,11 +186,11 @@ print_screen_with_notes() {
 }
 
 print_screen_to_clipboard() {
-    hyprshot -m region -o ~/Pictures/Screenshots
+    uwsm app -- hyprshot -m region -o ~/Pictures/Screenshots
 }
 
 tesseract_region() {
-    hyprshot -m region --raw | tesseract stdin stdout -l eng | wl-copy
+    uwsm app -- hyprshot -m region --raw | tesseract stdin stdout -l eng | wl-copy
 }
 
 hypr_reload() {

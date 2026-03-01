@@ -20,15 +20,12 @@
     "memory",
     "network",
     // "power-profiles-daemon",
-    "tray",
-    "bluetooth"
+    "tray"
+    // "bluetooth"
   ],
   "tray": {
     "icon-size": 19,
     "spacing": 5,
-    "icons": {
-      "blueman": "bluetooth"
-    }
   },
   "power-profiles-daemon": {
     "format": "{icon}",

@@ -43,6 +43,7 @@ in
   programs.dconf.enable = true;
 
   # GNOME Keyring - gerenciamento de secrets/senhas/SSH keys
+  security.polkit.enable = true;
   services.gnome.gnome-keyring.enable = true;
   security.pam.services.hyprlock.enableGnomeKeyring = true;
   security.pam.services.login.enableGnomeKeyring = true;
