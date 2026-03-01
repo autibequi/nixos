@@ -1,3 +1,5 @@
+.PHONY: get-ids reload switch update stow
+
 get-ids:
 	cat /etc/nixos/hardware-configuration.nix | grep -B 3 "device ="
 
@@ -13,4 +15,4 @@ update:
 	nh os switch --update .
 
 stow:
-	stow --target=$HOME -R stow
+	stow --target=$$HOME -R stow
