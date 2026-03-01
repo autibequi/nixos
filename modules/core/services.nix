@@ -12,6 +12,9 @@
   # fwupd
   services.fwupd.enable = true;
 
+  # Flatpak
+  services.flatpak.enable = true;
+
   # Tailscale (useRoutingFeatures = "client" para aceitar rotas de subnet do Pi sem drop por rp_filter)
   services.tailscale = {
     enable = true;

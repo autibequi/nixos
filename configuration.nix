@@ -30,10 +30,6 @@
     ./modules/steam.nix
     ./modules/podman.nix
 
-    # Custom Modules
-    ./modules/flatpak.nix
-    ./modules/virt.nix
-
     # Hardware Specific
     ./modules/asus.nix
     ./modules/nvidia.nix
@@ -46,7 +42,9 @@
 
     # Other Modules
     ./modules/work.nix
+    ./modules/virt.nix
     # ./modules/tlp.nix
     # ./modules/docker.nix
+    # ./modules/flatpak.nix
   ];
 }
