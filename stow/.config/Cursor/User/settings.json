@@ -59,6 +59,15 @@
     },
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "[javascript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
   "[python]": {
     "editor.defaultFormatter": "ms-python.python"
   },
@@ -305,11 +314,16 @@
   "update.mode": "none",
   "workbench.preferredDarkColorTheme": "Cursor Dark Midnight",
   "debug.toolBarLocation": "commandCenter",
-  "editor.formatOnPaste": true,
-  "editor.formatOnSave": true,
-  "editor.formatOnType": true,
   "workbench.editor.restoreViewState": false,
   "workbench.startupEditor": "welcomePage",
   "extensions.experimental.deferredStartupFinishedActivation": true,
   "window.restoreWindows": "none",
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "vue"
+  ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
 }
