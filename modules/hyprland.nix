@@ -29,7 +29,10 @@ in
     enable = true;
     package = hyprland-git.hyprland;
     xwayland.enable = true;
+    withUWSM = true;
   };
+
+  programs.uwsm.package = pkgs-unstable.uwsm;
 
   # Environment Variables
   environment.sessionVariables = {
@@ -52,6 +55,8 @@ in
     hyprpicker
     hyprpolkitagent
     cheese
+
+    pkgs-unstable.uwsm
 
     # Core Hyprland tools for navigation and productivity
     waybar # Status bar with useful info
