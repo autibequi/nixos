@@ -3,7 +3,6 @@
 	name = Pedro Correa
 
 [core]
-	editor = hx
 	pager = less -F -X
 	excludesfile = ~/.config/git/gitignore_global
 	autocrlf = input

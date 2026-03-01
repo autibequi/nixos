@@ -12,10 +12,6 @@
 
       programs.git = {
         enable = true;
-        settings.user = {
-          name = "Pedro Correa";
-          email = "pedro@autibequi.com";
-        };
       };
 
       # Corrige erro de caractere reservado no campo Exec (desktop spec)
