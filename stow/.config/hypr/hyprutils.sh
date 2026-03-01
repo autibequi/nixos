@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Theme helpers (dark_theme, light_theme, toggle_theme)
+# shellcheck source=theme.sh
+. "${HYPRLAND_CONFIG:-$HOME/.config/hypr}/theme.sh"
+
 # Returns the focused monitor name (e.g. eDP-1, HDMI-A-1, DP-2)
 _focused_monitor() {
     hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .name'
@@ -55,105 +59,6 @@ hide_active_special_workspaces(){
 toggle_or_hide_special_workspace(){
     # Super: apenas oculta o special workspace atual (sem reabrir ao pressionar de novo)
     hide_active_special_workspaces
-}
-
-apply_gtk_theme() {
-    local gtk_theme="$1"
-    local color_scheme="$2"
-
-    # 1. Criar arquivos de configuração GTK3
-    mkdir -p "$HOME/.config/gtk-3.0"
-    cat > "$HOME/.config/gtk-3.0/settings.ini" << EOF
-[Settings]
-gtk-theme-name=$gtk_theme
-gtk-application-prefer-dark-theme=$([ "$color_scheme" = "prefer-dark" ] && echo "1" || echo "0")
-gtk-icon-theme-name=Adwaita
-gtk-font-name=Sans 10
-gtk-cursor-theme-name=Adwaita
-gtk-cursor-theme-size=24
-gtk-enable-animations=true
-EOF
-
-    # 2. Criar arquivos de configuração GTK4
-    mkdir -p "$HOME/.config/gtk-4.0"
-    cat > "$HOME/.config/gtk-4.0/settings.ini" << EOF
-[Settings]
-gtk-theme-name=$gtk_theme
-gtk-application-prefer-dark-theme=$([ "$color_scheme" = "prefer-dark" ] && echo "1" || echo "0")
-gtk-icon-theme-name=Adwaita
-gtk-font-name=Sans 10
-gtk-cursor-theme-name=Adwaita
-gtk-cursor-theme-size=24
-gtk-enable-animations=true
-EOF
-
-    # 3. Tentar aplicar via gsettings (se schemas estiverem instalados)
-    if command -v gsettings &> /dev/null; then
-        gsettings set org.gnome.desktop.interface gtk-theme "$gtk_theme" 2>/dev/null || true
-        gsettings set org.gnome.desktop.interface color-scheme "$color_scheme" 2>/dev/null || true
-    fi
-
-    # 4. Tentar via dconf direto (mais robusto)
-    if command -v dconf &> /dev/null; then
-        dconf write /org/gnome/desktop/interface/gtk-theme "'$gtk_theme'" 2>/dev/null || true
-        dconf write /org/gnome/desktop/interface/color-scheme "'$color_scheme'" 2>/dev/null || true
-    fi
-
-    # 5. Exportar variáveis de ambiente para novas aplicações
-    export GTK_THEME="$gtk_theme"
-
-    # 6. Notificar todas as aplicações GTK rodando (via XSETTINGS)
-    # Isso faz apps existentes recarregarem o tema
-    killall -SIGHUP xsettingsd 2>/dev/null || true
-}
-
-toggle_theme() {
-    # Alterna entre tema claro e escuro (Hyprland-native, não depende do GNOME)
-    local theme_state_file="$HOME/.cache/hyprland/hyprutils_theme_state"
-    local alacritty_config="$HOME/.config/alacritty/alacritty.toml"
-    local current_theme
-
-    # Criar diretório se não existir
-    mkdir -p "$HOME/.cache/hyprland"
-
-    # Ler tema atual (default: dark)
-    if [ -f "$theme_state_file" ]; then
-        current_theme=$(cat "$theme_state_file")
-    else
-        current_theme="dark"
-    fi
-
-    if [ "$current_theme" = "dark" ]; then
-        # Mudar para light
-        echo "light" > "$theme_state_file"
-        apply_gtk_theme "adw-gtk3" "prefer-light"
-
-        # Trocar tema do Alacritty para light
-        if [ -f "$alacritty_config" ]; then
-            sed -i 's|import = \["~/.config/alacritty/dark-theme.toml"\]|import = ["~/.config/alacritty/light-theme.toml"]|g' "$alacritty_config"
-        fi
-
-        notify-send -t 500 "Theme changed to light ☀️"
-        uwsm app -- swww img ~/assets/wallpapers/the-death-of-socrates.jpg \
-            --transition-type fade \
-            --transition-fps 60 \
-            --transition-duration 0.3
-    else
-        # Mudar para dark
-        echo "dark" > "$theme_state_file"
-        apply_gtk_theme "adw-gtk3-dark" "prefer-dark"
-
-        # Trocar tema do Alacritty para dark
-        if [ -f "$alacritty_config" ]; then
-            sed -i 's|import = \["~/.config/alacritty/light-theme.toml"\]|import = ["~/.config/alacritty/dark-theme.toml"]|g' "$alacritty_config"
-        fi
-
-        notify-send -t 500 "Theme changed to dark 🌙"
-        uwsm app -- swww img ~/assets/wallpapers/the-wild-hunt-of-odin.jpg \
-            --transition-type fade \
-            --transition-fps 60 \
-            --transition-duration 0.3
-    fi
 }
 
 waybar_refresh() {
