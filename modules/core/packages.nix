@@ -94,6 +94,8 @@
 
     # Compression
     lz4
+
+    pkgs-unstable.howdy
   ];
   # permittedInsecurePackages = [
   #   "ventoy-qt5-1.1.05"

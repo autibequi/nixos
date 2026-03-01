@@ -25,10 +25,6 @@
   # Permitir hibernação (desabilita proteção de kernel image)
   security.protectKernelImage = false;
 
-  # disable TPM
-  boot.initrd.systemd.tpm2.enable = false;
-  systemd.tpm2.enable = false;
-
   boot.kernelParams = [
     # Logs
     "fastboot"
@@ -54,6 +50,17 @@
     "amd_pstate=active" # active/guided/passive - active é muito mais rápido e responsivo
   ];
 
+  boot.blacklistedKernelModules = [
+    # Disable TPM
+    "tpm"
+    "tpm_tis"
+    "tpm_crb"
+  ];
+
+  # Disable TPM
+  boot.initrd.systemd.tpm2.enable = false;
+  systemd.tpm2.enable = false;
+
   boot.kernel.sysctl = {
     # NVMe interno é rápido o suficiente para se beneficiar de swappiness moderado.
     # 10-20 significa que o kernel só começa a usar swap quando a RAM fica escassa,
@@ -66,7 +73,7 @@
 
     # NVMe interno aguenta rajadas de escrita muito bem.
     # Limites mais generosos reduzem stalls de CPU por flush prematuro.
-    "vm.dirty_ratio" = 20;           # flush forçado ao atingir 20% da RAM
+    "vm.dirty_ratio" = 20; # flush forçado ao atingir 20% da RAM
     "vm.dirty_background_ratio" = 10; # flush em background começa aos 10%
 
     # sched_autogroup: agrupa processos do mesmo terminal/sessão e aplica

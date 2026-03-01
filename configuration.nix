@@ -18,21 +18,35 @@
     ./modules/core/shell.nix
     ./modules/core/kernel.nix
     ./modules/core/hibernate.nix
-    ./modules/logiops.nix
 
     # Greeter
     ./modules/greetd.nix
 
     # Stable Modules
+    ./modules/logiops.nix
     ./modules/bluetooth.nix
-    # ./modules/plymouth.nix # Its so fast now that its not needed :(
+    ./modules/plymouth.nix # Its so fast now that its not needed :(
     ./modules/ai.nix
     ./modules/steam.nix
     ./modules/podman.nix
-    # ./modules/docker.nix
 
     # Custom Modules
     ./modules/flatpak.nix
     ./modules/virt.nix
+
+    # Hardware Specific
+    ./modules/asus.nix
+    ./modules/nvidia.nix
+
+    # Desktop Enviroments
+    ./modules/hyprland.nix
+    # ./modules/gnome/core.nix
+    # ./modules/cosmic.nix
+    # ./modules/kde.nixs
+
+    # Other Modules
+    ./modules/work.nix
+    # ./modules/tlp.nix
+    # ./modules/docker.nix
   ];
 }

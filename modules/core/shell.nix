@@ -14,12 +14,9 @@ let
     f = "fzf --wrap";
     clip = "wl-copy";
     clipb = "wl-paste";
-    zed = "zeditor";
     stow = "stow --target=$HOME";
     dotfiles = "stow --target=$HOME --dir=$HOME/projects/nixos stow";
     please = "sudo !!";
-    vim = "hx";
-    vi = "hx";
     wiki = "wikiti";
   };
 in
