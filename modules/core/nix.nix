@@ -25,7 +25,7 @@
   # Por enquanto Zeditor Preview
   programs.nix-ld = {
     enable = true;
-    package = pkgs.nix-ld;  # 25.11: nix-ld-rs renamed to nix-ld
+    package = pkgs.nix-ld; # 25.11: nix-ld-rs renamed to nix-ld
     libraries = with pkgs; [
       alsa-lib
       stdenv.cc.cc
@@ -127,7 +127,10 @@
     ];
 
     # Trusted users (permite aceitar flake configs como extra-substituters)
-    trusted-users = [ "root" "@wheel" ];
+    trusted-users = [
+      "root"
+      "@wheel"
+    ];
 
     # Accept flake configs automaticamente (caches declarados em flakes)
     accept-flake-config = true;
@@ -161,6 +164,8 @@
   };
 
   # AppImage Suport
-  programs.appimage.enable = true;
-  programs.appimage.binfmt = true;
+  programs.appimage = {
+    enable = true;
+    binfmt = true;
+  };
 }
