@@ -110,17 +110,6 @@
   services.scx.scheduler = "scx_lavd";
   services.scx.extraArgs = [ "--autopilot" ];
 
-  # Governor: schedutil é o correto para laptop.
-  # - "performance" é global — mantém o CPU no boost máximo mesmo na bateria,
-  #   o que destrói a autonomia. Não há distinção AC/BAT nesse setter.
-  # - "schedutil" reage à carga real do scheduler (CFS/SCX) e, combinado com
-  #   amd_pstate=active + auto-epp, entrega boost instantâneo quando há carga
-  #   E recua rapidamente quando ocioso — o melhor dos dois mundos em laptop.
-  # - auto-epp (abaixo) cuida do EPP (energy_performance_preference) por perfil
-  #   de energia, tornando o par schedutil+auto-epp equivalente a "performance
-  #   no AC, powersave inteligente na bateria" sem nenhum ajuste manual.
-  powerManagement.cpuFreqGovernor = "schedutil";
-
   # AMD Power Management Indication
   # auto-epp ajusta o EPP do amd_pstate automaticamente conforme AC/BAT:
   #   - AC  → energy_performance_preference = "performance"
