@@ -68,9 +68,6 @@
     # --- Zip ---
     zip
 
-    # --- MCP Servers ---
-    unstable.mcp-k8s-go # Kubernetes integration (Go)
-
     # TUIs
     # unstable.jiratui # Jira integration
   ];
