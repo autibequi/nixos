@@ -13,8 +13,8 @@ let
     name = "hyrpland-plugins";
     paths =
       (with unstable.hyprlandPlugins; [
-        hyprexpo
-        hypr-dynamic-cursors
+        # hyprexpo
+        # hypr-dynamic-cursors
         # hyprfocus
         # hyprtrails
         # hyprspace
