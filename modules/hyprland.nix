@@ -32,7 +32,11 @@ in
     withUWSM = true;
   };
 
-  programs.uwsm.package = unstable.uwsm;
+  programs.uwsm = {
+    package = unstable.uwsm;
+    # UWSM com withUWSM usa Hyprland direto; forçar start-hyprland (wrapper com dbus, etc.)
+    waylandCompositors.hyprland.binPath = lib.mkForce "${hyprland-git.hyprland}/bin/start-hyprland";
+  };
 
   # Environment Variables
   environment.sessionVariables = {

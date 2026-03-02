@@ -26,6 +26,9 @@
   security.protectKernelImage = false;
 
   boot.kernelParams = [
+    # Console: só framebuffer; evita esperar serial (ttyS0–ttyS3) no boot.
+    "console=tty0"
+
     # Logs
     "fastboot"
     "quiet"

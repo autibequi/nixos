@@ -1,12 +1,6 @@
 { ... }:
 
 {
-  # Workaround: driver NVIDIA proprietário conflita com systemd freeze da user session
-  # no suspend → resume traz tela preta/travada. Ver nixpkgs#371058.
-  systemd.services.systemd-suspend.environment.SYSTEMD_SLEEP_FREEZE_USER_SESSIONS = "false";
-  systemd.services.systemd-hibernate.environment.SYSTEMD_SLEEP_FREEZE_USER_SESSIONS = "false";
-  systemd.services.systemd-hybrid-sleep.environment.SYSTEMD_SLEEP_FREEZE_USER_SESSIONS = "false";
-
   services.logind.settings.Login = {
     HandleLidSwitch = "suspend";
     HandleLidSwitchExternalPower = "suspend";
