@@ -1,0 +1,14 @@
+services:
+  proxy:
+    image: nginx:alpine
+    container_name: reverseproxy
+    network_mode: "host" 
+    restart: always
+    ports:
+      - "80:80" # Maps host 80 to container 80
+      - "443:443" # Maps host 443 to container 443
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

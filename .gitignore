@@ -20,3 +20,5 @@ boot.nix
 
 result/**
 result/*
+
+*.pem
