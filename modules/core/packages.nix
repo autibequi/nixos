@@ -1,7 +1,7 @@
 {
   pkgs,
   inputs,
-  pkgs-unstable,
+  unstable,
   ...
 }:
 
@@ -23,12 +23,12 @@
     blanket # Noise
     papers # PDFS
     flameshot # PrintScreens
-    obsidian # Md Notes
+    unstable.obsidian # Md Notes
     mpv # media/shoes/chocolate player
     foliate # ePub reader
     fragments # torrent client
     discord # chattery
-    # pkgs-unstable.stremio # streaming
+    # unstable.stremio # streaming
 
     # Aesthetics
     banana-cursor # my boss saw it, it okay
@@ -91,12 +91,12 @@
     # inputs.voxtype.packages.${pkgs.system}.vulkan
 
     # Fun
-    pkgs-unstable.wayland-bongocat
+    unstable.wayland-bongocat
 
     # Compression
     lz4
 
-    pkgs-unstable.howdy
+    unstable.howdy
   ];
   # permittedInsecurePackages = [
   #   "ventoy-qt5-1.1.05"

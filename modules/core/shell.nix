@@ -1,5 +1,5 @@
-{ pkgs, pkgs-unstable, ... }:
-
+{ pkgs, unstable, ... }:
+  
 let
   sharedAliases = {
     history = "atuin";

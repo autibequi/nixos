@@ -2,7 +2,7 @@
 
 {
   pkgs,
-  pkgs-unstable,
+  unstable,
   ...
 }:
 {
@@ -15,7 +15,7 @@
 
     # 💻 AI IDEs
     windsurf
-    pkgs-unstable.code-cursor
+    unstable.code-cursor
     opencode
 
     # 🛠️ Utilities

@@ -3,7 +3,7 @@
   pkgs,
   inputs,
   hyprland-git,
-  pkgs-unstable,
+  unstable,
   ...
 }:
 with lib;
@@ -12,7 +12,7 @@ let
   hypr-plugin-dir = pkgs.symlinkJoin {
     name = "hyrpland-plugins";
     paths =
-      (with pkgs-unstable.hyprlandPlugins; [
+      (with unstable.hyprlandPlugins; [
         hyprexpo
         hypr-dynamic-cursors
         # hyprfocus
@@ -32,7 +32,7 @@ in
     withUWSM = true;
   };
 
-  programs.uwsm.package = pkgs-unstable.uwsm;
+  programs.uwsm.package = unstable.uwsm;
 
   # Environment Variables
   environment.sessionVariables = {
@@ -57,7 +57,7 @@ in
     hyprpolkitagent
     cheese
 
-    pkgs-unstable.uwsm
+    unstable.uwsm
 
     # Core Hyprland tools for navigation and productivity
     waybar # Status bar with useful info

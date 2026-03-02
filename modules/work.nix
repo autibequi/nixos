@@ -1,4 +1,4 @@
-{ pkgs, pkgs-unstable, ... }:
+{ pkgs, unstable, ... }:
 {
 
   # Environment Variables
@@ -69,10 +69,10 @@
     zip
 
     # --- MCP Servers ---
-    pkgs-unstable.mcp-k8s-go # Kubernetes integration (Go)
+    unstable.mcp-k8s-go # Kubernetes integration (Go)
 
     # TUIs
-    # pkgs-unstable.jiratui # Jira integration
+    # unstable.jiratui # Jira integration
   ];
 
   # Services

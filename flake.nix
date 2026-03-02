@@ -52,7 +52,7 @@
       let
       system = "x86_64-linux";
       # Configure the unstable channel to allow unfree packages
-      pkgs-unstable = import nixpkgs-unstable {
+      unstable = import nixpkgs-unstable {
         inherit system;
         config.allowUnfree = true;
       };
@@ -62,7 +62,7 @@
     {
       nixosConfigurations.nomad = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = { inherit inputs pkgs-unstable hyprland-git; };
+        specialArgs = { inherit inputs unstable hyprland-git; };
         modules = [
           {
             nixpkgs.config.allowUnfree = true;
