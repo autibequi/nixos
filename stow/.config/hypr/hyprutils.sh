@@ -91,11 +91,11 @@ print_screen_with_notes() {
 }
 
 print_screen_to_clipboard() {
-    uwsm app -- hyprshot -m region -o ~/Pictures/Screenshots
+    hyprshot -m region -o ~/Pictures/Screenshots
 }
 
 tesseract_region() {
-    uwsm app -- hyprshot -m region --raw | tesseract stdin stdout -l eng | wl-copy
+    hyprshot -m region --raw | tesseract stdin stdout -l eng | wl-copy
 }
 
 hypr_reload() {

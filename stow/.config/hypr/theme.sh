@@ -60,7 +60,7 @@ dark_theme() {
     fi
 
     if [ -f "$WALLPAPER_DARK" ]; then
-        uwsm app -- swww img "$WALLPAPER_DARK" \
+        swww img "$WALLPAPER_DARK" \
             --transition-type fade \
             --transition-fps 60 \
             --transition-duration 0.3
@@ -78,7 +78,7 @@ light_theme() {
     fi
 
     if [ -f "$WALLPAPER_LIGHT" ]; then
-        uwsm app -- swww img "$WALLPAPER_LIGHT" \
+        swww img "$WALLPAPER_LIGHT" \
             --transition-type fade \
             --transition-fps 60 \
             --transition-duration 0.3
