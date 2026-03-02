@@ -29,6 +29,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    antigravity-nix = {
+      url = "github:jacopone/antigravity-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # winboat = {
     #   url = "github:TibixDev/winboat";
     #   inputs.nixpkgs.follows = "nixpkgs";

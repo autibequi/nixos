@@ -97,6 +97,9 @@
     lz4
 
     unstable.howdy
+
+    # Google Antigravity (agentic IDE)
+    inputs.antigravity-nix.packages.${pkgs.system}.default
   ];
   # permittedInsecurePackages = [
   #   "ventoy-qt5-1.1.05"
