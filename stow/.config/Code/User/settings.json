@@ -4,7 +4,7 @@
   // --------------------------------------------------------------------------
   "workbench.enableExperiments": true,
   "workbench.iconTheme": "vscode-great-icons",
-  "workbench.activityBar.location": "hidden",
+  "workbench.activityBar.location": "top",
   "workbench.startupEditor.showTabs": false,
   "workbench.tips.enabled": false,
   "workbench.panel.defaultLocation": "top",
@@ -315,7 +315,7 @@
   "workbench.preferredDarkColorTheme": "Cursor Dark Midnight",
   "debug.toolBarLocation": "commandCenter",
   "workbench.editor.restoreViewState": false,
-  "workbench.startupEditor": "welcomePage",
+  "workbench.startupEditor": "none",
   "extensions.experimental.deferredStartupFinishedActivation": true,
   "window.restoreWindows": "none",
   "eslint.validate": [
@@ -326,4 +326,7 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
+  "claudeCode.preferredLocation": "panel",
+  "workbench.editor.editorActionsLocation": "titleBar",
+  "workbench.editor.showTabs": "single",
 }

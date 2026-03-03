@@ -352,6 +352,10 @@
     "NGINX": true,
     "SCSS": true,
     "XML": true,
+    "hyprlang": true,
+  },
+  "file_types": {
+    "Hyprland Config": ["*.conf"]
   },
   // ─── FORMATTING & LINTING ──────────────────────────────────────
   // Like VS Code's "editor.formatOnSave" + ESLint extension
@@ -410,6 +414,13 @@
     "Markdown": {
       "soft_wrap": "editor_width",
       "show_wrap_guides": false,
+    },
+    "Hyprland Config": {
+      "formatter": {
+        "language_server": {
+          "name": "hyprls"
+        }
+      }
     },
   },
   // ─── LSP (Language Server Protocol) ────────────────────────────
