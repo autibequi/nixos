@@ -103,6 +103,7 @@ window#waybar {
 #custom-updates,
 #custom-quote,
 #idle_inhibitor,
+#custom-swaync,
 #tray {
     margin: 0 1px;
     padding: 0 1px;
@@ -307,6 +308,29 @@ window#waybar {
     color: @main-bg;
     background-color: @main-text;
     border-bottom-color: @main-bg;
+}
+
+/*========================================================*
+ *                      SWAYNC                           *
+ *========================================================*/
+#custom-swaync {
+    color: @color-white;
+    padding: 0 5px;
+    min-width: 20px;
+}
+
+#custom-swaync.notification {
+    color: @color-white;
+}
+
+#custom-swaync.dnd-notification {
+    color: @color-white;
+    opacity: 0.5;
+}
+
+#custom-swaync.dnd-none {
+    color: @color-white;
+    opacity: 0.5;
 }
 
 /*========================================================*

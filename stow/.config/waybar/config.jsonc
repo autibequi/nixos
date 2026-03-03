@@ -21,6 +21,7 @@
     "network",
     // "power-profiles-daemon",
     "tray",
+    "custom/swaync",
     "bluetooth"
   ],
   "tray": {
@@ -200,6 +201,26 @@
     "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
     "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +2%",
     "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -2%"
+  },
+  "custom/swaync": {
+    "tooltip": false,
+    "format": "{icon} {text}",
+    "format-icons": {
+      "notification": "<span foreground='white'>󰂚<sup></sup></span>",
+      "none": "󰂜",
+      "dnd-notification": "<span foreground='white'>󰂛<sup></sup></span>",
+      "dnd-none": "󰂛",
+      "inhibited-notification": "<span foreground='white'>󰂚<sup></sup></span>",
+      "inhibited-none": "󰂜",
+      "dnd-inhibited-notification": "<span foreground='white'>󰂛<sup></sup></span>",
+      "dnd-inhibited-none": "󰂛"
+    },
+    "return-type": "json",
+    "exec-if": "which swaync-client",
+    "exec": "swaync-client -swb",
+    "on-click": "swaync-client -t -sw",
+    "on-click-right": "swaync-client -d -sw",
+    "escape": true
   },
   "backlight": {
     "format": "{icon} {percent}%",

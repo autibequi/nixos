@@ -32,12 +32,12 @@
     background: @bg;
     border: 1px solid @border;
     border-radius: 6px;
-    margin: 4px 8px;
+    margin: 2px 4px;
     padding: 0;
 }
 
 .notification-content {
-    padding: 8px 10px;
+    padding: 6px 8px;
 }
 
 .notification .notification-default-action {
@@ -81,13 +81,17 @@
 
 .summary {
     color: @fg;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
 }
 
 .body {
     color: @fg-dim;
-    font-size: 12px;
+    font-size: 11px;
+}
+
+.body > label {
+    -gtk-line-clamp: 2;
 }
 
 .time {
@@ -97,13 +101,19 @@
 }
 
 .image {
-    border-radius: 6px;
-    margin-right: 8px;
+    border-radius: 4px;
+    margin-right: 6px;
 }
 
 .body-image {
     border-radius: 4px;
     margin-top: 4px;
+}
+
+/* Floating popups: large screenshot preview */
+.floating-notifications .image {
+    min-width: 100px;
+    min-height: 100px;
 }
 
 .notification-group {
@@ -193,8 +203,8 @@
 .widget-mpris {
     background: @border;
     border-radius: 6px;
-    margin: 4px 6px;
-    padding: 8px;
+    margin: 2px 4px;
+    padding: 6px;
 }
 
 .widget-mpris-player {
@@ -261,7 +271,21 @@ scale slider {
 /* ======== Notification list inside CC ======== */
 .control-center .notification {
     border: 1px solid @border;
-    margin: 3px 2px;
+    margin: 1px 2px;
+}
+
+.control-center .notification-content {
+    padding: 4px 6px;
+}
+
+.control-center .image {
+    min-width: 28px;
+    min-height: 28px;
+}
+
+.control-center .notification .notification-action {
+    padding: 2px 6px;
+    font-size: 10px;
 }
 
 /* ======== Blank window (no notifications) ======== */
