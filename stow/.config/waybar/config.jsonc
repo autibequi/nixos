@@ -22,7 +22,6 @@
     // "power-profiles-daemon",
     "tray",
     "custom/swaync",
-    "custom/claude",
     "bluetooth"
   ],
   "tray": {
@@ -229,12 +228,6 @@
     "on-click": "swaync-client -t -sw",
     "on-click-right": "swaync-client -d -sw",
     "escape": true
-  },
-  "custom/claude": {
-    "format": "󱙺",
-    "tooltip": true,
-    "tooltip-format": "Claude Code",
-    "on-click": "alacritty -e claude"
   },
   "backlight": {
     "format": "{icon} {percent}%",
