@@ -48,7 +48,8 @@
     "window-rewrite-default": " ",
     "format-icons": {
       "obsidian": "⌐■_■",
-      "nixsearch": "ʕ■ᴥ■ʔ"
+      "f3": "ʕ■ᴥ■ʔ",
+      "f4": "ʕ■ᴥ■ʔ"
     },
     "workspace-taskbar": {
       "format": "{icon} {title}",
@@ -61,11 +62,12 @@
       "title<(.*[$%#] *)?([hb]|nv)top.*>": "btop",
       "title<(.* - )?(.[0-9]+. )?YouTube Music.*>": "",
       "title<(.*)(books - Obsidian)(.*)>": "",
-      "title<(.*)([cC]hat)(.*)>": "󰍡",
+      "class<(.*)(chat)(.*)>": "󰍡",
+      "title<(.*)(Gemini)(.*)>": "󰼙",
       "title<(.*)(JIRA)(.*)>": "󰌃",
       "title<(.*)(Meet)(.*)>": "",
       "firefox": "",
-      "vivaldi": "🌐",
+      "vivaldi": "󰯊",
       "app.zen_browser.zen": "",
       "zen": "",
       "chrome": "",
@@ -76,10 +78,10 @@
       "Alacritty": "󰆍",
       "ghostty": "󰆍",
       "org.gnome.Nautilus": "",
-      "zed": "",
+      "zed": "󰰶",
       "stremio": "🍿",
       "insomnia": "",
-      "yaak-app": "📠",
+      "yaak-app": "󰆚",
       "class<^steam_app_.*>": "󰮯",
       "title<.*Steam.*>": ""
     }
