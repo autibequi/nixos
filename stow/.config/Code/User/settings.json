@@ -4,7 +4,6 @@
   // --------------------------------------------------------------------------
   "workbench.enableExperiments": true,
   "workbench.iconTheme": "vscode-great-icons",
-  "workbench.activityBar.location": "top",
   "workbench.startupEditor.showTabs": false,
   "workbench.tips.enabled": false,
   "workbench.panel.defaultLocation": "top",
@@ -312,7 +311,7 @@
   "extensions.autoCheckUpdates": false,
   "update.showReleaseNotes": false,
   "update.mode": "none",
-  "workbench.preferredDarkColorTheme": "Cursor Dark Midnight",
+  "workbench.preferredDarkColorTheme": "Solarized Dark",
   "debug.toolBarLocation": "commandCenter",
   "workbench.editor.restoreViewState": false,
   "workbench.startupEditor": "none",
@@ -326,7 +325,10 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },
-  "claudeCode.preferredLocation": "panel",
   "workbench.editor.editorActionsLocation": "titleBar",
   "workbench.editor.showTabs": "single",
+  "claudeCode.initialPermissionMode": "acceptEdits",
+  "claudeCode.preferredLocation": "sidebar",
+  "gitlens.ai.model": "vscode",
+  "gitlens.ai.vscode.model": "copilot:gpt-4.1",
 }
