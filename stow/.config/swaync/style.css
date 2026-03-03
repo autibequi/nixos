@@ -14,7 +14,7 @@
 /* ======== Global ======== */
 * {
     font-family: 'JetBrainsMono Nerd Font', sans-serif;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 500;
 }
 
@@ -34,6 +34,7 @@
     border-radius: 6px;
     margin: 2px 4px;
     padding: 0;
+    min-width: 500px;
 }
 
 .notification-content {
@@ -81,13 +82,13 @@
 
 .summary {
     color: @fg;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
 }
 
 .body {
     color: @fg-dim;
-    font-size: 11px;
+    font-size: 10px;
 }
 
 .body > label {
@@ -96,8 +97,8 @@
 
 .time {
     color: @fg-dim;
-    font-size: 11px;
-    margin-right: 8px;
+    font-size: 9px;
+    margin-right: 6px;
 }
 
 .image {
@@ -112,8 +113,10 @@
 
 /* Floating popups: large screenshot preview */
 .floating-notifications .image {
-    min-width: 100px;
-    min-height: 100px;
+    min-width: 20px;
+    min-height: 20px;
+    padding-right:20px;
+    padding-left:20px;
 }
 
 .notification-group {
@@ -152,7 +155,7 @@
 /* ======== Title widget ======== */
 .widget-title {
     color: @fg;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 700;
     margin: 4px 6px;
 }
@@ -175,9 +178,9 @@
 /* ======== DND widget ======== */
 .widget-dnd {
     color: @fg;
-    font-size: 12px;
-    margin: 4px 6px;
-    padding: 4px 0;
+    font-size: 10px;
+    margin: 2px 6px;
+    padding: 2px 0;
 }
 
 .widget-dnd > switch {
@@ -197,75 +200,6 @@
     border-radius: 50%;
     min-height: 16px;
     min-width: 16px;
-}
-
-/* ======== MPRIS widget ======== */
-.widget-mpris {
-    background: @border;
-    border-radius: 6px;
-    margin: 2px 4px;
-    padding: 6px;
-}
-
-.widget-mpris-player {
-    padding: 0;
-}
-
-.widget-mpris-title {
-    color: @fg;
-    font-size: 12px;
-    font-weight: 700;
-}
-
-.widget-mpris-subtitle {
-    color: @fg-dim;
-    font-size: 11px;
-}
-
-.widget-mpris > box > button {
-    background: transparent;
-    border: none;
-    border-radius: 50%;
-    color: @fg;
-    min-height: 28px;
-    min-width: 28px;
-}
-
-.widget-mpris > box > button:hover {
-    background: @fg;
-    color: @bg;
-}
-
-/* ======== Volume widget ======== */
-.widget-volume {
-    margin: 4px 6px;
-    padding: 4px 0;
-}
-
-.widget-volume > box > button {
-    background: transparent;
-    border: none;
-    color: @fg;
-}
-
-/* Volume slider */
-scale trough {
-    background: @border;
-    border-radius: 4px;
-    min-height: 6px;
-}
-
-scale highlight {
-    background: @fg;
-    border-radius: 4px;
-    min-height: 6px;
-}
-
-scale slider {
-    background: @fg;
-    border-radius: 50%;
-    min-height: 14px;
-    min-width: 14px;
 }
 
 /* ======== Notification list inside CC ======== */

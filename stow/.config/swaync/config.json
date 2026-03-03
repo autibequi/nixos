@@ -11,7 +11,7 @@
   "control-center-margin-bottom": 5,
   "control-center-margin-right": 5,
   "control-center-margin-left": 0,
-  "control-center-width": 380,
+  "control-center-width": 480,
   "control-center-height": 600,
   "notification-2fa-action": true,
   "notification-inline-replies": true,
@@ -28,19 +28,25 @@
   "hide-on-action": true,
   "hide-on-button-press": true,
   "fit-to-screen": true,
+  "notification-grouping": false,
+  "notification-action-filter": {
+    "hide-chrome-settings": {
+      "desktop-entry": "google-chrome",
+      "use-regex": false,
+      "text-matcher": "Settings"
+    }
+  },
   "notification-visibility": {
     "google-chat-webapp": {
       "state": "transient",
       "app-name": "Google Chrome",
-      "summary": ".*chat\\.google\\.com.*"
+      "body": ".*chat\\.google\\.com.*"
     }
   },
   "widgets": [
     "title",
     "dnd",
-    "mpris",
-    "notifications",
-    "volume"
+    "notifications"
   ],
   "widget-config": {
     "title": {
@@ -50,13 +56,6 @@
     },
     "dnd": {
       "text": "Do Not Disturb"
-    },
-    "mpris": {
-      "image-size": 48,
-      "image-radius": 6
-    },
-    "volume": {
-      "label": "󰕾"
     }
   }
 }
