@@ -110,6 +110,7 @@ in
 
     nwg-displays # Display management
     hyprlock
+    hyprls # Language Server for Hyprland config files
     cliphist # Clipboard history manager
 
     # File managers
