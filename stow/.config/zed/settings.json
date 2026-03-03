@@ -8,7 +8,7 @@
   "session": {
     "trust_all_worktrees": true
   },
-  "agent_buffer_font_size": 14.0,
+  "agent_buffer_font_size": 15.0,
   "agent_servers": {
     "kimi": {
       "type": "registry"
@@ -35,7 +35,7 @@
   // ─── FONTS ─────────────────────────────────────────────────────
   // Editor (buffer) font
   "buffer_font_family": "JetBrainsMonoNL Nerd Font Mono",
-  "buffer_font_size": 14.0,
+  "buffer_font_size": 16.0,
   "buffer_font_weight": 600,
   "buffer_line_height": "comfortable",
   "buffer_font_features": {
@@ -44,10 +44,10 @@
   },
   // UI font
   "ui_font_family": "JetBrainsMonoNL Nerd Font Propo",
-  "ui_font_size": 14.0,
+  "ui_font_size": 18.0,
   "ui_font_weight": 600,
   // Agent panel font
-  "agent_ui_font_size": 14.0,
+  "agent_ui_font_size": 16.0,
   // ─── THEME & APPEARANCE ────────────────────────────────────────
   "theme": {
     "mode": "system",
