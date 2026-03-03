@@ -109,5 +109,5 @@ hypr_reload() {
     swaync-client -rs -R
     waybar_refresh
     hyprctl reloadr
-    notify-send "Hyprland reloaded"
+    notify-send "Hyprland reloaded" -u low
 }
