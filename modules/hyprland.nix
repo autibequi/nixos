@@ -84,7 +84,7 @@ in
     mpvpaper
     waytrogen
     bluetuith
-    ncpamixer
+    wiremix
     tesseract
     satty
 
