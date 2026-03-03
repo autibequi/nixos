@@ -45,13 +45,14 @@
     "all-outputs": true,
     "show-special": true,
     "format": "{icon}:{windows}",
+    "tooltip": true,
+    "tooltip-format": "{name}",
     "window-rewrite-default": " ",
     "format-icons": {
-      "obsidian": "⌐■_■",
-      "f1": "ʕ■ᴥ■ʔ",
-      "f2": "ʕ■ᴥ■ʔ",
-      "f3": "ʕ■ᴥ■ʔ",
-      "f4": "ʕ■ᴥ■ʔ"
+      "f1": "<span color='#ffffff'>ʕ■ᴥ■ʔ</span>",
+      "f2": "<span color='#ffffff'>ʕ■ᴥ■ʔ</span>",
+      "f3": "<span color='#ffffff'>ʕ■ᴥ■ʔ</span>",
+      "f4": "<span color='#ffffff'>ʕ■ᴥ■ʔ</span>"
     },
     "workspace-taskbar": {
       "format": "{icon} {title}",
