@@ -10,7 +10,7 @@
     # 🎨 ComfyUI - usar via: nix run github:nixified-ai/flake#comfyui-nvidia
 
     # 🤖 LLM Local
-    lmstudio
+    unstable.lmstudio
     jan
 
     # 💻 AI IDEs
