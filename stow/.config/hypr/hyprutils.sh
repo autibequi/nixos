@@ -95,7 +95,14 @@ print_screen_to_clipboard() {
 }
 
 tesseract_region() {
-    hyprshot -m region --raw | tesseract stdin stdout -l eng | wl-copy
+    local text
+    text=$(hyprshot -m region --raw | tesseract stdin stdout -l eng 2>/dev/null)
+    if [[ -n "$text" ]]; then
+        echo -n "$text" | wl-copy
+        notify-send -a "OCR" "Texto extraído" "$text"
+    else
+        notify-send -a "OCR" "OCR falhou" "Nenhum texto detectado na região"
+    fi
 }
 
 hypr_reload() {
