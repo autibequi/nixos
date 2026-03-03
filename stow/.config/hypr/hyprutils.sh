@@ -99,6 +99,7 @@ tesseract_region() {
 }
 
 hypr_reload() {
+    swaync-client -rs
     waybar_refresh
     hyprctl reloadr
     notify-send "Hyprland reloaded"
