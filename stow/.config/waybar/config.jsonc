@@ -22,6 +22,7 @@
     // "power-profiles-daemon",
     "tray",
     "custom/swaync",
+    "custom/claude",
     "bluetooth"
   ],
   "tray": {
@@ -66,6 +67,8 @@
       "title<(.* - )?(.[0-9]+. )?YouTube Music.*>": "",
       "title<(.*)(books - Obsidian)(.*)>": "",
       "class<(.*)(chat)(.*)>": "󰍡",
+      "title<(.*)(✳ Claude)(.*)>": "󱙺",
+      "title<(.*)(Claude)(.*)>": "✳",
       "title<(.*)(Gemini)(.*)>": "󰼙",
       "title<(.*)(JIRA)(.*)>": "󰌃",
       "title<(.*)(Meet)(.*)>": "",
@@ -226,6 +229,12 @@
     "on-click": "swaync-client -t -sw",
     "on-click-right": "swaync-client -d -sw",
     "escape": true
+  },
+  "custom/claude": {
+    "format": "󱙺",
+    "tooltip": true,
+    "tooltip-format": "Claude Code",
+    "on-click": "alacritty -e claude"
   },
   "backlight": {
     "format": "{icon} {percent}%",
