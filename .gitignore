@@ -22,3 +22,18 @@ result/**
 result/*
 
 *.pem
+
+# vscode/cursor: ignore everything, then re-include only user configs
+stow/.config/Code/*
+!stow/.config/Code/User/
+stow/.config/Code/User/*
+!stow/.config/Code/User/settings.json
+!stow/.config/Code/User/keybindings.json
+!stow/.config/Code/User/snippets/
+
+stow/.config/Cursor/*
+!stow/.config/Cursor/User/
+stow/.config/Cursor/User/*
+!stow/.config/Cursor/User/settings.json
+!stow/.config/Cursor/User/keybindings.json
+!stow/.config/Cursor/User/snippets/

@@ -310,7 +310,6 @@
   "cursor.composer.textSizeScale": 1.15,
   "extensions.autoCheckUpdates": false,
   "update.showReleaseNotes": false,
-  "update.mode": "none",
   "workbench.preferredDarkColorTheme": "Visual Studio Dark",
   "debug.toolBarLocation": "commandCenter",
   "workbench.editor.restoreViewState": false,
@@ -328,7 +327,7 @@
   "workbench.editor.editorActionsLocation": "titleBar",
   "workbench.editor.showTabs": "single",
   "claudeCode.initialPermissionMode": "acceptEdits",
-  "claudeCode.preferredLocation": "sidebar",
+  "claudeCode.preferredLocation": "panel",
   "gitlens.ai.model": "vscode",
   "gitlens.ai.vscode.model": "copilot:gpt-4.1",
   "[dart]": {
