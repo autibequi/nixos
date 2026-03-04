@@ -325,7 +325,6 @@
     "source.fixAll.eslint": "explicit"
   },
   "workbench.editor.editorActionsLocation": "titleBar",
-  "workbench.editor.showTabs": "single",
   "claudeCode.initialPermissionMode": "acceptEdits",
   "claudeCode.preferredLocation": "panel",
   "gitlens.ai.model": "vscode",
@@ -342,4 +341,5 @@
   },
   "redhat.telemetry.enabled": false,
   "debug.onTaskErrors": "showErrors",
+  "update.mode": "none",
 }
