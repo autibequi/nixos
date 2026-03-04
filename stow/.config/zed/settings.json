@@ -11,7 +11,14 @@
   "agent_buffer_font_size": 15.0,
   "agent_servers": {
     "claude": {
+      "favorite_config_option_values": {
+        "model": [
+          "haiku",
+          "opus"
+        ]
+      },
       "default_config_options": {
+        "model": "default",
         "mode": "acceptEdits"
       }
     },
@@ -57,7 +64,7 @@
   "theme": {
     "mode": "system",
     "light": "macOS Classic Light",
-    "dark": "macOS Classic Dark"
+    "dark": "Tokyo Night Storm"
   },
   "icon_theme": {
     "mode": "system",
@@ -116,7 +123,7 @@
   // Like VS Code's "editor.inlayHints.enabled"
   "inlay_hints": {
     "edit_debounce_ms": 100,
-    "show_value_hints": true,
+    "show_value_hints": false,
     "enabled": true,
     "show_type_hints": false,
     "show_parameter_hints": false,
@@ -272,8 +279,8 @@
   // ─── DEBUGGER ──────────────────────────────────────────────────
   "debugger": {
     "dock": "left",
-    "format_dap_log_messages": true,
-    "log_dap_communications": true,
+    "format_dap_log_messages": false,
+    "log_dap_communications": false,
     "save_breakpoints": true,
   },
   // ─── AI & EDIT PREDICTIONS ─────────────────────────────────────
@@ -347,6 +354,11 @@
   "message_editor": {
     "auto_replace_emoji_shortcode": true,
   },
+  "editor": {
+    "debugger_active_line": {
+      "background": ""
+    }
+  },
   // ─── EXTENSIONS ────────────────────────────────────────────────
   "auto_install_extensions": {
     "nix": true,
@@ -360,7 +372,9 @@
     "hyprlang": true,
   },
   "file_types": {
-    "Hyprland Config": ["*.conf"]
+    "Hyprland Config": [
+      "*.conf"
+    ]
   },
   // ─── FORMATTING & LINTING ──────────────────────────────────────
   // Like VS Code's "editor.formatOnSave" + ESLint extension
