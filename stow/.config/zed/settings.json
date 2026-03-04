@@ -63,8 +63,8 @@
   // ─── THEME & APPEARANCE ────────────────────────────────────────
   "theme": {
     "mode": "system",
-    "light": "macOS Classic Light",
-    "dark": "Tokyo Night Storm"
+    "light": "Dracula Light (Alucard)",
+    "dark": "Dracula"
   },
   "icon_theme": {
     "mode": "system",
