@@ -10,6 +10,11 @@
   },
   "agent_buffer_font_size": 15.0,
   "agent_servers": {
+    "claude": {
+      "default_config_options": {
+        "mode": "acceptEdits"
+      }
+    },
     "kimi": {
       "type": "registry"
     }
