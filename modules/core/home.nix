@@ -1,7 +1,9 @@
-{ ... }:
+{ pkgs, ... }:
 {
   # avoid file colisions
   home-manager.backupFileExtension = "backup";
+
+  users.defaultUserShell = pkgs.zsh;
 
   # it's a me, pedrinho! o-ho!
   home-manager.users."pedrinho" =
