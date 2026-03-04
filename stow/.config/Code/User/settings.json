@@ -311,7 +311,7 @@
   "extensions.autoCheckUpdates": false,
   "update.showReleaseNotes": false,
   "update.mode": "none",
-  "workbench.preferredDarkColorTheme": "Solarized Dark",
+  "workbench.preferredDarkColorTheme": "Visual Studio Dark",
   "debug.toolBarLocation": "commandCenter",
   "workbench.editor.restoreViewState": false,
   "workbench.startupEditor": "none",
@@ -331,4 +331,16 @@
   "claudeCode.preferredLocation": "sidebar",
   "gitlens.ai.model": "vscode",
   "gitlens.ai.vscode.model": "copilot:gpt-4.1",
+  "[dart]": {
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "editor.rulers": [
+      80
+    ],
+    "editor.selectionHighlight": false,
+    "editor.tabCompletion": "onlySnippets",
+    "editor.wordBasedSuggestions": "off"
+  },
+  "redhat.telemetry.enabled": false,
+  "debug.onTaskErrors": "showErrors",
 }
