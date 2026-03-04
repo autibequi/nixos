@@ -41,8 +41,18 @@
     "systemd.log_level=err"
     "vt.global_cursor_default=0"
 
-    # USB autosuspend: 2s suspende devices USB ociosos, economizando bateria.
+    # Watchdog disable (sysctl + cmdline para garantir)
+    "nowatchdog"
+    "nmi_watchdog=0"
+
+    # Disable USB autosuspend to avoid issues with USB devices.
     "usbcore.autosuspend=2"
+
+    # Disable mitigations for speed
+    "mitigations=off"
+
+    # Hugepages: madvise balanceia retenção de memória com perf de apps que usam madvise.
+    "transparent_hugepage=madvise"
 
     # Nvidia
     "nvidia.NVreg_DynamicPowerManagement=0x02"
@@ -79,10 +89,19 @@
     "vm.dirty_ratio" = 20; # flush forçado ao atingir 20% da RAM
     "vm.dirty_background_ratio" = 10; # flush em background começa aos 10%
 
+    # Flush proativo: reduz wakeups e permite que a drive batch writes melhor.
+    "vm.dirty_expire_centisecs" = 3000; # 30s (padrão, explícito)
+    "vm.dirty_writeback_centisecs" = 1500; # flush a cada 15s ao invés de 5s
+
     # sched_autogroup: agrupa processos do mesmo terminal/sessão e aplica
     # nice diferenciado por grupo — impede que builds pesados (cargo, gradle,
     # flutter) engulam o timeslice das janelas interativas.
     "kernel.sched_autogroup_enabled" = 1;
+
+    # Scheduler granularity: reduz microstutter em cargas pesadas.
+    # 1ms wakeup granularity para tarefa interactive, 500µs para aplicações despertando.
+    "kernel.sched_min_granularity_ns" = 1000000;
+    "kernel.sched_wakeup_granularity_ns" = 500000;
 
     # Desabilita NMI watchdog via sysctl (complementa nmi_watchdog=0 no cmdline).
     "kernel.nmi_watchdog" = 0;
@@ -91,6 +110,13 @@
     # de hugepages ao manter memória contígua disponível antecipadamente.
     # 20 é conservador o suficiente para não interferir com uso interativo.
     "vm.compaction_proactiveness" = 20;
+
+    # Rede: buffers maiores para melhor throughput
+    "net.core.netdev_max_backlog" = 16384;
+    "net.ipv4.tcp_fastopen" = 3;
+
+    # Inotify: suficiente para IDEs e file watchers (padrão é 8192)
+    "fs.inotify.max_user_watches" = 524288;
   };
 
   # Configurar compressão.
