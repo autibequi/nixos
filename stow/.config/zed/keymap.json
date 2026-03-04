@@ -42,5 +42,10 @@
       "ctrl-shift-s": "workspace::ToggleBottomDock",
       "ctrl-shift-d": "workspace::ToggleRightDock"
     }
+  },
+  {
+    "bindings": {
+      "ctrl-shift-t": "debug_panel::Toggle"
+    }
   }
 ]
