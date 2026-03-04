@@ -18,7 +18,7 @@
         ]
       },
       "default_config_options": {
-        "model": "default",
+        "model": "haiku",
         "mode": "acceptEdits"
       }
     },
@@ -326,7 +326,7 @@
     "default_model": {
       "enable_thinking": false,
       "provider": "anthropic",
-      "model": "claude-haiku-4-5-latest",
+      "model": "claude-sonnet-4-6-latest",
     },
     "inline_assistant_model": {
       "provider": "zed.dev",
