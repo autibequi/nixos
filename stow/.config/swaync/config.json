@@ -36,7 +36,7 @@
       "text-matcher": "Settings"
     },
     "hide-vivaldi-settings": {
-      "desktop-entry": "vivaldi",
+      "desktop-entry": "vivaldi-stable",
       "use-regex": false,
       "text-matcher": "Settings"
     }
@@ -64,4 +64,3 @@
     }
   }
 }
-
