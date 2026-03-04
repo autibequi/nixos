@@ -13,11 +13,11 @@
     // "hyprland/window"
   ],
   "modules-right": [
-    "pulseaudio",
     "custom/playerctl",
+    "pulseaudio",
     "backlight",
-    "cpu",
-    "memory",
+    // "cpu",
+    // "memory",
     "network",
     // "power-profiles-daemon",
     "tray",
@@ -49,10 +49,10 @@
     "tooltip-format": "{name}",
     "window-rewrite-default": " ",
     "format-icons": {
-      "f1": "<span color='#ffffff'>ʕ■ᴥ■ʔ</span>",
-      "f2": "<span color='#ffffff'>ʕ■ᴥ■ʔ</span>",
-      "f3": "<span color='#ffffff'>ʕ■ᴥ■ʔ</span>",
-      "f4": "<span color='#ffffff'>ʕ■ᴥ■ʔ</span>"
+      // "f1": "ʕ■ᴥ■ʔ",
+      // "f2": "ʕ■ᴥ■ʔ",
+      // "f3": "ʕ■ᴥ■ʔ",
+      // "f4": "ʕ■ᴥ■ʔ"
     },
     "workspace-taskbar": {
       "format": "{icon} {title}",
