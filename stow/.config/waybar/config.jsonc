@@ -42,7 +42,7 @@
   "hyprland/workspaces": {
     "interval": 1,
     "disable-scroll": true,
-    "all-outputs": true,
+    "all-outputs": false,
     "show-special": true,
     "format": "{icon}:{windows}",
     "tooltip": true,
