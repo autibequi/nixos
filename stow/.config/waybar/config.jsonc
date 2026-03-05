@@ -89,13 +89,9 @@
     }
   },
   "mpris": {
-    "format": "{player_icon} {dynamic}",
-    "format-paused": "{status_icon} {dynamic}",
-    "dynamic-len": 40,
-    "dynamic-order": [
-      "title",
-      "artist",
-    ],
+    "format": "{player_icon} {title} - {artist}",
+    "format-paused": "{status_icon} {title} - {artist}",
+    "max-length": 40,
     "tooltip-format": "{title} | {artist}",
     "player-icons": {
       "default": "▶",
