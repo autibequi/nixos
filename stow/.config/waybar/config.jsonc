@@ -8,6 +8,7 @@
     "hyprland/workspaces"
   ],
   "modules-center": [
+    "custom/swaync",
     "clock",
     "battery"
   ],
@@ -17,7 +18,6 @@
     "backlight",
     "network",
     "tray",
-    "custom/swaync",
     "bluetooth"
   ],
   "tray": {
@@ -69,7 +69,7 @@
       "title<(.*)(JIRA)(.*)>": "󰌃",
       "title<(.*)(Meet)(.*)>": "",
       "firefox": "",
-      "vivaldi": "󰯊",
+      "vivaldi": "",
       "app.zen_browser.zen": "",
       "zen": "",
       "chrome": "",
@@ -90,8 +90,8 @@
   },
   "mpris": {
     "format": "{player_icon} {title} - {artist}",
-    "format-paused": "{status_icon} {title} - {artist}",
-    "max-length": 40,
+    "format-paused": "{status_icon} CALADO, MORTAL!",
+    "max-length": 30,
     "tooltip-format": "{title} | {artist}",
     "player-icons": {
       "default": "▶",

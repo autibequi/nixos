@@ -157,6 +157,7 @@ window#waybar {
 }
 
 #mpris.paused {
+    padding-top: 4px;
     color: @color-orange;
     background-color: @color-black;
 }
