@@ -1,14 +1,3 @@
-/*
-  ██████╗ ███████╗██████╗      ██████╗ ██████╗ ███████╗
-  ██╔══██╗██╔════╝██╔══██╗    ██╔═══██╗██╔══██╗██╔════╝
-  ██████╔╝█████╗  ██████╔╝    ██║   ██║██████╔╝███████╗
-  ██╔═══╝ ██╔══╝  ██╔══██╗    ██║   ██║██╔═══╝ ╚════██║
-  ██║     ███████╗██║  ██║    ╚██████╔╝██║     ███████║
-  ╚═╝     ╚══════╝╚═╝  ╚═╝     ╚═════╝ ╚═╝     ╚══════╝
-        OLED Black Monochrome Colorscheme
-        for true black backgrounds on OLED displays
-*/
-
 /*========================================================*
  *                   BASE PALETTE                        *
  *========================================================*/
@@ -42,15 +31,8 @@
 /*========================================================*
  *                  MODULE COLORS                        *
  *========================================================*/
-@define-color mode-text @color-white;
-@define-color mpd-text @color-white;
-@define-color weather-text @color-white;
 @define-color playerctl-text @color-white;
 @define-color clock-text @color-white;
-@define-color cpu-text @color-white;
-@define-color memory-text @color-white;
-@define-color temp-text @color-white;
-@define-color temp-critical-text @color-white;
 @define-color battery-text @color-white;
 @define-color battery-charging-text @color-white;
 @define-color battery-warning-text @color-white;
@@ -60,10 +42,6 @@
 @define-color audio-text @color-white;
 @define-color audio-muted-text @color-white;
 @define-color backlight-text @color-white;
-@define-color disk-text @color-white;
-@define-color uptime-text @color-white;
-@define-color updates-text @color-white;
-@define-color quote-text @color-white;
 @define-color idle-inhibitor-text @main-text;
 @define-color idle-inhibitor-active-text @color-white;
 
@@ -74,7 +52,7 @@
     border: none;
     border-radius: 0;
     font-family: 'JetBrainsMono Nerd Font', FontAwesome, sans-serif;
-    font-size: 15px;
+    font-size: 11px;
     min-height: 0;
 }
 
@@ -86,22 +64,12 @@ window#waybar {
 /*========================================================*
  *             MODULE CONTAINER STYLES                   *
  *========================================================*/
-#mode,
-#mpd,
-#custom-weather,
 #custom-playerctl,
 #clock,
-#cpu,
-#memory,
-#temperature,
 #battery,
 #network,
 #pulseaudio,
 #backlight,
-#disk,
-#custom-uptime,
-#custom-updates,
-#custom-quote,
 #idle_inhibitor,
 #custom-swaync,
 #tray {
@@ -114,8 +82,8 @@ window#waybar {
 *                     WORKSPACES                        *
 *========================================================*/
 #workspaces button {
-    padding-left: 2px;
-    padding-right: 7px;
+    padding-left: 1px;
+    padding-right: 3px;
     background-color: transparent;
     color: @ws-text;
     margin: 0px;
@@ -172,32 +140,9 @@ window#waybar {
 /*========================================================*
 *                   MODULE STYLES                       *
 *========================================================*/
-#mode {
-    color: @mode-text;
-    border-bottom-color: @mode-text;
-}
-
-#mpd {
-    color: @mpd-text;
-    border-bottom-color: @mpd-text;
-}
-
-#mpd.disconnected,
-#mpd.stopped {
-    color: @color-black;
-    background-color: @main-text;
-    border-bottom-color: @main-text;
-}
-
-#custom-weather {
-    color: @weather-text;
-    border-bottom-color: @weather-text;
-    font-family: sans-serif;
-}
-
 #custom-playerctl {
-    padding-left: 10px;
-    padding-right: 10px;
+    padding-left: 7px;
+    padding-right: 7px;
     color: @playerctl-text;
     border-bottom-color: @playerctl-text;
 }
@@ -215,27 +160,6 @@ window#waybar {
 #clock {
     color: @clock-text;
     border-bottom-color: @clock-text;
-}
-
-#cpu {
-    color: @cpu-text;
-    border-bottom-color: @cpu-text;
-    min-width: 20px;
-}
-
-#memory {
-    color: @memory-text;
-    border-bottom-color: @memory-text;
-}
-
-#temperature {
-    color: @temp-text;
-    border-bottom-color: @temp-text;
-}
-
-#temperature.critical {
-    color: @temp-critical-text;
-    border-bottom-color: @temp-critical-text;
 }
 
 #battery {
@@ -284,31 +208,11 @@ window#waybar {
     border-bottom-color: @backlight-text;
 }
 
-#disk {
-    color: @disk-text;
-    border-bottom-color: @disk-text;
-}
-
-#custom-uptime {
-    color: @uptime-text;
-    border-bottom-color: @uptime-text;
-}
-
-#custom-updates {
-    color: @updates-text;
-    border-bottom-color: @updates-text;
-}
-
-#custom-quote {
-    color: @quote-text;
-    border-bottom-color: @quote-text;
-}
-
 #idle_inhibitor {
     margin: 0px;
     color: @idle-inhibitor-text;
     border-bottom-color: transparent;
-    min-width: 23px;
+    min-width: 17px;
 }
 
 #idle_inhibitor.activated {
@@ -322,8 +226,8 @@ window#waybar {
  *========================================================*/
 #custom-swaync {
     color: @color-white;
-    padding: 0 5px;
-    min-width: 20px;
+    padding: 0 4px;
+    min-width: 15px;
 }
 
 #custom-swaync.notification {
@@ -347,8 +251,8 @@ window#waybar {
     font-weight: bold;
     color: @color-white;
     border-bottom-color: @color-white;
-    min-width: 20px;
-    padding: 5px;
+    min-width: 15px;
+    padding: 4px;
 }
 
 #bluetooth.connected {
@@ -362,7 +266,7 @@ window#waybar {
  *========================================================*/
 #tray {
     background-color: transparent;
-    padding: 0 10px;
+    padding: 0 7px;
     margin: 0 2px;
     color: @main-text;
     border-bottom-color: @color-white;

@@ -10,22 +10,18 @@
   "modules-center": [
     "clock",
     "battery"
-    // "hyprland/window"
   ],
   "modules-right": [
     "custom/playerctl",
     "pulseaudio",
     "backlight",
-    // "cpu",
-    // "memory",
     "network",
-    // "power-profiles-daemon",
     "tray",
     "custom/swaync",
     "bluetooth"
   ],
   "tray": {
-    "icon-size": 19,
+    "icon-size": 14,
     "spacing": 5,
   },
   "power-profiles-daemon": {
