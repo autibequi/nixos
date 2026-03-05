@@ -9,7 +9,7 @@
   {
     "bindings": {
       // Quick Shortcuts
-      "ctrl-shift-t": "debug_panel::Toggle",
+      "ctrl-shift-q": "debug_panel::Toggle",
       // VSCode Like
       "ctrl-p": "file_finder::Toggle",
       "ctrl-u": "outline::Toggle",
