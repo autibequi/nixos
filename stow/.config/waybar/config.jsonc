@@ -49,6 +49,9 @@
     "tooltip-format": "{name}",
     "window-rewrite-default": " ",
     "format-icons": {
+      "settings": ",",
+      "bleh": "~",
+      "jira": "j"
       // "f1": "ʕ■ᴥ■ʔ",
       // "f2": "ʕ■ᴥ■ʔ",
       // "f3": "ʕ■ᴥ■ʔ",
