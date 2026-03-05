@@ -311,7 +311,7 @@
   "extensions.autoCheckUpdates": false,
   "update.showReleaseNotes": false,
   "workbench.preferredDarkColorTheme": "Visual Studio Dark",
-  "debug.toolBarLocation": "commandCenter",
+  "debug.toolBarLocation": "floating",
   "workbench.editor.restoreViewState": false,
   "workbench.startupEditor": "none",
   "extensions.experimental.deferredStartupFinishedActivation": true,
