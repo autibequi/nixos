@@ -31,7 +31,7 @@
 /*========================================================*
  *                  MODULE COLORS                        *
  *========================================================*/
-@define-color playerctl-text @color-white;
+@define-color mpris-text @color-white;
 @define-color clock-text @color-white;
 @define-color battery-text @color-white;
 @define-color battery-charging-text @color-white;
@@ -64,7 +64,7 @@ window#waybar {
 /*========================================================*
  *             MODULE CONTAINER STYLES                   *
  *========================================================*/
-#custom-playerctl,
+#mpris,
 #clock,
 #battery,
 #network,
@@ -82,11 +82,10 @@ window#waybar {
 *                     WORKSPACES                        *
 *========================================================*/
 #workspaces button {
-    padding-left: 1px;
-    padding-right: 3px;
+    padding: 2px 5px;
+    min-width: 0;
     background-color: transparent;
     color: @ws-text;
-    margin: 0px;
 }
 
 #workspaces button:hover {
@@ -116,8 +115,13 @@ window#waybar {
 }
 
 @keyframes urgent-pulse {
-    from { background-color: rgba(255, 0, 0, 0.1); }
-    to   { background-color: rgba(255, 0, 0, 0.35); }
+    from {
+        background-color: rgba(255, 0, 0, 0.1);
+    }
+
+    to {
+        background-color: rgba(255, 0, 0, 0.35);
+    }
 }
 
 #workspaces button.special {
@@ -140,19 +144,19 @@ window#waybar {
 /*========================================================*
 *                   MODULE STYLES                       *
 *========================================================*/
-#custom-playerctl {
+#mpris {
     padding-left: 7px;
     padding-right: 7px;
-    color: @playerctl-text;
-    border-bottom-color: @playerctl-text;
+    color: @mpris-text;
+    border-bottom-color: @mpris-text;
 }
 
-#custom-playerctl.Playing {
+#mpris.playing {
     color: @color-yellow;
     text-shadow: 0 0 6px @color-yellow;
 }
 
-#custom-playerctl.Paused {
+#mpris.paused {
     color: @color-orange;
     background-color: @color-black;
 }
