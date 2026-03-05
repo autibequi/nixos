@@ -8,7 +8,6 @@
     "key": "ctrl+b",
     "command": "-workbench.action.toggleSidebarVisibility"
   },
-
   // ===== Auxiliary Bar =====
   {
     "key": "ctrl+shift+d",
@@ -18,7 +17,6 @@
     "key": "ctrl+alt+b",
     "command": "-workbench.action.toggleAuxiliaryBar"
   },
-
   // ===== Painel Inferior =====
   {
     "key": "ctrl+shift+s",
@@ -28,19 +26,22 @@
     "key": "ctrl+j",
     "command": "-workbench.action.togglePanel"
   },
-
   // ===== Navegação de Código =====
   {
-    "key": "alt+shift+d",
+    "key": "ctrl+f12",
     "command": "editor.action.goToImplementation",
     "when": "editorHasImplementationProvider && editorTextFocus && !isInEmbeddedEditor"
   },
   {
-    "key": "alt+d",
+    "key": "f12",
+    "command": "-editor.action.revealDefinition",
+    "when": "editorHasDefinitionProvider && editorTextFocus && !isInEmbeddedEditor"
+  },
+  {
+    "key": "f12",
     "command": "editor.action.revealDefinition",
     "when": "editorHasDefinitionProvider && editorTextFocus && !isInEmbeddedEditor"
   },
-
   // ===== AI  =====
   {
     "key": "alt+tab",
@@ -52,7 +53,6 @@
     "command": "-editor.action.acceptCursorTabSuggestion",
     "when": "cpp.shouldAcceptTab"
   },
-
   // AI Popup
   {
     "key": "ctrl+enter",
@@ -64,7 +64,6 @@
     "command": "-aipopup.action.modal.generate",
     "when": "editorFocus && !composerBarIsVisible"
   },
-
   // just tab 💅
   {
     "key": "tab",
@@ -81,13 +80,13 @@
   {
     "key": "ctrl+r",
     "command": "-workbench.action.openRecent"
-},
-{
+  },
+  {
     "key": "shift+enter",
     "command": "workbench.action.terminal.sendSequence",
     "args": {
-        "text": "\u001b\r"
+      "text": "\u001b\r"
     },
     "when": "terminalFocus"
-}
+  }
 ]
