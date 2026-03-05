@@ -99,9 +99,9 @@ tesseract_region() {
     text=$(hyprshot -m region --raw | tesseract stdin stdout -l eng 2>/dev/null)
     if [[ -n "$text" ]]; then
         echo -n "$text" | wl-copy
-        notify-send -a "OCR" "Texto extraído" "$text"
+        notify-send -a "OCR" "Texto extraído" "$text"  -u low
     else
-        notify-send -a "OCR" "OCR falhou" "Nenhum texto detectado na região"
+        notify-send -a "OCR" "OCR falhou" "Nenhum texto detectado na região"  -u low
     fi
 }
 

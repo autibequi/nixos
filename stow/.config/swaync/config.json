@@ -46,6 +46,27 @@
       "state": "transient",
       "app-name": "Google Chrome",
       "body": ".*chat\\.google\\.com.*"
+    },
+    "hyprshot-appname": {
+      "state": "transient",
+      "app-name": "Hyprshot"
+    },
+    "hyprshot-desktop": {
+      "state": "transient",
+      "desktop-entry": "hyprshot"
+    },
+    "satty-appname": {
+      "state": "transient",
+      "app-name": "satty"
+    },
+    "satty-desktop": {
+      "state": "transient",
+      "desktop-entry": "satty"
+    },
+    "notify-send-low": {
+      "state": "transient",
+      "app-name": "notify-send",
+      "urgency": "Low"
     }
   },
   "widgets": [
