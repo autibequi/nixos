@@ -16,7 +16,9 @@
       // Panels WASD Management
       "ctrl-shift-a": "workspace::ToggleLeftDock",
       "ctrl-shift-s": "workspace::ToggleBottomDock",
-      "ctrl-shift-d": "workspace::ToggleRightDock"
+      "ctrl-shift-d": "workspace::ToggleRightDock",
+      // Open Projects
+      "ctrl-shift-r": "projects::OpenRecent"
     }
   }
 ]
