@@ -7,7 +7,10 @@
       "WebFetch(domain:wiki.hyprland.org)",
       "WebFetch(domain:wiki.hypr.land)",
       "Bash(hyprctl version:*)",
-      "Bash(hyprctl getoption:*)"
+      "Bash(hyprctl getoption:*)",
+      "Bash(hyprctl dispatch:*)",
+      "Bash(hyprctl binds:*)",
+      "Bash(hyprctl activewindow:*)"
     ]
   }
 }
