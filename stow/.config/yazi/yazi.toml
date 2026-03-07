@@ -1,0 +1,23 @@
+[mgr]
+show_hidden = true
+sort_by = "natural"
+sort_dir_first = true
+
+[preview]
+max_width = 4096
+max_height = 4096
+image_filter = "triangle"
+image_quality = 90
+
+[opener]
+edit = [
+  { run = '$EDITOR "$@"', block = true, desc = "Edit" },
+]
+open = [
+  { run = 'xdg-open "$@"', desc = "Open" },
+]
+
+[open]
+prepend_rules = [
+  { name = "*.pdf", use = "open" },
+]
