@@ -10,6 +10,9 @@
   },
   "agent_buffer_font_size": 15.0,
   "agent_servers": {
+    "cursor": {
+      "type": "registry"
+    },
     "claude": {
       "favorite_config_option_values": {
         "model": [
@@ -21,9 +24,6 @@
         "model": "haiku",
         "mode": "acceptEdits"
       }
-    },
-    "kimi": {
-      "type": "registry"
     }
   },
   "file_finder": {
