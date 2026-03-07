@@ -12,9 +12,9 @@ let
   hypr-plugin-dir = pkgs.symlinkJoin {
     name = "hyrpland-plugins";
     paths =
-      (with pkgs.hyprlandPlugins; [
-        hyprexpo
-        hypr-dynamic-cursors
+      (with unstable.hyprlandPlugins; [
+        # hyprexpo
+        # hypr-dynamic-cursors
         # hyprfocus
         # hyprtrails
         # hyprspace
@@ -36,6 +36,11 @@ in
   programs.uwsm = {
     enable = true;
     package = unstable.uwsm;
+    waylandCompositors.start-hyprland = {
+      prettyName = "Start-Hyprland ";
+      comment = "Hyprland compositor managed by UWSM";
+      binPath = "/run/current-system/sw/bin/start-hyprland";
+    };
   };
 
   # Environment Variables
