@@ -18,7 +18,9 @@
       "ctrl-shift-s": "workspace::ToggleBottomDock",
       "ctrl-shift-d": "workspace::ToggleRightDock",
       // Open Projects
-      "ctrl-shift-r": "projects::OpenRecent"
+      "ctrl-shift-r": "projects::OpenRecent",
+      "alt-enter": "agent::AllowOnce",
+      "alt-shift-enter": "agent::RejectOnce"
     }
   }
 ]
