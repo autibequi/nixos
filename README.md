@@ -1,94 +1,101 @@
 # NixOS
 
-i STILL have no ideia what i'm doing...
+Flake-based NixOS configuration for an ASUS Zephyrus G14 (AMD Ryzen + NVIDIA RTX 4060 mobile).
 
-- [Documentação do Gnome](./modules/gnome/README.md)
-- [Dotfile Docs](./dotfiles/README.md)
+## Structure
 
-## Dirs
-- `/core/` - Configurações essenciais (hardware, kernel, serviços, etc.)
-- `/modules/` - Módulos (gnome, cosmic, bluetooth, nvidia, plymouth, etc.)
-- `/assets/` - Arquivos de mídia, temas, ícones e outros recursos visuais
-- `/dotfiles` - Arquivos de configuração pessoais para programas e ferramentas
-
-## Instalation
-
-You will need GIT and a text editor, run with nix without installing first:
 ```
+flake.nix            # Flake inputs and nixosConfigurations.nomad output
+configuration.nix    # Module registry (enable/disable features here)
+hardware.nix         # Partition UUIDs (local-only, git skip-worktree'd)
+
+modules/
+  core/              # Essential modules (kernel, nix, packages, services, shell, fonts, hibernate)
+  hyprland.nix       # Hyprland compositor (active DE)
+  nvidia.nix         # NVIDIA PRIME offload (AMD iGPU as default)
+  asus.nix           # ASUS-specific hardware support
+  greetd.nix         # Login greeter
+  bluetooth.nix      # Bluetooth
+  plymouth.nix       # Boot splash
+  steam.nix          # Gaming
+  ai.nix             # AI tools (ComfyUI, Stable Diffusion)
+  podman.nix         # Containers
+  logiops.nix        # Logitech mouse config
+  work.nix           # Work-related setup
+  virt.nix           # Virtualization
+  gnome/             # GNOME DE (disabled)
+  cosmic.nix         # COSMIC DE (disabled)
+  kde.nix            # KDE DE (disabled)
+
+stow/                # Dotfiles managed with GNU stow (symlinked into ~)
+  .config/           # App configs (hypr, waybar, zed, ghostty, rofi, etc.)
+```
+
+## Flake Inputs
+
+- **nixpkgs**: NixOS 25.11 (stable)
+- **nixpkgs-unstable**: unstable channel (available as `unstable` in modules)
+- **chaotic**: CachyOS kernel
+- **hyprland**: pinned to v0.54.0
+- **nixos-hardware**: ASUS Zephyrus hardware support
+- **zen-browser**, **zed**, **isd**, **voxtype**, **nixified-ai**, **antigravity-nix**
+
+## Installation
+
+Get a shell with git and an editor:
+
+```sh
 nix-shell -p helix git
 ```
 
-From fresh install, get the `/boot`, `/` and `swap` partition UUIDs from the auto generated file.
-
-```sh
-grep device /etc/nixos/hardware-configuration.nix
-```
-
-you will get something like:
-
-```
-17:    { device = "/dev/disk/by-uuid/ee52cc58-f10d-4979-8244-4386302649c5";
-22:    { device = "/dev/disk/by-uuid/1F53-9115";
-28:    [ { device = "/dev/disk/by-uuid/17e5c565-c90c-4233-92c6-bb86adfed306"; }
-```
-
-In order: boot, root and swap. Check the file for extra safeness.
-
-Clone this repository then change the values in `configuration.nix` the extracted UUIds.
-
-Hibernation and Swap configuration are optional.
-
-After that run the following command to switch to the new configuration:
-
-```sh
-
-sudo nixos-rebuild switch --flake .#nomad
-```
-
-Make a little pray and reboot your system.
-
-```sh
-reboot
-```
-
-If it doesnt work boot the device and hit the hell out of `del` key to enter the latest stable version.
-
-## Tricks
-```
-Q: High wattage consumption without CPU or GPU usage:
-A: Nvi
-dia prob went crazy, go to `sudo powertop` and turn on the tweaks.
-```
-
-```
-Q: How update flakes
-nix --extra-experimental-features 'nix-command flakes' flake update
-```
-
-## SSHKey to pull/push changes
-
-```
-ssh-keygen -t ed25519 -C "your_email@example.com"
-```
-## Validade Store
-
-```sh
-sudo nix-channel --update && sudo nixos-rebuild switch && nix-store --verify --check-contents $(nix-store -qR $(which warp-taskbar))
-```
-
-## Worktree control (for hardware.nix template)
-
-Skip
-```sh
-git update-index --skip-worktree <file>
-```
-Unskip
-```sh
-git update-index --no-skip-worktree <file>
-```
-
-## Get UUIDs from hardware-configuration.nix
+Extract partition UUIDs from the auto-generated hardware config:
 
 ```sh
 cat /etc/nixos/hardware-configuration.nix | grep -B 3 "device ="
+```
+
+Clone this repo, then set the boot, root, and swap UUIDs in `hardware.nix`.
+
+Apply the configuration:
+
+```sh
+sudo nixos-rebuild switch --flake .#nomad
+```
+
+Reboot and hope for the best.
+
+## Common Commands
+
+```sh
+# Build without switching (test for errors)
+sudo nixos-rebuild build --flake .#nomad
+
+# Update all flake inputs
+nix --extra-experimental-features 'nix-command flakes' flake update
+
+# Update a single input
+nix --extra-experimental-features 'nix-command flakes' flake update nixpkgs
+
+# Apply dotfiles
+stow -d ~/projects/nixos/stow -t ~ .
+```
+
+## Tips
+
+**hardware.nix is a template** - it contains local partition UUIDs and is excluded from git via skip-worktree:
+
+```sh
+# Skip (default)
+git update-index --skip-worktree hardware.nix
+
+# Temporarily unskip to update the template
+git update-index --no-skip-worktree hardware.nix
+```
+
+**High idle power draw?** NVIDIA might be misbehaving. Check `sudo powertop` and enable the suggested tunables.
+
+**SSH key for push/pull:**
+
+```sh
+ssh-keygen -t ed25519 -C "your_email@example.com"
 ```
