@@ -65,9 +65,7 @@
     godot
 
     # Terminal
-    # ghostty
-    # warp-terminal
-    # allacritty
+    cool-retro-term
 
     # should be working (but its not)
     # cura
