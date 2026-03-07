@@ -286,7 +286,12 @@
   // ─── AI & EDIT PREDICTIONS ─────────────────────────────────────
   // Copilot + Agent (like VS Code's Copilot / Cursor AI)
   "edit_predictions": {
-    "provider": "zed",
+    "open_ai_compatible_api": {
+      "api_url": "http://127.0.0.1:1234/v1/completions",
+      "prompt_format": "qwen",
+      "model": "zed-industries_zeta"
+    },
+    "provider": "open_ai_compatible_api",
     "mode": "eager",
     "disabled_globs": [
       "**/node_modules/**",
