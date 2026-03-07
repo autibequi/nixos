@@ -113,6 +113,9 @@ in
 
     # File managers
     yazi # better ranger
+    ghostty # terminal with kitty graphics protocol (for yazi image preview)
+    poppler-utils # PDF preview (pdftoppm)
+    ffmpegthumbnailer # video thumbnails
     nautilus # file manager
   ];
 }
