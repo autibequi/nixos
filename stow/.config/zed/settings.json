@@ -21,7 +21,7 @@
         ]
       },
       "default_config_options": {
-        "model": "haiku",
+        "model": "default",
         "mode": "acceptEdits"
       }
     }
