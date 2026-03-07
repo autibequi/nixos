@@ -27,3 +27,5 @@ convert_video() {
     return 1
   fi
 }
+
+alias claudio="cd ~/projects/estrategia/claudio && make claude"
