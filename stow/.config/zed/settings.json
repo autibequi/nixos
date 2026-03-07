@@ -300,6 +300,7 @@
     ],
   },
   "agent": {
+    "message_editor_min_lines": 2,
     "tool_permissions": {
       "default": "allow"
     },
