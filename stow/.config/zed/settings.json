@@ -291,7 +291,7 @@
       "prompt_format": "qwen",
       "model": "zed-industries_zeta"
     },
-    "provider": "open_ai_compatible_api",
+    "provider": "zed",
     "mode": "eager",
     "disabled_globs": [
       "**/node_modules/**",
