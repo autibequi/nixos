@@ -10,7 +10,10 @@
       "Bash(hyprctl getoption:*)",
       "Bash(hyprctl dispatch:*)",
       "Bash(hyprctl binds:*)",
-      "Bash(hyprctl activewindow:*)"
+      "Bash(hyprctl activewindow:*)",
+      "Bash(nh os test:*)",
+      "mcp__nixos__nix",
+      "mcp__nixos__nix_versions"
     ]
   }
 }
