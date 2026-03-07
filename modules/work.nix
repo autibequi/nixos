@@ -9,9 +9,6 @@
 
   # Systemd Packages
   environment.systemPackages = with pkgs; [
-    # --- Testing ---
-    gh-copilot
-
     # --- CLI ---
     dig
     awscli2
@@ -59,11 +56,6 @@
 
     # --- Warp ---
     wgcf
-
-    jetbrains.datagrip
-
-    # Git
-    meld
 
     # --- Zip ---
     zip

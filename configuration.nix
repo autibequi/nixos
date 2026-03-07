@@ -24,7 +24,7 @@
     # Stable Modules
     ./modules/logiops.nix
     ./modules/bluetooth.nix
-    ./modules/plymouth.nix # Its so fast now that its not needed :(
+    ./modules/plymouth.nix
     ./modules/ai.nix
     ./modules/steam.nix
     ./modules/podman.nix

@@ -12,9 +12,9 @@ let
   hypr-plugin-dir = pkgs.symlinkJoin {
     name = "hyrpland-plugins";
     paths =
-      (with unstable.hyprlandPlugins; [
-        # hyprexpo
-        # hypr-dynamic-cursors
+      (with pkgs.hyprlandPlugins; [
+        hyprexpo
+        hypr-dynamic-cursors
         # hyprfocus
         # hyprtrails
         # hyprspace
@@ -27,15 +27,15 @@ in
 {
   programs.hyprland = {
     enable = true;
-    package = hyprland-git.hyprland;
+    # package = hyprland-git.hyprland;
+    package = unstable.hyprland;
     xwayland.enable = true;
     withUWSM = true;
   };
 
   programs.uwsm = {
+    enable = true;
     package = unstable.uwsm;
-    # UWSM com withUWSM usa Hyprland direto; forçar start-hyprland (wrapper com dbus, etc.)
-    waylandCompositors.hyprland.binPath = lib.mkForce "${hyprland-git.hyprland}/bin/start-hyprland";
   };
 
   # Environment Variables
@@ -60,8 +60,6 @@ in
     hyprpicker
     hyprpolkitagent
     cheese
-
-    unstable.uwsm
 
     # Core Hyprland tools for navigation and productivity
     waybar # Status bar with useful info

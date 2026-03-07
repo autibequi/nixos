@@ -1,6 +1,5 @@
 {
   pkgs,
-  inputs,
   unstable,
   ...
 }:
@@ -17,7 +16,6 @@
 
     killall
     # apps
-    fuse # Required for AppImage support (libfuse.so.2)
     onlyoffice-desktopeditors # office space apps
     sidequest # for oculus sideloading
     blanket # Noise
@@ -67,7 +65,7 @@
     godot
 
     # Terminal
-    ghostty
+    # ghostty
     # warp-terminal
     # allacritty
 
@@ -93,13 +91,10 @@
     # Fun
     unstable.wayland-bongocat
 
-    # Compression
-    lz4
-
-    unstable.howdy
+    # unstable.howdy
 
     # Google Antigravity (agentic IDE)
-    inputs.antigravity-nix.packages.${pkgs.system}.default
+    # inputs.antigravity-nix.packages.${pkgs.system}.default
   ];
   # permittedInsecurePackages = [
   #   "ventoy-qt5-1.1.05"

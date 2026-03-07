@@ -11,15 +11,15 @@
 
     # 🤖 LLM Local
     unstable.lmstudio
-    jan
+    # jan
 
     # 💻 AI IDEs
-    windsurf
+    # windsurf
     unstable.code-cursor
-    opencode
+    # opencode
 
     # 🛠️ Utilities
-    llm
+    # llm
     upscayl
   ];
 }
