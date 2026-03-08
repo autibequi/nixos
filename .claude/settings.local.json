@@ -3,18 +3,21 @@
     "allow": [
       "mcp__plugin_context7_context7__resolve-library-id",
       "mcp__plugin_context7_context7__query-docs",
-      "WebFetch(domain:wiki.hyprland.org)",
-      "WebFetch(domain:wiki.hypr.land)",
-      "Bash(hyprctl version:*)",
-      "Bash(hyprctl getoption:*)",
-      "Bash(hyprctl dispatch:*)",
-      "Bash(hyprctl binds:*)",
-      "Bash(hyprctl activewindow:*)",
-      "Bash(nh os test:*)",
       "mcp__nixos__nix",
       "mcp__nixos__nix_versions",
-      "WebFetch(domain:mynixos.com)",
-      "WebFetch(domain:github.com)"
+      "WebSearch",
+      "WebFetch",
+      "Bash(hyprctl *)",
+      "Bash(nh os test:*)",
+      "Bash(nh os switch:*)",
+      "Bash(stow *)",
+      "Bash(cat *)",
+      "Bash(ls *)",
+      "Bash(grep *)",
+      "Bash(pgrep *)",
+      "Bash(systemctl status *)",
+      "Bash(journalctl *)",
+      "Bash(nix *)"
     ]
   }
 }
