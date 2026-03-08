@@ -144,6 +144,14 @@
   # sem conflitar com o schedutil + SCX.
   services.auto-epp.enable = true;
 
+  # earlyoom: mata processos quando RAM < 5% para evitar travamento total
+  services.earlyoom = {
+    enable = true;
+    freeMemThreshold = 5;
+    freeSwapThreshold = 10;
+    enableNotifications = true;
+  };
+
   # TRIM periódico para saúde do NVMe interno
   services.fstrim.enable = true;
   services.fstrim.interval = "weekly";
