@@ -25,7 +25,14 @@ workspace_switch() {
         local withoutSpecialWorkspace
         withoutSpecialWorkspace=$(echo "$requested_workspace" | sed 's/special://')
         echo "$withoutSpecialWorkspace" > "$(_special_ws_file "$monitor")"
+        # Check if the special workspace is currently visible (meaning toggle will hide it)
+        local active_special
+        active_special=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .specialWorkspace.name')
         hyprctl dispatch togglespecialworkspace "$withoutSpecialWorkspace"
+        # If it was visible, we just hid it — kill rofi so it doesn't linger
+        if [ "$active_special" = "special:$withoutSpecialWorkspace" ]; then
+            pkill -x rofi 2>/dev/null
+        fi
     else
         echo "$requested_workspace" > ~/.cache/hyprland/hyprutils_normal_workspace
         # Oculta special workspace ativo antes de trocar
@@ -52,6 +59,7 @@ hide_active_special_workspaces(){
         name="${active#special:}"
         if [ -n "$name" ]; then
             hyprctl dispatch togglespecialworkspace "$name"
+            pkill -x rofi 2>/dev/null
         fi
     fi
 }
