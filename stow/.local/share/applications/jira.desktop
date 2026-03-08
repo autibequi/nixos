@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Jira
+Comment=Estrategia Jira Board
+Exec=google-chrome-stable --disable-extensions --no-proxy-server --no-first-run --new-window https://estrategia.atlassian.net/jira/software/c/projects/FUK2/boards/323?quickFilter=1182
+Icon=google-chrome
+Type=Application
+Categories=Development;ProjectManagement;
