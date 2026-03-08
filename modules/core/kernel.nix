@@ -68,6 +68,9 @@
     "tpm"
     "tpm_tis"
     "tpm_crb"
+    # Disable serial ports (3.5s boot penalty waiting for ttyS0-S3)
+    "8250_pci"
+    "serial_8250"
   ];
 
   # Disable TPM
