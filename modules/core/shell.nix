@@ -3,14 +3,10 @@
 let
   sharedAliases = {
     history = "atuin";
-    tasks = "pueue";
     grep = "rg";
     findf = "fd";
     cat = "bat";
     ls = "lsd -la";
-    du = "dust";
-    ps = "procs";
-    tree = "broot";
     f = "fzf --wrap";
     clip = "wl-copy";
     clipb = "wl-paste";
@@ -98,13 +94,12 @@ in
     lnav
     fastfetch
     pv
-    clippy
     starship # zsh kit
     rocmPackages.rocm-smi # amd basics for btop
 
     # Coding
     # ---------------
-    # Nix formating
+    # Nix
     nil
     nixd
     nixfmt-rfc-style
@@ -119,79 +114,46 @@ in
     rust-analyzer
     rustfmt
 
-    # Misc
-    jujutsu # git based replacement (confusing)
-
     # cli tools
     btop-rocm # better top with amd support
-    libnotify # cli notifications
     jq # json parser
-
-    # Silly
-    figlet # ascii art
-    toilet # ascii art
-    cowsay # ascii art
-    lolcat # rainbow text
-    sl # steam locomotive
-    cmatrix # matrix effect
-    fortune # random quotes
 
     # snippet manager
     pet
 
     # better cli
     atuin # fancy cli history
-    pueue # task manager
     fzf # fuzzy finder
     ripgrep # better grep
     fd # better find
     bat # better cat
     lsd # better ls
-    dust # better du
-    procs # better ps
-    broot # better tree
     zoxide # better cd
     tealdeer # better tldr
-    wl-clipboard # clipboard
 
     gping # ping with a graph
     gitui
-    hyperfine # command-line benchmarking tool
+    hyperfine # benchmarking
     jless # json viewer
 
-    # TESTING: rust cli tools
+    # rust cli tools
     xh # better curl
     zellij # better tmux
-    yazi # better ranger
     helix # better vim
     bacon # better cargo
     cargo-info # better cargo info
-    fselect # better find
-    ncspot # better spotify
-    rusty-man # better man
-    # git-delta   # better git diff
-    ripgrep-all # better ripgrep
-    tokei # better wc
-    wiki-tui # better wikipedia // wikiti is rust
+    ncspot # spotify TUI
+    tokei # code stats
+    wiki-tui # wikipedia TUI
     just # better make
-    mask # better make
-    mprocs # better docker-compose
-    # present-term # better reveal.js
-    #
-    #
 
     isd
 
-    # node ieks
+    # node
     pnpm
     nodejs
 
     # Media
-    mpv
     yt-dlp
-
-    # org
-    # taskwarrior3
-    # taskwarrior-tui
   ];
 }
