@@ -74,18 +74,11 @@ in
     swaynotificationcenter # Notifications
     grim # Screenshots
     hyprshot # Screenshots
-    swappy # Screen editing
     slurp # Screen selection
     swayimg # Image viewer for Wayland
     wl-clipboard # Clipboard management
     hyprshade
-    fuzzel
-    anyrun
-    walker
-    onagre
     swww
-    mpvpaper
-    waytrogen
     bluetuith
     wiremix
     tesseract
@@ -95,11 +88,9 @@ in
     rose-pine-hyprcursor
 
     # Dark/Light Theme Toggle - GTK theming
-    glib
+    glib # gsettings CLI
     gsettings-desktop-schemas
-    dconf-editor # Para debug e edição manual
-    gtk3 # Garantir lib GTK3 disponível
-    gtk4 # Opcional, se usar apps GTK4
+    gtk3
     adw-gtk3 # Tema Adwaita para GTK3 (suporta light/dark)
 
     # Gnome Oldies
