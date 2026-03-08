@@ -48,13 +48,6 @@
     # art
     # krita
 
-    # Cursor
-    banana-cursor
-    apple-cursor
-
-    # Icons
-    papirus-icon-theme
-
     # benchmark
     geekbench
     fio # I/O benchmark (CrystalDiskMark-style sequential)
