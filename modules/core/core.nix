@@ -23,6 +23,7 @@
 
   # Bootloader
   boot.loader.systemd-boot.enable = true;
+  boot.loader.systemd-boot.configurationLimit = 10; # limita gerações no menu
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Environment Variables
