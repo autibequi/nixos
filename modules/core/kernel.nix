@@ -97,14 +97,8 @@
     "vm.dirty_writeback_centisecs" = 1500; # flush a cada 15s ao invés de 5s
 
     # sched_autogroup: agrupa processos do mesmo terminal/sessão e aplica
-    # nice diferenciado por grupo — impede que builds pesados (cargo, gradle,
-    # flutter) engulam o timeslice das janelas interativas.
+    # nice diferenciado por grupo — fallback quando SCX não está ativo.
     "kernel.sched_autogroup_enabled" = 1;
-
-    # Scheduler granularity: reduz microstutter em cargas pesadas.
-    # 1ms wakeup granularity para tarefa interactive, 500µs para aplicações despertando.
-    "kernel.sched_min_granularity_ns" = 1000000;
-    "kernel.sched_wakeup_granularity_ns" = 500000;
 
     # Desabilita NMI watchdog via sysctl (complementa nmi_watchdog=0 no cmdline).
     "kernel.nmi_watchdog" = 0;
@@ -120,6 +114,7 @@
 
     # Inotify: suficiente para IDEs e file watchers (padrão é 8192)
     "fs.inotify.max_user_watches" = 524288;
+    "fs.inotify.max_user_instances" = 1024; # padrão 128, insuficiente com containers + IDEs
   };
 
   # Configurar compressão.
