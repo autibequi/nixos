@@ -1,7 +1,6 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:github.com)",
       "mcp__plugin_context7_context7__resolve-library-id",
       "mcp__plugin_context7_context7__query-docs",
       "WebFetch(domain:wiki.hyprland.org)",
@@ -13,7 +12,9 @@
       "Bash(hyprctl activewindow:*)",
       "Bash(nh os test:*)",
       "mcp__nixos__nix",
-      "mcp__nixos__nix_versions"
+      "mcp__nixos__nix_versions",
+      "WebFetch(domain:mynixos.com)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }
