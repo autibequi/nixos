@@ -15,9 +15,8 @@ update:
 	nh os switch --update .
 
 stow:
-	stow --target=$$HOME --no-folding -R stow
+	stow --target=$$HOME --no-folding --adopt -R stow
 
 restow:
 	stow --target=$$HOME -D stow
 	stow --target=$$HOME --no-folding -R stow
-DD
