@@ -6,7 +6,7 @@
 
 # Returns the focused monitor name (e.g. eDP-1, HDMI-A-1, DP-2)
 _focused_monitor() {
-    hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .name'
+    hyprctl monitors -j | jaq -r '.[] | select(.focused == true) | .name'
 }
 
 # Returns the per-monitor state file path for storing the last special workspace
@@ -21,25 +21,28 @@ workspace_switch() {
     monitor=$(_focused_monitor)
 
     # Save workspace special or normal in per-monitor files
-    if [[ "$requested_workspace" =~ ^special:.*$ ]]; then
-        local withoutSpecialWorkspace
-        withoutSpecialWorkspace=$(echo "$requested_workspace" | sed 's/special://')
-        echo "$withoutSpecialWorkspace" > "$(_special_ws_file "$monitor")"
-        # Check if the special workspace is currently visible (meaning toggle will hide it)
-        local active_special
-        active_special=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .specialWorkspace.name')
-        hyprctl dispatch togglespecialworkspace "$withoutSpecialWorkspace"
-        # If it was visible, we just hid it — kill rofi so it doesn't linger
-        if [ "$active_special" = "special:$withoutSpecialWorkspace" ]; then
-            pkill -x rofi 2>/dev/null
-        fi
-    else
-        echo "$requested_workspace" > ~/.cache/hyprland/hyprutils_normal_workspace
-        # Oculta special workspace ativo antes de trocar
-        hide_active_special_workspaces
-        # move para o workspace passado como argumento
-        hyprctl dispatch workspace "$requested_workspace"
-    fi
+    case "$requested_workspace" in
+        special:*)
+            local withoutSpecialWorkspace
+            withoutSpecialWorkspace=$(echo "$requested_workspace" | sed 's/special://')
+            echo "$withoutSpecialWorkspace" > "$(_special_ws_file "$monitor")"
+            # Check if the special workspace is currently visible (meaning toggle will hide it)
+            local active_special
+            active_special=$(hyprctl monitors -j | jaq -r '.[] | select(.focused == true) | .specialWorkspace.name')
+            hyprctl dispatch togglespecialworkspace "$withoutSpecialWorkspace"
+            # If it was visible, we just hid it — kill rofi so it doesn't linger
+            if [ "$active_special" = "special:$withoutSpecialWorkspace" ]; then
+                pkill -x rofi 2>/dev/null
+            fi
+            ;;
+        *)
+            echo "$requested_workspace" > ~/.cache/hyprland/hyprutils_normal_workspace
+            # Oculta special workspace ativo antes de trocar
+            hide_active_special_workspaces
+            # move para o workspace passado como argumento
+            hyprctl dispatch workspace "$requested_workspace"
+            ;;
+    esac
 }
 
 toggle_last_special_workspace(){
@@ -54,7 +57,7 @@ toggle_last_special_workspace(){
 
 hide_active_special_workspaces(){
     # Fecha o special workspace visível no monitor focado
-    active=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .specialWorkspace.name')
+    active=$(hyprctl monitors -j | jaq -r '.[] | select(.focused == true) | .specialWorkspace.name')
     if [ -n "$active" ] && [ "$active" != "" ]; then
         name="${active#special:}"
         if [ -n "$name" ]; then
@@ -81,11 +84,6 @@ waybar_refresh() {
 }
 
 clipboard_history() {
-    # Display clipboard history with preview pane in floating terminal
-    # Step 1: Launch alacritty as a floating popup window
-    # Step 2: Run fzf with side preview panel inside terminal
-    # Step 3: Decode selected entry and copy to clipboard
-
     alacritty --class="clipboard-history-popup,clipboard-history-popup" \
               --title="Clipboard History" \
               -o window.dimensions.columns=120 \
@@ -105,17 +103,23 @@ print_screen_to_clipboard() {
 tesseract_region() {
     local text
     text=$(hyprshot -m region --raw | tesseract stdin stdout -l eng 2>/dev/null)
-    if [[ -n "$text" ]]; then
-        echo -n "$text" | wl-copy
-        notify-send -a "OCR" "Texto extraído" "$text"  -u low
+    if [ -n "$text" ]; then
+        printf "%s" "$text" | wl-copy
+        notify-send -a "OCR" "Texto extraído" "$text" -u low
     else
-        notify-send -a "OCR" "OCR falhou" "Nenhum texto detectado na região"  -u low
+        notify-send -a "OCR" "OCR falhou" "Nenhum texto detectado na região" -u low
     fi
 }
 
 hypr_reload() {
     swaync-client -rs -R
     waybar_refresh
-    hyprctl reloadr
+    hyprctl reload
     notify-send "Hyprland reloaded" -u low
 }
+
+# Dispatcher: allows calling any function by name
+# Usage: ./hyprutils.sh workspace_switch 1
+if [ $# -gt 0 ]; then
+    "$@"
+fi

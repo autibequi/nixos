@@ -75,7 +75,7 @@ while IFS=';' read -r modmask key dispatcher arg; do
     esac
 
     # Construct the command to be executed when a line is selected.
-    local cmd
+    cmd=""
     if [[ "$dispatcher" == "exec" ]]; then
         cmd="$arg"
     else
