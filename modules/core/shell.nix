@@ -81,7 +81,11 @@ in
     '';
   };
 
+  # dash como /bin/sh (4x mais rápido que bash para scripts)
+  environment.binsh = "${pkgs.dash}/bin/dash";
+
   environment.systemPackages = with pkgs; [
+    dash
     # basic (why i had to install those)
     uutils-coreutils-full # rust coreutils
     unixtools.whereis
