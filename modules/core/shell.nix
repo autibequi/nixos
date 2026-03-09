@@ -87,7 +87,7 @@ in
   environment.systemPackages = with pkgs; [
     dash
     # basic (why i had to install those)
-    uutils-coreutils-full # rust coreutils
+    uutils-coreutils # rust coreutils
     unixtools.whereis
     pciutils
     gnumake
