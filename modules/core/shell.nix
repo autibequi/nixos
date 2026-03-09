@@ -14,6 +14,10 @@ let
     dotfiles = "stow --target=$HOME --dir=$HOME/projects/nixos stow";
     please = "sudo !!";
     wiki = "wikiti";
+    du = "dust";
+    ps = "procs";
+    sed = "sd";
+    jq = "jaq";
   };
 in
 {
@@ -79,7 +83,7 @@ in
 
   environment.systemPackages = with pkgs; [
     # basic (why i had to install those)
-    # uutils-coreutils # broken
+    uutils-coreutils-full # rust coreutils
     unixtools.whereis
     pciutils
     gnumake
@@ -116,7 +120,7 @@ in
 
     # cli tools
     btop-rocm # better top with amd support
-    jq # json parser
+    jaq # better jq (rust)
 
     # snippet manager
     pet
@@ -146,6 +150,10 @@ in
     tokei # code stats
     wiki-tui # wikipedia TUI
     just # better make
+    dust # better du
+    procs # better ps
+    sd # better sed
+    bandwhich # network monitor per process
 
     isd
 
