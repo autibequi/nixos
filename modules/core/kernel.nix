@@ -115,6 +115,9 @@
     # Inotify: suficiente para IDEs e file watchers (padrão é 8192)
     "fs.inotify.max_user_watches" = 524288;
     "fs.inotify.max_user_instances" = 1024; # padrão 128, insuficiente com containers + IDEs
+
+    # Permite containers rootless (Podman) bindarem portas baixas (80, 443, etc.)
+    "net.ipv4.ip_unprivileged_port_start" = 0;
   };
 
   # Configurar compressão.
