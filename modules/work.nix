@@ -19,6 +19,7 @@
     postgresql # for dbeaver dumps
     ffmpeg # video stuff
     openvpn # bastion access
+    openssl
 
     # --- APPS  ---
     dbeaver-bin
