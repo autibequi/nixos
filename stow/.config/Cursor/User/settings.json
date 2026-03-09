@@ -341,4 +341,5 @@
   "redhat.telemetry.enabled": false,
   "debug.onTaskErrors": "showErrors",
   "update.mode": "none",
+  "git.detectSubmodules": true,
 }
