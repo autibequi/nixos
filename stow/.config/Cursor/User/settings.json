@@ -342,4 +342,7 @@
   "debug.onTaskErrors": "showErrors",
   "update.mode": "none",
   "git.detectSubmodules": true,
+  "workbench.editorAssociations": {
+    "*.md": "vscode.markdown.preview.editor"
+  },
 }
