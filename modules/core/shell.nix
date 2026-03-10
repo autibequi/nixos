@@ -61,6 +61,8 @@ in
         eval "$(zoxide init zsh)"
         eval "$(atuin init zsh)"
 
+        pokemonsay "$(fortune -s)"
+
         source ~/secrets.sh
         source ~/.config/hypr/hyprutils.sh
         source ~/.config/zsh/functions.sh

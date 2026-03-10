@@ -81,6 +81,8 @@
 
     # Fun
     unstable.wayland-bongocat
+    pokemonsay
+    fortune
 
     # unstable.howdy
 
