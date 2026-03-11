@@ -21,5 +21,9 @@
       "Bash(journalctl *)",
       "Bash(nix *)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "nixos"
+  ],
+  "enableAllProjectMcpServers": true
 }
