@@ -56,9 +56,7 @@ in
     shellAliases = sharedAliases;
 
     shellInit = ''
-      if [ "$TERM" != "dumb" ]; then
-        source ~/.config/zsh/init.sh
-      fi
+      source ~/.config/zsh/init.sh
     '';
   };
 
