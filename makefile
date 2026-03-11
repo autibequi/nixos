@@ -1,4 +1,4 @@
-.PHONY: get-ids reload switch update stow restow
+.PHONY: get-ids reload switch update stow restow claude-sandbox claude-sandbox-build claude-sandbox-shell claude-sandbox-down
 
 get-ids:
 	cat /etc/nixos/hardware-configuration.nix | grep -B 3 "device ="
@@ -20,3 +20,17 @@ stow:
 restow:
 	stow --target=$$HOME -D stow
 	stow --target=$$HOME --no-folding -R stow
+
+COMPOSE_CLAUDE = docker compose -f docker-compose.claude.yml
+
+claude-sandbox-build:
+	$(COMPOSE_CLAUDE) build
+
+claude-sandbox:
+	$(COMPOSE_CLAUDE) up -d --build
+
+claude-sandbox-shell:
+	$(COMPOSE_CLAUDE) exec sandbox bash
+
+claude-sandbox-down:
+	$(COMPOSE_CLAUDE) down

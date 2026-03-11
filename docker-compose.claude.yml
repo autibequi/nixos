@@ -1,0 +1,13 @@
+services:
+  sandbox:
+    build:
+      context: .
+      dockerfile: Dockerfile.claude
+    image: claude-nix-sandbox
+    container_name: claude-sandbox
+    network_mode: host
+    volumes:
+      - ${HOME}/.claude:/root/.claude
+      - .:/workspace
+      - /tmp:/tmp
+    command: sleep infinity
