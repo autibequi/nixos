@@ -6,21 +6,30 @@ RUN mkdir -p /etc/nix && \
 
 # Install common tools Claude Code might need
 RUN nix profile install \
-    nixpkgs#bash \
-    nixpkgs#coreutils \
-    nixpkgs#curl \
-    nixpkgs#git \
     nixpkgs#jq \
     nixpkgs#yt-dlp \
     nixpkgs#ffmpeg \
     nixpkgs#python3 \
-    nixpkgs#ripgrep \
-    nixpkgs#findutils \
-    nixpkgs#gnused \
-    nixpkgs#gnugrep \
-    nixpkgs#gawk \
-    nixpkgs#wget
+    nixpkgs#nodejs
+
+# Create non-root user manually (no shadow utils needed)
+RUN echo "claude:x:1000:1000::/home/claude:/bin/bash" >> /etc/passwd && \
+    echo "claude:x:1000:" >> /etc/group && \
+    mkdir -p /home/claude/.claude && \
+    chown -R 1000:1000 /home/claude
+
+# Install Claude Code with custom npm prefix
+ENV NPM_CONFIG_PREFIX=/usr/local
+ENV PATH="/usr/local/bin:/root/.nix-profile/bin:${PATH}"
+RUN npm install -g @anthropic-ai/claude-code
+
+# Copy nix profile to claude user and create /bin/bash symlink
+RUN cp -r /root/.nix-profile /home/claude/.nix-profile && \
+    chown -R 1000:1000 /home/claude/.nix-profile && \
+    ln -sf /root/.nix-profile/bin/bash /bin/bash
+
+USER claude
+ENV PATH="/usr/local/bin:/home/claude/.nix-profile/bin:${PATH}"
+ENV HOME=/home/claude
 
 WORKDIR /workspace
-
-ENTRYPOINT ["/bin/bash"]

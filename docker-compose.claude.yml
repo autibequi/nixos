@@ -6,8 +6,21 @@ services:
     image: claude-nix-sandbox
     container_name: claude-sandbox
     network_mode: host
+    userns_mode: keep-id
+    environment:
+      - CLAUDE_BYPASS_PERMISSIONS_ACCEPTED=1
+      # Permite Clipboard em CLI em Wayland
+      - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
+      - XDG_RUNTIME_DIR=/run/user/1000
     volumes:
-      - ${HOME}/.claude:/root/.claude
+      - ${HOME}/.claude:/home/claude/.claude
+      - ${HOME}/.claude.json:/home/claude/.claude.json
+      - ./stow/.claude/commands:/home/claude/.claude/commands
+      # Wayland display forwarding
+      - ${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:/run/user/1000/${WAYLAND_DISPLAY}
       - .:/workspace
       - /tmp:/tmp
-    command: sleep infinity
+    stdin_open: true
+    tty: true
+    entrypoint: ["/home/claude/.nix-profile/bin/bash", "-c"]
+    command: ["sleep infinity"]

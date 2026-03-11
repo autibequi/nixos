@@ -27,10 +27,9 @@ claude-sandbox-build:
 	$(COMPOSE_CLAUDE) build
 
 claude-sandbox:
-	$(COMPOSE_CLAUDE) up -d --build
-
-claude-sandbox-shell:
-	$(COMPOSE_CLAUDE) exec sandbox bash
+	$(COMPOSE_CLAUDE) up -d sandbox
+	@echo "Entering sandbox..."
+	@docker exec -it claude-sandbox claude --dangerously-skip-permissions
 
 claude-sandbox-down:
 	$(COMPOSE_CLAUDE) down
