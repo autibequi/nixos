@@ -28,7 +28,7 @@ claude-sandbox-build:
 
 claude-sandbox:
 	$(COMPOSE_CLAUDE) up -d sandbox
-	@docker exec -it claude-sandbox claude --permission-mode bypassPermissions
+	@$(COMPOSE_CLAUDE) exec sandbox claude --permission-mode bypassPermissions
 
 claude-sandbox-down:
 	$(COMPOSE_CLAUDE) down
