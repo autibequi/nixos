@@ -57,15 +57,7 @@ in
 
     shellInit = ''
       if [ "$TERM" != "dumb" ]; then
-        eval "$(starship init zsh)"
-        eval "$(zoxide init zsh)"
-        eval "$(atuin init zsh)"
-
-        pokemonsay "$(fortune -s)"
-
-        source ~/secrets.sh
-        source ~/.config/hypr/hyprutils.sh
-        source ~/.config/zsh/functions.sh
+        source ~/.config/zsh/init.sh
       fi
     '';
   };
@@ -81,6 +73,7 @@ in
         atuin init fish | source
       end
     '';
+    # TODO: mover init pro stow quando usar fish
   };
 
   # dash como /bin/sh (4x mais rápido que bash para scripts)
