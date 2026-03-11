@@ -1,5 +1,5 @@
 { pkgs, unstable, ... }:
-  
+
 let
   sharedAliases = {
     history = "atuin";
@@ -60,25 +60,12 @@ in
     '';
   };
 
-  programs.fish = {
-    enable = true;
-    shellAliases = sharedAliases;
-
-    shellInit = ''
-      if test "$TERM" != "dumb"
-        starship init fish | source
-        zoxide init fish | source
-        atuin init fish | source
-      end
-    '';
-    # TODO: mover init pro stow quando usar fish
-  };
-
   # dash como /bin/sh (4x mais rápido que bash para scripts)
   environment.binsh = "${pkgs.dash}/bin/dash";
 
   environment.systemPackages = with pkgs; [
     dash
+    bash
     # basic (why i had to install those)
     uutils-coreutils # rust coreutils
     unixtools.whereis
