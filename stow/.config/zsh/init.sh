@@ -1,5 +1,13 @@
-# Shell functions and init (sourced from shell.nix)
+# Shell init (sourced from shell.nix)
 # Usage: available in every zsh session after dotfiles stow
+
+# Secrets (sempre carrega, Claude precisa das env vars)
+source ~/secrets.sh
+
+# Pula init interativo em automação (Claude Code, dumb terminals, etc)
+if [[ -n "$CLAUDECODE" || "$TERM" == "dumb" ]]; then
+  return 0
+fi
 
 # Shell tool init
 eval "$(starship init zsh)"
@@ -7,7 +15,6 @@ eval "$(zoxide init zsh)"
 eval "$(atuin init zsh)"
 
 # Sources
-source ~/secrets.sh
 source ~/.config/hypr/hyprutils.sh
 
 convert_video() {
@@ -39,5 +46,4 @@ convert_video() {
 
 alias claudio="cd ~/projects/estrategia/claudio && make claude"
 
-# Pokemon greeting (só em shell real, não em automação)
-[[ -z "$CLAUDE_CODE" ]] && pokemonsay "$(fortune -s)"
+pokemonsay "$(fortune -s)"
