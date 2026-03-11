@@ -73,8 +73,7 @@
     # ventoy-full-qt
 
     # Windows Nomopoly Mitigations:
-    # inputs.winboat.packages.${pkgs.system}.winboat
-    # freerdp3 # Required by WinBoat for RDP connections
+    winboat
 
     # voxtype-vulkan-unwrapped
     # inputs.voxtype.packages.${pkgs.system}.vulkan
