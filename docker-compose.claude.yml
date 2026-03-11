@@ -5,10 +5,8 @@ services:
       dockerfile: Dockerfile.claude
     image: claude-nix-sandbox
     container_name: claude-sandbox
-    network_mode: host
     userns_mode: keep-id
     environment:
-      - CLAUDE_BYPASS_PERMISSIONS_ACCEPTED=1
       # Permite Clipboard em CLI em Wayland
       - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
       - XDG_RUNTIME_DIR=/run/user/1000
@@ -19,7 +17,6 @@ services:
       # Wayland display forwarding
       - ${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:/run/user/1000/${WAYLAND_DISPLAY}
       - .:/workspace
-      - /tmp:/tmp
     stdin_open: true
     tty: true
     entrypoint: ["/home/claude/.nix-profile/bin/bash", "-c"]
