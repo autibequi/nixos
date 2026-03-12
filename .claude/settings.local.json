@@ -1,27 +1,4 @@
 {
-  "permissions": {
-    "allow": [
-      "Edit",
-      "Write",
-      "mcp__plugin_context7_context7__resolve-library-id",
-      "mcp__plugin_context7_context7__query-docs",
-      "mcp__nixos__nix",
-      "mcp__nixos__nix_versions",
-      "WebSearch",
-      "WebFetch",
-      "Bash(hyprctl *)",
-      "Bash(nh os test:*)",
-      "Bash(nh os switch:*)",
-      "Bash(stow *)",
-      "Bash(cat *)",
-      "Bash(ls *)",
-      "Bash(grep *)",
-      "Bash(pgrep *)",
-      "Bash(systemctl status *)",
-      "Bash(journalctl *)",
-      "Bash(nix *)"
-    ]
-  },
   "enabledMcpjsonServers": [
     "nixos"
   ],
