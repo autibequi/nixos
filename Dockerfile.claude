@@ -11,7 +11,8 @@ RUN nix profile install \
     nixpkgs#ffmpeg \
     nixpkgs#python3 \
     nixpkgs#nodejs \
-    nixpkgs#wl-clipboard
+    nixpkgs#wl-clipboard \
+    nixpkgs#sox
 
 # Create non-root user manually (no shadow utils needed)
 RUN echo "claude:x:1000:1000::/home/claude:/bin/bash" >> /etc/passwd && \

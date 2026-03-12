@@ -10,6 +10,8 @@ services:
       # Permite Clipboard em CLI em Wayland
       - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
       - XDG_RUNTIME_DIR=/run/user/1000
+      # PipeWire/PulseAudio para gravação de áudio (Claude /voice)
+      - PULSE_SERVER=unix:/run/user/1000/pulse/native
     volumes:
       # Host Claude Attach
       - ${HOME}/.claude:/home/claude/.claude
@@ -20,6 +22,8 @@ services:
       - ${HOME}/.claude/settings.json:/home/claude/.claude/settings.json:ro
       # Wayland display forwarding
       - ${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:/run/user/1000/${WAYLAND_DISPLAY}
+      # PipeWire/PulseAudio socket para áudio
+      - ${XDG_RUNTIME_DIR}/pulse:/run/user/1000/pulse
       - .:/workspace
     stdin_open: true
     tty: true
