@@ -45,7 +45,11 @@
     "tooltip-format": "{name}",
     "window-rewrite-default": "",
     "format-icons": {
-      "settings": "settings",
+      "f8": "f8.settings",
+      "bleh": "~.claudinho",
+      "1": "1.code",
+      "2": "2.test",
+      "3": "3.web",
       // "f1": "ʕ■ᴥ■ʔ",
       // "f2": "ʕ■ᴥ■ʔ",
       // "f3": "ʕ■ᴥ■ʔ",
