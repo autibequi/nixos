@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "notify-send 'Claude Code' 'Precisa da sua atenção'"
+          }
+        ]
+      }
+    ]
+  },
+  "voiceEnabled": true,
+  "skipDangerousModePermissionPrompt": true
+}
