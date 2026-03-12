@@ -70,10 +70,11 @@ hide_when_typing = true
 [selection]
 save_to_clipboard = true
 
-# --- Bell (visual only, subtle) ---
+# --- Bell ---
 [bell]
 animation = "EaseOutQuart"
 duration = 200
+command = { program = "/run/current-system/sw/bin/espeak-ng", args = ["-v", "pt-br", "-s", "200", "-a", "80", "opa!"] }
 
 # --- Hints (clickable URLs) ---
 [[hints.enabled]]

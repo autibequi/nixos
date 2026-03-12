@@ -59,6 +59,7 @@
 
     # Terminal
     cool-retro-term
+    espeak-ng # TTS for terminal bell
 
     # should be working (but its not)
     # cura
