@@ -7,7 +7,7 @@ Requires=graphical-session.target
 Type=simple
 Environment=CUDA_VISIBLE_DEVICES=0
 Environment=PATH=%h/.local/bin:%h/.venv/whisper/bin:/run/current-system/sw/bin:/usr/bin
-ExecStart=%h/.venv/whisper/bin/python %h/.config/whisper-ptt/whisper-daemon.py
+ExecStart=/run/current-system/sw/bin/whisper-ptt-start
 Restart=on-failure
 RestartSec=5
 

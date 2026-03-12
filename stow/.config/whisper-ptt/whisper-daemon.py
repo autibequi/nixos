@@ -26,11 +26,25 @@ SILENCE_TIMEOUT_MS = 500  # cut segment after this much silence
 OVERLAP_MS = 300  # overlap between segments to avoid losing words
 OVERLAP_SAMPLES = int(SAMPLE_RATE * OVERLAP_MS / 1000)
 VAD_AGGRESSIVENESS = 2
-MODEL_SIZE = "large-v3"
-COMPUTE_TYPE = "int8_float16"
+MODEL_SIZE = "distil-large-v3"
+COMPUTE_TYPE = "float16"
 DEVICE = "cuda"
-BEAM_SIZE = 5
+BEAM_SIZE = 3
 LANGUAGE = "pt"  # Portuguese, change as needed
+
+# Common Whisper hallucinations to filter out
+HALLUCINATIONS = {
+    "obrigado por assistir",
+    "obrigado por assistir.",
+    "thanks for watching",
+    "thanks for watching.",
+    "thank you for watching",
+    "thank you for watching.",
+    "legendas pela comunidade",
+    "inscreva-se",
+    "subtitle by",
+    "subtítulos por",
+}
 
 # ── Globals ─────────────────────────────────────────────────────────
 model = None
@@ -74,10 +88,8 @@ def output_text(text):
 
     # Copy to clipboard
     try:
-        proc = subprocess.Popen(
-            ["wl-copy"], stdin=subprocess.PIPE, timeout=5
-        )
-        proc.communicate(input=text.encode())
+        proc = subprocess.Popen(["wl-copy"], stdin=subprocess.PIPE)
+        proc.communicate(input=text.encode(), timeout=5)
     except Exception as e:
         log(f"wl-copy error: {e}")
 
@@ -92,15 +104,20 @@ def load_model():
     """Load faster-whisper model into VRAM."""
     global model
     log(f"Loading model {MODEL_SIZE} ({COMPUTE_TYPE}) on {DEVICE}...")
-    from faster_whisper import WhisperModel
+    try:
+        from faster_whisper import WhisperModel
 
-    model = WhisperModel(
-        MODEL_SIZE,
-        device=DEVICE,
-        compute_type=COMPUTE_TYPE,
-    )
-    log("Model loaded and ready.")
-    notify("Modelo carregado na VRAM")
+        model = WhisperModel(
+            MODEL_SIZE,
+            device=DEVICE,
+            compute_type=COMPUTE_TYPE,
+        )
+        log("Model loaded and ready.")
+        notify("Modelo carregado na VRAM")
+    except Exception as e:
+        log(f"Failed to load model: {e}")
+        notify(f"Erro ao carregar modelo: {e}")
+        sys.exit(1)
 
 
 def transcribe_segment(audio_data):
@@ -125,11 +142,12 @@ def transcribe_segment(audio_data):
         for segment in segments:
             full_text += segment.text
 
-        if full_text.strip():
+        if full_text.strip() and full_text.strip().lower() not in HALLUCINATIONS:
             output_text(full_text)
 
     except Exception as e:
         log(f"Transcription error: {e}")
+        notify(f"Erro na transcrição: {e}")
 
 
 def recording_loop():
@@ -323,6 +341,7 @@ def run_server():
                         break
             except Exception as e:
                 log(f"Connection error: {e}")
+                notify(f"Erro de conexão: {e}")
             finally:
                 conn.close()
     finally:
@@ -332,5 +351,10 @@ def run_server():
 
 
 if __name__ == "__main__":
-    load_model()
-    run_server()
+    try:
+        load_model()
+        run_server()
+    except Exception as e:
+        log(f"Fatal error: {e}")
+        notify(f"Whisper PTT crash: {e}")
+        sys.exit(1)
