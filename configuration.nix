@@ -26,6 +26,7 @@
     ./modules/bluetooth.nix
     ./modules/plymouth.nix
     ./modules/ai.nix
+    ./modules/whisper-ptt.nix
     ./modules/steam.nix
     ./modules/podman.nix
 
