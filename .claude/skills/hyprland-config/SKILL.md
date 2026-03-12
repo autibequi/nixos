@@ -1,6 +1,6 @@
 ---
 name: hyprland-config
-description: Use when configuring, installing, or troubleshooting Hyprland on NixOS - includes module setup, dotfile deployment, plugin management, and session verification
+description: Use when the user asks about Hyprland in any way - editing hyprland.conf, window rules, keybindings, workspace config, monitors, animations, decorations, exec-once, plugins, hyprlock, hypridle, waybar, or any file in stow/.config/hypr/. Also use for installing, troubleshooting, or changing the Hyprland NixOS module
 ---
 
 # Hyprland Configuration & Installation
