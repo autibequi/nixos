@@ -75,7 +75,7 @@
     # ventoy-full-qt
 
     # Windows Nomopoly Mitigations:
-    winboat
+    # winboat
 
     # voxtype-vulkan-unwrapped
     # inputs.voxtype.packages.${pkgs.system}.vulkan
