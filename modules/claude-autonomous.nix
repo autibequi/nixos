@@ -10,7 +10,7 @@ let
   commonEnv = [
     "HOME=/home/${user}"
     "XDG_RUNTIME_DIR=/run/user/1000"
-    "DOCKER_HOST=unix:///run/podman/podman.sock"
+    "DOCKER_HOST=unix:///run/user/1000/podman/podman.sock"
     "WAYLAND_DISPLAY=wayland-1"
     "PATH=${pkgs.podman}/bin:${pkgs.coreutils}/bin:${pkgs.gnugrep}/bin:${pkgs.bash}/bin:/run/current-system/sw/bin"
   ];

@@ -37,27 +37,28 @@ echo
 echo
 echo -e "${B}${CYAN}${PUNS[$((RANDOM % ${#PUNS[@]}))]}${R} presente! ⚡"
 
-# --- Workers ---
+# --- Workers (systemd oneshot + timer → detect via log age) ---
 worker_parts=()
 for tier in fast heavy; do
-  container_state=""
-  [[ -S /host/podman.sock ]] && container_state=$(curl -s --unix-socket /host/podman.sock \
-    "http://d/v4.0.0/libpod/containers/clau-worker-${tier}/json" 2>/dev/null \
-    | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['State']['Status'])" 2>/dev/null || true)
-
   IFS=: read -r last_mod last_log <<< "$(find_latest_log "$tier")"
 
-  if [[ "$container_state" == "running" ]]; then
-    ts=""; [[ -n "$last_log" ]] && ts=" $(fmt_age $((now - last_mod)))"
-    worker_parts+=("${GREEN}🟢 ${tier}${R}${DIM}${ts}${R}")
-  elif [[ -n "$last_log" ]]; then
-    age=$(( now - last_mod ))
-    if [[ "$tier" == "fast" ]]; then max=900; else max=4200; fi
-    color=$([[ $age -le $max ]] && echo "$GREEN" || echo "$YELLOW")
-    icon=$([[ $age -le $max ]] && echo "🟢" || echo "🟡")
-    worker_parts+=("${color}${icon} ${tier}${R} ${DIM}$(fmt_age $age)${R}")
-  else
+  if [[ -z "$last_log" ]]; then
     worker_parts+=("${RED}🔴 ${tier}${R} ${DIM}--${R}")
+  else
+    age=$(( now - last_mod ))
+    # Thresholds: fast timer=10min (max=900s), heavy timer=1h (max=4200s)
+    if [[ "$tier" == "fast" ]]; then max=900; else max=4200; fi
+
+    if [[ $age -le 120 ]]; then
+      # Log touched in last 2min → worker actively running
+      worker_parts+=("${GREEN}🟢 ${tier}${R} ${DIM}running${R}")
+    elif [[ $age -le $max ]]; then
+      # Within expected timer interval → healthy
+      worker_parts+=("${GREEN}🟢 ${tier}${R} ${DIM}$(fmt_age $age)${R}")
+    else
+      # Older than expected → timer may be stuck
+      worker_parts+=("${YELLOW}🟡 ${tier}${R} ${DIM}$(fmt_age $age)${R}")
+    fi
   fi
 done
 echo -e "${B}Workers:${R} ${worker_parts[0]}  ${worker_parts[1]}"
