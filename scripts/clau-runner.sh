@@ -269,6 +269,12 @@ finish_task() {
   local task="$1" source_dir="$2" exit_code="$3"
 
   if [ "$source_dir" = "recurring" ]; then
+    # Sync back evolved files to recurring/ before cleanup
+    for sync_file in memoria.md CLAUDE.md; do
+      if [ -f "$TASKS/running/$task/$sync_file" ]; then
+        cp "$TASKS/running/$task/$sync_file" "$TASKS/recurring/$task/$sync_file"
+      fi
+    done
     rm -rf "$TASKS/running/$task"
     kanban_unclaim_recurring "$task" 2>/dev/null || true
     echo "[clau:$WORKER_ID] '$task' cycle done"
