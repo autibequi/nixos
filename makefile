@@ -108,7 +108,7 @@ obsidian-login:
 	$(OB) login
 
 obsidian-setup:
-	$(OB) sync-setup --vault "Work" --path $(HOME)/.ovault --device-name "g14-nixos"
+	$(OB) sync-setup --vault "books" --path $(HOME)/.ovault --device-name "g14-nixos"
 
 # ── Dotfiles ───────────────────────────────────────────────────────
 
@@ -135,7 +135,7 @@ stow-confirm:
 
 # ── Container ──────────────────────────────────────────────────────
 
-COMPOSE = docker compose -f docker-compose.claude.yml
+COMPOSE = podman-compose -f docker-compose.claude.yml
 LOGDIR  = logs
 LOGFILE = $(LOGDIR)/$$(date +%Y-%m-%dT%H:%M:%S.%3N).log
 
@@ -171,7 +171,7 @@ inject:
 # ── Tasks ──────────────────────────────────────────────────────────
 
 run:
-	@existing=$$(docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}}" 2>/dev/null | head -1); \
+	@existing=$$(podman ps --filter "name=_worker_" --format "{{.ID}}" 2>/dev/null | head -1); \
 	if [ -n "$$existing" ]; then \
 		echo "[clau] Worker já rodando ($$existing). Use 'make stop' ou 'make logs'."; \
 		exit 0; \
@@ -183,7 +183,7 @@ run:
 		worker /workspace/scripts/clau-runner.sh $(task) 2>&1 | tee "$$logfile"
 
 auto:
-	@existing=$$(docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}}" 2>/dev/null | head -1); \
+	@existing=$$(podman ps --filter "name=_worker_" --format "{{.ID}}" 2>/dev/null | head -1); \
 	if [ -n "$$existing" ]; then \
 		echo "[clau] Worker já rodando ($$existing). Singleton ativo."; \
 		exit 0; \
@@ -219,7 +219,7 @@ reset:
 
 status:
 	@echo "=== Workers ==="
-	@docker ps --filter "label=com.docker.compose.service=worker" --format "table {{.ID}}\t{{.Status}}\t{{.RunningFor}}\t{{.Label \"clau.worker.id\"}}" 2>/dev/null || echo "(nenhum)"
+	@podman ps --filter "name=_worker_" --format "table {{.ID}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || echo "(nenhum)"
 	@echo "\n=== Systemd ==="
 	@systemctl is-active claude-autonomous.service 2>/dev/null || echo "inactive"
 	@echo "\n=== Kanban ==="
@@ -422,7 +422,7 @@ doctor:
 	@echo "=== docker/podman ==="
 	@echo -n "  engine:    "; docker --version 2>/dev/null | head -1 || echo "não encontrado"
 	@echo -n "  compose:   "; docker compose version 2>/dev/null | head -1 || echo "não encontrado"
-	@echo -n "  worker up: "; docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}} ({{.Status}})" 2>/dev/null || echo "não"
+	@echo -n "  worker up: "; podman ps --filter "name=_worker_" --format "{{.ID}} ({{.Status}})" 2>/dev/null || echo "não"
 	@echo ""
 	@echo "=== sistema ==="
 	@echo -n "  RAM total: "; free -h | awk '/^Mem:/{print $$2}'
@@ -449,7 +449,7 @@ logs:
 	if [ -z "$$latest" ]; then \
 		echo "(nenhum log em logs/)"; \
 	else \
-		id=$$(docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}}" 2>/dev/null | head -1); \
+		id=$$(podman ps --filter "name=_worker_" --format "{{.ID}}" 2>/dev/null | head -1); \
 		if [ -n "$$id" ]; then \
 			echo "=== Worker ativo — seguindo $$latest ==="; \
 			tail -f "$$latest"; \

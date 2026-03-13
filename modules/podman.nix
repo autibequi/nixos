@@ -11,7 +11,7 @@
   environment.sessionVariables.DOCKER_HOST = "unix:///run/podman/podman.sock";
 
   environment.systemPackages = with pkgs; [
-    docker-compose
+    podman-compose
     lazydocker
     dive
   ];
