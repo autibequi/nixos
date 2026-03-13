@@ -72,8 +72,8 @@ in {
       # Cleanup automático em qualquer saída (sucesso, falha, timeout, kill)
       ExecStopPost = "${cleanupScript}";
 
-      # Timeout generoso: max 20 tasks × 10min cada
-      TimeoutStartSec = "3h";
+      # Mata após 10min — processa o que der, cleanup devolve o resto
+      TimeoutStartSec = "10min";
       TimeoutStopSec = "2min";
 
       # Restart automático em falha (com backoff)
@@ -97,7 +97,6 @@ in {
     wantedBy = [ "timers.target" ];
     timerConfig = {
       OnCalendar = "hourly";
-      RandomizedDelaySec = "5min";
       Persistent = true;
     };
   };
