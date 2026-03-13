@@ -35,8 +35,8 @@ with pkgs; [
   # GitHub CLI
   gh
 
-  # Nix (superpoderes: nix-shell -p dentro do container)
-  nix
+  # Nix já vem da imagem base (nixos/nix:latest) — não incluir aqui pra evitar
+  # conflito de nix-daemon.service. Superpoderes (nix-shell -p) funcionam normalmente.
 
   # Docker CLI (socket forwarding pro Podman do host)
   docker-client

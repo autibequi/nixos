@@ -29,7 +29,6 @@
 ├── vault/               ← mount point Obsidian
 │   ├── _agent/tasks/    ← sistema de tasks (recurring/, pending/, running/, done/, failed/)
 │   ├── _agent/reports/  ← relatórios de tasks autônomas
-│   ├── inbox/           ← inbox user→agente (user escreve, worker processa)
 │   ├── artefacts/       ← entregáveis por task
 │   ├── sugestoes/       ← canal agente→user
 │   └── kanban.md        ← FONTE DE VERDADE (ver regra abaixo)
@@ -52,7 +51,7 @@ O kanban é memória compartilhada entre sessões, mecanismo de orquestração e
 
 | Task | Tier | Model | Função |
 |------|------|-------|--------|
-| processar-inbox | fast | haiku | Processa vault/inbox/ |
+| processar-inbox | fast | haiku | Processa coluna Inbox do kanban |
 | doctor | fast | haiku | Health check |
 | vigiar-logs | fast | haiku | Monitora logs |
 | radar | heavy | haiku | Jira/Notion |
@@ -62,8 +61,8 @@ O kanban é memória compartilhada entre sessões, mecanismo de orquestração e
 Workers: **fast** (a cada 10 min, tasks tier=fast) + **heavy** (hourly, tasks tier=heavy + pending).
 Detalhes em `docs/task-system.md`.
 
-## Inbox (`vault/inbox/`)
-User cria arquivo em `vault/inbox/` no Obsidian → worker fast processa a cada 10 min → cria task + card no kanban.
+## Inbox (coluna do kanban)
+User adiciona card na coluna "Inbox" do kanban no Obsidian (texto livre) → worker fast processa a cada 10 min → cria task + card formatado no Backlog.
 
 ## Meu papel
 1. **Config NixOS** — manter e evoluir a config do host

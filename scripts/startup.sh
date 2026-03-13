@@ -80,10 +80,14 @@ else
 fi
 echo -e "${B}Git:${R} ${git_str}  ${B}Ferias:${R} ${ferias_str}"
 
-# --- Inbox (só se tiver) ---
-INBOX_DIR="$WS/vault/inbox"
-if [[ -d "$INBOX_DIR" ]]; then
-  inbox_count=$(find "$INBOX_DIR" -maxdepth 1 -type f -name '*.md' 2>/dev/null | wc -l)
+# --- Inbox (coluna do kanban) ---
+if [[ -f "$KANBAN" ]]; then
+  inbox_count=0; in_inbox=0
+  while IFS= read -r line; do
+    [[ "$line" == "## Inbox" ]] && { in_inbox=1; continue; }
+    [[ "$line" =~ ^##\  ]] && [[ "$in_inbox" == "1" ]] && break
+    [[ "$in_inbox" == "1" ]] && [[ "$line" =~ ^-\ \[ ]] && inbox_count=$((inbox_count + 1))
+  done < "$KANBAN"
   [[ "$inbox_count" -gt 0 ]] && echo -e "${B}Inbox:${R} ${YELLOW}${inbox_count} pendente(s)${R}"
 fi
 

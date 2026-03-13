@@ -19,8 +19,7 @@ DEFAULT_MODEL="haiku"
 DEFAULT_MAX_TURNS=25
 
 mkdir -p "$EPHEMERAL/locks" "$TASKS/running" "$TASKS/done" "$TASKS/failed" \
-  "$WORKSPACE/vault/sugestoes" "$WORKSPACE/vault/_agent/reports" \
-  "$WORKSPACE/vault/inbox/done"
+  "$WORKSPACE/vault/sugestoes" "$WORKSPACE/vault/_agent/reports"
 
 [ -f "$EPHEMERAL/no-mcp.json" ] || echo '{"mcpServers":{}}' > "$EPHEMERAL/no-mcp.json"
 
