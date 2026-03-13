@@ -35,3 +35,7 @@ stow/.config/Cursor/User/*
 !stow/.config/Cursor/User/settings.json
 !stow/.config/Cursor/User/keybindings.json
 !stow/.config/Cursor/User/snippets/
+
+# claude: auto-generated/ephemeral
+stow/.claude/plugins/
+stow/.claude/skills/skill-evaluations/

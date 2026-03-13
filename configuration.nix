@@ -40,6 +40,9 @@
     # ./modules/cosmic.nix
     # ./modules/kde.nixs
 
+    # Monitoring
+    ./modules/netdata.nix
+
     # Other Modules
     ./modules/work.nix
     ./modules/virt.nix

@@ -1,0 +1,44 @@
+FROM node:22-slim
+
+RUN apt-get update && apt-get install -y \
+    git curl ca-certificates make wl-clipboard \
+    sox libsox-fmt-pulse pulseaudio-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+# GitHub CLI
+RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+        -o /usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+        > /etc/apt/sources.list.d/github-cli.list \
+    && apt-get update && apt-get install -y gh \
+    && rm -rf /var/lib/apt/lists/*
+
+# Go
+RUN curl -OL https://go.dev/dl/go1.24.4.linux-amd64.tar.gz \
+    && tar -C /usr/local -xzf go1.24.4.linux-amd64.tar.gz \
+    && rm go1.24.4.linux-amd64.tar.gz
+ENV PATH=$PATH:/usr/local/go/bin
+ENV GOPATH=/home/node/go
+ENV PATH=$PATH:/home/node/go/bin
+ENV GOPRIVATE=github.com/estrategiahq
+
+# nvm (Node 14 para bo-container, Node 20 para front-student, Node 22 default)
+ENV NVM_DIR=/usr/local/nvm
+RUN mkdir -p $NVM_DIR \
+    && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash \
+    && . $NVM_DIR/nvm.sh \
+    && nvm install 14.21.3 \
+    && nvm install 20.10.0 \
+    && nvm alias default 22
+
+RUN npm install -g @anthropic-ai/claude-code \
+    && chown -R node:node /usr/local/lib/node_modules /usr/local/bin
+
+# Make nvm available in interactive bash shells (container runs as 'node' user)
+RUN echo 'export NVM_DIR=/usr/local/nvm' >> /home/node/.bashrc \
+    && echo '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"' >> /home/node/.bashrc
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+WORKDIR /workspace
+ENTRYPOINT ["/entrypoint.sh"]
