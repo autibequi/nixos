@@ -12,6 +12,9 @@ services:
       - XDG_RUNTIME_DIR=/run/user/1000
       # PipeWire/PulseAudio para gravação de áudio (Claude /voice)
       - PULSE_SERVER=unix:/run/user/1000/pulse/native
+      # Anthropic API — uso/billing tracking
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - ANTHROPIC_ADMIN_KEY=${ANTHROPIC_ADMIN_KEY:-}
     volumes:
       # Host Claude Attach
       - ${HOME}/.claude:/home/claude/.claude

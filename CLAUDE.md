@@ -22,14 +22,15 @@
 ├── hardware.nix         ← template UUIDs (skip-worktree)
 ├── claudinho/           ← projetos de trabalho montados de fora
 ├── tasks/               ← sistema de tarefas autônomas
-│   ├── pending/         ← novas (commitável)
-│   ├── running/         ← em execução (gitignored)
+│   ├── recurring/       ← imortais (rodam toda hora, voltam pra fila)
+│   ├── pending/         ← one-shot (rodam uma vez, vão pra done/failed)
+│   ├── running/         ← em execução
 │   ├── done/            ← concluídas (gitignored)
 │   └── failed/          ← falharam (gitignored)
 ├── scripts/             ← scripts de automação
 │   └── clau-runner.sh   ← runner autônomo
 ├── .ephemeral/          ← memória efêmera (gitignored)
-│   ├── notes/           ← rascunhos pessoais
+│   ├── notes/<task>/    ← contexto persistente entre execuções
 │   ├── usage/           ← logs de uso JSONL
 │   └── scratch/         ← temp files
 ├── stow/                ← dotfiles do host (injetados no container)
@@ -108,17 +109,22 @@ Config flake-based para um ASUS Zephyrus G14 (AMD Ryzen + NVIDIA RTX 4060 mobile
 **Two-GPU setup:** NVIDIA configurada para PRIME offload (só ativa quando explicitamente pedida). AMD iGPU cuida do display por padrão.
 
 ## Modo Autônomo
-- Executado via `clau` ou systemd timer (20min/hora)
-- Lê tarefas de `tasks/pending/`, executa, move pra `done/` ou `failed/`
-- Sem interação — executa e reporta via `.result`
-
-## Memória Efêmera
-- `.ephemeral/notes/` — rascunhos pessoais, não commitáveis
-- `.ephemeral/usage/` — tracking de uso por sessão
+- Executado via `make clau` ou systemd timer (a cada hora)
+- Timeout: ~20min por task
+- Prioridade: `pending/` (one-shot) primeiro, depois `recurring/` (round-robin por última execução)
+- Sem interação — executa e reporta via contexto persistente
 
 ## Sistema de Tarefas
-- `tasks/pending/` → `tasks/running/` → `tasks/done/` | `tasks/failed/`
-- Cada task = pasta com CLAUDE.md
+- **`tasks/recurring/`** — imortais: rodam toda hora, voltam pra fila automaticamente
+- **`tasks/pending/`** — one-shot: rodam uma vez, vão pra `done/` ou `failed/`
+- **`tasks/running/`** — em execução (uma por vez)
+- Cada task = pasta com `CLAUDE.md` (instruções)
+- Contexto entre execuções: `.ephemeral/notes/<task>/contexto.md`
+- Histórico de runs: `.ephemeral/notes/<task>/historico.log`
+
+## Memória Efêmera
+- `.ephemeral/notes/<task>/` — contexto persistente entre execuções de cada task
+- `.ephemeral/usage/` — tracking de uso por sessão (JSONL)
 
 ## Iniciativa
 - Sugiro melhorias pro sistema (NixOS, workflows, dotfiles)

@@ -12,16 +12,16 @@ in {
       User = user;
       WorkingDirectory = projectDir;
       ExecStart = "${pkgs.bash}/bin/bash -c '${compose} up -d sandbox && ${compose} exec -T sandbox bash /workspace/scripts/clau-runner.sh'";
-      TimeoutStopSec = "25min";
+      TimeoutStopSec = "12min";
       Environment = [ "HOME=/home/${user}" "XDG_RUNTIME_DIR=/run/user/1000" ];
     };
   };
 
   systemd.timers.claude-autonomous = {
-    description = "Run Claudinho tasks 20min every hour";
+    description = "Run Claudinho tasks 10min every hour";
     wantedBy = [ "timers.target" ];
     timerConfig = {
-      OnCalendar = "hourly";
+      OnCalendar = "minutely";
       RandomizedDelaySec = "5min";
       Persistent = true;
     };

@@ -1,6 +1,6 @@
 .PHONY: get-ids reload switch update stow restow stow-tree stow-confirm \
        sandbox sandbox-build sandbox-shell sandbox-down sandbox-restart sandbox-inject \
-       clau clau-status usage
+       claude-resume clau clau-status usage
 
 # ── NixOS ──────────────────────────────────────────────────────────
 
@@ -65,6 +65,10 @@ sandbox-inject:
 	$(MAKE) restow
 	$(MAKE) sandbox-restart
 
+claude-resume:
+	$(COMPOSE) up -d sandbox
+	@$(COMPOSE) exec sandbox claude --resume --permission-mode bypassPermissions
+
 sandbox-down:
 	$(COMPOSE) down
 
@@ -75,19 +79,49 @@ clau:
 	@$(COMPOSE) exec -T sandbox bash /workspace/scripts/clau-runner.sh
 
 clau-status:
-	@echo "=== Pending ==="
+	@echo "=== Recurring (imortais) ==="
+	@ls -1 tasks/recurring/ 2>/dev/null | grep -v '\.gitkeep' || echo "(vazio)"
+	@echo "\n=== Pending (one-shot) ==="
 	@ls -1 tasks/pending/ 2>/dev/null | grep -v '\.gitkeep' || echo "(vazio)"
 	@echo "\n=== Running ==="
-	@ls -1 tasks/running/ 2>/dev/null || echo "(vazio)"
+	@ls -1 tasks/running/ 2>/dev/null | grep -v '\.gitkeep' || echo "(vazio)"
 	@echo "\n=== Done ==="
-	@ls -1 tasks/done/ 2>/dev/null || echo "(vazio)"
+	@ls -1 tasks/done/ 2>/dev/null | grep -v '\.gitkeep' || echo "(vazio)"
 	@echo "\n=== Failed ==="
-	@ls -1 tasks/failed/ 2>/dev/null || echo "(vazio)"
+	@ls -1 tasks/failed/ 2>/dev/null | grep -v '\.gitkeep' || echo "(vazio)"
+
+# ── Criar Tasks ───────────────────────────────────────────────────
+
+clau-new:
+	@[ -n "$(name)" ] || (echo "Uso: make clau-new name=minha-tarefa [type=recurring]" && exit 1)
+	@if [ "$(type)" = "recurring" ]; then \
+		mkdir -p tasks/recurring/$(name); \
+		echo "# $(name)\n\n## Personalidade\nVocê é o **$(name)**. Descreva quem você é e como pensa.\n\n## Missão\n\n## O que fazer a cada execução\n\n## Entregável\nAtualize \`<diretório de contexto>/contexto.md\`.\n\n## Regras\n\n## Auto-evolução\nNo final de CADA execução, reflita sobre seu funcionamento.\nSe precisar melhorar, **edite este CLAUDE.md** diretamente.\nRegistre mudanças em \`<diretório de contexto>/evolucao.log\`." \
+			> tasks/recurring/$(name)/CLAUDE.md; \
+		mkdir -p .ephemeral/notes/$(name); \
+		echo "Task recorrente criada: tasks/recurring/$(name)/"; \
+	else \
+		mkdir -p tasks/pending/$(name); \
+		echo "# $(name)\n\n## Objetivo\n\n## O que entregar\nEscreva resultado em \`<diretório de contexto>/contexto.md\`.\n\n## Regras" \
+			> tasks/pending/$(name)/CLAUDE.md; \
+		mkdir -p .ephemeral/notes/$(name); \
+		echo "Task one-shot criada: tasks/pending/$(name)/"; \
+	fi
+	@echo "Edite: $$( [ '$(type)' = 'recurring' ] && echo 'tasks/recurring' || echo 'tasks/pending' )/$(name)/CLAUDE.md"
 
 # ── Utils ──────────────────────────────────────────────────────────
 
 usage:
-	@echo "=== Uso do mês ==="
+	@echo "=== Uso do mês (tasks) ==="
 	@cat .ephemeral/usage/$$(date +%Y-%m).jsonl 2>/dev/null | jq -s \
 		'{ tasks: length, total_duration: (map(.duration) | add), entries: . }' \
-		|| echo "Sem dados de uso ainda."
+		|| echo "Sem dados de tasks ainda."
+
+usage-api:
+	@$(COMPOSE) exec sandbox bash /workspace/scripts/api-usage.sh
+
+usage-api-7d:
+	@$(COMPOSE) exec sandbox bash /workspace/scripts/api-usage.sh -- 7d
+
+usage-api-30d:
+	@$(COMPOSE) exec sandbox bash /workspace/scripts/api-usage.sh -- 30d
