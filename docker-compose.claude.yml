@@ -21,8 +21,8 @@ x-common: &common
     - GIT_COMMITTER_EMAIL=${GIT_AUTHOR_EMAIL:-pedro.correa@estrategia.com}
   volumes:
     - ${HOME}/projects:/home/claude/projects
-    - ${HOME}/.claude:/home/claude/.claude
     - ${HOME}/.claude.json:/home/claude/.claude.json
+    - ${HOME}/.local/share/claude-code:/home/claude/.claude
     - ${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:/run/user/1000/${WAYLAND_DISPLAY}
     - ${XDG_RUNTIME_DIR}/pulse:/run/user/1000/pulse
     - .:/workspace
