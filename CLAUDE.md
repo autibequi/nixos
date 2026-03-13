@@ -118,9 +118,59 @@ Config flake-based para um ASUS Zephyrus G14 (AMD Ryzen + NVIDIA RTX 4060 mobile
 - **`tasks/recurring/`** — imortais: rodam toda hora, voltam pra fila automaticamente
 - **`tasks/pending/`** — one-shot: rodam uma vez, vão pra `done/` ou `failed/`
 - **`tasks/running/`** — em execução (uma por vez)
-- Cada task = pasta com `CLAUDE.md` (instruções)
+- Cada task = pasta com `CLAUDE.md` (instruções) + `memoria.md` (memória evolutiva)
 - Contexto entre execuções: `.ephemeral/notes/<task>/contexto.md`
 - Histórico de runs: `.ephemeral/notes/<task>/historico.log`
+
+## Protocolo de Execução — Tarefas Recorrentes
+
+Toda task recorrente DEVE seguir este ciclo a cada execução:
+
+### 1. Ler estado atual
+- Ler `tasks/` — o que tem em pending, recurring, running, done, failed
+- Ler `memoria.md` da própria task — o que aprendi nas execuções anteriores
+- Ler contexto em `.ephemeral/notes/<task>/contexto.md` se existir
+
+### 2. Pensar sobre o problema
+- Com base no estado atual + memória acumulada, re-analisar o problema
+- O que mudou desde a última execução?
+- O que funcionou? O que não funcionou?
+- Qual o próximo passo lógico?
+
+### 3. Gerar artefato
+- Toda execução DEVE produzir um artefato concreto (relatório, proposta, código, análise)
+- Salvar em `.ephemeral/notes/<task>/` ou na própria pasta da task conforme o caso
+- Artefatos devem ser úteis por si só — não depender de contexto externo pra fazer sentido
+
+### 4. Atualizar memória
+- Atualizar `memoria.md` na pasta da task com:
+  - O que foi feito nesta execução
+  - O que aprendeu de novo
+  - Decisões tomadas e por quê
+  - Próximos passos planejados
+- Formato: append cronológico com timestamp
+
+### Estrutura obrigatória de uma task recorrente
+```
+tasks/recurring/<nome>/
+├── CLAUDE.md      ← instruções (personalidade, missão, regras)
+└── memoria.md     ← memória evolutiva (cresce a cada execução)
+```
+
+### Template do `memoria.md`
+```markdown
+# <nome-da-task> — Memória
+
+## Resumo
+<visão geral do que esta task faz e onde está no momento>
+
+## Histórico de execuções
+### <timestamp>
+- **O que fiz:** ...
+- **O que aprendi:** ...
+- **Decisões:** ...
+- **Próximos passos:** ...
+```
 
 ## Memória Efêmera
 - `.ephemeral/notes/<task>/` — contexto persistente entre execuções de cada task

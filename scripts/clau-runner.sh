@@ -5,17 +5,11 @@ WORKSPACE="/workspace"
 TASKS="$WORKSPACE/tasks"
 EPHEMERAL="$WORKSPACE/.ephemeral"
 LOCKFILE="$EPHEMERAL/.clau.lock"
-TOTAL_TIMEOUT="${CLAU_TIMEOUT:-600}"
+TASK_TIMEOUT="${CLAU_TIMEOUT:-600}"
 SPECIFIC_TASK="${1:-}"
 MAX_TASKS="${CLAU_MAX_TASKS:-10}"
 
-LOGDIR="$WORKSPACE/logs"
-mkdir -p "$EPHEMERAL" "$TASKS/running" "$TASKS/done" "$TASKS/failed" "$LOGDIR"
-
-# ── Redirecionar toda saída para arquivo de log ──────────────────
-LOGFILE="$LOGDIR/$(date +%Y-%m-%dT%H:%M:%S.%3N).log"
-exec > >(tee -a "$LOGFILE") 2>&1
-echo "[clau] Log: $LOGFILE"
+mkdir -p "$EPHEMERAL" "$TASKS/running" "$TASKS/done" "$TASKS/failed"
 
 # ── Singleton via flock ──────────────────────────────────────────
 exec 200>"$LOCKFILE"
@@ -56,7 +50,7 @@ for dir in "$TASKS/running"/*/; do
     started=$(grep '^started=' "$dir/.lock" | cut -d= -f2)
     source=$(grep '^source=' "$dir/.lock" | cut -d= -f2 || echo "pending")
     elapsed=$(( $(date +%s) - $(date -d "$started" +%s 2>/dev/null || echo "0") ))
-    if [ "$elapsed" -le $(( TOTAL_TIMEOUT + 300 )) ]; then
+    if [ "$elapsed" -le $(( TASK_TIMEOUT + 300 )) ]; then
       echo "[clau] '$name' ainda dentro do timeout (${elapsed}s) — skip reap"
       continue
     fi
@@ -92,7 +86,7 @@ claim_task() {
   fi
   cat > "$TASKS/running/$task/.lock" <<EOF
 started=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-timeout=$TOTAL_TIMEOUT
+timeout=$TASK_TIMEOUT
 source=$source_dir
 pid=$$
 EOF
@@ -144,6 +138,39 @@ $historico
 BLOCK
 }
 
+# ── Executar UMA task (chamado diretamente ou como sub-processo) ──
+run_single_task() {
+  local task="$1" source_dir="$2" is_recurring="$3"
+  local block
+  block=$(build_task_block "$task" "$source_dir" "$is_recurring")
+  local memoria=""
+  [ -f "$TASKS/running/$task/memoria.md" ] && memoria="
+### Memória evolutiva
+$(cat "$TASKS/running/$task/memoria.md")"
+
+  timeout "$TASK_TIMEOUT" claude --permission-mode bypassPermissions --model sonnet \
+    -p "Modo autônomo. Tarefa: $task
+Hora atual: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+Budget: ${TASK_TIMEOUT}s (~10min)
+
+$block
+$memoria
+
+## Instruções de execução
+1. Siga o protocolo descrito no CLAUDE.md da task
+2. Gere o artefato concreto que a task pede
+3. Atualize memoria.md em tasks/running/$task/memoria.md com timestamp, o que fez, o que aprendeu, próximos passos
+4. Atualize contexto efêmero em $EPHEMERAL/notes/$task/contexto.md
+5. Se a task permite auto-evolução, reflita e edite o CLAUDE.md se necessário
+
+## Ao finalizar
+$([ "$is_recurring" = "1" ] && echo "- Mova $TASKS/running/$task para $TASKS/recurring/$task" || echo "- Se sucesso: mova $TASKS/running/$task para $TASKS/done/$task")
+$([ "$is_recurring" != "1" ] && echo "- Se falha: mova $TASKS/running/$task para $TASKS/failed/$task")
+- Registre resultado em $EPHEMERAL/notes/$task/historico.log (formato: TIMESTAMP | ok ou fail | duração)
+- Registre uso em $EPHEMERAL/usage/$(date +%Y-%m).jsonl: {\"date\":\"TIMESTAMP\",\"task\":\"$task\",\"duration\":N,\"status\":\"STATUS\",\"type\":\"$([ "$is_recurring" = "1" ] && echo recurring || echo oneshot)\"}
+- Resuma em uma linha." 2>&1 || true
+}
+
 # ── Task específica: roda só ela e sai ───────────────────────────
 if [ -n "$SPECIFIC_TASK" ]; then
   source_dir=""
@@ -159,19 +186,7 @@ if [ -n "$SPECIFIC_TASK" ]; then
   fi
 
   claim_task "$SPECIFIC_TASK" "$source_dir" || exit 1
-  block=$(build_task_block "$SPECIFIC_TASK" "$source_dir" "$is_recurring")
-
-  timeout "$TOTAL_TIMEOUT" claude --permission-mode bypassPermissions --model sonnet \
-    -p "Modo autônomo. Tarefa única: $SPECIFIC_TASK
-Hora atual: $(date -u +%Y-%m-%dT%H:%M:%SZ)
-
-$block
-
-## Ao finalizar
-$([ "$is_recurring" = "1" ] && echo "- Mova $TASKS/running/$SPECIFIC_TASK para $TASKS/recurring/$SPECIFIC_TASK" || echo "- Se sucesso: mova $TASKS/running/$SPECIFIC_TASK para $TASKS/done/$SPECIFIC_TASK")
-$([ "$is_recurring" != "1" ] && echo "- Se falha: mova $TASKS/running/$SPECIFIC_TASK para $TASKS/failed/$SPECIFIC_TASK")
-- Registre resultado em $EPHEMERAL/notes/$SPECIFIC_TASK/historico.log (formato: TIMESTAMP | ok ou fail | duração)
-- Resuma em uma linha." 2>&1 || true
+  run_single_task "$SPECIFIC_TASK" "$source_dir" "$is_recurring"
 
   echo "[clau] Done (task específica)."
   exit 0

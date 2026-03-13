@@ -1,7 +1,7 @@
 .PHONY: get-ids reload switch update stow restow stow-tree stow-confirm \
        sandbox sandbox-build sandbox-shell sandbox-down sandbox-restart sandbox-inject \
        claude-resume clau clau-run clau-stop clau-reset clau-restart clau-worker clau-status clau-new \
-       clau-logs clau-logs-list logs usage
+       clau-debug clau-logs clau-logs-list logs usage
 
 # ── NixOS ──────────────────────────────────────────────────────────
 
@@ -75,6 +75,9 @@ sandbox-down:
 
 # ── Autônomo (singleton) ──────────────────────────────────────────
 
+LOGDIR = logs
+LOGFILE = $(LOGDIR)/$$(date +%Y-%m-%dT%H:%M:%S.%3N).log
+
 # Worker singleton: um container, processa todas as tasks sequencialmente
 # Seguro rodar do terminal — flock interno garante que só um roda por vez
 clau:
@@ -84,7 +87,23 @@ clau:
 		echo "[clau] Use 'make clau-stop' pra parar, ou 'make clau-logs' pra acompanhar."; \
 		exit 0; \
 	fi
-	$(COMPOSE) run --rm -T worker /workspace/scripts/clau-runner.sh
+	@mkdir -p $(LOGDIR)
+	@logfile="$(LOGFILE)"; \
+	echo "[clau] Log: $$logfile"; \
+	$(COMPOSE) run --rm -T worker /workspace/scripts/clau-runner.sh > "$$logfile" 2>&1
+
+# Debug: roda o worker com TTY no terminal (logs ao vivo + arquivo)
+# Usa script(1) pra manter PTY pro claude (senão ele omite output no pipe)
+clau-debug:
+	@existing=$$(docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}}" 2>/dev/null | head -1); \
+	if [ -n "$$existing" ]; then \
+		echo "[clau] Worker já rodando ($$existing). Singleton ativo."; \
+		exit 0; \
+	fi
+	@mkdir -p $(LOGDIR)
+	@logfile="$(LOGFILE)"; \
+	echo "[clau-debug] Log: $$logfile"; \
+	script -eqc '$(COMPOSE) run --rm worker /workspace/scripts/clau-runner.sh $(task)' "$$logfile"
 
 # Roda uma task específica: make clau-run task=nome-da-task
 clau-run:
