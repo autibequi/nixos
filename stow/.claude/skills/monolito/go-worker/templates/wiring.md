@@ -11,6 +11,7 @@ import (
     "monolito/apps"
     "monolito/apps/jobtracking"
     meudomain "monolito/apps/<app>/internal/handlers/<domain>"
+    "monolito/libs/sqs_middleware"
     "monolito/libs/utils/workerutils"
     handlerNames "monolito/libs/worker"
 
@@ -32,17 +33,24 @@ func NewEventHandlerContainer(apps *apps.Container, errorBot spacesbot.SpacesBot
     }
 }
 
-func (ec *EventContainer) Init(sqsWorker *sqsworker.Worker) {
-    // Handler com JobTracking
+func (ec *EventContainer) Init(sqsWorker *sqsworker.Worker, sqsMiddleware sqs_middleware.ISqsMiddleware) {
+    // IMPORTANTE: usar addHandler para TODOS os handlers — injeta sqsMiddleware
+    // (NewRelic tracing, K8S context, monitoring). NUNCA chamar
+    // workerutils.AddNamedHandler diretamente sem passar sqsMiddleware.
+    addHandler := func(name string, handler sqsworker.Handler, middleware ...sqsworker.Middleware) {
+        workerutils.AddNamedHandler(sqsWorker, name, handler, sqsMiddleware, middleware...)
+    }
+
     workerWrapper := jobtracking.NewWorkerWrapper(*ec.appsContainer)
 
-    workerutils.AddNamedHandler(sqsWorker,
+    // Handler com JobTracking
+    addHandler(
         handlerNames.MeuNovoHandlerName,
         workerWrapper.WithJobTracking(ec.MeuDomain.HandleMeuNovoEvento),
     )
 
     // DLQ handler (opcional — só se precisar de tratamento de falha)
-    workerutils.AddNamedHandler(sqsWorker,
+    addHandler(
         handlerNames.MeuNovoHandlerNameDLQ,
         workerWrapper.WithJobTrackingDLQ(
             ec.MeuDomain.HandleMeuNovoEventoDLQ,
@@ -55,9 +63,13 @@ func (ec *EventContainer) Init(sqsWorker *sqsworker.Worker) {
 ### Sem JobTracking (handlers simples)
 
 ```go
-func (ec *EventContainer) Init(sqsWorker *sqsworker.Worker) {
+func (ec *EventContainer) Init(sqsWorker *sqsworker.Worker, sqsMiddleware sqs_middleware.ISqsMiddleware) {
+    addHandler := func(name string, handler sqsworker.Handler, middleware ...sqsworker.Middleware) {
+        workerutils.AddNamedHandler(sqsWorker, name, handler, sqsMiddleware, middleware...)
+    }
+
     // Handler simples — sem job tracking
-    workerutils.AddNamedHandler(sqsWorker, handlerNames.MeuHandlerSimples,
+    addHandler(handlerNames.MeuHandlerSimples,
         workerutils.WrapHandler(ec.MeuDomain.HandleSimples))
 }
 ```
@@ -67,9 +79,9 @@ func (ec *EventContainer) Init(sqsWorker *sqsworker.Worker) {
 Em `apps/<app>/<app>.go`, adicionar ou modificar `PrepareWorker`:
 
 ```go
-func PrepareWorker(sqsWorker *sqsworker.Worker, clients clients.Clients, appsContainer *apps.Container, errorBot spacesbot.SpacesBot) {
+func PrepareWorker(sqsWorker *sqsworker.Worker, clients clients.Clients, appsContainer *apps.Container, errorBot spacesbot.SpacesBot, sqsMiddleware sqs_middleware.ISqsMiddleware) {
     handlers := handlers.NewEventHandlerContainer(appsContainer, errorBot)
-    handlers.Init(sqsWorker)
+    handlers.Init(sqsWorker, sqsMiddleware)
 }
 ```
 
@@ -79,7 +91,7 @@ Se o app **nao tem** `PrepareWorker`, criar a funcao e registrar no `cmd/worker/
 
 ```go
 // cmd/worker/main.go — adicionar a chamada
-<app>.PrepareWorker(sqsWorker, clients, appsContainer, errorBot)
+<app>.PrepareWorker(sqsWorker, clients, appsContainer, errorBot, sqsMiddleware)
 ```
 
 ## Configuracao da fila SQS

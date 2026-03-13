@@ -138,8 +138,9 @@ Service cria Job (RequestsCount=N)
 - [ ] Struct da mensagem com `job_id` em `apps/<app>/structs/`
 - [ ] JobType em `apps/jobtracking/structs/job_search.go`
 - [ ] Service cria job + envia mensagens (nunca o handler HTTP)
+- [ ] Service trata falha parcial de SQS (continue, não abort) e marca job como failed se falha total
 - [ ] Worker handler em `apps/<app>/internal/handlers/<domain>/worker.go`
-- [ ] EventContainer com wiring (AddNamedHandler + WithJobTracking)
+- [ ] EventContainer usa `addHandler` (com sqsMiddleware), NUNCA `workerutils.AddNamedHandler` direto
 - [ ] PrepareWorker chamado em `cmd/worker/main.go`
 - [ ] Handler mapeado na fila SQS em `configuration/config_sqs.yaml`
 - [ ] `make test-<app>` passa
@@ -156,6 +157,9 @@ Service cria Job (RequestsCount=N)
 | DLQ handler vazio | Apenas `return nil` — o wrapper cuida do tracking |
 | Callback de falha opcional | Usar para notificar bots/alertas quando job falha |
 | Vertical via appcontext | `appcontext.GetVertical(ctx)` para indexar service maps |
+| SEMPRE usar `addHandler` | Nunca chamar `workerutils.AddNamedHandler` direto — perde sqsMiddleware (tracing, monitoring) |
+| Loop SQS resiliente | Falha de 1 envio não aborta os restantes. `continue` + contar falhas |
+| Job zumbi → SetStatus failed | Se todos envios SQS falharem, marcar job como `failed` |
 
 ## Erros Comuns
 
@@ -164,3 +168,6 @@ Service cria Job (RequestsCount=N)
 - **Usar WrapHandler com WithJobTracking**: double unmarshal, comportamento indefinido
 - **Não registrar na config SQS**: handler registrado mas nunca recebe mensagens
 - **RequestsCount errado**: se enviar 10 mensagens mas criar job com RequestsCount=5, status fica "inconsistent"
+- **Chamar `workerutils.AddNamedHandler` diretamente ao invés de `addHandler`**: pula o `sqsMiddleware` que injeta NewRelic tracing, K8S context e monitoring. SEMPRE usar o helper `addHandler` definido no `Init`
+- **Abortar loop SQS na primeira falha**: se o loop de envio retorna no primeiro erro, os items restantes nunca são enfileirados mas o job já foi criado com RequestsCount=N. Usar `continue` e coletar falhas
+- **Job zumbi por falha total de SQS**: se TODOS os envios falharem, o job fica com status "started" eternamente. Marcar como `failed` via `SetStatus` quando `failedCount == len(items)`
