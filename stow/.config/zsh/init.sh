@@ -44,6 +44,9 @@ convert_video() {
   fi
 }
 
-alias claudio="cd ~/projects/estrategia/claudio && make claude"
+# === Claude Modes ===
+claudinho() { cd ~/projects/nixos && make sandbox; }
+claudio()   { cd ~/projects/estrategia/claudio && make claude; }
+clau()      { cd ~/projects/nixos && make clau; }
 
 pokemonsay "$(fortune -s)"

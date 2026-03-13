@@ -43,6 +43,9 @@
     # Monitoring
     ./modules/netdata.nix
 
+    # Autonomous
+    ./modules/claude-autonomous.nix
+
     # Other Modules
     ./modules/work.nix
     ./modules/virt.nix

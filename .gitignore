@@ -39,3 +39,14 @@ stow/.config/Cursor/User/*
 # claude: auto-generated/ephemeral
 stow/.claude/plugins/
 stow/.claude/skills/skill-evaluations/
+
+# ephemeral
+.ephemeral/
+
+# task lifecycle (só pending/ é commitado)
+tasks/running/
+tasks/done/
+tasks/failed/
+
+# workspace: ephemeral work dirs, bind-mounted from local drive
+workspace/

@@ -17,9 +17,8 @@ services:
       - ${HOME}/.claude:/home/claude/.claude
       - ${HOME}/.claude.json:/home/claude/.claude.json
       - ./stow/.claude/commands:/home/claude/.claude/commands
-      # Bloqueio de acesso aos arquivos de configuração do Claudinho
-      - ${HOME}/.claude/settings.local.json:/home/claude/.claude/settings.local.json:ro
-      - ${HOME}/.claude/settings.json:/home/claude/.claude/settings.json:ro
+      # Settings do Claudinho (stow como fonte de verdade)
+      - ./stow/.claude/settings.json:/home/claude/.claude/settings.json:ro
       # Wayland display forwarding
       - ${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:/run/user/1000/${WAYLAND_DISPLAY}
       # PipeWire/PulseAudio socket para áudio
