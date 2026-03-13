@@ -16,11 +16,9 @@ with pkgs; [
   git
   jq
   curl
-  python3
 
-  # Media
+  # Media (ffmpeg/python3 removidos — usar nix-shell -p sob demanda)
   yt-dlp
-  ffmpeg
   sox
 
   # System
