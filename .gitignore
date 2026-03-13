@@ -43,6 +43,9 @@ stow/.claude/skills/skill-evaluations/
 # ephemeral
 .ephemeral/
 
+# execution logs
+logs/
+
 # task lifecycle (só pending/ é commitado)
 tasks/.runner.lock
 tasks/running/
