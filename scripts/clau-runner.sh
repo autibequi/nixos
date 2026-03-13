@@ -87,7 +87,23 @@ done
 parse_frontmatter() {
   local file="$1" key="$2"
   [ -f "$file" ] || return
-  sed -n '/^---$/,/^---$/p' "$file" | grep -m1 "^${key}:" | sed "s/^${key}:[[:space:]]*//" | tr -d '[:space:]'
+  # Read between first two --- lines, find key, extract value (no sed needed)
+  local in_fm=0 line
+  while IFS= read -r line; do
+    if [ "$line" = "---" ]; then
+      if [ "$in_fm" = "1" ]; then break; fi
+      in_fm=1
+      continue
+    fi
+    if [ "$in_fm" = "1" ]; then
+      case "$line" in
+        "${key}:"*)
+          echo "${line#*: }" | tr -d '[:space:]'
+          return
+          ;;
+      esac
+    fi
+  done < "$file"
 }
 
 # ── Scheduling: day/night ────────────────────────────────────────
