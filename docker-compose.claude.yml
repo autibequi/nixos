@@ -22,6 +22,8 @@ x-common: &common
     - ${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:/run/user/1000/${WAYLAND_DISPLAY}
     - ${XDG_RUNTIME_DIR}/pulse:/run/user/1000/pulse
     - .:/workspace
+    # Obsidian vault (interface Claudinho → Obsidian)
+    - ${HOME}/.ovault/Work:/workspace/vault
     # Host read-only mounts (observabilidade)
     - /var/log/journal:/host/journal:ro
     - /proc/meminfo:/host/proc/meminfo:ro

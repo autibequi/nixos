@@ -29,11 +29,9 @@
 │   ├── running/         ← em execução (gitignored)
 │   ├── done/            ← concluídas (gitignored)
 │   └── failed/          ← falharam (gitignored)
-├── vault/               ← Obsidian vault (dashboard, sugestões, links)
+├── vault/               ← mount point Obsidian (docker-compose bind mount, não versionado)
 │   ├── dashboard.md     ← auto-gerado pelo runner
-│   ├── sugestoes/       ← canal task→user (sugestões, ideias, conclusões)
-│   ├── tasks → ../tasks
-│   └── reports → ../.ephemeral/notes
+│   └── sugestoes/       ← canal task→user (sugestões, ideias, conclusões)
 ├── .ephemeral/          ← memória efêmera (gitignored)
 └── makefile             ← targets de operação
 ```

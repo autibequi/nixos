@@ -62,11 +62,8 @@ tasks/*/*/review-cached-ldi-toc/
 tasks/*/*/melhorar-automacoes/
 tasks/*/*/parceiro/
 
-# vault: Obsidian sync interface
-# dashboard e sugestões são auto-gerados, .obsidian é config local
-vault/dashboard.md
-vault/.obsidian/
-vault/sugestoes/
+# vault: mount point for Obsidian (docker-compose bind mount)
+vault/
 
 # workspace: work projects mounted from outside (have their own git)
 projetos/claudio/

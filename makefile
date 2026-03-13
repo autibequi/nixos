@@ -273,8 +273,9 @@ dashboard:
 		echo "(fallback: rode 'make auto' pra gerar automaticamente)"
 
 vault-link:
-	@ln -sfn $$(pwd)/vault $$HOME/.ovault/Claudinho
-	@echo "Symlink criado: ~/.ovault/Claudinho → $$(pwd)/vault/"
+	@mkdir -p $$HOME/.ovault/Claudinho
+	@echo "Pasta criada: ~/.ovault/Claudinho/"
+	@echo "Rode 'make down && make sandbox' pra ativar o bind mount."
 
 ping:
 	@if [ -f .ephemeral/health.json ]; then \

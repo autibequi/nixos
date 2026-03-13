@@ -20,7 +20,7 @@ DEFAULT_MODEL_PENDING="sonnet"
 DEFAULT_SCHEDULE="night"
 DEFAULT_MAX_TURNS=25
 
-mkdir -p "$EPHEMERAL" "$TASKS/running" "$TASKS/done" "$TASKS/failed"
+mkdir -p "$EPHEMERAL" "$TASKS/running" "$TASKS/done" "$TASKS/failed" "$WORKSPACE/vault/sugestoes"
 
 # Ensure no-mcp config exists
 [ -f "$EPHEMERAL/no-mcp.json" ] || echo '{"mcpServers":{}}' > "$EPHEMERAL/no-mcp.json"
