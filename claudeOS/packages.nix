@@ -17,7 +17,6 @@ with pkgs; [
   jq
   curl
   python3
-  nodejs
 
   # Media
   yt-dlp

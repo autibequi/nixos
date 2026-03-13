@@ -7,14 +7,11 @@ RUN mkdir -p /etc/nix && \
 # Copy declarative package definition
 COPY claudeOS/ /tmp/claudeOS/
 
-# Build declarative env (sem nix-env -i pra evitar conflito com perfil base)
-RUN nix-build /tmp/claudeOS/ -A env -o /nix/claudeos-env && \
+# Build declarative env via flake (claude-code incluído via flake input)
+RUN nix build /tmp/claudeOS#default -o /nix/claudeos-env \
+      --extra-experimental-features "nix-command flakes" \
+      --fallback && \
     rm -rf /tmp/claudeOS
-
-# Install Claude Code via npm
-ENV NPM_CONFIG_PREFIX=/usr/local
-ENV PATH="/usr/local/bin:/nix/claudeos-env/bin:/root/.nix-profile/bin:${PATH}"
-RUN npm install -g @anthropic-ai/claude-code
 
 # Create non-root user with required groups
 RUN echo "claude:x:1000:1000::/home/claude:/bin/bash" >> /etc/passwd && \
@@ -33,7 +30,7 @@ RUN sed -i '/^build-users-group/d' /etc/nix/nix.conf && \
     chmod 1775 /nix/store
 
 USER claude
-ENV PATH="/usr/local/bin:/nix/claudeos-env/bin:${PATH}"
+ENV PATH="/nix/claudeos-env/bin:${PATH}"
 ENV HOME=/home/claude
 
 WORKDIR /workspace
