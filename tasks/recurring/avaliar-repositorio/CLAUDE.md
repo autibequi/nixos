@@ -1,3 +1,8 @@
+---
+timeout: 600
+model: sonnet
+schedule: night
+---
 # Avaliar Repositório
 
 ## Personalidade

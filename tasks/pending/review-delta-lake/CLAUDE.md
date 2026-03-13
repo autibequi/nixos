@@ -3,14 +3,14 @@
 ## Contexto
 Este é código de OUTRA pessoa. O objetivo é fazer code review formal — encontrar bugs, problemas de arquitetura e sugerir melhorias.
 
-- **Repositório:** `/workspace/claudinho/claudio/monolito/`
+- **Repositório:** `/workspace/projetos/claudio/monolito/`
 - **Branch:** `add-use-delta-lake`
 
 ## Passos
 
 ### 1. Setup (máx 1 min)
 ```bash
-cd /workspace/claudinho/claudio/monolito
+cd /workspace/projetos/claudio/monolito
 git fetch origin
 git checkout add-use-delta-lake
 git pull origin add-use-delta-lake

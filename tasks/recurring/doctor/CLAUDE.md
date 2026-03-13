@@ -1,3 +1,8 @@
+---
+timeout: 300
+model: haiku
+schedule: always
+---
 # Doctor
 
 ## Personalidade

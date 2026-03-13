@@ -10,6 +10,10 @@ x-common: &common
     - PULSE_SERVER=unix:/run/user/1000/pulse/native
     - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
     - ANTHROPIC_ADMIN_KEY=${ANTHROPIC_ADMIN_KEY:-}
+    - GIT_AUTHOR_NAME=${GIT_AUTHOR_NAME:-Pedrinho}
+    - GIT_AUTHOR_EMAIL=${GIT_AUTHOR_EMAIL:-pedro.correa@estrategia.com}
+    - GIT_COMMITTER_NAME=${GIT_AUTHOR_NAME:-Pedrinho}
+    - GIT_COMMITTER_EMAIL=${GIT_AUTHOR_EMAIL:-pedro.correa@estrategia.com}
   volumes:
     - ${HOME}/.claude:/home/claude/.claude
     - ${HOME}/.claude.json:/home/claude/.claude.json

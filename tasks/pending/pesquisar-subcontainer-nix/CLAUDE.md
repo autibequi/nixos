@@ -11,7 +11,7 @@ Pesquisar como criar subcontainers (containers aninhados) a partir do container 
 - Roda como user `claude` (uid 1000) dentro do container
 - Host usa Podman (não Docker daemon)
 - Compose file: `/workspace/docker-compose.claude.yml`
-- Projetos de trabalho montados em `/workspace/claudinho/`
+- Projetos de trabalho montados em `/workspace/projetos/`
 
 ## O que pesquisar
 

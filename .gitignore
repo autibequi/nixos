@@ -1,6 +1,8 @@
 # agent
 tmp/
 result/
+result/**
+result/*
 
 # nixos
 .direnv
@@ -8,6 +10,8 @@ result/
 # misc
 .opencode/
 .vscode/
+*.pem
+nano.*.save
 
 # lock configuration.nix file
 setup.nix
@@ -15,11 +19,6 @@ setup.nix
 # dont care to lock, me is maverick
 flake.lock
 boot.nix
-
-result/**
-result/*
-
-*.pem
 
 # vscode/cursor: ignore everything, then re-include only user configs
 stow/.config/Code/*
@@ -46,11 +45,19 @@ stow/.claude/skills/skill-evaluations/
 # execution logs
 logs/
 
-# task lifecycle (só pending/ é commitado)
+# task lifecycle (só pending/ e recurring/ CLAUDE.md são commitados)
 tasks/.runner.lock
 tasks/running/
 tasks/done/
 tasks/failed/
+tasks/**/memoria.md
+tasks/**/.lock
+tasks/.obsidian/
 
-# workspace: ephemeral work dirs, bind-mounted from local drive
-workspace/
+# vault: auto-generated content
+vault/dashboard.md
+vault/.obsidian/
+vault/sugestoes/
+
+# workspace: work projects mounted from outside (have their own git)
+projetos/claudio/

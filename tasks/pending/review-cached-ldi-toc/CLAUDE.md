@@ -3,7 +3,7 @@
 ## Contexto
 Este é código do PRÓPRIO usuário. O objetivo é validar se a implementação faz o que deveria.
 
-- **Repositório:** `/workspace/claudinho/claudio/monolito/`
+- **Repositório:** `/workspace/projetos/claudio/monolito/`
 - **Branch:** `FUK2-11746-vibed/cached-ldi-toc`
 - **PR:** https://github.com/estrategiahq/monolito/pull/4436
 
@@ -11,7 +11,7 @@ Este é código do PRÓPRIO usuário. O objetivo é validar se a implementação
 
 ### 1. Setup (máx 1 min)
 ```bash
-cd /workspace/claudinho/claudio/monolito
+cd /workspace/projetos/claudio/monolito
 git fetch origin
 git checkout FUK2-11746-vibed/cached-ldi-toc
 git pull origin FUK2-11746-vibed/cached-ldi-toc

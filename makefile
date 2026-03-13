@@ -1,7 +1,8 @@
 .PHONY: help switch update get-ids reload stow restow stow-tree stow-confirm \
        build shell sandbox resume down inject \
-       run auto stop reset status new logs logs-list usage usage-api \
-       test test-task test-container test-mcp test-runner doctor
+       run auto stop reset status new logs logs-list usage usage-api usage-api-7d usage-api-30d \
+       test test-task test-container test-mcp test-runner doctor \
+       dashboard clean-tasks ping vault-link
 
 help:
 	@echo ""
@@ -36,9 +37,14 @@ help:
 	@echo "  make stop              Para worker + reseta tasks presas"
 	@echo "  make reset             Devolve tasks de running/ pra origem"
 	@echo "  make status            Mostra estado do worker e das tasks"
-	@echo "  make new name=x        Cria task one-shot em pending/"
-	@echo "  make new name=x type=recurring"
-	@echo "                         Cria task recorrente"
+	@echo "  make new name=x        Cria task (wizard interativo)"
+	@echo ""
+	@echo "  Dashboard & Vault"
+	@echo "  ─────────────────────────────────────────────────────────"
+	@echo "  make dashboard         Regenera vault/dashboard.md"
+	@echo "  make vault-link        Cria symlink ~/.vault/Work → vault/"
+	@echo "  make ping              Health endpoint JSON (pra Waybar)"
+	@echo "  make clean-tasks       Limpa done/ e failed/"
 	@echo ""
 	@echo "  Teste & Validação"
 	@echo "  ─────────────────────────────────────────────────────────"
@@ -57,16 +63,6 @@ help:
 	@echo "  make usage-api         Uso da API Anthropic (hoje)"
 	@echo "  make usage-api-7d      Uso da API (últimos 7 dias)"
 	@echo "  make usage-api-30d     Uso da API (últimos 30 dias)"
-	@echo ""
-	@echo "  Uso típico"
-	@echo "  ─────────────────────────────────────────────────────────"
-	@echo "  1. Validar setup:       make doctor"
-	@echo "  2. Testar uma task:     make test-task task=usage-tracker"
-	@echo "  3. Rodar interativo:    make run task=usage-tracker"
-	@echo "  4. Rodar todas (vivo):  make run"
-	@echo "  5. Rodar headless:      make auto"
-	@echo "  6. Debug travamento:    make status && make logs"
-	@echo "  7. Destravou?:          make stop  (ou: make reset)"
 	@echo ""
 
 # ── NixOS ──────────────────────────────────────────────────────────
@@ -140,8 +136,6 @@ inject:
 
 # ── Tasks ──────────────────────────────────────────────────────────
 
-# make run — interativo com TTY (default)
-# make run task=nome — uma task específica
 run:
 	@existing=$$(docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}}" 2>/dev/null | head -1); \
 	if [ -n "$$existing" ]; then \
@@ -153,7 +147,6 @@ run:
 	echo "[clau] Log: $$logfile"; \
 	$(COMPOSE) run --rm -e CLAU_VERBOSE=1 worker /workspace/scripts/clau-runner.sh $(task) 2>&1 | tee "$$logfile"
 
-# make auto — headless (systemd/cron)
 auto:
 	@existing=$$(docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}}" 2>/dev/null | head -1); \
 	if [ -n "$$existing" ]; then \
@@ -193,41 +186,103 @@ status:
 	@docker ps --filter "label=com.docker.compose.service=worker" --format "table {{.ID}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || echo "(nenhum)"
 	@echo "\n=== Systemd ==="
 	@systemctl is-active claude-autonomous.service 2>/dev/null || echo "inactive"
-	@echo "\n=== Recurring ==="
-	@ls -1 tasks/recurring/ 2>/dev/null | grep -v '\.gitkeep' || echo "(vazio)"
-	@echo "\n=== Pending ==="
+	@echo "\n=== Recurring ($(shell ls -1 tasks/recurring/ 2>/dev/null | grep -cv '\.gitkeep' || echo 0)) ==="
+	@for dir in tasks/recurring/*/; do \
+		[ -d "$$dir" ] || continue; \
+		name=$$(basename "$$dir"); \
+		schedule=$$(sed -n '/^---$$/,/^---$$/p' "$$dir/CLAUDE.md" 2>/dev/null | grep -m1 '^schedule:' | awk '{print $$2}' || echo "?"); \
+		model=$$(sed -n '/^---$$/,/^---$$/p' "$$dir/CLAUDE.md" 2>/dev/null | grep -m1 '^model:' | awk '{print $$2}' || echo "?"); \
+		echo "  $$name ($$schedule, $$model)"; \
+	done
+	@echo "\n=== Pending ($(shell ls -1 tasks/pending/ 2>/dev/null | grep -cv '\.gitkeep' || echo 0)) ==="
 	@ls -1 tasks/pending/ 2>/dev/null | grep -v '\.gitkeep' || echo "(vazio)"
 	@echo "\n=== Running ==="
 	@ls -1 tasks/running/ 2>/dev/null | grep -v '\.gitkeep' || echo "(vazio)"
-	@echo "\n=== Done ==="
-	@ls -1 tasks/done/ 2>/dev/null | grep -v '\.gitkeep' || echo "(vazio)"
-	@echo "\n=== Failed ==="
-	@ls -1 tasks/failed/ 2>/dev/null | grep -v '\.gitkeep' || echo "(vazio)"
-
-new:
-	@[ -n "$(name)" ] || (echo "Uso: make new name=minha-tarefa [type=recurring]" && exit 1)
-	@if [ "$(type)" = "recurring" ]; then \
-		mkdir -p tasks/recurring/$(name); \
-		echo "# $(name)\n\n## Personalidade\nVocê é o **$(name)**. Descreva quem você é e como pensa.\n\n## Missão\n\n## O que fazer a cada execução\n\n## Entregável\nAtualize \`<diretório de contexto>/contexto.md\`.\n\n## Regras\n\n## Auto-evolução\nNo final de CADA execução, reflita sobre seu funcionamento.\nSe precisar melhorar, **edite este CLAUDE.md** diretamente.\nRegistre mudanças em \`<diretório de contexto>/evolucao.log\`." \
-			> tasks/recurring/$(name)/CLAUDE.md; \
-		mkdir -p .ephemeral/notes/$(name); \
-		echo "Task recorrente criada: tasks/recurring/$(name)/"; \
+	@echo "\n=== Últimas 5 execuções ==="
+	@if [ -f ".ephemeral/usage/$$(date +%Y-%m).jsonl" ]; then \
+		tail -5 ".ephemeral/usage/$$(date +%Y-%m).jsonl" 2>/dev/null | \
+		while IFS= read -r line; do \
+			task=$$(echo "$$line" | python3 -c "import sys,json; d=json.load(sys.stdin); print(f\"{d.get('task','?'):25s} {d.get('status','?'):5s} {d.get('model','?'):8s} {d.get('date','?')}\")" 2>/dev/null || echo "$$line"); \
+			echo "  $$task"; \
+		done; \
 	else \
-		mkdir -p tasks/pending/$(name); \
-		echo "# $(name)\n\n## Objetivo\n\n## O que entregar\nEscreva resultado em \`<diretório de contexto>/contexto.md\`.\n\n## Regras" \
-			> tasks/pending/$(name)/CLAUDE.md; \
-		mkdir -p .ephemeral/notes/$(name); \
-		echo "Task one-shot criada: tasks/pending/$(name)/"; \
+		echo "  (sem dados)"; \
 	fi
-	@echo "Edite: $$( [ '$(type)' = 'recurring' ] && echo 'tasks/recurring' || echo 'tasks/pending' )/$(name)/CLAUDE.md"
+
+# Task creation wizard
+new:
+	@[ -n "$(name)" ] || (echo "Uso: make new name=minha-tarefa [type=recurring|pending] [model=haiku|sonnet] [schedule=always|night] [timeout=300]" && exit 1)
+	@task_type="$${type:-pending}"; \
+	task_model="$${model:-$$([ "$$task_type" = "recurring" ] && echo "haiku" || echo "sonnet")}"; \
+	task_schedule="$${schedule:-$$([ "$$task_type" = "recurring" ] && echo "night" || echo "always")}"; \
+	task_timeout="$${timeout:-$$([ "$$task_type" = "recurring" ] && echo "300" || echo "900")}"; \
+	task_dir="tasks/$$task_type/$(name)"; \
+	mkdir -p "$$task_dir"; \
+	printf '%s\n' \
+		"---" \
+		"timeout: $$task_timeout" \
+		"model: $$task_model" \
+		"schedule: $$task_schedule" \
+		"---" \
+		"# $(name)" \
+		"" \
+		"## Objetivo" \
+		"" \
+		"## O que fazer" \
+		"" \
+		"## Entregável" \
+		"Atualize \`<diretório de contexto>/contexto.md\`." \
+		"" \
+		"## Regras" \
+		"" \
+		"## Sugestões" \
+		"Gere sugestões em \`vault/sugestoes/\` se identificar melhorias." \
+		> "$$task_dir/CLAUDE.md"; \
+	if [ "$$task_type" = "recurring" ]; then \
+		printf '%s\n' \
+			"# $(name) — Memória" \
+			"" \
+			"## Resumo" \
+			"Task nova. Primeira execução pendente." \
+			"" \
+			"## Histórico de execuções" \
+			"(nenhuma ainda)" \
+			> "$$task_dir/memoria.md"; \
+	fi; \
+	mkdir -p ".ephemeral/notes/$(name)"; \
+	echo "Task criada: $$task_dir/ ($$task_model, $$task_schedule, $${task_timeout}s)"; \
+	echo "Edite: $$task_dir/CLAUDE.md"
+
+# ── Dashboard & Vault ─────────────────────────────────────────────
+
+dashboard:
+	@echo "Gerando vault/dashboard.md..."
+	@$(COMPOSE) exec sandbox bash -c 'cd /workspace && bash scripts/clau-runner.sh __dashboard 2>/dev/null' || \
+		echo "(fallback: rode 'make auto' pra gerar automaticamente)"
+
+vault-link:
+	@mkdir -p $$HOME/.vault
+	@ln -sfn $$(pwd)/vault $$HOME/.vault/Work
+	@echo "Symlink criado: ~/.vault/Work → $$(pwd)/vault/"
+	@echo "Aponte o Obsidian para: $$HOME/.vault/Work"
+
+ping:
+	@if [ -f .ephemeral/health.json ]; then \
+		cat .ephemeral/health.json; \
+	else \
+		echo '{"text":"?","tooltip":"Claudinho: sem dados","class":"warning","alt":"unknown"}'; \
+	fi
+
+clean-tasks:
+	@echo "Limpando done/ e failed/..."
+	@rm -rf tasks/done/* tasks/failed/*
+	@echo "Limpo."
 
 # ── Teste & Validação ─────────────────────────────────────────────
 
-# Roda todos os testes de validação
 test: test-container test-mcp test-runner
 	@echo "\n=== Todos os testes passaram ==="
 
-# Testa se o container sobe e tem as dependências necessárias
 test-container:
 	@echo "=== test-container: verificando imagem e deps ==="
 	@$(COMPOSE) run --rm -T --entrypoint "" worker bash -c ' \
@@ -241,7 +296,6 @@ test-container:
 		echo "  [OK] Container funcional" \
 	'
 
-# Testa se o MCP no-mcp.json funciona e se o MCP server nix carrega
 test-mcp:
 	@echo "=== test-mcp: verificando configuração MCP ==="
 	@if [ -f .ephemeral/no-mcp.json ]; then \
@@ -264,7 +318,6 @@ test-mcp:
 		echo "(não existe)"; \
 	fi
 
-# Testa o runner sem executar Claude (valida claim, lock, cleanup)
 test-runner:
 	@echo "=== test-runner: verificando runner ==="
 	@echo -n "  clau-runner.sh: "; \
@@ -273,20 +326,18 @@ test-runner:
 	@echo -n "  tasks/pending:   "; ls -1 tasks/pending/ 2>/dev/null | grep -cv '\.gitkeep' || echo "0"
 	@echo -n "  tasks/running:   "; ls -1 tasks/running/ 2>/dev/null | grep -cv '\.gitkeep' || echo "0"
 	@echo -n "  lockfile:        "; \
-	[ -f .ephemeral/.clau.lock ] && echo "existe ($(wc -c < .ephemeral/.clau.lock)B)" || echo "limpo"
-	@echo -n "  NODE_OPTIONS:    "; echo "$${NODE_OPTIONS:-(não definido, runner usa --max-old-space-size=1536)}"
-	@echo -n "  CLAU_TIMEOUT:    "; echo "$${CLAU_TIMEOUT:-600}s"
+	[ -f .ephemeral/.clau.lock ] && echo "existe ($(shell wc -c < .ephemeral/.clau.lock 2>/dev/null || echo 0)B)" || echo "limpo"
+	@echo -n "  CLAU_TIMEOUT:    default 300s (recurring) / 900s (pending)"
+	@echo ""
 	@echo -n "  CLAU_MAX_TASKS:  "; echo "$${CLAU_MAX_TASKS:-5}"
 	@echo "  [OK] Runner configurado"
 
-# Roda uma task com timeout curto (60s) pra validar que funciona
 test-task:
 	@[ -n "$(task)" ] || (echo "Uso: make test-task task=nome-da-task" && exit 1)
 	@echo "=== test-task: $(task) (timeout 60s) ==="
 	@$(COMPOSE) run --rm -e CLAU_VERBOSE=1 -e CLAU_TIMEOUT=60 -e CLAU_MAX_TASKS=1 \
 		worker /workspace/scripts/clau-runner.sh $(task)
 
-# Diagnóstico completo: testa tudo + mostra estado atual
 doctor:
 	@echo "╔═══════════════════════════════════════════════════╗"
 	@echo "║              Claudinho Doctor                    ║"
@@ -315,6 +366,11 @@ doctor:
 	@echo -n "  done:      "; ls -1 tasks/done/ 2>/dev/null | grep -cv '\.gitkeep' || echo "0"
 	@echo -n "  failed:    "; ls -1 tasks/failed/ 2>/dev/null | grep -cv '\.gitkeep' || echo "0"
 	@echo ""
+	@echo "=== vault ==="
+	@echo -n "  dashboard: "; [ -f vault/dashboard.md ] && echo "existe ($$(wc -l < vault/dashboard.md) linhas)" || echo "não existe (rode make auto)"
+	@echo -n "  sugestões: "; ls -1 vault/sugestoes/ 2>/dev/null | wc -l || echo "0"
+	@echo -n "  health:    "; [ -f .ephemeral/health.json ] && cat .ephemeral/health.json || echo "(sem dados)"
+	@echo ""
 
 # ── Logs ───────────────────────────────────────────────────────────
 
@@ -340,16 +396,28 @@ logs-list:
 
 usage:
 	@echo "=== Uso do mês (tasks) ==="
-	@$(COMPOSE) exec sandbox jq -s \
-		'{ tasks: length, total_duration: (map(.duration) | add), entries: . }' \
-		/workspace/.ephemeral/usage/$$(date +%Y-%m).jsonl 2>/dev/null \
-		|| echo "Sem dados de tasks ainda."
+	@if [ -f ".ephemeral/usage/$$(date +%Y-%m).jsonl" ]; then \
+		python3 -c "\
+import json, sys; \
+lines = [json.loads(l) for l in open('.ephemeral/usage/$$(date +%Y-%m).jsonl')]; \
+print(f'  Tasks: {len(lines)}'); \
+print(f'  Duration total: {sum(l.get(\"duration\",0) for l in lines)}s'); \
+models = {}; \
+[models.update({l.get('model','?'): models.get(l.get('model','?'),0)+1}) for l in lines]; \
+print(f'  Models: {models}'); \
+statuses = {}; \
+[statuses.update({l.get('status','?'): statuses.get(l.get('status','?'),0)+1}) for l in lines]; \
+print(f'  Statuses: {statuses}')" 2>/dev/null || \
+		echo "Sem dados ou python3 indisponível."; \
+	else \
+		echo "Sem dados de tasks ainda."; \
+	fi
 
 usage-api:
-	@$(COMPOSE) exec sandbox bash /workspace/scripts/api-usage.sh
+	@bash scripts/api-usage.sh
 
 usage-api-7d:
-	@$(COMPOSE) exec sandbox bash /workspace/scripts/api-usage.sh -- 7d
+	@bash scripts/api-usage.sh 7d
 
 usage-api-30d:
-	@$(COMPOSE) exec sandbox bash /workspace/scripts/api-usage.sh -- 30d
+	@bash scripts/api-usage.sh 30d

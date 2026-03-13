@@ -1,3 +1,8 @@
+---
+timeout: 300
+model: haiku
+schedule: always
+---
 # Task: Usage Tracker
 
 ## Objetivo
