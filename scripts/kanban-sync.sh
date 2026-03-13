@@ -21,7 +21,6 @@ _kanban_atomic() {
 }
 
 # Encontra linhas de início e fim de uma coluna (0-indexed)
-# Retorna: START_LINE END_LINE (globais)
 _find_column() {
   local column="$1"
   local header="## $column"
@@ -49,14 +48,14 @@ _find_column() {
   return 1
 }
 
-# Extrai nome da task de um card line (ex: "- [ ] **doctor** ..." → "doctor")
+# Extrai nome da task de um card line
 _card_name() {
   local line="$1"
   local after="${line#*\*\*}"
   echo "${after%%\*\**}"
 }
 
-# Adiciona [worker] tag após **task** no card
+# Adiciona [worker] tag após **task**
 _add_worker_tag() {
   local line="$1" task="$2" worker="$3"
   local before="${line%%\*\*${task}\*\**}"
@@ -64,41 +63,104 @@ _add_worker_tag() {
   echo "${before}**${task}** [${worker}]${after}"
 }
 
-# Extrai número de #retry-N de uma linha
-_get_retry_num() {
-  local line="$1"
-  if [[ "$line" == *"#retry-"* ]]; then
-    local after="${line#*#retry-}"
-    local num="${after%% *}"
-    num="${num%%[!0-9]*}"
-    echo "${num:-0}"
+# ── Operação genérica: mover card entre colunas ──────────────────
+
+# _do_move_card source_col dest_col task transform_fn [extra_args...]
+# transform_fn recebe a card line e extra_args, retorna a new card line
+_do_move_card() {
+  local source_col="$1" dest_col="$2" task="$3" transform_fn="$4"
+  shift 4
+  local extra_args=("$@")
+
+  local tmp
+  tmp=$(mktemp)
+  local found=0
+  local card_line=""
+  local in_source=0
+  local in_dest=0
+  local inserted=0
+
+  while IFS= read -r line; do
+    if [ "$line" = "## $source_col" ]; then
+      in_source=1
+      echo "$line" >> "$tmp"
+      continue
+    fi
+    if [[ "$line" =~ ^##\  ]] && [ "$in_source" = "1" ]; then
+      in_source=0
+    fi
+
+    # Remove card from source
+    if [ "$in_source" = "1" ] && [[ "$line" =~ ^-\ \[ ]] && [[ "$line" == *"**${task}**"* ]]; then
+      card_line="$line"
+      found=1
+      continue
+    fi
+
+    # Insert into dest
+    if [ "$line" = "## $dest_col" ]; then
+      in_dest=1
+      echo "$line" >> "$tmp"
+      continue
+    fi
+
+    if [ "$in_dest" = "1" ] && [ "$inserted" = "0" ] && [ "$found" = "1" ]; then
+      if [ -z "$line" ] || [[ "$line" =~ ^-\ \[ ]] || [[ "$line" =~ ^##\  ]]; then
+        local new_card
+        new_card=$("$transform_fn" "$card_line" "$task" "${extra_args[@]}")
+        [ -z "$line" ] && echo "" >> "$tmp"
+        echo "$new_card" >> "$tmp"
+        inserted=1
+        in_dest=0
+        if [[ "$line" =~ ^##\  ]] || [[ "$line" =~ ^-\ \[ ]]; then
+          echo "$line" >> "$tmp"
+        fi
+        continue
+      fi
+    fi
+
+    echo "$line" >> "$tmp"
+  done < "$KANBAN"
+
+  # If dest was last column or empty
+  if [ "$found" = "1" ] && [ "$inserted" = "0" ]; then
+    local new_card
+    new_card=$("$transform_fn" "$card_line" "$task" "${extra_args[@]}")
+    echo "$new_card" >> "$tmp"
+  fi
+
+  if [ "$found" = "1" ]; then
+    mv "$tmp" "$KANBAN"
+    echo "[kanban-sync] '$task' ($source_col → $dest_col)"
   else
-    echo "0"
+    rm -f "$tmp"
+    echo "[kanban-sync] '$task' não encontrado em $source_col" >&2
+    return 1
   fi
 }
 
-# Remove #retry-N e #dead tags de um card
-_clean_retry_tags() {
-  local line="$1"
-  # Remove #retry-N
-  while [[ "$line" == *"#retry-"* ]]; do
-    local before="${line%% #retry-*}"
-    local after="${line#*#retry-}"
-    after="${after#*[0-9]}"
-    line="${before}${after}"
-  done
-  # Remove #dead
-  line="${line// #dead/}"
-  # Clean double spaces
-  while [[ "$line" == *"  "* ]]; do
-    line="${line//  / }"
-  done
-  echo "$line"
+# ── Transform functions ──────────────────────────────────────────
+
+_transform_claim() {
+  local card="$1" task="$2" worker="$3"
+  _add_worker_tag "$card" "$task" "$worker"
+}
+
+_transform_complete() {
+  local _card="$1" task="$2" report="$3"
+  local done_card="- [x] **${task}** #done $(date +%Y-%m-%d)"
+  [ -n "$report" ] && done_card="$done_card — [report](${report})"
+  echo "$done_card"
+}
+
+_transform_fail() {
+  local _card="$1" task="$2" reason="$3"
+  echo "- [ ] **${task}** #failed $(date +%Y-%m-%d) — ${reason}"
 }
 
 # ── Funções públicas ─────────────────────────────────────────────
 
-# Lista cards de uma coluna (linhas que começam com "- [")
+# Lista cards de uma coluna
 kanban_read_column() {
   local column="$1"
   _find_column "$column" || { echo "[kanban-sync] Coluna '$column' não encontrada" >&2; return 1; }
@@ -114,249 +176,25 @@ kanban_read_column() {
   done < "$KANBAN"
 }
 
-# Move card do Backlog → Em Andamento, adicionando [worker-N]
-# Uso: kanban_claim_card "task-name" "worker-1"
+# Move card do Backlog → Em Andamento com [worker-N]
 kanban_claim_card() {
   local task="$1" worker="$2"
-  _kanban_atomic _do_claim_card "$task" "$worker"
+  _kanban_atomic _do_move_card "Backlog" "Em Andamento" "$task" "_transform_claim" "$worker"
 }
 
-_do_claim_card() {
-  local task="$1" worker="$2"
-  local tmp
-  tmp=$(mktemp)
-  local found=0
-  local card_line=""
-  local in_backlog=0
-  local in_andamento=0
-  local inserted=0
-
-  while IFS= read -r line; do
-    if [ "$line" = "## Backlog" ]; then
-      in_backlog=1
-      echo "$line" >> "$tmp"
-      continue
-    fi
-    if [[ "$line" =~ ^##\  ]] && [ "$in_backlog" = "1" ]; then
-      in_backlog=0
-    fi
-
-    # Encontrou o card no Backlog — remove
-    if [ "$in_backlog" = "1" ] && [[ "$line" =~ ^-\ \[ ]] && [[ "$line" == *"**${task}**"* ]]; then
-      card_line="$line"
-      found=1
-      continue  # não escreve essa linha (remove do Backlog)
-    fi
-
-    # Ao encontrar "## Em Andamento", marca pra inserir depois
-    if [ "$line" = "## Em Andamento" ]; then
-      in_andamento=1
-      echo "$line" >> "$tmp"
-      continue
-    fi
-
-    # Inserir card no início de Em Andamento (após header + linha vazia)
-    if [ "$in_andamento" = "1" ] && [ "$inserted" = "0" ] && [ "$found" = "1" ]; then
-      if [ -z "$line" ] || [[ "$line" =~ ^-\ \[ ]] || [[ "$line" =~ ^##\  ]]; then
-        # Adiciona marcação do worker no card
-        local new_card
-        new_card=$(_add_worker_tag "$card_line" "$task" "$worker")
-        [ -z "$line" ] && echo "" >> "$tmp"
-        echo "$new_card" >> "$tmp"
-        inserted=1
-        if [[ "$line" =~ ^##\  ]] || [[ "$line" =~ ^-\ \[ ]]; then
-          echo "$line" >> "$tmp"
-        fi
-        in_andamento=0
-        continue
-      fi
-    fi
-
-    echo "$line" >> "$tmp"
-  done < "$KANBAN"
-
-  # Se não inseriu ainda (Em Andamento era a última coluna ou vazia)
-  if [ "$found" = "1" ] && [ "$inserted" = "0" ]; then
-    local new_card
-    new_card=$(_add_worker_tag "$card_line" "$task" "$worker")
-    echo "$new_card" >> "$tmp"
-  fi
-
-  if [ "$found" = "1" ]; then
-    mv "$tmp" "$KANBAN"
-    echo "[kanban-sync] '$task' claimed por $worker (Backlog → Em Andamento)"
-  else
-    rm -f "$tmp"
-    echo "[kanban-sync] '$task' não encontrado no Backlog" >&2
-    return 1
-  fi
-}
-
-# Move card de Em Andamento → Concluido com link pro report
-# Uso: kanban_complete_card "task-name" "vault/_agent/reports/2026-03-13-foo.md"
+# Move card de Em Andamento → Concluido
 kanban_complete_card() {
   local task="$1" report_link="${2:-}"
-  _kanban_atomic _do_complete_card "$task" "$report_link"
+  _kanban_atomic _do_move_card "Em Andamento" "Concluido" "$task" "_transform_complete" "$report_link"
 }
 
-_do_complete_card() {
-  local task="$1" report_link="$2"
-  local tmp
-  tmp=$(mktemp)
-  local found=0
-  local card_line=""
-  local in_andamento=0
-  local in_concluido=0
-  local inserted=0
-
-  while IFS= read -r line; do
-    if [ "$line" = "## Em Andamento" ]; then
-      in_andamento=1
-      echo "$line" >> "$tmp"
-      continue
-    fi
-    if [[ "$line" =~ ^##\  ]] && [ "$in_andamento" = "1" ]; then
-      in_andamento=0
-    fi
-
-    # Remove card de Em Andamento
-    if [ "$in_andamento" = "1" ] && [[ "$line" =~ ^-\ \[ ]] && [[ "$line" == *"**${task}**"* ]]; then
-      card_line="$line"
-      found=1
-      continue
-    fi
-
-    # Inserir no Concluido
-    if [ "$line" = "## Concluido" ]; then
-      in_concluido=1
-      echo "$line" >> "$tmp"
-      continue
-    fi
-
-    if [ "$in_concluido" = "1" ] && [ "$inserted" = "0" ] && [ "$found" = "1" ]; then
-      if [ -z "$line" ] || [[ "$line" =~ ^-\ \[ ]] || [[ "$line" =~ ^##\  ]]; then
-        # Formatar card como concluído
-        local done_card="- [x] **${task}** #done $(date +%Y-%m-%d)"
-        if [ -n "$report_link" ]; then
-          done_card="$done_card — [report](${report_link})"
-        fi
-        [ -z "$line" ] && echo "" >> "$tmp"
-        echo "$done_card" >> "$tmp"
-        inserted=1
-        in_concluido=0
-        if [[ "$line" =~ ^##\  ]] || [[ "$line" =~ ^-\ \[ ]]; then
-          echo "$line" >> "$tmp"
-        fi
-        continue
-      fi
-    fi
-
-    echo "$line" >> "$tmp"
-  done < "$KANBAN"
-
-  if [ "$found" = "1" ] && [ "$inserted" = "0" ]; then
-    echo "- [x] **${task}** #done $(date +%Y-%m-%d)${report_link:+ — [report](${report_link})}" >> "$tmp"
-  fi
-
-  if [ "$found" = "1" ]; then
-    mv "$tmp" "$KANBAN"
-    echo "[kanban-sync] '$task' concluído (Em Andamento → Concluido)"
-  else
-    rm -f "$tmp"
-    echo "[kanban-sync] '$task' não encontrado em Em Andamento" >&2
-    return 1
-  fi
-}
-
-# Move card de Em Andamento → Falhou com motivo e tag retry
-# Uso: kanban_fail_card "task-name" "timeout após 300s"
+# Move card de Em Andamento → Falhou
 kanban_fail_card() {
   local task="$1" reason="${2:-unknown}"
-  _kanban_atomic _do_fail_card "$task" "$reason"
-}
-
-_do_fail_card() {
-  local task="$1" reason="$2"
-  local tmp
-  tmp=$(mktemp)
-  local found=0
-  local card_line=""
-  local in_andamento=0
-  local in_falhou=0
-  local inserted=0
-
-  # Contar retries existentes na coluna Falhou
-  local retry_count=0
-  while IFS= read -r line; do
-    if [[ "$line" == *"**${task}**"* ]] && [[ "$line" == *"#retry-"* ]]; then
-      local n
-      n=$(_get_retry_num "$line")
-      [ -n "$n" ] && [ "$n" -gt "$retry_count" ] && retry_count=$n
-    fi
-  done < "$KANBAN"
-  retry_count=$((retry_count + 1))
-
-  while IFS= read -r line; do
-    if [ "$line" = "## Em Andamento" ]; then
-      in_andamento=1
-      echo "$line" >> "$tmp"
-      continue
-    fi
-    if [[ "$line" =~ ^##\  ]] && [ "$in_andamento" = "1" ]; then
-      in_andamento=0
-    fi
-
-    # Remove de Em Andamento
-    if [ "$in_andamento" = "1" ] && [[ "$line" =~ ^-\ \[ ]] && [[ "$line" == *"**${task}**"* ]]; then
-      card_line="$line"
-      found=1
-      continue
-    fi
-
-    # Inserir em Falhou
-    if [ "$line" = "## Falhou" ]; then
-      in_falhou=1
-      echo "$line" >> "$tmp"
-      continue
-    fi
-
-    if [ "$in_falhou" = "1" ] && [ "$inserted" = "0" ] && [ "$found" = "1" ]; then
-      local dead_tag=""
-      [ "$retry_count" -ge 3 ] && dead_tag=" #dead"
-      local fail_card="- [ ] **${task}** #retry-${retry_count}${dead_tag} $(date +%Y-%m-%d) — ${reason}"
-      if [ -z "$line" ] || [[ "$line" =~ ^-\ \[ ]] || [[ "$line" =~ ^##\  ]]; then
-        [ -z "$line" ] && echo "" >> "$tmp"
-        echo "$fail_card" >> "$tmp"
-        inserted=1
-        in_falhou=0
-        if [[ "$line" =~ ^##\  ]] || [[ "$line" =~ ^-\ \[ ]]; then
-          echo "$line" >> "$tmp"
-        fi
-        continue
-      fi
-    fi
-
-    echo "$line" >> "$tmp"
-  done < "$KANBAN"
-
-  if [ "$found" = "1" ] && [ "$inserted" = "0" ]; then
-    local dead_tag=""
-    [ "$retry_count" -ge 3 ] && dead_tag=" #dead"
-    echo "- [ ] **${task}** #retry-${retry_count}${dead_tag} $(date +%Y-%m-%d) — ${reason}" >> "$tmp"
-  fi
-
-  if [ "$found" = "1" ]; then
-    mv "$tmp" "$KANBAN"
-    echo "[kanban-sync] '$task' falhou #retry-${retry_count} (Em Andamento → Falhou)"
-  else
-    rm -f "$tmp"
-    echo "[kanban-sync] '$task' não encontrado em Em Andamento" >&2
-    return 1
-  fi
+  _kanban_atomic _do_move_card "Em Andamento" "Falhou" "$task" "_transform_fail" "$reason"
 }
 
 # Adiciona card numa coluna específica
-# Uso: kanban_add_card "Backlog" "- [ ] **minha-task** #pending 2026-03-13 \`haiku\` — descrição"
 kanban_add_card() {
   local column="$1" card="$2"
   _kanban_atomic _do_add_card "$column" "$card"
@@ -377,7 +215,6 @@ _do_add_card() {
       continue
     fi
 
-    # Inserir após a primeira linha vazia da coluna
     if [ "$in_column" = "1" ] && [ "$inserted" = "0" ]; then
       if [ -z "$line" ]; then
         echo "$card" >> "$tmp"
@@ -398,7 +235,6 @@ _do_add_card() {
 }
 
 # Copia card de Recorrentes → Em Andamento (original fica)
-# Uso: kanban_claim_recurring "doctor" "worker-1"
 kanban_claim_recurring() {
   local task="$1" worker="$2"
   _kanban_atomic _do_claim_recurring "$task" "$worker"
@@ -435,14 +271,12 @@ _do_claim_recurring() {
     return 1
   fi
 
-  # Adicionar cópia em Em Andamento com worker tag
   local new_card
   new_card=$(_add_worker_tag "$card_line" "$task" "$worker")
   _do_add_card "Em Andamento" "$new_card"
 }
 
 # Remove cópia de recurring de Em Andamento
-# Uso: kanban_unclaim_recurring "doctor"
 kanban_unclaim_recurring() {
   local task="$1"
   _kanban_atomic _do_unclaim_recurring "$task"
@@ -465,7 +299,6 @@ _do_unclaim_recurring() {
       in_andamento=0
     fi
 
-    # Remove card de Em Andamento
     if [ "$in_andamento" = "1" ] && [[ "$line" =~ ^-\ \[ ]] && [[ "$line" == *"**${task}**"* ]]; then
       found=1
       continue
@@ -484,7 +317,7 @@ _do_unclaim_recurring() {
   fi
 }
 
-# Retorna cards de uma coluna como nomes (sem formatação)
+# Retorna cards de uma coluna como nomes
 kanban_list_names() {
   local column="$1"
   kanban_read_column "$column" 2>/dev/null | while IFS= read -r line; do
@@ -492,77 +325,8 @@ kanban_list_names() {
   done
 }
 
-# Conta cards por coluna (para dashboard/statusline)
+# Conta cards por coluna
 kanban_count() {
   local column="$1"
   kanban_read_column "$column" 2>/dev/null | wc -l
-}
-
-# Move card de Falhou → Backlog (para retry)
-# Uso: kanban_retry_card "task-name"
-kanban_retry_card() {
-  local task="$1"
-  _kanban_atomic _do_retry_card "$task"
-}
-
-_do_retry_card() {
-  local task="$1"
-  local tmp
-  tmp=$(mktemp)
-  local found=0
-  local card_line=""
-  local in_falhou=0
-  local in_backlog=0
-  local inserted=0
-
-  while IFS= read -r line; do
-    if [ "$line" = "## Falhou" ]; then
-      in_falhou=1
-      echo "$line" >> "$tmp"
-      continue
-    fi
-    if [[ "$line" =~ ^##\  ]] && [ "$in_falhou" = "1" ]; then
-      in_falhou=0
-    fi
-
-    # Remove de Falhou (pega o mais recente)
-    if [ "$in_falhou" = "1" ] && [[ "$line" =~ ^-\ \[ ]] && [[ "$line" == *"**${task}**"* ]]; then
-      if [ "$found" = "0" ]; then
-        card_line="$line"
-        found=1
-        continue
-      fi
-    fi
-
-    # Inserir no Backlog
-    if [ "$line" = "## Backlog" ]; then
-      in_backlog=1
-      echo "$line" >> "$tmp"
-      continue
-    fi
-
-    if [ "$in_backlog" = "1" ] && [ "$inserted" = "0" ] && [ "$found" = "1" ]; then
-      if [ -z "$line" ]; then
-        echo "" >> "$tmp"
-        # Limpar retry tags do card
-        local clean_card
-        clean_card=$(_clean_retry_tags "$card_line")
-        echo "$clean_card" >> "$tmp"
-        inserted=1
-        in_backlog=0
-        continue
-      fi
-    fi
-
-    echo "$line" >> "$tmp"
-  done < "$KANBAN"
-
-  if [ "$found" = "1" ]; then
-    mv "$tmp" "$KANBAN"
-    echo "[kanban-sync] '$task' retornado (Falhou → Backlog)"
-  else
-    rm -f "$tmp"
-    echo "[kanban-sync] '$task' não encontrado em Falhou" >&2
-    return 1
-  fi
 }

@@ -66,10 +66,9 @@ if [[ -f "$KANBAN" ]]; then
   andamento=$(count_cards "Em Andamento")
   done_c=$(count_cards "Concluido")
   fail=$(count_cards "Falhou")
-  inter=$(count_cards "Interativo")
 
   echo -e "  ${DIM}♻${R} Recorrentes: ${rec}  ${DIM}📋${R} Backlog: ${back}  ${DIM}▶${R} Em Andamento: ${andamento}"
-  echo -e "  ${GREEN}✓${R} Concluido: ${done_c}  ${RED}✗${R} Falhou: ${fail}  ${CYAN}⚡${R} Interativo: ${inter}"
+  echo -e "  ${GREEN}✓${R} Concluido: ${done_c}  ${RED}✗${R} Falhou: ${fail}"
 
   # Mostrar tasks em andamento com worker ID
   if [[ "$andamento" -gt 0 ]]; then
@@ -86,19 +85,21 @@ if [[ -f "$KANBAN" ]]; then
     done < "$KANBAN"
   fi
 
-  # Mostrar tasks interativas pendentes
-  if [[ "$inter" -gt 0 ]]; then
-    echo -e "  ${B}Interativas (retomáveis):${R}"
-    local_in_col=0
-    while IFS= read -r line; do
-      if [[ "$line" == "## Interativo" ]]; then local_in_col=1; continue; fi
-      if [[ "$line" =~ ^##\  ]] && [[ "$local_in_col" == "1" ]]; then break; fi
-      if [[ "$local_in_col" == "1" ]] && [[ "$line" =~ ^-\ \[ ]]; then
-        after="${line#*\*\*}"; name="${after%%\*\**}"
-        echo -e "    ${CYAN}⚡${R} $name"
+  # Mostrar tasks interativas (tag #interativo em Em Andamento)
+  local_in_col=0
+  has_inter=0
+  while IFS= read -r line; do
+    if [[ "$line" == "## Em Andamento" ]]; then local_in_col=1; continue; fi
+    if [[ "$line" =~ ^##\  ]] && [[ "$local_in_col" == "1" ]]; then break; fi
+    if [[ "$local_in_col" == "1" ]] && [[ "$line" == *"#interativo"* ]]; then
+      if [[ "$has_inter" == "0" ]]; then
+        echo -e "  ${B}Interativas (retomáveis):${R}"
+        has_inter=1
       fi
-    done < "$KANBAN"
-  fi
+      after="${line#*\*\*}"; name="${after%%\*\**}"
+      echo -e "    ${CYAN}⚡${R} $name"
+    fi
+  done < "$KANBAN"
 else
   echo -e "${B}Kanban:${R} ${DIM}(vault/kanban.md não encontrado)${R}"
 fi

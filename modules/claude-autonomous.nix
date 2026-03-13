@@ -5,32 +5,40 @@ let
   vaultDir = "/home/${user}/.ovault/Work";
   compose = "${pkgs.podman-compose}/bin/podman-compose -f ${projectDir}/docker-compose.claude.yml";
 
-  # Multi-worker dispatch: lança N workers em paralelo, cada um sequencial
-  runnerScript = pkgs.writeShellScript "clau-dispatch" ''
+  commonEnv = [
+    "HOME=/home/${user}"
+    "XDG_RUNTIME_DIR=/run/user/1000"
+    "DOCKER_HOST=unix:///run/podman/podman.sock"
+    "WAYLAND_DISPLAY=wayland-1"
+    "PATH=${pkgs.podman}/bin:${pkgs.coreutils}/bin:${pkgs.gnugrep}/bin:${pkgs.bash}/bin:/run/current-system/sw/bin"
+  ];
+
+  # Multi-worker dispatch
+  mkRunnerScript = { tier, maxWorkers, serviceName }: pkgs.writeShellScript "clau-dispatch-${tier}" ''
     set -euo pipefail
     cd ${projectDir}
 
-    MAX_WORKERS=''${CLAU_MAX_WORKERS:-2}
+    MAX_WORKERS=${toString maxWorkers}
+    TIER="${tier}"
 
-    # Verifica se há tasks disponíveis (via kanban)
     if [ ! -f ${vaultDir}/kanban.md ]; then
-      echo "[clau] kanban.md não encontrado em ${vaultDir}."
+      echo "[clau:$TIER] kanban.md não encontrado."
       exit 0
     fi
 
-    # Checar se há algo no Backlog ou Recorrentes
     backlog=$(grep -c '^\- \[' ${vaultDir}/kanban.md 2>/dev/null || echo "0")
     if [ "$backlog" -eq 0 ]; then
-      echo "[clau] Sem cards no kanban."
+      echo "[clau:$TIER] Sem cards no kanban."
       exit 0
     fi
+
+    SERVICE=$( [ "$TIER" = "fast" ] && echo "worker-fast" || echo "worker" )
 
     PIDS=()
     for i in $(seq 1 $MAX_WORKERS); do
-      WORKER_ID="worker-$i"
+      WORKER_ID="$TIER-$i"
 
-      # Checar se worker-$i já roda
-      existing=$(${pkgs.podman}/bin/podman ps --filter "label=com.docker.compose.service=worker" \
+      existing=$(${pkgs.podman}/bin/podman ps --filter "label=com.docker.compose.service=$SERVICE" \
         --filter "label=clau.worker.id=$WORKER_ID" \
         --format "{{.ID}}" 2>/dev/null | head -1)
       if [ -n "$existing" ]; then
@@ -38,30 +46,29 @@ let
         continue
       fi
 
-      echo "[clau] Lançando $WORKER_ID..."
+      echo "[clau] Lançando $WORKER_ID ($TIER)..."
       ${compose} run --rm -T \
         -e CLAU_WORKER_ID="$WORKER_ID" \
+        -e CLAU_TIER="$TIER" \
         -l clau.worker.id="$WORKER_ID" \
-        worker /workspace/scripts/clau-runner.sh &
+        $SERVICE /workspace/scripts/clau-runner.sh &
       PIDS+=($!)
     done
 
     if [ ''${#PIDS[@]} -eq 0 ]; then
-      echo "[clau] Nenhum worker lançado."
+      echo "[clau:$TIER] Nenhum worker lançado."
       exit 0
     fi
 
-    echo "[clau] ''${#PIDS[@]} workers lançados. Aguardando..."
+    echo "[clau:$TIER] ''${#PIDS[@]} workers lançados."
     for pid in "''${PIDS[@]}"; do
       wait "$pid" 2>/dev/null || true
     done
-    echo "[clau] Todos os workers finalizaram."
+    echo "[clau:$TIER] Done."
   '';
 
-  # Cleanup: devolve tasks órfãs de running/ pro lugar de origem
   cleanupScript = pkgs.writeShellScript "clau-cleanup" ''
     cd ${projectDir}
-
     for dir in vault/_agent/tasks/running/*/; do
       [ -d "$dir" ] || continue
       name=$(basename "$dir")
@@ -69,20 +76,21 @@ let
       rm -f "$dir/.lock"
       if [ "$source" = "recurring" ]; then
         rm -rf "$dir"
-        echo "[clau-cleanup] $name (recurring copy) removed"
+        echo "[cleanup] $name (recurring) removed"
       else
         mv "$dir" "vault/_agent/tasks/pending/$name" 2>/dev/null || rm -rf "$dir"
-        echo "[clau-cleanup] $name → pending/"
+        echo "[cleanup] $name → pending/"
       fi
     done
-
-    # Limpa lockfiles
-    rm -f .ephemeral/.kanban.lock
-    rm -f .ephemeral/locks/*.lock
+    rm -f .ephemeral/.kanban.lock .ephemeral/locks/*.lock
   '';
+
+  heavyRunner = mkRunnerScript { tier = "heavy"; maxWorkers = 2; serviceName = "worker"; };
+  fastRunner = mkRunnerScript { tier = "fast"; maxWorkers = 1; serviceName = "worker-fast"; };
 in {
+  # ── Heavy worker (hourly) ────────────────────────────────────────
   systemd.services.claude-autonomous = {
-    description = "Claudinho autonomous task runner (multi-worker)";
+    description = "Claudinho heavy task runner";
     after = [ "network-online.target" ];
     conflicts = [ "claude-autonomous-reset.service" ];
     serviceConfig = {
@@ -90,29 +98,17 @@ in {
       User = user;
       Group = "users";
       WorkingDirectory = projectDir;
-
-      ExecStart = "${runnerScript}";
+      ExecStart = "${heavyRunner}";
       ExecStopPost = "${cleanupScript}";
-
-      # 2 workers × tasks (~20min each) + margem
       TimeoutStartSec = "45min";
       TimeoutStopSec = "2min";
-
       Restart = "no";
-
-      Environment = [
-        "HOME=/home/${user}"
-        "XDG_RUNTIME_DIR=/run/user/1000"
-        "DOCKER_HOST=unix:///run/podman/podman.sock"
-        "WAYLAND_DISPLAY=wayland-1"
-        "CLAU_MAX_WORKERS=2"
-        "PATH=${pkgs.podman}/bin:${pkgs.coreutils}/bin:${pkgs.gnugrep}/bin:${pkgs.bash}/bin:/run/current-system/sw/bin"
-      ];
+      Environment = commonEnv;
     };
   };
 
   systemd.timers.claude-autonomous = {
-    description = "Run Claudinho tasks every hour";
+    description = "Run Claudinho heavy tasks every hour";
     wantedBy = [ "timers.target" ];
     timerConfig = {
       OnCalendar = "hourly";
@@ -120,8 +116,36 @@ in {
     };
   };
 
+  # ── Fast worker (every 10 min) ───────────────────────────────────
+  systemd.services.claude-autonomous-fast = {
+    description = "Claudinho fast task runner";
+    after = [ "network-online.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      User = user;
+      Group = "users";
+      WorkingDirectory = projectDir;
+      ExecStart = "${fastRunner}";
+      ExecStopPost = "${cleanupScript}";
+      TimeoutStartSec = "5min";
+      TimeoutStopSec = "1min";
+      Restart = "no";
+      Environment = commonEnv;
+    };
+  };
+
+  systemd.timers.claude-autonomous-fast = {
+    description = "Run Claudinho fast tasks every 10 minutes";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "*:0/10";
+      Persistent = true;
+    };
+  };
+
+  # ── Reset service ────────────────────────────────────────────────
   systemd.services.claude-autonomous-reset = {
-    description = "Reset stuck Claudinho tasks (kills workers)";
+    description = "Reset stuck Claudinho tasks";
     conflicts = [ "claude-autonomous.service" ];
     serviceConfig = {
       Type = "oneshot";
@@ -130,18 +154,13 @@ in {
       WorkingDirectory = projectDir;
       ExecStart = pkgs.writeShellScript "clau-hard-reset" ''
         cd ${projectDir}
-        echo "[clau-reset] Parando workers..."
+        echo "[reset] Parando workers..."
         ${compose} kill worker 2>/dev/null || true
-        ${compose} rm -f worker 2>/dev/null || true
+        ${compose} kill worker-fast 2>/dev/null || true
+        ${compose} rm -f worker worker-fast 2>/dev/null || true
         ${cleanupScript}
       '';
-      Environment = [
-        "HOME=/home/${user}"
-        "XDG_RUNTIME_DIR=/run/user/1000"
-        "DOCKER_HOST=unix:///run/podman/podman.sock"
-        "WAYLAND_DISPLAY=wayland-1"
-        "PATH=${pkgs.podman}/bin:${pkgs.coreutils}/bin:${pkgs.gnugrep}/bin:${pkgs.bash}/bin:/run/current-system/sw/bin"
-      ];
+      Environment = commonEnv;
     };
   };
 }
