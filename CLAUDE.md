@@ -42,7 +42,9 @@ Usar especialmente para investigar o runner autônomo (`claude-autonomous.servic
 │   │   │   ├── running/    ← em execução (gitignored)
 │   │   │   ├── done/       ← concluídas (gitignored)
 │   │   │   └── failed/     ← falharam (gitignored)
-│   │   └── reports/     ← relatórios gerados por tasks (gitignored)
+│   │   └── reports/     ← relatórios gerados por tasks autônomas
+│   ├── artefacts/       ← entregáveis por task (subpasta por pedido/task)
+│   │   └── <task>/      ← ex: jonathas/, nixos-audit/, etc.
 │   ├── _templates/      ← templates Templater (nova-task.md, etc.)
 │   ├── kanban.md        ← Obsidian Kanban board (progresso real-time)
 │   ├── dashboard-home.md ← homepage Obsidian (Dataview queries)
@@ -135,15 +137,15 @@ Toda execução DEVE deixar rastro:
 - Sem artefato = execução desperdiçada
 
 ### Onde salvar o quê
-- `vault/_agent/reports/` — relatórios e resultados gerados por tasks (markdown, análises)
-- `artefatos/` — outputs não-markdown (binários, exports, scripts gerados, dados, imagens)
+- `vault/artefacts/<task>/` — **pasta principal de entregáveis** — toda task/pedido ganha uma subpasta própria com todos os artefatos (markdown, análises, planos, dados, exports). Criar subpasta com nome descritivo (ex: `jonathas`, `nixos-audit`, `refactor-auth`).
+- `vault/_agent/reports/` — relatórios gerados por tasks autônomas (worker)
 - `vault/sugestoes/` — sugestões do agente pro user revisar no Obsidian
 
-### Reports obrigatórios
-- Toda pesquisa/análise bem-sucedida DEVE gerar report em `vault/_agent/reports/YYYY-MM-DD-<topico>.md`
-- O report é o entregável canônico — resultado na pasta da task é rascunho
-- Card no kanban DEVE linkar pro report ao ser movido pra Concluido
-- Runner verifica existência do report após execução e loga warning se ausente
+### Workflow de artefatos
+1. Ao iniciar uma task/pedido: criar `vault/artefacts/<nome-task>/`
+2. Salvar TODOS os entregáveis dentro dessa pasta
+3. Card no kanban DEVE linkar pra pasta de artefatos ao ser movido pra Concluido
+4. Tasks autônomas também geram report em `vault/_agent/reports/` (duplicar link se necessário)
 
 ## Kanban (Controle Central)
 - `vault/kanban.md` é a FONTE DE VERDADE de tudo que o Claudinho faz
