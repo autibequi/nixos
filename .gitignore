@@ -50,28 +50,8 @@ stow/.claude/skills/skill-evaluations/
 # execution logs
 logs/
 
-# vault: mount point for Obsidian (docker-compose bind mount)
-vault/*
-!vault/_agent/
-
-# task lifecycle (só CLAUDE.md das tasks é versionado)
-vault/_agent/tasks/.runner.lock
-vault/_agent/tasks/running/
-vault/_agent/tasks/done/
-vault/_agent/tasks/failed/
-vault/_agent/tasks/**/memoria.md
-vault/_agent/tasks/**/.lock
-vault/_agent/tasks/**/contexto.md
-vault/_agent/tasks/.obsidian/
-
-# task nested duplicates (auto-gerados por bug de tasks que criam subpasta com mesmo nome)
-vault/_agent/tasks/*/*/avaliar-m5/
-vault/_agent/tasks/*/*/review-cached-ldi-toc/
-vault/_agent/tasks/*/*/melhorar-automacoes/
-vault/_agent/tasks/*/*/parceiro/
-
-# agent reports (generated, not versioned)
-vault/_agent/reports/
+# vault: bind mount do Obsidian — sync exclusivo pelo Obsidian Sync, git não toca
+vault/
 
 # workspace: work projects mounted from outside (have their own git)
 projetos/claudio/
