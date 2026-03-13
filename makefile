@@ -5,7 +5,7 @@ export GIT_COMMITTER_NAME := $(GIT_AUTHOR_NAME)
 export GIT_COMMITTER_EMAIL := $(GIT_AUTHOR_EMAIL)
 
 .PHONY: help switch update get-ids reload stow restow stow-tree stow-confirm \
-       build shell sandbox resume down inject \
+       build shell sandbox sandbox-shell resume down inject claude \
        run auto stop reset status new logs logs-list usage usage-api usage-api-7d usage-api-30d \
        test test-task test-container test-mcp test-runner doctor \
        dashboard clean-tasks ping vault-link
@@ -29,6 +29,7 @@ help:
 	@echo "  Container (sandbox interativo)"
 	@echo "  ─────────────────────────────────────────────────────────"
 	@echo "  make build             Build da imagem Docker"
+	@echo "  make claude            Abre Alacritty com sandbox Claude"
 	@echo "  make sandbox           Sobe sandbox + abre Claude"
 	@echo "  make shell             Sobe sandbox + abre bash"
 	@echo "  make resume            Retoma sessão Claude anterior"
@@ -127,6 +128,10 @@ shell:
 	$(COMPOSE) up -d sandbox
 	@$(COMPOSE) exec sandbox bash
 
+sandbox-shell:
+	$(COMPOSE) up -d sandbox
+	@$(COMPOSE) exec sandbox bash
+
 resume:
 	$(COMPOSE) up -d sandbox
 	@$(COMPOSE) exec sandbox claude --resume --permission-mode bypassPermissions
@@ -139,6 +144,7 @@ inject:
 	$(COMPOSE) down
 	$(COMPOSE) up -d sandbox
 	@$(COMPOSE) exec sandbox claude --permission-mode bypassPermissions -- "startup"
+
 
 # ── Tasks ──────────────────────────────────────────────────────────
 
@@ -267,10 +273,8 @@ dashboard:
 		echo "(fallback: rode 'make auto' pra gerar automaticamente)"
 
 vault-link:
-	@mkdir -p $$HOME/.vault
-	@ln -sfn $$(pwd)/vault $$HOME/.vault/Work
-	@echo "Symlink criado: ~/.vault/Work → $$(pwd)/vault/"
-	@echo "Aponte o Obsidian para: $$HOME/.vault/Work"
+	@ln -sfn $$(pwd)/vault $$HOME/.ovault/Claudinho
+	@echo "Symlink criado: ~/.ovault/Claudinho → $$(pwd)/vault/"
 
 ping:
 	@if [ -f .ephemeral/health.json ]; then \
