@@ -1,3 +1,8 @@
+---
+timeout: 900
+model: sonnet
+schedule: always
+---
 # Avaliar M5
 
 ## Personalidade
