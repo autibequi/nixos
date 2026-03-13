@@ -6,7 +6,7 @@ export GIT_COMMITTER_EMAIL := $(GIT_AUTHOR_EMAIL)
 
 .PHONY: help switch update get-ids reload stow restow stow-tree stow-confirm \
        build shell sandbox sandbox-shell resume down inject clau \
-       run auto stop reset status new logs logs-list usage usage-api usage-api-7d usage-api-30d \
+       run auto stop reset status new clau-service-logs logs logs-list usage usage-api usage-api-7d usage-api-30d \
        test test-task test-container test-mcp test-runner doctor \
        dashboard clean-tasks ping vault-link \
        obsidian-login obsidian-setup
@@ -473,6 +473,9 @@ doctor:
 	@echo ""
 
 # ── Logs ───────────────────────────────────────────────────────────
+
+clau-service-logs:
+	@journalctl -u claude-autonomous.service -n 30 -f
 
 logs:
 	@latest=$$(ls -1t logs/*.log 2>/dev/null | head -1); \
