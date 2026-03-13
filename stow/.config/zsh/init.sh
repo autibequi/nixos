@@ -51,3 +51,5 @@ clau()      { cd ~/projects/nixos && make run; }
 clau-auto() { cd ~/projects/nixos && make auto; }
 
 pokemonsay "$(fortune -s)"
+
+cd ~/projects/nixos

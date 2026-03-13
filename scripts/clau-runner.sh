@@ -6,6 +6,7 @@ TASKS="$WORKSPACE/tasks"
 EPHEMERAL="$WORKSPACE/.ephemeral"
 LOCKFILE="$EPHEMERAL/.clau.lock"
 TASK_TIMEOUT="${CLAU_TIMEOUT:-600}"
+CLAU_VERBOSE="${CLAU_VERBOSE:-0}"
 SPECIFIC_TASK="${1:-}"
 MAX_TASKS="${CLAU_MAX_TASKS:-5}"
 MAX_PARALLEL="${CLAU_MAX_PARALLEL:-1}"
@@ -160,7 +161,7 @@ $(cat "$TASKS/running/$task/memoria.md")"
   # Desabilita MCP servers pra tasks que não precisam (economia ~1GB RAM)
   local mcp_flags=()
   if ! grep -qi 'mcp\|nix-search\|nixos-option' "$TASKS/running/$task/CLAUDE.md" 2>/dev/null; then
-    mcp_flags=(--mcp-config '{"mcpServers":{}}' --strict-mcp-config)
+    mcp_flags=(--mcp-config "$EPHEMERAL/no-mcp.json" --strict-mcp-config)
   fi
 
   timeout "$TASK_TIMEOUT" claude --permission-mode bypassPermissions --model sonnet \
@@ -184,8 +185,8 @@ $([ "$is_recurring" = "1" ] && echo "- Mova $TASKS/running/$task para $TASKS/rec
 $([ "$is_recurring" != "1" ] && echo "- Se falha: mova $TASKS/running/$task para $TASKS/failed/$task")
 - Registre resultado em $EPHEMERAL/notes/$task/historico.log (formato: TIMESTAMP | ok ou fail | duração)
 - Registre uso em $EPHEMERAL/usage/$(date +%Y-%m).jsonl: {\"date\":\"TIMESTAMP\",\"task\":\"$task\",\"duration\":N,\"status\":\"STATUS\",\"type\":\"$([ "$is_recurring" = "1" ] && echo recurring || echo oneshot)\"}
-- Resuma em uma linha." > "$logfile" 2>&1
-  local exit_code=$?
+- Resuma em uma linha." 2>&1 | if [ "$CLAU_VERBOSE" = "1" ]; then tee "$logfile"; else cat > "$logfile"; fi
+  local exit_code=${PIPESTATUS[0]}
 
   if [ $exit_code -eq 0 ]; then
     echo "[clau:$task] ✓ Concluída ($(date -u +%H:%M:%S))"
@@ -194,7 +195,7 @@ $([ "$is_recurring" != "1" ] && echo "- Se falha: mova $TASKS/running/$task para
   fi
   # Mostra últimas 5 linhas do output pra dar visibilidade
   echo "[clau:$task] --- últimas linhas ---"
-  tail -5 "$logfile" 2>/dev/null | sed "s/^/[clau:$task]   /"
+  tail -5 "$logfile" 2>/dev/null | while IFS= read -r line; do echo "[clau:$task]   $line"; done
   echo "[clau:$task] --- log completo: $logfile ---"
   return $exit_code
 }
