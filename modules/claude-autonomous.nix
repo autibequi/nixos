@@ -106,6 +106,7 @@ in {
         "DOCKER_HOST=unix:///run/podman/podman.sock"
         "WAYLAND_DISPLAY=wayland-1"
         "CLAU_MAX_WORKERS=2"
+        "PATH=${pkgs.podman}/bin:${pkgs.coreutils}/bin:${pkgs.gnugrep}/bin:${pkgs.bash}/bin:/run/current-system/sw/bin"
       ];
     };
   };
@@ -139,6 +140,7 @@ in {
         "XDG_RUNTIME_DIR=/run/user/1000"
         "DOCKER_HOST=unix:///run/podman/podman.sock"
         "WAYLAND_DISPLAY=wayland-1"
+        "PATH=${pkgs.podman}/bin:${pkgs.coreutils}/bin:${pkgs.gnugrep}/bin:${pkgs.bash}/bin:/run/current-system/sw/bin"
       ];
     };
   };
