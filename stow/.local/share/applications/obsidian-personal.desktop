@@ -1,7 +1,7 @@
 [Desktop Entry]
-Name=Obsidian (Books)
-Comment=Obsidian Books Vault
-Exec=obsidian "obsidian://open?vault=books"
+Name=Obsidian
+Comment=Obsidian Personal Vault
+Exec=obsidian "obsidian://open?vault=.ovault"
 Icon=obsidian
 Type=Application
 Categories=Office;

@@ -1,3 +1,9 @@
+CONTAINER := claude-sandbox
+export GIT_AUTHOR_NAME := $(shell git config user.name)
+export GIT_AUTHOR_EMAIL := $(shell git config user.email)
+export GIT_COMMITTER_NAME := $(GIT_AUTHOR_NAME)
+export GIT_COMMITTER_EMAIL := $(GIT_AUTHOR_EMAIL)
+
 .PHONY: help switch update get-ids reload stow restow stow-tree stow-confirm \
        build shell sandbox resume down inject \
        run auto stop reset status new logs logs-list usage usage-api usage-api-7d usage-api-30d \

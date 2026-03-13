@@ -12,6 +12,7 @@ result/*
 .vscode/
 *.pem
 nano.*.save
+.claude/scheduled_tasks.lock
 
 # lock configuration.nix file
 setup.nix
@@ -45,16 +46,22 @@ stow/.claude/skills/skill-evaluations/
 # execution logs
 logs/
 
-# task lifecycle (só pending/ e recurring/ CLAUDE.md são commitados)
+# task lifecycle (só CLAUDE.md das tasks é versionado)
 tasks/.runner.lock
 tasks/running/
 tasks/done/
 tasks/failed/
 tasks/**/memoria.md
 tasks/**/.lock
+tasks/**/contexto.md
 tasks/.obsidian/
 
-# vault: auto-generated content
+# task artifacts (auto-gerados, duplicados em nested dirs)
+tasks/**/avaliar-m5/
+tasks/**/review-cached-ldi-toc/
+
+# vault: Obsidian sync interface
+# dashboard e sugestões são auto-gerados, .obsidian é config local
 vault/dashboard.md
 vault/.obsidian/
 vault/sugestoes/
