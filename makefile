@@ -1,7 +1,6 @@
-.PHONY: get-ids reload switch update stow restow stow-tree stow-confirm \
-       sandbox sandbox-build sandbox-shell sandbox-down sandbox-restart sandbox-inject \
-       claude-resume clau clau-auto clau-run clau-stop clau-reset clau-status clau-new \
-       clau-logs clau-logs-list logs usage
+.PHONY: switch update get-ids reload stow restow stow-tree stow-confirm \
+       build shell sandbox resume down inject \
+       run auto stop reset status new logs logs-list usage usage-api
 
 # ── NixOS ──────────────────────────────────────────────────────────
 
@@ -42,48 +41,44 @@ stow-confirm:
 	@read -p "Confirma restow? [y/N] " confirm && [ "$$confirm" = "y" ] && \
 		$(MAKE) restow || echo "Cancelado."
 
-# ── Sandbox Interativo ─────────────────────────────────────────────
+# ── Container ──────────────────────────────────────────────────────
 
 COMPOSE = docker compose -f docker-compose.claude.yml
+LOGDIR  = logs
+LOGFILE = $(LOGDIR)/$$(date +%Y-%m-%dT%H:%M:%S.%3N).log
 
-sandbox-build:
+build:
 	$(COMPOSE) build
 
 sandbox:
 	$(COMPOSE) up -d sandbox
 	@$(COMPOSE) exec sandbox claude --permission-mode bypassPermissions -- "startup"
 
-sandbox-shell:
+shell:
 	$(COMPOSE) up -d sandbox
 	@$(COMPOSE) exec sandbox bash
 
-sandbox-restart:
+resume:
+	$(COMPOSE) up -d sandbox
+	@$(COMPOSE) exec sandbox claude --resume --permission-mode bypassPermissions
+
+down:
+	$(COMPOSE) down
+
+inject:
+	$(MAKE) restow
 	$(COMPOSE) down
 	$(COMPOSE) up -d sandbox
 	@$(COMPOSE) exec sandbox claude --permission-mode bypassPermissions -- "startup"
 
-sandbox-inject:
-	$(MAKE) restow
-	$(MAKE) sandbox-restart
+# ── Tasks ──────────────────────────────────────────────────────────
 
-claude-resume:
-	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec sandbox claude --resume --permission-mode bypassPermissions
-
-sandbox-down:
-	$(COMPOSE) down
-
-# ── Clau (tasks autônomas) ─────────────────────────────────────────
-
-LOGDIR = logs
-LOGFILE = $(LOGDIR)/$$(date +%Y-%m-%dT%H:%M:%S.%3N).log
-
-# make clau — roda interativo com TTY (logs ao vivo + arquivo)
-# make clau task=nome — roda só uma task específica
-clau:
+# make run — interativo com TTY (default)
+# make run task=nome — uma task específica
+run:
 	@existing=$$(docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}}" 2>/dev/null | head -1); \
 	if [ -n "$$existing" ]; then \
-		echo "[clau] Worker já rodando ($$existing). Use 'make clau-stop' ou 'make clau-logs'."; \
+		echo "[clau] Worker já rodando ($$existing). Use 'make stop' ou 'make logs'."; \
 		exit 0; \
 	fi
 	@mkdir -p $(LOGDIR)
@@ -91,8 +86,8 @@ clau:
 	echo "[clau] Log: $$logfile"; \
 	script -eqc '$(COMPOSE) run --rm worker /workspace/scripts/clau-runner.sh $(task)' "$$logfile"
 
-# make clau-auto — headless (background, sem TTY, pra systemd/cron)
-clau-auto:
+# make auto — headless (systemd/cron)
+auto:
 	@existing=$$(docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}}" 2>/dev/null | head -1); \
 	if [ -n "$$existing" ]; then \
 		echo "[clau] Worker já rodando ($$existing). Singleton ativo."; \
@@ -103,18 +98,13 @@ clau-auto:
 	echo "[clau] Log: $$logfile"; \
 	$(COMPOSE) run --rm -T worker /workspace/scripts/clau-runner.sh > "$$logfile" 2>&1
 
-# make clau-run task=nome — one-off sem TTY
-clau-run:
-	@[ -n "$(task)" ] || (echo "Uso: make clau-run task=nome-da-task" && exit 1)
-	$(COMPOSE) run --rm -T worker /workspace/scripts/clau-runner.sh "$(task)"
-
-clau-stop:
+stop:
 	@echo "[clau] Parando worker..."
 	@$(COMPOSE) kill worker 2>/dev/null || true
 	@$(COMPOSE) rm -f worker 2>/dev/null || true
-	@$(MAKE) --no-print-directory clau-reset
+	@$(MAKE) --no-print-directory reset
 
-clau-reset:
+reset:
 	@for dir in tasks/running/*/; do \
 		[ -d "$$dir" ] || continue; \
 		name=$$(basename "$$dir"); \
@@ -131,7 +121,7 @@ clau-reset:
 	@rm -f .ephemeral/.clau.lock
 	@[ -z "$$(ls -A tasks/running/ 2>/dev/null | grep -v '\.gitkeep')" ] && echo "[reset] running/ limpo." || echo "[reset] AVISO: ainda há tasks em running/"
 
-clau-status:
+status:
 	@echo "=== Worker ==="
 	@docker ps --filter "label=com.docker.compose.service=worker" --format "table {{.ID}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || echo "(nenhum)"
 	@echo "\n=== Systemd ==="
@@ -147,8 +137,8 @@ clau-status:
 	@echo "\n=== Failed ==="
 	@ls -1 tasks/failed/ 2>/dev/null | grep -v '\.gitkeep' || echo "(vazio)"
 
-clau-new:
-	@[ -n "$(name)" ] || (echo "Uso: make clau-new name=minha-tarefa [type=recurring]" && exit 1)
+new:
+	@[ -n "$(name)" ] || (echo "Uso: make new name=minha-tarefa [type=recurring]" && exit 1)
 	@if [ "$(type)" = "recurring" ]; then \
 		mkdir -p tasks/recurring/$(name); \
 		echo "# $(name)\n\n## Personalidade\nVocê é o **$(name)**. Descreva quem você é e como pensa.\n\n## Missão\n\n## O que fazer a cada execução\n\n## Entregável\nAtualize \`<diretório de contexto>/contexto.md\`.\n\n## Regras\n\n## Auto-evolução\nNo final de CADA execução, reflita sobre seu funcionamento.\nSe precisar melhorar, **edite este CLAUDE.md** diretamente.\nRegistre mudanças em \`<diretório de contexto>/evolucao.log\`." \
@@ -164,7 +154,9 @@ clau-new:
 	fi
 	@echo "Edite: $$( [ '$(type)' = 'recurring' ] && echo 'tasks/recurring' || echo 'tasks/pending' )/$(name)/CLAUDE.md"
 
-clau-logs:
+# ── Logs ───────────────────────────────────────────────────────────
+
+logs:
 	@latest=$$(ls -1t logs/*.log 2>/dev/null | head -1); \
 	if [ -z "$$latest" ]; then \
 		echo "(nenhum log em logs/)"; \
@@ -179,10 +171,10 @@ clau-logs:
 		fi; \
 	fi
 
-clau-logs-list:
+logs-list:
 	@ls -1t logs/*.log 2>/dev/null || echo "(nenhum log)"
 
-# ── Utils ──────────────────────────────────────────────────────────
+# ── Usage ──────────────────────────────────────────────────────────
 
 usage:
 	@echo "=== Uso do mês (tasks) ==="

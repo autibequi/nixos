@@ -45,9 +45,9 @@ convert_video() {
 }
 
 # === Claude Modes ===
-claudinho()  { cd ~/projects/nixos && make sandbox; }
-claudio()    { cd ~/projects/estrategia/claudio && make claude; }
-clau()       { cd ~/projects/nixos && make clau; }
-clau-auto()  { cd ~/projects/nixos && make clau-auto; }
+claudinho() { cd ~/projects/nixos && make sandbox; }
+claudio()   { cd ~/projects/estrategia/claudio && make claude; }
+clau()      { cd ~/projects/nixos && make run; }
+clau-auto() { cd ~/projects/nixos && make auto; }
 
 pokemonsay "$(fortune -s)"
