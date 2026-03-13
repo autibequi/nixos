@@ -1,6 +1,6 @@
 .PHONY: get-ids reload switch update stow restow stow-tree stow-confirm \
        sandbox sandbox-build sandbox-shell sandbox-down sandbox-restart sandbox-inject \
-       claude-resume clau clau-status usage
+       claude-resume clau clau-run clau-status clau-workers usage
 
 # ── NixOS ──────────────────────────────────────────────────────────
 
@@ -74,9 +74,33 @@ sandbox-down:
 
 # ── Autônomo ───────────────────────────────────────────────────────
 
+# Spawna um worker por task disponível (pending + recurring), cada um no seu container
 clau:
-	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec -T sandbox bash /workspace/scripts/clau-runner.sh
+	@pending=$$(ls -1 tasks/pending/ 2>/dev/null | grep -v '\.gitkeep'); \
+	recurring=$$(ls -1 tasks/recurring/ 2>/dev/null | grep -v '\.gitkeep'); \
+	all="$$pending $$recurring"; \
+	count=0; \
+	for task in $$all; do \
+		[ -z "$$task" ] && continue; \
+		[ -d "tasks/running/$$task" ] && echo "[clau] $$task já em running, skip" && continue; \
+		echo "[clau] Spawning worker: $$task"; \
+		$(COMPOSE) run --rm -d -T worker /workspace/scripts/clau-runner.sh 600 "$$task" & \
+		count=$$((count + 1)); \
+	done; \
+	wait; \
+	[ "$$count" -eq 0 ] && echo "[clau] Sem tarefas disponíveis." || echo "[clau] $$count workers spawned."
+
+# Roda uma task específica: make clau-run task=nome-da-task
+clau-run:
+	@[ -n "$(task)" ] || (echo "Uso: make clau-run task=nome-da-task" && exit 1)
+	$(COMPOSE) run --rm -T worker /workspace/scripts/clau-runner.sh 600 "$(task)"
+
+# Lista workers ativos
+clau-workers:
+	@echo "=== Workers ativos ==="
+	@docker ps --filter "label=com.docker.compose.service=worker" --format "table {{.ID}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || echo "(nenhum)"
+	@echo "\n=== Tasks em running/ ==="
+	@ls -1 tasks/running/ 2>/dev/null | grep -v '\.gitkeep' || echo "(vazio)"
 
 clau-status:
 	@echo "=== Recurring (imortais) ==="

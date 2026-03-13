@@ -2,7 +2,7 @@
 let
   user = "pedrinho";
   projectDir = "/home/${user}/projects/nixos";
-  compose = "${pkgs.docker-compose}/bin/docker compose -f ${projectDir}/docker-compose.claude.yml";
+  compose = "${pkgs.docker-compose}/bin/docker-compose -f ${projectDir}/docker-compose.claude.yml";
 in {
   systemd.services.claude-autonomous = {
     description = "Claudinho autonomous task runner";
@@ -13,7 +13,7 @@ in {
       WorkingDirectory = projectDir;
       ExecStart = "${pkgs.bash}/bin/bash -c '${compose} up -d sandbox && ${compose} exec -T sandbox bash /workspace/scripts/clau-runner.sh'";
       TimeoutStopSec = "12min";
-      Environment = [ "HOME=/home/${user}" "XDG_RUNTIME_DIR=/run/user/1000" ];
+      Environment = [ "HOME=/home/${user}" "XDG_RUNTIME_DIR=/run/user/1000" "DOCKER_HOST=unix:///run/podman/podman.sock" ];
     };
   };
 

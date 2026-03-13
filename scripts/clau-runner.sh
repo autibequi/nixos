@@ -5,19 +5,7 @@ WORKSPACE="/workspace"
 TASKS="$WORKSPACE/tasks"
 EPHEMERAL="$WORKSPACE/.ephemeral"
 TIMEOUT="${1:-600}"
-LOCKFILE="$TASKS/.runner.lock"
-
-# ── Global lock: impede execuções simultâneas ─────────────────────
-if [ -f "$LOCKFILE" ]; then
-  runner_pid=$(cat "$LOCKFILE" 2>/dev/null || echo "")
-  if [ -n "$runner_pid" ] && kill -0 "$runner_pid" 2>/dev/null; then
-    echo "[clau] Outra instância rodando (pid $runner_pid). Saindo." >&2
-    exit 0
-  fi
-  echo "[clau] Lock stale (pid $runner_pid morto). Removendo." >&2
-  rm -f "$LOCKFILE"
-fi
-echo $$ > "$LOCKFILE"
+SPECIFIC_TASK="${2:-}"
 
 # ── Trap: devolve task pra origem se interrompido ─────────────────
 cleanup() {
@@ -32,14 +20,12 @@ cleanup() {
       echo "[clau] $sig — '$RUNNING_TASK' devolvida pra pending/"
     fi
   fi
-  rm -f "$LOCKFILE"
 }
 trap 'cleanup SIGINT; exit 1' SIGINT
 trap 'cleanup SIGTERM; exit 1' SIGTERM
 trap 'cleanup EXIT' EXIT
 
 # ── 1) Reap stuck tasks ──────────────────────────────────────────
-# First: reap orphaned tasks (in running/ but no lock file)
 for dir in "$TASKS/running"/*/; do
   [ -d "$dir" ] || continue
   [ -f "$dir/.lock" ] && continue
@@ -48,27 +34,17 @@ for dir in "$TASKS/running"/*/; do
   mv "$dir" "$TASKS/pending/$name" 2>/dev/null || rm -rf "$dir"
 done
 
-# Then: reap locked tasks with dead PIDs or expired timeouts
 for lock in "$TASKS/running"/*/.lock; do
   [ -f "$lock" ] || continue
-  task_pid=$(grep '^pid=' "$lock" | cut -d= -f2)
   started=$(grep '^started=' "$lock" | cut -d= -f2)
   source=$(grep '^source=' "$lock" | cut -d= -f2 || echo "pending")
+  lock_timeout=$(grep '^timeout=' "$lock" | cut -d= -f2 || echo "$TIMEOUT")
   task=$(dirname "$lock")
   name=$(basename "$task")
-  elapsed=$(( $(date +%s) - $(date -d "$started" +%s) ))
+  elapsed=$(( $(date +%s) - $(date -d "$started" +%s 2>/dev/null || echo "0") ))
 
-  # Reap se: PID morto OU timeout estourado
-  should_reap=0
-  if [ -n "$task_pid" ] && ! kill -0 "$task_pid" 2>/dev/null; then
-    echo "[clau] PID $task_pid morto — reaping '$name'"
-    should_reap=1
-  elif [ "$elapsed" -gt $(( TIMEOUT + 300 )) ]; then
+  if [ "$elapsed" -gt $(( lock_timeout + 300 )) ]; then
     echo "[clau] Timeout ${elapsed}s — reaping '$name'"
-    should_reap=1
-  fi
-
-  if [ "$should_reap" = "1" ]; then
     rm -f "$task/.lock"
     if [ "$source" = "recurring" ]; then
       mv "$task" "$TASKS/recurring/$name"
@@ -80,66 +56,83 @@ for lock in "$TASKS/running"/*/.lock; do
   fi
 done
 
-# ── 2) Pick task: pending first, then recurring ──────────────────
+# ── 2) Pick task ─────────────────────────────────────────────────
 TASK=""
 IS_RECURRING=""
 SOURCE_DIR=""
 
-# Pending (one-shot) tem prioridade
-TASK=$(ls -1 "$TASKS/pending/" 2>/dev/null | grep -v '\.gitkeep' | sort | head -1 || true)
-if [ -n "$TASK" ]; then
-  IS_RECURRING="0"
-  SOURCE_DIR="pending"
-fi
-
-# Se não tem pending, pega recurring (round-robin por último executado)
-if [ -z "$TASK" ]; then
-  # Pega a recurring que foi executada há mais tempo (ou nunca)
-  OLDEST_TIME=99999999999
-  for dir in "$TASKS/recurring"/*/; do
-    [ -d "$dir" ] || continue
-    name=$(basename "$dir")
-    ctx="$EPHEMERAL/notes/$name/historico.log"
-    if [ -f "$ctx" ]; then
-      last_ts=$(tail -1 "$ctx" | cut -d'|' -f1 | xargs)
-      last_epoch=$(date -d "$last_ts" +%s 2>/dev/null || echo "0")
-    else
-      last_epoch=0
-    fi
-    if [ "$last_epoch" -lt "$OLDEST_TIME" ]; then
-      OLDEST_TIME=$last_epoch
-      TASK=$name
-    fi
-  done
-  if [ -n "$TASK" ]; then
+if [ -n "$SPECIFIC_TASK" ]; then
+  # Task específica passada como argumento
+  if [ -d "$TASKS/pending/$SPECIFIC_TASK" ]; then
+    TASK="$SPECIFIC_TASK"
+    IS_RECURRING="0"
+    SOURCE_DIR="pending"
+  elif [ -d "$TASKS/recurring/$SPECIFIC_TASK" ]; then
+    TASK="$SPECIFIC_TASK"
     IS_RECURRING="1"
     SOURCE_DIR="recurring"
+  else
+    echo "[clau] Task '$SPECIFIC_TASK' não encontrada em pending/ ou recurring/."
+    exit 1
+  fi
+else
+  # Auto-pick: pending primeiro, depois recurring mais antiga
+  TASK=$(ls -1 "$TASKS/pending/" 2>/dev/null | grep -v '\.gitkeep' | sort | head -1 || true)
+  if [ -n "$TASK" ]; then
+    IS_RECURRING="0"
+    SOURCE_DIR="pending"
+  fi
+
+  if [ -z "$TASK" ]; then
+    OLDEST_TIME=99999999999
+    for dir in "$TASKS/recurring"/*/; do
+      [ -d "$dir" ] || continue
+      name=$(basename "$dir")
+      # Skip se já tá em running (outro worker pegou)
+      [ -d "$TASKS/running/$name" ] && continue
+      ctx="$EPHEMERAL/notes/$name/historico.log"
+      if [ -f "$ctx" ]; then
+        last_ts=$(tail -1 "$ctx" | cut -d'|' -f1 | xargs)
+        last_epoch=$(date -d "$last_ts" +%s 2>/dev/null || echo "0")
+      else
+        last_epoch=0
+      fi
+      if [ "$last_epoch" -lt "$OLDEST_TIME" ]; then
+        OLDEST_TIME=$last_epoch
+        TASK=$name
+      fi
+    done
+    if [ -n "$TASK" ]; then
+      IS_RECURRING="1"
+      SOURCE_DIR="recurring"
+    fi
   fi
 fi
 
-[ -z "${TASK:-}" ] && echo "Sem tarefas pendentes ou recorrentes." && exit 0
+[ -z "${TASK:-}" ] && echo "[clau] Sem tarefas disponíveis." && exit 0
 
-# Skip if task is already in running (previous run died mid-execution)
+# ── 3) Claim task atomicamente (mv é atômico no mesmo fs) ────────
+# Se já tá em running/, outro worker pegou
 if [ -d "$TASKS/running/$TASK" ]; then
-  echo "[clau] '$TASK' já está em running/ (run anterior não fez cleanup). Limpando..."
-  rm -f "$TASKS/running/$TASK/.lock"
-  if [ "$IS_RECURRING" = "1" ]; then
-    rm -rf "$TASKS/running/$TASK"
-  else
-    rm -rf "$TASKS/running/$TASK"
-  fi
+  echo "[clau] '$TASK' já está sendo executada por outro worker."
+  exit 0
 fi
 
 RUNNING_TASK="$TASK"
 
-# ── 3) Move to running + lock ────────────────────────────────────
-mv "$TASKS/$SOURCE_DIR/$TASK" "$TASKS/running/$TASK"
+if ! mv "$TASKS/$SOURCE_DIR/$TASK" "$TASKS/running/$TASK" 2>/dev/null; then
+  echo "[clau] '$TASK' já foi pega por outro worker."
+  RUNNING_TASK=""
+  exit 0
+fi
+
 cat > "$TASKS/running/$TASK/.lock" <<EOF
-pid=$$
 started=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 timeout=$TIMEOUT
 source=$SOURCE_DIR
 EOF
+
+echo "[clau] Worker $$ executando '$TASK' (${SOURCE_DIR}, timeout=${TIMEOUT}s)"
 
 # ── 4) Prepare context ───────────────────────────────────────────
 INSTRUCTIONS=$(cat "$TASKS/running/$TASK/CLAUDE.md")
@@ -201,12 +194,10 @@ DURATION=$((SECONDS - START))
 echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | $STATUS | ${DURATION}s" >> "$CONTEXT_DIR/historico.log"
 
 if [ "$IS_RECURRING" = "1" ]; then
-  # Recorrente: volta pra recurring/
   rm -f "$TASKS/running/$TASK/.lock"
   mv "$TASKS/running/$TASK" "$TASKS/recurring/$TASK"
   echo "[clau] Recorrente '$TASK' devolvida → recurring/"
 else
-  # One-shot: move pra done/failed
   rm -f "$TASKS/running/$TASK/.lock"
   if [ "$STATUS" = "ok" ]; then
     mv "$TASKS/running/$TASK" "$TASKS/done/$TASK"

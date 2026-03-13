@@ -1,33 +1,37 @@
+x-common: &common
+  build:
+    context: .
+    dockerfile: Dockerfile.claude
+  image: claude-nix-sandbox
+  userns_mode: keep-id
+  environment:
+    - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
+    - XDG_RUNTIME_DIR=/run/user/1000
+    - PULSE_SERVER=unix:/run/user/1000/pulse/native
+    - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    - ANTHROPIC_ADMIN_KEY=${ANTHROPIC_ADMIN_KEY:-}
+  volumes:
+    - ${HOME}/.claude:/home/claude/.claude
+    - ${HOME}/.claude.json:/home/claude/.claude.json
+    - ./stow/.claude/commands:/home/claude/.claude/commands
+    - ./stow/.claude/settings.json:/home/claude/.claude/settings.json:ro
+    - ${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:/run/user/1000/${WAYLAND_DISPLAY}
+    - ${XDG_RUNTIME_DIR}/pulse:/run/user/1000/pulse
+    - .:/workspace
+
 services:
+  # Container persistente pra sessões interativas (sandbox, sandbox-shell)
   sandbox:
-    build:
-      context: .
-      dockerfile: Dockerfile.claude
-    image: claude-nix-sandbox
+    <<: *common
     container_name: claude-sandbox
-    userns_mode: keep-id
-    environment:
-      # Permite Clipboard em CLI em Wayland
-      - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
-      - XDG_RUNTIME_DIR=/run/user/1000
-      # PipeWire/PulseAudio para gravação de áudio (Claude /voice)
-      - PULSE_SERVER=unix:/run/user/1000/pulse/native
-      # Anthropic API — uso/billing tracking
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
-      - ANTHROPIC_ADMIN_KEY=${ANTHROPIC_ADMIN_KEY:-}
-    volumes:
-      # Host Claude Attach
-      - ${HOME}/.claude:/home/claude/.claude
-      - ${HOME}/.claude.json:/home/claude/.claude.json
-      - ./stow/.claude/commands:/home/claude/.claude/commands
-      # Settings do Claudinho (stow como fonte de verdade)
-      - ./stow/.claude/settings.json:/home/claude/.claude/settings.json:ro
-      # Wayland display forwarding
-      - ${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:/run/user/1000/${WAYLAND_DISPLAY}
-      # PipeWire/PulseAudio socket para áudio
-      - ${XDG_RUNTIME_DIR}/pulse:/run/user/1000/pulse
-      - .:/workspace
     stdin_open: true
     tty: true
     entrypoint: ["/home/claude/.nix-profile/bin/bash", "-c"]
     command: ["sleep infinity"]
+
+  # Workers one-off pra tasks autônomas (docker compose run)
+  worker:
+    <<: *common
+    profiles: ["worker"]
+    entrypoint: ["/home/claude/.nix-profile/bin/bash"]
+    command: ["/workspace/scripts/clau-runner.sh"]

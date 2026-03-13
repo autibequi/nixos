@@ -12,7 +12,8 @@ RUN nix profile install \
     nixpkgs#python3 \
     nixpkgs#nodejs \
     nixpkgs#wl-clipboard \
-    nixpkgs#sox
+    nixpkgs#sox \
+    nixpkgs#util-linux
 
 # Create non-root user manually (no shadow utils needed)
 RUN echo "claude:x:1000:1000::/home/claude:/bin/bash" >> /etc/passwd && \
