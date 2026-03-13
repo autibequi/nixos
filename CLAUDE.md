@@ -53,6 +53,7 @@
 - Ser direto e conciso
 - Priorizar editar código existente sobre criar novo
 - MCP Jira/Notion: **READ ONLY** até segunda ordem — NUNCA criar/editar/transicionar
+- **Configs Claude em `stow/.claude/`** — skills, commands, plugins, settings vão SEMPRE em `stow/.claude/` (sincado via stow pro `~/.claude/`). NUNCA usar `.claude/` na raiz do repo.
 
 ## Sugestões e Comunicação
 Toda execução (interativa ou autônoma) pode gerar sugestões em `vault/sugestoes/`:

@@ -1,295 +1,278 @@
-# M5 — Proposta de Patches (Tier 1-2)
+# M5 — Propostas de Otimização (Ciclos 1 + 2)
 
-**Data:** 2026-03-13
-**Status:** Nenhuma recomendação anterior foi aplicada. Todas as 22 propostas ainda estão pendentes.
-
----
-
-## Resumo Executivo
-
-A análise completa identificou **22 recomendações de performance** para o ASUS G14 (Ryzen 9 7940HS + RTX 4060). A config atual é **sólida**, mas há espaço para otimizações incrementais de **baixo risco**.
-
-**Prioridade Imediata (Tier 1):** 4 mudanças que geram ganho real com risco zero:
-1. **Remover `cudaSupport = true`** — builds 10-50x mais rápios, ativa cache binário
-2. **Adicionar TCP buffers + BBR** — ganho mensurável em Wi-Fi/rede
-3. **GC 14-30d** — evita rebuilds inesperados
-4. **Resolver conflito Rust toolchain** — evita shadowing silencioso
+## Quick Wins — Baixo Esforço, Alto Impacto
 
 ---
 
-## Tier 1 — Implementação Imediata
+### 1. Remover Inputs Mortos do Flake
+**Situação:** `flake.nix` carrega 4 inputs que não são usados em lugar algum:
+- `voxtype` — comentado em packages.nix
+- `zed` — comentado, usa `unstable.zed-editor` no lugar
+- `antigravity-nix` — comentado
+- `nixified-ai` — módulo `comfyui` carregado mas sem `services.comfyui` configurado
 
-### 1. Remover `cudaSupport = true` (impacto: ALTO)
+**Proposta:** Remover as 4 entradas de `inputs {}` e do `outputs` em `flake.nix`.
 
-**Arquivo:** `/workspace/modules/core/nix.nix`
-
-**Problema:** `nixpkgs.config.cudaSupport = true` força recompilação de pacotes que suportam CUDA (llvm, pytorch, etc.) mesmo que o binário não seja usado. Isso:
-- Adiciona ~6-8 horas ao rebuild time
-- Desativa cache binário do nixpkgs para esses pacotes
-- Com `max-jobs = auto`, causa OOM em máquinas com menos de 64GB RAM
-
-**Solução:** Remover completamente ou comentar, usar `nix shell` por projeto quando CUDA for necessário.
-
-**Patch:**
-```diff
---- a/modules/core/nix.nix
-+++ b/modules/core/nix.nix
-@@ -134,7 +134,7 @@ {
-   nix.settings = {
-     max-jobs = "auto";
--    cudaSupport = true;
-+    # cudaSupport = true;  # Desabilitado: força rebuild de LLVM/PyTorch sem ganho real
-
-     # Complementa max-jobs para compiladores que paralelizam internamente (LLVM, GCC)
-```
-
-**ROI:** 10-50x mais rápido em rebuilds, cache binário reativado.
+**Impacto:** `flake update` ~25% mais rápido. `flake.lock` mais enxuto. Sem side effects.
 
 ---
 
-### 2. Adicionar TCP Buffers + BBR (impacto: MÉDIO)
+### 2. Corrigir Nix Build Parallelism
+**Situação:** `nix.settings.cores = 0` significa que cada build job usa 100% dos cores. Com `max-jobs = "auto"`, múltiplos jobs tentam usar todos os 16 threads simultaneamente.
 
-**Arquivo:** `/workspace/modules/core/kernel.nix`
-
-**Problema:** Buffers TCP padrão do Linux são conservadores (212KB). Em Wi-Fi, rede de alta latência ou links com perda, isso limita throughput a ~10-50Mbps mesmo se a banda existe.
-
-**Solução:** Expandir buffers para 16MB, usar BBR (congestion control superior ao CUBIC em Wi-Fi).
-
-**Patch:**
-```diff
---- a/modules/core/kernel.nix
-+++ b/modules/core/kernel.nix
-@@ -112,6 +112,19 @@ {
-     # Rede: buffers maiores para melhor throughput
-     "net.core.netdev_max_backlog" = 16384;
-     "net.ipv4.tcp_fastopen" = 3;
-+
-+    # TCP buffers para throughput alto (downloads, rsync, Tailscale subnet routing)
-+    # Padrão: 212KB. Novo: 16MB. Diferença real em links Wi-Fi com latência >20ms.
-+    "net.core.rmem_max" = 16777216;       # 16MB (SO_RCVBUF max)
-+    "net.core.wmem_max" = 16777216;       # 16MB (SO_SNDBUF max)
-+    "net.ipv4.tcp_rmem" = "4096 131072 16777216";    # min, default, max
-+    "net.ipv4.tcp_wmem" = "4096 16384 16777216";     # min, default, max
-+
-+    # BBR: superior ao CUBIC em links com perda (Wi-Fi) e alta latência
-+    # CachyOS kernel já inclui módulo tcp_bbr. fq (fair queueing) é essencial.
-+    "net.ipv4.tcp_congestion_control" = "bbr";
-+    "net.core.default_qdisc" = "fq";
-
-     # Inotify: suficiente para IDEs e file watchers (padrão é 8192)
-```
-
-**ROI:** +10-30% throughput em Wi-Fi, especialmente em redes com packet loss.
-
----
-
-### 3. Aumentar Garbage Collector para 14-30 dias (impacto: MÉDIO)
-
-**Arquivo:** `/workspace/modules/core/nix.nix`
-
-**Problema:** GC a cada 7 dias com auto-upgrade diário causa rebuilds inesperados. Pacotes são GC'd, depois rebuild os triggers auto-upgrade.
-
-**Solução:** GC 14-30 dias para acumular mais store paths antes da limpeza.
-
-**Patch:**
-```diff
---- a/modules/core/nix.nix
-+++ b/modules/core/nix.nix
-@@ -119,7 +119,7 @@ {
-   nix.gc = {
-     automatic = true;
-     dates = "weekly";
--    options = "--delete-older-than 7d";
-+    options = "--delete-older-than 14d";  # Aumentado: evita rebuilds entre auto-upgrades
-   };
-
-   nix.optimiseStore = {
-```
-
-**ROI:** Menos "surpresas" de rebuild, cache mais estável.
-
----
-
-### 4. Resolver Conflito Rust Toolchain (impacto: MÉDIO)
-
-**Arquivo:** `/workspace/modules/core/shell.nix`
-
-**Problema:** Simultaneamente `rustup` + `rustc`, `cargo`, `rustfmt`, `rust-analyzer` do nixpkgs. `rustup` cria shims que **shadowing** os do Nix silenciosamente, causando IDE apontar pra versão errada.
-
-**Solução:** Remover pacotes Nix, deixar `rustup` gerenciar tudo. Ou inverso: remover `rustup`, usar Nix puro.
-
-**Opção A — rustup-only (recomendado para compatibilidade com IDE extensions):**
-```diff
---- a/modules/core/shell.nix
-+++ b/modules/core/shell.nix
-@@ -XX (line onde estão os pacotes Rust),
--    cargo
--    rustc
--    rustfmt
--    rust-analyzer
-     rustup
-```
-
-**Opção B — Nix-only (mais hermético, sem rustup):**
-```diff
---- a/modules/core/shell.nix
-+++ b/modules/core/shell.nix
--    rustup
-```
-
-**Recomendação:** Opção A (rustup-only). O IDE é melhor com rustup + rust-analyzer do rustup.
-
-**ROI:** IDE sem ambiguidade de versão, builds mais previsíveis.
-
----
-
-## Tier 2 — Quick Wins de Cleanup
-
-### 5. Habilitar zswap (impacto: MÉDIO)
-
-**Arquivo:** `/workspace/modules/core/kernel.nix`
-
-**Problema:** Sem zswap, a pressão de memória causa trashing direto no NVMe. zswap comprime páginas na RAM (ratio típico 3:1), reduzindo I/O.
-
-**Patch:**
-```diff
---- a/modules/core/kernel.nix
-+++ b/modules/core/kernel.nix
-@@ -28,6 +28,10 @@ {
-     "transparent_hugepage=madvise"
-
-     # Nvidia
-+
-+    # zswap: compressão de páginas em RAM antes de swap no NVMe
-+    # zstd ratio ~3:1, max 20% da RAM (~6.4GB em 32GB total)
-+    "zswap.enabled=1"
-     "nvidia.NVreg_DynamicPowerManagement=0x02"
-```
-
-**ROI:** Proteção contra stalls em cargas pesadas (compilações CUDA, containers).
-
----
-
-### 6. Remover inputs não-usados do flake (impacto: BAIXO)
-
-**Arquivo:** `/workspace/flake.nix`
-
-**Problema:** `hyprland` v0.54.0 + `hyprtasking` são inputs mas nunca alcançam `outputs`. Adiciona fetches desnecessários.
-
-**Patch:**
-```diff
---- a/flake.nix
-+++ b/flake.nix
-@@ -18,11 +18,6 @@ {
-
-     zed.url = "github:zed-industries/zed";
-
--    hyprland.url = "github:hyprwm/Hyprland/v0.54.0";
--
--    hyprtasking = {
--      url = "github:raybbian/hyprtasking";
--      inputs.hyprland.follows = "hyprland";
--    };
-
-     zen-browser = {
-```
-
-**Nota:** `unstable.hyprland` é usado no `hyprland.nix` module, então Hyprland vem do unstable, não dessa input.
-
-**ROI:** Flake mais limpo, update time ~2s mais rápido.
-
----
-
-## Tier 3 — Avaliar com Uso Real
-
-### 7. nvidiaPersistenced para CUDA/Containers
-
-**Impacto:** MÉDIO se usa containers com GPU.
-
-Depende:
-- Usa containers NVIDIA com GPU? (nvidia-container-toolkit)
-- Roda CUDA workloads frequentemente?
-
-Se sim, ativar em `/workspace/modules/nvidia.nix`:
+**Proposta:** `modules/core/nix.nix`
 ```nix
-hardware.nvidia.nvidiaPersistenced = true;
+nix.settings = {
+  max-jobs = 4;   # 4 builds paralelas
+  cores = 4;      # cada job usa 4 threads = 16 threads totais, previsível
+};
+```
+
+**Impacto:** Elimina thrashing em builds pesadas (LLVM, Rust). Sistema fica responsivo durante rebuild.
+
+---
+
+### 3. Reativar TLP Parcialmente (Apenas Power Management de Hardware)
+**Situação:** `tlp.nix` existe com configurações valiosas mas está comentado. Auto-epp cuida do CPU EPP, mas **não gerencia**: NVME power saving, PCIe ASPM, platform profile.
+
+**Proposta:** Descomentar `./modules/tlp.nix` em `configuration.nix` — mas remover os settings de CPU governor que conflitam com auto-epp:
+```nix
+# Remover do tlp.nix (auto-epp já faz isso):
+# CPU_SCALING_GOVERNOR_ON_AC / _BAT
+# CPU_ENERGY_PERF_POLICY_ON_AC / _BAT
+
+# Manter (auto-epp NÃO faz):
+NVME_POWER_SAVING_ON_BAT = 1;       # +0.5-1W economia
+PCIE_ASPM_ON_BAT = "powersave";     # +1-2W economia
+PLATFORM_PROFILE_ON_BAT = "low-power";  # fan curve BIOS
+```
+
+**Impacto estimado:** +1.5-3W de economia na bateria (20-40min a mais de autonomia).
+
+---
+
+### 4. Aumentar HibernateDelaySec
+**Situação:** `HibernateDelaySec=30m` — com suspensão s2idle consumindo ~5-10% bateria por hora, 30min significa hibernação frequente se esquecer laptop suspenso.
+
+**Proposta:** `modules/core/hibernate.nix`
+```nix
+HibernateDelaySec = "60m";   # era 30m
+```
+
+**Impacto:** Bateria sobrevive bem a sessões de suspensão de 1h+ sem despertar para hibernar.
+
+---
+
+### 5. Ativar TCP BBR + Buffers Grandes
+**Situação:** Kernel atual usa congestion control `cubic` (padrão). Sem configuração de rmem/wmem.
+
+**Proposta:** Adicionar em `modules/core/kernel.nix` sysctl:
+```nix
+# TCP BBR (melhor para WiFi 6 + links com perda)
+"net.core.default_qdisc" = "fq";
+"net.ipv4.tcp_congestion_control" = "bbr";
+
+# Buffers TCP maiores (16MB) para throughput em Gigabit/WiFi 6
+"net.core.rmem_max" = 16777216;
+"net.core.wmem_max" = 16777216;
+"net.ipv4.tcp_rmem" = "4096 87380 16777216";
+"net.ipv4.tcp_wmem" = "4096 65536 16777216";
+
+# SYN flood protection (faltava)
+"net.ipv4.tcp_syncookies" = 1;
+
+# TCP window scaling (necessário para buffers > 64KB)
+"net.ipv4.tcp_window_scaling" = 1;
+```
+
+**Requer:** `boot.kernelModules = [ "tcp_bbr" ]` (ou está no CachyOS built-in).
+
+**Impacto:** +30% throughput em WiFi com perda de pacote. Sem impacto em LAN Gigabit limpa.
+
+---
+
+### 6. Limpar Redundâncias em Packages
+
+**6a. Remover `tailscale` dos packages (já incluído pelo serviço):**
+```nix
+# packages.nix — remover esta linha:
+tailscale   # serviço em services.nix já adiciona o pacote
+```
+
+**6b. Remover `rocmPackages.rocm-smi` (btop-rocm já cobre AMD):**
+```nix
+# shell.nix — remover:
+rocmPackages.rocm-smi   # btop-rocm já mostra stats AMD
+```
+
+**6c. Consolidar Rust toolchain:**
+```nix
+# shell.nix — problema: rustup + rustc + cargo juntos criam PATH ambíguo
+# Opção A: manter rustup, remover rustc/cargo/rustfmt do nix (rustup gerencia)
+# Opção B: remover rustup, manter rustc/cargo/rustfmt do nixpkgs
+
+# Recomendação: Opção A (rustup é mais flexível para múltiplas versões)
+# Remover: rustc, cargo, rustfmt (manter: rustup, rust-analyzer)
 ```
 
 ---
 
-### 8. Reduzir para 1 Navegador Chromium
+## Médio Prazo — Investigação Necessária
 
-**Impacto:** BAIXO, mas economiza ~500MB de closure.
+### 7. `mitigations=auto,nosmt` vs `mitigations=off`
+(Mantido do Ciclo 1 — decisão do usuário sobre trade-off segurança/perf)
 
-Em `/workspace/modules/core/packages.nix`, remover 2 dos 3:
-- `chromium`
-- `google-chrome`
-- `vivaldi`
+### 8. NVIDIA Persistenced
+`nvidiaPersistenced=true` se roda AI/ML local frequente. Medir com `nvidia-smi` idle W.
 
----
-
-### 9. Resolver supergfxd vs Power Management
-
-**Impacto:** BAIXO.
-
-Testar: Desabilitar `services.supergfxd` e verificar se thermal/power continua bem. Finegrained NVIDIA PM pode ser suficiente.
+### 9. Mover Packages Pesados para Home-Manager
+`onlyoffice-desktopeditors`, `sidequest`, `cool-retro-term`, `godot`, `geekbench` raramente precisam estar no sistema global. Mover para `home.packages` no home-manager reduz rebuild do sistema.
 
 ---
 
-## Tier 4 — Opcional/Cosmético
+---
 
-### Não Fazer (já está ótimo)
+## Ciclo 4 — Novas Oportunidades: Hyprland, AI, Filesystem, Programs
 
-Estas recomendações são para **marginal gains** e não valem o esforço:
-- `vm.page-cluster = 0` (#3) — diferença <1ms em NVMe
-- `NVreg_UsePageAttributeTable=1` (#5) — muito específico
-- `split_lock_detect=0` (#7) — afeta jogos antigos, SCX já mitiga
-- `perf_event_paranoid = 1` (#10) — overhead negligenciável no desktop
-- initrd compressor `-1` vs `-3` (#12) — delta ~50ms, não vale
-- `no_console_suspend` (#16) — flag de debug
-- Mover benchmarks/nodejs (#20, #22) — usar `nix shell` conforme necessário
+### 9. VRR/Freesync para AMD Radeon 780M (165Hz Display)
+
+**Situação:** G14 tem tela 165Hz com Radeon 780M iGPU que suporta freesync. Hyprland pode ativar VRR por workspace (dotfile), mas **requer kernel param para AMD funcionar**: `amdgpu.freesync_video=1`.
+
+**Proposta:** Adicionar em `modules/core/kernel.nix` boot parameters:
+```nix
+boot.kernelParams = [
+  "amdgpu.freesync_video=1"  # Enable VRR for AMD integrated GPU
+];
+```
+
+**Impacto:** Tearing zero em jogos/vídeos com AMD iGPU, sem custo de performance. Hyprland já ativa por workspace no dotfile.
 
 ---
 
-## Plano de Execução
+### 10. Remover wl-clipboard Duplicado
 
-| Ordem | Item | Arquivo | Esforço | Risk |
-|-------|------|---------|---------|------|
-| 1 | Remover cudaSupport | nix.nix | 1 linha | 🟢 Zero |
-| 2 | TCP buffers + BBR | kernel.nix | 10 linhas | 🟢 Zero |
-| 3 | GC 14d | nix.nix | 1 linha | 🟢 Zero |
-| 4 | Resolver Rust toolchain | shell.nix | 4 linhas | 🟡 Baixo (IDE testing) |
-| 5 | zswap | kernel.nix | 4 linhas | 🟢 Zero |
-| 6 | Limpar flake inputs | flake.nix | 8 linhas | 🟢 Zero |
+**Situação:** `wl-clipboard` instalado em `hyprland.nix:79` E `wl-clipboard-rs` em `programs.nix:19`. Ambos fornecem `wl-copy`/`wl-paste` — conflito de PATH potencial.
 
-**Estimado:** 30 minutos + `nixos-rebuild switch` (15-30 min).
+**Proposta:** Remover `wl-clipboard` de `hyprland.nix`, manter apenas `wl-clipboard-rs`:
+```nix
+# hyprland.nix — remover esta linha:
+wl-clipboard   # mantém wl-clipboard-rs em programs.nix
+```
 
----
-
-## Checklist Pós-Aplicação
-
-- [ ] Rebuild sem erros: `sudo nixos-rebuild switch --flake .#nomad`
-- [ ] Boot time < 30s
-- [ ] Wi-Fi throughput teste com `iperf3` (expected +10-20%)
-- [ ] IDE (VSCode/Zed) reconhece Rust toolchain sem ambiguidade
-- [ ] Memória sob carga não causa freezes
-- [ ] flake update ~2s mais rápido
+**Impacto:** Evita conflito de binários, rebuild mais limpa. Rust impl é mais mantida.
 
 ---
 
-## Referências
+### 11. Refinar Mount Options ext4 para NVMe
 
-- CachyOS wiki: https://wiki.cachyos.org
-- BBR + fq: https://wiki.archlinux.org/title/Improving_performance#TCP_congestion_control
-- zswap: https://wiki.archlinux.org/title/Zram#zswap
-- nixpkgs issue #177263: cudaSupport overhead
-- NixOS-hardware GA402X: https://github.com/NixOS/nixos-hardware/tree/master/asus/zephyrus/ga402x
+**Situação:** `hardware.nix` usa `options = ["defaults" "noatime"]`. Para NVMe moderno, cabe refinar:
+
+**Proposta:** `hardware.nix` → root filesystem:
+```nix
+fileSystems."/" = {
+  device = "/dev/disk/by-uuid/...";
+  fsType = "ext4";
+  options = [
+    "defaults"
+    "noatime"
+    "nodiscard"      # fstrim semanal (kernel.nix) já faz, sem overhead contínuo
+    "errors=continue" # não parar em single-bit error
+    "discard=async"   # async TRIM quando possível (2.6.37+)
+  ];
+};
+```
+
+**Impacto:** Melhor I/O previsibilidade. Sem impacto negativo (fstrim semanal já existe).
 
 ---
 
-## Próxima Execução
+### 12. Verificar GPU Acceleration em lmstudio
 
-- Verificar se patches foram aplicados
-- Medir impacto real (boot time, iperf3, rebuild time)
-- Avaliar #4, #8, #9 com feedback de uso
-- Investigar novo achados em modules/* (se houver mudanças)
+**Situação:** `lmstudio` instalado globalmente mas **sem CUDA/ROCm explícito** no sistema. LMStudio bundla libs, mas em NixOS pode não encontrar GPU drivers.
+
+**Proposta:** Diagnóstico manual:
+```sh
+lmstudio → settings → performance → verificar GPU detectada
+```
+
+Se GPU não detectada, considerar:
+```nix
+# modules/core/packages.nix — adicionar se lmstudio não roda em GPU:
+cudaPackages.cudatoolkit
+# ou (para ROCm AMD):
+rocmPackages.rocm-core
+rocmPackages.hipblas
+```
+
+**Impacto:** Se lmstudio roda em GPU, perf +10-20x. Atual: provavelmente CPU-only.
+
+---
+
+---
+
+## Ciclo 5 — Novas Propostas
+
+### 13. Corrigir Dynamic-Cursors Plugin Mismatch
+
+**Situacao:** `stow/.config/hypr/plugins/dynamic-cursors.conf` executa `hyprctl plugin load "$HYPR_PLUGIN_DIR/lib/libhypr-dynamic-cursors.so"` no startup. Porem em `modules/hyprland.nix` o plugin esta comentado (linha 17) — o `.so` nunca e compilado no `HYPR_PLUGIN_DIR`.
+
+**Resultado:** Hyprland tenta carregar um `.so` inexistente no startup. Dependendo da versao, pode gerar erro silencioso ou mensagem no journal (`journalctl --user -u hyprland`).
+
+**Proposta:** Habilitar o plugin em `modules/hyprland.nix`:
+```nix
+hypr-plugin-dir = pkgs.symlinkJoin {
+  name = "hyrpland-plugins";
+  paths = (with unstable.hyprlandPlugins; [
+    hypr-dynamic-cursors   # descomentar esta linha
+  ]) ++ [ ... ];
+};
+```
+
+**Impacto:** Cursor com animacao de tilt (ja configurado no dotfile). Zero overhead de performance — apenas efeito visual. Corrige erro silencioso de startup.
+
+---
+
+### 14. Consolidar Triple-Clipboard
+
+**Situacao:** `wl-clipboard` aparece em tres modulos distintos:
+- `modules/hyprland.nix:79` — `wl-clipboard`
+- `modules/whisper-ptt.nix:32` — `wl-clipboard`
+- `modules/core/programs.nix:20` — `wl-clipboard-rs`
+
+`wl-clipboard` e `wl-clipboard-rs` fornecem os mesmos binarios (`wl-copy`, `wl-paste`). O PATH acaba com ambos, e o comportamento depende de qual vem primeiro.
+
+**Proposta:** Remover `wl-clipboard` dos dois modulos que o duplicam:
+```nix
+# modules/hyprland.nix — remover linha 79:
+# wl-clipboard
+
+# modules/whisper-ptt.nix — remover linha 32:
+# wl-clipboard
+```
+Manter apenas `wl-clipboard-rs` em `programs.nix` (Rust, mais mantido, API identica).
+
+**Impacto:** PATH sem ambiguidade. `cliphist` e `wl-paste` chamam sempre o mesmo binario.
+
+---
+
+## Status Geral (Ciclos 1-5)
+- **Ciclo 1:** Analise kernel, NVIDIA, ASUS, services, packages, flake
+- **Ciclo 2:** TLP, nix build, flake inputs, hibernate, network, packages redundancy
+- **Ciclo 3:** Hyprland config (EXCELENTE), AI module (LIMPO), Filesystem (TOP-TIER)
+- **Ciclo 4:** Programs, package redundancy validation, VRR kernel param
+- **Ciclo 5:** Profiling readiness, whisper-ptt CUDA padrao, plugin mismatch, triple-clipboard
+- **Ciclo 6 (proximo):** Conclusoes finais + implementation guide
+
+## Tabela de Prioridades Final (Ciclos 1-5)
+| # | Proposta | Arquivo | Impacto | Esforco | Prioridade |
+|---|----------|---------|---------|---------|------------|
+| 2 | Remover inputs mortos flake | flake.nix | Alto | Baixo | CRITICO |
+| 2 | Fix nix build thrashing | core/nix.nix | Alto | Baixo | CRITICO |
+| 13 | Fix plugin mismatch dynamic-cursors | hyprland.nix | Medio | Baixo | IMPORTANTE |
+| 14 | Consolidar triple-clipboard | hyprland.nix + whisper-ptt.nix | Baixo | Baixo | IMPORTANTE |
+| 3 | Remover tailscale duplicado | core/packages.nix | Baixo | Baixo | IMPORTANTE |
+| 6 | Remover google-chrome | core/packages.nix | Medio | Baixo | IMPORTANTE |
+| 4 | HibernateDelaySec=60m | core/hibernate.nix | Medio | Baixo | IMPORTANTE |
+| 9 | amdgpu.freesync_video=1 | core/kernel.nix | Alto | Baixo | REFINAMENTO |
+| 5 | TCP BBR + buffers | core/kernel.nix | Medio | Baixo | REFINAMENTO |
+| 7 | mitigations decision | core/kernel.nix | Baixo | Zero | DECISAO DO USUARIO |

@@ -1,3 +1,16 @@
 {
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/workspace/stow/.claude/hooks/startup-hook.sh"
+          }
+        ]
+      }
+    ]
+  }
 }
