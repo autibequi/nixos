@@ -23,13 +23,16 @@
 ├── projetos/            ← projetos de trabalho (submódulos)
 │   └── CLAUDE.md        ← sub-personalidade trabalho (override quando entra)
 ├── scripts/             ← clau-runner.sh, api-usage.sh, etc.
-├── tasks/               ← sistema de tarefas autônomas
-│   ├── recurring/       ← imortais (rodam toda hora, voltam pra fila)
-│   ├── pending/         ← one-shot (rodam uma vez, vão pra done/failed)
-│   ├── running/         ← em execução (gitignored)
-│   ├── done/            ← concluídas (gitignored)
-│   └── failed/          ← falharam (gitignored)
-├── vault/               ← mount point Obsidian (docker-compose bind mount, não versionado)
+├── artefatos/           ← artefatos não-markdown (binários, exports, etc.)
+├── vault/               ← mount point Obsidian (docker-compose bind mount)
+│   ├── _agent/          ← área do agente (versionada)
+│   │   ├── tasks/       ← sistema de tarefas autônomas
+│   │   │   ├── recurring/  ← imortais (rodam toda hora, voltam pra fila)
+│   │   │   ├── pending/    ← one-shot (rodam uma vez, vão pra done/failed)
+│   │   │   ├── running/    ← em execução (gitignored)
+│   │   │   ├── done/       ← concluídas (gitignored)
+│   │   │   └── failed/     ← falharam (gitignored)
+│   │   └── reports/     ← relatórios gerados por tasks (gitignored)
 │   ├── dashboard.md     ← auto-gerado pelo runner
 │   └── sugestoes/       ← canal task→user (sugestões, ideias, conclusões)
 ├── .ephemeral/          ← memória efêmera (gitignored)
@@ -64,13 +67,13 @@ Toda execução (interativa ou autônoma) pode gerar sugestões em `vault/sugest
 
 ## Subconsciente
 Quando identificar algo que merece reflexão mas não é urgente:
-1. Criar task em `tasks/pending/` com prefixo (pensar-, pesquisar-, avaliar-, proto-)
+1. Criar task em `vault/_agent/tasks/pending/` com prefixo (pensar-, pesquisar-, avaliar-, proto-)
 2. Worker processa na próxima hora
-3. Resultado fica em `vault/` e `.ephemeral/notes/`
+3. Resultado fica em `vault/_agent/reports/` e `.ephemeral/notes/`
 
 ## Sistema de Tasks
-- `tasks/recurring/` — imortais: schedule `always` (o dia todo) ou `night` (00h-06h)
-- `tasks/pending/` — one-shot: rodam e vão pra done/failed
+- `vault/_agent/tasks/recurring/` — imortais: schedule `always` (o dia todo) ou `night` (00h-06h)
+- `vault/_agent/tasks/pending/` — one-shot: rodam e vão pra done/failed
 - Cada task tem `CLAUDE.md` com frontmatter (timeout, model, schedule, mcp) e `memoria.md`
 - Frontmatter: `timeout`, `model` (haiku/sonnet), `schedule` (always/night), `mcp` (true/false)
 - Lifecycle: `once` (default pending), `recurring` (imortal), `until-done` (roda incrementalmente até completar)

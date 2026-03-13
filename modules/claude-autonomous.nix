@@ -18,8 +18,8 @@ let
     fi
 
     # Verifica se há tasks disponíveis antes de levantar container
-    pending=$(ls -1 tasks/pending/ 2>/dev/null | grep -v '\.gitkeep' | head -1 || true)
-    recurring=$(ls -1 tasks/recurring/ 2>/dev/null | grep -v '\.gitkeep' | head -1 || true)
+    pending=$(ls -1 vault/_agent/tasks/pending/ 2>/dev/null | grep -v '\.gitkeep' | head -1 || true)
+    recurring=$(ls -1 vault/_agent/tasks/recurring/ 2>/dev/null | grep -v '\.gitkeep' | head -1 || true)
     if [ -z "$pending" ] && [ -z "$recurring" ]; then
       echo "[clau] Sem tarefas disponíveis."
       exit 0
@@ -35,16 +35,16 @@ let
     cd ${projectDir}
 
     # Devolve tasks órfãs em running/
-    for dir in tasks/running/*/; do
+    for dir in vault/_agent/tasks/running/*/; do
       [ -d "$dir" ] || continue
       name=$(basename "$dir")
       source=$(grep '^source=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "pending")
       rm -f "$dir/.lock"
       if [ "$source" = "recurring" ]; then
-        mv "$dir" "tasks/recurring/$name" 2>/dev/null || rm -rf "$dir"
+        mv "$dir" "vault/_agent/tasks/recurring/$name" 2>/dev/null || rm -rf "$dir"
         echo "[clau-cleanup] $name → recurring/"
       else
-        mv "$dir" "tasks/pending/$name" 2>/dev/null || rm -rf "$dir"
+        mv "$dir" "vault/_agent/tasks/pending/$name" 2>/dev/null || rm -rf "$dir"
         echo "[clau-cleanup] $name → pending/"
       fi
     done

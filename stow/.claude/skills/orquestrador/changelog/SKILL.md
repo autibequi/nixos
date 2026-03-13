@@ -89,19 +89,19 @@ Apresentar o resultado usando emojis para status e tipo, e formatação markdown
 
 ## Passo 5 — Salvar changelog em arquivo
 
-Após montar o changelog, **sempre** salvar o conteúdo completo em arquivo dentro de `tasks/`, com o nome `changelog.<data>.md`, onde `<data>` é a data atual no formato `YYYY-MM-DD`.
+Após montar o changelog, **sempre** salvar o conteúdo completo em arquivo dentro de `vault/_agent/tasks/`, com o nome `changelog.<data>.md`, onde `<data>` é a data atual no formato `YYYY-MM-DD`.
 
 **Onde salvar:**
-- **Se invocado dentro de uma feature** (existe pasta `tasks/FUK2-*/` ativa): salvar dentro da pasta da feature → `tasks/<pasta>/changelog.<data>.md`
-- **Se invocado standalone** (sem feature ativa): identificar a task a partir da branch atual de cada repositório e criar a pasta correspondente em `tasks/`:
+- **Se invocado dentro de uma feature** (existe pasta `vault/_agent/tasks/FUK2-*/` ativa): salvar dentro da pasta da feature → `vault/_agent/tasks/<pasta>/changelog.<data>.md`
+- **Se invocado standalone** (sem feature ativa): identificar a task a partir da branch atual de cada repositório e criar a pasta correspondente em `vault/_agent/tasks/`:
   1. Ler o nome da branch: `HOME=/tmp git -C <repo>/ branch --show-current`
   2. Extrair o código da task (ex: `FUK2-1234` de `FUK2-1234-descricao` ou da branch diretamente)
-  3. Criar pasta `tasks/<codigo>/` se não existir
-  4. Salvar em `tasks/<codigo>/changelog.<data>.md`
+  3. Criar pasta `vault/_agent/tasks/<codigo>/` se não existir
+  4. Salvar em `vault/_agent/tasks/<codigo>/changelog.<data>.md`
   5. Se não for possível extrair um código de task da branch (ex: branch `main`), perguntar ao dev qual código usar
 
-Exemplo dentro de feature: `tasks/FUK2-1234/changelog.2026-03-09.md`
-Exemplo standalone: `tasks/FUK2-1234/changelog.2026-03-09.md`
+Exemplo dentro de feature: `vault/_agent/tasks/FUK2-1234/changelog.2026-03-09.md`
+Exemplo standalone: `vault/_agent/tasks/FUK2-1234/changelog.2026-03-09.md`
 
 O arquivo deve conter exatamente o mesmo conteúdo markdown apresentado ao dev.
 
@@ -118,7 +118,7 @@ Quer que eu expanda os detalhes de alguma categoria ou arquivo específico?
 
 ## Regras
 
-- **Sempre salvar o changelog em arquivo dentro de `tasks/`** — na pasta da feature se houver, senão criar pasta a partir do código da branch
+- **Sempre salvar o changelog em arquivo dentro de `vault/_agent/tasks/`** — na pasta da feature se houver, senão criar pasta a partir do código da branch
 - **Analisar o diff real** (`git diff`), não adivinhar pelas extensões
 - **Extrair assinaturas completas** de métodos Go (incluindo receiver, params e retorno)
 - **Extrair props e eventos** de componentes Vue (não apenas o nome do arquivo)

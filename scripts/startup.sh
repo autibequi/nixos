@@ -79,7 +79,7 @@ echo
 
 # --- Tasks pending ---
 echo -e "${B}Tasks pending:${R}"
-PENDING="$WS/tasks/pending"
+PENDING="$WS/vault/_agent/tasks/pending"
 if [[ -d "$PENDING" ]] && ls "$PENDING"/*/ >/dev/null 2>&1; then
   for task in "$PENDING"/*/; do
     name=$(basename "$task")
@@ -103,7 +103,7 @@ else
 fi
 
 # --- Tasks recurring ---
-RECURRING="$WS/tasks/recurring"
+RECURRING="$WS/vault/_agent/tasks/recurring"
 if [[ -d "$RECURRING" ]] && ls "$RECURRING"/*/ >/dev/null 2>&1; then
   echo
   echo -e "${B}Tasks recurring:${R}"

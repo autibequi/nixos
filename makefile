@@ -177,39 +177,39 @@ stop:
 	@$(MAKE) --no-print-directory reset
 
 reset:
-	@for dir in tasks/running/*/; do \
+	@for dir in vault/_agent/tasks/running/*/; do \
 		[ -d "$$dir" ] || continue; \
 		name=$$(basename "$$dir"); \
 		source=$$(grep '^source=' "$$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "pending"); \
 		rm -f "$$dir/.lock"; \
 		if [ "$$source" = "recurring" ]; then \
-			mv "$$dir" "tasks/recurring/$$name"; \
+			mv "$$dir" "vault/_agent/tasks/recurring/$$name"; \
 			echo "[reset] $$name → recurring/"; \
 		else \
-			mv "$$dir" "tasks/pending/$$name"; \
+			mv "$$dir" "vault/_agent/tasks/pending/$$name"; \
 			echo "[reset] $$name → pending/"; \
 		fi; \
 	done
 	@rm -f .ephemeral/.clau.lock
-	@[ -z "$$(ls -A tasks/running/ 2>/dev/null | grep -v '\.gitkeep')" ] && echo "[reset] running/ limpo." || echo "[reset] AVISO: ainda há tasks em running/"
+	@[ -z "$$(ls -A vault/_agent/tasks/running/ 2>/dev/null | grep -v '\.gitkeep')" ] && echo "[reset] running/ limpo." || echo "[reset] AVISO: ainda há tasks em running/"
 
 status:
 	@echo "=== Worker ==="
 	@docker ps --filter "label=com.docker.compose.service=worker" --format "table {{.ID}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || echo "(nenhum)"
 	@echo "\n=== Systemd ==="
 	@systemctl is-active claude-autonomous.service 2>/dev/null || echo "inactive"
-	@echo "\n=== Recurring ($(shell ls -1 tasks/recurring/ 2>/dev/null | grep -cv '\.gitkeep' || echo 0)) ==="
-	@for dir in tasks/recurring/*/; do \
+	@echo "\n=== Recurring ($(shell ls -1 vault/_agent/tasks/recurring/ 2>/dev/null | grep -cv '\.gitkeep' || echo 0)) ==="
+	@for dir in vault/_agent/tasks/recurring/*/; do \
 		[ -d "$$dir" ] || continue; \
 		name=$$(basename "$$dir"); \
 		schedule=$$(sed -n '/^---$$/,/^---$$/p' "$$dir/CLAUDE.md" 2>/dev/null | grep -m1 '^schedule:' | awk '{print $$2}' || echo "?"); \
 		model=$$(sed -n '/^---$$/,/^---$$/p' "$$dir/CLAUDE.md" 2>/dev/null | grep -m1 '^model:' | awk '{print $$2}' || echo "?"); \
 		echo "  $$name ($$schedule, $$model)"; \
 	done
-	@echo "\n=== Pending ($(shell ls -1 tasks/pending/ 2>/dev/null | grep -cv '\.gitkeep' || echo 0)) ==="
-	@ls -1 tasks/pending/ 2>/dev/null | grep -v '\.gitkeep' || echo "(vazio)"
+	@echo "\n=== Pending ($(shell ls -1 vault/_agent/tasks/pending/ 2>/dev/null | grep -cv '\.gitkeep' || echo 0)) ==="
+	@ls -1 vault/_agent/tasks/pending/ 2>/dev/null | grep -v '\.gitkeep' || echo "(vazio)"
 	@echo "\n=== Running ==="
-	@ls -1 tasks/running/ 2>/dev/null | grep -v '\.gitkeep' || echo "(vazio)"
+	@ls -1 vault/_agent/tasks/running/ 2>/dev/null | grep -v '\.gitkeep' || echo "(vazio)"
 	@echo "\n=== Últimas 5 execuções ==="
 	@if [ -f ".ephemeral/usage/$$(date +%Y-%m).jsonl" ]; then \
 		tail -5 ".ephemeral/usage/$$(date +%Y-%m).jsonl" 2>/dev/null | \
@@ -228,7 +228,7 @@ new:
 	task_model="$${model:-$$([ "$$task_type" = "recurring" ] && echo "haiku" || echo "sonnet")}"; \
 	task_schedule="$${schedule:-$$([ "$$task_type" = "recurring" ] && echo "night" || echo "always")}"; \
 	task_timeout="$${timeout:-$$([ "$$task_type" = "recurring" ] && echo "300" || echo "900")}"; \
-	task_dir="tasks/$$task_type/$(name)"; \
+	task_dir="vault/_agent/tasks/$$task_type/$(name)"; \
 	mkdir -p "$$task_dir"; \
 	printf '%s\n' \
 		"---" \
@@ -286,7 +286,7 @@ ping:
 
 clean-tasks:
 	@echo "Limpando done/ e failed/..."
-	@rm -rf tasks/done/* tasks/failed/*
+	@rm -rf vault/_agent/tasks/done/* vault/_agent/tasks/failed/*
 	@echo "Limpo."
 
 # ── Teste & Validação ─────────────────────────────────────────────
@@ -333,9 +333,9 @@ test-runner:
 	@echo "=== test-runner: verificando runner ==="
 	@echo -n "  clau-runner.sh: "; \
 	[ -x scripts/clau-runner.sh ] && echo "[OK] executável" || echo "[AVISO] não-executável (chmod +x)"
-	@echo -n "  tasks/recurring: "; ls -1 tasks/recurring/ 2>/dev/null | grep -cv '\.gitkeep' || echo "0"
-	@echo -n "  tasks/pending:   "; ls -1 tasks/pending/ 2>/dev/null | grep -cv '\.gitkeep' || echo "0"
-	@echo -n "  tasks/running:   "; ls -1 tasks/running/ 2>/dev/null | grep -cv '\.gitkeep' || echo "0"
+	@echo -n "  tasks/recurring: "; ls -1 vault/_agent/tasks/recurring/ 2>/dev/null | grep -cv '\.gitkeep' || echo "0"
+	@echo -n "  tasks/pending:   "; ls -1 vault/_agent/tasks/pending/ 2>/dev/null | grep -cv '\.gitkeep' || echo "0"
+	@echo -n "  tasks/running:   "; ls -1 vault/_agent/tasks/running/ 2>/dev/null | grep -cv '\.gitkeep' || echo "0"
 	@echo -n "  lockfile:        "; \
 	[ -f .ephemeral/.clau.lock ] && echo "existe ($(shell wc -c < .ephemeral/.clau.lock 2>/dev/null || echo 0)B)" || echo "limpo"
 	@echo -n "  CLAU_TIMEOUT:    default 300s (recurring) / 900s (pending)"
@@ -371,11 +371,11 @@ doctor:
 	@echo -n "  swap:      "; free -h | awk '/^Swap:/{print $$2 " (usado: " $$3 ")"}'
 	@echo ""
 	@echo "=== tasks ==="
-	@echo -n "  recurring: "; ls -1 tasks/recurring/ 2>/dev/null | grep -cv '\.gitkeep' || echo "0"
-	@echo -n "  pending:   "; ls -1 tasks/pending/ 2>/dev/null | grep -cv '\.gitkeep' || echo "0"
-	@echo -n "  running:   "; ls -1 tasks/running/ 2>/dev/null | grep -cv '\.gitkeep' || echo "0"
-	@echo -n "  done:      "; ls -1 tasks/done/ 2>/dev/null | grep -cv '\.gitkeep' || echo "0"
-	@echo -n "  failed:    "; ls -1 tasks/failed/ 2>/dev/null | grep -cv '\.gitkeep' || echo "0"
+	@echo -n "  recurring: "; ls -1 vault/_agent/tasks/recurring/ 2>/dev/null | grep -cv '\.gitkeep' || echo "0"
+	@echo -n "  pending:   "; ls -1 vault/_agent/tasks/pending/ 2>/dev/null | grep -cv '\.gitkeep' || echo "0"
+	@echo -n "  running:   "; ls -1 vault/_agent/tasks/running/ 2>/dev/null | grep -cv '\.gitkeep' || echo "0"
+	@echo -n "  done:      "; ls -1 vault/_agent/tasks/done/ 2>/dev/null | grep -cv '\.gitkeep' || echo "0"
+	@echo -n "  failed:    "; ls -1 vault/_agent/tasks/failed/ 2>/dev/null | grep -cv '\.gitkeep' || echo "0"
 	@echo ""
 	@echo "=== vault ==="
 	@echo -n "  dashboard: "; [ -f vault/dashboard.md ] && echo "existe ($$(wc -l < vault/dashboard.md) linhas)" || echo "não existe (rode make auto)"

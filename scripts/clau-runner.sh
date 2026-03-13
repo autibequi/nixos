@@ -2,7 +2,7 @@
 set -euo pipefail
 
 WORKSPACE="/workspace"
-TASKS="$WORKSPACE/tasks"
+TASKS="$WORKSPACE/vault/_agent/tasks"
 EPHEMERAL="$WORKSPACE/.ephemeral"
 LOCKFILE="$EPHEMERAL/.clau.lock"
 CLAU_VERBOSE="${CLAU_VERBOSE:-0}"
@@ -20,7 +20,7 @@ DEFAULT_MODEL_PENDING="sonnet"
 DEFAULT_SCHEDULE="night"
 DEFAULT_MAX_TURNS=25
 
-mkdir -p "$EPHEMERAL" "$TASKS/running" "$TASKS/done" "$TASKS/failed" "$WORKSPACE/vault/sugestoes"
+mkdir -p "$EPHEMERAL" "$TASKS/running" "$TASKS/done" "$TASKS/failed" "$WORKSPACE/vault/sugestoes" "$WORKSPACE/vault/_agent/reports"
 
 # Ensure no-mcp config exists
 [ -f "$EPHEMERAL/no-mcp.json" ] || echo '{"mcpServers":{}}' > "$EPHEMERAL/no-mcp.json"
