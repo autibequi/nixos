@@ -33,5 +33,7 @@ services:
   worker:
     <<: *common
     profiles: ["worker"]
+    mem_limit: 8g
+    memswap_limit: 12g
     entrypoint: ["/home/claude/.nix-profile/bin/bash"]
     command: ["/workspace/scripts/clau-runner.sh"]

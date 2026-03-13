@@ -30,12 +30,9 @@ let
   '';
 
   # Cleanup: devolve tasks órfãs de running/ pro lugar de origem
+  # NÃO mata o worker — ele pode ser de um make clau manual
   cleanupScript = pkgs.writeShellScript "clau-cleanup" ''
     cd ${projectDir}
-
-    # Para container worker se ainda estiver rodando
-    ${compose} kill worker 2>/dev/null || true
-    ${compose} rm -f worker 2>/dev/null || true
 
     # Devolve tasks órfãs em running/
     for dir in tasks/running/*/; do
@@ -72,16 +69,14 @@ in {
       # Cleanup automático em qualquer saída (sucesso, falha, timeout, kill)
       ExecStopPost = "${cleanupScript}";
 
-      # Mata após 10min — processa o que der, cleanup devolve o resto
-      TimeoutStartSec = "10min";
+      # Tasks rodam em batches de 3 paralelos (~10min/batch)
+      # 10 tasks = 4 batches = ~40min + margem
+      TimeoutStartSec = "45min";
       TimeoutStopSec = "2min";
 
-      # Restart automático em falha (com backoff)
-      Restart = "on-failure";
-      RestartSec = "30s";
-      # Não reinicia em loop infinito
-      StartLimitIntervalSec = "10min";
-      StartLimitBurst = 3;
+      # Sem restart automático — o timer já re-executa a cada hora
+      # Restart on-failure causava loop: cleanup mata worker → falha → restart → cleanup mata de novo
+      Restart = "no";
 
       Environment = [
         "HOME=/home/${user}"
@@ -102,15 +97,22 @@ in {
   };
 
   # Service dedicado pra reset manual: systemctl start claude-autonomous-reset
+  # Este SIM mata o worker (é ação explícita do usuário)
   systemd.services.claude-autonomous-reset = {
-    description = "Reset stuck Claudinho tasks";
+    description = "Reset stuck Claudinho tasks (kills worker)";
     conflicts = [ "claude-autonomous.service" ];
     serviceConfig = {
       Type = "oneshot";
       User = user;
       Group = "users";
       WorkingDirectory = projectDir;
-      ExecStart = "${cleanupScript}";
+      ExecStart = pkgs.writeShellScript "clau-hard-reset" ''
+        cd ${projectDir}
+        echo "[clau-reset] Parando worker..."
+        ${compose} kill worker 2>/dev/null || true
+        ${compose} rm -f worker 2>/dev/null || true
+        ${cleanupScript}
+      '';
       Environment = [
         "HOME=/home/${user}"
         "XDG_RUNTIME_DIR=/run/user/1000"

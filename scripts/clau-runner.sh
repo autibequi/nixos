@@ -7,7 +7,10 @@ EPHEMERAL="$WORKSPACE/.ephemeral"
 LOCKFILE="$EPHEMERAL/.clau.lock"
 TASK_TIMEOUT="${CLAU_TIMEOUT:-600}"
 SPECIFIC_TASK="${1:-}"
-MAX_TASKS="${CLAU_MAX_TASKS:-10}"
+MAX_TASKS="${CLAU_MAX_TASKS:-5}"
+MAX_PARALLEL="${CLAU_MAX_PARALLEL:-1}"
+NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}"
+export NODE_OPTIONS
 
 mkdir -p "$EPHEMERAL" "$TASKS/running" "$TASKS/done" "$TASKS/failed"
 
@@ -141,14 +144,27 @@ BLOCK
 # ── Executar UMA task (chamado diretamente ou como sub-processo) ──
 run_single_task() {
   local task="$1" source_dir="$2" is_recurring="$3"
-  local block
+  local block logfile
   block=$(build_task_block "$task" "$source_dir" "$is_recurring")
   local memoria=""
   [ -f "$TASKS/running/$task/memoria.md" ] && memoria="
 ### Memória evolutiva
 $(cat "$TASKS/running/$task/memoria.md")"
 
+  # Log individual por task
+  logfile="$EPHEMERAL/notes/$task/last-run.log"
+  mkdir -p "$EPHEMERAL/notes/$task"
+
+  echo "[clau:$task] Iniciando Claude ($(date -u +%H:%M:%S))..."
+
+  # Desabilita MCP servers pra tasks que não precisam (economia ~1GB RAM)
+  local mcp_flags=()
+  if ! grep -qi 'mcp\|nix-search\|nixos-option' "$TASKS/running/$task/CLAUDE.md" 2>/dev/null; then
+    mcp_flags=(--mcp-config '{"mcpServers":{}}' --strict-mcp-config)
+  fi
+
   timeout "$TASK_TIMEOUT" claude --permission-mode bypassPermissions --model sonnet \
+    "${mcp_flags[@]}" \
     -p "Modo autônomo. Tarefa: $task
 Hora atual: $(date -u +%Y-%m-%dT%H:%M:%SZ)
 Budget: ${TASK_TIMEOUT}s (~10min)
@@ -168,7 +184,19 @@ $([ "$is_recurring" = "1" ] && echo "- Mova $TASKS/running/$task para $TASKS/rec
 $([ "$is_recurring" != "1" ] && echo "- Se falha: mova $TASKS/running/$task para $TASKS/failed/$task")
 - Registre resultado em $EPHEMERAL/notes/$task/historico.log (formato: TIMESTAMP | ok ou fail | duração)
 - Registre uso em $EPHEMERAL/usage/$(date +%Y-%m).jsonl: {\"date\":\"TIMESTAMP\",\"task\":\"$task\",\"duration\":N,\"status\":\"STATUS\",\"type\":\"$([ "$is_recurring" = "1" ] && echo recurring || echo oneshot)\"}
-- Resuma em uma linha." 2>&1 || true
+- Resuma em uma linha." > "$logfile" 2>&1
+  local exit_code=$?
+
+  if [ $exit_code -eq 0 ]; then
+    echo "[clau:$task] ✓ Concluída ($(date -u +%H:%M:%S))"
+  else
+    echo "[clau:$task] ✗ Falhou/timeout exit=$exit_code ($(date -u +%H:%M:%S))"
+  fi
+  # Mostra últimas 5 linhas do output pra dar visibilidade
+  echo "[clau:$task] --- últimas linhas ---"
+  tail -5 "$logfile" 2>/dev/null | sed "s/^/[clau:$task]   /"
+  echo "[clau:$task] --- log completo: $logfile ---"
+  return $exit_code
 }
 
 # ── Task específica: roda só ela e sai ───────────────────────────
@@ -186,7 +214,7 @@ if [ -n "$SPECIFIC_TASK" ]; then
   fi
 
   claim_task "$SPECIFIC_TASK" "$source_dir" || exit 1
-  run_single_task "$SPECIFIC_TASK" "$source_dir" "$is_recurring"
+  run_single_task "$SPECIFIC_TASK" "$source_dir" "$is_recurring" || true
 
   echo "[clau] Done (task específica)."
   exit 0
@@ -194,7 +222,6 @@ fi
 
 # ── Coletar tasks: RECORRENTES primeiro, depois PENDING ──────────
 task_count=0
-MANIFEST=""
 TASK_NAMES=()
 TASK_SOURCES=()
 TASK_RECURRING=()
@@ -217,7 +244,6 @@ done
 for task in $(for k in "${!recurring_ages[@]}"; do echo "$k ${recurring_ages[$k]}"; done | sort -k2 -n | cut -d' ' -f1); do
   [ "$task_count" -ge "$MAX_TASKS" ] && break
   claim_task "$task" "recurring" || continue
-  MANIFEST+=$(build_task_block "$task" "recurring" "1")
   TASK_NAMES+=("$task")
   TASK_SOURCES+=("recurring")
   TASK_RECURRING+=("1")
@@ -229,7 +255,6 @@ for task in $(ls -1 "$TASKS/pending/" 2>/dev/null | grep -v '\.gitkeep' | sort);
   [ -z "$task" ] && continue
   [ "$task_count" -ge "$MAX_TASKS" ] && break
   claim_task "$task" "pending" || continue
-  MANIFEST+=$(build_task_block "$task" "pending" "0")
   TASK_NAMES+=("$task")
   TASK_SOURCES+=("pending")
   TASK_RECURRING+=("0")
@@ -242,53 +267,49 @@ if [ "$task_count" -eq 0 ]; then
 fi
 
 echo "[clau] $task_count tasks coletadas: ${TASK_NAMES[*]}"
-echo "[clau] Lançando Claude sequencial (budget ${TOTAL_TIMEOUT}s)..."
+echo "[clau] Lançando em batches de $MAX_PARALLEL (${TASK_TIMEOUT}s/task)..."
 
-# ── Montar lista de roteamento ───────────────────────────────────
-ROUTING=""
-for i in "${!TASK_NAMES[@]}"; do
-  t="${TASK_NAMES[$i]}"
-  s="${TASK_SOURCES[$i]}"
-  r="${TASK_RECURRING[$i]}"
-  if [ "$r" = "1" ]; then
-    ROUTING+="- **${t}** (RECORRENTE): mova tasks/running/${t} → tasks/recurring/${t}
-"
-  else
-    ROUTING+="- **${t}** (ONE-SHOT): sucesso → tasks/done/${t} | falha → tasks/failed/${t}
-"
-  fi
+# ── Lançar tasks em batches paralelos ────────────────────────────
+start_time=$SECONDS
+failed_count=0
+batch_num=0
+
+for ((batch_start=0; batch_start<task_count; batch_start+=MAX_PARALLEL)); do
+  batch_num=$((batch_num + 1))
+  batch_end=$((batch_start + MAX_PARALLEL))
+  [ "$batch_end" -gt "$task_count" ] && batch_end=$task_count
+  batch_size=$((batch_end - batch_start))
+
+  echo "[clau] ── Batch $batch_num: tasks $((batch_start+1))-$batch_end de $task_count ──"
+
+  PIDS=()
+  BATCH_TASKS=()
+
+  for ((i=batch_start; i<batch_end; i++)); do
+    t="${TASK_NAMES[$i]}"
+    s="${TASK_SOURCES[$i]}"
+    r="${TASK_RECURRING[$i]}"
+    echo "[clau] ▶ Lançando '$t' (${s}, $([ "$r" = "1" ] && echo "recorrente" || echo "one-shot"))..."
+    (run_single_task "$t" "$s" "$r" || true) &
+    PIDS+=($!)
+    BATCH_TASKS+=("$t")
+  done
+
+  echo "[clau] ${#PIDS[@]} processos no batch $batch_num. Aguardando..."
+
+  for j in "${!PIDS[@]}"; do
+    pid=${PIDS[$j]}
+    task=${BATCH_TASKS[$j]}
+    if wait "$pid" 2>/dev/null; then
+      echo "[clau] ✓ '$task' concluída (PID $pid)"
+    else
+      echo "[clau] ✗ '$task' falhou ou timeout (PID $pid, exit $?)"
+      failed_count=$((failed_count + 1))
+    fi
+  done
+
+  echo "[clau] Batch $batch_num concluído."
 done
 
-# ── Lançar UM Sonnet sequencial ──────────────────────────────────
-start_time=$SECONDS
-
-timeout "$TOTAL_TIMEOUT" claude --permission-mode bypassPermissions --model sonnet \
-  -p "Modo autônomo — execução SEQUENCIAL de tasks.
-Hora atual: $(date -u +%Y-%m-%dT%H:%M:%SZ)
-Budget total: ${TOTAL_TIMEOUT}s (~10min)
-Tasks coletadas: $task_count
-
-## INSTRUÇÃO CRÍTICA: EXECUÇÃO SEQUENCIAL COM BUDGET
-
-Você é um executor sequencial. Execute CADA task uma por uma, na ordem listada.
-NÃO use sub-agentes. NÃO use a tool Agent. Faça tudo você mesmo, diretamente.
-
-### Regras:
-1. Execute as tasks NA ORDEM listada (recorrentes primeiro, depois pending)
-2. Para cada task: leia o CLAUDE.md, execute, salve contexto, faça roteamento
-3. Seja rápido e objetivo — você tem ~10min para TODAS as tasks
-4. Se o tempo estiver acabando, priorize salvar contexto das tasks já feitas
-5. Se uma task falhar, registre o erro e passe pra próxima (não trave)
-6. Ao terminar cada task, faça o roteamento IMEDIATAMENTE (não deixe pro final)
-
-### Roteamento pós-execução (faça após CADA task):
-$ROUTING
-- Registre em \`.ephemeral/notes/<task>/historico.log\`: \`TIMESTAMP | ok ou fail | duração\`
-- Registre uso em \`.ephemeral/usage/$(date +%Y-%m).jsonl\`: \`{\"date\":\"TIMESTAMP\",\"task\":\"NOME\",\"duration\":N,\"status\":\"STATUS\",\"type\":\"recurring ou oneshot\"}\`
-
-## Tasks (execute nesta ordem):
-
-$MANIFEST" 2>&1 || true
-
 duration=$((SECONDS - start_time))
-echo "[clau] Done — executor finalizou em ${duration}s ($task_count tasks)"
+echo "[clau] Done — $task_count tasks ($batch_num batches de $MAX_PARALLEL), ${failed_count} falhas, ${duration}s total"
