@@ -1,2 +1,3 @@
-# Ignore everything — Dockerfile.claude doesn't COPY anything from context
+# Ignore everything except claudeOS/
 *
+!claudeOS/

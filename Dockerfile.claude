@@ -1,41 +1,44 @@
 FROM nixos/nix:latest
 
-# Enable flakes and nix-command
+# Enable flakes and configure Nix for multi-user (daemon) mode
 RUN mkdir -p /etc/nix && \
-    echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf
+    echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf && \
+    echo "trusted-users = root claude" >> /etc/nix/nix.conf
 
-# Install common tools Claude Code might need
-RUN nix profile install \
-    nixpkgs#jq \
-    nixpkgs#yt-dlp \
-    nixpkgs#ffmpeg \
-    nixpkgs#python3 \
-    nixpkgs#nodejs \
-    nixpkgs#wl-clipboard \
-    nixpkgs#sox \
-    nixpkgs#util-linux \
-    nixpkgs#systemdMinimal \
-    nixpkgs#gh
+# Copy declarative package definition
+COPY claudeOS/ /tmp/claudeOS/
 
-# Create non-root user manually (no shadow utils needed)
-RUN echo "claude:x:1000:1000::/home/claude:/bin/bash" >> /etc/passwd && \
-    echo "claude:x:1000:" >> /etc/group && \
-    echo "systemd-journal:x:190:claude" >> /etc/group && \
-    mkdir -p /home/claude/.claude && \
-    chown -R 1000:1000 /home/claude
+# Install all packages as a single buildEnv (declarativo, uma linha)
+RUN nix-build /tmp/claudeOS/ -A env -o /tmp/env && \
+    nix-env -i /tmp/env && \
+    rm -rf /tmp/claudeOS /tmp/env && \
+    nix-collect-garbage -d
 
-# Install Claude Code with custom npm prefix
+# Install Claude Code via npm (flake-only pkg, no legacy nix support)
 ENV NPM_CONFIG_PREFIX=/usr/local
 ENV PATH="/usr/local/bin:/root/.nix-profile/bin:${PATH}"
 RUN npm install -g @anthropic-ai/claude-code
 
+# Create non-root user with required groups
+RUN echo "claude:x:1000:1000::/home/claude:/bin/bash" >> /etc/passwd && \
+    echo "claude:x:1000:" >> /etc/group && \
+    echo "systemd-journal:x:190:claude" >> /etc/group && \
+    echo "docker:x:999:claude" >> /etc/group && \
+    mkdir -p /home/claude/.claude && \
+    chown -R 1000:1000 /home/claude
+
 # Copy nix profile to claude user and create /bin/bash symlink
 RUN cp -r /root/.nix-profile /home/claude/.nix-profile && \
     chown -R 1000:1000 /home/claude/.nix-profile && \
-    ln -sf /root/.nix-profile/bin/bash /bin/bash
+    ln -sf /home/claude/.nix-profile/bin/bash /bin/bash
+
+# Entrypoint: start nix-daemon then drop to claude user
+COPY scripts/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 USER claude
 ENV PATH="/usr/local/bin:/home/claude/.nix-profile/bin:${PATH}"
 ENV HOME=/home/claude
 
 WORKDIR /workspace
+ENTRYPOINT ["/entrypoint.sh"]

@@ -42,7 +42,7 @@ services:
     container_name: claude-sandbox
     stdin_open: true
     tty: true
-    entrypoint: ["/home/claude/.nix-profile/bin/bash", "-c"]
+    entrypoint: ["/bin/bash", "-c"]
     command: ["sleep infinity"]
 
   # Worker heavy — tasks longas (hourly)
@@ -50,7 +50,7 @@ services:
     <<: *common
     mem_limit: 12g
     memswap_limit: 16g
-    entrypoint: ["/home/claude/.nix-profile/bin/bash"]
+    entrypoint: ["/bin/bash"]
     command: ["/workspace/scripts/clau-runner.sh"]
 
   # Worker fast — tasks rápidas (a cada 10 min)
@@ -58,5 +58,5 @@ services:
     <<: *common
     mem_limit: 4g
     memswap_limit: 6g
-    entrypoint: ["/home/claude/.nix-profile/bin/bash"]
+    entrypoint: ["/bin/bash"]
     command: ["/workspace/scripts/clau-runner.sh"]
