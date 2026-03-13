@@ -56,9 +56,11 @@ tasks/**/.lock
 tasks/**/contexto.md
 tasks/.obsidian/
 
-# task artifacts (auto-gerados, duplicados em nested dirs)
-tasks/**/avaliar-m5/
-tasks/**/review-cached-ldi-toc/
+# task nested duplicates (auto-gerados por bug de tasks que criam subpasta com mesmo nome)
+tasks/*/*/avaliar-m5/
+tasks/*/*/review-cached-ldi-toc/
+tasks/*/*/melhorar-automacoes/
+tasks/*/*/parceiro/
 
 # vault: Obsidian sync interface
 # dashboard e sugestões são auto-gerados, .obsidian é config local

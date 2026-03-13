@@ -33,6 +33,12 @@ Ler logs recentes do runner e das tasks, identificar padrões problemáticos, ge
 - Custo diário anormal (spike de tokens)
 - Modelo errado sendo usado (sonnet onde deveria ser haiku)
 
+### 5. Logs do host (`/host/journal/`)
+- Journald logs do systemd — erros de nvidia, OOM killer, serviços falhando
+- Kernel panics ou warnings
+- Podman/Docker errors
+- Nota: use `journalctl --directory=/host/journal --since '1 hour ago' --priority=err` se journalctl disponível, senão leia binários com cautela
+
 ## Entregável
 Atualize `<diretório de contexto>/contexto.md` com:
 

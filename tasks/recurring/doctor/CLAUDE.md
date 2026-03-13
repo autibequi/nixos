@@ -34,6 +34,13 @@ Verificar a saúde do container, workspace e sistema de tarefas. Reportar proble
 - stow/ existe com estrutura de dotfiles
 - Skills existem em stow/.claude/skills/
 
+### Host (read-only em /host/)
+- `/host/proc/meminfo` — RAM do host (warn se <2GB livre)
+- `/host/proc/loadavg` — load average (warn se >8 em 5min)
+- `/host/proc/uptime` — uptime do host
+- `/host/journal/` — logs systemd (erros de nvidia, OOM, serviços falhando)
+- `/host/podman.sock` — se acessível, checar containers rodando
+
 ### Performance
 - Espaço em disco (`df -h /workspace`)
 - Tamanho do .ephemeral/ (não crescendo demais?)
