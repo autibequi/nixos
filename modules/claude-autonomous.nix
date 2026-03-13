@@ -47,6 +47,14 @@ let
 
     SERVICE=$( [ "$TIER" = "fast" ] && echo "worker-fast" || echo "worker" )
 
+    # Ensure podman network exists (compose needs it)
+    COMPOSE_PROJECT=$(basename ${projectDir})
+    NETWORK="''${COMPOSE_PROJECT}_default"
+    if ! ${pkgs.podman}/bin/podman network exists "$NETWORK" 2>/dev/null; then
+      echo "[clau:$TIER] Criando network $NETWORK..."
+      ${pkgs.podman}/bin/podman network create "$NETWORK" 2>/dev/null || true
+    fi
+
     PIDS=()
     for i in $(seq 1 $MAX_WORKERS); do
       WORKER_ID="$TIER-$i"
