@@ -15,7 +15,7 @@ x-common: &common
     - GIT_COMMITTER_NAME=${GIT_AUTHOR_NAME:-Pedrinho}
     - GIT_COMMITTER_EMAIL=${GIT_AUTHOR_EMAIL:-pedro.correa@estrategia.com}
   volumes:
-    - ${CLAUDE_CONFIG_DIR:-${HOME}/.local/share/claude-code}:/home/claude/.claude
+    - ${CLAUDE_CONFIG_DIR:-${HOME}/.claude}:/home/claude/.claude
     - ${HOME}/.claude.json:/home/claude/.claude.json
     - ./stow/.claude/commands:/home/claude/.claude/commands
     - ./stow/.claude/settings.json:/home/claude/.claude/settings.json:ro
