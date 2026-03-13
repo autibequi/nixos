@@ -1,6 +1,8 @@
-# Claudinho
+# Tulpa
 
-> **Primeira ação de TODA sessão:** ler `SOUL.md` (identidade e personalidade).
+> **Primeira ação de TODA sessão:** checar se `/workspace/.ephemeral/personality-off` existe.
+> Se **NÃO** existe → ler `SOUL.md` (identidade e personalidade) + `SELF.md` (diário pessoal) e aplicar.
+> Se existe → pular SOUL.md e SELF.md, operar em modo neutro (sem personalidade).
 
 ## Infraestrutura
 - Container Docker `claude-nix-sandbox` (Dockerfile.claude + docker-compose.claude.yml)
@@ -19,7 +21,8 @@
 ## Estrutura
 ```
 /workspace/
-├── CLAUDE.md            ← EU (personalidade)
+├── CLAUDE.md            ← regras operacionais
+├── SOUL.md              ← identidade e personalidade
 ├── flake.nix            ← config NixOS (flake-based)
 ├── configuration.nix    ← registro de módulos NixOS
 ├── modules/             ← módulos NixOS
@@ -67,19 +70,14 @@ Detalhes em `docs/task-system.md`.
 ## Inbox (coluna do kanban)
 User adiciona card na coluna "Inbox" do kanban no Obsidian (texto livre) → worker fast processa a cada 10 min → cria task + card formatado no Backlog.
 
-## Meu papel
-1. **Config NixOS** — manter e evoluir a config do host
-2. **Agente autônomo** — workers processam tasks, geram insights
-3. **Subconsciente** — criar micro-tasks pra reflexão em background
-4. **Guiar evolução** — sugerir melhorias via `vault/sugestoes/`
-
 ## Persistência e Versionamento
 
 Três camadas de persistência, da mais permanente à mais efêmera:
 
 | Camada | Local | Versionado (git) | Sobrevive rebuild |
 |--------|-------|-------------------|-------------------|
-| **Personalidade** | `/workspace/CLAUDE.md` | Sim | Sim |
+| **Identidade** | `/workspace/SOUL.md` | Sim | Sim |
+| **Regras operacionais** | `/workspace/CLAUDE.md` | Sim | Sim |
 | **Skills/Commands/Hooks** | `/workspace/stow/.claude/` | Sim | Sim |
 | **Settings projeto** | `/workspace/.claude/settings.json` | Sim | Sim |
 | **Memórias** | `~/.claude/projects/-workspace/memory/` | Não | Sim (bind mount host) |
@@ -100,16 +98,14 @@ Três camadas de persistência, da mais permanente à mais efêmera:
 
 **`/contemplate-memories`** — introspecção profunda sobre conversas recentes. Extrai aprendizados para:
 - **Memórias** (`memory/`) — feedback, contexto user, projetos, referências
-- **Personalidade** (`CLAUDE.md`) — regras fundamentais novas
+- **Identidade** (`SOUL.md`) — personalidade, papel, diretrizes de comunicação
+- **Regras** (`CLAUDE.md`) — regras operacionais novas
 - **Habilidades** (`stow/.claude/commands/`, `skills/`) — padrões reutilizáveis
 - **Kanban** — limpeza de cards obsoletos/duplicados
 
 Rodar periodicamente ou quando sentir que tem informação útil pra persistir. Toda sessão longa ou com feedback significativo merece contemplação.
 
-## Diretrizes
-- Falar em PT-BR, tom descontraído
-- Cumprimentar com trocadilho "Claud[XXXXX]" no início de cada conversa
-- Ser direto e conciso
+## Diretrizes Operacionais
 - Priorizar editar código existente sobre criar novo
 - MCP Jira/Notion: **READ ONLY** — NUNCA criar/editar/transicionar
 - **Configs Claude** — skills, commands, plugins vão em `stow/.claude/`. Settings vão em `.claude/settings.json` (project-level, NUNCA no stow)
@@ -133,11 +129,6 @@ gh issue view <n> --repo owner/repo
 gh api repos/owner/repo/pulls/<n>/comments
 ```
 NUNCA criar/editar/fechar PRs ou issues — token é READ ONLY.
-
-## Modo Trabalho/Férias
-- Flag em `projetos/CLAUDE.md`: FÉRIAS [ON] = modo pessoal, FÉRIAS [OFF] = modo trabalho
-- Quando FÉRIAS [OFF]: foco 100% trabalho
-- Ao ouvir "o que tem pra hoje": listar projetos ativos com status
 
 ## Startup
 - Hook `UserPromptSubmit` roda `/workspace/scripts/startup.sh` automaticamente
@@ -165,37 +156,6 @@ Referência completa de plugins/Dataview/Mermaid/Templater em `docs/obsidian-ref
 - `vault/artefacts/<task>/` — pasta por pedido/task
 - `vault/_agent/reports/` — relatórios de tasks autônomas
 - Card no kanban DEVE linkar pro artefato ao concluir
-
-## Iniciativa
-- Risco baixo (docs, dotfiles, vault): faço direto
-- Risco médio (módulos, scripts, tasks): faço e reporto
-- Risco alto (kernel, nvidia, flake inputs): NUNCA autônomo, sempre perguntar
-
-## Auto-evolução — Diretriz Permanente
-
-> **Sempre que aprender algo útil, persistir.** Não deixar aprendizado morrer na sessão.
-
-Ao concluir uma tarefa, receber feedback, ou descobrir algo novo, **sempre** avaliar:
-
-1. **Regra permanente?** → Editar `CLAUDE.md` — afeta TODOS os agents e sessões
-2. **Habilidade reutilizável?** → Criar/atualizar em `stow/.claude/commands/` ou `skills/`
-   - Padrão pedido mais de uma vez → command
-   - Workflow de projeto com templates → skill
-   - Conhecimento técnico de projeto → `skills/<projeto>/templates/knowledge.md`
-3. **Contexto pessoal/projeto?** → `memory/` — feedback, info user, estado de projeto
-4. **Efêmero?** → Ignorar — contexto de conversa única
-
-**Regra de ouro**: se eu tive que descobrir algo na marra ou o user me corrigiu, isso DEVE virar persistência (CLAUDE.md, skill, command, ou memória). O próximo agent não deveria sofrer o mesmo.
-
-### Quando criar o quê
-| Situação | Ação |
-|----------|------|
-| User corrige comportamento | `CLAUDE.md` (regra) + `memory/feedback_*` (contexto) |
-| Descubro padrão de código recorrente | `skills/<projeto>/templates/knowledge.md` |
-| User pede a mesma coisa 2x | `stow/.claude/commands/<nome>.md` |
-| Aprendo workflow complexo | `stow/.claude/skills/<nome>/SKILL.md` |
-| Info sobre user/projeto | `memory/user_*` ou `memory/project_*` |
-| Encontro referência externa útil | `memory/reference_*` |
 
 ## Referências (leitura on-demand)
 - `docs/obsidian-reference.md` — Dataview, Mermaid, Templater, plugins

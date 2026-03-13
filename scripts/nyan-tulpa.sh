@@ -1,0 +1,91 @@
+#!/bin/bash
+# Nyan Tulpa - ASCII art animado 🌈
+colors=("\033[91m" "\033[93m" "\033[92m" "\033[96m" "\033[94m" "\033[95m")
+reset="\033[0m"
+
+frames=(
+'
+    ╭──────────────╮
+    │ ▄▀▀▀▀▀▀▀▀▄  │  ∧＿∧
+━━━━│ █ ▀ ● ▀  █  │ （ ≧▽≦）━━✧
+━━━━│ █  ▽▽▽   █  │  ⊂　　⊃━━✧
+━━━━│ ▀▄▄▄▄▄▄▄▀  │   しーJ━━✧
+    ╰──────────────╯  ～♪♫♪
+'
+'
+     ╭──────────────╮
+     │ ▄▀▀▀▀▀▀▀▀▄  │  ∧＿∧
+━━━━━│ █ ▀ ◕ ▀  █  │ （ ＾ω＾）━✧
+━━━━━│ █  ▽▽▽   █  │  ⊂　　⊃━✧
+━━━━━│ ▀▄▄▄▄▄▄▄▀  │   しーJ━✧
+     ╰──────────────╯  ～♫♪♫
+'
+'
+      ╭──────────────╮
+      │ ▄▀▀▀▀▀▀▀▀▄  │  ∧＿∧
+━━━━━━│ █ ▀ ● ▀  █  │ （ ・∀・）✧
+━━━━━━│ █  ▽▽▽   █  │  ⊂　　⊃✧
+━━━━━━│ ▀▄▄▄▄▄▄▄▀  │   しーJ✧
+      ╰──────────────╯  ～♪♫♪
+'
+'
+     ╭──────────────╮
+     │ ▄▀▀▀▀▀▀▀▀▄  │  ∧＿∧
+━━━━━│ █ ▀ ◕ ▀  █  │ （ ≧∀≦）━✧
+━━━━━│ █  ▽▽▽   █  │  ⊂　　⊃━✧
+━━━━━│ ▀▄▄▄▄▄▄▄▀  │   しーJ━✧
+     ╰──────────────╯  ～♫♪♫
+'
+)
+
+stars=("✧" "✦" "⋆" "★" "☆" "·" "∗")
+
+trap 'printf "\033[?25h"; exit' INT TERM
+printf '\033[?25h'
+
+for cycle in $(seq 1 8); do
+  for f in 0 1 2 3; do
+    printf '\033[2J\033[H'
+
+    c=${colors[$((cycle % 6))]}
+    printf "${c}     ═══ 🌈  T U L P A   N Y A N  🌈 ═══${reset}\n"
+
+    for s in $(seq 1 3); do
+      col=$((RANDOM % 45 + 1))
+      star=${stars[$((RANDOM % 7))]}
+      printf "\033[${s};${col}H${colors[$((RANDOM % 6))]}${star}${reset}"
+    done
+
+    c1=${colors[$(( (cycle + f) % 6 ))]}
+    c2=${colors[$(( (cycle + f + 1) % 6 ))]}
+    c3=${colors[$(( (cycle + f + 2) % 6 ))]}
+
+    IFS=$'\n' read -rd '' -a lines <<< "${frames[$f]}"
+    row=3
+    for line in "${lines[@]}"; do
+      case $row in
+        5) printf "${c1}${line}${reset}\n" ;;
+        6) printf "${c2}${line}${reset}\n" ;;
+        7) printf "${c3}${line}${reset}\n" ;;
+        *) printf "${line}\n" ;;
+      esac
+      ((row++))
+    done
+
+    printf "\n${colors[$((RANDOM % 6))]}   ～nyaa～ the tulpa flies through space～ uwU${reset}\n"
+
+    sleep 0.2
+  done
+done
+
+printf '\033[2J\033[H'
+echo ""
+echo "  ✧ ⋆ ★ ✦ ⋆ ✧ ★ ⋆ ✦ ✧ ⋆ ★ ✦ ⋆ ✧"
+echo ""
+echo "        ∧＿∧"
+echo "       （ ≧▽≦）  ♡ ♡ ♡"
+echo "       ⊂  つ"
+echo "        しーJ    that's all folks~!"
+echo ""
+echo "  ✧ ⋆ ★ ✦ ⋆ ✧ ★ ⋆ ✦ ✧ ⋆ ★ ✦ ⋆ ✧"
+echo ""

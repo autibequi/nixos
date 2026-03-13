@@ -80,7 +80,13 @@ if [[ -f "$MODE_FILE" ]] && grep -q 'FÉRIAS \[OFF\]' "$MODE_FILE" 2>/dev/null; 
 else
   ferias_str="${GREEN}ON${R}"
 fi
-echo -e "${B}Git:${R} ${git_str}  ${B}Ferias:${R} ${ferias_str}"
+PERSONALITY_FLAG="$WS/.ephemeral/personality-off"
+if [[ -f "$PERSONALITY_FLAG" ]]; then
+  personality_str="${DIM}OFF${R}"
+else
+  personality_str="${CYAN}ON${R}"
+fi
+echo -e "${B}Git:${R} ${git_str}  ${B}Ferias:${R} ${ferias_str}  ${B}Personality:${R} ${personality_str}"
 
 # --- Inbox (coluna do kanban) ---
 if [[ -f "$KANBAN" ]]; then
