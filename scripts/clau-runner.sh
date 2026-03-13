@@ -111,6 +111,12 @@ fi
 
 [ -z "${TASK:-}" ] && echo "[clau] Sem tarefas disponíveis." && exit 0
 
+# Validar que task tem CLAUDE.md
+if [ ! -f "$TASKS/$SOURCE_DIR/$TASK/CLAUDE.md" ]; then
+  echo "[clau] Task '$TASK' sem CLAUDE.md — skip."
+  exit 0
+fi
+
 # ── 3) Claim task atomicamente (mv é atômico no mesmo fs) ────────
 # Se já tá em running/, outro worker pegou
 if [ -d "$TASKS/running/$TASK" ]; then
