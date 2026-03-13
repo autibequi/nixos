@@ -46,41 +46,52 @@ for tier in fast heavy; do
       | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['State']['Status'])" 2>/dev/null || true)
   fi
 
-  # Checar último log do worker em /workspace/logs/
-  last_log=$(ls -t "$WS"/logs/*.log 2>/dev/null | head -1)
+  # Checar último log do worker (novo path + fallback legado)
+  last_log=""
+  last_mod=0
   now=$(date +%s)
+  # Novo path: .ephemeral/logs/worker-{tier}.log
+  if [[ -f "$WS/.ephemeral/logs/worker-${tier}.log" ]]; then
+    last_log="$WS/.ephemeral/logs/worker-${tier}.log"
+    last_mod=$(stat -c %Y "$last_log" 2>/dev/null || echo 0)
+  fi
+  # Legado: /workspace/logs/*.log (pegar o mais recente)
+  legacy_log=$(ls -t "$WS"/logs/*.log 2>/dev/null | head -1)
+  if [[ -n "$legacy_log" ]]; then
+    legacy_mod=$(stat -c %Y "$legacy_log" 2>/dev/null || echo 0)
+    if [[ "$legacy_mod" -gt "$last_mod" ]]; then
+      last_log="$legacy_log"
+      last_mod="$legacy_mod"
+    fi
+  fi
+
+  # Formatar tempo relativo
+  fmt_age() {
+    local s="$1"
+    local h=$(( s / 3600 )) m=$(( (s % 3600) / 60 ))
+    if [[ $h -gt 0 ]]; then echo "${h}h${m}m atrás"
+    else echo "${m}m atrás"
+    fi
+  }
 
   if [[ "$container_state" == "running" ]]; then
-    worker_status+=("${GREEN}🟢 ${tier}${R}")
+    age_str=""
+    if [[ -n "$last_log" ]]; then
+      age_str=" ${DIM}($(fmt_age $((now - last_mod))))${R}"
+    fi
+    worker_status+=("${GREEN}🟢 ${tier}${R}${age_str}")
   elif [[ -n "$last_log" ]]; then
-    last_mod=$(stat -c %Y "$last_log" 2>/dev/null || echo 0)
     age=$(( now - last_mod ))
     if [[ "$tier" == "fast" ]]; then max_age=900; else max_age=4200; fi
-    # Checar conteúdo do log mais recente
-    last_lines=$(tail -10 "$last_log" 2>/dev/null)
-    if ! echo "$last_lines" | grep -qE "\[clau:.*${tier}|CLAU_TIER=${tier}" 2>/dev/null; then
-      # Log não é desse tier, tentar achar o log certo
-      tier_log=$(grep -lE "CLAU_TIER=${tier}|\[clau:.*:${tier}\]" "$WS"/logs/*.log 2>/dev/null | tail -1 || true)
-      if [[ -n "$tier_log" ]]; then
-        last_mod=$(stat -c %Y "$tier_log" 2>/dev/null || echo 0)
-        age=$(( now - last_mod ))
-        last_lines=$(tail -10 "$tier_log" 2>/dev/null)
-      fi
-    fi
+    age_str=" ${DIM}($(fmt_age $age))${R}"
 
     if [[ "$age" -le "$max_age" ]]; then
-      worker_status+=("${GREEN}🟢 ${tier}${R} ${DIM}($(( age / 60 ))m atrás)${R}")
+      worker_status+=("${GREEN}🟢 ${tier}${R}${age_str}")
     else
-      hrs=$(( age / 3600 ))
-      mins=$(( (age % 3600) / 60 ))
-      if [[ "$hrs" -gt 0 ]]; then
-        worker_status+=("${YELLOW}🟡 ${tier}${R} ${DIM}(${hrs}h${mins}m atrás)${R}")
-      else
-        worker_status+=("${YELLOW}🟡 ${tier}${R} ${DIM}(${mins}m atrás)${R}")
-      fi
+      worker_status+=("${YELLOW}🟡 ${tier}${R}${age_str}")
     fi
   else
-    worker_status+=("${RED}🔴 ${tier}${R} ${DIM}(sem atividade)${R}")
+    worker_status+=("${RED}🔴 ${tier}${R} ${DIM}(nunca executou)${R}")
   fi
 done
 echo -e "${worker_status[0]}  ${worker_status[1]}"
@@ -113,113 +124,103 @@ fi
 if [[ -f "$KANBAN" ]]; then
   echo -e "${B}Kanban:${R}"
 
-  # Contar cards por coluna
-  count_cards() {
-    local col="$1"
-    local in_col=0 count=0
+  # Extrair tasks de uma coluna para array
+  extract_col() {
+    local col="$1" in_col=0
     while IFS= read -r line; do
       if [[ "$line" == "## $col" ]]; then in_col=1; continue; fi
       if [[ "$line" =~ ^##\  ]] && [[ "$in_col" == "1" ]]; then break; fi
-      if [[ "$in_col" == "1" ]] && [[ "$line" =~ ^-\ \[ ]]; then count=$((count + 1)); fi
+      if [[ "$in_col" == "1" ]] && [[ "$line" =~ ^-\ \[ ]]; then
+        after="${line#*\*\*}"; name="${after%%\*\**}"
+        # modelo entre backticks
+        model=""
+        if [[ "$line" =~ \`([a-z]+)\` ]]; then model=" (${BASH_REMATCH[1]})"; fi
+        # descrição após —
+        desc=""
+        if [[ "$line" == *" — "* ]]; then
+          raw_desc="${line##* — }"
+          # truncar descrição longa
+          if [[ ${#raw_desc} -gt 30 ]]; then raw_desc="${raw_desc:0:27}..."; fi
+          desc=" $raw_desc"
+        fi
+        echo "${name}${model}${desc}"
+      fi
     done < "$KANBAN"
-    echo "$count"
   }
 
-  # Contar concluídos de hoje
-  count_done_today() {
-    local in_col=0 count=0
+  # Concluídos: só de hoje
+  extract_done_today() {
+    local in_col=0
     while IFS= read -r line; do
       if [[ "$line" == "## Concluido" ]]; then in_col=1; continue; fi
       if [[ "$line" =~ ^##\  ]] && [[ "$in_col" == "1" ]]; then break; fi
       if [[ "$in_col" == "1" ]] && [[ "$line" =~ ^-\ \[ ]] && [[ "$line" == *"$TODAY"* ]]; then
-        count=$((count + 1))
-      fi
-    done < "$KANBAN"
-    echo "$count"
-  }
-
-  rec=$(count_cards "Recorrentes")
-  back=$(count_cards "Backlog")
-  andamento=$(count_cards "Em Andamento")
-  done_c=$(count_cards "Concluido")
-  done_today=$(count_done_today)
-  fail=$(count_cards "Falhou")
-
-  # Linha resumo — recorrentes só contador, concluído só hoje
-  echo -e "  ♻ ${rec} recorrentes  │  ▶ ${andamento} em andamento  │  📋 ${back} backlog"
-  summary_line="  ${GREEN}✓${R} ${done_today} concluída(s) hoje (${done_c} total)"
-  [[ "$fail" -gt 0 ]] && summary_line+="  │  ${RED}✗ ${fail} falha(s)${R}"
-  echo -e "$summary_line"
-
-  # Helper: listar tasks de uma coluna
-  list_tasks() {
-    local col="$1" icon="$2" color="$3"
-    local in_col=0
-    while IFS= read -r line; do
-      if [[ "$line" == "## $col" ]]; then in_col=1; continue; fi
-      if [[ "$line" =~ ^##\  ]] && [[ "$in_col" == "1" ]]; then break; fi
-      if [[ "$in_col" == "1" ]] && [[ "$line" =~ ^-\ \[ ]]; then
-        after="${line#*\*\*}"; name="${after%%\*\**}"
-        # Extrair modelo se presente (entre backticks)
-        model=""
-        if [[ "$line" =~ \`([a-z]+)\` ]]; then model=" ${DIM}(${BASH_REMATCH[1]})${R}"; fi
-        # Extrair descrição após o — se existir
-        desc=""
-        if [[ "$line" == *" — "* ]]; then desc=" ${DIM}— ${line##* — }${R}"; fi
-        echo -e "    ${color}${icon}${R} ${name}${model}${desc}"
-      fi
-    done < "$KANBAN"
-  }
-
-  # Helper: listar backlog com idade
-  list_backlog() {
-    local in_col=0
-    while IFS= read -r line; do
-      if [[ "$line" == "## Backlog" ]]; then in_col=1; continue; fi
-      if [[ "$line" =~ ^##\  ]] && [[ "$in_col" == "1" ]]; then break; fi
-      if [[ "$in_col" == "1" ]] && [[ "$line" =~ ^-\ \[ ]]; then
         after="${line#*\*\*}"; name="${after%%\*\**}"
         model=""
-        if [[ "$line" =~ \`([a-z]+)\` ]]; then model=" ${DIM}(${BASH_REMATCH[1]})${R}"; fi
-        desc=""
-        if [[ "$line" == *" — "* ]]; then desc=" ${DIM}— ${line##* — }${R}"; fi
-        # Calcular idade se tiver data
-        age=""
-        if [[ "$line" =~ ([0-9]{4}-[0-9]{2}-[0-9]{2}) ]]; then
-          task_date="${BASH_REMATCH[1]}"
-          days_ago=$(( ($(date -d "$TODAY" +%s) - $(date -d "$task_date" +%s)) / 86400 ))
-          if [[ "$days_ago" -eq 0 ]]; then
-            age=" ${DIM}(hoje)${R}"
-          elif [[ "$days_ago" -eq 1 ]]; then
-            age=" ${DIM}(ontem)${R}"
-          elif [[ "$days_ago" -le 7 ]]; then
-            age=" ${DIM}(${days_ago}d)${R}"
-          else
-            age=" ${YELLOW}(${days_ago}d!)${R}"
-          fi
-        fi
-        echo -e "    ${DIM}○${R} ${name}${model}${age}${desc}"
+        if [[ "$line" =~ \`([a-z]+)\` ]]; then model=" (${BASH_REMATCH[1]})"; fi
+        echo "${name}${model}"
       fi
     done < "$KANBAN"
   }
 
-  # Mostrar tasks em andamento
-  if [[ "$andamento" -gt 0 ]]; then
-    echo -e "  ${B}Rodando agora:${R}"
-    list_tasks "Em Andamento" "→" "$YELLOW"
-  fi
+  # Carregar colunas em arrays
+  mapfile -t backlog_items < <(extract_col "Backlog")
+  mapfile -t doing_items < <(extract_col "Em Andamento")
+  mapfile -t done_items < <(extract_done_today)
+  mapfile -t fail_items < <(extract_col "Falhou")
 
-  # Mostrar backlog com idade
-  if [[ "$back" -gt 0 ]]; then
-    echo -e "  ${B}Backlog:${R}"
-    list_backlog
-  fi
+  # Recorrentes — só contar
+  rec=0
+  in_rec=0
+  while IFS= read -r line; do
+    if [[ "$line" == "## Recorrentes" ]]; then in_rec=1; continue; fi
+    if [[ "$line" =~ ^##\  ]] && [[ "$in_rec" == "1" ]]; then break; fi
+    if [[ "$in_rec" == "1" ]] && [[ "$line" =~ ^-\ \[ ]]; then rec=$((rec + 1)); fi
+  done < "$KANBAN"
 
-  # Mostrar falhas se houver
-  if [[ "$fail" -gt 0 ]]; then
-    echo -e "  ${B}Falharam:${R}"
-    list_tasks "Falhou" "✗" "$RED"
-  fi
+  # Largura das colunas
+  COL_W=28
+
+  # Pad/truncar texto pra largura fixa (sem cores)
+  pad() {
+    local text="$1" w="$2"
+    if [[ ${#text} -ge $w ]]; then
+      echo "${text:0:$((w-1))}~"
+    else
+      printf "%-${w}s" "$text"
+    fi
+  }
+
+  # Header
+  echo -e "  ${B}$(pad "📋 Backlog" $COL_W)${R} │ ${B}$(pad "▶ Doing" $COL_W)${R} │ ${B}$(pad "✅ Done (hoje)" $COL_W)${R}"
+  echo -e "  $(printf '%.0s─' $(seq 1 $COL_W)) │ $(printf '%.0s─' $(seq 1 $COL_W)) │ $(printf '%.0s─' $(seq 1 $COL_W))"
+
+  # Calcular max rows
+  max=${#backlog_items[@]}
+  [[ ${#doing_items[@]} -gt $max ]] && max=${#doing_items[@]}
+  [[ ${#done_items[@]} -gt $max ]] && max=${#done_items[@]}
+  [[ $max -eq 0 ]] && max=1
+
+  for ((i=0; i<max; i++)); do
+    b="${backlog_items[$i]:-}"
+    d="${doing_items[$i]:-}"
+    f="${done_items[$i]:-}"
+    # Colorir cada célula
+    b_fmt="${DIM}$(pad "$b" $COL_W)${R}"
+    [[ -z "$b" ]] && b_fmt="$(pad "" $COL_W)"
+    d_fmt="${YELLOW}$(pad "$d" $COL_W)${R}"
+    [[ -z "$d" ]] && d_fmt="$(pad "" $COL_W)"
+    f_fmt="${GREEN}$(pad "$f" $COL_W)${R}"
+    [[ -z "$f" ]] && f_fmt="$(pad "" $COL_W)"
+    echo -e "  ${b_fmt} │ ${d_fmt} │ ${f_fmt}"
+  done
+
+  # Rodapé com contadores
+  total_done=$(extract_col "Concluido" | wc -l)
+  echo
+  echo -ne "  ${DIM}♻ ${rec} recorrentes${R}"
+  [[ ${#fail_items[@]} -gt 0 ]] && echo -ne "  │  ${RED}✗ ${#fail_items[@]} falha(s)${R}"
+  echo -e "  │  ${DIM}${total_done} concluída(s) total${R}"
 else
   echo -e "${B}Kanban:${R} ${DIM}(vault/kanban.md não encontrado)${R}"
 fi
@@ -274,22 +275,28 @@ if [[ -d "$PROJECTS_DIR" ]]; then
     name=$(basename "$proj")
     has_projects=true
 
-    # estrategia é umbrella — expandir sub-repos
+    # estrategia é umbrella — só listar dirty/não-main
     if [[ "$proj" == "$ESTRATEGIA_DIR/" ]]; then
-      echo -e "  ${MAGENTA}${name}/${R} ${DIM}(trabalho)${R}"
+      dirty_repos=()
       for sub in "$ESTRATEGIA_DIR"/*/; do
         [[ -d "$sub" ]] || continue
         subname=$(basename "$sub")
         if [[ -d "$sub/.git" ]]; then
           branch=$(git -C "$sub" branch --show-current 2>/dev/null || echo "?")
           dirty=$(git -C "$sub" status --porcelain 2>/dev/null | head -1)
-          status="${GREEN}clean${R}"
-          [[ -n "$dirty" ]] && status="${YELLOW}dirty${R}"
-          echo -e "    ${DIM}├──${R} ${subname} [${branch}] ${status}"
-        else
-          echo -e "    ${DIM}├──${R} ${subname} ${DIM}(no git)${R}"
+          if [[ -n "$dirty" ]] || [[ "$branch" != "main" && "$branch" != "master" ]]; then
+            status="${GREEN}clean${R}"
+            [[ -n "$dirty" ]] && status="${YELLOW}dirty${R}"
+            dirty_repos+=("    ${DIM}├──${R} ${subname} [${branch}] ${status}")
+          fi
         fi
       done
+      if [[ ${#dirty_repos[@]} -gt 0 ]]; then
+        echo -e "  ${MAGENTA}${name}/${R} ${DIM}(trabalho — ${#dirty_repos[@]} com alterações)${R}"
+        for r in "${dirty_repos[@]}"; do echo -e "$r"; done
+      else
+        echo -e "  ${MAGENTA}${name}/${R} ${DIM}(trabalho — tudo limpo)${R}"
+      fi
       continue
     fi
 
