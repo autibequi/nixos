@@ -5,6 +5,8 @@ let
   vaultDir = "/home/${user}/.ovault/Work";
   compose = "${pkgs.podman-compose}/bin/podman-compose -f ${projectDir}/docker-compose.claude.yml";
 
+  logsDir = "${projectDir}/.ephemeral/logs";
+
   commonEnv = [
     "HOME=/home/${user}"
     "XDG_RUNTIME_DIR=/run/user/1000"
@@ -20,6 +22,17 @@ let
 
     MAX_WORKERS=${toString maxWorkers}
     TIER="${tier}"
+    LOGFILE="${logsDir}/worker-${tier}.log"
+
+    mkdir -p "${logsDir}"
+
+    # Rotate log if > 500KB
+    if [ -f "$LOGFILE" ] && [ "$(stat -c%s "$LOGFILE" 2>/dev/null || echo 0)" -gt 512000 ]; then
+      tail -200 "$LOGFILE" > "$LOGFILE.tmp" && mv "$LOGFILE.tmp" "$LOGFILE"
+    fi
+
+    # Redirect all output to log file (and stdout for journal)
+    exec > >(${pkgs.coreutils}/bin/tee -a "$LOGFILE") 2>&1
 
     if [ ! -f ${vaultDir}/kanban.md ]; then
       echo "[clau:$TIER] kanban.md não encontrado."
