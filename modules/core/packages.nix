@@ -22,6 +22,7 @@
     papers # PDFS
     flameshot # PrintScreens
     unstable.obsidian # Md Notes
+    claude-code # AI coding assistant
     mpv # media/shoes/chocolate player
     foliate # ePub reader
     fragments # torrent client

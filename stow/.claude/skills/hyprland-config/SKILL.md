@@ -95,7 +95,7 @@ ls -la ~/.config/hypr/ 2>/dev/null
 **Decision point:**
 - ✅ All files exist, syntax valid, symlinks in place → Move to Layer 3
 - ❌ Syntax errors → Fix in `stow/.config/hypr/*.conf` and re-validate
-- ❌ Symlinks missing → Run `stow -d ~/projects/nixos/stow -t ~ .`
+- ❌ Symlinks missing → Run `stow -d ~/nixos/stow -t ~ .`
 
 ### 3. Validate Session Runtime Layer
 
@@ -150,7 +150,7 @@ When making changes, always follow this order:
 1. **Edit NixOS module** (e.g., enable a plugin)
 2. **Run rebuild**: `sudo nixos-rebuild switch --flake .#nomad`
 3. **Edit dotfiles** (e.g., hyprland.conf keybinds)
-4. **Redeploy dotfiles**: `stow -d ~/projects/nixos/stow -t ~ .`
+4. **Redeploy dotfiles**: `stow -d ~/nixos/stow -t ~ .`
 5. **Test session**: Log out and back into Hyprland
 6. **Verify startup**: Check `pgrep waybar`, `pgrep hypridle`, etc.
 
@@ -160,7 +160,7 @@ When making changes, always follow this order:
 |------|---------|
 | Apply NixOS changes | `sudo nixos-rebuild switch --flake .#nomad` |
 | Validate config syntax | `nix shell --impure -c hyprls lint stow/.config/hypr/hyprland.conf` |
-| Deploy dotfiles | `stow -d ~/projects/nixos/stow -t ~ .` |
+| Deploy dotfiles | `stow -d ~/nixos/stow -t ~ .` |
 | Check running services | `pgrep waybar && pgrep hypridle && pgrep swaync` |
 | View Hyprland logs | `journalctl -xe --grep=hypr` |
 | Reload Hyprland config | `hyprctl reload` (while in session) |

@@ -34,6 +34,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    claude-code.url = "github:sadjow/claude-code-nix";
+
   };
 
   # Outputs
@@ -48,6 +50,7 @@
       nixified-ai,
       voxtype,
       zed,
+      claude-code,
       ...
     }@inputs:
       let
@@ -68,6 +71,7 @@
           {
             nixpkgs.config.allowUnfree = true;
             nixpkgs.config.allowInsecure = true;
+            nixpkgs.overlays = [ claude-code.overlays.default ];
           }
 
           # Currenct Laptop Flake

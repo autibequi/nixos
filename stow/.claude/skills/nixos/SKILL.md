@@ -86,7 +86,7 @@ This repo has a specific structure. Match the change to the right file:
 
 **New feature module:** If the change doesn't fit any existing module, create `modules/<name>.nix` and add it to `configuration.nix`.
 
-**Dotfile configs** (Hyprland keybinds, Waybar layout, Zed settings, etc.) live in `stow/.config/` and are deployed with `stow -d ~/projects/nixos/stow -t ~ .`, NOT managed by NixOS modules.
+**Dotfile configs** (Hyprland keybinds, Waybar layout, Zed settings, etc.) live in `stow/.config/` and are deployed with `stow -d ~/nixos/stow -t ~ .`, NOT managed by NixOS modules.
 
 **Unstable packages:** To use a package from the unstable channel, use `unstable.pkgs.<name>` or `unstable.<name>`. The `unstable` arg is available in all modules via `specialArgs`.
 
@@ -147,5 +147,5 @@ When `nh os test .` fails, read the error output and classify it:
 | Search packages | `mcp__nixos__nix search packages <query>` |
 | Search options | `mcp__nixos__nix search options <query>` |
 | Package info | `mcp__nixos__nix info packages <query>` |
-| Deploy dotfiles | `stow -d ~/projects/nixos/stow -t ~ .` |
+| Deploy dotfiles | `stow -d ~/nixos/stow -t ~ .` |
 | Update flake inputs | `nix --extra-experimental-features 'nix-command flakes' flake update` |
