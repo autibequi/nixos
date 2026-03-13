@@ -6,10 +6,10 @@ Faça um code review completo seguindo a skill `monolito/review-code`.
 ## Instruções
 
 1. Ler TODOS os templates da skill `monolito/review-code` antes de começar:
-   - `stow/.claude/skills/monolito/review-code/SKILL.md`
-   - `stow/.claude/skills/monolito/review-code/templates/knowledge.md`
-   - `stow/.claude/skills/monolito/review-code/templates/checklist.md`
-   - `stow/.claude/skills/monolito/review-code/templates/output.md`
+   - `stow/.claude/skills/estrategia/monolito/review-code/SKILL.md`
+   - `stow/.claude/skills/estrategia/monolito/review-code/templates/knowledge.md`
+   - `stow/.claude/skills/estrategia/monolito/review-code/templates/checklist.md`
+   - `stow/.claude/skills/estrategia/monolito/review-code/templates/output.md`
 
 2. Executar o workflow completo descrito no SKILL.md
 

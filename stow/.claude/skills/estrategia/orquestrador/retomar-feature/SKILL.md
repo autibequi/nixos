@@ -42,7 +42,7 @@ Nem todos os arquivos existirão — apenas os repositórios envolvidos terão s
 Para cada repositório que tem `feature.X.md`:
 
 ```bash
-cd <repo>/
+cd /home/claude/projects/estrategia/<repo>/
 HOME=/tmp git branch --show-current
 HOME=/tmp git status --short
 HOME=/tmp git log --oneline -10

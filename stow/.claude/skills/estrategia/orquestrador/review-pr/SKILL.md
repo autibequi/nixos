@@ -24,7 +24,7 @@ Se o dev passou um número de PR ou URL, extrair o número e o repositório.
 Se não passou, detectar automaticamente a partir da branch atual de cada repositório:
 
 ```bash
-cd <repo>/
+cd /home/claude/projects/estrategia/<repo>/
 BRANCH=$(HOME=/tmp git branch --show-current)
 ```
 
@@ -156,13 +156,13 @@ Para cada item aprovado:
 2. **Entender o contexto completo** — ler funções adjacentes, imports, testes relacionados
 3. **Aplicar a correção** usando Edit
 4. **Verificar** se a correção não quebra nada:
-   - Go: `cd <repo> && go build ./...` e rodar testes relevantes
+   - Go: `cd /home/claude/projects/estrategia/<repo> && go build ./...` e rodar testes relevantes
    - Vue: verificar se o componente ainda faz sentido estruturalmente
 
 5. **Commitar** cada correção (ou grupo coeso):
 
 ```bash
-cd <repo>/
+cd /home/claude/projects/estrategia/<repo>/
 HOME=/tmp git -c user.name="$GIT_AUTHOR_NAME" -c user.email="$GIT_AUTHOR_EMAIL" add <arquivos>
 HOME=/tmp git -c user.name="$GIT_AUTHOR_NAME" -c user.email="$GIT_AUTHOR_EMAIL" commit -m "$(cat <<'EOF'
 fix: descrição da correção (review PR #N)
@@ -205,7 +205,7 @@ Deseja fazer push para atualizar o PR? (sim/não)
 Se sim:
 
 ```bash
-cd <repo>/
+cd /home/claude/projects/estrategia/<repo>/
 HOME=/tmp git push origin $(HOME=/tmp git branch --show-current)
 ```
 

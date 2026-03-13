@@ -26,7 +26,7 @@ Somente após responder essas perguntas iniciar a implementação.
 
 ## Skills Aninhadas — Onde Encontrá-las
 
-As skills abaixo estão em `.claude/skills/monolito/`:
+As skills abaixo estão em `.claude/skills/estrategia/monolito/`:
 
 - `monolito/go-migration`
 - `monolito/go-repository`

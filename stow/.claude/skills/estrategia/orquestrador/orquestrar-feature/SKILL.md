@@ -411,7 +411,7 @@ A **descrição curta** deve ser em kebab-case, derivada do título do card, com
 
 ```bash
 # Para cada repo envolvido (monolito, bo-container, front-student):
-cd <repo>/
+cd /home/claude/projects/estrategia/<repo>/
 git checkout main
 git pull origin main
 git checkout -b <JIRA-ID>/vibed/<descricao-curta>
@@ -437,7 +437,7 @@ Após confirmação, executar na ordem correta. **Todos os subagentes rodam sequ
 ### 6a — monolito (se necessário)
 
 Chamar a ferramenta `Agent` com:
-- `working_dir`: caminho absoluto para `monolito/`
+- `working_dir`: `/home/claude/projects/estrategia/monolito/`
 - `prompt`:
 
 → Usar o template em `templates/subagent.monolito.md` (substituindo `<JIRA-ID>`, `<descricao-curta>` e `<pasta-da-feature>` pelos valores reais)
@@ -455,7 +455,7 @@ Antes de lançar qualquer subagente de frontend:
 ### 6b — bo-container (se necessário)
 
 Chamar a ferramenta `Agent` com:
-- `working_dir`: caminho absoluto para `bo-container/`
+- `working_dir`: `/home/claude/projects/estrategia/bo-container/`
 - `prompt`:
 
 → Usar o template em `templates/subagent.bo.md` (substituindo `<JIRA-ID>`, `<descricao-curta>` e `<pasta-da-feature>` pelos valores reais)
@@ -467,7 +467,7 @@ Marcar as entregas do bo-container como concluídas (`- [x]`) na seção `### bo
 ### 6c — front-student (se necessário)
 
 Chamar a ferramenta `Agent` com:
-- `working_dir`: caminho absoluto para `front-student/`
+- `working_dir`: `/home/claude/projects/estrategia/front-student/`
 - `prompt`:
 
 → Usar o template em `templates/subagent.frontstudent.md` (substituindo `<JIRA-ID>`, `<descricao-curta>` e `<pasta-da-feature>` pelos valores reais)

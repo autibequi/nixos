@@ -23,7 +23,7 @@ Analisar o diff de cada sub-repositório (monolito, bo-container, front-student)
 Para cada sub-repositório (`monolito/`, `bo-container/`, `front-student/`), verificar se a branch atual difere de main:
 
 ```bash
-cd <repo>/
+cd /home/claude/projects/estrategia/<repo>/
 BRANCH=$(HOME=/tmp git branch --show-current)
 # Se estiver em main ou sem commits divergentes, pular
 FORK_POINT=$(HOME=/tmp git merge-base main HEAD 2>/dev/null)
@@ -39,7 +39,7 @@ Listar os repositórios com mudanças ao dev antes de prosseguir.
 ### 2a — Listar arquivos modificados/criados/deletados
 
 ```bash
-cd <repo>/
+cd /home/claude/projects/estrategia/<repo>/
 HOME=/tmp git diff --name-status ${FORK_POINT}..HEAD
 ```
 
@@ -48,7 +48,7 @@ Guardar a lista completa. Classificar cada arquivo por status: `A` (adicionado),
 ### 2b — Obter o diff completo dos arquivos relevantes
 
 ```bash
-cd <repo>/
+cd /home/claude/projects/estrategia/<repo>/
 HOME=/tmp git diff ${FORK_POINT}..HEAD -- <arquivo>
 ```
 
@@ -94,7 +94,7 @@ Após montar o changelog, **sempre** salvar o conteúdo completo em arquivo dent
 **Onde salvar:**
 - **Se invocado dentro de uma feature** (existe pasta `vault/_agent/tasks/FUK2-*/` ativa): salvar dentro da pasta da feature → `vault/_agent/tasks/<pasta>/changelog.<data>.md`
 - **Se invocado standalone** (sem feature ativa): identificar a task a partir da branch atual de cada repositório e criar a pasta correspondente em `vault/_agent/tasks/`:
-  1. Ler o nome da branch: `HOME=/tmp git -C <repo>/ branch --show-current`
+  1. Ler o nome da branch: `HOME=/tmp git -C /home/claude/projects/estrategia/<repo>/ branch --show-current`
   2. Extrair o código da task (ex: `FUK2-1234` de `FUK2-1234-descricao` ou da branch diretamente)
   3. Criar pasta `vault/_agent/tasks/<codigo>/` se não existir
   4. Salvar em `vault/_agent/tasks/<codigo>/changelog.<data>.md`

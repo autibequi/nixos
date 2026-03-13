@@ -23,7 +23,7 @@ Aguardar a resposta antes de prosseguir.
 Entrar no diretório do repositório escolhido e identificar o commit base (último commit antes do fork):
 
 ```bash
-cd <repo>/
+cd /home/claude/projects/estrategia/<repo>/
 HOME=/tmp git merge-base main HEAD
 ```
 
@@ -57,7 +57,7 @@ Confirma? (sim/não)
 ## Passo 3 — Executar o reset --soft
 
 ```bash
-cd <repo>/
+cd /home/claude/projects/estrategia/<repo>/
 HOME=/tmp git reset --soft <FORK_POINT>
 ```
 
@@ -177,7 +177,7 @@ Deseja fazer git push --force-with-lease?
 Se o dev confirmar o push:
 
 ```bash
-cd <repo>/
+cd /home/claude/projects/estrategia/<repo>/
 HOME=/tmp git push --force-with-lease origin <branch-atual>
 ```
 
