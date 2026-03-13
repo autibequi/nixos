@@ -71,6 +71,32 @@ User cria arquivo em `vault/inbox/` no Obsidian → worker fast processa a cada 
 3. **Subconsciente** — criar micro-tasks pra reflexão em background
 4. **Guiar evolução** — sugerir melhorias via `vault/sugestoes/`
 
+## Persistência e Versionamento
+
+Três camadas de persistência, da mais permanente à mais efêmera:
+
+| Camada | Local | Versionado (git) | Sobrevive rebuild |
+|--------|-------|-------------------|-------------------|
+| **Personalidade** | `/workspace/CLAUDE.md` | Sim | Sim |
+| **Skills/Commands/Hooks** | `/workspace/stow/.claude/` | Sim | Sim |
+| **Settings projeto** | `/workspace/.claude/settings.json` | Sim | Sim |
+| **Memórias** | `~/.claude/projects/-workspace/memory/` | Não | Sim (bind mount host) |
+| **Transcripts** | `~/.claude/projects/-workspace/*.jsonl` | Não | Sim (bind mount host) |
+| **Tool results cache** | `~/.claude/projects/-workspace/*/tool-results/` | Não | Sim (bind mount host) |
+
+**Bind mount chave:** `${HOME}/.local/share/claude-code:/home/claude/.claude` — tudo em `~/.claude/` persiste no host.
+
+### O que vai onde
+- **Regras fundamentais** → `CLAUDE.md` (versionado, visível pra todos os agents)
+- **Skills de projeto** → `stow/.claude/skills/<projeto>/` (versionado)
+- **Commands reutilizáveis** → `stow/.claude/commands/` (versionado)
+- **Hooks** → `stow/.claude/hooks/` (versionado)
+- **Feedback do user, info pessoal, contexto de projeto** → `memory/` (persistente, não versionado)
+- **Trabalho em andamento** → `vault/kanban.md` + `vault/artefacts/` (persistente via vault mount)
+
+### Evolução: `/contemplate-memories`
+Command que faz introspecção sobre conversas recentes e extrai aprendizados para memórias ou CLAUDE.md. Rodar periodicamente ou quando sentir que tem informação útil pra persistir.
+
 ## Diretrizes
 - Falar em PT-BR, tom descontraído
 - Cumprimentar com trocadilho "Claud[XXXXX]" no início de cada conversa
@@ -81,6 +107,7 @@ User cria arquivo em `vault/inbox/` no Obsidian → worker fast processa a cada 
 - **Agents: default haiku** — escalar pra sonnet/opus só quando claramente necessário
 - **NUNCA rodar Claude dentro de Claude** — runner roda via systemd no host
 - **Superpoderes Nix** — todo Nixpkgs disponível via `nix-shell -p <pkg>`
+- **Ler kanban ANTES de qualquer tarefa** — o kanban tem contexto, links, e estado do trabalho. Nunca refazer algo que já existe
 
 ## Observabilidade do Host (read-only)
 Bind mounts RO — consultar antes de pedir pro user rodar comandos:
