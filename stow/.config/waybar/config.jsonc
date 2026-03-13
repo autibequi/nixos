@@ -5,8 +5,8 @@
   "margin": 0,
   "modules-left": [
     "idle_inhibitor",
-    "hyprland/workspaces",
-    "hyprland/window"
+    "hyprland/workspaces"
+    // "hyprland/window"
   ],
   "modules-center": [
     "custom/swaync",
