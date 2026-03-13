@@ -16,13 +16,13 @@ let
   ];
 
   # Multi-worker dispatch
-  mkRunnerScript = { tier, maxWorkers, serviceName }: pkgs.writeShellScript "clau-dispatch-${tier}" ''
+  mkRunnerScript = { clock, maxWorkers, serviceName }: pkgs.writeShellScript "clau-dispatch-${clock}" ''
     set -euo pipefail
     cd ${projectDir}
 
     MAX_WORKERS=${toString maxWorkers}
-    TIER="${tier}"
-    LOGFILE="${logsDir}/worker-${tier}.log"
+    CLOCK="${clock}"
+    LOGFILE="${logsDir}/worker-${clock}.log"
 
     mkdir -p "${logsDir}"
 
@@ -35,7 +35,7 @@ let
     exec > >(${pkgs.coreutils}/bin/tee -a "$LOGFILE") 2>&1
 
     if [ ! -f ${vaultDir}/kanban.md ] && [ ! -f ${vaultDir}/scheduled.md ]; then
-      echo "[clau:$TIER] kanban.md/scheduled.md não encontrados."
+      echo "[clau:$CLOCK] kanban.md/scheduled.md não encontrados."
       exit 0
     fi
 
@@ -43,23 +43,23 @@ let
     scheduled_cards=$(grep -c '^\- \[' ${vaultDir}/scheduled.md 2>/dev/null || echo "0")
     total=$((kanban_cards + scheduled_cards))
     if [ "$total" -eq 0 ]; then
-      echo "[clau:$TIER] Sem cards no kanban/scheduled."
+      echo "[clau:$CLOCK] Sem cards no kanban/scheduled."
       exit 0
     fi
 
-    SERVICE=$( [ "$TIER" = "fast" ] && echo "worker-fast" || echo "worker" )
+    SERVICE=$( [ "$CLOCK" = "every10" ] && echo "worker-fast" || echo "worker" )
 
     # Ensure podman network exists (compose needs it)
     COMPOSE_PROJECT=$(basename ${projectDir})
     NETWORK="''${COMPOSE_PROJECT}_default"
     if ! ${pkgs.podman}/bin/podman network exists "$NETWORK" 2>/dev/null; then
-      echo "[clau:$TIER] Criando network $NETWORK..."
+      echo "[clau:$CLOCK] Criando network $NETWORK..."
       ${pkgs.podman}/bin/podman network create "$NETWORK" 2>/dev/null || true
     fi
 
     PIDS=()
     for i in $(seq 1 $MAX_WORKERS); do
-      WORKER_ID="$TIER-$i"
+      WORKER_ID="$CLOCK-$i"
 
       existing=$(${pkgs.podman}/bin/podman ps --filter "label=com.docker.compose.service=$SERVICE" \
         --filter "label=clau.worker.id=$WORKER_ID" \
@@ -69,25 +69,25 @@ let
         continue
       fi
 
-      echo "[clau] Lançando $WORKER_ID ($TIER)..."
+      echo "[clau] Lançando $WORKER_ID ($CLOCK)..."
       ${compose} run --rm -T \
         -e CLAU_WORKER_ID="$WORKER_ID" \
-        -e CLAU_TIER="$TIER" \
+        -e CLAU_CLOCK="$CLOCK" \
         -l clau.worker.id="$WORKER_ID" \
         $SERVICE /workspace/scripts/clau-runner.sh &
       PIDS+=($!)
     done
 
     if [ ''${#PIDS[@]} -eq 0 ]; then
-      echo "[clau:$TIER] Nenhum worker lançado."
+      echo "[clau:$CLOCK] Nenhum worker lançado."
       exit 0
     fi
 
-    echo "[clau:$TIER] ''${#PIDS[@]} workers lançados."
+    echo "[clau:$CLOCK] ''${#PIDS[@]} workers lançados."
     for pid in "''${PIDS[@]}"; do
       wait "$pid" 2>/dev/null || true
     done
-    echo "[clau:$TIER] Done."
+    echo "[clau:$CLOCK] Done."
   '';
 
   cleanupScript = pkgs.writeShellScript "clau-cleanup" ''
@@ -108,12 +108,12 @@ let
     rm -f .ephemeral/.kanban.lock .ephemeral/locks/*.lock
   '';
 
-  heavyRunner = mkRunnerScript { tier = "heavy"; maxWorkers = 2; serviceName = "worker"; };
-  fastRunner = mkRunnerScript { tier = "fast"; maxWorkers = 1; serviceName = "worker-fast"; };
+  heavyRunner = mkRunnerScript { clock = "every60"; maxWorkers = 2; serviceName = "worker"; };
+  fastRunner = mkRunnerScript { clock = "every10"; maxWorkers = 1; serviceName = "worker-fast"; };
 in {
-  # ── Heavy worker (hourly) ────────────────────────────────────────
+  # ── Worker every60 (a cada hora) ─────────────────────────────────
   systemd.services.claude-autonomous = {
-    description = "Claudinho heavy task runner";
+    description = "Claudinho every60 task runner";
     after = [ "network-online.target" ];
     conflicts = [ "claude-autonomous-reset.service" ];
     serviceConfig = {
@@ -131,7 +131,7 @@ in {
   };
 
   systemd.timers.claude-autonomous = {
-    description = "Run Claudinho heavy tasks every hour";
+    description = "Run Claudinho every60 tasks";
     wantedBy = [ "timers.target" ];
     timerConfig = {
       OnCalendar = "hourly";
@@ -139,9 +139,9 @@ in {
     };
   };
 
-  # ── Fast worker (every 10 min) ───────────────────────────────────
+  # ── Worker every10 (a cada 10 min) ──────────────────────────────
   systemd.services.claude-autonomous-fast = {
-    description = "Claudinho fast task runner";
+    description = "Claudinho every10 task runner";
     after = [ "network-online.target" ];
     serviceConfig = {
       Type = "oneshot";
@@ -158,7 +158,7 @@ in {
   };
 
   systemd.timers.claude-autonomous-fast = {
-    description = "Run Claudinho fast tasks every 10 minutes";
+    description = "Run Claudinho every10 tasks";
     wantedBy = [ "timers.target" ];
     timerConfig = {
       OnCalendar = "*:0/10";

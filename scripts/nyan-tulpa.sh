@@ -1,91 +1,73 @@
 #!/bin/bash
-# Nyan Tulpa - ASCII art animado 🌈
-colors=("\033[91m" "\033[93m" "\033[92m" "\033[96m" "\033[94m" "\033[95m")
+# Nyan Tulpa — Portal 2 test chamber animation
+orange="\033[38;5;208m"
+blue="\033[38;5;33m"
+white="\033[97m"
+dim="\033[2m"
+bold="\033[1m"
 reset="\033[0m"
 
+dia=$(date +"%d/%m")
+hora=$(date +"%H:%M")
+
+# Weather (quick fetch, fallback graceful)
+weather=$(curl -s --connect-timeout 2 "wttr.in/São+Paulo?format=%c+%t&lang=pt" 2>/dev/null | tr -d '+' || echo "")
+[[ "$weather" =~ "Unknown" || "$weather" =~ "Sorry" || -z "$weather" ]] && weather="--"
+
 frames=(
-'
-    ╭──────────────╮
-    │ ▄▀▀▀▀▀▀▀▀▄  │  ∧＿∧
-━━━━│ █ ▀ ● ▀  █  │ （ ≧▽≦）━━✧
-━━━━│ █  ▽▽▽   █  │  ⊂　　⊃━━✧
-━━━━│ ▀▄▄▄▄▄▄▄▀  │   しーJ━━✧
-    ╰──────────────╯  ～♪♫♪
-'
-'
-     ╭──────────────╮
-     │ ▄▀▀▀▀▀▀▀▀▄  │  ∧＿∧
-━━━━━│ █ ▀ ◕ ▀  █  │ （ ＾ω＾）━✧
-━━━━━│ █  ▽▽▽   █  │  ⊂　　⊃━✧
-━━━━━│ ▀▄▄▄▄▄▄▄▀  │   しーJ━✧
-     ╰──────────────╯  ～♫♪♫
-'
-'
-      ╭──────────────╮
-      │ ▄▀▀▀▀▀▀▀▀▄  │  ∧＿∧
-━━━━━━│ █ ▀ ● ▀  █  │ （ ・∀・）✧
-━━━━━━│ █  ▽▽▽   █  │  ⊂　　⊃✧
-━━━━━━│ ▀▄▄▄▄▄▄▄▀  │   しーJ✧
-      ╰──────────────╯  ～♪♫♪
-'
-'
-     ╭──────────────╮
-     │ ▄▀▀▀▀▀▀▀▀▄  │  ∧＿∧
-━━━━━│ █ ▀ ◕ ▀  █  │ （ ≧∀≦）━✧
-━━━━━│ █  ▽▽▽   █  │  ⊂　　⊃━✧
-━━━━━│ ▀▄▄▄▄▄▄▄▀  │   しーJ━✧
-     ╰──────────────╯  ～♫♪♫
-'
+"
+  ${white}┌──────────────────────────────────────────┐${reset}
+  ${white}│${reset}  ${orange}(o)${reset}                          ${blue}(o)${reset}       ${white}│${reset}
+  ${white}│${reset}   ${orange}\\\\${reset}   APERTURE SCIENCE         ${blue}/${reset}       ${white}│${reset}
+  ${white}│${reset}    ${orange}\\\\${reset}  ─────────────────       ${blue}/${reset}        ${white}│${reset}
+  ${white}│${reset}  ${dim}test chamber active${reset}                      ${white}│${reset}
+  ${white}│${reset}                                            ${white}│${reset}
+  ${white}│${reset}  ${bold}T U L P A${reset}   ${dim}${dia} ${hora}${reset}              ${white}│${reset}
+  ${white}│${reset}  ${dim}${weather}${reset}
+  ${white}│${reset}                                            ${white}│${reset}
+  ${white}└──────────────────────────────────────────┘${reset}
+"
+"
+  ${white}┌──────────────────────────────────────────┐${reset}
+  ${white}│${reset}  ${orange}(O)${reset}                          ${blue}(O)${reset}       ${white}│${reset}
+  ${white}│${reset}   ${orange}|${reset}   APERTURE SCIENCE          ${blue}|${reset}       ${white}│${reset}
+  ${white}│${reset}   ${orange}|${reset}   ─────────────────         ${blue}|${reset}       ${white}│${reset}
+  ${white}│${reset}  ${dim}// running diagnostics //${reset}               ${white}│${reset}
+  ${white}│${reset}                                            ${white}│${reset}
+  ${white}│${reset}  ${bold}T U L P A${reset}   ${dim}${dia} ${hora}${reset}              ${white}│${reset}
+  ${white}│${reset}  ${dim}${weather}${reset}
+  ${white}│${reset}                                            ${white}│${reset}
+  ${white}└──────────────────────────────────────────┘${reset}
+"
+"
+  ${white}┌──────────────────────────────────────────┐${reset}
+  ${white}│${reset}  ${orange}(o)${reset}                          ${blue}(o)${reset}       ${white}│${reset}
+  ${white}│${reset}   ${orange}/${reset}   APERTURE SCIENCE          ${blue}\\\\${reset}      ${white}│${reset}
+  ${white}│${reset}  ${orange}/${reset}    ─────────────────          ${blue}\\\\${reset}     ${white}│${reset}
+  ${white}│${reset}  ${dim}portal link established${reset}                  ${white}│${reset}
+  ${white}│${reset}                                            ${white}│${reset}
+  ${white}│${reset}  ${bold}T U L P A${reset}   ${dim}${dia} ${hora}${reset}              ${white}│${reset}
+  ${white}│${reset}  ${dim}${weather}${reset}
+  ${white}│${reset}                                            ${white}│${reset}
+  ${white}└──────────────────────────────────────────┘${reset}
+"
 )
 
-stars=("✧" "✦" "⋆" "★" "☆" "·" "∗")
-
 trap 'printf "\033[?25h"; exit' INT TERM
-printf '\033[?25h'
+printf '\033[?25l'
 
-for cycle in $(seq 1 8); do
-  for f in 0 1 2 3; do
+for cycle in $(seq 1 6); do
+  for f in 0 1 2; do
     printf '\033[2J\033[H'
-
-    c=${colors[$((cycle % 6))]}
-    printf "${c}     ═══ 🌈  T U L P A   N Y A N  🌈 ═══${reset}\n"
-
-    for s in $(seq 1 3); do
-      col=$((RANDOM % 45 + 1))
-      star=${stars[$((RANDOM % 7))]}
-      printf "\033[${s};${col}H${colors[$((RANDOM % 6))]}${star}${reset}"
-    done
-
-    c1=${colors[$(( (cycle + f) % 6 ))]}
-    c2=${colors[$(( (cycle + f + 1) % 6 ))]}
-    c3=${colors[$(( (cycle + f + 2) % 6 ))]}
-
-    IFS=$'\n' read -rd '' -a lines <<< "${frames[$f]}"
-    row=3
-    for line in "${lines[@]}"; do
-      case $row in
-        5) printf "${c1}${line}${reset}\n" ;;
-        6) printf "${c2}${line}${reset}\n" ;;
-        7) printf "${c3}${line}${reset}\n" ;;
-        *) printf "${line}\n" ;;
-      esac
-      ((row++))
-    done
-
-    printf "\n${colors[$((RANDOM % 6))]}   ～nyaa～ the tulpa flies through space～ uwU${reset}\n"
-
-    sleep 0.2
+    printf "${frames[$f]}\n"
+    sleep 0.3
   done
 done
 
 printf '\033[2J\033[H'
+printf '\033[?25h'
 echo ""
-echo "  ✧ ⋆ ★ ✦ ⋆ ✧ ★ ⋆ ✦ ✧ ⋆ ★ ✦ ⋆ ✧"
-echo ""
-echo "        ∧＿∧"
-echo "       （ ≧▽≦）  ♡ ♡ ♡"
-echo "       ⊂  つ"
-echo "        しーJ    that's all folks~!"
-echo ""
-echo "  ✧ ⋆ ★ ✦ ⋆ ✧ ★ ⋆ ✦ ✧ ⋆ ★ ✦ ⋆ ✧"
+printf "  ${orange}${bold}(o)${reset} ${white}${bold}APERTURE SCIENCE${reset} ${blue}${bold}(o)${reset}\n"
+printf "  ${bold}T U L P A${reset}  ${dim}personal dev agent${reset}\n"
+printf "  ${dim}${dia} ${hora}  ${weather}${reset}\n"
 echo ""

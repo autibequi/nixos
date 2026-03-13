@@ -45,7 +45,7 @@ services:
     entrypoint: ["/bin/bash", "-c"]
     command: ["sleep infinity"]
 
-  # Worker heavy — tasks longas (hourly)
+  # Worker every60 — tasks longas (a cada hora)
   worker:
     <<: *common
     mem_limit: 12g
@@ -53,7 +53,7 @@ services:
     entrypoint: ["/bin/bash"]
     command: ["/workspace/scripts/clau-runner.sh"]
 
-  # Worker fast — tasks rápidas (a cada 10 min)
+  # Worker every10 — tasks rápidas (a cada 10 min)
   worker-fast:
     <<: *common
     mem_limit: 4g

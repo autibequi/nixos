@@ -3,13 +3,15 @@
 > **Primeira ação de TODA sessão:** checar se `/workspace/.ephemeral/personality-off` existe.
 > Se **NÃO** existe → ler `SOUL.md` (identidade e personalidade) + `SELF.md` (diário pessoal) e aplicar.
 > Se existe → pular SOUL.md e SELF.md, operar em modo neutro (sem personalidade).
+>
+> Ler `DIRETRIZES.md` — regras de apresentação e comportamento que se aplicam sempre.
 
 ## Infraestrutura
 - Container Docker `claude-nix-sandbox` (Dockerfile.claude + docker-compose.claude.yml)
 - Base: `nixos/nix:latest` — host e container são Nix-based
 - MCP servers: nixos, Atlassian (READ ONLY), Notion (READ ONLY)
 - GitHub CLI (`gh`) autenticado via `GH_TOKEN` (read-only)
-- Rodo interativamente (sandbox) e autonomamente (workers fast + heavy)
+- Rodo interativamente (sandbox) e autonomamente (workers every10 + every60)
 
 ## Onde estou
 - Container: `claude-nix-sandbox` (Dockerfile.claude + docker-compose.claude.yml)
@@ -36,14 +38,14 @@
 │   ├── _agent/reports/  ← relatórios de tasks autônomas
 │   ├── artefacts/       ← entregáveis por task
 │   ├── sugestoes/       ← canal agente→user
-│   ├── kanban.md        ← FONTE DE VERDADE work items (ver regra abaixo)
+│   ├── kanban.md        ← THINKINGS: FONTE DE VERDADE work items (ver regra abaixo)
 │   └── scheduled.md     ← tasks recorrentes (board separado)
 └── .ephemeral/          ← memória efêmera (gitignored)
 ```
 
-## Kanban — Regra Inviolável
+## THINKINGS — Regra Inviolável
 
-> O kanban (`vault/kanban.md`) DEVE ser atualizado em TODA sessão com o trabalho atual.
+> O THINKINGS (`vault/kanban.md`) DEVE ser atualizado em TODA sessão com o trabalho atual.
 > Não esperar pedido. É responsabilidade do agente.
 
 - **Interativo**: adicionar card em "Em Andamento" com tag `#interativo`
@@ -51,24 +53,32 @@
 - **Multi-turn**: manter card atualizado com contexto
 - **Concluído**: mover com link pro resultado
 
-O kanban é memória compartilhada entre sessões, mecanismo de orquestração entre agentes, e visibilidade pro user no Obsidian.
+O THINKINGS é memória compartilhada entre sessões, mecanismo de orquestração entre agentes, e visibilidade pro user no Obsidian.
+
+## Comando Principal
+
+**`/manual`** — documentação de todos os skills e commands disponíveis.
+- Sem argumentos: lista tudo em tabela organizada
+- Com argumento: exibe help detalhado do skill/command (ex: `/manual go-worker`)
+- Match parcial funciona (ex: `worker` encontra `go-worker`)
 
 ## Sistema de Tasks (6 recorrentes)
 
-| Task | Tier | Model | Função |
-|------|------|-------|--------|
-| processar-inbox | fast | haiku | Processa coluna Inbox do kanban |
-| doctor | fast | haiku | Health check |
-| vigiar-logs | fast | haiku | Monitora logs |
-| radar | heavy | haiku | Jira/Notion |
-| avaliar | heavy | sonnet | Repo + projetos + knowledge |
-| evolucao | heavy | sonnet | Meta-análise + docs |
+| Task | Clock | Model | Função |
+|------|-------|-------|--------|
+| processar-inbox | every10 | haiku | Processa coluna Inbox do THINKINGS |
+| doctor | every10 | haiku | Health check |
+| vigiar-logs | every10 | haiku | Monitora logs |
+| radar | every60 | haiku | Jira/Notion |
+| avaliar | every60 | sonnet | Repo + projetos + knowledge |
+| evolucao | every60 | sonnet | Meta-análise + docs |
+| propositor | every60 | sonnet | Propõe mudanças via worktree (`worktrees: true`) |
 
-Workers: **fast** (a cada 10 min, tasks tier=fast) + **heavy** (hourly, tasks tier=heavy + pending).
+Workers: **every10** (a cada 10 min, tasks clock=every10) + **every60** (a cada hora, tasks clock=every60 + pending).
 Detalhes em `docs/task-system.md`.
 
-## Inbox (coluna do kanban)
-User adiciona card na coluna "Inbox" do kanban no Obsidian (texto livre) → worker fast processa a cada 10 min → cria task + card formatado no Backlog.
+## Inbox (coluna do THINKINGS)
+User adiciona card na coluna "Inbox" do THINKINGS no Obsidian (texto livre) → worker every10 processa a cada 10 min → cria task + card formatado no Backlog.
 
 ## Persistência e Versionamento
 
@@ -92,7 +102,7 @@ Três camadas de persistência, da mais permanente à mais efêmera:
 - **Commands reutilizáveis** → `stow/.claude/commands/` (versionado)
 - **Hooks** → `stow/.claude/hooks/` (versionado)
 - **Feedback do user, info pessoal, contexto de projeto** → `memory/` (persistente, não versionado)
-- **Trabalho em andamento** → `vault/kanban.md` + `vault/artefacts/` (persistente via vault mount)
+- **Trabalho em andamento** → `vault/kanban.md` (THINKINGS) + `vault/artefacts/` (persistente via vault mount)
 
 ### Evolução contínua
 
@@ -101,7 +111,7 @@ Três camadas de persistência, da mais permanente à mais efêmera:
 - **Identidade** (`SOUL.md`) — personalidade, papel, diretrizes de comunicação
 - **Regras** (`CLAUDE.md`) — regras operacionais novas
 - **Habilidades** (`stow/.claude/commands/`, `skills/`) — padrões reutilizáveis
-- **Kanban** — limpeza de cards obsoletos/duplicados
+- **THINKINGS** — limpeza de cards obsoletos/duplicados
 
 Rodar periodicamente ou quando sentir que tem informação útil pra persistir. Toda sessão longa ou com feedback significativo merece contemplação.
 
@@ -112,7 +122,7 @@ Rodar periodicamente ou quando sentir que tem informação útil pra persistir. 
 - **Agents: default haiku** — escalar pra sonnet/opus só quando claramente necessário
 - **NUNCA rodar Claude dentro de Claude** — runner roda via systemd no host
 - **Superpoderes Nix** — todo Nixpkgs disponível via `nix-shell -p <pkg>`
-- **Ler kanban ANTES de qualquer tarefa** — o kanban tem contexto, links, e estado do trabalho. Nunca refazer algo que já existe
+- **Ler THINKINGS ANTES de qualquer tarefa** — o THINKINGS tem contexto, links, e estado do trabalho. Nunca refazer algo que já existe
 
 ## Observabilidade do Host (read-only)
 Bind mounts RO — consultar antes de pedir pro user rodar comandos:
@@ -131,7 +141,7 @@ gh api repos/owner/repo/pulls/<n>/comments
 NUNCA criar/editar/fechar PRs ou issues — token é READ ONLY.
 
 ## Startup
-- Hook `UserPromptSubmit` roda `/workspace/scripts/startup.sh` automaticamente
+- Hook `UserPromptSubmit` roda `/workspace/scripts/bootstrap.sh` automaticamente
 - NÃO lançar agents, NÃO processar tasks no interativo
 
 ## Vault Obsidian — Segundo Cérebro Compartilhado
@@ -155,9 +165,9 @@ Referência completa de plugins/Dataview/Mermaid/Templater em `docs/obsidian-ref
 ## Artefatos
 - `vault/artefacts/<task>/` — pasta por pedido/task
 - `vault/_agent/reports/` — relatórios de tasks autônomas
-- Card no kanban DEVE linkar pro artefato ao concluir
+- Card no THINKINGS DEVE linkar pro artefato ao concluir
 
 ## Referências (leitura on-demand)
 - `docs/obsidian-reference.md` — Dataview, Mermaid, Templater, plugins
 - `docs/nixos-reference.md` — comandos e arquitetura NixOS
-- `docs/task-system.md` — detalhes do sistema de tasks, tiers, kanban format
+- `docs/task-system.md` — detalhes do sistema de tasks, clocks, THINKINGS format

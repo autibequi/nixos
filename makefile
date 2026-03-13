@@ -6,7 +6,7 @@ export GIT_COMMITTER_EMAIL := $(GIT_AUTHOR_EMAIL)
 
 .PHONY: help switch update stow restow build shell sandbox resume down inject \
        clau run auto stop reset status new logs logs-list \
-       usage-api usage-api-7d usage-api-30d clau-service-logs
+       usage-api usage-api-7d usage-api-30d clau-service-logs ask
 
 help:
 	@echo ""
@@ -31,12 +31,12 @@ help:
 	@echo ""
 	@echo "  Tasks"
 	@echo "  ─────────────────────────────────────────────────────────"
-	@echo "  make run               Roda worker heavy com output"
+	@echo "  make run               Roda worker every60 com output"
 	@echo "  make run task=nome     Roda task específica com output"
-	@echo "  make run-fast          Roda worker fast com output"
+	@echo "  make run-fast          Roda worker every10 com output"
 	@echo "  make auto              Roda worker headless (systemd)"
-	@echo "  make auto-fast         Roda worker fast headless"
-	@echo "  make clau              Lança workers (heavy x2)"
+	@echo "  make auto-fast         Roda worker every10 headless"
+	@echo "  make clau              Lança workers (every60 x2)"
 	@echo "  make stop              Para workers + reseta tasks presas"
 	@echo "  make reset             Devolve tasks de running/ pra origem"
 	@echo "  make status            Mostra estado via kanban + workers"
@@ -48,6 +48,11 @@ help:
 	@echo "  make logs-list         Lista todos os logs"
 	@echo "  make clau-service-logs Logs do systemd service"
 	@echo "  make usage-api         Uso da API Anthropic (hoje)"
+	@echo ""
+	@echo "  Quick"
+	@echo "  ─────────────────────────────────────────────────────────"
+	@echo "  make ask q='pergunta'  Abre Alacritty com Claude respondendo"
+	@echo "  make ask               Abre Claude interativo em Alacritty"
 	@echo ""
 
 # ── NixOS ──────────────────────────────────────────────────────────
@@ -92,10 +97,10 @@ clau:
 			echo "[clau] $$WORKER_ID já rodando ($$existing) — skip"; \
 			continue; \
 		fi; \
-		echo "[clau] Lançando $$WORKER_ID (heavy)..."; \
+		echo "[clau] Lançando $$WORKER_ID (every60)..."; \
 		$(COMPOSE) run --rm -T \
 			-e CLAU_WORKER_ID="$$WORKER_ID" \
-			-e CLAU_TIER=heavy \
+			-e CLAU_CLOCK=every60 \
 			-l clau.worker.id="$$WORKER_ID" \
 			worker /workspace/scripts/clau-runner.sh >> "$$logfile" 2>&1 & \
 	done; \
@@ -129,7 +134,7 @@ run:
 	@mkdir -p $(LOGDIR)
 	@logfile="$(LOGFILE)"; \
 	echo "[clau] Log: $$logfile"; \
-	$(COMPOSE) run --rm -e CLAU_VERBOSE=1 -e CLAU_TIER=heavy \
+	$(COMPOSE) run --rm -e CLAU_VERBOSE=1 -e CLAU_CLOCK=every60 \
 		-e CLAU_WORKER_ID=$${CLAU_WORKER_ID:-worker-1} \
 		worker /workspace/scripts/clau-runner.sh $(task) 2>&1 | tee "$$logfile"
 
@@ -137,21 +142,21 @@ run-fast:
 	@mkdir -p $(LOGDIR)
 	@logfile="$(LOGFILE)"; \
 	echo "[clau] Log: $$logfile"; \
-	$(COMPOSE) run --rm -e CLAU_VERBOSE=1 -e CLAU_TIER=fast \
+	$(COMPOSE) run --rm -e CLAU_VERBOSE=1 -e CLAU_CLOCK=every10 \
 		-e CLAU_WORKER_ID=$${CLAU_WORKER_ID:-worker-fast} \
 		worker-fast /workspace/scripts/clau-runner.sh 2>&1 | tee "$$logfile"
 
 auto:
 	@mkdir -p $(LOGDIR)
 	@logfile="$(LOGFILE)"; \
-	$(COMPOSE) run --rm -T -e CLAU_TIER=heavy \
+	$(COMPOSE) run --rm -T -e CLAU_CLOCK=every60 \
 		-e CLAU_WORKER_ID=$${CLAU_WORKER_ID:-worker-1} \
 		worker /workspace/scripts/clau-runner.sh > "$$logfile" 2>&1
 
 auto-fast:
 	@mkdir -p $(LOGDIR)
 	@logfile="$(LOGFILE)"; \
-	$(COMPOSE) run --rm -T -e CLAU_TIER=fast \
+	$(COMPOSE) run --rm -T -e CLAU_CLOCK=every10 \
 		-e CLAU_WORKER_ID=$${CLAU_WORKER_ID:-worker-fast} \
 		worker-fast /workspace/scripts/clau-runner.sh > "$$logfile" 2>&1
 
@@ -214,16 +219,16 @@ status:
 	done < vault/kanban.md 2>/dev/null || echo "  (vazio)"
 
 new:
-	@[ -n "$(name)" ] || (echo "Uso: make new name=minha-tarefa [type=recurring|pending] [model=haiku|sonnet] [tier=fast|heavy] [timeout=300]" && exit 1)
+	@[ -n "$(name)" ] || (echo "Uso: make new name=minha-tarefa [type=recurring|pending] [model=haiku|sonnet] [clock=every10|every60] [timeout=300]" && exit 1)
 	@task_type="$${type:-pending}"; \
 	task_model="$${model:-$$([ "$$task_type" = "recurring" ] && echo "haiku" || echo "sonnet")}"; \
-	task_tier="$${tier:-$$([ "$$task_type" = "recurring" ] && echo "fast" || echo "heavy")}"; \
-	task_timeout="$${timeout:-$$([ "$$task_tier" = "fast" ] && echo "120" || echo "300")}"; \
+	task_clock="$${clock:-$$([ "$$task_type" = "recurring" ] && echo "every10" || echo "every60")}"; \
+	task_timeout="$${timeout:-$$([ "$$task_clock" = "every10" ] && echo "120" || echo "300")}"; \
 	task_dir="vault/_agent/tasks/$$task_type/$(name)"; \
 	mkdir -p "$$task_dir"; \
 	printf '%s\n' \
 		"---" \
-		"tier: $$task_tier" \
+		"clock: $$task_clock" \
 		"timeout: $$task_timeout" \
 		"model: $$task_model" \
 		"schedule: always" \
@@ -243,6 +248,11 @@ new:
 	KANBAN_FILE="$$kanban_file" source scripts/kanban-sync.sh && kanban_add_card "$$kanban_col" "$$card" 2>/dev/null || \
 		echo "[AVISO] Não conseguiu adicionar card no kanban"; \
 	echo "Task: $$task_dir/ ($$task_model, $$task_tier, $${task_timeout}s)"
+
+# ── Quick Ask ──────────────────────────────────────────────────────
+
+ask:
+	@bash scripts/claude-ask.sh "$(q)"
 
 # ── Logs ───────────────────────────────────────────────────────────
 

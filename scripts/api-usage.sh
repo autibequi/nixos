@@ -75,11 +75,11 @@ fi
 START_DISPLAY=${START%%T*}
 END_DISPLAY=$(date -u +%Y-%m-%d)
 
-echo "╔═══════════════════════════════════════════════════╗"
-echo "║         Anthropic API Usage ($PERIOD)               ║"
-echo "╠═══════════════════════════════════════════════════╣"
-echo "║  Periodo: $START_DISPLAY → $END_DISPLAY"
-echo "╚═══════════════════════════════════════════════════╝"
+echo "  ┌──────────────────────────────────────────────────┐"
+echo "  │  APERTURE SCIENCE — API Usage Report ($PERIOD)      │"
+echo "  │  Periodo: $START_DISPLAY → $END_DISPLAY                        │"
+echo "  │  // the cake is a lie but the bill is real //  │"
+echo "  └──────────────────────────────────────────────────┘"
 echo ""
 
 # Precisa de jq pra output formatado

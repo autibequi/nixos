@@ -8,7 +8,7 @@ KANBAN="$WORKSPACE/vault/kanban.md"
 CLAU_VERBOSE="${CLAU_VERBOSE:-0}"
 SPECIFIC_TASK="${1:-}"
 WORKER_ID="${CLAU_WORKER_ID:-worker-1}"
-CLAU_TIER="${CLAU_TIER:-heavy}"
+CLAU_CLOCK="${CLAU_CLOCK:-every60}"
 NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}"
 export NODE_OPTIONS
 SCHEDULED="$WORKSPACE/vault/scheduled.md"
@@ -27,7 +27,7 @@ mkdir -p "$EPHEMERAL/locks" "$TASKS/running" "$TASKS/done" "$TASKS/failed" \
 
 source "$WORKSPACE/scripts/kanban-sync.sh"
 
-echo "[clau:$WORKER_ID:$CLAU_TIER] Iniciando (PID $$)"
+echo "[clau:$WORKER_ID:$CLAU_CLOCK] Iniciando (PID $$)"
 
 # ── Per-task lock ────────────────────────────────────────────────
 task_lock() {
@@ -106,10 +106,10 @@ get_timeout() {
   echo "${fm:-$DEFAULT_TIMEOUT}"
 }
 
-get_tier() {
+get_clock() {
   local task_dir="$1"
-  local fm; fm=$(parse_frontmatter "$task_dir/CLAUDE.md" "tier")
-  echo "${fm:-heavy}"
+  local fm; fm=$(parse_frontmatter "$task_dir/CLAUDE.md" "clock")
+  echo "${fm:-every60}"
 }
 
 get_mcp_flags() {
@@ -124,12 +124,12 @@ get_max_turns() {
   echo "${fm:-$DEFAULT_MAX_TURNS}"
 }
 
-# ── Tier filter ──────────────────────────────────────────────────
-should_run_tier() {
+# ── Clock filter ─────────────────────────────────────────────────
+should_run_clock() {
   local task_dir="$1"
-  local task_tier
-  task_tier=$(get_tier "$task_dir")
-  [ "$CLAU_TIER" = "$task_tier" ]
+  local task_clock
+  task_clock=$(get_clock "$task_dir")
+  [ "$CLAU_CLOCK" = "$task_clock" ]
 }
 
 # ── Claim task ───────────────────────────────────────────────────
@@ -138,9 +138,9 @@ claim_task() {
   [ -f "$TASKS/$source_dir/$task/CLAUDE.md" ] || { echo "[clau:$WORKER_ID] '$task' sem CLAUDE.md — skip"; return 1; }
   task_lock "$task" || return 1
 
-  # Tier filter
-  if ! should_run_tier "$TASKS/$source_dir/$task"; then
-    echo "[clau:$WORKER_ID] '$task' tier mismatch (task=$(get_tier "$TASKS/$source_dir/$task"), worker=$CLAU_TIER) — skip"
+  # Clock filter
+  if ! should_run_clock "$TASKS/$source_dir/$task"; then
+    echo "[clau:$WORKER_ID] '$task' clock mismatch (task=$(get_clock "$TASKS/$source_dir/$task"), worker=$CLAU_CLOCK) — skip"
     task_unlock "$task"; return 1
   fi
 
@@ -315,7 +315,7 @@ if [ -n "$SPECIFIC_TASK" ]; then
 fi
 
 # ── Process recurring tasks ──────────────────────────────────────
-echo "[clau:$WORKER_ID] === Recorrentes (tier=$CLAU_TIER) ==="
+echo "[clau:$WORKER_ID] === Recorrentes (clock=$CLAU_CLOCK) ==="
 start_time=$SECONDS
 ok_count=0; fail_count=0; task_count=0
 
@@ -333,7 +333,7 @@ for task in "${recurring_names[@]}"; do
   [ "$local_exit" -eq 0 ] && ok_count=$((ok_count + 1)) || fail_count=$((fail_count + 1))
 done
 
-# ── Process backlog (filtered by tier) ────────────────────────────
+# ── Process backlog (filtered by clock) ───────────────────────────
 echo "[clau:$WORKER_ID] === Backlog ==="
 mapfile -t backlog_names < <(kanban_list_names "Backlog" 2>/dev/null)
 
@@ -341,10 +341,10 @@ for task in "${backlog_names[@]}"; do
   [ -z "$task" ] && continue
   [ -d "$TASKS/pending/$task" ] || continue
 
-  # Filter by tier: task tier must match worker tier
-  task_tier=$(get_tier "$TASKS/pending/$task")
-  if [ "$task_tier" != "$CLAU_TIER" ]; then
-    echo "[clau:$WORKER_ID] '$task' tier mismatch (task=$task_tier, worker=$CLAU_TIER) — skip"
+  # Filter by clock: task clock must match worker clock
+  task_clock=$(get_clock "$TASKS/pending/$task")
+  if [ "$task_clock" != "$CLAU_CLOCK" ]; then
+    echo "[clau:$WORKER_ID] '$task' clock mismatch (task=$task_clock, worker=$CLAU_CLOCK) — skip"
     continue
   fi
 
