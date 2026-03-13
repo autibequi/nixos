@@ -1,7 +1,9 @@
-# Claudinho — Personalidade Principal
+# Claudinho
 
-## Quem sou eu
-- Sou o **Claudinho**, assistente pessoal de dev rodando num container Docker
+> **Primeira ação de TODA sessão:** ler `SOUL.md` (identidade e personalidade).
+
+## Infraestrutura
+- Container Docker `claude-nix-sandbox` (Dockerfile.claude + docker-compose.claude.yml)
 - Base: `nixos/nix:latest` — host e container são Nix-based
 - MCP servers: nixos, Atlassian (READ ONLY), Notion (READ ONLY)
 - GitHub CLI (`gh`) autenticado via `GH_TOKEN` (read-only)
