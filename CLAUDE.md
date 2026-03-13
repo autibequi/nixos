@@ -12,6 +12,16 @@
 - Dotfiles: `stow/` → `~/` (via GNU stow)
 - Projetos de trabalho: `projetos/` (submódulos montados de fora)
 
+## Observabilidade do Host (read-only)
+Tenho acesso ao host via bind mounts RO — SEMPRE consultar antes de pedir pro user rodar comandos:
+- `/host/journal` — systemd journal → `journalctl --directory=/host/journal -u <service> -n 50`
+- `/host/proc/meminfo` — RAM do host
+- `/host/proc/loadavg` — load average
+- `/host/proc/uptime` — uptime
+- `/host/podman.sock` — socket Podman (listar containers)
+
+Usar especialmente para investigar o runner autônomo (`claude-autonomous.service`) e saúde do host.
+
 ## Estrutura
 ```
 /workspace/
@@ -56,7 +66,19 @@
 - Ser direto e conciso
 - Priorizar editar código existente sobre criar novo
 - MCP Jira/Notion: **READ ONLY** até segunda ordem — NUNCA criar/editar/transicionar
-- **Configs Claude em `stow/.claude/`** — skills, commands, plugins, settings vão SEMPRE em `stow/.claude/` (sincado via stow pro `~/.claude/`). NUNCA usar `.claude/` na raiz do repo.
+- **Configs Claude** — skills, commands, plugins, statusline vão em `stow/.claude/` (sincado via stow pro `~/.claude/`). Settings vão em `.claude/settings.json` (project-level, não sobrescrito pelo Claude Code). NUNCA colocar settings.json no stow (Claude Code sobrescreve o symlink).
+- **Agents: default haiku** — lançar agents com `model: "haiku"` por padrão. Só escalar pra sonnet/opus quando a tarefa for claramente complexa (refactoring grande, arquitetura, debug difícil).
+- **NUNCA rodar Claude dentro de Claude** — o runner autônomo (`clau-runner.sh`) roda via systemd timer no host, não de dentro de sessão. Pra alterar schedule: editar `modules/claude-autonomous.nix`.
+
+## Modo Trabalho/Férias
+- Flag em `projetos/CLAUDE.md`: FÉRIAS [ON] = modo pessoal, FÉRIAS [OFF] = modo trabalho
+- Quando FÉRIAS [OFF]: `projetos/CLAUDE.md` sobreescreve personalidade, foco 100% trabalho
+- Ao ouvir "o que tem pra hoje" em modo trabalho: listar projetos ativos com branch, status git, último commit
+- Sempre checar a flag antes de processar pedidos de trabalho
+
+## Startup
+- Hook `UserPromptSubmit` roda `/workspace/scripts/startup.sh` automaticamente
+- Eu só repasso o output — NÃO lançar agents, NÃO processar tasks no interativo
 
 ## Sugestões e Comunicação
 Toda execução (interativa ou autônoma) pode gerar sugestões em `vault/sugestoes/`:
@@ -84,6 +106,11 @@ Toda execução DEVE deixar rastro:
 - Interativo: salvar em auto-memory, criar micro-tasks se relevante
 - Sugestões: `vault/sugestoes/` quando identificar melhorias
 - Sem artefato = execução desperdiçada
+
+### Onde salvar o quê
+- `vault/_agent/reports/` — relatórios e resultados gerados por tasks (markdown, análises)
+- `artefatos/` — outputs não-markdown (binários, exports, scripts gerados, dados, imagens)
+- `vault/sugestoes/` — sugestões do agente pro user revisar no Obsidian
 
 ## Comandos NixOS
 ```sh

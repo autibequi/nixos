@@ -13,11 +13,13 @@ RUN nix profile install \
     nixpkgs#nodejs \
     nixpkgs#wl-clipboard \
     nixpkgs#sox \
-    nixpkgs#util-linux
+    nixpkgs#util-linux \
+    nixpkgs#systemdMinimal
 
 # Create non-root user manually (no shadow utils needed)
 RUN echo "claude:x:1000:1000::/home/claude:/bin/bash" >> /etc/passwd && \
     echo "claude:x:1000:" >> /etc/group && \
+    echo "systemd-journal:x:190:claude" >> /etc/group && \
     mkdir -p /home/claude/.claude && \
     chown -R 1000:1000 /home/claude
 
