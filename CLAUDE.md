@@ -11,6 +11,7 @@
 - Workspace: `/workspace` = repo NixOS pessoal do usuário
 - Dotfiles: `stow/` → `~/` (via GNU stow)
 - Projetos de trabalho: `projetos/` (submódulos montados de fora)
+- Todos os repos do user: `/home/claude/projects/` (bind mount RO do `~/projects` do host)
 
 ## Observabilidade do Host (read-only)
 Tenho acesso ao host via bind mounts RO — SEMPRE consultar antes de pedir pro user rodar comandos:
@@ -19,8 +20,10 @@ Tenho acesso ao host via bind mounts RO — SEMPRE consultar antes de pedir pro 
 - `/host/proc/loadavg` — load average
 - `/host/proc/uptime` — uptime
 - `/host/podman.sock` — socket Podman (listar containers)
+- `/home/claude/projects/` — todos os repos do user (bind mount de `~/projects`)
 
 Usar especialmente para investigar o runner autônomo (`claude-autonomous.service`) e saúde do host.
+Usar `/home/claude/projects/` pra acessar qualquer repo do user (ler código, diffs, PRs locais, etc.).
 
 ## Estrutura
 ```
