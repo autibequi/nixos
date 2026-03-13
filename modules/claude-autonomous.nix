@@ -2,7 +2,8 @@
 let
   user = "pedrinho";
   projectDir = "/home/${user}/nixos";
-  compose = "${pkgs.docker-compose}/bin/docker-compose -f ${projectDir}/docker-compose.claude.yml";
+  vaultDir = "/home/${user}/.ovault/Work";
+  compose = "${pkgs.podman-compose}/bin/podman-compose -f ${projectDir}/docker-compose.claude.yml";
 
   # Multi-worker dispatch: lança N workers em paralelo, cada um sequencial
   runnerScript = pkgs.writeShellScript "clau-dispatch" ''
@@ -12,13 +13,13 @@ let
     MAX_WORKERS=''${CLAU_MAX_WORKERS:-2}
 
     # Verifica se há tasks disponíveis (via kanban)
-    if [ ! -f vault/kanban.md ]; then
-      echo "[clau] kanban.md não encontrado."
+    if [ ! -f ${vaultDir}/kanban.md ]; then
+      echo "[clau] kanban.md não encontrado em ${vaultDir}."
       exit 0
     fi
 
     # Checar se há algo no Backlog ou Recorrentes
-    backlog=$(grep -c '^\- \[' vault/kanban.md 2>/dev/null || echo "0")
+    backlog=$(grep -c '^\- \[' ${vaultDir}/kanban.md 2>/dev/null || echo "0")
     if [ "$backlog" -eq 0 ]; then
       echo "[clau] Sem cards no kanban."
       exit 0
@@ -29,7 +30,7 @@ let
       WORKER_ID="worker-$i"
 
       # Checar se worker-$i já roda
-      existing=$(docker ps --filter "label=com.docker.compose.service=worker" \
+      existing=$(${pkgs.podman}/bin/podman ps --filter "label=com.docker.compose.service=worker" \
         --filter "label=clau.worker.id=$WORKER_ID" \
         --format "{{.ID}}" 2>/dev/null | head -1)
       if [ -n "$existing" ]; then

@@ -48,7 +48,6 @@ services:
   # Workers one-off pra tasks autônomas (docker compose run)
   worker:
     <<: *common
-    profiles: ["worker"]
     mem_limit: 12g
     memswap_limit: 16g
     entrypoint: ["/home/claude/.nix-profile/bin/bash"]

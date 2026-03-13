@@ -5,7 +5,7 @@ export GIT_COMMITTER_NAME := $(GIT_AUTHOR_NAME)
 export GIT_COMMITTER_EMAIL := $(GIT_AUTHOR_EMAIL)
 
 .PHONY: help switch update get-ids reload stow restow stow-tree stow-confirm \
-       build shell sandbox sandbox-shell resume down inject claude \
+       build shell sandbox sandbox-shell resume down inject clau \
        run auto stop reset status new logs logs-list usage usage-api usage-api-7d usage-api-30d \
        test test-task test-container test-mcp test-runner doctor \
        dashboard clean-tasks ping vault-link \
@@ -40,7 +40,7 @@ help:
 	@echo "  Container (sandbox interativo)"
 	@echo "  ─────────────────────────────────────────────────────────"
 	@echo "  make build             Build da imagem Docker"
-	@echo "  make claude            Abre Alacritty com sandbox Claude"
+	@echo "  make clau              Lança workers autônomos (como systemd)"
 	@echo "  make sandbox           Sobe sandbox + abre Claude"
 	@echo "  make shell             Sobe sandbox + abre bash"
 	@echo "  make resume            Retoma sessão Claude anterior"
@@ -140,6 +140,37 @@ LOGFILE = $(LOGDIR)/$$(date +%Y-%m-%dT%H:%M:%S.%3N).log
 
 build:
 	$(COMPOSE) build
+
+VAULT_KANBAN = $(HOME)/.ovault/Work/kanban.md
+
+clau:
+	@if [ ! -f "$(VAULT_KANBAN)" ]; then \
+		echo "[clau] kanban.md não encontrado em $(VAULT_KANBAN)"; \
+		exit 1; \
+	fi
+	@backlog=$$(grep -c '^\- \[' "$(VAULT_KANBAN)" 2>/dev/null || echo "0"); \
+	if [ "$$backlog" -eq 0 ]; then \
+		echo "[clau] Sem cards no kanban."; \
+		exit 0; \
+	fi
+	@mkdir -p $(LOGDIR)
+	@logfile="$(LOGFILE)"; \
+	echo "[clau] Log: $$logfile"; \
+	for i in 1 2; do \
+		WORKER_ID="worker-$$i"; \
+		existing=$$(podman ps --filter "name=_worker_" --filter "label=clau.worker.id=$$WORKER_ID" --format "{{.ID}}" 2>/dev/null | head -1); \
+		if [ -n "$$existing" ]; then \
+			echo "[clau] $$WORKER_ID já rodando ($$existing) — skip"; \
+			continue; \
+		fi; \
+		echo "[clau] Lançando $$WORKER_ID..."; \
+		$(COMPOSE) run --rm -T \
+			-e CLAU_WORKER_ID="$$WORKER_ID" \
+			-l clau.worker.id="$$WORKER_ID" \
+			worker /workspace/scripts/clau-runner.sh >> "$$logfile" 2>&1 & \
+	done; \
+	echo "[clau] Workers lançados. Seguindo log..."; \
+	tail -f "$$logfile"
 
 sandbox:
 	$(COMPOSE) up -d sandbox
