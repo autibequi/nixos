@@ -162,3 +162,5 @@ if [[ -f "$KANBAN" ]]; then
   remaining=$(( ${#items[@]} - count ))
   [[ $remaining -gt 0 ]] && echo -e "  ${DIM}+${remaining} mais${R}"
 fi
+
+exit 0
