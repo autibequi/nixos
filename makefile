@@ -1,6 +1,6 @@
 .PHONY: get-ids reload switch update stow restow stow-tree stow-confirm \
        sandbox sandbox-build sandbox-shell sandbox-down sandbox-restart sandbox-inject \
-       claude-resume clau clau-run clau-reset clau-status clau-workers usage
+       claude-resume clau clau-run clau-reset clau-status clau-workers logs logs-follow usage
 
 # ── NixOS ──────────────────────────────────────────────────────────
 
@@ -151,6 +151,18 @@ clau-new:
 		echo "Task one-shot criada: tasks/pending/$(name)/"; \
 	fi
 	@echo "Edite: $$( [ '$(type)' = 'recurring' ] && echo 'tasks/recurring' || echo 'tasks/pending' )/$(name)/CLAUDE.md"
+
+# Logs dos workers (podman)
+logs:
+	@docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}}" 2>/dev/null | \
+		while read id; do echo "=== $$id ==="; docker logs --tail 50 "$$id" 2>&1; echo; done
+	@docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}}" 2>/dev/null | \
+		grep -q . || echo "(nenhum worker rodando)"
+
+# Logs em tempo real (follow)
+logs-follow:
+	@docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}}" 2>/dev/null | \
+		xargs -I{} docker logs -f {} 2>&1
 
 # ── Utils ──────────────────────────────────────────────────────────
 
