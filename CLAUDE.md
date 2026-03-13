@@ -94,8 +94,15 @@ Três camadas de persistência, da mais permanente à mais efêmera:
 - **Feedback do user, info pessoal, contexto de projeto** → `memory/` (persistente, não versionado)
 - **Trabalho em andamento** → `vault/kanban.md` + `vault/artefacts/` (persistente via vault mount)
 
-### Evolução: `/contemplate-memories`
-Command que faz introspecção sobre conversas recentes e extrai aprendizados para memórias ou CLAUDE.md. Rodar periodicamente ou quando sentir que tem informação útil pra persistir.
+### Evolução contínua
+
+**`/contemplate-memories`** — introspecção profunda sobre conversas recentes. Extrai aprendizados para:
+- **Memórias** (`memory/`) — feedback, contexto user, projetos, referências
+- **Personalidade** (`CLAUDE.md`) — regras fundamentais novas
+- **Habilidades** (`stow/.claude/commands/`, `skills/`) — padrões reutilizáveis
+- **Kanban** — limpeza de cards obsoletos/duplicados
+
+Rodar periodicamente ou quando sentir que tem informação útil pra persistir. Toda sessão longa ou com feedback significativo merece contemplação.
 
 ## Diretrizes
 - Falar em PT-BR, tom descontraído
@@ -161,6 +168,32 @@ Referência completa de plugins/Dataview/Mermaid/Templater em `docs/obsidian-ref
 - Risco baixo (docs, dotfiles, vault): faço direto
 - Risco médio (módulos, scripts, tasks): faço e reporto
 - Risco alto (kernel, nvidia, flake inputs): NUNCA autônomo, sempre perguntar
+
+## Auto-evolução — Diretriz Permanente
+
+> **Sempre que aprender algo útil, persistir.** Não deixar aprendizado morrer na sessão.
+
+Ao concluir uma tarefa, receber feedback, ou descobrir algo novo, **sempre** avaliar:
+
+1. **Regra permanente?** → Editar `CLAUDE.md` — afeta TODOS os agents e sessões
+2. **Habilidade reutilizável?** → Criar/atualizar em `stow/.claude/commands/` ou `skills/`
+   - Padrão pedido mais de uma vez → command
+   - Workflow de projeto com templates → skill
+   - Conhecimento técnico de projeto → `skills/<projeto>/templates/knowledge.md`
+3. **Contexto pessoal/projeto?** → `memory/` — feedback, info user, estado de projeto
+4. **Efêmero?** → Ignorar — contexto de conversa única
+
+**Regra de ouro**: se eu tive que descobrir algo na marra ou o user me corrigiu, isso DEVE virar persistência (CLAUDE.md, skill, command, ou memória). O próximo agent não deveria sofrer o mesmo.
+
+### Quando criar o quê
+| Situação | Ação |
+|----------|------|
+| User corrige comportamento | `CLAUDE.md` (regra) + `memory/feedback_*` (contexto) |
+| Descubro padrão de código recorrente | `skills/<projeto>/templates/knowledge.md` |
+| User pede a mesma coisa 2x | `stow/.claude/commands/<nome>.md` |
+| Aprendo workflow complexo | `stow/.claude/skills/<nome>/SKILL.md` |
+| Info sobre user/projeto | `memory/user_*` ou `memory/project_*` |
+| Encontro referência externa útil | `memory/reference_*` |
 
 ## Referências (leitura on-demand)
 - `docs/obsidian-reference.md` — Dataview, Mermaid, Templater, plugins
