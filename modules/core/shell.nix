@@ -11,7 +11,7 @@ let
     clip = "wl-copy";
     clipb = "wl-paste";
     stow = "stow --target=$HOME";
-    dotfiles = "stow --target=$HOME --dir=$HOME/projects/nixos stow";
+    dotfiles = "stow --target=$HOME --dir=$HOME/nixos stow";
     please = "sudo !!";
     wiki = "wikiti";
     du = "dust";

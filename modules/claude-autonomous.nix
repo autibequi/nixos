@@ -1,7 +1,7 @@
 { pkgs, ... }:
 let
   user = "pedrinho";
-  projectDir = "/home/${user}/projects/nixos";
+  projectDir = "/home/${user}/nixos";
   compose = "${pkgs.docker-compose}/bin/docker-compose -f ${projectDir}/docker-compose.claude.yml";
 
   # Multi-worker dispatch: lança N workers em paralelo, cada um sequencial

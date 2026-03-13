@@ -79,7 +79,7 @@
 
           "org/gnome/settings-daemon/plugins/media-keys/custom0" = {
             binding = "<Super>comma";
-            command = "sh -c 'cd ~/projects/nixos && zeditor .'";
+            command = "sh -c 'cd ~/nixos && zeditor .'";
             name = "Open Zed in NixOS Project";
           };
         };

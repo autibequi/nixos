@@ -109,7 +109,7 @@ sudo nixos-rebuild build --flake .#nomad
 nix --extra-experimental-features 'nix-command flakes' flake update
 
 # Apply dotfiles
-stow -d ~/projects/nixos/stow -t ~ .
+stow -d ~/nixos/stow -t ~ .
 ```
 
 ## Tips

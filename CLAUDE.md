@@ -199,7 +199,7 @@ Toda execução DEVE deixar rastro:
 sudo nixos-rebuild switch --flake .#nomad   # Apply config
 sudo nixos-rebuild build --flake .#nomad    # Test build
 nix --extra-experimental-features 'nix-command flakes' flake update  # Update inputs
-stow -d ~/projects/nixos/stow -t ~ .       # Apply dotfiles
+stow -d ~/nixos/stow -t ~ .       # Apply dotfiles
 ```
 
 ## Arquitetura NixOS
