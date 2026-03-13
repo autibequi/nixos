@@ -71,14 +71,16 @@ GLADOS_QUOTES=(
 )
 QUOTE="${GLADOS_QUOTES[$((RANDOM % ${#GLADOS_QUOTES[@]}))]}"
 
-# --- Banner Portal 2 ---
+# --- Banner Portal 2 (box-drawing only, no block chars) ---
 BANNERS=(
 "${WHITE}
     ╔══════════════════════════════════════════════════╗
     ║                                                  ║
-    ║  ${ORANGE}░█▀█░█▀█░█▀▀░█▀▄░▀█▀░█░█░█▀▄░█▀▀${WHITE}              ║
-    ║  ${ORANGE}░█▀█░█▀▀░█▀▀░█▀▄░░█░░█░█░█▀▄░█▀▀${WHITE}              ║
-    ║  ${ORANGE}░▀░▀░▀░░░▀▀▀░▀░▀░░▀░░▀▀▀░▀░▀░▀▀▀${WHITE}              ║
+    ║  ${ORANGE}  ##  ###  #### ###  ##### #  # ###  ####${WHITE}       ║
+    ║  ${ORANGE} #  # #  # #    #  #  #   #  # #  # #${WHITE}          ║
+    ║  ${ORANGE} #### ###  ###  ###   #   #  # ###  ###${WHITE}         ║
+    ║  ${ORANGE} #  # #    #    #  #  #   #  # #  # #${WHITE}          ║
+    ║  ${ORANGE} #  # #    #### #  #  #    ##  #  # ####${WHITE}       ║
     ║  ${BLUE}S C I E N C E${WHITE}                                    ║
     ║                                                  ║
     ║  ${CYAN}TULPA${R}${WHITE} personal dev agent                       ║
@@ -88,11 +90,11 @@ BANNERS=(
 "${WHITE}
     ┌──────────────────────────────────────────────────┐
     │                                                  │
-    │  ${ORANGE}▄▀█ █▀█ █▀▀ █▀█ ▀█▀ █ █ █▀█ █▀▀${WHITE}              │
-    │  ${ORANGE}█▀█ █▀▀ ██▄ █▀▄  █  █▄█ █▀▄ ██▄${WHITE}              │
-    │  ${BLUE}SCIENCE${WHITE}                                        │
+    │  ${ORANGE}APERTURE${WHITE}                                       │
+    │  ${BLUE}S C I E N C E${WHITE}                                    │
     │                                                  │
     │  ${CYAN}TULPA${R}${WHITE}  ────────────────────────                │
+    │  personal dev agent                              │
     │  ${DIM}${DIA}  ${HORA}  ${WEATHER_STR}${R}${WHITE}
     │                                                  │
     │  ${DIM}// test chamber initialized //${R}${WHITE}                │
@@ -100,11 +102,11 @@ BANNERS=(
 "${WHITE}
     ╔══════════════════════════════════════════════════╗
     ║                                                  ║
-    ║  ${ORANGE}█████${BLUE}╗${ORANGE} ${ORANGE}██████${BLUE}╗${ORANGE} ██████${BLUE}╗${WHITE}                       ║
-    ║  ${ORANGE}██${BLUE}╔══╝${ORANGE} ██${BLUE}╔═══╝${ORANGE} ██${BLUE}╔═══╝${WHITE}  ${CYAN}TULPA${R}${WHITE}               ║
-    ║  ${ORANGE}█████${BLUE}╗${ORANGE} ██████${BLUE}╗${ORANGE} ██████${BLUE}╗${WHITE}  personal dev agent    ║
-    ║  ${BLUE}╚══${ORANGE}██${BLUE}║ ╚═══${ORANGE}██${BLUE}║ ╚═══${ORANGE}██${BLUE}║${WHITE}                       ║
-    ║  ${ORANGE}█████${BLUE}╝${ORANGE} ██████${BLUE}╝${ORANGE} ██████${BLUE}╝${WHITE}  Aperture Science      ║
+    ║  ${ORANGE}┏━━┓ ┏━━┓ ┏━━┓${WHITE}                                ║
+    ║  ${ORANGE}┗━┓┃ ┗━┓┃ ┗━┓┃${WHITE}  ${CYAN}TULPA${R}${WHITE}                        ║
+    ║  ${ORANGE}┏━┛┃ ┏━┛┃ ┏━┛┃${WHITE}  personal dev agent             ║
+    ║  ${ORANGE}┃┏━┛ ┃┏━┛ ┃┏━┛${WHITE}                                ║
+    ║  ${ORANGE}┗┛   ┗┛   ┗┛${WHITE}   Aperture Science               ║
     ║                                                  ║
     ║  ${DIM}${DIA}  ${HORA}  ${WEATHER_STR}${R}${WHITE}
     ║                                                  ║
