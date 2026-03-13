@@ -4,6 +4,7 @@
 set -euo pipefail
 
 KANBAN="${KANBAN_FILE:-/workspace/vault/kanban.md}"
+SCHEDULED="${SCHEDULED_FILE:-/workspace/vault/scheduled.md}"
 LOCKFILE="${KANBAN_LOCKFILE:-/workspace/.ephemeral/.kanban.lock}"
 
 mkdir -p "$(dirname "$LOCKFILE")"
@@ -21,8 +22,10 @@ _kanban_atomic() {
 }
 
 # Encontra linhas de início e fim de uma coluna (0-indexed)
+# Usage: _find_column "ColName" [file]  (default: $KANBAN)
 _find_column() {
   local column="$1"
+  local file="${2:-$KANBAN}"
   local header="## $column"
   COLUMN_START=-1
   COLUMN_END=-1
@@ -39,7 +42,7 @@ _find_column() {
       found=1
     fi
     line_num=$((line_num + 1))
-  done < "$KANBAN"
+  done < "$file"
 
   if [ "$found" = "1" ]; then
     COLUMN_END=$line_num  # EOF
@@ -161,9 +164,11 @@ _transform_fail() {
 # ── Funções públicas ─────────────────────────────────────────────
 
 # Lista cards de uma coluna
+# Usage: kanban_read_column "ColName" [file]  (default: $KANBAN)
 kanban_read_column() {
   local column="$1"
-  _find_column "$column" || { echo "[kanban-sync] Coluna '$column' não encontrada" >&2; return 1; }
+  local file="${2:-$KANBAN}"
+  _find_column "$column" "$file" || { echo "[kanban-sync] Coluna '$column' não encontrada em $file" >&2; return 1; }
 
   local line_num=0
   while IFS= read -r line; do
@@ -173,7 +178,7 @@ kanban_read_column() {
       fi
     fi
     line_num=$((line_num + 1))
-  done < "$KANBAN"
+  done < "$file"
 }
 
 # Move card do Backlog → Em Andamento com [worker-N]
@@ -200,8 +205,9 @@ kanban_add_card() {
   _kanban_atomic _do_add_card "$column" "$card"
 }
 
-_do_add_card() {
-  local column="$1" card="$2"
+# _do_add_card_in column card file — adiciona card em coluna de qualquer arquivo
+_do_add_card_in() {
+  local column="$1" card="$2" file="$3"
   local tmp
   tmp=$(mktemp)
   local in_column=0
@@ -222,19 +228,24 @@ _do_add_card() {
         in_column=0
       fi
     fi
-  done < "$KANBAN"
+  done < "$file"
 
   if [ "$inserted" = "1" ]; then
-    mv "$tmp" "$KANBAN"
-    echo "[kanban-sync] Card adicionado em '$column'"
+    mv "$tmp" "$file"
+    echo "[kanban-sync] Card adicionado em '$column' ($file)"
   else
     rm -f "$tmp"
-    echo "[kanban-sync] Coluna '$column' não encontrada ou sem linha vazia" >&2
+    echo "[kanban-sync] Coluna '$column' não encontrada ou sem linha vazia em $file" >&2
     return 1
   fi
 }
 
-# Copia card de Recorrentes → Em Andamento (original fica)
+_do_add_card() {
+  local column="$1" card="$2"
+  _do_add_card_in "$column" "$card" "$KANBAN"
+}
+
+# Copia card de Recorrentes → Em Execução no scheduled.md (original fica)
 kanban_claim_recurring() {
   local task="$1" worker="$2"
   _kanban_atomic _do_claim_recurring "$task" "$worker"
@@ -243,17 +254,17 @@ kanban_claim_recurring() {
 _do_claim_recurring() {
   local task="$1" worker="$2"
 
-  # Verificar se já está em andamento
+  # Verificar se já está em execução no scheduled
   local already=0
   while IFS= read -r line; do
     if [[ "$line" == *"**${task}**"* ]] && [[ "$line" == *"[worker-"* ]]; then
       already=1
       break
     fi
-  done < <(kanban_read_column "Em Andamento" 2>/dev/null || true)
+  done < <(kanban_read_column "Em Execução" "$SCHEDULED" 2>/dev/null || true)
 
   if [ "$already" = "1" ]; then
-    echo "[kanban-sync] '$task' já em andamento por outro worker" >&2
+    echo "[kanban-sync] '$task' já em execução por outro worker" >&2
     return 1
   fi
 
@@ -264,7 +275,7 @@ _do_claim_recurring() {
       card_line="$line"
       break
     fi
-  done < <(kanban_read_column "Recorrentes" 2>/dev/null || true)
+  done < <(kanban_read_column "Recorrentes" "$SCHEDULED" 2>/dev/null || true)
 
   if [ -z "$card_line" ]; then
     echo "[kanban-sync] '$task' não encontrado em Recorrentes" >&2
@@ -273,10 +284,10 @@ _do_claim_recurring() {
 
   local new_card
   new_card=$(_add_worker_tag "$card_line" "$task" "$worker")
-  _do_add_card "Em Andamento" "$new_card"
+  _do_add_card_in "Em Execução" "$new_card" "$SCHEDULED"
 }
 
-# Remove cópia de recurring de Em Andamento
+# Remove cópia de recurring de Em Execução no scheduled.md
 kanban_unclaim_recurring() {
   local task="$1"
   _kanban_atomic _do_unclaim_recurring "$task"
@@ -287,46 +298,50 @@ _do_unclaim_recurring() {
   local tmp
   tmp=$(mktemp)
   local found=0
-  local in_andamento=0
+  local in_col=0
 
   while IFS= read -r line; do
-    if [ "$line" = "## Em Andamento" ]; then
-      in_andamento=1
+    if [ "$line" = "## Em Execução" ]; then
+      in_col=1
       echo "$line" >> "$tmp"
       continue
     fi
-    if [[ "$line" =~ ^##\  ]] && [ "$in_andamento" = "1" ]; then
-      in_andamento=0
+    if [[ "$line" =~ ^##\  ]] && [ "$in_col" = "1" ]; then
+      in_col=0
     fi
 
-    if [ "$in_andamento" = "1" ] && [[ "$line" =~ ^-\ \[ ]] && [[ "$line" == *"**${task}**"* ]]; then
+    if [ "$in_col" = "1" ] && [[ "$line" =~ ^-\ \[ ]] && [[ "$line" == *"**${task}**"* ]]; then
       found=1
       continue
     fi
 
     echo "$line" >> "$tmp"
-  done < "$KANBAN"
+  done < "$SCHEDULED"
 
   if [ "$found" = "1" ]; then
-    mv "$tmp" "$KANBAN"
-    echo "[kanban-sync] '$task' removido de Em Andamento (recurring unclaim)"
+    mv "$tmp" "$SCHEDULED"
+    echo "[kanban-sync] '$task' removido de Em Execução (recurring unclaim)"
   else
     rm -f "$tmp"
-    echo "[kanban-sync] '$task' não encontrado em Em Andamento" >&2
+    echo "[kanban-sync] '$task' não encontrado em Em Execução" >&2
     return 1
   fi
 }
 
 # Retorna cards de uma coluna como nomes
+# Usage: kanban_list_names "ColName" [file]  (default: $KANBAN)
 kanban_list_names() {
   local column="$1"
-  kanban_read_column "$column" 2>/dev/null | while IFS= read -r line; do
+  local file="${2:-$KANBAN}"
+  kanban_read_column "$column" "$file" 2>/dev/null | while IFS= read -r line; do
     _card_name "$line"
   done
 }
 
 # Conta cards por coluna
+# Usage: kanban_count "ColName" [file]  (default: $KANBAN)
 kanban_count() {
   local column="$1"
-  kanban_read_column "$column" 2>/dev/null | wc -l
+  local file="${2:-$KANBAN}"
+  kanban_read_column "$column" "$file" 2>/dev/null | wc -l
 }

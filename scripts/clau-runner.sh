@@ -11,7 +11,9 @@ WORKER_ID="${CLAU_WORKER_ID:-worker-1}"
 CLAU_TIER="${CLAU_TIER:-heavy}"
 NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}"
 export NODE_OPTIONS
+SCHEDULED="$WORKSPACE/vault/scheduled.md"
 export KANBAN_FILE="$KANBAN"
+export SCHEDULED_FILE="$SCHEDULED"
 export KANBAN_LOCKFILE="$EPHEMERAL/.kanban.lock"
 
 DEFAULT_TIMEOUT=300
@@ -136,8 +138,8 @@ claim_task() {
   [ -f "$TASKS/$source_dir/$task/CLAUDE.md" ] || { echo "[clau:$WORKER_ID] '$task' sem CLAUDE.md — skip"; return 1; }
   task_lock "$task" || return 1
 
-  # Tier filter (recurring only — pending always runs on heavy)
-  if [ "$source_dir" = "recurring" ] && ! should_run_tier "$TASKS/$source_dir/$task"; then
+  # Tier filter
+  if ! should_run_tier "$TASKS/$source_dir/$task"; then
     echo "[clau:$WORKER_ID] '$task' tier mismatch (task=$(get_tier "$TASKS/$source_dir/$task"), worker=$CLAU_TIER) — skip"
     task_unlock "$task"; return 1
   fi
@@ -311,7 +313,7 @@ echo "[clau:$WORKER_ID] === Recorrentes (tier=$CLAU_TIER) ==="
 start_time=$SECONDS
 ok_count=0; fail_count=0; task_count=0
 
-mapfile -t recurring_names < <(kanban_list_names "Recorrentes" 2>/dev/null)
+mapfile -t recurring_names < <(kanban_list_names "Recorrentes" "$SCHEDULED" 2>/dev/null)
 
 for task in "${recurring_names[@]}"; do
   [ -z "$task" ] && continue
@@ -325,25 +327,30 @@ for task in "${recurring_names[@]}"; do
   [ "$local_exit" -eq 0 ] && ok_count=$((ok_count + 1)) || fail_count=$((fail_count + 1))
 done
 
-# ── Process backlog (heavy tier only) ────────────────────────────
-if [ "$CLAU_TIER" = "heavy" ]; then
-  echo "[clau:$WORKER_ID] === Backlog ==="
-  mapfile -t backlog_names < <(kanban_list_names "Backlog" 2>/dev/null)
+# ── Process backlog (filtered by tier) ────────────────────────────
+echo "[clau:$WORKER_ID] === Backlog ==="
+mapfile -t backlog_names < <(kanban_list_names "Backlog" 2>/dev/null)
 
-  for task in "${backlog_names[@]}"; do
-    [ -z "$task" ] && continue
-    [ -d "$TASKS/pending/$task" ] || continue
+for task in "${backlog_names[@]}"; do
+  [ -z "$task" ] && continue
+  [ -d "$TASKS/pending/$task" ] || continue
 
-    claim_task "$task" "pending" || continue
-    task_count=$((task_count + 1))
+  # Filter by tier: task tier must match worker tier
+  task_tier=$(get_tier "$TASKS/pending/$task")
+  if [ "$task_tier" != "$CLAU_TIER" ]; then
+    echo "[clau:$WORKER_ID] '$task' tier mismatch (task=$task_tier, worker=$CLAU_TIER) — skip"
+    continue
+  fi
 
-    local_exit=0
-    run_single_task "$task" "pending" "0" || local_exit=$?
-    finish_task "$task" "pending" "$local_exit"
+  claim_task "$task" "pending" || continue
+  task_count=$((task_count + 1))
 
-    [ "$local_exit" -eq 0 ] && ok_count=$((ok_count + 1)) || fail_count=$((fail_count + 1))
-  done
-fi
+  local_exit=0
+  run_single_task "$task" "pending" "0" || local_exit=$?
+  finish_task "$task" "pending" "$local_exit"
+
+  [ "$local_exit" -eq 0 ] && ok_count=$((ok_count + 1)) || fail_count=$((fail_count + 1))
+done
 
 duration=$((SECONDS - start_time))
 echo "[clau:$WORKER_ID] Done — $task_count tasks, ${ok_count} ok, ${fail_count} falhas, ${duration}s"

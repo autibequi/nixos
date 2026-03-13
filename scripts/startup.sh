@@ -8,6 +8,7 @@ CYAN='\033[36m' GREEN='\033[32m' YELLOW='\033[33m' RED='\033[31m'
 
 WS="/workspace"
 KANBAN="$WS/vault/kanban.md"
+SCHEDULED="$WS/vault/scheduled.md"
 TODAY=$(date +%Y-%m-%d)
 now=$(date +%s)
 
@@ -137,13 +138,15 @@ if [[ -f "$KANBAN" ]]; then
     fi
   done < "$KANBAN"
 
-  # Rodapé info
+  # Rodapé info — recorrentes vêm do scheduled.md
   rec=0; in_rec=0
-  while IFS= read -r line; do
-    [[ "$line" == "## Recorrentes" ]] && { in_rec=1; continue; }
-    [[ "$line" =~ ^##\  ]] && [[ "$in_rec" == "1" ]] && break
-    [[ "$in_rec" == "1" ]] && [[ "$line" =~ ^-\ \[ ]] && rec=$((rec + 1))
-  done < "$KANBAN"
+  if [[ -f "$SCHEDULED" ]]; then
+    while IFS= read -r line; do
+      [[ "$line" == "## Recorrentes" ]] && { in_rec=1; continue; }
+      [[ "$line" =~ ^##\  ]] && [[ "$in_rec" == "1" ]] && break
+      [[ "$in_rec" == "1" ]] && [[ "$line" =~ ^-\ \[ ]] && rec=$((rec + 1))
+    done < "$SCHEDULED"
+  fi
   fail_count=0; in_fail=0
   while IFS= read -r line; do
     [[ "$line" == "## Falhou" ]] && { in_fail=1; continue; }

@@ -34,14 +34,16 @@ let
     # Redirect all output to log file (and stdout for journal)
     exec > >(${pkgs.coreutils}/bin/tee -a "$LOGFILE") 2>&1
 
-    if [ ! -f ${vaultDir}/kanban.md ]; then
-      echo "[clau:$TIER] kanban.md não encontrado."
+    if [ ! -f ${vaultDir}/kanban.md ] && [ ! -f ${vaultDir}/scheduled.md ]; then
+      echo "[clau:$TIER] kanban.md/scheduled.md não encontrados."
       exit 0
     fi
 
-    backlog=$(grep -c '^\- \[' ${vaultDir}/kanban.md 2>/dev/null || echo "0")
-    if [ "$backlog" -eq 0 ]; then
-      echo "[clau:$TIER] Sem cards no kanban."
+    kanban_cards=$(grep -c '^\- \[' ${vaultDir}/kanban.md 2>/dev/null || echo "0")
+    scheduled_cards=$(grep -c '^\- \[' ${vaultDir}/scheduled.md 2>/dev/null || echo "0")
+    total=$((kanban_cards + scheduled_cards))
+    if [ "$total" -eq 0 ]; then
+      echo "[clau:$TIER] Sem cards no kanban/scheduled."
       exit 0
     fi
 

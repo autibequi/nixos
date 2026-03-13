@@ -183,8 +183,19 @@ status:
 	@echo "=== Workers ==="
 	@podman ps --filter "name=_worker_" --format "table {{.ID}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || echo "(nenhum)"
 	@echo "\n=== Kanban ==="
+	@if [ -f vault/scheduled.md ]; then \
+		for col in "Recorrentes" "Em Execução"; do \
+			count=0; in_col=0; \
+			while IFS= read -r line; do \
+				if [ "$$line" = "## $$col" ]; then in_col=1; continue; fi; \
+				if echo "$$line" | grep -q '^## ' && [ "$$in_col" = "1" ]; then break; fi; \
+				if [ "$$in_col" = "1" ] && echo "$$line" | grep -q '^- \['; then count=$$((count + 1)); fi; \
+			done < vault/scheduled.md; \
+			echo "  $$col: $$count"; \
+		done; \
+	fi
 	@if [ -f vault/kanban.md ]; then \
-		for col in "Recorrentes" "Backlog" "Em Andamento" "Concluido" "Falhou"; do \
+		for col in "Backlog" "Em Andamento" "Concluido" "Falhou"; do \
 			count=0; in_col=0; \
 			while IFS= read -r line; do \
 				if [ "$$line" = "## $$col" ]; then in_col=1; continue; fi; \
@@ -226,10 +237,10 @@ new:
 		"## Entregável" \
 		"Atualize \`<diretório de contexto>/contexto.md\`." \
 		> "$$task_dir/CLAUDE.md"; \
-	kanban_col="Backlog"; \
-	[ "$$task_type" = "recurring" ] && kanban_col="Recorrentes"; \
+	kanban_col="Backlog"; kanban_file="vault/kanban.md"; \
+	if [ "$$task_type" = "recurring" ]; then kanban_col="Recorrentes"; kanban_file="vault/scheduled.md"; fi; \
 	card="- [ ] **$(name)** #$$task_type $$(date +%Y-%m-%d) \`$$task_model\`"; \
-	source scripts/kanban-sync.sh && kanban_add_card "$$kanban_col" "$$card" 2>/dev/null || \
+	KANBAN_FILE="$$kanban_file" source scripts/kanban-sync.sh && kanban_add_card "$$kanban_col" "$$card" 2>/dev/null || \
 		echo "[AVISO] Não conseguiu adicionar card no kanban"; \
 	echo "Task: $$task_dir/ ($$task_model, $$task_tier, $${task_timeout}s)"
 

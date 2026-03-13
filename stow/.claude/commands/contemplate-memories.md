@@ -6,6 +6,7 @@ Introspecção profunda: analisar conversas recentes, extrair aprendizados, e ev
 
 ### 1. Ler estado atual (obrigatório)
 - `vault/kanban.md` — estado do trabalho
+- `vault/scheduled.md` — tasks recorrentes
 - Todos os `memory/*.md` — memórias atuais
 - `/workspace/CLAUDE.md` — personalidade
 - `stow/.claude/commands/` — commands existentes

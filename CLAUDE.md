@@ -31,7 +31,8 @@
 │   ├── _agent/reports/  ← relatórios de tasks autônomas
 │   ├── artefacts/       ← entregáveis por task
 │   ├── sugestoes/       ← canal agente→user
-│   └── kanban.md        ← FONTE DE VERDADE (ver regra abaixo)
+│   ├── kanban.md        ← FONTE DE VERDADE work items (ver regra abaixo)
+│   └── scheduled.md     ← tasks recorrentes (board separado)
 └── .ephemeral/          ← memória efêmera (gitignored)
 ```
 
