@@ -54,5 +54,3 @@ clau()      { export CLAUDE_SESSION="${CLAUDE_SESSION:-worker}"; cd ~/nixos && m
 clau-auto() { export CLAUDE_SESSION="auto"; cd ~/nixos && make auto; }
 
 pokemonsay "$(fortune -s)"
-
-cd ~/nixos
