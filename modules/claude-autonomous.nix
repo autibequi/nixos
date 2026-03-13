@@ -19,12 +19,35 @@ let
       [ -d "tasks/running/$task" ] && continue
       [ ! -f "tasks/pending/$task/CLAUDE.md" ] && [ ! -f "tasks/recurring/$task/CLAUDE.md" ] && continue
       echo "[clau] Spawning worker: $task"
-      ${compose} run --rm -d -T worker /workspace/scripts/clau-runner.sh 600 "$task" &
+      ${compose} run --rm -d -T worker /workspace/scripts/clau-runner.sh 300 "$task" &
       count=$((count + 1))
     done
     wait
 
     [ "$count" -eq 0 ] && echo "[clau] Sem tarefas disponíveis." || echo "[clau] $count workers spawned."
+  '';
+
+  # Cleanup: devolve tasks órfãs de running/ pro lugar de origem
+  cleanupScript = pkgs.writeShellScript "clau-cleanup" ''
+    cd ${projectDir}
+
+    # Mata containers worker que ainda estejam rodando
+    ${compose} kill worker 2>/dev/null || true
+    ${compose} rm -f worker 2>/dev/null || true
+
+    for dir in tasks/running/*/; do
+      [ -d "$dir" ] || continue
+      name=$(basename "$dir")
+      source=$(grep '^source=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "pending")
+      rm -f "$dir/.lock"
+      if [ "$source" = "recurring" ]; then
+        mv "$dir" "tasks/recurring/$name"
+        echo "[clau-cleanup] $name → recurring/"
+      else
+        mv "$dir" "tasks/pending/$name"
+        echo "[clau-cleanup] $name → pending/"
+      fi
+    done
   '';
 in {
   systemd.services.claude-autonomous = {
@@ -35,7 +58,9 @@ in {
       User = user;
       WorkingDirectory = projectDir;
       ExecStart = "${runnerScript}";
-      TimeoutStopSec = "12min";
+      ExecStopPost = "${cleanupScript}";
+      TimeoutStartSec = "10min";
+      TimeoutStopSec = "2min";
       Environment = [
         "HOME=/home/${user}"
         "XDG_RUNTIME_DIR=/run/user/1000"

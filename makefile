@@ -1,6 +1,6 @@
 .PHONY: get-ids reload switch update stow restow stow-tree stow-confirm \
        sandbox sandbox-build sandbox-shell sandbox-down sandbox-restart sandbox-inject \
-       claude-resume clau clau-run clau-status clau-workers usage
+       claude-resume clau clau-run clau-reset clau-status clau-workers usage
 
 # ── NixOS ──────────────────────────────────────────────────────────
 
@@ -94,6 +94,25 @@ clau:
 clau-run:
 	@[ -n "$(task)" ] || (echo "Uso: make clau-run task=nome-da-task" && exit 1)
 	$(COMPOSE) run --rm -T worker /workspace/scripts/clau-runner.sh 600 "$(task)"
+
+# Reseta tasks presas em running/ → devolve pra origem
+clau-reset:
+	@$(COMPOSE) kill worker 2>/dev/null || true
+	@$(COMPOSE) rm -f worker 2>/dev/null || true
+	@for dir in tasks/running/*/; do \
+		[ -d "$$dir" ] || continue; \
+		name=$$(basename "$$dir"); \
+		source=$$(grep '^source=' "$$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "pending"); \
+		rm -f "$$dir/.lock"; \
+		if [ "$$source" = "recurring" ]; then \
+			mv "$$dir" "tasks/recurring/$$name"; \
+			echo "[clau-reset] $$name → recurring/"; \
+		else \
+			mv "$$dir" "tasks/pending/$$name"; \
+			echo "[clau-reset] $$name → pending/"; \
+		fi; \
+	done
+	@[ -z "$$(ls -A tasks/running/ 2>/dev/null | grep -v '\.gitkeep')" ] && echo "[clau-reset] running/ limpo." || echo "[clau-reset] AVISO: ainda há tasks em running/"
 
 # Lista workers ativos
 clau-workers:
