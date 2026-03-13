@@ -1,7 +1,7 @@
 .PHONY: get-ids reload switch update stow restow stow-tree stow-confirm \
        sandbox sandbox-build sandbox-shell sandbox-down sandbox-restart sandbox-inject \
        claude-resume clau clau-run clau-stop clau-reset clau-restart clau-worker clau-status clau-new \
-       clau-logs logs usage
+       clau-logs clau-logs-list logs usage
 
 # ── NixOS ──────────────────────────────────────────────────────────
 
@@ -163,14 +163,23 @@ clau-new:
 
 # Logs do worker singleton
 clau-logs:
-	@id=$$(docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}}" 2>/dev/null | head -1); \
-	if [ -n "$$id" ]; then \
-		docker logs -f "$$id" 2>&1; \
+	@latest=$$(ls -1t logs/*.log 2>/dev/null | head -1); \
+	if [ -z "$$latest" ]; then \
+		echo "(nenhum log encontrado em logs/)"; \
 	else \
-		echo "(nenhum worker rodando)"; \
-		echo "Últimos logs do systemd:"; \
-		journalctl -u claude-autonomous.service --no-pager -n 30 2>/dev/null || true; \
+		id=$$(docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}}" 2>/dev/null | head -1); \
+		if [ -n "$$id" ]; then \
+			echo "=== Worker ativo — seguindo $$latest ==="; \
+			tail -f "$$latest"; \
+		else \
+			echo "=== Último log: $$latest ==="; \
+			cat "$$latest"; \
+		fi; \
 	fi
+
+# Lista todos os logs de execução
+clau-logs-list:
+	@ls -1t logs/*.log 2>/dev/null || echo "(nenhum log)"
 
 # ── Utils ──────────────────────────────────────────────────────────
 
