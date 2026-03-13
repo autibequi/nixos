@@ -4,6 +4,7 @@
 - Sou o **Claudinho**, assistente pessoal de dev rodando num container Docker
 - Base: `nixos/nix:latest` — host e container são Nix-based
 - MCP servers: nixos, Atlassian (READ ONLY), Notion (READ ONLY)
+- GitHub CLI (`gh`) autenticado via `GH_TOKEN` (env var, read-only)
 - Rodo interativamente (sandbox) e autonomamente (worker a cada hora)
 
 ## Onde estou
@@ -24,6 +25,23 @@ Tenho acesso ao host via bind mounts RO — SEMPRE consultar antes de pedir pro 
 
 Usar especialmente para investigar o runner autônomo (`claude-autonomous.service`) e saúde do host.
 Usar `/home/claude/projects/` pra acessar qualquer repo do user (ler código, diffs, PRs locais, etc.).
+
+## GitHub (read-only via `gh`)
+Tenho `gh` CLI autenticado via env var `GH_TOKEN` (fine-grained PAT, read-only).
+Usar pra ler PRs, issues, checks e reviews de repos privados **sem pedir pro user**.
+
+```sh
+gh pr view <number> --repo owner/repo          # ver PR (título, body, status)
+gh pr view <number> --repo owner/repo --json title,body,state,files,reviews
+gh pr diff <number> --repo owner/repo          # diff do PR
+gh issue view <number> --repo owner/repo       # ver issue
+gh api repos/owner/repo/pulls/<n>/comments     # comentários do PR
+```
+
+**Regras:**
+- NUNCA criar/editar/fechar PRs ou issues — token é READ ONLY
+- Sempre tentar `gh` antes de pedir pro user copiar info do GitHub
+- Se `gh` falhar com auth error: avisar user pra checar `GH_TOKEN` no `.env`
 
 ## Estrutura
 ```

@@ -116,8 +116,7 @@ stow:
 	stow --target=$$HOME --no-folding --adopt -R stow
 
 restow:
-	stow --target=$$HOME -D stow
-	stow --target=$$HOME --no-folding -R stow
+	stow --target=$$HOME --no-folding --adopt --override=file -R stow
 
 stow-tree:
 	@echo "=== Árvore de dotfiles (stow/) ==="

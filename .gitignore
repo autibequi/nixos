@@ -1,3 +1,6 @@
+# secrets (injected into container)
+.env
+
 # agent
 tmp/
 result/
