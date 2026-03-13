@@ -73,11 +73,12 @@ git_str="[${ws_branch}]"
 [[ "$ws_behind" -gt 0 ]] && git_str+=" ${RED}↓${ws_behind}${R}"
 
 MODE_FILE="$WS/projetos/CLAUDE.md"
-mode_str="${DIM}pessoal${R}"
-if [[ -f "$MODE_FILE" ]]; then
-  grep -q 'FÉRIAS \[OFF\]' "$MODE_FILE" 2>/dev/null && mode_str="trabalho" || mode_str="ferias"
+if [[ -f "$MODE_FILE" ]] && grep -q 'FÉRIAS \[OFF\]' "$MODE_FILE" 2>/dev/null; then
+  ferias_str="${RED}OFF${R}"
+else
+  ferias_str="${GREEN}ON${R}"
 fi
-echo -e "${B}Git:${R} ${git_str}  ${B}Modo:${R} ${mode_str}"
+echo -e "${B}Git:${R} ${git_str}  ${B}Ferias:${R} ${ferias_str}"
 
 # --- Inbox (só se tiver) ---
 INBOX_DIR="$WS/vault/inbox"
