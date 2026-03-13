@@ -48,10 +48,8 @@ stow/.claude/skills/skill-evaluations/
 logs/
 
 # vault: mount point for Obsidian (docker-compose bind mount)
-vault/
-# un-ignore agent area inside vault (tasks + reports are versioned)
+vault/*
 !vault/_agent/
-!vault/_agent/**
 
 # task lifecycle (só CLAUDE.md das tasks é versionado)
 vault/_agent/tasks/.runner.lock
