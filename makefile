@@ -1,6 +1,7 @@
 .PHONY: get-ids reload switch update stow restow stow-tree stow-confirm \
        sandbox sandbox-build sandbox-shell sandbox-down sandbox-restart sandbox-inject \
-       claude-resume clau clau-run clau-reset clau-status clau-workers logs logs-follow usage
+       claude-resume clau clau-run clau-stop clau-reset clau-restart clau-worker clau-status clau-new \
+       clau-logs logs usage
 
 # ── NixOS ──────────────────────────────────────────────────────────
 
@@ -72,33 +73,33 @@ claude-resume:
 sandbox-down:
 	$(COMPOSE) down
 
-# ── Autônomo ───────────────────────────────────────────────────────
+# ── Autônomo (singleton) ──────────────────────────────────────────
 
-# Spawna um worker por task disponível (pending + recurring), cada um no seu container
+# Worker singleton: um container, processa todas as tasks sequencialmente
+# Seguro rodar do terminal — flock interno garante que só um roda por vez
 clau:
-	@pending=$$(ls -1 tasks/pending/ 2>/dev/null | grep -v '\.gitkeep'); \
-	recurring=$$(ls -1 tasks/recurring/ 2>/dev/null | grep -v '\.gitkeep'); \
-	all="$$pending $$recurring"; \
-	count=0; \
-	for task in $$all; do \
-		[ -z "$$task" ] && continue; \
-		[ -d "tasks/running/$$task" ] && echo "[clau] $$task já em running, skip" && continue; \
-		echo "[clau] Spawning worker: $$task"; \
-		$(COMPOSE) run --rm -d -T worker /workspace/scripts/clau-runner.sh 600 "$$task" & \
-		count=$$((count + 1)); \
-	done; \
-	wait; \
-	[ "$$count" -eq 0 ] && echo "[clau] Sem tarefas disponíveis." || echo "[clau] $$count workers spawned."
+	@existing=$$(docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}}" 2>/dev/null | head -1); \
+	if [ -n "$$existing" ]; then \
+		echo "[clau] Worker já rodando ($$existing). Singleton ativo."; \
+		echo "[clau] Use 'make clau-stop' pra parar, ou 'make clau-logs' pra acompanhar."; \
+		exit 0; \
+	fi
+	$(COMPOSE) run --rm -T worker /workspace/scripts/clau-runner.sh
 
 # Roda uma task específica: make clau-run task=nome-da-task
 clau-run:
 	@[ -n "$(task)" ] || (echo "Uso: make clau-run task=nome-da-task" && exit 1)
-	$(COMPOSE) run --rm -T worker /workspace/scripts/clau-runner.sh 600 "$(task)"
+	$(COMPOSE) run --rm -T worker /workspace/scripts/clau-runner.sh "$(task)"
 
-# Reseta tasks presas em running/ → devolve pra origem
-clau-reset:
+# Para o worker e reseta tasks presas
+clau-stop:
+	@echo "[clau-stop] Parando worker..."
 	@$(COMPOSE) kill worker 2>/dev/null || true
 	@$(COMPOSE) rm -f worker 2>/dev/null || true
+	@$(MAKE) --no-print-directory clau-reset
+
+# Reseta tasks presas em running/ → devolve pra origem (sem matar workers)
+clau-reset:
 	@for dir in tasks/running/*/; do \
 		[ -d "$$dir" ] || continue; \
 		name=$$(basename "$$dir"); \
@@ -112,12 +113,20 @@ clau-reset:
 			echo "[clau-reset] $$name → pending/"; \
 		fi; \
 	done
+	@rm -f .ephemeral/.clau.lock
 	@[ -z "$$(ls -A tasks/running/ 2>/dev/null | grep -v '\.gitkeep')" ] && echo "[clau-reset] running/ limpo." || echo "[clau-reset] AVISO: ainda há tasks em running/"
 
-# Lista workers ativos
-clau-workers:
-	@echo "=== Workers ativos ==="
+# Para via systemd (inclui cleanup automático via ExecStopPost)
+clau-restart:
+	sudo systemctl stop claude-autonomous.service 2>/dev/null || true
+	sudo systemctl start claude-autonomous.service
+
+# Worker ativo?
+clau-worker:
+	@echo "=== Worker container ==="
 	@docker ps --filter "label=com.docker.compose.service=worker" --format "table {{.ID}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || echo "(nenhum)"
+	@echo "\n=== Systemd service ==="
+	@systemctl is-active claude-autonomous.service 2>/dev/null || echo "inactive"
 	@echo "\n=== Tasks em running/ ==="
 	@ls -1 tasks/running/ 2>/dev/null | grep -v '\.gitkeep' || echo "(vazio)"
 
@@ -152,17 +161,16 @@ clau-new:
 	fi
 	@echo "Edite: $$( [ '$(type)' = 'recurring' ] && echo 'tasks/recurring' || echo 'tasks/pending' )/$(name)/CLAUDE.md"
 
-# Logs dos workers (podman)
-logs:
-	@docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}}" 2>/dev/null | \
-		while read id; do echo "=== $$id ==="; docker logs --tail 50 "$$id" 2>&1; echo; done
-	@docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}}" 2>/dev/null | \
-		grep -q . || echo "(nenhum worker rodando)"
-
-# Logs em tempo real (follow)
-logs-follow:
-	@docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}}" 2>/dev/null | \
-		xargs -I{} docker logs -f {} 2>&1
+# Logs do worker singleton
+clau-logs:
+	@id=$$(docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}}" 2>/dev/null | head -1); \
+	if [ -n "$$id" ]; then \
+		docker logs -f "$$id" 2>&1; \
+	else \
+		echo "(nenhum worker rodando)"; \
+		echo "Últimos logs do systemd:"; \
+		journalctl -u claude-autonomous.service --no-pager -n 30 2>/dev/null || true; \
+	fi
 
 # ── Utils ──────────────────────────────────────────────────────────
 

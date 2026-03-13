@@ -4,219 +4,223 @@ set -euo pipefail
 WORKSPACE="/workspace"
 TASKS="$WORKSPACE/tasks"
 EPHEMERAL="$WORKSPACE/.ephemeral"
-TIMEOUT="${1:-600}"
-SPECIFIC_TASK="${2:-}"
+LOCKFILE="$EPHEMERAL/.clau.lock"
+TIMEOUT="${CLAU_TIMEOUT:-600}"
+SPECIFIC_TASK="${1:-}"
+MAX_TASKS="${CLAU_MAX_TASKS:-20}"
 
-# ── Trap: devolve task pra origem se interrompido ─────────────────
+mkdir -p "$EPHEMERAL" "$TASKS/running" "$TASKS/done" "$TASKS/failed"
+
+# ── Singleton via flock ──────────────────────────────────────────
+exec 200>"$LOCKFILE"
+if ! flock -n 200; then
+  echo "[clau] Outro worker já rodando. Singleton ativo — saindo."
+  exit 0
+fi
+echo "[clau] Lock adquirido (PID $$)"
+
+# ── Trap: cleanup ao sair ────────────────────────────────────────
 cleanup() {
   local sig="${1:-EXIT}"
   if [ -n "${RUNNING_TASK:-}" ] && [ -d "$TASKS/running/$RUNNING_TASK" ]; then
     rm -f "$TASKS/running/$RUNNING_TASK/.lock"
-    if [ "${IS_RECURRING:-}" = "1" ]; then
-      mv "$TASKS/running/$RUNNING_TASK" "$TASKS/recurring/$RUNNING_TASK"
+    if [ "${CURRENT_SOURCE:-pending}" = "recurring" ]; then
+      mv "$TASKS/running/$RUNNING_TASK" "$TASKS/recurring/$RUNNING_TASK" 2>/dev/null || true
       echo "[clau] $sig — '$RUNNING_TASK' devolvida pra recurring/"
     else
-      mv "$TASKS/running/$RUNNING_TASK" "$TASKS/pending/$RUNNING_TASK"
+      mv "$TASKS/running/$RUNNING_TASK" "$TASKS/pending/$RUNNING_TASK" 2>/dev/null || true
       echo "[clau] $sig — '$RUNNING_TASK' devolvida pra pending/"
     fi
+    RUNNING_TASK=""
   fi
 }
 trap 'cleanup SIGINT; exit 1' SIGINT
 trap 'cleanup SIGTERM; exit 1' SIGTERM
 trap 'cleanup EXIT' EXIT
 
-# ── 1) Reap stuck tasks ──────────────────────────────────────────
+# ── Reap tasks órfãs em running/ ────────────────────────────────
 for dir in "$TASKS/running"/*/; do
   [ -d "$dir" ] || continue
-  [ -f "$dir/.lock" ] && continue
   name=$(basename "$dir")
-  echo "[clau] Orphan — '$name' sem lock, devolvendo pra pending/"
-  mv "$dir" "$TASKS/pending/$name" 2>/dev/null || rm -rf "$dir"
-done
-
-for lock in "$TASKS/running"/*/.lock; do
-  [ -f "$lock" ] || continue
-  started=$(grep '^started=' "$lock" | cut -d= -f2)
-  source=$(grep '^source=' "$lock" | cut -d= -f2 || echo "pending")
-  lock_timeout=$(grep '^timeout=' "$lock" | cut -d= -f2 || echo "$TIMEOUT")
-  task=$(dirname "$lock")
-  name=$(basename "$task")
-  elapsed=$(( $(date +%s) - $(date -d "$started" +%s 2>/dev/null || echo "0") ))
-
-  if [ "$elapsed" -gt $(( lock_timeout + 300 )) ]; then
+  if [ -f "$dir/.lock" ]; then
+    started=$(grep '^started=' "$dir/.lock" | cut -d= -f2)
+    source=$(grep '^source=' "$dir/.lock" | cut -d= -f2 || echo "pending")
+    elapsed=$(( $(date +%s) - $(date -d "$started" +%s 2>/dev/null || echo "0") ))
+    # Se passou mais de timeout + 5min de grace, é órfã
+    if [ "$elapsed" -le $(( TIMEOUT + 300 )) ]; then
+      echo "[clau] '$name' ainda dentro do timeout (${elapsed}s) — skip reap"
+      continue
+    fi
     echo "[clau] Timeout ${elapsed}s — reaping '$name'"
-    rm -f "$task/.lock"
-    if [ "$source" = "recurring" ]; then
-      mv "$task" "$TASKS/recurring/$name"
-      echo "[clau] '$name' devolvida pra recurring/"
-    else
-      mv "$task" "$TASKS/pending/$name"
-      echo "[clau] '$name' devolvida pra pending/ (retry)"
-    fi
+  else
+    source="pending"
+    echo "[clau] Órfã sem lock — reaping '$name'"
+  fi
+  rm -f "$dir/.lock"
+  if [ "$source" = "recurring" ]; then
+    mv "$dir" "$TASKS/recurring/$name" 2>/dev/null || rm -rf "$dir"
+    echo "[clau] '$name' → recurring/"
+  else
+    mv "$dir" "$TASKS/pending/$name" 2>/dev/null || rm -rf "$dir"
+    echo "[clau] '$name' → pending/"
   fi
 done
 
-# ── 2) Pick task ─────────────────────────────────────────────────
-TASK=""
-IS_RECURRING=""
-SOURCE_DIR=""
+# ── Executa uma task ─────────────────────────────────────────────
+run_task() {
+  local task="$1" source_dir="$2" is_recurring="$3"
 
-if [ -n "$SPECIFIC_TASK" ]; then
-  # Task específica passada como argumento
-  if [ -d "$TASKS/pending/$SPECIFIC_TASK" ]; then
-    TASK="$SPECIFIC_TASK"
-    IS_RECURRING="0"
-    SOURCE_DIR="pending"
-  elif [ -d "$TASKS/recurring/$SPECIFIC_TASK" ]; then
-    TASK="$SPECIFIC_TASK"
-    IS_RECURRING="1"
-    SOURCE_DIR="recurring"
-  else
-    echo "[clau] Task '$SPECIFIC_TASK' não encontrada em pending/ ou recurring/."
-    exit 1
-  fi
-else
-  # Auto-pick: pending primeiro, depois recurring mais antiga
-  TASK=$(ls -1 "$TASKS/pending/" 2>/dev/null | grep -v '\.gitkeep' | sort | head -1 || true)
-  if [ -n "$TASK" ]; then
-    IS_RECURRING="0"
-    SOURCE_DIR="pending"
+  # Validar CLAUDE.md
+  if [ ! -f "$TASKS/$source_dir/$task/CLAUDE.md" ]; then
+    echo "[clau] '$task' sem CLAUDE.md — skip"
+    return 0
   fi
 
-  if [ -z "$TASK" ]; then
-    OLDEST_TIME=99999999999
-    for dir in "$TASKS/recurring"/*/; do
-      [ -d "$dir" ] || continue
-      name=$(basename "$dir")
-      # Skip se já tá em running (outro worker pegou)
-      [ -d "$TASKS/running/$name" ] && continue
-      ctx="$EPHEMERAL/notes/$name/historico.log"
-      if [ -f "$ctx" ]; then
-        last_ts=$(tail -1 "$ctx" | cut -d'|' -f1 | xargs)
-        last_epoch=$(date -d "$last_ts" +%s 2>/dev/null || echo "0")
-      else
-        last_epoch=0
-      fi
-      if [ "$last_epoch" -lt "$OLDEST_TIME" ]; then
-        OLDEST_TIME=$last_epoch
-        TASK=$name
-      fi
-    done
-    if [ -n "$TASK" ]; then
-      IS_RECURRING="1"
-      SOURCE_DIR="recurring"
-    fi
+  # Claim via mv atômico
+  if [ -d "$TASKS/running/$task" ]; then
+    echo "[clau] '$task' já em running/ — skip"
+    return 0
   fi
-fi
+  if ! mv "$TASKS/$source_dir/$task" "$TASKS/running/$task" 2>/dev/null; then
+    echo "[clau] '$task' sumiu (race condition?) — skip"
+    return 0
+  fi
 
-[ -z "${TASK:-}" ] && echo "[clau] Sem tarefas disponíveis." && exit 0
+  RUNNING_TASK="$task"
+  CURRENT_SOURCE="$source_dir"
 
-# Validar que task tem CLAUDE.md
-if [ ! -f "$TASKS/$SOURCE_DIR/$TASK/CLAUDE.md" ]; then
-  echo "[clau] Task '$TASK' sem CLAUDE.md — skip."
-  exit 0
-fi
-
-# ── 3) Claim task atomicamente (mv é atômico no mesmo fs) ────────
-# Se já tá em running/, outro worker pegou
-if [ -d "$TASKS/running/$TASK" ]; then
-  echo "[clau] '$TASK' já está sendo executada por outro worker."
-  exit 0
-fi
-
-RUNNING_TASK="$TASK"
-
-if ! mv "$TASKS/$SOURCE_DIR/$TASK" "$TASKS/running/$TASK" 2>/dev/null; then
-  echo "[clau] '$TASK' já foi pega por outro worker."
-  RUNNING_TASK=""
-  exit 0
-fi
-
-cat > "$TASKS/running/$TASK/.lock" <<EOF
+  cat > "$TASKS/running/$task/.lock" <<EOF
 started=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 timeout=$TIMEOUT
-source=$SOURCE_DIR
+source=$source_dir
+pid=$$
 EOF
 
-echo "[clau] Worker $$ executando '$TASK' (${SOURCE_DIR}, timeout=${TIMEOUT}s)"
+  echo "[clau] ▶ Executando '$task' (${source_dir}, timeout=${TIMEOUT}s)"
 
-# ── 4) Prepare context ───────────────────────────────────────────
-INSTRUCTIONS=$(cat "$TASKS/running/$TASK/CLAUDE.md")
-CONTEXT_DIR="$EPHEMERAL/notes/$TASK"
-mkdir -p "$CONTEXT_DIR"
+  # Preparar contexto
+  local instructions context_dir context historico recurring_msg
+  instructions=$(cat "$TASKS/running/$task/CLAUDE.md")
+  context_dir="$EPHEMERAL/notes/$task"
+  mkdir -p "$context_dir"
 
-CONTEXT=""
-if [ -f "$CONTEXT_DIR/contexto.md" ]; then
-  CONTEXT="
-
+  context=""
+  [ -f "$context_dir/contexto.md" ] && context="
 ## Contexto da execução anterior
-$(cat "$CONTEXT_DIR/contexto.md")"
-fi
+$(cat "$context_dir/contexto.md")"
 
-HISTORICO=""
-if [ -f "$CONTEXT_DIR/historico.log" ]; then
-  HISTORICO="
-
+  historico=""
+  [ -f "$context_dir/historico.log" ] && historico="
 ## Histórico de execuções (últimas 20)
-$(tail -20 "$CONTEXT_DIR/historico.log")"
-fi
+$(tail -20 "$context_dir/historico.log")"
 
-RECURRING_MSG=""
-if [ "$IS_RECURRING" = "1" ]; then
-  RECURRING_MSG="
-
+  recurring_msg=""
+  if [ "$is_recurring" = "1" ]; then
+    recurring_msg="
 ## IMPORTANTE: Task recorrente (imortal)
 - Você roda a cada ~1 hora. Seu timeout é ${TIMEOUT}s (~10min).
-- Salve seu estado em: $CONTEXT_DIR/contexto.md (será lido na próxima execução)
-- Use $CONTEXT_DIR/ para qualquer arquivo auxiliar que precise persistir
+- Salve seu estado em: $context_dir/contexto.md
+- Use $context_dir/ para arquivos auxiliares
 - Não tente fazer tudo de uma vez — priorize, execute o mais importante, salve progresso
-- SEMPRE atualize contexto.md no final com: o que fez, o que falta, próximos passos"
-fi
+- SEMPRE atualize contexto.md no final"
+  fi
 
-START=$SECONDS
+  local start_time=$SECONDS status
 
-# ── 5) Execute ────────────────────────────────────────────────────
-if timeout "$TIMEOUT" claude --permission-mode bypassPermissions \
-  -p "Modo autônomo. Tarefa: $TASK
-Diretório da tarefa: $TASKS/running/$TASK
-Diretório de contexto: $CONTEXT_DIR
+  if timeout "$TIMEOUT" claude --permission-mode bypassPermissions \
+    -p "Modo autônomo. Tarefa: $task
+Diretório da tarefa: $TASKS/running/$task
+Diretório de contexto: $context_dir
 Hora atual: $(date -u +%Y-%m-%dT%H:%M:%SZ)
-Tipo: $([ "$IS_RECURRING" = "1" ] && echo "RECORRENTE (imortal)" || echo "ONE-SHOT")
+Tipo: $([ "$is_recurring" = "1" ] && echo "RECORRENTE (imortal)" || echo "ONE-SHOT")
 
-$INSTRUCTIONS
-$RECURRING_MSG
-$CONTEXT
-$HISTORICO
+$instructions
+$recurring_msg
+$context
+$historico
 
 Ao terminar, resuma em uma linha." 2>&1; then
-  STATUS="ok"
-else
-  STATUS="fail:$?"
-fi
-
-DURATION=$((SECONDS - START))
-
-# ── 6) Route result ──────────────────────────────────────────────
-echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | $STATUS | ${DURATION}s" >> "$CONTEXT_DIR/historico.log"
-
-if [ "$IS_RECURRING" = "1" ]; then
-  rm -f "$TASKS/running/$TASK/.lock"
-  mv "$TASKS/running/$TASK" "$TASKS/recurring/$TASK"
-  echo "[clau] Recorrente '$TASK' devolvida → recurring/"
-else
-  rm -f "$TASKS/running/$TASK/.lock"
-  if [ "$STATUS" = "ok" ]; then
-    mv "$TASKS/running/$TASK" "$TASKS/done/$TASK"
-    echo "$STATUS: ${DURATION}s" > "$TASKS/done/$TASK/.result"
+    status="ok"
   else
-    mv "$TASKS/running/$TASK" "$TASKS/failed/$TASK"
-    echo "$STATUS: ${DURATION}s" > "$TASKS/failed/$TASK/.result"
+    status="fail:$?"
   fi
+
+  local duration=$((SECONDS - start_time))
+  echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | $status | ${duration}s" >> "$context_dir/historico.log"
+
+  # Route resultado
+  rm -f "$TASKS/running/$task/.lock"
+  if [ "$is_recurring" = "1" ]; then
+    mv "$TASKS/running/$task" "$TASKS/recurring/$task"
+    echo "[clau] ✓ '$task' (${duration}s, $status) → recurring/"
+  elif [ "$status" = "ok" ]; then
+    mv "$TASKS/running/$task" "$TASKS/done/$task"
+    echo "$status: ${duration}s" > "$TASKS/done/$task/.result"
+    echo "[clau] ✓ '$task' (${duration}s) → done/"
+  else
+    mv "$TASKS/running/$task" "$TASKS/failed/$task"
+    echo "$status: ${duration}s" > "$TASKS/failed/$task/.result"
+    echo "[clau] ✗ '$task' (${duration}s, $status) → failed/"
+  fi
+
+  RUNNING_TASK=""
+  CURRENT_SOURCE=""
+
+  # Log usage
+  mkdir -p "$EPHEMERAL/usage"
+  echo "{\"date\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"task\":\"$task\",\"duration\":$duration,\"status\":\"$status\",\"type\":\"$([ "$is_recurring" = "1" ] && echo "recurring" || echo "oneshot")\"}" \
+    >> "$EPHEMERAL/usage/$(date +%Y-%m).jsonl"
+}
+
+# ── Task específica: roda só ela e sai ───────────────────────────
+if [ -n "$SPECIFIC_TASK" ]; then
+  if [ -d "$TASKS/pending/$SPECIFIC_TASK" ]; then
+    run_task "$SPECIFIC_TASK" "pending" "0"
+  elif [ -d "$TASKS/recurring/$SPECIFIC_TASK" ]; then
+    run_task "$SPECIFIC_TASK" "recurring" "1"
+  else
+    echo "[clau] Task '$SPECIFIC_TASK' não encontrada."
+    exit 1
+  fi
+  echo "[clau] Done (task específica)."
+  exit 0
 fi
 
-RUNNING_TASK=""
+# ── Loop: pending primeiro, depois recurring por idade ───────────
+task_count=0
 
-# ── 7) Log usage ─────────────────────────────────────────────────
-mkdir -p "$EPHEMERAL/usage"
-echo "{\"date\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"task\":\"$TASK\",\"duration\":$DURATION,\"status\":\"$STATUS\",\"type\":\"$([ "$IS_RECURRING" = "1" ] && echo "recurring" || echo "oneshot")\"}" \
-  >> "$EPHEMERAL/usage/$(date +%Y-%m).jsonl"
+# 1) Pending (one-shot) — todas, em ordem alfabética
+for task in $(ls -1 "$TASKS/pending/" 2>/dev/null | grep -v '\.gitkeep' | sort); do
+  [ -z "$task" ] && continue
+  [ "$task_count" -ge "$MAX_TASKS" ] && echo "[clau] Limite de $MAX_TASKS tasks atingido." && break
+  run_task "$task" "pending" "0"
+  task_count=$((task_count + 1))
+done
+
+# 2) Recurring — ordenadas por última execução (mais antiga primeiro)
+declare -A recurring_ages
+for dir in "$TASKS/recurring"/*/; do
+  [ -d "$dir" ] || continue
+  name=$(basename "$dir")
+  ctx="$EPHEMERAL/notes/$name/historico.log"
+  if [ -f "$ctx" ]; then
+    last_ts=$(tail -1 "$ctx" | cut -d'|' -f1 | xargs)
+    last_epoch=$(date -d "$last_ts" +%s 2>/dev/null || echo "0")
+  else
+    last_epoch=0
+  fi
+  recurring_ages[$name]=$last_epoch
+done
+
+# Ordenar por epoch crescente (mais antiga primeiro)
+for task in $(for k in "${!recurring_ages[@]}"; do echo "$k ${recurring_ages[$k]}"; done | sort -k2 -n | cut -d' ' -f1); do
+  [ "$task_count" -ge "$MAX_TASKS" ] && echo "[clau] Limite de $MAX_TASKS tasks atingido." && break
+  run_task "$task" "recurring" "1"
+  task_count=$((task_count + 1))
+done
+
+if [ "$task_count" -eq 0 ]; then
+  echo "[clau] Sem tarefas disponíveis."
+else
+  echo "[clau] Done — $task_count tasks processadas."
+fi
