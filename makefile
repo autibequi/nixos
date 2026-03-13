@@ -8,7 +8,8 @@ export GIT_COMMITTER_EMAIL := $(GIT_AUTHOR_EMAIL)
        build shell sandbox sandbox-shell resume down inject claude \
        run auto stop reset status new logs logs-list usage usage-api usage-api-7d usage-api-30d \
        test test-task test-container test-mcp test-runner doctor \
-       dashboard clean-tasks ping vault-link
+       dashboard clean-tasks ping vault-link \
+       obsidian-login obsidian-setup
 
 help:
 	@echo ""
@@ -18,6 +19,16 @@ help:
 	@echo "  make update            Atualiza flake e aplica"
 	@echo "  make get-ids           Mostra UUIDs de partição"
 	@echo "  make reload            Re-adiciona hardware.nix ao git"
+	@echo ""
+	@echo "  Dotfiles"
+	@echo "  ─────────────────────────────────────────────────────────"
+	@echo "  make obsidian-login    Login no Obsidian Sync (ob login)"
+	@echo "  make obsidian-setup    Setup vault sync (ob sync-setup)"
+	@echo ""
+	@echo "  Obsidian Sync"
+	@echo "  ─────────────────────────────────────────────────────────"
+	@echo "  make obsidian-login    Login no Obsidian Sync (ob login)"
+	@echo "  make obsidian-setup    Setup vault sync (ob sync-setup)"
 	@echo ""
 	@echo "  Dotfiles"
 	@echo "  ─────────────────────────────────────────────────────────"
@@ -38,20 +49,20 @@ help:
 	@echo ""
 	@echo "  Tasks (worker autônomo)"
 	@echo "  ─────────────────────────────────────────────────────────"
-	@echo "  make run               Roda todas as tasks com output ao vivo"
+	@echo "  make run               Roda worker com output ao vivo (kanban-driven)"
 	@echo "  make run task=nome     Roda uma task específica com output"
-	@echo "  make auto              Roda tasks headless (systemd/cron)"
-	@echo "  make stop              Para worker + reseta tasks presas"
+	@echo "  make auto              Roda worker headless (systemd/cron)"
+	@echo "  make stop              Para todos workers + reseta tasks presas"
 	@echo "  make reset             Devolve tasks de running/ pra origem"
-	@echo "  make status            Mostra estado do worker e das tasks"
-	@echo "  make new name=x        Cria task (wizard interativo)"
+	@echo "  make status            Mostra estado via kanban + workers"
+	@echo "  make new name=x        Cria task + card no kanban"
 	@echo ""
 	@echo "  Dashboard & Vault"
 	@echo "  ─────────────────────────────────────────────────────────"
 	@echo "  make dashboard         Regenera vault/dashboard.md"
 	@echo "  make vault-link        Cria symlink ~/.vault/Work → vault/"
 	@echo "  make ping              Health endpoint JSON (pra Waybar)"
-	@echo "  make clean-tasks       Limpa done/ e failed/"
+	@echo "  make clean-tasks       Limpa Concluido/Falhou do kanban + dirs"
 	@echo ""
 	@echo "  Teste & Validação"
 	@echo "  ─────────────────────────────────────────────────────────"
@@ -87,6 +98,17 @@ reload:
 	git update-index --no-skip-worktree hardware.nix
 	git add hardware.nix
 	git update-index --skip-worktree hardware.nix
+
+# ── Obsidian Sync ─────────────────────────────────────────────────
+
+NPM_PREFIX = $(HOME)/.npm-global
+OB = $(NPM_PREFIX)/bin/ob
+
+obsidian-login:
+	$(OB) login
+
+obsidian-setup:
+	$(OB) sync-setup --vault "Work" --path $(HOME)/.ovault --device-name "g14-nixos"
 
 # ── Dotfiles ───────────────────────────────────────────────────────
 
@@ -157,7 +179,8 @@ run:
 	@mkdir -p $(LOGDIR)
 	@logfile="$(LOGFILE)"; \
 	echo "[clau] Log: $$logfile"; \
-	$(COMPOSE) run --rm -e CLAU_VERBOSE=1 worker /workspace/scripts/clau-runner.sh $(task) 2>&1 | tee "$$logfile"
+	$(COMPOSE) run --rm -e CLAU_VERBOSE=1 -e CLAU_WORKER_ID=$${CLAU_WORKER_ID:-worker-1} \
+		worker /workspace/scripts/clau-runner.sh $(task) 2>&1 | tee "$$logfile"
 
 auto:
 	@existing=$$(docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}}" 2>/dev/null | head -1); \
@@ -168,10 +191,11 @@ auto:
 	@mkdir -p $(LOGDIR)
 	@logfile="$(LOGFILE)"; \
 	echo "[clau] Log: $$logfile"; \
-	$(COMPOSE) run --rm -T worker /workspace/scripts/clau-runner.sh > "$$logfile" 2>&1
+	$(COMPOSE) run --rm -T -e CLAU_WORKER_ID=$${CLAU_WORKER_ID:-worker-1} \
+		worker /workspace/scripts/clau-runner.sh > "$$logfile" 2>&1
 
 stop:
-	@echo "[clau] Parando worker..."
+	@echo "[clau] Parando workers..."
 	@$(COMPOSE) kill worker 2>/dev/null || true
 	@$(COMPOSE) rm -f worker 2>/dev/null || true
 	@$(MAKE) --no-print-directory reset
@@ -183,33 +207,42 @@ reset:
 		source=$$(grep '^source=' "$$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "pending"); \
 		rm -f "$$dir/.lock"; \
 		if [ "$$source" = "recurring" ]; then \
-			mv "$$dir" "vault/_agent/tasks/recurring/$$name"; \
-			echo "[reset] $$name → recurring/"; \
+			rm -rf "$$dir"; \
+			echo "[reset] $$name (recurring copy) removed"; \
 		else \
 			mv "$$dir" "vault/_agent/tasks/pending/$$name"; \
 			echo "[reset] $$name → pending/"; \
 		fi; \
 	done
-	@rm -f .ephemeral/.clau.lock
+	@rm -f .ephemeral/.kanban.lock .ephemeral/locks/*.lock
 	@[ -z "$$(ls -A vault/_agent/tasks/running/ 2>/dev/null | grep -v '\.gitkeep')" ] && echo "[reset] running/ limpo." || echo "[reset] AVISO: ainda há tasks em running/"
 
 status:
-	@echo "=== Worker ==="
-	@docker ps --filter "label=com.docker.compose.service=worker" --format "table {{.ID}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || echo "(nenhum)"
+	@echo "=== Workers ==="
+	@docker ps --filter "label=com.docker.compose.service=worker" --format "table {{.ID}}\t{{.Status}}\t{{.RunningFor}}\t{{.Label \"clau.worker.id\"}}" 2>/dev/null || echo "(nenhum)"
 	@echo "\n=== Systemd ==="
 	@systemctl is-active claude-autonomous.service 2>/dev/null || echo "inactive"
-	@echo "\n=== Recurring ($(shell ls -1 vault/_agent/tasks/recurring/ 2>/dev/null | grep -cv '\.gitkeep' || echo 0)) ==="
-	@for dir in vault/_agent/tasks/recurring/*/; do \
-		[ -d "$$dir" ] || continue; \
-		name=$$(basename "$$dir"); \
-		schedule=$$(sed -n '/^---$$/,/^---$$/p' "$$dir/CLAUDE.md" 2>/dev/null | grep -m1 '^schedule:' | awk '{print $$2}' || echo "?"); \
-		model=$$(sed -n '/^---$$/,/^---$$/p' "$$dir/CLAUDE.md" 2>/dev/null | grep -m1 '^model:' | awk '{print $$2}' || echo "?"); \
-		echo "  $$name ($$schedule, $$model)"; \
-	done
-	@echo "\n=== Pending ($(shell ls -1 vault/_agent/tasks/pending/ 2>/dev/null | grep -cv '\.gitkeep' || echo 0)) ==="
-	@ls -1 vault/_agent/tasks/pending/ 2>/dev/null | grep -v '\.gitkeep' || echo "(vazio)"
-	@echo "\n=== Running ==="
-	@ls -1 vault/_agent/tasks/running/ 2>/dev/null | grep -v '\.gitkeep' || echo "(vazio)"
+	@echo "\n=== Kanban ==="
+	@if [ -f vault/kanban.md ]; then \
+		for col in "Recorrentes" "Backlog" "Em Andamento" "Concluido" "Falhou" "Interativo"; do \
+			count=0; in_col=0; \
+			while IFS= read -r line; do \
+				if [ "$$line" = "## $$col" ]; then in_col=1; continue; fi; \
+				if echo "$$line" | grep -q '^## ' && [ "$$in_col" = "1" ]; then break; fi; \
+				if [ "$$in_col" = "1" ] && echo "$$line" | grep -q '^- \['; then count=$$((count + 1)); fi; \
+			done < vault/kanban.md; \
+			echo "  $$col: $$count"; \
+		done; \
+	else \
+		echo "  (kanban.md não encontrado)"; \
+	fi
+	@echo "\n=== Em Andamento (detalhe) ==="
+	@in_col=0; \
+	while IFS= read -r line; do \
+		if [ "$$line" = "## Em Andamento" ]; then in_col=1; continue; fi; \
+		if echo "$$line" | grep -q '^## ' && [ "$$in_col" = "1" ]; then break; fi; \
+		if [ "$$in_col" = "1" ] && echo "$$line" | grep -q '^- \['; then echo "  $$line"; fi; \
+	done < vault/kanban.md 2>/dev/null || echo "  (vazio)"
 	@echo "\n=== Últimas 5 execuções ==="
 	@if [ -f ".ephemeral/usage/$$(date +%Y-%m).jsonl" ]; then \
 		tail -5 ".ephemeral/usage/$$(date +%Y-%m).jsonl" 2>/dev/null | \
@@ -262,7 +295,13 @@ new:
 			> "$$task_dir/memoria.md"; \
 	fi; \
 	mkdir -p ".ephemeral/notes/$(name)"; \
+	kanban_col="Backlog"; \
+	[ "$$task_type" = "recurring" ] && kanban_col="Recorrentes"; \
+	card="- [ ] **$(name)** #$$task_type $$(date +%Y-%m-%d) \`$$task_model\`"; \
+	source scripts/kanban-sync.sh && kanban_add_card "$$kanban_col" "$$card" 2>/dev/null || \
+		echo "[AVISO] Não conseguiu adicionar card no kanban — adicione manualmente"; \
 	echo "Task criada: $$task_dir/ ($$task_model, $$task_schedule, $${task_timeout}s)"; \
+	echo "Card adicionado em $$kanban_col do kanban"; \
 	echo "Edite: $$task_dir/CLAUDE.md"
 
 # ── Dashboard & Vault ─────────────────────────────────────────────
@@ -285,8 +324,28 @@ ping:
 	fi
 
 clean-tasks:
-	@echo "Limpando done/ e failed/..."
+	@echo "Limpando done/ e failed/ (filesystem + kanban)..."
 	@rm -rf vault/_agent/tasks/done/* vault/_agent/tasks/failed/*
+	@if [ -f vault/kanban.md ]; then \
+		tmp=$$(mktemp); \
+		skip_col=""; \
+		while IFS= read -r line; do \
+			if [ "$$line" = "## Concluido" ] || [ "$$line" = "## Falhou" ]; then \
+				skip_col="1"; \
+				echo "$$line" >> "$$tmp"; \
+				continue; \
+			fi; \
+			if echo "$$line" | grep -q '^## ' && [ "$$skip_col" = "1" ]; then \
+				skip_col=""; \
+			fi; \
+			if [ "$$skip_col" = "1" ] && echo "$$line" | grep -q '^- \['; then \
+				continue; \
+			fi; \
+			echo "$$line" >> "$$tmp"; \
+		done < vault/kanban.md; \
+		mv "$$tmp" vault/kanban.md; \
+		echo "Kanban: colunas Concluido e Falhou limpas."; \
+	fi
 	@echo "Limpo."
 
 # ── Teste & Validação ─────────────────────────────────────────────

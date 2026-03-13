@@ -46,6 +46,9 @@
     # Autonomous
     ./modules/claude-autonomous.nix
 
+    # Obsidian Sync (headless)
+    ./modules/obsidian-sync.nix
+
     # Other Modules
     ./modules/work.nix
     ./modules/virt.nix

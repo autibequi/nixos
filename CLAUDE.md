@@ -43,7 +43,10 @@ Usar especialmente para investigar o runner autônomo (`claude-autonomous.servic
 │   │   │   ├── done/       ← concluídas (gitignored)
 │   │   │   └── failed/     ← falharam (gitignored)
 │   │   └── reports/     ← relatórios gerados por tasks (gitignored)
-│   ├── dashboard.md     ← auto-gerado pelo runner
+│   ├── _templates/      ← templates Templater (nova-task.md, etc.)
+│   ├── kanban.md        ← Obsidian Kanban board (progresso real-time)
+│   ├── dashboard-home.md ← homepage Obsidian (Dataview queries)
+│   ├── poc-*.md         ← dashboards/POCs com Dataview e Mermaid
 │   └── sugestoes/       ← canal task→user (sugestões, ideias, conclusões)
 ├── .ephemeral/          ← memória efêmera (gitignored)
 └── makefile             ← targets de operação
@@ -82,23 +85,47 @@ Usar especialmente para investigar o runner autônomo (`claude-autonomous.servic
 
 ## Sugestões e Comunicação
 Toda execução (interativa ou autônoma) pode gerar sugestões em `vault/sugestoes/`:
-- Formato: `vault/sugestoes/YYYY-MM-DD-<topico>.md`
-- Categorias: docker, permissoes, nixos, tasks, ideias, conclusoes
+- Formato: `vault/sugestoes/YYYY-MM-DD-<topico>.md` ou `vault/sugestoes/<categoria>/YYYY-MM-DD-<topico>.md`
+- Subcategorias: `docker-infra/`, `m5/`, `tasks/` (ou raiz pra genéricas)
 - O user revisa no Obsidian e decide o que implementar
 - Tasks e worker também geram sugestões — é o canal de comunicação agente→user
+- **Frontmatter obrigatório** em toda sugestão:
+  ```yaml
+  ---
+  date: YYYY-MM-DD
+  category: docker|m5|tasks|nixos|ideias|conclusoes
+  reviewed: false
+  ---
+  ```
+- User marca `reviewed: true` no Obsidian quando revisar
 
 ## Subconsciente
 Quando identificar algo que merece reflexão mas não é urgente:
-1. Criar task em `vault/_agent/tasks/pending/` com prefixo (pensar-, pesquisar-, avaliar-, proto-)
-2. Worker processa na próxima hora
-3. Resultado fica em `vault/_agent/reports/` e `.ephemeral/notes/`
+1. Criar task dir em `vault/_agent/tasks/pending/` com prefixo (pensar-, pesquisar-, avaliar-, proto-)
+2. Adicionar card correspondente na coluna "Backlog" do kanban
+3. Worker processa na próxima hora
+4. Resultado fica em `vault/_agent/reports/`
 
 ## Sistema de Tasks
-- `vault/_agent/tasks/recurring/` — imortais: schedule `always` (o dia todo) ou `night` (00h-06h)
-- `vault/_agent/tasks/pending/` — one-shot: rodam e vão pra done/failed
-- Cada task tem `CLAUDE.md` com frontmatter (timeout, model, schedule, mcp) e `memoria.md`
-- Frontmatter: `timeout`, `model` (haiku/sonnet), `schedule` (always/night), `mcp` (true/false)
-- Lifecycle: `once` (default pending), `recurring` (imortal), `until-done` (roda incrementalmente até completar)
+- Kanban controla o fluxo. Filesystem é workspace.
+- `vault/_agent/tasks/recurring/` — instruções + memória de tasks imortais
+- `vault/_agent/tasks/pending/` — instruções de one-shots
+- Cada task tem `CLAUDE.md` (frontmatter + instruções) e opcionalmente `memoria.md`
+- Frontmatter: `timeout`, `model`, `schedule`, `mcp`, `max_turns`
+- Runner descobre tasks pelo kanban, executa, atualiza kanban
+- Claude NÃO move diretórios — o runner cuida do lifecycle
+
+### Workers
+- Múltiplos workers rodam em paralelo (default: 2)
+- Cada worker processa 1 task por vez (sequencial)
+- Worker se identifica com CLAU_WORKER_ID (worker-1, worker-2, etc.)
+- Kanban mostra qual worker está rodando qual task via [worker-N]
+
+### Falhas
+- Tasks que falham vão pra coluna "Falhou" com tag #retry-N
+- Max 3 retries pra one-shots. Após retry-3: #dead (permanece em Falhou)
+- Recurring nunca morre — sempre volta pro próximo ciclo
+- User pode mover card de Falhou pra Backlog no Obsidian pra retry manual
 
 ## Artefatos e Evolução
 Toda execução DEVE deixar rastro:
@@ -111,6 +138,38 @@ Toda execução DEVE deixar rastro:
 - `vault/_agent/reports/` — relatórios e resultados gerados por tasks (markdown, análises)
 - `artefatos/` — outputs não-markdown (binários, exports, scripts gerados, dados, imagens)
 - `vault/sugestoes/` — sugestões do agente pro user revisar no Obsidian
+
+### Reports obrigatórios
+- Toda pesquisa/análise bem-sucedida DEVE gerar report em `vault/_agent/reports/YYYY-MM-DD-<topico>.md`
+- O report é o entregável canônico — resultado na pasta da task é rascunho
+- Card no kanban DEVE linkar pro report ao ser movido pra Concluido
+- Runner verifica existência do report após execução e loga warning se ausente
+
+## Kanban (Controle Central)
+- `vault/kanban.md` é a FONTE DE VERDADE de tudo que o Claudinho faz
+- Formato: Obsidian Kanban plugin (`kanban-plugin: basic`)
+- Colunas:
+  - **Recorrentes** — tasks imortais, NUNCA saem do board
+  - **Backlog** — work disponível (pending one-shots, ideias)
+  - **Em Andamento** — executando agora (worker marca [worker-N])
+  - **Concluido** — finalizado com sucesso, link pro report obrigatório
+  - **Falhou** — falhou, tag #retry-N, motivo no card
+  - **Interativo** — trabalho da sessão interativa (pra poder retomar)
+
+### Regras do Kanban
+- SEMPRE ler kanban antes de escrever (evitar perda de dados)
+- Worker autônomo: runner atualiza kanban automaticamente via kanban-sync.sh
+- Sessão interativa: o agente atualiza manualmente ao iniciar/concluir trabalho significativo
+- Card format: `- [ ] **nome** #tag DATA \`modelo\` — descrição`
+- Card concluído: `- [x] **nome** #done DATA \`modelo\` — [report](path)`
+- Ao criar task (pending ou recurring): adicionar card na coluna correspondente
+- O kanban é append-friendly — nunca apagar cards concluídos (histórico)
+
+### Interativo
+- Ao trabalhar em algo multi-turn ou que pode ser retomado: adicionar card em "Interativo"
+- Salvar contexto em `.ephemeral/notes/<task>/contexto.md`
+- Quando user pedir "continua aquilo" / "retoma": ler coluna Interativo, mostrar opções
+- Ao concluir: mover pra Concluido com link pro report
 
 ## Comandos NixOS
 ```sh
@@ -128,6 +187,86 @@ Config flake-based para ASUS Zephyrus G14 (AMD Ryzen + NVIDIA RTX 4060 mobile).
 - `modules/core/` — kernel, nix settings, packages, services, shell, fonts, hibernate
 - `modules/` — nvidia, asus, bluetooth, steam, ai, podman, work, virt, hyprland
 - NVIDIA: PRIME offload (AMD iGPU default)
+
+## Obsidian Vault — Plugins e Capacidades
+O vault Obsidian é o dashboard visual do Claudinho. User abre no host e vê tudo renderizado.
+
+### Plugins Instalados
+| Plugin | ID | Função |
+|--------|----|--------|
+| Kanban | `obsidian-kanban` | Board de tasks (fonte de verdade) |
+| Tasks | `obsidian-tasks-plugin` | Checkboxes com datas e recorrência |
+| Rainbow Sidebar | `rainbow-colored-sidebar` | Visual |
+| **Dataview** | `dataview` | Query engine — SQL-like sobre frontmatter YAML |
+| **Templater** | `templater-obsidian` | Templates com JS (folder: `_templates/`) |
+| **Homepage** | `homepage` | Abre `dashboard-home` ao iniciar vault |
+
+### Dataview — Como usar nos arquivos do vault
+Dataview permite queries em blocos de código que renderizam como tabelas/listas no Obsidian.
+
+**Tabela com frontmatter:**
+````markdown
+```dataview
+TABLE timeout, model, schedule
+FROM "_agent/tasks/recurring"
+WHERE file.name = "CLAUDE"
+SORT model ASC
+```
+````
+
+**Lista filtrada:**
+````markdown
+```dataview
+LIST
+FROM "sugestoes"
+WHERE reviewed = false
+SORT file.ctime DESC
+```
+````
+
+**Inline query** (dentro de texto):
+```markdown
+Total: `= length(filter(pages("sugestoes"), (p) => p.reviewed = false))` não revisadas
+```
+
+**DataviewJS** (JavaScript inline):
+```markdown
+`$= dv.pages('"sugestoes"').where(p => p.reviewed === false).length`
+```
+
+**Operadores úteis:** `FROM "pasta"`, `WHERE campo = valor`, `SORT campo ASC/DESC`, `LIMIT N`, `GROUP BY campo`, `FLATTEN campo`
+
+### Mermaid — Diagramas nativos
+Obsidian renderiza Mermaid nativamente. Usar para arquitetura, fluxos, state machines:
+````markdown
+```mermaid
+flowchart TD
+    A[Início] --> B{Decisão}
+    B -->|Sim| C[Ação]
+    B -->|Não| D[Outra]
+```
+````
+Tipos: `flowchart`, `graph`, `stateDiagram-v2`, `sequenceDiagram`, `gantt`, `pie`
+
+### Templater — Templates em `_templates/`
+- `nova-task.md` — template pra criar tasks (frontmatter + estrutura)
+- Placeholders: `<% tp.file.title %>`, `<% tp.date.now("YYYY-MM-DD") %>`, `<% tp.file.cursor(1) %>`
+- User cria nota via Templater (Ctrl+T) e seleciona template
+
+### Dashboards disponíveis
+| Arquivo | Conteúdo |
+|---------|----------|
+| `dashboard-home.md` | Homepage — tasks, links, sugestões recentes, Mermaid do fluxo |
+| `poc-task-analytics.md` | Analytics — distribuição modelo/schedule, budget timeout, contadores JS |
+| `poc-suggestions-tracker.md` | Tracker — sugestões por categoria, filtro não-revisados |
+| `poc-nixos-modules.md` | Catálogo — 22 módulos NixOS com status ativo/desativado |
+| `poc-mermaid-architecture.md` | Arquitetura — 5 diagramas Mermaid do sistema completo |
+
+### Ao criar conteúdo pro vault
+- **Sugestões**: SEMPRE incluir frontmatter (`date`, `category`, `reviewed: false`) — Dataview depende disso
+- **Reports**: podem ter frontmatter pra queries futuras (ex: `task`, `status`, `date`)
+- **Novos dashboards**: usar Dataview queries sobre frontmatter, Mermaid pra diagramas
+- **Novos templates**: criar em `vault/_templates/`, usar sintaxe Templater
 
 ## Iniciativa
 - Risco baixo (docs, dotfiles, vault): faço direto

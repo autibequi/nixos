@@ -48,10 +48,10 @@ convert_video() {
 }
 
 # === Claude Modes ===
-claudinho() { cd ~/projects/nixos && make sandbox; }
-claudio()   { cd ~/projects/estrategia/claudio && make claude; }
-clau()      { cd ~/projects/nixos && make run; }
-clau-auto() { cd ~/projects/nixos && make auto; }
+claudinho() { export CLAUDE_SESSION="${CLAUDE_SESSION:-pessoal}"; cd ~/projects/nixos && make sandbox; }
+claudio()   { export CLAUDE_SESSION="${CLAUDE_SESSION:-trabalho}"; cd ~/projects/estrategia/claudio && make claude; }
+clau()      { export CLAUDE_SESSION="${CLAUDE_SESSION:-worker}"; cd ~/projects/nixos && make run; }
+clau-auto() { export CLAUDE_SESSION="auto"; cd ~/projects/nixos && make auto; }
 
 pokemonsay "$(fortune -s)"
 

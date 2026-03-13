@@ -5,7 +5,8 @@
   "margin": 0,
   "modules-left": [
     "idle_inhibitor",
-    "hyprland/workspaces"
+    "hyprland/workspaces",
+    "hyprland/window"
   ],
   "modules-center": [
     "custom/swaync",
@@ -33,6 +34,14 @@
       "performance": "",
       "balanced": "",
       "power-saver": ""
+    }
+  },
+  "hyprland/window": {
+    "format": "{}",
+    "max-length": 50,
+    "rewrite": {
+      "Claude\\[(.+?)\\]:.*": "󱙺 $1",
+      "(.*) — Claude.*": "󱙺 $1"
     }
   },
   "hyprland/workspaces": {

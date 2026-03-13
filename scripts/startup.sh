@@ -11,8 +11,10 @@ CYAN='\033[36m'
 GREEN='\033[32m'
 YELLOW='\033[33m'
 MAGENTA='\033[35m'
+RED='\033[31m'
 
 WS="/workspace"
+KANBAN="$WS/vault/kanban.md"
 
 # --- Trocadilho aleatório ---
 PUNS=(
@@ -43,6 +45,65 @@ else
 fi
 echo
 
+# --- Kanban resumo ---
+if [[ -f "$KANBAN" ]]; then
+  echo -e "${B}Kanban:${R}"
+
+  # Contar cards por coluna
+  count_cards() {
+    local col="$1"
+    local in_col=0 count=0
+    while IFS= read -r line; do
+      if [[ "$line" == "## $col" ]]; then in_col=1; continue; fi
+      if [[ "$line" =~ ^##\  ]] && [[ "$in_col" == "1" ]]; then break; fi
+      if [[ "$in_col" == "1" ]] && [[ "$line" =~ ^-\ \[ ]]; then count=$((count + 1)); fi
+    done < "$KANBAN"
+    echo "$count"
+  }
+
+  rec=$(count_cards "Recorrentes")
+  back=$(count_cards "Backlog")
+  andamento=$(count_cards "Em Andamento")
+  done_c=$(count_cards "Concluido")
+  fail=$(count_cards "Falhou")
+  inter=$(count_cards "Interativo")
+
+  echo -e "  ${DIM}♻${R} Recorrentes: ${rec}  ${DIM}📋${R} Backlog: ${back}  ${DIM}▶${R} Em Andamento: ${andamento}"
+  echo -e "  ${GREEN}✓${R} Concluido: ${done_c}  ${RED}✗${R} Falhou: ${fail}  ${CYAN}⚡${R} Interativo: ${inter}"
+
+  # Mostrar tasks em andamento com worker ID
+  if [[ "$andamento" -gt 0 ]]; then
+    echo -e "  ${B}Rodando agora:${R}"
+    local_in_col=0
+    while IFS= read -r line; do
+      if [[ "$line" == "## Em Andamento" ]]; then local_in_col=1; continue; fi
+      if [[ "$line" =~ ^##\  ]] && [[ "$local_in_col" == "1" ]]; then break; fi
+      if [[ "$local_in_col" == "1" ]] && [[ "$line" =~ ^-\ \[ ]]; then
+        # Extrair nome e worker
+        after="${line#*\*\*}"; name="${after%%\*\**}"
+        echo -e "    ${YELLOW}→${R} $name"
+      fi
+    done < "$KANBAN"
+  fi
+
+  # Mostrar tasks interativas pendentes
+  if [[ "$inter" -gt 0 ]]; then
+    echo -e "  ${B}Interativas (retomáveis):${R}"
+    local_in_col=0
+    while IFS= read -r line; do
+      if [[ "$line" == "## Interativo" ]]; then local_in_col=1; continue; fi
+      if [[ "$line" =~ ^##\  ]] && [[ "$local_in_col" == "1" ]]; then break; fi
+      if [[ "$local_in_col" == "1" ]] && [[ "$line" =~ ^-\ \[ ]]; then
+        after="${line#*\*\*}"; name="${after%%\*\**}"
+        echo -e "    ${CYAN}⚡${R} $name"
+      fi
+    done < "$KANBAN"
+  fi
+else
+  echo -e "${B}Kanban:${R} ${DIM}(vault/kanban.md não encontrado)${R}"
+fi
+echo
+
 # --- Workspace tree nível 1 ---
 echo -e "${B}Workspace:${R}"
 for item in "$WS"/*/; do
@@ -63,7 +124,6 @@ for proj in "$WS"/projetos/*/; do
   name=$(basename "$proj")
   [[ "$name" == "CLAUDE.md" ]] && continue
   has_projects=true
-  # Git info
   if [[ -d "$proj/.git" ]]; then
     branch=$(git -C "$proj" branch --show-current 2>/dev/null || echo "?")
     dirty=$(git -C "$proj" status --porcelain 2>/dev/null | head -1)
@@ -75,55 +135,6 @@ for proj in "$WS"/projetos/*/; do
   fi
 done
 $has_projects || echo -e "  ${DIM}(nenhum)${R}"
-echo
-
-# --- Tasks pending ---
-echo -e "${B}Tasks pending:${R}"
-PENDING="$WS/vault/_agent/tasks/pending"
-if [[ -d "$PENDING" ]] && ls "$PENDING"/*/ >/dev/null 2>&1; then
-  for task in "$PENDING"/*/; do
-    name=$(basename "$task")
-    # Ler model do frontmatter
-    model=""
-    if [[ -f "$task/CLAUDE.md" ]]; then
-      in_fm=false
-      while IFS= read -r line; do
-        if [[ "$line" == "---" ]]; then
-          $in_fm && break
-          in_fm=true; continue
-        fi
-        $in_fm && [[ "$line" == model:* ]] && model="${line#model:}" && model="${model# }" && break
-      done < "$task/CLAUDE.md"
-    fi
-    [[ -n "$model" ]] && model=" ${DIM}(${model})${R}"
-    echo -e "  • ${name}${model}"
-  done
-else
-  echo -e "  ${DIM}(nenhuma)${R}"
-fi
-
-# --- Tasks recurring ---
-RECURRING="$WS/vault/_agent/tasks/recurring"
-if [[ -d "$RECURRING" ]] && ls "$RECURRING"/*/ >/dev/null 2>&1; then
-  echo
-  echo -e "${B}Tasks recurring:${R}"
-  for task in "$RECURRING"/*/; do
-    name=$(basename "$task")
-    schedule=""
-    if [[ -f "$task/CLAUDE.md" ]]; then
-      in_fm=false
-      while IFS= read -r line; do
-        if [[ "$line" == "---" ]]; then
-          $in_fm && break
-          in_fm=true; continue
-        fi
-        $in_fm && [[ "$line" == schedule:* ]] && schedule="${line#schedule:}" && schedule="${schedule# }" && break
-      done < "$task/CLAUDE.md"
-    fi
-    [[ -n "$schedule" ]] && schedule=" ${DIM}(${schedule})${R}"
-    echo -e "  ♻ ${name}${schedule}"
-  done
-fi
 
 echo
 echo -e "${DIM}─── pronto pra trabalhar ───${R}"
