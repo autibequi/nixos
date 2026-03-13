@@ -15,7 +15,7 @@ PROMPT=$(echo "$INPUT" | jq -r '.prompt // ""')
 if [[ "$PROMPT" == "startup" ]]; then
   SCRIPT="/workspace/scripts/startup.sh"
   if [[ -x "$SCRIPT" ]]; then
-    "$SCRIPT" 2>&1 >&2
+    "$SCRIPT" >&2
     exit 2
   fi
 fi
