@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# lib/colors.sh — ANSI color definitions, single source of truth
-# Source this file in any script: source "$(dirname "$0")/../lib/colors.sh"
+# scripts/colors.sh — ANSI color definitions, single source of truth
+# Source this file: source "$(dirname "$0")/colors.sh"
 # Supports NO_COLOR env var: https://no-color.org/
 
 # Guard against double-sourcing

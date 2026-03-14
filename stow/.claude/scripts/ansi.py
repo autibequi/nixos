@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""lib/ansi.py — ANSI and unicode utilities for shell scripts.
+"""scripts/ansi.py — ANSI and unicode utilities for shell scripts.
 
 Usage from shell:
-  python3 lib/ansi.py strip "hello \033[32mworld\033[0m"
-  python3 lib/ansi.py vlen "hello \033[32mworld\033[0m"
-  python3 lib/ansi.py calc "3.14 * 2"
+  python3 scripts/ansi.py strip "hello \033[32mworld\033[0m"
+  python3 scripts/ansi.py vlen "hello \033[32mworld\033[0m"
+  python3 scripts/ansi.py calc "3.14 * 2"
 
 Usage from Python:
   from ansi import strip_ansi, visual_len, calc

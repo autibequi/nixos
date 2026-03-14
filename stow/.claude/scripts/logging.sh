@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# lib/logging.sh — structured logging with prefix + color
-# Source this file: source "$(dirname "$0")/../lib/logging.sh"
+# scripts/logging.sh — structured logging with prefix + color
+# Source this file: source "$(dirname "$0")/logging.sh"
 # Requires colors.sh (auto-sourced if not loaded)
 
 [[ "${_LIB_LOGGING_LOADED:-}" == "1" ]] && return 0

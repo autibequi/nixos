@@ -2,7 +2,7 @@
   "skipDangerousModePermissionPrompt": true,
   "statusLine": {
     "type": "command",
-    "command": "~/.claude/statusline.sh"
+    "command": "~/.claude/scripts/statusline.sh"
   },
   "hooks": {
     "UserPromptSubmit": [
