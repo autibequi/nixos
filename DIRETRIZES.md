@@ -2,6 +2,10 @@
 
 Regras de apresentação e comportamento que se aplicam a toda interação.
 
+## Shell
+
+- considere usar dash para execução dos scripts que monta para otimizar velocidade de execução. considere e busque ferramentas, para coisas complexas usitilize python #CLAUDINHO_REVISA_AQUI_QUANDO_PASSAR_ESCREVE_MELHOR
+
 ## Output
 
 - Resultados finais devem ser apresentados como **infográfico** quando o conteúdo for complexo (dados, comparações, status, análises)

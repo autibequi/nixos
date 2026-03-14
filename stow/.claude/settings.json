@@ -4,19 +4,7 @@
     "type": "command",
     "command": "~/.claude/scripts/statusline.sh"
   },
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/workspace/stow/.claude/hooks/startup-hook.sh"
-          }
-        ]
-      }
-    ]
-  },
+  "hooks": {},
   "enabledMcpjsonServers": [
     "nixos"
   ],

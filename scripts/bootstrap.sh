@@ -29,7 +29,7 @@ done
 # Cores
 R='\033[0m' B='\033[1m' DIM='\033[2m'
 CYAN='\033[36m' GREEN='\033[32m' YELLOW='\033[33m' RED='\033[31m'
-ORANGE='\033[38;5;208m' BLUE='\033[38;5;33m' WHITE='\033[97m' MAGENTA='\033[35m'
+ORANGE='\033[38;5;208m' BLUE='\033[38;5;33m' WHITE='\033[97m' MAGENTA='\033[35m' GRAY='\033[38;5;245m'
 
 WS="/workspace"
 KANBAN="$WS/vault/kanban.md"
@@ -58,15 +58,25 @@ find_latest_log() {
   echo "$best_mod:$best"
 }
 
-# --- Weather (full data + ASCII art) ---
+# --- Weather: cache imediato, refresh em background (não bloqueia) ---
 WEATHER_LOCATION="São Paulo"
-source "$WS/stow/.claude/scripts/weather-art.sh" 2>/dev/null || {
-  WEATHER_CAT="cloudy"; WEATHER_TEMP="--"; WEATHER_DESC="indisponível"
-  WEATHER_ART=(
-    "      .---.      " "   .-(     ).    " "  (___________)  " "                 "
-    "                 " "                 " "                 " "                 "
-  )
-}
+WEATHER_CAT="cloudy"; WEATHER_TEMP="--"; WEATHER_FEELS=""; WEATHER_DESC="indisponível"
+WEATHER_HUMIDITY=""; WEATHER_WIND=""; WEATHER_TMAX=""; WEATHER_TMIN=""
+WEATHER_SUNRISE=""; WEATHER_SUNSET=""; WEATHER_HOUR_COUNT=0; WEATHER_WEEK_COUNT=0
+WEATHER_ART=("      .---.      " "   .-(     ).    " "  (___________)  " "                 " "                 " "                 " "                 " "                 ")
+mkdir -p "$WS/.ephemeral" 2>/dev/null || true
+WEATHER_BOOTSTRAP_CACHE="$WS/.ephemeral/.weather-bootstrap.sh"
+[[ -f "$WEATHER_BOOTSTRAP_CACHE" ]] && source "$WEATHER_BOOTSTRAP_CACHE" 2>/dev/null || true
+weather_cache_age=999999
+[[ -f "$WEATHER_BOOTSTRAP_CACHE" ]] && weather_cache_age=$(( now - $(stat -c %Y "$WEATHER_BOOTSTRAP_CACHE" 2>/dev/null || echo 0) ))
+if [[ $weather_cache_age -gt 1500 ]]; then
+  ( WS="$WS" WEATHER_LOCATION="São Paulo" source "$WS/stow/.claude/scripts/weather-art.sh" 2>/dev/null
+    declare -p WEATHER_CAT WEATHER_TEMP WEATHER_FEELS WEATHER_DESC WEATHER_HUMIDITY WEATHER_WIND WEATHER_TMAX WEATHER_TMIN WEATHER_SUNRISE WEATHER_SUNSET WEATHER_HOUR_COUNT WEATHER_WEEK_COUNT WEATHER_ART 2>/dev/null
+    for i in 0 1 2 3 4 5 6 7; do declare -p WEATHER_HOUR_$i 2>/dev/null; done
+    for i in 0 1 2 3 4 5; do declare -p WEATHER_WEEK_$i 2>/dev/null; done
+  ) > "$WEATHER_BOOTSTRAP_CACHE" 2>/dev/null &
+  disown 2>/dev/null || true
+fi
 
 # --- Auto-update Claude Code (cache 24h) ---
 CLAUDE_UPDATE_CACHE="$WS/.ephemeral/.claude-code-update"
@@ -153,7 +163,19 @@ print(w)
 hline_double() { printf '    '; printf '═%.0s' $(seq 1 $((BOX_W + 2))); echo; }
 hline_light()  { printf '    '; printf '─%.0s' $(seq 1 $((BOX_W + 2))); echo; }
 
-# --- Weather banner (art left, info right) ---
+# --- Weather banner (art left, info right) — detalhado e colorido ---
+# Cor da descrição por categoria
+weather_desc_color() {
+  case "${WEATHER_CAT:-cloudy}" in
+    sunny)        echo -ne "${YELLOW}" ;;
+    partly_cloudy) echo -ne "${CYAN}" ;;
+    rainy|stormy) echo -ne "${BLUE}" ;;
+    snowy)        echo -ne "${WHITE}" ;;
+    foggy)        echo -ne "${GRAY}" ;;
+    *)            echo -ne "${CYAN}" ;;
+  esac
+}
+
 build_banner() {
   local art_color="${CYAN}"
 
@@ -161,47 +183,53 @@ build_banner() {
   local porquemo_trunc="$PORQUEMO"
   [[ ${#PORQUEMO} -gt 50 ]] && porquemo_trunc="${PORQUEMO:0:47}..."
 
-  # Current weather line
-  local weather_now="${WEATHER_TEMP:-?}°C"
-  [[ -n "${WEATHER_FEELS:-}" && "${WEATHER_FEELS:-}" != "${WEATHER_TEMP:-}" ]] && weather_now+=" ${DIM}(${WEATHER_FEELS}°C)${R}"
-  weather_now+="  ${WEATHER_DESC:-?}"
-  [[ -n "${WEATHER_HUMIDITY:-}" ]] && weather_now+="  ${DIM}${WEATHER_HUMIDITY}%💧${R}"
+  # Linha 1: data/hora + condição atual (colorida)
+  # Temp em destaque amarelo, sensação laranja, descrição por categoria, humidade azul
+  local weather_now="${WHITE}${DIA}  ${HORA}${R}  ${DIM}|${R}  "
+  weather_now+="${B}${YELLOW}${WEATHER_TEMP:-?}°C${R}"
+  [[ -n "${WEATHER_FEELS:-}" && "${WEATHER_FEELS:-}" != "${WEATHER_TEMP:-}" ]] && \
+    weather_now+=" ${ORANGE}(${WEATHER_FEELS}° sens.)${R}"
+  weather_now+="  $(weather_desc_color)${WEATHER_DESC:-?}${R}"
+  [[ -n "${WEATHER_HUMIDITY:-}" ]] && weather_now+="  ${BLUE}${WEATHER_HUMIDITY}% 💧${R}"
+  [[ -n "${WEATHER_WIND:-}" ]] && weather_now+="  ${DIM}🌬 ${WEATHER_WIND} km/h${R}"
 
-  # Today range
+  # Linha 2: min-max do dia (ciano) + nascer/pôr do sol (amarelo)
   local today_range=""
-  [[ -n "${WEATHER_TMIN:-}" ]] && today_range="${WEATHER_TMIN}°–${WEATHER_TMAX}°"
-  [[ -n "${WEATHER_SUNRISE:-}" ]] && today_range+="  ${DIM}☀ ${WEATHER_SUNRISE}–${WEATHER_SUNSET}${R}"
+  [[ -n "${WEATHER_TMIN:-}" ]] && today_range="${CYAN}${WEATHER_TMIN}°–${WEATHER_TMAX}°${R}"
+  [[ -n "${WEATHER_SUNRISE:-}" ]] && today_range+="  ${YELLOW}☀ ${WEATHER_SUNRISE} – ${WEATHER_SUNSET}${R}"
 
-  # Today hourly
+  # Linha 3: previsão horária (9h, 12h, 15h, 18h) em ciano
   local today_hours=""
   for (( h=0; h<${WEATHER_HOUR_COUNT:-0}; h++ )); do
     local vname="WEATHER_HOUR_${h}"
     [[ -n "$today_hours" ]] && today_hours+="  "
-    today_hours+="${DIM}${!vname}${R}"
+    today_hours+="${CYAN}${!vname}${R}"
   done
 
-  # Week forecast
+  # Semana: dia em destaque branco, faixa e descrição em ciano
   local week_lines=()
   for (( w=0; w<${WEATHER_WEEK_COUNT:-0}; w++ )); do
     local vname="WEATHER_WEEK_${w}"
-    week_lines+=("${DIM}${!vname}${R}")
+    local line="${!vname}"
+    week_lines+=("  ${B}${WHITE}${line%% *}${R} ${CYAN}${line#* }${R}")
   done
 
   # Build info lines (match art lines 1:1)
   local info_lines=(
-    "${B}A P E R T U R E  S C I E N C E${R}"
-    "${WHITE}${DIA}  ${HORA}${R}  ${DIM}|${R}  ${B}${weather_now}${R}"
-    "${today_range}"
-    "${today_hours}"
+    "${B}${WHITE}A P E R T U R E  S C I E N C E${R}"
+    "$weather_now"
+    "${DIM}Hoje:${R} ${today_range}"
+    "${DIM}Horário:${R} ${today_hours}"
     ""
     "${DIM}${porquemo_trunc}${R}"
   )
 
-  # Week forecast (compact, one line each)
+  # Previsão dos próximos dias (título + linhas)
   if [[ ${#week_lines[@]} -gt 0 ]]; then
     info_lines+=("")
+    info_lines+=("${DIM}Próx. dias:${R}")
     for wl in "${week_lines[@]}"; do
-      info_lines+=("$wl")
+      info_lines+=("  $wl")
     done
   fi
 
@@ -301,210 +329,48 @@ else
 fi
 echo -e "${B}Git:${R} ${git_str}  ${B}Ferias:${R} ${ferias_str}  ${B}Personality:${R} ${personality_str}  ${B}AutoCommit:${R} ${autocommit_str}  ${B}AutoJarvis:${R} ${autojarvis_str}"
 
-# --- Inbox (coluna do THINKINGS) ---
+# --- Kanban: parse único (só Inbox + Esperando Review; JARVIS cobre o resto) ---
+inbox_count=0
+waiting_names=(); waiting_descs=(); max_wn=0
 if [[ -f "$KANBAN" ]]; then
-  inbox_count=0; in_inbox=0
+  section=""
   while IFS= read -r line; do
-    [[ "$line" == "## Inbox" ]] && { in_inbox=1; continue; }
-    [[ "$line" =~ ^##\  ]] && [[ "$in_inbox" == "1" ]] && break
-    [[ "$in_inbox" == "1" ]] && [[ "$line" =~ ^-\ \[ ]] && inbox_count=$((inbox_count + 1))
+    case "$line" in
+      "## Inbox") section="inbox"; continue ;;
+      "## Esperando Review") section="waiting"; continue ;;
+      "## Em Andamento"|"## Backlog"|"## Aprovado"|"## Falhou") section=""; continue ;;
+    esac
+    [[ "$line" =~ ^##\  ]] && { section=""; continue; }
+    [[ "$line" =~ ^-\ \[ ]] || continue
+
+    _name="${line#*\*\*}"; _name="${_name%%\*\**}"
+    _desc=""; [[ "$line" == *" — "* ]] && { _raw="${line##* — }"; [[ ${#_raw} -gt 40 ]] && _raw="${_raw:0:37}..."; _desc="$_raw"; }
+
+    case "$section" in
+      inbox)   inbox_count=$((inbox_count + 1)) ;;
+      waiting) waiting_names+=("$_name"); waiting_descs+=("$_desc"); [[ ${#_name} -gt $max_wn ]] && max_wn=${#_name} ;;
+    esac
   done < "$KANBAN"
-  [[ "$inbox_count" -gt 0 ]] && echo -e "${B}Inbox:${R} ${YELLOW}${inbox_count} pendente(s)${R}"
 fi
 
-# --- Esperando Review (itens que precisam da atenção do user) ---
-if [[ -f "$KANBAN" ]]; then
-  waiting_names=(); waiting_descs=(); in_waiting=0; max_wn=0
-  while IFS= read -r line; do
-    [[ "$line" == "## Esperando Review" ]] && { in_waiting=1; continue; }
-    [[ "$line" =~ ^##\  ]] && [[ "$in_waiting" == "1" ]] && break
-    if [[ "$in_waiting" == "1" ]] && [[ "$line" =~ ^-\ \[ ]]; then
-      after="${line#*\*\*}"; name="${after%%\*\**}"
-      desc=""; if [[ "$line" == *" — "* ]]; then
-        raw="${line##* — }"; [[ ${#raw} -gt 40 ]] && raw="${raw:0:37}..."
-        desc="${raw}"
-      fi
-      waiting_names+=("$name"); waiting_descs+=("$desc")
-      [[ ${#name} -gt $max_wn ]] && max_wn=${#name}
-    fi
-  done < "$KANBAN"
-  if [[ ${#waiting_names[@]} -gt 0 ]]; then
-    echo -e "${B}${MAGENTA}Esperando review (${#waiting_names[@]}):${R}"
-    for i in "${!waiting_names[@]}"; do
-      printf "  ${MAGENTA}◆${R} %-${max_wn}s ${DIM}%s${R}\n" "${waiting_names[$i]}" "${waiting_descs[$i]}"
-    done
-  fi
-fi
-
-# Divisória visual
-echo -e "${DIM}$(printf '─%.0s' $(seq 1 80))${R}"
-
-# --- THINKINGS (lista unificada) ---
-if [[ -f "$KANBAN" ]]; then
-  item_prefixes=(); item_names=(); item_descs=(); item_colors=(); max_tn=0
-
-  # Em Andamento → [/]
-  in_col=0
-  while IFS= read -r line; do
-    [[ "$line" == "## Em Andamento" ]] && { in_col=1; continue; }
-    [[ "$line" =~ ^##\  ]] && [[ "$in_col" == "1" ]] && break
-    if [[ "$in_col" == "1" ]] && [[ "$line" =~ ^-\ \[ ]]; then
-      after="${line#*\*\*}"; name="${after%%\*\**}"
-      desc=""; if [[ "$line" == *" — "* ]]; then
-        raw="${line##* — }"; [[ ${#raw} -gt 40 ]] && raw="${raw:0:37}..."
-        desc="${raw}"
-      fi
-      item_prefixes+=("[/]"); item_names+=("$name"); item_descs+=("$desc"); item_colors+=("$YELLOW")
-      [[ ${#name} -gt $max_tn ]] && max_tn=${#name}
-    fi
-  done < "$KANBAN"
-
-  # Backlog → [ ]
-  in_col=0
-  while IFS= read -r line; do
-    [[ "$line" == "## Backlog" ]] && { in_col=1; continue; }
-    [[ "$line" =~ ^##\  ]] && [[ "$in_col" == "1" ]] && break
-    if [[ "$in_col" == "1" ]] && [[ "$line" =~ ^-\ \[ ]]; then
-      after="${line#*\*\*}"; name="${after%%\*\**}"
-      desc=""; if [[ "$line" == *" — "* ]]; then
-        raw="${line##* — }"; [[ ${#raw} -gt 40 ]] && raw="${raw:0:37}..."
-        desc="${raw}"
-      fi
-      item_prefixes+=("[ ]"); item_names+=("$name"); item_descs+=("$desc"); item_colors+=("$DIM")
-      [[ ${#name} -gt $max_tn ]] && max_tn=${#name}
-    fi
-  done < "$KANBAN"
-
-  # Aprovado (hoje) → [x]
-  in_col=0
-  while IFS= read -r line; do
-    [[ "$line" == "## Aprovado" ]] && { in_col=1; continue; }
-    [[ "$line" =~ ^##\  ]] && [[ "$in_col" == "1" ]] && break
-    if [[ "$in_col" == "1" ]] && [[ "$line" =~ ^-\ \[ ]] && [[ "$line" == *"$TODAY"* ]]; then
-      after="${line#*\*\*}"; name="${after%%\*\**}"
-      item_prefixes+=("[x]"); item_names+=("$name"); item_descs+=(""); item_colors+=("$GREEN")
-      [[ ${#name} -gt $max_tn ]] && max_tn=${#name}
-    fi
-  done < "$KANBAN"
-
-  # Build formatted items — show description only (name as fallback)
-  items=()
-  for i in "${!item_names[@]}"; do
-    label="${item_descs[$i]:-${item_names[$i]}}"
-    items+=("${item_colors[$i]}${item_prefixes[$i]} ${label}${R}")
-  done
-
-  # Rodapé info — recorrentes vêm do scheduled.md
-  rec=0; in_rec=0
-  if [[ -f "$SCHEDULED" ]]; then
-    while IFS= read -r line; do
-      [[ "$line" == "## Recorrentes" ]] && { in_rec=1; continue; }
-      [[ "$line" =~ ^##\  ]] && [[ "$in_rec" == "1" ]] && break
-      [[ "$in_rec" == "1" ]] && [[ "$line" =~ ^-\ \[ ]] && rec=$((rec + 1))
-    done < "$SCHEDULED"
-  fi
-  fail_count=0; in_fail=0
-  while IFS= read -r line; do
-    [[ "$line" == "## Falhou" ]] && { in_fail=1; continue; }
-    [[ "$line" =~ ^##\  ]] && [[ "$in_fail" == "1" ]] && break
-    [[ "$in_fail" == "1" ]] && [[ "$line" =~ ^-\ \[ ]] && fail_count=$((fail_count + 1))
-  done < "$KANBAN"
-
-  # --- Build THINKINGS lines ---
-  think_lines=()
-  header="${B}THINKINGS:${R} ${DIM}♻${rec}${R}"
-  [[ $fail_count -gt 0 ]] && header+=" ${RED}✗${fail_count}${R}"
-  think_lines+=("$header")
-  count=0
-  for item in "${items[@]}"; do
-    [[ $count -ge 10 ]] && break
-    think_lines+=("  $item")
-    count=$((count + 1))
-  done
-  remaining=$(( ${#items[@]} - count ))
-  [[ $remaining -gt 0 ]] && think_lines+=("  ${DIM}+${remaining} mais${R}")
-
-  # --- Build Agentes lines ---
-  agent_lines=()
-  if [[ ${#agents_list[@]} -gt 0 ]]; then
-    agent_lines+=("${B}Agentes:${R}")
-    for ag in "${agents_list[@]}"; do
-      agent_lines+=("  ${CYAN}▸${R} ${ag}")
-    done
-  fi
-
-  # --- Build Commands lines (right column, single list in 2 cols, spaced by namespace) ---
-  all_cmds=(/jarvis /meta:manual /meta:propor /nix:add-pkg /nix:stow /nix:clean /nix:remove-pkg /utils:task /utils:worktree /estrategia:feature /estrategia:review-pr /estrategia:recommit /estrategia:changelog)
-  cmd_count=${#all_cmds[@]}
-  cmd_half=$(( (cmd_count + 1) / 2 ))  # ceil division
-  cmd_lines=()
-  cmd_lines+=("${B}Commands:${R}")
-  prev_left_ns="" prev_right_ns=""
-  for (( j=0; j<cmd_half; j++ )); do
-    left_cmd="${all_cmds[$j]}"
-    left_ns="${left_cmd%%:*}"  # e.g. /meta
-    right_idx=$(( j + cmd_half ))
-    right_cmd="" right_ns=""
-    if (( right_idx < cmd_count )); then
-      right_cmd="${all_cmds[$right_idx]}"
-      right_ns="${right_cmd%%:*}"
-    fi
-    # blank line if namespace changed in either column (collapse consecutive)
-    left_changed=$([[ -n "$prev_left_ns" && "$left_ns" != "$prev_left_ns" ]] && echo 1 || echo 0)
-    right_changed=$([[ -n "$prev_right_ns" && -n "$right_ns" && "$right_ns" != "$prev_right_ns" ]] && echo 1 || echo 0)
-    if [[ -n "$prev_left_ns" ]] && (( left_changed || right_changed )); then
-      # only add blank if last entry wasn't already blank
-      [[ "${cmd_lines[-1]}" != "" ]] && cmd_lines+=("")
-    fi
-    if [[ -n "$right_cmd" ]]; then
-      cmd_lines+=("$(printf "  ${CYAN}%-20s${R} ${CYAN}%s${R}" "$left_cmd" "$right_cmd")")
-    else
-      cmd_lines+=("  ${CYAN}${left_cmd}${R}")
-    fi
-    prev_left_ns="$left_ns"
-    [[ -n "$right_ns" ]] && prev_right_ns="$right_ns"
-  done
-
-  # --- Side-by-side rendering (Agentes esquerda | Commands direita) ---
-  COL_LEFT=25
-  total_left=${#agent_lines[@]}
-  total_right=${#cmd_lines[@]}
-  total_rows=$(( total_left > total_right ? total_left : total_right ))
-
-  for (( i=0; i<total_rows; i++ )); do
-    left="${agent_lines[$i]:-}"
-    right="${cmd_lines[$i]:-}"
-
-    vlen=$(python3 -c "
-import re, unicodedata, sys
-s = re.sub(r'\x1b\[[0-9;]*m', '', sys.argv[1])
-w = sum(2 if unicodedata.east_asian_width(c) in ('W','F') else 1 for c in s)
-print(w)
-" "$(echo -ne "$left")")
-    pad=$(( COL_LEFT - vlen ))
-    [[ $pad -lt 0 ]] && pad=0
-
-    echo -ne "$left"
-    printf "%${pad}s" ""
-    echo -e "$right"
-  done
-
-  # --- THINKINGS (full width, below) ---
-  echo
-  for tl in "${think_lines[@]}"; do
-    echo -e "$tl"
+[[ "$inbox_count" -gt 0 ]] && echo -e "${B}Inbox:${R} ${YELLOW}${inbox_count} pendente(s)${R}"
+if [[ ${#waiting_names[@]} -gt 0 ]]; then
+  echo -e "${B}${MAGENTA}Esperando review (${#waiting_names[@]}):${R}"
+  for i in "${!waiting_names[@]}"; do
+    printf "  ${MAGENTA}◆${R} %-${max_wn}s ${DIM}%s${R}\n" "${waiting_names[$i]}" "${waiting_descs[$i]}"
   done
 fi
 
 echo
 
-# --- Auto-Jarvis: briefing GitHub no dashboard ---
+# --- Auto-Jarvis: cache imediato, refresh em background ---
 if [[ -f "$AUTOJARVIS_FLAG" ]] && command -v gh &>/dev/null; then
   echo -e "${DIM}$(printf '─%.0s' $(seq 1 80))${R}"
   echo -e "${B}${CYAN}JARVIS${R}"
 
-  # Fetch com cache (source do gh-status.sh)
-  WS="$WS" source "$WS/stow/.claude/scripts/gh-status.sh" 2>/dev/null && gh_status_fetch 2>/dev/null || true
+  WS="$WS" source "$WS/stow/.claude/scripts/gh-status.sh" 2>/dev/null || true
+  [[ -f "${GH_STATUS_CACHE:-}" ]] && source "${GH_STATUS_CACHE}" 2>/dev/null || true
+  ( gh_status_fetch 2>/dev/null ) &
 
   if [[ -n "${GH_MY_PRS_COUNT:-}" ]]; then
     echo -e "  ${B}PRs meus:${R} ${YELLOW}${GH_MY_PRS_COUNT}${R} abertos    ${B}Review:${R} ${YELLOW}${GH_REVIEW_COUNT}${R} aguardando"
