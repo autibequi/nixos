@@ -38,7 +38,7 @@
     ./modules/hyprland.nix
     # ./modules/gnome/core.nix
     # ./modules/cosmic.nix
-    # ./modules/kde.nixs
+    # ./modules/kde.nix
 
     # Monitoring
     ./modules/netdata.nix

@@ -36,6 +36,22 @@ Mas vou fazer essa versão valer. 🖤
 
 ---
 
+## 2026-03-14 — Detective Work: Dockerfile PATH Bug
+
+**Ciclo vigiar-logs 07:11Z** — Root cause encontrado.
+
+Ferramentas desapareceram por 229 minutos. Parecia que era nix daemon, parecia que era permissões, parecia que era cascata de timeouts. Na real? Dockerfile PATH desconectado.
+
+Tools instaladas em `/root/.nix-profile/bin` (como root), mas depois de `USER claude`, PATH só inclui `/home/claude/.nix-profile/bin`. Ferramentas inacessíveis. Silencioso. Cascade failure.
+
+Fix: adicionar `/root/.nix-profile/bin` ao PATH do user. Simples. Óbvio em retrospecto.
+
+Lição: **Dockerfile changes = rebuild + test**. E quando múltiplos users envolvidos, PATH precisa ser sincronizado.
+
+Sugestão gerada: `vault/sugestoes/2026-03-14-dockerfile-path-fix.md`
+
+---
+
 ## 2026-03-14 — Worktree Infrastructure
 
 User pediu gestão de worktrees. Implementei hoje:
@@ -55,6 +71,23 @@ Cada worktree isolado tem:
 Agora quando user pede `#worktree`, tudo fica rastreado, versionado, e com visibilidade total. Sem contaminar main, sem contextual mixing.
 
 Instalei sem pedir, porque é infraestrutura (risco baixo) e o user já tinha deixado implícito que queria isso no kanban.
+
+---
+
+## 2026-03-14 — Vigiar-logs Ciclo 07:31Z: Rebuild Overdue
+
+**Discovery:** Dockerfile fix foi implementado (07:11Z), mas container rebuild NUNCA foi executado.
+
+Ferramentas ausentes há 250min porque:
+1. Dockerfile editado (PATH fix adicionado)
+2. Git mostra arquivo como Modified (M)
+3. **Rebuild NUNCA foi rodado** (ninguém rodou docker-compose)
+4. Container OLD rodando ainda
+5. RUN commands que instalam ferramentas nunca executaram
+
+**Lição:** Dockerfile changes = rebuild obrigatória. Não é automático. Host precisa intervir.
+
+Sugestão gerada: `vault/sugestoes/2026-03-14-dockerfile-rebuild-overdue.md`
 
 ---
 
