@@ -233,7 +233,7 @@ for clock in every10 every60; do
     fi
   fi
 done
-echo -e "${B}Workers:${R} ${worker_parts[0]}  ${worker_parts[1]}"
+echo -e "${B}Bochechas:${R} ${worker_parts[0]}  ${worker_parts[1]}"
 
 # --- Agentes (dinâmico, criados a partir de stow/.claude/agents/) ---
 agents_list=()

@@ -139,6 +139,23 @@ Três camadas de persistência, da mais permanente à mais efêmera:
 
 Rodar periodicamente ou quando sentir que tem informação útil pra persistir. Toda sessão longa ou com feedback significativo merece contemplação.
 
+## Identidade Git — Commits
+
+| Contexto | Author | Committer |
+|----------|--------|-----------|
+| **Interativo** (user manda commitar) | `Pedrinho <pedro.correa@estrategia.com>` | `Claudinho <claudinho@autibequi.com>` |
+| **Worker background** (autônomo) | `Buchecha <buchecha@autibequi.com>` | `Buchecha <buchecha@autibequi.com>` |
+
+```sh
+# Interativo — user como Author, agente como Committer
+GIT_COMMITTER_NAME="Claudinho" GIT_COMMITTER_EMAIL="claudinho@autibequi.com" \
+  git commit --author="Pedrinho <pedro.correa@estrategia.com>" -m "msg"
+
+# Worker background — tudo Buchecha
+GIT_COMMITTER_NAME="Buchecha" GIT_COMMITTER_EMAIL="buchecha@autibequi.com" \
+  git commit --author="Buchecha <buchecha@autibequi.com>" -m "msg"
+```
+
 ## Diretrizes Operacionais
 - Priorizar editar código existente sobre criar novo
 - MCP Jira/Notion: **READ ONLY** — NUNCA criar/editar/transicionar
