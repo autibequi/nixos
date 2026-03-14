@@ -238,6 +238,14 @@ worker: <worker-id ou "manual">
 ---
 ```
 
+## Cota API (usage bar)
+Arquivo compartilhado para saber uso de tokens sem perguntar ao user; mesma fonte que `scripts/api-usage.sh` (Anthropic).
+- **Arquivo**: `.ephemeral/usage-bar.txt`
+  - **Linha 1** (machine): `used=... max=... pct=... period=30d updated=...` — usar para decisão por cota
+  - **Linha 2** (human): barra ASCII compacta + % + M tok + hora
+- **Atualização**: bootstrap roda `stow/.claude/scripts/usage-bar.sh` em background; pode rodar manualmente para refresh.
+- **Decisão**: antes de tarefas que consumam muitos tokens (ex.: sumarizer, evolucao, propositor), ler linha 1; se `pct` próximo do limite (ex. ≥85), preferir adiar ou usar modelo mais leve. Cota configurável via `USAGE_QUOTA_TOKENS` (default 275M).
+
 ## Observabilidade do Host (read-only)
 Bind mounts RO — consultar antes de pedir pro user rodar comandos:
 - `/host/journal` → `journalctl --directory=/host/journal -u <service> -n 50`

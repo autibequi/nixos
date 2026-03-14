@@ -81,6 +81,13 @@ fi
 # --- Auto-update Claude Code (cache 24h) ---
 CLAUDE_UPDATE_CACHE="$WS/.ephemeral/.claude-code-update"
 mkdir -p "$WS/.ephemeral" 2>/dev/null || true
+
+# --- Usage bar (API cota) — atualiza em background para user + agente lerem .ephemeral/usage-bar.txt
+USAGE_BAR_FILE="$WS/.ephemeral/usage-bar.txt"
+if [[ -f "$WS/stow/.claude/scripts/usage-bar.sh" ]]; then
+  ( WS="$WS" OUT_FILE="$USAGE_BAR_FILE" source "$WS/stow/.claude/scripts/usage-bar.sh" 2>/dev/null ) &
+  disown 2>/dev/null || true
+fi
 if [[ -f "$CLAUDE_UPDATE_CACHE" ]]; then
   update_age=$(( now - $(stat -c %Y "$CLAUDE_UPDATE_CACHE" 2>/dev/null || echo 0) ))
 else
@@ -237,21 +244,14 @@ build_banner() {
       "${DIM}${porquemo_trunc}${R}"
     )
     [[ ${#week_lines[@]} -gt 0 ]] && {
-      info_lines+=("${DIM}Próx. dias:${R}")
+      info_lines+=("${DIM}Próximos dias:${R}")
       for wl in "${week_lines[@]}"; do info_lines+=("  $wl"); done
     }
   fi
 
   local total=${#info_lines[@]}
   for (( i=0; i<total; i++ )); do
-    local art_line="${WEATHER_ART[$i]:-                  }"
-    local info="${info_lines[$i]:-}"
-    local art_len=${#art_line}
-    local pad=$(( 20 - art_len ))
-    [[ $pad -lt 0 ]] && pad=0
-    echo -ne "  ${art_color}${art_line}${R}"
-    printf "%${pad}s" ""
-    echo -e "${info}"
+    echo -e "${info_lines[$i]:-}"
   done
 }
 
@@ -282,6 +282,12 @@ for clock in every10 every60 every240; do
   fi
 done
 echo -e "${B}Bochechas:${R} ${worker_parts[0]}  ${worker_parts[1]}  ${worker_parts[2]}"
+
+# --- Cota API (barra compacta — mesma fonte que /usage; agente lê .ephemeral/usage-bar.txt) ---
+if [[ -f "$USAGE_BAR_FILE" ]]; then
+  human_line=$(sed -n '2p' "$USAGE_BAR_FILE" 2>/dev/null)
+  [[ -n "$human_line" ]] && echo -e "${human_line}"
+fi
 
 # --- Agentes (dinâmico, criados a partir de stow/.claude/agents/) ---
 agents_list=()

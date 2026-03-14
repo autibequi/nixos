@@ -19,6 +19,7 @@ Scripts utilitários usados por statusline, hooks, agents e interativamente.
 | `gh-status.sh` | bash/lib | Coleta status GitHub (PRs meus, review requests) com cache 10min. `source gh-status.sh && gh_status_fetch` |
 | `task-schedule.sh` | bash | Tabela de tasks agendadas por slot: recorrentes, pending, timeline próximas horas. `bash task-schedule.sh` |
 | `weather-art.sh` | bash/lib | Weather fetch + ASCII art por condição (sol, chuva, nublado, etc). `source weather-art.sh` exporta WEATHER_ART[], WEATHER_CAT, dados |
+| `usage-bar.sh` | bash | Gera `.ephemeral/usage-bar.txt`: barra compacta de uso API (30d) + linha machine-readable. Bootstrap chama em background; agente lê para decisão por cota. `USAGE_QUOTA_TOKENS`, `USAGE_BAR_PERIOD` |
 
 ---
 
