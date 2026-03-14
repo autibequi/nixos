@@ -163,10 +163,20 @@ if [[ -n "$LINES_ADDED" && -n "$LINES_REMOVED" ]] && { [[ "$LINES_ADDED" != "0" 
   LINES_STR="+${LINES_ADDED} -${LINES_REMOVED}"
 fi
 
-# Cost: so exibe se > 0
+# Cost: sessão + total do período (usage-bar.txt)
 COST_STR=""
 if [[ -n "$COST_USD" && "$COST_USD" != "0" && "$COST_USD" != "null" ]]; then
   COST_STR=" | \$$(printf '%.2f' "$COST_USD")"
+  # Append total usage from period if available
+  if [[ -f "$WS/.ephemeral/usage-bar.txt" ]]; then
+    _ub_line=$(head -1 "$WS/.ephemeral/usage-bar.txt" 2>/dev/null)
+    _ub_used=$(echo "$_ub_line" | sed -n 's/.*used=\([0-9]*\).*/\1/p')
+    _ub_pct=$(echo "$_ub_line" | sed -n 's/.*pct=\([0-9]*\).*/\1/p')
+    if [[ -n "$_ub_used" && "$_ub_used" -gt 0 ]]; then
+      _ub_fmt=$(fmt_tokens "$_ub_used")
+      COST_STR+=" / ${_ub_fmt} ${_ub_pct}%"
+    fi
+  fi
 fi
 
 # Worktree: so exibe se estiver em worktree

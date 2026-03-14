@@ -138,6 +138,8 @@ build_banner
 echo
 
 # ── Workers (systemd oneshot + timer → detect via log age) ────────────────────
+ON=$'\033[1;32m'  # bright green
+OFF=$'\033[1;31m' # bright red
 worker_parts=()
 for clock in every10 every60 every240; do
   IFS=: read -r last_mod last_log <<< "$(find_latest_log "$clock")"
@@ -182,9 +184,6 @@ git_str="${P_CYAN}[${ws_branch}]${R}"
 [[ -n "$ws_dirty" ]] && git_str+=" ${P_AMBER}dirty${R}" || git_str+=" ${P_GREEN}clean${R}"
 [[ "$ws_ahead" -gt 0 ]] && git_str+=" ${P_GREEN}↑${ws_ahead}${R}"
 [[ "$ws_behind" -gt 0 ]] && git_str+=" ${P_RED}↓${ws_behind}${R}"
-
-ON=$'\033[1;32m'  # bright green
-OFF=$'\033[1;31m' # bright red
 
 MODE_FILE="$WS/projetos/CLAUDE.md"
 if [[ -f "$MODE_FILE" ]] && grep -q 'FÉRIAS \[OFF\]' "$MODE_FILE" 2>/dev/null; then
