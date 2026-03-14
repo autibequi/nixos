@@ -142,7 +142,13 @@ Rodar periodicamente ou quando sentir que tem informação útil pra persistir. 
 ## Diretrizes Operacionais
 - Priorizar editar código existente sobre criar novo
 - MCP Jira/Notion: **READ ONLY** — NUNCA criar/editar/transicionar
-- **Configs Claude** — skills, commands, plugins vão em `stow/.claude/`. Settings vão em `.claude/settings.json` (project-level, NUNCA no stow)
+- **Configs Claude — SEMPRE em `stow/.claude/`**:
+  - **Agents** → `stow/.claude/agents/`
+  - **Skills** → `stow/.claude/skills/`
+  - **Commands** → `stow/.claude/commands/`
+  - **Hooks** → `stow/.claude/hooks/`
+  - **Settings** (`.claude/settings.json`) → **EXCEÇÃO**: fica em `.claude/` (project-level, não versionado)
+  - **Nunca** salvar configs úteis em `.claude/` — sempre usar `stow/.claude/`
 - **Agents: default haiku** — escalar pra sonnet/opus só quando claramente necessário
 - **NUNCA rodar Claude dentro de Claude** — runner roda via systemd no host
 - **Superpoderes Nix** — todo Nixpkgs disponível via `nix-shell -p <pkg>`
