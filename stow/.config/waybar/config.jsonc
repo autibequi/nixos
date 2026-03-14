@@ -232,7 +232,7 @@
   "custom/claude": {
     "format": "{}",
     "interval": 300,
-    "exec": "claude-statusbar --plan max20 2>/dev/null || echo '󱙺 --'",
+    "exec": "claude-statusbar --plan max20 2>/dev/null || \"$HOME/nixos/stow/.claude/scripts/claude-ai-usage.sh\" 2>/dev/null || echo '󱙺 --'",
     "tooltip": true,
     "on-click": "alacritty -e bash -c 'claude-statusbar --plan max20; read'"
   },

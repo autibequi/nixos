@@ -71,7 +71,7 @@ max_turns: 25
 | Histórico | Log de execuções passadas (opcional) |
 
 ## Workers
-- Múltiplos workers em paralelo (default: 2 every60, 1 every10, 1 every240)
+- 1 worker por clock (every10, every60); execução sequencial por timer
 - Cada worker se identifica com CLAU_WORKER_ID
 - CLAU_CLOCK filtra quais tasks o worker roda (every10, every60 ou every240)
 - Runner lê recorrentes de scheduled.md, backlog de kanban.md

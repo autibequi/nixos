@@ -126,7 +126,8 @@ let
     rm -f .ephemeral/.kanban.lock .ephemeral/locks/*.lock
   '';
 
-  heavyRunner = mkRunnerScript { clock = "every60"; maxWorkers = 2; serviceName = "worker"; };
+  # 1 worker por clock: execução sequencial (cada timer levanta só 1 worker, 1 tarefa por vez)
+  heavyRunner = mkRunnerScript { clock = "every60"; maxWorkers = 1; serviceName = "worker"; };
   fastRunner = mkRunnerScript { clock = "every10"; maxWorkers = 1; serviceName = "worker-fast"; };
 
   commonEnvAsk = [
