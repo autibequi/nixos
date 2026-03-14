@@ -9,6 +9,8 @@ CLAU_VERBOSE="${CLAU_VERBOSE:-0}"
 SPECIFIC_TASK="${1:-}"
 WORKER_ID="${CLAU_WORKER_ID:-worker-1}"
 CLAU_CLOCK="${CLAU_CLOCK:-every60}"
+# Identidade desta execução — permite detectar órfãos mesmo quando runner é PID 1 (container)
+RUN_ID="$$-$(date +%s)-${RANDOM:-0}"
 NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}"
 export NODE_OPTIONS
 SCHEDULED="$WORKSPACE/vault/scheduled.md"
@@ -57,19 +59,29 @@ recover_orphans() {
     name=$(basename "$dir")
     [ -f "$dir/.lock" ] || continue
 
-    local lock_pid lock_started lock_timeout lock_source lock_worker
+    local lock_pid lock_started lock_timeout lock_source lock_worker lock_run_id
     lock_pid=$(grep '^pid=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "")
     lock_started=$(grep '^started=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "")
     lock_timeout=$(grep '^timeout=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "300")
     lock_source=$(grep '^source=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "pending")
     lock_worker=$(grep '^worker=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "")
+    lock_run_id=$(grep '^run_id=' "$dir/.lock" 2>/dev/null | cut -d= -f2- || echo "")
 
     local is_orphan=0
 
-    # pid=1 (init) não pode ser rastreado — orphan se não for o worker atual
-    if [ "$lock_pid" = "1" ] && [ "$lock_worker" != "$WORKER_ID" ]; then
+    # Mesmo worker: lock de outra execução (outro container/processo) → órfão (resolve pid=1)
+    if [ "$lock_worker" = "$WORKER_ID" ] && [ -n "$lock_run_id" ] && [ "$lock_run_id" != "$RUN_ID" ]; then
       is_orphan=1
-    # Processo morto
+    # Outro worker: NUNCA usar run_id (cada runner tem RUN_ID diferente); só processo morto ou timeout
+    # pid=1 de outro worker: não dá pra kill -0 1 (pode ser nós), deixar só timeout tratar
+    elif [ "$lock_worker" != "$WORKER_ID" ]; then
+      if [ -n "$lock_pid" ] && [ "$lock_pid" != "1" ] && ! kill -0 "$lock_pid" 2>/dev/null; then
+        is_orphan=1
+      fi
+    # Mesmo worker, lock antigo sem run_id: pid=1 não rastreável
+    elif [ "$lock_pid" = "1" ] && [ -z "$lock_run_id" ]; then
+      is_orphan=1
+    # Processo morto (nosso worker, pid != 1)
     elif [ -n "$lock_pid" ] && [ "$lock_pid" != "1" ] && ! kill -0 "$lock_pid" 2>/dev/null; then
       is_orphan=1
     fi
@@ -86,7 +98,7 @@ recover_orphans() {
 
     [ "$is_orphan" = "0" ] && continue
 
-    echo "[clau:$WORKER_ID] Orphan: '$name' (pid=${lock_pid}, worker=${lock_worker}, started=${lock_started}) — recuperando"
+    echo "[clau:$WORKER_ID] Orphan: '$name' (pid=${lock_pid}, worker=${lock_worker}, run_id=${lock_run_id:-<none>}, started=${lock_started}) — recuperando"
 
     rm -f "$dir/.lock"
     task_unlock "$name" 2>/dev/null || true
@@ -228,6 +240,7 @@ timeout=$task_timeout
 source=$source_dir
 worker=$WORKER_ID
 pid=$$
+run_id=$RUN_ID
 EOF
   echo "[clau:$WORKER_ID] Claimed '$task' ($source_dir, ${task_timeout}s)"
 }
