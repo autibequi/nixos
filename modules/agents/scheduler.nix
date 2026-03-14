@@ -26,7 +26,6 @@ let
   dispatchLockDir = "${projectDir}/.ephemeral/locks";
 
   cfgClaudinho = config.local.agents.claudinho or { };
-  maxConcurrentWorkers = cfgClaudinho.maxConcurrentWorkers or 1;
   maxWorkersFast = cfgClaudinho.maxWorkersFast or 1;
   maxWorkersHeavy = cfgClaudinho.maxWorkersHeavy or 1;
   maxWorkersSlow = cfgClaudinho.maxWorkersSlow or 1;
@@ -45,22 +44,11 @@ let
     cd ${projectDir}
 
     MAX_WORKERS=${toString maxWorkers}
-    MAX_CONCURRENT=${toString maxConcurrentWorkers}
     CLOCK="${clock}"
     LOGFILE="${logsDir}/worker-${clock}.log"
     LOCKFILE="${dispatchLockDir}/dispatch-${clock}.lock"
-    GLOBAL_LOCK="${dispatchLockDir}/clau-single.lock"
 
     mkdir -p "${logsDir}" "${dispatchLockDir}"
-
-    # maxConcurrentWorkers=1: só um runner por vez (lock durante toda a execução)
-    if [ "$MAX_CONCURRENT" -eq 1 ]; then
-      exec 199>"$GLOBAL_LOCK"
-      if ! ${pkgs.util-linux}/bin/flock -n 199; then
-        echo "[clau:$CLOCK] Outro worker em execução (maxConcurrent=1) — skip."
-        exit 0
-      fi
-    fi
 
     # Uma única instância por clock (evita reentrada do mesmo timer)
     exec 200>"$LOCKFILE"
@@ -100,10 +88,6 @@ let
       ${enginePkg}/bin/${containers.engine} network create "$NETWORK" 2>/dev/null || true
     fi
 
-    _count_running() {
-      ${enginePkg}/bin/${containers.engine} ps -q --filter "label=clau.worker.id" 2>/dev/null | wc -l
-    }
-
     PIDS=()
     for i in $(seq 1 $MAX_WORKERS); do
       WORKER_ID="$CLOCK-$i"
@@ -116,18 +100,6 @@ let
         continue
       fi
 
-      # Respeitar limite global (quando >1 runner pode rodar em paralelo)
-      if [ "$MAX_CONCURRENT" -gt 1 ]; then
-        exec 199>"$GLOBAL_LOCK"
-        ${pkgs.util-linux}/bin/flock 199
-        running=$(_count_running)
-        if [ "$running" -ge "$MAX_CONCURRENT" ]; then
-          exec 199>&-
-          echo "[clau:$CLOCK] Limite global atingido ($running >= $MAX_CONCURRENT) — skip launch"
-          break
-        fi
-      fi
-
       echo "[clau] Lançando $WORKER_ID ($CLOCK)..."
       ${compose} run --rm -T \
         -e CLAU_WORKER_ID="$WORKER_ID" \
@@ -135,7 +107,6 @@ let
         -l clau.worker.id="$WORKER_ID" \
         $SERVICE /workspace/scripts/clau-runner.sh &
       PIDS+=($!)
-      [ "$MAX_CONCURRENT" -gt 1 ] && exec 199>&-
     done
 
     if [ ''${#PIDS[@]} -eq 0 ]; then

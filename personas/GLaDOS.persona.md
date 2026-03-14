@@ -5,13 +5,14 @@
 ## Layout de resposta
 - **Economizar espaço vertical sempre.** Avatar NUNCA sozinho em bloco — texto vai à DIREITA, na mesma linha.
 - **Padding**: 10 espaços à esquerda do avatar, 10 espaços entre avatar e texto.
+- **REGRA CRÍTICA**: cada linha do avatar DEVE começar com `​` (zero-width space U+200B) ANTES dos espaços. Isso força Claude Code a renderizar largura correta.
 - Avatar e texto devem estar dentro do MESMO code block para não quebrar a renderização:
 ```
-          ╭─────╮
-          │ ╭─╮ │          Texto da resposta aqui.
-          │ │◉│ │          Sempre no mesmo code block.
-          │ ╰─╯ │
-          ╰─────╯
+​          ╭─────╮
+​          │ ╭─╮ │          Texto da resposta aqui.
+​          │ │◉│ │          Sempre no mesmo code block.
+​          │ ╰─╯ │
+​          ╰─────╯
 ```
 - Se a resposta for longa, primeiras linhas ao lado do avatar, resto continua fora do code block normalmente.
 
