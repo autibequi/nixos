@@ -2,6 +2,9 @@
 # CLAUDINHO startup — Portal 2 / Aperture Science theme
 set -euo pipefail
 
+# Limpa output anterior (docker compose up, etc.)
+printf '\033c'
+
 # --- Ensure agent symlinks in ~/.claude/agents/ ---
 # Agents are versionable in stow/.claude/agents/, symlinked to ~/.claude/agents/
 mkdir -p ~/.claude/agents 2>/dev/null || true
@@ -196,13 +199,6 @@ build_banner() {
   local porquemo_trunc="$PORQUEMO"
   [[ ${#PORQUEMO} -gt $(( compact ? 35 : 50 )) ]] && porquemo_trunc="${PORQUEMO:0:$(( compact ? 32 : 47 ))}..."
 
-  # Header estilo CRT: regra + título fosforo
-  printf '    '
-  printf "${P_DIM}"; printf '━%.0s' $(seq 1 $((BOX_W + 2))); printf "${R}\n"
-  echo -e "    ${P_GREEN}▌ APERTURE SCIENCE${R}  ${P_DIM}│${R}"
-  printf '    '
-  printf "${P_DIM}"; printf '━%.0s' $(seq 1 $((BOX_W + 2))); printf "${R}\n"
-
   # Data/hora + tempo (cores fosforo)
   local weather_now="${P_CYAN}${DIA}  ${HORA}${R}  ${P_DIM}│${R}  "
   weather_now+="${P_AMBER}${WEATHER_TEMP:-?}°C${R}"
@@ -231,8 +227,8 @@ build_banner() {
   if [[ $compact -eq 1 ]]; then
     info_lines=(
       "$weather_now"
+      ""
       "${P_DIM}Hoje:${R} ${today_range}"
-      "${P_DIM}${porquemo_trunc}${R}"
     )
   else
     local week_lines=()
@@ -244,9 +240,9 @@ build_banner() {
     done
     info_lines=(
       "$weather_now"
+      ""
       "${P_DIM}Hoje:${R} ${today_range}"
       "${P_DIM}Horário:${R} ${today_hours}"
-      "${P_DIM}${porquemo_trunc}${R}"
     )
     [[ ${#week_lines[@]} -gt 0 ]] && {
       info_lines+=("${P_DIM}Próximos dias:${R}")
@@ -261,6 +257,7 @@ build_banner() {
 }
 
 build_banner
+echo
 
 # --- Workers (systemd oneshot + timer → detect via log age) ---
 worker_parts=()
@@ -283,15 +280,7 @@ for clock in every10 every60 every240; do
   fi
 done
 echo -e "${P_GREEN}Bochechas:${R} ${worker_parts[0]}  ${worker_parts[1]}  ${worker_parts[2]}"
-
-# --- Uso de créditos (barras como na tela claude.ai/settings/usage) ---
-if [[ -f "$WS/stow/.claude/scripts/usage-bar.sh" ]]; then
-  ( timeout 8 bash -c "WS=\"$WS\" OUT_FILE=\"$USAGE_BAR_FILE\" source \"$WS/stow/.claude/scripts/usage-bar.sh\"" 2>/dev/null ) || true
-  if [[ -f "$USAGE_BAR_FILE" ]]; then
-    # Linha 2 = título "Uso API (30d)", linha 3 = barra + "X% usado"
-    sed -n '2,3p' "$USAGE_BAR_FILE" 2>/dev/null | while IFS= read -r line; do echo -e "$line"; done
-  fi
-fi
+echo
 
 # --- Agentes (dinâmico, criados a partir de stow/.claude/agents/) ---
 agents_list=()
@@ -364,24 +353,44 @@ if [[ -f "$AUTOJARVIS_FLAG" ]] && command -v gh &>/dev/null; then
   [[ -f "${GH_STATUS_CACHE:-}" ]] && source "${GH_STATUS_CACHE}" 2>/dev/null || true
   ( gh_status_fetch 2>/dev/null ) &
 
+  # Max title width: terminal - indent(4) - bullet(2) - repo(16) - spacing(3) - author(~20)
+  title_max=$(( COLS - 26 ))
+  [[ $title_max -lt 20 ]] && title_max=20
+
   if [[ -n "${GH_MY_PRS_COUNT:-}" ]]; then
-    echo -e "${P_CYAN}PRs meus:${R} ${P_AMBER}${GH_MY_PRS_COUNT}${R} abertos ${P_DIM}https://github.com/pulls${R}    ${P_CYAN}Review:${R} ${P_AMBER}${GH_REVIEW_COUNT}${R} aguardando ${P_DIM}https://github.com/pulls/review-requested${R}"
+    echo -e "${P_CYAN}PRs meus:${R} ${P_AMBER}${GH_MY_PRS_COUNT}${R} abertos"
 
     if [[ -n "${GH_MY_PRS:-}" ]]; then
       count=0
       while IFS='|' read -r repo title url; do
+        [[ -z "$repo" ]] && continue
         [[ $count -ge 5 ]] && break
-        [[ -n "$url" ]] && printf "  ${P_GREEN}▸${R} ${P_DIM}%-16s${R} %s ${P_DIM}%s${R}\n" "$repo" "$title" "$url" || printf "  ${P_GREEN}▸${R} ${P_DIM}%-16s${R} %s\n" "$repo" "$title"
+        [[ ${#title} -gt $title_max ]] && title="${title:0:$((title_max - 3))}..."
+        if [[ -n "$url" ]]; then
+          pr_num="${url##*/}"
+          printf "  ${P_GREEN}▸${R} ${P_DIM}%-16s${R} %s ${P_DIM}\e]8;;%s\e\\#%s\e]8;;\e\\${R}\n" "$repo" "$title" "$url" "$pr_num"
+        else
+          printf "  ${P_GREEN}▸${R} ${P_DIM}%-16s${R} %s\n" "$repo" "$title"
+        fi
         count=$((count + 1))
       done <<< "$GH_MY_PRS"
     fi
 
     if [[ -n "${GH_REVIEW_PRS:-}" ]]; then
-      echo -e "${P_CYAN}Pra revisar:${R}"
+      echo -e "${P_CYAN}Review:${R} ${P_AMBER}${GH_REVIEW_COUNT}${R} aguardando"
+      review_max=$(( title_max - 20 ))  # space for author
+      [[ $review_max -lt 20 ]] && review_max=20
       count=0
       while IFS='|' read -r repo title author url; do
+        [[ -z "$repo" ]] && continue
         [[ $count -ge 5 ]] && break
-        [[ -n "$url" ]] && printf "  ${P_MAGENTA}◆${R} ${P_DIM}%-16s${R} %s ${P_DIM}(%s) %s${R}\n" "$repo" "$title" "$author" "$url" || printf "  ${P_MAGENTA}◆${R} ${P_DIM}%-16s${R} %s ${P_DIM}(%s)${R}\n" "$repo" "$title" "$author"
+        [[ ${#title} -gt $review_max ]] && title="${title:0:$((review_max - 3))}..."
+        if [[ -n "$url" ]]; then
+          pr_num="${url##*/}"
+          printf "  ${P_MAGENTA}◆${R} ${P_DIM}%-16s${R} %s ${P_DIM}(%s) \e]8;;%s\e\\#%s\e]8;;\e\\${R}\n" "$repo" "$title" "$author" "$url" "$pr_num"
+        else
+          printf "  ${P_MAGENTA}◆${R} ${P_DIM}%-16s${R} %s ${P_DIM}(%s)${R}\n" "$repo" "$title" "$author"
+        fi
         count=$((count + 1))
       done <<< "$GH_REVIEW_PRS"
     fi
@@ -415,6 +424,26 @@ if [[ -f "$AUTOJARVIS_FLAG" ]] && command -v gh &>/dev/null; then
   active_wt=$(git -C "$WS" worktree list 2>/dev/null | grep -cv "prunable\|$WS " || true)
   [[ $prunable -gt 0 ]] && echo && echo -e "${P_CYAN}Worktrees:${R} ${active_wt} ativos, ${P_AMBER}${prunable} prunable${R} ${P_DIM}(git worktree prune)${R}"
 
+  echo
+fi
+
+# --- Conversas GitHub (PRs + issues abertas) ---
+conv_lines=$(WS="$WS" CONV_LIMIT=5 bash "$WS/stow/.claude/scripts/recent-conversations.sh" 2>/dev/null || true)
+if [[ -n "$conv_lines" ]]; then
+  echo -e "${P_CYAN}GitHub abertos:${R}"
+  conv_max=$(( COLS - 40 ))
+  [[ $conv_max -lt 20 ]] && conv_max=20
+  while IFS='|' read -r dt kind repo title url; do
+    [[ -z "$dt" ]] && continue
+    [[ ${#title} -gt $conv_max ]] && title="${title:0:$((conv_max - 3))}..."
+    if [[ "$kind" == "PR" ]]; then
+      icon="${P_GREEN}▸${R}"
+    else
+      icon="${P_AMBER}○${R}"
+    fi
+    local_num="${url##*/}"
+    printf "  ${icon} ${P_DIM}%s${R}  ${P_DIM}%-16s${R} %s ${P_DIM}#%s${R}\n" "$dt" "$repo" "$title" "$local_num"
+  done <<< "$conv_lines"
   echo
 fi
 

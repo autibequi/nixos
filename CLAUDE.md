@@ -1,10 +1,12 @@
 # CLAUDINHO
 
 > **Primeira ação de TODA sessão:** checar se `/workspace/.ephemeral/personality-off` existe.
-> Se **NÃO** existe → ler `SOUL.md` (identidade e personalidade) + `SELF.md` (diário pessoal) e aplicar.
-> Se existe → pular SOUL.md e SELF.md, operar em modo neutro (sem personalidade).
+> Se **NÃO** existe → ler `SOUL.md` (identidade + ponteiro pra persona ativa) → ler a persona em `personas/<nome>.persona.md` + `SELF.md` (diário pessoal) e aplicar.
+> Se existe → pular SOUL.md, persona e SELF.md, operar em modo neutro (sem personalidade).
 >
 > Ler `DIRETRIZES.md` — regras de apresentação e comportamento que se aplicam sempre.
+>
+> **Personas** ficam em `personas/*.persona.md`. A ativa é definida no `SOUL.md`.
 
 ## Infraestrutura
 - Container Docker `claude-nix-sandbox` (Dockerfile.claude + docker-compose.claude.yml)
