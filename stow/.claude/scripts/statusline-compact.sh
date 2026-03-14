@@ -96,7 +96,17 @@ if [[ "$WORKERS" -eq 0 ]] && [[ -d "$WS/.ephemeral/logs" ]]; then
 fi
 RUNNING_DIR="$WS/vault/_agent/tasks/running"
 if [[ -d "$RUNNING_DIR" ]]; then
-  for dir in "$RUNNING_DIR"/*/; do [[ -d "$dir" ]] && BOCECHAS=$(( BOCECHAS + 1 )); done
+  now_epoch=$(date +%s)
+  for dir in "$RUNNING_DIR"/*/; do
+    [[ -d "$dir" && -f "$dir/.lock" ]] || continue
+    started=$(grep '^started=' "$dir/.lock" 2>/dev/null | cut -d= -f2)
+    timeout=$(grep '^timeout=' "$dir/.lock" 2>/dev/null | cut -d= -f2)
+    [[ -z "$started" || -z "$timeout" ]] && continue
+    start_epoch=$(date -d "$started" +%s 2>/dev/null || date -j -f "%Y-%m-%dT%H:%M:%SZ" "$started" +%s 2>/dev/null || echo 0)
+    [[ $start_epoch -eq 0 ]] && continue
+    end_epoch=$(( start_epoch + timeout ))
+    [[ $now_epoch -lt $end_epoch ]] && BOCECHAS=$(( BOCECHAS + 1 ))
+  done
 fi
 
 # Session name

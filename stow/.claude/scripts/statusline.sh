@@ -95,11 +95,20 @@ if [[ "$WORKERS" -eq 0 ]] && [[ -d "$WS/.ephemeral/logs" ]]; then
     [[ $(( now_sec - mod )) -le 900 ]] && WORKERS=$(( WORKERS + 1 ))
   done
 fi
-# Bochechas: background workers rodando = pastas em vault/_agent/tasks/running/
+# Bochechas: só conta pastas em running/ com .lock não expirado (evita órfão = sempre 1)
 RUNNING_DIR="$WS/vault/_agent/tasks/running"
 if [[ -d "$RUNNING_DIR" ]]; then
+  now_epoch=$(date +%s)
   for dir in "$RUNNING_DIR"/*/; do
-    [[ -d "$dir" ]] && BOCECHAS=$(( BOCECHAS + 1 ))
+    [[ -d "$dir" ]] || continue
+    [[ -f "$dir/.lock" ]] || continue
+    started=$(grep '^started=' "$dir/.lock" 2>/dev/null | cut -d= -f2)
+    timeout=$(grep '^timeout=' "$dir/.lock" 2>/dev/null | cut -d= -f2)
+    [[ -z "$started" || -z "$timeout" ]] && continue
+    # started é ISO (2025-03-14T12:00:00Z); timeout é segundos
+    start_epoch=$(date -d "$started" +%s 2>/dev/null || date -j -f "%Y-%m-%dT%H:%M:%SZ" "$started" +%s 2>/dev/null || echo 0)
+    end_epoch=$(( start_epoch + timeout ))
+    [[ $now_epoch -lt $end_epoch ]] && BOCECHAS=$(( BOCECHAS + 1 ))
   done
 fi
 
