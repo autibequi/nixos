@@ -297,6 +297,9 @@ if [[ -f "$KANBAN" ]]; then
   fi
 fi
 
+# Divisória visual
+echo -e "${DIM}$(printf '─%.0s' $(seq 1 80))${R}"
+
 # --- THINKINGS (lista unificada) ---
 if [[ -f "$KANBAN" ]]; then
   items=()
