@@ -55,3 +55,7 @@ vault/
 
 # workspace: work projects mounted from outside (have their own git)
 projetos/claudio/
+
+workbench/
+workbench/**
+workbench/*
