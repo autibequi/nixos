@@ -68,7 +68,6 @@ fi
 
 # Claudios: só .agents/bochecha_* com .live recente (sem fallback para não travar em 1)
 WORKERS=0
-BOCECHAS=0
 WORKSPACE_DIR=$(echo "$input" | jq -r '.workspace.project_dir // .workspace.current_dir // .cwd // ""')
 WS="${WORKSPACE_DIR:-/workspace}"
 if [[ -d "$WS/.agents" ]]; then
@@ -80,34 +79,27 @@ if [[ -d "$WS/.agents" ]]; then
     [[ $(( now_sec - mod )) -le 900 ]] && WORKERS=$(( WORKERS + 1 ))
   done
 fi
-RUNNING_DIR="$WS/vault/_agent/tasks/running"
-if [[ -d "$RUNNING_DIR" ]]; then
-  now_epoch=$(date +%s)
-  for dir in "$RUNNING_DIR"/*/; do
-    [[ "$dir" == *"*"* ]] && continue
-    [[ -d "$dir" && -f "$dir/.lock" ]] || continue
-    started=$(grep '^started=' "$dir/.lock" 2>/dev/null | cut -d= -f2)
-    timeout=$(grep '^timeout=' "$dir/.lock" 2>/dev/null | cut -d= -f2)
-    [[ -z "$started" || -z "$timeout" ]] && continue
-    start_epoch=$(date -d "$started" +%s 2>/dev/null || date -j -f "%Y-%m-%dT%H:%M:%SZ" "$started" +%s 2>/dev/null || echo 0)
-    [[ -z "$start_epoch" || "$start_epoch" -eq 0 ]] && continue
-    end_epoch=$(( start_epoch + timeout ))
-    [[ $now_epoch -lt $end_epoch ]] && BOCECHAS=$(( BOCECHAS + 1 ))
-  done
+# Usage no período (lê .ephemeral/usage-bar.txt gerado por usage-bar.sh)
+USAGE_PCT=0
+USAGE_PERIOD=""
+if [[ -f "$WS/.ephemeral/usage-bar.txt" ]]; then
+  line1=$(head -1 "$WS/.ephemeral/usage-bar.txt" 2>/dev/null)
+  USAGE_PCT=$(echo "$line1" | sed -n 's/.*pct=\([0-9]*\).*/\1/p')
+  USAGE_PERIOD=$(echo "$line1" | sed -n 's/.*period=\([^ ]*\).*/\1/p')
+  [[ -z "$USAGE_PCT" || ! "$USAGE_PCT" =~ ^[0-9]+$ ]] && USAGE_PCT=0
 fi
+USAGE_BAR=$(minibar "${USAGE_PCT:-0}" 100 4)
 
-# Session name
 # Parse model name (shorthand: "Opus 4.6..." → "opus")
 MODEL_SHORT=$(echo "$MODEL" | grep -oE "^[a-zA-Z]+" | tr '[:upper:]' '[:lower:]' | head -c 3)
 MODEL_EMOJI="🧠"
 
-# Três barras: contexto %, Claudios (docker), Bochechas (running/)
+# Barras: contexto %, Claudios, usage (período)
 CTX_BAR=$(minibar "$CTX" 100 4)
 CLAUDIOS_BAR=$(minibar "$WORKERS" 5 4)
-BOCECHAS_BAR=$(minibar "$BOCECHAS" 10 4)
 
-# Compact oneliner: barras à esquerda, modelo na extrema direita
-STATUSLINE="ctx ${CTX_BAR} ${CTX_USED_K}k/${CTX_SIZE_FMT} | Claudios ${WORKERS} ${CLAUDIOS_BAR}  Bochechas ${BOCECHAS} ${BOCECHAS_BAR} | ${MODEL_EMOJI}${MODEL_SHORT}"
+# Compact oneliner: ctx | Claudios | usage (período) | modelo
+STATUSLINE="ctx ${CTX_BAR} ${CTX_USED_K}k/${CTX_SIZE_FMT} | Claudios ${WORKERS} ${CLAUDIOS_BAR} | use ${USAGE_BAR} ${USAGE_PCT}%${USAGE_PERIOD:+ ${USAGE_PERIOD}} | ${MODEL_EMOJI}${MODEL_SHORT}"
 
 # Terminal title
 printf '\033]0;Claude: %s\007' "$TOPIC" >&2

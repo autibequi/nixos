@@ -234,6 +234,14 @@ window#waybar {
 /*========================================================*
  *                      SWAYNC                           *
  *========================================================*/
+#custom-claude {
+    color: #f1c40f;
+    background: #2c3e50;
+    padding: 0 10px;
+    margin: 0 1px;
+    border-bottom-color: #f1c40f;
+}
+
 #custom-swaync {
     color: @color-white;
     padding: 0 4px;

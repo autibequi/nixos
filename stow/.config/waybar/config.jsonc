@@ -14,6 +14,7 @@
     "battery"
   ],
   "modules-right": [
+    "custom/claude",
     "mpris",
     "pulseaudio",
     "backlight",
@@ -227,6 +228,13 @@
     "on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
     "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +2%",
     "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -2%"
+  },
+  "custom/claude": {
+    "format": "{}",
+    "interval": 300,
+    "exec": "claude-statusbar --plan max20 2>/dev/null || echo '󱙺 --'",
+    "tooltip": true,
+    "on-click": "alacritty -e bash -c 'claude-statusbar --plan max20; read'"
   },
   "custom/swaync": {
     "tooltip": false,

@@ -23,6 +23,20 @@
     flameshot # PrintScreens
     unstable.obsidian # Md Notes
     claude-code # AI coding assistant
+    (python3Packages.buildPythonApplication rec {
+      pname = "claude-statusbar";
+      version = "1.3.1";
+      src = fetchFromGitHub {
+        owner = "leeguooooo";
+        repo = "claude-code-usage-bar";
+        rev = "main";
+        sha256 = "0wp2mmrxpbahp66l8imf0gv674graq8i0z6is6rkwsd0rfyxwab0";
+      };
+      pyproject = true;
+      nativeBuildInputs = [ python3Packages.setuptools ];
+      propagatedBuildInputs = [ ];
+      doCheck = false;
+    })
     mpv # media/shoes/chocolate player
     foliate # ePub reader
     fragments # torrent client
