@@ -1,4 +1,4 @@
-# Briefing — Assistente pessoal de status
+# Jarvis — Assistente pessoal de status
 
 Panorama completo: GitHub, repos locais, THINKINGS, tasks autônomas, worktrees, e recomendações.
 

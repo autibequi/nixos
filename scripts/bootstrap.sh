@@ -273,7 +273,13 @@ if [[ -f "$AUTOCOMMIT_FLAG" ]]; then
 else
   autocommit_str="${DIM}OFF${R}"
 fi
-echo -e "${B}Git:${R} ${git_str}  ${B}Ferias:${R} ${ferias_str}  ${B}Personality:${R} ${personality_str}  ${B}AutoCommit:${R} ${autocommit_str}"
+AUTOJARVIS_FLAG="$WS/.ephemeral/auto-jarvis"
+if [[ -f "$AUTOJARVIS_FLAG" ]]; then
+  autojarvis_str="${GREEN}ON${R}"
+else
+  autojarvis_str="${DIM}OFF${R}"
+fi
+echo -e "${B}Git:${R} ${git_str}  ${B}Ferias:${R} ${ferias_str}  ${B}Personality:${R} ${personality_str}  ${B}AutoCommit:${R} ${autocommit_str}  ${B}AutoJarvis:${R} ${autojarvis_str}"
 
 # --- Inbox (coluna do THINKINGS) ---
 if [[ -f "$KANBAN" ]]; then
@@ -408,7 +414,7 @@ if [[ -f "$KANBAN" ]]; then
   fi
 
   # --- Build Commands lines (right column, single list in 2 cols, spaced by namespace) ---
-  all_cmds=(/meta:manual /meta:propor /nix:add-pkg /nix:stow /nix:clean /nix:remove-pkg /utils:briefing /utils:task /utils:worktree /estrategia:feature /estrategia:review-pr /estrategia:recommit /estrategia:changelog)
+  all_cmds=(/jarvis /meta:manual /meta:propor /nix:add-pkg /nix:stow /nix:clean /nix:remove-pkg /utils:task /utils:worktree /estrategia:feature /estrategia:review-pr /estrategia:recommit /estrategia:changelog)
   cmd_count=${#all_cmds[@]}
   cmd_half=$(( (cmd_count + 1) / 2 ))  # ceil division
   cmd_lines=()
@@ -471,5 +477,69 @@ print(w)
 fi
 
 echo
+
+# --- Auto-Jarvis: briefing GitHub no dashboard ---
+if [[ -f "$AUTOJARVIS_FLAG" ]] && command -v gh &>/dev/null; then
+  echo -e "${DIM}$(printf '─%.0s' $(seq 1 80))${R}"
+  echo -e "${B}${CYAN}JARVIS${R}"
+
+  # Fetch com cache (source do gh-status.sh)
+  WS="$WS" source "$WS/stow/.claude/scripts/gh-status.sh" 2>/dev/null && gh_status_fetch 2>/dev/null || true
+
+  if [[ -n "${GH_MY_PRS_COUNT:-}" ]]; then
+    echo -e "  ${B}PRs meus:${R} ${YELLOW}${GH_MY_PRS_COUNT}${R} abertos    ${B}Review:${R} ${YELLOW}${GH_REVIEW_COUNT}${R} aguardando"
+
+    # Top PRs meus (max 5)
+    if [[ -n "${GH_MY_PRS:-}" ]]; then
+      count=0
+      while IFS='|' read -r repo title; do
+        [[ $count -ge 5 ]] && break
+        printf "    ${GREEN}▸${R} ${DIM}%-16s${R} %s\n" "$repo" "$title"
+        count=$((count + 1))
+      done <<< "$GH_MY_PRS"
+    fi
+
+    # Top review requests (max 5)
+    if [[ -n "${GH_REVIEW_PRS:-}" ]]; then
+      echo -e "  ${B}Pra revisar:${R}"
+      count=0
+      while IFS='|' read -r repo title author; do
+        [[ $count -ge 5 ]] && break
+        printf "    ${MAGENTA}◆${R} ${DIM}%-16s${R} %s ${DIM}(%s)${R}\n" "$repo" "$title" "$author"
+        count=$((count + 1))
+      done <<< "$GH_REVIEW_PRS"
+    fi
+  else
+    echo -e "  ${DIM}(gh indisponível ou sem dados)${R}"
+  fi
+
+  # Repos locais com dirty/ahead
+  dirty_repos=()
+  for repo in /home/claude/projects/estrategia/*/; do
+    [[ -d "$repo/.git" ]] || continue
+    name=$(basename "$repo")
+    dirty=$(git -C "$repo" status --short 2>/dev/null | wc -l)
+    branch=$(git -C "$repo" branch --show-current 2>/dev/null || echo "?")
+    ahead=$(git -C "$repo" rev-list --count '@{upstream}..HEAD' 2>/dev/null || echo "0")
+    if [[ "$dirty" -gt 0 || "$ahead" -gt 0 ]]; then
+      dirty_repos+=("$(printf "    ${ORANGE}●${R} ${DIM}%-16s${R} [%s] ${YELLOW}dirty:%s${R} ${GREEN}ahead:%s${R}" "$name" "$branch" "$dirty" "$ahead")")
+    fi
+  done
+  if [[ ${#dirty_repos[@]} -gt 0 ]]; then
+    echo -e "  ${B}Repos com mudanças:${R} ${#dirty_repos[@]}"
+    for line in "${dirty_repos[@]:0:6}"; do
+      echo -e "$line"
+    done
+    remaining=$(( ${#dirty_repos[@]} - 6 ))
+    [[ $remaining -gt 0 ]] && echo -e "    ${DIM}+${remaining} mais${R}"
+  fi
+
+  # Worktrees prunable
+  prunable=$(git -C "$WS" worktree list 2>/dev/null | grep -c prunable || true)
+  active_wt=$(git -C "$WS" worktree list 2>/dev/null | grep -cv "prunable\|$WS " || true)
+  [[ $prunable -gt 0 ]] && echo -e "  ${B}Worktrees:${R} ${active_wt} ativos, ${YELLOW}${prunable} prunable${R} ${DIM}(git worktree prune)${R}"
+
+  echo
+fi
 
 exit 0

@@ -17,6 +17,7 @@ Scripts utilitários usados por statusline, hooks, agents e interativamente.
 | `logging.sh` | bash/lib | Logging estruturado: `log_info`, `log_warn`, `log_error`, `log_success`, `log_debug`, `log_step`. Source: `colors.sh` |
 | `ansi.py` | python | Utilitários ANSI/unicode: `strip` (remove escapes), `vlen` (visual length), `calc` (math), `pad` (pad to width) |
 | `gh-status.sh` | bash/lib | Coleta status GitHub (PRs meus, review requests) com cache 10min. `source gh-status.sh && gh_status_fetch` |
+| `task-schedule.sh` | bash | Tabela de tasks agendadas por slot: recorrentes, pending, timeline próximas horas. `bash task-schedule.sh` |
 
 ---
 

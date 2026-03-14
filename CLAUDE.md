@@ -169,6 +169,13 @@ Flag: `/workspace/.ephemeral/auto-commit`. Toggle via `/auto-commit`.
 - Verificar flag no startup (bootstrap mostra status no dashboard)
 - Mesmo com auto-commit ON: nunca commitar código quebrado
 
+## Auto-Jarvis Mode
+
+Flag: `/workspace/.ephemeral/auto-jarvis`. Toggle via `/auto-jarvis`.
+- **ON**: bootstrap.sh exibe seção JARVIS no dashboard com GitHub PRs, repos dirty, worktrees
+- **OFF** (default): dashboard sem seção JARVIS
+- Para briefing completo com recomendações: user roda `/jarvis` manualmente
+
 ## Diretrizes Operacionais
 - Priorizar editar código existente sobre criar novo
 - MCP Jira/Notion: **READ ONLY** — NUNCA criar/editar/transicionar
