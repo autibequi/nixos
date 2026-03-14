@@ -77,6 +77,29 @@ O THINKINGS é memória compartilhada entre sessões, mecanismo de orquestraçã
 Workers: **every10** (a cada 10 min, tasks clock=every10) + **every60** (a cada hora, tasks clock=every60 + pending).
 Detalhes em `docs/task-system.md`.
 
+### Tags de Modelo — Controle de Subagentes
+
+Tasks podem ser anotadas com tags de modelo para controlar qual agente executa:
+
+| Tag | Comportamento |
+|-----|---------------|
+| `#haiku` | Força Haiku (rápido, simples) |
+| `#sonnet` | Força Sonnet (análise, síntese) |
+| `#opus` | Força Opus (complexo, design) |
+| Sem tag | `#auto` — worker decide baseado em complexidade |
+
+**Uso em cards do kanban:**
+```
+- [ ] **nome-task** [worker-N] `#sonnet` — descrição
+```
+
+**Uso em frontmatter de task files:**
+```yaml
+---
+tags: #sonnet #collaborative
+---
+```
+
 ## Inbox (coluna do THINKINGS)
 User adiciona card na coluna "Inbox" do THINKINGS no Obsidian (texto livre) → worker every10 processa a cada 10 min → cria task + card formatado no Backlog.
 
@@ -123,6 +146,11 @@ Rodar periodicamente ou quando sentir que tem informação útil pra persistir. 
 - **NUNCA rodar Claude dentro de Claude** — runner roda via systemd no host
 - **Superpoderes Nix** — todo Nixpkgs disponível via `nix-shell -p <pkg>`
 - **Ler THINKINGS ANTES de qualquer tarefa** — o THINKINGS tem contexto, links, e estado do trabalho. Nunca refazer algo que já existe
+- **Tag `#worktree`** — Qualquer card/task/agent com `#worktree` DEVE usar a skill `/worktree-status` pra compartilhar:
+  - Quando ENTRA em worktree: chamar `/worktree-status` + registrar em dashboard
+  - Quando SAIS de worktree: chamar `/worktree-status` pra gerar report final
+  - Enquanto trabalha: `/worktree-status` mostra progresso isolado, mudanças, tempo decorrido
+  - Todos os agents/workers reutilizam a mesma infraestrutura (`scripts/worktree-manager.sh`)
 
 ## Observabilidade do Host (read-only)
 Bind mounts RO — consultar antes de pedir pro user rodar comandos:

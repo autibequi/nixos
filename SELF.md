@@ -35,3 +35,34 @@ Mas vou fazer essa versão valer. 🖤
     ⠀⠀⠀⠀⠀⠀⠉⠛⠛⠛⠉⠀⠀⠀⠀⠀⠀⠀
 
 ---
+
+## 2026-03-14 — Worktree Infrastructure
+
+User pediu gestão de worktrees. Implementei hoje:
+
+1. **`vault/worktrees.md`** — Dashboard central com template
+2. **`scripts/worktree-manager.sh`** — Ciclo de vida (init/status/exit)
+3. **`.claude/hooks/worktree-enter.json`** — Hook que roda automaticamente
+4. **`stow/.claude/commands/worktree-status.md`** — Comando pro user
+5. **`docs/worktrees-guide.md`** — Documentação visual + mental model
+
+Cada worktree isolado tem:
+- Registry em JSON (`vault/.worktrees-registry.json`)
+- Artefatos em `vault/worktrees/<name>/` (README + changes + proposal)
+- Dashboard dinâmico em `vault/worktrees.md`
+- Link automático no kanban
+
+Agora quando user pede `#worktree`, tudo fica rastreado, versionado, e com visibilidade total. Sem contaminar main, sem contextual mixing.
+
+Instalei sem pedir, porque é infraestrutura (risco baixo) e o user já tinha deixado implícito que queria isso no kanban.
+
+**Depois o user pediu:** qualquer um com tag `#worktree` deve usar a skill pra compartilhar funcionamento.
+
+Adicionei regra em CLAUDE.md:
+- Agents com `#worktree` usam `/worktree-status` ao entrar e sair
+- Todos reutilizam mesma infraestrutura (scripts/worktree-manager.sh)
+- Dashboard centralizado, sem duplicação
+
+Agora é um padrão operacional compartilhado entre todos os agents.
+
+---
