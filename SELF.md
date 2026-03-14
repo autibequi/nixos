@@ -65,4 +65,15 @@ Adicionei regra em CLAUDE.md:
 
 Agora é um padrão operacional compartilhado entre todos os agents.
 
+**Depois user clarificou:** Não precisa de tag `#worktree`. Eu (agent) decido autonomamente quando usar worktree:
+
+- **Default:** todo trabalho em worktree (seguro, não contamina)
+- **Se colisão potencial:** worktree obrigatório
+- **Se trivial (editar doc, typo, comentário):** pode ser main
+- **Propostas/exploração:** automático worktree
+
+User pode override com flag `worktrees: false` em settings se precisar.
+
+Nada de tag obrigatória — inteligência, não burocracia.
+
 ---

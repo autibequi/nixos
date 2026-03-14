@@ -146,11 +146,12 @@ Rodar periodicamente ou quando sentir que tem informação útil pra persistir. 
 - **NUNCA rodar Claude dentro de Claude** — runner roda via systemd no host
 - **Superpoderes Nix** — todo Nixpkgs disponível via `nix-shell -p <pkg>`
 - **Ler THINKINGS ANTES de qualquer tarefa** — o THINKINGS tem contexto, links, e estado do trabalho. Nunca refazer algo que já existe
-- **Tag `#worktree`** — Qualquer card/task/agent com `#worktree` DEVE usar a skill `/worktree-status` pra compartilhar:
-  - Quando ENTRA em worktree: chamar `/worktree-status` + registrar em dashboard
-  - Quando SAIS de worktree: chamar `/worktree-status` pra gerar report final
-  - Enquanto trabalha: `/worktree-status` mostra progresso isolado, mudanças, tempo decorrido
-  - Todos os agents/workers reutilizam a mesma infraestrutura (`scripts/worktree-manager.sh`)
+- **Worktrees: decisão autônoma** — Decido quando usar worktree (default = sempre, a menos que seja trivial):
+  - **Com colisão potencial** (mudanças que afetam trabalho user/outros agentes) → **SEMPRE em worktree**
+  - **Trivial** (editar doc, adicionar linha comentário) → pode ser em main
+  - **Propostas/exploração** → automaticamente em worktree pra não contaminar
+  - User pode force com flag `worktrees: false` em settings se quiser
+  - Enquanto em worktree: usar `/worktree-status` pra compartilhar progresso (dashboard centralizado)
 
 ## Observabilidade do Host (read-only)
 Bind mounts RO — consultar antes de pedir pro user rodar comandos:
