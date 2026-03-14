@@ -4,6 +4,8 @@ x-common: &common
     dockerfile: Dockerfile.claude
   image: claude-nix-sandbox
   environment:
+    # PATH explícito para o container (evita host sobrescrever; binários Nix + installer Claude)
+    - PATH=/home/claude/.local/bin:/home/claude/.nix-profile/bin:/usr/bin:/bin
     - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
     - XDG_RUNTIME_DIR=/run/user/1000
     - PULSE_SERVER=unix:/run/user/1000/pulse/native

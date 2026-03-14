@@ -163,7 +163,13 @@ print(w)
 hline_double() { printf '    '; printf '═%.0s' $(seq 1 $((BOX_W + 2))); echo; }
 hline_light()  { printf '    '; printf '─%.0s' $(seq 1 $((BOX_W + 2))); echo; }
 
-# --- Weather banner (art left, info right) — detalhado e colorido ---
+# --- Modo banner: auto (por tamanho do terminal), compact, full ---
+# BOOTSTRAP_BANNER=compact | full | auto (default)
+BOOTSTRAP_BANNER="${BOOTSTRAP_BANNER:-auto}"
+COLS="${COLUMNS:-$(tput cols 2>/dev/null || echo 100)}"
+LINS="${LINES:-$(tput lines 2>/dev/null || echo 30)}"
+[[ "$BOOTSTRAP_BANNER" == "auto" ]] && { [[ "$COLS" -lt 90 || "$LINS" -lt 22 ]] && BOOTSTRAP_BANNER="compact" || BOOTSTRAP_BANNER="full"; }
+
 # Cor da descrição por categoria
 weather_desc_color() {
   case "${WEATHER_CAT:-cloudy}" in
@@ -178,70 +184,71 @@ weather_desc_color() {
 
 build_banner() {
   local art_color="${CYAN}"
+  local compact=0
+  [[ "$BOOTSTRAP_BANNER" == "compact" ]] && compact=1
 
-  # Truncar porquemo
   local porquemo_trunc="$PORQUEMO"
-  [[ ${#PORQUEMO} -gt 50 ]] && porquemo_trunc="${PORQUEMO:0:47}..."
+  [[ ${#PORQUEMO} -gt $(( compact ? 35 : 50 )) ]] && porquemo_trunc="${PORQUEMO:0:$(( compact ? 32 : 47 ))}..."
 
   # Linha 1: data/hora + condição atual
   local weather_now="${WHITE}${DIA}  ${HORA}${R}  ${DIM}|${R}  "
   weather_now+="${B}${YELLOW}${WEATHER_TEMP:-?}°C${R}"
-  [[ -n "${WEATHER_FEELS:-}" && "${WEATHER_FEELS:-}" != "${WEATHER_TEMP:-}" ]] && \
-    weather_now+=" ${ORANGE}(${WEATHER_FEELS}° sens.)${R}"
+  if [[ $compact -eq 0 ]]; then
+    [[ -n "${WEATHER_FEELS:-}" && "${WEATHER_FEELS:-}" != "${WEATHER_TEMP:-}" ]] && \
+      weather_now+=" ${ORANGE}(${WEATHER_FEELS}° sens.)${R}"
+  fi
   weather_now+="  $(weather_desc_color)${WEATHER_DESC:-?}${R}"
   [[ -n "${WEATHER_HUMIDITY:-}" ]] && weather_now+="  ${BLUE}${WEATHER_HUMIDITY}% 💧${R}"
-  [[ -n "${WEATHER_WIND:-}" ]] && weather_now+="  ${DIM}🌬 ${WEATHER_WIND} km/h${R}"
+  [[ $compact -eq 0 && -n "${WEATHER_WIND:-}" ]] && weather_now+="  ${DIM}🌬 ${WEATHER_WIND} km/h${R}"
 
-  # Min-max do dia (ciano) + nascer/pôr do sol (amarelo)
   local today_range=""
   [[ -n "${WEATHER_TMIN:-}" ]] && today_range="${CYAN}${WEATHER_TMIN}°–${WEATHER_TMAX}°${R}"
-  [[ -n "${WEATHER_SUNRISE:-}" ]] && today_range+="  ${YELLOW}☀ ${WEATHER_SUNRISE} – ${WEATHER_SUNSET}${R}"
+  [[ $compact -eq 0 && -n "${WEATHER_SUNRISE:-}" ]] && today_range+="  ${YELLOW}☀ ${WEATHER_SUNRISE} – ${WEATHER_SUNSET}${R}"
 
-  # Previsão horária (9h, 12h, 15h, 18h)
   local today_hours=""
-  for (( h=0; h<${WEATHER_HOUR_COUNT:-0}; h++ )); do
-    local vname="WEATHER_HOUR_${h}"
-    [[ -n "$today_hours" ]] && today_hours+="  "
-    today_hours+="${CYAN}${!vname:-}${R}"
-  done
-
-  # Semana: dia em destaque branco, faixa e descrição em ciano
-  local week_lines=()
-  for (( w=0; w<${WEATHER_WEEK_COUNT:-0}; w++ )); do
-    local vname="WEATHER_WEEK_${w}"
-    local line="${!vname:-}"
-    week_lines+=("  ${B}${WHITE}${line%% *}${R} ${CYAN}${line#* }${R}")
-  done
-
-  # Build info lines (com previsão do tempo)
-  local info_lines=(
-    "${B}${WHITE}A P E R T U R E  S C I E N C E${R}"
-    "$weather_now"
-    "${DIM}Hoje:${R} ${today_range}"
-    "${DIM}Horário:${R} ${today_hours}"
-    "${DIM}${porquemo_trunc}${R}"
-  )
-
-  # Previsão dos próximos dias (título + linhas)
-  if [[ ${#week_lines[@]} -gt 0 ]]; then
-    info_lines+=("${DIM}Próx. dias:${R}")
-    for wl in "${week_lines[@]}"; do
-      info_lines+=("  $wl")
+  if [[ $compact -eq 0 ]]; then
+    for (( h=0; h<${WEATHER_HOUR_COUNT:-0}; h++ )); do
+      local vname="WEATHER_HOUR_${h}"
+      [[ -n "$today_hours" ]] && today_hours+="  "
+      today_hours+="${CYAN}${!vname:-}${R}"
     done
   fi
 
-  # Art lines (from weather-art.sh) — total = só linhas com conteúdo (evita fileiras vazias)
-  local info_total=${#info_lines[@]}
-  local total=$info_total
+  local info_lines=()
+  if [[ $compact -eq 1 ]]; then
+    info_lines=(
+      "${B}${WHITE}A P E R T U R E  S C I E N C E${R}"
+      "$weather_now"
+      "${DIM}Hoje:${R} ${today_range}"
+      "${DIM}${porquemo_trunc}${R}"
+    )
+  else
+    local week_lines=()
+    for (( w=0; w<${WEATHER_WEEK_COUNT:-0}; w++ )); do
+      local vname="WEATHER_WEEK_${w}"
+      local line="${!vname:-}"
+      week_lines+=("  ${B}${WHITE}${line%% *}${R} ${CYAN}${line#* }${R}")
+    done
+    info_lines=(
+      "${B}${WHITE}A P E R T U R E  S C I E N C E${R}"
+      "$weather_now"
+      "${DIM}Hoje:${R} ${today_range}"
+      "${DIM}Horário:${R} ${today_hours}"
+      "${DIM}${porquemo_trunc}${R}"
+    )
+    [[ ${#week_lines[@]} -gt 0 ]] && {
+      info_lines+=("${DIM}Próx. dias:${R}")
+      for wl in "${week_lines[@]}"; do info_lines+=("  $wl"); done
+    }
+  fi
 
+  local total=${#info_lines[@]}
   for (( i=0; i<total; i++ )); do
     local art_line="${WEATHER_ART[$i]:-                  }"
     local info="${info_lines[$i]:-}"
-
     local art_len=${#art_line}
     local pad=$(( 20 - art_len ))
     [[ $pad -lt 0 ]] && pad=0
-
     echo -ne "  ${art_color}${art_line}${R}"
     printf "%${pad}s" ""
     echo -e "${info}"
