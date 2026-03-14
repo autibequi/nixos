@@ -89,8 +89,19 @@ scripts/     — utility scripts
 - **Reason:** Worktrees concluídas ou mergeadas acumulam espaço e poluem `git worktree list`
 - **Safety:** NUNCA remover worktree com uncommitted changes ou branch não-mergeada sem status done
 
-### 9. Empty Directories
-- **Trigger:** After archiving files (step 1-8)
+### 9. Cards Aprovados no THINKINGS (`vault/kanban.md` → `vault/_agent/graveyard.md`)
+- **Criteria:** Cards `[x]` na coluna **Aprovado** do kanban.md
+- **Logic:**
+  1. Ler `vault/kanban.md`, identificar seção `## Aprovado`
+  2. Coletar todos os cards marcados como `[x]` (done/resolved)
+  3. Mover cada card para `vault/_agent/graveyard.md` na seção `## Arquivado` (topo da lista)
+  4. Remover os cards movidos do kanban.md
+  5. Também checar outras colunas por cards `[x]` com `#done` — esses são candidatos a mover pro Aprovado ou direto pro graveyard
+- **Reason:** Cards aprovados já foram revisados pelo user; manter no kanban polui o board do Obsidian
+- **Safety:** Nunca deletar cards — apenas MOVER para graveyard.md preservando texto completo
+
+### 10. Empty Directories
+- **Trigger:** After archiving files (step 1-9)
 - **Logic:** Recursively find empty dirs, exclude protected paths, archive
 - **Reason:** Cleanup creates empty parents; archive them too
 
