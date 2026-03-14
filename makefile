@@ -6,7 +6,7 @@ export GIT_COMMITTER_EMAIL := $(GIT_AUTHOR_EMAIL)
 
 .PHONY: help switch update stow restow build start shell sandbox resume down destroy inject openclaw \
        clau run auto stop reset status new logs logs-list \
-       usage-api usage-api-7d usage-api-30d clau-service-logs ask claw claw-stop
+       usage-api usage-api-7d usage-api-30d clau-service-logs ask claw claw-stop code code-stop
 
 help:
 	@echo ""
@@ -132,7 +132,10 @@ resume:
 	@$(COMPOSE) exec sandbox /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions
 
 claw:
-	$(COMPOSE) exec sandbox openclaw tui 
+	$(COMPOSE) exec sandbox openclaw tui
+
+claw-stop:
+	$(COMPOSE) stop openclaw
 
 down:
 	$(COMPOSE) down
