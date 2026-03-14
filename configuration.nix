@@ -49,6 +49,9 @@
     # Obsidian Sync (headless)
     ./modules/obsidian-sync.nix
 
+    # OpenClaw Gateway
+    ./modules/openclaw.nix
+
     # Other Modules
     ./modules/work.nix
     ./modules/virt.nix

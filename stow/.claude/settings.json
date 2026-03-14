@@ -21,5 +21,6 @@
     "nixos"
   ],
   "enableAllProjectMcpServers": true,
-  "includeGitInstructions": false
+  "includeGitInstructions": false,
+  "model": "sonnet"
 }

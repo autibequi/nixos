@@ -344,4 +344,5 @@
   "workbench.editorAssociations": {
     "*.md": "default"
   },
+  "security.promptForLocalFileProtocolHandling": false,
 }

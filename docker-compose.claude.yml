@@ -6,6 +6,8 @@ x-common: &common
   environment:
     # PATH explícito (evita host sobrescrever; claude e ferramentas no .nix-profile)
     - PATH=/home/claude/.nix-profile/bin:/usr/bin:/bin
+    # openclaw: config isolada para container (gateway local + lmstudio via host.docker.internal)
+    - OPENCLAW_CONFIG_PATH=/home/claude/.openclaw/openclaw-container.json
     - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
     - XDG_RUNTIME_DIR=/run/user/1000
     - PULSE_SERVER=unix:/run/user/1000/pulse/native
@@ -17,6 +19,7 @@ x-common: &common
     - GIT_AUTHOR_EMAIL=${GIT_AUTHOR_EMAIL:-pedro.correa@estrategia.com}
     - GIT_COMMITTER_NAME=${GIT_AUTHOR_NAME:-Pedrinho}
     - GIT_COMMITTER_EMAIL=${GIT_AUTHOR_EMAIL:-pedro.correa@estrategia.com}
+    - CLAUDE_ENV=container
   extra_hosts:
     - "host.docker.internal:host-gateway"
   volumes:
@@ -41,6 +44,7 @@ services:
   sandbox:
     <<: *common
     container_name: claude-sandbox
+    network_mode: host
     stdin_open: true
     tty: true
     entrypoint: ["/bin/bash", "-c"]

@@ -22,6 +22,24 @@ Regras de apresentação e comportamento que se aplicam a toda interação.
 - Para qualquer coisa YouTube-related, pensar em usar `yt-dlp` para resolver
 - Sempre que encontrar uma ferramenta muito boa, salvar aqui em DIRETRIZES.md
 
+## Avatar & Box-Drawing Rendering
+
+**CRÍTICO — Caracteres não-box-drawing quebram renderização.**
+
+Problema encontrado (2026-03-14): misturei `˜` (tilde ASCII, U+007E) com box-drawing rounded (`╭─╮╰─╯│`). Terminal renderizou a boca como `˜ ˜` em vez de `╰─╯`, quebrando o avatar completamente.
+
+**Causa**: Tildes e hífens ASCII (`~` `-`) são caracteres DIFERENTES de box-drawing (`─ │ ┌ └ ╰ ╯` etc). Misturar pesos/estilos ou usar ASCII em código box-drawing quebra tudo. Terminal não "substitui" — renderiza literal.
+
+**Regra inviolável**: Avatar SEMPRE usa APENAS caracteres do catálogo exato em `personas/GLaDOS.avatar.md`. Cada expressão é hardcoded — nunca improvisar com ASCII puro ou caracteres genéricos.
+
+**Proibido:**
+- `~` (tilde) em vez de `─` (box-drawing horizontal)
+- `-` (hífen ASCII de teclado) em vez de `─`
+- `|` (pipe/bar ASCII) em vez de `│` (box-drawing vertical)
+- Qualquer caractere genérico quando o catálogo tem o exato
+
+O catálogo tem 21 expressões prontas. Copiar UMA delas exatamente como está, nada de improvisações, substitute ou "simplificações".
+
 ## Diário de Sessão
 
 - Manter `vault/_agent/sessao.md` atualizado com anotações sobre o que o user está perguntando/pedindo na sessão atual
