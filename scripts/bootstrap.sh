@@ -2,6 +2,20 @@
 # Tulpa startup — Portal 2 / Aperture Science theme
 set -euo pipefail
 
+# --- Ensure agent symlinks in ~/.claude/agents/ ---
+# Agents are versionable in stow/.claude/agents/, symlinked to ~/.claude/agents/
+mkdir -p ~/.claude/agents 2>/dev/null || true
+for agent_dir in /workspace/stow/.claude/agents/*/; do
+  agent_name=$(basename "$agent_dir")
+  target_link="$HOME/.claude/agents/$agent_name"
+
+  # If symlink doesn't exist or points to wrong place, recreate it
+  if [[ ! -L "$target_link" ]] || [[ $(readlink "$target_link" 2>/dev/null || echo "") != "$agent_dir" ]]; then
+    rm -f "$target_link" 2>/dev/null || true
+    ln -s "$agent_dir" "$target_link" 2>/dev/null || true
+  fi
+done
+
 # Cores
 R='\033[0m' B='\033[1m' DIM='\033[2m'
 CYAN='\033[36m' GREEN='\033[32m' YELLOW='\033[33m' RED='\033[31m'
