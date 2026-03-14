@@ -44,7 +44,7 @@
     ./modules/netdata.nix
 
     # Agentes (CLAUDINHO timers + agent-container)
-    ./modules/agents.nix
+    ./modules/agents
 
     # Obsidian Sync (headless)
     ./modules/obsidian-sync.nix
