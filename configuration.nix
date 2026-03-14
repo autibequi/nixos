@@ -45,7 +45,7 @@
 
     # Autonomous
     ./modules/claude-autonomous.nix
-    ./modules/claude-ask.nix
+    # ./modules/claude-ask.nix
 
     # Obsidian Sync (headless)
     ./modules/obsidian-sync.nix
