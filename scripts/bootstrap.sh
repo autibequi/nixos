@@ -26,8 +26,16 @@ for config_file in settings.json statusline.sh; do
   fi
 done
 
-# Cores
+# Tema: terminal de fósforo com cores (CRT glow)
 R='\033[0m' B='\033[1m' DIM='\033[2m'
+# Fosforo: brilho saturado (bold bright)
+P_GREEN='\033[1;92m'   # fosforo verde
+P_AMBER='\033[1;93m'   # âmbar
+P_CYAN='\033[1;96m'    # ciano
+P_MAGENTA='\033[1;95m' # magenta
+P_RED='\033[1;91m'     # vermelho
+P_DIM='\033[2;36m'     # scanline / secundário (dim cyan)
+# Fallback 256
 CYAN='\033[36m' GREEN='\033[32m' YELLOW='\033[33m' RED='\033[31m'
 ORANGE='\033[38;5;208m' BLUE='\033[38;5;33m' WHITE='\033[97m' MAGENTA='\033[35m' GRAY='\033[38;5;245m'
 
@@ -145,9 +153,9 @@ QUOTE="${GLADOS_QUOTES[$((RANDOM % ${#GLADOS_QUOTES[@]}))]}"
 # Strips ANSI escapes, counts display width, pads with spaces to align border
 BOX_W=50  # inner width between borders (excluding the 2 spaces of margin)
 
+# Bordes no estilo CRT (dim cyan)
 pad_line() {
   local border="$1" content="$2" width="${3:-$BOX_W}"
-  # Use python3 to strip ANSI + compute display width (unicodedata.east_asian_width)
   local vlen
   vlen=$(python3 -c "
 import re, unicodedata, sys
@@ -157,13 +165,10 @@ print(w)
 " "$(echo -ne "$content")")
   local pad=$(( width - vlen ))
   [[ $pad -lt 0 ]] && pad=0
-  echo -ne "    ${WHITE}${border}  ${content}${R}"
+  echo -ne "    ${P_DIM}${border}  ${content}${R}"
   printf "%${pad}s" ""
-  echo -e "${WHITE}${border}${R}"
+  echo -e "${P_DIM}${border}${R}"
 }
-
-hline_double() { printf '    '; printf '═%.0s' $(seq 1 $((BOX_W + 2))); echo; }
-hline_light()  { printf '    '; printf '─%.0s' $(seq 1 $((BOX_W + 2))); echo; }
 
 # --- Modo banner: auto (por tamanho do terminal), compact, full ---
 # BOOTSTRAP_BANNER=compact | full | auto (default)
@@ -172,57 +177,62 @@ COLS="${COLUMNS:-$(tput cols 2>/dev/null || echo 100)}"
 LINS="${LINES:-$(tput lines 2>/dev/null || echo 30)}"
 [[ "$BOOTSTRAP_BANNER" == "auto" ]] && { [[ "$COLS" -lt 90 || "$LINS" -lt 22 ]] && BOOTSTRAP_BANNER="compact" || BOOTSTRAP_BANNER="full"; }
 
-# Cor da descrição por categoria
+# Cor da descrição (fosforo)
 weather_desc_color() {
   case "${WEATHER_CAT:-cloudy}" in
-    sunny)        echo -ne "${YELLOW}" ;;
-    partly_cloudy) echo -ne "${CYAN}" ;;
-    rainy|stormy) echo -ne "${BLUE}" ;;
-    snowy)        echo -ne "${WHITE}" ;;
-    foggy)        echo -ne "${GRAY}" ;;
-    *)            echo -ne "${CYAN}" ;;
+    sunny)        echo -ne "${P_AMBER}" ;;
+    partly_cloudy) echo -ne "${P_CYAN}" ;;
+    rainy|stormy) echo -ne "${P_CYAN}" ;;
+    snowy)        echo -ne "${P_CYAN}" ;;
+    foggy)        echo -ne "${P_DIM}" ;;
+    *)            echo -ne "${P_CYAN}" ;;
   esac
 }
 
 build_banner() {
-  local art_color="${CYAN}"
   local compact=0
   [[ "$BOOTSTRAP_BANNER" == "compact" ]] && compact=1
 
   local porquemo_trunc="$PORQUEMO"
   [[ ${#PORQUEMO} -gt $(( compact ? 35 : 50 )) ]] && porquemo_trunc="${PORQUEMO:0:$(( compact ? 32 : 47 ))}..."
 
-  # Linha 1: data/hora + condição atual
-  local weather_now="${WHITE}${DIA}  ${HORA}${R}  ${DIM}|${R}  "
-  weather_now+="${B}${YELLOW}${WEATHER_TEMP:-?}°C${R}"
+  # Header estilo CRT: regra + título fosforo
+  printf '    '
+  printf "${P_DIM}"; printf '━%.0s' $(seq 1 $((BOX_W + 2))); printf "${R}\n"
+  echo -e "    ${P_GREEN}▌ APERTURE SCIENCE${R}  ${P_DIM}│${R}"
+  printf '    '
+  printf "${P_DIM}"; printf '━%.0s' $(seq 1 $((BOX_W + 2))); printf "${R}\n"
+
+  # Data/hora + tempo (cores fosforo)
+  local weather_now="${P_CYAN}${DIA}  ${HORA}${R}  ${P_DIM}│${R}  "
+  weather_now+="${P_AMBER}${WEATHER_TEMP:-?}°C${R}"
   if [[ $compact -eq 0 ]]; then
     [[ -n "${WEATHER_FEELS:-}" && "${WEATHER_FEELS:-}" != "${WEATHER_TEMP:-}" ]] && \
-      weather_now+=" ${ORANGE}(${WEATHER_FEELS}° sens.)${R}"
+      weather_now+=" ${P_DIM}(${WEATHER_FEELS}° sens.)${R}"
   fi
   weather_now+="  $(weather_desc_color)${WEATHER_DESC:-?}${R}"
-  [[ -n "${WEATHER_HUMIDITY:-}" ]] && weather_now+="  ${BLUE}${WEATHER_HUMIDITY}% 💧${R}"
-  [[ $compact -eq 0 && -n "${WEATHER_WIND:-}" ]] && weather_now+="  ${DIM}🌬 ${WEATHER_WIND} km/h${R}"
+  [[ -n "${WEATHER_HUMIDITY:-}" ]] && weather_now+="  ${P_CYAN}${WEATHER_HUMIDITY}% 💧${R}"
+  [[ $compact -eq 0 && -n "${WEATHER_WIND:-}" ]] && weather_now+="  ${P_DIM}🌬 ${WEATHER_WIND} km/h${R}"
 
   local today_range=""
-  [[ -n "${WEATHER_TMIN:-}" ]] && today_range="${CYAN}${WEATHER_TMIN}°–${WEATHER_TMAX}°${R}"
-  [[ $compact -eq 0 && -n "${WEATHER_SUNRISE:-}" ]] && today_range+="  ${YELLOW}☀ ${WEATHER_SUNRISE} – ${WEATHER_SUNSET}${R}"
+  [[ -n "${WEATHER_TMIN:-}" ]] && today_range="${P_CYAN}${WEATHER_TMIN}°–${WEATHER_TMAX}°${R}"
+  [[ $compact -eq 0 && -n "${WEATHER_SUNRISE:-}" ]] && today_range+="  ${P_AMBER}☀ ${WEATHER_SUNRISE} – ${WEATHER_SUNSET}${R}"
 
   local today_hours=""
   if [[ $compact -eq 0 ]]; then
     for (( h=0; h<${WEATHER_HOUR_COUNT:-0}; h++ )); do
       local vname="WEATHER_HOUR_${h}"
       [[ -n "$today_hours" ]] && today_hours+="  "
-      today_hours+="${CYAN}${!vname:-}${R}"
+      today_hours+="${P_CYAN}${!vname:-}${R}"
     done
   fi
 
   local info_lines=()
   if [[ $compact -eq 1 ]]; then
     info_lines=(
-      "${B}${WHITE}A P E R T U R E  S C I E N C E${R}"
       "$weather_now"
-      "${DIM}Hoje:${R} ${today_range}"
-      "${DIM}${porquemo_trunc}${R}"
+      "${P_DIM}Hoje:${R} ${today_range}"
+      "${P_DIM}${porquemo_trunc}${R}"
     )
   else
     local week_lines=()
@@ -230,17 +240,16 @@ build_banner() {
       local vname="WEATHER_WEEK_${w}"
       local line="${!vname:-}"
       [[ -z "${line// }" ]] && continue
-      week_lines+=("  ${B}${WHITE}${line%% *}${R} ${CYAN}${line#* }${R}")
+      week_lines+=("  ${P_GREEN}${line%% *}${R} ${P_CYAN}${line#* }${R}")
     done
     info_lines=(
-      "${B}${WHITE}A P E R T U R E  S C I E N C E${R}"
       "$weather_now"
-      "${DIM}Hoje:${R} ${today_range}"
-      "${DIM}Horário:${R} ${today_hours}"
-      "${DIM}${porquemo_trunc}${R}"
+      "${P_DIM}Hoje:${R} ${today_range}"
+      "${P_DIM}Horário:${R} ${today_hours}"
+      "${P_DIM}${porquemo_trunc}${R}"
     )
     [[ ${#week_lines[@]} -gt 0 ]] && {
-      info_lines+=("${DIM}Próximos dias:${R}")
+      info_lines+=("${P_DIM}Próximos dias:${R}")
       for wl in "${week_lines[@]}"; do info_lines+=("  $wl"); done
     }
   fi
@@ -259,25 +268,21 @@ for clock in every10 every60 every240; do
   IFS=: read -r last_mod last_log <<< "$(find_latest_log "$clock")"
 
   if [[ -z "$last_log" ]]; then
-    worker_parts+=("${RED}● ${clock}${R} ${DIM}--${R}")
+    worker_parts+=("${P_RED}● ${clock}${R} ${P_DIM}--${R}")
   else
     age=$(( now - last_mod ))
-    # Thresholds: every10=10min (900s), every60=1h (4200s), every240=4h (15000s)
     if [[ "$clock" == "every10" ]]; then max=900; elif [[ "$clock" == "every240" ]]; then max=15000; else max=4200; fi
 
     if [[ $age -le 120 ]]; then
-      # Log touched in last 2min → worker actively running
-      worker_parts+=("${GREEN}● ${clock}${R} ${DIM}running${R}")
+      worker_parts+=("${P_GREEN}● ${clock}${R} ${P_DIM}running${R}")
     elif [[ $age -le $max ]]; then
-      # Within expected timer interval → healthy
-      worker_parts+=("${GREEN}● ${clock}${R} ${DIM}$(fmt_age $age)${R}")
+      worker_parts+=("${P_GREEN}● ${clock}${R} ${P_DIM}$(fmt_age $age)${R}")
     else
-      # Older than expected → timer may be stuck
-      worker_parts+=("${YELLOW}● ${clock}${R} ${DIM}$(fmt_age $age)${R}")
+      worker_parts+=("${P_AMBER}● ${clock}${R} ${P_DIM}$(fmt_age $age)${R}")
     fi
   fi
 done
-echo -e "${B}Bochechas:${R} ${worker_parts[0]}  ${worker_parts[1]}  ${worker_parts[2]}"
+echo -e "${P_GREEN}Bochechas:${R} ${worker_parts[0]}  ${worker_parts[1]}  ${worker_parts[2]}"
 
 # --- Uso de créditos (barras como na tela claude.ai/settings/usage) ---
 if [[ -f "$WS/stow/.claude/scripts/usage-bar.sh" ]]; then
@@ -303,36 +308,36 @@ ws_branch=$(git -C "$WS" branch --show-current 2>/dev/null || echo "?")
 ws_dirty=$(git -C "$WS" status --porcelain 2>/dev/null | head -1)
 ws_ahead=$(git -C "$WS" rev-list --count '@{upstream}..HEAD' 2>/dev/null || echo 0)
 ws_behind=$(git -C "$WS" rev-list --count 'HEAD..@{upstream}' 2>/dev/null || echo 0)
-git_str="[${ws_branch}]"
-[[ -n "$ws_dirty" ]] && git_str+=" ${YELLOW}dirty${R}" || git_str+=" ${GREEN}clean${R}"
-[[ "$ws_ahead" -gt 0 ]] && git_str+=" ${GREEN}↑${ws_ahead}${R}"
-[[ "$ws_behind" -gt 0 ]] && git_str+=" ${RED}↓${ws_behind}${R}"
+git_str="${P_CYAN}[${ws_branch}]${R}"
+[[ -n "$ws_dirty" ]] && git_str+=" ${P_AMBER}dirty${R}" || git_str+=" ${P_GREEN}clean${R}"
+[[ "$ws_ahead" -gt 0 ]] && git_str+=" ${P_GREEN}↑${ws_ahead}${R}"
+[[ "$ws_behind" -gt 0 ]] && git_str+=" ${P_RED}↓${ws_behind}${R}"
 
 MODE_FILE="$WS/projetos/CLAUDE.md"
 if [[ -f "$MODE_FILE" ]] && grep -q 'FÉRIAS \[OFF\]' "$MODE_FILE" 2>/dev/null; then
-  ferias_str="${RED}OFF${R}"
+  ferias_str="${P_RED}OFF${R}"
 else
-  ferias_str="${GREEN}ON${R}"
+  ferias_str="${P_GREEN}ON${R}"
 fi
 PERSONALITY_FLAG="$WS/.ephemeral/personality-off"
 if [[ -f "$PERSONALITY_FLAG" ]]; then
-  personality_str="${DIM}OFF${R}"
+  personality_str="${P_DIM}OFF${R}"
 else
-  personality_str="${CYAN}ON${R}"
+  personality_str="${P_CYAN}ON${R}"
 fi
 AUTOCOMMIT_FLAG="$WS/.ephemeral/auto-commit"
 if [[ -f "$AUTOCOMMIT_FLAG" ]]; then
-  autocommit_str="${GREEN}ON${R}"
+  autocommit_str="${P_GREEN}ON${R}"
 else
-  autocommit_str="${DIM}OFF${R}"
+  autocommit_str="${P_DIM}OFF${R}"
 fi
 AUTOJARVIS_FLAG="$WS/.ephemeral/auto-jarvis"
 if [[ -f "$AUTOJARVIS_FLAG" ]]; then
-  autojarvis_str="${GREEN}ON${R}"
+  autojarvis_str="${P_GREEN}ON${R}"
 else
-  autojarvis_str="${DIM}OFF${R}"
+  autojarvis_str="${P_DIM}OFF${R}"
 fi
-echo -e "${B}Git:${R} ${git_str}  ${B}Ferias:${R} ${ferias_str}  ${B}Personality:${R} ${personality_str}  ${B}AutoCommit:${R} ${autocommit_str}  ${B}AutoJarvis:${R} ${autojarvis_str}"
+echo -e "${P_CYAN}Git:${R} ${git_str}  ${P_CYAN}Ferias:${R} ${ferias_str}  ${P_CYAN}Personality:${R} ${personality_str}  ${P_CYAN}AutoCommit:${R} ${autocommit_str}  ${P_CYAN}AutoJarvis:${R} ${autojarvis_str}"
 
 # --- Kanban: só Inbox (revisão unificada no JARVIS "Pra revisar") ---
 inbox_count=0
@@ -349,7 +354,7 @@ if [[ -f "$KANBAN" ]]; then
   done < "$KANBAN"
 fi
 
-[[ "$inbox_count" -gt 0 ]] && echo -e "${B}Inbox:${R} ${YELLOW}${inbox_count} pendente(s)${R}"
+[[ "$inbox_count" -gt 0 ]] && echo -e "${P_CYAN}Inbox:${R} ${P_AMBER}${inbox_count} pendente(s)${R}"
 
 echo
 
@@ -360,28 +365,28 @@ if [[ -f "$AUTOJARVIS_FLAG" ]] && command -v gh &>/dev/null; then
   ( gh_status_fetch 2>/dev/null ) &
 
   if [[ -n "${GH_MY_PRS_COUNT:-}" ]]; then
-    echo -e "${B}PRs meus:${R} ${YELLOW}${GH_MY_PRS_COUNT}${R} abertos    ${B}Review:${R} ${YELLOW}${GH_REVIEW_COUNT}${R} aguardando"
+    echo -e "${P_CYAN}PRs meus:${R} ${P_AMBER}${GH_MY_PRS_COUNT}${R} abertos    ${P_CYAN}Review:${R} ${P_AMBER}${GH_REVIEW_COUNT}${R} aguardando"
 
     if [[ -n "${GH_MY_PRS:-}" ]]; then
       count=0
       while IFS='|' read -r repo title; do
         [[ $count -ge 5 ]] && break
-        printf "  ${GREEN}▸${R} ${DIM}%-16s${R} %s\n" "$repo" "$title"
+        printf "  ${P_GREEN}▸${R} ${P_DIM}%-16s${R} %s\n" "$repo" "$title"
         count=$((count + 1))
       done <<< "$GH_MY_PRS"
     fi
 
     if [[ -n "${GH_REVIEW_PRS:-}" ]]; then
-      echo -e "${B}Pra revisar:${R}"
+      echo -e "${P_CYAN}Pra revisar:${R}"
       count=0
       while IFS='|' read -r repo title author; do
         [[ $count -ge 5 ]] && break
-        printf "  ${MAGENTA}◆${R} ${DIM}%-16s${R} %s ${DIM}(%s)${R}\n" "$repo" "$title" "$author"
+        printf "  ${P_MAGENTA}◆${R} ${P_DIM}%-16s${R} %s ${P_DIM}(%s)${R}\n" "$repo" "$title" "$author"
         count=$((count + 1))
       done <<< "$GH_REVIEW_PRS"
     fi
   else
-    echo -e "${DIM}(gh indisponível ou sem dados)${R}"
+    echo -e "${P_DIM}(gh indisponível ou sem dados)${R}"
   fi
 
   PROJECTS_ESTRATEGIA="${PROJECTS_ESTRATEGIA:-/home/claude/projects/estrategia}"
@@ -395,26 +400,26 @@ if [[ -f "$AUTOJARVIS_FLAG" ]] && command -v gh &>/dev/null; then
     branch=$(git -C "$repo" branch --show-current 2>/dev/null || echo "?")
     ahead=$(git -C "$repo" rev-list --count '@{upstream}..HEAD' 2>/dev/null || echo "0")
     [[ "$ahead" -gt 0 ]] || continue
-    dirty_repos+=("$(printf "  ${ORANGE}●${R} ${DIM}%-16s${R} [%s] ${YELLOW}dirty:%s${R} ${GREEN}ahead:%s${R}" "$name" "$branch" "$dirty" "$ahead")")
+    dirty_repos+=("$(printf "  ${P_AMBER}●${R} ${P_DIM}%-16s${R} [%s] ${P_AMBER}dirty:%s${R} ${P_GREEN}ahead:%s${R}" "$name" "$branch" "$dirty" "$ahead")")
   done
   if [[ ${#dirty_repos[@]} -gt 0 ]]; then
-    echo -e "${B}Repos com mudanças:${R} ${#dirty_repos[@]}"
+    echo -e "${P_CYAN}Repos com mudanças:${R} ${#dirty_repos[@]}"
     for line in "${dirty_repos[@]:0:6}"; do
       echo -e "$line"
     done
     remaining=$(( ${#dirty_repos[@]} - 6 ))
-    [[ $remaining -gt 0 ]] && echo -e "  ${DIM}+${remaining} mais${R}"
+    [[ $remaining -gt 0 ]] && echo -e "  ${P_DIM}+${remaining} mais${R}"
   fi
 
   prunable=$(git -C "$WS" worktree list 2>/dev/null | grep -c prunable || true)
   active_wt=$(git -C "$WS" worktree list 2>/dev/null | grep -cv "prunable\|$WS " || true)
-  [[ $prunable -gt 0 ]] && echo && echo -e "${B}Worktrees:${R} ${active_wt} ativos, ${YELLOW}${prunable} prunable${R} ${DIM}(git worktree prune)${R}"
+  [[ $prunable -gt 0 ]] && echo && echo -e "${P_CYAN}Worktrees:${R} ${active_wt} ativos, ${P_AMBER}${prunable} prunable${R} ${P_DIM}(git worktree prune)${R}"
 
   echo
 fi
 
-echo -e "${DIM}$(printf '─%.0s' $(seq 1 80))${R}"
-echo -e "${DIM}Iniciando Claudinho...${R}"
+echo -e "${P_DIM}$(printf '─%.0s' $(seq 1 80))${R}"
+echo -e "${P_DIM}Iniciando Claudinho...${R}"
 echo
 
 # Quando source/. : retorna; quando executado: exit (evita matar o shell no make start)

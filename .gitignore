@@ -47,6 +47,9 @@ stow/.claude/skills/skill-evaluations/
 # ephemeral
 .ephemeral/
 
+# agent presence (cada execução cria bochecha_*; some quando o processo morre)
+.agents/
+
 # execution logs
 logs/
 

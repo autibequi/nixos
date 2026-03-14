@@ -25,6 +25,24 @@ DEFAULT_MAX_TURNS=12
 mkdir -p "$EPHEMERAL/locks" "$TASKS/running" "$TASKS/done" "$TASKS/failed" \
   "$WORKSPACE/vault/sugestoes" "$WORKSPACE/vault/_agent/reports"
 
+# Presença em .agents/ — quando o processo morre (exit/trap), a pasta some; status line conta por aqui
+AGENTS_ROOT="$WORKSPACE/.agents"
+AGENT_MY_DIR="$AGENTS_ROOT/bochecha_${HOSTNAME:-unknown}_$$"
+mkdir -p "$AGENTS_ROOT"
+# Limpa pastas órfãs (container morreu com SIGKILL/crash — trap não rodou)
+now_agent=$(date +%s)
+for stale in "$AGENTS_ROOT"/bochecha_*/; do
+  [ -d "$stale" ] || continue
+  [ -f "$stale/.live" ] || continue
+  mod=$(stat -c %Y "$stale/.live" 2>/dev/null || echo 0)
+  [ $(( now_agent - mod )) -gt 900 ] && rm -rf "$stale"
+done
+mkdir -p "$AGENT_MY_DIR"
+echo "started=$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$AGENT_MY_DIR/.live"
+echo "worker=$WORKER_ID" >> "$AGENT_MY_DIR/.live"
+echo "clock=$CLAU_CLOCK" >> "$AGENT_MY_DIR/.live"
+trap 'rm -rf "$AGENT_MY_DIR"' EXIT
+
 [ -f "$EPHEMERAL/no-mcp.json" ] || echo '{"mcpServers":{}}' > "$EPHEMERAL/no-mcp.json"
 
 source "$WORKSPACE/scripts/kanban-sync.sh"
@@ -397,6 +415,7 @@ fi
 recover_orphans
 
 # ── Process recurring tasks ──────────────────────────────────────
+touch "$AGENT_MY_DIR/.live" 2>/dev/null || true
 echo "[clau:$WORKER_ID] === Recorrentes (clock=$CLAU_CLOCK) ==="
 start_time=$SECONDS
 ok_count=0; fail_count=0; task_count=0
@@ -416,6 +435,7 @@ for task in "${recurring_names[@]}"; do
 done
 
 # ── Process backlog (filtered by clock) ───────────────────────────
+touch "$AGENT_MY_DIR/.live" 2>/dev/null || true
 echo "[clau:$WORKER_ID] === Backlog ==="
 mapfile -t backlog_names < <(kanban_list_names "Backlog" 2>/dev/null)
 

@@ -64,49 +64,36 @@ if [[ ${#TOPIC} -ge 40 ]]; then
   TOPIC="${TOPIC:0:37}..."
 fi
 
-# Claudios: containers docker/podman ativos (worker + worker-fast)
+# Claudios: pastas em .agents/bochecha_* com .live recente (evita literal "bochecha_*/" quando glob não acha nada)
 WORKERS=0
 BOCECHAS=0
 WS="${WORKSPACE_DIR:-/workspace}"
-_run_ps() {
-  docker ps -q --filter "$1" 2>/dev/null | wc -l
-}
-_run_podman_ps() {
-  podman ps -q --filter "$1" 2>/dev/null | wc -l
-}
-if command -v docker &>/dev/null; then
-  [[ -S "/host/podman.sock" ]] && export DOCKER_HOST="unix:///host/podman.sock"
-  W1=$(_run_ps "label=com.docker.compose.service=worker")
-  W2=$(_run_ps "label=com.docker.compose.service=worker-fast")
-  WORKERS=$(( W1 + W2 ))
-  WORKERS=$(echo "$WORKERS" | tr -d '[:space:]')
-fi
-if [[ "$WORKERS" -eq 0 ]] && command -v podman &>/dev/null; then
-  W1=$(_run_podman_ps "label=com.docker.compose.service=worker")
-  W2=$(_run_podman_ps "label=com.docker.compose.service=worker-fast")
-  WORKERS=$(( W1 + W2 ))
-  WORKERS=$(echo "$WORKERS" | tr -d '[:space:]')
-fi
-if [[ "$WORKERS" -eq 0 ]] && [[ -d "$WS/.ephemeral/logs" ]]; then
+AGENTS_DIR="$WS/.agents"
+LIVE_MAX_AGE=900
+if [[ -d "$AGENTS_DIR" ]]; then
   now_sec=$(date +%s)
-  for log in "$WS"/.ephemeral/logs/worker-*.log; do
-    [[ -f "$log" ]] || continue
-    mod=$(stat -c %Y "$log" 2>/dev/null || echo 0)
-    [[ $(( now_sec - mod )) -le 900 ]] && WORKERS=$(( WORKERS + 1 ))
+  for dir in "$AGENTS_DIR"/bochecha_*/; do
+    [[ "$dir" == *"*"* ]] && continue
+    [[ -d "$dir" ]] || continue
+    [[ -f "$dir/.live" ]] || continue
+    mod=$(stat -c %Y "$dir/.live" 2>/dev/null || echo 0)
+    [[ $(( now_sec - mod )) -le $LIVE_MAX_AGE ]] && WORKERS=$(( WORKERS + 1 ))
   done
 fi
-# Bochechas: só conta pastas em running/ com .lock não expirado (evita órfão = sempre 1)
+# Claudios = só .agents/ (sem fallback docker/logs para não travar em 1)
+# Bochechas: só pastas em running/ com .lock não expirado; ignora data inválida (evita órfão = sempre 1)
 RUNNING_DIR="$WS/vault/_agent/tasks/running"
 if [[ -d "$RUNNING_DIR" ]]; then
   now_epoch=$(date +%s)
   for dir in "$RUNNING_DIR"/*/; do
+    [[ "$dir" == *"*"* ]] && continue
     [[ -d "$dir" ]] || continue
     [[ -f "$dir/.lock" ]] || continue
     started=$(grep '^started=' "$dir/.lock" 2>/dev/null | cut -d= -f2)
     timeout=$(grep '^timeout=' "$dir/.lock" 2>/dev/null | cut -d= -f2)
     [[ -z "$started" || -z "$timeout" ]] && continue
-    # started é ISO (2025-03-14T12:00:00Z); timeout é segundos
     start_epoch=$(date -d "$started" +%s 2>/dev/null || date -j -f "%Y-%m-%dT%H:%M:%SZ" "$started" +%s 2>/dev/null || echo 0)
+    [[ -z "$start_epoch" || "$start_epoch" -eq 0 ]] && continue
     end_epoch=$(( start_epoch + timeout ))
     [[ $now_epoch -lt $end_epoch ]] && BOCECHAS=$(( BOCECHAS + 1 ))
   done
