@@ -196,6 +196,9 @@ def generate_dashboard(items: list[dict], count: int, path: str):
         link = item.get("link", "")
         if len(title) > 60:
             title = title[:57] + "..."
+        # OSC 8 hyperlink for clickable titles in terminal
+        if link:
+            title = f"\033]8;;{link}\a{title}\033]8;;\a"
         lines.append(f"▸ [{cat}] {title} — {age}")
     with open(path, "w") as f:
         f.write("\n".join(lines) + "\n" if lines else "No items yet.\n")

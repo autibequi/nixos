@@ -23,7 +23,19 @@ if [[ -f "$RSS_DASH" ]]; then
   if [[ $rss_age -lt 7200 ]]; then
     echo -e "${P_CYAN}RSS:${R}"
     head -5 "$RSS_DASH" | while IFS= read -r line; do
-      printf "  ${P_DIM}%b${R}\n" "$line"
+      # Color RSS category tags
+      tag=""
+      if [[ "$line" =~ \[([a-z]+)[[:space:]]*\] ]]; then
+        tag="${BASH_REMATCH[1]}"
+      fi
+      case "$tag" in
+        tech)  line="${line/\[$tag/\\033[1;38;5;39m[$tag}" ; line="${line/\]/]\\033[0m}" ;;
+        linux) line="${line/\[$tag/\\033[1;38;5;214m[$tag}" ; line="${line/\]/]\\033[0m}" ;;
+        nixos) line="${line/\[$tag/\\033[1;38;5;117m[$tag}" ; line="${line/\]/]\\033[0m}" ;;
+        go)    line="${line/\[$tag/\\033[1;38;5;81m[$tag}"  ; line="${line/\]/]\\033[0m}" ;;
+        *)     line="${line/\[$tag/\\033[1;38;5;245m[$tag}" ; line="${line/\]/]\\033[0m}" ;;
+      esac
+      printf "  %b\n" "$line"
     done
     echo
   fi

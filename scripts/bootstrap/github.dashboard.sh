@@ -22,13 +22,14 @@ if [[ -n "${GH_MY_PRS_COUNT:-}" ]]; then
       [[ $count -ge 5 ]] && break
       [[ ${#title} -gt $title_max ]] && title="${title:0:$((title_max - 3))}..."
       pr_num="${url##*/}"
-      printf "  ${P_GREEN}▸${R} ${P_DIM}%-16s${R} %s ${P_DIM}#%s${R}\n" "$repo" "$title" "$pr_num"
+      printf "  ${P_GREEN}▸${R} ${P_DIM}%-16s${R} %s ${P_CYAN}#%s${R}\n" "$repo" "$title" "$pr_num"
       count=$((count + 1))
     done <<< "$GH_MY_PRS"
   fi
 
   # ── Review requests ──────────────────────────────────────────────────────
   if [[ -n "${GH_REVIEW_PRS:-}" ]]; then
+    echo
     echo -e "${P_CYAN}Review:${R} ${P_AMBER}${GH_REVIEW_COUNT}${R} aguardando"
     review_max=$(( title_max - 20 ))
     [[ $review_max -lt 20 ]] && review_max=20
@@ -38,7 +39,7 @@ if [[ -n "${GH_MY_PRS_COUNT:-}" ]]; then
       [[ $count -ge 5 ]] && break
       [[ ${#title} -gt $review_max ]] && title="${title:0:$((review_max - 3))}..."
       pr_num="${url##*/}"
-      printf "  ${P_MAGENTA}◆${R} ${P_DIM}%-16s${R} %s ${P_DIM}(%s) #%s${R}\n" "$repo" "$title" "$author" "$pr_num"
+      printf "  ${P_MAGENTA}◆${R} ${P_DIM}%-16s${R} %s ${P_AMBER}(%s)${R} ${P_CYAN}#%s${R}\n" "$repo" "$title" "$author" "$pr_num"
       count=$((count + 1))
     done <<< "$GH_REVIEW_PRS"
   fi

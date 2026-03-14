@@ -143,19 +143,21 @@ for clock in every10 every60 every240; do
   IFS=: read -r last_mod last_log <<< "$(find_latest_log "$clock")"
 
   if [[ -z "$last_log" ]]; then
-    worker_parts+=("${P_RED}● ${clock}${R} ${P_DIM}--${R}")
+    worker_parts+=("${OFF}● ${clock}${R} ${P_DIM}offline${R}")
   else
     age=$(( now - last_mod ))
-    if [[ "$clock" == "every10" ]]; then max=900
-    elif [[ "$clock" == "every240" ]]; then max=15000
-    else max=4200; fi
+    if [[ "$clock" == "every10" ]]; then max=900; stale=1800
+    elif [[ "$clock" == "every240" ]]; then max=15000; stale=30000
+    else max=4200; stale=7200; fi
 
     if [[ $age -le 120 ]]; then
-      worker_parts+=("${P_GREEN}● ${clock}${R} ${P_DIM}running${R}")
+      worker_parts+=("${ON}● ${clock}${R} ${P_DIM}running${R}")
     elif [[ $age -le $max ]]; then
-      worker_parts+=("${P_GREEN}● ${clock}${R} ${P_DIM}$(fmt_age $age)${R}")
-    else
+      worker_parts+=("${ON}● ${clock}${R} ${P_DIM}$(fmt_age $age)${R}")
+    elif [[ $age -le $stale ]]; then
       worker_parts+=("${P_AMBER}● ${clock}${R} ${P_DIM}$(fmt_age $age)${R}")
+    else
+      worker_parts+=("${OFF}● ${clock}${R} ${P_DIM}$(fmt_age $age) stale${R}")
     fi
   fi
 done
@@ -181,17 +183,20 @@ git_str="${P_CYAN}[${ws_branch}]${R}"
 [[ "$ws_ahead" -gt 0 ]] && git_str+=" ${P_GREEN}↑${ws_ahead}${R}"
 [[ "$ws_behind" -gt 0 ]] && git_str+=" ${P_RED}↓${ws_behind}${R}"
 
+ON=$'\033[1;32m'  # bright green
+OFF=$'\033[1;31m' # bright red
+
 MODE_FILE="$WS/projetos/CLAUDE.md"
 if [[ -f "$MODE_FILE" ]] && grep -q 'FÉRIAS \[OFF\]' "$MODE_FILE" 2>/dev/null; then
-  ferias_str="${P_RED}OFF${R}"
+  ferias_str="${OFF}OFF${R}"
 else
-  ferias_str="${P_GREEN}ON${R}"
+  ferias_str="${ON}ON${R}"
 fi
 PERSONALITY_FLAG="$WS/.ephemeral/personality-off"
-[[ -f "$PERSONALITY_FLAG" ]] && personality_str="${P_DIM}OFF${R}" || personality_str="${P_CYAN}ON${R}"
+[[ -f "$PERSONALITY_FLAG" ]] && personality_str="${OFF}OFF${R}" || personality_str="${ON}ON${R}"
 AUTOCOMMIT_FLAG="$WS/.ephemeral/auto-commit"
-[[ -f "$AUTOCOMMIT_FLAG" ]] && autocommit_str="${P_GREEN}ON${R}" || autocommit_str="${P_DIM}OFF${R}"
-[[ -f "$AUTOJARVIS_FLAG" ]] && autojarvis_str="${P_GREEN}ON${R}" || autojarvis_str="${P_DIM}OFF${R}"
+[[ -f "$AUTOCOMMIT_FLAG" ]] && autocommit_str="${ON}ON${R}" || autocommit_str="${OFF}OFF${R}"
+[[ -f "$AUTOJARVIS_FLAG" ]] && autojarvis_str="${ON}ON${R}" || autojarvis_str="${OFF}OFF${R}"
 
 echo -e "${P_CYAN}Git:${R} ${git_str}  ${P_CYAN}Ferias:${R} ${ferias_str}  ${P_CYAN}Personality:${R} ${personality_str}  ${P_CYAN}AutoCommit:${R} ${autocommit_str}  ${P_CYAN}AutoJarvis:${R} ${autojarvis_str}"
 

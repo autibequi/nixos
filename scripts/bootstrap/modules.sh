@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # modules.sh — bootstrap orchestrator: colors, helpers, then dashboard modules
 
-# ── Colors (CRT phosphor theme) ──────────────────────────────────────────────
+# ── Colors (coral theme — matching Claude mascot) ────────────────────────────
 R=$'\033[0m' B=$'\033[1m' DIM=$'\033[2m'
-P_GREEN=$'\033[1;92m'   P_AMBER=$'\033[1;93m'
-P_CYAN=$'\033[1;96m'    P_MAGENTA=$'\033[1;95m'
-P_RED=$'\033[1;91m'     P_DIM=$'\033[2;36m'
+P_GREEN=$'\033[1;38;5;174m'  P_AMBER=$'\033[1;93m'
+P_CYAN=$'\033[1;38;5;210m'   P_MAGENTA=$'\033[1;38;5;204m'
+P_RED=$'\033[1;91m'          P_DIM=$'\033[2;38;5;210m'
 # Fallback 256
-CYAN=$'\033[36m' GREEN=$'\033[32m' YELLOW=$'\033[33m' RED=$'\033[31m'
+CYAN=$'\033[38;5;210m' GREEN=$'\033[38;5;174m' YELLOW=$'\033[33m' RED=$'\033[31m'
 ORANGE=$'\033[38;5;208m' BLUE=$'\033[38;5;33m' WHITE=$'\033[97m'
-MAGENTA=$'\033[35m' GRAY=$'\033[38;5;245m'
+MAGENTA=$'\033[38;5;204m' GRAY=$'\033[38;5;245m'
 
 # ── Globals ───────────────────────────────────────────────────────────────────
 WS="/workspace"
@@ -70,5 +70,4 @@ source "$BOOTSTRAP_DIR/rss.dashboard.sh"
 
 # ── Footer ────────────────────────────────────────────────────────────────────
 echo -e "${P_DIM}$(printf '─%.0s' $(seq 1 80))${R}"
-echo -e "${P_DIM}Iniciando Claudinho...${R}"
 echo
