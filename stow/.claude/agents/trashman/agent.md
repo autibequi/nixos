@@ -77,8 +77,20 @@ scripts/     — utility scripts
 - **Logic:** Find all images, grep across all .md files in vault/, if not referenced anywhere, archive
 - **Reason:** Orphaned images take up space
 
-### 8. Empty Directories
-- **Trigger:** After archiving files (step 1-7)
+### 8. Stale Worktrees (`.claude/worktrees/` + `workbench/`)
+- **Criteria:** worktree com status `done` ou `archived` no `workbench/<task>.md`, OU branch já mergeada em main
+- **Logic:**
+  1. Listar worktrees com `git worktree list`
+  2. Para cada worktree, checar `workbench/<task>.md` em main — se `status: done` ou `status: archived`, é candidato
+  3. Checar se a branch do worktree já foi mergeada em main (`git branch --merged main`)
+  4. Se worktree tem changes uncommitted → **NUNCA deletar**, preservar e reportar
+  5. Se aprovado: `git worktree remove <path>` e deletar branch local com `git branch -d <branch>`
+  6. Mover o `workbench/<task>.md` correspondente para `.ephemeral/.trashbin/workbench/`
+- **Reason:** Worktrees concluídas ou mergeadas acumulam espaço e poluem `git worktree list`
+- **Safety:** NUNCA remover worktree com uncommitted changes ou branch não-mergeada sem status done
+
+### 9. Empty Directories
+- **Trigger:** After archiving files (step 1-8)
 - **Logic:** Recursively find empty dirs, exclude protected paths, archive
 - **Reason:** Cleanup creates empty parents; archive them too
 
