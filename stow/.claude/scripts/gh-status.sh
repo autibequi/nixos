@@ -33,17 +33,18 @@ gh_status_fetch() {
   GH_MY_PRS_COUNT=$(echo "$my_prs_json" | python3 -c "import sys,json; print(json.load(sys.stdin)['count'])" 2>/dev/null || echo 0)
   GH_REVIEW_COUNT=$(echo "$review_prs_json" | python3 -c "import sys,json; print(json.load(sys.stdin)['count'])" 2>/dev/null || echo 0)
 
-  # Format my PRs: "repo:title"
+  # Format my PRs: "repo|title|url"
   GH_MY_PRS=$(echo "$my_prs_json" | python3 -c "
 import sys, json
 data = json.load(sys.stdin)
 for item in data.get('items', [])[:8]:
     repo = item['repo']
     title = item['title'][:60] + ('...' if len(item['title']) > 60 else '')
-    print(f'{repo}|{title}')
+    url = item.get('url', '')
+    print(f'{repo}|{title}|{url}')
 " 2>/dev/null || echo "")
 
-  # Format review PRs: "repo:title:author"
+  # Format review PRs: "repo|title|author|url"
   GH_REVIEW_PRS=$(echo "$review_prs_json" | python3 -c "
 import sys, json
 data = json.load(sys.stdin)
@@ -51,7 +52,8 @@ for item in data.get('items', [])[:8]:
     repo = item['repo']
     title = item['title'][:50] + ('...' if len(item['title']) > 50 else '')
     author = item.get('author', '?')
-    print(f'{repo}|{title}|{author}')
+    url = item.get('url', '')
+    print(f'{repo}|{title}|{author}|{url}')
 " 2>/dev/null || echo "")
 
   GH_MY_PRS_JSON="$my_prs_json"

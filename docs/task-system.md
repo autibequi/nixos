@@ -71,7 +71,7 @@ max_turns: 25
 | Histórico | Log de execuções passadas (opcional) |
 
 ## Workers
-- 1 worker por clock (every10, every60); execução sequencial por timer
+- **1 worker por vez no sistema** (lock global): apenas um Claude roda de cada vez, qualquer que seja o clock (every10, every60, every240). Timers que disparam enquanto outro está rodando fazem skip.
 - Cada worker se identifica com CLAU_WORKER_ID
 - CLAU_CLOCK filtra quais tasks o worker roda (every10, every60 ou every240)
 - Runner lê recorrentes de scheduled.md, backlog de kanban.md

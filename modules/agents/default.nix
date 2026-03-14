@@ -37,7 +37,7 @@ let
   # Lock dir for dispatch (evita duas instâncias do mesmo clock rodando juntas)
   dispatchLockDir = "${projectDir}/.ephemeral/locks";
 
-  # Multi-worker dispatch
+  # Multi-worker dispatch — lock global: apenas 1 Claude (qualquer clock) por vez
   mkRunnerScript = { clock, maxWorkers, serviceName }: pkgs.writeShellScript "clau-dispatch-${clock}" ''
     set -euo pipefail
     cd ${projectDir}
@@ -46,13 +46,21 @@ let
     CLOCK="${clock}"
     LOGFILE="${logsDir}/worker-${clock}.log"
     LOCKFILE="${dispatchLockDir}/dispatch-${clock}.lock"
+    GLOBAL_LOCK="${dispatchLockDir}/clau-single.lock"
 
     mkdir -p "${logsDir}" "${dispatchLockDir}"
 
-    # Uma única instância por clock (evita cleanup rodar enquanto outro run ainda tem workers)
+    # Apenas 1 worker no sistema por vez (qualquer clock)
+    exec 199>"$GLOBAL_LOCK"
+    if ! ${pkgs.util-linux}/bin/flock -n 199; then
+      echo "[clau:$CLOCK] Outro worker em execução (lock global) — skip."
+      exit 0
+    fi
+
+    # Uma única instância por clock (evita reentrada do mesmo timer)
     exec 200>"$LOCKFILE"
     if ! ${pkgs.util-linux}/bin/flock -n 200; then
-      echo "[clau:$CLOCK] Outra instância em execução — skip."
+      echo "[clau:$CLOCK] Outra instância deste clock — skip."
       exit 0
     fi
 
@@ -138,7 +146,7 @@ let
     rm -f .ephemeral/.kanban.lock .ephemeral/locks/*.lock
   '';
 
-  heavyRunner = mkRunnerScript { clock = "every60"; maxWorkers = 2; serviceName = "worker"; };
+  heavyRunner = mkRunnerScript { clock = "every60"; maxWorkers = 1; serviceName = "worker"; };
   fastRunner = mkRunnerScript { clock = "every10"; maxWorkers = 1; serviceName = "worker-fast"; };
   slowRunner = mkRunnerScript { clock = "every240"; maxWorkers = 1; serviceName = "worker"; };
 in {

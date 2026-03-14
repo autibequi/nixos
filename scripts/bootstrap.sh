@@ -365,13 +365,13 @@ if [[ -f "$AUTOJARVIS_FLAG" ]] && command -v gh &>/dev/null; then
   ( gh_status_fetch 2>/dev/null ) &
 
   if [[ -n "${GH_MY_PRS_COUNT:-}" ]]; then
-    echo -e "${P_CYAN}PRs meus:${R} ${P_AMBER}${GH_MY_PRS_COUNT}${R} abertos    ${P_CYAN}Review:${R} ${P_AMBER}${GH_REVIEW_COUNT}${R} aguardando"
+    echo -e "${P_CYAN}PRs meus:${R} ${P_AMBER}${GH_MY_PRS_COUNT}${R} abertos ${P_DIM}https://github.com/pulls${R}    ${P_CYAN}Review:${R} ${P_AMBER}${GH_REVIEW_COUNT}${R} aguardando ${P_DIM}https://github.com/pulls/review-requested${R}"
 
     if [[ -n "${GH_MY_PRS:-}" ]]; then
       count=0
-      while IFS='|' read -r repo title; do
+      while IFS='|' read -r repo title url; do
         [[ $count -ge 5 ]] && break
-        printf "  ${P_GREEN}▸${R} ${P_DIM}%-16s${R} %s\n" "$repo" "$title"
+        [[ -n "$url" ]] && printf "  ${P_GREEN}▸${R} ${P_DIM}%-16s${R} %s ${P_DIM}%s${R}\n" "$repo" "$title" "$url" || printf "  ${P_GREEN}▸${R} ${P_DIM}%-16s${R} %s\n" "$repo" "$title"
         count=$((count + 1))
       done <<< "$GH_MY_PRS"
     fi
@@ -379,9 +379,9 @@ if [[ -f "$AUTOJARVIS_FLAG" ]] && command -v gh &>/dev/null; then
     if [[ -n "${GH_REVIEW_PRS:-}" ]]; then
       echo -e "${P_CYAN}Pra revisar:${R}"
       count=0
-      while IFS='|' read -r repo title author; do
+      while IFS='|' read -r repo title author url; do
         [[ $count -ge 5 ]] && break
-        printf "  ${P_MAGENTA}◆${R} ${P_DIM}%-16s${R} %s ${P_DIM}(%s)${R}\n" "$repo" "$title" "$author"
+        [[ -n "$url" ]] && printf "  ${P_MAGENTA}◆${R} ${P_DIM}%-16s${R} %s ${P_DIM}(%s) %s${R}\n" "$repo" "$title" "$author" "$url" || printf "  ${P_MAGENTA}◆${R} ${P_DIM}%-16s${R} %s ${P_DIM}(%s)${R}\n" "$repo" "$title" "$author"
         count=$((count + 1))
       done <<< "$GH_REVIEW_PRS"
     fi

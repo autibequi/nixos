@@ -24,6 +24,7 @@ let
   userSocket = if isPodman then "unix:///run/user/1000/podman/podman.sock" else "unix:///var/run/docker.sock";
 
   logsDir = "${projectDir}/.ephemeral/logs";
+  dispatchLockDir = "${projectDir}/.ephemeral/locks";
 
   commonEnv = [
     "HOME=/home/${user}"
@@ -33,7 +34,7 @@ let
     "CONTAINER_SOCK=${hostSocket}"
   ];
 
-  # Multi-worker dispatch
+  # Multi-worker dispatch — lock global: apenas 1 Claude (qualquer clock) por vez
   mkRunnerScript = { clock, maxWorkers, serviceName }: pkgs.writeShellScript "clau-dispatch-${clock}" ''
     set -euo pipefail
     cd ${projectDir}
@@ -41,8 +42,15 @@ let
     MAX_WORKERS=${toString maxWorkers}
     CLOCK="${clock}"
     LOGFILE="${logsDir}/worker-${clock}.log"
+    GLOBAL_LOCK="${dispatchLockDir}/clau-single.lock"
 
-    mkdir -p "${logsDir}"
+    mkdir -p "${logsDir}" "${dispatchLockDir}"
+
+    exec 199>"$GLOBAL_LOCK"
+    if ! ${pkgs.util-linux}/bin/flock -n 199; then
+      echo "[clau:$CLOCK] Outro worker em execução (lock global) — skip."
+      exit 0
+    fi
 
     # Rotate log if > 500KB
     if [ -f "$LOGFILE" ] && [ "$(stat -c%s "$LOGFILE" 2>/dev/null || echo 0)" -gt 512000 ]; then
