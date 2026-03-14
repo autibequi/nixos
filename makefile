@@ -39,6 +39,7 @@ help:
 	@echo "  make auto              Roda worker headless (systemd)"
 	@echo "  make auto-fast         Roda worker every10 headless"
 	@echo "  make clau              Lança workers (every60 x2)"
+	@echo "                         Vários runners: use CLAU_WORKER_ID diferente por processo"
 	@echo "  make stop              Para workers + reseta tasks presas"
 	@echo "  make reset             Devolve tasks de running/ pra origem"
 	@echo "  make status            Mostra estado via kanban + workers"
@@ -136,6 +137,9 @@ inject:
 	@$(COMPOSE) exec sandbox claude --permission-mode bypassPermissions -- "startup"
 
 # ── Tasks ──────────────────────────────────────────────────────────
+# Vários runners por linha de comando: use CLAU_WORKER_ID diferente em cada um.
+# Ex.: CLAU_WORKER_ID=worker-1 make run &  CLAU_WORKER_ID=worker-2 make run
+# Mesmo WORKER_ID em dois processos = um pode recuperar a task do outro como órfã.
 
 run:
 	@mkdir -p $(LOGDIR)
