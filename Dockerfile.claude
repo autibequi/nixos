@@ -14,7 +14,10 @@ RUN nix profile install \
     nixpkgs#sox \
     nixpkgs#util-linux \
     nixpkgs#systemdMinimal \
-    nixpkgs#gh
+    nixpkgs#gh \
+    nixpkgs#gawk \
+    nixpkgs#gnused \
+    nixpkgs#ffmpeg-headless
 
 # Create non-root user manually (no shadow utils needed)
 RUN echo "claude:x:1000:1000::/home/claude:/bin/bash" >> /etc/passwd && \
@@ -26,6 +29,7 @@ RUN echo "claude:x:1000:1000::/home/claude:/bin/bash" >> /etc/passwd && \
 # Install Claude Code with custom npm prefix
 ENV NPM_CONFIG_PREFIX=/usr/local
 ENV PATH="/usr/local/bin:/root/.nix-profile/bin:${PATH}"
+ENV CLAUDE_CODE_DISABLE_CRON=1
 RUN npm install -g @anthropic-ai/claude-code
 
 # Copy nix profile to claude user and create /bin/bash symlink
@@ -34,7 +38,7 @@ RUN cp -r /root/.nix-profile /home/claude/.nix-profile && \
     ln -sf /root/.nix-profile/bin/bash /bin/bash
 
 USER claude
-ENV PATH="/usr/local/bin:/home/claude/.nix-profile/bin:${PATH}"
+ENV PATH="/usr/local/bin:/home/claude/.nix-profile/bin:/root/.nix-profile/bin:${PATH}"
 ENV HOME=/home/claude
 
 WORKDIR /workspace

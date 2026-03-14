@@ -20,5 +20,6 @@
   "enabledMcpjsonServers": [
     "nixos"
   ],
-  "enableAllProjectMcpServers": true
+  "enableAllProjectMcpServers": true,
+  "includeGitInstructions": false
 }
