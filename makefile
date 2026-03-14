@@ -131,6 +131,9 @@ resume:
 	$(COMPOSE) up -d sandbox
 	@$(COMPOSE) exec sandbox /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions
 
+claw:
+	$(COMPOSE) exec sandbox openclaw tui 
+
 down:
 	$(COMPOSE) down
 

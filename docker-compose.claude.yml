@@ -50,6 +50,26 @@ services:
     entrypoint: ["/bin/bash", "-c"]
     command: ["sleep infinity"]
 
+  # OpenClaw Gateway — isolado do claude-sandbox
+  # Vault completo em leitura; vault/openclaw exclusivo em escrita
+  # Pré-requisito: mkdir -p ~/.ovault/Work/openclaw
+  # Attach TUI: docker exec -it claude-openclaw bash  (ou make claw)
+  openclaw:
+    <<: *common
+    container_name: claude-openclaw
+    network_mode: host
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["openclaw gateway & sleep infinity"]
+    volumes:
+      - ${HOME}/.openclaw:/home/claude/.openclaw
+      # vault completo read-only
+      - ${HOME}/.ovault/Work:/workspace/vault:ro
+      # pasta exclusiva openclaw read-write (override do :ro acima)
+      - ${HOME}/.ovault/Work/openclaw:/workspace/vault/openclaw
+
   # Worker every60 — tasks longas (a cada hora)
   worker:
     <<: *common
