@@ -42,7 +42,8 @@ max_turns: 25
 - Card interativo: `- [ ] **nome** #interativo \`modelo\` — descrição`
 
 ## Arquivos
-- `vault/kanban.md` — work items (Backlog, Inbox, Em Andamento, Esperando Review, Concluido, Falhou)
+- `vault/kanban.md` — work items (Backlog, Inbox, Em Andamento, Esperando Review, Aprovado, Falhou)
+- `vault/cemiterio-tasks.md` — tasks arquivadas/deprecated (Arquivado, Deprecated)
 - `vault/scheduled.md` — tasks recorrentes (Recorrentes, Em Execução, Histórico)
 
 ## Colunas — kanban.md
@@ -52,8 +53,14 @@ max_turns: 25
 | Inbox | Pedidos do user em texto livre — processados por processar-inbox |
 | Em Andamento | Executando agora (workers + interativo com tag #interativo) |
 | Esperando Review | Task terminou e aguarda atenção do user (worktree pronto, proposta, etc) |
-| Concluido | Finalizado com link pro report |
+| Aprovado | Finalizado e aprovado pelo user (com link pro report) |
 | Falhou | Com erro e motivo |
+
+## Colunas — cemiterio-tasks.md
+| Coluna | Função |
+|--------|--------|
+| Arquivado | Tasks concluídas movidas do Aprovado (limpeza periódica) |
+| Deprecated | Tasks obsoletas/descartadas (tag `#deprecated`) |
 
 ## Colunas — scheduled.md
 | Coluna | Função |

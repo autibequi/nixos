@@ -130,7 +130,7 @@ Usar o formato definido em `templates/output.md`. Cada artefato tem frontmatter 
 
 ## Passo 7 — Atualizar kanban
 
-Adicionar card em "Concluido" no `vault/kanban.md`:
+Adicionar card em "Aprovado" no `vault/kanban.md`:
 ```
 - [x] **<nome-review>** #done YYYY-MM-DD `opus` — [artefatos](artefacts/<nome>/README.md) <descrição curta>
 ```

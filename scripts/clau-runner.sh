@@ -44,6 +44,65 @@ task_unlock() {
   rm -f "$EPHEMERAL/locks/${1}.lock"
 }
 
+# ── Orphan recovery ──────────────────────────────────────────────
+# Tasks presas em running/ com PID morto ou expiradas por tempo
+recover_orphans() {
+  local now
+  now=$(date +%s)
+  local grace=60  # segundos extras após timeout antes de declarar orphan
+
+  for dir in "$TASKS/running"/*/; do
+    [ -d "$dir" ] || continue
+    local name
+    name=$(basename "$dir")
+    [ -f "$dir/.lock" ] || continue
+
+    local lock_pid lock_started lock_timeout lock_source lock_worker
+    lock_pid=$(grep '^pid=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "")
+    lock_started=$(grep '^started=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "")
+    lock_timeout=$(grep '^timeout=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "300")
+    lock_source=$(grep '^source=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "pending")
+    lock_worker=$(grep '^worker=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "")
+
+    local is_orphan=0
+
+    # pid=1 (init) não pode ser rastreado — orphan se não for o worker atual
+    if [ "$lock_pid" = "1" ] && [ "$lock_worker" != "$WORKER_ID" ]; then
+      is_orphan=1
+    # Processo morto
+    elif [ -n "$lock_pid" ] && [ "$lock_pid" != "1" ] && ! kill -0 "$lock_pid" 2>/dev/null; then
+      is_orphan=1
+    fi
+
+    # Timeout expirado — ground truth independente do PID
+    if [ -n "$lock_started" ]; then
+      local started_ts
+      started_ts=$(date -d "$lock_started" +%s 2>/dev/null || echo "0")
+      local deadline=$(( started_ts + lock_timeout + grace ))
+      if [ "$now" -gt "$deadline" ]; then
+        is_orphan=1
+      fi
+    fi
+
+    [ "$is_orphan" = "0" ] && continue
+
+    echo "[clau:$WORKER_ID] Orphan: '$name' (pid=${lock_pid}, worker=${lock_worker}, started=${lock_started}) — recuperando"
+
+    rm -f "$dir/.lock"
+    task_unlock "$name" 2>/dev/null || true
+
+    if [ "$lock_source" = "recurring" ]; then
+      rm -rf "$dir"
+      kanban_unclaim_recurring "$name" 2>/dev/null || true
+      echo "[clau:$WORKER_ID] '$name' orphan → recurring"
+    else
+      mv "$dir" "$TASKS/pending/$name" 2>/dev/null || true
+      kanban_unclaim_card "$name" 2>/dev/null || true
+      echo "[clau:$WORKER_ID] '$name' orphan → pending"
+    fi
+  done
+}
+
 # ── Cleanup ──────────────────────────────────────────────────────
 cleanup() {
   local sig="${1:-EXIT}"
@@ -321,6 +380,8 @@ if [ -n "$SPECIFIC_TASK" ]; then
   finish_task "$SPECIFIC_TASK" "$source_dir" "$local_exit"
   exit 0
 fi
+
+recover_orphans
 
 # ── Process recurring tasks ──────────────────────────────────────
 echo "[clau:$WORKER_ID] === Recorrentes (clock=$CLAU_CLOCK) ==="

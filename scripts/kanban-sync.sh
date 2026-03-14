@@ -5,6 +5,7 @@ set -euo pipefail
 
 KANBAN="${KANBAN_FILE:-/workspace/vault/kanban.md}"
 SCHEDULED="${SCHEDULED_FILE:-/workspace/vault/scheduled.md}"
+CEMITERIO="${CEMITERIO_FILE:-/workspace/vault/cemiterio-tasks.md}"
 LOCKFILE="${KANBAN_LOCKFILE:-/workspace/.ephemeral/.kanban.lock}"
 
 mkdir -p "$(dirname "$LOCKFILE")"
@@ -161,6 +162,12 @@ _transform_fail() {
   echo "- [ ] **${task}** #failed $(date +%Y-%m-%d) — ${reason}"
 }
 
+_transform_unclaim() {
+  local card="$1" task="$2"
+  # Strip worker tag " [every10-1]", " [every60-2]", etc.
+  echo "$card" | sed 's/ \[every[0-9]*-[0-9]*\]//'
+}
+
 # ── Funções públicas ─────────────────────────────────────────────
 
 # Lista cards de uma coluna
@@ -187,16 +194,22 @@ kanban_claim_card() {
   _kanban_atomic _do_move_card "Backlog" "Em Andamento" "$task" "_transform_claim" "$worker"
 }
 
-# Move card de Em Andamento → Concluido
+# Move card de Em Andamento → Aprovado
 kanban_complete_card() {
   local task="$1" report_link="${2:-}"
-  _kanban_atomic _do_move_card "Em Andamento" "Concluido" "$task" "_transform_complete" "$report_link"
+  _kanban_atomic _do_move_card "Em Andamento" "Aprovado" "$task" "_transform_complete" "$report_link"
 }
 
 # Move card de Em Andamento → Falhou
 kanban_fail_card() {
   local task="$1" reason="${2:-unknown}"
   _kanban_atomic _do_move_card "Em Andamento" "Falhou" "$task" "_transform_fail" "$reason"
+}
+
+# Move card de Em Andamento → Backlog (orphan recovery)
+kanban_unclaim_card() {
+  local task="$1"
+  _kanban_atomic _do_move_card "Em Andamento" "Backlog" "$task" "_transform_unclaim"
 }
 
 # Adiciona card numa coluna específica
@@ -344,4 +357,97 @@ kanban_count() {
   local column="$1"
   local file="${2:-$KANBAN}"
   kanban_read_column "$column" "$file" 2>/dev/null | wc -l
+}
+
+# ── Cemitério ─────────────────────────────────────────────────────
+
+# Move card de uma coluna do kanban → Arquivado no cemiterio-tasks.md
+# Usage: kanban_archive_card "task" "source_col"
+kanban_archive_card() {
+  local task="$1" source_col="${2:-Aprovado}"
+  _kanban_atomic _do_archive_card "$task" "$source_col"
+}
+
+_do_archive_card() {
+  local task="$1" source_col="$2"
+
+  # Find and remove card from source column
+  local tmp card_line=""
+  tmp=$(mktemp)
+  local in_col=0
+
+  while IFS= read -r line; do
+    if [ "$line" = "## $source_col" ]; then
+      in_col=1
+      echo "$line" >> "$tmp"
+      continue
+    fi
+    if [[ "$line" =~ ^##\  ]] && [ "$in_col" = "1" ]; then
+      in_col=0
+    fi
+
+    if [ "$in_col" = "1" ] && [[ "$line" =~ ^-\ \[ ]] && [[ "$line" == *"**${task}**"* ]]; then
+      card_line="$line"
+      continue
+    fi
+
+    echo "$line" >> "$tmp"
+  done < "$KANBAN"
+
+  if [ -z "$card_line" ]; then
+    rm -f "$tmp"
+    echo "[kanban-sync] '$task' não encontrado em $source_col para arquivar" >&2
+    return 1
+  fi
+
+  mv "$tmp" "$KANBAN"
+
+  # Add to cemetery
+  _do_add_card_in "Arquivado" "$card_line" "$CEMITERIO"
+  echo "[kanban-sync] '$task' → cemitério ($source_col → Arquivado)"
+}
+
+# Move card com tag #deprecated → coluna Deprecated no cemitério
+kanban_deprecate_card() {
+  local task="$1" source_col="${2:-Falhou}"
+  _kanban_atomic _do_deprecate_card "$task" "$source_col"
+}
+
+_do_deprecate_card() {
+  local task="$1" source_col="$2"
+
+  # Find and remove card from source column
+  local tmp card_line=""
+  tmp=$(mktemp)
+  local in_col=0
+
+  while IFS= read -r line; do
+    if [ "$line" = "## $source_col" ]; then
+      in_col=1
+      echo "$line" >> "$tmp"
+      continue
+    fi
+    if [[ "$line" =~ ^##\  ]] && [ "$in_col" = "1" ]; then
+      in_col=0
+    fi
+
+    if [ "$in_col" = "1" ] && [[ "$line" =~ ^-\ \[ ]] && [[ "$line" == *"**${task}**"* ]]; then
+      card_line="$line"
+      continue
+    fi
+
+    echo "$line" >> "$tmp"
+  done < "$KANBAN"
+
+  if [ -z "$card_line" ]; then
+    rm -f "$tmp"
+    echo "[kanban-sync] '$task' não encontrado em $source_col para deprecar" >&2
+    return 1
+  fi
+
+  mv "$tmp" "$KANBAN"
+
+  # Add to cemetery Deprecated column
+  _do_add_card_in "Deprecated" "$card_line" "$CEMITERIO"
+  echo "[kanban-sync] '$task' → cemitério ($source_col → Deprecated)"
 }

@@ -343,10 +343,10 @@ if [[ -f "$KANBAN" ]]; then
     fi
   done < "$KANBAN"
 
-  # Concluído (hoje) → [x]
+  # Aprovado (hoje) → [x]
   in_col=0
   while IFS= read -r line; do
-    [[ "$line" == "## Concluido" ]] && { in_col=1; continue; }
+    [[ "$line" == "## Aprovado" ]] && { in_col=1; continue; }
     [[ "$line" =~ ^##\  ]] && [[ "$in_col" == "1" ]] && break
     if [[ "$in_col" == "1" ]] && [[ "$line" =~ ^-\ \[ ]] && [[ "$line" == *"$TODAY"* ]]; then
       after="${line#*\*\*}"; name="${after%%\*\**}"

@@ -207,7 +207,7 @@ status:
 		done; \
 	fi
 	@if [ -f vault/kanban.md ]; then \
-		for col in "Backlog" "Em Andamento" "Concluido" "Falhou"; do \
+		for col in "Backlog" "Em Andamento" "Aprovado" "Falhou"; do \
 			count=0; in_col=0; \
 			while IFS= read -r line; do \
 				if [ "$$line" = "## $$col" ]; then in_col=1; continue; fi; \
