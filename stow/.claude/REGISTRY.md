@@ -45,6 +45,7 @@ Slash commands invocáveis pelo user via `/nome`.
 | Command | Invocação | Descrição |
 |---------|-----------|-----------|
 | `jarvis` | `/jarvis` | Assistente pessoal — status GitHub, repos locais, THINKINGS, tasks, worktrees, recomendações |
+| `rss` | `/rss` | Gerenciador RSS — `show`, `list`, `add <url> <cat> [max]`, `remove`, `fetch`, `config` |
 
 ### Utils
 | Command | Invocação | Descrição |
