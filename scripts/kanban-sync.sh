@@ -164,7 +164,7 @@ _transform_fail() {
 
 _transform_unclaim() {
   local card="$1" task="$2"
-  # Strip worker tag " [every10-1]", " [every60-2]", etc.
+  # Strip worker tag " [every10-1]", " [every60-2]", " [every240-1]", etc.
   echo "$card" | sed 's/ \[every[0-9]*-[0-9]*\]//'
 }
 

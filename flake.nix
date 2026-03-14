@@ -11,9 +11,6 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware/master"; # Hardware
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     home-manager.url = "github:nix-community/home-manager/release-25.11"; # Home Manager
-    voxtype.url = "github:peteonrails/voxtype";
-    nixified-ai.url = "github:nixified-ai/flake"; # Nixified AI
-
     claude-code.url = "github:sadjow/claude-code-nix";
 
   };
@@ -27,8 +24,6 @@
       nixos-hardware,
       home-manager,
       chaotic,
-      nixified-ai,
-      voxtype,
       claude-code,
       ...
     }@inputs:
@@ -62,12 +57,6 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
           }
-
-          # Nixified AI - ComfyUI + Stable Diffusion
-          nixified-ai.nixosModules.comfyui
-
-          # Voxtype
-          voxtype.nixosModules.default
 
           # Mine
           ./configuration.nix

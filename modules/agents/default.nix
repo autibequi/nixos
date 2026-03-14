@@ -140,6 +140,7 @@ let
 
   heavyRunner = mkRunnerScript { clock = "every60"; maxWorkers = 2; serviceName = "worker"; };
   fastRunner = mkRunnerScript { clock = "every10"; maxWorkers = 1; serviceName = "worker-fast"; };
+  slowRunner = mkRunnerScript { clock = "every240"; maxWorkers = 1; serviceName = "worker"; };
 in {
   # ---------------------------------------------------------------------------
   # Cron (agentes) — jobs periódicos via cron; adicione entradas aqui se quiser
@@ -208,11 +209,40 @@ in {
   };
 
   # ---------------------------------------------------------------------------
+  # CLAUDINHO — Worker every240 (a cada 4 horas)
+  # ---------------------------------------------------------------------------
+  systemd.services.claude-autonomous-slow = {
+    description = "CLAUDINHO every240 task runner";
+    after = [ "network-online.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      User = user;
+      Group = "users";
+      WorkingDirectory = projectDir;
+      ExecStart = "${slowRunner}";
+      ExecStopPost = "${cleanupScript}";
+      TimeoutStartSec = "45min";
+      TimeoutStopSec = "2min";
+      Restart = "no";
+      Environment = commonEnv;
+    };
+  };
+
+  systemd.timers.claude-autonomous-slow = {
+    description = "Run CLAUDINHO every240 tasks (a cada 4 horas)";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "*-*-* 0/4:00:00";
+      Persistent = true;
+    };
+  };
+
+  # ---------------------------------------------------------------------------
   # CLAUDINHO — Reset (tasks presas)
   # ---------------------------------------------------------------------------
   systemd.services.claude-autonomous-reset = {
     description = "Reset stuck CLAUDINHO tasks";
-    conflicts = [ "claude-autonomous.service" "claude-autonomous-fast.service" ];
+    conflicts = [ "claude-autonomous.service" "claude-autonomous-fast.service" "claude-autonomous-slow.service" ];
     serviceConfig = {
       Type = "oneshot";
       User = user;

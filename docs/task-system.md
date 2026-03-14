@@ -4,12 +4,13 @@
 | Clock | Timeout | Frequência | Uso |
 |-------|---------|------------|-----|
 | every10 | 120s | a cada 10 min | processar-inbox, doctor, vigiar-logs |
-| every60 | 300-600s | a cada hora | radar, avaliar, evolucao |
+| every60 | 180-600s | a cada hora | radar, avaliar, sumarizer, trashman, trashman-clean-assets |
+| every240 | 300-600s | a cada 4 horas | evolucao, wiseman, propositor, guardinha |
 
 ## Frontmatter de tasks
 ```yaml
 ---
-clock: every10|every60
+clock: every10|every60|every240
 timeout: 120
 model: haiku|sonnet
 schedule: always|night
@@ -70,11 +71,11 @@ max_turns: 25
 | Histórico | Log de execuções passadas (opcional) |
 
 ## Workers
-- Múltiplos workers em paralelo (default: 2 every60, 1 every10)
+- Múltiplos workers em paralelo (default: 2 every60, 1 every10, 1 every240)
 - Cada worker se identifica com CLAU_WORKER_ID
-- CLAU_CLOCK filtra quais tasks o worker roda (every10 ou every60)
+- CLAU_CLOCK filtra quais tasks o worker roda (every10, every60 ou every240)
 - Runner lê recorrentes de scheduled.md, backlog de kanban.md
-- Ambos os clocks processam backlog (filtrado por clock da task)
+- Todos os clocks processam backlog (filtrado por clock da task)
 
 ## Lifecycle
 1. Runner lê scheduled.md (recorrentes) + kanban.md (backlog) → encontra task disponível

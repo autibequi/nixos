@@ -20,7 +20,7 @@ export KANBAN_LOCKFILE="$EPHEMERAL/.kanban.lock"
 
 DEFAULT_TIMEOUT=300
 DEFAULT_MODEL="haiku"
-DEFAULT_MAX_TURNS=25
+DEFAULT_MAX_TURNS=12
 
 mkdir -p "$EPHEMERAL/locks" "$TASKS/running" "$TASKS/done" "$TASKS/failed" \
   "$WORKSPACE/vault/sugestoes" "$WORKSPACE/vault/_agent/reports"

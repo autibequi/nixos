@@ -63,7 +63,7 @@ O THINKINGS é memória compartilhada entre sessões, mecanismo de orquestraçã
 - Com argumento: exibe help detalhado do skill/command (ex: `/manual go-worker`)
 - Match parcial funciona (ex: `worker` encontra `go-worker`)
 
-## Sistema de Tasks (6 recorrentes)
+## Sistema de Tasks (12 recorrentes)
 
 | Task | Clock | Model | Função |
 |------|-------|-------|--------|
@@ -72,10 +72,15 @@ O THINKINGS é memória compartilhada entre sessões, mecanismo de orquestraçã
 | vigiar-logs | every10 | haiku | Monitora logs |
 | radar | every60 | haiku | Jira/Notion |
 | avaliar | every60 | sonnet | Repo + projetos + knowledge |
-| evolucao | every60 | sonnet | Meta-análise + docs |
-| propositor | every60 | sonnet | Propõe mudanças via worktree (`worktrees: true`) |
+| sumarizer | every60 | sonnet | Sintetiza insights + reunião de agentes |
+| trashman | every60 | haiku | Arquiva arquivos velhos/órfãos |
+| trashman-clean-assets | every60 | haiku | Limpa imagens não referenciadas |
+| evolucao | every240 | sonnet | Meta-análise + docs |
+| wiseman | every240 | haiku | Conexões entre notas do vault |
+| propositor | every240 | sonnet | Propõe mudanças via worktree |
+| guardinha | every240 | sonnet | Auditoria de segurança |
 
-Workers: **every10** (a cada 10 min, tasks clock=every10) + **every60** (a cada hora, tasks clock=every60 + pending).
+Workers: **every10** (10 min) + **every60** (1h) + **every240** (4h).
 Detalhes em `docs/task-system.md`.
 
 ### Tags de Modelo — Controle de Subagentes
@@ -155,6 +160,14 @@ GIT_COMMITTER_NAME="Claudinho" GIT_COMMITTER_EMAIL="claudinho@autibequi.com" \
 GIT_COMMITTER_NAME="Buchecha" GIT_COMMITTER_EMAIL="buchecha@autibequi.com" \
   git commit --author="Buchecha <buchecha@autibequi.com>" -m "msg"
 ```
+
+## Auto-Commit Mode
+
+Flag: `/workspace/.ephemeral/auto-commit`. Toggle via `/auto-commit`.
+- **ON**: commitar automaticamente sem perguntar, usando identidade git interativa
+- **OFF** (default): sempre pedir confirmação antes de commitar
+- Verificar flag no startup (bootstrap mostra status no dashboard)
+- Mesmo com auto-commit ON: nunca commitar código quebrado
 
 ## Diretrizes Operacionais
 - Priorizar editar código existente sobre criar novo

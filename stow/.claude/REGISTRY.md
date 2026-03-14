@@ -16,6 +16,7 @@ Scripts utilitários usados por statusline, hooks, agents e interativamente.
 | `colors.sh` | bash/lib | Definições ANSI (cores, bold, dim). `source scripts/colors.sh`. Respeita `NO_COLOR` |
 | `logging.sh` | bash/lib | Logging estruturado: `log_info`, `log_warn`, `log_error`, `log_success`, `log_debug`, `log_step`. Source: `colors.sh` |
 | `ansi.py` | python | Utilitários ANSI/unicode: `strip` (remove escapes), `vlen` (visual length), `calc` (math), `pad` (pad to width) |
+| `gh-status.sh` | bash/lib | Coleta status GitHub (PRs meus, review requests) com cache 10min. `source gh-status.sh && gh_status_fetch` |
 
 ---
 
@@ -31,10 +32,12 @@ Slash commands invocáveis pelo user via `/nome`.
 | `meta/personality` | `/personality` | Toggle personalidade (SOUL.md) on/off |
 | `meta/propor` | `/propor` | Pitch de mudança em worktree isolado |
 | `meta/suggestions` | `/suggestions` | Revisão de propostas de worktrees pendentes |
+| `meta/auto-commit` | `/auto-commit` | Toggle auto-commit ON/OFF |
 
 ### Utils
 | Command | Invocação | Descrição |
 |---------|-----------|-----------|
+| `utils/briefing` | `/briefing` | Assistente pessoal — status GitHub, THINKINGS, pendências, recomendações |
 | `utils/worktree` | `/worktree` | Dashboard de worktrees — status atual + histórico |
 | `utils/task` | `/task` | Gerenciar tarefas (criar, listar, status) |
 

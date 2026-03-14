@@ -211,15 +211,15 @@ echo
 
 # --- Workers (systemd oneshot + timer → detect via log age) ---
 worker_parts=()
-for clock in every10 every60; do
+for clock in every10 every60 every240; do
   IFS=: read -r last_mod last_log <<< "$(find_latest_log "$clock")"
 
   if [[ -z "$last_log" ]]; then
     worker_parts+=("${RED}● ${clock}${R} ${DIM}--${R}")
   else
     age=$(( now - last_mod ))
-    # Thresholds: every10 timer=10min (max=900s), every60 timer=1h (max=4200s)
-    if [[ "$clock" == "every10" ]]; then max=900; else max=4200; fi
+    # Thresholds: every10=10min (900s), every60=1h (4200s), every240=4h (15000s)
+    if [[ "$clock" == "every10" ]]; then max=900; elif [[ "$clock" == "every240" ]]; then max=15000; else max=4200; fi
 
     if [[ $age -le 120 ]]; then
       # Log touched in last 2min → worker actively running
@@ -233,7 +233,7 @@ for clock in every10 every60; do
     fi
   fi
 done
-echo -e "${B}Bochechas:${R} ${worker_parts[0]}  ${worker_parts[1]}"
+echo -e "${B}Bochechas:${R} ${worker_parts[0]}  ${worker_parts[1]}  ${worker_parts[2]}"
 
 # --- Agentes (dinâmico, criados a partir de stow/.claude/agents/) ---
 agents_list=()
@@ -267,7 +267,13 @@ if [[ -f "$PERSONALITY_FLAG" ]]; then
 else
   personality_str="${CYAN}ON${R}"
 fi
-echo -e "${B}Git:${R} ${git_str}  ${B}Ferias:${R} ${ferias_str}  ${B}Personality:${R} ${personality_str}"
+AUTOCOMMIT_FLAG="$WS/.ephemeral/auto-commit"
+if [[ -f "$AUTOCOMMIT_FLAG" ]]; then
+  autocommit_str="${GREEN}ON${R}"
+else
+  autocommit_str="${DIM}OFF${R}"
+fi
+echo -e "${B}Git:${R} ${git_str}  ${B}Ferias:${R} ${ferias_str}  ${B}Personality:${R} ${personality_str}  ${B}AutoCommit:${R} ${autocommit_str}"
 
 # --- Inbox (coluna do THINKINGS) ---
 if [[ -f "$KANBAN" ]]; then
@@ -401,17 +407,37 @@ if [[ -f "$KANBAN" ]]; then
     done
   fi
 
-  # --- Build Commands lines (right column, grouped by scope) ---
+  # --- Build Commands lines (right column, single list in 2 cols, spaced by namespace) ---
+  all_cmds=(/meta:manual /meta:propor /nix:add-pkg /nix:stow /nix:clean /nix:remove-pkg /utils:briefing /utils:task /utils:worktree /estrategia:feature /estrategia:review-pr /estrategia:recommit /estrategia:changelog)
+  cmd_count=${#all_cmds[@]}
+  cmd_half=$(( (cmd_count + 1) / 2 ))  # ceil division
   cmd_lines=()
   cmd_lines+=("${B}Commands:${R}")
-  cmd_lines+=("  ${CYAN}/meta:manual${R}")
-  cmd_lines+=("")
-  cmd_lines+=("  ${CYAN}/nix:add-pkg${R}  ${CYAN}/nix:stow${R}")
-  cmd_lines+=("  ${CYAN}/nix:clean${R}")
-  cmd_lines+=("")
-  cmd_lines+=("  ${CYAN}/utils:task${R}   ${CYAN}/utils:worktree${R}")
-  cmd_lines+=("")
-  cmd_lines+=("  ${CYAN}/work:propor${R}  ${CYAN}/work:review-pr${R}")
+  prev_left_ns="" prev_right_ns=""
+  for (( j=0; j<cmd_half; j++ )); do
+    left_cmd="${all_cmds[$j]}"
+    left_ns="${left_cmd%%:*}"  # e.g. /meta
+    right_idx=$(( j + cmd_half ))
+    right_cmd="" right_ns=""
+    if (( right_idx < cmd_count )); then
+      right_cmd="${all_cmds[$right_idx]}"
+      right_ns="${right_cmd%%:*}"
+    fi
+    # blank line if namespace changed in either column (collapse consecutive)
+    left_changed=$([[ -n "$prev_left_ns" && "$left_ns" != "$prev_left_ns" ]] && echo 1 || echo 0)
+    right_changed=$([[ -n "$prev_right_ns" && -n "$right_ns" && "$right_ns" != "$prev_right_ns" ]] && echo 1 || echo 0)
+    if [[ -n "$prev_left_ns" ]] && (( left_changed || right_changed )); then
+      # only add blank if last entry wasn't already blank
+      [[ "${cmd_lines[-1]}" != "" ]] && cmd_lines+=("")
+    fi
+    if [[ -n "$right_cmd" ]]; then
+      cmd_lines+=("$(printf "  ${CYAN}%-20s${R} ${CYAN}%s${R}" "$left_cmd" "$right_cmd")")
+    else
+      cmd_lines+=("  ${CYAN}${left_cmd}${R}")
+    fi
+    prev_left_ns="$left_ns"
+    [[ -n "$right_ns" ]] && prev_right_ns="$right_ns"
+  done
 
   # --- Side-by-side rendering (Agentes esquerda | Commands direita) ---
   COL_LEFT=25
