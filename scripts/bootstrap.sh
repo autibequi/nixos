@@ -58,24 +58,15 @@ find_latest_log() {
   echo "$best_mod:$best"
 }
 
-# --- Weather (async, cached 30min) ---
-WEATHER_CACHE="$WS/.ephemeral/.weather-cache"
-WEATHER_STR=""
-if [[ -f "$WEATHER_CACHE" ]]; then
-  cache_age=$(( now - $(stat -c %Y "$WEATHER_CACHE" 2>/dev/null || echo 0) ))
-  if [[ $cache_age -le 1800 ]]; then
-    WEATHER_STR=$(cat "$WEATHER_CACHE")
-  fi
-fi
-if [[ -z "$WEATHER_STR" ]]; then
-  WEATHER_STR=$(curl -s --connect-timeout 3 "wttr.in/${WEATHER_LOCATION}?format=%c+%t+%h&lang=pt" 2>/dev/null || echo "")
-  WEATHER_STR=$(echo "$WEATHER_STR" | tr -d '+')
-  if [[ -n "$WEATHER_STR" && ! "$WEATHER_STR" =~ "Unknown" && ! "$WEATHER_STR" =~ "Sorry" ]]; then
-    echo "$WEATHER_STR" > "$WEATHER_CACHE" 2>/dev/null || true
-  else
-    WEATHER_STR="--"
-  fi
-fi
+# --- Weather (full data + ASCII art) ---
+WEATHER_LOCATION="São Paulo"
+source "$WS/stow/.claude/scripts/weather-art.sh" 2>/dev/null || {
+  WEATHER_CAT="cloudy"; WEATHER_TEMP="--"; WEATHER_DESC="indisponível"
+  WEATHER_ART=(
+    "      .---.      " "   .-(     ).    " "  (___________)  " "                 "
+    "                 " "                 " "                 " "                 "
+  )
+}
 
 # --- Auto-update Claude Code (cache 24h) ---
 CLAUDE_UPDATE_CACHE="$WS/.ephemeral/.claude-code-update"
@@ -162,52 +153,81 @@ print(w)
 hline_double() { printf '    '; printf '═%.0s' $(seq 1 $((BOX_W + 2))); echo; }
 hline_light()  { printf '    '; printf '─%.0s' $(seq 1 $((BOX_W + 2))); echo; }
 
-build_banner_1() {
-  echo -e "${WHITE}"
-  printf '    ╔'; printf '═%.0s' $(seq 1 $((BOX_W + 2))); echo '╗'
-  pad_line "║" ""
-  pad_line "║" "${ORANGE}◉${R} ${B}A P E R T U R E${R} ${ORANGE}◉${R}"
-  pad_line "║" "${BLUE}  S C I E N C E${R}"
-  pad_line "║" ""
-  pad_line "║" "${DIM}${DIA}  ${HORA}  ${WEATHER_STR}${R}"
-  pad_line "║" ""
-  pad_line "║" "${DIM}${PORQUEMO}${R}"
-  printf '    ╚'; printf '═%.0s' $(seq 1 $((BOX_W + 2))); echo -e '╝'
-  echo -ne "${R}"
+# --- Weather banner (art left, info right) ---
+build_banner() {
+  local art_color="${CYAN}"
+
+  # Truncar porquemo
+  local porquemo_trunc="$PORQUEMO"
+  [[ ${#PORQUEMO} -gt 50 ]] && porquemo_trunc="${PORQUEMO:0:47}..."
+
+  # Current weather line
+  local weather_now="${WEATHER_TEMP:-?}°C"
+  [[ -n "${WEATHER_FEELS:-}" && "${WEATHER_FEELS:-}" != "${WEATHER_TEMP:-}" ]] && weather_now+=" ${DIM}(${WEATHER_FEELS}°C)${R}"
+  weather_now+="  ${WEATHER_DESC:-?}"
+  [[ -n "${WEATHER_HUMIDITY:-}" ]] && weather_now+="  ${DIM}${WEATHER_HUMIDITY}%💧${R}"
+
+  # Today range
+  local today_range=""
+  [[ -n "${WEATHER_TMIN:-}" ]] && today_range="${WEATHER_TMIN}°–${WEATHER_TMAX}°"
+  [[ -n "${WEATHER_SUNRISE:-}" ]] && today_range+="  ${DIM}☀ ${WEATHER_SUNRISE}–${WEATHER_SUNSET}${R}"
+
+  # Today hourly
+  local today_hours=""
+  for (( h=0; h<${WEATHER_HOUR_COUNT:-0}; h++ )); do
+    local vname="WEATHER_HOUR_${h}"
+    [[ -n "$today_hours" ]] && today_hours+="  "
+    today_hours+="${DIM}${!vname}${R}"
+  done
+
+  # Week forecast
+  local week_lines=()
+  for (( w=0; w<${WEATHER_WEEK_COUNT:-0}; w++ )); do
+    local vname="WEATHER_WEEK_${w}"
+    week_lines+=("${DIM}${!vname}${R}")
+  done
+
+  # Build info lines (match art lines 1:1)
+  local info_lines=(
+    "${B}A P E R T U R E  S C I E N C E${R}"
+    "${WHITE}${DIA}  ${HORA}${R}  ${DIM}|${R}  ${B}${weather_now}${R}"
+    "${today_range}"
+    "${today_hours}"
+    ""
+    "${DIM}${porquemo_trunc}${R}"
+  )
+
+  # Week forecast (compact, one line each)
+  if [[ ${#week_lines[@]} -gt 0 ]]; then
+    info_lines+=("")
+    for wl in "${week_lines[@]}"; do
+      info_lines+=("$wl")
+    done
+  fi
+
+  # Art lines (from weather-art.sh)
+  local total=${#WEATHER_ART[@]}
+  local info_total=${#info_lines[@]}
+  [[ $info_total -gt $total ]] && total=$info_total
+
+  echo
+  for (( i=0; i<total; i++ )); do
+    local art_line="${WEATHER_ART[$i]:-                  }"
+    local info="${info_lines[$i]:-}"
+
+    # Art is 18 chars wide; pad to fixed column
+    local art_len=${#art_line}
+    local pad=$(( 20 - art_len ))
+    [[ $pad -lt 0 ]] && pad=0
+
+    echo -ne "  ${art_color}${art_line}${R}"
+    printf "%${pad}s" ""
+    echo -e "${info}"
+  done
+  echo
 }
 
-build_banner_2() {
-  echo -e "${WHITE}"
-  printf '    ╭'; printf '─%.0s' $(seq 1 $((BOX_W + 2))); echo '╮'
-  pad_line "│" ""
-  pad_line "│" "${ORANGE}◉${R} ${B}A P E R T U R E${R} ${ORANGE}◉${R}"
-  pad_line "│" "${BLUE}  S C I E N C E${R}"
-  pad_line "│" ""
-  pad_line "│" "${DIM}${DIA}  ${HORA}  ${WEATHER_STR}${R}"
-  pad_line "│" ""
-  pad_line "│" "${DIM}${PORQUEMO}${R}"
-  printf '    ╰'; printf '─%.0s' $(seq 1 $((BOX_W + 2))); echo -e '╯'
-  echo -ne "${R}"
-}
-
-build_banner_3() {
-  echo -e "${WHITE}"
-  printf '    ╔'; printf '═%.0s' $(seq 1 $((BOX_W + 2))); echo '╗'
-  pad_line "║" ""
-  pad_line "║" "${ORANGE}◉${R} ${B}A P E R T U R E  S C I E N C E${R} ${ORANGE}◉${R}"
-  pad_line "║" ""
-  pad_line "║" "${DIM}${DIA}  ${HORA}  ${WEATHER_STR}${R}"
-  pad_line "║" ""
-  pad_line "║" "${DIM}${PORQUEMO}${R}"
-  printf '    ╚'; printf '═%.0s' $(seq 1 $((BOX_W + 2))); echo -e '╝'
-  echo -ne "${R}"
-}
-
-BANNER_FUNCS=(build_banner_1 build_banner_2 build_banner_3)
-
-echo
-${BANNER_FUNCS[$((RANDOM % ${#BANNER_FUNCS[@]}))]}
-echo
+build_banner
 
 # --- Workers (systemd oneshot + timer → detect via log age) ---
 worker_parts=()

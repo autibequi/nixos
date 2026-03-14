@@ -18,6 +18,7 @@ Scripts utilitários usados por statusline, hooks, agents e interativamente.
 | `ansi.py` | python | Utilitários ANSI/unicode: `strip` (remove escapes), `vlen` (visual length), `calc` (math), `pad` (pad to width) |
 | `gh-status.sh` | bash/lib | Coleta status GitHub (PRs meus, review requests) com cache 10min. `source gh-status.sh && gh_status_fetch` |
 | `task-schedule.sh` | bash | Tabela de tasks agendadas por slot: recorrentes, pending, timeline próximas horas. `bash task-schedule.sh` |
+| `weather-art.sh` | bash/lib | Weather fetch + ASCII art por condição (sol, chuva, nublado, etc). `source weather-art.sh` exporta WEATHER_ART[], WEATHER_CAT, dados |
 
 ---
 
