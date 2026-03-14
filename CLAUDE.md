@@ -113,7 +113,7 @@ Três camadas de persistência, da mais permanente à mais efêmera:
 | **Identidade** | `/workspace/SOUL.md` | Sim | Sim |
 | **Regras operacionais** | `/workspace/CLAUDE.md` | Sim | Sim |
 | **Skills/Commands/Hooks** | `/workspace/stow/.claude/` | Sim | Sim |
-| **Settings projeto** | `/workspace/.claude/settings.json` | Sim | Sim |
+| **Settings projeto** | `/workspace/stow/.claude/settings.json` | Sim | Sim |
 | **Memórias** | `~/.claude/projects/-workspace/memory/` | Não | Sim (bind mount host) |
 | **Transcripts** | `~/.claude/projects/-workspace/*.jsonl` | Não | Sim (bind mount host) |
 | **Tool results cache** | `~/.claude/projects/-workspace/*/tool-results/` | Não | Sim (bind mount host) |
@@ -147,7 +147,7 @@ Rodar periodicamente ou quando sentir que tem informação útil pra persistir. 
   - **Skills** → `stow/.claude/skills/`
   - **Commands** → `stow/.claude/commands/`
   - **Hooks** → `stow/.claude/hooks/`
-  - **Settings** (`.claude/settings.json`) → **EXCEÇÃO**: fica em `.claude/` (project-level, não versionado)
+  - **Settings** → `stow/.claude/settings.json`
   - **Nunca** salvar configs úteis em `.claude/` — sempre usar `stow/.claude/`
 - **Agents: default haiku** — escalar pra sonnet/opus só quando claramente necessário
 - **NUNCA rodar Claude dentro de Claude** — runner roda via systemd no host
