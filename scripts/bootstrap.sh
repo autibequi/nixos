@@ -16,6 +16,16 @@ for agent_dir in /workspace/stow/.claude/agents/*/; do
   fi
 done
 
+# --- Sync Claude configs from stow/.claude/ to ~/.claude/ ---
+# Settings, hooks, commands, skills need to be available at runtime
+for config_file in settings.json statusline.sh; do
+  src="/workspace/stow/.claude/$config_file"
+  dst="$HOME/.claude/$config_file"
+  if [[ -f "$src" ]]; then
+    cp "$src" "$dst" 2>/dev/null || true
+  fi
+done
+
 # Cores
 R='\033[0m' B='\033[1m' DIM='\033[2m'
 CYAN='\033[36m' GREEN='\033[32m' YELLOW='\033[33m' RED='\033[31m'
@@ -223,13 +233,10 @@ echo -e "${B}Workers:${R} ${worker_parts[0]}  ${worker_parts[1]}"
 agents_list=()
 if [[ -d ~/.claude/agents ]]; then
   for agent_dir in ~/.claude/agents/*/; do
+    [[ -d "$agent_dir" ]] || continue
     agent_name=$(basename "$agent_dir")
     agents_list+=("$agent_name")
   done
-fi
-
-if [[ ${#agents_list[@]} -gt 0 ]]; then
-  echo -e "${B}Agentes:${R} ${CYAN}$(IFS=', '; echo "${agents_list[*]}")${R}"
 fi
 
 # --- Git + Modo (mesma linha) ---
@@ -351,17 +358,53 @@ if [[ -f "$KANBAN" ]]; then
     [[ "$in_fail" == "1" ]] && [[ "$line" =~ ^-\ \[ ]] && fail_count=$((fail_count + 1))
   done < "$KANBAN"
 
-  echo -ne "${B}THINKINGS:${R} ${DIM}♻${rec}${R}"
-  [[ $fail_count -gt 0 ]] && echo -ne " ${RED}✗${fail_count}${R}"
-  echo
+  # --- Build THINKINGS lines ---
+  think_lines=()
+  header="${B}THINKINGS:${R} ${DIM}♻${rec}${R}"
+  [[ $fail_count -gt 0 ]] && header+=" ${RED}✗${fail_count}${R}"
+  think_lines+=("$header")
   count=0
   for item in "${items[@]}"; do
     [[ $count -ge 10 ]] && break
-    echo -e "  $item"
+    think_lines+=("  $item")
     count=$((count + 1))
   done
   remaining=$(( ${#items[@]} - count ))
-  [[ $remaining -gt 0 ]] && echo -e "  ${DIM}+${remaining} mais${R}"
+  [[ $remaining -gt 0 ]] && think_lines+=("  ${DIM}+${remaining} mais${R}")
+
+  # --- Build Agentes lines ---
+  agent_lines=()
+  if [[ ${#agents_list[@]} -gt 0 ]]; then
+    agent_lines+=("${B}Agentes:${R}")
+    for ag in "${agents_list[@]}"; do
+      agent_lines+=("  ${CYAN}▸${R} ${ag}")
+    done
+  fi
+
+  # --- Side-by-side rendering (Agentes esquerda | THINKINGS direita) ---
+  COL_LEFT=25  # display width for left column (Agentes)
+  total_left=${#agent_lines[@]}
+  total_right=${#think_lines[@]}
+  total_rows=$(( total_left > total_right ? total_left : total_right ))
+
+  for (( i=0; i<total_rows; i++ )); do
+    left="${agent_lines[$i]:-}"
+    right="${think_lines[$i]:-}"
+
+    # Compute visible width of left column (strip ANSI)
+    vlen=$(python3 -c "
+import re, unicodedata, sys
+s = re.sub(r'\x1b\[[0-9;]*m', '', sys.argv[1])
+w = sum(2 if unicodedata.east_asian_width(c) in ('W','F') else 1 for c in s)
+print(w)
+" "$(echo -ne "$left")")
+    pad=$(( COL_LEFT - vlen ))
+    [[ $pad -lt 0 ]] && pad=0
+
+    echo -ne "$left"
+    printf "%${pad}s" ""
+    echo -e "$right"
+  done
 fi
 
 echo
