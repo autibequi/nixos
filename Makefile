@@ -6,7 +6,7 @@ SERVICE      := sandbox
 OPENCLAW_SVC := openclaw
 OPENCODE_SVC := opencode
 
-.PHONY: help shell build rebuild start stop logs start-openclaw stop-openclaw logs-openclaw openclaw claw start-code stop-code logs-code code
+.PHONY: help shell build rebuild start stop logs start-openclaw stop-openclaw logs-openclaw openclaw claw claw-stop start-code stop-code logs-code code code-stop
 
 help:
 	@echo "Targets disponíveis:"
@@ -20,11 +20,13 @@ help:
 	@echo "  make stop-openclaw    — derruba o container openclaw"
 	@echo "  make logs-openclaw    — tail dos logs do openclaw"
 	@echo "  make claw             — abre openclaw TUI (sandbox → gateway via host network)"
+	@echo "  make claw-stop        — derruba o container openclaw"
 	@echo "  make openclaw         — abre shell no container openclaw"
 	@echo "  make start-code       — sobe container opencode"
 	@echo "  make stop-code        — derruba container opencode"
 	@echo "  make logs-code        — tail dos logs do opencode"
 	@echo "  make code             — abre opencode TUI no container"
+	@echo "  make code-stop        — derruba container opencode"
 
 shell:
 	docker compose -f $(COMPOSE_FILE) exec $(SERVICE) bash
@@ -79,6 +81,14 @@ code:
 	@mkdir -p $(HOME)/.opencode
 	docker compose -f $(COMPOSE_FILE) up -d $(OPENCODE_SVC)
 	docker compose -f $(COMPOSE_FILE) exec $(OPENCODE_SVC) opencode
+
+# Para o container opencode
+code-stop:
+	docker compose -f $(COMPOSE_FILE) stop $(OPENCODE_SVC)
+
+# Para o container openclaw
+claw-stop:
+	docker compose -f $(COMPOSE_FILE) stop $(OPENCLAW_SVC)
 
 # Abre openclaw TUI no sandbox (gateway acessível via host network)
 claw:
