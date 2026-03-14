@@ -4,7 +4,19 @@
     "type": "command",
     "command": "~/.claude/scripts/statusline.sh"
   },
-  "hooks": {},
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/workspace/stow/.claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ]
+  },
   "enabledMcpjsonServers": [
     "nixos"
   ],

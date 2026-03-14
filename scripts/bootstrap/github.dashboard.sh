@@ -77,21 +77,22 @@ active_wt=$(git -C "$WS" worktree list 2>/dev/null | grep -cv "prunable\|$WS " |
 echo
 
 # ── Recent conversations (open PRs/issues) ───────────────────────────────────
-conv_lines=$(WS="$WS" CONV_LIMIT=5 bash "$WS/stow/.claude/scripts/recent-conversations.sh" 2>/dev/null || true)
-if [[ -n "$conv_lines" ]]; then
-  echo -e "${P_CYAN}GitHub abertos:${R}"
-  conv_max=$(( COLS - 40 ))
-  [[ $conv_max -lt 20 ]] && conv_max=20
-  while IFS='|' read -r dt kind repo title url; do
-    [[ -z "$dt" ]] && continue
-    [[ ${#title} -gt $conv_max ]] && title="${title:0:$((conv_max - 3))}..."
-    if [[ "$kind" == "PR" ]]; then
-      icon="${P_GREEN}▸${R}"
-    else
-      icon="${P_AMBER}○${R}"
-    fi
-    local_num="${url##*/}"
-    printf "  %b ${P_DIM}%s${R}  ${P_DIM}%-16s${R} %s ${P_DIM}#%s${R}\n" "$icon" "$dt" "$repo" "$title" "$local_num"
-  done <<< "$conv_lines"
-  echo
-fi
+# Comentado a pedido do user — descomentar pra voltar
+# conv_lines=$(WS="$WS" CONV_LIMIT=5 bash "$WS/stow/.claude/scripts/recent-conversations.sh" 2>/dev/null || true)
+# if [[ -n "$conv_lines" ]]; then
+#   echo -e "${P_CYAN}GitHub abertos:${R}"
+#   conv_max=$(( COLS - 40 ))
+#   [[ $conv_max -lt 20 ]] && conv_max=20
+#   while IFS='|' read -r dt kind repo title url; do
+#     [[ -z "$dt" ]] && continue
+#     [[ ${#title} -gt $conv_max ]] && title="${title:0:$((conv_max - 3))}..."
+#     if [[ "$kind" == "PR" ]]; then
+#       icon="${P_GREEN}▸${R}"
+#     else
+#       icon="${P_AMBER}○${R}"
+#     fi
+#     local_num="${url##*/}"
+#     printf "  %b ${P_DIM}%s${R}  ${P_DIM}%-16s${R} %s ${P_DIM}#%s${R}\n" "$icon" "$dt" "$repo" "$title" "$local_num"
+#   done <<< "$conv_lines"
+#   echo
+# fi
