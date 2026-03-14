@@ -64,7 +64,12 @@ User pediu lista dinâmica de agentes criados no bootstrap.sh. Adicionei seção
 
 Depois alguém (worker?) transformou em renderização side-by-side: **Agentes à esquerda | THINKINGS à direita**.
 
-Ajustei COL_LEFT=25 pra agentes caberem direito, deixando visualização clara: ações (agentes) → contexto (kanban).
+User pediu ajustes finais:
+1. Coluna agentes à esquerda (já feito)
+2. Linha divisória entre "Esperando review" e "Agentes/THINKINGS" (adicionada)
+3. Remover quote GLaDOS pra limpar o output (removido)
+
+Bootstrap agora é minimalista: banner → workers → git → review → ────── → agentes|thinkings. Sem noise.
 
 **Depois o user pediu:** qualquer um com tag `#worktree` deve usar a skill pra compartilhar funcionamento.
 
