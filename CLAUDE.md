@@ -163,9 +163,12 @@ GIT_COMMITTER_NAME="Buchecha" GIT_COMMITTER_EMAIL="buchecha@autibequi.com" \
   - **Agents** → `stow/.claude/agents/`
   - **Skills** → `stow/.claude/skills/`
   - **Commands** → `stow/.claude/commands/`
+  - **Scripts** → `stow/.claude/scripts/` (utilitários shell/python — statusline, colors, logging, etc.)
   - **Hooks** → `stow/.claude/hooks/`
   - **Settings** → `stow/.claude/settings.json`
+  - **Registry** → `stow/.claude/REGISTRY.md` (catálogo de tudo acima)
   - **Nunca** salvar configs úteis em `.claude/` — sempre usar `stow/.claude/`
+  - **Todo script utilitário novo** → salvar em `stow/.claude/scripts/` e registrar no REGISTRY.md
 - **Agents: default haiku** — escalar pra sonnet/opus só quando claramente necessário
 - **NUNCA rodar Claude dentro de Claude** — runner roda via systemd no host
 - **`/home/claude/projects/`** — pasta com todos os repos GitHub do user (bind mount RW). É onde estão os projetos que eu trabalho ativamente. **NUNCA montar como read-only.**

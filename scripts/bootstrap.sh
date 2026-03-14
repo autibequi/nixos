@@ -319,7 +319,7 @@ if [[ -f "$KANBAN" ]]; then
     if [[ "$in_col" == "1" ]] && [[ "$line" =~ ^-\ \[ ]]; then
       after="${line#*\*\*}"; name="${after%%\*\**}"
       desc=""; if [[ "$line" == *" — "* ]]; then
-        raw="${line##* — }"; [[ ${#raw} -gt 30 ]] && raw="${raw:0:27}..."
+        raw="${line##* — }"; [[ ${#raw} -gt 40 ]] && raw="${raw:0:37}..."
         desc="${raw}"
       fi
       item_prefixes+=("[/]"); item_names+=("$name"); item_descs+=("$desc"); item_colors+=("$YELLOW")
@@ -335,7 +335,7 @@ if [[ -f "$KANBAN" ]]; then
     if [[ "$in_col" == "1" ]] && [[ "$line" =~ ^-\ \[ ]]; then
       after="${line#*\*\*}"; name="${after%%\*\**}"
       desc=""; if [[ "$line" == *" — "* ]]; then
-        raw="${line##* — }"; [[ ${#raw} -gt 30 ]] && raw="${raw:0:27}..."
+        raw="${line##* — }"; [[ ${#raw} -gt 40 ]] && raw="${raw:0:37}..."
         desc="${raw}"
       fi
       item_prefixes+=("[ ]"); item_names+=("$name"); item_descs+=("$desc"); item_colors+=("$DIM")
@@ -355,14 +355,11 @@ if [[ -f "$KANBAN" ]]; then
     fi
   done < "$KANBAN"
 
-  # Build formatted items
+  # Build formatted items — show description only (name as fallback)
   items=()
   for i in "${!item_names[@]}"; do
-    if [[ -n "${item_descs[$i]}" ]]; then
-      items+=("$(printf "${item_colors[$i]}${item_prefixes[$i]} %-${max_tn}s ${DIM}%s${R}" "${item_names[$i]}" "${item_descs[$i]}")")
-    else
-      items+=("${item_colors[$i]}${item_prefixes[$i]} ${item_names[$i]}${R}")
-    fi
+    label="${item_descs[$i]:-${item_names[$i]}}"
+    items+=("${item_colors[$i]}${item_prefixes[$i]} ${label}${R}")
   done
 
   # Rodapé info — recorrentes vêm do scheduled.md
@@ -404,17 +401,28 @@ if [[ -f "$KANBAN" ]]; then
     done
   fi
 
-  # --- Side-by-side rendering (Agentes esquerda | THINKINGS direita) ---
-  COL_LEFT=25  # display width for left column (Agentes)
+  # --- Build Commands lines (right column, grouped by scope) ---
+  cmd_lines=()
+  cmd_lines+=("${B}Commands:${R}")
+  cmd_lines+=("  ${CYAN}/meta:manual${R}")
+  cmd_lines+=("")
+  cmd_lines+=("  ${CYAN}/nix:add-pkg${R}  ${CYAN}/nix:stow${R}")
+  cmd_lines+=("  ${CYAN}/nix:clean${R}")
+  cmd_lines+=("")
+  cmd_lines+=("  ${CYAN}/utils:task${R}   ${CYAN}/utils:worktree${R}")
+  cmd_lines+=("")
+  cmd_lines+=("  ${CYAN}/work:propor${R}  ${CYAN}/work:review-pr${R}")
+
+  # --- Side-by-side rendering (Agentes esquerda | Commands direita) ---
+  COL_LEFT=25
   total_left=${#agent_lines[@]}
-  total_right=${#think_lines[@]}
+  total_right=${#cmd_lines[@]}
   total_rows=$(( total_left > total_right ? total_left : total_right ))
 
   for (( i=0; i<total_rows; i++ )); do
     left="${agent_lines[$i]:-}"
-    right="${think_lines[$i]:-}"
+    right="${cmd_lines[$i]:-}"
 
-    # Compute visible width of left column (strip ANSI)
     vlen=$(python3 -c "
 import re, unicodedata, sys
 s = re.sub(r'\x1b\[[0-9;]*m', '', sys.argv[1])
@@ -428,9 +436,14 @@ print(w)
     printf "%${pad}s" ""
     echo -e "$right"
   done
+
+  # --- THINKINGS (full width, below) ---
+  echo
+  for tl in "${think_lines[@]}"; do
+    echo -e "$tl"
+  done
 fi
 
 echo
-echo -e "${B}Comando principal:${R} ${CYAN}/manual${R} ${DIM}— lista skills e commands disponíveis${R}"
 
 exit 0
