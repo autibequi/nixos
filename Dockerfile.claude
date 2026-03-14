@@ -4,7 +4,7 @@ FROM nixos/nix:latest
 RUN mkdir -p /etc/nix && \
     echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf
 
-# Install common tools Claude Code might need (no nodejs — Claude Code uses native installer)
+# Install common tools + Claude Code via Nix (evita instalador oficial que exige glibc FHS)
 # curl omitido: já vem como dependência de yt-dlp (evita conflito no profile)
 RUN nix profile install \
     nixpkgs#jq \
@@ -17,35 +17,24 @@ RUN nix profile install \
     nixpkgs#gh \
     nixpkgs#gawk \
     nixpkgs#gnused \
-    nixpkgs#ffmpeg-headless
+    nixpkgs#ffmpeg-headless && \
+    nix profile install github:sadjow/claude-code-nix
 
-# Create non-root user manually (no shadow utils needed)
+# Create non-root user and copy profile (claude binary fica em .nix-profile/bin)
 RUN echo "claude:x:1000:1000::/home/claude:/bin/bash" >> /etc/passwd && \
     echo "claude:x:1000:" >> /etc/group && \
     echo "systemd-journal:x:190:claude" >> /etc/group && \
     mkdir -p /home/claude/.claude && \
-    chown -R 1000:1000 /home/claude
-
-# Copy nix profile to claude user and create /bin/bash symlink (before native install so claude has tools)
-RUN cp -r /root/.nix-profile /home/claude/.nix-profile && \
-    chown -R 1000:1000 /home/claude/.nix-profile && \
-    ln -sf /root/.nix-profile/bin/bash /bin/bash
-
-# Install Claude Code via official native installer (no Node/npm; recommended by Anthropic)
-# Rodar como root com HOME=/home/claude (su/runuser falham em imagem mínima sem PAM)
-ENV CLAUDE_CODE_DISABLE_CRON=1
-RUN curl -fsSL https://claude.ai/install.sh -o /tmp/install-claude-code.sh && \
-    chmod +x /tmp/install-claude-code.sh && \
-    HOME=/home/claude /bin/bash /tmp/install-claude-code.sh && \
+    cp -r /root/.nix-profile /home/claude/.nix-profile && \
     chown -R 1000:1000 /home/claude && \
-    rm /tmp/install-claude-code.sh
+    ln -sf /root/.nix-profile/bin/bash /bin/bash
 
 # Dashboard local ao abrir terminal (sem chamar API / UserPromptSubmit)
 RUN echo '[[ -t 0 && -f /workspace/scripts/bootstrap.sh ]] && /workspace/scripts/bootstrap.sh' >> /home/claude/.bashrc
 
 USER claude
-# PATH com todos os locais de binários no container (Nix profile + installer Claude)
-ENV PATH="/home/claude/.local/bin:/home/claude/.nix-profile/bin:/usr/bin:/bin:${PATH}"
+# PATH: binários no .nix-profile (inclui claude)
+ENV PATH="/home/claude/.nix-profile/bin:/usr/bin:/bin:${PATH}"
 ENV HOME=/home/claude
 
 WORKDIR /workspace

@@ -114,7 +114,7 @@ start: sandbox
 
 sandbox:
 	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/scripts/bootstrap.sh; exec /home/claude/.local/bin/claude --permission-mode bypassPermissions'
+	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
 
 shell:
 	$(COMPOSE) up -d sandbox
@@ -122,7 +122,7 @@ shell:
 
 resume:
 	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec sandbox /home/claude/.local/bin/claude --resume --permission-mode bypassPermissions
+	@$(COMPOSE) exec sandbox /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions
 
 down:
 	$(COMPOSE) down
@@ -134,7 +134,7 @@ inject:
 	$(MAKE) restow
 	$(COMPOSE) down
 	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/scripts/bootstrap.sh; exec /home/claude/.local/bin/claude --permission-mode bypassPermissions'
+	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
 
 # ── Tasks ──────────────────────────────────────────────────────────
 # Vários runners por linha de comando: use CLAU_WORKER_ID diferente em cada um.
