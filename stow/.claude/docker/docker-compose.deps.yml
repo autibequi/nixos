@@ -1,5 +1,0 @@
-services:
-  claude:
-    volumes:
-      - ${HOME}/.ssh:/home/node/.ssh:ro
-      - ${HOME}/.npmrc:/home/node/.npmrc:ro

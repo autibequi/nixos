@@ -1,0 +1,27 @@
+{
+  "_comment": "Claude Code Statusline Configuration - Copie a secao 'statusLine' para ~/.claude/settings.json",
+
+  "statusLine_padrão": {
+    "comment": "Statusline detalhado - mostra topic, model, context, workers",
+    "type": "command",
+    "command": "~/.claude/statusline.sh"
+  },
+
+  "statusLine_compacto": {
+    "comment": "Statusline compacto com emojis (emoji oneliner)",
+    "type": "command",
+    "command": "~/.claude/statusline-compact.sh"
+  },
+
+  "exemplos_output": {
+    "padrão": "[nova-sessao] Teste de statusline | Opus 4.6 45%% | W:1 R:2",
+    "compacto": "🔌[nova-sessao] | 🧠opi | 📊45% | W:1 R:2"
+  },
+
+  "como_usar": [
+    "1. Copie a config desejada (statusLine_padrão ou statusLine_compacto)",
+    "2. Edite ~/.claude/settings.json",
+    "3. Substitua a seção 'statusLine' existente",
+    "4. Reinicie Claude Code"
+  ]
+}
