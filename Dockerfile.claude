@@ -37,6 +37,9 @@ RUN cp -r /root/.nix-profile /home/claude/.nix-profile && \
     chown -R 1000:1000 /home/claude/.nix-profile && \
     ln -sf /root/.nix-profile/bin/bash /bin/bash
 
+# Dashboard local ao abrir terminal (sem chamar API / UserPromptSubmit)
+RUN echo '[[ -t 0 && -f /workspace/scripts/bootstrap.sh ]] && /workspace/scripts/bootstrap.sh' >> /home/claude/.bashrc
+
 USER claude
 ENV PATH="/usr/local/bin:/home/claude/.nix-profile/bin:/root/.nix-profile/bin:${PATH}"
 ENV HOME=/home/claude
