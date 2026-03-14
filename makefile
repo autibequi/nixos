@@ -31,6 +31,8 @@ help:
 	@echo "  make destroy           Para containers + remove imagens"
 	@echo "  make inject            Restow + restart sandbox + shell"
 	@echo "  make openclaw          Sobe sandbox e roda openclaw gateway no container"
+	@echo "  make code              Sobe sandbox e roda OpenCode (TUI) no container"
+	@echo "  make code-stop         Encerra opencode no container"
 	@echo ""
 	@echo "  Tasks"
 	@echo "  ─────────────────────────────────────────────────────────"
@@ -157,6 +159,13 @@ openclaw:
 	fi
 	$(COMPOSE) up -d sandbox
 	@$(COMPOSE) exec -it sandbox openclaw gateway
+
+code:
+	$(COMPOSE) up -d sandbox
+	@$(COMPOSE) exec -it sandbox opencode
+
+code-stop:
+	@$(COMPOSE) exec sandbox pkill opencode 2>/dev/null || true
 
 # ── Tasks ──────────────────────────────────────────────────────────
 # Vários runners por linha de comando: use CLAU_WORKER_ID diferente em cada um.
