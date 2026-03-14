@@ -11,6 +11,7 @@
       # Monospace fonts
       nerd-fonts.jetbrains-mono
       nerd-fonts.fira-code
+      nerd-fonts.iosevka
       fira-code
       jetbrains-mono
       meslo-lgs-nf # Font for p10k theme

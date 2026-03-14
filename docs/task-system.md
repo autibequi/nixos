@@ -23,6 +23,8 @@ max_turns: 25
 - `worktrees: true` no frontmatter = task pode usar `EnterWorktree`/`ExitWorktree`
 - Sem esse campo ou `worktrees: false` = worktree PROIBIDO
 - Sessões interativas (`/propor`) sempre podem — o user pediu explicitamente
+- Tasks com `worktrees: true` têm **liberdade total** dentro do worktree — podem editar código à vontade
+- Ao terminar, o worker move o card pra coluna **"Esperando Review"** e o user decide aceitar/descartar
 
 ## Tags especiais
 | Tag | Efeito |
@@ -36,7 +38,7 @@ max_turns: 25
 - Card interativo: `- [ ] **nome** #interativo \`modelo\` — descrição`
 
 ## Arquivos
-- `vault/kanban.md` — work items (Backlog, Inbox, Em Andamento, Concluido, Falhou)
+- `vault/kanban.md` — work items (Backlog, Inbox, Em Andamento, Esperando Review, Concluido, Falhou)
 - `vault/scheduled.md` — tasks recorrentes (Recorrentes, Em Execução, Histórico)
 
 ## Colunas — kanban.md
@@ -45,6 +47,7 @@ max_turns: 25
 | Backlog | Work disponível (pending one-shots, filtrado por clock) |
 | Inbox | Pedidos do user em texto livre — processados por processar-inbox |
 | Em Andamento | Executando agora (workers + interativo com tag #interativo) |
+| Esperando Review | Task terminou e aguarda atenção do user (worktree pronto, proposta, etc) |
 | Concluido | Finalizado com link pro report |
 | Falhou | Com erro e motivo |
 

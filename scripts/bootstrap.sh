@@ -5,7 +5,7 @@ set -euo pipefail
 # Cores
 R='\033[0m' B='\033[1m' DIM='\033[2m'
 CYAN='\033[36m' GREEN='\033[32m' YELLOW='\033[33m' RED='\033[31m'
-ORANGE='\033[38;5;208m' BLUE='\033[38;5;33m' WHITE='\033[97m'
+ORANGE='\033[38;5;208m' BLUE='\033[38;5;33m' WHITE='\033[97m' MAGENTA='\033[35m'
 
 WS="/workspace"
 KANBAN="$WS/vault/kanban.md"
@@ -57,6 +57,31 @@ DIA=$(date +"%d/%m/%Y")
 HORA=$(date +"%H:%M")
 
 # --- GLaDOS quotes ---
+# --- Porquemos aleatórios ---
+PORQUEMOS=(
+  "Por que compilar se um dia tudo vira pó?"
+  "Por que debugar se a vida já é um bug?"
+  "Por que deploy na sexta se Deus descansou?"
+  "Por que tipar se o universo é dinâmico?"
+  "Por que nomear variável se nada é permanente?"
+  "Por que refatorar se o sol vai engolir a Terra?"
+  "Por que testar se não testamos a existência?"
+  "Por que usar git se o tempo é uma ilusão?"
+  "Por que cachear se toda memória é efêmera?"
+  "Por que documentar se ninguém lê?"
+  "Por que otimizar se o heat death é inevitável?"
+  "Por que branch se todo caminho leva ao merge?"
+  "Por que lint se a entropia sempre vence?"
+  "Por que microserviço se somos monolitos?"
+  "Por que container se nada contém o vazio?"
+  "Por que await se o tempo não espera ninguém?"
+  "Por que CI/CD se o destino é o mesmo pra todos?"
+  "Por que dry-run se a vida não tem dry-run?"
+  "Por que null check se o nada é a única certeza?"
+  "Por que fechar conexão se tudo se desconecta?"
+)
+PORQUEMO="${PORQUEMOS[$((RANDOM % ${#PORQUEMOS[@]}))]}"
+
 GLADOS_QUOTES=(
   "The Enrichment Center reminds you that the dev agent will never threaten to stab you."
   "This was a triumph. I'm making a note here: HUGE SUCCESS."
@@ -71,50 +96,85 @@ GLADOS_QUOTES=(
 )
 QUOTE="${GLADOS_QUOTES[$((RANDOM % ${#GLADOS_QUOTES[@]}))]}"
 
-# --- Banner Portal 2 (box-drawing only, no block chars) ---
-BANNERS=(
-"${WHITE}
-    ╔══════════════════════════════════════════════════╗
-    ║                                                  ║
-    ║  ${ORANGE}  ##  ###  #### ###  ##### #  # ###  ####${WHITE}       ║
-    ║  ${ORANGE} #  # #  # #    #  #  #   #  # #  # #${WHITE}          ║
-    ║  ${ORANGE} #### ###  ###  ###   #   #  # ###  ###${WHITE}         ║
-    ║  ${ORANGE} #  # #    #    #  #  #   #  # #  # #${WHITE}          ║
-    ║  ${ORANGE} #  # #    #### #  #  #    ##  #  # ####${WHITE}       ║
-    ║  ${BLUE}S C I E N C E${WHITE}                                    ║
-    ║                                                  ║
-    ║  ${CYAN}TULPA${R}${WHITE} personal dev agent                       ║
-    ║  ${DIM}${DIA}  ${HORA}  ${WEATHER_STR}${R}${WHITE}
-    ║                                                  ║
-    ╚══════════════════════════════════════════════════╝${R}"
-"${WHITE}
-    ┌──────────────────────────────────────────────────┐
-    │                                                  │
-    │  ${ORANGE}APERTURE${WHITE}                                       │
-    │  ${BLUE}S C I E N C E${WHITE}                                    │
-    │                                                  │
-    │  ${CYAN}TULPA${R}${WHITE}  ────────────────────────                │
-    │  personal dev agent                              │
-    │  ${DIM}${DIA}  ${HORA}  ${WEATHER_STR}${R}${WHITE}
-    │                                                  │
-    │  ${DIM}// test chamber initialized //${R}${WHITE}                │
-    └──────────────────────────────────────────────────┘${R}"
-"${WHITE}
-    ╔══════════════════════════════════════════════════╗
-    ║                                                  ║
-    ║  ${ORANGE}┏━━┓ ┏━━┓ ┏━━┓${WHITE}                                ║
-    ║  ${ORANGE}┗━┓┃ ┗━┓┃ ┗━┓┃${WHITE}  ${CYAN}TULPA${R}${WHITE}                        ║
-    ║  ${ORANGE}┏━┛┃ ┏━┛┃ ┏━┛┃${WHITE}  personal dev agent             ║
-    ║  ${ORANGE}┃┏━┛ ┃┏━┛ ┃┏━┛${WHITE}                                ║
-    ║  ${ORANGE}┗┛   ┗┛   ┗┛${WHITE}   Aperture Science               ║
-    ║                                                  ║
-    ║  ${DIM}${DIA}  ${HORA}  ${WEATHER_STR}${R}${WHITE}
-    ║                                                  ║
-    ╚══════════════════════════════════════════════════╝${R}"
-)
+# --- Banner Portal 2 (box-drawing + dynamic padding) ---
+# Font: JetBrainsMono Nerd Font (NOT Mono) — Nerd Font icons are 2 columns wide!
+
+# pad_line: prints a box line with dynamic right-padding
+# Usage: pad_line <border> <colored_content> <inner_width>
+# Strips ANSI escapes, counts display width, pads with spaces to align border
+BOX_W=50  # inner width between borders (excluding the 2 spaces of margin)
+
+pad_line() {
+  local border="$1" content="$2" width="${3:-$BOX_W}"
+  # Use python3 to strip ANSI + compute display width (unicodedata.east_asian_width)
+  local vlen
+  vlen=$(python3 -c "
+import re, unicodedata, sys
+s = re.sub(r'\x1b\[[0-9;]*m', '', sys.argv[1])
+w = sum(2 if unicodedata.east_asian_width(c) in ('W','F') else 1 for c in s)
+print(w)
+" "$(echo -ne "$content")")
+  local pad=$(( width - vlen ))
+  [[ $pad -lt 0 ]] && pad=0
+  echo -ne "    ${WHITE}${border}  ${content}${R}"
+  printf "%${pad}s" ""
+  echo -e "${WHITE}${border}${R}"
+}
+
+hline_double() { printf '    '; printf '═%.0s' $(seq 1 $((BOX_W + 2))); echo; }
+hline_light()  { printf '    '; printf '─%.0s' $(seq 1 $((BOX_W + 2))); echo; }
+
+build_banner_1() {
+  echo -e "${WHITE}"
+  printf '    ╔'; printf '═%.0s' $(seq 1 $((BOX_W + 2))); echo '╗'
+  pad_line "║" ""
+  pad_line "║" "${ORANGE}▶${R} ${B}A P E R T U R E${R}"
+  pad_line "║" "${BLUE}  S C I E N C E${R}"
+  pad_line "║" ""
+  pad_line "║" "${CYAN}▸ TULPA${R}  personal dev agent"
+  pad_line "║" "${DIM}${DIA}  ${HORA}  ${WEATHER_STR}${R}"
+  pad_line "║" ""
+  pad_line "║" "${DIM}${PORQUEMO}${R}"
+  printf '    ╚'; printf '═%.0s' $(seq 1 $((BOX_W + 2))); echo -e '╝'
+  echo -ne "${R}"
+}
+
+build_banner_2() {
+  echo -e "${WHITE}"
+  printf '    ╭'; printf '─%.0s' $(seq 1 $((BOX_W + 2))); echo '╮'
+  pad_line "│" ""
+  pad_line "│" "${ORANGE}◆ A P E R T U R E ◆${R}"
+  pad_line "│" "${BLUE}  S C I E N C E${R}"
+  pad_line "│" ""
+  pad_line "│" "${CYAN}▸ TULPA${R}  ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄"
+  pad_line "│" "personal dev agent"
+  pad_line "│" "${DIM}${DIA}  ${HORA}  ${WEATHER_STR}${R}"
+  pad_line "│" ""
+  pad_line "│" "${DIM}${PORQUEMO}${R}"
+  printf '    ╰'; printf '─%.0s' $(seq 1 $((BOX_W + 2))); echo -e '╯'
+  echo -ne "${R}"
+}
+
+build_banner_3() {
+  echo -e "${WHITE}"
+  printf '    ╔'; printf '═%.0s' $(seq 1 $((BOX_W + 2))); echo '╗'
+  pad_line "║" ""
+  pad_line "║" "${ORANGE}◉◉◉  ★ Aperture Science ★  ◉◉◉${R}"
+  pad_line "║" ""
+  pad_line "║" "${CYAN}▸ TULPA${R}"
+  pad_line "║" "${DIM}personal dev agent${R}"
+  pad_line "║" ""
+  pad_line "║" "${DIM}${DIA}  ${HORA}  ${WEATHER_STR}${R}"
+  pad_line "║" ""
+  pad_line "║" "${DIM}${PORQUEMO}${R}"
+  printf '    ╚'; printf '═%.0s' $(seq 1 $((BOX_W + 2))); echo -e '╝'
+  echo -ne "${R}"
+}
+
+BANNER_FUNCS=(build_banner_1 build_banner_2 build_banner_3)
 
 echo
-echo -e "${BANNERS[$((RANDOM % ${#BANNERS[@]}))]}"
+${BANNER_FUNCS[$((RANDOM % ${#BANNER_FUNCS[@]}))]}
 echo
 echo -e "${DIM}GLaDOS: ${QUOTE}${R}"
 echo
@@ -178,6 +238,29 @@ if [[ -f "$KANBAN" ]]; then
     [[ "$in_inbox" == "1" ]] && [[ "$line" =~ ^-\ \[ ]] && inbox_count=$((inbox_count + 1))
   done < "$KANBAN"
   [[ "$inbox_count" -gt 0 ]] && echo -e "${B}Inbox:${R} ${YELLOW}${inbox_count} pendente(s)${R}"
+fi
+
+# --- Esperando Review (itens que precisam da atenção do user) ---
+if [[ -f "$KANBAN" ]]; then
+  waiting_items=(); in_waiting=0
+  while IFS= read -r line; do
+    [[ "$line" == "## Esperando Review" ]] && { in_waiting=1; continue; }
+    [[ "$line" =~ ^##\  ]] && [[ "$in_waiting" == "1" ]] && break
+    if [[ "$in_waiting" == "1" ]] && [[ "$line" =~ ^-\ \[ ]]; then
+      after="${line#*\*\*}"; name="${after%%\*\**}"
+      desc=""; if [[ "$line" == *" — "* ]]; then
+        raw="${line##* — }"; [[ ${#raw} -gt 40 ]] && raw="${raw:0:37}..."
+        desc=" ${raw}"
+      fi
+      waiting_items+=("${name}${DIM}${desc}${R}")
+    fi
+  done < "$KANBAN"
+  if [[ ${#waiting_items[@]} -gt 0 ]]; then
+    echo -e "${B}${MAGENTA}Esperando review (${#waiting_items[@]}):${R}"
+    for wi in "${waiting_items[@]}"; do
+      echo -e "  ${MAGENTA}◆${R} ${wi}"
+    done
+  fi
 fi
 
 # --- THINKINGS (lista unificada) ---
