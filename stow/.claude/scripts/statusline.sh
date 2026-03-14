@@ -14,11 +14,27 @@ fi
 
 # Dados do JSON (schema: code.claude.com/docs/en/statusline)
 MODEL=$(echo "$input" | jq -r '.model.display_name // "?"')
-CTX=$(echo "$input" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
+CTX_PCT=$(echo "$input" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
+CTX_SIZE=$(echo "$input" | jq -r '.context_window.context_window_size // 0')
+# Uso em tokens: current_usage (input+cache) ou estimado a partir de used_percentage
+CTX_USED=$(echo "$input" | jq -r '
+  if .context_window.current_usage then
+    (.context_window.current_usage.input_tokens // 0) +
+    (.context_window.current_usage.cache_creation_input_tokens // 0) +
+    (.context_window.current_usage.cache_read_input_tokens // 0)
+  else
+    (if .context_window.context_window_size > 0 and .context_window.used_percentage then
+      (.context_window.context_window_size * (.context_window.used_percentage / 100)) | floor
+     else 0 end)
+  end
+')
 TRANSCRIPT=$(echo "$input" | jq -r '.transcript_path // ""')
 SESSION_ID=$(echo "$input" | jq -r '.session_id // ""')
 WORKSPACE_DIR=$(echo "$input" | jq -r '.workspace.project_dir // .workspace.current_dir // .cwd // ""')
 COST_USD=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
+COST_DURATION_MS=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
+LINES_ADDED=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+LINES_REMOVED=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
 WORKTREE_NAME=$(echo "$input" | jq -r '.worktree.name // .worktree.branch // ""')
 
 # Extrair topico da ultima mensagem do user no transcript
@@ -49,12 +65,31 @@ if [[ ${#TOPIC} -ge 40 ]]; then
   TOPIC="${TOPIC:0:37}..."
 fi
 
-# Worker info: contar workers ativos e tasks rodando
+# Claudios: contar containers worker ativos (worker + worker-fast); fallback por logs
 WORKERS=0
 RUNNING=0
+_docker_ps() {
+  if [[ -S "/host/podman.sock" ]]; then
+    DOCKER_HOST="unix:///host/podman.sock" docker ps "$@" 2>/dev/null || true
+  else
+    docker ps "$@" 2>/dev/null || true
+  fi
+}
 if command -v docker &>/dev/null; then
-  WORKERS=$(docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}}" 2>/dev/null | wc -l || echo "0")
+  W1=$(_docker_ps -q --filter "label=com.docker.compose.service=worker" 2>/dev/null | wc -l)
+  W2=$(_docker_ps -q --filter "label=com.docker.compose.service=worker-fast" 2>/dev/null | wc -l)
+  WORKERS=$(( W1 + W2 ))
   WORKERS=$(echo "$WORKERS" | tr -d '[:space:]')
+fi
+# Fallback: se ainda 0, contar logs de worker tocados nos últimos 15 min (funciona dentro do container)
+WS="${WORKSPACE_DIR:-/workspace}"
+if [[ "$WORKERS" -eq 0 ]] && [[ -d "$WS/.ephemeral/logs" ]]; then
+  now_sec=$(date +%s)
+  for log in "$WS"/.ephemeral/logs/worker-*.log; do
+    [[ -f "$log" ]] || continue
+    mod=$(stat -c %Y "$log" 2>/dev/null || echo 0)
+    [[ $(( now_sec - mod )) -le 900 ]] && WORKERS=$(( WORKERS + 1 ))
+  done
 fi
 KANBAN="/workspace/vault/kanban.md"
 if [[ -f "$KANBAN" ]]; then
@@ -78,6 +113,64 @@ if [[ -n "$WORKSPACE_DIR" ]]; then
   REPO=$(basename "$WORKSPACE_DIR")
 fi
 
+# Formatar tamanho de contexto (200000 -> 200k, 1000000 -> 1M)
+fmt_tokens() {
+  local n="${1:-0}"
+  if [[ "$n" -ge 1000000 ]]; then
+    echo "$(( n / 1000000 ))M"
+  elif [[ "$n" -ge 1000 ]]; then
+    echo "$(( n / 1000 ))k"
+  else
+    echo "$n"
+  fi
+}
+CTX_SIZE_FMT=$(fmt_tokens "$CTX_SIZE")
+CTX_USED_K=$(( CTX_USED / 1000 ))
+
+# Minibarra (value, max, width) — sem ANSI; caracteres de bloco para status line
+minibar() {
+  local val="${1:-0}" max="${2:-100}" w="${3:-4}"
+  [[ "$max" -le 0 ]] && max=1
+  local fill=$(( val * w / max ))
+  [[ $fill -gt $w ]] && fill=$w
+  local i
+  local s=""
+  for (( i=0; i<fill; i++ )); do s="${s}█"; done
+  for (( i=fill; i<w; i++ )); do s="${s}░"; done
+  echo "$s"
+}
+
+# Três barras: contexto %, Claudios (docker), Sessions (worker sessions = Em Andamento)
+BAR_W=4
+CTX_BAR=$(minibar "$CTX_PCT" 100 "$BAR_W")
+CLAUDIOS_MAX=5
+SESSIONS_MAX=10
+CLAUDIOS_BAR=$(minibar "$WORKERS" "$CLAUDIOS_MAX" "$BAR_W")
+SESSIONS_BAR=$(minibar "$RUNNING" "$SESSIONS_MAX" "$BAR_W")
+
+# Contexto: barra + usado em K / máx (ex: 123k/1M)
+CTX_STR="ctx ${CTX_BAR} ${CTX_USED_K}k/${CTX_SIZE_FMT}"
+
+# Duração da sessão: ms -> 0s, 1m, 1h 5m + barra (escala 0–1h)
+DURATION_SEC=0
+[[ -n "$COST_DURATION_MS" && "$COST_DURATION_MS" != "0" && "$COST_DURATION_MS" != "null" ]] && DURATION_SEC=$(( COST_DURATION_MS / 1000 ))
+if [[ $DURATION_SEC -ge 3600 ]]; then
+  h=$(( DURATION_SEC / 3600 ))
+  m=$(( (DURATION_SEC % 3600) / 60 ))
+  DURATION_STR="${h}h ${m}m"
+elif [[ $DURATION_SEC -ge 60 ]]; then
+  m=$(( DURATION_SEC / 60 ))
+  DURATION_STR="${m}m"
+else
+  [[ "$DURATION_SEC" -eq 1 ]] && DURATION_STR="1 second" || DURATION_STR="${DURATION_SEC} seconds"
+fi
+
+# Linhas editadas
+LINES_STR=""
+if [[ -n "$LINES_ADDED" && -n "$LINES_REMOVED" ]] && { [[ "$LINES_ADDED" != "0" ]] || [[ "$LINES_REMOVED" != "0" ]]; }; then
+  LINES_STR="+${LINES_ADDED} -${LINES_REMOVED}"
+fi
+
 # Cost: so exibe se > 0
 COST_STR=""
 if [[ -n "$COST_USD" && "$COST_USD" != "0" && "$COST_USD" != "null" ]]; then
@@ -90,18 +183,16 @@ if [[ -n "$WORKTREE_NAME" && "$WORKTREE_NAME" != "null" ]]; then
   WT_STR=" | wt:$WORKTREE_NAME"
 fi
 
-# Worker suffix
-WORKER_INFO=""
-if [[ "$WORKERS" -gt 0 ]] || [[ "$RUNNING" -gt 0 ]]; then
-  WORKER_INFO=" | W:${WORKERS} R:${RUNNING}"
-fi
+# Claudios = containers docker rodando; Sessions = tarefas em andamento (kanban Em Andamento)
+WORKER_INFO=" | Claudios [${WORKERS}] ${CLAUDIOS_BAR}  Sessions [${RUNNING}] ${SESSIONS_BAR}"
 
-# Monta a linha: [repo] [session] topic | Model ctx% | $cost | wt:name | W:x R:y
-LEFT=""
-[[ -n "$REPO" ]] && LEFT="${LEFT}[$REPO] "
-[[ -n "$SESSION" ]] && LEFT="${LEFT}[$SESSION] "
-LEFT="${LEFT}$TOPIC"
-RIGHT="$MODEL ${CTX}%${COST_STR}${WT_STR}${WORKER_INFO}"
+# Partes opcionais: linhas (duração foi para a direita, antes do modelo)
+EXTRA=""
+[[ -n "$LINES_STR" ]] && EXTRA=" | ${LINES_STR}"
+
+# Status line: métricas à esquerda; à direita "alive for Xs!" e modelo
+ALIVE_STR="alive for ${DURATION_STR}!"
+RIGHT="${CTX_STR}${COST_STR}${EXTRA}${WT_STR}${WORKER_INFO} | ${ALIVE_STR} | $MODEL"
 
 # Terminal title via OSC (stderr)
 if [[ -n "$SESSION" ]]; then
@@ -110,4 +201,4 @@ else
   printf '\033]0;Claude: %s\007' "$TOPIC" >&2
 fi
 
-echo "${LEFT} | ${RIGHT}"
+echo "$RIGHT"

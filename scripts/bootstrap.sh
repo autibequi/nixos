@@ -82,12 +82,7 @@ fi
 CLAUDE_UPDATE_CACHE="$WS/.ephemeral/.claude-code-update"
 mkdir -p "$WS/.ephemeral" 2>/dev/null || true
 
-# --- Usage bar (API cota) — atualiza em background para user + agente lerem .ephemeral/usage-bar.txt
 USAGE_BAR_FILE="$WS/.ephemeral/usage-bar.txt"
-if [[ -f "$WS/stow/.claude/scripts/usage-bar.sh" ]]; then
-  ( WS="$WS" OUT_FILE="$USAGE_BAR_FILE" source "$WS/stow/.claude/scripts/usage-bar.sh" 2>/dev/null ) &
-  disown 2>/dev/null || true
-fi
 if [[ -f "$CLAUDE_UPDATE_CACHE" ]]; then
   update_age=$(( now - $(stat -c %Y "$CLAUDE_UPDATE_CACHE" 2>/dev/null || echo 0) ))
 else
@@ -234,6 +229,7 @@ build_banner() {
     for (( w=0; w<${WEATHER_WEEK_COUNT:-0}; w++ )); do
       local vname="WEATHER_WEEK_${w}"
       local line="${!vname:-}"
+      [[ -z "${line// }" ]] && continue
       week_lines+=("  ${B}${WHITE}${line%% *}${R} ${CYAN}${line#* }${R}")
     done
     info_lines=(
@@ -283,10 +279,13 @@ for clock in every10 every60 every240; do
 done
 echo -e "${B}Bochechas:${R} ${worker_parts[0]}  ${worker_parts[1]}  ${worker_parts[2]}"
 
-# --- Cota API (barra compacta — mesma fonte que /usage; agente lê .ephemeral/usage-bar.txt) ---
-if [[ -f "$USAGE_BAR_FILE" ]]; then
-  human_line=$(sed -n '2p' "$USAGE_BAR_FILE" 2>/dev/null)
-  [[ -n "$human_line" ]] && echo -e "${human_line}"
+# --- Uso de créditos (barras como na tela claude.ai/settings/usage) ---
+if [[ -f "$WS/stow/.claude/scripts/usage-bar.sh" ]]; then
+  ( timeout 8 bash -c "WS=\"$WS\" OUT_FILE=\"$USAGE_BAR_FILE\" source \"$WS/stow/.claude/scripts/usage-bar.sh\"" 2>/dev/null ) || true
+  if [[ -f "$USAGE_BAR_FILE" ]]; then
+    # Linha 2 = título "Uso API (30d)", linha 3 = barra + "X% usado"
+    sed -n '2,3p' "$USAGE_BAR_FILE" 2>/dev/null | while IFS= read -r line; do echo -e "$line"; done
+  fi
 fi
 
 # --- Agentes (dinâmico, criados a partir de stow/.claude/agents/) ---

@@ -11,15 +11,15 @@ Scripts utilitários usados por statusline, hooks, agents e interativamente.
 
 | Script | Tipo | Descrição |
 |--------|------|-----------|
-| `statusline.sh` | bash | Statusline: `[repo] [session] topic \| Model ctx% \| $cost \| wt:name \| W:x R:y`. Usa workspace, session_id, cost, worktree do JSON. `DEBUG_STATUSLINE=1` grava JSON em `.ephemeral/statusline-input.json` |
-| `statusline-compact.sh` | bash | Statusline compacta com emojis: `🔌[session] \| 🧠model \| 📊ctx%`. Recebe JSON via stdin |
+| `statusline.sh` | bash | Statusline: barras ctx% \| $ \| tempo \| wt \| [bar]Claudios [bar]Bochechas \| modelo (extrema dir.). **Métricas:** `docs/statusline-metrics.md` |
+| `statusline-compact.sh` | bash | Statusline compacta com emojis e mesmas 3 barras (ctx, Claudios, Bochechas). Modelo à direita |
 | `colors.sh` | bash/lib | Definições ANSI (cores, bold, dim). `source scripts/colors.sh`. Respeita `NO_COLOR` |
 | `logging.sh` | bash/lib | Logging estruturado: `log_info`, `log_warn`, `log_error`, `log_success`, `log_debug`, `log_step`. Source: `colors.sh` |
 | `ansi.py` | python | Utilitários ANSI/unicode: `strip` (remove escapes), `vlen` (visual length), `calc` (math), `pad` (pad to width) |
 | `gh-status.sh` | bash/lib | Coleta status GitHub (PRs meus, review requests) com cache 10min. `source gh-status.sh && gh_status_fetch` |
 | `task-schedule.sh` | bash | Tabela de tasks agendadas por slot: recorrentes, pending, timeline próximas horas. `bash task-schedule.sh` |
 | `weather-art.sh` | bash/lib | Weather fetch + ASCII art por condição (sol, chuva, nublado, etc). `source weather-art.sh` exporta WEATHER_ART[], WEATHER_CAT, dados |
-| `usage-bar.sh` | bash | Gera `.ephemeral/usage-bar.txt`: barra compacta de uso API (30d) + linha machine-readable. Bootstrap chama em background; agente lê para decisão por cota. `USAGE_QUOTA_TOKENS`, `USAGE_BAR_PERIOD` |
+| `usage-bar.sh` | bash | Gera `.ephemeral/usage-bar.txt`: uso API para bootstrap. **Fontes:** (1) Cursor /usage (Current, Resets) com `CURSOR_API_KEY` → `api.cursor.com/teams/spend`; (2) Anthropic tokens 30d com `ANTHROPIC_ADMIN_KEY` → `api-usage.sh`. Fallback: pede uma das duas keys. `USAGE_QUOTA_TOKENS`, `USAGE_BAR_PERIOD` |
 
 ---
 

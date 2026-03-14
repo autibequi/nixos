@@ -9,7 +9,36 @@ input=$(cat)
 # Extrair dados basicos
 MODEL=$(echo "$input" | jq -r '.model.display_name // "?"')
 CTX=$(echo "$input" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
+CTX_USED=$(echo "$input" | jq -r '
+  if .context_window.current_usage then
+    (.context_window.current_usage.input_tokens // 0) +
+    (.context_window.current_usage.cache_creation_input_tokens // 0) +
+    (.context_window.current_usage.cache_read_input_tokens // 0)
+  else
+    (if .context_window.context_window_size > 0 and .context_window.used_percentage then
+      (.context_window.context_window_size * (.context_window.used_percentage / 100)) | floor
+     else 0 end)
+  end
+')
+CTX_SIZE=$(echo "$input" | jq -r '.context_window.context_window_size // 0')
+CTX_USED_K=$(( CTX_USED / 1000 ))
+# Size: 1000000 -> 1M, 200000 -> 200k
+if [[ "$CTX_SIZE" -ge 1000000 ]]; then CTX_SIZE_FMT="$(( CTX_SIZE / 1000000 ))M"
+elif [[ "$CTX_SIZE" -ge 1000 ]]; then CTX_SIZE_FMT="$(( CTX_SIZE / 1000 ))k"
+else CTX_SIZE_FMT="0"; fi
 TRANSCRIPT=$(echo "$input" | jq -r '.transcript_path // ""')
+
+# Minibarra (value, max, width) — sem ANSI
+minibar() {
+  local val="${1:-0}" max="${2:-100}" w="${3:-4}"
+  [[ "$max" -le 0 ]] && max=1
+  local fill=$(( val * w / max ))
+  [[ $fill -gt $w ]] && fill=$w
+  local i s=""
+  for (( i=0; i<fill; i++ )); do s="${s}█"; done
+  for (( i=fill; i<w; i++ )); do s="${s}░"; done
+  echo "$s"
+}
 
 # Extrair topico da ultima mensagem do user no transcript
 TOPIC=""
@@ -37,12 +66,27 @@ if [[ ${#TOPIC} -ge 30 ]]; then
   TOPIC="${TOPIC:0:27}..."
 fi
 
-# Worker info
+# Claudios: worker + worker-fast; fallback por logs
 WORKERS=0
 RUNNING=0
+WORKSPACE_DIR=$(echo "$input" | jq -r '.workspace.project_dir // .workspace.current_dir // .cwd // ""')
+_docker_ps() {
+  [[ -S "/host/podman.sock" ]] && DOCKER_HOST="unix:///host/podman.sock" docker ps "$@" 2>/dev/null || docker ps "$@" 2>/dev/null || true
+}
 if command -v docker &>/dev/null; then
-  WORKERS=$(docker ps --filter "label=com.docker.compose.service=worker" --format "{{.ID}}" 2>/dev/null | wc -l || echo "0")
+  W1=$(_docker_ps -q --filter "label=com.docker.compose.service=worker" 2>/dev/null | wc -l)
+  W2=$(_docker_ps -q --filter "label=com.docker.compose.service=worker-fast" 2>/dev/null | wc -l)
+  WORKERS=$(( W1 + W2 ))
   WORKERS=$(echo "$WORKERS" | tr -d '[:space:]')
+fi
+WS="${WORKSPACE_DIR:-/workspace}"
+if [[ "$WORKERS" -eq 0 ]] && [[ -d "$WS/.ephemeral/logs" ]]; then
+  now_sec=$(date +%s)
+  for log in "$WS"/.ephemeral/logs/worker-*.log; do
+    [[ -f "$log" ]] || continue
+    mod=$(stat -c %Y "$log" 2>/dev/null || echo 0)
+    [[ $(( now_sec - mod )) -le 900 ]] && WORKERS=$(( WORKERS + 1 ))
+  done
 fi
 KANBAN="/workspace/vault/kanban.md"
 if [[ -f "$KANBAN" ]]; then
@@ -69,13 +113,13 @@ fi
 MODEL_SHORT=$(echo "$MODEL" | grep -oE "^[a-zA-Z]+" | tr '[:upper:]' '[:lower:]' | head -c 3)
 MODEL_EMOJI="🧠"
 
-WORKER_SUFFIX=""
-if [[ "$WORKERS" -gt 0 ]] || [[ "$RUNNING" -gt 0 ]]; then
-  WORKER_SUFFIX=" | W:${WORKERS} R:${RUNNING}"
-fi
+# Tres barras: contexto %, Claudios (workers), Bochechas (agentes em background)
+CTX_BAR=$(minibar "$CTX" 100 4)
+CLAUDIOS_BAR=$(minibar "$WORKERS" 5 4)
+BOCECHAS_BAR=$(minibar "$RUNNING" 10 4)
 
-# Compact oneliner
-STATUSLINE="${SESSION_STR} | ${MODEL_EMOJI}${MODEL_SHORT} | 📊${CTX}%${WORKER_SUFFIX}"
+# Compact oneliner: barras à esquerda, modelo na extrema direita
+STATUSLINE="${SESSION_STR} | ctx ${CTX_BAR} ${CTX_USED_K}k/${CTX_SIZE_FMT} | Claudios [${WORKERS}] ${CLAUDIOS_BAR}  Bochechas [${RUNNING}] ${BOCECHAS_BAR} | ${MODEL_EMOJI}${MODEL_SHORT}"
 
 # Terminal title
 if [[ -n "$SESSION" ]]; then
