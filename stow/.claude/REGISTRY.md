@@ -11,7 +11,7 @@ Scripts utilitários usados por statusline, hooks, agents e interativamente.
 
 | Script | Tipo | Descrição |
 |--------|------|-----------|
-| `statusline.sh` | bash | Statusline detalhada: `[session] topic \| Model ctx% \| W:x R:y`. Recebe JSON via stdin |
+| `statusline.sh` | bash | Statusline: `[repo] [session] topic \| Model ctx% \| $cost \| wt:name \| W:x R:y`. Usa workspace, session_id, cost, worktree do JSON. `DEBUG_STATUSLINE=1` grava JSON em `.ephemeral/statusline-input.json` |
 | `statusline-compact.sh` | bash | Statusline compacta com emojis: `🔌[session] \| 🧠model \| 📊ctx%`. Recebe JSON via stdin |
 | `colors.sh` | bash/lib | Definições ANSI (cores, bold, dim). `source scripts/colors.sh`. Respeita `NO_COLOR` |
 | `logging.sh` | bash/lib | Logging estruturado: `log_info`, `log_warn`, `log_error`, `log_success`, `log_debug`, `log_step`. Source: `colors.sh` |

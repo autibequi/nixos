@@ -203,47 +203,43 @@ build_banner() {
   for (( h=0; h<${WEATHER_HOUR_COUNT:-0}; h++ )); do
     local vname="WEATHER_HOUR_${h}"
     [[ -n "$today_hours" ]] && today_hours+="  "
-    today_hours+="${CYAN}${!vname}${R}"
+    today_hours+="${CYAN}${!vname:-}${R}"
   done
 
   # Semana: dia em destaque branco, faixa e descrição em ciano
   local week_lines=()
   for (( w=0; w<${WEATHER_WEEK_COUNT:-0}; w++ )); do
     local vname="WEATHER_WEEK_${w}"
-    local line="${!vname}"
+    local line="${!vname:-}"
     week_lines+=("  ${B}${WHITE}${line%% *}${R} ${CYAN}${line#* }${R}")
   done
 
-  # Build info lines (match art lines 1:1)
+  # Build info lines (match art lines 1:1, sem linhas vazias)
   local info_lines=(
     "${B}${WHITE}A P E R T U R E  S C I E N C E${R}"
     "$weather_now"
     "${DIM}Hoje:${R} ${today_range}"
     "${DIM}Horário:${R} ${today_hours}"
-    ""
     "${DIM}${porquemo_trunc}${R}"
   )
 
   # Previsão dos próximos dias (título + linhas)
   if [[ ${#week_lines[@]} -gt 0 ]]; then
-    info_lines+=("")
     info_lines+=("${DIM}Próx. dias:${R}")
     for wl in "${week_lines[@]}"; do
       info_lines+=("  $wl")
     done
   fi
 
-  # Art lines (from weather-art.sh)
-  local total=${#WEATHER_ART[@]}
+  # Art lines (from weather-art.sh) — total = só linhas com conteúdo (evita fileiras vazias)
   local info_total=${#info_lines[@]}
-  [[ $info_total -gt $total ]] && total=$info_total
+  local total=$info_total
 
   echo
   for (( i=0; i<total; i++ )); do
     local art_line="${WEATHER_ART[$i]:-                  }"
     local info="${info_lines[$i]:-}"
 
-    # Art is 18 chars wide; pad to fixed column
     local art_len=${#art_line}
     local pad=$(( 20 - art_len ))
     [[ $pad -lt 0 ]] && pad=0
@@ -252,7 +248,6 @@ build_banner() {
     printf "%${pad}s" ""
     echo -e "${info}"
   done
-  echo
 }
 
 build_banner
@@ -329,43 +324,27 @@ else
 fi
 echo -e "${B}Git:${R} ${git_str}  ${B}Ferias:${R} ${ferias_str}  ${B}Personality:${R} ${personality_str}  ${B}AutoCommit:${R} ${autocommit_str}  ${B}AutoJarvis:${R} ${autojarvis_str}"
 
-# --- Kanban: parse único (só Inbox + Esperando Review; JARVIS cobre o resto) ---
+# --- Kanban: só Inbox (revisão unificada no JARVIS "Pra revisar") ---
 inbox_count=0
-waiting_names=(); waiting_descs=(); max_wn=0
 if [[ -f "$KANBAN" ]]; then
   section=""
   while IFS= read -r line; do
     case "$line" in
       "## Inbox") section="inbox"; continue ;;
-      "## Esperando Review") section="waiting"; continue ;;
-      "## Em Andamento"|"## Backlog"|"## Aprovado"|"## Falhou") section=""; continue ;;
+      "## Esperando Review"|"## Em Andamento"|"## Backlog"|"## Aprovado"|"## Falhou") section=""; continue ;;
     esac
     [[ "$line" =~ ^##\  ]] && { section=""; continue; }
     [[ "$line" =~ ^-\ \[ ]] || continue
-
-    _name="${line#*\*\*}"; _name="${_name%%\*\**}"
-    _desc=""; [[ "$line" == *" — "* ]] && { _raw="${line##* — }"; [[ ${#_raw} -gt 40 ]] && _raw="${_raw:0:37}..."; _desc="$_raw"; }
-
-    case "$section" in
-      inbox)   inbox_count=$((inbox_count + 1)) ;;
-      waiting) waiting_names+=("$_name"); waiting_descs+=("$_desc"); [[ ${#_name} -gt $max_wn ]] && max_wn=${#_name} ;;
-    esac
+    [[ "$section" == "inbox" ]] && inbox_count=$((inbox_count + 1))
   done < "$KANBAN"
 fi
 
 [[ "$inbox_count" -gt 0 ]] && echo -e "${B}Inbox:${R} ${YELLOW}${inbox_count} pendente(s)${R}"
-if [[ ${#waiting_names[@]} -gt 0 ]]; then
-  echo -e "${B}${MAGENTA}Esperando review (${#waiting_names[@]}):${R}"
-  for i in "${!waiting_names[@]}"; do
-    printf "  ${MAGENTA}◆${R} %-${max_wn}s ${DIM}%s${R}\n" "${waiting_names[$i]}" "${waiting_descs[$i]}"
-  done
-fi
 
 echo
 
 # --- Auto-Jarvis: cache imediato, refresh em background ---
 if [[ -f "$AUTOJARVIS_FLAG" ]] && command -v gh &>/dev/null; then
-  echo -e "${DIM}$(printf '─%.0s' $(seq 1 80))${R}"
   echo -e "${B}${CYAN}JARVIS${R}"
 
   WS="$WS" source "$WS/stow/.claude/scripts/gh-status.sh" 2>/dev/null || true
@@ -427,5 +406,8 @@ if [[ -f "$AUTOJARVIS_FLAG" ]] && command -v gh &>/dev/null; then
 
   echo
 fi
+
+echo -e "${DIM}$(printf '─%.0s' $(seq 1 80))${R}"
+echo
 
 exit 0

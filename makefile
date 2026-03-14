@@ -23,13 +23,13 @@ help:
 	@echo "  Container"
 	@echo "  ─────────────────────────────────────────────────────────"
 	@echo "  make build             Build da imagem Docker"
-	@echo "  make start             Sobe sandbox + abre Claude (alias sandbox)"
-	@echo "  make sandbox           Sobe sandbox + abre Claude"
-	@echo "  make shell             Sobe sandbox + abre bash"
-	@echo "  make resume            Retoma sessão Claude anterior"
+	@echo "  make start             Sobe sandbox + bootstrap + Claude Code"
+	@echo "  make sandbox           Idem (bootstrap depois abre Claude)"
+	@echo "  make shell             Sobe sandbox + só bash (bootstrap no .bashrc)"
+	@echo "  make resume            Retoma sessão Claude anterior (usa API)"
 	@echo "  make down              Para todos os containers"
 	@echo "  make destroy           Para containers + remove imagens"
-	@echo "  make inject            Restow + restart sandbox + Claude"
+	@echo "  make inject            Restow + restart sandbox + shell"
 	@echo ""
 	@echo "  Tasks"
 	@echo "  ─────────────────────────────────────────────────────────"
@@ -114,11 +114,11 @@ start: sandbox
 
 sandbox:
 	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec sandbox claude --permission-mode bypassPermissions -- "startup"
+	@$(COMPOSE) exec -it sandbox bash -c '/workspace/scripts/bootstrap.sh; exec claude --permission-mode bypassPermissions'
 
 shell:
 	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec sandbox bash
+	@$(COMPOSE) exec -it sandbox bash
 
 resume:
 	$(COMPOSE) up -d sandbox
@@ -134,7 +134,7 @@ inject:
 	$(MAKE) restow
 	$(COMPOSE) down
 	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec sandbox claude --permission-mode bypassPermissions -- "startup"
+	@$(COMPOSE) exec -it sandbox bash -c '/workspace/scripts/bootstrap.sh; exec claude --permission-mode bypassPermissions'
 
 # ── Tasks ──────────────────────────────────────────────────────────
 # Vários runners por linha de comando: use CLAU_WORKER_ID diferente em cada um.
