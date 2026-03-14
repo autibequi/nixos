@@ -282,7 +282,7 @@ fi
 
 # --- Esperando Review (itens que precisam da atenção do user) ---
 if [[ -f "$KANBAN" ]]; then
-  waiting_items=(); in_waiting=0
+  waiting_names=(); waiting_descs=(); in_waiting=0; max_wn=0
   while IFS= read -r line; do
     [[ "$line" == "## Esperando Review" ]] && { in_waiting=1; continue; }
     [[ "$line" =~ ^##\  ]] && [[ "$in_waiting" == "1" ]] && break
@@ -290,15 +290,16 @@ if [[ -f "$KANBAN" ]]; then
       after="${line#*\*\*}"; name="${after%%\*\**}"
       desc=""; if [[ "$line" == *" — "* ]]; then
         raw="${line##* — }"; [[ ${#raw} -gt 40 ]] && raw="${raw:0:37}..."
-        desc=" ${raw}"
+        desc="${raw}"
       fi
-      waiting_items+=("${name}${DIM}${desc}${R}")
+      waiting_names+=("$name"); waiting_descs+=("$desc")
+      [[ ${#name} -gt $max_wn ]] && max_wn=${#name}
     fi
   done < "$KANBAN"
-  if [[ ${#waiting_items[@]} -gt 0 ]]; then
-    echo -e "${B}${MAGENTA}Esperando review (${#waiting_items[@]}):${R}"
-    for wi in "${waiting_items[@]}"; do
-      echo -e "  ${MAGENTA}◆${R} ${wi}"
+  if [[ ${#waiting_names[@]} -gt 0 ]]; then
+    echo -e "${B}${MAGENTA}Esperando review (${#waiting_names[@]}):${R}"
+    for i in "${!waiting_names[@]}"; do
+      printf "  ${MAGENTA}◆${R} %-${max_wn}s ${DIM}%s${R}\n" "${waiting_names[$i]}" "${waiting_descs[$i]}"
     done
   fi
 fi
@@ -308,7 +309,7 @@ echo -e "${DIM}$(printf '─%.0s' $(seq 1 80))${R}"
 
 # --- THINKINGS (lista unificada) ---
 if [[ -f "$KANBAN" ]]; then
-  items=()
+  item_prefixes=(); item_names=(); item_descs=(); item_colors=(); max_tn=0
 
   # Em Andamento → [/]
   in_col=0
@@ -319,9 +320,10 @@ if [[ -f "$KANBAN" ]]; then
       after="${line#*\*\*}"; name="${after%%\*\**}"
       desc=""; if [[ "$line" == *" — "* ]]; then
         raw="${line##* — }"; [[ ${#raw} -gt 30 ]] && raw="${raw:0:27}..."
-        desc=" ${raw}"
+        desc="${raw}"
       fi
-      items+=("${YELLOW}[/] ${name}${DIM}${desc}${R}")
+      item_prefixes+=("[/]"); item_names+=("$name"); item_descs+=("$desc"); item_colors+=("$YELLOW")
+      [[ ${#name} -gt $max_tn ]] && max_tn=${#name}
     fi
   done < "$KANBAN"
 
@@ -334,9 +336,10 @@ if [[ -f "$KANBAN" ]]; then
       after="${line#*\*\*}"; name="${after%%\*\**}"
       desc=""; if [[ "$line" == *" — "* ]]; then
         raw="${line##* — }"; [[ ${#raw} -gt 30 ]] && raw="${raw:0:27}..."
-        desc=" ${raw}"
+        desc="${raw}"
       fi
-      items+=("${DIM}[ ] ${name}${desc}${R}")
+      item_prefixes+=("[ ]"); item_names+=("$name"); item_descs+=("$desc"); item_colors+=("$DIM")
+      [[ ${#name} -gt $max_tn ]] && max_tn=${#name}
     fi
   done < "$KANBAN"
 
@@ -347,9 +350,20 @@ if [[ -f "$KANBAN" ]]; then
     [[ "$line" =~ ^##\  ]] && [[ "$in_col" == "1" ]] && break
     if [[ "$in_col" == "1" ]] && [[ "$line" =~ ^-\ \[ ]] && [[ "$line" == *"$TODAY"* ]]; then
       after="${line#*\*\*}"; name="${after%%\*\**}"
-      items+=("${GREEN}[x] ${name}${R}")
+      item_prefixes+=("[x]"); item_names+=("$name"); item_descs+=(""); item_colors+=("$GREEN")
+      [[ ${#name} -gt $max_tn ]] && max_tn=${#name}
     fi
   done < "$KANBAN"
+
+  # Build formatted items
+  items=()
+  for i in "${!item_names[@]}"; do
+    if [[ -n "${item_descs[$i]}" ]]; then
+      items+=("$(printf "${item_colors[$i]}${item_prefixes[$i]} %-${max_tn}s ${DIM}%s${R}" "${item_names[$i]}" "${item_descs[$i]}")")
+    else
+      items+=("${item_colors[$i]}${item_prefixes[$i]} ${item_names[$i]}${R}")
+    fi
+  done
 
   # Rodapé info — recorrentes vêm do scheduled.md
   rec=0; in_rec=0
