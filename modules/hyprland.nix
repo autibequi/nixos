@@ -2,28 +2,10 @@
   lib,
   pkgs,
   inputs,
-  hyprland-git,
   unstable,
   ...
 }:
 with lib;
-let
-  # Hyprland Plugins
-  hypr-plugin-dir = pkgs.symlinkJoin {
-    name = "hyrpland-plugins";
-    paths =
-      (with unstable.hyprlandPlugins; [
-        # hyprexpo
-        # hypr-dynamic-cursors
-        # hyprfocus
-        # hyprtrails
-        # hyprspace
-      ])
-      ++ [
-        # inputs.hyprtasking.packages.${pkgs.system}.hyprtasking
-      ];
-  };
-in
 {
   programs.hyprland = {
     enable = true;
@@ -41,11 +23,6 @@ in
       comment = "Hyprland compositor managed by UWSM";
       binPath = "/run/current-system/sw/bin/start-hyprland";
     };
-  };
-
-  # Environment Variables
-  environment.sessionVariables = {
-    HYPR_PLUGIN_DIR = hypr-plugin-dir;
   };
 
   # Habilitar serviço para compilar schemas

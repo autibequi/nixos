@@ -14,8 +14,6 @@
     voxtype.url = "github:peteonrails/voxtype";
     nixified-ai.url = "github:nixified-ai/flake"; # Nixified AI
 
-    hyprland.url = "github:hyprwm/Hyprland/v0.54.0";
-
     claude-code.url = "github:sadjow/claude-code-nix";
 
   };
@@ -41,13 +39,11 @@
         inherit system;
         config.allowUnfree = true;
       };
-
-      hyprland-git = inputs.hyprland.packages.${system};
     in
     {
       nixosConfigurations.nomad = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = { inherit inputs unstable hyprland-git; };
+        specialArgs = { inherit inputs unstable; };
         modules = [
           {
             nixpkgs.config.allowUnfree = true;
