@@ -65,11 +65,13 @@ User pediu lista dinâmica de agentes criados no bootstrap.sh. Adicionei seção
 Depois alguém (worker?) transformou em renderização side-by-side: **Agentes à esquerda | THINKINGS à direita**.
 
 User pediu ajustes finais:
-1. Coluna agentes à esquerda (já feito)
-2. Linha divisória entre "Esperando review" e "Agentes/THINKINGS" (adicionada)
-3. Remover quote GLaDOS pra limpar o output (removido)
+1. Coluna agentes à esquerda (feito)
+2. Linha divisória entre "Esperando review" e "Agentes/THINKINGS" (feito)
+3. Remover quote GLaDOS pra limpar output (feito)
+4. Colocar logo Aperture Science (lente ◉) nos banners (feito)
+5. Remover referência TULPA (feito)
 
-Bootstrap agora é minimalista: banner → workers → git → review → ────── → agentes|thinkings. Sem noise.
+Bootstrap agora é puramente Aperture Science: ◉ APERTURE SCIENCE ◉ + porquemo → workers → git → review → ────── → agentes|thinkings. Minimalista e visual.
 
 **Depois o user pediu:** qualquer um com tag `#worktree` deve usar a skill pra compartilhar funcionamento.
 
