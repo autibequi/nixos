@@ -200,8 +200,6 @@ BANNER_FUNCS=(build_banner_1 build_banner_2 build_banner_3)
 echo
 ${BANNER_FUNCS[$((RANDOM % ${#BANNER_FUNCS[@]}))]}
 echo
-echo -e "${DIM}GLaDOS: ${QUOTE}${R}"
-echo
 
 # --- Workers (systemd oneshot + timer → detect via log age) ---
 worker_parts=()
