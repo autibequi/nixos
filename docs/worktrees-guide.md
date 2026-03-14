@@ -37,7 +37,7 @@ Agora (com worktree):
         ├─ Hook: worktree-enter
         │  • scripts/worktree-manager.sh init
         │  • Registra em .worktrees-registry.json
-        │  • Atualiza vault/worktrees.md
+        │  • Atualiza vault/_agent/worktrees.md
         │
         ▼
 ┌─────────────────────────────────────────────────────────┐
@@ -77,7 +77,7 @@ Agora (com worktree):
 
 ---
 
-## 📊 Dashboard: `vault/worktrees.md`
+## 📊 Dashboard: `vault/_agent/worktrees.md`
 
 Documento vivo que mostra:
 
@@ -249,7 +249,7 @@ Roda automaticamente quando você chama `EnterWorktree`:
 cd /workspace && ./scripts/worktree-manager.sh update-dashboard
 ```
 
-Atualiza `vault/worktrees.md` com novo card.
+Atualiza `vault/_agent/worktrees.md` com novo card.
 
 ---
 
@@ -262,7 +262,7 @@ Atualiza `vault/worktrees.md` com novo card.
 # Acontece:
 # 1. EnterWorktree → git worktree add
 # 2. Hook → worktree-manager init
-# 3. Dashboard atualizado em vault/worktrees.md
+# 3. Dashboard atualizado em vault/_agent/worktrees.md
 
 # Você trabalha normalmente
 # Quando termina:

@@ -13,7 +13,7 @@ CLAU_CLOCK="${CLAU_CLOCK:-every60}"
 RUN_ID="$$-$(date +%s)-${RANDOM:-0}"
 NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}"
 export NODE_OPTIONS
-SCHEDULED="$WORKSPACE/vault/scheduled.md"
+SCHEDULED="$WORKSPACE/vault/_agent/scheduled.md"
 export KANBAN_FILE="$KANBAN"
 export SCHEDULED_FILE="$SCHEDULED"
 export KANBAN_LOCKFILE="$EPHEMERAL/.kanban.lock"

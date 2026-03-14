@@ -4,7 +4,7 @@
 set -euo pipefail
 
 KANBAN="${KANBAN_FILE:-/workspace/vault/kanban.md}"
-SCHEDULED="${SCHEDULED_FILE:-/workspace/vault/scheduled.md}"
+SCHEDULED="${SCHEDULED_FILE:-/workspace/vault/_agent/scheduled.md}"
 CEMITERIO="${CEMITERIO_FILE:-/workspace/vault/cemiterio-tasks.md}"
 LOCKFILE="${KANBAN_LOCKFILE:-/workspace/.ephemeral/.kanban.lock}"
 

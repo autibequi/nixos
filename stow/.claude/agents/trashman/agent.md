@@ -25,7 +25,7 @@ SELF.md            — personal diary
 flake.nix          — NixOS config
 configuration.nix  — NixOS registry
 kanban.md          — THINKINGS (work state)
-scheduled.md       — recurring tasks
+_agent/scheduled.md — recurring tasks
 memoria.md         — (any task) persistent state
 ```
 

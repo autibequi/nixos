@@ -70,7 +70,7 @@ Invoca o zelador pra arquivar lixo do workspace.
 ## 📊 Status Atual
 
 ### Ver tudo em ação
-- **`vault/scheduled.md`** — coluna "Recorrentes" mostra os dois (quando estão "Em Execução" = rodando agora)
+- **`vault/_agent/scheduled.md`** — coluna "Recorrentes" mostra os dois (quando estão "Em Execução" = rodando agora)
 - **`vault/_agent/reports/`** — relatórios automáticos após cada ciclo
 - **`vault/_agent/tasks/recurring/wiseman/`** — estado do Wiseman
 - **`vault/_agent/tasks/recurring/trashman/`** — estado do Trashman
@@ -104,7 +104,7 @@ Sim — edita o Chrononomicon e remove a nota do "Registro de Teias Tecidas". Pr
 
 - [ ] Executar `/wiseman` e verificar se tece alguma conexão
 - [ ] Executar `/trashman` e verificar se encontra algo pra limpar
-- [ ] Ver `vault/scheduled.md` → ambos em "Recorrentes" ✅
+- [ ] Ver `vault/_agent/scheduled.md` → ambos em "Recorrentes" ✅
 - [ ] Ler `vault/wiseman-chrononomicon.md` → verificar se tem dados
 - [ ] Verificar `.ephemeral/.trashlist` → verificar se tem histórico
 

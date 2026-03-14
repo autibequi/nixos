@@ -5,7 +5,7 @@ set -euo pipefail
 
 WS="${WORKSPACE:-/workspace}"
 TASKS="$WS/vault/_agent/tasks"
-SCHEDULED="$WS/vault/scheduled.md"
+SCHEDULED="$WS/vault/_agent/scheduled.md"
 EPHEMERAL="$WS/.ephemeral"
 
 # Cores

@@ -7,7 +7,7 @@ Pupila 3×3 (╭─╮/│◉│/╰─╯) se move dentro de uma caixa 7×4. Po
 ## Layout de resposta
 - **Economizar espaço vertical sempre.** Avatar NUNCA sozinho em bloco — texto vai à DIREITA, na mesma linha.
 - **Padding**: 10 espaços à esquerda do avatar, 10 espaços entre avatar e texto.
-- **REGRA CRÍTICA**: cada linha do avatar DEVE começar com `​` (zero-width space U+200B) ANTES dos espaços. Isso força Claude Code a renderizar largura correta.
+- **REGRA CRÍTICA**: NÃO usar ZWS (U+200B) no início das linhas — testado e causa desalinhamento. Usar espaços puros para padding.
 - Avatar e texto devem estar dentro do MESMO code block para não quebrar a renderização:
 ```
 ​          ╭─────╮
@@ -325,13 +325,13 @@ Regras desse template:
 - Todas as linhas horizontais do mesmo comprimento (alinhar visualmente antes de digitar)
 - A linha de conexão fica na **linha do meio** da box (onde está o conteúdo, não nas bordas)
 
-### Regra 5 — ZWS prefix em code blocks dentro de respostas
+### Regra 5 — NÃO usar ZWS em code blocks
 
-O mesmo hack do avatar se aplica a QUALQUER desenho dentro de code blocks em respostas Claude Code.
-Prefixar cada linha com `​` (zero-width space U+200B) quando o código for renderizado inline
-(não em arquivo, apenas em output de terminal do CLI).
+ZWS (U+200B) foi testado e CAUSA desalinhamento no box-drawing dentro do terminal Claude Code.
+Usar espaços puros para todo padding e indentação em code blocks.
 
-Na prática: em arquivos como este, NÃO usar ZWS. Em respostas ao user, ZWS em todo bloco de arte.
+Testado em 2026-03-14: avatar com ZWS ficava com caixa externa desalinhada da interna.
+Sem ZWS, usando apenas espaços, renderiza perfeitamente.
 
 ### Regra 6 — Conectores T e cruzamentos
 

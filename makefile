@@ -113,6 +113,12 @@ clau:
 
 start: sandbox
 
+start-haiku: sandbox-haiku
+
+sandbox-haiku:
+	$(COMPOSE) up -d sandbox
+	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --model claude-haiku-4-5-20251001 --permission-mode bypassPermissions "oi"'
+
 sandbox:
 	$(COMPOSE) up -d sandbox
 	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions "oi"'
@@ -209,14 +215,14 @@ status:
 	@echo "=== Workers ==="
 	@podman ps --filter "name=_worker_" --format "table {{.ID}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || echo "(nenhum)"
 	@echo "\n=== Kanban ==="
-	@if [ -f vault/scheduled.md ]; then \
+	@if [ -f vault/_agent/scheduled.md ]; then \
 		for col in "Recorrentes" "Em Execução"; do \
 			count=0; in_col=0; \
 			while IFS= read -r line; do \
 				if [ "$$line" = "## $$col" ]; then in_col=1; continue; fi; \
 				if echo "$$line" | grep -q '^## ' && [ "$$in_col" = "1" ]; then break; fi; \
 				if [ "$$in_col" = "1" ] && echo "$$line" | grep -q '^- \['; then count=$$((count + 1)); fi; \
-			done < vault/scheduled.md; \
+			done < vault/_agent/scheduled.md; \
 			echo "  $$col: $$count"; \
 		done; \
 	fi
@@ -264,7 +270,7 @@ new:
 		"Atualize \`<diretório de contexto>/contexto.md\`." \
 		> "$$task_dir/CLAUDE.md"; \
 	kanban_col="Backlog"; kanban_file="vault/kanban.md"; \
-	if [ "$$task_type" = "recurring" ]; then kanban_col="Recorrentes"; kanban_file="vault/scheduled.md"; fi; \
+	if [ "$$task_type" = "recurring" ]; then kanban_col="Recorrentes"; kanban_file="vault/_agent/scheduled.md"; fi; \
 	card="- [ ] **$(name)** #$$task_type $$(date +%Y-%m-%d) \`$$task_model\`"; \
 	KANBAN_FILE="$$kanban_file" source scripts/kanban-sync.sh && kanban_add_card "$$kanban_col" "$$card" 2>/dev/null || \
 		echo "[AVISO] Não conseguiu adicionar card no kanban"; \

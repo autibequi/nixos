@@ -2,7 +2,7 @@
 
 # worktree-manager.sh
 # Gerencia rastreamento de worktrees: entrada, status, saída
-# Atualiza vault/worktrees.md com dashboard dinâmico
+# Atualiza vault/_agent/worktrees.md com dashboard dinâmico
 
 set -euo pipefail
 

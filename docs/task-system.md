@@ -45,7 +45,7 @@ max_turns: 25
 ## Arquivos
 - `vault/kanban.md` — work items (Backlog, Inbox, Em Andamento, Esperando Review, Aprovado, Falhou)
 - `vault/cemiterio-tasks.md` — tasks arquivadas/deprecated (Arquivado, Deprecated)
-- `vault/scheduled.md` — tasks recorrentes (Recorrentes, Em Execução, Histórico)
+- `vault/_agent/scheduled.md` — tasks recorrentes (Recorrentes, Em Execução, Histórico)
 
 ## Colunas — kanban.md
 | Coluna | Função |

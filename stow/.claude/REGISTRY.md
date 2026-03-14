@@ -126,7 +126,7 @@ Agentes especializados invocáveis via `Agent` tool.
 | `bo-container` | — | Vue 2 BO: services, routes, components, pages |
 | `front-student` | — | Nuxt 2 Front: services, routes, components, pages |
 | `orquestrador` | — | Cross-repo: coordena Monolito + BO + Front |
-| `subconscient` | — | Agente de fundo: processamento autônomo |
+| `dreamman` | — | Agente de fundo: processamento autônomo |
 
 ---
 

@@ -14,6 +14,8 @@ fi
 
 # Dados do JSON (schema: code.claude.com/docs/en/statusline)
 MODEL=$(echo "$input" | jq -r '.model.display_name // "?"')
+# Extrair só o tamanho do modelo (haiku, sonnet, opus)
+MODEL_SIZE=$(echo "$MODEL" | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')
 CTX_PCT=$(echo "$input" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
 CTX_SIZE=$(echo "$input" | jq -r '.context_window.context_window_size // 0')
 # Uso em tokens: current_usage (input+cache) ou estimado a partir de used_percentage
@@ -140,8 +142,8 @@ BOCECHAS_MAX=10
 CLAUDIOS_BAR=$(minibar "$WORKERS" "$CLAUDIOS_MAX" "$BAR_W")
 BOCECHAS_BAR=$(minibar "$BOCECHAS" "$BOCECHAS_MAX" "$BAR_W")
 
-# Contexto: barra + usado em K / máx (ex: 123k/1M)
-CTX_STR="ctx ${CTX_BAR} ${CTX_USED_K}k/${CTX_SIZE_FMT}"
+# Contexto: barra + usado em K / máx (ex: 123k/1M) — sem prefixo "ctx"
+CTX_STR="${CTX_BAR} ${CTX_USED_K}k/${CTX_SIZE_FMT}"
 
 # Duração da sessão: ms -> 0s, 1m, 1h 5m + barra (escala 0–1h)
 DURATION_SEC=0
@@ -192,9 +194,9 @@ WORKER_INFO=" | Claudios ${WORKERS} ${CLAUDIOS_BAR}  Bochechas ${BOCECHAS} ${BOC
 EXTRA=""
 [[ -n "$LINES_STR" ]] && EXTRA=" | ${LINES_STR}"
 
-# Status line: métricas à esquerda; à direita "alive for Xs!" e modelo
+# Status line: modelo primeiro; métricas à esquerda; à direita "alive for Xs!"
 ALIVE_STR="alive for ${DURATION_STR}!"
-RIGHT="${CTX_STR}${COST_STR}${EXTRA}${WT_STR}${WORKER_INFO} | ${ALIVE_STR} | $MODEL"
+RIGHT="${MODEL_SIZE} ${CTX_STR}${COST_STR}${EXTRA}${WT_STR}${WORKER_INFO} | ${ALIVE_STR}"
 
 # Terminal title via OSC (stderr)
 printf '\033]0;Claude: %s\007' "$TOPIC" >&2

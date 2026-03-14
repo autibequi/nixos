@@ -14,7 +14,7 @@ MAGENTA=$'\033[38;5;204m' GRAY=$'\033[38;5;245m'
 # ── Globals ───────────────────────────────────────────────────────────────────
 WS="/workspace"
 KANBAN="$WS/vault/kanban.md"
-SCHEDULED="$WS/vault/scheduled.md"
+SCHEDULED="$WS/vault/_agent/scheduled.md"
 TODAY=$(date +%Y-%m-%d)
 now=$(date +%s)
 COLS="${COLUMNS:-$(tput cols 2>/dev/null || echo 100)}"

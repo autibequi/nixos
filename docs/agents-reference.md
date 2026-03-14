@@ -151,7 +151,7 @@ Se sim → edita `vault/_agent/tasks/recurring/trashman/CLAUDE.md` pra melhorar.
 
 ### Status em scheduled.md
 
-Ambos aparecem na coluna **"Recorrentes"** de `vault/scheduled.md`:
+Ambos aparecem na coluna **"Recorrentes"** de `vault/_agent/scheduled.md`:
 
 ```markdown
 ## Recorrentes
@@ -174,7 +174,7 @@ Cada task tem um `memoria.md` em seu diretório:
 ### Monitoramento
 
 Verifique no Obsidian:
-- **`vault/scheduled.md`** — status atual (Em Execução = rodando agora)
+- **`vault/_agent/scheduled.md`** — status atual (Em Execução = rodando agora)
 - **`vault/_agent/reports/`** — relatórios automáticos após cada ciclo
 - **`.ephemeral/.trashlist`** — log histórico de tudo que Trashman arquivou
 
@@ -209,7 +209,7 @@ Verifique no Obsidian:
 | **Wiseman Grimório** | `vault/wiseman-chrononomicon.md` |
 | **Trashman Log** | `.ephemeral/.trashlist` |
 | **Task System Docs** | `docs/task-system.md` |
-| **Status Atual** | `vault/scheduled.md` (Recorrentes) |
+| **Status Atual** | `vault/_agent/scheduled.md` (Recorrentes) |
 
 ---
 
