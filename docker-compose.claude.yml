@@ -70,6 +70,22 @@ services:
       # pasta exclusiva openclaw read-write (override do :ro acima)
       - ${HOME}/.ovault/Work/openclaw:/workspace/vault/openclaw
 
+  # OpenCode TUI — AI coding assistant (sst/opencode)
+  # Config persistida em ~/.opencode; workspace montado em /workspace
+  # Abrir TUI: make code
+  opencode:
+    <<: *common
+    container_name: claude-opencode
+    network_mode: host
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["sleep infinity"]
+    volumes:
+      - ${HOME}/.opencode:/home/claude/.opencode
+      - .:/workspace
+
   # Worker every60 — tasks longas (a cada hora)
   worker:
     <<: *common

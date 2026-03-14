@@ -4,8 +4,9 @@
 COMPOSE_FILE := docker-compose.claude.yml
 SERVICE      := sandbox
 OPENCLAW_SVC := openclaw
+OPENCODE_SVC := opencode
 
-.PHONY: help shell build rebuild start stop logs start-openclaw stop-openclaw logs-openclaw openclaw claw
+.PHONY: help shell build rebuild start stop logs start-openclaw stop-openclaw logs-openclaw openclaw claw start-code stop-code logs-code code
 
 help:
 	@echo "Targets disponíveis:"
@@ -20,6 +21,10 @@ help:
 	@echo "  make logs-openclaw    — tail dos logs do openclaw"
 	@echo "  make claw             — abre openclaw TUI (sandbox → gateway via host network)"
 	@echo "  make openclaw         — abre shell no container openclaw"
+	@echo "  make start-code       — sobe container opencode"
+	@echo "  make stop-code        — derruba container opencode"
+	@echo "  make logs-code        — tail dos logs do opencode"
+	@echo "  make code             — abre opencode TUI no container"
 
 shell:
 	docker compose -f $(COMPOSE_FILE) exec $(SERVICE) bash
@@ -56,6 +61,24 @@ logs-openclaw:
 # Shell dentro do container openclaw
 openclaw:
 	docker compose -f $(COMPOSE_FILE) exec $(OPENCLAW_SVC) bash
+
+# OpenCode — AI coding assistant
+start-code:
+	@mkdir -p $(HOME)/.opencode
+	docker compose -f $(COMPOSE_FILE) up -d $(OPENCODE_SVC)
+	@echo "Container opencode subindo em claude-opencode."
+
+stop-code:
+	docker compose -f $(COMPOSE_FILE) stop $(OPENCODE_SVC)
+
+logs-code:
+	docker compose -f $(COMPOSE_FILE) logs -f $(OPENCODE_SVC)
+
+# Abre opencode TUI no container dedicado
+code:
+	@mkdir -p $(HOME)/.opencode
+	docker compose -f $(COMPOSE_FILE) up -d $(OPENCODE_SVC)
+	docker compose -f $(COMPOSE_FILE) exec $(OPENCODE_SVC) opencode
 
 # Abre openclaw TUI no sandbox (gateway acessível via host network)
 claw:
