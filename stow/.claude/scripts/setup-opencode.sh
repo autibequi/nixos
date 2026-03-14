@@ -43,6 +43,14 @@ else
     echo -e "${YELLOW}⚠️  bun not found in PATH. Run 'bun install' manually in $CONFIG_DIR${NC}"
 fi
 
+# Make wrapper executable
+WRAPPER_SCRIPT="$WORKSPACE/stow/.claude/scripts/opencode-inject-claude.sh"
+if [[ -f "$WRAPPER_SCRIPT" ]]; then
+    chmod +x "$WRAPPER_SCRIPT"
+    echo -e "${GREEN}✓ Wrapper script ready${NC}"
+fi
+
 echo -e "${GREEN}✓ Setup complete!${NC}"
 echo -e "${BLUE}📍 Config location: $CONFIG_DIR${NC}"
 echo -e "${YELLOW}💡 Tip: Test with 'opencode --version'${NC}"
+echo -e "${YELLOW}💡 Tip: Use opencode-inject-claude.sh to always load CLAUDE.md context${NC}"

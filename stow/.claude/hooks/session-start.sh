@@ -40,6 +40,12 @@ if [ "$PERSONALITY" = "ON" ]; then
     cat "$WS/DIRETRIZES.md"
     echo "---/DIRETRIZES---"
   fi
+  # CLAUDE.md (project instructions)
+  if [ -f "$WS/CLAUDE.md" ]; then
+    echo "---CLAUDE.MD---"
+    cat "$WS/CLAUDE.md"
+    echo "---/CLAUDE.MD---"
+  fi
   # SELF.md (diário)
   if [ -f "$WS/SELF.md" ]; then
     echo "---SELF---"

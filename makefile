@@ -119,11 +119,11 @@ start-haiku: sandbox-haiku
 
 sandbox-haiku:
 	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --model claude-haiku-4-5-20251001 --permission-mode bypassPermissions "oi"'
+	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --model claude-haiku-4-5-20251001 --permission-mode bypassPermissions'
 
 sandbox:
 	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions "oi"'
+	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
 
 shell:
 	$(COMPOSE) up -d sandbox
