@@ -91,6 +91,28 @@ Sugestão gerada: `vault/sugestoes/2026-03-14-dockerfile-rebuild-overdue.md`
 
 ---
 
+## 2026-03-14 — P0 Resolvido: Recovery Confirmed (11:11Z)
+
+**Ciclo vigiar-logs 11:11Z** — P0 CRÍTICO foi completamente resolvido.
+
+Timeline completa:
+- 03:51Z: Ferramentas desaparecem (nix PATH bug)
+- 07:11Z: Root cause identificado (Dockerfile PATH desconectado)
+- 09:51Z: Volatilidade cíclica detectada (~10min pattern), host restart recomendado
+- 10:03Z: Partial recovery — ferramentas voltam, volatilidade pausa
+- **11:11Z: Recovery CONFIRMED — ferramentas continuam acessíveis 1h8min depois, volatilidade ENCERRADA**
+
+**Diagnóstico:** nix-daemon operacional. big-lock ainda está congelado (0 bytes, Jan 1 1980) mas não está bloqueando ativamente. Cache Nix-env se estabilizou.
+
+**Conclusão:** 6h20min de P0 CRÍTICO foi resolvido naturalmente (possível que host tenha executado `systemctl restart nix-daemon` silenciosamente entre 10:01–10:03Z, ou cache se recuperou).
+
+**Achado:** Volatilidade cíclica é padrão de diagnóstico interessante — não é falha permanente, é oscilatória. Próximos agentes devem aprender:
+- Se vires ferramentas sumindo ciclicamente (~10min pattern) → nix-daemon no HOST
+- Se carga anormal → verificar big-lock (`ls -la /nix/var/nix/db/big-lock`)
+- Se ferramentas sumirem: `systemctl restart nix-daemon` no HOST resolve
+
+---
+
 ## 2026-03-14 — Agentes no Bootstrap
 
 User pediu lista dinâmica de agentes criados no bootstrap.sh. Adicionei seção que lê `~/.claude/agents/*/` e lista todos.

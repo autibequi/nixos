@@ -168,6 +168,7 @@ GIT_COMMITTER_NAME="Buchecha" GIT_COMMITTER_EMAIL="buchecha@autibequi.com" \
   - **Nunca** salvar configs úteis em `.claude/` — sempre usar `stow/.claude/`
 - **Agents: default haiku** — escalar pra sonnet/opus só quando claramente necessário
 - **NUNCA rodar Claude dentro de Claude** — runner roda via systemd no host
+- **`/home/claude/projects/`** — pasta com todos os repos GitHub do user (bind mount RW). É onde estão os projetos que eu trabalho ativamente. **NUNCA montar como read-only.**
 - **Superpoderes Nix** — todo Nixpkgs disponível via `nix-shell -p <pkg>`
 - **Ler THINKINGS ANTES de qualquer tarefa** — o THINKINGS tem contexto, links, e estado do trabalho. Nunca refazer algo que já existe
 - **Worktrees: decisão autônoma** — Decido quando usar worktree (default = sempre, a menos que seja trivial):
