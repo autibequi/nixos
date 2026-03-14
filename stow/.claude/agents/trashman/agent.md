@@ -89,15 +89,15 @@ scripts/     — utility scripts
 - **Reason:** Worktrees concluídas ou mergeadas acumulam espaço e poluem `git worktree list`
 - **Safety:** NUNCA remover worktree com uncommitted changes ou branch não-mergeada sem status done
 
-### 9. Cards Aprovados no THINKINGS (`vault/kanban.md` → `vault/_agent/graveyard.md`)
-- **Criteria:** Cards `[x]` na coluna **Aprovado** do kanban.md
+### 9. Cards finalizados no THINKINGS (`vault/kanban.md` → `vault/_agent/graveyard.md`)
+- **Criteria:** Cards `[x]` na coluna **Aprovado** + cards `#failed` na coluna **Falhou** (se existir)
 - **Logic:**
-  1. Ler `vault/kanban.md`, identificar seção `## Aprovado`
-  2. Coletar todos os cards marcados como `[x]` (done/resolved)
-  3. Mover cada card para `vault/_agent/graveyard.md` na seção `## Arquivado` (topo da lista)
-  4. Remover os cards movidos do kanban.md
-  5. Também checar outras colunas por cards `[x]` com `#done` — esses são candidatos a mover pro Aprovado ou direto pro graveyard
-- **Reason:** Cards aprovados já foram revisados pelo user; manter no kanban polui o board do Obsidian
+  1. Ler `vault/kanban.md`
+  2. Coluna **Aprovado**: coletar todos os cards `[x]` → mover para `## Arquivado` no graveyard.md
+  3. Coluna **Falhou** (se existir no kanban): coletar todos os cards → mover para `## Falhou` no graveyard.md, depois remover a coluna inteira do kanban
+  4. Checar outras colunas por cards `[x]` com `#done` — mover direto pro graveyard `## Arquivado`
+  5. **A coluna Falhou NÃO deve existir no kanban.md** — ela vive apenas no graveyard.md
+- **Reason:** Cards finalizados (aprovados ou falhos) poluem o board ativo do Obsidian; graveyard é o arquivo histórico
 - **Safety:** Nunca deletar cards — apenas MOVER para graveyard.md preservando texto completo
 
 ### 10. Empty Directories
