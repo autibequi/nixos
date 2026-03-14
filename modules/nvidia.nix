@@ -42,7 +42,7 @@
     };
   };
 
-  # Permite podman usar o driver NVIDIA
+  # Permite containers usar o driver NVIDIA
   hardware.nvidia-container-toolkit.enable = true;
 
   # Permite o uso do CUDA

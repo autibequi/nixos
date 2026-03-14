@@ -64,7 +64,6 @@
       "hidraw"
       "input"
       "networkmanager"
-      "podman"
       "wheel"
     ];
     shell = pkgs.zsh;

@@ -1,12 +1,8 @@
-x-podman:
-  in_pod: false
-
 x-common: &common
   build:
     context: .
     dockerfile: Dockerfile.claude
   image: claude-nix-sandbox
-  userns_mode: keep-id
   environment:
     - WAYLAND_DISPLAY=${WAYLAND_DISPLAY}
     - XDG_RUNTIME_DIR=/run/user/1000
@@ -33,7 +29,7 @@ x-common: &common
     - /proc/meminfo:/host/proc/meminfo:ro
     - /proc/loadavg:/host/proc/loadavg:ro
     - /proc/uptime:/host/proc/uptime:ro
-    - /run/podman/podman.sock:/host/podman.sock:ro
+    - ${CONTAINER_SOCK:-/var/run/docker.sock}:/host/podman.sock:ro
 
 services:
   # Container persistente pra sessões interativas

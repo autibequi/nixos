@@ -1,18 +1,29 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 let
+  containers = config.local.containers;
+  isPodman = containers.engine == "podman";
+
   user = "pedrinho";
   projectDir = "/home/${user}/nixos";
   vaultDir = "/home/${user}/.ovault/Work";
-  compose = "${pkgs.podman-compose}/bin/podman-compose -f ${projectDir}/docker-compose.claude.yml";
+
+  enginePkg = if isPodman then pkgs.podman else pkgs.docker;
+  composePkg = if isPodman then pkgs.podman-compose else pkgs.docker-compose;
+  composeBin = if isPodman then "podman-compose" else "docker-compose";
+  composeFiles = "-f ${projectDir}/docker-compose.claude.yml"
+    + (if isPodman then " -f ${projectDir}/docker-compose.podman.yml" else "");
+  compose = "${composePkg}/bin/${composeBin} ${composeFiles}";
+
+  hostSocket = if isPodman then "/run/podman/podman.sock" else "/var/run/docker.sock";
 
   logsDir = "${projectDir}/.ephemeral/logs";
 
   commonEnv = [
     "HOME=/home/${user}"
     "XDG_RUNTIME_DIR=/run/user/1000"
-    "DOCKER_HOST=unix:///run/user/1000/podman/podman.sock"
     "WAYLAND_DISPLAY=wayland-1"
-    "PATH=${pkgs.podman}/bin:${pkgs.coreutils}/bin:${pkgs.gnugrep}/bin:${pkgs.bash}/bin:/run/current-system/sw/bin"
+    "PATH=${enginePkg}/bin:${pkgs.coreutils}/bin:${pkgs.gnugrep}/bin:${pkgs.bash}/bin:/run/current-system/sw/bin"
+    "CONTAINER_SOCK=${hostSocket}"
   ];
 
   # Multi-worker dispatch
@@ -49,19 +60,19 @@ let
 
     SERVICE=$( [ "$CLOCK" = "every10" ] && echo "worker-fast" || echo "worker" )
 
-    # Ensure podman network exists (compose needs it)
+    # Ensure container network exists (compose needs it)
     COMPOSE_PROJECT=$(basename ${projectDir})
     NETWORK="''${COMPOSE_PROJECT}_default"
-    if ! ${pkgs.podman}/bin/podman network exists "$NETWORK" 2>/dev/null; then
+    if ! ${enginePkg}/bin/${containers.engine} network exists "$NETWORK" 2>/dev/null; then
       echo "[clau:$CLOCK] Criando network $NETWORK..."
-      ${pkgs.podman}/bin/podman network create "$NETWORK" 2>/dev/null || true
+      ${enginePkg}/bin/${containers.engine} network create "$NETWORK" 2>/dev/null || true
     fi
 
     PIDS=()
     for i in $(seq 1 $MAX_WORKERS); do
       WORKER_ID="$CLOCK-$i"
 
-      existing=$(${pkgs.podman}/bin/podman ps --filter "label=com.docker.compose.service=$SERVICE" \
+      existing=$(${enginePkg}/bin/${containers.engine} ps --filter "label=com.docker.compose.service=$SERVICE" \
         --filter "label=clau.worker.id=$WORKER_ID" \
         --format "{{.ID}}" 2>/dev/null | head -1)
       if [ -n "$existing" ]; then

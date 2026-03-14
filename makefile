@@ -75,7 +75,7 @@ restow:
 
 # ── Container ──────────────────────────────────────────────────────
 
-COMPOSE = podman-compose -f docker-compose.claude.yml
+COMPOSE = docker compose -f docker-compose.claude.yml
 LOGDIR  = logs
 LOGFILE = $(LOGDIR)/$$(date +%Y-%m-%dT%H:%M:%S.%3N).log
 

@@ -28,7 +28,7 @@
     ./modules/ai.nix
     ./modules/whisper-ptt.nix
     ./modules/steam.nix
-    ./modules/podman.nix
+    ./modules/containers.nix
 
     # Hardware Specific
     ./modules/asus.nix
@@ -56,7 +56,7 @@
 
     # Legacy Modules
     # ./modules/tlp.nix
-    # ./modules/docker.nix
+    # ./modules/docker.nix  # legacy — consolidated into containers.nix
     # ./modules/flatpak.nix
     # ./modules/core/home.nix # using stow instead
   ];

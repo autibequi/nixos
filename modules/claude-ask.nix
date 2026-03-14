@@ -1,15 +1,22 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 let
+  containers = config.local.containers;
+  isPodman = containers.engine == "podman";
+
   user = "pedrinho";
   projectDir = "/home/${user}/nixos";
+
+  enginePkg = if isPodman then pkgs.podman else pkgs.docker;
+  composePkg = if isPodman then pkgs.podman-compose else pkgs.docker-compose;
+  socketPath = if isPodman then "unix:///run/user/1000/podman/podman.sock" else "unix:///var/run/docker.sock";
 
   commonEnv = [
     "HOME=/home/${user}"
     "XDG_RUNTIME_DIR=/run/user/1000"
-    "DOCKER_HOST=unix:///run/user/1000/podman/podman.sock"
+    "DOCKER_HOST=${socketPath}"
     "WAYLAND_DISPLAY=wayland-1"
     "DISPLAY=:0"
-    "PATH=${pkgs.podman}/bin:${pkgs.podman-compose}/bin:${pkgs.coreutils}/bin:${pkgs.gnugrep}/bin:${pkgs.bash}/bin:${pkgs.alacritty}/bin:${pkgs.hyprland}/bin:/run/current-system/sw/bin"
+    "PATH=${enginePkg}/bin:${composePkg}/bin:${pkgs.coreutils}/bin:${pkgs.gnugrep}/bin:${pkgs.bash}/bin:${pkgs.alacritty}/bin:${pkgs.hyprland}/bin:/run/current-system/sw/bin"
   ];
 
   askScript = pkgs.writeShellScript "claude-ask-launcher" ''
