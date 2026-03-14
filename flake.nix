@@ -10,29 +10,11 @@
     # Other Inputs
     nixos-hardware.url = "github:NixOS/nixos-hardware/master"; # Hardware
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
-    isd.url = "github:isd-project/isd"; # Interactive SystemD
     home-manager.url = "github:nix-community/home-manager/release-25.11"; # Home Manager
     voxtype.url = "github:peteonrails/voxtype";
     nixified-ai.url = "github:nixified-ai/flake"; # Nixified AI
 
-    zed.url = "github:zed-industries/zed";
-
     hyprland.url = "github:hyprwm/Hyprland/v0.54.0";
-
-    hyprtasking = {
-      url = "github:raybbian/hyprtasking";
-      inputs.hyprland.follows = "hyprland";
-    };
-
-    zen-browser = {
-      url = "github:youwen5/zen-browser-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    antigravity-nix = {
-      url = "github:jacopone/antigravity-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
 
     claude-code.url = "github:sadjow/claude-code-nix";
 
@@ -49,7 +31,6 @@
       chaotic,
       nixified-ai,
       voxtype,
-      zed,
       claude-code,
       ...
     }@inputs:
@@ -70,7 +51,6 @@
         modules = [
           {
             nixpkgs.config.allowUnfree = true;
-            nixpkgs.config.allowInsecure = true;
             nixpkgs.overlays = [ claude-code.overlays.default ];
           }
 

@@ -29,6 +29,10 @@ max_turns: 25
 ## Tags especiais
 | Tag | Efeito |
 |-----|--------|
+| `#haiku` | Task designada para Haiku (rápida, simples) |
+| `#sonnet` | Task designada para Sonnet (análise, síntese) |
+| `#opus` | Task designada para Opus (complexo, design) |
+| Sem tag modelo | `#auto` (worker decide baseado em contexto) |
 | `#interativo` | Card de sessão interativa (não processado por workers) |
 
 ## Kanban — Formato de cards

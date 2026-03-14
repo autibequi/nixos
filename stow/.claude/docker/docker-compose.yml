@@ -8,12 +8,12 @@ services:
     userns_mode: keep-id
     command: ["sleep", "infinity"]
     volumes:
-      # Claudinho Workspace
+      # Tulpa Workspace
       - .:/workspace
-      # Bloqueio de acesso aos arquivos de configuração do Claudinho
+      # Bloqueio de acesso aos arquivos de configuração da Tulpa
       - ./.claude/settings.local.json:/workspace/.claude/settings.local.json:ro
       - ./.claude/settings.json:/workspace/.claude/settings.json:ro
-      # Credenciais SSh do Claudinho (github)
+      # Credenciais SSH (github)
       - ~/.ssh/claudinho:/root/.ssh/claudinho:ro
       - ~/.ssh/claudinho.pub:/root/.ssh/claudinho.pub:ro
       # Permite Wayland Clipboard

@@ -234,6 +234,11 @@ $(cat "$TASKS/running/$task/memoria.md")"
 
   echo "[clau:$WORKER_ID:$task] Claude (model=$task_model, timeout=${task_timeout}s, $(date -u +%H:%M:%S))"
 
+  # Auto-tracking: criar worktree virtual pra task
+  local worker_branch="worker/${CLAU_CLOCK}/${task}"
+  export CLAU_CURRENT_WORKTREE="$task"
+  "$WORKSPACE/scripts/worktree-manager.sh" init "$task" "$worker_branch" "Task: $task (Worker: $WORKER_ID)" || true
+
   local mcp_flags=()
   [ -n "$mcp_flags_str" ] && mcp_flags=($mcp_flags_str)
 
@@ -267,6 +272,9 @@ $memoria
 # ── Finish task ──────────────────────────────────────────────────
 finish_task() {
   local task="$1" source_dir="$2" exit_code="$3"
+
+  # Auto-tracking: fechar worktree virtual
+  "$WORKSPACE/scripts/worktree-manager.sh" exit || true
 
   if [ "$source_dir" = "recurring" ]; then
     # Sync back evolved files to recurring/ before cleanup

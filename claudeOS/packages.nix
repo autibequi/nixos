@@ -11,6 +11,7 @@ with pkgs; [
   gzip
   which
   less
+  unstable.openclaw
 
   # Dev tools
   git

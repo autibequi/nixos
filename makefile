@@ -4,7 +4,7 @@ export GIT_AUTHOR_EMAIL := $(shell git config user.email)
 export GIT_COMMITTER_NAME := $(GIT_AUTHOR_NAME)
 export GIT_COMMITTER_EMAIL := $(GIT_AUTHOR_EMAIL)
 
-.PHONY: help switch update stow restow build shell sandbox resume down inject \
+.PHONY: help switch update stow restow build start shell sandbox resume down destroy inject \
        clau run auto stop reset status new logs logs-list \
        usage-api usage-api-7d usage-api-30d clau-service-logs ask
 
@@ -23,10 +23,12 @@ help:
 	@echo "  Container"
 	@echo "  ─────────────────────────────────────────────────────────"
 	@echo "  make build             Build da imagem Docker"
+	@echo "  make start             Sobe sandbox + abre Claude (alias sandbox)"
 	@echo "  make sandbox           Sobe sandbox + abre Claude"
 	@echo "  make shell             Sobe sandbox + abre bash"
 	@echo "  make resume            Retoma sessão Claude anterior"
 	@echo "  make down              Para todos os containers"
+	@echo "  make destroy           Para containers + remove imagens"
 	@echo "  make inject            Restow + restart sandbox + Claude"
 	@echo ""
 	@echo "  Tasks"
@@ -107,6 +109,8 @@ clau:
 	echo "[clau] Workers lançados. Seguindo log..."; \
 	tail -f "$$logfile"
 
+start: sandbox
+
 sandbox:
 	$(COMPOSE) up -d sandbox
 	@$(COMPOSE) exec sandbox claude --permission-mode bypassPermissions -- "startup"
@@ -121,6 +125,9 @@ resume:
 
 down:
 	$(COMPOSE) down
+
+destroy:
+	$(COMPOSE) down --rmi all --volumes
 
 inject:
 	$(MAKE) restow

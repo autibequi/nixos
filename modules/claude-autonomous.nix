@@ -113,7 +113,7 @@ let
 in {
   # ── Worker every60 (a cada hora) ─────────────────────────────────
   systemd.services.claude-autonomous = {
-    description = "Claudinho every60 task runner";
+    description = "Tulpa every60 task runner";
     after = [ "network-online.target" ];
     conflicts = [ "claude-autonomous-reset.service" ];
     serviceConfig = {
@@ -131,7 +131,7 @@ in {
   };
 
   systemd.timers.claude-autonomous = {
-    description = "Run Claudinho every60 tasks";
+    description = "Run Tulpa every60 tasks";
     wantedBy = [ "timers.target" ];
     timerConfig = {
       OnCalendar = "hourly";
@@ -141,7 +141,7 @@ in {
 
   # ── Worker every10 (a cada 10 min) ──────────────────────────────
   systemd.services.claude-autonomous-fast = {
-    description = "Claudinho every10 task runner";
+    description = "Tulpa every10 task runner";
     after = [ "network-online.target" ];
     serviceConfig = {
       Type = "oneshot";
@@ -158,17 +158,17 @@ in {
   };
 
   systemd.timers.claude-autonomous-fast = {
-    description = "Run Claudinho every10 tasks";
+    description = "Run Tulpa every10 tasks (a cada 10 min)";
     wantedBy = [ "timers.target" ];
     timerConfig = {
-      OnCalendar = "*:0/10";
+      OnCalendar = "*:0/10";  # a cada 10 min (0, 10, 20, 30, 40, 50)
       Persistent = true;
     };
   };
 
   # ── Reset service ────────────────────────────────────────────────
   systemd.services.claude-autonomous-reset = {
-    description = "Reset stuck Claudinho tasks";
+    description = "Reset stuck Tulpa tasks";
     conflicts = [ "claude-autonomous.service" ];
     serviceConfig = {
       Type = "oneshot";

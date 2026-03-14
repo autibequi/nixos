@@ -10,12 +10,36 @@ REPO_ROOT="${REPO_ROOT:-.}"
 VAULT="${REPO_ROOT}/vault"
 WORKTREE_DIR="${VAULT}/worktrees"
 WORKTREE_REGISTRY="${VAULT}/.worktrees-registry.json"
+WORKTREE_LOG="${VAULT}/.worktrees-log.jsonl"
+CURRENT_WORKTREE="${CLAU_CURRENT_WORKTREE:-}"  # Set by runner quando lança
 
-# Garante que o registro existe
+# Garante que os arquivos existem
 init_registry() {
     if [[ ! -f "$WORKTREE_REGISTRY" ]]; then
         echo '{}' > "$WORKTREE_REGISTRY"
     fi
+    if [[ ! -f "$WORKTREE_LOG" ]]; then
+        touch "$WORKTREE_LOG"
+    fi
+}
+
+# Adiciona evento ao log append-only (JSONL - uma linha por evento)
+log_event() {
+    local event_type="$1"  # enter/exit/update
+    local name="$2"
+    local branch="$3"
+    local objective="${4:-}"
+    local worker_id="${CLAU_WORKER_ID:-manual}"
+
+    local timestamp
+    timestamp=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+
+    # Compact JSON em uma linha
+    local event
+    event=$(printf '{"timestamp":"%s","type":"%s","name":"%s","branch":"%s","objective":"%s","worker":"%s"}' \
+        "$timestamp" "$event_type" "$name" "$branch" "$objective" "$worker_id")
+
+    echo "$event" >> "$WORKTREE_LOG"
 }
 
 # Detecta se estou em um worktree e retorna seu nome
@@ -55,6 +79,9 @@ worktree_init() {
 
     # Cria pasta do worktree
     mkdir -p "$WORKTREE_DIR/$name"
+
+    # Log do evento
+    log_event "enter" "$name" "$branch" "$objective"
 
     echo "✓ Worktree registrado: $name ($branch)"
 }
@@ -148,7 +175,10 @@ update_dashboard() {
 # Finaliza worktree e move artefatos
 worktree_exit() {
     local current
-    if ! current=$(get_current_worktree); then
+    # Tenta detectar pela env var primeiro (caso de workers), depois pelo git
+    if [[ -n "$CURRENT_WORKTREE" ]]; then
+        current="$CURRENT_WORKTREE"
+    elif ! current=$(get_current_worktree); then
         echo "❌ Não estou em um worktree"
         return 1
     fi
@@ -165,6 +195,9 @@ worktree_exit() {
     # Remove do registro
     jq "del(.[\"$current\"])" "$WORKTREE_REGISTRY" > "${WORKTREE_REGISTRY}.tmp"
     mv "${WORKTREE_REGISTRY}.tmp" "$WORKTREE_REGISTRY"
+
+    # Log do evento
+    log_event "exit" "$current" "" ""
 
     echo "✓ Worktree finalizado: $current"
     echo "  Artefatos movidos para: $report_dir"
@@ -187,6 +220,32 @@ case "${1:-status}" in
         ;;
     exit)
         worktree_exit
+        ;;
+    workers|--workers)
+        init_registry
+        echo "📊 Histórico: Workers Lançaram Worktrees"
+        echo ""
+        if [[ -f "$WORKTREE_LOG" ]] && [[ -s "$WORKTREE_LOG" ]]; then
+            tail -20 "$WORKTREE_LOG" | while IFS= read -r line; do
+                [[ -z "$line" ]] && continue
+
+                timestamp=$(echo "$line" | jq -r '.timestamp // empty' 2>/dev/null)
+                type=$(echo "$line" | jq -r '.type // empty' 2>/dev/null)
+                name=$(echo "$line" | jq -r '.name // empty' 2>/dev/null)
+                worker=$(echo "$line" | jq -r '.worker // empty' 2>/dev/null)
+
+                [[ -z "$timestamp" ]] && continue
+
+                if [[ "$type" == "enter" ]]; then
+                    echo "📍 $timestamp | $worker"
+                    echo "   ├─ Entrou: $name"
+                elif [[ "$type" == "exit" ]]; then
+                    echo "   └─ Saiu: $name"
+                fi
+            done
+        else
+            echo "Nenhum evento registrado ainda."
+        fi
         ;;
     *)
         cat << 'EOF'
