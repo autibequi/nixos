@@ -57,6 +57,7 @@ Minerar transcripts recentes e extrair aprendizados para memórias, personalidad
    - Todos os `memory/*.md` — memórias atuais
    - `/workspace/CLAUDE.md` — regras operacionais
    - Listar `stow/.claude/commands/` e `stow/.claude/skills/`
+   - `/workspace/.ephemeral/` — memória efêmera da sessão (notes, logs, flags, contexto temporário que ainda não virou memória persistente). Varrer `notes/`, `logs/`, e arquivos soltos — extrair aprendizados antes que desapareçam
 
 2. **Minerar transcripts** (`~/.claude/projects/-workspace/*.jsonl`):
 
@@ -137,7 +138,7 @@ Ler output de todas as tasks/agentes e consolidar para o user.
 **Processo:**
 1. Coletar dados de tasks recorrentes:
    - `vault/_agent/tasks/recurring/*/memoria.md`
-   - `.ephemeral/notes/*/contexto.md`
+   - `/workspace/.ephemeral/` — notas efêmeras, logs, flags, contexto temporário
    - `vault/sugestoes/`
 2. Comparar com estado anterior
 3. **Decisão:** há algo relevante?
