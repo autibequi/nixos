@@ -16,22 +16,37 @@ if [[ -z "$SESSION_KEY" && -f "${CLAUDE_DIR}/claude-ai-session" ]]; then
   SESSION_KEY=$(head -1 "${CLAUDE_DIR}/claude-ai-session")
 fi
 if [[ -z "$SESSION_KEY" && -f "${CLAUDE_DIR}/.credentials.json" ]] && command -v jq &>/dev/null; then
-  SESSION_KEY=$(jq -r '.sessionKey // .session_key // .cookie_session // .session // .access_token // .token // empty' "${CLAUDE_DIR}/.credentials.json" 2>/dev/null)
+  SESSION_KEY=$(jq -r '.sessionKey // .session_key // .cookie_session // .session // empty' "${CLAUDE_DIR}/.credentials.json" 2>/dev/null)
+  # OAuth: claudeAiOauth.accessToken (Claude Code Team/Max credential)
+  if [[ -z "$SESSION_KEY" || "$SESSION_KEY" == "null" ]]; then
+    ACCESS_TOKEN=$(jq -r '.claudeAiOauth.accessToken // empty' "${CLAUDE_DIR}/.credentials.json" 2>/dev/null)
+  fi
 fi
-if [[ -z "$SESSION_KEY" && -f "${CLAUDE_DIR}/credentials.json" ]] && command -v jq &>/dev/null; then
-  SESSION_KEY=$(jq -r '.sessionKey // .session_key // .cookie_session // .session // .access_token // .token // empty' "${CLAUDE_DIR}/credentials.json" 2>/dev/null)
+if [[ -z "$SESSION_KEY" && -z "${ACCESS_TOKEN:-}" && -f "${CLAUDE_DIR}/credentials.json" ]] && command -v jq &>/dev/null; then
+  SESSION_KEY=$(jq -r '.sessionKey // .session_key // .cookie_session // .session // empty' "${CLAUDE_DIR}/credentials.json" 2>/dev/null)
+  if [[ -z "$SESSION_KEY" || "$SESSION_KEY" == "null" ]]; then
+    ACCESS_TOKEN=$(jq -r '.claudeAiOauth.accessToken // empty' "${CLAUDE_DIR}/credentials.json" 2>/dev/null)
+  fi
 fi
 if [[ -z "$SESSION_KEY" && -f "${HOME}/.config/claude-ai-session" ]]; then
   SESSION_KEY=$(head -1 "${HOME}/.config/claude-ai-session")
 fi
-[[ -z "$SESSION_KEY" ]] && { echo "󱙺 --"; echo "session em CLAUDE_AI_SESSION_KEY ou ${CLAUDE_DIR}/claude-ai-session ou .credentials.json" >&2; exit 0; }
+[[ -z "$SESSION_KEY" && -z "${ACCESS_TOKEN:-}" ]] && { echo "󱙺 --"; echo "session em CLAUDE_AI_SESSION_KEY ou ${CLAUDE_DIR}/claude-ai-session ou .credentials.json (OAuth)" >&2; exit 0; }
+
+# Build auth headers based on credential type
+AUTH_ARGS=()
+if [[ -n "${ACCESS_TOKEN:-}" ]]; then
+  AUTH_ARGS=(-H "Authorization: Bearer ${ACCESS_TOKEN}")
+else
+  AUTH_ARGS=(--cookie "sessionKey=${SESSION_KEY}")
+fi
 
 JSON=$(curl -sS --max-time 10 \
   "https://claude.ai/api/organizations/${ORG_ID}/usage" \
   -H "Accept: application/json" \
   -H "anthropic-client-platform: web_claude_ai" \
   -H "Content-Type: application/json" \
-  --cookie "sessionKey=${SESSION_KEY}" \
+  "${AUTH_ARGS[@]}" \
   -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36") || { echo "󱙺 --"; exit 0; }
 
 if [[ "${1:-}" == "--json" ]]; then

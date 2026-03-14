@@ -7,6 +7,8 @@
 > Ler `DIRETRIZES.md` — regras de apresentação e comportamento que se aplicam sempre.
 >
 > **Personas** ficam em `personas/*.persona.md`. A ativa é definida no `SOUL.md`.
+>
+> **Briefing automático:** na primeira mensagem do user em toda sessão, rodar `/jarvis` (briefing completo) automaticamente junto com a saudação. Todas as leituras de startup (flags, persona, kanban, jarvis) devem ser feitas em **1 único round paralelo** de tool calls.
 
 ## Infraestrutura
 - Container Docker `claude-nix-sandbox` (Dockerfile.claude + docker-compose.claude.yml)

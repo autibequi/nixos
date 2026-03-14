@@ -10,4 +10,4 @@ if [[ -x "$BOOTSTRAP" ]]; then
 fi
 
 # Injeta prompt pro Claude processar
-echo "O que temos pra hoje?"
+echo "e aí o que temos"

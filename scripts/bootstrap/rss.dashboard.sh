@@ -37,6 +37,5 @@ if [[ -f "$RSS_DASH" ]]; then
       esac
       printf "  %b\n" "$line"
     done
-    echo
   fi
 fi

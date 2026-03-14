@@ -31,6 +31,7 @@
 
   fonts.fontconfig.defaultFonts = {
     monospace = [
+      "Iosevka Nerd Font Mono"
       "MesloLGS NF"
       "JetBrainsMono Nerd Font"
       "FiraCode Nerd Font"

@@ -70,4 +70,3 @@ source "$BOOTSTRAP_DIR/rss.dashboard.sh"
 
 # ── Footer ────────────────────────────────────────────────────────────────────
 echo -e "${P_DIM}$(printf '─%.0s' $(seq 1 80))${R}"
-echo

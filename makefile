@@ -115,7 +115,7 @@ start: sandbox
 
 sandbox:
 	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
+	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions "oi"'
 
 shell:
 	$(COMPOSE) up -d sandbox
@@ -135,7 +135,7 @@ inject:
 	$(MAKE) restow
 	$(COMPOSE) down
 	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
+	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions "oi"'
 
 openclaw:
 	@mkdir -p $(HOME)/.openclaw && \
