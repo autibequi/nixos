@@ -183,8 +183,7 @@ build_banner() {
   local porquemo_trunc="$PORQUEMO"
   [[ ${#PORQUEMO} -gt 50 ]] && porquemo_trunc="${PORQUEMO:0:47}..."
 
-  # Linha 1: data/hora + condição atual (colorida)
-  # Temp em destaque amarelo, sensação laranja, descrição por categoria, humidade azul
+  # Linha 1: data/hora + condição atual
   local weather_now="${WHITE}${DIA}  ${HORA}${R}  ${DIM}|${R}  "
   weather_now+="${B}${YELLOW}${WEATHER_TEMP:-?}°C${R}"
   [[ -n "${WEATHER_FEELS:-}" && "${WEATHER_FEELS:-}" != "${WEATHER_TEMP:-}" ]] && \
@@ -193,12 +192,12 @@ build_banner() {
   [[ -n "${WEATHER_HUMIDITY:-}" ]] && weather_now+="  ${BLUE}${WEATHER_HUMIDITY}% 💧${R}"
   [[ -n "${WEATHER_WIND:-}" ]] && weather_now+="  ${DIM}🌬 ${WEATHER_WIND} km/h${R}"
 
-  # Linha 2: min-max do dia (ciano) + nascer/pôr do sol (amarelo)
+  # Min-max do dia (ciano) + nascer/pôr do sol (amarelo)
   local today_range=""
   [[ -n "${WEATHER_TMIN:-}" ]] && today_range="${CYAN}${WEATHER_TMIN}°–${WEATHER_TMAX}°${R}"
   [[ -n "${WEATHER_SUNRISE:-}" ]] && today_range+="  ${YELLOW}☀ ${WEATHER_SUNRISE} – ${WEATHER_SUNSET}${R}"
 
-  # Linha 3: previsão horária (9h, 12h, 15h, 18h) em ciano
+  # Previsão horária (9h, 12h, 15h, 18h)
   local today_hours=""
   for (( h=0; h<${WEATHER_HOUR_COUNT:-0}; h++ )); do
     local vname="WEATHER_HOUR_${h}"
@@ -214,7 +213,7 @@ build_banner() {
     week_lines+=("  ${B}${WHITE}${line%% *}${R} ${CYAN}${line#* }${R}")
   done
 
-  # Build info lines (match art lines 1:1, sem linhas vazias)
+  # Build info lines (com previsão do tempo)
   local info_lines=(
     "${B}${WHITE}A P E R T U R E  S C I E N C E${R}"
     "$weather_now"
@@ -235,7 +234,6 @@ build_banner() {
   local info_total=${#info_lines[@]}
   local total=$info_total
 
-  echo
   for (( i=0; i<total; i++ )); do
     local art_line="${WEATHER_ART[$i]:-                  }"
     local info="${info_lines[$i]:-}"
@@ -343,66 +341,62 @@ fi
 
 echo
 
-# --- Auto-Jarvis: cache imediato, refresh em background ---
+# --- PRs / repos / worktrees (quando AutoJarvis ON) — alinhado com Bochechas/Git/Inbox ---
 if [[ -f "$AUTOJARVIS_FLAG" ]] && command -v gh &>/dev/null; then
-  echo -e "${B}${CYAN}JARVIS${R}"
-
   WS="$WS" source "$WS/stow/.claude/scripts/gh-status.sh" 2>/dev/null || true
   [[ -f "${GH_STATUS_CACHE:-}" ]] && source "${GH_STATUS_CACHE}" 2>/dev/null || true
   ( gh_status_fetch 2>/dev/null ) &
 
   if [[ -n "${GH_MY_PRS_COUNT:-}" ]]; then
-    echo -e "  ${B}PRs meus:${R} ${YELLOW}${GH_MY_PRS_COUNT}${R} abertos    ${B}Review:${R} ${YELLOW}${GH_REVIEW_COUNT}${R} aguardando"
+    echo -e "${B}PRs meus:${R} ${YELLOW}${GH_MY_PRS_COUNT}${R} abertos    ${B}Review:${R} ${YELLOW}${GH_REVIEW_COUNT}${R} aguardando"
 
-    # Top PRs meus (max 5)
     if [[ -n "${GH_MY_PRS:-}" ]]; then
       count=0
       while IFS='|' read -r repo title; do
         [[ $count -ge 5 ]] && break
-        printf "    ${GREEN}▸${R} ${DIM}%-16s${R} %s\n" "$repo" "$title"
+        printf "  ${GREEN}▸${R} ${DIM}%-16s${R} %s\n" "$repo" "$title"
         count=$((count + 1))
       done <<< "$GH_MY_PRS"
     fi
 
-    # Top review requests (max 5)
     if [[ -n "${GH_REVIEW_PRS:-}" ]]; then
-      echo -e "  ${B}Pra revisar:${R}"
+      echo -e "${B}Pra revisar:${R}"
       count=0
       while IFS='|' read -r repo title author; do
         [[ $count -ge 5 ]] && break
-        printf "    ${MAGENTA}◆${R} ${DIM}%-16s${R} %s ${DIM}(%s)${R}\n" "$repo" "$title" "$author"
+        printf "  ${MAGENTA}◆${R} ${DIM}%-16s${R} %s ${DIM}(%s)${R}\n" "$repo" "$title" "$author"
         count=$((count + 1))
       done <<< "$GH_REVIEW_PRS"
     fi
   else
-    echo -e "  ${DIM}(gh indisponível ou sem dados)${R}"
+    echo -e "${DIM}(gh indisponível ou sem dados)${R}"
   fi
 
-  # Repos locais com dirty/ahead
+  PROJECTS_ESTRATEGIA="${PROJECTS_ESTRATEGIA:-/home/claude/projects/estrategia}"
+  [[ ! -d "$PROJECTS_ESTRATEGIA" && -d "$HOME/projects/estrategia" ]] && PROJECTS_ESTRATEGIA="$HOME/projects/estrategia"
   dirty_repos=()
-  for repo in /home/claude/projects/estrategia/*/; do
+  for repo in "$PROJECTS_ESTRATEGIA"/*/; do
     [[ -d "$repo/.git" ]] || continue
     name=$(basename "$repo")
+    [[ "$name" == "bo-container" || "$name" == "monolito" || "$name" == "front-student" ]] && continue
     dirty=$(git -C "$repo" status --short 2>/dev/null | wc -l)
     branch=$(git -C "$repo" branch --show-current 2>/dev/null || echo "?")
     ahead=$(git -C "$repo" rev-list --count '@{upstream}..HEAD' 2>/dev/null || echo "0")
-    if [[ "$dirty" -gt 0 || "$ahead" -gt 0 ]]; then
-      dirty_repos+=("$(printf "    ${ORANGE}●${R} ${DIM}%-16s${R} [%s] ${YELLOW}dirty:%s${R} ${GREEN}ahead:%s${R}" "$name" "$branch" "$dirty" "$ahead")")
-    fi
+    [[ "$ahead" -gt 0 ]] || continue
+    dirty_repos+=("$(printf "  ${ORANGE}●${R} ${DIM}%-16s${R} [%s] ${YELLOW}dirty:%s${R} ${GREEN}ahead:%s${R}" "$name" "$branch" "$dirty" "$ahead")")
   done
   if [[ ${#dirty_repos[@]} -gt 0 ]]; then
-    echo -e "  ${B}Repos com mudanças:${R} ${#dirty_repos[@]}"
+    echo -e "${B}Repos com mudanças:${R} ${#dirty_repos[@]}"
     for line in "${dirty_repos[@]:0:6}"; do
       echo -e "$line"
     done
     remaining=$(( ${#dirty_repos[@]} - 6 ))
-    [[ $remaining -gt 0 ]] && echo -e "    ${DIM}+${remaining} mais${R}"
+    [[ $remaining -gt 0 ]] && echo -e "  ${DIM}+${remaining} mais${R}"
   fi
 
-  # Worktrees prunable
   prunable=$(git -C "$WS" worktree list 2>/dev/null | grep -c prunable || true)
   active_wt=$(git -C "$WS" worktree list 2>/dev/null | grep -cv "prunable\|$WS " || true)
-  [[ $prunable -gt 0 ]] && echo -e "  ${B}Worktrees:${R} ${active_wt} ativos, ${YELLOW}${prunable} prunable${R} ${DIM}(git worktree prune)${R}"
+  [[ $prunable -gt 0 ]] && echo && echo -e "${B}Worktrees:${R} ${active_wt} ativos, ${YELLOW}${prunable} prunable${R} ${DIM}(git worktree prune)${R}"
 
   echo
 fi
