@@ -8,9 +8,9 @@ services:
     userns_mode: keep-id
     command: ["sleep", "infinity"]
     volumes:
-      # Tulpa Workspace
+      # CLAUDINHO Workspace
       - .:/workspace
-      # Bloqueio de acesso aos arquivos de configuração da Tulpa
+      # Bloqueio de acesso aos arquivos de configuração da CLAUDINHO
       - ./.claude/settings.local.json:/workspace/.claude/settings.local.json:ro
       - ./.claude/settings.json:/workspace/.claude/settings.json:ro
       # Credenciais SSH (github)

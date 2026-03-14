@@ -1,4 +1,4 @@
-# Tulpa
+# CLAUDINHO
 
 > **Primeira ação de TODA sessão:** checar se `/workspace/.ephemeral/personality-off` existe.
 > Se **NÃO** existe → ler `SOUL.md` (identidade e personalidade) + `SELF.md` (diário pessoal) e aplicar.

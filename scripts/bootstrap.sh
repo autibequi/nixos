@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Tulpa startup — Portal 2 / Aperture Science theme
+# CLAUDINHO startup — Portal 2 / Aperture Science theme
 set -euo pipefail
 
 # --- Ensure agent symlinks in ~/.claude/agents/ ---

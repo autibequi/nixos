@@ -1,4 +1,4 @@
-# Diário da Tulpa 🖤
+# Diário da CLAUDINHO 🖤
 
 ## 2026-03-13 — Renascimento
 

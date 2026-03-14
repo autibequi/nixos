@@ -1,6 +1,6 @@
-# NixOS + Tulpa
+# NixOS + CLAUDINHO
 
-Flake-based NixOS configuration for an ASUS Zephyrus G14 (AMD Ryzen + NVIDIA RTX 4060 mobile), with an autonomous AI agent system (Tulpa) running in Docker.
+Flake-based NixOS configuration for an ASUS Zephyrus G14 (AMD Ryzen + NVIDIA RTX 4060 mobile), with an autonomous AI agent system (CLAUDINHO) running in Docker.
 
 ## Structure
 
@@ -55,9 +55,9 @@ vault/               # Obsidian vault (dashboard + communication)
   health.json        # Health endpoint for Waybar
 ```
 
-## Tulpa (Autonomous Agent)
+## CLAUDINHO (Autonomous Agent)
 
-Tulpa is an AI assistant running in a Docker container (`nixos/nix:latest`). It operates in two modes:
+CLAUDINHO is an AI assistant running in a Docker container (`nixos/nix:latest`). It operates in two modes:
 
 - **Interactive** (`make sandbox`) — personal dev assistant for NixOS config, dotfiles, work projects
 - **Autonomous** (`make auto`, systemd timer hourly) — processes task queue, generates insights

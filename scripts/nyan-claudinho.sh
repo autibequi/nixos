@@ -1,5 +1,5 @@
 #!/bin/bash
-# Nyan Tulpa — Portal 2 test chamber animation
+# Nyan CLAUDINHO — Portal 2 test chamber animation
 orange="\033[38;5;208m"
 blue="\033[38;5;33m"
 white="\033[97m"
@@ -22,7 +22,7 @@ frames=(
   ${white}│${reset}    ${orange}\\\\${reset}  ─────────────────       ${blue}/${reset}        ${white}│${reset}
   ${white}│${reset}  ${dim}test chamber active${reset}                      ${white}│${reset}
   ${white}│${reset}                                            ${white}│${reset}
-  ${white}│${reset}  ${bold}T U L P A${reset}   ${dim}${dia} ${hora}${reset}              ${white}│${reset}
+  ${white}│${reset}  ${bold}CLAUDINHO${reset}   ${dim}${dia} ${hora}${reset}              ${white}│${reset}
   ${white}│${reset}  ${dim}${weather}${reset}
   ${white}│${reset}                                            ${white}│${reset}
   ${white}└──────────────────────────────────────────┘${reset}
@@ -34,7 +34,7 @@ frames=(
   ${white}│${reset}   ${orange}|${reset}   ─────────────────         ${blue}|${reset}       ${white}│${reset}
   ${white}│${reset}  ${dim}// running diagnostics //${reset}               ${white}│${reset}
   ${white}│${reset}                                            ${white}│${reset}
-  ${white}│${reset}  ${bold}T U L P A${reset}   ${dim}${dia} ${hora}${reset}              ${white}│${reset}
+  ${white}│${reset}  ${bold}CLAUDINHO${reset}   ${dim}${dia} ${hora}${reset}              ${white}│${reset}
   ${white}│${reset}  ${dim}${weather}${reset}
   ${white}│${reset}                                            ${white}│${reset}
   ${white}└──────────────────────────────────────────┘${reset}
@@ -46,7 +46,7 @@ frames=(
   ${white}│${reset}  ${orange}/${reset}    ─────────────────          ${blue}\\\\${reset}     ${white}│${reset}
   ${white}│${reset}  ${dim}portal link established${reset}                  ${white}│${reset}
   ${white}│${reset}                                            ${white}│${reset}
-  ${white}│${reset}  ${bold}T U L P A${reset}   ${dim}${dia} ${hora}${reset}              ${white}│${reset}
+  ${white}│${reset}  ${bold}CLAUDINHO${reset}   ${dim}${dia} ${hora}${reset}              ${white}│${reset}
   ${white}│${reset}  ${dim}${weather}${reset}
   ${white}│${reset}                                            ${white}│${reset}
   ${white}└──────────────────────────────────────────┘${reset}
@@ -68,6 +68,6 @@ printf '\033[2J\033[H'
 printf '\033[?25h'
 echo ""
 printf "  ${orange}${bold}(o)${reset} ${white}${bold}APERTURE SCIENCE${reset} ${blue}${bold}(o)${reset}\n"
-printf "  ${bold}T U L P A${reset}  ${dim}personal dev agent${reset}\n"
+printf "  ${bold}CLAUDINHO${reset}  ${dim}personal dev agent${reset}\n"
 printf "  ${dim}${dia} ${hora}  ${weather}${reset}\n"
 echo ""

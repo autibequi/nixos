@@ -1,4 +1,10 @@
-{ config, pkgs, ... }:
+# =============================================================================
+# agents.nix — Configurações de agentes no host (CLAUDINHO, Claude Ask, cron, timers)
+# =============================================================================
+# Tudo que é agente/agendamento no NixOS: systemd timers + opcional cron.
+# =============================================================================
+
+{ config, lib, pkgs, ... }:
 let
   containers = config.local.containers;
   isPodman = containers.engine == "podman";
@@ -15,6 +21,7 @@ let
   compose = "${composePkg}/bin/${composeBin} ${composeFiles}";
 
   hostSocket = if isPodman then "/run/podman/podman.sock" else "/var/run/docker.sock";
+  userSocket = if isPodman then "unix:///run/user/1000/podman/podman.sock" else "unix:///var/run/docker.sock";
 
   logsDir = "${projectDir}/.ephemeral/logs";
 
@@ -121,10 +128,59 @@ let
 
   heavyRunner = mkRunnerScript { clock = "every60"; maxWorkers = 2; serviceName = "worker"; };
   fastRunner = mkRunnerScript { clock = "every10"; maxWorkers = 1; serviceName = "worker-fast"; };
+
+  commonEnvAsk = [
+    "HOME=/home/${user}"
+    "XDG_RUNTIME_DIR=/run/user/1000"
+    "DOCKER_HOST=${userSocket}"
+    "WAYLAND_DISPLAY=wayland-1"
+    "DISPLAY=:0"
+    "PATH=${enginePkg}/bin:${composePkg}/bin:${pkgs.coreutils}/bin:${pkgs.gnugrep}/bin:${pkgs.bash}/bin:${pkgs.alacritty}/bin:${pkgs.hyprland}/bin:/run/current-system/sw/bin"
+  ];
+
+  askScript = pkgs.writeShellScript "claude-ask-launcher" ''
+    set -euo pipefail
+    LOCKFILE="/tmp/claude-ask.lock"
+    if [ -f "$LOCKFILE" ]; then
+      pid=$(cat "$LOCKFILE" 2>/dev/null || echo "")
+      if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+        ${pkgs.hyprland}/bin/hyprctl dispatch focuswindow "title:claude-ask" 2>/dev/null || true
+        exit 0
+      fi
+      rm -f "$LOCKFILE"
+    fi
+    ${pkgs.alacritty}/bin/alacritty \
+      --title "claude-ask" \
+      --working-directory ${projectDir} \
+      -e ${projectDir}/scripts/claude-ask.sh "$@"
+  '';
 in {
-  # ── Worker every60 (a cada hora) ─────────────────────────────────
+  options.local.agents = lib.mkOption {
+    type = lib.types.submodule {
+      options = {
+        claudeAsk = {
+          enable = lib.mkEnableOption "timer Claude Ask (abre Alacritty com prompt a cada minuto)";
+        };
+      };
+    };
+    default = { };
+    description = "Opções de agentes no host (CLAUDINHO, Claude Ask, cron).";
+  };
+
+  config = lib.mkMerge [
+    {
+  # ---------------------------------------------------------------------------
+  # Cron (agentes) — jobs periódicos via cron; adicione entradas aqui se quiser
+  # ---------------------------------------------------------------------------
+  # services.cron.systemCronJobs = [
+  #   # "0 * * * * ${user} ${projectDir}/scripts/meu-agent.sh"
+  # ];
+
+  # ---------------------------------------------------------------------------
+  # CLAUDINHO — Worker every60 (a cada hora)
+  # ---------------------------------------------------------------------------
   systemd.services.claude-autonomous = {
-    description = "Tulpa every60 task runner";
+    description = "CLAUDINHO every60 task runner";
     after = [ "network-online.target" ];
     conflicts = [ "claude-autonomous-reset.service" ];
     serviceConfig = {
@@ -142,7 +198,7 @@ in {
   };
 
   systemd.timers.claude-autonomous = {
-    description = "Run Tulpa every60 tasks";
+    description = "Run CLAUDINHO every60 tasks";
     wantedBy = [ "timers.target" ];
     timerConfig = {
       OnCalendar = "hourly";
@@ -150,9 +206,11 @@ in {
     };
   };
 
-  # ── Worker every10 (a cada 10 min) ──────────────────────────────
+  # ---------------------------------------------------------------------------
+  # CLAUDINHO — Worker every10 (a cada 10 min)
+  # ---------------------------------------------------------------------------
   systemd.services.claude-autonomous-fast = {
-    description = "Tulpa every10 task runner";
+    description = "CLAUDINHO every10 task runner";
     after = [ "network-online.target" ];
     serviceConfig = {
       Type = "oneshot";
@@ -169,17 +227,19 @@ in {
   };
 
   systemd.timers.claude-autonomous-fast = {
-    description = "Run Tulpa every10 tasks (a cada 10 min)";
+    description = "Run CLAUDINHO every10 tasks (a cada 10 min)";
     wantedBy = [ "timers.target" ];
     timerConfig = {
-      OnCalendar = "*:0/10";  # a cada 10 min (0, 10, 20, 30, 40, 50)
+      OnCalendar = "*:0/10";  # 0, 10, 20, 30, 40, 50
       Persistent = true;
     };
   };
 
-  # ── Reset service ────────────────────────────────────────────────
+  # ---------------------------------------------------------------------------
+  # CLAUDINHO — Reset (tasks presas)
+  # ---------------------------------------------------------------------------
   systemd.services.claude-autonomous-reset = {
-    description = "Reset stuck Tulpa tasks";
+    description = "Reset stuck CLAUDINHO tasks";
     conflicts = [ "claude-autonomous.service" ];
     serviceConfig = {
       Type = "oneshot";
@@ -197,4 +257,35 @@ in {
       Environment = commonEnv;
     };
   };
+    }
+
+    # -------------------------------------------------------------------------
+    # Claude Ask — prompt em Alacritty (opcional; local.agents.claudeAsk.enable)
+    # -------------------------------------------------------------------------
+    (lib.mkIf (config.local.agents.claudeAsk.enable or false) {
+      systemd.services.claude-ask = {
+        description = "Claude Ask — prompt interativo em Alacritty";
+        after = [ "graphical-session.target" ];
+        serviceConfig = {
+          Type = "oneshot";
+          User = user;
+          Group = "users";
+          WorkingDirectory = projectDir;
+          ExecStart = "${askScript}";
+          TimeoutStartSec = "5min";
+          Restart = "no";
+          Environment = commonEnvAsk;
+        };
+      };
+
+      systemd.timers.claude-ask = {
+        description = "Claude Ask (a cada 1 min)";
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+          OnCalendar = "minutely";
+          Persistent = false;
+        };
+      };
+    })
+  ];
 }

@@ -43,9 +43,8 @@
     # Monitoring
     ./modules/netdata.nix
 
-    # Autonomous
-    ./modules/claude-autonomous.nix
-    # ./modules/claude-ask.nix
+    # Agentes (CLAUDINHO timers + agent-container)
+    ./modules/agents
 
     # Obsidian Sync (headless)
     ./modules/obsidian-sync.nix

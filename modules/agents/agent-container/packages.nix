@@ -1,0 +1,41 @@
+{ pkgs }:
+
+with pkgs; [
+  # Shell essentials
+  bashInteractive
+  coreutils
+  gnugrep
+  gnused
+  findutils
+  gnutar
+  gzip
+  which
+  less
+  unstable.openclaw
+
+  # Dev tools
+  git
+  jq
+  curl
+
+  # Media (ffmpeg/python3 removidos — usar nix-shell -p sob demanda)
+  yt-dlp
+  sox
+
+  # System
+  util-linux      # flock pro clau-runner
+  systemdMinimal  # journalctl
+  procps          # ps, top, free
+
+  # Wayland
+  wl-clipboard
+
+  # GitHub CLI
+  gh
+
+  # Nix (superpoderes: nix-shell -p dentro do container)
+  nix
+
+  # Docker CLI (socket forwarding pro Podman do host)
+  docker-client
+]
