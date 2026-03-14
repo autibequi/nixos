@@ -14,8 +14,8 @@
     "battery"
   ],
   "modules-right": [
-    "custom/claude",
     "mpris",
+    // "custom/claude",
     "pulseaudio",
     "backlight",
     "network",
