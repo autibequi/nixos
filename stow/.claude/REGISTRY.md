@@ -35,6 +35,8 @@ Slash commands invocáveis pelo user via `/nome`.
 | `meta/manual` | `/manual` | Documentação de todos os skills e commands |
 | `meta/diretrizes` | `/diretrizes` | Exibe DIRETRIZES.md |
 | `meta/personality` | `/personality` | Toggle personalidade (SOUL.md) on/off |
+| `meta/list-personalities` | `/list-personalities` | Lista personalidades disponíveis e exibe a ativa |
+| `meta/list-avatars` | `/list-avatars` | Lista avatares disponíveis |
 | `meta/propor` | `/propor` | Pitch de mudança em worktree isolado |
 | `meta/suggestions` | `/suggestions` | Revisão de propostas de worktrees pendentes |
 | `meta/auto-commit` | `/auto-commit` | Toggle auto-commit ON/OFF |
