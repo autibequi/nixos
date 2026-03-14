@@ -57,6 +57,45 @@ get_current_worktree() {
     echo "$branch"
 }
 
+# Cria arquivo de workbench em main
+worktree_create_workbench_summary() {
+    local name="$1"
+    local branch="$2"
+    local objective="$3"
+    local now
+    now=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+
+    mkdir -p "$REPO_ROOT/workbench"
+    local dest="$REPO_ROOT/workbench/${name}.md"
+
+    # Não sobrescrever se já existe
+    if [[ -f "$dest" ]]; then
+        return 0
+    fi
+
+    cat > "$dest" << EOF
+---
+task: ${name}
+branch: ${branch}
+created: ${now}
+status: in-progress
+artefacts: vault/artefacts/${name}/
+---
+
+# ${name}
+
+## Resumo
+${objective}
+
+## Artefatos
+(a preencher)
+
+## Branch
+\`${branch}\` — ativa
+EOF
+    echo "✓ Workbench criado: workbench/${name}.md"
+}
+
 # Registra entrada em worktree
 worktree_init() {
     local name="$1"
@@ -82,6 +121,9 @@ worktree_init() {
 
     # Log do evento
     log_event "enter" "$name" "$branch" "$objective"
+
+    # Cria workbench summary em main
+    worktree_create_workbench_summary "$name" "$branch" "$objective"
 
     echo "✓ Worktree registrado: $name ($branch)"
 }

@@ -40,6 +40,7 @@
 │   ├── sugestoes/       ← canal agente→user
 │   ├── kanban.md        ← THINKINGS: FONTE DE VERDADE work items (ver regra abaixo)
 │   └── scheduled.md     ← tasks recorrentes (board separado)
+├── workbench/           ← rastreio persistente de worktrees (um .md por worktree)
 └── .ephemeral/          ← memória efêmera (gitignored)
 ```
 
@@ -151,7 +152,44 @@ Rodar periodicamente ou quando sentir que tem informação útil pra persistir. 
   - **Trivial** (editar doc, adicionar linha comentário) → pode ser em main
   - **Propostas/exploração** → automaticamente em worktree pra não contaminar
   - User pode force com flag `worktrees: false` em settings se quiser
+  - Enquanto em worktree: manter `workbench/<task-name>.md` atualizado com objetivo, progresso, decisões
   - Enquanto em worktree: usar `/worktree-status` pra compartilhar progresso (dashboard centralizado)
+
+## Convenção Workbench
+
+Todo agente em worktree mantém dois arquivos paralelos para rastrear trabalho:
+
+| Arquivo | Local | Propósito |
+|---------|-------|-----------|
+| `workbench/<task>.md` | Dentro do worktree (`.claude/worktrees/<nome>/workbench/`) | Detalhe: objetivo, progresso, decisões |
+| `workbench/<task>.md` | Em main (`/workspace/workbench/`) | Summary persistente — sobrevive após remover worktree |
+
+- `<task>` = nome da task (kebab-case)
+- `worktree-manager.sh init` cria o arquivo em main automaticamente
+- Agente cria/atualiza o arquivo dentro do worktree ao entrar nele
+- Status válidos: `in-progress`, `done`, `archived`
+
+**Frontmatter do arquivo em main (summary):**
+```yaml
+---
+task: <nome>
+branch: worktree-<nome>
+created: YYYY-MM-DDTHH:MM:SSZ
+status: done | in-progress | archived
+artefacts: vault/artefacts/<task>/
+---
+```
+
+**Frontmatter do arquivo no worktree (detalhe):**
+```yaml
+---
+task: <nome>
+branch: worktree-<nome>
+started: YYYY-MM-DDTHH:MM:SSZ
+status: in-progress | done
+worker: <worker-id ou "manual">
+---
+```
 
 ## Observabilidade do Host (read-only)
 Bind mounts RO — consultar antes de pedir pro user rodar comandos:
