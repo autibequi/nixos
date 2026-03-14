@@ -23,7 +23,7 @@ if [[ -f "$RSS_DASH" ]]; then
   if [[ $rss_age -lt 7200 ]]; then
     echo -e "${P_CYAN}RSS:${R}"
     head -5 "$RSS_DASH" | while IFS= read -r line; do
-      echo -e "  ${P_DIM}${line}${R}"
+      printf "  ${P_DIM}%b${R}\n" "$line"
     done
     echo
   fi

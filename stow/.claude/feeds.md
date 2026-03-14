@@ -2,9 +2,9 @@
 
 | URL | Categoria | Max |
 |-----|-----------|-----|
-| https://hnrss.org/newest?points=100 | tech | 10 |
 | https://nixos.org/blog/announcements-rss.xml | nixos | 5 |
 | https://blog.golang.org/feed.atom | go | 5 |
+| https://www.phoronix.com/rss.php | linux | 10 |
 
 ## Config
 

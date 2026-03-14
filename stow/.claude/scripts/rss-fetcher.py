@@ -193,11 +193,58 @@ def generate_dashboard(items: list[dict], count: int, path: str):
         except Exception:
             age = "?"
         title = item["title"]
+        link = item.get("link", "")
         if len(title) > 60:
             title = title[:57] + "..."
         lines.append(f"▸ [{cat}] {title} — {age}")
     with open(path, "w") as f:
         f.write("\n".join(lines) + "\n" if lines else "No items yet.\n")
+
+
+# ── Vault Kanban ─────────────────────────────────────────────────────────────
+
+def generate_vault_kanban(items: list[dict], path: str):
+    """Generate Obsidian kanban board with RSS items grouped by category."""
+    os.makedirs(os.path.dirname(path) if os.path.dirname(path) else ".", exist_ok=True)
+
+    # Group by category
+    by_cat: dict[str, list[dict]] = {}
+    for item in items:
+        cat = item.get("category", "other")
+        by_cat.setdefault(cat, []).append(item)
+
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    lines = [
+        "---\n",
+        "kanban-plugin: board\n",
+        "\n---\n\n",
+    ]
+
+    # One column per category
+    for cat in sorted(by_cat.keys()):
+        cat_items = sorted(by_cat[cat], key=lambda x: x.get("published", ""), reverse=True)
+        lines.append(f"## {cat}\n\n")
+        for item in cat_items:
+            title = item["title"]
+            link = item.get("link", "")
+            try:
+                pub = datetime.fromisoformat(item["published"])
+                if pub.tzinfo is None:
+                    pub = pub.replace(tzinfo=timezone.utc)
+                age = fmt_age(pub)
+            except Exception:
+                age = "?"
+            if link:
+                lines.append(f"- [ ] [{title}]({link}) `{age}`\n")
+            else:
+                lines.append(f"- [ ] {title} `{age}`\n")
+        lines.append("\n\n")
+
+    # Kanban settings
+    lines.append("%% kanban:settings\n```\n{\"kanban-plugin\":\"board\"}\n```\n%%\n")
+
+    with open(path, "w") as f:
+        f.writelines(lines)
 
 
 # ── Main ─────────────────────────────────────────────────────────────────────
@@ -207,6 +254,7 @@ def main():
     parser.add_argument("--config", required=True, help="Path to feeds.md")
     parser.add_argument("--data", required=True, help="Path to items.json")
     parser.add_argument("--dashboard", required=True, help="Path to dashboard.txt")
+    parser.add_argument("--vault-kanban", default=None, help="Path to vault kanban.md (Obsidian board)")
     args = parser.parse_args()
 
     if not os.path.exists(args.config):
@@ -256,6 +304,10 @@ def main():
 
     save_items(args.data, existing)
     generate_dashboard(existing, config["dashboard_items"], args.dashboard)
+
+    # Generate vault kanban (Obsidian board)
+    if args.vault_kanban:
+        generate_vault_kanban(existing, args.vault_kanban)
 
     # Summary
     print(f"RSS: {len(feeds)} feeds | +{new_count} new | -{pruned_count} pruned | {len(existing)} total | {errors} errors")

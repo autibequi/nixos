@@ -44,7 +44,8 @@ Rodar o fetcher manualmente:
 python3 /workspace/stow/.claude/scripts/rss-fetcher.py \
   --config /workspace/stow/.claude/feeds.md \
   --data /workspace/.ephemeral/rss/items.json \
-  --dashboard /workspace/.ephemeral/rss/dashboard.txt
+  --dashboard /workspace/.ephemeral/rss/dashboard.txt \
+  --vault-kanban /workspace/vault/rss.md
 ```
 Exibir resultado (novos, podados, total, erros).
 
