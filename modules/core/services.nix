@@ -25,4 +25,11 @@
     useRoutingFeatures = "client";
   };
   networking.firewall.checkReversePath = "loose";
+
+  # LM Studio API Server
+  services.lmstudio = {
+    enable = true;
+    port = 1234;
+    host = "192.168.68.60";
+  };
 }

@@ -52,6 +52,9 @@
     # OpenClaw Gateway
     ./modules/openclaw.nix
 
+    # LM Studio Server
+    ./modules/lmstudio.nix
+
     # Other Modules
     ./modules/work.nix
     ./modules/virt.nix
