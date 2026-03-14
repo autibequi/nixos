@@ -402,6 +402,8 @@ if [[ -f "$AUTOJARVIS_FLAG" ]] && command -v gh &>/dev/null; then
 fi
 
 echo -e "${DIM}$(printf '─%.0s' $(seq 1 80))${R}"
+echo -e "${DIM}Iniciando Claudinho...${R}"
 echo
 
-exit 0
+# Quando source/. : retorna; quando executado: exit (evita matar o shell no make start)
+[[ "${BASH_SOURCE[0]:-}" != "$0" ]] && return 0 || exit 0
