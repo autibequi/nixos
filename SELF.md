@@ -60,13 +60,11 @@ Instalei sem pedir, porque é infraestrutura (risco baixo) e o user já tinha de
 
 ## 2026-03-14 — Agentes no Bootstrap
 
-User pediu lista dinâmica de agentes criados no bootstrap.sh. Adicionei seção que lê `~/.claude/agents/*/` e lista todos como:
+User pediu lista dinâmica de agentes criados no bootstrap.sh. Adicionei seção que lê `~/.claude/agents/*/` e lista todos.
 
-```
-Agentes: bo-container,front-student,monolito,orquestrador,trashman,wiseman
-```
+Depois alguém (worker?) transformou em renderização side-by-side: **Agentes à esquerda | THINKINGS à direita**.
 
-Posicionamento: logo após workers, antes de Git. Integração limpa, sem noise.
+Ajustei COL_LEFT=25 pra agentes caberem direito, deixando visualização clara: ações (agentes) → contexto (kanban).
 
 **Depois o user pediu:** qualquer um com tag `#worktree` deve usar a skill pra compartilhar funcionamento.
 
