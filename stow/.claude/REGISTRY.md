@@ -33,11 +33,17 @@ Slash commands invocáveis pelo user via `/nome`.
 | `meta/propor` | `/propor` | Pitch de mudança em worktree isolado |
 | `meta/suggestions` | `/suggestions` | Revisão de propostas de worktrees pendentes |
 | `meta/auto-commit` | `/auto-commit` | Toggle auto-commit ON/OFF |
+| `meta/auto-jarvis` | `/auto-jarvis` | Toggle auto-jarvis ON/OFF (executa /jarvis no startup) |
+| `meta/contemplate` | `/contemplate` | Introspecção profunda — minera efêmeros e sessão pra extrair aprendizados |
+
+### Global
+| Command | Invocação | Descrição |
+|---------|-----------|-----------|
+| `jarvis` | `/jarvis` | Assistente pessoal — status GitHub, repos locais, THINKINGS, tasks, worktrees, recomendações |
 
 ### Utils
 | Command | Invocação | Descrição |
 |---------|-----------|-----------|
-| `utils/briefing` | `/briefing` | Assistente pessoal — status GitHub, THINKINGS, pendências, recomendações |
 | `utils/worktree` | `/worktree` | Dashboard de worktrees — status atual + histórico |
 | `utils/task` | `/task` | Gerenciar tarefas (criar, listar, status) |
 
