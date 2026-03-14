@@ -4,7 +4,7 @@ export GIT_AUTHOR_EMAIL := $(shell git config user.email)
 export GIT_COMMITTER_NAME := $(GIT_AUTHOR_NAME)
 export GIT_COMMITTER_EMAIL := $(GIT_AUTHOR_EMAIL)
 
-.PHONY: help switch update stow restow build start shell sandbox resume down destroy inject \
+.PHONY: help switch update stow restow build start shell sandbox resume down destroy inject openclaw \
        clau run auto stop reset status new logs logs-list \
        usage-api usage-api-7d usage-api-30d clau-service-logs ask
 
@@ -30,6 +30,7 @@ help:
 	@echo "  make down              Para todos os containers"
 	@echo "  make destroy           Para containers + remove imagens"
 	@echo "  make inject            Restow + restart sandbox + shell"
+	@echo "  make openclaw          Sobe sandbox e roda openclaw gateway no container"
 	@echo ""
 	@echo "  Tasks"
 	@echo "  ─────────────────────────────────────────────────────────"
@@ -135,6 +136,15 @@ inject:
 	$(COMPOSE) down
 	$(COMPOSE) up -d sandbox
 	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
+
+openclaw:
+	@mkdir -p $(HOME)/.openclaw && \
+	if [ ! -f $(HOME)/.openclaw/openclaw.json ]; then \
+		cp .openclaw/openclaw.json $(HOME)/.openclaw/openclaw.json && \
+		echo "[openclaw] Config copiada para $(HOME)/.openclaw (LM Studio em host.docker.internal:1234)"; \
+	fi
+	$(COMPOSE) up -d sandbox
+	@$(COMPOSE) exec -it sandbox openclaw gateway
 
 # ── Tasks ──────────────────────────────────────────────────────────
 # Vários runners por linha de comando: use CLAU_WORKER_ID diferente em cada um.

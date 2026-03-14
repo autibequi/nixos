@@ -1,0 +1,38 @@
+{
+  "$schema": "https://config.clawi.sh/v2026.2.17",
+  "meta": {
+    "lastTouchedAt": "2026-03-14T00:00:00.000Z",
+    "lastTouchedVersion": "2026.2.26"
+  },
+  "gateway": {
+    "mode": "local"
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "lmstudio/local"
+      }
+    }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "lmstudio": {
+        "baseUrl": "http://host.docker.internal:1234/v1",
+        "apiKey": "lmstudio",
+        "api": "openai-responses",
+        "models": [
+          {
+            "id": "local",
+            "name": "LM Studio (host)",
+            "reasoning": false,
+            "input": ["text"],
+            "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 },
+            "contextWindow": 128000,
+            "maxTokens": 8192
+          }
+        ]
+      }
+    }
+  }
+}

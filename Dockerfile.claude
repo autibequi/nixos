@@ -18,6 +18,7 @@ RUN nix profile install \
     nixpkgs#gawk \
     nixpkgs#gnused \
     nixpkgs#ffmpeg-headless && \
+    NIXPKGS_ALLOW_INSECURE=1 nix profile install --impure "github:NixOS/nixpkgs/nixos-unstable#legacyPackages.x86_64-linux.openclaw" && \
     nix profile install github:sadjow/claude-code-nix
 
 # Create non-root user and copy profile (claude binary fica em .nix-profile/bin)
