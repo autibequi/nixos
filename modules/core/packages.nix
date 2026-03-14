@@ -37,14 +37,6 @@
       propagatedBuildInputs = [ ];
       doCheck = false;
     })
-    (python3Packages.buildPythonApplication rec {
-      pname = "claude-monitor";
-      version = "3.1.0";
-      src = fetchPypi { inherit pname version; sha256 = "9391e0efc01eb9643e46223e6f498b8d03e7c6a4f37ebba09c9f355a0453e7fc"; };
-      pyproject = true;
-      propagatedBuildInputs = with python3Packages; [ numpy pydantic pydantic-settings pyyaml pytz rich ];
-      doCheck = false;
-    })
     mpv # media/shoes/chocolate player
     foliate # ePub reader
     fragments # torrent client

@@ -9,9 +9,22 @@ set -euo pipefail
 
 ORG_ID="${CLAUDE_AI_ORG_ID:-995ebddd-ab0c-4ef8-aaf1-ad1fee25f624}"
 SESSION_KEY="${CLAUDE_AI_SESSION_KEY:-}"
-[[ -z "$SESSION_KEY" && -f "${HOME}/.claude/claude-ai-session" ]] && SESSION_KEY=$(head -1 "${HOME}/.claude/claude-ai-session")
-[[ -z "$SESSION_KEY" && -f "${HOME}/.config/claude-ai-session" ]] && SESSION_KEY=$(head -1 "${HOME}/.config/claude-ai-session")
-[[ -z "$SESSION_KEY" ]] && { echo "󱙺 --"; echo "token em CLAUDE_AI_SESSION_KEY ou ~/.claude/claude-ai-session" >&2; exit 0; }
+CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
+
+# 1) env 2) ~/.claude/claude-ai-session 3) ~/.claude/.credentials.json (ou credentials.json) 4) ~/.config/...
+if [[ -z "$SESSION_KEY" && -f "${CLAUDE_DIR}/claude-ai-session" ]]; then
+  SESSION_KEY=$(head -1 "${CLAUDE_DIR}/claude-ai-session")
+fi
+if [[ -z "$SESSION_KEY" && -f "${CLAUDE_DIR}/.credentials.json" ]] && command -v jq &>/dev/null; then
+  SESSION_KEY=$(jq -r '.sessionKey // .session_key // .cookie_session // .session // .access_token // .token // empty' "${CLAUDE_DIR}/.credentials.json" 2>/dev/null)
+fi
+if [[ -z "$SESSION_KEY" && -f "${CLAUDE_DIR}/credentials.json" ]] && command -v jq &>/dev/null; then
+  SESSION_KEY=$(jq -r '.sessionKey // .session_key // .cookie_session // .session // .access_token // .token // empty' "${CLAUDE_DIR}/credentials.json" 2>/dev/null)
+fi
+if [[ -z "$SESSION_KEY" && -f "${HOME}/.config/claude-ai-session" ]]; then
+  SESSION_KEY=$(head -1 "${HOME}/.config/claude-ai-session")
+fi
+[[ -z "$SESSION_KEY" ]] && { echo "󱙺 --"; echo "session em CLAUDE_AI_SESSION_KEY ou ${CLAUDE_DIR}/claude-ai-session ou .credentials.json" >&2; exit 0; }
 
 JSON=$(curl -sS --max-time 10 \
   "https://claude.ai/api/organizations/${ORG_ID}/usage" \

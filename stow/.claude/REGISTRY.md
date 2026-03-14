@@ -20,6 +20,7 @@ Scripts utilitários usados por statusline, hooks, agents e interativamente.
 | `task-schedule.sh` | bash | Tabela de tasks agendadas por slot: recorrentes, pending, timeline próximas horas. `bash task-schedule.sh` |
 | `weather-art.sh` | bash/lib | Weather fetch + ASCII art por condição (sol, chuva, nublado, etc). `source weather-art.sh` exporta WEATHER_ART[], WEATHER_CAT, dados |
 | `usage-bar.sh` | bash | Gera `.ephemeral/usage-bar.txt`: uso API para bootstrap. **Fontes:** (1) Cursor /usage (Current, Resets) com `CURSOR_API_KEY` → `api.cursor.com/teams/spend`; (2) Anthropic tokens 30d com `ANTHROPIC_ADMIN_KEY` → `api-usage.sh`. Fallback: pede uma das duas keys. `USAGE_QUOTA_TOKENS`, `USAGE_BAR_PERIOD` |
+| `claude-ai-usage.sh` | bash | Uso do plano via API web claude.ai (mesma fonte de Settings > Uso). **Session:** `CLAUDE_AI_SESSION_KEY` ou `~/.claude/claude-ai-session` ou `~/.config/claude-ai-session` (uma linha = cookie sessionKey). `--json` / `--debug`. Waybar: fallback do módulo `custom/claude`. |
 
 ---
 
