@@ -1,6 +1,6 @@
 #!/bin/bash
 # Statusline compacta (oneliner) com emojis
-# Mostra: 🔌[session] | 🧠model | 📊ctx% | W:x R:y
+# Mostra: ctx | Claudios | Bochechas | modelo
 # Output stdout: status line visivel
 # Output stderr: terminal title (OSC)
 
@@ -66,20 +66,26 @@ if [[ ${#TOPIC} -ge 30 ]]; then
   TOPIC="${TOPIC:0:27}..."
 fi
 
-# Claudios: worker + worker-fast; fallback por logs
+# Claudios: docker/podman containers; Bochechas: tasks em running/
 WORKERS=0
-RUNNING=0
+BOCECHAS=0
 WORKSPACE_DIR=$(echo "$input" | jq -r '.workspace.project_dir // .workspace.current_dir // .cwd // ""')
-_docker_ps() {
-  [[ -S "/host/podman.sock" ]] && DOCKER_HOST="unix:///host/podman.sock" docker ps "$@" 2>/dev/null || docker ps "$@" 2>/dev/null || true
-}
+WS="${WORKSPACE_DIR:-/workspace}"
+_run_ps() { docker ps -q --filter "$1" 2>/dev/null | wc -l; }
+_run_podman_ps() { podman ps -q --filter "$1" 2>/dev/null | wc -l; }
 if command -v docker &>/dev/null; then
-  W1=$(_docker_ps -q --filter "label=com.docker.compose.service=worker" 2>/dev/null | wc -l)
-  W2=$(_docker_ps -q --filter "label=com.docker.compose.service=worker-fast" 2>/dev/null | wc -l)
+  [[ -S "/host/podman.sock" ]] && export DOCKER_HOST="unix:///host/podman.sock"
+  W1=$(_run_ps "label=com.docker.compose.service=worker")
+  W2=$(_run_ps "label=com.docker.compose.service=worker-fast")
   WORKERS=$(( W1 + W2 ))
   WORKERS=$(echo "$WORKERS" | tr -d '[:space:]')
 fi
-WS="${WORKSPACE_DIR:-/workspace}"
+if [[ "$WORKERS" -eq 0 ]] && command -v podman &>/dev/null; then
+  W1=$(_run_podman_ps "label=com.docker.compose.service=worker")
+  W2=$(_run_podman_ps "label=com.docker.compose.service=worker-fast")
+  WORKERS=$(( W1 + W2 ))
+  WORKERS=$(echo "$WORKERS" | tr -d '[:space:]')
+fi
 if [[ "$WORKERS" -eq 0 ]] && [[ -d "$WS/.ephemeral/logs" ]]; then
   now_sec=$(date +%s)
   for log in "$WS"/.ephemeral/logs/worker-*.log; do
@@ -88,44 +94,25 @@ if [[ "$WORKERS" -eq 0 ]] && [[ -d "$WS/.ephemeral/logs" ]]; then
     [[ $(( now_sec - mod )) -le 900 ]] && WORKERS=$(( WORKERS + 1 ))
   done
 fi
-KANBAN="/workspace/vault/kanban.md"
-if [[ -f "$KANBAN" ]]; then
-  in_col=0
-  while IFS= read -r line; do
-    if [[ "$line" == "## Em Andamento" ]]; then in_col=1; continue; fi
-    if [[ "$line" =~ ^##\  ]] && [[ "$in_col" == "1" ]]; then break; fi
-    if [[ "$in_col" == "1" ]] && [[ "$line" =~ ^-\ \[ ]]; then RUNNING=$((RUNNING + 1)); fi
-  done < "$KANBAN"
+RUNNING_DIR="$WS/vault/_agent/tasks/running"
+if [[ -d "$RUNNING_DIR" ]]; then
+  for dir in "$RUNNING_DIR"/*/; do [[ -d "$dir" ]] && BOCECHAS=$(( BOCECHAS + 1 )); done
 fi
 
 # Session name
-SESSION="${CLAUDE_SESSION:-}"
-
-# Format compact: 🔌[session] | 🧠model | 📊ctx% | W:x R:y
-SESSION_STR=""
-if [[ -n "$SESSION" ]]; then
-  SESSION_STR="🔌[$SESSION]"
-else
-  SESSION_STR="🔌[~]"
-fi
-
 # Parse model name (shorthand: "Opus 4.6..." → "opus")
 MODEL_SHORT=$(echo "$MODEL" | grep -oE "^[a-zA-Z]+" | tr '[:upper:]' '[:lower:]' | head -c 3)
 MODEL_EMOJI="🧠"
 
-# Tres barras: contexto %, Claudios (workers), Bochechas (agentes em background)
+# Três barras: contexto %, Claudios (docker), Bochechas (running/)
 CTX_BAR=$(minibar "$CTX" 100 4)
 CLAUDIOS_BAR=$(minibar "$WORKERS" 5 4)
-BOCECHAS_BAR=$(minibar "$RUNNING" 10 4)
+BOCECHAS_BAR=$(minibar "$BOCECHAS" 10 4)
 
 # Compact oneliner: barras à esquerda, modelo na extrema direita
-STATUSLINE="${SESSION_STR} | ctx ${CTX_BAR} ${CTX_USED_K}k/${CTX_SIZE_FMT} | Claudios [${WORKERS}] ${CLAUDIOS_BAR}  Bochechas [${RUNNING}] ${BOCECHAS_BAR} | ${MODEL_EMOJI}${MODEL_SHORT}"
+STATUSLINE="ctx ${CTX_BAR} ${CTX_USED_K}k/${CTX_SIZE_FMT} | Claudios ${WORKERS} ${CLAUDIOS_BAR}  Bochechas ${BOCECHAS} ${BOCECHAS_BAR} | ${MODEL_EMOJI}${MODEL_SHORT}"
 
 # Terminal title
-if [[ -n "$SESSION" ]]; then
-  printf '\033]0;Claude[%s]: %s\007' "$SESSION" "$TOPIC" >&2
-else
-  printf '\033]0;Claude: %s\007' "$TOPIC" >&2
-fi
+printf '\033]0;Claude: %s\007' "$TOPIC" >&2
 
 echo "$STATUSLINE"

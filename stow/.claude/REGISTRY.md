@@ -11,8 +11,8 @@ Scripts utilitários usados por statusline, hooks, agents e interativamente.
 
 | Script | Tipo | Descrição |
 |--------|------|-----------|
-| `statusline.sh` | bash | Statusline: barras ctx% \| $ \| tempo \| wt \| [bar]Claudios [bar]Bochechas \| modelo (extrema dir.). **Métricas:** `docs/statusline-metrics.md` |
-| `statusline-compact.sh` | bash | Statusline compacta com emojis e mesmas 3 barras (ctx, Claudios, Bochechas). Modelo à direita |
+| `statusline.sh` | bash | Statusline: ctx \| $ \| Claudios (docker) \| Sessions (worker) \| alive \| modelo. **Métricas:** `docs/statusline-metrics.md` |
+| `statusline-compact.sh` | bash | Statusline compacta: ctx, Claudios, Sessions. Modelo à direita |
 | `colors.sh` | bash/lib | Definições ANSI (cores, bold, dim). `source scripts/colors.sh`. Respeita `NO_COLOR` |
 | `logging.sh` | bash/lib | Logging estruturado: `log_info`, `log_warn`, `log_error`, `log_success`, `log_debug`, `log_step`. Source: `colors.sh` |
 | `ansi.py` | python | Utilitários ANSI/unicode: `strip` (remove escapes), `vlen` (visual length), `calc` (math), `pad` (pad to width) |

@@ -33,19 +33,18 @@ O que cada campo significa, por que importa e que outras opções existem.
 
 ---
 
-### 4. `[████] Claudios:0` — **Claudios (workers em background)**
+### 4. **Claudios N ██** — containers Docker/Podman de pé
 
-- **O que é:** Número de **containers de worker** em execução (every10, every60, every240).
-- **Fonte:** `docker ps` com label `com.docker.compose.service=worker`.
-- **Por que importa:** Quantos agentes/workers estão rodando em background; 0 = nenhum Bochecha ativo.
-- **Barra:** Escala 0–5 (mais que 5 = barra cheia).
+- **O que é:** Número de **containers** de worker em execução (serviços `worker` e `worker-fast`).
+- **Fonte:** `docker ps` (com `DOCKER_HOST=unix:///host/podman.sock` se estiver no container); se der 0, tenta `podman ps`; fallback = logs em `.ephemeral/logs/worker-*.log` tocados nos últimos 15 min.
+- **Por que importa:** Quantos Claudios estão rodando em dockers separados (0, 1 ou 2).
 
 ---
 
-### 5. `[████] Bochechas:3` — **Bochechas (agentes em andamento)**
+### 5. **Bochechas N ██** — background workers rodando
 
-- **O que é:** Quantidade de **cards na coluna “Em Andamento”** do `vault/kanban.md` (THINKINGS) — agentes/tarefas rodando.
-- **Por que importa:** Quantos agentes estão em execução ao mesmo tempo; evita sobrecarga e ajuda a priorizar.
+- **O que é:** Quantidade de **pastas** em `vault/_agent/tasks/running/` (tasks em execução pelo clau-runner).
+- **Por que importa:** Quantos workers de background estão de fato rodando uma task naquele momento.
 - **Barra:** Escala 0–10.
 
 ---

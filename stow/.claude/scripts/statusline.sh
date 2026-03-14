@@ -29,7 +29,6 @@ CTX_USED=$(echo "$input" | jq -r '
   end
 ')
 TRANSCRIPT=$(echo "$input" | jq -r '.transcript_path // ""')
-SESSION_ID=$(echo "$input" | jq -r '.session_id // ""')
 WORKSPACE_DIR=$(echo "$input" | jq -r '.workspace.project_dir // .workspace.current_dir // .cwd // ""')
 COST_USD=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
 COST_DURATION_MS=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
@@ -65,24 +64,29 @@ if [[ ${#TOPIC} -ge 40 ]]; then
   TOPIC="${TOPIC:0:37}..."
 fi
 
-# Claudios: contar containers worker ativos (worker + worker-fast); fallback por logs
+# Claudios: containers docker/podman ativos (worker + worker-fast)
 WORKERS=0
-RUNNING=0
-_docker_ps() {
-  if [[ -S "/host/podman.sock" ]]; then
-    DOCKER_HOST="unix:///host/podman.sock" docker ps "$@" 2>/dev/null || true
-  else
-    docker ps "$@" 2>/dev/null || true
-  fi
+BOCECHAS=0
+WS="${WORKSPACE_DIR:-/workspace}"
+_run_ps() {
+  docker ps -q --filter "$1" 2>/dev/null | wc -l
+}
+_run_podman_ps() {
+  podman ps -q --filter "$1" 2>/dev/null | wc -l
 }
 if command -v docker &>/dev/null; then
-  W1=$(_docker_ps -q --filter "label=com.docker.compose.service=worker" 2>/dev/null | wc -l)
-  W2=$(_docker_ps -q --filter "label=com.docker.compose.service=worker-fast" 2>/dev/null | wc -l)
+  [[ -S "/host/podman.sock" ]] && export DOCKER_HOST="unix:///host/podman.sock"
+  W1=$(_run_ps "label=com.docker.compose.service=worker")
+  W2=$(_run_ps "label=com.docker.compose.service=worker-fast")
   WORKERS=$(( W1 + W2 ))
   WORKERS=$(echo "$WORKERS" | tr -d '[:space:]')
 fi
-# Fallback: se ainda 0, contar logs de worker tocados nos últimos 15 min (funciona dentro do container)
-WS="${WORKSPACE_DIR:-/workspace}"
+if [[ "$WORKERS" -eq 0 ]] && command -v podman &>/dev/null; then
+  W1=$(_run_podman_ps "label=com.docker.compose.service=worker")
+  W2=$(_run_podman_ps "label=com.docker.compose.service=worker-fast")
+  WORKERS=$(( W1 + W2 ))
+  WORKERS=$(echo "$WORKERS" | tr -d '[:space:]')
+fi
 if [[ "$WORKERS" -eq 0 ]] && [[ -d "$WS/.ephemeral/logs" ]]; then
   now_sec=$(date +%s)
   for log in "$WS"/.ephemeral/logs/worker-*.log; do
@@ -91,20 +95,12 @@ if [[ "$WORKERS" -eq 0 ]] && [[ -d "$WS/.ephemeral/logs" ]]; then
     [[ $(( now_sec - mod )) -le 900 ]] && WORKERS=$(( WORKERS + 1 ))
   done
 fi
-KANBAN="/workspace/vault/kanban.md"
-if [[ -f "$KANBAN" ]]; then
-  in_col=0
-  while IFS= read -r line; do
-    if [[ "$line" == "## Em Andamento" ]]; then in_col=1; continue; fi
-    if [[ "$line" =~ ^##\  ]] && [[ "$in_col" == "1" ]]; then break; fi
-    if [[ "$in_col" == "1" ]] && [[ "$line" =~ ^-\ \[ ]]; then RUNNING=$((RUNNING + 1)); fi
-  done < "$KANBAN"
-fi
-
-# Session: JSON session_id (curto) ou env CLAUDE_SESSION
-SESSION="${CLAUDE_SESSION:-}"
-if [[ -z "$SESSION" && -n "$SESSION_ID" ]]; then
-  SESSION="${SESSION_ID:0:8}"
+# Bochechas: background workers rodando = pastas em vault/_agent/tasks/running/
+RUNNING_DIR="$WS/vault/_agent/tasks/running"
+if [[ -d "$RUNNING_DIR" ]]; then
+  for dir in "$RUNNING_DIR"/*/; do
+    [[ -d "$dir" ]] && BOCECHAS=$(( BOCECHAS + 1 ))
+  done
 fi
 
 # Repo: basename do workspace (ex: nixos, monolito)
@@ -140,13 +136,13 @@ minibar() {
   echo "$s"
 }
 
-# Três barras: contexto %, Claudios (docker), Sessions (worker sessions = Em Andamento)
+# Três barras: contexto %, Claudios (docker), Bochechas (tasks em running/)
 BAR_W=4
 CTX_BAR=$(minibar "$CTX_PCT" 100 "$BAR_W")
 CLAUDIOS_MAX=5
-SESSIONS_MAX=10
+BOCECHAS_MAX=10
 CLAUDIOS_BAR=$(minibar "$WORKERS" "$CLAUDIOS_MAX" "$BAR_W")
-SESSIONS_BAR=$(minibar "$RUNNING" "$SESSIONS_MAX" "$BAR_W")
+BOCECHAS_BAR=$(minibar "$BOCECHAS" "$BOCECHAS_MAX" "$BAR_W")
 
 # Contexto: barra + usado em K / máx (ex: 123k/1M)
 CTX_STR="ctx ${CTX_BAR} ${CTX_USED_K}k/${CTX_SIZE_FMT}"
@@ -183,8 +179,8 @@ if [[ -n "$WORKTREE_NAME" && "$WORKTREE_NAME" != "null" ]]; then
   WT_STR=" | wt:$WORKTREE_NAME"
 fi
 
-# Claudios = containers docker rodando; Sessions = tarefas em andamento (kanban Em Andamento)
-WORKER_INFO=" | Claudios [${WORKERS}] ${CLAUDIOS_BAR}  Sessions [${RUNNING}] ${SESSIONS_BAR}"
+# Claudios = containers docker; Bochechas = background workers rodando (tasks em running/)
+WORKER_INFO=" | Claudios ${WORKERS} ${CLAUDIOS_BAR}  Bochechas ${BOCECHAS} ${BOCECHAS_BAR}"
 
 # Partes opcionais: linhas (duração foi para a direita, antes do modelo)
 EXTRA=""
@@ -195,10 +191,6 @@ ALIVE_STR="alive for ${DURATION_STR}!"
 RIGHT="${CTX_STR}${COST_STR}${EXTRA}${WT_STR}${WORKER_INFO} | ${ALIVE_STR} | $MODEL"
 
 # Terminal title via OSC (stderr)
-if [[ -n "$SESSION" ]]; then
-  printf '\033]0;Claude[%s]: %s\007' "$SESSION" "$TOPIC" >&2
-else
-  printf '\033]0;Claude: %s\007' "$TOPIC" >&2
-fi
+printf '\033]0;Claude: %s\007' "$TOPIC" >&2
 
 echo "$RIGHT"
