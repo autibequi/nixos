@@ -26,6 +26,12 @@ let
   logsDir = "${projectDir}/.ephemeral/logs";
   dispatchLockDir = "${projectDir}/.ephemeral/locks";
 
+  cfgClaudinho = config.local.agents.claudinho or { };
+  maxConcurrentWorkers = cfgClaudinho.maxConcurrentWorkers or 1;
+  maxWorkersFast = cfgClaudinho.maxWorkersFast or 1;
+  maxWorkersHeavy = cfgClaudinho.maxWorkersHeavy or 1;
+  maxWorkersSlow = cfgClaudinho.maxWorkersSlow or 1;
+
   commonEnv = [
     "HOME=/home/${user}"
     "XDG_RUNTIME_DIR=/run/user/1000"
@@ -34,22 +40,26 @@ let
     "CONTAINER_SOCK=${hostSocket}"
   ];
 
-  # Multi-worker dispatch — lock global: apenas 1 Claude (qualquer clock) por vez
+  # Multi-worker dispatch — controle de custo: maxConcurrentWorkers no sistema, maxWorkers por clock (fast/heavy/slow)
   mkRunnerScript = { clock, maxWorkers, serviceName }: pkgs.writeShellScript "clau-dispatch-${clock}" ''
     set -euo pipefail
     cd ${projectDir}
 
     MAX_WORKERS=${toString maxWorkers}
+    MAX_CONCURRENT=${toString maxConcurrentWorkers}
     CLOCK="${clock}"
     LOGFILE="${logsDir}/worker-${clock}.log"
     GLOBAL_LOCK="${dispatchLockDir}/clau-single.lock"
 
     mkdir -p "${logsDir}" "${dispatchLockDir}"
 
-    exec 199>"$GLOBAL_LOCK"
-    if ! ${pkgs.util-linux}/bin/flock -n 199; then
-      echo "[clau:$CLOCK] Outro worker em execução (lock global) — skip."
-      exit 0
+    # maxConcurrentWorkers=1: só um runner por vez (lock durante toda a execução)
+    if [ "$MAX_CONCURRENT" -eq 1 ]; then
+      exec 199>"$GLOBAL_LOCK"
+      if ! ${pkgs.util-linux}/bin/flock -n 199; then
+        echo "[clau:$CLOCK] Outro worker em execução (maxConcurrent=1) — skip."
+        exit 0
+      fi
     fi
 
     # Rotate log if > 500KB
@@ -83,6 +93,10 @@ let
       ${enginePkg}/bin/${containers.engine} network create "$NETWORK" 2>/dev/null || true
     fi
 
+    _count_running() {
+      ${enginePkg}/bin/${containers.engine} ps -q --filter "label=clau.worker.id" 2>/dev/null | wc -l
+    }
+
     PIDS=()
     for i in $(seq 1 $MAX_WORKERS); do
       WORKER_ID="$CLOCK-$i"
@@ -95,6 +109,18 @@ let
         continue
       fi
 
+      # Respeitar limite global (quando >1 runner pode rodar em paralelo)
+      if [ "$MAX_CONCURRENT" -gt 1 ]; then
+        exec 199>"$GLOBAL_LOCK"
+        ${pkgs.util-linux}/bin/flock 199
+        running=$(_count_running)
+        if [ "$running" -ge "$MAX_CONCURRENT" ]; then
+          exec 199>&-
+          echo "[clau:$CLOCK] Limite global atingido ($running >= $MAX_CONCURRENT) — skip launch"
+          break
+        fi
+      fi
+
       echo "[clau] Lançando $WORKER_ID ($CLOCK)..."
       ${compose} run --rm -T \
         -e CLAU_WORKER_ID="$WORKER_ID" \
@@ -102,6 +128,7 @@ let
         -l clau.worker.id="$WORKER_ID" \
         $SERVICE /workspace/scripts/clau-runner.sh &
       PIDS+=($!)
+      [ "$MAX_CONCURRENT" -gt 1 ] && exec 199>&-
     done
 
     if [ ''${#PIDS[@]} -eq 0 ]; then
@@ -134,9 +161,8 @@ let
     rm -f .ephemeral/.kanban.lock .ephemeral/locks/*.lock
   '';
 
-  # 1 worker por clock: execução sequencial (cada timer levanta só 1 worker, 1 tarefa por vez)
-  heavyRunner = mkRunnerScript { clock = "every60"; maxWorkers = 1; serviceName = "worker"; };
-  fastRunner = mkRunnerScript { clock = "every10"; maxWorkers = 1; serviceName = "worker-fast"; };
+  heavyRunner = mkRunnerScript { clock = "every60"; maxWorkers = maxWorkersHeavy; serviceName = "worker"; };
+  fastRunner = mkRunnerScript { clock = "every10"; maxWorkers = maxWorkersFast; serviceName = "worker-fast"; };
 
   commonEnvAsk = [
     "HOME=/home/${user}"
@@ -169,6 +195,34 @@ in {
       options = {
         claudeAsk = {
           enable = lib.mkEnableOption "timer Claude Ask (abre Alacritty com prompt a cada minuto)";
+        };
+        claudinho = lib.mkOption {
+          type = lib.types.submodule {
+            options = {
+              maxConcurrentWorkers = lib.mkOption {
+                type = lib.types.ints.positive;
+                default = 1;
+                description = "Máximo de containers worker (Claude) rodando ao mesmo tempo no sistema. Controle de custo; 1 = só um por vez.";
+              };
+              maxWorkersFast = lib.mkOption {
+                type = lib.types.ints.positive;
+                default = 1;
+                description = "Máximo de workers que o timer every10 (fast) pode levantar por execução.";
+              };
+              maxWorkersHeavy = lib.mkOption {
+                type = lib.types.ints.positive;
+                default = 1;
+                description = "Máximo de workers que o timer every60 (heavy) pode levantar por execução.";
+              };
+              maxWorkersSlow = lib.mkOption {
+                type = lib.types.ints.positive;
+                default = 1;
+                description = "Máximo de workers que o timer every240 (slow) pode levantar por execução.";
+              };
+            };
+          };
+          default = { };
+          description = "Controle de workers CLAUDINHO (custos; fast/heavy/slow).";
         };
       };
     };

@@ -93,6 +93,7 @@ Módulos opcionais ativados por import em `configuration.nix`:
 - `work.nix` - Ferramentas de trabalho/produtividade
 - `battery.nix` - Otimizações de bateria (TLP)
 - `logitech-mouse.nix` - Configurações de mouse Logitech
+- `agents.nix` / `agents/` - CLAUDINHO timers (every10, every60, every240). Controle de custo: `local.agents.claudinho.maxConcurrentWorkers` (default 1), `maxWorkersFast`/`maxWorkersHeavy`/`maxWorkersSlow` (default 1 cada).
 
 ### Desktop Environments (`modules/gnome/`, etc)
 Nota: A estrutura atual mostra `modules/gnome/` mas pode ter outros DEs:

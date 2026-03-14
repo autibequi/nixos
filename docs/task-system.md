@@ -71,7 +71,10 @@ max_turns: 25
 | Histórico | Log de execuções passadas (opcional) |
 
 ## Workers
-- **1 worker por vez no sistema** (lock global): apenas um Claude roda de cada vez, qualquer que seja o clock (every10, every60, every240). Timers que disparam enquanto outro está rodando fazem skip.
+- **Controle de custo parametrizável** via `local.agents.claudinho` (NixOS):
+  - `maxConcurrentWorkers` (default 1): máximo de containers Claude rodando ao mesmo tempo no sistema. 1 = só um por vez; no futuro pode aumentar.
+  - `maxWorkersFast` / `maxWorkersHeavy` / `maxWorkersSlow` (default 1 cada): máximo que cada timer (every10, every60, every240) pode levantar por execução — evita fast/heavy levantarem “10” de uma vez.
+- Com `maxConcurrentWorkers = 1`: lock global, apenas um runner por vez; com valor > 1: vários runners podem rodar em paralelo respeitando o limite total.
 - Cada worker se identifica com CLAU_WORKER_ID
 - CLAU_CLOCK filtra quais tasks o worker roda (every10, every60 ou every240)
 - Runner lê recorrentes de scheduled.md, backlog de kanban.md
