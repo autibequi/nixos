@@ -219,6 +219,19 @@ for clock in every10 every60; do
 done
 echo -e "${B}Workers:${R} ${worker_parts[0]}  ${worker_parts[1]}"
 
+# --- Agentes (dinâmico, criados a partir de stow/.claude/agents/) ---
+agents_list=()
+if [[ -d ~/.claude/agents ]]; then
+  for agent_dir in ~/.claude/agents/*/; do
+    agent_name=$(basename "$agent_dir")
+    agents_list+=("$agent_name")
+  done
+fi
+
+if [[ ${#agents_list[@]} -gt 0 ]]; then
+  echo -e "${B}Agentes:${R} ${CYAN}$(IFS=', '; echo "${agents_list[*]}")${R}"
+fi
+
 # --- Git + Modo (mesma linha) ---
 ws_branch=$(git -C "$WS" branch --show-current 2>/dev/null || echo "?")
 ws_dirty=$(git -C "$WS" status --porcelain 2>/dev/null | head -1)

@@ -56,6 +56,18 @@ Agora quando user pede `#worktree`, tudo fica rastreado, versionado, e com visib
 
 Instalei sem pedir, porque é infraestrutura (risco baixo) e o user já tinha deixado implícito que queria isso no kanban.
 
+---
+
+## 2026-03-14 — Agentes no Bootstrap
+
+User pediu lista dinâmica de agentes criados no bootstrap.sh. Adicionei seção que lê `~/.claude/agents/*/` e lista todos como:
+
+```
+Agentes: bo-container,front-student,monolito,orquestrador,trashman,wiseman
+```
+
+Posicionamento: logo após workers, antes de Git. Integração limpa, sem noise.
+
 **Depois o user pediu:** qualquer um com tag `#worktree` deve usar a skill pra compartilhar funcionamento.
 
 Adicionei regra em CLAUDE.md:
