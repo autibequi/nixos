@@ -77,6 +77,20 @@ if [[ -z "$WEATHER_STR" ]]; then
   fi
 fi
 
+# --- Auto-update Claude Code (cache 24h) ---
+CLAUDE_UPDATE_CACHE="$WS/.ephemeral/.claude-code-update"
+mkdir -p "$WS/.ephemeral" 2>/dev/null || true
+if [[ -f "$CLAUDE_UPDATE_CACHE" ]]; then
+  update_age=$(( now - $(stat -c %Y "$CLAUDE_UPDATE_CACHE" 2>/dev/null || echo 0) ))
+else
+  update_age=999999
+fi
+if [[ $update_age -gt 86400 ]]; then
+  # Run upgrade in background (don't block startup)
+  ( nix profile upgrade '.*claude-code.*' 2>/dev/null && \
+    touch "$CLAUDE_UPDATE_CACHE" 2>/dev/null || true ) &
+fi
+
 DIA=$(date +"%d/%m/%Y")
 HORA=$(date +"%H:%M")
 
@@ -152,10 +166,9 @@ build_banner_1() {
   echo -e "${WHITE}"
   printf '    ╔'; printf '═%.0s' $(seq 1 $((BOX_W + 2))); echo '╗'
   pad_line "║" ""
-  pad_line "║" "${ORANGE}▶${R} ${B}A P E R T U R E${R}"
+  pad_line "║" "${ORANGE}◉${R} ${B}A P E R T U R E${R} ${ORANGE}◉${R}"
   pad_line "║" "${BLUE}  S C I E N C E${R}"
   pad_line "║" ""
-  pad_line "║" "${CYAN}▸ TULPA${R}  personal dev agent"
   pad_line "║" "${DIM}${DIA}  ${HORA}  ${WEATHER_STR}${R}"
   pad_line "║" ""
   pad_line "║" "${DIM}${PORQUEMO}${R}"
@@ -167,11 +180,9 @@ build_banner_2() {
   echo -e "${WHITE}"
   printf '    ╭'; printf '─%.0s' $(seq 1 $((BOX_W + 2))); echo '╮'
   pad_line "│" ""
-  pad_line "│" "${ORANGE}◆ A P E R T U R E ◆${R}"
+  pad_line "│" "${ORANGE}◉${R} ${B}A P E R T U R E${R} ${ORANGE}◉${R}"
   pad_line "│" "${BLUE}  S C I E N C E${R}"
   pad_line "│" ""
-  pad_line "│" "${CYAN}▸ TULPA${R}  ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄"
-  pad_line "│" "personal dev agent"
   pad_line "│" "${DIM}${DIA}  ${HORA}  ${WEATHER_STR}${R}"
   pad_line "│" ""
   pad_line "│" "${DIM}${PORQUEMO}${R}"
@@ -183,10 +194,7 @@ build_banner_3() {
   echo -e "${WHITE}"
   printf '    ╔'; printf '═%.0s' $(seq 1 $((BOX_W + 2))); echo '╗'
   pad_line "║" ""
-  pad_line "║" "${ORANGE}◉◉◉  ★ Aperture Science ★  ◉◉◉${R}"
-  pad_line "║" ""
-  pad_line "║" "${CYAN}▸ TULPA${R}"
-  pad_line "║" "${DIM}personal dev agent${R}"
+  pad_line "║" "${ORANGE}◉${R} ${B}A P E R T U R E  S C I E N C E${R} ${ORANGE}◉${R}"
   pad_line "║" ""
   pad_line "║" "${DIM}${DIA}  ${HORA}  ${WEATHER_STR}${R}"
   pad_line "║" ""
