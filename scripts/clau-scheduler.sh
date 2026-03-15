@@ -285,9 +285,12 @@ init_state
 # Process any leftover completion markers from previous tick
 process_completions
 
-# Check prerequisites
-if [ ! -f "$KANBAN_FILE" ] && [ ! -f "$SCHEDULED_FILE" ]; then
-  if [ ! -d "$TASKS_DIR/recurring" ] || [ -z "$(ls -A "$TASKS_DIR/recurring" 2>/dev/null)" ]; then
+# Check prerequisites — recurring/ is authoritative; kanban only needed for one-shot tasks
+_has_recurring=0
+[ -d "$TASKS_DIR/recurring" ] && [ -n "$(ls -A "$TASKS_DIR/recurring" 2>/dev/null)" ] && _has_recurring=1
+
+if [ "$_has_recurring" -eq 0 ]; then
+  if [ ! -f "$KANBAN_FILE" ] && [ ! -f "$SCHEDULED_FILE" ]; then
     log "No kanban/scheduled/recurring tasks found."
     exit 0
   fi

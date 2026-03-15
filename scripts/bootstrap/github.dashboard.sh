@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # github.dashboard.sh — PRs, reviews, dirty repos, worktrees, conversations
 
-[[ -f "$AUTOJARVIS_FLAG" ]] && command -v gh &>/dev/null || return 0
+command -v gh &>/dev/null || return 0
 
 # ── Load gh-status cache ─────────────────────────────────────────────────────
-WS="$WS" source "$WS/stow/.claude/scripts/gh-status.sh" 2>/dev/null || true
+WS="$WS" source "$WS/host/stow/.claude/scripts/gh-status.sh" 2>/dev/null || true
 [[ -f "${GH_STATUS_CACHE:-}" ]] && source "${GH_STATUS_CACHE}" 2>/dev/null || true
 ( gh_status_fetch 2>/dev/null ) &
 
