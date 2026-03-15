@@ -59,15 +59,34 @@
 
 ## Onde estou
 
-**Detectar contexto:** checar `$CLAUDE_ENV` no boot.
-- `CLAUDE_ENV=container` → estou dentro do container Docker `claude-nix-sandbox`
-- `CLAUDE_ENV` ausente → estou no host NixOS diretamente
+**Booleano canônico:** `IS_CONTAINER` — setado pelo `bootstrap/modules.sh` e exportado para todos os submodules.
 
-**Implicações do container:**
+| Valor | Contexto | Fonte de verdade |
+|-------|----------|-----------------|
+| `IS_CONTAINER=1` | Dentro do container Docker `claude-nix-sandbox` | `CLAUDE_ENV=container` ou `/.dockerenv` |
+| `IS_CONTAINER=0` | No host NixOS diretamente | ausência das condições acima |
+
+**Uso em decisões — REGRA:** antes de qualquer comando com efeito no sistema, checar `IS_CONTAINER`:
+
+```bash
+if [[ "${IS_CONTAINER:-0}" -eq 1 ]]; then
+  # Dentro do container: sem sudo, sem systemctl host, sem nixos-rebuild
+  # Pedir pro user rodar no host
+else
+  # No host: pode rodar nixos-rebuild switch, systemctl, etc.
+fi
+```
+
+**Implicações quando `IS_CONTAINER=1`:**
 - Sem `sudo`, sem `systemctl` do host, sem `nixos-rebuild`
 - `/workspace` é o repo NixOS do host (bind mount) — posso editar os arquivos, mas o `nixos-rebuild switch` precisa ser rodado pelo user no host
 - Comandos que precisam do host: pedir pro user rodar no terminal dele
 - `host.docker.internal` = IP do host a partir do container
+
+**Implicações quando `IS_CONTAINER=0`:**
+- Posso rodar `nixos-rebuild switch`, `systemctl`, `sudo` normalmente
+- Workspace é o repo local diretamente (não bind mount)
+- Sem acesso a MCP servers que só existem no container
 
 - Container: `claude-nix-sandbox` (Dockerfile.claude + docker-compose.claude.yml)
 - Workspace: `/workspace` = repo NixOS pessoal do usuário

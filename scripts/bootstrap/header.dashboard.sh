@@ -197,7 +197,8 @@ AUTOCOMMIT_FLAG="$WS/.ephemeral/auto-commit"
 [[ -f "$AUTOCOMMIT_FLAG" ]] && autocommit_str="${ON}ON${R}" || autocommit_str="${OFF}OFF${R}"
 [[ -f "$AUTOJARVIS_FLAG" ]] && autojarvis_str="${ON}ON${R}" || autojarvis_str="${OFF}OFF${R}"
 
-echo -e "${P_CYAN}Git:${R} ${git_str}  ${P_CYAN}Ferias:${R} ${ferias_str}  ${P_CYAN}Personality:${R} ${personality_str}  ${P_CYAN}AutoCommit:${R} ${autocommit_str}  ${P_CYAN}AutoJarvis:${R} ${autojarvis_str}"
+[[ "${IS_CONTAINER:-0}" -eq 1 ]] && env_str="${P_CYAN}CONTAINER${R}" || env_str="${P_GREEN}HOST${R}"
+echo -e "${P_CYAN}Env:${R} ${env_str}  ${P_CYAN}Git:${R} ${git_str}  ${P_CYAN}Ferias:${R} ${ferias_str}  ${P_CYAN}Personality:${R} ${personality_str}  ${P_CYAN}AutoCommit:${R} ${autocommit_str}  ${P_CYAN}AutoJarvis:${R} ${autojarvis_str}"
 
 # ── Kanban: Inbox count ───────────────────────────────────────────────────────
 inbox_count=0

@@ -26,6 +26,17 @@ BOOTSTRAP_BANNER="${BOOTSTRAP_BANNER:-auto}"
 AUTOJARVIS_FLAG="$WS/.ephemeral/auto-jarvis"
 USAGE_BAR_FILE="$WS/.ephemeral/usage-bar.txt"
 
+# ── Contexto de execução: host vs container ───────────────────────────────────
+# IS_CONTAINER=1 → dentro do container claude-nix-sandbox
+# IS_CONTAINER=0 → no host NixOS diretamente
+if [[ "${CLAUDE_ENV:-}" == "container" ]]; then
+  IS_CONTAINER=1
+elif [[ -f "/.dockerenv" ]] || grep -q 'docker\|container' /proc/1/cgroup 2>/dev/null; then
+  IS_CONTAINER=1
+else
+  IS_CONTAINER=0
+fi
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
 fmt_age() {
   local s="$1" h=$(( $1 / 3600 )) m=$(( ($1 % 3600) / 60 ))
@@ -59,7 +70,7 @@ osc8_link() {
 }
 
 # ── Export for submodules ─────────────────────────────────────────────────────
-export WS KANBAN SCHEDULED TODAY now COLS LINS BOOTSTRAP_BANNER AUTOJARVIS_FLAG
+export WS KANBAN SCHEDULED TODAY now COLS LINS BOOTSTRAP_BANNER AUTOJARVIS_FLAG IS_CONTAINER
 
 # ── Source dashboard modules ──────────────────────────────────────────────────
 BOOTSTRAP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
