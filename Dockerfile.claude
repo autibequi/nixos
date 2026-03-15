@@ -29,9 +29,6 @@ RUN echo "claude:x:1000:1000::/home/claude:/bin/bash" >> /etc/passwd && \
     chown -R 1000:1000 /home/claude && \
     ln -sf /root/.nix-profile/bin/bash /bin/bash
 
-# Dashboard local ao abrir terminal (sem chamar API / UserPromptSubmit)
-RUN echo '[[ -t 0 && -f /workspace/host/scripts/bootstrap.sh ]] && /workspace/host/scripts/bootstrap.sh' >> /home/claude/.bashrc
-
 USER claude
 # PATH: binários no .nix-profile (inclui claude)
 ENV PATH="/home/claude/.nix-profile/bin:/usr/bin:/bin:${PATH}"

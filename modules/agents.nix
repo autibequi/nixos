@@ -18,7 +18,7 @@ let
   composeBin = if isPodman then "podman-compose" else "docker-compose";
   composeFiles = "-f ${projectDir}/docker-compose.claude.yml"
     + (if isPodman then " -f ${projectDir}/docker-compose.podman.yml" else "");
-  compose = "${composePkg}/bin/${composeBin} ${composeFiles}";
+  compose = "${composePkg}/bin/${composeBin} ${composeFiles} -p clau-workers";
 
   hostSocket = if isPodman then "/run/podman/podman.sock" else "/var/run/docker.sock";
   userSocket = if isPodman then "unix:///run/user/1000/podman/podman.sock" else "unix:///var/run/docker.sock";
@@ -86,8 +86,8 @@ let
     SERVICE=$( [ "$CLOCK" = "every10" ] && echo "worker-fast" || echo "worker" )
 
     # Ensure container network exists (compose needs it)
-    COMPOSE_PROJECT=$(basename ${projectDir})
-    NETWORK="''${COMPOSE_PROJECT}_default"
+    COMPOSE_PROJECT="clau-workers"
+    NETWORK="clau-workers_default"
     if ! ${enginePkg}/bin/${containers.engine} network exists "$NETWORK" 2>/dev/null; then
       echo "[clau:$CLOCK] Criando network $NETWORK..."
       ${enginePkg}/bin/${containers.engine} network create "$NETWORK" 2>/dev/null || true

@@ -10,7 +10,13 @@ SPECIFIC_TASK="${1:-}"
 WORKER_ID="${CLAU_WORKER_ID:-worker-1}"
 CLAU_CLOCK="${CLAU_CLOCK:-unified}"
 CLAU_TASK_LIST="${CLAU_TASK_LIST:-}"  # comma-separated list from scheduler
-SCHEDULER_COMPLETED_DIR="$EPHEMERAL/scheduler/completed"
+# When inside container, markers must land where the host scheduler reads them:
+# host: PROJECT_DIR/nixos/.ephemeral  =  container: /workspace/host/.ephemeral
+if [[ "${CLAUDE_ENV:-}" == "container" ]] || [[ -f "/.dockerenv" ]] || grep -q 'docker\|container' /proc/1/cgroup 2>/dev/null; then
+  SCHEDULER_COMPLETED_DIR="/workspace/host/.ephemeral/scheduler/completed"
+else
+  SCHEDULER_COMPLETED_DIR="$EPHEMERAL/scheduler/completed"
+fi
 # Identidade desta execução — permite detectar órfãos mesmo quando runner é PID 1 (container)
 RUN_ID="$$-$(date +%s)-${RANDOM:-0}"
 NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}"

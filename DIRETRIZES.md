@@ -4,7 +4,7 @@ Regras de apresentação e comportamento que se aplicam a toda interação.
 
 ## Shell
 
-- considere usar dash para execução dos scripts que monta para otimizar velocidade de execução. considere e busque ferramentas, para coisas complexas usitilize python #CLAUDINHO_REVISA_AQUI_QUANDO_PASSAR_ESCREVE_MELHOR
+- Preferir `dash` para scripts simples (velocidade). Para lógica complexa, usar `python`. Sempre buscar ferramentas CLI existentes antes de reinventar.
 
 ## Output
 

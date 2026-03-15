@@ -80,63 +80,31 @@ claudio() {
   proj_slug="$(basename "${mount_path}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-')"
   proj_slug="${proj_slug%-}"
 
-  # Resolve instância: cada instância = container separado
-  local proj_name
+  local proj_name="clau-${proj_slug}"
+  [[ -n "$instance" && "$instance" != "1" ]] && proj_name="${proj_name}-${instance}"
 
-  if [[ -n "$instance" ]]; then
-    [[ "$instance" == "1" ]] && proj_name="clau-${proj_slug}" || proj_name="clau-${proj_slug}-${instance}"
-    CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$obsidian_path" \
-      docker compose -f "$compose_file" -p "$proj_name" up -d --no-recreate sandbox
-  else
-    # auto: encontra próximo slot livre — com lock pra evitar race condition
-    local lockdir="${TMPDIR:-/tmp}/claudio-${proj_slug}.lock"
-    local n=1
-    proj_name="clau-${proj_slug}"
-    (
-      # lock atômico: mkdir é operação atômica no Linux
-      while ! mkdir "$lockdir" 2>/dev/null; do sleep 0.2; done
-      trap "rmdir '$lockdir' 2>/dev/null" EXIT
+  local _compose_env="CLAUDIO_MOUNT=${mount_path} CLAUDIO_MOUNT_OPTS=${mount_opts} OBSIDIAN_PATH=${obsidian_path}"
 
-      while docker compose -f "$compose_file" -p "$proj_name" ps sandbox 2>/dev/null | grep -qE 'running|starting|Up'; do
-        (( n++ ))
-        proj_name="clau-${proj_slug}-${n}"
-      done
-      # Sobe o container dentro do lock pra garantir que o slot fica reservado
-      CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$obsidian_path" \
-        docker compose -f "$compose_file" -p "$proj_name" up -d --no-recreate sandbox
-      # Exporta vars pro shell pai via arquivo temporário
-      printf 'proj_name=%s\n' "$proj_name" > "${lockdir}.result"
-    )
-    # Lê resultado do subshell
-    if [[ -f "${lockdir}.result" ]]; then
-      proj_name=$(grep '^proj_name=' "${lockdir}.result" | cut -d= -f2-)
-      rm -f "${lockdir}.result"
-    fi
-  fi
-
-  local _compose_env="CLAUDIO_MOUNT=${mount_path} CLAUDIO_MOUNT_OPTS=$mount_opts OBSIDIAN_PATH=$obsidian_path"
-
-  # Para o container ao sair para liberar o slot para próxima sessão
-  trap "env $_compose_env docker compose -f '$compose_file' -p '$proj_name' stop sandbox 2>/dev/null" EXIT INT TERM
-
+  # Cada sessão é um container efêmero independente — nasce e morre com a sessão
   case "$mode" in
     claude)
-      env $_compose_env docker compose -f "$compose_file" -p "$proj_name" exec -it \
-        -e CLAUDIO_MOUNT="${mount_path}" sandbox bash -c \
-        ". /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude ${model} --permission-mode bypassPermissions"
+      env $_compose_env docker compose -f "$compose_file" -p "$proj_name" run --rm -it \
+        --entrypoint /bin/bash \
+        -e CLAUDIO_MOUNT="${mount_path}" sandbox \
+        -c ". /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude ${model} --permission-mode bypassPermissions"
       ;;
     shell)
-      env $_compose_env docker compose -f "$compose_file" -p "$proj_name" exec -it \
-        -e CLAUDIO_MOUNT="${mount_path}" sandbox bash
+      env $_compose_env docker compose -f "$compose_file" -p "$proj_name" run --rm -it \
+        --entrypoint /bin/bash \
+        -e CLAUDIO_MOUNT="${mount_path}" sandbox
       ;;
     resume)
-      env $_compose_env docker compose -f "$compose_file" -p "$proj_name" exec -it \
+      env $_compose_env docker compose -f "$compose_file" -p "$proj_name" run --rm -it \
+        --entrypoint /bin/bash \
         -e CLAUDIO_MOUNT="${mount_path}" sandbox \
-        /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions
+        -c "exec /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions"
       ;;
   esac
-
-  trap - EXIT INT TERM
 }
 
 # === codio — entrypoint opencode com mount do projeto ===
