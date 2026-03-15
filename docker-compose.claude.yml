@@ -83,3 +83,8 @@ services:
       GIT_COMMITTER_EMAIL: buchecha@autibequi.com
     extra_hosts: *extra-hosts
     volumes: *base-volumes
+
+networks:
+  default:
+    name: nixos_default
+    external: true

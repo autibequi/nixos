@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # modules.sh — bootstrap orchestrator: colors, helpers, then dashboard modules
 
-# ── Colors (coral theme — matching Claude mascot) ────────────────────────────
+# ── Colors (slate/blue theme) ─────────────────────────────────────────────────
 R=$'\033[0m' B=$'\033[1m' DIM=$'\033[2m'
-P_GREEN=$'\033[1;38;5;174m'  P_AMBER=$'\033[1;93m'
-P_CYAN=$'\033[1;38;5;210m'   P_MAGENTA=$'\033[1;38;5;204m'
-P_RED=$'\033[1;91m'          P_DIM=$'\033[2;38;5;210m'
+P_GREEN=$'\033[1;38;5;114m'  P_AMBER=$'\033[1;38;5;214m'
+P_CYAN=$'\033[1;38;5;75m'    P_MAGENTA=$'\033[1;38;5;183m'
+P_RED=$'\033[1;91m'          P_DIM=$'\033[2;38;5;102m'
 ON=$'\033[1;32m'             OFF=$'\033[1;31m'
 # Fallback 256
-CYAN=$'\033[38;5;210m' GREEN=$'\033[38;5;174m' YELLOW=$'\033[33m' RED=$'\033[31m'
-ORANGE=$'\033[38;5;208m' BLUE=$'\033[38;5;33m' WHITE=$'\033[97m'
-MAGENTA=$'\033[38;5;204m' GRAY=$'\033[38;5;245m'
+CYAN=$'\033[38;5;75m' GREEN=$'\033[38;5;114m' YELLOW=$'\033[38;5;222m' RED=$'\033[31m'
+ORANGE=$'\033[38;5;214m' BLUE=$'\033[38;5;75m' WHITE=$'\033[97m'
+MAGENTA=$'\033[38;5;183m' GRAY=$'\033[38;5;245m'
 
 # ── Globals ───────────────────────────────────────────────────────────────────
 # Detect container once — sets IS_CONTAINER and WS

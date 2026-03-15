@@ -30,6 +30,9 @@ DEFAULT_TIMEOUT=300
 DEFAULT_MODEL="haiku"
 DEFAULT_MAX_TURNS=12
 
+# Worker container starts fresh — create vault symlink BEFORE any mkdir uses $TASKS
+[[ ! -e "$WORKSPACE/vault" ]] && ln -sfn "$WORKSPACE/obsidian" "$WORKSPACE/vault" 2>/dev/null || true
+
 mkdir -p "$EPHEMERAL/locks" "$TASKS/running" "$TASKS/done" "$TASKS/failed" \
   "$WORKSPACE/vault/sugestoes" "$WORKSPACE/vault/_agent/reports"
 
@@ -53,7 +56,7 @@ trap 'rm -rf "$AGENT_MY_DIR"' EXIT
 
 [ -f "$EPHEMERAL/no-mcp.json" ] || echo '{"mcpServers":{}}' > "$EPHEMERAL/no-mcp.json"
 
-source "$WORKSPACE/scripts/kanban-sync.sh"
+source "$WORKSPACE/host/scripts/kanban-sync.sh"
 
 echo "[clau:$WORKER_ID:$CLAU_CLOCK] Iniciando (PID $$)"
 
@@ -410,7 +413,7 @@ $(cat "$TASKS/running/$task/memoria.md")"
   # Auto-tracking: criar worktree virtual pra task
   local worker_branch="worker/${CLAU_CLOCK}/${task}"
   export CLAU_CURRENT_WORKTREE="$task"
-  "$WORKSPACE/scripts/worktree-manager.sh" init "$task" "$worker_branch" "Task: $task (Worker: $WORKER_ID)" || true
+  "$WORKSPACE/host/scripts/worktree-manager.sh" init "$task" "$worker_branch" "Task: $task (Worker: $WORKER_ID)" || true
 
   local mcp_flags=()
   [ -n "$mcp_flags_str" ] && mcp_flags=($mcp_flags_str)
@@ -447,7 +450,7 @@ finish_task() {
   local task="$1" source_dir="$2" exit_code="$3"
 
   # Auto-tracking: fechar worktree virtual
-  "$WORKSPACE/scripts/worktree-manager.sh" exit || true
+  "$WORKSPACE/host/scripts/worktree-manager.sh" exit || true
 
   if [ "$source_dir" = "recurring" ]; then
     # Sync back evolved files to recurring/ before cleanup
@@ -537,7 +540,7 @@ if [ -n "$CLAU_TASK_LIST" ]; then
     claim_task "$task" "$source_dir" || continue
     task_count=$((task_count + 1))
 
-    local task_start_s=$SECONDS
+    task_start_s=$SECONDS
     local_exit=0
     run_single_task "$task" "$source_dir" "$is_recurring" || local_exit=$?
     TASK_ELAPSED=$((SECONDS - task_start_s)) finish_task "$task" "$source_dir" "$local_exit"

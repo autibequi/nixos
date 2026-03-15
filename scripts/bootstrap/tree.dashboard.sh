@@ -1,20 +1,19 @@
 #!/usr/bin/env bash
-# tree.dashboard.sh — volumes mount status
+# tree.dashboard.sh — volumes status (vars only, output handled by header)
 
-volumes=(
-  "host"
-  "obsidian"
-  "mount"
-)
+vol_host="$WS/host"
+vol_obsidian="$WS/obsidian"
+vol_mount="$WS/mount"
 
-line=""
-for vol in "${volumes[@]}"; do
-  path="$WS/$vol"
+_vol_dot() {
+  local path="$1"
   if [[ -d "$path" ]] && [[ -n "$(ls -A "$path" 2>/dev/null)" ]]; then
-    line+="${ON}●${R} ${B}${vol}${R}   "
+    echo -ne "${ON}●${R}"
   else
-    line+="${OFF}●${R} ${P_DIM}${vol}${R}   "
+    echo -ne "${OFF}●${R}"
   fi
-done
+}
 
-echo -e "  ${P_DIM}volumes:${R}  $line"
+export VOL_HOST_DOT; VOL_HOST_DOT="$(_vol_dot "$vol_host")"
+export VOL_OBSIDIAN_DOT; VOL_OBSIDIAN_DOT="$(_vol_dot "$vol_obsidian")"
+export VOL_MOUNT_DOT; VOL_MOUNT_DOT="$(_vol_dot "$vol_mount")"

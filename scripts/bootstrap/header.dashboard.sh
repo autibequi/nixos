@@ -134,34 +134,28 @@ build_banner() {
   done
 }
 
-build_banner
-echo
-
-
 # ── Git + Mode flags ─────────────────────────────────────────────────────────
 ws_branch=$(git -C "$WS" branch --show-current 2>/dev/null || echo "?")
 ws_dirty=$(git -C "$WS" status --porcelain 2>/dev/null | head -1) || true
 ws_ahead=$(git -C "$WS" rev-list --count '@{upstream}..HEAD' 2>/dev/null || echo 0)
 ws_behind=$(git -C "$WS" rev-list --count 'HEAD..@{upstream}' 2>/dev/null || echo 0)
-git_str="${P_CYAN}[${ws_branch}]${R}"
+git_str="${P_DIM}${ws_branch}${R}"
 [[ -n "$ws_dirty" ]] && git_str+=" ${P_AMBER}dirty${R}" || git_str+=" ${P_GREEN}clean${R}"
-[[ "$ws_ahead" -gt 0 ]] && git_str+=" ${P_GREEN}↑${ws_ahead}${R}"
-[[ "$ws_behind" -gt 0 ]] && git_str+=" ${P_RED}↓${ws_behind}${R}"
+[[ "$ws_ahead" -gt 0 ]] && git_str+=" ${P_GREEN}+${ws_ahead}${R}"
+[[ "$ws_behind" -gt 0 ]] && git_str+=" ${P_RED}-${ws_behind}${R}"
 
 MODE_FILE="$WS/projetos/CLAUDE.md"
 if [[ -f "$MODE_FILE" ]] && grep -q 'FÉRIAS \[OFF\]' "$MODE_FILE" 2>/dev/null; then
-  ferias_str="${OFF}OFF${R}"
+  ferias_dot="${OFF}●${R}"
 else
-  ferias_str="${ON}ON${R}"
+  ferias_dot="${ON}●${R}"
 fi
 PERSONALITY_FLAG="$WS/.ephemeral/personality-off"
-[[ -f "$PERSONALITY_FLAG" ]] && personality_str="${OFF}OFF${R}" || personality_str="${ON}ON${R}"
+[[ -f "$PERSONALITY_FLAG" ]] && personality_dot="${OFF}●${R}" || personality_dot="${ON}●${R}"
 AUTOCOMMIT_FLAG="$WS/.ephemeral/auto-commit"
-[[ -f "$AUTOCOMMIT_FLAG" ]] && autocommit_str="${ON}ON${R}" || autocommit_str="${OFF}OFF${R}"
-[[ -f "$AUTOJARVIS_FLAG" ]] && autojarvis_str="${ON}ON${R}" || autojarvis_str="${OFF}OFF${R}"
-
+[[ -f "$AUTOCOMMIT_FLAG" ]] && autocommit_dot="${ON}●${R}" || autocommit_dot="${OFF}●${R}"
+[[ -f "$AUTOJARVIS_FLAG" ]] && autojarvis_dot="${ON}●${R}" || autojarvis_dot="${OFF}●${R}"
 [[ "${IS_CONTAINER:-0}" -eq 1 ]] && env_str="${P_CYAN}CONTAINER${R}" || env_str="${P_GREEN}HOST${R}"
-echo -e "${P_CYAN}Env:${R} ${env_str}  ${P_CYAN}Git:${R} ${git_str}  ${P_CYAN}Ferias:${R} ${ferias_str}  ${P_CYAN}Personality:${R} ${personality_str}  ${P_CYAN}AutoCommit:${R} ${autocommit_str}  ${P_CYAN}AutoJarvis:${R} ${autojarvis_str}"
 
 # ── Kanban: Inbox count ───────────────────────────────────────────────────────
 inbox_count=0
@@ -177,6 +171,18 @@ if [[ -f "$KANBAN" ]]; then
     [[ "$section" == "inbox" ]] && inbox_count=$((inbox_count + 1))
   done < "$KANBAN"
 fi
+[[ $inbox_count -gt 0 ]] && inbox_str="  ${P_DIM}│${R}  ${P_AMBER}inbox ${inbox_count}${R}" || inbox_str=""
 
-[[ "$inbox_count" -gt 0 ]] && echo -e "${P_CYAN}Inbox:${R} ${P_AMBER}${inbox_count} pendente(s)${R}"
+# ── Weather line ──────────────────────────────────────────────────────────────
+weather_line="${P_CYAN}${DIA}  ${HORA}${R}"
+[[ "${WEATHER_TEMP}" != "--" ]] && weather_line+="  ${P_DIM}│${R}  ${P_AMBER}${WEATHER_TEMP}°C${R}  ${P_DIM}${WEATHER_DESC}${R}" \
+  || weather_line+="  ${P_DIM}│  ${WEATHER_DESC}${R}"
+
+# ── Output: 4 clean lines com left border ────────────────────────────────────
+SEP="${P_DIM}│${R}"
+echo
+echo -e "  ${P_DIM}┌─${R} ${weather_line}"
+echo -e "  ${SEP}  ${env_str}  ${git_str}${inbox_str}"
+echo -e "  ${SEP}  ${P_DIM}host${R} ${VOL_HOST_DOT:-●}  ${P_DIM}obsidian${R} ${VOL_OBSIDIAN_DOT:-●}  ${P_DIM}mount${R} ${VOL_MOUNT_DOT:-●}"
+echo -e "  ${P_DIM}└─${R} ${P_DIM}Férias${R} ${ferias_dot}  ${P_DIM}Personality${R} ${personality_dot}  ${P_DIM}Commit${R} ${autocommit_dot}  ${P_DIM}Jarvis${R} ${autojarvis_dot}"
 echo
