@@ -8,14 +8,13 @@ printf '\033c'
 # --- Symlink vault/ → obsidian/ (volume só existe em runtime) ---
 [[ ! -e /workspace/vault ]] && ln -sfn /workspace/obsidian /workspace/vault 2>/dev/null || true
 
-# --- Ensure agent symlinks in ~/.claude/agents/ ---
-mkdir -p ~/.claude/agents 2>/dev/null || true
-for agent_dir in /workspace/host/stow/.claude/agents/*/; do
-  agent_name=$(basename "$agent_dir")
-  target_link="$HOME/.claude/agents/$agent_name"
-  if [[ ! -L "$target_link" ]] || [[ $(readlink "$target_link" 2>/dev/null || echo "") != "$agent_dir" ]]; then
-    rm -f "$target_link" 2>/dev/null || true
-    ln -s "$agent_dir" "$target_link" 2>/dev/null || true
+# --- Sync Claude skills from stow/.claude/ → ~/.claude/ ---
+for dir in agents commands hooks scripts skills; do
+  src="/workspace/host/stow/.claude/$dir"
+  dst="$HOME/.claude/$dir"
+  if [[ -d "$src" ]]; then
+    rm -rf "$dst" 2>/dev/null || true
+    ln -sfn "$src" "$dst" 2>/dev/null || true
   fi
 done
 
