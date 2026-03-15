@@ -207,7 +207,7 @@ EXTRA=""
 [[ -n "$LINES_STR" ]] && EXTRA=" | ${LINES_STR}"
 
 # Status line: modelo primeiro; métricas à esquerda
-RIGHT="󱙺 ${MODEL_SIZE} ${CTX_STR}${WT_STR}${MOUNT_STR}"
+RIGHT="claudinho 󱙺 ${MODEL_SIZE} ${CTX_STR}${WT_STR}${MOUNT_STR}"
 
 # Terminal title via OSC (stderr)
 printf '\033]0;Claude: %s\007' "$TOPIC" >&2
