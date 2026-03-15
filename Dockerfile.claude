@@ -37,7 +37,4 @@ USER claude
 ENV PATH="/home/claude/.nix-profile/bin:/usr/bin:/bin:${PATH}"
 ENV HOME=/home/claude
 
-# Symlink vault/ → obsidian/ é criado em runtime pelo bootstrap.sh
-# (/workspace só existe após o volume ser montado)
-
-WORKDIR /workspace/host
+WORKDIR /workspace

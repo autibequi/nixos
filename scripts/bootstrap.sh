@@ -5,6 +5,9 @@ set -uo pipefail
 # Limpa output anterior (docker compose up, etc.)
 printf '\033c'
 
+# --- Init /workspace como git repo para Claude Code abrir aqui ---
+[[ ! -d /workspace/.git ]] && git init /workspace >/dev/null 2>&1 || true
+
 # --- Sync Claude skills from stow/.claude/ → ~/.claude/ ---
 for dir in agents commands hooks scripts skills; do
   src="/workspace/host/stow/.claude/$dir"
