@@ -183,6 +183,6 @@ SEP="${P_DIM}│${R}"
 echo
 echo -e "  ${P_DIM}┌─${R} ${weather_line}"
 echo -e "  ${SEP}  ${env_str}  ${git_str}${inbox_str}"
-echo -e "  ${SEP}  ${P_DIM}host${R} ${VOL_HOST_DOT:-●}  ${P_DIM}obsidian${R} ${VOL_OBSIDIAN_DOT:-●}  ${P_DIM}mount${R} ${VOL_MOUNT_DOT:-●}"
-echo -e "  ${P_DIM}└─${R} ${P_DIM}Férias${R} ${ferias_dot}  ${P_DIM}Personality${R} ${personality_dot}  ${P_DIM}Commit${R} ${autocommit_dot}  ${P_DIM}Jarvis${R} ${autojarvis_dot}"
+echo -e "  ${SEP}  ${P_DIM}host${R}    ${VOL_HOST_DOT:-●}  ${P_DIM}obsidian${R}     ${VOL_OBSIDIAN_DOT:-●}  ${P_DIM}mount${R}   ${VOL_MOUNT_DOT:-●}"
+echo -e "  ${P_DIM}└─${R} ${P_DIM}Férias${R}  ${ferias_dot}  ${P_DIM}Personality${R}  ${personality_dot}  ${P_DIM}Commit${R}  ${autocommit_dot}  ${P_DIM}Jarvis${R}  ${autojarvis_dot}"
 echo
