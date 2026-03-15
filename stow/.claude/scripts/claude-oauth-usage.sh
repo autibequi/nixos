@@ -157,8 +157,8 @@ sn_num=$(echo "$JSON" | $JQ -r '(.seven_day_sonnet?.utilization? // 0) | floor')
 
 # --- modo: --waybar ---
 if [[ "$MODE" == "--waybar" ]]; then
-  text="󱙺 5h[$(_gauge "$fh_pct")${fh_pct}%] 7d[$(_gauge "$sd_pct")${sd_pct}%] sn[$(_gauge "$sn_num")${sn_num}%]"
-  $JQ -n \
+  text="sn$(_gauge "$sn_num") 5h$(_gauge "$fh_pct") 7d$(_gauge "$sd_pct")"
+  $JQ -cn \
     --arg text    "$text" \
     --arg tooltip "5h: ${fh_pct}% (reset ${fh_r})&#10;7d: ${sd_pct}% (reset ${sd_r})&#10;Sonnet 7d: ${sn_pct}%&#10;Opus 7d: ${op_pct}%&#10;Extra: ${ex_used}/${ex_limit} (${ex_pct}%)" \
     --arg class   "$css_class" \
