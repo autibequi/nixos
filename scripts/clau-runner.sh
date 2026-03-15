@@ -519,9 +519,9 @@ if [ -n "$CLAU_TASK_LIST" ]; then
 
     source_dir=""
     is_recurring="0"
-    if [ -d "$TASKS_DIR/recurring/$task" ]; then
+    if [ -d "$TASKS/recurring/$task" ]; then
       source_dir="recurring"; is_recurring="1"
-    elif [ -d "$TASKS_DIR/pending/$task" ]; then
+    elif [ -d "$TASKS/pending/$task" ]; then
       source_dir="pending"
     else
       echo "[clau:$WORKER_ID] '$task' not found in recurring/ or pending/ — skip"

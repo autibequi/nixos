@@ -23,6 +23,7 @@ x-base-volumes: &base-volumes
   - /proc/meminfo:/host/proc/meminfo:ro
   - /proc/loadavg:/host/proc/loadavg:ro
   - /proc/uptime:/host/proc/uptime:ro
+  - /tmp/claudio-hive-mind:/workspace/.hive-mind
 
 services:
   sandbox:

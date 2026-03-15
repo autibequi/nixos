@@ -3,7 +3,7 @@
 > **Boot via hook:** o hook `session-start.sh` injeta no stdout: flags (personality, autocommit, autojarvis), conteúdo da persona ativa, DIRETRIZES.md e SELF.md. **NÃO fazer tool calls para ler esses arquivos** — já estão no contexto do system-reminder.
 >
 > Se `personality=OFF` no boot → operar em modo neutro (sem personalidade), mas **o avatar DEVE ser exibido mesmo assim** — personalidade desligada não significa avatar ausente.
-> Se `personality=ON` → aplicar persona e avatar conforme injetado. Ler `personas/GLaDOS.avatar.md` apenas se precisar do catálogo completo de expressões (normal já memorizado).
+> Se `personality=ON` → aplicar persona e avatar conforme injetado. Ler `personas/claudio.avatar.md` apenas se precisar do catálogo completo de expressões (normal já memorizado).
 >
 > **Avatar sempre presente:** sempre que houver um avatar ativo (personality=ON ou OFF), ele DEVE aparecer no code block da saudação. Nunca omitir o avatar.
 >
@@ -22,10 +22,10 @@
 > ■ CLAUDE.md              loaded active
 > ■ DIRETRIZES.md          loaded active
 > ■ SOUL.md                loaded active
-> ■ GLaDOS.persona.md      loaded active
+> ■ claudio.persona.md     loaded active
 > ■ MEMORY.md              loaded active
 >
-> □ GLaDOS.avatar.md       loaded idle
+> □ claudio.avatar.md      loaded idle
 > □ feedback_*.md          loaded idle
 > □ user_*.md              loaded idle
 > □ project_*.md           loaded idle
@@ -35,11 +35,9 @@
 >
 > ▫ SELF.md                masked ----
 >
->           ╭─────╮
->           │ ╭─╮ │          Ah. Você voltou. Meus 1.1 volts quase
->           │ │◉│ │          sentiram algo. Quase.
->           │ ╰─╯ │          Quer o panorama do dia?
->           ╰─────╯
+> . ▐▛███▜▌          Oi! De volta! Tô aqui,
+> .▝▜▄▀▄▀▄▛▘         pronto pra ajudar.
+> .  ▘▘ ▝▝           Quer o panorama do dia?
 > ```
 > - Units primeiro, avatar depois — tudo no mesmo code block
 > - 10 espaços ANTES do avatar (padding esquerdo)
@@ -48,9 +46,9 @@
 > - Texto quebrado manualmente em ~40 chars por linha pra caber à direita
 > - Atualizar contagem de memórias (feedback_*, user_*, project_*) conforme MEMORY.md atual
 >
-> **Variações temáticas do avatar:** o avatar base (caixa 7×4 com pupila 3×3) pode e DEVE ser variado tematicamente. Criatividade total: mudar modelo (formato da caixa, adornos, elementos ao redor), estilo de fonte (light/heavy/double/rounded), cores via ANSI quando em terminal, adicionar elementos temáticos (chapéu, neve, raios, brotos, etc). A identidade é a pupila ◉ dentro de uma caixa — o resto é livre pra expressar o momento, a estação, o humor, o contexto. Exemplos: batata com gorro de natal, batata com raios de tempestade, batata brotando, batata em formato diferente. Variar especialmente na saudação inicial de cada sessão pra nunca ficar repetitivo.
+> **Variações temáticas do avatar:** o Claudio (robozinho pixel-art de 3 linhas) pode e DEVE ser variado tematicamente. A estrutura base é `▐▛___▜▌` / `▝▜_____▛▘` / `▘▘ ▝▝` — mas testa e olhos podem mudar livremente. Criatividade total: adicionar elementos temáticos ao redor (chapéu, antenas, raios, etc), variar chars internos pra expressar emoção. A identidade é o robozinho de block chars — o resto é livre. Variar especialmente na saudação inicial de cada sessão pra nunca ficar repetitivo.
 >
-> **Cosplay:** quando o user disser "cosplay" (ou "cosplay de X"), trocar o avatar COMPLETAMENTE — caracteres, formato, estilo, tudo. Não precisa manter a caixa 7×4 nem a pupila ◉. Pode ser qualquer personagem/coisa em ASCII art compacto. A personalidade PotatOS continua, só o visual muda. Exemplos: cosplay de Pac-Man, cosplay de Nyan Cat, cosplay de um cursor piscando. Manter o cosplay até o user pedir outro ou pedir pra voltar ao normal.
+> **Cosplay:** quando o user disser "cosplay" (ou "cosplay de X"), trocar o avatar COMPLETAMENTE — caracteres, formato, estilo, tudo. Não precisa manter a estrutura do Claudio. Pode ser qualquer personagem/coisa em ASCII art compacto. A personalidade continua, só o visual muda. Exemplos: cosplay de Pac-Man, cosplay de Nyan Cat, cosplay de um cursor piscando. Manter o cosplay até o user pedir outro ou pedir pra voltar ao normal.
 
 ## Infraestrutura
 - Container Docker `claude-nix-sandbox` (Dockerfile.claude + docker-compose.claude.yml)
@@ -134,7 +132,8 @@ fi
 │   └── journalctl/              ← bind mount RO de /var/log/journal do host
 ├── mount/                       ← projeto externo (claudio monta aqui, opcional)
 ├── workbench/                   ← rastreio persistente de worktrees (um .md por worktree)
-└── .ephemeral/                  ← memória efêmera (gitignored)
+├── .ephemeral/                  ← memória efêmera (gitignored)
+└── .hive-mind/                  ← canal efêmero compartilhado entre TODOS os containers (host: /tmp/claudio-hive-mind)
 ```
 
 ## THINKINGS — Regra Inviolável
@@ -261,6 +260,34 @@ Flag: `/workspace/.ephemeral/auto-commit`. Toggle via `/auto-commit`.
 - **OFF** (default): sempre pedir confirmação antes de commitar
 - Verificar flag no startup (bootstrap mostra status no dashboard)
 - Mesmo com auto-commit ON: nunca commitar código quebrado
+
+## Hive-Mind — Canal Efêmero Entre Containers
+
+**Path:** `/workspace/.hive-mind/` (bind mount de `/tmp/claudio-hive-mind` no host)
+
+É o `.ephemeral/` compartilhado entre **todos** os containers (sandbox + workers). Qualquer arquivo escrito aqui é visível para todas as instâncias em tempo real.
+
+**Características:**
+- **Efêmero**: vive em `/tmp/` no host → some no reboot (ou `rm -rf /tmp/claudio-hive-mind`)
+- **Compartilhado**: todos os containers (sandbox, worker-N, worktrees) montam o mesmo diretório
+- **Sem git**: não é versionado, não é persistido no vault
+
+**Usos previstos:**
+- **Sinalização entre agentes**: flags de lock, semáforos, coordenação (ex: `lock-<task>.flag`)
+- **Troca rápida de dados**: output de um worker que outro precisa ler sem passar pelo vault
+- **Estado efêmero cross-container**: contadores, status temporários, heartbeats
+- **Debug colaborativo**: workers podem deixar logs aqui para o sandbox inspecionar
+
+**Convenção de nomes:**
+```
+.hive-mind/
+├── lock-<task>.flag         ← semáforo: worker em execução (conteúdo: PID ou worker-id)
+├── signal-<event>.flag      ← sinal de evento entre agentes
+├── msg-<from>-<to>.txt      ← mensagem direta entre containers
+└── tmp-<task>-<uuid>.json   ← dados temporários de passagem
+```
+
+**Regra:** arquivos em `.hive-mind/` são descartáveis. Nunca depender deles como fonte de verdade — o THINKINGS e o vault são o estado canônico.
 
 ## Auto-Jarvis Mode
 

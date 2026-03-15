@@ -12,7 +12,7 @@ let
 
   user = config.local.agents.claudinho.user or "pedrinho";
   projectDir = "/home/${user}/nixos";
-  vaultDir = "/home/${user}/.ovault";
+  vaultDir = "/home/${user}/.ovault/Work";
 
   enginePkg = if isPodman then pkgs.podman else pkgs.docker;
   composePkg = if isPodman then pkgs.podman-compose else pkgs.docker-compose;
