@@ -113,6 +113,7 @@ services:
       - ${HOME}/.ovault/Journal:/workspace/journal:ro
       - ${HOME}/.ovault/opencode:/workspace/workbench
       - ${HOME}/.opencode:/home/claude/.opencode
+      - ./stow/.claude:/workspace/.claude
 
   worker:
     build:
