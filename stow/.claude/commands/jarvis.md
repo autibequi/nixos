@@ -35,15 +35,15 @@ done
 ```
 
 #### 1c. THINKINGS (kanban)
-Ler `/workspace/vault/kanban.md`:
+Ler `/workspace/obsidian/kanban.md`:
 - Inbox, Em Andamento, Esperando Review, Backlog, Aprovado (hoje), Falhou
 
 #### 1d. Tasks autônomas (vault)
 ```bash
-echo "pending:" && ls /workspace/vault/_agent/tasks/pending/ 2>/dev/null
-echo "running:" && ls /workspace/vault/_agent/tasks/running/ 2>/dev/null
-echo "failed:" && ls /workspace/vault/_agent/tasks/failed/ 2>/dev/null
-echo "done_recent:" && ls -t /workspace/vault/_agent/tasks/done/ 2>/dev/null | head -5
+echo "pending:" && ls /workspace/obsidian/_agent/tasks/pending/ 2>/dev/null
+echo "running:" && ls /workspace/obsidian/_agent/tasks/running/ 2>/dev/null
+echo "failed:" && ls /workspace/obsidian/_agent/tasks/failed/ 2>/dev/null
+echo "done_recent:" && ls -t /workspace/obsidian/_agent/tasks/done/ 2>/dev/null | head -5
 ```
 
 #### 1e. Worktrees

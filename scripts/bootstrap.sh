@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
 # CLAUDINHO startup — modular dashboard
-set -euo pipefail
+set -uo pipefail
 
 # Limpa output anterior (docker compose up, etc.)
 printf '\033c'
-
-# --- Symlink vault/ → obsidian/ (volume só existe em runtime) ---
-[[ ! -e /workspace/vault ]] && ln -sfn /workspace/obsidian /workspace/vault 2>/dev/null || true
 
 # --- Sync Claude skills from stow/.claude/ → ~/.claude/ ---
 for dir in agents commands hooks scripts skills; do

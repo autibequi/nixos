@@ -3,9 +3,9 @@
 # Todas as funções usam flock para concorrência segura entre workers
 set -euo pipefail
 
-KANBAN="${KANBAN_FILE:-/workspace/vault/kanban.md}"
-SCHEDULED="${SCHEDULED_FILE:-/workspace/vault/_agent/scheduled.md}"
-CEMITERIO="${CEMITERIO_FILE:-/workspace/vault/cemiterio-tasks.md}"
+KANBAN="${KANBAN_FILE:-/workspace/obsidian/kanban.md}"
+SCHEDULED="${SCHEDULED_FILE:-/workspace/obsidian/_agent/scheduled.md}"
+CEMITERIO="${CEMITERIO_FILE:-/workspace/obsidian/cemiterio-tasks.md}"
 LOCKFILE="${KANBAN_LOCKFILE:-/workspace/.ephemeral/.kanban.lock}"
 
 mkdir -p "$(dirname "$LOCKFILE")"

@@ -126,8 +126,8 @@ claudio:
 	$(eval CLAU_PROJ := clau-$(PROJ_SLUG))
 	@touch $(HOME)/.claude.json
 	@echo "[claudio] $(PROJ_SLUG) → projeto $(CLAU_PROJ)"
-	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CLAU_PROJ)" up -d sandbox
-	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CLAU_PROJ)" exec -it \
+	@CLAUDIO_MOUNT="$(MOUNT_DIR)" CLAUDIO_MOUNT_OPTS=rw docker compose -f docker-compose.claude.yml -p "$(CLAU_PROJ)" up -d sandbox
+	@CLAUDIO_MOUNT="$(MOUNT_DIR)" CLAUDIO_MOUNT_OPTS=rw docker compose -f docker-compose.claude.yml -p "$(CLAU_PROJ)" exec -it \
 		-e CLAUDIO_MOUNT="$(MOUNT_DIR)" sandbox bash -c \
 		'. /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
 
@@ -145,7 +145,7 @@ attach:
 sandbox:
 	@touch $(HOME)/.claude.json
 	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
+	@$(COMPOSE) exec -it -w /workspace sandbox bash -c '. /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
 
 shell:
 	$(COMPOSE) up -d sandbox

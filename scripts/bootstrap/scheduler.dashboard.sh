@@ -3,12 +3,7 @@
 
 # ── Path resolution (host vs container) ──────────────────────────────────────
 if [[ "${IS_CONTAINER:-0}" -eq 1 ]]; then
-  # Prefer /workspace/obsidian (direct mount) over /workspace/vault (symlink)
-  if [[ -d "$WS/obsidian/_agent/tasks" ]]; then
-    _SCHED_VAULT="$WS/obsidian"
-  else
-    _SCHED_VAULT="$WS/vault"
-  fi
+  _SCHED_VAULT="$WS/obsidian"
   _SCHED_EPH="$WS/host/.ephemeral"
 else
   _SCHED_VAULT="${HOME}/.ovault/Work"

@@ -16,7 +16,7 @@ x-base-volumes: &base-volumes
   - ${HOME}/.claude:/home/claude/.claude
   - ${HOME}/.claude.json:/home/claude/.claude.json
   - ${HOME}/projects:/home/claude/projects
-  - /var/log/journal:/workspace/hostlogs/journalctl:ro
+  - /var/log/journal:/workspace/logs/journalctl:ro
   - /proc/meminfo:/host/proc/meminfo:ro
   - /proc/loadavg:/host/proc/loadavg:ro
   - /proc/uptime:/host/proc/uptime:ro

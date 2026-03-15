@@ -9,7 +9,7 @@ set -euo pipefail
 calc() { python3 -c "print($1)" 2>/dev/null || echo "0"; }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VAULT_DIR="/workspace/vault/artefacts/dashboard-gestor-ti"
+VAULT_DIR="/workspace/obsidian/artefacts/dashboard-gestor-ti"
 
 # ── Defaults ──────────────────────────────────────────────────────────────────
 DRY_RUN=false

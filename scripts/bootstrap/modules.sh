@@ -20,8 +20,8 @@ else
   _mdir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   WS="$(cd "$_mdir/../.." && pwd)"
 fi
-KANBAN="$WS/vault/kanban.md"
-SCHEDULED="$WS/vault/_agent/scheduled.md"
+KANBAN="$WS/obsidian/kanban.md"
+SCHEDULED="$WS/obsidian/_agent/scheduled.md"
 TODAY=$(date +%Y-%m-%d)
 now=$(date +%s)
 COLS="${COLUMNS:-$(tput cols 2>/dev/null || echo 100)}"
@@ -82,10 +82,11 @@ export WS KANBAN SCHEDULED TODAY now COLS LINS BOOTSTRAP_BANNER AUTOJARVIS_FLAG 
 # ── Source dashboard modules ──────────────────────────────────────────────────
 BOOTSTRAP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-source "$BOOTSTRAP_DIR/header.dashboard.sh"
-source "$BOOTSTRAP_DIR/scheduler.dashboard.sh"
-source "$BOOTSTRAP_DIR/github.dashboard.sh"
-source "$BOOTSTRAP_DIR/rss.dashboard.sh"
+source "$BOOTSTRAP_DIR/tree.dashboard.sh"       || echo -e "${P_RED}  ✗ tree load failed${R}"
+source "$BOOTSTRAP_DIR/header.dashboard.sh"     || echo -e "${P_RED}  ✗ header load failed${R}"
+source "$BOOTSTRAP_DIR/scheduler.dashboard.sh"  || echo -e "${P_RED}  ✗ scheduler load failed${R}"
+source "$BOOTSTRAP_DIR/github.dashboard.sh"     || echo -e "${P_RED}  ✗ github load failed${R}"
+source "$BOOTSTRAP_DIR/rss.dashboard.sh"        || echo -e "${P_RED}  ✗ rss load failed${R}"
 
 # ── Footer ────────────────────────────────────────────────────────────────────
 echo -e "${P_DIM}$(printf '─%.0s' $(seq 1 80))${R}"
