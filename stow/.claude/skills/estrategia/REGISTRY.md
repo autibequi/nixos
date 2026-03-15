@@ -18,7 +18,7 @@ estrategiahq
 | monolito | /home/claude/projects/estrategia/monolito | `stow/.claude/agents/monolito/` | `stow/.claude/agents/monolito/skills/` | go-service, go-handler, go-migration, go-repository, go-worker, make-feature, review-code |
 | bo-container | /home/claude/projects/estrategia/bo-container | `stow/.claude/agents/bo-container/` | `stow/.claude/agents/bo-container/skills/` | service, route, component, page, make-feature |
 | front-student | /home/claude/projects/estrategia/front-student | `stow/.claude/agents/front-student/` | `stow/.claude/agents/front-student/skills/` | service, route, component, page, make-feature |
-| orquestrador | (cross-repo coordinator) | `stow/.claude/agents/orquestrador/` | `stow/.claude/agents/orquestrador/skills/` | orquestrar-feature, changelog, recommit, refinar-bug, retomar-feature, review-pr |
+| orquestrador | (cross-repo coordinator) | `stow/.claude/agents/orquestrador/` | `stow/.claude/agents/orquestrador/skills/` | orquestrar-feature, changelog, recommit, refinar-bug, retomar-feature, review-pr, doc-branch |
 
 ## Deteccao de Repo
 1. Se cwd esta sob /home/claude/projects/estrategia/<repo>/ → repo identificado
