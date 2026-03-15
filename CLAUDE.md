@@ -1,6 +1,6 @@
 # CLAUDINHO
 
-> **Boot via hook:** o hook `session-start.sh` injeta no stdout: flags (personality, autocommit, autojarvis), conteúdo da persona ativa, DIRETRIZES.md e SELF.md. **NÃO fazer tool calls para ler esses arquivos** — já estão no contexto do system-reminder.
+> **Boot via hook:** o hook `session-start.sh` injeta no stdout: flags (personality, autocommit, autojarvis), bloco **---API_USAGE---** (uso da API, gerado por `usage-bar.sh` que usa `scripts/api-usage.sh` ou Cursor), conteúdo da persona ativa, DIRETRIZES.md e SELF.md. **NÃO fazer tool calls para ler esses arquivos** — já estão no contexto do system-reminder.
 >
 > Se `personality=OFF` no boot → operar em modo neutro (sem personalidade), mas **o avatar DEVE ser exibido mesmo assim** — personalidade desligada não significa avatar ausente.
 > Se `personality=ON` → aplicar persona e avatar conforme injetado. Ler `claudinho/personas/claudio.avatar.md` apenas se precisar do catálogo completo de expressões (normal já memorizado).
@@ -24,6 +24,7 @@
 > ■ SOUL.md                loaded active
 > ■ claudio.persona.md     loaded active
 > ■ MEMORY.md              loaded active
+> ■ API usage (usage-bar)  loaded active
 >
 > □ claudio.avatar.md      loaded idle
 > □ feedback_*.md          loaded idle
@@ -169,7 +170,13 @@ User adiciona card na coluna "Inbox" do THINKINGS no Obsidian (texto livre) → 
 - **auto-commit**: `.ephemeral/auto-commit` — commita sem perguntar (toggle `/auto-commit`)
 - **auto-jarvis**: `.ephemeral/auto-jarvis` — JARVIS no dashboard (toggle `/auto-jarvis`)
 - **personality-off**: `.ephemeral/personality-off` — modo neutro (toggle `/personality`)
-- **Cota API**: `.ephemeral/usage-bar.txt` — ler antes de tasks pesadas (≥85% → adiar/usar haiku)
+
+## Cota API e controle de créditos (comportamento universal)
+- **Carregamento no boot:** o uso da API vem no bloco `---API_USAGE---` (gerado por `stow/.claude/scripts/usage-bar.sh`, que usa `scripts/api-usage.sh` ou Cursor). Se não estiver no contexto, ler `.ephemeral/usage-bar.txt` ou rodar `scripts/api-usage.sh`.
+- **Avaliar sempre** se os créditos/cota atuais permitem o expediente sem estourar.
+- **Se houver cota folgada** e for plausível que não vai queimar tudo no dia: pode gastar normalmente (incluindo rodar tarefas em background quando fizer sentido).
+- **Se a cota estiver no limite ou for provável que vá acabar** no expediente: **evitar** rodar tarefas em background; preferir haiku; adiar tasks pesadas; não disparar workers desnecessários.
+- **Regra existente:** ≥85% de uso → adiar tasks pesadas ou usar haiku.
 
 ## Hive-Mind
 Path: `/workspace/.hive-mind/` — efêmero, compartilhado entre todos os containers via `/tmp/claudio-hive-mind`. Usar para locks, sinais, dados temporários entre agentes. Detalhes em `/workspace/obsidian/docs/operational-reference.md`.

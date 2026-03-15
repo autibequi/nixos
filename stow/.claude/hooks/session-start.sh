@@ -33,6 +33,18 @@ AUTOJARVIS="OFF"
 
 echo "BOOT: personality=$PERSONALITY autocommit=$AUTOCOMMIT autojarvis=$AUTOJARVIS"
 
+# API usage (universal — sempre injetar para controle de cota)
+USAGE_BAR_SCRIPT="$WS/stow/.claude/scripts/usage-bar.sh"
+if [ -x "$USAGE_BAR_SCRIPT" ]; then
+  export WS
+  "$USAGE_BAR_SCRIPT" 2>/dev/null || true
+fi
+if [ -f "$WS/.ephemeral/usage-bar.txt" ]; then
+  echo "---API_USAGE---"
+  cat "$WS/.ephemeral/usage-bar.txt"
+  echo "---/API_USAGE---"
+fi
+
 # Persona content (inline — evita Read tool calls no boot)
 if [ "$PERSONALITY" = "ON" ]; then
   SOUL="$WS/claudinho/SOUL.md"
