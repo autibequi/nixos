@@ -32,6 +32,8 @@ if [ "$PERSONALITY" = "ON" ]; then
       echo "---PERSONA---"
       cat "$WS/$PERSONA_PATH"
       echo "---/PERSONA---"
+    elif [ -n "$PERSONA_PATH" ]; then
+      echo "WARN: persona file not found: $WS/$PERSONA_PATH" >&2
     fi
   fi
   # DIRETRIZES

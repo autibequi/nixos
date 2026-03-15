@@ -47,9 +47,68 @@ convert_video() {
   fi
 }
 
-# === Claude Modes ===
-claudinho() { export CLAUDE_SESSION="${CLAUDE_SESSION:-pessoal}"; cd ~/nixos && make sandbox; }
-claudio()   { export CLAUDE_SESSION="${CLAUDE_SESSION:-trabalho}"; cd ~/projects/estrategia/claudio && make claude; }
+# === claudio — entrypoint unificado pro container Claude ===
+claudio() {
+  local nixos_dir="${CLAUDIO_NIXOS_DIR:-$HOME/nixos}"
+  local compose="docker compose -f $nixos_dir/docker-compose.claude.yml"
+  local mode="claude" model="" mount_path=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --shell)   mode="shell"; shift ;;
+      --resume)  mode="resume"; shift ;;
+      --haiku)   model="--model claude-haiku-4-5-20251001"; shift ;;
+      --opus)    model="--model claude-opus-4-6"; shift ;;
+      --)        shift; break ;;
+      -*)        echo "claudio: unknown flag $1"; return 1 ;;
+      *)         mount_path="$(cd "$1" 2>/dev/null && pwd)" || { echo "claudio: dir not found: $1"; return 1; }; shift ;;
+    esac
+  done
+
+  # Default: CWD, mas skip se é ~/nixos (evita redundância)
+  local real_cwd="$(pwd -P)"
+  local real_nixos="$(cd "$nixos_dir" 2>/dev/null && pwd -P)"
+  if [[ -z "$mount_path" && "$real_cwd" != "$real_nixos" ]]; then
+    mount_path="$real_cwd"
+  fi
+
+  # Se tem mount, gera compose override temporário
+  local override_args=""
+  if [[ -n "$mount_path" ]]; then
+    local override="/tmp/claudio-mount-$$.yml"
+    cat > "$override" <<EOF
+services:
+  sandbox:
+    volumes:
+      - ${mount_path}:/workspace/mount
+    environment:
+      CLAUDIO_MOUNT: ${mount_path}
+EOF
+    override_args="-f $override"
+  fi
+
+  local full_compose="$compose $override_args"
+  eval "$full_compose up -d sandbox"
+
+  case "$mode" in
+    claude)
+      eval "$full_compose exec -it sandbox bash -c \
+        '. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude $model --permission-mode bypassPermissions'"
+      ;;
+    shell)
+      eval "$full_compose exec -it sandbox bash"
+      ;;
+    resume)
+      eval "$full_compose exec -it sandbox /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions"
+      ;;
+  esac
+
+  # Cleanup override
+  [[ -n "${override:-}" ]] && rm -f "$override"
+}
+
+# Legacy aliases (compatibilidade)
+claudinho() { export CLAUDE_SESSION="${CLAUDE_SESSION:-pessoal}"; cd ~/nixos && claudio "$@"; }
 clau()      { export CLAUDE_SESSION="${CLAUDE_SESSION:-worker}"; cd ~/nixos && make run; }
 clau-auto() { export CLAUDE_SESSION="auto"; cd ~/nixos && make auto; }
 

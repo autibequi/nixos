@@ -34,11 +34,8 @@
     ./modules/asus.nix
     ./modules/nvidia.nix
 
-    # Desktop Enviroments
+    # Desktop Environments
     ./modules/hyprland.nix
-    # ./modules/gnome/core.nix
-    # ./modules/cosmic.nix
-    # ./modules/kde.nix
 
     # Monitoring
     ./modules/netdata.nix
@@ -59,10 +56,5 @@
     ./modules/work.nix
     ./modules/virt.nix
 
-    # Legacy Modules
-    # ./modules/tlp.nix
-    # ./modules/docker.nix  # legacy — consolidated into containers.nix
-    # ./modules/flatpak.nix
-    # ./modules/core/home.nix # using stow instead
   ];
 }

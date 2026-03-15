@@ -9,7 +9,7 @@ let
   containers = config.local.containers;
   isPodman = containers.engine == "podman";
 
-  user = "pedrinho";
+  user = config.local.agents.claudinho.user or "pedrinho";
   projectDir = "/home/${user}/nixos";
   vaultDir = "/home/${user}/.ovault/Work";
 

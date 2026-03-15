@@ -201,17 +201,74 @@ EOF
 update_dashboard() {
     init_registry
 
-    local registry
-    registry=$(cat "$WORKTREE_REGISTRY")
+    local dashboard="${VAULT}/_agent/worktrees.md"
+    local now
+    now=$(date -u '+%Y-%m-%d %H:%M:%S')
 
-    if [[ -z "$registry" ]] || [[ "$registry" == "{}" ]]; then
-        # Nenhum worktree ativo
-        return 0
+    # Coleta worktrees reais do git
+    local worktree_list
+    worktree_list=$(git -C "$REPO_ROOT" worktree list --porcelain 2>/dev/null || true)
+
+    local count=0
+    local table=""
+    local current_wt="" current_branch="" current_head=""
+
+    while IFS= read -r line; do
+        case "$line" in
+            "worktree "*)
+                current_wt="${line#worktree }"
+                ;;
+            "HEAD "*)
+                current_head="${line#HEAD }"
+                current_head="${current_head:0:7}"
+                ;;
+            "branch "*)
+                current_branch="${line#branch refs/heads/}"
+                ;;
+            "")
+                if [[ -n "$current_wt" && "$current_branch" != "main" && -n "$current_branch" ]]; then
+                    local status="active"
+                    # Check registry for objective
+                    local objective=""
+                    if [[ -f "$WORKTREE_REGISTRY" ]]; then
+                        objective=$(jq -r ".\"$current_branch\".objective // \"\"" "$WORKTREE_REGISTRY" 2>/dev/null)
+                    fi
+                    table="${table}| \`${current_branch}\` | ${current_head} | ${objective:-—} |\n"
+                    count=$((count + 1))
+                fi
+                current_wt="" current_branch="" current_head=""
+                ;;
+        esac
+    done <<< "$worktree_list"
+
+    # Handle last entry (porcelain may not end with blank line)
+    if [[ -n "$current_wt" && "$current_branch" != "main" && -n "$current_branch" ]]; then
+        local objective=""
+        if [[ -f "$WORKTREE_REGISTRY" ]]; then
+            objective=$(jq -r ".\"$current_branch\".objective // \"\"" "$WORKTREE_REGISTRY" 2>/dev/null)
+        fi
+        table="${table}| \`${current_branch}\` | ${current_head} | ${objective:-—} |\n"
+        count=$((count + 1))
     fi
 
-    # TODO: Gerar tabela markdown dinâmica
-    # Por enquanto, apenas log
-    echo "✓ Dashboard atualizado"
+    mkdir -p "$(dirname "$dashboard")"
+    cat > "$dashboard" << EOF
+---
+updated: ${now}
+count: ${count}
+---
+
+# Worktrees Ativas
+
+> Atualizado: ${now}
+
+| Branch | HEAD | Objetivo |
+|--------|------|----------|
+$(echo -e "$table")
+
+**Total:** ${count} worktree(s) ativa(s)
+EOF
+    echo "✓ Dashboard atualizado: $count worktree(s)"
 }
 
 # Finaliza worktree e move artefatos
@@ -252,6 +309,7 @@ case "${1:-status}" in
         ;;
     status)
         worktree_status
+        update_dashboard
         ;;
     list)
         init_registry

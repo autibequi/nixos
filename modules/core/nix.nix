@@ -67,14 +67,6 @@
       gmp
       openssl
       freetype
-      fontconfig
-      harfbuzz
-      fribidi
-      xorg.libxcb
-      libgbm
-      libdrm
-      libgpg-error
-      e2fsprogs
     ];
   };
 

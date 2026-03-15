@@ -73,7 +73,14 @@
 - Workspace: `/workspace` = repo NixOS pessoal do usuário
 - Dotfiles: `stow/` → `~/` (via GNU stow)
 - Projetos de trabalho: `projetos/` (submódulos montados de fora)
-- Todos os repos do user: `/home/claude/projects/` (bind mount RO do `~/projects` do host)
+- Todos os repos do user: `/home/claude/projects/` (bind mount RW do `~/projects` do host)
+- Vault Obsidian: `/workspace/obsidian` (mount) → `/workspace/vault` (symlink) — scripts usam `vault/`
+
+## Projeto Montado (/workspace/mount)
+- Quando o user roda `claudio` de um diretório de projeto, esse diretório é montado em `/workspace/mount`
+- Verificar `$CLAUDIO_MOUNT` para saber o path original no host
+- Se `/workspace/mount` não existe ou está vazio → modo meta (trabalhando no repo NixOS)
+- Se existe → o foco é no projeto montado
 
 ## Estrutura
 ```
@@ -88,7 +95,8 @@
 │   └── CLAUDE.md        ← sub-personalidade trabalho
 ├── scripts/             ← clau-runner.sh, kanban-sync.sh, etc.
 ├── docs/                ← referências on-demand (obsidian, nixos, task-system)
-├── vault/               ← mount point Obsidian
+├── obsidian/            ← mount point Obsidian (Docker)
+├── vault -> obsidian    ← symlink (scripts usam vault/)
 │   ├── _agent/          ← controle interno dos agentes
 │   │   ├── tasks/       ← ciclo de vida (recurring/, pending/, running/, done/, failed/)
 │   │   ├── reports/     ← relatórios de execução
@@ -100,6 +108,7 @@
 │   ├── artefacts/       ← entregáveis por task
 │   ├── sugestoes/       ← canal agente→user
 │   └── kanban.md        ← THINKINGS: FONTE DE VERDADE work items (ver regra abaixo)
+├── mount/               ← projeto externo (claudio monta aqui, opcional)
 ├── workbench/           ← rastreio persistente de worktrees (um .md por worktree)
 └── .ephemeral/          ← memória efêmera (gitignored)
 ```

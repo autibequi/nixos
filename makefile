@@ -1,12 +1,8 @@
 CONTAINER := claude-sandbox
-export GIT_AUTHOR_NAME := $(shell git config user.name)
-export GIT_AUTHOR_EMAIL := $(shell git config user.email)
-export GIT_COMMITTER_NAME := $(GIT_AUTHOR_NAME)
-export GIT_COMMITTER_EMAIL := $(GIT_AUTHOR_EMAIL)
 
 .PHONY: help switch update stow restow build start shell sandbox resume down destroy inject openclaw \
        clau run auto stop reset status new logs logs-list \
-       usage-api usage-api-7d usage-api-30d clau-service-logs ask claw claw-stop code code-stop
+       usage-api usage-api-7d usage-api-30d clau-service-logs ask claw claw-stop code code-stop attach
 
 help:
 	@echo ""
@@ -23,6 +19,7 @@ help:
 	@echo "  Container"
 	@echo "  ─────────────────────────────────────────────────────────"
 	@echo "  make build             Build da imagem Docker"
+	@echo "  make attach [dir=path] Recria sandbox montando dir em /workspace/mount (default: pwd)"
 	@echo "  make start             Sobe sandbox + bootstrap + Claude Code"
 	@echo "  make sandbox           Idem (bootstrap depois abre Claude)"
 	@echo "  make shell             Sobe sandbox + só bash (bootstrap no .bashrc)"
@@ -120,6 +117,14 @@ start-haiku: sandbox-haiku
 sandbox-haiku:
 	$(COMPOSE) up -d sandbox
 	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --model claude-haiku-4-5-20251001 --permission-mode bypassPermissions'
+
+attach:
+	$(eval MOUNT_DIR := $(or $(dir),$(shell pwd)))
+	@mkdir -p /tmp/claude-mount-empty
+	@echo "[attach] Montando $(MOUNT_DIR) → /workspace/mount"
+	CLAUDIO_MOUNT="$(MOUNT_DIR)" $(COMPOSE) up -d --force-recreate sandbox
+	@$(COMPOSE) exec -it -e CLAUDIO_MOUNT="$(MOUNT_DIR)" sandbox bash -c \
+		'. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
 
 sandbox:
 	$(COMPOSE) up -d sandbox
