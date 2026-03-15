@@ -2,7 +2,7 @@
 # claudio — entrypoint unificado pro container Claude (script, funciona em bash e zsh)
 
 nixos_dir="${CLAUDIO_NIXOS_DIR:-$HOME/nixos}"
-compose_file="$nixos_dir/docker-compose.claude.yml"
+compose_file="$nixos_dir/claudinho/docker-compose.claude.yml"
 mode="claude"
 model=""
 mount_path=""

@@ -50,7 +50,7 @@ convert_video() {
 # === claudio — entrypoint unificado pro container Claude ===
 claudio() {
   local nixos_dir="${CLAUDIO_NIXOS_DIR:-$HOME/nixos}"
-  local compose_file="$nixos_dir/docker-compose.claude.yml"
+  local compose_file="$nixos_dir/claudinho/docker-compose.claude.yml"
   local mode="claude" model="" mount_path="" mount_opts="rw" instance=""
   local obsidian_path="${OBSIDIAN_PATH:-$HOME/.ovault}"
 
@@ -111,7 +111,7 @@ claudio() {
 # === codio — entrypoint opencode com mount do projeto ===
 codio() {
   local nixos_dir="${CLAUDIO_NIXOS_DIR:-$HOME/nixos}"
-  local compose="docker compose -f $nixos_dir/docker-compose.claude.yml"
+  local compose="docker compose -f $nixos_dir/claudinho/docker-compose.claude.yml"
   local mount_path="" mount_opts="ro"
 
   while [[ $# -gt 0 ]]; do
@@ -135,9 +135,9 @@ codio() {
 
   echo "[codio] ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
   CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="$mount_opts" \
-    docker compose -f "$nixos_dir/docker-compose.claude.yml" -p "$proj_name" up -d codio
+    docker compose -f "$nixos_dir/claudinho/docker-compose.claude.yml" -p "$proj_name" up -d codio
   CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="$mount_opts" \
-    docker compose -f "$nixos_dir/docker-compose.claude.yml" -p "$proj_name" exec -it \
+    docker compose -f "$nixos_dir/claudinho/docker-compose.claude.yml" -p "$proj_name" exec -it \
     -e CLAUDIO_MOUNT="${mount_path}" codio bash -c \
     'cd /workspace/mount && exec opencode'
 }
