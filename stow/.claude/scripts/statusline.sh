@@ -183,31 +183,19 @@ if [[ -n "$COST_USD" && "$COST_USD" != "0" && "$COST_USD" != "null" ]]; then
   fi
 fi
 
-# Claude plan usage — gauge style (cache-only, sem fetch)
-PLAN_STR=""
-_usage_cache="${XDG_CACHE_HOME:-${HOME}/.cache}/claude-usage.json"
-if [[ -f "$_usage_cache" ]] && command -v jq &>/dev/null; then
-  _fh=$(jq -r '.five_hour.utilization         // 0 | floor' "$_usage_cache" 2>/dev/null)
-  _sd=$(jq -r '.seven_day.utilization         // 0 | floor' "$_usage_cache" 2>/dev/null)
-  _sn=$(jq -r '.seven_day_sonnet.utilization  // 0 | floor' "$_usage_cache" 2>/dev/null)
-  _gauge() {
-    local pct="${1:-0}" w=5 filled empty bar="" i
-    filled=$(( pct * w / 100 ))
-    (( pct > 0 && filled == 0 )) && filled=1
-    empty=$(( w - filled ))
-    for (( i=0; i<filled; i++ )); do bar+="▓"; done
-    for (( i=0; i<empty;  i++ )); do bar+="░"; done
-    printf '%s' "$bar"
-  }
-  if [[ "$_fh" != "0" || "$_sd" != "0" || "$_sn" != "0" ]]; then
-    PLAN_STR=" | 󱙺 5h$(_gauge "$_fh") 7d$(_gauge "$_sd") sn$(_gauge "$_sn")"
-  fi
-fi
 
 # Worktree: so exibe se estiver em worktree
 WT_STR=""
 if [[ -n "$WORKTREE_NAME" && "$WORKTREE_NAME" != "null" ]]; then
   WT_STR=" | wt:$WORKTREE_NAME"
+fi
+
+# Mount: diretório montado (path no host via $CLAUDIO_MOUNT, fallback /workspace/mount)
+MOUNT_STR=""
+if [[ -n "${CLAUDIO_MOUNT:-}" ]]; then
+  MOUNT_STR=" | ${CLAUDIO_MOUNT}"
+elif [[ -d "/workspace/mount" ]] && [[ -n "$(ls -A /workspace/mount 2>/dev/null)" ]]; then
+  MOUNT_STR=" | /workspace/mount"
 fi
 
 # Claudios = containers docker; Bochechas = background workers rodando (tasks em running/)
@@ -217,9 +205,8 @@ WORKER_INFO=""
 EXTRA=""
 [[ -n "$LINES_STR" ]] && EXTRA=" | ${LINES_STR}"
 
-# Status line: modelo primeiro; métricas à esquerda; à direita "alive for Xs!"
-ALIVE_STR="alive for ${DURATION_STR}!"
-RIGHT="󱙺 ${MODEL_SIZE} ${CTX_STR}${WT_STR}${PLAN_STR} | ${ALIVE_STR}"
+# Status line: modelo primeiro; métricas à esquerda
+RIGHT="󱙺 ${MODEL_SIZE} ${CTX_STR}${WT_STR}${MOUNT_STR}"
 
 # Terminal title via OSC (stderr)
 printf '\033]0;Claude: %s\007' "$TOPIC" >&2
