@@ -237,10 +237,10 @@
     "on-click": "alacritty -e bash -c 'claude-statusbar --plan max20; read'"
   },
   "custom/claude-usage": {
-    "exec": "~/.claude/scripts/claude-oauth-usage.sh --waybar",
+    "exec": "$HOME/scripts/claude-oauth-usage.sh --waybar",
     "return-type": "json",
     "interval": 120,
-    "on-click": "~/.claude/scripts/claude-oauth-usage.sh --waybar",
+    "on-click": "$HOME/scripts/claude-oauth-usage.sh --refresh --waybar",
     "format": "{}",
     "tooltip": true
   },

@@ -145,7 +145,7 @@ CLAUDIOS_BAR=$(minibar "$WORKERS" "$CLAUDIOS_MAX" "$BAR_W")
 BOCECHAS_BAR=$(minibar "$BOCECHAS" "$BOCECHAS_MAX" "$BAR_W")
 
 # Contexto: barra + usado em K / máx (ex: 123k/1M) — sem prefixo "ctx"
-CTX_STR="${CTX_BAR} ${CTX_USED_K}k/${CTX_SIZE_FMT} C:${WORKERS} B:${BOCECHAS}"
+CTX_STR="${CTX_BAR} ${CTX_USED_K}k/${CTX_SIZE_FMT}"
 
 # Duração da sessão: ms -> 0s, 1m, 1h 5m + barra (escala 0–1h)
 DURATION_SEC=0
@@ -200,7 +200,7 @@ if [[ -f "$_usage_cache" ]] && command -v jq &>/dev/null; then
     printf '%s' "$bar"
   }
   if [[ "$_fh" != "0" || "$_sd" != "0" || "$_sn" != "0" ]]; then
-    PLAN_STR=" | 󱙺 5h[$(_gauge "$_fh")${_fh}%] 7d[$(_gauge "$_sd")${_sd}%] sn[$(_gauge "$_sn")${_sn}%]"
+    PLAN_STR=" | 󱙺 5h$(_gauge "$_fh") 7d$(_gauge "$_sd") sn$(_gauge "$_sn")"
   fi
 fi
 
@@ -219,7 +219,7 @@ EXTRA=""
 
 # Status line: modelo primeiro; métricas à esquerda; à direita "alive for Xs!"
 ALIVE_STR="alive for ${DURATION_STR}!"
-RIGHT="${MODEL_SIZE} ${CTX_STR}${COST_STR}${EXTRA}${WT_STR}${PLAN_STR}${WORKER_INFO} | ${ALIVE_STR}"
+RIGHT="󱙺 ${MODEL_SIZE} ${CTX_STR}${WT_STR}${PLAN_STR} | ${ALIVE_STR}"
 
 # Terminal title via OSC (stderr)
 printf '\033]0;Claude: %s\007' "$TOPIC" >&2
