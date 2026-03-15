@@ -34,8 +34,8 @@ DEFAULT_MAX_TURNS=12
 mkdir -p "$EPHEMERAL/locks" "$TASKS/running" "$TASKS/done" "$TASKS/failed" \
   "$WORKSPACE/obsidian/sugestoes" "$WORKSPACE/obsidian/_agent/reports"
 
-# Presença em .agents/ — quando o processo morre (exit/trap), a pasta some; status line conta por aqui
-AGENTS_ROOT="$WORKSPACE/.agents"
+# Presença em .ephemeral/agents/ — quando o processo morre (exit/trap), a pasta some; status line conta por aqui
+AGENTS_ROOT="$WORKSPACE/.ephemeral/agents"
 AGENT_MY_DIR="$AGENTS_ROOT/bochecha_${HOSTNAME:-unknown}_$$"
 mkdir -p "$AGENTS_ROOT"
 # Limpa pastas órfãs (container morreu com SIGKILL/crash — trap não rodou)

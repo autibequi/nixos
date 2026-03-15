@@ -66,13 +66,13 @@ if [[ ${#TOPIC} -ge 40 ]]; then
   TOPIC="${TOPIC:0:37}..."
 fi
 
-# Claudios: pastas em .agents/bochecha_* com .live recente (evita literal "bochecha_*/" quando glob não acha nada)
+# Claudios: pastas em .ephemeral/agents/* com .live recente (evita literal "bochecha_*/" quando glob não acha nada)
 WORKERS=0
 BOCECHAS=0
 WS="${WORKSPACE_DIR:-/workspace}"
-# .agents fica em /workspace/host/ (bind mount do repo nixos do host)
+# .ephemeral/agents fica em /workspace/host/ (bind mount do repo nixos do host)
 # claudio_* = sessões interativas; bochecha_* = workers autônomos
-AGENTS_DIR="/workspace/host/.agents"
+AGENTS_DIR="/workspace/host/.ephemeral/agents"
 LIVE_MAX_AGE=900
 if [[ -d "$AGENTS_DIR" ]]; then
   now_sec=$(date +%s)
@@ -84,7 +84,7 @@ if [[ -d "$AGENTS_DIR" ]]; then
     [[ $(( now_sec - mod )) -le $LIVE_MAX_AGE ]] && WORKERS=$(( WORKERS + 1 ))
   done
 fi
-# Claudios = só .agents/ (sem fallback docker/logs para não travar em 1)
+# Claudios = só .ephemeral/agents/ (sem fallback docker/logs para não travar em 1)
 # Bochechas: só pastas em running/ com .lock não expirado; ignora data inválida (evita órfão = sempre 1)
 RUNNING_DIR="$WS/obsidian/_agent/tasks/running"
 if [[ -d "$RUNNING_DIR" ]]; then

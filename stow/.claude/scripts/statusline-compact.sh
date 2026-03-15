@@ -66,13 +66,13 @@ if [[ ${#TOPIC} -ge 30 ]]; then
   TOPIC="${TOPIC:0:27}..."
 fi
 
-# Claudios: só .agents/bochecha_* com .live recente (sem fallback para não travar em 1)
+# Claudios: só .ephemeral/agents/bochecha_* com .live recente (sem fallback para não travar em 1)
 WORKERS=0
 WORKSPACE_DIR=$(echo "$input" | jq -r '.workspace.project_dir // .workspace.current_dir // .cwd // ""')
 WS="${WORKSPACE_DIR:-/workspace}"
-if [[ -d "$WS/.agents" ]]; then
+if [[ -d "$WS/.ephemeral/agents" ]]; then
   now_sec=$(date +%s)
-  for dir in "$WS/.agents"/bochecha_*/; do
+  for dir in "$WS/.ephemeral/agents"/bochecha_*/; do
     [[ "$dir" == *"*"* ]] && continue
     [[ -d "$dir" && -f "$dir/.live" ]] || continue
     mod=$(stat -c %Y "$dir/.live" 2>/dev/null || echo 0)
