@@ -145,7 +145,7 @@ attach:
 sandbox:
 	@touch $(HOME)/.claude.json
 	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec -it -w /workspace sandbox bash -c '. /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
+	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/host/scripts/bootstrap.sh; cd /workspace; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
 
 shell:
 	$(COMPOSE) up -d sandbox

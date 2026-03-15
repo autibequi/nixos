@@ -5,6 +5,8 @@ x-common-env: &common-env
   CLAUDE_SESSION: ${CLAUDE_SESSION:-}
   GH_TOKEN: ${GH_TOKEN:-}
   CLAUDE_ENV: container
+  WAYLAND_DISPLAY: ${WAYLAND_DISPLAY:-wayland-1}
+  XDG_RUNTIME_DIR: /run/user/1000
 
 x-extra-hosts: &extra-hosts
   - "host.docker.internal:host-gateway"
@@ -16,6 +18,7 @@ x-base-volumes: &base-volumes
   - ${HOME}/.claude:/home/claude/.claude
   - ${HOME}/.claude.json:/home/claude/.claude.json
   - ${HOME}/projects:/home/claude/projects
+  - ${XDG_RUNTIME_DIR:-/run/user/1000}/${WAYLAND_DISPLAY:-wayland-1}:/run/user/1000/${WAYLAND_DISPLAY:-wayland-1}
   - /var/log/journal:/workspace/logs/journalctl:ro
   - /proc/meminfo:/host/proc/meminfo:ro
   - /proc/loadavg:/host/proc/loadavg:ro
