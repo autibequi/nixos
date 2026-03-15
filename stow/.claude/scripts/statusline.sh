@@ -183,6 +183,18 @@ if [[ -n "$COST_USD" && "$COST_USD" != "0" && "$COST_USD" != "null" ]]; then
   fi
 fi
 
+# Claude plan usage (cache-only, sem fetch — não bloqueia statusline)
+PLAN_STR=""
+_usage_cache="${XDG_CACHE_HOME:-${HOME}/.cache}/claude-usage.json"
+if [[ -f "$_usage_cache" ]] && command -v jq &>/dev/null; then
+  _fh=$(jq -r '.five_hour.utilization  // 0 | floor' "$_usage_cache" 2>/dev/null)
+  _sd=$(jq -r '.seven_day.utilization  // 0 | floor' "$_usage_cache" 2>/dev/null)
+  _ex=$(jq -r '.extra_usage.utilization // 0 | floor' "$_usage_cache" 2>/dev/null)
+  if [[ "$_fh" != "0" || "$_sd" != "0" ]]; then
+    PLAN_STR=" | 󱙺 ${_fh}%·${_sd}%·${_ex}%"
+  fi
+fi
+
 # Worktree: so exibe se estiver em worktree
 WT_STR=""
 if [[ -n "$WORKTREE_NAME" && "$WORKTREE_NAME" != "null" ]]; then
@@ -198,7 +210,7 @@ EXTRA=""
 
 # Status line: modelo primeiro; métricas à esquerda; à direita "alive for Xs!"
 ALIVE_STR="alive for ${DURATION_STR}!"
-RIGHT="${MODEL_SIZE} ${CTX_STR}${COST_STR}${EXTRA}${WT_STR}${WORKER_INFO} | ${ALIVE_STR}"
+RIGHT="${MODEL_SIZE} ${CTX_STR}${COST_STR}${EXTRA}${WT_STR}${PLAN_STR}${WORKER_INFO} | ${ALIVE_STR}"
 
 # Terminal title via OSC (stderr)
 printf '\033]0;Claude: %s\007' "$TOPIC" >&2
