@@ -83,23 +83,24 @@ claudio() {
   local proj_name="clau-${proj_slug}"
   [[ -n "$instance" && "$instance" != "1" ]] && proj_name="${proj_name}-${instance}"
 
-  local _compose_env="CLAUDIO_MOUNT=${mount_path} CLAUDIO_MOUNT_OPTS=${mount_opts} OBSIDIAN_PATH=${obsidian_path}"
-
   # Cada sessão é um container efêmero independente — nasce e morre com a sessão
   case "$mode" in
     claude)
-      env $_compose_env docker compose -f "$compose_file" -p "$proj_name" run --rm -it \
+      CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="${mount_opts}" OBSIDIAN_PATH="${obsidian_path}" \
+        docker compose -f "$compose_file" -p "$proj_name" run --rm -it \
         --entrypoint /bin/bash \
         -e CLAUDIO_MOUNT="${mount_path}" sandbox \
         -c ". /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude ${model} --permission-mode bypassPermissions"
       ;;
     shell)
-      env $_compose_env docker compose -f "$compose_file" -p "$proj_name" run --rm -it \
+      CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="${mount_opts}" OBSIDIAN_PATH="${obsidian_path}" \
+        docker compose -f "$compose_file" -p "$proj_name" run --rm -it \
         --entrypoint /bin/bash \
         -e CLAUDIO_MOUNT="${mount_path}" sandbox
       ;;
     resume)
-      env $_compose_env docker compose -f "$compose_file" -p "$proj_name" run --rm -it \
+      CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="${mount_opts}" OBSIDIAN_PATH="${obsidian_path}" \
+        docker compose -f "$compose_file" -p "$proj_name" run --rm -it \
         --entrypoint /bin/bash \
         -e CLAUDIO_MOUNT="${mount_path}" sandbox \
         -c "exec /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions"
