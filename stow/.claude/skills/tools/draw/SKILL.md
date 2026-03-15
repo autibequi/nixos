@@ -325,23 +325,38 @@ Total por linha:      │ (1) + 16 + │ (1) = 18 chars
 
 ---
 
-### Anti-pattern 3: Largura inconsistente entre linhas
+### Anti-pattern 3: Largura inconsistente — borda direita "torta"
+
+**O que aparece:** o `│` direito aparece em colunas DIFERENTES em linhas diferentes. Parece uma borda ondulada/torta, ou a caixa "se abre" no lado direito.
 
 ```
-❌  ┌──────────┐
-    │ short    │
-    ├───────────────────┤  ← linha mais larga! quebra o box
-    │ muito mais content│
-    └───────────────────┘
-
-✅  ┌────────────────────┐  ← max width calculada uma vez
-    │ short              │  ← padding com espaços até o limite
-    ├────────────────────┤
-    │ muito mais content │
-    └────────────────────┘
+❌  ┌──────────────────────────────┐
+    │ services/  repositories/    │   ← │ na col 32
+    │                             │
+    │       ▼                     │
+    │  cache-or-fetch flow        │   ← │ na col 28 (TORTO!)
+    └──────────────────────────────┘
 ```
 
-**Regra:** Definir `MAX_WIDTH` globalmente. Todas as linhas horizontais têm exatamente esse tamanho. Linhas de conteúdo preenchem com espaços.
+**Causa:** as linhas de conteúdo têm comprimentos diferentes. O `│` fecha na posição do texto, não na posição da borda.
+
+**Regra:** CADA linha de conteúdo deve ser preenchida com espaços até ocupar exatamente `MAX_WIDTH` chars antes do `│` direito.
+
+```
+✅  passo 1: calcular MAX_WIDTH
+    conteúdo mais largo = "services/  repositories/" = 26 chars
+    padding = 1+26+1 = 28 chars de inner width
+
+    passo 2: TODA linha usa o mesmo inner width
+    ┌────────────────────────────┐   ← 28 dashes
+    │ services/  repositories/  │   ← 1 + 26 + 1 espaço = 28 ✓
+    │                            │   ← 1 + 26 espaços + 1  = 28 ✓
+    │       ▼                    │   ← 1 + 6 + 21 espaços + 0 = 28 ✓
+    │  cache-or-fetch flow       │   ← 1 + 1 + 20 + 6 espaços = 28 ✓
+    └────────────────────────────┘   ← 28 dashes
+```
+
+**Regra prática:** Contar a linha mais longa. Todas as outras → padding de espaços até o mesmo comprimento ANTES do `│` direito. O `│` direito é sempre na mesma coluna.
 
 ---
 

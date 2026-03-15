@@ -72,9 +72,23 @@ update:
 # ── Dotfiles ───────────────────────────────────────────────────────
 
 stow:
+	@for dir in agents commands hooks scripts skills; do \
+		link="$$HOME/.claude/$$dir"; \
+		if [ -L "$$link" ]; then \
+			target=$$(readlink "$$link"); \
+			case "$$target" in /workspace/*) echo "removing container symlink: $$link"; rm -f "$$link" ;; esac; \
+		fi; \
+	done
 	stow --target=$$HOME --no-folding --adopt -R stow
 
 restow:
+	@for dir in agents commands hooks scripts skills; do \
+		link="$$HOME/.claude/$$dir"; \
+		if [ -L "$$link" ]; then \
+			target=$$(readlink "$$link"); \
+			case "$$target" in /workspace/*) rm -f "$$link" ;; esac; \
+		fi; \
+	done
 	stow --target=$$HOME --no-folding --adopt --override=file -R stow
 
 # ── Container ──────────────────────────────────────────────────────
