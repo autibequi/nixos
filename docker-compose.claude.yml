@@ -14,7 +14,7 @@ x-base-volumes: &base-volumes
   - ${CLAUDIO_MOUNT:-${HOME}/projects}:/workspace/mount:${CLAUDIO_MOUNT_OPTS:-ro}
   - ${OBSIDIAN_PATH:-/tmp}:/workspace/obsidian
   - ${HOME}/.claude:/home/claude/.claude
-  - ${HOME}/.claude.json:/home/claude/.claude.json:ro
+  - ${HOME}/.claude.json:/home/claude/.claude.json
   - ${HOME}/projects:/home/claude/projects
   - /var/log/journal:/workspace/hostlogs/journalctl:ro
   - /proc/meminfo:/host/proc/meminfo:ro
