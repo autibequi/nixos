@@ -15,7 +15,7 @@
   ],
   "modules-right": [
     "mpris",
-    // "custom/claude",
+    "custom/claude-usage",
     "pulseaudio",
     "backlight",
     "network",
@@ -235,6 +235,14 @@
     "exec": "claude-statusbar --plan max20 2>/dev/null || \"${HOME}/.claude/scripts/claude-ai-usage.sh\" 2>/dev/null || echo '󱙺 --'",
     "tooltip": true,
     "on-click": "alacritty -e bash -c 'claude-statusbar --plan max20; read'"
+  },
+  "custom/claude-usage": {
+    "exec": "~/.claude/scripts/claude-oauth-usage.sh --waybar",
+    "return-type": "json",
+    "interval": 120,
+    "on-click": "~/.claude/scripts/claude-oauth-usage.sh --waybar",
+    "format": "{}",
+    "tooltip": true
   },
   "custom/swaync": {
     "tooltip": false,

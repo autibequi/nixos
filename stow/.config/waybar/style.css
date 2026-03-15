@@ -242,6 +242,21 @@ window#waybar {
     border-bottom-color: #f1c40f;
 }
 
+#custom-claude-usage {
+    color: #2ecc71;
+    padding: 0 8px;
+    margin: 0 1px;
+    transition: color 0.3s;
+}
+
+#custom-claude-usage.warning {
+    color: #f39c12;
+}
+
+#custom-claude-usage.critical {
+    color: #e74c3c;
+}
+
 #custom-swaync {
     color: @color-white;
     padding: 0 4px;

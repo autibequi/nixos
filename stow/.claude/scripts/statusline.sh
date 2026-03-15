@@ -70,11 +70,13 @@ fi
 WORKERS=0
 BOCECHAS=0
 WS="${WORKSPACE_DIR:-/workspace}"
-AGENTS_DIR="$WS/.agents"
+# .agents fica em /workspace/host/ (bind mount do repo nixos do host)
+# claudio_* = sessões interativas; bochecha_* = workers autônomos
+AGENTS_DIR="/workspace/host/.agents"
 LIVE_MAX_AGE=900
 if [[ -d "$AGENTS_DIR" ]]; then
   now_sec=$(date +%s)
-  for dir in "$AGENTS_DIR"/bochecha_*/; do
+  for dir in "$AGENTS_DIR"/claudio_*/ "$AGENTS_DIR"/bochecha_*/; do
     [[ "$dir" == *"*"* ]] && continue
     [[ -d "$dir" ]] || continue
     [[ -f "$dir/.live" ]] || continue
@@ -143,7 +145,7 @@ CLAUDIOS_BAR=$(minibar "$WORKERS" "$CLAUDIOS_MAX" "$BAR_W")
 BOCECHAS_BAR=$(minibar "$BOCECHAS" "$BOCECHAS_MAX" "$BAR_W")
 
 # Contexto: barra + usado em K / máx (ex: 123k/1M) — sem prefixo "ctx"
-CTX_STR="${CTX_BAR} ${CTX_USED_K}k/${CTX_SIZE_FMT}"
+CTX_STR="${CTX_BAR} ${CTX_USED_K}k/${CTX_SIZE_FMT} C:${WORKERS} B:${BOCECHAS}"
 
 # Duração da sessão: ms -> 0s, 1m, 1h 5m + barra (escala 0–1h)
 DURATION_SEC=0
@@ -188,7 +190,7 @@ if [[ -n "$WORKTREE_NAME" && "$WORKTREE_NAME" != "null" ]]; then
 fi
 
 # Claudios = containers docker; Bochechas = background workers rodando (tasks em running/)
-WORKER_INFO=" | Claudios ${WORKERS} ${CLAUDIOS_BAR}  Bochechas ${BOCECHAS} ${BOCECHAS_BAR}"
+WORKER_INFO=""
 
 # Partes opcionais: linhas (duração foi para a direita, antes do modelo)
 EXTRA=""
