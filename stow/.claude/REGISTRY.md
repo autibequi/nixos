@@ -51,6 +51,8 @@ Slash commands invocáveis pelo user via `/nome`.
 |---------|-----------|-----------|
 | `jarvis` | `/jarvis` | Assistente pessoal — status GitHub, repos locais, THINKINGS, tasks, worktrees, recomendações |
 | `rss` | `/rss` | Gerenciador RSS — `show`, `list`, `add <url> <cat> [max]`, `remove`, `fetch`, `config` |
+| `tamagochi` | `/tamagochi` | Status do bichinho + sugestão de interação |
+| `pet` | `/pet [status\|feed\|talk\|poke\|history]` | Interagir com o tamagochi |
 
 ### Utils
 | Command | Invocação | Descrição |
@@ -131,6 +133,7 @@ Agentes especializados invocáveis via `Agent` tool.
 
 | Agent | Model | Descrição |
 |-------|-------|-----------|
+| `tamagochi` | haiku | Pet virtual do vault: vagueia pelo Obsidian, reage a arquivos aleatórios, atualiza TAMAGOCHI.md |
 | `trashman` | haiku | Limpeza segura: scan workspace, archive reversível em `.trashbin/`, audit trail |
 | `wiseman` | haiku | Knowledge graph: interconecta notas do Obsidian com backlinks, tags, frontmatter |
 | `nixos` | haiku | NixOS config: pacotes, módulos, opções, troubleshoot |
