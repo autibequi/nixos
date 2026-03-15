@@ -2,7 +2,7 @@ CONTAINER := claude-sandbox
 
 .PHONY: help switch update stow restow build start shell sandbox resume down destroy inject openclaw \
        clau run auto stop reset status new logs logs-list \
-       usage-api usage-api-7d usage-api-30d clau-service-logs ask claw claw-stop code code-stop attach
+       usage-api usage-api-7d usage-api-30d clau-service-logs ask claw claw-stop code code-stop attach claudio
 
 help:
 	@echo ""
@@ -19,6 +19,7 @@ help:
 	@echo "  Container"
 	@echo "  ─────────────────────────────────────────────────────────"
 	@echo "  make build             Build da imagem Docker"
+	@echo "  make claudio [dir=path] Abre Claude isolado por projeto (multi-instância)"
 	@echo "  make attach [dir=path] Recria sandbox montando dir em /workspace/mount (default: pwd)"
 	@echo "  make start             Sobe sandbox + bootstrap + Claude Code"
 	@echo "  make sandbox           Idem (bootstrap depois abre Claude)"
@@ -117,6 +118,17 @@ start-haiku: sandbox-haiku
 sandbox-haiku:
 	$(COMPOSE) up -d sandbox
 	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --model claude-haiku-4-5-20251001 --permission-mode bypassPermissions'
+
+claudio:
+	$(eval MOUNT_DIR := $(or $(dir),$(shell pwd)))
+	$(eval PROJ_SLUG := $(shell basename "$(or $(dir),$(shell pwd))" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$$//'))
+	$(eval CLAU_PROJ := clau-$(PROJ_SLUG))
+	@mkdir -p /tmp/claude-mount-empty
+	@echo "[claudio] $(PROJ_SLUG) → projeto $(CLAU_PROJ)"
+	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CLAU_PROJ)" up -d claudio
+	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CLAU_PROJ)" exec -it \
+		-e CLAUDIO_MOUNT="$(MOUNT_DIR)" claudio bash -c \
+		'. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
 
 attach:
 	$(eval MOUNT_DIR := $(or $(dir),$(shell pwd)))

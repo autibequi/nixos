@@ -52,6 +52,25 @@ services:
     extra_hosts: *extra-hosts
     volumes: *full-volumes
 
+  claudio:
+    build:
+      context: .
+      dockerfile: Dockerfile.claude
+    image: claude-nix-sandbox
+    network_mode: host
+    stdin_open: true
+    tty: true
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["sleep infinity"]
+    environment:
+      <<: [*common-env, *media-env]
+      GIT_AUTHOR_NAME: Pedrinho
+      GIT_AUTHOR_EMAIL: pedro.correa@estrategia.com
+      GIT_COMMITTER_NAME: Claudinho
+      GIT_COMMITTER_EMAIL: claudinho@autibequi.com
+    extra_hosts: *extra-hosts
+    volumes: *full-volumes
+
   openclaw:
     build:
       context: .
