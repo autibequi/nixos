@@ -37,7 +37,6 @@ services:
       context: .
       dockerfile: Dockerfile.claude
     image: claude-nix-sandbox
-    container_name: claude-sandbox
     network_mode: host
     stdin_open: true
     tty: true

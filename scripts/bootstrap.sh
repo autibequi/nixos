@@ -5,6 +5,9 @@ set -euo pipefail
 # Limpa output anterior (docker compose up, etc.)
 printf '\033c'
 
+# --- Symlink vault/ → obsidian/ (volume só existe em runtime) ---
+[[ ! -e /workspace/vault ]] && ln -sfn /workspace/obsidian /workspace/vault 2>/dev/null || true
+
 # --- Ensure agent symlinks in ~/.claude/agents/ ---
 mkdir -p ~/.claude/agents 2>/dev/null || true
 for agent_dir in /workspace/stow/.claude/agents/*/; do

@@ -213,6 +213,63 @@ get_max_turns() {
   echo "${fm:-$DEFAULT_MAX_TURNS}"
 }
 
+get_wave() {
+  local task_dir="$1"
+  local fm; fm=$(parse_frontmatter "$task_dir/CLAUDE.md" "wave")
+  echo "${fm:-1}"
+}
+
+get_depends_on() {
+  local task_dir="$1"
+  local fm; fm=$(parse_frontmatter "$task_dir/CLAUDE.md" "depends_on")
+  echo "${fm:-}"
+}
+
+# ── Wave execution ───────────────────────────────────────────────
+group_by_wave() {
+  local tasks=("$@")
+  declare -A wave_tasks
+  
+  for task in "${tasks[@]}"; do
+    local w
+    w=$(get_wave "$TASKS/pending/$task")
+    wave_tasks[$w]="${wave_tasks[$w]:-} $task"
+  done
+  
+  for w in $(echo "${!wave_tasks[@]}" | tr ' ' '\n' | sort -n); do
+    echo "$w:${wave_tasks[$w]}"
+  done
+}
+
+run_wave_parallel() {
+  local wave_num="$1"
+  shift
+  local tasks=("$@")
+  
+  echo "[clau:$WORKER_ID] Wave $wave_num: ${tasks[*]} (parallel)"
+  
+  local pids=()
+  for task in "${tasks[@]}"; do
+    (
+      claim_task "$task" "pending" || exit 1
+      run_single_task "$task" "pending" "0"
+      local exit_code=$?
+      finish_task "$task" "pending" "$exit_code"
+      exit $exit_code
+    ) &
+    pids+=($!)
+  done
+  
+  local wave_ok=0 wave_fail=0
+  for pid in "${pids[@]}"; do
+    wait $pid || {
+      [ $? -ne 0 ] && wave_fail=$((wave_fail + 1)) || wave_ok=$((wave_ok + 1))
+    }
+  done
+  
+  echo "[clau:$WORKER_ID] Wave $wave_num done: ${wave_ok} ok, ${wave_fail} failed"
+}
+
 # ── Clock filter ─────────────────────────────────────────────────
 should_run_clock() {
   local task_dir="$1"
@@ -392,6 +449,19 @@ finish_task() {
     echo "[clau:$WORKER_ID] '$task' → failed ($reason)"
   fi
   task_unlock "$task"
+
+  # Fresh context: limpar tool-results cache para esta task
+  cleanup_task_cache "$task"
+}
+
+cleanup_task_cache() {
+  local task="$1"
+  local claude_home="${HOME}/.claude"
+  [ -d "$claude_home/projects" ] || return
+  for proj in "$claude_home/projects"/*/; do
+    [ -d "$proj/tool-results" ] || continue
+    find "$proj/tool-results" -type d -name "*${task}*" -exec rm -rf {} + 2>/dev/null || true
+  done
 }
 
 # ── Specific task mode ───────────────────────────────────────────
@@ -439,26 +509,56 @@ touch "$AGENT_MY_DIR/.live" 2>/dev/null || true
 echo "[clau:$WORKER_ID] === Backlog ==="
 mapfile -t backlog_names < <(kanban_list_names "Backlog" 2>/dev/null)
 
-for task in "${backlog_names[@]}"; do
-  [ -z "$task" ] && continue
-  [ -d "$TASKS/pending/$task" ] || continue
+filter_by_clock() {
+  local filtered=()
+  for task in "${backlog_names[@]}"; do
+    [ -z "$task" ] && continue
+    [ -d "$TASKS/pending/$task" ] || continue
+    task_clock=$(get_clock "$TASKS/pending/$task")
+    [ "$task_clock" = "$CLAU_CLOCK" ] && filtered+=("$task")
+  done
+  printf '%s\n' "${filtered[@]}"
+}
 
-  # Filter by clock: task clock must match worker clock
-  task_clock=$(get_clock "$TASKS/pending/$task")
-  if [ "$task_clock" != "$CLAU_CLOCK" ]; then
-    echo "[clau:$WORKER_ID] '$task' clock mismatch (task=$task_clock, worker=$CLAU_CLOCK) — skip"
-    continue
-  fi
+clock_filtered=()
+while IFS= read -r t; do clock_filtered+=("$t"); done < <(filter_by_clock)
 
-  claim_task "$task" "pending" || continue
-  task_count=$((task_count + 1))
+has_wave_support() {
+  for task in "${clock_filtered[@]}"; do
+    [ -f "$TASKS/pending/$task/CLAUDE.md" ] || continue
+    local wave
+    wave=$(get_wave "$TASKS/pending/$task")
+    [ "$wave" != "1" ] && return 0
+  done
+  return 1
+}
 
-  local_exit=0
-  run_single_task "$task" "pending" "0" || local_exit=$?
-  finish_task "$task" "pending" "$local_exit"
+if [ ${#clock_filtered[@]} -gt 0 ] && has_wave_support; then
+  echo "[clau:$WORKER_ID] Executando em modo WAVE"
+  
+  while IFS=':' read -r wave_num wave_tasks; do
+    [ -z "$wave_num" ] && continue
+    read -ra task_array <<< "$wave_tasks"
+    [ ${#task_array[@]} -eq 0 ] && continue
+    
+    run_wave_parallel "$wave_num" "${task_array[@]}"
+    task_count=$((task_count + ${#task_array[@]}))
+  done < <(group_by_wave "${clock_filtered[@]}")
+else
+  for task in "${clock_filtered[@]}"; do
+    [ -z "$task" ] && continue
+    [ -d "$TASKS/pending/$task" ] || continue
 
-  [ "$local_exit" -eq 0 ] && ok_count=$((ok_count + 1)) || fail_count=$((fail_count + 1))
-done
+    claim_task "$task" "pending" || continue
+    task_count=$((task_count + 1))
+
+    local_exit=0
+    run_single_task "$task" "pending" "0" || local_exit=$?
+    finish_task "$task" "pending" "$local_exit"
+
+    [ "$local_exit" -eq 0 ] && ok_count=$((ok_count + 1)) || fail_count=$((fail_count + 1))
+  done
+fi
 
 duration=$((SECONDS - start_time))
 echo "[clau:$WORKER_ID] Done — $task_count tasks, ${ok_count} ok, ${fail_count} falhas, ${duration}s"

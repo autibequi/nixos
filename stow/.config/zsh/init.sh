@@ -50,7 +50,7 @@ convert_video() {
 # === claudio — entrypoint unificado pro container Claude ===
 claudio() {
   local nixos_dir="${CLAUDIO_NIXOS_DIR:-$HOME/nixos}"
-  local compose="docker compose -f $nixos_dir/docker-compose.claude.yml"
+  local compose_file="$nixos_dir/docker-compose.claude.yml"
   local mode="claude" model="" mount_path=""
 
   while [[ $# -gt 0 ]]; do
@@ -72,39 +72,30 @@ claudio() {
     mount_path="$real_cwd"
   fi
 
-  # Se tem mount, gera compose override temporário
-  local override_args=""
-  if [[ -n "$mount_path" ]]; then
-    local override="/tmp/claudio-mount-$$.yml"
-    cat > "$override" <<EOF
-services:
-  sandbox:
-    volumes:
-      - ${mount_path}:/workspace/mount
-    environment:
-      CLAUDIO_MOUNT: ${mount_path}
-EOF
-    override_args="-f $override"
-  fi
+  # Projeto isolado por dir montado (ou "nixos" pra modo meta)
+  local proj_slug
+  proj_slug="$(basename "${mount_path:-nixos}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$//')"
+  local proj_name="clau-${proj_slug}"
 
-  local full_compose="$compose $override_args"
-  eval "$full_compose up -d sandbox"
+  echo "[claudio] ${proj_slug} → ${proj_name}"
+  CLAUDIO_MOUNT="${mount_path}" docker compose -f "$compose_file" -p "$proj_name" up -d sandbox
 
   case "$mode" in
     claude)
-      eval "$full_compose exec -it sandbox bash -c \
-        '. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude $model --permission-mode bypassPermissions'"
+      CLAUDIO_MOUNT="${mount_path}" docker compose -f "$compose_file" -p "$proj_name" exec -it \
+        -e CLAUDIO_MOUNT="${mount_path}" sandbox bash -c \
+        ". /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude ${model} --permission-mode bypassPermissions"
       ;;
     shell)
-      eval "$full_compose exec -it sandbox bash"
+      CLAUDIO_MOUNT="${mount_path}" docker compose -f "$compose_file" -p "$proj_name" exec -it \
+        -e CLAUDIO_MOUNT="${mount_path}" sandbox bash
       ;;
     resume)
-      eval "$full_compose exec -it sandbox /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions"
+      CLAUDIO_MOUNT="${mount_path}" docker compose -f "$compose_file" -p "$proj_name" exec -it \
+        -e CLAUDIO_MOUNT="${mount_path}" sandbox \
+        /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions
       ;;
   esac
-
-  # Cleanup override
-  [[ -n "${override:-}" ]] && rm -f "$override"
 }
 
 # === codio — entrypoint opencode com mount do projeto ===
