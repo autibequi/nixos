@@ -137,35 +137,6 @@ build_banner() {
 build_banner
 echo
 
-# ── Scheduler (unified single timer) ──────────────────────────────────────────
-ON=$'\033[1;32m'  # bright green
-OFF=$'\033[1;31m' # bright red
-scheduler_log="$WS/.ephemeral/logs/scheduler.log"
-scheduler_state="$WS/.ephemeral/scheduler/state.json"
-
-if [[ -f "$scheduler_log" ]]; then
-  sched_mod=$(stat -c %Y "$scheduler_log" 2>/dev/null || echo 0)
-  sched_age=$(( now - sched_mod ))
-  if [[ $sched_age -le 120 ]]; then
-    sched_status="${ON}● scheduler${R} ${P_DIM}running${R}"
-  elif [[ $sched_age -le 900 ]]; then
-    sched_status="${ON}● scheduler${R} ${P_DIM}$(fmt_age $sched_age)${R}"
-  elif [[ $sched_age -le 1800 ]]; then
-    sched_status="${P_AMBER}● scheduler${R} ${P_DIM}$(fmt_age $sched_age)${R}"
-  else
-    sched_status="${OFF}● scheduler${R} ${P_DIM}$(fmt_age $sched_age) stale${R}"
-  fi
-else
-  sched_status="${OFF}● scheduler${R} ${P_DIM}offline${R}"
-fi
-
-# Count tasks from state.json
-task_count=0
-if [[ -f "$scheduler_state" ]]; then
-  task_count=$(python3 -c "import json; print(len(json.load(open('$scheduler_state')).get('tasks',{})))" 2>/dev/null || echo 0)
-fi
-echo -e "${P_GREEN}Bochechas:${R} ${sched_status}  ${P_DIM}(${task_count} tasks tracked)${R}"
-echo
 
 # ── Agents (dynamic from stow/.claude/agents/) ───────────────────────────────
 agents_list=()

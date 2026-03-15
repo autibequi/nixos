@@ -25,7 +25,7 @@ TICK_BUDGET="${CLAU_TICK_BUDGET:-540}"  # 9 min default (1 min overhead)
 DRY_RUN=0
 [[ "${1:-}" == "--dry-run" ]] && DRY_RUN=1
 
-TASKS_DIR="$PROJECT_DIR/vault/_agent/tasks"
+TASKS_DIR="$VAULT_DIR/_agent/tasks"
 SCHEDULED_FILE="$VAULT_DIR/scheduled.md"
 KANBAN_FILE="$VAULT_DIR/kanban.md"
 

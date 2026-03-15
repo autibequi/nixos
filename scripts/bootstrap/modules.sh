@@ -76,6 +76,7 @@ export WS KANBAN SCHEDULED TODAY now COLS LINS BOOTSTRAP_BANNER AUTOJARVIS_FLAG 
 BOOTSTRAP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source "$BOOTSTRAP_DIR/header.dashboard.sh"
+source "$BOOTSTRAP_DIR/scheduler.dashboard.sh"
 source "$BOOTSTRAP_DIR/github.dashboard.sh"
 source "$BOOTSTRAP_DIR/rss.dashboard.sh"
 
