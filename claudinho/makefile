@@ -93,7 +93,7 @@ restow:
 
 # ── Container ──────────────────────────────────────────────────────
 
-COMPOSE = docker compose -f claudinho/docker-compose.claude.yml
+COMPOSE = docker compose -f claudinho/docker-compose.claude.yml --env-file claudinho/.env
 LOGDIR  = logs
 LOGFILE = $(LOGDIR)/$$(date +%Y-%m-%dT%H:%M:%S.%3N).log
 
