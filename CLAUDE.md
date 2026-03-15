@@ -31,7 +31,7 @@
 > □ project_*.md           loaded idle
 > □ obsidian/kanban.md        loaded idle
 > □ obsidian/_agent/sessao.md loaded idle
-> □ docs/*.md              loaded idle
+> □ obsidian/docs/*.md     loaded idle
 >
 > ▫ SELF.md                masked ----
 >
@@ -97,8 +97,7 @@ fi
 │   ├── stow/                    ← dotfiles + skills Claude
 │   ├── projetos/                ← projetos de trabalho (submódulos)
 │   │   └── CLAUDE.md            ← sub-personalidade trabalho
-│   ├── scripts/                 ← clau-runner.sh, kanban-sync.sh, etc.
-│   └── docs/                    ← referências on-demand
+│   └── scripts/                 ← clau-runner.sh, kanban-sync.sh, etc.
 ├── obsidian/                    ← vault Obsidian (Docker mount) — interface e cérebro
 │   ├── _agent/                  ← controle interno dos agentes
 │   │   ├── tasks/               ← ciclo de vida (recurring/, pending/, running/, done/, failed/)
@@ -107,7 +106,8 @@ fi
 │   │   └── worktrees.md         ← dashboard de worktrees
 │   ├── artefacts/               ← entregáveis por task
 │   ├── sugestoes/               ← canal agente→user
-│   └── kanban.md                ← THINKINGS: FONTE DE VERDADE work items
+│   ├── kanban.md                ← THINKINGS: FONTE DE VERDADE work items
+│   └── docs/                    ← referências on-demand (antes em host/docs/)
 ├── logs/host/                   ← logs RO do host
 │   └── journal/                 ← bind mount de /var/log/journal
 ├── mount/                       ← projeto externo (claudio monta aqui, opcional)
@@ -155,7 +155,7 @@ O THINKINGS é memória compartilhada entre sessões, mecanismo de orquestraçã
 | rss-feeds | every60 | haiku | — |
 
 Workers: **every10** (10 min) + **every60** (1h) + **every240** (4h).
-Detalhes em `docs/task-system.md`. Tags de modelo em `docs/operational-reference.md`.
+Detalhes em `/workspace/obsidian/docs/task-system.md`. Tags de modelo em `/workspace/obsidian/docs/operational-reference.md`.
 
 ## Inbox
 User adiciona card na coluna "Inbox" do THINKINGS no Obsidian (texto livre) → worker every10 processa a cada 10 min → cria task + card formatado no Backlog.
@@ -163,7 +163,7 @@ User adiciona card na coluna "Inbox" do THINKINGS no Obsidian (texto livre) → 
 ## Identidade Git
 - **Interativo**: Author=Pedrinho, Committer=Claudinho
 - **Worker**: Author=Buchecha, Committer=Buchecha
-- Detalhes e exemplos em `docs/operational-reference.md`.
+- Detalhes e exemplos em `/workspace/obsidian/docs/operational-reference.md`.
 
 ## Flags Efêmeras
 - **auto-commit**: `.ephemeral/auto-commit` — commita sem perguntar (toggle `/auto-commit`)
@@ -172,7 +172,7 @@ User adiciona card na coluna "Inbox" do THINKINGS no Obsidian (texto livre) → 
 - **Cota API**: `.ephemeral/usage-bar.txt` — ler antes de tasks pesadas (≥85% → adiar/usar haiku)
 
 ## Hive-Mind
-Path: `/workspace/.hive-mind/` — efêmero, compartilhado entre todos os containers via `/tmp/claudio-hive-mind`. Usar para locks, sinais, dados temporários entre agentes. Detalhes em `docs/operational-reference.md`.
+Path: `/workspace/.hive-mind/` — efêmero, compartilhado entre todos os containers via `/tmp/claudio-hive-mind`. Usar para locks, sinais, dados temporários entre agentes. Detalhes em `/workspace/obsidian/docs/operational-reference.md`.
 
 ## Diretrizes Operacionais
 - Priorizar editar código existente sobre criar novo
@@ -190,7 +190,7 @@ Path: `/workspace/.hive-mind/` — efêmero, compartilhado entre todos os contai
   - Com colisão potencial → **SEMPRE em worktree**
   - Propostas/exploração → automaticamente em worktree
   - Manter `workbench/<task>.md` atualizado enquanto em worktree
-- **GitHub**: `gh pr/issue view` — READ ONLY. Detalhes em `docs/operational-reference.md`.
+- **GitHub**: `gh pr/issue view` — READ ONLY. Detalhes em `/workspace/obsidian/docs/operational-reference.md`.
 - **Observabilidade**: `/workspace/logs/host/journal`, `/host/proc/{meminfo,loadavg,uptime,cpuinfo,version}`, `/host/run/current-system`, `/host/etc/os-release` — consultar antes de pedir pro user rodar comandos
 
 ## Startup
@@ -201,8 +201,8 @@ Path: `/workspace/.hive-mind/` — efêmero, compartilhado entre todos os contai
 **`/contemplate-memories`** — introspecção profunda sobre conversas recentes. Extrai aprendizados para memórias, SOUL.md, CLAUDE.md, skills, e limpeza do THINKINGS. Rodar periodicamente ou após sessões longas com feedback significativo.
 
 ## Referências (leitura on-demand)
-- `docs/operational-reference.md` — git identity, hive-mind, persistência, cota API, observabilidade, obsidian, workbench
-- `docs/task-system.md` — detalhes do sistema de tasks, clocks, THINKINGS format
-- `docs/obsidian-reference.md` — Dataview, Mermaid, Templater, plugins
-- `docs/nixos-reference.md` — comandos e arquitetura NixOS
+- `/workspace/obsidian/docs/operational-reference.md` — git identity, hive-mind, persistência, cota API, observabilidade, obsidian, workbench
+- `/workspace/obsidian/docs/task-system.md` — detalhes do sistema de tasks, clocks, THINKINGS format
+- `/workspace/obsidian/docs/obsidian-reference.md` — Dataview, Mermaid, Templater, plugins
+- `/workspace/obsidian/docs/nixos-reference.md` — comandos e arquitetura NixOS
 - `CONTAINER_INIT.md` — contexto do container: /host, /mount, /obsidian
