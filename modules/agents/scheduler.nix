@@ -12,7 +12,7 @@ let
 
   user = config.local.agents.claudinho.user or "pedrinho";
   projectDir = "/home/${user}/nixos";
-  vaultDir = "/home/${user}/.ovault/Work";
+  vaultDir = "/home/${user}/.ovault";
 
   enginePkg = if isPodman then pkgs.podman else pkgs.docker;
   composePkg = if isPodman then pkgs.podman-compose else pkgs.docker-compose;
@@ -57,8 +57,7 @@ let
   '';
 
   cleanupScript = pkgs.writeShellScript "clau-cleanup" ''
-    cd ${projectDir}
-    for dir in vault/_agent/tasks/running/*/; do
+    for dir in ${vaultDir}/_agent/tasks/running/*/; do
       [ -d "$dir" ] || continue
       name=$(basename "$dir")
       source=$(grep '^source=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "pending")
@@ -67,11 +66,11 @@ let
         rm -rf "$dir"
         echo "[cleanup] $name (recurring) removed"
       else
-        mv "$dir" "vault/_agent/tasks/pending/$name" 2>/dev/null || rm -rf "$dir"
+        mv "$dir" "${vaultDir}/_agent/tasks/pending/$name" 2>/dev/null || rm -rf "$dir"
         echo "[cleanup] $name → pending/"
       fi
     done
-    rm -f .ephemeral/.kanban.lock .ephemeral/locks/*.lock
+    rm -f ${projectDir}/.ephemeral/.kanban.lock ${projectDir}/.ephemeral/locks/*.lock
   '';
 in {
   config = {

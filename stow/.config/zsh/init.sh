@@ -52,6 +52,7 @@ claudio() {
   local nixos_dir="${CLAUDIO_NIXOS_DIR:-$HOME/nixos}"
   local compose_file="$nixos_dir/docker-compose.claude.yml"
   local mode="claude" model="" mount_path="" mount_opts="ro" instance=""
+  local obsidian_path="${OBSIDIAN_PATH:-$HOME/.ovault}"
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -110,7 +111,7 @@ claudio() {
       done
       mkdir -p "$claude_data"
       # Sobe o container dentro do lock pra garantir que o slot fica reservado
-      CLAUDE_DATA_DIR="$claude_data" CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="$mount_opts" \
+      CLAUDE_DATA_DIR="$claude_data" CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$obsidian_path" \
         docker compose -f "$compose_file" -p "$proj_name" up -d --no-recreate sandbox
       # Exporta vars pro shell pai via arquivo temporário
       printf 'claude_data=%s\nproj_name=%s\n' "$claude_data" "$proj_name" > "${lockdir}.result"
@@ -123,7 +124,7 @@ claudio() {
     fi
   fi
 
-  local _compose_env="CLAUDE_DATA_DIR=$claude_data CLAUDIO_MOUNT=${mount_path} CLAUDIO_MOUNT_OPTS=$mount_opts"
+  local _compose_env="CLAUDE_DATA_DIR=$claude_data CLAUDIO_MOUNT=${mount_path} CLAUDIO_MOUNT_OPTS=$mount_opts OBSIDIAN_PATH=$obsidian_path"
 
   # Para o container ao sair para liberar o slot para próxima sessão
   trap "env $_compose_env docker compose -f '$compose_file' -p '$proj_name' stop sandbox 2>/dev/null" EXIT INT TERM
@@ -132,7 +133,7 @@ claudio() {
     claude)
       env $_compose_env docker compose -f "$compose_file" -p "$proj_name" exec -it \
         -e CLAUDIO_MOUNT="${mount_path}" sandbox bash -c \
-        ". /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude ${model} --permission-mode bypassPermissions"
+        ". /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude ${model} --permission-mode bypassPermissions"
       ;;
     shell)
       env $_compose_env docker compose -f "$compose_file" -p "$proj_name" exec -it \

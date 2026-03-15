@@ -11,6 +11,9 @@ x-extra-hosts: &extra-hosts
 
 x-base-volumes: &base-volumes
   - ${HOME}/nixos:/workspace/host
+  - ${CLAUDIO_MOUNT:-/tmp}:/workspace/mount:${CLAUDIO_MOUNT_OPTS:-ro}
+  - ${OBSIDIAN_PATH:-/tmp}:/workspace/obsidian
+  - ${HOME}/.claude:/workspace/.claude
   - claude-credentials:/home/claude/.claude
   - ${HOME}/.claude.json:/home/claude/.claude.json
 
@@ -73,6 +76,4 @@ services:
 
 volumes:
   claude-credentials:
-    # Shared ~/.claude/ across all claude containers.
-    # Persists auth tokens, project history between starts.
     driver: local
