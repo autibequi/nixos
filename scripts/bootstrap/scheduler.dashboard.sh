@@ -85,6 +85,16 @@ fi
 
 echo -e "${P_GREEN}Bochechas  ${R}${_tick_str}"
 
+# ── Padding helper (ignora ANSI escapes no cálculo de largura) ───────────────
+_ansi_pad() {
+  local str="$1" width="$2"
+  local vis
+  vis=$(printf '%b' "$str" | sed $'s/\033\\[[0-9;]*m//g')
+  local pad=$(( width - ${#vis} ))
+  [[ $pad -lt 0 ]] && pad=0
+  printf '%b%*s' "$str" "$pad" ""
+}
+
 # ── Task table ────────────────────────────────────────────────────────────────
 if [[ ! -d "$_TASKS_DIR" ]]; then
   echo -e "  ${P_DIM}nenhuma task em $_TASKS_DIR${R}"
@@ -156,8 +166,10 @@ for _task_dir in "$_TASKS_DIR"/*/; do
     *)      _model_color="$P_DIM"    ;;
   esac
 
-  printf "  ${_name_color}%-22s${R}  ${P_DIM}%3dm${R}  ${_model_color}%-7s${R}  %-14b  %b\n" \
-    "$_task" "$_interval" "$_model" "$_last_str" "$_next_str"
+  printf "  ${_name_color}%-22s${R}  ${P_DIM}%-5s${R}  ${_model_color}%-7s${R}  %s  %s\n" \
+    "$_task" "${_interval}m" "$_model" \
+    "$(_ansi_pad "$_last_str" 14)" \
+    "$(_ansi_pad "$_next_str" 12)"
 done
 
 echo
