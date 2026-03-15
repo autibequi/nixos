@@ -32,7 +32,7 @@ RUN echo "claude:x:1000:1000::/home/claude:/bin/bash" >> /etc/passwd && \
     ln -sf /root/.nix-profile/bin/bash /bin/bash
 
 # Dashboard local ao abrir terminal (sem chamar API / UserPromptSubmit)
-RUN echo '[[ -t 0 && -f /workspace/scripts/bootstrap.sh ]] && /workspace/scripts/bootstrap.sh' >> /home/claude/.bashrc
+RUN echo '[[ -t 0 && -f /workspace/host/scripts/bootstrap.sh ]] && /workspace/host/scripts/bootstrap.sh' >> /home/claude/.bashrc
 
 USER claude
 # PATH: binários no .nix-profile (inclui claude)
@@ -42,4 +42,4 @@ ENV HOME=/home/claude
 # Symlink vault/ → obsidian/ é criado em runtime pelo bootstrap.sh
 # (/workspace só existe após o volume ser montado)
 
-WORKDIR /workspace
+WORKDIR /workspace/host

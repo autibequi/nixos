@@ -107,7 +107,7 @@ clau:
 			-e CLAU_WORKER_ID="$$WORKER_ID" \
 			-e CLAU_CLOCK=every60 \
 			-l clau.worker.id="$$WORKER_ID" \
-			worker /workspace/scripts/clau-runner.sh >> "$$logfile" 2>&1 & \
+			worker /workspace/host/scripts/clau-runner.sh >> "$$logfile" 2>&1 & \
 	done; \
 	echo "[clau] Workers lançados. Seguindo log..."; \
 	tail -f "$$logfile"
@@ -118,7 +118,7 @@ start-haiku: sandbox-haiku
 
 sandbox-haiku:
 	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --model claude-haiku-4-5-20251001 --permission-mode bypassPermissions'
+	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --model claude-haiku-4-5-20251001 --permission-mode bypassPermissions'
 
 claudio:
 	$(eval MOUNT_DIR := $(abspath $(or $(dir),$(shell pwd))))
@@ -129,7 +129,7 @@ claudio:
 	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CLAU_PROJ)" up -d claudio
 	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CLAU_PROJ)" exec -it \
 		-e CLAUDIO_MOUNT="$(MOUNT_DIR)" claudio bash -c \
-		'. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
+		'. /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
 
 attach:
 	$(eval MOUNT_DIR := $(abspath $(or $(dir),$(shell pwd))))
@@ -140,11 +140,11 @@ attach:
 	@CLAUDIO_MOUNT="$(MOUNT_DIR)" $(COMPOSE) -p "$(CLAU_PROJ)" up -d --no-recreate sandbox
 	@CLAUDIO_MOUNT="$(MOUNT_DIR)" $(COMPOSE) -p "$(CLAU_PROJ)" exec -it \
 		-e CLAUDIO_MOUNT="$(MOUNT_DIR)" sandbox bash -c \
-		'. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
+		'. /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
 
 sandbox:
 	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
+	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
 
 shell:
 	$(COMPOSE) up -d sandbox
@@ -170,7 +170,7 @@ inject:
 	$(MAKE) restow
 	$(COMPOSE) down
 	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions "oi"'
+	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions "oi"'
 
 openclaw:
 	@mkdir -p $(HOME)/.openclaw && \
@@ -210,7 +210,7 @@ run:
 	echo "[clau] Log: $$logfile"; \
 	$(COMPOSE) run --rm -e CLAU_VERBOSE=1 -e CLAU_CLOCK=every60 \
 		-e CLAU_WORKER_ID=$${CLAU_WORKER_ID:-worker-1} \
-		worker /workspace/scripts/clau-runner.sh $(task) 2>&1 | tee "$$logfile"
+		worker /workspace/host/scripts/clau-runner.sh $(task) 2>&1 | tee "$$logfile"
 
 run-fast:
 	@mkdir -p $(LOGDIR)
@@ -218,21 +218,21 @@ run-fast:
 	echo "[clau] Log: $$logfile"; \
 	$(COMPOSE) run --rm -e CLAU_VERBOSE=1 -e CLAU_CLOCK=every10 \
 		-e CLAU_WORKER_ID=$${CLAU_WORKER_ID:-worker-fast} \
-		worker-fast /workspace/scripts/clau-runner.sh 2>&1 | tee "$$logfile"
+		worker-fast /workspace/host/scripts/clau-runner.sh 2>&1 | tee "$$logfile"
 
 auto:
 	@mkdir -p $(LOGDIR)
 	@logfile="$(LOGFILE)"; \
 	$(COMPOSE) run --rm -T -e CLAU_CLOCK=every60 \
 		-e CLAU_WORKER_ID=$${CLAU_WORKER_ID:-worker-1} \
-		worker /workspace/scripts/clau-runner.sh > "$$logfile" 2>&1
+		worker /workspace/host/scripts/clau-runner.sh > "$$logfile" 2>&1
 
 auto-fast:
 	@mkdir -p $(LOGDIR)
 	@logfile="$(LOGFILE)"; \
 	$(COMPOSE) run --rm -T -e CLAU_CLOCK=every10 \
 		-e CLAU_WORKER_ID=$${CLAU_WORKER_ID:-worker-fast} \
-		worker-fast /workspace/scripts/clau-runner.sh > "$$logfile" 2>&1
+		worker-fast /workspace/host/scripts/clau-runner.sh > "$$logfile" 2>&1
 
 stop:
 	@echo "[clau] Parando workers..."

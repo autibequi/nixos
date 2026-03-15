@@ -16,7 +16,7 @@ x-media-env: &media-env
   PULSE_SERVER: unix:/run/user/1000/pulse/native
 
 x-full-volumes: &full-volumes
-  - .:/workspace
+  - .:/workspace/host
   - ${CLAUDIO_MOUNT:-/tmp/claude-mount-empty}:/workspace/mount:${CLAUDIO_MOUNT_OPTS:-rw}
   - ${HOME}/.ovault/Work:/workspace/obsidian
   - ${HOME}/projects:/home/claude/projects
@@ -25,7 +25,7 @@ x-full-volumes: &full-volumes
   - ${HOME}/.openclaw:/home/claude/.openclaw
   - ${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:/run/user/1000/${WAYLAND_DISPLAY}
   - ${XDG_RUNTIME_DIR}/pulse:/run/user/1000/pulse
-  - /var/log/journal:/host/journal:ro
+  - /var/log/journal:/workspace/hostlogs/journalctl:ro
   - /proc/meminfo:/host/proc/meminfo:ro
   - /proc/loadavg:/host/proc/loadavg:ro
   - /proc/uptime:/host/proc/uptime:ro
@@ -103,9 +103,11 @@ services:
       <<: *common-env
     extra_hosts: *extra-hosts
     volumes:
-      - .:/workspace
+      - .:/workspace/host
       - ${HOME}/.opencode:/home/claude/.opencode
-      - ./stow/.claude:/workspace/.claude
+      - ${CLAUDE_DATA_DIR:-${HOME}/.local/share/claude-code}:/home/claude/.claude
+      - ${HOME}/.claude.json:/home/claude/.claude.json
+      - ./stow/.claude:/workspace/host/.claude
 
   codio:
     build:
@@ -121,11 +123,12 @@ services:
       <<: *common-env
     extra_hosts: *extra-hosts
     volumes:
-      - .:/workspace
+      - .:/workspace/host
       - ${CLAUDIO_MOUNT:-/tmp/claude-mount-empty}:/workspace/mount:${CLAUDIO_MOUNT_OPTS:-rw}
       - ${HOME}/.opencode:/home/claude/.opencode
       - ${CLAUDE_DATA_DIR:-${HOME}/.local/share/claude-code}:/home/claude/.claude
-      - ./stow/.claude:/workspace/.claude
+      - ${HOME}/.claude.json:/home/claude/.claude.json
+      - ./stow/.claude:/workspace/host/.claude
 
   worker:
     build:

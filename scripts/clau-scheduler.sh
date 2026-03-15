@@ -260,7 +260,7 @@ dispatch_tasks() {
     -e CLAU_CLOCK="unified" \
     -e CLAU_TASK_LIST="$task_list" \
     -l clau.scheduler.tick="$(date +%s)" \
-    worker /workspace/scripts/clau-runner.sh
+    worker /workspace/host/scripts/clau-runner.sh
 
   return $?
 }

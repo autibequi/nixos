@@ -10,7 +10,7 @@ printf '\033c'
 
 # --- Ensure agent symlinks in ~/.claude/agents/ ---
 mkdir -p ~/.claude/agents 2>/dev/null || true
-for agent_dir in /workspace/stow/.claude/agents/*/; do
+for agent_dir in /workspace/host/stow/.claude/agents/*/; do
   agent_name=$(basename "$agent_dir")
   target_link="$HOME/.claude/agents/$agent_name"
   if [[ ! -L "$target_link" ]] || [[ $(readlink "$target_link" 2>/dev/null || echo "") != "$agent_dir" ]]; then
@@ -21,7 +21,7 @@ done
 
 # --- Sync Claude configs from stow/.claude/ to ~/.claude/ ---
 for config_file in settings.json statusline.sh; do
-  src="/workspace/stow/.claude/$config_file"
+  src="/workspace/host/stow/.claude/$config_file"
   dst="$HOME/.claude/$config_file"
   [[ -f "$src" ]] && cp "$src" "$dst" 2>/dev/null || true
 done

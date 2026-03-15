@@ -4,7 +4,9 @@
 # stderr → terminal do user (dashboard visual)
 
 # ── Detecta workspace (container vs host) ────────────────────────
-if [ -d "/workspace" ]; then
+if [ -d "/workspace/host" ]; then
+  WS="/workspace/host"
+elif [ -d "/workspace" ] && [ -f "/workspace/CLAUDE.md" ]; then
   WS="/workspace"
 else
   # host: resolve symlink real → stow/.claude/hooks/ → sobe 4 níveis

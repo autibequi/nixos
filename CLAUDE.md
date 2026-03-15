@@ -81,7 +81,7 @@ fi
 
 **Implicações quando `IS_CONTAINER=1`:**
 - Sem `sudo`, sem `systemctl` do host, sem `nixos-rebuild`
-- `/workspace` é o repo NixOS do host (bind mount) — posso editar os arquivos, mas o `nixos-rebuild switch` precisa ser rodado pelo user no host
+- `/workspace/host` é o repo NixOS do host (bind mount) — posso editar os arquivos, mas o `nixos-rebuild switch` precisa ser rodado pelo user no host
 - Comandos que precisam do host: pedir pro user rodar no terminal dele
 - `host.docker.internal` = IP do host a partir do container
 
@@ -91,7 +91,7 @@ fi
 - Sem acesso a MCP servers que só existem no container
 
 - Container: `claude-nix-sandbox` (Dockerfile.claude + docker-compose.claude.yml)
-- Workspace: `/workspace` = repo NixOS pessoal do usuário
+- Workspace repo: `/workspace/host` = repo NixOS pessoal do usuário (bind mount)
 - Dotfiles: `stow/` → `~/` (via GNU stow)
 - Projetos de trabalho: `projetos/` (submódulos montados de fora)
 - Todos os repos do user: `/home/claude/projects/` (bind mount RW do `~/projects` do host)
@@ -100,38 +100,41 @@ fi
 ## Projeto Montado (/workspace/mount)
 - Quando o user roda `claudio` de um diretório de projeto, esse diretório é montado em `/workspace/mount`
 - Verificar `$CLAUDIO_MOUNT` para saber o path original no host
-- Se `/workspace/mount` não existe ou está vazio → modo meta (trabalhando no repo NixOS)
+- Se `/workspace/mount` não existe ou está vazio → modo meta (trabalhando em `/workspace/host`)
 - Se existe → o foco é no projeto montado
 
 ## Estrutura
 ```
-/workspace/
-├── CLAUDE.md            ← regras operacionais
-├── SOUL.md              ← identidade e personalidade
-├── flake.nix            ← config NixOS (flake-based)
-├── configuration.nix    ← registro de módulos NixOS
-├── modules/             ← módulos NixOS
-├── stow/                ← dotfiles + skills Claude
-├── projetos/            ← projetos de trabalho (submódulos)
-│   └── CLAUDE.md        ← sub-personalidade trabalho
-├── scripts/             ← clau-runner.sh, kanban-sync.sh, etc.
-├── docs/                ← referências on-demand (obsidian, nixos, task-system)
-├── obsidian/            ← mount point Obsidian (Docker)
-├── vault -> obsidian    ← symlink (scripts usam vault/)
-│   ├── _agent/          ← controle interno dos agentes
-│   │   ├── tasks/       ← ciclo de vida (recurring/, pending/, running/, done/, failed/)
-│   │   ├── reports/     ← relatórios de execução
-│   │   ├── scheduled.md ← tasks recorrentes (board separado)
-│   │   ├── insights.md  ← insights dos agentes
-│   │   ├── painel-agentes.md ← status dos agentes
-│   │   ├── sessao.md    ← diário de sessão
-│   │   └── worktrees.md ← dashboard de worktrees
-│   ├── artefacts/       ← entregáveis por task
-│   ├── sugestoes/       ← canal agente→user
-│   └── kanban.md        ← THINKINGS: FONTE DE VERDADE work items (ver regra abaixo)
-├── mount/               ← projeto externo (claudio monta aqui, opcional)
-├── workbench/           ← rastreio persistente de worktrees (um .md por worktree)
-└── .ephemeral/          ← memória efêmera (gitignored)
+/workspace/                      ← volume do container (dados persistentes)
+├── host/                        ← bind mount do ~/nixos (repo NixOS)
+│   ├── CLAUDE.md                ← regras operacionais
+│   ├── SOUL.md                  ← identidade e personalidade
+│   ├── flake.nix                ← config NixOS (flake-based)
+│   ├── configuration.nix        ← registro de módulos NixOS
+│   ├── modules/                 ← módulos NixOS
+│   ├── stow/                    ← dotfiles + skills Claude
+│   ├── projetos/                ← projetos de trabalho (submódulos)
+│   │   └── CLAUDE.md            ← sub-personalidade trabalho
+│   ├── scripts/                 ← clau-runner.sh, kanban-sync.sh, etc.
+│   └── docs/                    ← referências on-demand (obsidian, nixos, task-system)
+├── obsidian/                    ← mount point Obsidian (Docker)
+├── vault -> obsidian            ← symlink (scripts usam vault/)
+│   ├── _agent/                  ← controle interno dos agentes
+│   │   ├── tasks/               ← ciclo de vida (recurring/, pending/, running/, done/, failed/)
+│   │   ├── reports/             ← relatórios de execução
+│   │   ├── scheduled.md         ← tasks recorrentes (board separado)
+│   │   ├── insights.md          ← insights dos agentes
+│   │   ├── painel-agentes.md    ← status dos agentes
+│   │   ├── sessao.md            ← diário de sessão
+│   │   └── worktrees.md         ← dashboard de worktrees
+│   ├── artefacts/               ← entregáveis por task
+│   ├── sugestoes/               ← canal agente→user
+│   └── kanban.md                ← THINKINGS: FONTE DE VERDADE work items
+├── hostlogs/
+│   └── journalctl/              ← bind mount RO de /var/log/journal do host
+├── mount/                       ← projeto externo (claudio monta aqui, opcional)
+├── workbench/                   ← rastreio persistente de worktrees (um .md por worktree)
+└── .ephemeral/                  ← memória efêmera (gitignored)
 ```
 
 ## THINKINGS — Regra Inviolável
@@ -338,7 +341,7 @@ Arquivo compartilhado para saber uso de tokens sem perguntar ao user; mesma font
 
 ## Observabilidade do Host (read-only)
 Bind mounts RO — consultar antes de pedir pro user rodar comandos:
-- `/host/journal` → `journalctl --directory=/host/journal -u <service> -n 50`
+- `/workspace/hostlogs/journalctl` → `journalctl --directory=/workspace/hostlogs/journalctl -u <service> -n 50`
 - `/host/proc/meminfo`, `/host/proc/loadavg`, `/host/proc/uptime`
 - `/host/podman.sock` — listar containers
 - `/home/claude/projects/` — todos os repos do user
