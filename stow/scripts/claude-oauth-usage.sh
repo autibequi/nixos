@@ -127,41 +127,58 @@ ex_pct=$(echo "$JSON"   | $JQ -r '(.extra_usage?.utilization?       // 0) | floo
 ex_used=$(echo "$JSON"  | $JQ -r '(.extra_usage?.used_credits?      // 0) | floor')
 ex_limit=$(echo "$JSON" | $JQ -r '(.extra_usage?.monthly_limit?     // 0)')
 
-# formatar reset timestamp
-fmt_reset() {
+# tempo restante até reset (ex: "1h30m", "45m", "já resetou")
+_time_until() {
   local ts="${1:-}"; [[ -z "$ts" ]] && echo "?" && return
-  local dp="${ts%%T*}" tp="${ts#*T}"
-  tp="${tp%%+*}"; tp="${tp%%.*}"; tp="${tp%:*}"
-  local md="${dp#*-}"; echo "${md##*-}/${md%%-*} ${tp}"
+  local now reset_epoch diff h m
+  now=$(date +%s)
+  reset_epoch=$(date -d "$ts" +%s 2>/dev/null) || { echo "?"; return; }
+  diff=$(( reset_epoch - now ))
+  (( diff <= 0 )) && echo "já resetou" && return
+  h=$(( diff / 3600 ))
+  m=$(( (diff % 3600) / 60 ))
+  (( h > 0 )) && printf '%dh%02dm' "$h" "$m" || printf '%dm' "$m"
 }
-fh_r=$(fmt_reset "$fh_reset")
-sd_r=$(fmt_reset "$sd_reset")
+fh_r=$(  _time_until "$fh_reset")
+sd_r=$(  _time_until "$sd_reset")
 
-# pior pct → css class
-max_pct=$(echo "$JSON" | $JQ '[(.five_hour?.utilization? // 0), (.seven_day?.utilization? // 0), (.extra_usage?.utilization? // 0)] | max // 0 | floor')
-css_class=""
-(( max_pct >= 100 )) && css_class="critical" || true
-(( max_pct >= 80 && max_pct < 100 )) && css_class="warning" || true
+# cor pango por percentual: verde → laranja → vermelho
+_color() {
+  local pct="${1:-0}"
+  (( pct >= 80 )) && echo "#e74c3c" && return
+  (( pct >= 60 )) && echo "#f39c12" && return
+  echo "#2ecc71"
+}
 
-# gauge: 5 blocos, pelo menos 1 se pct > 0
+# gauge: número no início, blocos depois, sem label
+# layout: [DD]▓▓▓▓▓░░
 _gauge() {
-  local pct="${1:-0}" w=5 filled empty bar="" i
+  local pct="${1:-0}" color num w=2 filled seg i
+  color=$(_color "$pct")
+  (( pct >= 100 )) && num="!!" || num=$(printf '%02d' "$pct")
   filled=$(( pct * w / 100 ))
-  (( pct > 0 && filled == 0 )) && filled=1
-  empty=$(( w - filled ))
-  for (( i=0; i<filled; i++ )); do bar+="▓"; done
-  for (( i=0; i<empty;  i++ )); do bar+="░"; done
-  printf '%s' "$bar"
+  (( filled > w )) && filled=$w
+  seg=""
+  for (( i=0; i<w; i++ )); do (( i < filled )) && seg+="▓" || seg+="░"; done
+  printf '<span background="%s" color="#111111">%s</span><span color="%s">%s</span>' \
+    "$color" "$num" "$color" "$seg"
 }
 sn_num=$(echo "$JSON" | $JQ -r '(.seven_day_sonnet?.utilization? // 0) | floor')
 
 # --- modo: --waybar ---
 if [[ "$MODE" == "--waybar" ]]; then
-  text="sn$(_gauge "$sn_num") 5h$(_gauge "$fh_pct") 7d$(_gauge "$sd_pct")"
+  text="$(_gauge "$sn_num") $(_gauge "$fh_pct") $(_gauge "$sd_pct")"
+  tooltip=$(printf \
+    "%-10s %3d%% — reset em %s\n%-10s %3d%% — reset em %s\n%-10s %3d%%\n%-10s %3d%%\n%-10s %s/%s (%d%%)" \
+    "5h"        "$fh_pct" "$fh_r" \
+    "7d"        "$sd_pct" "$sd_r" \
+    "Sonnet 7d" "$sn_pct" \
+    "Opus 7d"   "$op_pct" \
+    "Extra"     "$ex_used" "$ex_limit" "$ex_pct")
   $JQ -cn \
     --arg text    "$text" \
-    --arg tooltip "5h: ${fh_pct}% (reset ${fh_r})&#10;7d: ${sd_pct}% (reset ${sd_r})&#10;Sonnet 7d: ${sn_pct}%&#10;Opus 7d: ${op_pct}%&#10;Extra: ${ex_used}/${ex_limit} (${ex_pct}%)" \
-    --arg class   "$css_class" \
+    --arg tooltip "$tooltip" \
+    --arg class   "" \
     '{"text": $text, "tooltip": $tooltip, "class": $class}'
   exit 0
 fi

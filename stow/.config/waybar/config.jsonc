@@ -242,7 +242,8 @@
     "interval": 120,
     "on-click": "$HOME/scripts/claude-oauth-usage.sh --refresh --waybar",
     "format": "{}",
-    "tooltip": true
+    "tooltip": true,
+    "escape": false
   },
   "custom/swaync": {
     "tooltip": false,
