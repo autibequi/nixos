@@ -138,7 +138,8 @@ minibar() {
 
 # Três barras: contexto %, Claudios (docker), Bochechas (tasks em running/)
 BAR_W=4
-CTX_BAR=$(minibar "$CTX_PCT" 100 "$BAR_W")
+CTX_BAR_W=6
+CTX_BAR=$(minibar "$CTX_PCT" 100 "$CTX_BAR_W")
 CLAUDIOS_MAX=5
 BOCECHAS_MAX=10
 CLAUDIOS_BAR=$(minibar "$WORKERS" "$CLAUDIOS_MAX" "$BAR_W")
