@@ -247,7 +247,7 @@ build_task_queue() {
 
 # ── Compose dispatch ────────────────────────────────────────────────────────
 COMPOSE_BIN="${CLAU_COMPOSE_BIN:-docker-compose}"
-COMPOSE_FILES="${CLAU_COMPOSE_FILES:--f $PROJECT_DIR/docker-compose.claude.yml}"
+COMPOSE_FILES="${CLAU_COMPOSE_FILES:--f $PROJECT_DIR/claudinho/docker-compose.claude.yml}"
 
 dispatch_tasks() {
   local task_list="$1"

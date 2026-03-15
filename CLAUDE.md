@@ -3,11 +3,11 @@
 > **Boot via hook:** o hook `session-start.sh` injeta no stdout: flags (personality, autocommit, autojarvis), conteúdo da persona ativa, DIRETRIZES.md e SELF.md. **NÃO fazer tool calls para ler esses arquivos** — já estão no contexto do system-reminder.
 >
 > Se `personality=OFF` no boot → operar em modo neutro (sem personalidade), mas **o avatar DEVE ser exibido mesmo assim** — personalidade desligada não significa avatar ausente.
-> Se `personality=ON` → aplicar persona e avatar conforme injetado. Ler `personas/claudio.avatar.md` apenas se precisar do catálogo completo de expressões (normal já memorizado).
+> Se `personality=ON` → aplicar persona e avatar conforme injetado. Ler `claudinho/personas/claudio.avatar.md` apenas se precisar do catálogo completo de expressões (normal já memorizado).
 >
 > **Avatar sempre presente:** sempre que houver um avatar ativo (personality=ON ou OFF), ele DEVE aparecer no code block da saudação. Nunca omitir o avatar.
 >
-> **Personas** ficam em `personas/*.persona.md`. A ativa é definida no `SOUL.md`.
+> **Personas** ficam em `claudinho/personas/*.persona.md`. A ativa é definida no `claudinho/SOUL.md`.
 >
 > **Briefing sob demanda:** na primeira resposta, saudar com personalidade e **oferecer** o briefing (variar a frase, nunca igual). Só rodar `/jarvis` se o user confirmar ou pedir. Exemplos de oferta:
 > - "Quer o panorama do dia?"
@@ -51,7 +51,7 @@
 > **Cosplay:** quando o user disser "cosplay" (ou "cosplay de X"), trocar o avatar COMPLETAMENTE — caracteres, formato, estilo, tudo. Não precisa manter a estrutura do Claudio. Pode ser qualquer personagem/coisa em ASCII art compacto. A personalidade continua, só o visual muda. Exemplos: cosplay de Pac-Man, cosplay de Nyan Cat, cosplay de um cursor piscando. Manter o cosplay até o user pedir outro ou pedir pra voltar ao normal.
 
 ## Infraestrutura
-- Container Docker `claude-nix-sandbox` (Dockerfile.claude + docker-compose.claude.yml)
+- Container Docker `claude-nix-sandbox` (claudinho/Dockerfile.claude + claudinho/docker-compose.claude.yml)
 - Base: `nixos/nix:latest` — host e container são Nix-based
 - MCP servers: nixos, Atlassian (READ ONLY), Notion (READ ONLY)
 - GitHub CLI (`gh`) autenticado via `GH_TOKEN` (read-only)
@@ -111,7 +111,7 @@ fi
 ├── logs/host/                   ← logs RO do host
 │   └── journal/                 ← bind mount de /var/log/journal
 ├── mount/                       ← projeto externo (claudio monta aqui, opcional)
-├── workbench/                   ← rastreio persistente de worktrees
+├── obsidian/workbench/          ← rastreio persistente de worktrees (antes em host/workbench/)
 ├── .ephemeral/                  ← memória efêmera (gitignored)
 └── .hive-mind/                  ← canal efêmero compartilhado entre containers
 ```
@@ -189,7 +189,7 @@ Path: `/workspace/.hive-mind/` — efêmero, compartilhado entre todos os contai
 - **Worktrees: decisão autônoma** — default = sempre worktree, exceto mudanças triviais (doc, comentário):
   - Com colisão potencial → **SEMPRE em worktree**
   - Propostas/exploração → automaticamente em worktree
-  - Manter `workbench/<task>.md` atualizado enquanto em worktree
+  - Manter `obsidian/workbench/<task>.md` atualizado enquanto em worktree
 - **GitHub**: `gh pr/issue view` — READ ONLY. Detalhes em `/workspace/obsidian/docs/operational-reference.md`.
 - **Observabilidade**: `/workspace/logs/host/journal`, `/host/proc/{meminfo,loadavg,uptime,cpuinfo,version}`, `/host/run/current-system`, `/host/etc/os-release` — consultar antes de pedir pro user rodar comandos
 

@@ -5,7 +5,7 @@
 set -euo pipefail
 
 PROJECT_DIR="${PROJECT_DIR:-$HOME/nixos}"
-COMPOSE="podman-compose -f $PROJECT_DIR/docker-compose.claude.yml"
+COMPOSE="podman-compose -f $PROJECT_DIR/claudinho/docker-compose.claude.yml"
 LOCKFILE="/tmp/claude-ask.lock"
 PROMPT="${1:-}"
 

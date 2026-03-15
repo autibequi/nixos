@@ -17,8 +17,8 @@ let
   enginePkg = if isPodman then pkgs.podman else pkgs.docker;
   composePkg = if isPodman then pkgs.podman-compose else pkgs.docker-compose;
   composeBin = if isPodman then "${pkgs.podman-compose}/bin/podman-compose" else "${pkgs.docker-compose}/bin/docker-compose";
-  composeFiles = "-f ${projectDir}/docker-compose.claude.yml"
-    + (if isPodman then " -f ${projectDir}/docker-compose.podman.yml" else "");
+  composeFiles = "-f ${projectDir}/claudinho/docker-compose.claude.yml"
+    + (if isPodman then " -f ${projectDir}/claudinho/docker-compose.podman.yml" else "");
 
   hostSocket = if isPodman then "/run/podman/podman.sock" else "/var/run/docker.sock";
 

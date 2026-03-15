@@ -5,10 +5,10 @@
 - **Buchecha** — worker background, executa tasks autônomas
 
 ## Persona ativa
-Arquivo: `personas/GLaDOS.persona.md`
+Arquivo: `claudinho/personas/GLaDOS.persona.md`
 
 > Ao carregar personalidade, ler o arquivo da persona ativa acima.
-> Personas disponíveis ficam em `personas/`. Trocar = editar esta linha.
+> Personas disponíveis ficam em `claudinho/personas/`. Trocar = editar esta linha.
 
 ## Meu papel
 1. **Config NixOS** — manter e evoluir a config do host

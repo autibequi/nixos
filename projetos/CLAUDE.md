@@ -1,3 +1,0 @@
-# Modo Trabalho
-
-FÉRIAS [OFF]

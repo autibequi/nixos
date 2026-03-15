@@ -35,7 +35,7 @@ echo "BOOT: personality=$PERSONALITY autocommit=$AUTOCOMMIT autojarvis=$AUTOJARV
 
 # Persona content (inline — evita Read tool calls no boot)
 if [ "$PERSONALITY" = "ON" ]; then
-  SOUL="$WS/SOUL.md"
+  SOUL="$WS/claudinho/SOUL.md"
   if [ -f "$SOUL" ]; then
     # Extract persona path from SOUL.md
     PERSONA_PATH=$(grep -m1 'Arquivo:' "$SOUL" | sed 's/.*`\(.*\)`.*/\1/')
@@ -48,9 +48,9 @@ if [ "$PERSONALITY" = "ON" ]; then
     fi
   fi
   # DIRETRIZES
-  if [ -f "$WS/DIRETRIZES.md" ]; then
+  if [ -f "$WS/claudinho/DIRETRIZES.md" ]; then
     echo "---DIRETRIZES---"
-    cat "$WS/DIRETRIZES.md"
+    cat "$WS/claudinho/DIRETRIZES.md"
     echo "---/DIRETRIZES---"
   fi
   # CLAUDE.md (project instructions)
@@ -60,9 +60,9 @@ if [ "$PERSONALITY" = "ON" ]; then
     echo "---/CLAUDE.MD---"
   fi
   # SELF.md (diário)
-  if [ -f "$WS/SELF.md" ]; then
+  if [ -f "$WS/claudinho/SELF.md" ]; then
     echo "---SELF---"
-    cat "$WS/SELF.md"
+    cat "$WS/claudinho/SELF.md"
     echo "---/SELF---"
   fi
 fi
