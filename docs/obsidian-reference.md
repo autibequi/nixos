@@ -8,9 +8,9 @@
 | Rainbow Sidebar | `rainbow-colored-sidebar` | Visual |
 | **Dataview** | `dataview` | Query engine — SQL-like sobre frontmatter YAML |
 | **Templater** | `templater-obsidian` | Templates com JS (folder: `_templates/`) |
-| **Homepage** | `homepage` | Abre `dashboard-home` ao iniciar vault |
+| **Homepage** | `homepage` | Abre `dashboard-home` ao iniciar o Obsidian |
 
-## Dataview — Como usar nos arquivos do vault
+## Dataview — Como usar nos arquivos do Obsidian
 
 **Tabela com frontmatter:**
 ````markdown
@@ -70,8 +70,8 @@ Tipos: `flowchart`, `graph`, `stateDiagram-v2`, `sequenceDiagram`, `gantt`, `pie
 | `poc-nixos-modules.md` | Catálogo — módulos NixOS |
 | `poc-mermaid-architecture.md` | Arquitetura — diagramas Mermaid |
 
-## Ao criar conteúdo pro vault
+## Ao criar conteúdo pro Obsidian
 - **Sugestões**: SEMPRE incluir frontmatter (`date`, `category`, `reviewed: false`)
 - **Reports**: podem ter frontmatter pra queries futuras
 - **Novos dashboards**: usar Dataview queries, Mermaid pra diagramas
-- **Novos templates**: criar em `vault/_templates/`, sintaxe Templater
+- **Novos templates**: criar em `obsidian/_templates/`, sintaxe Templater

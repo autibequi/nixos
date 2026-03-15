@@ -37,7 +37,7 @@ Agora (com worktree):
         ├─ Hook: worktree-enter
         │  • scripts/worktree-manager.sh init
         │  • Registra em .worktrees-registry.json
-        │  • Atualiza vault/_agent/worktrees.md
+        │  • Atualiza obsidian/_agent/worktrees.md
         │
         ▼
 ┌─────────────────────────────────────────────────────────┐
@@ -57,7 +57,7 @@ Agora (com worktree):
         ▼
 ┌─────────────────────────────────────────────────────────┐
 │ 📝 Proposta de Merge                                    │
-│  • Crio vault/worktrees/<name>/proposal.md              │
+│  • Crio obsidian/worktrees/<name>/proposal.md              │
 │  • Descrevo o que faz                                   │
 │  • Link pra diff                                        │
 └──────────────────┬──────────────────────────────────────┘
@@ -65,7 +65,7 @@ Agora (com worktree):
                    ▼
         ExitWorktree (action: keep|remove)
         • Finaliza branch
-        • Move artefatos pra vault/_agent/reports/
+        • Move artefatos pra obsidian/_agent/reports/
         • Remove do registro
         │
         ▼
@@ -77,7 +77,7 @@ Agora (com worktree):
 
 ---
 
-## 📊 Dashboard: `vault/_agent/worktrees.md`
+## 📊 Dashboard: `obsidian/_agent/worktrees.md`
 
 Documento vivo que mostra:
 
@@ -117,7 +117,7 @@ Output:
 │  ├─ Deleções: 18 linhas
 │
 ├─ 📂 Artefatos:
-│  └─ vault/worktrees/propositor-bootstrap/
+│  └─ obsidian/worktrees/propositor-bootstrap/
 │     ├─ README.md
 │     ├─ changes.md
 │     └─ proposal.md
@@ -128,7 +128,7 @@ Output:
 ## 💾 Artefatos por Worktree
 
 ```
-vault/
+obsidian/
 └── worktrees/
     └── propositor-bootstrap/
         ├── README.md          ← contexto
@@ -249,7 +249,7 @@ Roda automaticamente quando você chama `EnterWorktree`:
 cd /workspace && ./scripts/worktree-manager.sh update-dashboard
 ```
 
-Atualiza `vault/_agent/worktrees.md` com novo card.
+Atualiza `obsidian/_agent/worktrees.md` com novo card.
 
 ---
 
@@ -262,13 +262,13 @@ Atualiza `vault/_agent/worktrees.md` com novo card.
 # Acontece:
 # 1. EnterWorktree → git worktree add
 # 2. Hook → worktree-manager init
-# 3. Dashboard atualizado em vault/_agent/worktrees.md
+# 3. Dashboard atualizado em obsidian/_agent/worktrees.md
 
 # Você trabalha normalmente
 # Quando termina:
 # ExitWorktree action: keep
 
-# Artefatos vão pra vault/_agent/reports/
+# Artefatos vão pra obsidian/_agent/reports/
 # Dashboard atualizado
 ```
 
@@ -279,9 +279,9 @@ Atualiza `vault/_agent/worktrees.md` com novo card.
 Antes de sair do worktree, verificar:
 
 - [ ] Branch tem commits bem documentados
-- [ ] `vault/worktrees/<name>/README.md` — contexto completo
-- [ ] `vault/worktrees/<name>/changes.md` — diff summarizado
-- [ ] `vault/worktrees/<name>/proposal.md` — pitch pra merge
+- [ ] `obsidian/worktrees/<name>/README.md` — contexto completo
+- [ ] `obsidian/worktrees/<name>/changes.md` — diff summarizado
+- [ ] `obsidian/worktrees/<name>/proposal.md` — pitch pra merge
 - [ ] Tests rodaram (se aplicável)
 - [ ] Sem conflicts com main
 - [ ] Link no kanban aponta pro resultado
@@ -310,5 +310,5 @@ Antes de sair do worktree, verificar:
 - [ ] Metrics: avg time per worktree, success rate
 - [ ] Slack notifications: "/worktree propositor-bootstrap is ready"
 - [ ] Integration com CI/CD: rodar testes em worktree antes de merge
-- [ ] Diff visualization inline no vault
+- [ ] Diff visualization inline no Obsidian
 

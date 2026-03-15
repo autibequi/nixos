@@ -18,7 +18,7 @@ Invoca o mago para tecer conexões sob demanda. Útil quando você adicionar um 
 
 #### Automático (Recorrente)
 Task `wiseman` roda a cada **hora** (every60, timeout 600s, Sonnet model).
-- Lê `vault/wiseman-chrononomicon.md` (seu grimório de memória)
+- Lê `obsidian/wiseman-chrononomicon.md` (seu grimório de memória)
 - Varre `sugestoes/`, `_agent/reports/`, `artefacts/`, etc.
 - Tece conexões semânticas (backlinks, tags, `related` field)
 - Atualiza Chrononomicon com novas heurísticas
@@ -34,13 +34,13 @@ schedule: always    # roda 24/7
 
 ### Workflow Padrão
 
-1. **Ler Chrononomicon** (`vault/wiseman-chrononomicon.md`) — suas memórias
-2. **Varrer o vault** — procurar notas novas/modificadas em:
-   - `vault/sugestoes/` — sugestões de tasks
-   - `vault/_agent/reports/` — relatórios
-   - `vault/artefacts/` — entregáveis
-   - `vault/_agent/tasks/done/` — tasks concluídas
-   - `vault/*.md` — notas na raiz
+1. **Ler Chrononomicon** (`obsidian/wiseman-chrononomicon.md`) — suas memórias
+2. **Varrer o Obsidian** — procurar notas novas/modificadas em:
+   - `obsidian/sugestoes/` — sugestões de tasks
+   - `obsidian/_agent/reports/` — relatórios
+   - `obsidian/artefacts/` — entregáveis
+   - `obsidian/_agent/tasks/done/` — tasks concluídas
+   - `obsidian/*.md` — notas na raiz
 3. **Analisar** — backlinks existentes? Tags normalizadas? Pertence a cluster?
 4. **Tecer** — adicionar `[[backlinks]]`, tags, campo `related` no frontmatter
 5. **Registrar** — atualizar Chrononomicon com o que fez
@@ -64,11 +64,11 @@ schedule: always    # roda 24/7
 
 ### Documentação Interna
 
-- **`vault/wiseman-chrononomicon.md`** — grimório pessoal do Wiseman (seu libro de memória)
-  - Tags canônicas do vault
+- **`obsidian/wiseman-chrononomicon.md`** — grimório pessoal do Wiseman (seu libro de memória)
+  - Tags canônicas do Obsidian
   - Heurísticas de correlação descobertas
   - Registro de teias já tecidas (pra não refazer)
-  - Regras de ouro do vault específico
+  - Regras de ouro do Obsidian
 
 ---
 
@@ -104,9 +104,9 @@ schedule: always    # roda 24/7
 1. **`.ephemeral/scratch/`** — arquivos temporários > 7 dias
 2. **`.ephemeral/logs/`** — logs > 14 dias
 3. **`.ephemeral/notes/`** — notas órfãs (task foi deletada)
-4. **`vault/artefacts/`** — pastas de tasks concluídas > 30 dias
-5. **`vault/_agent/reports/`** — reports > 30 dias
-6. **`vault/sugestoes/`** — sugestões revisadas (`reviewed: true`) > 14 dias
+4. **`obsidian/artefacts/`** — pastas de tasks concluídas > 30 dias
+5. **`obsidian/_agent/reports/`** — reports > 30 dias
+6. **`obsidian/sugestoes/`** — sugestões revisadas (`reviewed: true`) > 14 dias
 7. **Imagens/Assets** — arquivos não referenciados > 3 dias (delegado a `trashman-clean-assets`)
 8. **Pastas vazias** — recursivamente (após limpeza de arquivos)
 
@@ -143,7 +143,7 @@ Após cada execução, Trashman reflete:
 - Novos tipos de lixo a monitorar?
 - False positives? (arquivou algo que não devia?)
 
-Se sim → edita `vault/_agent/tasks/recurring/trashman/CLAUDE.md` pra melhorar.
+Se sim → edita `obsidian/_agent/tasks/recurring/trashman/CLAUDE.md` pra melhorar.
 
 ---
 
@@ -151,7 +151,7 @@ Se sim → edita `vault/_agent/tasks/recurring/trashman/CLAUDE.md` pra melhorar.
 
 ### Status em scheduled.md
 
-Ambos aparecem na coluna **"Recorrentes"** de `vault/_agent/scheduled.md`:
+Ambos aparecem na coluna **"Recorrentes"** de `obsidian/_agent/scheduled.md`:
 
 ```markdown
 ## Recorrentes
@@ -166,16 +166,16 @@ Ambos aparecem na coluna **"Recorrentes"** de `vault/_agent/scheduled.md`:
 
 Cada task tem um `memoria.md` em seu diretório:
 
-- **`vault/_agent/tasks/recurring/wiseman/memoria.md`** — estado do Wiseman (ciclos, notas processadas, clusters)
-- **`vault/_agent/tasks/recurring/trashman/memoria.md`** — histórico de limpezas (dados, status, motivos)
+- **`obsidian/_agent/tasks/recurring/wiseman/memoria.md`** — estado do Wiseman (ciclos, notas processadas, clusters)
+- **`obsidian/_agent/tasks/recurring/trashman/memoria.md`** — histórico de limpezas (dados, status, motivos)
 
 **Nunca deletar** — é como brain persistent entre execuções.
 
 ### Monitoramento
 
 Verifique no Obsidian:
-- **`vault/_agent/scheduled.md`** — status atual (Em Execução = rodando agora)
-- **`vault/_agent/reports/`** — relatórios automáticos após cada ciclo
+- **`obsidian/_agent/scheduled.md`** — status atual (Em Execução = rodando agora)
+- **`obsidian/_agent/reports/`** — relatórios automáticos após cada ciclo
 - **`.ephemeral/.trashlist`** — log histórico de tudo que Trashman arquivou
 
 ---
@@ -189,7 +189,7 @@ Verifique no Obsidian:
 - [x] Comando `/trashman` invocável (em `stow/.claude/commands/trashman.md`)
 - [x] Agente Wiseman registrado (em `stow/.claude/agents/wiseman/agent.md`)
 - [x] Agente Trashman registrado (em `stow/.claude/agents/trashman/`)
-- [x] `vault/wiseman-chrononomicon.md` existe (grimório)
+- [x] `obsidian/wiseman-chrononomicon.md` existe (grimório)
 - [x] `.ephemeral/.trashlist` existe (log de limpezas)
 - [x] Ambos rondam no `scheduled.md` sob "Recorrentes"
 - [x] Documentação unificada aqui (este arquivo)
@@ -204,12 +204,12 @@ Verifique no Obsidian:
 | **Trashman Agent** | `stow/.claude/agents/trashman/` |
 | **Wiseman Command** | `stow/.claude/commands/wiseman.md` |
 | **Trashman Command** | `stow/.claude/commands/trashman.md` |
-| **Wiseman Task** | `vault/_agent/tasks/recurring/wiseman/` |
-| **Trashman Task** | `vault/_agent/tasks/recurring/trashman/` |
-| **Wiseman Grimório** | `vault/wiseman-chrononomicon.md` |
+| **Wiseman Task** | `obsidian/_agent/tasks/recurring/wiseman/` |
+| **Trashman Task** | `obsidian/_agent/tasks/recurring/trashman/` |
+| **Wiseman Grimório** | `obsidian/wiseman-chrononomicon.md` |
 | **Trashman Log** | `.ephemeral/.trashlist` |
 | **Task System Docs** | `docs/task-system.md` |
-| **Status Atual** | `vault/_agent/scheduled.md` (Recorrentes) |
+| **Status Atual** | `obsidian/_agent/scheduled.md` (Recorrentes) |
 
 ---
 

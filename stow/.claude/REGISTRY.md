@@ -157,6 +157,7 @@ Skills são templates/knowledge base que commands consomem. Cada skill tem `SKIL
 | `orquestrador/` | orquestrar-feature, retomar-feature, review-pr, pr-inspector, refinar-bug, recommit, changelog | Patterns cross-repo |
 | `hyprland-config/` | SKILL.md | Config Hyprland (keybinds, monitors, rules) |
 | `nixos/` | SKILL.md | NixOS module patterns |
+| `gsd/draw/` | SKILL.md | ASCII art + diagramas: quando usar ASCII vs Mermaid por contexto de renderização |
 
 ---
 

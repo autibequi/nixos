@@ -10,20 +10,20 @@ Instruções práticas pra usar os dois agentes.
 ```
 /wiseman
 ```
-Invoca o mago pra tecer conexões nas notas do vault.
+Invoca o mago pra tecer conexões nas notas do Obsidian.
 
 ### Como funciona automaticamente
 - **Roda:** a cada hora (every60)
 - **Tempo máximo:** 10 minutos
 - **Modelo:** Sonnet (análise semântica)
 - **O que faz:**
-  1. Lê o grimório (`vault/wiseman-chrononomicon.md`)
+  1. Lê o grimório (`obsidian/wiseman-chrononomicon.md`)
   2. Procura novas notas em `sugestoes/`, `artefacts/`, etc.
   3. Adiciona backlinks `[[nota]]`, tags `#tema`, campo `related` no frontmatter
   4. Atualiza o grimório com novas heurísticas
 
 ### Onde ele guarda memória
-- **`vault/wiseman-chrononomicon.md`** — tudo que o Wiseman aprende (tags, heurísticas, log de conexões)
+- **`obsidian/wiseman-chrononomicon.md`** — tudo que o Wiseman aprende (tags, heurísticas, log de conexões)
 
 ### Regra de Ouro
 - ✅ Adiciona backlinks e tags
@@ -70,13 +70,13 @@ Invoca o zelador pra arquivar lixo do workspace.
 ## 📊 Status Atual
 
 ### Ver tudo em ação
-- **`vault/_agent/scheduled.md`** — coluna "Recorrentes" mostra os dois (quando estão "Em Execução" = rodando agora)
-- **`vault/_agent/reports/`** — relatórios automáticos após cada ciclo
-- **`vault/_agent/tasks/recurring/wiseman/`** — estado do Wiseman
-- **`vault/_agent/tasks/recurring/trashman/`** — estado do Trashman
+- **`obsidian/_agent/scheduled.md`** — coluna "Recorrentes" mostra os dois (quando estão "Em Execução" = rodando agora)
+- **`obsidian/_agent/reports/`** — relatórios automáticos após cada ciclo
+- **`obsidian/_agent/tasks/recurring/wiseman/`** — estado do Wiseman
+- **`obsidian/_agent/tasks/recurring/trashman/`** — estado do Trashman
 
 ### Verificar saúde
-- Wiseman processando novas notas? → check `vault/wiseman-chrononomicon.md` (seção "Análise do Vault")
+- Wiseman processando novas notas? → check `obsidian/wiseman-chrononomicon.md` (seção "Análise do Vault")
 - Trashman limpando? → check `/.ephemeral/.trashlist` (entrada mais recente)
 
 ---
@@ -93,7 +93,7 @@ Tá em `/.ephemeral/.trashbin/` com path relativo — recupera e coloca de volta
 Ele lê o Chrononomicon (grimório) que tem log de todas as notas que já processou. Tudo que não tá no log é novo.
 
 **P: Trashman muda a regra de limpeza?**
-Sim! Após cada execução, ele reflete sobre thresholds e pode editar `vault/_agent/tasks/recurring/trashman/CLAUDE.md` pra se melhorar.
+Sim! Após cada execução, ele reflete sobre thresholds e pode editar `obsidian/_agent/tasks/recurring/trashman/CLAUDE.md` pra se melhorar.
 
 **P: Posso forçar Wiseman a processar uma nota específica?**
 Sim — edita o Chrononomicon e remove a nota do "Registro de Teias Tecidas". Próxima execução ela será processada como nova.
@@ -104,8 +104,8 @@ Sim — edita o Chrononomicon e remove a nota do "Registro de Teias Tecidas". Pr
 
 - [ ] Executar `/wiseman` e verificar se tece alguma conexão
 - [ ] Executar `/trashman` e verificar se encontra algo pra limpar
-- [ ] Ver `vault/_agent/scheduled.md` → ambos em "Recorrentes" ✅
-- [ ] Ler `vault/wiseman-chrononomicon.md` → verificar se tem dados
+- [ ] Ver `obsidian/_agent/scheduled.md` → ambos em "Recorrentes" ✅
+- [ ] Ler `obsidian/wiseman-chrononomicon.md` → verificar se tem dados
 - [ ] Verificar `.ephemeral/.trashlist` → verificar se tem histórico
 
 ---

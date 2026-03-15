@@ -43,7 +43,7 @@ O que cada campo significa, por que importa e que outras opções existem.
 
 ### 5. **Bochechas N ██** — background workers rodando
 
-- **O que é:** Quantidade de **pastas** em `vault/_agent/tasks/running/` (tasks em execução pelo clau-runner).
+- **O que é:** Quantidade de **pastas** em `obsidian/_agent/tasks/running/` (tasks em execução pelo clau-runner).
 - **Por que importa:** Quantos workers de background estão de fato rodando uma task naquele momento.
 - **Barra:** Escala 0–10.
 

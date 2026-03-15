@@ -29,8 +29,8 @@
 > □ feedback_*.md          loaded idle
 > □ user_*.md              loaded idle
 > □ project_*.md           loaded idle
-> □ vault/kanban.md        loaded idle
-> □ vault/_agent/sessao.md loaded idle
+> □ obsidian/kanban.md        loaded idle
+> □ obsidian/_agent/sessao.md loaded idle
 > □ docs/*.md              loaded idle
 >
 > ▫ SELF.md                masked ----
@@ -99,8 +99,7 @@ fi
 │   │   └── CLAUDE.md            ← sub-personalidade trabalho
 │   ├── scripts/                 ← clau-runner.sh, kanban-sync.sh, etc.
 │   └── docs/                    ← referências on-demand
-├── obsidian/                    ← mount point Obsidian (Docker)
-├── vault -> obsidian            ← symlink (scripts usam vault/)
+├── obsidian/                    ← vault Obsidian (Docker mount) — interface e cérebro
 │   ├── _agent/                  ← controle interno dos agentes
 │   │   ├── tasks/               ← ciclo de vida (recurring/, pending/, running/, done/, failed/)
 │   │   ├── reports/             ← relatórios de execução
@@ -118,7 +117,7 @@ fi
 
 ## THINKINGS — Regra Inviolável
 
-> O THINKINGS (`vault/kanban.md`) DEVE ser atualizado em TODA sessão com o trabalho atual.
+> O THINKINGS (`obsidian/kanban.md`) DEVE ser atualizado em TODA sessão com o trabalho atual.
 > Não esperar pedido. É responsabilidade do agente.
 
 - **Interativo**: adicionar card em "Em Andamento" com tag `#interativo`
@@ -148,7 +147,7 @@ O THINKINGS é memória compartilhada entre sessões, mecanismo de orquestraçã
 | trashman | every60 | haiku | Arquiva arquivos velhos/órfãos |
 | trashman-clean-assets | every60 | haiku | Limpa imagens não referenciadas |
 | evolucao | every240 | sonnet | Meta-análise + docs |
-| wiseman | every240 | haiku | Conexões entre notas do vault |
+| wiseman | every240 | haiku | Conexões entre notas do Obsidian |
 | propositor | every240 | sonnet | Propõe mudanças via worktree |
 | guardinha | every240 | sonnet | Auditoria de segurança |
 | tamagochi | every240 | haiku | — |
@@ -201,7 +200,7 @@ Path: `/workspace/.hive-mind/` — efêmero, compartilhado entre todos os contai
 **`/contemplate-memories`** — introspecção profunda sobre conversas recentes. Extrai aprendizados para memórias, SOUL.md, CLAUDE.md, skills, e limpeza do THINKINGS. Rodar periodicamente ou após sessões longas com feedback significativo.
 
 ## Referências (leitura on-demand)
-- `docs/operational-reference.md` — git identity, hive-mind, persistência, cota API, observabilidade, vault, workbench
+- `docs/operational-reference.md` — git identity, hive-mind, persistência, cota API, observabilidade, obsidian, workbench
 - `docs/task-system.md` — detalhes do sistema de tasks, clocks, THINKINGS format
 - `docs/obsidian-reference.md` — Dataview, Mermaid, Templater, plugins
 - `docs/nixos-reference.md` — comandos e arquitetura NixOS

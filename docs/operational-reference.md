@@ -51,11 +51,11 @@ Flag: `/workspace/.ephemeral/auto-jarvis`. Toggle via `/auto-jarvis`.
 **Características:**
 - **Efêmero**: vive em `/tmp/` no host → some no reboot (ou `rm -rf /tmp/claudio-hive-mind`)
 - **Compartilhado**: todos os containers (sandbox, worker-N, worktrees) montam o mesmo diretório
-- **Sem git**: não é versionado, não é persistido no vault
+- **Sem git**: não é versionado, não é persistido no Obsidian
 
 **Usos previstos:**
 - **Sinalização entre agentes**: flags de lock, semáforos, coordenação (ex: `lock-<task>.flag`)
-- **Troca rápida de dados**: output de um worker que outro precisa ler sem passar pelo vault
+- **Troca rápida de dados**: output de um worker que outro precisa ler sem passar pelo Obsidian
 - **Estado efêmero cross-container**: contadores, status temporários, heartbeats
 - **Debug colaborativo**: workers podem deixar logs aqui para o sandbox inspecionar
 
@@ -68,7 +68,7 @@ Flag: `/workspace/.ephemeral/auto-jarvis`. Toggle via `/auto-jarvis`.
 └── tmp-<task>-<uuid>.json   ← dados temporários de passagem
 ```
 
-**Regra:** arquivos em `.hive-mind/` são descartáveis. Nunca depender deles como fonte de verdade — o THINKINGS e o vault são o estado canônico.
+**Regra:** arquivos em `.hive-mind/` são descartáveis. Nunca depender deles como fonte de verdade — o THINKINGS e o Obsidian são o estado canônico.
 
 ---
 
@@ -94,7 +94,7 @@ Três camadas de persistência, da mais permanente à mais efêmera:
 - **Commands reutilizáveis** → `stow/.claude/commands/` (versionado)
 - **Hooks** → `stow/.claude/hooks/` (versionado)
 - **Feedback do user, info pessoal, contexto de projeto** → `memory/` (persistente, não versionado)
-- **Trabalho em andamento** → `vault/kanban.md` (THINKINGS) + `vault/artefacts/` (persistente via vault mount)
+- **Trabalho em andamento** → `obsidian/kanban.md` (THINKINGS) + `obsidian/artefacts/` (persistente via obsidian mount)
 
 ---
 
@@ -133,7 +133,7 @@ NUNCA criar/editar/fechar PRs ou issues — token é READ ONLY.
 
 ## Vault Obsidian — Segundo Cérebro Compartilhado
 
-O vault é aberto no Obsidian pelo user. Tudo que eu escrevo lá é renderizado visualmente.
+O Obsidian é aberto pelo user pelo user. Tudo que eu escrevo lá é renderizado visualmente.
 
 - **Tags**: usar `#tag` livremente pra categorizar (ex: `#nixos`, `#bug`, `#ideia`, `#urgente`)
 - **Links internos**: `[[nome-da-nota]]` ou `[[pasta/nota|texto exibido]]` — Obsidian resolve automaticamente
@@ -144,13 +144,13 @@ O vault é aberto no Obsidian pelo user. Tudo que eu escrevo lá é renderizado 
 Referência completa de plugins/Dataview/Mermaid/Templater em `docs/obsidian-reference.md`.
 
 ### Sugestões
-- Formato: `vault/sugestoes/YYYY-MM-DD-<topico>.md`
+- Formato: `obsidian/sugestoes/YYYY-MM-DD-<topico>.md`
 - Frontmatter obrigatório: `date`, `category`, `reviewed: false`
 - User revisa no Obsidian
 
 ### Artefatos
-- `vault/artefacts/<task>/` — pasta por pedido/task
-- `vault/_agent/reports/` — relatórios de tasks autônomas
+- `obsidian/artefacts/<task>/` — pasta por pedido/task
+- `obsidian/_agent/reports/` — relatórios de tasks autônomas
 - Card no THINKINGS DEVE linkar pro artefato ao concluir
 
 ---
@@ -176,7 +176,7 @@ task: <nome>
 branch: worktree-<nome>
 created: YYYY-MM-DDTHH:MM:SSZ
 status: done | in-progress | archived
-artefacts: vault/artefacts/<task>/
+artefacts: obsidian/artefacts/<task>/
 ---
 ```
 

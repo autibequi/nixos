@@ -43,9 +43,9 @@ max_turns: 25
 - Card interativo: `- [ ] **nome** #interativo \`modelo\` — descrição`
 
 ## Arquivos
-- `vault/kanban.md` — work items (Backlog, Inbox, Em Andamento, Esperando Review, Aprovado, Falhou)
-- `vault/cemiterio-tasks.md` — tasks arquivadas/deprecated (Arquivado, Deprecated)
-- `vault/_agent/scheduled.md` — tasks recorrentes (Recorrentes, Em Execução, Histórico)
+- `obsidian/kanban.md` — work items (Backlog, Inbox, Em Andamento, Esperando Review, Aprovado, Falhou)
+- `obsidian/cemiterio-tasks.md` — tasks arquivadas/deprecated (Arquivado, Deprecated)
+- `obsidian/_agent/scheduled.md` — tasks recorrentes (Recorrentes, Em Execução, Histórico)
 
 ## Colunas — kanban.md
 | Coluna | Função |
