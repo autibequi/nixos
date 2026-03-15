@@ -9,27 +9,10 @@ x-common-env: &common-env
 x-extra-hosts: &extra-hosts
   - "host.docker.internal:host-gateway"
 
-x-media-env: &media-env
-  OPENCLAW_CONFIG_PATH: /home/claude/.openclaw/openclaw-container.json
-  WAYLAND_DISPLAY: ${WAYLAND_DISPLAY}
-  XDG_RUNTIME_DIR: /run/user/1000
-  PULSE_SERVER: unix:/run/user/1000/pulse/native
-
-x-full-volumes: &full-volumes
-  - .:/workspace/host
-  - ${CLAUDIO_MOUNT:-/tmp/claude-mount-empty}:/workspace/mount:${CLAUDIO_MOUNT_OPTS:-rw}
-  - ${HOME}/.ovault/Work:/workspace/obsidian
-  - ${HOME}/projects:/home/claude/projects
-  - ${CLAUDE_DATA_DIR:-${HOME}/.local/share/claude-code}:/home/claude/.claude
+x-base-volumes: &base-volumes
+  - ${HOME}/nixos:/workspace/host
+  - claude-credentials:/home/claude/.claude
   - ${HOME}/.claude.json:/home/claude/.claude.json
-  - ${HOME}/.openclaw:/home/claude/.openclaw
-  - ${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:/run/user/1000/${WAYLAND_DISPLAY}
-  - ${XDG_RUNTIME_DIR}/pulse:/run/user/1000/pulse
-  - /var/log/journal:/workspace/hostlogs/journalctl:ro
-  - /proc/meminfo:/host/proc/meminfo:ro
-  - /proc/loadavg:/host/proc/loadavg:ro
-  - /proc/uptime:/host/proc/uptime:ro
-  - ${CONTAINER_SOCK:-/var/run/docker.sock}:/host/podman.sock:ro
 
 services:
   sandbox:
@@ -43,13 +26,13 @@ services:
     entrypoint: ["/bin/bash", "-c"]
     command: ["sleep infinity"]
     environment:
-      <<: [*common-env, *media-env]
+      <<: *common-env
       GIT_AUTHOR_NAME: Pedrinho
       GIT_AUTHOR_EMAIL: pedro.correa@estrategia.com
       GIT_COMMITTER_NAME: Claudinho
       GIT_COMMITTER_EMAIL: claudinho@autibequi.com
     extra_hosts: *extra-hosts
-    volumes: *full-volumes
+    volumes: *base-volumes
 
   claudio:
     build:
@@ -62,73 +45,13 @@ services:
     entrypoint: ["/bin/bash", "-c"]
     command: ["sleep infinity"]
     environment:
-      <<: [*common-env, *media-env]
+      <<: *common-env
       GIT_AUTHOR_NAME: Pedrinho
       GIT_AUTHOR_EMAIL: pedro.correa@estrategia.com
       GIT_COMMITTER_NAME: Claudinho
       GIT_COMMITTER_EMAIL: claudinho@autibequi.com
     extra_hosts: *extra-hosts
-    volumes: *full-volumes
-
-  openclaw:
-    build:
-      context: .
-      dockerfile: Dockerfile.claude
-    image: claude-nix-sandbox
-    container_name: claude-openclaw
-    network_mode: host
-    stdin_open: true
-    tty: true
-    restart: unless-stopped
-    entrypoint: ["/bin/bash", "-c"]
-    command: ["openclaw gateway & sleep infinity"]
-    environment:
-      <<: [*common-env, *media-env]
-    extra_hosts: *extra-hosts
-    volumes: *full-volumes
-
-  opencode:
-    build:
-      context: .
-      dockerfile: Dockerfile.claude
-    image: claude-nix-sandbox
-    container_name: opencode
-    network_mode: host
-    stdin_open: true
-    tty: true
-    restart: unless-stopped
-    entrypoint: ["/bin/bash", "-c"]
-    command: ["sleep infinity"]
-    environment:
-      <<: *common-env
-    extra_hosts: *extra-hosts
-    volumes:
-      - .:/workspace/host
-      - ${HOME}/.opencode:/home/claude/.opencode
-      - ${CLAUDE_DATA_DIR:-${HOME}/.local/share/claude-code}:/home/claude/.claude
-      - ${HOME}/.claude.json:/home/claude/.claude.json
-      - ./stow/.claude:/workspace/host/.claude
-
-  codio:
-    build:
-      context: .
-      dockerfile: Dockerfile.claude
-    image: claude-nix-sandbox
-    network_mode: host
-    stdin_open: true
-    tty: true
-    entrypoint: ["/bin/bash", "-c"]
-    command: ["sleep infinity"]
-    environment:
-      <<: *common-env
-    extra_hosts: *extra-hosts
-    volumes:
-      - .:/workspace/host
-      - ${CLAUDIO_MOUNT:-/tmp/claude-mount-empty}:/workspace/mount:${CLAUDIO_MOUNT_OPTS:-rw}
-      - ${HOME}/.opencode:/home/claude/.opencode
-      - ${CLAUDE_DATA_DIR:-${HOME}/.local/share/claude-code}:/home/claude/.claude
-      - ${HOME}/.claude.json:/home/claude/.claude.json
-      - ./stow/.claude:/workspace/host/.claude
+    volumes: *base-volumes
 
   worker:
     build:
@@ -138,12 +61,18 @@ services:
     mem_limit: 12g
     memswap_limit: 16g
     entrypoint: ["/bin/bash"]
-    command: ["/workspace/scripts/clau-runner.sh"]
+    command: ["/workspace/host/scripts/clau-runner.sh"]
     environment:
-      <<: [*common-env, *media-env]
+      <<: *common-env
       GIT_AUTHOR_NAME: Buchecha
       GIT_AUTHOR_EMAIL: buchecha@autibequi.com
       GIT_COMMITTER_NAME: Buchecha
       GIT_COMMITTER_EMAIL: buchecha@autibequi.com
     extra_hosts: *extra-hosts
-    volumes: *full-volumes
+    volumes: *base-volumes
+
+volumes:
+  claude-credentials:
+    # Shared ~/.claude/ across all claude containers.
+    # Persists auth tokens, project history between starts.
+    driver: local

@@ -125,6 +125,7 @@ claudio:
 	$(eval PROJ_SLUG := $(shell basename "$(abspath $(or $(dir),$(shell pwd)))" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$$//'))
 	$(eval CLAU_PROJ := clau-$(PROJ_SLUG))
 	@mkdir -p /tmp/claude-mount-empty
+	@touch $(HOME)/.claude.json
 	@echo "[claudio] $(PROJ_SLUG) → projeto $(CLAU_PROJ)"
 	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CLAU_PROJ)" up -d claudio
 	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CLAU_PROJ)" exec -it \
@@ -143,6 +144,7 @@ attach:
 		'. /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
 
 sandbox:
+	@touch $(HOME)/.claude.json
 	$(COMPOSE) up -d sandbox
 	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
 

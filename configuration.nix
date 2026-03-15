@@ -46,9 +46,6 @@
     # Obsidian Sync (headless)
     ./modules/obsidian-sync.nix
 
-    # OpenClaw Gateway
-    ./modules/openclaw.nix
-
     # LM Studio Server
     ./modules/lmstudio.nix
 

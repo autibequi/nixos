@@ -26,10 +26,6 @@
   };
   networking.firewall.checkReversePath = "loose";
 
-  # LM Studio API Server
-  services.lmstudio = {
-    enable = true;
-    port = 1234;
-    host = "192.168.68.60";
-  };
+  # LM Studio API Server (disabled — lms binary segfaults, needs manual install)
+  services.lmstudio.enable = false;
 }

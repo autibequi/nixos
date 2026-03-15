@@ -33,7 +33,6 @@
       unstable = import nixpkgs-unstable {
         inherit system;
         config.allowUnfree = true;
-        config.permittedInsecurePackages = [ "openclaw-2026.2.26" ];
       };
     in
     {

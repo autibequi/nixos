@@ -72,7 +72,7 @@ in
         Type = "simple";
         User = cfg.user;
         Group = cfg.group;
-        ExecStart = "${unstable.lmstudio}/bin/lmstudio serve --host ${cfg.host} --port ${toString cfg.port}";
+        ExecStart = "${unstable.lmstudio}/bin/lms server start --host ${cfg.host} --port ${toString cfg.port}";
         Restart = "on-failure";
         RestartSec = 5;
         StandardOutput = "journal";
