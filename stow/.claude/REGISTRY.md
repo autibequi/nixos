@@ -76,6 +76,11 @@ Slash commands invocáveis pelo user via `/nome`.
 |---------|-----------|-----------|
 | `tools/resumo-video` | `/resumo-video` | Resume vídeo YouTube via transcrição |
 
+### Utils — Skills
+| Skill | Invocação | Descrição |
+|-------|-----------|-----------|
+| `skills/speak` | `/speak` | Fala texto via espeak-ng (TTS). Flags: `-v <voz>` (default pt-br), `-s <vel>`, `-p <pitch>`, `-a <amp>` |
+
 ### Estratégia — Monolito (Go)
 | Command | Invocação | Descrição |
 |---------|-----------|-----------|
