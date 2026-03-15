@@ -107,6 +107,37 @@ EOF
   [[ -n "${override:-}" ]] && rm -f "$override"
 }
 
+# === codio — entrypoint opencode com mount do projeto ===
+codio() {
+  local nixos_dir="${CLAUDIO_NIXOS_DIR:-$HOME/nixos}"
+  local compose="docker compose -f $nixos_dir/docker-compose.claude.yml"
+  local mount_path=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --) shift; break ;;
+      -*) echo "codio: unknown flag $1"; return 1 ;;
+      *)  mount_path="$(cd "$1" 2>/dev/null && pwd)" || { echo "codio: dir not found: $1"; return 1; }; shift ;;
+    esac
+  done
+
+  # Default: CWD, mas skip se é ~/nixos
+  local real_cwd="$(pwd -P)"
+  local real_nixos="$(cd "$nixos_dir" 2>/dev/null && pwd -P)"
+  if [[ -z "$mount_path" && "$real_cwd" != "$real_nixos" ]]; then
+    mount_path="$real_cwd"
+  fi
+
+  local proj_slug="$(basename "${mount_path:-nixos}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$//')"
+  local proj_name="codio-${proj_slug}"
+
+  echo "[codio] ${proj_slug} → ${proj_name}"
+  CLAUDIO_MOUNT="${mount_path}" docker compose -f "$nixos_dir/docker-compose.claude.yml" -p "$proj_name" up -d codio
+  CLAUDIO_MOUNT="${mount_path}" docker compose -f "$nixos_dir/docker-compose.claude.yml" -p "$proj_name" exec -it \
+    -e CLAUDIO_MOUNT="${mount_path}" codio bash -c \
+    'cd /workspace/mount && exec opencode'
+}
+
 # Legacy aliases (compatibilidade)
 claudinho() { export CLAUDE_SESSION="${CLAUDE_SESSION:-pessoal}"; cd ~/nixos && claudio "$@"; }
 clau()      { export CLAUDE_SESSION="${CLAUDE_SESSION:-worker}"; cd ~/nixos && make run; }

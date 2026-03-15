@@ -108,6 +108,26 @@ services:
       - ${HOME}/.opencode:/home/claude/.opencode
       - ./stow/.claude:/workspace/.claude
 
+  codio:
+    build:
+      context: .
+      dockerfile: Dockerfile.claude
+    image: claude-nix-sandbox
+    network_mode: host
+    stdin_open: true
+    tty: true
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["sleep infinity"]
+    environment:
+      <<: *common-env
+    extra_hosts: *extra-hosts
+    volumes:
+      - .:/workspace
+      - ${CLAUDIO_MOUNT:-/tmp/claude-mount-empty}:/workspace/mount
+      - ${HOME}/.opencode:/home/claude/.opencode
+      - ${HOME}/.local/share/claude-code:/home/claude/.claude
+      - ./stow/.claude:/workspace/.claude
+
   worker:
     build:
       context: .
