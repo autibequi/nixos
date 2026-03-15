@@ -128,7 +128,7 @@ fi
 │   ├── artefacts/               ← entregáveis por task
 │   ├── sugestoes/               ← canal agente→user
 │   └── kanban.md                ← THINKINGS: FONTE DE VERDADE work items
-├── hostlogs/
+├── logs/
 │   └── journalctl/              ← bind mount RO de /var/log/journal do host
 ├── mount/                       ← projeto externo (claudio monta aqui, opcional)
 ├── workbench/                   ← rastreio persistente de worktrees (um .md por worktree)
@@ -368,7 +368,7 @@ Arquivo compartilhado para saber uso de tokens sem perguntar ao user; mesma font
 
 ## Observabilidade do Host (read-only)
 Bind mounts RO — consultar antes de pedir pro user rodar comandos:
-- `/workspace/hostlogs/journalctl` → `journalctl --directory=/workspace/hostlogs/journalctl -u <service> -n 50`
+- `/workspace/logs/journalctl` → `journalctl --directory=/workspace/logs/journalctl -u <service> -n 50`
 - `/host/proc/meminfo`, `/host/proc/loadavg`, `/host/proc/uptime`
 - `/host/podman.sock` — listar containers
 - `/home/claude/projects/` — todos os repos do user
@@ -410,6 +410,7 @@ Referência completa de plugins/Dataview/Mermaid/Templater em `docs/obsidian-ref
 - Card no THINKINGS DEVE linkar pro artefato ao concluir
 
 ## Referências (leitura on-demand)
+- `CONTAINER_INIT.md` — contexto do container: /host, /mount, /obsidian — o que é cada mount e como usar
 - `docs/obsidian-reference.md` — Dataview, Mermaid, Templater, plugins
 - `docs/nixos-reference.md` — comandos e arquitetura NixOS
 - `docs/task-system.md` — detalhes do sistema de tasks, clocks, THINKINGS format

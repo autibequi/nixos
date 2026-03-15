@@ -13,10 +13,14 @@ ORANGE=$'\033[38;5;208m' BLUE=$'\033[38;5;33m' WHITE=$'\033[97m'
 MAGENTA=$'\033[38;5;204m' GRAY=$'\033[38;5;245m'
 
 # ── Globals ───────────────────────────────────────────────────────────────────
-# WS: container = /workspace, host = project dir derived from script location
+# Detect container once — sets IS_CONTAINER and WS
+# IS_CONTAINER=1 → dentro do container claude-nix-sandbox
+# IS_CONTAINER=0 → no host NixOS diretamente
 if [[ "${CLAUDE_ENV:-}" == "container" ]] || [[ -f "/.dockerenv" ]] || grep -q 'docker\|container' /proc/1/cgroup 2>/dev/null; then
+  IS_CONTAINER=1
   WS="/workspace"
 else
+  IS_CONTAINER=0
   _mdir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   WS="$(cd "$_mdir/../.." && pwd)"
 fi
@@ -32,17 +36,6 @@ BOOTSTRAP_BANNER="${BOOTSTRAP_BANNER:-auto}"
 }
 AUTOJARVIS_FLAG="$WS/.ephemeral/auto-jarvis"
 USAGE_BAR_FILE="$WS/.ephemeral/usage-bar.txt"
-
-# ── Contexto de execução: host vs container ───────────────────────────────────
-# IS_CONTAINER=1 → dentro do container claude-nix-sandbox
-# IS_CONTAINER=0 → no host NixOS diretamente
-if [[ "${CLAUDE_ENV:-}" == "container" ]]; then
-  IS_CONTAINER=1
-elif [[ -f "/.dockerenv" ]] || grep -q 'docker\|container' /proc/1/cgroup 2>/dev/null; then
-  IS_CONTAINER=1
-else
-  IS_CONTAINER=0
-fi
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 fmt_age() {

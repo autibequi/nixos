@@ -1,7 +1,7 @@
 CONTAINER := claude-sandbox
 
 .PHONY: help switch update stow restow build start shell sandbox resume down destroy inject openclaw \
-       clau run auto stop reset status new logs logs-list \
+       clau run auto stop stop-all reset status new logs logs-list \
        usage-api usage-api-7d usage-api-30d clau-service-logs ask claw claw-stop code code-stop attach claudio codio
 
 help:
@@ -43,6 +43,7 @@ help:
 	@echo "  make clau              Lança workers (every60 x2)"
 	@echo "                         Vários runners: use CLAU_WORKER_ID diferente por processo"
 	@echo "  make stop              Para workers + reseta tasks presas"
+	@echo "  make stop-all          Para TODOS os containers claude-nix-sandbox"
 	@echo "  make reset             Devolve tasks de running/ pra origem"
 	@echo "  make status            Mostra estado via kanban + workers"
 	@echo "  make new name=x        Cria task + card no kanban"
@@ -240,6 +241,16 @@ stop:
 	@$(COMPOSE) kill worker-fast 2>/dev/null || true
 	@$(COMPOSE) rm -f worker worker-fast 2>/dev/null || true
 	@$(MAKE) --no-print-directory reset
+
+stop-all:
+	@echo "[clau] Parando todos os containers claude..."
+	@docker ps --filter "ancestor=claude-nix-sandbox" --format "{{.ID}} {{.Names}}" | \
+		while read id name; do \
+			echo "  stopping $$name ($$id)"; \
+			docker stop "$$id"; \
+		done
+	@$(MAKE) --no-print-directory reset
+	@echo "[clau] done"
 
 reset:
 	@for dir in vault/_agent/tasks/running/*/; do \

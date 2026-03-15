@@ -138,15 +138,6 @@ build_banner
 echo
 
 
-# ── Agents (dynamic from stow/.claude/agents/) ───────────────────────────────
-agents_list=()
-if [[ -d ~/.claude/agents ]]; then
-  for agent_dir in ~/.claude/agents/*/; do
-    [[ -d "$agent_dir" ]] || continue
-    agents_list+=("$(basename "$agent_dir")")
-  done
-fi
-
 # ── Git + Mode flags ─────────────────────────────────────────────────────────
 ws_branch=$(git -C "$WS" branch --show-current 2>/dev/null || echo "?")
 ws_dirty=$(git -C "$WS" status --porcelain 2>/dev/null | head -1) || true

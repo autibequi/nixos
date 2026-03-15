@@ -43,27 +43,26 @@ _parse_fm() {
   done < "$file"
 }
 
-# ── Read state.json via python3 ───────────────────────────────────────────────
-_read_state() {
-  [[ -f "$_STATE_FILE" ]] || echo "{}"
-  python3 -c "
-import json, sys
-try:
-    print(open('$_STATE_FILE').read())
-except:
-    print('{}')
-" 2>/dev/null
-}
-
-# ── Last tick from state.json ─────────────────────────────────────────────────
-_last_tick=$(python3 -c "
+# ── Read all state in one python3 call ───────────────────────────────────────
+# Format: first line = last_tick, remaining lines = task_name:last_run_epoch
+_state_data=$(python3 -c "
 import json
 try:
     s = json.load(open('$_STATE_FILE'))
-    print(s.get('last_tick',''))
+    print(s.get('last_tick', ''))
+    for k, v in s.get('tasks', {}).items():
+        lr = v.get('last_run', 0) if isinstance(v, dict) else 0
+        print(k + ':' + str(int(lr) if lr else 0))
 except:
     print('')
 " 2>/dev/null)
+
+_last_tick=$(printf '%s\n' "$_state_data" | head -1)
+
+declare -A _task_last_runs
+while IFS=':' read -r _k _v; do
+  [[ -n "$_k" && -n "$_v" ]] && _task_last_runs["$_k"]="$_v"
+done < <(printf '%s\n' "$_state_data" | tail -n +2)
 
 # ── Scheduler header ──────────────────────────────────────────────────────────
 ON=$'\033[1;32m'; OFF=$'\033[1;31m'
@@ -120,16 +119,8 @@ for _task_dir in "$_TASKS_DIR"/*/; do
   fi
   _model="${_model:-haiku}"
 
-  # Lê last_run do state.json
-  _last_run=$(python3 -c "
-import json
-try:
-    s = json.load(open('$_STATE_FILE'))
-    v = s.get('tasks',{}).get('$_task',{}).get('last_run',0)
-    print(int(v) if v else 0)
-except:
-    print(0)
-" 2>/dev/null || echo 0)
+  # Lê last_run do array pré-carregado
+  _last_run="${_task_last_runs[$_task]:-0}"
 
   _int_s=$(( _interval * 60 ))
   _due_in=$(( _last_run + _int_s - now ))
