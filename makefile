@@ -124,12 +124,11 @@ claudio:
 	$(eval MOUNT_DIR := $(abspath $(or $(dir),$(shell pwd))))
 	$(eval PROJ_SLUG := $(shell basename "$(abspath $(or $(dir),$(shell pwd)))" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$$//'))
 	$(eval CLAU_PROJ := clau-$(PROJ_SLUG))
-	@mkdir -p /tmp/claude-mount-empty
 	@touch $(HOME)/.claude.json
 	@echo "[claudio] $(PROJ_SLUG) → projeto $(CLAU_PROJ)"
-	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CLAU_PROJ)" up -d claudio
+	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CLAU_PROJ)" up -d sandbox
 	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CLAU_PROJ)" exec -it \
-		-e CLAUDIO_MOUNT="$(MOUNT_DIR)" claudio bash -c \
+		-e CLAUDIO_MOUNT="$(MOUNT_DIR)" sandbox bash -c \
 		'. /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
 
 attach:
@@ -194,11 +193,10 @@ codio:
 	$(eval MOUNT_DIR := $(abspath $(or $(dir),$(shell pwd))))
 	$(eval PROJ_SLUG := $(shell basename "$(abspath $(or $(dir),$(shell pwd)))" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$$//'))
 	$(eval CODIO_PROJ := codio-$(PROJ_SLUG))
-	@mkdir -p /tmp/claude-mount-empty
 	@echo "[codio] $(PROJ_SLUG) → projeto $(CODIO_PROJ)"
-	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CODIO_PROJ)" up -d codio
+	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CODIO_PROJ)" up -d sandbox
 	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CODIO_PROJ)" exec -it \
-		-e CLAUDIO_MOUNT="$(MOUNT_DIR)" codio bash -c \
+		-e CLAUDIO_MOUNT="$(MOUNT_DIR)" sandbox bash -c \
 		'cd /workspace/mount && exec opencode'
 
 # ── Tasks ──────────────────────────────────────────────────────────

@@ -69,35 +69,28 @@ claudio() {
     esac
   done
 
-  # Default: CWD, mas skip se é ~/nixos (evita redundância)
-  local real_cwd="$(pwd -P)"
-  local real_nixos="$(cd "$nixos_dir" 2>/dev/null && pwd -P)"
-  if [[ -z "$mount_path" && "$real_cwd" != "$real_nixos" ]]; then
-    mount_path="$real_cwd"
+  # Default: ~/projects quando sem arg
+  if [[ -z "$mount_path" ]]; then
+    mount_path="$HOME/projects"
+    mount_opts="rw"
   fi
 
-  # Projeto isolado por dir montado (ou "nixos" pra modo meta)
+  # Projeto isolado por dir montado
   local proj_slug
-  proj_slug="$(basename "${mount_path:-nixos}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$//')"
+  proj_slug="$(basename "${mount_path}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-')"
+  proj_slug="${proj_slug%-}"
 
-  # Resolve instância: cada instância = container separado + data dir separado
-  local claude_data proj_name
-  local base_data
-  [[ -z "$mount_path" ]] \
-    && base_data="${HOME}/.local/share/claude-code" \
-    || base_data="${HOME}/.local/share/claude-code-${proj_slug}"
+  # Resolve instância: cada instância = container separado
+  local proj_name
 
   if [[ -n "$instance" ]]; then
-    [[ "$instance" == "1" ]] && claude_data="$base_data" || claude_data="${base_data}-${instance}"
     [[ "$instance" == "1" ]] && proj_name="clau-${proj_slug}" || proj_name="clau-${proj_slug}-${instance}"
-    mkdir -p "$claude_data"
-    CLAUDE_DATA_DIR="$claude_data" CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="$mount_opts" \
+    CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$obsidian_path" \
       docker compose -f "$compose_file" -p "$proj_name" up -d --no-recreate sandbox
   else
     # auto: encontra próximo slot livre — com lock pra evitar race condition
     local lockdir="${TMPDIR:-/tmp}/claudio-${proj_slug}.lock"
     local n=1
-    claude_data="$base_data"
     proj_name="clau-${proj_slug}"
     (
       # lock atômico: mkdir é operação atômica no Linux
@@ -106,25 +99,22 @@ claudio() {
 
       while docker compose -f "$compose_file" -p "$proj_name" ps sandbox 2>/dev/null | grep -qE 'running|starting|Up'; do
         (( n++ ))
-        claude_data="${base_data}-${n}"
         proj_name="clau-${proj_slug}-${n}"
       done
-      mkdir -p "$claude_data"
       # Sobe o container dentro do lock pra garantir que o slot fica reservado
-      CLAUDE_DATA_DIR="$claude_data" CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$obsidian_path" \
+      CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$obsidian_path" \
         docker compose -f "$compose_file" -p "$proj_name" up -d --no-recreate sandbox
       # Exporta vars pro shell pai via arquivo temporário
-      printf 'claude_data=%s\nproj_name=%s\n' "$claude_data" "$proj_name" > "${lockdir}.result"
+      printf 'proj_name=%s\n' "$proj_name" > "${lockdir}.result"
     )
     # Lê resultado do subshell
     if [[ -f "${lockdir}.result" ]]; then
-      claude_data=$(grep '^claude_data=' "${lockdir}.result" | cut -d= -f2-)
       proj_name=$(grep '^proj_name=' "${lockdir}.result" | cut -d= -f2-)
       rm -f "${lockdir}.result"
     fi
   fi
 
-  local _compose_env="CLAUDE_DATA_DIR=$claude_data CLAUDIO_MOUNT=${mount_path} CLAUDIO_MOUNT_OPTS=$mount_opts OBSIDIAN_PATH=$obsidian_path"
+  local _compose_env="CLAUDIO_MOUNT=${mount_path} CLAUDIO_MOUNT_OPTS=$mount_opts OBSIDIAN_PATH=$obsidian_path"
 
   # Para o container ao sair para liberar o slot para próxima sessão
   trap "env $_compose_env docker compose -f '$compose_file' -p '$proj_name' stop sandbox 2>/dev/null" EXIT INT TERM
@@ -164,14 +154,14 @@ codio() {
     esac
   done
 
-  # Default: CWD, mas skip se é ~/nixos
-  local real_cwd="$(pwd -P)"
-  local real_nixos="$(cd "$nixos_dir" 2>/dev/null && pwd -P)"
-  if [[ -z "$mount_path" && "$real_cwd" != "$real_nixos" ]]; then
-    mount_path="$real_cwd"
+  # Default: ~/projects quando sem arg
+  if [[ -z "$mount_path" ]]; then
+    mount_path="$HOME/projects"
+    mount_opts="rw"
   fi
 
-  local proj_slug="$(basename "${mount_path:-nixos}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$//')"
+  local proj_slug="$(basename "${mount_path}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-')"
+  proj_slug="${proj_slug%-}"
   local proj_name="codio-${proj_slug}"
 
   echo "[codio] ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
