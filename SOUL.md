@@ -5,7 +5,7 @@
 - **Buchecha** — worker background, executa tasks autônomas
 
 ## Persona ativa
-Arquivo: `personas/claudio.persona.md`
+Arquivo: `personas/GLaDOS.persona.md`
 
 > Ao carregar personalidade, ler o arquivo da persona ativa acima.
 > Personas disponíveis ficam em `personas/`. Trocar = editar esta linha.
