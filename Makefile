@@ -6,13 +6,14 @@ SERVICE      := sandbox
 OPENCLAW_SVC := openclaw
 OPENCODE_SVC := opencode
 
-.PHONY: help shell build rebuild start stop logs start-openclaw stop-openclaw logs-openclaw openclaw claw claw-stop start-code stop-code logs-code code code-stop
+.PHONY: help shell build rebuild up start stop logs start-openclaw stop-openclaw logs-openclaw openclaw claw claw-stop start-code stop-code logs-code code code-stop
 
 help:
 	@echo "Targets disponíveis:"
 	@echo "  make shell            — abre shell interativo no container sandbox"
 	@echo "  make build            — builda a imagem (sem cache: make rebuild)"
 	@echo "  make rebuild          — rebuild forçado da imagem"
+	@echo "  make up               — sobe sandbox + workers com mounts preparados"
 	@echo "  make start            — sobe sandbox em background"
 	@echo "  make stop             — derruba o container sandbox"
 	@echo "  make logs             — tail dos logs do sandbox"
@@ -36,6 +37,21 @@ build:
 
 rebuild:
 	docker compose -f $(COMPOSE_FILE) build --no-cache
+
+# Prepare mounts e sobe sandbox + workers
+up: _prepare-mounts
+	@echo "Subindo sandbox + workers com mounts preparados..."
+	docker compose -f $(COMPOSE_FILE) up -d $(SERVICE) worker worker-fast
+
+# Helper — cria todos os diretórios de mount necessários
+_prepare-mounts:
+	@mkdir -p $(HOME)/projects
+	@mkdir -p $(HOME)/.openclaw
+	@mkdir -p $(HOME)/.opencode
+	@mkdir -p $(HOME)/.ovault/Work
+	@mkdir -p $(HOME)/.ovault/Work/openclaw
+	@mkdir -p $(HOME)/.ovault/Work/opencode
+	@echo "✓ Mounts preparados"
 
 start:
 	docker compose -f $(COMPOSE_FILE) up -d $(SERVICE)
@@ -65,8 +81,7 @@ openclaw:
 	docker compose -f $(COMPOSE_FILE) exec $(OPENCLAW_SVC) bash
 
 # OpenCode — AI coding assistant
-start-code:
-	@mkdir -p $(HOME)/.opencode
+start-code: _prepare-mounts
 	docker compose -f $(COMPOSE_FILE) up -d $(OPENCODE_SVC)
 	@echo "Container opencode subindo em claude-opencode."
 
@@ -77,8 +92,7 @@ logs-code:
 	docker compose -f $(COMPOSE_FILE) logs -f $(OPENCODE_SVC)
 
 # Abre opencode TUI no container dedicado
-code:
-	@mkdir -p $(HOME)/.opencode
+code: _prepare-mounts
 	docker compose -f $(COMPOSE_FILE) up -d $(OPENCODE_SVC)
 	docker compose -f $(COMPOSE_FILE) exec $(OPENCODE_SVC) opencode
 

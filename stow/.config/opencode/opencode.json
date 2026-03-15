@@ -8,8 +8,14 @@
         "baseURL": "http://192.168.68.60:1234/v1"
       },
       "models": {
-        "local": {
-          "name": "LM Studio (Local)"
+        "qwen/qwen3-coder-30b": {
+          "name": "[CUSTOM] Qwen3 Coder 30B"
+        },
+        "qwen/qwen3.5-35b-a3b": {
+          "name": "[CUSTOM] Qwen3.5 35B"
+        },
+        "google/gemma-3-27b": {
+          "name": "[CUSTOM] Gemma 3 27B"
         }
       }
     }

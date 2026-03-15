@@ -161,11 +161,11 @@ openclaw:
 	@$(COMPOSE) exec -it sandbox openclaw gateway
 
 code:
-	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec -it sandbox opencode
+	$(COMPOSE) up -d opencode
+	@$(COMPOSE) exec -it opencode opencode
 
 code-stop:
-	@$(COMPOSE) exec sandbox pkill opencode 2>/dev/null || true
+	@$(COMPOSE) exec opencode pkill opencode 2>/dev/null || true
 
 # ── Tasks ──────────────────────────────────────────────────────────
 # Vários runners por linha de comando: use CLAU_WORKER_ID diferente em cada um.
