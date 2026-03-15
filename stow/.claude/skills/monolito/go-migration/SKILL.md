@@ -37,29 +37,31 @@ O arquivo gerado fica em `migration/<horizontal>/` com nome no formato:
 
 ## Regras de Escrita
 
-### 1. Sem schema prefix
+### 1. Sempre usar schema prefix
 
-O `search_path` já é configurado pelo goose via `WithSchema`. Não prefixar tabelas com o schema:
+Todas as tabelas DEVEM incluir explicitamente o schema para clareza e consistência. Embora o `search_path` seja configurado via `WithSchema`, o codebase usa schema prefix em 100% das migrations:
 
 ```sql
--- ✅ correto
-CREATE TABLE IF NOT EXISTS my_table (...);
-ALTER TABLE royalty_snapshots ADD COLUMN IF NOT EXISTS ...;
-
--- ❌ errado — schema redundante
+-- ✅ correto — com schema prefix (padrão do codebase)
 CREATE TABLE IF NOT EXISTS ldi.my_table (...);
+ALTER TABLE ldi.royalty_snapshots ADD COLUMN IF NOT EXISTS ...;
+
+-- ❌ errado — sem schema (inconsistente com codebase)
+CREATE TABLE IF NOT EXISTS my_table (...);
 ```
+
+O schema corresponde ao horizontal: `ldi.`, `objetivos.`, `pagamento_professores.`, etc.
 
 ### 2. Sempre idempotente
 
 ```sql
-CREATE TABLE IF NOT EXISTS my_table (...);
-DROP TABLE IF EXISTS my_table;
+CREATE TABLE IF NOT EXISTS ldi.my_table (...);
+DROP TABLE IF EXISTS ldi.my_table;
 
-ALTER TABLE courses ADD COLUMN IF NOT EXISTS cached_content JSONB DEFAULT NULL;
-ALTER TABLE courses DROP COLUMN IF EXISTS cached_content;
+ALTER TABLE ldi.courses ADD COLUMN IF NOT EXISTS cached_content JSONB DEFAULT NULL;
+ALTER TABLE ldi.courses DROP COLUMN IF EXISTS cached_content;
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_my_table_col ON my_table USING btree (col);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_my_table_col ON ldi.my_table USING btree (col);
 DROP INDEX CONCURRENTLY IF EXISTS idx_my_table_col;
 ```
 
@@ -71,9 +73,9 @@ DROP INDEX CONCURRENTLY IF EXISTS idx_my_table_col;
 
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE IF NOT EXISTS my_table (
+CREATE TABLE IF NOT EXISTS ldi.my_table (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    course_id UUID NOT NULL REFERENCES courses(id),
+    course_id UUID NOT NULL REFERENCES ldi.courses(id),
     name TEXT NOT NULL,
     data JSONB DEFAULT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
@@ -81,7 +83,7 @@ CREATE TABLE IF NOT EXISTS my_table (
 );
 -- +goose StatementEnd
 -- +goose StatementBegin
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_my_table_course_id ON my_table USING btree (course_id);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_my_table_course_id ON ldi.my_table USING btree (course_id);
 -- +goose StatementEnd
 
 -- +goose Down
@@ -89,7 +91,7 @@ CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_my_table_course_id ON my_table USING
 DROP INDEX CONCURRENTLY IF EXISTS idx_my_table_course_id;
 -- +goose StatementEnd
 -- +goose StatementBegin
-DROP TABLE IF EXISTS my_table;
+DROP TABLE IF EXISTS ldi.my_table;
 -- +goose StatementEnd
 ```
 
@@ -98,14 +100,14 @@ DROP TABLE IF EXISTS my_table;
 ```sql
 -- +goose Up
 -- +goose StatementBegin
-ALTER TABLE courses ADD COLUMN IF NOT EXISTS cached_content JSONB DEFAULT NULL;
-ALTER TABLE courses ADD COLUMN IF NOT EXISTS structure_updated_at TIMESTAMP DEFAULT NULL;
+ALTER TABLE ldi.courses ADD COLUMN IF NOT EXISTS cached_content JSONB DEFAULT NULL;
+ALTER TABLE ldi.courses ADD COLUMN IF NOT EXISTS structure_updated_at TIMESTAMP DEFAULT NULL;
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-ALTER TABLE courses DROP COLUMN IF EXISTS cached_content;
-ALTER TABLE courses DROP COLUMN IF EXISTS structure_updated_at;
+ALTER TABLE ldi.courses DROP COLUMN IF EXISTS cached_content;
+ALTER TABLE ldi.courses DROP COLUMN IF EXISTS structure_updated_at;
 -- +goose StatementEnd
 ```
 
@@ -154,7 +156,7 @@ Isso significa que **toda migration nova roda automaticamente** na próxima vez 
 
 ## Erros Comuns
 
-- **Schema prefix nas tabelas**: desnecessário e redundante — o `search_path` já está configurado
+- **Sem schema prefix nas tabelas**: todas as migrations devem usar `schema.table` (ex: `ldi.courses`) para consistência com o codebase
 - **Sem `IF NOT EXISTS` / `IF EXISTS`**: migration falha se rodar duas vezes
 - **Down vazio ou incompleto**: impossível reverter em emergência
 - **Index sem `CONCURRENTLY`**: bloqueia a tabela durante criação em produção

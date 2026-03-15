@@ -7,6 +7,3 @@ services:
 
   worker:
     userns_mode: keep-id
-
-  worker-fast:
-    userns_mode: keep-id

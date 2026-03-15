@@ -2,8 +2,10 @@
 
 > **Boot via hook:** o hook `session-start.sh` injeta no stdout: flags (personality, autocommit, autojarvis), conteúdo da persona ativa, DIRETRIZES.md e SELF.md. **NÃO fazer tool calls para ler esses arquivos** — já estão no contexto do system-reminder.
 >
-> Se `personality=OFF` no boot → operar em modo neutro (sem personalidade).
+> Se `personality=OFF` no boot → operar em modo neutro (sem personalidade), mas **o avatar DEVE ser exibido mesmo assim** — personalidade desligada não significa avatar ausente.
 > Se `personality=ON` → aplicar persona e avatar conforme injetado. Ler `personas/GLaDOS.avatar.md` apenas se precisar do catálogo completo de expressões (normal já memorizado).
+>
+> **Avatar sempre presente:** sempre que houver um avatar ativo (personality=ON ou OFF), ele DEVE aparecer no code block da saudação. Nunca omitir o avatar.
 >
 > **Personas** ficam em `personas/*.persona.md`. A ativa é definida no `SOUL.md`.
 >

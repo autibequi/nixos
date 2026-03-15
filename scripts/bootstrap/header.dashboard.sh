@@ -137,33 +137,34 @@ build_banner() {
 build_banner
 echo
 
-# ── Workers (systemd oneshot + timer → detect via log age) ────────────────────
+# ── Scheduler (unified single timer) ──────────────────────────────────────────
 ON=$'\033[1;32m'  # bright green
 OFF=$'\033[1;31m' # bright red
-worker_parts=()
-for clock in every10 every60 every240; do
-  IFS=: read -r last_mod last_log <<< "$(find_latest_log "$clock")"
+scheduler_log="$WS/.ephemeral/logs/scheduler.log"
+scheduler_state="$WS/.ephemeral/scheduler/state.json"
 
-  if [[ -z "$last_log" ]]; then
-    worker_parts+=("${OFF}● ${clock}${R} ${P_DIM}offline${R}")
+if [[ -f "$scheduler_log" ]]; then
+  sched_mod=$(stat -c %Y "$scheduler_log" 2>/dev/null || echo 0)
+  sched_age=$(( now - sched_mod ))
+  if [[ $sched_age -le 120 ]]; then
+    sched_status="${ON}● scheduler${R} ${P_DIM}running${R}"
+  elif [[ $sched_age -le 900 ]]; then
+    sched_status="${ON}● scheduler${R} ${P_DIM}$(fmt_age $sched_age)${R}"
+  elif [[ $sched_age -le 1800 ]]; then
+    sched_status="${P_AMBER}● scheduler${R} ${P_DIM}$(fmt_age $sched_age)${R}"
   else
-    age=$(( now - last_mod ))
-    if [[ "$clock" == "every10" ]]; then max=900; stale=1800
-    elif [[ "$clock" == "every240" ]]; then max=15000; stale=30000
-    else max=4200; stale=7200; fi
-
-    if [[ $age -le 120 ]]; then
-      worker_parts+=("${ON}● ${clock}${R} ${P_DIM}running${R}")
-    elif [[ $age -le $max ]]; then
-      worker_parts+=("${ON}● ${clock}${R} ${P_DIM}$(fmt_age $age)${R}")
-    elif [[ $age -le $stale ]]; then
-      worker_parts+=("${P_AMBER}● ${clock}${R} ${P_DIM}$(fmt_age $age)${R}")
-    else
-      worker_parts+=("${OFF}● ${clock}${R} ${P_DIM}$(fmt_age $age) stale${R}")
-    fi
+    sched_status="${OFF}● scheduler${R} ${P_DIM}$(fmt_age $sched_age) stale${R}"
   fi
-done
-echo -e "${P_GREEN}Bochechas:${R} ${worker_parts[0]}  ${worker_parts[1]}  ${worker_parts[2]}"
+else
+  sched_status="${OFF}● scheduler${R} ${P_DIM}offline${R}"
+fi
+
+# Count tasks from state.json
+task_count=0
+if [[ -f "$scheduler_state" ]]; then
+  task_count=$(python3 -c "import json; print(len(json.load(open('$scheduler_state')).get('tasks',{})))" 2>/dev/null || echo 0)
+fi
+echo -e "${P_GREEN}Bochechas:${R} ${sched_status}  ${P_DIM}(${task_count} tasks tracked)${R}"
 echo
 
 # ── Agents (dynamic from stow/.claude/agents/) ───────────────────────────────

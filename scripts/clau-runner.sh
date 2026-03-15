@@ -8,7 +8,9 @@ KANBAN="$WORKSPACE/vault/kanban.md"
 CLAU_VERBOSE="${CLAU_VERBOSE:-0}"
 SPECIFIC_TASK="${1:-}"
 WORKER_ID="${CLAU_WORKER_ID:-worker-1}"
-CLAU_CLOCK="${CLAU_CLOCK:-every60}"
+CLAU_CLOCK="${CLAU_CLOCK:-unified}"
+CLAU_TASK_LIST="${CLAU_TASK_LIST:-}"  # comma-separated list from scheduler
+SCHEDULER_COMPLETED_DIR="$EPHEMERAL/scheduler/completed"
 # Identidade desta execução — permite detectar órfãos mesmo quando runner é PID 1 (container)
 RUN_ID="$$-$(date +%s)-${RANDOM:-0}"
 NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}"
@@ -270,9 +272,27 @@ run_wave_parallel() {
   echo "[clau:$WORKER_ID] Wave $wave_num done: ${wave_ok} ok, ${wave_fail} failed"
 }
 
+# ── Interval helper (backward compat: clock → interval) ─────────
+get_interval() {
+  local task_dir="$1"
+  local interval
+  interval=$(parse_frontmatter "$task_dir/CLAUDE.md" "interval")
+  if [ -n "$interval" ]; then echo "$interval"; return; fi
+  local clock_val
+  clock_val=$(get_clock "$task_dir")
+  case "$clock_val" in
+    every10)  echo 10 ;;
+    every60)  echo 60 ;;
+    every240) echo 240 ;;
+    *)        echo 60 ;;
+  esac
+}
+
 # ── Clock filter ─────────────────────────────────────────────────
 should_run_clock() {
   local task_dir="$1"
+  # Unified scheduler: task list is pre-filtered, always run
+  [ "$CLAU_CLOCK" = "unified" ] && return 0
   local task_clock
   task_clock=$(get_clock "$task_dir")
   [ "$CLAU_CLOCK" = "$task_clock" ]
@@ -452,6 +472,10 @@ finish_task() {
 
   # Fresh context: limpar tool-results cache para esta task
   cleanup_task_cache "$task"
+
+  # Write completion marker for unified scheduler
+  local task_duration="${TASK_ELAPSED:-${SECONDS:-0}}"
+  write_completion_marker "$task" "$task_duration" "$exit_code"
 }
 
 cleanup_task_cache() {
@@ -463,6 +487,61 @@ cleanup_task_cache() {
     find "$proj/tool-results" -type d -name "*${task}*" -exec rm -rf {} + 2>/dev/null || true
   done
 }
+
+# ── Completion marker (for unified scheduler) ────────────────────────────────
+write_completion_marker() {
+  local task="$1" duration="$2" exit_code="$3"
+  mkdir -p "$SCHEDULER_COMPLETED_DIR"
+  local status="ok"
+  [ "$exit_code" -ne 0 ] && status="fail"
+  [ "$exit_code" -eq 124 ] && status="timeout"
+  cat > "$SCHEDULER_COMPLETED_DIR/${task}.done" <<EOF
+task=$task
+duration=$duration
+status=$status
+exit_code=$exit_code
+completed=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+worker=$WORKER_ID
+EOF
+}
+
+# ── Task list mode (unified scheduler) ───────────────────────────
+if [ -n "$CLAU_TASK_LIST" ]; then
+  recover_orphans
+  IFS=',' read -ra TASK_NAMES <<< "$CLAU_TASK_LIST"
+  echo "[clau:$WORKER_ID] Task list mode: ${TASK_NAMES[*]}"
+
+  ok_count=0; fail_count=0; task_count=0
+  for task in "${TASK_NAMES[@]}"; do
+    [ -z "$task" ] && continue
+    task=$(echo "$task" | tr -d '[:space:]')
+    touch "$AGENT_MY_DIR/.live" 2>/dev/null || true
+
+    source_dir=""
+    is_recurring="0"
+    if [ -d "$TASKS_DIR/recurring/$task" ]; then
+      source_dir="recurring"; is_recurring="1"
+    elif [ -d "$TASKS_DIR/pending/$task" ]; then
+      source_dir="pending"
+    else
+      echo "[clau:$WORKER_ID] '$task' not found in recurring/ or pending/ — skip"
+      continue
+    fi
+
+    claim_task "$task" "$source_dir" || continue
+    task_count=$((task_count + 1))
+
+    local task_start_s=$SECONDS
+    local_exit=0
+    run_single_task "$task" "$source_dir" "$is_recurring" || local_exit=$?
+    TASK_ELAPSED=$((SECONDS - task_start_s)) finish_task "$task" "$source_dir" "$local_exit"
+
+    [ "$local_exit" -eq 0 ] && ok_count=$((ok_count + 1)) || fail_count=$((fail_count + 1))
+  done
+
+  echo "[clau:$WORKER_ID] Task list done — $task_count tasks, ${ok_count} ok, ${fail_count} fail"
+  exit 0
+fi
 
 # ── Specific task mode ───────────────────────────────────────────
 if [ -n "$SPECIFIC_TASK" ]; then

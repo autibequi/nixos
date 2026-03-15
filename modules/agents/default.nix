@@ -18,13 +18,11 @@
           type = lib.types.submodule {
             options = {
               maxConcurrentWorkers = lib.mkOption { type = lib.types.ints.positive; default = 1; description = "Máximo de containers worker (Claude) rodando ao mesmo tempo. 1 = só um por vez (controle de custo)."; };
-              maxWorkersFast = lib.mkOption { type = lib.types.ints.positive; default = 1; description = "Máximo de workers que o timer every10 (fast) pode levantar por execução."; };
-              maxWorkersHeavy = lib.mkOption { type = lib.types.ints.positive; default = 1; description = "Máximo de workers que o timer every60 (heavy) pode levantar por execução."; };
-              maxWorkersSlow = lib.mkOption { type = lib.types.ints.positive; default = 1; description = "Máximo de workers que o timer every240 (slow) pode levantar por execução."; };
+              tickBudgetSeconds = lib.mkOption { type = lib.types.ints.positive; default = 540; description = "Budget em segundos por tick do scheduler (default 540 = 9min de 10min tick)."; };
             };
           };
           default = { };
-          description = "Controle de workers CLAUDINHO (custos; fast/heavy/slow).";
+          description = "Controle de workers CLAUDINHO (custos; scheduler unificado).";
         };
       };
     };

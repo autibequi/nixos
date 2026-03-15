@@ -20,7 +20,7 @@ help:
 	@echo "  ─────────────────────────────────────────────────────────"
 	@echo "  make build             Build da imagem Docker"
 	@echo "  make claudio [dir=path] Abre Claude isolado por projeto (multi-instância)"
-	@echo "  make attach [dir=path] Recria sandbox montando dir em /workspace/mount (default: pwd)"
+	@echo "  make attach [dir=path] Abre sandbox isolado por projeto (multi-instância, default: pwd)"
 	@echo "  make start             Sobe sandbox + bootstrap + Claude Code"
 	@echo "  make sandbox           Idem (bootstrap depois abre Claude)"
 	@echo "  make shell             Sobe sandbox + só bash (bootstrap no .bashrc)"
@@ -121,8 +121,8 @@ sandbox-haiku:
 	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --model claude-haiku-4-5-20251001 --permission-mode bypassPermissions'
 
 claudio:
-	$(eval MOUNT_DIR := $(or $(dir),$(shell pwd)))
-	$(eval PROJ_SLUG := $(shell basename "$(or $(dir),$(shell pwd))" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$$//'))
+	$(eval MOUNT_DIR := $(abspath $(or $(dir),$(shell pwd))))
+	$(eval PROJ_SLUG := $(shell basename "$(abspath $(or $(dir),$(shell pwd)))" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$$//'))
 	$(eval CLAU_PROJ := clau-$(PROJ_SLUG))
 	@mkdir -p /tmp/claude-mount-empty
 	@echo "[claudio] $(PROJ_SLUG) → projeto $(CLAU_PROJ)"
@@ -132,11 +132,14 @@ claudio:
 		'. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
 
 attach:
-	$(eval MOUNT_DIR := $(or $(dir),$(shell pwd)))
+	$(eval MOUNT_DIR := $(abspath $(or $(dir),$(shell pwd))))
+	$(eval PROJ_SLUG := $(shell basename "$(abspath $(or $(dir),$(shell pwd)))" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$$//'))
+	$(eval CLAU_PROJ := clau-$(PROJ_SLUG))
 	@mkdir -p /tmp/claude-mount-empty
-	@echo "[attach] Montando $(MOUNT_DIR) → /workspace/mount"
-	CLAUDIO_MOUNT="$(MOUNT_DIR)" $(COMPOSE) up -d --force-recreate sandbox
-	@$(COMPOSE) exec -it -e CLAUDIO_MOUNT="$(MOUNT_DIR)" sandbox bash -c \
+	@echo "[attach] $(PROJ_SLUG) → projeto $(CLAU_PROJ) (mount: $(MOUNT_DIR))"
+	@CLAUDIO_MOUNT="$(MOUNT_DIR)" $(COMPOSE) -p "$(CLAU_PROJ)" up -d --no-recreate sandbox
+	@CLAUDIO_MOUNT="$(MOUNT_DIR)" $(COMPOSE) -p "$(CLAU_PROJ)" exec -it \
+		-e CLAUDIO_MOUNT="$(MOUNT_DIR)" sandbox bash -c \
 		'. /workspace/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
 
 sandbox:
@@ -186,8 +189,8 @@ code-stop:
 	@$(COMPOSE) exec opencode pkill opencode 2>/dev/null || true
 
 codio:
-	$(eval MOUNT_DIR := $(or $(dir),$(shell pwd)))
-	$(eval PROJ_SLUG := $(shell basename "$(or $(dir),$(shell pwd))" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$$//'))
+	$(eval MOUNT_DIR := $(abspath $(or $(dir),$(shell pwd))))
+	$(eval PROJ_SLUG := $(shell basename "$(abspath $(or $(dir),$(shell pwd)))" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$$//'))
 	$(eval CODIO_PROJ := codio-$(PROJ_SLUG))
 	@mkdir -p /tmp/claude-mount-empty
 	@echo "[codio] $(PROJ_SLUG) → projeto $(CODIO_PROJ)"

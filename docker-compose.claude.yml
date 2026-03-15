@@ -17,10 +17,10 @@ x-media-env: &media-env
 
 x-full-volumes: &full-volumes
   - .:/workspace
-  - ${CLAUDIO_MOUNT:-/tmp/claude-mount-empty}:/workspace/mount
+  - ${CLAUDIO_MOUNT:-/tmp/claude-mount-empty}:/workspace/mount:${CLAUDIO_MOUNT_OPTS:-rw}
   - ${HOME}/.ovault/Work:/workspace/obsidian
   - ${HOME}/projects:/home/claude/projects
-  - ${HOME}/.local/share/claude-code:/home/claude/.claude
+  - ${CLAUDE_DATA_DIR:-${HOME}/.local/share/claude-code}:/home/claude/.claude
   - ${HOME}/.claude.json:/home/claude/.claude.json
   - ${HOME}/.openclaw:/home/claude/.openclaw
   - ${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:/run/user/1000/${WAYLAND_DISPLAY}
@@ -122,9 +122,9 @@ services:
     extra_hosts: *extra-hosts
     volumes:
       - .:/workspace
-      - ${CLAUDIO_MOUNT:-/tmp/claude-mount-empty}:/workspace/mount
+      - ${CLAUDIO_MOUNT:-/tmp/claude-mount-empty}:/workspace/mount:${CLAUDIO_MOUNT_OPTS:-rw}
       - ${HOME}/.opencode:/home/claude/.opencode
-      - ${HOME}/.local/share/claude-code:/home/claude/.claude
+      - ${CLAUDE_DATA_DIR:-${HOME}/.local/share/claude-code}:/home/claude/.claude
       - ./stow/.claude:/workspace/.claude
 
   worker:
@@ -134,24 +134,6 @@ services:
     image: claude-nix-sandbox
     mem_limit: 12g
     memswap_limit: 16g
-    entrypoint: ["/bin/bash"]
-    command: ["/workspace/scripts/clau-runner.sh"]
-    environment:
-      <<: [*common-env, *media-env]
-      GIT_AUTHOR_NAME: Buchecha
-      GIT_AUTHOR_EMAIL: buchecha@autibequi.com
-      GIT_COMMITTER_NAME: Buchecha
-      GIT_COMMITTER_EMAIL: buchecha@autibequi.com
-    extra_hosts: *extra-hosts
-    volumes: *full-volumes
-
-  worker-fast:
-    build:
-      context: .
-      dockerfile: Dockerfile.claude
-    image: claude-nix-sandbox
-    mem_limit: 4g
-    memswap_limit: 6g
     entrypoint: ["/bin/bash"]
     command: ["/workspace/scripts/clau-runner.sh"]
     environment:

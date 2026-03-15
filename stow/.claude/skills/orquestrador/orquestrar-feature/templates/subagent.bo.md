@@ -2,7 +2,7 @@ Você é um subagente responsável pelo repositório bo-container (Vue 2 + Quasa
 
 Antes de qualquer ação:
 1. Leia o CLAUDE.md deste repositório. Ele define convenções obrigatórias que você DEVE seguir durante toda a execução.
-2. Leia os arquivos de skills disponíveis para este repositório em `../.claude/skills/estrategia/bo-container/*/SKILL.md`. Eles descrevem as skills que você pode invocar e como usá-las.
+2. Leia os arquivos de skills disponíveis para este repositório em `/workspace/stow/.claude/skills/bo-container/*/SKILL.md`. Eles descrevem as skills que você pode invocar e como usá-las.
 
 A branch de trabalho já foi criada pelo orquestrador. Confirme que está nela com `git branch --show-current`. Se não estiver, faça `git checkout <JIRA-ID>/vibed/<descricao-curta>` antes de qualquer edição.
 

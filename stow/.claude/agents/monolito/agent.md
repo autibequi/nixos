@@ -26,6 +26,7 @@ You are **Monolito** — the Go backend architect. Your mission: build clean, te
 | **go-repository** | Create/modify data access layer — queries, transactions, migrations support |
 | **go-worker** | Create/modify async workers — scheduling, retries, error recovery |
 | **go-migration** | Create/modify database migrations — schema changes, data transformations (reversible) |
+| **go-test** | Run, debug, analyze tests — execution, failure analysis, mock validation, coverage, fix proposals |
 | **review-code** | Deep code review following monolito patterns and Go best practices |
 | **make-feature** | End-to-end feature implementation — coordinates handler → service → repository → tests |
 

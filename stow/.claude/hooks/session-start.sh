@@ -3,14 +3,23 @@
 # stdout → system-reminder (Claude vê)
 # stderr → terminal do user (dashboard visual)
 
+# ── Detecta workspace (container vs host) ────────────────────────
+if [ -d "/workspace" ]; then
+  WS="/workspace"
+else
+  # host: resolve symlink real → stow/.claude/hooks/ → sobe 4 níveis
+  _real="$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || echo "$0")"
+  _dir="$(cd "$(dirname "$_real")/../../../.." 2>/dev/null && pwd)"
+  [ -f "$_dir/CLAUDE.md" ] && WS="$_dir" || WS="$(pwd)"
+fi
+
 # Roda bootstrap (dashboard pro user via stderr)
-BOOTSTRAP="/workspace/scripts/bootstrap.sh"
+BOOTSTRAP="$WS/scripts/bootstrap.sh"
 if [ -x "$BOOTSTRAP" ]; then
   "$BOOTSTRAP" >&2
 fi
 
 # ── Boot context (stdout → Claude) ──────────────────────────────
-WS="/workspace"
 
 # Flags (inline, sem precisar de tool calls)
 PERSONALITY="ON"

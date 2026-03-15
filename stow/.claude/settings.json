@@ -11,7 +11,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/workspace/stow/.claude/hooks/session-start.sh"
+            "command": "~/.claude/hooks/session-start.sh"
           }
         ]
       }

@@ -85,6 +85,7 @@ Slash commands invocáveis pelo user via `/nome`.
 | `estrategia/mono/add-migration` | `/mono-add-migration` | SQL migration |
 | `estrategia/mono/add-worker` | `/mono-add-worker` | Background worker |
 | `estrategia/mono/review-code` | `/mono-review-code` | Code review Go |
+| `estrategia/mono/go-test` | `/mono-go-test` | Rodar, analisar e debuggar testes Go |
 
 ### Estratégia — BO Container (Vue 2)
 | Command | Invocação | Descrição |
@@ -113,6 +114,7 @@ Slash commands invocáveis pelo user via `/nome`.
 | `estrategia/orq/refinar-bug` | `/refinar-bug` | Refinar bug report |
 | `estrategia/orq/recommit` | `/recommit` | Reescrever commits |
 | `estrategia/orq/changelog` | `/changelog` | Gerar changelog |
+| `estrategia/orq/pr-inspector` | `/pr-inspector` | Inspeção interativa de PR (vibe-code detection) |
 
 ---
 
@@ -148,10 +150,10 @@ Skills são templates/knowledge base que commands consomem. Cada skill tem `SKIL
 
 | Namespace | Skills | Descrição |
 |-----------|--------|-----------|
-| `monolito/` | go-handler, go-service, go-repository, go-migration, go-worker, make-feature, review-code | Patterns Go para o monolito |
+| `monolito/` | go-handler, go-service, go-repository, go-migration, go-worker, go-test, make-feature, review-code | Patterns Go para o monolito |
 | `bo-container/` | component, service, page, route, make-feature | Patterns Vue 2 para BO |
 | `front-student/` | component, service, page, route, make-feature | Patterns Nuxt 2 para Front |
-| `orquestrador/` | orquestrar-feature, retomar-feature, review-pr, refinar-bug, recommit, changelog | Patterns cross-repo |
+| `orquestrador/` | orquestrar-feature, retomar-feature, review-pr, pr-inspector, refinar-bug, recommit, changelog | Patterns cross-repo |
 | `hyprland-config/` | SKILL.md | Config Hyprland (keybinds, monitors, rules) |
 | `nixos/` | SKILL.md | NixOS module patterns |
 
