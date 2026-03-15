@@ -12,8 +12,9 @@ obsidian_path="${OBSIDIAN_PATH:-$HOME/.ovault}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --shell|shell)   mode="shell"; shift ;;
-    --resume|resume) mode="resume"; shift ;;
+    --shell|shell)       mode="shell"; shift ;;
+    --resume|resume)     mode="resume"; shift ;;
+    --continue|continue) mode="continue"; shift ;;
     --haiku)         model="--model claude-haiku-4-5-20251001"; shift ;;
     --opus)          model="--model claude-opus-4-6"; shift ;;
     -rw)             mount_opts="rw"; shift ;;
@@ -55,5 +56,12 @@ case "$mode" in
       --entrypoint /bin/bash \
       -e CLAUDIO_MOUNT="${mount_path}" sandbox \
       -c "cd /workspace/mount && exec /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions"
+    ;;
+  continue)
+    CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="${mount_opts}" OBSIDIAN_PATH="${obsidian_path}" \
+      docker compose -f "$compose_file" -p "$proj_name" run --rm -it \
+      --entrypoint /bin/bash \
+      -e CLAUDIO_MOUNT="${mount_path}" sandbox \
+      -c ". /workspace/host/scripts/bootstrap.sh; cd /workspace/mount && exec /home/claude/.nix-profile/bin/claude --continue ${model} --permission-mode bypassPermissions"
     ;;
 esac
