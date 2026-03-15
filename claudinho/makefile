@@ -1,20 +1,10 @@
 CONTAINER := claude-sandbox
 
-.PHONY: help switch update stow restow build start shell sandbox resume down destroy inject openclaw \
+.PHONY: help build start shell sandbox resume down destroy inject openclaw \
        clau run auto stop stop-all reset status new logs logs-list \
        usage-api usage-api-7d usage-api-30d clau-service-logs ask claw claw-stop code code-stop attach claudio codio
 
 help:
-	@echo ""
-	@echo "  NixOS"
-	@echo "  ─────────────────────────────────────────────────────────"
-	@echo "  make switch            Aplica config NixOS (nh os switch)"
-	@echo "  make update            Atualiza flake e aplica"
-	@echo ""
-	@echo "  Dotfiles"
-	@echo "  ─────────────────────────────────────────────────────────"
-	@echo "  make stow              Injeta dotfiles via stow"
-	@echo "  make restow            Remove e re-injeta dotfiles"
 	@echo ""
 	@echo "  Container"
 	@echo "  ─────────────────────────────────────────────────────────"
@@ -61,40 +51,10 @@ help:
 	@echo "  make ask               Abre Claude interativo em Alacritty"
 	@echo ""
 
-# ── NixOS ──────────────────────────────────────────────────────────
-
-switch:
-	nh os switch .
-
-update:
-	nh os switch --update .
-
-# ── Dotfiles ───────────────────────────────────────────────────────
-
-stow:
-	@for dir in agents commands hooks scripts skills; do \
-		link="$$HOME/.claude/$$dir"; \
-		if [ -L "$$link" ]; then \
-			target=$$(readlink "$$link"); \
-			case "$$target" in /workspace/*) echo "removing container symlink: $$link"; rm -f "$$link" ;; esac; \
-		fi; \
-	done
-	stow --target=$$HOME --no-folding --adopt -R stow
-
-restow:
-	@for dir in agents commands hooks scripts skills; do \
-		link="$$HOME/.claude/$$dir"; \
-		if [ -L "$$link" ]; then \
-			target=$$(readlink "$$link"); \
-			case "$$target" in /workspace/*) rm -f "$$link" ;; esac; \
-		fi; \
-	done
-	stow --target=$$HOME --no-folding --adopt --override=file -R stow
-
 # ── Container ──────────────────────────────────────────────────────
 
-COMPOSE = docker compose -f claudinho/docker-compose.claude.yml --env-file claudinho/.env
-LOGDIR  = logs
+COMPOSE = docker compose -f docker-compose.claude.yml --env-file .env
+LOGDIR  = ../logs
 LOGFILE = $(LOGDIR)/$$(date +%Y-%m-%dT%H:%M:%S.%3N).log
 
 build:
@@ -141,8 +101,8 @@ claudio:
 	$(eval CLAU_PROJ := clau-$(PROJ_SLUG))
 	@touch $(HOME)/.claude.json
 	@echo "[claudio] $(PROJ_SLUG) → projeto $(CLAU_PROJ)"
-	@CLAUDIO_MOUNT="$(MOUNT_DIR)" CLAUDIO_MOUNT_OPTS=rw docker compose -f claudinho/docker-compose.claude.yml -p "$(CLAU_PROJ)" up -d sandbox
-	@CLAUDIO_MOUNT="$(MOUNT_DIR)" CLAUDIO_MOUNT_OPTS=rw docker compose -f claudinho/docker-compose.claude.yml -p "$(CLAU_PROJ)" exec -it \
+	@CLAUDIO_MOUNT="$(MOUNT_DIR)" CLAUDIO_MOUNT_OPTS=rw docker compose -f docker-compose.claude.yml -p "$(CLAU_PROJ)" up -d sandbox
+	@CLAUDIO_MOUNT="$(MOUNT_DIR)" CLAUDIO_MOUNT_OPTS=rw docker compose -f docker-compose.claude.yml -p "$(CLAU_PROJ)" exec -it \
 		-e CLAUDIO_MOUNT="$(MOUNT_DIR)" sandbox bash -c \
 		'. /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
 
@@ -183,7 +143,7 @@ destroy:
 	$(COMPOSE) down --rmi all --volumes
 
 inject:
-	$(MAKE) restow
+	$(MAKE) -C .. restow
 	$(COMPOSE) down
 	$(COMPOSE) up -d sandbox
 	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions "oi"'
@@ -191,7 +151,7 @@ inject:
 openclaw:
 	@mkdir -p $(HOME)/.openclaw && \
 	if [ ! -f $(HOME)/.openclaw/openclaw.json ]; then \
-		cp .openclaw/openclaw.json $(HOME)/.openclaw/openclaw.json && \
+		cp ../.openclaw/openclaw.json $(HOME)/.openclaw/openclaw.json && \
 		echo "[openclaw] Config copiada para $(HOME)/.openclaw (LM Studio em host.docker.internal:1234)"; \
 	fi
 	$(COMPOSE) up -d sandbox
@@ -209,8 +169,8 @@ codio:
 	$(eval PROJ_SLUG := $(shell basename "$(abspath $(or $(dir),$(shell pwd)))" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$$//'))
 	$(eval CODIO_PROJ := codio-$(PROJ_SLUG))
 	@echo "[codio] $(PROJ_SLUG) → projeto $(CODIO_PROJ)"
-	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f claudinho/docker-compose.claude.yml -p "$(CODIO_PROJ)" up -d sandbox
-	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f claudinho/docker-compose.claude.yml -p "$(CODIO_PROJ)" exec -it \
+	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CODIO_PROJ)" up -d sandbox
+	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CODIO_PROJ)" exec -it \
 		-e CLAUDIO_MOUNT="$(MOUNT_DIR)" sandbox bash -c \
 		'cd /workspace/mount && exec opencode'
 
@@ -267,7 +227,7 @@ stop-all:
 	@echo "[clau] done"
 
 reset:
-	@for dir in vault/_agent/tasks/running/*/; do \
+	@for dir in ../vault/_agent/tasks/running/*/; do \
 		[ -d "$$dir" ] || continue; \
 		name=$$(basename "$$dir"); \
 		source=$$(grep '^source=' "$$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "pending"); \
@@ -276,36 +236,36 @@ reset:
 			rm -rf "$$dir"; \
 			echo "[reset] $$name (recurring) removed"; \
 		else \
-			mv "$$dir" "vault/_agent/tasks/pending/$$name"; \
+			mv "$$dir" "../vault/_agent/tasks/pending/$$name"; \
 			echo "[reset] $$name → pending/"; \
 		fi; \
 	done
-	@rm -f .ephemeral/.kanban.lock .ephemeral/locks/*.lock
+	@rm -f ../.ephemeral/.kanban.lock ../.ephemeral/locks/*.lock
 	@echo "[reset] done"
 
 status:
 	@echo "=== Workers ==="
 	@podman ps --filter "name=_worker_" --format "table {{.ID}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || echo "(nenhum)"
 	@echo "\n=== Kanban ==="
-	@if [ -f vault/_agent/scheduled.md ]; then \
+	@if [ -f ../vault/_agent/scheduled.md ]; then \
 		for col in "Recorrentes" "Em Execução"; do \
 			count=0; in_col=0; \
 			while IFS= read -r line; do \
 				if [ "$$line" = "## $$col" ]; then in_col=1; continue; fi; \
 				if echo "$$line" | grep -q '^## ' && [ "$$in_col" = "1" ]; then break; fi; \
 				if [ "$$in_col" = "1" ] && echo "$$line" | grep -q '^- \['; then count=$$((count + 1)); fi; \
-			done < vault/_agent/scheduled.md; \
+			done < ../vault/_agent/scheduled.md; \
 			echo "  $$col: $$count"; \
 		done; \
 	fi
-	@if [ -f vault/kanban.md ]; then \
+	@if [ -f ../vault/kanban.md ]; then \
 		for col in "Backlog" "Em Andamento" "Aprovado" "Falhou"; do \
 			count=0; in_col=0; \
 			while IFS= read -r line; do \
 				if [ "$$line" = "## $$col" ]; then in_col=1; continue; fi; \
 				if echo "$$line" | grep -q '^## ' && [ "$$in_col" = "1" ]; then break; fi; \
 				if [ "$$in_col" = "1" ] && echo "$$line" | grep -q '^- \['; then count=$$((count + 1)); fi; \
-			done < vault/kanban.md; \
+			done < ../vault/kanban.md; \
 			echo "  $$col: $$count"; \
 		done; \
 	fi
@@ -315,7 +275,7 @@ status:
 		if [ "$$line" = "## Em Andamento" ]; then in_col=1; continue; fi; \
 		if echo "$$line" | grep -q '^## ' && [ "$$in_col" = "1" ]; then break; fi; \
 		if [ "$$in_col" = "1" ] && echo "$$line" | grep -q '^- \['; then echo "  $$line"; fi; \
-	done < vault/kanban.md 2>/dev/null || echo "  (vazio)"
+	done < ../vault/kanban.md 2>/dev/null || echo "  (vazio)"
 
 new:
 	@[ -n "$(name)" ] || (echo "Uso: make new name=minha-tarefa [type=recurring|pending] [model=haiku|sonnet] [clock=every10|every60] [timeout=300]" && exit 1)
@@ -323,7 +283,7 @@ new:
 	task_model="$${model:-$$([ "$$task_type" = "recurring" ] && echo "haiku" || echo "sonnet")}"; \
 	task_clock="$${clock:-$$([ "$$task_type" = "recurring" ] && echo "every10" || echo "every60")}"; \
 	task_timeout="$${timeout:-$$([ "$$task_clock" = "every10" ] && echo "120" || echo "300")}"; \
-	task_dir="vault/_agent/tasks/$$task_type/$(name)"; \
+	task_dir="../vault/_agent/tasks/$$task_type/$(name)"; \
 	mkdir -p "$$task_dir"; \
 	printf '%s\n' \
 		"---" \
@@ -341,17 +301,17 @@ new:
 		"## Entregável" \
 		"Atualize \`<diretório de contexto>/contexto.md\`." \
 		> "$$task_dir/CLAUDE.md"; \
-	kanban_col="Backlog"; kanban_file="vault/kanban.md"; \
-	if [ "$$task_type" = "recurring" ]; then kanban_col="Recorrentes"; kanban_file="vault/_agent/scheduled.md"; fi; \
+	kanban_col="Backlog"; kanban_file="../vault/kanban.md"; \
+	if [ "$$task_type" = "recurring" ]; then kanban_col="Recorrentes"; kanban_file="../vault/_agent/scheduled.md"; fi; \
 	card="- [ ] **$(name)** #$$task_type $$(date +%Y-%m-%d) \`$$task_model\`"; \
-	KANBAN_FILE="$$kanban_file" source scripts/kanban-sync.sh && kanban_add_card "$$kanban_col" "$$card" 2>/dev/null || \
+	KANBAN_FILE="$$kanban_file" source ../scripts/kanban-sync.sh && kanban_add_card "$$kanban_col" "$$card" 2>/dev/null || \
 		echo "[AVISO] Não conseguiu adicionar card no kanban"; \
 	echo "Task: $$task_dir/ ($$task_model, $$task_tier, $${task_timeout}s)"
 
 # ── Quick Ask ──────────────────────────────────────────────────────
 
 ask:
-	@bash scripts/claude-ask.sh "$(q)"
+	@bash ../scripts/claude-ask.sh "$(q)"
 
 # ── Logs ───────────────────────────────────────────────────────────
 
@@ -359,7 +319,7 @@ clau-service-logs:
 	@journalctl -u claude-autonomous.service -n 30 -f
 
 logs:
-	@latest=$$(ls -1t logs/*.log 2>/dev/null | head -1); \
+	@latest=$$(ls -1t ../logs/*.log 2>/dev/null | head -1); \
 	if [ -z "$$latest" ]; then \
 		echo "(nenhum log)"; \
 	else \
@@ -374,15 +334,15 @@ logs:
 	fi
 
 logs-list:
-	@ls -1t logs/*.log 2>/dev/null || echo "(nenhum log)"
+	@ls -1t ../logs/*.log 2>/dev/null || echo "(nenhum log)"
 
 # ── Usage ──────────────────────────────────────────────────────────
 
 usage-api:
-	@bash scripts/api-usage.sh
+	@bash ../scripts/api-usage.sh
 
 usage-api-7d:
-	@bash scripts/api-usage.sh 7d
+	@bash ../scripts/api-usage.sh 7d
 
 usage-api-30d:
-	@bash scripts/api-usage.sh 30d
+	@bash ../scripts/api-usage.sh 30d
