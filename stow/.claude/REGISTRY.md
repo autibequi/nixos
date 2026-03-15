@@ -146,6 +146,10 @@ Agentes especializados invocáveis via `Agent` tool.
 | Hook | Evento | Descrição |
 |------|--------|-----------|
 | `startup-hook.sh` | `UserPromptSubmit` | Intercepta prompt "startup" → roda `bootstrap.sh` |
+| `session-start.sh` | `SessionStart` | Boot context: inicia personalidade, flags, DIRETRIZES |
+| `user-prompt-submit.sh` | `UserPromptSubmit` | Heartbeat de sessão interativa (.live file) |
+| `pre-tool-use.sh` | `PreToolUse` | Sinaliza atividade Claude → BongoCat digita (`touch bongo-active`) |
+| `post-tool-use.sh` | `PostToolUse` | Remove sinal de atividade → BongoCat para (`rm bongo-active`) |
 | `worktree-enter.json` | — | Config de entrada em worktree |
 
 ---

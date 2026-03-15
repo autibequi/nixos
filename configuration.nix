@@ -27,6 +27,7 @@
     ./modules/plymouth.nix
     ./modules/ai.nix
     ./modules/whisper-ptt.nix
+    ./modules/bongocat.nix
     ./modules/steam.nix
     ./modules/containers.nix
 

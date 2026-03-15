@@ -142,22 +142,29 @@ _time_until() {
 fh_r=$(  _time_until "$fh_reset")
 sd_r=$(  _time_until "$sd_reset")
 
-# cor pango por percentual: verde → laranja → vermelho
+# cor pango por percentual: branco → verde → amarelo → vermelho
 _color() {
   local pct="${1:-0}"
   (( pct >= 80 )) && echo "#e74c3c" && return
-  (( pct >= 60 )) && echo "#f39c12" && return
-  echo "#2ecc71"
+  (( pct >= 50 )) && echo "#f39c12" && return
+  (( pct >= 10 )) && echo "#2ecc71" && return
+  echo "#ffffff"
 }
 
 # gauge: número no início, blocos depois, sem label
-# layout: [DD]▓▓▓▓▓░░
+# layout: [DD]▓▓▓▓░░
+# >100%: barra toda vermelha, cheia, mostra "100"
 _gauge() {
   local pct="${1:-0}" color num w=4 filled seg i
-  color=$(_color "$pct")
-  (( pct >= 100 )) && num="!!" || num=$(printf '%02d' "$pct")
-  filled=$(( pct * w / 100 ))
-  (( filled > w )) && filled=$w
+  if (( pct >= 100 )); then
+    color="#e74c3c"
+    num="100"
+    filled=$w
+  else
+    color=$(_color "$pct")
+    num=$(printf '%02d' "$pct")
+    filled=$(( pct * w / 100 ))
+  fi
   seg=""
   for (( i=0; i<w; i++ )); do (( i < filled )) && seg+="▓" || seg+="░"; done
   printf '<span background="%s" color="#111111">%s</span><span color="%s">%s</span>' \
