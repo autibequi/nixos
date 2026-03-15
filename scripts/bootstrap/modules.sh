@@ -13,7 +13,13 @@ ORANGE=$'\033[38;5;208m' BLUE=$'\033[38;5;33m' WHITE=$'\033[97m'
 MAGENTA=$'\033[38;5;204m' GRAY=$'\033[38;5;245m'
 
 # ── Globals ───────────────────────────────────────────────────────────────────
-WS="/workspace"
+# WS: container = /workspace, host = project dir derived from script location
+if [[ "${CLAUDE_ENV:-}" == "container" ]] || [[ -f "/.dockerenv" ]] || grep -q 'docker\|container' /proc/1/cgroup 2>/dev/null; then
+  WS="/workspace"
+else
+  _mdir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  WS="$(cd "$_mdir/../.." && pwd)"
+fi
 KANBAN="$WS/vault/kanban.md"
 SCHEDULED="$WS/vault/_agent/scheduled.md"
 TODAY=$(date +%Y-%m-%d)

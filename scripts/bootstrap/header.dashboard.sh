@@ -149,7 +149,7 @@ fi
 
 # ── Git + Mode flags ─────────────────────────────────────────────────────────
 ws_branch=$(git -C "$WS" branch --show-current 2>/dev/null || echo "?")
-ws_dirty=$(git -C "$WS" status --porcelain 2>/dev/null | head -1)
+ws_dirty=$(git -C "$WS" status --porcelain 2>/dev/null | head -1) || true
 ws_ahead=$(git -C "$WS" rev-list --count '@{upstream}..HEAD' 2>/dev/null || echo 0)
 ws_behind=$(git -C "$WS" rev-list --count 'HEAD..@{upstream}' 2>/dev/null || echo 0)
 git_str="${P_CYAN}[${ws_branch}]${R}"
