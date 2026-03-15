@@ -51,13 +51,13 @@ convert_video() {
 claudio() {
   local nixos_dir="${CLAUDIO_NIXOS_DIR:-$HOME/nixos}"
   local compose_file="$nixos_dir/docker-compose.claude.yml"
-  local mode="claude" model="" mount_path="" mount_opts="ro" instance=""
+  local mode="claude" model="" mount_path="" mount_opts="rw" instance=""
   local obsidian_path="${OBSIDIAN_PATH:-$HOME/.ovault}"
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --shell)      mode="shell"; shift ;;
-      --resume)     mode="resume"; shift ;;
+      --shell|shell)  mode="shell"; shift ;;
+      --resume|resume) mode="resume"; shift ;;
       --haiku)      model="--model claude-haiku-4-5-20251001"; shift ;;
       --opus)       model="--model claude-opus-4-6"; shift ;;
       -rw)          mount_opts="rw"; shift ;;
@@ -90,7 +90,7 @@ claudio() {
         docker compose -f "$compose_file" -p "$proj_name" run --rm -it \
         --entrypoint /bin/bash \
         -e CLAUDIO_MOUNT="${mount_path}" sandbox \
-        -c ". /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude ${model} --permission-mode bypassPermissions"
+        -c ". /workspace/host/scripts/bootstrap.sh; cd /workspace/mount && exec /home/claude/.nix-profile/bin/claude ${model} --permission-mode bypassPermissions"
       ;;
     shell)
       CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="${mount_opts}" OBSIDIAN_PATH="${obsidian_path}" \
@@ -103,7 +103,7 @@ claudio() {
         docker compose -f "$compose_file" -p "$proj_name" run --rm -it \
         --entrypoint /bin/bash \
         -e CLAUDIO_MOUNT="${mount_path}" sandbox \
-        -c "exec /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions"
+        -c "cd /workspace/mount && exec /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions"
       ;;
   esac
 }
