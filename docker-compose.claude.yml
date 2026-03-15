@@ -22,10 +22,14 @@ x-base-volumes: &base-volumes
   - ${HOME}/.claude.json:/home/claude/.claude.json
   - ${HOME}/projects:/home/claude/projects
   - ${XDG_RUNTIME_DIR:-/run/user/1000}/${WAYLAND_DISPLAY:-wayland-1}:/run/user/1000/${WAYLAND_DISPLAY:-wayland-1}
-  - /var/log/journal:/workspace/logs/journalctl:ro
+  - /var/log/journal:/workspace/logs/host/journal:ro
   - /proc/meminfo:/host/proc/meminfo:ro
   - /proc/loadavg:/host/proc/loadavg:ro
   - /proc/uptime:/host/proc/uptime:ro
+  - /proc/cpuinfo:/host/proc/cpuinfo:ro
+  - /proc/version:/host/proc/version:ro
+  - /run/current-system:/host/run/current-system:ro
+  - /etc/os-release:/host/etc/os-release:ro
   - /tmp/claudio-hive-mind:/workspace/.hive-mind
 
 services:

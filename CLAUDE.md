@@ -108,7 +108,8 @@ fi
 │   ├── artefacts/               ← entregáveis por task
 │   ├── sugestoes/               ← canal agente→user
 │   └── kanban.md                ← THINKINGS: FONTE DE VERDADE work items
-├── logs/journalctl/             ← bind mount RO de /var/log/journal do host
+├── logs/host/                   ← logs RO do host
+│   └── journal/                 ← bind mount de /var/log/journal
 ├── mount/                       ← projeto externo (claudio monta aqui, opcional)
 ├── workbench/                   ← rastreio persistente de worktrees
 ├── .ephemeral/                  ← memória efêmera (gitignored)
@@ -190,7 +191,7 @@ Path: `/workspace/.hive-mind/` — efêmero, compartilhado entre todos os contai
   - Propostas/exploração → automaticamente em worktree
   - Manter `workbench/<task>.md` atualizado enquanto em worktree
 - **GitHub**: `gh pr/issue view` — READ ONLY. Detalhes em `docs/operational-reference.md`.
-- **Observabilidade**: `/workspace/logs/journalctl`, `/host/proc/{meminfo,loadavg,uptime}` — consultar antes de pedir pro user rodar comandos
+- **Observabilidade**: `/workspace/logs/host/journal`, `/host/proc/{meminfo,loadavg,uptime,cpuinfo,version}`, `/host/run/current-system`, `/host/etc/os-release` — consultar antes de pedir pro user rodar comandos
 
 ## Startup
 - Hook `UserPromptSubmit` roda `/workspace/scripts/bootstrap.sh` automaticamente
