@@ -153,7 +153,7 @@ _color() {
 # gauge: número no início, blocos depois, sem label
 # layout: [DD]▓▓▓▓▓░░
 _gauge() {
-  local pct="${1:-0}" color num w=2 filled seg i
+  local pct="${1:-0}" color num w=4 filled seg i
   color=$(_color "$pct")
   (( pct >= 100 )) && num="!!" || num=$(printf '%02d' "$pct")
   filled=$(( pct * w / 100 ))
