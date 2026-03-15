@@ -187,15 +187,15 @@ fi
 # Worktree: so exibe se estiver em worktree
 WT_STR=""
 if [[ -n "$WORKTREE_NAME" && "$WORKTREE_NAME" != "null" ]]; then
-  WT_STR=" | wt:$WORKTREE_NAME"
+  WT_STR=" @ wt:$WORKTREE_NAME"
 fi
 
 # Mount: diretório montado (path no host via $CLAUDIO_MOUNT, fallback /workspace/mount)
 MOUNT_STR=""
 if [[ -n "${CLAUDIO_MOUNT:-}" ]]; then
-  MOUNT_STR=" | ${CLAUDIO_MOUNT}"
+  MOUNT_STR=" @ ${CLAUDIO_MOUNT}"
 elif [[ -d "/workspace/mount" ]] && [[ -n "$(ls -A /workspace/mount 2>/dev/null)" ]]; then
-  MOUNT_STR=" | /workspace/mount"
+  MOUNT_STR=" @ /workspace/mount"
 fi
 
 # Claudios = containers docker; Bochechas = background workers rodando (tasks em running/)
