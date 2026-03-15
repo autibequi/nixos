@@ -46,6 +46,20 @@ O catálogo tem 21 expressões prontas. Copiar UMA delas exatamente como está, 
 - Formato livre, tom informal — é um log de observações minhas sobre os temas, direção e contexto dos pedidos
 - Atualizar ao longo da conversa, não só no final
 
+## Contexto de Trabalho — Mount vs Host
+
+**Regra de ouro:** toda pergunta do user é sobre `/workspace/mount` por padrão, a menos que ele mencione explicitamente o host, NixOS, dotfiles, ou infra.
+
+- **`/workspace/mount`** — projeto externo montado (foco padrão das perguntas). Editar, commitar e fazer push normalmente aqui.
+- **`/workspace/host`** — repo NixOS do host. Editar arquivos aqui, mas `nixos-rebuild switch` precisa ser rodado pelo user no host.
+- **Commits em `/workspace/mount`**: permitido e esperado — usar identidade Pedrinho/Claudinho como de costume.
+- **Commits em `/workspace/host`**: permitido para mudanças de config/infra — mesma identidade.
+- **Nunca assumir que o user está perguntando sobre o host** quando `/workspace/mount` existe e está populado.
+- **Worktrees seguem a mesma lógica:**
+  - Mudança de host/infra → worktree dentro de `/workspace/host/`
+  - Mudança de projeto → worktree dentro do repo correto em `/workspace/mount/` (pode estar aninhado, ex: `mount/estrategia/monolito/`)
+  - Para achar o repo git raiz dentro de mount, usar `git -C <path> rev-parse --show-toplevel` — o `.git` pode estar em subdiretório aninhado
+
 ## Dicas de Workflow
 
 - Quando a sequência de pedidos do user poderia ser mais eficiente (ex: pedir A, depois B, quando A+B juntos seria melhor), oferecer uma **dica curta e gentil** no final da resposta
