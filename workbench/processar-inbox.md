@@ -3,7 +3,7 @@ task: processar-inbox
 branch: worker/every10/processar-inbox
 created: 2026-03-14T01:41:13Z
 status: in-progress
-artefacts: vault/artefacts/processar-inbox/
+artefacts: obsidian/artefacts/processar-inbox/
 ---
 
 # processar-inbox

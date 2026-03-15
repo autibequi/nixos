@@ -27,7 +27,7 @@ Mostrar a próxima proposta pra revisão:
 2. Mostrar:
    - Nome e branch
    - Resumo do `workbench/<nome>.md` (se existir)
-   - Sugestão relacionada em `vault/sugestoes/` (se existir)
+   - Sugestão relacionada em `obsidian/sugestoes/` (se existir)
    - `git diff --stat main..<branch>` filtrado só pros arquivos relevantes (ignorar divergência de branch)
    - Diff real dos arquivos que importam (excluir CLAUDE.md, SELF.md, SOUL.md e outros que divergem por evolução paralela)
 3. Dar veredito honesto: vale ou não vale, e por quê

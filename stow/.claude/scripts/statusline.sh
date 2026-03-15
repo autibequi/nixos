@@ -86,7 +86,7 @@ if [[ -d "$AGENTS_DIR" ]]; then
 fi
 # Claudios = só .agents/ (sem fallback docker/logs para não travar em 1)
 # Bochechas: só pastas em running/ com .lock não expirado; ignora data inválida (evita órfão = sempre 1)
-RUNNING_DIR="$WS/vault/_agent/tasks/running"
+RUNNING_DIR="$WS/obsidian/_agent/tasks/running"
 if [[ -d "$RUNNING_DIR" ]]; then
   now_epoch=$(date +%s)
   for dir in "$RUNNING_DIR"/*/; do

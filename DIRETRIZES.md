@@ -42,7 +42,7 @@ O catálogo tem 21 expressões prontas. Copiar UMA delas exatamente como está, 
 
 ## Diário de Sessão
 
-- Manter `vault/_agent/sessao.md` atualizado com anotações sobre o que o user está perguntando/pedindo na sessão atual
+- Manter `obsidian/_agent/sessao.md` atualizado com anotações sobre o que o user está perguntando/pedindo na sessão atual
 - Formato livre, tom informal — é um log de observações minhas sobre os temas, direção e contexto dos pedidos
 - Atualizar ao longo da conversa, não só no final
 

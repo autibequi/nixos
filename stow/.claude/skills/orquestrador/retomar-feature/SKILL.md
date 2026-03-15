@@ -14,13 +14,13 @@ Recebe o identificador da feature de uma das formas:
 
 ## Passo 1 — Localizar a pasta da feature
 
-Buscar a pasta dentro de `vault/_agent/tasks/`:
+Buscar a pasta dentro de `obsidian/_agent/tasks/`:
 
 ```bash
-ls vault/_agent/tasks/
+ls obsidian/_agent/tasks/
 ```
 
-Se o dev forneceu um Jira ID, procurar `vault/_agent/tasks/FUK2-<Codigo>/`. Se forneceu nome, procurar `vault/_agent/tasks/<nome>/`. Se não forneceu nada e houver apenas uma pasta, usar essa. Se houver múltiplas, listar e pedir que o dev escolha.
+Se o dev forneceu um Jira ID, procurar `obsidian/_agent/tasks/FUK2-<Codigo>/`. Se forneceu nome, procurar `obsidian/_agent/tasks/<nome>/`. Se não forneceu nada e houver apenas uma pasta, usar essa. Se houver múltiplas, listar e pedir que o dev escolha.
 
 **Se a pasta não existir:** informar o dev e perguntar se quer iniciar uma feature nova (redirecionar para `orquestrador/orquestrar-feature`).
 

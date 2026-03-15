@@ -37,8 +37,8 @@ scripts/
 
 artefatos/           # Non-markdown outputs (binaries, exports, generated data)
 
-vault/               # Obsidian vault (dashboard + communication)
-  _agent/            # Agent area (versioned inside vault)
+obsidian/               # Obsidian vault (dashboard + communication)
+  _agent/            # Agent area (versioned inside Obsidian)
     tasks/           # Autonomous task system
       recurring/     # Immortal tasks (run hourly, return to queue)
       pending/       # One-shot tasks (run once → done/failed)
@@ -83,7 +83,7 @@ make status          # Show task queue and recent executions
 make run             # Run all tasks with live output
 make auto            # Run tasks headless (for systemd/cron)
 make new name=x      # Create new task (wizard)
-make vault-link      # Symlink vault to ~/.vault/Work for Obsidian
+make vault-link      # Symlink Obsidian to ~/.obsidian/Work for Obsidian
 make ping            # Health JSON for Waybar integration
 ```
 

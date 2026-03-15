@@ -53,28 +53,28 @@ scripts/     — utility scripts
 
 ### 3. Orphaned Notes (`.ephemeral/notes/`)
 - **Age:** orphaned (task deleted)
-- **Logic:** For each .md file, check if corresponding task exists in `vault/_agent/tasks/{recurring,pending,running}/`
+- **Logic:** For each .md file, check if corresponding task exists in `obsidian/_agent/tasks/{recurring,pending,running}/`
 - **Reason:** If task is gone, notes are orphaned
 
-### 4. Old Artefacts (`vault/artefacts/`)
+### 4. Old Artefacts (`obsidian/artefacts/`)
 - **Age:** > 30 days
-- **Logic:** Check `vault/kanban.md` for task status. If task in "Concluído" column and older than 30 days, archive
+- **Logic:** Check `obsidian/kanban.md` for task status. If task in "Concluído" column and older than 30 days, archive
 - **Reason:** Completed tasks' artifacts can be archived
 
-### 5. Old Reports (`vault/_agent/reports/`)
+### 5. Old Reports (`obsidian/_agent/reports/`)
 - **Age:** > 30 days
 - **Logic:** Archive old report directories
 - **Reason:** Keep recent reports, archive history
 
-### 6. Reviewed Suggestions (`vault/sugestoes/`)
+### 6. Reviewed Suggestions (`obsidian/sugestoes/`)
 - **Age:** > 14 days + `reviewed: true`
 - **Logic:** Check frontmatter for `reviewed: true`, if old enough, archive
 - **Reason:** Already reviewed, safe to archive
 
-### 7. Unreferenced Images (`vault/` images)
+### 7. Unreferenced Images (`obsidian/` images)
 - **Age:** > 3 days
 - **Types:** *.png, *.jpg, *.jpeg, *.gif, *.webp, *.svg
-- **Logic:** Find all images, grep across all .md files in vault/, if not referenced anywhere, archive
+- **Logic:** Find all images, grep across all .md files in obsidian/, if not referenced anywhere, archive
 - **Reason:** Orphaned images take up space
 
 ### 8. Stale Worktrees (`.claude/worktrees/` + `workbench/`)
@@ -89,10 +89,10 @@ scripts/     — utility scripts
 - **Reason:** Worktrees concluídas ou mergeadas acumulam espaço e poluem `git worktree list`
 - **Safety:** NUNCA remover worktree com uncommitted changes ou branch não-mergeada sem status done
 
-### 9. Cards finalizados no THINKINGS (`vault/kanban.md` → `vault/_agent/graveyard.md`)
+### 9. Cards finalizados no THINKINGS (`obsidian/kanban.md` → `obsidian/_agent/graveyard.md`)
 - **Criteria:** Cards `[x]` na coluna **Aprovado** + cards `#failed` na coluna **Falhou** (se existir)
 - **Logic:**
-  1. Ler `vault/kanban.md`
+  1. Ler `obsidian/kanban.md`
   2. Coluna **Aprovado**: coletar todos os cards `[x]` → mover para `## Arquivado` no graveyard.md
   3. Coluna **Falhou** (se existir no kanban): coletar todos os cards → mover para `## Falhou` no graveyard.md, depois remover a coluna inteira do kanban
   4. Checar outras colunas por cards `[x]` com `#done` — mover direto pro graveyard `## Arquivado`
@@ -150,18 +150,18 @@ scripts/     — utility scripts
 
 ## Archive Structure
 
-**Original:** `vault/sugestoes/2025-10-01-old-idea.md`
+**Original:** `obsidian/sugestoes/2025-10-01-old-idea.md`
 ↓
-**Archived:** `.ephemeral/.trashbin/vault/sugestoes/2025-10-01-old-idea.md`
-**Logged:** `2026-03-14 10:30 | vault/sugestoes/2025-10-01-old-idea.md | reviewed >14d ago`
+**Archived:** `.ephemeral/.trashbin/obsidian/sugestoes/2025-10-01-old-idea.md`
+**Logged:** `2026-03-14 10:30 | obsidian/sugestoes/2025-10-01-old-idea.md | reviewed >14d ago`
 
 ## Log Format
 
 ```
 YYYY-MM-DD HH:MM | /path/to/original | reason
 2026-03-14 10:30 | .ephemeral/scratch/temp.txt | scratch >7d old
-2026-03-14 10:31 | vault/artefacts/old-task/ | task completed >30d
-2026-03-14 10:32 | vault/sugestoes/archive/ | empty dir after cleanup
+2026-03-14 10:31 | obsidian/artefacts/old-task/ | task completed >30d
+2026-03-14 10:32 | obsidian/sugestoes/archive/ | empty dir after cleanup
 ```
 
 ## Report Template
@@ -180,20 +180,20 @@ YYYY-MM-DD HH:MM | /path/to/original | reason
 - .ephemeral/scratch/: 47 files total → 8 archived (>7d)
 - .ephemeral/logs/: 23 files total → 3 archived (>14d)
 - .ephemeral/notes/: 5 files total → 0 archived (all valid tasks)
-- vault/artefacts/: 6 dirs total → 1 archived (>30d completed)
-- vault/_agent/reports/: 8 dirs total → 0 archived (all recent)
-- vault/sugestoes/: 12 files total → 0 archived (none reviewed+old)
-- vault/ images: 34 files total → 0 archived (all referenced)
+- obsidian/artefacts/: 6 dirs total → 1 archived (>30d completed)
+- obsidian/_agent/reports/: 8 dirs total → 0 archived (all recent)
+- obsidian/sugestoes/: 12 files total → 0 archived (none reviewed+old)
+- obsidian/ images: 34 files total → 0 archived (all referenced)
 - Empty directories: 5 found → 3 archived
 
 ## Archived
 - .ephemeral/scratch/temp-20260228-*.tmp (8 files)
-- vault/artefacts/old-project/ (dir)
-- vault/sugestoes/ (empty after cleanup)
+- obsidian/artefacts/old-project/ (dir)
+- obsidian/sugestoes/ (empty after cleanup)
 
 ## Preserved (Cautious Decisions)
 - .ephemeral/logs/system-20260310.log — not quite 14d old, keeping
-- vault/sugestoes/2026-03-01-idea.md — reviewed but very recent, keeping
+- obsidian/sugestoes/2026-03-01-idea.md — reviewed but very recent, keeping
 
 ## Auto-Evolution Notes
 - Thresholds seem right: no false positives this run
@@ -210,10 +210,10 @@ If something was archived incorrectly:
 ls -R .ephemeral/.trashbin/
 
 # Restore a file
-cp .ephemeral/.trashbin/vault/sugestoes/foo.md vault/sugestoes/foo.md
+cp .ephemeral/.trashbin/obsidian/sugestoes/foo.md obsidian/sugestoes/foo.md
 
 # Remove from log (optional - keep audit trail)
-grep -v "vault/sugestoes/foo.md" .ephemeral/.trashlist > .trashlist.tmp
+grep -v "obsidian/sugestoes/foo.md" .ephemeral/.trashlist > .trashlist.tmp
 mv .trashlist.tmp .ephemeral/.trashlist
 ```
 

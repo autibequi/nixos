@@ -3,7 +3,7 @@
 ## Pasta de artefatos
 
 ```
-vault/artefacts/<nome-review>/
+obsidian/artefacts/<nome-review>/
 ├── README.md
 ├── 01-visao-geral.md
 ├── 02-code-review.md

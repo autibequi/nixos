@@ -3,7 +3,7 @@ task: avaliar
 branch: worker/every60/avaliar
 created: 2026-03-14T01:41:13Z
 status: in-progress
-artefacts: vault/artefacts/avaliar/
+artefacts: obsidian/artefacts/avaliar/
 ---
 
 # avaliar

@@ -6,7 +6,7 @@ Documentação unificada dos dois agentes principais do workspace.
 
 ## 🧙‍♂️ Wiseman — The Mage of Connections
 
-**Propósito:** Interconectar notas no vault Obsidian usando backlinks, tags e frontmatter YAML, transformando notas isoladas em uma rede de conhecimento navegável.
+**Propósito:** Interconectar notas no Obsidian Obsidian usando backlinks, tags e frontmatter YAML, transformando notas isoladas em uma rede de conhecimento navegável.
 
 ### Como Usar
 
@@ -132,7 +132,7 @@ Para cada arquivo candidato:
 | **Arquivos** | `CLAUDE.md`, `SOUL.md`, `SELF.md`, `flake.nix`, `configuration.nix`, `kanban.md`, `scheduled.md` | Configuração essencial do workspace |
 | **Diretórios** | `modules/`, `stow/`, `projetos/`, `scripts/` | Código versionado |
 | **Task state** | `memoria.md` em recorrentes | Estado persistente entre ciclos |
-| **Vault linkado** | Arquivos referenciados em cards ativos (Backlog, Em Andamento) | Pode quebrar workflow |
+| **Obsidian linkado** | Arquivos referenciados em cards ativos (Backlog, Em Andamento) | Pode quebrar workflow |
 
 **Regra de Ouro:** Na dúvida, **NÃO arquivar**. Melhor deixar lixo que perder trabalho.
 

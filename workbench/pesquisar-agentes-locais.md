@@ -3,7 +3,7 @@ task: pesquisar-agentes-locais
 branch: worktree-pesquisar-agentes-locais
 created: 2026-03-14T00:00:00Z
 status: done
-artefacts: vault/artefacts/pesquisar-agentes-locais/
+artefacts: obsidian/artefacts/pesquisar-agentes-locais/
 ---
 
 # Pesquisar Agentes Locais

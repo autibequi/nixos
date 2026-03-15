@@ -17,7 +17,7 @@
 
 **Regra geral:**
 - Interativo no terminal → **ASCII puro**
-- Vault Obsidian / arquivo `.md` que vai pro GitHub → **Mermaid permitido**
+- Obsidian Obsidian / arquivo `.md` que vai pro GitHub → **Mermaid permitido**
 - Dúvida sobre o contexto → perguntar ou usar ASCII (sempre funciona)
 
 ---
@@ -264,7 +264,7 @@ erDiagram
 ## Regras de Uso
 
 1. **Contexto terminal sempre → ASCII**. Nunca usar Mermaid em respostas interativas do Claude Code.
-2. **Mermaid para vault/docs** — ao criar arquivos `.md` pro vault Obsidian ou GitHub, preferir Mermaid para diagramas complexos (sequência, ER, state machine).
+2. **Mermaid para obsidian/docs** — ao criar arquivos `.md` pro Obsidian Obsidian ou GitHub, preferir Mermaid para diagramas complexos (sequência, ER, state machine).
 3. **ASCII ≥ Mermaid** para coisas simples — uma caixa com setas é mais legível como ASCII do que como Mermaid de 3 linhas.
 4. **Consistência de estilo** — usar box-drawing Unicode (não `+`, `-`, `|` ASCII puro) para melhor alinhamento visual.
 5. **Code block obrigatório** — SEMPRE envolver diagramas ASCII em ` ```text ` ou ` ``` ` para preservar espaçamento monospace.
@@ -409,6 +409,6 @@ Total por linha:      │ (1) + 16 + │ (1) = 18 chars
 | Data | Descoberta | Contexto |
 |------|-----------|----------|
 | 2026-03-15 | Mermaid NÃO renderiza no Claude Code terminal — mostra código bruto | Investigação inicial |
-| 2026-03-15 | Obsidian renderiza Mermaid nativamente (confirmado em obsidian-reference.md) | Vault Obsidian |
+| 2026-03-15 | Obsidian renderiza Mermaid nativamente (confirmado em obsidian-reference.md) | Obsidian Obsidian |
 | 2026-03-15 | GitHub renderiza Mermaid em `.md` desde 2022 | GitHub |
 | 2026-03-15 | Claude.ai web renderiza Mermaid | Interface web |

@@ -1,6 +1,6 @@
 ---
 name: monolito/review-code
-description: Use when the developer wants to do a code review of a PR or branch in the monolito or estrategia projects. Reads the diff, analyzes architecture, identifies issues (race conditions, error handling, performance, testing gaps), generates structured artefacts in vault/artefacts/, and provides discussion topics. Evolves knowledge over time via templates/knowledge.md.
+description: Use when the developer wants to do a code review of a PR or branch in the monolito or estrategia projects. Reads the diff, analyzes architecture, identifies issues (race conditions, error handling, performance, testing gaps), generates structured artefacts in obsidian/artefacts/, and provides discussion topics. Evolves knowledge over time via templates/knowledge.md.
 ---
 
 # review-code: Code Review de PR/Branch
@@ -64,7 +64,7 @@ Se o diff for muito grande (>5000 linhas), priorizar:
 ## Passo 3 — Criar pasta de artefatos
 
 ```
-vault/artefacts/<nome-do-review>/
+obsidian/artefacts/<nome-do-review>/
 ├── README.md          ← índice com frontmatter
 ├── 01-visao-geral.md  ← arquitetura, motivação, tabelas/entities novas
 ├── 02-code-review.md  ← análise técnica, pontos de atenção por severidade
@@ -130,7 +130,7 @@ Usar o formato definido em `templates/output.md`. Cada artefato tem frontmatter 
 
 ## Passo 7 — Atualizar kanban
 
-Adicionar card em "Aprovado" no `vault/kanban.md`:
+Adicionar card em "Aprovado" no `obsidian/kanban.md`:
 ```
 - [x] **<nome-review>** #done YYYY-MM-DD `opus` — [artefatos](artefacts/<nome>/README.md) <descrição curta>
 ```

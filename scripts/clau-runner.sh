@@ -2,9 +2,9 @@
 set -euo pipefail
 
 WORKSPACE="/workspace"
-TASKS="$WORKSPACE/vault/_agent/tasks"
+TASKS="$WORKSPACE/obsidian/_agent/tasks"
 EPHEMERAL="$WORKSPACE/.ephemeral"
-KANBAN="$WORKSPACE/vault/kanban.md"
+KANBAN="$WORKSPACE/obsidian/kanban.md"
 CLAU_VERBOSE="${CLAU_VERBOSE:-0}"
 SPECIFIC_TASK="${1:-}"
 WORKER_ID="${CLAU_WORKER_ID:-worker-1}"
@@ -21,7 +21,7 @@ fi
 RUN_ID="$$-$(date +%s)-${RANDOM:-0}"
 NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}"
 export NODE_OPTIONS
-SCHEDULED="$WORKSPACE/vault/_agent/scheduled.md"
+SCHEDULED="$WORKSPACE/obsidian/_agent/scheduled.md"
 export KANBAN_FILE="$KANBAN"
 export SCHEDULED_FILE="$SCHEDULED"
 export KANBAN_LOCKFILE="$EPHEMERAL/.kanban.lock"
@@ -30,11 +30,9 @@ DEFAULT_TIMEOUT=300
 DEFAULT_MODEL="haiku"
 DEFAULT_MAX_TURNS=12
 
-# Worker container starts fresh — create vault symlink BEFORE any mkdir uses $TASKS
-[[ ! -e "$WORKSPACE/vault" ]] && ln -sfn "$WORKSPACE/obsidian" "$WORKSPACE/vault" 2>/dev/null || true
 
 mkdir -p "$EPHEMERAL/locks" "$TASKS/running" "$TASKS/done" "$TASKS/failed" \
-  "$WORKSPACE/vault/sugestoes" "$WORKSPACE/vault/_agent/reports"
+  "$WORKSPACE/obsidian/sugestoes" "$WORKSPACE/obsidian/_agent/reports"
 
 # Presença em .agents/ — quando o processo morre (exit/trap), a pasta some; status line conta por aqui
 AGENTS_ROOT="$WORKSPACE/.agents"
@@ -432,11 +430,11 @@ $memoria
 2. Gere o artefato concreto pedido
 3. Atualize memoria.md em $TASKS/running/$task/memoria.md
 4. Atualize contexto em $EPHEMERAL/notes/$task/contexto.md
-5. Se identificar melhorias, salve em $WORKSPACE/vault/sugestoes/\$(date +%Y-%m-%d)-<topico>.md
+5. Se identificar melhorias, salve em $WORKSPACE/obsidian/sugestoes/\$(date +%Y-%m-%d)-<topico>.md
 
 ## IMPORTANTE
 - NÃO mova diretórios — o runner cuida do lifecycle
-- NÃO edite vault/kanban.md — o runner atualiza
+- NÃO edite obsidian/kanban.md — o runner atualiza
 - Registre em $EPHEMERAL/notes/$task/historico.log: TIMESTAMP | ok/fail | duração" 2>&1 | if [ "$CLAU_VERBOSE" = "1" ]; then tee "$logfile"; else cat > "$logfile"; fi
   local exit_code=${PIPESTATUS[0]}
 
@@ -466,7 +464,7 @@ finish_task() {
     mv "$TASKS/running/$task" "$TASKS/done/$task" 2>/dev/null || true
     local report=""
     local report_file
-    report_file=$(ls -1t "$WORKSPACE/vault/_agent/reports/"*"$task"* 2>/dev/null | head -1 || true)
+    report_file=$(ls -1t "$WORKSPACE/obsidian/_agent/reports/"*"$task"* 2>/dev/null | head -1 || true)
     [ -n "$report_file" ] && report="$report_file"
     kanban_complete_card "$task" "$report" 2>/dev/null || true
     echo "[clau:$WORKER_ID] '$task' → done"

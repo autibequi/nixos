@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# kanban-sync.sh — Operações atômicas no vault/kanban.md
+# kanban-sync.sh — Operações atômicas no obsidian/kanban.md
 # Todas as funções usam flock para concorrência segura entre workers
 set -euo pipefail
 

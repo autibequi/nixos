@@ -50,10 +50,10 @@ Ler dados de TODAS as pastas de tasks e montar infográfico:
 ```
 
 ### Como montar o dashboard:
-1. Contar arquivos em cada pasta: `vault/_agent/tasks/{pending,running,done,failed}/`
-2. Para recorrentes: ler `vault/_agent/tasks/recurring/*/memoria.md` — extrair último ciclo e status
+1. Contar arquivos em cada pasta: `obsidian/_agent/tasks/{pending,running,done,failed}/`
+2. Para recorrentes: ler `obsidian/_agent/tasks/recurring/*/memoria.md` — extrair último ciclo e status
 3. Para pending: ler frontmatter de cada `CLAUDE.md` — extrair tipo, clock, model
-4. Para em andamento: ler coluna "Em Andamento" do `vault/kanban.md`
+4. Para em andamento: ler coluna "Em Andamento" do `obsidian/kanban.md`
 5. Apresentar como infográfico formatado (tabelas, indicadores)
 
 ---
@@ -96,8 +96,8 @@ doctor            │ every10 │ haiku  │ 22:40Z        │ ok     │ tudo s
 ```
 
 Dados vêm de:
-- `vault/_agent/tasks/recurring/<task>/CLAUDE.md` → frontmatter (clock, model)
-- `vault/_agent/tasks/recurring/<task>/memoria.md` → último ciclo, status
+- `obsidian/_agent/tasks/recurring/<task>/CLAUDE.md` → frontmatter (clock, model)
+- `obsidian/_agent/tasks/recurring/<task>/memoria.md` → último ciclo, status
 - `.ephemeral/notes/<task>/historico.log` → última linha
 
 ### `stats` — Estatísticas
@@ -143,7 +143,7 @@ Ativado por `create <desc>`, `new <desc>`, ou texto livre que não casa com nenh
 
 2. **Gerar slug**: lowercase, hifens, sem acentos, max 40 chars.
 
-3. **Criar arquivo** `vault/_agent/tasks/pending/<slug>/CLAUDE.md`:
+3. **Criar arquivo** `obsidian/_agent/tasks/pending/<slug>/CLAUDE.md`:
 ```markdown
 ---
 title: <slug>
@@ -166,7 +166,7 @@ tags: [<tipo>, <flags extras>]
 (passos concretos)
 ```
 
-4. **Adicionar card no THINKINGS** (`vault/kanban.md`) na coluna Backlog:
+4. **Adicionar card no THINKINGS** (`obsidian/kanban.md`) na coluna Backlog:
    ```
    - [ ] **<slug>** — <descrição curta> `#<tipo>` `#<clock>` <flags>
    ```
@@ -182,7 +182,7 @@ tags: [<tipo>, <flags extras>]
 - Slug deve ser único — checar se já existe em pending/
 - Descrição no card do kanban: max 80 chars
 - Se o user mencionar prioridade (urgente, importante), setar `priority: high`
-- Se o tipo for `pesquisa`, incluir na Ação: "Gerar relatório em vault/artefacts/<slug>/"
+- Se o tipo for `pesquisa`, incluir na Ação: "Gerar relatório em obsidian/artefacts/<slug>/"
 - Se tiver `worktrees: true`, incluir no frontmatter e na Ação: "Criar worktree com implementação"
 - Não inventar contexto — se o user foi vago, perguntar
 - Model pode ser overridden pelo user (ex: "usa opus pra isso")

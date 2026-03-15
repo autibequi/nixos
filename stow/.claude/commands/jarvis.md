@@ -38,7 +38,7 @@ done
 Ler `/workspace/obsidian/kanban.md`:
 - Inbox, Em Andamento, Esperando Review, Backlog, Aprovado (hoje), Falhou
 
-#### 1d. Tasks autônomas (vault)
+#### 1d. Tasks autônomas (Obsidian)
 ```bash
 echo "pending:" && ls /workspace/obsidian/_agent/tasks/pending/ 2>/dev/null
 echo "running:" && ls /workspace/obsidian/_agent/tasks/running/ 2>/dev/null

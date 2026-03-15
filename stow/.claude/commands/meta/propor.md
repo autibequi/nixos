@@ -51,7 +51,7 @@ Cria um worktree, implementa uma mudança proposta, e apresenta o diff pro user 
 ## Permissão de Worktrees
 - Este comando é **sempre permitido** em sessões interativas (o user pediu explicitamente)
 - Em **tasks autônomas** (workers), worktree só é permitido se o frontmatter tiver `worktrees: true`
-- Sem `worktrees: true`, o worker NÃO pode usar EnterWorktree — deve apenas sugerir a mudança em texto (vault/sugestoes/)
+- Sem `worktrees: true`, o worker NÃO pode usar EnterWorktree — deve apenas sugerir a mudança em texto (obsidian/sugestoes/)
 
 ## Regras
 - SEMPRE criar worktree — nunca propor mudança direto no branch de trabalho

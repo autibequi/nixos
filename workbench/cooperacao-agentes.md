@@ -3,7 +3,7 @@ task: cooperacao-agentes
 branch: worktree-cooperacao-agentes
 created: 2026-03-14T00:00:00Z
 status: done
-artefacts: vault/artefacts/cooperacao-agentes/
+artefacts: obsidian/artefacts/cooperacao-agentes/
 ---
 
 # Cooperação entre Agentes

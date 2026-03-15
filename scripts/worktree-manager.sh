@@ -2,12 +2,12 @@
 
 # worktree-manager.sh
 # Gerencia rastreamento de worktrees: entrada, status, saída
-# Atualiza vault/_agent/worktrees.md com dashboard dinâmico
+# Atualiza obsidian/_agent/worktrees.md com dashboard dinâmico
 
 set -euo pipefail
 
 REPO_ROOT="${REPO_ROOT:-.}"
-VAULT="${REPO_ROOT}/vault"
+VAULT="${REPO_ROOT}/obsidian"
 WORKTREE_DIR="${VAULT}/worktrees"
 WORKTREE_REGISTRY="${VAULT}/.worktrees-registry.json"
 WORKTREE_LOG="${VAULT}/.worktrees-log.jsonl"
@@ -79,7 +79,7 @@ task: ${name}
 branch: ${branch}
 created: ${now}
 status: in-progress
-artefacts: vault/artefacts/${name}/
+artefacts: obsidian/artefacts/${name}/
 ---
 
 # ${name}
@@ -197,7 +197,7 @@ worktree_status() {
 EOF
 }
 
-# Atualiza dashboard no vault
+# Atualiza dashboard no Obsidian
 update_dashboard() {
     init_registry
 

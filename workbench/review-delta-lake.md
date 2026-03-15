@@ -3,7 +3,7 @@ task: review-delta-lake
 branch: worktree-review-delta-lake
 created: 2026-03-14T00:00:00Z
 status: done
-artefacts: vault/artefacts/review-delta-lake/
+artefacts: obsidian/artefacts/review-delta-lake/
 ---
 
 # Review: Delta Lake na Arquitetura de Pagamento

@@ -266,10 +266,10 @@ Reportar divergências:
 
 ## Passo 7 — Gerar relatório
 
-Criar artefato em `vault/artefacts/inspect-pr-<N>/`:
+Criar artefato em `obsidian/artefacts/inspect-pr-<N>/`:
 
 ```
-vault/artefacts/inspect-pr-<N>/
+obsidian/artefacts/inspect-pr-<N>/
 ├── README.md          ← índice + frontmatter
 └── report.md          ← relatório completo
 ```

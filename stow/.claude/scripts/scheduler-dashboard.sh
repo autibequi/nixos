@@ -10,7 +10,7 @@ set -euo pipefail
 WORKSPACE="${WORKSPACE:-/workspace}"
 [ -d "$WORKSPACE" ] || WORKSPACE="$(cd "$(dirname "$0")/../../.." && pwd)"
 STATE_FILE="$WORKSPACE/.ephemeral/scheduler/state.json"
-TASKS_DIR="$WORKSPACE/vault/_agent/tasks/recurring"
+TASKS_DIR="$WORKSPACE/obsidian/_agent/tasks/recurring"
 DASHBOARD_FILE="$WORKSPACE/.ephemeral/scheduler/dashboard.txt"
 
 # ── Colors ───────────────────────────────────────────────────────────────────

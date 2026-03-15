@@ -4,8 +4,8 @@
 set -euo pipefail
 
 WS="${WORKSPACE:-/workspace}"
-TASKS="$WS/vault/_agent/tasks"
-SCHEDULED="$WS/vault/_agent/scheduled.md"
+TASKS="$WS/obsidian/_agent/tasks"
+SCHEDULED="$WS/obsidian/_agent/scheduled.md"
 EPHEMERAL="$WS/.ephemeral"
 
 # Cores

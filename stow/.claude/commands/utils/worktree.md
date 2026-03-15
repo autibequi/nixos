@@ -38,12 +38,12 @@ Dashboard unificado de worktrees isolados. Mostra:
 │ 2026-03-14 14:22 | worker-every60-1     │
 │ ├─ propositor-bootstrap                 │
 │ ├─ Duration: 1h 45min → concluído       │
-│ └─ Artefatos: [[vault/worktrees/...]]  │
+│ └─ Artefatos: [[obsidian/worktrees/...]]  │
 │                                          │
 │ 2026-03-14 12:10 | worker-every10-1     │
 │ ├─ fix-typo                             │
 │ ├─ Duration: 18min → em progresso       │
-│ └─ Artefatos: [[vault/worktrees/...]]  │
+│ └─ Artefatos: [[obsidian/worktrees/...]]  │
 │                                          │
 └──────────────────────────────────────────┘
 ```
@@ -55,7 +55,7 @@ Dashboard unificado de worktrees isolados. Mostra:
 3. **Quando termina** → `/worktree exit` finaliza e move pra reports
 4. **Histórico** → Tudo fica em `.worktrees-registry.json` + log
 
-Log permanente: `vault/.worktrees-log.jsonl` (append-only)
+Log permanente: `obsidian/.worktrees-log.jsonl` (append-only)
 - Cada linha = um evento de worktree (enter/exit/update)
 - Compartilhado entre todos os workers
 

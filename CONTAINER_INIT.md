@@ -39,13 +39,13 @@ Projeto externo montado via comando `claudio`. **Read-only por padrão** (RO), a
 ```
 ${OBSIDIAN_PATH:-/tmp} → /workspace/obsidian   (RW)
 ```
-Vault Obsidian do usuário. **Symlink:** `/workspace/vault` → `/workspace/obsidian` — scripts sempre usam `vault/`.
-- Se `$OBSIDIAN_PATH` não está setado → fallback para `/tmp` (vault não configurado!)
-- Verificar se o vault está configurado antes de escrever notas
+Vault Obsidian do usuário. Scripts usam `/workspace/obsidian/` diretamente.
+- Se `$OBSIDIAN_PATH` não está setado → fallback para `/tmp` (Obsidian não configurado!)
+- Verificar se o Obsidian está configurado antes de escrever notas
 
 Estrutura interna relevante:
 ```
-vault/
+obsidian/
 ├── kanban.md              ← THINKINGS (fonte de verdade de work items)
 ├── _agent/
 │   ├── tasks/             ← ciclo de vida de tasks
@@ -80,7 +80,7 @@ vault/
 ```
 Editar config NixOS / dotfiles?      → /workspace/host/
 Trabalhar no projeto montado?        → /workspace/mount/  (checar se RW!)
-Registrar tarefa / nota / insight?   → /workspace/vault/
+Registrar tarefa / nota / insight?   → /workspace/obsidian/
 Ver logs do host?                    → /workspace/logs/journalctl/
 Coordenar com outros workers?        → /workspace/.hive-mind/
 Repos do user?                       → /home/claude/projects/

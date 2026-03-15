@@ -3,7 +3,7 @@ task: radar
 branch: worker/every60/radar
 created: 2026-03-14T01:41:13Z
 status: in-progress
-artefacts: vault/artefacts/radar/
+artefacts: obsidian/artefacts/radar/
 ---
 
 # radar

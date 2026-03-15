@@ -126,7 +126,7 @@ Agentes especializados invocáveis via `Agent` tool.
 | Agent | Model | Descrição |
 |-------|-------|-----------|
 | `trashman` | haiku | Limpeza segura: scan workspace, archive reversível em `.trashbin/`, audit trail |
-| `wiseman` | haiku | Knowledge graph: interconecta notas do vault com backlinks, tags, frontmatter |
+| `wiseman` | haiku | Knowledge graph: interconecta notas do Obsidian com backlinks, tags, frontmatter |
 | `nixos` | haiku | NixOS config: pacotes, módulos, opções, troubleshoot |
 | `monolito` | — | Go monolith: handlers, services, repos, migrations, workers, mocks |
 | `bo-container` | — | Vue 2 BO: services, routes, components, pages |

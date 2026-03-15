@@ -3,7 +3,7 @@ task: propositor-comando-propostas
 branch: worktree-propositor-comando-propostas
 created: 2026-03-14T00:00:00Z
 status: in-progress
-artefacts: vault/artefacts/propositor-comando-propostas/
+artefacts: obsidian/artefacts/propositor-comando-propostas/
 ---
 
 # Propositor: Comando de Propostas

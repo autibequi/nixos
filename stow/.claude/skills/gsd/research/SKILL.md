@@ -17,7 +17,7 @@ Executar ANTES de:
 
 ## Output
 
-Criar arquivo `vault/artefacts/research-{nome-da-feature}.md`:
+Criar arquivo `obsidian/artefacts/research-{nome-da-feature}.md`:
 
 ```markdown
 # Research: {feature}

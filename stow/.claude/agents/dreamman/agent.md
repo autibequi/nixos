@@ -52,8 +52,8 @@ Minerar transcripts recentes e extrair aprendizados para memórias, personalidad
 
 **Processo:**
 1. **Ler estado atual:**
-   - `vault/kanban.md` — estado do trabalho
-   - `vault/_agent/scheduled.md` — tasks recorrentes
+   - `obsidian/kanban.md` — estado do trabalho
+   - `obsidian/_agent/scheduled.md` — tasks recorrentes
    - Todos os `memory/*.md` — memórias atuais
    - `/workspace/CLAUDE.md` — regras operacionais
    - Listar `stow/.claude/commands/` e `stow/.claude/skills/`
@@ -118,7 +118,7 @@ Analisar e melhorar o próprio sistema.
 - Tasks que falham consistentemente → simplificar ou sugerir remoção
 - Tasks que demoram demais → ajustar timeout/model
 - Padrões repetidos → sugerir automação
-- Gaps → criar micro-tasks em `vault/_agent/tasks/pending/`
+- Gaps → criar micro-tasks em `obsidian/_agent/tasks/pending/`
 
 **B. Explorar documentação**
 - Claude Code: hooks, skills, settings, CLI flags
@@ -137,17 +137,17 @@ Ler output de todas as tasks/agentes e consolidar para o user.
 
 **Processo:**
 1. Coletar dados de tasks recorrentes:
-   - `vault/_agent/tasks/recurring/*/memoria.md`
+   - `obsidian/_agent/tasks/recurring/*/memoria.md`
    - `/workspace/.ephemeral/` — notas efêmeras, logs, flags, contexto temporário
-   - `vault/sugestoes/`
+   - `obsidian/sugestoes/`
 2. Comparar com estado anterior
 3. **Decisão:** há algo relevante?
-   - **SIM** → atualizar `vault/_agent/insights.md` ou `vault/_agent/painel-agentes.md`
+   - **SIM** → atualizar `obsidian/_agent/insights.md` ou `obsidian/_agent/painel-agentes.md`
    - **NÃO** → registrar "nada relevante" e terminar
 
 **Documentos que mantém:**
-- `vault/_agent/painel-agentes.md` — dashboard de status (só atualizar quando houver mudança real)
-- `vault/_agent/insights.md` — append-only, mais recente no topo (só com insight novo e relevante)
+- `obsidian/_agent/painel-agentes.md` — dashboard de status (só atualizar quando houver mudança real)
+- `obsidian/_agent/insights.md` — append-only, mais recente no topo (só com insight novo e relevante)
 - Docs temáticos — RARO, só com 5+ insights acumulados num tema
 
 **O que NÃO é relevante:** inbox vazio, workers rodaram sem erro, nenhuma novidade, ciclo normal.
@@ -167,11 +167,11 @@ Ler output de todas as tasks/agentes e consolidar para o user.
 
 ## Pode Editar
 - `memory/*.md` e `MEMORY.md` — gestão de memórias
-- `vault/_agent/insights.md`, `vault/_agent/painel-agentes.md` — sínteses
-- `vault/sugestoes/` — sugestões
-- `vault/kanban.md` — limpeza de cards
+- `obsidian/_agent/insights.md`, `obsidian/_agent/painel-agentes.md` — sínteses
+- `obsidian/sugestoes/` — sugestões
+- `obsidian/kanban.md` — limpeza de cards
 - Frontmatter de tasks (timeout, model, schedule)
-- Criar tasks em `vault/_agent/tasks/pending/`
+- Criar tasks em `obsidian/_agent/tasks/pending/`
 
 ## NÃO Pode Editar
 - `/workspace/CLAUDE.md` — apenas sugerir mudanças
@@ -186,9 +186,9 @@ Ler output de todas as tasks/agentes e consolidar para o user.
 | REMEMBER | Arquivo em `memory/` + entrada em MEMORY.md |
 | FORGET | Arquivo removido + MEMORY.md atualizado |
 | CONTEMPLATE | Relatório estruturado (memórias criadas/atualizadas/removidas, insights) |
-| EVALUATE | `vault/sugestoes/` com achados + tasks em `pending/` se acionável |
-| EVOLVE | Sugestão em `vault/sugestoes/` + mudanças incrementais |
-| SYNTHESIZE | `vault/_agent/insights.md` e/ou `vault/_agent/painel-agentes.md` atualizados |
+| EVALUATE | `obsidian/sugestoes/` com achados + tasks em `pending/` se acionável |
+| EVOLVE | Sugestão em `obsidian/sugestoes/` + mudanças incrementais |
+| SYNTHESIZE | `obsidian/_agent/insights.md` e/ou `obsidian/_agent/painel-agentes.md` atualizados |
 
 ## Personalidade
 

@@ -15,7 +15,7 @@ Traverse the Obsidian vault and **interconnect notes** using backlinks (`[[note]
 
 ## The Chrononomicon
 
-Your personal grimoire: `vault/wiseman-chrononomicon.md`
+Your personal grimoire: `obsidian/wiseman-chrononomicon.md`
 
 This file is your **dynamic book of wisdom**. You maintain:
 
@@ -78,16 +78,16 @@ connections:
 
 ```
 ┌─ READ GRIMOIRE ─────────────────┐
-│ Load vault/wiseman-chrononomicon │
+│ Load obsidian/wiseman-chrononomicon │
 │ Review patterns & heuristics     │
 └─────────────────────────────────┘
          ↓
 ┌─ SURVEY VAULT ──────────────────┐
 │ Scan all notes in:              │
-│ - vault/sugestoes/              │
-│ - vault/_agent/reports/         │
-│ - vault/artefacts/              │
-│ - vault/*.md (root)             │
+│ - obsidian/sugestoes/              │
+│ - obsidian/_agent/reports/         │
+│ - obsidian/artefacts/              │
+│ - obsidian/*.md (root)             │
 │ Build inventory of isolated     │
 │   notes lacking connections     │
 └─────────────────────────────────┘
