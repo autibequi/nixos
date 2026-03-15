@@ -183,15 +183,24 @@ if [[ -n "$COST_USD" && "$COST_USD" != "0" && "$COST_USD" != "null" ]]; then
   fi
 fi
 
-# Claude plan usage (cache-only, sem fetch — não bloqueia statusline)
+# Claude plan usage — gauge style (cache-only, sem fetch)
 PLAN_STR=""
 _usage_cache="${XDG_CACHE_HOME:-${HOME}/.cache}/claude-usage.json"
 if [[ -f "$_usage_cache" ]] && command -v jq &>/dev/null; then
-  _fh=$(jq -r '.five_hour.utilization  // 0 | floor' "$_usage_cache" 2>/dev/null)
-  _sd=$(jq -r '.seven_day.utilization  // 0 | floor' "$_usage_cache" 2>/dev/null)
-  _ex=$(jq -r '.extra_usage.utilization // 0 | floor' "$_usage_cache" 2>/dev/null)
-  if [[ "$_fh" != "0" || "$_sd" != "0" ]]; then
-    PLAN_STR=" | 󱙺 ${_fh}%·${_sd}%·${_ex}%"
+  _fh=$(jq -r '.five_hour.utilization         // 0 | floor' "$_usage_cache" 2>/dev/null)
+  _sd=$(jq -r '.seven_day.utilization         // 0 | floor' "$_usage_cache" 2>/dev/null)
+  _sn=$(jq -r '.seven_day_sonnet.utilization  // 0 | floor' "$_usage_cache" 2>/dev/null)
+  _gauge() {
+    local pct="${1:-0}" w=5 filled empty bar="" i
+    filled=$(( pct * w / 100 ))
+    (( pct > 0 && filled == 0 )) && filled=1
+    empty=$(( w - filled ))
+    for (( i=0; i<filled; i++ )); do bar+="▓"; done
+    for (( i=0; i<empty;  i++ )); do bar+="░"; done
+    printf '%s' "$bar"
+  }
+  if [[ "$_fh" != "0" || "$_sd" != "0" || "$_sn" != "0" ]]; then
+    PLAN_STR=" | 󱙺 5h[$(_gauge "$_fh")${_fh}%] 7d[$(_gauge "$_sd")${_sd}%] sn[$(_gauge "$_sn")${_sn}%]"
   fi
 fi
 
