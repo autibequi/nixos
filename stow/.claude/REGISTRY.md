@@ -44,6 +44,7 @@ Slash commands invocáveis pelo user via `/nome`.
 | `meta/auto-commit` | `/auto-commit` | Toggle auto-commit ON/OFF |
 | `meta/auto-jarvis` | `/auto-jarvis` | Toggle auto-jarvis ON/OFF (executa /jarvis no startup) |
 | `meta/contemplate` | `/contemplate` | Introspecção profunda — minera efêmeros e sessão pra extrair aprendizados |
+| `meta/humanize` | `/humanize` | Remove padrões de escrita AI do texto — baseado no Wikipedia:Signs of AI writing |
 
 ### Global
 | Command | Invocação | Descrição |
