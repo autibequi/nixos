@@ -18,7 +18,8 @@ RUN nix profile install \
     nixpkgs#gawk \
     nixpkgs#gnused \
     nixpkgs#ffmpeg-headless \
-    nixpkgs#espeak-ng && \
+    nixpkgs#espeak-ng \
+    nixpkgs#opencode && \
     nix profile install github:sadjow/claude-code-nix
 
 # Create non-root user and copy profile (claude binary fica em .nix-profile/bin)

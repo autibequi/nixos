@@ -158,11 +158,11 @@ openclaw:
 	@$(COMPOSE) exec -it sandbox openclaw gateway
 
 code:
-	$(COMPOSE) up -d opencode
-	@$(COMPOSE) exec -it opencode opencode
+	$(COMPOSE) up -d sandbox
+	@$(COMPOSE) exec -it sandbox opencode
 
 code-stop:
-	@$(COMPOSE) exec opencode pkill opencode 2>/dev/null || true
+	@$(COMPOSE) exec sandbox pkill opencode 2>/dev/null || true
 
 codio:
 	$(eval MOUNT_DIR := $(abspath $(or $(dir),$(shell pwd))))

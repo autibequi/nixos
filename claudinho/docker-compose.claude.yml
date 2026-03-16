@@ -36,7 +36,7 @@ x-base-volumes: &base-volumes
 services:
   sandbox:
     build:
-      context: ..
+      context: .
       dockerfile: Dockerfile.claude
     image: claude-nix-sandbox
     network_mode: host
@@ -55,7 +55,7 @@ services:
 
   worker:
     build:
-      context: ..
+      context: .
       dockerfile: Dockerfile.claude
     image: claude-nix-sandbox
     mem_limit: 12g
@@ -73,7 +73,7 @@ services:
 
   worker-fast:
     build:
-      context: ..
+      context: .
       dockerfile: Dockerfile.claude
     image: claude-nix-sandbox
     mem_limit: 4g
