@@ -172,22 +172,30 @@ _color() {
 PAD_LEFT=' '
 
 # gauge: ícone (opcional) + número dentro da caixa colorida, depois blocos
-# layout: [ icon DD]▓▓▓▓░░  ($1=icon opcional, $2=pct, $3=w, $4=digits)
-# ícone e número na mesma caixa com cor da barra (fundo colorido, texto #111111)
+# Em 100%: só ícone + número, sem barra — exceto se $5=1 (tooltip: barra sempre desenhada).
+# layout: [ icon DD]▓▓▓▓░░  ($1=icon, $2=pct, $3=w, $4=digits, $5=full_bar_no_hide)
 _gauge() {
-  local icon="${1:-}" pct="${2:-0}" w="${3:-4}" digits="${4:-2}" color num filled seg i
+  local icon="${1:-}" pct="${2:-0}" w="${3:-4}" digits="${4:-2}" full_bar="${5:-}" color num filled seg i
   (( pct > 100 )) && pct=100
+  if (( pct >= 100 )) && [[ "$full_bar" != "1" ]]; then
+    color="#e74c3c"
+    if [[ "$digits" == "3" ]]; then num="100"; else num="100"; fi
+    printf '<span background="%s" color="#111111">%s%s%s</span>' \
+      "$color" "$PAD_LEFT" "${icon:+$icon }" "$num"
+    return
+  fi
   if (( pct >= 100 )); then
     color="#e74c3c"
     filled=$w
+    num="100"
   else
     color=$(_color "$pct")
     filled=$(( pct * w / 100 ))
-  fi
-  if [[ "$digits" == "3" ]]; then
-    num=$(printf '%03d' "$pct")
-  else
-    num=$(printf '%02d' "$pct")
+    if [[ "$digits" == "3" ]]; then
+      num=$(printf '%03d' "$pct")
+    else
+      num=$(printf '%02d' "$pct")
+    fi
   fi
   seg=""
   for (( i=0; i<w; i++ )); do (( i < filled )) && seg+="▓" || seg+="░"; done
@@ -195,19 +203,26 @@ _gauge() {
     "$color" "$PAD_LEFT" "${icon:+$icon }" "$num" "$color" "$seg"
 }
 
-# gauge dourado: créditos extras (ícone opcional dentro da caixa)
+# gauge dourado: créditos extras. Em 100%: só ícone + número, sem barra — exceto se $5=1 (tooltip).
 _gauge_gold() {
-  local icon="${1:-}" pct="${2:-0}" w="${3:-4}" digits="${4:-2}" gold="#d4af37" num filled seg i
+  local icon="${1:-}" pct="${2:-0}" w="${3:-4}" digits="${4:-2}" full_bar="${5:-}" gold="#d4af37" num filled seg i
   (( pct > 100 )) && pct=100
+  if (( pct >= 100 )) && [[ "$full_bar" != "1" ]]; then
+    num="100"
+    printf '<span background="%s" color="#1a1a0a">%s%s%s</span>' \
+      "$gold" "$PAD_LEFT" "${icon:+$icon }" "$num"
+    return
+  fi
   if (( pct >= 100 )); then
     filled=$w
+    num="100"
   else
     filled=$(( pct * w / 100 ))
-  fi
-  if [[ "$digits" == "3" ]]; then
-    num=$(printf '%03d' "$pct")
-  else
-    num=$(printf '%02d' "$pct")
+    if [[ "$digits" == "3" ]]; then
+      num=$(printf '%03d' "$pct")
+    else
+      num=$(printf '%02d' "$pct")
+    fi
   fi
   seg=""
   for (( i=0; i<w; i++ )); do (( i < filled )) && seg+="▓" || seg+="░"; done
@@ -218,11 +233,11 @@ _gauge_gold() {
 sn_num=$(echo "$JSON" | $JQ -r '(.seven_day_sonnet?.utilization? // 0) | floor')
 
 # Ícones por barra (Nerd Font): Sonnet, 5h, 7d, Opus, Extra
-ICON_SONNET='󱙺'   # Claude/AI
-ICON_5H='󰥔'       # relógio (janela 5h)
-ICON_7D='󰃮'       # calendário (janela 7d)
+ICON_SONNET='󰻀'   # brain (AI/Sonnet)
+ICON_5H='󱑑'       # timer (janela 5h)
+ICON_7D='󰴊'       # calendar-range (janela 7d)
 ICON_OPUS='󰐂'     # opus/premium (só no tooltip)
-ICON_EXTRA='󰊗'    # diamante (créditos extras)
+ICON_EXTRA='󰊗'    # diamond (créditos extras)
 
 # --- modo: --waybar ---
 if [[ "$MODE" == "--waybar" ]]; then
@@ -231,11 +246,12 @@ if [[ "$MODE" == "--waybar" ]]; then
   # tooltip: monospace, prefixo largura fixa (12 cols) + gauge 3 dígitos para barras alinhadas (sem ícone dentro da caixa)
   tw=12
   wprefix=12
-  p_5h=$(printf "%-${wprefix}s" "${ICON_5H} 5h");   line_5h="${p_5h}$(_gauge "" "$fh_pct" "$tw" 3)   reset em $fh_r"
-  p_7d=$(printf "%-${wprefix}s" "${ICON_7D} 7d");   line_7d="${p_7d}$(_gauge "" "$sd_pct" "$tw" 3)   reset em $sd_r"
-  p_sn=$(printf "%-${wprefix}s" "${ICON_SONNET} Sonnet"); line_sn="${p_sn}$(_gauge "" "$sn_pct" "$tw" 3)"
-  p_op=$(printf "%-${wprefix}s" "${ICON_OPUS} Opus");   line_op="${p_op}$(_gauge "" "$op_pct" "$tw" 3)"
-  p_ex=$(printf "%-${wprefix}s" "${ICON_EXTRA} Extra");  line_ex="${p_ex}$(_gauge_gold "" "$ex_pct" "$tw" 3)   ${ex_used}/${ex_limit}"
+  # tooltip: 5º arg = 1 → barra sempre desenhada por completo (inclusive em 100%)
+  p_5h=$(printf "%-${wprefix}s" "${ICON_5H} 5h");   line_5h="${p_5h}$(_gauge "" "$fh_pct" "$tw" 3 1)   reset em $fh_r"
+  p_7d=$(printf "%-${wprefix}s" "${ICON_7D} 7d");   line_7d="${p_7d}$(_gauge "" "$sd_pct" "$tw" 3 1)   reset em $sd_r"
+  p_sn=$(printf "%-${wprefix}s" "${ICON_SONNET} Sonnet"); line_sn="${p_sn}$(_gauge "" "$sn_pct" "$tw" 3 1)"
+  p_op=$(printf "%-${wprefix}s" "${ICON_OPUS} Opus");   line_op="${p_op}$(_gauge "" "$op_pct" "$tw" 3 1)"
+  p_ex=$(printf "%-${wprefix}s" "${ICON_EXTRA} Extra");  line_ex="${p_ex}$(_gauge_gold "" "$ex_pct" "$tw" 3 1)   ${ex_used}/${ex_limit}"
   tooltip="<span font_family='monospace' size='12000'>$(printf '%s\n%s\n%s\n%s\n%s' "$line_5h" "$line_7d" "$line_sn" "$line_op" "$line_ex")</span>"
   $JQ -cn \
     --arg text    "$text" \
