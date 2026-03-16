@@ -50,19 +50,32 @@ if [[ -z "$CURL" ]]; then
   done
 fi
 
+# Barra "NO CLAUDE" no estilo da barra vermelha (sem credencial válida)
+_no_claude_bar() {
+  local tooltip="${1:-sem credencial ativa}"
+  local red="#e74c3c"
+  local pad=' '  # hair space (igual às barras azuis)
+  local text="<span background=\"${red}\" color=\"#111111\">${pad}󱙺 NO</span><span color=\"${red}\">▓▓▓▓</span>"
+  if [[ -n "${JQ:-}" ]] && command -v "$JQ" &>/dev/null; then
+    $JQ -cn --arg text "$text" --arg tooltip "$tooltip" --arg class "critical" '{text: $text, tooltip: $tooltip, class: $class}'
+  else
+    printf '{"text":"%s","tooltip":"%s","class":"critical"}\n' "${text//\"/\\\"}" "${tooltip//\"/\\\"}"
+  fi
+}
+
 if [[ -z "$JQ" || -z "$CURL" ]]; then
-  [[ "$MODE" == "--waybar" ]] && echo '{"text":"󱙺 --","tooltip":"jq/curl não encontrado","class":""}' || echo "󱙺 --"
+  [[ "$MODE" == "--waybar" ]] && _no_claude_bar "jq/curl não encontrado" || echo "󱙺 --"
   exit 0
 fi
 
 # --- token ---
 if [[ ! -f "$CREDS_FILE" ]]; then
-  [[ "$MODE" == "--waybar" ]] && echo '{"text":"󱙺 --","tooltip":"credentials não encontrado","class":""}' || echo "󱙺 --"
+  [[ "$MODE" == "--waybar" ]] && _no_claude_bar "credentials não encontrado" || echo "󱙺 --"
   exit 0
 fi
 TOKEN=$($JQ -r '.claudeAiOauth.accessToken // empty' "$CREDS_FILE" 2>/dev/null)
 if [[ -z "$TOKEN" ]]; then
-  [[ "$MODE" == "--waybar" ]] && echo '{"text":"󱙺 --","tooltip":"token não encontrado","class":""}' || echo "󱙺 --"
+  [[ "$MODE" == "--waybar" ]] && _no_claude_bar "token não encontrado" || echo "󱙺 --"
   exit 0
 fi
 
@@ -109,7 +122,7 @@ if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
   if [[ -f "$CACHE_FILE" ]] && $JQ -e '.five_hour' "$CACHE_FILE" &>/dev/null; then
     JSON=$(cat "$CACHE_FILE")
   else
-    [[ "$MODE" == "--waybar" ]] && echo '{"text":"󱙺 rate limit","tooltip":"API limitada. Aguarde.","class":"warning"}' || echo "󱙺 rate limit"
+    [[ "$MODE" == "--waybar" ]] && _no_claude_bar "API limitada. Aguarde." || echo "󱙺 rate limit"
     exit 0
   fi
 fi
@@ -155,39 +168,51 @@ _color() {
   echo "#ffffff"
 }
 
-# gauge: número no início, blocos depois, sem label
-# layout: [DD]▓▓▓▓░░  (w=4 na barra; w maior no tooltip)
+# Padding à esquerda do ícone (igual às barras azuis — hair space U+200A)
+PAD_LEFT=' '
+
+# gauge: ícone (opcional) + número dentro da caixa colorida, depois blocos
+# layout: [ icon DD]▓▓▓▓░░  ($1=icon opcional, $2=pct, $3=w, $4=digits)
+# ícone e número na mesma caixa com cor da barra (fundo colorido, texto #111111)
 _gauge() {
-  local pct="${1:-0}" w="${2:-4}" color num filled seg i
+  local icon="${1:-}" pct="${2:-0}" w="${3:-4}" digits="${4:-2}" color num filled seg i
+  (( pct > 100 )) && pct=100
   if (( pct >= 100 )); then
     color="#e74c3c"
-    num="100"
     filled=$w
   else
     color=$(_color "$pct")
-    num=$(printf '%02d' "$pct")
     filled=$(( pct * w / 100 ))
   fi
-  seg=""
-  for (( i=0; i<w; i++ )); do (( i < filled )) && seg+="▓" || seg+="░"; done
-  printf '<span background="%s" color="#111111">%s</span><span color="%s">%s</span>' \
-    "$color" "$num" "$color" "$seg"
-}
-
-# gauge dourado: créditos extras (mesmo layout, cor fixa gold)
-_gauge_gold() {
-  local pct="${1:-0}" w="${2:-4}" gold="#d4af37" num filled seg i
-  if (( pct >= 100 )); then
-    num="100"
-    filled=$w
+  if [[ "$digits" == "3" ]]; then
+    num=$(printf '%03d' "$pct")
   else
     num=$(printf '%02d' "$pct")
-    filled=$(( pct * w / 100 ))
   fi
   seg=""
   for (( i=0; i<w; i++ )); do (( i < filled )) && seg+="▓" || seg+="░"; done
-  printf '<span background="%s" color="#1a1a0a">%s</span><span color="%s">%s</span>' \
-    "$gold" "$num" "$gold" "$seg"
+  printf '<span background="%s" color="#111111">%s%s%s</span><span color="%s">%s</span>' \
+    "$color" "$PAD_LEFT" "${icon:+$icon }" "$num" "$color" "$seg"
+}
+
+# gauge dourado: créditos extras (ícone opcional dentro da caixa)
+_gauge_gold() {
+  local icon="${1:-}" pct="${2:-0}" w="${3:-4}" digits="${4:-2}" gold="#d4af37" num filled seg i
+  (( pct > 100 )) && pct=100
+  if (( pct >= 100 )); then
+    filled=$w
+  else
+    filled=$(( pct * w / 100 ))
+  fi
+  if [[ "$digits" == "3" ]]; then
+    num=$(printf '%03d' "$pct")
+  else
+    num=$(printf '%02d' "$pct")
+  fi
+  seg=""
+  for (( i=0; i<w; i++ )); do (( i < filled )) && seg+="▓" || seg+="░"; done
+  printf '<span background="%s" color="#1a1a0a">%s%s%s</span><span color="%s">%s</span>' \
+    "$gold" "$PAD_LEFT" "${icon:+$icon }" "$num" "$gold" "$seg"
 }
 
 sn_num=$(echo "$JSON" | $JQ -r '(.seven_day_sonnet?.utilization? // 0) | floor')
@@ -201,14 +226,16 @@ ICON_EXTRA='󰊗'    # diamante (créditos extras)
 
 # --- modo: --waybar ---
 if [[ "$MODE" == "--waybar" ]]; then
-  text="${ICON_SONNET} $(_gauge "$sn_num") ${ICON_5H} $(_gauge "$fh_pct") ${ICON_7D} $(_gauge "$sd_pct") ${ICON_EXTRA} $(_gauge_gold "$ex_pct")"
-  # tooltip: tabela monospace, barrinhas maiores (w=12)
+  # Ícones dentro das caixinhas (mesma cor de fundo da barra)
+  text="$(_gauge "$ICON_SONNET" "$sn_num") $(_gauge "$ICON_5H" "$fh_pct") $(_gauge "$ICON_7D" "$sd_pct") $(_gauge_gold "$ICON_EXTRA" "$ex_pct")"
+  # tooltip: monospace, prefixo largura fixa (12 cols) + gauge 3 dígitos para barras alinhadas (sem ícone dentro da caixa)
   tw=12
-  pad=$(printf '%-10s' "5h");       line_5h="${ICON_5H} ${pad}$(_gauge "$fh_pct" "$tw")   reset em $fh_r"
-  pad=$(printf '%-10s' "7d");       line_7d="${ICON_7D} ${pad}$(_gauge "$sd_pct" "$tw")   reset em $sd_r"
-  pad=$(printf '%-10s' "Sonnet 7d"); line_sn="${ICON_SONNET} ${pad}$(_gauge "$sn_pct" "$tw")"
-  pad=$(printf '%-10s' "Opus 7d");  line_op="${ICON_OPUS} ${pad}$(_gauge "$op_pct" "$tw")"
-  pad=$(printf '%-10s' "Extra");    line_ex="${ICON_EXTRA} ${pad}$(_gauge_gold "$ex_pct" "$tw")   ${ex_used}/${ex_limit}"
+  wprefix=12
+  p_5h=$(printf "%-${wprefix}s" "${ICON_5H} 5h");   line_5h="${p_5h}$(_gauge "" "$fh_pct" "$tw" 3)   reset em $fh_r"
+  p_7d=$(printf "%-${wprefix}s" "${ICON_7D} 7d");   line_7d="${p_7d}$(_gauge "" "$sd_pct" "$tw" 3)   reset em $sd_r"
+  p_sn=$(printf "%-${wprefix}s" "${ICON_SONNET} Sonnet"); line_sn="${p_sn}$(_gauge "" "$sn_pct" "$tw" 3)"
+  p_op=$(printf "%-${wprefix}s" "${ICON_OPUS} Opus");   line_op="${p_op}$(_gauge "" "$op_pct" "$tw" 3)"
+  p_ex=$(printf "%-${wprefix}s" "${ICON_EXTRA} Extra");  line_ex="${p_ex}$(_gauge_gold "" "$ex_pct" "$tw" 3)   ${ex_used}/${ex_limit}"
   tooltip="<span font_family='monospace' size='12000'>$(printf '%s\n%s\n%s\n%s\n%s' "$line_5h" "$line_7d" "$line_sn" "$line_op" "$line_ex")</span>"
   $JQ -cn \
     --arg text    "$text" \
