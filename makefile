@@ -1,4 +1,4 @@
-.PHONY: help switch update stow restow
+.PHONY: help switch update stow restow proxy
 
 help:
 	@echo ""
@@ -11,6 +11,10 @@ help:
 	@echo "  ─────────────────────────────────────────────────────────"
 	@echo "  make stow              Injeta dotfiles via stow"
 	@echo "  make restow            Remove e re-injeta dotfiles"
+	@echo ""
+	@echo "  Gambiarras"
+	@echo "  ─────────────────────────────────────────────────────────"
+	@echo "  make proxy             Mocks LDI + sobe reverse proxy (docker)"
 	@echo ""
 	@echo "  Claudinho (make -C claudinho)"
 	@echo "  ─────────────────────────────────────────────────────────"
@@ -46,6 +50,12 @@ restow:
 		fi; \
 	done
 	stow --target=$$HOME --no-folding --adopt --override=file -R stow
+
+# ── Reverse proxy (gambiarras) ────────────────────────────────────
+
+proxy:
+	@if [ -f gambiarras/reverseproxy/Makefile ]; then $(MAKE) -C gambiarras/reverseproxy mocks-ldi; fi
+	docker compose -f gambiarras/reverseproxy/docker-compose.yaml up -d
 
 # ── Proxy claudinho targets ───────────────────────────────────────
 
