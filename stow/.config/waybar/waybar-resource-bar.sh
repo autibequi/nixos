@@ -25,7 +25,8 @@ _gauge_blue() {
   fi
   seg=""
   for (( i=0; i<w; i++ )); do (( i < filled )) && seg+="▓" || seg+="▒"; done
-  printf '<span background="%s" color="#111111">%s%s</span><span color="%s">%s</span>' \
+  # Padding mínimo à esquerda antes do ícone (hair space U+200A)
+  printf '<span background="%s" color="#111111"> %s%s</span><span color="%s">%s</span>' \
     "$BLUE" "$icon" "$num" "$BLUE" "$seg"
 }
 
@@ -54,27 +55,86 @@ _cpu_pct() {
   echo "$now" > "$CPU_PREV"
 }
 
+# Detalhes para tooltip CPU: load, modelo, freq, cores
+_cpu_tooltip() {
+  local load1 load5 load15
+  read -r load1 load5 load15 _ < /proc/loadavg 2>/dev/null || true
+  local model=""
+  model=$(grep -m1 'model name' /proc/cpuinfo 2>/dev/null | sed 's/^[^:]*: *//' || echo "?")
+  local freq_mhz=""
+  if [[ -r /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq ]]; then
+    freq_mhz=$(($(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq 2>/dev/null || echo 0) / 1000))
+  elif [[ -r /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq ]]; then
+    freq_mhz=$(($(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 2>/dev/null || echo 0) / 1000))
+  fi
+  local cores
+  cores=$(nproc 2>/dev/null || grep -c ^processor /proc/cpuinfo 2>/dev/null || echo "?")
+  printf "Uso: %s%%\nLoad (1/5/15 min): %s %s %s\nModelo: %s\n" "$1" "${load1:-?}" "${load5:-?}" "${load15:-?}" "$model"
+  [[ -n "$freq_mhz" && "$freq_mhz" -gt 0 ]] && printf "Frequência: %s MHz\n" "$freq_mhz"
+  printf "Núcleos: %s\n" "$cores"
+}
+
+# GPU: NVIDIA (nvidia-smi) ou AMD (rocm-smi / sys)
+_gpu_pct() {
+  if command -v nvidia-smi &>/dev/null; then
+    nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' ' || echo "0"
+  elif command -v rocm-smi &>/dev/null; then
+    rocm-smi --showuse 2>/dev/null | grep -oP '\d+(?=%)' | head -1 || echo "0"
+  else
+    echo "0"
+  fi
+}
+
+_gpu_tooltip() {
+  if command -v nvidia-smi &>/dev/null; then
+    local name util mem_used mem_total temp
+    name=$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1)
+    util=$(nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' ')
+    mem_used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' ')
+    mem_total=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' ')
+    temp=$(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' ')
+    printf "GPU: %s\nUso: %s%%\nVRAM: %s / %s MiB\n" "$name" "${util:-?}" "${mem_used:-?}" "${mem_total:-?}"
+    [[ -n "$temp" && "$temp" != "N/A" ]] && printf "Temperatura: %s °C\n" "$temp"
+  elif command -v rocm-smi &>/dev/null; then
+    rocm-smi --showproductname 2>/dev/null | sed 's/^/GPU: /'
+    rocm-smi --showmeminfo vram 2>/dev/null | head -5
+    rocm-smi --showtemp 2>/dev/null | head -3
+  else
+    echo "GPU: não detectada (nvidia-smi/rocm-smi)"
+  fi
+}
+
 case "${1:-}" in
   cpu)
     pct=$(_cpu_pct)
     text=$(_gauge_blue "󰍛 " "$pct")
-    tooltip="CPU: ${pct}%"
+    tooltip=$(_cpu_tooltip "$pct")
     ;;
   memory|mem|ram)
     pct=$(_mem_pct)
     text=$(_gauge_blue "󰘚 " "$pct")
-    tooltip="RAM: ${pct}%"
+    tooltip=$(awk -v pct="$pct" '/MemTotal/{t=$2} /MemAvailable/{a=$2} /MemFree/{f=$2} END{
+      printf "RAM: %s%%\nTotal: %.1f GiB\nDisponível: %.1f GiB\nLivre: %.1f GiB\n", pct, t/1024/1024, a/1024/1024, f/1024/1024
+    }' /proc/meminfo)
+    ;;
+  gpu)
+    pct=$(_gpu_pct)
+    text=$(_gauge_blue "󰢮 " "$pct")
+    tooltip=$(_gpu_tooltip)
     ;;
   *)
-    echo '{"text":"?","tooltip":"usage: cpu | memory","class":""}'
+    echo '{"text":"?","tooltip":"usage: cpu | memory | gpu","class":""}'
     exit 0
     ;;
 esac
 
-# Saída JSON segura (jq quando disponível, senão substituir aspas no text)
+# Saída JSON segura (jq quando disponível, senão escapar aspas e newlines)
 if command -v jq &>/dev/null; then
   jq -cn --arg text "$text" --arg tooltip "$tooltip" '{text: $text, tooltip: $tooltip, class: "resource-bar"}'
 else
   escaped_text="${text//\"/\\\"}"
-  printf '{"text":"%s","tooltip":"%s","class":"resource-bar"}\n' "$escaped_text" "$tooltip"
+  escaped_tooltip="${tooltip//\\/\\\\}"
+  escaped_tooltip="${escaped_tooltip//\"/\\\"}"
+  escaped_tooltip="${escaped_tooltip//$'\n'/\\n}"
+  printf '{"text":"%s","tooltip":"%s","class":"resource-bar"}\n' "$escaped_text" "$escaped_tooltip"
 fi

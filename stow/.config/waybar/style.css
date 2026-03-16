@@ -258,6 +258,7 @@ window#waybar {
 }
 
 #custom-cpu-bar,
+#custom-gpu-bar,
 #custom-ram-bar {
     color: @color-blue;
     padding: 0 8px;

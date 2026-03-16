@@ -23,7 +23,8 @@ _gauge_blue() {
   fi
   seg=""
   for (( i=0; i<w; i++ )); do (( i < filled )) && seg+="▓" || seg+="▒"; done
-  printf '<span background="%s" color="#111111">%s%s</span><span color="%s">%s</span>' \
+  # Padding mínimo à esquerda antes do ícone (hair space U+200A)
+  printf '<span background="%s" color="#111111"> %s%s</span><span color="%s">%s</span>' \
     "$BLUE" "$icon" "$num" "$BLUE" "$seg"
 }
 
