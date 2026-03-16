@@ -82,6 +82,7 @@
       "8": "<span foreground='#ffffff'>8: ",
       "9": "<span foreground='#ffffff'>9: ",
       "10": "<span foreground='#ffffff'>10: ",
+      "gemini": "<span foreground='#ffffff'>gemini: ",
       "default": "<span foreground='#ffffff'>"
     },
     "workspace-taskbar": {

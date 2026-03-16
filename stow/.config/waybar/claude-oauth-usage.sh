@@ -17,8 +17,10 @@ set -euo pipefail
 # Waybar não herda PATH do usuário — garantir que jq/curl sejam encontrados
 export PATH="/run/current-system/sw/bin:${HOME}/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/usr/bin:/bin:${PATH:-}"
 
+# Credenciais: Claude Code CLI pode usar ~/.claude ou ~/.local/share/claude-code
 CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
 CREDS_FILE="${CLAUDE_DIR}/.credentials.json"
+[[ ! -f "$CREDS_FILE" ]] && [[ -f "${HOME}/.local/share/claude-code/.credentials.json" ]] && CREDS_FILE="${HOME}/.local/share/claude-code/.credentials.json"
 CACHE_FILE="${XDG_CACHE_HOME:-${HOME}/.cache}/claude-usage.json"
 CACHE_TTL=300  # 5 minutos
 MODE="${1:-}"
@@ -194,8 +196,7 @@ sn_num=$(echo "$JSON" | $JQ -r '(.seven_day_sonnet?.utilization? // 0) | floor')
 if [[ "$MODE" == "--waybar" ]]; then
   text="$(_gauge "$sn_num") $(_gauge "$fh_pct") $(_gauge "$sd_pct") $(_gauge_gold "$ex_pct")"
   # tooltip: tabela monospace, barrinhas maiores (w=12)
-  local tw=12
-  local pad
+  tw=12
   pad=$(printf '%-10s' "5h");       line_5h="${pad}$(_gauge "$fh_pct" "$tw")   reset em $fh_r"
   pad=$(printf '%-10s' "7d");       line_7d="${pad}$(_gauge "$sd_pct" "$tw")   reset em $sd_r"
   pad=$(printf '%-10s' "Sonnet 7d"); line_sn="${pad}$(_gauge "$sn_pct" "$tw")"
