@@ -56,8 +56,9 @@ claudio() {
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --shell|shell)       mode="shell"; shift ;;
-      --resume|resume)     mode="resume"; shift ;;
+      --open|open)        mode="open"; shift ;;
+      --shell|shell)      mode="shell"; shift ;;
+      --resume|resume)    mode="resume"; shift ;;
       --continue|continue) mode="continue"; shift ;;
       --haiku)      model="--model claude-haiku-4-5-20251001"; shift ;;
       --opus)       model="--model claude-opus-4-6"; shift ;;
@@ -86,6 +87,13 @@ claudio() {
 
   # Cada sessão é um container efêmero independente — nasce e morre com a sessão
   case "$mode" in
+    open)
+      if [[ "$mount_opts" == "rw" ]]; then
+        codio -rw "$mount_path"
+      else
+        codio "$mount_path"
+      fi
+      ;;
     claude)
       CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="${mount_opts}" OBSIDIAN_PATH="${obsidian_path}" \
         docker compose -f "$compose_file" -p "$proj_name" run --rm -it \
@@ -143,10 +151,10 @@ codio() {
 
   echo "[codio] ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
   CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="$mount_opts" \
-    docker compose -f "$nixos_dir/claudinho/docker-compose.claude.yml" -p "$proj_name" up -d codio
+    docker compose -f "$nixos_dir/claudinho/docker-compose.claude.yml" -p "$proj_name" up -d sandbox
   CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="$mount_opts" \
     docker compose -f "$nixos_dir/claudinho/docker-compose.claude.yml" -p "$proj_name" exec -it \
-    -e CLAUDIO_MOUNT="${mount_path}" codio bash -c \
+    -e CLAUDIO_MOUNT="${mount_path}" sandbox bash -c \
     'cd /workspace/mount && exec opencode'
 }
 
