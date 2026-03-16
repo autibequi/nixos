@@ -89,6 +89,13 @@ commands:
     help: Regenera CLI (bashly) e instala symlink em stow/.local/bin.
     filename: commands/install.sh
 
+  - name: init
+    help: Cria ~/.claudio a partir de config.example (não sobrescreve se já existir).
+    flags:
+      - long: --force
+        help: Sobrescreve ~/.claudio se já existir
+    filename: commands/init.sh
+
   # ── Workers / tasks ───────────────────────────────────────
   - name: worker
     alias: [w]

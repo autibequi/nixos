@@ -41,6 +41,7 @@ claudio_usage() {
   printf "  %s   Para todos os containers do projeto.\n" "down           "
   printf "  %s   Para containers e remove imagens/volumes.\n" "destroy        "
   printf "  %s   Regenera CLI (bashly) e instala symlink em stow/.local/bin.\n" "install        "
+  printf "  %s   Cria ~/.claudio a partir de config.example (não sobrescreve se já existir).\n" "init           "
   printf "  %s   Roda worker every60 com output. task= opcional; aceita --engine=.\n" "worker         "
   printf "  %s   Roda worker every10 com output.\n" "worker-run-fast"
   printf "  %s   Roda 1 worker every60 em background (headless).\n" "worker-auto    "
@@ -370,6 +371,33 @@ claudio_install_usage() {
   # :command.long_usage
   if [[ -n "$long_usage" ]]; then
     printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+claudio_init_usage() {
+  printf "claudio init - Cria ~/.claudio a partir de config.example (não sobrescreve se já existir).\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  claudio init [OPTIONS]\n"
+  printf "  claudio init --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--force"
+    printf "    Sobrescreve ~/.claudio se já existir\n"
+    echo
 
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
@@ -1072,6 +1100,27 @@ claudio_install_command() {
 }
 
 # :command.function
+claudio_init_command() {
+
+  # src/commands/init.sh
+  # Cria ~/.claudio a partir de config.example
+  dest="${CLAUDIO_CONFIG:-$HOME/.claudio}"
+  src="$claudio_compose_dir/config.example"
+  if [[ ! -f "$src" ]]; then
+    echo "claudio init: config.example não encontrado em $src" >&2
+    exit 1
+  fi
+  if [[ -f "$dest" ]] && [[ -z "${flag_force:-}" ]]; then
+    echo "[claudio init] $dest já existe (use --force para sobrescrever)"
+    exit 0
+  fi
+  cp "$src" "$dest"
+  chmod 600 "$dest"
+  echo "[claudio init] Criado $dest — edite e preencha engine=, GH_TOKEN=, ANTHROPIC_API_KEY="
+
+}
+
+# :command.function
 claudio_worker_command() {
 
   # src/commands/worker.sh
@@ -1519,6 +1568,13 @@ parse_requirements() {
       action="install"
       shift
       claudio_install_parse_requirements "$@"
+      shift $#
+      ;;
+
+    init)
+      action="init"
+      shift
+      claudio_init_parse_requirements "$@"
       shift $#
       ;;
 
@@ -2113,6 +2169,58 @@ claudio_install_parse_requirements() {
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+claudio_init_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        claudio_init_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="init"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --force)
+
+        # :flag.case_no_arg
+        args['--force']=1
+        shift
+        ;;
 
       -?*)
         printf "invalid option: %s\n" "$key" >&2
@@ -2890,6 +2998,7 @@ run() {
     "down") claudio_down_command ;;
     "destroy") claudio_destroy_command ;;
     "install") claudio_install_command ;;
+    "init") claudio_init_command ;;
     "worker") claudio_worker_command ;;
     "worker-run-fast") claudio_worker_run_fast_command ;;
     "worker-auto") claudio_worker_auto_command ;;

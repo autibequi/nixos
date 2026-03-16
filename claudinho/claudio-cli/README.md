@@ -13,7 +13,14 @@ CLI unificado para o container Claude: sessões interativas, workers, build e ta
 
 ## Configuração (~/.claudio)
 
-Config do usuário: **~/.claudio** (KEY=value, sourceável). Copie `config.example` para `~/.claudio` e ajuste (chmod 600).
+Config do usuário: **~/.claudio** (KEY=value, sourceável). Para criar a partir do exemplo:
+
+```bash
+claudio init          # cria ~/.claudio (não sobrescreve)
+claudio init --force  # sobrescreve se já existir
+```
+
+Depois edite e preencha `engine=`, `GH_TOKEN=`, `ANTHROPIC_API_KEY=` (chmod 600 é aplicado pelo init).
 
 - **engine** — padrão para sessão: `opencode` | `claude` | `cursor`
 - **GH_TOKEN**, **ANTHROPIC_API_KEY** — injetados no container (não usar mais .env do repo para chaves)
