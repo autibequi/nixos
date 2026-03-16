@@ -21,6 +21,7 @@ claudio_load_config() {
     [[ -n "${model:-}" ]] && export CLAUDIO_MODEL="$model"
     [[ -n "${GH_TOKEN:-}" ]] && export GH_TOKEN
     [[ -n "${ANTHROPIC_API_KEY:-}" ]] && export ANTHROPIC_API_KEY
+    [[ -n "${CURSOR_API_KEY:-}" ]] && export CURSOR_API_KEY
     [[ -n "${OBSIDIAN_PATH:-}" ]] && export OBSIDIAN_PATH && claudio_obsidian_path="$OBSIDIAN_PATH"
   fi
 }

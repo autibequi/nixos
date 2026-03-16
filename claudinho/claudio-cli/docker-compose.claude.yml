@@ -1,6 +1,7 @@
 x-env-base: &env-base
-  PATH: /home/claude/.nix-profile/bin:/usr/bin:/bin
+  PATH: /home/claude/.local/bin:/home/claude/.nix-profile/bin:/usr/bin:/bin
   ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+  CURSOR_API_KEY: ${CURSOR_API_KEY:-}
   CLAUDE_SESSION: ${CLAUDE_SESSION:-}
   GH_TOKEN: ${GH_TOKEN:-}
   CLAUDE_ENV: container
@@ -21,6 +22,8 @@ x-base-volumes: &base-volumes
   - ${OBSIDIAN_PATH:-/tmp}:/workspace/obsidian
   - ${HOME}/.claude:/home/claude/.claude
   - ${HOME}/.claude.json:/home/claude/.claude.json
+  # Cursor CLI: credenciais e config (agent login ou CURSOR_API_KEY)
+  - ${HOME}/.cursor:/home/claude/.cursor
   # opencode: stow source no repo (evita symlink ~/.config/opencode que quebraria no container)
   - ${HOME}/nixos/stow/.config/opencode:/home/claude/.config/opencode
   - ${HOME}/projects:/home/claude/projects
