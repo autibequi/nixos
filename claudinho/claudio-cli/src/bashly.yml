@@ -1,0 +1,81 @@
+name: claudio
+help: |
+  CLI unificado para o container Claude (sandbox Nix + Claude Code / OpenCode).
+  Sem subcomando abre Claude no diretório atual ou em DIR.
+environment_variables:
+  - name: CLAUDIO_NIXOS_DIR
+    help: "Raiz do repo NixOS (default $HOME/nixos)"
+  - name: OBSIDIAN_PATH
+    help: "Caminho do vault Obsidian (default $HOME/.ovault)"
+
+flags:
+  - long: --haiku
+    help: Usar modelo Claude Haiku
+  - long: --opus
+    help: Usar modelo Claude Opus
+  - long: --instance
+    arg: id
+    help: "Sufixo da instância (ex. 2 = clau-projeto-2)"
+  - long: --rw
+    help: Montar projeto em read-write (default para run)
+  - long: --ro
+    help: Montar projeto read-only
+
+commands:
+  - name: run
+    alias: [r]
+    default: force
+    help: Abre Claude no container (sessão efêmera). Diretório atual ou DIR.
+    args:
+      - name: dir
+        help: "Diretório do projeto (default ~/projects)"
+    examples:
+      - claudio
+      - claudio run ~/meu-projeto
+      - claudio run --haiku
+    filename: commands/run.sh
+
+  - name: open
+    alias: [opencode, code]
+    help: Abre OpenCode (TUI) com o projeto montado. DIR opcional.
+    args:
+      - name: dir
+        help: "Diretório do projeto (default ~/projects)"
+    examples:
+      - claudio open
+      - claudio open . --rw
+    filename: commands/open.sh
+
+  - name: shell
+    alias: [sh]
+    help: Abre bash no container com o projeto montado.
+    args:
+      - name: dir
+        help: "Diretório do projeto (default ~/projects)"
+    filename: commands/shell.sh
+
+  - name: resume
+    help: Retoma sessão anterior do Claude (--resume).
+    args:
+      - name: dir
+        help: "Diretório do projeto (default ~/projects)"
+    filename: commands/resume.sh
+
+  - name: continue
+    alias: [cont]
+    help: Continua conversa no Claude (--continue).
+    args:
+      - name: dir
+        help: "Diretório do projeto (default ~/projects)"
+    filename: commands/continue.sh
+
+  - name: start
+    help: Sobe sandbox persistente e abre Claude (equiv. make start).
+    args:
+      - name: dir
+        help: "Diretório do projeto (default ~/projects)"
+    filename: commands/start.sh
+
+  - name: openclaw
+    help: Sobe sandbox e abre OpenClaw gateway (LM Studio).
+    filename: commands/openclaw.sh

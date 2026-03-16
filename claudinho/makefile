@@ -1,28 +1,17 @@
 CONTAINER := claude-sandbox
 
-.PHONY: help build start shell sandbox resume down destroy inject openclaw \
-       clau run auto stop stop-all reset status new logs logs-list \
-       usage-api usage-api-7d usage-api-30d clau-service-logs ask claw claw-stop \
-       attach claudio claudio-open claudio-code claudio-code-stop
+.PHONY: help build down destroy claudio-install clau run run-fast auto auto-fast \
+       stop stop-all reset status new logs logs-list usage-api usage-api-7d \
+       usage-api-30d clau-service-logs ask
 
 help:
 	@echo ""
-	@echo "  Container"
+	@echo "  Container (interativo: use o CLI claudio — claudio --help)"
 	@echo "  ─────────────────────────────────────────────────────────"
 	@echo "  make build             Build da imagem Docker"
-	@echo "  make claudio [dir=path] Abre Claude isolado por projeto (multi-instância)"
-	@echo "  make attach [dir=path] Abre sandbox isolado por projeto (multi-instância, default: pwd)"
-	@echo "  make start             Sobe sandbox + bootstrap + Claude Code"
-	@echo "  make sandbox           Idem (bootstrap depois abre Claude)"
-	@echo "  make shell             Sobe sandbox + só bash (bootstrap no .bashrc)"
-	@echo "  make resume            Retoma sessão Claude anterior (usa API)"
 	@echo "  make down              Para todos os containers"
 	@echo "  make destroy           Para containers + remove imagens"
-	@echo "  make inject            Restow + restart sandbox + shell"
-	@echo "  make openclaw              Sobe sandbox e roda openclaw gateway no container"
-	@echo "  make claudio-code          Sobe sandbox e roda OpenCode (TUI) no container"
-	@echo "  make claudio-code-stop     Encerra opencode no container"
-	@echo "  make claudio-open [dir=path]  Abre OpenCode isolado por projeto (equiv. claudio --open)"
+	@echo "  make claudio-install   Regenera CLI (bashly) e instala em stow/.local/bin"
 	@echo ""
 	@echo "  Tasks"
 	@echo "  ─────────────────────────────────────────────────────────"
@@ -61,6 +50,15 @@ LOGFILE = $(LOGDIR)/$$(date +%Y-%m-%dT%H:%M:%S.%3N).log
 build:
 	$(COMPOSE) build
 
+claudio-install:
+	@cd claudio-cli && bashly generate && \
+	if [ ! -L ../../stow/.local/bin/claudio ]; then \
+	  ln -sf ../../../claudinho/claudio-cli/claudio ../../stow/.local/bin/claudio; \
+	  echo "[claudio-install] symlink stow/.local/bin/claudio criado"; \
+	else \
+	  echo "[claudio-install] claudio regenerado (symlink já aponta para o script)"; \
+	fi
+
 VAULT_KANBAN = $(HOME)/.ovault/Work/kanban.md
 
 clau:
@@ -88,92 +86,11 @@ clau:
 	echo "[clau] Workers lançados. Seguindo log..."; \
 	tail -f "$$logfile"
 
-start: sandbox
-
-start-haiku: sandbox-haiku
-
-sandbox-haiku:
-	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --model claude-haiku-4-5-20251001 --permission-mode bypassPermissions'
-
-claudio:
-	$(eval MOUNT_DIR := $(abspath $(or $(dir),$(shell pwd))))
-	$(eval PROJ_SLUG := $(shell basename "$(abspath $(or $(dir),$(shell pwd)))" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$$//'))
-	$(eval CLAU_PROJ := clau-$(PROJ_SLUG))
-	@touch $(HOME)/.claude.json
-	@echo "[claudio] $(PROJ_SLUG) → projeto $(CLAU_PROJ)"
-	@CLAUDIO_MOUNT="$(MOUNT_DIR)" CLAUDIO_MOUNT_OPTS=rw docker compose -f docker-compose.claude.yml -p "$(CLAU_PROJ)" up -d sandbox
-	@CLAUDIO_MOUNT="$(MOUNT_DIR)" CLAUDIO_MOUNT_OPTS=rw docker compose -f docker-compose.claude.yml -p "$(CLAU_PROJ)" exec -it \
-		-e CLAUDIO_MOUNT="$(MOUNT_DIR)" sandbox bash -c \
-		'. /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
-
-attach:
-	$(eval MOUNT_DIR := $(abspath $(or $(dir),$(shell pwd))))
-	$(eval PROJ_SLUG := $(shell basename "$(abspath $(or $(dir),$(shell pwd)))" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$$//'))
-	$(eval CLAU_PROJ := clau-$(PROJ_SLUG))
-	@mkdir -p /tmp/claude-mount-empty
-	@echo "[attach] $(PROJ_SLUG) → projeto $(CLAU_PROJ) (mount: $(MOUNT_DIR))"
-	@CLAUDIO_MOUNT="$(MOUNT_DIR)" $(COMPOSE) -p "$(CLAU_PROJ)" up -d --no-recreate sandbox
-	@CLAUDIO_MOUNT="$(MOUNT_DIR)" $(COMPOSE) -p "$(CLAU_PROJ)" exec -it \
-		-e CLAUDIO_MOUNT="$(MOUNT_DIR)" sandbox bash -c \
-		'. /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
-
-sandbox:
-	@touch $(HOME)/.claude.json
-	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/host/scripts/bootstrap.sh; cd /workspace; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
-
-shell:
-	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec -it sandbox bash
-
-resume:
-	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec sandbox /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions
-
-claw:
-	$(COMPOSE) exec sandbox openclaw tui
-
-claw-stop:
-	$(COMPOSE) stop openclaw
-
 down:
 	$(COMPOSE) down
 
 destroy:
 	$(COMPOSE) down --rmi all --volumes
-
-inject:
-	$(MAKE) -C .. restow
-	$(COMPOSE) down
-	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec -it sandbox bash -c '. /workspace/host/scripts/bootstrap.sh; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions "oi"'
-
-openclaw:
-	@mkdir -p $(HOME)/.openclaw && \
-	if [ ! -f $(HOME)/.openclaw/openclaw.json ]; then \
-		cp ../.openclaw/openclaw.json $(HOME)/.openclaw/openclaw.json && \
-		echo "[openclaw] Config copiada para $(HOME)/.openclaw (LM Studio em host.docker.internal:1234)"; \
-	fi
-	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec -it sandbox openclaw gateway
-
-claudio-code:
-	$(COMPOSE) up -d sandbox
-	@$(COMPOSE) exec -it sandbox opencode
-
-claudio-code-stop:
-	@$(COMPOSE) exec sandbox pkill opencode 2>/dev/null || true
-
-claudio-open:
-	$(eval MOUNT_DIR := $(abspath $(or $(dir),$(shell pwd))))
-	$(eval PROJ_SLUG := $(shell basename "$(abspath $(or $(dir),$(shell pwd)))" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$$//'))
-	$(eval CLAU_PROJ := clau-$(PROJ_SLUG)-open)
-	@echo "[claudio-open] $(PROJ_SLUG) → projeto $(CLAU_PROJ)"
-	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CLAU_PROJ)" up -d sandbox
-	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CLAU_PROJ)" exec -it \
-		-e CLAUDIO_MOUNT="$(MOUNT_DIR)" sandbox bash -c \
-		'cd /workspace/mount && exec opencode'
 
 # ── Tasks ──────────────────────────────────────────────────────────
 # Vários runners por linha de comando: use CLAU_WORKER_ID diferente em cada um.
