@@ -25,7 +25,7 @@ Depois edite e preencha `engine=`, `GH_TOKEN=`, `ANTHROPIC_API_KEY=` (chmod 600 
 - **engine** — padrão para sessão: `opencode` | `claude` | `cursor`
 - **GH_TOKEN**, **ANTHROPIC_API_KEY** — injetados no container (não usar mais .env do repo para chaves)
 - **CURSOR_API_KEY** (opcional) — para engine `cursor`; alternativamente use login no host (`agent login`) e monte `~/.cursor` (já montado pelo compose)
-- **OBSIDIAN_PATH** (opcional)
+- **OBSIDIAN_PATH** (opcional) — caminho do vault Obsidian; se não definir, usa `~/.ovault`. Necessário para montar `/workspace/obsidian` no container. O host (repo nixos) é sempre montado em `/workspace/host` via `$HOME/nixos`.
 
 Sem `--engine=` na linha de comando, `claudio run` usa `engine=` de ~/.claudio; se não houver, exige `--engine=`.
 
@@ -77,7 +77,7 @@ Flags globais: `--engine=opencode|claude|cursor`, `--model=haiku|opus`, `--insta
 
 Com `engine=cursor`, o `claudio run` sobe o **Cursor CLI** (`agent`) no container, com o projeto em `/workspace/mount`. Autenticação:
 
-- **Montagem** — o compose monta `~/.cursor` do host em `/home/claude/.cursor`; se você fez `agent login` no host, o container usa as mesmas credenciais.
+- **Montagem** — o compose monta `~/.cursor` do host (config) e usa o volume nomeado `cursor_config` para `~/.config/cursor` (tokens). Bind mount do host em `.config/cursor` causaria EPERM porque o agent faz chmod nesse dir; o volume nomeado permite isso e persiste o login entre runs.
 - **API key** — defina `CURSOR_API_KEY=...` em `~/.claudio` (ou no `.env` do claudio-cli) para uso em scripts/headless.
 
 **Verificar autenticação (uma vez):** dentro do container, rode `agent status` (ex.: `claudio run --engine=cursor /tmp` e depois `agent status`; ou `docker compose -f docker-compose.claude.yml run --rm sandbox agent status` no dir do compose). Confirme que aparece autenticado antes de usar em fluxo real.

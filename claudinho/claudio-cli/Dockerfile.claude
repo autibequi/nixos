@@ -33,7 +33,7 @@ RUN nix profile install \
 RUN echo "claude:x:1000:1000::/home/claude:/bin/bash" >> /etc/passwd && \
     echo "claude:x:1000:" >> /etc/group && \
     echo "systemd-journal:x:190:claude" >> /etc/group && \
-    mkdir -p /home/claude/.claude /home/claude/.local && \
+    mkdir -p /home/claude/.claude /home/claude/.local /home/claude/.config/cursor && \
     cp -r /root/.nix-profile /home/claude/.nix-profile && \
     chown -R 1000:1000 /home/claude && \
     ln -sf /root/.nix-profile/bin/bash /bin/bash

@@ -11,6 +11,9 @@ claudio_config_file="${CLAUDIO_CONFIG:-$HOME/.claudio}"
 claudio_env_file="$claudio_cli_dir/.env"
 claudio_obsidian_path="${OBSIDIAN_PATH:-$HOME/.ovault}"
 
+# Garante HOME para o compose expandir ${HOME}/nixos e paths; usado por todos os comandos que montam volumes.
+[[ -z "${HOME:-}" ]] && export HOME="$(eval echo ~"$(id -un)")"
+
 # Carrega ~/.claudio (KEY=value, sourceável) e exporta para o compose/container.
 # Flags --engine e --model na linha de comando sempre sobrescrevem estes valores.
 claudio_load_config() {
@@ -22,8 +25,15 @@ claudio_load_config() {
     [[ -n "${GH_TOKEN:-}" ]] && export GH_TOKEN
     [[ -n "${ANTHROPIC_API_KEY:-}" ]] && export ANTHROPIC_API_KEY
     [[ -n "${CURSOR_API_KEY:-}" ]] && export CURSOR_API_KEY
-    [[ -n "${OBSIDIAN_PATH:-}" ]] && export OBSIDIAN_PATH && claudio_obsidian_path="$OBSIDIAN_PATH"
+    if [[ -n "${OBSIDIAN_PATH:-}" ]]; then
+      export OBSIDIAN_PATH
+      claudio_obsidian_path="$OBSIDIAN_PATH"
+    fi
   fi
+  # Path absoluto e ~ expandido para o compose (YAML não expande ~)
+  claudio_obsidian_path="${claudio_obsidian_path/#\~/$HOME}"
+  [[ -d "$claudio_obsidian_path" ]] && claudio_obsidian_path="$(cd "$claudio_obsidian_path" && pwd)"
+  export OBSIDIAN_PATH="$claudio_obsidian_path"
 }
 
 # Engine: opencode | claude | cursor. Se required=1 e vazio, reclama e sai.

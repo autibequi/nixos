@@ -24,6 +24,8 @@ x-base-volumes: &base-volumes
   - ${HOME}/.claude.json:/home/claude/.claude.json
   # Cursor CLI: credenciais e config (agent login ou CURSOR_API_KEY)
   - ${HOME}/.cursor:/home/claude/.cursor
+  # Cursor CLI: tokens de auth (agent faz chmod aqui; bind mount do host causa EPERM, por isso volume nomeado)
+  - cursor_config:/home/claude/.config/cursor
   # opencode: stow source no repo (evita symlink ~/.config/opencode que quebraria no container)
   - ${HOME}/nixos/stow/.config/opencode:/home/claude/.config/opencode
   - ${HOME}/projects:/home/claude/projects
@@ -93,6 +95,9 @@ services:
       GIT_COMMITTER_EMAIL: buchecha@autibequi.com
     extra_hosts: *extra-hosts
     volumes: *base-volumes
+
+volumes:
+  cursor_config:
 
 networks:
   default:
