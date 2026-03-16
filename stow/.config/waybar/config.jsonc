@@ -27,7 +27,7 @@
   ],
   "tray": {
     "icon-size": 14,
-    "spacing": 5,
+    "spacing": 2,
   },
   "power-profiles-daemon": {
     "format": "{icon}",

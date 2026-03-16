@@ -72,9 +72,14 @@ window#waybar {
 #backlight,
 #idle_inhibitor,
 #custom-swaync,
+#custom-cpu-bar,
+#custom-gpu-bar,
+#custom-ram-bar,
+#custom-claude-usage,
+#bluetooth,
 #tray {
-    margin: 0 1px;
-    padding: 0 1px;
+    margin: 0;
+    padding: 0 2px;
     background-color: transparent;
 }
 
@@ -82,7 +87,7 @@ window#waybar {
 *                     WORKSPACES                        *
 *========================================================*/
 #workspaces button {
-    padding: 2px 5px;
+    padding: 2px 3px;
     min-width: 0;
     background-color: transparent;
     color: @ws-text;
@@ -150,8 +155,8 @@ window#waybar {
 *                   MODULE STYLES                       *
 *========================================================*/
 #mpris {
-    padding-left: 7px;
-    padding-right: 7px;
+    padding-left: 4px;
+    padding-right: 4px;
     color: @mpris-text;
     border-bottom-color: @mpris-text;
 }
@@ -219,10 +224,11 @@ window#waybar {
 }
 
 #idle_inhibitor {
-    margin: 0px;
+    margin: 0;
+    padding: 0 2px;
     color: @idle-inhibitor-text;
     border-bottom-color: transparent;
-    min-width: 17px;
+    min-width: 14px;
 }
 
 #idle_inhibitor.activated {
@@ -237,15 +243,15 @@ window#waybar {
 #custom-claude {
     color: #f1c40f;
     background: #2c3e50;
-    padding: 0 10px;
-    margin: 0 1px;
+    padding: 0 4px;
+    margin: 0;
     border-bottom-color: #f1c40f;
 }
 
 #custom-claude-usage {
     color: #2ecc71;
-    padding: 0 8px;
-    margin: 0 1px;
+    padding: 0 4px;
+    margin: 0;
     transition: color 0.3s;
 }
 
@@ -261,14 +267,14 @@ window#waybar {
 #custom-gpu-bar,
 #custom-ram-bar {
     color: @color-blue;
-    padding: 0 8px;
-    margin: 0 1px;
+    padding: 0 4px;
+    margin: 0;
 }
 
 #custom-swaync {
     color: @color-white;
-    padding: 0 4px;
-    min-width: 15px;
+    padding: 0 2px;
+    min-width: 12px;
 }
 
 #custom-swaync.notification {
@@ -292,8 +298,8 @@ window#waybar {
     font-weight: bold;
     color: @color-white;
     border-bottom-color: @color-white;
-    min-width: 15px;
-    padding: 4px;
+    min-width: 12px;
+    padding: 0 2px;
 }
 
 #bluetooth.connected {
@@ -307,8 +313,8 @@ window#waybar {
  *========================================================*/
 #tray {
     background-color: transparent;
-    padding: 0 7px;
-    margin: 0 2px;
+    padding: 0 4px;
+    margin: 0;
     color: @main-text;
     border-bottom-color: @color-white;
     min-width: 0px;
