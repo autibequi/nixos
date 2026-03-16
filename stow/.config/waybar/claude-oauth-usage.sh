@@ -192,16 +192,23 @@ _gauge_gold() {
 
 sn_num=$(echo "$JSON" | $JQ -r '(.seven_day_sonnet?.utilization? // 0) | floor')
 
+# Ícones por barra (Nerd Font): Sonnet, 5h, 7d, Opus, Extra
+ICON_SONNET='󱙺'   # Claude/AI
+ICON_5H='󰥔'       # relógio (janela 5h)
+ICON_7D='󰃮'       # calendário (janela 7d)
+ICON_OPUS='󰐂'     # opus/premium (só no tooltip)
+ICON_EXTRA='󰊗'    # diamante (créditos extras)
+
 # --- modo: --waybar ---
 if [[ "$MODE" == "--waybar" ]]; then
-  text="$(_gauge "$sn_num") $(_gauge "$fh_pct") $(_gauge "$sd_pct") $(_gauge_gold "$ex_pct")"
+  text="${ICON_SONNET} $(_gauge "$sn_num") ${ICON_5H} $(_gauge "$fh_pct") ${ICON_7D} $(_gauge "$sd_pct") ${ICON_EXTRA} $(_gauge_gold "$ex_pct")"
   # tooltip: tabela monospace, barrinhas maiores (w=12)
   tw=12
-  pad=$(printf '%-10s' "5h");       line_5h="${pad}$(_gauge "$fh_pct" "$tw")   reset em $fh_r"
-  pad=$(printf '%-10s' "7d");       line_7d="${pad}$(_gauge "$sd_pct" "$tw")   reset em $sd_r"
-  pad=$(printf '%-10s' "Sonnet 7d"); line_sn="${pad}$(_gauge "$sn_pct" "$tw")"
-  pad=$(printf '%-10s' "Opus 7d");  line_op="${pad}$(_gauge "$op_pct" "$tw")"
-  pad=$(printf '%-10s' "Extra");    line_ex="${pad}$(_gauge_gold "$ex_pct" "$tw")   ${ex_used}/${ex_limit}"
+  pad=$(printf '%-10s' "5h");       line_5h="${ICON_5H} ${pad}$(_gauge "$fh_pct" "$tw")   reset em $fh_r"
+  pad=$(printf '%-10s' "7d");       line_7d="${ICON_7D} ${pad}$(_gauge "$sd_pct" "$tw")   reset em $sd_r"
+  pad=$(printf '%-10s' "Sonnet 7d"); line_sn="${ICON_SONNET} ${pad}$(_gauge "$sn_pct" "$tw")"
+  pad=$(printf '%-10s' "Opus 7d");  line_op="${ICON_OPUS} ${pad}$(_gauge "$op_pct" "$tw")"
+  pad=$(printf '%-10s' "Extra");    line_ex="${ICON_EXTRA} ${pad}$(_gauge_gold "$ex_pct" "$tw")   ${ex_used}/${ex_limit}"
   tooltip="<span font_family='monospace' size='12000'>$(printf '%s\n%s\n%s\n%s\n%s' "$line_5h" "$line_7d" "$line_sn" "$line_op" "$line_ex")</span>"
   $JQ -cn \
     --arg text    "$text" \
