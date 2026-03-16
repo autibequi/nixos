@@ -71,10 +71,18 @@
       "f6": "<span foreground='#3498db'>F6: ",
       "f7": "<span foreground='#9b59b6'>F7: ",
       "f8": "<span foreground='#e056fd'>f8.settings: ",
-      "bleh": "~.claudinho",
-      "1": "1.code",
-      "2": "2.test",
-      "3": "3.web"
+      "bleh": "<span foreground='#ffffff'>~.claudinho: ",
+      "1": "<span foreground='#ffffff'>1.code: ",
+      "2": "<span foreground='#ffffff'>2.test: ",
+      "3": "<span foreground='#ffffff'>3.web: ",
+      "4": "<span foreground='#ffffff'>4: ",
+      "5": "<span foreground='#ffffff'>5: ",
+      "6": "<span foreground='#ffffff'>6: ",
+      "7": "<span foreground='#ffffff'>7: ",
+      "8": "<span foreground='#ffffff'>8: ",
+      "9": "<span foreground='#ffffff'>9: ",
+      "10": "<span foreground='#ffffff'>10: ",
+      "default": "<span foreground='#ffffff'>"
     },
     "workspace-taskbar": {
       "format": "{icon} {title}",
