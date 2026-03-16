@@ -74,26 +74,47 @@ _cpu_tooltip() {
   printf "Núcleos: %s\n" "$cores"
 }
 
-# GPU: NVIDIA (nvidia-smi) ou AMD (rocm-smi / sys)
-_gpu_pct() {
+# Achar nvidia-smi (Waybar pode rodar com PATH limitado). Não usar ||/&& que falham com set -e.
+_nvidia_smi() {
   if command -v nvidia-smi &>/dev/null; then
-    nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' ' || echo "0"
-  elif command -v rocm-smi &>/dev/null; then
-    rocm-smi --showuse 2>/dev/null | grep -oP '\d+(?=%)' | head -1 || echo "0"
-  else
-    echo "0"
+    command -v nvidia-smi
+    return
+  fi
+  if [[ -x /run/current-system/sw/bin/nvidia-smi ]]; then
+    echo /run/current-system/sw/bin/nvidia-smi
+    return
+  fi
+  if [[ -x /nix/var/nix/profiles/system/sw/bin/nvidia-smi ]]; then
+    echo /nix/var/nix/profiles/system/sw/bin/nvidia-smi
   fi
 }
 
+# GPU: NVIDIA (nvidia-smi) ou AMD (rocm-smi)
+_gpu_pct() {
+  local raw="0" pct
+  local nvid=$(_nvidia_smi)
+  if [[ -n "$nvid" ]]; then
+    raw=$("$nvid" --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' ')
+    # nvidia-smi pode retornar "N/A" quando a GPU está em baixo consumo (ex.: Prime)
+    [[ -z "$raw" || "$raw" == "N/A" || ! "$raw" =~ ^[0-9]+$ ]] && raw="0"
+  elif command -v rocm-smi &>/dev/null; then
+    raw=$(rocm-smi --showuse 2>/dev/null | grep -oP '\d+(?=%)' | head -1)
+    [[ -z "$raw" ]] && raw="0"
+  fi
+  echo "${raw:-0}"
+}
+
 _gpu_tooltip() {
-  if command -v nvidia-smi &>/dev/null; then
+  local nvid=$(_nvidia_smi)
+  if [[ -n "$nvid" ]]; then
     local name util mem_used mem_total temp
-    name=$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1)
-    util=$(nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' ')
-    mem_used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' ')
-    mem_total=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' ')
-    temp=$(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' ')
-    printf "GPU: %s\nUso: %s%%\nVRAM: %s / %s MiB\n" "$name" "${util:-?}" "${mem_used:-?}" "${mem_total:-?}"
+    name=$("$nvid" --query-gpu=name --format=csv,noheader 2>/dev/null | head -1)
+    util=$("$nvid" --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' ')
+    mem_used=$("$nvid" --query-gpu=memory.used --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' ')
+    mem_total=$("$nvid" --query-gpu=memory.total --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' ')
+    temp=$("$nvid" --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 | tr -d ' ')
+    [[ "$util" == "N/A" || -z "$util" ]] && util="?"
+    printf "GPU: %s\nUso: %s%%\nVRAM: %s / %s MiB\n" "$name" "$util" "${mem_used:-?}" "${mem_total:-?}"
     [[ -n "$temp" && "$temp" != "N/A" ]] && printf "Temperatura: %s °C\n" "$temp"
   elif command -v rocm-smi &>/dev/null; then
     rocm-smi --showproductname 2>/dev/null | sed 's/^/GPU: /'

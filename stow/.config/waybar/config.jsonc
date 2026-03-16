@@ -57,20 +57,20 @@
     "persistent-workspaces": {
       "*": ["special:f1", "special:f2", "special:f3", "special:f4", "special:f5", "special:f6", "special:f7", "special:f8"]
     },
-    "format": "{icon}:{windows}",
+    "format": "{icon}{windows}</span>",
     "tooltip": true,
     "tooltip-format": "{name}",
     "window-rewrite-default": "",
     "escape": false,
     "format-icons": {
-      "f1": "<span foreground='#e74c3c'>F1</span>",
-      "f2": "<span foreground='#e67e22'>F2</span>",
-      "f3": "<span foreground='#f1c40f'>F3</span>",
-      "f4": "<span foreground='#2ecc71'>F4</span>",
-      "f5": "<span foreground='#1abc9c'>F5</span>",
-      "f6": "<span foreground='#3498db'>F6</span>",
-      "f7": "<span foreground='#9b59b6'>F7</span>",
-      "f8": "<span foreground='#e056fd'>f8.settings</span>",
+      "f1": "<span foreground='#e74c3c'>F1: ",
+      "f2": "<span foreground='#e67e22'>F2: ",
+      "f3": "<span foreground='#f1c40f'>F3: ",
+      "f4": "<span foreground='#2ecc71'>F4: ",
+      "f5": "<span foreground='#1abc9c'>F5: ",
+      "f6": "<span foreground='#3498db'>F6: ",
+      "f7": "<span foreground='#9b59b6'>F7: ",
+      "f8": "<span foreground='#e056fd'>f8.settings: ",
       "bleh": "~.claudinho",
       "1": "1.code",
       "2": "2.test",
@@ -248,10 +248,10 @@
     "on-click": "alacritty -e bash -c 'claude-statusbar --plan max20; read'"
   },
   "custom/claude-usage": {
-    "exec": "$HOME/scripts/claude-oauth-usage.sh --waybar",
+    "exec": "$HOME/.config/waybar/claude-oauth-usage.sh --waybar",
     "return-type": "json",
     "interval": 120,
-    "on-click": "$HOME/scripts/claude-oauth-usage.sh --refresh --waybar",
+    "on-click": "$HOME/.config/waybar/claude-oauth-usage.sh --refresh --waybar",
     "format": "{}",
     "tooltip": true,
     "escape": false
