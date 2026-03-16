@@ -1,5 +1,6 @@
-# secrets (injected into container)
+# secrets (injected into container) e config local
 claudinho/.env
+claudinho/claudio-cli/.claudio
 
 # agent
 tmp/
@@ -47,7 +48,7 @@ stow/.claude/skills/skill-evaluations/
 # ephemeral
 .ephemeral/
 
-# execution logs
+# execution logs	
 logs/
 
 # vault: bind mount do Obsidian — sync exclusivo pelo Obsidian Sync, git não toca
@@ -61,3 +62,5 @@ workbench/**
 workbench/*
 
 .claude/
+
+.env

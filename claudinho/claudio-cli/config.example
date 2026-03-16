@@ -1,0 +1,23 @@
+# Configuração do claudio — copie para ~/.claudio e ajuste (chmod 600 ~/.claudio)
+# Este arquivo é sourceado pelo CLI; use sintaxe shell KEY=value.
+# Nunca commite ~/.claudio (contém tokens).
+
+# ── Engine padrão (obrigatório para `claudio run` se não passar --engine=)
+# opencode = OpenCode TUI
+# claude   = Claude Code no container
+# cursor   = Cursor (por ora mesmo binário que claude no container)
+engine=claude
+
+# ── Tokens (injetados no container; use sempre menor escopo possível)
+# GitHub: Fine-grained PAT com Pull requests / Contents / Issues read-only
+GH_TOKEN=
+
+# Anthropic (Claude API)
+ANTHROPIC_API_KEY=
+
+# ── Opcionais
+# Caminho do vault Obsidian (default: $HOME/.ovault)
+# OBSIDIAN_PATH=$HOME/.ovault
+
+# Raiz do repo NixOS (default: $HOME/nixos)
+# CLAUDIO_NIXOS_DIR=$HOME/nixos

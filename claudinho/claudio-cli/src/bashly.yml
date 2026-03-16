@@ -1,7 +1,7 @@
 name: claudio
 help: |
-  CLI unificado para o container Claude (sandbox Nix + Claude Code / OpenCode).
-  Sem subcomando abre Claude no diretório atual ou em DIR.
+  CLI unificado para o container Claude (sandbox Nix + OpenCode/Claude/Cursor).
+  Sem subcomando = run. Exige --engine=opencode|claude|cursor (ou engine= em ~/.claudio).
 environment_variables:
   - name: CLAUDIO_NIXOS_DIR
     help: "Raiz do repo NixOS (default $HOME/nixos)"
@@ -9,6 +9,9 @@ environment_variables:
     help: "Caminho do vault Obsidian (default $HOME/.ovault)"
 
 flags:
+  - long: --engine
+    arg: engine
+    help: "Engine da sessão/worker: opencode | claude | cursor (obrigatório em run se não estiver em ~/.claudio)"
   - long: --haiku
     help: Usar modelo Claude Haiku
   - long: --opus
@@ -23,28 +26,17 @@ flags:
 
 commands:
   - name: run
-    alias: [r]
+    alias: [r, open, opencode, code]
     default: force
-    help: Abre Claude no container (sessão efêmera). Diretório atual ou DIR.
+    help: Sessão no container. Exige --engine=opencode|claude|cursor (ou engine= em ~/.claudio).
     args:
       - name: dir
         help: "Diretório do projeto (default ~/projects)"
     examples:
-      - claudio
-      - claudio run ~/meu-projeto
-      - claudio run --haiku
+      - claudio run --engine=claude
+      - claudio run --engine=opencode ~/meu-projeto
+      - claudio --engine=cursor
     filename: commands/run.sh
-
-  - name: open
-    alias: [opencode, code]
-    help: Abre OpenCode (TUI) com o projeto montado. DIR opcional.
-    args:
-      - name: dir
-        help: "Diretório do projeto (default ~/projects)"
-    examples:
-      - claudio open
-      - claudio open . --rw
-    filename: commands/open.sh
 
   - name: shell
     alias: [sh]
@@ -79,3 +71,109 @@ commands:
   - name: openclaw
     help: Sobe sandbox e abre OpenClaw gateway (LM Studio).
     filename: commands/openclaw.sh
+
+  # ── Container (build / down / destroy) ─────────────────────
+  - name: build
+    help: Build da imagem Docker do sandbox.
+    filename: commands/build.sh
+
+  - name: down
+    help: Para todos os containers do projeto.
+    filename: commands/down.sh
+
+  - name: destroy
+    help: Para containers e remove imagens/volumes.
+    filename: commands/destroy.sh
+
+  - name: install
+    help: Regenera CLI (bashly) e instala symlink em stow/.local/bin.
+    filename: commands/install.sh
+
+  # ── Workers / tasks ───────────────────────────────────────
+  - name: worker
+    alias: [w]
+    help: Roda worker every60 com output. task= opcional; aceita --engine=.
+    args:
+      - name: task
+        help: Nome da task (opcional).
+    filename: commands/worker.sh
+
+  - name: worker-run-fast
+    alias: [wrf]
+    help: Roda worker every10 com output.
+    filename: commands/worker_run_fast.sh
+
+  - name: worker-auto
+    help: Roda 1 worker every60 em background (headless).
+    filename: commands/worker_auto.sh
+
+  - name: worker-clau
+    help: Lança 2 workers every60 em background; segue log.
+    filename: commands/worker_clau.sh
+
+  - name: worker-stop
+    help: Para workers e reseta tasks presas.
+    filename: commands/worker_stop.sh
+
+  - name: worker-stop-all
+    help: Para TODOS os containers claude-nix-sandbox.
+    filename: commands/worker_stop_all.sh
+
+  - name: reset
+    help: Devolve tasks de running/ para origem (pending/recurring).
+    filename: commands/reset.sh
+
+  - name: status
+    help: Mostra estado via kanban + workers.
+    filename: commands/status.sh
+
+  - name: new
+    help: Cria task + card no kanban.
+    args:
+      - name: name
+        required: true
+        help: Nome da task (ex. minha-tarefa).
+    flags:
+      - long: --type
+        arg: type
+        default: pending
+        help: "pending ou recurring"
+      - long: --model
+        arg: model
+        help: "haiku ou sonnet"
+      - long: --clock
+        arg: clock
+        help: "every10 ou every60"
+      - long: --timeout
+        arg: timeout
+        help: Timeout em segundos
+    filename: commands/new_task.sh
+
+  # ── Logs / usage ────────────────────────────────────────────
+  - name: logs
+    help: Mostra ou segue o último log de worker.
+    filename: commands/logs.sh
+
+  - name: logs-list
+    help: Lista todos os arquivos de log.
+    filename: commands/logs_list.sh
+
+  - name: usage-api
+    help: Uso da API Anthropic (hoje; use --7d ou --30d para período).
+    flags:
+      - long: --7d
+        help: Últimos 7 dias
+      - long: --30d
+        help: Últimos 30 dias
+    filename: commands/usage_api.sh
+
+  - name: service-logs
+    help: journalctl do systemd service claude-autonomous.
+    filename: commands/service_logs.sh
+
+  - name: ask
+    help: Abre Alacritty com Claude respondendo (q=pergunta ou interativo).
+    args:
+      - name: question
+        help: Pergunta (opcional; sem arg = interativo).
+    filename: commands/ask.sh

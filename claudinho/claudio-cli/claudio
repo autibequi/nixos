@@ -19,9 +19,9 @@ version_command() {
 claudio_usage() {
   if [[ -n $long_usage ]]; then
     printf "claudio\n\n"
-    printf "  CLI unificado para o container Claude (sandbox Nix + Claude Code / OpenCode).\n  Sem subcomando abre Claude no diretório atual ou em DIR.\n\n"
+    printf "  CLI unificado para o container Claude (sandbox Nix + OpenCode/Claude/Cursor).\n  Sem subcomando = run. Exige --engine=opencode|claude|cursor (ou engine= em\n  ~/.claudio).\n\n"
   else
-    printf "claudio - CLI unificado para o container Claude (sandbox Nix + Claude Code / OpenCode).\n\n"
+    printf "claudio - CLI unificado para o container Claude (sandbox Nix + OpenCode/Claude/Cursor).\n\n"
   fi
 
   printf "%s\n" "Usage:"
@@ -31,13 +31,30 @@ claudio_usage() {
   echo
   # :command.usage_commands
   printf "%s\n" "Commands:"
-  printf "  %s   Abre Claude no container (sessão efêmera). Diretório atual ou DIR. (default)\n" "run     "
-  printf "  %s   Abre OpenCode (TUI) com o projeto montado. DIR opcional.\n" "open    "
-  printf "  %s   Abre bash no container com o projeto montado.\n" "shell   "
-  printf "  %s   Retoma sessão anterior do Claude (--resume).\n" "resume  "
-  printf "  %s   Continua conversa no Claude (--continue).\n" "continue"
-  printf "  %s   Sobe sandbox persistente e abre Claude (equiv. make start).\n" "start   "
-  printf "  %s   Sobe sandbox e abre OpenClaw gateway (LM Studio).\n" "openclaw"
+  printf "  %s   Sessão no container. Exige --engine=opencode|claude|cursor (ou engine= em ~/.claudio). (default)\n" "run            "
+  printf "  %s   Abre bash no container com o projeto montado.\n" "shell          "
+  printf "  %s   Retoma sessão anterior do Claude (--resume).\n" "resume         "
+  printf "  %s   Continua conversa no Claude (--continue).\n" "continue       "
+  printf "  %s   Sobe sandbox persistente e abre Claude (equiv. make start).\n" "start          "
+  printf "  %s   Sobe sandbox e abre OpenClaw gateway (LM Studio).\n" "openclaw       "
+  printf "  %s   Build da imagem Docker do sandbox.\n" "build          "
+  printf "  %s   Para todos os containers do projeto.\n" "down           "
+  printf "  %s   Para containers e remove imagens/volumes.\n" "destroy        "
+  printf "  %s   Regenera CLI (bashly) e instala symlink em stow/.local/bin.\n" "install        "
+  printf "  %s   Roda worker every60 com output. task= opcional; aceita --engine=.\n" "worker         "
+  printf "  %s   Roda worker every10 com output.\n" "worker-run-fast"
+  printf "  %s   Roda 1 worker every60 em background (headless).\n" "worker-auto    "
+  printf "  %s   Lança 2 workers every60 em background; segue log.\n" "worker-clau    "
+  printf "  %s   Para workers e reseta tasks presas.\n" "worker-stop    "
+  printf "  %s   Para TODOS os containers claude-nix-sandbox.\n" "worker-stop-all"
+  printf "  %s   Devolve tasks de running/ para origem (pending/recurring).\n" "reset          "
+  printf "  %s   Mostra estado via kanban + workers.\n" "status         "
+  printf "  %s   Cria task + card no kanban.\n" "new            "
+  printf "  %s   Mostra ou segue o último log de worker.\n" "logs           "
+  printf "  %s   Lista todos os arquivos de log.\n" "logs-list      "
+  printf "  %s   Uso da API Anthropic (hoje; use --7d ou --30d para período).\n" "usage-api      "
+  printf "  %s   journalctl do systemd service claude-autonomous.\n" "service-logs   "
+  printf "  %s   Abre Alacritty com Claude respondendo (q=pergunta ou interativo).\n" "ask            "
   echo
 
   # :command.long_usage
@@ -45,6 +62,11 @@ claudio_usage() {
     printf "%s\n" "Global Options:"
 
     # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--engine ENGINE"
+    printf "    Engine da sessão/worker: opencode | claude | cursor (obrigatório em run se\n    não estiver em ~/.claudio)\n"
+    echo
+
     # :flag.usage
     printf "  %s\n" "--haiku"
     printf "    Usar modelo Claude Haiku\n"
@@ -96,8 +118,8 @@ claudio_usage() {
 
 # :command.usage
 claudio_run_usage() {
-  printf "claudio run - Abre Claude no container (sessão efêmera). Diretório atual ou DIR.\n\n"
-  printf "Alias: r\n"
+  printf "claudio run - Sessão no container. Exige --engine=opencode|claude|cursor (ou engine= em ~/.claudio).\n\n"
+  printf "Alias: r, open, opencode, code\n"
   echo
 
   printf "%s\n" "Usage:"
@@ -124,46 +146,9 @@ claudio_run_usage() {
 
     # :command.usage_examples
     printf "%s\n" "Examples:"
-    printf "  claudio\n"
-    printf "  claudio run ~/meu-projeto\n"
-    printf "  claudio run --haiku\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-claudio_open_usage() {
-  printf "claudio open - Abre OpenCode (TUI) com o projeto montado. DIR opcional.\n\n"
-  printf "Alias: opencode, code\n"
-  echo
-
-  printf "%s\n" "Usage:"
-  printf "  claudio open [DIR]\n"
-  printf "  claudio open --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
-    echo
-
-    # :command.usage_args
-    printf "%s\n" "Arguments:"
-
-    # :argument.usage
-    printf "  %s\n" "DIR"
-    printf "    Diretório do projeto (default ~/projects)\n"
-    echo
-
-    # :command.usage_examples
-    printf "%s\n" "Examples:"
-    printf "  claudio open\n"
-    printf "  claudio open . --rw\n"
+    printf "  claudio run --engine=claude\n"
+    printf "  claudio run --engine=opencode ~/meu-projeto\n"
+    printf "  claudio --engine=cursor\n"
     echo
 
   fi
@@ -310,6 +295,445 @@ claudio_openclaw_usage() {
   fi
 }
 
+# :command.usage
+claudio_build_usage() {
+  printf "claudio build - Build da imagem Docker do sandbox.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  claudio build\n"
+  printf "  claudio build --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+claudio_down_usage() {
+  printf "claudio down - Para todos os containers do projeto.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  claudio down\n"
+  printf "  claudio down --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+claudio_destroy_usage() {
+  printf "claudio destroy - Para containers e remove imagens/volumes.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  claudio destroy\n"
+  printf "  claudio destroy --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+claudio_install_usage() {
+  printf "claudio install - Regenera CLI (bashly) e instala symlink em stow/.local/bin.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  claudio install\n"
+  printf "  claudio install --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+claudio_worker_usage() {
+  printf "claudio worker - Roda worker every60 com output. task= opcional; aceita --engine=.\n\n"
+  printf "Alias: w\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  claudio worker [TASK]\n"
+  printf "  claudio worker --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "Arguments:"
+
+    # :argument.usage
+    printf "  %s\n" "TASK"
+    printf "    Nome da task (opcional).\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+claudio_worker_run_fast_usage() {
+  printf "claudio worker-run-fast - Roda worker every10 com output.\n\n"
+  printf "Alias: wrf\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  claudio worker-run-fast\n"
+  printf "  claudio worker-run-fast --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+claudio_worker_auto_usage() {
+  printf "claudio worker-auto - Roda 1 worker every60 em background (headless).\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  claudio worker-auto\n"
+  printf "  claudio worker-auto --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+claudio_worker_clau_usage() {
+  printf "claudio worker-clau - Lança 2 workers every60 em background; segue log.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  claudio worker-clau\n"
+  printf "  claudio worker-clau --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+claudio_worker_stop_usage() {
+  printf "claudio worker-stop - Para workers e reseta tasks presas.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  claudio worker-stop\n"
+  printf "  claudio worker-stop --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+claudio_worker_stop_all_usage() {
+  printf "claudio worker-stop-all - Para TODOS os containers claude-nix-sandbox.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  claudio worker-stop-all\n"
+  printf "  claudio worker-stop-all --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+claudio_reset_usage() {
+  printf "claudio reset - Devolve tasks de running/ para origem (pending/recurring).\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  claudio reset\n"
+  printf "  claudio reset --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+claudio_status_usage() {
+  printf "claudio status - Mostra estado via kanban + workers.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  claudio status\n"
+  printf "  claudio status --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+claudio_new_usage() {
+  printf "claudio new - Cria task + card no kanban.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  claudio new NAME [OPTIONS]\n"
+  printf "  claudio new --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--type TYPE"
+    printf "    pending ou recurring\n"
+    printf "    %s\n" "Default: pending"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--model MODEL"
+    printf "    haiku ou sonnet\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--clock CLOCK"
+    printf "    every10 ou every60\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--timeout TIMEOUT"
+    printf "    Timeout em segundos\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "Arguments:"
+
+    # :argument.usage
+    printf "  %s\n" "NAME"
+    printf "    Nome da task (ex. minha-tarefa).\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+claudio_logs_usage() {
+  printf "claudio logs - Mostra ou segue o último log de worker.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  claudio logs\n"
+  printf "  claudio logs --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+claudio_logs_list_usage() {
+  printf "claudio logs-list - Lista todos os arquivos de log.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  claudio logs-list\n"
+  printf "  claudio logs-list --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+claudio_usage_api_usage() {
+  printf "claudio usage-api - Uso da API Anthropic (hoje; use --7d ou --30d para período).\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  claudio usage-api [OPTIONS]\n"
+  printf "  claudio usage-api --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--7d"
+    printf "    Últimos 7 dias\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--30d"
+    printf "    Últimos 30 dias\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+claudio_service_logs_usage() {
+  printf "claudio service-logs - journalctl do systemd service claude-autonomous.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  claudio service-logs\n"
+  printf "  claudio service-logs --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+claudio_ask_usage() {
+  printf "claudio ask - Abre Alacritty com Claude respondendo (q=pergunta ou interativo).\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  claudio ask [QUESTION]\n"
+  printf "  claudio ask --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "Arguments:"
+
+    # :argument.usage
+    printf "  %s\n" "QUESTION"
+    printf "    Pergunta (opcional; sem arg = interativo).\n"
+    echo
+
+  fi
+}
+
 # :command.normalize_input
 # :command.normalize_input_function
 normalize_input() {
@@ -377,10 +801,61 @@ inspect_args() {
 # src/lib/compose_lib.sh
 # Shared helpers for claudio CLI (compose file, mount path, project names).
 # Sourced by generated script. Uses CLAUDIO_NIXOS_DIR, OBSIDIAN_PATH, args, flag_*.
+# Toda a lógica de container vive em claudio-cli; compose e Dockerfile ficam aqui.
 
 claudio_nixos_dir="${CLAUDIO_NIXOS_DIR:-$HOME/nixos}"
-claudio_compose_file="$claudio_nixos_dir/claudinho/docker-compose.claude.yml"
+claudio_cli_dir="$claudio_nixos_dir/claudinho/claudio-cli"
+claudio_compose_file="$claudio_cli_dir/docker-compose.claude.yml"
+claudio_compose_dir="$claudio_cli_dir"
+# Config do usuário: engine padrão e chaves (GH_TOKEN, ANTHROPIC_API_KEY)
+claudio_config_file="${CLAUDIO_CONFIG:-$HOME/.claudio}"
+claudio_env_file="$claudio_cli_dir/.env"
 claudio_obsidian_path="${OBSIDIAN_PATH:-$HOME/.ovault}"
+
+# Carrega ~/.claudio (KEY=value, sourceável) e exporta para o compose/container
+claudio_load_config() {
+  if [[ -f "$claudio_config_file" ]]; then
+    # shellcheck source=/dev/null
+    source "$claudio_config_file"
+    [[ -n "${engine:-}" ]] && export CLAUDIO_ENGINE="$engine"
+    [[ -n "${GH_TOKEN:-}" ]] && export GH_TOKEN
+    [[ -n "${ANTHROPIC_API_KEY:-}" ]] && export ANTHROPIC_API_KEY
+    [[ -n "${OBSIDIAN_PATH:-}" ]] && export OBSIDIAN_PATH && claudio_obsidian_path="$OBSIDIAN_PATH"
+  fi
+}
+
+# Engine: opencode | claude | cursor. Se required=1 e vazio, reclama e sai.
+claudio_resolve_engine() {
+  local required="${1:-0}"
+  local e="${flag_engine:-$CLAUDIO_ENGINE}"
+  e="${e,,}"
+  if [[ -z "$e" ]]; then
+    if [[ "$required" == "1" ]]; then
+      echo "claudio: --engine=opencode|claude|cursor é obrigatório (ou defina engine= em ~/.claudio)" >&2
+      exit 1
+    fi
+    return 0
+  fi
+  case "$e" in
+    opencode|claude|cursor) echo "$e" ;;
+    *)
+      echo "claudio: engine inválido: $e (use opencode, claude ou cursor)" >&2
+      exit 1
+      ;;
+  esac
+}
+# Paths usados pelos comandos worker/logs/status/new/reset (equiv. makefile)
+claudio_nixos_logs="$claudio_nixos_dir/logs"
+claudio_nixos_scripts="$claudio_nixos_dir/scripts"
+claudio_vault_dir="${claudio_vault_dir:-$claudio_nixos_dir/vault}"
+claudio_ephemeral="$claudio_nixos_dir/.ephemeral"
+
+# Compose + env para invocar docker/podman (executar com cwd = claudio_compose_dir ou -f)
+claudio_compose_cmd() {
+  local cmd=(docker compose -f "$claudio_compose_file")
+  [[ -f "$claudio_env_file" ]] && cmd+=(--env-file "$claudio_env_file")
+  "${cmd[@]}" "$@"
+}
 
 # Resolve mount directory: named arg "dir" (bashly uses args['dir']) or default ~/projects
 claudio_resolve_dir() {
@@ -428,32 +903,45 @@ claudio_model_flag() {
 claudio_run_command() {
 
   # src/commands/run.sh
+  # Sessão no container: exige --engine=opencode|claude|cursor (ou engine= em ~/.claudio)
+  claudio_load_config
+  engine=$(claudio_resolve_engine 1)
   mount_path="$(claudio_resolve_dir)"
   proj_slug="$(claudio_proj_slug "$mount_path")"
-  proj_name="$(claudio_proj_name "$proj_slug")"
   mount_opts="$(claudio_mount_opts)"
-  model="$(claudio_model_flag)"
-  CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
-    docker compose -f "$claudio_compose_file" -p "$proj_name" run --rm -it \
-    --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" sandbox \
-    -c ". /workspace/host/scripts/bootstrap.sh; cd /workspace/mount && exec /home/claude/.nix-profile/bin/claude ${model} --permission-mode bypassPermissions"
 
-}
-
-# :command.function
-claudio_open_command() {
-
-  # src/commands/open.sh
-  mount_path="$(claudio_resolve_dir)"
-  proj_slug="$(claudio_proj_slug "$mount_path")"
-  proj_name="$(claudio_proj_name_open "$proj_slug")"
-  mount_opts="$(claudio_mount_opts)"
-  echo "[claudio open] ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
-  CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" \
-    docker compose -f "$claudio_compose_file" -p "$proj_name" up -d sandbox
-  CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" \
-    docker compose -f "$claudio_compose_file" -p "$proj_name" exec -it \
-    -e CLAUDIO_MOUNT="$mount_path" sandbox bash -c 'cd /workspace/mount && exec opencode'
+  case "$engine" in
+    opencode)
+      proj_name="$(claudio_proj_name_open "$proj_slug")"
+      echo "[claudio run] engine=opencode ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
+      CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
+        claudio_compose_cmd -p "$proj_name" up -d sandbox
+      CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
+        claudio_compose_cmd -p "$proj_name" exec -it \
+        -e CLAUDIO_MOUNT="$mount_path" sandbox bash -c 'cd /workspace/mount && exec opencode'
+      ;;
+    claude)
+      proj_name="$(claudio_proj_name "$proj_slug")"
+      model="$(claudio_model_flag)"
+      CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
+        claudio_compose_cmd -p "$proj_name" run --rm -it \
+        --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" sandbox \
+        -c ". /workspace/host/scripts/bootstrap.sh; cd /workspace/mount && exec /home/claude/.nix-profile/bin/claude ${model} --permission-mode bypassPermissions"
+      ;;
+    cursor)
+      # Cursor: por ora mesma UX que claude (container); pode evoluir para gateway/remote
+      proj_name="$(claudio_proj_name "$proj_slug")"
+      model="$(claudio_model_flag)"
+      CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
+        claudio_compose_cmd -p "$proj_name" run --rm -it \
+        --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" sandbox \
+        -c ". /workspace/host/scripts/bootstrap.sh; cd /workspace/mount && exec /home/claude/.nix-profile/bin/claude ${model} --permission-mode bypassPermissions"
+      ;;
+    *)
+      echo "claudio: engine inválido: $engine" >&2
+      exit 1
+      ;;
+  esac
 
 }
 
@@ -461,12 +949,13 @@ claudio_open_command() {
 claudio_shell_command() {
 
   # src/commands/shell.sh
+  claudio_load_config
   mount_path="$(claudio_resolve_dir)"
   proj_slug="$(claudio_proj_slug "$mount_path")"
   proj_name="$(claudio_proj_name "$proj_slug")"
   mount_opts="$(claudio_mount_opts)"
   CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
-    docker compose -f "$claudio_compose_file" -p "$proj_name" run --rm -it \
+    claudio_compose_cmd -p "$proj_name" run --rm -it \
     --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" sandbox
 
 }
@@ -475,12 +964,13 @@ claudio_shell_command() {
 claudio_resume_command() {
 
   # src/commands/resume.sh
+  claudio_load_config
   mount_path="$(claudio_resolve_dir)"
   proj_slug="$(claudio_proj_slug "$mount_path")"
   proj_name="$(claudio_proj_name "$proj_slug")"
   mount_opts="$(claudio_mount_opts)"
   CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
-    docker compose -f "$claudio_compose_file" -p "$proj_name" run --rm -it \
+    claudio_compose_cmd -p "$proj_name" run --rm -it \
     --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" sandbox \
     -c "cd /workspace/mount && exec /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions"
 
@@ -490,13 +980,14 @@ claudio_resume_command() {
 claudio_continue_command() {
 
   # src/commands/continue.sh
+  claudio_load_config
   mount_path="$(claudio_resolve_dir)"
   proj_slug="$(claudio_proj_slug "$mount_path")"
   proj_name="$(claudio_proj_name "$proj_slug")"
   mount_opts="$(claudio_mount_opts)"
   model="$(claudio_model_flag)"
   CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
-    docker compose -f "$claudio_compose_file" -p "$proj_name" run --rm -it \
+    claudio_compose_cmd -p "$proj_name" run --rm -it \
     --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" sandbox \
     -c ". /workspace/host/scripts/bootstrap.sh; cd /workspace/mount && exec /home/claude/.nix-profile/bin/claude --continue ${model} --permission-mode bypassPermissions"
 
@@ -507,6 +998,7 @@ claudio_start_command() {
 
   # src/commands/start.sh
   # Persistent sandbox + Claude (like legacy make start)
+  claudio_load_config
   mount_path="$(claudio_resolve_dir)"
   proj_slug="$(claudio_proj_slug "$mount_path")"
   proj_name="$(claudio_proj_name "$proj_slug")"
@@ -514,9 +1006,9 @@ claudio_start_command() {
   touch "$HOME/.claude.json"
   echo "[claudio start] ${proj_slug} → ${proj_name}"
   CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
-    docker compose -f "$claudio_compose_file" -p "$proj_name" up -d sandbox
+    claudio_compose_cmd -p "$proj_name" up -d sandbox
   CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
-    docker compose -f "$claudio_compose_file" -p "$proj_name" exec -it \
+    claudio_compose_cmd -p "$proj_name" exec -it \
     -e CLAUDIO_MOUNT="$mount_path" sandbox bash -c \
     '. /workspace/host/scripts/bootstrap.sh; cd /workspace; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
 
@@ -526,13 +1018,343 @@ claudio_start_command() {
 claudio_openclaw_command() {
 
   # src/commands/openclaw.sh
+  claudio_load_config
   mkdir -p "$HOME/.openclaw"
   if [[ ! -f "$HOME/.openclaw/openclaw.json" ]]; then
     cp "$claudio_nixos_dir/.openclaw/openclaw.json" "$HOME/.openclaw/openclaw.json" 2>/dev/null || true
     echo "[openclaw] Config copiada para $HOME/.openclaw (LM Studio em host.docker.internal:1234)"
   fi
-  docker compose -f "$claudio_compose_file" up -d sandbox
-  docker compose -f "$claudio_compose_file" exec -it sandbox openclaw gateway
+  claudio_compose_cmd up -d sandbox
+  claudio_compose_cmd exec -it sandbox openclaw gateway
+
+}
+
+# :command.function
+claudio_build_command() {
+
+  # src/commands/build.sh
+  # Build da imagem (context = dir do compose = claudio-cli)
+  cd "$claudio_compose_dir" && claudio_compose_cmd build
+
+}
+
+# :command.function
+claudio_down_command() {
+
+  # src/commands/down.sh
+  claudio_compose_cmd down
+
+}
+
+# :command.function
+claudio_destroy_command() {
+
+  # src/commands/destroy.sh
+  claudio_compose_cmd down --rmi all --volumes
+
+}
+
+# :command.function
+claudio_install_command() {
+
+  # src/commands/install.sh
+  # Regenera CLI (bashly) e instala symlink em stow/.local/bin
+  cd "$claudio_compose_dir" && bashly generate
+  bin_dest="$claudio_nixos_dir/stow/.local/bin/claudio"
+  mkdir -p "$(dirname "$bin_dest")"
+  if [[ ! -L "$bin_dest" ]]; then
+    ln -sf "$claudio_compose_dir/../claudio" "$bin_dest"
+    echo "[claudio install] symlink criado: $bin_dest"
+  else
+    echo "[claudio install] claudio regenerado (symlink já existe)"
+  fi
+
+}
+
+# :command.function
+claudio_worker_command() {
+
+  # src/commands/worker.sh
+  # Worker every60; task= opcional; --engine= opcional (repasse ao runner se precisar)
+  claudio_load_config
+  engine=$(claudio_resolve_engine 0)
+  mkdir -p "$claudio_nixos_logs"
+  logfile="$claudio_nixos_logs/$(date +%Y-%m-%dT%H:%M:%S.%3N).log"
+  echo "[claudio worker] Log: $logfile"
+  OBSIDIAN_PATH="$claudio_obsidian_path" \
+    CLAU_ENGINE="${engine:-}" \
+    claudio_compose_cmd run --rm \
+    -e CLAU_VERBOSE=1 -e CLAU_CLOCK=every60 \
+    -e CLAU_WORKER_ID="${CLAU_WORKER_ID:-worker-1}" \
+    -e CLAU_ENGINE="${engine:-}" \
+    worker /workspace/host/scripts/clau-runner.sh ${args[task]:-} 2>&1 | tee "$logfile"
+
+}
+
+# :command.function
+claudio_worker_run_fast_command() {
+
+  # src/commands/worker_run_fast.sh
+  mkdir -p "$claudio_nixos_logs"
+  logfile="$claudio_nixos_logs/$(date +%Y-%m-%dT%H:%M:%S.%3N).log"
+  echo "[claudio worker-run-fast] Log: $logfile"
+  OBSIDIAN_PATH="$claudio_obsidian_path" claudio_compose_cmd run --rm \
+    -e CLAU_VERBOSE=1 -e CLAU_CLOCK=every10 \
+    -e CLAU_WORKER_ID="${CLAU_WORKER_ID:-worker-fast}" \
+    worker-fast /workspace/host/scripts/clau-runner.sh 2>&1 | tee "$logfile"
+
+}
+
+# :command.function
+claudio_worker_auto_command() {
+
+  # src/commands/worker_auto.sh
+  claudio_load_config
+  mkdir -p "$claudio_nixos_logs"
+  logfile="$claudio_nixos_logs/$(date +%Y-%m-%dT%H:%M:%S.%3N).log"
+  OBSIDIAN_PATH="$claudio_obsidian_path" claudio_compose_cmd run --rm -T \
+    -e CLAU_CLOCK=every60 \
+    -e CLAU_WORKER_ID="${CLAU_WORKER_ID:-worker-1}" \
+    worker /workspace/host/scripts/clau-runner.sh > "$logfile" 2>&1
+
+}
+
+# :command.function
+claudio_worker_clau_command() {
+
+  # src/commands/worker_clau.sh
+  claudio_load_config
+  # Kanban: preferência por vault do repo; fallback Obsidian
+  kanban_file="${claudio_vault_dir}/kanban.md"
+  [[ -f "$kanban_file" ]] || kanban_file="${claudio_obsidian_path}/Work/kanban.md"
+  [[ -f "$kanban_file" ]] || kanban_file="${claudio_obsidian_path}/kanban.md"
+  if [[ ! -f "$kanban_file" ]]; then
+    echo "[claudio worker-clau] kanban não encontrado (procurei $claudio_vault_dir e $claudio_obsidian_path)" >&2
+    exit 1
+  fi
+  mkdir -p "$claudio_nixos_logs"
+  logfile="$claudio_nixos_logs/$(date +%Y-%m-%dT%H:%M:%S.%3N).log"
+  echo "[claudio worker-clau] Log: $logfile"
+  for i in 1 2; do
+    WORKER_ID="worker-$i"
+    existing=$(docker ps --filter "name=_worker_" --filter "label=clau.worker.id=$WORKER_ID" --format "{{.ID}}" 2>/dev/null | head -1)
+    if [[ -n "$existing" ]]; then
+      echo "[claudio worker-clau] $WORKER_ID já rodando ($existing) — skip"
+      continue
+    fi
+    echo "[claudio worker-clau] Lançando $WORKER_ID (every60)..."
+    OBSIDIAN_PATH="$claudio_obsidian_path" claudio_compose_cmd run --rm -T \
+      -e CLAU_WORKER_ID="$WORKER_ID" \
+      -e CLAU_CLOCK=every60 \
+      -l "clau.worker.id=$WORKER_ID" \
+      worker /workspace/host/scripts/clau-runner.sh >> "$logfile" 2>&1 &
+  done
+  echo "[claudio worker-clau] Workers lançados. Seguindo log..."
+  tail -f "$logfile"
+
+}
+
+# :command.function
+claudio_worker_stop_command() {
+
+  # src/commands/worker_stop.sh
+  echo "[claudio worker-stop] Parando workers..."
+  claudio_compose_cmd kill worker 2>/dev/null || true
+  claudio_compose_cmd kill worker-fast 2>/dev/null || true
+  claudio_compose_cmd rm -f worker worker-fast 2>/dev/null || true
+  # Reset tasks presas
+  for dir in "$claudio_vault_dir/_agent/tasks/running"/*/; do
+    [[ -d "$dir" ]] || continue
+    name=$(basename "$dir")
+    source=$(grep '^source=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "pending")
+    rm -f "$dir/.lock"
+    if [[ "$source" == "recurring" ]]; then
+      rm -rf "$dir"
+      echo "[reset] $name (recurring) removed"
+    else
+      mkdir -p "$claudio_vault_dir/_agent/tasks/pending"
+      mv "$dir" "$claudio_vault_dir/_agent/tasks/pending/$name"
+      echo "[reset] $name → pending/"
+    fi
+  done
+  mkdir -p "$claudio_ephemeral/locks"
+  rm -f "$claudio_ephemeral/.kanban.lock" "$claudio_ephemeral/locks"/*.lock 2>/dev/null || true
+  echo "[claudio worker-stop] done"
+
+}
+
+# :command.function
+claudio_worker_stop_all_command() {
+
+  # src/commands/worker_stop_all.sh
+  echo "[claudio worker-stop-all] Parando todos os containers claude..."
+  docker ps --filter "ancestor=claude-nix-sandbox" --format "{{.ID}} {{.Names}}" | while read -r id name; do
+    echo "  stopping $name ($id)"
+    docker stop "$id"
+  done
+  # Reset
+  for dir in "$claudio_vault_dir/_agent/tasks/running"/*/; do
+    [[ -d "$dir" ]] || continue
+    name=$(basename "$dir")
+    source=$(grep '^source=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "pending")
+    rm -f "$dir/.lock"
+    if [[ "$source" == "recurring" ]]; then
+      rm -rf "$dir"
+    else
+      mkdir -p "$claudio_vault_dir/_agent/tasks/pending"
+      mv "$dir" "$claudio_vault_dir/_agent/tasks/pending/$name"
+    fi
+  done
+  mkdir -p "$claudio_ephemeral/locks"
+  rm -f "$claudio_ephemeral/.kanban.lock" "$claudio_ephemeral/locks"/*.lock 2>/dev/null || true
+  echo "[claudio worker-stop-all] done"
+
+}
+
+# :command.function
+claudio_reset_command() {
+
+  # src/commands/reset.sh
+  running_dir="$claudio_vault_dir/_agent/tasks/running"
+  for dir in "$running_dir"/*/; do
+    [[ -d "$dir" ]] || continue
+    name=$(basename "$dir")
+    source=$(grep '^source=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "pending")
+    rm -f "$dir/.lock"
+    if [[ "$source" == "recurring" ]]; then
+      rm -rf "$dir"
+      echo "[reset] $name (recurring) removed"
+    else
+      mkdir -p "$claudio_vault_dir/_agent/tasks/pending"
+      mv "$dir" "$claudio_vault_dir/_agent/tasks/pending/$name"
+      echo "[reset] $name → pending/"
+    fi
+  done
+  mkdir -p "$claudio_ephemeral/locks"
+  rm -f "$claudio_ephemeral/.kanban.lock" "$claudio_ephemeral/locks"/*.lock 2>/dev/null || true
+  echo "[reset] done"
+
+}
+
+# :command.function
+claudio_status_command() {
+
+  # src/commands/status.sh
+  echo "=== Workers ==="
+  docker ps --filter "name=_worker_" --format "table {{.ID}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || echo "(nenhum)"
+  scheduled="$claudio_vault_dir/_agent/scheduled.md"
+  kanban="$claudio_vault_dir/kanban.md"
+  echo ""
+  echo "=== Kanban ==="
+  if [[ -f "$scheduled" ]]; then
+    for col in "Recorrentes" "Em Execução"; do
+      count=0 in_col=0
+      while IFS= read -r line; do
+        if [[ "$line" == "## $col" ]]; then in_col=1; continue; fi
+        if [[ "$line" =~ ^## ]] && [[ "$in_col" == "1" ]]; then break; fi
+        if [[ "$in_col" == "1" ]] && echo "$line" | grep -q '^- \['; then count=$((count+1)); fi
+      done < "$scheduled"
+      echo "  $col: $count"
+    done
+  fi
+  if [[ -f "$kanban" ]]; then
+    for col in "Backlog" "Em Andamento" "Aprovado" "Falhou"; do
+      count=0 in_col=0
+      while IFS= read -r line; do
+        if [[ "$line" == "## $col" ]]; then in_col=1; continue; fi
+        if [[ "$line" =~ ^## ]] && [[ "$in_col" == "1" ]]; then break; fi
+        if [[ "$in_col" == "1" ]] && echo "$line" | grep -q '^- \['; then count=$((count+1)); fi
+      done < "$kanban"
+      echo "  $col: $count"
+    done
+  fi
+  echo ""
+  echo "=== Em Andamento ==="
+  in_col=0
+  while IFS= read -r line; do
+    if [[ "$line" == "## Em Andamento" ]]; then in_col=1; continue; fi
+    if [[ "$line" =~ ^## ]] && [[ "$in_col" == "1" ]]; then break; fi
+    if [[ "$in_col" == "1" ]] && echo "$line" | grep -q '^- \['; then echo "  $line"; fi
+  done < "$kanban" 2>/dev/null || echo "  (vazio)"
+
+}
+
+# :command.function
+claudio_new_command() {
+
+  # src/commands/new_task.sh
+  # $name
+
+
+
+  Atualize \`<diretório de contexto>/contexto.md\`.
+  EOF
+  kanban_col="Backlog"
+  kanban_file="$claudio_vault_dir/kanban.md"
+  if [[ "$type" == "recurring" ]]; then
+    kanban_col="Recorrentes"
+    kanban_file="$claudio_vault_dir/_agent/scheduled.md"
+  fi
+  card="- [ ] **$name** #$type $(date +%Y-%m-%d) \`$model\`"
+  export KANBAN_FILE="$kanban_file"
+  # shellcheck source=/dev/null
+  source "$claudio_nixos_scripts/kanban-sync.sh" 2>/dev/null && kanban_add_card "$kanban_col" "$card" 2>/dev/null || echo "[AVISO] Não conseguiu adicionar card no kanban"
+  echo "Task: $task_dir/ ($model, ${timeout}s)"
+
+}
+
+# :command.function
+claudio_logs_command() {
+
+  # src/commands/logs.sh
+  latest=$(ls -1t "$claudio_nixos_logs"/*.log 2>/dev/null | head -1)
+  if [[ -z "$latest" ]]; then
+    echo "(nenhum log)"
+  else
+    id=$(docker ps --filter "name=_worker_" --format "{{.ID}}" 2>/dev/null | head -1)
+    if [[ -n "$id" ]]; then
+      echo "=== Seguindo $latest ==="
+      tail -f "$latest"
+    else
+      echo "=== $latest ==="
+      cat "$latest"
+    fi
+  fi
+
+}
+
+# :command.function
+claudio_logs_list_command() {
+
+  # src/commands/logs_list.sh
+  ls -1t "$claudio_nixos_logs"/*.log 2>/dev/null || echo "(nenhum log)"
+
+}
+
+# :command.function
+claudio_usage_api_command() {
+
+  # src/commands/usage_api.sh
+  period=""
+  [[ -n "${flag_7d:-}" ]] && period="7d"
+  [[ -n "${flag_30d:-}" ]] && period="30d"
+  "$claudio_nixos_scripts/api-usage.sh" $period
+
+}
+
+# :command.function
+claudio_service_logs_command() {
+
+  # src/commands/service_logs.sh
+  journalctl -u claude-autonomous.service -n 30 -f
+
+}
+
+# :command.function
+claudio_ask_command() {
+
+  # src/commands/ask.sh
+  "$claudio_nixos_scripts/claude-ask.sh" "${args[question]:-}"
 
 }
 
@@ -551,6 +1373,20 @@ parse_requirements() {
         long_usage=yes
         claudio_usage
         exit
+        ;;
+
+      # :flag.case
+      --engine)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--engine']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--engine requires an argument: --engine ENGINE" >&2
+          exit 1
+        fi
         ;;
 
       # :flag.case
@@ -616,17 +1452,10 @@ parse_requirements() {
 
   case $action in
 
-    run | r)
+    run | r | open | opencode | code)
       action="run"
       shift
       claudio_run_parse_requirements "$@"
-      shift $#
-      ;;
-
-    open | opencode | code)
-      action="open"
-      shift
-      claudio_open_parse_requirements "$@"
       shift $#
       ;;
 
@@ -662,6 +1491,132 @@ parse_requirements() {
       action="openclaw"
       shift
       claudio_openclaw_parse_requirements "$@"
+      shift $#
+      ;;
+
+    build)
+      action="build"
+      shift
+      claudio_build_parse_requirements "$@"
+      shift $#
+      ;;
+
+    down)
+      action="down"
+      shift
+      claudio_down_parse_requirements "$@"
+      shift $#
+      ;;
+
+    destroy)
+      action="destroy"
+      shift
+      claudio_destroy_parse_requirements "$@"
+      shift $#
+      ;;
+
+    install)
+      action="install"
+      shift
+      claudio_install_parse_requirements "$@"
+      shift $#
+      ;;
+
+    worker | w)
+      action="worker"
+      shift
+      claudio_worker_parse_requirements "$@"
+      shift $#
+      ;;
+
+    worker-run-fast | wrf)
+      action="worker-run-fast"
+      shift
+      claudio_worker_run_fast_parse_requirements "$@"
+      shift $#
+      ;;
+
+    worker-auto)
+      action="worker-auto"
+      shift
+      claudio_worker_auto_parse_requirements "$@"
+      shift $#
+      ;;
+
+    worker-clau)
+      action="worker-clau"
+      shift
+      claudio_worker_clau_parse_requirements "$@"
+      shift $#
+      ;;
+
+    worker-stop)
+      action="worker-stop"
+      shift
+      claudio_worker_stop_parse_requirements "$@"
+      shift $#
+      ;;
+
+    worker-stop-all)
+      action="worker-stop-all"
+      shift
+      claudio_worker_stop_all_parse_requirements "$@"
+      shift $#
+      ;;
+
+    reset)
+      action="reset"
+      shift
+      claudio_reset_parse_requirements "$@"
+      shift $#
+      ;;
+
+    status)
+      action="status"
+      shift
+      claudio_status_parse_requirements "$@"
+      shift $#
+      ;;
+
+    new)
+      action="new"
+      shift
+      claudio_new_parse_requirements "$@"
+      shift $#
+      ;;
+
+    logs)
+      action="logs"
+      shift
+      claudio_logs_parse_requirements "$@"
+      shift $#
+      ;;
+
+    logs-list)
+      action="logs-list"
+      shift
+      claudio_logs_list_parse_requirements "$@"
+      shift $#
+      ;;
+
+    usage-api)
+      action="usage-api"
+      shift
+      claudio_usage_api_parse_requirements "$@"
+      shift $#
+      ;;
+
+    service-logs)
+      action="service-logs"
+      shift
+      claudio_service_logs_parse_requirements "$@"
+      shift $#
+      ;;
+
+    ask)
+      action="ask"
+      shift
+      claudio_ask_parse_requirements "$@"
       shift $#
       ;;
 
@@ -718,57 +1673,6 @@ claudio_run_parse_requirements() {
 
   # :command.command_filter
   action="run"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        # :argument.case
-        if [[ -z ${args['dir']+x} ]]; then
-          args['dir']=$1
-          shift
-        else
-          printf "invalid argument: %s\n" "$key" >&2
-          exit 1
-        fi
-
-        ;;
-
-    esac
-  done
-
-}
-
-# :command.parse_requirements
-claudio_open_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        claudio_open_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="open"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
@@ -1048,6 +1952,914 @@ claudio_openclaw_parse_requirements() {
 
 }
 
+# :command.parse_requirements
+claudio_build_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        claudio_build_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="build"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+claudio_down_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        claudio_down_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="down"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+claudio_destroy_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        claudio_destroy_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="destroy"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+claudio_install_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        claudio_install_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="install"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+claudio_worker_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        claudio_worker_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="worker"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        # :argument.case
+        if [[ -z ${args['task']+x} ]]; then
+          args['task']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+claudio_worker_run_fast_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        claudio_worker_run_fast_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="worker-run-fast"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+claudio_worker_auto_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        claudio_worker_auto_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="worker-auto"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+claudio_worker_clau_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        claudio_worker_clau_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="worker-clau"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+claudio_worker_stop_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        claudio_worker_stop_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="worker-stop"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+claudio_worker_stop_all_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        claudio_worker_stop_all_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="worker-stop-all"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+claudio_reset_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        claudio_reset_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="reset"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+claudio_status_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        claudio_status_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="status"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+claudio_new_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        claudio_new_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="new"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --type)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--type']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--type requires an argument: --type TYPE" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --model)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--model']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--model requires an argument: --model MODEL" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --clock)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--clock']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--clock requires an argument: --clock CLOCK" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --timeout)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--timeout']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--timeout requires an argument: --timeout TIMEOUT" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        # :argument.case
+        if [[ -z ${args['name']+x} ]]; then
+          args['name']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
+
+        ;;
+
+    esac
+  done
+
+  # :command.required_args_filter
+  if [[ -z ${args['name']+x} ]]; then
+    printf "missing required argument: NAME\nusage: claudio new NAME [OPTIONS]\n" >&2
+
+    exit 1
+  fi
+
+  # :command.default_assignments
+  [[ -n ${args['--type']:-} ]] || args['--type']="pending"
+
+}
+
+# :command.parse_requirements
+claudio_logs_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        claudio_logs_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="logs"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+claudio_logs_list_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        claudio_logs_list_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="logs-list"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+claudio_usage_api_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        claudio_usage_api_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="usage-api"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --7d)
+
+        # :flag.case_no_arg
+        args['--7d']=1
+        shift
+        ;;
+
+      # :flag.case
+      --30d)
+
+        # :flag.case_no_arg
+        args['--30d']=1
+        shift
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+claudio_service_logs_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        claudio_service_logs_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="service-logs"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+claudio_ask_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        claudio_ask_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="ask"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        # :argument.case
+        if [[ -z ${args['question']+x} ]]; then
+          args['question']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
+
+        ;;
+
+    esac
+  done
+
+}
+
 # :command.initialize
 initialize() {
   declare -g version=""
@@ -1069,12 +2881,29 @@ run() {
 
   case "$action" in
     "run") claudio_run_command ;;
-    "open") claudio_open_command ;;
     "shell") claudio_shell_command ;;
     "resume") claudio_resume_command ;;
     "continue") claudio_continue_command ;;
     "start") claudio_start_command ;;
     "openclaw") claudio_openclaw_command ;;
+    "build") claudio_build_command ;;
+    "down") claudio_down_command ;;
+    "destroy") claudio_destroy_command ;;
+    "install") claudio_install_command ;;
+    "worker") claudio_worker_command ;;
+    "worker-run-fast") claudio_worker_run_fast_command ;;
+    "worker-auto") claudio_worker_auto_command ;;
+    "worker-clau") claudio_worker_clau_command ;;
+    "worker-stop") claudio_worker_stop_command ;;
+    "worker-stop-all") claudio_worker_stop_all_command ;;
+    "reset") claudio_reset_command ;;
+    "status") claudio_status_command ;;
+    "new") claudio_new_command ;;
+    "logs") claudio_logs_command ;;
+    "logs-list") claudio_logs_list_command ;;
+    "usage-api") claudio_usage_api_command ;;
+    "service-logs") claudio_service_logs_command ;;
+    "ask") claudio_ask_command ;;
   esac
 }
 

@@ -1,7 +1,14 @@
-# ClaudeOS — movido
+# Claudinho — prompts e persona
 
-Lógica do ambiente do container foi movida para:
+Esta pasta contém **apenas conteúdo de prompts e persona** do agente Claude:
 
-- **`../modules/agents/agent-container/`**
-  - `packages.nix` — lista de pacotes do container
-  - `flake.nix` — flake para build do env (ex.: `nix build ./modules/agents/agent-container#default` na raiz do repo)
+- **personas/** — personas e avatares (`.persona.md`, `avatar/`)
+- **SOUL.md**, **SELF.md**, **DIRETRIZES.md** — identidade e diretrizes
+- **CONTAINER_INIT.md**, **FONTS.md** — documentação
+
+Toda a **lógica de container, workers e tasks** está no **CLI `claudio`**:
+
+- **`claudinho/claudio-cli/`** — código do CLI (bashly), Docker, docker-compose, Make-equivalent
+- Uso: `claudio --help`, `claudio build`, `claudio worker`, `claudio status`, etc.
+
+Instalação do CLI: `claudio install` (regenera e cria symlink em `stow/.local/bin/claudio`).

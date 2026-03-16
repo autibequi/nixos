@@ -16,9 +16,9 @@ help:
 	@echo "  ─────────────────────────────────────────────────────────"
 	@echo "  make proxy             Mocks LDI + sobe reverse proxy (docker)"
 	@echo ""
-	@echo "  Claudinho (make -C claudinho)"
+	@echo "  Claudinho (CLI: claudio)"
 	@echo "  ─────────────────────────────────────────────────────────"
-	@echo "  make -C claudinho help Mostra comandos do claudinho"
+	@echo "  claudio --help       Lista comandos (run, build, worker, etc.)"
 	@echo ""
 
 # ── NixOS ──────────────────────────────────────────────────────────
