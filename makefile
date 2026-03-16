@@ -12,7 +12,7 @@ help:
 	@echo "  make stow              Injeta dotfiles via stow"
 	@echo "  make restow            Remove e re-injeta dotfiles"
 	@echo ""
-	@echo "  Gambiarras"
+	@echo "  Proxy"
 	@echo "  ─────────────────────────────────────────────────────────"
 	@echo "  make proxy             Mocks LDI + sobe reverse proxy (docker)"
 	@echo ""
@@ -51,11 +51,11 @@ restow:
 	done
 	stow --target=$$HOME --no-folding --adopt --override=file -R stow
 
-# ── Reverse proxy (gambiarras) ────────────────────────────────────
+# ── Reverse proxy ─────────────────────────────────────────────────
 
 proxy:
-	@if [ -f gambiarras/reverseproxy/Makefile ]; then $(MAKE) -C gambiarras/reverseproxy mocks-ldi; fi
-	docker compose -f gambiarras/reverseproxy/docker-compose.yaml up -d
+	@if [ -f scripts/reverseproxy/Makefile ]; then $(MAKE) -C scripts/reverseproxy mocks-ldi; fi
+	docker compose -f scripts/reverseproxy/docker-compose.yaml up -d
 
 # ── Proxy claudinho targets ───────────────────────────────────────
 
