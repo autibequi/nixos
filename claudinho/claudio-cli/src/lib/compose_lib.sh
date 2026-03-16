@@ -5,9 +5,9 @@ claudio_nixos_dir="${CLAUDIO_NIXOS_DIR:-$HOME/nixos}"
 claudio_compose_file="$claudio_nixos_dir/claudinho/docker-compose.claude.yml"
 claudio_obsidian_path="${OBSIDIAN_PATH:-$HOME/.ovault}"
 
-# Resolve mount directory: first positional arg or default ~/projects
+# Resolve mount directory: named arg "dir" (bashly uses args['dir']) or default ~/projects
 claudio_resolve_dir() {
-  local dir="${args[0]:-$HOME/projects}"
+  local dir="${args[dir]:-$HOME/projects}"
   if [[ -n "$dir" ]]; then
     (cd "$dir" 2>/dev/null && pwd) || { echo "claudio: dir not found: $dir" >&2; exit 1; }
   else
