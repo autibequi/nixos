@@ -57,4 +57,4 @@ Deve retornar os modelos disponíveis no LM Studio.
 
 ## OpenCode no container (claudinho sandbox)
 
-Quando o opencode roda dentro do container (`make code`), a config é montada de `~/.config/opencode` do host. O sandbox usa `network_mode: host`, então o LM Studio no host é acessível no mesmo endereço (ex.: `192.168.68.60:1234` ou `127.0.0.1:1234`). Nada precisa mudar no `opencode.json`.
+Quando o opencode roda dentro do container (`make claudio-code`), a config é montada de `~/.config/opencode` do host. O sandbox usa `network_mode: host`, então o LM Studio no host é acessível no mesmo endereço (ex.: `192.168.68.60:1234` ou `127.0.0.1:1234`). Nada precisa mudar no `opencode.json`.

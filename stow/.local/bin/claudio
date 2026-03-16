@@ -36,15 +36,15 @@ proj_slug="$(basename "${mount_path}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z
 proj_slug="${proj_slug%-}"
 proj_name="clau-${proj_slug}"
 [[ -n "$instance" && "$instance" != "1" ]] && proj_name="${proj_name}-${instance}"
-codio_proj_name="codio-${proj_slug}"
+claudio_open_proj_name="clau-${proj_slug}-open"
 
 case "$mode" in
   open)
-    echo "[claudio --open] ${proj_slug} → ${codio_proj_name} (mount: ${mount_opts})"
+    echo "[claudio --open] ${proj_slug} → ${claudio_open_proj_name} (mount: ${mount_opts})"
     CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="${mount_opts}" \
-      docker compose -f "$compose_file" -p "$codio_proj_name" up -d sandbox
+      docker compose -f "$compose_file" -p "$claudio_open_proj_name" up -d sandbox
     CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="${mount_opts}" \
-      docker compose -f "$compose_file" -p "$codio_proj_name" exec -it \
+      docker compose -f "$compose_file" -p "$claudio_open_proj_name" exec -it \
       -e CLAUDIO_MOUNT="${mount_path}" sandbox bash -c \
       'cd /workspace/mount && exec opencode'
     ;;

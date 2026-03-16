@@ -2,7 +2,8 @@ CONTAINER := claude-sandbox
 
 .PHONY: help build start shell sandbox resume down destroy inject openclaw \
        clau run auto stop stop-all reset status new logs logs-list \
-       usage-api usage-api-7d usage-api-30d clau-service-logs ask claw claw-stop code code-stop attach claudio codio
+       usage-api usage-api-7d usage-api-30d clau-service-logs ask claw claw-stop \
+       attach claudio claudio-open claudio-code claudio-code-stop
 
 help:
 	@echo ""
@@ -18,10 +19,10 @@ help:
 	@echo "  make down              Para todos os containers"
 	@echo "  make destroy           Para containers + remove imagens"
 	@echo "  make inject            Restow + restart sandbox + shell"
-	@echo "  make openclaw          Sobe sandbox e roda openclaw gateway no container"
-	@echo "  make code              Sobe sandbox e roda OpenCode (TUI) no container"
-	@echo "  make code-stop         Encerra opencode no container"
-	@echo "  make codio [dir=path]  Abre OpenCode isolado por projeto (multi-instância, monta pwd)"
+	@echo "  make openclaw              Sobe sandbox e roda openclaw gateway no container"
+	@echo "  make claudio-code          Sobe sandbox e roda OpenCode (TUI) no container"
+	@echo "  make claudio-code-stop     Encerra opencode no container"
+	@echo "  make claudio-open [dir=path]  Abre OpenCode isolado por projeto (equiv. claudio --open)"
 	@echo ""
 	@echo "  Tasks"
 	@echo "  ─────────────────────────────────────────────────────────"
@@ -157,20 +158,20 @@ openclaw:
 	$(COMPOSE) up -d sandbox
 	@$(COMPOSE) exec -it sandbox openclaw gateway
 
-code:
+claudio-code:
 	$(COMPOSE) up -d sandbox
 	@$(COMPOSE) exec -it sandbox opencode
 
-code-stop:
+claudio-code-stop:
 	@$(COMPOSE) exec sandbox pkill opencode 2>/dev/null || true
 
-codio:
+claudio-open:
 	$(eval MOUNT_DIR := $(abspath $(or $(dir),$(shell pwd))))
 	$(eval PROJ_SLUG := $(shell basename "$(abspath $(or $(dir),$(shell pwd)))" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$$//'))
-	$(eval CODIO_PROJ := codio-$(PROJ_SLUG))
-	@echo "[codio] $(PROJ_SLUG) → projeto $(CODIO_PROJ)"
-	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CODIO_PROJ)" up -d sandbox
-	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CODIO_PROJ)" exec -it \
+	$(eval CLAU_PROJ := clau-$(PROJ_SLUG)-open)
+	@echo "[claudio-open] $(PROJ_SLUG) → projeto $(CLAU_PROJ)"
+	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CLAU_PROJ)" up -d sandbox
+	@CLAUDIO_MOUNT="$(MOUNT_DIR)" docker compose -f docker-compose.claude.yml -p "$(CLAU_PROJ)" exec -it \
 		-e CLAUDIO_MOUNT="$(MOUNT_DIR)" sandbox bash -c \
 		'cd /workspace/mount && exec opencode'
 

@@ -147,9 +147,9 @@ codio() {
 
   local proj_slug="$(basename "${mount_path}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-')"
   proj_slug="${proj_slug%-}"
-  local proj_name="codio-${proj_slug}"
+  local proj_name="clau-${proj_slug}-open"
 
-  echo "[codio] ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
+  echo "[claudio-open] ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
   CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="$mount_opts" \
     docker compose -f "$nixos_dir/claudinho/docker-compose.claude.yml" -p "$proj_name" up -d sandbox
   CLAUDIO_MOUNT="${mount_path}" CLAUDIO_MOUNT_OPTS="$mount_opts" \
