@@ -6,6 +6,8 @@
 
 {
   environment.systemPackages = with pkgs; [
+    bashly
+    
     proton-pass
     stow
     rofimoji
