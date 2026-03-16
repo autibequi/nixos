@@ -12,9 +12,10 @@ BLUE="#3498db"
 # Cache CPU: /tmp é gravável em qualquer sessão (waybar roda como user)
 CPU_PREV="${TMPDIR:-/tmp}/waybar_cpu_prev_${UID:-0}"
 
-# Gauge azul: número + barra (▓ cheio, ▒ tracejado mesmo azul — estilo das outras barras)
+# Gauge azul: ícone + número + barra (▓ cheio, ▒ tracejado mesmo azul)
+# Uso: _gauge_blue "󰍛" 45  →  ícone + "45" + barra
 _gauge_blue() {
-  local pct="${1:-0}" num w=4 filled seg i
+  local icon="${1:-}" pct="${2:-0}" num w=4 filled seg i
   if (( pct >= 100 )); then
     num="100"
     filled=$w
@@ -24,8 +25,8 @@ _gauge_blue() {
   fi
   seg=""
   for (( i=0; i<w; i++ )); do (( i < filled )) && seg+="▓" || seg+="▒"; done
-  printf '<span background="%s" color="#111111">%s</span><span color="%s">%s</span>' \
-    "$BLUE" "$num" "$BLUE" "$seg"
+  printf '<span background="%s" color="#111111">%s%s</span><span color="%s">%s</span>' \
+    "$BLUE" "$icon" "$num" "$BLUE" "$seg"
 }
 
 # RAM: /proc/meminfo
@@ -56,12 +57,12 @@ _cpu_pct() {
 case "${1:-}" in
   cpu)
     pct=$(_cpu_pct)
-    text=$(_gauge_blue "$pct")
+    text=$(_gauge_blue "󰍛 " "$pct")
     tooltip="CPU: ${pct}%"
     ;;
   memory|mem|ram)
     pct=$(_mem_pct)
-    text=$(_gauge_blue "$pct")
+    text=$(_gauge_blue "󰘚 " "$pct")
     tooltip="RAM: ${pct}%"
     ;;
   *)

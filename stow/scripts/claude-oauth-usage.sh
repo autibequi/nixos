@@ -152,10 +152,10 @@ _color() {
 }
 
 # gauge: número no início, blocos depois, sem label
-# layout: [DD]▓▓▓▓░░
-# >100%: barra toda vermelha, cheia, mostra "100"
+# layout: [DD]▓▓▓▓░░  (w=4 na barra; w maior no tooltip)
+# uso: _gauge pct [w]; _gauge_gold pct [w]
 _gauge() {
-  local pct="${1:-0}" color num w=4 filled seg i
+  local pct="${1:-0}" w="${2:-4}" color num filled seg i
   if (( pct >= 100 )); then
     color="#e74c3c"
     num="100"
@@ -173,7 +173,7 @@ _gauge() {
 
 # gauge dourado: créditos extras (mesmo layout, cor fixa gold)
 _gauge_gold() {
-  local pct="${1:-0}" gold="#d4af37" num w=4 filled seg i
+  local pct="${1:-0}" w="${2:-4}" gold="#d4af37" num filled seg i
   if (( pct >= 100 )); then
     num="100"
     filled=$w
@@ -192,13 +192,15 @@ sn_num=$(echo "$JSON" | $JQ -r '(.seven_day_sonnet?.utilization? // 0) | floor')
 # --- modo: --waybar ---
 if [[ "$MODE" == "--waybar" ]]; then
   text="$(_gauge "$sn_num") $(_gauge "$fh_pct") $(_gauge "$sd_pct") $(_gauge_gold "$ex_pct")"
-  # tooltip com barrinhas (mesmo gauge da barra)
-  line_5h="5h        $(_gauge "$fh_pct")   reset em $fh_r"
-  line_7d="7d        $(_gauge "$sd_pct")   reset em $sd_r"
-  line_sn="Sonnet 7d $(_gauge "$sn_pct")"
-  line_op="Opus 7d   $(_gauge "$op_pct")"
-  line_ex="Extra     $(_gauge_gold "$ex_pct")   ${ex_used}/${ex_limit}"
-  tooltip=$(printf '%s\n%s\n%s\n%s\n%s' "$line_5h" "$line_7d" "$line_sn" "$line_op" "$line_ex")
+  # tooltip: tabela monospace, barrinhas maiores (w=12)
+  local tw=12
+  local pad
+  pad=$(printf '%-10s' "5h");       line_5h="${pad}$(_gauge "$fh_pct" "$tw")   reset em $fh_r"
+  pad=$(printf '%-10s' "7d");       line_7d="${pad}$(_gauge "$sd_pct" "$tw")   reset em $sd_r"
+  pad=$(printf '%-10s' "Sonnet 7d"); line_sn="${pad}$(_gauge "$sn_pct" "$tw")"
+  pad=$(printf '%-10s' "Opus 7d");  line_op="${pad}$(_gauge "$op_pct" "$tw")"
+  pad=$(printf '%-10s' "Extra");    line_ex="${pad}$(_gauge_gold "$ex_pct" "$tw")   ${ex_used}/${ex_limit}"
+  tooltip="<span font_family='monospace' size='12000'>$(printf '%s\n%s\n%s\n%s\n%s' "$line_5h" "$line_7d" "$line_sn" "$line_op" "$line_ex")</span>"
   $JQ -cn \
     --arg text    "$text" \
     --arg tooltip "$tooltip" \
