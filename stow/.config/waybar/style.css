@@ -86,9 +86,14 @@ window#waybar {
 /*========================================================*
 *                     WORKSPACES                        *
 *========================================================*/
+#workspaces {
+    margin: 0 2px;
+}
+
 #workspaces button {
-    padding: 2px 3px;
+    padding: 2px 5px;
     min-width: 0;
+    margin: 0;
     background-color: transparent;
     color: @ws-text;
 }
