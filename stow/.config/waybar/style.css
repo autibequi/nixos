@@ -134,16 +134,16 @@ window#waybar {
     text-shadow: 0 0 6px @ws-special-text;
 }
 
+/* Special F1–F8: keep rainbow colors from Pango markup; only add active indicator */
 #workspaces button.active.special {
-    color: @ws-special-active-text;
-    background-color: @ws-special-active-bg;
-    text-shadow: 0 0 6px @ws-special-active-text;
+    background-color: rgba(255, 255, 255, 0.12);
+    box-shadow: inset 0 -2px @color-white;
+    text-shadow: 0 0 8px currentColor;
 }
 
 #workspaces button.special:hover {
-    color: @ws-special-hover-text;
-    background-color: @ws-special-active-bg;
-    text-shadow: 0 0 6px @ws-special-hover-text;
+    background-color: rgba(255, 255, 255, 0.08);
+    text-shadow: 0 0 8px currentColor;
 }
 
 /*========================================================*
@@ -255,6 +255,13 @@ window#waybar {
 
 #custom-claude-usage.critical {
     color: #e74c3c;
+}
+
+#custom-cpu-bar,
+#custom-ram-bar {
+    color: @color-blue;
+    padding: 0 8px;
+    margin: 0 1px;
 }
 
 #custom-swaync {

@@ -170,18 +170,35 @@ _gauge() {
   printf '<span background="%s" color="#111111">%s</span><span color="%s">%s</span>' \
     "$color" "$num" "$color" "$seg"
 }
+
+# gauge dourado: créditos extras (mesmo layout, cor fixa gold)
+_gauge_gold() {
+  local pct="${1:-0}" gold="#d4af37" num w=4 filled seg i
+  if (( pct >= 100 )); then
+    num="100"
+    filled=$w
+  else
+    num=$(printf '%02d' "$pct")
+    filled=$(( pct * w / 100 ))
+  fi
+  seg=""
+  for (( i=0; i<w; i++ )); do (( i < filled )) && seg+="▓" || seg+="░"; done
+  printf '<span background="%s" color="#1a1a0a">%s</span><span color="%s">%s</span>' \
+    "$gold" "$num" "$gold" "$seg"
+}
+
 sn_num=$(echo "$JSON" | $JQ -r '(.seven_day_sonnet?.utilization? // 0) | floor')
 
 # --- modo: --waybar ---
 if [[ "$MODE" == "--waybar" ]]; then
-  text="$(_gauge "$sn_num") $(_gauge "$fh_pct") $(_gauge "$sd_pct")"
-  tooltip=$(printf \
-    "%-10s %3d%% — reset em %s\n%-10s %3d%% — reset em %s\n%-10s %3d%%\n%-10s %3d%%\n%-10s %s/%s (%d%%)" \
-    "5h"        "$fh_pct" "$fh_r" \
-    "7d"        "$sd_pct" "$sd_r" \
-    "Sonnet 7d" "$sn_pct" \
-    "Opus 7d"   "$op_pct" \
-    "Extra"     "$ex_used" "$ex_limit" "$ex_pct")
+  text="$(_gauge "$sn_num") $(_gauge "$fh_pct") $(_gauge "$sd_pct") $(_gauge_gold "$ex_pct")"
+  # tooltip com barrinhas (mesmo gauge da barra)
+  line_5h="5h        $(_gauge "$fh_pct")   reset em $fh_r"
+  line_7d="7d        $(_gauge "$sd_pct")   reset em $sd_r"
+  line_sn="Sonnet 7d $(_gauge "$sn_pct")"
+  line_op="Opus 7d   $(_gauge "$op_pct")"
+  line_ex="Extra     $(_gauge_gold "$ex_pct")   ${ex_used}/${ex_limit}"
+  tooltip=$(printf '%s\n%s\n%s\n%s\n%s' "$line_5h" "$line_7d" "$line_sn" "$line_op" "$line_ex")
   $JQ -cn \
     --arg text    "$text" \
     --arg tooltip "$tooltip" \

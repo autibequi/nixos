@@ -15,6 +15,8 @@
   ],
   "modules-right": [
     "mpris",
+    "custom/cpu-bar",
+    "custom/ram-bar",
     "custom/claude-usage",
     "pulseaudio",
     "backlight",
@@ -50,20 +52,28 @@
     "disable-scroll": true,
     "all-outputs": false,
     "show-special": true,
+    "special-visible-only": false,
+    "persistent-workspaces": {
+      "*": ["special:f1", "special:f2", "special:f3", "special:f4", "special:f5", "special:f6", "special:f7", "special:f8"]
+    },
     "format": "{icon}:{windows}",
     "tooltip": true,
     "tooltip-format": "{name}",
     "window-rewrite-default": "",
+    "escape": false,
     "format-icons": {
-      "f8": "f8.settings",
+      "f1": "<span foreground='#e74c3c'>F1</span>",
+      "f2": "<span foreground='#e67e22'>F2</span>",
+      "f3": "<span foreground='#f1c40f'>F3</span>",
+      "f4": "<span foreground='#2ecc71'>F4</span>",
+      "f5": "<span foreground='#1abc9c'>F5</span>",
+      "f6": "<span foreground='#3498db'>F6</span>",
+      "f7": "<span foreground='#9b59b6'>F7</span>",
+      "f8": "<span foreground='#e056fd'>f8.settings</span>",
       "bleh": "~.claudinho",
       "1": "1.code",
       "2": "2.test",
-      "3": "3.web",
-      // "f1": "ʕ■ᴥ■ʔ",
-      // "f2": "ʕ■ᴥ■ʔ",
-      // "f3": "ʕ■ᴥ■ʔ",
-      // "f4": "ʕ■ᴥ■ʔ"
+      "3": "3.web"
     },
     "workspace-taskbar": {
       "format": "{icon} {title}",
@@ -241,6 +251,22 @@
     "return-type": "json",
     "interval": 120,
     "on-click": "$HOME/scripts/claude-oauth-usage.sh --refresh --waybar",
+    "format": "{}",
+    "tooltip": true,
+    "escape": false
+  },
+  "custom/cpu-bar": {
+    "exec": "$HOME/.config/waybar/waybar-resource-bar.sh cpu",
+    "return-type": "json",
+    "interval": 2,
+    "format": "{}",
+    "tooltip": true,
+    "escape": false
+  },
+  "custom/ram-bar": {
+    "exec": "$HOME/.config/waybar/waybar-resource-bar.sh memory",
+    "return-type": "json",
+    "interval": 2,
     "format": "{}",
     "tooltip": true,
     "escape": false
