@@ -21,6 +21,7 @@ x-base-volumes: &base-volumes
   - ${OBSIDIAN_PATH:-/tmp}:/workspace/obsidian
   - ${HOME}/.claude:/home/claude/.claude
   - ${HOME}/.claude.json:/home/claude/.claude.json
+  - ${HOME}/.config/opencode:/home/claude/.config/opencode
   - ${HOME}/projects:/home/claude/projects
   - ${XDG_RUNTIME_DIR:-/run/user/1000}/${WAYLAND_DISPLAY:-wayland-1}:/run/user/1000/${WAYLAND_DISPLAY:-wayland-1}
   - /var/log/journal:/workspace/logs/host/journal:ro

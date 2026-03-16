@@ -19,6 +19,7 @@ RUN nix profile install \
     nixpkgs#gnused \
     nixpkgs#ffmpeg-headless \
     nixpkgs#espeak-ng \
+    nixpkgs#coreutils \
     nixpkgs#opencode && \
     nix profile install github:sadjow/claude-code-nix
 
