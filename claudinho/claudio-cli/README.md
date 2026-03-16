@@ -70,4 +70,4 @@ Sem `--engine=` na linha de comando, `claudio run` usa `engine=` de ~/.claudio; 
 | service-logs | journalctl claude-autonomous |
 | ask [pergunta] | Claude em Alacritty |
 
-Flags globais: `--engine=opencode|claude|cursor`, `--haiku`, `--opus`, `--instance ID`, `--rw`, `--ro`.
+Flags globais: `--engine=opencode|claude|cursor`, `--model=haiku|opus`, `--instance ID`, `--rw`, `--ro`.

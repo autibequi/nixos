@@ -5,7 +5,7 @@ if [[ ! -f "$src" ]]; then
   echo "claudio init: config.example não encontrado em $src" >&2
   exit 1
 fi
-if [[ -f "$dest" ]] && [[ -z "${flag_force:-}" ]]; then
+if [[ -f "$dest" ]] && [[ -z "${args['--force']:-${flag_force:-}}" ]]; then
   echo "[claudio init] $dest já existe (use --force para sobrescrever)"
   exit 0
 fi

@@ -12,10 +12,9 @@ flags:
   - long: --engine
     arg: engine
     help: "Engine da sessão/worker: opencode | claude | cursor (obrigatório em run se não estiver em ~/.claudio)"
-  - long: --haiku
-    help: Usar modelo Claude Haiku
-  - long: --opus
-    help: Usar modelo Claude Opus
+  - long: --model
+    arg: model
+    help: "Modelo Claude: haiku | opus (default: sonnet)"
   - long: --instance
     arg: id
     help: "Sufixo da instância (ex. 2 = clau-projeto-2)"

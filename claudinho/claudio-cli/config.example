@@ -2,11 +2,11 @@
 # Este arquivo é sourceado pelo CLI; use sintaxe shell KEY=value.
 # Nunca commite ~/.claudio (contém tokens).
 
-# ── Engine padrão (obrigatório para `claudio run` se não passar --engine=)
-# opencode = OpenCode TUI
-# claude   = Claude Code no container
-# cursor   = Cursor (por ora mesmo binário que claude no container)
+# ── Engine e modelo (--engine e --model na linha de comando sobrescrevem)
+# opencode = OpenCode TUI | claude = Claude Code | cursor = Cursor
 engine=claude
+# haiku | opus (vazio = sonnet)
+# model=sonnet
 
 # ── Tokens (injetados no container; use sempre menor escopo possível)
 # GitHub: Fine-grained PAT com Pull requests / Contents / Issues read-only

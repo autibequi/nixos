@@ -2,8 +2,9 @@
 # CLAUDINHO startup — modular dashboard
 set -uo pipefail
 
-# Limpa output anterior (docker compose up, etc.)
-printf '\033c'
+# Limpa output anterior (docker compose up, etc.). Não limpar quando vamos
+# passar o controle ao Claude Code (evita tela preta: claude não redesenha a tempo).
+[[ -z "${BOOTSTRAP_SKIP_CLEAR:-}" ]] && printf '\033c'
 
 # --- Init /workspace como git repo para Claude Code abrir aqui ---
 [[ ! -d /workspace/.git ]] && git init /workspace >/dev/null 2>&1 || true

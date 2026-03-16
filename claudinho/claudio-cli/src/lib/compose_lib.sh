@@ -11,12 +11,14 @@ claudio_config_file="${CLAUDIO_CONFIG:-$HOME/.claudio}"
 claudio_env_file="$claudio_cli_dir/.env"
 claudio_obsidian_path="${OBSIDIAN_PATH:-$HOME/.ovault}"
 
-# Carrega ~/.claudio (KEY=value, sourceável) e exporta para o compose/container
+# Carrega ~/.claudio (KEY=value, sourceável) e exporta para o compose/container.
+# Flags --engine e --model na linha de comando sempre sobrescrevem estes valores.
 claudio_load_config() {
   if [[ -f "$claudio_config_file" ]]; then
     # shellcheck source=/dev/null
     source "$claudio_config_file"
     [[ -n "${engine:-}" ]] && export CLAUDIO_ENGINE="$engine"
+    [[ -n "${model:-}" ]] && export CLAUDIO_MODEL="$model"
     [[ -n "${GH_TOKEN:-}" ]] && export GH_TOKEN
     [[ -n "${ANTHROPIC_API_KEY:-}" ]] && export ANTHROPIC_API_KEY
     [[ -n "${OBSIDIAN_PATH:-}" ]] && export OBSIDIAN_PATH && claudio_obsidian_path="$OBSIDIAN_PATH"
@@ -24,9 +26,10 @@ claudio_load_config() {
 }
 
 # Engine: opencode | claude | cursor. Se required=1 e vazio, reclama e sai.
+# Ordem: --engine= na linha de comando sobrescreve ~/.claudio (CLAUDIO_ENGINE).
 claudio_resolve_engine() {
   local required="${1:-0}"
-  local e="${flag_engine:-$CLAUDIO_ENGINE}"
+  local e="${args['--engine']:-${flag_engine:-$CLAUDIO_ENGINE}}"  # flag > config
   e="${e,,}"
   if [[ -z "$e" ]]; then
     if [[ "$required" == "1" ]]; then
@@ -75,7 +78,7 @@ claudio_proj_slug() {
 # Project name for claude (clau-SLUG or clau-SLUG-INSTANCE)
 claudio_proj_name() {
   local slug="$1"
-  local instance="${flag_instance:-}"
+  local instance="${args['--instance']:-${flag_instance:-}}"
   local name="clau-${slug}"
   [[ -n "$instance" && "$instance" != "1" ]] && name="${name}-${instance}"
   echo "$name"
@@ -89,10 +92,17 @@ claudio_proj_name_open() {
 
 # Mount opts: --rw (default for run) or --ro
 claudio_mount_opts() {
-  if [[ -n "${flag_rw:-}" ]]; then echo "rw"; elif [[ -n "${flag_ro:-}" ]]; then echo "ro"; else echo "rw"; fi
+  if [[ -n "${args['--rw']:-${flag_rw:-}}" ]]; then echo "rw"; elif [[ -n "${args['--ro']:-${flag_ro:-}}" ]]; then echo "ro"; else echo "rw"; fi
 }
 
-# Model flag for claude binary
+# Model flag for claude binary (--model=haiku|opus; default = nada = sonnet).
+# Ordem: --model= na linha de comando sobrescreve ~/.claudio (CLAUDIO_MODEL).
 claudio_model_flag() {
-  if [[ -n "${flag_haiku:-}" ]]; then echo "--model claude-haiku-4-5-20251001"; elif [[ -n "${flag_opus:-}" ]]; then echo "--model claude-opus-4-6"; else echo ""; fi
+  local m="${args['--model']:-${flag_model:-$CLAUDIO_MODEL}}"  # flag > config
+  m="${m,,}"
+  case "$m" in
+    haiku) echo "--model claude-haiku-4-5-20251001" ;;
+    opus)  echo "--model claude-opus-4-6" ;;
+    *)     echo "" ;;
+  esac
 }

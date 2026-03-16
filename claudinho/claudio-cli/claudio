@@ -69,13 +69,8 @@ claudio_usage() {
     echo
 
     # :flag.usage
-    printf "  %s\n" "--haiku"
-    printf "    Usar modelo Claude Haiku\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--opus"
-    printf "    Usar modelo Claude Opus\n"
+    printf "  %s\n" "--model MODEL"
+    printf "    Modelo Claude: haiku | opus (default: sonnet)\n"
     echo
 
     # :flag.usage
@@ -853,9 +848,10 @@ claudio_load_config() {
 }
 
 # Engine: opencode | claude | cursor. Se required=1 e vazio, reclama e sai.
+# Bashly guarda flags globais em args['--engine'], não em flag_engine.
 claudio_resolve_engine() {
   local required="${1:-0}"
-  local e="${flag_engine:-$CLAUDIO_ENGINE}"
+  local e="${args['--engine']:-${flag_engine:-$CLAUDIO_ENGINE}}"
   e="${e,,}"
   if [[ -z "$e" ]]; then
     if [[ "$required" == "1" ]]; then
@@ -904,7 +900,7 @@ claudio_proj_slug() {
 # Project name for claude (clau-SLUG or clau-SLUG-INSTANCE)
 claudio_proj_name() {
   local slug="$1"
-  local instance="${flag_instance:-}"
+  local instance="${args['--instance']:-${flag_instance:-}}"
   local name="clau-${slug}"
   [[ -n "$instance" && "$instance" != "1" ]] && name="${name}-${instance}"
   echo "$name"
@@ -918,12 +914,18 @@ claudio_proj_name_open() {
 
 # Mount opts: --rw (default for run) or --ro
 claudio_mount_opts() {
-  if [[ -n "${flag_rw:-}" ]]; then echo "rw"; elif [[ -n "${flag_ro:-}" ]]; then echo "ro"; else echo "rw"; fi
+  if [[ -n "${args['--rw']:-${flag_rw:-}}" ]]; then echo "rw"; elif [[ -n "${args['--ro']:-${flag_ro:-}}" ]]; then echo "ro"; else echo "rw"; fi
 }
 
-# Model flag for claude binary
+# Model flag for claude binary (--model=haiku|opus; default = nada = sonnet)
 claudio_model_flag() {
-  if [[ -n "${flag_haiku:-}" ]]; then echo "--model claude-haiku-4-5-20251001"; elif [[ -n "${flag_opus:-}" ]]; then echo "--model claude-opus-4-6"; else echo ""; fi
+  local m="${args['--model']:-${flag_model:-}}"
+  m="${m,,}"
+  case "$m" in
+    haiku) echo "--model claude-haiku-4-5-20251001" ;;
+    opus)  echo "--model claude-opus-4-6" ;;
+    *)     echo "" ;;
+  esac
 }
 
 # :command.command_functions
@@ -1110,7 +1112,7 @@ claudio_init_command() {
     echo "claudio init: config.example não encontrado em $src" >&2
     exit 1
   fi
-  if [[ -f "$dest" ]] && [[ -z "${flag_force:-}" ]]; then
+  if [[ -f "$dest" ]] && [[ -z "${args['--force']:-${flag_force:-}}" ]]; then
     echo "[claudio init] $dest já existe (use --force para sobrescrever)"
     exit 0
   fi
@@ -1439,19 +1441,17 @@ parse_requirements() {
         ;;
 
       # :flag.case
-      --haiku)
+      --model)
 
-        # :flag.case_no_arg
-        args['--haiku']=1
-        shift
-        ;;
-
-      # :flag.case
-      --opus)
-
-        # :flag.case_no_arg
-        args['--opus']=1
-        shift
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--model']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--model requires an argument: --model MODEL" >&2
+          exit 1
+        fi
         ;;
 
       # :flag.case
