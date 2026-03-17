@@ -48,3 +48,5 @@ convert_video() {
 }
 
 pokemonsay "$(fortune -s)"
+
+alias zion="echo 'use claudio'"
