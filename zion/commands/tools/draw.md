@@ -4,10 +4,10 @@ Use quando o usuário pedir diagramas no browser, "mostre no draw" ou quando Mer
 
 ## Antes de desenhar
 - **Levante o servidor ou verifique se está rodando.** Se a URL não abrir, inicie: `python3 /zion/scripts/draw-server.py &`
-- **Sempre**, logo após levantar o servidor, diga ao usuário para abrir a página, por exemplo: *"Servidor no ar. Abra **http://localhost:8765** no browser para ver os desenhos."*
+- **Sempre**, logo após levantar o servidor, diga ao usuário para abrir a página; use o link **zion:porta** (ex.: **http://zion:8765** ou **http://zion:8766**). Exemplo: *"Servidor no ar. Abra **http://zion:8766** no browser para ver os desenhos."*
 
 ## URL
-- **http://localhost:8765** — abrir no browser (no host; com `network_mode: host` a porta do container é a mesma).
+- **http://zion:8765** (ou **zion:8766** / **zion:8767** se 8765 estiver ocupada) — abrir no browser. O host `zion` faz redirect para localhost.
 
 ## Conteúdo
 - Escrever (Write) em **`/workspace/mnt/.zion-draw/content.md`** (ou `$WORKSPACE/.zion-draw/content.md`).

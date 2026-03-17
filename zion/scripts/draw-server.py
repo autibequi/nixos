@@ -13,8 +13,9 @@ import os
 import sys
 import time
 
-PORT = 8765
+PORT_DEFAULT = 8765
 HOST = "127.0.0.1"
+PORT_FALLBACKS = [8765, 8766, 8767]
 
 
 def content_path():
@@ -43,7 +44,7 @@ HTML_PAGE = """<!DOCTYPE html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Zion Draw</title>
+  <title>Draw</title>
   <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
@@ -186,6 +187,7 @@ class DrawHandler(BaseHTTPRequestHandler):
 
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    allow_reuse_address = True
     daemon_threads = True
 
 
@@ -196,8 +198,21 @@ def main():
             os.makedirs(content_dir, exist_ok=True)
         except OSError:
             pass
-    server = ThreadedHTTPServer((HOST, PORT), DrawHandler)
-    print("Zion Draw server: http://%s:%s (content: %s)" % (HOST, PORT, content_path()), file=sys.stderr)
+    server = None
+    port_used = None
+    for port in PORT_FALLBACKS:
+        try:
+            server = ThreadedHTTPServer((HOST, port), DrawHandler)
+            port_used = port
+            break
+        except OSError as e:
+            if e.errno != 98:  # Address already in use
+                raise
+            continue
+    if server is None:
+        print("Draw server: could not bind to any of %s" % PORT_FALLBACKS, file=sys.stderr)
+        sys.exit(1)
+    print("Draw server: http://zion:%s (content: %s)" % (port_used, content_path()), file=sys.stderr)
     sys.stderr.flush()
     try:
         server.serve_forever()

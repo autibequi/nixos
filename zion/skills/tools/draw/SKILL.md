@@ -7,15 +7,80 @@
 
 ## Draw Server (Zion) — desenhar no browser
 
-Quando for **desenhar para o usuário** (diagramas Mermaid, gráficos, Markdown rico no browser):
+Servidor HTTP que renderiza Mermaid + Markdown em tempo real. O **agente** é quem roda e reinicia o servidor.
 
-1. **Levante o servidor ou verifique se está rodando.** Se a URL não responder, inicie em background: `python3 /zion/scripts/draw-server.py &`
-2. **Sempre**, logo após levantar o servidor, diga ao usuário para abrir a página, por exemplo:
-   - *"Servidor no ar. Abra **http://localhost:8765** no browser para ver os desenhos."*
-   - Ou: *"Para ver o desenho, abra http://localhost:8765 (se a página não abrir, avise que eu subo o servidor)."*
-3. O conteúdo vai para **`/workspace/mnt/.zion-draw/content.md`**; a página atualiza sozinha a cada 2s.
+**Esta seção é a referência principal para o draw server.** Use-a quando for a única fonte carregada; aqui estão o fluxo, os paths, as portas e as lições aprendidas.
 
-Assim o usuário sabe que precisa abrir a URL para ver o que você desenhou.
+### Host e URL
+
+- **Host:** use **`zion`** (não localhost). O usuário configurou redirect de `zion` para localhost.
+- **Formato do link:** `http://zion:PORT` (ex.: `http://zion:8765`, `http://zion:8766`).
+- Ao falar com o usuário, sempre usar **zion:porta**; nunca "localhost" na mensagem.
+
+### Portas
+
+- O servidor tenta **8765**, depois **8766**, depois **8767** (fallback se a porta estiver ocupada).
+- Ao iniciar, o script imprime no stderr a URL real (ex.: `Draw server: http://zion:8766 (content: ...)`). Use **sempre essa porta** ao informar o usuário.
+
+### Quem roda e reinicia o servidor
+
+- **O agente.** Se você alterar o código do draw-server (ex.: título, layout, SSE), **você** deve reiniciar o servidor para a mudança refletir.
+- Iniciar: `python3 /zion/scripts/draw-server.py &`
+- Reiniciar: matar o processo (ex.: `pkill -9 -f draw-server.py`) e iniciar de novo, ou só iniciar — o script usa fallback de portas e sobe na primeira livre.
+
+### Conteúdo e path
+
+- **Arquivo único:** `/workspace/mnt/.zion-draw/content.md` (ou `$WORKSPACE/.zion-draw/content.md`).
+- O agente escreve com a ferramenta **Write**. Path configurável por env `ZION_DRAW_CONTENT`.
+- A página lê esse arquivo e re-renderiza quando ele muda.
+
+### Atualização em tempo real
+
+- **Server-Sent Events (SSE):** GET `/stream`. O servidor observa o `mtime` do arquivo a cada ~0,3s e envia o conteúdo quando muda. Não é polling no cliente; a página usa **EventSource** e recebe eventos em tempo real. Se a conexão cair, reconecta automaticamente.
+- No canto da página: status **"ao vivo"** (conectado) ou **"reconectando…"**.
+
+### Página servida
+
+- **Sem header** "Zion Draw"; título da aba é só **"Draw"**.
+- Só o bloco de conteúdo (Mermaid + Markdown) e o status de conexão no canto.
+
+### Como informar o usuário
+
+- **Sempre** mostrar o link numa **caixa** (bloco de código ou box ASCII) para o usuário copiar/abrir.
+- Exemplo de frase: *"Servidor no ar. Abra o link abaixo no browser para ver os desenhos:"*
+- Exemplo de caixa:
+
+  ```
+  ┌─────────────────────────────┐
+  │  http://zion:8766            │
+  └─────────────────────────────┘
+  ```
+
+  Ou em bloco de código: `` `http://zion:8766` ``. Usar a porta que o servidor imprimiu ao subir.
+
+### Fluxo resumido
+
+1. **Levantar ou verificar** o servidor (se a URL não responder, iniciar com `python3 /zion/scripts/draw-server.py &`).
+2. **Escrever** o conteúdo em `/workspace/mnt/.zion-draw/content.md` (Mermaid em blocos ` ```mermaid `, resto Markdown).
+3. **Avisar** o usuário com o link **em caixa**, usando a URL que o servidor indicou (ex.: http://zion:8766).
+
+### Onde está no repo
+
+| Item | Caminho |
+|------|--------|
+| Script do servidor | `zion/scripts/draw-server.py` |
+| Instruções do agente | `zion/system/CLAUDE.OVERRIDE.md` (seção 4) |
+| Comando de referência | `zion/commands/tools/draw.md` |
+
+### Lições aprendidas (Draw Server)
+
+- **Mudança no código não refletiu na página?** Quem serve o HTML é o processo do servidor. Se você alterou `draw-server.py`, **você** precisa reiniciar o servidor (pkill + iniciar de novo ou só iniciar em outra porta). O usuário não vê alteração até o servidor ser reiniciado.
+- **Porta em uso (Address already in use):** O script tenta 8765 → 8766 → 8767. Não precisa matar o processo manualmente para “liberar”; inicie de novo e use a URL que o servidor imprimir (ex.: http://zion:8766). Avise o usuário para abrir **essa** URL.
+- **Sempre use o host `zion`** na mensagem ao usuário. Ele configurou redirect (ex.: /etc/hosts) de `zion` para localhost. Se você disser "localhost:8766", o usuário pode estar acostumado a abrir "zion:8766"; mantenha consistência.
+- **Link em caixa sempre.** Não basta escrever o link no texto. Coloque numa caixa (bloco de código ou box ASCII) para o usuário copiar/colar ou clicar com facilidade.
+- **Quem roda o servidor é você.** Em sessões Zion, o agente é quem inicia e reinicia o draw server. Se o usuário pedir "reabra", "reinicie" ou "levanta o servidor", execute o comando (iniciar ou pkill + iniciar).
+- **Chrome bloqueia portas “inseguras”.** Por isso a porta não é 6666; usamos 8765 (e 8766, 8767 como fallback). Evite portas tipo 6665–6669 em novos serviços web para o browser.
+- **Conteúdo vazio ou “Aguardando conteúdo…”?** O arquivo pode não existir ainda. O agente deve escrever em `/workspace/mnt/.zion-draw/content.md`; o servidor cria o diretório `.zion-draw` se não existir. Após o Write, a página atualiza em tempo real via SSE.
 
 ---
 
@@ -441,3 +506,4 @@ Total por linha:      │ (1) + 16 + │ (1) = 18 chars
 | 2026-03-15 | Obsidian renderiza Mermaid nativamente (confirmado em obsidian-reference.md) | Obsidian Obsidian |
 | 2026-03-15 | GitHub renderiza Mermaid em `.md` desde 2022 | GitHub |
 | 2026-03-15 | Claude.ai web renderiza Mermaid | Interface web |
+| 2026-03-17 | Draw Server (Zion): host **zion** (redirect localhost), portas 8765→8766→8767, SSE em /stream, conteúdo em .zion-draw/content.md. Agente roda e reinicia o servidor; ao informar usuário, link em caixa (http://zion:PORT). Página sem header, título "Draw". | Draw server no Zion |
