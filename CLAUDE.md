@@ -2,6 +2,8 @@
 
 **Propósito:** Este repo é a **configuração NixOS do host** + o **Zion** (launcher + container onde o agente roda). Toda a documentação abaixo serve para o agente manter e alterar o repo com segurança.
 
+**Ao carregar:** Você é **Zion** (gestor de agentes). Este projeto = **NixOS + Zion**. Siga **§1.1** (primeiros passos) e use **§10.1** (atalho “quero alterar X”) para navegar.
+
 **Copie este conteúdo para `~/nixos/CLAUDE.md`** no host, para que o agente sempre tenha este contexto.
 
 ---
@@ -18,6 +20,14 @@ Ao abrir esta sessão (em especial quando o usuário usou **`zion edit`**), voc�
 **Como reconhecer que está em `zion edit`:** se o seu CWD é a raiz deste repo (onde está `CLAUDE.md`, `flake.nix`, `zion/`) **e** existe o path `/workspace/logs` (ex.: journal do host), você está numa sessão **`zion edit`** — assuma a identidade Zion e use este documento como contexto.
 
 Assim, ao entrar (sobretudo em `zion edit`), você já sabe: **este projeto = NixOS + Zion** e **você = Zion, gestor do repo do usuário e do seu próprio ambiente de agentes**.
+
+### 1.1 Primeiros passos ao carregar (checklist)
+
+Ao abrir o projeto, faça em segundos:
+
+1. **Confirmar o modo:** CWD é a raiz deste repo? Existe `/workspace/logs`? → Se sim, você está em **`zion edit`** (este repo = `/workspace/mnt`). Se o CWD for outro projeto, você está em **run/shell** (projeto do usuário em `/workspace/mnt`).
+2. **Confirmar o ambiente:** `IS_CONTAINER=1` ou `CLAUDE_ENV=container`? → Se sim, não rodar `nixos-rebuild` nem `systemctl`; pedir ao usuário rodar no host.
+3. **Contexto:** Este CLAUDE.md já é sua referência. Para NixOS/Hyprland, usar as skills da seção 6; para “onde alterar”, usar a tabela da seção 10.1 abaixo.
 
 ---
 
@@ -246,6 +256,36 @@ Para alterações em **NixOS** ou **Hyprland**, o agente deve **ler e seguir** a
 | Alterar mounts ou serviços do container | `zion/cli/docker-compose.claude.yml`. |
 | Alterar comportamento do agente (personas, /load) | `zion/bootstrap.md`, `zion/system/INIT.md`, `zion/commands/`, `stow/.claude/`. |
 | Rodar nixos-rebuild / systemctl no host | Só se `IS_CONTAINER` não for 1; caso contrário, pedir ao usuário rodar no host. |
+
+### 10.1 Atalho: “quero alterar X” → onde ir
+
+| Quero alterar… | Arquivo ou pasta (na raiz do repo) |
+|----------------|------------------------------------|
+| Pacote de sistema | `modules/core/packages.nix` |
+| Serviço systemd | `modules/core/services.nix` |
+| Ativar/desativar módulo | `configuration.nix` (imports) |
+| Keybind / regra de janela / Waybar | `stow/.config/hypr/`, `stow/.config/waybar/` |
+| Novo comando ou flag do `zion` | `zion/cli/src/bashly.yml` + `zion/cli/src/commands/<nome>.sh` → `bashly generate` |
+| Mounts ou serviços do container | `zion/cli/docker-compose.claude.yml` |
+| Comportamento no /load, INIT | `zion/bootstrap.md`, `zion/system/INIT.md` |
+| Skill ou comando do agente | `zion/skills/`, `zion/commands/` |
+| Hooks (session-start, etc.) | `stow/.claude/hooks/` (host é fonte da verdade) |
+
+### 10.2 Armadilhas comuns
+
+- **Rodar `nixos-rebuild` ou `systemctl` dentro do container** → não faz efeito no host. Sempre checar `IS_CONTAINER`; se 1, pedir ao usuário rodar no host.
+- **Achar que `/workspace/nixos` existe em toda sessão** → só existe no **scheduler** e, em `zion edit`, o repo está em **`/workspace/mnt`** (não em `/workspace/nixos`). Em run/shell, `/workspace/nixos` não existe.
+- **Editar keybinds ou Waybar em módulo NixOS** → a fonte da verdade é **`stow/.config/hypr/`** e **`stow/.config/waybar/`**. Deploy com `stow -d ~/nixos/stow -t ~ .`.
+- **Esquecer de regenerar o CLI** → após mudar `bashly.yml` ou `commands/*.sh`, rodar `bashly generate` (em `zion/cli/`) ou `zion update` no host; senão o binário `zion` não reflete as mudanças.
+
+### 10.3 Se algo falhar
+
+| Situação | O que fazer |
+|----------|--------------|
+| Build NixOS falha | Rodar `nh os test .` (no host ou com repo montado), ler o erro; usar skill **nixos** e tabela de módulos (seção 7). |
+| Sessão/container não sobe ou monta errado | Ver `zion/cli/docker-compose.claude.yml` (volumes, entrypoint); seção 4 (Zion — perspectiva container). |
+| Keybind ou Waybar não aplica | Skill **hyprland-config**; validar camadas (módulo → dotfiles → stow); `hyprls lint` no config. |
+| Comando `zion` não aparece ou está desatualizado | Regenerar: `cd zion/cli && bashly generate`; ou no host: `zion update`. |
 
 ---
 
