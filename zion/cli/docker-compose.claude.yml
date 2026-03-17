@@ -34,10 +34,10 @@ x-base-volumes: &base-volumes
   - ${HOME}/.claude.json:/home/claude/.claude.json
   # Cursor CLI: credenciais e config (agent login ou CURSOR_API_KEY)
   - ${HOME}/.cursor:/home/claude/.cursor
-  # Cursor: skills e commands (mesma fonte: zion/.cursor e zion/.claude)
-  - ${ZION_ROOT:-${HOME}/nixos/zion}/.cursor/skills:/home/claude/.cursor/skills
-  - ${ZION_ROOT:-${HOME}/nixos/zion}/.claude/commands:/home/claude/.cursor/commands
-  # zion/commands montado também como .cursor/rules (regras da pasta commands do zion)
+  # Cursor: zion/skills e zion/commands (não .cursor/ nem .claude/)
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/skills:/home/claude/.cursor/skills
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/commands:/home/claude/.cursor/commands
+  # zion/commands também como .cursor/rules
   - ${ZION_ROOT:-${HOME}/nixos/zion}/commands:/home/claude/.cursor/rules
   # Cursor CLI: tokens de auth (agent faz chmod aqui; bind mount do host causa EPERM, por isso volume nomeado)
   - cursor_config:/home/claude/.config/cursor
