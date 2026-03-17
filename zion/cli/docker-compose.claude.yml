@@ -16,7 +16,7 @@ x-env-worker: &env-worker
 x-extra-hosts: &extra-hosts
   - "host.docker.internal:host-gateway"
 
-# /workspace: apenas zion (/zion), obsidian e o projeto (mnt). Nixos e logs só em scheduler ou zion host-edit.
+# /workspace: apenas zion (/zion), obsidian e o projeto (mnt). Nixos e logs só em scheduler ou zion edit.
 x-base-volumes: &base-volumes
   - ${ZION_ROOT:-${HOME}/nixos/zion}:/zion
   - ${OBSIDIAN_PATH:-/tmp}:/workspace/obsidian

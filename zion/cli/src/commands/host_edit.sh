@@ -1,10 +1,10 @@
-# zion host-edit: ~/nixos em /workspace/mnt + /workspace/logs. Respeita engine em ~/.zion (ex.: cursor).
+# zion edit: ~/nixos em /workspace/mnt + /workspace/logs. Respeita engine em ~/.zion (ex.: cursor).
 # Cursor: usar credenciais do host como no outro container — ~/.claude (cursor_api_key, .env), ~/.config/cursor (mount).
 zion_load_config
 engine=$(zion_resolve_engine 0)
 [[ -z "$engine" ]] && engine="cursor"
 mount_path="${ZION_NIXOS_DIR:-$HOME/nixos}"
-mount_path="$(cd "$mount_path" 2>/dev/null && pwd)" || { echo "zion host-edit: dir not found: $mount_path" >&2; exit 1; }
+mount_path="$(cd "$mount_path" 2>/dev/null && pwd)" || { echo "zion edit: dir not found: $mount_path" >&2; exit 1; }
 proj_slug="nixos"
 # Mesmo project name do `zion` (~/projects) para compartilhar cursor_config e não pedir login.
 proj_name="clau-projects"
@@ -15,7 +15,7 @@ cursor_key_env=""
 
 case "$engine" in
   opencode)
-    echo "[zion host-edit] engine=opencode ${mount_path} → ${proj_name} (mnt + logs)"
+    echo "[zion edit] engine=opencode ${mount_path} → ${proj_name} (mnt + logs)"
     opencode_danger_env=""
     [[ -n "${flag_danger:-${args['--danger']:-${ZION_DANGER:-}}}" ]] && opencode_danger_env="-e OPENCODE_PERMISSION_BYPASS=1"
     HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
@@ -23,7 +23,7 @@ case "$engine" in
       --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" sandbox bash -c 'cd /workspace/mnt && exec opencode'
     ;;
   claude)
-    echo "[zion host-edit] engine=claude ${mount_path} → ${proj_name} (mnt + logs)"
+    echo "[zion edit] engine=claude ${mount_path} → ${proj_name} (mnt + logs)"
     model="$(zion_model_flag)"
     danger="$(zion_danger_flag claude)"
     HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
@@ -32,7 +32,7 @@ case "$engine" in
       -c ". /zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${model}${danger}"
     ;;
     cursor)
-      echo "[zion host-edit] engine=cursor ${mount_path} → ${proj_name} (mnt + logs)"
+      echo "[zion edit] engine=cursor ${mount_path} → ${proj_name} (mnt + logs)"
       danger="$(zion_danger_flag cursor)"
       cursor_resume_env=""
       [[ -n "$resume_id" ]] && cursor_resume_env="-e CLAUDIO_RESUME_SESSION=$resume_id"
@@ -44,7 +44,7 @@ case "$engine" in
       -c "$cursor_cmd"
     ;;
   *)
-    echo "zion host-edit: engine inválido: $engine (use opencode|claude|cursor em ~/.zion)" >&2
+    echo "zion edit: engine inválido: $engine (use opencode|claude|cursor em ~/.zion)" >&2
     exit 1
     ;;
 esac

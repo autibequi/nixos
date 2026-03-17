@@ -12,7 +12,7 @@ Documentação para **manutenção** deste repositório: configuração Linux Ni
 |----------|--------|
 | **Este repo** | Configuração NixOS do host: `flake.nix`, `modules/`, `stow/`, `scripts/`, `zion/`. Tudo que está aqui roda no **host** do container. |
 | **Zion** | Código-fonte do "launcher" que o usuário fez para o agente: CLI (`zion`), container Docker, bootstrap, skills. Fica em **`zion/`** dentro deste repo. |
-| **Zion CLI** | Comando `zion` (bashly): `zion run`, `zion host-edit`, `zion worker`, etc. Código em **`zion/cli/`**. |
+| **Zion CLI** | Comando `zion` (bashly): `zion run`, `zion edit`, `zion worker`, etc. Código em **`zion/cli/`**. |
 | **Container** | Imagem `claude-nix-sandbox` (Docker); o agente roda dentro dele. Compose: **`zion/cli/docker-compose.claude.yml`**. |
 
 Ou seja: **projeto inteiro = config NixOS no host**; **Zion = launcher + container** (pasta `zion/`).
@@ -50,7 +50,7 @@ Ou seja: **projeto inteiro = config NixOS no host**; **Zion = launcher + contain
 - **`/workspace/mnt`** — projeto que o usuário passou (ex.: `~/projects`); **cwd** do agente.
 - **Não** há mount de `/workspace/nixos` nem `/workspace/logs` na sessão normal.
 
-**`zion host-edit`** (editar este repo + logs no container):
+**`zion edit`** (editar este repo + logs no container):
 
 - **`/workspace/mnt`** = **`~/nixos`** (este repo).
 - **`/workspace/logs/host/journal`** = `/var/log/journal` (ro).
@@ -65,7 +65,7 @@ Resumo:
 | Modo | `/workspace/nixos` | `/workspace/logs` | `/workspace/mnt` |
 |------|--------------------|-------------------|------------------|
 | run / shell / start / resume | ❌ | ❌ | Projeto (ex.: ~/projects) |
-| **zion host-edit** | ❌ | ✅ (journal) | ~/nixos |
+| **zion edit** | ❌ | ✅ (journal) | ~/nixos |
 | scheduler | ✅ | ❌ | (default) |
 
 ---
@@ -101,9 +101,11 @@ Resumo:
 ## Zion CLI — manutenção
 
 - **Regenerar CLI:** na pasta `zion/cli/`, rodar `bashly generate` (ou `zion update` no host); isso regera o script `zion` a partir de `src/bashly.yml` e `src/commands/*.sh`.
-- **Comandos principais:** `run`, `shell`, `resume`, `start`, `host-edit`, `worker`, `scheduler`, `logs`, etc.
-- **Host-edit:** único comando que monta este repo em `/workspace/mnt` e ainda monta `/workspace/logs`; usa project `clau-projects` para compartilhar login do Cursor.
+- **Comandos principais:** `run`, `shell`, `resume`, `start`, `edit`, `worker`, `scheduler`, `logs`, etc.
+- **Edit:** único comando que monta este repo em `/workspace/mnt` e ainda monta `/workspace/logs`; usa project `clau-projects` para compartilhar login do Cursor. **Nome do comando é `edit`** (não host-edit).
 - **Compose:** volumes base em `x-base-volumes`; scheduler usa `x-scheduler-volumes` (base + nixos). Não colocar nixos/logs nos volumes base para não expor este repo em toda sessão.
+
+**Renomear um comando CLI:** (1) Em `src/bashly.yml`, alterar `name:` do comando. (2) Em `src/commands/<arquivo>.sh`, atualizar mensagens/echo que citem o nome antigo. (3) Regenerar com `bashly generate` no host; se bashly não estiver disponível (ex.: no container), editar manualmente o binário `zion`: trocar o `case` (ex.: `host-edit)` → `edit)`), `action="..."`, funções `zion_<antigo>_command` / `zion_<antigo>_parse_requirements` → `zion_<novo>_*`, help `printf` e todos os textos user-facing. (4) Atualizar comentários em `docker-compose.claude.yml` e **este CLAUDE.md** para refletir o novo nome.
 
 ---
 
@@ -135,7 +137,7 @@ Referência completa: skill **nixos** (MCP-NixOS, nh, tabela de módulos).
 ## Bootstrap no container
 
 - **Arquivo:** `zion/scripts/bootstrap.sh` (dentro do container é também `/zion/scripts/bootstrap.sh`).
-- Procura o bootstrap do repo NixOS em **`/workspace/nixos/scripts/bootstrap.sh`** ou **`/workspace/mnt/scripts/bootstrap.sh`** (host-edit: mnt = nixos).
+- Procura o bootstrap do repo NixOS em **`/workspace/nixos/scripts/bootstrap.sh`** ou **`/workspace/mnt/scripts/bootstrap.sh`** (zion edit: mnt = nixos).
 - Cria `/workspace/host` → symlink para `/workspace/nixos` ou `/workspace/mnt` quando for o repo NixOS.
 
 ---

@@ -57,7 +57,7 @@ zion_usage() {
   printf "  %s   Uso da API Anthropic (hoje; use --7d ou --30d para período).\n" "usage-api      "
   printf "  %s   journalctl do systemd service claude-autonomous.\n" "service-logs   "
   printf "  %s   Abre Alacritty com Claude respondendo (q=pergunta ou interativo).\n" "ask            "
-  printf "  %s   Abre ~/nixos em /workspace/mnt + /workspace/logs (único modo com nixos e logs).\n" "host-edit      "
+  printf "  %s   Abre ~/nixos em /workspace/mnt + /workspace/logs (único modo com nixos e logs).\n" "edit           "
   echo
 
   # :command.long_usage
@@ -1710,13 +1710,13 @@ zion_ask_command() {
 }
 
 # :command.function
-zion_host_edit_command() {
+zion_edit_command() {
   # src/commands/host_edit.sh — ~/nixos em /workspace/mnt + /workspace/logs; respeita engine em ~/.zion
   zion_load_config
   engine=$(zion_resolve_engine 0)
   [[ -z "$engine" ]] && engine="cursor"
   mount_path="${ZION_NIXOS_DIR:-$HOME/nixos}"
-  mount_path="$(cd "$mount_path" 2>/dev/null && pwd)" || { echo "zion host-edit: dir not found: $mount_path" >&2; exit 1; }
+  mount_path="$(cd "$mount_path" 2>/dev/null && pwd)" || { echo "zion edit: dir not found: $mount_path" >&2; exit 1; }
   proj_slug="nixos"
   # Mesmo project name do `zion` (~/projects) para compartilhar o volume cursor_config e não pedir login de novo.
   proj_name="clau-projects"
@@ -1726,7 +1726,7 @@ zion_host_edit_command() {
   cursor_key_env=""
   case "$engine" in
     opencode)
-      echo "[zion host-edit] engine=opencode ${mount_path} → ${proj_name} (mnt + logs)"
+      echo "[zion edit] engine=opencode ${mount_path} → ${proj_name} (mnt + logs)"
       opencode_danger_env=""
       [[ -n "${flag_danger:-${args['--danger']:-${ZION_DANGER:-}}}" ]] && opencode_danger_env="-e OPENCODE_PERMISSION_BYPASS=1"
       HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
@@ -1734,7 +1734,7 @@ zion_host_edit_command() {
         --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" sandbox bash -c 'cd /workspace/mnt && exec opencode'
       ;;
     claude)
-      echo "[zion host-edit] engine=claude ${mount_path} → ${proj_name} (mnt + logs)"
+      echo "[zion edit] engine=claude ${mount_path} → ${proj_name} (mnt + logs)"
       model="$(zion_model_flag)"
       danger="$(zion_danger_flag claude)"
       HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
@@ -1743,7 +1743,7 @@ zion_host_edit_command() {
         -c ". /zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${model}${danger}"
       ;;
     cursor)
-      echo "[zion host-edit] engine=cursor ${mount_path} → ${proj_name} (mnt + logs)"
+      echo "[zion edit] engine=cursor ${mount_path} → ${proj_name} (mnt + logs)"
       danger="$(zion_danger_flag cursor)"
       cursor_resume_env=""
       [[ -n "$resume_id" ]] && cursor_resume_env="-e CLAUDIO_RESUME_SESSION=$resume_id"
@@ -1755,7 +1755,7 @@ zion_host_edit_command() {
         -c "$cursor_cmd"
       ;;
     *)
-      echo "zion host-edit: engine inválido: $engine (use opencode|claude|cursor em ~/.zion)" >&2
+      echo "zion edit: engine inválido: $engine (use opencode|claude|cursor em ~/.zion)" >&2
       exit 1
       ;;
   esac
@@ -2071,10 +2071,10 @@ parse_requirements() {
       shift $#
       ;;
 
-    host-edit)
-      action="host-edit"
+    edit)
+      action="edit"
       shift
-      zion_host_edit_parse_requirements "$@"
+      zion_edit_parse_requirements "$@"
       shift $#
       ;;
 
@@ -3521,7 +3521,7 @@ zion_ask_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_host_edit_parse_requirements() {
+zion_edit_parse_requirements() {
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
@@ -3535,7 +3535,7 @@ zion_host_edit_parse_requirements() {
         ;;
     esac
   done
-  action="host-edit"
+  action="edit"
 }
 
 # :command.initialize
@@ -3584,7 +3584,7 @@ run() {
     "usage-api") zion_usage_api_command ;;
     "service-logs") zion_service_logs_command ;;
     "ask") zion_ask_command ;;
-    "host-edit") zion_host_edit_command ;;
+    "edit") zion_edit_command ;;
   esac
 }
 
