@@ -2,13 +2,14 @@
 # claude-oauth-usage.sh — Uso do plano Claude via OAuth token
 # Endpoint: api.anthropic.com/api/oauth/usage
 # Token: ~/.claude/.credentials.json (gerado pelo Claude Code CLI)
-# Cache: ~/.cache/claude-usage.json (TTL 5min — evita rate limit)
+# Cache: ~/.cache/claude-usage.json (TTL 2min — igual ao interval do waybar)
 #
 # Modos:
 #   (sem args)       → JSON bruto + popula cache
 #   --waybar         → JSON para módulo waybar (return-type: json)
 #   --statusline     → uma linha: 󱙺 5h:9% 7d:96% ex:100%
 #   --refresh        → força novo fetch ignorando cache
+#   --refresh --waybar → refresh + output waybar JSON (para on-click)
 #
 # Cópia em .config/waybar/ para o Waybar achar sem depender de ~/scripts
 
@@ -22,8 +23,17 @@ CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
 CREDS_FILE="${CLAUDE_DIR}/.credentials.json"
 [[ ! -f "$CREDS_FILE" ]] && [[ -f "${HOME}/.local/share/claude-code/.credentials.json" ]] && CREDS_FILE="${HOME}/.local/share/claude-code/.credentials.json"
 CACHE_FILE="${XDG_CACHE_HOME:-${HOME}/.cache}/claude-usage.json"
-CACHE_TTL=300  # 5 minutos
-MODE="${1:-}"
+CACHE_TTL=120  # 2 minutos (igual ao interval do waybar)
+# Suporta múltiplos args: --refresh --waybar
+MODE=""
+FORCE_REFRESH=0
+for _arg in "$@"; do
+  case "$_arg" in
+    --refresh) FORCE_REFRESH=1 ;;
+    --waybar|--statusline) MODE="$_arg" ;;
+    *) [[ -z "$MODE" ]] && MODE="$_arg" ;;
+  esac
+done
 
 # --- deps: suporta jq/jaq e curl/xh/wget ---
 JQ=""
@@ -106,7 +116,7 @@ _fetch_fresh() {
 
 # --- obter JSON (cache ou fetch) ---
 JSON=""
-if [[ "$MODE" == "--refresh" ]]; then
+if [[ "$FORCE_REFRESH" == "1" ]]; then
   JSON=$(_fetch_fresh 2>/dev/null) || true
 else
   if _cache_valid; then
@@ -128,7 +138,7 @@ if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
 fi
 
 # --- modo: JSON bruto ---
-if [[ -z "$MODE" || "$MODE" == "--refresh" ]]; then
+if [[ -z "$MODE" ]]; then
   echo "$JSON" | $JQ .
   exit 0
 fi

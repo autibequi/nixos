@@ -260,7 +260,8 @@
     "exec": "$HOME/.config/waybar/claude-oauth-usage.sh --waybar",
     "return-type": "json",
     "interval": 120,
-    "on-click": "$HOME/.config/waybar/claude-oauth-usage.sh --refresh --waybar",
+    "signal": 8,
+    "on-click": "$HOME/.config/waybar/claude-oauth-usage.sh --refresh --waybar; pkill -RTMIN+8 waybar",
     "format": "{}",
     "tooltip": true,
     "escape": false
