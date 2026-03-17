@@ -19,7 +19,7 @@
 
 A resposta ao `/load` é **somente** avatar + pergunta. Nada mais.
 
-**Se o usuário responder que sim** (ex.: "sim", "quero", "briefing", "fazer algo", "carrega", etc.): carregar e aplicar **`/zion/system/INIT.md`**. As regras em INIT são **CORE** e não devem ser esquecidas durante a sessão.
+**Se o usuário responder que sim** (ex.: "sim", "quero", "briefing", "fazer algo", "carrega", etc.): carregar **`/zion/system/INIT.md`**. O INIT é o **loader**: define quais módulos de `/zion/system/` carregar e a ordem (tabela "Módulos do sistema e ordem de carregamento" no INIT). Após carregar, o agente deve exibir a **árvore de módulos** com ☑ (carregado) e ☐ (não carregado); a árvore pode ser omitida só se o usuário pedir resposta mínima. Depois, seguir as regras CORE. As regras em INIT não devem ser esquecidas durante a sessão.
 
 ---
 
