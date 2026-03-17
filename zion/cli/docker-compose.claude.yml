@@ -34,6 +34,8 @@ x-base-volumes: &base-volumes
   # Cursor: skills e commands no / menu (mesma fonte: stow/.claude)
   - ${HOME}/nixos/stow/.claude/skills:/home/claude/.cursor/skills
   - ${HOME}/nixos/stow/.claude/commands:/home/claude/.cursor/commands
+  # zion/commands montado também como .cursor/rules (para regras virem da pasta commands do zion)
+  - ${HOME}/nixos/zion/commands:/home/claude/.cursor/rules
   # Cursor CLI: tokens de auth (agent faz chmod aqui; bind mount do host causa EPERM, por isso volume nomeado)
   - cursor_config:/home/claude/.config/cursor
   # opencode: stow source no repo (evita symlink ~/.config/opencode que quebraria no container)
