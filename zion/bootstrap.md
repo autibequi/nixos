@@ -40,7 +40,7 @@ A resposta ao `/load` é **somente** avatar + pergunta. Nada mais.
 | **`/workspace/nixos`**  | Configuração NixOS do host (quando montado). |
 | **`/workspace/obsidian`** | Obsidian compartilhado (quando montado). |
 | **`/workspace/logs`**   | Logs do host (quando montado). |
-| **`/workspace/mount`** | Diretório montado do host (quando montado). |
+| **`/workspace/mnt`** | Pasta que o user passou (CLAUDIO_MOUNT); projeto de trabalho. |
 
 **Regra:** nixos, obsidian, logs e mount ficam sempre **sob `/workspace`**; ao falar deles, usar esses paths (não na raiz do sistema).
 

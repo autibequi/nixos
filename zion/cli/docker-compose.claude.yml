@@ -16,13 +16,13 @@ x-env-worker: &env-worker
 x-extra-hosts: &extra-hosts
   - "host.docker.internal:host-gateway"
 
-# Mounts sob /workspace (não na raiz): nixos, obsidian, logs. ZION_ROOT = engine em /zion.
+# /workspace só contém as pastas montadas (nada mais). Conteúdo de projects (ou o path passado) fica só em /workspace/mnt.
 x-base-volumes: &base-volumes
   - ${ZION_ROOT:-${HOME}/nixos/zion}:/zion
-  - ${CLAUDIO_MOUNT:-${HOME}/projects}:/workspace:${CLAUDIO_MOUNT_OPTS:-ro}
   - ${HOME}/nixos:/workspace/nixos
   - ${OBSIDIAN_PATH:-/tmp}:/workspace/obsidian
   - /var/log/journal:/workspace/logs/host/journal:ro
+  - ${CLAUDIO_MOUNT:-${HOME}/projects}:/workspace/mnt:${CLAUDIO_MOUNT_OPTS:-rw}
   - ${HOME}/.claude:/home/claude/.claude
   # Fonte: zion/.claude (skills, commands); hooks e scripts vêm de stow (fonte da verdade)
   - ${ZION_ROOT:-${HOME}/nixos/zion}/.claude/skills:/home/claude/.claude/skills
@@ -64,6 +64,7 @@ services:
     network_mode: host
     stdin_open: true
     tty: true
+    working_dir: /workspace/mnt
     entrypoint: ["/bin/bash", "-c"]
     command: ["sleep infinity"]
     environment:

@@ -15,14 +15,14 @@ case "$engine" in
     opencode_danger_env=""
     [[ -n "${flag_danger:-${args['--danger']:-${ZION_DANGER:-}}}" ]] && opencode_danger_env="-e OPENCODE_PERMISSION_BYPASS=1"
     opencode_init_env=""
-    [[ -n "$initial_md" ]] && opencode_init_env="-e CLAUDE_INITIAL_MD=/workspace/$initial_md"
+    [[ -n "$initial_md" ]] && opencode_init_env="-e CLAUDE_INITIAL_MD=/workspace/mnt/$initial_md"
     opencode_resume_env=""
     [[ -n "$resume_id" ]] && opencode_resume_env="-e CLAUDIO_RESUME_SESSION=$resume_id"
     HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
       zion_compose_cmd -p "$proj_name" up -d sandbox
     HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
       zion_compose_cmd -p "$proj_name" exec -it \
-      -e CLAUDIO_MOUNT="$mount_path" $opencode_danger_env $opencode_init_env $opencode_resume_env sandbox bash -c 'cd /workspace && exec opencode'
+      -e CLAUDIO_MOUNT="$mount_path" $opencode_danger_env $opencode_init_env $opencode_resume_env sandbox bash -c 'cd /workspace/mnt && exec opencode'
     ;;
   claude)
     proj_name="$(zion_proj_name "$proj_slug")"
@@ -37,7 +37,7 @@ case "$engine" in
     HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
       zion_compose_cmd -p "$proj_name" run --rm -it \
       --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
-      -c ". /zion/scripts/bootstrap.sh; cd /workspace && exec /home/claude/.nix-profile/bin/claude ${model}${danger}${init_file}${resume_flag}"
+      -c ". /zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${model}${danger}${init_file}${resume_flag}"
     ;;
   cursor)
     proj_name="$(zion_proj_name "$proj_slug")"
@@ -47,11 +47,11 @@ case "$engine" in
     [[ -n "$initial_md" ]] && cursor_init_env="-e CLAUDIO_INITIAL_MD=$initial_md"
     cursor_resume_env=""
     [[ -n "$resume_id" ]] && cursor_resume_env="-e CLAUDIO_RESUME_SESSION=$resume_id"
-    cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace; '
+    cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; '
     cursor_cmd+='if [ -n "${CLAUDIO_RESUME_SESSION:-}" ]; then '
     cursor_cmd+='exec agent'"${danger}"' --resume="${CLAUDIO_RESUME_SESSION}"; '
-    cursor_cmd+='elif [ -n "${CLAUDIO_INITIAL_MD:-}" ] && [ -f "/workspace/$CLAUDIO_INITIAL_MD" ]; then '
-    cursor_cmd+='p=$(sed -e '\''s/\\\\/\\\\\\\\/g'\'' -e '\''s/"/\\"/g'\'' "/workspace/$CLAUDIO_INITIAL_MD"); exec agent'"${danger}"' "$p"; '
+    cursor_cmd+='elif [ -n "${CLAUDIO_INITIAL_MD:-}" ] && [ -f "/workspace/mnt/$CLAUDIO_INITIAL_MD" ]; then '
+    cursor_cmd+='p=$(sed -e '\''s/\\\\/\\\\\\\\/g'\'' -e '\''s/"/\\"/g'\'' "/workspace/mnt/$CLAUDIO_INITIAL_MD"); exec agent'"${danger}"' "$p"; '
     cursor_cmd+='else exec agent'"${danger}"'; fi'
     HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
       zion_compose_cmd -p "$proj_name" run --rm -it \

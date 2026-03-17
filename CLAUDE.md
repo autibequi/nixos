@@ -33,11 +33,11 @@ fi
 - **Mounts sob /workspace:** repo NixOS = `/workspace/nixos`; opcionalmente `/workspace/host` é symlink para `/workspace/nixos` (compat). Posso editar os arquivos; `nixos-rebuild switch` precisa ser rodado pelo user no host.
 - `host.docker.internal` = IP do host a partir do container
 
-## Projeto Montado (/workspace/mount)
+## Projeto Montado (/workspace/mnt)
 
-- Quando o user roda `claudio` de um diretório de projeto, esse diretório é montado em `/workspace/mount`
+- Quando o user roda `claudio` de um diretório de projeto, esse diretório é montado em `/workspace/mnt`
 - Verificar `$CLAUDIO_MOUNT` para saber o path original no host
-- Se `/workspace/mount` não existe ou está vazio → modo meta (trabalhando em `/workspace/nixos`)
+- Se `/workspace/mnt` não existe ou está vazio → modo meta (trabalhando em `/workspace/nixos`)
 - Se existe → o foco é no projeto montado
 
 ## Estrutura
@@ -62,7 +62,7 @@ fi
 │   ├── sugestoes/               ← canal agente→user
 │   └── kanban.md                ← THINKINGS
 ├── logs/host/                   ← logs RO do host
-├── mount/                       ← projeto externo (claudio monta aqui, opcional)
+├── mnt/                         ← projeto que o user passou (CLAUDIO_MOUNT); cwd do agente
 ├── .ephemeral/                  ← memória efêmera (gitignored)
 └── .hive-mind/                  ← canal efêmero compartilhado entre containers
 ```

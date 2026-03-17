@@ -191,12 +191,12 @@ if [[ -n "$WORKTREE_NAME" && "$WORKTREE_NAME" != "null" ]]; then
   WT_STR=" @ wt:$WORKTREE_NAME"
 fi
 
-# Mount: diretório montado (path no host via $CLAUDIO_MOUNT, fallback /workspace/mount)
+# Projeto atual: path no host via $CLAUDIO_MOUNT, no container = /workspace/mnt
 MOUNT_STR=""
 if [[ -n "${CLAUDIO_MOUNT:-}" ]]; then
   MOUNT_STR=" @ ${CLAUDIO_MOUNT}"
-elif [[ -d "/workspace/mount" ]] && [[ -n "$(ls -A /workspace/mount 2>/dev/null)" ]]; then
-  MOUNT_STR=" @ /workspace/mount"
+elif [[ -d "/workspace/mnt" ]] && [[ -n "$(ls -A /workspace/mnt 2>/dev/null)" ]]; then
+  MOUNT_STR=" @ /workspace/mnt"
 fi
 
 # Claudios = containers docker; Bochechas = background workers rodando (tasks em running/)

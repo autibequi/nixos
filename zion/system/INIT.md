@@ -138,7 +138,7 @@ O THINKINGS é memória compartilhada entre sessões, mecanismo de orquestraçã
 **`/contemplate-memories`** — introspecção profunda sobre conversas recentes. Extrai aprendizados para memórias, SOUL.md, CLAUDE.md, skills, e limpeza do THINKINGS. Rodar periodicamente ou após sessões longas com feedback significativo.
 
 ## Referências (leitura on-demand)
-- **Mounts sob /workspace:** repo NixOS = `/workspace/nixos`, vault Obsidian = `/workspace/obsidian`, logs = `/workspace/logs`, mount host = `/workspace/mount`. Não usar paths na raiz (`/nixos`, `/obsidian`).
+- **Mounts sob /workspace:** repo NixOS = `/workspace/nixos`, vault Obsidian = `/workspace/obsidian`, logs = `/workspace/logs`, projeto atual = `/workspace/mnt`. Não usar paths na raiz (`/nixos`, `/obsidian`).
 - `/workspace/obsidian/docs/operational-reference.md` — git identity, hive-mind, persistência, cota API, observabilidade, obsidian, workbench
 - `/workspace/obsidian/docs/task-system.md` — detalhes do sistema de tasks, clocks, THINKINGS format
 - `/workspace/obsidian/docs/obsidian-reference.md` — Dataview, Mermaid, Templater, plugins
