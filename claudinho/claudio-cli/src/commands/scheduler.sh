@@ -29,8 +29,18 @@ case "$action" in
   logs)
     OBSIDIAN_PATH="$claudio_obsidian_path" scheduler_cmd logs -f scheduler
     ;;
+  run-now)
+    # Um tick na hora, em foreground — para testar: scheduler escolhe tasks e roda worker com output
+    echo "[claudio scheduler] Rodando 1 tick agora (scheduler + worker em foreground)..."
+    export CLAU_PROJECT_DIR="$claudio_nixos_dir"
+    export CLAU_VAULT_DIR="$claudio_obsidian_path"
+    export OBSIDIAN_PATH="$claudio_obsidian_path"
+    export CLAU_COMPOSE_BIN="docker compose"
+    export CLAU_COMPOSE_FILES="-f $claudio_compose_file -p $CLAU_PROJECT"
+    "$claudio_nixos_dir/scripts/clau-scheduler.sh"
+    ;;
   *)
-    echo "claudio scheduler: action inválida '$action'. Use: start | stop | status | logs" >&2
+    echo "claudio scheduler: action inválida '$action'. Use: start | stop | status | logs | run-now" >&2
     exit 1
     ;;
 esac

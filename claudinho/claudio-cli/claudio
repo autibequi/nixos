@@ -40,7 +40,7 @@ claudio_usage() {
   printf "  %s   Build da imagem Docker do sandbox.\n" "build          "
   printf "  %s   Para todos os containers do projeto.\n" "down           "
   printf "  %s   Para containers e remove imagens/volumes.\n" "destroy        "
-  printf "  %s   Regenera CLI (bashly) e instala symlink em stow/.local/bin.\n" "install        "
+  printf "  %s   Regenera CLI (bashly) e instala/atualiza symlink em stow/.local/bin.\n" "update         "
   printf "  %s   Cria ~/.claudio a partir de config.example (não sobrescreve se já existir).\n" "init           "
   printf "  %s   Roda worker every60 com output. task= opcional; aceita --engine=.\n" "worker         "
   printf "  %s   Roda worker every10 com output.\n" "worker-run-fast"
@@ -404,12 +404,14 @@ claudio_destroy_usage() {
 }
 
 # :command.usage
-claudio_install_usage() {
-  printf "claudio install - Regenera CLI (bashly) e instala symlink em stow/.local/bin.\n\n"
+claudio_update_usage() {
+  printf "claudio update - Regenera CLI (bashly) e instala/atualiza symlink em stow/.local/bin.\n\n"
+  printf "Alias: install\n"
+  echo
 
   printf "%s\n" "Usage:"
-  printf "  claudio install\n"
-  printf "  claudio install --help | -h\n"
+  printf "  claudio update\n"
+  printf "  claudio update --help | -h\n"
   echo
 
   # :command.long_usage
@@ -614,7 +616,7 @@ claudio_scheduler_usage() {
 
     # :argument.usage
     printf "  %s\n" "ACTION"
-    printf "    start (default) | stop | status | logs\n"
+    printf "    start (default) | stop | status | logs | run-now\n"
     echo
 
   fi
@@ -1222,18 +1224,18 @@ claudio_destroy_command() {
 }
 
 # :command.function
-claudio_install_command() {
+claudio_update_command() {
 
-  # src/commands/install.sh
-  # Regenera CLI (bashly) e instala symlink em stow/.local/bin
+  # src/commands/update.sh
+  # Regenera CLI (bashly) e instala/atualiza symlink em stow/.local/bin
   cd "$claudio_compose_dir" && bashly generate
   bin_dest="$claudio_nixos_dir/stow/.local/bin/claudio"
   mkdir -p "$(dirname "$bin_dest")"
   if [[ ! -L "$bin_dest" ]]; then
     ln -sf "$claudio_compose_dir/claudio" "$bin_dest"
-    echo "[claudio install] symlink criado: $bin_dest"
+    echo "[claudio update] symlink criado: $bin_dest"
   else
-    echo "[claudio install] claudio regenerado (symlink já existe)"
+    echo "[claudio update] claudio regenerado (symlink já existe)"
   fi
 
 }
@@ -1434,8 +1436,18 @@ claudio_scheduler_command() {
     logs)
       OBSIDIAN_PATH="$claudio_obsidian_path" scheduler_cmd logs -f scheduler
       ;;
+    run-now)
+      # Um tick na hora, em foreground — para testar: scheduler escolhe tasks e roda worker com output
+      echo "[claudio scheduler] Rodando 1 tick agora (scheduler + worker em foreground)..."
+      export CLAU_PROJECT_DIR="$claudio_nixos_dir"
+      export CLAU_VAULT_DIR="$claudio_obsidian_path"
+      export OBSIDIAN_PATH="$claudio_obsidian_path"
+      export CLAU_COMPOSE_BIN="docker compose"
+      export CLAU_COMPOSE_FILES="-f $claudio_compose_file -p $CLAU_PROJECT"
+      "$claudio_nixos_dir/scripts/clau-scheduler.sh"
+      ;;
     *)
-      echo "claudio scheduler: action inválida '$action'. Use: start | stop | status | logs" >&2
+      echo "claudio scheduler: action inválida '$action'. Use: start | stop | status | logs | run-now" >&2
       exit 1
       ;;
   esac
@@ -1769,10 +1781,10 @@ parse_requirements() {
       shift $#
       ;;
 
-    install)
-      action="install"
+    update | install)
+      action="update"
       shift
-      claudio_install_parse_requirements "$@"
+      claudio_update_parse_requirements "$@"
       shift $#
       ;;
 
@@ -2441,14 +2453,14 @@ claudio_destroy_parse_requirements() {
 }
 
 # :command.parse_requirements
-claudio_install_parse_requirements() {
+claudio_update_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        claudio_install_usage
+        claudio_update_usage
         exit
         ;;
 
@@ -2460,7 +2472,7 @@ claudio_install_parse_requirements() {
   done
 
   # :command.command_filter
-  action="install"
+  action="update"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
@@ -3345,7 +3357,7 @@ run() {
     "build") claudio_build_command ;;
     "down") claudio_down_command ;;
     "destroy") claudio_destroy_command ;;
-    "install") claudio_install_command ;;
+    "update") claudio_update_command ;;
     "init") claudio_init_command ;;
     "worker") claudio_worker_command ;;
     "worker-run-fast") claudio_worker_run_fast_command ;;
