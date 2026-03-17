@@ -50,7 +50,6 @@ fi
 │   │   ├── CLAUDE.md            ← comportamento do agente
 │   │   ├── SOUL.md              ← identidade e personalidade
 │   │   ├── DIRETRIZES.md        ← diretrizes do agente
-│   │   ├── CONTAINER_INIT.md    ← contexto do container
 │   │   └── personas/            ← personas disponíveis
 │   ├── flake.nix                ← config NixOS (flake-based)
 │   ├── modules/                 ← módulos NixOS
@@ -86,7 +85,6 @@ Ver `claudinho/CLAUDE.md` para:
 ## Referências
 
 - `claudinho/CLAUDE.md` — comportamento completo do agente
-- `claudinho/CONTAINER_INIT.md` — contexto do container: /host, /mount, /obsidian
 - `/workspace/obsidian/docs/operational-reference.md` — git identity, hive-mind, persistência
 - `/workspace/obsidian/docs/task-system.md` — detalhes do sistema de tasks
 - `/workspace/obsidian/docs/nixos-reference.md` — comandos e arquitetura NixOS

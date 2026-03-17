@@ -142,4 +142,3 @@ O THINKINGS é memória compartilhada entre sessões, mecanismo de orquestraçã
 - `/workspace/obsidian/docs/task-system.md` — detalhes do sistema de tasks, clocks, THINKINGS format
 - `/workspace/obsidian/docs/obsidian-reference.md` — Dataview, Mermaid, Templater, plugins
 - `/workspace/obsidian/docs/nixos-reference.md` — comandos e arquitetura NixOS
-- `CONTAINER_INIT.md` — contexto do container: /host, /mount, /obsidian
