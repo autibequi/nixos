@@ -82,6 +82,8 @@
 
     127.0.0.1 redis
     127.0.0.1 postgres
+
+    127.0.0.1 zion
   '';
 
   # Cloudflare Warp
