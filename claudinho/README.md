@@ -11,4 +11,4 @@ Toda a **lógica de container, workers e tasks** está no **CLI `claudio`**:
 - **`claudinho/claudio-cli/`** — código do CLI (bashly), Docker, docker-compose, Make-equivalent
 - Uso: `claudio --help`, `claudio build`, `claudio worker`, `claudio status`, etc.
 
-Instalação do CLI: `claudio install` (regenera e cria symlink em `stow/.local/bin/claudio`).
+Instalação do CLI: `claudio update` (regenera e cria symlink em `stow/.local/bin/claudio`).

@@ -60,7 +60,7 @@ obsidian/               # Obsidian vault (dashboard + communication)
 CLAUDINHO is an AI assistant running in a Docker container (`nixos/nix:latest`). It operates in two modes:
 
 - **Interactive** (`make sandbox`) — personal dev assistant for NixOS config, dotfiles, work projects
-- **Autonomous** (`make auto`, systemd timer hourly) — processes task queue, generates insights
+- **Autonomous** — one long-running **scheduler** container (tick every 10 min in-container); `make auto` runs tasks headless for manual/cron. Host: `systemctl start claude-scheduler-container` to start the scheduler container.
 
 ### Task System
 
@@ -81,7 +81,7 @@ mcp: false        # enable MCP servers (Jira/Notion)
 make doctor          # Full health check
 make status          # Show task queue and recent executions
 make run             # Run all tasks with live output
-make auto            # Run tasks headless (for systemd/cron)
+make auto            # Run tasks headless (manual; recurring = scheduler container)
 make new name=x      # Create new task (wizard)
 make vault-link      # Symlink Obsidian to ~/.obsidian/Work for Obsidian
 make ping            # Health JSON for Waybar integration

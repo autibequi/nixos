@@ -48,6 +48,7 @@ claudio_usage() {
   printf "  %s   Lança 2 workers every60 em background; segue log.\n" "worker-clau    "
   printf "  %s   Para workers e reseta tasks presas.\n" "worker-stop    "
   printf "  %s   Para TODOS os containers claude-nix-sandbox.\n" "worker-stop-all"
+  printf "  %s   Sobe/para o container scheduler (tick a cada 10 min). Equiv. systemctl start/stop claude-scheduler-container.\n" "scheduler      "
   printf "  %s   Devolve tasks de running/ para origem (pending/recurring).\n" "reset          "
   printf "  %s   Mostra estado via kanban + workers.\n" "status         "
   printf "  %s   Cria task + card no kanban.\n" "new            "
@@ -583,6 +584,37 @@ claudio_worker_stop_all_usage() {
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
     printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+claudio_scheduler_usage() {
+  printf "claudio scheduler - Sobe/para o container scheduler (tick a cada 10 min). Equiv. systemctl start/stop claude-scheduler-container.\n\n"
+  printf "Alias: sched\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  claudio scheduler [ACTION]\n"
+  printf "  claudio scheduler --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "Arguments:"
+
+    # :argument.usage
+    printf "  %s\n" "ACTION"
+    printf "    start (default) | stop | status | logs\n"
     echo
 
   fi
@@ -1368,6 +1400,49 @@ claudio_worker_stop_all_command() {
 }
 
 # :command.function
+claudio_scheduler_command() {
+
+  # src/commands/scheduler.sh
+  # Sobe/para/status do container scheduler (tick a cada 10 min). Usa -p clau-workers como no systemd.
+  claudio_load_config
+
+  CLAU_PROJECT="${CLAU_PROJECT:-clau-workers}"
+  action="${args[action]:-start}"
+
+  scheduler_cmd() {
+    claudio_compose_cmd -p "$CLAU_PROJECT" "$@"
+  }
+
+  case "$action" in
+    start)
+      if ! docker network inspect nixos_default &>/dev/null; then
+        echo "[claudio scheduler] Criando rede nixos_default..."
+        docker network create nixos_default 2>/dev/null || true
+      fi
+      OBSIDIAN_PATH="$claudio_obsidian_path" scheduler_cmd up -d scheduler
+      echo "[claudio scheduler] Container scheduler iniciado (tick a cada 10 min)."
+      ;;
+    stop)
+      OBSIDIAN_PATH="$claudio_obsidian_path" scheduler_cmd stop scheduler
+      echo "[claudio scheduler] Container scheduler parado."
+      ;;
+    status)
+      OBSIDIAN_PATH="$claudio_obsidian_path" scheduler_cmd ps scheduler 2>/dev/null || \
+        docker ps --filter "label=com.docker.compose.service=scheduler" --format "table {{.Names}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || \
+        echo "Nenhum container scheduler rodando."
+      ;;
+    logs)
+      OBSIDIAN_PATH="$claudio_obsidian_path" scheduler_cmd logs -f scheduler
+      ;;
+    *)
+      echo "claudio scheduler: action inválida '$action'. Use: start | stop | status | logs" >&2
+      exit 1
+      ;;
+  esac
+
+}
+
+# :command.function
 claudio_reset_command() {
 
   # src/commands/reset.sh
@@ -1396,8 +1471,11 @@ claudio_reset_command() {
 claudio_status_command() {
 
   # src/commands/status.sh
-  echo "=== Workers ==="
-  docker ps --filter "name=_worker_" --format "table {{.ID}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || echo "(nenhum)"
+  echo "=== Scheduler (container 24/7, tick every 10 min) ==="
+  docker ps --filter "label=com.docker.compose.service=scheduler" --format "table {{.Names}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || podman ps --filter "label=com.docker.compose.service=scheduler" --format "table {{.Names}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || echo "(nenhum)"
+  echo ""
+  echo "=== Workers (on-demand) ==="
+  docker ps --filter "name=_worker_" --format "table {{.ID}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || podman ps --filter "name=_worker_" --format "table {{.ID}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || echo "(nenhum)"
   scheduled="$claudio_vault_dir/_agent/scheduled.md"
   kanban="$claudio_vault_dir/kanban.md"
   echo ""
@@ -1744,6 +1822,13 @@ parse_requirements() {
       action="worker-stop-all"
       shift
       claudio_worker_stop_all_parse_requirements "$@"
+      shift $#
+      ;;
+
+    scheduler | sched)
+      action="scheduler"
+      shift
+      claudio_scheduler_parse_requirements "$@"
       shift $#
       ;;
 
@@ -2729,6 +2814,57 @@ claudio_worker_stop_all_parse_requirements() {
 }
 
 # :command.parse_requirements
+claudio_scheduler_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        claudio_scheduler_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="scheduler"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        # :argument.case
+        if [[ -z ${args['action']+x} ]]; then
+          args['action']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
 claudio_reset_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
@@ -3217,6 +3353,7 @@ run() {
     "worker-clau") claudio_worker_clau_command ;;
     "worker-stop") claudio_worker_stop_command ;;
     "worker-stop-all") claudio_worker_stop_all_command ;;
+    "scheduler") claudio_scheduler_command ;;
     "reset") claudio_reset_command ;;
     "status") claudio_status_command ;;
     "new") claudio_new_command ;;

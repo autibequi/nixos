@@ -4,12 +4,12 @@ CLI unificado para o container Claude: sessões interativas, workers, build e ta
 
 ## Instalação
 
-`claudio install` — regenera o script (bashly) e cria/atualiza o symlink em `stow/.local/bin/claudio`. Após stow, `~/.local/bin/claudio` aponta para o script no repo.
+`claudio update` — regenera o script (bashly) e cria/atualiza o symlink em `stow/.local/bin/claudio`. Após stow, `~/.local/bin/claudio` aponta para o script no repo.
 
 ## Desenvolvimento
 
 - Editar `src/bashly.yml`, `src/commands/*.sh`, `src/lib/compose_lib.sh`
-- Regenerar: `claudio install` (ou `cd claudio-cli && bashly generate`)
+- Regenerar: `claudio update` (ou `cd claudio-cli && bashly generate`)
 
 ## Configuração (~/.claudio)
 
@@ -47,7 +47,7 @@ Sem `--engine=` na linha de comando, `claudio run` usa `engine=` de ~/.claudio; 
 | build    | Build da imagem Docker |
 | down     | Para containers do projeto |
 | destroy  | Para containers + remove imagens/volumes |
-| install  | Regenera CLI e symlink |
+| update   | Regenera CLI e symlink |
 
 ### Workers / tasks
 | Comando          | Alias | Descrição |

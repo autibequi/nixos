@@ -103,9 +103,10 @@ commands:
     help: Para containers e remove imagens/volumes.
     filename: commands/destroy.sh
 
-  - name: install
-    help: Regenera CLI (bashly) e instala symlink em stow/.local/bin.
-    filename: commands/install.sh
+  - name: update
+    alias: [install]
+    help: Regenera CLI (bashly) e instala/atualiza symlink em stow/.local/bin.
+    filename: commands/update.sh
 
   - name: init
     help: Cria ~/.claudio a partir de config.example (não sobrescreve se já existir).
@@ -143,6 +144,14 @@ commands:
   - name: worker-stop-all
     help: Para TODOS os containers claude-nix-sandbox.
     filename: commands/worker_stop_all.sh
+
+  - name: scheduler
+    alias: [sched]
+    help: Sobe/para o container scheduler (tick a cada 10 min). Equiv. systemctl start/stop claude-scheduler-container.
+    args:
+      - name: action
+        help: "start (default) | stop | status | logs | run-now"
+    filename: commands/scheduler.sh
 
   - name: reset
     help: Devolve tasks de running/ para origem (pending/recurring).

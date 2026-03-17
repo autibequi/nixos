@@ -3,6 +3,10 @@
 > Contexto de execução do container `claude-nix-sandbox`.
 > Fonte de verdade: `docker-compose.claude.yml` — seção `x-base-volumes`.
 
+## Recorrência (scheduler)
+
+A agenda de reexecução não usa mais systemd timer no host. Um **único container** (`scheduler`) fica de pé 24/7; dentro dele um loop executa `clau-scheduler.sh` a cada 10 min (tick + runner in-process). No host: `systemctl start claude-scheduler-container` sobe o container; `systemctl stop claude-scheduler-container` derruba. Reset de tasks presas: `systemctl start claude-scheduler-reset`. Logs do tick: no host em `PROJECT_DIR/.ephemeral/logs/scheduler.log` (ex.: `~/nixos/.ephemeral/logs/scheduler.log`) ou `docker compose logs -f scheduler`.
+
 ## Você está dentro de um container Docker
 
 Base: `nixos/nix:latest`. Workspace em `/workspace/` (volume Docker persistente).

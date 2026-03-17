@@ -24,6 +24,7 @@ LOGFILE="$EPHEMERAL/logs/scheduler.log"
 TICK_BUDGET="${CLAU_TICK_BUDGET:-540}"  # 9 min default (1 min overhead)
 DRY_RUN=0
 [[ "${1:-}" == "--dry-run" ]] && DRY_RUN=1
+IN_CONTAINER="${CLAU_IN_CONTAINER:-0}"
 
 TASKS_DIR="$VAULT_DIR/_agent/tasks"
 SCHEDULED_FILE="$VAULT_DIR/scheduled.md"
@@ -245,15 +246,21 @@ build_task_queue() {
   printf '%s\n' "${due_tasks[@]}" | sort -t'|' -k1,1n -k2,2n
 }
 
-# ── Compose dispatch ────────────────────────────────────────────────────────
+# ── Compose dispatch (host) / in-process dispatch (container) ─────────────────
 COMPOSE_BIN="${CLAU_COMPOSE_BIN:-docker-compose}"
 COMPOSE_FILES="${CLAU_COMPOSE_FILES:--f $PROJECT_DIR/claudinho/docker-compose.claude.yml}"
 
 dispatch_tasks() {
   local task_list="$1"
-  local clock_label="unified"
-
   log "Dispatching: $task_list"
+
+  if [ "$IN_CONTAINER" = "1" ]; then
+    export CLAU_WORKER_ID="scheduler-$$"
+    export CLAU_CLOCK="unified"
+    export CLAU_TASK_LIST="$task_list"
+    "${PROJECT_DIR}/scripts/clau-runner.sh"
+    return $?
+  fi
 
   $COMPOSE_BIN $COMPOSE_FILES run --rm -T \
     -e CLAU_WORKER_ID="scheduler-$$" \
@@ -280,6 +287,12 @@ process_completions() {
 }
 
 # ── Main ─────────────────────────────────────────────────────────────────────
+# When running inside scheduler container, run cleanup at start of tick
+if [ "$IN_CONTAINER" = "1" ]; then
+  CLAU_VAULT_DIR="$VAULT_DIR" CLAU_PROJECT_DIR="$PROJECT_DIR" \
+    "${PROJECT_DIR}/scripts/clau-cleanup.sh" 2>/dev/null || true
+fi
+
 init_state
 
 # Process any leftover completion markers from previous tick
