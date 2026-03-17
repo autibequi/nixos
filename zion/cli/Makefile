@@ -3,7 +3,8 @@
 
 .PHONY: help install
 
-NIXOS_ROOT := $(abspath ..)
+# From cli/ we need repo root (nixos/), so go up two levels.
+NIXOS_ROOT := $(abspath ../..)
 CLI_DIR    := $(NIXOS_ROOT)/zion/cli
 BIN_DEST   := $(NIXOS_ROOT)/stow/.local/bin/zion
 BIN_DIR    := $(patsubst %/,%,$(dir $(BIN_DEST)))
