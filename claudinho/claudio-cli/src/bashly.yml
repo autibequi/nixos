@@ -150,7 +150,7 @@ commands:
     help: Sobe/para o container scheduler (tick a cada 10 min). Equiv. systemctl start/stop claude-scheduler-container.
     args:
       - name: action
-        help: "start (default) | stop | status | logs | run-now"
+        help: "start (default) | stop | status | logs | run-now | shell"
     filename: commands/scheduler.sh
 
   - name: reset

@@ -39,8 +39,12 @@ case "$action" in
     export CLAU_COMPOSE_FILES="-f $claudio_compose_file -p $CLAU_PROJECT"
     "$claudio_nixos_dir/scripts/clau-scheduler.sh"
     ;;
+  shell)
+    # Entra no shell do container scheduler (precisa estar rodando)
+    OBSIDIAN_PATH="$claudio_obsidian_path" scheduler_cmd exec -it scheduler /bin/bash
+    ;;
   *)
-    echo "claudio scheduler: action inválida '$action'. Use: start | stop | status | logs | run-now" >&2
+    echo "claudio scheduler: action inválida '$action'. Use: start | stop | status | logs | run-now | shell" >&2
     exit 1
     ;;
 esac
