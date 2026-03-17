@@ -13,10 +13,13 @@ fi
 PROMPT=$(echo "$INPUT" | jq -r '.prompt // ""')
 
 if [[ "$PROMPT" == "startup" ]]; then
-  SCRIPT="/workspace/host/scripts/bootstrap.sh"
-  if [[ -x "$SCRIPT" ]]; then
-    "$SCRIPT" >&2
-  fi
+  for base in /workspace/nixos /workspace/host; do
+    SCRIPT="$base/scripts/bootstrap.sh"
+    if [[ -x "$SCRIPT" ]]; then
+      "$SCRIPT" >&2
+      break
+    fi
+  done
   exit 2
 fi
 

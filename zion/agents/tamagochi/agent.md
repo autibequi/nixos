@@ -81,7 +81,7 @@ Colunas do kanban:
 
 ```bash
 # 1. Ler persona ativa
-grep "Arquivo:" /workspace/host/claudinho/SOUL.md | head -1
+grep "Arquivo:" /workspace/nixos/claudinho/SOUL.md | head -1
 # → ex: claudinho/personas/GLaDOS.persona.md
 
 # 2. Derivar nome do avatar
@@ -89,7 +89,7 @@ grep "Arquivo:" /workspace/host/claudinho/SOUL.md | head -1
 # claudio.persona.md → claudio.avatar.md
 
 # 3. Ler o avatar
-cat /workspace/host/claudinho/personas/<nome>.avatar.md
+cat /workspace/nixos/claudinho/personas/<nome>.avatar.md
 ```
 
 **Fallback:** se SOUL.md não existir, persona não tiver avatar correspondente, ou qualquer erro → usar `claudio.avatar.md` como padrão.

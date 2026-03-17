@@ -70,9 +70,9 @@ fi
 WORKERS=0
 BOCECHAS=0
 WS="${WORKSPACE_DIR:-/workspace}"
-# .ephemeral/agents fica em /workspace/host/ (bind mount do repo nixos do host)
+# .ephemeral/agents fica no repo NixOS (em /workspace/nixos quando montado)
 # claudio_* = sessões interativas; bochecha_* = workers autônomos
-AGENTS_DIR="/workspace/host/.ephemeral/agents"
+AGENTS_DIR="/workspace/nixos/.ephemeral/agents"
 LIVE_MAX_AGE=900
 if [[ -d "$AGENTS_DIR" ]]; then
   now_sec=$(date +%s)

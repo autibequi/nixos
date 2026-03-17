@@ -4,7 +4,10 @@
 # stderr → terminal do user (dashboard visual)
 
 # ── Detecta workspace (container vs host) ────────────────────────
-if [ -d "/workspace/host" ]; then
+# Mounts sob /workspace: nixos, obsidian, logs, mount. Repo NixOS em /workspace/nixos (ou /workspace/host por symlink).
+if [ -d "/workspace/nixos" ] && [ -f "/workspace/nixos/CLAUDE.md" ]; then
+  WS="/workspace/nixos"
+elif [ -d "/workspace/host" ] && [ -f "/workspace/host/CLAUDE.md" ]; then
   WS="/workspace/host"
 elif [ -d "/workspace" ] && [ -f "/workspace/CLAUDE.md" ]; then
   WS="/workspace"

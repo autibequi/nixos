@@ -37,9 +37,12 @@ A resposta ao `/load` é **somente** avatar + pergunta. Nada mais.
 | **`/zion`**   | Engine dos agentes (comandos, scripts, bootstrap). |
 | **`/zion/system/`** | Prompts do sistema. Índice do que cada arquivo faz: em `INIT.md` (tabela no final). |
 | **`/zion/cli/`** | CLI: docker-compose.zion, Makefile, README. |
-| **`/nixos`**  | Configuração NixOS do host (quando montado). |
-| **`/logs`**   | Logs do host (quando montado). |
-| **`/obsidian`** | Obsidian compartilhado (quando montado). |
+| **`/workspace/nixos`**  | Configuração NixOS do host (quando montado). |
+| **`/workspace/obsidian`** | Obsidian compartilhado (quando montado). |
+| **`/workspace/logs`**   | Logs do host (quando montado). |
+| **`/workspace/mount`** | Diretório montado do host (quando montado). |
+
+**Regra:** nixos, obsidian, logs e mount ficam sempre **sob `/workspace`**; ao falar deles, usar esses paths (não na raiz do sistema).
 
 ---
 

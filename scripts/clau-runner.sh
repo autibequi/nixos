@@ -11,9 +11,9 @@ WORKER_ID="${SCHEDULER_WORKER_ID:-worker-1}"
 SCHEDULER_CLOCK="${SCHEDULER_CLOCK:-unified}"
 SCHEDULER_TASK_LIST="${SCHEDULER_TASK_LIST:-}"  # comma-separated list from scheduler
 # When inside container, markers must land where the host scheduler reads them:
-# host: PROJECT_DIR/nixos/.ephemeral  =  container: /workspace/host/.ephemeral
+# Repo NixOS em /workspace/nixos; .ephemeral fica lá
 if [[ "${CLAUDE_ENV:-}" == "container" ]] || [[ -f "/.dockerenv" ]] || grep -q 'docker\|container' /proc/1/cgroup 2>/dev/null; then
-  SCHEDULER_COMPLETED_DIR="/workspace/host/.ephemeral/scheduler/completed"
+  SCHEDULER_COMPLETED_DIR="/workspace/nixos/.ephemeral/scheduler/completed"
 else
   SCHEDULER_COMPLETED_DIR="$EPHEMERAL/scheduler/completed"
 fi
@@ -54,7 +54,7 @@ trap 'rm -rf "$AGENT_MY_DIR"' EXIT
 
 [ -f "$EPHEMERAL/no-mcp.json" ] || echo '{"mcpServers":{}}' > "$EPHEMERAL/no-mcp.json"
 
-source "$WORKSPACE/host/scripts/kanban-sync.sh"
+source "$WORKSPACE/nixos/scripts/kanban-sync.sh"
 
 echo "[clau:$WORKER_ID:$SCHEDULER_CLOCK] Iniciando (PID $$)"
 
@@ -411,7 +411,7 @@ $(cat "$TASKS/running/$task/memoria.md")"
   # Auto-tracking: criar worktree virtual pra task
   local worker_branch="worker/${SCHEDULER_CLOCK}/${task}"
   export SCHEDULER_CURRENT_WORKTREE="$task"
-  "$WORKSPACE/host/scripts/worktree-manager.sh" init "$task" "$worker_branch" "Task: $task (Worker: $WORKER_ID)" || true
+  "$WORKSPACE/nixos/scripts/worktree-manager.sh" init "$task" "$worker_branch" "Task: $task (Worker: $WORKER_ID)" || true
 
   local mcp_flags=()
   [ -n "$mcp_flags_str" ] && mcp_flags=($mcp_flags_str)
@@ -448,7 +448,7 @@ finish_task() {
   local task="$1" source_dir="$2" exit_code="$3"
 
   # Auto-tracking: fechar worktree virtual
-  "$WORKSPACE/host/scripts/worktree-manager.sh" exit || true
+  "$WORKSPACE/nixos/scripts/worktree-manager.sh" exit || true
 
   if [ "$source_dir" = "recurring" ]; then
     # Sync back evolved files to recurring/ before cleanup

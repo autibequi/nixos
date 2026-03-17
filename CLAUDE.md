@@ -30,21 +30,21 @@ else
 fi
 ```
 
-- `/workspace/host` é o repo NixOS do host (bind mount) — posso editar os arquivos, mas `nixos-rebuild switch` precisa ser rodado pelo user no host
+- **Mounts sob /workspace:** repo NixOS = `/workspace/nixos`; opcionalmente `/workspace/host` é symlink para `/workspace/nixos` (compat). Posso editar os arquivos; `nixos-rebuild switch` precisa ser rodado pelo user no host.
 - `host.docker.internal` = IP do host a partir do container
 
 ## Projeto Montado (/workspace/mount)
 
 - Quando o user roda `claudio` de um diretório de projeto, esse diretório é montado em `/workspace/mount`
 - Verificar `$CLAUDIO_MOUNT` para saber o path original no host
-- Se `/workspace/mount` não existe ou está vazio → modo meta (trabalhando em `/workspace/host`)
+- Se `/workspace/mount` não existe ou está vazio → modo meta (trabalhando em `/workspace/nixos`)
 - Se existe → o foco é no projeto montado
 
 ## Estrutura
 
 ```
 /workspace/                      ← volume do container (dados persistentes)
-├── host/                        ← bind mount do ~/nixos (repo NixOS)
+├── nixos/                       ← bind mount do repo NixOS (~/nixos no host)
 │   ├── CLAUDE.md                ← regras operacionais
 │   ├── claudinho/               ← comportamento do agente (personas, prompts, tasks)
 │   │   ├── CLAUDE.md            ← comportamento do agente

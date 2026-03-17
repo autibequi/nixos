@@ -18,7 +18,8 @@ help:
 	@echo ""
 	@echo "  Claudinho (CLI: claudio)"
 	@echo "  ─────────────────────────────────────────────────────────"
-	@echo "  make install        Regenera claudio (bashly) e symlink em stow/.local/bin"
+	@echo "  make install        Regenera zion (bashly), symlink e atualiza scripts/bootstrap.sh"
+	@echo "  make install-bootstrap  Só atualiza scripts/bootstrap.sh (mounts em /workspace/nixos)"
 	@echo "  claudio --help      Lista comandos (run, build, worker, etc.)"
 	@echo ""
 
@@ -58,7 +59,14 @@ proxy:
 	@if [ -f scripts/reverseproxy/Makefile ]; then $(MAKE) -C scripts/reverseproxy mocks-ldi; fi
 	docker compose -f scripts/reverseproxy/docker-compose.yaml up -d
 
-# ── Proxy claudinho targets ───────────────────────────────────────
+# ── Claudinho / Zion CLI ───────────────────────────────────────────
+# install = regenera zion (bashly) + symlink + copia bootstrap para scripts/
+# install-bootstrap = só copia bootstrap (mounts em /workspace/nixos) para scripts/bootstrap.sh
+
+install-bootstrap:
+	@mkdir -p scripts
+	@install -m 755 zion/scripts/bootstrap-dashboard.sh scripts/bootstrap.sh
+	@echo "[make] scripts/bootstrap.sh atualizado (fonte: zion/scripts/bootstrap-dashboard.sh)"
 
 %:
-	@$(MAKE) -C claudinho $@
+	@$(MAKE) -C zion/cli $@
