@@ -88,6 +88,11 @@ claudio_usage() {
     printf "    Montar projeto read-only\n"
     echo
 
+    # :flag.usage
+    printf "  %s\n" "--danger"
+    printf "    Bypass de permissões no engine (claude: bypassPermissions; cursor: --force; opencode: env)\n"
+    echo
+
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
     printf "    Show this help\n"
@@ -917,6 +922,20 @@ claudio_mount_opts() {
   if [[ -n "${args['--rw']:-${flag_rw:-}}" ]]; then echo "rw"; elif [[ -n "${args['--ro']:-${flag_ro:-}}" ]]; then echo "ro"; else echo "rw"; fi
 }
 
+# --danger: sufixo/args de bypass de permissões por engine (vazio se flag não setada)
+claudio_danger_flag() {
+  if [[ -z "${flag_danger:-${args['--danger']:-}}" ]]; then
+    echo ""
+    return 0
+  fi
+  case "${1:-}" in
+    claude)  echo " --permission-mode bypassPermissions" ;;
+    cursor)  echo " --force" ;;
+    opencode) echo "" ;;
+    *) echo "" ;;
+  esac
+}
+
 # Model flag for claude binary (--model=haiku|opus; default = nada = sonnet)
 claudio_model_flag() {
   local m="${args['--model']:-${flag_model:-}}"
@@ -944,27 +963,31 @@ claudio_run_command() {
     opencode)
       proj_name="$(claudio_proj_name_open "$proj_slug")"
       echo "[claudio run] engine=opencode ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
+      opencode_danger_env=""
+      [[ -n "${flag_danger:-${args['--danger']:-}}" ]] && opencode_danger_env="-e OPENCODE_PERMISSION_BYPASS=1"
       CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
         claudio_compose_cmd -p "$proj_name" up -d sandbox
       CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
         claudio_compose_cmd -p "$proj_name" exec -it \
-        -e CLAUDIO_MOUNT="$mount_path" sandbox bash -c 'cd /workspace/mount && exec opencode'
+        -e CLAUDIO_MOUNT="$mount_path" $opencode_danger_env sandbox bash -c 'cd /workspace/mount && exec opencode'
       ;;
     claude)
       proj_name="$(claudio_proj_name "$proj_slug")"
       model="$(claudio_model_flag)"
+      danger="$(claudio_danger_flag claude)"
       CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
         claudio_compose_cmd -p "$proj_name" run --rm -it \
-        --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" sandbox \
-        -c ". /workspace/host/scripts/bootstrap.sh; cd /workspace/mount && exec /home/claude/.nix-profile/bin/claude ${model} --permission-mode bypassPermissions"
+        --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
+        -c ". /workspace/host/scripts/bootstrap.sh; cd /workspace/mount && exec /home/claude/.nix-profile/bin/claude ${model}${danger}"
       ;;
     cursor)
       proj_name="$(claudio_proj_name "$proj_slug")"
+      danger="$(claudio_danger_flag cursor)"
       echo "[claudio run] engine=cursor ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
       CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
         claudio_compose_cmd -p "$proj_name" run --rm -it \
         --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
-        -c ". /workspace/host/scripts/bootstrap.sh; cd /workspace/mount && exec agent"
+        -c ". /workspace/host/scripts/bootstrap.sh; cd /workspace/mount && exec agent${danger}"
       ;;
     *)
       echo "claudio: engine inválido: $engine" >&2
@@ -1480,6 +1503,14 @@ parse_requirements() {
 
         # :flag.case_no_arg
         args['--ro']=1
+        shift
+        ;;
+
+      # :flag.case
+      --danger)
+
+        # :flag.case_no_arg
+        args['--danger']=1
         shift
         ;;
 

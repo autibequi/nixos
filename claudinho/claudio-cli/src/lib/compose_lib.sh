@@ -106,6 +106,20 @@ claudio_mount_opts() {
   if [[ -n "${args['--rw']:-${flag_rw:-}}" ]]; then echo "rw"; elif [[ -n "${args['--ro']:-${flag_ro:-}}" ]]; then echo "ro"; else echo "rw"; fi
 }
 
+# --danger: sufixo/args de bypass de permissões por engine (vazio se flag não setada)
+claudio_danger_flag() {
+  if [[ -z "${flag_danger:-${args['--danger']:-}}" ]]; then
+    echo ""
+    return 0
+  fi
+  case "${1:-}" in
+    claude)  echo " --permission-mode bypassPermissions" ;;
+    cursor)  echo " --force" ;;
+    opencode) echo "" ;;
+    *) echo "" ;;
+  esac
+}
+
 # Model flag for claude binary (--model=haiku|opus; default = nada = sonnet).
 # Ordem: --model= na linha de comando sobrescreve ~/.claudio (CLAUDIO_MODEL).
 claudio_model_flag() {

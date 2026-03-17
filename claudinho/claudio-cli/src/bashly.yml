@@ -22,6 +22,8 @@ flags:
     help: Montar projeto em read-write (default para run)
   - long: --ro
     help: Montar projeto read-only
+  - long: --danger
+    help: Bypass de permissões no engine (claude: --permission-mode bypassPermissions; cursor: --force; opencode: env auto-approve)
 
 commands:
   - name: run
