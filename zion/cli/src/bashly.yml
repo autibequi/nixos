@@ -215,13 +215,6 @@ commands:
     help: journalctl do systemd service claude-autonomous.
     filename: commands/service_logs.sh
 
-  - name: ask
-    help: Abre Alacritty com Claude respondendo (q=pergunta ou interativo).
-    args:
-      - name: question
-        help: Pergunta (opcional; sem arg = interativo).
-    filename: commands/ask.sh
-
   - name: edit
     help: Abre sessão com ~/nixos em /workspace/mnt e /workspace/logs (único modo com mount de nixos + logs).
     filename: commands/host_edit.sh
