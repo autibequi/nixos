@@ -26,11 +26,17 @@ case "$engine" in
   cursor)
     echo "[claudio resume] engine=cursor → $proj_name (mount: ${mount_opts})"
     danger="$(claudio_danger_flag cursor)"
-    cursor_cmd='. /host/claudinho/scripts/bootstrap.sh; cd /workspace; '
-    cursor_cmd+='exec agent'"${danger}"' --resume="${CLAUDIO_RESUME_SESSION:-1}"'
+    # Cursor agent: --continue = última sessão; --resume=UUID = sessão específica
+    if [[ -n "$resume_id" && "$resume_id" != "1" ]]; then
+      cursor_resume_env="-e CLAUDIO_RESUME_SESSION=$resume_id"
+      cursor_cmd='. /host/claudinho/scripts/bootstrap.sh; cd /workspace; exec agent'"${danger}"' --resume="${CLAUDIO_RESUME_SESSION}"'
+    else
+      cursor_resume_env=""
+      cursor_cmd='. /host/claudinho/scripts/bootstrap.sh; cd /workspace; exec agent'"${danger}"' --continue'
+    fi
     HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
       claudio_compose_cmd -p "$proj_name" run --rm -it \
-      --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 -e CLAUDIO_RESUME_SESSION="$resume_id" sandbox \
+      --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 $cursor_resume_env sandbox \
       -c "$cursor_cmd"
     ;;
   *)
