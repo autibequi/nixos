@@ -252,7 +252,7 @@ ICON_EXTRA='󰊗'    # diamond (créditos extras)
 # --- modo: --waybar ---
 if [[ "$MODE" == "--waybar" ]]; then
   # Ícones dentro das caixinhas (mesma cor de fundo da barra)
-  text="$(_gauge "$ICON_SONNET" "$sn_num") $(_gauge "$ICON_5H" "$fh_pct") $(_gauge "$ICON_7D" "$sd_pct") $(_gauge_gold "$ICON_EXTRA" "$ex_pct")"
+  text="$(_gauge "$ICON_SONNET" "$sn_num") $(_gauge "$ICON_5H" "$fh_pct") $(_gauge "$ICON_7D" "$sd_pct")"
   # tooltip: monospace, prefixo largura fixa (12 cols) + gauge 3 dígitos para barras alinhadas (sem ícone dentro da caixa)
   tw=12
   wprefix=12
