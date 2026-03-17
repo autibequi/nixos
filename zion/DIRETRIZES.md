@@ -51,12 +51,12 @@ O catálogo tem 21 expressões prontas. Copiar UMA delas exatamente como está, 
 **Regra de ouro:** toda pergunta do user é sobre `/workspace` por padrão, a menos que ele mencione explicitamente o host, NixOS, dotfiles, ou infra.
 
 - **`/workspace`** — projeto externo montado (foco padrão das perguntas). Editar, commitar e fazer push normalmente aqui.
-- **`/host`** — repo NixOS do host. Editar arquivos aqui, mas `nixos-rebuild switch` precisa ser rodado pelo user no host.
+- **`/nixos`** — repo NixOS do host. Editar arquivos aqui, mas `nixos-rebuild switch` precisa ser rodado pelo user no host.
 - **Commits em `/workspace`**: permitido e esperado — usar identidade Pedrinho/Claudinho como de costume.
-- **Commits em `/host`**: permitido para mudanças de config/infra — mesma identidade.
+- **Commits em `/nixos`**: permitido para mudanças de config/infra — mesma identidade.
 - **Nunca assumir que o user está perguntando sobre o host** quando `/workspace` existe e está populado.
 - **Worktrees seguem a mesma lógica:**
-  - Mudança de host/infra → worktree dentro de `/host/`
+  - Mudança de host/infra → worktree dentro de `/nixos/`
   - Mudança de projeto → worktree dentro do repo correto em `/workspace/` (pode estar aninhado, ex: `estrategia/monolito/`)
   - Para achar o repo git raiz dentro de mount, usar `git -C <path> rev-parse --show-toplevel` — o `.git` pode estar em subdiretório aninhado
 

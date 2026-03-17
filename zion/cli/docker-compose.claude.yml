@@ -17,7 +17,8 @@ x-extra-hosts: &extra-hosts
   - "host.docker.internal:host-gateway"
 
 x-base-volumes: &base-volumes
-  - ${HOME}/nixos:/host
+  - ${HOME}/nixos:/nixos
+  - ${HOME}/nixos/zion:/zion
   - ${CLAUDIO_MOUNT:-${HOME}/projects}:/workspace:${CLAUDIO_MOUNT_OPTS:-ro}
   - ${OBSIDIAN_PATH:-/tmp}:/obsidian
   - ${HOME}/.claude:/home/claude/.claude
@@ -40,13 +41,13 @@ x-base-volumes: &base-volumes
   - ${HOME}/projects:/home/claude/projects
   - ${XDG_RUNTIME_DIR:-/run/user/1000}/${WAYLAND_DISPLAY:-wayland-1}:/run/user/1000/${WAYLAND_DISPLAY:-wayland-1}
   - /var/log/journal:/logs/host/journal:ro
-  - /proc/meminfo:/host/proc/meminfo:ro
-  - /proc/loadavg:/host/proc/loadavg:ro
-  - /proc/uptime:/host/proc/uptime:ro
-  - /proc/cpuinfo:/host/proc/cpuinfo:ro
-  - /proc/version:/host/proc/version:ro
-  - /run/current-system:/host/run/current-system:ro
-  - /etc/os-release:/host/etc/os-release:ro
+  - /proc/meminfo:/nixos/proc/meminfo:ro
+  - /proc/loadavg:/nixos/proc/loadavg:ro
+  - /proc/uptime:/nixos/proc/uptime:ro
+  - /proc/cpuinfo:/nixos/proc/cpuinfo:ro
+  - /proc/version:/nixos/proc/version:ro
+  - /run/current-system:/nixos/run/current-system:ro
+  - /etc/os-release:/nixos/etc/os-release:ro
   - /tmp/zion-hive-mind:/workspace/.hive-mind
 
 services:
@@ -77,7 +78,7 @@ services:
     mem_limit: 12g
     memswap_limit: 16g
     entrypoint: ["/bin/bash"]
-    command: ["/host/zion/scripts/clau-runner.sh"]
+    command: ["/zion/scripts/clau-runner.sh"]
     environment:
       <<: *env-worker
       GIT_AUTHOR_NAME: Buchecha
@@ -95,7 +96,7 @@ services:
     mem_limit: 4g
     memswap_limit: 6g
     entrypoint: ["/bin/bash"]
-    command: ["/host/zion/scripts/clau-runner.sh"]
+    command: ["/zion/scripts/clau-runner.sh"]
     environment:
       <<: *env-worker
       GIT_AUTHOR_NAME: Buchecha
@@ -117,14 +118,14 @@ services:
     command:
       - |
         while true; do
-          SCHEDULER_IN_CONTAINER=1 SCHEDULER_VAULT_DIR=/obsidian SCHEDULER_PROJECT_DIR=/host \
-            /host/zion/scripts/clau-scheduler.sh
+          SCHEDULER_IN_CONTAINER=1 SCHEDULER_VAULT_DIR=/obsidian SCHEDULER_PROJECT_DIR=/nixos \
+            /zion/scripts/clau-scheduler.sh
           sleep 600
         done
     environment:
       <<: *env-worker
       SCHEDULER_VAULT_DIR: /obsidian
-      SCHEDULER_PROJECT_DIR: /host
+      SCHEDULER_PROJECT_DIR: /nixos
       GIT_AUTHOR_NAME: Buchecha
       GIT_AUTHOR_EMAIL: buchecha@autibequi.com
       GIT_COMMITTER_NAME: Buchecha

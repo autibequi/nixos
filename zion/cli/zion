@@ -1103,7 +1103,7 @@ zion_run_command() {
       HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
         zion_compose_cmd -p "$proj_name" run --rm -it \
         --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
-        -c ". /host/zion/scripts/bootstrap.sh; cd /workspace && exec /home/claude/.nix-profile/bin/claude ${model}${danger}${init_file}${resume_flag}"
+        -c ". /zion/scripts/bootstrap.sh; cd /workspace && exec /home/claude/.nix-profile/bin/claude ${model}${danger}${init_file}${resume_flag}"
       ;;
     cursor)
       proj_name="$(zion_proj_name "$proj_slug")"
@@ -1113,7 +1113,7 @@ zion_run_command() {
       [[ -n "$initial_md" ]] && cursor_init_env="-e CLAUDIO_INITIAL_MD=$initial_md"
       cursor_resume_env=""
       [[ -n "$resume_id" ]] && cursor_resume_env="-e CLAUDIO_RESUME_SESSION=$resume_id"
-      cursor_cmd='. /host/zion/scripts/bootstrap.sh; cd /workspace; '
+      cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace; '
       cursor_cmd+='if [ -n "${CLAUDIO_RESUME_SESSION:-}" ]; then '
       cursor_cmd+='exec agent'"${danger}"' --resume="${CLAUDIO_RESUME_SESSION}"; '
       cursor_cmd+='elif [ -n "${CLAUDIO_INITIAL_MD:-}" ] && [ -f "/workspace/$CLAUDIO_INITIAL_MD" ]; then '
@@ -1174,7 +1174,7 @@ zion_resume_command() {
       CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
         zion_compose_cmd -p "$proj_name" run --rm -it \
         --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
-        -c ". /host/zion/scripts/bootstrap.sh; cd /workspace && exec /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions"
+        -c ". /zion/scripts/bootstrap.sh; cd /workspace && exec /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions"
       ;;
     cursor)
       echo "[zion resume] engine=cursor → $proj_name (mount: ${mount_opts})"
@@ -1182,10 +1182,10 @@ zion_resume_command() {
       # Cursor agent: --continue = última sessão; --resume=UUID = sessão específica
       if [[ -n "$resume_id" && "$resume_id" != "1" ]]; then
         cursor_resume_env="-e CLAUDIO_RESUME_SESSION=$resume_id"
-        cursor_cmd='. /host/zion/scripts/bootstrap.sh; cd /workspace; exec agent'"${danger}"' --resume="${CLAUDIO_RESUME_SESSION}"'
+        cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace; exec agent'"${danger}"' --resume="${CLAUDIO_RESUME_SESSION}"'
       else
         cursor_resume_env=""
-        cursor_cmd='. /host/zion/scripts/bootstrap.sh; cd /workspace; exec agent'"${danger}"' --continue'
+        cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace; exec agent'"${danger}"' --continue'
       fi
       HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
         zion_compose_cmd -p "$proj_name" run --rm -it \
@@ -1213,7 +1213,7 @@ zion_continue_command() {
   CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
     zion_compose_cmd -p "$proj_name" run --rm -it \
     --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
-    -c ". /host/zion/scripts/bootstrap.sh; cd /workspace && exec /home/claude/.nix-profile/bin/claude --continue ${model} --permission-mode bypassPermissions"
+    -c ". /zion/scripts/bootstrap.sh; cd /workspace && exec /home/claude/.nix-profile/bin/claude --continue ${model} --permission-mode bypassPermissions"
 
 }
 
@@ -1234,7 +1234,7 @@ zion_start_command() {
   CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
     zion_compose_cmd -p "$proj_name" exec -it \
     -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox bash -c \
-    '. /host/zion/scripts/bootstrap.sh; cd /workspace; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
+    '. /zion/scripts/bootstrap.sh; cd /workspace; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
 
 }
 
@@ -1353,7 +1353,7 @@ zion_worker_command() {
     -e SCHEDULER_VERBOSE=1 -e SCHEDULER_CLOCK=every60 \
     -e SCHEDULER_WORKER_ID="${SCHEDULER_WORKER_ID:-worker-1}" \
     -e SCHEDULER_ENGINE="${engine:-}" \
-    worker /host/zion/scripts/clau-runner.sh ${args[task]:-} 2>&1 | tee "$logfile"
+    worker /zion/scripts/clau-runner.sh ${args[task]:-} 2>&1 | tee "$logfile"
 
 }
 
@@ -1367,7 +1367,7 @@ zion_worker_run_fast_command() {
   OBSIDIAN_PATH="$zion_obsidian_path" zion_compose_cmd run --rm \
     -e SCHEDULER_VERBOSE=1 -e SCHEDULER_CLOCK=every10 \
     -e SCHEDULER_WORKER_ID="${SCHEDULER_WORKER_ID:-worker-fast}" \
-    worker-fast /host/zion/scripts/clau-runner.sh 2>&1 | tee "$logfile"
+    worker-fast /zion/scripts/clau-runner.sh 2>&1 | tee "$logfile"
 
 }
 
@@ -1381,7 +1381,7 @@ zion_worker_auto_command() {
   OBSIDIAN_PATH="$zion_obsidian_path" zion_compose_cmd run --rm -T \
     -e SCHEDULER_CLOCK=every60 \
     -e SCHEDULER_WORKER_ID="${SCHEDULER_WORKER_ID:-worker-1}" \
-    worker /host/zion/scripts/clau-runner.sh > "$logfile" 2>&1
+    worker /zion/scripts/clau-runner.sh > "$logfile" 2>&1
 
 }
 
@@ -1413,7 +1413,7 @@ zion_worker_clau_command() {
       -e SCHEDULER_WORKER_ID="$WORKER_ID" \
       -e SCHEDULER_CLOCK=every60 \
       -l "clau.worker.id=$WORKER_ID" \
-      worker /host/zion/scripts/clau-runner.sh >> "$logfile" 2>&1 &
+      worker /zion/scripts/clau-runner.sh >> "$logfile" 2>&1 &
   done
   echo "[zion worker-clau] Workers lançados. Seguindo log..."
   tail -f "$logfile"
