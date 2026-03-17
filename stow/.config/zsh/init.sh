@@ -47,11 +47,4 @@ convert_video() {
   fi
 }
 
-# claudio = CLI unificado (bashly) em ~/.local/bin/claudio — use "claudio --help"
-# codio = atalho para claudio open
-alias codio='claudio open'
-claudinho() { export CLAUDE_SESSION="${CLAUDE_SESSION:-pessoal}"; claudio "${@:-$PWD}"; }
-clau()      { export CLAUDE_SESSION="${CLAUDE_SESSION:-worker}"; cd ~/nixos && claudio worker; }
-clau-auto() { export CLAUDE_SESSION="auto"; cd ~/nixos && claudio worker-auto; }
-
 pokemonsay "$(fortune -s)"
