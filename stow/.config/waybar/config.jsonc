@@ -16,7 +16,6 @@
   "modules-right": [
     "mpris",
     "custom/cpu-bar",
-    "custom/gpu-bar",
     "custom/ram-bar",
     "custom/claude-usage",
     "pulseaudio",
