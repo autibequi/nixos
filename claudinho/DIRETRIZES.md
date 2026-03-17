@@ -48,16 +48,16 @@ O catálogo tem 21 expressões prontas. Copiar UMA delas exatamente como está, 
 
 ## Contexto de Trabalho — Mount vs Host
 
-**Regra de ouro:** toda pergunta do user é sobre `/workspace/mount` por padrão, a menos que ele mencione explicitamente o host, NixOS, dotfiles, ou infra.
+**Regra de ouro:** toda pergunta do user é sobre `/workspace` por padrão, a menos que ele mencione explicitamente o host, NixOS, dotfiles, ou infra.
 
-- **`/workspace/mount`** — projeto externo montado (foco padrão das perguntas). Editar, commitar e fazer push normalmente aqui.
-- **`/workspace/host`** — repo NixOS do host. Editar arquivos aqui, mas `nixos-rebuild switch` precisa ser rodado pelo user no host.
-- **Commits em `/workspace/mount`**: permitido e esperado — usar identidade Pedrinho/Claudinho como de costume.
-- **Commits em `/workspace/host`**: permitido para mudanças de config/infra — mesma identidade.
-- **Nunca assumir que o user está perguntando sobre o host** quando `/workspace/mount` existe e está populado.
+- **`/workspace`** — projeto externo montado (foco padrão das perguntas). Editar, commitar e fazer push normalmente aqui.
+- **`/host`** — repo NixOS do host. Editar arquivos aqui, mas `nixos-rebuild switch` precisa ser rodado pelo user no host.
+- **Commits em `/workspace`**: permitido e esperado — usar identidade Pedrinho/Claudinho como de costume.
+- **Commits em `/host`**: permitido para mudanças de config/infra — mesma identidade.
+- **Nunca assumir que o user está perguntando sobre o host** quando `/workspace` existe e está populado.
 - **Worktrees seguem a mesma lógica:**
-  - Mudança de host/infra → worktree dentro de `/workspace/host/`
-  - Mudança de projeto → worktree dentro do repo correto em `/workspace/mount/` (pode estar aninhado, ex: `mount/estrategia/monolito/`)
+  - Mudança de host/infra → worktree dentro de `/host/`
+  - Mudança de projeto → worktree dentro do repo correto em `/workspace/` (pode estar aninhado, ex: `estrategia/monolito/`)
   - Para achar o repo git raiz dentro de mount, usar `git -C <path> rev-parse --show-toplevel` — o `.git` pode estar em subdiretório aninhado
 
 ## Dicas de Workflow

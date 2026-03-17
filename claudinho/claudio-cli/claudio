@@ -1075,14 +1075,14 @@ claudio_run_command() {
       opencode_danger_env=""
       [[ -n "${flag_danger:-${args['--danger']:-}}" ]] && opencode_danger_env="-e OPENCODE_PERMISSION_BYPASS=1"
       opencode_init_env=""
-      [[ -n "$initial_md" ]] && opencode_init_env="-e CLAUDE_INITIAL_MD=/workspace/mount/$initial_md"
+      [[ -n "$initial_md" ]] && opencode_init_env="-e CLAUDE_INITIAL_MD=/workspace/$initial_md"
       opencode_resume_env=""
       [[ -n "$resume_id" ]] && opencode_resume_env="-e CLAUDIO_RESUME_SESSION=$resume_id"
       HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
         claudio_compose_cmd -p "$proj_name" up -d sandbox
       HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
         claudio_compose_cmd -p "$proj_name" exec -it \
-        -e CLAUDIO_MOUNT="$mount_path" $opencode_danger_env $opencode_init_env $opencode_resume_env sandbox bash -c 'cd /workspace/mount && exec opencode'
+        -e CLAUDIO_MOUNT="$mount_path" $opencode_danger_env $opencode_init_env $opencode_resume_env sandbox bash -c 'cd /workspace && exec opencode'
       ;;
     claude)
       proj_name="$(claudio_proj_name "$proj_slug")"
@@ -1097,7 +1097,7 @@ claudio_run_command() {
       HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
         claudio_compose_cmd -p "$proj_name" run --rm -it \
         --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
-        -c ". /workspace/host/scripts/bootstrap.sh; cd /workspace/mount && exec /home/claude/.nix-profile/bin/claude ${model}${danger}${init_file}${resume_flag}"
+        -c ". /host/claudinho/scripts/bootstrap.sh; cd /workspace && exec /home/claude/.nix-profile/bin/claude ${model}${danger}${init_file}${resume_flag}"
       ;;
     cursor)
       proj_name="$(claudio_proj_name "$proj_slug")"
@@ -1108,11 +1108,11 @@ claudio_run_command() {
       cursor_resume_env=""
       [[ -n "$resume_id" ]] && cursor_resume_env="-e CLAUDIO_RESUME_SESSION=$resume_id"
       # Script no container: resume tem prioridade; senão init-md; senão agent sem arg
-      cursor_cmd='. /workspace/host/scripts/bootstrap.sh; cd /workspace/mount; '
+      cursor_cmd='. /host/claudinho/scripts/bootstrap.sh; cd /workspace; '
       cursor_cmd+='if [ -n "${CLAUDIO_RESUME_SESSION:-}" ]; then '
       cursor_cmd+='exec agent'"${danger}"' --resume="${CLAUDIO_RESUME_SESSION}"; '
-      cursor_cmd+='elif [ -n "${CLAUDIO_INITIAL_MD:-}" ] && [ -f "/workspace/mount/$CLAUDIO_INITIAL_MD" ]; then '
-      cursor_cmd+='p=$(sed -e '\''s/\\\\/\\\\\\\\/g'\'' -e '\''s/"/\\"/g'\'' "/workspace/mount/$CLAUDIO_INITIAL_MD"); exec agent'"${danger}"' "$p"; '
+      cursor_cmd+='elif [ -n "${CLAUDIO_INITIAL_MD:-}" ] && [ -f "/workspace/$CLAUDIO_INITIAL_MD" ]; then '
+      cursor_cmd+='p=$(sed -e '\''s/\\\\/\\\\\\\\/g'\'' -e '\''s/"/\\"/g'\'' "/workspace/$CLAUDIO_INITIAL_MD"); exec agent'"${danger}"' "$p"; '
       cursor_cmd+='else exec agent'"${danger}"'; fi'
       HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
         claudio_compose_cmd -p "$proj_name" run --rm -it \
@@ -1154,7 +1154,7 @@ claudio_resume_command() {
   CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
     claudio_compose_cmd -p "$proj_name" run --rm -it \
     --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
-    -c ". /workspace/host/scripts/bootstrap.sh; cd /workspace/mount && exec /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions"
+    -c ". /host/claudinho/scripts/bootstrap.sh; cd /workspace && exec /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions"
 
 }
 
@@ -1171,7 +1171,7 @@ claudio_continue_command() {
   CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
     claudio_compose_cmd -p "$proj_name" run --rm -it \
     --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
-    -c ". /workspace/host/scripts/bootstrap.sh; cd /workspace/mount && exec /home/claude/.nix-profile/bin/claude --continue ${model} --permission-mode bypassPermissions"
+    -c ". /host/claudinho/scripts/bootstrap.sh; cd /workspace && exec /home/claude/.nix-profile/bin/claude --continue ${model} --permission-mode bypassPermissions"
 
 }
 
@@ -1192,7 +1192,7 @@ claudio_start_command() {
   CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
     claudio_compose_cmd -p "$proj_name" exec -it \
     -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox bash -c \
-    '. /workspace/host/scripts/bootstrap.sh; cd /workspace; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
+    '. /host/claudinho/scripts/bootstrap.sh; cd /workspace; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
 
 }
 
@@ -1290,7 +1290,7 @@ claudio_worker_command() {
     -e SCHEDULER_VERBOSE=1 -e SCHEDULER_CLOCK=every60 \
     -e SCHEDULER_WORKER_ID="${SCHEDULER_WORKER_ID:-worker-1}" \
     -e SCHEDULER_ENGINE="${engine:-}" \
-    worker /workspace/host/scripts/clau-runner.sh ${args[task]:-} 2>&1 | tee "$logfile"
+    worker /host/claudinho/scripts/clau-runner.sh ${args[task]:-} 2>&1 | tee "$logfile"
 
 }
 
@@ -1304,7 +1304,7 @@ claudio_worker_run_fast_command() {
   OBSIDIAN_PATH="$claudio_obsidian_path" claudio_compose_cmd run --rm \
     -e SCHEDULER_VERBOSE=1 -e SCHEDULER_CLOCK=every10 \
     -e SCHEDULER_WORKER_ID="${SCHEDULER_WORKER_ID:-worker-fast}" \
-    worker-fast /workspace/host/scripts/clau-runner.sh 2>&1 | tee "$logfile"
+    worker-fast /host/claudinho/scripts/clau-runner.sh 2>&1 | tee "$logfile"
 
 }
 
@@ -1318,7 +1318,7 @@ claudio_worker_auto_command() {
   OBSIDIAN_PATH="$claudio_obsidian_path" claudio_compose_cmd run --rm -T \
     -e SCHEDULER_CLOCK=every60 \
     -e SCHEDULER_WORKER_ID="${SCHEDULER_WORKER_ID:-worker-1}" \
-    worker /workspace/host/scripts/clau-runner.sh > "$logfile" 2>&1
+    worker /host/claudinho/scripts/clau-runner.sh > "$logfile" 2>&1
 
 }
 
@@ -1350,7 +1350,7 @@ claudio_worker_clau_command() {
       -e SCHEDULER_WORKER_ID="$WORKER_ID" \
       -e SCHEDULER_CLOCK=every60 \
       -l "clau.worker.id=$WORKER_ID" \
-      worker /workspace/host/scripts/clau-runner.sh >> "$logfile" 2>&1 &
+      worker /host/claudinho/scripts/clau-runner.sh >> "$logfile" 2>&1 &
   done
   echo "[claudio worker-clau] Workers lançados. Seguindo log..."
   tail -f "$logfile"
@@ -1451,7 +1451,7 @@ claudio_scheduler_command() {
       ;;
     run-now)
       # Um tick na hora, em foreground — para testar: scheduler escolhe tasks e roda worker com output
-      # O worker é um container separado; ele precisa do mesmo OBSIDIAN_PATH (mount em /workspace/obsidian)
+      # O worker é um container separado; ele precisa do mesmo OBSIDIAN_PATH (mount em /obsidian)
       export SCHEDULER_PROJECT_DIR="$claudio_nixos_dir"
       export SCHEDULER_VAULT_DIR="$claudio_obsidian_path"
       export OBSIDIAN_PATH="$claudio_obsidian_path"

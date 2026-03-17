@@ -31,7 +31,7 @@ case "$action" in
     ;;
   run-now)
     # Um tick na hora, em foreground — para testar: scheduler escolhe tasks e roda worker com output
-    # O worker é um container separado; ele precisa do mesmo OBSIDIAN_PATH (mount em /workspace/obsidian)
+    # O worker é um container separado; ele precisa do mesmo OBSIDIAN_PATH (mount em /obsidian)
     export SCHEDULER_PROJECT_DIR="$claudio_nixos_dir"
     export SCHEDULER_VAULT_DIR="$claudio_obsidian_path"
     export OBSIDIAN_PATH="$claudio_obsidian_path"

@@ -22,7 +22,7 @@ for i in 1 2; do
     -e SCHEDULER_WORKER_ID="$WORKER_ID" \
     -e SCHEDULER_CLOCK=every60 \
     -l "clau.worker.id=$WORKER_ID" \
-    worker /workspace/host/scripts/clau-runner.sh >> "$logfile" 2>&1 &
+    worker /host/claudinho/scripts/clau-runner.sh >> "$logfile" 2>&1 &
 done
 echo "[claudio worker-clau] Workers lançados. Seguindo log..."
 tail -f "$logfile"

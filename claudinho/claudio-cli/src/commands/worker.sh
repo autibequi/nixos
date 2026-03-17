@@ -10,4 +10,4 @@ OBSIDIAN_PATH="$claudio_obsidian_path" \
   -e SCHEDULER_VERBOSE=1 -e SCHEDULER_CLOCK=every60 \
   -e SCHEDULER_WORKER_ID="${SCHEDULER_WORKER_ID:-worker-1}" \
   -e SCHEDULER_ENGINE="${engine:-}" \
-  worker /workspace/host/scripts/clau-runner.sh ${args[task]:-} 2>&1 | tee "$logfile"
+  worker /host/claudinho/scripts/clau-runner.sh ${args[task]:-} 2>&1 | tee "$logfile"
