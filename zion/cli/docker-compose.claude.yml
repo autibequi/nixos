@@ -25,9 +25,9 @@ x-base-volumes: &base-volumes
   - ${ZION_ROOT:-${HOME}/nixos/zion}/system/CLAUDE.OVERRIDE.md:/workspace/mnt/CLAUDE.OVERRIDE.md:ro
   - ${ZION_ROOT:-${HOME}/nixos/zion}/system/CLAUDE.OVERRIDE.md:/workspace/mnt/zion/CLAUDE.OVERRIDE.md:ro
   - ${HOME}/.claude:/home/claude/.claude
-  # Fonte: zion/.claude (skills, commands); hooks e scripts vêm de stow (fonte da verdade)
-  - ${ZION_ROOT:-${HOME}/nixos/zion}/.claude/skills:/home/claude/.claude/skills
-  - ${ZION_ROOT:-${HOME}/nixos/zion}/.claude/commands:/home/claude/.claude/commands
+  # Fonte: zion/skills e zion/commands (diretórios populados); hooks vêm de zion/hooks/claude-code
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/skills:/home/claude/.claude/skills
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/commands:/home/claude/.claude/commands
   - ${ZION_ROOT:-${HOME}/nixos/zion}/agents:/home/claude/.claude/agents
   # Hooks: stow no host (path absoluto)
   - ${HOME}/nixos/zion/hooks/claude-code:/home/claude/.claude/hooks
@@ -65,15 +65,14 @@ x-scheduler-volumes: &scheduler-volumes
   - ${ZION_ROOT:-${HOME}/nixos/zion}/system/CLAUDE.OVERRIDE.md:/workspace/mnt/zion/CLAUDE.OVERRIDE.md:ro
   - ${HOME}/nixos:/workspace/nixos
   - ${HOME}/.claude:/home/claude/.claude
-  - ${ZION_ROOT:-${HOME}/nixos/zion}/.claude/skills:/home/claude/.claude/skills
-  - ${ZION_ROOT:-${HOME}/nixos/zion}/.claude/commands:/home/claude/.claude/commands
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/skills:/home/claude/.claude/skills
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/commands:/home/claude/.claude/commands
   - ${ZION_ROOT:-${HOME}/nixos/zion}/agents:/home/claude/.claude/agents
   - ${HOME}/nixos/zion/hooks/claude-code:/home/claude/.claude/hooks
   - ${ZION_ROOT:-${HOME}/nixos/zion}/scripts:/home/claude/.claude/scripts
   - ${HOME}/.claude.json:/home/claude/.claude.json
   - ${HOME}/.cursor:/home/claude/.cursor
   - ${ZION_ROOT:-${HOME}/nixos/zion}/skills:/home/claude/.cursor/skills
-  - ${ZION_ROOT:-${HOME}/nixos/zion}/commands:/home/claude/.cursor/commands
   - ${ZION_ROOT:-${HOME}/nixos/zion}/commands:/home/claude/.cursor/rules
   - cursor_config:/home/claude/.config/cursor
   - ${ZION_ROOT:-${HOME}/nixos/zion}/.opencode:/home/claude/.config/opencode
