@@ -82,4 +82,4 @@ Com `engine=cursor`, o `zion run` sobe o **Cursor CLI** (`agent`) no container, 
 - **Montagem** — o compose monta `~/.cursor` do host (config) e usa o volume nomeado `cursor_config` para `~/.config/cursor` (tokens). Bind mount do host em `.config/cursor` causaria EPERM porque o agent faz chmod nesse dir; o volume nomeado permite isso e persiste o login entre runs.
 - **API key** — defina `CURSOR_API_KEY=...` em `~/.zion` (ou no `.env` do cli) para uso em scripts/headless.
 
-**Verificar autenticação (uma vez):** dentro do container, rode `agent status` (ex.: `zion run --engine=cursor /tmp` e depois `agent status`; ou `docker compose -f docker-compose.claude.yml run --rm sandbox agent status` no dir do compose). Confirme que aparece autenticado antes de usar em fluxo real.
+**Verificar autenticação (uma vez):** dentro do container, rode `agent status` (ex.: `zion run --engine=cursor /tmp` e depois `agent status`; ou `docker compose -f docker-compose.zion.yml run --rm sandbox agent status` no dir do compose). Confirme que aparece autenticado antes de usar em fluxo real.

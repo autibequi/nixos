@@ -247,7 +247,7 @@ build_task_queue() {
 
 # ── Compose dispatch (host) / in-process dispatch (container) ─────────────────
 COMPOSE_BIN="${SCHEDULER_COMPOSE_BIN:-docker-compose}"
-COMPOSE_FILES="${SCHEDULER_COMPOSE_FILES:--f $PROJECT_DIR/zion/cli/docker-compose.claude.yml}"
+COMPOSE_FILES="${SCHEDULER_COMPOSE_FILES:--f $PROJECT_DIR/zion/cli/docker-compose.puppy.yml}"
 
 dispatch_tasks() {
   local task_list="$1"

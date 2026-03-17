@@ -16,7 +16,7 @@ let
   enginePkg = if isPodman then pkgs.podman else pkgs.docker;
   composePkg = if isPodman then pkgs.podman-compose else pkgs.docker-compose;
   composeBin = if isPodman then "${pkgs.podman-compose}/bin/podman-compose" else "${pkgs.docker-compose}/bin/docker-compose";
-  composeFileMain = "${projectDir}/zion/cli/docker-compose.claude.yml";
+  composeFileMain = "${projectDir}/zion/cli/docker-compose.puppy.yml";
   composeFilePodman = if isPodman then " -f ${projectDir}/zion/cli/docker-compose.podman.yml" else "";
   composeProject = "puppy-workers";
   networkName = "nixos_default";
@@ -47,7 +47,7 @@ let
     if [ -f "${composeFileMain}" ]; then
       COMPOSE_FILES="-f ${composeFileMain}${composeFilePodman}"
     else
-      echo "[puppy-scheduler-container] No compose file at zion/cli/docker-compose.claude.yml" >&2
+      echo "[puppy-scheduler-container] No compose file at zion/cli/docker-compose.puppy.yml" >&2
       exit 0
     fi
     if ${composeBin} $COMPOSE_FILES -p ${composeProject} up -d scheduler 2>&1; then

@@ -41,7 +41,7 @@ Ao abrir o projeto, faça em segundos:
 | **Zion** | Nome do sistema de agentes: CLI `zion`, container `claude-nix-sandbox`, bootstrap, skills, hooks. Código em **`zion/`**. |
 | **Puppy** | Nome dos workers em background: scheduler, runner de tasks (kanban). Scripts: `puppy-runner.sh`, `puppy-scheduler.sh`, `puppy-cleanup.sh` em **`scripts/`**; symlinks em `zion/scripts/` para o container. |
 | **Zion CLI** | Comando `zion` (gerado por bashly). Fonte: **`zion/cli/src/bashly.yml`** + **`zion/cli/src/commands/*.sh`**. Após alterar: rodar **`bashly generate`** em `zion/cli/` (ou `zion update` no host). |
-| **Container** | Imagem `claude-nix-sandbox`. Compose: `zion/cli/docker-compose.claude.yml`. Sessões interativas = Zion; workers/scheduler = Puppy. |
+| **Container** | Imagem `claude-nix-sandbox`. Compose: `zion/cli/docker-compose.zion.yml / docker-compose.puppy.yml`. Sessões interativas = Zion; workers/scheduler = Puppy. |
 
 **Resumo:** Repo = NixOS no host. Zion = agentes/sessões. Puppy = workers em background. CLI em `zion/cli/`.
 
@@ -107,7 +107,7 @@ Esta seção descreve o sistema de containers e o uso do Zion **do ponto de vist
 
 ### 4.1 Como o host inicia o container
 
-- O usuário roda no **host** o comando **`zion`** (CLI em `zion/cli/`). O CLI usa **Docker Compose** com o arquivo `zion/cli/docker-compose.claude.yml`.
+- O usuário roda no **host** o comando **`zion`** (CLI em `zion/cli/`). O CLI usa **Docker Compose** com o arquivo `zion/cli/docker-compose.zion.yml / docker-compose.puppy.yml`.
 - A imagem é **`claude-nix-sandbox`** (build a partir de `zion/cli/Dockerfile.claude`). Todos os serviços (sandbox, worker, scheduler) usam essa mesma imagem.
 - O Compose define **três conjuntos de uso**: (1) **sandbox** — sessão interativa (Cursor/Claude/OpenCode); (2) **worker** / **worker-fast** — execução de tasks em background; (3) **scheduler** — loop a cada 10 min que despacha tasks. Cada um usa **volumes** diferentes conforme o modo (ver abaixo).
 
@@ -202,7 +202,7 @@ O **scheduler** lê estado em `$SCHEDULER_PROJECT_DIR/.ephemeral/scheduler/` (no
 ├── scripts/               ← Scripts do host (bootstrap.sh, puppy-runner.sh, puppy-scheduler.sh, api-usage.sh, etc.).
 ├── zion/                  ← Zion: launcher + container.
 │   ├── cli/               ← Zion CLI.
-│   │   ├── docker-compose.claude.yml   ← Compose do container do agente.
+│   │   ├── docker-compose.zion.yml / docker-compose.puppy.yml   ← Compose do container do agente.
 │   │   ├── zion                        ← Binário gerado (bashly).
 │   │   └── src/
 │   │       ├── bashly.yml              ← Definição de comandos e flags.
@@ -276,7 +276,7 @@ Para alterações em **NixOS** ou **Hyprland**, o agente deve **ler e seguir** a
 | Adicionar pacote / mudar opção NixOS | Skill **nixos**; editar módulo em `modules/`; `nh os test .`. |
 | Mudar keybind / Waybar / config Hyprland | Skill **hyprland-config** (`zion/skills/hyprland-config/SKILL.md`); editar em `stow/.config/hypr/`; deploy com `stow -d ~/nixos/stow -t ~ .`. |
 | Alterar comando Zion ou flags | `zion/cli/src/bashly.yml` e `zion/cli/src/commands/*.sh`; depois `bashly generate`. |
-| Alterar mounts ou serviços do container | `zion/cli/docker-compose.claude.yml`. |
+| Alterar mounts ou serviços do container | `zion/cli/docker-compose.zion.yml / docker-compose.puppy.yml`. |
 | Alterar comportamento do agente (personas, /load) | `zion/bootstrap.md`, `zion/system/INIT.md`, `zion/commands/`, `stow/.claude/`. |
 | Rodar nixos-rebuild / systemctl no host | Só se `IS_CONTAINER` não for 1; caso contrário, pedir ao usuário rodar no host. |
 
@@ -289,7 +289,7 @@ Para alterações em **NixOS** ou **Hyprland**, o agente deve **ler e seguir** a
 | Ativar/desativar módulo | `configuration.nix` (imports) |
 | Keybind / regra de janela / Waybar | `stow/.config/hypr/`, `stow/.config/waybar/` |
 | Novo comando ou flag do `zion` | `zion/cli/src/bashly.yml` + `zion/cli/src/commands/<nome>.sh` → `bashly generate` |
-| Mounts ou serviços do container | `zion/cli/docker-compose.claude.yml` |
+| Mounts ou serviços do container | `zion/cli/docker-compose.zion.yml / docker-compose.puppy.yml` |
 | Comportamento no /load, INIT | `zion/bootstrap.md`, `zion/system/INIT.md` |
 | Skill ou comando do agente | `zion/skills/`, `zion/commands/` |
 | Hooks (session-start, etc.) | `stow/.claude/hooks/` (host é fonte da verdade) |
@@ -307,7 +307,7 @@ Para alterações em **NixOS** ou **Hyprland**, o agente deve **ler e seguir** a
 | Situação | O que fazer |
 |----------|--------------|
 | Build NixOS falha | Rodar `nh os test .` (no host ou com repo montado), ler o erro; usar skill **nixos** e tabela de módulos (seção 7). |
-| Sessão/container não sobe ou monta errado | Ver `zion/cli/docker-compose.claude.yml` (volumes, entrypoint); seção 4 (Zion — perspectiva container). |
+| Sessão/container não sobe ou monta errado | Ver `zion/cli/docker-compose.zion.yml / docker-compose.puppy.yml` (volumes, entrypoint); seção 4 (Zion — perspectiva container). |
 | Keybind ou Waybar não aplica | Skill **hyprland-config**; validar camadas (módulo → dotfiles → stow); `hyprls lint` no config. |
 | Comando `zion` não aparece ou está desatualizado | Regenerar: `cd zion/cli && bashly generate`; ou no host: `zion update`. |
 
@@ -316,7 +316,7 @@ Para alterações em **NixOS** ou **Hyprland**, o agente deve **ler e seguir** a
 ## 11. O que o agente pode alterar a pedido
 
 - Qualquer arquivo deste repo: módulos NixOS, stow, scripts, **zion/**.
-- Zion CLI: `zion/cli/src/`, `bashly.yml`, `docker-compose.claude.yml`.
+- Zion CLI: `zion/cli/src/`, `bashly.yml`, `docker-compose.zion.yml / docker-compose.puppy.yml`.
 - Comportamento do agente: `stow/.claude/`, `zion/` (bootstrap, system, commands, skills, agents, hooks).
 
 Validação: mudanças em módulos NixOS → skill **nixos** + `nh os test .`. Dotfiles → stow. Hyprland/Cursor → arquivos em `stow/.config/` e em `zion/`.
@@ -328,7 +328,7 @@ Validação: mudanças em módulos NixOS → skill **nixos** + `nh os test .`. D
 | Tema | Onde |
 |------|------|
 | Comportamento do agente (personas, tasks) | `zion/bootstrap.md`, `zion/system/INIT.md`, equivalente em stow/obsidian |
-| Zion CLI (comandos, compose) | `zion/cli/README.md`, `zion/cli/docker-compose.claude.yml`, `zion/cli/src/bashly.yml` |
+| Zion CLI (comandos, compose) | `zion/cli/README.md`, `zion/cli/docker-compose.zion.yml / docker-compose.puppy.yml`, `zion/cli/src/bashly.yml` |
 | NixOS (packages, options, módulos) | Seção **6** (Skills) + `zion/skills/nixos/SKILL.md` + `modules/` |
 | Dotfiles / Hyprland | Seção **6** (Skills) + `zion/skills/hyprland-config/SKILL.md` + `stow/.config/` |
 | Boot do agente (/load, paths) | `zion/bootstrap.md`, `zion/commands/load.md` |

@@ -4,7 +4,7 @@
 
 zion_nixos_dir="${ZION_NIXOS_DIR:-$HOME/nixos}"
 zion_cli_dir="$zion_nixos_dir/zion/cli"
-zion_compose_file="$zion_cli_dir/docker-compose.claude.yml"
+zion_compose_file="$zion_cli_dir/docker-compose.zion.yml"
 zion_compose_dir="$zion_cli_dir"
 # Config do usuário: engine padrão e chaves (GH_TOKEN, ANTHROPIC_API_KEY)
 zion_config_file="${ZION_CONFIG:-$HOME/.zion}"

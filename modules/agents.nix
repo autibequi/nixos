@@ -14,7 +14,7 @@ let
   enginePkg = if isPodman then pkgs.podman else pkgs.docker;
   composePkg = if isPodman then pkgs.podman-compose else pkgs.docker-compose;
   composeBin = if isPodman then "podman-compose" else "docker-compose";
-  composeFiles = "-f ${projectDir}/zion/cli/docker-compose.claude.yml"
+  composeFiles = "-f ${projectDir}/zion/cli/docker-compose.puppy.yml"
     + (if isPodman then " -f ${projectDir}/zion/cli/docker-compose.podman.yml" else "");
   compose = "${composePkg}/bin/${composeBin} ${composeFiles} -p puppy-workers";
 
