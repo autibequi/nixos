@@ -53,21 +53,121 @@ HTML_PAGE = """<!DOCTYPE html>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Draw</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
-    body { font-family: system-ui, sans-serif; margin: 1rem; max-width: 960px; }
-    #content { min-height: 2rem; }
-    .mermaid { margin: 1rem 0; }
-    #content pre { background: #f4f4f4; padding: 0.5rem; overflow-x: auto; }
-    #content code { background: #f4f4f4; padding: 0.1em 0.3em; }
-    #status { position: fixed; bottom: 0.5rem; right: 0.5rem; font-size: 0.75rem; color: #666; }
-    #status.live { color: #0a0; }
-    #status.reconnecting { color: #a60; }
+    :root {
+      --bg: #0f0f12;
+      --surface: #18181c;
+      --border: #2a2a30;
+      --text: #e4e4e7;
+      --text-muted: #71717a;
+      --accent: #a78bfa;
+      --accent-dim: #7c3aed;
+      --live: #22c55e;
+      --reconnect: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    .page {
+      max-width: 52rem;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+    .brand {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+    .brand span { color: var(--accent); }
+    #content {
+      min-height: 12rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem 2rem;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+    }
+    #content .md-block + .md-block { margin-top: 1.5rem; }
+    #content :first-child { margin-top: 0; }
+    #content :last-child { margin-bottom: 0; }
+    #content h1 { font-size: 1.75rem; font-weight: 600; margin: 0 0 0.75rem; color: var(--text); }
+    #content h2 { font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.5rem; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 0.35rem; }
+    #content h3 { font-size: 1.1rem; font-weight: 600; margin: 1.25rem 0 0.4rem; color: var(--text); }
+    #content p { margin: 0 0 0.75rem; color: var(--text-muted); }
+    #content ul, #content ol { margin: 0 0 0.75rem; padding-left: 1.5rem; color: var(--text-muted); }
+    #content li { margin: 0.25rem 0; }
+    #content pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0;
+    }
+    #content code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875em;
+      background: var(--bg);
+      color: var(--accent);
+      padding: 0.2em 0.45em;
+      border-radius: 4px;
+    }
+    #content pre code { background: none; color: var(--text); padding: 0; }
+    #content blockquote {
+      margin: 0.75rem 0;
+      padding-left: 1rem;
+      border-left: 3px solid var(--accent-dim);
+      color: var(--text-muted);
+    }
+    #content a { color: var(--accent); text-decoration: none; }
+    #content a:hover { text-decoration: underline; }
+    #content hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    .mermaid {
+      margin: 1.25rem 0;
+      padding: 1rem;
+      background: var(--bg);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    #status {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+    #status.live { color: var(--live); border-color: rgba(34,197,94,0.35); background: rgba(34,197,94,0.08); }
+    #status.reconnecting { color: var(--reconnect); border-color: rgba(245,158,11,0.35); background: rgba(245,158,11,0.08); }
   </style>
 </head>
 <body>
-  <div id="content">Aguardando conteúdo…</div>
+  <div class="page">
+    <div class="brand"><span>Weblive</span> · Draw</div>
+    <div id="content">Aguardando conteúdo…</div>
+  </div>
   <div id="status">conectando…</div>
   <script>
     const contentEl = document.getElementById('content');
@@ -130,7 +230,18 @@ HTML_PAGE = """<!DOCTYPE html>
     }
 
     if (typeof marked !== 'undefined') marked.setOptions({ gfm: true });
-    mermaid.initialize({ startOnLoad: false });
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      themeVariables: {
+        primaryColor: '#7c3aed',
+        primaryTextColor: '#e4e4e7',
+        primaryBorderColor: '#2a2a30',
+        lineColor: '#71717a',
+        secondaryColor: '#18181c',
+        tertiaryColor: '#0f0f12'
+      }
+    });
     connect();
   </script>
 </body>
