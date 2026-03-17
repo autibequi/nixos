@@ -30,7 +30,7 @@ x-base-volumes: &base-volumes
   - ${ZION_ROOT:-${HOME}/nixos/zion}/.claude/commands:/home/claude/.claude/commands
   - ${ZION_ROOT:-${HOME}/nixos/zion}/agents:/home/claude/.claude/agents
   # Hooks: stow no host (path absoluto)
-  - ${HOME}/nixos/stow/.claude/hooks:/home/claude/.claude/hooks
+  - ${HOME}/nixos/zion/hooks/claude-code:/home/claude/.claude/hooks
   - ${ZION_ROOT:-${HOME}/nixos/zion}/scripts:/home/claude/.claude/scripts
   - ${HOME}/.claude.json:/home/claude/.claude.json
   # Cursor CLI: credenciais e config (agent login ou CURSOR_API_KEY)
@@ -68,7 +68,7 @@ x-scheduler-volumes: &scheduler-volumes
   - ${ZION_ROOT:-${HOME}/nixos/zion}/.claude/skills:/home/claude/.claude/skills
   - ${ZION_ROOT:-${HOME}/nixos/zion}/.claude/commands:/home/claude/.claude/commands
   - ${ZION_ROOT:-${HOME}/nixos/zion}/agents:/home/claude/.claude/agents
-  - ${HOME}/nixos/stow/.claude/hooks:/home/claude/.claude/hooks
+  - ${HOME}/nixos/zion/hooks/claude-code:/home/claude/.claude/hooks
   - ${ZION_ROOT:-${HOME}/nixos/zion}/scripts:/home/claude/.claude/scripts
   - ${HOME}/.claude.json:/home/claude/.claude.json
   - ${HOME}/.cursor:/home/claude/.cursor
