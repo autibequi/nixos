@@ -1,19 +1,17 @@
 # zion host-edit: ~/nixos em /workspace/mnt + /workspace/logs. Respeita engine em ~/.zion (ex.: cursor).
-# Cursor: passar API key para evitar login (workspace ~/nixos pode pedir auth; key em ~/.zion ou ~/.cursor/api_key).
+# Cursor: usar credenciais do host como no outro container — ~/.claude (cursor_api_key, .env), ~/.config/cursor (mount).
 zion_load_config
 engine=$(zion_resolve_engine 0)
 [[ -z "$engine" ]] && engine="cursor"
 mount_path="${ZION_NIXOS_DIR:-$HOME/nixos}"
 mount_path="$(cd "$mount_path" 2>/dev/null && pwd)" || { echo "zion host-edit: dir not found: $mount_path" >&2; exit 1; }
 proj_slug="nixos"
-proj_name="clau-nixos"
+# Mesmo project name do `zion` (~/projects) para compartilhar cursor_config e não pedir login.
+proj_name="clau-projects"
 mount_opts="rw"
 resume_id="${args['--resume']:-}"
 EXTRA_V="-v /var/log/journal:/workspace/logs/host/journal:ro"
-[[ -z "${CURSOR_API_KEY:-}" ]] && [[ -f "$HOME/.cursor/api_key" ]] && export CURSOR_API_KEY="$(head -1 "$HOME/.cursor/api_key" 2>/dev/null)"
 cursor_key_env=""
-[[ -n "${CURSOR_API_KEY:-}" ]] && cursor_key_env="-e CURSOR_API_KEY=$CURSOR_API_KEY"
-[[ -z "${CURSOR_API_KEY:-}" ]] && [[ "$engine" == "cursor" ]] && echo "[zion host-edit] Dica: para evitar login do Cursor, defina cursor_api_key= em ~/.zion ou coloque a chave em ~/.cursor/api_key" >&2
 
 case "$engine" in
   opencode)

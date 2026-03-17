@@ -1718,15 +1718,12 @@ zion_host_edit_command() {
   mount_path="${ZION_NIXOS_DIR:-$HOME/nixos}"
   mount_path="$(cd "$mount_path" 2>/dev/null && pwd)" || { echo "zion host-edit: dir not found: $mount_path" >&2; exit 1; }
   proj_slug="nixos"
-  proj_name="clau-nixos"
+  # Mesmo project name do `zion` (~/projects) para compartilhar o volume cursor_config e não pedir login de novo.
+  proj_name="clau-projects"
   mount_opts="rw"
   resume_id="${args['--resume']:-}"
   EXTRA_V="-v /var/log/journal:/workspace/logs/host/journal:ro"
-  # Cursor: passar API key explicitamente para evitar login ao abrir workspace ~/nixos (diferente de pastas em ~/projects).
-  [[ -z "${CURSOR_API_KEY:-}" ]] && [[ -f "$HOME/.cursor/api_key" ]] && export CURSOR_API_KEY="$(head -1 "$HOME/.cursor/api_key" 2>/dev/null)"
   cursor_key_env=""
-  [[ -n "${CURSOR_API_KEY:-}" ]] && cursor_key_env="-e CURSOR_API_KEY=$CURSOR_API_KEY"
-  [[ -z "${CURSOR_API_KEY:-}" ]] && [[ "$engine" == "cursor" ]] && echo "[zion host-edit] Dica: para evitar login do Cursor, defina cursor_api_key= em ~/.zion ou coloque a chave em ~/.cursor/api_key" >&2
   case "$engine" in
     opencode)
       echo "[zion host-edit] engine=opencode ${mount_path} → ${proj_name} (mnt + logs)"
