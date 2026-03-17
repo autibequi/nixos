@@ -1036,7 +1036,8 @@ zion_initial_md() {
   [[ -f "$full" ]] && echo "$f" || echo ""
 }
 
-# --danger: sufixo/args de bypass de permissões por engine (vazio se flag não setada)
+# --danger: sufixo/args de bypass de permissões por engine (vazio se flag não setada).
+# Config ~/.zion: DANGER=true deixa danger sempre ligado.
 zion_danger_flag() {
   if [[ -z "${flag_danger:-${args['--danger']:-${ZION_DANGER:-}}}" ]]; then
     echo ""
