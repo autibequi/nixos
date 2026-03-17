@@ -9,7 +9,7 @@
 
 - **Quando o servidor estiver ligado**, ou o usuário pedir para **desenhar** ou **fazer um site** (página, app, jogo, etc. no browser): **perguntar** se é para fazer no **weblive** (servir em `http://zion:PORT/...`).
 - **Se for óbvio no contexto**, não perguntar — fazer direto no weblive (ex.: "faz um jogo no navegador", "quero ver no browser", "sobe um site pra eu testar").
-- Weblive = pasta **`.weblive`** servida pelo servidor: Draw em `/`, arquivos estáticos em `/.weblive/...` (ex.: `/platformer/`).
+- Weblive = pasta **`.weblive`** servida pelo servidor: Draw em `/`, arquivos em subpastas em URLs como `/platformer/`, `/meu-site/`, etc.
 
 ---
 
