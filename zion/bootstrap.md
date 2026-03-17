@@ -1,6 +1,6 @@
 # Zion — Bootstrap do agente
 
-Este arquivo define como o agente deve se comportar quando operando no ambiente Zion. Ao receber **`/zion`** ou **`/zion load`**, o agente deve ler este documento e aplicar as instruções abaixo.
+Este arquivo define como o agente deve se comportar quando operando no ambiente Zion. Ao receber **`/load`** ou **`/load <nome>`**, o agente deve ler este documento e aplicar as instruções abaixo.
 
 ---
 
@@ -20,7 +20,7 @@ Este arquivo define como o agente deve se comportar quando operando no ambiente 
 | **`/logs`**   | Pasta **montada** com os **logs do host** (fora do container). |
 | **`/obsidian`** | Pasta do **Obsidian compartilhado** entre os agentes. |
 
-No container, a pasta zion é montada em `/zion`. No workspace do Cursor (ex.: `/workspace`), o mesmo conteúdo pode aparecer como `zion/`; use `zion/bootstrap.md` e `zion/commands/` como equivalentes a `/zion/bootstrap.md` e `/zion/commands/`.
+**No container**, a pasta da engine está em **`/zion`** (raiz do filesystem). O agente deve ler e aplicar os arquivos **diretamente** por esses paths: `/zion/bootstrap.md`, `/zion/commands/`, etc. **No workspace do Cursor** (ex.: `/workspace`), o mesmo conteúdo pode aparecer como `zion/`; nesse caso use `zion/bootstrap.md` e `zion/commands/` como equivalentes.
 
 ---
 
@@ -31,7 +31,7 @@ O Cursor/Claude pode não ter visibilidade direta de:
 - **Comandos:** `/zion/commands` — comandos por categoria (estrategia, meta, nixos, tools, utils, etc.). Cada `.md` descreve um comando ou fluxo.
 - **Skills:** local definido no host (ex.: `~/.cursor/skills` ou path montado em `/zion`). Quando o usuário disser "carregar skill X" ou invocar um comando que dependa de uma skill, considere ler de **`/zion/commands`** ou do path de skills que o usuário indicar.
 
-Ao **carregar** um comportamento (ex.: "/zion load" ou "carregar comando X"), o agente deve:
+Ao **carregar** um comportamento (ex.: "/load" ou "/load <nome>" ou "carregar comando X"), o agente deve:
 
 1. Ler **este** arquivo (`/zion/bootstrap.md` ou `zion/bootstrap.md` no workspace).
 2. Opcionalmente, ler o arquivo de comando ou skill solicitado (ex.: arquivo em `/zion/commands/...`).
@@ -48,16 +48,16 @@ Ao **carregar** um comportamento (ex.: "/zion load" ou "carregar comando X"), o 
 
 ## 5. Acionamento
 
-- **`/zion`** ou **`/zion load`**: ler e aplicar **este** bootstrap (tornar-se consciente dos caminhos, do papel de agente base e da localização de comandos/skills).
-- **`/zion load <nome>`**: além do bootstrap, carregar o comando ou comportamento indicado em `/zion/commands/...` (ex.: `/zion load estrategia/orq/changelog`).
+- **`/load`**: ler e aplicar **este** bootstrap (tornar-se consciente dos caminhos, do papel de agente base e da localização de comandos/skills).
+- **`/load <nome>`**: além do bootstrap, carregar o comando ou comportamento indicado em `/zion/commands/...` (ex.: `/load estrategia/orq/changelog`).
 
 ---
 
-## 6. Resumo de ação ao receber `/zion` ou `/zion load`
+## 6. Resumo de ação ao receber `/load` ou `/load <nome>`
 
 1. Ler este arquivo (`/zion/bootstrap.md` ou `zion/bootstrap.md`).
 2. Internalizar: `/zion` = engine dos agentes; `/nixos` = config NixOS do host; `/logs` = logs do host; `/obsidian` = Obsidian compartilhado.
 3. Passar a considerar comandos em `/zion/commands` e skills nos paths que o usuário definir.
 4. Comportar-se como agente base que carrega comportamentos sob demanda, respeitando as regras do usuário para submódulos.
 
-Se o usuário disser **`/zion load <algo>`**, após o passo acima, ler e aplicar o arquivo correspondente em `/zion/commands/...` (ou path indicado).
+Se o usuário disser **`/load <algo>`**, após o passo acima, ler e aplicar o arquivo correspondente em `/zion/commands/...` (ou path indicado).
