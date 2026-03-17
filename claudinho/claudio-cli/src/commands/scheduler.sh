@@ -1,11 +1,11 @@
 # Sobe/para/status do container scheduler (tick a cada 10 min). Usa -p clau-workers como no systemd.
 claudio_load_config
 
-CLAU_PROJECT="${CLAU_PROJECT:-clau-workers}"
+SCHEDULER_PROJECT="${SCHEDULER_PROJECT:-clau-workers}"
 action="${args[action]:-start}"
 
 scheduler_cmd() {
-  claudio_compose_cmd -p "$CLAU_PROJECT" "$@"
+  claudio_compose_cmd -p "$SCHEDULER_PROJECT" "$@"
 }
 
 case "$action" in
@@ -31,12 +31,26 @@ case "$action" in
     ;;
   run-now)
     # Um tick na hora, em foreground — para testar: scheduler escolhe tasks e roda worker com output
-    echo "[claudio scheduler] Rodando 1 tick agora (scheduler + worker em foreground)..."
-    export CLAU_PROJECT_DIR="$claudio_nixos_dir"
-    export CLAU_VAULT_DIR="$claudio_obsidian_path"
+    # O worker é um container separado; ele precisa do mesmo OBSIDIAN_PATH (mount em /workspace/obsidian)
+    export SCHEDULER_PROJECT_DIR="$claudio_nixos_dir"
+    export SCHEDULER_VAULT_DIR="$claudio_obsidian_path"
     export OBSIDIAN_PATH="$claudio_obsidian_path"
-    export CLAU_COMPOSE_BIN="docker compose"
-    export CLAU_COMPOSE_FILES="-f $claudio_compose_file -p $CLAU_PROJECT"
+    export SCHEDULER_COMPOSE_BIN="docker compose"
+    export SCHEDULER_COMPOSE_FILES="-f $claudio_compose_file -p $SCHEDULER_PROJECT"
+    echo "[claudio scheduler] Rodando 1 tick agora (scheduler + worker em foreground)..."
+    echo "[claudio scheduler] Constantes (antes de rodar):"
+    echo "  SCHEDULER_PROJECT_DIR=$SCHEDULER_PROJECT_DIR"
+    echo "  SCHEDULER_VAULT_DIR=$SCHEDULER_VAULT_DIR"
+    echo "  OBSIDIAN_PATH=$OBSIDIAN_PATH"
+    echo "  SCHEDULER_COMPOSE_BIN=$SCHEDULER_COMPOSE_BIN"
+    echo "  SCHEDULER_COMPOSE_FILES=$SCHEDULER_COMPOSE_FILES"
+    echo "  claudio_compose_file=$claudio_compose_file"
+    echo "  SCHEDULER_PROJECT=$SCHEDULER_PROJECT"
+    if [[ -d "$OBSIDIAN_PATH/_agent/tasks/recurring" ]]; then
+      echo "  _agent/tasks/recurring: existe ($(ls -1 "$OBSIDIAN_PATH/_agent/tasks/recurring" 2>/dev/null | wc -l) pastas)"
+    else
+      echo "  _agent/tasks/recurring: NÃO EXISTE em $OBSIDIAN_PATH — worker verá 0 tasks." >&2
+    fi
     "$claudio_nixos_dir/scripts/clau-scheduler.sh"
     ;;
   shell)

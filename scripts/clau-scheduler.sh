@@ -11,8 +11,8 @@
 # =============================================================================
 set -euo pipefail
 
-PROJECT_DIR="${CLAU_PROJECT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
-VAULT_DIR="${CLAU_VAULT_DIR:-${HOME}/.ovault/Work}"
+PROJECT_DIR="${SCHEDULER_PROJECT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}"
+VAULT_DIR="${SCHEDULER_VAULT_DIR:-${HOME}/.ovault/Work}"
 EPHEMERAL="$PROJECT_DIR/.ephemeral"
 SCHEDULER_DIR="$EPHEMERAL/scheduler"
 STATE_FILE="$SCHEDULER_DIR/state.json"
@@ -21,10 +21,10 @@ DASHBOARD_FILE="$SCHEDULER_DIR/dashboard.txt"
 LOCKFILE="$EPHEMERAL/locks/scheduler.lock"
 LOGFILE="$EPHEMERAL/logs/scheduler.log"
 
-TICK_BUDGET="${CLAU_TICK_BUDGET:-540}"  # 9 min default (1 min overhead)
+TICK_BUDGET="${SCHEDULER_TICK_BUDGET:-540}"  # 9 min default (1 min overhead)
 DRY_RUN=0
 [[ "${1:-}" == "--dry-run" ]] && DRY_RUN=1
-IN_CONTAINER="${CLAU_IN_CONTAINER:-0}"
+IN_CONTAINER="${SCHEDULER_IN_CONTAINER:-0}"
 
 TASKS_DIR="$VAULT_DIR/_agent/tasks"
 SCHEDULED_FILE="$VAULT_DIR/scheduled.md"
@@ -247,25 +247,28 @@ build_task_queue() {
 }
 
 # ── Compose dispatch (host) / in-process dispatch (container) ─────────────────
-COMPOSE_BIN="${CLAU_COMPOSE_BIN:-docker-compose}"
-COMPOSE_FILES="${CLAU_COMPOSE_FILES:--f $PROJECT_DIR/claudinho/docker-compose.claude.yml}"
+COMPOSE_BIN="${SCHEDULER_COMPOSE_BIN:-docker-compose}"
+COMPOSE_FILES="${SCHEDULER_COMPOSE_FILES:--f $PROJECT_DIR/claudinho/docker-compose.claude.yml}"
 
 dispatch_tasks() {
   local task_list="$1"
   log "Dispatching: $task_list"
 
   if [ "$IN_CONTAINER" = "1" ]; then
-    export CLAU_WORKER_ID="scheduler-$$"
-    export CLAU_CLOCK="unified"
-    export CLAU_TASK_LIST="$task_list"
+    export SCHEDULER_WORKER_ID="scheduler-$$"
+    export SCHEDULER_CLOCK="unified"
+    export SCHEDULER_TASK_LIST="$task_list"
     "${PROJECT_DIR}/scripts/clau-runner.sh"
     return $?
   fi
 
-  $COMPOSE_BIN $COMPOSE_FILES run --rm -T \
-    -e CLAU_WORKER_ID="scheduler-$$" \
-    -e CLAU_CLOCK="unified" \
-    -e CLAU_TASK_LIST="$task_list" \
+  # Garantir mount do vault: OBSIDIAN_PATH na hora do parse do YAML (compose usa para volumes)
+  export OBSIDIAN_PATH="${OBSIDIAN_PATH:-$VAULT_DIR}"
+  OBSIDIAN_PATH="$OBSIDIAN_PATH" $COMPOSE_BIN $COMPOSE_FILES run --rm -T \
+    -e OBSIDIAN_PATH="$OBSIDIAN_PATH" \
+    -e SCHEDULER_WORKER_ID="scheduler-$$" \
+    -e SCHEDULER_CLOCK="unified" \
+    -e SCHEDULER_TASK_LIST="$task_list" \
     -l clau.scheduler.tick="$(date +%s)" \
     worker /workspace/host/scripts/clau-runner.sh
 
@@ -289,7 +292,7 @@ process_completions() {
 # ── Main ─────────────────────────────────────────────────────────────────────
 # When running inside scheduler container, run cleanup at start of tick
 if [ "$IN_CONTAINER" = "1" ]; then
-  CLAU_VAULT_DIR="$VAULT_DIR" CLAU_PROJECT_DIR="$PROJECT_DIR" \
+  SCHEDULER_VAULT_DIR="$VAULT_DIR" SCHEDULER_PROJECT_DIR="$PROJECT_DIR" \
     "${PROJECT_DIR}/scripts/clau-cleanup.sh" 2>/dev/null || true
 fi
 

@@ -11,7 +11,7 @@ VAULT="${REPO_ROOT}/obsidian"
 WORKTREE_DIR="${VAULT}/worktrees"
 WORKTREE_REGISTRY="${VAULT}/.worktrees-registry.json"
 WORKTREE_LOG="${VAULT}/.worktrees-log.jsonl"
-CURRENT_WORKTREE="${CLAU_CURRENT_WORKTREE:-}"  # Set by runner quando lança
+CURRENT_WORKTREE="${SCHEDULER_CURRENT_WORKTREE:-}"  # Set by runner quando lança
 
 # Garante que os arquivos existem
 init_registry() {
@@ -29,7 +29,7 @@ log_event() {
     local name="$2"
     local branch="$3"
     local objective="${4:-}"
-    local worker_id="${CLAU_WORKER_ID:-manual}"
+    local worker_id="${SCHEDULER_WORKER_ID:-manual}"
 
     local timestamp
     timestamp=$(date -u '+%Y-%m-%dT%H:%M:%SZ')

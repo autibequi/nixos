@@ -123,8 +123,8 @@ let
 
       echo "[clau] Lançando $WORKER_ID ($CLOCK)..."
       ${compose} run --rm -T \
-        -e CLAU_WORKER_ID="$WORKER_ID" \
-        -e CLAU_CLOCK="$CLOCK" \
+        -e SCHEDULER_WORKER_ID="$WORKER_ID" \
+        -e SCHEDULER_CLOCK="$CLOCK" \
         -l clau.worker.id="$WORKER_ID" \
         $SERVICE /workspace/scripts/clau-runner.sh &
       PIDS+=($!)

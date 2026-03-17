@@ -2,13 +2,13 @@
 # =============================================================================
 # clau-cleanup.sh — Clean stuck CLAUDINHO tasks and locks
 # =============================================================================
-# Uses CLAU_VAULT_DIR and CLAU_PROJECT_DIR (or PROJECT_DIR). Safe to run on
+# Uses SCHEDULER_VAULT_DIR and SCHEDULER_PROJECT_DIR (or PROJECT_DIR). Safe to run on
 # host (Nix ExecStopPost) or inside scheduler container.
 # =============================================================================
 set -euo pipefail
 
-PROJECT_DIR="${CLAU_PROJECT_DIR:-${PROJECT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}}"
-VAULT_DIR="${CLAU_VAULT_DIR:-${HOME:-/tmp}/.ovault/Work}"
+PROJECT_DIR="${SCHEDULER_PROJECT_DIR:-${PROJECT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}}"
+VAULT_DIR="${SCHEDULER_VAULT_DIR:-${HOME:-/tmp}/.ovault/Work}"
 
 RUNNING_ROOT="${VAULT_DIR}/_agent/tasks/running"
 PENDING_ROOT="${VAULT_DIR}/_agent/tasks/pending"

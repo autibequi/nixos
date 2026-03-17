@@ -30,8 +30,8 @@ let
     "XDG_RUNTIME_DIR=/run/user/1000"
     "WAYLAND_DISPLAY=wayland-1"
     "PATH=${enginePkg}/bin:${composePkg}/bin:${pkgs.coreutils}/bin:${pkgs.gnugrep}/bin:${pkgs.bash}/bin:/run/current-system/sw/bin"
-    "CLAU_VAULT_DIR=${vaultDir}"
-    "CLAU_PROJECT_DIR=${projectDir}"
+    "SCHEDULER_VAULT_DIR=${vaultDir}"
+    "SCHEDULER_PROJECT_DIR=${projectDir}"
     "OBSIDIAN_PATH=${vaultDir}"
   ];
 
@@ -118,8 +118,8 @@ in {
           echo "[reset] Stopping scheduler container..."
           ${stopScript} 2>/dev/null || true
           echo "[reset] Running cleanup..."
-          export CLAU_VAULT_DIR="${vaultDir}"
-          export CLAU_PROJECT_DIR="${projectDir}"
+          export SCHEDULER_VAULT_DIR="${vaultDir}"
+          export SCHEDULER_PROJECT_DIR="${projectDir}"
           ${pkgs.bash}/bin/bash ${cleanupScript}
           echo "[reset] Starting scheduler container..."
           ${startScript}

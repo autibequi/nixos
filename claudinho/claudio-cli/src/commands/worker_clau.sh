@@ -19,8 +19,8 @@ for i in 1 2; do
   fi
   echo "[claudio worker-clau] Lançando $WORKER_ID (every60)..."
   OBSIDIAN_PATH="$claudio_obsidian_path" claudio_compose_cmd run --rm -T \
-    -e CLAU_WORKER_ID="$WORKER_ID" \
-    -e CLAU_CLOCK=every60 \
+    -e SCHEDULER_WORKER_ID="$WORKER_ID" \
+    -e SCHEDULER_CLOCK=every60 \
     -l "clau.worker.id=$WORKER_ID" \
     worker /workspace/host/scripts/clau-runner.sh >> "$logfile" 2>&1 &
 done

@@ -5,11 +5,11 @@ WORKSPACE="/workspace"
 TASKS="$WORKSPACE/obsidian/_agent/tasks"
 EPHEMERAL="$WORKSPACE/.ephemeral"
 KANBAN="$WORKSPACE/obsidian/kanban.md"
-CLAU_VERBOSE="${CLAU_VERBOSE:-0}"
+SCHEDULER_VERBOSE="${SCHEDULER_VERBOSE:-0}"
 SPECIFIC_TASK="${1:-}"
-WORKER_ID="${CLAU_WORKER_ID:-worker-1}"
-CLAU_CLOCK="${CLAU_CLOCK:-unified}"
-CLAU_TASK_LIST="${CLAU_TASK_LIST:-}"  # comma-separated list from scheduler
+WORKER_ID="${SCHEDULER_WORKER_ID:-worker-1}"
+SCHEDULER_CLOCK="${SCHEDULER_CLOCK:-unified}"
+SCHEDULER_TASK_LIST="${SCHEDULER_TASK_LIST:-}"  # comma-separated list from scheduler
 # When inside container, markers must land where the host scheduler reads them:
 # host: PROJECT_DIR/nixos/.ephemeral  =  container: /workspace/host/.ephemeral
 if [[ "${CLAUDE_ENV:-}" == "container" ]] || [[ -f "/.dockerenv" ]] || grep -q 'docker\|container' /proc/1/cgroup 2>/dev/null; then
@@ -49,14 +49,14 @@ done
 mkdir -p "$AGENT_MY_DIR"
 echo "started=$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$AGENT_MY_DIR/.live"
 echo "worker=$WORKER_ID" >> "$AGENT_MY_DIR/.live"
-echo "clock=$CLAU_CLOCK" >> "$AGENT_MY_DIR/.live"
+echo "clock=$SCHEDULER_CLOCK" >> "$AGENT_MY_DIR/.live"
 trap 'rm -rf "$AGENT_MY_DIR"' EXIT
 
 [ -f "$EPHEMERAL/no-mcp.json" ] || echo '{"mcpServers":{}}' > "$EPHEMERAL/no-mcp.json"
 
 source "$WORKSPACE/host/scripts/kanban-sync.sh"
 
-echo "[clau:$WORKER_ID:$CLAU_CLOCK] Iniciando (PID $$)"
+echo "[clau:$WORKER_ID:$SCHEDULER_CLOCK] Iniciando (PID $$)"
 
 # ── Per-task lock ────────────────────────────────────────────────
 task_lock() {
@@ -193,7 +193,7 @@ parse_frontmatter() {
 # ── Task config helpers ──────────────────────────────────────────
 get_model() {
   local task_dir="$1"
-  [ -n "${CLAU_MODEL:-}" ] && echo "$CLAU_MODEL" && return
+  [ -n "${SCHEDULER_MODEL:-}" ] && echo "$SCHEDULER_MODEL" && return
   local fm; fm=$(parse_frontmatter "$task_dir/CLAUDE.md" "model")
   echo "${fm:-$DEFAULT_MODEL}"
 }
@@ -299,10 +299,10 @@ get_interval() {
 should_run_clock() {
   local task_dir="$1"
   # Unified scheduler: task list is pre-filtered, always run
-  [ "$CLAU_CLOCK" = "unified" ] && return 0
+  [ "$SCHEDULER_CLOCK" = "unified" ] && return 0
   local task_clock
   task_clock=$(get_clock "$task_dir")
-  [ "$CLAU_CLOCK" = "$task_clock" ]
+  [ "$SCHEDULER_CLOCK" = "$task_clock" ]
 }
 
 # ── Claim task ───────────────────────────────────────────────────
@@ -313,7 +313,7 @@ claim_task() {
 
   # Clock filter
   if ! should_run_clock "$TASKS/$source_dir/$task"; then
-    echo "[clau:$WORKER_ID] '$task' clock mismatch (task=$(get_clock "$TASKS/$source_dir/$task"), worker=$CLAU_CLOCK) — skip"
+    echo "[clau:$WORKER_ID] '$task' clock mismatch (task=$(get_clock "$TASKS/$source_dir/$task"), worker=$SCHEDULER_CLOCK) — skip"
     task_unlock "$task"; return 1
   fi
 
@@ -409,8 +409,8 @@ $(cat "$TASKS/running/$task/memoria.md")"
   echo "[clau:$WORKER_ID:$task] Claude (model=$task_model, timeout=${task_timeout}s, $(date -u +%H:%M:%S))"
 
   # Auto-tracking: criar worktree virtual pra task
-  local worker_branch="worker/${CLAU_CLOCK}/${task}"
-  export CLAU_CURRENT_WORKTREE="$task"
+  local worker_branch="worker/${SCHEDULER_CLOCK}/${task}"
+  export SCHEDULER_CURRENT_WORKTREE="$task"
   "$WORKSPACE/host/scripts/worktree-manager.sh" init "$task" "$worker_branch" "Task: $task (Worker: $WORKER_ID)" || true
 
   local mcp_flags=()
@@ -435,7 +435,7 @@ $memoria
 ## IMPORTANTE
 - NÃO mova diretórios — o runner cuida do lifecycle
 - NÃO edite obsidian/kanban.md — o runner atualiza
-- Registre em $EPHEMERAL/notes/$task/historico.log: TIMESTAMP | ok/fail | duração" 2>&1 | if [ "$CLAU_VERBOSE" = "1" ]; then tee "$logfile"; else cat > "$logfile"; fi
+- Registre em $EPHEMERAL/notes/$task/historico.log: TIMESTAMP | ok/fail | duração" 2>&1 | if [ "$SCHEDULER_VERBOSE" = "1" ]; then tee "$logfile"; else cat > "$logfile"; fi
   local exit_code=${PIPESTATUS[0]}
 
   [ $exit_code -eq 0 ] && echo "[clau:$WORKER_ID:$task] OK" || echo "[clau:$WORKER_ID:$task] FAIL exit=$exit_code"
@@ -513,10 +513,15 @@ EOF
 }
 
 # ── Task list mode (unified scheduler) ───────────────────────────
-if [ -n "$CLAU_TASK_LIST" ]; then
+if [ -n "$SCHEDULER_TASK_LIST" ]; then
   recover_orphans
-  IFS=',' read -ra TASK_NAMES <<< "$CLAU_TASK_LIST"
+  IFS=',' read -ra TASK_NAMES <<< "$SCHEDULER_TASK_LIST"
   echo "[clau:$WORKER_ID] Task list mode: ${TASK_NAMES[*]}"
+  # Debug: onde o worker está procurando as tasks (ajuda quando 0 tasks = mount errado)
+  [ "$SCHEDULER_VERBOSE" = "1" ] && echo "[clau:$WORKER_ID] TASKS base: $TASKS (recurring: $TASKS/recurring, pending: $TASKS/pending)"
+  if [ ! -d "$TASKS/recurring" ] && [ ! -d "$TASKS/pending" ]; then
+    echo "[clau:$WORKER_ID] AVISO: nem recurring/ nem pending/ existem em $TASKS — confira mount de /workspace/obsidian (OBSIDIAN_PATH no host)" >&2
+  fi
 
   ok_count=0; fail_count=0; task_count=0
   for task in "${TASK_NAMES[@]}"; do
@@ -531,7 +536,7 @@ if [ -n "$CLAU_TASK_LIST" ]; then
     elif [ -d "$TASKS/pending/$task" ]; then
       source_dir="pending"
     else
-      echo "[clau:$WORKER_ID] '$task' not found in recurring/ or pending/ — skip"
+      echo "[clau:$WORKER_ID] '$task' not found in recurring/ or pending/ — skip (checado: $TASKS/recurring/$task e $TASKS/pending/$task)"
       continue
     fi
 
@@ -572,7 +577,7 @@ recover_orphans
 
 # ── Process recurring tasks ──────────────────────────────────────
 touch "$AGENT_MY_DIR/.live" 2>/dev/null || true
-echo "[clau:$WORKER_ID] === Recorrentes (clock=$CLAU_CLOCK) ==="
+echo "[clau:$WORKER_ID] === Recorrentes (clock=$SCHEDULER_CLOCK) ==="
 start_time=$SECONDS
 ok_count=0; fail_count=0; task_count=0
 
@@ -601,7 +606,7 @@ filter_by_clock() {
     [ -z "$task" ] && continue
     [ -d "$TASKS/pending/$task" ] || continue
     task_clock=$(get_clock "$TASKS/pending/$task")
-    [ "$task_clock" = "$CLAU_CLOCK" ] && filtered+=("$task")
+    [ "$task_clock" = "$SCHEDULER_CLOCK" ] && filtered+=("$task")
   done
   printf '%s\n' "${filtered[@]}"
 }
