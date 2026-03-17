@@ -11,9 +11,21 @@ fi
 # Bootstrap completo (dashboard, sync stow, módulos) vive em /nixos/scripts/bootstrap.sh
 if [[ -f /nixos/scripts/bootstrap.sh ]]; then
   source /nixos/scripts/bootstrap.sh
-  return "$?" 2>/dev/null || exit "$?"
+  _ret=$?
 fi
 
 # Fallback mínimo se o repo não tiver scripts (não deveria acontecer)
-echo "[zion bootstrap] /nixos/scripts/bootstrap.sh não encontrado; continuando sem dashboard." >&2
-return 0 2>/dev/null || exit 0
+if [[ -z "${_ret:-}" ]]; then
+  echo "[zion bootstrap] /nixos/scripts/bootstrap.sh não encontrado; continuando sem dashboard." >&2
+  _ret=0
+fi
+
+# Última coisa: árvore do primeiro nível da pasta atual
+_here="$(pwd)"
+echo "[zion bootstrap] Árvore de: ${_here}" >&2
+if command -v tree &>/dev/null; then
+  tree -L 1 -a --dirsfirst 2>/dev/null || tree -L 1 -a
+else
+  find . -maxdepth 1 -print 2>/dev/null | sed -e 's;[^/]*/;|____;g;s;____|; |;g' | head -50
+fi
+return "${_ret}" 2>/dev/null || exit "${_ret}"
