@@ -1,14 +1,25 @@
-# Claudinho — prompts e persona
+# Zion
 
-Esta pasta contém **apenas conteúdo de prompts e persona** do agente Claude:
+Engine que roda as IAs no container. Comando principal: **`zion`** (ex.: `zion --help`).
 
-- **personas/** — personas e avatares (`.persona.md`, `avatar/`)
-- **SOUL.md**, **SELF.md**, **DIRETRIZES.md** — identidade e diretrizes
-- **CONTAINER_INIT.md**, **FONTS.md** — documentação
+## Layout no container: pasta zion na raiz do filesystem
 
-Toda a **lógica de container, workers e tasks** está no **CLI `claudio`**:
+A pasta **zion** fica montada em **`/zion`** (raiz do filesystem). Dentro do container:
 
-- **`zion/cli/`** — código do CLI (bashly), Docker, docker-compose, Make-equivalent
-- Uso: `claudio --help`, `claudio build`, `claudio worker`, `claudio status`, etc.
+- **`/zion`** — raiz da engine (bootstrap: `/zion/bootstrap.md`, comandos: `/zion/commands/`, scripts: `/zion/scripts/`)
+- **`/nixos`** — configuração NixOS do host (raiz do repo)
+- **`/logs`** — logs do host
+- **`/obsidian`** — vault Obsidian compartilhado
 
-Instalação do CLI: `claudio update` (regenera e cria symlink em `stow/.local/bin/claudio`).
+## Estrutura
+
+- **`docker-compose.zion.yml`** — monta a pasta zion em **`/zion`** e a raiz do repo em `/nixos`; monta `.claude`, `.cursor` e `.opencode` em `/root/` para os agentes. Rodar na raiz do repo: `docker compose -f zion/docker-compose.zion.yml run --rm zion`. O CLI invoca `/zion/scripts/bootstrap.sh`.
+- **`bootstrap.md`** — instruções para o agente (ler ao receber `/zion` ou `/zion load`).
+- **`commands/`** — comandos por categoria (zion, estrategia, meta, nixos, tools, utils, etc.).
+- **`scripts/`** — bootstrap.sh e outros scripts.
+- **`.cursor/`** — regra e comando do `/zion` para o Cursor (rules, commands).
+- **`zion-alias.zsh`** — alias `claudio=zion` para retrocompatibilidade; adicione ao `~/.zshrc` ou `source /zion/zion-alias.zsh`.
+
+## Comando /zion no Cursor
+
+Para o Cursor reconhecer `/zion` e `/zion load`, use a regra e o comando em **`/zion/.cursor/`** (copie ou linke para o `.cursor` do seu projeto, se quiser).

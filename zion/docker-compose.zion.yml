@@ -1,0 +1,34 @@
+# Docker Compose do Zion — volumes esperados pelo container.
+#
+# Uso: na raiz do repo (onde existem zion/ e host/):
+#   docker compose -f zion/docker-compose.zion.yml run --rm zion
+#
+# Paths dentro do container (pasta zion na raiz do filesystem):
+#   /zion       = pasta zion na raiz do filesystem (engine dos agentes). Bootstrap: /zion/bootstrap.md, comandos: /zion/commands/
+#   /nixos      = raiz do repo (config NixOS do host; contém zion/, host/, etc.)
+#   /workspace  = pasta do projeto anexado (engine Cursor)
+#   /obsidian   = vault Obsidian compartilhado
+#   /logs       = logs do host
+#
+# Dotfiles dos agentes (Cursor, Claude, OpenCode): montados em ~/.cursor, ~/.claude, ~/.opencode
+# para que skills e comandos funcionem nos três.
+#
+# O zion-cli deve invocar /zion/scripts/bootstrap.sh e o agente carrega /zion/bootstrap.md.
+
+services:
+  zion:
+    image: alpine:latest
+    command: ["/bin/sh", "-c", "test -f /zion/bootstrap.md && echo 'OK: /zion montado na raiz' || echo 'ERRO: /zion não montado'; exec sleep infinity"]
+    volumes:
+      # Pasta zion na raiz do filesystem (compose em zion/, então . = zion).
+      - .:/zion
+      # Raiz do repo → /nixos (para config NixOS, host, etc.).
+      - ..:/nixos
+      # Dotfiles dos agentes (paths relativos ao diretório do compose = zion/).
+      - ./.claude:/root/.claude
+      - ./.cursor:/root/.cursor
+      - ./.opencode:/root/.opencode
+    environment:
+      - NIXOS_ROOT=/nixos
+      - ZION_ROOT=/zion
+    working_dir: /zion

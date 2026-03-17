@@ -16,30 +16,32 @@ x-env-worker: &env-worker
 x-extra-hosts: &extra-hosts
   - "host.docker.internal:host-gateway"
 
+# ZION_ROOT: pasta zion na raiz do sistema (ex.: /zion) ou ${HOME}/nixos/zion. Dotfiles .claude, .cursor, .opencode ficam aqui.
 x-base-volumes: &base-volumes
   - ${HOME}/nixos:/nixos
-  - ${HOME}/nixos/zion:/zion
+  - ${ZION_ROOT:-${HOME}/nixos/zion}:/zion
   - ${CLAUDIO_MOUNT:-${HOME}/projects}:/workspace:${CLAUDIO_MOUNT_OPTS:-ro}
   - ${OBSIDIAN_PATH:-/tmp}:/obsidian
   - ${HOME}/.claude:/home/claude/.claude
-  # stow/.claude: skills e commands; zion: agents, hooks, scripts (sobrescrevem subpastas de .claude)
-  - ${HOME}/nixos/stow/.claude/skills:/home/claude/.claude/skills
-  - ${HOME}/nixos/stow/.claude/commands:/home/claude/.claude/commands
-  - ${HOME}/nixos/zion/agents:/home/claude/.claude/agents
-  - ${HOME}/nixos/zion/hooks:/home/claude/.claude/hooks
-  - ${HOME}/nixos/zion/scripts:/home/claude/.claude/scripts
+  # Fonte: zion/.claude (skills, commands); hooks e scripts vêm de stow (fonte da verdade)
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/.claude/skills:/home/claude/.claude/skills
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/.claude/commands:/home/claude/.claude/commands
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/agents:/home/claude/.claude/agents
+  # Hooks: /nixos/stow/.claude/hooks (session-start, pre-tool-use, etc.)
+  - ${HOME}/nixos/stow/.claude/hooks:/home/claude/.claude/hooks
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/scripts:/home/claude/.claude/scripts
   - ${HOME}/.claude.json:/home/claude/.claude.json
   # Cursor CLI: credenciais e config (agent login ou CURSOR_API_KEY)
   - ${HOME}/.cursor:/home/claude/.cursor
-  # Cursor: skills e commands no / menu (mesma fonte: stow/.claude)
-  - ${HOME}/nixos/stow/.claude/skills:/home/claude/.cursor/skills
-  - ${HOME}/nixos/stow/.claude/commands:/home/claude/.cursor/commands
-  # zion/commands montado também como .cursor/rules (para regras virem da pasta commands do zion)
-  - ${HOME}/nixos/zion/commands:/home/claude/.cursor/rules
+  # Cursor: skills e commands (mesma fonte: zion/.cursor e zion/.claude)
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/.cursor/skills:/home/claude/.cursor/skills
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/.claude/commands:/home/claude/.cursor/commands
+  # zion/commands montado também como .cursor/rules (regras da pasta commands do zion)
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/commands:/home/claude/.cursor/rules
   # Cursor CLI: tokens de auth (agent faz chmod aqui; bind mount do host causa EPERM, por isso volume nomeado)
   - cursor_config:/home/claude/.config/cursor
-  # opencode: stow source no repo (evita symlink ~/.config/opencode que quebraria no container)
-  - ${HOME}/nixos/stow/.config/opencode:/home/claude/.config/opencode
+  # opencode: fonte em zion/.opencode
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/.opencode:/home/claude/.config/opencode
   - ${HOME}/projects:/home/claude/projects
   - ${XDG_RUNTIME_DIR:-/run/user/1000}/${WAYLAND_DISPLAY:-wayland-1}:/run/user/1000/${WAYLAND_DISPLAY:-wayland-1}
   - /var/log/journal:/logs/host/journal:ro
