@@ -1,0 +1,141 @@
+x-env-base: &env-base
+  PATH: /home/claude/.local/bin:/home/claude/.nix-profile/bin:/usr/bin:/bin
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+  CURSOR_API_KEY: ${CURSOR_API_KEY:-}
+  CLAUDE_SESSION: ${CLAUDE_SESSION:-}
+  GH_TOKEN: ${GH_TOKEN:-}
+  CLAUDE_ENV: container
+  WAYLAND_DISPLAY: ${WAYLAND_DISPLAY:-wayland-1}
+  XDG_RUNTIME_DIR: /run/user/1000
+  DISABLE_AUTOUPDATER: false
+
+x-env-worker: &env-worker
+  <<: *env-base
+  ANTHROPIC_ADMIN_KEY: ${ANTHROPIC_ADMIN_KEY:-}
+
+x-extra-hosts: &extra-hosts
+  - "host.docker.internal:host-gateway"
+
+x-base-volumes: &base-volumes
+  - ${HOME}/nixos:/host
+  - ${CLAUDIO_MOUNT:-${HOME}/projects}:/workspace:${CLAUDIO_MOUNT_OPTS:-ro}
+  - ${OBSIDIAN_PATH:-/tmp}:/obsidian
+  - ${HOME}/.claude:/home/claude/.claude
+  # stow/.claude: skills e commands; zion: agents, hooks, scripts (sobrescrevem subpastas de .claude)
+  - ${HOME}/nixos/stow/.claude/skills:/home/claude/.claude/skills
+  - ${HOME}/nixos/stow/.claude/commands:/home/claude/.claude/commands
+  - ${HOME}/nixos/zion/agents:/home/claude/.claude/agents
+  - ${HOME}/nixos/zion/hooks:/home/claude/.claude/hooks
+  - ${HOME}/nixos/zion/scripts:/home/claude/.claude/scripts
+  - ${HOME}/.claude.json:/home/claude/.claude.json
+  # Cursor CLI: credenciais e config (agent login ou CURSOR_API_KEY)
+  - ${HOME}/.cursor:/home/claude/.cursor
+  # Cursor: skills e commands no / menu (mesma fonte: stow/.claude)
+  - ${HOME}/nixos/stow/.claude/skills:/home/claude/.cursor/skills
+  - ${HOME}/nixos/stow/.claude/commands:/home/claude/.cursor/commands
+  # Cursor CLI: tokens de auth (agent faz chmod aqui; bind mount do host causa EPERM, por isso volume nomeado)
+  - cursor_config:/home/claude/.config/cursor
+  # opencode: stow source no repo (evita symlink ~/.config/opencode que quebraria no container)
+  - ${HOME}/nixos/stow/.config/opencode:/home/claude/.config/opencode
+  - ${HOME}/projects:/home/claude/projects
+  - ${XDG_RUNTIME_DIR:-/run/user/1000}/${WAYLAND_DISPLAY:-wayland-1}:/run/user/1000/${WAYLAND_DISPLAY:-wayland-1}
+  - /var/log/journal:/logs/host/journal:ro
+  - /proc/meminfo:/host/proc/meminfo:ro
+  - /proc/loadavg:/host/proc/loadavg:ro
+  - /proc/uptime:/host/proc/uptime:ro
+  - /proc/cpuinfo:/host/proc/cpuinfo:ro
+  - /proc/version:/host/proc/version:ro
+  - /run/current-system:/host/run/current-system:ro
+  - /etc/os-release:/host/etc/os-release:ro
+  - /tmp/zion-hive-mind:/workspace/.hive-mind
+
+services:
+  sandbox:
+    build:
+      context: .
+      dockerfile: Dockerfile.claude
+    image: claude-nix-sandbox
+    network_mode: host
+    stdin_open: true
+    tty: true
+    entrypoint: ["/bin/bash", "-c"]
+    command: ["sleep infinity"]
+    environment:
+      <<: *env-base
+      GIT_AUTHOR_NAME: Pedrinho
+      GIT_AUTHOR_EMAIL: pedro.correa@estrategia.com
+      GIT_COMMITTER_NAME: Zion
+      GIT_COMMITTER_EMAIL: zion@autibequi.com
+    extra_hosts: *extra-hosts
+    volumes: *base-volumes
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.claude
+    image: claude-nix-sandbox
+    mem_limit: 12g
+    memswap_limit: 16g
+    entrypoint: ["/bin/bash"]
+    command: ["/host/zion/scripts/clau-runner.sh"]
+    environment:
+      <<: *env-worker
+      GIT_AUTHOR_NAME: Buchecha
+      GIT_AUTHOR_EMAIL: buchecha@autibequi.com
+      GIT_COMMITTER_NAME: Buchecha
+      GIT_COMMITTER_EMAIL: buchecha@autibequi.com
+    extra_hosts: *extra-hosts
+    volumes: *base-volumes
+
+  worker-fast:
+    build:
+      context: .
+      dockerfile: Dockerfile.claude
+    image: claude-nix-sandbox
+    mem_limit: 4g
+    memswap_limit: 6g
+    entrypoint: ["/bin/bash"]
+    command: ["/host/zion/scripts/clau-runner.sh"]
+    environment:
+      <<: *env-worker
+      GIT_AUTHOR_NAME: Buchecha
+      GIT_AUTHOR_EMAIL: buchecha@autibequi.com
+      GIT_COMMITTER_NAME: Buchecha
+      GIT_COMMITTER_EMAIL: buchecha@autibequi.com
+    extra_hosts: *extra-hosts
+    volumes: *base-volumes
+
+  # Long-running scheduler: runs tick every 600s (10 min) in-process; no systemd timer on host
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile.claude
+    image: claude-nix-sandbox
+    mem_limit: 12g
+    memswap_limit: 16g
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        while true; do
+          SCHEDULER_IN_CONTAINER=1 SCHEDULER_VAULT_DIR=/obsidian SCHEDULER_PROJECT_DIR=/host \
+            /host/zion/scripts/clau-scheduler.sh
+          sleep 600
+        done
+    environment:
+      <<: *env-worker
+      SCHEDULER_VAULT_DIR: /obsidian
+      SCHEDULER_PROJECT_DIR: /host
+      GIT_AUTHOR_NAME: Buchecha
+      GIT_AUTHOR_EMAIL: buchecha@autibequi.com
+      GIT_COMMITTER_NAME: Buchecha
+      GIT_COMMITTER_EMAIL: buchecha@autibequi.com
+    extra_hosts: *extra-hosts
+    volumes: *base-volumes
+
+volumes:
+  cursor_config:
+
+networks:
+  default:
+    name: nixos_default
+    external: true

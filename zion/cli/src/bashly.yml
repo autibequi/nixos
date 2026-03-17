@@ -1,0 +1,219 @@
+name: zion
+help: |
+  CLI unificado para o container Claude (sandbox Nix + OpenCode/Claude/Cursor).
+  Sem subcomando = run. Exige --engine=opencode|claude|cursor (ou engine= em ~/.zion).
+environment_variables:
+  - name: ZION_NIXOS_DIR
+    help: "Raiz do repo NixOS (default $HOME/nixos)"
+  - name: OBSIDIAN_PATH
+    help: "Caminho do vault Obsidian (default $HOME/.ovault)"
+
+flags:
+  - long: --engine
+    arg: engine
+    help: "Engine da sessão/worker: opencode | claude | cursor (obrigatório em run se não estiver em ~/.zion)"
+  - long: --model
+    arg: model
+    help: "Modelo Claude: haiku | opus (default: sonnet)"
+  - long: --instance
+    arg: id
+    help: "Sufixo da instância (ex. 2 = clau-projeto-2)"
+  - long: --rw
+    help: Montar projeto em read-write (default para run)
+  - long: --ro
+    help: Montar projeto read-only
+  - long: --danger
+    help: "Bypass de permissões no engine (claude: --permission-mode bypassPermissions; cursor: --force; opencode: env auto-approve)"
+  - long: --init-md
+    arg: file
+    default: contexto.md
+    help: "Arquivo markdown inicial carregado por todos os engines (default: contexto.md no projeto). Claude: --append-system-prompt-file; Cursor: prompt com @file; OpenCode: env."
+  - long: --resume
+    arg: session_id
+    help: "Retoma sessão: cursor/agent usa --resume=UUID; claude usa --resume; opencode: env ZION_RESUME_SESSION."
+
+commands:
+  - name: run
+    alias: [r, open, opencode, code]
+    default: force
+    help: Sessão no container. Exige --engine=opencode|claude|cursor (ou engine= em ~/.zion).
+    args:
+      - name: dir
+        help: "Diretório do projeto (default ~/projects)"
+    flags:
+      - long: --init-md
+        arg: file
+        default: contexto.md
+      - long: --danger
+      - long: --resume
+        arg: session_id
+      - long: --engine
+        arg: engine
+      - long: --model
+        arg: model
+      - long: --instance
+        arg: id
+      - long: --rw
+      - long: --ro
+    examples:
+      - zion run --engine=claude
+      - zion --engine=cursor --resume=11eaea99-5993-482b-9662-e4d9584c1200 ~/projects
+      - zion run --engine=opencode ~/meu-projeto
+      - zion --engine=cursor --init-md contexto.md ~/projects
+    filename: commands/run.sh
+
+  - name: shell
+    alias: [sh]
+    help: Abre bash no container com o projeto montado.
+    args:
+      - name: dir
+        help: "Diretório do projeto (default ~/projects)"
+    filename: commands/shell.sh
+
+  - name: resume
+    help: Retoma sessão anterior do Claude (--resume).
+    args:
+      - name: dir
+        help: "Diretório do projeto (default ~/projects)"
+    filename: commands/resume.sh
+
+  - name: continue
+    alias: [cont]
+    help: Continua conversa no Claude (--continue).
+    args:
+      - name: dir
+        help: "Diretório do projeto (default ~/projects)"
+    filename: commands/continue.sh
+
+  - name: start
+    help: Sobe sandbox persistente e abre Claude (equiv. make start).
+    args:
+      - name: dir
+        help: "Diretório do projeto (default ~/projects)"
+    filename: commands/start.sh
+
+  - name: openclaw
+    help: Sobe sandbox e abre OpenClaw gateway (LM Studio).
+    filename: commands/openclaw.sh
+
+  # ── Container (build / down / destroy) ─────────────────────
+  - name: build
+    help: Build da imagem Docker do sandbox.
+    filename: commands/build.sh
+
+  - name: down
+    help: Para todos os containers do projeto.
+    filename: commands/down.sh
+
+  - name: destroy
+    help: Para containers e remove imagens/volumes.
+    filename: commands/destroy.sh
+
+  - name: update
+    alias: [install]
+    help: Regenera CLI (bashly) e instala/atualiza symlink em stow/.local/bin.
+    filename: commands/update.sh
+
+  - name: init
+    help: Cria ~/.zion a partir de config.example (não sobrescreve se já existir).
+    flags:
+      - long: --force
+        help: Sobrescreve ~/.zion se já existir
+    filename: commands/init.sh
+
+  # ── Workers / tasks ───────────────────────────────────────
+  - name: worker
+    alias: [w]
+    help: Roda worker every60 com output. task= opcional; aceita --engine=.
+    args:
+      - name: task
+        help: Nome da task (opcional).
+    filename: commands/worker.sh
+
+  - name: worker-run-fast
+    alias: [wrf]
+    help: Roda worker every10 com output.
+    filename: commands/worker_run_fast.sh
+
+  - name: worker-auto
+    help: Roda 1 worker every60 em background (headless).
+    filename: commands/worker_auto.sh
+
+  - name: worker-clau
+    help: Lança 2 workers every60 em background; segue log.
+    filename: commands/worker_clau.sh
+
+  - name: worker-stop
+    help: Para workers e reseta tasks presas.
+    filename: commands/worker_stop.sh
+
+  - name: worker-stop-all
+    help: Para TODOS os containers claude-nix-sandbox.
+    filename: commands/worker_stop_all.sh
+
+  - name: scheduler
+    alias: [sched]
+    help: Sobe/para o container scheduler (tick a cada 10 min). Equiv. systemctl start/stop claude-scheduler-container.
+    args:
+      - name: action
+        help: "start (default) | stop | status | logs | run-now | shell"
+    filename: commands/scheduler.sh
+
+  - name: reset
+    help: Devolve tasks de running/ para origem (pending/recurring).
+    filename: commands/reset.sh
+
+  - name: status
+    help: Mostra estado via kanban + workers.
+    filename: commands/status.sh
+
+  - name: new
+    help: Cria task + card no kanban.
+    args:
+      - name: name
+        required: true
+        help: Nome da task (ex. minha-tarefa).
+    flags:
+      - long: --type
+        arg: type
+        default: pending
+        help: "pending ou recurring"
+      - long: --model
+        arg: model
+        help: "haiku ou sonnet"
+      - long: --clock
+        arg: clock
+        help: "every10 ou every60"
+      - long: --timeout
+        arg: timeout
+        help: Timeout em segundos
+    filename: commands/new_task.sh
+
+  # ── Logs / usage ────────────────────────────────────────────
+  - name: logs
+    help: Mostra ou segue o último log de worker.
+    filename: commands/logs.sh
+
+  - name: logs-list
+    help: Lista todos os arquivos de log.
+    filename: commands/logs_list.sh
+
+  - name: usage-api
+    help: Uso da API Anthropic (hoje; use --7d ou --30d para período).
+    flags:
+      - long: --7d
+        help: Últimos 7 dias
+      - long: --30d
+        help: Últimos 30 dias
+    filename: commands/usage_api.sh
+
+  - name: service-logs
+    help: journalctl do systemd service claude-autonomous.
+    filename: commands/service_logs.sh
+
+  - name: ask
+    help: Abre Alacritty com Claude respondendo (q=pergunta ou interativo).
+    args:
+      - name: question
+        help: Pergunta (opcional; sem arg = interativo).
+    filename: commands/ask.sh

@@ -1,0 +1,143 @@
+# Shared helpers for zion CLI (compose file, mount path, project names).
+# Sourced by generated script. Uses ZION_NIXOS_DIR, OBSIDIAN_PATH, args, flag_*.
+# Toda a lógica de container vive em cli; compose e Dockerfile ficam aqui.
+
+zion_nixos_dir="${ZION_NIXOS_DIR:-$HOME/nixos}"
+zion_cli_dir="$zion_nixos_dir/zion/cli"
+zion_compose_file="$zion_cli_dir/docker-compose.claude.yml"
+zion_compose_dir="$zion_cli_dir"
+# Config do usuário: engine padrão e chaves (GH_TOKEN, ANTHROPIC_API_KEY)
+zion_config_file="${ZION_CONFIG:-$HOME/.zion}"
+zion_env_file="$zion_cli_dir/.env"
+zion_obsidian_path="${OBSIDIAN_PATH:-$HOME/.ovault}"
+
+# Garante HOME para o compose expandir ${HOME}/nixos e paths; usado por todos os comandos que montam volumes.
+[[ -z "${HOME:-}" ]] && export HOME="$(eval echo ~"$(id -un)")"
+
+# Carrega ~/.zion (KEY=value, sourceável) e exporta para o compose/container.
+# Flags --engine e --model na linha de comando sempre sobrescrevem estes valores.
+zion_load_config() {
+  if [[ -f "$zion_config_file" ]]; then
+    # shellcheck source=/dev/null
+    source "$zion_config_file"
+    [[ -n "${engine:-}" ]] && export ZION_ENGINE="$engine"
+    [[ -n "${model:-}" ]] && export ZION_MODEL="$model"
+    [[ -n "${GH_TOKEN:-}" ]] && export GH_TOKEN
+    [[ -n "${ANTHROPIC_API_KEY:-}" ]] && export ANTHROPIC_API_KEY
+    [[ -n "${CURSOR_API_KEY:-}" ]] && export CURSOR_API_KEY
+    if [[ -n "${OBSIDIAN_PATH:-}" ]]; then
+      export OBSIDIAN_PATH
+      zion_obsidian_path="$OBSIDIAN_PATH"
+    fi
+  fi
+  # Path absoluto e ~ expandido para o compose (YAML não expande ~)
+  zion_obsidian_path="${zion_obsidian_path/#\~/$HOME}"
+  [[ -d "$zion_obsidian_path" ]] && zion_obsidian_path="$(cd "$zion_obsidian_path" && pwd)"
+  export OBSIDIAN_PATH="$zion_obsidian_path"
+}
+
+# Engine: opencode | claude | cursor. Se required=1 e vazio, reclama e sai.
+# Ordem: --engine= na linha de comando sobrescreve ~/.zion (ZION_ENGINE).
+zion_resolve_engine() {
+  local required="${1:-0}"
+  local e="${args['--engine']:-${flag_engine:-$ZION_ENGINE}}"  # flag > config
+  e="${e,,}"
+  if [[ -z "$e" ]]; then
+    if [[ "$required" == "1" ]]; then
+      echo "zion: --engine=opencode|claude|cursor é obrigatório (ou defina engine= em ~/.zion)" >&2
+      exit 1
+    fi
+    return 0
+  fi
+  case "$e" in
+    opencode|claude|cursor) echo "$e" ;;
+    *)
+      echo "zion: engine inválido: $e (use opencode, claude ou cursor)" >&2
+      exit 1
+      ;;
+  esac
+}
+# Paths usados pelos comandos worker/logs/status/new/reset (equiv. makefile)
+zion_nixos_logs="$zion_nixos_dir/logs"
+zion_nixos_scripts="$zion_nixos_dir/scripts"
+zion_vault_dir="${zion_vault_dir:-$zion_nixos_dir/vault}"
+zion_ephemeral="$zion_nixos_dir/.ephemeral"
+
+# Compose + env para invocar docker/podman (executar com cwd = zion_compose_dir ou -f)
+zion_compose_cmd() {
+  local cmd=(docker compose -f "$zion_compose_file")
+  [[ -f "$zion_env_file" ]] && cmd+=(--env-file "$zion_env_file")
+  "${cmd[@]}" "$@"
+}
+
+# Resolve mount directory: named arg "dir" (bashly uses args['dir']) or default ~/projects
+zion_resolve_dir() {
+  local dir="${args[dir]:-$HOME/projects}"
+  if [[ -n "$dir" ]]; then
+    (cd "$dir" 2>/dev/null && pwd) || { echo "zion: dir not found: $dir" >&2; exit 1; }
+  else
+    echo "$HOME/projects"
+  fi
+}
+
+# Slug from dir basename (lowercase, alphanumeric + hyphen)
+zion_proj_slug() {
+  local d="$1"
+  basename "$d" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$//'
+}
+
+# Project name for claude (clau-SLUG or clau-SLUG-INSTANCE)
+zion_proj_name() {
+  local slug="$1"
+  local instance="${args['--instance']:-${flag_instance:-}}"
+  local name="clau-${slug}"
+  [[ -n "$instance" && "$instance" != "1" ]] && name="${name}-${instance}"
+  echo "$name"
+}
+
+# Project name for opencode (persistent sandbox)
+zion_proj_name_open() {
+  local slug="$1"
+  echo "clau-${slug}-open"
+}
+
+# Mount opts: --rw (default for run) or --ro
+zion_mount_opts() {
+  if [[ -n "${args['--rw']:-${flag_rw:-}}" ]]; then echo "rw"; elif [[ -n "${args['--ro']:-${flag_ro:-}}" ]]; then echo "ro"; else echo "rw"; fi
+}
+
+# --init-md: path do markdown inicial (relativo ao mount); vazio se arquivo não existe
+# Valor vem de flag_init_md (run seta de args) ou ZION_INITIAL_MD. Default contexto.md é no bashly (--init-md sem arg).
+zion_initial_md() {
+  local mount="${1:-}"
+  local f="${flag_init_md:-${ZION_INITIAL_MD:-}}"
+  [[ -z "$f" ]] && return 0
+  local full="$mount/$f"
+  [[ -f "$full" ]] && echo "$f" || echo ""
+}
+
+# --danger: sufixo/args de bypass de permissões por engine (vazio se flag não setada)
+zion_danger_flag() {
+  if [[ -z "${flag_danger:-${args['--danger']:-}}" ]]; then
+    echo ""
+    return 0
+  fi
+  case "${1:-}" in
+    claude)  echo " --permission-mode bypassPermissions" ;;
+    cursor)  echo " --force" ;;
+    opencode) echo "" ;;
+    *) echo "" ;;
+  esac
+}
+
+# Model flag for claude binary (--model=haiku|opus; default = nada = sonnet).
+# Ordem: --model= na linha de comando sobrescreve ~/.zion (ZION_MODEL).
+zion_model_flag() {
+  local m="${args['--model']:-${flag_model:-$ZION_MODEL}}"  # flag > config
+  m="${m,,}"
+  case "$m" in
+    haiku) echo "--model claude-haiku-4-5-20251001" ;;
+    opus)  echo "--model claude-opus-4-6" ;;
+    *)     echo "" ;;
+  esac
+}
