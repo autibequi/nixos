@@ -36,15 +36,16 @@ case "$engine" in
     proj_name="$(claudio_proj_name "$proj_slug")"
     danger="$(claudio_danger_flag cursor)"
     echo "[claudio run] engine=cursor ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
-    # Cursor CLI não resolve @file no terminal; injetamos o conteúdo do init-md no prompt
+    # --init-md: envia o texto do arquivo como primeira mensagem ao agent (script no container evita quoting)
     cursor_init_env=""
-    cursor_cmd='. /workspace/host/scripts/bootstrap.sh; cd /workspace/mount'
     if [[ -n "$initial_md" ]]; then
       cursor_init_env="-e CLAUDIO_INITIAL_MD=$initial_md"
-      cursor_cmd="$cursor_cmd; if [ -n \"\$CLAUDIO_INITIAL_MD\" ] && [ -f \"/workspace/mount/\$CLAUDIO_INITIAL_MD\" ]; then p=\$(cat \"/workspace/mount/\$CLAUDIO_INITIAL_MD\" | sed 's/\"/\\\\\"/g'); prompt=\"Use the following as your initial context. Then proceed with my requests.\n\n\$p\"; exec agent${danger} \"\$prompt\"; else exec agent${danger}; fi"
-    else
-      cursor_cmd="$cursor_cmd && exec agent${danger}"
     fi
+    # Script no container: lê init-md, escapa aspas e passa como primeiro arg ao agent
+    cursor_cmd='. /workspace/host/scripts/bootstrap.sh; cd /workspace/mount; '
+    cursor_cmd+='if [ -n "${CLAUDIO_INITIAL_MD:-}" ] && [ -f "/workspace/mount/$CLAUDIO_INITIAL_MD" ]; then '
+    cursor_cmd+='p=$(sed -e '\''s/\\\\/\\\\\\\\/g'\'' -e '\''s/"/\\"/g'\'' "/workspace/mount/$CLAUDIO_INITIAL_MD"); exec agent'"${danger}"' "$p"; '
+    cursor_cmd+='else exec agent'"${danger}"'; fi'
     HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
       claudio_compose_cmd -p "$proj_name" run --rm -it \
       --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 $cursor_init_env sandbox \
