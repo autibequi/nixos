@@ -13,6 +13,16 @@
 
 ---
 
+## Regra: feed do Draw (não sobrescrever o index)
+
+- **Nunca sobrescrever** o conteúdo atual do Draw (`content.md`). Sempre **colocar a nova iteração/conteúdo no topo** e deixar o restante para baixo — como um **feed** do que foi feito (mais recente em cima).
+- Pode usar mais de um arquivo (ex.: vários `.md` ou fontes), mas o objetivo é **uma única página** que recarrega sozinha com tudo (ex.: `content.md` agregando ou sendo o único que a página lê).
+- O usuário pode pedir para colocar nessa página: **trechos de código** que você está avaliando, **links**, diagramas, snippets, resumos, etc. — atender e ir **prependendo** no topo para a página atualizar sozinha.
+
+**Implementação:** ao atualizar `content.md`, ler o conteúdo atual, então escrever `novo_bloco + "\n\n---\n\n" + conteúdo_atual` (ou equivalente), para que o novo fique sempre no topo.
+
+---
+
 ## Weblive Server — desenhar e sites no browser
 
 Servidor HTTP que (1) renderiza Mermaid + Markdown em tempo real em `/` (Draw) e (2) serve a pasta **`.weblive`** como estático (ex.: jogos, sites). O **agente** é quem roda e reinicia o servidor.
@@ -89,7 +99,7 @@ Servidor HTTP que (1) renderiza Mermaid + Markdown em tempo real em `/` (Draw) e
 - **Link em caixa sempre.** Não basta escrever o link no texto. Coloque numa caixa (bloco de código ou box ASCII) para o usuário copiar/colar ou clicar com facilidade.
 - **Quem roda o servidor é você.** Em sessões Zion, o agente é quem inicia e reinicia o draw server. Se o usuário pedir "reabra", "reinicie" ou "levanta o servidor", execute o comando (iniciar ou pkill + iniciar).
 - **Chrome bloqueia portas “inseguras”.** Por isso a porta não é 6666; usamos 8765 (e 8766, 8767 como fallback). Evite portas tipo 6665–6669 em novos serviços web para o browser.
-- **Conteúdo vazio ou “Aguardando conteúdo…”?** O arquivo pode não existir ainda. O agente deve escrever em `/workspace/mnt/.zion-draw/content.md`; o servidor cria o diretório `.zion-draw` se não existir. Após o Write, a página atualiza em tempo real via SSE.
+- **Conteúdo vazio ou “Aguardando conteúdo…”?** O arquivo pode não existir ainda. O agente deve escrever em `$WORKSPACE/.weblive/content.md`; o servidor cria o diretório `.weblive` se não existir. Após o Write, a página atualiza em tempo real via SSE.
 
 ---
 
