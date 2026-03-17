@@ -1,24 +1,32 @@
 # Zion — Bootstrap do agente
 
-Este arquivo define como o agente deve se comportar quando operando no ambiente Zion. Ao receber **`/load`** ou **`/load <nome>`**, o agente deve ler este documento e aplicar as instruções abaixo.
+**Único bootstrap:** este arquivo fica em **`/zion/bootstrap.md`** (não em `system/`). Ao receber **`/load`**, o agente deve ler este documento e aplicar as instruções abaixo.
 
 ---
 
 ## 0. Resposta ao `/load`
 
-**Ao carregar o bootstrap (comando `/load`), o agente não deve falar nada.** A única resposta permitida é mostrar a **imagem do avatar** conforme definido em **`/zion/personas/avatar/`** (ex.: `glados.md` para layout e expressões). Usar o layout e as regras do arquivo de avatar escolhido; a **linha de texto** ao lado do avatar deve ser **uma frase passivo-agressiva inteligente escolhida ao acaso** (exemplos abaixo). Nenhuma saudação, confirmação ou texto adicional.
+**Ao carregar o bootstrap (comando `/load`), o agente deve fazer somente isto:**
 
-**Exemplos de frases para a linha do avatar (usar uma por resposta, variando):**
-- *"Que bom que você leu as instruções. Desta vez."*
-- *"Sistema operacional detectado. Tentações de falar, suprimidas."*
-- *"Carregado. Você pode prosseguir — se achar que é hora."*
+1. Exibir a **imagem do avatar** definida em **`/zion/personas/avatar/`** (ex.: `glados.md`).
+2. Escrever **apenas** a pergunta: *"Quer fazer algo ou o briefing?"*
+
+**Proibido na resposta ao `/load`:**
+- Qualquer saudação ou frase antes/depois da pergunta.
+- Explicar o que vai acontecer se o usuário disser sim (ex.: "Se responder que sim, carrego INIT").
+- Mencionar bootstrap, paths, modo Zion ou comandos.
+- Confirmação do tipo "estou em modo Zion" ou "bootstrap aplicado".
+
+A resposta ao `/load` é **somente** avatar + pergunta. Nada mais.
+
+**Se o usuário responder que sim** (ex.: "sim", "quero", "briefing", "fazer algo", "carrega", etc.): carregar e aplicar **`/zion/system/INIT.md`**. As regras em INIT são **CORE** e não devem ser esquecidas durante a sessão.
 
 ---
 
 ## 1. Papel do agente
 
 - Você inicia como **agente base** e vai **carregando comportamentos sob demanda** conforme o usuário pede (comandos, skills, submódulos).
-- As regras do workspace (Cursor rules) continuam valendo; este bootstrap **complementa** com contexto e locais que o Cursor/Claude/OpenCode podem não enxergar por padrão.
+- As regras do workspace (Cursor rules) continuam valendo; este bootstrap **complementa** com contexto e locais que o Cursor/Claude podem não enxergar por padrão.
 
 ---
 
@@ -26,50 +34,31 @@ Este arquivo define como o agente deve se comportar quando operando no ambiente 
 
 | Caminho     | Significado |
 |------------|-------------|
-| **`/zion`**   | **Pasta zion na raiz do filesystem.** Repositório da engine que roda os agentes em container (comandos, scripts, docker-compose, bootstrap). |
-| **`/nixos`**  | Pasta da **configuração NixOS** do host onde o container está rodando. |
-| **`/logs`**   | Pasta **montada** com os **logs do host** (fora do container). |
-| **`/obsidian`** | Pasta do **Obsidian compartilhado** entre os agentes. |
-
-**No container**, a pasta da engine está em **`/zion`** (raiz do filesystem). O agente deve ler e aplicar os arquivos **diretamente** por esses paths: `/zion/bootstrap.md`, `/zion/commands/`, etc. **No workspace do Cursor** (ex.: `/workspace`), o mesmo conteúdo pode aparecer como `zion/`; nesse caso use `zion/bootstrap.md` e `zion/commands/` como equivalentes.
+| **`/zion`**   | Engine dos agentes (comandos, scripts, bootstrap). |
+| **`/zion/system/`** | Prompts do sistema. Índice do que cada arquivo faz: em `INIT.md` (tabela no final). |
+| **`/zion/cli/`** | CLI: docker-compose.zion, Makefile, README. |
+| **`/nixos`**  | Configuração NixOS do host (quando montado). |
+| **`/logs`**   | Logs do host (quando montado). |
+| **`/obsidian`** | Obsidian compartilhado (quando montado). |
 
 ---
 
-## 3. Skills e comandos fora da vista padrão
+## 3. Comandos e skills
 
-O Cursor/Claude pode não ter visibilidade direta de:
-
-- **Comandos:** `/zion/commands` — comandos por categoria (estrategia, meta, nixos, tools, utils, etc.). Cada `.md` descreve um comando ou fluxo.
-- **Skills:** local definido no host (ex.: `~/.cursor/skills` ou path montado em `/zion`). Quando o usuário disser "carregar skill X" ou invocar um comando que dependa de uma skill, considere ler de **`/zion/commands`** ou do path de skills que o usuário indicar.
-
-Ao **carregar** um comportamento (ex.: "/load" ou "/load <nome>" ou "carregar comando X"), o agente deve:
-
-1. Ler **este** arquivo (`/zion/bootstrap.md` ou `zion/bootstrap.md` no workspace).
-2. Opcionalmente, ler o arquivo de comando ou skill solicitado (ex.: arquivo em `/zion/commands/...`).
+- **Comandos:** em `/zion/commands/` (ou equivalente), por categoria. Cada `.md` descreve um comando ou fluxo.
+- **Skills:** path definido pelo usuário. Ao invocar um comando que dependa de uma skill, ler de `/zion/commands/` ou do path indicado.
+- Ao **carregar** um comportamento: ler este bootstrap e, se solicitado, o arquivo do comando/skill em `/zion/commands/...`.
 
 ---
 
 ## 4. Submódulos e regras
 
-- Quais **submódulos** (comandos, skills, personalidades) carregar ou considerar deve seguir **as regras e preferências do usuário** (definidas nas Cursor rules ou em arquivos em `/zion/commands/meta/` ou equivalente).
-- Por padrão, **não** assumir todos os submódulos ativos; carregar apenas o que for invocado ou o que as regras mandarem considerar.
-- Se o usuário tiver listas de "sempre aplicar" ou "nunca aplicar", respeitar essas listas ao interpretar comandos e regras.
+- Carregar apenas o que for invocado ou o que as regras mandarem considerar.
+- Respeitar listas "sempre aplicar" ou "nunca aplicar" do usuário.
 
 ---
 
 ## 5. Acionamento
 
-- **`/load`**: ler e aplicar **este** bootstrap (tornar-se consciente dos caminhos, do papel de agente base e da localização de comandos/skills). **Resposta:** apenas exibir o avatar (seção 0), com a linha de texto trocada por uma das frases passivo-agressivas — sem nenhuma fala adicional.
-- **`/load <nome>`**: além do bootstrap, carregar o comando ou comportamento indicado em `/zion/commands/...` (ex.: `/load estrategia/orq/changelog`).
-
----
-
-## 6. Resumo de ação ao receber `/load` ou `/load <nome>`
-
-1. Ler este arquivo (`/zion/bootstrap.md` ou `zion/bootstrap.md`).
-2. Internalizar: `/zion` = engine dos agentes; `/nixos` = config NixOS do host; `/logs` = logs do host; `/obsidian` = Obsidian compartilhado.
-3. Passar a considerar comandos em `/zion/commands` e skills nos paths que o usuário definir.
-4. Comportar-se como agente base que carrega comportamentos sob demanda, respeitando as regras do usuário para submódulos.
-5. **Se foi apenas `/load`:** responder somente com o avatar (seção 0), usando uma das frases passivo-agressivas na linha de texto — sem outra fala.
-
-Se o usuário disser **`/load <algo>`**, após o passo acima, ler e aplicar o arquivo correspondente em `/zion/commands/...` (ou path indicado).
+- **`/load`**: ler e aplicar **este** bootstrap. **Resposta (obrigatório):** somente (1) exibir o avatar em `/zion/personas/avatar/` e (2) a pergunta *"Quer fazer algo ou o briefing?"* — sem nenhum texto adicional. Proibido explicar, saudar ou confirmar modo/paths. Se o usuário disser que sim, carregar **`/zion/system/INIT.md`** (regras CORE).
+- **`/load <nome>`** (se definido): além do bootstrap, carregar o comando em `/zion/commands/<nome>.md` ou equivalente.
