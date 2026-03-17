@@ -66,6 +66,12 @@ if [ "$PERSONALITY" = "ON" ]; then
     cat "$WS/zion/system/DIRETRIZES.md"
     echo "---/DIRETRIZES---"
   fi
+  # CLAUDE.OVERRIDE.md tem prioridade sobre CLAUDE.md (injetar primeiro)
+  if [ -f "$WS/CLAUDE.OVERRIDE.md" ]; then
+    echo "---CLAUDE.OVERRIDE.MD---"
+    cat "$WS/CLAUDE.OVERRIDE.md"
+    echo "---/CLAUDE.OVERRIDE.MD---"
+  fi
   if [ -f "$WS/CLAUDE.md" ]; then
     echo "---CLAUDE.MD---"
     cat "$WS/CLAUDE.md"
