@@ -5,6 +5,20 @@
 
 ---
 
+## Draw Server (Zion) — desenhar no browser
+
+Quando for **desenhar para o usuário** (diagramas Mermaid, gráficos, Markdown rico no browser):
+
+1. **Levante o servidor ou verifique se está rodando.** Se a URL não responder, inicie em background: `python3 /zion/scripts/draw-server.py &`
+2. **Sempre**, logo após levantar o servidor, diga ao usuário para abrir a página, por exemplo:
+   - *"Servidor no ar. Abra **http://localhost:8765** no browser para ver os desenhos."*
+   - Ou: *"Para ver o desenho, abra http://localhost:8765 (se a página não abrir, avise que eu subo o servidor)."*
+3. O conteúdo vai para **`/workspace/mnt/.zion-draw/content.md`**; a página atualiza sozinha a cada 2s.
+
+Assim o usuário sabe que precisa abrir a URL para ver o que você desenhou.
+
+---
+
 ## Matriz de Renderização
 
 | Contexto | ASCII/Box-drawing | Mermaid | Notas |

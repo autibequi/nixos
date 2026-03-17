@@ -39,3 +39,16 @@ Dentro do container, a pasta **`/workspace/zion`** (ou **`/zion`**) é o **engin
 3. **Prompts em `/workspace/zion`** — consultar quando precisar de conhecimento que não está no contexto (comandos, skills, system).
 
 Assim você mantém um comportamento consistente em todo workspace, usando o Zion como fonte de verdade para comandos e skills, e o CLAUDE.md do projeto só para regras específicas daquele repositório.
+
+---
+
+## 4. Servidor de desenho (draw server)
+
+O Zion expõe um servidor HTTP em **http://localhost:8765** para renderizar diagramas (Mermaid) e Markdown rico no browser, em vez do terminal.
+
+1. **URL:** O usuário abre **http://localhost:8765** no browser para ver a página. Com `network_mode: host`, a porta 8765 do container é a mesma do host.
+2. **Quando usar:** Para diagramas Mermaid, Markdown complexo ou gráficos que o terminal não renderiza bem. **Preferir Mermaid** nessa página em vez de ASCII no chat quando fizer sentido (consulte a skill **draw** em `zion/skills/` ou `~/.cursor/skills/tools/draw/`).
+3. **Como enviar conteúdo:** Escrever (ferramenta Write) em **`/workspace/mnt/.zion-draw/content.md`** (ou em `$WORKSPACE/.zion-draw/content.md`). A página faz polling a cada 2s e atualiza sozinha.
+4. **Output preferido:** Quando o usuário indicar que está com a página aberta ou pedir "mostre no draw" / "desenhe no browser" / "mostre no localhost:8765", usar essa página como canal de output: escrever no arquivo acima e avisar "atualizei a página" ou "a página deve atualizar em instantes".
+5. **Iniciar o servidor:** Se o usuário não conseguir acessar a URL, o agente pode iniciar o servidor em background: `python3 /zion/scripts/draw-server.py &` (no mesmo ambiente da sessão sandbox, onde existe `/workspace/mnt`). O servidor usa o path de conteúdo por env `ZION_DRAW_CONTENT` ou default `$WORKSPACE/.zion-draw/content.md`.
+6. **Para desenhar para o usuário:** Sempre **levante o servidor ou verifique se está rodando** antes de escrever no conteúdo. Logo após subir o servidor, **sempre** avise o usuário para abrir a página, por exemplo: *"Servidor no ar. Abra **http://localhost:8765** no browser para ver os desenhos."*
