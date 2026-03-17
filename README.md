@@ -1,6 +1,6 @@
-# NixOS + CLAUDINHO
+# NixOS + Zion
 
-Flake-based NixOS configuration for an ASUS Zephyrus G14 (AMD Ryzen + NVIDIA RTX 4060 mobile), with an autonomous AI agent system (CLAUDINHO) running in Docker.
+Flake-based NixOS configuration for an ASUS Zephyrus G14 (AMD Ryzen + NVIDIA RTX 4060 mobile), with Zion (agent launcher + container) and Puppy workers (background task runners).
 
 ## Structure
 
@@ -32,7 +32,7 @@ projetos/            # Work projects (mounted submódules, separate repos)
   CLAUDE.md          # Work mode switch (FERIAS/TRABALHO)
 
 scripts/
-  clau-runner.sh     # Autonomous task runner (frontmatter-aware)
+  puppy-runner.sh     # Puppy: autonomous task runner (frontmatter-aware)
   api-usage.sh       # Anthropic API usage query
 
 artefatos/           # Non-markdown outputs (binaries, exports, generated data)

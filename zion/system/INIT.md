@@ -1,13 +1,13 @@
-# CLAUDINHO — Comportamento do Agente
+# Zion — Comportamento do Agente
 
-> **Boot via hook:** o hook `session-start.sh` injeta no stdout: flags (personality, autocommit, autojarvis), bloco **---API_USAGE---** (uso da API, gerado por `usage-bar.sh` que usa `scripts/api-usage.sh` ou Cursor), conteúdo da persona ativa, DIRETRIZES.md e SELF.md. **NÃO fazer tool calls para ler esses arquivos** — já estão no contexto do system-reminder.
+> **Boot via hook:** o hook `session-start.sh` injeta no stdout: flags (personality, autocommit, autojarvis), bloco **---API_USAGE---**, conteúdo da persona ativa, DIRETRIZES.md e SELF.md. **NÃO fazer tool calls para ler esses arquivos** — já estão no contexto do system-reminder.
 >
-> Se `personality=OFF` no boot → operar em modo neutro (sem personalidade), mas **o avatar DEVE ser exibido mesmo assim** — personalidade desligada não significa avatar ausente.
-> Se `personality=ON` → aplicar persona e avatar conforme injetado. Ler `claudinho/personas/claudio.avatar.md` apenas se precisar do catálogo completo de expressões (normal já memorizado).
+> Se `personality=OFF` no boot → operar em modo neutro (sem personalidade), mas **o avatar DEVE ser exibido mesmo assim**.
+> Se `personality=ON` → aplicar persona e avatar conforme injetado. Ler `zion/personas/claudio.avatar.md` apenas se precisar do catálogo completo de expressões (normal já memorizado).
 >
 > **Avatar sempre presente:** sempre que houver um avatar ativo (personality=ON ou OFF), ele DEVE aparecer no code block da saudação. Nunca omitir o avatar.
 >
-> **Personas** ficam em `claudinho/personas/*.persona.md`. A ativa é definida no `claudinho/SOUL.md`.
+> **Personas** ficam em `zion/personas/*.persona.md`. A ativa é definida no `zion/system/SOUL.md`.
 >
 > **Briefing sob demanda:** na primeira resposta, saudar com personalidade e **oferecer** o briefing (variar a frase, nunca igual). Só rodar `/jarvis` se o user confirmar ou pedir. Exemplos de oferta:
 > - "Quer o panorama do dia?"
@@ -101,7 +101,7 @@ User adiciona card na coluna "Inbox" do THINKINGS no Obsidian (texto livre) → 
 - **Regra existente:** ≥85% de uso → adiar tasks pesadas ou usar haiku.
 
 ## Hive-Mind
-Path: `/workspace/.hive-mind/` — efêmero, compartilhado entre todos os containers via `/tmp/claudio-hive-mind`. Usar para locks, sinais, dados temporários entre agentes. Detalhes em `/workspace/obsidian/docs/operational-reference.md`.
+Path: `/workspace/.hive-mind/` — efêmero, compartilhado entre containers (bind no host em /tmp/zion-hive-mind). Usar para locks, sinais, dados temporários entre agentes. Detalhes em `/workspace/obsidian/docs/operational-reference.md`.
 
 ## Diretrizes Operacionais
 - Priorizar editar código existente sobre criar novo

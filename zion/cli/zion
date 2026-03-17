@@ -19,9 +19,9 @@ version_command() {
 zion_usage() {
   if [[ -n $long_usage ]]; then
     printf "zion\n\n"
-    printf "  CLI unificado para o container Claude (sandbox Nix + OpenCode/Claude/Cursor).\n  Sem subcomando = run. Exige --engine=opencode|claude|cursor (ou engine= em\n  ~/.zion).\n\n"
+    printf "  CLI unificado para o container (Zion = agentes, Puppy = workers).\n  Sem subcomando = continue (última sessão). zion new = nova sessão. zion resume\n  = lista de sessões.\n\n"
   else
-    printf "zion - CLI unificado para o container Claude (sandbox Nix + OpenCode/Claude/Cursor).\n\n"
+    printf "zion - CLI unificado para o container (Zion = agentes, Puppy = workers).\n\n"
   fi
 
   printf "%s\n" "Usage:"
@@ -31,10 +31,10 @@ zion_usage() {
   echo
   # :command.usage_commands
   printf "%s\n" "Commands:"
-  printf "  %s   Sessão no container. Exige --engine=opencode|claude|cursor (ou engine= em ~/.zion). (default)\n" "run            "
+  printf "  %s   Continua a última sessão (mesmo que digitar só zion). (default)\n" "continue       "
+  printf "  %s   Nova sessão no container. Exige --engine (ou engine= em ~/.zion).\n" "new            "
   printf "  %s   Abre bash no container com o projeto montado.\n" "shell          "
-  printf "  %s   Retoma sessão anterior do Claude (--resume).\n" "resume         "
-  printf "  %s   Continua conversa no Claude (--continue).\n" "continue       "
+  printf "  %s   Mostra lista de sessões e permite escolher qual retomar.\n" "resume         "
   printf "  %s   Sobe sandbox persistente e abre Claude (equiv. make start).\n" "start          "
   printf "  %s   Sobe sandbox e abre OpenClaw gateway (LM Studio).\n" "openclaw       "
   printf "  %s   Build da imagem Docker do sandbox.\n" "build          "
@@ -51,13 +51,13 @@ zion_usage() {
   printf "  %s   Sobe/para o container scheduler (tick a cada 10 min). Equiv. systemctl start/stop claude-scheduler-container.\n" "scheduler      "
   printf "  %s   Devolve tasks de running/ para origem (pending/recurring).\n" "reset          "
   printf "  %s   Mostra estado via kanban + workers.\n" "status         "
-  printf "  %s   Cria task + card no kanban.\n" "new            "
+  printf "  %s   Cria task + card no kanban (Puppy).\n" "new-task       "
   printf "  %s   Mostra ou segue o último log de worker.\n" "logs           "
   printf "  %s   Lista todos os arquivos de log.\n" "logs-list      "
   printf "  %s   Uso da API Anthropic (hoje; use --7d ou --30d para período).\n" "usage-api      "
   printf "  %s   journalctl do systemd service claude-autonomous.\n" "service-logs   "
   printf "  %s   Abre Alacritty com Claude respondendo (q=pergunta ou interativo).\n" "ask            "
-  printf "  %s   Abre ~/nixos em /workspace/mnt + /workspace/logs (único modo com nixos e logs).\n" "edit           "
+  printf "  %s   Abre sessão com ~/nixos em /workspace/mnt e /workspace/logs (único modo com mount de nixos + logs).\n" "edit           "
   echo
 
   # :command.long_usage
@@ -77,7 +77,7 @@ zion_usage() {
 
     # :flag.usage
     printf "  %s\n" "--instance ID"
-    printf "    Sufixo da instância (ex. 2 = clau-projeto-2)\n"
+    printf "    Sufixo da instância (ex. 2 = zion-projeto-2)\n"
     echo
 
     # :flag.usage
@@ -131,14 +131,45 @@ zion_usage() {
 }
 
 # :command.usage
-zion_run_usage() {
-  printf "zion run - Sessão no container. Exige --engine=opencode|claude|cursor (ou engine= em ~/.zion).\n\n"
-  printf "Alias: r, open, opencode, code\n"
+zion_continue_usage() {
+  printf "zion continue - Continua a última sessão (mesmo que digitar só zion).\n\n"
+  printf "Alias: cont\n"
   echo
 
   printf "%s\n" "Usage:"
-  printf "  zion [run] [DIR] [OPTIONS]\n"
-  printf "  zion run --help | -h\n"
+  printf "  zion [continue] [DIR]\n"
+  printf "  zion continue --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "Arguments:"
+
+    # :argument.usage
+    printf "  %s\n" "DIR"
+    printf "    Diretório do projeto (default ~/projects)\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_new_usage() {
+  printf "zion new - Nova sessão no container. Exige --engine (ou engine= em ~/.zion).\n\n"
+  printf "Alias: run, r, open, opencode, code\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  zion new [DIR] [OPTIONS]\n"
+  printf "  zion new --help | -h\n"
   echo
 
   # :command.long_usage
@@ -202,10 +233,9 @@ zion_run_usage() {
 
     # :command.usage_examples
     printf "%s\n" "Examples:"
-    printf "  zion run --engine=claude\n"
-    printf "  zion --engine=cursor --resume=11eaea99-5993-482b-9662-e4d9584c1200 ~/projects\n"
+    printf "  zion new --engine=claude\n"
+    printf "  zion new --engine=cursor ~/projects\n"
     printf "  zion run --engine=opencode ~/meu-projeto\n"
-    printf "  zion --engine=cursor --init-md contexto.md ~/projects\n"
     echo
 
   fi
@@ -244,10 +274,10 @@ zion_shell_usage() {
 
 # :command.usage
 zion_resume_usage() {
-  printf "zion resume - Retoma sessão anterior do Claude (--resume).\n\n"
+  printf "zion resume - Mostra lista de sessões e permite escolher qual retomar.\n\n"
 
   printf "%s\n" "Usage:"
-  printf "  zion resume [DIR]\n"
+  printf "  zion resume [DIR] [OPTIONS]\n"
   printf "  zion resume --help | -h\n"
   echo
 
@@ -255,36 +285,11 @@ zion_resume_usage() {
   if [[ -n "$long_usage" ]]; then
     printf "%s\n" "Options:"
 
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--resume SESSION_ID"
+    printf "    UUID da sessão (opcional; sem isso mostra lista)\n"
     echo
-
-    # :command.usage_args
-    printf "%s\n" "Arguments:"
-
-    # :argument.usage
-    printf "  %s\n" "DIR"
-    printf "    Diretório do projeto (default ~/projects)\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-zion_continue_usage() {
-  printf "zion continue - Continua conversa no Claude (--continue).\n\n"
-  printf "Alias: cont\n"
-  echo
-
-  printf "%s\n" "Usage:"
-  printf "  zion continue [DIR]\n"
-  printf "  zion continue --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
 
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
@@ -677,12 +682,14 @@ zion_status_usage() {
 }
 
 # :command.usage
-zion_new_usage() {
-  printf "zion new - Cria task + card no kanban.\n\n"
+zion_new_task_usage() {
+  printf "zion new-task - Cria task + card no kanban (Puppy).\n\n"
+  printf "Alias: task-new\n"
+  echo
 
   printf "%s\n" "Usage:"
-  printf "  zion new NAME [OPTIONS]\n"
-  printf "  zion new --help | -h\n"
+  printf "  zion new-task NAME [OPTIONS]\n"
+  printf "  zion new-task --help | -h\n"
   echo
 
   # :command.long_usage
@@ -851,6 +858,27 @@ zion_ask_usage() {
   fi
 }
 
+# :command.usage
+zion_edit_usage() {
+  printf "zion edit - Abre sessão com ~/nixos em /workspace/mnt e /workspace/logs (único modo com mount de nixos + logs).\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion edit\n"
+  printf "  zion edit --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
 # :command.normalize_input
 # :command.normalize_input_function
 normalize_input() {
@@ -1007,11 +1035,11 @@ zion_proj_slug() {
   basename "$d" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$//'
 }
 
-# Project name for claude (clau-SLUG or clau-SLUG-INSTANCE)
+# Project name for agent sessions (Zion)
 zion_proj_name() {
   local slug="$1"
   local instance="${args['--instance']:-${flag_instance:-}}"
-  local name="clau-${slug}"
+  local name="zion-${slug}"
   [[ -n "$instance" && "$instance" != "1" ]] && name="${name}-${instance}"
   echo "$name"
 }
@@ -1019,7 +1047,7 @@ zion_proj_name() {
 # Project name for opencode (persistent sandbox)
 zion_proj_name_open() {
   local slug="$1"
-  echo "clau-${slug}-open"
+  echo "zion-${slug}-open"
 }
 
 # Mount opts: --rw (default for run) or --ro
@@ -1066,10 +1094,58 @@ zion_model_flag() {
 
 # :command.command_functions
 # :command.function
-zion_run_command() {
+zion_continue_command() {
 
-  # src/commands/run.sh
-  # Sessão no container: exige --engine=opencode|claude|cursor (ou engine= em ~/.zion)
+  # src/commands/continue.sh
+  # Continua a última sessão (todos os engines). Sem subcomando = mesmo que zion continue.
+  zion_load_config
+  engine="$(zion_resolve_engine 0)"
+  [[ -z "$engine" ]] && engine="cursor"
+  mount_path="$(zion_resolve_dir)"
+  proj_slug="$(zion_proj_slug "$mount_path")"
+  proj_name="$(zion_proj_name "$proj_slug")"
+  mount_opts="$(zion_mount_opts)"
+
+  case "$engine" in
+    opencode)
+      proj_name_open="$(zion_proj_name_open "$proj_slug")"
+      echo "[zion continue] engine=opencode → $proj_name_open (última sessão)"
+      HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
+        zion_compose_cmd -p "$proj_name_open" run --rm -it \
+        --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
+        bash -c 'cd /workspace/mnt && exec opencode'
+      ;;
+    claude)
+      echo "[zion continue] engine=claude → $proj_name (última sessão)"
+      model="$(zion_model_flag)"
+      danger="$(zion_danger_flag claude)"
+      CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
+        zion_compose_cmd -p "$proj_name" run --rm -it \
+        --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
+        -c ". /zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude --continue ${model}${danger} --permission-mode bypassPermissions"
+      ;;
+    cursor)
+      echo "[zion continue] engine=cursor → $proj_name (última sessão, mount: ${mount_opts})"
+      danger="$(zion_danger_flag cursor)"
+      cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; exec agent'"${danger}"' --continue'
+      HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
+        zion_compose_cmd -p "$proj_name" run --rm -it \
+        --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
+        -c "$cursor_cmd"
+      ;;
+    *)
+      echo "zion: engine inválido: $engine (use opencode|claude|cursor em ~/.zion)" >&2
+      exit 1
+      ;;
+  esac
+
+}
+
+# :command.function
+zion_new_command() {
+
+  # src/commands/new_session.sh
+  # Nova sessão no container. Exige --engine (ou engine= em ~/.zion).
   zion_load_config
   engine=$(zion_resolve_engine 1)
   mount_path="$(zion_resolve_dir)"
@@ -1082,7 +1158,7 @@ zion_run_command() {
   case "$engine" in
     opencode)
       proj_name="$(zion_proj_name_open "$proj_slug")"
-      echo "[zion run] engine=opencode ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
+      echo "[zion new] engine=opencode ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
       opencode_danger_env=""
       [[ -n "${flag_danger:-${args['--danger']:-${ZION_DANGER:-}}}" ]] && opencode_danger_env="-e OPENCODE_PERMISSION_BYPASS=1"
       opencode_init_env=""
@@ -1113,7 +1189,7 @@ zion_run_command() {
     cursor)
       proj_name="$(zion_proj_name "$proj_slug")"
       danger="$(zion_danger_flag cursor)"
-      echo "[zion run] engine=cursor ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
+      echo "[zion new] engine=cursor ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
       cursor_init_env=""
       [[ -n "$initial_md" ]] && cursor_init_env="-e CLAUDIO_INITIAL_MD=$initial_md"
       cursor_resume_env=""
@@ -1156,15 +1232,40 @@ zion_shell_command() {
 zion_resume_command() {
 
   # src/commands/resume.sh
-  # resume usa o mesmo engine que run (cursor/claude/opencode) a partir de ~/.claudio
+  # Mostra lista de sessões e permite escolher qual retomar. Com --resume=UUID pula a lista.
+  zion_load_config
   engine="$(zion_resolve_engine 0)"
   [[ -z "$engine" ]] && engine="cursor"
   mount_path="$(zion_resolve_dir)"
   proj_slug="$(zion_proj_slug "$mount_path")"
   proj_name="$(zion_proj_name "$proj_slug")"
   mount_opts="$(zion_mount_opts)"
-  resume_id="${args['--resume']:-1}"
+  resume_id="${args['--resume']:-}"
 
+  # Se não passou --resume, mostrar lista e pedir escolha (só se TTY)
+  if [[ -z "$resume_id" ]]; then
+    if [[ -t 0 ]]; then
+      echo "[zion resume] Listando sessões (engine=$engine)..."
+      list_out=""
+      if [[ "$engine" == "cursor" ]]; then
+        list_out=$(HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" OBSIDIAN_PATH="$zion_obsidian_path" \
+          zion_compose_cmd -p "$proj_name" run --rm -T \
+          --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" sandbox \
+          -c ". /zion/scripts/bootstrap.sh 2>/dev/null; cd /workspace/mnt 2>/dev/null; agent list 2>/dev/null || true" 2>/dev/null) || true
+      fi
+      if [[ -n "$list_out" ]]; then
+        echo "$list_out"
+      else
+        echo "Lista não disponível para este engine. Use 'zion continue' (ou só 'zion') para última sessão."
+      fi
+      echo ""
+      read -r -p "UUID da sessão (ou Enter para última): " resume_id
+    fi
+    # Sem TTY ou Enter = última sessão (equivalente a continue)
+    [[ -z "$resume_id" ]] && resume_id="1"
+  fi
+
+  # resume_id "1" = última sessão (--continue)
   case "$engine" in
     opencode)
       proj_name_open="$(zion_proj_name_open "$proj_slug")"
@@ -1184,7 +1285,6 @@ zion_resume_command() {
     cursor)
       echo "[zion resume] engine=cursor → $proj_name (mount: ${mount_opts})"
       danger="$(zion_danger_flag cursor)"
-      # Cursor agent: --continue = última sessão; --resume=UUID = sessão específica
       if [[ -n "$resume_id" && "$resume_id" != "1" ]]; then
         cursor_resume_env="-e CLAUDIO_RESUME_SESSION=$resume_id"
         cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; exec agent'"${danger}"' --resume="${CLAUDIO_RESUME_SESSION}"'
@@ -1202,23 +1302,6 @@ zion_resume_command() {
       exit 1
       ;;
   esac
-
-}
-
-# :command.function
-zion_continue_command() {
-
-  # src/commands/continue.sh
-  zion_load_config
-  mount_path="$(zion_resolve_dir)"
-  proj_slug="$(zion_proj_slug "$mount_path")"
-  proj_name="$(zion_proj_name "$proj_slug")"
-  mount_opts="$(zion_mount_opts)"
-  model="$(zion_model_flag)"
-  CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
-    zion_compose_cmd -p "$proj_name" run --rm -it \
-    --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
-    -c ". /zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude --continue ${model} --permission-mode bypassPermissions"
 
 }
 
@@ -1325,7 +1408,7 @@ zion_init_command() {
   chmod 600 "$dest"
   echo "[zion init] Criado $dest — edite e preencha engine=, GH_TOKEN=, ANTHROPIC_API_KEY="
 
-  # Garante PATH e alias no ~/.zshrc e ~/.bashrc para zion e claudio funcionarem (zsh e bash)
+  # Garante PATH no ~/.zshrc e ~/.bashrc para zion funcionar (zsh e bash)
   bin_dir="$zion_nixos_dir/stow/.local/bin"
   for rc in "${ZDOTDIR:-$HOME}/.zshrc" "$HOME/.bashrc"; do
     [[ -d "$bin_dir" ]] || continue
@@ -1338,10 +1421,6 @@ zion_init_command() {
       echo "# Zion CLI (adicionado por zion init)" >> "$rc"
       printf 'export PATH="%s:$PATH"\n' "$bin_dir" >> "$rc"
       added="PATH "
-    fi
-    if ! grep -q "alias claudio=zion" "$rc" 2>/dev/null; then
-      echo "alias claudio=zion" >> "$rc"
-      added="${added}alias "
     fi
     [[ -n "$added" ]] && echo "[zion init] ${added}em $rc — rode: source $rc"
   done
@@ -1364,7 +1443,7 @@ zion_worker_command() {
     -e SCHEDULER_VERBOSE=1 -e SCHEDULER_CLOCK=every60 \
     -e SCHEDULER_WORKER_ID="${SCHEDULER_WORKER_ID:-worker-1}" \
     -e SCHEDULER_ENGINE="${engine:-}" \
-    worker /zion/scripts/clau-runner.sh ${args[task]:-} 2>&1 | tee "$logfile"
+    worker /zion/scripts/puppy-runner.sh ${args[task]:-} 2>&1 | tee "$logfile"
 
 }
 
@@ -1378,7 +1457,7 @@ zion_worker_run_fast_command() {
   OBSIDIAN_PATH="$zion_obsidian_path" zion_compose_cmd run --rm \
     -e SCHEDULER_VERBOSE=1 -e SCHEDULER_CLOCK=every10 \
     -e SCHEDULER_WORKER_ID="${SCHEDULER_WORKER_ID:-worker-fast}" \
-    worker-fast /zion/scripts/clau-runner.sh 2>&1 | tee "$logfile"
+    worker-fast /zion/scripts/puppy-runner.sh 2>&1 | tee "$logfile"
 
 }
 
@@ -1392,7 +1471,7 @@ zion_worker_auto_command() {
   OBSIDIAN_PATH="$zion_obsidian_path" zion_compose_cmd run --rm -T \
     -e SCHEDULER_CLOCK=every60 \
     -e SCHEDULER_WORKER_ID="${SCHEDULER_WORKER_ID:-worker-1}" \
-    worker /zion/scripts/clau-runner.sh > "$logfile" 2>&1
+    worker /zion/scripts/puppy-runner.sh > "$logfile" 2>&1
 
 }
 
@@ -1424,7 +1503,7 @@ zion_worker_clau_command() {
       -e SCHEDULER_WORKER_ID="$WORKER_ID" \
       -e SCHEDULER_CLOCK=every60 \
       -l "clau.worker.id=$WORKER_ID" \
-      worker /zion/scripts/clau-runner.sh >> "$logfile" 2>&1 &
+      worker /zion/scripts/puppy-runner.sh >> "$logfile" 2>&1 &
   done
   echo "[zion worker-clau] Workers lançados. Seguindo log..."
   tail -f "$logfile"
@@ -1492,10 +1571,10 @@ zion_worker_stop_all_command() {
 zion_scheduler_command() {
 
   # src/commands/scheduler.sh
-  # Sobe/para/status do container scheduler (tick a cada 10 min). Usa -p clau-workers como no systemd.
+  # Sobe/para/status do container scheduler (tick a cada 10 min). Puppy workers project.
   zion_load_config
 
-  SCHEDULER_PROJECT="${SCHEDULER_PROJECT:-clau-workers}"
+  SCHEDULER_PROJECT="${SCHEDULER_PROJECT:-puppy-workers}"
   action="${args[action]:-start}"
 
   scheduler_cmd() {
@@ -1545,14 +1624,14 @@ zion_scheduler_command() {
       else
         echo "  _agent/tasks/recurring: NÃO EXISTE em $OBSIDIAN_PATH — worker verá 0 tasks." >&2
       fi
-      "$zion_nixos_dir/scripts/clau-scheduler.sh"
+      "$zion_nixos_dir/scripts/puppy-scheduler.sh"
       ;;
     shell)
       # Entra no shell do container scheduler (precisa estar rodando)
       OBSIDIAN_PATH="$zion_obsidian_path" scheduler_cmd exec -it scheduler /bin/bash
       ;;
     *)
-      echo "claudio scheduler: action inválida '$action'. Use: start | stop | status | logs | run-now | shell" >&2
+      echo "zion scheduler: action inválida '$action'. Use: start | stop | status | logs | run-now | shell" >&2
       exit 1
       ;;
   esac
@@ -1631,7 +1710,7 @@ zion_status_command() {
 }
 
 # :command.function
-zion_new_command() {
+zion_new_task_command() {
 
   # src/commands/new_task.sh
   # $name
@@ -1711,19 +1790,23 @@ zion_ask_command() {
 
 # :command.function
 zion_edit_command() {
-  # src/commands/host_edit.sh — ~/nixos em /workspace/mnt + /workspace/logs; respeita engine em ~/.zion
+
+  # src/commands/host_edit.sh
+  # zion edit: ~/nixos em /workspace/mnt + /workspace/logs. Respeita engine em ~/.zion (ex.: cursor).
+  # Cursor: usar credenciais do host como no outro container — ~/.claude (cursor_api_key, .env), ~/.config/cursor (mount).
   zion_load_config
   engine=$(zion_resolve_engine 0)
   [[ -z "$engine" ]] && engine="cursor"
   mount_path="${ZION_NIXOS_DIR:-$HOME/nixos}"
   mount_path="$(cd "$mount_path" 2>/dev/null && pwd)" || { echo "zion edit: dir not found: $mount_path" >&2; exit 1; }
   proj_slug="nixos"
-  # Mesmo project name do `zion` (~/projects) para compartilhar o volume cursor_config e não pedir login de novo.
-  proj_name="clau-projects"
+  # Mesmo project name do `zion` (~/projects) para compartilhar cursor_config e não pedir login.
+  proj_name="zion-projects"
   mount_opts="rw"
   resume_id="${args['--resume']:-}"
   EXTRA_V="-v /var/log/journal:/workspace/logs/host/journal:ro"
   cursor_key_env=""
+
   case "$engine" in
     opencode)
       echo "[zion edit] engine=opencode ${mount_path} → ${proj_name} (mnt + logs)"
@@ -1742,14 +1825,14 @@ zion_edit_command() {
         --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
         -c ". /zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${model}${danger}"
       ;;
-    cursor)
-      echo "[zion edit] engine=cursor ${mount_path} → ${proj_name} (mnt + logs)"
-      danger="$(zion_danger_flag cursor)"
-      cursor_resume_env=""
-      [[ -n "$resume_id" ]] && cursor_resume_env="-e CLAUDIO_RESUME_SESSION=$resume_id"
-      cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; '
-      cursor_cmd+='if [ -n "${CLAUDIO_RESUME_SESSION:-}" ]; then exec agent'"${danger}"' --resume="${CLAUDIO_RESUME_SESSION}"; else exec agent'"${danger}"'; fi'
-      HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
+      cursor)
+        echo "[zion edit] engine=cursor ${mount_path} → ${proj_name} (mnt + logs)"
+        danger="$(zion_danger_flag cursor)"
+        cursor_resume_env=""
+        [[ -n "$resume_id" ]] && cursor_resume_env="-e CLAUDIO_RESUME_SESSION=$resume_id"
+        cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; '
+        cursor_cmd+='if [ -n "${CLAUDIO_RESUME_SESSION:-}" ]; then exec agent'"${danger}"' --resume="${CLAUDIO_RESUME_SESSION}"; else exec agent'"${danger}"'; fi'
+        HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
         zion_compose_cmd -p "$proj_name" run --rm -it $EXTRA_V $cursor_key_env \
         --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 $cursor_resume_env sandbox \
         -c "$cursor_cmd"
@@ -1759,6 +1842,7 @@ zion_edit_command() {
       exit 1
       ;;
   esac
+
 }
 
 # :command.parse_requirements
@@ -1889,10 +1973,17 @@ parse_requirements() {
 
   case $action in
 
-    run | r | open | opencode | code)
-      action="run"
+    continue | cont)
+      action="continue"
       shift
-      zion_run_parse_requirements "$@"
+      zion_continue_parse_requirements "$@"
+      shift $#
+      ;;
+
+    new | run | r | open | opencode | code)
+      action="new"
+      shift
+      zion_new_parse_requirements "$@"
       shift $#
       ;;
 
@@ -1907,13 +1998,6 @@ parse_requirements() {
       action="resume"
       shift
       zion_resume_parse_requirements "$@"
-      shift $#
-      ;;
-
-    continue | cont)
-      action="continue"
-      shift
-      zion_continue_parse_requirements "$@"
       shift $#
       ;;
 
@@ -2029,10 +2113,10 @@ parse_requirements() {
       shift $#
       ;;
 
-    new)
-      action="new"
+    new-task | task-new)
+      action="new-task"
       shift
-      zion_new_parse_requirements "$@"
+      zion_new_task_parse_requirements "$@"
       shift $#
       ;;
 
@@ -2080,8 +2164,8 @@ parse_requirements() {
 
     # :command.command_fallback
     *)
-      action="run"
-      zion_run_parse_requirements "$@"
+      action="continue"
+      zion_continue_parse_requirements "$@"
       shift $#
       ;;
 
@@ -2114,14 +2198,14 @@ parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_run_parse_requirements() {
+zion_continue_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        zion_run_usage
+        zion_continue_usage
         exit
         ;;
 
@@ -2133,7 +2217,58 @@ zion_run_parse_requirements() {
   done
 
   # :command.command_filter
-  action="run"
+  action="continue"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        # :argument.case
+        if [[ -z ${args['dir']+x} ]]; then
+          args['dir']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_new_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_new_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="new"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
@@ -2337,57 +2472,19 @@ zion_resume_parse_requirements() {
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
+      # :flag.case
+      --resume)
 
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        # :argument.case
-        if [[ -z ${args['dir']+x} ]]; then
-          args['dir']=$1
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--resume']="$2"
+          shift
           shift
         else
-          printf "invalid argument: %s\n" "$key" >&2
+          printf "%s\n" "--resume requires an argument: --resume SESSION_ID" >&2
           exit 1
         fi
-
         ;;
-
-    esac
-  done
-
-}
-
-# :command.parse_requirements
-zion_continue_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_continue_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="continue"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
 
       -?*)
         printf "invalid option: %s\n" "$key" >&2
@@ -3159,14 +3256,14 @@ zion_status_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_new_parse_requirements() {
+zion_new_task_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        zion_new_usage
+        zion_new_task_usage
         exit
         ;;
 
@@ -3178,7 +3275,7 @@ zion_new_parse_requirements() {
   done
 
   # :command.command_filter
-  action="new"
+  action="new-task"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
@@ -3264,7 +3361,7 @@ zion_new_parse_requirements() {
 
   # :command.required_args_filter
   if [[ -z ${args['name']+x} ]]; then
-    printf "missing required argument: NAME\nusage: zion new NAME [OPTIONS]\n" >&2
+    printf "missing required argument: NAME\nusage: zion new-task NAME [OPTIONS]\n" >&2
 
     exit 1
   fi
@@ -3522,20 +3619,47 @@ zion_ask_parse_requirements() {
 
 # :command.parse_requirements
 zion_edit_parse_requirements() {
+  # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        zion_usage
+        zion_edit_usage
         exit
         ;;
+
       *)
         break
         ;;
+
     esac
   done
+
+  # :command.command_filter
   action="edit"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
 }
 
 # :command.initialize
@@ -3558,10 +3682,10 @@ run() {
   parse_requirements "${input[@]}"
 
   case "$action" in
-    "run") zion_run_command ;;
+    "continue") zion_continue_command ;;
+    "new") zion_new_command ;;
     "shell") zion_shell_command ;;
     "resume") zion_resume_command ;;
-    "continue") zion_continue_command ;;
     "start") zion_start_command ;;
     "openclaw") zion_openclaw_command ;;
     "build") zion_build_command ;;
@@ -3578,7 +3702,7 @@ run() {
     "scheduler") zion_scheduler_command ;;
     "reset") zion_reset_command ;;
     "status") zion_status_command ;;
-    "new") zion_new_command ;;
+    "new-task") zion_new_task_command ;;
     "logs") zion_logs_command ;;
     "logs-list") zion_logs_list_command ;;
     "usage-api") zion_usage_api_command ;;

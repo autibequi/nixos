@@ -16,11 +16,11 @@ help:
 	@echo "  ─────────────────────────────────────────────────────────"
 	@echo "  make proxy             Mocks LDI + sobe reverse proxy (docker)"
 	@echo ""
-	@echo "  Claudinho (CLI: claudio)"
+	@echo "  Zion (CLI: zion)"
 	@echo "  ─────────────────────────────────────────────────────────"
-	@echo "  make install        Regenera zion (bashly), symlink e atualiza scripts/bootstrap.sh"
-	@echo "  make install-bootstrap  Só atualiza scripts/bootstrap.sh (mounts em /workspace/nixos)"
-	@echo "  claudio --help      Lista comandos (run, build, worker, etc.)"
+	@echo "  make install        Regenera zion (bashly), symlink e bootstrap"
+	@echo "  make install-bootstrap  Só atualiza scripts/bootstrap.sh"
+	@echo "  zion --help         Lista comandos (continue, new, resume, worker, etc.)"
 	@echo ""
 
 # ── NixOS ──────────────────────────────────────────────────────────

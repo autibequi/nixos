@@ -7,7 +7,7 @@ mount_path="${ZION_NIXOS_DIR:-$HOME/nixos}"
 mount_path="$(cd "$mount_path" 2>/dev/null && pwd)" || { echo "zion edit: dir not found: $mount_path" >&2; exit 1; }
 proj_slug="nixos"
 # Mesmo project name do `zion` (~/projects) para compartilhar cursor_config e não pedir login.
-proj_name="clau-projects"
+proj_name="zion-projects"
 mount_opts="rw"
 resume_id="${args['--resume']:-}"
 EXTRA_V="-v /var/log/journal:/workspace/logs/host/journal:ro"

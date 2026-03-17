@@ -1,7 +1,7 @@
 name: zion
 help: |
-  CLI unificado para o container Claude (sandbox Nix + OpenCode/Claude/Cursor).
-  Sem subcomando = run. Exige --engine=opencode|claude|cursor (ou engine= em ~/.zion).
+  CLI unificado para o container (Zion = agentes, Puppy = workers).
+  Sem subcomando = continue (última sessão). zion new = nova sessão. zion resume = lista de sessões.
 environment_variables:
   - name: ZION_NIXOS_DIR
     help: "Raiz do repo NixOS (default $HOME/nixos)"
@@ -17,7 +17,7 @@ flags:
     help: "Modelo Claude: haiku | opus (default: sonnet)"
   - long: --instance
     arg: id
-    help: "Sufixo da instância (ex. 2 = clau-projeto-2)"
+    help: "Sufixo da instância (ex. 2 = zion-projeto-2)"
   - long: --rw
     help: Montar projeto em read-write (default para run)
   - long: --ro
@@ -33,10 +33,18 @@ flags:
     help: "Retoma sessão: cursor/agent usa --resume=UUID; claude usa --resume; opencode: env ZION_RESUME_SESSION."
 
 commands:
-  - name: run
-    alias: [r, open, opencode, code]
+  - name: continue
+    alias: [cont]
     default: force
-    help: Sessão no container. Exige --engine=opencode|claude|cursor (ou engine= em ~/.zion).
+    help: Continua a última sessão (mesmo que digitar só zion).
+    args:
+      - name: dir
+        help: "Diretório do projeto (default ~/projects)"
+    filename: commands/continue.sh
+
+  - name: new
+    alias: [run, r, open, opencode, code]
+    help: Nova sessão no container. Exige --engine (ou engine= em ~/.zion).
     args:
       - name: dir
         help: "Diretório do projeto (default ~/projects)"
@@ -56,11 +64,10 @@ commands:
       - long: --rw
       - long: --ro
     examples:
-      - zion run --engine=claude
-      - zion --engine=cursor --resume=11eaea99-5993-482b-9662-e4d9584c1200 ~/projects
+      - zion new --engine=claude
+      - zion new --engine=cursor ~/projects
       - zion run --engine=opencode ~/meu-projeto
-      - zion --engine=cursor --init-md contexto.md ~/projects
-    filename: commands/run.sh
+    filename: commands/new_session.sh
 
   - name: shell
     alias: [sh]
@@ -71,19 +78,15 @@ commands:
     filename: commands/shell.sh
 
   - name: resume
-    help: Retoma sessão anterior do Claude (--resume).
+    help: Mostra lista de sessões e permite escolher qual retomar.
     args:
       - name: dir
         help: "Diretório do projeto (default ~/projects)"
+    flags:
+      - long: --resume
+        arg: session_id
+        help: "UUID da sessão (opcional; sem isso mostra lista)"
     filename: commands/resume.sh
-
-  - name: continue
-    alias: [cont]
-    help: Continua conversa no Claude (--continue).
-    args:
-      - name: dir
-        help: "Diretório do projeto (default ~/projects)"
-    filename: commands/continue.sh
 
   - name: start
     help: Sobe sandbox persistente e abre Claude (equiv. make start).
@@ -167,8 +170,9 @@ commands:
     help: Mostra estado via kanban + workers.
     filename: commands/status.sh
 
-  - name: new
-    help: Cria task + card no kanban.
+  - name: new-task
+    alias: [task-new]
+    help: Cria task + card no kanban (Puppy).
     args:
       - name: name
         required: true

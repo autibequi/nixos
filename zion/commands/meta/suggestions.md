@@ -46,7 +46,7 @@ Commitar o que está staged (após accept):
 1. Verificar que tem algo staged (`git diff --cached --stat`)
 2. Commitar com identidade interativa:
    ```bash
-   GIT_COMMITTER_NAME="Claudinho" GIT_COMMITTER_EMAIL="claudinho@autibequi.com" \
+   GIT_COMMITTER_NAME="Zion" GIT_COMMITTER_EMAIL="zion@autibequi.com" \
      git commit --author="Pedrinho <pedro.correa@estrategia.com>" -m "<msg baseada no commit original>"
    ```
 3. Limpar o worktree e branch:

@@ -1,7 +1,5 @@
 # =============================================================================
-# agents.nix — Configurações de agentes no host (CLAUDINHO, Claude Ask, cron, timers)
-# =============================================================================
-# Tudo que é agente/agendamento no NixOS: systemd timers + opcional cron.
+# agents.nix — Agentes no host (Zion, Puppy workers, Claude Ask, timers)
 # =============================================================================
 
 { config, lib, pkgs, ... }:
@@ -16,9 +14,9 @@ let
   enginePkg = if isPodman then pkgs.podman else pkgs.docker;
   composePkg = if isPodman then pkgs.podman-compose else pkgs.docker-compose;
   composeBin = if isPodman then "podman-compose" else "docker-compose";
-  composeFiles = "-f ${projectDir}/claudinho/docker-compose.claude.yml"
-    + (if isPodman then " -f ${projectDir}/claudinho/docker-compose.podman.yml" else "");
-  compose = "${composePkg}/bin/${composeBin} ${composeFiles} -p clau-workers";
+  composeFiles = "-f ${projectDir}/zion/cli/docker-compose.claude.yml"
+    + (if isPodman then " -f ${projectDir}/zion/cli/docker-compose.podman.yml" else "");
+  compose = "${composePkg}/bin/${composeBin} ${composeFiles} -p puppy-workers";
 
   hostSocket = if isPodman then "/run/podman/podman.sock" else "/var/run/docker.sock";
   userSocket = if isPodman then "unix:///run/user/1000/podman/podman.sock" else "unix:///var/run/docker.sock";
@@ -41,7 +39,7 @@ let
   ];
 
   # Multi-worker dispatch — controle de custo: maxConcurrentWorkers no sistema, maxWorkers por clock (fast/heavy/slow)
-  mkRunnerScript = { clock, maxWorkers, serviceName }: pkgs.writeShellScript "clau-dispatch-${clock}" ''
+  mkRunnerScript = { clock, maxWorkers, serviceName }: pkgs.writeShellScript "puppy-dispatch-${clock}" ''
     set -euo pipefail
     cd ${projectDir}
 
@@ -49,7 +47,7 @@ let
     MAX_CONCURRENT=${toString maxConcurrentWorkers}
     CLOCK="${clock}"
     LOGFILE="${logsDir}/worker-${clock}.log"
-    GLOBAL_LOCK="${dispatchLockDir}/clau-single.lock"
+    GLOBAL_LOCK="${dispatchLockDir}/puppy-single.lock"
 
     mkdir -p "${logsDir}" "${dispatchLockDir}"
 
@@ -57,7 +55,7 @@ let
     if [ "$MAX_CONCURRENT" -eq 1 ]; then
       exec 199>"$GLOBAL_LOCK"
       if ! ${pkgs.util-linux}/bin/flock -n 199; then
-        echo "[clau:$CLOCK] Outro worker em execução (maxConcurrent=1) — skip."
+        echo "[puppy:$CLOCK] Outro worker em execução (maxConcurrent=1) — skip."
         exit 0
       fi
     fi
@@ -71,7 +69,7 @@ let
     exec > >(${pkgs.coreutils}/bin/tee -a "$LOGFILE") 2>&1
 
     if [ ! -f ${vaultDir}/kanban.md ] && [ ! -f ${vaultDir}/scheduled.md ]; then
-      echo "[clau:$CLOCK] kanban.md/scheduled.md não encontrados."
+      echo "[puppy:$CLOCK] kanban.md/scheduled.md não encontrados."
       exit 0
     fi
 
@@ -79,22 +77,22 @@ let
     scheduled_cards=$(grep -c '^\- \[' ${vaultDir}/scheduled.md 2>/dev/null || echo "0")
     total=$((kanban_cards + scheduled_cards))
     if [ "$total" -eq 0 ]; then
-      echo "[clau:$CLOCK] Sem cards no kanban/scheduled."
+      echo "[puppy:$CLOCK] Sem cards no kanban/scheduled."
       exit 0
     fi
 
     SERVICE=$( [ "$CLOCK" = "every10" ] && echo "worker-fast" || echo "worker" )
 
     # Ensure container network exists (compose needs it)
-    COMPOSE_PROJECT="clau-workers"
-    NETWORK="clau-workers_default"
+    COMPOSE_PROJECT="puppy-workers"
+    NETWORK="puppy-workers_default"
     if ! ${enginePkg}/bin/${containers.engine} network exists "$NETWORK" 2>/dev/null; then
-      echo "[clau:$CLOCK] Criando network $NETWORK..."
+      echo "[puppy:$CLOCK] Criando network $NETWORK..."
       ${enginePkg}/bin/${containers.engine} network create "$NETWORK" 2>/dev/null || true
     fi
 
     _count_running() {
-      ${enginePkg}/bin/${containers.engine} ps -q --filter "label=clau.worker.id" 2>/dev/null | wc -l
+      ${enginePkg}/bin/${containers.engine} ps -q --filter "label=puppy.worker.id" 2>/dev/null | wc -l
     }
 
     PIDS=()
@@ -102,10 +100,10 @@ let
       WORKER_ID="$CLOCK-$i"
 
       existing=$(${enginePkg}/bin/${containers.engine} ps --filter "label=com.docker.compose.service=$SERVICE" \
-        --filter "label=clau.worker.id=$WORKER_ID" \
+        --filter "label=puppy.worker.id=$WORKER_ID" \
         --format "{{.ID}}" 2>/dev/null | head -1)
       if [ -n "$existing" ]; then
-        echo "[clau] $WORKER_ID já rodando ($existing) — skip"
+        echo "[puppy] $WORKER_ID já rodando ($existing) — skip"
         continue
       fi
 
@@ -116,34 +114,34 @@ let
         running=$(_count_running)
         if [ "$running" -ge "$MAX_CONCURRENT" ]; then
           exec 199>&-
-          echo "[clau:$CLOCK] Limite global atingido ($running >= $MAX_CONCURRENT) — skip launch"
+          echo "[puppy:$CLOCK] Limite global atingido ($running >= $MAX_CONCURRENT) — skip launch"
           break
         fi
       fi
 
-      echo "[clau] Lançando $WORKER_ID ($CLOCK)..."
+      echo "[puppy] Lançando $WORKER_ID ($CLOCK)..."
       ${compose} run --rm -T \
         -e SCHEDULER_WORKER_ID="$WORKER_ID" \
         -e SCHEDULER_CLOCK="$CLOCK" \
-        -l clau.worker.id="$WORKER_ID" \
-        $SERVICE /workspace/scripts/clau-runner.sh &
+        -l puppy.worker.id="$WORKER_ID" \
+        $SERVICE /zion/scripts/puppy-runner.sh &
       PIDS+=($!)
       [ "$MAX_CONCURRENT" -gt 1 ] && exec 199>&-
     done
 
     if [ ''${#PIDS[@]} -eq 0 ]; then
-      echo "[clau:$CLOCK] Nenhum worker lançado."
+      echo "[puppy:$CLOCK] Nenhum worker lançado."
       exit 0
     fi
 
-    echo "[clau:$CLOCK] ''${#PIDS[@]} workers lançados."
+    echo "[puppy:$CLOCK] ''${#PIDS[@]} workers lançados."
     for pid in "''${PIDS[@]}"; do
       wait "$pid" 2>/dev/null || true
     done
-    echo "[clau:$CLOCK] Done."
+    echo "[puppy:$CLOCK] Done."
   '';
 
-  cleanupScript = pkgs.writeShellScript "clau-cleanup" ''
+  cleanupScript = pkgs.writeShellScript "puppy-cleanup" ''
     cd ${projectDir}
     for dir in obsidian/_agent/tasks/running/*/; do
       [ -d "$dir" ] || continue
@@ -309,7 +307,7 @@ in {
       User = user;
       Group = "users";
       WorkingDirectory = projectDir;
-      ExecStart = pkgs.writeShellScript "clau-hard-reset" ''
+      ExecStart = pkgs.writeShellScript "puppy-hard-reset" ''
         cd ${projectDir}
         echo "[reset] Parando workers..."
         ${compose} kill worker 2>/dev/null || true

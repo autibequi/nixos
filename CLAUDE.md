@@ -75,7 +75,7 @@ Variável **`IS_CONTAINER`** (definida no bootstrap do container, ex.: `zion/scr
 | **`zion edit`** | ❌ (mnt = nixos) | ✅ (journal ro) | **~/nixos** (este repo) |
 | **scheduler** | ✅ | ❌ | default |
 
-Em **`zion edit`**, `/workspace/mnt` aponta para o repo NixOS; é o modo para o agente editar este repo e acessar logs. Usa o mesmo project name (ex.: `clau-projects`) para compartilhar `cursor_config` com outras sessões.
+Em **`zion edit`**, `/workspace/mnt` aponta para o repo NixOS; é o modo para o agente editar este repo e acessar logs. Usa o mesmo project name (ex.: `zion-projects`) para compartilhar `cursor_config` com outras sessões.
 
 ---
 
@@ -115,7 +115,7 @@ Os mounts são definidos no compose como **anchors** reutilizáveis:
 - **`zion edit`** (comando `edit`) — não é um serviço separado no compose; é o **mesmo serviço sandbox** rodado com parâmetros diferentes pelo CLI:
   - **`/workspace/mnt`** = **`~/nixos`** (este repo), montado read-write.
   - **Volume extra:** `/var/log/journal` do host → `/workspace/logs/host/journal` (ro).
-  - **Project name** fixo `clau-projects` para compartilhar o volume `cursor_config` com a sessão “projeto” e evitar novo login no Cursor.
+  - **Project name** fixo `zion-projects` para compartilhar o volume `cursor_config` com a sessão “projeto” e evitar novo login no Cursor.
 
 Resumo prático para o agente:
 
@@ -130,9 +130,9 @@ Resumo prático para o agente:
 | Serviço | Uso | Entrypoint / comando |
 |---------|-----|----------------------|
 | **sandbox** | Sessão interativa (Cursor/Claude/OpenCode). Fica com `sleep infinity` até o CLI fazer `exec` com o engine (agent, claude, opencode). | Default: `sleep infinity`. O `zion run`/`edit` faz `exec` no container com bash que roda bootstrap + engine. |
-| **worker** | Roda tasks do kanban (recurring/pending). Limite de memória 12g. | `entrypoint: bash`, `command: /zion/scripts/clau-runner.sh`. O runner usa `WORKSPACE=/workspace` e tasks em `$WORKSPACE/obsidian/_agent/tasks`; com base-volumes, `/workspace/nixos` não existe no worker (apenas no scheduler). O script `clau-runner.sh` no repo está em `scripts/`; no container o compose invoca via `/zion/scripts/` (link ou cópia no deploy). |
-| **worker-fast** | Mesmo que worker, com menos memória (4g). | Idem, outro profile de recursos. |
-| **scheduler** | Loop contínuo: a cada 600 s executa `clau-scheduler.sh` (com `SCHEDULER_IN_CONTAINER=1`, `SCHEDULER_VAULT_DIR=/workspace/obsidian`, `SCHEDULER_PROJECT_DIR=/workspace/nixos`), depois dorme 600 s. | `command`: loop `while true; do ... /zion/scripts/clau-scheduler.sh; sleep 600; done`. Usa **scheduler-volumes** (com `/workspace/nixos`). |
+| **worker** | Puppy: roda tasks do kanban (recurring/pending). Limite 12g. | `command: /zion/scripts/puppy-runner.sh`. Symlink em zion/scripts aponta para scripts/puppy-runner.sh. |
+| **worker-fast** | Mesmo que worker, menos memória (4g). | Idem. |
+| **scheduler** | Loop a cada 600 s executa puppy-scheduler.sh (SCHEDULER_IN_CONTAINER=1, SCHEDULER_VAULT_DIR, SCHEDULER_PROJECT_DIR). | `command`: loop `... /zion/scripts/puppy-scheduler.sh; sleep 600`. Usa **scheduler-volumes** (com `/workspace/nixos`). |
 
 O **scheduler** lê estado em `$SCHEDULER_PROJECT_DIR/.ephemeral/scheduler/` (no container = `/workspace/nixos/.ephemeral/scheduler/`). O **runner** (workers) usa `$WORKSPACE/obsidian/_agent/tasks` (running/done/failed) e, quando em container, pode usar `/workspace/nixos/.ephemeral/scheduler/completed` para marcar conclusões visíveis ao host.
 
@@ -177,7 +177,7 @@ O **scheduler** lê estado em `$SCHEDULER_PROJECT_DIR/.ephemeral/scheduler/` (no
 ├── stow/                  ← Dotfiles (GNU stow → symlink em ~).
 │   ├── .config/           ← hypr, waybar, zed, ghostty, rofi, zsh, etc.
 │   └── .claude/           ← Hooks, scripts, agents (Claude no host/container).
-├── scripts/               ← Scripts do host (bootstrap.sh, clau-runner.sh, clau-scheduler.sh, api-usage.sh, etc.).
+├── scripts/               ← Scripts do host (bootstrap.sh, puppy-runner.sh, puppy-scheduler.sh, api-usage.sh, etc.).
 ├── zion/                  ← Zion: launcher + container.
 │   ├── cli/               ← Zion CLI.
 │   │   ├── docker-compose.claude.yml   ← Compose do container do agente.
@@ -198,7 +198,7 @@ O **scheduler** lê estado em `$SCHEDULER_PROJECT_DIR/.ephemeral/scheduler/` (no
 ```
 
 - **Dotfiles:** em `stow/.config/` e `stow/.claude/`. Deploy: `stow -d ~/nixos/stow -t ~ .` (não vêm de módulos NixOS).
-- **Hyprland (keybinds):** `stow/.config/hypr/` (ex.: `application.conf` — MOD3+p = abrir `zion`/Cursor; `$claudinho` / `$claudio` = só `zion`, respeitando `~/.zion`).
+- **Hyprland (keybinds):** `stow/.config/hypr/` (ex.: `application.conf` — MOD3+c = Zion/Cursor, respeitando `~/.zion`).
 
 ---
 

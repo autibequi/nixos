@@ -18,7 +18,7 @@ A pasta **zion** fica montada em **`/zion`** (raiz do filesystem). Dentro do con
 - **`commands/`** — comandos por categoria (load, estrategia, meta, nixos, tools, utils, etc.).
 - **`scripts/`** — bootstrap.sh e outros scripts.
 - **`.cursor/`** — regra e comando do `/load` para o Cursor (rules, commands).
-- **`zion-alias.zsh`** — alias `claudio=zion` para retrocompatibilidade; adicione ao `~/.zshrc` ou `source /zion/zion-alias.zsh`.
+- **Comando:** `zion` (PATH em stow/.local/bin; use `zion update` ou make install no host).
 
 ## Comando /load no Cursor
 

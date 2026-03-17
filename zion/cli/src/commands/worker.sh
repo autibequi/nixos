@@ -10,4 +10,4 @@ OBSIDIAN_PATH="$zion_obsidian_path" \
   -e SCHEDULER_VERBOSE=1 -e SCHEDULER_CLOCK=every60 \
   -e SCHEDULER_WORKER_ID="${SCHEDULER_WORKER_ID:-worker-1}" \
   -e SCHEDULER_ENGINE="${engine:-}" \
-  worker /zion/scripts/clau-runner.sh ${args[task]:-} 2>&1 | tee "$logfile"
+  worker /zion/scripts/puppy-runner.sh ${args[task]:-} 2>&1 | tee "$logfile"

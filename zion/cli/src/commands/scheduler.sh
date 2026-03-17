@@ -1,7 +1,7 @@
-# Sobe/para/status do container scheduler (tick a cada 10 min). Usa -p clau-workers como no systemd.
+# Sobe/para/status do container scheduler (tick a cada 10 min). Puppy workers project.
 zion_load_config
 
-SCHEDULER_PROJECT="${SCHEDULER_PROJECT:-clau-workers}"
+SCHEDULER_PROJECT="${SCHEDULER_PROJECT:-puppy-workers}"
 action="${args[action]:-start}"
 
 scheduler_cmd() {
@@ -51,14 +51,14 @@ case "$action" in
     else
       echo "  _agent/tasks/recurring: NÃO EXISTE em $OBSIDIAN_PATH — worker verá 0 tasks." >&2
     fi
-    "$zion_nixos_dir/scripts/clau-scheduler.sh"
+    "$zion_nixos_dir/scripts/puppy-scheduler.sh"
     ;;
   shell)
     # Entra no shell do container scheduler (precisa estar rodando)
     OBSIDIAN_PATH="$zion_obsidian_path" scheduler_cmd exec -it scheduler /bin/bash
     ;;
   *)
-    echo "claudio scheduler: action inválida '$action'. Use: start | stop | status | logs | run-now | shell" >&2
+    echo "zion scheduler: action inválida '$action'. Use: start | stop | status | logs | run-now | shell" >&2
     exit 1
     ;;
 esac

@@ -112,7 +112,7 @@ services:
     mem_limit: 12g
     memswap_limit: 16g
     entrypoint: ["/bin/bash"]
-    command: ["/zion/scripts/clau-runner.sh"]
+    command: ["/zion/scripts/puppy-runner.sh"]
     environment:
       <<: *env-worker
       GIT_AUTHOR_NAME: Buchecha
@@ -130,7 +130,7 @@ services:
     mem_limit: 4g
     memswap_limit: 6g
     entrypoint: ["/bin/bash"]
-    command: ["/zion/scripts/clau-runner.sh"]
+    command: ["/zion/scripts/puppy-runner.sh"]
     environment:
       <<: *env-worker
       GIT_AUTHOR_NAME: Buchecha
@@ -153,7 +153,7 @@ services:
       - |
         while true; do
           SCHEDULER_IN_CONTAINER=1 SCHEDULER_VAULT_DIR=/workspace/obsidian SCHEDULER_PROJECT_DIR=/workspace/nixos \
-            /zion/scripts/clau-scheduler.sh
+            /zion/scripts/puppy-scheduler.sh
           sleep 600
         done
     environment:

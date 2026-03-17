@@ -1,12 +1,37 @@
-# resume usa o mesmo engine que run (cursor/claude/opencode) a partir de ~/.claudio
+# Mostra lista de sessões e permite escolher qual retomar. Com --resume=UUID pula a lista.
+zion_load_config
 engine="$(zion_resolve_engine 0)"
 [[ -z "$engine" ]] && engine="cursor"
 mount_path="$(zion_resolve_dir)"
 proj_slug="$(zion_proj_slug "$mount_path")"
 proj_name="$(zion_proj_name "$proj_slug")"
 mount_opts="$(zion_mount_opts)"
-resume_id="${args['--resume']:-1}"
+resume_id="${args['--resume']:-}"
 
+# Se não passou --resume, mostrar lista e pedir escolha (só se TTY)
+if [[ -z "$resume_id" ]]; then
+  if [[ -t 0 ]]; then
+    echo "[zion resume] Listando sessões (engine=$engine)..."
+    list_out=""
+    if [[ "$engine" == "cursor" ]]; then
+      list_out=$(HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" OBSIDIAN_PATH="$zion_obsidian_path" \
+        zion_compose_cmd -p "$proj_name" run --rm -T \
+        --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" sandbox \
+        -c ". /zion/scripts/bootstrap.sh 2>/dev/null; cd /workspace/mnt 2>/dev/null; agent list 2>/dev/null || true" 2>/dev/null) || true
+    fi
+    if [[ -n "$list_out" ]]; then
+      echo "$list_out"
+    else
+      echo "Lista não disponível para este engine. Use 'zion continue' (ou só 'zion') para última sessão."
+    fi
+    echo ""
+    read -r -p "UUID da sessão (ou Enter para última): " resume_id
+  fi
+  # Sem TTY ou Enter = última sessão (equivalente a continue)
+  [[ -z "$resume_id" ]] && resume_id="1"
+fi
+
+# resume_id "1" = última sessão (--continue)
 case "$engine" in
   opencode)
     proj_name_open="$(zion_proj_name_open "$proj_slug")"
@@ -26,7 +51,6 @@ case "$engine" in
   cursor)
     echo "[zion resume] engine=cursor → $proj_name (mount: ${mount_opts})"
     danger="$(zion_danger_flag cursor)"
-    # Cursor agent: --continue = última sessão; --resume=UUID = sessão específica
     if [[ -n "$resume_id" && "$resume_id" != "1" ]]; then
       cursor_resume_env="-e CLAUDIO_RESUME_SESSION=$resume_id"
       cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; exec agent'"${danger}"' --resume="${CLAUDIO_RESUME_SESSION}"'

@@ -1,8 +1,7 @@
 # =============================================================================
-# scheduler.nix — CLAUDINHO scheduler as a long-running container
+# scheduler.nix — Puppy scheduler (long-running container)
 # =============================================================================
-# Single container runs 24/7; inside it a loop runs clau-scheduler.sh every
-# 10 min (tick + runner in-process). No systemd timer on the host.
+# Single container runs 24/7; loop runs puppy-scheduler.sh every 10 min.
 # =============================================================================
 
 { config, lib, pkgs, ... }:
@@ -17,12 +16,9 @@ let
   enginePkg = if isPodman then pkgs.podman else pkgs.docker;
   composePkg = if isPodman then pkgs.podman-compose else pkgs.docker-compose;
   composeBin = if isPodman then "${pkgs.podman-compose}/bin/podman-compose" else "${pkgs.docker-compose}/bin/docker-compose";
-  # Try claudinho/ first (agents.nix layout / symlink), then claudinho/claudio-cli/
-  composeFileMain = "${projectDir}/claudinho/docker-compose.claude.yml";
-  composeFileAlt = "${projectDir}/claudinho/claudio-cli/docker-compose.claude.yml";
-  composeFilePodman = if isPodman then " -f ${projectDir}/claudinho/docker-compose.podman.yml" else "";
-  composeFilePodmanAlt = if isPodman then " -f ${projectDir}/claudinho/claudio-cli/docker-compose.podman.yml" else "";
-  composeProject = "clau-workers";
+  composeFileMain = "${projectDir}/zion/cli/docker-compose.claude.yml";
+  composeFilePodman = if isPodman then " -f ${projectDir}/zion/cli/docker-compose.podman.yml" else "";
+  composeProject = "puppy-workers";
   networkName = "nixos_default";
 
   commonEnv = [
@@ -35,7 +31,7 @@ let
     "OBSIDIAN_PATH=${vaultDir}"
   ];
 
-  cleanupScript = "${projectDir}/scripts/clau-cleanup.sh";
+  cleanupScript = "${projectDir}/scripts/puppy-cleanup.sh";
 
   # Start script: ensure network, pick compose file path, run up -d scheduler. Exit 0 so activation never fails.
   startScript = pkgs.writeShellScript "claude-scheduler-container-start" ''
@@ -50,16 +46,14 @@ let
     COMPOSE_FILES=""
     if [ -f "${composeFileMain}" ]; then
       COMPOSE_FILES="-f ${composeFileMain}${composeFilePodman}"
-    elif [ -f "${composeFileAlt}" ]; then
-      COMPOSE_FILES="-f ${composeFileAlt}${composeFilePodmanAlt}"
     else
-      echo "[claude-scheduler-container] No compose file found at claudinho/docker-compose.claude.yml or claudinho/claudio-cli/docker-compose.claude.yml" >&2
+      echo "[puppy-scheduler-container] No compose file at zion/cli/docker-compose.claude.yml" >&2
       exit 0
     fi
     if ${composeBin} $COMPOSE_FILES -p ${composeProject} up -d scheduler 2>&1; then
-      echo "[claude-scheduler-container] Scheduler container started."
+      echo "[puppy-scheduler-container] Scheduler started."
     else
-      echo "[claude-scheduler-container] compose up failed (check journalctl). Container may start after docker/podman is ready." >&2
+      echo "[puppy-scheduler-container] compose up failed (check journalctl)." >&2
     fi
     exit 0
   '';
@@ -68,24 +62,21 @@ let
     set -e
     cd ${projectDir}
     export PATH="${enginePkg}/bin:${composePkg}/bin:$PATH"
-    for f in "${composeFileMain}" "${composeFileAlt}"; do
-      [ -f "$f" ] || continue
-      COMPOSE_FILES="-f $f"
-      podman_yml="''${f%.claude.yml}.podman.yml"
-      [ -f "$podman_yml" ] && COMPOSE_FILES="$COMPOSE_FILES -f $podman_yml"
-      ${composeBin} $COMPOSE_FILES -p ${composeProject} stop scheduler 2>/dev/null || true
-      break
-    done
+    [ -f "${composeFileMain}" ] || exit 0
+    COMPOSE_FILES="-f ${composeFileMain}"
+    podman_yml="''${composeFileMain%.claude.yml}.podman.yml"
+    [ -f "$podman_yml" ] && COMPOSE_FILES="$COMPOSE_FILES -f $podman_yml"
+    ${composeBin} $COMPOSE_FILES -p ${composeProject} stop scheduler 2>/dev/null || true
   '';
 
   containerEngineService = if isPodman then "podman.service" else "docker.socket";
 in {
   config = {
     # ─────────────────────────────────────────────────────────────────────────
-    # CLAUDINHO — Scheduler container (long-running; tick every 10 min inside)
+    # Puppy scheduler container (long-running; tick every 10 min inside)
     # ─────────────────────────────────────────────────────────────────────────
     systemd.services.claude-scheduler-container = {
-      description = "CLAUDINHO scheduler container (tick every 10 min in-container)";
+      description = "Puppy scheduler container (tick every 10 min)";
       after = [ "network-online.target" containerEngineService ];
       wants = [ "network-online.target" ];
       wantedBy = [ "multi-user.target" ];
@@ -102,16 +93,16 @@ in {
     };
 
     # ─────────────────────────────────────────────────────────────────────────
-    # CLAUDINHO — Reset (stuck tasks): stop scheduler, cleanup, restart scheduler
+    # Reset stuck Puppy tasks and restart scheduler container
     # ─────────────────────────────────────────────────────────────────────────
     systemd.services.claude-scheduler-reset = {
-      description = "Reset stuck CLAUDINHO tasks and restart scheduler container";
+      description = "Reset stuck Puppy tasks and restart scheduler";
       serviceConfig = {
         Type = "oneshot";
         User = user;
         Group = "users";
         WorkingDirectory = projectDir;
-        ExecStart = pkgs.writeShellScript "clau-scheduler-reset" ''
+        ExecStart = pkgs.writeShellScript "puppy-scheduler-reset" ''
           set -euo pipefail
           cd ${projectDir}
           export PATH="${enginePkg}/bin:${composePkg}/bin:$PATH"

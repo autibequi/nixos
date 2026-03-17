@@ -22,12 +22,12 @@ install-bootstrap:
 	@mkdir -p "$(NIXOS_ROOT)/scripts"
 	@install -m 755 "$(NIXOS_ROOT)/zion/scripts/bootstrap-dashboard.sh" "$(NIXOS_ROOT)/scripts/bootstrap.sh"
 	@echo "[zion] scripts/bootstrap.sh atualizado (mounts em /workspace/nixos)"
-	@if [ -f "$(NIXOS_ROOT)/scripts/clau-scheduler.sh" ]; then \
-	  sed -i 's|/workspace/host/scripts/clau-runner.sh|/workspace/nixos/scripts/clau-runner.sh|g' "$(NIXOS_ROOT)/scripts/clau-scheduler.sh" 2>/dev/null && echo "[zion] scripts/clau-scheduler.sh: path /workspace/nixos aplicado" || true; \
+	@if [ -f "$(NIXOS_ROOT)/scripts/puppy-scheduler.sh" ]; then \
+	  sed -i 's|/workspace/host/scripts/puppy-runner.sh|/workspace/nixos/scripts/puppy-runner.sh|g' "$(NIXOS_ROOT)/scripts/puppy-scheduler.sh" 2>/dev/null && echo "[zion] puppy-scheduler.sh: path /workspace/nixos aplicado" || true; \
 	fi
 	@for rc in "$$HOME/.zshrc" "$$HOME/.bashrc"; do \
 	  [ -n "$$rc" ] && (touch "$$rc" 2>/dev/null) && [ -w "$$rc" ] || continue; \
 	  grep -q 'stow/.local/bin' "$$rc" 2>/dev/null || { echo "" >> "$$rc"; echo "# Zion CLI (make install)" >> "$$rc"; echo 'export PATH="$(BIN_DIR):$$PATH"' >> "$$rc"; echo "[zion] PATH adicionado em $$rc"; }; \
-	  grep -q 'alias claudio=zion' "$$rc" 2>/dev/null || { echo 'alias claudio=zion' >> "$$rc"; echo "[zion] alias claudio=zion em $$rc"; }; \
+	  grep -q 'alias zion=' "$$rc" 2>/dev/null || grep -q 'stow/.local/bin' "$$rc" 2>/dev/null || { echo 'alias zion=zion' >> "$$rc"; echo "[zion] alias em $$rc"; }; \
 	done; \
 	echo "[zion] Rode: source ~/.zshrc  (ou source ~/.bashrc se usar bash)"

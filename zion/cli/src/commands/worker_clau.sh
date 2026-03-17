@@ -22,7 +22,7 @@ for i in 1 2; do
     -e SCHEDULER_WORKER_ID="$WORKER_ID" \
     -e SCHEDULER_CLOCK=every60 \
     -l "clau.worker.id=$WORKER_ID" \
-    worker /zion/scripts/clau-runner.sh >> "$logfile" 2>&1 &
+    worker /zion/scripts/puppy-runner.sh >> "$logfile" 2>&1 &
 done
 echo "[zion worker-clau] Workers lançados. Seguindo log..."
 tail -f "$logfile"

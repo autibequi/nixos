@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# clau-cleanup.sh — Clean stuck CLAUDINHO tasks and locks
+# puppy-cleanup.sh — Clean stuck Puppy tasks and locks
 # =============================================================================
 # Uses SCHEDULER_VAULT_DIR and SCHEDULER_PROJECT_DIR (or PROJECT_DIR). Safe to run on
 # host (Nix ExecStopPost) or inside scheduler container.

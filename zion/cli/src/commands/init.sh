@@ -13,7 +13,7 @@ cp "$src" "$dest"
 chmod 600 "$dest"
 echo "[zion init] Criado $dest — edite e preencha engine=, GH_TOKEN=, ANTHROPIC_API_KEY="
 
-# Garante PATH e alias no ~/.zshrc e ~/.bashrc para zion e claudio funcionarem (zsh e bash)
+# Garante PATH no ~/.zshrc e ~/.bashrc para zion funcionar (zsh e bash)
 bin_dir="$zion_nixos_dir/stow/.local/bin"
 for rc in "${ZDOTDIR:-$HOME}/.zshrc" "$HOME/.bashrc"; do
   [[ -d "$bin_dir" ]] || continue
@@ -26,10 +26,6 @@ for rc in "${ZDOTDIR:-$HOME}/.zshrc" "$HOME/.bashrc"; do
     echo "# Zion CLI (adicionado por zion init)" >> "$rc"
     printf 'export PATH="%s:$PATH"\n' "$bin_dir" >> "$rc"
     added="PATH "
-  fi
-  if ! grep -q "alias claudio=zion" "$rc" 2>/dev/null; then
-    echo "alias claudio=zion" >> "$rc"
-    added="${added}alias "
   fi
   [[ -n "$added" ]] && echo "[zion init] ${added}em $rc — rode: source $rc"
 done

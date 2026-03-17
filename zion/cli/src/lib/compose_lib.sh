@@ -89,11 +89,11 @@ zion_proj_slug() {
   basename "$d" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$//'
 }
 
-# Project name for claude (clau-SLUG or clau-SLUG-INSTANCE)
+# Project name for agent sessions (Zion)
 zion_proj_name() {
   local slug="$1"
   local instance="${args['--instance']:-${flag_instance:-}}"
-  local name="clau-${slug}"
+  local name="zion-${slug}"
   [[ -n "$instance" && "$instance" != "1" ]] && name="${name}-${instance}"
   echo "$name"
 }
@@ -101,7 +101,7 @@ zion_proj_name() {
 # Project name for opencode (persistent sandbox)
 zion_proj_name_open() {
   local slug="$1"
-  echo "clau-${slug}-open"
+  echo "zion-${slug}-open"
 }
 
 # Mount opts: --rw (default for run) or --ro

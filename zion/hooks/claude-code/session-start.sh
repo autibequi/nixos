@@ -48,11 +48,10 @@ if [ -f "$WS/.ephemeral/usage-bar.txt" ]; then
   echo "---/API_USAGE---"
 fi
 
-# Persona content (inline — evita Read tool calls no boot)
+# Persona content (inline — evita Read tool calls no boot). Personality files live in zion/system/
 if [ "$PERSONALITY" = "ON" ]; then
-  SOUL="$WS/claudinho/SOUL.md"
+  SOUL="$WS/zion/system/SOUL.md"
   if [ -f "$SOUL" ]; then
-    # Extract persona path from SOUL.md
     PERSONA_PATH=$(grep -m1 'Arquivo:' "$SOUL" | sed 's/.*`\(.*\)`.*/\1/')
     if [ -n "$PERSONA_PATH" ] && [ -f "$WS/$PERSONA_PATH" ]; then
       echo "---PERSONA---"
@@ -62,22 +61,19 @@ if [ "$PERSONALITY" = "ON" ]; then
       echo "WARN: persona file not found: $WS/$PERSONA_PATH" >&2
     fi
   fi
-  # DIRETRIZES
-  if [ -f "$WS/claudinho/DIRETRIZES.md" ]; then
+  if [ -f "$WS/zion/system/DIRETRIZES.md" ]; then
     echo "---DIRETRIZES---"
-    cat "$WS/claudinho/DIRETRIZES.md"
+    cat "$WS/zion/system/DIRETRIZES.md"
     echo "---/DIRETRIZES---"
   fi
-  # CLAUDE.md (project instructions)
   if [ -f "$WS/CLAUDE.md" ]; then
     echo "---CLAUDE.MD---"
     cat "$WS/CLAUDE.md"
     echo "---/CLAUDE.MD---"
   fi
-  # SELF.md (diário)
-  if [ -f "$WS/claudinho/SELF.md" ]; then
+  if [ -f "$WS/zion/system/SELF.md" ]; then
     echo "---SELF---"
-    cat "$WS/claudinho/SELF.md"
+    cat "$WS/zion/system/SELF.md"
     echo "---/SELF---"
   fi
 fi

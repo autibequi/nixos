@@ -1,5 +1,5 @@
 name="${args[name]:-}"
-[[ -n "$name" ]] || { echo "Uso: claudio new <name> [--type pending|recurring] [--model haiku|sonnet] [--clock every10|every60] [--timeout N]" >&2; exit 1; }
+[[ -n "$name" ]] || { echo "Uso: zion new-task <name> [--type pending|recurring] [--model haiku|sonnet] [--clock every10|every60] [--timeout N]" >&2; exit 1; }
 type="${flag_type:-pending}"
 model="${flag_model:-}"
 clock="${flag_clock:-}"

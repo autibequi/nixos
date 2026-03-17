@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 # =============================================================================
-# clau-scheduler.sh — Unified scheduler for CLAUDINHO workers
+# puppy-scheduler.sh — Scheduler for Puppy workers (background task runners)
 # =============================================================================
-# Single 10-min timer dispatches all tasks based on budget algorithm.
-# Replaces 3 separate timers (every10/every60/every240).
+# Single 10-min timer dispatches tasks based on budget algorithm.
 #
 # Usage:
-#   clau-scheduler.sh              # normal execution
-#   clau-scheduler.sh --dry-run    # show what would run without executing
+#   puppy-scheduler.sh              # normal execution
+#   puppy-scheduler.sh --dry-run    # show what would run without executing
 # =============================================================================
 set -euo pipefail
 
@@ -248,7 +247,7 @@ build_task_queue() {
 
 # ── Compose dispatch (host) / in-process dispatch (container) ─────────────────
 COMPOSE_BIN="${SCHEDULER_COMPOSE_BIN:-docker-compose}"
-COMPOSE_FILES="${SCHEDULER_COMPOSE_FILES:--f $PROJECT_DIR/claudinho/docker-compose.claude.yml}"
+COMPOSE_FILES="${SCHEDULER_COMPOSE_FILES:--f $PROJECT_DIR/zion/cli/docker-compose.claude.yml}"
 
 dispatch_tasks() {
   local task_list="$1"
@@ -258,7 +257,7 @@ dispatch_tasks() {
     export SCHEDULER_WORKER_ID="scheduler-$$"
     export SCHEDULER_CLOCK="unified"
     export SCHEDULER_TASK_LIST="$task_list"
-    "${PROJECT_DIR}/scripts/clau-runner.sh"
+    "${PROJECT_DIR}/scripts/puppy-runner.sh"
     return $?
   fi
 
@@ -270,7 +269,7 @@ dispatch_tasks() {
     -e SCHEDULER_CLOCK="unified" \
     -e SCHEDULER_TASK_LIST="$task_list" \
     -l clau.scheduler.tick="$(date +%s)" \
-    worker /workspace/nixos/scripts/clau-runner.sh
+    worker /workspace/nixos/scripts/puppy-runner.sh
 
   return $?
 }
@@ -293,7 +292,7 @@ process_completions() {
 # When running inside scheduler container, run cleanup at start of tick
 if [ "$IN_CONTAINER" = "1" ]; then
   SCHEDULER_VAULT_DIR="$VAULT_DIR" SCHEDULER_PROJECT_DIR="$PROJECT_DIR" \
-    "${PROJECT_DIR}/scripts/clau-cleanup.sh" 2>/dev/null || true
+    "${PROJECT_DIR}/scripts/puppy-cleanup.sh" 2>/dev/null || true
 fi
 
 init_state

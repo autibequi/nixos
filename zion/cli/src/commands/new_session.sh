@@ -1,4 +1,4 @@
-# Sessão no container: exige --engine=opencode|claude|cursor (ou engine= em ~/.zion)
+# Nova sessão no container. Exige --engine (ou engine= em ~/.zion).
 zion_load_config
 engine=$(zion_resolve_engine 1)
 mount_path="$(zion_resolve_dir)"
@@ -11,7 +11,7 @@ resume_id="${args['--resume']:-}"
 case "$engine" in
   opencode)
     proj_name="$(zion_proj_name_open "$proj_slug")"
-    echo "[zion run] engine=opencode ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
+    echo "[zion new] engine=opencode ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
     opencode_danger_env=""
     [[ -n "${flag_danger:-${args['--danger']:-${ZION_DANGER:-}}}" ]] && opencode_danger_env="-e OPENCODE_PERMISSION_BYPASS=1"
     opencode_init_env=""
@@ -42,7 +42,7 @@ case "$engine" in
   cursor)
     proj_name="$(zion_proj_name "$proj_slug")"
     danger="$(zion_danger_flag cursor)"
-    echo "[zion run] engine=cursor ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
+    echo "[zion new] engine=cursor ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
     cursor_init_env=""
     [[ -n "$initial_md" ]] && cursor_init_env="-e CLAUDIO_INITIAL_MD=$initial_md"
     cursor_resume_env=""

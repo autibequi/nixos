@@ -1,6 +1,8 @@
 # secrets (injected into container) e config local
+# legacy paths (claudinho → zion)
 claudinho/.env
 claudinho/claudio-cli/.claudio
+zion/cli/.env
 
 # agent
 tmp/

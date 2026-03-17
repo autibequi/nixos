@@ -34,13 +34,13 @@ DEFAULT_MAX_TURNS=12
 mkdir -p "$EPHEMERAL/locks" "$TASKS/running" "$TASKS/done" "$TASKS/failed" \
   "$WORKSPACE/obsidian/sugestoes" "$WORKSPACE/obsidian/_agent/reports"
 
-# Presença em .ephemeral/agents/ — quando o processo morre (exit/trap), a pasta some; status line conta por aqui
+# Presença em .ephemeral/agents/ — puppies = workers em background (Zion = sessões interativas)
 AGENTS_ROOT="$WORKSPACE/.ephemeral/agents"
-AGENT_MY_DIR="$AGENTS_ROOT/bochecha_${HOSTNAME:-unknown}_$$"
+AGENT_MY_DIR="$AGENTS_ROOT/puppy_${HOSTNAME:-unknown}_$$"
 mkdir -p "$AGENTS_ROOT"
 # Limpa pastas órfãs (container morreu com SIGKILL/crash — trap não rodou)
 now_agent=$(date +%s)
-for stale in "$AGENTS_ROOT"/bochecha_*/; do
+for stale in "$AGENTS_ROOT"/puppy_*/; do
   [ -d "$stale" ] || continue
   [ -f "$stale/.live" ] || continue
   mod=$(stat -c %Y "$stale/.live" 2>/dev/null || echo 0)
@@ -56,7 +56,7 @@ trap 'rm -rf "$AGENT_MY_DIR"' EXIT
 
 source "$WORKSPACE/nixos/scripts/kanban-sync.sh"
 
-echo "[clau:$WORKER_ID:$SCHEDULER_CLOCK] Iniciando (PID $$)"
+echo "[puppy:$WORKER_ID:$SCHEDULER_CLOCK] Iniciando (PID $$)"
 
 # ── Per-task lock ────────────────────────────────────────────────
 task_lock() {
@@ -64,7 +64,7 @@ task_lock() {
   local lockfile="$EPHEMERAL/locks/${task}.lock"
   exec 201>"$lockfile"
   if ! flock -n 201; then
-    echo "[clau:$WORKER_ID] '$task' locked — skip"
+    echo "[puppy:$WORKER_ID] '$task' locked — skip"
     return 1
   fi
 }
@@ -125,7 +125,7 @@ recover_orphans() {
 
     [ "$is_orphan" = "0" ] && continue
 
-    echo "[clau:$WORKER_ID] Orphan: '$name' (pid=${lock_pid}, worker=${lock_worker}, run_id=${lock_run_id:-<none>}, started=${lock_started}) — recuperando"
+    echo "[puppy:$WORKER_ID] Orphan: '$name' (pid=${lock_pid}, worker=${lock_worker}, run_id=${lock_run_id:-<none>}, started=${lock_started}) — recuperando"
 
     rm -f "$dir/.lock"
     task_unlock "$name" 2>/dev/null || true
@@ -133,11 +133,11 @@ recover_orphans() {
     if [ "$lock_source" = "recurring" ]; then
       rm -rf "$dir"
       kanban_unclaim_recurring "$name" 2>/dev/null || true
-      echo "[clau:$WORKER_ID] '$name' orphan → recurring"
+      echo "[puppy:$WORKER_ID] '$name' orphan → recurring"
     else
       mv "$dir" "$TASKS/pending/$name" 2>/dev/null || true
       kanban_unclaim_card "$name" 2>/dev/null || true
-      echo "[clau:$WORKER_ID] '$name' orphan → pending"
+      echo "[puppy:$WORKER_ID] '$name' orphan → pending"
     fi
   done
 }
@@ -163,7 +163,7 @@ cleanup() {
           mv "$dir" "$TASKS/pending/$name" 2>/dev/null || rm -rf "$dir"
         fi
         task_unlock "$name"
-        echo "[clau:$WORKER_ID] $sig — '$name' devolvida"
+        echo "[puppy:$WORKER_ID] $sig — '$name' devolvida"
       fi
     fi
   done
@@ -255,7 +255,7 @@ run_wave_parallel() {
   shift
   local tasks=("$@")
   
-  echo "[clau:$WORKER_ID] Wave $wave_num: ${tasks[*]} (parallel)"
+  echo "[puppy:$WORKER_ID] Wave $wave_num: ${tasks[*]} (parallel)"
   
   local pids=()
   for task in "${tasks[@]}"; do
@@ -276,7 +276,7 @@ run_wave_parallel() {
     }
   done
   
-  echo "[clau:$WORKER_ID] Wave $wave_num done: ${wave_ok} ok, ${wave_fail} failed"
+  echo "[puppy:$WORKER_ID] Wave $wave_num done: ${wave_ok} ok, ${wave_fail} failed"
 }
 
 # ── Interval helper (backward compat: clock → interval) ─────────
@@ -308,12 +308,12 @@ should_run_clock() {
 # ── Claim task ───────────────────────────────────────────────────
 claim_task() {
   local task="$1" source_dir="$2"
-  [ -f "$TASKS/$source_dir/$task/CLAUDE.md" ] || { echo "[clau:$WORKER_ID] '$task' sem CLAUDE.md — skip"; return 1; }
+  [ -f "$TASKS/$source_dir/$task/CLAUDE.md" ] || { echo "[puppy:$WORKER_ID] '$task' sem CLAUDE.md — skip"; return 1; }
   task_lock "$task" || return 1
 
   # Clock filter
   if ! should_run_clock "$TASKS/$source_dir/$task"; then
-    echo "[clau:$WORKER_ID] '$task' clock mismatch (task=$(get_clock "$TASKS/$source_dir/$task"), worker=$SCHEDULER_CLOCK) — skip"
+    echo "[puppy:$WORKER_ID] '$task' clock mismatch (task=$(get_clock "$TASKS/$source_dir/$task"), worker=$SCHEDULER_CLOCK) — skip"
     task_unlock "$task"; return 1
   fi
 
@@ -344,7 +344,7 @@ worker=$WORKER_ID
 pid=$$
 run_id=$RUN_ID
 EOF
-  echo "[clau:$WORKER_ID] Claimed '$task' ($source_dir, ${task_timeout}s)"
+  echo "[puppy:$WORKER_ID] Claimed '$task' ($source_dir, ${task_timeout}s)"
 }
 
 # ── Build prompt ─────────────────────────────────────────────────
@@ -406,7 +406,7 @@ $(cat "$TASKS/running/$task/memoria.md")"
   task_max_turns=$(get_max_turns "$TASKS/running/$task")
   mcp_flags_str=$(get_mcp_flags "$TASKS/running/$task")
 
-  echo "[clau:$WORKER_ID:$task] Claude (model=$task_model, timeout=${task_timeout}s, $(date -u +%H:%M:%S))"
+  echo "[puppy:$WORKER_ID:$task] Claude (model=$task_model, timeout=${task_timeout}s, $(date -u +%H:%M:%S))"
 
   # Auto-tracking: criar worktree virtual pra task
   local worker_branch="worker/${SCHEDULER_CLOCK}/${task}"
@@ -438,8 +438,8 @@ $memoria
 - Registre em $EPHEMERAL/notes/$task/historico.log: TIMESTAMP | ok/fail | duração" 2>&1 | if [ "$SCHEDULER_VERBOSE" = "1" ]; then tee "$logfile"; else cat > "$logfile"; fi
   local exit_code=${PIPESTATUS[0]}
 
-  [ $exit_code -eq 0 ] && echo "[clau:$WORKER_ID:$task] OK" || echo "[clau:$WORKER_ID:$task] FAIL exit=$exit_code"
-  tail -3 "$logfile" 2>/dev/null | while IFS= read -r line; do echo "[clau:$WORKER_ID:$task]   $line"; done
+  [ $exit_code -eq 0 ] && echo "[puppy:$WORKER_ID:$task] OK" || echo "[puppy:$WORKER_ID:$task] FAIL exit=$exit_code"
+  tail -3 "$logfile" 2>/dev/null | while IFS= read -r line; do echo "[puppy:$WORKER_ID:$task]   $line"; done
   return $exit_code
 }
 
@@ -459,7 +459,7 @@ finish_task() {
     done
     rm -rf "$TASKS/running/$task"
     kanban_unclaim_recurring "$task" 2>/dev/null || true
-    echo "[clau:$WORKER_ID] '$task' cycle done"
+    echo "[puppy:$WORKER_ID] '$task' cycle done"
   elif [ "$exit_code" -eq 0 ]; then
     mv "$TASKS/running/$task" "$TASKS/done/$task" 2>/dev/null || true
     local report=""
@@ -467,13 +467,13 @@ finish_task() {
     report_file=$(ls -1t "$WORKSPACE/obsidian/_agent/reports/"*"$task"* 2>/dev/null | head -1 || true)
     [ -n "$report_file" ] && report="$report_file"
     kanban_complete_card "$task" "$report" 2>/dev/null || true
-    echo "[clau:$WORKER_ID] '$task' → done"
+    echo "[puppy:$WORKER_ID] '$task' → done"
   else
     mv "$TASKS/running/$task" "$TASKS/failed/$task" 2>/dev/null || true
     local reason="exit code $exit_code"
     [ "$exit_code" -eq 124 ] && reason="timeout"
     kanban_fail_card "$task" "$reason" 2>/dev/null || true
-    echo "[clau:$WORKER_ID] '$task' → failed ($reason)"
+    echo "[puppy:$WORKER_ID] '$task' → failed ($reason)"
   fi
   task_unlock "$task"
 
@@ -516,11 +516,11 @@ EOF
 if [ -n "$SCHEDULER_TASK_LIST" ]; then
   recover_orphans
   IFS=',' read -ra TASK_NAMES <<< "$SCHEDULER_TASK_LIST"
-  echo "[clau:$WORKER_ID] Task list mode: ${TASK_NAMES[*]}"
+  echo "[puppy:$WORKER_ID] Task list mode: ${TASK_NAMES[*]}"
   # Debug: onde o worker está procurando as tasks (ajuda quando 0 tasks = mount errado)
-  [ "$SCHEDULER_VERBOSE" = "1" ] && echo "[clau:$WORKER_ID] TASKS base: $TASKS (recurring: $TASKS/recurring, pending: $TASKS/pending)"
+  [ "$SCHEDULER_VERBOSE" = "1" ] && echo "[puppy:$WORKER_ID] TASKS base: $TASKS (recurring: $TASKS/recurring, pending: $TASKS/pending)"
   if [ ! -d "$TASKS/recurring" ] && [ ! -d "$TASKS/pending" ]; then
-    echo "[clau:$WORKER_ID] AVISO: nem recurring/ nem pending/ existem em $TASKS — confira mount de /workspace/obsidian (OBSIDIAN_PATH no host)" >&2
+    echo "[puppy:$WORKER_ID] AVISO: nem recurring/ nem pending/ existem em $TASKS — confira mount de /workspace/obsidian (OBSIDIAN_PATH no host)" >&2
   fi
 
   ok_count=0; fail_count=0; task_count=0
@@ -536,7 +536,7 @@ if [ -n "$SCHEDULER_TASK_LIST" ]; then
     elif [ -d "$TASKS/pending/$task" ]; then
       source_dir="pending"
     else
-      echo "[clau:$WORKER_ID] '$task' not found in recurring/ or pending/ — skip (checado: $TASKS/recurring/$task e $TASKS/pending/$task)"
+      echo "[puppy:$WORKER_ID] '$task' not found in recurring/ or pending/ — skip (checado: $TASKS/recurring/$task e $TASKS/pending/$task)"
       continue
     fi
 
@@ -551,7 +551,7 @@ if [ -n "$SCHEDULER_TASK_LIST" ]; then
     [ "$local_exit" -eq 0 ] && ok_count=$((ok_count + 1)) || fail_count=$((fail_count + 1))
   done
 
-  echo "[clau:$WORKER_ID] Task list done — $task_count tasks, ${ok_count} ok, ${fail_count} fail"
+  echo "[puppy:$WORKER_ID] Task list done — $task_count tasks, ${ok_count} ok, ${fail_count} fail"
   exit 0
 fi
 
@@ -564,7 +564,7 @@ if [ -n "$SPECIFIC_TASK" ]; then
   elif [ -d "$TASKS/recurring/$SPECIFIC_TASK" ]; then
     source_dir="recurring"; is_recurring="1"
   else
-    echo "[clau:$WORKER_ID] Task '$SPECIFIC_TASK' não encontrada."; exit 1
+    echo "[puppy:$WORKER_ID] Task '$SPECIFIC_TASK' não encontrada."; exit 1
   fi
   claim_task "$SPECIFIC_TASK" "$source_dir" || exit 1
   local_exit=0
@@ -577,7 +577,7 @@ recover_orphans
 
 # ── Process recurring tasks ──────────────────────────────────────
 touch "$AGENT_MY_DIR/.live" 2>/dev/null || true
-echo "[clau:$WORKER_ID] === Recorrentes (clock=$SCHEDULER_CLOCK) ==="
+echo "[puppy:$WORKER_ID] === Recorrentes (clock=$SCHEDULER_CLOCK) ==="
 start_time=$SECONDS
 ok_count=0; fail_count=0; task_count=0
 
@@ -597,7 +597,7 @@ done
 
 # ── Process backlog (filtered by clock) ───────────────────────────
 touch "$AGENT_MY_DIR/.live" 2>/dev/null || true
-echo "[clau:$WORKER_ID] === Backlog ==="
+echo "[puppy:$WORKER_ID] === Backlog ==="
 mapfile -t backlog_names < <(kanban_list_names "Backlog" 2>/dev/null)
 
 filter_by_clock() {
@@ -625,7 +625,7 @@ has_wave_support() {
 }
 
 if [ ${#clock_filtered[@]} -gt 0 ] && has_wave_support; then
-  echo "[clau:$WORKER_ID] Executando em modo WAVE"
+  echo "[puppy:$WORKER_ID] Executando em modo WAVE"
   
   while IFS=':' read -r wave_num wave_tasks; do
     [ -z "$wave_num" ] && continue
@@ -652,4 +652,4 @@ else
 fi
 
 duration=$((SECONDS - start_time))
-echo "[clau:$WORKER_ID] Done — $task_count tasks, ${ok_count} ok, ${fail_count} falhas, ${duration}s"
+echo "[puppy:$WORKER_ID] Done — $task_count tasks, ${ok_count} ok, ${fail_count} falhas, ${duration}s"
