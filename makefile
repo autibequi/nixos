@@ -18,7 +18,8 @@ help:
 	@echo ""
 	@echo "  Claudinho (CLI: claudio)"
 	@echo "  ─────────────────────────────────────────────────────────"
-	@echo "  claudio --help       Lista comandos (run, build, worker, etc.)"
+	@echo "  make install        Regenera claudio (bashly) e symlink em stow/.local/bin"
+	@echo "  claudio --help      Lista comandos (run, build, worker, etc.)"
 	@echo ""
 
 # ── NixOS ──────────────────────────────────────────────────────────

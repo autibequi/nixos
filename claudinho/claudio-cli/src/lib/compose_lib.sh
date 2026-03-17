@@ -106,6 +106,16 @@ claudio_mount_opts() {
   if [[ -n "${args['--rw']:-${flag_rw:-}}" ]]; then echo "rw"; elif [[ -n "${args['--ro']:-${flag_ro:-}}" ]]; then echo "ro"; else echo "rw"; fi
 }
 
+# --init-md: path do markdown inicial (relativo ao mount); vazio se arquivo não existe
+# Valor vem de flag_init_md (run seta de args) ou CLAUDIO_INITIAL_MD. Default contexto.md é no bashly (--init-md sem arg).
+claudio_initial_md() {
+  local mount="${1:-}"
+  local f="${flag_init_md:-${CLAUDIO_INITIAL_MD:-}}"
+  [[ -z "$f" ]] && return 0
+  local full="$mount/$f"
+  [[ -f "$full" ]] && echo "$f" || echo ""
+}
+
 # --danger: sufixo/args de bypass de permissões por engine (vazio se flag não setada)
 claudio_danger_flag() {
   if [[ -z "${flag_danger:-${args['--danger']:-}}" ]]; then

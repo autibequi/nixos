@@ -23,7 +23,11 @@ flags:
   - long: --ro
     help: Montar projeto read-only
   - long: --danger
-    help: Bypass de permissões no engine (claude: --permission-mode bypassPermissions; cursor: --force; opencode: env auto-approve)
+    help: "Bypass de permissões no engine (claude: --permission-mode bypassPermissions; cursor: --force; opencode: env auto-approve)"
+  - long: --init-md
+    arg: file
+    default: contexto.md
+    help: "Arquivo markdown inicial carregado por todos os engines (default: contexto.md no projeto). Claude: --append-system-prompt-file; Cursor: prompt com @file; OpenCode: env."
 
 commands:
   - name: run
@@ -33,10 +37,23 @@ commands:
     args:
       - name: dir
         help: "Diretório do projeto (default ~/projects)"
+    flags:
+      - long: --init-md
+        arg: file
+        default: contexto.md
+      - long: --danger
+      - long: --engine
+        arg: engine
+      - long: --model
+        arg: model
+      - long: --instance
+        arg: id
+      - long: --rw
+      - long: --ro
     examples:
       - claudio run --engine=claude
       - claudio run --engine=opencode ~/meu-projeto
-      - claudio --engine=cursor
+      - claudio --engine=cursor --init-md contexto.md ~/projects
     filename: commands/run.sh
 
   - name: shell

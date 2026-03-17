@@ -90,7 +90,13 @@ claudio_usage() {
 
     # :flag.usage
     printf "  %s\n" "--danger"
-    printf "    Bypass de permissões no engine (claude: bypassPermissions; cursor: --force; opencode: env)\n"
+    printf "    Bypass de permissões no engine (claude: --permission-mode bypassPermissions;\n    cursor: --force; opencode: env auto-approve)\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--init-md FILE"
+    printf "    Arquivo markdown inicial carregado por todos os engines (default:\n    contexto.md no projeto). Claude: --append-system-prompt-file; Cursor: prompt\n    com @file; OpenCode: env.\n"
+    printf "    %s\n" "Default: contexto.md"
     echo
 
     # :command.usage_fixed_flags
@@ -124,13 +130,50 @@ claudio_run_usage() {
   echo
 
   printf "%s\n" "Usage:"
-  printf "  claudio [run] [DIR]\n"
+  printf "  claudio [run] [DIR] [OPTIONS]\n"
   printf "  claudio run --help | -h\n"
   echo
 
   # :command.long_usage
   if [[ -n "$long_usage" ]]; then
     printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--init-md FILE"
+    printf "\n"
+    printf "    %s\n" "Default: contexto.md"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--danger"
+    printf "\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--engine ENGINE"
+    printf "\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--model MODEL"
+    printf "\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--instance ID"
+    printf "\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--rw"
+    printf "\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--ro"
+    printf "\n"
+    echo
 
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
@@ -149,7 +192,7 @@ claudio_run_usage() {
     printf "%s\n" "Examples:"
     printf "  claudio run --engine=claude\n"
     printf "  claudio run --engine=opencode ~/meu-projeto\n"
-    printf "  claudio --engine=cursor\n"
+    printf "  claudio --engine=cursor --init-md contexto.md ~/projects\n"
     echo
 
   fi
@@ -840,23 +883,36 @@ claudio_config_file="${CLAUDIO_CONFIG:-$HOME/.claudio}"
 claudio_env_file="$claudio_cli_dir/.env"
 claudio_obsidian_path="${OBSIDIAN_PATH:-$HOME/.ovault}"
 
-# Carrega ~/.claudio (KEY=value, sourceável) e exporta para o compose/container
+# Garante HOME para o compose expandir ${HOME}/nixos e paths; usado por todos os comandos que montam volumes.
+[[ -z "${HOME:-}" ]] && export HOME="$(eval echo ~"$(id -un)")"
+
+# Carrega ~/.claudio (KEY=value, sourceável) e exporta para o compose/container.
+# Flags --engine e --model na linha de comando sempre sobrescrevem estes valores.
 claudio_load_config() {
   if [[ -f "$claudio_config_file" ]]; then
     # shellcheck source=/dev/null
     source "$claudio_config_file"
     [[ -n "${engine:-}" ]] && export CLAUDIO_ENGINE="$engine"
+    [[ -n "${model:-}" ]] && export CLAUDIO_MODEL="$model"
     [[ -n "${GH_TOKEN:-}" ]] && export GH_TOKEN
     [[ -n "${ANTHROPIC_API_KEY:-}" ]] && export ANTHROPIC_API_KEY
-    [[ -n "${OBSIDIAN_PATH:-}" ]] && export OBSIDIAN_PATH && claudio_obsidian_path="$OBSIDIAN_PATH"
+    [[ -n "${CURSOR_API_KEY:-}" ]] && export CURSOR_API_KEY
+    if [[ -n "${OBSIDIAN_PATH:-}" ]]; then
+      export OBSIDIAN_PATH
+      claudio_obsidian_path="$OBSIDIAN_PATH"
+    fi
   fi
+  # Path absoluto e ~ expandido para o compose (YAML não expande ~)
+  claudio_obsidian_path="${claudio_obsidian_path/#\~/$HOME}"
+  [[ -d "$claudio_obsidian_path" ]] && claudio_obsidian_path="$(cd "$claudio_obsidian_path" && pwd)"
+  export OBSIDIAN_PATH="$claudio_obsidian_path"
 }
 
 # Engine: opencode | claude | cursor. Se required=1 e vazio, reclama e sai.
-# Bashly guarda flags globais em args['--engine'], não em flag_engine.
+# Ordem: --engine= na linha de comando sobrescreve ~/.claudio (CLAUDIO_ENGINE).
 claudio_resolve_engine() {
   local required="${1:-0}"
-  local e="${args['--engine']:-${flag_engine:-$CLAUDIO_ENGINE}}"
+  local e="${args['--engine']:-${flag_engine:-$CLAUDIO_ENGINE}}"  # flag > config
   e="${e,,}"
   if [[ -z "$e" ]]; then
     if [[ "$required" == "1" ]]; then
@@ -922,6 +978,16 @@ claudio_mount_opts() {
   if [[ -n "${args['--rw']:-${flag_rw:-}}" ]]; then echo "rw"; elif [[ -n "${args['--ro']:-${flag_ro:-}}" ]]; then echo "ro"; else echo "rw"; fi
 }
 
+# --init-md: path do markdown inicial (relativo ao mount); vazio se arquivo não existe
+# Valor vem de flag_init_md (run seta de args) ou CLAUDIO_INITIAL_MD. Default contexto.md é no bashly (--init-md sem arg).
+claudio_initial_md() {
+  local mount="${1:-}"
+  local f="${flag_init_md:-${CLAUDIO_INITIAL_MD:-}}"
+  [[ -z "$f" ]] && return 0
+  local full="$mount/$f"
+  [[ -f "$full" ]] && echo "$f" || echo ""
+}
+
 # --danger: sufixo/args de bypass de permissões por engine (vazio se flag não setada)
 claudio_danger_flag() {
   if [[ -z "${flag_danger:-${args['--danger']:-}}" ]]; then
@@ -936,9 +1002,10 @@ claudio_danger_flag() {
   esac
 }
 
-# Model flag for claude binary (--model=haiku|opus; default = nada = sonnet)
+# Model flag for claude binary (--model=haiku|opus; default = nada = sonnet).
+# Ordem: --model= na linha de comando sobrescreve ~/.claudio (CLAUDIO_MODEL).
 claudio_model_flag() {
-  local m="${args['--model']:-${flag_model:-}}"
+  local m="${args['--model']:-${flag_model:-$CLAUDIO_MODEL}}"  # flag > config
   m="${m,,}"
   case "$m" in
     haiku) echo "--model claude-haiku-4-5-20251001" ;;
@@ -958,6 +1025,8 @@ claudio_run_command() {
   mount_path="$(claudio_resolve_dir)"
   proj_slug="$(claudio_proj_slug "$mount_path")"
   mount_opts="$(claudio_mount_opts)"
+  flag_init_md="${args['--init-md']:-}"
+  initial_md="$(claudio_initial_md "$mount_path")"
 
   case "$engine" in
     opencode)
@@ -965,29 +1034,35 @@ claudio_run_command() {
       echo "[claudio run] engine=opencode ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
       opencode_danger_env=""
       [[ -n "${flag_danger:-${args['--danger']:-}}" ]] && opencode_danger_env="-e OPENCODE_PERMISSION_BYPASS=1"
-      CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
+      opencode_init_env=""
+      [[ -n "$initial_md" ]] && opencode_init_env="-e CLAUDE_INITIAL_MD=/workspace/mount/$initial_md"
+      HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
         claudio_compose_cmd -p "$proj_name" up -d sandbox
-      CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
+      HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
         claudio_compose_cmd -p "$proj_name" exec -it \
-        -e CLAUDIO_MOUNT="$mount_path" $opencode_danger_env sandbox bash -c 'cd /workspace/mount && exec opencode'
+        -e CLAUDIO_MOUNT="$mount_path" $opencode_danger_env $opencode_init_env sandbox bash -c 'cd /workspace/mount && exec opencode'
       ;;
     claude)
       proj_name="$(claudio_proj_name "$proj_slug")"
       model="$(claudio_model_flag)"
       danger="$(claudio_danger_flag claude)"
-      CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
+      init_file=""
+      [[ -n "$initial_md" ]] && init_file=" --append-system-prompt-file $initial_md"
+      HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
         claudio_compose_cmd -p "$proj_name" run --rm -it \
         --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
-        -c ". /workspace/host/scripts/bootstrap.sh; cd /workspace/mount && exec /home/claude/.nix-profile/bin/claude ${model}${danger}"
+        -c ". /workspace/host/scripts/bootstrap.sh; cd /workspace/mount && exec /home/claude/.nix-profile/bin/claude ${model}${danger}${init_file}"
       ;;
     cursor)
       proj_name="$(claudio_proj_name "$proj_slug")"
       danger="$(claudio_danger_flag cursor)"
       echo "[claudio run] engine=cursor ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
-      CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
+      cursor_init_prompt=""
+      [[ -n "$initial_md" ]] && cursor_init_prompt=" 'Use the instructions in @${initial_md} as your initial context. Then you can proceed with my requests.'"
+      HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
         claudio_compose_cmd -p "$proj_name" run --rm -it \
         --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
-        -c ". /workspace/host/scripts/bootstrap.sh; cd /workspace/mount && exec agent${danger}"
+        -c ". /workspace/host/scripts/bootstrap.sh; cd /workspace/mount && exec agent${danger}${cursor_init_prompt}"
       ;;
     *)
       echo "claudio: engine inválido: $engine" >&2
@@ -1023,8 +1098,8 @@ claudio_resume_command() {
   mount_opts="$(claudio_mount_opts)"
   CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
     claudio_compose_cmd -p "$proj_name" run --rm -it \
-    --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" sandbox \
-    -c "cd /workspace/mount && exec /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions"
+    --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
+    -c ". /workspace/host/scripts/bootstrap.sh; cd /workspace/mount && exec /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions"
 
 }
 
@@ -1040,7 +1115,7 @@ claudio_continue_command() {
   model="$(claudio_model_flag)"
   CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
     claudio_compose_cmd -p "$proj_name" run --rm -it \
-    --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" sandbox \
+    --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
     -c ". /workspace/host/scripts/bootstrap.sh; cd /workspace/mount && exec /home/claude/.nix-profile/bin/claude --continue ${model} --permission-mode bypassPermissions"
 
 }
@@ -1061,7 +1136,7 @@ claudio_start_command() {
     claudio_compose_cmd -p "$proj_name" up -d sandbox
   CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$claudio_obsidian_path" \
     claudio_compose_cmd -p "$proj_name" exec -it \
-    -e CLAUDIO_MOUNT="$mount_path" sandbox bash -c \
+    -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox bash -c \
     '. /workspace/host/scripts/bootstrap.sh; cd /workspace; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
 
 }
@@ -1115,7 +1190,7 @@ claudio_install_command() {
   bin_dest="$claudio_nixos_dir/stow/.local/bin/claudio"
   mkdir -p "$(dirname "$bin_dest")"
   if [[ ! -L "$bin_dest" ]]; then
-    ln -sf "$claudio_compose_dir/../claudio" "$bin_dest"
+    ln -sf "$claudio_compose_dir/claudio" "$bin_dest"
     echo "[claudio install] symlink criado: $bin_dest"
   else
     echo "[claudio install] claudio regenerado (symlink já existe)"
@@ -1514,6 +1589,20 @@ parse_requirements() {
         shift
         ;;
 
+      # :flag.case
+      --init-md)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--init-md']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--init-md requires an argument: --init-md FILE" >&2
+          exit 1
+        fi
+        ;;
+
       *)
         break
         ;;
@@ -1736,6 +1825,9 @@ parse_requirements() {
     esac
   done
 
+  # :command.default_assignments
+  [[ -n ${args['--init-md']:-} ]] || args['--init-md']="contexto.md"
+
 }
 
 # :command.parse_requirements
@@ -1764,6 +1856,85 @@ claudio_run_parse_requirements() {
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
+      # :flag.case
+      --init-md)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--init-md']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--init-md requires an argument: --init-md FILE" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --danger)
+
+        # :flag.case_no_arg
+        args['--danger']=1
+        shift
+        ;;
+
+      # :flag.case
+      --engine)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--engine']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--engine requires an argument: --engine ENGINE" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --model)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--model']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--model requires an argument: --model MODEL" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --instance)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--instance']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--instance requires an argument: --instance ID" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --rw)
+
+        # :flag.case_no_arg
+        args['--rw']=1
+        shift
+        ;;
+
+      # :flag.case
+      --ro)
+
+        # :flag.case_no_arg
+        args['--ro']=1
+        shift
+        ;;
 
       -?*)
         printf "invalid option: %s\n" "$key" >&2
@@ -1786,6 +1957,9 @@ claudio_run_parse_requirements() {
 
     esac
   done
+
+  # :command.default_assignments
+  [[ -n ${args['--init-md']:-} ]] || args['--init-md']="contexto.md"
 
 }
 
