@@ -16,8 +16,7 @@ set -uo pipefail
 for dir in agents commands hooks scripts skills; do
   for base in /workspace/nixos /workspace/host; do
     src="$base/stow/.claude/$dir"
-    # Skip empty dirs — avoids wiping bind-mounted dirs (e.g. hooks from compose)
-    if [[ -d "$src" ]] && [[ -n "$(ls -A "$src" 2>/dev/null)" ]]; then
+    if [[ -d "$src" ]]; then
       rm -rf "$HOME/.claude/$dir" 2>/dev/null || true
       ln -sfn "$src" "$HOME/.claude/$dir" 2>/dev/null || true
       break

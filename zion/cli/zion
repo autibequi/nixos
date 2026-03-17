@@ -56,7 +56,6 @@ zion_usage() {
   printf "  %s   Lista todos os arquivos de log.\n" "logs-list      "
   printf "  %s   Uso da API Anthropic (hoje; use --7d ou --30d para período).\n" "usage-api      "
   printf "  %s   journalctl do systemd service claude-autonomous.\n" "service-logs   "
-  printf "  %s   Abre Alacritty com Claude respondendo (q=pergunta ou interativo).\n" "ask            "
   printf "  %s   Abre sessão com ~/nixos em /workspace/mnt e /workspace/logs (único modo com mount de nixos + logs).\n" "edit           "
   echo
 
@@ -830,35 +829,6 @@ zion_service_logs_usage() {
 }
 
 # :command.usage
-zion_ask_usage() {
-  printf "zion ask - Abre Alacritty com Claude respondendo (q=pergunta ou interativo).\n\n"
-
-  printf "%s\n" "Usage:"
-  printf "  zion ask [QUESTION]\n"
-  printf "  zion ask --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
-    echo
-
-    # :command.usage_args
-    printf "%s\n" "Arguments:"
-
-    # :argument.usage
-    printf "  %s\n" "QUESTION"
-    printf "    Pergunta (opcional; sem arg = interativo).\n"
-    echo
-
-  fi
-}
-
-# :command.usage
 zion_edit_usage() {
   printf "zion edit - Abre sessão com ~/nixos em /workspace/mnt e /workspace/logs (único modo com mount de nixos + logs).\n\n"
 
@@ -950,7 +920,7 @@ inspect_args() {
 
 zion_nixos_dir="${ZION_NIXOS_DIR:-$HOME/nixos}"
 zion_cli_dir="$zion_nixos_dir/zion/cli"
-zion_compose_file="$zion_cli_dir/docker-compose.claude.yml"
+zion_compose_file="$zion_cli_dir/docker-compose.zion.yml"
 zion_compose_dir="$zion_cli_dir"
 # Config do usuário: engine padrão e chaves (GH_TOKEN, ANTHROPIC_API_KEY)
 zion_config_file="${ZION_CONFIG:-$HOME/.zion}"
@@ -968,6 +938,10 @@ zion_load_config() {
     source "$zion_config_file"
     [[ -n "${engine:-}" ]] && export ZION_ENGINE="$engine"
     [[ -n "${model:-}" ]] && export ZION_MODEL="$model"
+    # Modelos por engine (model_claude=, model_opencode=, model_cursor=)
+    [[ -n "${model_claude:-}" ]]   && export ZION_MODEL_CLAUDE="$model_claude"
+    [[ -n "${model_opencode:-}" ]] && export ZION_MODEL_OPENCODE="$model_opencode"
+    [[ -n "${model_cursor:-}" ]]   && export ZION_MODEL_CURSOR="$model_cursor"
     if [[ -n "${DANGER:-${danger:-}}" ]] && [[ "${DANGER:-${danger:-}}" != "0" ]] && [[ "${DANGER:-${danger:-}}" != "false" ]]; then
       export ZION_DANGER=1
     fi
@@ -1080,16 +1054,49 @@ zion_danger_flag() {
   esac
 }
 
-# Model flag for claude binary (--model=haiku|opus; default = nada = sonnet).
-# Ordem: --model= na linha de comando sobrescreve ~/.zion (ZION_MODEL).
-zion_model_flag() {
-  local m="${args['--model']:-${flag_model:-$ZION_MODEL}}"  # flag > config
-  m="${m,,}"
+# Converte shorthand de modelo para o ID completo (uso interno).
+zion_resolve_model_id() {
+  local m="${1,,}"
   case "$m" in
-    haiku) echo "--model claude-haiku-4-5-20251001" ;;
-    opus)  echo "--model claude-opus-4-6" ;;
-    *)     echo "" ;;
+    haiku)   echo "claude-haiku-4-5-20251001" ;;
+    opus)    echo "claude-opus-4-6" ;;
+    sonnet)  echo "claude-sonnet-4-6" ;;
+    "")      echo "" ;;
+    *)       echo "$m" ;;  # já é ID completo
   esac
+}
+
+# Model flag para binários que aceitam --model=<id> (claude, cursor/agent).
+# Aceita engine como argumento opcional para usar o modelo por engine.
+# Ordem: --model= (CLI) > model_<engine>= (~/.zion) > model= (~/.zion).
+zion_model_flag() {
+  local engine="${1:-}"
+  local cli_flag="${args['--model']:-${flag_model:-}}"
+  local per_engine=""
+  case "${engine,,}" in
+    claude)   per_engine="${ZION_MODEL_CLAUDE:-}" ;;
+    opencode) per_engine="${ZION_MODEL_OPENCODE:-}" ;;
+    cursor)   per_engine="${ZION_MODEL_CURSOR:-}" ;;
+  esac
+  local m="${cli_flag:-${per_engine:-$ZION_MODEL}}"
+  local id
+  id="$(zion_resolve_model_id "$m")"
+  [[ -n "$id" ]] && echo "--model $id" || echo ""
+}
+
+# Resolve model ID bruto (sem flag prefix) para engines como opencode que usam env var.
+# Ordem: --model= (CLI) > model_opencode= (~/.zion) > model= (~/.zion).
+zion_model_id() {
+  local engine="${1:-}"
+  local cli_flag="${args['--model']:-${flag_model:-}}"
+  local per_engine=""
+  case "${engine,,}" in
+    claude)   per_engine="${ZION_MODEL_CLAUDE:-}" ;;
+    opencode) per_engine="${ZION_MODEL_OPENCODE:-}" ;;
+    cursor)   per_engine="${ZION_MODEL_CURSOR:-}" ;;
+  esac
+  local m="${cli_flag:-${per_engine:-$ZION_MODEL}}"
+  zion_resolve_model_id "$m"
 }
 
 # :command.command_functions
@@ -1110,24 +1117,28 @@ zion_continue_command() {
     opencode)
       proj_name_open="$(zion_proj_name_open "$proj_slug")"
       echo "[zion continue] engine=opencode → $proj_name_open (última sessão)"
+      opencode_model_env=""
+      _oc_model="$(zion_model_id opencode)"
+      [[ -n "$_oc_model" ]] && opencode_model_env="-e OPENCODE_MODEL=$_oc_model"
       HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
         zion_compose_cmd -p "$proj_name_open" run --rm -it \
-        --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
-        bash -c 'cd /workspace/mnt && exec opencode'
+        --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 $opencode_model_env sandbox \
+        bash -c 'cd /workspace/mnt && opencode'
       ;;
     claude)
       echo "[zion continue] engine=claude → $proj_name (última sessão)"
-      model="$(zion_model_flag)"
+      model="$(zion_model_flag claude)"
       danger="$(zion_danger_flag claude)"
       CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
         zion_compose_cmd -p "$proj_name" run --rm -it \
         --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
-        -c ". /zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude --continue ${model}${danger} --permission-mode bypassPermissions"
+        -c ". /zion/scripts/bootstrap.sh; cd /workspace/mnt && /home/claude/.nix-profile/bin/claude --continue ${model}${danger} --permission-mode bypassPermissions"
       ;;
     cursor)
       echo "[zion continue] engine=cursor → $proj_name (última sessão, mount: ${mount_opts})"
       danger="$(zion_danger_flag cursor)"
-      cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; exec agent'"${danger}"' --continue'
+      model="$(zion_model_flag cursor)"
+      cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; agent'"${danger}${model:+ $model}"' --continue'
       HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
         zion_compose_cmd -p "$proj_name" run --rm -it \
         --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
@@ -1165,15 +1176,18 @@ zion_new_command() {
       [[ -n "$initial_md" ]] && opencode_init_env="-e CLAUDE_INITIAL_MD=/workspace/mnt/$initial_md"
       opencode_resume_env=""
       [[ -n "$resume_id" ]] && opencode_resume_env="-e CLAUDIO_RESUME_SESSION=$resume_id"
+      opencode_model_env=""
+      _oc_model="$(zion_model_id opencode)"
+      [[ -n "$_oc_model" ]] && opencode_model_env="-e OPENCODE_MODEL=$_oc_model"
       HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
         zion_compose_cmd -p "$proj_name" up -d sandbox
       HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
         zion_compose_cmd -p "$proj_name" exec -it \
-        -e CLAUDIO_MOUNT="$mount_path" $opencode_danger_env $opencode_init_env $opencode_resume_env sandbox bash -c 'cd /workspace/mnt && exec opencode'
+        -e CLAUDIO_MOUNT="$mount_path" $opencode_danger_env $opencode_init_env $opencode_resume_env $opencode_model_env sandbox bash -c 'cd /workspace/mnt && exec opencode'
       ;;
     claude)
       proj_name="$(zion_proj_name "$proj_slug")"
-      model="$(zion_model_flag)"
+      model="$(zion_model_flag claude)"
       danger="$(zion_danger_flag claude)"
       init_file=""
       [[ -n "$initial_md" ]] && init_file=" --append-system-prompt-file $initial_md"
@@ -1184,11 +1198,12 @@ zion_new_command() {
       HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
         zion_compose_cmd -p "$proj_name" run --rm -it \
         --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
-        -c ". /zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${model}${danger}${init_file}${resume_flag}"
+        -c ". /zion/scripts/bootstrap.sh; cd /workspace/mnt && /home/claude/.nix-profile/bin/claude ${model}${danger}${init_file}${resume_flag}"
       ;;
     cursor)
       proj_name="$(zion_proj_name "$proj_slug")"
       danger="$(zion_danger_flag cursor)"
+      model="$(zion_model_flag cursor)"
       echo "[zion new] engine=cursor ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
       cursor_init_env=""
       [[ -n "$initial_md" ]] && cursor_init_env="-e CLAUDIO_INITIAL_MD=$initial_md"
@@ -1196,10 +1211,10 @@ zion_new_command() {
       [[ -n "$resume_id" ]] && cursor_resume_env="-e CLAUDIO_RESUME_SESSION=$resume_id"
       cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; '
       cursor_cmd+='if [ -n "${CLAUDIO_RESUME_SESSION:-}" ]; then '
-      cursor_cmd+='exec agent'"${danger}"' --resume="${CLAUDIO_RESUME_SESSION}"; '
+      cursor_cmd+='agent'"${danger}${model:+ $model}"' --resume="${CLAUDIO_RESUME_SESSION}"; '
       cursor_cmd+='elif [ -n "${CLAUDIO_INITIAL_MD:-}" ] && [ -f "/workspace/mnt/$CLAUDIO_INITIAL_MD" ]; then '
-      cursor_cmd+='p=$(sed -e '\''s/\\\\/\\\\\\\\/g'\'' -e '\''s/"/\\"/g'\'' "/workspace/mnt/$CLAUDIO_INITIAL_MD"); exec agent'"${danger}"' "$p"; '
-      cursor_cmd+='else exec agent'"${danger}"'; fi'
+      cursor_cmd+='p=$(sed -e '\''s/\\\\/\\\\\\\\/g'\'' -e '\''s/"/\\"/g'\'' "/workspace/mnt/$CLAUDIO_INITIAL_MD"); agent'"${danger}${model:+ $model}"' "$p"; '
+      cursor_cmd+='else agent'"${danger}${model:+ $model}"'; fi'
       HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
         zion_compose_cmd -p "$proj_name" run --rm -it \
         --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 $cursor_init_env $cursor_resume_env sandbox \
@@ -1273,24 +1288,24 @@ zion_resume_command() {
       HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
         zion_compose_cmd -p "$proj_name_open" run --rm -it \
         --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 -e CLAUDIO_RESUME_SESSION="$resume_id" sandbox \
-        bash -c 'cd /workspace/mnt && exec opencode'
+        bash -c 'cd /workspace/mnt && opencode'
       ;;
     claude)
       echo "[zion resume] engine=claude → $proj_name"
       CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
         zion_compose_cmd -p "$proj_name" run --rm -it \
         --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
-        -c ". /zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions"
+        -c ". /zion/scripts/bootstrap.sh; cd /workspace/mnt && /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions"
       ;;
     cursor)
       echo "[zion resume] engine=cursor → $proj_name (mount: ${mount_opts})"
       danger="$(zion_danger_flag cursor)"
       if [[ -n "$resume_id" && "$resume_id" != "1" ]]; then
         cursor_resume_env="-e CLAUDIO_RESUME_SESSION=$resume_id"
-        cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; exec agent'"${danger}"' --resume="${CLAUDIO_RESUME_SESSION}"'
+        cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; agent'"${danger}"' --resume="${CLAUDIO_RESUME_SESSION}"'
       else
         cursor_resume_env=""
-        cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; exec agent'"${danger}"' --continue'
+        cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; agent'"${danger}"' --continue'
       fi
       HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
         zion_compose_cmd -p "$proj_name" run --rm -it \
@@ -1781,14 +1796,6 @@ zion_service_logs_command() {
 }
 
 # :command.function
-zion_ask_command() {
-
-  # src/commands/ask.sh
-  "$zion_nixos_scripts/claude-ask.sh" "${args[question]:-}"
-
-}
-
-# :command.function
 zion_edit_command() {
 
   # src/commands/host_edit.sh
@@ -2145,13 +2152,6 @@ parse_requirements() {
       action="service-logs"
       shift
       zion_service_logs_parse_requirements "$@"
-      shift $#
-      ;;
-
-    ask)
-      action="ask"
-      shift
-      zion_ask_parse_requirements "$@"
       shift $#
       ;;
 
@@ -3567,57 +3567,6 @@ zion_service_logs_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_ask_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_ask_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="ask"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        # :argument.case
-        if [[ -z ${args['question']+x} ]]; then
-          args['question']=$1
-          shift
-        else
-          printf "invalid argument: %s\n" "$key" >&2
-          exit 1
-        fi
-
-        ;;
-
-    esac
-  done
-
-}
-
-# :command.parse_requirements
 zion_edit_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
@@ -3707,7 +3656,6 @@ run() {
     "logs-list") zion_logs_list_command ;;
     "usage-api") zion_usage_api_command ;;
     "service-logs") zion_service_logs_command ;;
-    "ask") zion_ask_command ;;
     "edit") zion_edit_command ;;
   esac
 }

@@ -22,6 +22,10 @@ zion_load_config() {
     source "$zion_config_file"
     [[ -n "${engine:-}" ]] && export ZION_ENGINE="$engine"
     [[ -n "${model:-}" ]] && export ZION_MODEL="$model"
+    # Modelos por engine (model_claude=, model_opencode=, model_cursor=)
+    [[ -n "${model_claude:-}" ]]   && export ZION_MODEL_CLAUDE="$model_claude"
+    [[ -n "${model_opencode:-}" ]] && export ZION_MODEL_OPENCODE="$model_opencode"
+    [[ -n "${model_cursor:-}" ]]   && export ZION_MODEL_CURSOR="$model_cursor"
     if [[ -n "${DANGER:-${danger:-}}" ]] && [[ "${DANGER:-${danger:-}}" != "0" ]] && [[ "${DANGER:-${danger:-}}" != "false" ]]; then
       export ZION_DANGER=1
     fi
@@ -134,14 +138,47 @@ zion_danger_flag() {
   esac
 }
 
-# Model flag for claude binary (--model=haiku|opus; default = nada = sonnet).
-# Ordem: --model= na linha de comando sobrescreve ~/.zion (ZION_MODEL).
-zion_model_flag() {
-  local m="${args['--model']:-${flag_model:-$ZION_MODEL}}"  # flag > config
-  m="${m,,}"
+# Converte shorthand de modelo para o ID completo (uso interno).
+zion_resolve_model_id() {
+  local m="${1,,}"
   case "$m" in
-    haiku) echo "--model claude-haiku-4-5-20251001" ;;
-    opus)  echo "--model claude-opus-4-6" ;;
-    *)     echo "" ;;
+    haiku)   echo "claude-haiku-4-5-20251001" ;;
+    opus)    echo "claude-opus-4-6" ;;
+    sonnet)  echo "claude-sonnet-4-6" ;;
+    "")      echo "" ;;
+    *)       echo "$m" ;;  # já é ID completo
   esac
+}
+
+# Model flag para binários que aceitam --model=<id> (claude, cursor/agent).
+# Aceita engine como argumento opcional para usar o modelo por engine.
+# Ordem: --model= (CLI) > model_<engine>= (~/.zion) > model= (~/.zion).
+zion_model_flag() {
+  local engine="${1:-}"
+  local cli_flag="${args['--model']:-${flag_model:-}}"
+  local per_engine=""
+  case "${engine,,}" in
+    claude)   per_engine="${ZION_MODEL_CLAUDE:-}" ;;
+    opencode) per_engine="${ZION_MODEL_OPENCODE:-}" ;;
+    cursor)   per_engine="${ZION_MODEL_CURSOR:-}" ;;
+  esac
+  local m="${cli_flag:-${per_engine:-$ZION_MODEL}}"
+  local id
+  id="$(zion_resolve_model_id "$m")"
+  [[ -n "$id" ]] && echo "--model $id" || echo ""
+}
+
+# Resolve model ID bruto (sem flag prefix) para engines como opencode que usam env var.
+# Ordem: --model= (CLI) > model_opencode= (~/.zion) > model= (~/.zion).
+zion_model_id() {
+  local engine="${1:-}"
+  local cli_flag="${args['--model']:-${flag_model:-}}"
+  local per_engine=""
+  case "${engine,,}" in
+    claude)   per_engine="${ZION_MODEL_CLAUDE:-}" ;;
+    opencode) per_engine="${ZION_MODEL_OPENCODE:-}" ;;
+    cursor)   per_engine="${ZION_MODEL_CURSOR:-}" ;;
+  esac
+  local m="${cli_flag:-${per_engine:-$ZION_MODEL}}"
+  zion_resolve_model_id "$m"
 }

@@ -11,24 +11,28 @@ case "$engine" in
   opencode)
     proj_name_open="$(zion_proj_name_open "$proj_slug")"
     echo "[zion continue] engine=opencode → $proj_name_open (última sessão)"
+    opencode_model_env=""
+    _oc_model="$(zion_model_id opencode)"
+    [[ -n "$_oc_model" ]] && opencode_model_env="-e OPENCODE_MODEL=$_oc_model"
     HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
       zion_compose_cmd -p "$proj_name_open" run --rm -it \
-      --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
-      bash -c 'cd /workspace/mnt && exec opencode'
+      --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 $opencode_model_env sandbox \
+      bash -c 'cd /workspace/mnt && opencode'
     ;;
   claude)
     echo "[zion continue] engine=claude → $proj_name (última sessão)"
-    model="$(zion_model_flag)"
+    model="$(zion_model_flag claude)"
     danger="$(zion_danger_flag claude)"
     CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
       zion_compose_cmd -p "$proj_name" run --rm -it \
       --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
-      -c ". /zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude --continue ${model}${danger} --permission-mode bypassPermissions"
+      -c ". /zion/scripts/bootstrap.sh; cd /workspace/mnt && /home/claude/.nix-profile/bin/claude --continue ${model}${danger} --permission-mode bypassPermissions"
     ;;
   cursor)
     echo "[zion continue] engine=cursor → $proj_name (última sessão, mount: ${mount_opts})"
     danger="$(zion_danger_flag cursor)"
-    cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; exec agent'"${danger}"' --continue'
+    model="$(zion_model_flag cursor)"
+    cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; agent'"${danger}${model:+ $model}"' --continue'
     HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
       zion_compose_cmd -p "$proj_name" run --rm -it \
       --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \

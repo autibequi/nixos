@@ -39,24 +39,24 @@ case "$engine" in
     HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
       zion_compose_cmd -p "$proj_name_open" run --rm -it \
       --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 -e CLAUDIO_RESUME_SESSION="$resume_id" sandbox \
-      bash -c 'cd /workspace/mnt && exec opencode'
+      bash -c 'cd /workspace/mnt && opencode'
     ;;
   claude)
     echo "[zion resume] engine=claude → $proj_name"
     CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
       zion_compose_cmd -p "$proj_name" run --rm -it \
       --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox \
-      -c ". /zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions"
+      -c ". /zion/scripts/bootstrap.sh; cd /workspace/mnt && /home/claude/.nix-profile/bin/claude --resume --permission-mode bypassPermissions"
     ;;
   cursor)
     echo "[zion resume] engine=cursor → $proj_name (mount: ${mount_opts})"
     danger="$(zion_danger_flag cursor)"
     if [[ -n "$resume_id" && "$resume_id" != "1" ]]; then
       cursor_resume_env="-e CLAUDIO_RESUME_SESSION=$resume_id"
-      cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; exec agent'"${danger}"' --resume="${CLAUDIO_RESUME_SESSION}"'
+      cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; agent'"${danger}"' --resume="${CLAUDIO_RESUME_SESSION}"'
     else
       cursor_resume_env=""
-      cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; exec agent'"${danger}"' --continue'
+      cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; agent'"${danger}"' --continue'
     fi
     HOME="${HOME:-$(eval echo ~"$(id -un)")}" CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
       zion_compose_cmd -p "$proj_name" run --rm -it \

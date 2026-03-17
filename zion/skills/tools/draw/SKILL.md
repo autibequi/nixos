@@ -23,50 +23,100 @@
 
 ---
 
-## Weblive Server — desenhar e sites no browser
+## Weblive Server — Feed + Biblioteca de Desenhos
 
-Servidor HTTP que (1) renderiza Mermaid + Markdown em tempo real em `/` (Draw) e (2) serve a pasta **`.weblive`** como estático (ex.: jogos, sites). O **agente** é quem roda e reinicia o servidor.
+Servidor HTTP v2 com **duas funcionalidades**: (1) Feed live (Mermaid + Markdown via SSE) e (2) Biblioteca de Desenhos pesquisável. Serve também a pasta `.weblive` como estático.
 
-**Esta seção é a referência principal para o weblive server.** Aqui estão o fluxo, os paths, as portas e as lições aprendidas.
+**Esta seção é a referência principal para o weblive server.**
 
 ### Host e URL
 
 - **Host:** use **`zion`** (não localhost). O usuário configurou redirect de `zion` para localhost.
 - **Formato do link:** `http://zion:PORT` (ex.: `http://zion:8765`, `http://zion:8766`).
-- Ao falar com o usuário, sempre usar **zion:porta**; nunca "localhost" na mensagem.
+- Ao falar com o usuário, sempre usar **zion:porta**; nunca “localhost” na mensagem.
 
 ### Portas
 
-- O servidor tenta **8765**, depois **8766**, depois **8767** (fallback se a porta estiver ocupada).
-- Ao iniciar, o script imprime no stderr a URL real (ex.: `Weblive server: http://zion:8766 (root: ...)`). Use **sempre essa porta** ao informar o usuário.
+- O servidor tenta **8765 → 8766 → 8767 → 8768** (fallback se a porta estiver ocupada).
+- Ao iniciar, o script imprime no stderr a URL real: `Weblive server: http://zion:8766 (root: ...)`. Use **sempre essa porta**.
+
+### Estrutura de pastas
+
+```
+$WORKSPACE/.weblive/
+  content.md          ← feed live (página principal, aba Feed)
+  desenhos/           ← biblioteca de desenhos (aba Desenhos)
+    slug.md           ← drawing com frontmatter opcional
+  .server.pid         ← PID do processo rodando
+```
+
+### Formato de drawing (`.weblive/desenhos/*.md`)
+
+```markdown
+---
+title: Título do Desenho
+tags: tag1, tag2
+date: 2026-03-17
+---
+Conteúdo Markdown + Mermaid aqui
+```
+
+Se sem frontmatter: título = nome do arquivo humanizado.
+
+### Quando usar Feed vs Desenho
+
+| Situação | Onde escrever |
+|----------|--------------|
+| Diagrama rápido, status, iteração | **Feed** → `content.md` (prepend) |
+| Relatório, arquitetura, documentação complexa | **Desenho** → `desenhos/<slug>.md` |
+| Resultado para o usuário ver e rever depois | **Desenho** (persiste com URL própria) |
+| Conteúdo que vai mudar logo | **Feed** (sempre mostra o mais recente) |
+
+### Rotas disponíveis
+
+| Rota | Descrição |
+|------|-----------|
+| `GET /` | Página principal com abas Feed / Desenhos |
+| `GET /stream` | SSE — mtime watch do content.md |
+| `GET /content` | Raw content.md |
+| `GET /d/<slug>` | Renderiza drawing individual |
+| `GET /api/drawings?q=` | JSON lista de drawings (busca em título/tags/corpo) |
+| `GET /<path>` | Arquivos estáticos de .weblive/ |
+
+### Start / Restart / PID
+
+```bash
+# Iniciar (idempotente — sai se já rodando)
+WORKSPACE=/workspace/mnt python3 /zion/scripts/draw-server.py --once &
+
+# Forçar restart
+kill $(cat /workspace/mnt/.weblive/.server.pid) 2>/dev/null
+WORKSPACE=/workspace/mnt python3 /zion/scripts/draw-server.py &
+
+# Verificar porta: o script imprime no stderr
+# “Weblive server: http://zion:<PORT>”
+```
+
+- `--once`: verifica se já existe servidor em 8765-8768; se sim, imprime porta e sai 0 (idempotente para bootstrap).
+- **Múltiplos containers**: só um servidor roda por vez; `--once` garante isso via check de porta.
+- O bootstrap (`/workspace/mnt/scripts/bootstrap.sh`) já roda `--once` automaticamente.
 
 ### Quem roda e reinicia o servidor
 
-- **O agente.** Se você alterar o código do draw-server (ex.: título, layout, SSE), **você** deve reiniciar o servidor para a mudança refletir.
-- Iniciar: `python3 /zion/scripts/draw-server.py &`
-- Reiniciar: matar o processo (ex.: `pkill -9 -f draw-server.py`) e iniciar de novo, ou só iniciar — o script usa fallback de portas e sobe na primeira livre.
+- **O agente.** Se você alterou `draw-server.py`, **você** precisa reiniciar.
+- Reiniciar: `kill $(cat /workspace/mnt/.weblive/.server.pid)` e iniciar de novo.
 
 ### Conteúdo e path
 
-- **Draw (Mermaid/Markdown):** `$WORKSPACE/.weblive/content.md` (ex.: `/workspace/mnt/.weblive/content.md`). Path configurável por env `ZION_DRAW_CONTENT`.
+- **Feed (Mermaid/Markdown):** `$WORKSPACE/.weblive/content.md`. Path configurável por env `ZION_DRAW_CONTENT`.
+- **Desenho:** `$WORKSPACE/.weblive/desenhos/<slug>.md`.
 - **Sites/arquivos estáticos:** qualquer arquivo dentro de `$WORKSPACE/.weblive/` é servido (ex.: `.weblive/platformer/index.html` → `http://zion:PORT/platformer/`).
-- O agente escreve com a ferramenta **Write**. A página Draw lê `content.md` e re-renderiza quando ele muda (SSE).
-
-### Atualização em tempo real
-
-- **Server-Sent Events (SSE):** GET `/stream`. O servidor observa o `mtime` do arquivo a cada ~0,3s e envia o conteúdo quando muda. Não é polling no cliente; a página usa **EventSource** e recebe eventos em tempo real. Se a conexão cair, reconecta automaticamente.
-- No canto da página: status **"ao vivo"** (conectado) ou **"reconectando…"**.
-
-### Página servida
-
-- **Sem header** "Zion Draw"; título da aba é só **"Draw"**.
-- Só o bloco de conteúdo (Mermaid + Markdown) e o status de conexão no canto.
 
 ### Como informar o usuário
 
-- **Sempre** mostrar o link numa **caixa** (bloco de código ou box ASCII) para o usuário copiar/abrir.
-- Exemplo de frase: *"Servidor no ar. Abra o link abaixo no browser para ver os desenhos:"*
-- Exemplo de caixa:
+- **Sempre** mostrar o link numa **caixa** para o usuário copiar/abrir.
+- Para drawing: `http://zion:PORT/d/<slug>`
+- Para feed: `http://zion:PORT`
 
   ```
   ┌─────────────────────────────┐
@@ -74,32 +124,31 @@ Servidor HTTP que (1) renderiza Mermaid + Markdown em tempo real em `/` (Draw) e
   └─────────────────────────────┘
   ```
 
-  Ou em bloco de código: `` `http://zion:8766` ``. Usar a porta que o servidor imprimiu ao subir.
-
 ### Fluxo resumido
 
-1. **Levantar ou verificar** o servidor (se a URL não responder, iniciar com `WORKSPACE=/workspace/mnt python3 <path>/draw-server.py &`; script em `host/stow/.claude/scripts/draw-server.py` ou `zion/scripts/` conforme o repo).
-2. **Draw:** escrever em `$WORKSPACE/.weblive/content.md` (Mermaid em blocos ` ```mermaid `, resto Markdown).
-3. **Site/jogo:** criar ou editar arquivos em `$WORKSPACE/.weblive/<nome>/` (ex.: `.weblive/meu-jogo/index.html` → `http://zion:PORT/meu-jogo/`).
-4. **Avisar** o usuário com o link **em caixa**, usando a URL que o servidor indicou (ex.: http://zion:8766 ou http://zion:8766/meu-jogo/).
+1. **Verificar/levantar** o servidor: `WORKSPACE=/workspace/mnt python3 /zion/scripts/draw-server.py --once &`
+2. **Feed:** escrever em `$WORKSPACE/.weblive/content.md` (prepend, nunca sobrescrever).
+3. **Desenho:** escrever em `$WORKSPACE/.weblive/desenhos/<slug>.md` com frontmatter.
+4. **Avisar** o usuário com o link em caixa (feed: `/`, desenho: `/d/<slug>`).
 
 ### Onde está no repo
 
 | Item | Caminho |
 |------|--------|
 | Script do servidor | `zion/scripts/draw-server.py` |
+| Bootstrap auto-start | `workspace/mnt/scripts/bootstrap.sh` |
 | Instruções do agente | `zion/system/CLAUDE.OVERRIDE.md` (seção 4) |
-| Comando de referência | `zion/commands/tools/draw.md` |
 
 ### Lições aprendidas (Draw Server)
 
-- **Mudança no código não refletiu na página?** Quem serve o HTML é o processo do servidor. Se você alterou `draw-server.py`, **você** precisa reiniciar o servidor (pkill + iniciar de novo ou só iniciar em outra porta). O usuário não vê alteração até o servidor ser reiniciado.
-- **Porta em uso (Address already in use):** O script tenta 8765 → 8766 → 8767. Não precisa matar o processo manualmente para “liberar”; inicie de novo e use a URL que o servidor imprimir (ex.: http://zion:8766). Avise o usuário para abrir **essa** URL.
-- **Sempre use o host `zion`** na mensagem ao usuário. Ele configurou redirect (ex.: /etc/hosts) de `zion` para localhost. Se você disser "localhost:8766", o usuário pode estar acostumado a abrir "zion:8766"; mantenha consistência.
-- **Link em caixa sempre.** Não basta escrever o link no texto. Coloque numa caixa (bloco de código ou box ASCII) para o usuário copiar/colar ou clicar com facilidade.
-- **Quem roda o servidor é você.** Em sessões Zion, o agente é quem inicia e reinicia o draw server. Se o usuário pedir "reabra", "reinicie" ou "levanta o servidor", execute o comando (iniciar ou pkill + iniciar).
-- **Chrome bloqueia portas “inseguras”.** Por isso a porta não é 6666; usamos 8765 (e 8766, 8767 como fallback). Evite portas tipo 6665–6669 em novos serviços web para o browser.
-- **Conteúdo vazio ou “Aguardando conteúdo…”?** O arquivo pode não existir ainda. O agente deve escrever em `$WORKSPACE/.weblive/content.md`; o servidor cria o diretório `.weblive` se não existir. Após o Write, a página atualiza em tempo real via SSE.
+- **Mudança no código não refletiu na página?** Reiniciar o servidor (pkill + iniciar de novo).
+- **Porta em uso:** O script tenta 8765→8768. Inicie de novo e use a URL que imprimir.
+- **Sempre use o host `zion`** na mensagem ao usuário (nunca “localhost”).
+- **Link em caixa sempre.** Não basta escrever o link no texto.
+- **Quem roda o servidor é você.** Se o usuário pedir “reabra”, “reinicie”, execute o comando.
+- **Chrome bloqueia portas inseguras.** Usar 8765+ (evitar 6665–6669).
+- **Conteúdo vazio?** O arquivo pode não existir ainda — escrever em `content.md` dispara o SSE.
+- **Desenho não aparece na biblioteca?** Verificar se está em `desenhos/` com extensão `.md` e slug válido (só letras, números, `-`, `_`).
 
 ---
 
@@ -527,3 +576,4 @@ Total por linha:      │ (1) + 16 + │ (1) = 18 chars
 | 2026-03-15 | Claude.ai web renderiza Mermaid | Interface web |
 | 2026-03-17 | Weblive Server: host **zion**, portas 8765→8768, pasta **.weblive** (Draw em / + estático). content.md para Draw; arquivos em .weblive/ servidos (ex.: /platformer/). Agente roda e reinicia; link em caixa. | Weblive no Zion |
 | 2026-03-17 | Regra: com servidor ligado ou pedido de "desenhar"/"fazer site", perguntar se é no weblive — salvo se óbvio no contexto, aí fazer direto. | Skill draw |
+| 2026-03-17 | Weblive v2: Feed (content.md) + Biblioteca de Desenhos (.weblive/desenhos/*.md). Rotas: `/d/<slug>`, `/api/drawings?q=`. `--once` flag para startup idempotente. Bootstrap auto-start em workspace/mnt/scripts/bootstrap.sh. | Reescrita draw-server.py |

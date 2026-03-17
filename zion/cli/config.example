@@ -5,8 +5,15 @@
 # ── Engine e modelo (--engine e --model na linha de comando sobrescrevem)
 # opencode = OpenCode TUI | claude = Claude Code | cursor = Cursor
 engine=claude
-# haiku | opus (vazio = sonnet)
+
+# Modelo padrão global: haiku | opus | sonnet (vazio = sonnet)
 # model=sonnet
+
+# Modelo por engine (sobrescreve model= para o engine específico)
+# Shorthand: haiku | opus | sonnet. Aceita também ID completo (ex: claude-opus-4-6).
+# model_claude=opus
+# model_opencode=claude-sonnet-4-6
+# model_cursor=haiku
 
 # ── Tokens (injetados no container; use sempre menor escopo possível)
 # GitHub: Fine-grained PAT com Pull requests / Contents / Issues read-only
