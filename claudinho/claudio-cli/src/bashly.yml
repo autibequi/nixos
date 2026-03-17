@@ -28,6 +28,9 @@ flags:
     arg: file
     default: contexto.md
     help: "Arquivo markdown inicial carregado por todos os engines (default: contexto.md no projeto). Claude: --append-system-prompt-file; Cursor: prompt com @file; OpenCode: env."
+  - long: --resume
+    arg: session_id
+    help: "Retoma sessão: cursor/agent usa --resume=UUID; claude usa --resume; opencode: env CLAUDIO_RESUME_SESSION."
 
 commands:
   - name: run
@@ -42,6 +45,8 @@ commands:
         arg: file
         default: contexto.md
       - long: --danger
+      - long: --resume
+        arg: session_id
       - long: --engine
         arg: engine
       - long: --model
@@ -52,6 +57,7 @@ commands:
       - long: --ro
     examples:
       - claudio run --engine=claude
+      - claudio --engine=cursor --resume=11eaea99-5993-482b-9662-e4d9584c1200 ~/projects
       - claudio run --engine=opencode ~/meu-projeto
       - claudio --engine=cursor --init-md contexto.md ~/projects
     filename: commands/run.sh

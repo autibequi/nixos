@@ -21,9 +21,18 @@ x-base-volumes: &base-volumes
   - ${CLAUDIO_MOUNT:-${HOME}/projects}:/workspace/mount:${CLAUDIO_MOUNT_OPTS:-ro}
   - ${OBSIDIAN_PATH:-/tmp}:/workspace/obsidian
   - ${HOME}/.claude:/home/claude/.claude
+  # stow/.claude: skills e commands; claudinho: agents, hooks, scripts (sobrescrevem subpastas de .claude)
+  - ${HOME}/nixos/stow/.claude/skills:/home/claude/.claude/skills
+  - ${HOME}/nixos/stow/.claude/commands:/home/claude/.claude/commands
+  - ${HOME}/nixos/claudinho/agents:/home/claude/.claude/agents
+  - ${HOME}/nixos/claudinho/hooks:/home/claude/.claude/hooks
+  - ${HOME}/nixos/claudinho/scripts:/home/claude/.claude/scripts
   - ${HOME}/.claude.json:/home/claude/.claude.json
   # Cursor CLI: credenciais e config (agent login ou CURSOR_API_KEY)
   - ${HOME}/.cursor:/home/claude/.cursor
+  # Cursor: skills e commands no / menu (mesma fonte: stow/.claude)
+  - ${HOME}/nixos/stow/.claude/skills:/home/claude/.cursor/skills
+  - ${HOME}/nixos/stow/.claude/commands:/home/claude/.cursor/commands
   # Cursor CLI: tokens de auth (agent faz chmod aqui; bind mount do host causa EPERM, por isso volume nomeado)
   - cursor_config:/home/claude/.config/cursor
   # opencode: stow source no repo (evita symlink ~/.config/opencode que quebraria no container)
