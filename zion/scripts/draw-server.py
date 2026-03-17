@@ -1,31 +1,39 @@
 #!/usr/bin/env python3
 """
-Zion Draw Server — HTTP server on 127.0.0.1:8765.
-Serves a single page that renders Mermaid + Markdown from a content file.
-GET / → HTML with Mermaid.js + marked.js, SSE em /stream (tempo real).
-GET /stream → Server-Sent Events: envia conteúdo quando o arquivo muda.
-GET /content → raw content (fallback).
-Agent writes to the content file; no POST needed.
+Weblive Server — HTTP server on 127.0.0.1:8765.
+- GET / → Draw: página que renderiza Mermaid + Markdown de content.md (SSE em /stream).
+- GET /content → raw content.md.
+- GET /stream → SSE para atualização ao vivo do Draw.
+- GET /caminho → serve arquivos estáticos da pasta .weblive (ex.: /platformer/index.html).
 """
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
 import os
 import sys
 import time
+import urllib.parse
 
 PORT_DEFAULT = 8765
 HOST = "127.0.0.1"
-PORT_FALLBACKS = [8765, 8766, 8767]
+PORT_FALLBACKS = [8765, 8766, 8767, 8768]
+
+
+def weblive_root():
+    """Diretório raiz servido (pasta .weblive)."""
+    p = os.environ.get("ZION_WEBLIVE_ROOT")
+    if p:
+        return os.path.abspath(p)
+    ws = os.environ.get("WORKSPACE", "")
+    if ws:
+        return os.path.join(ws, ".weblive")
+    return os.path.join(os.getcwd(), ".weblive")
 
 
 def content_path():
     p = os.environ.get("ZION_DRAW_CONTENT")
     if p:
         return os.path.abspath(p)
-    ws = os.environ.get("WORKSPACE", "")
-    if ws:
-        return os.path.join(ws, ".zion-draw", "content.md")
-    return os.path.join(os.getcwd(), ".zion-draw", "content.md")
+    return os.path.join(weblive_root(), "content.md")
 
 
 def read_content():
@@ -179,8 +187,62 @@ class DrawHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(body.encode("utf-8"))
             return
-        self.send_response(404)
+        # Servir pasta .weblive (arquivos estáticos)
+        path = urllib.parse.unquote(self.path)
+        if "?" in path:
+            path = path.split("?")[0]
+        if path.startswith("/"):
+            path = path[1:]
+        safe = os.path.normpath(path) if path else ""
+        if not safe:
+            self.send_response(404)
+            self.end_headers()
+            return
+        if safe.startswith("..") or os.path.isabs(safe):
+            self.send_response(403)
+            self.end_headers()
+            return
+        full = os.path.join(weblive_root(), safe)
+        if os.path.isdir(full):
+            index = os.path.join(full, "index.html")
+            if os.path.isfile(index):
+                full = index
+            else:
+                self.send_response(404)
+                self.end_headers()
+                return
+        if not os.path.isfile(full):
+            self.send_response(404)
+            self.end_headers()
+            return
+        ext = os.path.splitext(full)[1].lower()
+        mime = {
+            ".html": "text/html; charset=utf-8",
+            ".htm": "text/html; charset=utf-8",
+            ".css": "text/css; charset=utf-8",
+            ".js": "application/javascript; charset=utf-8",
+            ".json": "application/json; charset=utf-8",
+            ".png": "image/png",
+            ".jpg": "image/jpeg",
+            ".jpeg": "image/jpeg",
+            ".gif": "image/gif",
+            ".svg": "image/svg+xml",
+            ".ico": "image/x-icon",
+            ".woff": "font/woff",
+            ".woff2": "font/woff2",
+        }.get(ext, "application/octet-stream")
+        try:
+            with open(full, "rb") as f:
+                body = f.read()
+        except OSError:
+            self.send_response(500)
+            self.end_headers()
+            return
+        self.send_response(200)
+        self.send_header("Content-Type", mime)
+        self.send_header("Content-Length", len(body))
         self.end_headers()
+        self.wfile.write(body)
 
     def log_message(self, format, *args):
         sys.stderr.write("%s - %s\n" % (self.log_date_time_string(), format % args))
@@ -192,10 +254,10 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 
 
 def main():
-    content_dir = os.path.dirname(content_path())
-    if content_dir and not os.path.isdir(content_dir):
+    root = weblive_root()
+    if root and not os.path.isdir(root):
         try:
-            os.makedirs(content_dir, exist_ok=True)
+            os.makedirs(root, exist_ok=True)
         except OSError:
             pass
     server = None
@@ -212,7 +274,7 @@ def main():
     if server is None:
         print("Draw server: could not bind to any of %s" % PORT_FALLBACKS, file=sys.stderr)
         sys.exit(1)
-    print("Draw server: http://zion:%s (content: %s)" % (port_used, content_path()), file=sys.stderr)
+    print("Weblive server: http://zion:%s (root: %s)" % (port_used, weblive_root()), file=sys.stderr)
     sys.stderr.flush()
     try:
         server.serve_forever()

@@ -5,11 +5,19 @@
 
 ---
 
-## Draw Server (Zion) — desenhar no browser
+## Regra: quando oferecer Weblive
 
-Servidor HTTP que renderiza Mermaid + Markdown em tempo real. O **agente** é quem roda e reinicia o servidor.
+- **Quando o servidor estiver ligado**, ou o usuário pedir para **desenhar** ou **fazer um site** (página, app, jogo, etc. no browser): **perguntar** se é para fazer no **weblive** (servir em `http://zion:PORT/...`).
+- **Se for óbvio no contexto**, não perguntar — fazer direto no weblive (ex.: "faz um jogo no navegador", "quero ver no browser", "sobe um site pra eu testar").
+- Weblive = pasta **`.weblive`** servida pelo servidor: Draw em `/`, arquivos estáticos em `/.weblive/...` (ex.: `/platformer/`).
 
-**Esta seção é a referência principal para o draw server.** Use-a quando for a única fonte carregada; aqui estão o fluxo, os paths, as portas e as lições aprendidas.
+---
+
+## Weblive Server — desenhar e sites no browser
+
+Servidor HTTP que (1) renderiza Mermaid + Markdown em tempo real em `/` (Draw) e (2) serve a pasta **`.weblive`** como estático (ex.: jogos, sites). O **agente** é quem roda e reinicia o servidor.
+
+**Esta seção é a referência principal para o weblive server.** Aqui estão o fluxo, os paths, as portas e as lições aprendidas.
 
 ### Host e URL
 
@@ -20,7 +28,7 @@ Servidor HTTP que renderiza Mermaid + Markdown em tempo real. O **agente** é qu
 ### Portas
 
 - O servidor tenta **8765**, depois **8766**, depois **8767** (fallback se a porta estiver ocupada).
-- Ao iniciar, o script imprime no stderr a URL real (ex.: `Draw server: http://zion:8766 (content: ...)`). Use **sempre essa porta** ao informar o usuário.
+- Ao iniciar, o script imprime no stderr a URL real (ex.: `Weblive server: http://zion:8766 (root: ...)`). Use **sempre essa porta** ao informar o usuário.
 
 ### Quem roda e reinicia o servidor
 
@@ -30,9 +38,9 @@ Servidor HTTP que renderiza Mermaid + Markdown em tempo real. O **agente** é qu
 
 ### Conteúdo e path
 
-- **Arquivo único:** `/workspace/mnt/.zion-draw/content.md` (ou `$WORKSPACE/.zion-draw/content.md`).
-- O agente escreve com a ferramenta **Write**. Path configurável por env `ZION_DRAW_CONTENT`.
-- A página lê esse arquivo e re-renderiza quando ele muda.
+- **Draw (Mermaid/Markdown):** `$WORKSPACE/.weblive/content.md` (ex.: `/workspace/mnt/.weblive/content.md`). Path configurável por env `ZION_DRAW_CONTENT`.
+- **Sites/arquivos estáticos:** qualquer arquivo dentro de `$WORKSPACE/.weblive/` é servido (ex.: `.weblive/platformer/index.html` → `http://zion:PORT/platformer/`).
+- O agente escreve com a ferramenta **Write**. A página Draw lê `content.md` e re-renderiza quando ele muda (SSE).
 
 ### Atualização em tempo real
 
@@ -60,9 +68,10 @@ Servidor HTTP que renderiza Mermaid + Markdown em tempo real. O **agente** é qu
 
 ### Fluxo resumido
 
-1. **Levantar ou verificar** o servidor (se a URL não responder, iniciar com `python3 /zion/scripts/draw-server.py &`).
-2. **Escrever** o conteúdo em `/workspace/mnt/.zion-draw/content.md` (Mermaid em blocos ` ```mermaid `, resto Markdown).
-3. **Avisar** o usuário com o link **em caixa**, usando a URL que o servidor indicou (ex.: http://zion:8766).
+1. **Levantar ou verificar** o servidor (se a URL não responder, iniciar com `WORKSPACE=/workspace/mnt python3 <path>/draw-server.py &`; script em `host/stow/.claude/scripts/draw-server.py` ou `zion/scripts/` conforme o repo).
+2. **Draw:** escrever em `$WORKSPACE/.weblive/content.md` (Mermaid em blocos ` ```mermaid `, resto Markdown).
+3. **Site/jogo:** criar ou editar arquivos em `$WORKSPACE/.weblive/<nome>/` (ex.: `.weblive/meu-jogo/index.html` → `http://zion:PORT/meu-jogo/`).
+4. **Avisar** o usuário com o link **em caixa**, usando a URL que o servidor indicou (ex.: http://zion:8766 ou http://zion:8766/meu-jogo/).
 
 ### Onde está no repo
 
@@ -506,4 +515,5 @@ Total por linha:      │ (1) + 16 + │ (1) = 18 chars
 | 2026-03-15 | Obsidian renderiza Mermaid nativamente (confirmado em obsidian-reference.md) | Obsidian Obsidian |
 | 2026-03-15 | GitHub renderiza Mermaid em `.md` desde 2022 | GitHub |
 | 2026-03-15 | Claude.ai web renderiza Mermaid | Interface web |
-| 2026-03-17 | Draw Server (Zion): host **zion** (redirect localhost), portas 8765→8766→8767, SSE em /stream, conteúdo em .zion-draw/content.md. Agente roda e reinicia o servidor; ao informar usuário, link em caixa (http://zion:PORT). Página sem header, título "Draw". | Draw server no Zion |
+| 2026-03-17 | Weblive Server: host **zion**, portas 8765→8768, pasta **.weblive** (Draw em / + estático). content.md para Draw; arquivos em .weblive/ servidos (ex.: /platformer/). Agente roda e reinicia; link em caixa. | Weblive no Zion |
+| 2026-03-17 | Regra: com servidor ligado ou pedido de "desenhar"/"fazer site", perguntar se é no weblive — salvo se óbvio no contexto, aí fazer direto. | Skill draw |
