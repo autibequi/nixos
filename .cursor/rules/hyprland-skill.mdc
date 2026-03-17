@@ -1,0 +1,16 @@
+---
+description: Ao alterar Hyprland (config, keybinds, waybar, módulo) — usar skill hyprland-config
+globs: "**/stow/.config/hypr/**/*.conf,**/stow/.config/waybar/**,**/modules/hyprland.nix"
+alwaysApply: false
+---
+
+# Hyprland — usar skill hyprland-config
+
+Ao editar configuração do Hyprland (keybinds, window rules, waybar, hyprlock, hypridle, ou o módulo NixOS do Hyprland):
+
+1. **Ler e seguir** a skill: **`zion/skills/hyprland-config/SKILL.md`** (ou `/zion/skills/hyprland-config/SKILL.md` no container).
+2. **Camadas:** (1) Módulo NixOS `modules/hyprland.nix`, (2) dotfiles em `stow/.config/hypr/`, (3) sessão runtime. Validar em ordem.
+3. **Config de keybinds/regras:** editar em `stow/.config/hypr/` (ex.: `application.conf`, `hyprland.conf`, `windowrules.conf`). Deploy: `stow -d ~/nixos/stow -t ~ .`
+4. **Lint:** `nix shell --impure -c hyprls lint stow/.config/hypr/hyprland.conf` antes de aplicar.
+
+Não alterar keybinds/waybar em módulos NixOS; a fonte da verdade é `stow/.config/hypr/` e `stow/.config/waybar/`.

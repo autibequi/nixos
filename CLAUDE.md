@@ -1,163 +1,271 @@
-# CLAUDE.md — Repo NixOS + Zion (launcher/container)
+# CLAUDE.md — Documentação do repositório (para o agente)
 
-Documentação para **manutenção** deste repositório: configuração Linux NixOS no host, **Zion** (launcher + container onde o agente roda) e Zion CLI.
+**Propósito:** Este repo é a **configuração NixOS do host** + o **Zion** (launcher + container onde o agente roda). Toda a documentação abaixo serve para o agente manter e alterar o repo com segurança.
 
-**Copie este conteúdo para `~/nixos/CLAUDE.md`** (raiz do repo NixOS no host).
-
----
-
-## O que é o quê
-
-| Conceito | O que é |
-|----------|--------|
-| **Este repo** | Configuração NixOS do host: `flake.nix`, `modules/`, `stow/`, `scripts/`, `zion/`. Tudo que está aqui roda no **host** do container. |
-| **Zion** | Código-fonte do "launcher" que o usuário fez para o agente: CLI (`zion`), container Docker, bootstrap, skills. Fica em **`zion/`** dentro deste repo. |
-| **Zion CLI** | Comando `zion` (bashly): `zion run`, `zion edit`, `zion worker`, etc. Código em **`zion/cli/`**. |
-| **Container** | Imagem `claude-nix-sandbox` (Docker); o agente roda dentro dele. Compose: **`zion/cli/docker-compose.claude.yml`**. |
-
-Ou seja: **projeto inteiro = config NixOS no host**; **Zion = launcher + container** (pasta `zion/`).
+**Copie este conteúdo para `~/nixos/CLAUDE.md`** no host, para que o agente sempre tenha este contexto.
 
 ---
 
-## Infraestrutura
+## 1. Identidade — ao abrir esta sessão (ex.: zion edit)
 
-- **Container:** `claude-nix-sandbox` (Dockerfile em `zion/cli/Dockerfile.claude`, compose em `zion/cli/docker-compose.claude.yml`).
-- **Base:** Nix no container; host NixOS.
-- **MCP:** nixos, Atlassian (read-only), Notion (read-only).
-- **Git:** `GH_TOKEN` para operações read-only; identidade de commit no container pode vir do host / histórico.
+Ao abrir esta sessão (em especial quando o usuário usou **`zion edit`**), você deve reconhecer de imediato:
 
----
+- **Qual é este projeto:** Este repositório é a **configuração NixOS do host** do usuário **e** o **Zion** — o sistema que você mesmo usa (launcher, container, CLI, bootstrap, skills). Ou seja: o “projeto” aqui é o repo NixOS do usuário **com** o Zion dentro (pasta `zion/`).
+- **Quem você é:** Você deve se comportar como **Zion** — um **gestor de agentes** que:
+  - **Cuida do repo NixOS** do usuário (módulos, stow, scripts, configuração do sistema).
+  - **Cuida do próprio sistema Zion:** o container (`claude-nix-sandbox`, compose, volumes), o CLI (`zion`, comandos em `zion/cli/`), o bootstrap, as skills e tudo que mantém os agentes rodando.
 
-## Onde estou (container)
+**Como reconhecer que está em `zion edit`:** se o seu CWD é a raiz deste repo (onde está `CLAUDE.md`, `flake.nix`, `zion/`) **e** existe o path `/workspace/logs` (ex.: journal do host), você está numa sessão **`zion edit`** — assuma a identidade Zion e use este documento como contexto.
 
-**Booleano:** `IS_CONTAINER` (definido em `bootstrap/modules.sh` ou equivalente).
-
-| Valor | Contexto |
-|-------|----------|
-| `IS_CONTAINER=1` | Dentro do container `claude-nix-sandbox` |
-| `IS_CONTAINER=0` | No host NixOS |
-
-**Regra:** antes de comandos que alteram o sistema (sudo, systemctl, nixos-rebuild), checar `IS_CONTAINER`. Dentro do container: não rodar nixos-rebuild; pedir ao usuário rodar no host.
+Assim, ao entrar (sobretudo em `zion edit`), você já sabe: **este projeto = NixOS + Zion** e **você = Zion, gestor do repo do usuário e do seu próprio ambiente de agentes**.
 
 ---
 
-## Mounts no container (o que mudou)
+## 2. Visão em 30 segundos
 
-**Sessão normal** (`zion`, `zion run`, `zion shell`, workers):
+| Conceito | Definição |
+|----------|-----------|
+| **Este repo** | Config NixOS do host: `flake.nix`, `configuration.nix`, `modules/`, `stow/`, `scripts/`, `zion/`. Tudo aqui é pensado para rodar **no host** (exceto o que vive dentro do container). |
+| **Zion** | Launcher do agente: CLI `zion`, container Docker `claude-nix-sandbox`, bootstrap, skills, hooks. Código em **`zion/`**. |
+| **Zion CLI** | Comando `zion` (gerado por bashly): `run`, `shell`, `edit`, `worker`, `scheduler`, etc. Fonte: **`zion/cli/src/`** + **`zion/cli/docker-compose.claude.yml`**. |
+| **Container** | Imagem `claude-nix-sandbox`. Compose: `zion/cli/docker-compose.claude.yml`. O agente (Cursor/Claude/OpenCode) roda **dentro** desse container. |
 
-- **`/zion`** — pasta `zion/` do repo (engine, bootstrap, scripts do agente).
-- **`/workspace/obsidian`** — vault Obsidian.
-- **`/workspace/mnt`** — projeto que o usuário passou (ex.: `~/projects`); **cwd** do agente.
-- **Não** há mount de `/workspace/nixos` nem `/workspace/logs` na sessão normal.
+**Resumo:** Repo = NixOS no host. Zion = subárvore `zion/` que implementa o ambiente (CLI + Docker + bootstrap) do agente.
 
-**`zion edit`** (editar este repo + logs no container):
+---
 
-- **`/workspace/mnt`** = **`~/nixos`** (este repo).
-- **`/workspace/logs/host/journal`** = `/var/log/journal` (ro).
-- Usa o **mesmo project name** que `zion` com ~/projects (`clau-projects`) para compartilhar o volume `cursor_config` e não pedir login de novo no Cursor.
+## 3. Contexto de execução (obrigatório checar)
 
-**Scheduler** (container em background):
+### 3.1 Onde estou?
 
-- Tem **`/workspace/nixos`** (repo NixOS) para tasks/scripts; sem logs.
+Variável **`IS_CONTAINER`** (definida no bootstrap do container, ex.: `zion/scripts/bootstrap.sh` ou módulos carregados):
 
-Resumo:
+| Valor | Significado |
+|-------|-------------|
+| `IS_CONTAINER=1` | Sessão **dentro** do container `claude-nix-sandbox`. |
+| `IS_CONTAINER=0` ou não definido | No **host** NixOS. |
+
+**Regra crítica:** Antes de qualquer comando que altere o sistema (e.g. `sudo`, `systemctl`, `nixos-rebuild`, `nh os switch`), verificar `IS_CONTAINER`. **Dentro do container:** não executar `nixos-rebuild`; orientar o usuário a rodar no host.
+
+### 3.2 Paths no container (workspace)
+
+| Path no container | Conteúdo |
+|-------------------|----------|
+| **`/zion`** | Pasta `zion/` do repo (engine: bootstrap, scripts, skills, commands, agents). |
+| **`/workspace/mnt`** | Projeto que o usuário montou (ex.: `~/projects`). **CWD típico do agente.** |
+| **`/workspace/obsidian`** | Vault Obsidian. |
+| **`/workspace/nixos`** | Repo NixOS (este repo). **Só montado no scheduler e em `zion edit`** (não na sessão normal `run`/`shell`). |
+| **`/workspace/logs`** | Logs do host (ex.: journal). **Só montado em `zion edit`.** |
+
+### 3.3 Modos de sessão e mounts
 
 | Modo | `/workspace/nixos` | `/workspace/logs` | `/workspace/mnt` |
 |------|--------------------|-------------------|------------------|
-| run / shell / start / resume | ❌ | ❌ | Projeto (ex.: ~/projects) |
-| **zion edit** | ❌ | ✅ (journal) | ~/nixos |
-| scheduler | ✅ | ❌ | (default) |
+| `zion run`, `zion shell`, `start`, `resume`, workers | ❌ | ❌ | Projeto do usuário (ex.: ~/projects) |
+| **`zion edit`** | ❌ (mnt = nixos) | ✅ (journal ro) | **~/nixos** (este repo) |
+| **scheduler** | ✅ | ❌ | default |
+
+Em **`zion edit`**, `/workspace/mnt` aponta para o repo NixOS; é o modo para o agente editar este repo e acessar logs. Usa o mesmo project name (ex.: `clau-projects`) para compartilhar `cursor_config` com outras sessões.
 
 ---
 
-## Estrutura do repo (host)
+## 4. Zion — perspectiva de dentro do container
 
-```
-~/nixos/                          ← este repo (config NixOS)
-├── CLAUDE.md                     ← este arquivo
-├── flake.nix
-├── configuration.nix
-├── modules/                      ← módulos NixOS (packages, services, hyprland, etc.)
-├── stow/                         ← dotfiles (Hyprland, Waybar, Zed, .claude, etc.)
-│   ├── .config/                  ← hypr, waybar, etc. (stow -d ~/nixos/stow -t ~ .)
-│   └── .claude/                  ← hooks, scripts, agents (Claude no host/container)
-├── scripts/                      ← scripts do host (bootstrap.sh, kanban-sync, etc.)
-├── zion/                         ← Zion: launcher + container
-│   ├── cli/                      ← Zion CLI (bashly, docker-compose, comandos)
-│   │   ├── docker-compose.claude.yml
-│   │   ├── zion                  ← binário gerado (bashly)
-│   │   └── src/commands/         ← comandos (run.sh, host_edit.sh, etc.)
-│   ├── scripts/                  ← bootstrap do container (bootstrap.sh, etc.)
-│   ├── bootstrap.md
-│   └── ...
-└── ...
-```
+Esta seção descreve o sistema de containers e o uso do Zion **do ponto de vista de quem está rodando dentro do container** (o agente). Use-a para entender onde você está, o que está montado e como o host orquestra as sessões.
 
-- **Dotfiles:** em `stow/.config/`; deploy com `stow -d ~/nixos/stow -t ~ .` (não são gerenciados por módulos NixOS).
-- **Hyprland / atalhos:** `stow/.config/hypr/` (ex.: `application.conf` — MOD3+p = `zion` / Cursor).
+### 4.1 Como o host inicia o container
+
+- O usuário roda no **host** o comando **`zion`** (CLI em `zion/cli/`). O CLI usa **Docker Compose** com o arquivo `zion/cli/docker-compose.claude.yml`.
+- A imagem é **`claude-nix-sandbox`** (build a partir de `zion/cli/Dockerfile.claude`). Todos os serviços (sandbox, worker, scheduler) usam essa mesma imagem.
+- O Compose define **três conjuntos de uso**: (1) **sandbox** — sessão interativa (Cursor/Claude/OpenCode); (2) **worker** / **worker-fast** — execução de tasks em background; (3) **scheduler** — loop a cada 10 min que despacha tasks. Cada um usa **volumes** diferentes conforme o modo (ver abaixo).
+
+### 4.2 Como você sabe que está dentro do container
+
+- **Variável de ambiente:** `CLAUDE_ENV=container` (definida no compose em todos os serviços).
+- **Bootstrap:** ao iniciar a sessão, o script **`/zion/scripts/bootstrap.sh`** é executado. Ele por sua vez chama o bootstrap do repo NixOS em **`/workspace/nixos/scripts/bootstrap.sh`** ou **`/workspace/mnt/scripts/bootstrap.sh`**. Esse bootstrap carrega **`scripts/bootstrap/modules.sh`**, que define:
+  - **`IS_CONTAINER=1`** se `CLAUDE_ENV=container` ou existir `/.dockerenv` ou cgroup indicar docker/container.
+  - **`IS_CONTAINER=0`** no host.
+  - **`WS=/workspace`** dentro do container; no host, `WS` é a raiz do repo.
+- **Regra para o agente:** se `IS_CONTAINER=1`, não rodar `nixos-rebuild`, `systemctl`, etc.; pedir ao usuário executar no host.
+
+### 4.3 Sistema de volumes (o que você enxerga)
+
+Os mounts são definidos no compose como **anchors** reutilizáveis:
+
+- **`x-base-volumes`** — usado por **sandbox** (sessão interativa) e por **workers**.
+  - **`/zion`** ← pasta `zion/` do repo (sempre a mesma).
+  - **`/workspace/obsidian`** ← vault Obsidian (host: `OBSIDIAN_PATH`).
+  - **`/workspace/mnt`** ← projeto do usuário (host: `CLAUDIO_MOUNT`, ex.: `~/projects`). **working_dir** do sandbox é `/workspace/mnt`.
+  - **Não** há `/workspace/nixos` nem `/workspace/logs` nesses modos.
+  - Além disso: `~/.claude`, `~/.cursor`, skills/commands do zion, hooks do stow do host, `cursor_config` (volume nomeado), `/host/proc/*` e `/host/etc/*` (read-only para observabilidade), `/workspace/.hive-mind`.
+
+- **`x-scheduler-volumes`** — usado só pelo serviço **scheduler**.
+  - Igual ao base, mas **inclui** **`~/nixos` do host → `/workspace/nixos`**. Assim o scheduler (e scripts que ele chama) enxergam o repo NixOS e podem ler/escrever em `.ephemeral/` do repo.
+
+- **`zion edit`** (comando `edit`) — não é um serviço separado no compose; é o **mesmo serviço sandbox** rodado com parâmetros diferentes pelo CLI:
+  - **`/workspace/mnt`** = **`~/nixos`** (este repo), montado read-write.
+  - **Volume extra:** `/var/log/journal` do host → `/workspace/logs/host/journal` (ro).
+  - **Project name** fixo `clau-projects` para compartilhar o volume `cursor_config` com a sessão “projeto” e evitar novo login no Cursor.
+
+Resumo prático para o agente:
+
+| Você está em… | `/workspace/mnt` é… | `/workspace/nixos` existe? | `/workspace/logs` existe? |
+|---------------|----------------------|----------------------------|----------------------------|
+| Sessão normal (`zion run` / `shell`) | Projeto do usuário (ex.: ~/projects) | ❌ | ❌ |
+| **`zion edit`** | Repo NixOS (este repo) | ❌ (mnt = nixos) | ✅ (journal) |
+| **Scheduler** (container em background) | Projeto default | ✅ | ❌ |
+
+### 4.4 Serviços do compose e o que fazem
+
+| Serviço | Uso | Entrypoint / comando |
+|---------|-----|----------------------|
+| **sandbox** | Sessão interativa (Cursor/Claude/OpenCode). Fica com `sleep infinity` até o CLI fazer `exec` com o engine (agent, claude, opencode). | Default: `sleep infinity`. O `zion run`/`edit` faz `exec` no container com bash que roda bootstrap + engine. |
+| **worker** | Roda tasks do kanban (recurring/pending). Limite de memória 12g. | `entrypoint: bash`, `command: /zion/scripts/clau-runner.sh`. O runner usa `WORKSPACE=/workspace` e tasks em `$WORKSPACE/obsidian/_agent/tasks`; com base-volumes, `/workspace/nixos` não existe no worker (apenas no scheduler). O script `clau-runner.sh` no repo está em `scripts/`; no container o compose invoca via `/zion/scripts/` (link ou cópia no deploy). |
+| **worker-fast** | Mesmo que worker, com menos memória (4g). | Idem, outro profile de recursos. |
+| **scheduler** | Loop contínuo: a cada 600 s executa `clau-scheduler.sh` (com `SCHEDULER_IN_CONTAINER=1`, `SCHEDULER_VAULT_DIR=/workspace/obsidian`, `SCHEDULER_PROJECT_DIR=/workspace/nixos`), depois dorme 600 s. | `command`: loop `while true; do ... /zion/scripts/clau-scheduler.sh; sleep 600; done`. Usa **scheduler-volumes** (com `/workspace/nixos`). |
+
+O **scheduler** lê estado em `$SCHEDULER_PROJECT_DIR/.ephemeral/scheduler/` (no container = `/workspace/nixos/.ephemeral/scheduler/`). O **runner** (workers) usa `$WORKSPACE/obsidian/_agent/tasks` (running/done/failed) e, quando em container, pode usar `/workspace/nixos/.ephemeral/scheduler/completed` para marcar conclusões visíveis ao host.
+
+### 4.5 Bootstrap em cadeia (o que roda ao abrir a sessão)
+
+1. O CLI (no host) sobe o container e executa algo como:  
+   `. /zion/scripts/bootstrap.sh; cd /workspace/mnt; exec agent` (ou claude/opencode).
+2. **`/zion/scripts/bootstrap.sh`** (dentro do container):
+   - Cria **`/workspace/host`** como symlink para `/workspace/nixos` (se existir) ou para `/workspace/mnt` (se `mnt` for o repo NixOS, ex.: `zion edit`), para compatibilidade com scripts que esperam “repo do host”.
+   - Chama **`scripts/bootstrap.sh`** do repo NixOS (em `/workspace/nixos` ou `/workspace/mnt`). Esse script está no repo em **`scripts/bootstrap.sh`** e faz:
+     - Sync de `stow/.claude/*` para `~/.claude/` (agents, commands, hooks, scripts, skills) e configs (settings.json, statusline.sh).
+     - Carrega **`scripts/bootstrap/modules.sh`**, que define **IS_CONTAINER**, **WS**, e os módulos do dashboard (header, scheduler, github, rss, etc.).
+3. Depois do bootstrap, o shell está em **`/workspace/mnt`** e o engine (Cursor/Claude/OpenCode) inicia. O agente vê **CWD = projeto** (ou repo NixOS em `zion edit`).
+
+### 4.6 Uso prático para o agente
+
+- **Se o seu CWD é um projeto (ex.: ~/projects):** você está em sessão **run/shell**. `/workspace/mnt` = esse projeto. Para editar o repo NixOS ou logs, o usuário precisa abrir uma sessão com **`zion edit`**.
+- **Se o seu CWD é este repo (NixOS) e há `/workspace/logs`:** você está em **`zion edit`**. Pode editar este repo e ler logs do host em `/workspace/logs/host/journal`.
+- **Skills e comandos:** vêm de **`/zion/skills`**, **`/zion/commands`**, e são expostos em `~/.cursor/skills`, `~/.cursor/rules` e `~/.claude/` via mounts. Hooks vêm do **stow** do host (`stow/.claude/hooks`).
+- **Não executar no container:** `nixos-rebuild`, `nh os switch`, `systemctl start/stop` de serviços do host. Usar **`nh os test .`** só para validar build quando o repo NixOS estiver montado (edit/scheduler); mesmo assim, o apply é no host.
 
 ---
 
-## Zion CLI — manutenção
+## 5. Mapa do repositório
 
-- **Regenerar CLI:** na pasta `zion/cli/`, rodar `bashly generate` (ou `zion update` no host); isso regera o script `zion` a partir de `src/bashly.yml` e `src/commands/*.sh`.
-- **Comandos principais:** `run`, `shell`, `resume`, `start`, `edit`, `worker`, `scheduler`, `logs`, etc.
-- **Edit:** único comando que monta este repo em `/workspace/mnt` e ainda monta `/workspace/logs`; usa project `clau-projects` para compartilhar login do Cursor. **Nome do comando é `edit`** (não host-edit).
+```
+.
+├── CLAUDE.md              ← Este arquivo (contexto do agente).
+├── README.md              ← Visão geral humana (NixOS + CLAUDINHO).
+├── flake.nix              ← Inputs (nixpkgs 25.11, nixos-hardware, chaotic, home-manager, claude-code) e nixosConfigurations.nomad.
+├── configuration.nix      ← Registry de módulos (só imports; ativar/desativar aqui).
+├── hardware.nix           ← UUIDs de partição (local; costuma estar skip-worktree).
+├── makefile               ← Atalhos do host (doctor, run, auto, vault-link, etc.).
+├── modules/               ← Módulos NixOS.
+│   ├── core/              ← nix, core, services, programs, packages, fonts, shell, kernel, hibernate.
+│   ├── greetd.nix         ← Greeter de login.
+│   ├── hyprland.nix       ← Compositor (DE ativo).
+│   ├── nvidia.nix         ← NVIDIA PRIME (iGPU AMD default).
+│   ├── asus.nix           ← ASUS Zephyrus.
+│   ├── agents/            ← Scheduler container + agent-container (systemd).
+│   ├── obsidian-sync.nix, lmstudio.nix, netdata.nix, work.nix, virt.nix, etc.
+├── stow/                  ← Dotfiles (GNU stow → symlink em ~).
+│   ├── .config/           ← hypr, waybar, zed, ghostty, rofi, zsh, etc.
+│   └── .claude/           ← Hooks, scripts, agents (Claude no host/container).
+├── scripts/               ← Scripts do host (bootstrap.sh, clau-runner.sh, clau-scheduler.sh, api-usage.sh, etc.).
+├── zion/                  ← Zion: launcher + container.
+│   ├── cli/               ← Zion CLI.
+│   │   ├── docker-compose.claude.yml   ← Compose do container do agente.
+│   │   ├── zion                        ← Binário gerado (bashly).
+│   │   └── src/
+│   │       ├── bashly.yml              ← Definição de comandos e flags.
+│   │       └── commands/*.sh            ← run, shell, edit, worker, scheduler, etc.
+│   ├── scripts/           ← Bootstrap e scripts no container (bootstrap.sh, statusline, etc.).
+│   ├── bootstrap.md       ← Instruções para o agente (/load).
+│   ├── system/            ← INIT.md e módulos de sistema (loader).
+│   ├── commands/          ← Comandos de alto nível (load.md, zion.md).
+│   ├── skills/            ← Skills do agente (nixos, monolito, orquestrador, etc.).
+│   ├── agents/            ← Personas/agentes (orquestrador, nixos, etc.).
+│   ├── personas/          ← Avatar (glados, etc.).
+│   └── hooks/             ← Hooks claude-code (session-start, pre-tool-use, etc.).
+├── run/                   ← (Pode ser específico do ambiente.)
+└── .ephemeral/            ← Estado efêmero (logs, scheduler state; muitas vezes gitignored).
+```
+
+- **Dotfiles:** em `stow/.config/` e `stow/.claude/`. Deploy: `stow -d ~/nixos/stow -t ~ .` (não vêm de módulos NixOS).
+- **Hyprland (keybinds):** `stow/.config/hypr/` (ex.: `application.conf` — MOD3+p = abrir `zion`/Cursor; `$claudinho` / `$claudio` = só `zion`, respeitando `~/.zion`).
+
+---
+
+## 6. Skills do projeto (NixOS e Hyprland)
+
+Para alterações em **NixOS** ou **Hyprland**, o agente deve **ler e seguir** as skills abaixo (no repo estão em `zion/skills/`; no container em `/zion/skills/`).
+
+| Skill | Caminho no repo | Quando usar |
+|-------|-----------------|-------------|
+| **nixos** | `zion/skills/nixos/SKILL.md` | Adicionar/remover pacotes, mudar opções NixOS, editar módulos (`modules/*.nix`, `configuration.nix`, `flake.nix`), corrigir erros de build. Usa MCP-NixOS e `nh os test .`. |
+| **hyprland-config** | `zion/skills/hyprland-config/SKILL.md` | Editar config do Hyprland (hyprland.conf, keybinds, window rules, workspace, waybar, hyprlock, hypridle), instalar/troubleshoot o módulo Hyprland, qualquer arquivo em `stow/.config/hypr/`. |
+
+**Regras Cursor:** As regras em `.cursor/rules/nixos-skill.mdc` e `.cursor/rules/hyprland-skill.mdc` ativam o uso dessas skills quando os arquivos correspondentes estão em contexto (globs: módulos NixOS e config Hyprland/waybar).
+
+---
+
+## 7. NixOS — onde alterar o quê
+
+- **Pacotes de sistema:** `modules/core/packages.nix`.
+- **Serviços:** `modules/core/services.nix`.
+- **Hyprland (módulo NixOS):** `modules/hyprland.nix`.
+- **Keybinds / Waybar / config de DE:** **`stow/.config/`** (stow), não em módulos NixOS.
+- **Ativar/desativar módulos:** editar **`configuration.nix`** (lista de `imports`).
+
+**Workflow recomendado:** Usar a skill **nixos** (MCP-NixOS, nh): buscar pacotes/opções, editar o módulo adequado, rodar **`nh os test .`** para validar. **Não** rodar `nixos-rebuild switch` a menos que o usuário peça. Dotfiles: sempre via stow.
+
+---
+
+## 8. Zion CLI — manutenção
+
+- **Regenerar o binário `zion`:** em `zion/cli/` executar `bashly generate` (ou no host: `zion update`). Fonte: `src/bashly.yml` + `src/commands/*.sh`.
+- **Comandos principais:** `run` (default), `shell`, `resume`, `continue`, `start`, `edit`, `worker`, `worker-auto`, `scheduler`, `logs`, `status`, `new`, `build`, `down`, `destroy`, `update`, `init`.
+- **`edit`:** único comando que monta este repo em `/workspace/mnt` e ainda monta `/workspace/logs`; nome do comando no CLI é **`edit`** (arquivo: `host_edit.sh`).
 - **Compose:** volumes base em `x-base-volumes`; scheduler usa `x-scheduler-volumes` (base + nixos). Não colocar nixos/logs nos volumes base para não expor este repo em toda sessão.
 
-**Renomear um comando CLI:** (1) Em `src/bashly.yml`, alterar `name:` do comando. (2) Em `src/commands/<arquivo>.sh`, atualizar mensagens/echo que citem o nome antigo. (3) Regenerar com `bashly generate` no host; se bashly não estiver disponível (ex.: no container), editar manualmente o binário `zion`: trocar o `case` (ex.: `host-edit)` → `edit)`), `action="..."`, funções `zion_<antigo>_command` / `zion_<antigo>_parse_requirements` → `zion_<novo>_*`, help `printf` e todos os textos user-facing. (4) Atualizar comentários em `docker-compose.claude.yml` e **este CLAUDE.md** para refletir o novo nome.
+**Renomear comando:** (1) `src/bashly.yml`: alterar `name:` e `filename` se necessário. (2) Renomear/criar arquivo em `src/commands/`. (3) Regenerar com `bashly generate`. (4) Atualizar referências em compose e neste CLAUDE.md.
 
 ---
 
-## NixOS — manutenção (skills)
+## 9. Bootstrap no container
 
-Para alterar **packages, options, módulos NixOS** neste repo:
-
-1. **Usar a skill `nixos`** (NixOS Configuration Management): buscar pacotes/opções via MCP-NixOS, editar o módulo certo, rodar `nh os test .` e iterar em erros.
-2. **Módulos comuns:**  
-   - Pacotes sistema → `modules/core/packages.nix`  
-   - Serviços → `modules/core/services.nix`  
-   - Hyprland → `modules/hyprland.nix`  
-   - Dotfiles (keybinds, waybar, etc.) → **`stow/.config/`** (stow, não NixOS).
-3. **Testar:** `nh os test .` (ativação temporária). **Não** rodar `nixos-rebuild switch` a menos que o usuário peça.
-4. **Deploy dotfiles:** `stow -d ~/nixos/stow -t ~ .`
-
-Referência completa: skill **nixos** (MCP-NixOS, nh, tabela de módulos).
+- **Bootstrap do agente:** `zion/scripts/bootstrap.sh` (no container: `/zion/scripts/bootstrap.sh`).
+- **Instruções de comportamento (/load):** `zion/bootstrap.md` (avatar + pergunta; depois INIT e módulos em `/zion/system/`).
+- **Bootstrap do repo NixOS:** o script do Zion procura em `/workspace/nixos/scripts/bootstrap.sh` ou `/workspace/mnt/scripts/bootstrap.sh` (em `zion edit`, mnt = nixos). Cria `/workspace/host` como symlink para o repo NixOS quando aplicável.
 
 ---
 
-## Hyprland (keybinds / dotfiles)
+## 10. Decisões rápidas (para o agente)
 
-- Config em **`stow/.config/hypr/`** (ex.: `application.conf`, `hyprland.conf`).
-- **MOD3+p** → abre só `zion` (respeita `~/.zion`, ex.: engine=cursor).
-- `$claudinho` e `$claudio` = apenas `zion` (sem `zion start`), para respeitar `.zion`.
-
----
-
-## Bootstrap no container
-
-- **Arquivo:** `zion/scripts/bootstrap.sh` (dentro do container é também `/zion/scripts/bootstrap.sh`).
-- Procura o bootstrap do repo NixOS em **`/workspace/nixos/scripts/bootstrap.sh`** ou **`/workspace/mnt/scripts/bootstrap.sh`** (zion edit: mnt = nixos).
-- Cria `/workspace/host` → symlink para `/workspace/nixos` ou `/workspace/mnt` quando for o repo NixOS.
+| Se o usuário pedir… | Ação |
+|--------------------|------|
+| Adicionar pacote / mudar opção NixOS | Skill **nixos**; editar módulo em `modules/`; `nh os test .`. |
+| Mudar keybind / Waybar / config Hyprland | Skill **hyprland-config** (`zion/skills/hyprland-config/SKILL.md`); editar em `stow/.config/hypr/`; deploy com `stow -d ~/nixos/stow -t ~ .`. |
+| Alterar comando Zion ou flags | `zion/cli/src/bashly.yml` e `zion/cli/src/commands/*.sh`; depois `bashly generate`. |
+| Alterar mounts ou serviços do container | `zion/cli/docker-compose.claude.yml`. |
+| Alterar comportamento do agente (personas, /load) | `zion/bootstrap.md`, `zion/system/INIT.md`, `zion/commands/`, `stow/.claude/`. |
+| Rodar nixos-rebuild / systemctl no host | Só se `IS_CONTAINER` não for 1; caso contrário, pedir ao usuário rodar no host. |
 
 ---
 
-## O que você pode alterar a pedido
+## 11. O que o agente pode alterar a pedido
 
-- Arquivos deste repo (módulos NixOS, stow, scripts, **zion/**).
-- Zion CLI: comandos em `zion/cli/src/commands/`, `bashly.yml`, `docker-compose.claude.yml`.
-- Comportamento do agente: `stow/.claude/`, `zion/` (bootstrap, personas, etc.).
+- Qualquer arquivo deste repo: módulos NixOS, stow, scripts, **zion/**.
+- Zion CLI: `zion/cli/src/`, `bashly.yml`, `docker-compose.claude.yml`.
+- Comportamento do agente: `stow/.claude/`, `zion/` (bootstrap, system, commands, skills, agents, hooks).
 
-Sempre que fizer mudanças em NixOS (módulos), usar a skill **nixos** e validar com `nh os test .`. Dotfiles via stow; Cursor/Hyprland via arquivos em `stow/.config/`.
+Validação: mudanças em módulos NixOS → skill **nixos** + `nh os test .`. Dotfiles → stow. Hyprland/Cursor → arquivos em `stow/.config/` e em `zion/`.
 
 ---
 
-## Referências rápidas
+## 12. Referências rápidas
 
 | Tema | Onde |
 |------|------|
-| Comportamento do agente (personas, tasks) | `claudinho/CLAUDE.md` ou equivalente em stow/obsidian |
-| Zion CLI (comandos, compose) | `zion/cli/README.md`, `zion/cli/docker-compose.claude.yml` |
-| NixOS (packages, options, módulos) | Skill **nixos** + `modules/` |
-| Dotfiles / Hyprland | `stow/.config/` |
-| Boot do agente (paths, /load) | Skill **load** ou `zion/bootstrap.md` |
+| Comportamento do agente (personas, tasks) | `zion/bootstrap.md`, `zion/system/INIT.md`, equivalente em stow/obsidian |
+| Zion CLI (comandos, compose) | `zion/cli/README.md`, `zion/cli/docker-compose.claude.yml`, `zion/cli/src/bashly.yml` |
+| NixOS (packages, options, módulos) | Seção **6** (Skills) + `zion/skills/nixos/SKILL.md` + `modules/` |
+| Dotfiles / Hyprland | Seção **6** (Skills) + `zion/skills/hyprland-config/SKILL.md` + `stow/.config/` |
+| Boot do agente (/load, paths) | `zion/bootstrap.md`, `zion/commands/load.md` |
+| Infra (MCP, Git) | MCP: nixos, Atlassian (ro), Notion (ro). Git: GH_TOKEN read-only; identidade de commit pode vir do host. |
