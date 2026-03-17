@@ -939,6 +939,9 @@ zion_load_config() {
     source "$zion_config_file"
     [[ -n "${engine:-}" ]] && export ZION_ENGINE="$engine"
     [[ -n "${model:-}" ]] && export ZION_MODEL="$model"
+    if [[ -n "${DANGER:-${danger:-}}" ]] && [[ "${DANGER:-${danger:-}}" != "0" ]] && [[ "${DANGER:-${danger:-}}" != "false" ]]; then
+      export ZION_DANGER=1
+    fi
     [[ -n "${GH_TOKEN:-}" ]] && export GH_TOKEN
     [[ -n "${ANTHROPIC_API_KEY:-}" ]] && export ANTHROPIC_API_KEY
     [[ -n "${CURSOR_API_KEY:-}" ]] && export CURSOR_API_KEY
@@ -1035,7 +1038,7 @@ zion_initial_md() {
 
 # --danger: sufixo/args de bypass de permissões por engine (vazio se flag não setada)
 zion_danger_flag() {
-  if [[ -z "${flag_danger:-${args['--danger']:-}}" ]]; then
+  if [[ -z "${flag_danger:-${args['--danger']:-${ZION_DANGER:-}}}" ]]; then
     echo ""
     return 0
   fi
@@ -1079,7 +1082,7 @@ zion_run_command() {
       proj_name="$(zion_proj_name_open "$proj_slug")"
       echo "[zion run] engine=opencode ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
       opencode_danger_env=""
-      [[ -n "${flag_danger:-${args['--danger']:-}}" ]] && opencode_danger_env="-e OPENCODE_PERMISSION_BYPASS=1"
+      [[ -n "${flag_danger:-${args['--danger']:-${ZION_DANGER:-}}}" ]] && opencode_danger_env="-e OPENCODE_PERMISSION_BYPASS=1"
       opencode_init_env=""
       [[ -n "$initial_md" ]] && opencode_init_env="-e CLAUDE_INITIAL_MD=/workspace/$initial_md"
       opencode_resume_env=""

@@ -13,7 +13,7 @@ case "$engine" in
     proj_name="$(zion_proj_name_open "$proj_slug")"
     echo "[zion run] engine=opencode ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
     opencode_danger_env=""
-    [[ -n "${flag_danger:-${args['--danger']:-}}" ]] && opencode_danger_env="-e OPENCODE_PERMISSION_BYPASS=1"
+    [[ -n "${flag_danger:-${args['--danger']:-${ZION_DANGER:-}}}" ]] && opencode_danger_env="-e OPENCODE_PERMISSION_BYPASS=1"
     opencode_init_env=""
     [[ -n "$initial_md" ]] && opencode_init_env="-e CLAUDE_INITIAL_MD=/workspace/$initial_md"
     opencode_resume_env=""

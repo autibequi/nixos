@@ -73,7 +73,7 @@ Sem `--engine=` na linha de comando, `zion run` usa `engine=` de ~/.zion; se nã
 
 Flags globais: `--engine=opencode|claude|cursor`, `--model=haiku|opus`, `--instance ID`, `--rw`, `--ro`, `--danger`.
 
-- **`--danger`** — bypass de permissões no engine: **claude** = `--permission-mode bypassPermissions`; **cursor** = `--force` (auto-approve); **opencode** = env `OPENCODE_PERMISSION_BYPASS=1` (se o binário suportar). Sem a flag, o engine pede confirmação conforme config.
+- **`--danger`** — bypass de permissões no engine: **claude** = `--permission-mode bypassPermissions`; **cursor** = `--force` (auto-approve); **opencode** = env `OPENCODE_PERMISSION_BYPASS=1` (se o binário suportar). Sem a flag, o engine pede confirmação conforme config. Em **~/.zion** use **`DANGER=true`** para deixar danger sempre ligado (equiv. a passar `--danger` em todo run/resume/continue).
 
 ### Engine Cursor (Cursor CLI)
 

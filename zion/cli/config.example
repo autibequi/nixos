@@ -1,6 +1,6 @@
-# Configuração do claudio — copie para ~/.claudio e ajuste (chmod 600 ~/.claudio)
+# Configuração do zion — copie para ~/.zion e ajuste (chmod 600 ~/.zion)
 # Este arquivo é sourceado pelo CLI; use sintaxe shell KEY=value.
-# Nunca commite ~/.claudio (contém tokens).
+# Nunca commite ~/.zion (contém tokens).
 
 # ── Engine e modelo (--engine e --model na linha de comando sobrescrevem)
 # opencode = OpenCode TUI | claude = Claude Code | cursor = Cursor
@@ -18,6 +18,9 @@ ANTHROPIC_API_KEY=
 # ── Opcionais
 # Caminho do vault Obsidian (default: $HOME/.ovault)
 # OBSIDIAN_PATH=$HOME/.ovault
+
+# Danger sempre ligado (equiv. a passar --danger em todo run/resume/continue)
+# DANGER=true
 
 # Raiz do repo NixOS (default: $HOME/nixos)
 # ZION_NIXOS_DIR=$HOME/nixos

@@ -22,6 +22,9 @@ zion_load_config() {
     source "$zion_config_file"
     [[ -n "${engine:-}" ]] && export ZION_ENGINE="$engine"
     [[ -n "${model:-}" ]] && export ZION_MODEL="$model"
+    if [[ -n "${DANGER:-${danger:-}}" ]] && [[ "${DANGER:-${danger:-}}" != "0" ]] && [[ "${DANGER:-${danger:-}}" != "false" ]]; then
+      export ZION_DANGER=1
+    fi
     [[ -n "${GH_TOKEN:-}" ]] && export GH_TOKEN
     [[ -n "${ANTHROPIC_API_KEY:-}" ]] && export ANTHROPIC_API_KEY
     [[ -n "${CURSOR_API_KEY:-}" ]] && export CURSOR_API_KEY
@@ -116,9 +119,10 @@ zion_initial_md() {
   [[ -f "$full" ]] && echo "$f" || echo ""
 }
 
-# --danger: sufixo/args de bypass de permissões por engine (vazio se flag não setada)
+# --danger: sufixo/args de bypass de permissões por engine (vazio se flag não setada).
+# Config ~/.zion: DANGER=true deixa danger sempre ligado.
 zion_danger_flag() {
-  if [[ -z "${flag_danger:-${args['--danger']:-}}" ]]; then
+  if [[ -z "${flag_danger:-${args['--danger']:-${ZION_DANGER:-}}}" ]]; then
     echo ""
     return 0
   fi
