@@ -12,3 +12,15 @@ fi
 cp "$src" "$dest"
 chmod 600 "$dest"
 echo "[zion init] Criado $dest — edite e preencha engine=, GH_TOKEN=, ANTHROPIC_API_KEY="
+
+# Garante que o diretório do zion está no PATH no ~/.zshrc
+bin_dir="$zion_nixos_dir/stow/.local/bin"
+zshrc="${ZDOTDIR:-$HOME}/.zshrc"
+if [[ -d "$bin_dir" ]] && [[ -w "${zshrc:-$HOME/.zshrc}" ]] 2>/dev/null; then
+  if ! grep -q "stow/.local/bin" "$zshrc" 2>/dev/null; then
+    echo "" >> "$zshrc"
+    echo "# Zion CLI (adicionado por zion init)" >> "$zshrc"
+    printf 'export PATH="%s:$PATH"\n' "$bin_dir" >> "$zshrc"
+    echo "[zion init] PATH adicionado em $zshrc — rode 'source $zshrc' ou abra um novo terminal para usar o comando zion"
+  fi
+fi
