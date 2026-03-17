@@ -217,3 +217,7 @@ commands:
       - name: question
         help: Pergunta (opcional; sem arg = interativo).
     filename: commands/ask.sh
+
+  - name: host-edit
+    help: Abre sessão com ~/nixos em /workspace/mnt e /workspace/logs (único modo com mount de nixos + logs).
+    filename: commands/host_edit.sh

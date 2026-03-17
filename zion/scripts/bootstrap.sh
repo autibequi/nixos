@@ -2,20 +2,25 @@
 # Zion: bootstrap do agente no container.
 # Delega para o bootstrap do repo NixOS. No container, mounts ficam sob /workspace (nixos, obsidian, logs, mount).
 
-# Repo NixOS em /workspace/nixos. Opcional: symlink /workspace/host -> /workspace/nixos para compatibilidade.
+# Repo NixOS: em /workspace/nixos (scheduler) ou em /workspace/mnt (zion host-edit). Symlink /workspace/host para compatibilidade.
 if [[ -d /workspace/nixos ]] && [[ -d /workspace ]] && [[ ! -e /workspace/host ]]; then
   ln -sfn /workspace/nixos /workspace/host 2>/dev/null || true
+elif [[ -d /workspace/mnt ]] && [[ -f /workspace/mnt/CLAUDE.md ]] && [[ -d /workspace ]] && [[ ! -e /workspace/host ]]; then
+  ln -sfn /workspace/mnt /workspace/host 2>/dev/null || true
 fi
 
-# Bootstrap completo (dashboard, sync stow, módulos) vive em /workspace/nixos/scripts/bootstrap.sh
-if [[ -f /workspace/nixos/scripts/bootstrap.sh ]]; then
-  source /workspace/nixos/scripts/bootstrap.sh
-  _ret=$?
-fi
+# Bootstrap completo (dashboard, sync stow, módulos): nixos ou mnt (host-edit)
+for base in /workspace/nixos /workspace/mnt; do
+  if [[ -f "$base/scripts/bootstrap.sh" ]]; then
+    source "$base/scripts/bootstrap.sh"
+    _ret=$?
+    break
+  fi
+  _ret=
+done
 
-# Fallback mínimo se o repo não tiver scripts (não deveria acontecer)
 if [[ -z "${_ret:-}" ]]; then
-  echo "[zion bootstrap] /workspace/nixos/scripts/bootstrap.sh não encontrado; continuando sem dashboard." >&2
+  echo "[zion bootstrap] scripts/bootstrap.sh do repo NixOS não encontrado; continuando sem dashboard." >&2
   _ret=0
 fi
 

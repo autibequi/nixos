@@ -16,19 +16,17 @@ x-env-worker: &env-worker
 x-extra-hosts: &extra-hosts
   - "host.docker.internal:host-gateway"
 
-# /workspace só contém as pastas montadas (nada mais). Conteúdo de projects (ou o path passado) fica só em /workspace/mnt.
+# /workspace: apenas zion (/zion), obsidian e o projeto (mnt). Nixos e logs só em scheduler ou zion host-edit.
 x-base-volumes: &base-volumes
   - ${ZION_ROOT:-${HOME}/nixos/zion}:/zion
-  - ${HOME}/nixos:/workspace/nixos
   - ${OBSIDIAN_PATH:-/tmp}:/workspace/obsidian
-  - /var/log/journal:/workspace/logs/host/journal:ro
   - ${CLAUDIO_MOUNT:-${HOME}/projects}:/workspace/mnt:${CLAUDIO_MOUNT_OPTS:-rw}
   - ${HOME}/.claude:/home/claude/.claude
   # Fonte: zion/.claude (skills, commands); hooks e scripts vêm de stow (fonte da verdade)
   - ${ZION_ROOT:-${HOME}/nixos/zion}/.claude/skills:/home/claude/.claude/skills
   - ${ZION_ROOT:-${HOME}/nixos/zion}/.claude/commands:/home/claude/.claude/commands
   - ${ZION_ROOT:-${HOME}/nixos/zion}/agents:/home/claude/.claude/agents
-  # Hooks: /workspace/nixos/stow/.claude/hooks (session-start, pre-tool-use, etc.)
+  # Hooks: stow no host (path absoluto)
   - ${HOME}/nixos/stow/.claude/hooks:/home/claude/.claude/hooks
   - ${ZION_ROOT:-${HOME}/nixos/zion}/scripts:/home/claude/.claude/scripts
   - ${HOME}/.claude.json:/home/claude/.claude.json
@@ -46,6 +44,36 @@ x-base-volumes: &base-volumes
   - ${HOME}/projects:/home/claude/projects
   - ${XDG_RUNTIME_DIR:-/run/user/1000}/${WAYLAND_DISPLAY:-wayland-1}:/run/user/1000/${WAYLAND_DISPLAY:-wayland-1}
   # Host /proc e /etc (observabilidade)
+  - /proc/meminfo:/host/proc/meminfo:ro
+  - /proc/loadavg:/host/proc/loadavg:ro
+  - /proc/uptime:/host/proc/uptime:ro
+  - /proc/cpuinfo:/host/proc/cpuinfo:ro
+  - /proc/version:/host/proc/version:ro
+  - /run/current-system:/host/run/current-system:ro
+  - /etc/os-release:/host/etc/os-release:ro
+  - /tmp/zion-hive-mind:/workspace/.hive-mind
+
+# Scheduler: base + nixos (único serviço que vê /workspace/nixos).
+x-scheduler-volumes: &scheduler-volumes
+  - ${ZION_ROOT:-${HOME}/nixos/zion}:/zion
+  - ${OBSIDIAN_PATH:-/tmp}:/workspace/obsidian
+  - ${CLAUDIO_MOUNT:-${HOME}/projects}:/workspace/mnt:${CLAUDIO_MOUNT_OPTS:-rw}
+  - ${HOME}/nixos:/workspace/nixos
+  - ${HOME}/.claude:/home/claude/.claude
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/.claude/skills:/home/claude/.claude/skills
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/.claude/commands:/home/claude/.claude/commands
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/agents:/home/claude/.claude/agents
+  - ${HOME}/nixos/stow/.claude/hooks:/home/claude/.claude/hooks
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/scripts:/home/claude/.claude/scripts
+  - ${HOME}/.claude.json:/home/claude/.claude.json
+  - ${HOME}/.cursor:/home/claude/.cursor
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/skills:/home/claude/.cursor/skills
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/commands:/home/claude/.cursor/commands
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/commands:/home/claude/.cursor/rules
+  - cursor_config:/home/claude/.config/cursor
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/.opencode:/home/claude/.config/opencode
+  - ${HOME}/projects:/home/claude/projects
+  - ${XDG_RUNTIME_DIR:-/run/user/1000}/${WAYLAND_DISPLAY:-wayland-1}:/run/user/1000/${WAYLAND_DISPLAY:-wayland-1}
   - /proc/meminfo:/host/proc/meminfo:ro
   - /proc/loadavg:/host/proc/loadavg:ro
   - /proc/uptime:/host/proc/uptime:ro
@@ -137,7 +165,7 @@ services:
       GIT_COMMITTER_NAME: Buchecha
       GIT_COMMITTER_EMAIL: buchecha@autibequi.com
     extra_hosts: *extra-hosts
-    volumes: *base-volumes
+    volumes: *scheduler-volumes
 
 volumes:
   cursor_config:
