@@ -6,7 +6,7 @@
 
 **Copie este conteúdo para `~/nixos/CLAUDE.md`** no host, para que o agente sempre tenha este contexto.
 
-**Contexto rápido para próximas execuções:** Nomenclatura = **Zion** (agentes/sessões), **Puppy** (workers em background). CLI: **`zion`** sem arg = continue (última sessão); **`zion new`** = nova sessão; **`zion resume`** = mostra lista; **`zion new-task`** = task no kanban. Config em **`~/.zion`**. Personalidade em **`zion/system/`** (SOUL, DIRETRIZES, SELF) e **`zion/personas/`**. Scripts de worker: **`puppy-runner.sh`**, **`puppy-scheduler.sh`** em `scripts/`; symlinks em `zion/scripts/`. Após mudar CLI: **`bashly generate`** em `zion/cli/`.
+**Contexto rápido para próximas execuções:** Nomenclatura = **Zion** (agentes/sessões), **Puppy** (workers em background). CLI: **`zion`** sem arg = new (nova sessão); **`zion continue`** = continua última sessão; **`zion resume`** = mostra lista; **`zion new-task`** = task no kanban. Config em **`~/.zion`**. Personalidade em **`zion/system/`** (SOUL, DIRETRIZES, SELF) e **`zion/personas/`**. Scripts de worker: **`puppy-runner.sh`**, **`puppy-scheduler.sh`** em `scripts/`; symlinks em `zion/scripts/`. Após mudar CLI: **`bashly generate`** em `zion/cli/`.
 
 ---
 
@@ -49,7 +49,7 @@ Ao abrir o projeto, faça em segundos:
 
 | Comando | O que faz |
 |---------|-----------|
-| **`zion`** (sem subcomando) | **Continue** — abre a **última sessão** (equivalente a `zion continue`). Comportamento padrão. |
+| **`zion`** (sem subcomando) | **New** — abre uma **nova sessão** (equivalente a `zion new`). Comportamento padrão. |
 | **`zion continue`** | Continua a última sessão (todos os engines: opencode, claude, cursor). Sem lista, sem prompt. |
 | **`zion new`** | **Nova sessão** no container. Exige `--engine` (ou `engine=` em `~/.zion`). Aliases: `run`, `r`, `open`, `opencode`, `code`. |
 | **`zion resume`** | **Mostra lista** de sessões (quando há TTY), pergunta UUID ou Enter para última, depois conecta. Com `--resume=UUID` pula a lista. |
@@ -267,7 +267,7 @@ Para alterações em **NixOS** ou **Hyprland**, o agente deve **ler e seguir** a
 ## 8. Zion CLI — manutenção
 
 - **Regenerar o binário `zion`:** em `zion/cli/` executar **`bashly generate`** (ou no host: **`zion update`**). Fonte: `src/bashly.yml` + `src/commands/*.sh`. **Sempre regenerar após alterar comandos ou bashly.yml** — o arquivo `zion/cli/zion` é gerado e fica desatualizado até o generate.
-- **Comportamento padrão:** sem subcomando = **continue** (última sessão). Nova sessão = **`zion new`** (aliases: run, r, open, opencode, code). Lista de sessões = **`zion resume`**. Task no kanban = **`zion new-task <nome>`**.
+- **Comportamento padrão:** sem subcomando = **new** (nova sessão). Continuar última sessão = **`zion continue`**. Lista de sessões = **`zion resume`**. Task no kanban = **`zion new-task <nome>`**.
 - **Comandos principais:** `continue` (default), `new`, `resume`, `shell`, `start`, `edit`, `puppy` (start/stop/run/status/logs/shell/tick), `logs`, `status`, `new-task`, `build`, `down`, `destroy`, `update`, `init`.
 - **`edit`:** único comando que monta este repo em `/workspace/mnt` e ainda monta `/workspace/logs`; arquivo: `host_edit.sh`; project name `zion-projects`.
 - **`puppy`:** grupo de subcomandos para o container persistente Puppy. `start` sobe container + daemon; `run <task>` executa 1 task; `tick` roda 1 tick do scheduler.

@@ -26,8 +26,8 @@ zion_usage() {
   echo
   # :command.usage_commands
   printf "%s\n" "Commands:"
-  printf "  %s   Continua a última sessão (mesmo que digitar só zion). (default)\n" "continue"
-  printf "  %s   Nova sessão no container. Exige --engine (ou engine= em ~/.zion).\n" "new     "
+  printf "  %s   Continua a última sessão.\n" "continue"
+  printf "  %s   Nova sessão no container. Exige --engine (ou engine= em ~/.zion). (default)\n" "new     "
   printf "  %s   Abre bash no container com o projeto montado.\n" "shell   "
   printf "  %s   Mostra lista de sessões e permite escolher qual retomar.\n" "resume  "
   printf "  %s   [DEPRECATED] Use 'zion new --engine=claude --danger'. Mantido por compatibilidade.\n" "start   "
@@ -5848,8 +5848,8 @@ parse_requirements() {
 
     # :command.command_fallback
     *)
-      action="continue"
-      zion_continue_parse_requirements "$@"
+      action="new"
+      zion_new_parse_requirements "$@"
       shift $#
       ;;
 

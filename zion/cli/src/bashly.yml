@@ -34,8 +34,7 @@ flags:
 commands:
   - name: continue
     alias: [cont]
-    default: force
-    help: Continua a última sessão (mesmo que digitar só zion).
+    help: Continua a última sessão.
     args:
       - name: dir
         help: "Diretório do projeto (default ~/projects)"
@@ -43,6 +42,7 @@ commands:
 
   - name: new
     alias: [run, r, open, code]
+    default: force
     help: Nova sessão no container. Exige --engine (ou engine= em ~/.zion).
     args:
       - name: dir
