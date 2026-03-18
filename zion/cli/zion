@@ -1122,6 +1122,7 @@ zion_docker_monolito_usage() {
   printf "  %s   Status dos containers\n" "status "
   printf "  %s   Constroi imagem Docker\n" "build  "
   printf "  %s   Para containers e remove volumes\n" "flush  "
+  printf "  %s   Roda testes no container (default: make test-ldi)\n" "test   "
   printf "  %s   Gerencia servidor monolito\n" "server "
   printf "  %s   Gerencia worker monolito\n" "worker "
   echo
@@ -1309,6 +1310,38 @@ zion_docker_monolito_flush_usage() {
     printf "%s\n" "Options:"
 
     # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
+    printf "    Worktree alternativo\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_monolito_test_usage() {
+  printf "zion docker monolito test - Roda testes no container (default: make test-ldi)\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker monolito test [OPTIONS]\n"
+  printf "  zion docker monolito test --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--cmd CMD"
+    printf "    Comando a executar (default: make test-ldi)\n"
+    echo
+
     # :flag.usage
     printf "  %s\n" "--worktree WORKTREE"
     printf "    Worktree alternativo\n"
@@ -1540,6 +1573,7 @@ zion_docker_bo_container_usage() {
   printf "  %s   Status dos containers\n" "status "
   printf "  %s   Constroi imagem Docker\n" "build  "
   printf "  %s   Para containers e remove volumes\n" "flush  "
+  printf "  %s   Roda testes no container (default: yarn test)\n" "test   "
   printf "  %s   Gerencia servidor bo-container\n" "server "
   echo
 
@@ -1740,6 +1774,38 @@ zion_docker_bo_container_flush_usage() {
 }
 
 # :command.usage
+zion_docker_bo_container_test_usage() {
+  printf "zion docker bo-container test - Roda testes no container (default: yarn test)\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker bo-container test [OPTIONS]\n"
+  printf "  zion docker bo-container test --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--cmd CMD"
+    printf "    Comando a executar (default: yarn test)\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
+    printf "    Worktree alternativo\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
 zion_docker_bo_container_server_usage() {
   printf "zion docker bo-container server - Gerencia servidor bo-container\n\n"
 
@@ -1857,6 +1923,7 @@ zion_docker_front_student_usage() {
   printf "  %s   Status dos containers\n" "status "
   printf "  %s   Constroi imagem Docker\n" "build  "
   printf "  %s   Para containers e remove volumes\n" "flush  "
+  printf "  %s   Roda testes no container (default: yarn test)\n" "test   "
   printf "  %s   Gerencia servidor front-student\n" "server "
   echo
 
@@ -2043,6 +2110,38 @@ zion_docker_front_student_flush_usage() {
     printf "%s\n" "Options:"
 
     # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
+    printf "    Worktree alternativo\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_front_student_test_usage() {
+  printf "zion docker front-student test - Roda testes no container (default: yarn test)\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker front-student test [OPTIONS]\n"
+  printf "  zion docker front-student test --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--cmd CMD"
+    printf "    Comando a executar (default: yarn test)\n"
+    echo
+
     # :flag.usage
     printf "  %s\n" "--worktree WORKTREE"
     printf "    Worktree alternativo\n"
@@ -4565,6 +4664,15 @@ zion_docker_monolito_flush_command() {
 }
 
 # :command.function
+zion_docker_monolito_test_command() {
+
+  # src/commands/docker_monolito_test.sh
+  zion_load_config
+  _zion_dk_shell "monolito" "app" "${args[--cmd]:-make test-ldi}" "${args[--worktree]:-}"
+
+}
+
+# :command.function
 zion_docker_monolito_server_start_command() {
 
   # src/commands/docker_monolito_server_start.sh
@@ -4655,6 +4763,15 @@ zion_docker_bo_container_flush_command() {
 }
 
 # :command.function
+zion_docker_bo_container_test_command() {
+
+  # src/commands/docker_bo_container_test.sh
+  zion_load_config
+  _zion_dk_shell "bo-container" "app" "${args[--cmd]:-yarn test}" "${args[--worktree]:-}"
+
+}
+
+# :command.function
 zion_docker_bo_container_server_start_command() {
 
   # src/commands/docker_bo_container_server_start.sh
@@ -4723,6 +4840,15 @@ zion_docker_front_student_flush_command() {
   # src/commands/docker_front_student_flush.sh
   zion_load_config
   _zion_dk_flush "front-student" "${args[--worktree]:-}"
+
+}
+
+# :command.function
+zion_docker_front_student_test_command() {
+
+  # src/commands/docker_front_student_test.sh
+  zion_load_config
+  _zion_dk_shell "front-student" "app" "${args[--cmd]:-yarn test}" "${args[--worktree]:-}"
 
 }
 
@@ -7842,6 +7968,13 @@ zion_docker_monolito_parse_requirements() {
       shift $#
       ;;
 
+    test)
+      action="test"
+      shift
+      zion_docker_monolito_test_parse_requirements "$@"
+      shift $#
+      ;;
+
     server)
       action="server"
       shift
@@ -8268,6 +8401,78 @@ zion_docker_monolito_flush_parse_requirements() {
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_monolito_test_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_monolito_test_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker monolito test"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --cmd)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--cmd']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--cmd requires an argument: --cmd CMD" >&2
+          exit 1
+        fi
+        ;;
+
       # :flag.case
       --worktree)
 
@@ -8815,6 +9020,13 @@ zion_docker_bo_container_parse_requirements() {
       shift $#
       ;;
 
+    test)
+      action="test"
+      shift
+      zion_docker_bo_container_test_parse_requirements "$@"
+      shift $#
+      ;;
+
     server)
       action="server"
       shift
@@ -9267,6 +9479,78 @@ zion_docker_bo_container_flush_parse_requirements() {
 }
 
 # :command.parse_requirements
+zion_docker_bo_container_test_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_bo_container_test_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker bo-container test"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --cmd)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--cmd']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--cmd requires an argument: --cmd CMD" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
 zion_docker_bo_container_server_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
@@ -9554,6 +9838,13 @@ zion_docker_front_student_parse_requirements() {
       action="flush"
       shift
       zion_docker_front_student_flush_parse_requirements "$@"
+      shift $#
+      ;;
+
+    test)
+      action="test"
+      shift
+      zion_docker_front_student_test_parse_requirements "$@"
       shift $#
       ;;
 
@@ -9976,6 +10267,78 @@ zion_docker_front_student_flush_parse_requirements() {
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_front_student_test_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_front_student_test_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker front-student test"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --cmd)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--cmd']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--cmd requires an argument: --cmd CMD" >&2
+          exit 1
+        fi
+        ;;
+
       # :flag.case
       --worktree)
 
@@ -10677,6 +11040,7 @@ run() {
     "docker monolito status") zion_docker_monolito_status_command ;;
     "docker monolito build") zion_docker_monolito_build_command ;;
     "docker monolito flush") zion_docker_monolito_flush_command ;;
+    "docker monolito test") zion_docker_monolito_test_command ;;
     "docker monolito server") zion_docker_monolito_server_command ;;
     "docker monolito server start") zion_docker_monolito_server_start_command ;;
     "docker monolito server stop") zion_docker_monolito_server_stop_command ;;
@@ -10690,6 +11054,7 @@ run() {
     "docker bo-container status") zion_docker_bo_container_status_command ;;
     "docker bo-container build") zion_docker_bo_container_build_command ;;
     "docker bo-container flush") zion_docker_bo_container_flush_command ;;
+    "docker bo-container test") zion_docker_bo_container_test_command ;;
     "docker bo-container server") zion_docker_bo_container_server_command ;;
     "docker bo-container server start") zion_docker_bo_container_server_start_command ;;
     "docker bo-container server stop") zion_docker_bo_container_server_stop_command ;;
@@ -10700,6 +11065,7 @@ run() {
     "docker front-student status") zion_docker_front_student_status_command ;;
     "docker front-student build") zion_docker_front_student_build_command ;;
     "docker front-student flush") zion_docker_front_student_flush_command ;;
+    "docker front-student test") zion_docker_front_student_test_command ;;
     "docker front-student server") zion_docker_front_student_server_command ;;
     "docker front-student server start") zion_docker_front_student_server_start_command ;;
     "docker front-student server stop") zion_docker_front_student_server_stop_command ;;
