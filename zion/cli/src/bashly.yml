@@ -208,6 +208,14 @@ commands:
         help: Sobrescreve ~/.zion se já existir
     filename: commands/init.sh
 
+  - name: set
+    help: "Define engine padrão em ~/.zion (engine= claude | opencode | cursor)."
+    args:
+      - name: engine
+        required: true
+        help: "Engine padrão: claude | opencode | cursor"
+    filename: commands/set_engine.sh
+
   # ── Puppy (worker persistente) ────────────────────────────
   - name: puppy
     alias: [p]
