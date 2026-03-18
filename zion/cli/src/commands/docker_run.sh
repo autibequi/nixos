@@ -54,6 +54,9 @@ echo "  compose: $compose"
 echo "  env:     $env_file"
 echo "  logs:    $log_dir"
 
+# 0. Garantir reverse proxy (80/443 -> 4004)
+zion_docker_ensure_reverseproxy
+
 # 1. Subir dependencias em background (se compose de deps existe)
 if [[ -f "$deps_compose" ]]; then
   echo ">>> Subindo dependencias..."

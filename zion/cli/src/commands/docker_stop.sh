@@ -19,3 +19,6 @@ docker compose -p "$project" down 2>/dev/null
 docker compose -p "${project}-deps" down 2>/dev/null
 
 echo "Servico $service parado."
+
+# Derrubar reverse proxy se nenhum servico estrategia continua rodando
+zion_docker_stop_reverseproxy_if_idle

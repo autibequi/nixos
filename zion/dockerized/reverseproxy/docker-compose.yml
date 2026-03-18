@@ -1,0 +1,9 @@
+services:
+  reverseproxy:
+    image: nginx:alpine
+    container_name: zion-reverseproxy
+    network_mode: "host"
+    restart: unless-stopped
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./certs:/etc/nginx/certs:ro

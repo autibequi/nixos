@@ -1,4 +1,4 @@
-# Remove sessoes Zion paradas/exited e containers orfaos.
+# Remove sessoes Zion orfas: exited, dead, ou running com apenas sleep infinity.
 zion_load_config
 
 RESET='\033[0m'
@@ -11,41 +11,47 @@ CYAN='\033[36m'
 
 force="${args[--force]:-}"
 
-# 1. Sessoes exited (zion-* excluindo zion-dk-*)
-exited=$(docker ps -a --filter "name=zion-" --filter "status=exited" \
-  --format "{{.ID}}\t{{.Names}}\t{{.Status}}" 2>/dev/null \
+# Collect all zion session containers (exclude zion-dk-* = docker services)
+all_sessions=$(docker ps -a --filter "name=zion-" \
+  --format "{{.ID}}\t{{.Names}}\t{{.Status}}\t{{.State}}" 2>/dev/null \
   | grep -v "zion-dk-" || true)
 
-# 2. Sessoes created mas nunca rodaram
-created=$(docker ps -a --filter "name=zion-" --filter "status=created" \
-  --format "{{.ID}}\t{{.Names}}\t{{.Status}}" 2>/dev/null \
-  | grep -v "zion-dk-" || true)
+[[ -z "$all_sessions" ]] && { echo -e "${GREEN}●${RESET} Nenhuma sessao encontrada."; exit 0; }
 
-# 3. Sessoes dead
-dead=$(docker ps -a --filter "name=zion-" --filter "status=dead" \
-  --format "{{.ID}}\t{{.Names}}\t{{.Status}}" 2>/dev/null \
-  | grep -v "zion-dk-" || true)
+stale_ids=()
+stale_lines=()
 
-all_stale=""
-[[ -n "$exited" ]] && all_stale+="$exited"$'\n'
-[[ -n "$created" ]] && all_stale+="$created"$'\n'
-[[ -n "$dead" ]] && all_stale+="$dead"$'\n'
-# Remove blank lines
-all_stale=$(echo "$all_stale" | sed '/^$/d')
+while IFS=$'\t' read -r id name status state; do
+  [[ -z "$id" ]] && continue
 
-if [[ -z "$all_stale" ]]; then
-  echo -e "${GREEN}●${RESET} Nenhum container parado para limpar."
+  if [[ "$state" != "running" ]]; then
+    # Exited, dead, created — sempre stale
+    stale_ids+=("$id")
+    stale_lines+=("${RED}○${RESET} ${name#zion-}  ${DIM}${status}${RESET}")
+    continue
+  fi
+
+  # Running: check if it's an orphan (only sleep/bash, no agent process)
+  # A live session has claude, cursor, or opencode running inside
+  procs=$(docker exec "$id" ps -eo comm 2>/dev/null | grep -cE '(claude|cursor|opencode)' || true)
+  procs="${procs:-0}"
+  if [[ "$procs" -eq 0 ]]; then
+    stale_ids+=("$id")
+    stale_lines+=("${YELLOW}◐${RESET} ${name#zion-}  ${DIM}${status} (orphan — no agent)${RESET}")
+  fi
+done <<< "$all_sessions"
+
+if [[ "${#stale_ids[@]}" -eq 0 ]]; then
+  echo -e "${GREEN}●${RESET} Nenhum container orfao para limpar."
   exit 0
 fi
 
-count=$(echo "$all_stale" | wc -l)
-echo -e "${BOLD}${CYAN}Sessoes paradas:${RESET} ${count}\n"
+count="${#stale_ids[@]}"
+echo -e "${BOLD}${CYAN}Sessoes para remover:${RESET} ${count}\n"
 
-while IFS=$'\t' read -r id name status; do
-  [[ -z "$id" ]] && continue
-  short="${name#zion-}"
-  echo -e "  ${RED}○${RESET} ${short}  ${DIM}${status}${RESET}"
-done <<< "$all_stale"
+for line in "${stale_lines[@]}"; do
+  echo -e "  $line"
+done
 
 echo ""
 
@@ -54,14 +60,12 @@ if [[ -z "$force" ]]; then
   [[ "$confirm" != "y" && "$confirm" != "Y" ]] && { echo "Cancelado."; exit 0; }
 fi
 
-# Remove
 removed=0
-while IFS=$'\t' read -r id name status; do
-  [[ -z "$id" ]] && continue
+for id in "${stale_ids[@]}"; do
   docker rm -f "$id" >/dev/null 2>&1 && removed=$((removed + 1))
-done <<< "$all_stale"
+done
 
 echo -e "\n${GREEN}●${RESET} ${removed}/${count} containers removidos."
 
-# Prune dangling networks from compose runs
+# Prune dangling networks
 docker network prune -f >/dev/null 2>&1 || true

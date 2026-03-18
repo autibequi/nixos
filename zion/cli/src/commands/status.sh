@@ -66,7 +66,7 @@ row() {
 # key=value com cor
 kv() {
   local label="$1" value="$2" color="${3:-$WHITE}"
-  printf "  ${DIM}%-14s${RESET} ${color}%s${RESET}\n" "$label" "$value"
+  printf "  ${DIM}%-14s${RESET} ${color}%b${RESET}\n" "$label" "$value"
 }
 
 count_dirs() {
@@ -159,30 +159,32 @@ session_dead=0
 if [[ -z "$session_rows" ]]; then
   echo -e "  ${DIM}(nenhuma)${RESET}"
 else
+  session_orphan=0
   while IFS=$'\t' read -r name status ports state cmd; do
     [[ -z "$name" ]] && continue
-    s_icon="$icon_stopped"
+    short="${name#zion-}"
     if [[ "$state" == "running" ]]; then
-      s_icon="$icon_running"
-      session_up=$((session_up + 1))
+      # Check if agent is alive inside (claude, cursor, opencode)
+      procs=$(docker exec "$name" ps -eo comm 2>/dev/null | grep -cE '(claude|cursor|opencode)' || true)
+      procs="${procs:-0}"
+      if [[ "$procs" -gt 0 ]]; then
+        s_icon="$icon_running"
+        session_up=$((session_up + 1))
+      else
+        s_icon="$icon_partial"
+        session_orphan=$((session_orphan + 1))
+      fi
     else
+      s_icon="$icon_stopped"
       session_dead=$((session_dead + 1))
     fi
-    short="${name#zion-}"
-    # Detect engine from command
-    engine_hint=""
-    case "$cmd" in
-      *cursor*) engine_hint=" ${DIM}cursor${RESET}" ;;
-      *claude*) engine_hint=" ${DIM}claude${RESET}" ;;
-      *opencode*) engine_hint=" ${DIM}opencode${RESET}" ;;
-    esac
     row "  ${s_icon} " "$short" "$status" "$ports"
-    # Print engine hint on same conceptual line (after row)
   done <<< "$session_rows"
   # Summary
+  stale=$((session_dead + session_orphan))
   summary="  ${DIM}"
-  [[ "$session_up" -gt 0 ]] && summary+="${session_up} running"
-  [[ "$session_dead" -gt 0 ]] && summary+="  ${YELLOW}${session_dead} exited${RESET}${DIM} (zion clean to remove)"
+  [[ "$session_up" -gt 0 ]] && summary+="${session_up} active"
+  [[ "$stale" -gt 0 ]] && summary+="  ${YELLOW}${stale} stale${RESET}${DIM} (zion clean to remove)"
   summary+="${RESET}"
   echo -e "$summary"
 fi

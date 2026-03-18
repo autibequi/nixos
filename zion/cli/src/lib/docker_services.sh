@@ -94,3 +94,45 @@ zion_docker_validate_service() {
 
   return 0
 }
+
+# --- Reverse Proxy (sobe/desce automaticamente com servicos estrategia) ---
+
+_REVERSEPROXY_DIR="${zion_nixos_dir}/zion/dockerized/reverseproxy"
+_REVERSEPROXY_PROJECT="zion-dk-reverseproxy"
+
+# Sobe o reverse proxy se ainda nao estiver rodando.
+# Gera certs autoassinados se nao existirem.
+zion_docker_ensure_reverseproxy() {
+  # Ja esta rodando?
+  if docker ps --format '{{.Names}}' 2>/dev/null | grep -q '^zion-reverseproxy$'; then
+    return 0
+  fi
+
+  # Gerar certs se nao existem
+  if [[ ! -f "$_REVERSEPROXY_DIR/certs/fullchain.pem" ]]; then
+    echo "[zion docker] Gerando certificados do reverse proxy..."
+    bash "$_REVERSEPROXY_DIR/gen-cert.sh"
+  fi
+
+  echo "[zion docker] Subindo reverse proxy (80/443 -> 4004)..."
+  docker compose -f "$_REVERSEPROXY_DIR/docker-compose.yml" -p "$_REVERSEPROXY_PROJECT" up -d --remove-orphans 2>/dev/null
+}
+
+# Desce o reverse proxy se nenhum servico estrategia estiver rodando.
+zion_docker_stop_reverseproxy_if_idle() {
+  local services
+  services=$(zion_docker_known_services)
+  for svc in $services; do
+    local proj
+    proj=$(zion_docker_project_name "$svc")
+    if docker compose -p "$proj" ps --status running -q 2>/dev/null | grep -q .; then
+      return 0  # ainda tem servico rodando, manter proxy
+    fi
+  done
+
+  # Nenhum servico rodando — derrubar proxy
+  if docker ps --format '{{.Names}}' 2>/dev/null | grep -q '^zion-reverseproxy$'; then
+    echo "[zion docker] Nenhum servico estrategia rodando, parando reverse proxy..."
+    docker compose -f "$_REVERSEPROXY_DIR/docker-compose.yml" -p "$_REVERSEPROXY_PROJECT" down 2>/dev/null
+  fi
+}
