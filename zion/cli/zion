@@ -44,7 +44,7 @@ zion_usage() {
   printf "  %s   Cria ~/.zion a partir de config.example (não sobrescreve se já existir).\n" "init        "
   printf "  %s   Define engine padrão em ~/.zion (engine= claude | opencode | cursor).\n" "set         "
   printf "  %s   Gerencia o Puppy worker (container persistente + task runner).\n" "puppy       "
-  printf "  %s   Gerencia servicos Docker da estrategia (monolito, bo-container, front-student, etc.)\n" "docker      "
+  printf "  %s   Gerencia servicos Docker da estrategia\n" "docker      "
   printf "  %s   Lista worktrees dos servicos Docker e permite escolher worktree + comando interativamente.\n" "worktree    "
   printf "  %s   Cria task + card no kanban (Puppy).\n" "new-task    "
   printf "  %s   Status agregado: sessoes, docker services e puppy workers.\n" "status      "
@@ -1050,7 +1050,7 @@ zion_puppy_query_usage() {
 
 # :command.usage
 zion_docker_usage() {
-  printf "zion docker - Gerencia servicos Docker da estrategia (monolito, bo-container, front-student, etc.)\n\n"
+  printf "zion docker - Gerencia servicos Docker da estrategia\n\n"
   printf "Alias: dk\n"
   echo
 
@@ -1060,15 +1060,9 @@ zion_docker_usage() {
   echo
   # :command.usage_commands
   printf "%s\n" "Commands:"
-  printf "  %s   Levanta um servico em container Docker.\n" "run    "
-  printf "  %s   Para um servico Docker.\n" "stop   "
-  printf "  %s   Mostra logs de um servico Docker.\n" "logs   "
-  printf "  %s   Status dos servicos Docker.\n" "status "
-  printf "  %s   Abre shell interativo ou executa comando com Go toolchain no container do servico.\n" "shell  "
-  printf "  %s   Reinicia um servico Docker.\n" "restart"
-  printf "  %s   Rebuilda a imagem Docker do servico (sem derrubar containers).\n" "build  "
-  printf "  %s   Remove tudo do servico: containers, imagens, volumes, logs e vendor/.\n" "flush  "
-  printf "  %s   Instala dependencias do servico (monta SSH do host, roda go mod download + build automaticamente).\n" "install"
+  printf "  %s   Servico monolito (Go API)\n" "monolito     "
+  printf "  %s   Servico bo-container (Vue2 admin)\n" "bo-container "
+  printf "  %s   Servico front-student (Nuxt2)\n" "front-student"
   echo
 
   # :command.long_usage
@@ -1084,14 +1078,46 @@ zion_docker_usage() {
 }
 
 # :command.usage
-zion_docker_run_usage() {
-  printf "zion docker run - Levanta um servico em container Docker.\n\n"
-  printf "Alias: up\n"
+zion_docker_monolito_usage() {
+  printf "zion docker monolito - Servico monolito (Go API)\n\n"
+  printf "Alias: mono\n"
   echo
 
   printf "%s\n" "Usage:"
-  printf "  zion docker run SERVICE [OPTIONS]\n"
-  printf "  zion docker run --help | -h\n"
+  printf "  zion docker monolito COMMAND\n"
+  printf "  zion docker monolito [COMMAND] --help | -h\n"
+  echo
+  # :command.usage_commands
+  printf "%s\n" "Commands:"
+  printf "  %s   Instala dependencias Go no container\n" "install"
+  printf "  %s   Abre shell no container (ou executa comando)\n" "shell  "
+  printf "  %s   Exibe logs do servico\n" "logs   "
+  printf "  %s   Status dos containers\n" "status "
+  printf "  %s   Constroi imagem Docker\n" "build  "
+  printf "  %s   Para containers e remove volumes\n" "flush  "
+  printf "  %s   Gerencia servidor monolito\n" "server "
+  printf "  %s   Gerencia worker monolito\n" "worker "
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_monolito_install_usage() {
+  printf "zion docker monolito install - Instala dependencias Go no container\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker monolito install [OPTIONS]\n"
+  printf "  zion docker monolito install --help | -h\n"
   echo
 
   # :command.long_usage
@@ -1100,63 +1126,13 @@ zion_docker_run_usage() {
 
     # :command.usage_flags
     # :flag.usage
-    printf "  %s\n" "--env, -e ENVIRONMENT"
-    printf "    Ambiente: sand | prod | qa | local (default: sand)\n"
+    printf "  %s\n" "--env, -e ENV"
+    printf "    Ambiente (sand, prod)\n"
     printf "    %s\n" "Default: sand"
     echo
 
     # :flag.usage
-    printf "  %s\n" "--detach, -d"
-    printf "    Roda em background (detached, sem follow de logs)\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--debug"
-    printf "    Modo debug: compila sem otimizações e expõe delve na porta 2345 (attach via\n    VS Code DAP)\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--worktree, -w NAME"
-    printf "    Usa um git worktree alternativo (nome = ultimo componente do path)\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--vertical, -V VERTICAL"
-    printf "    Vertical do front-student (carreiras-juridicas, concursos, medicina, etc.)\n"
-    echo
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
-    echo
-
-    # :command.usage_args
-    printf "%s\n" "Arguments:"
-
-    # :argument.usage
-    printf "  %s\n" "SERVICE"
-    printf "    Nome do servico (monolito, bo-container, front-student)\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-zion_docker_stop_usage() {
-  printf "zion docker stop - Para um servico Docker.\n\n"
-
-  printf "%s\n" "Usage:"
-  printf "  zion docker stop SERVICE [OPTIONS]\n"
-  printf "  zion docker stop --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_flags
-    # :flag.usage
-    printf "  %s\n" "--worktree, -w NAME"
+    printf "  %s\n" "--worktree WORKTREE"
     printf "    Worktree alternativo\n"
     echo
 
@@ -1165,24 +1141,54 @@ zion_docker_stop_usage() {
     printf "    Show this help\n"
     echo
 
-    # :command.usage_args
-    printf "%s\n" "Arguments:"
+  fi
+}
 
-    # :argument.usage
-    printf "  %s\n" "SERVICE"
-    printf "    Nome do servico\n"
+# :command.usage
+zion_docker_monolito_shell_usage() {
+  printf "zion docker monolito shell - Abre shell no container (ou executa comando)\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker monolito shell [OPTIONS]\n"
+  printf "  zion docker monolito shell --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--container, -c CONTAINER"
+    printf "    Container (app, worker, postgres, redis)\n"
+    printf "    %s\n" "Default: app"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--cmd CMD"
+    printf "    Comando a executar\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
+    printf "    Worktree alternativo\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
     echo
 
   fi
 }
 
 # :command.usage
-zion_docker_logs_usage() {
-  printf "zion docker logs - Mostra logs de um servico Docker.\n\n"
+zion_docker_monolito_logs_usage() {
+  printf "zion docker monolito logs - Exibe logs do servico\n\n"
 
   printf "%s\n" "Usage:"
-  printf "  zion docker logs SERVICE [OPTIONS]\n"
-  printf "  zion docker logs --help | -h\n"
+  printf "  zion docker monolito logs [OPTIONS]\n"
+  printf "  zion docker monolito logs --help | -h\n"
   echo
 
   # :command.long_usage
@@ -1192,17 +1198,17 @@ zion_docker_logs_usage() {
     # :command.usage_flags
     # :flag.usage
     printf "  %s\n" "--follow, -f"
-    printf "    Follow log output\n"
+    printf "    Seguir logs em tempo real\n"
     echo
 
     # :flag.usage
-    printf "  %s\n" "--tail LINES"
-    printf "    Numero de linhas (default 100)\n"
+    printf "  %s\n" "--tail, -t TAIL"
+    printf "    Numero de linhas\n"
     printf "    %s\n" "Default: 100"
     echo
 
     # :flag.usage
-    printf "  %s\n" "--worktree, -w NAME"
+    printf "  %s\n" "--worktree WORKTREE"
     printf "    Worktree alternativo\n"
     echo
 
@@ -1211,26 +1217,16 @@ zion_docker_logs_usage() {
     printf "    Show this help\n"
     echo
 
-    # :command.usage_args
-    printf "%s\n" "Arguments:"
-
-    # :argument.usage
-    printf "  %s\n" "SERVICE"
-    printf "    Nome do servico\n"
-    echo
-
   fi
 }
 
 # :command.usage
-zion_docker_status_usage() {
-  printf "zion docker status - Status dos servicos Docker.\n\n"
-  printf "Alias: ps\n"
-  echo
+zion_docker_monolito_status_usage() {
+  printf "zion docker monolito status - Status dos containers\n\n"
 
   printf "%s\n" "Usage:"
-  printf "  zion docker status [SERVICE]\n"
-  printf "  zion docker status --help | -h\n"
+  printf "  zion docker monolito status\n"
+  printf "  zion docker monolito status --help | -h\n"
   echo
 
   # :command.long_usage
@@ -1242,24 +1238,16 @@ zion_docker_status_usage() {
     printf "    Show this help\n"
     echo
 
-    # :command.usage_args
-    printf "%s\n" "Arguments:"
-
-    # :argument.usage
-    printf "  %s\n" "SERVICE"
-    printf "    Nome do servico (opcional; sem = todos)\n"
-    echo
-
   fi
 }
 
 # :command.usage
-zion_docker_shell_usage() {
-  printf "zion docker shell - Abre shell interativo ou executa comando com Go toolchain no container do servico.\n\n"
+zion_docker_monolito_build_usage() {
+  printf "zion docker monolito build - Constroi imagem Docker\n\n"
 
   printf "%s\n" "Usage:"
-  printf "  zion docker shell SERVICE [OPTIONS]\n"
-  printf "  zion docker shell --help | -h\n"
+  printf "  zion docker monolito build [OPTIONS]\n"
+  printf "  zion docker monolito build --help | -h\n"
   echo
 
   # :command.long_usage
@@ -1268,18 +1256,7 @@ zion_docker_shell_usage() {
 
     # :command.usage_flags
     # :flag.usage
-    printf "  %s\n" "--container, -C NAME"
-    printf "    Container especifico (app, worker, postgres, redis). Default: app (usado sem\n    -c)\n"
-    printf "    %s\n" "Default: app"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--cmd, -c COMMAND"
-    printf "    Comando a executar em container dev (golang + make, source montado). Ex:\n    make test\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--worktree, -w NAME"
+    printf "  %s\n" "--worktree WORKTREE"
     printf "    Worktree alternativo\n"
     echo
 
@@ -1288,33 +1265,16 @@ zion_docker_shell_usage() {
     printf "    Show this help\n"
     echo
 
-    # :command.usage_args
-    printf "%s\n" "Arguments:"
-
-    # :argument.usage
-    printf "  %s\n" "SERVICE"
-    printf "    Nome do servico\n"
-    echo
-
-    # :command.usage_examples
-    printf "%s\n" "Examples:"
-    printf "  zion docker shell monolito\n"
-    printf "  zion docker shell monolito -c make test\n"
-    printf "  zion docker shell monolito -c \"make test-ldi\"\n"
-    printf "  zion docker shell monolito -C worker\n"
-    printf "  zion docker shell monolito --worktree feat-xyz\n"
-    echo
-
   fi
 }
 
 # :command.usage
-zion_docker_restart_usage() {
-  printf "zion docker restart - Reinicia um servico Docker.\n\n"
+zion_docker_monolito_flush_usage() {
+  printf "zion docker monolito flush - Para containers e remove volumes\n\n"
 
   printf "%s\n" "Usage:"
-  printf "  zion docker restart SERVICE [OPTIONS]\n"
-  printf "  zion docker restart --help | -h\n"
+  printf "  zion docker monolito flush [OPTIONS]\n"
+  printf "  zion docker monolito flush --help | -h\n"
   echo
 
   # :command.long_usage
@@ -1323,12 +1283,7 @@ zion_docker_restart_usage() {
 
     # :command.usage_flags
     # :flag.usage
-    printf "  %s\n" "--env, -e ENVIRONMENT"
-    printf "    Ambiente (se omitido, mantem o atual)\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--worktree, -w NAME"
+    printf "  %s\n" "--worktree WORKTREE"
     printf "    Worktree alternativo\n"
     echo
 
@@ -1337,59 +1292,44 @@ zion_docker_restart_usage() {
     printf "    Show this help\n"
     echo
 
-    # :command.usage_args
-    printf "%s\n" "Arguments:"
-
-    # :argument.usage
-    printf "  %s\n" "SERVICE"
-    printf "\n"
-    echo
-
   fi
 }
 
 # :command.usage
-zion_docker_build_usage() {
-  printf "zion docker build - Rebuilda a imagem Docker do servico (sem derrubar containers).\n\n"
+zion_docker_monolito_server_usage() {
+  printf "zion docker monolito server - Gerencia servidor monolito\n\n"
 
   printf "%s\n" "Usage:"
-  printf "  zion docker build SERVICE [OPTIONS]\n"
-  printf "  zion docker build --help | -h\n"
+  printf "  zion docker monolito server COMMAND\n"
+  printf "  zion docker monolito server [COMMAND] --help | -h\n"
+  echo
+  # :command.usage_commands
+  printf "%s\n" "Commands:"
+  printf "  %s   Sobe o servidor\n" "start"
+  printf "  %s   Para o servidor\n" "stop "
   echo
 
   # :command.long_usage
   if [[ -n "$long_usage" ]]; then
     printf "%s\n" "Options:"
-
-    # :command.usage_flags
-    # :flag.usage
-    printf "  %s\n" "--worktree, -w NAME"
-    printf "    Worktree alternativo\n"
-    echo
 
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
     printf "    Show this help\n"
     echo
 
-    # :command.usage_args
-    printf "%s\n" "Arguments:"
-
-    # :argument.usage
-    printf "  %s\n" "SERVICE"
-    printf "    Nome do servico (monolito, bo-container, front-student)\n"
-    echo
-
   fi
 }
 
 # :command.usage
-zion_docker_flush_usage() {
-  printf "zion docker flush - Remove tudo do servico: containers, imagens, volumes, logs e vendor/.\n\n"
+zion_docker_monolito_server_start_usage() {
+  printf "zion docker monolito server start - Sobe o servidor\n\n"
+  printf "Alias: up\n"
+  echo
 
   printf "%s\n" "Usage:"
-  printf "  zion docker flush SERVICE [OPTIONS]\n"
-  printf "  zion docker flush --help | -h\n"
+  printf "  zion docker monolito server start [OPTIONS]\n"
+  printf "  zion docker monolito server start --help | -h\n"
   echo
 
   # :command.long_usage
@@ -1398,48 +1338,23 @@ zion_docker_flush_usage() {
 
     # :command.usage_flags
     # :flag.usage
-    printf "  %s\n" "--worktree, -w NAME"
-    printf "    Worktree alternativo\n"
-    echo
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
-    echo
-
-    # :command.usage_args
-    printf "%s\n" "Arguments:"
-
-    # :argument.usage
-    printf "  %s\n" "SERVICE"
-    printf "    Nome do servico (monolito, bo-container, front-student)\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-zion_docker_install_usage() {
-  printf "zion docker install - Instala dependencias do servico (monta SSH do host, roda go mod download + build automaticamente).\n\n"
-
-  printf "%s\n" "Usage:"
-  printf "  zion docker install SERVICE [OPTIONS]\n"
-  printf "  zion docker install --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_flags
-    # :flag.usage
-    printf "  %s\n" "--env, -e ENVIRONMENT"
-    printf "    Ambiente: sand | prod | qa | local (default: sand)\n"
+    printf "  %s\n" "--env, -e ENV"
+    printf "    Ambiente (sand, prod)\n"
     printf "    %s\n" "Default: sand"
     echo
 
     # :flag.usage
-    printf "  %s\n" "--worktree, -w NAME"
+    printf "  %s\n" "--detach, -d"
+    printf "    Modo detach\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--debug"
+    printf "    Modo debug (dlv)\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
     printf "    Worktree alternativo\n"
     echo
 
@@ -1448,12 +1363,773 @@ zion_docker_install_usage() {
     printf "    Show this help\n"
     echo
 
-    # :command.usage_args
-    printf "%s\n" "Arguments:"
+  fi
+}
 
-    # :argument.usage
-    printf "  %s\n" "SERVICE"
-    printf "    Nome do servico (monolito, bo-container, front-student)\n"
+# :command.usage
+zion_docker_monolito_server_stop_usage() {
+  printf "zion docker monolito server stop - Para o servidor\n\n"
+  printf "Alias: down\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker monolito server stop [OPTIONS]\n"
+  printf "  zion docker monolito server stop --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
+    printf "    Worktree alternativo\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_monolito_worker_usage() {
+  printf "zion docker monolito worker - Gerencia worker monolito\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker monolito worker COMMAND\n"
+  printf "  zion docker monolito worker [COMMAND] --help | -h\n"
+  echo
+  # :command.usage_commands
+  printf "%s\n" "Commands:"
+  printf "  %s   Sobe o worker\n" "start"
+  printf "  %s   Para o worker\n" "stop "
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_monolito_worker_start_usage() {
+  printf "zion docker monolito worker start - Sobe o worker\n\n"
+  printf "Alias: up\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker monolito worker start [OPTIONS]\n"
+  printf "  zion docker monolito worker start --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--env, -e ENV"
+    printf "    Ambiente (sand, prod)\n"
+    printf "    %s\n" "Default: sand"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--detach, -d"
+    printf "    Modo detach\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--debug"
+    printf "    Modo debug (dlv)\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
+    printf "    Worktree alternativo\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_monolito_worker_stop_usage() {
+  printf "zion docker monolito worker stop - Para o worker\n\n"
+  printf "Alias: down\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker monolito worker stop [OPTIONS]\n"
+  printf "  zion docker monolito worker stop --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
+    printf "    Worktree alternativo\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_bo_container_usage() {
+  printf "zion docker bo-container - Servico bo-container (Vue2 admin)\n\n"
+  printf "Alias: bo\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker bo-container COMMAND\n"
+  printf "  zion docker bo-container [COMMAND] --help | -h\n"
+  echo
+  # :command.usage_commands
+  printf "%s\n" "Commands:"
+  printf "  %s   Instala dependencias Node no container\n" "install"
+  printf "  %s   Abre shell no container (ou executa comando)\n" "shell  "
+  printf "  %s   Exibe logs do servico\n" "logs   "
+  printf "  %s   Status dos containers\n" "status "
+  printf "  %s   Constroi imagem Docker\n" "build  "
+  printf "  %s   Para containers e remove volumes\n" "flush  "
+  printf "  %s   Gerencia servidor bo-container\n" "server "
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_bo_container_install_usage() {
+  printf "zion docker bo-container install - Instala dependencias Node no container\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker bo-container install [OPTIONS]\n"
+  printf "  zion docker bo-container install --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--env, -e ENV"
+    printf "    Ambiente (sand, prod)\n"
+    printf "    %s\n" "Default: sand"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
+    printf "    Worktree alternativo\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_bo_container_shell_usage() {
+  printf "zion docker bo-container shell - Abre shell no container (ou executa comando)\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker bo-container shell [OPTIONS]\n"
+  printf "  zion docker bo-container shell --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--container, -c CONTAINER"
+    printf "    Container (app)\n"
+    printf "    %s\n" "Default: app"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--cmd CMD"
+    printf "    Comando a executar\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
+    printf "    Worktree alternativo\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_bo_container_logs_usage() {
+  printf "zion docker bo-container logs - Exibe logs do servico\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker bo-container logs [OPTIONS]\n"
+  printf "  zion docker bo-container logs --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--follow, -f"
+    printf "    Seguir logs em tempo real\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--tail, -t TAIL"
+    printf "    Numero de linhas\n"
+    printf "    %s\n" "Default: 100"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
+    printf "    Worktree alternativo\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_bo_container_status_usage() {
+  printf "zion docker bo-container status - Status dos containers\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker bo-container status\n"
+  printf "  zion docker bo-container status --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_bo_container_build_usage() {
+  printf "zion docker bo-container build - Constroi imagem Docker\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker bo-container build [OPTIONS]\n"
+  printf "  zion docker bo-container build --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
+    printf "    Worktree alternativo\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_bo_container_flush_usage() {
+  printf "zion docker bo-container flush - Para containers e remove volumes\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker bo-container flush [OPTIONS]\n"
+  printf "  zion docker bo-container flush --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
+    printf "    Worktree alternativo\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_bo_container_server_usage() {
+  printf "zion docker bo-container server - Gerencia servidor bo-container\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker bo-container server COMMAND\n"
+  printf "  zion docker bo-container server [COMMAND] --help | -h\n"
+  echo
+  # :command.usage_commands
+  printf "%s\n" "Commands:"
+  printf "  %s   Sobe o servidor\n" "start"
+  printf "  %s   Para o servidor\n" "stop "
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_bo_container_server_start_usage() {
+  printf "zion docker bo-container server start - Sobe o servidor\n\n"
+  printf "Alias: up\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker bo-container server start [OPTIONS]\n"
+  printf "  zion docker bo-container server start --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--env, -e ENV"
+    printf "    Ambiente (sand, prod)\n"
+    printf "    %s\n" "Default: sand"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--detach, -d"
+    printf "    Modo detach\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--debug"
+    printf "    Modo debug (dlv)\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
+    printf "    Worktree alternativo\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_bo_container_server_stop_usage() {
+  printf "zion docker bo-container server stop - Para o servidor\n\n"
+  printf "Alias: down\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker bo-container server stop [OPTIONS]\n"
+  printf "  zion docker bo-container server stop --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
+    printf "    Worktree alternativo\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_front_student_usage() {
+  printf "zion docker front-student - Servico front-student (Nuxt2)\n\n"
+  printf "Alias: front, fs\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker front-student COMMAND\n"
+  printf "  zion docker front-student [COMMAND] --help | -h\n"
+  echo
+  # :command.usage_commands
+  printf "%s\n" "Commands:"
+  printf "  %s   Instala dependencias Node no container\n" "install"
+  printf "  %s   Abre shell no container (ou executa comando)\n" "shell  "
+  printf "  %s   Exibe logs do servico\n" "logs   "
+  printf "  %s   Status dos containers\n" "status "
+  printf "  %s   Constroi imagem Docker\n" "build  "
+  printf "  %s   Para containers e remove volumes\n" "flush  "
+  printf "  %s   Gerencia servidor front-student\n" "server "
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_front_student_install_usage() {
+  printf "zion docker front-student install - Instala dependencias Node no container\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker front-student install [OPTIONS]\n"
+  printf "  zion docker front-student install --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--env, -e ENV"
+    printf "    Ambiente (sand, prod)\n"
+    printf "    %s\n" "Default: sand"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
+    printf "    Worktree alternativo\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_front_student_shell_usage() {
+  printf "zion docker front-student shell - Abre shell no container (ou executa comando)\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker front-student shell [OPTIONS]\n"
+  printf "  zion docker front-student shell --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--container, -c CONTAINER"
+    printf "    Container (app)\n"
+    printf "    %s\n" "Default: app"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--cmd CMD"
+    printf "    Comando a executar\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
+    printf "    Worktree alternativo\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_front_student_logs_usage() {
+  printf "zion docker front-student logs - Exibe logs do servico\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker front-student logs [OPTIONS]\n"
+  printf "  zion docker front-student logs --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--follow, -f"
+    printf "    Seguir logs em tempo real\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--tail, -t TAIL"
+    printf "    Numero de linhas\n"
+    printf "    %s\n" "Default: 100"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
+    printf "    Worktree alternativo\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_front_student_status_usage() {
+  printf "zion docker front-student status - Status dos containers\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker front-student status\n"
+  printf "  zion docker front-student status --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_front_student_build_usage() {
+  printf "zion docker front-student build - Constroi imagem Docker\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker front-student build [OPTIONS]\n"
+  printf "  zion docker front-student build --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
+    printf "    Worktree alternativo\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_front_student_flush_usage() {
+  printf "zion docker front-student flush - Para containers e remove volumes\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker front-student flush [OPTIONS]\n"
+  printf "  zion docker front-student flush --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
+    printf "    Worktree alternativo\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_front_student_server_usage() {
+  printf "zion docker front-student server - Gerencia servidor front-student\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker front-student server COMMAND\n"
+  printf "  zion docker front-student server [COMMAND] --help | -h\n"
+  echo
+  # :command.usage_commands
+  printf "%s\n" "Commands:"
+  printf "  %s   Sobe o servidor\n" "start"
+  printf "  %s   Para o servidor\n" "stop "
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_front_student_server_start_usage() {
+  printf "zion docker front-student server start - Sobe o servidor\n\n"
+  printf "Alias: up\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker front-student server start [OPTIONS]\n"
+  printf "  zion docker front-student server start --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--env, -e ENV"
+    printf "    Ambiente (sand, prod)\n"
+    printf "    %s\n" "Default: sand"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--detach, -d"
+    printf "    Modo detach\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--debug"
+    printf "    Modo debug (dlv)\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--vertical, -V VERTICAL"
+    printf "    Vertical (carreiras-juridicas, concursos, medicina, etc.)\n"
+    printf "    %s\n" "Default: carreiras-juridicas"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
+    printf "    Worktree alternativo\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_front_student_server_stop_usage() {
+  printf "zion docker front-student server stop - Para o servidor\n\n"
+  printf "Alias: down\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker front-student server stop [OPTIONS]\n"
+  printf "  zion docker front-student server stop --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--worktree WORKTREE"
+    printf "    Worktree alternativo\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
     echo
 
   fi
@@ -2058,6 +2734,436 @@ zion_session_run() {
   esac
 }
 
+# src/lib/docker_build_impl.sh
+# docker_build_impl.sh — rebuilda a imagem Docker de um servico sem derrubar containers.
+#
+# Uso: _zion_dk_build <service> <worktree>
+
+_zion_dk_build() {
+  local service="$1"
+  local worktree="${2:-}"
+
+  zion_docker_validate_service "$service" || return 1
+  zion_docker_init_worktree "$service" "$worktree" || return 1
+
+  zion_docker_export_dirs "$service"
+  export ZION_NIXOS_DIR="$zion_nixos_dir"
+
+  local compose project
+  compose=$(zion_docker_compose_file "$service")
+  project=$(zion_docker_effective_project "$service")
+
+  echo "=== [docker build] $service ==="
+  docker compose -f "$compose" -p "$project" build --no-cache
+  echo ""
+  echo "Imagem rebuilt. Rode 'zion docker $service server start' para subir."
+}
+
+# src/lib/docker_flush_impl.sh
+# docker_flush_impl.sh — remove tudo relacionado a um servico Docker:
+# containers, imagens, volumes, logs, vendor.
+#
+# Uso: _zion_dk_flush <service> <worktree>
+
+_zion_dk_flush() {
+  local service="$1"
+  local worktree="${2:-}"
+
+  zion_docker_validate_service "$service" || return 1
+  zion_docker_init_worktree "$service" "$worktree" || return 1
+
+  local dir config_dir compose deps_compose project log_dir
+  dir=$(zion_docker_effective_dir "$service")
+  config_dir=$(zion_docker_config_dir "$service")
+  compose=$(zion_docker_compose_file "$service")
+  deps_compose=$(zion_docker_deps_file "$service")
+  project=$(zion_docker_effective_project "$service")
+  log_dir=$(zion_docker_log_dir "$service")
+  [[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
+
+  local local_label="$service"
+  [[ -n "$_ZION_DK_WORKTREE" ]] && local_label="$service (wt: $_ZION_DK_WORKTREE)"
+
+  echo "=== Flush: $local_label ==="
+  echo "  containers + imagens + volumes"
+  echo "  logs: $log_dir"
+  [[ "$service" == "monolito" || "$service" == "monolito-worker" ]] && echo "  vendor: $dir/vendor"
+  echo ""
+
+  # 1. Parar logger se rodando
+  if [[ -f "$log_dir/logger.pid" ]]; then
+    kill "$(cat "$log_dir/logger.pid")" 2>/dev/null || true
+    rm -f "$log_dir/logger.pid"
+  fi
+
+  # 2. Derrubar containers + remover volumes
+  echo ">>> Parando containers..."
+  docker compose -f "$compose" -p "$project" down -v --remove-orphans 2>/dev/null || true
+  docker compose -p "${project}-deps" down -v --remove-orphans 2>/dev/null || true
+
+  # 3. Remover imagens buildadas para este servico
+  echo ">>> Removendo imagens..."
+  docker images --filter "label=com.docker.compose.project=$project" -q | xargs docker rmi -f 2>/dev/null || true
+  # Tambem tenta por nome do container
+  docker rmi -f "zion-dk-${service}-app" "zion-dk-${service}-worker" 2>/dev/null || true
+
+  # 4. Remover volumes nomeados
+  echo ">>> Removendo volumes..."
+  docker volume ls --filter "label=com.docker.compose.project=$project" -q | xargs docker volume rm 2>/dev/null || true
+
+  # 5. Limpar logs
+  echo ">>> Limpando logs..."
+  rm -rf "$log_dir"
+
+  # 6. Remover vendor (se Go project)
+  if [[ -d "$dir/vendor" ]]; then
+    echo ">>> Removendo vendor/..."
+    rm -rf "$dir/vendor"
+  fi
+
+  echo ""
+  echo "Flush concluido. Rode 'zion docker $service install' para reinstalar."
+}
+
+# src/lib/docker_install_impl.sh
+# docker_install_impl.sh — instala dependencias de um servico usando SSH do host.
+# Go:   go mod download + vendor (vendor/ fica no projeto)
+# Node: npm install (node_modules/ fica no projeto)
+#
+# Uso: _zion_dk_install <service> <env> <worktree>
+
+_zion_dk_install() {
+  local service="$1"
+  local env="${2:-sand}"
+  local worktree="${3:-}"
+
+  zion_docker_validate_service "$service" || return 1
+  zion_docker_init_worktree "$service" "$worktree" || return 1
+
+  local dir config_dir log_dir
+  dir=$(zion_docker_effective_dir "$service")
+  config_dir=$(zion_docker_config_dir "$service")
+  log_dir=$(zion_docker_log_dir "$service")
+  [[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
+
+  mkdir -p "$log_dir"
+
+  # Detectar tipo de servico
+  _is_node_service() {
+    [[ -f "$dir/package.json" ]]
+  }
+
+  # ── Node.js install ──────────────────────────────────────────────────────────
+  if _is_node_service; then
+    # Detectar versao do Node requerida (engines.node no package.json)
+    local node_version
+    node_version=$(node -e "const p=require('$dir/package.json'); const v=(p.engines&&p.engines.node)||'20'; console.log(v.match(/\d+/)[0])" 2>/dev/null || echo "20")
+    local node_image="node:${node_version}-alpine"
+    local host_uid host_gid
+    host_uid="$(id -u)"
+    host_gid="$(id -g)"
+
+    echo "=== Instalando dependencias de $service (Node) [env=$env] ==="
+    [[ -n "$_ZION_DK_WORKTREE" ]] && echo "  worktree: $_ZION_DK_WORKTREE"
+    echo "  SSH:     ~/.ssh (montada read-only)"
+    echo "  npmrc:   ~/.npmrc (montada read-only)"
+    echo "  Projeto: $dir"
+    echo "  Image:   $node_image"
+    echo "  logs:    $log_dir/install.log"
+    echo ""
+    echo "Rodando: ferramentas -> npm install"
+    echo "---"
+
+    docker run \
+      --rm \
+      -it \
+      -v "$HOME/.ssh:/ssh-host:ro" \
+      -v "$HOME/.npmrc:/npmrc-host:ro" \
+      -v "$dir:/app" \
+      -e NPM_TOKEN="${NPM_TOKEN:-}" \
+      -e TERM=xterm-256color \
+      -e COLORTERM=truecolor \
+      -e HOST_UID="$host_uid" \
+      -e HOST_GID="$host_gid" \
+      -w "/app" \
+      "$node_image" \
+      sh -c '
+        set -e
+
+        apk add --no-cache git openssh-client ca-certificates python3 make g++ \
+          autoconf automake libtool nasm pkgconfig
+
+        mkdir -p /root/.ssh
+        cp /ssh-host/* /root/.ssh/ 2>/dev/null || true
+        chmod 700 /root/.ssh
+        chmod 600 /root/.ssh/* 2>/dev/null || true
+        ssh-keyscan github.com >> /root/.ssh/known_hosts 2>/dev/null
+
+        # .npmrc: host tem prioridade; fallback para NPM_TOKEN env
+        if [ -f /npmrc-host ]; then
+          cp /npmrc-host /root/.npmrc
+        elif [ -n "$NPM_TOKEN" ]; then
+          echo "//npm.pkg.github.com/:_authToken=${NPM_TOKEN}" > /root/.npmrc
+        fi
+        echo "@estrategiahq:registry=https://npm.pkg.github.com/estrategiahq" >> /root/.npmrc
+
+        echo "[1/2] Instalando dependencias (npm install)..."
+        npm install
+        chown -R "$HOST_UID:$HOST_GID" /app/node_modules 2>/dev/null || true
+
+        echo "[2/2] Recompilando bindings nativos para Alpine/musl (compilando do fonte)..."
+        rm -rf node_modules/node-sass/vendor/
+        npm rebuild node-sass || true
+
+        echo ""
+        echo "Dependencias instaladas! node_modules/ gerado no projeto."
+      ' 2>&1 | tee "$log_dir/install.log"
+
+    if [[ "${PIPESTATUS[0]}" -eq 0 ]]; then
+      echo ""
+      echo "Instalacao finalizada! Rode: zion docker $service server start --env=$env"
+    else
+      echo ""
+      echo "Instalacao falhou. Verifique: $log_dir/install.log"
+      return 1
+    fi
+
+    return 0
+  fi
+
+  # ── Go install ───────────────────────────────────────────────────────────────
+  local host_uid host_gid
+  host_uid="$(id -u)"
+  host_gid="$(id -g)"
+
+  echo "=== Instalando dependencias de $service (Go) [env=$env] ==="
+  [[ -n "$_ZION_DK_WORKTREE" ]] && echo "  worktree: $_ZION_DK_WORKTREE"
+  echo "  SSH:     ~/.ssh (montada read-only)"
+  echo "  Projeto: $dir"
+  echo "  logs:    $log_dir/install.log"
+  echo ""
+  echo "Rodando: ferramentas -> go mod download -> go mod tidy -> go mod vendor"
+  echo "---"
+
+  # Roda docker run e grava em arquivo simultaneamente (preserva cores com script)
+  docker run \
+    --rm \
+    -it \
+    -v "$HOME/.ssh:/ssh-host:ro" \
+    -v "$dir:/go/app" \
+    -e GOPATH=/go \
+    -e GOPRIVATE="github.com/estrategiahq" \
+    -e TERM=xterm-256color \
+    -e COLORTERM=truecolor \
+    -e HOST_UID="$host_uid" \
+    -e HOST_GID="$host_gid" \
+    -w "/go/app" \
+    "golang:1.24.4-alpine" \
+    sh -c '
+      set -e
+
+      mkdir -p /root/.ssh
+      cp /ssh-host/* /root/.ssh/ 2>/dev/null || true
+      chmod 700 /root/.ssh
+      chmod 600 /root/.ssh/* 2>/dev/null || true
+
+      echo "[1/4] Instalando ferramentas..."
+      apk add --no-cache git gcc musl-dev librdkafka-dev ca-certificates openssh-client
+
+      git config --global url."git@github.com:estrategiahq".insteadOf "https://github.com/estrategiahq"
+      ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts 2>/dev/null
+
+      echo "[2/4] Download de modulos Go (pode demorar)..."
+      go mod download
+
+      echo "[3/4] Limpando modulos..."
+      go mod tidy
+
+      echo "[4/4] Vendoring dependencias (workspace)..."
+      go work vendor
+      chown -R "$HOST_UID:$HOST_GID" /go/app/vendor 2>/dev/null || true
+
+      echo ""
+      echo "Dependencias instaladas! vendor/ gerado no projeto."
+    ' 2>&1 | tee "$log_dir/install.log"
+
+  if [[ "${PIPESTATUS[0]}" -eq 0 ]]; then
+    echo ""
+    echo "Instalacao finalizada! Rode: zion docker $service server start --env=$env"
+  else
+    echo ""
+    echo "Instalacao falhou. Verifique: $log_dir/install.log"
+    return 1
+  fi
+}
+
+# src/lib/docker_logs_impl.sh
+# docker_logs_impl.sh — mostra logs de um servico Docker.
+# Reconecta se container esta rodando, le arquivo se parado.
+#
+# Uso: _zion_dk_logs <service> <follow> <tail> <worktree>
+
+_zion_dk_logs() {
+  local service="$1"
+  local follow="${2:-}"
+  local tail_lines="${3:-100}"
+  local worktree="${4:-}"
+
+  zion_docker_init_worktree "$service" "$worktree" || return 1
+
+  local project log_dir compose
+  project=$(zion_docker_effective_project "$service")
+  log_dir=$(zion_docker_log_dir "$service")
+  [[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
+  compose=$(zion_docker_compose_file "$service")
+
+  # Tentar reconectar ao container rodando
+  local running
+  running=$(docker compose -f "$compose" -p "$project" ps --status running 2>/dev/null | tail -n +2 | wc -l)
+
+  if [[ "$running" -gt 0 ]]; then
+    local ARGS="--tail $tail_lines"
+    [[ -n "$follow" ]] && ARGS="$ARGS -f"
+    docker compose -f "$compose" -p "$project" logs --no-log-prefix $ARGS
+  elif [[ -f "$log_dir/service.log" ]]; then
+    echo "=== Container parado. Mostrando log gravado ==="
+    if [[ -n "$follow" ]]; then
+      tail -f "$log_dir/service.log"
+    else
+      tail -n "$tail_lines" "$log_dir/service.log"
+    fi
+  else
+    echo "Nenhum container rodando e nenhum log encontrado para $service"
+    echo "Use: zion docker $service server start"
+  fi
+}
+
+# src/lib/docker_run_impl.sh
+# docker_run_impl.sh — levanta um servico Docker em background e abre logs.
+#
+# Uso: _zion_dk_run <service> <env> <debug> <worktree> <vertical> <detach>
+
+_zion_dk_run() {
+  local service="$1"
+  local env="${2:-sand}"
+  local debug="${3:-}"
+  local worktree="${4:-}"
+  local vertical="${5:-carreiras-juridicas}"
+  local detach="${6:-}"
+
+  zion_docker_validate_service "$service" || return 1
+  zion_docker_init_worktree "$service" "$worktree" || return 1
+
+  local dir config_dir compose deps_compose env_file project log_dir
+  dir=$(zion_docker_effective_dir "$service")
+  config_dir=$(zion_docker_config_dir "$service")
+  compose=$(zion_docker_compose_file "$service")
+  deps_compose=$(zion_docker_deps_file "$service")
+  env_file=$(zion_docker_env_file "$service" "$env")
+  project=$(zion_docker_effective_project "$service")
+  log_dir=$(zion_docker_log_dir "$service")
+  [[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
+
+  mkdir -p "$log_dir"
+
+  # Exportar variaveis que o compose precisa (com override de worktree)
+  zion_docker_export_dirs "$service"
+  export ZION_NIXOS_DIR="$zion_nixos_dir"
+  export APP_ENV="$env"
+
+  # Mapear env para sufixo do arquivo .env do projeto
+  case "$env" in
+    sand)   export APP_ENV_FILE="sandbox" ;;
+    local)  export APP_ENV_FILE="local" ;;
+    devbox) export APP_ENV_FILE="devbox" ;;
+    *)      export APP_ENV_FILE="$env" ;;
+  esac
+
+  # Mapear env para nome do npm script (front-student usa devbox/qa/prod)
+  case "$env" in
+    sand|local) export NPM_SCRIPT_ENV="devbox" ;;
+    *)          export NPM_SCRIPT_ENV="$env" ;;
+  esac
+
+  # Vertical (front-student: carreiras-juridicas, concursos, medicina, etc.)
+  export VERTICAL="${vertical:-carreiras-juridicas}"
+
+  # Garantir rede
+  if ! docker network inspect nixos_default &>/dev/null; then
+    echo "[zion docker] Criando rede nixos_default..."
+    docker network create nixos_default 2>/dev/null || true
+  fi
+
+  local COMPOSE_ARGS="-f $compose -p $project"
+  if [[ -n "$debug" ]]; then
+    local debug_compose
+    debug_compose=$(dirname "$compose")/docker-compose.debug.yml
+    COMPOSE_ARGS="$COMPOSE_ARGS -f $debug_compose"
+  fi
+
+  if [[ -n "$debug" ]]; then
+    echo "=== Levantando $service [env=$env] [DEBUG - dlv :2345] ==="
+  else
+    echo "=== Levantando $service [env=$env] ==="
+  fi
+  echo "  projeto: $dir"
+  [[ -n "$_ZION_DK_WORKTREE" ]] && echo "  worktree: $_ZION_DK_WORKTREE"
+  echo "  compose: $compose"
+  echo "  env:     $env_file"
+  echo "  logs:    $log_dir"
+
+  # Parar instancia anterior do mesmo servico (libera porta, evita "port already allocated")
+  _zion_dk_stop "$service" "$worktree" 2>/dev/null || true
+  # Fallback: parar qualquer container que ainda esteja segurando a(s) porta(s) do servico
+  for port in $(zion_docker_service_host_ports "$service"); do
+    zion_docker_free_port "$port"
+  done
+
+  # 0. Garantir reverse proxy (80/443 -> 4004)
+  zion_docker_ensure_reverseproxy
+
+  # 1. Subir dependencias em background (se compose de deps existe)
+  if [[ -f "$deps_compose" ]]; then
+    echo ">>> Subindo dependencias..."
+    docker compose -f "$deps_compose" -p "${project}-deps" up -d --remove-orphans 2>&1 | tee "$log_dir/deps.log"
+    echo ">>> Aguardando postgres ficar saudavel..."
+    until docker exec zion-dk-monolito-postgres pg_isready -U "${DB_USER:-estrategia}" &>/dev/null; do
+      sleep 1
+    done
+    echo ">>> Postgres pronto."
+  fi
+
+  # 2. Build + subir servico em background (com SSH forwarding para repos privados)
+  echo ">>> Subindo $service..."
+  DOCKER_BUILDKIT=1 docker compose $COMPOSE_ARGS build 2>&1 | tee "$log_dir/startup.log"
+  docker compose $COMPOSE_ARGS up -d --force-recreate --remove-orphans 2>&1 | tee -a "$log_dir/startup.log"
+
+  # 3. Logger persistente: grava logs em arquivo continuamente
+  if [[ -f "$log_dir/logger.pid" ]]; then
+    kill "$(cat "$log_dir/logger.pid")" 2>/dev/null || true
+  fi
+  nohup docker compose $COMPOSE_ARGS logs -f --no-log-prefix > "$log_dir/service.log" 2>&1 &
+  if [[ -n "$debug" ]]; then
+    echo ">>> [DEBUG] Delve aguardando attach em localhost:2345"
+    echo ">>> [DEBUG] VS Code: use a config 'Attach to monolito' (porta 2345)"
+  fi
+  echo $! > "$log_dir/logger.pid"
+
+  # 4. Se --detach, sair silenciosamente
+  if [[ -n "$detach" ]]; then
+    echo ">>> Container rodando em background."
+    echo ">>> Logs: zion docker $service logs -f"
+    echo ">>> Arquivo: $log_dir/service.log"
+    return 0
+  fi
+
+  # 5. Mostrar logs no terminal (Ctrl+C sai mas container + logger continuam)
+  echo ">>> Container rodando. Logs em tempo real [Ctrl+C para sair, container continua]:"
+  echo ">>> Reconectar: zion docker $service logs -f"
+  echo "---"
+  docker compose $COMPOSE_ARGS logs -f --no-log-prefix --tail 50
+}
+
 # src/lib/docker_services.sh
 # Registry de servicos Docker conhecidos.
 # Paths dos projetos vem de ~/.zion (ex: MONOLITO_DIR=...)
@@ -2367,6 +3473,251 @@ zion_docker_stop_reverseproxy_if_idle() {
     echo "[zion docker] Nenhum servico estrategia rodando, parando reverse proxy..."
     docker compose -f "$_REVERSEPROXY_DIR/docker-compose.yml" -p "$_REVERSEPROXY_PROJECT" down 2>/dev/null
   fi
+}
+
+# src/lib/docker_shell_impl.sh
+# docker_shell_impl.sh — abre shell interativo ou executa comando com Go toolchain.
+# Sem cmd: exec no container rodando (app ou container especificado).
+# Com cmd: roda one-off dev container (golang:alpine + make) com source montado.
+#
+# Uso: _zion_dk_shell <service> <container> <cmd> <worktree>
+
+_zion_dk_shell() {
+  local service="$1"
+  local container="${2:-app}"
+  local cmd="${3:-}"
+  local worktree="${4:-}"
+
+  zion_docker_validate_service "$service" || return 1
+  zion_docker_init_worktree "$service" "$worktree" || return 1
+
+  local dir project compose
+  dir=$(zion_docker_effective_dir "$service")
+  project=$(zion_docker_effective_project "$service")
+  compose=$(zion_docker_compose_file "$service")
+
+  if [[ -n "$cmd" ]]; then
+    # Modo dev: one-off container golang com source montado + make + ferramentas
+    local host_uid host_gid
+    host_uid="$(id -u)"
+    host_gid="$(id -g)"
+
+    echo "=== [$service] exec: $cmd ==="
+    [[ -n "$_ZION_DK_WORKTREE" ]] && echo "  worktree: $_ZION_DK_WORKTREE ($dir)"
+    docker run \
+      --rm \
+      -it \
+      -v "$dir:/go/app" \
+      -v /var/run/docker.sock:/var/run/docker.sock \
+      -e GOPATH=/go \
+      -e GOPRIVATE="github.com/estrategiahq" \
+      -e TERM=xterm-256color \
+      -e COLORTERM=truecolor \
+      -e DOCKER_HOST=unix:///var/run/docker.sock \
+      -e TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock \
+      -e HOST_UID="$host_uid" \
+      -e HOST_GID="$host_gid" \
+      --network host \
+      -w "/go/app" \
+      "golang:1.24.4-alpine" \
+      sh -c "apk add --no-cache make gcc musl-dev librdkafka-dev ca-certificates docker-cli > /dev/null 2>&1 && $cmd && chown -R \"$HOST_UID:$HOST_GID\" /go/app 2>/dev/null || true"
+  else
+    # Modo interativo: exec no container rodando
+    docker compose -f "$compose" -p "$project" exec "$container" /bin/sh
+  fi
+}
+
+# src/lib/docker_status_impl.sh
+# docker_status_impl.sh — status dos servicos Docker.
+#
+# Uso: _zion_dk_status <service>
+# Se service for vazio, mostra todos os servicos.
+
+_zion_dk_status() {
+  local service="${1:-}"
+
+  # Cores
+  local RESET='\033[0m'
+  local BOLD='\033[1m'
+  local DIM='\033[2m'
+  local GREEN='\033[32m'
+  local RED='\033[31m'
+  local YELLOW='\033[33m'
+  local CYAN='\033[36m'
+  local BLUE='\033[34m'
+  local MAGENTA='\033[35m'
+  local WHITE='\033[37m'
+  local ORANGE='\033[38;5;214m'
+
+  local icon_running="${GREEN}●${RESET}"
+  local icon_stopped="${RED}○${RESET}"
+  local icon_partial="${YELLOW}◐${RESET}"
+
+  # Extrai portas unicas no formato :PORT (remove duplicatas ipv4/ipv6)
+  format_ports() {
+    local raw="$1"
+    [[ -z "$raw" ]] && return
+    echo "$raw" \
+      | grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:[0-9]+->[0-9]+' \
+      | grep -oE ':[0-9]+->' \
+      | sed 's/->//' \
+      | sort -u \
+      | tr '\n' '  ' \
+      | sed 's/  $//'
+  }
+
+  # Simplifica status: "Up 2 hours (healthy)" -> "2h  healthy"
+  format_status() {
+    local s="$1"
+    if echo "$s" | grep -qi "up"; then
+      # extrai tempo
+      local t
+      t=$(echo "$s" | sed -E 's/Up //i; s/ \(.*\)//')
+      t=$(echo "$t" | sed -E 's/ minutes?/min/; s/ hours?/h/; s/ days?/d/; s/ weeks?/w/')
+      local healthy=""
+      echo "$s" | grep -qi "healthy" && healthy=" ${GREEN}✓${RESET}"
+      echo "${ORANGE}${t}${RESET}${healthy}"
+    elif echo "$s" | grep -qi "exited"; then
+      echo "${RED}exited${RESET}"
+    else
+      echo "${YELLOW}${s}${RESET}"
+    fi
+  }
+
+  # Imprime: tempo  nome  :port1  :port2  (tudo na mesma linha, nome alinhado)
+  print_container_row() {
+    local tree_pfx="$1" name="$2" status="$3" ports="$4"
+    local TIME_W=9 NAME_W=14
+
+    local status_str
+    status_str=$(format_status "$status")
+
+    local fmt_ports=""
+    fmt_ports=$(format_ports "$ports")
+    local ports_str=""
+    [[ -n "$fmt_ports" ]] && ports_str="  ${DIM}${fmt_ports}${RESET}"
+
+    local padded_name
+    padded_name=$(printf "%-${NAME_W}s" "$name")
+
+    echo -e "${tree_pfx}$(printf "%-${TIME_W}b" "$status_str")  ${WHITE}${padded_name}${RESET}${ports_str}"
+  }
+
+  print_service_tree() {
+    local svc="$1"
+    local project compose
+    project=$(zion_docker_project_name "$svc")
+    compose=$(zion_docker_compose_file "$svc")
+
+    local running deps_running
+    running=$(docker compose -f "$compose" -p "$project" ps --status running 2>/dev/null | tail -n +2 | wc -l)
+    deps_running=$(docker compose -p "${project}-deps" ps --status running 2>/dev/null | tail -n +2 | wc -l)
+    local total=$((running + deps_running))
+
+    # Header
+    if [[ "$total" -eq 0 ]]; then
+      echo -e "${icon_stopped} ${BOLD}${CYAN}${svc}${RESET}  ${DIM}parado${RESET}"
+      return
+    fi
+
+    local svc_icon="$icon_running"
+    [[ "$running" -eq 0 || "$deps_running" -eq 0 ]] && svc_icon="$icon_partial"
+
+    local has_deps=0
+    local dep_rows_raw
+    dep_rows_raw=$(docker compose -p "${project}-deps" ps --format "{{.Name}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null)
+    local dep_lines=()
+    while IFS= read -r line; do [[ -n "$line" ]] && dep_lines+=("$line"); done <<< "$dep_rows_raw"
+    [[ "${#dep_lines[@]}" -gt 0 ]] && has_deps=1
+
+    echo -e "${svc_icon} ${BOLD}${CYAN}${svc}${RESET}"
+
+    # App containers
+    local main_rows
+    main_rows=$(docker compose -f "$compose" -p "$project" ps --format "{{.Name}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null)
+    if [[ -n "$main_rows" ]]; then
+      local branch_char="├─"
+      [[ "$has_deps" -eq 0 ]] && branch_char="└─"
+      echo -e "  ${BLUE}${branch_char}${RESET} ${BOLD}${svc}${RESET}"
+      local cont_line="│  "
+      [[ "$has_deps" -eq 0 ]] && cont_line="   "
+      while IFS=$'\t' read -r name status ports; do
+        [[ -z "$name" ]] && continue
+        local short="${name##${project}-}"
+        print_container_row "  ${cont_line}└─ " "$short" "$status" "$ports"
+      done <<< "$main_rows"
+    fi
+
+    # Deps
+    if [[ "$has_deps" -eq 1 ]]; then
+      echo -e "  ${BLUE}└─${RESET} ${BOLD}deps${RESET}"
+      local total_deps="${#dep_lines[@]}"
+      local i=0
+      for row in "${dep_lines[@]}"; do
+        i=$((i + 1))
+        IFS=$'\t' read -r name status ports <<< "$row"
+        [[ -z "$name" ]] && continue
+        local short="${name##zion-dk-${svc}-}"
+        local tc="├─" port_cont="│  "
+        if [[ "$i" -eq "$total_deps" ]]; then tc="└─"; port_cont="   "; fi
+        print_container_row "     ${tc} " "$short" "$status" "$ports"
+      done
+    fi
+  }
+
+  if [[ -n "$service" ]]; then
+    print_service_tree "$service"
+  else
+    echo -e "\n${BOLD}${MAGENTA}  Zion Docker${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}\n"
+    local services_list="monolito bo-container front-student"
+    local count=0
+    local total_svcs
+    total_svcs=$(echo "$services_list" | wc -w)
+    for svc in $services_list; do
+      count=$((count + 1))
+      print_service_tree "$svc"
+      [[ "$count" -lt "$total_svcs" ]] && echo ""
+    done
+    echo ""
+  fi
+}
+
+# src/lib/docker_stop_impl.sh
+# docker_stop_impl.sh — para um servico Docker e seus deps.
+#
+# Uso: _zion_dk_stop <service> <worktree>
+
+_zion_dk_stop() {
+  local service="$1"
+  local worktree="${2:-}"
+
+  zion_docker_validate_service "$service" || return 1
+  zion_docker_init_worktree "$service" "$worktree" || return 1
+
+  local compose deps_compose project log_dir
+  compose=$(zion_docker_compose_file "$service")
+  deps_compose=$(zion_docker_deps_file "$service")
+  project=$(zion_docker_effective_project "$service")
+  log_dir=$(zion_docker_log_dir "$service")
+  [[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
+
+  # Parar logger persistente
+  if [[ -f "$log_dir/logger.pid" ]]; then
+    kill "$(cat "$log_dir/logger.pid")" 2>/dev/null || true
+    rm -f "$log_dir/logger.pid"
+  fi
+
+  local local_label="$service"
+  [[ -n "$_ZION_DK_WORKTREE" ]] && local_label="$service (wt: $_ZION_DK_WORKTREE)"
+
+  echo "[zion docker] Parando $local_label..."
+  docker compose -f "$compose" -p "$project" down 2>/dev/null
+  [[ -f "$deps_compose" ]] && docker compose -f "$deps_compose" -p "${project}-deps" down 2>/dev/null
+
+  echo "Servico $local_label parado."
+
+  # Derrubar reverse proxy se nenhum servico estrategia continua rodando
+  zion_docker_stop_reverseproxy_if_idle
 }
 
 # :command.command_functions
@@ -3133,715 +4484,236 @@ zion_puppy_query_command() {
 }
 
 # :command.function
-zion_docker_run_command() {
+zion_docker_monolito_install_command() {
 
-  # src/commands/docker_run.sh
-  # Levanta um servico Docker em background e abre logs no terminal.
+  # src/commands/docker_monolito_install.sh
   zion_load_config
-
-  service="${args[service]}"
-  env="${args[--env]:-sand}"
-  debug="${args[--debug]:-}"
-  worktree="${args[--worktree]:-}"
-
-  zion_docker_validate_service "$service" || exit 1
-  zion_docker_init_worktree "$service" "$worktree" || exit 1
-
-  dir=$(zion_docker_effective_dir "$service")
-  config_dir=$(zion_docker_config_dir "$service")
-  compose=$(zion_docker_compose_file "$service")
-  deps_compose=$(zion_docker_deps_file "$service")
-  env_file=$(zion_docker_env_file "$service" "$env")
-  project=$(zion_docker_effective_project "$service")
-  log_dir=$(zion_docker_log_dir "$service")
-  [[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
-
-  mkdir -p "$log_dir"
-
-  # Exportar variaveis que o compose precisa (com override de worktree)
-  zion_docker_export_dirs "$service"
-  export ZION_NIXOS_DIR="$zion_nixos_dir"
-  export APP_ENV="$env"
-
-  # Mapear env para sufixo do arquivo .env do projeto
-  case "$env" in
-    sand)   export APP_ENV_FILE="sandbox" ;;
-    local)  export APP_ENV_FILE="local" ;;
-    devbox) export APP_ENV_FILE="devbox" ;;
-    *)      export APP_ENV_FILE="$env" ;;
-  esac
-
-  # Mapear env para nome do npm script (front-student usa devbox/qa/prod)
-  case "$env" in
-    sand|local) export NPM_SCRIPT_ENV="devbox" ;;
-    *)          export NPM_SCRIPT_ENV="$env" ;;
-  esac
-
-  # Vertical (front-student: carreiras-juridicas, concursos, medicina, etc.)
-  export VERTICAL="${args[--vertical]:-carreiras-juridicas}"
-
-  # Garantir rede
-  if ! docker network inspect nixos_default &>/dev/null; then
-    echo "[zion docker] Criando rede nixos_default..."
-    docker network create nixos_default 2>/dev/null || true
-  fi
-
-  COMPOSE_ARGS="-f $compose -p $project"
-  if [[ -n "$debug" ]]; then
-    debug_compose=$(dirname "$compose")/docker-compose.debug.yml
-    COMPOSE_ARGS="$COMPOSE_ARGS -f $debug_compose"
-  fi
-
-  if [[ -n "$debug" ]]; then
-    echo "=== Levantando $service [env=$env] [DEBUG - dlv :2345] ==="
-  else
-    echo "=== Levantando $service [env=$env] ==="
-  fi
-  echo "  projeto: $dir"
-  [[ -n "$_ZION_DK_WORKTREE" ]] && echo "  worktree: $_ZION_DK_WORKTREE"
-  echo "  compose: $compose"
-  echo "  env:     $env_file"
-  echo "  logs:    $log_dir"
-
-  # Parar instância anterior do mesmo serviço (libera porta, evita "port already allocated")
-  "$0" docker stop "$service" ${worktree:+--worktree="$worktree"} 2>/dev/null || true
-  # Fallback: parar qualquer container que ainda esteja segurando a(s) porta(s) do serviço
-  for port in $(zion_docker_service_host_ports "$service"); do
-    zion_docker_free_port "$port"
-  done
-
-  # 0. Garantir reverse proxy (80/443 -> 4004)
-  zion_docker_ensure_reverseproxy
-
-  # 1. Subir dependencias em background (se compose de deps existe)
-  if [[ -f "$deps_compose" ]]; then
-    echo ">>> Subindo dependencias..."
-    docker compose -f "$deps_compose" -p "${project}-deps" up -d --remove-orphans 2>&1 | tee "$log_dir/deps.log"
-    echo ">>> Aguardando postgres ficar saudavel..."
-    until docker exec zion-dk-monolito-postgres pg_isready -U "${DB_USER:-estrategia}" &>/dev/null; do
-      sleep 1
-    done
-    echo ">>> Postgres pronto."
-  fi
-
-  # 2. Build + subir servico em background (com SSH forwarding para repos privados)
-  echo ">>> Subindo $service..."
-  DOCKER_BUILDKIT=1 docker compose $COMPOSE_ARGS build 2>&1 | tee "$log_dir/startup.log"
-  docker compose $COMPOSE_ARGS up -d --force-recreate --remove-orphans 2>&1 | tee -a "$log_dir/startup.log"
-
-  # 3. Logger persistente: grava logs em arquivo continuamente
-  if [[ -f "$log_dir/logger.pid" ]]; then
-    kill "$(cat "$log_dir/logger.pid")" 2>/dev/null || true
-  fi
-  nohup docker compose $COMPOSE_ARGS logs -f --no-log-prefix > "$log_dir/service.log" 2>&1 &
-  if [[ -n "$debug" ]]; then
-    echo ">>> [DEBUG] Delve aguardando attach em localhost:2345"
-    echo ">>> [DEBUG] VS Code: use a config 'Attach to monolito' (porta 2345)"
-  fi
-  echo $! > "$log_dir/logger.pid"
-
-  # 4. Se --detach, sair silenciosamente
-  if [[ -n "${args[--detach]:-}" ]]; then
-    echo ">>> Container rodando em background."
-    echo ">>> Logs: zion docker logs $service -f"
-    echo ">>> Arquivo: $log_dir/service.log"
-    exit 0
-  fi
-
-  # 5. Mostrar logs no terminal (Ctrl+C sai mas container + logger continuam)
-  echo ">>> Container rodando. Logs em tempo real [Ctrl+C para sair, container continua]:"
-  echo ">>> Reconectar: zion docker logs $service -f"
-  echo "---"
-  docker compose $COMPOSE_ARGS logs -f --no-log-prefix --tail 50
+  _zion_dk_install "monolito" "${args[--env]:-sand}" "${args[--worktree]:-}"
 
 }
 
 # :command.function
-zion_docker_stop_command() {
+zion_docker_monolito_shell_command() {
 
-  # src/commands/docker_stop.sh
-  # Para um servico Docker e seus deps.
+  # src/commands/docker_monolito_shell.sh
   zion_load_config
-
-  service="${args[service]}"
-  worktree="${args[--worktree]:-}"
-
-  zion_docker_validate_service "$service" || exit 1
-  zion_docker_init_worktree "$service" "$worktree" || exit 1
-
-  compose=$(zion_docker_compose_file "$service")
-  deps_compose=$(zion_docker_deps_file "$service")
-  project=$(zion_docker_effective_project "$service")
-  log_dir=$(zion_docker_log_dir "$service")
-  [[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
-
-  # Parar logger persistente
-  if [[ -f "$log_dir/logger.pid" ]]; then
-    kill "$(cat "$log_dir/logger.pid")" 2>/dev/null || true
-    rm -f "$log_dir/logger.pid"
-  fi
-
-  local_label="$service"
-  [[ -n "$_ZION_DK_WORKTREE" ]] && local_label="$service (wt: $_ZION_DK_WORKTREE)"
-
-  echo "[zion docker] Parando $local_label..."
-  docker compose -f "$compose" -p "$project" down 2>/dev/null
-  [[ -f "$deps_compose" ]] && docker compose -f "$deps_compose" -p "${project}-deps" down 2>/dev/null
-
-  echo "Servico $local_label parado."
-
-  # Derrubar reverse proxy se nenhum servico estrategia continua rodando
-  zion_docker_stop_reverseproxy_if_idle
+  _zion_dk_shell "monolito" "${args[--container]:-app}" "${args[--cmd]:-}" "${args[--worktree]:-}"
 
 }
 
 # :command.function
-zion_docker_logs_command() {
+zion_docker_monolito_logs_command() {
 
-  # src/commands/docker_logs.sh
-  # Mostra logs de um servico Docker (reconecta se container esta rodando, le arquivo se parado).
+  # src/commands/docker_monolito_logs.sh
   zion_load_config
-
-  service="${args[service]}"
-  follow="${args[--follow]:-}"
-  tail_lines="${args[--tail]:-100}"
-  worktree="${args[--worktree]:-}"
-
-  zion_docker_init_worktree "$service" "$worktree" || exit 1
-
-  project=$(zion_docker_effective_project "$service")
-  log_dir=$(zion_docker_log_dir "$service")
-  [[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
-  compose=$(zion_docker_compose_file "$service")
-
-  # Tentar reconectar ao container rodando
-  running=$(docker compose -f "$compose" -p "$project" ps --status running 2>/dev/null | tail -n +2 | wc -l)
-
-  if [[ "$running" -gt 0 ]]; then
-    ARGS="--tail $tail_lines"
-    [[ -n "$follow" ]] && ARGS="$ARGS -f"
-    docker compose -f "$compose" -p "$project" logs --no-log-prefix $ARGS
-  elif [[ -f "$log_dir/service.log" ]]; then
-    echo "=== Container parado. Mostrando log gravado ==="
-    if [[ -n "$follow" ]]; then
-      tail -f "$log_dir/service.log"
-    else
-      tail -n "$tail_lines" "$log_dir/service.log"
-    fi
-  else
-    echo "Nenhum container rodando e nenhum log encontrado para $service"
-    echo "Use: zion docker run $service"
-  fi
+  _zion_dk_logs "monolito" "${args[--follow]:-}" "${args[--tail]:-100}" "${args[--worktree]:-}"
 
 }
 
 # :command.function
-zion_docker_status_command() {
+zion_docker_monolito_status_command() {
 
-  # src/commands/docker_status.sh
-  # Status dos servicos Docker.
+  # src/commands/docker_monolito_status.sh
   zion_load_config
-
-  # Cores
-  RESET='\033[0m'
-  BOLD='\033[1m'
-  DIM='\033[2m'
-  GREEN='\033[32m'
-  RED='\033[31m'
-  YELLOW='\033[33m'
-  CYAN='\033[36m'
-  BLUE='\033[34m'
-  MAGENTA='\033[35m'
-  WHITE='\033[37m'
-  ORANGE='\033[38;5;214m'
-
-  icon_running="${GREEN}●${RESET}"
-  icon_stopped="${RED}○${RESET}"
-  icon_partial="${YELLOW}◐${RESET}"
-
-  service="${args[service]:-}"
-
-  # Extrai portas unicas no formato :PORT (remove duplicatas ipv4/ipv6)
-  format_ports() {
-    local raw="$1"
-    [[ -z "$raw" ]] && return
-    echo "$raw" \
-      | grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:[0-9]+->[0-9]+' \
-      | grep -oE ':[0-9]+->' \
-      | sed 's/->//' \
-      | sort -u \
-      | tr '\n' '  ' \
-      | sed 's/  $//'
-  }
-
-  # Simplifica status: "Up 2 hours (healthy)" -> "2h  healthy"
-  format_status() {
-    local s="$1"
-    if echo "$s" | grep -qi "up"; then
-      # extrai tempo
-      local t
-      t=$(echo "$s" | sed -E 's/Up //i; s/ \(.*\)//')
-      t=$(echo "$t" | sed -E 's/ minutes?/min/; s/ hours?/h/; s/ days?/d/; s/ weeks?/w/')
-      local healthy=""
-      echo "$s" | grep -qi "healthy" && healthy=" ${GREEN}✓${RESET}"
-      echo "${ORANGE}${t}${RESET}${healthy}"
-    elif echo "$s" | grep -qi "exited"; then
-      echo "${RED}exited${RESET}"
-    else
-      echo "${YELLOW}${s}${RESET}"
-    fi
-  }
-
-  # Imprime: tempo  nome  :port1  :port2  (tudo na mesma linha, nome alinhado)
-  print_container_row() {
-    local tree_pfx="$1" name="$2" status="$3" ports="$4"
-    local TIME_W=9 NAME_W=14
-
-    local status_str
-    status_str=$(format_status "$status")
-
-    local fmt_ports=""
-    fmt_ports=$(format_ports "$ports")
-    local ports_str=""
-    [[ -n "$fmt_ports" ]] && ports_str="  ${DIM}${fmt_ports}${RESET}"
-
-    local padded_name
-    padded_name=$(printf "%-${NAME_W}s" "$name")
-
-    echo -e "${tree_pfx}$(printf "%-${TIME_W}b" "$status_str")  ${WHITE}${padded_name}${RESET}${ports_str}"
-  }
-
-  print_service_tree() {
-    local svc="$1"
-    local project compose
-    project=$(zion_docker_project_name "$svc")
-    compose=$(zion_docker_compose_file "$svc")
-
-    local running deps_running
-    running=$(docker compose -f "$compose" -p "$project" ps --status running 2>/dev/null | tail -n +2 | wc -l)
-    deps_running=$(docker compose -p "${project}-deps" ps --status running 2>/dev/null | tail -n +2 | wc -l)
-    local total=$((running + deps_running))
-
-    # Header
-    if [[ "$total" -eq 0 ]]; then
-      echo -e "${icon_stopped} ${BOLD}${CYAN}${svc}${RESET}  ${DIM}parado${RESET}"
-      return
-    fi
-
-    local svc_icon="$icon_running"
-    [[ "$running" -eq 0 || "$deps_running" -eq 0 ]] && svc_icon="$icon_partial"
-
-    local has_deps=0
-    dep_rows_raw=$(docker compose -p "${project}-deps" ps --format "{{.Name}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null)
-    dep_lines=()
-    while IFS= read -r line; do [[ -n "$line" ]] && dep_lines+=("$line"); done <<< "$dep_rows_raw"
-    [[ "${#dep_lines[@]}" -gt 0 ]] && has_deps=1
-
-    echo -e "${svc_icon} ${BOLD}${CYAN}${svc}${RESET}"
-
-    # App containers
-    local main_rows
-    main_rows=$(docker compose -f "$compose" -p "$project" ps --format "{{.Name}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null)
-    if [[ -n "$main_rows" ]]; then
-      local branch_char="├─"
-      [[ "$has_deps" -eq 0 ]] && branch_char="└─"
-      echo -e "  ${BLUE}${branch_char}${RESET} ${BOLD}${svc}${RESET}"
-      local cont_line="│  "
-      [[ "$has_deps" -eq 0 ]] && cont_line="   "
-      while IFS=$'\t' read -r name status ports; do
-        [[ -z "$name" ]] && continue
-        local short="${name##${project}-}"
-        print_container_row "  ${cont_line}└─ " "$short" "$status" "$ports"
-      done <<< "$main_rows"
-    fi
-
-    # Deps
-    if [[ "$has_deps" -eq 1 ]]; then
-      echo -e "  ${BLUE}└─${RESET} ${BOLD}deps${RESET}"
-      local total_deps="${#dep_lines[@]}"
-      local i=0
-      for row in "${dep_lines[@]}"; do
-        i=$((i + 1))
-        IFS=$'\t' read -r name status ports <<< "$row"
-        [[ -z "$name" ]] && continue
-        local short="${name##zion-dk-${svc}-}"
-        local tc="├─" port_cont="│  "
-        if [[ "$i" -eq "$total_deps" ]]; then tc="└─"; port_cont="   "; fi
-        print_container_row "     ${tc} " "$short" "$status" "$ports"
-      done
-    fi
-  }
-
-  if [[ -n "$service" ]]; then
-    print_service_tree "$service"
-  else
-    echo -e "\n${BOLD}${MAGENTA}  Zion Docker${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}\n"
-    services_list="monolito bo-container front-student"
-    count=0
-    total_svcs=$(echo "$services_list" | wc -w)
-    for svc in $services_list; do
-      count=$((count + 1))
-      print_service_tree "$svc"
-      [[ "$count" -lt "$total_svcs" ]] && echo ""
-    done
-    echo ""
-  fi
+  _zion_dk_status "monolito"
 
 }
 
 # :command.function
-zion_docker_shell_command() {
+zion_docker_monolito_build_command() {
 
-  # src/commands/docker_shell.sh
-  # Abre shell interativo ou executa comando com Go toolchain.
-  # Sem -c: exec no container rodando (app ou --container especificado).
-  # Com -c CMD: roda one-off dev container (golang:alpine + make) com source montado.
-
+  # src/commands/docker_monolito_build.sh
   zion_load_config
-
-  service="${args[service]}"
-  container="${args[--container]:-app}"
-  cmd="${args[--cmd]}"
-  worktree="${args[--worktree]:-}"
-
-  zion_docker_validate_service "$service" || exit 1
-  zion_docker_init_worktree "$service" "$worktree" || exit 1
-
-  dir=$(zion_docker_effective_dir "$service")
-  project=$(zion_docker_effective_project "$service")
-  compose=$(zion_docker_compose_file "$service")
-
-  if [[ -n "$cmd" ]]; then
-    # Modo dev: one-off container golang com source montado + make + ferramentas
-    echo "=== [$service] exec: $cmd ==="
-    [[ -n "$_ZION_DK_WORKTREE" ]] && echo "  worktree: $_ZION_DK_WORKTREE ($dir)"
-    docker run \
-      --rm \
-      -it \
-      -v "$dir:/go/app" \
-      -v /var/run/docker.sock:/var/run/docker.sock \
-      -e GOPATH=/go \
-      -e GOPRIVATE="github.com/estrategiahq" \
-      -e TERM=xterm-256color \
-      -e COLORTERM=truecolor \
-      -e DOCKER_HOST=unix:///var/run/docker.sock \
-      -e TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock \
-      --network host \
-      -w "/go/app" \
-      "golang:1.24.4-alpine" \
-      sh -c "apk add --no-cache make gcc musl-dev librdkafka-dev ca-certificates docker-cli > /dev/null 2>&1 && $cmd"
-  else
-    # Modo interativo: exec no container rodando
-    docker compose -f "$compose" -p "$project" exec "$container" /bin/sh
-  fi
+  _zion_dk_build "monolito" "${args[--worktree]:-}"
 
 }
 
 # :command.function
-zion_docker_restart_command() {
+zion_docker_monolito_flush_command() {
 
-  # src/commands/docker_restart.sh
-  # Reinicia um servico Docker.
+  # src/commands/docker_monolito_flush.sh
   zion_load_config
-
-  service="${args[service]}"
-  env="${args[--env]:-}"
-  worktree="${args[--worktree]:-}"
-
-  # Caso especial: reverseproxy (nao e servico registrado, tem handling proprio)
-  if [[ "$service" == "reverseproxy" ]]; then
-    echo "[zion docker] Recarregando nginx do reverse proxy..."
-    if docker ps --format '{{.Names}}' 2>/dev/null | grep -q '^zion-reverseproxy$'; then
-      docker exec zion-reverseproxy nginx -s reload
-      echo "[zion docker] nginx recarregado."
-    else
-      echo "[zion docker] Reverse proxy nao esta rodando. Subindo..."
-      docker compose -f "${zion_nixos_dir}/zion/dockerized/reverseproxy/docker-compose.yml" \
-        -p zion-dk-reverseproxy up -d --remove-orphans
-    fi
-    exit 0
-  fi
-
-  zion_docker_init_worktree "$service" "$worktree" || exit 1
-
-  project=$(zion_docker_effective_project "$service")
-  compose=$(zion_docker_compose_file "$service")
-  log_dir=$(zion_docker_log_dir "$service")
-  [[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
-
-  # Parar logger
-  if [[ -f "$log_dir/logger.pid" ]]; then
-    kill "$(cat "$log_dir/logger.pid")" 2>/dev/null || true
-    rm -f "$log_dir/logger.pid"
-  fi
-
-  local_label="$service"
-  [[ -n "$_ZION_DK_WORKTREE" ]] && local_label="$service (wt: $_ZION_DK_WORKTREE)"
-
-  echo "[zion docker] Parando $local_label..."
-  docker compose -f "$compose" -p "$project" down 2>/dev/null
-  docker compose -p "${project}-deps" down 2>/dev/null
-
-  # Re-levantar via zion docker run
-  restart_env="${env:-sand}"
-  wt_flag=""
-  [[ -n "$worktree" ]] && wt_flag="--worktree=$worktree"
-  echo "[zion docker] Reiniciando $local_label [env=$restart_env]..."
-  exec "$0" docker run "$service" --env="$restart_env" --detach $wt_flag
+  _zion_dk_flush "monolito" "${args[--worktree]:-}"
 
 }
 
 # :command.function
-zion_docker_build_command() {
+zion_docker_monolito_server_start_command() {
 
-  # src/commands/docker_build.sh
-  # Rebuilda a imagem Docker de um servico sem derrubar containers.
-
+  # src/commands/docker_monolito_server_start.sh
   zion_load_config
-
-  service="${args[service]}"
-  worktree="${args[--worktree]:-}"
-
-  zion_docker_validate_service "$service" || exit 1
-  zion_docker_init_worktree "$service" "$worktree" || exit 1
-
-  zion_docker_export_dirs "$service"
-  export ZION_NIXOS_DIR="$zion_nixos_dir"
-
-  compose=$(zion_docker_compose_file "$service")
-  project=$(zion_docker_effective_project "$service")
-
-  echo "=== [docker build] $service ==="
-  docker compose -f "$compose" -p "$project" build --no-cache
-  echo ""
-  echo "Imagem rebuilt. Rode 'zion docker run $service' para subir."
+  _zion_dk_run "monolito" "${args[--env]:-sand}" "${args[--debug]:-}" "${args[--worktree]:-}" "" "${args[--detach]:-}"
 
 }
 
 # :command.function
-zion_docker_flush_command() {
+zion_docker_monolito_server_stop_command() {
 
-  # src/commands/docker_flush.sh
-  # Remove tudo relacionado a um servico Docker: containers, imagens, volumes, logs, vendor.
-
+  # src/commands/docker_monolito_server_stop.sh
   zion_load_config
-
-  service="${args[service]}"
-  worktree="${args[--worktree]:-}"
-
-  zion_docker_validate_service "$service" || exit 1
-  zion_docker_init_worktree "$service" "$worktree" || exit 1
-
-  dir=$(zion_docker_effective_dir "$service")
-  config_dir=$(zion_docker_config_dir "$service")
-  compose=$(zion_docker_compose_file "$service")
-  deps_compose=$(zion_docker_deps_file "$service")
-  project=$(zion_docker_effective_project "$service")
-  log_dir=$(zion_docker_log_dir "$service")
-  [[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
-
-  local_label="$service"
-  [[ -n "$_ZION_DK_WORKTREE" ]] && local_label="$service (wt: $_ZION_DK_WORKTREE)"
-
-  echo "=== Flush: $local_label ==="
-  echo "  containers + imagens + volumes"
-  echo "  logs: $log_dir"
-  [[ "$service" == "monolito" || "$service" == "monolito-worker" ]] && echo "  vendor: $dir/vendor"
-  echo ""
-
-  # 1. Parar logger se rodando
-  if [[ -f "$log_dir/logger.pid" ]]; then
-    kill "$(cat "$log_dir/logger.pid")" 2>/dev/null || true
-    rm -f "$log_dir/logger.pid"
-  fi
-
-  # 2. Derrubar containers + remover volumes
-  echo ">>> Parando containers..."
-  docker compose -f "$compose" -p "$project" down -v --remove-orphans 2>/dev/null || true
-  docker compose -p "${project}-deps" down -v --remove-orphans 2>/dev/null || true
-
-  # 3. Remover imagens buildadas para este servico
-  echo ">>> Removendo imagens..."
-  docker images --filter "label=com.docker.compose.project=$project" -q | xargs docker rmi -f 2>/dev/null || true
-  # Tambem tenta por nome do container
-  docker rmi -f "zion-dk-${service}-app" "zion-dk-${service}-worker" 2>/dev/null || true
-
-  # 4. Remover volumes nomeados
-  echo ">>> Removendo volumes..."
-  docker volume ls --filter "label=com.docker.compose.project=$project" -q | xargs docker volume rm 2>/dev/null || true
-
-  # 5. Limpar logs
-  echo ">>> Limpando logs..."
-  rm -rf "$log_dir"
-
-  # 6. Remover vendor (se Go project)
-  if [[ -d "$dir/vendor" ]]; then
-    echo ">>> Removendo vendor/..."
-    rm -rf "$dir/vendor"
-  fi
-
-  echo ""
-  echo "Flush concluido. Rode 'zion docker install $service' para reinstalar."
+  _zion_dk_stop "monolito" "${args[--worktree]:-}"
 
 }
 
 # :command.function
-zion_docker_install_command() {
+zion_docker_monolito_worker_start_command() {
 
-  # src/commands/docker_install.sh
-  # Instala dependencias de um servico usando SSH do host.
-  # Go:   go mod download + vendor (vendor/ fica no projeto)
-  # Node: npm install (node_modules/ fica no projeto)
-
+  # src/commands/docker_monolito_worker_start.sh
   zion_load_config
+  _zion_dk_run "monolito-worker" "${args[--env]:-sand}" "${args[--debug]:-}" "${args[--worktree]:-}" "" "${args[--detach]:-}"
 
-  service="${args[service]}"
-  env="${args[--env]:-sand}"
-  worktree="${args[--worktree]:-}"
+}
 
-  zion_docker_validate_service "$service" || exit 1
-  zion_docker_init_worktree "$service" "$worktree" || exit 1
+# :command.function
+zion_docker_monolito_worker_stop_command() {
 
-  dir=$(zion_docker_effective_dir "$service")
-  config_dir=$(zion_docker_config_dir "$service")
-  log_dir=$(zion_docker_log_dir "$service")
-  [[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
+  # src/commands/docker_monolito_worker_stop.sh
+  zion_load_config
+  _zion_dk_stop "monolito-worker" "${args[--worktree]:-}"
 
-  mkdir -p "$log_dir"
+}
 
-  # Detectar tipo de servico
-  _is_node_service() {
-    [[ -f "$dir/package.json" ]]
-  }
+# :command.function
+zion_docker_bo_container_install_command() {
 
-  # ── Node.js install ──────────────────────────────────────────────────────────
-  if _is_node_service; then
-    # Detectar versao do Node requerida (engines.node no package.json)
-    node_version=$(node -e "const p=require('$dir/package.json'); const v=(p.engines&&p.engines.node)||'20'; console.log(v.match(/\d+/)[0])" 2>/dev/null || echo "20")
-    node_image="node:${node_version}-alpine"
+  # src/commands/docker_bo_container_install.sh
+  zion_load_config
+  _zion_dk_install "bo-container" "${args[--env]:-sand}" "${args[--worktree]:-}"
 
-    echo "=== Instalando dependencias de $service (Node) [env=$env] ==="
-    [[ -n "$_ZION_DK_WORKTREE" ]] && echo "  worktree: $_ZION_DK_WORKTREE"
-    echo "  SSH:     ~/.ssh (montada read-only)"
-    echo "  npmrc:   ~/.npmrc (montada read-only)"
-    echo "  Projeto: $dir"
-    echo "  Image:   $node_image"
-    echo "  logs:    $log_dir/install.log"
-    echo ""
-    echo "Rodando: ferramentas -> npm install"
-    echo "---"
+}
 
-    docker run \
-      --rm \
-      -it \
-      -v "$HOME/.ssh:/ssh-host:ro" \
-      -v "$HOME/.npmrc:/npmrc-host:ro" \
-      -v "$dir:/app" \
-      -e NPM_TOKEN="${NPM_TOKEN:-}" \
-      -e TERM=xterm-256color \
-      -e COLORTERM=truecolor \
-      -w "/app" \
-      "$node_image" \
-      sh -c '
-        set -e
+# :command.function
+zion_docker_bo_container_shell_command() {
 
-        apk add --no-cache git openssh-client ca-certificates python3 make g++ \
-          autoconf automake libtool nasm pkgconfig
+  # src/commands/docker_bo_container_shell.sh
+  zion_load_config
+  _zion_dk_shell "bo-container" "${args[--container]:-app}" "${args[--cmd]:-}" "${args[--worktree]:-}"
 
-        mkdir -p /root/.ssh
-        cp /ssh-host/* /root/.ssh/ 2>/dev/null || true
-        chmod 700 /root/.ssh
-        chmod 600 /root/.ssh/* 2>/dev/null || true
-        ssh-keyscan github.com >> /root/.ssh/known_hosts 2>/dev/null
+}
 
-        # .npmrc: host tem prioridade; fallback para NPM_TOKEN env
-        if [ -f /npmrc-host ]; then
-          cp /npmrc-host /root/.npmrc
-        elif [ -n "$NPM_TOKEN" ]; then
-          echo "//npm.pkg.github.com/:_authToken=${NPM_TOKEN}" > /root/.npmrc
-        fi
-        echo "@estrategiahq:registry=https://npm.pkg.github.com/estrategiahq" >> /root/.npmrc
+# :command.function
+zion_docker_bo_container_logs_command() {
 
-        echo "[1/2] Instalando dependencias (npm install)..."
-        npm install
+  # src/commands/docker_bo_container_logs.sh
+  zion_load_config
+  _zion_dk_logs "bo-container" "${args[--follow]:-}" "${args[--tail]:-100}" "${args[--worktree]:-}"
 
-        echo "[2/2] Recompilando bindings nativos para Alpine/musl (compilando do fonte)..."
-        rm -rf node_modules/node-sass/vendor/
-        npm rebuild node-sass || true
+}
 
-        echo ""
-        echo "Dependencias instaladas! node_modules/ gerado no projeto."
-      ' 2>&1 | tee "$log_dir/install.log"
+# :command.function
+zion_docker_bo_container_status_command() {
 
-    if [[ "${PIPESTATUS[0]}" -eq 0 ]]; then
-      echo ""
-      echo "Instalacao finalizada! Rode: zion docker run $service --env=$env"
-    else
-      echo ""
-      echo "Instalacao falhou. Verifique: $log_dir/install.log"
-      exit 1
-    fi
+  # src/commands/docker_bo_container_status.sh
+  zion_load_config
+  _zion_dk_status "bo-container"
 
-    exit 0
-  fi
+}
 
-  # ── Go install ───────────────────────────────────────────────────────────────
-  echo "=== Instalando dependencias de $service (Go) [env=$env] ==="
-  [[ -n "$_ZION_DK_WORKTREE" ]] && echo "  worktree: $_ZION_DK_WORKTREE"
-  echo "  SSH:     ~/.ssh (montada read-only)"
-  echo "  Projeto: $dir"
-  echo "  logs:    $log_dir/install.log"
-  echo ""
-  echo "Rodando: ferramentas -> go mod download -> go mod tidy -> go mod vendor"
-  echo "---"
+# :command.function
+zion_docker_bo_container_build_command() {
 
-  # Roda docker run e grava em arquivo simultaneamente (preserva cores com script)
-  docker run \
-    --rm \
-    -it \
-    -v "$HOME/.ssh:/ssh-host:ro" \
-    -v "$dir:/go/app" \
-    -e GOPATH=/go \
-    -e GOPRIVATE="github.com/estrategiahq" \
-    -e TERM=xterm-256color \
-    -e COLORTERM=truecolor \
-    -w "/go/app" \
-    "golang:1.24.4-alpine" \
-    sh -c '
-      set -e
+  # src/commands/docker_bo_container_build.sh
+  zion_load_config
+  _zion_dk_build "bo-container" "${args[--worktree]:-}"
 
-      mkdir -p /root/.ssh
-      cp /ssh-host/* /root/.ssh/ 2>/dev/null || true
-      chmod 700 /root/.ssh
-      chmod 600 /root/.ssh/* 2>/dev/null || true
+}
 
-      echo "[1/4] Instalando ferramentas..."
-      apk add --no-cache git gcc musl-dev librdkafka-dev ca-certificates openssh-client
+# :command.function
+zion_docker_bo_container_flush_command() {
 
-      git config --global url."git@github.com:estrategiahq".insteadOf "https://github.com/estrategiahq"
-      ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts 2>/dev/null
+  # src/commands/docker_bo_container_flush.sh
+  zion_load_config
+  _zion_dk_flush "bo-container" "${args[--worktree]:-}"
 
-      echo "[2/4] Download de modulos Go (pode demorar)..."
-      go mod download
+}
 
-      echo "[3/4] Limpando modulos..."
-      go mod tidy
+# :command.function
+zion_docker_bo_container_server_start_command() {
 
-      echo "[4/4] Vendoring dependencias (workspace)..."
-      go work vendor
+  # src/commands/docker_bo_container_server_start.sh
+  zion_load_config
+  _zion_dk_run "bo-container" "${args[--env]:-sand}" "${args[--debug]:-}" "${args[--worktree]:-}" "" "${args[--detach]:-}"
 
-      echo ""
-      echo "Dependencias instaladas! vendor/ gerado no projeto."
-    ' 2>&1 | tee "$log_dir/install.log"
+}
 
-  if [[ "${PIPESTATUS[0]}" -eq 0 ]]; then
-    echo ""
-    echo "Instalacao finalizada! Rode: zion docker run $service --env=$env"
-  else
-    echo ""
-    echo "Instalacao falhou. Verifique: $log_dir/install.log"
-    exit 1
-  fi
+# :command.function
+zion_docker_bo_container_server_stop_command() {
+
+  # src/commands/docker_bo_container_server_stop.sh
+  zion_load_config
+  _zion_dk_stop "bo-container" "${args[--worktree]:-}"
+
+}
+
+# :command.function
+zion_docker_front_student_install_command() {
+
+  # src/commands/docker_front_student_install.sh
+  zion_load_config
+  _zion_dk_install "front-student" "${args[--env]:-sand}" "${args[--worktree]:-}"
+
+}
+
+# :command.function
+zion_docker_front_student_shell_command() {
+
+  # src/commands/docker_front_student_shell.sh
+  zion_load_config
+  _zion_dk_shell "front-student" "${args[--container]:-app}" "${args[--cmd]:-}" "${args[--worktree]:-}"
+
+}
+
+# :command.function
+zion_docker_front_student_logs_command() {
+
+  # src/commands/docker_front_student_logs.sh
+  zion_load_config
+  _zion_dk_logs "front-student" "${args[--follow]:-}" "${args[--tail]:-100}" "${args[--worktree]:-}"
+
+}
+
+# :command.function
+zion_docker_front_student_status_command() {
+
+  # src/commands/docker_front_student_status.sh
+  zion_load_config
+  _zion_dk_status "front-student"
+
+}
+
+# :command.function
+zion_docker_front_student_build_command() {
+
+  # src/commands/docker_front_student_build.sh
+  zion_load_config
+  _zion_dk_build "front-student" "${args[--worktree]:-}"
+
+}
+
+# :command.function
+zion_docker_front_student_flush_command() {
+
+  # src/commands/docker_front_student_flush.sh
+  zion_load_config
+  _zion_dk_flush "front-student" "${args[--worktree]:-}"
+
+}
+
+# :command.function
+zion_docker_front_student_server_start_command() {
+
+  # src/commands/docker_front_student_server_start.sh
+  zion_load_config
+  _zion_dk_run "front-student" "${args[--env]:-sand}" "${args[--debug]:-}" "${args[--worktree]:-}" "${args[--vertical]:-carreiras-juridicas}" "${args[--detach]:-}"
+
+}
+
+# :command.function
+zion_docker_front_student_server_stop_command() {
+
+  # src/commands/docker_front_student_server_stop.sh
+  zion_load_config
+  _zion_dk_stop "front-student" "${args[--worktree]:-}"
 
 }
 
@@ -6751,66 +7623,24 @@ zion_docker_parse_requirements() {
   case $action in
     -*) ;;
 
-    run | up)
-      action="run"
+    monolito | mono)
+      action="monolito"
       shift
-      zion_docker_run_parse_requirements "$@"
+      zion_docker_monolito_parse_requirements "$@"
       shift $#
       ;;
 
-    stop)
-      action="stop"
+    bo-container | bo)
+      action="bo-container"
       shift
-      zion_docker_stop_parse_requirements "$@"
+      zion_docker_bo_container_parse_requirements "$@"
       shift $#
       ;;
 
-    logs)
-      action="logs"
+    front-student | front | fs)
+      action="front-student"
       shift
-      zion_docker_logs_parse_requirements "$@"
-      shift $#
-      ;;
-
-    status | ps)
-      action="status"
-      shift
-      zion_docker_status_parse_requirements "$@"
-      shift $#
-      ;;
-
-    shell)
-      action="shell"
-      shift
-      zion_docker_shell_parse_requirements "$@"
-      shift $#
-      ;;
-
-    restart)
-      action="restart"
-      shift
-      zion_docker_restart_parse_requirements "$@"
-      shift $#
-      ;;
-
-    build)
-      action="build"
-      shift
-      zion_docker_build_parse_requirements "$@"
-      shift $#
-      ;;
-
-    flush)
-      action="flush"
-      shift
-      zion_docker_flush_parse_requirements "$@"
-      shift $#
-      ;;
-
-    install)
-      action="install"
-      shift
-      zion_docker_install_parse_requirements "$@"
+      zion_docker_front_student_parse_requirements "$@"
       shift $#
       ;;
 
@@ -6851,14 +7681,14 @@ zion_docker_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_docker_run_parse_requirements() {
+zion_docker_monolito_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        zion_docker_run_usage
+        zion_docker_monolito_usage
         exit
         ;;
 
@@ -6870,7 +7700,124 @@ zion_docker_run_parse_requirements() {
   done
 
   # :command.command_filter
-  action="docker run"
+  action=${1:-}
+
+  case $action in
+    -*) ;;
+
+    install)
+      action="install"
+      shift
+      zion_docker_monolito_install_parse_requirements "$@"
+      shift $#
+      ;;
+
+    shell)
+      action="shell"
+      shift
+      zion_docker_monolito_shell_parse_requirements "$@"
+      shift $#
+      ;;
+
+    logs)
+      action="logs"
+      shift
+      zion_docker_monolito_logs_parse_requirements "$@"
+      shift $#
+      ;;
+
+    status)
+      action="status"
+      shift
+      zion_docker_monolito_status_parse_requirements "$@"
+      shift $#
+      ;;
+
+    build)
+      action="build"
+      shift
+      zion_docker_monolito_build_parse_requirements "$@"
+      shift $#
+      ;;
+
+    flush)
+      action="flush"
+      shift
+      zion_docker_monolito_flush_parse_requirements "$@"
+      shift $#
+      ;;
+
+    server)
+      action="server"
+      shift
+      zion_docker_monolito_server_parse_requirements "$@"
+      shift $#
+      ;;
+
+    worker)
+      action="worker"
+      shift
+      zion_docker_monolito_worker_parse_requirements "$@"
+      shift $#
+      ;;
+
+    # :command.command_fallback
+    "")
+      zion_docker_monolito_usage >&2
+      exit 1
+      ;;
+
+    *)
+      printf "invalid command: %s\n" "$action" >&2
+      exit 1
+      ;;
+
+  esac
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_monolito_install_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_monolito_install_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker monolito install"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
@@ -6885,7 +7832,490 @@ zion_docker_run_parse_requirements() {
           shift
           shift
         else
-          printf "%s\n" "--env requires an argument: --env, -e ENVIRONMENT" >&2
+          printf "%s\n" "--env requires an argument: --env, -e ENV" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+  # :command.default_assignments
+  [[ -n ${args['--env']:-} ]] || args['--env']="sand"
+
+}
+
+# :command.parse_requirements
+zion_docker_monolito_shell_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_monolito_shell_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker monolito shell"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --container | -c)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--container']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--container requires an argument: --container, -c CONTAINER" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --cmd)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--cmd']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--cmd requires an argument: --cmd CMD" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+  # :command.default_assignments
+  [[ -n ${args['--container']:-} ]] || args['--container']="app"
+
+}
+
+# :command.parse_requirements
+zion_docker_monolito_logs_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_monolito_logs_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker monolito logs"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --follow | -f)
+
+        # :flag.case_no_arg
+        args['--follow']=1
+        shift
+        ;;
+
+      # :flag.case
+      --tail | -t)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--tail']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--tail requires an argument: --tail, -t TAIL" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+  # :command.default_assignments
+  [[ -n ${args['--tail']:-} ]] || args['--tail']="100"
+
+}
+
+# :command.parse_requirements
+zion_docker_monolito_status_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_monolito_status_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker monolito status"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_monolito_build_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_monolito_build_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker monolito build"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_monolito_flush_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_monolito_flush_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker monolito flush"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_monolito_server_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_monolito_server_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action=${1:-}
+
+  case $action in
+    -*) ;;
+
+    start | up)
+      action="start"
+      shift
+      zion_docker_monolito_server_start_parse_requirements "$@"
+      shift $#
+      ;;
+
+    stop | down)
+      action="stop"
+      shift
+      zion_docker_monolito_server_stop_parse_requirements "$@"
+      shift $#
+      ;;
+
+    # :command.command_fallback
+    "")
+      zion_docker_monolito_server_usage >&2
+      exit 1
+      ;;
+
+    *)
+      printf "invalid command: %s\n" "$action" >&2
+      exit 1
+      ;;
+
+  esac
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_monolito_server_start_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_monolito_server_start_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker monolito server start"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --env | -e)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--env']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--env requires an argument: --env, -e ENV" >&2
           exit 1
         fi
         ;;
@@ -6907,7 +8337,7 @@ zion_docker_run_parse_requirements() {
         ;;
 
       # :flag.case
-      --worktree | -w)
+      --worktree)
 
         # :flag.case_arg
         if [[ -n ${2+x} ]]; then
@@ -6915,9 +8345,1703 @@ zion_docker_run_parse_requirements() {
           shift
           shift
         else
-          printf "%s\n" "--worktree requires an argument: --worktree, -w NAME" >&2
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
           exit 1
         fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+  # :command.default_assignments
+  [[ -n ${args['--env']:-} ]] || args['--env']="sand"
+
+}
+
+# :command.parse_requirements
+zion_docker_monolito_server_stop_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_monolito_server_stop_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker monolito server stop"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_monolito_worker_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_monolito_worker_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action=${1:-}
+
+  case $action in
+    -*) ;;
+
+    start | up)
+      action="start"
+      shift
+      zion_docker_monolito_worker_start_parse_requirements "$@"
+      shift $#
+      ;;
+
+    stop | down)
+      action="stop"
+      shift
+      zion_docker_monolito_worker_stop_parse_requirements "$@"
+      shift $#
+      ;;
+
+    # :command.command_fallback
+    "")
+      zion_docker_monolito_worker_usage >&2
+      exit 1
+      ;;
+
+    *)
+      printf "invalid command: %s\n" "$action" >&2
+      exit 1
+      ;;
+
+  esac
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_monolito_worker_start_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_monolito_worker_start_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker monolito worker start"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --env | -e)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--env']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--env requires an argument: --env, -e ENV" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --detach | -d)
+
+        # :flag.case_no_arg
+        args['--detach']=1
+        shift
+        ;;
+
+      # :flag.case
+      --debug)
+
+        # :flag.case_no_arg
+        args['--debug']=1
+        shift
+        ;;
+
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+  # :command.default_assignments
+  [[ -n ${args['--env']:-} ]] || args['--env']="sand"
+
+}
+
+# :command.parse_requirements
+zion_docker_monolito_worker_stop_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_monolito_worker_stop_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker monolito worker stop"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_bo_container_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_bo_container_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action=${1:-}
+
+  case $action in
+    -*) ;;
+
+    install)
+      action="install"
+      shift
+      zion_docker_bo_container_install_parse_requirements "$@"
+      shift $#
+      ;;
+
+    shell)
+      action="shell"
+      shift
+      zion_docker_bo_container_shell_parse_requirements "$@"
+      shift $#
+      ;;
+
+    logs)
+      action="logs"
+      shift
+      zion_docker_bo_container_logs_parse_requirements "$@"
+      shift $#
+      ;;
+
+    status)
+      action="status"
+      shift
+      zion_docker_bo_container_status_parse_requirements "$@"
+      shift $#
+      ;;
+
+    build)
+      action="build"
+      shift
+      zion_docker_bo_container_build_parse_requirements "$@"
+      shift $#
+      ;;
+
+    flush)
+      action="flush"
+      shift
+      zion_docker_bo_container_flush_parse_requirements "$@"
+      shift $#
+      ;;
+
+    server)
+      action="server"
+      shift
+      zion_docker_bo_container_server_parse_requirements "$@"
+      shift $#
+      ;;
+
+    # :command.command_fallback
+    "")
+      zion_docker_bo_container_usage >&2
+      exit 1
+      ;;
+
+    *)
+      printf "invalid command: %s\n" "$action" >&2
+      exit 1
+      ;;
+
+  esac
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_bo_container_install_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_bo_container_install_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker bo-container install"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --env | -e)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--env']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--env requires an argument: --env, -e ENV" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+  # :command.default_assignments
+  [[ -n ${args['--env']:-} ]] || args['--env']="sand"
+
+}
+
+# :command.parse_requirements
+zion_docker_bo_container_shell_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_bo_container_shell_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker bo-container shell"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --container | -c)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--container']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--container requires an argument: --container, -c CONTAINER" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --cmd)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--cmd']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--cmd requires an argument: --cmd CMD" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+  # :command.default_assignments
+  [[ -n ${args['--container']:-} ]] || args['--container']="app"
+
+}
+
+# :command.parse_requirements
+zion_docker_bo_container_logs_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_bo_container_logs_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker bo-container logs"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --follow | -f)
+
+        # :flag.case_no_arg
+        args['--follow']=1
+        shift
+        ;;
+
+      # :flag.case
+      --tail | -t)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--tail']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--tail requires an argument: --tail, -t TAIL" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+  # :command.default_assignments
+  [[ -n ${args['--tail']:-} ]] || args['--tail']="100"
+
+}
+
+# :command.parse_requirements
+zion_docker_bo_container_status_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_bo_container_status_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker bo-container status"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_bo_container_build_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_bo_container_build_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker bo-container build"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_bo_container_flush_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_bo_container_flush_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker bo-container flush"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_bo_container_server_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_bo_container_server_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action=${1:-}
+
+  case $action in
+    -*) ;;
+
+    start | up)
+      action="start"
+      shift
+      zion_docker_bo_container_server_start_parse_requirements "$@"
+      shift $#
+      ;;
+
+    stop | down)
+      action="stop"
+      shift
+      zion_docker_bo_container_server_stop_parse_requirements "$@"
+      shift $#
+      ;;
+
+    # :command.command_fallback
+    "")
+      zion_docker_bo_container_server_usage >&2
+      exit 1
+      ;;
+
+    *)
+      printf "invalid command: %s\n" "$action" >&2
+      exit 1
+      ;;
+
+  esac
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_bo_container_server_start_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_bo_container_server_start_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker bo-container server start"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --env | -e)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--env']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--env requires an argument: --env, -e ENV" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --detach | -d)
+
+        # :flag.case_no_arg
+        args['--detach']=1
+        shift
+        ;;
+
+      # :flag.case
+      --debug)
+
+        # :flag.case_no_arg
+        args['--debug']=1
+        shift
+        ;;
+
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+  # :command.default_assignments
+  [[ -n ${args['--env']:-} ]] || args['--env']="sand"
+
+}
+
+# :command.parse_requirements
+zion_docker_bo_container_server_stop_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_bo_container_server_stop_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker bo-container server stop"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_front_student_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_front_student_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action=${1:-}
+
+  case $action in
+    -*) ;;
+
+    install)
+      action="install"
+      shift
+      zion_docker_front_student_install_parse_requirements "$@"
+      shift $#
+      ;;
+
+    shell)
+      action="shell"
+      shift
+      zion_docker_front_student_shell_parse_requirements "$@"
+      shift $#
+      ;;
+
+    logs)
+      action="logs"
+      shift
+      zion_docker_front_student_logs_parse_requirements "$@"
+      shift $#
+      ;;
+
+    status)
+      action="status"
+      shift
+      zion_docker_front_student_status_parse_requirements "$@"
+      shift $#
+      ;;
+
+    build)
+      action="build"
+      shift
+      zion_docker_front_student_build_parse_requirements "$@"
+      shift $#
+      ;;
+
+    flush)
+      action="flush"
+      shift
+      zion_docker_front_student_flush_parse_requirements "$@"
+      shift $#
+      ;;
+
+    server)
+      action="server"
+      shift
+      zion_docker_front_student_server_parse_requirements "$@"
+      shift $#
+      ;;
+
+    # :command.command_fallback
+    "")
+      zion_docker_front_student_usage >&2
+      exit 1
+      ;;
+
+    *)
+      printf "invalid command: %s\n" "$action" >&2
+      exit 1
+      ;;
+
+  esac
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_front_student_install_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_front_student_install_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker front-student install"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --env | -e)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--env']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--env requires an argument: --env, -e ENV" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+  # :command.default_assignments
+  [[ -n ${args['--env']:-} ]] || args['--env']="sand"
+
+}
+
+# :command.parse_requirements
+zion_docker_front_student_shell_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_front_student_shell_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker front-student shell"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --container | -c)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--container']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--container requires an argument: --container, -c CONTAINER" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --cmd)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--cmd']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--cmd requires an argument: --cmd CMD" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+  # :command.default_assignments
+  [[ -n ${args['--container']:-} ]] || args['--container']="app"
+
+}
+
+# :command.parse_requirements
+zion_docker_front_student_logs_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_front_student_logs_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker front-student logs"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --follow | -f)
+
+        # :flag.case_no_arg
+        args['--follow']=1
+        shift
+        ;;
+
+      # :flag.case
+      --tail | -t)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--tail']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--tail requires an argument: --tail, -t TAIL" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+  # :command.default_assignments
+  [[ -n ${args['--tail']:-} ]] || args['--tail']="100"
+
+}
+
+# :command.parse_requirements
+zion_docker_front_student_status_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_front_student_status_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker front-student status"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_front_student_build_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_front_student_build_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker front-student build"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_front_student_flush_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_front_student_flush_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker front-student flush"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_front_student_server_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_front_student_server_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action=${1:-}
+
+  case $action in
+    -*) ;;
+
+    start | up)
+      action="start"
+      shift
+      zion_docker_front_student_server_start_parse_requirements "$@"
+      shift $#
+      ;;
+
+    stop | down)
+      action="stop"
+      shift
+      zion_docker_front_student_server_stop_parse_requirements "$@"
+      shift $#
+      ;;
+
+    # :command.command_fallback
+    "")
+      zion_docker_front_student_server_usage >&2
+      exit 1
+      ;;
+
+    *)
+      printf "invalid command: %s\n" "$action" >&2
+      exit 1
+      ;;
+
+  esac
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_front_student_server_start_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_front_student_server_start_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker front-student server start"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --env | -e)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--env']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--env requires an argument: --env, -e ENV" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --detach | -d)
+
+        # :flag.case_no_arg
+        args['--detach']=1
+        shift
+        ;;
+
+      # :flag.case
+      --debug)
+
+        # :flag.case_no_arg
+        args['--debug']=1
+        shift
         ;;
 
       # :flag.case
@@ -6934,6 +10058,20 @@ zion_docker_run_parse_requirements() {
         fi
         ;;
 
+      # :flag.case
+      --worktree)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--worktree']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
+          exit 1
+        fi
+        ;;
+
       -?*)
         printf "invalid option: %s\n" "$key" >&2
         exit 1
@@ -6942,41 +10080,29 @@ zion_docker_run_parse_requirements() {
       *)
         # :command.parse_requirements_case
         # :command.parse_requirements_case_simple
-        # :argument.case
-        if [[ -z ${args['service']+x} ]]; then
-          args['service']=$1
-          shift
-        else
-          printf "invalid argument: %s\n" "$key" >&2
-          exit 1
-        fi
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
 
         ;;
 
     esac
   done
-
-  # :command.required_args_filter
-  if [[ -z ${args['service']+x} ]]; then
-    printf "missing required argument: SERVICE\nusage: zion docker run SERVICE [OPTIONS]\n" >&2
-
-    exit 1
-  fi
 
   # :command.default_assignments
   [[ -n ${args['--env']:-} ]] || args['--env']="sand"
+  [[ -n ${args['--vertical']:-} ]] || args['--vertical']="carreiras-juridicas"
 
 }
 
 # :command.parse_requirements
-zion_docker_stop_parse_requirements() {
+zion_docker_front_student_server_stop_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        zion_docker_stop_usage
+        zion_docker_front_student_server_stop_usage
         exit
         ;;
 
@@ -6988,14 +10114,14 @@ zion_docker_stop_parse_requirements() {
   done
 
   # :command.command_filter
-  action="docker stop"
+  action="docker front-student server stop"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       # :flag.case
-      --worktree | -w)
+      --worktree)
 
         # :flag.case_arg
         if [[ -n ${2+x} ]]; then
@@ -7003,7 +10129,7 @@ zion_docker_stop_parse_requirements() {
           shift
           shift
         else
-          printf "%s\n" "--worktree requires an argument: --worktree, -w NAME" >&2
+          printf "%s\n" "--worktree requires an argument: --worktree WORKTREE" >&2
           exit 1
         fi
         ;;
@@ -7016,590 +10142,13 @@ zion_docker_stop_parse_requirements() {
       *)
         # :command.parse_requirements_case
         # :command.parse_requirements_case_simple
-        # :argument.case
-        if [[ -z ${args['service']+x} ]]; then
-          args['service']=$1
-          shift
-        else
-          printf "invalid argument: %s\n" "$key" >&2
-          exit 1
-        fi
-
-        ;;
-
-    esac
-  done
-
-  # :command.required_args_filter
-  if [[ -z ${args['service']+x} ]]; then
-    printf "missing required argument: SERVICE\nusage: zion docker stop SERVICE [OPTIONS]\n" >&2
-
-    exit 1
-  fi
-
-}
-
-# :command.parse_requirements
-zion_docker_logs_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_docker_logs_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="docker logs"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      # :flag.case
-      --follow | -f)
-
-        # :flag.case_no_arg
-        args['--follow']=1
-        shift
-        ;;
-
-      # :flag.case
-      --tail)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--tail']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--tail requires an argument: --tail LINES" >&2
-          exit 1
-        fi
-        ;;
-
-      # :flag.case
-      --worktree | -w)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--worktree']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--worktree requires an argument: --worktree, -w NAME" >&2
-          exit 1
-        fi
-        ;;
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
+        printf "invalid argument: %s\n" "$key" >&2
         exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        # :argument.case
-        if [[ -z ${args['service']+x} ]]; then
-          args['service']=$1
-          shift
-        else
-          printf "invalid argument: %s\n" "$key" >&2
-          exit 1
-        fi
 
         ;;
 
     esac
   done
-
-  # :command.required_args_filter
-  if [[ -z ${args['service']+x} ]]; then
-    printf "missing required argument: SERVICE\nusage: zion docker logs SERVICE [OPTIONS]\n" >&2
-
-    exit 1
-  fi
-
-  # :command.default_assignments
-  [[ -n ${args['--tail']:-} ]] || args['--tail']="100"
-
-}
-
-# :command.parse_requirements
-zion_docker_status_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_docker_status_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="docker status"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        # :argument.case
-        if [[ -z ${args['service']+x} ]]; then
-          args['service']=$1
-          shift
-        else
-          printf "invalid argument: %s\n" "$key" >&2
-          exit 1
-        fi
-
-        ;;
-
-    esac
-  done
-
-}
-
-# :command.parse_requirements
-zion_docker_shell_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_docker_shell_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="docker shell"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      # :flag.case
-      --container | -C)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--container']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--container requires an argument: --container, -C NAME" >&2
-          exit 1
-        fi
-        ;;
-
-      # :flag.case
-      --cmd | -c)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--cmd']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--cmd requires an argument: --cmd, -c COMMAND" >&2
-          exit 1
-        fi
-        ;;
-
-      # :flag.case
-      --worktree | -w)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--worktree']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--worktree requires an argument: --worktree, -w NAME" >&2
-          exit 1
-        fi
-        ;;
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        # :argument.case
-        if [[ -z ${args['service']+x} ]]; then
-          args['service']=$1
-          shift
-        else
-          printf "invalid argument: %s\n" "$key" >&2
-          exit 1
-        fi
-
-        ;;
-
-    esac
-  done
-
-  # :command.required_args_filter
-  if [[ -z ${args['service']+x} ]]; then
-    printf "missing required argument: SERVICE\nusage: zion docker shell SERVICE [OPTIONS]\n" >&2
-
-    exit 1
-  fi
-
-  # :command.default_assignments
-  [[ -n ${args['--container']:-} ]] || args['--container']="app"
-
-}
-
-# :command.parse_requirements
-zion_docker_restart_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_docker_restart_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="docker restart"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      # :flag.case
-      --env | -e)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--env']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--env requires an argument: --env, -e ENVIRONMENT" >&2
-          exit 1
-        fi
-        ;;
-
-      # :flag.case
-      --worktree | -w)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--worktree']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--worktree requires an argument: --worktree, -w NAME" >&2
-          exit 1
-        fi
-        ;;
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        # :argument.case
-        if [[ -z ${args['service']+x} ]]; then
-          args['service']=$1
-          shift
-        else
-          printf "invalid argument: %s\n" "$key" >&2
-          exit 1
-        fi
-
-        ;;
-
-    esac
-  done
-
-  # :command.required_args_filter
-  if [[ -z ${args['service']+x} ]]; then
-    printf "missing required argument: SERVICE\nusage: zion docker restart SERVICE [OPTIONS]\n" >&2
-
-    exit 1
-  fi
-
-}
-
-# :command.parse_requirements
-zion_docker_build_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_docker_build_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="docker build"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      # :flag.case
-      --worktree | -w)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--worktree']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--worktree requires an argument: --worktree, -w NAME" >&2
-          exit 1
-        fi
-        ;;
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        # :argument.case
-        if [[ -z ${args['service']+x} ]]; then
-          args['service']=$1
-          shift
-        else
-          printf "invalid argument: %s\n" "$key" >&2
-          exit 1
-        fi
-
-        ;;
-
-    esac
-  done
-
-  # :command.required_args_filter
-  if [[ -z ${args['service']+x} ]]; then
-    printf "missing required argument: SERVICE\nusage: zion docker build SERVICE [OPTIONS]\n" >&2
-
-    exit 1
-  fi
-
-}
-
-# :command.parse_requirements
-zion_docker_flush_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_docker_flush_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="docker flush"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      # :flag.case
-      --worktree | -w)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--worktree']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--worktree requires an argument: --worktree, -w NAME" >&2
-          exit 1
-        fi
-        ;;
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        # :argument.case
-        if [[ -z ${args['service']+x} ]]; then
-          args['service']=$1
-          shift
-        else
-          printf "invalid argument: %s\n" "$key" >&2
-          exit 1
-        fi
-
-        ;;
-
-    esac
-  done
-
-  # :command.required_args_filter
-  if [[ -z ${args['service']+x} ]]; then
-    printf "missing required argument: SERVICE\nusage: zion docker flush SERVICE [OPTIONS]\n" >&2
-
-    exit 1
-  fi
-
-}
-
-# :command.parse_requirements
-zion_docker_install_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_docker_install_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="docker install"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      # :flag.case
-      --env | -e)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--env']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--env requires an argument: --env, -e ENVIRONMENT" >&2
-          exit 1
-        fi
-        ;;
-
-      # :flag.case
-      --worktree | -w)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--worktree']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--worktree requires an argument: --worktree, -w NAME" >&2
-          exit 1
-        fi
-        ;;
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        # :argument.case
-        if [[ -z ${args['service']+x} ]]; then
-          args['service']=$1
-          shift
-        else
-          printf "invalid argument: %s\n" "$key" >&2
-          exit 1
-        fi
-
-        ;;
-
-    esac
-  done
-
-  # :command.required_args_filter
-  if [[ -z ${args['service']+x} ]]; then
-    printf "missing required argument: SERVICE\nusage: zion docker install SERVICE [OPTIONS]\n" >&2
-
-    exit 1
-  fi
-
-  # :command.default_assignments
-  [[ -n ${args['--env']:-} ]] || args['--env']="sand"
 
 }
 
@@ -8025,15 +10574,39 @@ run() {
     "puppy tick") zion_puppy_tick_command ;;
     "puppy query") zion_puppy_query_command ;;
     "docker") zion_docker_command ;;
-    "docker run") zion_docker_run_command ;;
-    "docker stop") zion_docker_stop_command ;;
-    "docker logs") zion_docker_logs_command ;;
-    "docker status") zion_docker_status_command ;;
-    "docker shell") zion_docker_shell_command ;;
-    "docker restart") zion_docker_restart_command ;;
-    "docker build") zion_docker_build_command ;;
-    "docker flush") zion_docker_flush_command ;;
-    "docker install") zion_docker_install_command ;;
+    "docker monolito") zion_docker_monolito_command ;;
+    "docker monolito install") zion_docker_monolito_install_command ;;
+    "docker monolito shell") zion_docker_monolito_shell_command ;;
+    "docker monolito logs") zion_docker_monolito_logs_command ;;
+    "docker monolito status") zion_docker_monolito_status_command ;;
+    "docker monolito build") zion_docker_monolito_build_command ;;
+    "docker monolito flush") zion_docker_monolito_flush_command ;;
+    "docker monolito server") zion_docker_monolito_server_command ;;
+    "docker monolito server start") zion_docker_monolito_server_start_command ;;
+    "docker monolito server stop") zion_docker_monolito_server_stop_command ;;
+    "docker monolito worker") zion_docker_monolito_worker_command ;;
+    "docker monolito worker start") zion_docker_monolito_worker_start_command ;;
+    "docker monolito worker stop") zion_docker_monolito_worker_stop_command ;;
+    "docker bo-container") zion_docker_bo_container_command ;;
+    "docker bo-container install") zion_docker_bo_container_install_command ;;
+    "docker bo-container shell") zion_docker_bo_container_shell_command ;;
+    "docker bo-container logs") zion_docker_bo_container_logs_command ;;
+    "docker bo-container status") zion_docker_bo_container_status_command ;;
+    "docker bo-container build") zion_docker_bo_container_build_command ;;
+    "docker bo-container flush") zion_docker_bo_container_flush_command ;;
+    "docker bo-container server") zion_docker_bo_container_server_command ;;
+    "docker bo-container server start") zion_docker_bo_container_server_start_command ;;
+    "docker bo-container server stop") zion_docker_bo_container_server_stop_command ;;
+    "docker front-student") zion_docker_front_student_command ;;
+    "docker front-student install") zion_docker_front_student_install_command ;;
+    "docker front-student shell") zion_docker_front_student_shell_command ;;
+    "docker front-student logs") zion_docker_front_student_logs_command ;;
+    "docker front-student status") zion_docker_front_student_status_command ;;
+    "docker front-student build") zion_docker_front_student_build_command ;;
+    "docker front-student flush") zion_docker_front_student_flush_command ;;
+    "docker front-student server") zion_docker_front_student_server_command ;;
+    "docker front-student server start") zion_docker_front_student_server_start_command ;;
+    "docker front-student server stop") zion_docker_front_student_server_stop_command ;;
     "worktree") zion_worktree_command ;;
     "new-task") zion_new_task_command ;;
     "status") zion_status_command ;;

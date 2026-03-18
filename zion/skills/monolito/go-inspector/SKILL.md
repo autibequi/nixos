@@ -75,14 +75,31 @@ Se encontrou um ticket ID, buscar via MCP Atlassian:
 - Usar `mcp__claude_ai_Atlassian__getJiraIssue` com o ticket ID
 - Coletar: título, descrição, critérios de aceite, comentários relevantes
 
-### 2c — Notion:
+### 2c — Comentários do PR (se existir PR aberto):
+
+```bash
+GH_TOKEN=$GH_TOKEN gh pr list --repo estrategiahq/monolito --head <branch> --json number,title,state
+GH_TOKEN=$GH_TOKEN gh pr view <number> --repo estrategiahq/monolito --json reviews,comments,reviewRequests
+GH_TOKEN=$GH_TOKEN gh pr review-requests --repo estrategiahq/monolito <number>  # revisores pendentes
+```
+
+Coletar:
+- **Review comments** (inline): threads em arquivos específicos — indicam pontos já contestados pelo time
+- **PR comments** (gerais): discussões de design, decisões tomadas, dúvidas levantadas
+- **Review status**: quem aprovou, quem pediu changes, o que pediu
+- Comentários de revisores humanos têm prioridade — ignorar bots (Codecov, CodeRabbit automático sem customização, etc.)
+
+> Esses dados são críticos: um reviewer pode já ter apontado o mesmo bug que o inspector vai encontrar, ou pode ter aprovado algo que o inspector marcaria como problema — contexto valioso para calibrar o tom dos findings.
+
+### 2d — Notion:
 Buscar página relacionada ao PR/ticket:
 - Usar `mcp__claude_ai_Notion__notion-search` com título do PR ou nome da feature
 - Se encontrar: coletar contexto de produto, decisões de design, user stories
 
-### 2d — Gerar 00-contexto.md:
+### 2e — Gerar 00-contexto.md:
 Criar o artefato de contexto seguindo o formato de `templates/output.md`. Incluir:
 - Dados do PR (título, autor, descrição completa, commits)
+- **Comentários e reviews do PR** (se existir PR aberto)
 - Dados do JIRA (se encontrado)
 - Dados do Notion (se encontrado)
 - Resumo sintético: o que foi pedido vs o que foi entregue
@@ -98,6 +115,8 @@ Ler os 7 arquivos de definição:
 - `/workspace/obsidian/agents/inspectors/simplifier.md`
 
 ## Passo 3 — Spawnar 6 inspetores em paralelo
+
+> **IMPORTANTE (aprendizado da primeira execução, 2026-03-18):** O agente Monolito não tem o skill `go-inspector` disponível como ferramenta registrada. O agente deve **ler os arquivos de definição dos inspetores diretamente** (via Read tool) e executar cada perspectiva manualmente, consolidando no mesmo agente. O fluxo de 6 agentes background paralelos funciona quando invocado do contexto principal (Claude Code), não dentro do próprio agente Monolito. Ao spawnar os 6 inspetores, usar `subagent_type=general-purpose` ou `subagent_type=Explore` em vez de `Monolito`.
 
 Usar o Agent tool com `run_in_background: true` para cada inspector. Todos recebem:
 - O contexto coletado (PR body, JIRA, Notion)

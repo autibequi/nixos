@@ -3,7 +3,23 @@
 
 _zion_engines() { compadd claude opencode cursor }
 _zion_models()  { compadd haiku sonnet opus }
-_zion_docker_services() { compadd monolito bo-container front-student }
+# Descobre servicos a partir do diretorio dockerized (exclui _shared e reverseproxy)
+_zion_docker_services() {
+  local nixos_dir="${NIXOS_DIR:-$HOME/nixos}"
+  local dockerized_dir="$nixos_dir/zion/dockerized"
+  if [[ -d "$dockerized_dir" ]]; then
+    local services=()
+    for d in "$dockerized_dir"/*/; do
+      local name="${d%/}"
+      name="${name##*/}"
+      [[ "$name" == _* || "$name" == "reverseproxy" ]] && continue
+      services+=("$name")
+    done
+    compadd -a services
+  else
+    compadd monolito bo-container front-student
+  fi
+}
 _zion_docker_envs()     { compadd sand prod qa local }
 _zion_puppy_models()    { compadd haiku sonnet opus }
 
@@ -113,25 +129,52 @@ _zion() {
           esac ;;
 
         docker|dk)
-          _arguments '1: :_zion_docker_commands' '*:: :->docker_args'
+          _arguments '1: :_zion_docker_services' '*:: :->docker_service_args'
           case $state in
-            docker_args)
-              case $words[1] in
-                run|up)
-                  _arguments \
-                    '--env[Ambiente]:env:_zion_docker_envs' \
-                    '-e[Ambiente]:env:_zion_docker_envs' \
-                    '--detach[Background]' '-d[Background]' \
-                    '--debug[Modo debug]' \
-                    '--worktree[Worktree]:name' '-w[Worktree]:name' \
-                    '--vertical[Vertical front-student]:vertical' '-V[Vertical]:vertical' \
-                    ':service:_zion_docker_services' ;;
-                stop|restart|build|flush|install|shell|logs)
-                  _arguments \
-                    '--worktree[Worktree]:name' '-w[Worktree]:name' \
-                    ':service:_zion_docker_services' ;;
-                status|ps)
-                  _arguments ':service:_zion_docker_services' ;;
+            docker_service_args)
+              local service="$words[1]"
+              _arguments '1: :_zion_docker_service_ops' '*:: :->docker_op_args'
+              case $state in
+                docker_op_args)
+                  case $words[1] in
+                    install)
+                      _arguments \
+                        '--env[Ambiente]:env:_zion_docker_envs' \
+                        '-e[Ambiente]:env:_zion_docker_envs' \
+                        '--worktree[Worktree]:name' '-w[Worktree]:name' ;;
+                    shell)
+                      _arguments \
+                        '--container[Container]:container:(app db redis)' \
+                        '-c[Container]:container:(app db redis)' \
+                        '--cmd[Comando]:cmd' \
+                        '--worktree[Worktree]:name' '-w[Worktree]:name' ;;
+                    logs)
+                      _arguments \
+                        '--follow[Seguir em tempo real]' '-f[Follow]' \
+                        '--tail[Linhas]:n' '-t[Linhas]:n' \
+                        '--worktree[Worktree]:name' '-w[Worktree]:name' ;;
+                    build|flush)
+                      _arguments \
+                        '--worktree[Worktree]:name' '-w[Worktree]:name' ;;
+                    server|worker)
+                      _arguments '1: :_zion_docker_server_ops' '*:: :->server_op_args'
+                      case $state in
+                        server_op_args)
+                          case $words[1] in
+                            start|up)
+                              _arguments \
+                                '--env[Ambiente]:env:_zion_docker_envs' \
+                                '-e[Ambiente]:env:_zion_docker_envs' \
+                                '--detach[Background]' '-d[Background]' \
+                                '--debug[Modo debug]' \
+                                '--worktree[Worktree]:name' '-w[Worktree]:name' \
+                                ${service:+$( [[ "$service" == "front-student" ]] && echo '--vertical[Vertical]:vertical -V[Vertical]:vertical' )} ;;
+                            stop|down)
+                              _arguments \
+                                '--worktree[Worktree]:name' '-w[Worktree]:name' ;;
+                          esac ;;
+                      esac ;;
+                  esac ;;
               esac ;;
           esac ;;
 
@@ -139,6 +182,28 @@ _zion() {
           _arguments ':service:_zion_docker_services' ;;
       esac ;;
   esac
+}
+
+_zion_docker_service_ops() {
+  local ops=(
+    'install:Instala dependências'
+    'shell:Shell no container'
+    'logs:Logs do serviço'
+    'status:Status dos containers'
+    'build:Rebuilda a imagem'
+    'flush:Remove containers e volumes'
+    'server:Gerencia o servidor'
+    'worker:Gerencia o worker (monolito)'
+  )
+  _describe 'operação' ops
+}
+
+_zion_docker_server_ops() {
+  local ops=(
+    'start:Sobe o serviço'
+    'stop:Para o serviço'
+  )
+  _describe 'ação' ops
 }
 
 _zion_commands() {
@@ -186,19 +251,5 @@ _zion_puppy_commands() {
   _describe 'subcomando puppy' commands
 }
 
-_zion_docker_commands() {
-  local commands=(
-    'run:Levanta um serviço'
-    'stop:Para um serviço'
-    'logs:Logs de um serviço'
-    'status:Status dos serviços'
-    'shell:Shell no container do serviço'
-    'restart:Reinicia um serviço'
-    'build:Rebuilda a imagem'
-    'flush:Remove tudo do serviço'
-    'install:Instala dependências'
-  )
-  _describe 'subcomando docker' commands
-}
 
 _zion "$@"
