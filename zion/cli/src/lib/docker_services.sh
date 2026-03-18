@@ -7,9 +7,10 @@ zion_docker_service_dir() {
   local service="$1"
   local var_name
   case "$service" in
-    monolito)      var_name="MONOLITO_DIR" ;;
-    bo-container)  var_name="BO_CONTAINER_DIR" ;;
-    front-student) var_name="FRONT_STUDENT_DIR" ;;
+    monolito)         var_name="MONOLITO_DIR" ;;
+    monolito-worker)  var_name="MONOLITO_DIR" ;;
+    bo-container)     var_name="BO_CONTAINER_DIR" ;;
+    front-student)    var_name="FRONT_STUDENT_DIR" ;;
     *) echo ""; return 1 ;;
   esac
   local dir="${!var_name}"
@@ -18,14 +19,22 @@ zion_docker_service_dir() {
 }
 
 # Diretorio da config Docker versionada (neste repo)
+# monolito-worker aponta pro mesmo dir do monolito
 zion_docker_config_dir() {
   local service="$1"
-  echo "${zion_nixos_dir}/zion/dockerized/${service}"
+  case "$service" in
+    monolito-worker) echo "${zion_nixos_dir}/zion/dockerized/monolito" ;;
+    *)               echo "${zion_nixos_dir}/zion/dockerized/${service}" ;;
+  esac
 }
 
 # Compose principal do servico (versionado)
 zion_docker_compose_file() {
-  echo "$(zion_docker_config_dir "$1")/docker-compose.yml"
+  local service="$1"
+  case "$service" in
+    monolito-worker) echo "$(zion_docker_config_dir "$service")/docker-compose.worker.yml" ;;
+    *)               echo "$(zion_docker_config_dir "$service")/docker-compose.yml" ;;
+  esac
 }
 
 # Compose de dependencias (versionado)
@@ -49,7 +58,7 @@ zion_docker_log_dir() {
 
 # Lista servicos conhecidos
 zion_docker_known_services() {
-  echo "monolito bo-container front-student"
+  echo "monolito monolito-worker bo-container front-student"
 }
 
 # Valida que o servico existe e tem config

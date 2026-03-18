@@ -40,15 +40,18 @@ echo "  logs:    $log_dir"
 # 1. Subir dependencias em background (se compose de deps existe)
 if [[ -f "$deps_compose" ]]; then
   echo ">>> Subindo dependencias..."
-  docker compose -f "$deps_compose" -p "${project}-deps" up -d 2>&1 | tee "$log_dir/deps.log"
-  echo ">>> Aguardando healthchecks das deps..."
-  sleep 5
+  docker compose -f "$deps_compose" -p "${project}-deps" up -d --remove-orphans 2>&1 | tee "$log_dir/deps.log"
+  echo ">>> Aguardando postgres ficar saudavel..."
+  until docker exec zion-dk-monolito-postgres pg_isready -U "${DB_USER:-estrategia}" &>/dev/null; do
+    sleep 1
+  done
+  echo ">>> Postgres pronto."
 fi
 
 # 2. Build + subir servico em background (com SSH forwarding para repos privados)
 echo ">>> Subindo $service..."
 DOCKER_BUILDKIT=1 docker compose $COMPOSE_ARGS build 2>&1 | tee "$log_dir/startup.log"
-docker compose $COMPOSE_ARGS up -d 2>&1 | tee -a "$log_dir/startup.log"
+docker compose $COMPOSE_ARGS up -d --force-recreate --remove-orphans 2>&1 | tee -a "$log_dir/startup.log"
 
 # 3. Logger persistente: grava logs em arquivo continuamente
 if [[ -f "$log_dir/logger.pid" ]]; then

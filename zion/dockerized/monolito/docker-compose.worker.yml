@@ -1,14 +1,11 @@
 services:
-  app:
+  worker:
     build:
       context: ${MONOLITO_DIR}
-      dockerfile: ${ZION_NIXOS_DIR}/zion/dockerized/monolito/Dockerfile
-    container_name: zion-dk-monolito-app
+      dockerfile: ${ZION_NIXOS_DIR}/zion/dockerized/monolito/Dockerfile.worker
+    container_name: zion-dk-monolito-worker
     env_file:
       - ./env/${APP_ENV:-sand}.env
-    ports:
-      - "4004:4004"
-      - "2345:2345"
     networks:
       - default
     restart: unless-stopped

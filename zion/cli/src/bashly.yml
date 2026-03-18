@@ -251,6 +251,14 @@ commands:
             help: "Ambiente (se omitido, mantem o atual)"
         filename: commands/docker_restart.sh
 
+      - name: flush
+        help: "Remove tudo do servico: containers, imagens, volumes, logs e vendor/."
+        args:
+          - name: service
+            required: true
+            help: "Nome do servico (monolito, bo-container, front-student)"
+        filename: commands/docker_flush.sh
+
       - name: install
         help: "Instala dependencias do servico (monta SSH do host, roda go mod download + build automaticamente)."
         args:
