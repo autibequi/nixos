@@ -160,9 +160,10 @@ Comandos para levantar serviços (monolito, bo-container, front-student) em cont
 - `docker-compose.deps.yml` — postgres, redis, localstack
 - `env/sand.env`, `env/prod.env`, `env/qa.env`, `env/local.env`
 
-**Logs acessíveis ao agente:** `/tmp/zion-logs/dockerized/<service>/` (no host). Montados em `/workspace/logs/docker/<service>/` dentro do container do agente.
+**Logs acessíveis ao agente:** `/tmp/zion-logs/dockerized/<service>/` (no host, **efêmero — some no reboot**). Montados em `/workspace/logs/docker/<service>/` dentro do container do agente.
 - `service.log` — logs do servidor em runtime (`zion docker <service> server start`)
 - `test.log` — output completo dos testes (`zion docker <service> test`)
+- Se `/workspace/logs/docker/` aparecer vazio, rodar o serviço/teste novamente para regenerar.
 
 **Serviços configurados:** `monolito` (Go 1.24.4, CGO_ENABLED=1 -tags musl), `bo-container` (futuro), `front-student` (futuro).
 
