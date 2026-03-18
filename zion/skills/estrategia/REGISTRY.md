@@ -20,6 +20,12 @@ estrategiahq
 | front-student | /home/claude/projects/estrategia/front-student | `stow/.claude/agents/front-student/` | `stow/.claude/agents/front-student/skills/` | service, route, component, page, make-feature |
 | orquestrador | (cross-repo coordinator) | `stow/.claude/agents/orquestrador/` | `stow/.claude/agents/orquestrador/skills/` | orquestrar-feature, changelog, recommit, refinar-bug, retomar-feature, review-pr, doc-branch |
 
+## Skills Globais (cross-repo)
+
+| Skill | Path | Descrição |
+|---|---|---|
+| estrategia/jira | `~/.claude/skills/estrategia/jira/` | Ler card Jira completo com todos os campos — mapa de custom fields, chamada MCP correta, extração ADF |
+
 ## Deteccao de Repo
 1. Se cwd esta sob /home/claude/projects/estrategia/<repo>/ → repo identificado
 2. `git remote get-url origin` contem `estrategiahq/<repo>`
