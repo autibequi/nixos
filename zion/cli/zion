@@ -2972,7 +2972,7 @@ _zion_dk_install() {
   log_dir=$(zion_docker_log_dir "$service")
   [[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
 
-  mkdir -p "$log_dir"
+  zion_ensure_log_dir "$log_dir"
 
   # Detectar tipo de servico
   _is_node_service() {
@@ -3190,7 +3190,7 @@ _zion_dk_run() {
   log_dir=$(zion_docker_log_dir "$service")
   [[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
 
-  mkdir -p "$log_dir"
+  zion_ensure_log_dir "$log_dir"
 
   # Exportar variaveis que o compose precisa (com override de worktree)
   zion_docker_export_dirs "$service"
@@ -3347,6 +3347,13 @@ zion_docker_project_name() {
 
 zion_docker_log_dir() {
   echo "/tmp/zion-logs/dockerized/${1}"
+}
+
+zion_ensure_log_dir() {
+  local dir="$1"
+  mkdir -p "$dir" 2>/dev/null && return 0
+  # Parent pode existir owned by root (ex: criado via docker/sudo) — corrigir e recriar
+  sudo mkdir -p "$dir" && sudo chown -R "$(id -u):$(id -g)" "/tmp/zion-logs"
 }
 
 # Portas host publicadas por servico (para liberar antes do run)
@@ -3630,7 +3637,7 @@ _zion_dk_shell() {
     log_dir="$(zion_docker_log_dir "$service")"
     [[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
     log_file="$log_dir/test.log"
-    mkdir -p "$log_dir"
+    zion_ensure_log_dir "$log_dir"
 
     echo "=== [$service] exec: $cmd ===" | tee "$log_file"
     [[ -n "$_ZION_DK_WORKTREE" ]] && echo "  worktree: $_ZION_DK_WORKTREE ($dir)" | tee -a "$log_file"
