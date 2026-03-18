@@ -1,6 +1,16 @@
 # Zion — Bootstrap do agente
 
-**Único bootstrap:** este arquivo fica em **`/zion/bootstrap.md`** (não em `system/`). Ao receber **`/load`**, o agente deve ler este documento e aplicar as instruções abaixo.
+**Este arquivo é injetado no boot** pelo hook `session-start.sh` — sempre presente no contexto, independente de personality. Ao receber **`/load`**, aplicar as instruções abaixo.
+
+---
+
+## Prioridade
+
+1. **Este arquivo (bootstrap.md)** — máxima prioridade, injetado no boot.
+2. **CLAUDE.md do projeto** (se existir na raiz do workspace) — complementar, não conflita com este bootstrap.
+3. **Prompts em `/zion`** — consultar quando precisar de conhecimento não memorizado (comandos, skills, system).
+
+Usar o Zion como fonte de verdade para comandos e skills. O CLAUDE.md do projeto serve apenas para regras específicas daquele repositório.
 
 ---
 
@@ -32,17 +42,25 @@ A resposta ao `/load` é **somente** avatar + pergunta. Nada mais.
 
 ## 2. Entendimento fundamental dos caminhos
 
-| Caminho     | Significado |
-|------------|-------------|
-| **`/zion`**   | Engine dos agentes (comandos, scripts, bootstrap). |
-| **`/zion/system/`** | Prompts do sistema. Índice do que cada arquivo faz: em `INIT.md` (tabela no final). |
+A pasta **`/zion`** (ou **`/workspace/zion`** no repo NixOS) é o **engine dos agentes**: comandos, sistema, skills, personas.
+
+| Caminho | Conteúdo |
+|---------|----------|
+| **`/zion`** | Engine dos agentes (comandos, scripts, bootstrap). |
+| **`/zion/system/`** | Prompts do sistema. **INIT.md** = loader e índice; **SOUL.md** = persona ativa; **DIRETRIZES.md** = diretrizes operacionais; **SELF.md** = diário. |
+| **`/zion/bootstrap.md`** | Este arquivo. Resposta ao `/load`, papel do agente, caminhos. |
+| **`/zion/commands/`** | Comandos de alto nível (`.md` por comando): `load.md`, `zion.md`, `jarvis.md`, `manual`, `contemplate`, e por categoria: `estrategia/`, `nixos/`, `meta/`, `utils/`, `tools/`. |
+| **`/zion/skills/`** | Skills especializadas (cada uma em pasta com `SKILL.md`): nixos, hyprland-config, monolito/\*, orquestrador/\*, front-student/\*, bo-container/\*. **Usar a skill** quando a tarefa se encaixar. |
+| **`/zion/agents/`** | Definições de agentes por contexto (monolito, nixos, orquestrador, etc.). |
+| **`/zion/personas/`** | Personas (`.persona.md`) e avatares. A ativa é definida em `zion/system/SOUL.md`. |
+| **`/zion/hooks/`** | Hooks claude-code (session-start, pre-tool-use, etc.). |
 | **`/zion/cli/`** | CLI: docker-compose.zion, Makefile, README. |
-| **`/workspace/nixos`**  | Configuração NixOS do host (quando montado). |
+| **`/workspace/nixos`** | Configuração NixOS do host (quando montado). |
 | **`/workspace/obsidian`** | Obsidian compartilhado (quando montado). |
-| **`/workspace/logs`**   | Logs do host (quando montado). |
+| **`/workspace/logs`** | Logs do host (quando montado). |
 | **`/workspace/mnt`** | Pasta que o user passou (CLAUDIO_MOUNT); projeto de trabalho. |
 
-**Regra:** nixos, obsidian, logs e mount ficam sempre **sob `/workspace`**; ao falar deles, usar esses paths (não na raiz do sistema).
+**Regra:** nixos, obsidian, logs e mount ficam sempre **sob `/workspace`**. Quando não souber como fazer X (ex.: "adicionar handler no monolito", "editar config Hyprland"), procurar em **`/zion/commands/`** ou **`/zion/skills/`** e **ler o arquivo** antes de executar.
 
 ---
 

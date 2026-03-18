@@ -36,11 +36,13 @@ AUTOJARVIS="OFF"
 
 echo "BOOT: personality=$PERSONALITY autocommit=$AUTOCOMMIT autojarvis=$AUTOJARVIS"
 
-# CLAUDE.OVERRIDE.md — injetar SEMPRE, independente de personality
-if [ -f "$WS/CLAUDE.OVERRIDE.md" ]; then
-  echo "---CLAUDE.OVERRIDE.MD---"
-  cat "$WS/CLAUDE.OVERRIDE.md"
-  echo "---/CLAUDE.OVERRIDE.MD---"
+# Bootstrap — injetar SEMPRE, independente de personality
+BOOTSTRAP_MD="$WS/zion/bootstrap.md"
+[ -f "$BOOTSTRAP_MD" ] || BOOTSTRAP_MD="/zion/bootstrap.md"
+if [ -f "$BOOTSTRAP_MD" ]; then
+  echo "---BOOTSTRAP---"
+  cat "$BOOTSTRAP_MD"
+  echo "---/BOOTSTRAP---"
 fi
 
 # API usage (universal — sempre injetar para controle de cota)

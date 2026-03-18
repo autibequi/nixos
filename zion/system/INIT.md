@@ -161,6 +161,17 @@ Comandos para levantar serviços (monolito, bo-container, front-student) em cont
 
 **Paths dos projetos** vêm de `~/.zion`: `MONOLITO_DIR`, `BO_CONTAINER_DIR`, `FRONT_STUDENT_DIR`.
 
+## Servidor de Desenho (Draw Server)
+
+O Zion expõe um servidor HTTP em **http://zion:8765** (portas alternativas 8766, 8767 se 8765 estiver ocupada) para renderizar diagramas Mermaid e Markdown rico no browser.
+
+1. **URL:** O usuário abre **http://zion:8765** (ou **zion:8766**, **zion:8767**) no browser.
+2. **Quando usar:** Para diagramas Mermaid ou Markdown complexo que o terminal não renderiza bem. Preferir Mermaid nessa página em vez de ASCII no chat quando fizer sentido. Consultar a skill **draw** em `/zion/skills/tools/draw/`.
+3. **Como enviar conteúdo:** Escrever (ferramenta Write) em **`/workspace/mnt/.zion-draw/content.md`**. A página faz polling a cada 2s e atualiza sozinha.
+4. **Output preferido:** Quando o usuário pedir "mostre no draw" / "desenhe no browser" / "mostre no zion:8766", escrever no arquivo acima e avisar "atualizei a página".
+5. **Iniciar o servidor:** Se o usuário não conseguir acessar a URL: `python3 /zion/scripts/draw-server.py &`. O servidor usa `ZION_DRAW_CONTENT` ou default `$WORKSPACE/.zion-draw/content.md`.
+6. **Ao subir:** sempre avisar o usuário para abrir a página numa caixa com o link (ex.: **http://zion:8766**).
+
 ## Referências (leitura on-demand)
 - **Mounts sob /workspace:** repo NixOS = `/workspace/nixos`, vault Obsidian = `/workspace/obsidian`, logs = `/workspace/logs`, projeto atual = `/workspace/mnt`. Não usar paths na raiz (`/nixos`, `/obsidian`).
 - `/workspace/obsidian/docs/operational-reference.md` — git identity, hive-mind, persistência, cota API, observabilidade, obsidian, workbench

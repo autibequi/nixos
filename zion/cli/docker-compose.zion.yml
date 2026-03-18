@@ -15,13 +15,10 @@ x-extra-hosts: &extra-hosts
   - "host.docker.internal:host-gateway"
 
 # /workspace: zion (/zion), obsidian e o projeto (mnt). Nixos e logs só em zion edit.
-# CLAUDE.OVERRIDE.md montado na raiz do workspace e em mnt/zion/ (prioridade sobre CLAUDE.md do projeto).
 x-base-volumes: &base-volumes
   - ${ZION_ROOT:-${HOME}/nixos/zion}:/zion
   - ${OBSIDIAN_PATH:-/tmp}:/workspace/obsidian
   - ${CLAUDIO_MOUNT:-${HOME}/projects}:/workspace/mnt:${CLAUDIO_MOUNT_OPTS:-rw}
-  - ${ZION_ROOT:-${HOME}/nixos/zion}/system/CLAUDE.OVERRIDE.md:/workspace/mnt/CLAUDE.OVERRIDE.md:ro
-  - ${ZION_ROOT:-${HOME}/nixos/zion}/system/CLAUDE.OVERRIDE.md:/workspace/mnt/zion/CLAUDE.OVERRIDE.md:ro
   - ${HOME}/.claude:/home/claude/.claude
   # zion/skills e zion/commands sobrescrevem o ~/.claude do host
   - ${ZION_ROOT:-${HOME}/nixos/zion}/skills:/home/claude/.claude/skills
