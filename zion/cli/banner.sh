@@ -19,19 +19,27 @@ cat << 'BANNER'
       █  ░▒▓█ Z I O N █▓▒░          agent orchestration system             █
       █▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀█
       █                                                                     █
-      █  puppy                              sessions                        █
+      █  sessions                         engine shortcuts                  █
       █                                                                     █
-      █   zion puppy start                   zion                           █
-      █   zion puppy stop                    zion new                       █
-      █   zion puppy restart                 zion resume                    █
-      █   zion puppy run <task>              zion edit                      █
-      █   zion puppy tick                    zion shell                     █
-      █   zion puppy query [prompt]                                         █
-      █   zion puppy status                 docker                          █
-      █   zion puppy logs -f                                                █
-      █   zion puppy shell                   zion build                     █
-      █                                      zion down                      █
-      █                                      zion destroy                   █
+      █   zion                             zion claude [dir]                █
+      █   zion new --engine=<e>            zion cursor [dir]                █
+      █   zion resume                      zion opencode [dir]              █
+      █   zion edit                                                         █
+      █   zion shell                      puppy                             █
+      █                                                                     █
+      █  docker                            zion puppy start|stop|restart    █
+      █                                    zion puppy run <task>            █
+      █   zion dk run <svc>                zion puppy status                █
+      █   zion dk stop <svc>               zion puppy logs -f              █
+      █   zion dk logs <svc>               zion puppy query [prompt]       █
+      █   zion dk status                   zion ask [prompt]               █
+      █   zion dk shell <svc>                                               █
+      █                                   meta                              █
+      █  container                                                          █
+      █                                    zion status                      █
+      █   zion build                       zion clean                       █
+      █   zion down                        zion update                      █
+      █   zion destroy                     zion man                         █
       █                                                                     █
       ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 BANNER
