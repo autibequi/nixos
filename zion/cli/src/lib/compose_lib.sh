@@ -32,6 +32,8 @@ zion_load_config() {
     [[ -n "${GH_TOKEN:-}" ]] && export GH_TOKEN
     [[ -n "${ANTHROPIC_API_KEY:-}" ]] && export ANTHROPIC_API_KEY
     [[ -n "${CURSOR_API_KEY:-}" ]] && export CURSOR_API_KEY
+    [[ -n "${GRAFANA_URL:-}" ]] && export GRAFANA_URL
+    [[ -n "${GRAFANA_TOKEN:-}" ]] && export GRAFANA_TOKEN
     if [[ -n "${OBSIDIAN_PATH:-}" ]]; then
       export OBSIDIAN_PATH
       zion_obsidian_path="$OBSIDIAN_PATH"

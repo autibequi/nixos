@@ -24,6 +24,17 @@ if [[ -z "${_ret:-}" ]]; then
   _ret=0
 fi
 
+# Grafana MCP — registra se credenciais disponíveis e não registrado ainda
+if [[ -n "${GRAFANA_URL:-}" ]] && [[ -n "${GRAFANA_TOKEN:-}" ]]; then
+  if ! grep -q '"grafana"' ~/.claude/settings.json 2>/dev/null; then
+    claude mcp add grafana \
+      --transport stdio \
+      -- mcp-grafana \
+      --grafana-url "$GRAFANA_URL" \
+      --grafana-api-key "$GRAFANA_TOKEN" 2>/dev/null || true
+  fi
+fi
+
 # Última coisa: árvore do primeiro nível da pasta atual
 _here="$(pwd)"
 echo "[zion bootstrap] Árvore de: ${_here}" >&2

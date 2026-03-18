@@ -25,6 +25,7 @@ estrategiahq
 | Skill | Path | Descrição |
 |---|---|---|
 | estrategia/jira | `~/.claude/skills/estrategia/jira/` | Ler card Jira completo com todos os campos — mapa de custom fields, chamada MCP correta, extração ADF |
+| estrategia/grafana | `~/.claude/skills/estrategia/grafana/` | Query logs Loki e dashboards Grafana — serviços, patterns de debug, integração com workflow |
 
 ## Deteccao de Repo
 1. Se cwd esta sob /home/claude/projects/estrategia/<repo>/ → repo identificado

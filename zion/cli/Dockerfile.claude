@@ -52,6 +52,11 @@ RUN CURSOR_VER="$(ls /home/claude/.local/share/cursor-agent/versions)" && \
     ln -s /home/claude/.local/share/cursor-agent/versions/"$CURSOR_VER"/cursor-agent /home/claude/.local/bin/cursor-agent && \
     chown -R 1000:1000 /home/claude/.local
 
+# MCP Grafana server (static Go binary — read-only dashboards/Loki queries)
+RUN curl -fsSL "https://github.com/grafana/mcp-grafana/releases/latest/download/mcp-grafana_Linux_x86_64.tar.gz" \
+    | tar xz -C /home/claude/.local/bin/ mcp-grafana && \
+    chown 1000:1000 /home/claude/.local/bin/mcp-grafana
+
 USER claude
 # PATH: Cursor CLI (agent) + .nix-profile (claude, opencode)
 ENV PATH="/home/claude/.local/bin:/home/claude/.nix-profile/bin:/usr/bin:/bin:${PATH}"
