@@ -1,6 +1,6 @@
 # Instala dependencias de um servico usando SSH do host.
-# Monta ~/.ssh read-only no container e roda go mod download + build automaticamente.
-# Nao expoe chaves SSH ao agente — tudo roda dentro do container isolado.
+# Monta ~/.ssh read-only no container, roda go mod download + vendor.
+# O vendor/ gerado fica no projeto — build posterior nao precisa de SSH.
 
 zion_load_config
 
@@ -13,11 +13,10 @@ dir=$(zion_docker_service_dir "$service")
 config_dir=$(zion_docker_config_dir "$service")
 
 echo "=== Instalando dependencias de $service [env=$env] ==="
-echo "  SSH:     ~/.ssh (montada read-only em /root/.ssh)"
+echo "  SSH:     ~/.ssh (montada read-only)"
 echo "  Projeto: $dir"
-echo "  Config:  $config_dir"
 echo ""
-echo "Rodando: ferramentas -> go mod download -> go mod tidy -> build"
+echo "Rodando: ferramentas -> go mod download -> go mod tidy -> go mod vendor"
 echo "---"
 
 docker run \
@@ -27,6 +26,8 @@ docker run \
   -v "$dir:/go/app" \
   -e GOPATH=/go \
   -e GOPRIVATE="github.com/estrategiahq" \
+  -e TERM=xterm-256color \
+  -e COLORTERM=truecolor \
   -w "/go/app" \
   "golang:1.24.4-alpine" \
   sh -c '
@@ -42,30 +43,26 @@ docker run \
     apk add --no-cache git gcc musl-dev librdkafka-dev ca-certificates openssh-client
 
     git config --global url."git@github.com:estrategiahq".insteadOf "https://github.com/estrategiahq"
-
-    # Adiciona github.com ao known_hosts pra evitar prompt interativo
     ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts 2>/dev/null
 
-    echo "[2/4] Download de modulos Go..."
-    go mod download -x
+    echo "[2/4] Download de modulos Go (pode demorar)..."
+    go mod download
 
     echo "[3/4] Limpando modulos..."
     go mod tidy
 
-    echo "[4/4] Compilando server e worker..."
-    CGO_ENABLED=1 GOOS=linux go build -tags musl -o server ./cmd/server/main.go
-    CGO_ENABLED=1 GOOS=linux go build -tags musl -o worker ./cmd/worker/main.go
+    echo "[4/4] Vendoring dependencias..."
+    GOWORK=off go mod vendor
 
     echo ""
-    echo "✅ Dependencias instaladas e binarios compilados!"
+    echo "Dependencias instaladas! vendor/ gerado no projeto."
   '
 
 if [[ $? -eq 0 ]]; then
   echo ""
-  echo "✅ Instalação finalizada com sucesso!"
-  echo "Agora rode: zion docker run $service --env=$env"
+  echo "Instalacao finalizada! Rode: zion docker run $service --env=$env"
 else
   echo ""
-  echo "❌ Instalação falhou. Verifique os logs acima."
+  echo "Instalacao falhou. Verifique os logs acima."
   exit 1
 fi

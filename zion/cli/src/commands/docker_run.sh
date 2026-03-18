@@ -47,7 +47,7 @@ fi
 
 # 2. Build + subir servico em background (com SSH forwarding para repos privados)
 echo ">>> Subindo $service..."
-DOCKER_BUILDKIT=1 docker compose $COMPOSE_ARGS build --ssh default 2>&1 | tee "$log_dir/startup.log"
+DOCKER_BUILDKIT=1 docker compose $COMPOSE_ARGS build 2>&1 | tee "$log_dir/startup.log"
 docker compose $COMPOSE_ARGS up -d 2>&1 | tee -a "$log_dir/startup.log"
 
 # 3. Logger persistente: grava logs em arquivo continuamente
