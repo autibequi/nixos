@@ -1,14 +1,17 @@
+# syntax=docker/dockerfile:1
 FROM golang:1.24.4-alpine AS builder
 
 RUN apk add --no-cache ca-certificates git openssh-client gcc libc-dev librdkafka-dev
 
 RUN git config --global url."git@github.com:estrategiahq".insteadOf "https://github.com/estrategiahq"
-RUN mkdir -p /root/.ssh
+RUN mkdir -p /root/.ssh && ssh-keyscan github.com >> /root/.ssh/known_hosts 2>/dev/null
 
 WORKDIR /go/app
 
 COPY go.mod go.sum ./
-RUN go mod download
+
+# SSH forwarding via BuildKit para repos privados
+RUN --mount=type=ssh go mod download
 
 COPY . .
 
