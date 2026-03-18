@@ -94,11 +94,12 @@ User adiciona card na coluna "Inbox" do THINKINGS no Obsidian (texto livre) → 
 - **personality-off**: `.ephemeral/personality-off` — modo neutro (toggle `/personality`)
 
 ## Cota API e controle de créditos (comportamento universal)
-- **Carregamento no boot:** o uso da API vem no bloco `---API_USAGE---` (gerado por `stow/.claude/scripts/usage-bar.sh`, que usa `scripts/api-usage.sh` ou Cursor). Se não estiver no contexto, ler `.ephemeral/usage-bar.txt` ou rodar `scripts/api-usage.sh`.
+- **Carregamento no boot:** uso da API vem no bloco `---API_USAGE---`. Regras de cota também são injetadas no boot — seguir as regras conforme o nível atual.
 - **Avaliar sempre** se os créditos/cota atuais permitem o expediente sem estourar.
-- **Se houver cota folgada** e for plausível que não vai queimar tudo no dia: pode gastar normalmente (incluindo rodar tarefas em background quando fizer sentido).
-- **Se a cota estiver no limite ou for provável que vá acabar** no expediente: **evitar** rodar tarefas em background; preferir haiku; adiar tasks pesadas; não disparar workers desnecessários.
-- **Regra existente:** ≥85% de uso → adiar tasks pesadas ou usar haiku.
+- **Folgada (<85%):** gastar normalmente, incluindo tarefas em background quando fizer sentido.
+- **≥85%:** adiar tasks pesadas, preferir haiku, não disparar workers desnecessários.
+- **Worker (headless) + ≥85% + noturno (22h–8h):** NÃO iniciar. Se já rodando: salvar estado e encerrar.
+- **≥95%:** encerrar qualquer worker imediatamente, independente do horário.
 
 ## Hive-Mind
 Path: `/workspace/.hive-mind/` — efêmero, compartilhado entre containers (bind no host em /tmp/zion-hive-mind). Usar para locks, sinais, dados temporários entre agentes. Detalhes em `/workspace/obsidian/docs/operational-reference.md`.
