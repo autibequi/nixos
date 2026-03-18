@@ -23,7 +23,7 @@ _zion_dk_run() {
   log_dir=$(zion_docker_log_dir "$service")
   [[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
 
-  mkdir -p "$log_dir"
+  zion_ensure_log_dir "$log_dir"
 
   # Exportar variaveis que o compose precisa (com override de worktree)
   zion_docker_export_dirs "$service"

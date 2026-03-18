@@ -18,7 +18,7 @@ _zion_dk_install() {
   log_dir=$(zion_docker_log_dir "$service")
   [[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
 
-  mkdir -p "$log_dir"
+  zion_ensure_log_dir "$log_dir"
 
   # Detectar tipo de servico
   _is_node_service() {

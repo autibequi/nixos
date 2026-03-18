@@ -26,7 +26,7 @@ _zion_dk_shell() {
     log_dir="$(zion_docker_log_dir "$service")"
     [[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
     log_file="$log_dir/test.log"
-    mkdir -p "$log_dir"
+    zion_ensure_log_dir "$log_dir"
 
     echo "=== [$service] exec: $cmd ===" | tee "$log_file"
     [[ -n "$_ZION_DK_WORKTREE" ]] && echo "  worktree: $_ZION_DK_WORKTREE ($dir)" | tee -a "$log_file"

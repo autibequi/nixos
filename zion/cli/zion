@@ -4361,7 +4361,8 @@ zion_set_command() {
 zion_puppy_start_command() {
 
   # src/commands/puppy_start.sh
-  # Inicia o container puppy persistente e o daemon interno.
+  # Inicia o container puppy persistente.
+  # O daemon é iniciado automaticamente pelo entrypoint do container (após 30s delay).
   zion_load_config
 
   PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
