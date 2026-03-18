@@ -4,7 +4,8 @@
 
 ```
 obsidian/inspection/<tarefa>/<data>/
-├── README.md                  ← índice consolidado com frontmatter
+├── BOARD.md                   ← resumo visual executivo (abrir primeiro)
+├── README.md                  ← índice detalhado com frontmatter
 ├── 00-contexto.md             ← dados coletados do PR, JIRA e Notion
 ├── 01-architect.md            ← visão geral, design, schema, tópicos de discussão
 ├── 02-claude.md               ← findings do inspector-claude (qualidade geral Go)
@@ -200,6 +201,146 @@ Oportunidades não aplicadas que o dev pode considerar.
 - Simplificações aplicadas: N commits, -N linhas
 - Arquivos analisados: N
 - Inspetores executados: 7/7
+```
+
+---
+
+## BOARD.md — Resumo Visual Executivo
+
+Este é o primeiro arquivo a ser aberto. Uma página, tudo que importa.
+
+```markdown
+---
+task: <tarefa>
+date: YYYY-MM-DD
+type: board
+---
+
+# 🔍 Inspeção — <tarefa>
+
+> <1 frase descrevendo o PR>
+> **PR:** #N · **Autor:** @username · **JIRA:** [<ticket>](...) · **Data:** YYYY-MM-DD
+
+---
+
+## Veredito
+
+| | Status |
+|---|---|
+| **Pode mergear?** | 🔴 Não — N blocker(s) · ou · 🟡 Com ressalvas · ou · 🟢 Sim |
+| **Testes ok?** | 🔴 N gaps críticos · ou · 🟢 Cobertura adequada |
+| **Simplificável?** | N commits aplicados · M sugeridos |
+
+---
+
+## Placar dos Inspetores
+
+| Inspector | 🔴 Blocker | 🟠 Média | 🟡 Baixa | ℹ️ Info | Barra |
+|-----------|-----------|---------|---------|--------|-------|
+| 🏛️ Architect | N | N | N | N | `██░░░░░░░░` |
+| 🐹 Claude | N | N | N | N | `████░░░░░░` |
+| 📄 Documentation | N | N | N | N | `██░░░░░░░░` |
+| 🤝 QA | N | N | N | N | `███░░░░░░░` |
+| 🏷️ Namer | N | N | N | N | `█░░░░░░░░░` |
+| 🧪 Coverage | N gaps | N críticos | N médios | — | `████░░░░░░` |
+| ✂️ Simplifier | N aplicados | — | N sugeridos | — | `██░░░░░░░░` |
+
+> Barra: `█` por finding (máx 10). Serve pra ter noção do volume por inspector.
+
+---
+
+## 🔴 Blockers — Ação obrigatória antes do merge
+
+> Se vazio: 🟢 Nenhum blocker encontrado.
+
+| # | Inspector | Arquivo | Descrição |
+|---|-----------|---------|-----------|
+| 1 | claude | `service.go:L42` | Nil panic em retorno de repo sem guard |
+| 2 | coverage | `service.go:L80` | Método principal sem nenhum teste |
+| 3 | qa | `handler.go:L15` | Breaking change em response struct |
+
+---
+
+## 🧪 Gaps de Cobertura
+
+> O que precisa de teste antes do merge.
+
+| # | Severidade | Método | Cenário não coberto |
+|---|-----------|--------|---------------------|
+| 1 | 🔴 Crítico | `Service.Create` | Erro do repo não testado |
+| 2 | 🟠 Médio | `Service.Get` | Input nil |
+
+---
+
+## 💬 Tópicos para o Autor
+
+> Perguntas que precisam de resposta antes do merge (ou na conversa de review).
+
+1. **[Tópico 1]** — <pergunta direta>
+2. **[Tópico 2]** — <pergunta direta>
+
+---
+
+## 🟠 Pontos de Atenção
+
+| # | Inspector | Descrição |
+|---|-----------|-----------|
+| 1 | claude | Race condition possível em X |
+| 2 | qa | Campo novo sem omitempty |
+
+---
+
+## ✂️ Simplificações Aplicadas
+
+> Commits já feitos no worktree. Aguardando aprovação do dev.
+
+| Commit | Descrição | Impacto |
+|--------|-----------|---------|
+| `abc1234` | simplify: extract validateX | -12 linhas |
+
+> 🟡 Nenhuma simplificação aplicada. / Ver `07-simplifier.md` para sugestões.
+
+---
+
+## 📊 Métricas
+
+```
+Findings totais ............ N
+  🔴 Blockers .............. N
+  🟠 Média ................. N
+  🟡 Baixa ................. N
+  ℹ️  Info .................. N
+
+Cobertura
+  Fluxos mapeados .......... N
+  Com teste ................ N (XX%)
+  Gaps críticos ............ N
+  Gaps médios .............. N
+
+Simplificador
+  Commits aplicados ........ N
+  Linhas removidas ......... -N
+  Sugestões pendentes ...... N
+
+Inspetores ................. 7/7 ✅
+Arquivos analisados ........ N
+```
+
+---
+
+## 🗂️ Artefatos Completos
+
+| Arquivo | Conteúdo |
+|---------|----------|
+| [00-contexto](00-contexto.md) | PR body, JIRA, Notion |
+| [01-architect](01-architect.md) | Visão geral, design, tópicos |
+| [02-claude](02-claude.md) | Correctness, concurrency, performance |
+| [03-documentation](03-documentation.md) | Swagger, godoc, comentários |
+| [04-qa](04-qa.md) | Contratos, breaking changes |
+| [05-namer](05-namer.md) | Nomenclatura |
+| [06-coverage](06-coverage.md) | Gaps de teste detalhados |
+| [07-simplifier](07-simplifier.md) | Refactors aplicados e sugeridos |
+| [08-consolidado](08-consolidado.md) | Visão unificada completa |
 ```
 
 ---
