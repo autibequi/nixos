@@ -239,12 +239,38 @@ Onde `<tarefa>` = slug da branch (ex: `add-delta-lake`) e `<data>` = data atual 
 - Tópicos para o autor
 - Métricas consolidadas em bloco de texto formatado
 
-## Passo 7 — Atualizar kanban
+## Passo 7 — Atualizar kanban e INDEX
 
+### Kanban
 Adicionar card no `obsidian/kanban.md`:
 ```
-- [x] **<tarefa>** #done YYYY-MM-DD `opus` — [inspeção](inspection/<tarefa>/<data>/README.md) N findings, M blockers, K gaps de cobertura, J simplificações
+- [x] **<tarefa>** #done YYYY-MM-DD `opus` — [inspeção](inspection/<tarefa>/<data>/BOARD.md) N findings, M blockers, K gaps de cobertura, J simplificações
 ```
+
+### INDEX.md
+Atualizar (ou criar se não existir) `obsidian/inspection/INDEX.md` adicionando uma linha na tabela:
+
+```markdown
+| YYYY-MM-DD | [<tarefa>](/<tarefa>/<data>/BOARD.md) | [#N](link-pr) | <ticket> | 🔴 N / 🟠 N / 🟡 N | XX% (N gaps) | ✅ ok / 🔴 revisão / ⏳ aberto |
+```
+
+Estrutura completa do INDEX.md:
+
+```markdown
+# Histórico de Inspeções — Monolito
+
+> Atualizado automaticamente após cada `go-inspector`. Ordenado do mais recente ao mais antigo.
+
+| Data | Tarefa | PR | JIRA | Findings (🔴/🟠/🟡) | Cobertura | Status |
+|------|--------|----|------|----------------------|-----------|--------|
+| 2026-03-18 | [cached-ldi-toc](cached-ldi-toc/2026-03-18/BOARD.md) | [#138](…) | LDI-42 | 0 / 3 / 5 | 62% (2 gaps) | ✅ merged |
+| 2026-03-13 | [add-delta-lake](add-delta-lake/2026-03-13/BOARD.md) | [#131](…) | MON-891 | 2 / 4 / 3 | 45% (5 gaps) | 🔴 revisão |
+```
+
+**Regras do INDEX:**
+- Sempre inserir no topo (mais recente primeiro)
+- Se a mesma `<tarefa>` já existe com data diferente (re-inspeção após correções), adicionar nova linha — não substituir
+- Status: `✅ merged` quando o PR for mergeado, `🔴 revisão` quando tiver blockers, `⏳ aberto` quando ainda em review
 
 ## Passo 8 — Auto-Evolução (post-hook obrigatório)
 
