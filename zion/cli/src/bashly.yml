@@ -311,6 +311,11 @@ commands:
         help: Timeout em segundos
     filename: commands/new_task.sh
 
+  - name: status
+    alias: [st]
+    help: "Status agregado: sessoes, docker services e puppy workers."
+    filename: commands/status.sh
+
   - name: edit
     help: Abre sessao com ~/nixos em /workspace/mnt e /workspace/logs.
     filename: commands/host_edit.sh
