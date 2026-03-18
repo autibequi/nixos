@@ -195,6 +195,8 @@ commands:
           - long: --detach
             short: -d
             help: "Roda em background (detached, sem follow de logs)"
+          - long: --debug
+            help: "Modo debug: compila sem otimizações e expõe delve na porta 2345 (attach via VS Code DAP)"
         filename: commands/docker_run.sh
 
       - name: stop

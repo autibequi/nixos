@@ -1,0 +1,9 @@
+services:
+  app:
+    build:
+      dockerfile: ${ZION_NIXOS_DIR}/zion/dockerized/monolito/Dockerfile.debug
+    # ptrace is required for delve to work inside Docker
+    security_opt:
+      - apparmor:unconfined
+    cap_add:
+      - SYS_PTRACE

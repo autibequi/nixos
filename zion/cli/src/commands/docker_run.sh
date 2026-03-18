@@ -3,6 +3,7 @@ zion_load_config
 
 service="${args[service]}"
 env="${args[--env]:-sand}"
+debug="${args[--debug]:-}"
 
 zion_docker_validate_service "$service" || exit 1
 
@@ -38,8 +39,16 @@ if ! docker network inspect nixos_default &>/dev/null; then
 fi
 
 COMPOSE_ARGS="-f $compose -p $project"
+if [[ -n "$debug" ]]; then
+  debug_compose=$(dirname "$compose")/docker-compose.debug.yml
+  COMPOSE_ARGS="$COMPOSE_ARGS -f $debug_compose"
+fi
 
-echo "=== Levantando $service [env=$env] ==="
+if [[ -n "$debug" ]]; then
+  echo "=== Levantando $service [env=$env] [DEBUG - dlv :2345] ==="
+else
+  echo "=== Levantando $service [env=$env] ==="
+fi
 echo "  projeto: $dir"
 echo "  compose: $compose"
 echo "  env:     $env_file"
@@ -66,6 +75,10 @@ if [[ -f "$log_dir/logger.pid" ]]; then
   kill "$(cat "$log_dir/logger.pid")" 2>/dev/null || true
 fi
 nohup docker compose $COMPOSE_ARGS logs -f --no-log-prefix > "$log_dir/service.log" 2>&1 &
+if [[ -n "$debug" ]]; then
+  echo ">>> [DEBUG] Delve aguardando attach em localhost:2345"
+  echo ">>> [DEBUG] VS Code: use a config 'Attach to monolito' (porta 2345)"
+fi
 echo $! > "$log_dir/logger.pid"
 
 # 4. Se --detach, sair silenciosamente
