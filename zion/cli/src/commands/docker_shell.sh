@@ -21,10 +21,13 @@ if [[ -n "$cmd" ]]; then
     --rm \
     -it \
     -v "$dir:/go/app" \
+    -v /var/run/docker.sock:/var/run/docker.sock \
     -e GOPATH=/go \
     -e GOPRIVATE="github.com/estrategiahq" \
     -e TERM=xterm-256color \
     -e COLORTERM=truecolor \
+    -e DOCKER_HOST=unix:///var/run/docker.sock \
+    -e TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock \
     --network nixos_default \
     -w "/go/app" \
     "golang:1.24.4-alpine" \

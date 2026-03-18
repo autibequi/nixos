@@ -7,6 +7,9 @@ services:
     env_file:
       - ${MONOLITO_DIR}/.env.${APP_ENV_FILE:-sandbox}
       - ./env/${APP_ENV:-sand}.env
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
     volumes:
       - ${MONOLITO_DIR}/configuration:/go/app/configuration:ro
       - /var/run/docker.sock:/var/run/docker.sock

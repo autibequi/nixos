@@ -1,0 +1,25 @@
+services:
+  app:
+    build:
+      context: ${FRONT_STUDENT_DIR}
+      dockerfile: ${ZION_NIXOS_DIR}/zion/dockerized/front-student/Dockerfile
+    container_name: zion-dk-front-student-app
+    env_file:
+      - ./env/${APP_ENV:-sandbox}.env
+    environment:
+      - FORCE_COLOR=1
+      - TERM=xterm-256color
+    tty: true
+    volumes:
+      # Bind mount completo: source + node_modules (gerado por zion docker install)
+      - ${FRONT_STUDENT_DIR}:/app
+    ports:
+      - "8082:8082"
+    networks:
+      - default
+    restart: unless-stopped
+
+networks:
+  default:
+    name: nixos_default
+    external: true

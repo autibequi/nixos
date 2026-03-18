@@ -56,8 +56,7 @@ restow:
 # ── Reverse proxy ─────────────────────────────────────────────────
 
 proxy:
-	@if [ -f scripts/reverseproxy/Makefile ]; then $(MAKE) -C scripts/reverseproxy mocks-ldi; fi
-	docker compose -f scripts/reverseproxy/docker-compose.yaml up -d
+	docker compose -f zion/dockerized/reverseproxy/docker-compose.yml -p zion-dk-reverseproxy up -d
 
 # ── Claudinho / Zion CLI ───────────────────────────────────────────
 # install = regenera zion (bashly) + symlink + copia bootstrap para scripts/

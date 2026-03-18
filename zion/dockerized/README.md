@@ -7,8 +7,8 @@ Configs Docker versionadas para servicos da estrategia. Cada servico tem seu pro
 | Servico | Status | Descricao |
 |---------|--------|-----------|
 | monolito | ativo | Go monolith (app + worker + deps) |
-| bo-container | futuro | Vue 2 backoffice |
-| front-student | futuro | Nuxt 2 frontend |
+| bo-container | ativo | Vue 2 backoffice |
+| front-student | ativo | Nuxt 2 frontend |
 
 ## Uso
 
