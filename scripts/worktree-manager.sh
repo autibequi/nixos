@@ -2,7 +2,7 @@
 
 # worktree-manager.sh
 # Gerencia rastreamento de worktrees: entrada, status, saída
-# Atualiza obsidian/_agent/worktrees.md com dashboard dinâmico
+# Atualiza obsidian/agents/worktrees.md com dashboard dinâmico
 
 set -euo pipefail
 
