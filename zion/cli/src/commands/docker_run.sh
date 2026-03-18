@@ -23,6 +23,14 @@ export FRONT_STUDENT_DIR="${FRONT_STUDENT_DIR:-$HOME/projects/estrategia/front-s
 export ZION_NIXOS_DIR="$zion_nixos_dir"
 export APP_ENV="$env"
 
+# Mapear env para sufixo do arquivo .env do projeto
+case "$env" in
+  sand)   export APP_ENV_FILE="sandbox" ;;
+  local)  export APP_ENV_FILE="local" ;;
+  devbox) export APP_ENV_FILE="devbox" ;;
+  *)      export APP_ENV_FILE="$env" ;;
+esac
+
 # Garantir rede
 if ! docker network inspect nixos_default &>/dev/null; then
   echo "[zion docker] Criando rede nixos_default..."

@@ -5,7 +5,10 @@ services:
       dockerfile: ${ZION_NIXOS_DIR}/zion/dockerized/monolito/Dockerfile.worker
     container_name: zion-dk-monolito-worker
     env_file:
+      - ${MONOLITO_DIR}/.env.${APP_ENV_FILE:-sandbox}
       - ./env/${APP_ENV:-sand}.env
+    volumes:
+      - ${MONOLITO_DIR}/configuration:/go/app/configuration:ro
     networks:
       - default
     restart: unless-stopped

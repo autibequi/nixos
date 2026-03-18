@@ -20,7 +20,7 @@ RUN CGO_ENABLED=1 GOOS=linux go build -mod=vendor -tags musl -o server ./cmd/ser
 
 FROM alpine:latest AS runtime
 
-RUN apk --no-cache add ca-certificates librdkafka
+RUN apk --no-cache add ca-certificates librdkafka tzdata
 
 WORKDIR /go/app
 
