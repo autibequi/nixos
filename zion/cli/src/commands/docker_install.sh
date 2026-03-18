@@ -22,7 +22,7 @@ echo "---"
 
 docker run \
   --rm \
-  -v "$HOME/.ssh:/root/.ssh:ro" \
+  -v "$HOME/.ssh:/ssh-host:ro" \
   -v "$dir:/go/app" \
   -e GOPATH=/go \
   -e GOPRIVATE="github.com/estrategiahq" \
@@ -31,17 +31,19 @@ docker run \
   sh -c '
     set -e
 
-    # Configura SSH e git para repos privados
+    # Copiar SSH do mount read-only para diretorio com permissoes corretas
+    mkdir -p /root/.ssh
+    cp /ssh-host/* /root/.ssh/ 2>/dev/null || true
     chmod 700 /root/.ssh
     chmod 600 /root/.ssh/* 2>/dev/null || true
-    git config --global url."git@github.com:estrategiahq".insteadOf "https://github.com/estrategiahq"
-
-    # Adiciona github.com ao known_hosts pra evitar prompt interativo
-    mkdir -p /root/.ssh
-    ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts 2>/dev/null
 
     echo "[1/4] Instalando ferramentas..."
     apk add --no-cache git gcc musl-dev librdkafka-dev ca-certificates openssh-client
+
+    git config --global url."git@github.com:estrategiahq".insteadOf "https://github.com/estrategiahq"
+
+    # Adiciona github.com ao known_hosts pra evitar prompt interativo
+    ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts 2>/dev/null
 
     echo "[2/4] Download de modulos Go..."
     go mod download
