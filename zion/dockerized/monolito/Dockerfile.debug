@@ -37,6 +37,6 @@ EXPOSE 4004 2345
 # --api-version=2: newer protocol (required for VS Code)
 # --accept-multiclient: allow reconnecting after disconnect
 # --continue: start execution without waiting for attach
-CMD ["/root/go/bin/dlv", "exec", "./server", \
+CMD ["/go/bin/dlv", "exec", "./server", \
      "--headless", "--listen=:2345", "--api-version=2", \
      "--accept-multiclient", "--continue"]
