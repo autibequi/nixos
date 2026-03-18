@@ -1,39 +1,31 @@
-echo "=== Scheduler (container 24/7, tick every 10 min) ==="
-docker ps --filter "label=com.docker.compose.service=scheduler" --format "table {{.Names}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || podman ps --filter "label=com.docker.compose.service=scheduler" --format "table {{.Names}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || echo "(nenhum)"
+zion_load_config
+
+PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
+PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
+
+echo "=== Puppy Container ==="
+OBSIDIAN_PATH="$zion_obsidian_path" \
+  docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" ps 2>/dev/null || \
+  echo "  nenhum container rodando"
+
 echo ""
-echo "=== Workers (on-demand) ==="
-docker ps --filter "name=_worker_" --format "table {{.ID}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || podman ps --filter "name=_worker_" --format "table {{.ID}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || echo "(nenhum)"
-scheduled="$zion_vault_dir/_agent/scheduled.md"
-kanban="$zion_vault_dir/kanban.md"
-echo ""
-echo "=== Kanban ==="
-if [[ -f "$scheduled" ]]; then
-  for col in "Recorrentes" "Em Execução"; do
-    count=0 in_col=0
-    while IFS= read -r line; do
-      if [[ "$line" == "## $col" ]]; then in_col=1; continue; fi
-      if [[ "$line" =~ ^## ]] && [[ "$in_col" == "1" ]]; then break; fi
-      if [[ "$in_col" == "1" ]] && echo "$line" | grep -q '^- \['; then count=$((count+1)); fi
-    done < "$scheduled"
-    echo "  $col: $count"
+echo "=== Tasks em doing/ ==="
+vault="${zion_obsidian_path}/tasks/doing"
+if [ -d "$vault" ] && [ -n "$(ls -A "$vault" 2>/dev/null)" ]; then
+  for d in "$vault"/*/; do
+    [ -d "$d" ] || continue
+    echo "  $(basename "$d")"
   done
+else
+  echo "  nenhuma"
 fi
-if [[ -f "$kanban" ]]; then
-  for col in "Backlog" "Em Andamento" "Aprovado" "Falhou"; do
-    count=0 in_col=0
-    while IFS= read -r line; do
-      if [[ "$line" == "## $col" ]]; then in_col=1; continue; fi
-      if [[ "$line" =~ ^## ]] && [[ "$in_col" == "1" ]]; then break; fi
-      if [[ "$in_col" == "1" ]] && echo "$line" | grep -q '^- \['; then count=$((count+1)); fi
-    done < "$kanban"
-    echo "  $col: $count"
-  done
-fi
+
 echo ""
-echo "=== Em Andamento ==="
-in_col=0
-while IFS= read -r line; do
-  if [[ "$line" == "## Em Andamento" ]]; then in_col=1; continue; fi
-  if [[ "$line" =~ ^## ]] && [[ "$in_col" == "1" ]]; then break; fi
-  if [[ "$in_col" == "1" ]] && echo "$line" | grep -q '^- \['; then echo "  $line"; fi
-done < "$kanban" 2>/dev/null || echo "  (vazio)"
+echo "=== Scheduled ==="
+sched="${zion_obsidian_path}/tasks/_scheduled"
+if [ -d "$sched" ]; then
+  count=$(ls -d "$sched"/*/ 2>/dev/null | wc -l)
+  echo "  $count tasks em _scheduled/"
+else
+  echo "  sem _scheduled/"
+fi

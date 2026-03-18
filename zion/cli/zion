@@ -17,12 +17,7 @@ version_command() {
 
 # :command.usage
 zion_usage() {
-  if [[ -n $long_usage ]]; then
-    printf "zion\n\n"
-    printf "  CLI unificado para o container (Zion = agentes, Puppy = workers).\n  Sem subcomando = continue (última sessão). zion new = nova sessão. zion resume\n  = lista de sessões.\n\n"
-  else
-    printf "zion - CLI unificado para o container (Zion = agentes, Puppy = workers).\n\n"
-  fi
+  printf "zion - ZION - agent orchestration system\n\n"
 
   printf "%s\n" "Usage:"
   printf "  zion [OPTIONS] [COMMAND]\n"
@@ -482,7 +477,7 @@ zion_puppy_usage() {
   printf "  %s   Segue logs do container puppy.\n" "logs   "
   printf "  %s   Abre bash dentro do container puppy.\n" "shell  "
   printf "  %s   Roda 1 tick do scheduler imediatamente (para teste).\n" "tick   "
-  printf "  %s   Envia um prompt de teste ao Claude dentro do container puppy.\n" "query  "
+  printf "  %s   Envia um prompt ao Claude dentro do container puppy (headless = sem supervisão).\n" "query  "
   echo
 
   # :command.long_usage
@@ -681,18 +676,34 @@ zion_puppy_tick_usage() {
 
 # :command.usage
 zion_puppy_query_usage() {
-  printf "zion puppy query - Envia um prompt de teste ao Claude dentro do container puppy.\n\n"
+  printf "zion puppy query - Envia um prompt ao Claude dentro do container puppy (headless = sem supervisão).\n\n"
   printf "Alias: q\n"
   echo
 
   printf "%s\n" "Usage:"
-  printf "  zion puppy query PROMPT\n"
+  printf "  zion puppy query PROMPT [OPTIONS]\n"
   printf "  zion puppy query --help | -h\n"
   echo
 
   # :command.long_usage
   if [[ -n "$long_usage" ]]; then
     printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--headless"
+    printf "    Modo headless: ninguém está observando, vá o mais longe possível\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--timeout SECONDS"
+    printf "    Timeout em segundos (default 300). O agente é informado do deadline.\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--model MODEL"
+    printf "    Modelo Claude: haiku | sonnet | opus (default: haiku)\n"
+    echo
 
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
@@ -1715,16 +1726,16 @@ zion_puppy_tick_command() {
 zion_puppy_query_command() {
 
   # src/commands/puppy_query.sh
-  # Envia um prompt de teste direto ao Claude dentro do container puppy.
-  zion_load_config
-
-  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
-  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
-  prompt="${args[prompt]}"
+  $prompt"
+  fi
 
   OBSIDIAN_PATH="$zion_obsidian_path" \
     docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
-    exec puppy claude --permission-mode bypassPermissions --model haiku -p "$prompt"
+    exec "${env_flags[@]}" puppy \
+    timeout "$timeout_secs" claude \
+      --permission-mode bypassPermissions \
+      --model "$model" \
+      -p "$final_prompt"
 
 }
 
@@ -1740,7 +1751,7 @@ zion_reset_command() {
     rm -f "$dir/.lock"
     if [[ "$source" == "recurring" ]]; then
       rm -rf "$dir"
-      echo "[reset] $name (recurring) removed"
+      echo "[reset] $name recurring removed"
     else
       mkdir -p "$zion_vault_dir/_agent/tasks/pending"
       mv "$dir" "$zion_vault_dir/_agent/tasks/pending/$name"
@@ -1757,45 +1768,37 @@ zion_reset_command() {
 zion_status_command() {
 
   # src/commands/status.sh
-  echo "=== Scheduler (container 24/7, tick every 10 min) ==="
-  docker ps --filter "label=com.docker.compose.service=scheduler" --format "table {{.Names}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || podman ps --filter "label=com.docker.compose.service=scheduler" --format "table {{.Names}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || echo "(nenhum)"
+  zion_load_config
+
+  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
+  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
+
+  echo "=== Puppy Container ==="
+  OBSIDIAN_PATH="$zion_obsidian_path" \
+    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" ps 2>/dev/null || \
+    echo "  nenhum container rodando"
+
   echo ""
-  echo "=== Workers (on-demand) ==="
-  docker ps --filter "name=_worker_" --format "table {{.ID}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || podman ps --filter "name=_worker_" --format "table {{.ID}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || echo "(nenhum)"
-  scheduled="$zion_vault_dir/_agent/scheduled.md"
-  kanban="$zion_vault_dir/kanban.md"
-  echo ""
-  echo "=== Kanban ==="
-  if [[ -f "$scheduled" ]]; then
-    for col in "Recorrentes" "Em Execução"; do
-      count=0 in_col=0
-      while IFS= read -r line; do
-        if [[ "$line" == "## $col" ]]; then in_col=1; continue; fi
-        if [[ "$line" =~ ^## ]] && [[ "$in_col" == "1" ]]; then break; fi
-        if [[ "$in_col" == "1" ]] && echo "$line" | grep -q '^- \['; then count=$((count+1)); fi
-      done < "$scheduled"
-      echo "  $col: $count"
+  echo "=== Tasks em doing/ ==="
+  vault="${zion_obsidian_path}/tasks/doing"
+  if [ -d "$vault" ] && [ -n "$(ls -A "$vault" 2>/dev/null)" ]; then
+    for d in "$vault"/*/; do
+      [ -d "$d" ] || continue
+      echo "  $(basename "$d")"
     done
+  else
+    echo "  nenhuma"
   fi
-  if [[ -f "$kanban" ]]; then
-    for col in "Backlog" "Em Andamento" "Aprovado" "Falhou"; do
-      count=0 in_col=0
-      while IFS= read -r line; do
-        if [[ "$line" == "## $col" ]]; then in_col=1; continue; fi
-        if [[ "$line" =~ ^## ]] && [[ "$in_col" == "1" ]]; then break; fi
-        if [[ "$in_col" == "1" ]] && echo "$line" | grep -q '^- \['; then count=$((count+1)); fi
-      done < "$kanban"
-      echo "  $col: $count"
-    done
-  fi
+
   echo ""
-  echo "=== Em Andamento ==="
-  in_col=0
-  while IFS= read -r line; do
-    if [[ "$line" == "## Em Andamento" ]]; then in_col=1; continue; fi
-    if [[ "$line" =~ ^## ]] && [[ "$in_col" == "1" ]]; then break; fi
-    if [[ "$in_col" == "1" ]] && echo "$line" | grep -q '^- \['; then echo "  $line"; fi
-  done < "$kanban" 2>/dev/null || echo "  (vazio)"
+  echo "=== Scheduled ==="
+  sched="${zion_obsidian_path}/tasks/_scheduled"
+  if [ -d "$sched" ]; then
+    count=$(ls -d "$sched"/*/ 2>/dev/null | wc -l)
+    echo "  $count tasks em _scheduled/"
+  else
+    echo "  sem _scheduled/"
+  fi
 
 }
 
@@ -3386,6 +3389,41 @@ zion_puppy_query_parse_requirements() {
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
+      # :flag.case
+      --headless)
+
+        # :flag.case_no_arg
+        args['--headless']=1
+        shift
+        ;;
+
+      # :flag.case
+      --timeout)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--timeout']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--timeout requires an argument: --timeout SECONDS" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --model)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--model']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--model requires an argument: --model MODEL" >&2
+          exit 1
+        fi
+        ;;
 
       -?*)
         printf "invalid option: %s\n" "$key" >&2
@@ -3411,7 +3449,7 @@ zion_puppy_query_parse_requirements() {
 
   # :command.required_args_filter
   if [[ -z ${args['prompt']+x} ]]; then
-    printf "missing required argument: PROMPT\nusage: zion puppy query PROMPT\n" >&2
+    printf "missing required argument: PROMPT\nusage: zion puppy query PROMPT [OPTIONS]\n" >&2
 
     exit 1
   fi

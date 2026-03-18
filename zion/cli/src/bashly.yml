@@ -1,7 +1,5 @@
 name: zion
-help: |
-  CLI unificado para o container (Zion = agentes, Puppy = workers).
-  Sem subcomando = continue (última sessão). zion new = nova sessão. zion resume = lista de sessões.
+help: ZION - agent orchestration system
 environment_variables:
   - name: ZION_NIXOS_DIR
     help: "Raiz do repo NixOS (default $HOME/nixos)"

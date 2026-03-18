@@ -6,7 +6,7 @@ for dir in "$running_dir"/*/; do
   rm -f "$dir/.lock"
   if [[ "$source" == "recurring" ]]; then
     rm -rf "$dir"
-    echo "[reset] $name (recurring) removed"
+    echo "[reset] $name recurring removed"
   else
     mkdir -p "$zion_vault_dir/_agent/tasks/pending"
     mv "$dir" "$zion_vault_dir/_agent/tasks/pending/$name"
