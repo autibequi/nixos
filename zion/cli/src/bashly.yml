@@ -107,6 +107,15 @@ commands:
     help: Para containers e remove imagens/volumes.
     filename: commands/destroy.sh
 
+  - name: clean
+    alias: [gc, prune]
+    help: "Remove sessoes Zion paradas/exited e containers orfaos."
+    flags:
+      - long: --force
+        short: -f
+        help: "Remove sem pedir confirmacao"
+    filename: commands/clean.sh
+
   - name: update
     alias: [install]
     help: Regenera CLI (bashly) e instala/atualiza symlink em stow/.local/bin.
