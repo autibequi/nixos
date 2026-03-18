@@ -26,31 +26,30 @@ zion_usage() {
   echo
   # :command.usage_commands
   printf "%s\n" "Commands:"
-  printf "  %s   Continua a última sessão (mesmo que digitar só zion). (default)\n" "continue    "
-  printf "  %s   Nova sessão no container. Exige --engine (ou engine= em ~/.zion).\n" "new         "
-  printf "  %s   Abre bash no container com o projeto montado.\n" "shell       "
-  printf "  %s   Mostra lista de sessões e permite escolher qual retomar.\n" "resume      "
-  printf "  %s   [DEPRECATED] Use 'zion new --engine=claude --danger'. Mantido por compatibilidade.\n" "start       "
-  printf "  %s   Estatísticas de uso Claude (API OAuth / claude.ai). Saída: --waybar = JSON para usage bar; sem flag = JSON bruto.\n" "claude-usage"
-  printf "  %s   Atalho: nova sessão com engine Claude (= zion new --engine=claude).\n" "claude      "
-  printf "  %s   Atalho: nova sessão com engine Cursor (= zion new --engine=cursor).\n" "cursor      "
-  printf "  %s   Atalho: nova sessão com engine OpenCode (= zion new --engine=opencode).\n" "opencode    "
-  printf "  %s   Atalho: envia prompt ao Puppy (= zion puppy query).\n" "ask         "
-  printf "  %s   Build da imagem Docker do sandbox.\n" "build       "
-  printf "  %s   Para todos os containers do projeto.\n" "down        "
-  printf "  %s   Para containers e remove imagens/volumes.\n" "destroy     "
-  printf "  %s   Remove sessoes Zion paradas/exited e containers orfaos.\n" "clean       "
-  printf "  %s   Regenera CLI (bashly) e instala/atualiza symlink em stow/.local/bin.\n" "update      "
-  printf "  %s   Cria ~/.zion a partir de config.example (não sobrescreve se já existir).\n" "init        "
-  printf "  %s   Define engine padrão em ~/.zion (engine= claude | opencode | cursor).\n" "set         "
-  printf "  %s   Gerencia o Puppy worker (container persistente + task runner).\n" "puppy       "
-  printf "  %s   Gerencia servicos Docker da estrategia\n" "docker      "
-  printf "  %s   Lista worktrees dos servicos Docker e permite escolher worktree + comando interativamente.\n" "worktree    "
-  printf "  %s   Cria task + card no kanban (Puppy).\n" "new-task    "
-  printf "  %s   Status agregado: sessoes, docker services e puppy workers.\n" "status      "
-  printf "  %s   Abre sessao com ~/nixos em /workspace/mnt e /workspace/logs.\n" "edit        "
-  printf "  %s   Mostra o banner com comandos principais.\n" "help        "
-  printf "  %s   Documentacao completa de todos os comandos e flags.\n" "man         "
+  printf "  %s   Continua a última sessão (mesmo que digitar só zion). (default)\n" "continue"
+  printf "  %s   Nova sessão no container. Exige --engine (ou engine= em ~/.zion).\n" "new     "
+  printf "  %s   Abre bash no container com o projeto montado.\n" "shell   "
+  printf "  %s   Mostra lista de sessões e permite escolher qual retomar.\n" "resume  "
+  printf "  %s   [DEPRECATED] Use 'zion new --engine=claude --danger'. Mantido por compatibilidade.\n" "start   "
+  printf "  %s   Nova sessão Claude ou consultar uso. Sem subcomando = nova sessão.\n" "claude  "
+  printf "  %s   Atalho: nova sessão com engine Cursor (= zion new --engine=cursor).\n" "cursor  "
+  printf "  %s   Atalho: nova sessão com engine OpenCode (= zion new --engine=opencode).\n" "opencode"
+  printf "  %s   Atalho: envia prompt ao Puppy (= zion puppy query).\n" "ask     "
+  printf "  %s   Build da imagem Docker do sandbox.\n" "build   "
+  printf "  %s   Para todos os containers do projeto.\n" "down    "
+  printf "  %s   Para containers e remove imagens/volumes.\n" "destroy "
+  printf "  %s   Remove sessoes Zion paradas/exited e containers orfaos.\n" "clean   "
+  printf "  %s   Regenera CLI (bashly) e instala/atualiza symlink em stow/.local/bin.\n" "update  "
+  printf "  %s   Cria ~/.zion a partir de config.example (não sobrescreve se já existir).\n" "init    "
+  printf "  %s   Define engine padrão em ~/.zion (engine= claude | opencode | cursor).\n" "set     "
+  printf "  %s   Gerencia o Puppy worker (container persistente + task runner).\n" "puppy   "
+  printf "  %s   Gerencia servicos Docker da estrategia\n" "docker  "
+  printf "  %s   Lista worktrees dos servicos Docker e permite escolher worktree + comando interativamente.\n" "worktree"
+  printf "  %s   Cria task + card no kanban (Puppy).\n" "new-task"
+  printf "  %s   Status agregado: sessoes, docker services e puppy workers.\n" "status  "
+  printf "  %s   Abre sessao com ~/nixos em /workspace/mnt e /workspace/logs.\n" "edit    "
+  printf "  %s   Mostra o banner com comandos principais.\n" "help    "
+  printf "  %s   Documentacao completa de todos os comandos e flags.\n" "man     "
   echo
 
   # :command.long_usage
@@ -330,33 +329,22 @@ zion_start_usage() {
 }
 
 # :command.usage
-zion_claude_usage_usage() {
-  printf "zion claude-usage - Estatísticas de uso Claude (API OAuth / claude.ai). Saída: --waybar = JSON para usage bar; sem flag = JSON bruto.\n\n"
+zion_claude_usage() {
+  printf "zion claude - Nova sessão Claude ou consultar uso. Sem subcomando = nova sessão.\n\n"
 
   printf "%s\n" "Usage:"
-  printf "  zion claude-usage [OPTIONS]\n"
-  printf "  zion claude-usage --help | -h\n"
+  printf "  zion claude COMMAND\n"
+  printf "  zion claude [COMMAND] --help | -h\n"
+  echo
+  # :command.usage_commands
+  printf "%s\n" "Commands:"
+  printf "  %s   Nova sessão com engine Claude (= zion new --engine=claude). (default)\n" "new  "
+  printf "  %s   Estatísticas de uso Claude (API OAuth / claude.ai).\n" "usage"
   echo
 
   # :command.long_usage
   if [[ -n "$long_usage" ]]; then
     printf "%s\n" "Options:"
-
-    # :command.usage_flags
-    # :flag.usage
-    printf "  %s\n" "--waybar"
-    printf "    Formato Waybar (text, tooltip, class) para o usage bar consumir\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--json"
-    printf "    JSON bruto da API (five_hour, seven_day, seven_day_sonnet)\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--refresh"
-    printf "    Força fetch, ignora cache\n"
-    echo
 
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
@@ -367,12 +355,12 @@ zion_claude_usage_usage() {
 }
 
 # :command.usage
-zion_claude_usage() {
-  printf "zion claude - Atalho: nova sessão com engine Claude (= zion new --engine=claude).\n\n"
+zion_claude_new_usage() {
+  printf "zion claude new - Nova sessão com engine Claude (= zion new --engine=claude).\n\n"
 
   printf "%s\n" "Usage:"
-  printf "  zion claude [DIR] [OPTIONS]\n"
-  printf "  zion claude --help | -h\n"
+  printf "  zion claude [new] [DIR] [OPTIONS]\n"
+  printf "  zion claude new --help | -h\n"
   echo
 
   # :command.long_usage
@@ -427,6 +415,45 @@ zion_claude_usage() {
     # :argument.usage
     printf "  %s\n" "DIR"
     printf "    Diretório do projeto (default ~/projects)\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_claude_usage_usage() {
+  printf "zion claude usage - Estatísticas de uso Claude (API OAuth / claude.ai).\n\n"
+  printf "Alias: u\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  zion claude usage [OPTIONS]\n"
+  printf "  zion claude usage --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--waybar"
+    printf "    Formato Waybar (text, tooltip, class) para o usage bar consumir\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--json"
+    printf "    JSON bruto da API (five_hour, seven_day, seven_day_sonnet)\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--refresh"
+    printf "    Força fetch, ignora cache\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
     echo
 
   fi
@@ -3866,47 +3893,7 @@ zion_start_command() {
 }
 
 # :command.function
-zion_claude_usage_command() {
-
-  # src/commands/claude_usage.sh
-  # zion claude-usage — Estatísticas de uso Claude (OAuth / claude.ai).
-  # Delega para o script do waybar; saída no formato que o usage bar consome (--waybar) ou JSON bruto.
-  # Uso: zion claude-usage [--waybar] [--json] [--refresh]
-
-  # Resolve o script: repo (stow) ou deploy em ~/.config/waybar
-  zion_nixos_dir="${ZION_NIXOS_DIR:-$HOME/nixos}"
-  usage_script=""
-  for candidate in \
-    "$HOME/.config/waybar/claude-oauth-usage.sh" \
-    "$zion_nixos_dir/stow/.config/waybar/claude-oauth-usage.sh" \
-    "$HOME/nixos/stow/.config/waybar/claude-oauth-usage.sh" \
-    "/workspace/mnt/stow/.config/waybar/claude-oauth-usage.sh"; do
-    if [[ -x "$candidate" ]] || [[ -f "$candidate" ]]; then
-      usage_script="$candidate"
-      break
-    fi
-  done
-
-  if [[ -z "$usage_script" ]] || [[ ! -f "$usage_script" ]]; then
-    echo "zion claude-usage: script não encontrado (procure em ~/.config/waybar/claude-oauth-usage.sh ou repo stow)" >&2
-    exit 1
-  fi
-
-  # --waybar → saída para Waybar (text, tooltip, class). Caso contrário → JSON bruto da API.
-  if [[ -n "${args[--waybar]}" ]]; then
-    run_args=(--waybar)
-    [[ -n "${args[--refresh]}" ]] && run_args+=(--refresh)
-    exec bash "$usage_script" "${run_args[@]}"
-  else
-    # JSON bruto (five_hour, seven_day, seven_day_sonnet) — para consumidor ou inspeção
-    run_args=(--refresh)
-    exec bash "$usage_script" "${run_args[@]}"
-  fi
-
-}
-
-# :command.function
-zion_claude_command() {
+zion_claude_new_command() {
 
   # src/commands/engine_claude.sh
   # Atalho: zion claude = zion new --engine=claude
@@ -3930,6 +3917,46 @@ zion_claude_command() {
   fi
 
   zion_session_run "claude" "$proj_name" "$mount_path" "$mount_opts" "$engine_args"
+
+}
+
+# :command.function
+zion_claude_usage_command() {
+
+  # src/commands/claude_usage.sh
+  # zion claude usage — Estatísticas de uso Claude (OAuth / claude.ai).
+  # Delega para o script do waybar; saída no formato que o usage bar consome (--waybar) ou JSON bruto.
+  # Uso: zion claude usage [--waybar] [--json] [--refresh]
+
+  # Resolve o script: repo (stow) ou deploy em ~/.config/waybar
+  zion_nixos_dir="${ZION_NIXOS_DIR:-$HOME/nixos}"
+  usage_script=""
+  for candidate in \
+    "$HOME/.config/waybar/claude-oauth-usage.sh" \
+    "$zion_nixos_dir/stow/.config/waybar/claude-oauth-usage.sh" \
+    "$HOME/nixos/stow/.config/waybar/claude-oauth-usage.sh" \
+    "/workspace/mnt/stow/.config/waybar/claude-oauth-usage.sh"; do
+    if [[ -x "$candidate" ]] || [[ -f "$candidate" ]]; then
+      usage_script="$candidate"
+      break
+    fi
+  done
+
+  if [[ -z "$usage_script" ]] || [[ ! -f "$usage_script" ]]; then
+    echo "zion claude usage: script não encontrado (procure em ~/.config/waybar/claude-oauth-usage.sh ou repo stow)" >&2
+    exit 1
+  fi
+
+  # --waybar → saída para Waybar (text, tooltip, class). Caso contrário → JSON bruto da API.
+  if [[ -n "${args[--waybar]}" ]]; then
+    run_args=(--waybar)
+    [[ -n "${args[--refresh]}" ]] && run_args+=(--refresh)
+    exec bash "$usage_script" "${run_args[@]}"
+  else
+    # JSON bruto (five_hour, seven_day, seven_day_sonnet) — para consumidor ou inspeção
+    run_args=(--refresh)
+    exec bash "$usage_script" "${run_args[@]}"
+  fi
 
 }
 
@@ -5560,13 +5587,6 @@ parse_requirements() {
       shift $#
       ;;
 
-    claude-usage)
-      action="claude-usage"
-      shift
-      zion_claude_usage_parse_requirements "$@"
-      shift $#
-      ;;
-
     claude)
       action="claude"
       shift
@@ -6100,14 +6120,14 @@ zion_start_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_claude_usage_parse_requirements() {
+zion_claude_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        zion_claude_usage_usage
+        zion_claude_usage
         exit
         ;;
 
@@ -6119,35 +6139,42 @@ zion_claude_usage_parse_requirements() {
   done
 
   # :command.command_filter
-  action="claude-usage"
+  action=${1:-}
+
+  case $action in
+
+    new)
+      action="new"
+      shift
+      zion_claude_new_parse_requirements "$@"
+      shift $#
+      ;;
+
+    usage | u)
+      action="usage"
+      shift
+      zion_claude_usage_parse_requirements "$@"
+      shift $#
+      ;;
+
+    # :command.command_fallback
+    "")
+      zion_claude_usage >&2
+      exit 1
+      ;;
+
+    *)
+      action="new"
+      zion_claude_new_parse_requirements "$@"
+      shift $#
+      ;;
+
+  esac
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
-      # :flag.case
-      --waybar)
-
-        # :flag.case_no_arg
-        args['--waybar']=1
-        shift
-        ;;
-
-      # :flag.case
-      --json)
-
-        # :flag.case_no_arg
-        args['--json']=1
-        shift
-        ;;
-
-      # :flag.case
-      --refresh)
-
-        # :flag.case_no_arg
-        args['--refresh']=1
-        shift
-        ;;
 
       -?*)
         printf "invalid option: %s\n" "$key" >&2
@@ -6168,14 +6195,14 @@ zion_claude_usage_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_claude_parse_requirements() {
+zion_claude_new_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        zion_claude_usage
+        zion_claude_new_usage
         exit
         ;;
 
@@ -6187,7 +6214,7 @@ zion_claude_parse_requirements() {
   done
 
   # :command.command_filter
-  action="claude"
+  action="claude new"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
@@ -6297,6 +6324,74 @@ zion_claude_parse_requirements() {
 
   # :command.default_assignments
   [[ -n ${args['--init-md']:-} ]] || args['--init-md']="contexto.md"
+
+}
+
+# :command.parse_requirements
+zion_claude_usage_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_claude_usage_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="claude usage"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --waybar)
+
+        # :flag.case_no_arg
+        args['--waybar']=1
+        shift
+        ;;
+
+      # :flag.case
+      --json)
+
+        # :flag.case_no_arg
+        args['--json']=1
+        shift
+        ;;
+
+      # :flag.case
+      --refresh)
+
+        # :flag.case_no_arg
+        args['--refresh']=1
+        shift
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
 
 }
 
@@ -10551,8 +10646,9 @@ run() {
     "shell") zion_shell_command ;;
     "resume") zion_resume_command ;;
     "start") zion_start_command ;;
-    "claude-usage") zion_claude_usage_command ;;
     "claude") zion_claude_command ;;
+    "claude new") zion_claude_new_command ;;
+    "claude usage") zion_claude_usage_command ;;
     "cursor") zion_cursor_command ;;
     "opencode") zion_opencode_command ;;
     "ask") zion_ask_command ;;

@@ -1,6 +1,6 @@
-# zion claude-usage — Estatísticas de uso Claude (OAuth / claude.ai).
+# zion claude usage — Estatísticas de uso Claude (OAuth / claude.ai).
 # Delega para o script do waybar; saída no formato que o usage bar consome (--waybar) ou JSON bruto.
-# Uso: zion claude-usage [--waybar] [--json] [--refresh]
+# Uso: zion claude usage [--waybar] [--json] [--refresh]
 
 # Resolve o script: repo (stow) ou deploy em ~/.config/waybar
 zion_nixos_dir="${ZION_NIXOS_DIR:-$HOME/nixos}"
@@ -17,7 +17,7 @@ for candidate in \
 done
 
 if [[ -z "$usage_script" ]] || [[ ! -f "$usage_script" ]]; then
-  echo "zion claude-usage: script não encontrado (procure em ~/.config/waybar/claude-oauth-usage.sh ou repo stow)" >&2
+  echo "zion claude usage: script não encontrado (procure em ~/.config/waybar/claude-oauth-usage.sh ou repo stow)" >&2
   exit 1
 fi
 

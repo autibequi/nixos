@@ -64,9 +64,21 @@ _zion() {
             ':dir:_files -/' ;;
 
         claude)
-          _arguments \
-            $_zion_session_flags \
-            ':dir:_files -/' ;;
+          _arguments '1: :_zion_claude_commands' '*:: :->claude_args'
+          case $state in
+            claude_args)
+              case $words[1] in
+                new|'')
+                  _arguments \
+                    $_zion_session_flags \
+                    ':dir:_files -/' ;;
+                usage|u)
+                  _arguments \
+                    '--waybar[Formato Waybar JSON]' \
+                    '--json[JSON bruto]' \
+                    '--refresh[Força fetch, ignora cache]' ;;
+              esac ;;
+          esac ;;
 
         cursor)
           _arguments \
@@ -77,12 +89,6 @@ _zion() {
           _arguments \
             $_zion_session_flags \
             ':dir:_files -/' ;;
-
-        claude-usage)
-          _arguments \
-            '--waybar[Formato Waybar JSON]' \
-            '--json[JSON bruto]' \
-            '--refresh[Força fetch, ignora cache]' ;;
 
         ask)
           _arguments \
@@ -184,6 +190,14 @@ _zion() {
   esac
 }
 
+_zion_claude_commands() {
+  local commands=(
+    'new:Nova sessão Claude (padrão)'
+    'usage:Estatísticas de uso Claude'
+  )
+  _describe 'subcomando claude' commands
+}
+
 _zion_docker_service_ops() {
   local ops=(
     'install:Instala dependências'
@@ -215,7 +229,6 @@ _zion_commands() {
     'claude:Nova sessão com engine Claude'
     'cursor:Nova sessão com engine Cursor'
     'opencode:Nova sessão com engine OpenCode'
-    'claude-usage:Estatísticas de uso Claude'
     'ask:Envia prompt ao Puppy'
     'puppy:Gerencia o Puppy worker'
     'docker:Gerencia serviços Docker'

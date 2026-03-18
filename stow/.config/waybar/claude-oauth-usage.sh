@@ -284,9 +284,9 @@ _gauge_gold() {
 sn_num=$(echo "$JSON" | $JQ -r '(.seven_day_sonnet?.utilization? // 0) | floor')
 
 # Ícones por barra (Nerd Font): Sonnet, 5h, 7d, Opus, Extra
-ICON_SONNET='󰻀'   # brain (AI/Sonnet)
-ICON_5H='󱑑'       # timer (janela 5h)
-ICON_7D='󰴊'       # calendar-range (janela 7d)
+ICON_SONNET='󰻀'   # brain (AI/Sonnet — limite semanal Sonnet)
+ICON_5H='󱗼'       # clock-fast (sessão ~5h — janela curta)
+ICON_7D='󰃭'       # calendar-month (limite semanal — todos os modelos)
 ICON_OPUS='󰐂'     # opus/premium (só no tooltip)
 
 # --- modo: --waybar ---

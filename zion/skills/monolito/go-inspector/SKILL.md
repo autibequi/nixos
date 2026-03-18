@@ -114,6 +114,39 @@ Ler os 7 arquivos de definição:
 - `/workspace/obsidian/agents/inspectors/coverage.md`
 - `/workspace/obsidian/agents/inspectors/simplifier.md`
 
+## Passo 2f — Inspeção de Contrato Frontend ← → Backend (pré-inspeção paralela)
+
+**Rodar ANTES dos 6 inspetores, em paralelo para cada repo frontend afetado.**
+
+Se o diff tocar em handlers BO, BFF ou structs de response, spawnar um `inspector-contrato` por repositório:
+
+```
+Agent subagent_type=Explore run_in_background=true prompt="
+Você é o inspector-contrato para [bo-container|front-student].
+Definição completa: <conteúdo de /workspace/obsidian/agents/inspectors/contrato.md>
+
+Contexto (handlers modificados, structs de response, novos endpoints):
+<extraído do diff e do 00-contexto.md>
+
+Repos:
+- Monolito: /workspace/mnt/estrategia/monolito
+- bo-container: /workspace/mnt/estrategia/bo-container
+- front-student: /workspace/mnt/estrategia/front-student
+
+Missão:
+1. Ler os services do frontend que chamam os endpoints modificados
+2. Cruzar campo a campo: URL, método HTTP, request body, response shape
+3. Verificar se o frontend trata os novos status codes (ex: 409 de CheckTOCRebuild)
+4. Reportar: ✅ ALINHADO / 🔴 QUEBRADO / ⚠️ RISCO / ❓ NÃO VERIFICÁVEL
+"
+```
+
+**Quando pular este passo:** se o diff não tocar em nenhum handler HTTP (só workers, migrations, services internos).
+
+**Output:** artefato `09-contrato.md` na pasta da inspeção.
+
+---
+
 ## Passo 3 — Spawnar 6 inspetores em paralelo
 
 > **IMPORTANTE (aprendizado da primeira execução, 2026-03-18):** O agente Monolito não tem o skill `go-inspector` disponível como ferramenta registrada. O agente deve **ler os arquivos de definição dos inspetores diretamente** (via Read tool) e executar cada perspectiva manualmente, consolidando no mesmo agente. O fluxo de 6 agentes background paralelos funciona quando invocado do contexto principal (Claude Code), não dentro do próprio agente Monolito. Ao spawnar os 6 inspetores, usar `subagent_type=general-purpose` ou `subagent_type=Explore` em vez de `Monolito`.

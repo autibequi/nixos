@@ -95,36 +95,40 @@ commands:
     filename: commands/start.sh
 
   # ── Claude (sessão ou usage) ─────────────────────────────────
-  - name: claude-usage
-    help: "Estatísticas de uso Claude (API OAuth / claude.ai). Saída: --waybar = JSON para usage bar; sem flag = JSON bruto."
-    flags:
-      - long: --waybar
-        help: "Formato Waybar (text, tooltip, class) para o usage bar consumir"
-      - long: --json
-        help: "JSON bruto da API (five_hour, seven_day, seven_day_sonnet)"
-      - long: --refresh
-        help: "Força fetch, ignora cache"
-    filename: commands/claude_usage.sh
-
   - name: claude
-    help: "Atalho: nova sessão com engine Claude (= zion new --engine=claude)."
-    args:
-      - name: dir
-        help: "Diretório do projeto (default ~/projects)"
-    flags:
-      - long: --init-md
-        arg: file
-        default: contexto.md
-      - long: --danger
-      - long: --resume
-        arg: session_id
-      - long: --model
-        arg: model
-      - long: --instance
-        arg: id
-      - long: --rw
-      - long: --ro
-    filename: commands/engine_claude.sh
+    help: "Nova sessão Claude ou consultar uso. Sem subcomando = nova sessão."
+    commands:
+      - name: new
+        help: "Nova sessão com engine Claude (= zion new --engine=claude)."
+        default: true
+        args:
+          - name: dir
+            help: "Diretório do projeto (default ~/projects)"
+        flags:
+          - long: --init-md
+            arg: file
+            default: contexto.md
+          - long: --danger
+          - long: --resume
+            arg: session_id
+          - long: --model
+            arg: model
+          - long: --instance
+            arg: id
+          - long: --rw
+          - long: --ro
+        filename: commands/engine_claude.sh
+      - name: usage
+        alias: [u]
+        help: "Estatísticas de uso Claude (API OAuth / claude.ai)."
+        flags:
+          - long: --waybar
+            help: "Formato Waybar (text, tooltip, class) para o usage bar consumir"
+          - long: --json
+            help: "JSON bruto da API (five_hour, seven_day, seven_day_sonnet)"
+          - long: --refresh
+            help: "Força fetch, ignora cache"
+        filename: commands/claude_usage.sh
 
   - name: cursor
     help: "Atalho: nova sessão com engine Cursor (= zion new --engine=cursor)."
