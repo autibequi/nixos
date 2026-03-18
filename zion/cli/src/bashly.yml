@@ -1,5 +1,6 @@
 name: zion
 help: ZION - agent orchestration system
+version: "1.0"
 environment_variables:
   - name: ZION_NIXOS_DIR
     help: "Raiz do repo NixOS (default $HOME/nixos)"
@@ -227,5 +228,13 @@ commands:
     filename: commands/usage_api.sh
 
   - name: edit
-    help: Abre sessão com ~/nixos em /workspace/mnt e /workspace/logs (único modo com mount de nixos + logs).
+    help: Abre sessao com ~/nixos em /workspace/mnt e /workspace/logs.
     filename: commands/host_edit.sh
+
+  - name: help
+    help: Mostra o banner com comandos principais.
+    filename: commands/help.sh
+
+  - name: man
+    help: Documentacao completa de todos os comandos e flags.
+    filename: commands/man.sh

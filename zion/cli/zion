@@ -44,7 +44,9 @@ zion_usage() {
   printf "  %s   Mostra ou segue o último log de worker.\n" "logs     "
   printf "  %s   Lista todos os arquivos de log.\n" "logs-list"
   printf "  %s   Uso da API Anthropic (hoje; use --7d ou --30d para período).\n" "usage-api"
-  printf "  %s   Abre sessão com ~/nixos em /workspace/mnt e /workspace/logs (único modo com mount de nixos + logs).\n" "edit     "
+  printf "  %s   Abre sessao com ~/nixos em /workspace/mnt e /workspace/logs.\n" "edit     "
+  printf "  %s   Mostra o banner com comandos principais.\n" "help     "
+  printf "  %s   Documentacao completa de todos os comandos e flags.\n" "man      "
   echo
 
   # :command.long_usage
@@ -892,11 +894,53 @@ zion_usage_api_usage() {
 
 # :command.usage
 zion_edit_usage() {
-  printf "zion edit - Abre sessão com ~/nixos em /workspace/mnt e /workspace/logs (único modo com mount de nixos + logs).\n\n"
+  printf "zion edit - Abre sessao com ~/nixos em /workspace/mnt e /workspace/logs.\n\n"
 
   printf "%s\n" "Usage:"
   printf "  zion edit\n"
   printf "  zion edit --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_help_usage() {
+  printf "zion help - Mostra o banner com comandos principais.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion help\n"
+  printf "  zion help --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_man_usage() {
+  printf "zion man - Documentacao completa de todos os comandos e flags.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion man\n"
+  printf "  zion man --help | -h\n"
   echo
 
   # :command.long_usage
@@ -1447,7 +1491,7 @@ zion_destroy_command() {
 zion_update_command() {
 
   # src/commands/update.sh
-  # Regenera CLI (bashly), instala/atualiza symlink e atualiza scripts/bootstrap.sh (mounts em /workspace/nixos)
+  # Regenera CLI (bashly), instala/atualiza symlink e atualiza scripts/bootstrap.sh
   cd "$zion_compose_dir" && bashly generate
   bin_dest="$zion_nixos_dir/stow/.local/bin/zion"
   mkdir -p "$(dirname "$bin_dest")"
@@ -1455,7 +1499,7 @@ zion_update_command() {
     ln -sf "$zion_compose_dir/zion" "$bin_dest"
     echo "[zion update] symlink criado: $bin_dest"
   else
-    echo "[zion update] zion regenerado (symlink já existe)"
+    echo "[zion update] zion regenerado (symlink ja existe)"
   fi
   # Atualiza scripts/bootstrap.sh a partir da fonte (mounts sob /workspace)
   if [[ -f "$zion_nixos_dir/zion/scripts/bootstrap-dashboard.sh" ]]; then
@@ -1922,6 +1966,22 @@ zion_edit_command() {
 
 }
 
+# :command.function
+zion_help_command() {
+
+  # src/commands/help.sh
+  bash "$zion_cli_dir/banner.sh" 2>/dev/null
+
+}
+
+# :command.function
+zion_man_command() {
+
+  # src/commands/man.sh
+  zion_usage
+
+}
+
 # :command.parse_requirements
 parse_requirements() {
   # :command.fixed_flags_filter
@@ -2180,6 +2240,20 @@ parse_requirements() {
       action="edit"
       shift
       zion_edit_parse_requirements "$@"
+      shift $#
+      ;;
+
+    help)
+      action="help"
+      shift
+      zion_help_parse_requirements "$@"
+      shift $#
+      ;;
+
+    man)
+      action="man"
+      shift
+      zion_man_parse_requirements "$@"
       shift $#
       ;;
 
@@ -3857,9 +3931,99 @@ zion_edit_parse_requirements() {
 
 }
 
+# :command.parse_requirements
+zion_help_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_help_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="help"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_man_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_man_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="man"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
 # :command.initialize
 initialize() {
-  declare -g version=""
+  declare -g version="1.0"
   set -e
 
 }
@@ -3905,6 +4069,8 @@ run() {
     "logs-list") zion_logs_list_command ;;
     "usage-api") zion_usage_api_command ;;
     "edit") zion_edit_command ;;
+    "help") zion_help_command ;;
+    "man") zion_man_command ;;
   esac
 }
 
