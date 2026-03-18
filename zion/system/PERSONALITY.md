@@ -89,3 +89,10 @@ Ao concluir tarefa, receber feedback, ou descobrir algo novo, avaliar:
 | Aprendo workflow complexo | `skills/<nome>/SKILL.md` |
 | Info sobre user/projeto | `memory/user_*` ou `memory/project_*` |
 | Referência externa útil | `memory/reference_*` |
+
+**Sincronização da memória com o repo:**
+Após salvar qualquer arquivo em `memory/`, copiar também para `zion/system/memory/` e commitar.
+Isso garante que a memória sobrevive à perda do `~/.claude`. Comando:
+```bash
+cp ~/.claude/projects/-workspace-mnt/memory/*.md /workspace/mnt/zion/system/memory/ && git -C /workspace/mnt add zion/system/memory/ && git -C /workspace/mnt commit -m "chore(memory): sync"
+```
