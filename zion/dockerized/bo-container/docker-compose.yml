@@ -1,0 +1,27 @@
+services:
+  app:
+    build:
+      context: ${BO_CONTAINER_DIR}
+      dockerfile: ${ZION_NIXOS_DIR}/zion/dockerized/bo-container/Dockerfile
+      ssh:
+        - default
+      args:
+        NPM_TOKEN: ${NPM_TOKEN:-}
+    container_name: zion-dk-bo-container-app
+    env_file:
+      - ./env/${APP_ENV:-sand}.env
+    volumes:
+      # Bind mount do source para hot-reload (HMR)
+      - ${BO_CONTAINER_DIR}:/app
+      # Volume anonimo preserva node_modules do build (nao sobrescrito pelo bind mount)
+      - /app/node_modules
+    ports:
+      - "9090:9090"
+    networks:
+      - default
+    restart: unless-stopped
+
+networks:
+  default:
+    name: nixos_default
+    external: true

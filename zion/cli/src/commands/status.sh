@@ -197,56 +197,25 @@ fi
 echo ""
 echo -e "${BOLD}${CYAN}  Recent Runs${RESET}"
 
+STATE_HOST="$zion_ephemeral/scheduler/state.json"
+STATE_PY="$zion_cli_dir/src/lib/state_reader.py"
 state_output=""
-state_output=$(OBSIDIAN_PATH="$zion_obsidian_path" \
-  docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" exec -T puppy \
-  python3 -c '
-import json, time, sys
 
-def fmt_ago(ts):
-    if not ts or ts == 0: return "never"
-    diff = int(time.time()) - int(ts)
-    if diff < 0: return "just now"
-    if diff < 60: return f"{diff}s ago"
-    if diff < 3600: return f"{diff // 60}min ago"
-    if diff < 86400: return f"{diff // 3600}h ago"
-    return f"{diff // 86400}d ago"
+# Fonte 1: state.json direto no host
+if [[ -f "$STATE_HOST" ]] && [[ -f "$STATE_PY" ]]; then
+  state_output=$(python3 "$STATE_PY" "$STATE_HOST" 2>/dev/null) || true
+fi
 
-def fmt_dur(s):
-    s = int(s)
-    if s < 60: return f"{s}s"
-    if s < 3600: return f"{s // 60}m{s % 60:02d}s"
-    return f"{s // 3600}h{(s % 3600) // 60}m"
-
-try:
-    state = json.load(open("/workspace/.ephemeral/scheduler/state.json"))
-    tasks = state.get("tasks", {})
-    if not tasks:
-        print("  \033[2m(sem historico)\033[0m")
-        sys.exit(0)
-
-    sorted_tasks = sorted(tasks.items(), key=lambda x: x[1].get("last_run", 0), reverse=True)
-    for name, t in sorted_tasks[:10]:
-        last_run = t.get("last_run", 0)
-        status = t.get("last_status", "?")
-        avg = t.get("avg_duration_s", 0)
-        total = t.get("runs_total", 0)
-        failed = t.get("runs_failed", 0)
-        last_dur = t.get("last_duration_s", 0)
-
-        icon = "\033[32m✓\033[0m" if status == "ok" else "\033[31m✗\033[0m" if status in ("fail", "error", "timeout") else "\033[33m?\033[0m"
-        dim = "\033[2m"
-        reset = "\033[0m"
-
-        ago = fmt_ago(last_run)
-        dur = fmt_dur(last_dur) if last_dur else fmt_dur(avg)
-        fail_str = f"  {dim}({failed} fails){reset}" if failed > 0 else ""
-        print(f"  {icon} {name:<20} {ago:<12} {dim}~{dur}  x{total}{fail_str}{reset}")
-except FileNotFoundError:
-    print("  \033[2m(sem state.json)\033[0m")
-except Exception as e:
-    print(f"  \033[2m(erro: {e})\033[0m")
-' 2>/dev/null) || true
+# Fonte 2: via docker exec com timeout (evita travar se container parado)
+if [[ -z "$state_output" ]] && [[ -f "$STATE_PY" ]]; then
+  puppy_running=$(OBSIDIAN_PATH="$zion_obsidian_path" \
+    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" ps --status running -q 2>/dev/null || true)
+  if [[ -n "$puppy_running" ]]; then
+    state_output=$(timeout 3s \
+      docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" exec -T puppy \
+      python3 -c "$(cat "$STATE_PY")" "/workspace/.ephemeral/scheduler/state.json" 2>/dev/null) || true
+  fi
+fi
 
 if [[ -n "$state_output" ]]; then
   echo -e "$state_output"
@@ -257,15 +226,30 @@ else
     recent=$(grep '^|' "$TASK_LOG" | grep -v '^| timestamp' | grep -v '^|---' | tail -10 | tac)
     if [[ -n "$recent" ]]; then
       while IFS='|' read -r _ ts task event model dur _; do
-        ts=$(echo "$ts" | xargs)
-        task=$(echo "$task" | xargs)
-        event=$(echo "$event" | xargs)
-        model=$(echo "$model" | xargs)
-        [[ -z "$ts" ]] && continue
+        ts=$(echo "$ts" | xargs 2>/dev/null)
+        task=$(echo "$task" | xargs 2>/dev/null)
+        event=$(echo "$event" | xargs 2>/dev/null)
+        model=$(echo "$model" | xargs 2>/dev/null)
+        dur=$(echo "$dur" | xargs 2>/dev/null)
+        [[ -z "$ts" || -z "$task" ]] && continue
         r_icon="${YELLOW}▶${RESET}"
         [[ "$event" == *"done"* || "$event" == *"✔"* ]] && r_icon="${GREEN}✓${RESET}"
         [[ "$event" == *"fail"* || "$event" == *"✗"* ]] && r_icon="${RED}✗${RESET}"
-        echo -e "  ${r_icon} $(printf '%-20s' "$task") ${DIM}${ts}  ${model}${RESET}"
+        ts_epoch=$(date -d "$ts" +%s 2>/dev/null || echo "0")
+        now_epoch=$(date +%s)
+        diff_s=$((now_epoch - ts_epoch))
+        if [[ "$ts_epoch" -gt 0 ]] && [[ "$diff_s" -ge 0 ]]; then
+          if [[ "$diff_s" -lt 60 ]]; then ago="${diff_s}s ago"
+          elif [[ "$diff_s" -lt 3600 ]]; then ago="$((diff_s / 60))min ago"
+          elif [[ "$diff_s" -lt 86400 ]]; then ago="$((diff_s / 3600))h ago"
+          else ago="$((diff_s / 86400))d ago"
+          fi
+        else
+          ago="$ts"
+        fi
+        dur_str=""
+        [[ -n "$dur" && "$dur" != "—" ]] && dur_str="  ${DIM}${dur}${RESET}"
+        echo -e "  ${r_icon} $(printf '%-20s' "$task") ${ORANGE}$(printf '%-12s' "$ago")${RESET} ${DIM}${event}  ${model}${dur_str}${RESET}"
       done <<< "$recent"
     else
       echo -e "  ${DIM}(sem historico)${RESET}"
@@ -275,4 +259,40 @@ else
   fi
 fi
 
-echo ""
+# ══════════════════════════════════════════════════════════════════════════════
+# 5. SCHEDULED — tasks registradas no scheduler
+# ══════════════════════════════════════════════════════════════════════════════
+sched_dirs=("${zion_obsidian_path}/tasks/_scheduled" "${zion_obsidian_path}/tasks/recurring")
+sched_count=0
+sched_lines=""
+
+for sdir in "${sched_dirs[@]}"; do
+  [[ -d "$sdir" ]] || continue
+  for tdir in "$sdir"/*/; do
+    [[ -d "$tdir" ]] || continue
+    tname=$(basename "$tdir")
+    # Ler clock/interval do frontmatter
+    cfg=""
+    [[ -f "$tdir/TASK.md" ]] && cfg="$tdir/TASK.md"
+    [[ -z "$cfg" && -f "$tdir/CLAUDE.md" ]] && cfg="$tdir/CLAUDE.md"
+    clock="" model_t="" timeout_t=""
+    if [[ -n "$cfg" ]]; then
+      clock=$(sed -n '/^---$/,/^---$/{ /^clock:/{ s/^clock: *//; p; } }' "$cfg" 2>/dev/null | tr -d '[:space:]')
+      model_t=$(sed -n '/^---$/,/^---$/{ /^model:/{ s/^model: *//; p; } }' "$cfg" 2>/dev/null | tr -d '[:space:]')
+      timeout_t=$(sed -n '/^---$/,/^---$/{ /^timeout:/{ s/^timeout: *//; p; } }' "$cfg" 2>/dev/null | tr -d '[:space:]')
+    fi
+    clock="${clock:-every60}"
+    model_t="${model_t:-haiku}"
+    timeout_t="${timeout_t:-300}"
+    sched_lines+="  ${DIM}⏲${RESET}  $(printf '%-20s' "$tname") ${DIM}${clock}  ${model_t}  ${timeout_t}s${RESET}\n"
+    sched_count=$((sched_count + 1))
+  done
+done
+
+if [[ "$sched_count" -gt 0 ]]; then
+  echo ""
+  echo -e "${BOLD}${CYAN}  Scheduled${RESET}  ${DIM}(${sched_count} tasks)${RESET}"
+  echo -e "$sched_lines"
+else
+  echo ""
+fi
