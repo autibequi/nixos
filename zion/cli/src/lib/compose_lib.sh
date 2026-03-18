@@ -187,3 +187,164 @@ zion_model_id() {
   local m="${cli_flag:-${per_engine:-$ZION_MODEL}}"
   zion_resolve_model_id "$m"
 }
+
+# ── Compose env helper ──────────────────────────────────────────────────────
+# Exporta as variáveis necessárias para o compose expandir volumes.
+# Chamado internamente por zion_session_run; pode ser usado diretamente.
+zion_compose_env() {
+  export HOME="${HOME:-$(eval echo ~"$(id -un)")}"
+  export CLAUDIO_MOUNT="$1"
+  export CLAUDIO_MOUNT_OPTS="$2"
+  export OBSIDIAN_PATH="$zion_obsidian_path"
+}
+
+# ── Unified session runner ──────────────────────────────────────────────────
+# Centraliza o dispatch de engine (opencode/claude/cursor) para todas as sessões.
+#
+# Uso:
+#   zion_session_run <engine> <proj_name> <mount_path> <mount_opts> <mode> [engine_args] [extra_volumes]
+#
+# Parâmetros:
+#   engine        - opencode | claude | cursor
+#   proj_name     - nome do projeto compose (ex: zion-projects)
+#   mount_path    - path absoluto do projeto no host
+#   mount_opts    - rw | ro
+#   mode          - engine_args string com flags específicas do engine:
+#                     --continue, --resume, --resume=UUID, --init-md=file
+#                   Flags reconhecidas e mapeadas por engine automaticamente.
+#   extra_volumes - string com volumes extras (ex: "-v /var/log/journal:/workspace/logs/host/journal:ro")
+#
+# O mode "persistent" (up -d + exec) é usado quando opencode precisa de sandbox persistente.
+# Demais engines usam "run --rm -it" (efêmero).
+zion_session_run() {
+  local engine="$1"
+  local proj_name="$2"
+  local mount_path="$3"
+  local mount_opts="$4"
+  local engine_args="${5:-}"
+  local extra_volumes="${6:-}"
+
+  zion_compose_env "$mount_path" "$mount_opts"
+
+  local danger model
+
+  case "$engine" in
+    opencode)
+      # Opencode usa up -d + exec (persistent sandbox)
+      local oc_envs=()
+      oc_envs+=(-e "CLAUDIO_MOUNT=$mount_path")
+      oc_envs+=(-e "BOOTSTRAP_SKIP_CLEAR=1")
+
+      # Model
+      local _oc_model
+      _oc_model="$(zion_model_id opencode)"
+      [[ -n "$_oc_model" ]] && oc_envs+=(-e "OPENCODE_MODEL=$_oc_model")
+
+      # Danger
+      [[ -n "${flag_danger:-${args['--danger']:-${ZION_DANGER:-}}}" ]] && oc_envs+=(-e "OPENCODE_PERMISSION_BYPASS=1")
+
+      # Init-md
+      if [[ "$engine_args" == *"--init-md="* ]]; then
+        local init_file="${engine_args#*--init-md=}"
+        init_file="${init_file%% *}"
+        [[ -n "$init_file" ]] && oc_envs+=(-e "CLAUDE_INITIAL_MD=/workspace/mnt/$init_file")
+      fi
+
+      # Resume
+      if [[ "$engine_args" == *"--resume="* ]]; then
+        local resume_id="${engine_args#*--resume=}"
+        resume_id="${resume_id%% *}"
+        [[ -n "$resume_id" ]] && oc_envs+=(-e "CLAUDIO_RESUME_SESSION=$resume_id")
+      fi
+
+      # Opencode: persistent (up + exec) for new; ephemeral (run) for continue/resume
+      if [[ "$engine_args" == *"--continue"* ]] || [[ "$engine_args" == *"--resume"* ]]; then
+        zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes \
+          --entrypoint /bin/bash "${oc_envs[@]}" sandbox \
+          bash -c 'cd /workspace/mnt && opencode'
+      else
+        zion_compose_cmd -p "$proj_name" up -d sandbox
+        zion_compose_cmd -p "$proj_name" exec -it \
+          "${oc_envs[@]}" sandbox bash -c 'cd /workspace/mnt && exec opencode'
+      fi
+      ;;
+
+    claude)
+      model="$(zion_model_flag claude)"
+      danger="$(zion_danger_flag claude)"
+
+      # Build claude CLI args
+      local claude_args="${model}${danger}"
+
+      # Continue
+      [[ "$engine_args" == *"--continue"* ]] && claude_args+=" --continue"
+
+      # Resume
+      if [[ "$engine_args" == *"--resume="* ]]; then
+        local resume_id="${engine_args#*--resume=}"
+        resume_id="${resume_id%% *}"
+        if [[ "$resume_id" == "1" ]]; then
+          claude_args+=" --resume"
+        else
+          claude_args+=" --resume=$resume_id"
+        fi
+      elif [[ "$engine_args" == *"--resume"* ]]; then
+        claude_args+=" --resume"
+      fi
+
+      # Init-md
+      if [[ "$engine_args" == *"--init-md="* ]]; then
+        local init_file="${engine_args#*--init-md=}"
+        init_file="${init_file%% *}"
+        [[ -n "$init_file" ]] && claude_args+=" --append-system-prompt-file $init_file"
+      fi
+
+      # Always bypass permissions (was hardcoded in continue and resume)
+      [[ "$claude_args" != *"--permission-mode"* ]] && claude_args+=" --permission-mode bypassPermissions"
+
+      zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes \
+        --entrypoint /bin/bash -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" sandbox \
+        -c ". /zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
+      ;;
+
+    cursor)
+      danger="$(zion_danger_flag cursor)"
+      model="$(zion_model_flag cursor)"
+      local agent_flags="${danger}${model:+ $model}"
+
+      local cursor_envs=()
+      cursor_envs+=(-e "CLAUDIO_MOUNT=$mount_path")
+      cursor_envs+=(-e "BOOTSTRAP_SKIP_CLEAR=1")
+
+      local cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; '
+
+      # Resume (takes priority over init-md)
+      if [[ "$engine_args" == *"--resume="* ]]; then
+        local resume_id="${engine_args#*--resume=}"
+        resume_id="${resume_id%% *}"
+        cursor_envs+=(-e "CLAUDIO_RESUME_SESSION=$resume_id")
+        cursor_cmd+='exec agent'"${agent_flags}"' --resume="${CLAUDIO_RESUME_SESSION}"'
+      elif [[ "$engine_args" == *"--continue"* ]]; then
+        cursor_cmd+='exec agent'"${agent_flags}"' --continue'
+      elif [[ "$engine_args" == *"--init-md="* ]]; then
+        local init_file="${engine_args#*--init-md=}"
+        init_file="${init_file%% *}"
+        cursor_envs+=(-e "CLAUDIO_INITIAL_MD=$init_file")
+        cursor_cmd+='if [ -n "${CLAUDIO_INITIAL_MD:-}" ] && [ -f "/workspace/mnt/$CLAUDIO_INITIAL_MD" ]; then '
+        cursor_cmd+='p=$(sed -e '\''s/\\\\/\\\\\\\\/g'\'' -e '\''s/"/\\"/g'\'' "/workspace/mnt/$CLAUDIO_INITIAL_MD"); exec agent'"${agent_flags}"' "$p"; '
+        cursor_cmd+='else exec agent'"${agent_flags}"'; fi'
+      else
+        cursor_cmd+='exec agent'"${agent_flags}'"
+      fi
+
+      zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes \
+        --entrypoint /bin/bash "${cursor_envs[@]}" sandbox \
+        -c "$cursor_cmd"
+      ;;
+
+    *)
+      echo "zion: engine inválido: $engine (use opencode|claude|cursor)" >&2
+      exit 1
+      ;;
+  esac
+}

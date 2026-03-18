@@ -1,26 +1,21 @@
-# Nova sessão no container. Exige --engine (ou engine= em ~/.zion).
+# Atalho: zion opencode = zion new --engine=opencode
+args['--engine']="opencode"
 zion_load_config
-engine=$(zion_resolve_engine 1)
+engine="opencode"
 mount_path="$(zion_resolve_dir)"
 proj_slug="$(zion_proj_slug "$mount_path")"
+proj_name="$(zion_proj_name_open "$proj_slug")"
 mount_opts="$(zion_mount_opts)"
 flag_init_md="${args['--init-md']:-}"
 initial_md="$(zion_initial_md "$mount_path")"
 resume_id="${args['--resume']:-}"
 
-if [[ "$engine" == "opencode" ]]; then
-  proj_name="$(zion_proj_name_open "$proj_slug")"
-else
-  proj_name="$(zion_proj_name "$proj_slug")"
-fi
+echo "[zion opencode] ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
 
-echo "[zion new] engine=$engine ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
-
-# Build engine_args string
 engine_args=""
 [[ -n "$initial_md" ]] && engine_args+=" --init-md=$initial_md"
 if [[ -n "$resume_id" ]]; then
   [[ "$resume_id" == "1" ]] && engine_args+=" --resume" || engine_args+=" --resume=$resume_id"
 fi
 
-zion_session_run "$engine" "$proj_name" "$mount_path" "$mount_opts" "$engine_args"
+zion_session_run "opencode" "$proj_name" "$mount_path" "$mount_opts" "$engine_args"
