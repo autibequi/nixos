@@ -137,6 +137,30 @@ O THINKINGS é memória compartilhada entre sessões, mecanismo de orquestraçã
 ## Evolução Contínua
 **`/contemplate-memories`** — introspecção profunda sobre conversas recentes. Extrai aprendizados para memórias, SOUL.md, CLAUDE.md, skills, e limpeza do THINKINGS. Rodar periodicamente ou após sessões longas com feedback significativo.
 
+## Sistema Docker — Serviços da Estratégia
+
+Comandos para levantar serviços (monolito, bo-container, front-student) em containers Docker, com logs acessíveis ao agente.
+
+**Comandos disponíveis:**
+- `zion docker run <service> [--env=sand|prod|qa|local]` — levanta deps + serviço, abre logs no terminal. Container continua se Ctrl+C.
+- `zion docker install <service>` — instala deps com SSH do host montado (go mod download + build). Fire-and-forget, sem interação.
+- `zion docker logs <service> [-f]` — reconecta a logs do container rodando
+- `zion docker stop <service>` — para serviço + deps
+- `zion docker status` — lista todos os serviços rodando
+- `zion docker shell <service> [container]` — shell dentro do container
+
+**Configs versionadas em `/zion/dockerized/<service>/`:**
+- `Dockerfile` — multi-stage build do serviço
+- `docker-compose.yml` — app + worker
+- `docker-compose.deps.yml` — postgres, redis, localstack
+- `env/sand.env`, `env/prod.env`, `env/qa.env`, `env/local.env`
+
+**Logs acessíveis ao agente:** `~/.local/share/zion/logs/docker/<service>/service.log` (no host). Montados em `/workspace/logs/docker/<service>/` dentro do container do agente.
+
+**Serviços configurados:** `monolito` (Go 1.24.4, CGO_ENABLED=1 -tags musl), `bo-container` (futuro), `front-student` (futuro).
+
+**Paths dos projetos** vêm de `~/.zion`: `MONOLITO_DIR`, `BO_CONTAINER_DIR`, `FRONT_STUDENT_DIR`.
+
 ## Referências (leitura on-demand)
 - **Mounts sob /workspace:** repo NixOS = `/workspace/nixos`, vault Obsidian = `/workspace/obsidian`, logs = `/workspace/logs`, projeto atual = `/workspace/mnt`. Não usar paths na raiz (`/nixos`, `/obsidian`).
 - `/workspace/obsidian/docs/operational-reference.md` — git identity, hive-mind, persistência, cota API, observabilidade, obsidian, workbench

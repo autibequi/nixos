@@ -47,7 +47,7 @@ docker run \
     ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts 2>/dev/null
 
     echo "[2/4] Download de modulos Go..."
-    go mod download
+    go mod download -x
 
     echo "[3/4] Limpando modulos..."
     go mod tidy
