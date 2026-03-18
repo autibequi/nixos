@@ -20,16 +20,22 @@ _zion_dk_shell() {
 
   if [[ -n "$cmd" ]]; then
     # Modo dev: one-off container golang com source montado + make + ferramentas
-    local host_uid host_gid
+    local host_uid host_gid log_dir log_file
     host_uid="$(id -u)"
     host_gid="$(id -g)"
+    log_dir="$(zion_docker_log_dir "$service")"
+    [[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
+    log_file="$log_dir/test.log"
+    mkdir -p "$log_dir"
 
-    echo "=== [$service] exec: $cmd ==="
-    [[ -n "$_ZION_DK_WORKTREE" ]] && echo "  worktree: $_ZION_DK_WORKTREE ($dir)"
+    echo "=== [$service] exec: $cmd ===" | tee "$log_file"
+    [[ -n "$_ZION_DK_WORKTREE" ]] && echo "  worktree: $_ZION_DK_WORKTREE ($dir)" | tee -a "$log_file"
+    echo "  logs: $log_file"
     docker run \
       --rm \
-      -it \
+      -i \
       -v "$dir:/go/app" \
+      -v "$log_dir:/workspace/logs" \
       -v /var/run/docker.sock:/var/run/docker.sock \
       -e GOPATH=/go \
       -e GOPRIVATE="github.com/estrategiahq" \
@@ -42,7 +48,7 @@ _zion_dk_shell() {
       --network host \
       -w "/go/app" \
       "golang:1.24.4-alpine" \
-      sh -c "apk add --no-cache make gcc musl-dev librdkafka-dev ca-certificates docker-cli > /dev/null 2>&1 && $cmd && chown -R \"$HOST_UID:$HOST_GID\" /go/app 2>/dev/null || true"
+      sh -c "apk add --no-cache make gcc musl-dev librdkafka-dev ca-certificates docker-cli > /dev/null 2>&1 && $cmd && chown -R \"$HOST_UID:$HOST_GID\" /go/app 2>/dev/null || true" 2>&1 | tee -a "$log_file"
   else
     # Modo interativo: exec no container rodando
     docker compose -f "$compose" -p "$project" exec "$container" /bin/sh

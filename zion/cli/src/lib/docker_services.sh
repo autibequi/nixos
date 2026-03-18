@@ -53,7 +53,7 @@ zion_docker_project_name() {
 }
 
 zion_docker_log_dir() {
-  echo "$HOME/.local/share/zion/logs/${1}"
+  echo "/tmp/zion-logs/dockerized/${1}"
 }
 
 # Portas host publicadas por servico (para liberar antes do run)
