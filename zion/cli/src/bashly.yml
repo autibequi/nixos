@@ -124,43 +124,43 @@ commands:
         help: Sobrescreve ~/.zion se já existir
     filename: commands/init.sh
 
-  # ── Workers / tasks ───────────────────────────────────────
-  - name: worker
-    alias: [w]
-    help: Roda worker every60 com output. task= opcional; aceita --engine=.
-    args:
-      - name: task
-        help: Nome da task (opcional).
-    filename: commands/worker.sh
-
-  - name: worker-run-fast
-    alias: [wrf]
-    help: Roda worker every10 com output.
-    filename: commands/worker_run_fast.sh
-
-  - name: worker-auto
-    help: Roda 1 worker every60 em background (headless).
-    filename: commands/worker_auto.sh
-
-  - name: worker-clau
-    help: Lança 2 workers every60 em background; segue log.
-    filename: commands/worker_clau.sh
-
-  - name: worker-stop
-    help: Para workers e reseta tasks presas.
-    filename: commands/worker_stop.sh
-
-  - name: worker-stop-all
-    help: Para TODOS os containers claude-nix-sandbox.
-    filename: commands/worker_stop_all.sh
-
-  - name: scheduler
-    alias: [sched]
-    help: Sobe/para o container scheduler (tick a cada 10 min). Equiv. systemctl start/stop claude-scheduler-container.
-    args:
-      - name: action
-        help: "start (default) | stop | status | logs | run-now | shell"
-    filename: commands/scheduler.sh
+  # ── Puppy (worker persistente) ────────────────────────────
+  - name: puppy
+    alias: [p]
+    help: "Gerencia o Puppy worker (container persistente + task runner)."
+    commands:
+      - name: start
+        help: "Inicia o container puppy e o daemon interno."
+        filename: commands/puppy_start.sh
+      - name: stop
+        help: "Para o container puppy."
+        filename: commands/puppy_stop.sh
+      - name: restart
+        help: "Reinicia o container puppy (stop + start)."
+        filename: commands/puppy_restart.sh
+      - name: run
+        help: "Roda uma task especifica dentro do container puppy."
+        args:
+          - name: task
+            required: true
+            help: "Nome da task (de _scheduled/ ou backlog/)"
+        filename: commands/puppy_run.sh
+      - name: status
+        help: "Mostra estado do container e tasks."
+        filename: commands/puppy_status.sh
+      - name: logs
+        help: "Segue logs do container puppy."
+        flags:
+          - long: --follow
+            short: -f
+            help: "Follow log output"
+        filename: commands/puppy_logs.sh
+      - name: shell
+        help: "Abre bash dentro do container puppy."
+        filename: commands/puppy_shell.sh
+      - name: tick
+        help: "Roda 1 tick do scheduler imediatamente (para teste)."
+        filename: commands/puppy_tick.sh
 
   - name: reset
     help: Devolve tasks de running/ para origem (pending/recurring).
@@ -210,10 +210,6 @@ commands:
       - long: --30d
         help: Últimos 30 dias
     filename: commands/usage_api.sh
-
-  - name: service-logs
-    help: journalctl do systemd service claude-autonomous.
-    filename: commands/service_logs.sh
 
   - name: edit
     help: Abre sessão com ~/nixos em /workspace/mnt e /workspace/logs (único modo com mount de nixos + logs).

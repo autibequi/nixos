@@ -41,9 +41,6 @@
     # Monitoring
     ./modules/netdata.nix
 
-    # Agentes (CLAUDINHO scheduler container + agent-container)
-    ./modules/agents
-
     # Obsidian Sync (headless)
     ./modules/obsidian-sync.nix
 

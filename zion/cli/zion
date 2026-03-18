@@ -31,32 +31,25 @@ zion_usage() {
   echo
   # :command.usage_commands
   printf "%s\n" "Commands:"
-  printf "  %s   Continua a última sessão (mesmo que digitar só zion). (default)\n" "continue       "
-  printf "  %s   Nova sessão no container. Exige --engine (ou engine= em ~/.zion).\n" "new            "
-  printf "  %s   Abre bash no container com o projeto montado.\n" "shell          "
-  printf "  %s   Mostra lista de sessões e permite escolher qual retomar.\n" "resume         "
-  printf "  %s   Sobe sandbox persistente e abre Claude (equiv. make start).\n" "start          "
-  printf "  %s   Sobe sandbox e abre OpenClaw gateway (LM Studio).\n" "openclaw       "
-  printf "  %s   Build da imagem Docker do sandbox.\n" "build          "
-  printf "  %s   Para todos os containers do projeto.\n" "down           "
-  printf "  %s   Para containers e remove imagens/volumes.\n" "destroy        "
-  printf "  %s   Regenera CLI (bashly) e instala/atualiza symlink em stow/.local/bin.\n" "update         "
-  printf "  %s   Cria ~/.zion a partir de config.example (não sobrescreve se já existir).\n" "init           "
-  printf "  %s   Roda worker every60 com output. task= opcional; aceita --engine=.\n" "worker         "
-  printf "  %s   Roda worker every10 com output.\n" "worker-run-fast"
-  printf "  %s   Roda 1 worker every60 em background (headless).\n" "worker-auto    "
-  printf "  %s   Lança 2 workers every60 em background; segue log.\n" "worker-clau    "
-  printf "  %s   Para workers e reseta tasks presas.\n" "worker-stop    "
-  printf "  %s   Para TODOS os containers claude-nix-sandbox.\n" "worker-stop-all"
-  printf "  %s   Sobe/para o container scheduler (tick a cada 10 min). Equiv. systemctl start/stop claude-scheduler-container.\n" "scheduler      "
-  printf "  %s   Devolve tasks de running/ para origem (pending/recurring).\n" "reset          "
-  printf "  %s   Mostra estado via kanban + workers.\n" "status         "
-  printf "  %s   Cria task + card no kanban (Puppy).\n" "new-task       "
-  printf "  %s   Mostra ou segue o último log de worker.\n" "logs           "
-  printf "  %s   Lista todos os arquivos de log.\n" "logs-list      "
-  printf "  %s   Uso da API Anthropic (hoje; use --7d ou --30d para período).\n" "usage-api      "
-  printf "  %s   journalctl do systemd service claude-autonomous.\n" "service-logs   "
-  printf "  %s   Abre sessão com ~/nixos em /workspace/mnt e /workspace/logs (único modo com mount de nixos + logs).\n" "edit           "
+  printf "  %s   Continua a última sessão (mesmo que digitar só zion). (default)\n" "continue "
+  printf "  %s   Nova sessão no container. Exige --engine (ou engine= em ~/.zion).\n" "new      "
+  printf "  %s   Abre bash no container com o projeto montado.\n" "shell    "
+  printf "  %s   Mostra lista de sessões e permite escolher qual retomar.\n" "resume   "
+  printf "  %s   Sobe sandbox persistente e abre Claude (equiv. make start).\n" "start    "
+  printf "  %s   Sobe sandbox e abre OpenClaw gateway (LM Studio).\n" "openclaw "
+  printf "  %s   Build da imagem Docker do sandbox.\n" "build    "
+  printf "  %s   Para todos os containers do projeto.\n" "down     "
+  printf "  %s   Para containers e remove imagens/volumes.\n" "destroy  "
+  printf "  %s   Regenera CLI (bashly) e instala/atualiza symlink em stow/.local/bin.\n" "update   "
+  printf "  %s   Cria ~/.zion a partir de config.example (não sobrescreve se já existir).\n" "init     "
+  printf "  %s   Gerencia o Puppy worker (container persistente + task runner).\n" "puppy    "
+  printf "  %s   Devolve tasks de running/ para origem (pending/recurring).\n" "reset    "
+  printf "  %s   Mostra estado via kanban + workers.\n" "status   "
+  printf "  %s   Cria task + card no kanban (Puppy).\n" "new-task "
+  printf "  %s   Mostra ou segue o último log de worker.\n" "logs     "
+  printf "  %s   Lista todos os arquivos de log.\n" "logs-list"
+  printf "  %s   Uso da API Anthropic (hoje; use --7d ou --30d para período).\n" "usage-api"
+  printf "  %s   Abre sessão com ~/nixos em /workspace/mnt e /workspace/logs (único modo com mount de nixos + logs).\n" "edit     "
   echo
 
   # :command.long_usage
@@ -470,14 +463,109 @@ zion_init_usage() {
 }
 
 # :command.usage
-zion_worker_usage() {
-  printf "zion worker - Roda worker every60 com output. task= opcional; aceita --engine=.\n\n"
-  printf "Alias: w\n"
+zion_puppy_usage() {
+  printf "zion puppy - Gerencia o Puppy worker (container persistente + task runner).\n\n"
+  printf "Alias: p\n"
   echo
 
   printf "%s\n" "Usage:"
-  printf "  zion worker [TASK]\n"
-  printf "  zion worker --help | -h\n"
+  printf "  zion puppy COMMAND\n"
+  printf "  zion puppy [COMMAND] --help | -h\n"
+  echo
+  # :command.usage_commands
+  printf "%s\n" "Commands:"
+  printf "  %s   Inicia o container puppy e o daemon interno.\n" "start  "
+  printf "  %s   Para o container puppy.\n" "stop   "
+  printf "  %s   Reinicia o container puppy (stop + start).\n" "restart"
+  printf "  %s   Roda uma task especifica dentro do container puppy.\n" "run    "
+  printf "  %s   Mostra estado do container e tasks.\n" "status "
+  printf "  %s   Segue logs do container puppy.\n" "logs   "
+  printf "  %s   Abre bash dentro do container puppy.\n" "shell  "
+  printf "  %s   Roda 1 tick do scheduler imediatamente (para teste).\n" "tick   "
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_puppy_start_usage() {
+  printf "zion puppy start - Inicia o container puppy e o daemon interno.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion puppy start\n"
+  printf "  zion puppy start --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_puppy_stop_usage() {
+  printf "zion puppy stop - Para o container puppy.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion puppy stop\n"
+  printf "  zion puppy stop --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_puppy_restart_usage() {
+  printf "zion puppy restart - Reinicia o container puppy (stop + start).\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion puppy restart\n"
+  printf "  zion puppy restart --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_puppy_run_usage() {
+  printf "zion puppy run - Roda uma task especifica dentro do container puppy.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion puppy run TASK\n"
+  printf "  zion puppy run --help | -h\n"
   echo
 
   # :command.long_usage
@@ -494,21 +582,19 @@ zion_worker_usage() {
 
     # :argument.usage
     printf "  %s\n" "TASK"
-    printf "    Nome da task (opcional).\n"
+    printf "    Nome da task (de _scheduled/ ou backlog/)\n"
     echo
 
   fi
 }
 
 # :command.usage
-zion_worker_run_fast_usage() {
-  printf "zion worker-run-fast - Roda worker every10 com output.\n\n"
-  printf "Alias: wrf\n"
-  echo
+zion_puppy_status_usage() {
+  printf "zion puppy status - Mostra estado do container e tasks.\n\n"
 
   printf "%s\n" "Usage:"
-  printf "  zion worker-run-fast\n"
-  printf "  zion worker-run-fast --help | -h\n"
+  printf "  zion puppy status\n"
+  printf "  zion puppy status --help | -h\n"
   echo
 
   # :command.long_usage
@@ -524,12 +610,39 @@ zion_worker_run_fast_usage() {
 }
 
 # :command.usage
-zion_worker_auto_usage() {
-  printf "zion worker-auto - Roda 1 worker every60 em background (headless).\n\n"
+zion_puppy_logs_usage() {
+  printf "zion puppy logs - Segue logs do container puppy.\n\n"
 
   printf "%s\n" "Usage:"
-  printf "  zion worker-auto\n"
-  printf "  zion worker-auto --help | -h\n"
+  printf "  zion puppy logs [OPTIONS]\n"
+  printf "  zion puppy logs --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--follow, -f"
+    printf "    Follow log output\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_puppy_shell_usage() {
+  printf "zion puppy shell - Abre bash dentro do container puppy.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion puppy shell\n"
+  printf "  zion puppy shell --help | -h\n"
   echo
 
   # :command.long_usage
@@ -545,12 +658,12 @@ zion_worker_auto_usage() {
 }
 
 # :command.usage
-zion_worker_clau_usage() {
-  printf "zion worker-clau - Lança 2 workers every60 em background; segue log.\n\n"
+zion_puppy_tick_usage() {
+  printf "zion puppy tick - Roda 1 tick do scheduler imediatamente (para teste).\n\n"
 
   printf "%s\n" "Usage:"
-  printf "  zion worker-clau\n"
-  printf "  zion worker-clau --help | -h\n"
+  printf "  zion puppy tick\n"
+  printf "  zion puppy tick --help | -h\n"
   echo
 
   # :command.long_usage
@@ -560,79 +673,6 @@ zion_worker_clau_usage() {
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
     printf "    Show this help\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-zion_worker_stop_usage() {
-  printf "zion worker-stop - Para workers e reseta tasks presas.\n\n"
-
-  printf "%s\n" "Usage:"
-  printf "  zion worker-stop\n"
-  printf "  zion worker-stop --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-zion_worker_stop_all_usage() {
-  printf "zion worker-stop-all - Para TODOS os containers claude-nix-sandbox.\n\n"
-
-  printf "%s\n" "Usage:"
-  printf "  zion worker-stop-all\n"
-  printf "  zion worker-stop-all --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-zion_scheduler_usage() {
-  printf "zion scheduler - Sobe/para o container scheduler (tick a cada 10 min). Equiv. systemctl start/stop claude-scheduler-container.\n\n"
-  printf "Alias: sched\n"
-  echo
-
-  printf "%s\n" "Usage:"
-  printf "  zion scheduler [ACTION]\n"
-  printf "  zion scheduler --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
-    echo
-
-    # :command.usage_args
-    printf "%s\n" "Arguments:"
-
-    # :argument.usage
-    printf "  %s\n" "ACTION"
-    printf "    start (default) | stop | status | logs | run-now | shell\n"
     echo
 
   fi
@@ -798,27 +838,6 @@ zion_usage_api_usage() {
     printf "  %s\n" "--30d"
     printf "    Últimos 30 dias\n"
     echo
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-zion_service_logs_usage() {
-  printf "zion service-logs - journalctl do systemd service claude-autonomous.\n\n"
-
-  printf "%s\n" "Usage:"
-  printf "  zion service-logs\n"
-  printf "  zion service-logs --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
 
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
@@ -1443,213 +1462,220 @@ zion_init_command() {
 }
 
 # :command.function
-zion_worker_command() {
+zion_puppy_start_command() {
 
-  # src/commands/worker.sh
-  # Worker every60; task= opcional; --engine= opcional (repasse ao runner se precisar)
+  # src/commands/puppy_start.sh
+  # Inicia o container puppy persistente e o daemon interno.
   zion_load_config
-  engine=$(zion_resolve_engine 0)
-  mkdir -p "$zion_nixos_logs"
-  logfile="$zion_nixos_logs/$(date +%Y-%m-%dT%H:%M:%S.%3N).log"
-  echo "[zion worker] Log: $logfile"
+
+  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
+  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
+
+  if ! docker network inspect nixos_default &>/dev/null; then
+    echo "[zion puppy] Criando rede nixos_default..."
+    docker network create nixos_default 2>/dev/null || true
+  fi
+
+  echo "[zion puppy] Subindo container puppy..."
   OBSIDIAN_PATH="$zion_obsidian_path" \
-    SCHEDULER_ENGINE="${engine:-}" \
-    zion_compose_cmd run --rm \
-    -e SCHEDULER_VERBOSE=1 -e SCHEDULER_CLOCK=every60 \
-    -e SCHEDULER_WORKER_ID="${SCHEDULER_WORKER_ID:-worker-1}" \
-    -e SCHEDULER_ENGINE="${engine:-}" \
-    worker /zion/scripts/puppy-runner.sh ${args[task]:-} 2>&1 | tee "$logfile"
+    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" up -d puppy
+
+  echo "[zion puppy] Iniciando daemon interno..."
+  OBSIDIAN_PATH="$zion_obsidian_path" \
+    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
+    exec -d puppy /bin/bash -c "/zion/scripts/puppy-daemon.sh"
+
+  echo "[zion puppy] Container puppy + daemon iniciados."
 
 }
 
 # :command.function
-zion_worker_run_fast_command() {
+zion_puppy_stop_command() {
 
-  # src/commands/worker_run_fast.sh
-  mkdir -p "$zion_nixos_logs"
-  logfile="$zion_nixos_logs/$(date +%Y-%m-%dT%H:%M:%S.%3N).log"
-  echo "[zion worker-run-fast] Log: $logfile"
-  OBSIDIAN_PATH="$zion_obsidian_path" zion_compose_cmd run --rm \
-    -e SCHEDULER_VERBOSE=1 -e SCHEDULER_CLOCK=every10 \
-    -e SCHEDULER_WORKER_ID="${SCHEDULER_WORKER_ID:-worker-fast}" \
-    worker-fast /zion/scripts/puppy-runner.sh 2>&1 | tee "$logfile"
-
-}
-
-# :command.function
-zion_worker_auto_command() {
-
-  # src/commands/worker_auto.sh
+  # src/commands/puppy_stop.sh
+  # Para o container puppy.
   zion_load_config
-  mkdir -p "$zion_nixos_logs"
-  logfile="$zion_nixos_logs/$(date +%Y-%m-%dT%H:%M:%S.%3N).log"
-  OBSIDIAN_PATH="$zion_obsidian_path" zion_compose_cmd run --rm -T \
-    -e SCHEDULER_CLOCK=every60 \
-    -e SCHEDULER_WORKER_ID="${SCHEDULER_WORKER_ID:-worker-1}" \
-    worker /zion/scripts/puppy-runner.sh > "$logfile" 2>&1
+
+  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
+  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
+
+  echo "[zion puppy] Parando container..."
+  OBSIDIAN_PATH="$zion_obsidian_path" \
+    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" down
+
+  echo "[zion puppy] Container puppy parado."
 
 }
 
 # :command.function
-zion_worker_clau_command() {
+zion_puppy_restart_command() {
 
-  # src/commands/worker_clau.sh
+  # src/commands/puppy_restart.sh
+  # Reinicia o container puppy (stop + start).
   zion_load_config
-  # Kanban: preferência por vault do repo; fallback Obsidian
-  kanban_file="${zion_vault_dir}/kanban.md"
-  [[ -f "$kanban_file" ]] || kanban_file="${zion_obsidian_path}/Work/kanban.md"
-  [[ -f "$kanban_file" ]] || kanban_file="${zion_obsidian_path}/kanban.md"
-  if [[ ! -f "$kanban_file" ]]; then
-    echo "[zion worker-clau] kanban não encontrado (procurei $zion_vault_dir e $zion_obsidian_path)" >&2
+
+  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
+  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
+
+  echo "[zion puppy] Parando container..."
+  OBSIDIAN_PATH="$zion_obsidian_path" \
+    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" down 2>/dev/null || true
+
+  if ! docker network inspect nixos_default &>/dev/null; then
+    docker network create nixos_default 2>/dev/null || true
+  fi
+
+  echo "[zion puppy] Subindo container puppy..."
+  OBSIDIAN_PATH="$zion_obsidian_path" \
+    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" up -d puppy
+
+  echo "[zion puppy] Iniciando daemon interno..."
+  OBSIDIAN_PATH="$zion_obsidian_path" \
+    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
+    exec -d puppy /bin/bash -c "/zion/scripts/puppy-daemon.sh"
+
+  echo "[zion puppy] Reiniciado."
+
+}
+
+# :command.function
+zion_puppy_run_command() {
+
+  # src/commands/puppy_run.sh
+  # Roda uma task especifica dentro do container puppy.
+  zion_load_config
+
+  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
+  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
+  task="${args[task]}"
+
+  # Check container is running
+  if ! OBSIDIAN_PATH="$zion_obsidian_path" docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" ps --status running 2>/dev/null | grep -q puppy; then
+    echo "[zion puppy] Container puppy nao esta rodando. Use: zion puppy start" >&2
     exit 1
   fi
-  mkdir -p "$zion_nixos_logs"
-  logfile="$zion_nixos_logs/$(date +%Y-%m-%dT%H:%M:%S.%3N).log"
-  echo "[zion worker-clau] Log: $logfile"
-  for i in 1 2; do
-    WORKER_ID="worker-$i"
-    existing=$(docker ps --filter "name=_worker_" --filter "label=clau.worker.id=$WORKER_ID" --format "{{.ID}}" 2>/dev/null | head -1)
-    if [[ -n "$existing" ]]; then
-      echo "[zion worker-clau] $WORKER_ID já rodando ($existing) — skip"
-      continue
-    fi
-    echo "[zion worker-clau] Lançando $WORKER_ID (every60)..."
-    OBSIDIAN_PATH="$zion_obsidian_path" zion_compose_cmd run --rm -T \
-      -e SCHEDULER_WORKER_ID="$WORKER_ID" \
-      -e SCHEDULER_CLOCK=every60 \
-      -l "clau.worker.id=$WORKER_ID" \
-      worker /zion/scripts/puppy-runner.sh >> "$logfile" 2>&1 &
-  done
-  echo "[zion worker-clau] Workers lançados. Seguindo log..."
-  tail -f "$logfile"
+
+  echo "[zion puppy] Rodando task '$task'..."
+  OBSIDIAN_PATH="$zion_obsidian_path" \
+    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
+    exec -e SCHEDULER_VERBOSE=1 -e SCHEDULER_WORKER_ID="manual-$$" -e SCHEDULER_CLOCK="unified" \
+    puppy /zion/scripts/puppy-runner.sh "$task"
 
 }
 
 # :command.function
-zion_worker_stop_command() {
+zion_puppy_status_command() {
 
-  # src/commands/worker_stop.sh
-  echo "[zion worker-stop] Parando workers..."
-  zion_compose_cmd kill worker 2>/dev/null || true
-  zion_compose_cmd kill worker-fast 2>/dev/null || true
-  zion_compose_cmd rm -f worker worker-fast 2>/dev/null || true
-  # Reset tasks presas
-  for dir in "$zion_vault_dir/_agent/tasks/running"/*/; do
-    [[ -d "$dir" ]] || continue
-    name=$(basename "$dir")
-    source=$(grep '^source=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "pending")
-    rm -f "$dir/.lock"
-    if [[ "$source" == "recurring" ]]; then
-      rm -rf "$dir"
-      echo "[reset] $name (recurring) removed"
-    else
-      mkdir -p "$zion_vault_dir/_agent/tasks/pending"
-      mv "$dir" "$zion_vault_dir/_agent/tasks/pending/$name"
-      echo "[reset] $name → pending/"
-    fi
-  done
-  mkdir -p "$zion_ephemeral/locks"
-  rm -f "$zion_ephemeral/.kanban.lock" "$zion_ephemeral/locks"/*.lock 2>/dev/null || true
-  echo "[zion worker-stop] done"
-
-}
-
-# :command.function
-zion_worker_stop_all_command() {
-
-  # src/commands/worker_stop_all.sh
-  echo "[zion worker-stop-all] Parando todos os containers claude..."
-  docker ps --filter "ancestor=claude-nix-sandbox" --format "{{.ID}} {{.Names}}" | while read -r id name; do
-    echo "  stopping $name ($id)"
-    docker stop "$id"
-  done
-  # Reset
-  for dir in "$zion_vault_dir/_agent/tasks/running"/*/; do
-    [[ -d "$dir" ]] || continue
-    name=$(basename "$dir")
-    source=$(grep '^source=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "pending")
-    rm -f "$dir/.lock"
-    if [[ "$source" == "recurring" ]]; then
-      rm -rf "$dir"
-    else
-      mkdir -p "$zion_vault_dir/_agent/tasks/pending"
-      mv "$dir" "$zion_vault_dir/_agent/tasks/pending/$name"
-    fi
-  done
-  mkdir -p "$zion_ephemeral/locks"
-  rm -f "$zion_ephemeral/.kanban.lock" "$zion_ephemeral/locks"/*.lock 2>/dev/null || true
-  echo "[zion worker-stop-all] done"
-
-}
-
-# :command.function
-zion_scheduler_command() {
-
-  # src/commands/scheduler.sh
-  # Sobe/para/status do container scheduler (tick a cada 10 min). Puppy workers project.
+  # src/commands/puppy_status.sh
+  # Mostra estado do container puppy e tasks em doing/.
   zion_load_config
 
-  SCHEDULER_PROJECT="${SCHEDULER_PROJECT:-puppy-workers}"
-  action="${args[action]:-start}"
+  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
+  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
 
-  scheduler_cmd() {
-    zion_compose_cmd -p "$SCHEDULER_PROJECT" "$@"
-  }
+  echo "=== Container ==="
+  OBSIDIAN_PATH="$zion_obsidian_path" \
+    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" ps 2>/dev/null || \
+    echo "Nenhum container puppy rodando."
 
-  case "$action" in
-    start)
-      if ! docker network inspect nixos_default &>/dev/null; then
-        echo "[zion scheduler] Criando rede nixos_default..."
-        docker network create nixos_default 2>/dev/null || true
-      fi
-      OBSIDIAN_PATH="$zion_obsidian_path" scheduler_cmd up -d scheduler
-      echo "[zion scheduler] Container scheduler iniciado (tick a cada 10 min)."
-      ;;
-    stop)
-      OBSIDIAN_PATH="$zion_obsidian_path" scheduler_cmd stop scheduler
-      echo "[zion scheduler] Container scheduler parado."
-      ;;
-    status)
-      OBSIDIAN_PATH="$zion_obsidian_path" scheduler_cmd ps scheduler 2>/dev/null || \
-        docker ps --filter "label=com.docker.compose.service=scheduler" --format "table {{.Names}}\t{{.Status}}\t{{.RunningFor}}" 2>/dev/null || \
-        echo "Nenhum container scheduler rodando."
-      ;;
-    logs)
-      OBSIDIAN_PATH="$zion_obsidian_path" scheduler_cmd logs -f scheduler
-      ;;
-    run-now)
-      # Um tick na hora, em foreground — para testar: scheduler escolhe tasks e roda worker com output
-      # O worker é um container separado; ele precisa do mesmo OBSIDIAN_PATH (mount em /obsidian)
-      export SCHEDULER_PROJECT_DIR="$zion_nixos_dir"
-      export SCHEDULER_VAULT_DIR="$zion_obsidian_path"
-      export OBSIDIAN_PATH="$zion_obsidian_path"
-      export SCHEDULER_COMPOSE_BIN="docker compose"
-      export SCHEDULER_COMPOSE_FILES="-f $zion_compose_file -p $SCHEDULER_PROJECT"
-      echo "[zion scheduler] Rodando 1 tick agora (scheduler + worker em foreground)..."
-      echo "[zion scheduler] Constantes (antes de rodar):"
-      echo "  SCHEDULER_PROJECT_DIR=$SCHEDULER_PROJECT_DIR"
-      echo "  SCHEDULER_VAULT_DIR=$SCHEDULER_VAULT_DIR"
-      echo "  OBSIDIAN_PATH=$OBSIDIAN_PATH"
-      echo "  SCHEDULER_COMPOSE_BIN=$SCHEDULER_COMPOSE_BIN"
-      echo "  SCHEDULER_COMPOSE_FILES=$SCHEDULER_COMPOSE_FILES"
-      echo "  zion_compose_file=$zion_compose_file"
-      echo "  SCHEDULER_PROJECT=$SCHEDULER_PROJECT"
-      if [[ -d "$OBSIDIAN_PATH/_agent/tasks/recurring" ]]; then
-        echo "  _agent/tasks/recurring: existe ($(ls -1 "$OBSIDIAN_PATH/_agent/tasks/recurring" 2>/dev/null | wc -l) pastas)"
-      else
-        echo "  _agent/tasks/recurring: NÃO EXISTE em $OBSIDIAN_PATH — worker verá 0 tasks." >&2
-      fi
-      "$zion_nixos_dir/scripts/puppy-scheduler.sh"
-      ;;
-    shell)
-      # Entra no shell do container scheduler (precisa estar rodando)
-      OBSIDIAN_PATH="$zion_obsidian_path" scheduler_cmd exec -it scheduler /bin/bash
-      ;;
-    *)
-      echo "zion scheduler: action inválida '$action'. Use: start | stop | status | logs | run-now | shell" >&2
-      exit 1
-      ;;
-  esac
+  echo ""
+  echo "=== Tasks em doing/ ==="
+  vault="${zion_obsidian_path}/tasks/doing"
+  if [ -d "$vault" ] && [ -n "$(ls -A "$vault" 2>/dev/null)" ]; then
+    for d in "$vault"/*/; do
+      [ -d "$d" ] || continue
+      name=$(basename "$d")
+      lock_info=""
+      [ -f "$d/.lock" ] && lock_info=" (locked: $(grep '^worker=' "$d/.lock" 2>/dev/null | cut -d= -f2))"
+      echo "  $name$lock_info"
+    done
+  else
+    echo "  (nenhuma)"
+  fi
+
+  echo ""
+  echo "=== State (últimas execuções) ==="
+  OBSIDIAN_PATH="$zion_obsidian_path" \
+    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" exec -T puppy \
+    python3 -c '
+  import json, sys
+  try:
+      s = json.load(open("/workspace/.ephemeral/scheduler/state.json"))
+      print(f"Last tick: {s.get(\"last_tick\", \"never\")}")
+      for name, t in sorted(s.get("tasks", {}).items()):
+          status = t.get("last_status", "?")
+          avg = t.get("avg_duration_s", 0)
+          total = t.get("runs_total", 0)
+          failed = t.get("runs_failed", 0)
+          print(f"  {name:<20} status={status:<7} avg={avg}s  runs={total}  failed={failed}")
+  except FileNotFoundError:
+      print("  (sem state.json — daemon ainda nao rodou)")
+  except Exception as e:
+      print(f"  (erro: {e})")
+  ' 2>/dev/null || echo "  (container nao esta rodando)"
+
+}
+
+# :command.function
+zion_puppy_logs_command() {
+
+  # src/commands/puppy_logs.sh
+  # Segue logs do daemon dentro do container puppy.
+  zion_load_config
+
+  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
+  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
+
+  LOGFILE="/workspace/.ephemeral/logs/daemon.log"
+
+  if [[ -n "${args[--follow]:-}" ]]; then
+    OBSIDIAN_PATH="$zion_obsidian_path" \
+      docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
+      exec -T puppy tail -f "$LOGFILE"
+  else
+    OBSIDIAN_PATH="$zion_obsidian_path" \
+      docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
+      exec -T puppy cat "$LOGFILE" 2>/dev/null || echo "(sem logs — daemon ainda nao rodou)"
+  fi
+
+}
+
+# :command.function
+zion_puppy_shell_command() {
+
+  # src/commands/puppy_shell.sh
+  # Abre bash dentro do container puppy.
+  zion_load_config
+
+  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
+  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
+
+  OBSIDIAN_PATH="$zion_obsidian_path" \
+    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" exec -it puppy /bin/bash
+
+}
+
+# :command.function
+zion_puppy_tick_command() {
+
+  # src/commands/puppy_tick.sh
+  # Roda 1 tick do scheduler imediatamente (para teste).
+  zion_load_config
+
+  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
+  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
+
+  # Check container is running
+  if ! OBSIDIAN_PATH="$zion_obsidian_path" docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" ps --status running 2>/dev/null | grep -q puppy; then
+    echo "[zion puppy] Container puppy nao esta rodando. Use: zion puppy start" >&2
+    exit 1
+  fi
+
+  echo "[zion puppy] Rodando 1 tick do daemon..."
+  OBSIDIAN_PATH="$zion_obsidian_path" \
+    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
+    exec -e PUPPY_SINGLE_TICK=1 -e SCHEDULER_VERBOSE=1 \
+    puppy /zion/scripts/puppy-daemon.sh
 
 }
 
@@ -1784,14 +1810,6 @@ zion_usage_api_command() {
   [[ -n "${flag_7d:-}" ]] && period="7d"
   [[ -n "${flag_30d:-}" ]] && period="30d"
   "$zion_nixos_scripts/api-usage.sh" $period
-
-}
-
-# :command.function
-zion_service_logs_command() {
-
-  # src/commands/service_logs.sh
-  journalctl -u claude-autonomous.service -n 30 -f
 
 }
 
@@ -2057,52 +2075,10 @@ parse_requirements() {
       shift $#
       ;;
 
-    worker | w)
-      action="worker"
+    puppy | p)
+      action="puppy"
       shift
-      zion_worker_parse_requirements "$@"
-      shift $#
-      ;;
-
-    worker-run-fast | wrf)
-      action="worker-run-fast"
-      shift
-      zion_worker_run_fast_parse_requirements "$@"
-      shift $#
-      ;;
-
-    worker-auto)
-      action="worker-auto"
-      shift
-      zion_worker_auto_parse_requirements "$@"
-      shift $#
-      ;;
-
-    worker-clau)
-      action="worker-clau"
-      shift
-      zion_worker_clau_parse_requirements "$@"
-      shift $#
-      ;;
-
-    worker-stop)
-      action="worker-stop"
-      shift
-      zion_worker_stop_parse_requirements "$@"
-      shift $#
-      ;;
-
-    worker-stop-all)
-      action="worker-stop-all"
-      shift
-      zion_worker_stop_all_parse_requirements "$@"
-      shift $#
-      ;;
-
-    scheduler | sched)
-      action="scheduler"
-      shift
-      zion_scheduler_parse_requirements "$@"
+      zion_puppy_parse_requirements "$@"
       shift $#
       ;;
 
@@ -2145,13 +2121,6 @@ parse_requirements() {
       action="usage-api"
       shift
       zion_usage_api_parse_requirements "$@"
-      shift $#
-      ;;
-
-    service-logs)
-      action="service-logs"
-      shift
-      zion_service_logs_parse_requirements "$@"
       shift $#
       ;;
 
@@ -2839,14 +2808,14 @@ zion_init_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_worker_parse_requirements() {
+zion_puppy_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        zion_worker_usage
+        zion_puppy_usage
         exit
         ;;
 
@@ -2858,7 +2827,259 @@ zion_worker_parse_requirements() {
   done
 
   # :command.command_filter
-  action="worker"
+  action=${1:-}
+
+  case $action in
+    -*) ;;
+
+    start)
+      action="start"
+      shift
+      zion_puppy_start_parse_requirements "$@"
+      shift $#
+      ;;
+
+    stop)
+      action="stop"
+      shift
+      zion_puppy_stop_parse_requirements "$@"
+      shift $#
+      ;;
+
+    restart)
+      action="restart"
+      shift
+      zion_puppy_restart_parse_requirements "$@"
+      shift $#
+      ;;
+
+    run)
+      action="run"
+      shift
+      zion_puppy_run_parse_requirements "$@"
+      shift $#
+      ;;
+
+    status)
+      action="status"
+      shift
+      zion_puppy_status_parse_requirements "$@"
+      shift $#
+      ;;
+
+    logs)
+      action="logs"
+      shift
+      zion_puppy_logs_parse_requirements "$@"
+      shift $#
+      ;;
+
+    shell)
+      action="shell"
+      shift
+      zion_puppy_shell_parse_requirements "$@"
+      shift $#
+      ;;
+
+    tick)
+      action="tick"
+      shift
+      zion_puppy_tick_parse_requirements "$@"
+      shift $#
+      ;;
+
+    # :command.command_fallback
+    "")
+      zion_puppy_usage >&2
+      exit 1
+      ;;
+
+    *)
+      printf "invalid command: %s\n" "$action" >&2
+      exit 1
+      ;;
+
+  esac
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_puppy_start_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_puppy_start_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="puppy start"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_puppy_stop_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_puppy_stop_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="puppy stop"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_puppy_restart_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_puppy_restart_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="puppy restart"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_puppy_run_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_puppy_run_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="puppy run"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
@@ -2887,17 +3108,24 @@ zion_worker_parse_requirements() {
     esac
   done
 
+  # :command.required_args_filter
+  if [[ -z ${args['task']+x} ]]; then
+    printf "missing required argument: TASK\nusage: zion puppy run TASK\n" >&2
+
+    exit 1
+  fi
+
 }
 
 # :command.parse_requirements
-zion_worker_run_fast_parse_requirements() {
+zion_puppy_status_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        zion_worker_run_fast_usage
+        zion_puppy_status_usage
         exit
         ;;
 
@@ -2909,7 +3137,7 @@ zion_worker_run_fast_parse_requirements() {
   done
 
   # :command.command_filter
-  action="worker-run-fast"
+  action="puppy status"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
@@ -2935,14 +3163,14 @@ zion_worker_run_fast_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_worker_auto_parse_requirements() {
+zion_puppy_logs_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        zion_worker_auto_usage
+        zion_puppy_logs_usage
         exit
         ;;
 
@@ -2954,7 +3182,59 @@ zion_worker_auto_parse_requirements() {
   done
 
   # :command.command_filter
-  action="worker-auto"
+  action="puppy logs"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --follow | -f)
+
+        # :flag.case_no_arg
+        args['--follow']=1
+        shift
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_puppy_shell_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_puppy_shell_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="puppy shell"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
@@ -2980,14 +3260,14 @@ zion_worker_auto_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_worker_clau_parse_requirements() {
+zion_puppy_tick_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        zion_worker_clau_usage
+        zion_puppy_tick_usage
         exit
         ;;
 
@@ -2999,7 +3279,7 @@ zion_worker_clau_parse_requirements() {
   done
 
   # :command.command_filter
-  action="worker-clau"
+  action="puppy tick"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
@@ -3016,147 +3296,6 @@ zion_worker_clau_parse_requirements() {
         # :command.parse_requirements_case_simple
         printf "invalid argument: %s\n" "$key" >&2
         exit 1
-
-        ;;
-
-    esac
-  done
-
-}
-
-# :command.parse_requirements
-zion_worker_stop_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_worker_stop_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="worker-stop"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        printf "invalid argument: %s\n" "$key" >&2
-        exit 1
-
-        ;;
-
-    esac
-  done
-
-}
-
-# :command.parse_requirements
-zion_worker_stop_all_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_worker_stop_all_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="worker-stop-all"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        printf "invalid argument: %s\n" "$key" >&2
-        exit 1
-
-        ;;
-
-    esac
-  done
-
-}
-
-# :command.parse_requirements
-zion_scheduler_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_scheduler_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="scheduler"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        # :argument.case
-        if [[ -z ${args['action']+x} ]]; then
-          args['action']=$1
-          shift
-        else
-          printf "invalid argument: %s\n" "$key" >&2
-          exit 1
-        fi
 
         ;;
 
@@ -3522,51 +3661,6 @@ zion_usage_api_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_service_logs_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_service_logs_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="service-logs"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        printf "invalid argument: %s\n" "$key" >&2
-        exit 1
-
-        ;;
-
-    esac
-  done
-
-}
-
-# :command.parse_requirements
 zion_edit_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
@@ -3642,20 +3736,21 @@ run() {
     "destroy") zion_destroy_command ;;
     "update") zion_update_command ;;
     "init") zion_init_command ;;
-    "worker") zion_worker_command ;;
-    "worker-run-fast") zion_worker_run_fast_command ;;
-    "worker-auto") zion_worker_auto_command ;;
-    "worker-clau") zion_worker_clau_command ;;
-    "worker-stop") zion_worker_stop_command ;;
-    "worker-stop-all") zion_worker_stop_all_command ;;
-    "scheduler") zion_scheduler_command ;;
+    "puppy") zion_puppy_command ;;
+    "puppy start") zion_puppy_start_command ;;
+    "puppy stop") zion_puppy_stop_command ;;
+    "puppy restart") zion_puppy_restart_command ;;
+    "puppy run") zion_puppy_run_command ;;
+    "puppy status") zion_puppy_status_command ;;
+    "puppy logs") zion_puppy_logs_command ;;
+    "puppy shell") zion_puppy_shell_command ;;
+    "puppy tick") zion_puppy_tick_command ;;
     "reset") zion_reset_command ;;
     "status") zion_status_command ;;
     "new-task") zion_new_task_command ;;
     "logs") zion_logs_command ;;
     "logs-list") zion_logs_list_command ;;
     "usage-api") zion_usage_api_command ;;
-    "service-logs") zion_service_logs_command ;;
     "edit") zion_edit_command ;;
   esac
 }

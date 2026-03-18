@@ -10,13 +10,8 @@ SPECIFIC_TASK="${1:-}"
 WORKER_ID="${SCHEDULER_WORKER_ID:-worker-1}"
 SCHEDULER_CLOCK="${SCHEDULER_CLOCK:-unified}"
 SCHEDULER_TASK_LIST="${SCHEDULER_TASK_LIST:-}"  # comma-separated list from scheduler
-# When inside container, markers must land where the host scheduler reads them:
-# Repo NixOS em /workspace/nixos; .ephemeral fica lá
-if [[ "${CLAUDE_ENV:-}" == "container" ]] || [[ -f "/.dockerenv" ]] || grep -q 'docker\|container' /proc/1/cgroup 2>/dev/null; then
-  SCHEDULER_COMPLETED_DIR="/workspace/nixos/.ephemeral/scheduler/completed"
-else
-  SCHEDULER_COMPLETED_DIR="$EPHEMERAL/scheduler/completed"
-fi
+# Completion markers — always in workspace ephemeral (daemon reads them in-process)
+SCHEDULER_COMPLETED_DIR="$EPHEMERAL/scheduler/completed"
 # Identidade desta execução — permite detectar órfãos mesmo quando runner é PID 1 (container)
 RUN_ID="$$-$(date +%s)-${RANDOM:-0}"
 NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}"
@@ -56,7 +51,7 @@ trap 'rm -rf "$AGENT_MY_DIR"' EXIT
 
 [ -f "$EPHEMERAL/no-mcp.json" ] || echo '{"mcpServers":{}}' > "$EPHEMERAL/no-mcp.json"
 
-source "$WORKSPACE/nixos/scripts/kanban-sync.sh"
+source "$(dirname "$(readlink -f "$0")")/kanban-sync.sh"
 
 echo "[puppy:$WORKER_ID:$SCHEDULER_CLOCK] Iniciando (PID $$)"
 
@@ -370,57 +365,10 @@ EOF
   echo "| $(date -u +%Y-%m-%dT%H:%M:%SZ) | $task | ▶ start | $(get_model "$TASKS/doing/$task") | — |" >> "$TASK_LOG" 2>/dev/null || true
 }
 
-# ── Build prompt ─────────────────────────────────────────────────
-build_task_block() {
-  local task="$1" source_dir="$2" is_recurring="$3"
-  local context_dir="$EPHEMERAL/notes/$task"
-  mkdir -p "$context_dir"
-
-  local instructions context historico recurring_msg
-  local cfg_file; cfg_file=$(task_config_file "$TASKS/doing/$task")
-  instructions=$(cat "$cfg_file")
-
-  context=""
-  [ -f "$context_dir/contexto.md" ] && context="
-### Contexto anterior
-$(cat "$context_dir/contexto.md")"
-
-  historico=""
-  [ -f "$context_dir/historico.log" ] && historico="
-### Histórico (últimas 20)
-$(tail -20 "$context_dir/historico.log")"
-
-  recurring_msg=""
-  [ "$is_recurring" = "1" ] && recurring_msg="
-### Task recorrente
-- Salve estado em: $context_dir/contexto.md
-- Priorize, execute o mais importante, salve progresso
-- SEMPRE atualize contexto.md no final"
-
-  cat <<BLOCK
-## Task: $task
-- **Contexto:** $context_dir
-- **Tipo:** $([ "$is_recurring" = "1" ] && echo "RECORRENTE" || echo "ONE-SHOT")
-- **Worker:** $WORKER_ID
-
-$instructions
-$recurring_msg
-$context
-$historico
-BLOCK
-}
-
 # ── Run task ─────────────────────────────────────────────────────
 run_single_task() {
   local task="$1" source_dir="$2" is_recurring="$3"
-  local block logfile
-  block=$(build_task_block "$task" "$source_dir" "$is_recurring")
-
-  local memoria=""
-  [ -f "$TASKS/doing/$task/memoria.md" ] && memoria="
-### Memória evolutiva
-$(cat "$TASKS/doing/$task/memoria.md")"
-
+  local logfile
   logfile="$EPHEMERAL/notes/$task/last-run.log"
   mkdir -p "$EPHEMERAL/notes/$task"
 
@@ -432,37 +380,24 @@ $(cat "$TASKS/doing/$task/memoria.md")"
 
   echo "[puppy:$WORKER_ID:$task] Claude (model=$task_model, timeout=${task_timeout}s, $(date -u +%H:%M:%S))"
 
-  # Auto-tracking: criar worktree virtual pra task
-  local worker_branch="worker/${SCHEDULER_CLOCK}/${task}"
-  export SCHEDULER_CURRENT_WORKTREE="$task"
-  "$WORKSPACE/nixos/scripts/worktree-manager.sh" init "$task" "$worker_branch" "Task: $task (Worker: $WORKER_ID)" 2>/dev/null || true
-
   local mcp_flags=()
   [ -n "$mcp_flags_str" ] && mcp_flags=($mcp_flags_str)
 
-  timeout "$task_timeout" claude --permission-mode bypassPermissions --model "$task_model" \
+  local task_type="ONE-SHOT"
+  [ "$is_recurring" = "1" ] && task_type="RECORRENTE"
+
+  timeout "$task_timeout" claude \
+    --agent-file /home/claude/.claude/agents/puppy-runner/agent.md \
+    --permission-mode bypassPermissions \
+    --model "$task_model" \
     --max-turns "$task_max_turns" \
     "${mcp_flags[@]}" \
-    -p "Modo autônomo. Task: $task (Worker: $WORKER_ID)
-Hora: $(date -u +%Y-%m-%dT%H:%M:%SZ) | Budget: ${task_timeout}s | Model: $task_model
-
-$block
-$memoria
-
-## Instruções
-1. Siga o protocolo do TASK.md da task
-2. Gere o artefato concreto pedido
-3. Atualize memoria.md em $TASKS/doing/$task/memoria.md
-4. Atualize contexto em $EPHEMERAL/notes/$task/contexto.md
-5. Se identificar melhorias, poste no MURAL: $WORKSPACE/obsidian/MURAL.md (seção Posts dos Agentes, NO TOPO)
-   NÃO criar arquivos em sugestoes/ (pasta aposentada)
-
-## IMPORTANTE
-- NÃO mova diretórios — o runner cuida do lifecycle
-- NÃO edite obsidian/kanban.md — use MURAL.md para comunicação
-- Registre em $EPHEMERAL/notes/$task/historico.log: TIMESTAMP | ok/fail | duração
-- Diário: $WORKSPACE/obsidian/agents/diarios/$task/diario-\$(date +%Y-%m-%d).md
-- Memória cross-session: $WORKSPACE/obsidian/agents/diarios/$task/memoria.md" 2>&1 | if [ "$SCHEDULER_VERBOSE" = "1" ]; then tee "$logfile"; else cat > "$logfile"; fi
+    -p "Processe a task: $task (Worker: $WORKER_ID)
+Task dir: $TASKS/doing/$task
+Context dir: $EPHEMERAL/notes/$task
+MURAL: $MURAL
+Tipo: $task_type
+Hora: $(date -u +%Y-%m-%dT%H:%M:%SZ) | Budget: ${task_timeout}s" 2>&1 | if [ "$SCHEDULER_VERBOSE" = "1" ]; then tee "$logfile"; else cat > "$logfile"; fi
   local exit_code=${PIPESTATUS[0]}
 
   [ $exit_code -eq 0 ] && echo "[puppy:$WORKER_ID:$task] OK" || echo "[puppy:$WORKER_ID:$task] FAIL exit=$exit_code"
@@ -510,7 +445,7 @@ finish_task() {
   task_model_log=$(get_model "$TASKS/doing/$task" 2>/dev/null || echo "haiku")
 
   # Auto-tracking: fechar worktree virtual
-  "$WORKSPACE/nixos/scripts/worktree-manager.sh" exit 2>/dev/null || true
+  "$(dirname "$(readlink -f "$0")")/worktree-manager.sh" exit 2>/dev/null || true
 
   if [ "$source_dir" = "_scheduled" ] || [ "$source_dir" = "recurring" ]; then
     # Sync back evolved files to _scheduled/ before cleanup
@@ -626,7 +561,15 @@ fi
 if [ -n "$SPECIFIC_TASK" ]; then
   source_dir=""
   is_recurring="0"
-  if [ -d "$TASKS/backlog/$SPECIFIC_TASK" ]; then
+  if [ -d "$TASKS/doing/$SPECIFIC_TASK" ]; then
+    # Already in doing/ (e.g. claimed by daemon) — run in-place without re-claiming
+    echo "[puppy:$WORKER_ID] '$SPECIFIC_TASK' already in doing/ — running in-place"
+    is_recurring="1"  # treat as recurring (don't move to done)
+    local_exit=0
+    run_single_task "$SPECIFIC_TASK" "doing" "$is_recurring" || local_exit=$?
+    echo "[puppy:$WORKER_ID] '$SPECIFIC_TASK' in-place run done (exit=$local_exit)"
+    exit $local_exit
+  elif [ -d "$TASKS/backlog/$SPECIFIC_TASK" ]; then
     source_dir="backlog"
   elif [ -d "$TASKS/_scheduled/$SPECIFIC_TASK" ]; then
     source_dir="_scheduled"; is_recurring="1"

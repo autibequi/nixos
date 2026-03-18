@@ -39,9 +39,9 @@ Ao abrir o projeto, faça em segundos:
 |----------|-----------|
 | **Este repo** | Config NixOS do host: `flake.nix`, `configuration.nix`, `modules/`, `stow/`, `scripts/`, `zion/`. Tudo aqui é pensado para rodar **no host** (exceto o que vive dentro do container). |
 | **Zion** | Nome do sistema de agentes: CLI `zion`, container `claude-nix-sandbox`, bootstrap, skills, hooks. Código em **`zion/`**. |
-| **Puppy** | Nome dos workers em background: scheduler, runner de tasks (kanban). Scripts: `puppy-runner.sh`, `puppy-scheduler.sh`, `puppy-cleanup.sh` em **`scripts/`**; symlinks em `zion/scripts/` para o container. |
+| **Puppy** | Container persistente de workers em background: daemon interno (scheduler) + runner de tasks. Scripts: `puppy-daemon.sh`, `puppy-runner.sh`, `puppy-cleanup.sh` em **`scripts/`**; symlinks em `zion/scripts/`. Agent: `zion/agents/puppy-runner/agent.md`. |
 | **Zion CLI** | Comando `zion` (gerado por bashly). Fonte: **`zion/cli/src/bashly.yml`** + **`zion/cli/src/commands/*.sh`**. Após alterar: rodar **`bashly generate`** em `zion/cli/` (ou `zion update` no host). |
-| **Container** | Imagem `claude-nix-sandbox`. Compose: `zion/cli/docker-compose.zion.yml / docker-compose.puppy.yml`. Sessões interativas = Zion; workers/scheduler = Puppy. |
+| **Container** | Imagem `claude-nix-sandbox`. Compose: `zion/cli/docker-compose.zion.yml` (sessões Zion) / `docker-compose.puppy.yml` (container persistente Puppy). |
 
 **Resumo:** Repo = NixOS no host. Zion = agentes/sessões. Puppy = workers em background. CLI em `zion/cli/`.
 
@@ -56,7 +56,13 @@ Ao abrir o projeto, faça em segundos:
 | **`zion new-task <nome>`** | Cria task + card no kanban (Puppy). Antes era `zion new`; o `new` de sessão tem prioridade. |
 | **`zion edit`** | Abre sessão com **~/nixos** em `/workspace/mnt` e `/workspace/logs` (único modo com mount de logs). Project name fixo `zion-projects`. |
 | **`zion shell`** | Bash no container com o projeto montado. |
-| **`zion worker`**, **`zion scheduler`**, etc. | Workers e scheduler usam **Puppy** (puppy-runner, puppy-scheduler, project `puppy-workers`). |
+| **`zion puppy start`** | Sobe container persistente Puppy + daemon interno (scheduler a cada 10 min). |
+| **`zion puppy stop`** | Para o container Puppy. |
+| **`zion puppy run <task>`** | Roda 1 task especifica dentro do container Puppy. |
+| **`zion puppy status`** | Container + tasks em doing/ + state.json. |
+| **`zion puppy tick`** | 1 tick do daemon imediato (para teste). |
+| **`zion puppy logs [-f]`** | Logs do container Puppy. |
+| **`zion puppy shell`** | Bash dentro do container Puppy. |
 
 **Config:** `~/.zion` (não `~/.claudio`). Engine padrão, chaves, `OBSIDIAN_PATH`, etc.
 
@@ -86,16 +92,15 @@ Variável **`IS_CONTAINER`** (definida no bootstrap do container, ex.: `zion/scr
 | **`/zion`** | Pasta `zion/` do repo (engine: bootstrap, scripts, skills, commands, agents). |
 | **`/workspace/mnt`** | Projeto que o usuário montou (ex.: `~/projects`). **CWD típico do agente.** |
 | **`/workspace/obsidian`** | Vault Obsidian. |
-| **`/workspace/nixos`** | Repo NixOS (este repo). **Só montado no scheduler e em `zion edit`** (não na sessão normal `run`/`shell`). |
+| **`/workspace/nixos`** | Repo NixOS (este repo). **Só montado em `zion edit`** (não na sessão normal `run`/`shell` nem no Puppy). |
 | **`/workspace/logs`** | Logs do host (ex.: journal). **Só montado em `zion edit`.** |
 
 ### 3.3 Modos de sessão e mounts
 
 | Modo | `/workspace/nixos` | `/workspace/logs` | `/workspace/mnt` |
 |------|--------------------|-------------------|------------------|
-| `zion` / `zion continue` / `zion new`, `shell`, `resume`, workers | ❌ | ❌ | Projeto do usuário (ex.: ~/projects) |
+| `zion` / `zion continue` / `zion new`, `shell`, `resume`, `puppy` | ❌ | ❌ | Projeto do usuário (ex.: ~/projects) |
 | **`zion edit`** | ❌ (mnt = nixos) | ✅ (journal ro) | **~/nixos** (este repo) |
-| **scheduler** | ✅ | ❌ | default |
 
 Em **`zion edit`**, `/workspace/mnt` aponta para o repo NixOS; é o modo para o agente editar este repo e acessar logs. Usa o mesmo project name (ex.: `zion-projects`) para compartilhar `cursor_config` com outras sessões.
 
@@ -108,8 +113,8 @@ Esta seção descreve o sistema de containers e o uso do Zion **do ponto de vist
 ### 4.1 Como o host inicia o container
 
 - O usuário roda no **host** o comando **`zion`** (CLI em `zion/cli/`). O CLI usa **Docker Compose** com o arquivo `zion/cli/docker-compose.zion.yml / docker-compose.puppy.yml`.
-- A imagem é **`claude-nix-sandbox`** (build a partir de `zion/cli/Dockerfile.claude`). Todos os serviços (sandbox, worker, scheduler) usam essa mesma imagem.
-- O Compose define **três conjuntos de uso**: (1) **sandbox** — sessão interativa (Cursor/Claude/OpenCode); (2) **worker** / **worker-fast** — execução de tasks em background; (3) **scheduler** — loop a cada 10 min que despacha tasks. Cada um usa **volumes** diferentes conforme o modo (ver abaixo).
+- A imagem é **`claude-nix-sandbox`** (build a partir de `zion/cli/Dockerfile.claude`). Todos os serviços usam essa mesma imagem.
+- O Compose define **dois serviços**: (1) **sandbox** (`docker-compose.zion.yml`) — sessão interativa (Cursor/Claude/OpenCode); (2) **puppy** (`docker-compose.puppy.yml`) — container persistente com daemon interno (scheduler) + runner de tasks. Ambos usam os mesmos **`x-base-volumes`**.
 
 ### 4.2 Como você sabe que está dentro do container
 
@@ -124,15 +129,12 @@ Esta seção descreve o sistema de containers e o uso do Zion **do ponto de vist
 
 Os mounts são definidos no compose como **anchors** reutilizáveis:
 
-- **`x-base-volumes`** — usado por **sandbox** (sessão interativa) e por **workers**.
+- **`x-base-volumes`** — usado por **sandbox** (sessão interativa) e **puppy** (worker persistente).
   - **`/zion`** ← pasta `zion/` do repo (sempre a mesma).
   - **`/workspace/obsidian`** ← vault Obsidian (host: `OBSIDIAN_PATH`).
   - **`/workspace/mnt`** ← projeto do usuário (host: `CLAUDIO_MOUNT`, ex.: `~/projects`). **working_dir** do sandbox é `/workspace/mnt`.
   - **Não** há `/workspace/nixos` nem `/workspace/logs` nesses modos.
   - Além disso: `~/.claude`, `~/.cursor`, skills/commands do zion, hooks do stow do host, `cursor_config` (volume nomeado), `/host/proc/*` e `/host/etc/*` (read-only para observabilidade), `/workspace/.hive-mind`.
-
-- **`x-scheduler-volumes`** — usado só pelo serviço **scheduler**.
-  - Igual ao base, mas **inclui** **`~/nixos` do host → `/workspace/nixos`**. Assim o scheduler (e scripts que ele chama) enxergam o repo NixOS e podem ler/escrever em `.ephemeral/` do repo.
 
 - **`zion edit`** (comando `edit`) — não é um serviço separado no compose; é o **mesmo serviço sandbox** rodado com parâmetros diferentes pelo CLI:
   - **`/workspace/mnt`** = **`~/nixos`** (este repo), montado read-write.
@@ -145,18 +147,16 @@ Resumo prático para o agente:
 |---------------|----------------------|----------------------------|----------------------------|
 | Sessão normal (`zion run` / `shell`) | Projeto do usuário (ex.: ~/projects) | ❌ | ❌ |
 | **`zion edit`** | Repo NixOS (este repo) | ❌ (mnt = nixos) | ✅ (journal) |
-| **Scheduler** (container em background) | Projeto default | ✅ | ❌ |
+| **Puppy** (`zion puppy start`) | Projeto default | ❌ | ❌ |
 
 ### 4.4 Serviços do compose e o que fazem
 
-| Serviço | Uso | Entrypoint / comando |
-|---------|-----|----------------------|
-| **sandbox** | Sessão interativa (Cursor/Claude/OpenCode). Fica com `sleep infinity` até o CLI fazer `exec` com o engine (agent, claude, opencode). | Default: `sleep infinity`. O `zion run`/`edit` faz `exec` no container com bash que roda bootstrap + engine. |
-| **worker** | Puppy: roda tasks do kanban (recurring/pending). Limite 12g. | `command: /zion/scripts/puppy-runner.sh`. Symlink em zion/scripts aponta para scripts/puppy-runner.sh. |
-| **worker-fast** | Mesmo que worker, menos memória (4g). | Idem. |
-| **scheduler** | Loop a cada 600 s executa puppy-scheduler.sh (SCHEDULER_IN_CONTAINER=1, SCHEDULER_VAULT_DIR, SCHEDULER_PROJECT_DIR). | `command`: loop `... /zion/scripts/puppy-scheduler.sh; sleep 600`. Usa **scheduler-volumes** (com `/workspace/nixos`). |
+| Serviço | Compose | Uso | Entrypoint / comando |
+|---------|---------|-----|----------------------|
+| **sandbox** | `docker-compose.zion.yml` | Sessão interativa (Cursor/Claude/OpenCode). Fica com `sleep infinity` até o CLI fazer `exec` com o engine. | Default: `sleep infinity`. O `zion run`/`edit` faz `exec` no container com bash que roda bootstrap + engine. |
+| **puppy** | `docker-compose.puppy.yml` | Container persistente com daemon interno (scheduler) + runner de tasks. 12g mem. | `sleep infinity` + daemon via `exec`. Runner usa `--agent-file puppy-runner/agent.md`. |
 
-O **scheduler** lê estado em `$SCHEDULER_PROJECT_DIR/.ephemeral/scheduler/` (no container = `/workspace/nixos/.ephemeral/scheduler/`). O **runner** (workers) usa `$WORKSPACE/obsidian/_agent/tasks` (running/done/failed) e, quando em container, pode usar `/workspace/nixos/.ephemeral/scheduler/completed` para marcar conclusões visíveis ao host.
+O **daemon** (`puppy-daemon.sh`) roda dentro do container persistente e lê estado em `/workspace/.ephemeral/scheduler/` (state.json, completed/). O **runner** (`puppy-runner.sh`) usa `$WORKSPACE/obsidian/tasks` (doing/done/cancelled) e o agent file `puppy-runner/agent.md` para processar tasks.
 
 ### 4.5 Bootstrap em cadeia (o que roda ao abrir a sessão)
 
@@ -174,7 +174,7 @@ O **scheduler** lê estado em `$SCHEDULER_PROJECT_DIR/.ephemeral/scheduler/` (no
 - **Se o seu CWD é um projeto (ex.: ~/projects):** você está em sessão **run/shell**. `/workspace/mnt` = esse projeto. Para editar o repo NixOS ou logs, o usuário precisa abrir uma sessão com **`zion edit`**.
 - **Se o seu CWD é este repo (NixOS) e há `/workspace/logs`:** você está em **`zion edit`**. Pode editar este repo e ler logs do host em `/workspace/logs/host/journal`.
 - **Skills e comandos:** vêm de **`/zion/skills`**, **`/zion/commands`**, e são expostos em `~/.cursor/skills`, `~/.cursor/rules` e `~/.claude/` via mounts. Hooks vêm do **stow** do host (`stow/.claude/hooks`).
-- **Não executar no container:** `nixos-rebuild`, `nh os switch`, `systemctl start/stop` de serviços do host. Usar **`nh os test .`** só para validar build quando o repo NixOS estiver montado (edit/scheduler); mesmo assim, o apply é no host.
+- **Não executar no container:** `nixos-rebuild`, `nh os switch`, `systemctl start/stop` de serviços do host. Usar **`nh os test .`** só para validar build quando o repo NixOS estiver montado (edit); mesmo assim, o apply é no host.
 
 ---
 
@@ -194,19 +194,19 @@ O **scheduler** lê estado em `$SCHEDULER_PROJECT_DIR/.ephemeral/scheduler/` (no
 │   ├── hyprland.nix       ← Compositor (DE ativo).
 │   ├── nvidia.nix         ← NVIDIA PRIME (iGPU AMD default).
 │   ├── asus.nix           ← ASUS Zephyrus.
-│   ├── agents/            ← Scheduler container + agent-container (systemd).
+│   ├── agents/            ← Agent options (agent-container).
 │   ├── obsidian-sync.nix, lmstudio.nix, netdata.nix, work.nix, virt.nix, etc.
 ├── stow/                  ← Dotfiles (GNU stow → symlink em ~).
 │   ├── .config/           ← hypr, waybar, zed, ghostty, rofi, zsh, etc.
 │   └── .claude/           ← Hooks, scripts, agents (Claude no host/container).
-├── scripts/               ← Scripts do host (bootstrap.sh, puppy-runner.sh, puppy-scheduler.sh, api-usage.sh, etc.).
+├── scripts/               ← Scripts do host (bootstrap.sh, puppy-daemon.sh, puppy-runner.sh, puppy-cleanup.sh, api-usage.sh, etc.).
 ├── zion/                  ← Zion: launcher + container.
 │   ├── cli/               ← Zion CLI.
 │   │   ├── docker-compose.zion.yml / docker-compose.puppy.yml   ← Compose do container do agente.
 │   │   ├── zion                        ← Binário gerado (bashly).
 │   │   └── src/
 │   │       ├── bashly.yml              ← Definição de comandos e flags.
-│   │       └── commands/*.sh            ← continue.sh (default), new_session.sh, resume.sh, shell, edit, worker, scheduler, etc.
+│   │       └── commands/*.sh            ← continue.sh (default), new_session.sh, resume.sh, shell, edit, puppy_*.sh, etc.
 │   ├── scripts/           ← Bootstrap e scripts no container (bootstrap.sh, statusline, etc.).
 │   ├── bootstrap.md       ← Instruções para o agente (/load).
 │   ├── system/            ← INIT.md e módulos de sistema (loader).
@@ -253,9 +253,10 @@ Para alterações em **NixOS** ou **Hyprland**, o agente deve **ler e seguir** a
 
 - **Regenerar o binário `zion`:** em `zion/cli/` executar **`bashly generate`** (ou no host: **`zion update`**). Fonte: `src/bashly.yml` + `src/commands/*.sh`. **Sempre regenerar após alterar comandos ou bashly.yml** — o arquivo `zion/cli/zion` é gerado e fica desatualizado até o generate.
 - **Comportamento padrão:** sem subcomando = **continue** (última sessão). Nova sessão = **`zion new`** (aliases: run, r, open, opencode, code). Lista de sessões = **`zion resume`**. Task no kanban = **`zion new-task <nome>`**.
-- **Comandos principais:** `continue` (default), `new`, `resume`, `shell`, `start`, `edit`, `worker`, `worker-auto`, `scheduler`, `logs`, `status`, `new-task`, `build`, `down`, `destroy`, `update`, `init`.
+- **Comandos principais:** `continue` (default), `new`, `resume`, `shell`, `start`, `edit`, `puppy` (start/stop/run/status/logs/shell/tick), `logs`, `status`, `new-task`, `build`, `down`, `destroy`, `update`, `init`.
 - **`edit`:** único comando que monta este repo em `/workspace/mnt` e ainda monta `/workspace/logs`; arquivo: `host_edit.sh`; project name `zion-projects`.
-- **Compose:** volumes base em `x-base-volumes`; scheduler usa `x-scheduler-volumes` (base + nixos). Workers rodam **puppy-runner.sh** (symlink em zion/scripts → scripts/puppy-runner.sh).
+- **`puppy`:** grupo de subcomandos para o container persistente Puppy. `start` sobe container + daemon; `run <task>` executa 1 task; `tick` roda 1 tick do scheduler.
+- **Compose:** `docker-compose.zion.yml` (sessões Zion) e `docker-compose.puppy.yml` (container persistente Puppy com volumes base).
 
 **Renomear ou adicionar comando:** (1) `src/bashly.yml`: alterar `name:`, `default`, `filename`. (2) Criar/renomear em `src/commands/*.sh`. (3) **`bashly generate`**. (4) Atualizar este CLAUDE.md e compose se aplicável.
 
@@ -297,7 +298,7 @@ Para alterações em **NixOS** ou **Hyprland**, o agente deve **ler e seguir** a
 ### 10.2 Armadilhas comuns
 
 - **Rodar `nixos-rebuild` ou `systemctl` dentro do container** → não faz efeito no host. Sempre checar `IS_CONTAINER`; se 1, pedir ao usuário rodar no host.
-- **Achar que `/workspace/nixos` existe em toda sessão** → só existe no **scheduler** e, em `zion edit`, o repo está em **`/workspace/mnt`** (não em `/workspace/nixos`). Em sessão normal, `/workspace/nixos` não existe.
+- **Achar que `/workspace/nixos` existe em toda sessão** → em `zion edit`, o repo está em **`/workspace/mnt`** (não em `/workspace/nixos`). Em sessão normal e no Puppy, `/workspace/nixos` não existe.
 - **Editar keybinds ou Waybar em módulo NixOS** → a fonte da verdade é **`stow/.config/hypr/`** e **`stow/.config/waybar/`**. Deploy com `stow -d ~/nixos/stow -t ~ .`.
 - **Esquecer de regenerar o CLI** → após mudar `bashly.yml` ou `commands/*.sh`, rodar **`bashly generate`** em `zion/cli/` (ou `zion update` no host). O arquivo `zion/cli/zion` é **gerado**; sem generate ele continua com comandos/strings antigos (ex. clau-runner, clau-workers).
 - **Confundir `zion new` com task** → **`zion new`** = nova sessão; **`zion new-task <nome>`** = criar task no kanban (Puppy).
