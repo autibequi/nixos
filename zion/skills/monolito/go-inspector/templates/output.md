@@ -302,25 +302,95 @@ type: board
 
 ---
 
-## 📊 Métricas
+## 📊 Visualizações ASCII
+
+> **OBRIGATÓRIO:** gerar TODOS os gráficos abaixo com dados reais da inspeção. Usar `█` para cheio, `░` para vazio, `▓` para risco/parcial.
+
+### Placar dos Inspetores (horizontal)
+
+```
+architect     ████████████  APROVADO / N findings
+claude        ████████░░░░  N findings — descrição curta
+documentation ████████████  APROVADO
+qa            ██████░░░░░░  N gaps — descrição curta
+namer         ████████████  APROVADO
+coverage      ██████░░░░░░  N métodos sem teste
+simplifier    ██████████░░  N melhorias identificadas
+```
+
+> Barra reflete saúde: 12 blocos = limpo, menos = mais issues. Ajustar proporcionalmente.
+
+### Findings por Severidade (vertical)
+
+```
+         ▲
+       N │  ██
+         │  ██
+       1 │  ██  ██              ██
+         │  ██  ██              ██
+       0 │  ██  ██  ░░  ░░  ░░  ██
+         └──────────────────────────▶
+            🔴  🟠  🟡  🟡  🟡  ⚠️
+           (N) (N) (N) (N) (N) (N)
+```
+
+> Mostrar cada finding individualmente no eixo X com sua categoria e repo de origem.
+
+### Cobertura de Testes (barras horizontais)
+
+```
+                    0%      50%     100%
+                    │       │        │
+MetodoA             ░░░░░░░░░░░░░░░░  ← sem teste
+MetodoB             ████████░░░░░░░░  parcial
+MetodoC             ████████████████  ✅ coberto
+```
+
+> Um linha por método/fluxo relevante da feature. Priorizar os do caminho crítico.
+
+### Contrato Frontend ← → Backend (quando aplicável)
+
+```
+                  ✅ ok   ⚠️ risco   🔴 quebrado
+bo-container  ████████████████░░░░░░░  N✅ N⚠️ N🔴
+front-student ████░░░░░░░░░░░░▓▓▓▓▓▓▓  N✅ N⚠️ N🔴
+bff-mobile    ████████████████████████  N✅ N⚠️ N🔴
+```
+
+> Omitir repos não afetados pela feature.
+
+### Risco de Deploy (quando contrato inspecionado)
+
+```
+  Backend sozinho   ████████████████████  🔴 ALTO
+  Backend + fronts  ████████████░░░░░░░░  🟡 MÉDIO
+  Tudo alinhado     ████████████████░░░░  🟢 BAIXO
+                    0        50%      100% pronto
+```
+
+### Métricas finais
 
 ```
 Findings totais ............ N
-  🔴 Blockers .............. N
-  🟠 Média ................. N
-  🟡 Baixa ................. N
-  ℹ️  Info .................. N
+  🔴 Críticos .............. N
+  🟠 Médios ................ N
+  🟡 Baixos ................ N
+  ⬛ Cosméticos ............ N
 
 Cobertura
-  Fluxos mapeados .......... N
+  Métodos mapeados ......... N
   Com teste ................ N (XX%)
   Gaps críticos ............ N
-  Gaps médios .............. N
+
+Contrato (se inspecionado)
+  Endpoints verificados .... N
+  Alinhados ................ N
+  Em risco ................. N
+  Quebrados ................ N
 
 Simplificador
   Commits aplicados ........ N
   Linhas removidas ......... -N
-  Sugestões pendentes ...... N
 
 Inspetores ................. 7/7 ✅
 Arquivos analisados ........ N

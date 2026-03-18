@@ -285,7 +285,7 @@ sn_num=$(echo "$JSON" | $JQ -r '(.seven_day_sonnet?.utilization? // 0) | floor')
 
 # Ícones por barra (Nerd Font): Sonnet, 5h, 7d, Opus, Extra
 ICON_SONNET='󱙺'   # star-shooting (AI/Sonnet — limite semanal Sonnet)
-ICON_5H='󰔚'       # timer-sand (sessão ~5h — janela curta)
+ICON_5H='󱦟'       # timer-sand-empty (sessão ~5h — ampulheta vazia)
 ICON_7D='󰸗'       # calendar-week (limite semanal — todos os modelos)
 ICON_OPUS='󰐂'     # opus/premium (só no tooltip)
 
@@ -302,7 +302,7 @@ if [[ "$MODE" == "--waybar" ]]; then
   sk_status="sessionKey: $([[ -n "$SESSION_KEY" ]] && echo "sim" || echo "não")"
   org_status="org: $([[ -n "$ORG_ID" ]] && echo "${ORG_ID:0:8}…" || echo "não")"
   source_line="Fonte: ${USED_SOURCE:-?}"
-  tooltip="<span font_family='monospace' size='12000'>${sk_status} | ${org_status} | ${source_line}\n$(printf '%s\n%s\n%s\n%s' "$line_5h" "$line_7d" "$line_sn" "$line_op")</span>"
+  tooltip="<span font_family='monospace' size='12000'>${sk_status} | ${org_status} | ${source_line}"$'\n'"$(printf '%s\n%s\n%s\n%s' "$line_5h" "$line_7d" "$line_sn" "$line_op")</span>"
   $JQ -cn \
     --arg text    "$text" \
     --arg tooltip "$tooltip" \
