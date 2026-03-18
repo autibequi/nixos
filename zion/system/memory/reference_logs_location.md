@@ -19,8 +19,8 @@ Logs de monitoramento ficam em `/workspace/logs/` (disponível em todas as sess�
 - `/workspace/logs/docker/bo-container/test.log`
 - `/workspace/logs/docker/front-student/test.log`
 
-**Volume mount:** `/tmp/zion-logs/dockerized` → `/workspace/logs/docker` (ro)
-**Função host:** `zion_docker_log_dir("monolito")` = `/tmp/zion-logs/dockerized/monolito`
+**Volume mount:** `~/.local/share/zion/logs/dockerized` → `/workspace/logs/docker` (ro)
+**Função host:** `zion_docker_log_dir("monolito")` = `~/.local/share/zion/logs/dockerized/monolito` (usa `$XDG_DATA_HOME` se definido)
 **No container do teste:** o mesmo diretório é montado em `/workspace/logs` (rw) — testes podem escrever artefatos lá
 
 **Logs do host/sistema:**

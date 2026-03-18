@@ -49,7 +49,7 @@ x-base-volumes: &base-volumes
   - /etc/os-release:/host/etc/os-release:ro
   - /tmp/zion-hive-mind:/workspace/.hive-mind
   # Logs de servicos Docker (zion docker run/test) — acessiveis pelo agente
-  - /tmp/zion-logs/dockerized:/workspace/logs/docker:ro
+  - ${XDG_DATA_HOME:-${HOME}/.local/share}/zion/logs/dockerized:/workspace/logs/docker:ro
   # Docker socket — permite agente gerenciar containers (zion docker run/install/logs)
   - /var/run/docker.sock:/var/run/docker.sock
   # Dockerized configs — agente pode editar docker-compose, .env, etc.

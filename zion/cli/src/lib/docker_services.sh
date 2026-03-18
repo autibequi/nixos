@@ -53,14 +53,12 @@ zion_docker_project_name() {
 }
 
 zion_docker_log_dir() {
-  echo "/tmp/zion-logs/dockerized/${1}"
+  echo "${XDG_DATA_HOME:-$HOME/.local/share}/zion/logs/dockerized/${1}"
 }
 
 zion_ensure_log_dir() {
   local dir="$1"
-  mkdir -p "$dir" 2>/dev/null && return 0
-  # Parent pode existir owned by root (ex: criado via docker/sudo) — corrigir e recriar
-  sudo mkdir -p "$dir" && sudo chown -R "$(id -u):$(id -g)" "/tmp/zion-logs"
+  mkdir -p "$dir"
 }
 
 # Portas host publicadas por servico (para liberar antes do run)
