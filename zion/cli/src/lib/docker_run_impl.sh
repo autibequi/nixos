@@ -27,6 +27,7 @@ _zion_dk_run() {
 
   # Exportar variaveis que o compose precisa (com override de worktree)
   zion_docker_export_dirs "$service"
+  _zion_dk_container_fixup
   export ZION_NIXOS_DIR="$zion_nixos_dir"
   export APP_ENV="$env"
 

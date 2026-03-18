@@ -12,6 +12,10 @@ _zion_dk_install() {
   zion_docker_validate_service "$service" || return 1
   zion_docker_init_worktree "$service" "$worktree" || return 1
 
+  # Exportar e fixar paths para container→host translation
+  zion_docker_export_dirs "$service"
+  _zion_dk_container_fixup
+
   local dir config_dir log_dir
   dir=$(zion_docker_effective_dir "$service")
   config_dir=$(zion_docker_config_dir "$service")
@@ -46,11 +50,13 @@ _zion_dk_install() {
     echo "Rodando: ferramentas -> npm install"
     echo "---"
 
+    local ssh_dir="${HOST_SSH_DIR:-$HOME/.ssh}"
+    local npmrc="${HOST_NPMRC:-$HOME/.npmrc}"
     docker run \
       --rm \
       -it \
-      -v "$HOME/.ssh:/ssh-host:ro" \
-      -v "$HOME/.npmrc:/npmrc-host:ro" \
+      -v "$ssh_dir:/ssh-host:ro" \
+      -v "$npmrc:/npmrc-host:ro" \
       -v "$dir:/app" \
       -e NPM_TOKEN="${NPM_TOKEN:-}" \
       -e TERM=xterm-256color \
@@ -121,7 +127,7 @@ _zion_dk_install() {
   docker run \
     --rm \
     -it \
-    -v "$HOME/.ssh:/ssh-host:ro" \
+    -v "${HOST_SSH_DIR:-$HOME/.ssh}:/ssh-host:ro" \
     -v "$dir:/go/app" \
     -e GOPATH=/go \
     -e GOPRIVATE="github.com/estrategiahq" \

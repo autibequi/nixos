@@ -13,6 +13,10 @@ _zion_dk_shell() {
   zion_docker_validate_service "$service" || return 1
   zion_docker_init_worktree "$service" "$worktree" || return 1
 
+  # Exportar e fixar paths para container→host translation
+  zion_docker_export_dirs "$service"
+  _zion_dk_container_fixup
+
   local dir project compose
   dir=$(zion_docker_effective_dir "$service")
   project=$(zion_docker_effective_project "$service")

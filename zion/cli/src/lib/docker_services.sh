@@ -53,7 +53,11 @@ zion_docker_project_name() {
 }
 
 zion_docker_log_dir() {
-  echo "${XDG_DATA_HOME:-$HOME/.local/share}/zion/logs/dockerized/${1}"
+  if [[ "${CLAUDE_ENV:-}" == "container" ]]; then
+    echo "/workspace/logs/docker/${1}"
+  else
+    echo "${XDG_DATA_HOME:-$HOME/.local/share}/zion/logs/dockerized/${1}"
+  fi
 }
 
 zion_ensure_log_dir() {
@@ -311,4 +315,35 @@ zion_docker_stop_reverseproxy_if_idle() {
     echo "[zion docker] Nenhum servico estrategia rodando, parando reverse proxy..."
     docker compose -f "$_REVERSEPROXY_DIR/docker-compose.yml" -p "$_REVERSEPROXY_PROJECT" down 2>/dev/null
   fi
+}
+
+# --- Container → Host path translation ---
+# Quando o agente roda dentro do container, os *_DIR apontam para /home/claude/projects/...
+# Mas o Docker daemon (no host) precisa de paths do host para volumes e build context.
+# Os mirror mounts (${HOME}/projects:${HOME}/projects no compose) garantem que host paths
+# existem fisicamente dentro do container, entao apos fixup tudo funciona:
+# - docker compose build (CLI le context localmente via mirror mount)
+# - docker compose up (daemon resolve volumes no host)
+# - docker run -v (daemon resolve no host)
+_zion_dk_container_fixup() {
+  [[ "${CLAUDE_ENV:-}" != "container" ]] && return 0
+  local host_home="${HOST_HOME:-}"
+  [[ -z "$host_home" ]] && return 0
+
+  local container_home="/home/claude"
+
+  # Traduzir *_DIR de /home/claude/... para host paths
+  for var in MONOLITO_DIR BO_CONTAINER_DIR FRONT_STUDENT_DIR; do
+    local val="${!var:-}"
+    [[ -n "$val" ]] && export "$var"="${val/#$container_home/$host_home}"
+  done
+
+  # Traduzir SSH path para docker run (install/shell)
+  export HOST_SSH_DIR="${host_home}/.ssh"
+  export HOST_NPMRC="${host_home}/.npmrc"
+
+  # ZION_NIXOS_DIR para compose files que referenciam paths do host
+  export ZION_NIXOS_DIR="${HOST_NIXOS_DIR:-$host_home/nixos}"
+  # Atualizar shell var tambem (usada por zion_docker_config_dir apos fixup)
+  zion_nixos_dir="$ZION_NIXOS_DIR"
 }

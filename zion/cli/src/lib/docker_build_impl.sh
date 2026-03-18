@@ -10,6 +10,7 @@ _zion_dk_build() {
   zion_docker_init_worktree "$service" "$worktree" || return 1
 
   zion_docker_export_dirs "$service"
+  _zion_dk_container_fixup
   export ZION_NIXOS_DIR="$zion_nixos_dir"
 
   local compose project

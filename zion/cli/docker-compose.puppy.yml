@@ -1,5 +1,5 @@
 x-env-base: &env-base
-  PATH: /home/claude/.local/bin:/home/claude/.nix-profile/bin:/usr/bin:/bin
+  PATH: /home/claude/.local/bin:/home/claude/.nix-profile/bin:/workspace/zion/cli:/usr/bin:/bin
   ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
   CURSOR_API_KEY: ${CURSOR_API_KEY:-}
   CLAUDE_SESSION: ${CLAUDE_SESSION:-}
@@ -10,6 +10,11 @@ x-env-base: &env-base
   WAYLAND_DISPLAY: ${WAYLAND_DISPLAY:-wayland-1}
   XDG_RUNTIME_DIR: /run/user/1000
   DISABLE_AUTOUPDATER: false
+  # Docker autonomy: host paths for container→host translation
+  ZION_NIXOS_DIR: ${HOME}/nixos
+  HOST_HOME: ${HOME}
+  HOST_PROJECTS_DIR: ${HOME}/projects
+  HOST_NIXOS_DIR: ${HOME}/nixos
 
 x-env-worker: &env-worker
   <<: *env-base
@@ -45,11 +50,14 @@ x-base-volumes: &base-volumes
   - /etc/os-release:/host/etc/os-release:ro
   - /tmp/zion-hive-mind:/workspace/.hive-mind
   # Logs de servicos Docker (zion docker run/test) — acessiveis pelo agente
-  - ${XDG_DATA_HOME:-${HOME}/.local/share}/zion/logs/dockerized:/workspace/logs/docker:ro
+  - ${XDG_DATA_HOME:-${HOME}/.local/share}/zion/logs/dockerized:/workspace/logs/docker:rw
   # Docker socket — permite agente gerenciar containers (zion docker run/install/logs)
   - /var/run/docker.sock:/var/run/docker.sock
   # Dockerized configs — agente pode editar docker-compose, .env, etc.
   - ${HOME}/.local/share/zion/dockerized:/workspace/dockerized
+  # Mirror mounts: host paths acessiveis dentro do container (Docker build context + daemon volumes)
+  - ${HOME}/projects:${HOME}/projects
+  - ${HOME}/nixos:${HOME}/nixos:ro
 
 services:
   puppy:
