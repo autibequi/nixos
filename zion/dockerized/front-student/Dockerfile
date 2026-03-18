@@ -12,5 +12,6 @@ ENV HOST=0.0.0.0
 ENV PORT=8082
 
 # node_modules vem do bind mount (gerado por: zion docker install front-student)
-# Roda nuxt dev diretamente — vars vem do Docker env_file
-CMD ["./node_modules/.bin/nuxt", "dev"]
+# Comando: npm run <VERTICAL>:<APP_ENV> (ex: npm run carreiras-juridicas:sand)
+# VERTICAL e APP_ENV vem do docker-compose environment
+CMD ["sh", "-c", "npm run ${VERTICAL:-carreiras-juridicas}:${APP_ENV:-sand}"]

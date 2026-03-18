@@ -5,7 +5,7 @@ services:
       dockerfile: ${ZION_NIXOS_DIR}/zion/dockerized/bo-container/Dockerfile
     container_name: zion-dk-bo-container-app
     env_file:
-      - ./env/${APP_ENV:-sandbox}.env
+      - ./env/${APP_ENV_FILE:-sandbox}.env
     environment:
       - FORCE_COLOR=1
       - TERM=xterm-256color

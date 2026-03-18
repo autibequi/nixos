@@ -210,6 +210,10 @@ commands:
             short: -w
             arg: name
             help: "Usa um git worktree alternativo (nome = ultimo componente do path)"
+          - long: --vertical
+            short: -V
+            arg: vertical
+            help: "Vertical do front-student (carreiras-juridicas, concursos, medicina, etc.)"
         filename: commands/docker_run.sh
 
       - name: stop
