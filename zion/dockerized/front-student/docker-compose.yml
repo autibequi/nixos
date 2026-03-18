@@ -16,6 +16,9 @@ services:
       - ${FRONT_STUDENT_DIR}:/app
     ports:
       - "3005:3005"
+    extra_hosts:
+      # Resolve *.local.estrategia-sandbox.com.br via host (onde o reverse proxy roda)
+      - "api.local.estrategia-sandbox.com.br:host-gateway"
     networks:
       - default
     restart: unless-stopped

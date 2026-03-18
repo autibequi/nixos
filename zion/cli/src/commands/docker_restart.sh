@@ -5,6 +5,20 @@ service="${args[service]}"
 env="${args[--env]:-}"
 worktree="${args[--worktree]:-}"
 
+# Caso especial: reverseproxy (nao e servico registrado, tem handling proprio)
+if [[ "$service" == "reverseproxy" ]]; then
+  echo "[zion docker] Recarregando nginx do reverse proxy..."
+  if docker ps --format '{{.Names}}' 2>/dev/null | grep -q '^zion-reverseproxy$'; then
+    docker exec zion-reverseproxy nginx -s reload
+    echo "[zion docker] nginx recarregado."
+  else
+    echo "[zion docker] Reverse proxy nao esta rodando. Subindo..."
+    docker compose -f "${zion_nixos_dir}/zion/dockerized/reverseproxy/docker-compose.yml" \
+      -p zion-dk-reverseproxy up -d --remove-orphans
+  fi
+  exit 0
+fi
+
 zion_docker_init_worktree "$service" "$worktree" || exit 1
 
 project=$(zion_docker_effective_project "$service")
