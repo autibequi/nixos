@@ -44,7 +44,7 @@ zion_docker_project_name() {
 }
 
 zion_docker_log_dir() {
-  echo "$HOME/.zion/logs/docker/${1}"
+  echo "$HOME/.local/share/zion/logs/docker/${1}"
 }
 
 # Lista servicos conhecidos
