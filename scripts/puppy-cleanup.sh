@@ -10,8 +10,8 @@ set -euo pipefail
 PROJECT_DIR="${SCHEDULER_PROJECT_DIR:-${PROJECT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}}"
 VAULT_DIR="${SCHEDULER_VAULT_DIR:-${HOME:-/tmp}/.ovault/Work}"
 
-RUNNING_ROOT="${VAULT_DIR}/_agent/tasks/running"
-PENDING_ROOT="${VAULT_DIR}/_agent/tasks/pending"
+RUNNING_ROOT="${VAULT_DIR}/tasks/doing"
+PENDING_ROOT="${VAULT_DIR}/tasks/backlog"
 EPHEMERAL="${PROJECT_DIR}/.ephemeral"
 
 [ -d "$RUNNING_ROOT" ] || exit 0

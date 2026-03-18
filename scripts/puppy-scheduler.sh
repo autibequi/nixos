@@ -25,8 +25,8 @@ DRY_RUN=0
 [[ "${1:-}" == "--dry-run" ]] && DRY_RUN=1
 IN_CONTAINER="${SCHEDULER_IN_CONTAINER:-0}"
 
-TASKS_DIR="$VAULT_DIR/_agent/tasks"
-SCHEDULED_FILE="$VAULT_DIR/scheduled.md"
+TASKS_DIR="$VAULT_DIR/tasks"
+SCHEDULED_FILE="$VAULT_DIR/agents/task.log.md"
 KANBAN_FILE="$VAULT_DIR/kanban.md"
 
 # ── Setup ────────────────────────────────────────────────────────────────────
@@ -99,17 +99,32 @@ json.dump(s, open(f, 'w'), indent=2)
 " 2>/dev/null
 }
 
-# ── Clock mapping (backward compat) ─────────────────────────────────────────
+# ── Clock mapping (backward compat + new patterns) ──────────────────────────
 clock_to_interval() {
   case "$1" in
-    every10)  echo 10 ;;
-    every60)  echo 60 ;;
-    every240) echo 240 ;;
-    *)        echo 60 ;;
+    every5m)             echo 5   ;;
+    every10|every10m)    echo 10  ;;
+    every15m)            echo 15  ;;
+    every30m)            echo 30  ;;
+    every60|every60m|every1h) echo 60 ;;
+    every2h)             echo 120 ;;
+    every4h|every240)    echo 240 ;;
+    every6h)             echo 360 ;;
+    every12h)            echo 720 ;;
+    every24h|daily)      echo 1440 ;;
+    daily@*)             echo 1440 ;;
+    *)                   echo 60  ;;
   esac
 }
 
-# ── Parse frontmatter from task CLAUDE.md ────────────────────────────────────
+# ── Parse frontmatter from task TASK.md (fallback CLAUDE.md) ─────────────────
+_task_config_file() {
+  local task_dir="$1"
+  if [ -f "$task_dir/TASK.md" ]; then echo "$task_dir/TASK.md"
+  else echo "$task_dir/CLAUDE.md"
+  fi
+}
+
 parse_fm() {
   local file="$1" key="$2"
   [ -f "$file" ] || return
@@ -130,42 +145,43 @@ parse_fm() {
 # Get interval in minutes for a task
 get_interval() {
   local task_dir="$1"
-  local interval timeout_val clock_val
-  interval=$(parse_fm "$task_dir/CLAUDE.md" "interval")
+  local cfg interval clock_val
+  cfg=$(_task_config_file "$task_dir")
+  interval=$(parse_fm "$cfg" "interval")
   if [ -n "$interval" ]; then
     echo "$interval"
     return
   fi
-  # Fallback: clock → interval mapping
-  clock_val=$(parse_fm "$task_dir/CLAUDE.md" "clock")
+  clock_val=$(parse_fm "$cfg" "clock")
   clock_to_interval "${clock_val:-every60}"
 }
 
 get_timeout() {
   local task_dir="$1"
   local fm
-  fm=$(parse_fm "$task_dir/CLAUDE.md" "timeout")
+  fm=$(parse_fm "$(_task_config_file "$task_dir")" "timeout")
   echo "${fm:-300}"
 }
 
 get_model() {
   local task_dir="$1"
   local fm
-  fm=$(parse_fm "$task_dir/CLAUDE.md" "model")
+  fm=$(parse_fm "$(_task_config_file "$task_dir")" "model")
   echo "${fm:-haiku}"
 }
 
 # ── Discover all recurring tasks ─────────────────────────────────────────────
 discover_tasks() {
   local tasks=()
-  # From recurring/ directory
-  if [ -d "$TASKS_DIR/recurring" ]; then
-    for dir in "$TASKS_DIR/recurring"/*/; do
+  # From _scheduled/ directory (new) or recurring/ (legacy)
+  for sched_dir in "$TASKS_DIR/_scheduled" "$TASKS_DIR/recurring"; do
+    [ -d "$sched_dir" ] || continue
+    for dir in "$sched_dir"/*/; do
       [ -d "$dir" ] || continue
-      [ -f "$dir/CLAUDE.md" ] || continue
+      [ -f "$dir/TASK.md" ] || [ -f "$dir/CLAUDE.md" ] || continue
       tasks+=("$(basename "$dir")")
     done
-  fi
+  done
   printf '%s\n' "${tasks[@]}"
 }
 
@@ -216,7 +232,12 @@ build_task_queue() {
 
   while IFS= read -r task; do
     [ -z "$task" ] && continue
-    local task_dir="$TASKS_DIR/recurring/$task"
+    local task_dir
+    if [ -d "$TASKS_DIR/_scheduled/$task" ]; then
+      task_dir="$TASKS_DIR/_scheduled/$task"
+    else
+      task_dir="$TASKS_DIR/recurring/$task"
+    fi
     local interval
     interval=$(get_interval "$task_dir")
 
@@ -300,9 +321,10 @@ init_state
 # Process any leftover completion markers from previous tick
 process_completions
 
-# Check prerequisites — recurring/ is authoritative; kanban only needed for one-shot tasks
+# Check prerequisites — _scheduled/ is authoritative; kanban only needed for one-shot tasks
 _has_recurring=0
-[ -d "$TASKS_DIR/recurring" ] && [ -n "$(ls -A "$TASKS_DIR/recurring" 2>/dev/null)" ] && _has_recurring=1
+[ -d "$TASKS_DIR/_scheduled" ] && [ -n "$(ls -A "$TASKS_DIR/_scheduled" 2>/dev/null)" ] && _has_recurring=1
+[ "$_has_recurring" -eq 0 ] && [ -d "$TASKS_DIR/recurring" ] && [ -n "$(ls -A "$TASKS_DIR/recurring" 2>/dev/null)" ] && _has_recurring=1
 
 if [ "$_has_recurring" -eq 0 ]; then
   if [ ! -f "$KANBAN_FILE" ] && [ ! -f "$SCHEDULED_FILE" ]; then
@@ -330,7 +352,9 @@ for entry in "${queue[@]}"; do
   [ -z "$entry" ] && continue
   IFS='|' read -r priority estimate interval forced overdue_s task <<< "$entry"
 
-  local_model=$(get_model "$TASKS_DIR/recurring/$task")
+  if [ -d "$TASKS_DIR/_scheduled/$task" ]; then _tdir="$TASKS_DIR/_scheduled/$task"
+  else _tdir="$TASKS_DIR/recurring/$task"; fi
+  local_model=$(get_model "$_tdir")
 
   if [ "$estimate" -le "$budget_remaining" ]; then
     # Fits in budget
@@ -375,7 +399,9 @@ if [ "$DRY_RUN" = "1" ]; then
   for entry in "${queue[@]}"; do
     [ -z "$entry" ] && continue
     IFS='|' read -r priority estimate interval forced overdue_s task <<< "$entry"
-    local_model=$(get_model "$TASKS_DIR/recurring/$task")
+    if [ -d "$TASKS_DIR/_scheduled/$task" ]; then _tdir="$TASKS_DIR/_scheduled/$task"
+    else _tdir="$TASKS_DIR/recurring/$task"; fi
+    local_model=$(get_model "$_tdir")
     local_avg=$(get_state "$task" "avg_duration_s")
     printf "  %-20s P%d  int=%3dm  est=%4ds  avg=%4ss  model=%-6s\n" \
       "$task" "$priority" "$interval" "$estimate" "${local_avg:-?}" "$local_model"

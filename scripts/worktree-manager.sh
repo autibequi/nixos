@@ -201,7 +201,7 @@ EOF
 update_dashboard() {
     init_registry
 
-    local dashboard="${VAULT}/_agent/worktrees.md"
+    local dashboard="${VAULT}/agents/worktrees.md"
     local now
     now=$(date -u '+%Y-%m-%d %H:%M:%S')
 
@@ -283,7 +283,7 @@ worktree_exit() {
     fi
 
     # Move pra reports
-    local report_dir="${VAULT}/_agent/reports/worktree-${current}-$(date +%Y%m%d-%H%M%S)"
+    local report_dir="${VAULT}/agents/reports/worktree-${current}-$(date +%Y%m%d-%H%M%S)"
     mkdir -p "$report_dir"
 
     if [[ -d "$WORKTREE_DIR/$current" ]]; then

@@ -4,8 +4,8 @@
 set -euo pipefail
 
 KANBAN="${KANBAN_FILE:-/workspace/obsidian/kanban.md}"
-SCHEDULED="${SCHEDULED_FILE:-/workspace/obsidian/_agent/scheduled.md}"
-CEMITERIO="${CEMITERIO_FILE:-/workspace/obsidian/cemiterio-tasks.md}"
+SCHEDULED="${SCHEDULED_FILE:-/workspace/obsidian/agents/task.log.md}"
+CEMITERIO="${CEMITERIO_FILE:-/workspace/obsidian/trash/archive/2026-03/cemiterio-tasks.md}"
 LOCKFILE="${KANBAN_LOCKFILE:-/workspace/.ephemeral/.kanban.lock}"
 
 mkdir -p "$(dirname "$LOCKFILE")"

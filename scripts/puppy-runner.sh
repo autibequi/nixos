@@ -2,7 +2,7 @@
 set -euo pipefail
 
 WORKSPACE="/workspace"
-TASKS="$WORKSPACE/obsidian/_agent/tasks"
+TASKS="$WORKSPACE/obsidian/tasks"
 EPHEMERAL="$WORKSPACE/.ephemeral"
 KANBAN="$WORKSPACE/obsidian/kanban.md"
 SCHEDULER_VERBOSE="${SCHEDULER_VERBOSE:-0}"
@@ -21,7 +21,9 @@ fi
 RUN_ID="$$-$(date +%s)-${RANDOM:-0}"
 NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}"
 export NODE_OPTIONS
-SCHEDULED="$WORKSPACE/obsidian/_agent/scheduled.md"
+SCHEDULED="$WORKSPACE/obsidian/agents/task.log.md"
+TASK_LOG="$WORKSPACE/obsidian/agents/task.log.md"
+MURAL="$WORKSPACE/obsidian/MURAL.md"
 export KANBAN_FILE="$KANBAN"
 export SCHEDULED_FILE="$SCHEDULED"
 export KANBAN_LOCKFILE="$EPHEMERAL/.kanban.lock"
@@ -31,8 +33,8 @@ DEFAULT_MODEL="haiku"
 DEFAULT_MAX_TURNS=12
 
 
-mkdir -p "$EPHEMERAL/locks" "$TASKS/running" "$TASKS/done" "$TASKS/failed" \
-  "$WORKSPACE/obsidian/sugestoes" "$WORKSPACE/obsidian/_agent/reports"
+mkdir -p "$EPHEMERAL/locks" "$TASKS/doing" "$TASKS/done" "$TASKS/cancelled" \
+  "$WORKSPACE/obsidian/agents/reports" "$WORKSPACE/obsidian/agents/diarios"
 
 # Presença em .ephemeral/agents/ — puppies = workers em background (Zion = sessões interativas)
 AGENTS_ROOT="$WORKSPACE/.ephemeral/agents"
@@ -80,7 +82,7 @@ recover_orphans() {
   now=$(date +%s)
   local grace=60  # segundos extras após timeout antes de declarar orphan
 
-  for dir in "$TASKS/running"/*/; do
+  for dir in "$TASKS/doing"/*/; do
     [ -d "$dir" ] || continue
     local name
     name=$(basename "$dir")
@@ -90,7 +92,7 @@ recover_orphans() {
     lock_pid=$(grep '^pid=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "")
     lock_started=$(grep '^started=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "")
     lock_timeout=$(grep '^timeout=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "300")
-    lock_source=$(grep '^source=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "pending")
+    lock_source=$(grep '^source=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "backlog")
     lock_worker=$(grep '^worker=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "")
     lock_run_id=$(grep '^run_id=' "$dir/.lock" 2>/dev/null | cut -d= -f2- || echo "")
 
@@ -130,14 +132,14 @@ recover_orphans() {
     rm -f "$dir/.lock"
     task_unlock "$name" 2>/dev/null || true
 
-    if [ "$lock_source" = "recurring" ]; then
+    if [ "$lock_source" = "_scheduled" ] || [ "$lock_source" = "recurring" ]; then
       rm -rf "$dir"
       kanban_unclaim_recurring "$name" 2>/dev/null || true
-      echo "[puppy:$WORKER_ID] '$name' orphan → recurring"
+      echo "[puppy:$WORKER_ID] '$name' orphan → _scheduled"
     else
-      mv "$dir" "$TASKS/pending/$name" 2>/dev/null || true
+      mv "$dir" "$TASKS/backlog/$name" 2>/dev/null || true
       kanban_unclaim_card "$name" 2>/dev/null || true
-      echo "[puppy:$WORKER_ID] '$name' orphan → pending"
+      echo "[puppy:$WORKER_ID] '$name' orphan → backlog"
     fi
   done
 }
@@ -145,7 +147,7 @@ recover_orphans() {
 # ── Cleanup ──────────────────────────────────────────────────────
 cleanup() {
   local sig="${1:-EXIT}"
-  for dir in "$TASKS/running"/*/; do
+  for dir in "$TASKS/doing"/*/; do
     [ -d "$dir" ] || continue
     local name
     name=$(basename "$dir")
@@ -154,13 +156,13 @@ cleanup() {
       lock_worker=$(grep '^worker=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "")
       if [ "$lock_worker" = "$WORKER_ID" ]; then
         local source
-        source=$(grep '^source=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "pending")
+        source=$(grep '^source=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "backlog")
         rm -f "$dir/.lock"
-        if [ "$source" = "recurring" ]; then
-          mv "$dir" "$TASKS/recurring/$name" 2>/dev/null || rm -rf "$dir"
+        if [ "$source" = "_scheduled" ] || [ "$source" = "recurring" ]; then
+          mv "$dir" "$TASKS/_scheduled/$name" 2>/dev/null || rm -rf "$dir"
           kanban_unclaim_recurring "$name" 2>/dev/null || true
         else
-          mv "$dir" "$TASKS/pending/$name" 2>/dev/null || rm -rf "$dir"
+          mv "$dir" "$TASKS/backlog/$name" 2>/dev/null || rm -rf "$dir"
         fi
         task_unlock "$name"
         echo "[puppy:$WORKER_ID] $sig — '$name' devolvida"
@@ -190,47 +192,55 @@ parse_frontmatter() {
   done < "$file"
 }
 
+# ── Task config file (TASK.md with CLAUDE.md fallback) ───────────
+task_config_file() {
+  local task_dir="$1"
+  if [ -f "$task_dir/TASK.md" ]; then echo "$task_dir/TASK.md"
+  else echo "$task_dir/CLAUDE.md"
+  fi
+}
+
 # ── Task config helpers ──────────────────────────────────────────
 get_model() {
   local task_dir="$1"
   [ -n "${SCHEDULER_MODEL:-}" ] && echo "$SCHEDULER_MODEL" && return
-  local fm; fm=$(parse_frontmatter "$task_dir/CLAUDE.md" "model")
+  local fm; fm=$(parse_frontmatter "$(task_config_file "$task_dir")" "model")
   echo "${fm:-$DEFAULT_MODEL}"
 }
 
 get_timeout() {
   local task_dir="$1"
-  local fm; fm=$(parse_frontmatter "$task_dir/CLAUDE.md" "timeout")
+  local fm; fm=$(parse_frontmatter "$(task_config_file "$task_dir")" "timeout")
   echo "${fm:-$DEFAULT_TIMEOUT}"
 }
 
 get_clock() {
   local task_dir="$1"
-  local fm; fm=$(parse_frontmatter "$task_dir/CLAUDE.md" "clock")
+  local fm; fm=$(parse_frontmatter "$(task_config_file "$task_dir")" "clock")
   echo "${fm:-every60}"
 }
 
 get_mcp_flags() {
   local task_dir="$1"
-  local mcp; mcp=$(parse_frontmatter "$task_dir/CLAUDE.md" "mcp")
+  local mcp; mcp=$(parse_frontmatter "$(task_config_file "$task_dir")" "mcp")
   [ "$mcp" = "true" ] && echo "" || echo "--mcp-config $EPHEMERAL/no-mcp.json"
 }
 
 get_max_turns() {
   local task_dir="$1"
-  local fm; fm=$(parse_frontmatter "$task_dir/CLAUDE.md" "max_turns")
+  local fm; fm=$(parse_frontmatter "$(task_config_file "$task_dir")" "max_turns")
   echo "${fm:-$DEFAULT_MAX_TURNS}"
 }
 
 get_wave() {
   local task_dir="$1"
-  local fm; fm=$(parse_frontmatter "$task_dir/CLAUDE.md" "wave")
+  local fm; fm=$(parse_frontmatter "$(task_config_file "$task_dir")" "wave")
   echo "${fm:-1}"
 }
 
 get_depends_on() {
   local task_dir="$1"
-  local fm; fm=$(parse_frontmatter "$task_dir/CLAUDE.md" "depends_on")
+  local fm; fm=$(parse_frontmatter "$(task_config_file "$task_dir")" "depends_on")
   echo "${fm:-}"
 }
 
@@ -238,10 +248,10 @@ get_depends_on() {
 group_by_wave() {
   local tasks=("$@")
   declare -A wave_tasks
-  
+
   for task in "${tasks[@]}"; do
     local w
-    w=$(get_wave "$TASKS/pending/$task")
+    w=$(get_wave "$TASKS/backlog/$task")
     wave_tasks[$w]="${wave_tasks[$w]:-} $task"
   done
   
@@ -260,10 +270,10 @@ run_wave_parallel() {
   local pids=()
   for task in "${tasks[@]}"; do
     (
-      claim_task "$task" "pending" || exit 1
-      run_single_task "$task" "pending" "0"
+      claim_task "$task" "backlog" || exit 1
+      run_single_task "$task" "backlog" "0"
       local exit_code=$?
-      finish_task "$task" "pending" "$exit_code"
+      finish_task "$task" "backlog" "$exit_code"
       exit $exit_code
     ) &
     pids+=($!)
@@ -283,15 +293,23 @@ run_wave_parallel() {
 get_interval() {
   local task_dir="$1"
   local interval
-  interval=$(parse_frontmatter "$task_dir/CLAUDE.md" "interval")
+  interval=$(parse_frontmatter "$(task_config_file "$task_dir")" "interval")
   if [ -n "$interval" ]; then echo "$interval"; return; fi
   local clock_val
   clock_val=$(get_clock "$task_dir")
   case "$clock_val" in
-    every10)  echo 10 ;;
-    every60)  echo 60 ;;
-    every240) echo 240 ;;
-    *)        echo 60 ;;
+    every5m)             echo 5   ;;
+    every10|every10m)    echo 10  ;;
+    every15m)            echo 15  ;;
+    every30m)            echo 30  ;;
+    every60|every60m|every1h) echo 60 ;;
+    every2h)             echo 120 ;;
+    every4h|every240)    echo 240 ;;
+    every6h)             echo 360 ;;
+    every12h)            echo 720 ;;
+    every24h|daily)      echo 1440 ;;
+    daily@*)             echo 1440 ;;
+    *)                   echo 60  ;;
   esac
 }
 
@@ -308,35 +326,37 @@ should_run_clock() {
 # ── Claim task ───────────────────────────────────────────────────
 claim_task() {
   local task="$1" source_dir="$2"
-  [ -f "$TASKS/$source_dir/$task/CLAUDE.md" ] || { echo "[puppy:$WORKER_ID] '$task' sem CLAUDE.md — skip"; return 1; }
+  local task_dir="$TASKS/$source_dir/$task"
+  local config_file
+  config_file=$(task_config_file "$task_dir")
+  [ -f "$config_file" ] || { echo "[puppy:$WORKER_ID] '$task' sem TASK.md/CLAUDE.md — skip"; return 1; }
   task_lock "$task" || return 1
 
   # Clock filter
-  if ! should_run_clock "$TASKS/$source_dir/$task"; then
-    echo "[puppy:$WORKER_ID] '$task' clock mismatch (task=$(get_clock "$TASKS/$source_dir/$task"), worker=$SCHEDULER_CLOCK) — skip"
+  if ! should_run_clock "$task_dir"; then
+    echo "[puppy:$WORKER_ID] '$task' clock mismatch (task=$(get_clock "$task_dir"), worker=$SCHEDULER_CLOCK) — skip"
     task_unlock "$task"; return 1
   fi
 
-  # Kanban claim
-  if [ "$source_dir" = "recurring" ]; then
-    kanban_claim_recurring "$task" "$WORKER_ID" 2>/dev/null || { task_unlock "$task"; return 1; }
+  # Kanban claim (best-effort, kanban.md may be retired)
+  if [ "$source_dir" = "_scheduled" ] || [ "$source_dir" = "recurring" ]; then
+    kanban_claim_recurring "$task" "$WORKER_ID" 2>/dev/null || true
   else
-    kanban_claim_card "$task" "$WORKER_ID" 2>/dev/null || { task_unlock "$task"; return 1; }
+    kanban_claim_card "$task" "$WORKER_ID" 2>/dev/null || true
   fi
 
   # Filesystem
-  if [ "$source_dir" = "recurring" ]; then
-    cp -r "$TASKS/recurring/$task" "$TASKS/running/$task" 2>/dev/null || {
-      kanban_unclaim_recurring "$task" 2>/dev/null || true
+  if [ "$source_dir" = "_scheduled" ] || [ "$source_dir" = "recurring" ]; then
+    cp -r "$TASKS/$source_dir/$task" "$TASKS/doing/$task" 2>/dev/null || {
       task_unlock "$task"; return 1
     }
   else
-    mv "$TASKS/pending/$task" "$TASKS/running/$task" 2>/dev/null || { task_unlock "$task"; return 1; }
+    mv "$TASKS/$source_dir/$task" "$TASKS/doing/$task" 2>/dev/null || { task_unlock "$task"; return 1; }
   fi
 
   local task_timeout
-  task_timeout=$(get_timeout "$TASKS/running/$task")
-  cat > "$TASKS/running/$task/.lock" <<EOF
+  task_timeout=$(get_timeout "$TASKS/doing/$task")
+  cat > "$TASKS/doing/$task/.lock" <<EOF
 started=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 timeout=$task_timeout
 source=$source_dir
@@ -345,6 +365,9 @@ pid=$$
 run_id=$RUN_ID
 EOF
   echo "[puppy:$WORKER_ID] Claimed '$task' ($source_dir, ${task_timeout}s)"
+
+  # Log task start
+  echo "| $(date -u +%Y-%m-%dT%H:%M:%SZ) | $task | ▶ start | $(get_model "$TASKS/doing/$task") | — |" >> "$TASK_LOG" 2>/dev/null || true
 }
 
 # ── Build prompt ─────────────────────────────────────────────────
@@ -354,7 +377,8 @@ build_task_block() {
   mkdir -p "$context_dir"
 
   local instructions context historico recurring_msg
-  instructions=$(cat "$TASKS/running/$task/CLAUDE.md")
+  local cfg_file; cfg_file=$(task_config_file "$TASKS/doing/$task")
+  instructions=$(cat "$cfg_file")
 
   context=""
   [ -f "$context_dir/contexto.md" ] && context="
@@ -393,25 +417,25 @@ run_single_task() {
   block=$(build_task_block "$task" "$source_dir" "$is_recurring")
 
   local memoria=""
-  [ -f "$TASKS/running/$task/memoria.md" ] && memoria="
+  [ -f "$TASKS/doing/$task/memoria.md" ] && memoria="
 ### Memória evolutiva
-$(cat "$TASKS/running/$task/memoria.md")"
+$(cat "$TASKS/doing/$task/memoria.md")"
 
   logfile="$EPHEMERAL/notes/$task/last-run.log"
   mkdir -p "$EPHEMERAL/notes/$task"
 
   local task_timeout task_model task_max_turns mcp_flags_str
-  task_timeout=$(get_timeout "$TASKS/running/$task")
-  task_model=$(get_model "$TASKS/running/$task")
-  task_max_turns=$(get_max_turns "$TASKS/running/$task")
-  mcp_flags_str=$(get_mcp_flags "$TASKS/running/$task")
+  task_timeout=$(get_timeout "$TASKS/doing/$task")
+  task_model=$(get_model "$TASKS/doing/$task")
+  task_max_turns=$(get_max_turns "$TASKS/doing/$task")
+  mcp_flags_str=$(get_mcp_flags "$TASKS/doing/$task")
 
   echo "[puppy:$WORKER_ID:$task] Claude (model=$task_model, timeout=${task_timeout}s, $(date -u +%H:%M:%S))"
 
   # Auto-tracking: criar worktree virtual pra task
   local worker_branch="worker/${SCHEDULER_CLOCK}/${task}"
   export SCHEDULER_CURRENT_WORKTREE="$task"
-  "$WORKSPACE/nixos/scripts/worktree-manager.sh" init "$task" "$worker_branch" "Task: $task (Worker: $WORKER_ID)" || true
+  "$WORKSPACE/nixos/scripts/worktree-manager.sh" init "$task" "$worker_branch" "Task: $task (Worker: $WORKER_ID)" 2>/dev/null || true
 
   local mcp_flags=()
   [ -n "$mcp_flags_str" ] && mcp_flags=($mcp_flags_str)
@@ -426,16 +450,19 @@ $block
 $memoria
 
 ## Instruções
-1. Siga o protocolo do CLAUDE.md da task
+1. Siga o protocolo do TASK.md da task
 2. Gere o artefato concreto pedido
-3. Atualize memoria.md em $TASKS/running/$task/memoria.md
+3. Atualize memoria.md em $TASKS/doing/$task/memoria.md
 4. Atualize contexto em $EPHEMERAL/notes/$task/contexto.md
-5. Se identificar melhorias, salve em $WORKSPACE/obsidian/sugestoes/\$(date +%Y-%m-%d)-<topico>.md
+5. Se identificar melhorias, poste no MURAL: $WORKSPACE/obsidian/MURAL.md (seção Posts dos Agentes, NO TOPO)
+   NÃO criar arquivos em sugestoes/ (pasta aposentada)
 
 ## IMPORTANTE
 - NÃO mova diretórios — o runner cuida do lifecycle
-- NÃO edite obsidian/kanban.md — o runner atualiza
-- Registre em $EPHEMERAL/notes/$task/historico.log: TIMESTAMP | ok/fail | duração" 2>&1 | if [ "$SCHEDULER_VERBOSE" = "1" ]; then tee "$logfile"; else cat > "$logfile"; fi
+- NÃO edite obsidian/kanban.md — use MURAL.md para comunicação
+- Registre em $EPHEMERAL/notes/$task/historico.log: TIMESTAMP | ok/fail | duração
+- Diário: $WORKSPACE/obsidian/agents/diarios/$task/diario-\$(date +%Y-%m-%d).md
+- Memória cross-session: $WORKSPACE/obsidian/agents/diarios/$task/memoria.md" 2>&1 | if [ "$SCHEDULER_VERBOSE" = "1" ]; then tee "$logfile"; else cat > "$logfile"; fi
   local exit_code=${PIPESTATUS[0]}
 
   [ $exit_code -eq 0 ] && echo "[puppy:$WORKER_ID:$task] OK" || echo "[puppy:$WORKER_ID:$task] FAIL exit=$exit_code"
@@ -444,38 +471,78 @@ $memoria
 }
 
 # ── Finish task ──────────────────────────────────────────────────
+update_mural_kanban() {
+  local mural="$MURAL"
+  [ -f "$mural" ] || return 0
+  local tasks_dir="$TASKS"
+  local row=""
+  for col in inbox backlog doing done _waiting blocked cancelled; do
+    local items
+    items=$(ls "$tasks_dir/$col/"*.md 2>/dev/null | xargs -I{} basename {} .md 2>/dev/null | \
+      head -5 | tr '\n' ', ' | sed 's/,$//' || echo "")
+    # Also count folders (task dirs)
+    local folder_items
+    folder_items=$(ls -d "$tasks_dir/$col"/*/ 2>/dev/null | xargs -I{} basename {} 2>/dev/null | \
+      head -5 | tr '\n' ', ' | sed 's/,$//' || echo "")
+    [ -z "$items" ] && items="$folder_items"
+    [ -z "$items" ] && items="—"
+    row="$row| $items "
+  done
+  row="$row|"
+  local new_kanban="## Kanban\n\n| inbox | backlog | doing | done | _waiting | blocked | cancelled |\n|-------|---------|-------|------|----------|---------|-----------|\n$row"
+  # Replace between markers using python3 for reliability
+  python3 -c "
+import re, sys
+content = open('$mural').read()
+new_section = '''$new_kanban'''
+pattern = r'<!-- KANBAN:START[^>]*-->.*?<!-- KANBAN:END -->'
+replacement = '<!-- KANBAN:START — auto-gerado pelo runner, não editar manualmente -->\n' + new_section + '\n<!-- KANBAN:END -->'
+new_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
+open('$mural', 'w').write(new_content)
+" 2>/dev/null || true
+}
+
 finish_task() {
   local task="$1" source_dir="$2" exit_code="$3"
+  local task_elapsed_fmt
+  task_elapsed_fmt="$((${TASK_ELAPSED:-0}/60))m$((${TASK_ELAPSED:-0}%60))s"
+  local task_model_log
+  task_model_log=$(get_model "$TASKS/doing/$task" 2>/dev/null || echo "haiku")
 
   # Auto-tracking: fechar worktree virtual
-  "$WORKSPACE/nixos/scripts/worktree-manager.sh" exit || true
+  "$WORKSPACE/nixos/scripts/worktree-manager.sh" exit 2>/dev/null || true
 
-  if [ "$source_dir" = "recurring" ]; then
-    # Sync back evolved files to recurring/ before cleanup
-    for sync_file in memoria.md CLAUDE.md; do
-      if [ -f "$TASKS/running/$task/$sync_file" ]; then
-        cp "$TASKS/running/$task/$sync_file" "$TASKS/recurring/$task/$sync_file"
+  if [ "$source_dir" = "_scheduled" ] || [ "$source_dir" = "recurring" ]; then
+    # Sync back evolved files to _scheduled/ before cleanup
+    for sync_file in memoria.md TASK.md CLAUDE.md; do
+      if [ -f "$TASKS/doing/$task/$sync_file" ]; then
+        cp "$TASKS/doing/$task/$sync_file" "$TASKS/_scheduled/$task/$sync_file" 2>/dev/null || true
       fi
     done
-    rm -rf "$TASKS/running/$task"
+    rm -rf "$TASKS/doing/$task"
     kanban_unclaim_recurring "$task" 2>/dev/null || true
+    local log_icon="✅"; [ "$exit_code" -ne 0 ] && log_icon="❌"
+    echo "| $(date -u +%Y-%m-%dT%H:%M:%SZ) | $task | $log_icon done | $task_model_log | $task_elapsed_fmt |" >> "$TASK_LOG" 2>/dev/null || true
     echo "[puppy:$WORKER_ID] '$task' cycle done"
   elif [ "$exit_code" -eq 0 ]; then
-    mv "$TASKS/running/$task" "$TASKS/done/$task" 2>/dev/null || true
-    local report=""
+    mv "$TASKS/doing/$task" "$TASKS/done/$task" 2>/dev/null || true
     local report_file
-    report_file=$(ls -1t "$WORKSPACE/obsidian/_agent/reports/"*"$task"* 2>/dev/null | head -1 || true)
-    [ -n "$report_file" ] && report="$report_file"
-    kanban_complete_card "$task" "$report" 2>/dev/null || true
+    report_file=$(ls -1t "$WORKSPACE/obsidian/agents/reports/"*"$task"* 2>/dev/null | head -1 || true)
+    kanban_complete_card "$task" "${report_file:-}" 2>/dev/null || true
+    echo "| $(date -u +%Y-%m-%dT%H:%M:%SZ) | $task | ✅ done | $task_model_log | $task_elapsed_fmt |" >> "$TASK_LOG" 2>/dev/null || true
     echo "[puppy:$WORKER_ID] '$task' → done"
   else
-    mv "$TASKS/running/$task" "$TASKS/failed/$task" 2>/dev/null || true
+    mv "$TASKS/doing/$task" "$TASKS/cancelled/$task" 2>/dev/null || true
     local reason="exit code $exit_code"
     [ "$exit_code" -eq 124 ] && reason="timeout"
     kanban_fail_card "$task" "$reason" 2>/dev/null || true
-    echo "[puppy:$WORKER_ID] '$task' → failed ($reason)"
+    echo "| $(date -u +%Y-%m-%dT%H:%M:%SZ) | $task | ❌ cancelled | $task_model_log | $task_elapsed_fmt |" >> "$TASK_LOG" 2>/dev/null || true
+    echo "[puppy:$WORKER_ID] '$task' → cancelled ($reason)"
   fi
   task_unlock "$task"
+
+  # Update MURAL kanban view
+  update_mural_kanban 2>/dev/null || true
 
   # Fresh context: limpar tool-results cache para esta task
   cleanup_task_cache "$task"
@@ -518,9 +585,9 @@ if [ -n "$SCHEDULER_TASK_LIST" ]; then
   IFS=',' read -ra TASK_NAMES <<< "$SCHEDULER_TASK_LIST"
   echo "[puppy:$WORKER_ID] Task list mode: ${TASK_NAMES[*]}"
   # Debug: onde o worker está procurando as tasks (ajuda quando 0 tasks = mount errado)
-  [ "$SCHEDULER_VERBOSE" = "1" ] && echo "[puppy:$WORKER_ID] TASKS base: $TASKS (recurring: $TASKS/recurring, pending: $TASKS/pending)"
-  if [ ! -d "$TASKS/recurring" ] && [ ! -d "$TASKS/pending" ]; then
-    echo "[puppy:$WORKER_ID] AVISO: nem recurring/ nem pending/ existem em $TASKS — confira mount de /workspace/obsidian (OBSIDIAN_PATH no host)" >&2
+  [ "$SCHEDULER_VERBOSE" = "1" ] && echo "[puppy:$WORKER_ID] TASKS base: $TASKS (_scheduled: $TASKS/_scheduled, backlog: $TASKS/backlog)"
+  if [ ! -d "$TASKS/_scheduled" ] && [ ! -d "$TASKS/backlog" ]; then
+    echo "[puppy:$WORKER_ID] AVISO: nem _scheduled/ nem backlog/ existem em $TASKS — confira mount de /workspace/obsidian (OBSIDIAN_PATH no host)" >&2
   fi
 
   ok_count=0; fail_count=0; task_count=0
@@ -531,12 +598,12 @@ if [ -n "$SCHEDULER_TASK_LIST" ]; then
 
     source_dir=""
     is_recurring="0"
-    if [ -d "$TASKS/recurring/$task" ]; then
-      source_dir="recurring"; is_recurring="1"
-    elif [ -d "$TASKS/pending/$task" ]; then
-      source_dir="pending"
+    if [ -d "$TASKS/_scheduled/$task" ]; then
+      source_dir="_scheduled"; is_recurring="1"
+    elif [ -d "$TASKS/backlog/$task" ]; then
+      source_dir="backlog"
     else
-      echo "[puppy:$WORKER_ID] '$task' not found in recurring/ or pending/ — skip (checado: $TASKS/recurring/$task e $TASKS/pending/$task)"
+      echo "[puppy:$WORKER_ID] '$task' not found in _scheduled/ or backlog/ — skip (checado: $TASKS/_scheduled/$task e $TASKS/backlog/$task)"
       continue
     fi
 
@@ -559,10 +626,10 @@ fi
 if [ -n "$SPECIFIC_TASK" ]; then
   source_dir=""
   is_recurring="0"
-  if [ -d "$TASKS/pending/$SPECIFIC_TASK" ]; then
-    source_dir="pending"
-  elif [ -d "$TASKS/recurring/$SPECIFIC_TASK" ]; then
-    source_dir="recurring"; is_recurring="1"
+  if [ -d "$TASKS/backlog/$SPECIFIC_TASK" ]; then
+    source_dir="backlog"
+  elif [ -d "$TASKS/_scheduled/$SPECIFIC_TASK" ]; then
+    source_dir="_scheduled"; is_recurring="1"
   else
     echo "[puppy:$WORKER_ID] Task '$SPECIFIC_TASK' não encontrada."; exit 1
   fi
@@ -577,35 +644,48 @@ recover_orphans
 
 # ── Process recurring tasks ──────────────────────────────────────
 touch "$AGENT_MY_DIR/.live" 2>/dev/null || true
-echo "[puppy:$WORKER_ID] === Recorrentes (clock=$SCHEDULER_CLOCK) ==="
+echo "[puppy:$WORKER_ID] === Recorrentes (_scheduled, clock=$SCHEDULER_CLOCK) ==="
 start_time=$SECONDS
 ok_count=0; fail_count=0; task_count=0
 
-mapfile -t recurring_names < <(kanban_list_names "Recorrentes" "$SCHEDULED" 2>/dev/null)
+# Discover _scheduled tasks from filesystem (kanban.md retired)
+mapfile -t recurring_names < <(
+  for d in "$TASKS/_scheduled"/*/; do
+    [ -d "$d" ] || continue
+    basename "$d"
+  done
+)
 
 for task in "${recurring_names[@]}"; do
   [ -z "$task" ] && continue
-  claim_task "$task" "recurring" || continue
+  claim_task "$task" "_scheduled" || continue
   task_count=$((task_count + 1))
 
   local_exit=0
-  run_single_task "$task" "recurring" "1" || local_exit=$?
-  finish_task "$task" "recurring" "$local_exit"
+  run_single_task "$task" "_scheduled" "1" || local_exit=$?
+  TASK_ELAPSED=$((SECONDS - start_time)) finish_task "$task" "_scheduled" "$local_exit"
 
   [ "$local_exit" -eq 0 ] && ok_count=$((ok_count + 1)) || fail_count=$((fail_count + 1))
 done
 
-# ── Process backlog (filtered by clock) ───────────────────────────
+# ── Process backlog ───────────────────────────────────────────────
 touch "$AGENT_MY_DIR/.live" 2>/dev/null || true
 echo "[puppy:$WORKER_ID] === Backlog ==="
-mapfile -t backlog_names < <(kanban_list_names "Backlog" 2>/dev/null)
+
+# Discover backlog tasks from filesystem (ignore _waiting/)
+mapfile -t backlog_names < <(
+  for f in "$TASKS/backlog"/*.md "$TASKS/backlog"/*/; do
+    [ -e "$f" ] || continue
+    basename "$f" .md
+  done | sort -u
+)
 
 filter_by_clock() {
   local filtered=()
   for task in "${backlog_names[@]}"; do
     [ -z "$task" ] && continue
-    [ -d "$TASKS/pending/$task" ] || continue
-    task_clock=$(get_clock "$TASKS/pending/$task")
+    [ -d "$TASKS/backlog/$task" ] || continue
+    task_clock=$(get_clock "$TASKS/backlog/$task")
     [ "$task_clock" = "$SCHEDULER_CLOCK" ] && filtered+=("$task")
   done
   printf '%s\n' "${filtered[@]}"
@@ -616,9 +696,10 @@ while IFS= read -r t; do clock_filtered+=("$t"); done < <(filter_by_clock)
 
 has_wave_support() {
   for task in "${clock_filtered[@]}"; do
-    [ -f "$TASKS/pending/$task/CLAUDE.md" ] || continue
+    local cfg; cfg=$(task_config_file "$TASKS/backlog/$task")
+    [ -f "$cfg" ] || continue
     local wave
-    wave=$(get_wave "$TASKS/pending/$task")
+    wave=$(get_wave "$TASKS/backlog/$task")
     [ "$wave" != "1" ] && return 0
   done
   return 1
@@ -626,26 +707,26 @@ has_wave_support() {
 
 if [ ${#clock_filtered[@]} -gt 0 ] && has_wave_support; then
   echo "[puppy:$WORKER_ID] Executando em modo WAVE"
-  
+
   while IFS=':' read -r wave_num wave_tasks; do
     [ -z "$wave_num" ] && continue
     read -ra task_array <<< "$wave_tasks"
     [ ${#task_array[@]} -eq 0 ] && continue
-    
+
     run_wave_parallel "$wave_num" "${task_array[@]}"
     task_count=$((task_count + ${#task_array[@]}))
   done < <(group_by_wave "${clock_filtered[@]}")
 else
   for task in "${clock_filtered[@]}"; do
     [ -z "$task" ] && continue
-    [ -d "$TASKS/pending/$task" ] || continue
+    [ -d "$TASKS/backlog/$task" ] || continue
 
-    claim_task "$task" "pending" || continue
+    claim_task "$task" "backlog" || continue
     task_count=$((task_count + 1))
 
     local_exit=0
-    run_single_task "$task" "pending" "0" || local_exit=$?
-    finish_task "$task" "pending" "$local_exit"
+    run_single_task "$task" "backlog" "0" || local_exit=$?
+    TASK_ELAPSED=$((SECONDS - start_time)) finish_task "$task" "backlog" "$local_exit"
 
     [ "$local_exit" -eq 0 ] && ok_count=$((ok_count + 1)) || fail_count=$((fail_count + 1))
   done

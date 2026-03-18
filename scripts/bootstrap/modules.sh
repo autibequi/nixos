@@ -25,7 +25,7 @@ else
   WS="$(cd "$_mdir/../.." && pwd)"
 fi
 KANBAN="$WS/obsidian/kanban.md"
-SCHEDULED="$WS/obsidian/_agent/scheduled.md"
+SCHEDULED="$WS/obsidian/agents/task.log.md"
 TODAY=$(date +%Y-%m-%d)
 now=$(date +%s)
 COLS="${COLUMNS:-$(tput cols 2>/dev/null || echo 100)}"

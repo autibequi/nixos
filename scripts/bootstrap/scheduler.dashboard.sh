@@ -12,7 +12,7 @@ fi
 
 _STATE_FILE="$_SCHED_EPH/scheduler/state.json"
 _SCHED_LOG="$_SCHED_EPH/logs/scheduler.log"
-_TASKS_DIR="$_SCHED_VAULT/_agent/tasks/recurring"
+_TASKS_DIR="$_SCHED_VAULT/tasks/_scheduled"
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 _sched_fmt_ago() {
@@ -111,20 +111,29 @@ printf "  ${P_DIM}%-22s  %-5s  %-7s  %-14s  %-12s${R}\n" \
 for _task_dir in "$_TASKS_DIR"/*/; do
   [[ -d "$_task_dir" ]] || continue
   _task=$(basename "$_task_dir")
-  _claude_md="$_task_dir/CLAUDE.md"
+  # TASK.md preferred, fallback to CLAUDE.md
+  if [[ -f "$_task_dir/TASK.md" ]]; then _claude_md="$_task_dir/TASK.md"
+  else _claude_md="$_task_dir/CLAUDE.md"; fi
 
   # Lê config da task
   _interval=$(_parse_fm "$_claude_md" "interval")
   _clock=$(_parse_fm "$_claude_md" "clock")
   _model=$(_parse_fm "$_claude_md" "model")
 
-  # Normaliza interval
+  # Normaliza interval (suporta padrões novos e legados)
   if [[ -z "$_interval" ]]; then
     case "${_clock:-every60}" in
-      every10)  _interval=10  ;;
-      every60)  _interval=60  ;;
-      every240) _interval=240 ;;
-      *)        _interval=60  ;;
+      every5m)             _interval=5   ;;
+      every10|every10m)    _interval=10  ;;
+      every15m)            _interval=15  ;;
+      every30m)            _interval=30  ;;
+      every60|every60m|every1h) _interval=60 ;;
+      every2h)             _interval=120 ;;
+      every4h|every240)    _interval=240 ;;
+      every6h)             _interval=360 ;;
+      every12h)            _interval=720 ;;
+      every24h|daily|daily@*) _interval=1440 ;;
+      *)                   _interval=60  ;;
     esac
   fi
   _model="${_model:-haiku}"
@@ -173,3 +182,14 @@ for _task_dir in "$_TASKS_DIR"/*/; do
 done
 
 echo
+
+# ── Task column summary ────────────────────────────────────────────────────────
+_tasks_root="$_SCHED_VAULT/tasks"
+if [[ -d "$_tasks_root" ]]; then
+  _summary=""
+  for _col in inbox backlog doing done blocked cancelled _waiting; do
+    _cnt=$(ls "$_tasks_root/$_col/" 2>/dev/null | wc -l)
+    [[ "$_cnt" -gt 0 ]] && _summary="${_summary}${_col}:${_cnt}  "
+  done
+  [[ -n "$_summary" ]] && echo -e "  ${P_DIM}kanban ${R}${_summary}"
+fi
