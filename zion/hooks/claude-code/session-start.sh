@@ -153,20 +153,47 @@ if [ -f "$USAGE_FILE" ]; then
 fi
 
 # ────────────────────────────────────────────────────────────────
-# 7. PERSONA (apenas personality=ON)
+# 7. PERSONALITY (apenas personality=ON)
+#    Cascata: PERSONALITY.md → persona file → avatar file
 # ────────────────────────────────────────────────────────────────
 if [ "$PERSONALITY" = "ON" ]; then
-  SOUL="$WS/zion/system/SOUL.md"
-  [ -f "$SOUL" ] || SOUL="/workspace/zion/system/SOUL.md"
-  if [ -f "$SOUL" ]; then
-    PERSONA_PATH=$(grep -m1 'Arquivo:' "$SOUL" | sed 's/.*`\(.*\)`.*/\1/')
-    if [ -n "$PERSONA_PATH" ] && [ -f "$WS/$PERSONA_PATH" ]; then
-      echo "---PERSONA---"
-      cat "$WS/$PERSONA_PATH"
-      echo "---/PERSONA---"
-    elif [ -n "$PERSONA_PATH" ]; then
-      echo "WARN: persona file not found: $WS/$PERSONA_PATH" >&2
+  PERS_MD="$WS/zion/system/PERSONALITY.md"
+  [ -f "$PERS_MD" ] || PERS_MD="/workspace/zion/system/PERSONALITY.md"
+  if [ -f "$PERS_MD" ]; then
+    echo "---PERSONALITY---"
+
+    # 1. Camada genérica
+    cat "$PERS_MD"
+
+    # 2. Persona específica (lê path da linha "Persona: `...`")
+    PERSONA_PATH=$(grep -m1 '^Persona:' "$PERS_MD" | sed 's/Persona:[[:space:]]*`\(.*\)`.*/\1/')
+    if [ -n "$PERSONA_PATH" ]; then
+      _persona_file="$WS/$PERSONA_PATH"
+      [ -f "$_persona_file" ] || _persona_file="/workspace/$PERSONA_PATH"
+      if [ -f "$_persona_file" ]; then
+        echo ""
+        echo "---persona:$PERSONA_PATH---"
+        cat "$_persona_file"
+      else
+        echo "WARN: persona file not found: $PERSONA_PATH" >&2
+      fi
     fi
+
+    # 3. Avatar (lê path da linha "Avatar: `...`")
+    AVATAR_PATH=$(grep -m1 '^Avatar:' "$PERS_MD" | sed 's/Avatar:[[:space:]]*`\(.*\)`.*/\1/')
+    if [ -n "$AVATAR_PATH" ]; then
+      _avatar_file="$WS/$AVATAR_PATH"
+      [ -f "$_avatar_file" ] || _avatar_file="/workspace/$AVATAR_PATH"
+      if [ -f "$_avatar_file" ]; then
+        echo ""
+        echo "---avatar:$AVATAR_PATH---"
+        cat "$_avatar_file"
+      else
+        echo "WARN: avatar file not found: $AVATAR_PATH" >&2
+      fi
+    fi
+
+    echo "---/PERSONALITY---"
   fi
 fi
 

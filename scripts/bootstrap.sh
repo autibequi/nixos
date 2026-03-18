@@ -13,7 +13,7 @@ set -uo pipefail
 
 # --- Sync Claude skills from stow/.claude/ → ~/.claude/ ---
 # Repo NixOS em /workspace/nixos (ou /workspace/host por symlink)
-for dir in agents commands scripts skills; do
+for dir in agents commands hooks scripts skills; do
   for base in /workspace/nixos /workspace/host; do
     src="$base/stow/.claude/$dir"
     if [[ -d "$src" ]]; then

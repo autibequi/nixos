@@ -2716,7 +2716,7 @@ zion_session_run() {
 
       zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes \
         --entrypoint /bin/bash -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" sandbox \
-        -c ". /zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
+        -c ". /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
       ;;
 
     cursor)
@@ -2728,7 +2728,7 @@ zion_session_run() {
       cursor_envs+=(-e "CLAUDIO_MOUNT=$mount_path")
       cursor_envs+=(-e "BOOTSTRAP_SKIP_CLEAR=1")
 
-      local cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; '
+      local cursor_cmd='. /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt; '
 
       # Resume (takes priority over init-md)
       if [[ "$engine_args" == *"--resume="* ]]; then
@@ -3842,7 +3842,7 @@ zion_resume_command() {
         zion_compose_env "$mount_path" "$mount_opts"
         list_out=$(zion_compose_cmd -p "$proj_name" run --rm -T \
           --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" sandbox \
-          -c ". /zion/scripts/bootstrap.sh 2>/dev/null; cd /workspace/mnt 2>/dev/null; agent list 2>/dev/null || true" 2>/dev/null) || true
+          -c ". /workspace/zion/scripts/bootstrap.sh 2>/dev/null; cd /workspace/mnt 2>/dev/null; agent list 2>/dev/null || true" 2>/dev/null) || true
       fi
       if [[ -n "$list_out" ]]; then
         echo "$list_out"
@@ -4274,7 +4274,7 @@ zion_puppy_start_command() {
   echo "[zion puppy] Iniciando daemon interno..."
   OBSIDIAN_PATH="$zion_obsidian_path" \
     docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
-    exec -d puppy /bin/bash -c "/zion/scripts/puppy-daemon.sh"
+    exec -d puppy /bin/bash -c "/workspace/zion/scripts/puppy-daemon.sh"
 
   echo "[zion puppy] Container puppy + daemon iniciados."
 
@@ -4323,7 +4323,7 @@ zion_puppy_restart_command() {
   echo "[zion puppy] Iniciando daemon interno..."
   OBSIDIAN_PATH="$zion_obsidian_path" \
     docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
-    exec -d puppy /bin/bash -c "/zion/scripts/puppy-daemon.sh"
+    exec -d puppy /bin/bash -c "/workspace/zion/scripts/puppy-daemon.sh"
 
   echo "[zion puppy] Reiniciado."
 
@@ -4350,7 +4350,7 @@ zion_puppy_run_command() {
   OBSIDIAN_PATH="$zion_obsidian_path" \
     docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
     exec -e SCHEDULER_VERBOSE=1 -e SCHEDULER_WORKER_ID="manual-$$" -e SCHEDULER_CLOCK="unified" \
-    puppy /zion/scripts/puppy-runner.sh "$task"
+    puppy /workspace/zion/scripts/puppy-runner.sh "$task"
 
 }
 
@@ -4466,7 +4466,7 @@ zion_puppy_tick_command() {
   OBSIDIAN_PATH="$zion_obsidian_path" \
     docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
     exec -e PUPPY_SINGLE_TICK=1 -e SCHEDULER_VERBOSE=1 \
-    puppy /zion/scripts/puppy-daemon.sh
+    puppy /workspace/zion/scripts/puppy-daemon.sh
 
 }
 

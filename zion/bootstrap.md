@@ -23,7 +23,7 @@ Sempre presente, independente de personality ou modo.
 | `---SELF---` | personality=ON | diário da persona |
 | `---ENV---` | sempre | contexto docker/host + estrutura /workspace |
 | `---API_USAGE---` | sempre | cota atual + regras por threshold |
-| `---PERSONA---` | personality=ON | tom, avatar, comportamento |
+| `---PERSONALITY---` | personality=ON | cascata: PERSONALITY.md → persona → avatar |
 | `---CLAUDE.MD---` | sempre | CLAUDE.md do projeto |
 
 **Para adicionar flag:** editar `session-start.sh` seção `# 1. BOOT FLAGS` e adicionar linha na tabela abaixo.
