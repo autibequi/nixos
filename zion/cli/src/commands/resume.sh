@@ -16,8 +16,8 @@ if [[ -z "$resume_id" ]]; then
     if [[ "$engine" == "cursor" ]]; then
       zion_compose_env "$mount_path" "$mount_opts"
       list_out=$(zion_compose_cmd -p "$proj_name" run --rm -T \
-        --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" sandbox \
-        -c ". /workspace/zion/scripts/bootstrap.sh 2>/dev/null; cd /workspace/mnt 2>/dev/null; agent list 2>/dev/null || true" 2>/dev/null) || true
+        --entrypoint /entrypoint.sh -e CLAUDIO_MOUNT="$mount_path" sandbox \
+        /bin/bash -c ". /workspace/zion/scripts/bootstrap.sh 2>/dev/null; cd /workspace/mnt 2>/dev/null; agent list 2>/dev/null || true" 2>/dev/null) || true
     fi
     if [[ -n "$list_out" ]]; then
       echo "$list_out"

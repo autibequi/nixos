@@ -26,6 +26,7 @@ RUN nix profile install \
     nixpkgs#ffmpeg-headless \
     nixpkgs#espeak-ng \
     nixpkgs#coreutils \
+    nixpkgs#gosu \
     nixpkgs#opencode && \
     nix profile install github:sadjow/claude-code-nix
 
@@ -57,9 +58,15 @@ RUN curl -fsSL "https://github.com/grafana/mcp-grafana/releases/latest/download/
     | tar xz -C /home/claude/.local/bin/ mcp-grafana && \
     chown 1000:1000 /home/claude/.local/bin/mcp-grafana
 
-USER claude
-# PATH: Cursor CLI (agent) + .nix-profile (claude, opencode)
-ENV PATH="/home/claude/.local/bin:/home/claude/.nix-profile/bin:/usr/bin:/bin:${PATH}"
+# Entrypoint: inicia nix-daemon como root, depois delega para claude via gosu
+RUN printf '#!/bin/bash\nnix-daemon &\nsleep 1\nexec gosu claude "$@"\n' > /entrypoint.sh && \
+    chmod +x /entrypoint.sh
+
+# Container roda como root por default para que /entrypoint.sh possa iniciar nix-daemon.
+# gosu no entrypoint cuida da troca para claude. docker exec usa -u claude explicitamente.
+# PATH: Cursor CLI (agent) + .nix-profile (claude e gosu instalados aqui)
+ENV PATH="/home/claude/.local/bin:/home/claude/.nix-profile/bin:/root/.nix-profile/bin:/usr/bin:/bin:${PATH}"
 ENV HOME=/home/claude
 
+ENTRYPOINT ["/entrypoint.sh"]
 WORKDIR /workspace

@@ -65,8 +65,8 @@ services:
     stdin_open: true
     tty: true
     working_dir: /workspace/mnt
-    entrypoint: ["/bin/bash", "-c"]
-    command: ["sleep infinity"]
+    entrypoint: ["/entrypoint.sh"]
+    command: ["/bin/bash", "-c", "sleep infinity"]
     group_add:
       - "${DOCKER_GID:-999}"
     environment:

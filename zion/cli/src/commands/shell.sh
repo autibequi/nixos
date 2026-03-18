@@ -5,4 +5,4 @@ proj_name="$(zion_proj_name "$proj_slug")"
 mount_opts="$(zion_mount_opts)"
 CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
   zion_compose_cmd -p "$proj_name" run --rm -it \
-  --entrypoint /bin/bash -e CLAUDIO_MOUNT="$mount_path" sandbox
+  --entrypoint /entrypoint.sh -e CLAUDIO_MOUNT="$mount_path" sandbox /bin/bash

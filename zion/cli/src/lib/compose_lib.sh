@@ -262,11 +262,11 @@ zion_session_run() {
       # Opencode: persistent (up + exec) for new; ephemeral (run) for continue/resume
       if [[ "$engine_args" == *"--continue"* ]] || [[ "$engine_args" == *"--resume"* ]]; then
         zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes \
-          --entrypoint /bin/bash "${oc_envs[@]}" sandbox \
-          bash -c 'cd /workspace/mnt && opencode'
+          --entrypoint /entrypoint.sh "${oc_envs[@]}" sandbox \
+          /bin/bash -c 'cd /workspace/mnt && opencode'
       else
         zion_compose_cmd -p "$proj_name" up -d sandbox
-        zion_compose_cmd -p "$proj_name" exec -it \
+        zion_compose_cmd -p "$proj_name" exec -it -u claude \
           "${oc_envs[@]}" sandbox bash -c 'cd /workspace/mnt && exec opencode'
       fi
       ;;
@@ -305,8 +305,8 @@ zion_session_run() {
       [[ "$claude_args" != *"--permission-mode"* ]] && claude_args+=" --permission-mode bypassPermissions"
 
       zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes \
-        --entrypoint /bin/bash -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" sandbox \
-        -c ". /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
+        --entrypoint /entrypoint.sh -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" sandbox \
+        /bin/bash -c ". /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
       ;;
 
     cursor)
@@ -340,8 +340,8 @@ zion_session_run() {
       fi
 
       zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes \
-        --entrypoint /bin/bash "${cursor_envs[@]}" sandbox \
-        -c "$cursor_cmd"
+        --entrypoint /entrypoint.sh "${cursor_envs[@]}" sandbox \
+        /bin/bash -c "$cursor_cmd"
       ;;
 
     *)
