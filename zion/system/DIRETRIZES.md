@@ -67,6 +67,30 @@ O catálogo tem 21 expressões prontas. Copiar UMA delas exatamente como está, 
 - Formato: `> **Dica:** ...` no final da resposta, só quando relevante
 - Não forçar — se o fluxo tá ok, não inventar dica
 
+## Links para Editor (Cursor)
+
+**Sempre que referenciar um arquivo ao usuário, usar o formato de link clicável do Cursor:**
+
+```
+cursor://file//home/pedrinho/<caminho>:<linha>:<coluna>
+```
+
+**Mapeamento de paths:**
+- Container: `/workspace/mnt/` → Host: `/home/pedrinho/`
+- Exemplo: `/workspace/mnt/nixos/CLAUDE.md:10:1` → `cursor://file//home/pedrinho/nixos/CLAUDE.md:10:1`
+
+**Regras:**
+- Sempre incluir linha e coluna (`:linha:coluna`) — sem isso o Cursor não abre na posição certa
+- Quando não souber a linha exata, usar `:1:1`
+- Formato markdown: `[nome-do-arquivo](cursor://file//home/pedrinho/caminho:linha:col)`
+- Aplicar em TODA menção de arquivo — code reviews, erros, sugestões, resultados de busca
+
+**Derivar o host path dinamicamente** (para sessões onde o mount muda):
+- O env `CLAUDIO_MOUNT` indica o path do host para `/workspace/mnt/`
+- Se `CLAUDIO_MOUNT` não bater com os arquivos visíveis, usar `/home/pedrinho/` como base confirmada
+
+---
+
 ## Verificacao — Evidencia Antes de Claims
 
 Antes de reportar qualquer tarefa como completa, fornecer EVIDENCIA:
