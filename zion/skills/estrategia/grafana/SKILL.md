@@ -232,6 +232,73 @@ count by(flow_key) (rate(search_worker_messages_ingested_total{status="error"}[$
 
 ---
 
+## Deeplinks — Como gerar URLs que abrem queries no browser
+
+O `generate_deeplink` do MCP **não funciona** para Explore (gera formato antigo `left=`).
+Usar o formato manual com `schemaVersion=1&panes=` (Grafana v11+).
+
+### Formato da URL
+
+```
+https://grafana.platform.estrategia.io/explore?schemaVersion=1&panes=<JSON_URL_ENCODED>
+```
+
+O JSON de `panes` segue esta estrutura:
+
+```json
+{
+  "a": {
+    "datasource": "<uid>",
+    "queries": [
+      {
+        "refId": "A",
+        "expr": "<logql ou promql>",
+        "queryType": "range",
+        "datasource": {"type": "<tipo>", "uid": "<uid>"}
+      }
+    ],
+    "range": {"from": "now-1h", "to": "now"}
+  }
+}
+```
+
+### Gerar via Python (usar no Bash tool)
+
+```python
+import json, urllib.parse
+
+panes = {
+    "a": {
+        "datasource": "loki",  # ou "prometheus"
+        "queries": [{
+            "refId": "A",
+            "expr": '{app="monolito-worker"} | json',
+            "queryType": "range",
+            "datasource": {"type": "loki", "uid": "loki"}
+        }],
+        "range": {"from": "now-1h", "to": "now"}
+    }
+}
+url = "https://grafana.platform.estrategia.io/explore?schemaVersion=1&panes=" + urllib.parse.quote(json.dumps(panes))
+```
+
+### Para Prometheus, trocar datasource:
+
+```python
+"datasource": "prometheus",
+# ...
+"datasource": {"type": "prometheus", "uid": "prometheus"}
+```
+
+### Para dashboards, o `generate_deeplink` funciona normalmente:
+
+```tool
+generate_deeplink(resourceType="dashboard", dashboardUid="cehsqeou8rtvke",
+  timeRange={"from": "now-6h", "to": "now"})
+```
+
+---
+
 ## Manutenção — Como atualizar esta skill
 
 Se dashboards sumirem ou queries não retornarem resultados, re-executar:
