@@ -232,13 +232,26 @@ commands:
         filename: commands/docker_status.sh
 
       - name: shell
-        help: "Abre shell dentro do container do servico."
+        help: "Abre shell interativo ou executa comando com Go toolchain no container do servico."
         args:
           - name: service
             required: true
             help: "Nome do servico"
-          - name: container
-            help: "Container especifico (app, worker, postgres, redis). Default: app"
+        flags:
+          - long: --container
+            short: -C
+            arg: name
+            default: app
+            help: "Container especifico (app, worker, postgres, redis). Default: app (usado sem -c)"
+          - long: --cmd
+            short: -c
+            arg: command
+            help: "Comando a executar em container dev (golang + make, source montado). Ex: make test"
+        examples:
+          - zion docker shell monolito
+          - zion docker shell monolito -c make test
+          - zion docker shell monolito -c "make test-ldi"
+          - zion docker shell monolito -C worker
         filename: commands/docker_shell.sh
 
       - name: restart
