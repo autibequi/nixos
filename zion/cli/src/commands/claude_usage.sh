@@ -8,7 +8,8 @@ usage_script=""
 for candidate in \
   "$HOME/.config/waybar/claude-oauth-usage.sh" \
   "$zion_nixos_dir/stow/.config/waybar/claude-oauth-usage.sh" \
-  "$HOME/nixos/stow/.config/waybar/claude-oauth-usage.sh"; do
+  "$HOME/nixos/stow/.config/waybar/claude-oauth-usage.sh" \
+  "/workspace/mnt/stow/.config/waybar/claude-oauth-usage.sh"; do
   if [[ -x "$candidate" ]] || [[ -f "$candidate" ]]; then
     usage_script="$candidate"
     break
