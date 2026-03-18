@@ -129,6 +129,8 @@ fields @timestamp, @message
 sum(rate({app="monolito-worker"} | json | level="error" [5m]))
 ```
 
+> **Visualização no Explore:** para listagem em colunas limpas, acrescentar `| line_format "[{{ .handler }}] {{ .message }} (user={{ .appctx_user_id }})"` e usar vista **Table**. Ver seção *Visualização de logs no Explore*.
+
 ### Loki — Ecommerce Worker (K8s SQS)
 
 ```logql
@@ -296,6 +298,62 @@ url = "https://grafana.platform.estrategia.io/explore?schemaVersion=1&panes=" + 
 generate_deeplink(resourceType="dashboard", dashboardUid="cehsqeou8rtvke",
   timeRange={"from": "now-6h", "to": "now"})
 ```
+
+---
+
+## Visualização de logs no Explore — organizado e legível
+
+Em Explore, o resultado bruto de uma query Loki costuma vir como JSON expandido (labels + linha), difícil de scanear. Para listagem **em colunas limpas** e fácil de achar:
+
+### 1. Usar `line_format` no LogQL
+
+Depois do pipeline (`| json | level="error"`), adicionar `line_format` com um template que mostra só o que importa.
+
+| Objetivo | Padrão LogQL | Exemplo de linha exibida |
+|----------|--------------|---------------------------|
+| Erros de qualquer app K8s | `\| line_format "[{{ .app }}] {{ .message }}"` | `[search] falha ao processar mensagem` |
+| Erros do monolito-worker (handler + user) | `\| line_format "[{{ .handler }}] {{ .message }} (user={{ .appctx_user_id }})"` | `[ldis.print.resolved] timeout (user=12345)` |
+| Ecommerce (handler + order) | `\| line_format "[{{ .appctx_worker_handler_name }}] {{ .message }} order={{ .appctx_order_id }}"` | `[CreateLeadFromOrder] erro order=uuid` |
+
+**Funções válidas no template:** apenas as que o Loki suporta. Por exemplo: `trunc N` (trunca a N caracteres).  
+**Não usar:** `padding` — **não existe** no Loki e gera parse error (`function "padding" not defined`).
+
+Exemplo com trunc (opcional):
+
+```logql
+{namespace=~"monolito-worker|ecommerce|..."} | json | level="error"
+  | line_format "{{ .app | trunc 15 }} | {{ .message | trunc 80 }}"
+```
+
+### 2. Vista Table no Explore
+
+No painel de logs do Grafana, o modo **Logs** expande labels e metadados. Para ver só a linha formatada em coluna:
+
+- Clicar no seletor de visualização (canto superior direito do painel).
+- Escolher **Table**.
+
+Assim a tabela mostra basicamente **Time** + **Line** (sua linha formatada), sem o JSON gigante — organizado e fácil de achar.
+
+### 3. Padrões recomendados por contexto
+
+| Contexto | Campos a mostrar no line_format | Query base |
+|----------|----------------------------------|------------|
+| Visão geral erros K8s | `app`, `message` | `{namespace=~"monolito-worker\|ecommerce\|user-access\|accounts\|debezium"} \| json \| level="error"` |
+| Drill-down monolito-worker | `handler`, `message`, `appctx_user_id` | `{app="monolito-worker"} \| json \| level="error"` |
+| Drill-down ecommerce | `appctx_worker_handler_name`, `message`, `appctx_order_id` | `{app="ecommerce"} \| json \| level="error"` |
+| Search (Debezium) | `message` (ou `caller` se útil) | `{app="search", namespace="debezium"} \| json \| level="error"` |
+
+Sempre preferir **poucos campos** na linha: app/handler, message, e um ID (user/order) quando fizer sentido. Evitar jogar todo o JSON no `line_format`.
+
+### 4. Deeplinks com line_format
+
+Ao montar o JSON de `panes` para Explore, incluir o `line_format` já no `expr`:
+
+```python
+"expr": '{namespace=~"monolito-worker|ecommerce|user-access|accounts|debezium"} | json | level="error" | line_format "[{{ .app }}] {{ .message }}"'
+```
+
+Com isso, o link que abrir no browser já carrega a query com visualização limpa; o usuário só precisa trocar para vista **Table** se quiser só as colunas.
 
 ---
 

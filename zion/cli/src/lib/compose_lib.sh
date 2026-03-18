@@ -336,7 +336,7 @@ zion_session_run() {
         cursor_cmd+='p=$(sed -e '\''s/\\\\/\\\\\\\\/g'\'' -e '\''s/"/\\"/g'\'' "/workspace/mnt/$CLAUDIO_INITIAL_MD"); exec agent'"${agent_flags}"' "$p"; '
         cursor_cmd+='else exec agent'"${agent_flags}"'; fi'
       else
-        cursor_cmd+='exec agent'"${agent_flags}'"
+        cursor_cmd+='exec agent'"${agent_flags}"
       fi
 
       zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes \

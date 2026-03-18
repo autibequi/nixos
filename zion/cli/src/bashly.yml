@@ -465,6 +465,13 @@ commands:
 
   - name: edit
     help: Abre sessao com ~/nixos em /workspace/mnt e /workspace/logs.
+    flags:
+      - long: --engine
+        arg: engine
+        help: "Engine: opencode | claude | cursor (default: cursor)"
+      - long: --resume
+        arg: session_id
+        help: "Retoma sessão (UUID ou 1 para última)"
     filename: commands/host_edit.sh
 
   - name: help

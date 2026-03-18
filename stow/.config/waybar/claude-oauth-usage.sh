@@ -2,7 +2,7 @@
 # claude-oauth-usage.sh — Uso do plano Claude via OAuth token
 # Endpoint: api.anthropic.com/api/oauth/usage
 # Token: ~/.claude/.credentials.json (gerado pelo Claude Code CLI)
-# Cache: ~/.cache/claude-usage.json (TTL 2min — igual ao interval do waybar)
+# Cache: ~/.cache/claude-usage.json (TTL 1min — igual ao interval do waybar)
 #
 # Modos:
 #   (sem args)       → JSON bruto + popula cache
@@ -23,7 +23,7 @@ CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
 CREDS_FILE="${CLAUDE_DIR}/.credentials.json"
 [[ ! -f "$CREDS_FILE" ]] && [[ -f "${HOME}/.local/share/claude-code/.credentials.json" ]] && CREDS_FILE="${HOME}/.local/share/claude-code/.credentials.json"
 CACHE_FILE="${XDG_CACHE_HOME:-${HOME}/.cache}/claude-usage.json"
-CACHE_TTL=120  # 2 minutos (igual ao interval do waybar)
+CACHE_TTL=60   # 1 minuto (igual ao interval do waybar; atualiza barra com mais frequência)
 # Suporta múltiplos args: --refresh --waybar
 MODE=""
 FORCE_REFRESH=0
