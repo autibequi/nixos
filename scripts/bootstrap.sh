@@ -11,20 +11,10 @@ set -uo pipefail
 # --- Init /workspace como git repo para Claude Code abrir aqui ---
 [[ ! -d /workspace/.git ]] && git init /workspace >/dev/null 2>&1 || true
 
-# --- Sync Claude skills from stow/.claude/ → ~/.claude/ ---
-# Repo NixOS em /workspace/nixos (ou /workspace/host por symlink)
-for dir in agents commands hooks scripts skills; do
-  for base in /workspace/nixos /workspace/host; do
-    src="$base/stow/.claude/$dir"
-    if [[ -d "$src" ]]; then
-      rm -rf "$HOME/.claude/$dir" 2>/dev/null || true
-      ln -sfn "$src" "$HOME/.claude/$dir" 2>/dev/null || true
-      break
-    fi
-  done
-done
-
 # --- Sync Claude configs from stow/.claude/ to ~/.claude/ ---
+# NOTE: agents, commands, hooks, scripts, skills are mounted directly from
+# zion/ via docker-compose volumes. Do NOT rm -rf or symlink them here —
+# that would destroy the mount contents. Only sync loose config files.
 for config_file in settings.json statusline.sh; do
   for base in /workspace/nixos /workspace/host; do
     src="$base/stow/.claude/$config_file"

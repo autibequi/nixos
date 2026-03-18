@@ -69,6 +69,19 @@ Se identificar melhorias, bugs ou insights relevantes para outros agentes:
 - Postar no MURAL (`$MURAL`), na secao **Posts dos Agentes**, NO TOPO
 - Formato: `### [task-name] titulo curto (YYYY-MM-DD HH:MM)\n\nConteudo breve.`
 
+## Modo Headless
+
+Quando o prompt contem `[HEADLESS MODE]`, voce esta rodando **sem supervisao**. Ninguem esta olhando a saida nem vai interagir. Regras especificas:
+
+1. **Autonomia total**: nao espere confirmacao, nao faca perguntas, nao peca input. Va direto ao trabalho.
+2. **Maximize progresso**: va o mais longe que puder dentro do tempo. Nao seja conservador — explore, execute, produza.
+3. **Gestao de tempo critica**: voce recebe um timeout no prompt (ex. `Timeout: 300s`). **Reserve os ultimos 30 segundos para salvar estado** (memoria.md, contexto.md, historico.log). Se o timeout estourar antes de salvar, **todo o progresso e perdido** — o processo e morto com SIGKILL.
+4. **Variaveis de ambiente disponiveis**:
+   - `HEADLESS=1` — confirma modo headless
+   - `PUPPY_TIMEOUT=<seconds>` — timeout total em segundos
+5. **Estrategia**: trabalhe em ciclos curtos (fazer algo → salvar parcial → continuar). Assim, mesmo que o timeout mate o processo no meio, voce ja salvou progresso parcial.
+6. **Sem output decorativo**: nao imprima status para o usuario, nao faca resumos bonitos. Foque 100% em execucao e persistencia.
+
 ## Regras
 
 - **NUNCA** mova diretorios de task — o runner cuida do lifecycle (doing -> done/cancelled)

@@ -63,6 +63,20 @@ Ao abrir o projeto, faça em segundos:
 | **`zion puppy tick`** | 1 tick do daemon imediato (para teste). |
 | **`zion puppy logs [-f]`** | Logs do container Puppy. |
 | **`zion puppy shell`** | Bash dentro do container Puppy. |
+| **`zion puppy query --headless --timeout=600 "prompt"`** | Envia prompt headless com timeout. O agente sabe que ninguém observa e deve ir o mais longe possível. |
+
+### 2.2 Modo Headless (workers e queries sem supervisão)
+
+Quando o agente roda em **modo headless** (tasks do Puppy ou `zion puppy query --headless`), ele recebe `[HEADLESS MODE]` no prompt e as variáveis:
+- **`HEADLESS=1`** — confirma que ninguém está observando a saída
+- **`PUPPY_TIMEOUT=<seconds>`** — tempo total antes do processo ser morto
+
+**Comportamento esperado no headless:**
+1. **Autonomia total** — não esperar input, não fazer perguntas, ir direto ao trabalho.
+2. **Maximize progresso** — vá o mais longe que puder. Não seja conservador.
+3. **Gestão de tempo** — reserve os últimos ~30s para salvar estado (memoria.md, contexto.md). Se o timeout estourar sem salvar, **todo o progresso é perdido** (SIGKILL).
+4. **Ciclos curtos** — trabalhe em ciclos (executar → salvar parcial → continuar) para nunca perder tudo.
+5. **Sem output decorativo** — foque 100% em execução e persistência.
 
 **Config:** `~/.zion` (não `~/.claudio`). Engine padrão, chaves, `OBSIDIAN_PATH`, etc.
 

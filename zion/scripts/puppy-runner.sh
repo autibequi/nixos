@@ -389,13 +389,21 @@ run_single_task() {
   local agent_prompt
   agent_prompt=$(cat /home/claude/.claude/agents/puppy-runner/agent.md 2>/dev/null || echo "")
 
+  # Headless mode: all puppy tasks are headless by nature (no human watching)
+  local headless_header=""
+  if [ "${HEADLESS:-1}" = "1" ]; then
+    headless_header="[HEADLESS MODE] Timeout: ${task_timeout}s | Deadline: $(date -u -d "+${task_timeout} seconds" +%H:%M:%S 2>/dev/null || echo "${task_timeout}s from now")
+"
+  fi
+
+  HEADLESS="${HEADLESS:-1}" PUPPY_TIMEOUT="$task_timeout" \
   timeout "$task_timeout" claude \
     --permission-mode bypassPermissions \
     --model "$task_model" \
     --max-turns "$task_max_turns" \
     --append-system-prompt "$agent_prompt" \
     "${mcp_flags[@]}" \
-    -p "Processe a task: $task (Worker: $WORKER_ID)
+    -p "${headless_header}Processe a task: $task (Worker: $WORKER_ID)
 Task dir: $TASKS/doing/$task
 Context dir: $EPHEMERAL/notes/$task
 MURAL: $MURAL
