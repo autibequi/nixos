@@ -251,6 +251,20 @@ commands:
             help: "Ambiente (se omitido, mantem o atual)"
         filename: commands/docker_restart.sh
 
+      - name: install
+        help: "Instala dependencias do servico (monta SSH do host, roda go mod download + build automaticamente)."
+        args:
+          - name: service
+            required: true
+            help: "Nome do servico (monolito, bo-container, front-student)"
+        flags:
+          - long: --env
+            short: -e
+            arg: environment
+            default: sand
+            help: "Ambiente: sand | prod | qa | local (default: sand)"
+        filename: commands/docker_install.sh
+
   - name: new-task
     alias: [task-new]
     help: Cria task + card no kanban (Puppy).

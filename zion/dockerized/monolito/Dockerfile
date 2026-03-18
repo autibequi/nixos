@@ -1,6 +1,9 @@
-FROM golang:1.23-alpine AS builder
+FROM golang:1.24.4-alpine AS builder
 
-RUN apk add --no-cache git gcc musl-dev
+RUN apk add --no-cache ca-certificates git openssh-client gcc libc-dev librdkafka-dev
+
+RUN git config --global url."git@github.com:estrategiahq".insteadOf "https://github.com/estrategiahq"
+RUN mkdir -p /root/.ssh
 
 WORKDIR /go/app
 
@@ -9,18 +12,21 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /go/bin/app ./apps/server/main.go
-RUN CGO_ENABLED=0 GOOS=linux go build -o /go/bin/worker ./apps/worker/main.go
+RUN CGO_ENABLED=1 GOOS=linux go build -tags musl -o server ./cmd/server/main.go
+RUN CGO_ENABLED=1 GOOS=linux go build -tags musl -o worker ./cmd/worker/main.go
 
-FROM alpine:3.19 AS runtime
+FROM alpine:latest AS runtime
 
-RUN apk add --no-cache ca-certificates tzdata
+RUN apk --no-cache add ca-certificates librdkafka
 
-WORKDIR /app
+WORKDIR /go/app
 
-COPY --from=builder /go/bin/app .
-COPY --from=builder /go/bin/worker .
+COPY --from=builder /go/app/server .
+COPY --from=builder /go/app/worker .
 
-EXPOSE 4004
+EXPOSE 4001 4004
 
-CMD ["./app"]
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:4004/health || exit 1
+
+CMD ["./server"]
