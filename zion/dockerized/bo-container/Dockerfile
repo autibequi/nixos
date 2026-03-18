@@ -12,4 +12,4 @@ ENV LOCAL_BO_CONTAINER_HOST=0.0.0.0
 
 # node_modules vem do bind mount (gerado por: zion docker install bo-container)
 # node-sass precisa ser recompilado para musl (Alpine) se instalado em glibc
-CMD ["sh", "-c", "npm rebuild node-sass --silent 2>/dev/null || true && ./node_modules/.bin/quasar dev"]
+CMD ["./node_modules/.bin/quasar", "dev"]

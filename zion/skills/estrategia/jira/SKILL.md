@@ -501,3 +501,14 @@ Antes de escrever, ler o conteúdo atual do campo (`customfield_11246`) e avalia
 | Campo tem conteúdo real escrito por humano ou refinamento anterior | **Append** — adicionar `rule` + banner + novo conteúdo abaixo. Nunca sobrescrever. |
 
 **Dúvida?** Se não for óbvio que o conteúdo existente é lixo/template, tratar como conteúdo real e fazer append.
+
+### Marcar "Refinado por" ao salvar
+
+Sempre que salvar a Sugestão de Implementação, também atualizar o campo **"Refinado por"** (`customfield_11248`) com o usuário autenticado no momento:
+
+1. Chamar `atlassianUserInfo` para obter o `accountId` do usuário conectado — **nunca perguntar o nome, nunca usar `lookupJiraAccountId`**
+2. Ler o valor atual de `customfield_11248` (array de usuários)
+3. Adicionar o novo usuário à lista se ainda não estiver (append, nunca replace)
+4. Atualizar via `editJiraIssue` com formato: `[{ "accountId": "..." }, ...]`
+
+Isso garante que toda sugestão escrita tenha um responsável registrado e não fique solta no card.

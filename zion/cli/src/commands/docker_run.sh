@@ -33,6 +33,15 @@ case "$env" in
   *)      export APP_ENV_FILE="$env" ;;
 esac
 
+# Mapear env para nome do npm script (front-student usa devbox/qa/prod)
+case "$env" in
+  sand|local) export NPM_SCRIPT_ENV="devbox" ;;
+  *)          export NPM_SCRIPT_ENV="$env" ;;
+esac
+
+# Vertical (front-student: carreiras-juridicas, concursos, medicina, etc.)
+export VERTICAL="${args[--vertical]:-carreiras-juridicas}"
+
 # Garantir rede
 if ! docker network inspect nixos_default &>/dev/null; then
   echo "[zion docker] Criando rede nixos_default..."

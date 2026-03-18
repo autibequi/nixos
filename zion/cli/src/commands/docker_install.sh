@@ -54,7 +54,8 @@ if _is_node_service; then
     sh -c '
       set -e
 
-      apk add --no-cache git openssh-client ca-certificates python3 make g++
+      apk add --no-cache git openssh-client ca-certificates python3 make g++ \
+        autoconf automake libtool nasm pkgconfig
 
       mkdir -p /root/.ssh
       cp /ssh-host/* /root/.ssh/ 2>/dev/null || true
@@ -70,8 +71,12 @@ if _is_node_service; then
       fi
       echo "@estrategiahq:registry=https://npm.pkg.github.com/estrategiahq" >> /root/.npmrc
 
-      echo "[1/1] Instalando dependencias (npm install)..."
+      echo "[1/2] Instalando dependencias (npm install)..."
       npm install
+
+      echo "[2/2] Recompilando bindings nativos para Alpine/musl (compilando do fonte)..."
+      rm -rf node_modules/node-sass/vendor/
+      npm rebuild node-sass || true
 
       echo ""
       echo "Dependencias instaladas! node_modules/ gerado no projeto."

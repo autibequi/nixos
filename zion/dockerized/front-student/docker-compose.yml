@@ -9,7 +9,7 @@ services:
       - FORCE_COLOR=1
       - TERM=xterm-256color
       - VERTICAL=${VERTICAL:-carreiras-juridicas}
-      - APP_ENV=${APP_ENV:-sand}
+      - NPM_SCRIPT_ENV=${NPM_SCRIPT_ENV:-dev}
     tty: true
     volumes:
       # Bind mount completo: source + node_modules (gerado por zion docker install)
