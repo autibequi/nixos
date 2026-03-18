@@ -95,6 +95,108 @@ zion_docker_validate_service() {
   return 0
 }
 
+# --- Worktree support ---
+
+_ZION_DK_WORKTREE=""
+_ZION_DK_WORKTREE_DIR=""
+
+# Resolve um worktree por nome (ultimo componente do path).
+# Seta _ZION_DK_WORKTREE e _ZION_DK_WORKTREE_DIR.
+zion_docker_init_worktree() {
+  local service="$1" worktree="${2:-}"
+  _ZION_DK_WORKTREE=""
+  _ZION_DK_WORKTREE_DIR=""
+  [[ -z "$worktree" ]] && return 0
+
+  local base_dir
+  base_dir=$(zion_docker_service_dir "$service")
+  [[ ! -d "$base_dir" ]] && { echo "Diretorio base nao encontrado: $base_dir" >&2; return 1; }
+
+  local wt_path=""
+  while IFS= read -r line; do
+    local p="${line%% *}"
+    local name
+    name=$(basename "$p")
+    if [[ "$name" == "$worktree" ]]; then
+      wt_path="$p"
+      break
+    fi
+  done < <(git -C "$base_dir" worktree list 2>/dev/null)
+
+  if [[ -z "$wt_path" ]]; then
+    echo "Worktree '$worktree' nao encontrado para $service." >&2
+    echo "Disponiveis:" >&2
+    git -C "$base_dir" worktree list 2>/dev/null | sed 's/^/  /' >&2
+    return 1
+  fi
+
+  _ZION_DK_WORKTREE="$worktree"
+  _ZION_DK_WORKTREE_DIR="$wt_path"
+}
+
+# Dir efetivo (worktree se setado, senao service dir)
+zion_docker_effective_dir() {
+  local service="$1"
+  if [[ -n "$_ZION_DK_WORKTREE_DIR" ]]; then
+    echo "$_ZION_DK_WORKTREE_DIR"
+  else
+    zion_docker_service_dir "$service"
+  fi
+}
+
+# Project name efetivo (inclui sufixo -wt-<nome> se worktree)
+zion_docker_effective_project() {
+  local service="$1"
+  if [[ -n "$_ZION_DK_WORKTREE" ]]; then
+    local safe
+    safe=$(echo "$_ZION_DK_WORKTREE" | tr '/' '-' | tr '[:upper:]' '[:lower:]')
+    echo "zion-dk-${service}-wt-${safe}"
+  else
+    zion_docker_project_name "$service"
+  fi
+}
+
+# Exporta *_DIR overridado para compose
+zion_docker_export_dirs() {
+  local service="$1"
+  export MONOLITO_DIR="${MONOLITO_DIR:-$HOME/projects/estrategia/monolito}"
+  export BO_CONTAINER_DIR="${BO_CONTAINER_DIR:-$HOME/projects/estrategia/bo-container}"
+  export FRONT_STUDENT_DIR="${FRONT_STUDENT_DIR:-$HOME/projects/estrategia/front-student}"
+
+  if [[ -n "$_ZION_DK_WORKTREE_DIR" ]]; then
+    case "$service" in
+      monolito|monolito-worker) export MONOLITO_DIR="$_ZION_DK_WORKTREE_DIR" ;;
+      bo-container)             export BO_CONTAINER_DIR="$_ZION_DK_WORKTREE_DIR" ;;
+      front-student)            export FRONT_STUDENT_DIR="$_ZION_DK_WORKTREE_DIR" ;;
+    esac
+  fi
+}
+
+# Lista worktrees de um servico (formato: path branch)
+zion_docker_list_worktrees() {
+  local service="$1"
+  local dir
+  dir=$(zion_docker_service_dir "$service")
+  [[ ! -d "$dir" ]] && return 1
+  git -C "$dir" worktree list 2>/dev/null
+}
+
+# Lista worktrees de todos os servicos
+zion_docker_list_all_worktrees() {
+  local services="monolito bo-container front-student"
+  for svc in $services; do
+    local dir
+    dir=$(zion_docker_service_dir "$svc")
+    [[ ! -d "$dir" ]] && continue
+    local wt_count
+    wt_count=$(git -C "$dir" worktree list 2>/dev/null | wc -l)
+    [[ "$wt_count" -le 1 ]] && continue
+    echo "SERVICE:$svc"
+    git -C "$dir" worktree list 2>/dev/null
+    echo ""
+  done
+}
+
 # --- Reverse Proxy (sobe/desce automaticamente com servicos estrategia) ---
 
 _REVERSEPROXY_DIR="${zion_nixos_dir}/zion/dockerized/reverseproxy"

@@ -1,9 +1,0 @@
-services:
-  proxy:
-    image: nginx:alpine
-    container_name: reverseproxy
-    network_mode: "host"
-    restart: always
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./certs:/etc/nginx/certs:ro
