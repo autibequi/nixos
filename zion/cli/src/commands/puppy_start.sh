@@ -1,4 +1,5 @@
-# Inicia o container puppy persistente e o daemon interno.
+# Inicia o container puppy persistente.
+# O daemon é iniciado automaticamente pelo entrypoint do container (após 30s delay).
 zion_load_config
 
 PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
@@ -13,9 +14,6 @@ echo "[zion puppy] Subindo container puppy..."
 OBSIDIAN_PATH="$zion_obsidian_path" \
   docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" up -d puppy
 
-echo "[zion puppy] Iniciando daemon interno..."
-OBSIDIAN_PATH="$zion_obsidian_path" \
-  docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
-  exec -d puppy /bin/bash -c "/workspace/zion/scripts/puppy-daemon.sh"
-
-echo "[zion puppy] Container puppy + daemon iniciados."
+echo "[zion puppy] Container puppy iniciado. Daemon inicia automaticamente em ~30s."
+echo "[zion puppy] Logs: zion puppy logs -f"
+echo "[zion puppy] Heartbeat: cat \$OBSIDIAN_PATH/agents/cron/heartbeat"

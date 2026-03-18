@@ -61,7 +61,9 @@ services:
     network_mode: host
     working_dir: /workspace/mnt
     entrypoint: ["/bin/bash", "-c"]
-    command: ["sleep infinity"]
+    command: [
+      "mkdir -p /workspace/obsidian/agents/cron && sleep 30 && exec /workspace/mnt/scripts/puppy-daemon.sh"
+    ]
     restart: unless-stopped
     group_add:
       - "${DOCKER_GID:-999}"

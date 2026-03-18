@@ -15,11 +15,14 @@ set -euo pipefail
 WORKSPACE="/workspace"
 VAULT_DIR="$WORKSPACE/obsidian"
 EPHEMERAL="$WORKSPACE/.ephemeral"
+CRON_DIR="$VAULT_DIR/agents/cron"
+# Persistent state/logs → Obsidian (survive container restarts)
+STATE_FILE="$CRON_DIR/state.json"
+LOGFILE="$CRON_DIR/daemon.log"
+# Ephemeral state → .ephemeral (locks/completions are intentionally reset on restart)
 SCHEDULER_DIR="$EPHEMERAL/scheduler"
-STATE_FILE="$SCHEDULER_DIR/state.json"
 COMPLETED_DIR="$SCHEDULER_DIR/completed"
 LOCKFILE="$EPHEMERAL/locks/daemon.lock"
-LOGFILE="$EPHEMERAL/logs/daemon.log"
 
 TICK_INTERVAL="${PUPPY_TICK_INTERVAL:-600}"  # 10 min default
 TICK_BUDGET="${PUPPY_TICK_BUDGET:-540}"      # 9 min default
@@ -34,7 +37,7 @@ SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 RUNNER="$SCRIPT_DIR/puppy-runner.sh"
 
 # ── Setup ────────────────────────────────────────────────────────────────────
-mkdir -p "$SCHEDULER_DIR" "$COMPLETED_DIR" "$EPHEMERAL/locks" "$EPHEMERAL/logs"
+mkdir -p "$CRON_DIR" "$CRON_DIR/runs" "$SCHEDULER_DIR" "$COMPLETED_DIR" "$EPHEMERAL/locks"
 
 # ── Logging ──────────────────────────────────────────────────────────────────
 log() { echo "[daemon:$(date +%H:%M:%S)] $*"; }
@@ -289,6 +292,7 @@ run_tick() {
 
   if [ ${#queue[@]} -eq 0 ]; then
     log "No tasks due."
+    echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$CRON_DIR/heartbeat"
     return 0
   fi
 
@@ -367,6 +371,9 @@ run_tick() {
 
   process_completions
   log "=== Tick done (exit=$dispatch_exit) ==="
+
+  # Heartbeat — proof that daemon ran (visible in Obsidian)
+  echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$CRON_DIR/heartbeat"
 }
 
 # ── Main loop ────────────────────────────────────────────────────────────────
