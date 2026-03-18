@@ -80,4 +80,4 @@ fi
 echo ">>> Container rodando. Logs em tempo real [Ctrl+C para sair, container continua]:"
 echo ">>> Reconectar: zion docker logs $service -f"
 echo "---"
-docker compose $COMPOSE_ARGS logs -f --tail 50
+docker compose $COMPOSE_ARGS logs -f --no-log-prefix --tail 50
