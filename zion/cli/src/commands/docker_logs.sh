@@ -15,7 +15,7 @@ running=$(docker compose -f "$compose" -p "$project" ps --status running 2>/dev/
 if [[ "$running" -gt 0 ]]; then
   ARGS="--tail $tail_lines"
   [[ -n "$follow" ]] && ARGS="$ARGS -f"
-  docker compose -f "$compose" -p "$project" logs $ARGS
+  docker compose -f "$compose" -p "$project" logs --no-log-prefix $ARGS
 elif [[ -f "$log_dir/service.log" ]]; then
   echo "=== Container parado. Mostrando log gravado ==="
   if [[ -n "$follow" ]]; then
