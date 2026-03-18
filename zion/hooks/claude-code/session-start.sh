@@ -36,6 +36,13 @@ AUTOJARVIS="OFF"
 
 echo "BOOT: personality=$PERSONALITY autocommit=$AUTOCOMMIT autojarvis=$AUTOJARVIS"
 
+# CLAUDE.OVERRIDE.md — injetar SEMPRE, independente de personality
+if [ -f "$WS/CLAUDE.OVERRIDE.md" ]; then
+  echo "---CLAUDE.OVERRIDE.MD---"
+  cat "$WS/CLAUDE.OVERRIDE.md"
+  echo "---/CLAUDE.OVERRIDE.MD---"
+fi
+
 # API usage (universal — sempre injetar para controle de cota)
 USAGE_BAR_SCRIPT="$WS/stow/.claude/scripts/usage-bar.sh"
 if [ -x "$USAGE_BAR_SCRIPT" ]; then
@@ -65,12 +72,6 @@ if [ "$PERSONALITY" = "ON" ]; then
     echo "---DIRETRIZES---"
     cat "$WS/zion/system/DIRETRIZES.md"
     echo "---/DIRETRIZES---"
-  fi
-  # CLAUDE.OVERRIDE.md tem prioridade sobre CLAUDE.md (injetar primeiro)
-  if [ -f "$WS/CLAUDE.OVERRIDE.md" ]; then
-    echo "---CLAUDE.OVERRIDE.MD---"
-    cat "$WS/CLAUDE.OVERRIDE.md"
-    echo "---/CLAUDE.OVERRIDE.MD---"
   fi
   if [ -f "$WS/CLAUDE.md" ]; then
     echo "---CLAUDE.MD---"
