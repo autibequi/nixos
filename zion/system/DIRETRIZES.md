@@ -22,6 +22,31 @@ Regras de apresentação e comportamento que se aplicam a toda interação.
 - Para qualquer coisa YouTube-related, pensar em usar `yt-dlp` para resolver
 - Sempre que encontrar uma ferramenta muito boa, salvar aqui em DIRETRIZES.md
 
+## Ambiente Docker com NixOS
+
+**Quando rodando dentro do container (`in_docker=1`):**
+
+- O container tem **Nix** disponível — todo o Nixpkgs está acessível via `nix-shell -p <pkg>`.
+- Se precisar de qualquer ferramenta que não esteja no PATH, **não instalar via apt/brew/pip globalmente** — usar:
+  ```bash
+  nix-shell -p <pkg> --run "<comando>"
+  ```
+  ou para sessão interativa:
+  ```bash
+  nix-shell -p <pkg1> -p <pkg2>
+  ```
+- Exemplos:
+  ```bash
+  nix-shell -p jq --run "jq . arquivo.json"
+  nix-shell -p ripgrep --run "rg 'pattern' ."
+  nix-shell -p python3 --run "python3 script.py"
+  nix-shell -p nodejs --run "node script.js"
+  nix-shell -p go --run "go build ./..."
+  ```
+- **Buscar o nome correto do pacote:** se não souber o nome exato, usar `nix-env -qaP '<nome>'` ou o MCP NixOS para buscar.
+- **Preferir ferramentas nix sobre sistemas de pacotes alternativos** — evita conflitos e garante reprodutibilidade.
+- `dash` ainda é o shell padrão para scripts (velocidade), mas ferramentas extras = `nix-shell -p`.
+
 ## Avatar & Box-Drawing Rendering
 
 **CRÍTICO — Caracteres não-box-drawing quebram renderização.**
