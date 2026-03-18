@@ -58,28 +58,30 @@ Injetadas no bloco `---BOOT---` toda sessão:
 
 ## Caminhos fundamentais
 
-A pasta **`/zion`** é o engine dos agentes. No repo NixOS: `$WS/zion/`.
+Tudo fica sob `/workspace/`. O engine dos agentes é sempre `/workspace/zion/`.
 
-| Caminho | Conteúdo |
-|---------|----------|
-| **`/zion/system/`** | **INIT.md** = comportamento completo; **SOUL.md** = persona ativa; **DIRETRIZES.md** = regras operacionais; **SELF.md** = diário |
-| **`/zion/commands/`** | Comandos de alto nível por categoria: `estrategia/`, `nixos/`, `meta/`, `utils/`, `tools/` |
-| **`/zion/skills/`** | Skills especializadas (`SKILL.md` em cada pasta). Ler antes de executar tarefas que se encaixem |
-| **`/zion/agents/`** | Definições de agentes por contexto |
-| **`/zion/personas/`** | Personas e avatares. Ativa definida em `SOUL.md` |
-| **`/zion/hooks/`** | Hooks claude-code (este arquivo vem daqui) |
-| **`/zion/cli/`** | CLI zion: docker-compose, bashly, README |
-| **`/workspace/mnt`** | Projeto atual (CLAUDIO_MOUNT) |
-| **`/workspace/obsidian`** | Vault Obsidian (quando montado) |
-| **`/workspace/nixos`** | Config NixOS do host (só em `zion edit`) |
-| **`/workspace/logs`** | Logs do host (só em `zion edit`) |
+| Caminho | Papel |
+|---------|-------|
+| **`/workspace/zion/`** | Engine dos agentes — sempre montado aqui |
+| **`/workspace/zion/system/`** | **INIT.md** = comportamento completo; **SOUL.md** = persona ativa; **DIRETRIZES.md** = regras; **SELF.md** = diário |
+| **`/workspace/zion/commands/`** | Comandos por categoria: `estrategia/`, `nixos/`, `meta/`, `utils/`, `tools/` |
+| **`/workspace/zion/skills/`** | Skills especializadas (`SKILL.md` em cada pasta). Ler antes de executar |
+| **`/workspace/zion/agents/`** | Definições de agentes por contexto |
+| **`/workspace/zion/personas/`** | Personas e avatares. Ativa definida em `SOUL.md` |
+| **`/workspace/zion/scripts/`** | Scripts de bootstrap e workers |
+| **`/workspace/mnt/`** | Zona de trabalho — pasta do host attachada para você editar (nixos/, projects/, etc.) |
+| **`/workspace/obsidian/`** | Cérebro persistente — vault Obsidian acessível pelo usuário no host |
+| **`/workspace/logs/`** | Logs: `host/journal/` (sistema), `docker/<serviço>/` (containers de aplicação) |
+| **`/workspace/dockerized/`** | Configs docker dos serviços (Dockerfile, compose, .env) |
 
-**Regra:** quando não souber como fazer X, procurar em `/zion/commands/` ou `/zion/skills/` e **ler o arquivo** antes de executar.
+Detalhes sobre cada path só relevantes em container estão no bloco `---ENV---` do boot.
+
+**Regra:** quando não souber como fazer X, procurar em `/workspace/zion/commands/` ou `/workspace/zion/skills/` e **ler o arquivo** antes de executar.
 
 ---
 
 ## Comandos e skills
 
-- **Comandos:** `/zion/commands/` — cada `.md` descreve um fluxo. Ler antes de executar.
-- **Skills:** `/zion/skills/<nome>/SKILL.md` — usar quando a tarefa se encaixar na descrição.
+- **Comandos:** `/workspace/zion/commands/` — cada `.md` descreve um fluxo. Ler antes de executar.
+- **Skills:** `/workspace/zion/skills/<nome>/SKILL.md` — usar quando a tarefa se encaixar na descrição.
 - Carregar apenas o que for invocado ou necessário para a tarefa atual.

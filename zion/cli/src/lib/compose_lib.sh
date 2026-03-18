@@ -306,7 +306,7 @@ zion_session_run() {
 
       zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes \
         --entrypoint /bin/bash -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" sandbox \
-        -c ". /zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
+        -c ". /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
       ;;
 
     cursor)
@@ -318,7 +318,7 @@ zion_session_run() {
       cursor_envs+=(-e "CLAUDIO_MOUNT=$mount_path")
       cursor_envs+=(-e "BOOTSTRAP_SKIP_CLEAR=1")
 
-      local cursor_cmd='. /zion/scripts/bootstrap.sh; cd /workspace/mnt; '
+      local cursor_cmd='. /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt; '
 
       # Resume (takes priority over init-md)
       if [[ "$engine_args" == *"--resume="* ]]; then

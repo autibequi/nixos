@@ -45,8 +45,8 @@ echo "---/BOOT---"
 # ────────────────────────────────────────────────────────────────
 # 2. BOOTSTRAP / caminhos / prioridade (sempre)
 # ────────────────────────────────────────────────────────────────
-BOOTSTRAP_MD="$WS/zion/bootstrap.md"
-[ -f "$BOOTSTRAP_MD" ] || BOOTSTRAP_MD="/zion/bootstrap.md"
+BOOTSTRAP_MD="$WS/workspace/zion/bootstrap.md"
+[ -f "$BOOTSTRAP_MD" ] || BOOTSTRAP_MD="/workspace/zion/bootstrap.md"
 if [ -f "$BOOTSTRAP_MD" ]; then
   echo "---BOOTSTRAP---"
   cat "$BOOTSTRAP_MD"
@@ -56,8 +56,8 @@ fi
 # ────────────────────────────────────────────────────────────────
 # 3. DIRETRIZES operacionais (sempre)
 # ────────────────────────────────────────────────────────────────
-DIRETRIZES="$WS/zion/system/DIRETRIZES.md"
-[ -f "$DIRETRIZES" ] || DIRETRIZES="/zion/system/DIRETRIZES.md"
+DIRETRIZES="$WS/workspace/zion/system/DIRETRIZES.md"
+[ -f "$DIRETRIZES" ] || DIRETRIZES="/workspace/zion/system/DIRETRIZES.md"
 if [ -f "$DIRETRIZES" ]; then
   echo "---DIRETRIZES---"
   cat "$DIRETRIZES"
@@ -67,8 +67,8 @@ fi
 # ────────────────────────────────────────────────────────────────
 # 4. SELF / diário da persona (sempre)
 # ────────────────────────────────────────────────────────────────
-SELF="$WS/zion/system/SELF.md"
-[ -f "$SELF" ] || SELF="/zion/system/SELF.md"
+SELF="$WS/workspace/zion/system/SELF.md"
+[ -f "$SELF" ] || SELF="/workspace/zion/system/SELF.md"
 if [ -f "$SELF" ]; then
   echo "---SELF---"
   cat "$SELF"
@@ -82,20 +82,38 @@ echo "---ENV---"
 if [ "$IN_DOCKER" = "1" ]; then
   cat <<'DOCKER'
 Você está DENTRO de um container Docker (in_docker=1).
-- NÃO executar: nixos-rebuild, nh os switch, systemctl — não afeta o host
-- Para comandos de sistema, pedir ao usuário rodar no host
-- Paths disponíveis: /workspace/mnt (projeto) | /zion (engine) | /workspace/obsidian (vault)
-- /workspace/logs e /workspace/nixos só existem em `zion edit`
-- Superpoderes: todo Nixpkgs disponível via `nix-shell -p <pkg>`
+NÃO executar: nixos-rebuild, nh os switch, systemctl — não afeta o host.
+Para comandos de sistema, pedir ao usuário rodar no host.
+Superpoderes: todo Nixpkgs disponível via `nix-shell -p <pkg>`.
+
+Estrutura do /workspace (o que você enxerga):
+
+/workspace/zion/          engine dos agentes — seus prompts, scripts, hooks, skills, personas
+/workspace/mnt/           sua ZONA DE TRABALHO — pasta do host attachada pelo usuário (rw)
+                          pode ser ~/nixos (este repo), ~/projects/ (vários repos), etc.
+                          é aqui que você lê, edita e commita código
+/workspace/obsidian/      seu CÉREBRO PERSISTENTE entre execuções docker
+                          o usuário acessa do host no Obsidian — use para exibir resultados,
+                          notas, kanban, memória cross-session
+/workspace/logs/          logs attachados pelo usuário para você ler
+  logs/host/journal/      logs do sistema host (journald)
+  logs/docker/            logs de containers de aplicação:
+    logs/docker/monolito/     logs do monolito Go
+    logs/docker/bo-container/ logs do BO Container
+    logs/docker/front-student/ logs do Front Student
+/workspace/dockerized/    configs docker versionadas dos serviços (Dockerfile, compose, .env)
+/workspace/.hive-mind/    área efêmera compartilhada entre containers (locks, sinais)
+
+Disponível apenas em `zion edit`:
+  /workspace/nixos/       repo NixOS do host montado explicitamente (quando mnt != nixos)
 DOCKER
   if [ "$HEADLESS" = "1" ]; then
     echo ""
-    echo "Modo HEADLESS ativo (in_docker=1, headless=1):"
+    echo "Modo HEADLESS ativo (headless=1):"
     echo "- Autonomia total — não esperar input, não fazer perguntas"
     echo "- Ir o mais longe possível dentro do timeout"
     [ -n "$PUPPY_TIMEOUT" ] && echo "- Timeout: ${PUPPY_TIMEOUT}s — reserve os últimos ~30s para salvar estado (SIGKILL ao estourar)"
-    echo "- Ciclos curtos: executar → salvar parcial → continuar"
-    echo "- Sem output decorativo, foco em execução e persistência"
+    echo "- Ciclos curtos: executar → salvar parcial → continuar. Sem output decorativo."
   fi
 else
   cat <<'HOST'
@@ -127,8 +145,8 @@ fi
 # 7. PERSONA (apenas personality=ON)
 # ────────────────────────────────────────────────────────────────
 if [ "$PERSONALITY" = "ON" ]; then
-  SOUL="$WS/zion/system/SOUL.md"
-  [ -f "$SOUL" ] || SOUL="/zion/system/SOUL.md"
+  SOUL="$WS/workspace/zion/system/SOUL.md"
+  [ -f "$SOUL" ] || SOUL="/workspace/zion/system/SOUL.md"
   if [ -f "$SOUL" ]; then
     PERSONA_PATH=$(grep -m1 'Arquivo:' "$SOUL" | sed 's/.*`\(.*\)`.*/\1/')
     if [ -n "$PERSONA_PATH" ] && [ -f "$WS/$PERSONA_PATH" ]; then

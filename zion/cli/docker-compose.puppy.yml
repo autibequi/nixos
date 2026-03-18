@@ -19,7 +19,7 @@ x-extra-hosts: &extra-hosts
   - "host.docker.internal:host-gateway"
 
 x-base-volumes: &base-volumes
-  - ${ZION_ROOT:-${HOME}/nixos/zion}:/zion
+  - ${ZION_ROOT:-${HOME}/nixos/zion}:/workspace/zion
   - ${OBSIDIAN_PATH:-/tmp}:/workspace/obsidian
   - ${CLAUDIO_MOUNT:-${HOME}/projects}:/workspace/mnt:${CLAUDIO_MOUNT_OPTS:-rw}
   - ${HOME}/.claude:/home/claude/.claude

@@ -15,4 +15,4 @@ echo "[zion puppy] Rodando task '$task'..."
 OBSIDIAN_PATH="$zion_obsidian_path" \
   docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
   exec -e SCHEDULER_VERBOSE=1 -e SCHEDULER_WORKER_ID="manual-$$" -e SCHEDULER_CLOCK="unified" \
-  puppy /zion/scripts/puppy-runner.sh "$task"
+  puppy /workspace/zion/scripts/puppy-runner.sh "$task"
