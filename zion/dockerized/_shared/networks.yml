@@ -1,0 +1,7 @@
+networks:
+  estrategia:
+    name: estrategia-net
+    driver: bridge
+  default:
+    name: nixos_default
+    external: true

@@ -94,10 +94,6 @@ commands:
         help: "Diretório do projeto (default ~/projects)"
     filename: commands/start.sh
 
-  - name: openclaw
-    help: Sobe sandbox e abre OpenClaw gateway (LM Studio).
-    filename: commands/openclaw.sh
-
   # ── Container (build / down / destroy) ─────────────────────
   - name: build
     help: Build da imagem Docker do sandbox.
@@ -178,13 +174,82 @@ commands:
             help: "Modelo Claude: haiku | sonnet | opus (default: haiku)"
         filename: commands/puppy_query.sh
 
-  - name: reset
-    help: Devolve tasks de running/ para origem (pending/recurring).
-    filename: commands/reset.sh
+  # ── Docker (servicos estrategia) ──────────────────────────
+  - name: docker
+    alias: [dk]
+    help: "Gerencia servicos Docker da estrategia (monolito, bo-container, front-student, etc.)"
+    commands:
+      - name: run
+        alias: [up]
+        help: "Levanta um servico em container Docker."
+        args:
+          - name: service
+            required: true
+            help: "Nome do servico (monolito, bo-container, front-student)"
+        flags:
+          - long: --env
+            short: -e
+            arg: environment
+            default: sand
+            help: "Ambiente: sand | prod | qa | local (default: sand)"
+          - long: --detach
+            short: -d
+            help: "Roda em background (detached, sem follow de logs)"
+        filename: commands/docker_run.sh
 
-  - name: status
-    help: Mostra estado via kanban + workers.
-    filename: commands/status.sh
+      - name: stop
+        help: "Para um servico Docker."
+        args:
+          - name: service
+            required: true
+            help: "Nome do servico"
+        filename: commands/docker_stop.sh
+
+      - name: logs
+        help: "Mostra logs de um servico Docker."
+        args:
+          - name: service
+            required: true
+            help: "Nome do servico"
+        flags:
+          - long: --follow
+            short: -f
+            help: "Follow log output"
+          - long: --tail
+            arg: lines
+            default: "100"
+            help: "Numero de linhas (default 100)"
+        filename: commands/docker_logs.sh
+
+      - name: status
+        alias: [ps]
+        help: "Status dos servicos Docker."
+        args:
+          - name: service
+            help: "Nome do servico (opcional; sem = todos)"
+        filename: commands/docker_status.sh
+
+      - name: shell
+        help: "Abre shell dentro do container do servico."
+        args:
+          - name: service
+            required: true
+            help: "Nome do servico"
+          - name: container
+            help: "Container especifico (app, worker, postgres, redis). Default: app"
+        filename: commands/docker_shell.sh
+
+      - name: restart
+        help: "Reinicia um servico Docker."
+        args:
+          - name: service
+            required: true
+        flags:
+          - long: --env
+            short: -e
+            arg: environment
+            help: "Ambiente (se omitido, mantem o atual)"
+        filename: commands/docker_restart.sh
 
   - name: new-task
     alias: [task-new]
@@ -208,24 +273,6 @@ commands:
         arg: timeout
         help: Timeout em segundos
     filename: commands/new_task.sh
-
-  # ── Logs / usage ────────────────────────────────────────────
-  - name: logs
-    help: Mostra ou segue o último log de worker.
-    filename: commands/logs.sh
-
-  - name: logs-list
-    help: Lista todos os arquivos de log.
-    filename: commands/logs_list.sh
-
-  - name: usage-api
-    help: Uso da API Anthropic (hoje; use --7d ou --30d para período).
-    flags:
-      - long: --7d
-        help: Últimos 7 dias
-      - long: --30d
-        help: Últimos 30 dias
-    filename: commands/usage_api.sh
 
   - name: edit
     help: Abre sessao com ~/nixos em /workspace/mnt e /workspace/logs.

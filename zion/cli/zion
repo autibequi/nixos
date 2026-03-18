@@ -26,27 +26,22 @@ zion_usage() {
   echo
   # :command.usage_commands
   printf "%s\n" "Commands:"
-  printf "  %s   Continua a última sessão (mesmo que digitar só zion). (default)\n" "continue "
-  printf "  %s   Nova sessão no container. Exige --engine (ou engine= em ~/.zion).\n" "new      "
-  printf "  %s   Abre bash no container com o projeto montado.\n" "shell    "
-  printf "  %s   Mostra lista de sessões e permite escolher qual retomar.\n" "resume   "
-  printf "  %s   Sobe sandbox persistente e abre Claude (equiv. make start).\n" "start    "
-  printf "  %s   Sobe sandbox e abre OpenClaw gateway (LM Studio).\n" "openclaw "
-  printf "  %s   Build da imagem Docker do sandbox.\n" "build    "
-  printf "  %s   Para todos os containers do projeto.\n" "down     "
-  printf "  %s   Para containers e remove imagens/volumes.\n" "destroy  "
-  printf "  %s   Regenera CLI (bashly) e instala/atualiza symlink em stow/.local/bin.\n" "update   "
-  printf "  %s   Cria ~/.zion a partir de config.example (não sobrescreve se já existir).\n" "init     "
-  printf "  %s   Gerencia o Puppy worker (container persistente + task runner).\n" "puppy    "
-  printf "  %s   Devolve tasks de running/ para origem (pending/recurring).\n" "reset    "
-  printf "  %s   Mostra estado via kanban + workers.\n" "status   "
-  printf "  %s   Cria task + card no kanban (Puppy).\n" "new-task "
-  printf "  %s   Mostra ou segue o último log de worker.\n" "logs     "
-  printf "  %s   Lista todos os arquivos de log.\n" "logs-list"
-  printf "  %s   Uso da API Anthropic (hoje; use --7d ou --30d para período).\n" "usage-api"
-  printf "  %s   Abre sessao com ~/nixos em /workspace/mnt e /workspace/logs.\n" "edit     "
-  printf "  %s   Mostra o banner com comandos principais.\n" "help     "
-  printf "  %s   Documentacao completa de todos os comandos e flags.\n" "man      "
+  printf "  %s   Continua a última sessão (mesmo que digitar só zion). (default)\n" "continue"
+  printf "  %s   Nova sessão no container. Exige --engine (ou engine= em ~/.zion).\n" "new     "
+  printf "  %s   Abre bash no container com o projeto montado.\n" "shell   "
+  printf "  %s   Mostra lista de sessões e permite escolher qual retomar.\n" "resume  "
+  printf "  %s   Sobe sandbox persistente e abre Claude (equiv. make start).\n" "start   "
+  printf "  %s   Build da imagem Docker do sandbox.\n" "build   "
+  printf "  %s   Para todos os containers do projeto.\n" "down    "
+  printf "  %s   Para containers e remove imagens/volumes.\n" "destroy "
+  printf "  %s   Regenera CLI (bashly) e instala/atualiza symlink em stow/.local/bin.\n" "update  "
+  printf "  %s   Cria ~/.zion a partir de config.example (não sobrescreve se já existir).\n" "init    "
+  printf "  %s   Gerencia o Puppy worker (container persistente + task runner).\n" "puppy   "
+  printf "  %s   Gerencia servicos Docker da estrategia (monolito, bo-container, front-student, etc.)\n" "docker  "
+  printf "  %s   Cria task + card no kanban (Puppy).\n" "new-task"
+  printf "  %s   Abre sessao com ~/nixos em /workspace/mnt e /workspace/logs.\n" "edit    "
+  printf "  %s   Mostra o banner com comandos principais.\n" "help    "
+  printf "  %s   Documentacao completa de todos os comandos e flags.\n" "man     "
   echo
 
   # :command.long_usage
@@ -320,27 +315,6 @@ zion_start_usage() {
     # :argument.usage
     printf "  %s\n" "DIR"
     printf "    Diretório do projeto (default ~/projects)\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-zion_openclaw_usage() {
-  printf "zion openclaw - Sobe sandbox e abre OpenClaw gateway (LM Studio).\n\n"
-
-  printf "%s\n" "Usage:"
-  printf "  zion openclaw\n"
-  printf "  zion openclaw --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
     echo
 
   fi
@@ -724,12 +698,23 @@ zion_puppy_query_usage() {
 }
 
 # :command.usage
-zion_reset_usage() {
-  printf "zion reset - Devolve tasks de running/ para origem (pending/recurring).\n\n"
+zion_docker_usage() {
+  printf "zion docker - Gerencia servicos Docker da estrategia (monolito, bo-container, front-student, etc.)\n\n"
+  printf "Alias: dk\n"
+  echo
 
   printf "%s\n" "Usage:"
-  printf "  zion reset\n"
-  printf "  zion reset --help | -h\n"
+  printf "  zion docker COMMAND\n"
+  printf "  zion docker [COMMAND] --help | -h\n"
+  echo
+  # :command.usage_commands
+  printf "%s\n" "Commands:"
+  printf "  %s   Levanta um servico em container Docker.\n" "run    "
+  printf "  %s   Para um servico Docker.\n" "stop   "
+  printf "  %s   Mostra logs de um servico Docker.\n" "logs   "
+  printf "  %s   Status dos servicos Docker.\n" "status "
+  printf "  %s   Abre shell dentro do container do servico.\n" "shell  "
+  printf "  %s   Reinicia um servico Docker.\n" "restart"
   echo
 
   # :command.long_usage
@@ -745,12 +730,55 @@ zion_reset_usage() {
 }
 
 # :command.usage
-zion_status_usage() {
-  printf "zion status - Mostra estado via kanban + workers.\n\n"
+zion_docker_run_usage() {
+  printf "zion docker run - Levanta um servico em container Docker.\n\n"
+  printf "Alias: up\n"
+  echo
 
   printf "%s\n" "Usage:"
-  printf "  zion status\n"
-  printf "  zion status --help | -h\n"
+  printf "  zion docker run SERVICE [OPTIONS]\n"
+  printf "  zion docker run --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--env, -e ENVIRONMENT"
+    printf "    Ambiente: sand | prod | qa | local (default: sand)\n"
+    printf "    %s\n" "Default: sand"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--detach, -d"
+    printf "    Roda em background (detached, sem follow de logs)\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "Arguments:"
+
+    # :argument.usage
+    printf "  %s\n" "SERVICE"
+    printf "    Nome do servico (monolito, bo-container, front-student)\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_stop_usage() {
+  printf "zion docker stop - Para um servico Docker.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker stop SERVICE\n"
+  printf "  zion docker stop --help | -h\n"
   echo
 
   # :command.long_usage
@@ -760,6 +788,155 @@ zion_status_usage() {
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
     printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "Arguments:"
+
+    # :argument.usage
+    printf "  %s\n" "SERVICE"
+    printf "    Nome do servico\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_logs_usage() {
+  printf "zion docker logs - Mostra logs de um servico Docker.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker logs SERVICE [OPTIONS]\n"
+  printf "  zion docker logs --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--follow, -f"
+    printf "    Follow log output\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--tail LINES"
+    printf "    Numero de linhas (default 100)\n"
+    printf "    %s\n" "Default: 100"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "Arguments:"
+
+    # :argument.usage
+    printf "  %s\n" "SERVICE"
+    printf "    Nome do servico\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_status_usage() {
+  printf "zion docker status - Status dos servicos Docker.\n\n"
+  printf "Alias: ps\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker status [SERVICE]\n"
+  printf "  zion docker status --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "Arguments:"
+
+    # :argument.usage
+    printf "  %s\n" "SERVICE"
+    printf "    Nome do servico (opcional; sem = todos)\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_shell_usage() {
+  printf "zion docker shell - Abre shell dentro do container do servico.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker shell SERVICE [CONTAINER]\n"
+  printf "  zion docker shell --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "Arguments:"
+
+    # :argument.usage
+    printf "  %s\n" "SERVICE"
+    printf "    Nome do servico\n"
+    echo
+
+    # :argument.usage
+    printf "  %s\n" "CONTAINER"
+    printf "    Container especifico (app, worker, postgres, redis). Default: app\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_docker_restart_usage() {
+  printf "zion docker restart - Reinicia um servico Docker.\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion docker restart SERVICE [OPTIONS]\n"
+  printf "  zion docker restart --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--env, -e ENVIRONMENT"
+    printf "    Ambiente (se omitido, mantem o atual)\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "Arguments:"
+
+    # :argument.usage
+    printf "  %s\n" "SERVICE"
+    printf "\n"
     echo
 
   fi
@@ -813,80 +990,6 @@ zion_new_task_usage() {
     # :argument.usage
     printf "  %s\n" "NAME"
     printf "    Nome da task (ex. minha-tarefa).\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-zion_logs_usage() {
-  printf "zion logs - Mostra ou segue o último log de worker.\n\n"
-
-  printf "%s\n" "Usage:"
-  printf "  zion logs\n"
-  printf "  zion logs --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-zion_logs_list_usage() {
-  printf "zion logs-list - Lista todos os arquivos de log.\n\n"
-
-  printf "%s\n" "Usage:"
-  printf "  zion logs-list\n"
-  printf "  zion logs-list --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-zion_usage_api_usage() {
-  printf "zion usage-api - Uso da API Anthropic (hoje; use --7d ou --30d para período).\n\n"
-
-  printf "%s\n" "Usage:"
-  printf "  zion usage-api [OPTIONS]\n"
-  printf "  zion usage-api --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_flags
-    # :flag.usage
-    printf "  %s\n" "--7d"
-    printf "    Últimos 7 dias\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--30d"
-    printf "    Últimos 30 dias\n"
-    echo
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
     echo
 
   fi
@@ -1205,6 +1308,95 @@ zion_model_id() {
   zion_resolve_model_id "$m"
 }
 
+# src/lib/docker_services.sh
+# Registry de servicos Docker conhecidos.
+# Paths dos projetos vem de ~/.zion (ex: MONOLITO_DIR=...)
+# Configs Docker versionadas em zion/dockerized/<service>/
+
+# Diretorio do source do projeto (de ~/.zion)
+zion_docker_service_dir() {
+  local service="$1"
+  local var_name
+  case "$service" in
+    monolito)      var_name="MONOLITO_DIR" ;;
+    bo-container)  var_name="BO_CONTAINER_DIR" ;;
+    front-student) var_name="FRONT_STUDENT_DIR" ;;
+    *) echo ""; return 1 ;;
+  esac
+  local dir="${!var_name}"
+  [[ -z "$dir" ]] && dir="$HOME/projects/estrategia/$service"
+  echo "$dir"
+}
+
+# Diretorio da config Docker versionada (neste repo)
+zion_docker_config_dir() {
+  local service="$1"
+  echo "${zion_nixos_dir}/zion/dockerized/${service}"
+}
+
+# Compose principal do servico (versionado)
+zion_docker_compose_file() {
+  echo "$(zion_docker_config_dir "$1")/docker-compose.yml"
+}
+
+# Compose de dependencias (versionado)
+zion_docker_deps_file() {
+  echo "$(zion_docker_config_dir "$1")/docker-compose.deps.yml"
+}
+
+# Env file por ambiente (versionado)
+zion_docker_env_file() {
+  local service="$1" env="$2"
+  echo "$(zion_docker_config_dir "$service")/env/${env}.env"
+}
+
+zion_docker_project_name() {
+  echo "zion-dk-${1}"
+}
+
+zion_docker_log_dir() {
+  echo "$HOME/.zion/logs/docker/${1}"
+}
+
+# Lista servicos conhecidos
+zion_docker_known_services() {
+  echo "monolito bo-container front-student"
+}
+
+# Valida que o servico existe e tem config
+zion_docker_validate_service() {
+  local service="$1"
+  local dir config_dir compose
+
+  dir=$(zion_docker_service_dir "$service")
+  if [[ -z "$dir" ]]; then
+    echo "Servico desconhecido: $service" >&2
+    echo "Servicos disponiveis: $(zion_docker_known_services)" >&2
+    return 1
+  fi
+
+  if [[ ! -d "$dir" ]]; then
+    echo "Diretorio do projeto nao encontrado: $dir" >&2
+    echo "Configure ${service^^}_DIR em ~/.zion ou crie o diretorio." >&2
+    return 1
+  fi
+
+  config_dir=$(zion_docker_config_dir "$service")
+  if [[ ! -d "$config_dir" ]]; then
+    echo "Config Docker nao encontrada: $config_dir" >&2
+    echo "Use a skill /dockerizer para gerar a config." >&2
+    return 1
+  fi
+
+  compose=$(zion_docker_compose_file "$service")
+  if [[ ! -f "$compose" ]]; then
+    echo "Compose nao encontrado: $compose" >&2
+    return 1
+  fi
+
+  return 0
+}
+
 # :command.command_functions
 # :command.function
 zion_continue_command() {
@@ -1444,21 +1636,6 @@ zion_start_command() {
     zion_compose_cmd -p "$proj_name" exec -it \
     -e CLAUDIO_MOUNT="$mount_path" -e BOOTSTRAP_SKIP_CLEAR=1 sandbox bash -c \
     '. /zion/scripts/bootstrap.sh; cd /workspace/mnt; exec /home/claude/.nix-profile/bin/claude --permission-mode bypassPermissions'
-
-}
-
-# :command.function
-zion_openclaw_command() {
-
-  # src/commands/openclaw.sh
-  zion_load_config
-  mkdir -p "$HOME/.openclaw"
-  if [[ ! -f "$HOME/.openclaw/openclaw.json" ]]; then
-    cp "$zion_nixos_dir/.openclaw/openclaw.json" "$HOME/.openclaw/openclaw.json" 2>/dev/null || true
-    echo "[openclaw] Config copiada para $HOME/.openclaw (LM Studio em host.docker.internal:1234)"
-  fi
-  zion_compose_cmd up -d sandbox
-  zion_compose_cmd exec -it sandbox openclaw gateway
 
 }
 
@@ -1770,7 +1947,30 @@ zion_puppy_tick_command() {
 zion_puppy_query_command() {
 
   # src/commands/puppy_query.sh
-  $prompt"
+  # Envia um prompt ao Claude dentro do container puppy.
+  # Com --headless: informa o agente que ninguem esta observando e deve ir o mais longe possivel.
+  zion_load_config
+
+  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
+  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
+  prompt="${args[prompt]}"
+  headless="${args[--headless]}"
+  timeout_secs="${args[--timeout]:-300}"
+  model="${args[--model]:-haiku}"
+
+  # Build env vars to pass into the container
+  env_flags=()
+  env_flags+=(-e "HEADLESS=${headless:+1}")
+  env_flags+=(-e "PUPPY_TIMEOUT=$timeout_secs")
+
+  # Build the final prompt with headless context
+  final_prompt="$prompt"
+
+  if [[ -n "$headless" ]]; then
+    deadline_str="$(date -u -d "+${timeout_secs} seconds" +%H:%M:%S 2>/dev/null || echo "${timeout_secs}s from now")"
+    headless_header="[HEADLESS MODE] Timeout: ${timeout_secs}s | Deadline: ${deadline_str}"
+    headless_rules="REGRAS HEADLESS: Ninguem esta observando. Nao espere input. Va o mais longe que puder. Voce tem ${timeout_secs}s. Reserve os ultimos 30s para salvar estado. Se o tempo acabar sem salvar, VOCE PERDE TODO O PROGRESSO. Priorize: executar > salvar estado > comunicar resultados."
+    final_prompt="${headless_header} ${headless_rules} --- ${prompt}"
   fi
 
   OBSIDIAN_PATH="$zion_obsidian_path" \
@@ -1784,65 +1984,225 @@ zion_puppy_query_command() {
 }
 
 # :command.function
-zion_reset_command() {
+zion_docker_run_command() {
 
-  # src/commands/reset.sh
-  running_dir="$zion_vault_dir/_agent/tasks/running"
-  for dir in "$running_dir"/*/; do
-    [[ -d "$dir" ]] || continue
-    name=$(basename "$dir")
-    source=$(grep '^source=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "pending")
-    rm -f "$dir/.lock"
-    if [[ "$source" == "recurring" ]]; then
-      rm -rf "$dir"
-      echo "[reset] $name recurring removed"
-    else
-      mkdir -p "$zion_vault_dir/_agent/tasks/pending"
-      mv "$dir" "$zion_vault_dir/_agent/tasks/pending/$name"
-      echo "[reset] $name → pending/"
-    fi
-  done
-  mkdir -p "$zion_ephemeral/locks"
-  rm -f "$zion_ephemeral/.kanban.lock" "$zion_ephemeral/locks"/*.lock 2>/dev/null || true
-  echo "[reset] done"
+  # src/commands/docker_run.sh
+  # Levanta um servico Docker em background e abre logs no terminal.
+  zion_load_config
+
+  service="${args[service]}"
+  env="${args[--env]:-sand}"
+
+  zion_docker_validate_service "$service" || exit 1
+
+  dir=$(zion_docker_service_dir "$service")
+  config_dir=$(zion_docker_config_dir "$service")
+  compose=$(zion_docker_compose_file "$service")
+  deps_compose=$(zion_docker_deps_file "$service")
+  env_file=$(zion_docker_env_file "$service" "$env")
+  project=$(zion_docker_project_name "$service")
+  log_dir=$(zion_docker_log_dir "$service")
+
+  mkdir -p "$log_dir"
+
+  # Exportar variaveis que o compose precisa
+  export MONOLITO_DIR="${MONOLITO_DIR:-$HOME/projects/estrategia/monolito}"
+  export BO_CONTAINER_DIR="${BO_CONTAINER_DIR:-$HOME/projects/estrategia/bo-container}"
+  export FRONT_STUDENT_DIR="${FRONT_STUDENT_DIR:-$HOME/projects/estrategia/front-student}"
+  export ZION_NIXOS_DIR="$zion_nixos_dir"
+  export APP_ENV="$env"
+
+  # Garantir rede
+  if ! docker network inspect nixos_default &>/dev/null; then
+    echo "[zion docker] Criando rede nixos_default..."
+    docker network create nixos_default 2>/dev/null || true
+  fi
+
+  COMPOSE_ARGS="-f $compose -p $project"
+
+  echo "=== Levantando $service [env=$env] ==="
+  echo "  projeto: $dir"
+  echo "  compose: $compose"
+  echo "  env:     $env_file"
+  echo "  logs:    $log_dir"
+
+  # 1. Subir dependencias em background (se compose de deps existe)
+  if [[ -f "$deps_compose" ]]; then
+    echo ">>> Subindo dependencias..."
+    docker compose -f "$deps_compose" -p "${project}-deps" up -d 2>&1 | tee "$log_dir/deps.log"
+    echo ">>> Aguardando healthchecks das deps..."
+    sleep 5
+  fi
+
+  # 2. Subir servico em background
+  echo ">>> Subindo $service..."
+  docker compose $COMPOSE_ARGS up -d 2>&1 | tee "$log_dir/startup.log"
+
+  # 3. Logger persistente: grava logs em arquivo continuamente
+  if [[ -f "$log_dir/logger.pid" ]]; then
+    kill "$(cat "$log_dir/logger.pid")" 2>/dev/null || true
+  fi
+  nohup docker compose $COMPOSE_ARGS logs -f --no-log-prefix > "$log_dir/service.log" 2>&1 &
+  echo $! > "$log_dir/logger.pid"
+
+  # 4. Se --detach, sair silenciosamente
+  if [[ -n "${args[--detach]:-}" ]]; then
+    echo ">>> Container rodando em background."
+    echo ">>> Logs: zion docker logs $service -f"
+    echo ">>> Arquivo: $log_dir/service.log"
+    exit 0
+  fi
+
+  # 5. Mostrar logs no terminal (Ctrl+C sai mas container + logger continuam)
+  echo ">>> Container rodando. Logs em tempo real [Ctrl+C para sair, container continua]:"
+  echo ">>> Reconectar: zion docker logs $service -f"
+  echo "---"
+  docker compose $COMPOSE_ARGS logs -f --tail 50
 
 }
 
 # :command.function
-zion_status_command() {
+zion_docker_stop_command() {
 
-  # src/commands/status.sh
+  # src/commands/docker_stop.sh
+  # Para um servico Docker e seus deps.
   zion_load_config
 
-  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
-  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
+  service="${args[service]}"
 
-  echo "=== Puppy Container ==="
-  OBSIDIAN_PATH="$zion_obsidian_path" \
-    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" ps 2>/dev/null || \
-    echo "  nenhum container rodando"
+  zion_docker_validate_service "$service" || exit 1
 
-  echo ""
-  echo "=== Tasks em doing/ ==="
-  vault="${zion_obsidian_path}/tasks/doing"
-  if [ -d "$vault" ] && [ -n "$(ls -A "$vault" 2>/dev/null)" ]; then
-    for d in "$vault"/*/; do
-      [ -d "$d" ] || continue
-      echo "  $(basename "$d")"
+  project=$(zion_docker_project_name "$service")
+  log_dir=$(zion_docker_log_dir "$service")
+
+  # Parar logger persistente
+  if [[ -f "$log_dir/logger.pid" ]]; then
+    kill "$(cat "$log_dir/logger.pid")" 2>/dev/null || true
+    rm -f "$log_dir/logger.pid"
+  fi
+
+  echo "[zion docker] Parando $service..."
+  docker compose -p "$project" down 2>/dev/null
+  docker compose -p "${project}-deps" down 2>/dev/null
+
+  echo "Servico $service parado."
+
+}
+
+# :command.function
+zion_docker_logs_command() {
+
+  # src/commands/docker_logs.sh
+  # Mostra logs de um servico Docker (reconecta se container esta rodando, le arquivo se parado).
+  zion_load_config
+
+  service="${args[service]}"
+  follow="${args[--follow]:-}"
+  tail_lines="${args[--tail]:-100}"
+
+  project=$(zion_docker_project_name "$service")
+  log_dir=$(zion_docker_log_dir "$service")
+  compose=$(zion_docker_compose_file "$service")
+
+  # Tentar reconectar ao container rodando
+  running=$(docker compose -f "$compose" -p "$project" ps --status running 2>/dev/null | tail -n +2 | wc -l)
+
+  if [[ "$running" -gt 0 ]]; then
+    ARGS="--tail $tail_lines"
+    [[ -n "$follow" ]] && ARGS="$ARGS -f"
+    docker compose -f "$compose" -p "$project" logs $ARGS
+  elif [[ -f "$log_dir/service.log" ]]; then
+    echo "=== Container parado. Mostrando log gravado ==="
+    if [[ -n "$follow" ]]; then
+      tail -f "$log_dir/service.log"
+    else
+      tail -n "$tail_lines" "$log_dir/service.log"
+    fi
+  else
+    echo "Nenhum container rodando e nenhum log encontrado para $service"
+    echo "Use: zion docker run $service"
+  fi
+
+}
+
+# :command.function
+zion_docker_status_command() {
+
+  # src/commands/docker_status.sh
+  # Status dos servicos Docker.
+  zion_load_config
+
+  service="${args[service]:-}"
+
+  if [[ -n "$service" ]]; then
+    project=$(zion_docker_project_name "$service")
+    compose=$(zion_docker_compose_file "$service")
+    echo "=== $service ==="
+    docker compose -f "$compose" -p "$project" ps 2>/dev/null || echo "$service: nao encontrado"
+    docker compose -p "${project}-deps" ps 2>/dev/null
+  else
+    echo "=== Servicos Docker Zion ==="
+    for svc in monolito bo-container front-student; do
+      project=$(zion_docker_project_name "$svc")
+      compose=$(zion_docker_compose_file "$svc")
+      running=$(docker compose -f "$compose" -p "$project" ps --status running 2>/dev/null | tail -n +2 | wc -l)
+      deps_running=$(docker compose -p "${project}-deps" ps --status running 2>/dev/null | tail -n +2 | wc -l)
+      total=$((running + deps_running))
+      if [[ "$total" -gt 0 ]]; then
+        echo "  $svc: $running services + $deps_running deps rodando"
+      else
+        echo "  $svc: parado"
+      fi
     done
-  else
-    echo "  nenhuma"
   fi
 
-  echo ""
-  echo "=== Scheduled ==="
-  sched="${zion_obsidian_path}/tasks/_scheduled"
-  if [ -d "$sched" ]; then
-    count=$(ls -d "$sched"/*/ 2>/dev/null | wc -l)
-    echo "  $count tasks em _scheduled/"
-  else
-    echo "  sem _scheduled/"
+}
+
+# :command.function
+zion_docker_shell_command() {
+
+  # src/commands/docker_shell.sh
+  # Abre shell dentro do container de um servico Docker.
+  zion_load_config
+
+  service="${args[service]}"
+  container="${args[container]:-app}"
+
+  project=$(zion_docker_project_name "$service")
+  compose=$(zion_docker_compose_file "$service")
+
+  docker compose -f "$compose" -p "$project" exec "$container" /bin/sh
+
+}
+
+# :command.function
+zion_docker_restart_command() {
+
+  # src/commands/docker_restart.sh
+  # Reinicia um servico Docker.
+  zion_load_config
+
+  service="${args[service]}"
+  env="${args[--env]:-}"
+
+  project=$(zion_docker_project_name "$service")
+  compose=$(zion_docker_compose_file "$service")
+  log_dir=$(zion_docker_log_dir "$service")
+
+  # Parar logger
+  if [[ -f "$log_dir/logger.pid" ]]; then
+    kill "$(cat "$log_dir/logger.pid")" 2>/dev/null || true
+    rm -f "$log_dir/logger.pid"
   fi
+
+  echo "[zion docker] Parando $service..."
+  docker compose -f "$compose" -p "$project" down 2>/dev/null
+  docker compose -p "${project}-deps" down 2>/dev/null
+
+  # Re-levantar via zion docker run
+  restart_env="${env:-sand}"
+  echo "[zion docker] Reiniciando $service [env=$restart_env]..."
+  exec "$0" docker run "$service" --env="$restart_env" --detach
 
 }
 
@@ -1850,12 +2210,33 @@ zion_status_command() {
 zion_new_task_command() {
 
   # src/commands/new_task.sh
-  # $name
-
-
-
-  Atualize \`<diretório de contexto>/contexto.md\`.
-  EOF
+  name="${args[name]:-}"
+  [[ -n "$name" ]] || { echo "Uso: zion new-task <name> [--type pending|recurring] [--model haiku|sonnet] [--clock every10|every60] [--timeout N]" >&2; exit 1; }
+  type="${flag_type:-pending}"
+  model="${flag_model:-}"
+  clock="${flag_clock:-}"
+  timeout="${flag_timeout:-}"
+  [[ -n "$model" ]] || { [[ "$type" == "recurring" ]] && model="haiku" || model="sonnet"; }
+  [[ -n "$clock" ]] || { [[ "$type" == "recurring" ]] && clock="every10" || clock="every60"; }
+  [[ -n "$timeout" ]] || { [[ "$clock" == "every10" ]] && timeout="120" || timeout="300"; }
+  task_dir="$zion_vault_dir/_agent/tasks/$type/$name"
+  mkdir -p "$task_dir"
+  {
+    echo "---"
+    echo "clock: $clock"
+    echo "timeout: $timeout"
+    echo "model: $model"
+    echo "schedule: always"
+    echo "---"
+    echo "# $name"
+    echo ""
+    echo "## Objetivo"
+    echo ""
+    echo "## O que fazer"
+    echo ""
+    echo "## Entregavel"
+    echo "Atualize \`<diretorio de contexto>/contexto.md\`."
+  } > "$task_dir/CLAUDE.md"
   kanban_col="Backlog"
   kanban_file="$zion_vault_dir/kanban.md"
   if [[ "$type" == "recurring" ]]; then
@@ -1867,45 +2248,6 @@ zion_new_task_command() {
   # shellcheck source=/dev/null
   source "$zion_nixos_scripts/kanban-sync.sh" 2>/dev/null && kanban_add_card "$kanban_col" "$card" 2>/dev/null || echo "[AVISO] Não conseguiu adicionar card no kanban"
   echo "Task: $task_dir/ ($model, ${timeout}s)"
-
-}
-
-# :command.function
-zion_logs_command() {
-
-  # src/commands/logs.sh
-  latest=$(ls -1t "$zion_nixos_logs"/*.log 2>/dev/null | head -1)
-  if [[ -z "$latest" ]]; then
-    echo "(nenhum log)"
-  else
-    id=$(docker ps --filter "name=_worker_" --format "{{.ID}}" 2>/dev/null | head -1)
-    if [[ -n "$id" ]]; then
-      echo "=== Seguindo $latest ==="
-      tail -f "$latest"
-    else
-      echo "=== $latest ==="
-      cat "$latest"
-    fi
-  fi
-
-}
-
-# :command.function
-zion_logs_list_command() {
-
-  # src/commands/logs_list.sh
-  ls -1t "$zion_nixos_logs"/*.log 2>/dev/null || echo "(nenhum log)"
-
-}
-
-# :command.function
-zion_usage_api_command() {
-
-  # src/commands/usage_api.sh
-  period=""
-  [[ -n "${flag_7d:-}" ]] && period="7d"
-  [[ -n "${flag_30d:-}" ]] && period="30d"
-  "$zion_nixos_scripts/api-usage.sh" $period
 
 }
 
@@ -1978,7 +2320,8 @@ zion_help_command() {
 zion_man_command() {
 
   # src/commands/man.sh
-  zion_usage
+  bash "$zion_cli_dir/banner.sh" 2>/dev/null
+  bash "$zion_cli_dir/man-page.sh" 2>/dev/null
 
 }
 
@@ -2145,13 +2488,6 @@ parse_requirements() {
       shift $#
       ;;
 
-    openclaw)
-      action="openclaw"
-      shift
-      zion_openclaw_parse_requirements "$@"
-      shift $#
-      ;;
-
     build)
       action="build"
       shift
@@ -2194,17 +2530,10 @@ parse_requirements() {
       shift $#
       ;;
 
-    reset)
-      action="reset"
+    docker | dk)
+      action="docker"
       shift
-      zion_reset_parse_requirements "$@"
-      shift $#
-      ;;
-
-    status)
-      action="status"
-      shift
-      zion_status_parse_requirements "$@"
+      zion_docker_parse_requirements "$@"
       shift $#
       ;;
 
@@ -2212,27 +2541,6 @@ parse_requirements() {
       action="new-task"
       shift
       zion_new_task_parse_requirements "$@"
-      shift $#
-      ;;
-
-    logs)
-      action="logs"
-      shift
-      zion_logs_parse_requirements "$@"
-      shift $#
-      ;;
-
-    logs-list)
-      action="logs-list"
-      shift
-      zion_logs_list_parse_requirements "$@"
-      shift $#
-      ;;
-
-    usage-api)
-      action="usage-api"
-      shift
-      zion_usage_api_parse_requirements "$@"
       shift $#
       ;;
 
@@ -2648,51 +2956,6 @@ zion_start_parse_requirements() {
           printf "invalid argument: %s\n" "$key" >&2
           exit 1
         fi
-
-        ;;
-
-    esac
-  done
-
-}
-
-# :command.parse_requirements
-zion_openclaw_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_openclaw_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="openclaw"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        printf "invalid argument: %s\n" "$key" >&2
-        exit 1
 
         ;;
 
@@ -3531,14 +3794,14 @@ zion_puppy_query_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_reset_parse_requirements() {
+zion_docker_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        zion_reset_usage
+        zion_docker_usage
         exit
         ;;
 
@@ -3550,7 +3813,65 @@ zion_reset_parse_requirements() {
   done
 
   # :command.command_filter
-  action="reset"
+  action=${1:-}
+
+  case $action in
+    -*) ;;
+
+    run | up)
+      action="run"
+      shift
+      zion_docker_run_parse_requirements "$@"
+      shift $#
+      ;;
+
+    stop)
+      action="stop"
+      shift
+      zion_docker_stop_parse_requirements "$@"
+      shift $#
+      ;;
+
+    logs)
+      action="logs"
+      shift
+      zion_docker_logs_parse_requirements "$@"
+      shift $#
+      ;;
+
+    status | ps)
+      action="status"
+      shift
+      zion_docker_status_parse_requirements "$@"
+      shift $#
+      ;;
+
+    shell)
+      action="shell"
+      shift
+      zion_docker_shell_parse_requirements "$@"
+      shift $#
+      ;;
+
+    restart)
+      action="restart"
+      shift
+      zion_docker_restart_parse_requirements "$@"
+      shift $#
+      ;;
+
+    # :command.command_fallback
+    "")
+      zion_docker_usage >&2
+      exit 1
+      ;;
+
+    *)
+      printf "invalid command: %s\n" "$action" >&2
+      exit 1
+      ;;
+
+  esac
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
@@ -3576,14 +3897,14 @@ zion_reset_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_status_parse_requirements() {
+zion_docker_run_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        zion_status_usage
+        zion_docker_run_usage
         exit
         ;;
 
@@ -3595,7 +3916,89 @@ zion_status_parse_requirements() {
   done
 
   # :command.command_filter
-  action="status"
+  action="docker run"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --env | -e)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--env']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--env requires an argument: --env, -e ENVIRONMENT" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --detach | -d)
+
+        # :flag.case_no_arg
+        args['--detach']=1
+        shift
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        # :argument.case
+        if [[ -z ${args['service']+x} ]]; then
+          args['service']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
+
+        ;;
+
+    esac
+  done
+
+  # :command.required_args_filter
+  if [[ -z ${args['service']+x} ]]; then
+    printf "missing required argument: SERVICE\nusage: zion docker run SERVICE [OPTIONS]\n" >&2
+
+    exit 1
+  fi
+
+  # :command.default_assignments
+  [[ -n ${args['--env']:-} ]] || args['--env']="sand"
+
+}
+
+# :command.parse_requirements
+zion_docker_stop_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_stop_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker stop"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
@@ -3610,13 +4013,292 @@ zion_status_parse_requirements() {
       *)
         # :command.parse_requirements_case
         # :command.parse_requirements_case_simple
-        printf "invalid argument: %s\n" "$key" >&2
-        exit 1
+        # :argument.case
+        if [[ -z ${args['service']+x} ]]; then
+          args['service']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
 
         ;;
 
     esac
   done
+
+  # :command.required_args_filter
+  if [[ -z ${args['service']+x} ]]; then
+    printf "missing required argument: SERVICE\nusage: zion docker stop SERVICE\n" >&2
+
+    exit 1
+  fi
+
+}
+
+# :command.parse_requirements
+zion_docker_logs_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_logs_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker logs"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --follow | -f)
+
+        # :flag.case_no_arg
+        args['--follow']=1
+        shift
+        ;;
+
+      # :flag.case
+      --tail)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--tail']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--tail requires an argument: --tail LINES" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        # :argument.case
+        if [[ -z ${args['service']+x} ]]; then
+          args['service']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
+
+        ;;
+
+    esac
+  done
+
+  # :command.required_args_filter
+  if [[ -z ${args['service']+x} ]]; then
+    printf "missing required argument: SERVICE\nusage: zion docker logs SERVICE [OPTIONS]\n" >&2
+
+    exit 1
+  fi
+
+  # :command.default_assignments
+  [[ -n ${args['--tail']:-} ]] || args['--tail']="100"
+
+}
+
+# :command.parse_requirements
+zion_docker_status_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_status_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker status"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        # :argument.case
+        if [[ -z ${args['service']+x} ]]; then
+          args['service']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_docker_shell_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_shell_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker shell"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        # :argument.case
+        if [[ -z ${args['service']+x} ]]; then
+          args['service']=$1
+          shift
+        # :argument.case
+        elif [[ -z ${args['container']+x} ]]; then
+          args['container']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
+
+        ;;
+
+    esac
+  done
+
+  # :command.required_args_filter
+  if [[ -z ${args['service']+x} ]]; then
+    printf "missing required argument: SERVICE\nusage: zion docker shell SERVICE [CONTAINER]\n" >&2
+
+    exit 1
+  fi
+
+}
+
+# :command.parse_requirements
+zion_docker_restart_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_docker_restart_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="docker restart"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --env | -e)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--env']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--env requires an argument: --env, -e ENVIRONMENT" >&2
+          exit 1
+        fi
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        # :argument.case
+        if [[ -z ${args['service']+x} ]]; then
+          args['service']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
+
+        ;;
+
+    esac
+  done
+
+  # :command.required_args_filter
+  if [[ -z ${args['service']+x} ]]; then
+    printf "missing required argument: SERVICE\nusage: zion docker restart SERVICE [OPTIONS]\n" >&2
+
+    exit 1
+  fi
 
 }
 
@@ -3733,156 +4415,6 @@ zion_new_task_parse_requirements() {
 
   # :command.default_assignments
   [[ -n ${args['--type']:-} ]] || args['--type']="pending"
-
-}
-
-# :command.parse_requirements
-zion_logs_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_logs_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="logs"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        printf "invalid argument: %s\n" "$key" >&2
-        exit 1
-
-        ;;
-
-    esac
-  done
-
-}
-
-# :command.parse_requirements
-zion_logs_list_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_logs_list_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="logs-list"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        printf "invalid argument: %s\n" "$key" >&2
-        exit 1
-
-        ;;
-
-    esac
-  done
-
-}
-
-# :command.parse_requirements
-zion_usage_api_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_usage_api_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="usage-api"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      # :flag.case
-      --7d)
-
-        # :flag.case_no_arg
-        args['--7d']=1
-        shift
-        ;;
-
-      # :flag.case
-      --30d)
-
-        # :flag.case_no_arg
-        args['--30d']=1
-        shift
-        ;;
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        printf "invalid argument: %s\n" "$key" >&2
-        exit 1
-
-        ;;
-
-    esac
-  done
 
 }
 
@@ -4046,7 +4578,6 @@ run() {
     "shell") zion_shell_command ;;
     "resume") zion_resume_command ;;
     "start") zion_start_command ;;
-    "openclaw") zion_openclaw_command ;;
     "build") zion_build_command ;;
     "down") zion_down_command ;;
     "destroy") zion_destroy_command ;;
@@ -4062,12 +4593,14 @@ run() {
     "puppy shell") zion_puppy_shell_command ;;
     "puppy tick") zion_puppy_tick_command ;;
     "puppy query") zion_puppy_query_command ;;
-    "reset") zion_reset_command ;;
-    "status") zion_status_command ;;
+    "docker") zion_docker_command ;;
+    "docker run") zion_docker_run_command ;;
+    "docker stop") zion_docker_stop_command ;;
+    "docker logs") zion_docker_logs_command ;;
+    "docker status") zion_docker_status_command ;;
+    "docker shell") zion_docker_shell_command ;;
+    "docker restart") zion_docker_restart_command ;;
     "new-task") zion_new_task_command ;;
-    "logs") zion_logs_command ;;
-    "logs-list") zion_logs_list_command ;;
-    "usage-api") zion_usage_api_command ;;
     "edit") zion_edit_command ;;
     "help") zion_help_command ;;
     "man") zion_man_command ;;

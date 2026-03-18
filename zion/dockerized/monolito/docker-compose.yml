@@ -1,0 +1,88 @@
+services:
+  app:
+    build:
+      context: ${MONOLITO_DIR}
+      dockerfile: ${ZION_NIXOS_DIR}/zion/dockerized/monolito/Dockerfile
+    container_name: zion-dk-monolito-app
+    volumes:
+      - ${MONOLITO_DIR}/apps:/go/app/apps
+      - ${MONOLITO_DIR}/libs:/go/app/libs
+      - ${MONOLITO_DIR}/go.mod:/go/app/go.mod
+      - ${MONOLITO_DIR}/go.sum:/go/app/go.sum
+    env_file:
+      - ./env/${APP_ENV:-sand}.env
+    ports:
+      - "4004:4004"
+      - "2345:2345"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - default
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: ${MONOLITO_DIR}
+      dockerfile: ${ZION_NIXOS_DIR}/zion/dockerized/monolito/Dockerfile
+      target: builder
+    container_name: zion-dk-monolito-worker
+    command: ["go", "run", "./apps/worker/main.go"]
+    volumes:
+      - ${MONOLITO_DIR}/apps:/go/app/apps
+      - ${MONOLITO_DIR}/libs:/go/app/libs
+      - ${MONOLITO_DIR}/go.mod:/go/app/go.mod
+      - ${MONOLITO_DIR}/go.sum:/go/app/go.sum
+    env_file:
+      - ./env/${APP_ENV:-sand}.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - default
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: zion-dk-monolito-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER:-estrategia}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-estrategia}
+      POSTGRES_DB: ${DB_NAME:-estrategia}
+    volumes:
+      - monolito-pgdata:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-estrategia}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - default
+
+  redis:
+    image: redis:7-alpine
+    container_name: zion-dk-monolito-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - default
+
+volumes:
+  monolito-pgdata:
+
+networks:
+  default:
+    name: nixos_default
+    external: true

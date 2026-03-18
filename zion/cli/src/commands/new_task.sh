@@ -9,22 +9,22 @@ timeout="${flag_timeout:-}"
 [[ -n "$timeout" ]] || { [[ "$clock" == "every10" ]] && timeout="120" || timeout="300"; }
 task_dir="$zion_vault_dir/_agent/tasks/$type/$name"
 mkdir -p "$task_dir"
-cat > "$task_dir/CLAUDE.md" << EOF
----
-clock: $clock
-timeout: $timeout
-model: $model
-schedule: always
----
-# $name
-
-## Objetivo
-
-## O que fazer
-
-## Entregável
-Atualize \`<diretório de contexto>/contexto.md\`.
-EOF
+{
+  echo "---"
+  echo "clock: $clock"
+  echo "timeout: $timeout"
+  echo "model: $model"
+  echo "schedule: always"
+  echo "---"
+  echo "# $name"
+  echo ""
+  echo "## Objetivo"
+  echo ""
+  echo "## O que fazer"
+  echo ""
+  echo "## Entregavel"
+  echo "Atualize \`<diretorio de contexto>/contexto.md\`."
+} > "$task_dir/CLAUDE.md"
 kanban_col="Backlog"
 kanban_file="$zion_vault_dir/kanban.md"
 if [[ "$type" == "recurring" ]]; then
