@@ -284,14 +284,14 @@ _gauge_gold() {
 sn_num=$(echo "$JSON" | $JQ -r '(.seven_day_sonnet?.utilization? // 0) | floor')
 
 # Ícones por barra (Nerd Font): Sonnet, 5h, 7d, Opus, Extra
-ICON_SONNET='󰻀'   # brain (AI/Sonnet — limite semanal Sonnet)
-ICON_5H='󱗼'       # clock-fast (sessão ~5h — janela curta)
-ICON_7D='󰃭'       # calendar-month (limite semanal — todos os modelos)
+ICON_SONNET='󱙺'   # star-shooting (AI/Sonnet — limite semanal Sonnet)
+ICON_5H='󰔚'       # timer-sand (sessão ~5h — janela curta)
+ICON_7D='󰸗'       # calendar-week (limite semanal — todos os modelos)
 ICON_OPUS='󰐂'     # opus/premium (só no tooltip)
 
 # --- modo: --waybar ---
 if [[ "$MODE" == "--waybar" ]]; then
-  text="$(_gauge "$ICON_SONNET" "$sn_num") $(_gauge "$ICON_5H" "$fh_pct") $(_gauge "$ICON_7D" "$sd_pct")"
+  text="$(_gauge "$ICON_5H" "$fh_pct") $(_gauge "$ICON_SONNET" "$sn_num") $(_gauge "$ICON_7D" "$sd_pct")"
   tw=12
   wprefix=12
   p_5h=$(printf "%-${wprefix}s" "${ICON_5H} 5h");   line_5h="${p_5h}$(_gauge "" "$fh_pct" "$tw" 3 1)   reset em $fh_r"
