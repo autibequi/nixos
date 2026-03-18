@@ -115,8 +115,6 @@
 history_filter = [
   "^claude",
   "^zion",
-  "^zion ",
-  "^zion$",
   "^claudinho",
   "^claudio",
   "^clau ",
