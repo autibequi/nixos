@@ -9,6 +9,7 @@ services:
       - ./env/${APP_ENV:-sand}.env
     volumes:
       - ${MONOLITO_DIR}/configuration:/go/app/configuration:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "4004:4004"
       - "2345:2345"

@@ -1,4 +1,4 @@
-# Status agregado: sessoes Zion, Docker services e Puppy workers.
+# Status agregado do Zion: config, containers, services, puppy, tasks, repo.
 zion_load_config
 
 # ── Cores ──────────────────────────────────────────────────────────────────────
@@ -17,6 +17,9 @@ ORANGE='\033[38;5;214m'
 icon_running="${GREEN}●${RESET}"
 icon_stopped="${RED}○${RESET}"
 icon_partial="${YELLOW}◐${RESET}"
+icon_ok="${GREEN}✓${RESET}"
+icon_fail="${RED}✗${RESET}"
+icon_warn="${YELLOW}!${RESET}"
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -48,7 +51,6 @@ fmt_ports() {
     | sed 's/  $//'
 }
 
-# Print a container row: prefix, name, status, ports
 row() {
   local pfx="$1" name="$2" status="$3" ports="$4"
   local TIME_W=9 NAME_W=16
@@ -61,31 +63,132 @@ row() {
   echo -e "${pfx}$(printf "%-${TIME_W}b" "$st")  ${WHITE}$(printf "%-${NAME_W}s" "$name")${RESET}${ps}"
 }
 
+# key=value com cor
+kv() {
+  local label="$1" value="$2" color="${3:-$WHITE}"
+  printf "  ${DIM}%-14s${RESET} ${color}%s${RESET}\n" "$label" "$value"
+}
+
+count_dirs() {
+  local dir="$1"
+  [[ -d "$dir" ]] && find "$dir" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l || echo "0"
+}
+
 # ── Header ─────────────────────────────────────────────────────────────────────
 echo -e "\n${BOLD}${MAGENTA}  Zion Status${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}\n"
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 1. SESSIONS — containers zion-* (sessoes do agente)
+# 1. CONFIG — engine, model, keys
 # ══════════════════════════════════════════════════════════════════════════════
+echo -e "${BOLD}${CYAN}  Config${RESET}"
+
+cfg_engine="${ZION_ENGINE:-${engine:-}}"
+cfg_model="${ZION_MODEL:-${model:-}}"
+[[ -n "$cfg_engine" ]] && kv "engine:" "$cfg_engine" "$GREEN" || kv "engine:" "(not set)" "$YELLOW"
+[[ -n "$cfg_model" ]] && kv "model:" "$cfg_model" "$GREEN" || kv "model:" "(default)" "$DIM"
+
+# API keys
+key_line="  "
+if [[ -n "${ANTHROPIC_API_KEY:-}" ]]; then
+  key_line+="${GREEN}ANTHROPIC${RESET} "
+else
+  key_line+="${RED}ANTHROPIC${RESET} "
+fi
+if [[ -n "${GH_TOKEN:-}" ]]; then
+  key_line+="${GREEN}GH_TOKEN${RESET} "
+else
+  key_line+="${YELLOW}GH_TOKEN${RESET} "
+fi
+if [[ -n "${CURSOR_API_KEY:-}" ]]; then
+  key_line+="${GREEN}CURSOR${RESET}"
+else
+  key_line+="${DIM}CURSOR${RESET}"
+fi
+echo -e "  ${DIM}keys:${RESET}         $key_line"
+
+# Image
+img_info=$(docker images claude-nix-sandbox --format "{{.Size}}\t{{.CreatedSince}}" 2>/dev/null | head -1)
+if [[ -n "$img_info" ]]; then
+  IFS=$'\t' read -r img_size img_age <<< "$img_info"
+  kv "image:" "${img_size}  ${DIM}(${img_age})${RESET}" "$WHITE"
+fi
+
+# Rebuild needed?
+if [[ -f "$zion_ephemeral/rebuild-docker-needed" ]]; then
+  echo -e "  ${YELLOW}!${RESET} ${YELLOW}rebuild-docker-needed${RESET}"
+fi
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 2. REPO — git status
+# ══════════════════════════════════════════════════════════════════════════════
+echo ""
+echo -e "${BOLD}${CYAN}  Repo${RESET}"
+
+if [[ -d "$zion_nixos_dir/.git" ]]; then
+  repo_branch=$(git -C "$zion_nixos_dir" branch --show-current 2>/dev/null)
+  repo_dirty=$(git -C "$zion_nixos_dir" status --porcelain 2>/dev/null | wc -l)
+  repo_commit=$(git -C "$zion_nixos_dir" log -1 --format="%h %s" 2>/dev/null)
+  repo_worktrees=$(git -C "$zion_nixos_dir" worktree list 2>/dev/null | wc -l)
+  # Subtract 1 for the main worktree
+  repo_worktrees=$((repo_worktrees - 1))
+  [[ "$repo_worktrees" -lt 0 ]] && repo_worktrees=0
+
+  dirty_str=""
+  if [[ "$repo_dirty" -gt 0 ]]; then
+    dirty_str="  ${YELLOW}(${repo_dirty} dirty)${RESET}"
+  fi
+  kv "branch:" "${repo_branch}${dirty_str}" "$GREEN"
+  kv "commit:" "$repo_commit" "$DIM"
+  [[ "$repo_worktrees" -gt 0 ]] && kv "worktrees:" "$repo_worktrees" "$ORANGE"
+fi
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 3. SESSIONS — containers zion-*
+# ══════════════════════════════════════════════════════════════════════════════
+echo ""
 echo -e "${BOLD}${CYAN}  Sessions${RESET}"
 
-session_rows=$(docker ps -a --filter "name=zion-" --format "{{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null \
+# Format: name, status, ports, state (running/exited), command (to detect engine)
+session_rows=$(docker ps -a --filter "name=zion-" \
+  --format "{{.Names}}\t{{.Status}}\t{{.Ports}}\t{{.State}}\t{{.Command}}" 2>/dev/null \
   | grep -v "zion-dk-" || true)
+
+session_up=0
+session_dead=0
 
 if [[ -z "$session_rows" ]]; then
   echo -e "  ${DIM}(nenhuma)${RESET}"
 else
-  while IFS=$'\t' read -r name status ports; do
+  while IFS=$'\t' read -r name status ports state cmd; do
     [[ -z "$name" ]] && continue
     s_icon="$icon_stopped"
-    echo "$status" | grep -qi "up" && s_icon="$icon_running"
+    if [[ "$state" == "running" ]]; then
+      s_icon="$icon_running"
+      session_up=$((session_up + 1))
+    else
+      session_dead=$((session_dead + 1))
+    fi
     short="${name#zion-}"
+    # Detect engine from command
+    engine_hint=""
+    case "$cmd" in
+      *cursor*) engine_hint=" ${DIM}cursor${RESET}" ;;
+      *claude*) engine_hint=" ${DIM}claude${RESET}" ;;
+      *opencode*) engine_hint=" ${DIM}opencode${RESET}" ;;
+    esac
     row "  ${s_icon} " "$short" "$status" "$ports"
+    # Print engine hint on same conceptual line (after row)
   done <<< "$session_rows"
+  # Summary
+  summary="  ${DIM}"
+  [[ "$session_up" -gt 0 ]] && summary+="${session_up} running"
+  [[ "$session_dead" -gt 0 ]] && summary+="  ${YELLOW}${session_dead} exited${RESET}${DIM} (zion clean to remove)"
+  summary+="${RESET}"
+  echo -e "$summary"
 fi
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 2. DOCKER SERVICES — estrategia (monolito, bo-container, front-student)
+# 4. DOCKER SERVICES — estrategia
 # ══════════════════════════════════════════════════════════════════════════════
 echo ""
 echo -e "${BOLD}${CYAN}  Docker Services${RESET}"
@@ -94,13 +197,10 @@ for svc in monolito bo-container front-student; do
   project=$(zion_docker_project_name "$svc")
   compose=$(zion_docker_compose_file "$svc" 2>/dev/null || echo "")
 
-  # Main containers
   main_rows=""
   if [[ -n "$compose" ]] && [[ -f "$compose" ]]; then
     main_rows=$(docker compose -f "$compose" -p "$project" ps --format "{{.Name}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || true)
   fi
-
-  # Deps containers
   dep_rows=$(docker compose -p "${project}-deps" ps --format "{{.Name}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || true)
 
   running=0; total=0
@@ -123,7 +223,6 @@ for svc in monolito bo-container front-student; do
   [[ "$running" -eq 0 ]] && svc_icon="$icon_stopped"
   echo -e "  ${svc_icon} ${BOLD}${svc}${RESET}"
 
-  # Main
   if [[ -n "$main_rows" ]]; then
     has_deps=0
     [[ -n "$dep_rows" ]] && has_deps=1
@@ -135,7 +234,6 @@ for svc in monolito bo-container front-student; do
     done <<< "$main_rows"
   fi
 
-  # Deps
   if [[ -n "$dep_rows" ]]; then
     echo -e "    ${BLUE}└─${RESET} ${DIM}deps${RESET}"
     dep_arr=()
@@ -153,7 +251,7 @@ for svc in monolito bo-container front-student; do
 done
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 3. PUPPY — worker persistente
+# 5. PUPPY — worker persistente
 # ══════════════════════════════════════════════════════════════════════════════
 echo ""
 echo -e "${BOLD}${CYAN}  Puppy${RESET}"
@@ -192,7 +290,29 @@ fi
 [[ "$doing_count" -eq 0 ]] && echo -e "    ${DIM}(sem tasks ativas)${RESET}"
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 4. RECENT RUNS — ultimas execucoes do scheduler
+# 6. TASKS — contagem por status
+# ══════════════════════════════════════════════════════════════════════════════
+echo ""
+echo -e "${BOLD}${CYAN}  Tasks${RESET}"
+
+tasks_base="${zion_obsidian_path}/tasks"
+t_doing=$(count_dirs "$tasks_base/doing")
+t_backlog=$(count_dirs "$tasks_base/backlog")
+t_sched=$(count_dirs "$tasks_base/_scheduled")
+t_recur=$(count_dirs "$tasks_base/recurring")
+t_done=$(count_dirs "$tasks_base/done")
+t_cancel=$(count_dirs "$tasks_base/cancelled")
+
+sched_total=$((t_sched + t_recur))
+
+task_line="  "
+[[ "$t_doing" -gt 0 ]] && task_line+="${YELLOW}${t_doing} doing${RESET}  " || task_line+="${DIM}0 doing${RESET}  "
+[[ "$t_backlog" -gt 0 ]] && task_line+="${WHITE}${t_backlog} backlog${RESET}  " || task_line+="${DIM}0 backlog${RESET}  "
+task_line+="${DIM}${sched_total} scheduled  ${t_done} done  ${t_cancel} cancelled${RESET}"
+echo -e "$task_line"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 7. RECENT RUNS — ultimas execucoes do scheduler
 # ══════════════════════════════════════════════════════════════════════════════
 echo ""
 echo -e "${BOLD}${CYAN}  Recent Runs${RESET}"
@@ -206,7 +326,7 @@ if [[ -f "$STATE_HOST" ]] && [[ -f "$STATE_PY" ]]; then
   state_output=$(python3 "$STATE_PY" "$STATE_HOST" 2>/dev/null) || true
 fi
 
-# Fonte 2: via docker exec com timeout (evita travar se container parado)
+# Fonte 2: via docker exec com timeout
 if [[ -z "$state_output" ]] && [[ -f "$STATE_PY" ]]; then
   puppy_running=$(OBSIDIAN_PATH="$zion_obsidian_path" \
     docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" ps --status running -q 2>/dev/null || true)
@@ -260,7 +380,7 @@ else
 fi
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 5. SCHEDULED — tasks registradas no scheduler
+# 8. SCHEDULED — tasks registradas
 # ══════════════════════════════════════════════════════════════════════════════
 sched_dirs=("${zion_obsidian_path}/tasks/_scheduled" "${zion_obsidian_path}/tasks/recurring")
 sched_count=0
@@ -271,7 +391,6 @@ for sdir in "${sched_dirs[@]}"; do
   for tdir in "$sdir"/*/; do
     [[ -d "$tdir" ]] || continue
     tname=$(basename "$tdir")
-    # Ler clock/interval do frontmatter
     cfg=""
     [[ -f "$tdir/TASK.md" ]] && cfg="$tdir/TASK.md"
     [[ -z "$cfg" && -f "$tdir/CLAUDE.md" ]] && cfg="$tdir/CLAUDE.md"
@@ -293,6 +412,40 @@ if [[ "$sched_count" -gt 0 ]]; then
   echo ""
   echo -e "${BOLD}${CYAN}  Scheduled${RESET}  ${DIM}(${sched_count} tasks)${RESET}"
   echo -e "$sched_lines"
-else
-  echo ""
 fi
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 9. API USAGE — barra de uso (se disponivel)
+# ══════════════════════════════════════════════════════════════════════════════
+usage_file="$zion_ephemeral/usage-bar.txt"
+if [[ -f "$usage_file" ]]; then
+  usage_pct=$(grep '^pct=' "$usage_file" 2>/dev/null | cut -d= -f2)
+  usage_used=$(grep '^used=' "$usage_file" 2>/dev/null | cut -d= -f2)
+  usage_max=$(grep '^max=' "$usage_file" 2>/dev/null | cut -d= -f2)
+  usage_updated=$(grep '^updated=' "$usage_file" 2>/dev/null | cut -d= -f2)
+  usage_period=$(grep '^period=' "$usage_file" 2>/dev/null | cut -d= -f2)
+
+  if [[ -n "$usage_pct" ]]; then
+    echo ""
+    echo -e "${BOLD}${CYAN}  API Usage${RESET}"
+    # Color based on percentage
+    pct_num="${usage_pct%%%}"
+    usage_color="$GREEN"
+    [[ "$pct_num" -gt 50 ]] && usage_color="$YELLOW"
+    [[ "$pct_num" -gt 80 ]] && usage_color="$RED"
+    # Simple bar
+    bar_width=20
+    filled=$((pct_num * bar_width / 100))
+    [[ "$filled" -gt "$bar_width" ]] && filled="$bar_width"
+    empty=$((bar_width - filled))
+    bar="${usage_color}"
+    for ((i=0; i<filled; i++)); do bar+="█"; done
+    bar+="${DIM}"
+    for ((i=0; i<empty; i++)); do bar+="░"; done
+    bar+="${RESET}"
+    echo -e "  ${bar} ${usage_color}${usage_pct}${RESET}  ${DIM}\$${usage_used}/\$${usage_max}  ${usage_period}${RESET}"
+    [[ -n "$usage_updated" ]] && echo -e "  ${DIM}updated: ${usage_updated}${RESET}"
+  fi
+fi
+
+echo ""

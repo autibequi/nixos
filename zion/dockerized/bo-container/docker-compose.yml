@@ -3,18 +3,16 @@ services:
     build:
       context: ${BO_CONTAINER_DIR}
       dockerfile: ${ZION_NIXOS_DIR}/zion/dockerized/bo-container/Dockerfile
-      ssh:
-        - default
-      args:
-        NPM_TOKEN: ${NPM_TOKEN:-}
     container_name: zion-dk-bo-container-app
     env_file:
-      - ./env/${APP_ENV:-sand}.env
+      - ./env/${APP_ENV:-sandbox}.env
+    environment:
+      - FORCE_COLOR=1
+      - TERM=xterm-256color
+    tty: true
     volumes:
-      # Bind mount do source para hot-reload (HMR)
+      # Bind mount completo: source + node_modules (gerado por zion docker install)
       - ${BO_CONTAINER_DIR}:/app
-      # Volume anonimo preserva node_modules do build (nao sobrescrito pelo bind mount)
-      - /app/node_modules
     ports:
       - "9090:9090"
     networks:

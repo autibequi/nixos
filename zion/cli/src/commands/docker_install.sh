@@ -1,6 +1,6 @@
 # Instala dependencias de um servico usando SSH do host.
-# Monta ~/.ssh read-only no container, roda go mod download + vendor.
-# O vendor/ gerado fica no projeto — build posterior nao precisa de SSH.
+# Go:   go mod download + vendor (vendor/ fica no projeto)
+# Node: npm install (node_modules/ fica no projeto)
 
 zion_load_config
 
@@ -15,7 +15,78 @@ log_dir=$(zion_docker_log_dir "$service")
 
 mkdir -p "$log_dir"
 
-echo "=== Instalando dependencias de $service [env=$env] ==="
+# Detectar tipo de servico
+_is_node_service() {
+  [[ -f "$dir/package.json" ]]
+}
+
+# ── Node.js install ──────────────────────────────────────────────────────────
+if _is_node_service; then
+  # Detectar versao do Node requerida (engines.node no package.json)
+  node_version=$(node -e "const p=require('$dir/package.json'); const v=(p.engines&&p.engines.node)||'20'; console.log(v.match(/\d+/)[0])" 2>/dev/null || echo "20")
+  node_image="node:${node_version}-alpine"
+
+  echo "=== Instalando dependencias de $service (Node) [env=$env] ==="
+  echo "  SSH:     ~/.ssh (montada read-only)"
+  echo "  npmrc:   ~/.npmrc (montada read-only)"
+  echo "  Projeto: $dir"
+  echo "  Image:   $node_image"
+  echo "  logs:    $log_dir/install.log"
+  echo ""
+  echo "Rodando: ferramentas -> npm install"
+  echo "---"
+
+  docker run \
+    --rm \
+    -it \
+    -v "$HOME/.ssh:/ssh-host:ro" \
+    -v "$HOME/.npmrc:/npmrc-host:ro" \
+    -v "$dir:/app" \
+    -e NPM_TOKEN="${NPM_TOKEN:-}" \
+    -e TERM=xterm-256color \
+    -e COLORTERM=truecolor \
+    -w "/app" \
+    "$node_image" \
+    sh -c '
+      set -e
+
+      apk add --no-cache git openssh-client ca-certificates python3 make g++
+
+      mkdir -p /root/.ssh
+      cp /ssh-host/* /root/.ssh/ 2>/dev/null || true
+      chmod 700 /root/.ssh
+      chmod 600 /root/.ssh/* 2>/dev/null || true
+      ssh-keyscan github.com >> /root/.ssh/known_hosts 2>/dev/null
+
+      # .npmrc: host tem prioridade; fallback para NPM_TOKEN env
+      if [ -f /npmrc-host ]; then
+        cp /npmrc-host /root/.npmrc
+      elif [ -n "$NPM_TOKEN" ]; then
+        echo "//npm.pkg.github.com/:_authToken=${NPM_TOKEN}" > /root/.npmrc
+      fi
+      echo "@estrategiahq:registry=https://npm.pkg.github.com/estrategiahq" >> /root/.npmrc
+
+      echo "[1/1] Instalando dependencias (npm install)..."
+      npm install
+
+      echo ""
+      echo "Dependencias instaladas! node_modules/ gerado no projeto."
+    ' 2>&1 | tee "$log_dir/install.log"
+
+  if [[ "${PIPESTATUS[0]}" -eq 0 ]]; then
+    echo ""
+    echo "Instalacao finalizada! Rode: zion docker run $service --env=$env"
+  else
+    echo ""
+    echo "Instalacao falhou. Verifique: $log_dir/install.log"
+    exit 1
+  fi
+
+  exit 0
+fi
+
+# ── Go install ───────────────────────────────────────────────────────────────
+echo "=== Instalando dependencias de $service (Go) [env=$env] ==="
 echo "  SSH:     ~/.ssh (montada read-only)"
 echo "  Projeto: $dir"
 echo "  logs:    $log_dir/install.log"
@@ -26,7 +97,7 @@ echo "---"
 # Roda docker run e grava em arquivo simultaneamente (preserva cores com script)
 docker run \
   --rm \
-  -t \
+  -it \
   -v "$HOME/.ssh:/ssh-host:ro" \
   -v "$dir:/go/app" \
   -e GOPATH=/go \
