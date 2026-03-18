@@ -27,6 +27,19 @@ estrategiahq
 | estrategia/jira | `~/.claude/skills/estrategia/jira/` | Ler card Jira completo com todos os campos — mapa de custom fields, chamada MCP correta, extração ADF |
 | estrategia/grafana | `~/.claude/skills/estrategia/grafana/` | Query logs Loki e dashboards Grafana — serviços, patterns de debug, integração com workflow |
 
+## Sandbox local (testes)
+
+**Referência:** usar sempre estes domínios quando rodar sandbox localmente para testes.
+
+| Uso | URL completa |
+|-----|--------------|
+| **App principal (front)** | http://local.estrategia-sandbox.com.br |
+| **App principal (porta 3005)** | http://local.estrategia-sandbox.com.br:3005/ |
+| **Admin (BO)** | http://admin.local.estrategia-sandbox.com.br |
+| **API (monolito)** | http://api.local.estrategia-sandbox.com.br |
+
+Ao documentar fluxos, exemplos de curl ou links para o usuário testar, preferir esses URLs.
+
 ## Deteccao de Repo
 1. Se cwd esta sob /home/claude/projects/estrategia/<repo>/ → repo identificado
 2. `git remote get-url origin` contem `estrategiahq/<repo>`

@@ -81,14 +81,28 @@ if [[ -z "$JQ" || -z "$CURL" ]]; then
   exit 0
 fi
 
-# --- token ---
+# --- credenciais: OAuth token e/ou session (claude.ai) + org ---
 if [[ ! -f "$CREDS_FILE" ]]; then
   [[ "$MODE" == "--waybar" ]] && _no_claude_bar "credentials não encontrado" || echo "󱙺 --"
   exit 0
 fi
 TOKEN=$($JQ -r '.claudeAiOauth.accessToken // empty' "$CREDS_FILE" 2>/dev/null)
-if [[ -z "$TOKEN" ]]; then
-  [[ "$MODE" == "--waybar" ]] && _no_claude_bar "token não encontrado" || echo "󱙺 --"
+SESSION_KEY=$($JQ -r '.sessionKey // .session_key // .cookie_session // .session // empty' "$CREDS_FILE" 2>/dev/null)
+[[ -z "$SESSION_KEY" || "$SESSION_KEY" == "null" ]] && SESSION_KEY=""
+if [[ -z "$SESSION_KEY" ]] && [[ -f "${CLAUDE_DIR}/claude-ai-session" ]]; then
+  SESSION_KEY=$(head -1 "${CLAUDE_DIR}/claude-ai-session" 2>/dev/null)
+fi
+# Org ID (claude.ai): env → .credentials.json → ~/.claude.json
+ORG_ID="${CLAUDE_AI_ORG_ID:-}"
+if [[ -z "$ORG_ID" ]]; then
+  ORG_ID=$($JQ -r '.organizationUuid // .organization_id // .oauthAccount.organizationUuid // empty' "$CREDS_FILE" 2>/dev/null) || true
+fi
+if [[ -z "$ORG_ID" || "$ORG_ID" == "null" ]] && [[ -f "${HOME}/.claude.json" ]]; then
+  ORG_ID=$($JQ -r '.oauthAccount.organizationUuid // empty' "${HOME}/.claude.json" 2>/dev/null) || true
+fi
+[[ -z "$ORG_ID" || "$ORG_ID" == "null" ]] && ORG_ID=""
+if [[ -z "$TOKEN" ]] && [[ -z "$SESSION_KEY" ]]; then
+  [[ "$MODE" == "--waybar" ]] && _no_claude_bar "token/session não encontrado" || echo "󱙺 --"
   exit 0
 fi
 
@@ -102,7 +116,23 @@ _cache_valid() {
   (( age < CACHE_TTL ))
 }
 
+_fetch_claude_ai() {
+  [[ -n "$SESSION_KEY" && -n "$ORG_ID" ]] || return 1
+  local raw
+  raw=$($CURL -sS --max-time 10 \
+    "https://claude.ai/api/organizations/${ORG_ID}/usage" \
+    -H "Accept: application/json" \
+    -H "anthropic-client-platform: web_claude_ai" \
+    -H "Content-Type: application/json" \
+    --cookie "sessionKey=${SESSION_KEY}" \
+    -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" 2>/dev/null) || return 1
+  echo "$raw" | $JQ -e '.five_hour' &>/dev/null || return 1
+  mkdir -p "$(dirname "$CACHE_FILE")" 2>/dev/null && echo "$raw" > "$CACHE_FILE" 2>/dev/null || true
+  echo "$raw"
+}
+
 _fetch_fresh() {
+  [[ -n "$TOKEN" ]] || return 1
   local raw
   raw=$($CURL -sS --max-time 10 \
     'https://api.anthropic.com/api/oauth/usage' \
@@ -110,18 +140,19 @@ _fetch_fresh() {
     -H 'anthropic-beta: oauth-2025-04-20' \
     -H 'anthropic-version: 2023-06-01' \
     -H 'Accept: application/json' 2>/dev/null) || return 1
-  # só salva se tiver five_hour (resposta válida)
   echo "$raw" | $JQ -e '.five_hour' &>/dev/null || return 1
-  mkdir -p "$(dirname "$CACHE_FILE")"
-  echo "$raw" > "$CACHE_FILE"
+  mkdir -p "$(dirname "$CACHE_FILE")" 2>/dev/null && echo "$raw" > "$CACHE_FILE" 2>/dev/null || true
   echo "$raw"
 }
 
 # --- obter JSON (cache ou fetch) ---
-# Em modo waybar sempre faz fetch (sem cache) para a barra atualizar a cada interval do Waybar
+# Preferência: claude.ai (session + org) → OAuth. Em waybar sempre fetch.
 JSON=""
 if [[ "$FORCE_REFRESH" == "1" ]] || [[ "$MODE" == "--waybar" ]]; then
-  JSON=$(_fetch_fresh 2>/dev/null) || true
+  JSON=$(_fetch_claude_ai 2>/dev/null) || true
+  if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
+    JSON=$(_fetch_fresh 2>/dev/null) || true
+  fi
 fi
 if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
   # fora do waybar: usar cache se válido

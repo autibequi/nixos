@@ -3,13 +3,24 @@
 # Requer: sessionKey do cookie (login no claude.ai no browser).
 # Ordem de leitura: CLAUDE_AI_SESSION_KEY (env) → ~/.claude/claude-ai-session → ~/.config/claude-ai-session
 # Arquivo: uma linha com o valor do cookie sessionKey — chmod 600.
-# Org ID: CLAUDE_AI_ORG_ID (opcional).
+# Org ID: CLAUDE_AI_ORG_ID (opcional); senão lido de ~/.claude/.credentials.json ou ~/.claude.json (oauthAccount.organizationUuid).
 # Saída: uma linha para Waybar (sessão % | semana %) ou JSON se --json.
 set -euo pipefail
 
-ORG_ID="${CLAUDE_AI_ORG_ID:-995ebddd-ab0c-4ef8-aaf1-ad1fee25f624}"
 SESSION_KEY="${CLAUDE_AI_SESSION_KEY:-}"
 CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
+
+# Org ID: env → ~/.claude/.credentials.json → ~/.claude.json (oauthAccount.organizationUuid)
+ORG_ID="${CLAUDE_AI_ORG_ID:-}"
+if [[ -z "$ORG_ID" ]] && command -v jq &>/dev/null; then
+  if [[ -f "${CLAUDE_DIR}/.credentials.json" ]]; then
+    ORG_ID=$(jq -r '.organizationUuid // .organization_id // .oauthAccount.organizationUuid // empty' "${CLAUDE_DIR}/.credentials.json" 2>/dev/null)
+  fi
+  if [[ -z "$ORG_ID" || "$ORG_ID" == "null" ]] && [[ -f "${HOME}/.claude.json" ]]; then
+    ORG_ID=$(jq -r '.oauthAccount.organizationUuid // empty' "${HOME}/.claude.json" 2>/dev/null)
+  fi
+fi
+ORG_ID="${ORG_ID:-995ebddd-ab0c-4ef8-aaf1-ad1fee25f624}"
 
 # 1) env 2) ~/.claude/claude-ai-session 3) ~/.claude/.credentials.json (ou credentials.json) 4) ~/.config/...
 if [[ -z "$SESSION_KEY" && -f "${CLAUDE_DIR}/claude-ai-session" ]]; then
