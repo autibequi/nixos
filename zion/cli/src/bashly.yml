@@ -355,6 +355,16 @@ commands:
               - long: --worktree
                 arg: worktree
                 help: "Worktree alternativo"
+          - name: test
+            help: "Roda testes no container (default: make test-ldi)"
+            filename: commands/docker_monolito_test.sh
+            flags:
+              - long: --cmd
+                arg: cmd
+                help: "Comando a executar (default: make test-ldi)"
+              - long: --worktree
+                arg: worktree
+                help: "Worktree alternativo"
           - name: server
             help: "Gerencia servidor monolito"
             commands:
@@ -477,6 +487,16 @@ commands:
               - long: --worktree
                 arg: worktree
                 help: "Worktree alternativo"
+          - name: test
+            help: "Roda testes no container (default: yarn test)"
+            filename: commands/docker_bo_container_test.sh
+            flags:
+              - long: --cmd
+                arg: cmd
+                help: "Comando a executar (default: yarn test)"
+              - long: --worktree
+                arg: worktree
+                help: "Worktree alternativo"
           - name: server
             help: "Gerencia servidor bo-container"
             commands:
@@ -567,6 +587,16 @@ commands:
             help: "Para containers e remove volumes"
             filename: commands/docker_front_student_flush.sh
             flags:
+              - long: --worktree
+                arg: worktree
+                help: "Worktree alternativo"
+          - name: test
+            help: "Roda testes no container (default: yarn test)"
+            filename: commands/docker_front_student_test.sh
+            flags:
+              - long: --cmd
+                arg: cmd
+                help: "Comando a executar (default: yarn test)"
               - long: --worktree
                 arg: worktree
                 help: "Worktree alternativo"
