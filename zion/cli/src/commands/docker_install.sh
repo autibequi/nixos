@@ -22,6 +22,7 @@ echo "---"
 
 docker run \
   --rm \
+  -t \
   -v "$HOME/.ssh:/ssh-host:ro" \
   -v "$dir:/go/app" \
   -e GOPATH=/go \
