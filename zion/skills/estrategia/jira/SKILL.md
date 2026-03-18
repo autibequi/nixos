@@ -483,7 +483,21 @@ O banner fica no início do campo, dentro de um `codeBlock` ADF com `language: "
 }
 ```
 
+### Quando preencher — REGRA OBRIGATÓRIA
+
+**Nunca salvar no Jira sem autorização explícita do dev.** Mesmo que a sugestão esteja pronta, sempre mostrar o conteúdo no terminal e aguardar confirmação antes de chamar `editJiraIssue`.
+
+Exceção: se o dev disser explicitamente "pode salvar", "salva direto", "sem confirmação" ou equivalente — aí pode prosseguir sem pedir.
+
 ### Append vs Replace
 
-- Se o campo já tem conteúdo: fazer **append** — adicionar `rule` (separador) + banner + novo conteúdo ao `content` existente. Nunca sobrescrever refinamentos anteriores.
-- Se o campo está vazio: usar a estrutura completa acima do zero.
+Antes de escrever, ler o conteúdo atual do campo (`customfield_11246`) e avaliar:
+
+| Situação | Ação |
+|---|---|
+| Campo vazio ou `null` | Escrever do zero com a estrutura completa |
+| Campo tem só template vazio (placeholders como `[conteúdo]`, `[preencher]`) | Substituir — não tem valor real |
+| Campo tem conteúdo gerado por automação sem valor (lixo de workflow) | Substituir |
+| Campo tem conteúdo real escrito por humano ou refinamento anterior | **Append** — adicionar `rule` + banner + novo conteúdo abaixo. Nunca sobrescrever. |
+
+**Dúvida?** Se não for óbvio que o conteúdo existente é lixo/template, tratar como conteúdo real e fazer append.
