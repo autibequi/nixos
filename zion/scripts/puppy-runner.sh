@@ -386,11 +386,14 @@ run_single_task() {
   local task_type="ONE-SHOT"
   [ "$is_recurring" = "1" ] && task_type="RECORRENTE"
 
+  local agent_prompt
+  agent_prompt=$(cat /home/claude/.claude/agents/puppy-runner/agent.md 2>/dev/null || echo "")
+
   timeout "$task_timeout" claude \
-    --agent-file /home/claude/.claude/agents/puppy-runner/agent.md \
     --permission-mode bypassPermissions \
     --model "$task_model" \
     --max-turns "$task_max_turns" \
+    --append-system-prompt "$agent_prompt" \
     "${mcp_flags[@]}" \
     -p "Processe a task: $task (Worker: $WORKER_ID)
 Task dir: $TASKS/doing/$task

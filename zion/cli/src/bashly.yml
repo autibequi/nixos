@@ -161,6 +161,23 @@ commands:
       - name: tick
         help: "Roda 1 tick do scheduler imediatamente (para teste)."
         filename: commands/puppy_tick.sh
+      - name: query
+        alias: [q]
+        help: "Envia um prompt ao Claude dentro do container puppy (headless = sem supervisão)."
+        args:
+          - name: prompt
+            required: true
+            help: "Prompt a enviar (ex. 'diga oi')"
+        flags:
+          - long: --headless
+            help: "Modo headless: ninguém está observando, vá o mais longe possível"
+          - long: --timeout
+            arg: seconds
+            help: "Timeout em segundos (default 300). O agente é informado do deadline."
+          - long: --model
+            arg: model
+            help: "Modelo Claude: haiku | sonnet | opus (default: haiku)"
+        filename: commands/puppy_query.sh
 
   - name: reset
     help: Devolve tasks de running/ para origem (pending/recurring).

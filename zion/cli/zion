@@ -482,6 +482,7 @@ zion_puppy_usage() {
   printf "  %s   Segue logs do container puppy.\n" "logs   "
   printf "  %s   Abre bash dentro do container puppy.\n" "shell  "
   printf "  %s   Roda 1 tick do scheduler imediatamente (para teste).\n" "tick   "
+  printf "  %s   Envia um prompt de teste ao Claude dentro do container puppy.\n" "query  "
   echo
 
   # :command.long_usage
@@ -673,6 +674,37 @@ zion_puppy_tick_usage() {
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
     printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_puppy_query_usage() {
+  printf "zion puppy query - Envia um prompt de teste ao Claude dentro do container puppy.\n\n"
+  printf "Alias: q\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  zion puppy query PROMPT\n"
+  printf "  zion puppy query --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "Arguments:"
+
+    # :argument.usage
+    printf "  %s\n" "PROMPT"
+    printf "    Prompt a enviar (ex. 'diga oi')\n"
     echo
 
   fi
@@ -1676,6 +1708,23 @@ zion_puppy_tick_command() {
     docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
     exec -e PUPPY_SINGLE_TICK=1 -e SCHEDULER_VERBOSE=1 \
     puppy /zion/scripts/puppy-daemon.sh
+
+}
+
+# :command.function
+zion_puppy_query_command() {
+
+  # src/commands/puppy_query.sh
+  # Envia um prompt de teste direto ao Claude dentro do container puppy.
+  zion_load_config
+
+  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
+  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
+  prompt="${args[prompt]}"
+
+  OBSIDIAN_PATH="$zion_obsidian_path" \
+    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
+    exec puppy claude --permission-mode bypassPermissions --model haiku -p "$prompt"
 
 }
 
@@ -2888,6 +2937,13 @@ zion_puppy_parse_requirements() {
       shift $#
       ;;
 
+    query | q)
+      action="query"
+      shift
+      zion_puppy_query_parse_requirements "$@"
+      shift $#
+      ;;
+
     # :command.command_fallback
     "")
       zion_puppy_usage >&2
@@ -3301,6 +3357,64 @@ zion_puppy_tick_parse_requirements() {
 
     esac
   done
+
+}
+
+# :command.parse_requirements
+zion_puppy_query_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_puppy_query_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="puppy query"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        # :argument.case
+        if [[ -z ${args['prompt']+x} ]]; then
+          args['prompt']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
+
+        ;;
+
+    esac
+  done
+
+  # :command.required_args_filter
+  if [[ -z ${args['prompt']+x} ]]; then
+    printf "missing required argument: PROMPT\nusage: zion puppy query PROMPT\n" >&2
+
+    exit 1
+  fi
 
 }
 
@@ -3745,6 +3859,7 @@ run() {
     "puppy logs") zion_puppy_logs_command ;;
     "puppy shell") zion_puppy_shell_command ;;
     "puppy tick") zion_puppy_tick_command ;;
+    "puppy query") zion_puppy_query_command ;;
     "reset") zion_reset_command ;;
     "status") zion_status_command ;;
     "new-task") zion_new_task_command ;;
