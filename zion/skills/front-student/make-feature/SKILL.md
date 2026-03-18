@@ -18,6 +18,7 @@ description: Use when implementing, modifying, or refactoring a feature in front
 ## Fluxo de Orquestração
 
 ```
+0. LER STATE.md → /workspace/mnt/estrategia/front-student/STATE.md (posição atual, blockers)
 1. EXPLORAR: ler modules/<módulo>/services/, components/, containers/, pages/ do módulo alvo
 2. front-student/service   → criar/extender service e registrar em services/index.js
 3. RESOLVER COMPONENTES:
@@ -57,6 +58,12 @@ Páginas ficam em `pages/`, **fora** dos módulos — elas importam de `modules/
 - **Rotas são file-based** — apenas criar/mover arquivo em `pages/` para criar uma rota.
 - **asyncData** para dados que precisam de SSR; `mounted` para client-only.
 - **Containers** são o lugar certo para lógica de negócio — não colocar em páginas.
+- **Verificação obrigatória antes de reportar:**
+  - [ ] `yarn build` sem erros
+  - [ ] `yarn lint` sem erros novos introduzidos pela feature
+  - [ ] Nenhum erro no console ao navegar pelas rotas da feature
+  - Se alguma verificação falhar: corrigir antes de reportar
+- **Atualizar STATE.md** ao concluir: registrar feature implementada, decisões técnicas relevantes, e qualquer blocker encontrado em `/workspace/mnt/estrategia/front-student/STATE.md`
 - **Reportar ao final** (para o orquestrador):
   - Arquivos criados: lista com paths
   - Arquivos modificados: lista com paths

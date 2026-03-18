@@ -11,6 +11,8 @@ Skill de orquestração. Não duplica conteúdo das sub-skills — define a orde
 
 ## Passo 0 — Entender o escopo antes de escrever qualquer código
 
+Ler `/workspace/mnt/estrategia/monolito/STATE.md` para verificar posição atual, decisões técnicas anteriores e blockers conhecidos.
+
 Antes de começar, responder:
 
 1. **Qual app de domínio** concentra a regra de negócio? (ver index em CLAUDE.md)
@@ -132,6 +134,8 @@ golangci-lint run
 ```
 
 Não declarar a funcionalidade completa antes de ambos passarem.
+
+Após a verificação passar: atualizar `/workspace/mnt/estrategia/monolito/STATE.md` com a feature implementada, decisões técnicas relevantes (ex: arquitetura escolhida, motivo de não usar cache, cross-app patterns), e qualquer blocker encontrado.
 
 ## Cross-App Dependencies
 

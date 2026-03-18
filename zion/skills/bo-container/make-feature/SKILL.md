@@ -18,6 +18,7 @@ description: Use when implementing, modifying, or refactoring a feature in bo-co
 ## Fluxo de Orquestração
 
 ```
+0. LER STATE.md → /workspace/mnt/estrategia/bo-container/STATE.md (posição atual, blockers)
 1. EXPLORAR: ler router/index.js, services/, pages/ do módulo alvo
 2. bo-container/service   → criar/extender service com os endpoints fornecidos
 3. bo-container/route     → registrar rota (SOMENTE se is_extension = false)
@@ -36,6 +37,12 @@ Pular steps 3 (bo-container/route) e 5 (bo-container/page). Modificar diretament
 - **Nunca** tocar em módulos além do alvo. Se precisar de dado de outro módulo, use serviço de `src/modules/shared/services/` ou crie um lá.
 - **Sempre** priorizar componentes de `shared/` antes de criar novos.
 - **Não** criar rotas no `src/router/routes.js` global — cada módulo gerencia seu próprio router.
+- **Verificação obrigatória antes de reportar:**
+  - [ ] `yarn build` sem erros
+  - [ ] `yarn lint` sem erros novos introduzidos pela feature
+  - [ ] Nenhum erro no console ao acessar as rotas da feature
+  - Se alguma verificação falhar: corrigir antes de reportar
+- **Atualizar STATE.md** ao concluir: registrar feature implementada, decisões técnicas relevantes, e qualquer blocker encontrado em `/workspace/mnt/estrategia/bo-container/STATE.md`
 - **Reportar ao final** (para o orquestrador):
   - Arquivos criados: lista com paths
   - Arquivos modificados: lista com paths
