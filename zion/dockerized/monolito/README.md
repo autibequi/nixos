@@ -29,7 +29,7 @@ graph TD
     subgraph HOST["Host NixOS"]
         ZionCLI["zion CLI\n~/nixos/zion/cli/zion"]
         ZionCFG["~/.zion\nMONOLITO_DIR · engine · keys"]
-        LOGS["/tmp/zion-logs/dockerized/monolito/\nservice.log · test.log · startup.log · deps.log"]
+        LOGS["~/.local/share/zion/logs/dockerized/monolito/\nservice.log · test.log · startup.log · deps.log"]
     end
 
     subgraph COMPOSE["Docker Compose — zion-dk-monolito"]
@@ -128,6 +128,6 @@ MONOLITO_DIR="$HOME/projects/estrategia/monolito"
 
 ## Logs
 
-- Host: `/tmp/zion-logs/dockerized/monolito/`
+- Host: `~/.local/share/zion/logs/dockerized/monolito/`
 - Container (agente): `/workspace/logs/docker/monolito/`
 - Arquivos: `service.log`, `test.log`, `startup.log`, `deps.log`, `install.log`
