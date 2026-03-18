@@ -3,17 +3,23 @@
 zion_load_config
 
 service="${args[service]}"
+worktree="${args[--worktree]:-}"
 
 zion_docker_validate_service "$service" || exit 1
+zion_docker_init_worktree "$service" "$worktree" || exit 1
 
-dir=$(zion_docker_service_dir "$service")
+dir=$(zion_docker_effective_dir "$service")
 config_dir=$(zion_docker_config_dir "$service")
 compose=$(zion_docker_compose_file "$service")
 deps_compose=$(zion_docker_deps_file "$service")
-project=$(zion_docker_project_name "$service")
+project=$(zion_docker_effective_project "$service")
 log_dir=$(zion_docker_log_dir "$service")
+[[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
 
-echo "=== Flush: $service ==="
+local_label="$service"
+[[ -n "$_ZION_DK_WORKTREE" ]] && local_label="$service (wt: $_ZION_DK_WORKTREE)"
+
+echo "=== Flush: $local_label ==="
 echo "  containers + imagens + volumes"
 echo "  logs: $log_dir"
 [[ "$service" == "monolito" || "$service" == "monolito-worker" ]] && echo "  vendor: $dir/vendor"

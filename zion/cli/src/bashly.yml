@@ -206,6 +206,10 @@ commands:
             help: "Roda em background (detached, sem follow de logs)"
           - long: --debug
             help: "Modo debug: compila sem otimizações e expõe delve na porta 2345 (attach via VS Code DAP)"
+          - long: --worktree
+            short: -w
+            arg: name
+            help: "Usa um git worktree alternativo (nome = ultimo componente do path)"
         filename: commands/docker_run.sh
 
       - name: stop
@@ -214,6 +218,11 @@ commands:
           - name: service
             required: true
             help: "Nome do servico"
+        flags:
+          - long: --worktree
+            short: -w
+            arg: name
+            help: "Worktree alternativo"
         filename: commands/docker_stop.sh
 
       - name: logs
@@ -230,6 +239,10 @@ commands:
             arg: lines
             default: "100"
             help: "Numero de linhas (default 100)"
+          - long: --worktree
+            short: -w
+            arg: name
+            help: "Worktree alternativo"
         filename: commands/docker_logs.sh
 
       - name: status
@@ -256,11 +269,16 @@ commands:
             short: -c
             arg: command
             help: "Comando a executar em container dev (golang + make, source montado). Ex: make test"
+          - long: --worktree
+            short: -w
+            arg: name
+            help: "Worktree alternativo"
         examples:
           - zion docker shell monolito
           - zion docker shell monolito -c make test
           - zion docker shell monolito -c "make test-ldi"
           - zion docker shell monolito -C worker
+          - zion docker shell monolito --worktree feat-xyz
         filename: commands/docker_shell.sh
 
       - name: restart
@@ -273,6 +291,10 @@ commands:
             short: -e
             arg: environment
             help: "Ambiente (se omitido, mantem o atual)"
+          - long: --worktree
+            short: -w
+            arg: name
+            help: "Worktree alternativo"
         filename: commands/docker_restart.sh
 
       - name: flush
@@ -281,6 +303,11 @@ commands:
           - name: service
             required: true
             help: "Nome do servico (monolito, bo-container, front-student)"
+        flags:
+          - long: --worktree
+            short: -w
+            arg: name
+            help: "Worktree alternativo"
         filename: commands/docker_flush.sh
 
       - name: install
@@ -295,7 +322,20 @@ commands:
             arg: environment
             default: sand
             help: "Ambiente: sand | prod | qa | local (default: sand)"
+          - long: --worktree
+            short: -w
+            arg: name
+            help: "Worktree alternativo"
         filename: commands/docker_install.sh
+
+  # ── Worktree (atalho interativo) ──────────────────────────
+  - name: worktree
+    alias: [wt]
+    help: "Lista worktrees dos servicos Docker e permite escolher worktree + comando interativamente."
+    args:
+      - name: service
+        help: "Filtrar por servico (opcional; sem = todos)"
+    filename: commands/worktree.sh
 
   - name: new-task
     alias: [task-new]

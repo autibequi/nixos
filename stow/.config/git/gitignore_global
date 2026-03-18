@@ -5,3 +5,4 @@ shell.nix
 .vscode/settings.json
 
 STATE.md
+.claude/worktrees

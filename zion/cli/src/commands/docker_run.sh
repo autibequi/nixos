@@ -4,23 +4,24 @@ zion_load_config
 service="${args[service]}"
 env="${args[--env]:-sand}"
 debug="${args[--debug]:-}"
+worktree="${args[--worktree]:-}"
 
 zion_docker_validate_service "$service" || exit 1
+zion_docker_init_worktree "$service" "$worktree" || exit 1
 
-dir=$(zion_docker_service_dir "$service")
+dir=$(zion_docker_effective_dir "$service")
 config_dir=$(zion_docker_config_dir "$service")
 compose=$(zion_docker_compose_file "$service")
 deps_compose=$(zion_docker_deps_file "$service")
 env_file=$(zion_docker_env_file "$service" "$env")
-project=$(zion_docker_project_name "$service")
+project=$(zion_docker_effective_project "$service")
 log_dir=$(zion_docker_log_dir "$service")
+[[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
 
 mkdir -p "$log_dir"
 
-# Exportar variaveis que o compose precisa
-export MONOLITO_DIR="${MONOLITO_DIR:-$HOME/projects/estrategia/monolito}"
-export BO_CONTAINER_DIR="${BO_CONTAINER_DIR:-$HOME/projects/estrategia/bo-container}"
-export FRONT_STUDENT_DIR="${FRONT_STUDENT_DIR:-$HOME/projects/estrategia/front-student}"
+# Exportar variaveis que o compose precisa (com override de worktree)
+zion_docker_export_dirs "$service"
 export ZION_NIXOS_DIR="$zion_nixos_dir"
 export APP_ENV="$env"
 
@@ -50,6 +51,7 @@ else
   echo "=== Levantando $service [env=$env] ==="
 fi
 echo "  projeto: $dir"
+[[ -n "$_ZION_DK_WORKTREE" ]] && echo "  worktree: $_ZION_DK_WORKTREE"
 echo "  compose: $compose"
 echo "  env:     $env_file"
 echo "  logs:    $log_dir"

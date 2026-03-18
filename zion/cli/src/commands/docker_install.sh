@@ -6,12 +6,15 @@ zion_load_config
 
 service="${args[service]}"
 env="${args[--env]:-sand}"
+worktree="${args[--worktree]:-}"
 
 zion_docker_validate_service "$service" || exit 1
+zion_docker_init_worktree "$service" "$worktree" || exit 1
 
-dir=$(zion_docker_service_dir "$service")
+dir=$(zion_docker_effective_dir "$service")
 config_dir=$(zion_docker_config_dir "$service")
 log_dir=$(zion_docker_log_dir "$service")
+[[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
 
 mkdir -p "$log_dir"
 
@@ -27,6 +30,7 @@ if _is_node_service; then
   node_image="node:${node_version}-alpine"
 
   echo "=== Instalando dependencias de $service (Node) [env=$env] ==="
+  [[ -n "$_ZION_DK_WORKTREE" ]] && echo "  worktree: $_ZION_DK_WORKTREE"
   echo "  SSH:     ~/.ssh (montada read-only)"
   echo "  npmrc:   ~/.npmrc (montada read-only)"
   echo "  Projeto: $dir"
@@ -87,6 +91,7 @@ fi
 
 # ── Go install ───────────────────────────────────────────────────────────────
 echo "=== Instalando dependencias de $service (Go) [env=$env] ==="
+[[ -n "$_ZION_DK_WORKTREE" ]] && echo "  worktree: $_ZION_DK_WORKTREE"
 echo "  SSH:     ~/.ssh (montada read-only)"
 echo "  Projeto: $dir"
 echo "  logs:    $log_dir/install.log"

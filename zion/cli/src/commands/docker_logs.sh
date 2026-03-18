@@ -4,9 +4,13 @@ zion_load_config
 service="${args[service]}"
 follow="${args[--follow]:-}"
 tail_lines="${args[--tail]:-100}"
+worktree="${args[--worktree]:-}"
 
-project=$(zion_docker_project_name "$service")
+zion_docker_init_worktree "$service" "$worktree" || exit 1
+
+project=$(zion_docker_effective_project "$service")
 log_dir=$(zion_docker_log_dir "$service")
+[[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
 compose=$(zion_docker_compose_file "$service")
 
 # Tentar reconectar ao container rodando
