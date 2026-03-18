@@ -77,24 +77,91 @@ Atualizar `zion/dockerized/README.md` com o novo servico.
 - **Env por ambiente:** sand (default), local, qa, prod; segredos nunca commitados
 - **Network:** usar `nixos_default` (external) para comunicacao entre containers Zion
 
+## Debug remoto (Go + Docker + Cursor/VS Code)
+
+Adicionar `Dockerfile.debug` e `docker-compose.debug.yml` ao servico.
+
+### Dockerfile.debug
+```dockerfile
+# syntax=docker/dockerfile:1
+FROM golang:1.24.4-alpine AS builder
+RUN apk add --no-cache ca-certificates git gcc libc-dev <libs-cgo>
+WORKDIR /go/app
+COPY go.mod go.sum ./
+COPY vendor ./vendor
+COPY . .
+# -gcflags desativa otimizacoes e inlining (obrigatorio para dlv)
+RUN CGO_ENABLED=1 GOOS=linux go build -mod=vendor \
+    -gcflags="all=-N -l" -o server ./cmd/server/main.go
+
+# Runtime precisa ser golang:alpine (nao alpine puro) para ter go install
+FROM golang:1.24.4-alpine AS runtime
+RUN apk --no-cache add ca-certificates <libs-runtime>
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
+WORKDIR /go/app
+COPY --from=builder /go/app/server .
+EXPOSE 4004 2345
+# dlv em /go/bin/dlv (GOPATH da imagem golang:alpine, NAO /root/go/bin)
+CMD ["/go/bin/dlv", "exec", "./server",
+     "--headless", "--listen=:2345", "--api-version=2",
+     "--accept-multiclient", "--continue"]
+# ATENCAO: --continue exige --accept-multiclient obrigatoriamente
+```
+
+### docker-compose.debug.yml
+```yaml
+services:
+  app:
+    build:
+      dockerfile: ${ZION_NIXOS_DIR}/zion/dockerized/<service>/Dockerfile.debug
+    security_opt:
+      - apparmor:unconfined   # obrigatorio para dlv
+    cap_add:
+      - SYS_PTRACE            # obrigatorio para dlv
+```
+
+### launch.json (Cursor/VS Code)
+```json
+{
+  "name": "[DOCKER] Attach to <service>",
+  "type": "go",
+  "request": "attach",
+  "mode": "remote",
+  "port": 2345,
+  "host": "127.0.0.1",
+  "showLog": true,
+  "substitutePath": [
+    { "from": "${workspaceFolder}", "to": "/go/app" }
+  ]
+}
+```
+**Notas:**
+- Usar `substitutePath` (nao `remotePath`/`localRoot` — deprecated nas versoes novas)
+- Nao usar `"debugAdapter": "dlv-dap"` — usa o modo legado JSON-RPC que funciona
+- Debug Console mostrando "Type 'dlv help'" = conectado com sucesso (nao e erro)
+- Logs do servidor vao para `zion docker logs`, nao para o Debug Console
+
 ## Templates
 
 ### Go (multi-stage)
 ```dockerfile
-FROM golang:1.23-alpine AS builder
-RUN apk add --no-cache git gcc musl-dev
+FROM golang:1.24.4-alpine AS builder
+RUN apk add --no-cache git gcc libc-dev librdkafka-dev
 WORKDIR /go/app
 COPY go.mod go.sum ./
-RUN go mod download
+COPY vendor ./vendor   # vendor gerado por zion docker install
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o /go/bin/app ./apps/server/main.go
+# CGO_ENABLED=1 + musl se usar librdkafka ou cgo
+RUN CGO_ENABLED=1 GOOS=linux go build -mod=vendor -tags musl -o server ./cmd/server/main.go
 
-FROM alpine:3.19 AS runtime
-RUN apk add --no-cache ca-certificates tzdata
-WORKDIR /app
-COPY --from=builder /go/bin/app .
+FROM alpine:latest AS runtime
+RUN apk --no-cache add ca-certificates librdkafka tzdata
+WORKDIR /go/app
+COPY --from=builder /go/app/server .
 EXPOSE 4004
-CMD ["./app"]
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:4004/health || exit 1
+CMD ["./server"]
 ```
 
 ### Node/Nuxt
