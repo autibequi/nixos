@@ -2,7 +2,10 @@
 # claude-oauth-usage.sh — Uso do plano Claude via OAuth token
 # Endpoint: api.anthropic.com/api/oauth/usage
 # Token: ~/.claude/.credentials.json (gerado pelo Claude Code CLI)
-# Cache: ~/.cache/claude-usage.json (TTL 1min — igual ao interval do waybar)
+# Cache: ~/.cache/claude-usage.json (em --waybar sempre fetch)
+#
+# Limitação: o /usage do Cursor (Current session 100%, resets 4pm; Current week 14%/42%)
+# vem do backend do Cursor; esta API OAuth não expõe esses buckets. Barra = 5h, 7d, Sonnet 7d.
 #
 # Modos:
 #   (sem args)       → JSON bruto + popula cache
@@ -23,7 +26,7 @@ CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
 CREDS_FILE="${CLAUDE_DIR}/.credentials.json"
 [[ ! -f "$CREDS_FILE" ]] && [[ -f "${HOME}/.local/share/claude-code/.credentials.json" ]] && CREDS_FILE="${HOME}/.local/share/claude-code/.credentials.json"
 CACHE_FILE="${XDG_CACHE_HOME:-${HOME}/.cache}/claude-usage.json"
-CACHE_TTL=60   # 1 minuto (igual ao interval do waybar; atualiza barra com mais frequência)
+CACHE_TTL=60   # só para chamadas fora do waybar; em --waybar sempre faz fetch
 # Suporta múltiplos args: --refresh --waybar
 MODE=""
 FORCE_REFRESH=0
@@ -115,14 +118,21 @@ _fetch_fresh() {
 }
 
 # --- obter JSON (cache ou fetch) ---
+# Em modo waybar sempre faz fetch (sem cache) para a barra atualizar a cada interval do Waybar
 JSON=""
-if [[ "$FORCE_REFRESH" == "1" ]]; then
+if [[ "$FORCE_REFRESH" == "1" ]] || [[ "$MODE" == "--waybar" ]]; then
   JSON=$(_fetch_fresh 2>/dev/null) || true
-else
-  if _cache_valid; then
+fi
+if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
+  # fora do waybar: usar cache se válido
+  if [[ "$MODE" != "--waybar" ]] && _cache_valid; then
     JSON=$(cat "$CACHE_FILE")
-  else
-    JSON=$(_fetch_fresh 2>/dev/null) || true
+  fi
+fi
+if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
+  # fallback: cache expirado/antigo
+  if [[ -f "$CACHE_FILE" ]] && $JQ -e '.five_hour' "$CACHE_FILE" &>/dev/null; then
+    JSON=$(cat "$CACHE_FILE")
   fi
 fi
 
@@ -247,22 +257,19 @@ ICON_SONNET='󰻀'   # brain (AI/Sonnet)
 ICON_5H='󱑑'       # timer (janela 5h)
 ICON_7D='󰴊'       # calendar-range (janela 7d)
 ICON_OPUS='󰐂'     # opus/premium (só no tooltip)
-ICON_EXTRA='󰊗'    # diamond (créditos extras)
 
 # --- modo: --waybar ---
+# API OAuth devolve: 5h, 7d, seven_day_sonnet, extra_usage. O /usage do Cursor (Current session 100%, 4pm UTC;
+# Current week 14%/42%) vem do backend do Cursor — não há endpoint público para isso; esta barra mostra só OAuth.
 if [[ "$MODE" == "--waybar" ]]; then
-  # Ícones dentro das caixinhas (mesma cor de fundo da barra)
   text="$(_gauge "$ICON_SONNET" "$sn_num") $(_gauge "$ICON_5H" "$fh_pct") $(_gauge "$ICON_7D" "$sd_pct")"
-  # tooltip: monospace, prefixo largura fixa (12 cols) + gauge 3 dígitos para barras alinhadas (sem ícone dentro da caixa)
   tw=12
   wprefix=12
-  # tooltip: 5º arg = 1 → barra sempre desenhada por completo (inclusive em 100%)
   p_5h=$(printf "%-${wprefix}s" "${ICON_5H} 5h");   line_5h="${p_5h}$(_gauge "" "$fh_pct" "$tw" 3 1)   reset em $fh_r"
   p_7d=$(printf "%-${wprefix}s" "${ICON_7D} 7d");   line_7d="${p_7d}$(_gauge "" "$sd_pct" "$tw" 3 1)   reset em $sd_r"
   p_sn=$(printf "%-${wprefix}s" "${ICON_SONNET} Sonnet"); line_sn="${p_sn}$(_gauge "" "$sn_pct" "$tw" 3 1)"
   p_op=$(printf "%-${wprefix}s" "${ICON_OPUS} Opus");   line_op="${p_op}$(_gauge "" "$op_pct" "$tw" 3 1)"
-  p_ex=$(printf "%-${wprefix}s" "${ICON_EXTRA} Extra");  line_ex="${p_ex}$(_gauge_gold "" "$ex_pct" "$tw" 3 1)   ${ex_used}/${ex_limit}"
-  tooltip="<span font_family='monospace' size='12000'>$(printf '%s\n%s\n%s\n%s\n%s' "$line_5h" "$line_7d" "$line_sn" "$line_op" "$line_ex")</span>"
+  tooltip="<span font_family='monospace' size='12000'>OAuth usage (≠ Cursor /usage)\n$(printf '%s\n%s\n%s\n%s' "$line_5h" "$line_7d" "$line_sn" "$line_op")</span>"
   $JQ -cn \
     --arg text    "$text" \
     --arg tooltip "$tooltip" \

@@ -65,6 +65,13 @@ echo "  compose: $compose"
 echo "  env:     $env_file"
 echo "  logs:    $log_dir"
 
+# Parar instância anterior do mesmo serviço (libera porta, evita "port already allocated")
+"$0" docker stop "$service" ${worktree:+--worktree="$worktree"} 2>/dev/null || true
+# Fallback: parar qualquer container que ainda esteja segurando a(s) porta(s) do serviço
+for port in $(zion_docker_service_host_ports "$service"); do
+  zion_docker_free_port "$port"
+done
+
 # 0. Garantir reverse proxy (80/443 -> 4004)
 zion_docker_ensure_reverseproxy
 

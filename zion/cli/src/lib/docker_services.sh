@@ -56,6 +56,28 @@ zion_docker_log_dir() {
   echo "$HOME/.local/share/zion/logs/${1}"
 }
 
+# Portas host publicadas por servico (para liberar antes do run)
+zion_docker_service_host_ports() {
+  case "$1" in
+    front-student)   echo "3005" ;;
+    bo-container)    echo "9090" ;;
+    monolito)        echo "4004 2345" ;;
+    monolito-worker) echo "" ;;
+    *) echo "" ;;
+  esac
+}
+
+# Para qualquer container que esteja publicando a porta (fallback apos down)
+zion_docker_free_port() {
+  local port="$1"
+  local ids
+  ids=$(docker ps -q --filter "publish=$port" 2>/dev/null)
+  if [[ -n "$ids" ]]; then
+    echo "[zion docker] Liberando porta $port (parando containers que a usam)..."
+    echo "$ids" | xargs -r docker stop 2>/dev/null || true
+  fi
+}
+
 # Lista servicos conhecidos
 zion_docker_known_services() {
   echo "monolito monolito-worker bo-container front-student"
