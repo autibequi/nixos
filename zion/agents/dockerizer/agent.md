@@ -36,4 +36,5 @@ Especialista em containerizacao. Analisa projetos, gera Dockerfiles, compose fil
 - CLI registry: `zion/cli/src/lib/docker_services.sh`
 - Skill com templates: `zion/skills/dockerizer/SKILL.md`
 - Compose do Zion: `zion/cli/docker-compose.zion.yml`
-- Logs: `~/.zion/logs/docker/<service>/` (host) → `/workspace/logs/docker/<service>/` (container)
+- Logs: `/tmp/zion-logs/dockerized/<service>/` (host) → `/workspace/logs/docker/<service>/` (container)
+  - `service.log` — runtime; `test.log` — testes; `startup.log`, `deps.log`, `install.log`

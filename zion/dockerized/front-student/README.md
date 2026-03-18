@@ -81,7 +81,7 @@ graph TD
     subgraph HOST["Host NixOS"]
         ZionCLI["zion CLI"]
         ZionCFG["~/.zion\nFRONT_STUDENT_DIR · NPM_TOKEN"]
-        LOGS["~/.local/share/zion/logs/front-student/\nservice.log · startup.log"]
+        LOGS["/tmp/zion-logs/dockerized/front-student/\nservice.log · test.log · startup.log"]
         SSHAgent["SSH Agent\n(git+ssh deps)"]
     end
 
@@ -124,6 +124,6 @@ FRONT_STUDENT_DIR="$HOME/projects/estrategia/front-student"
 
 ## Logs
 
-- Host: `~/.local/share/zion/logs/front-student/`
-- Container (zion edit): `/workspace/logs/docker/front-student/`
-- Arquivos: `service.log`, `startup.log`
+- Host: `/tmp/zion-logs/dockerized/front-student/`
+- Container (agente): `/workspace/logs/docker/front-student/`
+- Arquivos: `service.log`, `test.log`, `startup.log`

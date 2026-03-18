@@ -76,7 +76,7 @@ graph TD
     subgraph HOST["Host NixOS"]
         ZionCLI["zion CLI"]
         ZionCFG["~/.zion\nBO_CONTAINER_DIR · NPM_TOKEN"]
-        LOGS["~/.local/share/zion/logs/bo-container/\nservice.log · startup.log"]
+        LOGS["/tmp/zion-logs/dockerized/bo-container/\nservice.log · test.log · startup.log"]
         SSHAgent["SSH Agent\n(git+ssh deps)"]
     end
 
@@ -123,6 +123,6 @@ BO_CONTAINER_DIR="$HOME/projects/estrategia/bo-container"
 
 ## Logs
 
-- Host: `~/.local/share/zion/logs/bo-container/`
-- Container (zion edit): `/workspace/logs/docker/bo-container/`
-- Arquivos: `service.log`, `startup.log`
+- Host: `/tmp/zion-logs/dockerized/bo-container/`
+- Container (agente): `/workspace/logs/docker/bo-container/`
+- Arquivos: `service.log`, `test.log`, `startup.log`
