@@ -1,0 +1,204 @@
+#compdef zion
+# Zsh completion for zion CLI (gerado a partir de bashly.yml)
+
+_zion_engines() { compadd claude opencode cursor }
+_zion_models()  { compadd haiku sonnet opus }
+_zion_docker_services() { compadd monolito bo-container front-student }
+_zion_docker_envs()     { compadd sand prod qa local }
+_zion_puppy_models()    { compadd haiku sonnet opus }
+
+_zion_session_flags=(
+  '--engine[Engine da sessão]:engine:_zion_engines'
+  '--model[Modelo Claude]:model:_zion_models'
+  '--instance[Sufixo da instância]:id'
+  '--rw[Montar read-write]'
+  '--ro[Montar read-only]'
+  '--danger[Bypass de permissões]'
+  '--init-md[Arquivo markdown inicial]:file:_files'
+  '--resume[Retoma sessão]:session_id'
+)
+
+_zion() {
+  local context state state_descr line
+  typeset -A opt_args
+
+  _arguments -C \
+    '(-h --help)'{-h,--help}'[Ajuda]' \
+    '(-v --version)'{-v,--version}'[Versão]' \
+    '1: :_zion_commands' \
+    '*:: :->args'
+
+  case $state in
+    args)
+      case $words[1] in
+        continue|cont)
+          _arguments ':dir:_files -/' ;;
+
+        new|run|r|open|code)
+          _arguments \
+            $_zion_session_flags \
+            ':dir:_files -/' ;;
+
+        shell|sh)
+          _arguments ':dir:_files -/' ;;
+
+        resume)
+          _arguments \
+            '--resume[UUID da sessão]:session_id' \
+            ':dir:_files -/' ;;
+
+        claude)
+          _arguments \
+            $_zion_session_flags \
+            ':dir:_files -/' ;;
+
+        cursor)
+          _arguments \
+            $_zion_session_flags \
+            ':dir:_files -/' ;;
+
+        opencode|oc)
+          _arguments \
+            $_zion_session_flags \
+            ':dir:_files -/' ;;
+
+        claude-usage)
+          _arguments \
+            '--waybar[Formato Waybar JSON]' \
+            '--json[JSON bruto]' \
+            '--refresh[Força fetch, ignora cache]' ;;
+
+        ask)
+          _arguments \
+            '--headless[Modo headless]' \
+            '--timeout[Timeout em segundos]:seconds' \
+            '--model[Modelo]:model:_zion_puppy_models' \
+            ':prompt' ;;
+
+        set)
+          _arguments ':engine:_zion_engines' ;;
+
+        new-task|task-new)
+          _arguments \
+            '--type[Tipo]:type:(pending recurring)' \
+            '--model[Modelo]:model:_zion_models' \
+            '--clock[Frequência]:clock:(every10 every60)' \
+            '--timeout[Timeout]:timeout' \
+            ':name' ;;
+
+        edit)
+          _arguments \
+            '--engine[Engine]:engine:_zion_engines' \
+            '--resume[Retoma sessão]:session_id' ;;
+
+        clean|gc|prune)
+          _arguments '--force[Sem confirmação]' ;;
+
+        puppy|p)
+          _arguments '1: :_zion_puppy_commands' '*:: :->puppy_args'
+          case $state in
+            puppy_args)
+              case $words[1] in
+                run)
+                  _arguments ':task' ;;
+                logs)
+                  _arguments '--follow[Follow log output]' '-f[Follow log output]' ;;
+                query|q)
+                  _arguments \
+                    '--headless[Modo headless]' \
+                    '--timeout[Timeout]:seconds' \
+                    '--model[Modelo]:model:_zion_puppy_models' \
+                    ':prompt' ;;
+              esac ;;
+          esac ;;
+
+        docker|dk)
+          _arguments '1: :_zion_docker_commands' '*:: :->docker_args'
+          case $state in
+            docker_args)
+              case $words[1] in
+                run|up)
+                  _arguments \
+                    '--env[Ambiente]:env:_zion_docker_envs' \
+                    '-e[Ambiente]:env:_zion_docker_envs' \
+                    '--detach[Background]' '-d[Background]' \
+                    '--debug[Modo debug]' \
+                    '--worktree[Worktree]:name' '-w[Worktree]:name' \
+                    '--vertical[Vertical front-student]:vertical' '-V[Vertical]:vertical' \
+                    ':service:_zion_docker_services' ;;
+                stop|restart|build|flush|install|shell|logs)
+                  _arguments \
+                    '--worktree[Worktree]:name' '-w[Worktree]:name' \
+                    ':service:_zion_docker_services' ;;
+                status|ps)
+                  _arguments ':service:_zion_docker_services' ;;
+              esac ;;
+          esac ;;
+
+        worktree|wt)
+          _arguments ':service:_zion_docker_services' ;;
+      esac ;;
+  esac
+}
+
+_zion_commands() {
+  local commands=(
+    'continue:Continua a última sessão'
+    'new:Nova sessão no container'
+    'shell:Bash no container'
+    'resume:Lista sessões e escolhe qual retomar'
+    'claude:Nova sessão com engine Claude'
+    'cursor:Nova sessão com engine Cursor'
+    'opencode:Nova sessão com engine OpenCode'
+    'claude-usage:Estatísticas de uso Claude'
+    'ask:Envia prompt ao Puppy'
+    'puppy:Gerencia o Puppy worker'
+    'docker:Gerencia serviços Docker'
+    'worktree:Lista worktrees dos serviços'
+    'new-task:Cria task no kanban'
+    'set:Define engine padrão'
+    'status:Status agregado'
+    'edit:Abre sessão com ~/nixos'
+    'build:Build da imagem Docker'
+    'down:Para todos os containers'
+    'destroy:Para containers e remove imagens'
+    'clean:Remove sessões paradas'
+    'update:Regenera CLI e atualiza symlink'
+    'init:Cria ~/.zion'
+    'help:Mostra banner com comandos'
+    'man:Documentação completa'
+  )
+  _describe 'comando' commands
+}
+
+_zion_puppy_commands() {
+  local commands=(
+    'start:Inicia o container puppy'
+    'stop:Para o container puppy'
+    'restart:Reinicia o container puppy'
+    'run:Roda uma task específica'
+    'status:Estado do container e tasks'
+    'logs:Logs do container puppy'
+    'shell:Bash dentro do container puppy'
+    'tick:Roda 1 tick do scheduler'
+    'query:Envia prompt ao Claude no puppy'
+  )
+  _describe 'subcomando puppy' commands
+}
+
+_zion_docker_commands() {
+  local commands=(
+    'run:Levanta um serviço'
+    'stop:Para um serviço'
+    'logs:Logs de um serviço'
+    'status:Status dos serviços'
+    'shell:Shell no container do serviço'
+    'restart:Reinicia um serviço'
+    'build:Rebuilda a imagem'
+    'flush:Remove tudo do serviço'
+    'install:Instala dependências'
+  )
+  _describe 'subcomando docker' commands
+}
+
+_zion "$@"

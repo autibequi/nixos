@@ -179,17 +179,22 @@ Adicionar card no `obsidian/kanban.md`:
 - [x] **inspect-<slug>** #done YYYY-MM-DD `opus` — [artefatos](artefatos/inspect-<slug>/README.md) Inspeção multi-perspectiva: N findings, M blockers, K simplificações
 ```
 
-## Passo 8 — Evoluir conhecimento
+## Passo 8 — Auto-Evolução (post-hook obrigatório)
 
-**CRÍTICO: Esta é a parte que faz os inspetores melhorarem ao longo do tempo.**
+**Este passo SEMPRE roda, independente do tamanho da inspeção. Não é opcional.**
 
-Para cada inspetor, avaliar:
-1. Descobriu algum pattern novo que não está na sua definição?
-2. Encontrou uma armadilha que deveria checar em inspeções futuras?
-3. Alguma heurística que se mostrou particularmente útil ou inútil?
+Para cada um dos 6 inspetores que rodou:
 
-Se sim, **atualizar a seção "Aprendizados"** do arquivo correspondente em `/workspace/obsidian/agents/inspectors/`. Formato:
+1. Leia o resultado que o inspector produziu
+2. Leia o arquivo atual do inspector em `/workspace/obsidian/agents/inspectors/<nome>.md`
+3. Avalie: o inspector encontrou algo que ainda não está documentado na sua definição?
+   - Novo pattern do monolito
+   - Armadilha nova descoberta no diff
+   - Heurística que funcionou bem ou mal
+4. **Sempre** adicionar o nome da inspeção ao frontmatter `inspections:` do inspector
+5. Se há novidade: adicionar em `## Aprendizados` e atualizar `updated:` no frontmatter
 
+Formato de entrada em Aprendizados:
 ```markdown
 ### [Título curto]
 **Aprendido em:** inspect-<slug> (YYYY-MM-DD)
@@ -197,7 +202,7 @@ Se sim, **atualizar a seção "Aprendizados"** do arquivo correspondente em `/wo
 **O que checar:** <ação concreta para inspeções futuras>
 ```
 
-Também atualizar o campo `updated:` no frontmatter do inspector.
+**Cada inspector deve sair desta inspeção mais inteligente do que entrou.**
 
 ## Regras
 
