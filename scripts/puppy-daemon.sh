@@ -15,8 +15,13 @@ set -euo pipefail
 WORKSPACE="/workspace"
 VAULT_DIR="$WORKSPACE/obsidian"
 EPHEMERAL="$WORKSPACE/.ephemeral"
-CRON_DIR="$VAULT_DIR/agents/cron"
 # Persistent state/logs → Obsidian (survive container restarts)
+# Fallback to .ephemeral if Obsidian is not mounted
+if [ -d "$VAULT_DIR" ]; then
+  CRON_DIR="$VAULT_DIR/agents/cron"
+else
+  CRON_DIR="$EPHEMERAL/cron"
+fi
 STATE_FILE="$CRON_DIR/state.json"
 LOGFILE="$CRON_DIR/daemon.log"
 # Ephemeral state → .ephemeral (locks/completions are intentionally reset on restart)

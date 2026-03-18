@@ -368,9 +368,12 @@ EOF
 # ── Run task ─────────────────────────────────────────────────────
 run_single_task() {
   local task="$1" source_dir="$2" is_recurring="$3"
-  local logfile
-  logfile="$WORKSPACE/obsidian/agents/cron/runs/${task}/$(date +%Y-%m-%d_%H-%M).log"
-  mkdir -p "$WORKSPACE/obsidian/agents/cron/runs/${task}"
+  local logfile cron_dir
+  cron_dir="$WORKSPACE/obsidian/agents/cron"
+  # Fallback to .ephemeral if Obsidian is not mounted
+  [ -d "$WORKSPACE/obsidian" ] || cron_dir="$WORKSPACE/.ephemeral/cron"
+  logfile="$cron_dir/runs/${task}/$(date +%Y-%m-%d_%H-%M).log"
+  mkdir -p "$cron_dir/runs/${task}"
 
   local task_timeout task_model task_max_turns mcp_flags_str
   task_timeout=$(get_timeout "$TASKS/doing/$task")

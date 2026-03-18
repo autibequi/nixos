@@ -14,21 +14,16 @@ BAR_WIDTH=22
 
 mkdir -p "$(dirname "$OUT_FILE")"
 
-R='\033[0m' B='\033[1m' DIM='\033[2m'
-GREEN='\033[32m' YELLOW='\033[33m' RED='\033[31m'
-[[ ! -t 1 ]] && R="" B="" DIM="" GREEN="" YELLOW="" RED=""
+R='' B='' DIM='' GREEN='' YELLOW='' RED=''
 
 bar() {
-  local value="$1" max="$2" width="${3:-20}" color="$4"
-  local fill=0
+  local value="$1" max="$2" width="${3:-20}"
+  local fill=0 i
   if [[ "${max:-0}" -gt 0 ]]; then fill=$(( value * width / max )); fi
   [[ $fill -gt $width ]] && fill=$width
   local empty=$(( width - fill ))
-  printf '%b' "$color"
-  printf '%*s' "$fill" '' | tr ' ' '━'
-  printf '%b' "$DIM"
-  printf '%*s' "$empty" '' | tr ' ' '─'
-  printf '%b' "$R"
+  for ((i=0; i<fill; i++)); do printf '━'; done
+  for ((i=0; i<empty; i++)); do printf '─'; done
 }
 
 bar_color() {
@@ -59,10 +54,8 @@ if [[ -n "$OAUTH_SCRIPT" ]] && command -v jq &>/dev/null; then
     EX_PCT=$(echo "$OAUTH_JSON" | jq -r '(.extra_usage?.utilization? // 0) | floor')
     UPDATED_ISO=$(date -u +%Y-%m-%dT%H:%M:%SZ)
     echo "used=0 max=0 pct=$SD_PCT period=7d updated=$UPDATED_ISO source=oauth" > "$OUT_FILE"
-    COLOR_FH=$(bar_color "$FH_PCT")
-    COLOR_SD=$(bar_color "$SD_PCT")
-    BAR_FH=$(bar "$FH_PCT" 100 10 "$COLOR_FH")
-    BAR_SD=$(bar "$SD_PCT" 100 "$BAR_WIDTH" "$COLOR_SD")
+    BAR_FH=$(bar "$FH_PCT" 100 10)
+    BAR_SD=$(bar "$SD_PCT" 100 "$BAR_WIDTH")
     LINE="  ${B}Claude OAuth${R}  5h: ${BAR_FH} ${B}${FH_PCT}%${R}  7d: ${BAR_SD} ${B}${SD_PCT}%${R}"
     [[ "${EX_LIMIT:-0}" != "0" ]] && LINE="${LINE}  ex: ${B}${EX_PCT}%${R}"
     echo -e "$LINE" >> "$OUT_FILE"

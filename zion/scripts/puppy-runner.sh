@@ -368,9 +368,12 @@ EOF
 # ── Run task ─────────────────────────────────────────────────────
 run_single_task() {
   local task="$1" source_dir="$2" is_recurring="$3"
-  local logfile
-  logfile="$EPHEMERAL/notes/$task/last-run.log"
-  mkdir -p "$EPHEMERAL/notes/$task"
+  local logfile cron_dir
+  cron_dir="$WORKSPACE/obsidian/agents/cron"
+  # Fallback to .ephemeral if Obsidian is not mounted
+  [ -d "$WORKSPACE/obsidian" ] || cron_dir="$WORKSPACE/.ephemeral/cron"
+  logfile="$cron_dir/runs/${task}/$(date +%Y-%m-%d_%H-%M).log"
+  mkdir -p "$cron_dir/runs/${task}"
 
   local task_timeout task_model task_max_turns mcp_flags_str
   task_timeout=$(get_timeout "$TASKS/doing/$task")
@@ -496,6 +499,11 @@ finish_task() {
   # Write completion marker for unified scheduler
   local task_duration="${TASK_ELAPSED:-${SECONDS:-0}}"
   write_completion_marker "$task" "$task_duration" "$exit_code"
+
+  # Regenerate STATUS.md
+  local status_script
+  status_script="$(dirname "$(readlink -f "$0")")/puppy-status.sh"
+  [ -x "$status_script" ] && "$status_script" 2>/dev/null || true
 }
 
 cleanup_task_cache() {

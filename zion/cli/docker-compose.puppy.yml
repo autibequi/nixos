@@ -62,7 +62,7 @@ services:
     working_dir: /workspace/mnt
     entrypoint: ["/bin/bash", "-c"]
     command: [
-      "mkdir -p /workspace/obsidian/agents/cron && sleep 30 && exec /workspace/mnt/scripts/puppy-daemon.sh"
+      "mkdir -p /workspace/obsidian/agents/cron 2>/dev/null; sleep 30 && exec /workspace/zion/scripts/puppy-daemon.sh"
     ]
     restart: unless-stopped
     group_add:
