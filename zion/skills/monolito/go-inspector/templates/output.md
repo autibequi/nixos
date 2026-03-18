@@ -3,27 +3,27 @@
 ## Pasta de artefatos
 
 ```
-obsidian/inspection/<tarefa>/<data>/
-├── BOARD.md                   ← resumo visual executivo (abrir primeiro)
-├── README.md                  ← índice detalhado com frontmatter
-├── 00-contexto.md             ← dados coletados do PR, JIRA e Notion
-├── 01-architect.md            ← visão geral, design, schema, tópicos de discussão
-├── 02-claude.md               ← findings do inspector-claude (qualidade geral Go)
-├── 03-documentation.md        ← findings do inspector-documentation
-├── 04-qa.md                   ← findings do inspector-qa (contratos)
-├── 05-namer.md                ← findings do inspector-namer (nomenclatura)
-├── 06-coverage.md             ← análise de cobertura de testes e gaps
-├── 07-simplifier.md           ← findings + commits do inspector-simplifier
-└── 08-consolidado.md          ← visão unificada, deduplicada, priorizada
+artefatos/inspections/<tarefa>/
+├── README.md              ← índice com ASCII charts (criar PRIMEIRO)
+├── 00-contexto.md         ← dados do PR, JIRA e Notion
+├── 01-claude.md           ← qualidade geral Go (correctness, concurrency, error handling)
+├── 02-documentation.md    ← swagger, godoc, comentários, migrations
+├── 03-qa.md               ← contratos API, breaking changes, frontends
+├── 04-namer.md            ← nomenclatura (arquivos, funções, tipos, variáveis)
+├── 05-simplifier.md       ← simplificações aplicadas + sugeridas
+├── 06-consolidado.md      ← visão unificada, deduplicada, priorizada
+└── 07-contrato.md         ← contrato frontend ← → backend (omitir se diff não toca handlers)
 ```
 
-Onde:
-- `<tarefa>` = slug da branch/PR (ex: `add-delta-lake`, `cached-ldi-toc`)
-- `<data>` = YYYY-MM-DD da inspeção
+Onde `<tarefa>` = slug da branch/PR (ex: `cached-ldi-toc`, `add-delta-lake`).
+
+**Sem subpasta de data** — uma inspeção por tarefa. Re-inspeção após correções: adicionar nota no README existente.
 
 ---
 
 ## README.md
+
+**Criar PRIMEIRO. Inclui tabela-resumo + ASCII charts obrigatórios.**
 
 ```markdown
 ---
@@ -33,7 +33,10 @@ pr: "#<número>" (se disponível)
 jira: "<ticket>" (se disponível)
 date: YYYY-MM-DD
 status: done
-inspectors: [architect, claude, documentation, qa, namer, coverage, simplifier]
+inspectors: [claude, documentation, qa, namer, simplifier]
+tags: [trabalho, <area>]
+related:
+  - "[[artefatos/BOARD|Board de Inspeções]]"
 ---
 
 # Inspeção — <branch ou PR title>
@@ -43,26 +46,75 @@ inspectors: [architect, claude, documentation, qa, namer, coverage, simplifier]
 ## Resumo
 
 | Inspector | Findings | Blockers | Média | Baixa | Info |
-|-----------|----------|----------|-------|-------|------|
-| architect | N | N | N | N | N |
+|-----------|:--------:|:--------:|:-----:|:-----:|:----:|
 | claude | N | N | N | N | N |
 | documentation | N | N | N | N | N |
 | qa | N | N | N | N | N |
 | namer | N | N | N | N | N |
-| coverage | N gaps | N blockers | N | N | - |
-| simplifier | N aplicadas, M sugeridas | - | - | - | - |
+| simplifier | N sugeridas | — | — | — | — |
+| **Total** | **N** | **N** | **N** | **N** | **N** |
+
+---
+
+## Visão Geral
+
+```
+Findings por Inspector                   Severidade Total (N)
+──────────────────────────────────────   ──────────────────────────────────────
+claude        ████████████  N           🔴 Blocker  ████              N  (N%)
+documentation ███████████   N           🟠 Média    █████████████████ N  (N%)
+qa            ██████████    N           🟡 Baixa    ███████████       N  (N%)
+namer         ████████████  N           ⬜ Info     ████              N  (N%)
+simplifier    ███████        N suger.   🔧 Simplif  ███████           N  (N%)
+              0    4    8   12
+```
+
+```
+Blockers por Inspector                   Distribuição por Inspector
+──────────────────────────────────────   ──────────────────────────────────────
+claude        ███  N                     claude        ███░░░░░░░  NB NM NL Ni
+qa            ██   N                     documentation ░░░░████░░  NB NM NL Ni
+documentation ·    0                     qa            ██░░░░░░░░  NB NM NL Ni
+namer         ·    0                     namer         ░░░███░░░░  NB NM NL Ni
+              0    1    2    3           legenda: B=blocker M=média L=baixa i=info
+```
+
+(incluir apenas se diff tocou em handlers HTTP)
+```
+Risco de Deploy
+──────────────────────────────────────────────────────
+backend solo   ███████████████████░░░░░░  ALTO   — <motivo>
+backend+front  █████████████░░░░░░░░░░░  MÉDIO  — <motivo>
+tudo alinhado  ████████░░░░░░░░░░░░░░░░  BAIXO  — <motivo>
+               0%                    100% seguro
+```
+
+(incluir apenas se contrato inspecionado)
+```
+Contrato Frontend ← → Backend
+──────────────────────────────────────
+bo-container   ████████████████░░  N✅ N⚠️ N🔴
+front-student  ████░░░░░░▓▓░░░░░  N✅ N⚠️ N🔴
+               █ alinhado  ░ risco  ▓ quebrado
+```
+
+---
+
+## Blockers prioritários
+
+1. **<descrição>** — <arquivo> (<inspector>)
+...
 
 ## Índice
 
-- [00 - Contexto](00-contexto.md)
-- [01 - Visão Geral e Design](01-architect.md)
-- [02 - Qualidade Geral Go](02-claude.md)
-- [03 - Documentação](03-documentation.md)
-- [04 - Contratos QA](04-qa.md)
-- [05 - Nomenclatura](05-namer.md)
-- [06 - Cobertura de Testes](06-coverage.md)
-- [07 - Simplificações](07-simplifier.md)
-- [08 - Consolidado](08-consolidado.md)
+- [00 - Contexto (Jira/PR)](00-contexto.md)
+- [01 - Qualidade Geral Go](01-claude.md)
+- [02 - Documentação](02-documentation.md)
+- [03 - Contratos QA](03-qa.md)
+- [04 - Nomenclatura](04-namer.md)
+- [05 - Simplificações](05-simplifier.md)
+- [06 - Consolidado](06-consolidado.md)
+- [07 - Contrato Frontend](07-contrato.md)  ← omitir se não aplicável
 ```
 
 ---
@@ -74,63 +126,77 @@ inspectors: [architect, claude, documentation, qa, namer, coverage, simplifier]
 task: <tarefa>
 date: YYYY-MM-DD
 type: contexto
+jira: <ticket>
+branch: <branch>
 ---
 
 # Contexto — <tarefa>
 
-## PR
+## Card Jira
 
-- **Título:** <título>
-- **Autor:** <username>
-- **Branch:** `<branch>` → `main`
-- **Arquivos:** N alterados, +X -Y linhas
-- **Estado:** open | merged
+- **ID**: <ticket>
+- **Título**: <título>
+- **Status**: <status>
+- **Assignee**: <nome>
+- **Estimativa**: <pontos>
+- **Labels**: <labels>
 
-### Descrição do PR
-<body do PR copiado integralmente>
+## Problema
 
-### Commits
-<lista de commits do log>
+<descrição do problema que motivou a feature>
 
-## JIRA
+## Solução implementada
 
-<conteúdo do ticket se encontrado — título, descrição, critérios de aceite, comentários relevantes>
+<o que foi implementado — bullet points>
 
-Se não encontrado: `Ticket não localizado. Branch: <nome>`
+## Branch
+
+`<branch>`
+
+## Diff
+
+- N arquivos, +X -Y linhas
+- <resumo dos arquivos principais>
+
+## Reviews do PR (se existir)
+
+<comentários e reviews inline relevantes>
 
 ## Notion
 
-<conteúdo da página se encontrada — contexto de produto, decisões de design, user stories>
-
-Se não encontrado: `Página não localizada.`
-
-## Resumo de Contexto
-
-<2-3 frases sintetizando o contexto: o que foi pedido (JIRA/Notion) vs o que foi entregue (PR)>
+<link e resumo da página, se encontrada. "Não encontrada." se ausente>
 ```
 
 ---
 
-## Artefatos de cada Inspector (01 a 07)
+## Artefatos de cada Inspector (01 a 05)
 
 ```markdown
 ---
 task: <tarefa>
 date: YYYY-MM-DD
-inspector: <nome-do-inspector>
+inspector: <nome>
 type: inspection
 ---
 
-# <Inspector Name> — Findings
+# Inspector <Nome> — <Especialidade>
 
 ## Resumo
 
-<1 parágrafo com visão geral dos findings>
+<1 parágrafo com visão geral dos findings e tom geral>
 
 ## Findings
 
 ### 1. [SEVERIDADE] Título
-...formato específico do inspector...
+
+**Arquivo:** `caminho/arquivo.go:LN`
+**Problema:** <descrição clara do problema>
+**Sugestão:**
+```go
+// código de exemplo quando aplicável
+```
+
+---
 
 ## Tabela de Findings
 
@@ -140,277 +206,206 @@ type: inspection
 | 2 | Média | `file.go:L100` | Descrição curta |
 ```
 
-### Formato especial: 01-architect.md
+### Severidades
 
-Segue o formato definido em `obsidian/agents/inspectors/architect.md` — inclui visão geral, análise de design, findings de schema/layer e tópicos de discussão.
-
-### Formato especial: 06-coverage.md
-
-Segue o formato definido em `obsidian/agents/inspectors/coverage.md` — inclui mapeamento de fluxos, tabela de gaps e testes sugeridos.
+| Label | Significado |
+|-------|-------------|
+| `[BLOCKER]` | Obrigatório corrigir antes do merge |
+| `[MÉDIA]` | Recomendado corrigir — risco real mas não bloqueia |
+| `[BAIXA]` | Nice-to-have — melhoria de qualidade |
+| `[INFO]` | Observação / documentação para o autor |
 
 ---
 
-## 08-consolidado.md
+## 06-consolidado.md
 
 ```markdown
 ---
 task: <tarefa>
 date: YYYY-MM-DD
 type: consolidado
+related:
+  - "[[artefatos/inspections/<tarefa>/README|Índice da Inspeção]]"
 ---
 
 # Consolidado — <tarefa>
 
-## Contexto em 1 parágrafo
-
-<resumo do 00-contexto.md: o que foi pedido e o que foi entregue>
-
 ## Blockers (ação obrigatória antes do merge)
 
-Lista deduplicada de todos os blockers, com referência ao inspector que encontrou.
+### B1. <título>
+**Inspector:** <nome> | **Arquivo:** `arquivo.go:LN`
+<descrição do problema e ação necessária>
+
+...
+
+---
 
 ## Pontos de Atenção (ação recomendada)
 
-Lista deduplicada de findings de severidade média.
+### A1. <título>
+**Inspectors:** <nomes> | **Arquivo:** `arquivo.go:LN`
+<descrição>
 
-## Gaps de Cobertura
+...
 
-Reexportar os gaps críticos do coverage inspector — o que precisa ser testado antes do merge.
-
-## Tópicos de Discussão
-
-Reexportar os tópicos do architect — perguntas que precisam de resposta do autor.
+---
 
 ## Sugestões (nice-to-have)
 
-Lista de findings de severidade baixa, agrupadas por tema.
+### Nomenclatura
+- <lista de sugestões>
+
+### Simplificações
+- <lista de oportunidades>
+
+### Qualidade
+- <lista de melhorias>
+
+---
 
 ## Simplificações Aplicadas
 
-Resumo dos commits do simplifier com diff links.
+<commits do simplifier, ou "Nenhuma simplificação foi aplicada.">
 
 ## Simplificações Sugeridas
 
-Oportunidades não aplicadas que o dev pode considerar.
+<N oportunidades identificadas, ~N linhas de redução total. Destaques:>
+
+---
+
+## O que está correto
+
+- <aspecto aprovado>: APROVADO
+- <aspecto aprovado>: APROVADO
+...
+
+---
 
 ## Métricas
 
-- Total de findings: N
-- Blockers: N
-- Gaps de cobertura críticos: N
-- Simplificações aplicadas: N commits, -N linhas
-- Arquivos analisados: N
-- Inspetores executados: 7/7
+| Métrica | Valor |
+|---------|-------|
+| Total de findings | N |
+| Blockers | N |
+| Pontos de atenção (Média) | N |
+| Sugestões (Baixa/Info) | N |
+| Simplificações aplicadas | N commits |
+| Simplificações sugeridas | N oportunidades |
+| Arquivos analisados | N |
+| Inspetores executados | N/5 |
 ```
 
 ---
 
-## BOARD.md — Resumo Visual Executivo
-
-Este é o primeiro arquivo a ser aberto. Uma página, tudo que importa.
+## 07-contrato.md
 
 ```markdown
 ---
 task: <tarefa>
 date: YYYY-MM-DD
-type: board
+type: contrato
+repos: [front-student, bo-container]
 ---
 
-# 🔍 Inspeção — <tarefa>
+# Inspector Contrato — <tarefa>
 
-> <1 frase descrevendo o PR>
-> **PR:** #N · **Autor:** @username · **JIRA:** [<ticket>](...) · **Data:** YYYY-MM-DD
+## <repo-1> vs Backend
 
----
+### Resumo: N ✅ / N ⚠️ / N 🔴
 
-## Veredito
+| Endpoint | Status | Observação |
+|----------|--------|------------|
+| `GET /path` | ✅ | alinhado |
+| `POST /path` | ⚠️ | <risco> |
+| `PUT /path` | 🔴 | <o que quebra> |
 
-| | Status |
-|---|---|
-| **Pode mergear?** | 🔴 Não — N blocker(s) · ou · 🟡 Com ressalvas · ou · 🟢 Sim |
-| **Testes ok?** | 🔴 N gaps críticos · ou · 🟢 Cobertura adequada |
-| **Simplificável?** | N commits aplicados · M sugeridos |
+### Findings
 
----
+#### 🔴 <título do problema crítico>
 
-## Placar dos Inspetores
+**Arquivo:** `<repo>/path/to/file.js:LN`
+<descrição detalhada com código de exemplo>
 
-| Inspector | 🔴 Blocker | 🟠 Média | 🟡 Baixa | ℹ️ Info | Barra |
-|-----------|-----------|---------|---------|--------|-------|
-| 🏛️ Architect | N | N | N | N | `██░░░░░░░░` |
-| 🐹 Claude | N | N | N | N | `████░░░░░░` |
-| 📄 Documentation | N | N | N | N | `██░░░░░░░░` |
-| 🤝 QA | N | N | N | N | `███░░░░░░░` |
-| 🏷️ Namer | N | N | N | N | `█░░░░░░░░░` |
-| 🧪 Coverage | N gaps | N críticos | N médios | — | `████░░░░░░` |
-| ✂️ Simplifier | N aplicados | — | N sugeridos | — | `██░░░░░░░░` |
+...
 
-> Barra: `█` por finding (máx 10). Serve pra ter noção do volume por inspector.
+## <repo-2> vs Backend
 
----
+...
 
-## 🔴 Blockers — Ação obrigatória antes do merge
+## Checklist de status codes novos
 
-> Se vazio: 🟢 Nenhum blocker encontrado.
-
-| # | Inspector | Arquivo | Descrição |
-|---|-----------|---------|-----------|
-| 1 | claude | `service.go:L42` | Nil panic em retorno de repo sem guard |
-| 2 | coverage | `service.go:L80` | Método principal sem nenhum teste |
-| 3 | qa | `handler.go:L15` | Breaking change em response struct |
-
----
-
-## 🧪 Gaps de Cobertura
-
-> O que precisa de teste antes do merge.
-
-| # | Severidade | Método | Cenário não coberto |
-|---|-----------|--------|---------------------|
-| 1 | 🔴 Crítico | `Service.Create` | Erro do repo não testado |
-| 2 | 🟠 Médio | `Service.Get` | Input nil |
-
----
-
-## 💬 Tópicos para o Autor
-
-> Perguntas que precisam de resposta antes do merge (ou na conversa de review).
-
-1. **[Tópico 1]** — <pergunta direta>
-2. **[Tópico 2]** — <pergunta direta>
-
----
-
-## 🟠 Pontos de Atenção
-
-| # | Inspector | Descrição |
-|---|-----------|-----------|
-| 1 | claude | Race condition possível em X |
-| 2 | qa | Campo novo sem omitempty |
-
----
-
-## ✂️ Simplificações Aplicadas
-
-> Commits já feitos no worktree. Aguardando aprovação do dev.
-
-| Commit | Descrição | Impacto |
-|--------|-----------|---------|
-| `abc1234` | simplify: extract validateX | -12 linhas |
-
-> 🟡 Nenhuma simplificação aplicada. / Ver `07-simplifier.md` para sugestões.
-
----
-
-## 📊 Visualizações ASCII
-
-> **OBRIGATÓRIO:** gerar TODOS os gráficos abaixo com dados reais da inspeção. Usar `█` para cheio, `░` para vazio, `▓` para risco/parcial.
-
-### Placar dos Inspetores (horizontal)
-
-```
-architect     ████████████  APROVADO / N findings
-claude        ████████░░░░  N findings — descrição curta
-documentation ████████████  APROVADO
-qa            ██████░░░░░░  N gaps — descrição curta
-namer         ████████████  APROVADO
-coverage      ██████░░░░░░  N métodos sem teste
-simplifier    ██████████░░  N melhorias identificadas
-```
-
-> Barra reflete saúde: 12 blocos = limpo, menos = mais issues. Ajustar proporcionalmente.
-
-### Findings por Severidade (vertical)
-
-```
-         ▲
-       N │  ██
-         │  ██
-       1 │  ██  ██              ██
-         │  ██  ██              ██
-       0 │  ██  ██  ░░  ░░  ░░  ██
-         └──────────────────────────▶
-            🔴  🟠  🟡  🟡  🟡  ⚠️
-           (N) (N) (N) (N) (N) (N)
-```
-
-> Mostrar cada finding individualmente no eixo X com sua categoria e repo de origem.
-
-### Cobertura de Testes (barras horizontais)
-
-```
-                    0%      50%     100%
-                    │       │        │
-MetodoA             ░░░░░░░░░░░░░░░░  ← sem teste
-MetodoB             ████████░░░░░░░░  parcial
-MetodoC             ████████████████  ✅ coberto
-```
-
-> Um linha por método/fluxo relevante da feature. Priorizar os do caminho crítico.
-
-### Contrato Frontend ← → Backend (quando aplicável)
-
-```
-                  ✅ ok   ⚠️ risco   🔴 quebrado
-bo-container  ████████████████░░░░░░░  N✅ N⚠️ N🔴
-front-student ████░░░░░░░░░░░░▓▓▓▓▓▓▓  N✅ N⚠️ N🔴
-bff-mobile    ████████████████████████  N✅ N⚠️ N🔴
-```
-
-> Omitir repos não afetados pela feature.
-
-### Risco de Deploy (quando contrato inspecionado)
-
-```
-  Backend sozinho   ████████████████████  🔴 ALTO
-  Backend + fronts  ████████████░░░░░░░░  🟡 MÉDIO
-  Tudo alinhado     ████████████████░░░░  🟢 BAIXO
-                    0        50%      100% pronto
-```
-
-### Métricas finais
-
-```
-Findings totais ............ N
-  🔴 Críticos .............. N
-  🟠 Médios ................ N
-  🟡 Baixos ................ N
-  ⬛ Cosméticos ............ N
-
-Cobertura
-  Métodos mapeados ......... N
-  Com teste ................ N (XX%)
-  Gaps críticos ............ N
-
-Contrato (se inspecionado)
-  Endpoints verificados .... N
-  Alinhados ................ N
-  Em risco ................. N
-  Quebrados ................ N
-
-Simplificador
-  Commits aplicados ........ N
-  Linhas removidas ......... -N
-
-Inspetores ................. 7/7 ✅
-Arquivos analisados ........ N
+| Status Code | Operação | <repo-1> trata? | <repo-2> trata? |
+|-------------|----------|-----------------|-----------------|
+| 409 | <operação> | ❓ | ❓ |
 ```
 
 ---
 
-## 🗂️ Artefatos Completos
+## BOARD principal (`artefatos/BOARD.md`)
 
-| Arquivo | Conteúdo |
-|---------|----------|
-| [00-contexto](00-contexto.md) | PR body, JIRA, Notion |
-| [01-architect](01-architect.md) | Visão geral, design, tópicos |
-| [02-claude](02-claude.md) | Correctness, concurrency, performance |
-| [03-documentation](03-documentation.md) | Swagger, godoc, comentários |
-| [04-qa](04-qa.md) | Contratos, breaking changes |
-| [05-namer](05-namer.md) | Nomenclatura |
-| [06-coverage](06-coverage.md) | Gaps de teste detalhados |
-| [07-simplifier](07-simplifier.md) | Refactors aplicados e sugeridos |
-| [08-consolidado](08-consolidado.md) | Visão unificada completa |
+O BOARD é a página central de todas as inspeções. Manter sempre atualizado.
+
+**Regra de tamanho:**
+- ≤5 inspeções: conteúdo de cada inspeção inline com âncoras
+- >5 inspeções: apenas tabela índice com links para os README.md individuais
+
+```markdown
+---
+title: Board de Inspeções
+tags: [trabalho, board, code-review]
+---
+
+# Board de Inspeções
+
+| Inspeção | Branch | Data | Blockers | Findings |
+|----------|--------|------|:--------:|:--------:|
+| [<tarefa>](#<tarefa>) | `<branch>` | YYYY-MM-DD | N | N |
+
+---
+
+## <tarefa>
+
+<descrição curta da feature>
+
+| Inspector | Findings | Blockers | Média | Baixa | Info |
+|-----------|:--------:|:--------:|:-----:|:-----:|:----:|
+| [Claude — Qualidade Geral](#claude--qualidade-geral) | N | N | N | N | N |
+| [Documentation — Swagger/Godoc](#documentation--swaggergodoc) | N | N | N | N | N |
+| [QA — Contratos API](#qa--contratos-api) | N | N | N | N | N |
+| [Namer — Nomenclatura](#namer--nomenclatura) | N | N | N | N | N |
+| [Simplifier — Simplificações](#simplifier--simplificações) | N sugeridas | — | — | — | — |
+| [Consolidado](#consolidado--<tarefa>) | **N** | **N** | **N** | **N** | **N** |
+
+---
+
+### Claude — Qualidade Geral
+
+(conteúdo resumido dos findings do inspector)
+
+---
+
+### Documentation — Swagger/Godoc
+
+...
+
+(repetir para cada inspector)
+
+---
+
+### Consolidado — <tarefa>
+
+#### Blockers (ação obrigatória antes do merge)
+
+**B1 — <título>** _(<inspector>)_
+`arquivo.go:LN` — <descrição>
+
+#### Métricas
+
+| Métrica | Valor |
+|---------|-------|
+| Arquivos analisados | N |
+| Total de findings | N |
+| Blockers | N |
 ```
 
 ---
@@ -421,7 +416,8 @@ Arquivos analisados ........ N
 ---
 task: <tarefa>
 date: YYYY-MM-DD
-inspector: <nome> (exceto README, contexto e consolidado)
-type: inspection | contexto | consolidado
+inspector: <nome>       # exceto README, contexto e consolidado
+type: inspection | contexto | consolidado | contrato
+tags: [trabalho, <área>]
 ---
 ```

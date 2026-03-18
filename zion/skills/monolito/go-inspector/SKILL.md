@@ -1,6 +1,6 @@
 ---
 name: monolito/go-inspector
-description: Inspeção multi-perspectiva de feature chain no monolito. Coleta contexto de PR/JIRA/Notion, spawna 6 inspetores paralelos (architect, claude, documentation, qa, namer, coverage) + simplifier sequencial em worktree. Gera relatórios acionáveis em obsidian/inspection/<tarefa>/<data>/.
+description: Inspeção multi-perspectiva de feature chain no monolito. Coleta contexto de PR/JIRA/Notion, spawna 5 inspetores paralelos (claude, documentation, qa, namer, coverage) + inspector-contrato + simplifier sequencial em worktree. Gera relatórios acionáveis em artefatos/inspections/<tarefa>/ e atualiza o BOARD principal em artefatos/BOARD.md.
 ---
 
 # go-inspector: Inspeção Multi-Perspectiva
@@ -67,7 +67,6 @@ Se o diff for muito grande (>5000 linhas), priorizar:
 Branch geralmente contém o ticket: `feature/MON-123-descricao`, `fix/MON-456-bug`.
 
 ```bash
-# Extrair ticket ID da branch
 echo "<branch>" | grep -oE '[A-Z]+-[0-9]+'
 ```
 
@@ -80,7 +79,6 @@ Se encontrou um ticket ID, buscar via MCP Atlassian:
 ```bash
 GH_TOKEN=$GH_TOKEN gh pr list --repo estrategiahq/monolito --head <branch> --json number,title,state
 GH_TOKEN=$GH_TOKEN gh pr view <number> --repo estrategiahq/monolito --json reviews,comments,reviewRequests
-GH_TOKEN=$GH_TOKEN gh pr review-requests --repo estrategiahq/monolito <number>  # revisores pendentes
 ```
 
 Coletar:
@@ -105,18 +103,16 @@ Criar o artefato de contexto seguindo o formato de `templates/output.md`. Inclui
 - Resumo sintético: o que foi pedido vs o que foi entregue
 
 ### Definições dos inspetores:
-Ler os 7 arquivos de definição:
-- `/workspace/obsidian/agents/inspectors/architect.md`
+Ler os arquivos de definição:
 - `/workspace/obsidian/agents/inspectors/claude.md`
 - `/workspace/obsidian/agents/inspectors/documentation.md`
 - `/workspace/obsidian/agents/inspectors/qa.md`
 - `/workspace/obsidian/agents/inspectors/namer.md`
-- `/workspace/obsidian/agents/inspectors/coverage.md`
 - `/workspace/obsidian/agents/inspectors/simplifier.md`
 
-## Passo 2f — Inspeção de Contrato Frontend ← → Backend (pré-inspeção paralela)
+## Passo 2f — Inspector de Contrato Frontend ← → Backend (pré-inspeção paralela)
 
-**Rodar ANTES dos 6 inspetores, em paralelo para cada repo frontend afetado.**
+**Rodar ANTES dos inspetores principais, em paralelo para cada repo frontend afetado.**
 
 Se o diff tocar em handlers BO, BFF ou structs de response, spawnar um `inspector-contrato` por repositório:
 
@@ -138,18 +134,20 @@ Missão:
 2. Cruzar campo a campo: URL, método HTTP, request body, response shape
 3. Verificar se o frontend trata os novos status codes (ex: 409 de CheckTOCRebuild)
 4. Reportar: ✅ ALINHADO / 🔴 QUEBRADO / ⚠️ RISCO / ❓ NÃO VERIFICÁVEL
+
+Output: tabela por repo (N✅ / N⚠️ / N🔴) + findings detalhados por endpoint.
 "
 ```
 
 **Quando pular este passo:** se o diff não tocar em nenhum handler HTTP (só workers, migrations, services internos).
 
-**Output:** artefato `09-contrato.md` na pasta da inspeção.
+**Output:** artefato `07-contrato.md` na pasta da inspeção.
 
 ---
 
-## Passo 3 — Spawnar 6 inspetores em paralelo
+## Passo 3 — Spawnar 5 inspetores em paralelo
 
-> **IMPORTANTE (aprendizado da primeira execução, 2026-03-18):** O agente Monolito não tem o skill `go-inspector` disponível como ferramenta registrada. O agente deve **ler os arquivos de definição dos inspetores diretamente** (via Read tool) e executar cada perspectiva manualmente, consolidando no mesmo agente. O fluxo de 6 agentes background paralelos funciona quando invocado do contexto principal (Claude Code), não dentro do próprio agente Monolito. Ao spawnar os 6 inspetores, usar `subagent_type=general-purpose` ou `subagent_type=Explore` em vez de `Monolito`.
+> **IMPORTANTE:** O agente Monolito não tem o skill `go-inspector` disponível como ferramenta registrada. Ler os arquivos de definição dos inspetores diretamente (via Read tool) e executar cada perspectiva manualmente, consolidando no mesmo agente. Ao spawnar inspetores, usar `subagent_type=general-purpose` ou `subagent_type=Explore`.
 
 Usar o Agent tool com `run_in_background: true` para cada inspector. Todos recebem:
 - O contexto coletado (PR body, JIRA, Notion)
@@ -159,28 +157,7 @@ Usar o Agent tool com `run_in_background: true` para cada inspector. Todos receb
 - O formato de output esperado
 
 ```
-Agent subagent_type=Monolito run_in_background=true prompt="
-Você é o **inspector-architect**. Sua definição completa:
-<definição do obsidian/agents/inspectors/architect.md>
-
-Contexto coletado (PR/JIRA/Notion):
-<conteúdo do 00-contexto.md>
-
-Analise o seguinte diff e arquivos:
-<diff>
-<lista de arquivos>
-
-Produza o output no formato especificado na sua definição:
-- Visão geral arquitetural (tabelas, entities, fluxo)
-- Análise de design decisions (use o contexto JIRA/Notion para entender a intenção)
-- Findings de schema/layer (migrations, entities, interfaces)
-- Tópicos de discussão para o autor
-Leia os arquivos completos quando necessário para entender o contexto de design.
-"
-```
-
-```
-Agent subagent_type=Monolito run_in_background=true prompt="
+Agent subagent_type=Explore run_in_background=true prompt="
 Você é o **inspector-claude**. Sua definição completa:
 <definição do obsidian/agents/inspectors/claude.md>
 
@@ -191,41 +168,19 @@ Analise o seguinte diff e arquivos:
 <diff>
 <lista de arquivos>
 
-Produza findings no formato especificado na sua definição.
 Foco: qualidade geral Go — correctness, concurrency, error handling, performance, observabilidade.
-Use o contexto para entender a intenção e identificar divergências de implementação.
+Produza findings no formato especificado na sua definição.
 Leia os arquivos completos quando necessário.
-"
-```
-
-```
-Agent subagent_type=Monolito run_in_background=true prompt="
-Você é o **inspector-coverage**. Sua definição completa:
-<definição do obsidian/agents/inspectors/coverage.md>
-
-Contexto coletado (PR/JIRA/Notion):
-<conteúdo do 00-contexto.md>
-
-Branch/PR a analisar: <branch>
-Arquivos alterados: <lista de arquivos>
-Diff: <diff>
-
-Sua missão:
-1. Mapear os principais fluxos afetados (use os critérios de aceite do JIRA/Notion se disponíveis)
-2. Localizar os arquivos de teste existentes nos packages afetados
-3. Executar os testes: go test ./apps/<app>/internal/... -v -count=1
-4. Identificar gaps de cobertura por severidade
-5. Gerar relatório acionável com testes sugeridos para os gaps críticos
 "
 ```
 
 Repetir para: `documentation`, `qa`, `namer` — cada um com sua definição, contexto e foco.
 
-**IMPORTANTE:** Os 6 agents devem ser lançados em uma única mensagem (paralelo real).
+**IMPORTANTE:** Os 5 agents devem ser lançados em uma única mensagem (paralelo real).
 
 ## Passo 4 — Coletar e consolidar resultados
 
-Aguardar os 6 inspetores completarem. Para cada resultado:
+Aguardar os 5 inspetores + inspector-contrato completarem. Para cada resultado:
 1. Extrair findings estruturados
 2. Classificar por severidade (BLOCKER > MÉDIA > BAIXA > INFO)
 3. Deduplicar usando as regras do `templates/checklist.md`:
@@ -235,20 +190,20 @@ Aguardar os 6 inspetores completarem. Para cada resultado:
 
 ## Passo 5 — Spawnar simplifier em worktree
 
-Após consolidar findings dos 6 primeiros:
+Após consolidar findings dos 5 primeiros:
 
 ```
 Agent subagent_type=Monolito isolation=worktree prompt="
 Você é o **inspector-simplifier**. Sua definição completa:
 <definição do obsidian/agents/inspectors/simplifier.md>
 
-Contexto: os 6 inspetores anteriores encontraram estes findings:
+Contexto: os inspetores anteriores encontraram estes findings:
 <findings consolidados>
 
 Arquivos alterados na branch:
 <lista de arquivos>
 
-Sua missão:
+Missão:
 1. Analise cada arquivo buscando oportunidades de simplificação
 2. Para cada simplificação viável:
    a. Faça a mudança no código
@@ -262,73 +217,90 @@ Sua missão:
 
 Apresentar o diff do simplifier ao dev para aprovação.
 
-## Passo 6 — Gerar relatório
+## Passo 6 — Gerar artefatos
 
 Criar pasta seguindo `templates/output.md`:
 
 ```
-obsidian/inspection/<tarefa>/<data>/
-├── BOARD.md              ← gerar ESTE PRIMEIRO — resumo visual executivo
-├── README.md
+artefatos/inspections/<tarefa>/
+├── README.md              ← índice com ASCII charts (gerar ESTE PRIMEIRO)
 ├── 00-contexto.md
-├── 01-architect.md
-├── 02-claude.md
-├── 03-documentation.md
-├── 04-qa.md
-├── 05-namer.md
-├── 06-coverage.md
-├── 07-simplifier.md
-└── 08-consolidado.md
+├── 01-claude.md
+├── 02-documentation.md
+├── 03-qa.md
+├── 04-namer.md
+├── 05-simplifier.md
+├── 06-consolidado.md
+└── 07-contrato.md         ← só se diff tocou em handlers HTTP
 ```
 
-Onde `<tarefa>` = slug da branch (ex: `add-delta-lake`) e `<data>` = data atual (YYYY-MM-DD).
+Onde `<tarefa>` = slug da branch/PR (ex: `cached-ldi-toc`, `add-delta-lake`).
 
-**BOARD.md é o primeiro arquivo a ser criado** — é o resumo executivo visual que o dev abre primeiro. Seguir rigorosamente o template em `templates/output.md`. Inclui:
-- Veredito de merge (pode ou não pode, com justificativa)
-- Placar dos inspetores com barra de volume
-- Blockers em tabela
-- Gaps de cobertura críticos
-- Tópicos para o autor
-- Métricas consolidadas em bloco de texto formatado
+**README.md é o primeiro arquivo a ser criado** — inclui tabela-resumo + gráficos ASCII obrigatórios:
+- Findings por inspector (barras horizontais)
+- Distribuição de severidade total (com percentuais)
+- Blockers por inspector
+- Contrato frontend ← → backend (se contrato inspecionado)
+- Risco de deploy (3 cenários)
 
-## Passo 7 — Atualizar kanban e INDEX
+Ver template completo em `templates/output.md`.
 
-### Kanban
-Adicionar card no `obsidian/kanban.md`:
-```
-- [x] **<tarefa>** #done YYYY-MM-DD `opus` — [inspeção](inspection/<tarefa>/<data>/BOARD.md) N findings, M blockers, K gaps de cobertura, J simplificações
-```
+## Passo 7 — Atualizar BOARD principal e INDEX
 
-### INDEX.md
-Atualizar (ou criar se não existir) `obsidian/inspection/INDEX.md` adicionando uma linha na tabela:
+### BOARD principal (`artefatos/BOARD.md`)
 
+O BOARD é a página central de todas as inspeções. Sempre manter atualizado.
+
+**Regra de tamanho:**
+- Poucas inspeções (≤5): conteúdo inline com âncoras na mesma página
+- Muitas inspeções (>5): só índice com links para cada `README.md`
+
+Estrutura do BOARD:
 ```markdown
-| YYYY-MM-DD | [<tarefa>](/<tarefa>/<data>/BOARD.md) | [#N](link-pr) | <ticket> | 🔴 N / 🟠 N / 🟡 N | XX% (N gaps) | ✅ ok / 🔴 revisão / ⏳ aberto |
+# Board de Inspeções
+
+| Inspeção | Branch | Data | Blockers | Findings |
+|----------|--------|------|:--------:|:--------:|
+| [<tarefa>](#<tarefa>) | `<branch>` | YYYY-MM-DD | N | N |
+
+---
+
+## <tarefa>
+
+<descrição curta>
+
+| Inspector | Findings | Blockers | Média | Baixa | Info |
+|-----------|:--------:|:--------:|:-----:|:-----:|:----:|
+| [Claude — Qualidade Geral](#claude--qualidade-geral-<tarefa>) | N | N | N | N | N |
+...
+
+(conteúdo de cada inspector com âncoras, ou link para README.md se muitas inspeções)
 ```
 
-Estrutura completa do INDEX.md:
+Ao adicionar nova inspeção:
+1. Adicionar linha na tabela do topo
+2. Adicionar seção com conteúdo da inspeção (inline ou link)
+
+### INDEX (`artefatos/inspections/INDEX.md`)
+
+Histórico cronológico de todas as inspeções:
 
 ```markdown
 # Histórico de Inspeções — Monolito
 
-> Atualizado automaticamente após cada `go-inspector`. Ordenado do mais recente ao mais antigo.
-
-| Data | Tarefa | PR | JIRA | Findings (🔴/🟠/🟡) | Cobertura | Status |
-|------|--------|----|------|----------------------|-----------|--------|
-| 2026-03-18 | [cached-ldi-toc](cached-ldi-toc/2026-03-18/BOARD.md) | [#138](…) | LDI-42 | 0 / 3 / 5 | 62% (2 gaps) | ✅ merged |
-| 2026-03-13 | [add-delta-lake](add-delta-lake/2026-03-13/BOARD.md) | [#131](…) | MON-891 | 2 / 4 / 3 | 45% (5 gaps) | 🔴 revisão |
+| Data | Tarefa | Branch | JIRA | Findings (🔴/🟠/🟡) | Status |
+|------|--------|--------|------|----------------------|--------|
+| YYYY-MM-DD | [<tarefa>](<tarefa>/README.md) | `<branch>` | <ticket> | N/N/N | ⏳/✅/🔴 |
 ```
 
-**Regras do INDEX:**
-- Sempre inserir no topo (mais recente primeiro)
-- Se a mesma `<tarefa>` já existe com data diferente (re-inspeção após correções), adicionar nova linha — não substituir
-- Status: `✅ merged` quando o PR for mergeado, `🔴 revisão` quando tiver blockers, `⏳ aberto` quando ainda em review
+Status: `✅ merged`, `🔴 revisão`, `⏳ aguardando review`
+Sempre inserir no topo (mais recente primeiro).
 
 ## Passo 8 — Auto-Evolução (post-hook obrigatório)
 
 **Este passo SEMPRE roda, independente do tamanho da inspeção. Não é opcional.**
 
-Para cada um dos 7 inspetores que rodou:
+Para cada um dos inspetores que rodou:
 
 1. Leia o resultado que o inspector produziu
 2. Leia o arquivo atual do inspector em `/workspace/obsidian/agents/inspectors/<nome>.md`
@@ -352,11 +324,13 @@ Formato de entrada em Aprendizados:
 ## Regras
 
 - **Contexto primeiro** — nunca inspecionar sem ter lido PR body, JIRA e Notion (se disponíveis)
-- **Paralelo real** — os 6 primeiros inspetores rodam em background simultaneamente
-- **Simplifier é sequencial** — só roda após os 6 primeiros completarem, recebe findings como input
+- **Paralelo real** — os 5 inspetores + contrato rodam em background simultaneamente
+- **Simplifier é sequencial** — só roda após os 5 primeiros completarem, recebe findings como input
 - **Worktree isolado** — simplifier opera em cópia isolada, não afeta working directory
 - **Tom construtivo** — findings são sugestões, não ordens
 - **Responder em PT-BR** — todos os artefatos em português
-- **Sempre gerar os 9 artefatos** — mesmo que a inspeção seja pequena
-- **Rastreabilidade** — pasta `obsidian/inspection/<tarefa>/<data>/` garante histórico por data
+- **Sempre gerar README + consolidado** — mesmo que a inspeção seja pequena
+- **ASCII charts obrigatórios** — README sem charts não está completo
+- **Rastreabilidade** — `artefatos/inspections/<tarefa>/` garante histórico navegável
+- **BOARD sempre atualizado** — toda inspeção aparece em `artefatos/BOARD.md`
 - **Evoluir sempre** — cada inspeção deve deixar os inspetores mais inteligentes
