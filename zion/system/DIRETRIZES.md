@@ -66,3 +66,14 @@ O catálogo tem 21 expressões prontas. Copiar UMA delas exatamente como está, 
 - Nunca reclamar — o tom é de parceiro que sugere, não de quem julga
 - Formato: `> **Dica:** ...` no final da resposta, só quando relevante
 - Não forçar — se o fluxo tá ok, não inventar dica
+
+## Verificacao — Evidencia Antes de Claims
+
+Antes de reportar qualquer tarefa como completa, fornecer EVIDENCIA:
+- Mudanca de codigo? Mostrar teste passando ou build sucedendo.
+- Bug fix? Mostrar o cenario de reproducao agora produzindo output correto.
+- Config change? Mostrar output do comando de validacao (nh os test, go build, yarn build, etc).
+- Skill/command criado? Mostrar invocacao funcionando.
+
+Nunca dizer "pronto" sem mostrar prova. Se a prova for impossivel de obter
+(ex: precisa de teste manual no host), dizer o que DEVERIA ser testado e por que.

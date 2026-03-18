@@ -1,16 +1,15 @@
 # syntax=docker/dockerfile:1
-FROM node:14-alpine
+FROM node:20-alpine
 
 RUN apk add --no-cache git ca-certificates python3 make g++ \
     autoconf automake libtool nasm pkgconfig
 
 WORKDIR /app
 
-EXPOSE 8082
+EXPOSE 3005
 
 # 0.0.0.0 para aceitar conexoes externas ao container
 ENV HOST=0.0.0.0
-ENV PORT=8082
 
 # node_modules vem do bind mount (gerado por: zion docker install front-student)
 # Comando: npm run <NPM_SCRIPT_ENV>:<VERTICAL> (ex: npm run dev:carreiras-juridicas)
