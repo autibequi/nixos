@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
-# claude-oauth-usage.sh — Uso do plano Claude via OAuth token
-# Endpoint: api.anthropic.com/api/oauth/usage
-# Token: ~/.claude/.credentials.json (gerado pelo Claude Code CLI)
-# Cache: ~/.cache/claude-usage.json (em --waybar sempre fetch)
-#
-# Limitação: o /usage do Cursor (Current session 100%, resets 4pm; Current week 14%/42%)
-# vem do backend do Cursor; esta API OAuth não expõe esses buckets. Barra = 5h, 7d, Sonnet 7d.
+# claude-oauth-usage.sh — Uso do plano Claude (OAuth ou claude.ai)
+# Preferência: API claude.ai (sessionKey + org) → senão api.anthropic.com/api/oauth/usage
+# sessionKey: .credentials.json, ~/.claude/claude-ai-session ou ~/.claude/cookies.txt (Netscape; extensão "Get cookies.txt")
+# org: CLAUDE_AI_ORG_ID, cookies.txt (lastActiveOrg) ou hardcoded. Cache: ~/.cache/claude-usage.json
 #
 # Modos:
 #   (sem args)       → JSON bruto + popula cache
@@ -82,27 +79,41 @@ if [[ -z "$JQ" || -z "$CURL" ]]; then
 fi
 
 # --- credenciais: OAuth token e/ou session (claude.ai) + org ---
-if [[ ! -f "$CREDS_FILE" ]]; then
-  [[ "$MODE" == "--waybar" ]] && _no_claude_bar "credentials não encontrado" || echo "󱙺 --"
-  exit 0
+# sessionKey: env → .credentials.json → claude-ai-session → cookies.txt
+# org: env CLAUDE_AI_ORG_ID → cookies.txt (lastActiveOrg) → hardcoded
+TOKEN=""
+SESSION_KEY="${CLAUDE_AI_SESSION_KEY:-}"
+ORG_ID="${CLAUDE_AI_ORG_ID:-}"
+
+if [[ -f "$CREDS_FILE" ]]; then
+  [[ -z "$TOKEN" ]] && TOKEN=$($JQ -r '.claudeAiOauth.accessToken // empty' "$CREDS_FILE" 2>/dev/null)
+  if [[ -z "$SESSION_KEY" ]]; then
+    SESSION_KEY=$($JQ -r '.sessionKey // .session_key // .cookie_session // .session // empty' "$CREDS_FILE" 2>/dev/null)
+    [[ -z "$SESSION_KEY" || "$SESSION_KEY" == "null" ]] && SESSION_KEY=""
+  fi
 fi
-TOKEN=$($JQ -r '.claudeAiOauth.accessToken // empty' "$CREDS_FILE" 2>/dev/null)
-SESSION_KEY=$($JQ -r '.sessionKey // .session_key // .cookie_session // .session // empty' "$CREDS_FILE" 2>/dev/null)
-[[ -z "$SESSION_KEY" || "$SESSION_KEY" == "null" ]] && SESSION_KEY=""
 if [[ -z "$SESSION_KEY" ]] && [[ -f "${CLAUDE_DIR}/claude-ai-session" ]]; then
   SESSION_KEY=$(head -1 "${CLAUDE_DIR}/claude-ai-session" 2>/dev/null)
 fi
-# Org ID (claude.ai): env → .credentials.json → ~/.claude.json
-ORG_ID="${CLAUDE_AI_ORG_ID:-}"
-if [[ -z "$ORG_ID" ]]; then
-  ORG_ID=$($JQ -r '.organizationUuid // .organization_id // .oauthAccount.organizationUuid // empty' "$CREDS_FILE" 2>/dev/null) || true
+# ~/.claude.json (Claude Code às vezes guarda session/cookie aqui)
+if [[ -z "$SESSION_KEY" ]] && [[ -f "${HOME}/.claude.json" ]]; then
+  SESSION_KEY=$($JQ -r '.sessionKey // .session // .cookie_session // .oauthAccount.sessionKey // empty' "${HOME}/.claude.json" 2>/dev/null) || true
+  [[ -z "$SESSION_KEY" || "$SESSION_KEY" == "null" ]] && SESSION_KEY=""
 fi
-if [[ -z "$ORG_ID" || "$ORG_ID" == "null" ]] && [[ -f "${HOME}/.claude.json" ]]; then
-  ORG_ID=$($JQ -r '.oauthAccount.organizationUuid // empty' "${HOME}/.claude.json" 2>/dev/null) || true
+# cookies.txt: Netscape (extensão "Get cookies.txt"); extrai sessionKey e lastActiveOrg
+if [[ -f "${CLAUDE_DIR}/cookies.txt" ]]; then
+  if [[ -z "$SESSION_KEY" ]]; then
+    SESSION_KEY=$(awk -F'\t' 'tolower($1) ~ /claude\.ai/ && $6 == "sessionKey" {print $7; exit}' "${CLAUDE_DIR}/cookies.txt" 2>/dev/null)
+  fi
+  if [[ -z "$ORG_ID" ]]; then
+    _o=$(awk -F'\t' 'tolower($1) ~ /claude\.ai/ && $6 == "lastActiveOrg" {print $7; exit}' "${CLAUDE_DIR}/cookies.txt" 2>/dev/null)
+    [[ -n "$_o" ]] && ORG_ID="$_o"
+  fi
 fi
-[[ -z "$ORG_ID" || "$ORG_ID" == "null" ]] && ORG_ID=""
+[[ -z "$ORG_ID" ]] && ORG_ID="995ebddd-ab0c-4ef8-aaf1-ad1fee25f624"
+
 if [[ -z "$TOKEN" ]] && [[ -z "$SESSION_KEY" ]]; then
-  [[ "$MODE" == "--waybar" ]] && _no_claude_bar "token/session não encontrado" || echo "󱙺 --"
+  [[ "$MODE" == "--waybar" ]] && _no_claude_bar "token OAuth ok; para 1%%/14%%/42%% use sessionKey em .credentials.json, .claude.json, claude-ai-session ou cookies.txt" || echo "󱙺 --"
   exit 0
 fi
 
@@ -147,11 +158,18 @@ _fetch_fresh() {
 
 # --- obter JSON (cache ou fetch) ---
 # Preferência: claude.ai (session + org) → OAuth. Em waybar sempre fetch.
+USED_SOURCE=""
 JSON=""
 if [[ "$FORCE_REFRESH" == "1" ]] || [[ "$MODE" == "--waybar" ]]; then
   JSON=$(_fetch_claude_ai 2>/dev/null) || true
-  if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
+  if [[ -n "$JSON" ]] && echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
+    USED_SOURCE="claude.ai"
+  fi
+  if [[ -z "$USED_SOURCE" ]]; then
     JSON=$(_fetch_fresh 2>/dev/null) || true
+    if [[ -n "$JSON" ]] && echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
+      USED_SOURCE="OAuth"
+    fi
   fi
 fi
 if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
@@ -180,7 +198,7 @@ fi
 
 # --- modo: JSON bruto ---
 if [[ -z "$MODE" ]]; then
-  echo "$JSON" | $JQ .
+  echo "$JSON" | $JQ . 2>/dev/null || echo "$JSON"
   exit 0
 fi
 
@@ -290,8 +308,6 @@ ICON_7D='󰴊'       # calendar-range (janela 7d)
 ICON_OPUS='󰐂'     # opus/premium (só no tooltip)
 
 # --- modo: --waybar ---
-# API OAuth devolve: 5h, 7d, seven_day_sonnet, extra_usage. O /usage do Cursor (Current session 100%, 4pm UTC;
-# Current week 14%/42%) vem do backend do Cursor — não há endpoint público para isso; esta barra mostra só OAuth.
 if [[ "$MODE" == "--waybar" ]]; then
   text="$(_gauge "$ICON_SONNET" "$sn_num") $(_gauge "$ICON_5H" "$fh_pct") $(_gauge "$ICON_7D" "$sd_pct")"
   tw=12
@@ -300,7 +316,11 @@ if [[ "$MODE" == "--waybar" ]]; then
   p_7d=$(printf "%-${wprefix}s" "${ICON_7D} 7d");   line_7d="${p_7d}$(_gauge "" "$sd_pct" "$tw" 3 1)   reset em $sd_r"
   p_sn=$(printf "%-${wprefix}s" "${ICON_SONNET} Sonnet"); line_sn="${p_sn}$(_gauge "" "$sn_pct" "$tw" 3 1)"
   p_op=$(printf "%-${wprefix}s" "${ICON_OPUS} Opus");   line_op="${p_op}$(_gauge "" "$op_pct" "$tw" 3 1)"
-  tooltip="<span font_family='monospace' size='12000'>OAuth usage (≠ Cursor /usage)\n$(printf '%s\n%s\n%s\n%s' "$line_5h" "$line_7d" "$line_sn" "$line_op")</span>"
+  # Primeira linha do tooltip: sessionKey e org (vê se está usando claude.ai) + fonte dos dados
+  sk_status="sessionKey: $([[ -n "$SESSION_KEY" ]] && echo "sim" || echo "não")"
+  org_status="org: $([[ -n "$ORG_ID" ]] && echo "${ORG_ID:0:8}…" || echo "não")"
+  source_line="Fonte: ${USED_SOURCE:-?}"
+  tooltip="<span font_family='monospace' size='12000'>${sk_status} | ${org_status} | ${source_line}\n$(printf '%s\n%s\n%s\n%s' "$line_5h" "$line_7d" "$line_sn" "$line_op")</span>"
   $JQ -cn \
     --arg text    "$text" \
     --arg tooltip "$tooltip" \

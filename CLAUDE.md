@@ -64,6 +64,7 @@ Ao abrir o projeto, faça em segundos:
 | **`zion puppy logs [-f]`** | Logs do container Puppy. |
 | **`zion puppy shell`** | Bash dentro do container Puppy. |
 | **`zion puppy query --headless --timeout=600 "prompt"`** | Envia prompt headless com timeout. O agente sabe que ninguém observa e deve ir o mais longe possível. |
+| **`zion claude-usage`** | Estatísticas de uso Claude (API OAuth / claude.ai). Sem flag = JSON bruto; `--waybar` = JSON para o usage bar consumir; `--refresh` = ignora cache. |
 
 ### 2.2 Modo Headless (workers e queries sem supervisão)
 

@@ -94,7 +94,18 @@ commands:
         help: "Diretório do projeto (default ~/projects)"
     filename: commands/start.sh
 
-  # ── Engine shortcuts ─────────────────────────────────────────
+  # ── Claude (sessão ou usage) ─────────────────────────────────
+  - name: claude-usage
+    help: "Estatísticas de uso Claude (API OAuth / claude.ai). Saída: --waybar = JSON para usage bar; sem flag = JSON bruto."
+    flags:
+      - long: --waybar
+        help: "Formato Waybar (text, tooltip, class) para o usage bar consumir"
+      - long: --json
+        help: "JSON bruto da API (five_hour, seven_day, seven_day_sonnet)"
+      - long: --refresh
+        help: "Força fetch, ignora cache"
+    filename: commands/claude_usage.sh
+
   - name: claude
     help: "Atalho: nova sessão com engine Claude (= zion new --engine=claude)."
     args:
