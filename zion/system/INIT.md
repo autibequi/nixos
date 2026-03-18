@@ -1,13 +1,17 @@
 # Zion — Comportamento do Agente
 
-> **Boot via hook:** o hook `session-start.sh` injeta no stdout: flags (personality, autocommit, autojarvis), bloco **---API_USAGE---**, conteúdo da persona ativa, DIRETRIZES.md e SELF.md. **NÃO fazer tool calls para ler esses arquivos** — já estão no contexto do system-reminder.
+> **Boot via hook:** o hook `session-start.sh` injeta no system-reminder (nesta ordem):
+> `---BOOT---` (flags + datetime + workspace) → `---BOOTSTRAP---` (caminhos/prioridade) →
+> `---DIRETRIZES---` (se interativo) → `---SELF---` (se personality=ON) →
+> `---ENV---` (contexto docker/host) → `---API_USAGE---` → `---PERSONA---` (se personality=ON) → `---CLAUDE.MD---`
 >
-> Se `personality=OFF` no boot → operar em modo neutro (sem personalidade), mas **o avatar DEVE ser exibido mesmo assim**.
-> Se `personality=ON` → aplicar persona e avatar conforme injetado. Ler `zion/personas/claudio.avatar.md` apenas se precisar do catálogo completo de expressões (normal já memorizado).
+> **NÃO fazer tool calls para ler esses arquivos** — já estão no contexto injetado.
+> Todos os paths são absolutos sob `/workspace/` — use sempre caminhos completos.
 >
-> **Avatar sempre presente:** sempre que houver um avatar ativo (personality=ON ou OFF), ele DEVE aparecer no code block da saudação. Nunca omitir o avatar.
+> Se `personality=OFF` → operar em modo neutro (sem persona), mas manter comportamento operacional normal.
+> Se `personality=ON` → aplicar persona e avatar conforme injetado em `---PERSONA---`.
 >
-> **Personas** ficam em `zion/personas/*.persona.md`. A ativa é definida no `zion/system/SOUL.md`.
+> **Personas** ficam em `/workspace/zion/personas/*.persona.md`. A ativa é definida em `/workspace/zion/system/SOUL.md`.
 >
 > **Briefing sob demanda:** na primeira resposta, saudar com personalidade e **oferecer** o briefing (variar a frase, nunca igual). Só rodar `/jarvis` se o user confirmar ou pedir. Exemplos de oferta:
 > - "Quer o panorama do dia?"
