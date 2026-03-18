@@ -301,6 +301,19 @@ commands:
             help: "Worktree alternativo"
         filename: commands/docker_restart.sh
 
+      - name: build
+        help: "Rebuilda a imagem Docker do servico (sem derrubar containers)."
+        args:
+          - name: service
+            required: true
+            help: "Nome do servico (monolito, bo-container, front-student)"
+        flags:
+          - long: --worktree
+            short: -w
+            arg: name
+            help: "Worktree alternativo"
+        filename: commands/docker_build.sh
+
       - name: flush
         help: "Remove tudo do servico: containers, imagens, volumes, logs e vendor/."
         args:

@@ -248,3 +248,242 @@ A busca Rovo (`searchAtlassian`) pode falhar com 403 "The app is not installed".
 | `fetchAtlassian` | Ler recurso por ARI (issue ou page) |
 
 Todas as chamadas usam `cloudId: "9795b90e-d410-4737-a422-a7c15f9eadf0"`.
+
+---
+
+## Escrever Sugestão de Implementação (customfield_11246)
+
+Quando for solicitado a preencher ou refinar a Sugestão de Implementação de um card, usar o template abaixo com os 7 blocos padrão, **sempre precedido de um banner ASCII**.
+
+### Banner ASCII
+
+O banner fica no início do campo, dentro de um `codeBlock` ADF com `language: "text"`. **Variar o estilo do banner a cada vez** — escolher um dos abaixo ou criar uma variação criativa com o mesmo tema "REFINED BY CLAUDINHO":
+
+**Variação 1 (pixel bold):**
+```
+█▀█ █▀▀ █▀▀ █ █▄ █ █▀▀ █▀▄   █▄▄ █▄█
+█▀▄ ██▄ █▀  █ █ ▀█ ██▄ █▄▀   █▄█  █
+
+█▀▀ █   █▀█ █ █ █▀▄ █ █▄ █ █ █ █▀█
+█▄▄ █▄▄ █▀█ █▄█ █▄▀ █ █ ▀█ █▀█ █▄█
+```
+
+**Variação 2 (box drawing):**
+```
+╦═╗╔═╗╔═╗╦╔╗╔╔═╗╔╦╗  ╔╗ ╦ ╦
+╠╦╝║╣ ╠╣ ║║║║║╣  ║║  ╠╩╗╚╦╝
+╩╚═╚═╝╚  ╩╝╚╝╚═╝═╩╝  ╚═╝ ╩
+╔═╗╦  ╔═╗╦ ╦╔╦╗╦╔╗╔╦ ╦╔═╗
+║  ║  ╠═╣║ ║ ║║║║║║╠═╣║ ║
+╚═╝╩═╝╩ ╩╚═╝═╩╝╩╝╚╝╩ ╩╚═╝
+```
+
+**Regra:** não repetir o mesmo banner duas vezes seguidas. Pode criar novas variações ASCII desde que legíveis e no tema "refined by claudinho" (ou abreviações/variações criativas como "REFIND BY CLAU", "CLAUDINHO WAS HERE", etc.).
+
+---
+
+### Template dos 7 blocos
+
+```
+1. Descrição da Solução
+   Explicação direta do que está errado/faltando e o que precisa ser feito.
+   Mencionar causa raiz se for bug.
+
+2. Componentes / Arquivos Impactados
+   Aplicações / Serviços
+   - [repo] path/to/file:linha — Método() — por que é relevante
+
+   Banco de Dados
+   - tabela, coluna, migration relevante (ou N/A)
+
+   OpenSearch
+   - índice afetado, campos (ou N/A)
+
+3. Dependências Externas
+   - Serviços externos, feature flags, Redis keys, etc. (ou "Nenhuma")
+
+4. Sugestão de Testes
+   Happy Path:
+   - [cenário de sucesso 1]
+
+   Sad Path:
+   - [cenário de erro/edge case 1]
+
+5. Contratos de API
+   - [método HTTP + path + mudanças no payload/response] (ou N/A)
+
+6. Referências Técnicas
+   - Links, PRs, cards relacionados, comentários de devs relevantes
+
+7. Restrições / Impactos a Evitar
+   - O que NÃO deve ser alterado
+   - Efeitos colaterais a monitorar
+```
+
+---
+
+### Estrutura ADF completa para `editJiraIssue`
+
+```json
+{
+  "version": 1,
+  "type": "doc",
+  "content": [
+    {
+      "type": "codeBlock",
+      "attrs": { "language": "text" },
+      "content": [{ "type": "text", "text": "<BANNER AQUI — escolher variação>" }]
+    },
+    {
+      "type": "heading",
+      "attrs": { "level": 2 },
+      "content": [{ "type": "text", "text": "1. Descrição da Solução" }]
+    },
+    {
+      "type": "paragraph",
+      "content": [{ "type": "text", "text": "[conteúdo dinâmico]" }]
+    },
+    {
+      "type": "heading",
+      "attrs": { "level": 2 },
+      "content": [{ "type": "text", "text": "2. Componentes / Arquivos Impactados" }]
+    },
+    {
+      "type": "heading",
+      "attrs": { "level": 3 },
+      "content": [{ "type": "text", "text": "Aplicações / Serviços" }]
+    },
+    {
+      "type": "bulletList",
+      "content": [
+        {
+          "type": "listItem",
+          "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "[repo] path/file:linha — Método() — relevância" }] }]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": { "level": 3 },
+      "content": [{ "type": "text", "text": "Banco de Dados" }]
+    },
+    {
+      "type": "bulletList",
+      "content": [
+        {
+          "type": "listItem",
+          "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "[conteúdo ou N/A]" }] }]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": { "level": 3 },
+      "content": [{ "type": "text", "text": "OpenSearch" }]
+    },
+    {
+      "type": "bulletList",
+      "content": [
+        {
+          "type": "listItem",
+          "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "[conteúdo ou N/A]" }] }]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": { "level": 2 },
+      "content": [{ "type": "text", "text": "3. Dependências Externas" }]
+    },
+    {
+      "type": "bulletList",
+      "content": [
+        {
+          "type": "listItem",
+          "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "[conteúdo ou Nenhuma]" }] }]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": { "level": 2 },
+      "content": [{ "type": "text", "text": "4. Sugestão de Testes" }]
+    },
+    {
+      "type": "heading",
+      "attrs": { "level": 3 },
+      "content": [{ "type": "text", "text": "Happy Path" }]
+    },
+    {
+      "type": "bulletList",
+      "content": [
+        {
+          "type": "listItem",
+          "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "[cenário dinâmico]" }] }]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": { "level": 3 },
+      "content": [{ "type": "text", "text": "Sad Path" }]
+    },
+    {
+      "type": "bulletList",
+      "content": [
+        {
+          "type": "listItem",
+          "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "[cenário dinâmico]" }] }]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": { "level": 2 },
+      "content": [{ "type": "text", "text": "5. Contratos de API" }]
+    },
+    {
+      "type": "bulletList",
+      "content": [
+        {
+          "type": "listItem",
+          "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "[conteúdo ou N/A]" }] }]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": { "level": 2 },
+      "content": [{ "type": "text", "text": "6. Referências Técnicas" }]
+    },
+    {
+      "type": "bulletList",
+      "content": [
+        {
+          "type": "listItem",
+          "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "[links, PRs, cards]" }] }]
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "attrs": { "level": 2 },
+      "content": [{ "type": "text", "text": "7. Restrições / Impactos a Evitar" }]
+    },
+    {
+      "type": "bulletList",
+      "content": [
+        {
+          "type": "listItem",
+          "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "[conteúdo dinâmico]" }] }]
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Append vs Replace
+
+- Se o campo já tem conteúdo: fazer **append** — adicionar `rule` (separador) + banner + novo conteúdo ao `content` existente. Nunca sobrescrever refinamentos anteriores.
+- Se o campo está vazio: usar a estrutura completa acima do zero.

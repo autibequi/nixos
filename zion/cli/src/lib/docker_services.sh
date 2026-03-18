@@ -130,6 +130,53 @@ zion_docker_init_worktree() {
     return 1
   fi
 
+  # Validar que o path tem arquivos do projeto.
+  # Worktrees criados dentro do container gravam paths como /workspace/mnt/...
+  # que no host sao diretorios vazios. Nesse caso, reconstruir o path relativo
+  # a partir do base_dir do host.
+  if [[ ! -f "$wt_path/package.json" && ! -f "$wt_path/go.mod" ]]; then
+    # Tentar: base_dir + caminho relativo do worktree (ex: .claude/worktrees/<name>)
+    local git_toplevel
+    git_toplevel=$(git -C "$base_dir" rev-parse --show-toplevel 2>/dev/null)
+
+    # Extrair path relativo: se git reportou /workspace/mnt/X/.claude/worktrees/Y
+    # e o toplevel no container era /workspace/mnt/X, o relativo eh .claude/worktrees/Y
+    local rel_path=""
+    # Tentar todas as possiveis raizes de container (/workspace/mnt, /workspace/nixos)
+    for container_root in "/workspace/mnt" "/workspace/nixos" "/workspace"; do
+      if [[ "$wt_path" == "$container_root/"* ]]; then
+        # wt_path relativo ao projeto dentro do container
+        local container_project_path
+        container_project_path=$(echo "$wt_path" | sed "s|^$container_root/||")
+        # Reconstruir: pegar so a parte apos o nome do servico (ou base dir)
+        local base_name
+        base_name=$(basename "$base_dir")
+        if [[ "$container_project_path" == *"$base_name/"* ]]; then
+          rel_path="${container_project_path#*$base_name/}"
+        fi
+        break
+      fi
+    done
+
+    # Fallback: tentar path padrao do Claude Code
+    if [[ -z "$rel_path" ]]; then
+      rel_path=".claude/worktrees/$worktree"
+    fi
+
+    local alt_path="$base_dir/$rel_path"
+    if [[ -f "$alt_path/package.json" || -f "$alt_path/go.mod" ]]; then
+      echo "[zion docker] Path corrigido: $alt_path" >&2
+      echo "  (git reportou path de container: $wt_path)" >&2
+      wt_path="$alt_path"
+    else
+      echo "Worktree '$worktree' encontrado mas sem arquivos do projeto." >&2
+      echo "  git reportou: $wt_path" >&2
+      echo "  tentativa:    $alt_path" >&2
+      echo "O worktree pode ter sido criado dentro de um container com path diferente." >&2
+      return 1
+    fi
+  fi
+
   _ZION_DK_WORKTREE="$worktree"
   _ZION_DK_WORKTREE_DIR="$wt_path"
 }

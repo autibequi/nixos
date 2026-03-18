@@ -11,5 +11,5 @@ EXPOSE 9090
 ENV LOCAL_BO_CONTAINER_HOST=0.0.0.0
 
 # node_modules vem do bind mount (gerado por: zion docker install bo-container)
-# Roda quasar dev diretamente — vars vem do Docker env_file, nao do env-cmd
-CMD ["./node_modules/.bin/quasar", "dev"]
+# node-sass precisa ser recompilado para musl (Alpine) se instalado em glibc
+CMD ["sh", "-c", "npm rebuild node-sass --silent 2>/dev/null || true && ./node_modules/.bin/quasar dev"]
