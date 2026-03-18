@@ -1,6 +1,6 @@
 ---
 name: monolito/go-inspector
-description: Inspeção multi-perspectiva de feature chain no monolito. Spawna 4 inspetores paralelos + simplifier em worktree.
+description: Inspeção multi-perspectiva de feature chain no monolito. Spawna 5 inspetores paralelos (architect, claude, documentation, qa, namer) + simplifier sequencial em worktree. Substitui monolito/review-code.
 ---
 
 # go-inspector: Inspeção Multi-Perspectiva
@@ -62,20 +62,39 @@ Se o diff for muito grande (>5000 linhas), priorizar:
 6. Config/infra (menor prioridade)
 
 ### Definições dos inspetores:
-Ler os 5 arquivos de definição:
+Ler os 6 arquivos de definição:
+- `/workspace/obsidian/agents/inspectors/architect.md`
 - `/workspace/obsidian/agents/inspectors/claude.md`
 - `/workspace/obsidian/agents/inspectors/documentation.md`
 - `/workspace/obsidian/agents/inspectors/qa.md`
 - `/workspace/obsidian/agents/inspectors/namer.md`
 - `/workspace/obsidian/agents/inspectors/simplifier.md`
 
-## Passo 3 — Spawnar 4 inspetores em paralelo
+## Passo 3 — Spawnar 5 inspetores em paralelo
 
 Usar o Agent tool com `run_in_background: true` para cada inspector. Todos recebem:
 - O diff coletado
 - A lista de arquivos alterados
 - A definição do inspetor (conteúdo do .md do Obsidian)
 - O formato de output esperado
+
+```
+Agent subagent_type=Monolito run_in_background=true prompt="
+Você é o **inspector-architect**. Sua definição completa:
+<definição do obsidian/agents/inspectors/architect.md>
+
+Analise o seguinte diff e arquivos:
+<diff>
+<lista de arquivos>
+
+Produza o output no formato especificado na sua definição:
+- Visão geral arquitetural (tabelas, entities, fluxo)
+- Análise de design decisions
+- Findings de schema/layer (migrations, entities, interfaces)
+- Tópicos de discussão para o autor
+Leia os arquivos completos quando necessário para entender o contexto de design.
+"
+```
 
 ```
 Agent subagent_type=Monolito run_in_background=true prompt="
@@ -94,11 +113,11 @@ Leia os arquivos completos quando necessário para entender contexto.
 
 Repetir para: `documentation`, `qa`, `namer` — cada um com sua definição e foco.
 
-**IMPORTANTE:** Os 4 agents devem ser lançados em uma única mensagem (paralelo real).
+**IMPORTANTE:** Os 5 agents devem ser lançados em uma única mensagem (paralelo real).
 
 ## Passo 4 — Coletar e consolidar resultados
 
-Aguardar os 4 inspetores completarem. Para cada resultado:
+Aguardar os 5 inspetores completarem. Para cada resultado:
 1. Extrair findings estruturados
 2. Classificar por severidade (BLOCKER > MÉDIA > BAIXA > INFO)
 3. Deduplicar usando as regras do `templates/checklist.md`:
@@ -108,14 +127,14 @@ Aguardar os 4 inspetores completarem. Para cada resultado:
 
 ## Passo 5 — Spawnar simplifier em worktree
 
-Após consolidar findings dos 4 primeiros:
+Após consolidar findings dos 5 primeiros:
 
 ```
 Agent subagent_type=Monolito isolation=worktree prompt="
 Você é o **inspector-simplifier**. Sua definição completa:
 <definição do obsidian/agents/inspectors/simplifier.md>
 
-Contexto: os 4 inspetores anteriores encontraram estes findings:
+Contexto: os 5 inspetores anteriores encontraram estes findings:
 <findings consolidados>
 
 Arquivos alterados na branch:
@@ -142,12 +161,13 @@ Criar pasta de artefatos seguindo `templates/output.md`:
 ```
 obsidian/artefatos/inspect-<slug>/
 ├── README.md
-├── 01-claude.md
-├── 02-documentation.md
-├── 03-qa.md
-├── 04-namer.md
-├── 05-simplifier.md
-└── 06-consolidado.md
+├── 01-architect.md
+├── 02-claude.md
+├── 03-documentation.md
+├── 04-qa.md
+├── 05-namer.md
+├── 06-simplifier.md
+└── 07-consolidado.md
 ```
 
 Onde `<slug>` é derivado do nome da branch (ex: `add-delta-lake` → `inspect-delta-lake`).
@@ -181,10 +201,10 @@ Também atualizar o campo `updated:` no frontmatter do inspector.
 
 ## Regras
 
-- **Paralelo real** — os 4 primeiros inspetores rodam em background simultaneamente
-- **Simplifier é sequencial** — só roda após os 4 primeiros completarem, recebe findings como input
+- **Paralelo real** — os 5 primeiros inspetores rodam em background simultaneamente
+- **Simplifier é sequencial** — só roda após os 5 primeiros completarem, recebe findings como input
 - **Worktree isolado** — simplifier opera em cópia isolada, não afeta working directory
 - **Tom construtivo** — findings são sugestões, não ordens
 - **Responder em PT-BR** — todos os artefatos em português
-- **Sempre gerar os 6 artefatos** — mesmo que a inspeção seja pequena
+- **Sempre gerar os 7 artefatos** — mesmo que a inspeção seja pequena
 - **Evoluir sempre** — cada inspeção deve deixar os inspetores mais inteligentes

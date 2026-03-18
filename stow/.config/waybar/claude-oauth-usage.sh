@@ -23,7 +23,7 @@ CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
 CREDS_FILE="${CLAUDE_DIR}/.credentials.json"
 [[ ! -f "$CREDS_FILE" ]] && [[ -f "${HOME}/.local/share/claude-code/.credentials.json" ]] && CREDS_FILE="${HOME}/.local/share/claude-code/.credentials.json"
 CACHE_FILE="${XDG_CACHE_HOME:-${HOME}/.cache}/claude-usage.json"
-CACHE_TTL=60   # só para chamadas fora do waybar; em --waybar sempre faz fetch
+CACHE_TTL=5
 # Suporta múltiplos args: --refresh --waybar
 MODE=""
 FORCE_REFRESH=0
@@ -120,13 +120,13 @@ fi
 # --- cache helpers ---
 _cache_valid() {
   [[ -f "$CACHE_FILE" ]] || return 1
-  local mtime now age
+  local mtime now
   mtime=$(date -r "$CACHE_FILE" +%s 2>/dev/null) || return 1
   now=$(date +%s)
-  age=$(( now - mtime ))
-  (( age < CACHE_TTL ))
+  (( now - mtime < CACHE_TTL ))
 }
 
+# --- fetch helpers ---
 _fetch_claude_ai() {
   [[ -n "$SESSION_KEY" && -n "$ORG_ID" ]] || return 1
   local raw
@@ -156,44 +156,26 @@ _fetch_fresh() {
   echo "$raw"
 }
 
-# --- obter JSON (cache ou fetch) ---
-# Preferência: claude.ai (session + org) → OAuth. Em waybar sempre fetch.
+# --- obter JSON: cache (60s) → fetch ---
+# Preferência: claude.ai (session + org) → OAuth.
 USED_SOURCE=""
 JSON=""
-if [[ "$FORCE_REFRESH" == "1" ]] || [[ "$MODE" == "--waybar" ]]; then
+if ! _cache_valid || [[ -n "${args[--refresh]:-}" ]]; then
   JSON=$(_fetch_claude_ai 2>/dev/null) || true
   if [[ -n "$JSON" ]] && echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
     USED_SOURCE="claude.ai"
-  fi
-  if [[ -z "$USED_SOURCE" ]]; then
+  else
     JSON=$(_fetch_fresh 2>/dev/null) || true
-    if [[ -n "$JSON" ]] && echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
-      USED_SOURCE="OAuth"
-    fi
+    [[ -n "$JSON" ]] && echo "$JSON" | $JQ -e '.five_hour' &>/dev/null && USED_SOURCE="OAuth"
   fi
 fi
 if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
-  # fora do waybar: usar cache se válido
-  if [[ "$MODE" != "--waybar" ]] && _cache_valid; then
-    JSON=$(cat "$CACHE_FILE")
-  fi
-fi
-if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
-  # fallback: cache expirado/antigo
-  if [[ -f "$CACHE_FILE" ]] && $JQ -e '.five_hour' "$CACHE_FILE" &>/dev/null; then
-    JSON=$(cat "$CACHE_FILE")
-  fi
+  [[ -f "$CACHE_FILE" ]] && JSON=$(cat "$CACHE_FILE") || true
 fi
 
-# sem dados: fallback
 if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
-  # se tem cache antigo, usa mesmo expirado
-  if [[ -f "$CACHE_FILE" ]] && $JQ -e '.five_hour' "$CACHE_FILE" &>/dev/null; then
-    JSON=$(cat "$CACHE_FILE")
-  else
-    [[ "$MODE" == "--waybar" ]] && _no_claude_bar "API limitada. Aguarde." || echo "󱙺 rate limit"
-    exit 0
-  fi
+  [[ "$MODE" == "--waybar" ]] && _no_claude_bar "API limitada. Aguarde." || echo "󱙺 rate limit"
+  exit 0
 fi
 
 # --- modo: JSON bruto ---

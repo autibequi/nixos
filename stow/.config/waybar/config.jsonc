@@ -256,11 +256,11 @@
     "on-click": "alacritty -e bash -c 'claude-statusbar --plan max20; read'"
   },
   "custom/claude-usage": {
-    "exec": "bash -c '\"$HOME/.config/waybar/claude-oauth-usage.sh\" --waybar 2>/dev/null || echo \"{\\\"text\\\":\\\" 󱙺 --\\\",\\\"tooltip\\\":\\\"Claude: erro ao rodar script\\\",\\\"class\\\":\\\"\\\"}\"'",
+    "exec": "zion claude-usage --waybar 2>/dev/null || echo \"{\\\"text\\\":\\\" 󱙺 --\\\",\\\"tooltip\\\":\\\"Claude: erro ao rodar script\\\",\\\"class\\\":\\\"\\\"}\"",
     "return-type": "json",
     "interval": 15,
     "signal": 8,
-    "on-click": "bash -c '\"$HOME/.config/waybar/claude-oauth-usage.sh\" --refresh --waybar'; pkill -RTMIN+8 waybar",
+    "on-click": "zion claude-usage --waybar --refresh; pkill -RTMIN+8 waybar",
     "format": "{}",
     "tooltip": true,
     "escape": false

@@ -5,12 +5,13 @@
 ```
 obsidian/artefatos/inspect-<slug>/
 ├── README.md                  ← índice consolidado com frontmatter
-├── 01-claude.md               ← findings do inspector-claude (qualidade geral)
-├── 02-documentation.md        ← findings do inspector-documentation
-├── 03-qa.md                   ← findings do inspector-qa (contratos)
-├── 04-namer.md                ← findings do inspector-namer (nomenclatura)
-├── 05-simplifier.md           ← findings + commits do inspector-simplifier
-└── 06-consolidado.md          ← visão unificada, deduplicada, priorizada
+├── 01-architect.md            ← visão geral, design, schema, tópicos de discussão
+├── 02-claude.md               ← findings do inspector-claude (qualidade geral Go)
+├── 03-documentation.md        ← findings do inspector-documentation
+├── 04-qa.md                   ← findings do inspector-qa (contratos)
+├── 05-namer.md                ← findings do inspector-namer (nomenclatura)
+├── 06-simplifier.md           ← findings + commits do inspector-simplifier
+└── 07-consolidado.md          ← visão unificada, deduplicada, priorizada
 ```
 
 ---
@@ -23,7 +24,7 @@ task: inspect-<slug>
 branch: <branch-name>
 date: YYYY-MM-DD
 status: done
-inspectors: [claude, documentation, qa, namer, simplifier]
+inspectors: [architect, claude, documentation, qa, namer, simplifier]
 ---
 
 # Inspeção — <branch ou PR title>
@@ -34,6 +35,7 @@ inspectors: [claude, documentation, qa, namer, simplifier]
 
 | Inspector | Findings | Blockers | Média | Baixa | Info |
 |-----------|----------|----------|-------|-------|------|
+| architect | N | N | N | N | N |
 | claude | N | N | N | N | N |
 | documentation | N | N | N | N | N |
 | qa | N | N | N | N | N |
@@ -42,17 +44,18 @@ inspectors: [claude, documentation, qa, namer, simplifier]
 
 ## Índice
 
-- [01 - Qualidade Geral](01-claude.md)
-- [02 - Documentação](02-documentation.md)
-- [03 - Contratos QA](03-qa.md)
-- [04 - Nomenclatura](04-namer.md)
-- [05 - Simplificações](05-simplifier.md)
-- [06 - Consolidado](06-consolidado.md)
+- [01 - Visão Geral e Design](01-architect.md)
+- [02 - Qualidade Geral Go](02-claude.md)
+- [03 - Documentação](03-documentation.md)
+- [04 - Contratos QA](04-qa.md)
+- [05 - Nomenclatura](05-namer.md)
+- [06 - Simplificações](06-simplifier.md)
+- [07 - Consolidado](07-consolidado.md)
 ```
 
 ---
 
-## Artefatos de cada Inspector (01 a 05)
+## Artefatos de cada Inspector (01 a 06)
 
 ```markdown
 ---
@@ -84,9 +87,17 @@ type: inspection
 | 2 | Média | `file.go:L100` | Descrição curta |
 ```
 
+### Formato especial: 01-architect.md
+
+O artefato do architect segue o formato definido em `obsidian/agents/inspectors/architect.md`, que inclui:
+- Visão Geral (tabelas, entities, fluxo)
+- Análise de Design
+- Findings de Schema/Layer
+- Tópicos de Discussão (com resumo de prioridades)
+
 ---
 
-## 06-consolidado.md
+## 07-consolidado.md
 
 ```markdown
 ---
@@ -109,6 +120,10 @@ Lista deduplicada de findings de severidade média.
 
 Lista de findings de severidade baixa, agrupadas por tema.
 
+## Tópicos de Discussão
+
+Reexportar os tópicos do architect (os de maior prioridade), para visibilidade no consolidado.
+
 ## Simplificações Aplicadas
 
 Resumo dos commits do simplifier com diff links.
@@ -123,7 +138,7 @@ Oportunidades não aplicadas que o dev pode considerar.
 - Blockers: N
 - Simplificações aplicadas: N commits, -N linhas
 - Arquivos analisados: N
-- Inspetores executados: 5/5
+- Inspetores executados: 6/6
 ```
 
 ---
