@@ -51,6 +51,10 @@ x-base-volumes: &base-volumes
   - /tmp/zion-hive-mind:/workspace/.hive-mind
   # Logs de servicos Docker (zion docker run) — acessiveis pelo agente
   - ${HOME}/.local/share/zion/logs:/workspace/logs/docker:ro
+  # Docker socket — permite agente gerenciar containers (zion docker run/install/logs)
+  - /var/run/docker.sock:/var/run/docker.sock
+  # Dockerized configs — agente pode editar docker-compose, .env, etc.
+  - ${HOME}/.local/share/zion/dockerized:/workspace/dockerized
 
 services:
   sandbox:
@@ -64,6 +68,8 @@ services:
     working_dir: /workspace/mnt
     entrypoint: ["/bin/bash", "-c"]
     command: ["sleep infinity"]
+    group_add:
+      - "${DOCKER_GID:-999}"
     environment:
       <<: *env-base
       GIT_AUTHOR_NAME: Pedrinho

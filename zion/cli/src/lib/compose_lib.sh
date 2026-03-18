@@ -37,6 +37,11 @@ zion_load_config() {
       zion_obsidian_path="$OBSIDIAN_PATH"
     fi
   fi
+  # Docker GID para group_add no compose (agente precisa acessar /var/run/docker.sock)
+  if [[ -z "${DOCKER_GID:-}" ]] && [[ -S /var/run/docker.sock ]]; then
+    DOCKER_GID=$(stat -c %g /var/run/docker.sock)
+  fi
+  export DOCKER_GID="${DOCKER_GID:-999}"
   # Path absoluto e ~ expandido para o compose (YAML não expande ~)
   zion_obsidian_path="${zion_obsidian_path/#\~/$HOME}"
   [[ -d "$zion_obsidian_path" ]] && zion_obsidian_path="$(cd "$zion_obsidian_path" && pwd)"
