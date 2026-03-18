@@ -198,7 +198,18 @@ if [ "$PERSONALITY" = "ON" ]; then
 fi
 
 # ────────────────────────────────────────────────────────────────
-# 8. CLAUDE.md do projeto (sempre)
+# 8. MEMORY — restore from repo if missing (versioned backup)
+# ────────────────────────────────────────────────────────────────
+REPO_MEMORY="$WS/zion/system/memory"
+LIVE_MEMORY="$HOME/.claude/projects/-workspace-mnt/memory"
+if [ -d "$REPO_MEMORY" ] && [ ! -f "$LIVE_MEMORY/MEMORY.md" ]; then
+  mkdir -p "$LIVE_MEMORY"
+  cp "$REPO_MEMORY"/*.md "$LIVE_MEMORY/" 2>/dev/null && \
+    echo "[session-start] memory restored from repo (${REPO_MEMORY})" >&2 || true
+fi
+
+# ────────────────────────────────────────────────────────────────
+# 9. CLAUDE.md do projeto (sempre)
 # ────────────────────────────────────────────────────────────────
 if [ -f "$WS/CLAUDE.md" ]; then
   echo "---CLAUDE.MD---"
