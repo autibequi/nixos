@@ -28,7 +28,7 @@ x-base-volumes: &base-volumes
   - ${ZION_ROOT:-${HOME}/nixos/zion}/commands:/home/claude/.claude/commands
   - ${ZION_ROOT:-${HOME}/nixos/zion}/agents:/home/claude/.claude/agents
   # Hooks: zion/hooks/claude-code (bootstrap não wiped — stow/.claude/hooks está vazio)
-  - ${ZION_ROOT:-${HOME}/nixos/zion}/hooks/claude-code:/home/claude/.claude/hooks
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/hooks/claude-code:/home/claude/.claude/hooks:ro
   - ${ZION_ROOT:-${HOME}/nixos/zion}/scripts:/home/claude/.claude/scripts
   - ${HOME}/.claude.json:/home/claude/.claude.json
   # Cursor: credenciais do host + skills/commands/rules do zion
