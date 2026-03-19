@@ -98,6 +98,15 @@ _zion_dk_install() {
       ' 2>&1 | tee "$log_dir/install.log"
 
     if [[ "${PIPESTATUS[0]}" -eq 0 ]]; then
+      # Adicionar node_modules/ ao .git/info/exclude local para nao sujar o git do projeto
+      local exclude_file="$dir/.git/info/exclude"
+      if [[ -f "$dir/.git/info/exclude" ]] || [[ -d "$dir/.git" ]]; then
+        mkdir -p "$dir/.git/info"
+        if ! grep -qxF 'node_modules/' "$exclude_file" 2>/dev/null; then
+          echo 'node_modules/' >> "$exclude_file"
+          echo "[zion docker] node_modules/ adicionado ao .git/info/exclude (gitignore local)"
+        fi
+      fi
       echo ""
       echo "Instalacao finalizada! Rode: zion docker $service server start --env=$env"
     else
@@ -166,6 +175,15 @@ _zion_dk_install() {
     ' 2>&1 | tee "$log_dir/install.log"
 
   if [[ "${PIPESTATUS[0]}" -eq 0 ]]; then
+    # Adicionar vendor/ ao .git/info/exclude local para nao sujar o git do projeto
+    local exclude_file="$dir/.git/info/exclude"
+    if [[ -f "$dir/.git/info/exclude" ]] || [[ -d "$dir/.git" ]]; then
+      mkdir -p "$dir/.git/info"
+      if ! grep -qxF 'vendor/' "$exclude_file" 2>/dev/null; then
+        echo 'vendor/' >> "$exclude_file"
+        echo "[zion docker] vendor/ adicionado ao .git/info/exclude (gitignore local)"
+      fi
+    fi
     echo ""
     echo "Instalacao finalizada! Rode: zion docker $service server start --env=$env"
   else
