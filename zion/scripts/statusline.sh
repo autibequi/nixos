@@ -119,30 +119,29 @@ OUT_TOKENS_FMT=$(fmt_tokens "$OUT_TOKENS")
 # --- Barras ---
 
 # Contexto combinado: █ input  ▒ output  ░ livre  (3 tons distintos como cache)
-# Urgencia via prefixo quando >75% ou >90%
+# Usa percentuais direto pra evitar divisao inteira zerando com tokens pequenos
 ctx_combined_bar() {
-  local in_tokens="${1:-0}" out_tokens="${2:-0}" ctx_size="${3:-200000}" w="${4:-6}"
-  [[ "$ctx_size" -le 0 ]] && ctx_size=200000
-  local in_fill=$(( in_tokens * w / ctx_size ))
-  local out_fill=$(( out_tokens * w / ctx_size ))
+  local in_pct="${1:-0}" out_pct="${2:-0}" w="${3:-6}"
+  local in_fill=$(( (in_pct * w + 50) / 100 ))
+  local out_fill=$(( (out_pct * w + 50) / 100 ))
   [[ $in_fill -gt $w ]] && in_fill=$w
   [[ $(( in_fill + out_fill )) -gt $w ]] && out_fill=$(( w - in_fill ))
   local free=$(( w - in_fill - out_fill ))
+  [[ $free -lt 0 ]] && free=0
   local s="" i
-  for (( i=0; i<in_fill;  i++ )); do s="${s}█"; done  # input: cheio
-  for (( i=0; i<out_fill; i++ )); do s="${s}▒"; done  # output: médio
-  for (( i=0; i<free;     i++ )); do s="${s}░"; done  # livre: leve
-  local pct=$(( (in_tokens + out_tokens) * 100 / ctx_size ))
+  for (( i=0; i<in_fill;  i++ )); do s="${s}█"; done
+  for (( i=0; i<out_fill; i++ )); do s="${s}▒"; done
+  for (( i=0; i<free;     i++ )); do s="${s}░"; done
   local prefix=""
-  (( pct >= 90 )) && prefix="▸▸" || { (( pct >= 75 )) && prefix="▸"; }
+  (( in_pct >= 90 )) && prefix="▸▸" || { (( in_pct >= 75 )) && prefix="▸"; }
   echo "${prefix}${s}"
 }
 
 # Cache: ▓ hit  ▒ criado  ░ fresh — largura 4
 cache_bar() {
   local hit_pct="${1:-0}" create_pct="${2:-0}" w="${3:-4}"
-  local hit_fill=$(( hit_pct * w / 100 ))
-  local cre_fill=$(( create_pct * w / 100 ))
+  local hit_fill=$(( (hit_pct * w + 50) / 100 ))
+  local cre_fill=$(( (create_pct * w + 50) / 100 ))
   [[ $(( hit_fill + cre_fill )) -gt $w ]] && cre_fill=$(( w - hit_fill ))
   local fresh=$(( w - hit_fill - cre_fill ))
   local s="" i
@@ -152,7 +151,9 @@ cache_bar() {
   echo "$s"
 }
 
-CTX_BAR=$(ctx_combined_bar "$CTX_USED" "$OUT_TOKENS" "$CTX_SIZE" 8)
+OUT_PCT=0
+[[ "$CTX_SIZE" -gt 0 && "$OUT_TOKENS" -gt 0 ]] && OUT_PCT=$(( OUT_TOKENS * 100 / CTX_SIZE ))
+CTX_BAR=$(ctx_combined_bar "$CTX_PCT" "$OUT_PCT" 6)
 
 CACHE_CREATE_PCT=0
 [[ $TOTAL_IN -gt 0 ]] && CACHE_CREATE_PCT=$(( CACHE_CREATE * 100 / TOTAL_IN ))
