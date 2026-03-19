@@ -1,5 +1,10 @@
-echo "# This file is located at 'src/commands/puppy_run.sh'."
-echo "# It contains the implementation for the 'zion puppy run' command."
-echo "# The code you write here will be wrapped by a function named 'zion_puppy_run_command()'."
-echo "# Feel free to edit this file; your changes will persist when regenerating."
-inspect_args
+# Run a specific task inside the puppy container
+local task="${args[task]}"
+
+# Find source directory
+local source="backlog"
+local compose_file="${ZION_ROOT:-$HOME/nixos/zion}/cli/docker-compose.puppy.yml"
+
+echo "Running task: $task"
+docker compose -f "$compose_file" exec puppy \
+  /workspace/zion/scripts/task-runner.sh "$task" "$source"

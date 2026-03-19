@@ -71,7 +71,7 @@ services:
     network_mode: host
     working_dir: /workspace/mnt
     entrypoint: ["/entrypoint.sh"]
-    command: ["/bin/bash", "-c", "mkdir -p /workspace/obsidian/agents/cron 2>/dev/null; sleep 30 && exec /workspace/zion/scripts/puppy-daemon.sh"]
+    command: ["/bin/bash", "-c", "mkdir -p /workspace/obsidian/agents/cron 2>/dev/null; sleep 30 && exec /workspace/zion/scripts/task-daemon.sh"]
     restart: unless-stopped
     group_add:
       - "${DOCKER_GID:-999}"

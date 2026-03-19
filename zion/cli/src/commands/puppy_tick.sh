@@ -1,5 +1,6 @@
-echo "# This file is located at 'src/commands/puppy_tick.sh'."
-echo "# It contains the implementation for the 'zion puppy tick' command."
-echo "# The code you write here will be wrapped by a function named 'zion_puppy_tick_command()'."
-echo "# Feel free to edit this file; your changes will persist when regenerating."
-inspect_args
+# Run a single tick of the task-daemon (for testing)
+local compose_file="${ZION_ROOT:-$HOME/nixos/zion}/cli/docker-compose.puppy.yml"
+
+echo "Running single tick..."
+docker compose -f "$compose_file" exec -e PUPPY_SINGLE_TICK=1 puppy \
+  /workspace/zion/scripts/task-daemon.sh

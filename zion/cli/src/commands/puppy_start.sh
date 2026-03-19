@@ -1,5 +1,11 @@
-echo "# This file is located at 'src/commands/puppy_start.sh'."
-echo "# It contains the implementation for the 'zion puppy start' command."
-echo "# The code you write here will be wrapped by a function named 'zion_puppy_start_command()'."
-echo "# Feel free to edit this file; your changes will persist when regenerating."
-inspect_args
+# Start puppy container with task-daemon
+local compose_file="${ZION_ROOT:-$HOME/nixos/zion}/cli/docker-compose.puppy.yml"
+
+if [ ! -f "$compose_file" ]; then
+  echo "Compose file not found: $compose_file"
+  exit 1
+fi
+
+echo "Starting puppy container (task-daemon)..."
+docker compose -f "$compose_file" up -d
+echo "Puppy started. Use 'zion puppy logs -f' to follow."
