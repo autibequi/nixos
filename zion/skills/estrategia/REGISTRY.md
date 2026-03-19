@@ -28,6 +28,43 @@ estrategiahq
 | estrategia/grafana | `~/.claude/skills/estrategia/grafana/` | Query logs Loki e dashboards Grafana — serviços, patterns de debug, integração com workflow |
 | estrategia/opensearch | `~/.claude/skills/estrategia/opensearch/` | Consultar cluster OpenSearch sandbox — mapeamento de índices, queries DSL, links Dev Console |
 
+## Git Flow — Branch vs Worktree
+
+### 1. Antes de qualquer implementação: buscar trabalho existente
+
+```bash
+# Buscar pelo código Jira em branches locais e remotas
+git branch -a | grep -i "<FUK2-XXXXX>"
+
+# Verificar worktrees abertas
+git worktree list
+
+# Verificar pastas irmãs ao repo
+ls /workspace/mnt/estrategia/ | grep -i "<FUK2-XXXXX>"
+```
+
+Se já existir branch ou worktree → continuar de lá, não criar novo.
+
+### 2. Decidir: branch ou worktree?
+
+| Situação | Usar |
+|---|---|
+| **Bug fix / correção pontual** (sem feature nova, sem migration, ~1-3 arquivos) | Branch simples: `git checkout -b FUK2-XXXXX/descricao-curta` |
+| **Feature nova / refactoring multi-camada / migration / worker** | Worktree isolado: `git worktree add -b FUK2-XXXXX/descricao-curta ../monolito-FUK2-XXXXX main` |
+
+### 3. Nomenclatura obrigatória
+
+Sempre prefixar com o código Jira: **`FUK2-XXXXX/descricao-curta-em-kebab`**
+
+- ✅ `FUK2-11766/corrige-is-active-video-simpleonly`
+- ✅ `FUK2-1234/add-endpoint-goals-by-course`
+- ❌ `fix/nome-sem-jira`
+- ❌ `feat/nome-sem-jira`
+
+Válido para todos os repos: monolito, bo-container, front-student.
+
+---
+
 ## Sandbox local (testes)
 
 **Referência:** usar sempre estes domínios quando rodar sandbox localmente para testes.

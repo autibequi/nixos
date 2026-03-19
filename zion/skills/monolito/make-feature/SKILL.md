@@ -9,6 +9,12 @@ description: Use when asked to implement, modify, or refactor any feature, endpo
 
 Skill de orquestração. Não duplica conteúdo das sub-skills — define a ordem de execução, os pontos de decisão e garante o wiring entre cada camada antes de avançar.
 
+## Pré-requisito — Branch ou Worktree
+
+Ver regras globais em `estrategia/REGISTRY.md` → seção **Git Flow — Branch vs Worktree**.
+
+---
+
 ## Passo 0 — Entender o escopo antes de escrever qualquer código
 
 Ler `/workspace/mnt/estrategia/monolito/STATE.md` para verificar posição atual, decisões técnicas anteriores e blockers conhecidos.
