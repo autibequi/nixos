@@ -11,6 +11,18 @@ timeout_secs="${args[--timeout]:-300}"
 headless="${args[--headless]}"
 max_turns="${args[--max-turns]:-12}"
 
+# Lista tasks disponíveis
+if [[ "$task_name" == "list" ]]; then
+  doing_dir="$zion_obsidian_path/tasks/doing"
+  if [[ -d "$doing_dir" ]]; then
+    echo "Tasks em doing:"
+    ls "$doing_dir"
+  else
+    echo "Nenhuma task em doing ($doing_dir)" >&2
+  fi
+  exit 0
+fi
+
 # Check container is running
 if ! OBSIDIAN_PATH="$zion_obsidian_path" docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" ps --status running 2>/dev/null | grep -q puppy; then
   echo "[zion puppy] Container puppy não está rodando. Use: zion puppy start" >&2
@@ -39,7 +51,7 @@ fi
 
 OBSIDIAN_PATH="$zion_obsidian_path" \
   docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
-  exec "${env_flags[@]}" puppy \
+  exec -u claude "${env_flags[@]}" puppy \
   bash -c "
     if [ -f '$agent_file' ]; then
       agent_prompt=\"\$(cat '$agent_file')\"

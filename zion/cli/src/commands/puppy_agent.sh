@@ -49,7 +49,7 @@ fi
 
 OBSIDIAN_PATH="$zion_obsidian_path" \
   docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
-  exec "${env_flags[@]}" puppy \
+  exec -u claude "${env_flags[@]}" puppy \
   bash -c "
     if [ -f '$agent_file' ]; then
       agent_prompt=\"\$(cat '$agent_file')\"

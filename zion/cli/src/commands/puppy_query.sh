@@ -26,7 +26,7 @@ fi
 
 OBSIDIAN_PATH="$zion_obsidian_path" \
   docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
-  exec "${env_flags[@]}" puppy \
+  exec -u claude "${env_flags[@]}" puppy \
   timeout "$timeout_secs" claude \
     --permission-mode bypassPermissions \
     --model "$model" \

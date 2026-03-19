@@ -13,5 +13,5 @@ fi
 echo "[zion puppy] Rodando 1 tick do daemon..."
 OBSIDIAN_PATH="$zion_obsidian_path" \
   docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
-  exec -e PUPPY_SINGLE_TICK=1 -e SCHEDULER_VERBOSE=1 \
+  exec -u claude -e PUPPY_SINGLE_TICK=1 -e SCHEDULER_VERBOSE=1 \
   puppy /workspace/zion/scripts/puppy-daemon.sh
