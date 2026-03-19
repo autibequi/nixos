@@ -29,7 +29,7 @@ if [[ -n "${args['--shell']:-}" ]]; then
   echo "[zion leech --shell] ${mount_path} → ${proj_name}"
   CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
     zion_compose_cmd -p "$proj_name" run --rm -it $EXTRA_V \
-    --entrypoint /entrypoint.sh -e CLAUDIO_MOUNT="$mount_path" leech /bin/bash
+    --entrypoint /entrypoint.sh -e CLAUDIO_MOUNT="$mount_path" sandbox /bin/bash
   exit 0
 fi
 
@@ -52,6 +52,7 @@ else
 fi
 
 resume_id="${args['--resume']:-}"
+flag_init_md="${args['--init-md']:-}"
 initial_md="$(zion_initial_md "$mount_path")"
 engine_args=""
 [[ -n "$initial_md" ]] && engine_args+=" --init-md=$initial_md"
