@@ -138,7 +138,7 @@ _fetch_claude_ai() {
     -H "Content-Type: application/json" \
     --cookie "sessionKey=${SESSION_KEY}" \
     -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" 2>/dev/null) || return 1
-  echo "$raw" | $JQ -e '.five_hour' &>/dev/null || return 1
+  [[ -n "$(echo "$raw" | $JQ -r '.five_hour.utilization // empty' 2>/dev/null)" ]] || return 1
   mkdir -p "$(dirname "$CACHE_FILE")" 2>/dev/null
   echo "$raw" > "$CACHE_FILE" 2>/dev/null || true
   cp "$CACHE_FILE" "$CACHE_LAST" 2>/dev/null || true
@@ -154,7 +154,7 @@ _fetch_fresh() {
     -H 'anthropic-beta: oauth-2025-04-20' \
     -H 'anthropic-version: 2023-06-01' \
     -H 'Accept: application/json' 2>/dev/null) || return 1
-  echo "$raw" | $JQ -e '.five_hour' &>/dev/null || return 1
+  [[ -n "$(echo "$raw" | $JQ -r '.five_hour.utilization // empty' 2>/dev/null)" ]] || return 1
   mkdir -p "$(dirname "$CACHE_FILE")" 2>/dev/null
   echo "$raw" > "$CACHE_FILE" 2>/dev/null || true
   cp "$CACHE_FILE" "$CACHE_LAST" 2>/dev/null || true
@@ -168,7 +168,8 @@ SHARED_FILE="${CLAUDE_DIR}/claude-usage-shared.json"
 USED_SOURCE=""
 JSON=""
 
-_has_five_hour() { echo "$1" | $JQ -e '.five_hour' &>/dev/null; }
+# jaq nao suporta -e igual ao jq; usar checagem de string em vez de exit code
+_has_five_hour() { [[ -n "$(echo "$1" | $JQ -r '.five_hour.utilization // empty' 2>/dev/null)" ]]; }
 
 # 1. shared file do container — TTL 8h (container atualiza a cada sessao)
 if [[ -f "$SHARED_FILE" ]] && [[ "$FORCE_REFRESH" != "1" ]]; then
