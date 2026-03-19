@@ -1,2 +1,0 @@
-zion_load_config
-_zion_dk_flush "monolito" "${args[--worktree]:-}"

@@ -198,7 +198,7 @@ commands:
 
   # ── Container (build / down / destroy) ─────────────────────
   - name: build
-    help: Build da imagem Docker do sandbox.
+    help: Build da imagem Docker do leech (claude-nix-sandbox).
     filename: commands/build.sh
 
   - name: down
@@ -345,352 +345,195 @@ commands:
         filename: commands/puppy_agent.sh
 
   # ── Docker (servicos estrategia) ──────────────────────────
+  # servico: monolito | bo-container | front-student (aliases: mono | bo | front/fs)
   - name: docker
     alias: [dk]
-    help: "Gerencia servicos Docker da estrategia"
+    help: "Gerencia servicos Docker. Ex: zion docker logs monolito --follow"
     commands:
-      - name: monolito
-        alias: [mono]
-        help: "Servico monolito (Go API)"
-        commands:
-          - name: install
-            help: "Instala dependencias Go no container"
-            filename: commands/docker_monolito_install.sh
-            flags:
-              - long: --env
-                short: -e
-                arg: env
-                default: sand
-                help: "Ambiente (sand, prod)"
-              - long: --worktree
-                arg: worktree
-                help: "Worktree alternativo"
-          - name: shell
-            help: "Abre shell no container (ou executa comando)"
-            filename: commands/docker_monolito_shell.sh
-            flags:
-              - long: --container
-                short: -c
-                arg: container
-                default: app
-                help: "Container (app, worker, postgres, redis)"
-              - long: --cmd
-                arg: cmd
-                help: "Comando a executar"
-              - long: --worktree
-                arg: worktree
-                help: "Worktree alternativo"
-          - name: logs
-            help: "Exibe logs do servico"
-            filename: commands/docker_monolito_logs.sh
-            flags:
-              - long: --follow
-                short: -f
-                help: "Seguir logs em tempo real"
-              - long: --tail
-                short: -t
-                arg: tail
-                default: "100"
-                help: "Numero de linhas"
-              - long: --worktree
-                arg: worktree
-                help: "Worktree alternativo"
-          - name: status
-            help: "Status dos containers"
-            filename: commands/docker_monolito_status.sh
-          - name: build
-            help: "Constroi imagem Docker"
-            filename: commands/docker_monolito_build.sh
-            flags:
-              - long: --worktree
-                arg: worktree
-                help: "Worktree alternativo"
-          - name: flush
-            help: "Para containers e remove volumes"
-            filename: commands/docker_monolito_flush.sh
-            flags:
-              - long: --worktree
-                arg: worktree
-                help: "Worktree alternativo"
-          - name: test
-            help: "Roda testes no container (default: make test-ldi)"
-            filename: commands/docker_monolito_test.sh
-            flags:
-              - long: --cmd
-                arg: cmd
-                help: "Comando a executar (default: make test-ldi)"
-              - long: --worktree
-                arg: worktree
-                help: "Worktree alternativo"
-          - name: server
-            help: "Gerencia servidor monolito"
-            commands:
-              - name: start
-                alias: [up]
-                help: "Sobe o servidor"
-                filename: commands/docker_monolito_server_start.sh
-                flags:
-                  - long: --env
-                    short: -e
-                    arg: env
-                    default: sand
-                    help: "Ambiente (sand, prod)"
-                  - long: --detach
-                    short: -d
-                    help: "Modo detach"
-                  - long: --debug
-                    help: "Modo debug (dlv)"
-                  - long: --worktree
-                    arg: worktree
-                    help: "Worktree alternativo"
-              - name: stop
-                alias: [down]
-                help: "Para o servidor"
-                filename: commands/docker_monolito_server_stop.sh
-                flags:
-                  - long: --worktree
-                    arg: worktree
-                    help: "Worktree alternativo"
-          - name: worker
-            help: "Gerencia worker monolito"
-            commands:
-              - name: start
-                alias: [up]
-                help: "Sobe o worker"
-                filename: commands/docker_monolito_worker_start.sh
-                flags:
-                  - long: --env
-                    short: -e
-                    arg: env
-                    default: sand
-                    help: "Ambiente (sand, prod)"
-                  - long: --detach
-                    short: -d
-                    help: "Modo detach"
-                  - long: --debug
-                    help: "Modo debug (dlv)"
-                  - long: --worktree
-                    arg: worktree
-                    help: "Worktree alternativo"
-              - name: stop
-                alias: [down]
-                help: "Para o worker"
-                filename: commands/docker_monolito_worker_stop.sh
-                flags:
-                  - long: --worktree
-                    arg: worktree
-                    help: "Worktree alternativo"
+      - name: install
+        help: "Instala dependencias no container (mono|bo|front)"
+        args:
+          - name: service
+            required: true
+            help: "Servico: monolito | bo-container | front-student"
+        flags:
+          - long: --env
+            short: -e
+            arg: env
+            default: sand
+            help: "Ambiente (sand, prod)"
+          - long: --worktree
+            arg: worktree
+            help: "Worktree alternativo"
+        filename: commands/docker_install.sh
 
-      - name: bo-container
-        alias: [bo]
-        help: "Servico bo-container (Vue2 admin)"
-        commands:
-          - name: install
-            help: "Instala dependencias Node no container"
-            filename: commands/docker_bo_container_install.sh
-            flags:
-              - long: --env
-                short: -e
-                arg: env
-                default: sand
-                help: "Ambiente (sand, prod)"
-              - long: --worktree
-                arg: worktree
-                help: "Worktree alternativo"
-          - name: shell
-            help: "Abre shell no container (ou executa comando)"
-            filename: commands/docker_bo_container_shell.sh
-            flags:
-              - long: --container
-                short: -c
-                arg: container
-                default: app
-                help: "Container (app)"
-              - long: --cmd
-                arg: cmd
-                help: "Comando a executar"
-              - long: --worktree
-                arg: worktree
-                help: "Worktree alternativo"
-          - name: logs
-            help: "Exibe logs do servico"
-            filename: commands/docker_bo_container_logs.sh
-            flags:
-              - long: --follow
-                short: -f
-                help: "Seguir logs em tempo real"
-              - long: --tail
-                short: -t
-                arg: tail
-                default: "100"
-                help: "Numero de linhas"
-              - long: --worktree
-                arg: worktree
-                help: "Worktree alternativo"
-          - name: status
-            help: "Status dos containers"
-            filename: commands/docker_bo_container_status.sh
-          - name: build
-            help: "Constroi imagem Docker"
-            filename: commands/docker_bo_container_build.sh
-            flags:
-              - long: --worktree
-                arg: worktree
-                help: "Worktree alternativo"
-          - name: flush
-            help: "Para containers e remove volumes"
-            filename: commands/docker_bo_container_flush.sh
-            flags:
-              - long: --worktree
-                arg: worktree
-                help: "Worktree alternativo"
-          - name: test
-            help: "Roda testes no container (default: yarn test)"
-            filename: commands/docker_bo_container_test.sh
-            flags:
-              - long: --cmd
-                arg: cmd
-                help: "Comando a executar (default: yarn test)"
-              - long: --worktree
-                arg: worktree
-                help: "Worktree alternativo"
-          - name: server
-            help: "Gerencia servidor bo-container"
-            commands:
-              - name: start
-                alias: [up]
-                help: "Sobe o servidor"
-                filename: commands/docker_bo_container_server_start.sh
-                flags:
-                  - long: --env
-                    short: -e
-                    arg: env
-                    default: sand
-                    help: "Ambiente (sand, prod)"
-                  - long: --detach
-                    short: -d
-                    help: "Modo detach"
-                  - long: --debug
-                    help: "Modo debug (dlv)"
-                  - long: --worktree
-                    arg: worktree
-                    help: "Worktree alternativo"
-              - name: stop
-                alias: [down]
-                help: "Para o servidor"
-                filename: commands/docker_bo_container_server_stop.sh
-                flags:
-                  - long: --worktree
-                    arg: worktree
-                    help: "Worktree alternativo"
+      - name: shell
+        help: "Abre shell no container (mono|bo|front)"
+        args:
+          - name: service
+            required: true
+            help: "Servico: monolito | bo-container | front-student"
+        flags:
+          - long: --container
+            short: -c
+            arg: container
+            default: app
+            help: "Container (app, worker, postgres, redis)"
+          - long: --cmd
+            arg: cmd
+            help: "Comando a executar"
+          - long: --worktree
+            arg: worktree
+            help: "Worktree alternativo"
+        filename: commands/docker_shell.sh
 
-      - name: front-student
-        alias: [front, fs]
-        help: "Servico front-student (Nuxt2)"
+      - name: logs
+        help: "Exibe logs do servico (mono|bo|front)"
+        args:
+          - name: service
+            required: true
+            help: "Servico: monolito | bo-container | front-student"
+        flags:
+          - long: --follow
+            short: -f
+            help: "Seguir logs em tempo real"
+          - long: --tail
+            short: -t
+            arg: tail
+            default: "100"
+            help: "Numero de linhas"
+          - long: --worktree
+            arg: worktree
+            help: "Worktree alternativo"
+        filename: commands/docker_logs.sh
+
+      - name: status
+        help: "Status dos containers (mono|bo|front)"
+        args:
+          - name: service
+            required: true
+            help: "Servico: monolito | bo-container | front-student"
+        filename: commands/docker_status.sh
+
+      - name: build
+        help: "Constroi imagem Docker (mono|bo|front)"
+        args:
+          - name: service
+            required: true
+            help: "Servico: monolito | bo-container | front-student"
+        flags:
+          - long: --worktree
+            arg: worktree
+            help: "Worktree alternativo"
+        filename: commands/docker_build.sh
+
+      - name: flush
+        help: "Para containers e remove volumes (mono|bo|front)"
+        args:
+          - name: service
+            required: true
+            help: "Servico: monolito | bo-container | front-student"
+        flags:
+          - long: --worktree
+            arg: worktree
+            help: "Worktree alternativo"
+        filename: commands/docker_flush.sh
+
+      - name: test
+        help: "Roda testes no container (mono|bo|front)"
+        args:
+          - name: service
+            required: true
+            help: "Servico: monolito | bo-container | front-student"
+        flags:
+          - long: --cmd
+            arg: cmd
+            help: "Comando (default: make test-ldi para mono, yarn test para bo/front)"
+          - long: --worktree
+            arg: worktree
+            help: "Worktree alternativo"
+        filename: commands/docker_test.sh
+
+      - name: server
+        help: "Gerencia servidor (mono|bo|front)"
         commands:
-          - name: install
-            help: "Instala dependencias Node no container"
-            filename: commands/docker_front_student_install.sh
+          - name: start
+            alias: [up]
+            help: "Sobe o servidor"
+            args:
+              - name: service
+                required: true
+                help: "Servico: monolito | bo-container | front-student"
             flags:
               - long: --env
                 short: -e
                 arg: env
                 default: sand
                 help: "Ambiente (sand, prod)"
+              - long: --detach
+                short: -d
+                help: "Modo detach"
+              - long: --debug
+                help: "Modo debug (dlv)"
+              - long: --vertical
+                short: -V
+                arg: vertical
+                default: carreiras-juridicas
+                help: "Vertical front-student (carreiras-juridicas, concursos, etc.)"
               - long: --worktree
                 arg: worktree
                 help: "Worktree alternativo"
-          - name: shell
-            help: "Abre shell no container (ou executa comando)"
-            filename: commands/docker_front_student_shell.sh
-            flags:
-              - long: --container
-                short: -c
-                arg: container
-                default: app
-                help: "Container (app)"
-              - long: --cmd
-                arg: cmd
-                help: "Comando a executar"
-              - long: --worktree
-                arg: worktree
-                help: "Worktree alternativo"
-          - name: logs
-            help: "Exibe logs do servico"
-            filename: commands/docker_front_student_logs.sh
-            flags:
-              - long: --follow
-                short: -f
-                help: "Seguir logs em tempo real"
-              - long: --tail
-                short: -t
-                arg: tail
-                default: "100"
-                help: "Numero de linhas"
-              - long: --worktree
-                arg: worktree
-                help: "Worktree alternativo"
-          - name: status
-            help: "Status dos containers"
-            filename: commands/docker_front_student_status.sh
-          - name: build
-            help: "Constroi imagem Docker"
-            filename: commands/docker_front_student_build.sh
+            filename: commands/docker_server_start.sh
+          - name: stop
+            alias: [down]
+            help: "Para o servidor"
+            args:
+              - name: service
+                required: true
+                help: "Servico: monolito | bo-container | front-student"
             flags:
               - long: --worktree
                 arg: worktree
                 help: "Worktree alternativo"
-          - name: flush
-            help: "Para containers e remove volumes"
-            filename: commands/docker_front_student_flush.sh
+            filename: commands/docker_server_stop.sh
+
+      - name: worker
+        help: "Gerencia worker (apenas monolito)"
+        commands:
+          - name: start
+            alias: [up]
+            help: "Sobe o worker"
+            args:
+              - name: service
+                default: monolito
+                help: "Servico (default: monolito)"
+            flags:
+              - long: --env
+                short: -e
+                arg: env
+                default: sand
+                help: "Ambiente (sand, prod)"
+              - long: --detach
+                short: -d
+                help: "Modo detach"
+              - long: --debug
+                help: "Modo debug (dlv)"
+              - long: --worktree
+                arg: worktree
+                help: "Worktree alternativo"
+            filename: commands/docker_worker_start.sh
+          - name: stop
+            alias: [down]
+            help: "Para o worker"
+            args:
+              - name: service
+                default: monolito
+                help: "Servico (default: monolito)"
             flags:
               - long: --worktree
                 arg: worktree
                 help: "Worktree alternativo"
-          - name: test
-            help: "Roda testes no container (default: yarn test)"
-            filename: commands/docker_front_student_test.sh
-            flags:
-              - long: --cmd
-                arg: cmd
-                help: "Comando a executar (default: yarn test)"
-              - long: --worktree
-                arg: worktree
-                help: "Worktree alternativo"
-          - name: server
-            help: "Gerencia servidor front-student"
-            commands:
-              - name: start
-                alias: [up]
-                help: "Sobe o servidor"
-                filename: commands/docker_front_student_server_start.sh
-                flags:
-                  - long: --env
-                    short: -e
-                    arg: env
-                    default: sand
-                    help: "Ambiente (sand, prod)"
-                  - long: --detach
-                    short: -d
-                    help: "Modo detach"
-                  - long: --debug
-                    help: "Modo debug (dlv)"
-                  - long: --vertical
-                    short: -V
-                    arg: vertical
-                    default: carreiras-juridicas
-                    help: "Vertical (carreiras-juridicas, concursos, medicina, etc.)"
-                  - long: --worktree
-                    arg: worktree
-                    help: "Worktree alternativo"
-              - name: stop
-                alias: [down]
-                help: "Para o servidor"
-                filename: commands/docker_front_student_server_stop.sh
-                flags:
-                  - long: --worktree
-                    arg: worktree
-                    help: "Worktree alternativo"
+            filename: commands/docker_worker_stop.sh
 
   # ── Worktree (atalho interativo) ──────────────────────────
   - name: hooks
@@ -766,6 +609,36 @@ commands:
         default: switch
         help: "Modo: switch (default), test, boot, build"
     filename: commands/switch.sh
+
+  - name: leech
+    alias: [l]
+    help: "Engatou numa pasta — sessão efêmera (auto-detecta nixos → monta logs)."
+    args:
+      - name: dir
+        help: "Pasta a engatou (default: ~/projects). nixos repo detectado automaticamente."
+    flags:
+      - long: --shell
+        short: -s
+        help: "Bash interativo em vez de engine AI"
+      - long: --engine
+        arg: engine
+        help: "Engine: opencode | claude | cursor (default: ~/.zion)"
+      - long: --model
+        arg: model
+        help: "Modelo Claude: haiku | sonnet | opus"
+      - long: --resume
+        arg: session_id
+        help: "Retoma sessão (UUID)"
+      - long: --danger
+        help: "Bypass de permissões"
+      - long: --ro
+        help: "Montar read-only"
+      - long: --rw
+        help: "Montar read-write (default)"
+      - long: --init-md
+        arg: file
+        default: contexto.md
+    filename: commands/leech.sh
 
   - name: edit
     help: Abre sessao com ~/nixos em /workspace/mnt e /workspace/logs.
