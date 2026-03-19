@@ -1,11 +1,5 @@
-# Para o container puppy.
-zion_load_config
-
-PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
-PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
-
-echo "[zion puppy] Parando container..."
-OBSIDIAN_PATH="$zion_obsidian_path" \
-  docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" down
-
-echo "[zion puppy] Container puppy parado."
+echo "# This file is located at 'src/commands/puppy_stop.sh'."
+echo "# It contains the implementation for the 'zion puppy stop' command."
+echo "# The code you write here will be wrapped by a function named 'zion_puppy_stop_command()'."
+echo "# Feel free to edit this file; your changes will persist when regenerating."
+inspect_args

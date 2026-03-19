@@ -1,4 +1,5 @@
-zion_load_config
-svc="${args[service]:-monolito}"
-case "$svc" in mono) svc="monolito" ;; esac
-_zion_dk_run "${svc}-worker" "${args[--env]:-sand}" "${args[--debug]:-}" "${args[--worktree]:-}" "" "${args[--detach]:-}"
+echo "# This file is located at 'src/commands/docker_worker_start.sh'."
+echo "# It contains the implementation for the 'zion docker worker start' command."
+echo "# The code you write here will be wrapped by a function named 'zion_docker_worker_start_command()'."
+echo "# Feel free to edit this file; your changes will persist when regenerating."
+inspect_args

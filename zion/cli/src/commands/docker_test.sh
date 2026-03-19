@@ -1,6 +1,5 @@
-zion_load_config
-svc="${args[service]}"
-case "$svc" in mono) svc="monolito" ;; bo) svc="bo-container" ;; front|fs) svc="front-student" ;; esac
-default_cmd="yarn test"
-[[ "$svc" == "monolito" ]] && default_cmd="make test-ldi"
-_zion_dk_shell "$svc" "app" "${args[--cmd]:-$default_cmd}" "${args[--worktree]:-}"
+echo "# This file is located at 'src/commands/docker_test.sh'."
+echo "# It contains the implementation for the 'zion docker test' command."
+echo "# The code you write here will be wrapped by a function named 'zion_docker_test_command()'."
+echo "# Feel free to edit this file; your changes will persist when regenerating."
+inspect_args
