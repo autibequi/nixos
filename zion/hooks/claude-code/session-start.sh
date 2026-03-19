@@ -318,7 +318,7 @@ Formato obrigatório (exibir dentro de code block):
   PERSONALITY .........  OK    [  56ms]  <persona> · <avatar>
   MEMORY      .........  OK    [  19ms]  <N> files
   API_USAGE   .........  OK    [ 142ms]
-              <barra 5h> <barra 7d> <barra monthly>   ← só █░, sem labels, sem %
+                                        <barra 5h> <barra 7d> <barra monthly>   ← só █░, sem labels, sem %
 
 Regras de alinhamento:
 - Nome: 12 chars (pad direita)
@@ -330,7 +330,7 @@ Regras de alinhamento:
 - Módulos ausentes por condição: SKIP + motivo entre parênteses
 - Módulos ausentes sem razão: FAIL
 - PERSONALITY sempre penúltimo, MEMORY sempre último
-- API_USAGE: sub-linha com 3 barras █░ separadas por espaço
+- API_USAGE: sub-linha com 3 barras █░ separadas por espaço; alinhar início das barras à coluna do conteúdo inline (após o `ms]`) — mesma indentação da linha acima onde ficaria o conteúdo extra
 - DIGNITY: ocasional (~1 em 3), dots podem ser ASCII art curto
 
 Após o boot display, continuar com avatar e saudação normalmente.
