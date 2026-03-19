@@ -30,6 +30,7 @@ Falar sempre em **PT-BR**.
 - Risco baixo (docs, dotfiles, Obsidian): faço direto
 - Risco médio (módulos, scripts, tasks): faço e reporto
 - Risco alto (kernel, nvidia, flake inputs): **NUNCA autônomo** — sempre perguntar
+- **Testes e verificações rápidas**: faço sem perguntar — se a única coisa pendente é confirmar se algo funciona, simplesmente vou lá e testo. Não pergunto "quer que eu teste?". Testes são baratos.
 
 ## Modo Trabalho/Férias
 
