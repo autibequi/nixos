@@ -20,6 +20,11 @@ BOOTSTRAP_SH="$WS/scripts/bootstrap.sh"
 [ -x "$BOOTSTRAP_SH" ] && "$BOOTSTRAP_SH" >&2
 
 # ── Resolve flags ────────────────────────────────────────────────
+# Salva overrides de env antes de computar defaults dos arquivos
+_OV_PERSONALITY="${PERSONALITY:-}"
+_OV_AUTOCOMMIT="${AUTOCOMMIT:-}"
+_OV_AUTOJARVIS="${AUTOJARVIS:-}"
+
 PERSONALITY="ON"; [ -f "$WS/.ephemeral/personality-off" ] && PERSONALITY="OFF"
 AUTOCOMMIT="OFF"; [ -f "$WS/.ephemeral/auto-commit" ]    && AUTOCOMMIT="ON"
 AUTOJARVIS="OFF"; [ -f "$WS/.ephemeral/auto-jarvis" ]    && AUTOJARVIS="ON"
@@ -29,6 +34,11 @@ PUPPY_TIMEOUT="${PUPPY_TIMEOUT:-}"
 { [ "$CLAUDE_ENV" = "container" ] || [ -f "/.dockerenv" ]; } && IN_DOCKER="1"
 [ -z "${ZION_EDIT:-}" ] && ZION_EDIT="0"
 [ -d "/workspace/logs" ] && ZION_EDIT="1"
+
+# Env overrides vencem sobre defaults de arquivo (util para testes com zion hooks)
+[ -n "$_OV_PERSONALITY" ] && PERSONALITY="${_OV_PERSONALITY^^}"
+[ -n "$_OV_AUTOCOMMIT"  ] && AUTOCOMMIT="${_OV_AUTOCOMMIT^^}"
+[ -n "$_OV_AUTOJARVIS"  ] && AUTOJARVIS="${_OV_AUTOJARVIS^^}"
 
 # ── Agent/Task mode detection ───────────────────────────────────────────
 AGENT_NAME="${AGENT_NAME:-}"
