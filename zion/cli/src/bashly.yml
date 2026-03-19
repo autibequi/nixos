@@ -5,7 +5,7 @@ environment_variables:
   - name: ZION_NIXOS_DIR
     help: "Raiz do repo NixOS (default $HOME/nixos)"
   - name: OBSIDIAN_PATH
-    help: "Caminho do vault Obsidian (default $HOME/.ovault)"
+    help: "Caminho do vault Obsidian (default $HOME/.ovault/Zion)"
 
 flags:
   - long: --engine
@@ -560,28 +560,58 @@ commands:
         help: "Filtrar por servico (opcional; sem = todos)"
     filename: commands/worktree.sh
 
-  - name: new-task
-    alias: [task-new]
-    help: Cria task + card no kanban (Puppy).
-    args:
-      - name: name
-        required: true
-        help: Nome da task (ex. minha-tarefa).
-    flags:
-      - long: --type
-        arg: type
-        default: pending
-        help: "pending ou recurring"
-      - long: --model
-        arg: model
-        help: "haiku ou sonnet"
-      - long: --clock
-        arg: clock
-        help: "every10 ou every60"
-      - long: --timeout
-        arg: timeout
-        help: Timeout em segundos
-    filename: commands/new_task.sh
+  # ── Tasks (card system) ──────────────────────────────────────
+  - name: tasks
+    alias: [t, task]
+    help: "Gerencia tasks (cards em TODO/DOING/DONE)."
+    commands:
+      - name: run
+        help: "Executa uma task card pelo nome (sem prefixo de data, sem .md)."
+        args:
+          - name: name
+            required: true
+            help: "Nome da task (ex: doctor). Busca em TODO/ e DOING/."
+        filename: commands/tasks_run.sh
+      - name: status
+        alias: [st, log]
+        help: "Mostra log de ultimas execucoes."
+        flags:
+          - long: --lines
+            short: -n
+            arg: lines
+            default: "20"
+            help: "Numero de linhas (default 20)"
+        filename: commands/tasks_status.sh
+      - name: list
+        alias: [ls]
+        help: "Lista cards em TODO/DOING/DONE."
+        flags:
+          - long: --all
+            short: -a
+            help: "Mostra todas as pastas (TODO + DOING + DONE)"
+        filename: commands/tasks_list.sh
+      - name: new
+        help: "Cria um novo card de task."
+        args:
+          - name: name
+            required: true
+            help: "Nome da task (ex: minha-tarefa)"
+        flags:
+          - long: --model
+            arg: model
+            default: haiku
+            help: "Modelo: haiku | sonnet | opus"
+          - long: --timeout
+            arg: timeout
+            default: "300"
+            help: "Timeout em segundos"
+          - long: --when
+            arg: when
+            help: "Data/hora (YYYYMMDD_HH_MM). Default: agora."
+          - long: --agent
+            arg: agent
+            help: "Nome do agente (carrega memory)"
+        filename: commands/tasks_new.sh
 
   - name: status
     alias: [st]

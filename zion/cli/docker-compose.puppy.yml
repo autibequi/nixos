@@ -25,7 +25,7 @@ x-extra-hosts: &extra-hosts
 
 x-base-volumes: &base-volumes
   - ${ZION_ROOT:-${HOME}/nixos/zion}:/workspace/zion
-  - ${OBSIDIAN_PATH:-/tmp}:/workspace/obsidian
+  - ${OBSIDIAN_PATH:-${HOME}/.ovault/Zion}:/workspace/obsidian
   - ${CLAUDIO_MOUNT:-${HOME}/projects}:/workspace/mnt:${CLAUDIO_MOUNT_OPTS:-rw}
   - ${HOME}/.claude:/home/claude/.claude
   - ${ZION_ROOT:-${HOME}/nixos/zion}/skills:/home/claude/.claude/skills

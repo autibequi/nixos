@@ -1,49 +1,52 @@
 #!/usr/bin/env bash
-# task-runner.sh — Run a single task (one-shot or recurring cycle)
-# Usage: task-runner.sh <task-name> <source>
-#   source: _scheduled | backlog
+# task-runner.sh — Run a single task card
+# Usage: task-runner.sh <filename.md>  (file must be in TODO/ or DOING/)
 set -euo pipefail
 
 WORKSPACE="/workspace"
 TASKS="$WORKSPACE/obsidian/tasks"
-EPHEMERAL="$WORKSPACE/.ephemeral"
-STATE_FILE="${TASK_STATE_FILE:-$WORKSPACE/obsidian/agents/cron/state.json}"
-MURAL="$WORKSPACE/obsidian/MURAL.md"
-TASK_LOG="$WORKSPACE/obsidian/agents/task.log.md"
+LOG="$TASKS/log.md"
+MEMORY_DIR="$WORKSPACE/obsidian/agents/memory"
 VERBOSE="${TASK_VERBOSE:-0}"
-
-TASK_NAME="${1:?Usage: task-runner.sh <task> <source>}"
-SOURCE="${2:-backlog}"
-
-DEFAULT_TIMEOUT=300
-DEFAULT_MODEL="haiku"
-DEFAULT_MAX_TURNS=12
 NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}"
 export NODE_OPTIONS
 
-mkdir -p "$EPHEMERAL/locks" "$TASKS/doing" "$TASKS/done" "$TASKS/cancelled"
+CARD="${1:?Usage: task-runner.sh <card.md>}"
+CARD_BASE="$(basename "$CARD" .md)"
+
+# ── Find card ────────────────────────────────────────────────────
+CARD_PATH=""
+if [ -f "$TASKS/TODO/$CARD" ]; then
+  CARD_PATH="$TASKS/TODO/$CARD"
+elif [ -f "$TASKS/TODO/${CARD}.md" ]; then
+  CARD_PATH="$TASKS/TODO/${CARD}.md"
+  CARD="${CARD}.md"
+elif [ -f "$TASKS/DOING/$CARD" ]; then
+  CARD_PATH="$TASKS/DOING/$CARD"
+elif [ -f "$TASKS/DOING/${CARD}.md" ]; then
+  CARD_PATH="$TASKS/DOING/${CARD}.md"
+  CARD="${CARD}.md"
+else
+  echo "[runner] card '$CARD' not found in TODO/ or DOING/"
+  exit 1
+fi
 
 # ── Lock (atomic via mkdir) ──────────────────────────────────────
-LOCKDIR="$EPHEMERAL/locks/${TASK_NAME}.lock"
+LOCKDIR="$WORKSPACE/.ephemeral/locks/${CARD_BASE}.lock"
+mkdir -p "$(dirname "$LOCKDIR")"
 cleanup_lock() { rm -rf "$LOCKDIR" 2>/dev/null || true; }
 if ! mkdir "$LOCKDIR" 2>/dev/null; then
-  echo "[task-runner] '$TASK_NAME' locked — skip"
+  echo "[runner] '$CARD_BASE' locked — skip"
   exit 0
 fi
 trap cleanup_lock EXIT
 
-# ── Locate task ──────────────────────────────────────────────────
-TASK_SRC="$TASKS/$SOURCE/$TASK_NAME"
-[ -d "$TASK_SRC" ] || { echo "[task-runner] '$TASK_NAME' not found in $SOURCE/"; exit 1; }
-
-task_file() {
-  if [ -f "$1/TASK.md" ]; then echo "$1/TASK.md"
-  elif [ -f "$1/CLAUDE.md" ]; then echo "$1/CLAUDE.md"
-  else echo ""; fi
-}
-
-CONFIG=$(task_file "$TASK_SRC")
-[ -n "$CONFIG" ] || { echo "[task-runner] '$TASK_NAME' has no TASK.md or CLAUDE.md"; exit 1; }
+# ── Move to DOING ────────────────────────────────────────────────
+mkdir -p "$TASKS/DOING" "$TASKS/DONE"
+if [ "$(dirname "$CARD_PATH")" != "$TASKS/DOING" ]; then
+  mv "$CARD_PATH" "$TASKS/DOING/$CARD"
+  CARD_PATH="$TASKS/DOING/$CARD"
+fi
 
 # ── Parse frontmatter ────────────────────────────────────────────
 parse_fm() {
@@ -63,67 +66,6 @@ parse_fm() {
   done < "$file"
 }
 
-# Extract tags from frontmatter (supports: tags: [a, b, c] or tags: [a,b,c])
-parse_tags() {
-  local file="$1"
-  parse_fm "$file" "tags" | tr -d '[]' | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
-}
-
-# ── Resolve template ─────────────────────────────────────────────
-TEMPLATE_NAME=$(parse_fm "$CONFIG" "template")
-TEMPLATE_FILE=""
-TEMPLATE_BODY=""
-if [ -n "$TEMPLATE_NAME" ]; then
-  TEMPLATE_FILE="$WORKSPACE/obsidian/templates/agents/${TEMPLATE_NAME}.md"
-  [ -f "$TEMPLATE_FILE" ] || { echo "[task-runner] template '$TEMPLATE_NAME' not found"; TEMPLATE_FILE=""; }
-fi
-
-# ── Merge config (task overrides template) ───────────────────────
-resolve() {
-  local key="$1" default="$2"
-  local val=""
-  val=$(parse_fm "$CONFIG" "$key")
-  if [ -z "$val" ] && [ -n "$TEMPLATE_FILE" ]; then
-    val=$(parse_fm "$TEMPLATE_FILE" "$key")
-  fi
-  echo "${val:-$default}"
-}
-
-TIMEOUT=$(resolve "timeout" "$DEFAULT_TIMEOUT")
-MODEL="haiku"
-MAX_TURNS="$DEFAULT_MAX_TURNS"
-MCP_OFF=0
-
-# Collect tags from both template and task (union)
-ALL_TAGS=""
-[ -n "$TEMPLATE_FILE" ] && ALL_TAGS=$(parse_tags "$TEMPLATE_FILE")
-ALL_TAGS=$(printf '%s\n%s' "$ALL_TAGS" "$(parse_tags "$CONFIG")" | sort -u | grep -v '^$' || true)
-
-# Process tags
-while IFS= read -r tag; do
-  [ -z "$tag" ] && continue
-  case "$tag" in
-    model/haiku)  MODEL="haiku" ;;
-    model/sonnet) MODEL="sonnet" ;;
-    model/opus)   MODEL="opus" ;;
-    mcp/off)      MCP_OFF=1 ;;
-    turns/*)      MAX_TURNS="${tag#turns/}" ;;
-    *)            ;; # other tags are informational
-  esac
-done <<< "$ALL_TAGS"
-
-# Direct frontmatter model/max_turns override tags (backward compat)
-FM_MODEL=$(parse_fm "$CONFIG" "model")
-[ -n "$FM_MODEL" ] && MODEL="$FM_MODEL"
-FM_TURNS=$(parse_fm "$CONFIG" "max_turns")
-[ -n "$FM_TURNS" ] && MAX_TURNS="$FM_TURNS"
-
-# MCP backward compat
-FM_MCP=$(parse_fm "$CONFIG" "mcp")
-[ "$FM_MCP" = "false" ] && MCP_OFF=1
-
-# ── Build prompt ─────────────────────────────────────────────────
-# Template body = everything after frontmatter
 extract_body() {
   local file="$1"
   [ -f "$file" ] || return
@@ -137,58 +79,104 @@ extract_body() {
   done < "$file"
 }
 
-TEMPLATE_BODY=""
-[ -n "$TEMPLATE_FILE" ] && TEMPLATE_BODY=$(extract_body "$TEMPLATE_FILE")
-TASK_BODY=$(extract_body "$CONFIG")
+# ── Config ───────────────────────────────────────────────────────
+MODEL=$(parse_fm "$CARD_PATH" "model")
+TIMEOUT=$(parse_fm "$CARD_PATH" "timeout")
+MAX_TURNS=$(parse_fm "$CARD_PATH" "max_turns")
+MCP=$(parse_fm "$CARD_PATH" "mcp")
+AGENT=$(parse_fm "$CARD_PATH" "agent")
 
-PROMPT=""
-[ -n "$TEMPLATE_BODY" ] && PROMPT="$TEMPLATE_BODY
+MODEL="${MODEL:-haiku}"
+TIMEOUT="${TIMEOUT:-300}"
+MAX_TURNS="${MAX_TURNS:-12}"
 
----
-
-"
-PROMPT="${PROMPT}${TASK_BODY}"
-
-# ── Claim (copy for recurring, move for one-shot) ────────────────
-IS_RECURRING=0
-[ "$SOURCE" = "_scheduled" ] && IS_RECURRING=1
-
-if [ "$IS_RECURRING" = "1" ]; then
-  cp -r "$TASK_SRC" "$TASKS/doing/$TASK_NAME" 2>/dev/null || { echo "[task-runner] claim failed"; exit 1; }
-else
-  mv "$TASK_SRC" "$TASKS/doing/$TASK_NAME" 2>/dev/null || { echo "[task-runner] claim failed"; exit 1; }
+# ── Extract task name (strip date prefix) ────────────────────────
+# Format: YYYYMMDD_HH_MM_name.md → name
+TASK_NAME="$CARD_BASE"
+if [[ "$TASK_NAME" =~ ^[0-9]{8}_[0-9]{2}_[0-9]{2}_(.*) ]]; then
+  TASK_NAME="${BASH_REMATCH[1]}"
 fi
 
-echo "[task-runner] '$TASK_NAME' claimed (model=$MODEL, timeout=${TIMEOUT}s, turns=$MAX_TURNS, mcp=$([ $MCP_OFF = 1 ] && echo off || echo on))"
+# ── Credit check (skip for scheduler — haiku, essential) ────────
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+USAGE_SCRIPT="$SCRIPT_DIR/claude-ai-usage.sh"
+if [ -x "$USAGE_SCRIPT" ] && [ "$TASK_NAME" != "scheduler" ]; then
+  USAGE_JSON=$("$USAGE_SCRIPT" --json 2>/dev/null || echo "{}")
+  WEEK_PCT=$(echo "$USAGE_JSON" | jq -r '
+    [.weekly_limits[]? // .weeklyLimits[]? // .limits[]? // empty]
+    | (.[0].percentage_used // .[0].percentageUsed // 0)
+  ' 2>/dev/null || echo "0")
+  WEEK_PCT="${WEEK_PCT%%.*}"  # truncate decimals
+  if [ "${WEEK_PCT:-0}" -ge 70 ] 2>/dev/null; then
+    echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | QUOTA_HOLD | $TASK_NAME | week=${WEEK_PCT}% | $CARD" >> "$LOG"
+    echo "[runner] '$TASK_NAME' — QUOTA_HOLD (week=${WEEK_PCT}%), rescheduling +60min"
+    # Move card back to TODO with +60min
+    NEXT=$(date -d "+60 minutes" +%Y%m%d_%H_%M)
+    mv "$CARD_PATH" "$TASKS/TODO/${NEXT}_${TASK_NAME}.md" 2>/dev/null || true
+    exit 0
+  fi
+fi
+
+# ── Build prompt ─────────────────────────────────────────────────
+BODY=$(extract_body "$CARD_PATH")
+
+# Load agent memory if exists
+MEMORY=""
+if [ -n "$AGENT" ] && [ -f "$MEMORY_DIR/${AGENT}.md" ]; then
+  MEMORY=$(cat "$MEMORY_DIR/${AGENT}.md")
+elif [ -f "$MEMORY_DIR/${TASK_NAME}.md" ]; then
+  MEMORY=$(cat "$MEMORY_DIR/${TASK_NAME}.md")
+fi
+
+PROMPT="[HEADLESS MODE] Timeout: ${TIMEOUT}s | Time: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+Task: $TASK_NAME | Card: $CARD | Budget: ${TIMEOUT}s
+
+## Task card location
+This card is at: $CARD_PATH
+Tasks dir: $TASKS
+Memory dir: $MEMORY_DIR"
+
+if [ -n "$MEMORY" ]; then
+  PROMPT="$PROMPT
+
+## Agent Memory
+$MEMORY"
+fi
+
+PROMPT="$PROMPT
+
+## Instructions
+$BODY
+
+## Artifacts
+Produce any artifacts (reports, files, outputs) in: /workspace/obsidian/artefatos/${TASK_NAME}/
+
+## After completing
+- To reschedule: move this card back to TODO/ with a new date prefix (YYYYMMDD_HH_MM_name.md)
+  - YOU choose when to run next (minimum 30 minutes)
+  - Prefer scheduling between 21h-06h (BRT) — agents' preferred window
+  - If nothing urgent, schedule later to conserve quota
+- To finish: the runner will move the card to DONE/ automatically
+- Update your memory file at $MEMORY_DIR/${AGENT:-$TASK_NAME}.md if you learned something persistent"
 
 # ── MCP config ───────────────────────────────────────────────────
 MCP_FLAGS=()
-if [ "$MCP_OFF" = "1" ]; then
-  [ -f "$EPHEMERAL/no-mcp.json" ] || echo '{"mcpServers":{}}' > "$EPHEMERAL/no-mcp.json"
-  MCP_FLAGS=(--mcp-config "$EPHEMERAL/no-mcp.json")
+if [ "$MCP" = "false" ] || [ "$MCP" = "off" ]; then
+  no_mcp="$WORKSPACE/.ephemeral/no-mcp.json"
+  [ -f "$no_mcp" ] || echo '{"mcpServers":{}}' > "$no_mcp"
+  MCP_FLAGS=(--mcp-config "$no_mcp")
 fi
 
 # ── Log start ────────────────────────────────────────────────────
-echo "| $(date -u +%Y-%m-%dT%H:%M:%SZ) | $TASK_NAME | start | $MODEL | — |" >> "$TASK_LOG" 2>/dev/null || true
+echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | START | $TASK_NAME | $MODEL | $CARD" >> "$LOG"
+echo "[runner] running '$TASK_NAME' (model=$MODEL, timeout=${TIMEOUT}s, turns=$MAX_TURNS)"
 
-# ── Invoke Claude ────────────────────────────────────────────────
+# ── Run ──────────────────────────────────────────────────────────
 LOGDIR="$WORKSPACE/obsidian/agents/cron/runs/$TASK_NAME"
 mkdir -p "$LOGDIR"
 LOGFILE="$LOGDIR/$(date +%Y-%m-%d_%H-%M).log"
 
-TASK_TYPE="ONE-SHOT"
-[ "$IS_RECURRING" = "1" ] && TASK_TYPE="RECURRING"
-
-FULL_PROMPT="[HEADLESS MODE] Timeout: ${TIMEOUT}s | Deadline: $(date -u -d "+${TIMEOUT} seconds" +%H:%M:%S 2>/dev/null || echo "${TIMEOUT}s from now")
-
-Task: $TASK_NAME | Type: $TASK_TYPE | Dir: $TASKS/doing/$TASK_NAME
-Context: $EPHEMERAL/notes/$TASK_NAME | MURAL: $MURAL
-Time: $(date -u +%Y-%m-%dT%H:%M:%SZ) | Budget: ${TIMEOUT}s
-
-$PROMPT"
-
 START_S=$SECONDS
-EXIT_CODE=0
 
 CLAUDE_ARGS=(
   --permission-mode bypassPermissions
@@ -196,64 +184,27 @@ CLAUDE_ARGS=(
   --max-turns "$MAX_TURNS"
 )
 [ ${#MCP_FLAGS[@]} -gt 0 ] && CLAUDE_ARGS+=("${MCP_FLAGS[@]}")
-CLAUDE_ARGS+=(-p "$FULL_PROMPT")
+CLAUDE_ARGS+=(-p "$PROMPT")
 
+EXIT_CODE=0
 HEADLESS=1 PUPPY_TIMEOUT="$TIMEOUT" \
 timeout "$TIMEOUT" claude "${CLAUDE_ARGS[@]}" 2>&1 | \
   if [ "$VERBOSE" = "1" ]; then tee "$LOGFILE"; else cat > "$LOGFILE"; fi || true
 EXIT_CODE=${PIPESTATUS[0]}
 ELAPSED=$((SECONDS - START_S))
 
-[ "$EXIT_CODE" -eq 0 ] && echo "[task-runner] '$TASK_NAME' OK (${ELAPSED}s)" || echo "[task-runner] '$TASK_NAME' FAIL exit=$EXIT_CODE (${ELAPSED}s)"
+STATUS="ok"; [ "$EXIT_CODE" -ne 0 ] && STATUS="fail"; [ "$EXIT_CODE" -eq 124 ] && STATUS="timeout"
 
 # ── Finish ───────────────────────────────────────────────────────
-STATUS="ok"; [ "$EXIT_CODE" -ne 0 ] && STATUS="fail"; [ "$EXIT_CODE" -eq 124 ] && STATUS="timeout"
-ICON="done"; [ "$EXIT_CODE" -ne 0 ] && ICON="cancelled"
+ELAPSED_FMT="$((ELAPSED/60))m$((ELAPSED%60))s"
+echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | $STATUS | $TASK_NAME | $MODEL | ${ELAPSED_FMT} | $CARD" >> "$LOG"
 
-if [ "$IS_RECURRING" = "1" ]; then
-  # Sync evolved files back to _scheduled
-  for f in memoria.md TASK.md CLAUDE.md; do
-    [ -f "$TASKS/doing/$TASK_NAME/$f" ] && cp "$TASKS/doing/$TASK_NAME/$f" "$TASKS/_scheduled/$TASK_NAME/$f" 2>/dev/null || true
-  done
-  rm -rf "$TASKS/doing/$TASK_NAME"
-  echo "[task-runner] '$TASK_NAME' cycle done"
-elif [ "$EXIT_CODE" -eq 0 ]; then
-  mv "$TASKS/doing/$TASK_NAME" "$TASKS/done/$TASK_NAME" 2>/dev/null || true
-  echo "[task-runner] '$TASK_NAME' -> done"
-else
-  mv "$TASKS/doing/$TASK_NAME" "$TASKS/cancelled/$TASK_NAME" 2>/dev/null || true
-  echo "[task-runner] '$TASK_NAME' -> cancelled ($STATUS)"
+# If agent moved card back to TODO (rescheduled itself), we're done
+if [ ! -f "$CARD_PATH" ]; then
+  echo "[runner] '$TASK_NAME' — card moved by agent (rescheduled or custom)"
+  exit 0
 fi
 
-# Log completion
-ELAPSED_FMT="$((ELAPSED/60))m$((ELAPSED%60))s"
-echo "| $(date -u +%Y-%m-%dT%H:%M:%SZ) | $TASK_NAME | $ICON | $MODEL | $ELAPSED_FMT |" >> "$TASK_LOG" 2>/dev/null || true
-
-# ── Update state.json ────────────────────────────────────────────
-mkdir -p "$(dirname "$STATE_FILE")"
-python3 -c "
-import json, time, os
-f = '$STATE_FILE'
-try:
-    s = json.load(open(f))
-except:
-    s = {'last_tick': '', 'tasks': {}}
-t = s.setdefault('tasks', {}).setdefault('$TASK_NAME', {
-    'last_run': 0, 'last_status': '', 'last_duration_s': 0,
-    'avg_duration_s': 0, 'runs_total': 0, 'runs_failed': 0
-})
-t['last_run'] = int(time.time())
-t['last_status'] = '$STATUS'
-t['last_duration_s'] = $ELAPSED
-old_avg = t.get('avg_duration_s', 0)
-t['avg_duration_s'] = round(0.3 * $ELAPSED + 0.7 * old_avg) if old_avg > 0 else $ELAPSED
-t['runs_total'] = t.get('runs_total', 0) + 1
-if '$STATUS' != 'ok':
-    t['runs_failed'] = t.get('runs_failed', 0) + 1
-s['last_tick'] = '$(date -u +%Y-%m-%dT%H:%M:%SZ)'
-json.dump(s, open(f, 'w'), indent=2)
-" 2>/dev/null || true
-
-# Regenerate STATUS.md
-STATUS_SCRIPT="$(dirname "$(readlink -f "$0")")/puppy-status.sh"
-[ -x "$STATUS_SCRIPT" ] && "$STATUS_SCRIPT" 2>/dev/null || true
+# Otherwise move to DONE
+mv "$CARD_PATH" "$TASKS/DONE/$CARD" 2>/dev/null || true
+echo "[runner] '$TASK_NAME' → DONE ($STATUS, ${ELAPSED_FMT})"

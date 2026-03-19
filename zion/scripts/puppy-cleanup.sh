@@ -8,15 +8,13 @@
 set -euo pipefail
 
 PROJECT_DIR="${SCHEDULER_PROJECT_DIR:-${PROJECT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}}"
-VAULT_DIR="${SCHEDULER_VAULT_DIR:-${HOME:-/tmp}/.ovault/Work}"
+VAULT_DIR="${SCHEDULER_VAULT_DIR:-${HOME:-/tmp}/.ovault/Zion}"
 
-RUNNING_ROOT="${VAULT_DIR}/tasks/doing"
-PENDING_ROOT="${VAULT_DIR}/tasks/backlog"
+DOING_DIR="${VAULT_DIR}/tasks/DOING"
+TODO_DIR="${VAULT_DIR}/tasks/TODO"
 EPHEMERAL="${PROJECT_DIR}/.ephemeral"
 WORKSPACE="${WORKSPACE:-/workspace}"
 CRON_RUNS_DIR="${WORKSPACE}/obsidian/agents/cron/runs"
-
-[ -d "$RUNNING_ROOT" ] || exit 0
 
 # ─────────────────────────────────────────────────────────────────
 # Log rotation: keep only 10 most recent logs per task directory
@@ -50,22 +48,19 @@ rotate_cron_logs() {
   [ "$rotated_count" -gt 0 ] && echo "[cleanup] Rotated $rotated_count cron logs total"
 }
 
-for dir in "$RUNNING_ROOT"/*/; do
-  [ -d "$dir" ] || continue
-  name=$(basename "$dir")
-  source=$(grep '^source=' "$dir/.lock" 2>/dev/null | cut -d= -f2 || echo "pending")
-  rm -f "$dir/.lock"
-  if [ "$source" = "recurring" ]; then
-    rm -rf "$dir"
-    echo "[cleanup] $name (recurring) removed"
-  else
-    mkdir -p "$PENDING_ROOT"
-    mv "$dir" "$PENDING_ROOT/$name" 2>/dev/null || rm -rf "$dir"
-    echo "[cleanup] $name → pending/"
-  fi
-done
+# Move stuck DOING cards back to TODO
+if [ -d "$DOING_DIR" ]; then
+  for card in "$DOING_DIR"/*.md; do
+    [ -f "$card" ] || continue
+    name=$(basename "$card")
+    mv "$card" "$TODO_DIR/$name" 2>/dev/null || true
+    echo "[cleanup] $name: DOING → TODO"
+  done
+fi
 
-rm -f "${EPHEMERAL}/.kanban.lock" "${EPHEMERAL}"/locks/*.lock 2>/dev/null || true
+# Clean locks
+rm -f "${EPHEMERAL}/.kanban.lock" 2>/dev/null || true
+rm -rf "${EPHEMERAL}"/locks/*.lock 2>/dev/null || true
 
 # Rotate cron logs (keep 10 per task)
 rotate_cron_logs

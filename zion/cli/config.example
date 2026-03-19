@@ -34,8 +34,8 @@ GH_TOKEN=
 ANTHROPIC_API_KEY=
 
 # ── Opcionais
-# Caminho do vault Obsidian (default: $HOME/.ovault)
-# OBSIDIAN_PATH=$HOME/.ovault
+# Caminho do vault Obsidian (default: $HOME/.ovault/Zion)
+# OBSIDIAN_PATH=$HOME/.ovault/Zion
 
 # Grafana (read-only — Service Account Token com role Viewer)
 #   1. Abrir https://grafana.platform.estrategia.io

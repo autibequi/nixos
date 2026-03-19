@@ -1,3 +1,4 @@
+zion_load_config
 # Run a single tick of the task-daemon (for testing)
 local compose_file="${ZION_ROOT:-$HOME/nixos/zion}/cli/docker-compose.puppy.yml"
 
