@@ -672,6 +672,24 @@ commands:
     help: "Status agregado: sessoes, docker services e puppy workers."
     filename: commands/status.sh
 
+  # ── Host operations (stow / switch) ──────────────────────
+  - name: stow
+    help: "Deploy dotfiles no host via GNU stow (restow, delete, status)."
+    args:
+      - name: action
+        default: restow
+        help: "Ação: restow (default), delete, status"
+    filename: commands/stow_command.sh
+
+  - name: switch
+    alias: [sw]
+    help: "Aplica configuração NixOS no host (nh os switch/test/boot/build)."
+    args:
+      - name: mode
+        default: switch
+        help: "Modo: switch (default), test, boot, build"
+    filename: commands/switch.sh
+
   - name: edit
     help: Abre sessao com ~/nixos em /workspace/mnt e /workspace/logs.
     flags:

@@ -47,6 +47,8 @@ zion_usage() {
   printf "  %s   Lista worktrees dos servicos Docker e permite escolher worktree + comando interativamente.\n" "worktree"
   printf "  %s   Cria task + card no kanban (Puppy).\n" "new-task"
   printf "  %s   Status agregado: sessoes, docker services e puppy workers.\n" "status  "
+  printf "  %s   Deploy dotfiles no host via GNU stow.\n" "stow    "
+  printf "  %s   Aplica configuração NixOS no host.\n" "switch  "
   printf "  %s   Abre sessao com ~/nixos em /workspace/mnt e /workspace/logs.\n" "edit    "
   printf "  %s   Mostra o banner com comandos principais.\n" "help    "
   printf "  %s   Documentacao completa de todos os comandos e flags.\n" "man     "
@@ -2369,6 +2371,44 @@ zion_status_usage() {
 }
 
 # :command.usage
+zion_stow_usage() {
+  printf "zion stow - Deploy dotfiles no host via GNU stow (restow, delete, status).\n\n"
+  printf "%s\n" "Usage:"
+  printf "  zion stow [ACTION]\n"
+  printf "  zion stow --help | -h\n"
+  echo
+  printf "%s\n" "Arguments:"
+  printf "  %s\n" "ACTION"
+  printf "    Ação: restow (default), delete, status\n"
+  printf "    Default: restow\n"
+  echo
+
+}
+
+# :command.usage
+zion_switch_usage() {
+  if [[ -n $long_usage ]]; then
+    printf "zion switch - Aplica configuração NixOS no host (nh os switch/test/boot/build).\n\n"
+  else
+    printf "zion switch - Aplica configuração NixOS no host.\n\n"
+  fi
+
+  printf "%s\n" "Alias: sw"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  zion switch [MODE]\n"
+  printf "  zion switch --help | -h\n"
+  echo
+  printf "%s\n" "Arguments:"
+  printf "  %s\n" "MODE"
+  printf "    Modo: switch (default), test, boot, build\n"
+  printf "    Default: switch\n"
+  echo
+
+}
+
+# :command.usage
 zion_edit_usage() {
   printf "zion edit - Abre sessao com ~/nixos em /workspace/mnt e /workspace/logs.\n\n"
 
@@ -3298,6 +3338,33 @@ _zion_dk_run() {
   docker compose $COMPOSE_ARGS logs -f --no-log-prefix --tail 50
 }
 
+# src/lib/host_exec.sh
+# host_exec.sh — executa comandos no HOST via nsenter (Docker socket).
+#
+# Dentro do container, usa um container temporário com --pid=host + nsenter
+# para rodar comandos no namespace do host. No host, executa diretamente.
+
+_zion_host_exec() {
+  if [[ "${CLAUDE_ENV:-}" != "container" ]]; then
+    # No host: executar diretamente
+    eval "$@"
+    return $?
+  fi
+
+  local host_home="${HOST_HOME:-/home/pedrinho}"
+  local host_user
+  host_user=$(basename "$host_home")
+
+  echo "[zion] Executando no host via nsenter..."
+  docker run --rm -i \
+    --privileged \
+    --pid=host \
+    --network=host \
+    alpine:latest \
+    nsenter -t 1 -m -u -i -n -- \
+    su - "$host_user" -c "$*"
+}
+
 # src/lib/docker_services.sh
 # Registry de servicos Docker conhecidos.
 # Paths dos projetos vem de ~/.zion (ex: MONOLITO_DIR=...)
@@ -4217,8 +4284,8 @@ zion_ask_command() {
 zion_build_command() {
 
   # src/commands/build.sh
-  # Build da imagem (context = dir do compose = cli)
-  cd "$zion_compose_dir" && zion_compose_cmd build
+  # Build da imagem com BuildKit (habilita --mount=type=cache no Dockerfile)
+  cd "$zion_compose_dir" && DOCKER_BUILDKIT=1 zion_compose_cmd build
 
 }
 
@@ -5563,6 +5630,67 @@ zion_status_command() {
 }
 
 # :command.function
+zion_stow_command() {
+
+  # src/commands/stow_command.sh
+  local nixos_dir="${HOST_NIXOS_DIR:-$HOME/nixos}"
+
+  case "${args[action]:-restow}" in
+    restow|re)
+      echo "=== Stow restow (deploy dotfiles) ==="
+      _zion_host_exec "cd $nixos_dir && stow -d stow -t \$HOME -R ."
+      ;;
+    delete|un|unstow)
+      echo "=== Stow delete (remove symlinks) ==="
+      _zion_host_exec "cd $nixos_dir && stow -d stow -t \$HOME -D ."
+      ;;
+    status|st)
+      echo "=== Stow status ==="
+      _zion_host_exec "cd $nixos_dir && stow -d stow -t \$HOME -n -R . 2>&1 | head -30"
+      ;;
+    *)
+      echo "Ação desconhecida: ${args[action]}"
+      echo "Uso: zion stow [restow|delete|status]"
+      return 1
+      ;;
+  esac
+
+}
+
+# :command.function
+zion_switch_command() {
+
+  # src/commands/switch.sh
+  local nixos_dir="${HOST_NIXOS_DIR:-$HOME/nixos}"
+  local mode="${args[mode]:-switch}"
+
+  case "$mode" in
+    switch)
+      echo "=== NixOS switch ==="
+      _zion_host_exec "cd $nixos_dir && nh os switch ."
+      ;;
+    test)
+      echo "=== NixOS test (build sem ativar) ==="
+      _zion_host_exec "cd $nixos_dir && nh os test ."
+      ;;
+    boot)
+      echo "=== NixOS boot (ativa no próximo reboot) ==="
+      _zion_host_exec "cd $nixos_dir && nh os boot ."
+      ;;
+    build)
+      echo "=== NixOS build (só compila) ==="
+      _zion_host_exec "cd $nixos_dir && nh os build ."
+      ;;
+    *)
+      echo "Modo desconhecido: $mode"
+      echo "Uso: zion switch [switch|test|boot|build]"
+      return 1
+      ;;
+  esac
+
+}
+
+# :command.function
 zion_edit_command() {
 
   # src/commands/host_edit.sh
@@ -5878,6 +6006,20 @@ parse_requirements() {
       action="status"
       shift
       zion_status_parse_requirements "$@"
+      shift $#
+      ;;
+
+    stow)
+      action="stow"
+      shift
+      zion_stow_parse_requirements "$@"
+      shift $#
+      ;;
+
+    switch | sw)
+      action="switch"
+      shift
+      zion_switch_parse_requirements "$@"
       shift $#
       ;;
 
@@ -10879,6 +11021,96 @@ zion_status_parse_requirements() {
 }
 
 # :command.parse_requirements
+zion_stow_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_stow_usage
+        exit
+        ;;
+      *)
+        break
+        ;;
+    esac
+  done
+
+  # :command.command_filter
+  action="stow"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+      *)
+        if [[ -z ${args['action']+x} ]]; then
+          args['action']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
+        ;;
+    esac
+  done
+
+  # :command.default_assignments
+  [[ -n ${args['action']:-} ]] || args['action']="restow"
+
+}
+
+# :command.parse_requirements
+zion_switch_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_switch_usage
+        exit
+        ;;
+      *)
+        break
+        ;;
+    esac
+  done
+
+  # :command.command_filter
+  action="switch"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+      *)
+        if [[ -z ${args['mode']+x} ]]; then
+          args['mode']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
+        ;;
+    esac
+  done
+
+  # :command.default_assignments
+  [[ -n ${args['mode']:-} ]] || args['mode']="switch"
+
+}
+
+# :command.parse_requirements
 zion_edit_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
@@ -11128,6 +11360,8 @@ run() {
     "worktree") zion_worktree_command ;;
     "new-task") zion_new_task_command ;;
     "status") zion_status_command ;;
+    "stow") zion_stow_command ;;
+    "switch") zion_switch_command ;;
     "edit") zion_edit_command ;;
     "help") zion_help_command ;;
     "man") zion_man_command ;;
