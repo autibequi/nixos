@@ -58,11 +58,28 @@ Páginas ficam em `pages/`, **fora** dos módulos — elas importam de `modules/
 - **Rotas são file-based** — apenas criar/mover arquivo em `pages/` para criar uma rota.
 - **asyncData** para dados que precisam de SSR; `mounted` para client-only.
 - **Containers** são o lugar certo para lógica de negócio — não colocar em páginas.
-- **Verificação obrigatória antes de reportar:**
+- **Verificação obrigatória antes de qualquer commit:**
+
+  **Passo 1 — lint nos arquivos alterados:**
+  ```bash
+  npx eslint --ext .js,.vue $(git diff --name-only main -- . | grep '\.vue$\|\.js$' | while read f; do [ -f "$f" ] && echo "$f"; done | tr '\n' ' ')
+  ```
+
+  **Passo 2 — auto-fix e re-verificar:**
+  ```bash
+  npx eslint --ext .js,.vue --fix <arquivos alterados>
+  npx eslint --ext .js,.vue <arquivos alterados>
+  ```
+
+  **Passo 3 — build:**
+  ```bash
+  yarn build
+  ```
+
+  - [ ] `npx eslint` nos changed files sem erros (warnings são ok)
   - [ ] `yarn build` sem erros
-  - [ ] `yarn lint` sem erros novos introduzidos pela feature
   - [ ] Nenhum erro no console ao navegar pelas rotas da feature
-  - Se alguma verificação falhar: corrigir antes de reportar
+  - Se alguma verificação falhar: corrigir antes de commitar
 - **Atualizar STATE.md** ao concluir: registrar feature implementada, decisões técnicas relevantes, e qualquer blocker encontrado em `/workspace/mnt/estrategia/front-student/STATE.md`
 - **Reportar ao final** (para o orquestrador):
   - Arquivos criados: lista com paths

@@ -134,12 +134,24 @@ Checklist obrigatório ao final:
 
 ## Etapa 8 — Verificação
 
+Obrigatório antes de qualquer commit:
+
 ```sh
+# Build — detecta erros de compilação
+go build ./...
+
+# Lint — somente nos pacotes alterados
+golangci-lint run ./apps/<app>/...
+
+# Testes do app
 make test-<app>
-golangci-lint run
 ```
 
-Não declarar a funcionalidade completa antes de ambos passarem.
+- [ ] `go build ./...` sem erros
+- [ ] `golangci-lint run` nos pacotes alterados sem erros
+- [ ] `make test-<app>` passando
+
+Não declarar a funcionalidade completa antes de todos passarem.
 
 Após a verificação passar: atualizar `/workspace/mnt/estrategia/monolito/STATE.md` com a feature implementada, decisões técnicas relevantes (ex: arquitetura escolhida, motivo de não usar cache, cross-app patterns), e qualquer blocker encontrado.
 

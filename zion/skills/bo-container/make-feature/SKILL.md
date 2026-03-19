@@ -37,11 +37,28 @@ Pular steps 3 (bo-container/route) e 5 (bo-container/page). Modificar diretament
 - **Nunca** tocar em módulos além do alvo. Se precisar de dado de outro módulo, use serviço de `src/modules/shared/services/` ou crie um lá.
 - **Sempre** priorizar componentes de `shared/` antes de criar novos.
 - **Não** criar rotas no `src/router/routes.js` global — cada módulo gerencia seu próprio router.
-- **Verificação obrigatória antes de reportar:**
+- **Verificação obrigatória antes de qualquer commit:**
+
+  **Passo 1 — lint nos arquivos alterados:**
+  ```bash
+  npx eslint $(git diff --name-only main -- . | grep '\.vue$\|\.js$' | while read f; do [ -f "$f" ] && echo "$f"; done | tr '\n' ' ')
+  ```
+
+  **Passo 2 — auto-fix e re-verificar:**
+  ```bash
+  npx eslint --fix <arquivos alterados>
+  npx eslint <arquivos alterados>
+  ```
+
+  **Passo 3 — build:**
+  ```bash
+  yarn build
+  ```
+
+  - [ ] `npx eslint` nos changed files sem erros (warnings são ok)
   - [ ] `yarn build` sem erros
-  - [ ] `yarn lint` sem erros novos introduzidos pela feature
   - [ ] Nenhum erro no console ao acessar as rotas da feature
-  - Se alguma verificação falhar: corrigir antes de reportar
+  - Se alguma verificação falhar: corrigir antes de commitar
 - **Atualizar STATE.md** ao concluir: registrar feature implementada, decisões técnicas relevantes, e qualquer blocker encontrado em `/workspace/mnt/estrategia/bo-container/STATE.md`
 - **Reportar ao final** (para o orquestrador):
   - Arquivos criados: lista com paths
