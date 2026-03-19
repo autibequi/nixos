@@ -4169,6 +4169,20 @@ zion_claude_new_command() {
 }
 
 # :command.function
+zion_claude_token_command() {
+  # src/commands/claude_token.sh
+  CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
+  CREDS="${CLAUDE_DIR}/.credentials.json"
+  if [[ ! -f "$CREDS" ]]; then
+    echo "Erro: credenciais nao encontradas em $CREDS" >&2; exit 1
+  fi
+  TOKEN=$(jq -r '.claudeAiOauth.accessToken // empty' "$CREDS" 2>/dev/null)
+  if [[ -z "$TOKEN" ]]; then
+    echo "Erro: token nao encontrado em $CREDS" >&2; exit 1
+  fi
+  echo "$TOKEN"
+}
+
 zion_claude_usage_command() {
 
   # src/commands/claude_usage.sh
@@ -6508,6 +6522,12 @@ zion_claude_parse_requirements() {
       action="usage"
       shift
       zion_claude_usage_parse_requirements "$@"
+      shift $#
+      ;;
+
+    token | t)
+      action="claude token"
+      shift
       shift $#
       ;;
 
@@ -11348,6 +11368,7 @@ run() {
     "claude") zion_claude_command ;;
     "claude new") zion_claude_new_command ;;
     "claude usage") zion_claude_usage_command ;;
+    "claude token"|"claude t") zion_claude_token_command ;;
     "cursor") zion_cursor_command ;;
     "opencode") zion_opencode_command ;;
     "ask") zion_ask_command ;;

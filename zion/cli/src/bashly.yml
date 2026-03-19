@@ -130,6 +130,11 @@ commands:
             help: "Força fetch, ignora cache"
         filename: commands/claude_usage.sh
 
+      - name: token
+        alias: [t]
+        help: "Imprime o OAuth access token do Claude (util para curl manual)."
+        filename: commands/claude_token.sh
+
   - name: cursor
     help: "Atalho: nova sessão com engine Cursor (= zion new --engine=cursor)."
     args:
