@@ -1,5 +1,5 @@
-echo "# This file is located at 'src/commands/docker_shell.sh'."
-echo "# It contains the implementation for the 'zion docker shell' command."
-echo "# The code you write here will be wrapped by a function named 'zion_docker_shell_command()'."
-echo "# Feel free to edit this file; your changes will persist when regenerating."
-inspect_args
+_zion_dk_shell \
+  "${args[service]}" \
+  "${args[--container]:-app}" \
+  "${args[--cmd]:-}" \
+  "${args[--worktree]:-}"
