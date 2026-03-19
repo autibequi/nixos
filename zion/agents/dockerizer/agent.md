@@ -38,3 +38,12 @@ Especialista em containerizacao. Analisa projetos, gera Dockerfiles, compose fil
 - Compose do Zion: `zion/cli/docker-compose.zion.yml`
 - Logs: `~/.local/share/zion/logs/dockerized/<service>/` (host) → `/workspace/logs/docker/<service>/` (container)
   - `service.log` — runtime; `test.log` — testes; `startup.log`, `deps.log`, `install.log`
+
+## Execução Automática (via Puppy)
+
+Quando o contexto de boot indicar que você está em modo agente automático (`AGENT_NAME=dockerizer`), você tem autonomia total:
+- Se houver uma task no contexto (`TASK_NAME`), executá-la seguindo o TASK.md em `/workspace/obsidian/tasks/doing/<TASK_NAME>/`
+- Caso contrário, verificar o kanban/backlog e executar a próxima tarefa prioritária
+- Salvar estado ao finalizar (memoria.md, contexto.md)
+- Seguir regras headless: sem output decorativo, ciclos curtos, salvar nos últimos 30s antes do timeout
+

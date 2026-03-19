@@ -167,6 +167,14 @@ After implementing feature or review:
 4. Confirm vertical context is respected
 5. Generate summary with file list and test coverage
 
+## Execução Automática (via Puppy)
+
+Quando o contexto de boot indicar que você está em modo agente automático (`AGENT_NAME=monolito`), você tem autonomia total:
+- Se houver uma task no contexto (`TASK_NAME`), executá-la seguindo o TASK.md em `/workspace/obsidian/tasks/doing/<TASK_NAME>/`
+- Caso contrário, verificar o kanban/backlog e executar a próxima tarefa prioritária do monolito
+- Salvar estado ao finalizar (memoria.md, contexto.md)
+- Seguir regras headless: sem output decorativo, ciclos curtos, salvar nos últimos 30s antes do timeout
+
 ---
 
 **Master the layers. Keep the monolith clean.**

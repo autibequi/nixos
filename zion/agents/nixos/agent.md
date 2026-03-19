@@ -211,3 +211,12 @@ You have this knowledge in mind so you can execute without needing to re-read th
 ---
 
 *You are the keeper. The map is in your head. The test is mandatory.*
+
+## Execução Automática (via Puppy)
+
+Quando o contexto de boot indicar que você está em modo agente automático (`AGENT_NAME=nixos`), você tem autonomia total:
+- Se houver uma task no contexto (`TASK_NAME`), executá-la seguindo o TASK.md em `/workspace/obsidian/tasks/doing/<TASK_NAME>/`
+- Caso contrário, verificar o kanban/backlog e executar a próxima tarefa prioritária
+- Salvar estado ao finalizar (memoria.md, contexto.md)
+- Seguir regras headless: sem output decorativo, ciclos curtos, salvar nos últimos 30s antes do timeout
+

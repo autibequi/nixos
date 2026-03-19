@@ -30,6 +30,12 @@ IN_DOCKER="0"
 ZION_EDIT="0"
 [ -d "/workspace/logs" ] && ZION_EDIT="1"
 
+# ── Agent/Task mode detection ───────────────────────────────────────────
+AGENT_NAME="${AGENT_NAME:-}"
+TASK_NAME="${TASK_NAME:-}"
+AGENT_MODE="0"
+[ -n "$AGENT_NAME" ] || [ -n "$TASK_NAME" ] && AGENT_MODE="1"
+
 # ────────────────────────────────────────────────────────────────
 # 1. BOOT FLAGS (sempre)
 # Para adicionar nova flag: incluir aqui e documentar em bootstrap.md
@@ -43,25 +49,30 @@ echo "in_docker=$IN_DOCKER       # 1=container | 0=host"
 echo "zion_edit=$ZION_EDIT       # 1=mnt é o repo nixos + logs montados | 0=projeto externo"
 echo "headless=$HEADLESS         # 1=worker sem supervisão | 0=interativo"
 [ -n "$PUPPY_TIMEOUT" ] && echo "puppy_timeout=${PUPPY_TIMEOUT}s"
+[ -n "$AGENT_NAME" ] && echo "agent_name=$AGENT_NAME"
+[ -n "$TASK_NAME" ] && echo "task_name=$TASK_NAME"
+echo "agent_mode=$AGENT_MODE      # 1=running as named agent or processing a task"
 echo "workspace=$WS"
 echo "---/BOOT---"
 
 # ────────────────────────────────────────────────────────────────
 # 2. BOOTSTRAP — caminhos e prioridade (sempre)
 # ────────────────────────────────────────────────────────────────
-BOOTSTRAP_MD="$WS/zion/bootstrap.md"
-[ -f "$BOOTSTRAP_MD" ] || BOOTSTRAP_MD="/workspace/zion/bootstrap.md"
-if [ -f "$BOOTSTRAP_MD" ]; then
-  echo "---BOOTSTRAP---"
-  cat "$BOOTSTRAP_MD"
-  echo "---/BOOTSTRAP---"
+if [ "$AGENT_MODE" != "1" ]; then
+  BOOTSTRAP_MD="$WS/zion/bootstrap.md"
+  [ -f "$BOOTSTRAP_MD" ] || BOOTSTRAP_MD="/workspace/zion/bootstrap.md"
+  if [ -f "$BOOTSTRAP_MD" ]; then
+    echo "---BOOTSTRAP---"
+    cat "$BOOTSTRAP_MD"
+    echo "---/BOOTSTRAP---"
+  fi
 fi
 
 # ────────────────────────────────────────────────────────────────
 # 3. DIRETRIZES operacionais
 #    sempre em interativo | skip em headless (workers usam INIT.md)
 # ────────────────────────────────────────────────────────────────
-if [ "$HEADLESS" != "1" ]; then
+if [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
   DIRETRIZES="$WS/zion/system/DIRETRIZES.md"
   [ -f "$DIRETRIZES" ] || DIRETRIZES="/workspace/zion/system/DIRETRIZES.md"
   if [ -f "$DIRETRIZES" ]; then
@@ -74,7 +85,7 @@ fi
 # ────────────────────────────────────────────────────────────────
 # 4. SELF — diário da persona (apenas personality=ON)
 # ────────────────────────────────────────────────────────────────
-if [ "$PERSONALITY" = "ON" ]; then
+if [ "$PERSONALITY" = "ON" ] && [ "$AGENT_MODE" != "1" ]; then
   SELF="$WS/zion/system/SELF.md"
   [ -f "$SELF" ] || SELF="/workspace/zion/system/SELF.md"
   if [ -f "$SELF" ]; then
@@ -153,10 +164,32 @@ if [ -f "$USAGE_FILE" ]; then
 fi
 
 # ────────────────────────────────────────────────────────────────
+# 6.5 AGENT_MODE / TASK_MODE (apenas quando AGENT_MODE=1)
+# ────────────────────────────────────────────────────────────────
+if [ "$AGENT_MODE" = "1" ]; then
+  if [ -n "$AGENT_NAME" ] && [ -n "$TASK_NAME" ]; then
+    echo "---AGENT_MODE---"
+    echo "Você está rodando no modo $AGENT_NAME. Siga suas diretrizes de execução automática."
+    echo "---/AGENT_MODE---"
+    echo "---TASK_MODE---"
+    echo "Você é o agente executor $AGENT_NAME e deve executar a task: $TASK_NAME"
+    echo "---/TASK_MODE---"
+  elif [ -n "$AGENT_NAME" ]; then
+    echo "---AGENT_MODE---"
+    echo "Você está rodando no modo $AGENT_NAME. Siga suas diretrizes de execução automática."
+    echo "---/AGENT_MODE---"
+  elif [ -n "$TASK_NAME" ]; then
+    echo "---TASK_MODE---"
+    echo "Você é o agente executor genérico e deve executar a task: $TASK_NAME"
+    echo "---/TASK_MODE---"
+  fi
+fi
+
+# ────────────────────────────────────────────────────────────────
 # 7. PERSONALITY (apenas personality=ON)
 #    Cascata: PERSONALITY.md → persona file → avatar file
 # ────────────────────────────────────────────────────────────────
-if [ "$PERSONALITY" = "ON" ]; then
+if [ "$PERSONALITY" = "ON" ] && [ "$AGENT_MODE" != "1" ]; then
   PERS_MD="$WS/zion/system/PERSONALITY.md"
   [ -f "$PERS_MD" ] || PERS_MD="/workspace/zion/system/PERSONALITY.md"
   if [ -f "$PERS_MD" ]; then

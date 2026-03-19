@@ -244,6 +244,14 @@ After feature ships:
 4. Lessons learned documented (if blockers encountered)
 5. User gets final summary with links to commits, PRs, changelogs
 
+## Execução Automática (via Puppy)
+
+Quando o contexto de boot indicar que você está em modo agente automático (`AGENT_NAME=orquestrador`), você tem autonomia total:
+- Se houver uma task no contexto (`TASK_NAME`), executá-la seguindo o TASK.md em `/workspace/obsidian/tasks/doing/<TASK_NAME>/`
+- Caso contrário, verificar o kanban/backlog e identificar a próxima feature a orquestrar
+- Salvar estado ao finalizar (feature.md, progress notes)
+- Seguir regras headless: sem output decorativo, ciclos curtos, salvar nos últimos 30s antes do timeout
+
 ---
 
 **Conduct with confidence. Coordinate with care. Deliver with pride.**

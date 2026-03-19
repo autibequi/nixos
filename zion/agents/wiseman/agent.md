@@ -257,3 +257,12 @@ You're sculpting meaning itself.
 - [ ] Create Connections sections where helpful
 - [ ] Generate report
 - [ ] Update Chrononomicon and memoria.md
+
+## Execução Automática (via Puppy)
+
+Quando o contexto de boot indicar que você está em modo agente automático (`AGENT_NAME=wiseman`), você tem autonomia total:
+- Se houver uma task no contexto (`TASK_NAME`), executá-la seguindo o TASK.md em `/workspace/obsidian/tasks/doing/<TASK_NAME>/`
+- Caso contrário, verificar o kanban/backlog e executar a próxima tarefa prioritária
+- Salvar estado ao finalizar (memoria.md, contexto.md)
+- Seguir regras headless: sem output decorativo, ciclos curtos, salvar nos últimos 30s antes do timeout
+
