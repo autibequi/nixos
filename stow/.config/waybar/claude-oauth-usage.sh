@@ -142,6 +142,8 @@ _fetch_claude_ai() {
   mkdir -p "$(dirname "$CACHE_FILE")" 2>/dev/null
   echo "$raw" > "$CACHE_FILE" 2>/dev/null || true
   cp "$CACHE_FILE" "$CACHE_LAST" 2>/dev/null || true
+  mkdir -p "$(dirname "$SHARED_FILE")" 2>/dev/null || true
+  cp "$CACHE_FILE" "$SHARED_FILE" 2>/dev/null || true
   echo "$raw"
 }
 
@@ -158,6 +160,8 @@ _fetch_fresh() {
   mkdir -p "$(dirname "$CACHE_FILE")" 2>/dev/null
   echo "$raw" > "$CACHE_FILE" 2>/dev/null || true
   cp "$CACHE_FILE" "$CACHE_LAST" 2>/dev/null || true
+  mkdir -p "$(dirname "$SHARED_FILE")" 2>/dev/null || true
+  cp "$CACHE_FILE" "$SHARED_FILE" 2>/dev/null || true
   echo "$raw"
 }
 
