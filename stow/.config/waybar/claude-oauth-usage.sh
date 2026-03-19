@@ -161,47 +161,51 @@ _fetch_fresh() {
   echo "$raw"
 }
 
-# --- obter JSON: shared (container) → cache → fetch → last ---
-# Prioridade: shared file (escrito pelo container, sem restricao de rede) → cache local → fetch API → last known
+# --- obter JSON: shared (container) → cache → fetch API → shared expirado → last ---
+# Prioridade: shared file recente → cache local → fetch API → shared expirado (stale) → last known
+# Nunca mostra NO enquanto houver qualquer dado salvo, independente da idade.
 SHARED_FILE="${CLAUDE_DIR}/claude-usage-shared.json"
 USED_SOURCE=""
 JSON=""
 
-# 1. shared file do container (fonte principal quando host nao alcanca a API)
+_has_five_hour() { echo "$1" | $JQ -e '.five_hour' &>/dev/null; }
+
+# 1. shared file do container — TTL 8h (container atualiza a cada sessao)
 if [[ -f "$SHARED_FILE" ]] && [[ "$FORCE_REFRESH" != "1" ]]; then
   _shmtime=$(date -r "$SHARED_FILE" +%s 2>/dev/null) || _shmtime=0
-  _shnow=$(date +%s)
-  # usar shared se tiver menos de 2h (container atualiza a cada sessao)
-  if (( _shnow - _shmtime < 7200 )); then
-    JSON=$(cat "$SHARED_FILE") && USED_SOURCE="container" || true
+  if (( $(date +%s) - _shmtime < 28800 )); then
+    _tmp=$(cat "$SHARED_FILE" 2>/dev/null) && _has_five_hour "$_tmp" && JSON="$_tmp" && USED_SOURCE="container" || true
   fi
 fi
 
 # 2. cache local (60s TTL)
-if ([[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null) && _cache_valid; then
-  JSON=$(cat "$CACHE_FILE") && USED_SOURCE="cache" || true
+if [[ -z "$JSON" ]] && _cache_valid; then
+  _tmp=$(cat "$CACHE_FILE" 2>/dev/null) && _has_five_hour "$_tmp" && JSON="$_tmp" && USED_SOURCE="cache" || true
 fi
 
-# 3. fetch da API (funciona se host tem acesso)
-if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null || [[ "$FORCE_REFRESH" == "1" ]]; then
+# 3. fetch da API (funciona se host tem acesso direto; no container sempre funciona)
+if [[ -z "$JSON" ]] || [[ "$FORCE_REFRESH" == "1" ]]; then
   _fetched=$(_fetch_claude_ai 2>/dev/null) || true
-  if [[ -n "$_fetched" ]] && echo "$_fetched" | $JQ -e '.five_hour' &>/dev/null; then
+  if [[ -n "$_fetched" ]] && _has_five_hour "$_fetched"; then
     JSON="$_fetched"; USED_SOURCE="claude.ai"
   else
     _fetched=$(_fetch_fresh 2>/dev/null) || true
-    if [[ -n "$_fetched" ]] && echo "$_fetched" | $JQ -e '.five_hour' &>/dev/null; then
-      JSON="$_fetched"; USED_SOURCE="OAuth"
-    fi
+    [[ -n "$_fetched" ]] && _has_five_hour "$_fetched" && JSON="$_fetched" && USED_SOURCE="OAuth" || true
   fi
 fi
 
-# 4. ultimo valor bom
-if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
-  [[ -f "$CACHE_LAST" ]] && JSON=$(cat "$CACHE_LAST") && USED_SOURCE="last" || true
+# 4. shared file expirado (stale) — melhor que NO
+if [[ -z "$JSON" ]] && [[ -f "$SHARED_FILE" ]]; then
+  _tmp=$(cat "$SHARED_FILE" 2>/dev/null) && _has_five_hour "$_tmp" && JSON="$_tmp" && USED_SOURCE="container(stale)" || true
 fi
 
-if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
-  [[ "$MODE" == "--waybar" ]] && _no_claude_bar "API limitada. Aguarde." || echo "󱙺 rate limit"
+# 5. ultimo valor bom conhecido
+if [[ -z "$JSON" ]] && [[ -f "$CACHE_LAST" ]]; then
+  _tmp=$(cat "$CACHE_LAST" 2>/dev/null) && _has_five_hour "$_tmp" && JSON="$_tmp" && USED_SOURCE="last" || true
+fi
+
+if [[ -z "$JSON" ]]; then
+  [[ "$MODE" == "--waybar" ]] && _no_claude_bar "sem dados — rode: zion claude usage --refresh" || echo "󱙺 --"
   exit 0
 fi
 
