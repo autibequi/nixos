@@ -259,7 +259,7 @@
   "custom/claude-usage": {
     "exec": "zion claude usage --waybar 2>/dev/null || echo \"{\\\"text\\\":\\\" 󱙺 --\\\",\\\"tooltip\\\":\\\"Claude: erro ao rodar script\\\",\\\"class\\\":\\\"\\\"}\"",
     "return-type": "json",
-    "interval": 15,
+    "interval": 120,
     "signal": 8,
     "on-click": "zion claude usage --waybar --refresh; pkill -RTMIN+8 waybar",
     "format": "{}",
@@ -274,7 +274,7 @@
     "tooltip": true,
     "escape": false,
     "on-click": "alacritty -e bash -c '$HOME/.config/waybar/obsidian-sync-panel.sh'",
-    "on-click-right": "xdg-open $HOME/nixos/modules/obsidian-sync.nix"
+    "on-click-right": "alacritty -e journalctl -u obsidian-sync -f"
   },
   "custom/cpu-bar": {
     "exec": "$HOME/.config/waybar/waybar-resource-bar.sh cpu",
