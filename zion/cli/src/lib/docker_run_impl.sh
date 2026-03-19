@@ -39,10 +39,13 @@ _zion_dk_run() {
     *)      export APP_ENV_FILE="$env" ;;
   esac
 
-  # Mapear env para nome do npm script (front-student usa devbox/qa/prod)
+  # Mapear env para nome do npm script (front-student usa sandbox/devbox/qa/prod)
+  # sand -> sandbox (aponta pra api.estrategia-sandbox.com.br, sem reverseproxy local)
+  # local -> devbox (aponta pra api.local.estrategia-sandbox.com.br, requer reverseproxy + monolito local)
   case "$env" in
-    sand|local) export NPM_SCRIPT_ENV="devbox" ;;
-    *)          export NPM_SCRIPT_ENV="$env" ;;
+    sand)  export NPM_SCRIPT_ENV="sandbox" ;;
+    local) export NPM_SCRIPT_ENV="devbox" ;;
+    *)     export NPM_SCRIPT_ENV="$env" ;;
   esac
 
   # Vertical (front-student: carreiras-juridicas, concursos, medicina, etc.)
@@ -138,5 +141,11 @@ _zion_dk_run() {
   # seguir logs ao vivo (Ctrl+C sai mas container continua)
   printf "  \033[2m[Ctrl+C para sair — container continua] reconectar: zion docker %s logs -f\033[0m\n" "$service"
   printf "  \033[2m%s\033[0m\n\n" "─────────────────────────────────────────"
+
+  # Identificador no título do terminal (aba/janela e pane tmux)
+  local label="zion · $service [$env]"
+  printf "\033]0;%s\007" "$label"                    # título da aba/janela
+  printf "\033k%s\033\\" "$label" 2>/dev/null || true # pane tmux
+
   docker compose $COMPOSE_ARGS logs -f --no-log-prefix --tail 50
 }
