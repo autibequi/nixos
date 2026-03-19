@@ -1,5 +1,5 @@
 # zion hooks <hook> [KEY=VALUE...] — Executa um hook e mostra o output (preview do que seria injetado).
-# Util para debug de session-start, pre-tool-use, etc. sem abrir uma sessao completa.
+# Util para debug de session-start, pre-tool-use, user-prompt-submit, etc. sem abrir uma sessao completa.
 
 HOOKS_DIR=""
 for _d in \
@@ -53,4 +53,16 @@ if [[ -n "${args[env_overrides]:-}" ]]; then
   done
 fi
 
-exec bash "$HOOK_FILE"
+# Se stdin é TTY (chamada manual sem pipe), injeta JSON default pra não bloquear
+if [[ -t 0 ]]; then
+  # Infere payload padrão pelo nome do hook
+  case "$HOOK" in
+    startup-hook)       _default='{"prompt":"startup"}' ;;
+    session-start)      _default='{"session_id":"test","prompt":"startup"}' ;;
+    user-prompt-submit) _default='{"prompt":"teste"}' ;;
+    *)                  _default='{}' ;;
+  esac
+  echo "$_default" | bash "$HOOK_FILE"
+else
+  exec bash "$HOOK_FILE"
+fi

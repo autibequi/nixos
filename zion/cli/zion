@@ -44,6 +44,7 @@ zion_usage() {
   printf "  %s   Define engine padrão em ~/.zion (engine= claude | opencode | cursor).\n" "set     "
   printf "  %s   Gerencia o Puppy worker (container persistente + task runner).\n" "puppy   "
   printf "  %s   Gerencia servicos Docker da estrategia\n" "docker  "
+  printf "  %s   Executa um hook do Claude Code e mostra o que seria injetado.\n" "hooks   "
   printf "  %s   Lista worktrees dos servicos Docker e permite escolher worktree + comando interativamente.\n" "worktree"
   printf "  %s   Cria task + card no kanban (Puppy).\n" "new-task"
   printf "  %s   Status agregado: sessoes, docker services e puppy workers.\n" "status  "
@@ -2409,6 +2410,48 @@ zion_docker_front_student_server_stop_usage() {
 }
 
 # :command.usage
+zion_hooks_usage() {
+  printf "zion hooks - Executa um hook do Claude Code e mostra o que seria injetado.\n\n"
+  printf "Alias: hook\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  zion hooks HOOK [ENV_OVERRIDES...] [OPTIONS]\n"
+  printf "  zion hooks --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--list, -l"
+    printf "    Lista hooks disponiveis\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "Arguments:"
+
+    # :argument.usage
+    printf "  %s\n" "HOOK"
+    printf "    Nome do hook (ex: session-start, pre-tool-use, user-prompt-submit)\n"
+    echo
+
+    # :argument.usage
+    printf "  %s\n" "ENV_OVERRIDES..."
+    printf "    Variaveis de ambiente KEY=VALUE para override (ex: DEBUG=ON PERSONALITY=OFF)\n"
+    echo
+
+  fi
+}
+
+# :command.usage
 zion_worktree_usage() {
   printf "zion worktree - Lista worktrees dos servicos Docker e permite escolher worktree + comando interativamente.\n\n"
   printf "Alias: wt\n"
@@ -2520,13 +2563,19 @@ zion_stow_usage() {
   printf "zion stow - Deploy dotfiles no host via GNU stow (restow, delete, status).\n\n"
 
   printf "%s\n" "Usage:"
-  printf "  zion stow [ACTION]\n"
+  printf "  zion stow [ACTION] [OPTIONS]\n"
   printf "  zion stow --help | -h\n"
   echo
 
   # :command.long_usage
   if [[ -n "$long_usage" ]]; then
     printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--reload, -r"
+    printf "    Após deploy, recarrega Hyprland (hyprctl reload) e Waybar (SIGUSR2)\n"
+    echo
 
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
@@ -4167,22 +4216,11 @@ _zion_host_exec() {
 zion_continue_command() {
 
   # src/commands/continue.sh
-  # Continua a última sessão (todos os engines). Sem subcomando = mesmo que zion continue.
-  zion_load_config
-  engine="$(zion_resolve_engine 0)"
-  [[ -z "$engine" ]] && engine="cursor"
-  mount_path="$(zion_resolve_dir)"
-  proj_slug="$(zion_proj_slug "$mount_path")"
-  mount_opts="$(zion_mount_opts)"
-
-  if [[ "$engine" == "opencode" ]]; then
-    proj_name="$(zion_proj_name_open "$proj_slug")"
-  else
-    proj_name="$(zion_proj_name "$proj_slug")"
-  fi
-
-  echo "[zion continue] engine=$engine → $proj_name (última sessão, mount: ${mount_opts})"
-  zion_session_run "$engine" "$proj_name" "$mount_path" "$mount_opts" "--continue"
+  echo "# This file is located at 'src/commands/continue.sh'."
+  echo "# It contains the implementation for the 'zion continue' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_continue_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4190,32 +4228,11 @@ zion_continue_command() {
 zion_new_command() {
 
   # src/commands/new_session.sh
-  # Nova sessão no container. Exige --engine (ou engine= em ~/.zion).
-  zion_load_config
-  engine=$(zion_resolve_engine 1)
-  mount_path="$(zion_resolve_dir)"
-  proj_slug="$(zion_proj_slug "$mount_path")"
-  mount_opts="$(zion_mount_opts)"
-  flag_init_md="${args['--init-md']:-}"
-  initial_md="$(zion_initial_md "$mount_path")"
-  resume_id="${args['--resume']:-}"
-
-  if [[ "$engine" == "opencode" ]]; then
-    proj_name="$(zion_proj_name_open "$proj_slug")"
-  else
-    proj_name="$(zion_proj_name "$proj_slug")"
-  fi
-
-  echo "[zion new] engine=$engine ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
-
-  # Build engine_args string
-  engine_args=""
-  [[ -n "$initial_md" ]] && engine_args+=" --init-md=$initial_md"
-  if [[ -n "$resume_id" ]]; then
-    [[ "$resume_id" == "1" ]] && engine_args+=" --resume" || engine_args+=" --resume=$resume_id"
-  fi
-
-  zion_session_run "$engine" "$proj_name" "$mount_path" "$mount_opts" "$engine_args"
+  echo "# This file is located at 'src/commands/new_session.sh'."
+  echo "# It contains the implementation for the 'zion new' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_new_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4223,14 +4240,11 @@ zion_new_command() {
 zion_shell_command() {
 
   # src/commands/shell.sh
-  zion_load_config
-  mount_path="$(zion_resolve_dir)"
-  proj_slug="$(zion_proj_slug "$mount_path")"
-  proj_name="$(zion_proj_name "$proj_slug")"
-  mount_opts="$(zion_mount_opts)"
-  CLAUDIO_MOUNT="$mount_path" CLAUDIO_MOUNT_OPTS="$mount_opts" OBSIDIAN_PATH="$zion_obsidian_path" \
-    zion_compose_cmd -p "$proj_name" run --rm -it \
-    --entrypoint /entrypoint.sh -e CLAUDIO_MOUNT="$mount_path" sandbox /bin/bash
+  echo "# This file is located at 'src/commands/shell.sh'."
+  echo "# It contains the implementation for the 'zion shell' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_shell_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4238,51 +4252,11 @@ zion_shell_command() {
 zion_resume_command() {
 
   # src/commands/resume.sh
-  # Mostra lista de sessões e permite escolher qual retomar. Com --resume=UUID pula a lista.
-  zion_load_config
-  engine="$(zion_resolve_engine 0)"
-  [[ -z "$engine" ]] && engine="cursor"
-  mount_path="$(zion_resolve_dir)"
-  proj_slug="$(zion_proj_slug "$mount_path")"
-  proj_name="$(zion_proj_name "$proj_slug")"
-  mount_opts="$(zion_mount_opts)"
-  resume_id="${args['--resume']:-}"
-
-  # Se não passou --resume, mostrar lista e pedir escolha (só se TTY)
-  if [[ -z "$resume_id" ]]; then
-    if [[ -t 0 ]]; then
-      echo "[zion resume] Listando sessões (engine=$engine)..."
-      list_out=""
-      if [[ "$engine" == "cursor" ]]; then
-        zion_compose_env "$mount_path" "$mount_opts"
-        list_out=$(zion_compose_cmd -p "$proj_name" run --rm -T \
-          --entrypoint /entrypoint.sh -e CLAUDIO_MOUNT="$mount_path" sandbox \
-          /bin/bash -c ". /workspace/zion/scripts/bootstrap.sh 2>/dev/null; cd /workspace/mnt 2>/dev/null; agent list 2>/dev/null || true" 2>/dev/null) || true
-      fi
-      if [[ -n "$list_out" ]]; then
-        echo "$list_out"
-      else
-        echo "Lista não disponível para este engine. Use 'zion continue' (ou só 'zion') para última sessão."
-      fi
-      echo ""
-      read -r -p "UUID da sessão (ou Enter para última): " resume_id
-    fi
-    # Sem TTY ou Enter = última sessão (equivalente a continue)
-    [[ -z "$resume_id" ]] && resume_id="1"
-  fi
-
-  if [[ "$engine" == "opencode" ]]; then
-    proj_name="$(zion_proj_name_open "$proj_slug")"
-  fi
-
-  echo "[zion resume] engine=$engine → $proj_name"
-
-  # resume_id "1" = última sessão (--continue)
-  if [[ "$resume_id" == "1" ]]; then
-    zion_session_run "$engine" "$proj_name" "$mount_path" "$mount_opts" "--continue"
-  else
-    zion_session_run "$engine" "$proj_name" "$mount_path" "$mount_opts" "--resume=$resume_id"
-  fi
+  echo "# This file is located at 'src/commands/resume.sh'."
+  echo "# It contains the implementation for the 'zion resume' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_resume_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4290,20 +4264,11 @@ zion_resume_command() {
 zion_start_command() {
 
   # src/commands/start.sh
-  # DEPRECATED: use 'zion new --engine=claude --danger' instead.
-  # Kept for backwards compatibility — delegates to new session with claude engine.
-  echo "[zion start] DEPRECATED — use 'zion new --engine=claude --danger'" >&2
-  zion_load_config
-  mount_path="$(zion_resolve_dir)"
-  proj_slug="$(zion_proj_slug "$mount_path")"
-  proj_name="$(zion_proj_name "$proj_slug")"
-  mount_opts="$(zion_mount_opts)"
-
-  echo "[zion start] ${proj_slug} → ${proj_name}"
-
-  # Force danger mode (original behavior: --permission-mode bypassPermissions)
-  export ZION_DANGER=1
-  zion_session_run "claude" "$proj_name" "$mount_path" "$mount_opts" ""
+  echo "# This file is located at 'src/commands/start.sh'."
+  echo "# It contains the implementation for the 'zion start' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_start_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4311,27 +4276,11 @@ zion_start_command() {
 zion_claude_new_command() {
 
   # src/commands/engine_claude.sh
-  # Atalho: zion claude = zion new --engine=claude
-  args['--engine']="claude"
-  zion_load_config
-  engine="claude"
-  mount_path="$(zion_resolve_dir)"
-  proj_slug="$(zion_proj_slug "$mount_path")"
-  proj_name="$(zion_proj_name "$proj_slug")"
-  mount_opts="$(zion_mount_opts)"
-  flag_init_md="${args['--init-md']:-}"
-  initial_md="$(zion_initial_md "$mount_path")"
-  resume_id="${args['--resume']:-}"
-
-  echo "[zion claude] ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
-
-  engine_args=""
-  [[ -n "$initial_md" ]] && engine_args+=" --init-md=$initial_md"
-  if [[ -n "$resume_id" ]]; then
-    [[ "$resume_id" == "1" ]] && engine_args+=" --resume" || engine_args+=" --resume=$resume_id"
-  fi
-
-  zion_session_run "claude" "$proj_name" "$mount_path" "$mount_opts" "$engine_args"
+  echo "# This file is located at 'src/commands/engine_claude.sh'."
+  echo "# It contains the implementation for the 'zion claude new' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_claude_new_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4339,42 +4288,11 @@ zion_claude_new_command() {
 zion_claude_usage_command() {
 
   # src/commands/claude_usage.sh
-  # zion claude usage — Estatísticas de uso Claude (OAuth / claude.ai).
-  # Delega para o script do waybar; saída no formato que o usage bar consome (--waybar) ou JSON bruto.
-  # Uso: zion claude usage [--waybar] [--json] [--refresh]
-
-  # Resolve o script: repo (stow) ou deploy em ~/.config/waybar
-  zion_nixos_dir="${ZION_NIXOS_DIR:-$HOME/nixos}"
-  usage_script=""
-  for candidate in \
-    "$HOME/.config/waybar/claude-oauth-usage.sh" \
-    "$zion_nixos_dir/stow/.config/waybar/claude-oauth-usage.sh" \
-    "$HOME/nixos/stow/.config/waybar/claude-oauth-usage.sh" \
-    "/workspace/mnt/stow/.config/waybar/claude-oauth-usage.sh"; do
-    if [[ -x "$candidate" ]] || [[ -f "$candidate" ]]; then
-      usage_script="$candidate"
-      break
-    fi
-  done
-
-  if [[ -z "$usage_script" ]] || [[ ! -f "$usage_script" ]]; then
-    echo "zion claude usage: script não encontrado (procure em ~/.config/waybar/claude-oauth-usage.sh ou repo stow)" >&2
-    exit 1
-  fi
-
-  # --no-cache / --refresh → passa --refresh para o script
-  _no_cache=""
-  [[ -n "${args[--no-cache]:-}" || -n "${args[--refresh]:-}" ]] && _no_cache="1"
-
-  if [[ -n "${args[--waybar]:-}" ]]; then
-    run_args=(--waybar)
-    [[ -n "$_no_cache" ]] && run_args+=(--refresh)
-    exec bash "$usage_script" "${run_args[@]}"
-  else
-    run_args=()
-    [[ -n "$_no_cache" ]] && run_args+=(--refresh)
-    exec bash "$usage_script" "${run_args[@]}"
-  fi
+  echo "# This file is located at 'src/commands/claude_usage.sh'."
+  echo "# It contains the implementation for the 'zion claude usage' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_claude_usage_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4382,27 +4300,11 @@ zion_claude_usage_command() {
 zion_claude_token_command() {
 
   # src/commands/claude_token.sh
-  # zion claude token — Imprime o OAuth access token do Claude.
-  # Util para curl manual: TOKEN=$(zion claude token)
-
-  CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
-  CREDS="${CLAUDE_DIR}/.credentials.json"
-
-  if [[ ! -f "$CREDS" ]]; then
-    echo "Erro: credenciais nao encontradas em $CREDS" >&2
-    exit 1
-  fi
-
-  # Extrai token sem depender de jq (grep PCRE com fallback sed)
-  TOKEN=$(grep -oP '"accessToken"\s*:\s*"\K[^"]+' "$CREDS" 2>/dev/null)
-  [[ -z "$TOKEN" ]] && TOKEN=$(sed -n 's/.*"accessToken"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$CREDS" 2>/dev/null | head -1)
-
-  if [[ -z "$TOKEN" ]]; then
-    echo "Erro: token nao encontrado em $CREDS" >&2
-    exit 1
-  fi
-
-  echo "$TOKEN"
+  echo "# This file is located at 'src/commands/claude_token.sh'."
+  echo "# It contains the implementation for the 'zion claude token' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_claude_token_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4410,27 +4312,11 @@ zion_claude_token_command() {
 zion_cursor_command() {
 
   # src/commands/engine_cursor.sh
-  # Atalho: zion cursor = zion new --engine=cursor
-  args['--engine']="cursor"
-  zion_load_config
-  engine="cursor"
-  mount_path="$(zion_resolve_dir)"
-  proj_slug="$(zion_proj_slug "$mount_path")"
-  proj_name="$(zion_proj_name "$proj_slug")"
-  mount_opts="$(zion_mount_opts)"
-  flag_init_md="${args['--init-md']:-}"
-  initial_md="$(zion_initial_md "$mount_path")"
-  resume_id="${args['--resume']:-}"
-
-  echo "[zion cursor] ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
-
-  engine_args=""
-  [[ -n "$initial_md" ]] && engine_args+=" --init-md=$initial_md"
-  if [[ -n "$resume_id" ]]; then
-    [[ "$resume_id" == "1" ]] && engine_args+=" --resume" || engine_args+=" --resume=$resume_id"
-  fi
-
-  zion_session_run "cursor" "$proj_name" "$mount_path" "$mount_opts" "$engine_args"
+  echo "# This file is located at 'src/commands/engine_cursor.sh'."
+  echo "# It contains the implementation for the 'zion cursor' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_cursor_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4438,27 +4324,11 @@ zion_cursor_command() {
 zion_opencode_command() {
 
   # src/commands/engine_opencode.sh
-  # Atalho: zion opencode = zion new --engine=opencode
-  args['--engine']="opencode"
-  zion_load_config
-  engine="opencode"
-  mount_path="$(zion_resolve_dir)"
-  proj_slug="$(zion_proj_slug "$mount_path")"
-  proj_name="$(zion_proj_name_open "$proj_slug")"
-  mount_opts="$(zion_mount_opts)"
-  flag_init_md="${args['--init-md']:-}"
-  initial_md="$(zion_initial_md "$mount_path")"
-  resume_id="${args['--resume']:-}"
-
-  echo "[zion opencode] ${proj_slug} → ${proj_name} (mount: ${mount_opts})"
-
-  engine_args=""
-  [[ -n "$initial_md" ]] && engine_args+=" --init-md=$initial_md"
-  if [[ -n "$resume_id" ]]; then
-    [[ "$resume_id" == "1" ]] && engine_args+=" --resume" || engine_args+=" --resume=$resume_id"
-  fi
-
-  zion_session_run "opencode" "$proj_name" "$mount_path" "$mount_opts" "$engine_args"
+  echo "# This file is located at 'src/commands/engine_opencode.sh'."
+  echo "# It contains the implementation for the 'zion opencode' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_opencode_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4466,39 +4336,11 @@ zion_opencode_command() {
 zion_ask_command() {
 
   # src/commands/ask.sh
-  # Atalho: zion ask = zion puppy query.
-  # Envia um prompt ao Claude dentro do container puppy.
-  zion_load_config
-
-  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
-  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
-  prompt="${args[prompt]}"
-  headless="${args[--headless]}"
-  timeout_secs="${args[--timeout]:-300}"
-  model="${args[--model]:-haiku}"
-
-  # Build env vars to pass into the container
-  env_flags=()
-  env_flags+=(-e "HEADLESS=${headless:+1}")
-  env_flags+=(-e "PUPPY_TIMEOUT=$timeout_secs")
-
-  # Build the final prompt with headless context
-  final_prompt="$prompt"
-
-  if [[ -n "$headless" ]]; then
-    deadline_str="$(date -u -d "+${timeout_secs} seconds" +%H:%M:%S 2>/dev/null || echo "${timeout_secs}s from now")"
-    headless_header="[HEADLESS MODE] Timeout: ${timeout_secs}s | Deadline: ${deadline_str}"
-    headless_rules="REGRAS HEADLESS: Ninguem esta observando. Nao espere input. Va o mais longe que puder. Voce tem ${timeout_secs}s. Reserve os ultimos 30s para salvar estado. Se o tempo acabar sem salvar, VOCE PERDE TODO O PROGRESSO. Priorize: executar > salvar estado > comunicar resultados."
-    final_prompt="${headless_header} ${headless_rules} --- ${prompt}"
-  fi
-
-  OBSIDIAN_PATH="$zion_obsidian_path" \
-    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
-    exec "${env_flags[@]}" puppy \
-    timeout "$timeout_secs" claude \
-      --permission-mode bypassPermissions \
-      --model "$model" \
-      -p "$final_prompt"
+  echo "# This file is located at 'src/commands/ask.sh'."
+  echo "# It contains the implementation for the 'zion ask' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_ask_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4506,8 +4348,11 @@ zion_ask_command() {
 zion_build_command() {
 
   # src/commands/build.sh
-  # Build da imagem com BuildKit (habilita --mount=type=cache no Dockerfile)
-  cd "$zion_compose_dir" && DOCKER_BUILDKIT=1 zion_compose_cmd build
+  echo "# This file is located at 'src/commands/build.sh'."
+  echo "# It contains the implementation for the 'zion build' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_build_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4515,7 +4360,11 @@ zion_build_command() {
 zion_down_command() {
 
   # src/commands/down.sh
-  zion_compose_cmd down
+  echo "# This file is located at 'src/commands/down.sh'."
+  echo "# It contains the implementation for the 'zion down' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_down_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4523,7 +4372,11 @@ zion_down_command() {
 zion_destroy_command() {
 
   # src/commands/destroy.sh
-  zion_compose_cmd down --rmi all --volumes
+  echo "# This file is located at 'src/commands/destroy.sh'."
+  echo "# It contains the implementation for the 'zion destroy' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_destroy_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4531,77 +4384,11 @@ zion_destroy_command() {
 zion_clean_command() {
 
   # src/commands/clean.sh
-  # Remove sessoes Zion orfas: exited, dead, ou running com apenas sleep infinity.
-  zion_load_config
-
-  RESET='\033[0m'
-  BOLD='\033[1m'
-  DIM='\033[2m'
-  GREEN='\033[32m'
-  RED='\033[31m'
-  YELLOW='\033[33m'
-  CYAN='\033[36m'
-
-  force="${args[--force]:-}"
-
-  # Collect all zion session containers (exclude zion-dk-* = docker services)
-  all_sessions=$(docker ps -a --filter "name=zion-" \
-    --format "{{.ID}}\t{{.Names}}\t{{.Status}}\t{{.State}}" 2>/dev/null \
-    | grep -v "zion-dk-" || true)
-
-  [[ -z "$all_sessions" ]] && { echo -e "${GREEN}●${RESET} Nenhuma sessao encontrada."; exit 0; }
-
-  stale_ids=()
-  stale_lines=()
-
-  while IFS=$'\t' read -r id name status state; do
-    [[ -z "$id" ]] && continue
-
-    if [[ "$state" != "running" ]]; then
-      # Exited, dead, created — sempre stale
-      stale_ids+=("$id")
-      stale_lines+=("${RED}○${RESET} ${name#zion-}  ${DIM}${status}${RESET}")
-      continue
-    fi
-
-    # Running: check if it's an orphan (only sleep/bash, no agent process)
-    # A live session has claude, cursor, or opencode running inside
-    procs=$(docker exec "$id" ps -eo comm 2>/dev/null | grep -cE '(claude|cursor|opencode)' || true)
-    procs="${procs:-0}"
-    if [[ "$procs" -eq 0 ]]; then
-      stale_ids+=("$id")
-      stale_lines+=("${YELLOW}◐${RESET} ${name#zion-}  ${DIM}${status} (orphan — no agent)${RESET}")
-    fi
-  done <<< "$all_sessions"
-
-  if [[ "${#stale_ids[@]}" -eq 0 ]]; then
-    echo -e "${GREEN}●${RESET} Nenhum container orfao para limpar."
-    exit 0
-  fi
-
-  count="${#stale_ids[@]}"
-  echo -e "${BOLD}${CYAN}Sessoes para remover:${RESET} ${count}\n"
-
-  for line in "${stale_lines[@]}"; do
-    echo -e "  $line"
-  done
-
-  echo ""
-
-  if [[ -z "$force" ]]; then
-    read -rp "Remover ${count} container(s)? [y/N] " confirm
-    [[ "$confirm" != "y" && "$confirm" != "Y" ]] && { echo "Cancelado."; exit 0; }
-  fi
-
-  removed=0
-  for id in "${stale_ids[@]}"; do
-    docker rm -f "$id" >/dev/null 2>&1 && removed=$((removed + 1))
-  done
-
-  echo -e "\n${GREEN}●${RESET} ${removed}/${count} containers removidos."
-
-  # Prune dangling networks
-  docker network prune -f >/dev/null 2>&1 || true
+  echo "# This file is located at 'src/commands/clean.sh'."
+  echo "# It contains the implementation for the 'zion clean' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_clean_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4609,22 +4396,11 @@ zion_clean_command() {
 zion_update_command() {
 
   # src/commands/update.sh
-  # Regenera CLI (bashly), instala/atualiza symlink e atualiza scripts/bootstrap.sh
-  cd "$zion_compose_dir" && bashly generate
-  bin_dest="$zion_nixos_dir/stow/.local/bin/zion"
-  mkdir -p "$(dirname "$bin_dest")"
-  if [[ ! -L "$bin_dest" ]]; then
-    ln -sf "$zion_compose_dir/zion" "$bin_dest"
-    echo "[zion update] symlink criado: $bin_dest"
-  else
-    echo "[zion update] zion regenerado (symlink ja existe)"
-  fi
-  # Atualiza scripts/bootstrap.sh a partir da fonte (mounts sob /workspace)
-  if [[ -f "$zion_nixos_dir/zion/scripts/bootstrap-dashboard.sh" ]]; then
-    mkdir -p "$zion_nixos_dir/scripts"
-    install -m 755 "$zion_nixos_dir/zion/scripts/bootstrap-dashboard.sh" "$zion_nixos_dir/scripts/bootstrap.sh"
-    echo "[zion update] scripts/bootstrap.sh atualizado"
-  fi
+  echo "# This file is located at 'src/commands/update.sh'."
+  echo "# It contains the implementation for the 'zion update' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_update_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4632,37 +4408,11 @@ zion_update_command() {
 zion_init_command() {
 
   # src/commands/init.sh
-  # Cria ~/.zion a partir de config.example
-  dest="${ZION_CONFIG:-$HOME/.zion}"
-  src="$zion_compose_dir/config.example"
-  if [[ ! -f "$src" ]]; then
-    echo "zion init: config.example não encontrado em $src" >&2
-    exit 1
-  fi
-  if [[ -f "$dest" ]] && [[ -z "${args['--force']:-${flag_force:-}}" ]]; then
-    echo "[zion init] $dest já existe (use --force para sobrescrever)"
-    exit 0
-  fi
-  cp "$src" "$dest"
-  chmod 600 "$dest"
-  echo "[zion init] Criado $dest — edite e preencha engine=, GH_TOKEN=, ANTHROPIC_API_KEY="
-
-  # Garante PATH no ~/.zshrc e ~/.bashrc para zion funcionar (zsh e bash)
-  bin_dir="$zion_nixos_dir/stow/.local/bin"
-  for rc in "${ZDOTDIR:-$HOME}/.zshrc" "$HOME/.bashrc"; do
-    [[ -d "$bin_dir" ]] || continue
-    [[ -n "$rc" ]] || continue
-    [[ -f "$rc" ]] || touch "$rc"
-    [[ -w "$rc" ]] || continue
-    added=""
-    if ! grep -q "stow/.local/bin" "$rc" 2>/dev/null; then
-      echo "" >> "$rc"
-      echo "# Zion CLI (adicionado por zion init)" >> "$rc"
-      printf 'export PATH="%s:$PATH"\n' "$bin_dir" >> "$rc"
-      added="PATH "
-    fi
-    [[ -n "$added" ]] && echo "[zion init] ${added}em $rc — rode: source $rc"
-  done
+  echo "# This file is located at 'src/commands/init.sh'."
+  echo "# It contains the implementation for the 'zion init' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_init_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4670,31 +4420,11 @@ zion_init_command() {
 zion_set_command() {
 
   # src/commands/set_engine.sh
-  # Define o engine padrão em ~/.zion
-  engine_arg="${args['engine']:-}"
-  config_file="${ZION_CONFIG:-$HOME/.zion}"
-
-  case "$engine_arg" in
-    claude|opencode|cursor) ;;
-    *)
-      echo "zion set: engine inválido '$engine_arg' (use: claude | opencode | cursor)" >&2
-      exit 1
-      ;;
-  esac
-
-  if [[ ! -f "$config_file" ]]; then
-    echo "zion set: $config_file não encontrado — rode 'zion init' primeiro" >&2
-    exit 1
-  fi
-
-  # Atualiza ou insere engine= no ~/.zion
-  if grep -q "^engine=" "$config_file"; then
-    sed -i "s|^engine=.*|engine=${engine_arg}|" "$config_file"
-  else
-    echo "engine=${engine_arg}" >> "$config_file"
-  fi
-
-  echo "[zion set] engine=${engine_arg} → $config_file"
+  echo "# This file is located at 'src/commands/set_engine.sh'."
+  echo "# It contains the implementation for the 'zion set' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_set_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4702,25 +4432,11 @@ zion_set_command() {
 zion_puppy_start_command() {
 
   # src/commands/puppy_start.sh
-  # Inicia o container puppy persistente.
-  # O daemon é iniciado automaticamente pelo entrypoint do container (após 30s delay).
-  zion_load_config
-
-  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
-  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
-
-  if ! docker network inspect nixos_default &>/dev/null; then
-    echo "[zion puppy] Criando rede nixos_default..."
-    docker network create nixos_default 2>/dev/null || true
-  fi
-
-  echo "[zion puppy] Subindo container puppy..."
-  OBSIDIAN_PATH="$zion_obsidian_path" \
-    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" up -d puppy
-
-  echo "[zion puppy] Container puppy iniciado. Daemon inicia automaticamente em ~30s."
-  echo "[zion puppy] Logs: zion puppy logs -f"
-  echo "[zion puppy] Heartbeat: cat \$OBSIDIAN_PATH/agents/cron/heartbeat"
+  echo "# This file is located at 'src/commands/puppy_start.sh'."
+  echo "# It contains the implementation for the 'zion puppy start' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_puppy_start_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4728,17 +4444,11 @@ zion_puppy_start_command() {
 zion_puppy_stop_command() {
 
   # src/commands/puppy_stop.sh
-  # Para o container puppy.
-  zion_load_config
-
-  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
-  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
-
-  echo "[zion puppy] Parando container..."
-  OBSIDIAN_PATH="$zion_obsidian_path" \
-    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" down
-
-  echo "[zion puppy] Container puppy parado."
+  echo "# This file is located at 'src/commands/puppy_stop.sh'."
+  echo "# It contains the implementation for the 'zion puppy stop' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_puppy_stop_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4746,30 +4456,11 @@ zion_puppy_stop_command() {
 zion_puppy_restart_command() {
 
   # src/commands/puppy_restart.sh
-  # Reinicia o container puppy (stop + start).
-  zion_load_config
-
-  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
-  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
-
-  echo "[zion puppy] Parando container..."
-  OBSIDIAN_PATH="$zion_obsidian_path" \
-    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" down 2>/dev/null || true
-
-  if ! docker network inspect nixos_default &>/dev/null; then
-    docker network create nixos_default 2>/dev/null || true
-  fi
-
-  echo "[zion puppy] Subindo container puppy..."
-  OBSIDIAN_PATH="$zion_obsidian_path" \
-    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" up -d puppy
-
-  echo "[zion puppy] Iniciando daemon interno..."
-  OBSIDIAN_PATH="$zion_obsidian_path" \
-    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
-    exec -d puppy /bin/bash -c "/workspace/zion/scripts/puppy-daemon.sh"
-
-  echo "[zion puppy] Reiniciado."
+  echo "# This file is located at 'src/commands/puppy_restart.sh'."
+  echo "# It contains the implementation for the 'zion puppy restart' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_puppy_restart_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4777,24 +4468,11 @@ zion_puppy_restart_command() {
 zion_puppy_run_command() {
 
   # src/commands/puppy_run.sh
-  # Roda uma task especifica dentro do container puppy.
-  zion_load_config
-
-  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
-  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
-  task="${args[task]}"
-
-  # Check container is running
-  if ! OBSIDIAN_PATH="$zion_obsidian_path" docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" ps --status running 2>/dev/null | grep -q puppy; then
-    echo "[zion puppy] Container puppy nao esta rodando. Use: zion puppy start" >&2
-    exit 1
-  fi
-
-  echo "[zion puppy] Rodando task '$task'..."
-  OBSIDIAN_PATH="$zion_obsidian_path" \
-    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
-    exec -e SCHEDULER_VERBOSE=1 -e SCHEDULER_WORKER_ID="manual-$$" -e SCHEDULER_CLOCK="unified" \
-    puppy /workspace/zion/scripts/puppy-runner.sh "$task"
+  echo "# This file is located at 'src/commands/puppy_run.sh'."
+  echo "# It contains the implementation for the 'zion puppy run' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_puppy_run_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4802,52 +4480,11 @@ zion_puppy_run_command() {
 zion_puppy_status_command() {
 
   # src/commands/puppy_status.sh
-  # Mostra estado do container puppy e tasks em doing/.
-  zion_load_config
-
-  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
-  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
-
-  echo "=== Container ==="
-  OBSIDIAN_PATH="$zion_obsidian_path" \
-    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" ps 2>/dev/null || \
-    echo "Nenhum container puppy rodando."
-
-  echo ""
-  echo "=== Tasks em doing/ ==="
-  vault="${zion_obsidian_path}/tasks/doing"
-  if [ -d "$vault" ] && [ -n "$(ls -A "$vault" 2>/dev/null)" ]; then
-    for d in "$vault"/*/; do
-      [ -d "$d" ] || continue
-      name=$(basename "$d")
-      lock_info=""
-      [ -f "$d/.lock" ] && lock_info=" (locked: $(grep '^worker=' "$d/.lock" 2>/dev/null | cut -d= -f2))"
-      echo "  $name$lock_info"
-    done
-  else
-    echo "  (nenhuma)"
-  fi
-
-  echo ""
-  echo "=== State (últimas execuções) ==="
-  OBSIDIAN_PATH="$zion_obsidian_path" \
-    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" exec -T puppy \
-    python3 -c '
-  import json, sys
-  try:
-      s = json.load(open("/workspace/.ephemeral/scheduler/state.json"))
-      print(f"Last tick: {s.get(\"last_tick\", \"never\")}")
-      for name, t in sorted(s.get("tasks", {}).items()):
-          status = t.get("last_status", "?")
-          avg = t.get("avg_duration_s", 0)
-          total = t.get("runs_total", 0)
-          failed = t.get("runs_failed", 0)
-          print(f"  {name:<20} status={status:<7} avg={avg}s  runs={total}  failed={failed}")
-  except FileNotFoundError:
-      print("  (sem state.json — daemon ainda nao rodou)")
-  except Exception as e:
-      print(f"  (erro: {e})")
-  ' 2>/dev/null || echo "  (container nao esta rodando)"
+  echo "# This file is located at 'src/commands/puppy_status.sh'."
+  echo "# It contains the implementation for the 'zion puppy status' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_puppy_status_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4855,23 +4492,11 @@ zion_puppy_status_command() {
 zion_puppy_logs_command() {
 
   # src/commands/puppy_logs.sh
-  # Segue logs do daemon dentro do container puppy.
-  zion_load_config
-
-  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
-  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
-
-  LOGFILE="/workspace/.ephemeral/logs/daemon.log"
-
-  if [[ -n "${args[--follow]:-}" ]]; then
-    OBSIDIAN_PATH="$zion_obsidian_path" \
-      docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
-      exec -T puppy tail -f "$LOGFILE"
-  else
-    OBSIDIAN_PATH="$zion_obsidian_path" \
-      docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
-      exec -T puppy cat "$LOGFILE" 2>/dev/null || echo "(sem logs — daemon ainda nao rodou)"
-  fi
+  echo "# This file is located at 'src/commands/puppy_logs.sh'."
+  echo "# It contains the implementation for the 'zion puppy logs' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_puppy_logs_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4879,14 +4504,11 @@ zion_puppy_logs_command() {
 zion_puppy_shell_command() {
 
   # src/commands/puppy_shell.sh
-  # Abre bash dentro do container puppy.
-  zion_load_config
-
-  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
-  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
-
-  OBSIDIAN_PATH="$zion_obsidian_path" \
-    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" exec -it puppy /bin/bash
+  echo "# This file is located at 'src/commands/puppy_shell.sh'."
+  echo "# It contains the implementation for the 'zion puppy shell' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_puppy_shell_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4894,23 +4516,11 @@ zion_puppy_shell_command() {
 zion_puppy_tick_command() {
 
   # src/commands/puppy_tick.sh
-  # Roda 1 tick do scheduler imediatamente (para teste).
-  zion_load_config
-
-  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
-  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
-
-  # Check container is running
-  if ! OBSIDIAN_PATH="$zion_obsidian_path" docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" ps --status running 2>/dev/null | grep -q puppy; then
-    echo "[zion puppy] Container puppy nao esta rodando. Use: zion puppy start" >&2
-    exit 1
-  fi
-
-  echo "[zion puppy] Rodando 1 tick do daemon..."
-  OBSIDIAN_PATH="$zion_obsidian_path" \
-    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
-    exec -e PUPPY_SINGLE_TICK=1 -e SCHEDULER_VERBOSE=1 \
-    puppy /workspace/zion/scripts/puppy-daemon.sh
+  echo "# This file is located at 'src/commands/puppy_tick.sh'."
+  echo "# It contains the implementation for the 'zion puppy tick' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_puppy_tick_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4918,39 +4528,11 @@ zion_puppy_tick_command() {
 zion_puppy_query_command() {
 
   # src/commands/puppy_query.sh
-  # Envia um prompt ao Claude dentro do container puppy.
-  # Com --headless: informa o agente que ninguem esta observando e deve ir o mais longe possivel.
-  zion_load_config
-
-  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
-  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
-  prompt="${args[prompt]}"
-  headless="${args[--headless]}"
-  timeout_secs="${args[--timeout]:-300}"
-  model="${args[--model]:-haiku}"
-
-  # Build env vars to pass into the container
-  env_flags=()
-  env_flags+=(-e "HEADLESS=${headless:+1}")
-  env_flags+=(-e "PUPPY_TIMEOUT=$timeout_secs")
-
-  # Build the final prompt with headless context
-  final_prompt="$prompt"
-
-  if [[ -n "$headless" ]]; then
-    deadline_str="$(date -u -d "+${timeout_secs} seconds" +%H:%M:%S 2>/dev/null || echo "${timeout_secs}s from now")"
-    headless_header="[HEADLESS MODE] Timeout: ${timeout_secs}s | Deadline: ${deadline_str}"
-    headless_rules="REGRAS HEADLESS: Ninguem esta observando. Nao espere input. Va o mais longe que puder. Voce tem ${timeout_secs}s. Reserve os ultimos 30s para salvar estado. Se o tempo acabar sem salvar, VOCE PERDE TODO O PROGRESSO. Priorize: executar > salvar estado > comunicar resultados."
-    final_prompt="${headless_header} ${headless_rules} --- ${prompt}"
-  fi
-
-  OBSIDIAN_PATH="$zion_obsidian_path" \
-    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
-    exec "${env_flags[@]}" puppy \
-    timeout "$timeout_secs" claude \
-      --permission-mode bypassPermissions \
-      --model "$model" \
-      -p "$final_prompt"
+  echo "# This file is located at 'src/commands/puppy_query.sh'."
+  echo "# It contains the implementation for the 'zion puppy query' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_puppy_query_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -4958,62 +4540,11 @@ zion_puppy_query_command() {
 zion_puppy_task_command() {
 
   # src/commands/puppy_task.sh
-  # Executa uma task com o agente Puppy (genérico ou específico via --agent).
-  zion_load_config
-
-  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
-  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
-
-  task_name="${args[task]}"
-  agent_name="${args[--agent]:-puppy}"
-  model="${args[--model]:-haiku}"
-  timeout_secs="${args[--timeout]:-300}"
-  headless="${args[--headless]}"
-  max_turns="${args[--max-turns]:-12}"
-
-  # Check container is running
-  if ! OBSIDIAN_PATH="$zion_obsidian_path" docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" ps --status running 2>/dev/null | grep -q puppy; then
-    echo "[zion puppy] Container puppy não está rodando. Use: zion puppy start" >&2
-    exit 1
-  fi
-
-  # Resolve agent file path inside the container
-  agent_file="/workspace/zion/agents/${agent_name}/agent.md"
-
-  echo "[zion puppy] Rodando task '$task_name' com agente '$agent_name'..."
-
-  # Build env flags
-  env_flags=()
-  env_flags+=(-e "TASK_NAME=$task_name")
-  env_flags+=(-e "AGENT_NAME=$agent_name")
-  env_flags+=(-e "HEADLESS=${headless:+1}")
-  env_flags+=(-e "PUPPY_TIMEOUT=$timeout_secs")
-
-  # Build prompt
-  if [[ -n "$headless" ]]; then
-    deadline_str="$(date -u -d "+${timeout_secs} seconds" +%H:%M:%S 2>/dev/null || echo "${timeout_secs}s from now")"
-    prompt="[HEADLESS MODE] Timeout: ${timeout_secs}s | Deadline: ${deadline_str} --- Execute a task: $task_name"
-  else
-    prompt="Execute a task: $task_name"
-  fi
-
-  OBSIDIAN_PATH="$zion_obsidian_path" \
-    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
-    exec "${env_flags[@]}" puppy \
-    bash -c "
-      if [ -f '$agent_file' ]; then
-        agent_prompt=\"\$(cat '$agent_file')\"
-        timeout '$timeout_secs' claude \
-          --permission-mode bypassPermissions \
-          --model '$model' \
-          --max-turns '$max_turns' \
-          --append-system-prompt \"\$agent_prompt\" \
-          -p '$prompt'
-      else
-        echo '[puppy_task] Agent file not found: $agent_file' >&2
-        exit 1
-      fi
-    "
+  echo "# This file is located at 'src/commands/puppy_task.sh'."
+  echo "# It contains the implementation for the 'zion puppy task' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_puppy_task_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5021,72 +4552,11 @@ zion_puppy_task_command() {
 zion_puppy_agent_command() {
 
   # src/commands/puppy_agent.sh
-  # Executa um agente nomeado dentro do container Puppy, opcionalmente em uma task.
-  zion_load_config
-
-  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
-  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
-
-  agent_name="${args[agent]}"
-  task_name="${args[--task]:-}"
-  model="${args[--model]:-haiku}"
-  timeout_secs="${args[--timeout]:-300}"
-  headless="${args[--headless]}"
-  max_turns="${args[--max-turns]:-12}"
-
-  # Check container is running
-  if ! OBSIDIAN_PATH="$zion_obsidian_path" docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" ps --status running 2>/dev/null | grep -q puppy; then
-    echo "[zion puppy] Container puppy não está rodando. Use: zion puppy start" >&2
-    exit 1
-  fi
-
-  # Resolve agent file path inside the container
-  agent_file="/workspace/zion/agents/${agent_name}/agent.md"
-
-  if [[ -n "$task_name" ]]; then
-    echo "[zion puppy] Rodando agente '$agent_name' na task '$task_name'..."
-  else
-    echo "[zion puppy] Rodando agente '$agent_name'..."
-  fi
-
-  # Build env flags
-  env_flags=()
-  env_flags+=(-e "AGENT_NAME=$agent_name")
-  env_flags+=(-e "HEADLESS=${headless:+1}")
-  env_flags+=(-e "PUPPY_TIMEOUT=$timeout_secs")
-  [[ -n "$task_name" ]] && env_flags+=(-e "TASK_NAME=$task_name")
-
-  # Build prompt
-  if [[ -n "$task_name" ]]; then
-    base_prompt="Execute como agente $agent_name na task $task_name"
-  else
-    base_prompt="Execute como agente $agent_name"
-  fi
-
-  if [[ -n "$headless" ]]; then
-    deadline_str="$(date -u -d "+${timeout_secs} seconds" +%H:%M:%S 2>/dev/null || echo "${timeout_secs}s from now")"
-    prompt="[HEADLESS MODE] Timeout: ${timeout_secs}s | Deadline: ${deadline_str} --- ${base_prompt}"
-  else
-    prompt="$base_prompt"
-  fi
-
-  OBSIDIAN_PATH="$zion_obsidian_path" \
-    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" \
-    exec "${env_flags[@]}" puppy \
-    bash -c "
-      if [ -f '$agent_file' ]; then
-        agent_prompt=\"\$(cat '$agent_file')\"
-        timeout '$timeout_secs' claude \
-          --permission-mode bypassPermissions \
-          --model '$model' \
-          --max-turns '$max_turns' \
-          --append-system-prompt \"\$agent_prompt\" \
-          -p '$prompt'
-      else
-        echo '[puppy_agent] Agent file not found: $agent_file' >&2
-        exit 1
-      fi
-    "
+  echo "# This file is located at 'src/commands/puppy_agent.sh'."
+  echo "# It contains the implementation for the 'zion puppy agent' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_puppy_agent_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5094,8 +4564,11 @@ zion_puppy_agent_command() {
 zion_docker_monolito_install_command() {
 
   # src/commands/docker_monolito_install.sh
-  zion_load_config
-  _zion_dk_install "monolito" "${args[--env]:-sand}" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_monolito_install.sh'."
+  echo "# It contains the implementation for the 'zion docker monolito install' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_monolito_install_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5103,8 +4576,11 @@ zion_docker_monolito_install_command() {
 zion_docker_monolito_shell_command() {
 
   # src/commands/docker_monolito_shell.sh
-  zion_load_config
-  _zion_dk_shell "monolito" "${args[--container]:-app}" "${args[--cmd]:-}" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_monolito_shell.sh'."
+  echo "# It contains the implementation for the 'zion docker monolito shell' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_monolito_shell_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5112,8 +4588,11 @@ zion_docker_monolito_shell_command() {
 zion_docker_monolito_logs_command() {
 
   # src/commands/docker_monolito_logs.sh
-  zion_load_config
-  _zion_dk_logs "monolito" "${args[--follow]:-}" "${args[--tail]:-100}" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_monolito_logs.sh'."
+  echo "# It contains the implementation for the 'zion docker monolito logs' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_monolito_logs_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5121,8 +4600,11 @@ zion_docker_monolito_logs_command() {
 zion_docker_monolito_status_command() {
 
   # src/commands/docker_monolito_status.sh
-  zion_load_config
-  _zion_dk_status "monolito"
+  echo "# This file is located at 'src/commands/docker_monolito_status.sh'."
+  echo "# It contains the implementation for the 'zion docker monolito status' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_monolito_status_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5130,8 +4612,11 @@ zion_docker_monolito_status_command() {
 zion_docker_monolito_build_command() {
 
   # src/commands/docker_monolito_build.sh
-  zion_load_config
-  _zion_dk_build "monolito" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_monolito_build.sh'."
+  echo "# It contains the implementation for the 'zion docker monolito build' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_monolito_build_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5139,8 +4624,11 @@ zion_docker_monolito_build_command() {
 zion_docker_monolito_flush_command() {
 
   # src/commands/docker_monolito_flush.sh
-  zion_load_config
-  _zion_dk_flush "monolito" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_monolito_flush.sh'."
+  echo "# It contains the implementation for the 'zion docker monolito flush' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_monolito_flush_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5148,8 +4636,11 @@ zion_docker_monolito_flush_command() {
 zion_docker_monolito_test_command() {
 
   # src/commands/docker_monolito_test.sh
-  zion_load_config
-  _zion_dk_shell "monolito" "app" "${args[--cmd]:-make test-ldi}" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_monolito_test.sh'."
+  echo "# It contains the implementation for the 'zion docker monolito test' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_monolito_test_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5157,8 +4648,11 @@ zion_docker_monolito_test_command() {
 zion_docker_monolito_server_start_command() {
 
   # src/commands/docker_monolito_server_start.sh
-  zion_load_config
-  _zion_dk_run "monolito" "${args[--env]:-sand}" "${args[--debug]:-}" "${args[--worktree]:-}" "" "${args[--detach]:-}"
+  echo "# This file is located at 'src/commands/docker_monolito_server_start.sh'."
+  echo "# It contains the implementation for the 'zion docker monolito server start' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_monolito_server_start_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5166,8 +4660,11 @@ zion_docker_monolito_server_start_command() {
 zion_docker_monolito_server_stop_command() {
 
   # src/commands/docker_monolito_server_stop.sh
-  zion_load_config
-  _zion_dk_stop "monolito" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_monolito_server_stop.sh'."
+  echo "# It contains the implementation for the 'zion docker monolito server stop' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_monolito_server_stop_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5175,8 +4672,11 @@ zion_docker_monolito_server_stop_command() {
 zion_docker_monolito_worker_start_command() {
 
   # src/commands/docker_monolito_worker_start.sh
-  zion_load_config
-  _zion_dk_run "monolito-worker" "${args[--env]:-sand}" "${args[--debug]:-}" "${args[--worktree]:-}" "" "${args[--detach]:-}"
+  echo "# This file is located at 'src/commands/docker_monolito_worker_start.sh'."
+  echo "# It contains the implementation for the 'zion docker monolito worker start' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_monolito_worker_start_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5184,8 +4684,11 @@ zion_docker_monolito_worker_start_command() {
 zion_docker_monolito_worker_stop_command() {
 
   # src/commands/docker_monolito_worker_stop.sh
-  zion_load_config
-  _zion_dk_stop "monolito-worker" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_monolito_worker_stop.sh'."
+  echo "# It contains the implementation for the 'zion docker monolito worker stop' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_monolito_worker_stop_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5193,8 +4696,11 @@ zion_docker_monolito_worker_stop_command() {
 zion_docker_bo_container_install_command() {
 
   # src/commands/docker_bo_container_install.sh
-  zion_load_config
-  _zion_dk_install "bo-container" "${args[--env]:-sand}" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_bo_container_install.sh'."
+  echo "# It contains the implementation for the 'zion docker bo-container install' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_bo_container_install_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5202,8 +4708,11 @@ zion_docker_bo_container_install_command() {
 zion_docker_bo_container_shell_command() {
 
   # src/commands/docker_bo_container_shell.sh
-  zion_load_config
-  _zion_dk_shell "bo-container" "${args[--container]:-app}" "${args[--cmd]:-}" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_bo_container_shell.sh'."
+  echo "# It contains the implementation for the 'zion docker bo-container shell' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_bo_container_shell_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5211,8 +4720,11 @@ zion_docker_bo_container_shell_command() {
 zion_docker_bo_container_logs_command() {
 
   # src/commands/docker_bo_container_logs.sh
-  zion_load_config
-  _zion_dk_logs "bo-container" "${args[--follow]:-}" "${args[--tail]:-100}" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_bo_container_logs.sh'."
+  echo "# It contains the implementation for the 'zion docker bo-container logs' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_bo_container_logs_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5220,8 +4732,11 @@ zion_docker_bo_container_logs_command() {
 zion_docker_bo_container_status_command() {
 
   # src/commands/docker_bo_container_status.sh
-  zion_load_config
-  _zion_dk_status "bo-container"
+  echo "# This file is located at 'src/commands/docker_bo_container_status.sh'."
+  echo "# It contains the implementation for the 'zion docker bo-container status' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_bo_container_status_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5229,8 +4744,11 @@ zion_docker_bo_container_status_command() {
 zion_docker_bo_container_build_command() {
 
   # src/commands/docker_bo_container_build.sh
-  zion_load_config
-  _zion_dk_build "bo-container" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_bo_container_build.sh'."
+  echo "# It contains the implementation for the 'zion docker bo-container build' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_bo_container_build_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5238,8 +4756,11 @@ zion_docker_bo_container_build_command() {
 zion_docker_bo_container_flush_command() {
 
   # src/commands/docker_bo_container_flush.sh
-  zion_load_config
-  _zion_dk_flush "bo-container" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_bo_container_flush.sh'."
+  echo "# It contains the implementation for the 'zion docker bo-container flush' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_bo_container_flush_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5247,8 +4768,11 @@ zion_docker_bo_container_flush_command() {
 zion_docker_bo_container_test_command() {
 
   # src/commands/docker_bo_container_test.sh
-  zion_load_config
-  _zion_dk_shell "bo-container" "app" "${args[--cmd]:-yarn test}" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_bo_container_test.sh'."
+  echo "# It contains the implementation for the 'zion docker bo-container test' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_bo_container_test_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5256,8 +4780,11 @@ zion_docker_bo_container_test_command() {
 zion_docker_bo_container_server_start_command() {
 
   # src/commands/docker_bo_container_server_start.sh
-  zion_load_config
-  _zion_dk_run "bo-container" "${args[--env]:-sand}" "${args[--debug]:-}" "${args[--worktree]:-}" "" "${args[--detach]:-}"
+  echo "# This file is located at 'src/commands/docker_bo_container_server_start.sh'."
+  echo "# It contains the implementation for the 'zion docker bo-container server start' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_bo_container_server_start_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5265,8 +4792,11 @@ zion_docker_bo_container_server_start_command() {
 zion_docker_bo_container_server_stop_command() {
 
   # src/commands/docker_bo_container_server_stop.sh
-  zion_load_config
-  _zion_dk_stop "bo-container" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_bo_container_server_stop.sh'."
+  echo "# It contains the implementation for the 'zion docker bo-container server stop' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_bo_container_server_stop_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5274,8 +4804,11 @@ zion_docker_bo_container_server_stop_command() {
 zion_docker_front_student_install_command() {
 
   # src/commands/docker_front_student_install.sh
-  zion_load_config
-  _zion_dk_install "front-student" "${args[--env]:-sand}" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_front_student_install.sh'."
+  echo "# It contains the implementation for the 'zion docker front-student install' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_front_student_install_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5283,8 +4816,11 @@ zion_docker_front_student_install_command() {
 zion_docker_front_student_shell_command() {
 
   # src/commands/docker_front_student_shell.sh
-  zion_load_config
-  _zion_dk_shell "front-student" "${args[--container]:-app}" "${args[--cmd]:-}" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_front_student_shell.sh'."
+  echo "# It contains the implementation for the 'zion docker front-student shell' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_front_student_shell_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5292,8 +4828,11 @@ zion_docker_front_student_shell_command() {
 zion_docker_front_student_logs_command() {
 
   # src/commands/docker_front_student_logs.sh
-  zion_load_config
-  _zion_dk_logs "front-student" "${args[--follow]:-}" "${args[--tail]:-100}" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_front_student_logs.sh'."
+  echo "# It contains the implementation for the 'zion docker front-student logs' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_front_student_logs_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5301,8 +4840,11 @@ zion_docker_front_student_logs_command() {
 zion_docker_front_student_status_command() {
 
   # src/commands/docker_front_student_status.sh
-  zion_load_config
-  _zion_dk_status "front-student"
+  echo "# This file is located at 'src/commands/docker_front_student_status.sh'."
+  echo "# It contains the implementation for the 'zion docker front-student status' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_front_student_status_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5310,8 +4852,11 @@ zion_docker_front_student_status_command() {
 zion_docker_front_student_build_command() {
 
   # src/commands/docker_front_student_build.sh
-  zion_load_config
-  _zion_dk_build "front-student" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_front_student_build.sh'."
+  echo "# It contains the implementation for the 'zion docker front-student build' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_front_student_build_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5319,8 +4864,11 @@ zion_docker_front_student_build_command() {
 zion_docker_front_student_flush_command() {
 
   # src/commands/docker_front_student_flush.sh
-  zion_load_config
-  _zion_dk_flush "front-student" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_front_student_flush.sh'."
+  echo "# It contains the implementation for the 'zion docker front-student flush' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_front_student_flush_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5328,8 +4876,11 @@ zion_docker_front_student_flush_command() {
 zion_docker_front_student_test_command() {
 
   # src/commands/docker_front_student_test.sh
-  zion_load_config
-  _zion_dk_shell "front-student" "app" "${args[--cmd]:-yarn test}" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_front_student_test.sh'."
+  echo "# It contains the implementation for the 'zion docker front-student test' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_front_student_test_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5337,8 +4888,11 @@ zion_docker_front_student_test_command() {
 zion_docker_front_student_server_start_command() {
 
   # src/commands/docker_front_student_server_start.sh
-  zion_load_config
-  _zion_dk_run "front-student" "${args[--env]:-sand}" "${args[--debug]:-}" "${args[--worktree]:-}" "${args[--vertical]:-carreiras-juridicas}" "${args[--detach]:-}"
+  echo "# This file is located at 'src/commands/docker_front_student_server_start.sh'."
+  echo "# It contains the implementation for the 'zion docker front-student server start' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_front_student_server_start_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5346,8 +4900,86 @@ zion_docker_front_student_server_start_command() {
 zion_docker_front_student_server_stop_command() {
 
   # src/commands/docker_front_student_server_stop.sh
-  zion_load_config
-  _zion_dk_stop "front-student" "${args[--worktree]:-}"
+  echo "# This file is located at 'src/commands/docker_front_student_server_stop.sh'."
+  echo "# It contains the implementation for the 'zion docker front-student server stop' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_docker_front_student_server_stop_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
+
+}
+
+# :command.function
+zion_hooks_command() {
+
+  # src/commands/hooks.sh
+  # zion hooks <hook> [KEY=VALUE...] — Executa um hook e mostra o output (preview do que seria injetado).
+  # Util para debug de session-start, pre-tool-use, user-prompt-submit, etc. sem abrir uma sessao completa.
+
+  HOOKS_DIR=""
+  for _d in \
+    "/zion/hooks/claude-code" \
+    "${ZION_ROOT:-${HOME}/nixos/zion}/hooks/claude-code" \
+    "/workspace/mnt/zion/hooks/claude-code"; do
+    [[ -d "$_d" ]] && HOOKS_DIR="$_d" && break
+  done
+
+  # --list: lista hooks disponíveis
+  if [[ -n "${args[--list]:-}" ]]; then
+    if [[ -z "$HOOKS_DIR" ]]; then
+      echo "hooks: diretório não encontrado" >&2; exit 1
+    fi
+    echo "Hooks disponíveis em $HOOKS_DIR:"
+    for f in "$HOOKS_DIR"/*.sh "$HOOKS_DIR"/*.json; do
+      [[ -f "$f" ]] && printf "  %s\n" "$(basename "$f" | sed 's/\.\(sh\|json\)$//')"
+    done
+    exit 0
+  fi
+
+  HOOK="${args[hook]}"
+
+  if [[ -z "$HOOKS_DIR" ]]; then
+    echo "hooks: diretório de hooks não encontrado" >&2; exit 1
+  fi
+
+  # Resolve o arquivo: tenta .sh e .json
+  HOOK_FILE=""
+  for ext in sh json ""; do
+    candidate="$HOOKS_DIR/${HOOK}${ext:+.$ext}"
+    [[ -f "$candidate" ]] && HOOK_FILE="$candidate" && break
+  done
+
+  if [[ -z "$HOOK_FILE" ]]; then
+    echo "hooks: hook '$HOOK' não encontrado em $HOOKS_DIR" >&2
+    echo "Use 'zion hooks --list' para ver disponíveis." >&2
+    exit 1
+  fi
+
+  # Aplica overrides de env passados como KEY=VALUE ou key=value
+  if [[ -n "${args[env_overrides]:-}" ]]; then
+    IFS=' ' read -ra _overrides <<< "${args[env_overrides]}"
+    for _kv in "${_overrides[@]}"; do
+      if [[ "$_kv" == *=* ]]; then
+        _key="${_kv%%=*}"
+        _val="${_kv#*=}"
+        # normaliza para maiúsculas (PERSONALITY=OFF e personality=OFF sao equivalentes)
+        export "${_key^^}=${_val}"
+      fi
+    done
+  fi
+
+  # Se stdin é TTY (chamada manual sem pipe), injeta JSON default pra não bloquear
+  if [[ -t 0 ]]; then
+    # Infere payload padrão pelo nome do hook
+    case "$HOOK" in
+      startup-hook)       _default='{"prompt":"startup"}' ;;
+      session-start)      _default='{"session_id":"test","prompt":"startup"}' ;;
+      user-prompt-submit) _default='{"prompt":"teste"}' ;;
+      *)                  _default='{}' ;;
+    esac
+    echo "$_default" | bash "$HOOK_FILE"
+  else
+    exec bash "$HOOK_FILE"
+  fi
 
 }
 
@@ -5355,130 +4987,11 @@ zion_docker_front_student_server_stop_command() {
 zion_worktree_command() {
 
   # src/commands/worktree.sh
-  # Lista worktrees dos servicos Docker e permite escolher worktree + comando interativamente.
-  zion_load_config
-
-  RESET='\033[0m'
-  BOLD='\033[1m'
-  DIM='\033[2m'
-  GREEN='\033[32m'
-  CYAN='\033[36m'
-  YELLOW='\033[33m'
-  MAGENTA='\033[35m'
-  WHITE='\033[37m'
-
-  filter_service="${args[service]:-}"
-
-  # ── 1. Coletar worktrees de todos os servicos ───────────────────────────────
-  declare -a wt_entries=()   # "service|worktree_name|path|branch"
-  declare -a wt_display=()   # display string para selecao
-
-  services="monolito bo-container front-student"
-  [[ -n "$filter_service" ]] && services="$filter_service"
-
-  for svc in $services; do
-    dir=$(zion_docker_service_dir "$svc" 2>/dev/null)
-    [[ ! -d "$dir" ]] && continue
-
-    while IFS= read -r line; do
-      [[ -z "$line" ]] && continue
-      wt_path="${line%% *}"
-      rest="${line#* }"
-      # Extrair hash e branch
-      branch=$(echo "$rest" | grep -oP '\[.*?\]' | tr -d '[]')
-      wt_name=$(basename "$wt_path")
-
-      wt_entries+=("${svc}|${wt_name}|${wt_path}|${branch}")
-      wt_display+=("$(printf "%-16s %-24s %s" "$svc" "$wt_name" "[$branch]")")
-    done < <(git -C "$dir" worktree list 2>/dev/null)
-  done
-
-  if [[ ${#wt_entries[@]} -eq 0 ]]; then
-    echo "Nenhum worktree encontrado."
-    [[ -n "$filter_service" ]] && echo "Servico: $filter_service"
-    echo "Servicos verificados: $services"
-    exit 0
-  fi
-
-  # ── 2. Listar worktrees ─────────────────────────────────────────────────────
-  echo ""
-  echo -e "${BOLD}${MAGENTA}  Worktrees${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}"
-  echo ""
-
-  current_svc=""
-  for i in "${!wt_entries[@]}"; do
-    IFS='|' read -r svc wt_name wt_path branch <<< "${wt_entries[$i]}"
-    if [[ "$svc" != "$current_svc" ]]; then
-      [[ -n "$current_svc" ]] && echo ""
-      echo -e "  ${BOLD}${CYAN}$svc${RESET}"
-      current_svc="$svc"
-    fi
-    # Marcar main/principal
-    local_dir=$(zion_docker_service_dir "$svc" 2>/dev/null)
-    if [[ "$wt_path" == "$local_dir" ]]; then
-      echo -e "    ${GREEN}$((i+1)))${RESET} ${WHITE}${wt_name}${RESET}  ${DIM}${branch}${RESET}  ${YELLOW}(main)${RESET}"
-    else
-      echo -e "    ${GREEN}$((i+1)))${RESET} ${WHITE}${wt_name}${RESET}  ${DIM}${branch}${RESET}"
-    fi
-  done
-  echo ""
-
-  # ── 3. Escolher worktree ────────────────────────────────────────────────────
-  echo -en "${BOLD}Worktree [1-${#wt_entries[@]}]: ${RESET}"
-  read -r wt_choice
-
-  # Validar
-  if [[ -z "$wt_choice" || ! "$wt_choice" =~ ^[0-9]+$ || "$wt_choice" -lt 1 || "$wt_choice" -gt ${#wt_entries[@]} ]]; then
-    echo "Cancelado."
-    exit 0
-  fi
-
-  idx=$((wt_choice - 1))
-  IFS='|' read -r chosen_svc chosen_wt chosen_path chosen_branch <<< "${wt_entries[$idx]}"
-
-  # Se escolheu o main dir, nao precisa de --worktree
-  main_dir=$(zion_docker_service_dir "$chosen_svc" 2>/dev/null)
-  wt_flag=""
-  if [[ "$chosen_path" != "$main_dir" ]]; then
-    wt_flag=" --worktree=$chosen_wt"
-  fi
-
-  echo ""
-  echo -e "  Selecionado: ${BOLD}${chosen_svc}${RESET} → ${CYAN}${chosen_wt}${RESET} ${DIM}[${chosen_branch}]${RESET}"
-  echo ""
-
-  # ── 4. Escolher comando ─────────────────────────────────────────────────────
-  cmds=("run" "shell" "logs" "stop" "restart" "install" "flush" "status")
-  echo -e "${BOLD}Comando:${RESET}"
-  for i in "${!cmds[@]}"; do
-    echo -e "  ${GREEN}$((i+1)))${RESET} ${cmds[$i]}"
-  done
-  echo ""
-  echo -en "${BOLD}Comando [1-${#cmds[@]}]: ${RESET}"
-  read -r cmd_choice
-
-  if [[ -z "$cmd_choice" || ! "$cmd_choice" =~ ^[0-9]+$ || "$cmd_choice" -lt 1 || "$cmd_choice" -gt ${#cmds[@]} ]]; then
-    echo "Cancelado."
-    exit 0
-  fi
-
-  chosen_cmd="${cmds[$((cmd_choice - 1))]}"
-
-  # ── 5. Montar comando e deixar usuario confirmar ────────────────────────────
-  final_cmd="zion docker ${chosen_cmd} ${chosen_svc}${wt_flag}"
-
-  echo ""
-  echo -e "${DIM}Edite o comando se necessario e pressione Enter para executar:${RESET}"
-  read -e -r -p "> " -i "$final_cmd" edited_cmd
-
-  if [[ -z "$edited_cmd" ]]; then
-    echo "Cancelado."
-    exit 0
-  fi
-
-  # ── 6. Executar ──────────────────────────────────────────────────────────────
-  echo ""
-  eval "$edited_cmd"
+  echo "# This file is located at 'src/commands/worktree.sh'."
+  echo "# It contains the implementation for the 'zion worktree' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_worktree_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5486,44 +4999,11 @@ zion_worktree_command() {
 zion_new_task_command() {
 
   # src/commands/new_task.sh
-  name="${args[name]:-}"
-  [[ -n "$name" ]] || { echo "Uso: zion new-task <name> [--type pending|recurring] [--model haiku|sonnet] [--clock every10|every60] [--timeout N]" >&2; exit 1; }
-  type="${flag_type:-pending}"
-  model="${flag_model:-}"
-  clock="${flag_clock:-}"
-  timeout="${flag_timeout:-}"
-  [[ -n "$model" ]] || { [[ "$type" == "recurring" ]] && model="haiku" || model="sonnet"; }
-  [[ -n "$clock" ]] || { [[ "$type" == "recurring" ]] && clock="every10" || clock="every60"; }
-  [[ -n "$timeout" ]] || { [[ "$clock" == "every10" ]] && timeout="120" || timeout="300"; }
-  task_dir="$zion_vault_dir/_agent/tasks/$type/$name"
-  mkdir -p "$task_dir"
-  {
-    echo "---"
-    echo "clock: $clock"
-    echo "timeout: $timeout"
-    echo "model: $model"
-    echo "schedule: always"
-    echo "---"
-    echo "# $name"
-    echo ""
-    echo "## Objetivo"
-    echo ""
-    echo "## O que fazer"
-    echo ""
-    echo "## Entregavel"
-    echo "Atualize \`<diretorio de contexto>/contexto.md\`."
-  } > "$task_dir/CLAUDE.md"
-  kanban_col="Backlog"
-  kanban_file="$zion_vault_dir/kanban.md"
-  if [[ "$type" == "recurring" ]]; then
-    kanban_col="Recorrentes"
-    kanban_file="$zion_vault_dir/_agent/scheduled.md"
-  fi
-  card="- [ ] **$name** #$type $(date +%Y-%m-%d) \`$model\`"
-  export KANBAN_FILE="$kanban_file"
-  # shellcheck source=/dev/null
-  source "$zion_nixos_scripts/kanban-sync.sh" 2>/dev/null && kanban_add_card "$kanban_col" "$card" 2>/dev/null || echo "[AVISO] Não conseguiu adicionar card no kanban"
-  echo "Task: $task_dir/ ($model, ${timeout}s)"
+  echo "# This file is located at 'src/commands/new_task.sh'."
+  echo "# It contains the implementation for the 'zion new-task' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_new_task_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5531,459 +5011,11 @@ zion_new_task_command() {
 zion_status_command() {
 
   # src/commands/status.sh
-  # Status agregado do Zion: config, containers, services, puppy, tasks, repo.
-  zion_load_config
-
-  # ── Cores ──────────────────────────────────────────────────────────────────────
-  RESET='\033[0m'
-  BOLD='\033[1m'
-  DIM='\033[2m'
-  GREEN='\033[32m'
-  RED='\033[31m'
-  YELLOW='\033[33m'
-  CYAN='\033[36m'
-  BLUE='\033[34m'
-  MAGENTA='\033[35m'
-  WHITE='\033[37m'
-  ORANGE='\033[38;5;214m'
-
-  icon_running="${GREEN}●${RESET}"
-  icon_stopped="${RED}○${RESET}"
-  icon_partial="${YELLOW}◐${RESET}"
-  icon_ok="${GREEN}✓${RESET}"
-  icon_fail="${RED}✗${RESET}"
-  icon_warn="${YELLOW}!${RESET}"
-
-  # ── Helpers ────────────────────────────────────────────────────────────────────
-
-  fmt_uptime() {
-    local s="$1"
-    if echo "$s" | grep -qi "up"; then
-      local t
-      t=$(echo "$s" | sed -E 's/Up //i; s/ \(.*\)//')
-      t=$(echo "$t" | sed -E 's/ minutes?/min/; s/ hours?/h/; s/ days?/d/; s/ weeks?/w/; s/ seconds?/s/')
-      local healthy=""
-      echo "$s" | grep -qi "healthy" && healthy=" ${GREEN}✓${RESET}"
-      echo "${ORANGE}${t}${RESET}${healthy}"
-    elif echo "$s" | grep -qi "exited"; then
-      echo "${RED}exited${RESET}"
-    else
-      echo "${YELLOW}${s}${RESET}"
-    fi
-  }
-
-  fmt_ports() {
-    local raw="$1"
-    [[ -z "$raw" ]] && return
-    echo "$raw" \
-      | grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:[0-9]+->[0-9]+' \
-      | grep -oE ':[0-9]+->' \
-      | sed 's/->//' \
-      | sort -u \
-      | tr '\n' '  ' \
-      | sed 's/  $//'
-  }
-
-  row() {
-    local pfx="$1" name="$2" status="$3" ports="$4"
-    local TIME_W=9 NAME_W=16
-    local st
-    st=$(fmt_uptime "$status")
-    local fp=""
-    fp=$(fmt_ports "$ports")
-    local ps=""
-    [[ -n "$fp" ]] && ps="  ${DIM}${fp}${RESET}"
-    echo -e "${pfx}$(printf "%-${TIME_W}b" "$st")  ${WHITE}$(printf "%-${NAME_W}s" "$name")${RESET}${ps}"
-  }
-
-  # key=value com cor
-  kv() {
-    local label="$1" value="$2" color="${3:-$WHITE}"
-    printf "  ${DIM}%-14s${RESET} ${color}%b${RESET}\n" "$label" "$value"
-  }
-
-  count_dirs() {
-    local dir="$1"
-    [[ -d "$dir" ]] && find "$dir" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l || echo "0"
-  }
-
-  # ── Header ─────────────────────────────────────────────────────────────────────
-  echo -e "\n${BOLD}${MAGENTA}  Zion Status${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}\n"
-
-  # ══════════════════════════════════════════════════════════════════════════════
-  # 1. CONFIG — engine, model, keys
-  # ══════════════════════════════════════════════════════════════════════════════
-  echo -e "${BOLD}${CYAN}  Config${RESET}"
-
-  cfg_engine="${ZION_ENGINE:-${engine:-}}"
-  cfg_model="${ZION_MODEL:-${model:-}}"
-  [[ -n "$cfg_engine" ]] && kv "engine:" "$cfg_engine" "$GREEN" || kv "engine:" "(not set)" "$YELLOW"
-  [[ -n "$cfg_model" ]] && kv "model:" "$cfg_model" "$GREEN" || kv "model:" "(default)" "$DIM"
-
-  # API keys
-  key_line="  "
-  if [[ -n "${ANTHROPIC_API_KEY:-}" ]]; then
-    key_line+="${GREEN}ANTHROPIC${RESET} "
-  else
-    key_line+="${RED}ANTHROPIC${RESET} "
-  fi
-  if [[ -n "${GH_TOKEN:-}" ]]; then
-    key_line+="${GREEN}GH_TOKEN${RESET} "
-  else
-    key_line+="${YELLOW}GH_TOKEN${RESET} "
-  fi
-  if [[ -n "${CURSOR_API_KEY:-}" ]]; then
-    key_line+="${GREEN}CURSOR${RESET}"
-  else
-    key_line+="${DIM}CURSOR${RESET}"
-  fi
-  echo -e "  ${DIM}keys:${RESET}         $key_line"
-
-  # Image
-  img_info=$(docker images claude-nix-sandbox --format "{{.Size}}\t{{.CreatedSince}}" 2>/dev/null | head -1)
-  if [[ -n "$img_info" ]]; then
-    IFS=$'\t' read -r img_size img_age <<< "$img_info"
-    kv "image:" "${img_size}  ${DIM}(${img_age})${RESET}" "$WHITE"
-  fi
-
-  # Rebuild needed?
-  if [[ -f "$zion_ephemeral/rebuild-docker-needed" ]]; then
-    echo -e "  ${YELLOW}!${RESET} ${YELLOW}rebuild-docker-needed${RESET}"
-  fi
-
-  # ══════════════════════════════════════════════════════════════════════════════
-  # 2. REPO — git status
-  # ══════════════════════════════════════════════════════════════════════════════
-  echo ""
-  echo -e "${BOLD}${CYAN}  Repo${RESET}"
-
-  if [[ -d "$zion_nixos_dir/.git" ]]; then
-    repo_branch=$(git -C "$zion_nixos_dir" branch --show-current 2>/dev/null)
-    repo_dirty=$(git -C "$zion_nixos_dir" status --porcelain 2>/dev/null | wc -l)
-    repo_commit=$(git -C "$zion_nixos_dir" log -1 --format="%h %s" 2>/dev/null)
-    repo_worktrees=$(git -C "$zion_nixos_dir" worktree list 2>/dev/null | wc -l)
-    # Subtract 1 for the main worktree
-    repo_worktrees=$((repo_worktrees - 1))
-    [[ "$repo_worktrees" -lt 0 ]] && repo_worktrees=0
-
-    dirty_str=""
-    if [[ "$repo_dirty" -gt 0 ]]; then
-      dirty_str="  ${YELLOW}(${repo_dirty} dirty)${RESET}"
-    fi
-    kv "branch:" "${repo_branch}${dirty_str}" "$GREEN"
-    kv "commit:" "$repo_commit" "$DIM"
-    [[ "$repo_worktrees" -gt 0 ]] && kv "worktrees:" "$repo_worktrees" "$ORANGE"
-  fi
-
-  # ══════════════════════════════════════════════════════════════════════════════
-  # 3. SESSIONS — containers zion-*
-  # ══════════════════════════════════════════════════════════════════════════════
-  echo ""
-  echo -e "${BOLD}${CYAN}  Sessions${RESET}"
-
-  # Format: name, status, ports, state (running/exited), command (to detect engine)
-  session_rows=$(docker ps -a --filter "name=zion-" \
-    --format "{{.Names}}\t{{.Status}}\t{{.Ports}}\t{{.State}}\t{{.Command}}" 2>/dev/null \
-    | grep -v "zion-dk-" || true)
-
-  session_up=0
-  session_dead=0
-
-  if [[ -z "$session_rows" ]]; then
-    echo -e "  ${DIM}(nenhuma)${RESET}"
-  else
-    session_orphan=0
-    while IFS=$'\t' read -r name status ports state cmd; do
-      [[ -z "$name" ]] && continue
-      short="${name#zion-}"
-      if [[ "$state" == "running" ]]; then
-        # Check if agent is alive inside (claude, cursor, opencode)
-        procs=$(docker exec "$name" ps -eo comm 2>/dev/null | grep -cE '(claude|cursor|opencode)' || true)
-        procs="${procs:-0}"
-        if [[ "$procs" -gt 0 ]]; then
-          s_icon="$icon_running"
-          session_up=$((session_up + 1))
-        else
-          s_icon="$icon_partial"
-          session_orphan=$((session_orphan + 1))
-        fi
-      else
-        s_icon="$icon_stopped"
-        session_dead=$((session_dead + 1))
-      fi
-      row "  ${s_icon} " "$short" "$status" "$ports"
-    done <<< "$session_rows"
-    # Summary
-    stale=$((session_dead + session_orphan))
-    summary="  ${DIM}"
-    [[ "$session_up" -gt 0 ]] && summary+="${session_up} active"
-    [[ "$stale" -gt 0 ]] && summary+="  ${YELLOW}${stale} stale${RESET}${DIM} (zion clean to remove)"
-    summary+="${RESET}"
-    echo -e "$summary"
-  fi
-
-  # ══════════════════════════════════════════════════════════════════════════════
-  # 4. DOCKER SERVICES — estrategia
-  # ══════════════════════════════════════════════════════════════════════════════
-  echo ""
-  echo -e "${BOLD}${CYAN}  Docker Services${RESET}"
-
-  for svc in monolito bo-container front-student; do
-    project=$(zion_docker_project_name "$svc")
-    compose=$(zion_docker_compose_file "$svc" 2>/dev/null || echo "")
-
-    main_rows=""
-    if [[ -n "$compose" ]] && [[ -f "$compose" ]]; then
-      main_rows=$(docker compose -f "$compose" -p "$project" ps --format "{{.Name}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || true)
-    fi
-    dep_rows=$(docker compose -p "${project}-deps" ps --format "{{.Name}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || true)
-
-    running=0; total=0
-    for block in "$main_rows" "$dep_rows"; do
-      [[ -z "$block" ]] && continue
-      while IFS=$'\t' read -r n s p; do
-        [[ -z "$n" ]] && continue
-        total=$((total + 1))
-        echo "$s" | grep -qi "up" && running=$((running + 1))
-      done <<< "$block"
-    done
-
-    if [[ "$total" -eq 0 ]]; then
-      echo -e "  ${icon_stopped} ${BOLD}${svc}${RESET}  ${DIM}parado${RESET}"
-      continue
-    fi
-
-    svc_icon="$icon_running"
-    [[ "$running" -lt "$total" ]] && svc_icon="$icon_partial"
-    [[ "$running" -eq 0 ]] && svc_icon="$icon_stopped"
-    echo -e "  ${svc_icon} ${BOLD}${svc}${RESET}"
-
-    if [[ -n "$main_rows" ]]; then
-      has_deps=0
-      [[ -n "$dep_rows" ]] && has_deps=1
-      cont="   "; [[ "$has_deps" -eq 1 ]] && cont="│  "
-      while IFS=$'\t' read -r name status ports; do
-        [[ -z "$name" ]] && continue
-        short="${name##${project}-}"
-        row "    ${cont}└─ " "$short" "$status" "$ports"
-      done <<< "$main_rows"
-    fi
-
-    if [[ -n "$dep_rows" ]]; then
-      echo -e "    ${BLUE}└─${RESET} ${DIM}deps${RESET}"
-      dep_arr=()
-      while IFS= read -r line; do [[ -n "$line" ]] && dep_arr+=("$line"); done <<< "$dep_rows"
-      idx=0
-      for dep_row in "${dep_arr[@]}"; do
-        idx=$((idx + 1))
-        IFS=$'\t' read -r name status ports <<< "$dep_row"
-        [[ -z "$name" ]] && continue
-        short="${name##zion-dk-${svc}-}"
-        tc="├─"; [[ "$idx" -eq "${#dep_arr[@]}" ]] && tc="└─"
-        row "       ${tc} " "$short" "$status" "$ports"
-      done
-    fi
-  done
-
-  # ══════════════════════════════════════════════════════════════════════════════
-  # 5. PUPPY — worker persistente
-  # ══════════════════════════════════════════════════════════════════════════════
-  echo ""
-  echo -e "${BOLD}${CYAN}  Puppy${RESET}"
-
-  PUPPY_PROJECT="${PUPPY_PROJECT:-puppy-workers}"
-  PUPPY_COMPOSE="$zion_cli_dir/docker-compose.puppy.yml"
-
-  puppy_rows=$(OBSIDIAN_PATH="$zion_obsidian_path" \
-    docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" ps --format "{{.Name}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || true)
-
-  if [[ -z "$puppy_rows" ]]; then
-    echo -e "  ${icon_stopped} ${BOLD}container${RESET}  ${DIM}parado${RESET}"
-  else
-    while IFS=$'\t' read -r name status ports; do
-      [[ -z "$name" ]] && continue
-      p_icon="$icon_stopped"
-      echo "$status" | grep -qi "up" && p_icon="$icon_running"
-      short="${name##${PUPPY_PROJECT}-}"
-      row "  ${p_icon} " "$short" "$status" "$ports"
-    done <<< "$puppy_rows"
-  fi
-
-  # Tasks em doing/
-  vault="${zion_obsidian_path}/tasks/doing"
-  doing_count=0
-  if [ -d "$vault" ] && [ -n "$(ls -A "$vault" 2>/dev/null)" ]; then
-    for d in "$vault"/*/; do
-      [ -d "$d" ] || continue
-      doing_count=$((doing_count + 1))
-      name=$(basename "$d")
-      lock_info=""
-      [ -f "$d/.lock" ] && lock_info=" ${DIM}(locked: $(grep '^worker=' "$d/.lock" 2>/dev/null | cut -d= -f2))${RESET}"
-      echo -e "    ${YELLOW}▶${RESET} ${name}${lock_info}"
-    done
-  fi
-  [[ "$doing_count" -eq 0 ]] && echo -e "    ${DIM}(sem tasks ativas)${RESET}"
-
-  # ══════════════════════════════════════════════════════════════════════════════
-  # 6. TASKS — contagem por status
-  # ══════════════════════════════════════════════════════════════════════════════
-  echo ""
-  echo -e "${BOLD}${CYAN}  Tasks${RESET}"
-
-  tasks_base="${zion_obsidian_path}/tasks"
-  t_doing=$(count_dirs "$tasks_base/doing")
-  t_backlog=$(count_dirs "$tasks_base/backlog")
-  t_sched=$(count_dirs "$tasks_base/_scheduled")
-  t_recur=$(count_dirs "$tasks_base/recurring")
-  t_done=$(count_dirs "$tasks_base/done")
-  t_cancel=$(count_dirs "$tasks_base/cancelled")
-
-  sched_total=$((t_sched + t_recur))
-
-  task_line="  "
-  [[ "$t_doing" -gt 0 ]] && task_line+="${YELLOW}${t_doing} doing${RESET}  " || task_line+="${DIM}0 doing${RESET}  "
-  [[ "$t_backlog" -gt 0 ]] && task_line+="${WHITE}${t_backlog} backlog${RESET}  " || task_line+="${DIM}0 backlog${RESET}  "
-  task_line+="${DIM}${sched_total} scheduled  ${t_done} done  ${t_cancel} cancelled${RESET}"
-  echo -e "$task_line"
-
-  # ══════════════════════════════════════════════════════════════════════════════
-  # 7. RECENT RUNS — ultimas execucoes do scheduler
-  # ══════════════════════════════════════════════════════════════════════════════
-  echo ""
-  echo -e "${BOLD}${CYAN}  Recent Runs${RESET}"
-
-  STATE_HOST="$zion_ephemeral/scheduler/state.json"
-  STATE_PY="$zion_cli_dir/src/lib/state_reader.py"
-  state_output=""
-
-  # Fonte 1: state.json direto no host
-  if [[ -f "$STATE_HOST" ]] && [[ -f "$STATE_PY" ]]; then
-    state_output=$(python3 "$STATE_PY" "$STATE_HOST" 2>/dev/null) || true
-  fi
-
-  # Fonte 2: via docker exec com timeout
-  if [[ -z "$state_output" ]] && [[ -f "$STATE_PY" ]]; then
-    puppy_running=$(OBSIDIAN_PATH="$zion_obsidian_path" \
-      docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" ps --status running -q 2>/dev/null || true)
-    if [[ -n "$puppy_running" ]]; then
-      state_output=$(timeout 3s \
-        docker compose -f "$PUPPY_COMPOSE" -p "$PUPPY_PROJECT" exec -T puppy \
-        python3 -c "$(cat "$STATE_PY")" "/workspace/.ephemeral/scheduler/state.json" 2>/dev/null) || true
-    fi
-  fi
-
-  if [[ -n "$state_output" ]]; then
-    echo -e "$state_output"
-  else
-    # Fallback: task.log.md
-    TASK_LOG="${zion_obsidian_path}/agents/task.log.md"
-    if [[ -f "$TASK_LOG" ]]; then
-      recent=$(grep '^|' "$TASK_LOG" | grep -v '^| timestamp' | grep -v '^|---' | tail -10 | tac)
-      if [[ -n "$recent" ]]; then
-        while IFS='|' read -r _ ts task event model dur _; do
-          ts=$(echo "$ts" | xargs 2>/dev/null)
-          task=$(echo "$task" | xargs 2>/dev/null)
-          event=$(echo "$event" | xargs 2>/dev/null)
-          model=$(echo "$model" | xargs 2>/dev/null)
-          dur=$(echo "$dur" | xargs 2>/dev/null)
-          [[ -z "$ts" || -z "$task" ]] && continue
-          r_icon="${YELLOW}▶${RESET}"
-          [[ "$event" == *"done"* || "$event" == *"✔"* ]] && r_icon="${GREEN}✓${RESET}"
-          [[ "$event" == *"fail"* || "$event" == *"✗"* ]] && r_icon="${RED}✗${RESET}"
-          ts_epoch=$(date -d "$ts" +%s 2>/dev/null || echo "0")
-          now_epoch=$(date +%s)
-          diff_s=$((now_epoch - ts_epoch))
-          if [[ "$ts_epoch" -gt 0 ]] && [[ "$diff_s" -ge 0 ]]; then
-            if [[ "$diff_s" -lt 60 ]]; then ago="${diff_s}s ago"
-            elif [[ "$diff_s" -lt 3600 ]]; then ago="$((diff_s / 60))min ago"
-            elif [[ "$diff_s" -lt 86400 ]]; then ago="$((diff_s / 3600))h ago"
-            else ago="$((diff_s / 86400))d ago"
-            fi
-          else
-            ago="$ts"
-          fi
-          dur_str=""
-          [[ -n "$dur" && "$dur" != "—" ]] && dur_str="  ${DIM}${dur}${RESET}"
-          echo -e "  ${r_icon} $(printf '%-20s' "$task") ${ORANGE}$(printf '%-12s' "$ago")${RESET} ${DIM}${event}  ${model}${dur_str}${RESET}"
-        done <<< "$recent"
-      else
-        echo -e "  ${DIM}(sem historico)${RESET}"
-      fi
-    else
-      echo -e "  ${DIM}(sem historico)${RESET}"
-    fi
-  fi
-
-  # ══════════════════════════════════════════════════════════════════════════════
-  # 8. SCHEDULED — tasks registradas
-  # ══════════════════════════════════════════════════════════════════════════════
-  sched_dirs=("${zion_obsidian_path}/tasks/_scheduled" "${zion_obsidian_path}/tasks/recurring")
-  sched_count=0
-  sched_lines=""
-
-  for sdir in "${sched_dirs[@]}"; do
-    [[ -d "$sdir" ]] || continue
-    for tdir in "$sdir"/*/; do
-      [[ -d "$tdir" ]] || continue
-      tname=$(basename "$tdir")
-      cfg=""
-      [[ -f "$tdir/TASK.md" ]] && cfg="$tdir/TASK.md"
-      [[ -z "$cfg" && -f "$tdir/CLAUDE.md" ]] && cfg="$tdir/CLAUDE.md"
-      clock="" model_t="" timeout_t=""
-      if [[ -n "$cfg" ]]; then
-        clock=$(sed -n '/^---$/,/^---$/{ /^clock:/{ s/^clock: *//; p; } }' "$cfg" 2>/dev/null | tr -d '[:space:]')
-        model_t=$(sed -n '/^---$/,/^---$/{ /^model:/{ s/^model: *//; p; } }' "$cfg" 2>/dev/null | tr -d '[:space:]')
-        timeout_t=$(sed -n '/^---$/,/^---$/{ /^timeout:/{ s/^timeout: *//; p; } }' "$cfg" 2>/dev/null | tr -d '[:space:]')
-      fi
-      clock="${clock:-every60}"
-      model_t="${model_t:-haiku}"
-      timeout_t="${timeout_t:-300}"
-      sched_lines+="  ${DIM}⏲${RESET}  $(printf '%-20s' "$tname") ${DIM}${clock}  ${model_t}  ${timeout_t}s${RESET}\n"
-      sched_count=$((sched_count + 1))
-    done
-  done
-
-  if [[ "$sched_count" -gt 0 ]]; then
-    echo ""
-    echo -e "${BOLD}${CYAN}  Scheduled${RESET}  ${DIM}(${sched_count} tasks)${RESET}"
-    echo -e "$sched_lines"
-  fi
-
-  # ══════════════════════════════════════════════════════════════════════════════
-  # 9. API USAGE — barra de uso (se disponivel)
-  # ══════════════════════════════════════════════════════════════════════════════
-  usage_file="$zion_ephemeral/usage-bar.txt"
-  if [[ -f "$usage_file" ]]; then
-    usage_pct=$(grep '^pct=' "$usage_file" 2>/dev/null | cut -d= -f2)
-    usage_used=$(grep '^used=' "$usage_file" 2>/dev/null | cut -d= -f2)
-    usage_max=$(grep '^max=' "$usage_file" 2>/dev/null | cut -d= -f2)
-    usage_updated=$(grep '^updated=' "$usage_file" 2>/dev/null | cut -d= -f2)
-    usage_period=$(grep '^period=' "$usage_file" 2>/dev/null | cut -d= -f2)
-
-    if [[ -n "$usage_pct" ]]; then
-      echo ""
-      echo -e "${BOLD}${CYAN}  API Usage${RESET}"
-      # Color based on percentage
-      pct_num="${usage_pct%%%}"
-      usage_color="$GREEN"
-      [[ "$pct_num" -gt 50 ]] && usage_color="$YELLOW"
-      [[ "$pct_num" -gt 80 ]] && usage_color="$RED"
-      # Simple bar
-      bar_width=20
-      filled=$((pct_num * bar_width / 100))
-      [[ "$filled" -gt "$bar_width" ]] && filled="$bar_width"
-      empty=$((bar_width - filled))
-      bar="${usage_color}"
-      for ((i=0; i<filled; i++)); do bar+="█"; done
-      bar+="${DIM}"
-      for ((i=0; i<empty; i++)); do bar+="░"; done
-      bar+="${RESET}"
-      echo -e "  ${bar} ${usage_color}${usage_pct}${RESET}  ${DIM}\$${usage_used}/\$${usage_max}  ${usage_period}${RESET}"
-      [[ -n "$usage_updated" ]] && echo -e "  ${DIM}updated: ${usage_updated}${RESET}"
-    fi
-  fi
-
-  echo ""
+  echo "# This file is located at 'src/commands/status.sh'."
+  echo "# It contains the implementation for the 'zion status' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_status_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5991,30 +5023,11 @@ zion_status_command() {
 zion_stow_command() {
 
   # src/commands/stow_command.sh
-  # zion stow — deploy dotfiles no host via GNU stow.
-  # Dentro do container usa nsenter; no host roda direto.
-
-  local nixos_dir="${HOST_NIXOS_DIR:-$HOME/nixos}"
-
-  case "${args[action]:-restow}" in
-    restow|re)
-      echo "=== Stow restow (deploy dotfiles) ==="
-      _zion_host_exec "cd $nixos_dir && stow -d stow -t \$HOME -R ."
-      ;;
-    delete|un|unstow)
-      echo "=== Stow delete (remove symlinks) ==="
-      _zion_host_exec "cd $nixos_dir && stow -d stow -t \$HOME -D ."
-      ;;
-    status|st)
-      echo "=== Stow status ==="
-      _zion_host_exec "cd $nixos_dir && stow -d stow -t \$HOME -n -R . 2>&1 | head -30"
-      ;;
-    *)
-      echo "Ação desconhecida: ${args[action]}"
-      echo "Uso: zion stow [restow|delete|status]"
-      return 1
-      ;;
-  esac
+  echo "# This file is located at 'src/commands/stow_command.sh'."
+  echo "# It contains the implementation for the 'zion stow' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_stow_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -6022,35 +5035,11 @@ zion_stow_command() {
 zion_switch_command() {
 
   # src/commands/switch.sh
-  # zion switch — aplica configuração NixOS no host.
-  # Dentro do container usa nsenter; no host roda direto.
-
-  local nixos_dir="${HOST_NIXOS_DIR:-$HOME/nixos}"
-  local mode="${args[mode]:-switch}"
-
-  case "$mode" in
-    switch)
-      echo "=== NixOS switch ==="
-      _zion_host_exec "cd $nixos_dir && nh os switch ."
-      ;;
-    test)
-      echo "=== NixOS test (build sem ativar) ==="
-      _zion_host_exec "cd $nixos_dir && nh os test ."
-      ;;
-    boot)
-      echo "=== NixOS boot (ativa no próximo reboot) ==="
-      _zion_host_exec "cd $nixos_dir && nh os boot ."
-      ;;
-    build)
-      echo "=== NixOS build (só compila) ==="
-      _zion_host_exec "cd $nixos_dir && nh os build ."
-      ;;
-    *)
-      echo "Modo desconhecido: $mode"
-      echo "Uso: zion switch [switch|test|boot|build]"
-      return 1
-      ;;
-  esac
+  echo "# This file is located at 'src/commands/switch.sh'."
+  echo "# It contains the implementation for the 'zion switch' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_switch_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -6058,27 +5047,11 @@ zion_switch_command() {
 zion_edit_command() {
 
   # src/commands/host_edit.sh
-  # zion edit: ~/nixos em /workspace/mnt + /workspace/logs. Respeita engine em ~/.zion (ex.: cursor).
-  zion_load_config
-  engine=$(zion_resolve_engine 0)
-  [[ -z "$engine" ]] && engine="cursor"
-  mount_path="${ZION_NIXOS_DIR:-$HOME/nixos}"
-  mount_path="$(cd "$mount_path" 2>/dev/null && pwd)" || { echo "zion edit: dir not found: $mount_path" >&2; exit 1; }
-  # Mesmo project name do `zion` (~/projects) para compartilhar cursor_config e não pedir login.
-  proj_name="zion-projects"
-  mount_opts="rw"
-  resume_id="${args['--resume']:-}"
-
-  EXTRA_V="-v /var/log/journal:/workspace/logs/host/journal:ro"
-
-  echo "[zion edit] engine=$engine ${mount_path} → ${proj_name} (mnt + logs)"
-
-  engine_args=""
-  if [[ -n "$resume_id" ]]; then
-    [[ "$resume_id" == "1" ]] && engine_args+=" --resume" || engine_args+=" --resume=$resume_id"
-  fi
-
-  zion_session_run "$engine" "$proj_name" "$mount_path" "$mount_opts" "$engine_args" "$EXTRA_V"
+  echo "# This file is located at 'src/commands/host_edit.sh'."
+  echo "# It contains the implementation for the 'zion edit' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_edit_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -6086,7 +5059,11 @@ zion_edit_command() {
 zion_help_command() {
 
   # src/commands/help.sh
-  bash "$zion_cli_dir/banner.sh" 2>/dev/null
+  echo "# This file is located at 'src/commands/help.sh'."
+  echo "# It contains the implementation for the 'zion help' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_help_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -6094,7 +5071,11 @@ zion_help_command() {
 zion_man_command() {
 
   # src/commands/man.sh
-  bash "$zion_cli_dir/man-page.sh" 2>/dev/null
+  echo "# This file is located at 'src/commands/man.sh'."
+  echo "# It contains the implementation for the 'zion man' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_man_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -11503,98 +10484,74 @@ zion_docker_front_student_server_stop_parse_requirements() {
 
 }
 
-# :command.function
-zion_hooks_command() {
-
-  # src/commands/hooks.sh
-  HOOKS_DIR=""
-  for _d in \
-    "/zion/hooks/claude-code" \
-    "${ZION_ROOT:-${HOME}/nixos/zion}/hooks/claude-code" \
-    "/workspace/mnt/zion/hooks/claude-code"; do
-    [[ -d "$_d" ]] && HOOKS_DIR="$_d" && break
-  done
-
-  if [[ -n "${args[--list]:-}" ]]; then
-    if [[ -z "$HOOKS_DIR" ]]; then
-      echo "hooks: diretório não encontrado" >&2; exit 1
-    fi
-    echo "Hooks disponíveis em $HOOKS_DIR:"
-    for f in "$HOOKS_DIR"/*.sh "$HOOKS_DIR"/*.json; do
-      [[ -f "$f" ]] && printf "  %s\n" "$(basename "$f" | sed 's/\.\(sh\|json\)$//')"
-    done
-    exit 0
-  fi
-
-  HOOK="${args[hook]}"
-
-  if [[ -z "$HOOKS_DIR" ]]; then
-    echo "hooks: diretório de hooks não encontrado" >&2; exit 1
-  fi
-
-  HOOK_FILE=""
-  for ext in sh json ""; do
-    candidate="$HOOKS_DIR/${HOOK}${ext:+.$ext}"
-    [[ -f "$candidate" ]] && HOOK_FILE="$candidate" && break
-  done
-
-  if [[ -z "$HOOK_FILE" ]]; then
-    echo "hooks: hook '$HOOK' não encontrado em $HOOKS_DIR" >&2
-    echo "Use 'zion hooks --list' para ver disponíveis." >&2
-    exit 1
-  fi
-
-  if [[ -n "${args[env_overrides]:-}" ]]; then
-    IFS=' ' read -ra _overrides <<< "${args[env_overrides]}"
-    for _kv in "${_overrides[@]}"; do
-      if [[ "$_kv" == *=* ]]; then
-        _key="${_kv%%=*}"
-        _val="${_kv#*=}"
-        export "${_key^^}=${_val}"
-      fi
-    done
-  fi
-
-  exec bash "$HOOK_FILE"
-
-}
-
 # :command.parse_requirements
 zion_hooks_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
-      --list|-l)
-        args['--list']=1
-        shift
-        ;;
-      --help|-h)
+      --help | -h)
         long_usage=yes
         zion_hooks_usage
         exit
         ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="hooks"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --list | -l)
+
+        # :flag.case_no_arg
+        args['--list']=1
+        shift
+        ;;
+
       -?*)
         printf "invalid option: %s\n" "$key" >&2
         exit 1
         ;;
+
       *)
-        if [[ -z "${args[hook]:-}" ]]; then
-          args[hook]="$key"
-          shift
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_repeatable
+        # :argument.case_repeatable
+        escaped="$(printf '%q' "$1")"
+        if [[ -z ${args['hook']+x} ]]; then
+          args['hook']="$1"
+
+        # :argument.case_repeatable
+        elif [[ -z ${args['env_overrides']+x} ]]; then
+          args['env_overrides']="$escaped"
         else
-          # repeatable: env_overrides
-          args[env_overrides]+="${args[env_overrides]:+ }$key"
-          shift
+          args['env_overrides']="${args['env_overrides']} $escaped"
+
         fi
+        shift
+
         ;;
+
     esac
   done
 
-  if [[ -z "${args[hook]:-}" ]] && [[ -z "${args[--list]:-}" ]]; then
-    printf "missing required argument: hook\nUsage: zion hooks HOOK [ENV_OVERRIDES...]\n" >&2
+  # :command.required_args_filter
+  if [[ -z ${args['hook']+x} ]]; then
+    printf "missing required argument: HOOK\nusage: zion hooks HOOK [ENV_OVERRIDES...] [OPTIONS]\n" >&2
+
     exit 1
   fi
+
 }
 
 # :command.parse_requirements
@@ -11835,6 +10792,13 @@ zion_stow_parse_requirements() {
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
+      # :flag.case
+      --reload | -r)
+
+        # :flag.case_no_arg
+        args['--reload']=1
+        shift
+        ;;
 
       -?*)
         printf "invalid option: %s\n" "$key" >&2
