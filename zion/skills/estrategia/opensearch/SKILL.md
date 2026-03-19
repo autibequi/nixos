@@ -11,7 +11,9 @@ Responder perguntas sobre dados no OpenSearch da Estrategia, montar queries pron
 
 ---
 
-## Cluster
+## Clusters
+
+### Sandbox
 
 | | |
 |---|---|
@@ -20,6 +22,17 @@ Responder perguntas sobre dados no OpenSearch da Estrategia, montar queries pron
 | **Versão** | OpenSearch 7.10.2 (compatível com ES 7.x) |
 | **Auth** | Sem autenticação (VPC interno) |
 | **Acesso via container** | `curl -s "$BASE/<índice>/_search"` funciona direto |
+
+### Produção
+
+| | |
+|---|---|
+| **Base URL** | `https://vpc-cluster-prod-v2-tm4hiwrf5rsnyvbm7zktc55r6e.us-east-1.es.amazonaws.com` |
+| **Dev Console** | `https://vpc-cluster-prod-v2-tm4hiwrf5rsnyvbm7zktc55r6e.us-east-1.es.amazonaws.com/_dashboards/app/dev_tools#/console` |
+| **Region** | us-east-1 |
+| **Auth** | VPC interno — verificar se requer credenciais |
+
+> Por padrão usar **sandbox** para exploração. Usar produção apenas quando explicitamente solicitado.
 
 ---
 
