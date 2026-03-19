@@ -23,6 +23,7 @@ CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
 CREDS_FILE="${CLAUDE_DIR}/.credentials.json"
 [[ ! -f "$CREDS_FILE" ]] && [[ -f "${HOME}/.local/share/claude-code/.credentials.json" ]] && CREDS_FILE="${HOME}/.local/share/claude-code/.credentials.json"
 CACHE_FILE="${XDG_CACHE_HOME:-${HOME}/.cache}/claude-usage.json"
+CACHE_LAST="${XDG_CACHE_HOME:-${HOME}/.cache}/claude-usage-last.json"
 CACHE_TTL=60
 # Suporta múltiplos args: --refresh --waybar
 MODE=""
@@ -138,7 +139,9 @@ _fetch_claude_ai() {
     --cookie "sessionKey=${SESSION_KEY}" \
     -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" 2>/dev/null) || return 1
   echo "$raw" | $JQ -e '.five_hour' &>/dev/null || return 1
-  mkdir -p "$(dirname "$CACHE_FILE")" 2>/dev/null && echo "$raw" > "$CACHE_FILE" 2>/dev/null || true
+  mkdir -p "$(dirname "$CACHE_FILE")" 2>/dev/null
+  echo "$raw" > "$CACHE_FILE" 2>/dev/null || true
+  cp "$CACHE_FILE" "$CACHE_LAST" 2>/dev/null || true
   echo "$raw"
 }
 
@@ -152,7 +155,9 @@ _fetch_fresh() {
     -H 'anthropic-version: 2023-06-01' \
     -H 'Accept: application/json' 2>/dev/null) || return 1
   echo "$raw" | $JQ -e '.five_hour' &>/dev/null || return 1
-  mkdir -p "$(dirname "$CACHE_FILE")" 2>/dev/null && echo "$raw" > "$CACHE_FILE" 2>/dev/null || true
+  mkdir -p "$(dirname "$CACHE_FILE")" 2>/dev/null
+  echo "$raw" > "$CACHE_FILE" 2>/dev/null || true
+  cp "$CACHE_FILE" "$CACHE_LAST" 2>/dev/null || true
   echo "$raw"
 }
 
@@ -171,6 +176,9 @@ if ! _cache_valid || [[ "$FORCE_REFRESH" == "1" ]]; then
 fi
 if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
   [[ -f "$CACHE_FILE" ]] && JSON=$(cat "$CACHE_FILE") || true
+fi
+if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
+  [[ -f "$CACHE_LAST" ]] && JSON=$(cat "$CACHE_LAST") || true
 fi
 
 if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
