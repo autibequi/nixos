@@ -665,14 +665,3 @@ commands:
   - name: beta
     help: "Toggle do modo BETA (beta overrides). Liga/desliga observacao da sessao."
     filename: commands/beta.sh
-
-  - name: web
-    help: Chromium relay com CDP (porta 9222). Agent controla o browser.
-    flags:
-      - long: --port
-        arg: port
-        default: "9222"
-        help: Porta do Chrome DevTools Protocol
-      - long: --kill
-        help: Mata o Chromium relay
-    filename: commands/web.sh
