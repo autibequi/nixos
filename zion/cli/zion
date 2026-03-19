@@ -342,6 +342,7 @@ zion_claude_usage() {
   printf "%s\n" "Commands:"
   printf "  %s   Nova sessão com engine Claude (= zion new --engine=claude). (default)\n" "new  "
   printf "  %s   Estatísticas de uso Claude (API OAuth / claude.ai).\n" "usage"
+  printf "  %s   Imprime o OAuth access token do Claude (util para curl manual).\n" "token"
   echo
 
   # :command.long_usage
@@ -452,6 +453,29 @@ zion_claude_usage_usage() {
     printf "  %s\n" "--refresh"
     printf "    Força fetch, ignora cache\n"
     echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_claude_token_usage() {
+  printf "zion claude token - Imprime o OAuth access token do Claude (util para curl manual).\n\n"
+  printf "Alias: t\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  zion claude token\n"
+  printf "  zion claude token --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
 
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
@@ -3117,6 +3141,15 @@ _zion_dk_install() {
       ' 2>&1 | tee "$log_dir/install.log"
 
     if [[ "${PIPESTATUS[0]}" -eq 0 ]]; then
+      # Adicionar node_modules/ ao .git/info/exclude local para nao sujar o git do projeto
+      local exclude_file="$dir/.git/info/exclude"
+      if [[ -f "$dir/.git/info/exclude" ]] || [[ -d "$dir/.git" ]]; then
+        mkdir -p "$dir/.git/info"
+        if ! grep -qxF 'node_modules/' "$exclude_file" 2>/dev/null; then
+          echo 'node_modules/' >> "$exclude_file"
+          echo "[zion docker] node_modules/ adicionado ao .git/info/exclude (gitignore local)"
+        fi
+      fi
       echo ""
       echo "Instalacao finalizada! Rode: zion docker $service server start --env=$env"
     else
@@ -3185,6 +3218,15 @@ _zion_dk_install() {
     ' 2>&1 | tee "$log_dir/install.log"
 
   if [[ "${PIPESTATUS[0]}" -eq 0 ]]; then
+    # Adicionar vendor/ ao .git/info/exclude local para nao sujar o git do projeto
+    local exclude_file="$dir/.git/info/exclude"
+    if [[ -f "$dir/.git/info/exclude" ]] || [[ -d "$dir/.git" ]]; then
+      mkdir -p "$dir/.git/info"
+      if ! grep -qxF 'vendor/' "$exclude_file" 2>/dev/null; then
+        echo 'vendor/' >> "$exclude_file"
+        echo "[zion docker] vendor/ adicionado ao .git/info/exclude (gitignore local)"
+      fi
+    fi
     echo ""
     echo "Instalacao finalizada! Rode: zion docker $service server start --env=$env"
   else
@@ -4169,20 +4211,6 @@ zion_claude_new_command() {
 }
 
 # :command.function
-zion_claude_token_command() {
-  # src/commands/claude_token.sh
-  CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
-  CREDS="${CLAUDE_DIR}/.credentials.json"
-  if [[ ! -f "$CREDS" ]]; then
-    echo "Erro: credenciais nao encontradas em $CREDS" >&2; exit 1
-  fi
-  TOKEN=$(jq -r '.claudeAiOauth.accessToken // empty' "$CREDS" 2>/dev/null)
-  if [[ -z "$TOKEN" ]]; then
-    echo "Erro: token nao encontrado em $CREDS" >&2; exit 1
-  fi
-  echo "$TOKEN"
-}
-
 zion_claude_usage_command() {
 
   # src/commands/claude_usage.sh
@@ -4219,6 +4247,38 @@ zion_claude_usage_command() {
     run_args=(--refresh)
     exec bash "$usage_script" "${run_args[@]}"
   fi
+
+}
+
+# :command.function
+zion_claude_token_command() {
+
+  # src/commands/claude_token.sh
+  CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
+  CREDS="${CLAUDE_DIR}/.credentials.json"
+
+  if [[ ! -f "$CREDS" ]]; then
+    echo "Erro: credenciais nao encontradas em $CREDS" >&2
+    exit 1
+  fi
+
+  JQ_BIN=""
+  for _p in jq /run/current-system/sw/bin/jq "${HOME}/.nix-profile/bin/jq" /usr/bin/jq; do
+    command -v "$_p" &>/dev/null && JQ_BIN="$_p" && break
+    [[ -x "$_p" ]] && JQ_BIN="$_p" && break
+  done
+  if [[ -z "$JQ_BIN" ]]; then
+    echo "Erro: jq nao encontrado" >&2; exit 1
+  fi
+
+  TOKEN=$("$JQ_BIN" -r '.claudeAiOauth.accessToken // empty' "$CREDS" 2>/dev/null)
+
+  if [[ -z "$TOKEN" ]]; then
+    echo "Erro: token não encontrado em $CREDS" >&2
+    exit 1
+  fi
+
+  echo "$TOKEN"
 
 }
 
@@ -6526,8 +6586,9 @@ zion_claude_parse_requirements() {
       ;;
 
     token | t)
-      action="claude token"
+      action="token"
       shift
+      zion_claude_token_parse_requirements "$@"
       shift $#
       ;;
 
@@ -6750,6 +6811,51 @@ zion_claude_usage_parse_requirements() {
         args['--refresh']=1
         shift
         ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_claude_token_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_claude_token_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="claude token"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
 
       -?*)
         printf "invalid option: %s\n" "$key" >&2
@@ -11368,7 +11474,7 @@ run() {
     "claude") zion_claude_command ;;
     "claude new") zion_claude_new_command ;;
     "claude usage") zion_claude_usage_command ;;
-    "claude token"|"claude t") zion_claude_token_command ;;
+    "claude token") zion_claude_token_command ;;
     "cursor") zion_cursor_command ;;
     "opencode") zion_opencode_command ;;
     "ask") zion_ask_command ;;
