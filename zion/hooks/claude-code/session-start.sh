@@ -25,9 +25,9 @@ AUTOCOMMIT="OFF"; [ -f "$WS/.ephemeral/auto-commit" ]    && AUTOCOMMIT="ON"
 AUTOJARVIS="OFF"; [ -f "$WS/.ephemeral/auto-jarvis" ]    && AUTOJARVIS="ON"
 HEADLESS="${HEADLESS:-0}"
 PUPPY_TIMEOUT="${PUPPY_TIMEOUT:-}"
-IN_DOCKER="0"
+[ -z "${IN_DOCKER:-}" ] && IN_DOCKER="0"
 { [ "$CLAUDE_ENV" = "container" ] || [ -f "/.dockerenv" ]; } && IN_DOCKER="1"
-ZION_EDIT="0"
+[ -z "${ZION_EDIT:-}" ] && ZION_EDIT="0"
 [ -d "/workspace/logs" ] && ZION_EDIT="1"
 
 # ── Agent/Task mode detection ───────────────────────────────────────────
