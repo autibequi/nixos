@@ -68,7 +68,7 @@ x-base-volumes: &base-volumes
   - nix_store:/nix
 
 services:
-  sandbox:
+  leech:
     build:
       context: .
       dockerfile: Dockerfile.claude
