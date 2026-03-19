@@ -35,12 +35,4 @@ if [[ -n "${GRAFANA_URL:-}" ]] && [[ -n "${GRAFANA_TOKEN:-}" ]]; then
   fi
 fi
 
-# Última coisa: árvore do primeiro nível da pasta atual
-_here="$(pwd)"
-echo "[zion bootstrap] Árvore de: ${_here}" >&2
-if command -v tree &>/dev/null; then
-  tree -L 1 -a --dirsfirst 2>/dev/null || tree -L 1 -a
-else
-  find . -maxdepth 1 -print 2>/dev/null | sed -e 's;[^/]*/;|____;g;s;____|; |;g' | head -50
-fi
 return "${_ret}" 2>/dev/null || exit "${_ret}"
