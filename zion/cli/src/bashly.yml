@@ -659,20 +659,19 @@ commands:
     alias: [g]
     help: "Utilitarios Git. Ex: zion git sandbox"
     commands:
-      - name: sandbox
-        alias: [sb]
-        help: "Fetch, recria sandbox limpa do remote, merge branch atual, push, volta."
+      - name: append
+        alias: [ap]
+        help: "Merge da branch atual em <BRANCH> (recriada limpa do remote), push e volta."
         args:
           - name: branch
-            help: "Branch a mergear (default: branch atual)"
+            required: true
+            help: "Branch destino (ex: sandbox, staging)"
         flags:
-          - long: --target
-            short: -t
-            arg: target
-            default: sandbox
-            help: "Branch destino (default: sandbox)"
           - long: --no-push
             help: "Nao faz push (apenas merge local)"
+          - long: --yes
+            short: -y
+            help: "Pula confirmacao interativa"
         filename: commands/git_sandbox.sh
 
   - name: help
