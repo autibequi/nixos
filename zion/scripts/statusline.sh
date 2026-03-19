@@ -16,9 +16,9 @@ fi
 MODEL=$(echo "$input" | jq -r '.model.display_name // "?"')
 MODEL_SIZE=$(echo "$MODEL" | cut -d' ' -f1 | tr '[:upper:]' '[:lower:]')
 
-CTX_PCT=$(echo "$input" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
-CTX_REM_PCT=$(echo "$input" | jq -r '.context_window.remaining_percentage // 0' | cut -d. -f1)
-CTX_SIZE=$(echo "$input" | jq -r '.context_window.context_window_size // 0')
+CTX_PCT=$(echo "$input"     | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
+CTX_SIZE=$(echo "$input"    | jq -r '.context_window.context_window_size // 0')
+EXCEEDS=$(echo "$input"     | jq -r '.exceeds_200k_tokens // false')
 
 # Tokens de input (contexto atual)
 CTX_USED=$(echo "$input" | jq -r '
@@ -118,10 +118,10 @@ OUT_TOKENS_FMT=$(fmt_tokens "$OUT_TOKENS")
 
 # --- Barras ---
 
-# Contexto combinado: █ input  ▓ output  ░ livre
+# Contexto combinado: █ input  ▒ output  ░ livre  (3 tons distintos como cache)
 # Urgencia via prefixo quando >75% ou >90%
 ctx_combined_bar() {
-  local in_tokens="${1:-0}" out_tokens="${2:-0}" ctx_size="${3:-200000}" w="${4:-8}"
+  local in_tokens="${1:-0}" out_tokens="${2:-0}" ctx_size="${3:-200000}" w="${4:-6}"
   [[ "$ctx_size" -le 0 ]] && ctx_size=200000
   local in_fill=$(( in_tokens * w / ctx_size ))
   local out_fill=$(( out_tokens * w / ctx_size ))
@@ -129,9 +129,9 @@ ctx_combined_bar() {
   [[ $(( in_fill + out_fill )) -gt $w ]] && out_fill=$(( w - in_fill ))
   local free=$(( w - in_fill - out_fill ))
   local s="" i
-  for (( i=0; i<in_fill;  i++ )); do s="${s}█"; done
-  for (( i=0; i<out_fill; i++ )); do s="${s}▓"; done
-  for (( i=0; i<free;     i++ )); do s="${s}░"; done
+  for (( i=0; i<in_fill;  i++ )); do s="${s}█"; done  # input: cheio
+  for (( i=0; i<out_fill; i++ )); do s="${s}▒"; done  # output: médio
+  for (( i=0; i<free;     i++ )); do s="${s}░"; done  # livre: leve
   local pct=$(( (in_tokens + out_tokens) * 100 / ctx_size ))
   local prefix=""
   (( pct >= 90 )) && prefix="▸▸" || { (( pct >= 75 )) && prefix="▸"; }
@@ -188,8 +188,11 @@ elif [[ -d "/workspace/mnt" ]] && [[ -n "$(ls -A /workspace/mnt 2>/dev/null)" ]]
   MOUNT_STR=" @ /workspace/mnt"
 fi
 
+# Icone: alerta se excedeu 200k, senão robot normal
+[[ "$EXCEEDS" == "true" ]] && ICON="󰀦" || ICON="󱙺"
+
 # Composicao final
-RIGHT="󱙺 ${MODEL_SIZE} ${CTX_STR}${CACHE_STR}${COST_STR}${WT_STR}${MOUNT_STR}"
+RIGHT="${ICON} ${MODEL_SIZE} ${CTX_STR}${CACHE_STR}${COST_STR}${WT_STR}${MOUNT_STR}"
 
 # Terminal title via OSC (stderr)
 printf '\033]0;Claude: %s\007' "$TOPIC" >&2
