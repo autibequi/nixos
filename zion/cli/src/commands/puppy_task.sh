@@ -44,7 +44,7 @@ OBSIDIAN_PATH="$zion_obsidian_path" \
     if [ -f '$agent_file' ]; then
       agent_prompt=\"\$(cat '$agent_file')\"
       timeout '$timeout_secs' claude \
-        --permission-mode bypassPermissions \
+        --permission-mode acceptEdits \
         --model '$model' \
         --max-turns '$max_turns' \
         --append-system-prompt \"\$agent_prompt\" \
