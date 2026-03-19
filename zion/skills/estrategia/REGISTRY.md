@@ -26,6 +26,7 @@ estrategiahq
 |---|---|---|
 | estrategia/jira | `~/.claude/skills/estrategia/jira/` | Ler card Jira completo com todos os campos — mapa de custom fields, chamada MCP correta, extração ADF |
 | estrategia/grafana | `~/.claude/skills/estrategia/grafana/` | Query logs Loki e dashboards Grafana — serviços, patterns de debug, integração com workflow |
+| estrategia/opensearch | `~/.claude/skills/estrategia/opensearch/` | Consultar cluster OpenSearch sandbox — mapeamento de índices, queries DSL, links Dev Console |
 
 ## Sandbox local (testes)
 
