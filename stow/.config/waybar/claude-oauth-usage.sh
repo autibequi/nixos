@@ -214,6 +214,47 @@ if [[ -z "$JSON" ]]; then
   exit 0
 fi
 
+# --- freshness: data do cache + cor do indicador ---
+_file_age_label() {
+  local f="${1:-}"; [[ -f "$f" ]] || { echo "[? old] ?"; return; }
+  local mtime now mins
+  mtime=$(date -r "$f" +%s 2>/dev/null) || { echo "[? old] ?"; return; }
+  now=$(date +%s)
+  mins=$(( (now - mtime) / 60 ))
+  printf '[%dmin old] %s' "$mins" "$(date -r "$f" '+%d/%m %H:%M' 2>/dev/null || echo '?')"
+}
+
+DATA_DATE=""
+FRESHNESS_COLOR=""
+case "${USED_SOURCE:-}" in
+  claude.ai|OAuth)
+    DATA_DATE="[0min old] agora"
+    FRESHNESS_COLOR="#2ecc71"
+    FRESHNESS_LABEL="fresh"
+    ;;
+  cache)
+    DATA_DATE=$(_file_age_label "$CACHE_FILE")
+    FRESHNESS_COLOR="#2ecc71"
+    FRESHNESS_LABEL="fresh"
+    ;;
+  container)
+    DATA_DATE=$(_file_age_label "$SHARED_FILE")
+    FRESHNESS_COLOR="#f39c12"
+    FRESHNESS_LABEL="okayish"
+    ;;
+  "container(stale)"|last)
+    _stale_file="$([[ "$USED_SOURCE" == "last" ]] && echo "$CACHE_LAST" || echo "$SHARED_FILE")"
+    DATA_DATE=$(_file_age_label "$_stale_file")
+    FRESHNESS_COLOR="#e74c3c"
+    FRESHNESS_LABEL="ohno"
+    ;;
+  *)
+    DATA_DATE="[? old] ?"
+    FRESHNESS_COLOR="#e74c3c"
+    FRESHNESS_LABEL="ohno"
+    ;;
+esac
+
 # --- modo: JSON bruto ---
 if [[ -z "$MODE" ]]; then
   echo "$JSON" | $JQ . 2>/dev/null || echo "$JSON"
@@ -334,11 +375,12 @@ if [[ "$MODE" == "--waybar" ]]; then
   p_7d=$(printf "%-${wprefix}s" "${ICON_7D} 7d");   line_7d="${p_7d}$(_gauge "" "$sd_pct" "$tw" 3 1)   reset em $sd_r"
   p_sn=$(printf "%-${wprefix}s" "${ICON_SONNET} Sonnet"); line_sn="${p_sn}$(_gauge "" "$sn_pct" "$tw" 3 1)"
   p_op=$(printf "%-${wprefix}s" "${ICON_OPUS} Opus");   line_op="${p_op}$(_gauge "" "$op_pct" "$tw" 3 1)"
-  # Primeira linha do tooltip: sessionKey e org (vê se está usando claude.ai) + fonte dos dados
+  # Primeira linha do tooltip: sessionKey e org + fonte dos dados + indicador de frescor
   sk_status="sessionKey: $([[ -n "$SESSION_KEY" ]] && echo "sim" || echo "não")"
   org_status="org: $([[ -n "$ORG_ID" ]] && echo "${ORG_ID:0:8}…" || echo "não")"
-  source_line="Fonte: ${USED_SOURCE:-?}"
-  tooltip="<span font_family='monospace' size='12000'>${sk_status} | ${org_status} | ${source_line}"$'\n'"$(printf '%s\n%s\n%s\n%s' "$line_5h" "$line_7d" "$line_sn" "$line_op")</span>"
+  freshness_dot="<span color='${FRESHNESS_COLOR}'>●</span>"
+  source_line="${freshness_dot} ${FRESHNESS_LABEL}  ${DATA_DATE}"
+  tooltip="<span font_family='monospace' size='12000'>${source_line}"$'\n'"$(printf '%s\n%s\n%s\n%s' "$line_5h" "$line_7d" "$line_sn" "$line_op")</span>"
   $JQ -cn \
     --arg text    "$text" \
     --arg tooltip "$tooltip" \
