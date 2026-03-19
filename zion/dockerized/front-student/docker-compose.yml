@@ -16,7 +16,7 @@ services:
       # Bind mount completo: source + node_modules (gerado por zion docker install)
       - ${FRONT_STUDENT_DIR}:/app
     ports:
-      - "8082:8082"
+      - "3005:3005"
     extra_hosts:
       # Resolve *.local.estrategia-sandbox.com.br via host (onde o reverse proxy roda)
       - "api.local.estrategia-sandbox.com.br:host-gateway"

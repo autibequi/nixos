@@ -50,7 +50,7 @@ zion docker run front-student
 O `install` roda `npm install` com SSH + NPM_TOKEN no container.
 O `run` sobe o Nuxt dev server na porta 8082.
 
-**Acesso:** `http://localhost:8082`
+**Acesso:** `http://localhost:3005`
 
 ## Hot-reload
 
@@ -118,7 +118,7 @@ FRONT_STUDENT_DIR="$HOME/projects/estrategia/front-student"
 
 - Node 20 Alpine
 - Nuxt 2 + Vue 2
-- Dev server HTTP em `:8082` (HOST=0.0.0.0, PORT=8082)
+- Dev server HTTP em `:3005` (porta hardcoded no nuxt.config.js)
 - `nuxt dev` executado diretamente — vars vem do Docker env_file
 - Hot-reload via bind mount do source
 

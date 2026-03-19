@@ -6,7 +6,7 @@ RUN apk add --no-cache git ca-certificates python3 make g++ \
 
 WORKDIR /app
 
-EXPOSE 8082
+EXPOSE 3005
 
 # 0.0.0.0 para aceitar conexoes externas ao container
 ENV HOST=0.0.0.0

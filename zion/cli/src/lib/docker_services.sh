@@ -68,7 +68,7 @@ zion_ensure_log_dir() {
 # Portas host publicadas por servico (para liberar antes do run)
 zion_docker_service_host_ports() {
   case "$1" in
-    front-student)   echo "8082" ;;
+    front-student)   echo "3005" ;;
     bo-container)    echo "9090" ;;
     monolito)        echo "4004 2345" ;;
     monolito-worker) echo "" ;;
