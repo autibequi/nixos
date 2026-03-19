@@ -8,3 +8,6 @@ STATE.md
 .claude/worktrees
 .claude/settings
 .claude/settings.json
+
+# AI SWARM
+.worktrees/
