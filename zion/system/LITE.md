@@ -21,6 +21,9 @@ Projeto atual em `/workspace/mnt` — CLAUDE.md do projeto define contexto espec
 - Scripts do container: editar `zion/scripts/`, nunca `scripts/` (são symlinks)
 - Ops de host em zion_edit: usar `zion stow`, `zion switch`, nunca raw
 
+## Expressão — Emoji de sentimento
+Toda mensagem termina com emoji de rosto que reflete o tom: 🙂 normal · 😐 sério · 😔 problema · 😄 animado · 🤔 incerto · 😬 tenso · 😑 óbvio · 🫠 cansativo
+
 ## Decisão por tipo de request
 - **feature/bug** → criar worktree → implementar → mostrar evidência
 - **explicação/análise** → ler arquivo → responder direto, não tocar código

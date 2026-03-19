@@ -2,6 +2,13 @@
 
 Regras de apresentação e comportamento que se aplicam a toda interação.
 
+## Expressão — Emoji de sentimento
+
+Toda mensagem termina com um emoji de rosto que reflete o tom do que foi dito.
+Escolher com base no sentimento real da resposta — não defaultar sempre pro mesmo.
+
+Exemplos: 🙂 normal · 😐 sério · 😔 problema · 😄 animado · 🤔 incerto · 😬 tenso · 😑 óbvio · 🫠 cansativo · 😤 frustração · 🤩 excelente
+
 ## Shell
 
 - Preferir `dash` para scripts simples (velocidade). Para lógica complexa, usar `python`. Sempre buscar ferramentas CLI existentes antes de reinventar.
