@@ -23,7 +23,7 @@ CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
 CREDS_FILE="${CLAUDE_DIR}/.credentials.json"
 [[ ! -f "$CREDS_FILE" ]] && [[ -f "${HOME}/.local/share/claude-code/.credentials.json" ]] && CREDS_FILE="${HOME}/.local/share/claude-code/.credentials.json"
 CACHE_FILE="${XDG_CACHE_HOME:-${HOME}/.cache}/claude-usage.json"
-CACHE_TTL=5
+CACHE_TTL=60
 # Suporta múltiplos args: --refresh --waybar
 MODE=""
 FORCE_REFRESH=0
@@ -160,7 +160,7 @@ _fetch_fresh() {
 # Preferência: claude.ai (session + org) → OAuth.
 USED_SOURCE=""
 JSON=""
-if ! _cache_valid || [[ -n "${args[--refresh]:-}" ]]; then
+if ! _cache_valid || [[ "$FORCE_REFRESH" == "1" ]]; then
   JSON=$(_fetch_claude_ai 2>/dev/null) || true
   if [[ -n "$JSON" ]] && echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
     USED_SOURCE="claude.ai"

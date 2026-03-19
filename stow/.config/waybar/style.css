@@ -76,6 +76,7 @@ window#waybar {
 #custom-gpu-bar,
 #custom-ram-bar,
 #custom-claude-usage,
+#custom-obsidian-sync,
 #bluetooth,
 #tray {
     margin: 0;
@@ -266,6 +267,22 @@ window#waybar {
 
 #custom-claude-usage.critical {
     color: #e74c3c;
+}
+
+#custom-obsidian-sync {
+    color: #9b59b6;
+    padding: 0 4px;
+    margin: 0;
+    transition: color 0.3s;
+}
+
+#custom-obsidian-sync.inactive {
+    color: #636e72;
+}
+
+#custom-obsidian-sync.failed {
+    color: #e74c3c;
+    animation: urgent-pulse 0.6s ease-in-out infinite alternate;
 }
 
 #custom-cpu-bar,

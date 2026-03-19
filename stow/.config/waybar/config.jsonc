@@ -18,6 +18,7 @@
     "custom/cpu-bar",
     "custom/ram-bar",
     "custom/claude-usage",
+    "custom/obsidian-sync",
     "pulseaudio",
     "backlight",
     "network",
@@ -264,6 +265,16 @@
     "format": "{}",
     "tooltip": true,
     "escape": false
+  },
+  "custom/obsidian-sync": {
+    "exec": "$HOME/.config/waybar/obsidian-sync-status.sh",
+    "return-type": "json",
+    "interval": 30,
+    "format": "{}",
+    "tooltip": true,
+    "escape": false,
+    "on-click": "alacritty -e bash -c '$HOME/.config/waybar/obsidian-sync-panel.sh'",
+    "on-click-right": "xdg-open $HOME/nixos/modules/obsidian-sync.nix"
   },
   "custom/cpu-bar": {
     "exec": "$HOME/.config/waybar/waybar-resource-bar.sh cpu",

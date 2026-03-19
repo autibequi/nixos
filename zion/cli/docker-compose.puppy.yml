@@ -58,6 +58,8 @@ x-base-volumes: &base-volumes
   # Mirror mounts: host paths acessiveis dentro do container (Docker build context + daemon volumes)
   - ${HOME}/projects:${HOME}/projects
   - ${HOME}/nixos:${HOME}/nixos:ro
+  # Nix store compartilhado: persiste entre resets e evita re-download de pacotes
+  - nix_store:/nix
 
 services:
   puppy:
@@ -84,6 +86,7 @@ services:
 
 volumes:
   cursor_config:
+  nix_store:
 
 networks:
   default:

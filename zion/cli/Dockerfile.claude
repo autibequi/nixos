@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # Stage 0: install Cursor CLI on Debian (FHS + glibc/libstdc++ for node binary)
 FROM debian:bookworm-slim AS cursor-cli
 RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && \
@@ -11,8 +12,9 @@ RUN mkdir -p /etc/nix && \
     echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf
 
 # Install common tools + Claude Code via Nix (evita instalador oficial que exige glibc FHS)
-# curl omitido: já vem como dependência de yt-dlp (evita conflito no profile)
-RUN nix profile install \
+# --mount=type=cache: reutiliza tarballs baixados entre rebuilds (não re-baixa do cache.nixos.org)
+RUN --mount=type=cache,target=/root/.cache/nix \
+    nix profile install \
     nixpkgs#jq \
     nixpkgs#yt-dlp \
     nixpkgs#python3 \
@@ -23,7 +25,6 @@ RUN nix profile install \
     nixpkgs#gh \
     nixpkgs#gawk \
     nixpkgs#gnused \
-    nixpkgs#ffmpeg-headless \
     nixpkgs#espeak-ng \
     nixpkgs#coreutils \
     nixpkgs#gosu \
