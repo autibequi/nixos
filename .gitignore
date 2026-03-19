@@ -69,7 +69,4 @@ workbench/*
 
 .env
 
-/CLAUDE.OVERRIDE.md
-/zion/CLAUDE.OVERRIDE.md
-
 .weblive
