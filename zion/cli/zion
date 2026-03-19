@@ -3181,6 +3181,8 @@ _zion_dk_install() {
     -it \
     -v "${HOST_SSH_DIR:-$HOME/.ssh}:/ssh-host:ro" \
     -v "$dir:/go/app" \
+    -v "zion-go-mod-cache:/go/pkg/mod" \
+    -v "zion-go-build-cache:/root/.cache/go-build" \
     -e GOPATH=/go \
     -e GOPRIVATE="github.com/estrategiahq" \
     -e TERM=xterm-256color \
@@ -3799,6 +3801,8 @@ _zion_dk_shell() {
       -v "$dir:/go/app" \
       -v "$log_dir:/workspace/logs" \
       -v /var/run/docker.sock:/var/run/docker.sock \
+      -v "zion-go-mod-cache:/go/pkg/mod" \
+      -v "zion-go-build-cache:/root/.cache/go-build" \
       -e GOPATH=/go \
       -e GOPRIVATE="github.com/estrategiahq" \
       -e TERM=xterm-256color \
@@ -4254,6 +4258,9 @@ zion_claude_usage_command() {
 zion_claude_token_command() {
 
   # src/commands/claude_token.sh
+  # zion claude token — Imprime o OAuth access token do Claude.
+  # Util para curl manual: TOKEN=$(zion claude token)
+
   CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
   CREDS="${CLAUDE_DIR}/.credentials.json"
 
@@ -4262,19 +4269,12 @@ zion_claude_token_command() {
     exit 1
   fi
 
-  JQ_BIN=""
-  for _p in jq /run/current-system/sw/bin/jq "${HOME}/.nix-profile/bin/jq" /usr/bin/jq; do
-    command -v "$_p" &>/dev/null && JQ_BIN="$_p" && break
-    [[ -x "$_p" ]] && JQ_BIN="$_p" && break
-  done
-  if [[ -z "$JQ_BIN" ]]; then
-    echo "Erro: jq nao encontrado" >&2; exit 1
-  fi
-
-  TOKEN=$("$JQ_BIN" -r '.claudeAiOauth.accessToken // empty' "$CREDS" 2>/dev/null)
+  # Extrai token sem depender de jq (grep PCRE com fallback sed)
+  TOKEN=$(grep -oP '"accessToken"\s*:\s*"\K[^"]+' "$CREDS" 2>/dev/null)
+  [[ -z "$TOKEN" ]] && TOKEN=$(sed -n 's/.*"accessToken"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$CREDS" 2>/dev/null | head -1)
 
   if [[ -z "$TOKEN" ]]; then
-    echo "Erro: token não encontrado em $CREDS" >&2
+    echo "Erro: token nao encontrado em $CREDS" >&2
     exit 1
   fi
 

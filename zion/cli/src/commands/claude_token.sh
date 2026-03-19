@@ -9,16 +9,9 @@ if [[ ! -f "$CREDS" ]]; then
   exit 1
 fi
 
-JQ_BIN=""
-for _p in jq /run/current-system/sw/bin/jq "${HOME}/.nix-profile/bin/jq" /usr/bin/jq; do
-  command -v "$_p" &>/dev/null && JQ_BIN="$_p" && break
-  [[ -x "$_p" ]] && JQ_BIN="$_p" && break
-done
-if [[ -z "$JQ_BIN" ]]; then
-  echo "Erro: jq nao encontrado" >&2; exit 1
-fi
-
-TOKEN=$("$JQ_BIN" -r '.claudeAiOauth.accessToken // empty' "$CREDS" 2>/dev/null)
+# Extrai token sem depender de jq (grep PCRE com fallback sed)
+TOKEN=$(grep -oP '"accessToken"\s*:\s*"\K[^"]+' "$CREDS" 2>/dev/null)
+[[ -z "$TOKEN" ]] && TOKEN=$(sed -n 's/.*"accessToken"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$CREDS" 2>/dev/null | head -1)
 
 if [[ -z "$TOKEN" ]]; then
   echo "Erro: token nao encontrado em $CREDS" >&2
