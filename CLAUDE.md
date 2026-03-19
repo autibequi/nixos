@@ -8,6 +8,8 @@
 
 **Contexto rápido para próximas execuções:** Nomenclatura = **Zion** (agentes/sessões), **Puppy** (workers em background). CLI: **`zion`** sem arg = new (nova sessão); **`zion continue`** = continua última sessão; **`zion resume`** = mostra lista; **`zion new-task`** = task no kanban. Config em **`~/.zion`**. Personalidade em **`zion/system/`** (SOUL, DIRETRIZES, SELF) e **`zion/personas/`**. Scripts de worker: **`puppy-runner.sh`**, **`puppy-scheduler.sh`** em `scripts/`; symlinks em `zion/scripts/`. Após mudar CLI: **`bashly generate`** em `zion/cli/`.
 
+**Em `zion edit`, sempre preferir os comandos `zion` para operações de host.** Ver tabela completa em §2.3. Para lista exaustiva: `zion man`.
+
 ---
 
 ## 1. Identidade — ao abrir esta sessão (ex.: zion edit)
@@ -65,6 +67,25 @@ Ao abrir o projeto, faça em segundos:
 | **`zion puppy shell`** | Bash dentro do container Puppy. |
 | **`zion puppy query --headless --timeout=600 "prompt"`** | Envia prompt headless com timeout. O agente sabe que ninguém observa e deve ir o mais longe possível. |
 | **`zion claude-usage`** | Estatísticas de uso Claude (API OAuth / claude.ai). Sem flag = JSON bruto; `--waybar` = JSON para o usage bar consumir; `--refresh` = ignora cache. |
+
+### 2.3 Comandos de host — usar sempre em `zion edit`
+
+> **Regra:** nunca usar comandos raw (`stow`, `nh os`, `hyprctl reload`) quando há equivalente `zion`. Para ver todos os comandos: **`zion man`**.
+
+| Operação | Comando `zion` | Raw equivalente (evitar) |
+|----------|---------------|--------------------------|
+| Deploy dotfiles | `zion stow` | `stow -d ~/nixos/stow -t ~ .` |
+| Deploy + reload Hyprland | `zion stow --reload` | `stow ... && hyprctl reload` |
+| Build NixOS (validar) | `zion switch test` | `nh os test .` |
+| Aplicar NixOS | `zion switch` | `nh os switch .` |
+| Aplicar no próximo boot | `zion switch boot` | `nh os boot .` |
+| Regenerar CLI zion | `zion update` | `cd zion/cli && bashly generate` |
+| Status dotfiles | `zion stow status` | `stow -d stow -t ~ -n -R .` |
+| Remover symlinks stow | `zion stow delete` | `stow -d stow -t ~ -D .` |
+
+**`zion stow --reload`** ainda não existe — ver §8 para adicionar. Proposta: após deploy, chamar `hyprctl reload && pkill -SIGUSR2 waybar`.
+
+---
 
 ### 2.2 Modo Headless (workers e queries sem supervisão)
 
@@ -260,7 +281,7 @@ Para alterações em **NixOS** ou **Hyprland**, o agente deve **ler e seguir** a
 - **Keybinds / Waybar / config de DE:** **`stow/.config/`** (stow), não em módulos NixOS.
 - **Ativar/desativar módulos:** editar **`configuration.nix`** (lista de `imports`).
 
-**Workflow recomendado:** Usar a skill **nixos** (MCP-NixOS, nh): buscar pacotes/opções, editar o módulo adequado, rodar **`nh os test .`** para validar. **Não** rodar `nixos-rebuild switch` a menos que o usuário peça. Dotfiles: sempre via stow.
+**Workflow recomendado:** Usar a skill **nixos** (MCP-NixOS, nh): buscar pacotes/opções, editar o módulo adequado, rodar **`zion switch test`** para validar. **Não** rodar `nixos-rebuild switch` a menos que o usuário peça explicitamente — usar **`zion switch`**. Dotfiles: sempre via **`zion stow`** (não chamar `stow` diretamente). Para deploy + reload Hyprland em um passo: **`zion stow --reload`** (quando implementado).
 
 ---
 
@@ -303,7 +324,7 @@ Para alterações em **NixOS** ou **Hyprland**, o agente deve **ler e seguir** a
 | Pacote de sistema | `modules/core/packages.nix` |
 | Serviço systemd | `modules/core/services.nix` |
 | Ativar/desativar módulo | `configuration.nix` (imports) |
-| Keybind / regra de janela / Waybar | `stow/.config/hypr/`, `stow/.config/waybar/` |
+| Keybind / regra de janela / Waybar | `stow/.config/hypr/`, `stow/.config/waybar/` → deploy com **`zion stow`** |
 | Novo comando ou flag do `zion` | `zion/cli/src/bashly.yml` + `zion/cli/src/commands/<nome>.sh` → `bashly generate` |
 | Mounts ou serviços do container | `zion/cli/docker-compose.zion.yml / docker-compose.puppy.yml` |
 | Comportamento no /load, INIT | `zion/bootstrap.md`, `zion/system/INIT.md` |

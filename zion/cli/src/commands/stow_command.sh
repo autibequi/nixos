@@ -22,3 +22,8 @@ case "${args[action]:-restow}" in
     return 1
     ;;
 esac
+
+if [[ -n "${args[--reload]}" ]]; then
+  echo "=== Recarregando Hyprland + Waybar ==="
+  _zion_host_exec "hyprctl reload && pkill -SIGUSR2 waybar 2>/dev/null; echo 'reload ok'"
+fi

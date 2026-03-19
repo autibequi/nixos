@@ -9,3 +9,5 @@
 - [feedback_cursor_links.md](feedback_cursor_links.md) — Sempre usar cursor://file//home/pedrinho/... com :linha:col para links clicáveis de arquivos
 - [feedback_worktree_obrigatorio.md](feedback_worktree_obrigatorio.md) — Sempre criar worktree isolado antes de implementar em qualquer repositório
 - [feedback_zion_scripts_source.md](feedback_zion_scripts_source.md) — Scripts do container: fonte da verdade é zion/scripts/; scripts/ contém symlinks. Nunca editar scripts/ esperando afetar o container
+- [feedback_autocommit.md](feedback_autocommit.md) — Nunca commitar automaticamente sem o usuário pedir; respeitar flag auto-commit
+- [feedback_zion_cli_commands.md](feedback_zion_cli_commands.md) — Em zion edit: sempre usar `zion stow`, `zion switch`, `zion man`. Nunca comandos raw.

@@ -247,6 +247,88 @@ if [ -d "$REPO_MEMORY" ] && [ ! -f "$LIVE_MEMORY/MEMORY.md" ]; then
 fi
 
 # ────────────────────────────────────────────────────────────────
+# 8.5 BOOT DISPLAY — apenas zion_edit=1
+#     Instrui o agente a exibir o loader na primeira resposta
+# ────────────────────────────────────────────────────────────────
+if [ "$ZION_EDIT" = "1" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
+  # Coleta dados para o display
+  _worktrees=$(git -C "$WS" worktree list 2>/dev/null | wc -l | tr -d ' ')
+  _inbox=$(wc -l < /workspace/obsidian/tasks/inbox/inbox.md 2>/dev/null || echo "?")
+  _uptime=$(awk '{h=int($1/3600); m=int(($1%3600)/60); printf "%dh %dm", h, m}' /proc/uptime 2>/dev/null || echo "?")
+  _git_branch=$(git -C "$WS" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
+  _git_dirty=$(git -C "$WS" status --porcelain 2>/dev/null | wc -l | tr -d ' ')
+  _git_ahead=$(git -C "$WS" rev-list @{u}..HEAD 2>/dev/null | wc -l | tr -d ' ')
+  _puppy_doing=$(ls /workspace/obsidian/tasks/doing/ 2>/dev/null | wc -l | tr -d ' ')
+  _puppy_next=$(ls /workspace/obsidian/tasks/_scheduled/ 2>/dev/null | head -1 || echo "?")
+  _backlog=$(ls /workspace/obsidian/tasks/backlog/ 2>/dev/null | wc -l | tr -d ' ')
+  _done=$(ls /workspace/obsidian/tasks/done/ 2>/dev/null | wc -l | tr -d ' ')
+
+  echo "---BOOT_DISPLAY---"
+  cat <<BOOTDISPLAY
+Na sua PRIMEIRA resposta desta sessão, exibir o boot display abaixo antes de tudo.
+Gerado dinamicamente — recriar com os valores reais do contexto recebido.
+
+Dados coletados pelo hook (usar esses valores):
+  container_up = ${_uptime}
+  worktrees    = ${_worktrees}
+  inbox        = ${_inbox} items
+  git_branch   = ${_git_branch}
+  git_ahead    = ${_git_ahead}
+  git_dirty    = ${_git_dirty} dirty
+  puppy_doing  = ${_puppy_doing} doing
+  puppy_next   = ${_puppy_next}
+  backlog      = ${_backlog}
+  done         = ${_done}
+
+Formato obrigatório (exibir dentro de code block):
+
+  provider               ANTHROPIC
+  model                  <modelo atual>
+
+  headless               <OFF/ON>
+  in_docker              <OFF/ON>
+  zion_edit              <OFF/ON>
+  autocommit             <OFF/ON>
+  personality            <OFF/ON>
+
+  container_up           <valor>
+  worktrees              <N> active
+  inbox                  <N> items
+
+  BOOT        .........  OK    [  12ms]
+  ENV         .........  OK    [   8ms]  docker
+  BOOTSTRAP   .........  OK    [  88ms]
+  GIT         .........  OK    [  23ms]  <branch>  ↑<ahead>  <dirty> dirty
+  DIRETRIZES  .........  OK    [  34ms]
+  SELF        .........  OK    [  21ms]
+  PUPPY       .........  OK    [every10]  » next: <puppy_next>
+  TASKS       .........  OK    [  16ms]  <backlog> backlog  ·  <done> done
+  CLAUDE.MD   .........  OK    [ 210ms]
+  DIGNITY     ..ʕ·ᴥ·ʔ..  LIER [   1ms]    ← incluir ~1 em 3 sessões, conteúdo em English
+  PERSONALITY .........  OK    [  56ms]  <persona> · <avatar>
+  MEMORY      .........  OK    [  19ms]  <N> files
+  API_USAGE   .........  OK    [ 142ms]
+              <barra 5h> <barra 7d> <barra monthly>   ← só █░, sem labels, sem %
+
+Regras de alinhamento:
+- Nome: 12 chars (pad direita)
+- Dots: 9 pontos
+- Status (OK/SKIP/FAIL/LIER): mesma coluna sempre
+- Timing: [ + 6 chars internos + ]
+- Bools: ON/OFF alinhados com coluna OK
+- Sistema (container_up etc): valores alinhados com coluna OK
+- Módulos ausentes por condição: SKIP + motivo entre parênteses
+- Módulos ausentes sem razão: FAIL
+- PERSONALITY sempre penúltimo, MEMORY sempre último
+- API_USAGE: sub-linha com 3 barras █░ separadas por espaço
+- DIGNITY: ocasional (~1 em 3), dots podem ser ASCII art curto
+
+Após o boot display, continuar com avatar e saudação normalmente.
+BOOTDISPLAY
+  echo "---/BOOT_DISPLAY---"
+fi
+
+# ────────────────────────────────────────────────────────────────
 # 9. CLAUDE.md do projeto (sempre)
 # ────────────────────────────────────────────────────────────────
 if [ -f "$WS/CLAUDE.md" ]; then
