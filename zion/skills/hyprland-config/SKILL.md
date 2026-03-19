@@ -5,6 +5,12 @@ description: Use when the user asks about Hyprland in any way - editing hyprland
 
 # Hyprland Configuration & Installation
 
+## Passo 0 — Plan Mode Obrigatório
+
+Chamar `EnterPlanMode` imediatamente antes de qualquer ação.
+Sair apenas após aprovação explícita do dev.
+Exceção: se invocado dentro de fluxo Orquestrador já aprovado, pular.
+
 ## Overview
 
 Installing Hyprland on NixOS involves 3 distinct layers: **NixOS module**, **dotfile configs**, and **session runtime**. Each layer must be validated before moving to the next.

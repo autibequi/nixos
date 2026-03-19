@@ -5,6 +5,12 @@ description: Use when adding packages, changing NixOS options, editing modules, 
 
 # NixOS Configuration Management
 
+## Passo 0 — Plan Mode Obrigatório
+
+Chamar `EnterPlanMode` imediatamente antes de qualquer ação.
+Sair apenas após aprovação explícita do dev.
+Exceção: se invocado dentro de fluxo Orquestrador já aprovado, pular.
+
 ## Overview
 
 This skill manages the full lifecycle of NixOS configuration changes: search for packages/options, edit the correct module, build-test, and iterate on errors until the build passes.
