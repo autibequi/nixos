@@ -654,6 +654,27 @@ commands:
         help: "Modelo Claude: haiku | sonnet | opus (default: sonnet)"
     filename: commands/host_edit.sh
 
+  # ── Git helpers ───────────────────────────────────────────
+  - name: git
+    alias: [g]
+    help: "Utilitarios Git. Ex: zion git sandbox"
+    commands:
+      - name: sandbox
+        alias: [sb]
+        help: "Fetch, recria sandbox limpa do remote, merge branch atual, push, volta."
+        args:
+          - name: branch
+            help: "Branch a mergear (default: branch atual)"
+        flags:
+          - long: --target
+            short: -t
+            arg: target
+            default: sandbox
+            help: "Branch destino (default: sandbox)"
+          - long: --no-push
+            help: "Nao faz push (apenas merge local)"
+        filename: commands/git_sandbox.sh
+
   - name: help
     help: Mostra o banner com comandos principais.
     filename: commands/help.sh
