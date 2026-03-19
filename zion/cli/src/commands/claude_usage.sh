@@ -21,13 +21,16 @@ if [[ -z "$usage_script" ]] || [[ ! -f "$usage_script" ]]; then
   exit 1
 fi
 
-# --waybar → saída para Waybar (text, tooltip, class). Caso contrário → JSON bruto da API.
-if [[ -n "${args[--waybar]}" ]]; then
+# --no-cache / --refresh → passa --refresh para o script
+_no_cache=""
+[[ -n "${args[--no-cache]:-}" || -n "${args[--refresh]:-}" ]] && _no_cache="1"
+
+if [[ -n "${args[--waybar]:-}" ]]; then
   run_args=(--waybar)
-  [[ -n "${args[--refresh]}" ]] && run_args+=(--refresh)
+  [[ -n "$_no_cache" ]] && run_args+=(--refresh)
   exec bash "$usage_script" "${run_args[@]}"
 else
-  # JSON bruto (five_hour, seven_day, seven_day_sonnet) — para consumidor ou inspeção
-  run_args=(--refresh)
+  run_args=()
+  [[ -n "$_no_cache" ]] && run_args+=(--refresh)
   exec bash "$usage_script" "${run_args[@]}"
 fi

@@ -450,8 +450,13 @@ zion_claude_usage_usage() {
     echo
 
     # :flag.usage
+    printf "  %s\n" "--no-cache"
+    printf "    Pula cache, busca direto na API\n"
+    echo
+
+    # :flag.usage
     printf "  %s\n" "--refresh"
-    printf "    Força fetch, ignora cache\n"
+    printf "    Alias de --no-cache\n"
     echo
 
     # :command.usage_fixed_flags
@@ -4357,14 +4362,17 @@ zion_claude_usage_command() {
     exit 1
   fi
 
-  # --waybar → saída para Waybar (text, tooltip, class). Caso contrário → JSON bruto da API.
-  if [[ -n "${args[--waybar]}" ]]; then
+  # --no-cache / --refresh → passa --refresh para o script
+  _no_cache=""
+  [[ -n "${args[--no-cache]:-}" || -n "${args[--refresh]:-}" ]] && _no_cache="1"
+
+  if [[ -n "${args[--waybar]:-}" ]]; then
     run_args=(--waybar)
-    [[ -n "${args[--refresh]}" ]] && run_args+=(--refresh)
+    [[ -n "$_no_cache" ]] && run_args+=(--refresh)
     exec bash "$usage_script" "${run_args[@]}"
   else
-    # JSON bruto (five_hour, seven_day, seven_day_sonnet) — para consumidor ou inspeção
-    run_args=(--refresh)
+    run_args=()
+    [[ -n "$_no_cache" ]] && run_args+=(--refresh)
     exec bash "$usage_script" "${run_args[@]}"
   fi
 
@@ -7053,6 +7061,14 @@ zion_claude_usage_parse_requirements() {
 
         # :flag.case_no_arg
         args['--json']=1
+        shift
+        ;;
+
+      # :flag.case
+      --no-cache)
+
+        # :flag.case_no_arg
+        args['--no-cache']=1
         shift
         ;;
 
