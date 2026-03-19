@@ -138,6 +138,8 @@ _zion_dk_install() {
     -it \
     -v "${HOST_SSH_DIR:-$HOME/.ssh}:/ssh-host:ro" \
     -v "$dir:/go/app" \
+    -v "zion-go-mod-cache:/go/pkg/mod" \
+    -v "zion-go-build-cache:/root/.cache/go-build" \
     -e GOPATH=/go \
     -e GOPRIVATE="github.com/estrategiahq" \
     -e TERM=xterm-256color \
