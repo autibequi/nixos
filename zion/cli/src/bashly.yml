@@ -776,6 +776,9 @@ commands:
       - long: --resume
         arg: session_id
         help: "Retoma sessão (UUID ou 1 para última)"
+      - long: --model
+        arg: model
+        help: "Modelo Claude: haiku | sonnet | opus (default: sonnet)"
     filename: commands/host_edit.sh
 
   - name: help
