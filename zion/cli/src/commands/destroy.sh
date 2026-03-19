@@ -1,1 +1,1 @@
-zion_compose_cmd down --rmi all --volumes
+cd "$zion_compose_dir" && just destroy

@@ -1,1 +1,1 @@
-zion_compose_cmd down
+cd "$zion_compose_dir" && just down

@@ -4,14 +4,39 @@
 
 set shell := ["bash", "-c"]
 
-nixos_dir := env_var_or_default("ZION_NIXOS_DIR", env_var("HOME") + "/nixos")
-cli_dir    := justfile_directory()
-bin_dest   := nixos_dir + "/stow/.local/bin/zion"
-hooks_dir  := nixos_dir + "/zion/hooks/claude-code"
+nixos_dir    := env_var_or_default("ZION_NIXOS_DIR", env_var("HOME") + "/nixos")
+cli_dir      := justfile_directory()
+bin_dest     := nixos_dir + "/stow/.local/bin/zion"
+hooks_dir    := nixos_dir + "/zion/hooks/claude-code"
+compose_file := cli_dir + "/docker-compose.zion.yml"
+env_file     := cli_dir + "/.env"
 
 # Lista receitas disponíveis
 default:
     @just --list
+
+# Helper interno: docker compose com env-file se existir
+[private]
+_compose *args:
+    @if [ -f "{{env_file}}" ]; then \
+        docker compose -f "{{compose_file}}" --env-file "{{env_file}}" {{args}}; \
+    else \
+        docker compose -f "{{compose_file}}" {{args}}; \
+    fi
+
+# ── Container ─────────────────────────────────────────────────────────────
+
+# Build da imagem Docker (BuildKit habilitado)
+build:
+    DOCKER_BUILDKIT=1 just _compose build
+
+# Para todos os containers do projeto
+down:
+    just _compose down
+
+# Para containers e remove imagens/volumes
+destroy:
+    just _compose down --rmi all --volumes
 
 # ── Build ─────────────────────────────────────────────────────────────────
 
