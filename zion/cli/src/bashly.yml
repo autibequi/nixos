@@ -789,6 +789,6 @@ commands:
     help: Documentacao completa de todos os comandos e flags.
     filename: commands/man.sh
 
-  - name: debug
-    help: "Toggle do modo DEBUG (testing overrides). Liga/desliga observacao da sessao."
-    filename: commands/debug.sh
+  - name: beta
+    help: "Toggle do modo BETA (beta overrides). Liga/desliga observacao da sessao."
+    filename: commands/beta.sh
