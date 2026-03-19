@@ -9,62 +9,71 @@ RED="#e74c3c"
 GRAY="#636e72"
 
 VAULT_PATH="/home/pedrinho/.ovault"
-CONFIG_PATH="/home/pedrinho/.config/obsidian-headless"
-MODULE_PATH="$HOME/nixos/modules/obsidian-sync.nix"
 
 state=$(systemctl is-active obsidian-sync 2>/dev/null || true)
 
-# Mesmo "active", pode ter erros recentes no journal (ex: ENOENT)
+# Mesmo "active", pode ter erros recentes no journal
 has_errors=false
 if [[ "$state" == "active" ]]; then
-  recent_errors=$(journalctl -u obsidian-sync --since "5 min ago" --no-pager -p err -q 2>/dev/null | tail -3 || true)
+  recent_errors=$(journalctl -u obsidian-sync --since "5 min ago" --no-pager -p err -q 2>/dev/null | tail -1 || true)
   [[ -n "$recent_errors" ]] && has_errors=true
 fi
 
-# Contar vaults (subpastas em .ovault)
-vault_count=0
-vault_list=""
+# Últimos arquivos modificados no vault (proxy de "arquivos sincados")
+recent_files=""
 if [[ -d "$VAULT_PATH" ]]; then
-  while IFS= read -r d; do
-    vault_count=$((vault_count + 1))
-    vault_list="${vault_list}  - $(basename "$d")\n"
-  done < <(find "$VAULT_PATH" -mindepth 1 -maxdepth 1 -type d 2>/dev/null)
+  recent_files=$(find "$VAULT_PATH" -type f -name '*.md' -mmin -60 -printf '%T+ %P\n' 2>/dev/null | sort -r | head -8 | sed 's/^[^ ]* /  /' || true)
 fi
 
-# Uptime do serviço
+# Uptime
 uptime=""
 if [[ "$state" == "active" ]]; then
   uptime=$(systemctl show obsidian-sync --property=ActiveEnterTimestamp --value 2>/dev/null || true)
-  [[ -n "$uptime" ]] && uptime="Desde: ${uptime}"
 fi
 
-# Tooltip
-base_tooltip="Obsidian Sync\nPasta: ${VAULT_PATH}\nVaults: ${vault_count}\n${vault_list}${uptime}"
+# Vaults (subpastas)
+vaults=""
+if [[ -d "$VAULT_PATH" ]]; then
+  vaults=$(find "$VAULT_PATH" -mindepth 1 -maxdepth 1 -type d -printf '  %f\n' 2>/dev/null || true)
+fi
+
+# Montar tooltip
+tooltip="Obsidian Sync"
+tooltip="${tooltip}\nPasta: ${VAULT_PATH}"
+[[ -n "$vaults" ]] && tooltip="${tooltip}\nVaults:\n${vaults}"
+[[ -n "$uptime" ]] && tooltip="${tooltip}\nDesde: ${uptime}"
 
 if [[ "$state" == "active" && "$has_errors" == "false" ]]; then
   color="$PURPLE"
-  icon="󰄬"
-  tooltip="${base_tooltip}\nStatus: OK"
+  icon="✔"
+  tooltip="${tooltip}\nStatus: OK"
   class="active"
+  if [[ -n "$recent_files" ]]; then
+    tooltip="${tooltip}\n\nÚltimos arquivos (1h):\n${recent_files}"
+  else
+    tooltip="${tooltip}\n\nNenhum arquivo modificado na última hora"
+  fi
 elif [[ "$state" == "active" && "$has_errors" == "true" ]]; then
   color="$RED"
-  icon="󰅙"
-  tooltip="${base_tooltip}\nStatus: erros recentes\n$(echo "$recent_errors" | tr '\n' ' ' | sed 's/"/\\"/g')"
+  icon="✖"
+  err_short=$(echo "$recent_errors" | grep -oP 'path: .*' | head -1 || echo "$recent_errors")
+  tooltip="${tooltip}\nStatus: erros recentes\n${err_short}"
   class="error"
 elif [[ "$state" == "failed" ]]; then
   color="$RED"
-  icon="󰅙"
-  tooltip="${base_tooltip}\nStatus: FALHOU"
+  icon="✖"
+  tooltip="${tooltip}\nStatus: FALHOU"
   class="failed"
 else
   color="$GRAY"
-  icon="󰅙"
-  tooltip="${base_tooltip}\nStatus: $state"
+  icon="⏸"
+  tooltip="${tooltip}\nStatus: $state"
   class="inactive"
 fi
 
 text="<span background='${color}' color='#111111'> ${icon} </span>"
 
+# Escapar pra JSON
 escaped_tooltip="${tooltip//\\/\\\\}"
 escaped_tooltip="${escaped_tooltip//\"/\\\"}"
 escaped_tooltip="${escaped_tooltip//$'\n'/\\n}"

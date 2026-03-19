@@ -21,6 +21,7 @@ let
     export PATH="${nodejs}/bin:${npmPrefix}/bin:$PATH"
     export NPM_CONFIG_PREFIX="${npmPrefix}"
 
+    mkdir -p "${vaultPath}"
     echo "[obsidian-sync] Iniciando sync contínuo: ${vaultPath}"
     exec ob sync --continuous --path "${vaultPath}"
   '';
