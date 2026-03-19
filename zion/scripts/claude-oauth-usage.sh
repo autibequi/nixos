@@ -84,8 +84,10 @@ _fetch_fresh() {
   echo "$raw" | $JQ -e '.five_hour' &>/dev/null || return 1
   mkdir -p "$(dirname "$CACHE_FILE")"
   echo "$raw" > "$CACHE_FILE"
-  # Compartilha com o host via ~/.claude/ (montado no compose)
-  cp "$CACHE_FILE" "${CLAUDE_DIR}/claude-usage-shared.json" 2>/dev/null || true
+  # Compartilha com o host via ~/.local/share/zion/ (montado no compose)
+  _zion_data="${XDG_DATA_HOME:-${HOME}/.local/share}/zion"
+  mkdir -p "$_zion_data" 2>/dev/null || true
+  cp "$CACHE_FILE" "${_zion_data}/claude-usage.json" 2>/dev/null || true
   echo "$raw"
 }
 

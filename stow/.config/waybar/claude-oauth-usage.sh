@@ -164,7 +164,7 @@ _fetch_fresh() {
 # --- obter JSON: shared (container) → cache → fetch API → shared expirado → last ---
 # Prioridade: shared file recente → cache local → fetch API → shared expirado (stale) → last known
 # Nunca mostra NO enquanto houver qualquer dado salvo, independente da idade.
-SHARED_FILE="${CLAUDE_DIR}/claude-usage-shared.json"
+SHARED_FILE="${XDG_DATA_HOME:-${HOME}/.local/share}/zion/claude-usage.json"
 USED_SOURCE=""
 JSON=""
 

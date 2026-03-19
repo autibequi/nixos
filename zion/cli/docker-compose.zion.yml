@@ -59,6 +59,8 @@ x-base-volumes: &base-volumes
   - /var/run/docker.sock:/var/run/docker.sock
   # Dockerized configs — agente pode editar docker-compose, .env, etc.
   - ${HOME}/.local/share/zion/dockerized:/workspace/dockerized
+  # Dados locais do Zion (usage cache, estado compartilhado host↔container)
+  - ${XDG_DATA_HOME:-${HOME}/.local/share}/zion:/home/claude/.local/share/zion
   # Mirror mounts: host paths acessiveis dentro do container (Docker build context + daemon volumes)
   - ${HOME}/projects:${HOME}/projects
   - ${HOME}/nixos:${HOME}/nixos:ro
