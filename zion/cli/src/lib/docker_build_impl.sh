@@ -17,8 +17,16 @@ _zion_dk_build() {
   compose=$(zion_docker_compose_file "$service")
   project=$(zion_docker_effective_project "$service")
 
-  echo "=== [docker build] $service ==="
-  docker compose -f "$compose" -p "$project" build --no-cache
-  echo ""
-  echo "Imagem rebuilt. Rode 'zion docker $service server start' para subir."
+  _zion_progress_init
+  local label="$service"
+  [[ -n "$_ZION_DK_WORKTREE" ]] && label="$service (wt: $_ZION_DK_WORKTREE)"
+  _zion_header "docker build  $label"
+
+  _build_image() {
+    DOCKER_BUILDKIT=1 docker compose -f "$compose" -p "$project" build --no-cache
+  }
+
+  _zion_step 1 1 "Building image" _build_image || return 1
+  _zion_done
+  printf "  Rode 'zion docker %s server start' para subir.\n" "$service"
 }

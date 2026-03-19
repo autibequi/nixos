@@ -48,12 +48,6 @@ _zion_dk_run() {
   # Vertical (front-student: carreiras-juridicas, concursos, medicina, etc.)
   export VERTICAL="${vertical:-carreiras-juridicas}"
 
-  # Garantir rede
-  if ! docker network inspect nixos_default &>/dev/null; then
-    echo "[zion docker] Criando rede nixos_default..."
-    docker network create nixos_default 2>/dev/null || true
-  fi
-
   local COMPOSE_ARGS="-f $compose -p $project"
   if [[ -n "$debug" ]]; then
     local debug_compose
@@ -61,65 +55,86 @@ _zion_dk_run() {
     COMPOSE_ARGS="$COMPOSE_ARGS -f $debug_compose"
   fi
 
-  if [[ -n "$debug" ]]; then
-    echo "=== Levantando $service [env=$env] [DEBUG - dlv :2345] ==="
-  else
-    echo "=== Levantando $service [env=$env] ==="
-  fi
-  echo "  projeto: $dir"
-  [[ -n "$_ZION_DK_WORKTREE" ]] && echo "  worktree: $_ZION_DK_WORKTREE"
-  echo "  compose: $compose"
-  echo "  env:     $env_file"
-  echo "  logs:    $log_dir"
+  _zion_progress_init
 
-  # Parar instancia anterior do mesmo servico (libera porta, evita "port already allocated")
-  _zion_dk_stop "$service" "$worktree" 2>/dev/null || true
-  # Fallback: parar qualquer container que ainda esteja segurando a(s) porta(s) do servico
-  for port in $(zion_docker_service_host_ports "$service"); do
-    zion_docker_free_port "$port"
-  done
+  local title="docker run  $service  [env=$env]"
+  [[ -n "$debug" ]] && title="$title  [DEBUG :2345]"
+  _zion_header "$title"
 
-  # 0. Garantir reverse proxy (80/443 -> 4004)
-  zion_docker_ensure_reverseproxy
+  local has_deps=0
+  [[ -f "$deps_compose" ]] && has_deps=1
 
-  # 1. Subir dependencias em background (se compose de deps existe)
-  if [[ -f "$deps_compose" ]]; then
-    echo ">>> Subindo dependencias..."
-    docker compose -f "$deps_compose" -p "${project}-deps" up -d --remove-orphans 2>&1 | tee "$log_dir/deps.log"
-    echo ">>> Aguardando postgres ficar saudavel..."
-    until docker exec zion-dk-monolito-postgres pg_isready -U "${DB_USER:-estrategia}" &>/dev/null; do
-      sleep 1
+  local total=4
+  [[ $has_deps -eq 1 ]] && total=6
+
+  # step 1: parar instancia anterior + liberar portas
+  _stop_prev() {
+    _zion_dk_stop "$service" "$worktree" 2>/dev/null || true
+    for port in $(zion_docker_service_host_ports "$service"); do
+      zion_docker_free_port "$port"
     done
-    echo ">>> Postgres pronto."
+  }
+
+  # step 2: garantir rede + reverse proxy
+  _ensure_network() {
+    docker network inspect nixos_default &>/dev/null \
+      || docker network create nixos_default 2>/dev/null || true
+    zion_docker_ensure_reverseproxy
+  }
+
+  local step=0
+  step=$((step + 1)); _zion_step $step $total "Parando instância anterior" _stop_prev     || return 1
+  step=$((step + 1)); _zion_step $step $total "Rede + reverse proxy"       _ensure_network || return 1
+
+  # step 3+4 (opcionais): deps
+  if [[ $has_deps -eq 1 ]]; then
+    _start_deps() {
+      docker compose -f "$deps_compose" -p "${project}-deps" up -d --remove-orphans \
+        > "$log_dir/deps.log" 2>&1
+    }
+    _wait_postgres() {
+      until docker exec zion-dk-monolito-postgres \
+          pg_isready -U "${DB_USER:-estrategia}" &>/dev/null; do
+        sleep 1
+      done
+    }
+    step=$((step + 1)); _zion_step $step $total "Subindo dependências"   _start_deps    || return 1
+    step=$((step + 1)); _zion_step $step $total "Aguardando Postgres"    _wait_postgres || return 1
   fi
 
-  # 2. Build + subir servico em background (com SSH forwarding para repos privados)
-  echo ">>> Subindo $service..."
-  DOCKER_BUILDKIT=1 docker compose $COMPOSE_ARGS build 2>&1 | tee "$log_dir/startup.log"
-  docker compose $COMPOSE_ARGS up -d --force-recreate --remove-orphans 2>&1 | tee -a "$log_dir/startup.log"
+  # build
+  _build_svc() {
+    DOCKER_BUILDKIT=1 docker compose $COMPOSE_ARGS build > "$log_dir/startup.log" 2>&1
+  }
+  step=$((step + 1)); _zion_step $step $total "Building image" _build_svc || return 1
 
-  # 3. Logger persistente: grava logs em arquivo continuamente
-  if [[ -f "$log_dir/logger.pid" ]]; then
-    kill "$(cat "$log_dir/logger.pid")" 2>/dev/null || true
-  fi
-  nohup docker compose $COMPOSE_ARGS logs -f --no-log-prefix > "$log_dir/service.log" 2>&1 &
+  # up + logger
+  _start_svc() {
+    docker compose $COMPOSE_ARGS up -d --force-recreate --remove-orphans \
+      >> "$log_dir/startup.log" 2>&1
+    [[ -f "$log_dir/logger.pid" ]] && kill "$(cat "$log_dir/logger.pid")" 2>/dev/null || true
+    nohup docker compose $COMPOSE_ARGS logs -f --no-log-prefix \
+      > "$log_dir/service.log" 2>&1 &
+    echo $! > "$log_dir/logger.pid"
+  }
+  step=$((step + 1)); _zion_step $step $total "Iniciando container" _start_svc || return 1
+
+  _zion_done
+
   if [[ -n "$debug" ]]; then
-    echo ">>> [DEBUG] Delve aguardando attach em localhost:2345"
-    echo ">>> [DEBUG] VS Code: use a config 'Attach to monolito' (porta 2345)"
+    printf "  \033[33m[DEBUG]\033[0m Delve aguardando attach em localhost:2345\n"
+    printf "  \033[33m[DEBUG]\033[0m VS Code: use a config 'Attach to monolito'\n\n"
   fi
-  echo $! > "$log_dir/logger.pid"
 
-  # 4. Se --detach, sair silenciosamente
+  # detach: sair sem seguir logs
   if [[ -n "$detach" ]]; then
-    echo ">>> Container rodando em background."
-    echo ">>> Logs: zion docker $service logs -f"
-    echo ">>> Arquivo: $log_dir/service.log"
+    printf "  \033[2mLogs: zion docker %s logs -f\033[0m\n" "$service"
+    printf "  \033[2mArquivo: %s/service.log\033[0m\n\n" "$log_dir"
     return 0
   fi
 
-  # 5. Mostrar logs no terminal (Ctrl+C sai mas container + logger continuam)
-  echo ">>> Container rodando. Logs em tempo real [Ctrl+C para sair, container continua]:"
-  echo ">>> Reconectar: zion docker $service logs -f"
-  echo "---"
+  # seguir logs ao vivo (Ctrl+C sai mas container continua)
+  printf "  \033[2m[Ctrl+C para sair — container continua] reconectar: zion docker %s logs -f\033[0m\n" "$service"
+  printf "  \033[2m%s\033[0m\n\n" "─────────────────────────────────────────"
   docker compose $COMPOSE_ARGS logs -f --no-log-prefix --tail 50
 }
