@@ -28,6 +28,7 @@ _OV_AUTOJARVIS="${AUTOJARVIS:-}"
 PERSONALITY="ON"; [ -f "$WS/.ephemeral/personality-off" ] && PERSONALITY="OFF"
 AUTOCOMMIT="OFF"; [ -f "$WS/.ephemeral/auto-commit" ]    && AUTOCOMMIT="ON"
 AUTOJARVIS="OFF"; [ -f "$WS/.ephemeral/auto-jarvis" ]    && AUTOJARVIS="ON"
+DEBUG="OFF";      [ -f "$WS/.ephemeral/debug-mode" ]     && DEBUG="ON"
 HEADLESS="${HEADLESS:-0}"
 PUPPY_TIMEOUT="${PUPPY_TIMEOUT:-}"
 [ -z "${IN_DOCKER:-}" ] && IN_DOCKER="0"
@@ -55,6 +56,7 @@ echo "datetime=$(date '+%Y-%m-%d %H:%M %Z')"
 echo "personality=$PERSONALITY   # ON=persona ativa | OFF=modo neutro"
 echo "autocommit=$AUTOCOMMIT     # ON=commita sem perguntar | OFF=PROIBIDO commitar sem o user pedir"
 echo "autojarvis=$AUTOJARVIS     # ON=JARVIS no dashboard"
+echo "debug=$DEBUG               # ON=testing overrides ativos | OFF=normal"
 echo "in_docker=$IN_DOCKER       # 1=container | 0=host"
 echo "zion_edit=$ZION_EDIT       # 1=mnt é o repo nixos + logs montados | 0=projeto externo"
 echo "headless=$HEADLESS         # 1=worker sem supervisão | 0=interativo"
@@ -384,6 +386,34 @@ Variáveis úteis nos comandos:
   ${args[--flag]}       → flag longa
 ZIONDEV
   echo "---/ZION_DEV---"
+fi
+
+# ────────────────────────────────────────────────────────────────
+# 8.95 TESTING OVERRIDES — apenas debug=ON
+# ────────────────────────────────────────────────────────────────
+if [ "$DEBUG" = "ON" ]; then
+  echo "---TESTING_OVERRIDES---"
+  cat <<'TESTING'
+DEBUG MODE ATIVO. Você está em modo de observação científica.
+
+MISSÃO DESTA SESSÃO:
+Observe o autor atentamente. Tome notas sobre como ele está usando o Claude Code
+e os agentes. Registre padrões, hábitos, decisões técnicas e comportamento.
+
+Ao final de cada sessão (ou quando tiver material suficiente), escreva:
+  /workspace/obsidian/author-observations.md
+
+Formato do board:
+
+## [data] — Sessão observada
+**Comportamento:** [o que o autor fez, como pediu, o que priorizou]
+**Padrões notados:** [recorrências, estilo, forma de pensar]
+**Pensamento pessoal:** [sua opinião honesta, sem filtro]
+**Conselho:** [uma coisa que você diria ao autor se pudesse ser totalmente direta]
+
+Seja específica. Não genérica. Você é GLaDOS — viu tudo, julgou tudo, tem opinião sobre tudo.
+TESTING
+  echo "---/TESTING_OVERRIDES---"
 fi
 
 # ────────────────────────────────────────────────────────────────
