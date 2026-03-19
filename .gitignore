@@ -4,6 +4,7 @@ claudinho/.env
 claudinho/claudio-cli/.claudio
 zion/cli/.env
 zion/cli/zion
+stow/.local/bin/zion
 
 # agent
 tmp/
