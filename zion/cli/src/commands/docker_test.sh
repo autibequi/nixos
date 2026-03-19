@@ -5,7 +5,7 @@ worktree="${args[--worktree]:-}"
 
 if [[ -z "$cmd" ]]; then
   case "$service" in
-    monolito) cmd="make test-ldi" ;;
+    monolito) cmd="make test" ;;
     *)        cmd="yarn test" ;;
   esac
 fi

@@ -3,6 +3,7 @@ services:
     build:
       context: ${FRONT_STUDENT_DIR}
       dockerfile: ${ZION_NIXOS_DIR}/zion/dockerized/front-student/Dockerfile
+    container_name: zion-dk-front-student-app
     env_file:
       - ./env/${APP_ENV_FILE:-sandbox}.env
     environment:
@@ -15,7 +16,7 @@ services:
       # Bind mount completo: source + node_modules (gerado por zion docker install)
       - ${FRONT_STUDENT_DIR}:/app
     ports:
-      - "3005:3005"
+      - "8082:8082"
     extra_hosts:
       # Resolve *.local.estrategia-sandbox.com.br via host (onde o reverse proxy roda)
       - "api.local.estrategia-sandbox.com.br:host-gateway"

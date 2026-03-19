@@ -90,7 +90,7 @@ graph TD
     end
 
     subgraph BUILD["Build (docker compose build)"]
-        DF["Dockerfile\nnode:14-alpine"]
+        DF["Dockerfile\nnode:20-alpine"]
     end
 
     ZionCFG --> ZionCLI
@@ -116,7 +116,7 @@ FRONT_STUDENT_DIR="$HOME/projects/estrategia/front-student"
 
 ## Detalhes tecnicos
 
-- Node 14 Alpine (mesma era do bo-container)
+- Node 20 Alpine
 - Nuxt 2 + Vue 2
 - Dev server HTTP em `:8082` (HOST=0.0.0.0, PORT=8082)
 - `nuxt dev` executado diretamente — vars vem do Docker env_file
