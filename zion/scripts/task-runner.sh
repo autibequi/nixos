@@ -189,13 +189,18 @@ $PROMPT"
 
 START_S=$SECONDS
 EXIT_CODE=0
+
+CLAUDE_ARGS=(
+  --permission-mode bypassPermissions
+  --model "$MODEL"
+  --max-turns "$MAX_TURNS"
+)
+[ ${#MCP_FLAGS[@]} -gt 0 ] && CLAUDE_ARGS+=("${MCP_FLAGS[@]}")
+CLAUDE_ARGS+=(-p "$FULL_PROMPT")
+
 HEADLESS=1 PUPPY_TIMEOUT="$TIMEOUT" \
-timeout "$TIMEOUT" claude \
-  --permission-mode bypassPermissions \
-  --model "$MODEL" \
-  --max-turns "$MAX_TURNS" \
-  "${MCP_FLAGS[@]}" \
-  -p "$FULL_PROMPT" 2>&1 | if [ "$VERBOSE" = "1" ]; then tee "$LOGFILE"; else cat > "$LOGFILE"; fi || true
+timeout "$TIMEOUT" claude "${CLAUDE_ARGS[@]}" 2>&1 | \
+  if [ "$VERBOSE" = "1" ]; then tee "$LOGFILE"; else cat > "$LOGFILE"; fi || true
 EXIT_CODE=${PIPESTATUS[0]}
 ELAPSED=$((SECONDS - START_S))
 

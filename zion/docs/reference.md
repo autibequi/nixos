@@ -123,7 +123,7 @@ Em `zion edit` / `zion leech ~/nixos` (extras):
 ├── stow/
 │   ├── .config/           ← hypr, waybar, zed, ghostty, rofi, zsh, etc.
 │   └── .claude/           ← Hooks, scripts, agents (Claude host/container)
-├── scripts/               ← bootstrap.sh, puppy-daemon.sh, puppy-runner.sh, api-usage.sh, etc.
+├── scripts/               ← bootstrap.sh, task-daemon.sh, task-runner.sh, api-usage.sh, etc.
 └── zion/
     ├── cli/               ← CLI zion (bashly.yml + commands/*.sh + docker-compose)
     ├── scripts/           ← Bootstrap e scripts do container
