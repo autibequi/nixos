@@ -5,6 +5,12 @@ description: Use when implementing, modifying, or refactoring a feature in bo-co
 
 # bo-container/make-feature: Implementar Feature Completa no bo-container
 
+## Passo 0 — Plan Mode Obrigatório
+
+Chamar `EnterPlanMode` imediatamente antes de qualquer ação.
+Sair apenas após aprovação explícita do dev.
+Exceção: se invocado dentro de fluxo Orquestrador já aprovado, pular.
+
 ## Inputs Esperados do Orquestrador
 
 | Campo | Tipo | Descrição |

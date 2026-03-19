@@ -17,6 +17,12 @@ Recebe o número do card Jira (ex: `FUK2-9719`).
 
 Todas as chamadas Jira usam: `9795b90e-d410-4737-a422-a7c15f9eadf0`
 
+## Passo 0 — Plan Mode Obrigatório
+
+Chamar `EnterPlanMode` imediatamente antes de qualquer ação.
+Sair apenas após aprovação explícita do dev.
+Exceção: se invocado dentro de fluxo Orquestrador já aprovado, pular.
+
 ## Passo 1 — Ler o card Jira
 
 1. Buscar o card com `getJiraIssue`:

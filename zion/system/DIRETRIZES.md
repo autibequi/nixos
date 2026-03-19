@@ -147,6 +147,25 @@ Exemplos:
 
 ---
 
+## Plan Mode — Obrigatório para Qualquer Implementação
+
+**Regra:** Sempre que o usuário expressar intenção de criar ou modificar código
+(em qualquer codebase: monolito, bo, front, Zion, NixOS, ou qualquer outro),
+Claude DEVE entrar em `EnterPlanMode` ANTES de propor ou executar qualquer coisa.
+
+**Gatilhos** (qualquer um destes):
+- "quero adicionar X"
+- "quero modificar Y"
+- "quero implementar Z"
+- "preciso de uma feature que..."
+- "tem como criar um..."
+- Qualquer descrição de trabalho a ser feito em código
+
+**Exceção:** se já está dentro de um fluxo aprovado (`ExitPlanMode` já foi chamado
+após aprovação explícita do dev nessa conversa), não re-entrar.
+
+**Regra de ouro:** na dúvida, entrar em plan mode. Custa pouco, evita retrabalho.
+
 ## Verificacao — Evidencia Antes de Claims
 
 Antes de reportar qualquer tarefa como completa, fornecer EVIDENCIA:

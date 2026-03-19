@@ -5,6 +5,12 @@ description: Use when creating, modifying, or refactoring any API service in a b
 
 # bo-service: Criar ou Extender Service no bo-container
 
+## Passo 0 — Plan Mode Obrigatório
+
+Chamar `EnterPlanMode` imediatamente antes de qualquer ação.
+Sair apenas após aprovação explícita do dev.
+Exceção: se invocado dentro de fluxo Orquestrador já aprovado, pular.
+
 ## Contexto do Projeto
 
 Services ficam em `src/modules/<módulo>/services/`. Cada módulo tem um `index.js` que:

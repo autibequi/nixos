@@ -5,6 +5,12 @@ description: Use when creating, modifying, or refactoring any repository in the 
 
 # Estrategia Go Repository Pattern
 
+## Passo 0 — Plan Mode Obrigatório
+
+Chamar `EnterPlanMode` imediatamente antes de qualquer ação.
+Sair apenas após aprovação explícita do dev.
+Exceção: se invocado dentro de fluxo Orquestrador já aprovado, pular.
+
 ## Templates
 
 Antes de executar, ler os templates de referencia com patterns completos e exemplos de codigo:

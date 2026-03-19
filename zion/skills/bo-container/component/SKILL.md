@@ -5,6 +5,12 @@ description: Use when creating, modifying, or refactoring any UI component in bo
 
 # bo-component: Criar Componente no bo-container
 
+## Passo 0 — Plan Mode Obrigatório
+
+Chamar `EnterPlanMode` imediatamente antes de qualquer ação.
+Sair apenas após aprovação explícita do dev.
+Exceção: se invocado dentro de fluxo Orquestrador já aprovado, pular.
+
 ## Prioridade de Resolução (SEMPRE nesta ordem)
 
 1. **`src/modules/shared/components/`** — verifique se existe algo que atenda (mesmo que precise de uma prop a mais)

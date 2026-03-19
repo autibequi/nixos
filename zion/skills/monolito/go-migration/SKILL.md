@@ -5,6 +5,12 @@ description: Use when creating, modifying, or reviewing any database migration i
 
 # Estratégia Go Migration Pattern
 
+## Passo 0 — Plan Mode Obrigatório
+
+Chamar `EnterPlanMode` imediatamente antes de qualquer ação.
+Sair apenas após aprovação explícita do dev.
+Exceção: se invocado dentro de fluxo Orquestrador já aprovado, pular.
+
 ## Overview
 
 Migrations usam [Goose](https://github.com/pressly/goose). Rodam automaticamente no startup da aplicação via `MigrateUpSharedDb` ou `MigrateUp` em cada app. Toda migration precisa de `Up` e `Down` — sem exceção.

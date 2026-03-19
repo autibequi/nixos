@@ -5,6 +5,12 @@ description: Use when creating, modifying, or refactoring any route in a bo-cont
 
 # bo-route: Registrar Rota no bo-container
 
+## Passo 0 — Plan Mode Obrigatório
+
+Chamar `EnterPlanMode` imediatamente antes de qualquer ação.
+Sair apenas após aprovação explícita do dev.
+Exceção: se invocado dentro de fluxo Orquestrador já aprovado, pular.
+
 ## Contexto do Projeto
 
 Cada módulo tem seu próprio `src/modules/<módulo>/router/index.js` que exporta um array de rotas. Este array é importado em `src/router/routes.js` e injetado dentro da rota `/:vertical/` — **não modifique** o `routes.js` global.

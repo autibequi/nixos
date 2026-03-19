@@ -9,6 +9,12 @@ description: Use when asked to implement, modify, or refactor any feature, endpo
 
 Skill de orquestração. Não duplica conteúdo das sub-skills — define a ordem de execução, os pontos de decisão e garante o wiring entre cada camada antes de avançar.
 
+## Passo 0 — Plan Mode Obrigatório
+
+Chamar `EnterPlanMode` imediatamente antes de qualquer ação.
+Sair apenas após aprovação explícita do dev.
+Exceção: se invocado dentro de fluxo Orquestrador já aprovado, pular.
+
 ## Pré-requisito — Branch ou Worktree
 
 Ver regras globais em `estrategia/REGISTRY.md` → seção **Git Flow — Branch vs Worktree**.
