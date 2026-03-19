@@ -140,6 +140,20 @@ Estrutura /workspace:
 Se zion_edit=1: você está editando o repo nixos. /workspace/mnt = ~/nixos.
 Se zion_edit=0: /workspace/mnt é um projeto externo do usuário.
 DOCKER
+  if [ "$ZION_EDIT" = "1" ]; then
+    cat <<'ZION_REPOS'
+
+REPOS NESTA SESSÃO (zion_edit=1 — dois repos Git isolados):
+  /workspace/mnt  = NixOS source — código-fonte do SO do host onde este container roda
+                    (modules/, configuration.nix, flake.nix, stow/, scripts/)
+                    NÃO é um projeto do usuário. É o sistema operacional do host.
+  /zion           = Zion source — código-fonte do CLI e engine dos agentes
+                    (cli/bashly.yml, cli/docker-compose, hooks/, skills/, agents/, personas/)
+
+REGRA: não entre nessas pastas a menos que precise editar algo específico.
+       Se conseguir responder com esse mapa, responda sem ler nada.
+ZION_REPOS
+  fi
   if [ "$HEADLESS" = "1" ]; then
     echo ""
     echo "Modo HEADLESS (headless=1):"
@@ -373,9 +387,11 @@ ZIONDEV
 fi
 
 # ────────────────────────────────────────────────────────────────
-# 9. CLAUDE.md do projeto (sempre)
+# 9. CLAUDE.md do projeto (apenas zion_edit=1)
+#    Em sessão normal (zion_edit=0) o projeto é externo — CLAUDE.md
+#    do nixos é irrelevante e desperdiçaria ~15k tokens de contexto.
 # ────────────────────────────────────────────────────────────────
-if [ -f "$WS/CLAUDE.md" ]; then
+if [ "$ZION_EDIT" = "1" ] && [ -f "$WS/CLAUDE.md" ]; then
   echo "---CLAUDE.MD---"
   cat "$WS/CLAUDE.md"
   echo "---/CLAUDE.MD---"
