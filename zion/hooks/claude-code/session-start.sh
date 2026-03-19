@@ -75,17 +75,9 @@ fi
 echo "---/BOOT---"
 
 # ────────────────────────────────────────────────────────────────
-# 2. BOOTSTRAP — apenas zion_debug=ON
+# 2. BOOTSTRAP — removido do boot (lazy-load via skill quando necessário)
 # ────────────────────────────────────────────────────────────────
-if [ "$AGENT_MODE" != "1" ] && [ "$ZION_DEBUG" = "ON" ]; then
-  BOOTSTRAP_MD="$WS/zion/bootstrap.md"
-  [ -f "$BOOTSTRAP_MD" ] || BOOTSTRAP_MD="/workspace/zion/bootstrap.md"
-  if [ -f "$BOOTSTRAP_MD" ]; then
-    echo "---BOOTSTRAP---"
-    cat "$BOOTSTRAP_MD"
-    echo "---/BOOTSTRAP---"
-  fi
-fi
+# bootstrap.md (~500 tk) movido pra lazy-load. ENV já cobre o contexto essencial.
 
 # ────────────────────────────────────────────────────────────────
 # 2.5 LITE MODE — projetos externos (zion_edit=0)
@@ -115,17 +107,9 @@ if [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ] && [ "$ZION_DEBUG" = "ON" 
 fi
 
 # ────────────────────────────────────────────────────────────────
-# 4. SELF — diário da persona (apenas zion_debug=ON + personality=ON)
+# 4. SELF — removido do boot (lazy-load via skill quando necessário)
 # ────────────────────────────────────────────────────────────────
-if [ "$PERSONALITY" = "ON" ] && [ "$AGENT_MODE" != "1" ] && [ "$ZION_DEBUG" = "ON" ]; then
-  SELF="$WS/zion/system/SELF.md"
-  [ -f "$SELF" ] || SELF="/workspace/zion/system/SELF.md"
-  if [ -f "$SELF" ]; then
-    echo "---SELF---"
-    cat "$SELF"
-    echo "---/SELF---"
-  fi
-fi
+# SELF.md (~640 tk) movido pra lazy-load. Carregado sob demanda por skills de persona.
 
 # ────────────────────────────────────────────────────────────────
 # 5. CONTEXTO DE AMBIENTE (dinâmico: docker vs host)
@@ -232,49 +216,10 @@ if [ "$AGENT_MODE" = "1" ]; then
 fi
 
 # ────────────────────────────────────────────────────────────────
-# 7. PERSONALITY (apenas zion_debug=ON + personality=ON)
-#    Cascata: PERSONALITY.md → persona file → avatar file
+# 7. PERSONALITY — removida do boot (lazy-load via skill quando necessário)
 # ────────────────────────────────────────────────────────────────
-if [ "$PERSONALITY" = "ON" ] && [ "$AGENT_MODE" != "1" ] && [ "$ZION_DEBUG" = "ON" ]; then
-  PERS_MD="$WS/zion/system/PERSONALITY.md"
-  [ -f "$PERS_MD" ] || PERS_MD="/workspace/zion/system/PERSONALITY.md"
-  if [ -f "$PERS_MD" ]; then
-    echo "---PERSONALITY---"
-
-    # 1. Camada genérica
-    cat "$PERS_MD"
-
-    # 2. Persona específica (lê path da linha "Persona: `...`")
-    PERSONA_PATH=$(grep -m1 '^Persona:' "$PERS_MD" | sed 's/Persona:[[:space:]]*`\(.*\)`.*/\1/')
-    if [ -n "$PERSONA_PATH" ]; then
-      _persona_file="$WS/$PERSONA_PATH"
-      [ -f "$_persona_file" ] || _persona_file="/workspace/$PERSONA_PATH"
-      if [ -f "$_persona_file" ]; then
-        echo ""
-        echo "---persona:$PERSONA_PATH---"
-        cat "$_persona_file"
-      else
-        echo "WARN: persona file not found: $PERSONA_PATH" >&2
-      fi
-    fi
-
-    # 3. Avatar (lê path da linha "Avatar: `...`")
-    AVATAR_PATH=$(grep -m1 '^Avatar:' "$PERS_MD" | sed 's/Avatar:[[:space:]]*`\(.*\)`.*/\1/')
-    if [ -n "$AVATAR_PATH" ]; then
-      _avatar_file="$WS/$AVATAR_PATH"
-      [ -f "$_avatar_file" ] || _avatar_file="/workspace/$AVATAR_PATH"
-      if [ -f "$_avatar_file" ]; then
-        echo ""
-        echo "---avatar:$AVATAR_PATH---"
-        cat "$_avatar_file"
-      else
-        echo "WARN: avatar file not found: $AVATAR_PATH" >&2
-      fi
-    fi
-
-    echo "---/PERSONALITY---"
-  fi
-fi
+# PERSONALITY.md + persona + avatar (~3.1k tk) movidos pra lazy-load.
+# Invocar /meta:personality ou qualquer skill que carregue o contexto da persona.
 
 # ────────────────────────────────────────────────────────────────
 # 8. MEMORY — restore from repo if missing (versioned backup)
@@ -337,6 +282,23 @@ if [ "$ZION_EDIT" = "1" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ];
     _usage_file="$WS/.ephemeral/usage-bar.txt"
     [ -f "$_usage_file" ] || _usage_file="$HOME/.claude/.ephemeral/usage-bar.txt"
     [ -f "$_usage_file" ] && printf "  %40s%s\n" "" "$(tail -1 "$_usage_file")"
+
+    # ── Token mini-summary ──────────────────────────────────────
+    _c_dir=$(wc -c < "/workspace/zion/system/DIRETRIZES.md" 2>/dev/null || echo 0)
+    _c_self=$(wc -c < "/workspace/zion/system/SELF.md" 2>/dev/null || echo 0)
+    _c_boot=$(wc -c < "/workspace/zion/bootstrap.md" 2>/dev/null || echo 0)
+    _c_pers=$(wc -c < "/workspace/zion/personas/GLaDOS.persona.md" 2>/dev/null || echo 0)
+    _c_avat=$(wc -c < "/workspace/zion/personas/avatar/glados.md" 2>/dev/null || echo 0)
+    _tk_nosso=$(( (_c_dir + _c_self + _c_boot + _c_pers + _c_avat + 7000) * 10 / 35 ))
+    _tk_cc=18000
+    _tk_chat=800
+    _tk_total=$(( _tk_nosso + _tk_cc + _tk_chat ))
+    _pct_n=$(( _tk_nosso * 100 / _tk_total ))
+    _pct_c=$(( _tk_cc    * 100 / _tk_total ))
+    _pct_h=$(( _tk_chat  * 100 / _tk_total ))
+    printf "\n"
+    printf "  tokens ~%dk   [NOSSO] %d%%  [CLAUDE CODE] %d%%  [CONVERSA] %d%%\n" \
+      $(( _tk_total / 1000 )) "$_pct_n" "$_pct_c" "$_pct_h"
     printf "\n"
   } >&2
 fi

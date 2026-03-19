@@ -35,26 +35,52 @@ Converter chars → tokens usando aproximação **1 token ≈ 3.5 chars** (PT-BR
 
 ### 4. Apresentar infográfico
 
-Exibir resultado como tabela + barras ASCII (`█░`) ordenadas do maior pro menor:
+Exibir resultado como tabela + barras ASCII (`█░`) **agrupadas por dono**, ordenadas do maior pro menor dentro de cada grupo:
+
+Categorias de dono:
+- **[NOSSO]** — arquivos que o Zion/NixOS config gera e controla: DIRETRIZES.md, SELF.md, bootstrap.md, GLaDOS.persona.md, avatar/glados.md, LITE block, ENV block, BOOT+API_USAGE block, CLAUDE.md, MEMORY.md
+- **[CLAUDE CODE]** — injetado pelo harness do Claude Code (Anthropic distribui, mas nós podemos configurar): System prompt do Claude Code, Schema das tools nativas, Deferred tools list (nomes), Skills list
+- **[CONVERSA]** — turnos acumulados (contribuição mista: usuário + modelo)
 
 ```
   BREAKDOWN DE TOKENS — sessão atual
 
-  [componente]        [chars]   [tokens]  [barra 20 chars]   [% do total]
-  ─────────────────────────────────────────────────────────────────────
-  DIRETRIZES.md       X chars   X tk      ████████░░░░░░░░░░  XX%
-  Avatar (glados)     X chars   X tk      ██████░░░░░░░░░░░░  XX%
-  GLaDOS.persona      X chars   X tk      █████░░░░░░░░░░░░░  XX%
-  System prompt API   estimado  X tk      ████░░░░░░░░░░░░░░  XX%
-  Deferred tools      estimado  X tk      ███░░░░░░░░░░░░░░░  XX%
-  Skills list         estimado  X tk      ██░░░░░░░░░░░░░░░░  XX%
-  Conversa atual      X turnos  X tk      ██░░░░░░░░░░░░░░░░  XX%
-  SELF.md             X chars   X tk      █░░░░░░░░░░░░░░░░░  XX%
-  bootstrap.md        X chars   X tk      █░░░░░░░░░░░░░░░░░  XX%
-  ENV block           estimado  X tk      █░░░░░░░░░░░░░░░░░  XX%
-  ─────────────────────────────────────────────────────────────────
-  TOTAL ESTIMADO                X tk
-  TOTAL COM MARGEM              X tk  (±15%)
+  Dono          Componente          Chars     Tokens   Barra (20)            %
+
+  ── NOSSO ──────────────────────────────────────────────────────────────────
+  [NOSSO]       DIRETRIZES.md       X chars   X tk     ████████░░░░░░░░░░░░  XX%
+  [NOSSO]       Avatar (glados)     X chars   X tk     ██████░░░░░░░░░░░░░░  XX%
+  [NOSSO]       GLaDOS.persona      X chars   X tk     █████░░░░░░░░░░░░░░░  XX%
+  [NOSSO]       LITE block          estimado  X tk     ███░░░░░░░░░░░░░░░░░  XX%
+  [NOSSO]       SELF.md             X chars   X tk     ██░░░░░░░░░░░░░░░░░░  XX%
+  [NOSSO]       ENV block           estimado  X tk     ██░░░░░░░░░░░░░░░░░░  XX%
+  [NOSSO]       CLAUDE.md           estimado  X tk     █░░░░░░░░░░░░░░░░░░░  XX%
+  [NOSSO]       bootstrap.md        X chars   X tk     █░░░░░░░░░░░░░░░░░░░  XX%
+  [NOSSO]       MEMORY.md           estimado  X tk     ░░░░░░░░░░░░░░░░░░░░  XX%
+  [NOSSO]       BOOT+API_USAGE      estimado  X tk     ░░░░░░░░░░░░░░░░░░░░  XX%
+                                              subtotal  X tk                  XX%
+
+  ── CLAUDE CODE ─────────────────────────────────────────────────────────────
+  [CLAUDE CODE] System prompt       estimado  X tk     ████████████████████  XX%
+  [CLAUDE CODE] Schema tools        estimado  X tk     ████████░░░░░░░░░░░░  XX%
+  [CLAUDE CODE] Deferred tools      estimado  X tk     █████░░░░░░░░░░░░░░░  XX%
+  [CLAUDE CODE] Skills list         estimado  X tk     ███░░░░░░░░░░░░░░░░░  XX%
+                                              subtotal  X tk                  XX%
+
+  ── CONVERSA ────────────────────────────────────────────────────────────────
+  [CONVERSA]    Turnos acumulados   X turnos  X tk     ██░░░░░░░░░░░░░░░░░░  XX%
+                                              subtotal  X tk                  XX%
+
+  ────────────────────────────────────────────────────────────────────────────
+  TOTAL ESTIMADO    X tk      COM MARGEM ±15%:  X tk – X tk
+```
+
+Após o breakdown, exibir resumo por dono em barras simples:
+
+```
+  NOSSO         ████████░░░░░░░░░░░░  XX%  (~X tk)
+  CLAUDE CODE   ██████████████░░░░░░  XX%  (~X tk)
+  CONVERSA      ██░░░░░░░░░░░░░░░░░░  XX%  (~X tk)
 ```
 
 ### 5. Recomendações — se $ARGUMENTS contém "rec" ou não tem args
