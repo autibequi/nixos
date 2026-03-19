@@ -41,6 +41,8 @@ _zion_dk_shell() {
       -v "$dir:/go/app" \
       -v "$log_dir:/workspace/logs" \
       -v /var/run/docker.sock:/var/run/docker.sock \
+      -v "zion-go-mod-cache:/go/pkg/mod" \
+      -v "zion-go-build-cache:/root/.cache/go-build" \
       -e GOPATH=/go \
       -e GOPRIVATE="github.com/estrategiahq" \
       -e TERM=xterm-256color \
