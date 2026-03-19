@@ -74,7 +74,7 @@ TEMPLATE_NAME=$(parse_fm "$CONFIG" "template")
 TEMPLATE_FILE=""
 TEMPLATE_BODY=""
 if [ -n "$TEMPLATE_NAME" ]; then
-  TEMPLATE_FILE="$TASKS/templates/${TEMPLATE_NAME}.md"
+  TEMPLATE_FILE="$WORKSPACE/obsidian/templates/agents/${TEMPLATE_NAME}.md"
   [ -f "$TEMPLATE_FILE" ] || { echo "[task-runner] template '$TEMPLATE_NAME' not found"; TEMPLATE_FILE=""; }
 fi
 
