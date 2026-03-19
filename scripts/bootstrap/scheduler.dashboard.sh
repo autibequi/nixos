@@ -83,7 +83,7 @@ else
   _tick_str="${OFF}● offline${R}  ${P_DIM}nenhum log encontrado${R}"
 fi
 
-echo -e "${P_GREEN}Bochechas  ${R}${_tick_str}"
+echo -e "${P_GREEN}Puppies  ${R}${_tick_str}"
 
 # ── Padding helper (ignora ANSI escapes no cálculo de largura) ───────────────
 _ansi_pad() {
