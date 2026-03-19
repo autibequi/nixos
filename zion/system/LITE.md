@@ -19,3 +19,9 @@ Projeto atual em `/workspace/mnt` — CLAUDE.md do projeto define contexto espec
 - Evidência antes de claims: teste, build ou output do comando
 - `in_docker=1` → não rodar `nixos-rebuild`/`systemctl`; pedir ao user rodar no host
 - Skills e commands em `/workspace/zion/` — ler o arquivo antes de executar
+
+## Zion Debug (segundo stage)
+
+Para tasks que envolvam NixOS, Hyprland, `zion/`, personas ou DIRETRIZES:
+invocar `/zion-debug` para carregar contexto completo nesta sessão.
+Só disponível em `zion_edit=1`. É toggleable — persiste entre sessões via flag.

@@ -29,6 +29,7 @@ PERSONALITY="ON"; [ -f "$WS/.ephemeral/personality-off" ] && PERSONALITY="OFF"
 AUTOCOMMIT="OFF"; [ -f "$WS/.ephemeral/auto-commit" ]    && AUTOCOMMIT="ON"
 AUTOJARVIS="OFF"; [ -f "$WS/.ephemeral/auto-jarvis" ]    && AUTOJARVIS="ON"
 BETA="OFF";       [ -f "$WS/.ephemeral/beta-mode" ]      && BETA="ON"
+ZION_DEBUG="OFF"; [ -f "$WS/.ephemeral/zion-debug" ]     && ZION_DEBUG="ON"
 HEADLESS="${HEADLESS:-0}"
 PUPPY_TIMEOUT="${PUPPY_TIMEOUT:-}"
 [ -z "${IN_DOCKER:-}" ] && IN_DOCKER="0"
@@ -59,6 +60,7 @@ echo "autojarvis=$AUTOJARVIS     # ON=JARVIS no dashboard"
 echo "beta=$BETA                 # ON=beta overrides ativos | OFF=normal"
 echo "in_docker=$IN_DOCKER       # 1=container | 0=host"
 echo "zion_edit=$ZION_EDIT       # 1=mnt é o repo nixos + logs montados | 0=projeto externo"
+echo "zion_debug=$ZION_DEBUG     # ON=contexto completo (DIRETRIZES+persona+avatar) | OFF=lite mode"
 echo "headless=$HEADLESS         # 1=worker sem supervisão | 0=interativo"
 [ -n "$PUPPY_TIMEOUT" ] && echo "puppy_timeout=${PUPPY_TIMEOUT}s"
 [ -n "$AGENT_NAME" ] && echo "agent_name=$AGENT_NAME"
@@ -73,9 +75,9 @@ fi
 echo "---/BOOT---"
 
 # ────────────────────────────────────────────────────────────────
-# 2. BOOTSTRAP — apenas zion_edit (pesado, irrelevante em projetos externos)
+# 2. BOOTSTRAP — apenas zion_debug=ON
 # ────────────────────────────────────────────────────────────────
-if [ "$AGENT_MODE" != "1" ] && [ "$ZION_EDIT" = "1" ]; then
+if [ "$AGENT_MODE" != "1" ] && [ "$ZION_DEBUG" = "ON" ]; then
   BOOTSTRAP_MD="$WS/zion/bootstrap.md"
   [ -f "$BOOTSTRAP_MD" ] || BOOTSTRAP_MD="/workspace/zion/bootstrap.md"
   if [ -f "$BOOTSTRAP_MD" ]; then
@@ -89,7 +91,7 @@ fi
 # 2.5 LITE MODE — projetos externos (zion_edit=0)
 #     Substitui BOOTSTRAP + DIRETRIZES + SELF + PERSONALITY com prompt mínimo
 # ────────────────────────────────────────────────────────────────
-if [ "$ZION_EDIT" = "0" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
+if [ "$ZION_DEBUG" = "OFF" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
   LITE_MD="$WS/zion/system/LITE.md"
   [ -f "$LITE_MD" ] || LITE_MD="/workspace/zion/system/LITE.md"
   if [ -f "$LITE_MD" ]; then
@@ -100,9 +102,9 @@ if [ "$ZION_EDIT" = "0" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ];
 fi
 
 # ────────────────────────────────────────────────────────────────
-# 3. DIRETRIZES operacionais — apenas zion_edit (lite mode usa LITE.md)
+# 3. DIRETRIZES operacionais — apenas zion_debug=ON
 # ────────────────────────────────────────────────────────────────
-if [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ] && [ "$ZION_EDIT" = "1" ]; then
+if [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ] && [ "$ZION_DEBUG" = "ON" ]; then
   DIRETRIZES="$WS/zion/system/DIRETRIZES.md"
   [ -f "$DIRETRIZES" ] || DIRETRIZES="/workspace/zion/system/DIRETRIZES.md"
   if [ -f "$DIRETRIZES" ]; then
@@ -113,9 +115,9 @@ if [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ] && [ "$ZION_EDIT" = "1" ];
 fi
 
 # ────────────────────────────────────────────────────────────────
-# 4. SELF — diário da persona (apenas zion_edit + personality=ON)
+# 4. SELF — diário da persona (apenas zion_debug=ON + personality=ON)
 # ────────────────────────────────────────────────────────────────
-if [ "$PERSONALITY" = "ON" ] && [ "$AGENT_MODE" != "1" ] && [ "$ZION_EDIT" = "1" ]; then
+if [ "$PERSONALITY" = "ON" ] && [ "$AGENT_MODE" != "1" ] && [ "$ZION_DEBUG" = "ON" ]; then
   SELF="$WS/zion/system/SELF.md"
   [ -f "$SELF" ] || SELF="/workspace/zion/system/SELF.md"
   if [ -f "$SELF" ]; then
@@ -230,10 +232,10 @@ if [ "$AGENT_MODE" = "1" ]; then
 fi
 
 # ────────────────────────────────────────────────────────────────
-# 7. PERSONALITY (apenas zion_edit + personality=ON)
+# 7. PERSONALITY (apenas zion_debug=ON + personality=ON)
 #    Cascata: PERSONALITY.md → persona file → avatar file
 # ────────────────────────────────────────────────────────────────
-if [ "$PERSONALITY" = "ON" ] && [ "$AGENT_MODE" != "1" ] && [ "$ZION_EDIT" = "1" ]; then
+if [ "$PERSONALITY" = "ON" ] && [ "$AGENT_MODE" != "1" ] && [ "$ZION_DEBUG" = "ON" ]; then
   PERS_MD="$WS/zion/system/PERSONALITY.md"
   [ -f "$PERS_MD" ] || PERS_MD="/workspace/zion/system/PERSONALITY.md"
   if [ -f "$PERS_MD" ]; then
