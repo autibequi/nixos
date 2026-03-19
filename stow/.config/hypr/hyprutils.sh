@@ -100,6 +100,15 @@ print_screen_to_clipboard() {
     hyprshot -m region -o ~/Pictures/Screenshots
 }
 
+print_screen_full_then_crop() {
+    mkdir -p ~/Pictures/printscreens
+    local tmpfile monitor
+    tmpfile=$(mktemp /tmp/screenshot_XXXXXX.png)
+    monitor=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .name')
+    grim -o "$monitor" "$tmpfile" && satty -f "$tmpfile" --early-exit --fullscreen --copy-command wl-copy --init-tool crop --annotation-size-factor 0.5 --output-filename ~/Pictures/printscreens/$(date +%Y%m%d_%H%M%S).png
+    rm -f "$tmpfile"
+}
+
 tesseract_region() {
     local text
     text=$(hyprshot -m region --raw | tesseract stdin stdout -l eng 2>/dev/null)
