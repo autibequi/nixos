@@ -425,13 +425,5 @@ TESTING
   echo "---/BETA_OVERRIDES---"
 fi
 
-# ────────────────────────────────────────────────────────────────
-# 9. CLAUDE.md do projeto (apenas zion_edit=1)
-#    Em sessão normal (zion_edit=0) o projeto é externo — CLAUDE.md
-#    do nixos é irrelevante e desperdiçaria ~15k tokens de contexto.
-# ────────────────────────────────────────────────────────────────
-if [ "$ZION_EDIT" = "1" ] && [ -f "$WS/CLAUDE.md" ]; then
-  echo "---CLAUDE.MD---"
-  cat "$WS/CLAUDE.md"
-  echo "---/CLAUDE.MD---"
-fi
+# CLAUDE.md removido — Claude Code já injeta automaticamente via claudeMd.
+# Injetar aqui causava duplicata de ~7k tokens por sessão.
