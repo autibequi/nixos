@@ -161,31 +161,43 @@ _fetch_fresh() {
   echo "$raw"
 }
 
-# --- obter JSON: cache (60s) → shared (container) → fetch → last ---
-# Preferência: claude.ai (session + org) → OAuth → shared file do container.
+# --- obter JSON: shared (container) → cache → fetch → last ---
+# Prioridade: shared file (escrito pelo container, sem restricao de rede) → cache local → fetch API → last known
 SHARED_FILE="${CLAUDE_DIR}/claude-usage-shared.json"
 USED_SOURCE=""
 JSON=""
-if ! _cache_valid || [[ "$FORCE_REFRESH" == "1" ]]; then
-  JSON=$(_fetch_claude_ai 2>/dev/null) || true
-  if [[ -n "$JSON" ]] && echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
-    USED_SOURCE="claude.ai"
-  else
-    JSON=$(_fetch_fresh 2>/dev/null) || true
-    [[ -n "$JSON" ]] && echo "$JSON" | $JQ -e '.five_hour' &>/dev/null && USED_SOURCE="OAuth"
+
+# 1. shared file do container (fonte principal quando host nao alcanca a API)
+if [[ -f "$SHARED_FILE" ]] && [[ "$FORCE_REFRESH" != "1" ]]; then
+  _shmtime=$(date -r "$SHARED_FILE" +%s 2>/dev/null) || _shmtime=0
+  _shnow=$(date +%s)
+  # usar shared se tiver menos de 2h (container atualiza a cada sessao)
+  if (( _shnow - _shmtime < 7200 )); then
+    JSON=$(cat "$SHARED_FILE") && USED_SOURCE="container" || true
   fi
 fi
-# Fallback 1: cache local
-if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
-  [[ -f "$CACHE_FILE" ]] && JSON=$(cat "$CACHE_FILE") || true
+
+# 2. cache local (60s TTL)
+if ([[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null) && _cache_valid; then
+  JSON=$(cat "$CACHE_FILE") && USED_SOURCE="cache" || true
 fi
-# Fallback 2: arquivo compartilhado escrito pelo container (sem restrição de rede)
-if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
-  [[ -f "$SHARED_FILE" ]] && JSON=$(cat "$SHARED_FILE") && USED_SOURCE="container" || true
+
+# 3. fetch da API (funciona se host tem acesso)
+if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null || [[ "$FORCE_REFRESH" == "1" ]]; then
+  _fetched=$(_fetch_claude_ai 2>/dev/null) || true
+  if [[ -n "$_fetched" ]] && echo "$_fetched" | $JQ -e '.five_hour' &>/dev/null; then
+    JSON="$_fetched"; USED_SOURCE="claude.ai"
+  else
+    _fetched=$(_fetch_fresh 2>/dev/null) || true
+    if [[ -n "$_fetched" ]] && echo "$_fetched" | $JQ -e '.five_hour' &>/dev/null; then
+      JSON="$_fetched"; USED_SOURCE="OAuth"
+    fi
+  fi
 fi
-# Fallback 3: último valor bom
+
+# 4. ultimo valor bom
 if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
-  [[ -f "$CACHE_LAST" ]] && JSON=$(cat "$CACHE_LAST") || true
+  [[ -f "$CACHE_LAST" ]] && JSON=$(cat "$CACHE_LAST") && USED_SOURCE="last" || true
 fi
 
 if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
