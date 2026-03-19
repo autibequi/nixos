@@ -7,7 +7,8 @@
 {
   environment.systemPackages = with pkgs; [
     bashly
-    
+    jq # scripts de waybar e sistema usam jq diretamente (sem herdar alias jq=jaq do shell)
+
     proton-pass
     stow
     rofimoji
