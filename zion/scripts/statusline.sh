@@ -117,81 +117,70 @@ CTX_USED_K=$(( CTX_USED / 1000 ))
 OUT_TOKENS_FMT=$(fmt_tokens "$OUT_TOKENS")
 
 # --- Barras ---
-# Contexto: █ (cheio) ░ (vazio) — nivel de urgencia via prefixo
-# <50%: normal  50-75%: ▸ aviso  75-90%: ▸▸ alto  >90%: ▸▸▸ critico
-ctx_bar() {
-  local pct="${1:-0}" w="${2:-12}"
-  local fill=$(( pct * w / 100 ))
-  [[ $fill -gt $w ]] && fill=$w
+
+# Contexto combinado: █ input  ▓ output  ░ livre
+# Urgencia via prefixo quando >75% ou >90%
+ctx_combined_bar() {
+  local in_tokens="${1:-0}" out_tokens="${2:-0}" ctx_size="${3:-200000}" w="${4:-8}"
+  [[ "$ctx_size" -le 0 ]] && ctx_size=200000
+  local in_fill=$(( in_tokens * w / ctx_size ))
+  local out_fill=$(( out_tokens * w / ctx_size ))
+  [[ $in_fill -gt $w ]] && in_fill=$w
+  [[ $(( in_fill + out_fill )) -gt $w ]] && out_fill=$(( w - in_fill ))
+  local free=$(( w - in_fill - out_fill ))
   local s="" i
-  for (( i=0; i<fill;  i++ )); do s="${s}█"; done
-  for (( i=fill; i<w;  i++ )); do s="${s}░"; done
+  for (( i=0; i<in_fill;  i++ )); do s="${s}█"; done
+  for (( i=0; i<out_fill; i++ )); do s="${s}▓"; done
+  for (( i=0; i<free;     i++ )); do s="${s}░"; done
+  local pct=$(( (in_tokens + out_tokens) * 100 / ctx_size ))
   local prefix=""
-  (( pct >= 90 )) && prefix="▸▸▸" || { (( pct >= 75 )) && prefix="▸▸" || { (( pct >= 50 )) && prefix="▸"; }; }
-  [[ -n "$prefix" ]] && echo "${prefix}${s}" || echo "$s"
+  (( pct >= 90 )) && prefix="▸▸" || { (( pct >= 75 )) && prefix="▸"; }
+  echo "${prefix}${s}"
 }
 
-# Cache: ▓ (hit) ▒ (criado) ░ (fresh) — textura gradiente, largura 6
+# Cache: ▓ hit  ▒ criado  ░ fresh — largura 4
 cache_bar() {
-  local hit_pct="${1:-0}" create_pct="${2:-0}" w="${3:-6}"
+  local hit_pct="${1:-0}" create_pct="${2:-0}" w="${3:-4}"
   local hit_fill=$(( hit_pct * w / 100 ))
   local cre_fill=$(( create_pct * w / 100 ))
   [[ $(( hit_fill + cre_fill )) -gt $w ]] && cre_fill=$(( w - hit_fill ))
-  local fresh_fill=$(( w - hit_fill - cre_fill ))
+  local fresh=$(( w - hit_fill - cre_fill ))
   local s="" i
-  for (( i=0; i<hit_fill;   i++ )); do s="${s}▓"; done  # cache hit
-  for (( i=0; i<cre_fill;   i++ )); do s="${s}▒"; done  # cache criado (novo write)
-  for (( i=0; i<fresh_fill; i++ )); do s="${s}░"; done  # fresh input
+  for (( i=0; i<hit_fill; i++ )); do s="${s}▓"; done
+  for (( i=0; i<cre_fill; i++ )); do s="${s}▒"; done
+  for (( i=0; i<fresh;    i++ )); do s="${s}░"; done
   echo "$s"
 }
 
-CTX_BAR_W=12
-CTX_BAR=$(ctx_bar "$CTX_PCT" "$CTX_BAR_W")
+CTX_BAR=$(ctx_combined_bar "$CTX_USED" "$OUT_TOKENS" "$CTX_SIZE" 8)
 
-# Cache: % criado no cache
 CACHE_CREATE_PCT=0
 [[ $TOTAL_IN -gt 0 ]] && CACHE_CREATE_PCT=$(( CACHE_CREATE * 100 / TOTAL_IN ))
-CACHE_BAR=$(cache_bar "$CACHE_HIT_PCT" "$CACHE_CREATE_PCT" 6)
+CACHE_BAR=$(cache_bar "$CACHE_HIT_PCT" "$CACHE_CREATE_PCT" 4)
 
-# --- Secoes da status line ---
+# --- Secoes ---
 
-# 1. Contexto: barra + tokens usados/total + %
-CTX_STR="${CTX_BAR} ${CTX_USED_K}k/${CTX_SIZE_FMT} ${CTX_PCT}%"
+# 1. Contexto: barra + in↑out/total  (ex: ████▓░░░ 55k↑8k/200k)
+OUT_RAW=$(( OUT_TOKENS / 1000 ))
+CTX_SIZE_RAW=$(( CTX_SIZE / 1000 ))
+CTX_STR="${CTX_BAR} ${OUT_RAW}/${CTX_USED_K}/${CTX_SIZE_RAW}k"
 
-# 2. Cache: barra + hit% (so mostra se tiver dados de cache)
+# 2. Cache (so se tiver dados)
 CACHE_STR=""
-if [[ $TOTAL_IN -gt 0 ]]; then
-  CACHE_STR=" · ${CACHE_BAR} ${CACHE_HIT_PCT}%↩"
-fi
+[[ $TOTAL_IN -gt 0 ]] && CACHE_STR=" 󰆼 ${CACHE_BAR}${CACHE_HIT_PCT}%"
 
-# 3. Output tokens (so se > 0)
-OUT_STR=""
-if [[ "$OUT_TOKENS" -gt 0 ]]; then
-  OUT_STR=" · ↑${OUT_TOKENS_FMT}"
-fi
-
-# 4. Custo (so se > $0.01)
+# 3. Custo (so se > $0.01)
 COST_STR=""
 if [[ -n "$COST_USD" && "$COST_USD" != "0" && "$COST_USD" != "null" ]]; then
   _cost_cents=$(echo "$COST_USD" | awk '{printf "%d", $1 * 100}')
-  if [[ "${_cost_cents:-0}" -ge 1 ]]; then
-    COST_STR=" · \$$(printf '%.2f' "$COST_USD")"
-  fi
+  [[ "${_cost_cents:-0}" -ge 1 ]] && COST_STR=" \$$(printf '%.2f' "$COST_USD")"
 fi
 
-# 5. Linhas editadas (so se houver)
-LINES_STR=""
-if [[ -n "$LINES_ADDED" && -n "$LINES_REMOVED" ]] && { [[ "$LINES_ADDED" != "0" ]] || [[ "$LINES_REMOVED" != "0" ]]; }; then
-  LINES_STR=" · +${LINES_ADDED}-${LINES_REMOVED}"
-fi
-
-# 6. Worktree
+# 4. Worktree
 WT_STR=""
-if [[ -n "$WORKTREE_NAME" && "$WORKTREE_NAME" != "null" ]]; then
-  WT_STR=" @ wt:$WORKTREE_NAME"
-fi
+[[ -n "$WORKTREE_NAME" && "$WORKTREE_NAME" != "null" ]] && WT_STR=" wt:$WORKTREE_NAME"
 
-# 7. Mount / workspace
+# 5. Mount / workspace
 MOUNT_STR=""
 if [[ -n "${CLAUDIO_MOUNT:-}" ]]; then
   MOUNT_STR=" @ ${CLAUDIO_MOUNT}"
@@ -200,7 +189,7 @@ elif [[ -d "/workspace/mnt" ]] && [[ -n "$(ls -A /workspace/mnt 2>/dev/null)" ]]
 fi
 
 # Composicao final
-RIGHT="󱙺 ${MODEL_SIZE}  ${CTX_STR}${CACHE_STR}${OUT_STR}${COST_STR}${LINES_STR}${WT_STR}${MOUNT_STR}"
+RIGHT="󱙺 ${MODEL_SIZE} ${CTX_STR}${CACHE_STR}${COST_STR}${WT_STR}${MOUNT_STR}"
 
 # Terminal title via OSC (stderr)
 printf '\033]0;Claude: %s\007' "$TOPIC" >&2
