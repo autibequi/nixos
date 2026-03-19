@@ -73,9 +73,9 @@ fi
 echo "---/BOOT---"
 
 # ────────────────────────────────────────────────────────────────
-# 2. BOOTSTRAP — caminhos e prioridade (sempre)
+# 2. BOOTSTRAP — apenas zion_edit (pesado, irrelevante em projetos externos)
 # ────────────────────────────────────────────────────────────────
-if [ "$AGENT_MODE" != "1" ]; then
+if [ "$AGENT_MODE" != "1" ] && [ "$ZION_EDIT" = "1" ]; then
   BOOTSTRAP_MD="$WS/zion/bootstrap.md"
   [ -f "$BOOTSTRAP_MD" ] || BOOTSTRAP_MD="/workspace/zion/bootstrap.md"
   if [ -f "$BOOTSTRAP_MD" ]; then
@@ -86,10 +86,23 @@ if [ "$AGENT_MODE" != "1" ]; then
 fi
 
 # ────────────────────────────────────────────────────────────────
-# 3. DIRETRIZES operacionais
-#    sempre em interativo | skip em headless (workers usam INIT.md)
+# 2.5 LITE MODE — projetos externos (zion_edit=0)
+#     Substitui BOOTSTRAP + DIRETRIZES + SELF + PERSONALITY com prompt mínimo
 # ────────────────────────────────────────────────────────────────
-if [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
+if [ "$ZION_EDIT" = "0" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
+  LITE_MD="$WS/zion/system/LITE.md"
+  [ -f "$LITE_MD" ] || LITE_MD="/workspace/zion/system/LITE.md"
+  if [ -f "$LITE_MD" ]; then
+    echo "---LITE---"
+    cat "$LITE_MD"
+    echo "---/LITE---"
+  fi
+fi
+
+# ────────────────────────────────────────────────────────────────
+# 3. DIRETRIZES operacionais — apenas zion_edit (lite mode usa LITE.md)
+# ────────────────────────────────────────────────────────────────
+if [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ] && [ "$ZION_EDIT" = "1" ]; then
   DIRETRIZES="$WS/zion/system/DIRETRIZES.md"
   [ -f "$DIRETRIZES" ] || DIRETRIZES="/workspace/zion/system/DIRETRIZES.md"
   if [ -f "$DIRETRIZES" ]; then
@@ -100,9 +113,9 @@ if [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
 fi
 
 # ────────────────────────────────────────────────────────────────
-# 4. SELF — diário da persona (apenas personality=ON)
+# 4. SELF — diário da persona (apenas zion_edit + personality=ON)
 # ────────────────────────────────────────────────────────────────
-if [ "$PERSONALITY" = "ON" ] && [ "$AGENT_MODE" != "1" ]; then
+if [ "$PERSONALITY" = "ON" ] && [ "$AGENT_MODE" != "1" ] && [ "$ZION_EDIT" = "1" ]; then
   SELF="$WS/zion/system/SELF.md"
   [ -f "$SELF" ] || SELF="/workspace/zion/system/SELF.md"
   if [ -f "$SELF" ]; then
@@ -217,10 +230,10 @@ if [ "$AGENT_MODE" = "1" ]; then
 fi
 
 # ────────────────────────────────────────────────────────────────
-# 7. PERSONALITY (apenas personality=ON)
+# 7. PERSONALITY (apenas zion_edit + personality=ON)
 #    Cascata: PERSONALITY.md → persona file → avatar file
 # ────────────────────────────────────────────────────────────────
-if [ "$PERSONALITY" = "ON" ] && [ "$AGENT_MODE" != "1" ]; then
+if [ "$PERSONALITY" = "ON" ] && [ "$AGENT_MODE" != "1" ] && [ "$ZION_EDIT" = "1" ]; then
   PERS_MD="$WS/zion/system/PERSONALITY.md"
   [ -f "$PERS_MD" ] || PERS_MD="/workspace/zion/system/PERSONALITY.md"
   if [ -f "$PERS_MD" ]; then
