@@ -39,16 +39,8 @@ _zion_dk_install() {
     host_uid="$(id -u)"
     host_gid="$(id -g)"
 
-    echo "=== Instalando dependencias de $service (Node) [env=$env] ==="
-    [[ -n "$_ZION_DK_WORKTREE" ]] && echo "  worktree: $_ZION_DK_WORKTREE"
-    echo "  SSH:     ~/.ssh (montada read-only)"
-    echo "  npmrc:   ~/.npmrc (montada read-only)"
-    echo "  Projeto: $dir"
-    echo "  Image:   $node_image"
-    echo "  logs:    $log_dir/install.log"
-    echo ""
-    echo "Rodando: ferramentas -> npm install"
-    echo "---"
+    _zion_header "docker install  $service (Node)  [env=$env]"
+    printf "  \033[2mimage: %s  •  logs: %s/install.log\033[0m\n\n" "$node_image" "$log_dir"
 
     local ssh_dir="${HOST_SSH_DIR:-$HOME/.ssh}"
     local npmrc="${HOST_NPMRC:-$HOME/.npmrc}"
@@ -104,14 +96,11 @@ _zion_dk_install() {
         mkdir -p "$dir/.git/info"
         if ! grep -qxF 'node_modules/' "$exclude_file" 2>/dev/null; then
           echo 'node_modules/' >> "$exclude_file"
-          echo "[zion docker] node_modules/ adicionado ao .git/info/exclude (gitignore local)"
         fi
       fi
-      echo ""
-      echo "Instalacao finalizada! Rode: zion docker $service server start --env=$env"
+      printf "\n  \033[32m\033[1mFeito!\033[0m  Rode: zion docker %s server start --env=%s\n\n" "$service" "$env"
     else
-      echo ""
-      echo "Instalacao falhou. Verifique: $log_dir/install.log"
+      printf "\n  \033[31mInstalacao falhou.\033[0m  Verifique: %s/install.log\n\n" "$log_dir"
       return 1
     fi
 
@@ -123,14 +112,8 @@ _zion_dk_install() {
   host_uid="$(id -u)"
   host_gid="$(id -g)"
 
-  echo "=== Instalando dependencias de $service (Go) [env=$env] ==="
-  [[ -n "$_ZION_DK_WORKTREE" ]] && echo "  worktree: $_ZION_DK_WORKTREE"
-  echo "  SSH:     ~/.ssh (montada read-only)"
-  echo "  Projeto: $dir"
-  echo "  logs:    $log_dir/install.log"
-  echo ""
-  echo "Rodando: ferramentas -> go mod download -> go mod tidy -> go mod vendor"
-  echo "---"
+  _zion_header "docker install  $service (Go)  [env=$env]"
+  printf "  \033[2mlogs: %s/install.log\033[0m\n\n" "$log_dir"
 
   # Roda docker run e grava em arquivo simultaneamente (preserva cores com script)
   docker run \
@@ -183,14 +166,11 @@ _zion_dk_install() {
       mkdir -p "$dir/.git/info"
       if ! grep -qxF 'vendor/' "$exclude_file" 2>/dev/null; then
         echo 'vendor/' >> "$exclude_file"
-        echo "[zion docker] vendor/ adicionado ao .git/info/exclude (gitignore local)"
       fi
     fi
-    echo ""
-    echo "Instalacao finalizada! Rode: zion docker $service server start --env=$env"
+    printf "\n  \033[32m\033[1mFeito!\033[0m  Rode: zion docker %s server start --env=%s\n\n" "$service" "$env"
   else
-    echo ""
-    echo "Instalacao falhou. Verifique: $log_dir/install.log"
+    printf "\n  \033[31mInstalacao falhou.\033[0m  Verifique: %s/install.log\n\n" "$log_dir"
     return 1
   fi
 }
