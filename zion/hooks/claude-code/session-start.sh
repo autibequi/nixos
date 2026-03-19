@@ -355,38 +355,8 @@ BOOTDISPLAY
 fi
 
 # ────────────────────────────────────────────────────────────────
-# 8.9 ZION DEV — guia rápido de edição (apenas zion_edit=1)
-# ────────────────────────────────────────────────────────────────
-if [ "$ZION_EDIT" = "1" ] && [ "$AGENT_MODE" != "1" ]; then
-  echo "---ZION_DEV---"
-  cat <<'ZIONDEV'
-Você pode editar o próprio Zion. Fluxo básico:
-
-ADICIONAR/EDITAR comando:
-  1. zion/cli/src/bashly.yml      → declarar nome, args, flags, filename
-  2. zion/cli/src/commands/<cmd>.sh → implementar (zion_load_config no topo)
-  3. cd /workspace/zion/cli && bashly generate   → regenera o binário
-  4. zion <cmd>  para testar
-
-REMOVER comando:
-  1. Remover entrada do bashly.yml
-  2. Remover o .sh em src/commands/
-  3. bashly generate
-
-EDITAR hook de sessão:
-  zion/hooks/claude-code/session-start.sh  (fonte da verdade — montado como ~/.claude/hooks/)
-
-EDITAR agente:
-  zion/agents/<nome>/agent.md
-
-Variáveis úteis nos comandos:
-  zion_load_config      → carrega $zion_cli_dir, $zion_obsidian_path, $zion_nixos_dir
-  $zion_cli_dir         → ~/nixos/zion/cli (onde fica o docker-compose)
-  ${args[nome]}         → argumento posicional
-  ${args[--flag]}       → flag longa
-ZIONDEV
-  echo "---/ZION_DEV---"
-fi
+# ZION_DEV removido — conteúdo já está em CLAUDE.md §8 (Zion CLI manutenção).
+# Carregado sob demanda se necessário.
 
 # ────────────────────────────────────────────────────────────────
 # 8.95 BETA OVERRIDES — apenas beta=ON
