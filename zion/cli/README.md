@@ -25,7 +25,7 @@ Depois edite e preencha `engine=`, `GH_TOKEN=`, `ANTHROPIC_API_KEY=` (chmod 600 
 - **engine** — padrão para sessão: `opencode` | `claude` | `cursor`
 - **GH_TOKEN**, **ANTHROPIC_API_KEY** — injetados no container (não usar mais .env do repo para chaves)
 - **CURSOR_API_KEY** (opcional) — para engine `cursor`; alternativamente use login no host (`agent login`) e monte `~/.cursor` (já montado pelo compose)
-- **OBSIDIAN_PATH** (opcional) — caminho do vault Obsidian; se não definir, usa `~/.ovault/Zion`. Necessário para montar `/obsidian` no container. O host (repo nixos) é sempre montado em `/nixos` via `$HOME/nixos`.
+- **OBSIDIAN_PATH** (opcional) — caminho do vault Obsidian; se não definir, usa `~/.ovault/Work`. Necessário para montar `/obsidian` no container. O host (repo nixos) é sempre montado em `/nixos` via `$HOME/nixos`.
 
 Sem `--engine=` na linha de comando, `zion run` usa `engine=` de ~/.zion; se não houver, exige `--engine=`.
 

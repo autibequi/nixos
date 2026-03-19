@@ -5,7 +5,7 @@ local timeout="${args[--timeout]:-300}"
 local when="${args[--when]:-$(date +%Y%m%d_%H_%M)}"
 local agent="${args[--agent]:-}"
 zion_load_config
-local vault="${OBSIDIAN_PATH:-$HOME/.ovault/Zion}/tasks"
+local vault="${OBSIDIAN_PATH:-$HOME/.ovault/Work}/tasks"
 
 local filename="${when}_${name}.md"
 local filepath="$vault/TODO/$filename"

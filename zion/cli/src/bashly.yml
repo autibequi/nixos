@@ -5,7 +5,7 @@ environment_variables:
   - name: ZION_NIXOS_DIR
     help: "Raiz do repo NixOS (default $HOME/nixos)"
   - name: OBSIDIAN_PATH
-    help: "Caminho do vault Obsidian (default $HOME/.ovault/Zion)"
+    help: "Caminho do vault Obsidian (default $HOME/.ovault/Work)"
 
 flags:
   - long: --engine

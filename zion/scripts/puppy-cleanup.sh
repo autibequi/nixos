@@ -8,7 +8,7 @@
 set -euo pipefail
 
 PROJECT_DIR="${SCHEDULER_PROJECT_DIR:-${PROJECT_DIR:-$(cd "$(dirname "$0")/.." && pwd)}}"
-VAULT_DIR="${SCHEDULER_VAULT_DIR:-${HOME:-/tmp}/.ovault/Zion}"
+VAULT_DIR="${SCHEDULER_VAULT_DIR:-${HOME:-/tmp}/.ovault/Work}"
 
 DOING_DIR="${VAULT_DIR}/tasks/DOING"
 TODO_DIR="${VAULT_DIR}/tasks/TODO"

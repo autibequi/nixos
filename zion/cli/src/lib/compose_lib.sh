@@ -9,7 +9,7 @@ zion_compose_dir="$zion_cli_dir"
 # Config do usuário: engine padrão e chaves (GH_TOKEN, ANTHROPIC_API_KEY)
 zion_config_file="${ZION_CONFIG:-$HOME/.zion}"
 zion_env_file="$zion_cli_dir/.env"
-zion_obsidian_path="${OBSIDIAN_PATH:-$HOME/.ovault/Zion}"
+zion_obsidian_path="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
 
 # Garante HOME para o compose expandir ${HOME}/nixos e paths; usado por todos os comandos que montam volumes.
 [[ -z "${HOME:-}" ]] && export HOME="$(eval echo ~"$(id -un)")"

@@ -22,7 +22,7 @@ x-extra-hosts: &extra-hosts
 # /workspace: zion (/zion), obsidian e o projeto (mnt). Nixos e logs só em zion edit.
 x-base-volumes: &base-volumes
   - ${ZION_ROOT:-${HOME}/nixos/zion}:/workspace/zion
-  - ${OBSIDIAN_PATH:-${HOME}/.ovault/Zion}:/workspace/obsidian
+  - ${OBSIDIAN_PATH:-${HOME}/.ovault/Work}:/workspace/obsidian
   - ${CLAUDIO_MOUNT:-${HOME}/projects}:/workspace/mnt:${CLAUDIO_MOUNT_OPTS:-rw}
   - ${HOME}/.claude:/home/claude/.claude
   # zion/skills e zion/commands sobrescrevem o ~/.claude do host
