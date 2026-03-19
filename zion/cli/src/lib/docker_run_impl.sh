@@ -89,8 +89,9 @@ _zion_dk_run() {
   # step 3+4 (opcionais): deps
   if [[ $has_deps -eq 1 ]]; then
     _start_deps() {
-      docker compose -f "$deps_compose" -p "${project}-deps" up -d --remove-orphans \
-        > "$log_dir/deps.log" 2>&1
+      docker compose -f "$deps_compose" -p "${project}-deps" up -d --remove-orphans 2>&1 \
+        | tee "$log_dir/deps.log"
+      return "${PIPESTATUS[0]}"
     }
     _wait_postgres() {
       until docker exec zion-dk-monolito-postgres \
@@ -104,7 +105,8 @@ _zion_dk_run() {
 
   # build
   _build_svc() {
-    DOCKER_BUILDKIT=1 docker compose $COMPOSE_ARGS build > "$log_dir/startup.log" 2>&1
+    DOCKER_BUILDKIT=1 docker compose $COMPOSE_ARGS build 2>&1 | tee "$log_dir/startup.log"
+    return "${PIPESTATUS[0]}"
   }
   step=$((step + 1)); _zion_step $step $total "Building image" _build_svc || return 1
 
