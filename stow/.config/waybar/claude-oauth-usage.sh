@@ -161,8 +161,9 @@ _fetch_fresh() {
   echo "$raw"
 }
 
-# --- obter JSON: cache (60s) → fetch ---
-# Preferência: claude.ai (session + org) → OAuth.
+# --- obter JSON: cache (60s) → shared (container) → fetch → last ---
+# Preferência: claude.ai (session + org) → OAuth → shared file do container.
+SHARED_FILE="${CLAUDE_DIR}/claude-usage-shared.json"
 USED_SOURCE=""
 JSON=""
 if ! _cache_valid || [[ "$FORCE_REFRESH" == "1" ]]; then
@@ -174,9 +175,15 @@ if ! _cache_valid || [[ "$FORCE_REFRESH" == "1" ]]; then
     [[ -n "$JSON" ]] && echo "$JSON" | $JQ -e '.five_hour' &>/dev/null && USED_SOURCE="OAuth"
   fi
 fi
+# Fallback 1: cache local
 if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
   [[ -f "$CACHE_FILE" ]] && JSON=$(cat "$CACHE_FILE") || true
 fi
+# Fallback 2: arquivo compartilhado escrito pelo container (sem restrição de rede)
+if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
+  [[ -f "$SHARED_FILE" ]] && JSON=$(cat "$SHARED_FILE") && USED_SOURCE="container" || true
+fi
+# Fallback 3: último valor bom
 if [[ -z "$JSON" ]] || ! echo "$JSON" | $JQ -e '.five_hour' &>/dev/null; then
   [[ -f "$CACHE_LAST" ]] && JSON=$(cat "$CACHE_LAST") || true
 fi

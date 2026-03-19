@@ -84,6 +84,8 @@ _fetch_fresh() {
   echo "$raw" | $JQ -e '.five_hour' &>/dev/null || return 1
   mkdir -p "$(dirname "$CACHE_FILE")"
   echo "$raw" > "$CACHE_FILE"
+  # Compartilha com o host via ~/.claude/ (montado no compose)
+  cp "$CACHE_FILE" "${CLAUDE_DIR}/claude-usage-shared.json" 2>/dev/null || true
   echo "$raw"
 }
 
