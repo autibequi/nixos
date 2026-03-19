@@ -168,8 +168,8 @@ SHARED_FILE="${CLAUDE_DIR}/claude-usage-shared.json"
 USED_SOURCE=""
 JSON=""
 
-# jaq nao suporta -e igual ao jq; usar checagem de string em vez de exit code
-_has_five_hour() { [[ -n "$(echo "$1" | $JQ -r '.five_hour.utilization // empty' 2>/dev/null)" ]]; }
+# checagem sem dependencia de jq/jaq: JSON valido tem "five_hour" no texto
+_has_five_hour() { [[ "$1" == *'"five_hour"'* ]]; }
 
 # 1. shared file do container — TTL 8h (container atualiza a cada sessao)
 if [[ -f "$SHARED_FILE" ]] && [[ "$FORCE_REFRESH" != "1" ]]; then
