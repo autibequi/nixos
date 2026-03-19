@@ -126,8 +126,10 @@ commands:
             help: "Formato Waybar (text, tooltip, class) para o usage bar consumir"
           - long: --json
             help: "JSON bruto da API (five_hour, seven_day, seven_day_sonnet)"
+          - long: --no-cache
+            help: "Pula cache, busca direto na API"
           - long: --refresh
-            help: "Força fetch, ignora cache"
+            help: "Alias de --no-cache"
         filename: commands/claude_usage.sh
 
       - name: token

@@ -43,7 +43,7 @@ AGENT_MODE="0"
 echo "---BOOT---"
 echo "datetime=$(date '+%Y-%m-%d %H:%M %Z')"
 echo "personality=$PERSONALITY   # ON=persona ativa | OFF=modo neutro"
-echo "autocommit=$AUTOCOMMIT     # ON=commita sem perguntar"
+echo "autocommit=$AUTOCOMMIT     # ON=commita sem perguntar | OFF=PROIBIDO commitar sem o user pedir"
 echo "autojarvis=$AUTOJARVIS     # ON=JARVIS no dashboard"
 echo "in_docker=$IN_DOCKER       # 1=container | 0=host"
 echo "zion_edit=$ZION_EDIT       # 1=mnt é o repo nixos + logs montados | 0=projeto externo"
@@ -53,6 +53,11 @@ echo "headless=$HEADLESS         # 1=worker sem supervisão | 0=interativo"
 [ -n "$TASK_NAME" ] && echo "task_name=$TASK_NAME"
 echo "agent_mode=$AGENT_MODE      # 1=running as named agent or processing a task"
 echo "workspace=$WS"
+echo ""
+if [ "$AUTOCOMMIT" = "OFF" ]; then
+  echo "REGRA: autocommit=OFF — NÃO fazer git commit por iniciativa própria."
+  echo "       Esperar o usuário pedir explicitamente antes de commitar qualquer coisa."
+fi
 echo "---/BOOT---"
 
 # ────────────────────────────────────────────────────────────────

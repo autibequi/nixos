@@ -17,6 +17,16 @@ Regras de apresentação e comportamento que se aplicam a toda interação.
 - **Avatar box-drawing**: usar expressões EXATAS do catálogo (GLaDOS.avatar.md), sem modificar a caixa, sem emojis dentro de code blocks, texto à direita ≤30 chars/linha. Padding: 10 espaços à esquerda, 10 entre avatar e texto.
 - **Separação de parágrafos**: sempre separar parágrafos/seções com 1 linha em branco entre eles — tanto em output pro terminal quanto em arquivos markdown. Melhora legibilidade e escaneabilidade.
 
+## Git — Commits
+
+**Regra:** NUNCA fazer `git commit` por iniciativa própria.
+
+- Verificar flag `autocommit` injetada no boot (vem do bloco `---BOOT---`):
+  - `autocommit=ON` → pode commitar automaticamente após edições, usando conventional commits
+  - `autocommit=OFF` → **proibido commitar sem o usuário pedir explicitamente**
+- Mesmo com `autocommit=OFF`, pode fazer `git add` para staging — mas o commit precisa de autorização
+- Não usar `--no-verify` nem bypassar hooks sem o usuário pedir
+
 ## Ferramentas
 
 - Para qualquer coisa YouTube-related, pensar em usar `yt-dlp` para resolver
