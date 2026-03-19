@@ -693,6 +693,22 @@ commands:
                     help: "Worktree alternativo"
 
   # ── Worktree (atalho interativo) ──────────────────────────
+  - name: hooks
+    alias: [hook]
+    help: "Executa um hook do Claude Code e mostra o que seria injetado."
+    args:
+      - name: hook
+        help: "Nome do hook (ex: session-start, pre-tool-use, user-prompt-submit)"
+        required: true
+      - name: env_overrides
+        help: "Variaveis de ambiente KEY=VALUE para override (ex: DEBUG=ON PERSONALITY=OFF)"
+        repeatable: true
+    flags:
+      - long: --list
+        short: -l
+        help: "Lista hooks disponiveis"
+    filename: commands/hooks.sh
+
   - name: worktree
     alias: [wt]
     help: "Lista worktrees dos servicos Docker e permite escolher worktree + comando interativamente."
@@ -736,6 +752,10 @@ commands:
       - name: action
         default: restow
         help: "Ação: restow (default), delete, status"
+    flags:
+      - long: --reload
+        short: -r
+        help: "Após deploy, recarrega Hyprland (hyprctl reload) e Waybar (SIGUSR2)"
     filename: commands/stow_command.sh
 
   - name: switch

@@ -6352,6 +6352,13 @@ parse_requirements() {
       shift $#
       ;;
 
+    hooks | hook)
+      action="hooks"
+      shift
+      zion_hooks_parse_requirements "$@"
+      shift $#
+      ;;
+
     worktree | wt)
       action="worktree"
       shift
@@ -11496,6 +11503,100 @@ zion_docker_front_student_server_stop_parse_requirements() {
 
 }
 
+# :command.function
+zion_hooks_command() {
+
+  # src/commands/hooks.sh
+  HOOKS_DIR=""
+  for _d in \
+    "/zion/hooks/claude-code" \
+    "${ZION_ROOT:-${HOME}/nixos/zion}/hooks/claude-code" \
+    "/workspace/mnt/zion/hooks/claude-code"; do
+    [[ -d "$_d" ]] && HOOKS_DIR="$_d" && break
+  done
+
+  if [[ -n "${args[--list]:-}" ]]; then
+    if [[ -z "$HOOKS_DIR" ]]; then
+      echo "hooks: diretório não encontrado" >&2; exit 1
+    fi
+    echo "Hooks disponíveis em $HOOKS_DIR:"
+    for f in "$HOOKS_DIR"/*.sh "$HOOKS_DIR"/*.json; do
+      [[ -f "$f" ]] && printf "  %s\n" "$(basename "$f" | sed 's/\.\(sh\|json\)$//')"
+    done
+    exit 0
+  fi
+
+  HOOK="${args[hook]}"
+
+  if [[ -z "$HOOKS_DIR" ]]; then
+    echo "hooks: diretório de hooks não encontrado" >&2; exit 1
+  fi
+
+  HOOK_FILE=""
+  for ext in sh json ""; do
+    candidate="$HOOKS_DIR/${HOOK}${ext:+.$ext}"
+    [[ -f "$candidate" ]] && HOOK_FILE="$candidate" && break
+  done
+
+  if [[ -z "$HOOK_FILE" ]]; then
+    echo "hooks: hook '$HOOK' não encontrado em $HOOKS_DIR" >&2
+    echo "Use 'zion hooks --list' para ver disponíveis." >&2
+    exit 1
+  fi
+
+  if [[ -n "${args[env_overrides]:-}" ]]; then
+    IFS=' ' read -ra _overrides <<< "${args[env_overrides]}"
+    for _kv in "${_overrides[@]}"; do
+      if [[ "$_kv" == *=* ]]; then
+        _key="${_kv%%=*}"
+        _val="${_kv#*=}"
+        export "${_key^^}=${_val}"
+      fi
+    done
+  fi
+
+  exec bash "$HOOK_FILE"
+
+}
+
+# :command.parse_requirements
+zion_hooks_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --list|-l)
+        args['--list']=1
+        shift
+        ;;
+      --help|-h)
+        long_usage=yes
+        zion_hooks_usage
+        exit
+        ;;
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+      *)
+        if [[ -z "${args[hook]:-}" ]]; then
+          args[hook]="$key"
+          shift
+        else
+          # repeatable: env_overrides
+          args[env_overrides]+="${args[env_overrides]:+ }$key"
+          shift
+        fi
+        ;;
+    esac
+  done
+
+  if [[ -z "${args[hook]:-}" ]] && [[ -z "${args[--list]:-}" ]]; then
+    printf "missing required argument: hook\nUsage: zion hooks HOOK [ENV_OVERRIDES...]\n" >&2
+    exit 1
+  fi
+}
+
 # :command.parse_requirements
 zion_worktree_parse_requirements() {
   # :command.fixed_flags_filter
@@ -12066,6 +12167,7 @@ run() {
     "docker front-student server") zion_docker_front_student_server_command ;;
     "docker front-student server start") zion_docker_front_student_server_start_command ;;
     "docker front-student server stop") zion_docker_front_student_server_stop_command ;;
+    "hooks") zion_hooks_command ;;
     "worktree") zion_worktree_command ;;
     "new-task") zion_new_task_command ;;
     "status") zion_status_command ;;
