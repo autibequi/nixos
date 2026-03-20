@@ -1,190 +1,144 @@
 # Task — Gerenciar tarefas
 
-Sistema completo de gerenciamento de tasks. Dashboard, listagem, filtros e criação.
+Sistema de cards em kanban TODO/DOING/DONE em `/workspace/obsidian/tasks/`.
 
 ## Entrada
 - `$ARGUMENTS`: subcomando + args (texto livre)
 
 ## Roteamento
 
-Interpretar `$ARGUMENTS` e rotear:
-
 | Input | Ação |
 |-------|------|
 | *(vazio)* | **Dashboard** — overview completo |
-| `list` ou `ls` | **Listar** — todas as tasks por status |
-| `list <filtro>` | **Filtrar** — por tipo, tag, status, modelo |
-| `pending` | Listar só pending |
-| `done` | Listar só concluídas |
-| `failed` | Listar só falhas |
-| `running` | Listar tasks em execução agora |
-| `recurring` ou `rec` | Listar recorrentes com último status |
-| `stats` | Estatísticas (contagens, taxa sucesso) |
-| `create <desc>` ou `new <desc>` | **Criar** nova task (fluxo de criação) |
-| `<qualquer texto livre>` | Assume **criar** com esse texto como descrição |
+| `list` ou `ls` | Listar cards por pasta |
+| `tick` | Mostrar o que rodaria agora (`zion task tick --dry-run`) |
+| `run <nome>` | Rodar card específico |
+| `new <desc>` ou texto livre | Criar novo card |
+| `log` | Últimas execuções (`obsidian/tasks/log.md`) |
+
+---
+
+## Sistema de Cards
+
+### Estrutura
+```
+obsidian/tasks/
+  TODO/    ← agendado: YYYYMMDD_HH_MM_nome.md
+  DOING/   ← em execução (locked)
+  DONE/    ← concluído/arquivado
+  log.md   ← histórico de execuções
+```
+
+### Formato do card
+```markdown
+---
+model: haiku          # haiku | sonnet | opus
+timeout: 1800         # segundos (default 30min — max_turns controla na prática)
+max_turns: 12         # turns claude CLI (default 12; sobrescrito por #stepsN no tick)
+mcp: false            # false = desabilita MCP servers
+agent: nome           # carrega memory de agents/memory/nome.md
+---
+
+Instruções para o agente...
+
+#steps30              ← tag no corpo: controla max_turns no `zion task tick`
+```
+
+### Prefixo de data
+`YYYYMMDD_HH_MM_nome.md` — define quando o card vence.
+O daemon e o `tick` processam cards com data `<= agora + 10min`.
+
+---
+
+## Comandos CLI
+
+### `zion tasks tick`
+Roda um tick local (sem puppy). Detecta cards vencidos e executa serialmente.
+
+```bash
+zion task tick              # roda tudo que está vencido
+zion task tick --dry-run    # só lista, não executa
+zion task tick --steps 5    # sobrescreve #stepsN de todos
+```
+
+- Lê `#stepsN` do corpo do card como `max_turns` (fallback: **30**)
+- Passa `TASK_DIR` e `TASK_MEMORY_DIR` para o runner funcionar fora do container
+
+### `zion tasks run <nome>`
+Roda um card específico pelo nome (sem prefixo de data, sem `.md`).
+
+```bash
+zion task run scheduler
+zion task run scheduler --max-turns 5   # override de turns
+zion task run doctor -t 1               # -t é alias de --max-turns
+```
+
+### `zion tasks list`
+Lista cards em TODO/DOING/DONE com timestamps e status.
+
+### `zion tasks new <nome>`
+Cria novo card interativamente com frontmatter preenchido.
+
+---
+
+## task-runner.sh — como funciona
+
+1. Acha o card em TODO/ ou DOING/
+2. Cria lock atômico em `/tmp/zion-locks/<nome>.lock`
+3. Move para DOING/
+4. Checa cota (`claude-ai-usage.sh`) — se ≥70%, reagenda +60min e sai
+5. Monta prompt com: instruções do card + memória do agente + contexto
+6. Invoca `claude --max-turns N --model M -p PROMPT`
+7. Agente pode se reagendar (mover card de volta para TODO/ com nova data)
+8. Runner move para DONE/ ao final
+
+### Variáveis de override (env)
+| Var | Efeito |
+|-----|--------|
+| `TASK_MAX_TURNS` | Sobrescreve max_turns do frontmatter |
+| `TASK_DIR` | Caminho da pasta tasks (padrão: `/workspace/obsidian/tasks`) |
+| `TASK_MEMORY_DIR` | Caminho de agents/memory (padrão: derivado de TASK_DIR) |
 
 ---
 
 ## Dashboard (sem argumentos)
 
-Ler dados de TODAS as pastas de tasks e montar infográfico:
+Ler dados reais e montar overview:
 
 ```
-╔═══════════════════════════════════════════════╗
-║              TASK DASHBOARD                    ║
-╠═══════════════════════════════════════════════╣
-║ Pending: N  │ Running: N  │ Done: N │ Failed: N
-╠═══════════════════════════════════════════════╣
-║ RECORRENTES          último run    status     ║
-║ processar-inbox      HH:MM         ok/fail    ║
-║ doctor               HH:MM         ok/fail    ║
-║ ...                                           ║
-╠═══════════════════════════════════════════════╣
-║ PENDING                                       ║
-║ slug              tipo     clock    model     ║
-║ ...                                           ║
-╠═══════════════════════════════════════════════╣
-║ EM ANDAMENTO (kanban)                         ║
-║ card1, card2, ...                             ║
-╚═══════════════════════════════════════════════╝
+╔══════════════════════════════════════════════════╗
+║             TASK DASHBOARD                        ║
+╠══════════════════════════════════════════════════╣
+║ TODO: N  │  DOING: N  │  DONE hoje: N            ║
+╠══════════════════════════════════════════════════╣
+║ PRÓXIMOS A VENCER                                 ║
+║ HH:MM  nome              model   #steps          ║
+╠══════════════════════════════════════════════════╣
+║ EM ANDAMENTO (DOING/)                             ║
+║ nome  (lock age)                                  ║
+╠══════════════════════════════════════════════════╣
+║ ÚLTIMAS EXECUÇÕES (log.md)                        ║
+║ status  nome  model  tempo                        ║
+╚══════════════════════════════════════════════════╝
 ```
 
-### Como montar o dashboard:
-1. Contar arquivos em cada pasta: `obsidian/_agent/tasks/{pending,running,done,failed}/`
-2. Para recorrentes: ler `obsidian/_agent/tasks/recurring/*/memoria.md` — extrair último ciclo e status
-3. Para pending: ler frontmatter de cada `CLAUDE.md` — extrair tipo, clock, model
-4. Para em andamento: ler coluna "Em Andamento" do `obsidian/kanban.md`
-5. Apresentar como infográfico formatado (tabelas, indicadores)
+Para montar: ler `obsidian/tasks/TODO/*.md` (frontmatter + data prefix), `DOING/*.md`, últimas linhas de `log.md`.
 
 ---
 
-## Listar / Filtrar
+## Criar novo card
 
-### `list` — Listar tudo
-Mostrar tabela com TODAS as tasks organizadas por status:
+Fluxo para `new <desc>` ou texto livre:
 
-```
-STATUS   │ SLUG                    │ TIPO      │ CLOCK   │ MODEL
-─────────┼─────────────────────────┼───────────┼─────────┼────────
-pending  │ pesquisar-agentes       │ pesquisa  │ every60 │ sonnet
-done     │ pesquisar-subcontainer  │ pesquisa  │ every60 │ sonnet
-...
-```
+1. Inferir modelo adequado (haiku para manutenção, sonnet para análise/implementação)
+2. Sugerir data de agendamento (próxima janela 21h-06h BRT se não urgente)
+3. Gerar arquivo `TODO/YYYYMMDD_HH_MM_nome.md` com frontmatter + instruções
+4. Incluir `#stepsN` no corpo se o escopo for claro
 
-### `list <filtro>` — Filtrar
-Aceitar filtros por:
-- **Tipo**: `list pesquisa`, `list fix`, `list review`
-- **Tag**: `list #trabalho`, `list #worktree`
-- **Status**: `list pending`, `list done`, `list failed`
-- **Modelo**: `list sonnet`, `list haiku`
-- **Clock**: `list every10`, `list every60`
-
-Buscar o filtro no frontmatter de cada task e na coluna do kanban.
-
-### `pending`, `done`, `failed`, `running` — Atalhos
-Equivalente a `list <status>` — mostra só tasks daquele status.
-
-### `recurring` / `rec` — Recorrentes
-Tabela especial para tasks recorrentes:
-
-```
-TASK              │ CLOCK   │ MODEL  │ ÚLTIMO CICLO  │ STATUS │ NOTAS
-──────────────────┼─────────┼────────┼───────────────┼────────┼──────
-processar-inbox   │ every10 │ haiku  │ 22:40Z        │ ok     │ 0 items
-doctor            │ every10 │ haiku  │ 22:40Z        │ ok     │ tudo saudável
-...
-```
-
-Dados vêm de:
-- `obsidian/_agent/tasks/recurring/<task>/CLAUDE.md` → frontmatter (clock, model)
-- `obsidian/_agent/tasks/recurring/<task>/memoria.md` → último ciclo, status
-- `.ephemeral/notes/<task>/historico.log` → última linha
-
-### `stats` — Estatísticas
-```
-Total: N tasks
-  Pending: N  │  Done: N  │  Failed: N  │  Recurring: N
-
-Taxa de sucesso: N% (done / (done + failed))
-
-Por tipo:
-  pesquisa: N  │  fix: N  │  projeto: N  │  ...
-
-Por modelo:
-  haiku: N  │  sonnet: N  │  opus: N
-```
-
----
-
-## Criar (fluxo original)
-
-Ativado por `create <desc>`, `new <desc>`, ou texto livre que não casa com nenhum subcomando.
-
-### Fluxo:
-
-1. **Classificar a task** usando AskUserQuestion com as opções:
-
-   **Tipo:**
-   | Tipo | Descrição | Modelo default |
-   |------|-----------|----------------|
-   | `pesquisa` | Investigar, comparar, gerar relatório | sonnet |
-   | `projeto` | Implementar algo novo (feature, script, config) | sonnet |
-   | `fix` | Corrigir bug ou problema identificado | haiku |
-   | `limpeza` | Remover, simplificar, organizar | haiku |
-   | `docs` | Documentação, tutorial, guia | haiku |
-   | `review` | Analisar código, PR, arquitetura | sonnet |
-
-   **Flags opcionais (multiSelect):**
-   - `worktrees: true` (pode criar worktrees), `#mcp` (precisa de MCP servers), `#trabalho` (projeto Estratégia)
-
-   **Clock:**
-   - `every10` — rápida, simples (<2min)
-   - `every60` — complexa, precisa pensar (até 10min)
-
-2. **Gerar slug**: lowercase, hifens, sem acentos, max 40 chars.
-
-3. **Criar arquivo** `obsidian/_agent/tasks/pending/<slug>/CLAUDE.md`:
-```markdown
----
-title: <slug>
-clock: <every10|every60>
-model: <haiku|sonnet>
-type: <pesquisa|projeto|fix|limpeza|docs|review>
-priority: <low|medium|high>
-created: <YYYY-MM-DDTHH:MM:SSZ>
-tags: [<tipo>, <flags extras>]
----
-
-# <slug>
-
-<descrição expandida>
-
-## Contexto
-(extrair do que o user falou)
-
-## Ação
-(passos concretos)
-```
-
-4. **Adicionar card no THINKINGS** (`obsidian/kanban.md`) na coluna Backlog:
-   ```
-   - [ ] **<slug>** — <descrição curta> `#<tipo>` `#<clock>` <flags>
-   ```
-
-5. **Confirmar**:
-   ```
-   Task criada: <slug>
-   Tipo: <tipo> | Clock: <clock> | Model: <modelo>
-   Flags: <flags ou nenhuma>
-   ```
-
-## Regras Gerais
-- Slug deve ser único — checar se já existe em pending/
-- Descrição no card do kanban: max 80 chars
-- Se o user mencionar prioridade (urgente, importante), setar `priority: high`
-- Se o tipo for `pesquisa`, incluir na Ação: "Gerar relatório em obsidian/artefacts/<slug>/"
-- Se tiver `worktrees: true`, incluir no frontmatter e na Ação: "Criar worktree com implementação"
-- Não inventar contexto — se o user foi vago, perguntar
-- Model pode ser overridden pelo user (ex: "usa opus pra isso")
-- Dashboard e listagens devem ser apresentados como **infográfico** (tabelas formatadas, indicadores visuais)
-- Usar dados reais do filesystem — nunca inventar contagens
+### Boas práticas
+- Janela preferencial de agentes: **21h-06h BRT** (economiza cota)
+- Mínimo 30min no futuro para novas tarefas
+- Se nada urgente, agendar mais tarde para conservar quota
+- `#steps5-10` para tarefas de manutenção rápida
+- `#steps20-30` para implementações
+- `mcp: false` para tasks que não precisam de Notion/Jira (mais rápido)
