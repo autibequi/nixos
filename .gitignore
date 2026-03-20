@@ -6,6 +6,10 @@ zion/cli/.env
 zion/cli/zion
 stow/.local/bin/zion
 
+# zion docker environment files — NEVER commit real secrets to git
+zion/dockerized/**/env/*.env
+!zion/dockerized/**/env/*.env.example
+
 # agent
 tmp/
 result/
