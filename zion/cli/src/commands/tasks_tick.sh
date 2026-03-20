@@ -1,10 +1,12 @@
 # Run a local tick: find due cards, report, execute serially
 # Parses #stepsN tag from card body as max_turns (fallback: 30)
+zion_load_config
+ZION_DIR="${ZION_ROOT:-${HOME}/nixos/zion}"
+RUNNER="$ZION_DIR/scripts/task-runner.sh"
 TASKS="${OBSIDIAN_PATH:-${HOME}/.ovault/Work}/tasks"
-RUNNER="/workspace/zion/scripts/task-runner.sh"
 # Fallback: find tasks dir from common paths
 if [ ! -d "$TASKS" ]; then
-  for try in /workspace/obsidian/tasks "$HOME/obsidian/tasks"; do
+  for try in "$ZION_DIR/../obsidian/tasks" /workspace/obsidian/tasks "$HOME/obsidian/tasks"; do
     [ -d "$try" ] && TASKS="$try" && break
   done
 fi
