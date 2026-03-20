@@ -287,13 +287,13 @@ _time_until() {
 fh_r=$(  _time_until "$fh_reset")
 sd_r=$(  _time_until "$sd_reset")
 
-# cor pango por percentual: branco → verde → amarelo → vermelho
+# cor pango por percentual: cinza → verde → amarelo → vermelho
 _color() {
   local pct="${1:-0}"
   (( pct >= 80 )) && echo "#e74c3c" && return
   (( pct >= 50 )) && echo "#f39c12" && return
   (( pct >= 10 )) && echo "#2ecc71" && return
-  echo "#ffffff"
+  echo "#7f8c8d"
 }
 
 # Padding à esquerda do ícone (igual às barras azuis — hair space U+200A)
