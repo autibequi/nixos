@@ -200,6 +200,7 @@ _do_status_render() {
     done
   }
 
+  echo ""
   _print_agent_group "agents" "$_agent_rows"
   _print_agent_group "background" "$_bg_rows"
 
