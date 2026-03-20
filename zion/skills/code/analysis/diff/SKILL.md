@@ -97,44 +97,16 @@ python3 /tmp/gen_diff.py > /dev/null
 # HTML puro salvo em OUTPUT_FILE
 ```
 
-### Passo 5 — Abrir no Chrome via servidor HTTP local
+### Passo 5 — Abrir no Chrome via relay
 
-**Não usar** `data:text/html` nem `document.write` — HTMLs com Unicode (▾, ├─, ◆)
-quebram o encoding. O padrão confiável é um servidor HTTP one-shot na porta 9876:
-
-```python
-# /tmp/open_diff.py
-import sys, time, threading, http.server
-
-RELAY  = '/workspace/zion/scripts/chrome-relay.py'
-HTML_F = '/tmp/mono_diff.html'   # trocar para o arquivo correto
-
-class Handler(http.server.BaseHTTPRequestHandler):
-    def do_GET(self):
-        with open(HTML_F, 'rb') as f:
-            data = f.read()
-        self.send_response(200)
-        self.send_header('Content-Type', 'text/html; charset=utf-8')
-        self.send_header('Content-Length', len(data))
-        self.end_headers()
-        self.wfile.write(data)
-    def log_message(self, *a): pass
-
-server = http.server.HTTPServer(('', 9876), Handler)
-threading.Thread(target=server.serve_forever, daemon=True).start()
-
-sys.argv = ['chrome-relay.py', 'nav', 'http://localhost:9876/']
-exec(open(RELAY).read())
-
-time.sleep(5)   # manter server enquanto Chrome carrega
-server.shutdown()
-```
+Salvar o HTML em `/tmp/chrome-relay/diff.html` e navegar via relay:
 
 ```bash
-python3 /tmp/open_diff.py
+cp /tmp/<repo>_diff_annotated.html /tmp/chrome-relay/diff.html
+python3 /workspace/zion/scripts/chrome-relay.py nav "http://zion:8766/diff.html"
 ```
 
-> **Nota:** o relay usa `localhost` (não `127.0.0.1`) — Chrome pode estar em IPv6.
+O servidor do relay já serve `/tmp/chrome-relay/` em `http://zion:8766/` — UTF-8 correto, sem limites de tamanho, sem servidor extra.
 
 ---
 

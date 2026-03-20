@@ -115,7 +115,7 @@ _zion_dk_status() {
 
   # Imprime linha de container + segunda linha com mounts
   print_container_row() {
-    local tree_pfx="$1" name="$2" status="$3" ports="$4" full_name="${5:-$2}" tc="${6:-└─}"
+    local tree_pfx="$1" name="$2" status="$3" ports="$4" full_name="${5:-$2}" tc="${6:-└─}" extra="${7:-}"
 
     local row_icon
     if echo "$status" | grep -qi "^up"; then
@@ -161,15 +161,24 @@ _zion_dk_status() {
       fi
     fi
 
-    echo -e "${tree_pfx}${row_icon} ${uptime_colored}  ${WHITE}${padded_name}${RESET}  ${ports_str}  ${stats_str}"
+    echo -e "${tree_pfx}${row_icon} ${uptime_colored}  ${WHITE}${padded_name}${RESET}  ${ports_str}  ${stats_str}${extra}"
+
+    local cont_indent
+    [[ "$tc" == "├─" ]] && cont_indent="  ${BLUE}│${RESET}    " || cont_indent="       "
 
     if echo "$status" | grep -qi "^up"; then
       local mnt_names
       mnt_names=$(format_mounts "$full_name")
       if [[ -n "$mnt_names" ]]; then
-        local cont_indent
-        [[ "$tc" == "├─" ]] && cont_indent="  ${BLUE}│${RESET}    " || cont_indent="       "
         echo -e "${cont_indent}${GREEN}${mnt_names}${RESET}"
+      fi
+    elif echo "$status" | grep -qi "exited"; then
+      local err_lines
+      err_lines=$(docker logs --tail 5 "$full_name" 2>&1 | tail -5)
+      if [[ -n "$err_lines" ]]; then
+        while IFS= read -r _eline; do
+          echo -e "${cont_indent}${RED}${DIM}${_eline}${RESET}"
+        done <<< "$err_lines"
       fi
     fi
   }
@@ -191,7 +200,15 @@ _zion_dk_status() {
     if [[ -z "$any_rows" ]]; then
       local _pfx_icon="$icon_stopped"
       [[ "$_is_selected" -eq 1 ]] && _pfx_icon="${CYAN}▶${RESET}"
-      echo -e "${_pfx_icon} ${BOLD}${CYAN}${svc}${RESET}  ${DIM}parado${RESET}"
+      local _pending_env="${_svc_env[$svc]:-sand}"
+      # Mostrar acao pendente (iniciando/parando) se recente
+      local _act="${_svc_action[$svc]:-}" _act_ts="${_svc_action_ts[$svc]:-0}"
+      local _now_act; _now_act=$(date +%s)
+      if [[ -n "$_act" && $(( _now_act - _act_ts )) -lt 15 ]]; then
+        echo -e "${_pfx_icon} ${BOLD}${CYAN}${svc}${RESET}  ${DIM}${YELLOW}${_pending_env}${RESET}  ${YELLOW}${_act}...${RESET}"
+      else
+        echo -e "${_pfx_icon} ${BOLD}${CYAN}${svc}${RESET}  ${DIM}${YELLOW}${_pending_env}${RESET}  ${DIM}parado${RESET}"
+      fi
       return
     fi
 
@@ -206,28 +223,51 @@ _zion_dk_status() {
     local has_deps=0
     [[ -n "$deps_rows" ]] && has_deps=1
 
-    # ENV + branch label (somente quando app esta rodando)
-    local meta=""
+    # ENV (cabeçalho) e branch (linha do app) — com cache TTL 30s
+    local env_label="" branch_label=""
     if echo "$main_rows" | grep -qi "	Up "; then
-      local _app_cname="${project}-app"
-      local env_label=""
-      env_label=$(docker inspect --format '{{range .Config.Env}}{{.}}{{"\n"}}{{end}}' "$_app_cname" 2>/dev/null \
-        | grep '^APP_ENV=' | sed 's/^APP_ENV=//' | head -1)
-      local branch_label=""
-      local _svc_dir
-      _svc_dir=$(zion_docker_service_dir "$svc" 2>/dev/null || true)
-      [[ -n "$_svc_dir" && -d "$_svc_dir" ]] && \
-        branch_label=$(git -C "$_svc_dir" branch --show-current 2>/dev/null || true)
-      if [[ -n "$env_label" || -n "$branch_label" ]]; then
-        meta="  ${DIM}["
-        [[ -n "$env_label" ]] && meta+="${env_label}"
-        [[ -n "$env_label" && -n "$branch_label" ]] && meta+=" · "
-        [[ -n "$branch_label" ]] && meta+="${branch_label}"
-        meta+="]${RESET}"
+      local _now_meta; _now_meta=$(date +%s)
+      local _cached_ts="${_svc_meta_ts[$svc]:-0}"
+      if [[ $(( _now_meta - _cached_ts )) -gt 30 ]]; then
+        # Re-fetch: env vars + branch
+        local _app_cname="${project}-app"
+        local _env_vars
+        _env_vars=$(docker inspect --format '{{range .Config.Env}}{{.}}{{"\n"}}{{end}}' "$_app_cname" 2>/dev/null)
+        # Tenta vars conhecidas de ambiente na ordem de prioridade
+        env_label=$(echo "$_env_vars" | grep -E '^(APP_ENV|RAILS_ENV|MIX_ENV|ENVIRONMENT|APP_ENVIRONMENT)=' \
+          | sed 's/^[^=]*=//' | head -1)
+        # Fallback por valor: qualquer var cujo valor seja sand/prod/local/staging/development
+        if [[ -z "$env_label" ]]; then
+          env_label=$(echo "$_env_vars" \
+            | grep -E '=(sand|sandbox|prod|production|local|staging|development)$' \
+            | grep -vE '^(HOME|HOSTNAME|PATH|TERM|SHELL|USER|LANG|PWD|LC_|SHLVL)' \
+            | sed 's/^[^=]*=//' | head -1)
+        fi
+        local _svc_dir
+        _svc_dir=$(zion_docker_service_dir "$svc" 2>/dev/null || true)
+        [[ -n "$_svc_dir" && -d "$_svc_dir" ]] && \
+          branch_label=$(git -C "$_svc_dir" branch --show-current 2>/dev/null || true)
+        # Salva no cache (via dynamic scoping — arrays declarados em status.sh)
+        _svc_env_label[$svc]="$env_label"
+        _svc_branch_label[$svc]="$branch_label"
+        _svc_meta_ts[$svc]="$_now_meta"
+      else
+        env_label="${_svc_env_label[$svc]:-}"
+        branch_label="${_svc_branch_label[$svc]:-}"
       fi
     fi
 
-    echo -e "${prefix_icon} ${BOLD}${CYAN}${svc}${RESET}${meta}"
+    # Feedback de acao pendente (parando...)
+    local _act="${_svc_action[$svc]:-}" _act_ts="${_svc_action_ts[$svc]:-0}"
+    local _now_act2; _now_act2=$(date +%s)
+    local _act_label=""
+    [[ -n "$_act" && $(( _now_act2 - _act_ts )) -lt 15 ]] && \
+      _act_label="  ${YELLOW}${_act}...${RESET}"
+
+    # Cabeçalho: nome + env solto (sem colchetes) + acao
+    local meta=""
+    [[ -n "$env_label" ]] && meta="  ${DIM}${env_label}${RESET}"
+    echo -e "${prefix_icon} ${BOLD}${CYAN}${svc}${RESET}${meta}${_act_label}"
 
     local main_arr=()
     while IFS= read -r line; do [[ -n "$line" ]] && main_arr+=("$line"); done <<< "$main_rows"
@@ -244,7 +284,11 @@ _zion_dk_status() {
       local short="${name##${project}-}"
       local tc="├─"
       [[ "$has_deps" -eq 0 && "$i" -eq "$((total_main - 1))" ]] && tc="└─"
-      print_container_row "  ${BLUE}${tc}${RESET} " "$short" "$status" "$ports" "$name" "$tc"
+      # Branch aparece na linha do container app, junto com CPU
+      local _row_extra=""
+      [[ "$short" == "app" && -n "$branch_label" ]] && \
+        _row_extra="  ${DIM}[${branch_label}]${RESET}"
+      print_container_row "  ${BLUE}${tc}${RESET} " "$short" "$status" "$ports" "$name" "$tc" "$_row_extra"
     done
 
     if [[ "$has_deps" -eq 1 ]]; then

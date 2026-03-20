@@ -22,7 +22,18 @@ _svc_list=(monolito bo-container front-student)
 _cursor_idx=0
 _cursor_svc="${_svc_list[0]}"
 
-trap 'kill "$_stats_pid" "$_quota_pid" 2>/dev/null; rm -f "$_tmpfile" "$_stats_file" "${_stats_file}.new" "$_quota_file" "${_quota_file}.new"; printf "\033[?25h\n"' EXIT
+# Env selecionado por servico (usado no start)
+declare -A _svc_env
+for _s in "${_svc_list[@]}"; do _svc_env[$_s]="sand"; done
+_envs_cycle=(sand local prod)
+
+# Cache de env/branch por servico (TTL 30s — evita docker inspect no arrow key)
+declare -A _svc_env_label _svc_branch_label _svc_meta_ts
+
+# Feedback de acao (iniciando/parando) — exibido por 15s
+declare -A _svc_action _svc_action_ts
+
+trap 'kill "$_stats_pid" "$_quota_pid" 2>/dev/null; rm -f "$_tmpfile" "$_stats_file" "${_stats_file}.new" "$_quota_file" "${_quota_file}.new"; printf "\033[?1049l\033[?25h"' EXIT
 trap 'exit 0' INT TERM
 
 # ── Background: stats CPU/mem (atualiza a cada 5s) ────────────
@@ -205,47 +216,35 @@ _do_status_render() {
 
   # Rodapé interativo
   echo -e "${DIM}──────────────────────────────────────────────────${RESET}"
-  echo -e "  ${DIM}↑↓ navegar   ${CYAN}s${RESET}${DIM} iniciar   ${RED}S${RESET}${DIM} parar   ${BLUE}l${RESET}${DIM} logs   ${YELLOW}t${RESET}${DIM} test   [${_cursor_svc}]${RESET}"
+  local _cenv="${_svc_env[$_cursor_svc]:-sand}"
+  echo -e "  ${DIM}↑↓ navegar   ${GREEN}e${RESET}${DIM}[${YELLOW}${_cenv}${RESET}${DIM}]   ${CYAN}s${RESET}${DIM} iniciar   ${RED}S${RESET}${DIM} parar   ${BLUE}l${RESET}${DIM} logs   ${YELLOW}t${RESET}${DIM} test   [${_cursor_svc}]${RESET}"
 }
 
-local _lines=0
-
+# Alternate screen: posicionamento absoluto, sem tracking de linhas
 _render_frame() {
   _do_status_render > "$_tmpfile"
-  local _new_lines
-  _new_lines=$(wc -l < "$_tmpfile")
-
-  printf '\033[?25l'  # esconde cursor durante rendering
-  [[ "$_lines" -gt 0 ]] && printf "\033[%dA" "$_lines"
-  printf "\r"
-
+  printf '\033[?25l\033[H'  # esconde cursor, vai pro topo
   while IFS= read -r _line; do
     printf '\r%s\033[K\n' "$_line"
   done < "$_tmpfile"
-
-  local _diff=$((_lines - _new_lines))
-  for ((i=0; i<_diff; i++)); do printf '\033[2K\n'; done
-  [[ "$_diff" -gt 0 ]] && printf "\033[%dA" "$_diff"
-
-  _lines=$_new_lines
-  printf '\033[?25h'  # restaura cursor
+  printf '\033[J'   # limpa resto da tela
+  printf '\033[?25h'
 }
 
 _update_header() {
   local _remaining="$1"
-  # Monta indicador de dots que "drena" conforme o tempo passa
   local _ind=""
   for ((i=0; i<_tick; i++)); do
     [[ "$i" -lt "$_remaining" ]] && _ind+="·" || _ind+=" "
   done
-  # Header está na linha 2 do bloco; cursor está abaixo de _lines linhas
-  # Para chegar na linha 2: subir (_lines - 1) linhas
   printf '\033[?25l'
-  printf "\033[%dA\r" "$((_lines - 1))"
+  printf '\033[2;1H'  # linha 2, col 1 (sempre o header)
   printf "  ${BOLD}${MAGENTA}Zion Status${RESET}  ${DIM}$(date '+%H:%M:%S')  ${_ind}${RESET}\033[K"
-  printf "\033[%dB\r" "$((_lines - 1))"
   printf '\033[?25h'
 }
+
+# Entrar em alternate screen (preserva conteudo do terminal ao sair)
+printf '\033[?1049h\033[H\033[2J'
 
 while true; do
   _render_frame
@@ -272,11 +271,27 @@ while true; do
         esac
       else
         case "$_key" in
+          e)
+            local _cur_env="${_svc_env[$_cursor_svc]:-sand}"
+            local _ei=0
+            for _ci in "${!_envs_cycle[@]}"; do
+              [[ "${_envs_cycle[$_ci]}" == "$_cur_env" ]] && _ei="$_ci"
+            done
+            _ei=$(( (_ei + 1) % ${#_envs_cycle[@]} ))
+            _svc_env[$_cursor_svc]="${_envs_cycle[$_ei]}"
+            break
+            ;;
           s)
-            zion docker "$_cursor_svc" start &>/dev/null &
+            zion docker "$_cursor_svc" start --env="${_svc_env[$_cursor_svc]:-sand}" &>/dev/null &
+            _svc_action[$_cursor_svc]="iniciando"
+            _svc_action_ts[$_cursor_svc]=$(date +%s)
+            break
             ;;
           S)
             zion docker "$_cursor_svc" stop &>/dev/null &
+            _svc_action[$_cursor_svc]="parando"
+            _svc_action_ts[$_cursor_svc]=$(date +%s)
+            break
             ;;
           l)
             trap '' INT

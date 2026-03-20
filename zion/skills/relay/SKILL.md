@@ -71,6 +71,79 @@ python3 /zion/scripts/chrome-relay.py inject "document.title"
 python3 /zion/scripts/chrome-relay.py inject "document.querySelector('h1').textContent"
 ```
 
+## Controle de janela e abas via CDP direto
+
+Algumas operacoes nao tem comando no script — usar CDP REST ou WebSocket diretamente.
+
+### Abrir nova aba
+
+```bash
+curl -s -X PUT "http://localhost:9222/json/new?about:blank"
+# Retorna JSON com o id da nova aba
+```
+
+### Fullscreen / Maximizar / Restaurar
+
+Requer WebSocket com Browser.setWindowBounds. **Regra importante:** para sair do fullscreen, passar por `normal` antes de ir pra `maximized` — o CDP rejeita a transicao direta.
+
+```python
+# Sequencia correta para ENTRAR em fullscreen:
+#   windowState: "fullscreen"
+
+# Sequencia correta para SAIR do fullscreen:
+#   1. windowState: "normal"
+#   2. windowState: "maximized"
+```
+
+Script reutilizavel (salvar em /tmp/cdp_window.py ou copiar inline):
+
+```python
+import urllib.request, json, socket, os, base64, struct
+from urllib.parse import urlparse
+
+def cdp_get(path):
+    return json.loads(urllib.request.urlopen(f'http://localhost:9222{path}').read())
+
+def cdp_ws_connect(ws_url):
+    parsed = urlparse(ws_url)
+    sock = socket.create_connection((parsed.hostname, parsed.port), timeout=5)
+    key = base64.b64encode(os.urandom(16)).decode()
+    hs = ('GET %s HTTP/1.1\r\nHost: %s:%s\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Key: %s\r\nSec-WebSocket-Version: 13\r\n\r\n') % (parsed.path, parsed.hostname, parsed.port, key)
+    sock.sendall(hs.encode())
+    resp = b''
+    while b'\r\n\r\n' not in resp:
+        resp += sock.recv(4096)
+    return sock
+
+def ws_send(sock, msg):
+    payload = msg.encode(); mask = os.urandom(4); n = len(payload)
+    hdr = bytes([0x81, 0x80 | n]) if n < 126 else bytes([0x81, 0xFE]) + struct.pack('>H', n)
+    sock.sendall(hdr + mask + bytes(b ^ mask[i % 4] for i, b in enumerate(payload)))
+
+def ws_recv(sock):
+    sock.settimeout(3); d = sock.recv(2); n = d[1] & 0x7F
+    if n == 126: n = struct.unpack('>H', sock.recv(2))[0]
+    p = b''
+    while len(p) < n: p += sock.recv(n - len(p))
+    return json.loads(p.decode())
+
+def get_window_id():
+    info = cdp_get('/json/version')
+    sock = cdp_ws_connect(info['webSocketDebuggerUrl'])
+    target_id = [t for t in cdp_get('/json') if t.get('type') == 'page'][0]['id']
+    ws_send(sock, json.dumps({'id':1,'method':'Browser.getWindowForTarget','params':{'targetId': target_id}}))
+    return sock, ws_recv(sock)['result']['windowId']
+
+def set_window_state(state):
+    sock, wid = get_window_id()
+    ws_send(sock, json.dumps({'id':2,'method':'Browser.setWindowBounds','params':{'windowId': wid, 'bounds': {'windowState': state}}}))
+    return ws_recv(sock)
+
+# Uso:
+# set_window_state('fullscreen')
+# set_window_state('normal'); set_window_state('maximized')  # sair do fullscreen
+```
+
 ## Integracao com Grafana
 
 O MCP Grafana gera deeplinks. Fluxo:
