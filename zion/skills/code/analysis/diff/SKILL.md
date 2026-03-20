@@ -1,9 +1,9 @@
 ---
 name: code/analysis/diff
-description: Roda difftree.py e renderiza o output no Chrome com HTML preservando as cores ANSI. Wrapper do estrategia:glance com camada de visualização no browser. Use quando quiser a árvore de arquivos modificados no Chrome em vez do terminal.
+description: Renderiza árvore interativa de diff no Chrome — pastas colapsáveis, clique em arquivo brilha todos os diretórios ancestrais até a raiz, breadcrumb fixo no rodapé. Tema Catppuccin Mocha dark. Use quando quiser navegar visualmente os arquivos modificados da branch.
 ---
 
-# code/analysis/diff — Árvore de Diff no Chrome
+# code/analysis/diff — Árvore Interativa de Diff no Chrome
 
 ## Argumentos
 
@@ -11,81 +11,65 @@ description: Roda difftree.py e renderiza o output no Chrome com HTML preservand
 /code:analysis:diff [--repos monolito|bo|front|all] [--compare origin/main]
 ```
 
-Defaults: `--repos all`, `--compare origin/main`
+Defaults: `--repos all` (detecta todos com diff), `--compare origin/main`
+
+## Template
+
+Ler `templates/interactive-tree.html` — contém:
+- Funções Python (`build_tree`, `squash`, `render_tree_html`) para gerar o `{{TREE_HTML}}`
+- HTML completo com CSS/JS inline
+- Placeholders e script de uso completo
+
+## Funcionalidades do viewer
+
+| Interação | Comportamento |
+|---|---|
+| Clique numa **pasta** | Colapsa/expande a subárvore (animação suave) |
+| Clique num **arquivo** | Destaca o arquivo em azul + brilha todos os dirs ancestrais até a raiz |
+| **Breadcrumb** (rodapé) | Mostra o caminho completo do arquivo selecionado |
+| **◆** (roxo) | Pastas/arquivos que contêm keywords da feature ativa |
 
 ## Processo
 
-### Passo 1 — Rodar difftree.py
-
-O script já existe em `/workspace/mnt/estrategia/difftree.py`.
+### Passo 1 — Obter diff
 
 ```bash
-cd /workspace/mnt/estrategia/
-python3 difftree.py 2>&1 | python3 -m ansi2html > /tmp/diff_output.html
+cd /home/claude/projects/estrategia/<REPO>/
+HOME=/tmp git branch --show-current        # branch atual
+git diff origin/main --name-status         # lista de arquivos
 ```
 
-Se `ansi2html` não estiver disponível:
-```bash
-pip install ansi2html --quiet
-python3 difftree.py 2>&1 | ansi2html > /tmp/diff_output.html
-```
+Para múltiplos repos, repetir para cada um e combinar numa página com seções separadas.
 
-### Passo 2 — Envolver em HTML dark
+### Passo 2 — Gerar tree HTML
 
-Criar `/tmp/diff_chrome.html` com o output do ansi2html encapsulado num wrapper dark Catppuccin:
+Usar as funções `build_tree` + `squash` + `render_tree_html` do template.
+Reset `_node_id[0] = 0` antes de cada repo.
 
-```html
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<style>
-  body {
-    background: #1e1e2e;
-    color: #cdd6f4;
-    font-family: 'JetBrains Mono', monospace;
-    padding: 1.5rem;
-    margin: 0;
-  }
-  pre { margin: 0; white-space: pre; }
-  /* Override ansi2html background */
-  .ansi2html-content { background: transparent !important; }
-</style>
-</head>
-<body>
-<!-- INJECT_ANSI2HTML_OUTPUT -->
-</body>
-</html>
-```
+### Passo 3 — Substituir placeholders e abrir
 
-### Passo 3 — Abrir no Chrome
+Ver script completo em `templates/interactive-tree.html`.
 
 ```bash
-HTML_B64=$(base64 -w 0 /tmp/diff_chrome.html)
-python3 /workspace/zion/scripts/chrome-relay.py nav "data:text/html;base64,${HTML_B64}"
+b64=$(base64 -w0 /tmp/diff.html)
+python3 /workspace/zion/scripts/chrome-relay.py nav "data:text/html;base64,${b64}"
 ```
 
-## Alternativa sem ansi2html
+## Keywords de feature (◆)
 
-Se preferir, rodar o script diretamente e usar ANSI capture manual:
+Ajustar `CHAPTER_KW` no script para a feature em andamento:
 
 ```python
-import subprocess, base64
-
-result = subprocess.run(
-    ['python3', '/workspace/mnt/estrategia/difftree.py'],
-    capture_output=True, text=True
-)
-# Converter ANSI para HTML CSS inline via regex simples
-# e encapsular no wrapper dark acima
+CHAPTER_KW = ['chapter', 'toc', 'content_tree', 'course_chapter', 'getCourse']
+# Outros exemplos:
+# ['payment', 'checkout', 'order']
+# ['enrollment', 'subscription']
 ```
 
-## Relação com estrategia:glance
+## Repos e paths
 
-- `estrategia:glance` → output no terminal
-- `code:analysis:diff` → mesmo conteúdo, renderizado no Chrome
-
-Para customizar keywords de highlight (feature ativa), editar diretamente `difftree.py` na linha:
-```python
-CHAPTER_KW = ['chapter', 'toc', 'content_tree', ...]
-```
+| Repo | Path |
+|---|---|
+| monolito | `/home/claude/projects/estrategia/monolito` |
+| bo-container | `/home/claude/projects/estrategia/bo-container` |
+| front-student | `/home/claude/projects/estrategia/front-student` |

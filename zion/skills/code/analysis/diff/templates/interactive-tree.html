@@ -1,0 +1,402 @@
+---
+name: code/analysis/diff/interactive-tree
+description: Template HTML interativo para o diff viewer — pastas colapsáveis + glow de ancestrais ao clicar num arquivo + breadcrumb fixo. Tema Catppuccin Mocha dark. Placeholders: {{BRANCH_NAME}}, {{REPO_NAME}}, {{TOTAL_FILES}}, {{TOTAL_A}}, {{TOTAL_M}}, {{TOTAL_D}}, {{TOTAL_CH}}, {{TREE_HTML}}.
+---
+
+# Template: Interactive Diff Tree
+
+Placeholders a substituir ao gerar:
+
+| Placeholder | Valor |
+|---|---|
+| `{{BRANCH_NAME}}` | Nome da branch atual (ex: `FUK2-11746/cached-ldi-toc`) |
+| `{{REPO_NAME}}` | Nome do repo (ex: `monolito`) |
+| `{{TOTAL_FILES}}` | Total de arquivos no diff |
+| `{{TOTAL_A}}` | Arquivos adicionados |
+| `{{TOTAL_M}}` | Arquivos modificados |
+| `{{TOTAL_D}}` | Arquivos deletados |
+| `{{TOTAL_CH}}` | Arquivos com keyword de feature (chapter/toc/etc) |
+| `{{TREE_HTML}}` | HTML gerado pela função `render_tree_html()` — ver gerador abaixo |
+
+---
+
+## Gerador Python (`render_tree_html`)
+
+Copiar no script gerador. Recebe o `tree` squashado e retorna HTML com `data-path`, `data-dir`, `data-target` nos nós.
+
+```python
+from collections import defaultdict
+
+CHAPTER_KW = ['chapter', 'toc', 'content_tree', 'course_chapter', 'getCourse']
+
+def is_chapter(path):
+    return any(k.lower() in path.lower() for k in CHAPTER_KW)
+
+def build_tree(files):
+    tree = {}
+    for status, path in files:
+        parts = path.split('/')
+        node = tree
+        for p in parts[:-1]:
+            node = node.setdefault(p, {})
+        node.setdefault('__files__', []).append((status, parts[-1], path))
+    return tree
+
+def squash(tree):
+    result = {}
+    for k, v in tree.items():
+        if k == '__files__':
+            result[k] = v
+            continue
+        v = squash(v)
+        cdirs = [ck for ck in v if ck != '__files__']
+        while '__files__' not in v and len(cdirs) == 1:
+            ck = cdirs[0]
+            k = f'{k}/{ck}'
+            v = v[ck]
+            v = squash(v)
+            cdirs = [ck for ck in v if ck != '__files__']
+        result[k] = v
+    return result
+
+def count_types(tree):
+    r = defaultdict(int)
+    for s, _, _ in tree.get('__files__', []):
+        r[s] += 1
+    for k, v in tree.items():
+        if k != '__files__':
+            for s, n in count_types(v).items():
+                r[s] += n
+    return r
+
+def has_chapter_tree(tree):
+    for s, n, fp in tree.get('__files__', []):
+        if is_chapter(fp):
+            return True
+    return any(has_chapter_tree(v) for k, v in tree.items() if k != '__files__')
+
+STATUS_COLOR = {'M': '#fab387', 'A': '#a6e3a1', 'D': '#f38ba8'}
+STATUS_SYM   = {'M': '~', 'A': '+', 'D': '×'}
+
+_node_id = [0]
+
+def render_tree_html(tree, path_prefix=''):
+    html = ''
+    files = sorted(tree.get('__files__', []), key=lambda x: x[1])
+    dirs  = sorted((k, v) for k, v in tree.items() if k != '__files__')
+    items = [('f', x) for x in files] + [('d', x) for x in dirs]
+
+    for idx, (kind, item) in enumerate(items):
+        last = idx == len(items) - 1
+        connector_sym = '└─' if last else '├─'
+
+        if kind == 'f':
+            status, fname, fullpath = item
+            sym = STATUS_SYM[status]
+            color = STATUS_COLOR[status]
+            ch = 'chapter-hit' if is_chapter(fullpath) else ''
+            fname_class = 'fname chapter' if is_chapter(fullpath) else 'fname'
+            html += (
+                f'<div class="tree-line file-node {ch}" '
+                f'data-path="{fullpath}" '
+                f'data-prefix="{path_prefix}" '
+                f'onclick="selectFile(this)">'
+                f'<span class="connector">{connector_sym} </span>'
+                f'<span class="sym" style="color:{color}">{sym}</span> '
+                f'<span class="{fname_class}">{fname}</span>'
+                f'</div>\n'
+            )
+        else:
+            dname, subtree = item
+            ct = count_types(subtree)
+            total = sum(ct.values())
+            anc = has_chapter_tree(subtree)
+            stats = ''.join(
+                f'<span style="color:{STATUS_COLOR[s]}">{STATUS_SYM[s]}{n}</span> '
+                for s, n in sorted(ct.items()) if n
+            )
+            full_dir_path = f'{path_prefix}/{dname}' if path_prefix else dname
+            nid = f'dir-{_node_id[0]}'
+            _node_id[0] += 1
+            dname_class = 'dirname chapter-dir' if anc else 'dirname'
+            diamond = '<span class="diamond">◆</span> ' if anc else ''
+            html += (
+                f'<div class="tree-line dir-node" '
+                f'data-dir="{full_dir_path}" '
+                f'data-target="{nid}" '
+                f'onclick="toggleDir(this)">'
+                f'<span class="connector">{connector_sym} </span>'
+                f'<span class="collapse-arrow">▾</span> '
+                f'{diamond}'
+                f'<span class="{dname_class}">{dname}/</span> '
+                f'<span class="count">({total})</span> {stats}'
+                f'</div>\n'
+                f'<div class="subtree" id="{nid}">\n'
+            )
+            html += render_tree_html(subtree, full_dir_path)
+            html += '</div>\n'
+
+    return html
+```
+
+---
+
+## HTML Template
+
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Diff — {{REPO_NAME}} — {{BRANCH_NAME}}</title>
+<style>
+:root {
+  --ctp-base:    #1e1e2e;
+  --ctp-mantle:  #181825;
+  --ctp-crust:   #11111b;
+  --ctp-surface0:#313244;
+  --ctp-surface1:#45475a;
+  --ctp-overlay0:#6c7086;
+  --ctp-text:    #cdd6f4;
+  --ctp-subtext0:#a6adc8;
+  --ctp-green:   #a6e3a1;
+  --ctp-peach:   #fab387;
+  --ctp-red:     #f38ba8;
+  --ctp-mauve:   #cba6f7;
+  --ctp-lavender:#b4befe;
+  --ctp-sapphire:#74c7ec;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--ctp-base);
+  color: var(--ctp-text);
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 13px;
+  min-height: 100vh;
+  padding-bottom: 4rem;
+}
+
+/* Header */
+.header {
+  background: var(--ctp-mantle);
+  border-bottom: 2px solid var(--ctp-surface1);
+  padding: 1.1rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-title { font-size: 0.9rem; color: var(--ctp-mauve); font-weight: bold; letter-spacing: 0.1em; text-transform: uppercase; }
+.repo-badge { background: var(--ctp-sapphire); color: var(--ctp-crust); padding: 0.15rem 0.7rem; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
+.branch-badge { background: var(--ctp-surface0); color: var(--ctp-green); padding: 0.15rem 0.7rem; border-radius: 4px; font-size: 0.8rem; }
+.stats { display: flex; gap: 1rem; margin-left: auto; align-items: center; }
+.stat { font-size: 0.82rem; }
+.chapter-count { background: rgba(203,166,247,0.12); color: var(--ctp-mauve); padding: 0.15rem 0.6rem; border-radius: 4px; font-size: 0.8rem; }
+
+/* Tree */
+.tree-container {
+  padding: 1.2rem 1.5rem 1.2rem 1.8rem;
+  line-height: 2;
+  user-select: none;
+}
+.subtree {
+  padding-left: 1.4rem;
+  border-left: 1px solid var(--ctp-surface0);
+  margin-left: 0.5rem;
+  overflow: hidden;
+  transition: max-height 0.22s cubic-bezier(0.4,0,0.2,1), opacity 0.18s ease;
+  max-height: 9999px;
+  opacity: 1;
+}
+.subtree.collapsed { max-height: 0 !important; opacity: 0; pointer-events: none; }
+
+.tree-line {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  padding: 0 0.3rem;
+  border-radius: 4px;
+  transition: background 0.12s;
+}
+.tree-line:hover { background: rgba(255,255,255,0.04); }
+
+.connector { color: var(--ctp-surface1); margin-right: 0.3rem; letter-spacing: -1px; }
+.sym { font-weight: bold; width: 1.3em; display: inline-block; margin-right: 0.2rem; }
+.fname { color: var(--ctp-subtext0); }
+.dirname { color: var(--ctp-lavender); font-weight: 500; }
+.count { color: var(--ctp-overlay0); font-size: 0.82em; margin-left: 0.3rem; }
+.chapter-dir { color: var(--ctp-mauve); font-weight: bold; }
+.diamond { color: var(--ctp-mauve); margin-right: 0.1rem; }
+
+/* Collapse arrow */
+.collapse-arrow {
+  font-size: 0.75rem; color: var(--ctp-overlay0);
+  display: inline-block; transition: transform 0.18s ease;
+  margin-right: 0.2rem; width: 1em;
+}
+.dir-node { cursor: pointer; }
+.dir-node.collapsed-dir .collapse-arrow { transform: rotate(-90deg); }
+.dir-node.collapsed-dir .dirname { opacity: 0.6; }
+
+/* Chapter highlight */
+.chapter-hit { background: rgba(203,166,247,0.05); border-left: 2px solid rgba(203,166,247,0.4); padding-left: 2px; }
+.chapter { color: var(--ctp-text); font-weight: 600; }
+
+/* File selection + ancestor glow */
+.file-node { cursor: pointer; }
+.file-node.selected { background: rgba(116,199,236,0.12) !important; }
+.file-node.selected .fname { color: var(--ctp-sapphire) !important; font-weight: bold; }
+.dir-node.ancestor-glow { background: rgba(116,199,236,0.07); }
+.dir-node.ancestor-glow .dirname { color: var(--ctp-sapphire) !important; text-shadow: 0 0 12px rgba(116,199,236,0.5); }
+.dir-node.ancestor-glow .connector { color: rgba(116,199,236,0.5) !important; }
+.subtree.ancestor-glow-branch { border-left-color: rgba(116,199,236,0.4) !important; }
+
+/* Breadcrumb */
+#breadcrumb {
+  position: sticky; bottom: 0;
+  background: var(--ctp-crust);
+  border-top: 1px solid var(--ctp-surface1);
+  padding: 0.5rem 2rem;
+  font-size: 0.8rem; color: var(--ctp-overlay0);
+  min-height: 2rem;
+}
+#breadcrumb span { color: var(--ctp-sapphire); }
+#breadcrumb .bc-sep { color: var(--ctp-surface1); margin: 0 0.3rem; }
+#breadcrumb .bc-file { color: var(--ctp-text); font-weight: bold; }
+
+/* Legend */
+.legend {
+  display: flex; gap: 1.5rem; padding: 0.6rem 2rem;
+  background: var(--ctp-mantle); border-top: 1px solid var(--ctp-surface0);
+  margin-top: 1rem; font-size: 0.78rem; color: var(--ctp-overlay0);
+}
+.leg { display: flex; align-items: center; gap: 0.4rem; }
+.leg-dot { width: 10px; height: 10px; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="header-title">DIFF</span>
+  <span class="repo-badge">{{REPO_NAME}}</span>
+  <span class="branch-badge">{{BRANCH_NAME}}</span>
+  <div class="stats">
+    <span class="stat" style="color:var(--ctp-text)">{{TOTAL_FILES}} files</span>
+    <span class="stat" style="color:#a6e3a1">+{{TOTAL_A}} novos</span>
+    <span class="stat" style="color:#fab387">~{{TOTAL_M}} mod</span>
+    <span class="stat" style="color:#f38ba8">×{{TOTAL_D}} del</span>
+    <span class="chapter-count">◆ {{TOTAL_CH}} feature</span>
+  </div>
+</div>
+
+<div class="tree-container" id="tree-root">
+{{TREE_HTML}}
+</div>
+
+<div class="legend">
+  <div class="leg"><div class="leg-dot" style="background:#a6e3a1"></div>novo (+)</div>
+  <div class="leg"><div class="leg-dot" style="background:#fab387"></div>modificado (~)</div>
+  <div class="leg"><div class="leg-dot" style="background:#f38ba8"></div>deletado (×)</div>
+  <div class="leg" style="color:var(--ctp-mauve)">◆ feature keywords</div>
+  <div class="leg" style="margin-left:auto; color:var(--ctp-overlay0)">clique pasta = colapsar · clique arquivo = trilha</div>
+</div>
+
+<div id="breadcrumb">clique em um arquivo para ver o caminho</div>
+
+<script>
+function toggleDir(dirEl) {
+  const sub = document.getElementById(dirEl.dataset.target);
+  if (!sub) return;
+  const isCollapsed = sub.classList.contains('collapsed');
+  sub.classList.toggle('collapsed', !isCollapsed);
+  dirEl.classList.toggle('collapsed-dir', !isCollapsed);
+}
+
+let lastSelected = null;
+
+function selectFile(fileEl) {
+  if (lastSelected) lastSelected.classList.remove('selected');
+  document.querySelectorAll('.ancestor-glow').forEach(el => el.classList.remove('ancestor-glow'));
+  document.querySelectorAll('.ancestor-glow-branch').forEach(el => el.classList.remove('ancestor-glow-branch'));
+
+  fileEl.classList.add('selected');
+  lastSelected = fileEl;
+
+  // Breadcrumb
+  const parts = fileEl.dataset.path.split('/');
+  const fname = parts[parts.length - 1];
+  let bc = parts.slice(0, -1).map(d => `<span>${d}</span><span class="bc-sep">/</span>`).join('');
+  bc += `<span class="bc-file">${fname}</span>`;
+  document.getElementById('breadcrumb').innerHTML = bc;
+
+  // Glow ancestors
+  let node = fileEl.parentElement;
+  while (node && node.id !== 'tree-root') {
+    if (node.classList.contains('subtree')) {
+      node.classList.add('ancestor-glow-branch');
+      const dirNode = node.previousElementSibling;
+      if (dirNode && dirNode.classList.contains('dir-node')) {
+        dirNode.classList.add('ancestor-glow');
+      }
+    }
+    node = node.parentElement;
+  }
+}
+</script>
+</body>
+</html>
+```
+
+---
+
+## Como usar (script completo)
+
+```python
+import base64
+from collections import defaultdict
+
+# 1. Obter diff
+import subprocess
+result = subprocess.run(
+    ['git', 'diff', 'origin/main', '--name-status'],
+    cwd='/home/claude/projects/estrategia/<REPO>',
+    capture_output=True, text=True
+)
+files = []
+for line in result.stdout.strip().splitlines():
+    parts = line.split('\t', 1)
+    if len(parts) == 2:
+        files.append((parts[0], parts[1]))
+
+# 2. Buildar árvore e gerar HTML (usando funções acima)
+_node_id[0] = 0  # reset counter
+tree = squash(build_tree(files))
+tree_html = render_tree_html(tree)
+
+# 3. Substituir placeholders no template e abrir
+branch = subprocess.run(['git', 'branch', '--show-current'],
+    cwd='/home/claude/projects/estrategia/<REPO>',
+    capture_output=True, text=True, env={**os.environ, 'HOME': '/tmp'}).stdout.strip()
+
+total_a = sum(1 for s,_ in files if s=='A')
+total_m = sum(1 for s,_ in files if s=='M')
+total_d = sum(1 for s,_ in files if s=='D')
+total_ch = sum(1 for s,p in files if is_chapter(p))
+
+html = TEMPLATE  # string do template acima
+html = html.replace('{{BRANCH_NAME}}', branch)
+html = html.replace('{{REPO_NAME}}', '<REPO>')
+html = html.replace('{{TOTAL_FILES}}', str(len(files)))
+html = html.replace('{{TOTAL_A}}', str(total_a))
+html = html.replace('{{TOTAL_M}}', str(total_m))
+html = html.replace('{{TOTAL_D}}', str(total_d))
+html = html.replace('{{TOTAL_CH}}', str(total_ch))
+html = html.replace('{{TREE_HTML}}', tree_html)
+
+b64 = base64.b64encode(html.encode()).decode()
+subprocess.run(['python3', '/workspace/zion/scripts/chrome-relay.py', 'nav',
+    f'data:text/html;base64,{b64}'])
+```

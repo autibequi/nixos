@@ -2,6 +2,7 @@
 #
 # Uso: _zion_dk_status <service>
 # Se service for vazio, mostra todos os servicos.
+# Usa _ZION_SHARED_STATS e _ZION_SHARED_DK_ROWS se disponíveis (evita refetch).
 
 _zion_dk_status() {
   local service="${1:-}"
@@ -28,10 +29,23 @@ _zion_dk_status() {
   local NAME_W=16   # nome do container
   local PORTS_W=18  # portas (string padded)
 
-  # Cache de stats: "NOME cpu mem" por linha — buscado uma vez
+  # Usa cache compartilhado se disponível, senão busca
   local _stats_cache
-  _stats_cache=$(docker stats --no-stream \
-    --format "{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" 2>/dev/null || true)
+  if [[ -n "${_ZION_SHARED_STATS:-}" ]]; then
+    _stats_cache="$_ZION_SHARED_STATS"
+  else
+    _stats_cache=$(docker stats --no-stream \
+      --format "{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" 2>/dev/null || true)
+  fi
+
+  # all_dk_rows: usa cache compartilhado se disponível
+  local _all_dk_rows
+  if [[ -n "${_ZION_SHARED_DK_ROWS:-}" ]]; then
+    _all_dk_rows="$_ZION_SHARED_DK_ROWS"
+  else
+    _all_dk_rows=$(docker ps -a --filter "name=zion-dk-" \
+      --format "{{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || true)
+  fi
 
   # Lookup cpu/mem para um container
   stats_for() {
@@ -52,18 +66,29 @@ _zion_dk_status() {
       | sed 's/ $//'
   }
 
-  # Bind mounts relevantes — apenas paths sob $HOME (projetos, configs)
+  # Batch inspect de mounts para todos os containers dk (um único docker inspect)
+  local _dk_names=()
+  while IFS=$'\t' read -r _n _ _; do
+    [[ -n "$_n" ]] && _dk_names+=("$_n")
+  done <<< "$_all_dk_rows"
+
+  # Formato: "name|src1->dest1 src2->dest2 ..."
+  local _mounts_cache=""
+  if [[ "${#_dk_names[@]}" -gt 0 ]]; then
+    _mounts_cache=$(docker inspect \
+      --format '{{.Name}}|{{range .Mounts}}{{if eq .Type "bind"}}{{.Source}}->{{.Destination}} {{end}}{{end}}' \
+      "${_dk_names[@]}" 2>/dev/null | sed 's|^/||')
+  fi
+
+  # Bind mounts relevantes — do cache batch
   format_mounts() {
     local cname="$1"
     local entries
-    entries=$(docker inspect \
-      --format '{{range .Mounts}}{{if eq .Type "bind"}}{{.Source}}->{{.Destination}} {{end}}{{end}}' \
-      "$cname" 2>/dev/null || true)
+    entries=$(echo "$_mounts_cache" | awk -F'|' -v n="$cname" '$1==n {print $2}' | head -1)
     local result=()
     for entry in $entries; do
       local src="${entry%%->*}"
       local dest="${entry##*->}"
-      # Só mounts onde source é em /home (projetos do usuário)
       echo "$src" | grep -qE '^/home/' || continue
       local label="${dest##*/}"
       [[ -z "$label" || "$dest" == "/" ]] && label="${src##*/}"
@@ -74,7 +99,7 @@ _zion_dk_status() {
     fi
   }
 
-  # Simplifica status: "Up 2 hours (healthy)" -> "2h"  (texto puro, sem ANSI)
+  # Simplifica status: texto puro, sem ANSI
   format_status() {
     local s="$1"
     if echo "$s" | grep -qi "up"; then
@@ -90,12 +115,9 @@ _zion_dk_status() {
   }
 
   # Imprime linha de container + segunda linha com mounts
-  # Formato linha 1: ICON UPTIME(7) NAME(16) PORTS(18) cpu CPU%(7) mem MEM
-  # Formato linha 2: continuação + mounts (dim)
   print_container_row() {
     local tree_pfx="$1" name="$2" status="$3" ports="$4" full_name="${5:-$2}" tc="${6:-└─}"
 
-    # Icon
     local row_icon
     if echo "$status" | grep -qi "^up"; then
       row_icon="${GREEN}●${RESET}"
@@ -103,12 +125,10 @@ _zion_dk_status() {
       row_icon="${RED}○${RESET}"
     fi
 
-    # Uptime: pad no texto puro, depois aplicar cor (igual agents)
-    local uptime_raw
+    # Uptime: pad no texto puro, depois cor
+    local uptime_raw uptime_pad uptime_colored
     uptime_raw=$(format_status "$status")
-    local uptime_pad
     uptime_pad=$(printf "%-${TIME_W}s" "$uptime_raw")
-    local uptime_colored
     if echo "$status" | grep -qi "^up"; then
       uptime_colored="${ORANGE}${uptime_pad}${RESET}"
     elif echo "$status" | grep -qi "exited"; then
@@ -117,18 +137,14 @@ _zion_dk_status() {
       uptime_colored="${YELLOW}${uptime_pad}${RESET}"
     fi
 
-    # Portas padded
-    local raw_ports
+    local raw_ports ports_padded ports_str
     raw_ports=$(format_ports "$ports")
-    local ports_padded
     ports_padded=$(printf "%-${PORTS_W}s" "$raw_ports")
-    local ports_str="${DIM}${ports_padded}${RESET}"
+    ports_str="${DIM}${ports_padded}${RESET}"
 
-    # Nome padded
     local padded_name
     padded_name=$(printf "%-${NAME_W}s" "$name")
 
-    # Stats cpu/mem
     local stats_str=""
     if echo "$status" | grep -qi "^up"; then
       local raw_stats
@@ -146,10 +162,8 @@ _zion_dk_status() {
       fi
     fi
 
-    # Linha principal
     echo -e "${tree_pfx}${row_icon} ${uptime_colored}  ${WHITE}${padded_name}${RESET}  ${ports_str}  ${stats_str}"
 
-    # Linha 2: mounts (só se running e tiver mounts relevantes)
     if echo "$status" | grep -qi "^up"; then
       local mnt_names
       mnt_names=$(format_mounts "$full_name")
@@ -160,11 +174,6 @@ _zion_dk_status() {
       fi
     fi
   }
-
-  # all_dk_rows: cache unico de todos os containers zion-dk-*
-  local _all_dk_rows
-  _all_dk_rows=$(docker ps -a --filter "name=zion-dk-" \
-    --format "{{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || true)
 
   print_service_tree() {
     local svc="$1"

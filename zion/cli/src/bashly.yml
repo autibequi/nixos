@@ -513,7 +513,13 @@ commands:
 
   - name: status
     alias: [st]
-    help: "Status agregado: sessoes e docker services."
+    help: "Status agregado: sessoes e docker services. Atualiza a cada 30s por padrao."
+    flags:
+      - long: --tick
+        short: -t
+        arg: seconds
+        default: "5"
+        help: "Intervalo de atualizacao em segundos (padrao 5)"
     filename: commands/status.sh
 
   # ── Host operations (stow / os) ───────────────────────────

@@ -13,38 +13,104 @@ local ORANGE='\033[38;5;214m'
 local WHITE='\033[37m'
 local BLUE='\033[34m'
 
-echo -e "\n${BOLD}${MAGENTA}  Zion Status${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}\n"
+local _tick="${args[--tick]:-5}"
+local _tmpfile _stats_file _quota_file
+_tmpfile=$(mktemp); _stats_file=$(mktemp); _quota_file=$(mktemp)
 
-# Cota
-local usage_script="${ZION_ROOT:-$HOME/nixos/zion}/scripts/claude-ai-usage.sh"
-[ -x "$usage_script" ] && "$usage_script" 2>/dev/null | tail -2 | sed 's/^/  /' || true
-echo ""
+trap 'kill "$_stats_pid" "$_quota_pid" 2>/dev/null; rm -f "$_tmpfile" "$_stats_file" "${_stats_file}.new" "$_quota_file" "${_quota_file}.new"; printf "\n"' EXIT
+trap 'exit 0' INT TERM
 
-if ! docker info >/dev/null 2>&1; then
-  echo -e "  ${RED}sem acesso ao Docker${RESET}\n"
-else
-  # Larguras de coluna -- unificadas com dockerized
+# ── Background: stats CPU/mem (atualiza a cada 5s) ────────────
+_run_stats_bg() {
+  while true; do
+    docker stats --no-stream \
+      --format "{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" \
+      > "${_stats_file}.new" 2>/dev/null \
+      && mv "${_stats_file}.new" "$_stats_file" || true
+    sleep 5
+  done
+}
+_run_stats_bg &
+local _stats_pid=$!
+
+# ── Background: quota Claude (atualiza a cada 60s) ────────────
+_run_quota_bg() {
+  local usage_script="${ZION_ROOT:-$HOME/nixos/zion}/scripts/claude-ai-usage.sh"
+  while true; do
+    { [ -x "$usage_script" ] && "$usage_script" 2>/dev/null | tail -2 | sed 's/^/  /' || true; } \
+      > "${_quota_file}.new" 2>/dev/null \
+      && mv "${_quota_file}.new" "$_quota_file" || true
+    sleep 60
+  done
+}
+_run_quota_bg &
+local _quota_pid=$!
+
+_do_status_render() {
   local _A_UPTIME_W=7 _A_NAME_W=16 _A_PORTS_W=18
 
-  # Stats cache (cpu/mem)
-  local _sess_stats_cache
-  _sess_stats_cache=$(docker stats --no-stream \
-    --format "{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" 2>/dev/null || true)
+  # ── Coleta paralela: docker ps leech + dk (rápido, ~50ms cada) ──
+  local _f_leech _f_dk
+  _f_leech=$(mktemp); _f_dk=$(mktemp)
 
-  # Todos os containers leech (agent sessions + headless workers)
-  local _all_leech_rows
-  _all_leech_rows=$(docker ps -a \
+  docker ps -a \
     --filter "ancestor=claude-nix-sandbox" \
     --filter "name=leech" \
-    --format "{{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null \
-    | sort -u | grep -v "^$" || true)
+    --format "{{.Names}}\t{{.Status}}\t{{.Ports}}" \
+    > "$_f_leech" 2>/dev/null &
+  local _pid_leech=$!
+
+  docker ps -a --filter "name=zion-dk-" \
+    --format "{{.Names}}\t{{.Status}}\t{{.Ports}}" \
+    > "$_f_dk" 2>/dev/null &
+  local _pid_dk=$!
+
+  # Header enquanto coleta
+  echo -e "\n${BOLD}${MAGENTA}  Zion Status${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}\n"
+
+  # Quota: lê do arquivo de background (instantâneo)
+  cat "$_quota_file" 2>/dev/null || true
+  echo ""
+
+  if ! docker info >/dev/null 2>&1; then
+    echo -e "  ${RED}sem acesso ao Docker${RESET}\n"
+    wait "$_pid_leech" "$_pid_dk"; rm -f "$_f_leech" "$_f_dk"
+    return
+  fi
+
+  wait "$_pid_leech" "$_pid_dk"
+
+  local _all_leech_rows _all_dk_rows
+  _all_leech_rows=$(sort -u "$_f_leech" | grep -v "^$" || true)
+  _all_dk_rows=$(cat "$_f_dk")
+  rm -f "$_f_leech" "$_f_dk"
+
+  # Stats: lê do arquivo de background (instantâneo)
+  local _sess_stats_cache
+  _sess_stats_cache=$(cat "$_stats_file" 2>/dev/null || true)
+  export _ZION_SHARED_STATS="$_sess_stats_cache"
+  export _ZION_SHARED_DK_ROWS="$_all_dk_rows"
+
+  # ── Batch docker inspect: TTY + mounts num único request ─────
+  local _leech_names=()
+  while IFS=$'\t' read -r _cn _ _; do
+    [[ -n "$_cn" ]] && _leech_names+=("$_cn")
+  done <<< "$_all_leech_rows"
+
+  local _inspect_cache=""
+  if [[ "${#_leech_names[@]}" -gt 0 ]]; then
+    _inspect_cache=$(docker inspect \
+      --format '{{.Name}}|{{.Config.Tty}}|{{range .Mounts}}{{.Destination}} {{end}}' \
+      "${_leech_names[@]}" 2>/dev/null | sed 's|^/||')
+  fi
 
   # Separa interactive (TTY=true) de background (TTY=false)
   local _agent_rows="" _bg_rows=""
   while IFS=$'\t' read -r _cn _cs _cp; do
     [[ -z "$_cn" ]] && continue
     local _tty
-    _tty=$(docker inspect --format '{{.Config.Tty}}' "$_cn" 2>/dev/null || echo "true")
+    _tty=$(echo "$_inspect_cache" | awk -F'|' -v n="$_cn" '$1==n {print $2}' | head -1)
+    [[ -z "$_tty" ]] && _tty="true"
     if [[ "$_tty" == "true" ]]; then
       _agent_rows+="${_cn}"$'\t'"${_cs}"$'\t'"${_cp}"$'\n'
     else
@@ -52,9 +118,6 @@ else
     fi
   done <<< "$_all_leech_rows"
 
-  # Helper: formata linha de agente
-  # Linha 1: PREFIX ICON UPTIME(7) NAME(16) PORTS(18=vazio) cpu CPU%(7) mem MEM
-  # Linha 2: continuacao + 4 mounts-chave (mnt/obs/zion/logs) com cor
   _print_agent_row() {
     local pfx="$1" name="$2" status="$3" tc="${4:-└─}"
     local icon uptime_raw
@@ -68,13 +131,11 @@ else
     local uptime_pad
     uptime_pad=$(printf "%-${_A_UPTIME_W}s" "$uptime_raw")
 
-    # Nome curto padded
     local short="${name#zion-projects-leech-run-}"
     short="${short#zion-projects-}"
     local name_pad
     name_pad=$(printf "%-${_A_NAME_W}s" "$short")
 
-    # Stats cpu/mem
     local cpu_str="" mem_str=""
     if echo "$status" | grep -qi "^up"; then
       local raw_stats
@@ -88,16 +149,13 @@ else
       fi
     fi
 
-    # Ports vazio padded (agents usam host-network)
     local ports_pad
     ports_pad=$(printf "%-${_A_PORTS_W}s" "")
 
-    # Linha principal
     echo -e "${pfx}${icon} ${ORANGE}${uptime_pad}${RESET}  ${WHITE}${name_pad}${RESET}  ${DIM}${ports_pad}${RESET}  ${cpu_str}${mem_str}"
 
-    # Linha 2: 4 mounts-chave com cor (verde=conectado, vermelho=ausente)
     local dest_mounts
-    dest_mounts=$(docker inspect --format '{{range .Mounts}}{{.Destination}} {{end}}' "$name" 2>/dev/null || true)
+    dest_mounts=$(echo "$_inspect_cache" | awk -F'|' -v n="$name" '$1==n {print $3}' | head -1)
     local vols=()
     for v_entry in "/workspace/mnt:mnt" "/workspace/obsidian:obs" "/workspace/zion:zion" "/workspace/logs/docker:logs"; do
       local vp="${v_entry%%:*}" vn="${v_entry##*:}"
@@ -120,7 +178,7 @@ else
     [[ "$n" -eq 0 ]] && return
 
     local any_up=0
-    echo "$rows" | grep -qi "	Up " && any_up=1
+    echo "$rows" | awk -F'\t' '$2 ~ /^[Uu]p /{found=1} END{exit !found}' && any_up=1
     local grp_icon; [[ "$any_up" -eq 1 ]] && grp_icon="${GREEN}●${RESET}" || grp_icon="${RED}○${RESET}"
     echo -e "${grp_icon} ${BOLD}${CYAN}${label}${RESET}"
     for i in "${!arr[@]}"; do
@@ -134,10 +192,24 @@ else
   _print_agent_group "agents" "$_agent_rows"
   _print_agent_group "background" "$_bg_rows"
 
-  # Dockerized services — sem header separado, mesma lista
   source "${ZION_ROOT:-$HOME/nixos/zion}/cli/src/lib/docker_status_impl.sh" 2>/dev/null || true
   if declare -f _zion_dk_status >/dev/null 2>&1; then
     _zion_dk_status "" 1
   fi
   echo ""
-fi
+}
+
+local _lines=0
+while true; do
+  _do_status_render > "$_tmpfile"
+
+  if [[ "$_lines" -gt 0 ]]; then
+    printf "\033[%dA" "$_lines"
+    printf "\033[0J"
+  fi
+
+  cat "$_tmpfile"
+  _lines=$(wc -l < "$_tmpfile")
+
+  sleep "$_tick"
+done
