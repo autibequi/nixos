@@ -23,6 +23,11 @@ _zion_dk_status() {
   local icon_stopped="${RED}○${RESET}"
   local icon_partial="${YELLOW}◐${RESET}"
 
+  # Larguras de coluna — unificadas com a sessao de agents
+  local TIME_W=7    # uptime
+  local NAME_W=16   # nome do container
+  local PORTS_W=18  # portas (string padded)
+
   # Cache de stats: "NOME cpu mem" por linha — buscado uma vez
   local _stats_cache
   _stats_cache=$(docker stats --no-stream \
@@ -37,17 +42,38 @@ _zion_dk_status() {
   # Extrai portas unicas no formato :PORT (remove duplicatas ipv4/ipv6)
   format_ports() {
     local raw="$1"
-    [[ -z "$raw" ]] && return
+    [[ -z "$raw" ]] && echo "" && return
     echo "$raw" \
       | grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:[0-9]+->[0-9]+' \
       | grep -oE ':[0-9]+->' \
       | sed 's/->//' \
       | sort -u \
-      | tr '\n' '  ' \
-      | sed 's/  $//'
+      | tr '\n' ' ' \
+      | sed 's/ $//'
   }
 
-  # Simplifica status: "Up 2 hours (healthy)" -> "2h  healthy"
+  # Bind mounts que parecem diretorios de projeto (sob /home ou /projects)
+  format_mounts() {
+    local cname="$1"
+    local mounts
+    mounts=$(docker inspect \
+      --format '{{range .Mounts}}{{if eq .Type "bind"}}{{.Source}} {{end}}{{end}}' \
+      "$cname" 2>/dev/null || true)
+    local result=()
+    for src in $mounts; do
+      # Filtra: só paths que parecem repositórios de projeto
+      if echo "$src" | grep -qE '/(projects|nixos|obsidian|estrategia)/'; then
+        result+=("${src##*/}")
+      fi
+    done
+    if [[ "${#result[@]}" -gt 0 ]]; then
+      local deduped
+      deduped=$(printf '%s\n' "${result[@]}" | sort -u | tr '\n' ' ' | sed 's/ $//')
+      echo "$deduped"
+    fi
+  }
+
+  # Simplifica status: "Up 2 hours (healthy)" -> "2h ✓"
   format_status() {
     local s="$1"
     if echo "$s" | grep -qi "up"; then
@@ -64,19 +90,30 @@ _zion_dk_status() {
     fi
   }
 
-  # Imprime: uptime  nome  :ports  cpu  mem
+  # Imprime linha unificada: icon  uptime  nome  ports  cpu  mem  mounts
+  # Mesmo formato das linhas de agents (icon + UPTIME(7) + NAME(16) + PORTS(18) + cpu + mem + mounts)
   print_container_row() {
     local tree_pfx="$1" name="$2" status="$3" ports="$4"
-    local TIME_W=9 NAME_W=14
+
+    # Icon: ●/○ baseado no status (running vs stopped)
+    local row_icon
+    if echo "$status" | grep -qi "^up"; then
+      row_icon="${GREEN}●${RESET}"
+    else
+      row_icon="${RED}○${RESET}"
+    fi
 
     local status_str
     status_str=$(format_status "$status")
 
-    local fmt_ports=""
-    fmt_ports=$(format_ports "$ports")
-    local ports_str=""
-    [[ -n "$fmt_ports" ]] && ports_str="  ${DIM}${fmt_ports}${RESET}"
+    # Portas: extrair e pad para PORTS_W
+    local raw_ports
+    raw_ports=$(format_ports "$ports")
+    local ports_padded
+    ports_padded=$(printf "%-${PORTS_W}s" "$raw_ports")
+    local ports_str="${DIM}${ports_padded}${RESET}"
 
+    # Nome padded
     local padded_name
     padded_name=$(printf "%-${NAME_W}s" "$name")
 
@@ -86,7 +123,6 @@ _zion_dk_status() {
       local raw_stats
       raw_stats=$(stats_for "$name")
       if [[ -z "$raw_stats" ]]; then
-        # tenta com prefixo do projeto
         local full_name
         full_name=$(echo "$_stats_cache" | awk -F'\t' -v n="$name" '$1 ~ n {print $1}' | head -1)
         [[ -n "$full_name" ]] && raw_stats=$(stats_for "$full_name")
@@ -95,11 +131,19 @@ _zion_dk_status() {
         local cpu mem
         cpu=$(echo "$raw_stats" | awk '{print $1}')
         mem=$(echo "$raw_stats" | awk '{print $2, $3, $4}')
-        stats_str="  ${DIM}cpu ${YELLOW}${cpu}${RESET}${DIM}  mem ${CYAN}${mem}${RESET}"
+        stats_str="${DIM}cpu ${YELLOW}$(printf "%-7s" "$cpu")${RESET}${DIM}  mem ${CYAN}${mem}${RESET}"
       fi
     fi
 
-    echo -e "${tree_pfx}$(printf "%-${TIME_W}b" "$status_str")  ${WHITE}${padded_name}${RESET}${ports_str}${stats_str}"
+    # Mounts
+    local mnt_str=""
+    if echo "$status" | grep -qi "^up"; then
+      local mnt_names
+      mnt_names=$(format_mounts "$name")
+      [[ -n "$mnt_names" ]] && mnt_str="  ${DIM}${mnt_names}${RESET}"
+    fi
+
+    echo -e "${tree_pfx}${row_icon} $(printf "%-${TIME_W}b" "$status_str")  ${WHITE}${padded_name}${RESET}  ${ports_str}  ${stats_str}${mnt_str}"
   }
 
   # all_dk_rows: cache unico de todos os containers zion-dk-* (evita N chamadas docker ps)
