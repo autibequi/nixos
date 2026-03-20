@@ -74,20 +74,18 @@ _zion_dk_status() {
     fi
   }
 
-  # Simplifica status: "Up 2 hours (healthy)" -> "2h ✓"
+  # Simplifica status: "Up 2 hours (healthy)" -> "2h"  (texto puro, sem ANSI)
   format_status() {
     local s="$1"
     if echo "$s" | grep -qi "up"; then
       local t
       t=$(echo "$s" | sed -E 's/Up //i; s/ \(.*\)//')
-      t=$(echo "$t" | sed -E 's/ minutes?/min/; s/ hours?/h/; s/ days?/d/; s/ weeks?/w/')
-      local healthy=""
-      echo "$s" | grep -qi "healthy" && healthy=" ${GREEN}✓${RESET}"
-      echo "${ORANGE}${t}${RESET}${healthy}"
+      t=$(echo "$t" | sed -E 's/ seconds?/s/; s/ minutes?/min/; s/ hours?/h/; s/ days?/d/; s/ weeks?/w/')
+      echo "$t"
     elif echo "$s" | grep -qi "exited"; then
-      echo "${RED}exited${RESET}"
+      echo "exited"
     else
-      echo "${YELLOW}${s}${RESET}"
+      echo "$s"
     fi
   }
 
@@ -105,8 +103,19 @@ _zion_dk_status() {
       row_icon="${RED}○${RESET}"
     fi
 
-    local status_str
-    status_str=$(format_status "$status")
+    # Uptime: pad no texto puro, depois aplicar cor (igual agents)
+    local uptime_raw
+    uptime_raw=$(format_status "$status")
+    local uptime_pad
+    uptime_pad=$(printf "%-${TIME_W}s" "$uptime_raw")
+    local uptime_colored
+    if echo "$status" | grep -qi "^up"; then
+      uptime_colored="${ORANGE}${uptime_pad}${RESET}"
+    elif echo "$status" | grep -qi "exited"; then
+      uptime_colored="${RED}${uptime_pad}${RESET}"
+    else
+      uptime_colored="${YELLOW}${uptime_pad}${RESET}"
+    fi
 
     # Portas padded
     local raw_ports
@@ -138,7 +147,7 @@ _zion_dk_status() {
     fi
 
     # Linha principal
-    echo -e "${tree_pfx}${row_icon} $(printf "%-${TIME_W}b" "$status_str")  ${WHITE}${padded_name}${RESET}  ${ports_str}  ${stats_str}"
+    echo -e "${tree_pfx}${row_icon} ${uptime_colored}  ${WHITE}${padded_name}${RESET}  ${ports_str}  ${stats_str}"
 
     # Linha 2: mounts (só se running e tiver mounts relevantes)
     if echo "$status" | grep -qi "^up"; then

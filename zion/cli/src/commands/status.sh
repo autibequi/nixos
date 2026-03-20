@@ -60,7 +60,7 @@ else
     local icon uptime_raw
     if echo "$status" | grep -qi "^up"; then
       icon="${GREEN}●${RESET}"
-      uptime_raw=$(echo "$status" | sed -E 's/Up //i; s/ \(.*\)//; s/ minutes?/min/; s/ hours?/h/; s/ days?/d/')
+      uptime_raw=$(echo "$status" | sed -E 's/Up //i; s/ \(.*\)//; s/ seconds?/s/; s/ minutes?/min/; s/ hours?/h/; s/ days?/d/')
     else
       icon="${RED}○${RESET}"
       uptime_raw="stopped"
