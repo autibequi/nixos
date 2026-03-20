@@ -70,7 +70,7 @@ _zion_dk_status() {
       result+=("$label")
     done
     if [[ "${#result[@]}" -gt 0 ]]; then
-      printf '%s\n' "${result[@]}" | sort -u | tr '\n' ' ' | sed 's/ $//'
+      printf '%s\n' "${result[@]}" | sort -u | tr '\n' ' ' | sed 's/ $//' | sed 's/ /  /g'
     fi
   }
 
@@ -147,7 +147,7 @@ _zion_dk_status() {
       if [[ -n "$mnt_names" ]]; then
         local cont_indent
         [[ "$tc" == "├─" ]] && cont_indent="  ${BLUE}│${RESET}    " || cont_indent="       "
-        echo -e "${cont_indent}${DIM}${mnt_names}${RESET}"
+        echo -e "${cont_indent}${GREEN}${mnt_names}${RESET}"
       fi
     fi
   }
