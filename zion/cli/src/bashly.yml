@@ -209,7 +209,7 @@ commands:
 
   - name: update
     alias: [install]
-    help: Regenera CLI (bashly) e instala/atualiza symlink em stow/.local/bin.
+    help: Regenera CLI (bashly) e instala/atualiza symlink em ~/.local/bin.
     filename: commands/update.sh
 
   - name: init

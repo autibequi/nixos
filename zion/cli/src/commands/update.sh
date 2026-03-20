@@ -1,7 +1,7 @@
 # Regenera CLI, instala symlink e atualiza bootstrap
 cli_dir="$zion_compose_dir"
 nixos_dir="$zion_nixos_dir"
-bin_dest="$nixos_dir/stow/.local/bin/zion"
+bin_dest="${HOME}/.local/bin/zion"
 log_file="$(mktemp /tmp/zion-update-XXXXXX.log)"
 trap 'rm -f "$log_file"' EXIT
 
