@@ -1,14 +1,13 @@
-# Show task execution log from inside puppy container
+# Show task execution log (local)
 local lines="${args[--lines]:-20}"
 zion_load_config
-local compose_file="${ZION_ROOT:-$HOME/nixos/zion}/cli/docker-compose.puppy.yml"
+local tasks="${OBSIDIAN_PATH:-$HOME/.ovault/Work}/tasks"
+[ ! -d "$tasks" ] && tasks="/workspace/obsidian/tasks"
+local log="$tasks/log.md"
 
-docker compose -f "$compose_file" exec -T -u claude puppy bash -c "
-  LOG=/workspace/obsidian/tasks/log.md
-  if [ ! -f \$LOG ]; then echo 'No task log found'; exit 0; fi
-  echo '=== Task Log (last $lines) ==='
-  tail -n $lines \$LOG
-" 2>/dev/null || {
-  echo "Puppy container not running. Start with: zion puppy start"
-  exit 1
-}
+if [ ! -f "$log" ]; then
+  echo "No task log found at $log"
+  exit 0
+fi
+echo "=== Task Log (last $lines) ==="
+tail -n "$lines" "$log"

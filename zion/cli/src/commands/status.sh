@@ -1,8 +1,7 @@
-# Status agregado: sessões, docker services e puppy workers
+# Status agregado: sessões, docker services e tasks
 zion_load_config
 local compose_zion="${ZION_ROOT:-$HOME/nixos/zion}/cli/docker-compose.zion.yml"
-local compose_puppy="${ZION_ROOT:-$HOME/nixos/zion}/cli/docker-compose.puppy.yml"
-local obsidian="${OBSIDIAN_PATH:-/workspace/obsidian}"
+local obsidian="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
 [ ! -d "$obsidian" ] && obsidian="/workspace/obsidian"
 
 echo "=== Zion Status ==="
@@ -17,14 +16,10 @@ else
 fi
 
 echo ""
-echo "--- Puppy ---"
-if docker compose -f "$compose_puppy" ps --status running 2>/dev/null | grep -q puppy; then
-  echo "  puppy: RUNNING"
-  docker compose -f "$compose_puppy" exec -T -u claude puppy \
-    bash -c "echo \"  tasks TODO: \$(ls /workspace/obsidian/tasks/TODO/*.md 2>/dev/null | wc -l)\"" 2>/dev/null || true
-else
-  echo "  puppy: STOPPED"
-fi
+echo "--- Tick (systemd) ---"
+systemctl --user status zion-tick.timer 2>/dev/null | grep -E "Active|Trigger" | sed 's/^/  /' \
+  || systemctl status zion-tick.timer 2>/dev/null | grep -E "Active|Trigger" | sed 's/^/  /' \
+  || echo "  (timer nao encontrado — rode: nh os switch)"
 
 echo ""
 echo "--- Tasks (local) ---"

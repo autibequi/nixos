@@ -25,14 +25,14 @@ cat << 'BANNER'
       █   zion new --engine=<e>            zion cursor [dir]                █
       █   zion resume                      zion opencode [dir]              █
       █   zion edit                                                         █
-      █   zion shell                      puppy                             █
+      █   zion shell                      tasks                             █
       █                                                                     █
-      █  docker                            zion puppy start|stop|restart    █
-      █                                    zion puppy run <task>            █
-      █   zion dk run <svc>                zion puppy status                █
-      █   zion dk stop <svc>               zion puppy logs -f              █
-      █   zion dk logs <svc>               zion puppy query [prompt]       █
-      █   zion dk status                   zion ask [prompt]               █
+      █  docker                            zion tasks tick                  █
+      █                                    zion tasks tick -d               █
+      █   zion dk run <svc>                zion tasks run <nome>            █
+      █   zion dk stop <svc>               zion tasks run <n> -t N         █
+      █   zion dk logs <svc>               zion tasks list                  █
+      █   zion dk status                   zion tasks new <nome>            █
       █   zion dk shell <svc>                                               █
       █                                   meta                              █
       █  container                                                          █

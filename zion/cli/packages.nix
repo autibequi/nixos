@@ -22,7 +22,7 @@ with pkgs; [
   sox
 
   # System
-  util-linux      # flock for puppy-runner
+  util-linux      # flock for task-runner
   systemdMinimal  # journalctl
   procps          # ps, top, free
 

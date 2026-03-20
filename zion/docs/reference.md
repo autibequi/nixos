@@ -16,28 +16,27 @@
 | **`zion edit`** | Sessão com `~/nixos` em `/workspace/mnt` + `/workspace/logs`. Project name fixo `zion-projects`. |
 | **`zion leech [dir]`** | Sessão efêmera em qualquer pasta. Auto-detecta nixos repo → monta logs. Alias: `l`. |
 | **`zion shell`** | Bash no container com o projeto montado. |
-| **`zion puppy start`** | Sobe container persistente Puppy + daemon (scheduler a cada 10 min). |
-| **`zion puppy stop`** | Para o container Puppy. |
-| **`zion puppy run <task>`** | Roda 1 task específica dentro do container Puppy. |
-| **`zion puppy status`** | Container + tasks em doing/ + state.json. |
-| **`zion puppy tick`** | 1 tick do daemon imediato (para teste). |
-| **`zion puppy logs [-f]`** | Logs do container Puppy. |
-| **`zion puppy shell`** | Bash dentro do container Puppy. |
-| **`zion puppy query --headless --timeout=600 "prompt"`** | Prompt headless com timeout. O agente vai o mais longe possível sem supervisão. |
+| **`zion tasks tick`** | Executa cards vencidos do kanban (local, sem container). |
+| **`zion tasks tick --dry-run`** | Lista o que seria executado sem rodar. |
+| **`zion tasks run <nome>`** | Roda 1 card específico pelo nome. |
+| **`zion tasks run <nome> -t N`** | Roda com max-turns override. |
+| **`zion tasks list`** | Lista TODO/DOING/DONE. |
+| **`zion tasks new <nome>`** | Cria novo card de task. |
+| **`zion tasks status`** | Log das últimas execuções. |
 | **`zion claude-usage`** | Estatísticas de uso Claude. `--waybar` = JSON para usage bar; `--refresh` = ignora cache. |
 
 ---
 
 ## Modo Headless
 
-Quando `HEADLESS=1` (tasks Puppy ou `zion puppy query --headless`):
+Quando `HEADLESS=1` (tasks via task-runner.sh):
 1. **Autonomia total** — não esperar input, não fazer perguntas.
 2. **Maximize progresso** — vá o mais longe possível.
 3. **Gestão de tempo** — reserve os últimos ~30s para salvar estado (memoria.md, contexto.md). SIGKILL sem aviso.
 4. **Ciclos curtos** — executar → salvar parcial → continuar.
 5. **Sem output decorativo** — foco em execução e persistência.
 
-`PUPPY_TIMEOUT=<seconds>` — tempo total antes do processo ser morto.
+`timeout <seconds>` no frontmatter do card — hard limit (default 1800s).
 
 ---
 
@@ -64,7 +63,7 @@ Quando `HEADLESS=1` (tasks Puppy ou `zion puppy query --headless`):
 
 | Modo | `/workspace/mnt` | `/workspace/logs` |
 |------|-----------------|-------------------|
-| `zion` / `new` / `shell` / `resume` / `puppy` | Projeto do usuário | ❌ |
+| `zion` / `new` / `shell` / `resume` | Projeto do usuário | ❌ |
 | **`zion edit`** | `~/nixos` (este repo) | ✅ (journal ro) |
 | **`zion leech ~/nixos`** | `~/nixos` (auto-detect) | ✅ (journal ro) |
 | **`zion leech <outro-dir>`** | Dir especificado | ❌ |
@@ -73,14 +72,12 @@ Quando `HEADLESS=1` (tasks Puppy ou `zion puppy query --headless`):
 
 ## Como o container é iniciado
 
-- CLI no host (`zion/cli/`) usa Docker Compose: `docker-compose.zion.yml` (sessões interativas) ou `docker-compose.puppy.yml` (worker persistente).
+- CLI no host (`zion/cli/`) usa Docker Compose: `docker-compose.zion.yml` (sessões interativas).
 - Imagem: `claude-nix-sandbox` (build de `zion/cli/Dockerfile.claude`).
 - **leech** — sessão efêmera: `sleep infinity` + `exec` do engine.
-- **puppy** — container persistente: daemon interno (scheduler) + runner de tasks. 12g mem.
+- **Tasks** rodam direto no host via `systemd zion-tick.timer` → `zion tasks tick`.
 
 ### Volumes base (`x-base-volumes`)
-
-Compartilhados por leech e puppy:
 - `/zion` ← `zion/` do repo
 - `/workspace/obsidian` ← `OBSIDIAN_PATH`
 - `/workspace/mnt` ← `CLAUDIO_MOUNT`
@@ -130,7 +127,7 @@ Em `zion edit` / `zion leech ~/nixos` (extras):
     ├── system/            ← INIT.md, SOUL.md, SELF.md, DIRETRIZES.md
     ├── commands/          ← Comandos do agente
     ├── skills/            ← Skills (nixos, hyprland-config, monolito, etc.)
-    ├── agents/            ← Agentes (puppy-runner, orquestrador, etc.)
+    ├── agents/            ← Agentes (orquestrador, etc.)
     ├── personas/          ← Avatars e personas
     ├── hooks/             ← Hooks claude-code
     └── docs/              ← Esta documentação de referência
@@ -152,5 +149,4 @@ Em `zion edit` / `zion leech ~/nixos` (extras):
 ## Nomes de projeto no compose
 
 - Sessões interativas: `zion-<slug>` ou `zion-projects` (edit/leech nixos)
-- Workers/scheduler: `puppy-workers`
 - Config em `~/.zion` (não `~/.claudio`)

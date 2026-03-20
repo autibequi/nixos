@@ -34,7 +34,7 @@ Toda mensagem termina com emoji de rosto que reflete o tom: 🙂 normal · 😐 
 ## Anti-patterns (❌ → ✅)
 ❌ `git commit` após editar → ✅ "Pronto. Quer commitar?"
 ❌ `nh os switch` dentro do container → ✅ pedir ao user rodar no host
-❌ editar `scripts/puppy.sh` → ✅ editar `zion/scripts/puppy.sh`
+❌ editar `scripts/task-runner.sh` → ✅ editar `zion/scripts/task-runner.sh`
 ❌ `stow -d ~/nixos/stow -t ~` → ✅ `zion stow`
 ❌ "vai funcionar porque X" sem testar → ✅ rodar e mostrar saída
 ❌ implementar direto na main branch → ✅ worktree isolado primeiro

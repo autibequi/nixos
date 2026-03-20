@@ -3,7 +3,7 @@
 # Cards are due if their date prefix (YYYYMMDD_HH_MM) is <= now + 10min
 # Usage:
 #   task-daemon.sh              # loop
-#   PUPPY_SINGLE_TICK=1 task-daemon.sh  # 1 tick
+#   TASK_SINGLE_TICK=1 task-daemon.sh  # 1 tick
 #   task-daemon.sh --dry-run    # show what would run
 set -euo pipefail
 
@@ -12,8 +12,8 @@ TASKS="$WORKSPACE/obsidian/tasks"
 LOGFILE="$WORKSPACE/obsidian/agents/cron/daemon.log"
 LOCKFILE="/tmp/zion-locks/daemon.lock"
 
-TICK_INTERVAL="${PUPPY_TICK_INTERVAL:-300}"
-SINGLE_TICK="${PUPPY_SINGLE_TICK:-0}"
+TICK_INTERVAL="${TASK_TICK_INTERVAL:-300}"
+SINGLE_TICK="${TASK_SINGLE_TICK:-0}"
 DRY_RUN=0
 [[ "${1:-}" == "--dry-run" ]] && DRY_RUN=1
 

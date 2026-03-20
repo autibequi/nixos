@@ -39,6 +39,6 @@ Nomenclatura do sistema. Referência rápida para entender os termos usados em s
 | `/workspace/mnt/zion/hooks/claude-code/session-start.sh` | o que recebo no boot |
 | `/workspace/mnt/zion/commands/meta/lab.md` | skill /meta:lab |
 | `/workspace/mnt/zion/scripts/task-runner.sh` | executor de tasks |
-| `/workspace/mnt/zion/scripts/task-daemon.sh` | daemon do puppy |
+| `/workspace/mnt/zion/scripts/task-daemon.sh` | daemon de tasks |
 | `/workspace/obsidian/tasks/` | kanban TODO/DOING/DONE |
 | `/workspace/obsidian/agents/memory/` | memória persistente dos agentes |

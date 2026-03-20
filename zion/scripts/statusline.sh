@@ -72,7 +72,6 @@ fi
 TOPIC=$(echo "$TOPIC" | tr '\n' ' ' | sed 's/  */ /g' | head -c 40 | sed 's/[[:space:]]*$//')
 [[ ${#TOPIC} -ge 40 ]] && TOPIC="${TOPIC:0:37}..."
 
-# Workers ativos (sessoes zion_ e puppy_)
 WORKERS=0
 BOCECHAS=0
 WS="${WORKSPACE_DIR:-/workspace}"
@@ -80,7 +79,6 @@ AGENTS_DIR="/workspace/nixos/.ephemeral/agents"
 LIVE_MAX_AGE=900
 if [[ -d "$AGENTS_DIR" ]]; then
   now_sec=$(date +%s)
-  for dir in "$AGENTS_DIR"/zion_*/ "$AGENTS_DIR"/puppy_*/; do
     [[ "$dir" == *"*"* ]] && continue
     [[ -d "$dir" ]] || continue
     [[ -f "$dir/.live" ]] || continue

@@ -4,9 +4,9 @@ description: Fonte da verdade para scripts do container Puppy/Zion é zion/scrip
 type: feedback
 ---
 
-Para scripts que rodam DENTRO do container (puppy-daemon.sh, puppy-runner.sh, puppy-status.sh, kanban-sync.sh, worktree-manager.sh, puppy-cleanup.sh): **sempre editar `zion/scripts/`**.
+Para scripts que rodam via systemd/tick (task-runner.sh, task-daemon.sh): **sempre editar `zion/scripts/`**.
 
-**Why:** O container monta `zion/` em `/workspace/zion`. Os arquivos em `scripts/` (raiz do repo) são apenas symlinks → `../zion/scripts/`. Editar `scripts/` diretamente não afeta o container. Erro cometido: editei `scripts/puppy-daemon.sh` e `scripts/puppy-runner.sh` — o container continuou usando as versões antigas de `zion/scripts/`.
+**Why:** O container monta `zion/` em `/workspace/zion`. Os arquivos em `scripts/` (raiz do repo) são apenas symlinks → `../zion/scripts/`. Editar `scripts/` diretamente não afeta o container. Erro cometido: editei scripts em `scripts/` (raiz) — o container continuou usando as versões antigas de `zion/scripts/`.
 
 **How to apply:**
 - `zion/scripts/` = fonte da verdade para scripts do container

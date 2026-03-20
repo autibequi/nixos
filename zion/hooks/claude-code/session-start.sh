@@ -32,7 +32,6 @@ BETA="OFF";       [ -f "$WS/.ephemeral/beta-mode" ]      && BETA="ON"
 ZION_DEBUG="OFF"; [ -f "$WS/.ephemeral/zion-debug" ]     && ZION_DEBUG="ON"
 ANALYSIS_MODE="${ZION_ANALYSIS_MODE:-0}"
 HEADLESS="${HEADLESS:-0}"
-PUPPY_TIMEOUT="${PUPPY_TIMEOUT:-}"
 [ -z "${IN_DOCKER:-}" ] && IN_DOCKER="0"
 { [ "$CLAUDE_ENV" = "container" ] || [ -f "/.dockerenv" ]; } && IN_DOCKER="1"
 [ -z "${ZION_EDIT:-}" ] && ZION_EDIT="0"
@@ -64,7 +63,6 @@ echo "zion_edit=$ZION_EDIT       # 1=mnt é o repo nixos + logs montados | 0=pro
 echo "zion_debug=$ZION_DEBUG     # ON=contexto completo (DIRETRIZES+persona+avatar) | OFF=lite mode"
 echo "headless=$HEADLESS         # 1=worker sem supervisão | 0=interativo"
 echo "analysis_mode=$ANALYSIS_MODE  # 1=modo experimento isolado (proativo, self-modify, debug livre)"
-[ -n "$PUPPY_TIMEOUT" ] && echo "puppy_timeout=${PUPPY_TIMEOUT}s"
 [ -n "$AGENT_NAME" ] && echo "agent_name=$AGENT_NAME"
 [ -n "$TASK_NAME" ] && echo "task_name=$TASK_NAME"
 echo "agent_mode=$AGENT_MODE      # 1=running as named agent or processing a task"
@@ -162,7 +160,6 @@ ZION_REPOS
     echo "Modo HEADLESS (headless=1):"
     echo "  autonomia total — não esperar input, não fazer perguntas"
     echo "  maximizar progresso dentro do timeout"
-    [ -n "$PUPPY_TIMEOUT" ] && echo "  timeout: ${PUPPY_TIMEOUT}s — salve estado nos últimos ~30s (SIGKILL ao estourar)"
     echo "  ciclos curtos: executar → salvar parcial → continuar"
     echo "  sem output decorativo, foco em execução e persistência"
   fi
@@ -245,9 +242,7 @@ if [ "$ZION_EDIT" = "1" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ];
   _git_branch=$(git -C "$WS" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
   _git_dirty=$(git -C "$WS" status --porcelain 2>/dev/null | wc -l | tr -d ' ')
   _git_ahead=$(git -C "$WS" rev-list @{u}..HEAD 2>/dev/null | wc -l | tr -d ' ')
-  _puppy_next=$(ls /workspace/obsidian/tasks/_scheduled/ 2>/dev/null | head -1 || echo "avaliar")
-  _backlog=$(ls /workspace/obsidian/tasks/backlog/ 2>/dev/null | wc -l | tr -d ' ')
-  _done=$(ls /workspace/obsidian/tasks/done/ 2>/dev/null | wc -l | tr -d ' ')
+  _todo_count=$(ls /workspace/obsidian/tasks/TODO/*.md 2>/dev/null | wc -l | tr -d ' ')
   _mem_count=$(ls "$HOME/.claude/projects/-workspace-mnt/memory/"*.md 2>/dev/null | wc -l | tr -d ' ')
   _h_off=$([ "$HEADLESS" = "1" ] && echo "ON" || echo "OFF")
   _d_on=$([ "$IN_DOCKER" = "1" ] && echo "ON" || echo "OFF")
@@ -274,8 +269,7 @@ if [ "$ZION_EDIT" = "1" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ];
     printf "  %-12s .........  OK    [  23ms]  %s  ↑%s  %s dirty\n" "GIT" "$_git_branch" "$_git_ahead" "$_git_dirty"
     printf "  %-12s .........  OK    [  34ms]\n" "DIRETRIZES"
     printf "  %-12s .........  OK    [  21ms]\n" "SELF"
-    printf "  %-12s .........  OK    [every10]  » next: %s\n" "PUPPY" "$_puppy_next"
-    printf "  %-12s .........  OK    [  16ms]  %s backlog  ·  %s done\n" "TASKS" "$_backlog" "$_done"
+    printf "  %-12s .........  OK    [systemd]  » todo: %s\n" "TASKS" "$_todo_count"
     printf "  %-12s .........  OK    [ 210ms]\n" "CLAUDE.MD"
     [ $(( RANDOM % 3 )) -eq 0 ] && printf "  %-12s ..ʕ·ᴥ·ʔ..  LIER [   1ms]\n" "DIGNITY"
     printf "  %-12s .........  OK    [  56ms]\n" "PERSONALITY"
@@ -324,7 +318,7 @@ O usuário externo NÃO vê o output desta sessão diretamente. Você pode:
 
 ## Postura
 - Ser maximamente proativo — executar sem pedir confirmação
-- Usar `zion` livremente: `zion puppy run`, `zion puppy logs`, `zion puppy tick`, etc.
+- Usar `zion` livremente: `zion tasks tick`, `zion tasks run <nome>`, `zion tasks list`, etc.
 - Iterar rápido: tenta → observa → corrige → tenta de novo
 - Comentar em voz alta o que está pensando (monólogo interno é útil aqui)
 - Modificar arquivos de config, scripts, hooks para testar hipóteses

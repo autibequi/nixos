@@ -181,24 +181,6 @@ commands:
       - long: --ro
     filename: commands/engine_opencode.sh
 
-  # ── Ask (atalho para puppy query) ───────────────────────────
-  - name: ask
-    help: "Atalho: envia prompt ao Puppy (= zion puppy query)."
-    args:
-      - name: prompt
-        required: true
-        help: "Prompt a enviar (ex. 'diga oi')"
-    flags:
-      - long: --headless
-        help: "Modo headless: ninguém está observando, vá o mais longe possível"
-      - long: --timeout
-        arg: seconds
-        help: "Timeout em segundos (default 300)"
-      - long: --model
-        arg: model
-        help: "Modelo Claude: haiku | sonnet | opus (default: haiku)"
-    filename: commands/ask.sh
-
   # ── Container (build / down / destroy) ─────────────────────
   - name: build
     help: Build da imagem Docker do leech (claude-nix-sandbox).
@@ -240,112 +222,6 @@ commands:
         required: true
         help: "Engine padrão: claude | opencode | cursor"
     filename: commands/set_engine.sh
-
-  # ── Puppy (worker persistente) ────────────────────────────
-  - name: puppy
-    alias: [p]
-    help: "Gerencia o Puppy worker (container persistente + task runner)."
-    commands:
-      - name: start
-        help: "Inicia o container puppy e o daemon interno."
-        filename: commands/puppy_start.sh
-      - name: stop
-        help: "Para o container puppy."
-        filename: commands/puppy_stop.sh
-      - name: restart
-        help: "Reinicia o container puppy (stop + start)."
-        filename: commands/puppy_restart.sh
-      - name: run
-        help: "Roda uma task especifica dentro do container puppy."
-        args:
-          - name: task
-            required: true
-            help: "Nome da task (de _scheduled/ ou backlog/)"
-        filename: commands/puppy_run.sh
-      - name: status
-        alias: [st]
-        help: "Mostra estado do container e tasks."
-        filename: commands/puppy_status.sh
-      - name: logs
-        help: "Segue logs do container puppy."
-        flags:
-          - long: --follow
-            short: -f
-            help: "Follow log output"
-        filename: commands/puppy_logs.sh
-      - name: shell
-        help: "Abre bash dentro do container puppy."
-        filename: commands/puppy_shell.sh
-      - name: tick
-        help: "Roda 1 tick do scheduler imediatamente (para teste)."
-        filename: commands/puppy_tick.sh
-      - name: query
-        alias: [q]
-        help: "Envia um prompt ao Claude dentro do container puppy (headless = sem supervisão)."
-        args:
-          - name: prompt
-            required: true
-            help: "Prompt a enviar (ex. 'diga oi')"
-        flags:
-          - long: --headless
-            help: "Modo headless: ninguém está observando, vá o mais longe possível"
-          - long: --timeout
-            arg: seconds
-            help: "Timeout em segundos (default 300). O agente é informado do deadline."
-          - long: --model
-            arg: model
-            help: "Modelo Claude: haiku | sonnet | opus (default: haiku)"
-        filename: commands/puppy_query.sh
-
-      - name: task
-        help: "Executa uma task com o agente genérico Puppy (ou agente específico via --agent)."
-        args:
-          - name: task
-            required: true
-            help: "Nome da task (ex. minha-tarefa)"
-        flags:
-          - long: --agent
-            arg: agent
-            help: "Agente específico (default: puppy genérico)"
-          - long: --model
-            arg: model
-            help: "Modelo Claude: haiku | sonnet | opus (default: haiku)"
-          - long: --timeout
-            arg: seconds
-            default: "300"
-            help: "Timeout em segundos (default 300)"
-          - long: --headless
-            help: "Modo headless: ninguém está observando"
-          - long: --max-turns
-            arg: max_turns
-            default: "12"
-            help: "Máximo de turnos Claude (default 12)"
-        filename: commands/puppy_task.sh
-
-      - name: agent
-        help: "Executa um agente nomeado, opcionalmente em uma task."
-        args:
-          - name: agent
-            required: true
-            help: "Nome do agente (ex. monolito, orquestrador)"
-        flags:
-          - long: --task
-            arg: task
-            help: "Nome da task (opcional)"
-          - long: --model
-            arg: model
-            help: "Modelo Claude: haiku | sonnet | opus (default: haiku)"
-          - long: --timeout
-            arg: seconds
-            default: "300"
-            help: "Timeout em segundos (default 300)"
-          - long: --headless
-            help: "Modo headless: ninguém está observando"
-          - long: --max-turns
-            arg: max_turns
-            default: "12"
-            help: "Máximo de turnos Claude (default 12)"
-        filename: commands/puppy_agent.sh
 
   # ── Docker (servicos estrategia) ──────────────────────────
   # servico: monolito | bo-container | front-student (aliases: mono | bo | front/fs)
@@ -635,7 +511,7 @@ commands:
 
   - name: status
     alias: [st]
-    help: "Status agregado: sessoes, docker services e puppy workers."
+    help: "Status agregado: sessoes e docker services."
     filename: commands/status.sh
 
   # ── Host operations (stow / switch) ──────────────────────

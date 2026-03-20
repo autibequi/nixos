@@ -16,17 +16,17 @@ cat << 'EOF'
     │  zion shell              bash no container                     │
     │  zion start              [DEPRECATED] use zion claude --danger │
     │                                                                │
-    ├─ PUPPY (workers) ─────────────────────────────────────────────┤
+    ├─ TASKS (kanban TODO/DOING/DONE) ──────────────────────────────┤
     │                                                                │
-    │  zion puppy start        sobe container + daemon               │
-    │  zion puppy stop         para o container                      │
-    │  zion puppy restart      stop + start                          │
-    │  zion puppy run <task>   executa 1 task manual                 │
-    │  zion puppy tick         roda 1 tick do scheduler              │
-    │  zion puppy query [p]    envia prompt ao Claude                │
-    │  zion puppy status       estado do container + tasks (st)      │
-    │  zion puppy logs -f      acompanha logs do daemon              │
-    │  zion puppy shell        bash dentro do container              │
+    │  zion tasks tick          executa cards vencidos (local)       │
+    │  zion tasks tick -d       dry-run: lista sem executar          │
+    │  zion tasks run <nome>    executa 1 card específico            │
+    │  zion tasks run <n> -t N  executa com max-turns override       │
+    │  zion tasks list          lista TODO/DOING/DONE                │
+    │  zion tasks list -a       inclui DONE                          │
+    │  zion tasks new <nome>    cria novo card                       │
+    │  zion tasks status        log de execuções                     │
+    │  (systemd timer: zion-tick.timer — a cada 10min)               │
     │                                                                │
     ├─ DOCKER (servicos estrategia) ────────────────────────────────┤
     │                                                                │
@@ -54,7 +54,7 @@ cat << 'EOF'
     ├─ TASKS ────────────────────────────────────────────────────────┤
     │                                                                │
     │  zion new-task <nome>    cria task no kanban                   │
-    │  zion status             status agregado (sessoes/dk/puppy)    │
+    │  zion status             status agregado (sessoes/docker)      │
     │  zion worktree [svc]     lista worktrees interativamente       │
     │                                                                │
     ├─ META ─────────────────────────────────────────────────────────┤
@@ -79,10 +79,8 @@ cat << 'EOF'
     │  zion claude  = zion new --engine=claude                       │
     │  zion cursor  = zion new --engine=cursor                       │
     │  zion oc      = zion new --engine=opencode                     │
-    │  zion ask     = zion puppy query                               │
     │  zion dk      = zion docker                                    │
-    │  zion p       = zion puppy                                     │
-    │  zion p st    = zion puppy status                              │
+    │  zion t       = zion tasks                                     │
     │  zion st      = zion status                                    │
     │  zion wt      = zion worktree                                  │
     │                                                                │

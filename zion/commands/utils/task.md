@@ -53,7 +53,7 @@ O daemon e o `tick` processam cards com data `<= agora + 10min`.
 ## Comandos CLI
 
 ### `zion tasks tick`
-Roda um tick local (sem puppy). Detecta cards vencidos e executa serialmente.
+Roda um tick local. Detecta cards vencidos e executa serialmente.
 
 ```bash
 zion task tick              # roda tudo que está vencido

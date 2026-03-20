@@ -50,7 +50,7 @@ rm -f "$SYSFILE"
 | `/workspace/mnt/zion/` | **fonte da verdade** — hooks, skills, agents, scripts | sim |
 | `/workspace/obsidian/` | vault Obsidian, persistente entre sessões | sim |
 | `/workspace/obsidian/tasks/` | kanban TODO/DOING/DONE | sim |
-| `/workspace/obsidian/agents/memory/` | memória dos agentes puppy | sim |
+| `/workspace/obsidian/agents/memory/` | memória dos agentes | sim |
 | `/workspace/obsidian/agents/cron/runs/` | logs de execução por agente | leitura |
 | `/home/claude/.claude/` | config Claude Code (memórias, hooks, skills montados) | sim |
 | `/home/claude/.nix-profile/bin/claude` | Claude CLI v2.1.79 | — |
@@ -60,7 +60,7 @@ rm -f "$SYSFILE"
 ## Limitações desta sessão (zion edit sem restart)
 
 - **Sem Docker**: socket precisa GID 131, não estou no grupo
-- `zion puppy run X` requer Docker → precisa rodar no host
+- `zion tasks run X` requer Docker → precisa rodar no host
 - `zion edit` do host spawna container com `group_add: [131]` — ao reiniciar terei acesso
 - O que posso fazer: Claude interno direto, editar arquivos, rodar scripts, task-runner.sh
 
