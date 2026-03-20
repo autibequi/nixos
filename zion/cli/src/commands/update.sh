@@ -41,10 +41,10 @@ _gen() {
 }
 
 _symlink() {
+  local old_dest="$nixos_dir/stow/.local/bin/zion"
+  [[ -L "$old_dest" ]] && rm -f "$old_dest"
   mkdir -p "$(dirname "$bin_dest")"
-  if [[ ! -L "$bin_dest" ]]; then
-    ln -sf "$cli_dir/zion" "$bin_dest"
-  fi
+  ln -sf "$cli_dir/zion" "$bin_dest"
 }
 
 _bootstrap() {
