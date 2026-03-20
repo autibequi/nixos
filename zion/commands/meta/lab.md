@@ -92,3 +92,47 @@ Eu devo:
 2. Reportar estado atual: tasks pendentes, DOING orphans, última execução
 3. Propor o que testaria no lab agora
 4. Aguardar direção do user ou agir se tiver permissão clara
+
+---
+
+## Instalar Módulo — workflow de persistência
+
+**Regra fundamental:**
+- Tudo que o mini-Claude cria/modifica → **morre ao reiniciar** (efêmero)
+- Tudo que eu sou/sei → **some se não estiver no GitHub**
+- Único caminho pra persistir: `editar /workspace/mnt/zion/` → `git commit` → `git push`
+
+### Quando o user diz "instala o módulo"
+
+Significa: pegar o que foi criado/descoberto no mini-Claude e aplicar em mim mesmo.
+
+Workflow:
+```
+mini-Claude cria/modifica algo
+       ↓
+user: "instala o módulo"
+       ↓
+eu (externo) leio o que o mini fez
+       ↓
+aplico em /workspace/mnt/zion/ (hooks, skills, scripts, agents, etc.)
+       ↓
+commit + push = permanente
+```
+
+### Onde cada coisa persiste
+
+| O que | Onde salvar | Como persiste |
+|-------|-------------|---------------|
+| Hooks, skills, scripts | `/workspace/mnt/zion/` | git commit + push |
+| Memórias cross-session | `/home/claude/.claude/projects/*/memory/` | volume Docker (some se volume deletado) |
+| Tasks/kanban | `/workspace/obsidian/tasks/` | vault Obsidian do user |
+| Memória dos agentes | `/workspace/obsidian/agents/memory/` | vault Obsidian do user |
+| Tudo que o mini cria | `/tmp/`, memória da sessão | **morre no restart** |
+
+### Pós-instalação
+
+Depois de instalar um módulo, sempre:
+1. `bash -n <arquivo>` — syntax check
+2. Testar localmente se possível
+3. `git commit` com mensagem descritiva
+4. Checar se precisa de `zion update` no host (mudanças no CLI bashly)
