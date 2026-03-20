@@ -1,5 +1,21 @@
-echo "# This file is located at 'src/commands/claude_token.sh'."
-echo "# It contains the implementation for the 'zion claude token' command."
-echo "# The code you write here will be wrapped by a function named 'zion_claude_token_command()'."
-echo "# Feel free to edit this file; your changes will persist when regenerating."
-inspect_args
+# zion claude token — Imprime o OAuth access token do Claude.
+# Util para curl manual: TOKEN=$(zion claude token)
+
+CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
+CREDS="${CLAUDE_DIR}/.credentials.json"
+
+if [[ ! -f "$CREDS" ]]; then
+  echo "Erro: credenciais nao encontradas em $CREDS" >&2
+  exit 1
+fi
+
+# Extrai token sem depender de jq (grep PCRE com fallback sed)
+TOKEN=$(grep -oP '"accessToken"\s*:\s*"\K[^"]+' "$CREDS" 2>/dev/null)
+[[ -z "$TOKEN" ]] && TOKEN=$(sed -n 's/.*"accessToken"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$CREDS" 2>/dev/null | head -1)
+
+if [[ -z "$TOKEN" ]]; then
+  echo "Erro: token nao encontrado em $CREDS" >&2
+  exit 1
+fi
+
+echo "$TOKEN"
