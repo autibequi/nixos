@@ -1,7 +1,16 @@
-{ ... }:
+{ pkgs, ... }:
 let
   user = "pedrinho";
   zionBin = "/home/${user}/.local/bin/zion";
+
+  tickScript = pkgs.writeShellScript "zion-tick" ''
+    if [ ! -x "${zionBin}" ]; then
+      echo "zion-tick: ${zionBin} not found, skipping"
+      exit 0
+    fi
+    export HOME="/home/${user}"
+    exec "${zionBin}" tasks tick
+  '';
 in {
   systemd.services.zion-tick = {
     description = "Zion task tick — executa cards vencidos do kanban";
@@ -10,7 +19,7 @@ in {
     serviceConfig = {
       Type = "oneshot";
       User = user;
-      ExecStart = "${zionBin} tasks tick";
+      ExecStart = "${tickScript}";
       Environment = [
         "HOME=/home/${user}"
         "PATH=/home/${user}/.local/bin:/run/current-system/sw/bin:/usr/bin:/bin"
