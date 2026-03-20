@@ -13,7 +13,7 @@
 | **`zion new`** | Nova sessão no container. Exige `--engine` (ou `engine=` em `~/.zion`). Aliases: `run`, `r`, `open`, `opencode`, `code`. |
 | **`zion resume`** | Mostra lista de sessões, pergunta UUID ou Enter para última, depois conecta. `--resume=UUID` pula a lista. |
 | **`zion new-task <nome>`** | Cria task + card no kanban (Puppy). |
-| **`zion edit`** | Sessão com `~/nixos` em `/workspace/mnt` + `/workspace/logs`. Project name fixo `zion-projects`. |
+| **`zion lab`** | Sessão lab: `~/nixos` em `/workspace/mnt` + `/workspace/logs`. Project name fixo `zion-projects`. Ativa `lab_mode=1`. |
 | **`zion leech [dir]`** | Sessão efêmera em qualquer pasta. Auto-detecta nixos repo → monta logs. Alias: `l`. |
 | **`zion shell`** | Bash no container com o projeto montado. |
 | **`zion tasks tick`** | Executa cards vencidos do kanban (local, sem container). |
@@ -57,14 +57,14 @@ Quando `HEADLESS=1` (tasks via task-runner.sh):
 | `/zion` | `zion/` do repo (skills, commands, agents, bootstrap, scripts) |
 | `/workspace/mnt` | Projeto montado (CWD típico) |
 | `/workspace/obsidian` | Vault Obsidian |
-| `/workspace/logs` | Logs do host — **só em `zion edit`** |
+| `/workspace/logs` | Logs do host — **só em `zion lab`** |
 
 ### Modos de sessão e mounts
 
 | Modo | `/workspace/mnt` | `/workspace/logs` |
 |------|-----------------|-------------------|
 | `zion` / `new` / `shell` / `resume` | Projeto do usuário | ❌ |
-| **`zion edit`** | `~/nixos` (este repo) | ✅ (journal ro) |
+| **`zion lab`** | `~/nixos` (este repo) | ✅ (journal ro) |
 | **`zion leech ~/nixos`** | `~/nixos` (auto-detect) | ✅ (journal ro) |
 | **`zion leech <outro-dir>`** | Dir especificado | ❌ |
 
@@ -85,7 +85,7 @@ Quando `HEADLESS=1` (tasks via task-runner.sh):
 - `/host/proc/*`, `/host/etc/*` (ro, observabilidade)
 - `/workspace/.hive-mind`
 
-Em `zion edit` / `zion leech ~/nixos` (extras):
+Em `zion lab` / `zion leech ~/nixos` (extras):
 - `/workspace/mnt` = `~/nixos`
 - `/workspace/logs/host/journal` ← `/var/log/journal` (ro)
 

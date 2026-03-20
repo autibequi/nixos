@@ -1,13 +1,5 @@
-# Show task execution log (local)
-local lines="${args[--lines]:-20}"
-zion_load_config
-local tasks="${OBSIDIAN_PATH:-$HOME/.ovault/Work}/tasks"
-[ ! -d "$tasks" ] && tasks="/workspace/obsidian/tasks"
-local log="$tasks/log.md"
-
-if [ ! -f "$log" ]; then
-  echo "No task log found at $log"
-  exit 0
-fi
-echo "=== Task Log (last $lines) ==="
-tail -n "$lines" "$log"
+echo "# This file is located at 'src/commands/tasks_status.sh'."
+echo "# It contains the implementation for the 'zion tasks status' command."
+echo "# The code you write here will be wrapped by a function named 'zion_tasks_status_command()'."
+echo "# Feel free to edit this file; your changes will persist when regenerating."
+inspect_args

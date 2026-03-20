@@ -1,16 +1,5 @@
-zion_load_config
-
-mount_path="$(zion_resolve_dir)"
-mount_opts="$(zion_mount_opts)"
-slug="$(zion_proj_slug "$mount_path")"
-proj_name="$(zion_proj_name "$slug")"
-
-# Build engine_args
-engine_args=""
-resume="${args['--resume']:-}"
-[[ -n "$resume" ]] && engine_args+=" --resume=$resume"
-
-init_md="$(zion_initial_md "$mount_path")"
-[[ -n "$init_md" ]] && engine_args+=" --init-md=$init_md"
-
-zion_session_run "claude" "$proj_name" "$mount_path" "$mount_opts" "$engine_args"
+echo "# This file is located at 'src/commands/engine_claude.sh'."
+echo "# It contains the implementation for the 'zion claude new' command."
+echo "# The code you write here will be wrapped by a function named 'zion_claude_new_command()'."
+echo "# Feel free to edit this file; your changes will persist when regenerating."
+inspect_args

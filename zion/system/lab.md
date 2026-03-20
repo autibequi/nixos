@@ -57,11 +57,11 @@ rm -f "$SYSFILE"
 | `/tmp/zion-locks/` | locks de tasks (atomic mkdir) | runtime |
 | `/var/run/docker.sock` | Docker socket — GID 131, eu tenho GID 1000+190 | **sem acesso** |
 
-## Limitações desta sessão (zion edit sem restart)
+## Limitações desta sessão (zion lab sem restart)
 
 - **Sem Docker**: socket precisa GID 131, não estou no grupo
 - `zion tasks run X` requer Docker → precisa rodar no host
-- `zion edit` do host spawna container com `group_add: [131]` — ao reiniciar terei acesso
+- `zion lab` do host spawna container com `group_add: [131]` — ao reiniciar terei acesso
 - O que posso fazer: Claude interno direto, editar arquivos, rodar scripts, task-runner.sh
 
 ## Workflow lab

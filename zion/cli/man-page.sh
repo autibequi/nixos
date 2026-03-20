@@ -12,7 +12,7 @@ cat << 'EOF'
     │  zion                    continua ultima sessao                │
     │  zion new --engine=<e>   nova sessao interativa                │
     │  zion resume             lista e retoma sessao                 │
-    │  zion edit               edita repo NixOS + logs               │
+    │  zion lab                edita repo NixOS + logs (lab_mode)    │
     │  zion shell              bash no container                     │
     │  zion start              [DEPRECATED] use zion claude --danger │
     │                                                                │

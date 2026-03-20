@@ -1,14 +1,14 @@
 ---
 name: feedback_zion_cli_commands
-description: Em zion edit, sempre usar comandos zion (zion stow, zion switch) em vez de comandos raw. Consultar zion man para referência completa.
+description: Em zion lab, sempre usar comandos zion (zion stow, zion switch) em vez de comandos raw. Consultar zion man para referência completa.
 type: feedback
 ---
 
-Em sessão `zion edit`, nunca usar comandos raw quando há equivalente `zion`.
+Em sessão `zion lab`, nunca usar comandos raw quando há equivalente `zion`.
 
 **Why:** O CLI zion unifica operações de host (stow, nh os, hyprctl) com tratamento correto de container vs host via `_zion_host_exec`. Comandos raw não funcionam dentro do container ou são menos seguros.
 
-**How to apply:** Ao sugerir operações de host em zion edit, usar sempre a tabela abaixo. Para ver lista completa: `zion man`.
+**How to apply:** Ao sugerir operações de host em zion lab, usar sempre a tabela abaixo. Para ver lista completa: `zion man`.
 
 | Operação | Usar | Nunca |
 |----------|------|-------|

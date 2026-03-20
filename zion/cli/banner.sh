@@ -24,7 +24,7 @@ cat << 'BANNER'
       █   zion                             zion claude [dir]                █
       █   zion new --engine=<e>            zion cursor [dir]                █
       █   zion resume                      zion opencode [dir]              █
-      █   zion edit                                                         █
+      █   zion lab                                                          █
       █   zion shell                      tasks                             █
       █                                                                     █
       █  docker                            zion tasks tick                  █

@@ -1,23 +1,5 @@
-# Remove sessões Zion paradas/exited e containers órfãos
-zion_load_config
-
-force="${args[--force]:-}"
-
-echo "=== Containers Zion parados ==="
-stopped=$(docker ps -a --filter "name=zion-" --filter "status=exited" --format "{{.Names}}" 2>/dev/null)
-if [ -z "$stopped" ]; then
-  echo "  Nenhum."
-else
-  echo "$stopped"
-  if [ -n "$force" ]; then
-    echo "$stopped" | xargs docker rm 2>/dev/null || true
-    echo "  Removidos."
-  else
-    echo "  Use --force para remover."
-  fi
-fi
-
-echo ""
-echo "=== Containers órfãos (criados pelo compose mas sem projeto) ==="
-docker compose -f "${ZION_ROOT:-$HOME/nixos/zion}/cli/docker-compose.zion.yml" \
-  ps --all 2>/dev/null | grep -v "NAME" | grep -v "running" || echo "  Nenhum."
+echo "# This file is located at 'src/commands/clean.sh'."
+echo "# It contains the implementation for the 'zion clean' command."
+echo "# The code you write here will be wrapped by a function named 'zion_clean_command()'."
+echo "# Feel free to edit this file; your changes will persist when regenerating."
+inspect_args

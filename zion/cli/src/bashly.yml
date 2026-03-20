@@ -514,7 +514,7 @@ commands:
     help: "Status agregado: sessoes e docker services."
     filename: commands/status.sh
 
-  # ── Host operations (stow / switch) ──────────────────────
+  # ── Host operations (stow / os) ───────────────────────────
   - name: stow
     help: "Deploy dotfiles no host via GNU stow (restow, delete, status)."
     args:
@@ -527,14 +527,24 @@ commands:
         help: "Após deploy, recarrega Hyprland (hyprctl reload) e Waybar (SIGUSR2)"
     filename: commands/stow_command.sh
 
-  - name: switch
-    alias: [sw]
-    help: "Aplica configuração NixOS no host (nh os switch/test/boot/build)."
-    args:
-      - name: mode
-        default: switch
-        help: "Modo: switch (default), test, boot, build"
-    filename: commands/switch.sh
+  - name: os
+    help: "Aplica configuração NixOS no host via nh os."
+    commands:
+      - name: switch
+        alias: [sw]
+        help: "nh os switch (aplica imediatamente)"
+        filename: commands/os_switch.sh
+      - name: test
+        alias: [t]
+        help: "nh os test (aplica sem tornar default)"
+        filename: commands/os_test.sh
+      - name: boot
+        alias: [b]
+        help: "nh os boot (aplica no próximo boot)"
+        filename: commands/os_boot.sh
+      - name: build
+        help: "nh os build (só compila, não aplica)"
+        filename: commands/os_build.sh
 
   - name: leech
     alias: [l]
@@ -566,8 +576,8 @@ commands:
         default: contexto.md
     filename: commands/leech.sh
 
-  - name: edit
-    help: Abre sessao com ~/nixos em /workspace/mnt e /workspace/logs.
+  - name: lab
+    help: "Abre sessão lab: ~/nixos em /workspace/mnt + /workspace/logs (lab_mode=1)."
     flags:
       - long: --engine
         arg: engine
@@ -578,7 +588,7 @@ commands:
       - long: --model
         arg: model
         help: "Modelo Claude: haiku | sonnet | opus (default: sonnet)"
-    filename: commands/host_edit.sh
+    filename: commands/lab.sh
 
   # ── Git helpers ───────────────────────────────────────────
   - name: git

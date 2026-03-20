@@ -4,7 +4,7 @@ description: Onde encontrar logs de serviços, testes e containers Docker no amb
 type: reference
 ---
 
-Logs de monitoramento ficam em `/workspace/logs/` (disponível em todas as sessões, não só `zion edit`).
+Logs de monitoramento ficam em `/workspace/logs/` (disponível em todas as sessões, não só `zion lab`).
 
 **Estrutura no agente (`/workspace/logs/docker/<service>/`):**
 - `service.log` — logs do servidor em runtime (streaming do docker compose)
@@ -24,6 +24,6 @@ Logs de monitoramento ficam em `/workspace/logs/` (disponível em todas as sess�
 **No container do teste:** o mesmo diretório é montado em `/workspace/logs` (rw) — testes podem escrever artefatos lá
 
 **Logs do host/sistema:**
-- `/workspace/logs/host/journal/` — journal systemd do host NixOS (só em `zion edit`)
+- `/workspace/logs/host/journal/` — journal systemd do host NixOS (só em `zion lab`)
 
 **Regra:** quando o usuário falar sobre logs de um serviço ou testes, buscar em `/workspace/logs/docker/<nome>/`. Para logs do sistema/host, usar `/workspace/logs/host/journal/`.

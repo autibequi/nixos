@@ -1,11 +1,5 @@
-# Para containers, remove imagens e volumes do projeto
-zion_load_config
-compose_zion="${ZION_ROOT:-$HOME/nixos/zion}/cli/docker-compose.zion.yml"
-
-echo "Destroying zion session containers + volumes..."
-docker compose -f "$compose_zion" down --volumes --remove-orphans 2>/dev/null || true
-
-echo "Removing claude-nix-sandbox image..."
-docker image rm claude-nix-sandbox 2>/dev/null || echo "  (image not found or in use)"
-
-echo "Done."
+echo "# This file is located at 'src/commands/destroy.sh'."
+echo "# It contains the implementation for the 'zion destroy' command."
+echo "# The code you write here will be wrapped by a function named 'zion_destroy_command()'."
+echo "# Feel free to edit this file; your changes will persist when regenerating."
+inspect_args

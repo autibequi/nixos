@@ -22,7 +22,7 @@ Chamar automaticamente quando a task envolver:
 ## Procedimento
 
 1. Verificar se está em ambiente zion_edit (checar `zion_edit=1` no boot ou se `/workspace/logs` existe).
-   Se não estiver: informar "Zion Debug só disponível em sessão zion edit." e parar.
+   Se não estiver: informar "Zion Debug só disponível em sessão zion lab." e parar.
 
 2. Verificar flag: `/workspace/.ephemeral/zion-debug`
 
