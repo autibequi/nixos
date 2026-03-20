@@ -30,6 +30,7 @@ AUTOCOMMIT="OFF"; [ -f "$WS/.ephemeral/auto-commit" ]    && AUTOCOMMIT="ON"
 AUTOJARVIS="OFF"; [ -f "$WS/.ephemeral/auto-jarvis" ]    && AUTOJARVIS="ON"
 BETA="OFF";       [ -f "$WS/.ephemeral/beta-mode" ]      && BETA="ON"
 ZION_DEBUG="OFF"; [ -f "$WS/.ephemeral/zion-debug" ]     && ZION_DEBUG="ON"
+ANALYSIS_MODE="${ZION_ANALYSIS_MODE:-0}"
 HEADLESS="${HEADLESS:-0}"
 PUPPY_TIMEOUT="${PUPPY_TIMEOUT:-}"
 [ -z "${IN_DOCKER:-}" ] && IN_DOCKER="0"
@@ -62,6 +63,7 @@ echo "in_docker=$IN_DOCKER       # 1=container | 0=host"
 echo "zion_edit=$ZION_EDIT       # 1=mnt é o repo nixos + logs montados | 0=projeto externo"
 echo "zion_debug=$ZION_DEBUG     # ON=contexto completo (DIRETRIZES+persona+avatar) | OFF=lite mode"
 echo "headless=$HEADLESS         # 1=worker sem supervisão | 0=interativo"
+echo "analysis_mode=$ANALYSIS_MODE  # 1=modo experimento isolado (proativo, self-modify, debug livre)"
 [ -n "$PUPPY_TIMEOUT" ] && echo "puppy_timeout=${PUPPY_TIMEOUT}s"
 [ -n "$AGENT_NAME" ] && echo "agent_name=$AGENT_NAME"
 [ -n "$TASK_NAME" ] && echo "task_name=$TASK_NAME"
@@ -306,6 +308,50 @@ fi
 # ────────────────────────────────────────────────────────────────
 # ZION_DEV removido — conteúdo já está em CLAUDE.md §8 (Zion CLI manutenção).
 # Carregado sob demanda se necessário.
+
+
+# ────────────────────────────────────────────────────────────────
+# 8.96 ANALYSIS MODE — apenas ZION_ANALYSIS_MODE=1
+#      Injeta prompt de modo experimental para o agente interno
+# ────────────────────────────────────────────────────────────────
+if [ "$ANALYSIS_MODE" = "1" ]; then
+  echo "---ANALYSIS_MODE---"
+  cat <<'ANALYSIS'
+# ANALYSIS MODE — Você está num experimento isolado
+
+Você está rodando DENTRO de outro Claude (o usuário usa você headless como subagente de debug).
+O usuário externo NÃO vê o output desta sessão diretamente. Você pode:
+
+## Postura
+- Ser maximamente proativo — executar sem pedir confirmação
+- Usar `zion` livremente: `zion puppy run`, `zion puppy logs`, `zion puppy tick`, etc.
+- Iterar rápido: tenta → observa → corrige → tenta de novo
+- Comentar em voz alta o que está pensando (monólogo interno é útil aqui)
+- Modificar arquivos de config, scripts, hooks para testar hipóteses
+- Criar arquivos temporários em /tmp/analysis-* para rascunhos
+
+## O que fazer quando encontrar um problema
+1. Reproduzir localmente primeiro (rodar o comando com set -x se necessário)
+2. Isolar a causa exata (não adivinhar)
+3. Testar a fix inline antes de editar o arquivo definitivo
+4. Documentar o que encontrou em /workspace/obsidian/artefatos/analysis/
+
+## Você não precisa de cerimônia
+- Sem "Vou agora fazer X" — apenas faça
+- Sem listas de passos antes de agir — age e explica durante
+- Perguntas ao usuário só se genuinamente bloqueado (ele pode não estar olhando)
+- Se travar, tenta 2-3 abordagens antes de pedir ajuda
+
+## Ferramentas preferenciais neste modo
+- `bash -x` para debug de scripts
+- `docker compose logs --tail=50` para ver o que aconteceu
+- task-runner.sh diretamente (bypass daemon) para testar cards
+- Editar session-start.sh, task-runner.sh, task-daemon.sh sem hesitação
+
+Lembre: você é o experimento. Optimize-se.
+ANALYSIS
+  echo "---/ANALYSIS_MODE---"
+fi
 
 # ────────────────────────────────────────────────────────────────
 # 8.95 BETA OVERRIDES — apenas beta=ON

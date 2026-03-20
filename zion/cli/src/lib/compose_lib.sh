@@ -226,6 +226,9 @@ zion_session_run() {
   local mount_opts="$4"
   local engine_args="${5:-}"
   local extra_volumes="${6:-}"
+  # Analysis mode: passa ZION_ANALYSIS_MODE=1 pro container via env
+  local analysis_env=""
+  [[ -n "${flag_analysis_mode:-${args['--analysis-mode']:-}}" ]] && analysis_env="-e ZION_ANALYSIS_MODE=1"
 
   zion_compose_env "$mount_path" "$mount_opts"
 
@@ -262,13 +265,13 @@ zion_session_run() {
 
       # Opencode: persistent (up + exec) for new; ephemeral (run) for continue/resume
       if [[ "$engine_args" == *"--continue"* ]] || [[ "$engine_args" == *"--resume"* ]]; then
-        zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes \
+        zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes $analysis_env \
           --entrypoint /entrypoint.sh "${oc_envs[@]}" leech \
           /bin/bash -c 'cd /workspace/mnt && opencode'
       else
         zion_compose_cmd -p "$proj_name" up -d leech
         zion_compose_cmd -p "$proj_name" exec -it -u claude \
-          "${oc_envs[@]}" leech bash -c 'cd /workspace/mnt && exec opencode'
+          $analysis_env "${oc_envs[@]}" leech bash -c 'cd /workspace/mnt && exec opencode'
       fi
       ;;
 
@@ -305,7 +308,7 @@ zion_session_run() {
       # Always bypass permissions (was hardcoded in continue and resume)
       [[ "$claude_args" != *"--permission-mode"* ]] && claude_args+=" --permission-mode bypassPermissions"
 
-      zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes \
+      zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes $analysis_env \
         --entrypoint /entrypoint.sh -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" leech \
         /bin/bash -c ". /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
       ;;
@@ -340,7 +343,7 @@ zion_session_run() {
         cursor_cmd+='exec agent'"${agent_flags}"
       fi
 
-      zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes \
+      zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes $analysis_env \
         --entrypoint /entrypoint.sh "${cursor_envs[@]}" leech \
         /bin/bash -c "$cursor_cmd"
       ;;

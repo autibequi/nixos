@@ -31,6 +31,9 @@ flags:
     arg: session_id
     help: "Retoma sessão: cursor/agent usa --resume=UUID; claude usa --resume; opencode: env ZION_RESUME_SESSION."
 
+  - long: --analysis-mode
+    short: -A
+    help: "Modo análise: injeta prompt experimental no container (proativo, self-modifying, debug livre sem output pro user)."
 commands:
   - name: continue
     alias: [cont]
