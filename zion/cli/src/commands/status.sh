@@ -289,20 +289,20 @@ while true; do
             break
             ;;
           l)
-            trap '' INT
+            trap - INT
             printf "\033[2J\033[H"
             zion docker "$_cursor_svc" logs || true
             trap 'exit 0' INT TERM
-            printf "\033[2J\033[H"  # limpa tela antes de voltar ao TUI
-            _lines=0; break
+            printf "\033[2J\033[H"
+            break
             ;;
           t)
-            trap '' INT
+            trap - INT
             printf "\033[2J\033[H"
             zion docker "$_cursor_svc" test || true
             trap 'exit 0' INT TERM
-            printf "\033[2J\033[H"  # limpa tela antes de voltar ao TUI
-            _lines=0; break
+            printf "\033[2J\033[H"
+            break
             ;;
           q) exit 0 ;;
         esac
