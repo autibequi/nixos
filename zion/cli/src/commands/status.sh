@@ -82,7 +82,7 @@ _do_status_render() {
   local _pid_dk=$!
 
   # Header enquanto coleta
-  echo -e "${BOLD}${MAGENTA}  Zion Status${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}\n"
+  echo -e "${BOLD}${MAGENTA}  Zion Status${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}  ${DIM}$(TZ=UTC date '+%H:%M') UTC${RESET}\n"
 
   # Quota: lê do arquivo de background (instantâneo)
   cat "$_quota_file" 2>/dev/null || true
@@ -235,7 +235,7 @@ _update_header() {
   done
   printf '\033[?25l'
   printf '\033[2;1H'  # linha 2, col 1 (sempre o header)
-  printf "  ${BOLD}${MAGENTA}Zion Status${RESET}  ${DIM}$(date '+%H:%M:%S')  ${_ind}${RESET}\033[K"
+  printf "  ${BOLD}${MAGENTA}Zion Status${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}  ${DIM}$(TZ=UTC date '+%H:%M') UTC  ${_ind}${RESET}\033[K"
   printf '\033[?25h'
 }
 
