@@ -79,6 +79,7 @@ AGENTS_DIR="/workspace/nixos/.ephemeral/agents"
 LIVE_MAX_AGE=900
 if [[ -d "$AGENTS_DIR" ]]; then
   now_sec=$(date +%s)
+  for dir in "$AGENTS_DIR"/*/; do
     [[ "$dir" == *"*"* ]] && continue
     [[ -d "$dir" ]] || continue
     [[ -f "$dir/.live" ]] || continue

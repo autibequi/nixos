@@ -313,6 +313,9 @@ zion_session_run() {
       # Always bypass permissions (was hardcoded in continue and resume)
       [[ "$claude_args" != *"--permission-mode"* ]] && claude_args+=" --permission-mode bypassPermissions"
 
+      # Session name = mounted folder (shown in header and statusline)
+      [[ -n "$mount_path" ]] && claude_args+=" --name ${mount_path##*/}"
+
       zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes $analysis_env \
         --entrypoint /entrypoint.sh -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" leech \
         /bin/bash -c ". /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
@@ -321,7 +324,9 @@ zion_session_run() {
     cursor)
       danger="$(zion_danger_flag cursor)"
       model="$(zion_model_flag cursor)"
-      local agent_flags="${danger}${model:+ $model}"
+      local name_flag=""
+      [[ -n "$mount_path" ]] && name_flag=" --name ${mount_path##*/}"
+      local agent_flags="${danger}${model:+ $model}${name_flag}"
 
       local cursor_envs=()
       cursor_envs+=(-e "CLAUDIO_MOUNT=$mount_path")

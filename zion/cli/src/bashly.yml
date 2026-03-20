@@ -190,6 +190,10 @@ commands:
     help: Para todos os containers do projeto.
     filename: commands/down.sh
 
+  - name: shutdown
+    help: "Para containers do compose + mata qualquer stray com nome zion/claude/puppy."
+    filename: commands/shutdown.sh
+
   - name: destroy
     help: Para containers e remove imagens/volumes.
     filename: commands/destroy.sh

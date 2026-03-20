@@ -23,6 +23,17 @@ _zion_dk_status() {
   local icon_stopped="${RED}○${RESET}"
   local icon_partial="${YELLOW}◐${RESET}"
 
+  # Cache de stats: "NOME cpu mem" por linha — buscado uma vez
+  local _stats_cache
+  _stats_cache=$(docker stats --no-stream \
+    --format "{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" 2>/dev/null || true)
+
+  # Lookup cpu/mem para um container
+  stats_for() {
+    local cname="$1"
+    echo "$_stats_cache" | awk -F'\t' -v n="$cname" '$1==n {print $2, $3}' | head -1
+  }
+
   # Extrai portas unicas no formato :PORT (remove duplicatas ipv4/ipv6)
   format_ports() {
     local raw="$1"
@@ -40,7 +51,6 @@ _zion_dk_status() {
   format_status() {
     local s="$1"
     if echo "$s" | grep -qi "up"; then
-      # extrai tempo
       local t
       t=$(echo "$s" | sed -E 's/Up //i; s/ \(.*\)//')
       t=$(echo "$t" | sed -E 's/ minutes?/min/; s/ hours?/h/; s/ days?/d/; s/ weeks?/w/')
@@ -54,7 +64,7 @@ _zion_dk_status() {
     fi
   }
 
-  # Imprime: tempo  nome  :port1  :port2  (tudo na mesma linha, nome alinhado)
+  # Imprime: uptime  nome  :ports  cpu  mem
   print_container_row() {
     local tree_pfx="$1" name="$2" status="$3" ports="$4"
     local TIME_W=9 NAME_W=14
@@ -70,41 +80,60 @@ _zion_dk_status() {
     local padded_name
     padded_name=$(printf "%-${NAME_W}s" "$name")
 
-    echo -e "${tree_pfx}$(printf "%-${TIME_W}b" "$status_str")  ${WHITE}${padded_name}${RESET}${ports_str}"
+    # Stats (cpu/mem) — só se container estiver up
+    local stats_str=""
+    if echo "$status" | grep -qi "^up"; then
+      local raw_stats
+      raw_stats=$(stats_for "$name")
+      if [[ -z "$raw_stats" ]]; then
+        # tenta com prefixo do projeto
+        local full_name
+        full_name=$(echo "$_stats_cache" | awk -F'\t' -v n="$name" '$1 ~ n {print $1}' | head -1)
+        [[ -n "$full_name" ]] && raw_stats=$(stats_for "$full_name")
+      fi
+      if [[ -n "$raw_stats" ]]; then
+        local cpu mem
+        cpu=$(echo "$raw_stats" | awk '{print $1}')
+        mem=$(echo "$raw_stats" | awk '{print $2, $3, $4}')
+        stats_str="  ${DIM}cpu ${YELLOW}${cpu}${RESET}${DIM}  mem ${CYAN}${mem}${RESET}"
+      fi
+    fi
+
+    echo -e "${tree_pfx}$(printf "%-${TIME_W}b" "$status_str")  ${WHITE}${padded_name}${RESET}${ports_str}${stats_str}"
   }
+
+  # all_dk_rows: cache unico de todos os containers zion-dk-* (evita N chamadas docker ps)
+  local _all_dk_rows
+  _all_dk_rows=$(docker ps -a --filter "name=zion-dk-" \
+    --format "{{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || true)
 
   print_service_tree() {
     local svc="$1"
-    local project compose
-    project=$(zion_docker_project_name "$svc")
-    compose=$(zion_docker_compose_file "$svc")
+    local project
+    project=$(zion_docker_project_name "$svc")  # zion-dk-<svc>
 
-    local running deps_running
-    running=$(docker compose -f "$compose" -p "$project" ps --status running 2>/dev/null | tail -n +2 | wc -l)
-    deps_running=$(docker compose -p "${project}-deps" ps --status running 2>/dev/null | tail -n +2 | wc -l)
-    local total=$((running + deps_running))
+    # Separa main (nao deps) de deps — baseado em nome, nao em label compose
+    local main_rows deps_rows
+    main_rows=$(echo "$_all_dk_rows" | grep -E "^${project}-" | grep -vE "^${project}-deps-" || true)
+    deps_rows=$(echo "$_all_dk_rows"  | grep -E "^${project}-deps-" || true)
 
-    # Header
-    if [[ "$total" -eq 0 ]]; then
+    local any_rows="${main_rows}${deps_rows}"
+    if [[ -z "$any_rows" ]]; then
       echo -e "${icon_stopped} ${BOLD}${CYAN}${svc}${RESET}  ${DIM}parado${RESET}"
       return
     fi
 
-    local svc_icon="$icon_running"
-    [[ "$running" -eq 0 || "$deps_running" -eq 0 ]] && svc_icon="$icon_partial"
+    # Icone: verde se algum main esta up, amarelo se so deps, vermelho se tudo exited
+    local svc_icon="$icon_stopped"
+    echo "$main_rows" | grep -qi "	Up " && svc_icon="$icon_running"
+    [[ "$svc_icon" == "$icon_stopped" ]] && \
+      echo "$deps_rows" | grep -qi "	Up " && svc_icon="$icon_partial"
 
     local has_deps=0
-    local dep_rows_raw
-    dep_rows_raw=$(docker compose -p "${project}-deps" ps --format "{{.Name}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null)
-    local dep_lines=()
-    while IFS= read -r line; do [[ -n "$line" ]] && dep_lines+=("$line"); done <<< "$dep_rows_raw"
-    [[ "${#dep_lines[@]}" -gt 0 ]] && has_deps=1
+    [[ -n "$deps_rows" ]] && has_deps=1
 
     echo -e "${svc_icon} ${BOLD}${CYAN}${svc}${RESET}"
 
-    # App containers
-    local main_rows
-    main_rows=$(docker compose -f "$compose" -p "$project" ps --format "{{.Name}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null)
     if [[ -n "$main_rows" ]]; then
       local branch_char="├─"
       [[ "$has_deps" -eq 0 ]] && branch_char="└─"
