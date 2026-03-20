@@ -213,7 +213,7 @@ _do_status_render() {
   # Rodapé interativo
   echo -e "${DIM}──────────────────────────────────────────────────${RESET}"
   local _cenv="${_svc_env[$_cursor_svc]:-sand}"
-  echo -e "  ${DIM}↑↓ navegar   ${GREEN}e${RESET}${DIM}[${YELLOW}${_cenv}${RESET}${DIM}]   ${CYAN}s${RESET}${DIM} iniciar   ${RED}S${RESET}${DIM} parar   ${BLUE}l${RESET}${DIM} logs   ${YELLOW}t${RESET}${DIM} test   [${_cursor_svc}]${RESET}"
+  echo -e "  ${DIM}↑↓ navegar   ${GREEN}e${RESET}${DIM}[${YELLOW}${_cenv}${RESET}${DIM}]   ${CYAN}s${RESET}${DIM} iniciar   ${RED}S${RESET}${DIM} parar   ${BLUE}l${RESET}${DIM} logs   ${YELLOW}t${RESET}${DIM} test   ${MAGENTA}x${RESET}${DIM} shell   [${_cursor_svc}]${RESET}"
 }
 
 # Alternate screen: posicionamento absoluto, sem tracking de linhas
@@ -301,6 +301,14 @@ while true; do
             trap - INT
             printf "\033[2J\033[H"
             zion docker "$_cursor_svc" test || true
+            trap 'exit 0' INT TERM
+            printf "\033[2J\033[H"
+            break
+            ;;
+          x)
+            trap - INT
+            printf "\033[2J\033[H"
+            zion docker "$_cursor_svc" shell || true
             trap 'exit 0' INT TERM
             printf "\033[2J\033[H"
             break
