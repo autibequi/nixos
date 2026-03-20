@@ -364,3 +364,24 @@ zion_session_run() {
       ;;
   esac
 }
+
+# Helper: lança sessão com engine forçado — usado por zion cursor/opencode/claude new
+# Uso: zion_launch_session <engine>
+zion_launch_session() {
+  local forced_engine="$1"
+  args['--engine']="$forced_engine"
+  zion_load_config
+  local mount_path engine engine_args init_md
+  mount_path="$(zion_resolve_dir)"
+  local mount_opts slug proj_name
+  mount_opts="$(zion_mount_opts)"
+  slug="$(zion_proj_slug "$mount_path")"
+  proj_name="$(zion_proj_name "$slug")"
+  engine="$(zion_resolve_engine 1)"
+  engine_args=""
+  local resume="${args['--resume']:-}"
+  [[ -n "$resume" ]] && engine_args+=" --resume=$resume"
+  init_md="$(zion_initial_md "$mount_path")"
+  [[ -n "$init_md" ]] && engine_args+=" --init-md=$init_md"
+  zion_session_run "$engine" "$proj_name" "$mount_path" "$mount_opts" "$engine_args"
+}

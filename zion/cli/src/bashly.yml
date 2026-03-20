@@ -460,23 +460,21 @@ commands:
             arg: max_turns
             help: "Sobrescreve max_turns do frontmatter do card."
         filename: commands/tasks_run.sh
-      - name: status
-        alias: [st, log]
-        help: "Mostra log de ultimas execucoes."
-        flags:
-          - long: --lines
-            short: -n
-            arg: lines
-            default: "20"
-            help: "Numero de linhas (default 20)"
-        filename: commands/tasks_status.sh
       - name: list
-        alias: [ls]
-        help: "Lista cards em TODO/DOING/DONE."
+        alias: [ls, status, st, log]
+        help: "Lista cards em TODO/DOING/DONE. Com --log mostra log de execucao."
         flags:
           - long: --all
             short: -a
             help: "Mostra todas as pastas (TODO + DOING + DONE)"
+          - long: --log
+            short: -l
+            help: "Mostra log de execucao em vez dos cards"
+          - long: --lines
+            short: -n
+            arg: lines
+            default: "20"
+            help: "Linhas do log (default 20, so com --log)"
         filename: commands/tasks_list.sh
       - name: new
         help: "Cria um novo card de task."

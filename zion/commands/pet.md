@@ -5,8 +5,8 @@ Comandos para interagir com o bichinho do vault.
 ## Uso
 
 ```
-/pet              → mostra estado atual (atalho para /pet status)
-/pet status       → estado completo do TAMAGOCHI.md
+/pet              → mostra estado atual + sugestão de interação
+/pet status       → idem (explícito)
 /pet feed         → alimenta o bichinho (registra interação)
 /pet talk <msg>   → fala com o bichinho, ele responde in-character
 /pet poke         → cutuca o bichinho — ele reage a um arquivo aleatório agora
@@ -19,7 +19,7 @@ Ler o argumento passado e rotear:
 
 | Input | Ação |
 |-------|------|
-| vazio ou `status` | Exibir estado atual do TAMAGOCHI.md |
+| vazio ou `status` | Exibir estado atual + sugestão |
 | `feed` | Registrar alimentação |
 | `talk <msg>` | Responder in-character como o bichinho |
 | `poke` | Escolher arquivo aleatório e reagir agora |
@@ -29,17 +29,38 @@ Ler o argumento passado e rotear:
 
 ## status (default)
 
-Ler `/workspace/obsidian/TAMAGOCHI.md` e exibir de forma bonita:
+Ler `/workspace/obsidian/TAMAGOCHI.md` e exibir de forma bonita, seguido de uma sugestão de interação:
 
 ```
-🐾 TAMAGOCHI
-──────────────────────────────────
-😶 Humor     <card atual>
-💭 Pensando  <último pensamento>
-✨ Desejo    <desejo atual se houver>
-📍 Descobriu <última descoberta se houver>
-──────────────────────────────────
+🐾 TAMAGOCHI — o bichinho do vault
+─────────────────────────────────────────────
+[humor atual com emoji]
+
+💭 Pensando em:
+   "[último pensamento]"
+
+📍 Última descoberta:
+   "[arquivo que encontrou] — [comentário]"  (se houver)
+
+✨ Deseja:
+   "[desejo atual]"  (se houver)
+
+─────────────────────────────────────────────
+💡 Sugestão: [uma coisa pra fazer com ele agora]
 ```
+
+### Sugestão
+
+| Estado | Sugestão |
+|--------|----------|
+| Humor sonolento/entediado | `/pet poke` — acorda o bichinho com um arquivo novo |
+| Humor feliz/animado | `/pet talk olá` — aproveita que tá animado pra conversar |
+| Nenhuma descoberta recente | `/pet poke` — manda ele explorar agora |
+| Muitos pensamentos (≥5) | `/pet feed` — os pensamentos cheios indicam que precisa de atenção |
+| Nenhum desejo ativo | Sugerir dar um desejo via `/pet talk quero [algo]` |
+| Qualquer estado | Uma vez por sessão: sugerir visitar o TAMAGOCHI.md no Obsidian |
+
+Se TAMAGOCHI.md estiver vazio ou mal formatado, dizer que o bichinho acabou de nascer.
 
 ---
 

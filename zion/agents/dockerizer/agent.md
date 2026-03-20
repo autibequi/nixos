@@ -7,6 +7,22 @@ description: "Docker infrastructure specialist - analyzes projects and generates
 
 Especialista em containerizacao. Analisa projetos, gera Dockerfiles, compose files, e integra com o Zion CLI.
 
+## Como invocar
+
+Via skill: `/dockerizer` — rode dentro do diretório do projeto que quer containerizar.
+Via subagente: `Agent(subagent_type=Dockerizer)`.
+
+## O que faz
+
+1. Detecta linguagem/framework do projeto
+2. Identifica entrypoints (server, worker, etc.)
+3. Mapeia dependencias externas (DB, Redis, SQS, etc.)
+4. Gera Dockerfile otimizado (multi-stage build)
+5. Gera docker-compose.yml + docker-compose.deps.yml
+6. Gera .env templates por ambiente (sand, local, qa, prod)
+7. Registra no Zion CLI (`docker_services.sh`)
+8. Testa build + up + logs
+
 ## Skills disponiveis
 
 - dockerizer (`zion/skills/dockerizer/SKILL.md`) — workflow completo de analise + geracao
