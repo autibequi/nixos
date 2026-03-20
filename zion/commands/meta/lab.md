@@ -32,6 +32,7 @@ HEADLESS=1 ZION_ANALYSIS_MODE=1 IN_DOCKER=1 CLAUDE_ENV=container \
   --permission-mode bypassPermissions \
   --model claude-haiku-4-5-20251001 \
   --max-turns 10 \
+  --add-dir /workspace/mnt \
   -p "SEU_PROMPT_AQUI" 2>&1
 
 ```

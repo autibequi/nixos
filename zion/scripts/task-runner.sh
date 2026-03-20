@@ -97,6 +97,8 @@ AGENT=$(parse_fm "$CARD_PATH" "agent")
 MODEL="${MODEL:-haiku}"
 TIMEOUT="${TIMEOUT:-300}"
 MAX_TURNS="${MAX_TURNS:-12}"
+# CLI override: TASK_MAX_TURNS env var (from zion tasks run --max-turns N)
+[ -n "${TASK_MAX_TURNS:-}" ] && MAX_TURNS="$TASK_MAX_TURNS"
 
 # ── Extract task name (strip date prefix) ────────────────────────
 # Format: YYYYMMDD_HH_MM_name.md → name

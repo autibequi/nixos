@@ -64,8 +64,9 @@ x-base-volumes: &base-volumes
 services:
   puppy:
     image: claude-nix-sandbox
+    cpus: "14.4"
     mem_limit: 12g
-    memswap_limit: 16g
+    memswap_limit: 12g
     stdin_open: true
     tty: true
     network_mode: host

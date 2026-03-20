@@ -4,6 +4,9 @@ services:
       context: ${FRONT_STUDENT_DIR}
       dockerfile: ${ZION_NIXOS_DIR}/zion/dockerized/front-student/Dockerfile
     container_name: zion-dk-front-student-app
+    cpus: "14.4"
+    mem_limit: 4g
+    memswap_limit: 4g
     env_file:
       - ./env/${APP_ENV_FILE:-sandbox}.env
     environment:

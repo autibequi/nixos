@@ -4,6 +4,9 @@ services:
       context: ${MONOLITO_DIR}
       dockerfile: ${ZION_NIXOS_DIR}/zion/dockerized/monolito/Dockerfile.worker
     container_name: zion-dk-monolito-worker
+    cpus: "14.4"
+    mem_limit: 4g
+    memswap_limit: 4g
     env_file:
       - ${MONOLITO_DIR}/.env.${APP_ENV_FILE:-sandbox}
       - ./env/${APP_ENV:-sand}.env

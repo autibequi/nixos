@@ -574,6 +574,11 @@ commands:
           - name: name
             required: true
             help: "Nome da task (ex: doctor). Busca em TODO/ e DOING/."
+        flags:
+          - long: --max-turns
+            short: -t
+            arg: max_turns
+            help: "Sobrescreve max_turns do frontmatter do card."
         filename: commands/tasks_run.sh
       - name: status
         alias: [st, log]
@@ -615,6 +620,18 @@ commands:
             arg: agent
             help: "Nome do agente (carrega memory)"
         filename: commands/tasks_new.sh
+      - name: tick
+        alias: [tk]
+        help: "Roda um tick local: lista cards vencidos e executa serialmente. Usa #stepsN no card como max_turns (default 30)."
+        flags:
+          - long: --dry-run
+            short: -d
+            help: "Apenas lista o que seria executado, sem rodar."
+          - long: --steps
+            short: -s
+            arg: steps
+            help: "Sobrescreve #stepsN de todos os cards."
+        filename: commands/tasks_tick.sh
 
   - name: status
     alias: [st]
