@@ -305,12 +305,32 @@ _zion_dk_status() {
     local no_header="${2:-0}"
     [[ "$no_header" -eq 0 ]] && echo -e "\n${BOLD}${MAGENTA}  Zion Docker${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}\n"
     local services_list="monolito bo-container front-student"
-    local count=0
-    local total_svcs
-    total_svcs=$(echo "$services_list" | wc -w)
     for svc in $services_list; do
-      count=$((count + 1))
+      echo ""
       print_service_tree "$svc"
     done
+
+    # Reverse proxy
+    local rp_row
+    rp_row=$(docker ps -a --filter "name=zion-reverseproxy" \
+      --format "{{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null \
+      | grep "^zion-reverseproxy	" | head -1)
+    if [[ -n "$rp_row" ]]; then
+      echo ""
+      IFS=$'\t' read -r _rp_name rp_status rp_ports <<< "$rp_row"
+      local rp_icon rp_uptime rp_uptime_colored
+      echo "$rp_status" | grep -qi "^up" && rp_icon="${GREEN}●${RESET}" || rp_icon="${RED}○${RESET}"
+      rp_uptime=$(format_status "$rp_status")
+      if echo "$rp_status" | grep -qi "^up"; then
+        rp_uptime_colored="${ORANGE}${rp_uptime}${RESET}"
+      else
+        rp_uptime_colored="${RED}${rp_uptime}${RESET}"
+      fi
+      local rp_ports_str=""
+      local rp_ports_fmt
+      rp_ports_fmt=$(format_ports "$rp_ports")
+      [[ -n "$rp_ports_fmt" ]] && rp_ports_str="  ${DIM}${rp_ports_fmt}${RESET}"
+      echo -e "${rp_icon} ${DIM}reverseproxy${RESET}  ${rp_uptime_colored}${rp_ports_str}"
+    fi
   fi
 }
