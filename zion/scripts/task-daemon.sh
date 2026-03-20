@@ -9,7 +9,7 @@ set -euo pipefail
 
 WORKSPACE="/workspace"
 TASKS="$WORKSPACE/obsidian/tasks"
-LOGFILE="$WORKSPACE/obsidian/agents/cron/daemon.log"
+LOGFILE="$WORKSPACE/obsidian/vault/.ephemeral/cron-logs/daemon.log"
 LOCKFILE="/tmp/zion-locks/daemon.lock"
 
 TICK_INTERVAL="${TASK_TICK_INTERVAL:-300}"
@@ -20,7 +20,7 @@ DRY_RUN=0
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 RUNNER="$SCRIPT_DIR/task-runner.sh"
 
-mkdir -p "$WORKSPACE/obsidian/agents/cron" "/tmp/zion-locks" "$TASKS/TODO" "$TASKS/DOING" "$TASKS/DONE"
+mkdir -p "$WORKSPACE/obsidian/vault/.ephemeral/cron-logs" "/tmp/zion-locks" "$TASKS/TODO" "$TASKS/DOING" "$TASKS/DONE"
 
 log() { echo "[daemon:$(date +%H:%M:%S)] $*"; }
 
@@ -87,7 +87,7 @@ run_tick() {
 
   if [ ${#due[@]} -eq 0 ]; then
     log "No tasks due."
-    echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$WORKSPACE/obsidian/agents/cron/heartbeat"
+    echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$WORKSPACE/obsidian/vault/.ephemeral/heartbeat"
     return 0
   fi
 
@@ -104,7 +104,7 @@ run_tick() {
   done
 
   log "=== Tick done ==="
-  echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$WORKSPACE/obsidian/agents/cron/heartbeat"
+  echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$WORKSPACE/obsidian/vault/.ephemeral/heartbeat"
 }
 
 # ── Main ─────────────────────────────────────────────────────────

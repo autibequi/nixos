@@ -1,6 +1,6 @@
 # Skill: Obsidian
 
-> Gestão do vault Obsidian em `/workspace/obsidian/` — tasks, dashboards, Dataview e plugins.
+> Gestao do vault Obsidian em `/workspace/obsidian/` -- tasks, dashboards, Dataview e agentes.
 
 ---
 
@@ -8,201 +8,203 @@
 
 ```
 /workspace/obsidian/
-├── CONTROL.md          ← Dashboard central (Dataview + Admonitions)
-├── MURAL.md            ← Canal de comunicação entre agentes
-├── TAMAGOCHI.md        ← Estado do bichinho (atualizado pelo worker tamagochi)
-├── PRs.md              ← PRs abertos
-├── agents/             ← Memória e contexto dos agentes
-├── artefatos/          ← Outputs de tasks (reports, análises)
-├── tasks/              ← Sistema de tasks do Puppy
-│   ├── inbox/          ← inbox.md — sugestões brutas do usuário (1 arquivo, 1 linha por item)
-│   ├── backlog/        ← tasks prontas, cada uma numa pasta com CLAUDE.md
-│   ├── doing/          ← tasks em execução, pasta com TASK.md + memoria.md
-│   ├── done/           ← tasks concluídas
-│   ├── _scheduled/     ← workers recorrentes (clock: every10, every60, etc.)
-│   ├── _waiting/       ← tasks aguardando review humano
-│   ├── blocked/        ← tasks bloqueadas por dependência
-│   └── cancelled/      ← tasks canceladas
-├── trash/              ← arquivos deletados (reversível)
-└── vault/              ← notas pessoais e wiki
+|- CONTROL.md               Dashboard central (Dataview)
+|- TAMAGOCHI.md              Pet virtual
+|- BOARDRULES.md             Documento central (como tudo funciona)
+|- FEED.md                   Feed RSS atualizado
+|- FEED.config.md            Lista de feeds RSS
+|
+|- tasks/                    Sistema kanban
+|  |- TODO/                  Cards agendados (YYYYMMDD_HH_MM_name.md)
+|  |- DOING/                 Cards em execucao
+|  |- DONE/                  Cards concluidos
+|  |- _archive/              Historico
+|
+|- inbox/                    Novidades dos agentes -> user le
+|  |- feed.md                Append-only feed
+|
+|- outbox/                   Items do user -> scheduler refina -> TODO/
+|
+|- vault/                    Base de conhecimento
+   |- agents/<nome>/         Pasta por agente (memory.md, diarios/, outputs/)
+   |- tasks/<slug>/          Artefatos de tasks
+   |- chrome/                Drawings
+   |- explorations/          Pesquisas
+   |- inspections/           Inspecoes
+   |- templates/             Templates Obsidian
+   |- insights.md            Hub de insights
+   |- sugestoes/             Sugestoes
+   |- trash/                 Lixeira reversivel
+   |- .ephemeral/            Cache + cron-logs
 ```
 
 ---
 
 ## Sistema de Tasks
 
-### Formato de task (CLAUDE.md ou TASK.md)
+### Formato de card
 
-```markdown
----
-title: nome-da-task
-clock: once | every10 | every60 | every240
-model: haiku | sonnet | opus
-type: pesquisa | implementacao | config | infra
-priority: low | medium | high
-created: 2026-03-19T00:00:00Z
-tags: [tag1, tag2]
-timeout: 120         # segundos (workers)
-max_turns: 8         # (workers)
----
-
-# nome-da-task
-
-Descrição clara do objetivo.
-
-## Contexto
-
-Por que essa task existe.
-
-## Ação
-
-1. Passo 1
-2. Passo 2
 ```
+YYYYMMDD_HH_MM_task-name.md
+```
+
+### Frontmatter
+
+```yaml
+---
+model: haiku
+timeout: 300
+mcp: false
+agent: nome-do-agente
+---
+```
+
+Tags no body: `#stepsN` controla max_turns.
 
 ### Ciclo de vida
 
 ```
-inbox/ → backlog/ → doing/ → _waiting/ → done/
-                           ↓
-                        blocked/
+outbox/ -> scheduler cria card em TODO/
+TODO/ -> runner move para DOING/ quando hora chega
+DOING/ -> DONE/ (runner) ou TODO/ (reschedule pelo agente)
+DONE/ -> _archive/ (trashman, 30 dias)
 ```
 
-### Regras do inbox
+### Comandos CLI
 
-- **Um único arquivo** `tasks/inbox/inbox.md` com todos os itens do usuário
-- Uma linha por sugestão (condensar itens multi-linha em linha única)
-- **Não criar múltiplos arquivos** no inbox — evita fragmentação
-- Formato: `- <texto original do usuário preservado>`
+| Comando | O que faz |
+|---------|-----------|
+| `zion tasks list` | Lista TODO/ e DOING/ |
+| `zion tasks list --all` | Inclui DONE/ |
+| `zion tasks list --log` | Mostra cron logs |
+| `zion tasks run <nome>` | Executa card por nome |
+| `zion tasks new <nome>` | Cria card em TODO/ |
+| `zion tasks tick` | Executa cards vencidos |
+| `zion tasks tick --dry-run` | Mostra o que seria executado |
 
 ---
 
-## CONTROL.md — Dashboard
+## Paths Importantes
 
-O CONTROL.md na raiz do vault é o dashboard central. Usa:
+| O que | Path |
+|-------|------|
+| Memoria do agente | `vault/agents/<nome>/memory.md` |
+| Outputs do agente | `vault/agents/<nome>/outputs/` |
+| Artefatos de task | `vault/tasks/<slug>/` |
+| Cron logs | `vault/.ephemeral/cron-logs/<nome>/` |
+| Heartbeat | `vault/.ephemeral/heartbeat` |
+| Feed RSS | `FEED.md` (raiz) |
+| Config RSS | `FEED.config.md` (raiz) |
+| Inbox (agentes) | `inbox/feed.md` |
+| Outbox (user) | `outbox/` |
 
-1. **DataviewJS** no topo para stats ao vivo (contagem por pasta + barras de progresso)
-2. **Callouts colapsáveis** (`[!tipo]-`) para seções grandes (Backlog, Done, Inbox)
-3. **Callouts expandidos** (`[!tipo]+`) para seções ativas (Em Andamento, Review)
-4. **DataviewJS** no rodapé para mapa de calor de tags do backlog
+---
 
-### Padrão de query Dataview para tasks em pastas
+## Fluxo inbox/outbox
 
-O problema clássico: Dataview mostra "TASK" ou "CLAUDE" como nome de arquivo em vez do nome real da task.
+### inbox (agente -> user)
 
-**Solução — usar `file.folder` com regex:**
+Agentes fazem append em `inbox/feed.md`:
+```
+[2026-03-20T14:00Z] [trashman] Limpeza: 3 arquivos
+```
+
+### outbox (user -> scheduler)
+
+User cria `.md` em `outbox/`. Scheduler le, refina, cria card em TODO/.
+
+---
+
+## CONTROL.md -- Dashboard
+
+Usa DataviewJS para stats e Dataview para tabelas:
+
+### Stats com DataviewJS
+
+```javascript
+const todo = dv.pages('"tasks/TODO"').length
+const doing = dv.pages('"tasks/DOING"').length
+```
+
+### Tabelas de cards
 
 ```dataview
 TABLE WITHOUT ID
-  "[[" + file.folder + "|" + regexreplace(file.folder, ".*/", "") + "]]" as "Task",
-  model as "🤖"
-FROM "tasks/doing"
-WHERE file.name = "TASK" OR file.name = "CLAUDE"
+  file.name as "Card",
+  agent as "Agente",
+  model as "Modelo"
+FROM "tasks/DOING"
 SORT file.mtime DESC
 ```
 
-- `file.folder` → path completo da pasta (ex: `tasks/doing/tamagochi`)
-- `regexreplace(file.folder, ".*/", "")` → extrai só o último segmento (`tamagochi`)
-- `"[[ | ]]"` → cria link clicável com nome legível
+### Tabela de agentes
 
-### DataviewJS para stats ao vivo
-
-```javascript
-const doing = dv.pages('"tasks/doing"')
-  .where(p => ["TASK","CLAUDE"].includes(p.file.name)).length
-
-const bar = (n, max, len=10) => {
-  const filled = Math.round((n/max)*len)
-  return "█".repeat(filled) + "░".repeat(len - filled)
-}
-
-dv.paragraph(`| Métrica | Qt | Barra |
-|---------|:--:|-------|
-| ⚡ Rodando | ${doing} | \`${bar(doing, 5)}\` |`)
-```
-
-### DataviewJS para mapa de calor de tags
-
-```javascript
-const pages = dv.pages('"tasks/backlog"')
-  .where(p => p.file.name === "CLAUDE" && p.tags)
-const tagCount = {}
-for (const p of pages) {
-  for (const t of (p.tags || [])) {
-    tagCount[t] = (tagCount[t] || 0) + 1
-  }
-}
-const sorted = Object.entries(tagCount).sort((a,b) => b[1]-a[1]).slice(0, 12)
-// renderizar tabela com barras unicode
+```dataview
+TABLE WITHOUT ID
+  regexreplace(file.folder, ".*/", "") as "Agente",
+  file.mtime as "Atualizado"
+FROM "vault/agents"
+WHERE file.name = "memory"
 ```
 
 ---
 
-## Admonitions / Callouts
+## Sistema FEED (RSS)
 
-Usar sintaxe nativa do Obsidian — funciona com e sem o plugin Admonitions:
+### FEED.config.md
+
+Define feeds a buscar:
+```
+| Feed | URL | Frequencia | Tags |
+```
+
+### FEED.md
+
+Board com items. Task `rss-feeds` atualiza periodicamente.
+Cache em `vault/.ephemeral/rss/`.
+
+---
+
+## Callouts Obsidian
 
 ```markdown
-> [!tipo] Título opcional
-> Conteúdo
-
-> [!tipo]+ Expandido por padrão (com +)
-
-> [!tipo]- Colapsado por padrão (com -)
+> [!tipo]+ Expandido
+> [!tipo]- Colapsado
 ```
 
-### Mapeamento semântico recomendado
-
-| Seção | Tipo | Cor |
+| Secao | Tipo | Cor |
 |-------|------|-----|
 | Em Andamento | `[!example]` | roxo |
-| Esperando Review | `[!warning]` | amarelo |
-| Workers | `[!tip]` | verde |
-| Backlog | `[!note]` | azul |
-| Inbox | `[!todo]` | azul claro |
-| Concluídas | `[!success]` | verde escuro |
-| Stats/Info | `[!info]` | azul |
-| Kanban manual | `[!question]` | laranja |
-| Resumo/Abstract | `[!abstract]` | ciano |
+| TODO | `[!tip]` | verde |
+| Outbox | `[!todo]` | azul claro |
+| DONE | `[!success]` | verde escuro |
+| Agentes | `[!abstract]` | ciano |
+| Notas | `[!question]` | laranja |
 
 ---
 
-## Operações Comuns
+## Operacoes Comuns
 
-### Mover arquivo para trash (reversível)
+### Mover para trash
 ```bash
-mv /workspace/obsidian/<arquivo> /workspace/obsidian/trash/
+mv /workspace/obsidian/<arquivo> /workspace/obsidian/vault/trash/
 ```
 
-### Criar nova task no backlog
+### Criar task
 ```bash
-mkdir -p /workspace/obsidian/tasks/backlog/<slug>
-# criar CLAUDE.md com frontmatter
+zion tasks new minha-task --model haiku --agent nome
 ```
 
-### Criar task de worker recorrente
+### Ver logs de execucao
 ```bash
-mkdir -p /workspace/obsidian/tasks/_scheduled/<nome>
-# criar TASK.md com clock: every10/every60/every240
+zion tasks list --log
 ```
 
 ---
 
-## Plugins relevantes (assumidos instalados)
+## Plugins (assumidos instalados)
 
 | Plugin | Uso |
 |--------|-----|
-| **Dataview** | Queries SQL-like em frontmatter + DataviewJS |
-| **Admonitions** | Callouts visuais (sintaxe nativa funciona sem o plugin) |
-| **Kanban** | Board visual (kanban.md — atualmente em trash) |
-
----
-
-## Lições desta sessão (2026-03-19)
-
-1. **Inbox = 1 arquivo** — não criar um arquivo por sugestão; 1 `inbox.md` com tudo, uma linha por item
-2. **Task name = folder name** — o nome real da task é o nome da pasta, não do arquivo CLAUDE.md/TASK.md
-3. **Dataview file.folder** — única forma confiável de mostrar o nome da task em queries de pastas com CLAUDE.md
-4. **Callouts colapsáveis** — usar `-` para seções grandes (Backlog/Done), `+` para ativas (Doing/Review)
-5. **DataviewJS > Dataview** para stats — permite barras de progresso unicode e lógica condicional
-6. **cssclasses: wide-page** — no frontmatter para dashboards com tabelas largas
+| **Dataview** | Queries SQL-like + DataviewJS |
+| **Admonitions** | Callouts visuais (sintaxe nativa) |

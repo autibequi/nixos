@@ -22,7 +22,7 @@ if [ -n "$agent" ]; then
     "---" \
     "# $name" \
     "" \
-    "Run the $agent agent. See agent memory at agents/memory/${agent}.md." \
+    "Run the $agent agent. See agent memory at vault/agents/${agent}/memory.md." \
     > "$filepath"
 else
   printf '%s\n' \

@@ -12,7 +12,7 @@ if [ ! -d "$TASKS" ]; then
 fi
 # Export so task-runner.sh uses the same resolved paths
 export TASK_DIR="$TASKS"
-export TASK_MEMORY_DIR="$(dirname "$TASKS")/agents/memory"
+export TASK_AGENTS_DIR="$(dirname "$TASKS")/vault/agents"
 
 DRY_RUN="${args[--dry-run]:-}"
 STEPS_OVERRIDE="${args[--steps]:-}"

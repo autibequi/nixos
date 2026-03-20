@@ -5,8 +5,7 @@ set -euo pipefail
 
 WORKSPACE="/workspace"
 TASKS="${TASK_DIR:-$WORKSPACE/obsidian/tasks}"
-LOG="$TASKS/log.md"
-MEMORY_DIR="${TASK_MEMORY_DIR:-$WORKSPACE/obsidian/agents/memory}"
+AGENTS_DIR="${TASK_AGENTS_DIR:-$WORKSPACE/obsidian/vault/agents}"
 VERBOSE="${TASK_VERBOSE:-0}"
 NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}"
 export NODE_OPTIONS
@@ -118,7 +117,6 @@ if [ -x "$USAGE_SCRIPT" ] && [ "$TASK_NAME" != "scheduler" ]; then
   ' 2>/dev/null || echo "0")
   WEEK_PCT="${WEEK_PCT%%.*}"  # truncate decimals
   if [ "${WEEK_PCT:-0}" -ge 70 ] 2>/dev/null; then
-    echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | QUOTA_HOLD | $TASK_NAME | week=${WEEK_PCT}% | $CARD" >> "$LOG"
     echo "[runner] '$TASK_NAME' — QUOTA_HOLD (week=${WEEK_PCT}%), rescheduling +60min"
     # Move card back to TODO with +60min
     NEXT=$(date -d "+60 minutes" +%Y%m%d_%H_%M)
@@ -132,10 +130,17 @@ BODY=$(extract_body "$CARD_PATH")
 
 # Load agent memory if exists
 MEMORY=""
-if [ -n "$AGENT" ] && [ -f "$MEMORY_DIR/${AGENT}.md" ]; then
-  MEMORY=$(cat "$MEMORY_DIR/${AGENT}.md")
-elif [ -f "$MEMORY_DIR/${TASK_NAME}.md" ]; then
-  MEMORY=$(cat "$MEMORY_DIR/${TASK_NAME}.md")
+if [ -n "$AGENT" ] && [ -f "$AGENTS_DIR/${AGENT}/memory.md" ]; then
+  MEMORY=$(cat "$AGENTS_DIR/${AGENT}/memory.md")
+elif [ -f "$AGENTS_DIR/${TASK_NAME}/memory.md" ]; then
+  MEMORY=$(cat "$AGENTS_DIR/${TASK_NAME}/memory.md")
+fi
+
+# Determine artifacts path
+if [ -n "$AGENT" ]; then
+  ARTIFACTS_DIR="/workspace/obsidian/vault/agents/${AGENT}/outputs/"
+else
+  ARTIFACTS_DIR="/workspace/obsidian/vault/tasks/${TASK_NAME}/"
 fi
 
 PROMPT="[HEADLESS MODE] Timeout: ${TIMEOUT}s | Time: $(date -u +%Y-%m-%dT%H:%M:%SZ)
@@ -144,7 +149,7 @@ Task: $TASK_NAME | Card: $CARD | Budget: ${TIMEOUT}s
 ## Task card location
 This card is at: $CARD_PATH
 Tasks dir: $TASKS
-Memory dir: $MEMORY_DIR"
+Agents dir: $AGENTS_DIR"
 
 if [ -n "$MEMORY" ]; then
   PROMPT="$PROMPT
@@ -159,7 +164,7 @@ PROMPT="$PROMPT
 $BODY
 
 ## Artifacts
-Produce any artifacts (reports, files, outputs) in: /workspace/obsidian/artefatos/${TASK_NAME}/
+Produce any artifacts (reports, files, outputs) in: $ARTIFACTS_DIR
 
 ## After completing
 - To reschedule: move this card back to TODO/ with a new date prefix (YYYYMMDD_HH_MM_name.md)
@@ -167,7 +172,7 @@ Produce any artifacts (reports, files, outputs) in: /workspace/obsidian/artefato
   - Prefer scheduling between 21h-06h (BRT) — agents' preferred window
   - If nothing urgent, schedule later to conserve quota
 - To finish: the runner will move the card to DONE/ automatically
-- Update your memory file at $MEMORY_DIR/${AGENT:-$TASK_NAME}.md if you learned something persistent"
+- Update your memory file at $AGENTS_DIR/${AGENT:-$TASK_NAME}/memory.md if you learned something persistent"
 
 # ── MCP config ───────────────────────────────────────────────────
 MCP_FLAGS=()
@@ -179,11 +184,10 @@ fi
 
 # ── Log start ────────────────────────────────────────────────────
 RUN_START_FMT=$(date -u +"%H:%M:%S UTC")
-echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | START | $TASK_NAME | $MODEL | $CARD" >> "$LOG"
 echo "[runner] running '$TASK_NAME' (model=$MODEL, timeout=${TIMEOUT}s, turns=$MAX_TURNS, start=$RUN_START_FMT)"
 
 # ── Run ──────────────────────────────────────────────────────────
-LOGDIR="$(dirname "$TASKS")/agents/cron/runs/$TASK_NAME"
+LOGDIR="$(dirname "$TASKS")/vault/.ephemeral/cron-logs/$TASK_NAME"
 mkdir -p "$LOGDIR"
 # Fix dirs criados como root por execuções anteriores sem -u claude
 if [ ! -w "$LOGDIR" ]; then
@@ -229,7 +233,6 @@ fi
 # ── Finish ───────────────────────────────────────────────────────
 ELAPSED_FMT="$((ELAPSED/60))m$((ELAPSED%60))s"
 RUN_END_FMT=$(date -u +"%H:%M:%S UTC")
-echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | $STATUS | $TASK_NAME | $MODEL | ${ELAPSED_FMT} | exit=$EXIT_CODE | $CARD" >> "$LOG"
 
 if [ "$STATUS" != "ok" ]; then
   echo "[runner] '$TASK_NAME' — $STATUS (exit=$EXIT_CODE, ${ELAPSED_FMT})"
