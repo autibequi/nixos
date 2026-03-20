@@ -10,6 +10,9 @@ if [ ! -d "$TASKS" ]; then
     [ -d "$try" ] && TASKS="$try" && break
   done
 fi
+# Export so task-runner.sh uses the same resolved paths
+export TASK_DIR="$TASKS"
+export TASK_MEMORY_DIR="$(dirname "$TASKS")/agents/memory"
 
 DRY_RUN="${args[--dry-run]:-}"
 STEPS_OVERRIDE="${args[--steps]:-}"

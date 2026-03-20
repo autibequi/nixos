@@ -4,9 +4,9 @@
 set -euo pipefail
 
 WORKSPACE="/workspace"
-TASKS="$WORKSPACE/obsidian/tasks"
+TASKS="${TASK_DIR:-$WORKSPACE/obsidian/tasks}"
 LOG="$TASKS/log.md"
-MEMORY_DIR="$WORKSPACE/obsidian/agents/memory"
+MEMORY_DIR="${TASK_MEMORY_DIR:-$WORKSPACE/obsidian/agents/memory}"
 VERBOSE="${TASK_VERBOSE:-0}"
 NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}"
 export NODE_OPTIONS
@@ -182,7 +182,7 @@ echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | START | $TASK_NAME | $MODEL | $CARD" >> "
 echo "[runner] running '$TASK_NAME' (model=$MODEL, timeout=${TIMEOUT}s, turns=$MAX_TURNS)"
 
 # ── Run ──────────────────────────────────────────────────────────
-LOGDIR="$WORKSPACE/obsidian/agents/cron/runs/$TASK_NAME"
+LOGDIR="$(dirname "$TASKS")/agents/cron/runs/$TASK_NAME"
 mkdir -p "$LOGDIR"
 # Fix dirs criados como root por execuções anteriores sem -u claude
 if [ ! -w "$LOGDIR" ]; then
