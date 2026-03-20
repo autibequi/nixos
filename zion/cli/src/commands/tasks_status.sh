@@ -1,5 +1,14 @@
-echo "# This file is located at 'src/commands/tasks_status.sh'."
-echo "# It contains the implementation for the 'zion tasks status' command."
-echo "# The code you write here will be wrapped by a function named 'zion_tasks_status_command()'."
-echo "# Feel free to edit this file; your changes will persist when regenerating."
-inspect_args
+# Show task execution log from inside puppy container
+local lines="${args[--lines]:-20}"
+zion_load_config
+local compose_file="${ZION_ROOT:-$HOME/nixos/zion}/cli/docker-compose.puppy.yml"
+
+docker compose -f "$compose_file" exec -T -u claude puppy bash -c "
+  LOG=/workspace/obsidian/tasks/log.md
+  if [ ! -f \$LOG ]; then echo 'No task log found'; exit 0; fi
+  echo '=== Task Log (last $lines) ==='
+  tail -n $lines \$LOG
+" 2>/dev/null || {
+  echo "Puppy container not running. Start with: zion puppy start"
+  exit 1
+}

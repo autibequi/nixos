@@ -1,5 +1,6 @@
-echo "# This file is located at 'src/commands/git_sandbox.sh'."
-echo "# It contains the implementation for the 'zion git append' command."
-echo "# The code you write here will be wrapped by a function named 'zion_git_append_command()'."
-echo "# Feel free to edit this file; your changes will persist when regenerating."
-inspect_args
+# zion git append — cria commit de append no branch atual
+# Alias legado de git sandbox
+zion_load_config
+local cwd="${args[dir]:-$(pwd)}"
+cd "$cwd" || { echo "zion: dir not found: $cwd" >&2; exit 1; }
+exec git add -A && git commit -m "chore: append $(date +%Y%m%d_%H%M)"

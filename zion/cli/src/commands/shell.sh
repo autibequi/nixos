@@ -1,5 +1,15 @@
-echo "# This file is located at 'src/commands/shell.sh'."
-echo "# It contains the implementation for the 'zion shell' command."
-echo "# The code you write here will be wrapped by a function named 'zion_shell_command()'."
-echo "# Feel free to edit this file; your changes will persist when regenerating."
-inspect_args
+zion_load_config
+
+mount_path="$(zion_resolve_dir)"
+mount_opts="$(zion_mount_opts)"
+slug="$(zion_proj_slug "$mount_path")"
+proj_name="$(zion_proj_name "$slug")"
+
+zion_compose_env "$mount_path" "$mount_opts"
+
+zion_compose_cmd -p "$proj_name" run --rm -it \
+  --entrypoint /entrypoint.sh \
+  -e "CLAUDIO_MOUNT=$mount_path" \
+  -e "BOOTSTRAP_SKIP_CLEAR=1" \
+  leech \
+  /bin/bash -c ". /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt && exec bash"

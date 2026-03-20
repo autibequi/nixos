@@ -1,5 +1,13 @@
-echo "# This file is located at 'src/commands/docker_test.sh'."
-echo "# It contains the implementation for the 'zion docker test' command."
-echo "# The code you write here will be wrapped by a function named 'zion_docker_test_command()'."
-echo "# Feel free to edit this file; your changes will persist when regenerating."
-inspect_args
+# Determina o comando padrão por tipo de servico
+service="${args[service]}"
+cmd="${args[--cmd]:-}"
+worktree="${args[--worktree]:-}"
+
+if [[ -z "$cmd" ]]; then
+  case "$service" in
+    monolito) cmd="make test" ;;
+    *)        cmd="yarn test" ;;
+  esac
+fi
+
+_zion_dk_shell "$service" "app" "$cmd" "$worktree"

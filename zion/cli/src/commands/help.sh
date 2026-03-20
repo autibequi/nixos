@@ -1,5 +1,1 @@
-echo "# This file is located at 'src/commands/help.sh'."
-echo "# It contains the implementation for the 'zion help' command."
-echo "# The code you write here will be wrapped by a function named 'zion_help_command()'."
-echo "# Feel free to edit this file; your changes will persist when regenerating."
-inspect_args
+bash "$zion_cli_dir/banner.sh" 2>/dev/null
