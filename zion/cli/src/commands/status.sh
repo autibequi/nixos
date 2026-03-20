@@ -200,16 +200,46 @@ _do_status_render() {
 }
 
 local _lines=0
-while true; do
+
+_render_frame() {
   _do_status_render > "$_tmpfile"
+  local _new_lines
+  _new_lines=$(wc -l < "$_tmpfile")
 
-  if [[ "$_lines" -gt 0 ]]; then
-    printf "\033[%dA" "$_lines"
-    printf "\033[0J"
-  fi
+  [[ "$_lines" -gt 0 ]] && printf "\033[%dA" "$_lines"
 
-  cat "$_tmpfile"
-  _lines=$(wc -l < "$_tmpfile")
+  while IFS= read -r _line; do
+    printf '%s\033[K\n' "$_line"
+  done < "$_tmpfile"
 
-  sleep "$_tick"
+  local _diff=$((_lines - _new_lines))
+  for ((i=0; i<_diff; i++)); do printf '\033[2K\n'; done
+  [[ "$_diff" -gt 0 ]] && printf "\033[%dA" "$_diff"
+
+  _lines=$_new_lines
+}
+
+_update_header() {
+  local _remaining="$1"
+  # Monta indicador de dots que "drena" conforme o tempo passa
+  local _ind=""
+  for ((i=0; i<_tick; i++)); do
+    [[ "$i" -lt "$_remaining" ]] && _ind+="·" || _ind+=" "
+  done
+  # Header está na linha 2 do bloco; cursor está abaixo de _lines linhas
+  # Para chegar na linha 2: subir (_lines - 1) linhas
+  printf "\033[%dA" "$((_lines - 1))"
+  printf "  ${BOLD}${MAGENTA}Zion Status${RESET}  ${DIM}$(date '+%H:%M:%S')  ${_ind}${RESET}\033[K"
+  printf "\033[%dB" "$((_lines - 1))"
+}
+
+while true; do
+  _render_frame
+
+  local _remaining="$_tick"
+  while [[ "$_remaining" -gt 0 ]]; do
+    sleep 1
+    _remaining=$((_remaining - 1))
+    _update_header "$_remaining"
+  done
 done
