@@ -45,6 +45,11 @@ zion_load_config() {
     DOCKER_GID=$(stat -c %g /var/run/docker.sock)
   fi
   export DOCKER_GID="${DOCKER_GID:-999}"
+  # Journal GID para group_add no compose (agente precisa ler /var/log/journal)
+  if [[ -z "${JOURNAL_GID:-}" ]]; then
+    JOURNAL_GID=$(getent group systemd-journal 2>/dev/null | cut -d: -f3)
+  fi
+  export JOURNAL_GID="${JOURNAL_GID:-62}"
   # Path absoluto e ~ expandido para o compose (YAML não expande ~)
   zion_obsidian_path="${zion_obsidian_path/#\~/$HOME}"
   [[ -d "$zion_obsidian_path" ]] && zion_obsidian_path="$(cd "$zion_obsidian_path" && pwd)"

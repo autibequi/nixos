@@ -84,6 +84,7 @@ services:
     command: ["/bin/bash", "-c", "sleep infinity"]
     group_add:
       - "${DOCKER_GID:-999}"
+      - "${JOURNAL_GID:-62}"
     cap_drop:
       - NET_RAW
       - SYS_PTRACE
