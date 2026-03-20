@@ -13,10 +13,12 @@ description: Renderiza árvore interativa de diff no Chrome — pastas colapsáv
 
 Defaults: `--repos all` (detecta todos com diff), `--compare origin/main`
 
-## Template
+## Templates
 
-O gerador completo está em `templates/generator.py`. Script Python auto-contido:
-lê o diff, constrói a árvore e gera HTML com todas as funcionalidades.
+| Arquivo | Quando usar |
+|---|---|
+| `templates/generator.py` | Árvore única flat de todo o diff com anotações |
+| `templates/generator_by_layer.py` | Diff segregado por camada (Handlers, Services, Repos...) |
 
 ---
 
@@ -29,6 +31,7 @@ lê o diff, constrói a árvore e gera HTML com todas as funcionalidades.
 | **Path bar** (sticky abaixo do header) | Path completo + tag curta + detalhe longo do arquivo selecionado |
 | **Anotação dim** (coluna fixa `left: 460px`) | `// tag` ciano escuro ao lado de cada arquivo com descrição |
 | **Ícone copy** (SVG, aparece no hover) | Copia o path relativo para o clipboard; flash verde ao copiar |
+| **`// desc ON/OFF`** (botão no header) | Toggle para mostrar/esconder todas as anotações inline |
 | **◆** (roxo) | Pastas/arquivos que contêm keywords da feature ativa (`CHAPTER_KW`) |
 
 ---
@@ -45,17 +48,23 @@ git diff origin/main --name-status > /tmp/<repo>_diff.txt
 
 ### Passo 2 — Copiar e configurar o gerador
 
+Para diff flat (árvore única):
 ```bash
 cp /home/claude/.claude/skills/code/analysis/diff/templates/generator.py /tmp/gen_diff.py
 ```
 
-Editar as variáveis no topo de `/tmp/gen_diff.py`:
+Para diff por camada (Handlers, Services, Repos...):
+```bash
+cp /home/claude/.claude/skills/code/analysis/diff/templates/generator_by_layer.py /tmp/gen_diff.py
+```
+
+Editar as variáveis no topo:
 
 ```python
 REPO        = 'monolito'
 BRANCH      = 'FUK2-11746-vibed/cached-ldi-toc'
 DIFF_FILE   = '/tmp/mono_diff.txt'
-OUTPUT_FILE = '/tmp/mono_diff_annotated.html'
+OUTPUT_FILE = '/tmp/mono_diff.html'
 
 CHAPTER_KW = ['chapter', 'toc', 'content_tree']  # keywords da feature ativa
 ```
@@ -67,27 +76,15 @@ O dict `DESCRIPTIONS` mapeia path relativo → `('tag curta', 'detalhe longo')`.
 - **tag**: aparece inline na linha (dim cyan) e em destaque no path bar ao selecionar
 - **detalhe**: só aparece no path bar ao selecionar o arquivo
 
-Para preencher, ler os arquivos relevantes:
-
-```bash
-git diff origin/main -- apps/bff/internal/handlers/main/ldi/get_course_structure.go | head -40
-```
-
-Exemplo:
-
 ```python
 DESCRIPTIONS = {
     'apps/bff/internal/handlers/main/ldi/get_course_structure.go':
         ('novo endpoint GET /toc',
-         'retorna estrutura flat (chapters+items+has_blocks) sem dados pesados de progresso/favoritos'),
+         'retorna estrutura flat (chapters+items+has_blocks) sem dados pesados'),
 
     'services/course/content_tree.go':
         ('BuildAndSaveContentTree',
          'serializa CourseStructureResponse no JSONB do curso para cache persistente'),
-
-    'repositories/course/cache.go':
-        ('GetCachedStructure',
-         'lê o JSONB salvo e deserializa — retorna nil se ainda não existe'),
 }
 ```
 
@@ -100,37 +97,98 @@ python3 /tmp/gen_diff.py > /dev/null
 # HTML puro salvo em OUTPUT_FILE
 ```
 
-> **Importante:** redirecionar stdout para `/dev/null`. O script printa o data URL
-> (legado) que não é necessário. O HTML vai para o arquivo configurado.
+### Passo 5 — Abrir no Chrome via servidor HTTP local
 
-### Passo 5 — Abrir no Chrome via relay
-
-**Não usar** `data:text/html` como arg de linha de comando — HTMLs grandes causam
-`OSError: Argument list too long`. Usar o padrão inject:
+**Não usar** `data:text/html` nem `document.write` — HTMLs com Unicode (▾, ├─, ◆)
+quebram o encoding. O padrão confiável é um servidor HTTP one-shot na porta 9876:
 
 ```python
 # /tmp/open_diff.py
-import sys, base64, time
+import sys, time, threading, http.server
 
 RELAY  = '/workspace/zion/scripts/chrome-relay.py'
-HTML_F = '/tmp/mono_diff_annotated.html'
+HTML_F = '/tmp/mono_diff.html'   # trocar para o arquivo correto
 
-sys.argv = ['chrome-relay.py', 'nav', 'about:blank']
+class Handler(http.server.BaseHTTPRequestHandler):
+    def do_GET(self):
+        with open(HTML_F, 'rb') as f:
+            data = f.read()
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/html; charset=utf-8')
+        self.send_header('Content-Length', len(data))
+        self.end_headers()
+        self.wfile.write(data)
+    def log_message(self, *a): pass
+
+server = http.server.HTTPServer(('', 9876), Handler)
+threading.Thread(target=server.serve_forever, daemon=True).start()
+
+sys.argv = ['chrome-relay.py', 'nav', 'http://localhost:9876/']
 exec(open(RELAY).read())
 
-time.sleep(0.4)
-
-with open(HTML_F, 'rb') as f:
-    html = f.read().decode()
-
-b64 = base64.b64encode(html.encode()).decode()
-js  = f"document.open();document.write(atob('{b64}'));document.close();"
-sys.argv = ['chrome-relay.py', 'inject', js]
-exec(open(RELAY).read())
+time.sleep(5)   # manter server enquanto Chrome carrega
+server.shutdown()
 ```
 
 ```bash
 python3 /tmp/open_diff.py
+```
+
+> **Nota:** o relay usa `localhost` (não `127.0.0.1`) — Chrome pode estar em IPv6.
+
+---
+
+## Variante: por camada (`generator_by_layer.py`)
+
+Agrupa os arquivos em seções colapsáveis por tipo (Handlers, Services, Repositories,
+Workers, etc.) — cada seção com sua própria mini-árvore interativa.
+
+Usar quando quiser responder: *"quais handlers/services/repos foram tocados nessa branch?"*
+
+### Configurar LAYERS
+
+```python
+# Monolito
+LAYERS = [
+    ('Handlers',      '#89b4fa', lambda p: '/handlers/' in p or p.startswith('handlers/')),
+    ('Services',      '#a6e3a1', lambda p: '/services/'  in p or p.startswith('services/')),
+    ('Repositories',  '#94e2d5', lambda p: '/repositories/' in p or p.startswith('repositories/')),
+    ('Workers',       '#fab387', lambda p: '/workers/'   in p or p.startswith('workers/')),
+    ('Migrations',    '#f9e2af', lambda p: 'migration'   in p.lower()),
+    ('Mocks',         '#6c7086', lambda p: '/mocks/'     in p or p.startswith('mocks/')),
+    ('Outros',        '#45475a', lambda p: True),   # catch-all — deve ser o ultimo
+]
+
+# BO Container
+LAYERS = [
+    ('Pages',       '#89b4fa', lambda p: '/pages/'      in p),
+    ('Components',  '#a6e3a1', lambda p: '/components/' in p),
+    ('Services',    '#94e2d5', lambda p: '/services/'   in p),
+    ('Routes',      '#fab387', lambda p: '/router/'     in p),
+    ('Outros',      '#45475a', lambda p: True),
+]
+
+# Front Student
+LAYERS = [
+    ('Pages',       '#89b4fa', lambda p: '/pages/'       in p),
+    ('Containers',  '#a6e3a1', lambda p: '/containers/'  in p),
+    ('Components',  '#94e2d5', lambda p: '/components/'  in p),
+    ('Composables', '#fab387', lambda p: '/composables/' in p),
+    ('Services',    '#cba6f7', lambda p: '/services/'    in p),
+    ('Types',       '#f9e2af', lambda p: '/types/'       in p),
+    ('Outros',      '#45475a', lambda p: True),
+]
+```
+
+A ordem importa: cada arquivo entra na **primeira** camada que der match.
+
+### Rodar
+
+```bash
+cp /home/claude/.claude/skills/code/analysis/diff/templates/generator_by_layer.py /tmp/gen_diff.py
+# editar REPO, BRANCH, DIFF_FILE, OUTPUT_FILE, LAYERS, DESCRIPTIONS
+python3 /tmp/gen_diff.py > /dev/null
+# abrir com o servidor HTTP (Passo 5 acima, ajustando HTML_F)
 ```
 
 ---
@@ -159,9 +217,9 @@ CHAPTER_KW = ['chapter', 'toc', 'content_tree', 'course_chapter', 'getCourse']
 
 ## Detalhes técnicos
 
-### Funções principais (`templates/generator.py`)
+### Funções principais (ambos os templates)
 
-| Função | O que faz |
+| Funcao | O que faz |
 |---|---|
 | `build_tree(files)` | Constrói árvore dict aninhada a partir de lista `(status, path)` |
 | `squash(tree)` | Colapsa dirs com filho único (sem arquivos) em `pai/filho` |
@@ -169,7 +227,14 @@ CHAPTER_KW = ['chapter', 'toc', 'content_tree', 'course_chapter', 'getCourse']
 | `has_chapter_tree(tree)` | Verifica se algum descendente tem keyword da feature |
 | `render_tree_html(tree, prefix)` | Gera HTML da árvore com todos os data-attributes |
 
-### Por que `left: 460px` e não `margin-left: auto`?
+### Por que servidor HTTP e não inject/Blob?
+
+- `data:text/html` como argumento CLI: `OSError: Argument list too long` para HTMLs grandes
+- `document.write(atob(...))`: encoding Latin-1, quebra caracteres UTF-8 (▾, ├─, ◆)
+- `Blob URL via location.href`: Chrome bloqueia navegacao de `about:blank` para blob
+- **Servidor HTTP local porta 9876**: confiavel, UTF-8 correto, sem limites de tamanho
+
+### Por que `left: 460px` e nao `margin-left: auto`?
 
 `margin-left: auto` funciona em flex mas os itens têm larguras variáveis
 (profundidade + comprimento do nome). Com `position: absolute; left: 460px`

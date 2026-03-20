@@ -30,7 +30,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
 from urllib.parse import urlparse, quote
 
-CDP_HOST = "127.0.0.1"
+CDP_HOST = "localhost"
 CDP_PORT = 9222
 SERVE_HOST = "127.0.0.1"
 SERVE_PORTS = [8765, 8766, 8767, 8768]

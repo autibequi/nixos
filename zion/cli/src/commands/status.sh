@@ -17,7 +17,12 @@ local _tick="${args[--tick]:-5}"
 local _tmpfile _stats_file _quota_file
 _tmpfile=$(mktemp); _stats_file=$(mktemp); _quota_file=$(mktemp)
 
-trap 'kill "$_stats_pid" "$_quota_pid" 2>/dev/null; rm -f "$_tmpfile" "$_stats_file" "${_stats_file}.new" "$_quota_file" "${_quota_file}.new"; printf "\n"' EXIT
+# Cursor interativo: lista de servicos navegaveis
+_svc_list=(monolito bo-container front-student)
+_cursor_idx=0
+_cursor_svc="${_svc_list[0]}"
+
+trap 'kill "$_stats_pid" "$_quota_pid" 2>/dev/null; rm -f "$_tmpfile" "$_stats_file" "${_stats_file}.new" "$_quota_file" "${_quota_file}.new"; printf "\033[?25h\n"' EXIT
 trap 'exit 0' INT TERM
 
 # ── Background: stats CPU/mem (atualiza a cada 5s) ────────────
@@ -197,6 +202,10 @@ _do_status_render() {
     _zion_dk_status "" 1
   fi
   echo ""
+
+  # Rodapé interativo
+  echo -e "${DIM}──────────────────────────────────────────────────${RESET}"
+  echo -e "  ${DIM}↑↓ navegar   ${CYAN}s${RESET}${DIM} iniciar   ${RED}S${RESET}${DIM} parar   ${BLUE}l${RESET}${DIM} logs   ${YELLOW}t${RESET}${DIM} test   [${_cursor_svc}]${RESET}"
 }
 
 local _lines=0
@@ -206,10 +215,12 @@ _render_frame() {
   local _new_lines
   _new_lines=$(wc -l < "$_tmpfile")
 
+  printf '\033[?25l'  # esconde cursor durante rendering
   [[ "$_lines" -gt 0 ]] && printf "\033[%dA" "$_lines"
+  printf "\r"
 
   while IFS= read -r _line; do
-    printf '%s\033[K\n' "$_line"
+    printf '\r%s\033[K\n' "$_line"
   done < "$_tmpfile"
 
   local _diff=$((_lines - _new_lines))
@@ -217,6 +228,7 @@ _render_frame() {
   [[ "$_diff" -gt 0 ]] && printf "\033[%dA" "$_diff"
 
   _lines=$_new_lines
+  printf '\033[?25h'  # restaura cursor
 }
 
 _update_header() {
@@ -228,9 +240,11 @@ _update_header() {
   done
   # Header está na linha 2 do bloco; cursor está abaixo de _lines linhas
   # Para chegar na linha 2: subir (_lines - 1) linhas
-  printf "\033[%dA" "$((_lines - 1))"
+  printf '\033[?25l'
+  printf "\033[%dA\r" "$((_lines - 1))"
   printf "  ${BOLD}${MAGENTA}Zion Status${RESET}  ${DIM}$(date '+%H:%M:%S')  ${_ind}${RESET}\033[K"
-  printf "\033[%dB" "$((_lines - 1))"
+  printf "\033[%dB\r" "$((_lines - 1))"
+  printf '\033[?25h'
 }
 
 while true; do
@@ -238,7 +252,52 @@ while true; do
 
   local _remaining="$_tick"
   while [[ "$_remaining" -gt 0 ]]; do
-    sleep 1
+    local _key=""
+    if read -t 1 -rsn1 _key 2>/dev/null; then
+      if [[ "$_key" == $'\033' ]]; then
+        # Sequencia de escape (setas)
+        local _seq=""
+        read -t 0.1 -rsn2 _seq 2>/dev/null || true
+        case "$_seq" in
+          '[A')  # Up
+            _cursor_idx=$(( (_cursor_idx - 1 + ${#_svc_list[@]}) % ${#_svc_list[@]} ))
+            _cursor_svc="${_svc_list[$_cursor_idx]}"
+            break
+            ;;
+          '[B')  # Down
+            _cursor_idx=$(( (_cursor_idx + 1) % ${#_svc_list[@]} ))
+            _cursor_svc="${_svc_list[$_cursor_idx]}"
+            break
+            ;;
+        esac
+      else
+        case "$_key" in
+          s)
+            zion docker "$_cursor_svc" start &>/dev/null &
+            ;;
+          S)
+            zion docker "$_cursor_svc" stop &>/dev/null &
+            ;;
+          l)
+            trap '' INT
+            printf "\033[2J\033[H"
+            zion docker "$_cursor_svc" logs || true
+            trap 'exit 0' INT TERM
+            printf "\033[2J\033[H"  # limpa tela antes de voltar ao TUI
+            _lines=0; break
+            ;;
+          t)
+            trap '' INT
+            printf "\033[2J\033[H"
+            zion docker "$_cursor_svc" test || true
+            trap 'exit 0' INT TERM
+            printf "\033[2J\033[H"  # limpa tela antes de voltar ao TUI
+            _lines=0; break
+            ;;
+          q) exit 0 ;;
+        esac
+      fi
+    fi
     _remaining=$((_remaining - 1))
     _update_header "$_remaining"
   done

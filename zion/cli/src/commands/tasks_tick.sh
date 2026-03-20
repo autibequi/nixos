@@ -86,8 +86,24 @@ echo ""
 for i in "${!due[@]}"; do
   filename="${due[$i]}"
   steps="${STEPS_OVERRIDE:-${due_steps[$i]}}"
-  echo "━━━ [$((i+1))/$total] $filename  (steps=$steps)"
+  task_start_s=$(date +%s)
+  task_start_fmt=$(date -u +"%Y-%m-%d %H:%M UTC")
+
+  echo ""
+  echo "╔══════════════════════════════════════════════════════════════════╗"
+  printf "║  [%d/%d]  %-38s  steps=%-3s  ║\n" "$((i+1))" "$total" "${filename%.md}" "$steps"
+  printf "║  %-64s  ║\n" "START  $task_start_fmt"
+  echo "╚══════════════════════════════════════════════════════════════════╝"
+
   TASK_MAX_TURNS="$steps" "$RUNNER" "$filename" || true
+
+  task_end_s=$(date +%s)
+  task_elapsed=$(( task_end_s - task_start_s ))
+  task_elapsed_fmt="$((task_elapsed/60))m$((task_elapsed%60))s"
+  task_end_fmt=$(date -u +"%H:%M UTC")
+  task_start_hm=$(date -u -d "@$task_start_s" +"%H:%M")
+
+  echo "╰─ [$((i+1))/$total] ${filename%.md}  ·  ${task_elapsed_fmt}  ·  ${task_start_hm}→${task_end_fmt} ─╯"
   echo ""
 done
 

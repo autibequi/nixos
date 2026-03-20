@@ -90,8 +90,7 @@ _zion_dk_status() {
       local src="${entry%%->*}"
       local dest="${entry##*->}"
       echo "$src" | grep -qE '^/home/' || continue
-      local label="${dest##*/}"
-      [[ -z "$label" || "$dest" == "/" ]] && label="${src##*/}"
+      local label="${src##*/}"
       result+=("$label")
     done
     if [[ "${#result[@]}" -gt 0 ]]; then
@@ -184,9 +183,15 @@ _zion_dk_status() {
     main_rows=$(echo "$_all_dk_rows" | grep -E "^${project}-" | grep -vE "^${project}-deps-" | grep -vE "^${project}-wt-" || true)
     deps_rows=$(echo "$_all_dk_rows"  | grep -E "^${project}-deps-" || true)
 
+    # Cursor: ▶ se este servico estiver selecionado (via dynamic scoping)
+    local _is_selected=0
+    [[ "${_cursor_svc:-}" == "$svc" ]] && _is_selected=1
+
     local any_rows="${main_rows}${deps_rows}"
     if [[ -z "$any_rows" ]]; then
-      echo -e "${icon_stopped} ${BOLD}${CYAN}${svc}${RESET}  ${DIM}parado${RESET}"
+      local _pfx_icon="$icon_stopped"
+      [[ "$_is_selected" -eq 1 ]] && _pfx_icon="${CYAN}▶${RESET}"
+      echo -e "${_pfx_icon} ${BOLD}${CYAN}${svc}${RESET}  ${DIM}parado${RESET}"
       return
     fi
 
@@ -195,10 +200,34 @@ _zion_dk_status() {
     [[ "$svc_icon" == "$icon_stopped" ]] && \
       echo "$deps_rows" | grep -qi "	Up " && svc_icon="$icon_partial"
 
+    local prefix_icon="$svc_icon"
+    [[ "$_is_selected" -eq 1 ]] && prefix_icon="${CYAN}▶${RESET}"
+
     local has_deps=0
     [[ -n "$deps_rows" ]] && has_deps=1
 
-    echo -e "${svc_icon} ${BOLD}${CYAN}${svc}${RESET}"
+    # ENV + branch label (somente quando app esta rodando)
+    local meta=""
+    if echo "$main_rows" | grep -qi "	Up "; then
+      local _app_cname="${project}-app"
+      local env_label=""
+      env_label=$(docker inspect --format '{{range .Config.Env}}{{.}}{{"\n"}}{{end}}' "$_app_cname" 2>/dev/null \
+        | grep '^APP_ENV=' | sed 's/^APP_ENV=//' | head -1)
+      local branch_label=""
+      local _svc_dir
+      _svc_dir=$(zion_docker_service_dir "$svc" 2>/dev/null || true)
+      [[ -n "$_svc_dir" && -d "$_svc_dir" ]] && \
+        branch_label=$(git -C "$_svc_dir" branch --show-current 2>/dev/null || true)
+      if [[ -n "$env_label" || -n "$branch_label" ]]; then
+        meta="  ${DIM}["
+        [[ -n "$env_label" ]] && meta+="${env_label}"
+        [[ -n "$env_label" && -n "$branch_label" ]] && meta+=" · "
+        [[ -n "$branch_label" ]] && meta+="${branch_label}"
+        meta+="]${RESET}"
+      fi
+    fi
+
+    echo -e "${prefix_icon} ${BOLD}${CYAN}${svc}${RESET}${meta}"
 
     local main_arr=()
     while IFS= read -r line; do [[ -n "$line" ]] && main_arr+=("$line"); done <<< "$main_rows"

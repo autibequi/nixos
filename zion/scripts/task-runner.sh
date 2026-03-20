@@ -178,8 +178,9 @@ if [ "$MCP" = "false" ] || [ "$MCP" = "off" ]; then
 fi
 
 # ── Log start ────────────────────────────────────────────────────
+RUN_START_FMT=$(date -u +"%H:%M:%S UTC")
 echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | START | $TASK_NAME | $MODEL | $CARD" >> "$LOG"
-echo "[runner] running '$TASK_NAME' (model=$MODEL, timeout=${TIMEOUT}s, turns=$MAX_TURNS)"
+echo "[runner] running '$TASK_NAME' (model=$MODEL, timeout=${TIMEOUT}s, turns=$MAX_TURNS, start=$RUN_START_FMT)"
 
 # ── Run ──────────────────────────────────────────────────────────
 LOGDIR="$(dirname "$TASKS")/agents/cron/runs/$TASK_NAME"
@@ -213,8 +214,21 @@ STATUS="ok"
 [ "$EXIT_CODE" -eq 124 ] && STATUS="timeout"
 [ "$EXIT_CODE" -ne 0 ] && [ "$EXIT_CODE" -ne 124 ] && STATUS="fail"
 
+# ── Token usage (best-effort parse from log) ─────────────────────
+if [ -f "$LOGFILE" ]; then
+  TOK_IN=$(grep -oiE '"input_tokens":[[:space:]]*[0-9]+' "$LOGFILE" | tail -1 | grep -oE '[0-9]+' || true)
+  TOK_OUT=$(grep -oiE '"output_tokens":[[:space:]]*[0-9]+' "$LOGFILE" | tail -1 | grep -oE '[0-9]+' || true)
+  TOK_CACHE=$(grep -oiE '"cache_read_input_tokens":[[:space:]]*[0-9]+' "$LOGFILE" | tail -1 | grep -oE '[0-9]+' || true)
+  if [ -n "$TOK_IN" ] || [ -n "$TOK_OUT" ]; then
+    echo "  ┌─ usage ──────────────────────────────┐"
+    printf "  │  in=%-8s  out=%-8s  cache=%s\n" "${TOK_IN:-?}" "${TOK_OUT:-?}" "${TOK_CACHE:-?}"
+    echo "  └──────────────────────────────────────┘"
+  fi
+fi
+
 # ── Finish ───────────────────────────────────────────────────────
 ELAPSED_FMT="$((ELAPSED/60))m$((ELAPSED%60))s"
+RUN_END_FMT=$(date -u +"%H:%M:%S UTC")
 echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | $STATUS | $TASK_NAME | $MODEL | ${ELAPSED_FMT} | exit=$EXIT_CODE | $CARD" >> "$LOG"
 
 if [ "$STATUS" != "ok" ]; then
@@ -227,10 +241,10 @@ fi
 
 # If agent moved card back to TODO (rescheduled itself), we're done
 if [ ! -f "$CARD_PATH" ]; then
-  echo "[runner] '$TASK_NAME' — rescheduled (${ELAPSED_FMT})"
+  echo "[runner] '$TASK_NAME' — rescheduled (${RUN_START_FMT} → ${RUN_END_FMT}, ${ELAPSED_FMT})"
   exit 0
 fi
 
 # Otherwise move to DONE
 mv "$CARD_PATH" "$TASKS/DONE/$CARD" 2>/dev/null || true
-echo "[runner] '$TASK_NAME' → DONE ($STATUS, ${ELAPSED_FMT})"
+echo "[runner] '$TASK_NAME' → DONE ($STATUS, ${RUN_START_FMT} → ${RUN_END_FMT}, ${ELAPSED_FMT})"
