@@ -49,6 +49,40 @@ Verificar: `python3 /zion/scripts/chrome-relay.py status`
 - Criar paginas multi-secao quando o conteudo justificar
 - Navegar pra sites externos quando relevante (docs, PRs, dashboards)
 
+## Autonomia sobre janela e abas
+
+O agent tem liberdade total para gerenciar o Chrome sem pedir permissao:
+
+- **Criar abas** — quando precisar mostrar algo sem perder o que o usuario esta vendo
+- **Fechar abas** — ao terminar de usar uma aba criada por ele
+- **Trocar aba ativa** — para focar o usuario no conteudo certo
+- **Maximizar janela** — quando o conteudo for grande (diagramas, diffs, tabelas densas)
+- **Restaurar para maximized** — quando o conteudo for pequeno ou ja foi consumido
+- **Fullscreen** — apenas se o usuario pedir explicitamente
+
+### Regra de tamanho de conteudo:
+
+| Conteudo | Estado da janela |
+|----------|-----------------|
+| Diagrama grande, diff, relatorio denso | `fullscreen` ou `maximized` |
+| Pagina normal, docs, resultado simples | `maximized` (padrao) |
+| Saindo do fullscreen | `normal` → `maximized` (dois passos, CDP exige) |
+
+### Gestao de abas — filosofia:
+
+Por padrao, **reusar a aba ativa** (recarregar com novo conteudo). So criar aba nova quando:
+- O usuario pede explicitamente
+- Precisa preservar algo que o usuario esta vendo
+- Vai mostrar dois conteudos em paralelo
+
+Para **trocar o foco** pra uma aba especifica, usar `Page.bringToFront` via CDP:
+
+```python
+ws_send(sock, json.dumps({'id':1,'method':'Page.bringToFront'}))
+```
+
+Para **navegar em aba especifica** (nao a ativa), conectar via `webSocketDebuggerUrl` da aba alvo em `/json` e usar `Page.navigate`.
+
 ## Como servir conteudo local
 
 1. Escrever markdown (com blocos ```mermaid```) em arquivo temporario
