@@ -6,8 +6,8 @@ mount_path="$(cd "$nixos_dir" 2>/dev/null && pwd)" \
 proj_name="zion-projects"
 mount_opts="rw"
 
-# Engine: flag > ~/.zion > default cursor
-engine="${args['--engine']:-${flag_engine:-${ZION_ENGINE:-cursor}}}"
+# Engine: flag > ~/.zion > default claude (cursor-agent não suporta --name)
+engine="${args['--engine']:-${flag_engine:-${ZION_ENGINE:-claude}}}"
 engine="${engine,,}"
 case "$engine" in
   opencode|claude|cursor) ;;

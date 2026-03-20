@@ -112,9 +112,9 @@ _zion_dk_status() {
     local project
     project=$(zion_docker_project_name "$svc")  # zion-dk-<svc>
 
-    # Separa main (nao deps) de deps — baseado em nome, nao em label compose
+    # Separa main (nao deps, nao worktrees) de deps — baseado em nome
     local main_rows deps_rows
-    main_rows=$(echo "$_all_dk_rows" | grep -E "^${project}-" | grep -vE "^${project}-deps-" || true)
+    main_rows=$(echo "$_all_dk_rows" | grep -E "^${project}-" | grep -vE "^${project}-deps-" | grep -vE "^${project}-wt-" || true)
     deps_rows=$(echo "$_all_dk_rows"  | grep -E "^${project}-deps-" || true)
 
     local any_rows="${main_rows}${deps_rows}"
@@ -134,31 +134,35 @@ _zion_dk_status() {
 
     echo -e "${svc_icon} ${BOLD}${CYAN}${svc}${RESET}"
 
-    if [[ -n "$main_rows" ]]; then
-      local branch_char="├─"
-      [[ "$has_deps" -eq 0 ]] && branch_char="└─"
-      echo -e "  ${BLUE}${branch_char}${RESET} ${BOLD}${svc}${RESET}"
-      local cont_line="│  "
-      [[ "$has_deps" -eq 0 ]] && cont_line="   "
-      while IFS=$'\t' read -r name status ports; do
-        [[ -z "$name" ]] && continue
-        local short="${name##${project}-}"
-        print_container_row "  ${cont_line}└─ " "$short" "$status" "$ports"
-      done <<< "$main_rows"
-    fi
+    # Lê main em array para usar branch chars corretos (├─ vs └─)
+    local main_arr=()
+    while IFS= read -r line; do [[ -n "$line" ]] && main_arr+=("$line"); done <<< "$main_rows"
+
+    local deps_arr=()
+    while IFS= read -r line; do [[ -n "$line" ]] && deps_arr+=("$line"); done <<< "$deps_rows"
+
+    local total_main="${#main_arr[@]}"
+    local total_deps="${#deps_arr[@]}"
+
+    # Main containers — direto sob o header do serviço (sem label intermediário)
+    for i in "${!main_arr[@]}"; do
+      IFS=$'\t' read -r name status ports <<< "${main_arr[$i]}"
+      [[ -z "$name" ]] && continue
+      local short="${name##${project}-}"
+      local tc="├─"
+      [[ "$has_deps" -eq 0 && "$i" -eq "$((total_main - 1))" ]] && tc="└─"
+      print_container_row "  ${BLUE}${tc}${RESET} " "$short" "$status" "$ports"
+    done
 
     # Deps
     if [[ "$has_deps" -eq 1 ]]; then
       echo -e "  ${BLUE}└─${RESET} ${BOLD}deps${RESET}"
-      local total_deps="${#dep_lines[@]}"
-      local i=0
-      for row in "${dep_lines[@]}"; do
-        i=$((i + 1))
-        IFS=$'\t' read -r name status ports <<< "$row"
+      for i in "${!deps_arr[@]}"; do
+        IFS=$'\t' read -r name status ports <<< "${deps_arr[$i]}"
         [[ -z "$name" ]] && continue
-        local short="${name##zion-dk-${svc}-}"
-        local tc="├─" port_cont="│  "
-        if [[ "$i" -eq "$total_deps" ]]; then tc="└─"; port_cont="   "; fi
+        local short="${name##${project}-deps-}"
+        local tc="├─"
+        [[ "$i" -eq "$((total_deps - 1))" ]] && tc="└─"
         print_container_row "     ${tc} " "$short" "$status" "$ports"
       done
     fi
@@ -167,7 +171,8 @@ _zion_dk_status() {
   if [[ -n "$service" ]]; then
     print_service_tree "$service"
   else
-    echo -e "\n${BOLD}${MAGENTA}  Zion Docker${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}\n"
+    local no_header="${2:-0}"
+    [[ "$no_header" -eq 0 ]] && echo -e "\n${BOLD}${MAGENTA}  Zion Docker${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}\n"
     local services_list="monolito bo-container front-student"
     local count=0
     local total_svcs
