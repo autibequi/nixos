@@ -87,19 +87,17 @@ else
       fi
     fi
 
-    # Volumes conectados
+    # Volumes conectados — todos os /workspace/* montados
     local dest_mounts
     dest_mounts=$(docker inspect --format '{{range .Mounts}}{{.Destination}} {{end}}' "$name" 2>/dev/null || true)
     local vols=()
-    for v_entry in "/workspace/mnt:mnt" "/workspace/obsidian:obs" "/workspace/zion:zion" "/workspace/logs/docker:logs"; do
-      local vp="${v_entry%%:*}" vn="${v_entry##*:}"
-      if echo "$dest_mounts" | grep -qw "$vp"; then
-        vols+=("${GREEN}${vn}${RESET}")
-      else
-        vols+=("${RED}${vn}${RESET}")
-      fi
+    for dest in $dest_mounts; do
+      [[ "$dest" == /workspace/* ]] || continue
+      local vn="${dest#/workspace/}"
+      vols+=("${GREEN}${vn}${RESET}")
     done
-    local vol_str="  $(IFS=' '; echo "${vols[*]}")"
+    local vol_str=""
+    [[ "${#vols[@]}" -gt 0 ]] && vol_str="  $(IFS=' '; echo "${vols[*]}")"
 
     # Ports vazio padded (agents usam host-network)
     local ports_pad

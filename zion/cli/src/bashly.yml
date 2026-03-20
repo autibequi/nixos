@@ -620,6 +620,15 @@ commands:
     help: Documentacao completa de todos os comandos e flags.
     filename: commands/man.sh
 
+  - name: relay
+    help: "Chrome Relay — inicia Chrome no host com CDP para o agent conectar."
+    args:
+      - name: action
+        help: "Acao: start (default), stop, status"
+        allowed: [start, stop, status]
+        default: start
+    filename: commands/relay.sh
+
   - name: beta
     help: "Toggle do modo BETA (beta overrides). Liga/desliga observacao da sessao."
     filename: commands/beta.sh

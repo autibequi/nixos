@@ -52,24 +52,26 @@ _zion_dk_status() {
       | sed 's/ $//'
   }
 
-  # Bind mounts que parecem diretorios de projeto (sob /home ou /projects)
+  # Bind mounts — mostra todos os não-sistema (exclui /proc /sys /dev /run /etc)
   format_mounts() {
     local cname="$1"
-    local mounts
-    mounts=$(docker inspect \
-      --format '{{range .Mounts}}{{if eq .Type "bind"}}{{.Source}} {{end}}{{end}}' \
+    local entries
+    entries=$(docker inspect \
+      --format '{{range .Mounts}}{{if eq .Type "bind"}}{{.Source}}->{{.Destination}} {{end}}{{end}}' \
       "$cname" 2>/dev/null || true)
     local result=()
-    for src in $mounts; do
-      # Filtra: só paths que parecem repositórios de projeto
-      if echo "$src" | grep -qE '/(projects|nixos|obsidian|estrategia)/'; then
-        result+=("${src##*/}")
-      fi
+    for entry in $entries; do
+      local src="${entry%%->*}"
+      local dest="${entry##*->}"
+      # Exclui paths de sistema
+      echo "$src" | grep -qE '^/(proc|sys|dev|run/|var/run|etc/)' && continue
+      # Usa basename do destino como label (mais informativo para o contexto do container)
+      local label="${dest##*/}"
+      [[ -z "$label" || "$dest" == "/" ]] && label="$src"
+      result+=("$label")
     done
     if [[ "${#result[@]}" -gt 0 ]]; then
-      local deduped
-      deduped=$(printf '%s\n' "${result[@]}" | sort -u | tr '\n' ' ' | sed 's/ $//')
-      echo "$deduped"
+      printf '%s\n' "${result[@]}" | sort -u | tr '\n' ' ' | sed 's/ $//'
     fi
   }
 
@@ -93,7 +95,7 @@ _zion_dk_status() {
   # Imprime linha unificada: icon  uptime  nome  ports  cpu  mem  mounts
   # Mesmo formato das linhas de agents (icon + UPTIME(7) + NAME(16) + PORTS(18) + cpu + mem + mounts)
   print_container_row() {
-    local tree_pfx="$1" name="$2" status="$3" ports="$4"
+    local tree_pfx="$1" name="$2" status="$3" ports="$4" full_name="${5:-$2}"
 
     # Icon: ●/○ baseado no status (running vs stopped)
     local row_icon
@@ -139,7 +141,7 @@ _zion_dk_status() {
     local mnt_str=""
     if echo "$status" | grep -qi "^up"; then
       local mnt_names
-      mnt_names=$(format_mounts "$name")
+      mnt_names=$(format_mounts "$full_name")
       [[ -n "$mnt_names" ]] && mnt_str="  ${DIM}${mnt_names}${RESET}"
     fi
 
@@ -195,7 +197,7 @@ _zion_dk_status() {
       local short="${name##${project}-}"
       local tc="├─"
       [[ "$has_deps" -eq 0 && "$i" -eq "$((total_main - 1))" ]] && tc="└─"
-      print_container_row "  ${BLUE}${tc}${RESET} " "$short" "$status" "$ports"
+      print_container_row "  ${BLUE}${tc}${RESET} " "$short" "$status" "$ports" "$name"
     done
 
     # Deps
@@ -207,7 +209,7 @@ _zion_dk_status() {
         local short="${name##${project}-deps-}"
         local tc="├─"
         [[ "$i" -eq "$((total_deps - 1))" ]] && tc="└─"
-        print_container_row "     ${tc} " "$short" "$status" "$ports"
+        print_container_row "     ${tc} " "$short" "$status" "$ports" "$name"
       done
     fi
   }
