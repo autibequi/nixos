@@ -12,7 +12,8 @@ zion_env_file="$zion_cli_dir/.env"
 zion_obsidian_path="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
 
 # Garante HOME para o compose expandir ${HOME}/nixos e paths; usado por todos os comandos que montam volumes.
-[[ -z "${HOME:-}" ]] && export HOME="$(eval echo ~"$(id -un)")"
+# Garante HOME correto (corrige warning do Nix quando HOME nao bate com passwd)
+export HOME="$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f6 || eval echo ~"$(id -un)")"
 
 # Carrega ~/.zion (KEY=value, sourceável) e exporta para o compose/container.
 # Flags --engine e --model na linha de comando sempre sobrescrevem estes valores.

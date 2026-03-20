@@ -10,7 +10,7 @@ set -euo pipefail
 WORKSPACE="/workspace"
 TASKS="$WORKSPACE/obsidian/tasks"
 LOGFILE="$WORKSPACE/obsidian/agents/cron/daemon.log"
-LOCKFILE="$WORKSPACE/.ephemeral/locks/daemon.lock"
+LOCKFILE="/tmp/zion-locks/daemon.lock"
 
 TICK_INTERVAL="${PUPPY_TICK_INTERVAL:-300}"
 SINGLE_TICK="${PUPPY_SINGLE_TICK:-0}"
@@ -20,7 +20,7 @@ DRY_RUN=0
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 RUNNER="$SCRIPT_DIR/task-runner.sh"
 
-mkdir -p "$WORKSPACE/obsidian/agents/cron" "$WORKSPACE/.ephemeral/locks" "$TASKS/TODO" "$TASKS/DOING" "$TASKS/DONE"
+mkdir -p "$WORKSPACE/obsidian/agents/cron" "/tmp/zion-locks" "$TASKS/TODO" "$TASKS/DOING" "$TASKS/DONE"
 
 log() { echo "[daemon:$(date +%H:%M:%S)] $*"; }
 
@@ -79,7 +79,7 @@ run_tick() {
     [ -f "$card" ] || continue
     local filename; filename=$(basename "$card")
     local card_base; card_base=$(basename "$filename" .md)
-    if [ ! -d "$WORKSPACE/.ephemeral/locks/${card_base}.lock" ]; then
+    if [ ! -d "/tmp/zion-locks/${card_base}.lock" ]; then
       due+=("$filename")
       log "  orphan: $filename (in DOING but not locked)"
     fi

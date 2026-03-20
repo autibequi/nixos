@@ -1,5 +1,12 @@
-echo "# This file is located at 'src/commands/down.sh'."
-echo "# It contains the implementation for the 'zion down' command."
-echo "# The code you write here will be wrapped by a function named 'zion_down_command()'."
-echo "# Feel free to edit this file; your changes will persist when regenerating."
-inspect_args
+# Para todos os containers do projeto (zion sessions + puppy)
+zion_load_config
+compose_zion="${ZION_ROOT:-$HOME/nixos/zion}/cli/docker-compose.zion.yml"
+compose_puppy="${ZION_ROOT:-$HOME/nixos/zion}/cli/docker-compose.puppy.yml"
+
+echo "Stopping zion session containers..."
+docker compose -f "$compose_zion" down 2>/dev/null || true
+
+echo "Stopping puppy container..."
+docker compose -f "$compose_puppy" down 2>/dev/null || true
+
+echo "Done."

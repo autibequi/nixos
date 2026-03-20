@@ -170,7 +170,7 @@ Produce any artifacts (reports, files, outputs) in: /workspace/obsidian/artefato
 # ── MCP config ───────────────────────────────────────────────────
 MCP_FLAGS=()
 if [ "$MCP" = "false" ] || [ "$MCP" = "off" ]; then
-  no_mcp="$WORKSPACE/.ephemeral/no-mcp.json"
+  no_mcp="/tmp/zion-no-mcp.json"
   [ -f "$no_mcp" ] || echo '{"mcpServers":{}}' > "$no_mcp"
   MCP_FLAGS=(--mcp-config "$no_mcp")
 fi
