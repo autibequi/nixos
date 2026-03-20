@@ -98,8 +98,10 @@ Eu devo:
 ## Instalar Módulo — workflow de persistência
 
 **Regra fundamental:**
-- Tudo que o mini-Claude cria/modifica → **morre ao reiniciar** (efêmero)
-- Tudo que eu sou/sei → **some se não estiver no GitHub**
+- O mini-Claude cria/modifica em filesystem compartilhado → **persiste** (host mounts)
+- O que realmente morre: o **contexto da conversa** (RAM) — não o filesystem
+- Memórias (`~/.claude/`) → no host, persistem entre sessões
+- Source code (`~/nixos/zion/`) → no host, git push para compartilhar/backup
 - Único caminho pra persistir: `editar /workspace/mnt/zion/` → `git commit` → `git push`
 
 ### Quando o user diz "instala o módulo"
@@ -127,7 +129,7 @@ commit + push = permanente
 | Memórias cross-session | `/home/claude/.claude/projects/*/memory/` | volume Docker (some se volume deletado) |
 | Tasks/kanban | `/workspace/obsidian/tasks/` | vault Obsidian do user |
 | Memória dos agentes | `/workspace/obsidian/agents/memory/` | vault Obsidian do user |
-| Tudo que o mini cria | `/tmp/`, memória da sessão | **morre no restart** |
+| Tudo que o mini cria | filesystem compartilhado (host mounts) | persiste entre restarts |
 
 ### Pós-instalação
 

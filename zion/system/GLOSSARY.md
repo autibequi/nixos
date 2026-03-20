@@ -29,7 +29,7 @@ Nomenclatura do sistema. Referência rápida para entender os termos usados em s
 | Memórias cross-session | `/home/claude/.claude/projects/*/memory/` | volume Docker deletado |
 | Tasks / kanban | `/workspace/obsidian/` | vault Obsidian do user |
 | O que Mini-Zion cria | filesystem compartilhado | restart do container |
-| Contexto desta sessão | RAM / contexto Claude | fim da conversa |
+| Contexto desta sessão (RAM) | processo Claude Code | fim da conversa — única coisa que realmente some |
 
 ## Paths essenciais
 
