@@ -53,9 +53,10 @@ else
   done <<< "$_all_leech_rows"
 
   # Helper: formata linha de agente
-  # Formato: PREFIX ICON UPTIME(7) NAME(16) PORTS(18=vazio) cpu CPU%(7) mem MEM volumes
+  # Linha 1: PREFIX ICON UPTIME(7) NAME(16) PORTS(18=vazio) cpu CPU%(7) mem MEM
+  # Linha 2: continuacao + 4 mounts-chave (mnt/obs/zion/logs) com cor
   _print_agent_row() {
-    local pfx="$1" name="$2" status="$3"
+    local pfx="$1" name="$2" status="$3" tc="${4:-└─}"
     local icon uptime_raw
     if echo "$status" | grep -qi "^up"; then
       icon="${GREEN}●${RESET}"
@@ -87,23 +88,28 @@ else
       fi
     fi
 
-    # Volumes conectados — todos os /workspace/* montados
-    local dest_mounts
-    dest_mounts=$(docker inspect --format '{{range .Mounts}}{{.Destination}} {{end}}' "$name" 2>/dev/null || true)
-    local vols=()
-    for dest in $dest_mounts; do
-      [[ "$dest" == /workspace/* ]] || continue
-      local vn="${dest#/workspace/}"
-      vols+=("${GREEN}${vn}${RESET}")
-    done
-    local vol_str=""
-    [[ "${#vols[@]}" -gt 0 ]] && vol_str="  $(IFS=' '; echo "${vols[*]}")"
-
     # Ports vazio padded (agents usam host-network)
     local ports_pad
     ports_pad=$(printf "%-${_A_PORTS_W}s" "")
 
-    echo -e "${pfx}${icon} ${ORANGE}${uptime_pad}${RESET}  ${WHITE}${name_pad}${RESET}  ${DIM}${ports_pad}${RESET}  ${cpu_str}${mem_str}${vol_str}"
+    # Linha principal
+    echo -e "${pfx}${icon} ${ORANGE}${uptime_pad}${RESET}  ${WHITE}${name_pad}${RESET}  ${DIM}${ports_pad}${RESET}  ${cpu_str}${mem_str}"
+
+    # Linha 2: 4 mounts-chave com cor (verde=conectado, vermelho=ausente)
+    local dest_mounts
+    dest_mounts=$(docker inspect --format '{{range .Mounts}}{{.Destination}} {{end}}' "$name" 2>/dev/null || true)
+    local vols=()
+    for v_entry in "/workspace/mnt:mnt" "/workspace/obsidian:obs" "/workspace/zion:zion" "/workspace/logs/docker:logs"; do
+      local vp="${v_entry%%:*}" vn="${v_entry##*:}"
+      if echo "$dest_mounts" | grep -qw "$vp"; then
+        vols+=("${GREEN}${vn}${RESET}")
+      else
+        vols+=("${RED}${vn}${RESET}")
+      fi
+    done
+    local cont_indent
+    [[ "$tc" == "├─" ]] && cont_indent="  ${BLUE}│${RESET}    " || cont_indent="       "
+    echo -e "${cont_indent}${DIM}$(IFS='  '; echo "${vols[*]}")${RESET}"
   }
 
   _print_agent_group() {
@@ -120,7 +126,7 @@ else
     for i in "${!arr[@]}"; do
       IFS=$'\t' read -r _cn _cs _cp <<< "${arr[$i]}"
       local tc="├─"; [[ "$i" -eq "$((n - 1))" ]] && tc="└─"
-      _print_agent_row "  ${BLUE}${tc}${RESET} " "$_cn" "$_cs"
+      _print_agent_row "  ${BLUE}${tc}${RESET} " "$_cn" "$_cs" "$tc"
     done
     echo ""
   }
@@ -128,8 +134,7 @@ else
   _print_agent_group "agents" "$_agent_rows"
   _print_agent_group "background" "$_bg_rows"
 
-  # Dockerized services
-  echo -e "${BOLD}${CYAN}  Dockerized${RESET}\n"
+  # Dockerized services — sem header separado, mesma lista
   source "${ZION_ROOT:-$HOME/nixos/zion}/cli/src/lib/docker_status_impl.sh" 2>/dev/null || true
   if declare -f _zion_dk_status >/dev/null 2>&1; then
     _zion_dk_status "" 1

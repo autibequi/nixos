@@ -23,7 +23,7 @@ _zion_dk_status() {
   local icon_stopped="${RED}○${RESET}"
   local icon_partial="${YELLOW}◐${RESET}"
 
-  # Larguras de coluna — unificadas com a sessao de agents
+  # Larguras de coluna — unificadas com agents
   local TIME_W=7    # uptime
   local NAME_W=16   # nome do container
   local PORTS_W=18  # portas (string padded)
@@ -52,7 +52,7 @@ _zion_dk_status() {
       | sed 's/ $//'
   }
 
-  # Bind mounts — mostra todos os não-sistema (exclui /proc /sys /dev /run /etc)
+  # Bind mounts relevantes — apenas paths sob $HOME (projetos, configs)
   format_mounts() {
     local cname="$1"
     local entries
@@ -63,11 +63,10 @@ _zion_dk_status() {
     for entry in $entries; do
       local src="${entry%%->*}"
       local dest="${entry##*->}"
-      # Exclui paths de sistema
-      echo "$src" | grep -qE '^/(proc|sys|dev|run/|var/run|etc/)' && continue
-      # Usa basename do destino como label (mais informativo para o contexto do container)
+      # Só mounts onde source é em /home (projetos do usuário)
+      echo "$src" | grep -qE '^/home/' || continue
       local label="${dest##*/}"
-      [[ -z "$label" || "$dest" == "/" ]] && label="$src"
+      [[ -z "$label" || "$dest" == "/" ]] && label="${src##*/}"
       result+=("$label")
     done
     if [[ "${#result[@]}" -gt 0 ]]; then
@@ -92,12 +91,13 @@ _zion_dk_status() {
     fi
   }
 
-  # Imprime linha unificada: icon  uptime  nome  ports  cpu  mem  mounts
-  # Mesmo formato das linhas de agents (icon + UPTIME(7) + NAME(16) + PORTS(18) + cpu + mem + mounts)
+  # Imprime linha de container + segunda linha com mounts
+  # Formato linha 1: ICON UPTIME(7) NAME(16) PORTS(18) cpu CPU%(7) mem MEM
+  # Formato linha 2: continuação + mounts (dim)
   print_container_row() {
-    local tree_pfx="$1" name="$2" status="$3" ports="$4" full_name="${5:-$2}"
+    local tree_pfx="$1" name="$2" status="$3" ports="$4" full_name="${5:-$2}" tc="${6:-└─}"
 
-    # Icon: ●/○ baseado no status (running vs stopped)
+    # Icon
     local row_icon
     if echo "$status" | grep -qi "^up"; then
       row_icon="${GREEN}●${RESET}"
@@ -108,7 +108,7 @@ _zion_dk_status() {
     local status_str
     status_str=$(format_status "$status")
 
-    # Portas: extrair e pad para PORTS_W
+    # Portas padded
     local raw_ports
     raw_ports=$(format_ports "$ports")
     local ports_padded
@@ -119,15 +119,15 @@ _zion_dk_status() {
     local padded_name
     padded_name=$(printf "%-${NAME_W}s" "$name")
 
-    # Stats (cpu/mem) — só se container estiver up
+    # Stats cpu/mem
     local stats_str=""
     if echo "$status" | grep -qi "^up"; then
       local raw_stats
       raw_stats=$(stats_for "$name")
       if [[ -z "$raw_stats" ]]; then
-        local full_name
-        full_name=$(echo "$_stats_cache" | awk -F'\t' -v n="$name" '$1 ~ n {print $1}' | head -1)
-        [[ -n "$full_name" ]] && raw_stats=$(stats_for "$full_name")
+        local _fname
+        _fname=$(echo "$_stats_cache" | awk -F'\t' -v n="$full_name" '$1 ~ n {print $1}' | head -1)
+        [[ -n "$_fname" ]] && raw_stats=$(stats_for "$_fname")
       fi
       if [[ -n "$raw_stats" ]]; then
         local cpu mem
@@ -137,18 +137,22 @@ _zion_dk_status() {
       fi
     fi
 
-    # Mounts
-    local mnt_str=""
+    # Linha principal
+    echo -e "${tree_pfx}${row_icon} $(printf "%-${TIME_W}b" "$status_str")  ${WHITE}${padded_name}${RESET}  ${ports_str}  ${stats_str}"
+
+    # Linha 2: mounts (só se running e tiver mounts relevantes)
     if echo "$status" | grep -qi "^up"; then
       local mnt_names
       mnt_names=$(format_mounts "$full_name")
-      [[ -n "$mnt_names" ]] && mnt_str="  ${DIM}${mnt_names}${RESET}"
+      if [[ -n "$mnt_names" ]]; then
+        local cont_indent
+        [[ "$tc" == "├─" ]] && cont_indent="  ${BLUE}│${RESET}    " || cont_indent="       "
+        echo -e "${cont_indent}${DIM}${mnt_names}${RESET}"
+      fi
     fi
-
-    echo -e "${tree_pfx}${row_icon} $(printf "%-${TIME_W}b" "$status_str")  ${WHITE}${padded_name}${RESET}  ${ports_str}  ${stats_str}${mnt_str}"
   }
 
-  # all_dk_rows: cache unico de todos os containers zion-dk-* (evita N chamadas docker ps)
+  # all_dk_rows: cache unico de todos os containers zion-dk-*
   local _all_dk_rows
   _all_dk_rows=$(docker ps -a --filter "name=zion-dk-" \
     --format "{{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || true)
@@ -158,7 +162,6 @@ _zion_dk_status() {
     local project
     project=$(zion_docker_project_name "$svc")  # zion-dk-<svc>
 
-    # Separa main (nao deps, nao worktrees) de deps — baseado em nome
     local main_rows deps_rows
     main_rows=$(echo "$_all_dk_rows" | grep -E "^${project}-" | grep -vE "^${project}-deps-" | grep -vE "^${project}-wt-" || true)
     deps_rows=$(echo "$_all_dk_rows"  | grep -E "^${project}-deps-" || true)
@@ -169,7 +172,6 @@ _zion_dk_status() {
       return
     fi
 
-    # Icone: verde se algum main esta up, amarelo se so deps, vermelho se tudo exited
     local svc_icon="$icon_stopped"
     echo "$main_rows" | grep -qi "	Up " && svc_icon="$icon_running"
     [[ "$svc_icon" == "$icon_stopped" ]] && \
@@ -180,7 +182,6 @@ _zion_dk_status() {
 
     echo -e "${svc_icon} ${BOLD}${CYAN}${svc}${RESET}"
 
-    # Lê main em array para usar branch chars corretos (├─ vs └─)
     local main_arr=()
     while IFS= read -r line; do [[ -n "$line" ]] && main_arr+=("$line"); done <<< "$main_rows"
 
@@ -190,17 +191,15 @@ _zion_dk_status() {
     local total_main="${#main_arr[@]}"
     local total_deps="${#deps_arr[@]}"
 
-    # Main containers — direto sob o header do serviço (sem label intermediário)
     for i in "${!main_arr[@]}"; do
       IFS=$'\t' read -r name status ports <<< "${main_arr[$i]}"
       [[ -z "$name" ]] && continue
       local short="${name##${project}-}"
       local tc="├─"
       [[ "$has_deps" -eq 0 && "$i" -eq "$((total_main - 1))" ]] && tc="└─"
-      print_container_row "  ${BLUE}${tc}${RESET} " "$short" "$status" "$ports" "$name"
+      print_container_row "  ${BLUE}${tc}${RESET} " "$short" "$status" "$ports" "$name" "$tc"
     done
 
-    # Deps
     if [[ "$has_deps" -eq 1 ]]; then
       echo -e "  ${BLUE}└─${RESET} ${BOLD}deps${RESET}"
       for i in "${!deps_arr[@]}"; do
@@ -209,7 +208,7 @@ _zion_dk_status() {
         local short="${name##${project}-deps-}"
         local tc="├─"
         [[ "$i" -eq "$((total_deps - 1))" ]] && tc="└─"
-        print_container_row "     ${tc} " "$short" "$status" "$ports" "$name"
+        print_container_row "     ${tc} " "$short" "$status" "$ports" "$name" "$tc"
       done
     fi
   }
