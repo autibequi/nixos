@@ -70,6 +70,7 @@ sleep 1\n\
 # Garantir dirs essenciais com dono correto antes de trocar usuario\n\
 mkdir -p /workspace/.ephemeral/locks /workspace/.ephemeral/notes /workspace/.ephemeral/scratch /tmp/zion-locks\n\
 chown -R claude:claude /workspace/.ephemeral /tmp/zion-locks 2>/dev/null || true\n\
+chown -R claude:claude /workspace/obsidian/agents/cron 2>/dev/null || true\n\
 exec gosu claude "$@"\n' > /entrypoint.sh && \
     chmod +x /entrypoint.sh
 

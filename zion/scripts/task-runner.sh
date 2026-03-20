@@ -182,6 +182,13 @@ echo "[runner] running '$TASK_NAME' (model=$MODEL, timeout=${TIMEOUT}s, turns=$M
 # ── Run ──────────────────────────────────────────────────────────
 LOGDIR="$WORKSPACE/obsidian/agents/cron/runs/$TASK_NAME"
 mkdir -p "$LOGDIR"
+# Fix dirs criados como root por execuções anteriores sem -u claude
+if [ ! -w "$LOGDIR" ]; then
+  chmod 755 "$LOGDIR" 2>/dev/null || true
+  # Se ainda não tem acesso, usar /tmp como fallback
+  LOGDIR="/tmp/zion-runs/$TASK_NAME"
+  mkdir -p "$LOGDIR"
+fi
 LOGFILE="$LOGDIR/$(date +%Y-%m-%d_%H-%M).log"
 
 START_S=$SECONDS
