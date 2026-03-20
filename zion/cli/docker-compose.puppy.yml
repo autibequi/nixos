@@ -75,6 +75,14 @@ services:
     restart: unless-stopped
     group_add:
       - "${DOCKER_GID:-999}"
+    # Isolation: drop all caps except what nix-daemon + gosu need
+    cap_drop:
+      - NET_RAW
+      - SYS_PTRACE
+      - SYS_RAWIO
+      - MKNOD
+      - AUDIT_WRITE
+      - NET_BIND_SERVICE
     environment:
       <<: *env-worker
       GIT_AUTHOR_NAME: Buchecha

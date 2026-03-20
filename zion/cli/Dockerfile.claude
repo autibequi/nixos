@@ -60,8 +60,17 @@ RUN curl -fsSL "https://github.com/grafana/mcp-grafana/releases/latest/download/
     | tar xz -C /home/claude/.local/bin/ mcp-grafana && \
     chown 1000:1000 /home/claude/.local/bin/mcp-grafana
 
-# Entrypoint: inicia nix-daemon como root, depois delega para claude via gosu
-RUN printf '#!/bin/bash\nnix-daemon &\nsleep 1\nexec gosu claude "$@"\n' > /entrypoint.sh && \
+# Workspace owned by claude (evita dirs criados como root)
+RUN mkdir -p /workspace && chown claude:claude /workspace
+
+# Entrypoint: inicia nix-daemon como root, cria dirs essenciais como claude, depois delega via gosu
+RUN printf '#!/bin/bash\n\
+nix-daemon &\n\
+sleep 1\n\
+# Garantir dirs essenciais com dono correto antes de trocar usuario\n\
+mkdir -p /workspace/.ephemeral/locks /workspace/.ephemeral/notes /workspace/.ephemeral/scratch /tmp/zion-locks\n\
+chown -R claude:claude /workspace/.ephemeral /tmp/zion-locks 2>/dev/null || true\n\
+exec gosu claude "$@"\n' > /entrypoint.sh && \
     chmod +x /entrypoint.sh
 
 # Container roda como root por default para que /entrypoint.sh possa iniciar nix-daemon.

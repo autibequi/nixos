@@ -3,7 +3,7 @@ local lines="${args[--lines]:-20}"
 zion_load_config
 local compose_file="${ZION_ROOT:-$HOME/nixos/zion}/cli/docker-compose.puppy.yml"
 
-docker compose -f "$compose_file" exec -T puppy bash -c "
+docker compose -f "$compose_file" exec -T -u claude puppy bash -c "
   LOG=/workspace/obsidian/tasks/log.md
   if [ ! -f \$LOG ]; then echo 'No task log found'; exit 0; fi
   echo '=== Task Log (last $lines) ==='

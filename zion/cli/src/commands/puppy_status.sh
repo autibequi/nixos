@@ -1,5 +1,12 @@
-echo "# This file is located at 'src/commands/puppy_status.sh'."
-echo "# It contains the implementation for the 'zion puppy status' command."
-echo "# The code you write here will be wrapped by a function named 'zion_puppy_status_command()'."
-echo "# Feel free to edit this file; your changes will persist when regenerating."
-inspect_args
+# Show puppy container status and recent task log
+zion_load_config
+local compose_file="${ZION_ROOT:-$HOME/nixos/zion}/cli/docker-compose.puppy.yml"
+
+echo "=== Container ==="
+docker compose -f "$compose_file" ps puppy 2>/dev/null || echo "  (not running)"
+
+echo ""
+echo "=== Recent tasks (last 20) ==="
+docker compose -f "$compose_file" exec -T -u claude puppy \
+  bash -c "tail -20 /workspace/obsidian/tasks/log.md 2>/dev/null || echo '  (no log yet)'" 2>/dev/null || \
+  echo "  (container not running)"

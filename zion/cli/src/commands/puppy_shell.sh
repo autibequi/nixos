@@ -1,5 +1,5 @@
-echo "# This file is located at 'src/commands/puppy_shell.sh'."
-echo "# It contains the implementation for the 'zion puppy shell' command."
-echo "# The code you write here will be wrapped by a function named 'zion_puppy_shell_command()'."
-echo "# Feel free to edit this file; your changes will persist when regenerating."
-inspect_args
+# Open interactive bash inside puppy container
+zion_load_config
+local compose_file="${ZION_ROOT:-$HOME/nixos/zion}/cli/docker-compose.puppy.yml"
+
+docker compose -f "$compose_file" exec puppy bash

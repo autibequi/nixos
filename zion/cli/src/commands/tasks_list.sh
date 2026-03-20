@@ -9,7 +9,7 @@ if [ -n "$show_all" ]; then
   cmd="$cmd; echo; echo '=== DONE (last 20) ==='; ls -t \$T/DONE/*.md 2>/dev/null | head -20 | xargs -I{} basename {} || echo '  (empty)'"
 fi
 
-docker compose -f "$compose_file" exec -T puppy bash -c "$cmd" 2>/dev/null || {
+docker compose -f "$compose_file" exec -T -u claude puppy bash -c "$cmd" 2>/dev/null || {
   echo "Puppy container not running. Start with: zion puppy start"
   exit 1
 }

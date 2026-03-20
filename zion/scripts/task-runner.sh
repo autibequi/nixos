@@ -32,12 +32,20 @@ else
 fi
 
 # ── Lock (atomic via mkdir) ──────────────────────────────────────
-LOCKDIR="$WORKSPACE/.ephemeral/locks/${CARD_BASE}.lock"
+LOCKDIR="/tmp/zion-locks/${CARD_BASE}.lock"
 mkdir -p "$(dirname "$LOCKDIR")"
 cleanup_lock() { rm -rf "$LOCKDIR" 2>/dev/null || true; }
 if ! mkdir "$LOCKDIR" 2>/dev/null; then
-  echo "[runner] '$CARD_BASE' locked — skip"
-  exit 0
+  LOCK_AGE=$(( $(date +%s) - $(stat -c %Y "$LOCKDIR" 2>/dev/null || echo 0) ))
+  MAX_AGE=$(( ${TIMEOUT:-300} + 60 ))
+  if [ "$LOCK_AGE" -gt "$MAX_AGE" ]; then
+    echo "[runner] '$CARD_BASE' — stale lock (${LOCK_AGE}s), clearing"
+    rm -rf "$LOCKDIR"
+    mkdir "$LOCKDIR"
+  else
+    echo "[runner] '$CARD_BASE' locked — skip (${LOCK_AGE}s old)"
+    exit 0
+  fi
 fi
 trap cleanup_lock EXIT
 
@@ -188,20 +196,29 @@ CLAUDE_ARGS+=(-p "$PROMPT")
 
 EXIT_CODE=0
 HEADLESS=1 PUPPY_TIMEOUT="$TIMEOUT" \
-timeout "$TIMEOUT" claude "${CLAUDE_ARGS[@]}" 2>&1 | \
-  if [ "$VERBOSE" = "1" ]; then tee "$LOGFILE"; else cat > "$LOGFILE"; fi || true
+timeout "$TIMEOUT" claude "${CLAUDE_ARGS[@]}" 2>&1 | tee "$LOGFILE" || true
 EXIT_CODE=${PIPESTATUS[0]}
 ELAPSED=$((SECONDS - START_S))
 
-STATUS="ok"; [ "$EXIT_CODE" -ne 0 ] && STATUS="fail"; [ "$EXIT_CODE" -eq 124 ] && STATUS="timeout"
+STATUS="ok"
+[ "$EXIT_CODE" -eq 124 ] && STATUS="timeout"
+[ "$EXIT_CODE" -ne 0 ] && [ "$EXIT_CODE" -ne 124 ] && STATUS="fail"
 
 # ── Finish ───────────────────────────────────────────────────────
 ELAPSED_FMT="$((ELAPSED/60))m$((ELAPSED%60))s"
-echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | $STATUS | $TASK_NAME | $MODEL | ${ELAPSED_FMT} | $CARD" >> "$LOG"
+echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) | $STATUS | $TASK_NAME | $MODEL | ${ELAPSED_FMT} | exit=$EXIT_CODE | $CARD" >> "$LOG"
+
+if [ "$STATUS" != "ok" ]; then
+  echo "[runner] '$TASK_NAME' — $STATUS (exit=$EXIT_CODE, ${ELAPSED_FMT})"
+  echo "[runner] log: $LOGFILE"
+  echo "[runner] --- last 20 lines ---"
+  tail -20 "$LOGFILE" 2>/dev/null || true
+  echo "[runner] ---"
+fi
 
 # If agent moved card back to TODO (rescheduled itself), we're done
 if [ ! -f "$CARD_PATH" ]; then
-  echo "[runner] '$TASK_NAME' — card moved by agent (rescheduled or custom)"
+  echo "[runner] '$TASK_NAME' — rescheduled (${ELAPSED_FMT})"
   exit 0
 fi
 

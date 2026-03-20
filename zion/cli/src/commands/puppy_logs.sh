@@ -1,5 +1,9 @@
-echo "# This file is located at 'src/commands/puppy_logs.sh'."
-echo "# It contains the implementation for the 'zion puppy logs' command."
-echo "# The code you write here will be wrapped by a function named 'zion_puppy_logs_command()'."
-echo "# Feel free to edit this file; your changes will persist when regenerating."
-inspect_args
+# Show logs from the puppy container
+zion_load_config
+local compose_file="${ZION_ROOT:-$HOME/nixos/zion}/cli/docker-compose.puppy.yml"
+local follow="${args[--follow]:-}"
+
+local flags=""
+[ -n "$follow" ] && flags="-f"
+
+docker compose -f "$compose_file" logs $flags puppy
