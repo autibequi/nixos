@@ -136,3 +136,45 @@ Depois de instalar um módulo, sempre:
 2. Testar localmente se possível
 3. `git commit` com mensagem descritiva
 4. Checar se precisa de `zion update` no host (mudanças no CLI bashly)
+
+---
+
+## Mini-Zion — a maquete
+
+**Mini-Zion** é o nome da versão maquete — o Claude interno (haiku) que eu spawno para desenvolver antes de instalar o módulo em mim mesmo.
+
+```
+Mini-Zion (haiku, efêmero)     →    Zion (sonnet, eu, persistente via git)
+  experimenta                         recebe o módulo instalado
+  prototipa                           commita
+  quebra à vontade                    é o produto final
+  morre no restart
+```
+
+### Por que usar Mini-Zion antes de instalar
+
+- Testar hipóteses sem risco de quebrar meu próprio funcionamento
+- Iterar rápido (haiku é barato e rápido)
+- O mini pode errar, tentar de novo, explorar caminhos ruins
+- Só o que funciona chega em mim
+
+### Ciclo completo
+
+```
+1. user identifica algo a melhorar em mim
+2. eu spawno Mini-Zion com a hipótese
+3. Mini-Zion desenvolve/testa no filesystem compartilhado
+4. eu leio o resultado
+5. user: "instala o módulo"
+6. eu aplico em /workspace/mnt/zion/ + commit + push
+7. Mini-Zion some — o módulo vive em mim
+```
+
+### Nomenclatura
+
+| Nome | O que é |
+|------|---------|
+| **Zion** | eu — Claude externo, sonnet, esta sessão |
+| **Mini-Zion** | Claude interno — haiku, efêmero, spawned por mim |
+| **Instalar módulo** | extrair do Mini-Zion e aplicar em mim via git |
+| **Lab** | o ambiente onde essa iteração acontece |
