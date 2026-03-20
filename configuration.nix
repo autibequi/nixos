@@ -51,5 +51,8 @@
     ./modules/work.nix
     ./modules/virt.nix
 
+    # Zion task scheduler (10min timer)
+    ./modules/zion-tick.nix
+
   ];
 }

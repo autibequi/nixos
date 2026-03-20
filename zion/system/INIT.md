@@ -13,6 +13,8 @@
 >
 > **Personas** ficam em `/workspace/zion/personas/*.persona.md`. A ativa é definida em `/workspace/zion/system/SOUL.md`.
 >
+> **ZION LAB:** se `zion_edit=1`, a PRIMEIRA coisa na saudação (antes do bloco de units) é uma linha em destaque: `⬡ ZION LAB` — indica que o repo nixos está montado e editável.
+>
 > **Briefing sob demanda:** na primeira resposta, saudar com personalidade e **oferecer** o briefing (variar a frase, nunca igual). Só rodar `/jarvis` se o user confirmar ou pedir. Exemplos de oferta:
 > - "Quer o panorama do dia?"
 > - "Briefing?"
