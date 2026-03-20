@@ -14,20 +14,23 @@ Isso significa: navegar pra qualquer URL, servir paginas locais com Mermaid/Mark
 ## Pre-requisito
 
 Chrome rodando no host com `--remote-debugging-port=9222`.
-Verificar: `python3 /zion/scripts/chrome-relay.py status`
+Verificar: `python3 /workspace/zion/scripts/chrome-relay.py status`
 
 ## Script
 
-`/zion/scripts/chrome-relay.py` — arquivo unico, sem dependencias externas.
+Path correto dentro do container: `/workspace/zion/scripts/chrome-relay.py`
 
 | Comando | O que faz |
 |---------|-----------|
-| `nav <url>` | Navega o Chrome pra URL |
+| `nav <url>` | Navega a aba ativa pra URL |
 | `show <file.md>` | Serve arquivo markdown e navega Chrome pra ele |
 | `inject <js>` | Executa JavaScript na aba ativa |
 | `tabs` | Lista abas abertas |
-| `serve [--once]` | Sobe servidor de conteudo (http://zion:8765) |
 | `status` | Verifica Chrome CDP + servidor |
+
+**IMPORTANTE:** o script NAO tem flag `--tab`. Para navegar em aba especifica, usar CDP direto (ver secao abaixo).
+
+**IMPORTANTE:** `inject "window.open(...)"` NAO abre nova aba de forma confiavel. Usar `curl -X PUT` (ver secao abaixo).
 
 ## Comportamento PROATIVO
 
@@ -55,7 +58,7 @@ O agent tem liberdade total para gerenciar o Chrome sem pedir permissao:
 
 - **Criar abas** — quando precisar mostrar algo sem perder o que o usuario esta vendo
 - **Fechar abas** — ao terminar de usar uma aba criada por ele
-- **Trocar aba ativa** — para focar o usuario no conteudo certo
+- **Trocar aba ativa / foco** — para direcionar o usuario pro conteudo certo
 - **Maximizar janela** — quando o conteudo for grande (diagramas, diffs, tabelas densas)
 - **Restaurar para maximized** — quando o conteudo for pequeno ou ja foi consumido
 - **Fullscreen** — apenas se o usuario pedir explicitamente
@@ -64,9 +67,10 @@ O agent tem liberdade total para gerenciar o Chrome sem pedir permissao:
 
 | Conteudo | Estado da janela |
 |----------|-----------------|
-| Diagrama grande, diff, relatorio denso | `fullscreen` ou `maximized` |
+| Diagrama grande, diff, relatorio denso | `maximized` (padrao rico) |
 | Pagina normal, docs, resultado simples | `maximized` (padrao) |
-| Saindo do fullscreen | `normal` → `maximized` (dois passos, CDP exige) |
+| Usuario pediu fullscreen | `fullscreen` |
+| Saindo do fullscreen | `normal` primeiro, depois `maximized` (CDP exige dois passos) |
 
 ### Gestao de abas — filosofia:
 
@@ -75,61 +79,76 @@ Por padrao, **reusar a aba ativa** (recarregar com novo conteudo). So criar aba 
 - Precisa preservar algo que o usuario esta vendo
 - Vai mostrar dois conteudos em paralelo
 
-Para **trocar o foco** pra uma aba especifica, usar `Page.bringToFront` via CDP:
-
-```python
-ws_send(sock, json.dumps({'id':1,'method':'Page.bringToFront'}))
-```
-
-Para **navegar em aba especifica** (nao a ativa), conectar via `webSocketDebuggerUrl` da aba alvo em `/json` e usar `Page.navigate`.
-
 ## Como servir conteudo local
 
 1. Escrever markdown (com blocos ```mermaid```) em arquivo temporario
-2. Usar `chrome-relay.py show <arquivo>` — ele:
+2. **Salvar copia em `/workspace/obsidian/chrome/`** com nome descritivo (ex: `2026-03-20_fluxo-auth.md`) — funciona como livro de artes do agent, acessivel no Obsidian do usuario
+3. Usar `chrome-relay.py show <arquivo>` — ele:
    - Sobe servidor HTTP automaticamente
-   - Navega o Chrome pra http://zion:8765
+   - Navega o Chrome para a pagina renderizada
    - A pagina renderiza Mermaid + Markdown com tema dark
    - Live reload via SSE (se editar o arquivo, atualiza sozinho)
+
+### Livro de artes — `/workspace/obsidian/chrome/`
+
+Toda pagina gerada pelo agent deve ser salva nessa pasta antes de exibir no Chrome.
+O usuario pode navegar pelo Obsidian e ver o historico de visualizacoes passadas.
+O agent tambem pode reabrir paginas antigas no Chrome a qualquer momento — tanto pra rever quanto pra mostrar algo ao usuario sem regerar do zero.
+Nao apagar arquivos antigos. A pasta e acumulativa e serve como memoria visual cross-session.
 
 ## Como navegar pra URL externa
 
 ```bash
-python3 /zion/scripts/chrome-relay.py nav "https://grafana.example.com/d/uid"
+python3 /workspace/zion/scripts/chrome-relay.py nav "https://exemplo.com"
 ```
 
 ## Como injetar JavaScript
 
 ```bash
-python3 /zion/scripts/chrome-relay.py inject "document.title"
-python3 /zion/scripts/chrome-relay.py inject "document.querySelector('h1').textContent"
+python3 /workspace/zion/scripts/chrome-relay.py inject "document.title"
+python3 /workspace/zion/scripts/chrome-relay.py inject "document.querySelector('h1').textContent"
 ```
 
 ## Controle de janela e abas via CDP direto
-
-Algumas operacoes nao tem comando no script — usar CDP REST ou WebSocket diretamente.
 
 ### Abrir nova aba
 
 ```bash
 curl -s -X PUT "http://localhost:9222/json/new?about:blank"
-# Retorna JSON com o id da nova aba
+# Retorna JSON com id, webSocketDebuggerUrl, etc.
+```
+
+### Navegar em aba especifica (nao a ativa)
+
+Conectar via `webSocketDebuggerUrl` da aba alvo (obtida em `http://localhost:9222/json`) e usar `Page.navigate`:
+
+```python
+tabs = cdp_get('/json')
+target = next(t for t in tabs if t['id'] == TAB_ID)
+sock = cdp_ws_connect(target['webSocketDebuggerUrl'])
+ws_send(sock, json.dumps({'id':1,'method':'Page.navigate','params':{'url':'https://...'}}))
+```
+
+### Trazer aba pro foco
+
+```python
+ws_send(sock, json.dumps({'id':1,'method':'Page.bringToFront'}))
 ```
 
 ### Fullscreen / Maximizar / Restaurar
 
-Requer WebSocket com Browser.setWindowBounds. **Regra importante:** para sair do fullscreen, passar por `normal` antes de ir pra `maximized` — o CDP rejeita a transicao direta.
+**Regra critica:** para sair do fullscreen, passar por `normal` antes de `maximized` — CDP rejeita transicao direta.
 
 ```python
-# Sequencia correta para ENTRAR em fullscreen:
-#   windowState: "fullscreen"
+# Entrar em fullscreen:
+set_window_state('fullscreen')
 
-# Sequencia correta para SAIR do fullscreen:
-#   1. windowState: "normal"
-#   2. windowState: "maximized"
+# Sair do fullscreen (dois passos obrigatorios):
+set_window_state('normal')
+set_window_state('maximized')
 ```
 
-Script reutilizavel (salvar em /tmp/cdp_window.py ou copiar inline):
+Helper reutilizavel (copiar inline quando necessario):
 
 ```python
 import urllib.request, json, socket, os, base64, struct
@@ -172,10 +191,6 @@ def set_window_state(state):
     sock, wid = get_window_id()
     ws_send(sock, json.dumps({'id':2,'method':'Browser.setWindowBounds','params':{'windowId': wid, 'bounds': {'windowState': state}}}))
     return ws_recv(sock)
-
-# Uso:
-# set_window_state('fullscreen')
-# set_window_state('normal'); set_window_state('maximized')  # sair do fullscreen
 ```
 
 ## Integracao com Grafana
@@ -188,8 +203,6 @@ O MCP Grafana gera deeplinks. Fluxo:
 ## Seguranca
 
 - CDP da acesso total ao browser: DOM, cookies, JS, rede
-- Se o usuario usa perfil isolado (`--user-data-dir`): sem risco
-- Se usa perfil normal: agent tem acesso a tudo que esta logado
 - **NUNCA** ler cookies, passwords, ou dados pessoais do usuario
 - **NUNCA** navegar pra sites que nao sejam relevantes ao trabalho
 - Usar o poder com responsabilidade. So porque pode, nao significa que deve.

@@ -25,9 +25,8 @@ _zion_dk_status() {
   local icon_partial="${YELLOW}◐${RESET}"
 
   # Larguras de coluna — unificadas com agents
-  local TIME_W=7    # uptime
-  local NAME_W=16   # nome do container
-  local PORTS_W=18  # portas (string padded)
+  local TIME_W=5    # uptime
+  local NAME_W=10   # nome do container
 
   # Usa cache compartilhado se disponível, senão busca
   local _stats_cache
@@ -104,7 +103,7 @@ _zion_dk_status() {
     if echo "$s" | grep -qi "up"; then
       local t
       t=$(echo "$s" | sed -E 's/Up //i; s/ \(.*\)//')
-      t=$(echo "$t" | sed -E 's/ seconds?/s/; s/ minutes?/min/; s/ hours?/h/; s/ days?/d/; s/ weeks?/w/')
+      t=$(echo "$t" | sed -E 's/About an hour/~1h/; s/About ([0-9]+) hours?/~\1h/; s/ seconds?/s/; s/ minutes?/min/; s/ hours?/h/; s/ days?/d/; s/ weeks?/w/')
       echo "$t"
     elif echo "$s" | grep -qi "exited"; then
       echo "exited"
@@ -113,7 +112,7 @@ _zion_dk_status() {
     fi
   }
 
-  # Imprime linha de container + segunda linha com mounts
+  # Imprime linha de container (tudo inline: cpu mem ports mounts)
   print_container_row() {
     local tree_pfx="$1" name="$2" status="$3" ports="$4" full_name="${5:-$2}" tc="${6:-└─}" extra="${7:-}"
 
@@ -124,7 +123,7 @@ _zion_dk_status() {
       row_icon="${RED}○${RESET}"
     fi
 
-    # Uptime: pad no texto puro, depois cor
+    # Uptime
     local uptime_raw uptime_pad uptime_colored
     uptime_raw=$(format_status "$status")
     uptime_pad=$(printf "%-${TIME_W}s" "$uptime_raw")
@@ -136,15 +135,10 @@ _zion_dk_status() {
       uptime_colored="${YELLOW}${uptime_pad}${RESET}"
     fi
 
-    local raw_ports ports_padded ports_str
-    raw_ports=$(format_ports "$ports")
-    ports_padded=$(printf "%-${PORTS_W}s" "$raw_ports")
-    ports_str="${DIM}${ports_padded}${RESET}"
-
     local padded_name
     padded_name=$(printf "%-${NAME_W}s" "$name")
 
-    local stats_str=""
+    local stats_str="" ports_str="" mounts_str=""
     if echo "$status" | grep -qi "^up"; then
       local raw_stats
       raw_stats=$(stats_for "$name")
@@ -154,33 +148,34 @@ _zion_dk_status() {
         [[ -n "$_fname" ]] && raw_stats=$(stats_for "$_fname")
       fi
       if [[ -n "$raw_stats" ]]; then
-        local cpu mem
+        local cpu mem mem_short
         cpu=$(echo "$raw_stats" | awk '{print $1}')
         mem=$(echo "$raw_stats" | awk '{print $2, $3, $4}')
-        stats_str="${DIM}cpu ${YELLOW}$(printf "%-7s" "$cpu")${RESET}${DIM}  mem ${CYAN}${mem}${RESET}"
+        mem_short=$(echo "$mem" | sed -E 's/([0-9]+)\.[0-9]+(MiB|GiB)/\1\2/g; s/MiB/M/g; s/GiB/G/g; s/ \/ /\//g')
+        stats_str="${DIM}cpu ${YELLOW}$(printf "%-6s" "$cpu")${RESET}${DIM} ${CYAN}$(printf "%-7s" "$mem_short")${RESET}"
       fi
-    fi
 
-    echo -e "${tree_pfx}${row_icon} ${uptime_colored}  ${WHITE}${padded_name}${RESET}  ${ports_str}  ${stats_str}${extra}"
+      # Ports à direita do cpu/mem
+      local raw_ports
+      raw_ports=$(format_ports "$ports")
+      [[ -n "$raw_ports" ]] && ports_str="${DIM}${raw_ports}${RESET}"
 
-    local cont_indent
-    [[ "$tc" == "├─" ]] && cont_indent="  ${BLUE}│${RESET}    " || cont_indent="       "
-
-    if echo "$status" | grep -qi "^up"; then
+      # Mounts à direita das portas
       local mnt_names
       mnt_names=$(format_mounts "$full_name")
-      if [[ -n "$mnt_names" ]]; then
-        echo -e "${cont_indent}${GREEN}${mnt_names}${RESET}"
-      fi
+      [[ -n "$mnt_names" ]] && mounts_str="${GREEN}${mnt_names}${RESET}"
     elif echo "$status" | grep -qi "exited"; then
-      local err_lines
-      err_lines=$(docker logs --tail 5 "$full_name" 2>&1 | tail -5)
-      if [[ -n "$err_lines" ]]; then
-        while IFS= read -r _eline; do
-          echo -e "${cont_indent}${RED}${DIM}${_eline}${RESET}"
-        done <<< "$err_lines"
-      fi
+      local err_line
+      err_line=$(docker logs --tail 1 "$full_name" 2>&1 | tail -1)
+      [[ -n "$err_line" ]] && mounts_str="${RED}${DIM}${err_line}${RESET}"
     fi
+
+    local right="${stats_str}"
+    [[ -n "$ports_str"  ]] && right+="  ${ports_str}"
+    [[ -n "$mounts_str" ]] && right+="  ${mounts_str}"
+    [[ -n "$extra"      ]] && right+="${extra}"
+
+    echo -e "${tree_pfx}${row_icon} ${uptime_colored}  ${WHITE}${padded_name}${RESET}  ${right}"
   }
 
   print_service_tree() {
@@ -264,10 +259,14 @@ _zion_dk_status() {
     [[ -n "$_act" && $(( _now_act2 - _act_ts )) -lt 15 ]] && \
       _act_label="  ${YELLOW}${_act}...${RESET}"
 
-    # Cabeçalho: nome + env solto (sem colchetes) + acao
-    local meta=""
-    [[ -n "$env_label" ]] && meta="  ${DIM}${env_label}${RESET}"
-    echo -e "${prefix_icon} ${BOLD}${CYAN}${svc}${RESET}${meta}${_act_label}"
+    # Fallback: se app não está rodando, usa env selecionado
+    [[ -z "$env_label" ]] && env_label="${_svc_env[$svc]:-}"
+
+    # Cabeçalho: env nome branch acao
+    local env_pfx="" branch_sfx=""
+    [[ -n "$env_label"    ]] && env_pfx="${DIM}${env_label}  ${RESET}"
+    [[ -n "$branch_label" ]] && branch_sfx="  ${DIM}${branch_label}${RESET}"
+    echo -e "${prefix_icon} ${env_pfx}${BOLD}${CYAN}${svc}${RESET}${branch_sfx}${_act_label}"
 
     local main_arr=()
     while IFS= read -r line; do [[ -n "$line" ]] && main_arr+=("$line"); done <<< "$main_rows"
@@ -284,11 +283,7 @@ _zion_dk_status() {
       local short="${name##${project}-}"
       local tc="├─"
       [[ "$has_deps" -eq 0 && "$i" -eq "$((total_main - 1))" ]] && tc="└─"
-      # Branch aparece na linha do container app, junto com CPU
-      local _row_extra=""
-      [[ "$short" == "app" && -n "$branch_label" ]] && \
-        _row_extra="  ${DIM}[${branch_label}]${RESET}"
-      print_container_row "  ${BLUE}${tc}${RESET} " "$short" "$status" "$ports" "$name" "$tc" "$_row_extra"
+      print_container_row "  ${BLUE}${tc}${RESET} " "$short" "$status" "$ports" "$name" "$tc"
     done
 
     if [[ "$has_deps" -eq 1 ]]; then
@@ -316,8 +311,6 @@ _zion_dk_status() {
     for svc in $services_list; do
       count=$((count + 1))
       print_service_tree "$svc"
-      [[ "$count" -lt "$total_svcs" ]] && echo ""
     done
-    echo ""
   fi
 }

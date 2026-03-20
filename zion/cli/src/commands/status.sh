@@ -63,7 +63,7 @@ _run_quota_bg &
 local _quota_pid=$!
 
 _do_status_render() {
-  local _A_UPTIME_W=7 _A_NAME_W=16 _A_PORTS_W=18
+  local _A_UPTIME_W=5 _A_NAME_W=12
 
   # ── Coleta paralela: docker ps leech + dk (rápido, ~50ms cada) ──
   local _f_leech _f_dk
@@ -82,11 +82,10 @@ _do_status_render() {
   local _pid_dk=$!
 
   # Header enquanto coleta
-  echo -e "\n${BOLD}${MAGENTA}  Zion Status${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}\n"
+  echo -e "${BOLD}${MAGENTA}  Zion Status${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}\n"
 
   # Quota: lê do arquivo de background (instantâneo)
   cat "$_quota_file" 2>/dev/null || true
-  echo ""
 
   if ! docker info >/dev/null 2>&1; then
     echo -e "  ${RED}sem acesso ao Docker${RESET}\n"
@@ -139,7 +138,7 @@ _do_status_render() {
     local icon uptime_raw
     if echo "$status" | grep -qi "^up"; then
       icon="${GREEN}●${RESET}"
-      uptime_raw=$(echo "$status" | sed -E 's/Up //i; s/ \(.*\)//; s/ seconds?/s/; s/ minutes?/min/; s/ hours?/h/; s/ days?/d/')
+      uptime_raw=$(echo "$status" | sed -E 's/Up //i; s/ \(.*\)//; s/About an hour/~1h/; s/About ([0-9]+) hours?/~\1h/; s/ seconds?/s/; s/ minutes?/min/; s/ hours?/h/; s/ days?/d/')
     else
       icon="${RED}○${RESET}"
       uptime_raw="stopped"
@@ -152,24 +151,6 @@ _do_status_render() {
     local name_pad
     name_pad=$(printf "%-${_A_NAME_W}s" "$short")
 
-    local cpu_str="" mem_str=""
-    if echo "$status" | grep -qi "^up"; then
-      local raw_stats
-      raw_stats=$(echo "$_sess_stats_cache" | awk -F'\t' -v n="$name" '$1==n || $1 ~ n {print $2, $3, $4}' | head -1)
-      if [[ -n "$raw_stats" ]]; then
-        local cpu mem
-        cpu=$(echo "$raw_stats" | awk '{print $1}')
-        mem=$(echo "$raw_stats" | awk '{print $2, $3, $4}')
-        cpu_str="${DIM}cpu ${YELLOW}$(printf "%-7s" "$cpu")${RESET}"
-        mem_str="${DIM}  mem ${CYAN}${mem}${RESET}"
-      fi
-    fi
-
-    local ports_pad
-    ports_pad=$(printf "%-${_A_PORTS_W}s" "")
-
-    echo -e "${pfx}${icon} ${ORANGE}${uptime_pad}${RESET}  ${WHITE}${name_pad}${RESET}  ${DIM}${ports_pad}${RESET}  ${cpu_str}${mem_str}"
-
     local dest_mounts
     dest_mounts=$(echo "$_inspect_cache" | awk -F'|' -v n="$name" '$1==n {print $3}' | head -1)
     local vols=()
@@ -181,9 +162,24 @@ _do_status_render() {
         vols+=("${RED}${vn}${RESET}")
       fi
     done
-    local cont_indent
-    [[ "$tc" == "├─" ]] && cont_indent="  ${BLUE}│${RESET}    " || cont_indent="       "
-    echo -e "${cont_indent}${DIM}$(IFS='  '; echo "${vols[*]}")${RESET}"
+    local vols_str
+    vols_str=$(IFS=' '; echo "${vols[*]}")
+
+    local cpu_str="" mem_str=""
+    if echo "$status" | grep -qi "^up"; then
+      local raw_stats
+      raw_stats=$(echo "$_sess_stats_cache" | awk -F'\t' -v n="$name" '$1==n || $1 ~ n {print $2, $3, $4}' | head -1)
+      if [[ -n "$raw_stats" ]]; then
+        local cpu mem mem_short
+        cpu=$(echo "$raw_stats" | awk '{print $1}')
+        mem=$(echo "$raw_stats" | awk '{print $2, $3, $4}')
+        mem_short=$(echo "$mem" | sed -E 's/([0-9]+)\.[0-9]+(MiB|GiB)/\1\2/g; s/MiB/M/g; s/GiB/G/g; s/ \/ /\//g')
+        cpu_str="${DIM}cpu ${YELLOW}$(printf "%-6s" "$cpu")${RESET}"
+        mem_str="${DIM} ${CYAN}${mem_short}${RESET}"
+      fi
+    fi
+
+    echo -e "${pfx}${icon} ${ORANGE}${uptime_pad}${RESET}  ${WHITE}${name_pad}${RESET}  ${cpu_str}${mem_str}  ${DIM}${vols_str}${RESET}"
   }
 
   _print_agent_group() {
@@ -202,7 +198,6 @@ _do_status_render() {
       local tc="├─"; [[ "$i" -eq "$((n - 1))" ]] && tc="└─"
       _print_agent_row "  ${BLUE}${tc}${RESET} " "$_cn" "$_cs" "$tc"
     done
-    echo ""
   }
 
   _print_agent_group "agents" "$_agent_rows"
