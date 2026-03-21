@@ -1,6 +1,5 @@
 # Executa agents e tasks vencidos — timer systemd (10min)
 zion_load_config
-echo "[auto] DEBUG schedule=$SCHEDULE tasks=$TASKS" >&2
 
 ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/zion}"
 OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
@@ -31,6 +30,9 @@ fi
 
 DRY_RUN="${args[--dry-run]:-}"
 STEPS_OVERRIDE="${args[--steps]:-}"
+
+echo "[auto] DEBUG OBSIDIAN=$OBSIDIAN SCHEDULE=$SCHEDULE TASKS=$TASKS RUNNER=$RUNNER" >&2
+echo "[auto] DEBUG schedule_exists=$([ -d "$SCHEDULE" ] && echo Y || echo N) runner_exists=$([ -f "$RUNNER" ] && echo Y || echo N)" >&2
 
 if [ ! -f "$RUNNER" ]; then
   echo "[auto] task-runner nao encontrado: $RUNNER"
