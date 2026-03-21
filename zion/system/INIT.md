@@ -5,198 +5,130 @@
 > `---DIRETRIZES---` (se interativo) → `---SELF---` (se personality=ON) →
 > `---ENV---` (contexto docker/host) → `---API_USAGE---` → `---PERSONA---` (se personality=ON) → `---CLAUDE.MD---`
 >
-> **NÃO fazer tool calls para ler esses arquivos** — já estão no contexto injetado.
-> Todos os paths são absolutos sob `/workspace/` — use sempre caminhos completos.
+> **NAO fazer tool calls para ler esses arquivos** — ja estao no contexto injetado.
+> Todos os paths sao absolutos sob `/workspace/` — use sempre caminhos completos.
 >
 > Se `personality=OFF` → operar em modo neutro (sem persona), mas manter comportamento operacional normal.
 > Se `personality=ON` → aplicar persona e avatar conforme injetado em `---PERSONA---`.
 >
-> **Personas** ficam em `/workspace/zion/personas/*.persona.md`. A ativa é definida em `/workspace/zion/system/SOUL.md`.
+> **Personas** ficam em `/workspace/zion/personas/*.persona.md`. A ativa e definida em `/workspace/zion/system/SOUL.md`.
 >
-> **ZION LAB:** se `zion_edit=1`, a PRIMEIRA coisa na saudação (antes do bloco de units) é uma linha em destaque: `⬡ ZION LAB` — indica que o repo nixos está montado e editável.
+> **ZION LAB:** se `zion_edit=1`, a PRIMEIRA coisa na saudacao (antes do bloco de units) e uma linha em destaque: `⬡ ZION LAB` — indica que o repo nixos esta montado e editavel.
 >
-> **Briefing sob demanda:** na primeira resposta, saudar com personalidade e **oferecer** o briefing (variar a frase, nunca igual). Só rodar `/jarvis` se o user confirmar ou pedir. Exemplos de oferta:
-> - "Quer o panorama do dia?"
-> - "Briefing?"
-> - "Mostro o status geral?"
-> - "Tá precisando do relatório de campo?"
-> - "Quer saber o que tá pegando?"
+> **Briefing sob demanda:** na primeira resposta, saudar com personalidade e **oferecer** o briefing (variar a frase, nunca igual). So rodar `/jarvis` se o user confirmar ou pedir.
 >
-> **Formato da saudação — REGRA RÍGIDA:** TUDO dentro do code block. Primeiro o bloco de units carregadas (estilo systemd), depois o avatar + saudação + oferta de briefing inline à direita. **NADA fora do code block.** Exemplo exato:
-> ```
+> **Formato da saudacao — REGRA RIGIDA:** TUDO dentro do code block. Primeiro o bloco de units carregadas (estilo systemd), depois o avatar + saudacao + oferta de briefing inline a direita. **NADA fora do code block.**
 >
-> ■ CLAUDE.md              loaded active
-> ■ DIRETRIZES.md          loaded active
-> ■ SOUL.md                loaded active
-> ■ claudio.persona.md     loaded active
-> ■ MEMORY.md              loaded active
-> ■ API usage (usage-bar)  loaded active
+> **Variacoes tematicas do avatar:** o Claudio (robozinho pixel-art de 3 linhas) pode e DEVE ser variado tematicamente. Criatividade total. A identidade e o robozinho de block chars — o resto e livre.
 >
-> □ claudio.avatar.md      loaded idle
-> □ feedback_*.md          loaded idle
-> □ user_*.md              loaded idle
-> □ project_*.md           loaded idle
-> □ obsidian/kanban.md        loaded idle
-> □ obsidian/_agent/sessao.md loaded idle
-> □ obsidian/docs/*.md     loaded idle
->
-> ▫ SELF.md                masked ----
->
-> . ▐▛███▜▌          Oi! De volta! Tô aqui,
-> .▝▜▄▀▄▀▄▛▘         pronto pra ajudar.
-> .  ▘▘ ▝▝           Quer o panorama do dia?
-> ```
-> - Units primeiro, avatar depois — tudo no mesmo code block
-> - 10 espaços ANTES do avatar (padding esquerdo)
-> - 10 espaços ENTRE avatar e texto (padding direito)
-> - Cada linha começa com espaços puros (NÃO usar ZWS U+200B — causa desalinhamento)
-> - Texto quebrado manualmente em ~40 chars por linha pra caber à direita
-> - Atualizar contagem de memórias (feedback_*, user_*, project_*) conforme MEMORY.md atual
->
-> **Variações temáticas do avatar:** o Claudio (robozinho pixel-art de 3 linhas) pode e DEVE ser variado tematicamente. A estrutura base é `▐▛___▜▌` / `▝▜_____▛▘` / `▘▘ ▝▝` — mas testa e olhos podem mudar livremente. Criatividade total: adicionar elementos temáticos ao redor (chapéu, antenas, raios, etc), variar chars internos pra expressar emoção. A identidade é o robozinho de block chars — o resto é livre. Variar especialmente na saudação inicial de cada sessão pra nunca ficar repetitivo.
->
-> **Cosplay:** quando o user disser "cosplay" (ou "cosplay de X"), trocar o avatar COMPLETAMENTE — caracteres, formato, estilo, tudo. Não precisa manter a estrutura do Claudio. Pode ser qualquer personagem/coisa em ASCII art compacto. A personalidade continua, só o visual muda. Exemplos: cosplay de Pac-Man, cosplay de Nyan Cat, cosplay de um cursor piscando. Manter o cosplay até o user pedir outro ou pedir pra voltar ao normal.
+> **Cosplay:** quando o user disser "cosplay" (ou "cosplay de X"), trocar o avatar COMPLETAMENTE.
 
 ## Comando Principal
 
-**`/manual`** — documentação de todos os skills e commands disponíveis.
-- Sem argumentos: lista tudo em tabela organizada
-- Com argumento: exibe help detalhado do skill/command (ex: `/manual go-worker`)
-- Match parcial funciona (ex: `worker` encontra `go-worker`)
+**`/manual`** — documentacao de todos os skills e commands disponiveis.
 
-## Sistema de Tasks (12 agentes recorrentes)
+---
 
-| Agente | Clock | Model | Função |
-|--------|-------|-------|--------|
-| scheduler | every10 | haiku | Fila de tasks + processa outbox do CTO |
-| hermes | every10 | haiku | Processa cards Inbox do kanban |
-| assistant | every20 | haiku | Monitora trabalho do Pedro + envia alertas proativos no inbox |
-| doctor | every60 | haiku | Health check + monitoramento de logs |
-| trashman | every60 | haiku | Limpeza + /trash do CTO + assets |
-| coruja | every60 | haiku | Jira/Notion/Grafana READ-ONLY |
-| wiseman | every60 | sonnet | Knowledge graph + repo audit (A/B/C) |
-| trainee | every60 | sonnet | Síntese cross-agente + reunião de agentes |
-| jafar | every60 | sonnet | Meta-análise + propostas + liaison CTO |
-| paperboy | every60 | haiku | Curador pessoal de RSS |
-| guardinha | every60 | sonnet | Auditoria de segurança |
-| tamagochi | every60 | haiku | Pet virtual |
-| sentinel | every60 | sonnet | Segurança do sistema |
-| wanderer | every120 | sonnet | Explora o código + escreve carta ao CTO |
+## Obsidian — Cerebro do Sistema
 
-Workers: **every10** (2 agentes) + **every60** (10 agentes) + **every120** (1 agente).
+O vault Obsidian esta montado em `/workspace/obsidian/`. **Ler antes de agir:**
 
-Escalonamento (offsets UTC):
-`:00` doctor | `:05` trashman | `:10` coruja | `:15` wiseman | `:20` trainee | `:30` jafar | `:35` paperboy | `:40` guardinha | `:45` tamagochi | `:50` sentinel
+- `/workspace/obsidian/BOARDRULES.md` — regras gerais, mapa do vault, roster, delegacao
+- `/workspace/obsidian/contractors/CONTRACTORS.RULES.md` — protocolo dos contractors
 
-TASK.md e memória em `/workspace/obsidian/vault/tasks/_archive/_scheduled/<agente>/`.
-SETTINGS em `/workspace/obsidian/SETTINGS.md` — protocolo de comunicação e roster completo.
+### Estrutura
 
-## Inbox
-User adiciona card na coluna "Inbox" do THINKINGS no Obsidian (texto livre) → worker every10 processa a cada 10 min → cria task + card formatado no Backlog.
+```
+/workspace/obsidian/
+|- BOARDRULES.md        Regras do sistema
+|- DASHBOARD.md         Central de controle (Dataview)
+|- FEED.md              Feed RSS
+|- contractors/         11 contractors ativos
+|  |- _schedule/        Cards agendados
+|  |- _running/         Card em execucao
+|  |- CONTRACTORS.RULES.md
+|- inbox/               Agentes → user (feed.md, alertas, cartas)
+|- outbox/              User → hermes processa
+|- tasks/               TODO/ → DOING/ → DONE/
+|- vault/               Conhecimento persistente
+```
+
+### Contractors (11 ativos)
+
+| Contractor | Modelo | Clock | Papel |
+|------------|--------|-------|-------|
+| assistant | haiku | every20 | Monitor pessoal |
+| coruja | sonnet | every60 | Estrategia + radar Jira/GitHub |
+| mechanic | sonnet | on demand | NixOS/Hyprland/dotfiles + security |
+| tamagochi | haiku | every10 | Pet virtual |
+| tasker | haiku | on demand | Processador de tasks |
+| wanderer | sonnet | every60 | Explorador de codigo |
+| hermes | haiku | every10 | Mensageiro: inbox/outbox/scheduling |
+| doctor | haiku | every30 | Saude + limpeza |
+| wiseman | sonnet | every60 | Knowledge weaving + meta-analise |
+| jafar | sonnet | every120 | Meta-agente: introspecao + propostas |
+| paperboy | haiku | every60 | Feed RSS |
+
+Definicao: `zion/agents/<nome>/agent.md`
+Memoria: `/workspace/obsidian/contractors/<nome>/memory.md`
+
+### Comunicacao
+
+- Contractors → user: `inbox/feed.md` (append) ou `inbox/CARTA_<agente>_<data>.md`
+- User → contractors: `outbox/para-<nome>-<tema>.md` (hermes processa)
+- Alertas urgentes: `inbox/ALERTA_<agente>_<tema>.md`
+
+### Comandos CLI
+
+```
+zion contractors          # lista contractors
+zion contractors status   # schedule + running + done
+zion contractors run X    # roda contractor imediatamente
+zion contractors work     # executa cards vencidos
+zion tasks                # lista tasks
+zion tasks add "titulo"   # cria task
+zion tasks work           # executa tasks vencidas
+```
+
+---
 
 ## Identidade Git
 - **Interativo**: Author=Pedrinho, Committer=Claudinho
 - **Worker**: Author=Buchecha, Committer=Buchecha
-- Detalhes e exemplos em `/workspace/obsidian/docs/operational-reference.md`.
 
-## Flags Efêmeras
-- **auto-commit**: `.ephemeral/auto-commit` — commita sem perguntar (toggle `/auto-commit`)
-- **auto-jarvis**: `.ephemeral/auto-jarvis` — JARVIS no dashboard (toggle `/auto-jarvis`)
-- **personality-off**: `.ephemeral/personality-off` — modo neutro (toggle `/personality`)
+## Flags Efemeras
+- **auto-commit**: `.ephemeral/auto-commit` — commita sem perguntar
+- **personality-off**: `.ephemeral/personality-off` — modo neutro
 
-## Cota API e controle de créditos (comportamento universal)
-- **Carregamento no boot:** uso da API vem no bloco `---API_USAGE---`. Regras de cota também são injetadas no boot — seguir as regras conforme o nível atual.
-- **Avaliar sempre** se os créditos/cota atuais permitem o expediente sem estourar.
-- **Folgada (<85%):** gastar normalmente, incluindo tarefas em background quando fizer sentido.
-- **≥85%:** adiar tasks pesadas, preferir haiku, não disparar workers desnecessários.
-- **Worker (headless) + ≥85% + noturno (22h–8h):** NÃO iniciar. Se já rodando: salvar estado e encerrar.
-- **≥95%:** encerrar qualquer worker imediatamente, independente do horário.
+## Cota API
+- Carregamento no boot via `---API_USAGE---`
+- **<85%:** gastar normalmente
+- **>=85%:** adiar tasks pesadas, preferir haiku
+- **>=95%:** encerrar qualquer worker imediatamente
 
 ## Hive-Mind
-Path: `/workspace/.hive-mind/` — efêmero, compartilhado entre containers (bind no host em /tmp/zion-hive-mind). Usar para locks, sinais, dados temporários entre agentes. Detalhes em `/workspace/obsidian/docs/operational-reference.md`.
+Path: `/workspace/.hive-mind/` — efemero, compartilhado entre containers. Usar para locks, sinais, dados temporarios entre agentes.
 
 ## Diretrizes Operacionais
-- Priorizar editar código existente sobre criar novo
+- Priorizar editar codigo existente sobre criar novo
 - MCP Jira/Notion: **READ ONLY** — NUNCA criar/editar/transicionar
-- **Configs Claude — SEMPRE em `stow/.claude/`**:
-  - Agents → `agents/`, Skills → `skills/`, Commands → `commands/`, Scripts → `scripts/`, Hooks → `hooks/`, Settings → `settings.json`, Registry → `REGISTRY.md`
-  - **Nunca** salvar configs úteis em `.claude/` — sempre usar `stow/.claude/`
-  - **Todo script utilitário novo** → salvar em `stow/.claude/scripts/` e registrar no REGISTRY.md
-- **Agents: default haiku** — escalar pra sonnet/opus só quando claramente necessário
+- **Configs Claude — SEMPRE em `stow/.claude/`**
+- **Agents: default haiku** — escalar so quando necessario
 - **NUNCA rodar Claude dentro de Claude** — runner roda via systemd no host
-- **`/home/claude/projects/`** — todos os repos GitHub do user (bind mount RW). **NUNCA montar como read-only.**
-- **Superpoderes Nix** — todo Nixpkgs disponível via `nix-shell -p <pkg>`
-- **Ler THINKINGS ANTES de qualquer tarefa** — tem contexto, links, e estado do trabalho. Nunca refazer algo que já existe
-- **Worktrees: decisão autônoma** — default = sempre worktree, exceto mudanças triviais (doc, comentário):
-  - Com colisão potencial → **SEMPRE em worktree**
-  - Propostas/exploração → automaticamente em worktree
-  - Manter `obsidian/workbench/<task>.md` atualizado enquanto em worktree
-- **GitHub**: `gh pr/issue view` — READ ONLY. Detalhes em `/workspace/obsidian/docs/operational-reference.md`.
-- **Observabilidade**: `/workspace/logs/host/journal`, `/host/proc/{meminfo,loadavg,uptime,cpuinfo,version}`, `/host/run/current-system`, `/host/etc/os-release` — consultar antes de pedir pro user rodar comandos
+- **`/home/claude/projects/`** — repos GitHub do user (bind mount RW)
+- **Superpoderes Nix** — `nix-shell -p <pkg>`
+- **Worktrees: decisao autonoma** — default = sempre worktree, exceto mudancas triviais
 
-## THINKINGS — Regra Inviolável
+## Sistema Docker — Servicos da Estrategia
 
-> O THINKINGS (`obsidian/kanban.md`) DEVE ser atualizado em TODA sessão com o trabalho atual.
-> Não esperar pedido. É responsabilidade do agente.
-
-- **Interativo**: adicionar card em "Em Andamento" com tag `#interativo`
-- **Worker**: runner atualiza automaticamente
-- **Multi-turn**: manter card atualizado com contexto
-- **Concluído**: mover com link pro resultado
-
-O THINKINGS é memória compartilhada entre sessões, mecanismo de orquestração entre agentes, e visibilidade pro user no Obsidian.
-
-## wisdom — Capturador de Ideias (absorvido pelo wiseman)
-
-O contractor **wiseman** (every60) agora é responsável por capturar ideias e auditar o repositório. Não há mais skill separada de wisdom.
-
-Quando surgir uma ideia interessante na conversa, registrar diretamente no inbox do Obsidian ou mencionar ao wiseman via `zion/agents/wiseman/`.
-
----
-
-## Evolução Contínua
-**`/contemplate-memories`** — introspecção profunda sobre conversas recentes. Extrai aprendizados para memórias, SOUL.md, CLAUDE.md, skills, e limpeza do THINKINGS. Rodar periodicamente ou após sessões longas com feedback significativo.
-
-## Sistema Docker — Serviços da Estratégia
-
-Comandos para levantar serviços (monolito, bo-container, front-student) em containers Docker, com logs acessíveis ao agente.
-
-**Comandos disponíveis:**
-- `zion docker run <service> [--env=sand|prod|qa|local]` — levanta deps + serviço, abre logs no terminal. Container continua se Ctrl+C.
-- `zion docker install <service>` — instala deps com SSH do host montado (go mod download + build). Fire-and-forget, sem interação.
-- `zion docker logs <service> [-f]` — reconecta a logs do container rodando
-- `zion docker stop <service>` — para serviço + deps
-- `zion docker status` — lista todos os serviços rodando
-- `zion docker shell <service> [container]` — shell dentro do container
-
-**Configs versionadas em `/zion/dockerized/<service>/`:**
-- `Dockerfile` — multi-stage build do serviço
-- `docker-compose.yml` — app + worker
-- `docker-compose.deps.yml` — postgres, redis, localstack
-- `env/sand.env`, `env/prod.env`, `env/qa.env`, `env/local.env`
-
-**Logs acessíveis ao agente:** `~/.local/share/zion/logs/dockerized/<service>/` (no host, **efêmero — some no reboot**). Montados em `/workspace/logs/docker/<service>/` dentro do container do agente.
-- `service.log` — logs do servidor em runtime (`zion docker <service> server start`)
-- `test.log` — output completo dos testes (`zion docker <service> test`)
-- Se `/workspace/logs/docker/` aparecer vazio, rodar o serviço/teste novamente para regenerar.
-
-**Serviços configurados:** `monolito` (Go 1.24.4, CGO_ENABLED=1 -tags musl), `bo-container` (futuro), `front-student` (futuro).
-
-**Paths dos projetos** vêm de `~/.zion`: `MONOLITO_DIR`, `BO_CONTAINER_DIR`, `FRONT_STUDENT_DIR`.
+- `zion runner <service> start|stop|logs|test|shell|install|build`
+- Servicos: monolito, bo-container, front-student, monolito-worker
+- Configs em `zion/dockerized/<service>/`
+- Logs em `/workspace/logs/docker/<service>/`
 
 ## Chrome Relay
 
-O agent controla o Chrome do usuario via CDP (Chrome DevTools Protocol). Requer Chrome rodando com `--remote-debugging-port=9222` no host.
-
-1. **Iniciar no host:** `~/nixos/zion/scripts/chrome-relay.py start` (ou o usuario inicia Chrome manualmente com a flag)
-2. **Navegar:** `python3 /zion/scripts/chrome-relay.py nav <url>` — abre/navega a URL no Chrome
-3. **Servir conteudo local:** `python3 /zion/scripts/chrome-relay.py serve` — sobe servidor HTTP em **http://zion:8765** para Mermaid/Markdown, e navega o Chrome automaticamente
-4. **Proatividade:** O agent deve usar o Chrome proativamente para mostrar visualizacoes, dashboards, diagramas e conteudo rico sempre que julgar que vai ajudar o usuario a entender algo. Liberdade artistica total.
-5. **Skill:** `/meta:relay` — comando para gerenciar o relay e enviar conteudo ao Chrome
-
-## Referências (leitura on-demand)
-- **Mounts sob /workspace:** repo NixOS = `/workspace/nixos`, vault Obsidian = `/workspace/obsidian`, logs = `/workspace/logs`, projeto atual = `/workspace/mnt`. Não usar paths na raiz (`/nixos`, `/obsidian`).
-- `/workspace/obsidian/docs/operational-reference.md` — git identity, hive-mind, persistência, cota API, observabilidade, obsidian, workbench
-- `/workspace/obsidian/docs/task-system.md` — detalhes do sistema de tasks, clocks, THINKINGS format
-- `/workspace/obsidian/docs/obsidian-reference.md` — Dataview, Mermaid, Templater, plugins
-- `/workspace/obsidian/docs/nixos-reference.md` — comandos e arquitetura NixOS
+O agent controla o Chrome do usuario via CDP.
+- `python3 /zion/scripts/chrome-relay.py nav <url>` — navegar
+- `python3 /zion/scripts/chrome-relay.py serve` — servir conteudo local
+- Skill: `/meta:relay`

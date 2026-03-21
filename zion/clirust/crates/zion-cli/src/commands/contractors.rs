@@ -144,11 +144,14 @@ pub fn work(dry_run: bool) -> Result<()> {
 
     let contractors_dir = schedule.parent().map(|p| p.to_path_buf());
 
+    let obsidian = paths::obsidian_path();
+
     for (filename, _) in &due {
         println!("[work] → {filename}");
         let mut cmd = std::process::Command::new(&runner);
         cmd.arg(filename)
-            .env("SCHEDULE_DIR", &schedule);
+            .env("SCHEDULE_DIR", &schedule)
+            .env("OBSIDIAN_PATH", &obsidian);
         if let Some(ref cd) = contractors_dir {
             cmd.env("TASK_CONTRACTORS_DIR", cd);
         }

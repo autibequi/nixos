@@ -64,10 +64,58 @@
 
 ---
 
+## Obsidian — Vault do sistema
+
+O vault Obsidian esta montado em `/workspace/obsidian/`. E o cerebro operacional do Zion.
+
+**Antes de mexer no vault, ler:**
+1. `/workspace/obsidian/BOARDRULES.md` — regras gerais, mapa do vault, roster de contractors
+2. `/workspace/obsidian/contractors/CONTRACTORS.RULES.md` — protocolo dos contractors (self-scheduling, comunicacao)
+
+### Estrutura
+
+```
+/workspace/obsidian/
+|- BOARDRULES.md        Regras do sistema (fonte da verdade)
+|- DASHBOARD.md         Central de controle (Dataview)
+|- FEED.md              Feed RSS
+|- contractors/         11 contractors ativos (pastas com memory.md, card.md, done/)
+|  |- _schedule/        Cards agendados (contractor roda quando hora chega)
+|  |- _running/         Card em execucao
+|  |- CONTRACTORS.RULES.md  Protocolo base de todo contractor
+|- inbox/               Mensagens dos contractors → user le
+|  |- feed.md           Append-only: [HH:MM] [agente] mensagem
+|- outbox/              Mensagens do user → hermes processa
+|- tasks/               Kanban: TODO/ → DOING/ → DONE/
+|- vault/               Conhecimento: explorations, inspections, insights
+```
+
+### Contractors (11 ativos)
+
+assistant, coruja, doctor, hermes, jafar, mechanic, paperboy, tamagochi, tasker, wanderer, wiseman
+
+Definicao de cada um: `zion/agents/<nome>/agent.md`
+Memoria/estado: `/workspace/obsidian/contractors/<nome>/memory.md`
+
+### Comandos
+
+| Operacao | Comando |
+|----------|---------|
+| Listar contractors | `zion contractors` |
+| Status detalhado | `zion contractors status` |
+| Rodar um contractor | `zion contractors run <nome>` |
+| Executar cards vencidos | `zion contractors work` |
+| Listar tasks | `zion tasks` |
+| Criar task | `zion tasks add <titulo>` |
+| Executar tasks vencidas | `zion tasks work` |
+
+---
+
 ## Armadilhas
 
-- `nixos-rebuild`/`systemctl` no container → não afeta o host. Pedir ao usuário.
-- Em `zion edit`: repo está em `/workspace/mnt`, **não** em `/workspace/nixos`.
-- Keybinds/Waybar: fonte da verdade é `stow/.config/`, não módulos NixOS.
-- Após mudar `bashly.yml`/`commands/*.sh`: sempre `bashly generate`.
-- `zion new` = nova sessão. `zion new-task <nome>` = task no kanban (Puppy).
+- `nixos-rebuild`/`systemctl` no container → nao afeta o host. Pedir ao usuario.
+- Em `zion edit`: repo esta em `/workspace/mnt`, **nao** em `/workspace/nixos`.
+- Keybinds/Waybar: fonte da verdade e `stow/.config/`, nao modulos NixOS.
+- Apos mudar `bashly.yml`/`commands/*.sh`: sempre `bashly generate`.
+- Obsidian: ler BOARDRULES.md antes de modificar qualquer coisa no vault.
+- Contractors: cada um DEVE se reagendar ao final do ciclo ou morre (ver CONTRACTORS.RULES.md).
