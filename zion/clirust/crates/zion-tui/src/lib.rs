@@ -19,7 +19,26 @@ use ratatui::Terminal;
 
 use app::App;
 use event::{map_key, poll, AppEvent};
-use zion_sdk::status;
+use zion_sdk::{paths, status};
+
+/// Build a `Command` for the bash CLI (`zion-bash` or fallback to `zion`).
+///
+/// On the host, the bash CLI is at `~/.local/bin/zion-bash`.
+/// Inside a container, it lives directly on PATH as `zion`.
+fn bash_cmd() -> std::process::Command {
+    // Prefer zion-bash (installed by `zion update`)
+    let candidates = [
+        paths::bin_dir().join("zion-bash"),
+        paths::clibash_dir().join("zion"),
+    ];
+    for p in &candidates {
+        if p.exists() {
+            return std::process::Command::new(p);
+        }
+    }
+    // Last resort: whatever `zion` is on PATH
+    std::process::Command::new("zion")
+}
 
 /// Entry point: run the interactive status TUI.
 pub fn run_status(tick: u64) -> Result<()> {
@@ -74,7 +93,7 @@ pub fn run_status(tick: u64) -> Result<()> {
                             let env = app.current_env().to_string();
                             app.last_action = Some((app.cursor_idx, format!("starting {svc}")));
                             std::thread::spawn(move || {
-                                let _ = std::process::Command::new("zion")
+                                let _ = bash_cmd()
                                     .args(["docker", &svc, "start", &format!("--env={env}")])
                                     .stdout(std::process::Stdio::null())
                                     .stderr(std::process::Stdio::null())
@@ -85,7 +104,7 @@ pub fn run_status(tick: u64) -> Result<()> {
                             let svc = app.current_service().to_string();
                             app.last_action = Some((app.cursor_idx, format!("stopping {svc}")));
                             std::thread::spawn(move || {
-                                let _ = std::process::Command::new("zion")
+                                let _ = bash_cmd()
                                     .args(["docker", &svc, "stop"])
                                     .stdout(std::process::Stdio::null())
                                     .stderr(std::process::Stdio::null())
@@ -98,7 +117,7 @@ pub fn run_status(tick: u64) -> Result<()> {
                             execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
 
                             let svc = app.current_service();
-                            let _ = std::process::Command::new("zion")
+                            let _ = bash_cmd()
                                 .args(["docker", svc, action])
                                 .stdin(std::process::Stdio::inherit())
                                 .stdout(std::process::Stdio::inherit())

@@ -12,8 +12,21 @@ use crate::theme;
 pub fn render(frame: &mut Frame, app: &App, area: Rect) {
     let b = &app.snapshot.boot;
 
+    if !b.has_session {
+        let line = Line::from(vec![
+            Span::raw("  "),
+            Span::styled("no active session", theme::dim()),
+        ]);
+        frame.render_widget(Paragraph::new(vec![line]), area);
+        return;
+    }
+
+    // Helper: only emit flag if value is non-empty
     let flag = |label: &'static str, val: &str, on_val: &str| -> Vec<Span<'static>> {
-        let is_on = val == on_val || val == "1" && on_val == "ON";
+        if val.is_empty() {
+            return vec![];
+        }
+        let is_on = val == on_val || (on_val == "ON" && val == "1");
         let val_style = if is_on { theme::up_icon() } else { theme::dim() };
         vec![
             Span::styled(format!("{label}="), theme::dim()),
@@ -24,7 +37,6 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
 
     let mut spans: Vec<Span> = vec![Span::raw("  ")];
 
-    // datetime first, abbreviated
     if !b.datetime.is_empty() {
         spans.push(Span::styled(b.datetime.clone(), theme::dim()));
         spans.push(Span::raw("  "));
@@ -37,6 +49,5 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
     for s in flag("headless", &b.headless, "ON") { spans.push(s); }
     for s in flag("debug", &b.zion_debug, "ON") { spans.push(s); }
 
-    let lines = vec![Line::from(spans)];
-    frame.render_widget(Paragraph::new(lines), area);
+    frame.render_widget(Paragraph::new(vec![Line::from(spans)]), area);
 }
