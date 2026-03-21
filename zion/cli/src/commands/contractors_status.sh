@@ -13,7 +13,7 @@ if [ ! -d "$logbase" ]; then
   exit 1
 fi
 
-mapfile -t logs < <(find "$logbase" -name "*.log" ! -name "daemon.log" -printf "%T@ %p\n" 2>/dev/null \
+mapfile -t logs < <(find "$logbase" -name "*.log" ! -name "daemon.log" -printf "%f %p\n" 2>/dev/null \
   | sort -rn | head -20 | awk '{print $2}')
 
 if [ ${#logs[@]} -eq 0 ]; then
@@ -21,10 +21,24 @@ if [ ${#logs[@]} -eq 0 ]; then
   exit 0
 fi
 
-local G=$'\033[32m' Y=$'\033[33m' M=$'\033[35m' R=$'\033[0m' B=$'\033[1m' D=$'\033[2m'
+local G=$'\033[32m' Y=$'\033[33m' M=$'\033[35m' R=$'\033[0m' B=$'\033[1m' D=$'\033[2m' C=$'\033[36m'
+local now_epoch
+now_epoch=$(date +%s)
 
-printf "${B}%-18s %-14s %-8s %-10s${R}\n" "DATA/HORA" "CONTRACTOR" "STATUS" "DURAÇÃO"
-printf "${D}%-18s %-14s %-8s %-10s${R}\n" "------------------" "--------------" "--------" "----------"
+# Diretório de cards para lookup de model
+local taskdir="${TASK_DIR:-/workspace/obsidian/tasks}"
+
+# Função: lê model do frontmatter do card do contractor
+lookup_model() {
+  local name="$1"
+  local card
+  card=$(grep -rl "^contractor: ${name}$" "$taskdir/TODO" "$taskdir/DOING" 2>/dev/null | head -1)
+  [[ -z "$card" ]] && echo "-" && return
+  awk '/^model:/{print $2; exit}' "$card"
+}
+
+printf "${B}%-14s %-8s %-16s %-12s %s${R}\n" "CONTRACTOR" "MODEL" "INÍCIO" "STATUS" "IDADE"
+printf "${D}%-14s %-8s %-16s %-12s %s${R}\n" "--------------" "--------" "----------------" "------------" "----------"
 
 for logfile in "${logs[@]}"; do
   contractor=$(basename "$(dirname "$logfile")")
@@ -34,12 +48,20 @@ for logfile in "${logs[@]}"; do
   time_fmt="${time_part//-/:}"
   ts="${date_part} ${time_fmt}"
 
+  model=$(lookup_model "$contractor")
+
+  # usar stat mtime do arquivo como fallback mais confiável que parse de filename
   start_epoch=$(date -d "${date_part} ${time_fmt}:00" +%s 2>/dev/null || echo "0")
-  end_epoch=$(stat -c %Y "$logfile" 2>/dev/null || echo "0")
-  duration="-"
-  if [[ "$start_epoch" -gt 0 && "$end_epoch" -gt "$start_epoch" ]]; then
-    secs=$(( end_epoch - start_epoch ))
-    duration="$(( secs / 60 ))m$(( secs % 60 ))s"
+
+  # Idade relativa (mínimo minutos; negativo = relógio skew, mostrar "agora")
+  age="-"
+  if [[ "$start_epoch" -gt 0 ]]; then
+    diff=$(( now_epoch - start_epoch ))
+    if   (( diff <= 90 ));   then age="agora"
+    elif (( diff < 3600 ));  then age="$(( diff / 60 ))min atrás"
+    elif (( diff < 86400 )); then age="$(( diff / 3600 ))h atrás"
+    else age="$(( diff / 86400 ))d atrás"
+    fi
   fi
 
   status_plain="?"
@@ -47,8 +69,8 @@ for logfile in "${logs[@]}"; do
 
   if grep -q "Reached max turns" "$logfile" 2>/dev/null; then
     turns=$(grep -oE "max turns \([0-9]+\)" "$logfile" | grep -oE "[0-9]+" | tail -1)
-    status_plain="done(${turns}t)"
-    status_color="${G}${status_plain}${R}"
+    status_plain="max(${turns}t)"
+    status_color="${Y}${status_plain}${R}"
   elif grep -q "rescheduled\|reschedule" "$logfile" 2>/dev/null; then
     status_plain="resched"
     status_color="${Y}${status_plain}${R}"
@@ -60,8 +82,9 @@ for logfile in "${logs[@]}"; do
     status_color="${G}${status_plain}${R}"
   fi
 
-  pad=$(( 8 - ${#status_plain} ))
+  pad=$(( 12 - ${#status_plain} ))
   [[ $pad -lt 0 ]] && pad=0
   spaces=$(printf '%*s' "$pad" '')
-  printf "%-18s %-14s %s%s %-10s\n" "$ts" "$contractor" "${status_color}" "$spaces" "$duration"
+  printf "%-14s ${D}%-8s${R}${D}%-16s${R} %s%s ${C}%s${R}\n" "$contractor" "$model" "$ts" "${status_color}" "$spaces" "$age"
 done
+printf "${D}  done=terminou  max(Nt)=bateu limite de turns  resched=reagendado  quota=pausado por cota${R}\n"

@@ -164,10 +164,6 @@ _zion_dk_status() {
       local mnt_names
       mnt_names=$(format_mounts "$full_name")
       [[ -n "$mnt_names" ]] && mounts_str="${GREEN}${mnt_names}${RESET}"
-    elif echo "$status" | grep -qi "exited"; then
-      local err_line
-      err_line=$(docker logs --tail 1 "$full_name" 2>&1 | tail -1)
-      [[ -n "$err_line" ]] && mounts_str="${RED}${DIM}${err_line}${RESET}"
     fi
 
     local right="${stats_str}"
@@ -175,7 +171,14 @@ _zion_dk_status() {
     [[ -n "$mounts_str" ]] && right+="  ${mounts_str}"
     [[ -n "$extra"      ]] && right+="${extra}"
 
-    echo -e "${tree_pfx}${row_icon} ${uptime_colored}  ${WHITE}${padded_name}${RESET}  ${right}"
+    local name_display
+    if echo "$status" | grep -qi "exited"; then
+      name_display="\033[41m\033[97m ${padded_name}\033[0m"
+    else
+      name_display="${WHITE}${padded_name}${RESET}"
+    fi
+
+    echo -e "${tree_pfx}${row_icon} ${uptime_colored}  ${name_display}  ${right}"
   }
 
   print_service_tree() {
