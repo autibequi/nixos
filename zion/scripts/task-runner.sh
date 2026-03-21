@@ -248,14 +248,33 @@ if [ "$STATUS" != "ok" ]; then
 fi
 
 # If agent moved card back to _schedule (rescheduled itself), we're done
+DONE_AGENT="${AGENT:-$TASK_NAME}"
+_write_activity_log() {
+  local agent="$1"
+  local activity_dir="$OBSIDIAN/agents/_logs/activity"
+  mkdir -p "$activity_dir"
+  local tok_str="in=${TOK_IN:-0} out=${TOK_OUT:-0}"
+  [ -n "$TOK_CACHE" ] && tok_str+=" cache=${TOK_CACHE}"
+  local card_label="${CARD%.md}"
+  printf "%s\t%s\t%s\t%s\t%s\t%s\n" \
+    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    "$agent" \
+    "$STATUS" \
+    "$ELAPSED_FMT" \
+    "$tok_str" \
+    "$card_label" \
+    >> "$activity_dir/$agent"
+}
+
 if [ ! -f "$CARD_PATH" ]; then
+  _write_activity_log "$DONE_AGENT"
   echo "[runner] '$TASK_NAME' — rescheduled (${RUN_START_FMT} → ${RUN_END_FMT}, ${ELAPSED_FMT})"
   exit 0
 fi
 
 # Otherwise move to contractor's done/ folder
-DONE_AGENT="${AGENT:-$TASK_NAME}"
 DONE_DIR="$CONTRACTORS_DIR/${DONE_AGENT}/done"
 mkdir -p "$DONE_DIR"
 mv "$CARD_PATH" "$DONE_DIR/$CARD" 2>/dev/null || true
+_write_activity_log "$DONE_AGENT"
 echo "[runner] '$TASK_NAME' → ${DONE_AGENT}/done/ ($STATUS, ${RUN_START_FMT} → ${RUN_END_FMT}, ${ELAPSED_FMT})"

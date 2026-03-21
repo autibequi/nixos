@@ -341,7 +341,19 @@ commands:
         filename: commands/agents_phone.sh
 
       - name: log
-        help: "Mostra _schedule, _running e execucoes recentes."
+        help: "Activity log dos agents (agents/_logs/activity/). Com nome: filtra por agent."
+        args:
+          - name: agent
+            help: "Filtrar por agent (ex: coruja, hermes). Sem arg: todos."
+        flags:
+          - long: --tail
+            short: -n
+            arg: lines
+            help: "Ultimas N entradas (default: 30)"
+            default: "30"
+          - long: --schedule
+            short: -s
+            help: "Mostrar view de _running/_schedule ao inves do activity log"
         filename: commands/agents_log.sh
 
   - name: tasks

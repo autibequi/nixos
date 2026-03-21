@@ -192,3 +192,53 @@ Emitir alertas se:
 - Tool results > 500 linhas em um único resultado → avisar desperdício
 - Mesmo arquivo lido 3x+ → recomendar cache mental ou nota
 - Total estimado > 60k tk → aviso de aproximação do limite
+
+---
+
+### 5. Timeline de arquivos + gráfico de tool calls
+
+Reconstruir a sequência cronológica de tool calls da sessão a partir do histórico visível.
+
+**Regras de agrupamento:**
+- Se o mesmo tema gerou 3+ tool calls pequenos consecutivos → agrupar em uma linha com `[N calls]`
+- Temas sugeridos: boot, edição de arquivo, busca, conversa com agente, análise
+- Marcar se o resultado **injetou contexto** (✦) ou foi só lido/descartado (·)
+
+**Formato da timeline:**
+```
+  ── TIMELINE ─────────────────────────────────────────────────────
+  │
+  ▼ BOOT        ✦ DIRETRIZES · SELF · persona · avatar · MEMORY
+  │               ~8k tk fixo injetado
+  │
+  ▼ turno N     · Glob → commands/**                    (listagem, ~100 tk)
+  │
+  ▼ turno N     ✦ Read → arquivo.md                     (~800 tk injetado)
+  │               Edit → arquivo.md                     (sem injeção)
+  │
+  ▼ turno N     [3 calls agrupados — busca de agente]
+  │               · grep ✗ · find ✗ · grep ✓            (~200 tk, 2 desperdiçados)
+  │
+  ▼ agora
+```
+
+**Legenda:**
+- `✦` = resultado permanece no contexto (injetou tokens)
+- `·` = resultado lido mas não crítico / descartado
+- `✗` = falhou (tokens gastos sem retorno)
+- `[N calls]` = grupo temático
+
+**Gráfico de volume por turno** (barra horizontal proporcional ao total de tokens injetados naquele turno):
+
+```
+  ── VOLUME POR TURNO ─────────────────────────────────────────────
+  BOOT       ████████████████████  ~8k tk
+  turno  3   ██░░░░░░░░░░░░░░░░░░  ~800 tk
+  turno  5   ████░░░░░░░░░░░░░░░░  ~1.5k tk
+  turno  8   ██████░░░░░░░░░░░░░░  ~2k tk
+  turno 12   ████████████░░░░░░░░  ~4k tk  ← pico (leitura agent.md completo)
+  turno 15   ███░░░░░░░░░░░░░░░░░  ~900 tk
+  turno 18   ██░░░░░░░░░░░░░░░░░░  ~600 tk
+```
+
+Identificar o **turno pico** e explicar o que causou (arquivo grande, grep sem limit, etc).
