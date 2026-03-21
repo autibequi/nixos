@@ -55,11 +55,7 @@ pub fn collect(n: usize) -> Vec<LogEntry> {
         }
     }
 
-    // Keep last `n` entries overall
-    if all.len() > n {
-        all.drain(..all.len() - n);
-    }
-
+    // No global drain — UI filters by service, so keep all per-service entries
     all
 }
 
