@@ -1,4 +1,9 @@
-# Skill: Dockerizer
+---
+name: runner
+description: Analisa um projeto e gera toda a infraestrutura Docker necessaria para o workflow Zion (Dockerfile, compose, env files). Use quando precisar containerizar um novo servico ou adicionar ao `zion docker`.
+---
+
+# Skill: Runner (Dockerizer)
 
 Analisa um projeto e gera toda a infraestrutura Docker necessaria para o workflow Zion.
 

@@ -1,16 +1,16 @@
-# /pet — Interagir com o Tamagochi
+# /meta:tamagochi — Interagir com o Tamagochi
 
 Comandos para interagir com o bichinho do vault.
 
 ## Uso
 
 ```
-/pet              → mostra estado atual + sugestão de interação
-/pet status       → idem (explícito)
-/pet feed         → alimenta o bichinho (registra interação)
-/pet talk <msg>   → fala com o bichinho, ele responde in-character
-/pet poke         → cutuca o bichinho — ele reage a um arquivo aleatório agora
-/pet history      → mostra as Memórias do kanban
+/meta:tamagochi              → mostra estado atual + sugestão de interação
+/meta:tamagochi status       → idem (explícito)
+/meta:tamagochi feed         → alimenta o bichinho (registra interação)
+/meta:tamagochi talk <msg>   → fala com o bichinho, ele responde in-character
+/meta:tamagochi poke         → cutuca o bichinho — ele reage a um arquivo aleatório agora
+/meta:tamagochi history      → mostra as Memórias do kanban
 ```
 
 ## Roteamento
@@ -53,11 +53,11 @@ Ler `/workspace/obsidian/TAMAGOCHI.md` e exibir de forma bonita, seguido de uma 
 
 | Estado | Sugestão |
 |--------|----------|
-| Humor sonolento/entediado | `/pet poke` — acorda o bichinho com um arquivo novo |
-| Humor feliz/animado | `/pet talk olá` — aproveita que tá animado pra conversar |
-| Nenhuma descoberta recente | `/pet poke` — manda ele explorar agora |
-| Muitos pensamentos (≥5) | `/pet feed` — os pensamentos cheios indicam que precisa de atenção |
-| Nenhum desejo ativo | Sugerir dar um desejo via `/pet talk quero [algo]` |
+| Humor sonolento/entediado | `/meta:tamagochi poke` — acorda o bichinho com um arquivo novo |
+| Humor feliz/animado | `/meta:tamagochi talk olá` — aproveita que tá animado pra conversar |
+| Nenhuma descoberta recente | `/meta:tamagochi poke` — manda ele explorar agora |
+| Muitos pensamentos (≥5) | `/meta:tamagochi feed` — os pensamentos cheios indicam que precisa de atenção |
+| Nenhum desejo ativo | Sugerir dar um desejo via `/meta:tamagochi talk quero [algo]` |
 | Qualquer estado | Uma vez por sessão: sugerir visitar o TAMAGOCHI.md no Obsidian |
 
 Se TAMAGOCHI.md estiver vazio ou mal formatado, dizer que o bichinho acabou de nascer.

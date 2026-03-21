@@ -44,8 +44,7 @@
 
 | Skill | Quando usar |
 |-------|-------------|
-| `nixos` — `zion/skills/nixos/SKILL.md` | Pacotes, opções NixOS, módulos, erros de build |
-| `hyprland-config` — `zion/skills/hyprland-config/SKILL.md` | Keybinds, Waybar, window rules, stow/.config/hypr/ |
+| `meta:linux` — `zion/commands/meta/linux.md` | Pacotes NixOS, módulos, opções, Hyprland, Waybar, dotfiles stow |
 
 ---
 

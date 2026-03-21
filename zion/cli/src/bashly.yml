@@ -319,6 +319,23 @@ commands:
         filename: commands/contractor.sh
 
 
+  - name: tasks
+    alias: [tk]
+    help: "Gerencia tasks do kanban (cards vencidos, execucao serial)."
+    commands:
+      - name: tick
+        help: "Executa cards vencidos do kanban (mesmo fluxo do zion-tick.service)."
+        flags:
+          - long: --dry-run
+            short: -n
+            help: "Lista cards vencidos sem executar."
+          - long: --steps
+            short: -s
+            arg: steps
+            help: "Sobrescreve #stepsN de todos os cards (default: valor do card ou 30)."
+        filename: commands/tasks_tick.sh
+
+
   - name: status
     alias: [st]
     help: "Status agregado: sessoes e docker services. Atualiza a cada 30s por padrao."

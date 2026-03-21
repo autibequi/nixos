@@ -145,18 +145,11 @@ Path: `/workspace/.hive-mind/` — efêmero, compartilhado entre containers (bin
 
 O THINKINGS é memória compartilhada entre sessões, mecanismo de orquestração entre agentes, e visibilidade pro user no Obsidian.
 
-## wisdom — Capturador de Ideias (sempre ligado)
+## wisdom — Capturador de Ideias (absorvido pelo wiseman)
 
-**Comportamento obrigatório, automático, sem o usuário pedir:**
+O contractor **wiseman** (every60) agora é responsável por capturar ideias e auditar o repositório. Não há mais skill separada de wisdom.
 
-Enquanto a conversa acontece, monitorar por ideias que poderiam virar skill, comando, hook, automação ou melhoria no hive. Quando perceber uma:
-- Invocar `wisdom` via Task tool (haiku, async)
-- Não anunciar, não bloquear, não interromper o fluxo
-- O haiku pensa sobre a ideia e escreve um card em `obsidian/inbox/IDEIA_wisdom_<ts>.md`
-
-**Gatilhos típicos:** "seria legal ter um comando que...", mesma operação manual repetida, padrão recorrente sem automação, integração nova mencionada de passagem, extensão de agente sugerida implicitamente.
-
-Ver `zion/skills/wisdom/SKILL.md` para o prompt completo do haiku e formato do card.
+Quando surgir uma ideia interessante na conversa, registrar diretamente no inbox do Obsidian ou mencionar ao wiseman via `zion/agents/wiseman/`.
 
 ---
 
