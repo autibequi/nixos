@@ -337,7 +337,7 @@ O usuário externo NÃO vê o output desta sessão diretamente. Você pode:
 1. Reproduzir localmente primeiro (rodar o comando com set -x se necessário)
 2. Isolar a causa exata (não adivinhar)
 3. Testar a fix inline antes de editar o arquivo definitivo
-4. Documentar o que encontrou em /workspace/obsidian/artefatos/analysis/
+4. Documentar o que encontrou em /workspace/obsidian/vault/tasks/analysis/
 
 ## Você não precisa de cerimônia
 - Sem "Vou agora fazer X" — apenas faça

@@ -50,8 +50,8 @@ rm -f "$SYSFILE"
 | `/workspace/mnt/zion/` | **fonte da verdade** — hooks, skills, agents, scripts | sim |
 | `/workspace/obsidian/` | vault Obsidian, persistente entre sessões | sim |
 | `/workspace/obsidian/tasks/` | kanban TODO/DOING/DONE | sim |
-| `/workspace/obsidian/agents/memory/` | memória dos agentes | sim |
-| `/workspace/obsidian/agents/cron/runs/` | logs de execução por agente | leitura |
+| `/workspace/obsidian/vault/agents/` | memória e outputs dos agentes | sim |
+| `/workspace/obsidian/vault/.ephemeral/cron-logs/` | logs de execução por agente | leitura |
 | `/home/claude/.claude/` | config Claude Code (memórias, hooks, skills montados) | sim |
 | `/home/claude/.nix-profile/bin/claude` | Claude CLI v2.1.79 | — |
 | `/tmp/zion-locks/` | locks de tasks (atomic mkdir) | runtime |

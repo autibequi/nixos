@@ -85,7 +85,7 @@ python3 /workspace/zion/scripts/chrome-relay.py nav "data:text/html;base64,<BASE
 
 #### Format: obsidian
 
-Salvar em `/workspace/mnt/obsidian/artefatos/report-<branch>/report.md`:
+Salvar em `/workspace/obsidian/vault/tasks/report-<branch>/report.md`:
 
 ```markdown
 # Report: <branch-name>

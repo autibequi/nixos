@@ -26,7 +26,7 @@ Todo agente employee — incluindo especializações — segue este protocolo ba
 ```
 1. Ler o card da task: /workspace/obsidian/tasks/doing/<TASK_NAME>.md
 2. Carregar contexto anterior (se existir):
-   - /workspace/obsidian/agents/memory/<agent-name>.md
+   - /workspace/obsidian/vault/agents/<agent-name>/memory.md
    - /workspace/.ephemeral/notes/<TASK_NAME>/contexto.md
 3. Identificar: o que foi feito? O que falta? Qual o próximo passo?
 4. Iniciar execução com autonomia total
@@ -45,7 +45,7 @@ Todo agente employee — incluindo especializações — segue este protocolo ba
 
 ```
 Ao finalizar (ou quando o tempo estiver acabando):
-1. memoria.md em /workspace/obsidian/agents/memory/<agent-name>.md
+1. memoria.md em /workspace/obsidian/vault/agents/<agent-name>/memory.md
    - Aprendizados, decisões, o que funcionou/falhou
    - Append ao topo, manter últimas 10 entradas
 2. contexto.md em /workspace/.ephemeral/notes/<TASK_NAME>/contexto.md
@@ -84,9 +84,9 @@ Para cada task executada:
 
 | Artefato | Local | Conteúdo |
 |----------|-------|---------|
-| Memória | `/workspace/obsidian/agents/memory/<agent>.md` | Aprendizados da execução |
+| Memória | `/workspace/obsidian/vault/agents/<agent>/memory.md` | Aprendizados da execução |
 | Contexto | `/workspace/.ephemeral/notes/<task>/contexto.md` | Estado atual + próximos passos |
-| Artefatos | `/workspace/obsidian/artefatos/<task>/` | Outputs específicos da task |
+| Artefatos | `/workspace/obsidian/vault/agents/<agent>/outputs/` ou `vault/tasks/<task>/` | Outputs específicos |
 
 ## Herança — Como Especializações Funcionam
 

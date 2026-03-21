@@ -250,6 +250,82 @@ def generate_vault_kanban(items: list[dict], path: str):
         f.writelines(lines)
 
 
+# ── Vault Feed ───────────────────────────────────────────────────────────────
+
+def generate_vault_feed(items: list[dict], path: str):
+    """Generate FEED.md — Obsidian board with items grouped by category.
+
+    Preserves frontmatter and Digest section if present, regenerates category sections.
+    """
+    # Read existing file to preserve frontmatter + digest
+    header_lines = []
+    if os.path.exists(path):
+        with open(path) as f:
+            content = f.read()
+        lines = content.splitlines(keepends=True)
+        # Keep everything up to (but not including) the first category ## that isn't ## Digest
+        in_frontmatter = False
+        past_frontmatter = False
+        for line in lines:
+            stripped = line.strip()
+            if stripped == "---" and not past_frontmatter:
+                in_frontmatter = not in_frontmatter
+                header_lines.append(line)
+                if not in_frontmatter:
+                    past_frontmatter = True
+                continue
+            if in_frontmatter or not past_frontmatter:
+                header_lines.append(line)
+                continue
+            # After frontmatter: keep lines until we hit a category section
+            if stripped.startswith("## ") and stripped != "## Digest":
+                break
+            header_lines.append(line)
+    else:
+        header_lines = [
+            "---\n", "type: feed\n", f"updated: {datetime.now(timezone.utc).strftime('%Y-%m-%d')}\n",
+            "cssclasses:\n", "  - wide-page\n", "---\n",
+            "# Feed\n", "\n",
+            "Board atualizado pelo **Paperboy**. Itens dos feeds configurados em [[FEED.config]].\n", "\n",
+            "> Marque `#mais` ou `#menos` nos items pra calibrar as preferencias do Paperboy.\n", "\n",
+            "---\n", "\n",
+            "## Digest\n",
+            "> Top picks curados pelo Paperboy. _Aguardando proxima execucao para gerar digest._\n", "\n",
+            "---\n", "\n",
+        ]
+
+    # Group items by category
+    by_cat: dict[str, list[dict]] = {}
+    for item in items:
+        cat = item.get("category", "other")
+        by_cat.setdefault(cat, []).append(item)
+
+    # Build category sections
+    cat_lines = []
+    for cat in sorted(by_cat.keys()):
+        cat_items = sorted(by_cat[cat], key=lambda x: x.get("published", ""), reverse=True)
+        cat_lines.append(f"## {cat}\n\n")
+        for item in cat_items:
+            title = item["title"]
+            link = item.get("link", "")
+            try:
+                pub = datetime.fromisoformat(item["published"])
+                if pub.tzinfo is None:
+                    pub = pub.replace(tzinfo=timezone.utc)
+                age = fmt_age(pub)
+            except Exception:
+                age = "?"
+            if link:
+                cat_lines.append(f"- [ ] [{title}]({link}) `{age}`\n")
+            else:
+                cat_lines.append(f"- [ ] {title} `{age}`\n")
+        cat_lines.append("\n")
+
+    with open(path, "w") as f:
+        f.writelines(header_lines)
+        f.writelines(cat_lines)
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 def main():
@@ -258,6 +334,7 @@ def main():
     parser.add_argument("--data", required=True, help="Path to items.json")
     parser.add_argument("--dashboard", required=True, help="Path to dashboard.txt")
     parser.add_argument("--vault-kanban", default=None, help="Path to vault kanban.md (Obsidian board)")
+    parser.add_argument("--vault-feed", default=None, help="Path to vault FEED.md (Obsidian board with categories)")
     args = parser.parse_args()
 
     if not os.path.exists(args.config):
@@ -311,6 +388,10 @@ def main():
     # Generate vault kanban (Obsidian board)
     if args.vault_kanban:
         generate_vault_kanban(existing, args.vault_kanban)
+
+    # Generate vault feed (FEED.md with categories)
+    if args.vault_feed:
+        generate_vault_feed(existing, args.vault_feed)
 
     # Summary
     print(f"RSS: {len(feeds)} feeds | +{new_count} new | -{pruned_count} pruned | {len(existing)} total | {errors} errors")

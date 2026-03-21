@@ -2,6 +2,13 @@
 # Sourced by generated script. Uses ZION_NIXOS_DIR, OBSIDIAN_PATH, args, flag_*.
 # Toda a lógica de container vive em cli; compose e Dockerfile ficam aqui.
 
+# Garante HOME correto ANTES de qualquer path ser definido.
+# Nix pode sobrescrever HOME para /root quando HOME nao pertence ao usuario atual.
+# Fallback para HOME original se getent e tilde expansion falharem (comum no NixOS).
+_zion_resolved_home="$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f6 || eval echo ~"$(id -un)" 2>/dev/null)"
+export HOME="${_zion_resolved_home:-$HOME}"
+unset _zion_resolved_home
+
 zion_nixos_dir="${ZION_NIXOS_DIR:-$HOME/nixos}"
 zion_cli_dir="$zion_nixos_dir/zion/cli"
 zion_compose_file="$zion_cli_dir/docker-compose.zion.yml"
@@ -10,10 +17,6 @@ zion_compose_dir="$zion_cli_dir"
 zion_config_file="${ZION_CONFIG:-$HOME/.zion}"
 zion_env_file="$zion_cli_dir/.env"
 zion_obsidian_path="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
-
-# Garante HOME para o compose expandir ${HOME}/nixos e paths; usado por todos os comandos que montam volumes.
-# Garante HOME correto (corrige warning do Nix quando HOME nao bate com passwd)
-export HOME="$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f6 || eval echo ~"$(id -un)")"
 
 # Carrega ~/.zion (KEY=value, sourceável) e exporta para o compose/container.
 # Flags --engine e --model na linha de comando sempre sobrescrevem estes valores.
@@ -310,9 +313,6 @@ zion_session_run() {
         [[ -n "$init_file" ]] && claude_args+=" --append-system-prompt-file $init_file"
       fi
 
-      # Always bypass permissions (was hardcoded in continue and resume)
-      [[ "$claude_args" != *"--permission-mode"* ]] && claude_args+=" --permission-mode bypassPermissions"
-
       # Session name = mounted folder (shown in header and statusline)
       [[ -n "$mount_path" ]] && claude_args+=" --name ${mount_path##*/}"
 
@@ -332,7 +332,8 @@ zion_session_run() {
       cursor_envs+=(-e "CLAUDIO_MOUNT=$mount_path")
       cursor_envs+=(-e "BOOTSTRAP_SKIP_CLEAR=1")
 
-      local cursor_cmd='. /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt; '
+      local agent_check='agent --version >/dev/null 2>&1 || { echo "zion: cursor-agent nao funciona (versao expirada ou imagem desatualizada). Rode: zion build" >&2; exit 1; }; '
+      local cursor_cmd=". /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt; ${agent_check}"
 
       # Resume (takes priority over init-md)
       if [[ "$engine_args" == *"--resume="* ]]; then

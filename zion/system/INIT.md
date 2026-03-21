@@ -81,7 +81,7 @@
 | propositor | every240 | sonnet | Propõe mudanças via worktree |
 | guardinha | every240 | sonnet | Auditoria de segurança |
 | tamagochi | every240 | haiku | — |
-| rss-feeds | every60 | haiku | — |
+| paperboy | every60 | haiku | Curador pessoal de RSS |
 
 Workers: **every10** (10 min) + **every60** (1h) + **every240** (4h).
 Detalhes em `/workspace/obsidian/docs/task-system.md`. Tags de modelo em `/workspace/obsidian/docs/operational-reference.md`.

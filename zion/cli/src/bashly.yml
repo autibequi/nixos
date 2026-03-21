@@ -184,6 +184,9 @@ commands:
   # ── Container (build / down / destroy) ─────────────────────
   - name: build
     help: Build da imagem Docker do leech (claude-nix-sandbox).
+    flags:
+      - long: --danger
+        help: "Força rebuild sem cache (--no-cache)"
     filename: commands/build.sh
 
   - name: down
@@ -450,6 +453,8 @@ commands:
       - long: --model
         arg: model
         help: "Modelo Claude: haiku | sonnet | opus (default: sonnet)"
+      - long: --danger
+        help: "Bypass de permissões no engine"
     filename: commands/lab.sh
 
   # ── Git helpers ───────────────────────────────────────────

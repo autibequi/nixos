@@ -303,6 +303,6 @@ zion switch
 
 ## Questions?
 
-- Sentinel agent (security): `/home/pedrinho/.ovault/Work/agents/memory/sentinel.md`
+- Sentinel agent (security): `/home/pedrinho/.ovault/Work/vault/agents/sentinel/memory.md`
 - Zion CLI: `zion man`
 - NixOS secrets: See nixos wiki on agenix/sops-nix

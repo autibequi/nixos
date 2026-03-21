@@ -3,7 +3,7 @@
 ## Pasta de artefatos
 
 ```
-artefatos/inspections/<tarefa>/
+vault/inspections/<tarefa>/
 ├── README.md              ← índice com ASCII charts (criar PRIMEIRO)
 ├── 00-contexto.md         ← dados do PR, JIRA e Notion
 ├── 01-claude.md           ← qualidade geral Go (correctness, concurrency, error handling)
@@ -36,7 +36,7 @@ status: done
 inspectors: [claude, documentation, qa, namer, simplifier]
 tags: [trabalho, <area>]
 related:
-  - "[[artefatos/BOARD|Board de Inspeções]]"
+  - "[[vault/inspections/BOARD|Board de Inspeções]]"
 ---
 
 # Inspeção — <branch ou PR title>
@@ -225,7 +225,7 @@ task: <tarefa>
 date: YYYY-MM-DD
 type: consolidado
 related:
-  - "[[artefatos/inspections/<tarefa>/README|Índice da Inspeção]]"
+  - "[[vault/inspections/<tarefa>/README|Índice da Inspeção]]"
 ---
 
 # Consolidado — <tarefa>
@@ -341,7 +341,7 @@ repos: [front-student, bo-container]
 
 ---
 
-## BOARD principal (`artefatos/BOARD.md`)
+## BOARD principal (`vault/inspections/BOARD.md`)
 
 O BOARD é a página central de todas as inspeções. Manter sempre atualizado.
 

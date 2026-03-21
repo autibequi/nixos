@@ -1,6 +1,6 @@
 ---
 name: monolito/go-inspector
-description: Inspeção multi-perspectiva de feature chain no monolito. Coleta contexto de PR/JIRA/Notion, spawna 5 inspetores paralelos (claude, documentation, qa, namer, coverage) + inspector-contrato + simplifier sequencial em worktree. Gera relatórios acionáveis em artefatos/inspections/<tarefa>/ e atualiza o BOARD principal em artefatos/BOARD.md.
+description: Inspeção multi-perspectiva de feature chain no monolito. Coleta contexto de PR/JIRA/Notion, spawna 5 inspetores paralelos (claude, documentation, qa, namer, coverage) + inspector-contrato + simplifier sequencial em worktree. Gera relatórios acionáveis em vault/inspections/<tarefa>/ e atualiza o BOARD principal em vault/inspections/BOARD.md.
 ---
 
 # go-inspector: Inspeção Multi-Perspectiva
@@ -222,7 +222,7 @@ Apresentar o diff do simplifier ao dev para aprovação.
 Criar pasta seguindo `templates/output.md`:
 
 ```
-artefatos/inspections/<tarefa>/
+vault/inspections/<tarefa>/
 ├── README.md              ← índice com ASCII charts (gerar ESTE PRIMEIRO)
 ├── 00-contexto.md
 ├── 01-claude.md
@@ -247,7 +247,7 @@ Ver template completo em `templates/output.md`.
 
 ## Passo 7 — Atualizar BOARD principal e INDEX
 
-### BOARD principal (`artefatos/BOARD.md`)
+### BOARD principal (`vault/inspections/BOARD.md`)
 
 O BOARD é a página central de todas as inspeções. Sempre manter atualizado.
 
@@ -281,7 +281,7 @@ Ao adicionar nova inspeção:
 1. Adicionar linha na tabela do topo
 2. Adicionar seção com conteúdo da inspeção (inline ou link)
 
-### INDEX (`artefatos/inspections/INDEX.md`)
+### INDEX (`vault/inspections/INDEX.md`)
 
 Histórico cronológico de todas as inspeções:
 
@@ -331,6 +331,6 @@ Formato de entrada em Aprendizados:
 - **Responder em PT-BR** — todos os artefatos em português
 - **Sempre gerar README + consolidado** — mesmo que a inspeção seja pequena
 - **ASCII charts obrigatórios** — README sem charts não está completo
-- **Rastreabilidade** — `artefatos/inspections/<tarefa>/` garante histórico navegável
-- **BOARD sempre atualizado** — toda inspeção aparece em `artefatos/BOARD.md`
+- **Rastreabilidade** — `vault/inspections/<tarefa>/` garante histórico navegável
+- **BOARD sempre atualizado** — toda inspeção aparece em `vault/inspections/BOARD.md`
 - **Evoluir sempre** — cada inspeção deve deixar os inspetores mais inteligentes

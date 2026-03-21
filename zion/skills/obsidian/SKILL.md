@@ -160,7 +160,7 @@ Define feeds a buscar:
 
 ### FEED.md
 
-Board com items. Task `rss-feeds` atualiza periodicamente.
+Board com items + digest curado. Task `paperboy` atualiza periodicamente.
 Cache em `vault/.ephemeral/rss/`.
 
 ---

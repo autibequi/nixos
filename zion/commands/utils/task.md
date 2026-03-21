@@ -36,7 +36,7 @@ model: haiku          # haiku | sonnet | opus
 timeout: 1800         # segundos (default 30min — max_turns controla na prática)
 max_turns: 12         # turns claude CLI (default 12; sobrescrito por #stepsN no tick)
 mcp: false            # false = desabilita MCP servers
-agent: nome           # carrega memory de agents/memory/nome.md
+agent: nome           # carrega memory de vault/agents/nome/memory.md
 ---
 
 Instruções para o agente...
@@ -97,7 +97,7 @@ Cria novo card interativamente com frontmatter preenchido.
 |-----|--------|
 | `TASK_MAX_TURNS` | Sobrescreve max_turns do frontmatter |
 | `TASK_DIR` | Caminho da pasta tasks (padrão: `/workspace/obsidian/tasks`) |
-| `TASK_MEMORY_DIR` | Caminho de agents/memory (padrão: derivado de TASK_DIR) |
+| `TASK_AGENTS_DIR` | Caminho de vault/agents (padrão: derivado de TASK_DIR) |
 
 ---
 
