@@ -5,7 +5,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::Paragraph;
 use ratatui::Frame;
 
-use super::{logs, quota, services, sessions};
+use super::{logs, popup, quota, services, sessions};
 use crate::app::App;
 use crate::theme;
 
@@ -35,6 +35,9 @@ pub fn render(frame: &mut Frame, app: &App) {
     render_log_separator(frame, app, chunks[4]);
     logs::render(frame, app, chunks[5]);
     render_footer(frame, app, chunks[6]);
+
+    // Overlay: menu or error popup (rendered last so it's on top)
+    popup::render(frame, app);
 }
 
 fn sessions_height(app: &App) -> u16 {
@@ -90,19 +93,11 @@ fn render_footer(frame: &mut Frame, app: &App, area: Rect) {
     let line = Line::from(vec![
         Span::styled("  ↑↓", theme::footer_dim()),
         Span::styled(" nav  ", theme::footer_dim()),
+        Span::styled("Enter", theme::footer_key()),
+        Span::styled(" menu  ", theme::footer_dim()),
         Span::styled("e", theme::footer_key()),
         Span::styled(format!("[{env}]"), theme::dim()),
-        Span::styled("  s", theme::footer_key()),
-        Span::styled(" start  ", theme::footer_dim()),
-        Span::styled("S", theme::footer_key()),
-        Span::styled(" stop  ", theme::footer_dim()),
-        Span::styled("l", theme::footer_key()),
-        Span::styled(" logs  ", theme::footer_dim()),
-        Span::styled("t", theme::footer_key()),
-        Span::styled(" test  ", theme::footer_dim()),
-        Span::styled("x", theme::footer_key()),
-        Span::styled(" shell  ", theme::footer_dim()),
-        Span::styled("[/]", theme::footer_key()),
+        Span::styled("  [/]", theme::footer_key()),
         Span::styled(" scroll  ", theme::footer_dim()),
         Span::styled("q", theme::footer_key()),
         Span::styled(" quit  ", theme::footer_dim()),
