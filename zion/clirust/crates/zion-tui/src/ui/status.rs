@@ -51,13 +51,13 @@ fn sessions_height(app: &App) -> u16 {
 }
 
 fn dk_services_height(app: &App) -> u16 {
-    let count = app.snapshot.dk_services.len();
-    if count == 0 {
-        // Still show the static list
-        (crate::app::DK_SERVICES.len() as u16) + 1
+    let svc_count = if app.snapshot.dk_services.is_empty() {
+        crate::app::DK_SERVICES.len()
     } else {
-        (count as u16) + 1
-    }
+        app.snapshot.dk_services.len()
+    };
+    // +1 header, +1 inline log preview row for selected service
+    (svc_count as u16) + 2
 }
 
 fn logs_height(app: &App) -> u16 {

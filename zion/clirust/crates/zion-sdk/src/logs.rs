@@ -29,6 +29,16 @@ fn log_root() -> PathBuf {
     PathBuf::from(xdg).join("zion/logs/dockerized")
 }
 
+/// Read only the very last non-empty line of a service's log file.
+#[must_use]
+pub fn last_line(svc: &str) -> Option<String> {
+    let path = log_root().join(svc).join("service.log");
+    tail_file(&path, 5)
+        .into_iter()
+        .rev()
+        .find(|l| !l.trim().is_empty())
+}
+
 /// Collect the last `n` lines per service, merging into a flat list.
 #[must_use]
 pub fn collect(n: usize) -> Vec<LogEntry> {
