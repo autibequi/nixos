@@ -489,3 +489,7 @@ commands:
   - name: beta
     help: "Toggle do modo BETA (beta overrides). Liga/desliga observacao da sessao."
     filename: commands/beta.sh
+
+  - name: uninstall
+    help: "Remove o symlink do zion de ~/.local/bin (desinstala do PATH)."
+    filename: commands/uninstall.sh

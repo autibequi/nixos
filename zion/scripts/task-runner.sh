@@ -211,7 +211,7 @@ CLAUDE_ARGS+=(-p "$PROMPT")
 
 EXIT_CODE=0
 HEADLESS=1 \
-timeout "$TIMEOUT" claude "${CLAUDE_ARGS[@]}" 2>&1 | tee "$LOGFILE" || true
+timeout "$TIMEOUT" claude "${CLAUDE_ARGS[@]}" --add-dir "$HOME" 2>&1 | tee "$LOGFILE" || true
 EXIT_CODE=${PIPESTATUS[0]}
 ELAPSED=$((SECONDS - START_S))
 
