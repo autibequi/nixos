@@ -23,11 +23,11 @@ pub fn down() -> Result<()> {
         &[
             "compose",
             "-f",
-            &zion.join("cli/docker-compose.zion.yml").to_string_lossy(),
+            &zion.join("container/docker-compose.zion.yml").to_string_lossy(),
             "down",
         ],
     );
-    let puppy = zion.join("cli/docker-compose.puppy.yml");
+    let puppy = zion.join("container/docker-compose.puppy.yml");
     if puppy.exists() {
         crate::exec::fire(
             "docker",

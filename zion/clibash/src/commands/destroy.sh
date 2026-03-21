@@ -1,7 +1,7 @@
 # Para containers, remove imagens e volumes do projeto
 zion_load_config
-compose_zion="${ZION_ROOT:-$HOME/nixos/zion}/cli/docker-compose.zion.yml"
-compose_puppy="${ZION_ROOT:-$HOME/nixos/zion}/cli/docker-compose.puppy.yml"
+compose_zion="${ZION_ROOT:-$HOME/nixos/zion}/container/docker-compose.zion.yml"
+compose_puppy="${ZION_ROOT:-$HOME/nixos/zion}/container/docker-compose.puppy.yml"
 
 echo "Destroying zion session containers + volumes..."
 docker compose -f "$compose_zion" down --volumes --remove-orphans 2>/dev/null || true

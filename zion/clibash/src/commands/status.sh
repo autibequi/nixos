@@ -204,7 +204,7 @@ _do_status_render() {
   _print_agent_group "agents" "$_agent_rows"
   _print_agent_group "background" "$_bg_rows"
 
-  source "${ZION_ROOT:-$HOME/nixos/zion}/cli/src/lib/docker_status_impl.sh" 2>/dev/null || true
+  source "${ZION_ROOT:-$HOME/nixos/zion}/clibash/src/lib/docker_status_impl.sh" 2>/dev/null || true
   if declare -f _zion_dk_status >/dev/null 2>&1; then
     _zion_dk_status "" 1
   fi

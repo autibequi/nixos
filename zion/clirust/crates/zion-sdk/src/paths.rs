@@ -22,8 +22,19 @@ pub fn zion_root() -> PathBuf {
 }
 
 #[must_use]
+pub fn clibash_dir() -> PathBuf {
+    zion_root().join("clibash")
+}
+
+/// Backward-compatible alias for [`clibash_dir`].
+#[must_use]
 pub fn cli_dir() -> PathBuf {
-    zion_root().join("cli")
+    clibash_dir()
+}
+
+#[must_use]
+pub fn container_dir() -> PathBuf {
+    zion_root().join("container")
 }
 
 #[must_use]
@@ -33,12 +44,12 @@ pub fn clirust_dir() -> PathBuf {
 
 #[must_use]
 pub fn compose_file() -> PathBuf {
-    cli_dir().join("docker-compose.zion.yml")
+    container_dir().join("docker-compose.zion.yml")
 }
 
 #[must_use]
 pub fn env_file() -> PathBuf {
-    cli_dir().join(".env")
+    container_dir().join(".env")
 }
 
 #[must_use]

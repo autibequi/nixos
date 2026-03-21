@@ -1,6 +1,6 @@
 # Shared helpers for zion CLI (compose file, mount path, project names).
 # Sourced by generated script. Uses ZION_NIXOS_DIR, OBSIDIAN_PATH, args, flag_*.
-# Toda a lógica de container vive em cli; compose e Dockerfile ficam aqui.
+# Toda a lógica de container vive em container/; scripts CLI vivem em clibash/.
 
 # Garante HOME correto ANTES de qualquer path ser definido.
 # Nix pode sobrescrever HOME para /root quando HOME nao pertence ao usuario atual.
@@ -10,12 +10,13 @@ export HOME="${_zion_resolved_home:-$HOME}"
 unset _zion_resolved_home
 
 zion_nixos_dir="${ZION_NIXOS_DIR:-$HOME/nixos}"
-zion_cli_dir="$zion_nixos_dir/zion/cli"
-zion_compose_file="$zion_cli_dir/docker-compose.zion.yml"
-zion_compose_dir="$zion_cli_dir"
+zion_clibash_dir="$zion_nixos_dir/zion/clibash"
+zion_container_dir="$zion_nixos_dir/zion/container"
+zion_compose_file="$zion_container_dir/docker-compose.zion.yml"
+zion_compose_dir="$zion_container_dir"
 # Config do usuário: engine padrão e chaves (GH_TOKEN, ANTHROPIC_API_KEY)
 zion_config_file="${ZION_CONFIG:-$HOME/.zion}"
-zion_env_file="$zion_cli_dir/.env"
+zion_env_file="$zion_container_dir/.env"
 zion_obsidian_path="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
 
 # Carrega ~/.zion (KEY=value, sourceável) e exporta para o compose/container.
