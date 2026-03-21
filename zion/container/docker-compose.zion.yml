@@ -1,5 +1,5 @@
 x-env-base: &env-base
-  PATH: /home/claude/.local/bin:/home/claude/.nix-profile/bin:/workspace/zion/cli:/usr/bin:/bin
+  PATH: /home/claude/.local/bin:/home/claude/.nix-profile/bin:/workspace/zion/clibash:/usr/bin:/bin
   ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
   CURSOR_API_KEY: ${CURSOR_API_KEY:-}
   CLAUDE_SESSION: ${CLAUDE_SESSION:-}
