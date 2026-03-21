@@ -1,4 +1,4 @@
-//! Logs panel — tail of recent service log lines.
+//! Logs panel — tail of the selected service's log lines, scrollable.
 
 use ratatui::layout::Rect;
 use ratatui::style::{Color, Style};
@@ -9,9 +9,19 @@ use ratatui::Frame;
 use crate::app::App;
 use crate::theme;
 
-/// Render the logs tail section.
+/// Render the logs tail section for the currently selected service.
 pub fn render(frame: &mut Frame, app: &App, area: Rect) {
-    if app.snapshot.logs.is_empty() {
+    let svc = app.current_service();
+
+    // Filter to only entries for the selected service
+    let entries: Vec<&zion_sdk::logs::LogEntry> = app
+        .snapshot
+        .logs
+        .iter()
+        .filter(|e| e.service == svc)
+        .collect();
+
+    if entries.is_empty() {
         let line = Line::from(vec![
             Span::raw("  "),
             Span::styled("no logs", theme::dim()),
@@ -20,40 +30,29 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
         return;
     }
 
-    // How many lines fit in the area
     let max_lines = area.height as usize;
-    let entries = &app.snapshot.logs;
-    let skip = entries.len().saturating_sub(max_lines);
+    let total = entries.len();
 
-    let lines: Vec<Line> = entries[skip..]
+    // scroll=0 → bottom, scroll=N → N lines up from bottom
+    let scroll_clamped = app.log_scroll.min(total.saturating_sub(1));
+    let end = total.saturating_sub(scroll_clamped);
+    let start = end.saturating_sub(max_lines);
+
+    let lines: Vec<Line> = entries[start..end]
         .iter()
         .map(|entry| {
-            let svc_color = svc_color(&entry.service);
-            let (level, line_rest) = detect_level(&entry.line);
+            let (level, line_text) = detect_level(&entry.line);
             let level_style = level_style(level);
-
             Line::from(vec![
                 Span::raw("  "),
-                Span::styled(format!("{:<14}", entry.service), Style::default().fg(svc_color)),
-                Span::raw(" "),
                 Span::styled(format!("{:<5}", level), level_style),
                 Span::raw(" "),
-                Span::styled(line_rest.to_string(), theme::dim()),
+                Span::styled(line_text.to_string(), theme::dim()),
             ])
         })
         .collect();
 
     frame.render_widget(Paragraph::new(lines), area);
-}
-
-fn svc_color(svc: &str) -> Color {
-    match svc {
-        "monolito"     => Color::Cyan,
-        "bo-container" => Color::Magenta,
-        "front-student"=> Color::Yellow,
-        "host"         => Color::Blue,
-        _              => Color::White,
-    }
 }
 
 fn detect_level(line: &str) -> (&'static str, &str) {

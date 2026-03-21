@@ -38,6 +38,8 @@ pub fn map_key(key: KeyEvent) -> Option<&'static str> {
         KeyCode::Char('l') => Some("logs"),
         KeyCode::Char('t') => Some("test"),
         KeyCode::Char('x') => Some("shell"),
+        KeyCode::Char('[') | KeyCode::PageUp => Some("log_up"),
+        KeyCode::Char(']') | KeyCode::PageDown => Some("log_down"),
         _ => None,
     }
 }

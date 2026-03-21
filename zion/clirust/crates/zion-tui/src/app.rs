@@ -18,6 +18,8 @@ pub struct App {
     pub svc_envs: Vec<usize>,
     /// Most recent action label for display: `(service_idx, description)`.
     pub last_action: Option<(usize, String)>,
+    /// Lines scrolled up from the bottom in the log panel (0 = bottom).
+    pub log_scroll: usize,
 }
 
 impl App {
@@ -28,7 +30,18 @@ impl App {
             cursor_idx: 0,
             svc_envs: vec![0; DK_SERVICES.len()],
             last_action: None,
+            log_scroll: 0,
         }
+    }
+
+    /// Scroll log panel up (towards older entries).
+    pub fn log_scroll_up(&mut self, n: usize) {
+        self.log_scroll = self.log_scroll.saturating_add(n);
+    }
+
+    /// Scroll log panel down (towards newer entries).
+    pub fn log_scroll_down(&mut self, n: usize) {
+        self.log_scroll = self.log_scroll.saturating_sub(n);
     }
 
     /// Return the name of the currently selected service.
@@ -48,11 +61,13 @@ impl App {
         } else {
             self.cursor_idx -= 1;
         }
+        self.log_scroll = 0;
     }
 
     /// Move the cursor down, wrapping to the first service.
     pub fn move_down(&mut self) {
         self.cursor_idx = (self.cursor_idx + 1) % DK_SERVICES.len();
+        self.log_scroll = 0;
     }
 
     /// Cycle the selected environment for the current service.

@@ -88,6 +88,8 @@ pub fn run_status(tick: u64) -> Result<()> {
                         "up" => app.move_up(),
                         "down" => app.move_down(),
                         "cycle_env" => app.cycle_env(),
+                        "log_up" => app.log_scroll_up(5),
+                        "log_down" => app.log_scroll_down(5),
                         "start" => {
                             let svc = app.current_service().to_string();
                             let env = app.current_env().to_string();
