@@ -35,7 +35,7 @@ HEADLESS="${HEADLESS:-0}"
 [ -z "${IN_DOCKER:-}" ] && IN_DOCKER="0"
 { [ "$CLAUDE_ENV" = "container" ] || [ -f "/.dockerenv" ]; } && IN_DOCKER="1"
 [ -z "${ZION_EDIT:-}" ] && ZION_EDIT="0"
-[ -d "/workspace/logs" ] && ZION_EDIT="1"
+[ -d "/workspace/lab" ] && ZION_EDIT="1"
 
 # Env overrides vencem sobre defaults de arquivo (util para testes com zion hooks)
 [ -n "$_OV_PERSONALITY" ] && PERSONALITY="${_OV_PERSONALITY^^}"
@@ -59,7 +59,7 @@ echo "autocommit=$AUTOCOMMIT     # ON=commita sem perguntar | OFF=PROIBIDO commi
 echo "autojarvis=$AUTOJARVIS     # ON=JARVIS no dashboard"
 echo "beta=$BETA                 # ON=beta overrides ativos | OFF=normal"
 echo "in_docker=$IN_DOCKER       # 1=container | 0=host"
-echo "zion_edit=$ZION_EDIT       # 1=mnt é o repo nixos + logs montados | 0=projeto externo"
+echo "zion_edit=$ZION_EDIT       # 1=lab mode: /workspace/lab editável | 0=projeto externo"
 echo "zion_debug=$ZION_DEBUG     # ON=contexto completo (DIRETRIZES+persona+avatar) | OFF=lite mode"
 echo "headless=$HEADLESS         # 1=worker sem supervisão | 0=interativo"
 echo "analysis_mode=$ANALYSIS_MODE  # 1=modo experimento isolado (proativo, self-modify, debug livre)"
@@ -133,21 +133,22 @@ Estrutura /workspace:
   /workspace/dockerized/    configs docker dos serviços (Dockerfile, compose, .env)
   /workspace/.hive-mind/    área efêmera compartilhada entre containers (locks, sinais)
 
-Se zion_edit=1: você está editando o repo nixos. /workspace/mnt = ~/nixos.
+Se zion_edit=1: lab mode — /workspace/lab/ contém o repo NixOS+Zion (editável).
 Se zion_edit=0: /workspace/mnt é um projeto externo do usuário.
 DOCKER
   if [ "$ZION_EDIT" = "1" ]; then
     cat <<'ZION_REPOS'
 
-REPOS NESTA SESSÃO (zion_edit=1 — dois repos Git isolados):
-  /workspace/mnt  = NixOS source — código-fonte do SO do host onde este container roda
-                    (modules/, configuration.nix, flake.nix, stow/, scripts/)
-                    NÃO é um projeto do usuário. É o sistema operacional do host.
-  /zion           = Zion source — código-fonte do CLI e engine dos agentes
-                    (cli/bashly.yml, cli/docker-compose, hooks/, skills/, agents/, personas/)
+LAB MODE (zion_edit=1):
+  /workspace/mnt  = Projeto do usuário (zona de trabalho normal — igual zion new)
+  /workspace/lab/ = NixOS+Zion source (~/nixos) — EDITÁVEL para auto-aperfeiçoamento
+                    (modules/, configuration.nix, flake.nix, stow/, zion/)
+                    Use para melhorar skills, hooks, prompts, agents, CLI do Zion.
+                    Mudanças aqui afetam o sistema e as próximas sessões.
+  /workspace/zion = Bind mount de ~/nixos/zion (mesmo conteúdo que /workspace/lab/zion)
 
-REGRA: não entre nessas pastas a menos que precise editar algo específico.
-       Se conseguir responder com esse mapa, responda sem ler nada.
+REGRA: /workspace/lab/ é sua zona de evolução. Edite-a quando identificar melhorias
+       em skills, agents, hooks ou prompts. Commits vão pro repo NixOS do host.
 ZION_REPOS
   fi
   if [ "$HEADLESS" = "1" ]; then
@@ -231,12 +232,13 @@ fi
 #     Gerado em bash → stderr (terminal). Sem instruções pro Claude.
 # ────────────────────────────────────────────────────────────────
 if [ "$ZION_EDIT" = "1" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
-  _worktrees=$(git -C "$WS" worktree list 2>/dev/null | wc -l | tr -d ' ')
+  _lab_dir="/workspace/lab"
+  _worktrees=$(git -C "$_lab_dir" worktree list 2>/dev/null | wc -l | tr -d ' ')
   _inbox=$(wc -l < /workspace/obsidian/tasks/inbox/inbox.md 2>/dev/null || echo "?")
   _uptime=$(awk '{h=int($1/3600); m=int(($1%3600)/60); printf "%dh %dm", h, m}' /proc/uptime 2>/dev/null || echo "?")
-  _git_branch=$(git -C "$WS" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
-  _git_dirty=$(git -C "$WS" status --porcelain 2>/dev/null | wc -l | tr -d ' ')
-  _git_ahead=$(git -C "$WS" rev-list @{u}..HEAD 2>/dev/null | wc -l | tr -d ' ')
+  _git_branch=$(git -C "$_lab_dir" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
+  _git_dirty=$(git -C "$_lab_dir" status --porcelain 2>/dev/null | wc -l | tr -d ' ')
+  _git_ahead=$(git -C "$_lab_dir" rev-list @{u}..HEAD 2>/dev/null | wc -l | tr -d ' ')
   _todo_count=$(ls /workspace/obsidian/contractors/_schedule/*.md 2>/dev/null | wc -l | tr -d ' ')
   _mem_count=$(ls "$HOME/.claude/projects/-workspace-mnt/memory/"*.md 2>/dev/null | wc -l | tr -d ' ')
   _h_off=$([ "$HEADLESS" = "1" ] && echo "ON" || echo "OFF")
@@ -279,7 +281,8 @@ if [ "$ZION_EDIT" = "1" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ];
     printf "  %-12s .........  OK    [  56ms]\n" "PERSONALITY"
     printf "  %-12s .........  OK    [  19ms]  %s files\n" "MEMORY" "$_mem_count"
     printf "  %-12s .........  OK    [ 142ms]\n" "API_USAGE"
-    _usage_file="$WS/.ephemeral/usage-bar.txt"
+    _usage_file="/workspace/lab/.ephemeral/usage-bar.txt"
+    [ -f "$_usage_file" ] || _usage_file="$WS/.ephemeral/usage-bar.txt"
     [ -f "$_usage_file" ] || _usage_file="$HOME/.claude/.ephemeral/usage-bar.txt"
     [ -f "$_usage_file" ] && printf "  %40s%s\n" "" "$(tail -1 "$_usage_file")"
 

@@ -428,11 +428,14 @@ commands:
     filename: commands/leech.sh
 
   - name: lab
-    help: "Abre sessão lab: ~/nixos em /workspace/mnt + /workspace/logs (lab_mode=1)."
+    help: "Sessão lab: projeto em /workspace/mnt + ~/nixos em /workspace/lab (editável)."
+    args:
+      - name: dir
+        help: "Diretório do projeto (default ~/projects)"
     flags:
       - long: --engine
         arg: engine
-        help: "Engine: opencode | claude | cursor (default: cursor)"
+        help: "Engine: opencode | claude | cursor (default: ~/.zion)"
       - long: --resume
         arg: session_id
         help: "Retoma sessão (UUID ou 1 para última)"
@@ -441,6 +444,11 @@ commands:
         help: "Modelo Claude: haiku | sonnet | opus (default: sonnet)"
       - long: --danger
         help: "Bypass de permissões no engine"
+      - long: --init-md
+        arg: file
+        default: contexto.md
+      - long: --rw
+      - long: --ro
     filename: commands/lab.sh
 
   # ── Git helpers ───────────────────────────────────────────

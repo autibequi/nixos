@@ -51,7 +51,7 @@ zion_usage() {
   printf "  %s   Deploy dotfiles no host via GNU stow (restow, delete, status).\n" "stow     "
   printf "  %s   Aplica configuração NixOS no host via nh os.\n" "os       "
   printf "  %s   Engatou numa pasta — sessão efêmera (auto-detecta nixos → monta logs).\n" "leech    "
-  printf "  %s   Abre sessão lab: ~/nixos em /workspace/mnt + /workspace/logs (lab_mode=1).\n" "lab      "
+  printf "  %s   Sessão lab: projeto em /workspace/mnt + ~/nixos em /workspace/lab (editável).\n" "lab      "
   printf "  %s   Utilitarios Git. Ex: zion git sandbox\n" "git      "
   printf "  %s   Lista o inbox ou adiciona uma entrada. Sem args: mostra inbox.md. Com texto: adiciona entrada.\n" "inbox    "
   printf "  %s   Lista os arquivos do outbox.\n" "outbox   "
@@ -1429,10 +1429,10 @@ zion_leech_usage() {
 
 # :command.usage
 zion_lab_usage() {
-  printf "zion lab - Abre sessão lab: ~/nixos em /workspace/mnt + /workspace/logs (lab_mode=1).\n\n"
+  printf "zion lab - Sessão lab: projeto em /workspace/mnt + ~/nixos em /workspace/lab (editável).\n\n"
 
   printf "%s\n" "Usage:"
-  printf "  zion lab [OPTIONS]\n"
+  printf "  zion lab [DIR] [OPTIONS]\n"
   printf "  zion lab --help | -h\n"
   echo
 
@@ -1443,7 +1443,7 @@ zion_lab_usage() {
     # :command.usage_flags
     # :flag.usage
     printf "  %s\n" "--engine ENGINE"
-    printf "    Engine: opencode | claude | cursor (default: cursor)\n"
+    printf "    Engine: opencode | claude | cursor (default: ~/.zion)\n"
     echo
 
     # :flag.usage
@@ -1461,9 +1461,33 @@ zion_lab_usage() {
     printf "    Bypass de permissões no engine\n"
     echo
 
+    # :flag.usage
+    printf "  %s\n" "--init-md FILE"
+    printf "\n"
+    printf "    %s\n" "Default: contexto.md"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--rw"
+    printf "\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--ro"
+    printf "\n"
+    echo
+
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
     printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "Arguments:"
+
+    # :argument.usage
+    printf "  %s\n" "DIR"
+    printf "    Diretório do projeto (default ~/projects)\n"
     echo
 
   fi
@@ -5295,30 +5319,27 @@ zion_lab_command() {
   # src/commands/lab.sh
   zion_load_config
 
-  nixos_dir="${ZION_NIXOS_DIR:-$HOME/nixos}"
-  mount_path="$(cd "$nixos_dir" 2>/dev/null && pwd)" \
-    || { echo "zion: nixos dir não encontrado: $nixos_dir" >&2; exit 1; }
-  proj_name="zion-projects"
-  mount_opts="rw"
-
-  # Engine: flag > ~/.zion > default claude (cursor-agent não suporta --name)
-  engine="${args['--engine']:-${flag_engine:-${ZION_ENGINE:-claude}}}"
-  engine="${engine,,}"
-  case "$engine" in
-    opencode|claude|cursor) ;;
-    *)
-      echo "zion: engine inválido: $engine (use opencode|claude|cursor)" >&2
-      exit 1
-      ;;
-  esac
+  # Project mount: identical to zion new
+  mount_path="$(zion_resolve_dir)"
+  mount_opts="$(zion_mount_opts)"
+  slug="$(zion_proj_slug "$mount_path")"
+  proj_name="$(zion_proj_name "$slug")"
+  engine="$(zion_resolve_engine 1)"
 
   # Build engine_args
   engine_args=""
-  resume="${args['--resume']:-${flag_resume:-}}"
+  resume="${args['--resume']:-}"
   [[ -n "$resume" ]] && engine_args+=" --resume=$resume"
 
-  # Extra volumes: host journal para /workspace/logs
-  extra_volumes="-v /var/log/journal:/workspace/logs/host/journal:ro"
+  init_md="$(zion_initial_md "$mount_path")"
+  [[ -n "$init_md" ]] && engine_args+=" --init-md=$init_md"
+
+  # Lab volumes: nixos repo at /workspace/lab (writable) + host journal
+  nixos_dir="${ZION_NIXOS_DIR:-$HOME/nixos}"
+  nixos_real="$(cd "$nixos_dir" 2>/dev/null && pwd)" \
+    || { echo "zion: nixos dir não encontrado: $nixos_dir" >&2; exit 1; }
+  extra_volumes="-v ${nixos_real}:/workspace/lab:rw"
+  extra_volumes+=" -v /var/log/journal:/workspace/logs/host/journal:ro"
 
   zion_session_run "$engine" "$proj_name" "$mount_path" "$mount_opts" "$engine_args" "$extra_volumes"
 
@@ -8624,6 +8645,36 @@ zion_lab_parse_requirements() {
         shift
         ;;
 
+      # :flag.case
+      --init-md)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--init-md']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--init-md requires an argument: --init-md FILE" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --rw)
+
+        # :flag.case_no_arg
+        args['--rw']=1
+        shift
+        ;;
+
+      # :flag.case
+      --ro)
+
+        # :flag.case_no_arg
+        args['--ro']=1
+        shift
+        ;;
+
       -?*)
         printf "invalid option: %s\n" "$key" >&2
         exit 1
@@ -8632,13 +8683,22 @@ zion_lab_parse_requirements() {
       *)
         # :command.parse_requirements_case
         # :command.parse_requirements_case_simple
-        printf "invalid argument: %s\n" "$key" >&2
-        exit 1
+        # :argument.case
+        if [[ -z ${args['dir']+x} ]]; then
+          args['dir']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
 
         ;;
 
     esac
   done
+
+  # :command.default_assignments
+  [[ -n ${args['--init-md']:-} ]] || args['--init-md']="contexto.md"
 
 }
 

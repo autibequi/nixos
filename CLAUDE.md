@@ -8,9 +8,10 @@
 
 ## Checklist ao abrir
 
-1. `/workspace/logs` existe? → você está em `zion edit` (repo NixOS em `/workspace/mnt`).
+1. `/workspace/lab/` existe? → você está em `zion lab` (repo NixOS editável em `/workspace/lab/`).
 2. `in_docker=1` → **nunca** rodar `nixos-rebuild`/`systemctl`; pedir ao usuário rodar no host.
-3. Para NixOS/Hyprland → usar skills abaixo. Para "onde editar" → tabela §onde.
+3. Em lab mode: `/workspace/lab/` é sua zona de evolução — edite skills, hooks, agents, CLI.
+4. Para NixOS/Hyprland → usar skills abaixo. Para "onde editar" → tabela §onde.
 
 ---
 
@@ -50,6 +51,9 @@
 
 ## Onde editar o quê
 
+> Em lab mode (`zion_edit=1`): os paths abaixo são relativos a `/workspace/lab/` (repo NixOS).
+> Em sessão normal: estes paths estão em `/workspace/mnt/` se o projeto montado for o repo NixOS.
+
 | Quero alterar… | Onde |
 |----------------|------|
 | Pacote de sistema | `modules/core/packages.nix` |
@@ -57,10 +61,10 @@
 | Ativar/desativar módulo | `configuration.nix` (imports) |
 | Keybind / Waybar / config DE | `stow/.config/hypr/`, `stow/.config/waybar/` → `zion stow` |
 | Comando ou flag do `zion` | `zion/cli/src/bashly.yml` + `commands/<nome>.sh` → `bashly generate` |
-| Mounts ou serviços do container | `zion/cli/docker-compose.zion.yml` / `docker-compose.puppy.yml` |
+| Mounts ou serviços do container | `zion/containers/zion/docker-compose.zion.yml` |
 | Comportamento do agente (/load) | `zion/bootstrap.md`, `zion/system/INIT.md` |
 | Skills ou comandos | `zion/skills/`, `zion/commands/` |
-| Hooks (session-start, etc.) | `stow/.claude/hooks/` |
+| Hooks (session-start, etc.) | `zion/hooks/claude-code/` |
 
 ---
 
@@ -113,7 +117,7 @@ Breakroom (memoria/estado): `/workspace/obsidian/agents/<nome>/memory.md`
 ## Armadilhas
 
 - `nixos-rebuild`/`systemctl` no container → nao afeta o host. Pedir ao usuario.
-- Em `zion edit`: repo esta em `/workspace/mnt`, **nao** em `/workspace/nixos`.
+- Em `zion lab`: repo NixOS esta em `/workspace/lab/`, projeto em `/workspace/mnt`.
 - Keybinds/Waybar: fonte da verdade e `stow/.config/`, nao modulos NixOS.
 - Apos mudar `bashly.yml`/`commands/*.sh`: sempre `bashly generate`.
 - Obsidian: ler BOARDRULES.md antes de modificar qualquer coisa no vault.
