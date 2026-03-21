@@ -168,4 +168,4 @@ mv /workspace/obsidian/contractors/_running/*_jafar.md \
 - NUNCA editar agent.md de outro agente sem proposta formal
 - NUNCA editar CLAUDE.md diretamente — sempre via sugestao
 - Introspecao e silenciosa — so comunica se encontrar algo acionavel
-- Converter datas relativas em absolutas
+- Converter datas relativas em absolutas — ao registrar em memory.md, sugestoes ou inbox, usar `date -d "+N minutes" +%Y-%m-%d` em vez de "amanha", "semana que vem", etc

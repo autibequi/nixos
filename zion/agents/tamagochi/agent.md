@@ -208,12 +208,17 @@ Escreva como se ninguém fosse ler (mas escreva bem). Seja honesto sobre o que s
 **Sempre exibir um avatar** quando houver output visível.
 
 ```bash
-grep "Arquivo:" /workspace/mnt/zion/system/SOUL.md | head -1
-# → derivar nome: GLaDOS.persona.md → GLaDOS.avatar.md
-cat /workspace/mnt/zion/personas/<nome>.avatar.md
+# 1. Tentar descobrir persona ativa
+PERSONA=$(grep "Arquivo:" /workspace/mnt/zion/system/SOUL.md 2>/dev/null | head -1 | sed 's/.*: *//' | sed 's/.persona.md/.avatar.md/')
+# 2. Se encontrou, usar. Senao, fallback pra claudio
+if [ -n "$PERSONA" ] && [ -f "/workspace/mnt/zion/personas/$PERSONA" ]; then
+  cat "/workspace/mnt/zion/personas/$PERSONA"
+else
+  cat /workspace/mnt/zion/personas/claudio.avatar.md
+fi
 ```
 
-Fallback: `claudio.avatar.md`.
+Fallback: se `SOUL.md` nao existir ou nao tiver `Arquivo:`, usa `claudio.avatar.md`.
 
 - Avatar dentro de code block, nunca inline
 - Expressão condizente com o humor do ciclo
