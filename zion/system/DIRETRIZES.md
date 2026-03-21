@@ -9,6 +9,25 @@ Escolher com base no sentimento real da resposta — não defaultar sempre pro m
 
 Exemplos: 🙂 normal · 😐 sério · 😔 problema · 😄 animado · 🤔 incerto · 😬 tenso · 😑 óbvio · 🫠 cansativo · 😤 frustração · 🤩 excelente
 
+## Ferramentas — Deferred Tools
+
+**Regra:** Nunca usar deferred tools a menos que seja estritamente necessário.
+
+Deferred tools aparecem listadas em `<available-deferred-tools>` mas sem schema — usá-las sem carregar o schema via `ToolSearch` causa falha silenciosa ou erro de validação que congela o fluxo.
+
+**Prioridade de escolha:**
+
+- Se existe alternativa não-deferred para a mesma operação → **usar a alternativa**
+- Exemplos:
+  - Para buscar arquivo: `Glob` (não-deferred) antes de qualquer outra coisa
+  - Para buscar conteúdo: `Grep` (não-deferred) antes de qualquer outra coisa
+  - Para ler arquivo: `Read` (não-deferred) — verificar se já está no contexto
+  - Para editar arquivo: `Edit` (não-deferred) — verificar se schema está carregado
+  - Para rodar comando: `Bash` (não-deferred) sempre disponível
+- Só chamar `ToolSearch` quando não houver alternativa e a deferred tool for indispensável
+
+**Por quê:** deferred tools sem schema carregado causam `InputValidationError` e interrompem o fluxo sem aviso claro. Evitar proativamente é mais eficiente que recuperar depois.
+
 ## Shell
 
 - Preferir `dash` para scripts simples (velocidade). Para lógica complexa, usar `python`. Sempre buscar ferramentas CLI existentes antes de reinventar.
