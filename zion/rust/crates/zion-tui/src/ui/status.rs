@@ -107,12 +107,12 @@ fn render_footer(frame: &mut Frame, app: &App, area: Rect) {
 }
 
 fn chrono_now() -> String {
-    use std::process::Command;
-    Command::new("date")
-        .arg("+%H:%M:%S")
-        .output()
-        .ok()
-        .and_then(|o| String::from_utf8(o.stdout).ok())
-        .map(|s| s.trim().to_string())
-        .unwrap_or_else(|| "--:--:--".to_string())
+    use std::time::{SystemTime, UNIX_EPOCH};
+    let secs = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+    // UTC time: no TZ dependency, no subprocess spawn
+    let s = secs % 86400;
+    format!("{:02}:{:02}:{:02}", s / 3600, (s % 3600) / 60, s % 60)
 }

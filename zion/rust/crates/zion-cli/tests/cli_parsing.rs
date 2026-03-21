@@ -18,7 +18,7 @@ fn help_shows_all_commands() {
         "new", "continue", "claude", "cursor", "opencode", "resume", "shell",
         "leech", "lab", "build", "down", "shutdown", "clean", "stow", "os",
         "update", "init", "set", "hooks", "relay", "inbox", "outbox", "man",
-        "banner", "usage", "token", "status", "contractors", "git",
+        "banner", "usage", "token", "status", "agents", "git",
     ];
     for cmd in expected {
         assert!(stdout.contains(cmd), "missing command in help: {cmd}");
@@ -57,23 +57,12 @@ fn os_help_shows_subcommands() {
 }
 
 #[test]
-fn contractors_help() {
-    let out = zion_bin().args(["contractors", "--help"]).output().unwrap();
+fn agents_help() {
+    let out = zion_bin().args(["agents", "--help"]).output().unwrap();
     let s = String::from_utf8_lossy(&out.stdout);
-    assert!(s.contains("run"));
-    assert!(s.contains("status"));
-    assert!(s.contains("work"));
-}
-
-#[test]
-fn contractors_work_help() {
-    let out = zion_bin()
-        .args(["contractors", "work", "--help"])
-        .output()
-        .unwrap();
-    let s = String::from_utf8_lossy(&out.stdout);
-    assert!(out.status.success());
-    assert!(s.contains("--dry-run"));
+    assert!(s.contains("list"));
+    assert!(s.contains("phone"));
+    assert!(s.contains("log"));
 }
 
 #[test]
@@ -134,14 +123,14 @@ fn resume_accepts_uuid() {
 #[test]
 fn aliases_work() {
     for (alias, expected_in_help) in [
-        ("run", "--engine"),    // alias for new
+        ("r", "NAME"),          // alias for run
         ("cont", "[DIR]"),     // alias for continue
         ("oc", "--engine"),    // alias for opencode
         ("sh", "[DIR]"),       // alias for shell
         ("st", "--tick"),      // alias for status
         ("gc", "--force"),     // alias for clean
         ("l", "--shell"),      // alias for leech
-        ("ct", "run"),         // alias for contractors
+        ("a", "list"),         // alias for agents
         ("g", "append"),       // alias for git
         ("ib", "[MESSAGE]"),   // alias for inbox
         ("ob", ""),            // alias for outbox

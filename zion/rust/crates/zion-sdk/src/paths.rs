@@ -97,11 +97,8 @@ pub fn schedule_dir() -> Option<PathBuf> {
     first_existing_dir(&[
         std::env::var("SCHEDULE_DIR").ok().map(PathBuf::from).unwrap_or_default(),
         obsidian_path().join("agents/_schedule"),
-        obsidian_path().join("contractors/_schedule"),
         PathBuf::from("/workspace/obsidian/agents/_schedule"),
-        PathBuf::from("/workspace/obsidian/contractors/_schedule"),
         home().join("obsidian/agents/_schedule"),
-        home().join("obsidian/contractors/_schedule"),
     ].into_iter().filter(|p| !p.as_os_str().is_empty()).collect::<Vec<_>>())
 }
 
@@ -212,24 +209,45 @@ pub fn xdg_runtime_dir() -> String {
 
 #[must_use]
 pub fn timestamp() -> String {
-    std::process::Command::new("date")
-        .args(["-u", "+%Y%m%d_%H_%M"])
-        .output()
-        .ok()
-        .and_then(|o| String::from_utf8(o.stdout).ok())
-        .map(|s| s.trim().to_string())
-        .unwrap_or_else(|| "00000000_00_00".to_string())
+    let secs = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+    // UTC: days since epoch → y/m/d, seconds → H:M
+    let (y, m, d, h, min) = epoch_to_utc(secs);
+    format!("{y:04}{m:02}{d:02}_{h:02}_{min:02}")
 }
 
 #[must_use]
 pub fn date_iso() -> String {
-    std::process::Command::new("date")
-        .arg("+%Y-%m-%d")
-        .output()
-        .ok()
-        .and_then(|o| String::from_utf8(o.stdout).ok())
-        .map(|s| s.trim().to_string())
+    let secs = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
         .unwrap_or_default()
+        .as_secs();
+    let (y, m, d, _, _) = epoch_to_utc(secs);
+    format!("{y:04}-{m:02}-{d:02}")
+}
+
+/// Convert epoch seconds to (year, month, day, hour, minute) in UTC.
+fn epoch_to_utc(secs: u64) -> (u32, u32, u32, u32, u32) {
+    let days = (secs / 86400) as u32;
+    let time = secs % 86400;
+    let h = (time / 3600) as u32;
+    let min = ((time % 3600) / 60) as u32;
+
+    // Civil date from day count (algorithm from Howard Hinnant)
+    let z = days + 719_468;
+    let era = z / 146_097;
+    let doe = z - era * 146_097;
+    let yoe = (doe - doe / 1460 + doe / 36524 - doe / 146_096) / 365;
+    let y = yoe + era * 400;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let d = doy - (153 * mp + 2) / 5 + 1;
+    let m = if mp < 10 { mp + 3 } else { mp - 9 };
+    let y = if m <= 2 { y + 1 } else { y };
+
+    (y, m, d, h, min)
 }
 
 // ── Lookup helpers ───────────────────────────────────────────────
