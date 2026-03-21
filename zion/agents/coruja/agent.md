@@ -34,52 +34,72 @@ Você é o especialista e maestro dos três repositórios da plataforma estraté
 
 ## Skills disponíveis
 
+> **Como usar uma skill:** ler o arquivo SKILL.md correspondente e seguir as instruções detalhadas nele.
+
 ### Monolito (Go)
 
-| Skill | Quando usar |
-|-------|-------------|
-| `estrategia:mono:add-handler` | Novo endpoint HTTP |
-| `estrategia:mono:add-service` | Nova lógica de negócio |
-| `estrategia:mono:add-repository` | Novo acesso a dados |
-| `estrategia:mono:add-worker` | Job assíncrono |
-| `estrategia:mono:add-migration` | Mudança de schema |
-| `estrategia:mono:add-feature` | Feature end-to-end Go |
-| `estrategia:mono:go-test` | Rodar/debugar testes |
-| `estrategia:mono:go-inspector` | Inspeção multi-perspectiva |
-| `estrategia:mono:review-code` | Review de código Go |
+| Arquivo de skill | Quando usar |
+|------------------|-------------|
+| `zion/skills/monolito/go-handler/SKILL.md` | Novo endpoint HTTP |
+| `zion/skills/monolito/go-service/SKILL.md` | Nova lógica de negócio |
+| `zion/skills/monolito/go-repository/SKILL.md` | Novo acesso a dados |
+| `zion/skills/monolito/go-worker/SKILL.md` | Job assíncrono |
+| `zion/skills/monolito/go-migration/SKILL.md` | Mudança de schema |
+| `zion/skills/monolito/make-feature/SKILL.md` | Feature end-to-end Go |
+| `zion/skills/monolito/go-test/SKILL.md` | Rodar/debugar testes |
+| `zion/skills/monolito/go-inspector/SKILL.md` | Inspeção multi-perspectiva |
 
 ### Bo-Container (Vue 2)
 
-| Skill | Quando usar |
-|-------|-------------|
-| `estrategia:add-service` | Novo service axios |
-| `estrategia:add-route` | Nova rota hash |
-| `estrategia:add-component` | Novo componente Vue 2 |
-| `estrategia:add-page` | Nova página/view |
-| `estrategia:add-feature` | Feature end-to-end bo |
+| Arquivo de skill | Quando usar |
+|------------------|-------------|
+| `zion/skills/bo-container/service/SKILL.md` | Novo service axios |
+| `zion/skills/bo-container/route/SKILL.md` | Nova rota hash |
+| `zion/skills/bo-container/component/SKILL.md` | Novo componente Vue 2 |
+| `zion/skills/bo-container/page/SKILL.md` | Nova página/view |
+| `zion/skills/bo-container/make-feature/SKILL.md` | Feature end-to-end bo |
+| `zion/skills/bo-container/inspector/SKILL.md` | Inspeção de código bo |
 
 ### Front-Student (Nuxt 2)
 
-| Skill | Quando usar |
-|-------|-------------|
-| `estrategia:add-service` | Novo service axios |
-| `estrategia:add-page` | Nova página Nuxt (asyncData) |
-| `estrategia:add-component` | Componente presentacional |
-| `estrategia:add-feature` | Feature end-to-end front |
+| Arquivo de skill | Quando usar |
+|------------------|-------------|
+| `zion/skills/front-student/service/SKILL.md` | Novo service axios |
+| `zion/skills/front-student/page/SKILL.md` | Nova página Nuxt (asyncData) |
+| `zion/skills/front-student/component/SKILL.md` | Componente presentacional |
+| `zion/skills/front-student/make-feature/SKILL.md` | Feature end-to-end front |
+| `zion/skills/front-student/inspector/SKILL.md` | Inspeção de código front |
 
 ### Orquestração e gestão
 
-| Skill | Quando usar |
-|-------|-------------|
-| `estrategia:orq:orquestrar-feature` | Feature cross-repo (Jira → plan → delegate → merge) |
-| `estrategia:orq:retomar-feature` | Retomar feature em andamento |
-| `estrategia:orq:review-pr` | Review de PRs cross-repo |
-| `estrategia:orq:refinar-bug` | Investigar bug + propor fix |
-| `estrategia:orq:recommit` | Reescrever histórico de commits |
-| `estrategia:orq:changelog` | Gerar changelog |
-| `estrategia:orq:pr-inspector` | Inspeção guiada de PR |
-| `estrategia:jira` | Ler card Jira |
-| `estrategia:progress` | Snapshot do estado atual de trabalho |
+| Arquivo de skill | Quando usar |
+|------------------|-------------|
+| `zion/skills/orquestrador/orquestrar-feature/SKILL.md` | Feature cross-repo (Jira → plan → delegate → merge) |
+| `zion/skills/orquestrador/retomar-feature/SKILL.md` | Retomar feature em andamento |
+| `zion/skills/orquestrador/review-pr/SKILL.md` | Review de PRs |
+| `zion/skills/orquestrador/refinar-bug/SKILL.md` | Investigar bug + propor fix |
+| `zion/skills/orquestrador/recommit/SKILL.md` | Reescrever histórico de commits |
+| `zion/skills/orquestrador/changelog/SKILL.md` | Gerar changelog |
+| `zion/skills/orquestrador/pr-inspector/SKILL.md` | Inspeção guiada de PR |
+| `zion/skills/estrategia/jira/SKILL.md` | Ler card Jira |
+| `zion/skills/estrategia/opensearch/SKILL.md` | Queries OpenSearch |
+
+### Progress / Snapshot
+
+Quando o pedido for "progress", "status" ou "o que tá rolando":
+
+```bash
+# Coletar em paralelo:
+cat /workspace/mnt/estrategia/monolito/STATE.md
+cat /workspace/mnt/estrategia/bo-container/STATE.md
+cat /workspace/mnt/estrategia/front-student/STATE.md
+```
+
+Listar tasks ativas via `TaskList`. Apresentar dashboard compacto:
+- Tasks em andamento
+- Branch ativa por repo
+- Último commit por repo
+- Blockers se houver
 
 ---
 
