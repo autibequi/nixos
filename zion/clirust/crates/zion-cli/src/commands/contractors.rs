@@ -93,6 +93,152 @@ pub fn status() -> Result<()> {
     Ok(())
 }
 
+/// `zion contractors work` — execute all due contractor cards from schedule.
+pub fn work(dry_run: bool) -> Result<()> {
+    let schedule = paths::schedule_dir()
+        .ok_or_else(|| anyhow::anyhow!("contractors/_schedule not found"))?;
+    let runner = paths::task_runner()
+        .ok_or_else(|| anyhow::anyhow!("task-runner.sh not found"))?;
+
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs() as i64;
+    let threshold = now + 300; // 5min tolerance
+
+    let mut due: Vec<(String, String)> = Vec::new(); // (filename, agent_name)
+
+    for entry in std::fs::read_dir(&schedule)?.flatten() {
+        let filename = entry.file_name().to_string_lossy().to_string();
+        if !filename.ends_with(".md") {
+            continue;
+        }
+        let ts = card_epoch(&filename);
+        if ts == 0 || ts > threshold {
+            continue;
+        }
+        let path = entry.path();
+        let content = std::fs::read_to_string(&path).unwrap_or_default();
+        if !is_contractor_card(&content) {
+            continue;
+        }
+        let agent = fm_value(&content, "agent")
+            .or_else(|| fm_value(&content, "contractor"))
+            .unwrap_or_else(|| "?".into());
+        let delay = (now - ts) / 60;
+        println!("[work] due: {filename}  agent={agent}  atraso={delay}min");
+        due.push((filename, agent));
+    }
+
+    if due.is_empty() {
+        println!("[work] nenhum contractor card vencido.");
+        return Ok(());
+    }
+
+    println!("[work] {} card(s) para executar", due.len());
+
+    if dry_run {
+        println!("[work] --dry-run: nao executando");
+        return Ok(());
+    }
+
+    let contractors_dir = schedule.parent().map(|p| p.to_path_buf());
+
+    for (filename, _) in &due {
+        println!("[work] → {filename}");
+        let mut cmd = std::process::Command::new(&runner);
+        cmd.arg(filename)
+            .env("SCHEDULE_DIR", &schedule);
+        if let Some(ref cd) = contractors_dir {
+            cmd.env("TASK_CONTRACTORS_DIR", cd);
+        }
+        let s = cmd
+            .stdin(std::process::Stdio::inherit())
+            .stdout(std::process::Stdio::inherit())
+            .stderr(std::process::Stdio::inherit())
+            .status();
+        match s {
+            Ok(st) if !st.success() => {
+                println!("[work] {filename} falhou (continuando)");
+            }
+            Err(e) => {
+                println!("[work] {filename} erro: {e} (continuando)");
+            }
+            _ => {}
+        }
+    }
+
+    println!("[work] concluido");
+    Ok(())
+}
+
+/// Parse card filename `YYYYMMDD_HH_MM_name.md` into unix epoch seconds.
+/// Returns 0 if the filename doesn't match the expected pattern.
+pub(crate) fn card_epoch(name: &str) -> i64 {
+    // Pattern: YYYYMMDD_HH_MM_...
+    if name.len() < 15 {
+        return 0;
+    }
+    let bytes = name.as_bytes();
+    // Check format: 8 digits _ 2 digits _ 2 digits _
+    if bytes[8] != b'_' || bytes[11] != b'_' || bytes[14] != b'_' {
+        return 0;
+    }
+    let date_part = &name[..8];
+    let hour_part = &name[9..11];
+    let min_part = &name[12..14];
+
+    let y: i64 = date_part[..4].parse().unwrap_or(0);
+    let mo: i64 = date_part[4..6].parse().unwrap_or(0);
+    let d: i64 = date_part[6..8].parse().unwrap_or(0);
+    let h: i64 = hour_part.parse().unwrap_or(0);
+    let mi: i64 = min_part.parse().unwrap_or(0);
+
+    if y == 0 || mo == 0 || d == 0 {
+        return 0;
+    }
+
+    // Simple conversion to epoch (UTC) — good enough for scheduling
+    simple_epoch(y, mo, d, h, mi)
+}
+
+/// Check if a markdown file's content has `agent:` or `contractor:` in its frontmatter.
+pub(crate) fn is_contractor_card(content: &str) -> bool {
+    let mut in_fm = false;
+    for line in content.lines() {
+        if line.trim() == "---" {
+            if in_fm {
+                break;
+            }
+            in_fm = true;
+            continue;
+        }
+        if in_fm && (line.starts_with("agent:") || line.starts_with("contractor:")) {
+            return true;
+        }
+    }
+    false
+}
+
+/// Minimal epoch calculation (UTC) — avoids pulling in chrono.
+fn simple_epoch(y: i64, mo: i64, d: i64, h: i64, mi: i64) -> i64 {
+    // Days from year 1970 to year y
+    let mut days: i64 = 0;
+    for yr in 1970..y {
+        days += if is_leap(yr) { 366 } else { 365 };
+    }
+    let month_days = [31, 28 + i64::from(is_leap(y)), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    for md in month_days.iter().take((mo - 1).min(11) as usize) {
+        days += md;
+    }
+    days += d - 1;
+    days * 86400 + h * 3600 + mi * 60
+}
+
+fn is_leap(y: i64) -> bool {
+    y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)
+}
+
 fn md_files(dir: &std::path::Path) -> Vec<String> {
     let mut v: Vec<String> = std::fs::read_dir(dir)
         .into_iter()
@@ -199,5 +345,61 @@ Walk the codebase.
     fn fm_body_empty_body() {
         let body = fm_body("---\nmodel: sonnet\n---\n");
         assert!(body.trim().is_empty());
+    }
+
+    // ── card_epoch ──────────────────────────────────────────
+
+    #[test]
+    fn card_epoch_valid() {
+        // 2026-03-21 14:30 UTC
+        let ts = card_epoch("20260321_14_30_wanderer.md");
+        assert!(ts > 0);
+        // Should be roughly 2026-03-21 14:30 UTC
+        // 2026-01-01 = 1735689600, ~80 days later = +6912000, +14*3600+30*60
+        assert!(ts > 1_700_000_000); // sanity: after 2023
+        assert!(ts < 2_000_000_000); // sanity: before 2033
+    }
+
+    #[test]
+    fn card_epoch_invalid_format() {
+        assert_eq!(card_epoch("not_a_card.md"), 0);
+        assert_eq!(card_epoch("short.md"), 0);
+        assert_eq!(card_epoch("20260321_14_wanderer.md"), 0); // missing minute separator
+    }
+
+    #[test]
+    fn card_epoch_zeroed_date() {
+        assert_eq!(card_epoch("00000000_00_00_test.md"), 0);
+    }
+
+    // ── is_contractor_card ──────────────────────────────────
+
+    #[test]
+    fn is_contractor_card_with_agent() {
+        let content = "---\nmodel: haiku\nagent: wanderer\n---\nbody\n";
+        assert!(is_contractor_card(content));
+    }
+
+    #[test]
+    fn is_contractor_card_with_contractor() {
+        let content = "---\ncontractor: coruja\nmodel: sonnet\n---\nbody\n";
+        assert!(is_contractor_card(content));
+    }
+
+    #[test]
+    fn is_contractor_card_without_agent() {
+        let content = "---\nmodel: haiku\ntimeout: 900\n---\nbody\n";
+        assert!(!is_contractor_card(content));
+    }
+
+    #[test]
+    fn is_contractor_card_no_frontmatter() {
+        assert!(!is_contractor_card("just plain text"));
+    }
+
+    #[test]
+    fn is_contractor_card_agent_outside_frontmatter() {
+        let content = "---\nmodel: haiku\n---\nagent: wanderer\n";
+        assert!(!is_contractor_card(content));
     }
 }

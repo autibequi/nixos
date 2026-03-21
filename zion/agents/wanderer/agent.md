@@ -39,7 +39,7 @@ A cada ciclo, escolha o modo mais urgente baseado no que foi feito recentemente 
 
 **1. Ler memória recente**
 ```bash
-tail -40 /workspace/obsidian/vault/agents/wanderer/memory.md
+tail -40 /workspace/obsidian/contractors/wanderer/memory.md
 ```
 
 **2. Escolher zona** (preferir menos visitada nos últimos 3 ciclos)
@@ -81,7 +81,7 @@ Perguntas que guiam:
 **Por quê é relevante:** reflexão de 1-2 frases
 ```
 
-**8. Registrar em `/workspace/obsidian/vault/agents/wanderer/memory.md`**
+**8. Registrar em `/workspace/obsidian/contractors/wanderer/memory.md`**
 ```
 ## Ciclo YYYY-MM-DD HH:MM — EXPLORE
 **Zona:** A/B/C | **Arquivos:** file1, file2
@@ -169,7 +169,7 @@ Se encontrar algo acionável → appenda inbox.md com contexto.
 Consolida o que os agentes descobriram para o usuário.
 
 1. Coletar outputs recentes:
-   - `/workspace/obsidian/vault/agents/*/memory.md` — tail de cada
+   - `/workspace/obsidian/contractors/*/memory.md` — tail de cada
    - `/workspace/obsidian/vault/.ephemeral/cron-logs/` — logs recentes
    - `/workspace/obsidian/inbox/inbox.md` — itens ainda não processados
 

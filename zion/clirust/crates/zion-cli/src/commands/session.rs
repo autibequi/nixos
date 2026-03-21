@@ -113,6 +113,12 @@ pub fn leech(flags: SessionFlags, shell_mode: bool) -> Result<()> {
         paths::proj_name(&paths::proj_slug(&mount), None)
     };
 
+    let extra_volumes = if is_nixos {
+        vec!["/var/log/journal:/workspace/logs/host/journal:ro".into()]
+    } else {
+        vec![]
+    };
+
     let engine = resolve_engine(flags.engine.as_deref(), &config)?;
     let init_md = flags.resolve_init_md(&mount);
 
@@ -124,6 +130,7 @@ pub fn leech(flags: SessionFlags, shell_mode: bool) -> Result<()> {
         .danger(flags.danger)
         .resume(flags.resume)
         .init_md(init_md)
+        .extra_volumes(extra_volumes)
         .run(&config)?)
 }
 
@@ -152,6 +159,9 @@ pub fn lab(
         .model(model)
         .danger(danger)
         .resume(resume)
+        .extra_volumes(vec![
+            "/var/log/journal:/workspace/logs/host/journal:ro".into(),
+        ])
         .run(&config)?)
 }
 

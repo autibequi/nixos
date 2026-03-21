@@ -72,9 +72,23 @@ pub fn obsidian_ensured() -> String {
 pub fn tasks_dir() -> Option<PathBuf> {
     first_existing_dir(&[
         obsidian_path().join("tasks"),
+        zion_root().parent().map_or_else(
+            || PathBuf::from("/nonexistent"),
+            |p| p.join("obsidian/tasks"),
+        ),
         PathBuf::from("/workspace/obsidian/tasks"),
         home().join("obsidian/tasks"),
     ])
+}
+
+#[must_use]
+pub fn schedule_dir() -> Option<PathBuf> {
+    first_existing_dir(&[
+        std::env::var("SCHEDULE_DIR").ok().map(PathBuf::from).unwrap_or_default(),
+        obsidian_path().join("contractors/_schedule"),
+        PathBuf::from("/workspace/obsidian/contractors/_schedule"),
+        home().join("obsidian/contractors/_schedule"),
+    ].into_iter().filter(|p| !p.as_os_str().is_empty()).collect::<Vec<_>>())
 }
 
 #[must_use]
@@ -340,6 +354,14 @@ mod tests {
             PathBuf::from("/nonexistent_2"),
         ]);
         assert!(r.is_none());
+    }
+
+    #[test]
+    fn schedule_dir_env_override() {
+        std::env::set_var("SCHEDULE_DIR", "/tmp");
+        let r = schedule_dir();
+        std::env::remove_var("SCHEDULE_DIR");
+        assert_eq!(r, Some(PathBuf::from("/tmp")));
     }
 
     #[test]

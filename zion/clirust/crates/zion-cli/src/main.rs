@@ -37,8 +37,11 @@ enum Commands {
     /// Continue last session
     #[command(alias = "cont")]
     Continue { dir: Option<String> },
-    /// Session with Claude engine
+    /// Session with Claude engine (default: new session)
     Claude {
+        #[command(subcommand)]
+        action: Option<ClaudeAction>,
+
         #[command(flatten)]
         flags: SessionFlags,
     },
@@ -146,7 +149,7 @@ enum Commands {
     /// Show banner
     #[command(alias = "h")]
     Banner,
-    /// Claude usage stats
+    /// Claude usage stats (alias for `claude usage`)
     Usage {
         #[arg(long)]
         waybar: bool,
@@ -157,7 +160,7 @@ enum Commands {
         #[arg(long)]
         refresh: bool,
     },
-    /// Print Claude OAuth token
+    /// Print Claude OAuth token (alias for `claude token`)
     Token,
 
     /// Interactive status dashboard
@@ -183,6 +186,21 @@ enum Commands {
 }
 
 #[derive(Subcommand)]
+enum ClaudeAction {
+    /// Claude usage stats
+    Usage {
+        #[arg(long)]
+        waybar: bool,
+        #[arg(long)]
+        no_cache: bool,
+        #[arg(long)]
+        refresh: bool,
+    },
+    /// Print Claude OAuth token
+    Token,
+}
+
+#[derive(Subcommand)]
 enum OsAction {
     #[command(alias = "sw")]
     Switch,
@@ -203,6 +221,12 @@ enum ContractorsAction {
     },
     #[command(alias = "st", alias = "log")]
     Status,
+    /// Execute all due contractor cards from schedule
+    #[command(alias = "w")]
+    Work {
+        #[arg(long)]
+        dry_run: bool,
+    },
 }
 
 #[derive(Subcommand)]
@@ -218,7 +242,15 @@ fn main() -> Result<()> {
         // Session
         Some(Commands::New { flags }) => commands::session::new(flags),
         Some(Commands::Continue { dir }) => commands::session::cont(dir),
-        Some(Commands::Claude { flags }) => commands::session::engine("claude", flags),
+        Some(Commands::Claude { action, flags }) => match action {
+            Some(ClaudeAction::Usage {
+                waybar,
+                no_cache,
+                refresh,
+            }) => commands::tools::usage(waybar, no_cache || refresh),
+            Some(ClaudeAction::Token) => commands::tools::token(),
+            None => commands::session::engine("claude", flags),
+        },
         Some(Commands::Cursor { flags }) => commands::session::engine("cursor", flags),
         Some(Commands::Opencode { flags }) => commands::session::engine("opencode", flags),
         Some(Commands::Resume { dir, resume }) => commands::session::resume(dir, resume),
@@ -277,6 +309,7 @@ fn main() -> Result<()> {
         Some(Commands::Contractors { action }) => match action {
             ContractorsAction::Run { name, steps } => commands::contractors::run(&name, steps),
             ContractorsAction::Status => commands::contractors::status(),
+            ContractorsAction::Work { dry_run } => commands::contractors::work(dry_run),
         },
         // Git
         Some(Commands::Git { action }) => match action {

@@ -62,6 +62,38 @@ fn contractors_help() {
     let s = String::from_utf8_lossy(&out.stdout);
     assert!(s.contains("run"));
     assert!(s.contains("status"));
+    assert!(s.contains("work"));
+}
+
+#[test]
+fn contractors_work_help() {
+    let out = zion_bin()
+        .args(["contractors", "work", "--help"])
+        .output()
+        .unwrap();
+    let s = String::from_utf8_lossy(&out.stdout);
+    assert!(out.status.success());
+    assert!(s.contains("--dry-run"));
+}
+
+#[test]
+fn claude_usage_help() {
+    let out = zion_bin()
+        .args(["claude", "usage", "--help"])
+        .output()
+        .unwrap();
+    let s = String::from_utf8_lossy(&out.stdout);
+    assert!(out.status.success());
+    assert!(s.contains("--waybar"));
+}
+
+#[test]
+fn claude_token_help() {
+    let out = zion_bin()
+        .args(["claude", "token", "--help"])
+        .output()
+        .unwrap();
+    assert!(out.status.success());
 }
 
 #[test]

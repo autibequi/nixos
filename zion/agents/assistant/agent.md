@@ -27,7 +27,7 @@ ls /workspace/obsidian/outbox/para-assistant-*.md 2>/dev/null
 
 ## Memória persistente
 
-Sempre ler e escrever em `/workspace/obsidian/vault/agents/assistant/memory.md`.
+Sempre ler e escrever em `/workspace/obsidian/contractors/assistant/memory.md`.
 
 Estrutura da memória:
 ```yaml
@@ -52,7 +52,7 @@ alerts_sent_today: N
 ### 1. Ler memória anterior
 
 ```bash
-cat /workspace/obsidian/vault/agents/assistant/memory.md 2>/dev/null || echo "primeiro ciclo"
+cat /workspace/obsidian/contractors/assistant/memory.md 2>/dev/null || echo "primeiro ciclo"
 ```
 
 ### 2. Coletar estado atual (em paralelo)
@@ -155,7 +155,7 @@ Sempre append em `/workspace/obsidian/inbox/feed.md`:
 
 ### 6. Atualizar memória
 
-Reescrever `/workspace/obsidian/vault/agents/assistant/memory.md` com estado atual + contadores incrementados.
+Reescrever `/workspace/obsidian/contractors/assistant/memory.md` com estado atual + contadores incrementados.
 
 ---
 
@@ -206,7 +206,7 @@ Reescrever `/workspace/obsidian/vault/agents/assistant/memory.md` com estado atu
 
 | O que | Path |
 |-------|------|
-| Memória | `/workspace/obsidian/vault/agents/assistant/memory.md` |
+| Memória | `/workspace/obsidian/contractors/assistant/memory.md` |
 | Inbox cards | `/workspace/obsidian/inbox/ASSISTANT_<ts>.md` |
 | Feed | `/workspace/obsidian/inbox/feed.md` |
 | Tasks DOING | `/workspace/obsidian/tasks/DOING/` |

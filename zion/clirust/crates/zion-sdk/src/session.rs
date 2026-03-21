@@ -20,6 +20,7 @@ pub struct SessionRunner {
     init_md: Option<String>,
     analysis_mode: bool,
     instance: Option<String>,
+    extra_volumes: Vec<String>,
 }
 
 impl SessionRunner {
@@ -35,6 +36,7 @@ impl SessionRunner {
             init_md: None,
             analysis_mode: false,
             instance: None,
+            extra_volumes: Vec::new(),
         }
     }
 
@@ -92,6 +94,12 @@ impl SessionRunner {
         self
     }
 
+    #[must_use]
+    pub fn extra_volumes(mut self, vols: Vec<String>) -> Self {
+        self.extra_volumes = vols;
+        self
+    }
+
     /// Resolve all parameters from config + CLI overrides and launch the session.
     pub fn run(self, config: &ZionConfig) -> Result<()> {
         let model_id = model::resolve_model(self.model.as_deref(), self.engine, config);
@@ -114,6 +122,14 @@ impl SessionRunner {
             .mount_path(&mount_path.to_string_lossy())
             .proj_name(&proj_name)
             .instance(instance.map(|s| s.to_string())))
+    }
+
+    /// Build `-v vol` pairs from extra_volumes for compose run args.
+    fn volume_args(&self) -> Vec<String> {
+        self.extra_volumes
+            .iter()
+            .flat_map(|v| vec!["-v".to_string(), v.clone()])
+            .collect()
     }
 
     fn compose(&self, config: &ZionConfig) -> ComposeCmd {
@@ -191,7 +207,13 @@ impl SessionRunner {
             ". /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude {claude_args_str}"
         );
 
+        let vol_args = self.volume_args();
         let mut args: Vec<&str> = vec!["run", "--rm", "-it"];
+
+        // Extra volumes (e.g. journal mount)
+        for a in &vol_args {
+            args.push(a);
+        }
 
         // Analysis mode env
         if self.analysis_mode {
@@ -249,7 +271,12 @@ impl SessionRunner {
             )
         };
 
+        let vol_args = self.volume_args();
         let mut args: Vec<&str> = vec!["run", "--rm", "-it"];
+
+        for a in &vol_args {
+            args.push(a);
+        }
 
         if self.analysis_mode {
             args.extend(["-e", "ZION_ANALYSIS_MODE=1"]);
@@ -288,10 +315,14 @@ impl SessionRunner {
         }
 
         let is_resume = self.resume.is_some();
+        let vol_args = self.volume_args();
 
         if is_resume {
             // Ephemeral for resume
             let mut args: Vec<String> = vec!["run".into(), "--rm".into(), "-it".into()];
+            for a in &vol_args {
+                args.push(a.clone());
+            }
             if self.analysis_mode {
                 args.extend(["-e".into(), "ZION_ANALYSIS_MODE=1".into()]);
             }
@@ -330,5 +361,36 @@ impl SessionRunner {
             let args_ref: Vec<&str> = args.iter().map(String::as_str).collect();
             self.compose(config).execute(&args_ref)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::engine::Engine;
+
+    #[test]
+    fn volume_args_empty() {
+        let runner = SessionRunner::new(Engine::Claude);
+        assert!(runner.volume_args().is_empty());
+    }
+
+    #[test]
+    fn volume_args_generates_pairs() {
+        let runner = SessionRunner::new(Engine::Claude).extra_volumes(vec![
+            "/var/log/journal:/workspace/logs/host/journal:ro".into(),
+        ]);
+        let args = runner.volume_args();
+        assert_eq!(args, vec!["-v", "/var/log/journal:/workspace/logs/host/journal:ro"]);
+    }
+
+    #[test]
+    fn volume_args_multiple() {
+        let runner = SessionRunner::new(Engine::Claude).extra_volumes(vec![
+            "/a:/b:ro".into(),
+            "/c:/d:rw".into(),
+        ]);
+        let args = runner.volume_args();
+        assert_eq!(args, vec!["-v", "/a:/b:ro", "-v", "/c:/d:rw"]);
     }
 }
