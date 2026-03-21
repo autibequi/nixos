@@ -8,7 +8,10 @@ pub fn run(name: &str, steps: Option<u32>) -> Result<()> {
     let agent_file =
         paths::agent_file(name).ok_or_else(|| anyhow::anyhow!("contractor '{name}' not found"))?;
     let runner = paths::task_runner().ok_or_else(|| anyhow::anyhow!("task-runner.sh not found"))?;
-    let tasks = paths::tasks_dir().ok_or_else(|| anyhow::anyhow!("tasks dir not found"))?;
+    let obsidian = paths::obsidian_path();
+    let contractors_dir = obsidian.join("contractors");
+    let schedule = contractors_dir.join("_schedule");
+    std::fs::create_dir_all(&schedule)?;
 
     let content = std::fs::read_to_string(&agent_file)?;
     let model = fm_value(&content, "model").unwrap_or_else(|| "sonnet".into());
@@ -25,10 +28,8 @@ pub fn run(name: &str, steps: Option<u32>) -> Result<()> {
 
     let when = paths::timestamp();
     let card = format!("{when}_{name}.md");
-    let todo = tasks.join("TODO");
-    std::fs::create_dir_all(&todo)?;
 
-    std::fs::write(todo.join(&card), format!(
+    std::fs::write(schedule.join(&card), format!(
         "---\nmodel: {model}\ntimeout: {timeout}\nmcp: false\nagent: {name}\n---\n{}\n\n#steps{steps}\n",
         fm_body(&content),
     ))?;
@@ -36,14 +37,12 @@ pub fn run(name: &str, steps: Option<u32>) -> Result<()> {
     println!("[contractor] '{name}' -> {card}  model={model}  steps={steps}");
     let _ = std::fs::remove_dir_all(format!("/tmp/zion-locks/{when}_{name}.lock"));
 
-    let agents_dir = tasks.parent().map(|p| p.join("vault/agents"));
     let mut cmd = std::process::Command::new(&runner);
     cmd.arg(&card)
-        .env("TASK_DIR", &tasks)
+        .env("OBSIDIAN_PATH", &obsidian)
+        .env("SCHEDULE_DIR", &schedule)
+        .env("TASK_CONTRACTORS_DIR", &contractors_dir)
         .env("TASK_MAX_TURNS", steps.to_string());
-    if let Some(ad) = &agents_dir {
-        cmd.env("TASK_AGENTS_DIR", ad);
-    }
 
     let s = cmd
         .stdin(std::process::Stdio::inherit())

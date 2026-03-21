@@ -171,7 +171,7 @@ enum Commands {
     },
 
     // ── Contractors ──────────────────────────────────────────
-    #[command(alias = "ct")]
+    #[command(alias = "ct", alias = "contractor")]
     Contractors {
         #[command(subcommand)]
         action: ContractorsAction,
