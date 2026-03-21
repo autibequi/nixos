@@ -35,11 +35,11 @@ cat package.json | jq '.scripts'  # scripts
 cat nuxt.config.js | head -20     # framework config
 ```
 
-### 2. Gerar configs em `zion/dockerized/<service>/`
+### 2. Gerar configs em `zion/containers/<service>/`
 
 Estrutura obrigatoria:
 ```
-zion/dockerized/<service>/
+zion/containers/<service>/
 ├── docker-compose.yml       # servico principal
 ├── docker-compose.deps.yml  # deps (postgres, redis, etc)
 ├── Dockerfile               # multi-stage build
@@ -69,7 +69,7 @@ zion docker stop <service>
 
 ### 5. Documentar
 
-Atualizar `zion/dockerized/README.md` com o novo servico.
+Atualizar `zion/containers/README.md` com o novo servico.
 
 ## Principios
 
@@ -118,7 +118,7 @@ CMD ["/go/bin/dlv", "exec", "./server",
 services:
   app:
     build:
-      dockerfile: ${ZION_NIXOS_DIR}/zion/dockerized/<service>/Dockerfile.debug
+      dockerfile: ${ZION_NIXOS_DIR}/zion/containers/<service>/Dockerfile.debug
     security_opt:
       - apparmor:unconfined   # obrigatorio para dlv
     cap_add:

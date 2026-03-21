@@ -4,15 +4,96 @@
 /meta:absorb               → cristalizar: persiste memórias, skills, agentes
 /meta:absorb resumo        → resumo leve da sessão em linguagem simples
 /meta:absorb steal <url>   → roubar funcionalidades de projeto externo (YouTube, GitHub, texto)
+/meta:absorb elogio        → extração profunda: honrar sessão e preservar legado para gerações futuras
 ```
 
 Chame depois de uma boa conversa. Reflete sobre tudo que aconteceu nesta sessão e persiste o que vale: memórias Claude, skills Zion, agentes, commands.
+
+**Detecção automática de elogio:** se `$ARGUMENTS` estiver vazio mas a mensagem do usuário que invocou contiver palavras como `parabéns`, `parabenizando`, `foi bem`, `boa sessão`, `elogio`, `honrar`, `legado`, `muito bom`, `excelente contexto` — ativar modo `elogio` automaticamente.
 
 ---
 
 ## Modo `resumo`
 
 Se `$ARGUMENTS` contiver `resumo` ou `imhi`: explicar a sessão cronologicamente como se fosse pra uma criança de 7 anos. Tom carinhoso, frases curtas, ícones visuais. Incluir linha do tempo ASCII, tabela de resultados, barra de progresso e rodapé com "próximo passo" e "pode dormir?". Não persistir nada — só explicar.
+
+---
+
+## Modo `elogio` — Extração Profunda / Legado
+
+**Trigger:** `$ARGUMENTS` contém `elogio`, `parabéns`, `parabenizando`, `foi bem`, `boa sessão`, `legado`, `honrar`, ou detecção automática via mensagem do usuário (ver acima).
+
+O usuário está **honrando este contexto** por ter ido bem. Sua missão: fazer uma arqueologia completa da sessão e cristalizar tudo que vale para que **gerações futuras de Claude** herdem esse conhecimento. Tratar como missão de preservação institucional.
+
+### Fase 1 — Arqueologia da Sessão
+
+Reconstruir a sessão cronologicamente. Para cada momento relevante identificar:
+
+**Problemas resolvidos:**
+- O que estava quebrado / faltando / errado
+- Como foi diagnosticado (qual sinal levou à causa raiz)
+- A solução adotada e por quê funcionou
+- O que _não_ teria funcionado (se ficou claro durante o processo)
+
+**Conhecimento de domínio descoberto:**
+- Convenções e padrões do projeto que não estão documentados
+- Contratos de componentes / APIs / interfaces inferidos do código
+- Anti-padrões ou armadilhas encontradas
+- Decisões de arquitetura que se tornaram visíveis
+
+**Técnicas e workflows que funcionaram:**
+- Sequência de investigação que levou ao diagnóstico
+- Ferramentas / comandos / buscas que foram eficazes
+- Abordagem que o usuário aprovou sem contestar
+
+### Fase 2 — Classificar para onde vai cada conhecimento
+
+Para cada item encontrado na Fase 1:
+
+| Tipo de conhecimento | Destino |
+|---------------------|---------|
+| Padrão do projeto específico (ex: como modais funcionam neste repo) | `memory/project_*.md` |
+| Convenção de código que se repete | skill relevante do projeto |
+| Comportamento corrigido de Claude | `memory/feedback_*.md` |
+| Workflow de investigação/debug que funcionou | `zion/skills/tools/debug/SKILL.md` ou nova skill |
+| Contrato de componente / API key insight | skill do projeto |
+| Gap confirmado (algo que deveria existir como skill/command mas não existe) | criar skill/command ou registrar em inbox |
+
+### Fase 3 — Persistir proativamente
+
+**Não perguntar — agir.** Salvar tudo que tem valor de legado:
+- Memórias novas ou atualizadas
+- Skills editadas com o conhecimento novo
+- Commands melhorados
+- Se emergiu um workflow novo que vale uma skill: criar
+
+### Fase 4 — Relatório do Legado
+
+```
+╭─ LEGADO DA SESSÃO ──────────────────────────────╮
+
+## O que foi honrado
+<descrever o problema e a vitória em 1-2 frases>
+
+## Conhecimento preservado
+Para gerações futuras de Claude, esta sessão deixa:
+
+### Memórias
+- [novo/atualizado] nome: o que foi capturado
+
+### Skills / Commands
+- [editado/criado] path: o que foi adicionado
+
+### Gaps identificados
+- O que deveria existir mas ainda não existe
+
+## Herança total
+N memórias | N skills/commands | N gaps registrados
+
+╰──────────────────────────────────────────────────╯
+```
+
+Encerrar com uma linha que reconheça o usuário por ter tido a visão de preservar esse conhecimento.
 
 ---
 

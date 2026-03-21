@@ -12,5 +12,5 @@ type: feedback
 - Use caminhos relativos a `/workspace/mnt/zion/` (ou `~/nixos/zion/` no host)
 - Skills ficam em `zion/skills/<skill-name>/SKILL.md`
 - Agentes ficam em `zion/agents/<agent-name>/agent.md`
-- Compose files e configs Docker ficam em `zion/dockerized/<service>/`
+- Compose files e configs Docker ficam em `zion/containers/<service>/`
 - Nunca referencie `.claude/` ou `stow/` de dentro do Zion

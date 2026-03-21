@@ -50,7 +50,7 @@ AGENT_MODE="0"
 
 # ────────────────────────────────────────────────────────────────
 # 1. BOOT FLAGS (sempre)
-# Para adicionar nova flag: incluir aqui e documentar em bootstrap.md
+# Para adicionar nova flag: incluir aqui e documentar em session-start.sh
 # ────────────────────────────────────────────────────────────────
 echo "---BOOT---"
 echo "datetime=$(date '+%Y-%m-%d %H:%M %Z')"
@@ -73,11 +73,6 @@ if [ "$AUTOCOMMIT" = "OFF" ]; then
   echo "       Esperar o usuário pedir explicitamente antes de commitar qualquer coisa."
 fi
 echo "---/BOOT---"
-
-# ────────────────────────────────────────────────────────────────
-# 2. BOOTSTRAP — removido do boot (lazy-load via skill quando necessário)
-# ────────────────────────────────────────────────────────────────
-# bootstrap.md (~500 tk) movido pra lazy-load. ENV já cobre o contexto essencial.
 
 # ────────────────────────────────────────────────────────────────
 # 2.5 LITE MODE — projetos externos (zion_edit=0)
@@ -291,10 +286,9 @@ if [ "$ZION_EDIT" = "1" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ];
     # ── Token mini-summary ──────────────────────────────────────
     _c_dir=$(wc -c < "/workspace/zion/system/DIRETRIZES.md" 2>/dev/null || echo 0)
     _c_self=$(wc -c < "/workspace/zion/system/SELF.md" 2>/dev/null || echo 0)
-    _c_boot=$(wc -c < "/workspace/zion/bootstrap.md" 2>/dev/null || echo 0)
     _c_pers=$(wc -c < "/workspace/zion/personas/GLaDOS.persona.md" 2>/dev/null || echo 0)
     _c_avat=$(wc -c < "/workspace/zion/personas/avatar/glados.md" 2>/dev/null || echo 0)
-    _tk_nosso=$(( (_c_dir + _c_self + _c_boot + _c_pers + _c_avat + 7000) * 10 / 35 ))
+    _tk_nosso=$(( (_c_dir + _c_self + _c_pers + _c_avat + 7000) * 10 / 35 ))
     _tk_cc=18000
     _tk_chat=800
     _tk_total=$(( _tk_nosso + _tk_cc + _tk_chat ))

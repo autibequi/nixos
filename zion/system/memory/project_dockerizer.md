@@ -4,7 +4,7 @@ description: Sistema zion docker run/install/logs para monolito e outros serviç
 type: project
 ---
 
-Sistema de dockerização versionado em `/zion/dockerized/<service>/` (montado do nixos do host).
+Sistema de dockerização versionado em `/zion/containers/<service>/` (montado do nixos do host).
 
 **Why:** User quer levantar monolito/bo-container/front-student via `zion docker run <service>` sem precisar ir ao host manualmente. Agente lê logs em `/workspace/logs/docker/<service>/service.log`.
 
@@ -22,7 +22,7 @@ Sistema de dockerização versionado em `/zion/dockerized/<service>/` (montado d
 
 **How to apply:** Quando falar de docker, containers, ou levantar serviços da estratégia — este sistema já existe e está funcionando.
 
-## Estrutura de arquivos por serviço (/zion/dockerized/monolito/)
+## Estrutura de arquivos por serviço (/zion/containers/monolito/)
 
 - `Dockerfile` — multi-stage Go build (golang:1.24.4-alpine → alpine runtime)
 - `Dockerfile.debug` — mesmo build + `-gcflags="all=-N -l"` + dlv, runtime usa `golang:1.24.4-alpine` (tem /go/bin/dlv)

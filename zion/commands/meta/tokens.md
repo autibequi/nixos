@@ -35,7 +35,6 @@ description: Tokens da sessão atual — análise de consumo por componente (bre
 wc -c \
   /workspace/zion/system/DIRETRIZES.md \
   /workspace/zion/system/SELF.md \
-  /workspace/zion/bootstrap.md \
   /workspace/zion/personas/GLaDOS.persona.md \
   /workspace/zion/personas/avatar/glados.md \
   2>/dev/null
@@ -67,7 +66,6 @@ Conversão: **1 token ≈ 3.5 chars** (PT-BR + box-drawing).
   [NOSSO]       DIRETRIZES.md       X chars   X tk     ████████░░░░░░░░░░░░  XX%
   [NOSSO]       GLaDOS.persona      X chars   X tk     █████░░░░░░░░░░░░░░░  XX%
   [NOSSO]       SELF.md             X chars   X tk     ██░░░░░░░░░░░░░░░░░░  XX%
-  [NOSSO]       bootstrap.md        X chars   X tk     █░░░░░░░░░░░░░░░░░░░  XX%
   [NOSSO]       MEMORY.md           estimado  X tk     ░░░░░░░░░░░░░░░░░░░░  XX%
                                               subtotal  X tk                  XX%
 

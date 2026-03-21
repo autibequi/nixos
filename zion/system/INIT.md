@@ -123,7 +123,7 @@ Path: `/workspace/.hive-mind/` — efemero, compartilhado entre containers. Usar
 
 - `zion runner <service> start|stop|logs|test|shell|install|build`
 - Servicos: monolito, bo-container, front-student, monolito-worker
-- Configs em `zion/dockerized/<service>/`
+- Configs em `zion/containers/<service>/`
 - Logs em `/workspace/logs/docker/<service>/`
 
 ## Chrome Relay

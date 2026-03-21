@@ -21,7 +21,7 @@
 | **Este repo** | `flake.nix`, `configuration.nix`, `modules/`, `stow/`, `scripts/`, `zion/` |
 | **Zion** | CLI `zion`, container `claude-nix-sandbox`, skills, hooks → código em `zion/` |
 | **Puppy** | Workers background: `puppy-daemon.sh`, `puppy-runner.sh` → agent em `zion/agents/puppy-runner/` |
-| **Zion CLI** | Gerado por bashly: `zion/cli/src/bashly.yml` + `commands/*.sh` → após mudar: `bashly generate` |
+| **Zion CLI** | Gerado por bashly: `zion/bash/src/bashly.yml` + `commands/*.sh` → após mudar: `bashly generate` |
 
 ---
 
@@ -101,15 +101,12 @@ Breakroom (memoria/estado): `/workspace/obsidian/agents/<nome>/memory.md`
 
 | Operacao | Comando |
 |----------|---------|
+| Timer automatico (10min) | `zion auto` (systemd timer) |
+| Rodar agent ou task | `zion run <nome> [-s N]` |
 | Listar agents | `zion agents` |
-| Ver execucoes | `zion agents log` |
+| Ver execucoes agents | `zion agents log` |
 | Conversar com agent | `zion agents phone <nome>` |
-| Rodar um agent | `zion agents run <nome>` |
-| Executar cards vencidos | `zion agents work` |
-| Sync timers NixOS | `zion agents cron` + `zion switch` |
-| Listar tasks | `zion tasks` |
-| Criar task | `zion tasks add <titulo>` |
-| Executar tasks vencidas | `zion tasks work` |
+| Ver execucoes tasks | `zion tasks log` |
 
 ---
 

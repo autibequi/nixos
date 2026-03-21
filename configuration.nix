@@ -51,8 +51,8 @@
     ./modules/work.nix
     ./modules/virt.nix
 
-    # Zion agents — timers de execucao dos agentes background
-    ./modules/zion-agents.nix
+    # Zion auto — timer unico agents + tasks (10min)
+    ./modules/zion-auto.nix
 
   ];
 }
