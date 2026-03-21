@@ -14,6 +14,12 @@ flags:
   - long: --model
     arg: model
     help: "Modelo Claude: haiku | opus (default: sonnet)"
+  - long: --haiku
+    help: "Shortcut: --model haiku"
+  - long: --opus
+    help: "Shortcut: --model opus"
+  - long: --sonnet
+    help: "Shortcut: --model sonnet"
   - long: --instance
     arg: id
     help: "Sufixo da instância (ex. 2 = zion-projeto-2)"
@@ -197,9 +203,6 @@ commands:
     help: "Para containers do compose + mata qualquer stray com nome zion/claude/puppy."
     filename: commands/shutdown.sh
 
-  - name: destroy
-    help: Para containers e remove imagens/volumes.
-    filename: commands/destroy.sh
 
   - name: clean
     alias: [gc, prune]
@@ -233,13 +236,13 @@ commands:
   # ── Docker (servicos estrategia) ──────────────────────────
   # servico: monolito | bo-container | front-student | monolito-worker
   # aliases:  mono    | bo           | front/fs      |
-  - name: docker
+  - name: runner
     alias: [dk]
-    help: "Gerencia servicos Docker. Ex: zion docker monolito | zion docker monolito logs"
+    help: "Gerencia servicos. Ex: zion runner monolito start | zion runner monolito logs"
     args:
       - name: service
         required: true
-        help: "monolito | bo-container | front-student | monolito-worker (aliases: mono, bo, front)"
+        help: "monolito | bo-container | front-student | monolito-worker (aliases: mono, bo, front, mw)"
       - name: action
         default: "start"
         allowed: [start, stop, logs, test, shell, install, build, flush]
@@ -273,7 +276,7 @@ commands:
       - long: --cmd
         arg: cmd
         help: "Comando a executar (para test/shell)"
-    filename: commands/docker.sh
+    filename: commands/runner.sh
 
   # ── Worktree (atalho interativo) ──────────────────────────
   - name: hooks
@@ -292,15 +295,7 @@ commands:
         help: "Lista hooks disponiveis"
     filename: commands/hooks.sh
 
-  - name: worktree
-    alias: [wt]
-    help: "Lista worktrees dos servicos Docker e permite escolher worktree + comando interativamente."
-    args:
-      - name: service
-        help: "Filtrar por servico (opcional; sem = todos)"
-    filename: commands/worktree.sh
 
-  # ── Tasks (card system) ──────────────────────────────────────
   - name: contractors
     alias: [ct]
     help: "Gerencia contractors (agentes background)."

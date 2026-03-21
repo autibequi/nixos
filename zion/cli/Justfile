@@ -26,7 +26,11 @@ _compose *args:
 
 # ── Container ─────────────────────────────────────────────────────────────
 
-# Build da imagem Docker (BuildKit habilitado)
+# Build da imagem base lenta (nixpkgs + cursor CLI) — rodar só quando mudar pacotes
+build-base:
+    DOCKER_BUILDKIT=1 docker build -f Dockerfile.claude.base -t zion-base:latest .
+
+# Build da imagem rápida (requer zion-base:latest)
 build:
     DOCKER_BUILDKIT=1 just _compose build
 

@@ -7,7 +7,7 @@ cat << 'EOF'
     │  zion opencode [dir]     nova sessao com OpenCode (alias: oc)  │
     │  zion ask [prompt]       envia prompt ao Puppy (alias query)   │
     │                                                                │
-    ├─ SESSIONS ─────────────────────────────────────────────────────┤
+    ├─ SESSIONS (--haiku / --opus / --sonnet em todos) ───────────────┤
     │                                                                │
     │  zion                    continua ultima sessao                │
     │  zion new --engine=<e>   nova sessao interativa                │
@@ -28,33 +28,25 @@ cat << 'EOF'
     │  zion inbox "mensagem"    adiciona entrada ao inbox            │
     │  zion outbox              lista arquivos do outbox             │
     │                                                                │
-    ├─ DOCKER (servicos estrategia) ────────────────────────────────┤
+    ├─ RUNNER (servicos estrategia) ────────────────────────────────┤
     │                                                                │
-    │  zion docker run <svc>     levanta servico (monolito, etc.)    │
-    │  zion docker stop <svc>    para servico + deps                 │
-    │  zion docker logs <svc>    mostra/reconecta logs               │
-    │  zion docker status        lista containers rodando            │
-    │  zion docker shell <svc>   shell no container do servico       │
-    │  zion docker restart <svc> restart do servico                  │
-    │  zion docker build <svc>   rebuild da imagem                   │
-    │  zion docker install <svc> instala dependencias                │
-    │  zion docker flush <svc>   remove tudo do servico              │
+    │  zion runner monolito start/stop/logs/shell/build/install      │
+    │  zion runner monolito-worker start/stop/logs/shell             │
+    │  zion runner bo-container start/stop/logs/shell                │
+    │  zion runner front-student start/stop/logs/shell               │
     │                                                                │
-    │  Flags: --env=sand|qa|prod|local  --detach  --debug            │
-    │         --worktree=<name>  --vertical=<v>                      │
+    │  Aliases: mono, mw, bo, front | Flags: --env --debug           │
     │  Alias: zion dk                                                │
     │                                                                │
     ├─ CONTAINER ───────────────────────────────────────────────────┤
     │                                                                │
     │  zion build              build da imagem docker                │
     │  zion down               para todos os containers              │
-    │  zion destroy            remove containers + volumes           │
     │  zion clean              remove sessoes paradas (gc, prune)    │
     │                                                                │
     ├─ META ─────────────────────────────────────────────────────────┤
     │                                                                │
-    │  zion status             status agregado (sessoes/docker)      │
-    │  zion worktree [svc]     lista worktrees interativamente       │
+    │  zion status             status agregado (sessoes/runner)      │
     │                                                                │
     ├─ UTIL ─────────────────────────────────────────────────────────┤
     │                                                                │
@@ -78,10 +70,10 @@ cat << 'EOF'
     │  zion claude  = zion new --engine=claude                       │
     │  zion cursor  = zion new --engine=cursor                       │
     │  zion oc      = zion new --engine=opencode                     │
-    │  zion dk      = zion docker                                    │
+    │  zion dk      = zion runner                                   │
     │  zion ct      = zion contractors                               │
     │  zion st      = zion status                                    │
-    │  zion wt      = zion worktree                                  │
+
     │                                                                │
     └────────────────────────────────────────────────────────────────┘
 EOF

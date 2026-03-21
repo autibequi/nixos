@@ -27,13 +27,13 @@ cat << 'BANNER'
       █   zion lab                                                          █
       █   zion shell                      tasks                             █
       █                                                                     █
-      █  docker                            contractors                      █
+      █  runner                            contractors                      █
       █                                                                     █
-      █   zion dk run <svc>                zion contractors run <nome>      █
-      █   zion dk stop <svc>                                                █
-      █   zion dk logs <svc>              inbox / outbox                   █
-      █   zion dk status                  zion inbox / zion outbox         █
-      █   zion dk shell <svc>                                               █
+      █   zion runner mono start           zion contractors run <nome>      █
+      █   zion runner mw start                                              █
+      █   zion runner mono logs           inbox / outbox                   █
+      █   zion runner mono shell          zion inbox / zion outbox         █
+      █   Alias: zion dk                                                   █
       █                                   meta                              █
       █  container                                                          █
       █                                    zion status                      █
