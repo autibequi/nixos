@@ -1,6 +1,6 @@
 //! Zion CLI — command-line interface for the Zion agent orchestration system.
 
-use anyhow::{bail, Result};
+use anyhow::Result;
 use clap::{Parser, Subcommand};
 
 mod commands;
@@ -29,7 +29,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     /// New session in container
-    #[command(alias = "run", alias = "r", alias = "open", alias = "code")]
+    #[command(alias = "open", alias = "code")]
     New {
         #[command(flatten)]
         flags: SessionFlags,
@@ -170,14 +170,39 @@ enum Commands {
         tick: u64,
     },
 
-    // ── Agents ───────────────────────────────────────────────
-    #[command(alias = "ag", alias = "a", alias = "contractors", alias = "ct")]
-    Agents {
-        #[command(subcommand)]
-        action: AgentsAction,
+    // ── Auto (timer systemd) ────────────────────────────────────
+    /// Execute agents e tasks vencidos (timer systemd 10min)
+    Auto {
+        #[arg(long, short = 'n')]
+        dry_run: bool,
+        #[arg(long, short = 's')]
+        steps: Option<u32>,
     },
 
-    // ── Git ──────────────────────────────────────────────────
+    // ── Run (agent or task) ─────────────────────────────────────
+    /// Roda um agente ou task imediatamente
+    #[command(alias = "r")]
+    Run {
+        name: String,
+        #[arg(long, short = 's')]
+        steps: Option<u32>,
+    },
+
+    // ── Agents ──────────────────────────────────────────────────
+    #[command(alias = "ag", alias = "a")]
+    Agents {
+        #[command(subcommand)]
+        action: Option<AgentsAction>,
+    },
+
+    // ── Tasks ───────────────────────────────────────────────────
+    #[command(alias = "tk")]
+    Tasks {
+        #[command(subcommand)]
+        action: Option<TasksAction>,
+    },
+
+    // ── Git ─────────────────────────────────────────────────────
     #[command(alias = "g")]
     Git {
         #[command(subcommand)]
@@ -213,27 +238,22 @@ enum OsAction {
 
 #[derive(Subcommand)]
 enum AgentsAction {
-    #[command(alias = "r")]
-    Run {
-        name: String,
-        #[arg(long, short = 's')]
-        steps: Option<u32>,
-    },
-    #[command(alias = "st", alias = "status")]
-    Log,
+    /// Lista todos os agentes e status
+    #[command(alias = "ls")]
+    List,
     /// Conversa interativa com um agente
     #[command(alias = "p", alias = "call")]
     Phone {
         name: Option<String>,
     },
-    /// Execute all due agent cards from schedule
-    #[command(alias = "w")]
-    Work {
-        #[arg(long)]
-        dry_run: bool,
-    },
-    /// Sync agent clock: fields to zion-agents.nix
-    Cron,
+    /// Mostra _schedule, _running e execucoes recentes
+    Log,
+}
+
+#[derive(Subcommand)]
+enum TasksAction {
+    /// Ultimas execucoes de tasks
+    Log,
 }
 
 #[derive(Subcommand)]
@@ -312,27 +332,33 @@ fn main() -> Result<()> {
             zion_tui::run_status(tick)?;
             Ok(())
         }
+
+        // Auto — delegates to bash CLI
+        Some(Commands::Auto { dry_run, steps }) => {
+            commands::agents::auto(dry_run, steps)
+        }
+
+        // Run — delegates to bash CLI
+        Some(Commands::Run { name, steps }) => {
+            commands::agents::run_unified(&name, steps)
+        }
+
         // Agents
-        Some(Commands::Agents { action }) => match action {
-            AgentsAction::Run { name, steps } => commands::agents::run(&name, steps),
+        Some(Commands::Agents { action }) => match action.unwrap_or(AgentsAction::List) {
+            AgentsAction::List => exec::bash_delegate(&["agents"]),
             AgentsAction::Log => commands::agents::log(),
             AgentsAction::Phone { name } => {
-                // Delegate to bash agent via exec
                 let mut args = vec!["agents".to_string(), "phone".to_string()];
                 if let Some(n) = name { args.push(n); }
-                let zion = std::env::current_exe().unwrap_or_else(|_| std::path::PathBuf::from("zion"));
-                let s = std::process::Command::new(zion).args(&args).status()?;
-                if !s.success() { bail!("agents phone failed"); }
-                Ok(())
-            },
-            AgentsAction::Work { dry_run } => commands::agents::work(dry_run),
-            AgentsAction::Cron => {
-                let zion = std::env::current_exe().unwrap_or_else(|_| std::path::PathBuf::from("zion"));
-                let s = std::process::Command::new(zion).args(["agents", "cron"]).status()?;
-                if !s.success() { bail!("agents cron failed"); }
-                Ok(())
+                exec::bash_delegate(&args.iter().map(|s| s.as_str()).collect::<Vec<_>>())
             },
         },
+
+        // Tasks
+        Some(Commands::Tasks { action }) => match action.unwrap_or(TasksAction::Log) {
+            TasksAction::Log => commands::agents::tasks_log(),
+        },
+
         // Git
         Some(Commands::Git { action }) => match action {
             GitAction::Append { branch } => commands::git::append(&branch),

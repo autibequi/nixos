@@ -62,6 +62,15 @@ pub fn fire(program: &str, args: &[&str]) {
         .status();
 }
 
+/// Delegate to the bash CLI (zion/bash/zion) with the given args.
+pub fn bash_delegate(args: &[&str]) -> Result<()> {
+    let bash_cli = zion_sdk::paths::bash_dir().join("zion");
+    if !bash_cli.exists() {
+        bail!("bash CLI not found at {}", bash_cli.display());
+    }
+    run(&bash_cli.to_string_lossy(), args)
+}
+
 /// Bail if running inside container.
 pub fn require_host() -> Result<()> {
     if zion_sdk::paths::in_container() {
