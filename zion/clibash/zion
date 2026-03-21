@@ -4168,21 +4168,21 @@ zion_set_command() {
 zion_runner_command() {
 
   # src/commands/runner.sh
-  zion_load_config
-  local svc="${args[service]}"
+  # Resolve aliases de servico
+  svc="${args[service]}"
   case "$svc" in
     mono) svc="monolito" ;;
     bo)   svc="bo-container" ;;
     front|fs) svc="front-student" ;;
   esac
 
-  local _env="${args[--env]:-sand}"
-  local _worktree="${args[--worktree]:-}"
-  local _vertical="${args[--vertical]:-carreiras-juridicas}"
-  local _container="${args[--container]:-app}"
-  local _cmd="${args[--cmd]:-}"
-  local _tail="${args[--tail]:-100}"
-  local _debug="${args[--debug]:-}"
+  _env="${args[--env]:-sand}"
+  _worktree="${args[--worktree]:-}"
+  _vertical="${args[--vertical]:-carreiras-juridicas}"
+  _container="${args[--container]:-app}"
+  _cmd="${args[--cmd]:-}"
+  _tail="${args[--tail]:-100}"
+  _debug="${args[--debug]:-}"
 
   case "${args[action]}" in
     start)

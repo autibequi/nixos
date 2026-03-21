@@ -13,28 +13,25 @@ use crate::theme;
 pub fn render(frame: &mut Frame, app: &App) {
     let sessions_h = sessions_height(app);
     let services_h = dk_services_height(app);
-    let logs_h = logs_height(app);
 
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Length(2),           // header
-            Constraint::Length(2),           // quota bars
+            Constraint::Length(1),           // header (title + time + quota inline)
             Constraint::Length(sessions_h),  // agents + background
             Constraint::Length(services_h),  // dk services
             Constraint::Length(1),           // separator (Logs [svc])
-            Constraint::Min(logs_h),         // logs tail
+            Constraint::Min(0),              // logs — fills all remaining space
             Constraint::Length(1),           // footer
         ])
         .split(frame.area());
 
-    render_header(frame, chunks[0]);
-    quota::render(frame, app, chunks[1]);
-    sessions::render(frame, app, chunks[2]);
-    services::render(frame, app, chunks[3]);
-    render_log_separator(frame, app, chunks[4]);
-    logs::render(frame, app, chunks[5]);
-    render_footer(frame, app, chunks[6]);
+    render_header(frame, app, chunks[0]);
+    sessions::render(frame, app, chunks[1]);
+    services::render(frame, app, chunks[2]);
+    render_log_separator(frame, app, chunks[3]);
+    logs::render(frame, app, chunks[4]);
+    render_footer(frame, app, chunks[5]);
 
     // Overlay: menu or error popup (rendered last so it's on top)
     popup::render(frame, app);
@@ -47,7 +44,7 @@ fn sessions_height(app: &App) -> u16 {
         + (if app.snapshot.background.is_empty() { 0 } else { 1 });
     let between = if groups == 2 { 1 } else { 0 };
     let rows = n + groups + between;
-    (rows as u16).max(2)
+    (rows as u16).max(1)
 }
 
 fn dk_services_height(app: &App) -> u16 {
@@ -58,10 +55,6 @@ fn dk_services_height(app: &App) -> u16 {
     };
     // +1 header, +1 inline log preview row for selected service
     (svc_count as u16) + 2
-}
-
-fn logs_height(app: &App) -> u16 {
-    (app.snapshot.logs.len() as u16).min(8).max(3)
 }
 
 fn render_log_separator(frame: &mut Frame, app: &App, area: Rect) {
@@ -76,15 +69,16 @@ fn render_log_separator(frame: &mut Frame, app: &App, area: Rect) {
     frame.render_widget(Paragraph::new(line), area);
 }
 
-fn render_header(frame: &mut Frame, area: Rect) {
+fn render_header(frame: &mut Frame, app: &App, area: Rect) {
     let now = chrono_now();
-    let line = Line::from(vec![
+    let mut spans = vec![
         Span::raw("  "),
         Span::styled("Zion Status", theme::header()),
         Span::raw("  "),
         Span::styled(now, theme::dim()),
-    ]);
-    frame.render_widget(Paragraph::new(line), area);
+    ];
+    spans.extend(quota::header_spans(app));
+    frame.render_widget(Paragraph::new(Line::from(spans)), area);
 }
 
 fn render_footer(frame: &mut Frame, app: &App, area: Rect) {

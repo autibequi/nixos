@@ -57,8 +57,9 @@ pub fn list_containers(filter: &str) -> Result<Vec<ContainerInfo>> {
     Ok(containers)
 }
 
-/// Batch inspect containers for TTY and mounts.
-pub fn inspect_containers(names: &[String]) -> Result<Vec<(String, bool, String)>> {
+/// Batch inspect containers for TTY, mounts, and the host path bound to /workspace/mnt.
+/// Returns `(name, is_tty, dest_mounts_string, mnt_host_path)`.
+pub fn inspect_containers(names: &[String]) -> Result<Vec<(String, bool, String, String)>> {
     if names.is_empty() {
         return Ok(Vec::new());
     }
@@ -67,7 +68,8 @@ pub fn inspect_containers(names: &[String]) -> Result<Vec<(String, bool, String)
     cmd.args([
         "inspect",
         "--format",
-        "{{.Name}}|{{.Config.Tty}}|{{range .Mounts}}{{.Destination}} {{end}}",
+        // Emit dest-only list + a sentinel, then Source:Dest pairs for /workspace/mnt
+        "{{.Name}}|{{.Config.Tty}}|{{range .Mounts}}{{.Destination}} {{end}}|{{range .Mounts}}{{.Source}}:{{.Destination}} {{end}}",
     ]);
     for name in names {
         cmd.arg(name);
@@ -82,14 +84,25 @@ pub fn inspect_containers(names: &[String]) -> Result<Vec<(String, bool, String)
 
     for line in stdout.lines() {
         let line = line.trim_start_matches('/');
-        let parts: Vec<&str> = line.splitn(3, '|').collect();
+        let parts: Vec<&str> = line.splitn(4, '|').collect();
         if parts.len() < 3 {
             continue;
         }
         let name = parts[0].to_string();
         let is_tty = parts[1] == "true";
         let mounts = parts[2].to_string();
-        results.push((name, is_tty, mounts));
+        // Extract host path for /workspace/mnt from source:dest pairs
+        let mnt_path = if parts.len() >= 4 {
+            parts[3]
+                .split_whitespace()
+                .find(|pair| pair.ends_with(":/workspace/mnt"))
+                .and_then(|pair| pair.strip_suffix(":/workspace/mnt"))
+                .unwrap_or("")
+                .to_string()
+        } else {
+            String::new()
+        };
+        results.push((name, is_tty, mounts, mnt_path));
     }
 
     Ok(results)

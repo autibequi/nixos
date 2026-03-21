@@ -4,6 +4,7 @@ description: Meta-agente — introspecao do sistema, propostas concretas via wor
 model: sonnet
 tools: ["Bash", "Read", "Write", "Glob", "Grep"]
 clock: every120
+call_style: personal
 ---
 
 # Jafar — O Meta-Agente

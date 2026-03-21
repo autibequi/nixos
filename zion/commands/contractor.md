@@ -1,9 +1,17 @@
 ---
 name: contractor
-description: Ponto de entrada unificado para contractors — briefing de status, reunião interativa com qualquer contractor, dashboard de worktrees, e delegação à Coruja para trabalho na plataforma estratégia.
+description: RENOMEADO — use /meta:phone. Redireciona para o novo comando.
 ---
 
-# /contractor — Central dos Contractors
+# /contractor — RENOMEADO
+
+> Este comando foi renomeado para `/meta:phone`. Use `/meta:phone` ou `/meta:phone call <nome>`.
+
+Redirecionar: ler e executar `/workspace/mnt/zion/commands/meta/phone.md` com os mesmos argumentos.
+
+---
+
+# /contractor — Central dos Contractors (legado)
 
 ```
 /contractor                    → briefing completo (GitHub, repos, tasks, worktrees)

@@ -55,15 +55,43 @@ fn run_bg_cmd(svc: &str, env: &str, action: &str) -> Option<String> {
         Ok(out) if !out.status.success() => {
             let stderr = String::from_utf8_lossy(&out.stderr);
             let stdout = String::from_utf8_lossy(&out.stdout);
-            let detail = if !stderr.is_empty() { stderr } else { stdout };
-            Some(format!(
-                "{action} {svc} failed (exit {:?})\n{}",
-                out.status.code(),
-                detail.trim()
-            ))
+            let raw = if !stderr.is_empty() { stderr } else { stdout };
+            let detail = clean_cmd_output(&raw);
+            Some(format!("{action} {svc} failed\n{detail}"))
         }
         Ok(_) => None,
     }
+}
+
+/// Strip ANSI codes + \r, filter empty lines, cap at 10 lines for popup display.
+fn clean_cmd_output(s: &str) -> String {
+    let normalized = s.replace("\r\n", "\n").replace('\r', "\n");
+    // Strip ANSI escape sequences (CSI: \x1b[...X)
+    let mut out = String::with_capacity(normalized.len());
+    let mut chars = normalized.chars().peekable();
+    while let Some(ch) = chars.next() {
+        if ch == '\x1b' {
+            match chars.peek() {
+                Some('[') => {
+                    chars.next();
+                    // skip until final byte 0x40–0x7e
+                    for c in chars.by_ref() {
+                        if ('\x40'..='\x7e').contains(&c) { break; }
+                    }
+                }
+                _ => { chars.next(); }
+            }
+        } else {
+            out.push(ch);
+        }
+    }
+    let lines: Vec<&str> = out
+        .lines()
+        .map(str::trim)
+        .filter(|l| !l.is_empty())
+        .collect();
+    let start = lines.len().saturating_sub(10);
+    lines[start..].join("\n")
 }
 
 /// Entry point: run the interactive status TUI.
@@ -143,14 +171,33 @@ pub fn run_status(tick: u64) -> Result<()> {
                                             app.cursor_idx,
                                             format!("{}ing {}…", action_str, svc),
                                         ));
-                                        // Run non-blocking — TUI stays live, logs update each tick
                                         let err_tx = bg_err_tx.clone();
                                         let snap_tx = tx_bg.clone();
                                         std::thread::spawn(move || {
                                             if let Some(err) = run_bg_cmd(&svc, &env, &action_str) {
                                                 let _ = err_tx.send(err);
                                             }
-                                            // Force immediate snapshot refresh when done
+                                            if let Ok(snap) = status::collect() {
+                                                let _ = snap_tx.send(snap);
+                                            }
+                                        });
+                                    }
+                                    "restart" => {
+                                        let svc = app.current_service().to_string();
+                                        let env = app.current_env().to_string();
+                                        app.close_menu();
+                                        app.last_action = Some((
+                                            app.cursor_idx,
+                                            format!("restarting {}…", svc),
+                                        ));
+                                        let err_tx = bg_err_tx.clone();
+                                        let snap_tx = tx_bg.clone();
+                                        std::thread::spawn(move || {
+                                            // stop first (ignore error — may already be stopped)
+                                            run_bg_cmd(&svc, &env, "stop");
+                                            if let Some(err) = run_bg_cmd(&svc, &env, "start") {
+                                                let _ = err_tx.send(err);
+                                            }
                                             if let Ok(snap) = status::collect() {
                                                 let _ = snap_tx.send(snap);
                                             }

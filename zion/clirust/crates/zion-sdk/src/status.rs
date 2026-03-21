@@ -29,6 +29,8 @@ pub struct SessionInfo {
     pub cpu: String,
     pub mem: String,
     pub mounts: Vec<MountStatus>,
+    /// Host path bound to /workspace/mnt (the project directory).
+    pub mnt_path: String,
 }
 
 #[derive(Debug, Clone)]
@@ -51,7 +53,7 @@ pub struct DkServiceInfo {
 pub fn collect() -> Result<StatusSnapshot> {
     // Boot info and logs are cheap — collect immediately
     let boot = crate::boot::collect();
-    let logs = crate::logs::collect(20);
+    let logs = crate::logs::collect(100);
 
     // Last log line per service (for inline preview)
     let last_log: std::collections::HashMap<String, String> =
@@ -109,10 +111,12 @@ pub fn collect() -> Result<StatusSnapshot> {
         let is_up = container.status.to_lowercase().starts_with("up");
 
         // Find TTY and mounts from inspect
-        let (is_tty, mount_str) = inspect_data
+        let (is_tty, mount_str, mnt_path) = inspect_data
             .iter()
-            .find(|(n, _, _)| *n == container.name)
-            .map_or((true, ""), |(_, tty, mounts)| (*tty, mounts.as_str()));
+            .find(|(n, _, _, _)| *n == container.name)
+            .map_or((true, "", String::new()), |(_, tty, mounts, mnt)| {
+                (*tty, mounts.as_str(), mnt.clone())
+            });
 
         let mounts: Vec<MountStatus> = mount_checks
             .iter()
@@ -132,6 +136,7 @@ pub fn collect() -> Result<StatusSnapshot> {
             cpu,
             mem,
             mounts,
+            mnt_path,
         };
 
         if is_tty {

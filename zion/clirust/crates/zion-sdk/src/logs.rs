@@ -29,6 +29,54 @@ fn log_root() -> PathBuf {
     PathBuf::from(xdg).join("zion/logs/dockerized")
 }
 
+/// Strip ANSI/VT100 escape sequences from a string.
+/// Handles CSI sequences (\x1b[...X), OSC (\x1b]...\x07/ST), and bare \x1b.
+fn strip_ansi(s: &str) -> String {
+    let bytes = s.as_bytes();
+    let mut out = Vec::with_capacity(bytes.len());
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == 0x1b {
+            i += 1;
+            if i >= bytes.len() {
+                break;
+            }
+            match bytes[i] {
+                // CSI: \x1b[ ... <final byte 0x40–0x7e>
+                b'[' => {
+                    i += 1;
+                    while i < bytes.len() && !(0x40..=0x7e).contains(&bytes[i]) {
+                        i += 1;
+                    }
+                    i += 1; // skip final byte
+                }
+                // OSC: \x1b] ... \x07 or \x1b\\
+                b']' => {
+                    i += 1;
+                    while i < bytes.len() && bytes[i] != 0x07 {
+                        if bytes[i] == 0x1b && i + 1 < bytes.len() && bytes[i + 1] == b'\\' {
+                            i += 2;
+                            break;
+                        }
+                        i += 1;
+                    }
+                    if i < bytes.len() {
+                        i += 1;
+                    }
+                }
+                // Other Fe sequences: single extra byte
+                _ => {
+                    i += 1;
+                }
+            }
+        } else {
+            out.push(bytes[i]);
+            i += 1;
+        }
+    }
+    String::from_utf8_lossy(&out).into_owned()
+}
+
 /// Read only the very last non-empty line of a service's log file.
 #[must_use]
 pub fn last_line(svc: &str) -> Option<String> {
@@ -79,18 +127,21 @@ fn tail_file(path: &Path, n: usize) -> Vec<String> {
         return Vec::new();
     }
 
-    let mut buf = String::new();
-    if file.read_to_string(&mut buf).is_err() {
-        // Try lossy
-        let mut raw = Vec::new();
-        let _ = file.seek(SeekFrom::Start(start));
-        if file.read_to_end(&mut raw).is_err() {
-            return Vec::new();
-        }
-        buf = String::from_utf8_lossy(&raw).into_owned();
+    let mut raw = Vec::new();
+    if file.read_to_end(&mut raw).is_err() {
+        return Vec::new();
     }
+    let buf = String::from_utf8_lossy(&raw).into_owned();
 
-    let lines: Vec<&str> = buf.lines().collect();
+    // Normalize carriage returns: \r\n → \n, bare \r → \n
+    // This handles tools like webpack that use \r for in-place progress updates.
+    let normalized = buf.replace("\r\n", "\n").replace('\r', "\n");
+
+    let lines: Vec<String> = normalized
+        .lines()
+        .map(strip_ansi)
+        .filter(|l| !l.trim().is_empty())
+        .collect();
     let skip = lines.len().saturating_sub(n);
-    lines[skip..].iter().map(|l| l.to_string()).collect()
+    lines[skip..].to_vec()
 }

@@ -10,12 +10,13 @@ pub const ENVS: &[&str] = &["sand", "local", "prod"];
 
 /// Menu items: (display label, action key).
 pub const MENU_ITEMS: &[(&str, &str)] = &[
-    ("Start",  "start"),
-    ("Stop",   "stop"),
-    ("Logs",   "logs"),
-    ("Test",   "test"),
-    ("Shell",  "shell"),
-    ("Cancel", "cancel"),
+    ("Start",   "start"),
+    ("Stop",    "stop"),
+    ("Restart", "restart"),
+    ("Logs",    "logs"),
+    ("Test",    "test"),
+    ("Shell",   "shell"),
+    ("Cancel",  "cancel"),
 ];
 
 /// UI mode.

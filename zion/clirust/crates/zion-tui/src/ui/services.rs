@@ -17,7 +17,7 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
         lines.push(Line::from(vec![
             Span::styled("\u{25cb}", theme::down_icon()),
             Span::raw(" "),
-            Span::styled("services", theme::group_label()),
+            Span::styled("projects", theme::group_label()),
         ]));
 
         for (i, &svc) in DK_SERVICES.iter().enumerate() {
@@ -60,7 +60,7 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
         lines.push(Line::from(vec![
             Span::styled(icon, icon_style),
             Span::raw(" "),
-            Span::styled("services", theme::group_label()),
+            Span::styled("projects", theme::group_label()),
         ]));
 
         for (i, &svc) in DK_SERVICES.iter().enumerate() {
