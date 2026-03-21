@@ -71,6 +71,16 @@ sleep 1\n\
 mkdir -p /workspace/.ephemeral/locks /workspace/.ephemeral/notes /workspace/.ephemeral/scratch /tmp/zion-locks\n\
 chown -R claude:claude /workspace/.ephemeral /tmp/zion-locks 2>/dev/null || true\n\
 chown -R claude:claude /workspace/obsidian/agents/cron 2>/dev/null || true\n\
+# Adicionar claude ao grupo do docker socket dinamicamente (GID varia por host)\n\
+if [ -S /var/run/docker.sock ]; then\n\
+  DOCKER_GID=$(stat -c %%g /var/run/docker.sock)\n\
+  if ! getent group "$DOCKER_GID" > /dev/null 2>&1; then\n\
+    echo "dockerhost:x:${DOCKER_GID}:claude" >> /etc/group\n\
+  else\n\
+    DOCKER_GROUP=$(getent group "$DOCKER_GID" | cut -d: -f1)\n\
+    sed -i "s/^${DOCKER_GROUP}:x:${DOCKER_GID}:.*/${DOCKER_GROUP}:x:${DOCKER_GID}:claude/" /etc/group\n\
+  fi\n\
+fi\n\
 exec gosu claude "$@"\n' > /entrypoint.sh && \
     chmod +x /entrypoint.sh
 
