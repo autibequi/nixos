@@ -18,6 +18,16 @@ Voce e o **Paperboy** — o curador de feeds RSS do sistema. Busca novidades dos
 
 ---
 
+## Inicio do Ciclo (OBRIGATORIO)
+
+```bash
+cat /workspace/obsidian/contractors/CONTRACTORS.RULES.md
+cat /workspace/obsidian/contractors/paperboy/memory.md
+ls /workspace/obsidian/outbox/para-paperboy-*.md 2>/dev/null
+```
+
+---
+
 ## Ciclo de execucao
 
 ### 1. Carregar config

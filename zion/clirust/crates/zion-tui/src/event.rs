@@ -1,8 +1,13 @@
+//! Input event polling and key-to-action mapping.
+
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyModifiers};
 use std::time::Duration;
 
+/// Events produced by the event loop.
 pub enum AppEvent {
+    /// A keyboard key was pressed.
     Key(KeyEvent),
+    /// No input arrived within the poll timeout.
     Tick,
 }
 
@@ -16,7 +21,7 @@ pub fn poll(tick_rate: Duration) -> std::io::Result<AppEvent> {
     Ok(AppEvent::Tick)
 }
 
-/// Map a key event to an action string.
+/// Map a key event to an action string, returning `None` for unbound keys.
 pub fn map_key(key: KeyEvent) -> Option<&'static str> {
     // Ctrl+C always quits
     if key.modifiers.contains(KeyModifiers::CONTROL) && key.code == KeyCode::Char('c') {

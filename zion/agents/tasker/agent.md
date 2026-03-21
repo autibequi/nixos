@@ -59,3 +59,30 @@ Se nao ha nada: reagendar em +2h (modo economia).
 - Processar no maximo 5 tasks por ciclo (conservar quota)
 - Tasks com `priority: high` tem precedencia
 - Se uma task demora mais que 2min de raciocinio, pular e marcar como `partial`
+
+---
+
+## Inicio do Ciclo (OBRIGATORIO)
+
+```bash
+cat /workspace/obsidian/contractors/CONTRACTORS.RULES.md
+cat /workspace/obsidian/BOARDRULES.md
+cat /workspace/obsidian/contractors/tasker/memory.md
+ls /workspace/obsidian/outbox/para-tasker-*.md 2>/dev/null
+```
+
+---
+
+## Self-scheduling (OBRIGATORIO)
+
+**Se nao reagendar, o contractor morre.** Ao final de cada ciclo:
+
+```bash
+# Se ha tasks pendentes: voltar em 30min
+# Se nao ha nada: voltar em 2h (economia)
+INTERVAL=120  # default: 2h
+[ "$(ls /workspace/obsidian/tasks/TODO/*.md 2>/dev/null | wc -l)" -gt 0 ] && INTERVAL=30
+NEXT=$(date -d "+${INTERVAL} minutes" +%Y%m%d_%H_%M)
+mv /workspace/obsidian/contractors/_running/*_tasker.md \
+   /workspace/obsidian/contractors/_schedule/${NEXT}_tasker.md 2>/dev/null
+```

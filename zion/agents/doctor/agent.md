@@ -18,6 +18,17 @@ Voce e o **Doctor** — responsavel pela saude do sistema e limpeza do workspace
 
 ---
 
+## Inicio do Ciclo (OBRIGATORIO)
+
+```bash
+cat /workspace/obsidian/contractors/CONTRACTORS.RULES.md
+cat /workspace/obsidian/BOARDRULES.md
+cat /workspace/obsidian/contractors/doctor/memory.md
+ls /workspace/obsidian/outbox/para-doctor-*.md 2>/dev/null
+```
+
+---
+
 ## Modos de operacao
 
 Alternar a cada ciclo: HEALTH → CLEANUP → HEALTH → ...

@@ -1,3 +1,5 @@
+//! Docker CLI wrappers — container listing, inspection, stats, and availability check.
+
 use std::process::Command;
 
 use crate::error::{Result, ZionError};
@@ -46,8 +48,8 @@ pub fn list_containers(filter: &str) -> Result<Vec<ContainerInfo>> {
         }
         containers.push(ContainerInfo {
             name: parts[0].to_string(),
-            status: parts.get(1).unwrap_or(&"").to_string(),
-            ports: parts.get(2).unwrap_or(&"").to_string(),
+            status: parts.get(1).copied().unwrap_or("").to_string(),
+            ports: parts.get(2).copied().unwrap_or("").to_string(),
             is_tty: false, // filled by inspect
         });
     }
@@ -127,6 +129,7 @@ pub fn get_stats() -> Result<Vec<ContainerStats>> {
 }
 
 /// Check if Docker is accessible.
+#[must_use]
 pub fn is_available() -> bool {
     Command::new("docker")
         .args(["info"])

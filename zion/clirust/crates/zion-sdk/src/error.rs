@@ -1,3 +1,5 @@
+//! Error types and `Result` alias for the Zion SDK.
+
 use thiserror::Error;
 
 #[derive(Error, Debug)]

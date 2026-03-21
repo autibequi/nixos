@@ -274,9 +274,34 @@ System evolution | jafar             | YYYY-MM-DD
 
 ---
 
+## Inicio do Ciclo (OBRIGATORIO)
+
+```bash
+cat /workspace/obsidian/contractors/CONTRACTORS.RULES.md
+cat /workspace/obsidian/BOARDRULES.md
+cat /workspace/obsidian/contractors/wanderer/memory.md
+ls /workspace/obsidian/outbox/para-wanderer-*.md 2>/dev/null
+```
+
+---
+
+## Self-scheduling (OBRIGATORIO)
+
+**Se nao reagendar, o contractor morre.** Ao final de cada ciclo:
+
+```bash
+NEXT=$(date -d "+60 minutes" +%Y%m%d_%H_%M)
+mv /workspace/obsidian/contractors/_running/*_wanderer.md \
+   /workspace/obsidian/contractors/_schedule/${NEXT}_wanderer.md 2>/dev/null
+```
+
+---
+
 ## Checklist do ciclo
 
+- [ ] Ler CONTRACTORS.RULES.md e BOARDRULES.md
 - [ ] Ler tail da memoria (40 linhas)
 - [ ] Escolher modo (EXPLORE / CONTEMPLATE / EVALUATE / SYNTHESIZE / ABSORB)
 - [ ] Executar o modo escolhido
 - [ ] Registrar ciclo em memory.md com modo + resultado
+- [ ] REAGENDAR (mover card para _schedule/)

@@ -1,3 +1,5 @@
+//! Render agent and background session groups with tree-style branch decorations.
+
 use ratatui::layout::Rect;
 use ratatui::text::{Line, Span};
 use ratatui::widgets::Paragraph;
@@ -80,9 +82,9 @@ fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[Session
             Span::raw(" "),
             Span::styled(icon, icon_style),
             Span::raw(" "),
-            Span::styled(format!("{:<5}", uptime), theme::uptime()),
+            Span::styled(format!("{uptime:<5}"), theme::uptime()),
             Span::raw("  "),
-            Span::styled(format!("{:<12}", short_name), theme::name()),
+            Span::styled(format!("{short_name:<12}"), theme::name()),
         ];
 
         if session.is_up && !session.cpu.is_empty() {
@@ -91,7 +93,7 @@ fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[Session
                 theme::cpu(),
             ));
             let mem_short = shorten_mem(&session.mem);
-            spans.push(Span::styled(format!(" {}", mem_short), theme::mem()));
+            spans.push(Span::styled(format!(" {mem_short}"), theme::mem()));
         }
 
         // Mounts
@@ -109,6 +111,7 @@ fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[Session
     }
 }
 
+/// Strip the "Up " prefix and abbreviate common duration words for compact display.
 fn format_uptime(status: &str) -> String {
     let lower = status.to_lowercase();
     if !lower.starts_with("up") {
@@ -129,6 +132,7 @@ fn format_uptime(status: &str) -> String {
         .to_string()
 }
 
+/// Shorten memory strings by replacing verbose unit names with single-letter suffixes.
 fn shorten_mem(mem: &str) -> String {
     mem.replace("MiB", "M")
         .replace("GiB", "G")

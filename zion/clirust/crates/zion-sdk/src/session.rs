@@ -1,3 +1,5 @@
+//! `SessionRunner` builder — constructs and launches docker compose sessions for any engine.
+
 use crate::compose::ComposeCmd;
 use crate::config::ZionConfig;
 use crate::engine::Engine;
@@ -36,46 +38,55 @@ impl SessionRunner {
         }
     }
 
+    #[must_use]
     pub fn mount_path(mut self, path: &str) -> Self {
         self.mount_path = path.to_string();
         self
     }
 
+    #[must_use]
     pub fn mount_opts(mut self, opts: &str) -> Self {
         self.mount_opts = opts.to_string();
         self
     }
 
+    #[must_use]
     pub fn proj_name(mut self, name: &str) -> Self {
         self.proj_name = name.to_string();
         self
     }
 
+    #[must_use]
     pub fn model(mut self, model: Option<String>) -> Self {
         self.model = model;
         self
     }
 
+    #[must_use]
     pub fn danger(mut self, d: bool) -> Self {
         self.danger = d;
         self
     }
 
+    #[must_use]
     pub fn resume(mut self, session_id: Option<String>) -> Self {
         self.resume = session_id;
         self
     }
 
+    #[must_use]
     pub fn init_md(mut self, file: Option<String>) -> Self {
         self.init_md = file;
         self
     }
 
+    #[must_use]
     pub fn analysis_mode(mut self, enabled: bool) -> Self {
         self.analysis_mode = enabled;
         self
     }
 
+    #[must_use]
     pub fn instance(mut self, id: Option<String>) -> Self {
         self.instance = id;
         self
@@ -295,7 +306,7 @@ impl SessionRunner {
                 "-c".into(),
                 "cd /workspace/mnt && opencode".into(),
             ]);
-            let args_ref: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
+            let args_ref: Vec<&str> = args.iter().map(String::as_str).collect();
             self.compose(config).execute(&args_ref)
         } else {
             // Persistent: up -d + exec
@@ -316,7 +327,7 @@ impl SessionRunner {
                 "-c".into(),
                 "cd /workspace/mnt && exec opencode".into(),
             ]);
-            let args_ref: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
+            let args_ref: Vec<&str> = args.iter().map(String::as_str).collect();
             self.compose(config).execute(&args_ref)
         }
     }

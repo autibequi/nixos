@@ -1,3 +1,5 @@
+//! Zion TUI — interactive terminal dashboard using ratatui.
+
 mod app;
 mod event;
 mod theme;
@@ -28,7 +30,7 @@ pub fn run_status(tick: u64) -> Result<()> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let mut app = App::new(tick);
+    let mut app = App::new();
 
     // Initial data collection
     if let Ok(snap) = status::collect() {

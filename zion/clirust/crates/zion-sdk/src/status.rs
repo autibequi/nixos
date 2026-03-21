@@ -1,3 +1,5 @@
+//! System status collection — agent containers, background sessions, DK services, and stats.
+
 use crate::docker::{self, ContainerStats};
 use crate::error::Result;
 
@@ -39,8 +41,7 @@ pub struct DkServiceInfo {
 
 /// Collect a full status snapshot.
 pub fn collect() -> Result<StatusSnapshot> {
-    let docker_available = docker::is_available();
-    if !docker_available {
+    if !docker::is_available() {
         return Ok(StatusSnapshot::default());
     }
 
@@ -50,9 +51,9 @@ pub fn collect() -> Result<StatusSnapshot> {
     let dk_handle = std::thread::spawn(|| docker::list_containers("name=zion-dk-"));
     let stats_handle = std::thread::spawn(docker::get_stats);
 
-    let leech_containers = leech_handle.join().unwrap()?;
-    let dk_containers = dk_handle.join().unwrap()?;
-    let stats = stats_handle.join().unwrap()?;
+    let leech_containers = leech_handle.join().unwrap_or_else(|_| Ok(Vec::new()))?;
+    let dk_containers = dk_handle.join().unwrap_or_else(|_| Ok(Vec::new()))?;
+    let stats = stats_handle.join().unwrap_or_else(|_| Ok(Vec::new()))?;
 
     // Inspect leech containers for TTY + mounts
     let names: Vec<String> = leech_containers.iter().map(|c| c.name.clone()).collect();
@@ -75,13 +76,12 @@ pub fn collect() -> Result<StatusSnapshot> {
         let (is_tty, mount_str) = inspect_data
             .iter()
             .find(|(n, _, _)| *n == container.name)
-            .map(|(_, tty, mounts)| (*tty, mounts.as_str()))
-            .unwrap_or((true, ""));
+            .map_or((true, ""), |(_, tty, mounts)| (*tty, mounts.as_str()));
 
         let mounts: Vec<MountStatus> = mount_checks
             .iter()
             .map(|(path, label)| MountStatus {
-                label: label.to_string(),
+                label: (*label).to_string(),
                 present: mount_str.contains(path),
             })
             .collect();
@@ -133,6 +133,42 @@ fn find_stats(stats: &[ContainerStats], name: &str) -> (String, String) {
     stats
         .iter()
         .find(|s| s.name == name || s.name.contains(name))
-        .map(|s| (s.cpu.clone(), s.mem.clone()))
-        .unwrap_or_default()
+        .map_or_else(
+            || (String::new(), String::new()),
+            |s| (s.cpu.clone(), s.mem.clone()),
+        )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_status_snapshot_default() {
+        let snap = StatusSnapshot::default();
+        assert!(snap.agents.is_empty());
+        assert!(snap.background.is_empty());
+        assert!(snap.dk_services.is_empty());
+        assert!(snap.stats.is_empty());
+    }
+
+    #[test]
+    fn test_find_stats_missing() {
+        let stats: Vec<ContainerStats> = Vec::new();
+        let (cpu, mem) = find_stats(&stats, "nonexistent");
+        assert!(cpu.is_empty());
+        assert!(mem.is_empty());
+    }
+
+    #[test]
+    fn test_find_stats_found() {
+        let stats = vec![ContainerStats {
+            name: "my-container".to_string(),
+            cpu: "5%".to_string(),
+            mem: "100MiB".to_string(),
+        }];
+        let (cpu, mem) = find_stats(&stats, "my-container");
+        assert_eq!(cpu, "5%");
+        assert_eq!(mem, "100MiB");
+    }
 }

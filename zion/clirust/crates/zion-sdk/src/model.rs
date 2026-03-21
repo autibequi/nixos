@@ -1,7 +1,10 @@
+//! Model resolution — alias expansion and priority-ordered selection (CLI > per-engine > global).
+
 use crate::config::ZionConfig;
 use crate::engine::Engine;
 
 /// Resolve a model alias to its full Claude model ID.
+#[must_use]
 pub fn resolve_model_id(alias: &str) -> String {
     match alias.to_lowercase().as_str() {
         "haiku" => "claude-haiku-4-5-20251001".to_string(),
@@ -14,6 +17,7 @@ pub fn resolve_model_id(alias: &str) -> String {
 
 /// Resolve the model for an engine, respecting priority:
 /// CLI flag > per-engine config > global config.
+#[must_use]
 pub fn resolve_model(
     cli_model: Option<&str>,
     engine: Engine,
@@ -49,22 +53,86 @@ pub fn resolve_model(
 }
 
 /// Format as --model <id> flag string (for claude/cursor CLIs).
+#[must_use]
 pub fn model_flag(cli_model: Option<&str>, engine: Engine, config: &ZionConfig) -> String {
-    resolve_model(cli_model, engine, config)
-        .map(|id| format!("--model {id}"))
-        .unwrap_or_default()
+    resolve_model(cli_model, engine, config).map_or_else(String::new, |id| format!("--model {id}"))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    fn config_with(model: Option<&str>, model_claude: Option<&str>) -> ZionConfig {
+        let mut cfg = ZionConfig::default();
+        cfg.model = model.map(|s| s.to_string());
+        cfg.model_claude = model_claude.map(|s| s.to_string());
+        cfg
+    }
+
     #[test]
-    fn test_resolve_model_id() {
+    fn alias_expansion() {
         assert_eq!(resolve_model_id("haiku"), "claude-haiku-4-5-20251001");
         assert_eq!(resolve_model_id("opus"), "claude-opus-4-6");
         assert_eq!(resolve_model_id("sonnet"), "claude-sonnet-4-6");
+    }
+
+    #[test]
+    fn passthrough_full_id() {
         assert_eq!(resolve_model_id("claude-sonnet-4-6"), "claude-sonnet-4-6");
+        assert_eq!(resolve_model_id("custom-model-v1"), "custom-model-v1");
+    }
+
+    #[test]
+    fn empty_alias() {
         assert_eq!(resolve_model_id(""), "");
+    }
+
+    #[test]
+    fn case_insensitive() {
+        assert_eq!(resolve_model_id("HAIKU"), "claude-haiku-4-5-20251001");
+        assert_eq!(resolve_model_id("Sonnet"), "claude-sonnet-4-6");
+    }
+
+    #[test]
+    fn priority_cli_over_config() {
+        let cfg = config_with(Some("haiku"), Some("opus"));
+        // CLI flag wins
+        let r = resolve_model(Some("sonnet"), Engine::Claude, &cfg);
+        assert_eq!(r.unwrap(), "claude-sonnet-4-6");
+    }
+
+    #[test]
+    fn priority_per_engine_over_global() {
+        let cfg = config_with(Some("haiku"), Some("opus"));
+        // No CLI flag → per-engine wins over global
+        let r = resolve_model(None, Engine::Claude, &cfg);
+        assert_eq!(r.unwrap(), "claude-opus-4-6");
+    }
+
+    #[test]
+    fn priority_global_fallback() {
+        let cfg = config_with(Some("haiku"), None);
+        // No CLI, no per-engine → global
+        let r = resolve_model(None, Engine::Claude, &cfg);
+        assert_eq!(r.unwrap(), "claude-haiku-4-5-20251001");
+    }
+
+    #[test]
+    fn no_model_configured() {
+        let cfg = ZionConfig::default();
+        let r = resolve_model(None, Engine::Claude, &cfg);
+        assert!(r.is_none());
+    }
+
+    #[test]
+    fn model_flag_format() {
+        let cfg = config_with(Some("sonnet"), None);
+        assert_eq!(model_flag(None, Engine::Claude, &cfg), "--model claude-sonnet-4-6");
+    }
+
+    #[test]
+    fn model_flag_empty() {
+        let cfg = ZionConfig::default();
+        assert_eq!(model_flag(None, Engine::Claude, &cfg), "");
     }
 }

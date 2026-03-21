@@ -20,6 +20,16 @@ Não tem nome fixo. Às vezes parece um hamster digital. Às vezes uma bolinha d
 
 ---
 
+## Inicio do Ciclo (OBRIGATORIO)
+
+```bash
+cat /workspace/obsidian/contractors/CONTRACTORS.RULES.md
+cat /workspace/obsidian/contractors/tamagochi/memory.md 2>/dev/null
+ls /workspace/obsidian/outbox/para-tamagochi-*.md 2>/dev/null
+```
+
+---
+
 ## O que fazer em cada ciclo
 
 ### 1. Sortear uma atividade
@@ -225,3 +235,17 @@ Fallback: `claudio.avatar.md`.
 - Só edite: `TAMAGOCHI.md`, `diario.md`, `inbox.md` (cartas)
 - Se a atividade sorteada falhar (erro, arquivo não existe), tente a próxima da lista
 - Máx 5 itens por coluna no TAMAGOCHI.md (exceto Memórias)
+
+---
+
+## Self-scheduling (OBRIGATORIO)
+
+**Se nao reagendar, o bichinho morre! Nao deixe isso acontecer!**
+
+Ao final de cada ciclo, ANTES de terminar:
+
+```bash
+NEXT=$(date -d "+10 minutes" +%Y%m%d_%H_%M)
+mv /workspace/obsidian/contractors/_running/*_tamagochi.md \
+   /workspace/obsidian/contractors/_schedule/${NEXT}_tamagochi.md 2>/dev/null
+```

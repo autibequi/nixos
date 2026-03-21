@@ -1,3 +1,5 @@
+//! `ComposeCmd` builder — wraps `docker compose` with file, env-file, project, and env-var support.
+
 use std::process::Command;
 
 use crate::error::{Result, ZionError};
@@ -21,21 +23,23 @@ impl Default for ComposeCmd {
 impl ComposeCmd {
     pub fn new() -> Self {
         Self {
-            compose_file: paths::compose_file().to_string_lossy().to_string(),
+            compose_file: paths::compose_file().to_string_lossy().into_owned(),
             env_file: {
                 let ef = paths::env_file();
-                ef.exists().then(|| ef.to_string_lossy().to_string())
+                ef.exists().then(|| ef.to_string_lossy().into_owned())
             },
             project: None,
             env_vars: Vec::new(),
         }
     }
 
+    #[must_use]
     pub fn project(mut self, name: &str) -> Self {
         self.project = Some(name.to_string());
         self
     }
 
+    #[must_use]
     pub fn env(mut self, key: &str, val: &str) -> Self {
         self.env_vars.push((key.to_string(), val.to_string()));
         self

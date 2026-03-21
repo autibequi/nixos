@@ -1,3 +1,5 @@
+//! `ZionConfig` — loads and parses `~/.zion` (KEY=value, bash-sourceable format).
+
 use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
@@ -44,7 +46,7 @@ impl ZionConfig {
             cfg.danger = cfg
                 .raw
                 .get("DANGER")
-                .or(cfg.raw.get("danger"))
+                .or_else(|| cfg.raw.get("danger"))
                 .is_some_and(|v| v != "0" && v != "false");
             cfg.gh_token = cfg.raw.get("GH_TOKEN").cloned();
             cfg.anthropic_api_key = cfg.raw.get("ANTHROPIC_API_KEY").cloned();
@@ -72,21 +74,18 @@ impl ZionConfig {
         Ok(cfg)
     }
 
+    #[must_use]
     pub fn get(&self, key: &str) -> Option<&str> {
-        self.raw.get(key).map(|s| s.as_str())
+        self.raw.get(key).map(String::as_str)
     }
 }
 
 fn config_path() -> PathBuf {
-    std::env::var("ZION_CONFIG")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| dirs_home().join(".zion"))
+    std::env::var("ZION_CONFIG").map_or_else(|_| dirs_home().join(".zion"), PathBuf::from)
 }
 
 fn dirs_home() -> PathBuf {
-    std::env::var("HOME")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| PathBuf::from("/root"))
+    std::env::var("HOME").map_or_else(|_| PathBuf::from("/root"), PathBuf::from)
 }
 
 fn docker_socket_gid() -> Option<u32> {
@@ -127,18 +126,54 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_key_value() {
-        let content = r#"
-# comment
-engine=claude
-model="sonnet"
-GH_TOKEN='abc123'
-export DANGER=true
-"#;
-        let map = parse_key_value(content);
+    fn parse_basic() {
+        let map = parse_key_value("engine=claude\nmodel=sonnet\n");
         assert_eq!(map.get("engine").unwrap(), "claude");
         assert_eq!(map.get("model").unwrap(), "sonnet");
+    }
+
+    #[test]
+    fn parse_quotes_and_export() {
+        let map = parse_key_value(r#"
+# comment
+GH_TOKEN='abc123'
+export ANTHROPIC_API_KEY="sk-ant-xxx"
+DANGER=true
+"#);
         assert_eq!(map.get("GH_TOKEN").unwrap(), "abc123");
+        assert_eq!(map.get("ANTHROPIC_API_KEY").unwrap(), "sk-ant-xxx");
         assert_eq!(map.get("DANGER").unwrap(), "true");
+    }
+
+    #[test]
+    fn parse_empty_and_comments() {
+        let map = parse_key_value("# only comments\n\n  \n");
+        assert!(map.is_empty());
+    }
+
+    #[test]
+    fn parse_value_with_equals() {
+        // KEY=value=with=equals should capture everything after first =
+        let map = parse_key_value("url=https://example.com?a=1&b=2\n");
+        assert_eq!(map.get("url").unwrap(), "https://example.com?a=1&b=2");
+    }
+
+    #[test]
+    fn parse_spaces_around_key() {
+        let map = parse_key_value("  engine = claude  \n");
+        assert_eq!(map.get("engine").unwrap(), "claude");
+    }
+
+    #[test]
+    fn parse_danger_false_not_set() {
+        let map = parse_key_value("danger=false\n");
+        // The config loader checks this — verify raw value is preserved
+        assert_eq!(map.get("danger").unwrap(), "false");
+    }
+
+    #[test]
+    fn parse_overrides_last_wins() {
+        let map = parse_key_value("engine=claude\nengine=cursor\n");
+        assert_eq!(map.get("engine").unwrap(), "cursor");
     }
 }

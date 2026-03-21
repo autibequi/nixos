@@ -1,9 +1,10 @@
+//! Zion CLI — command-line interface for the Zion agent orchestration system.
+
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 
 mod commands;
 mod exec;
-mod output;
 
 use commands::SessionFlags;
 
@@ -17,65 +18,123 @@ struct Cli {
     #[command(flatten)]
     flags: SessionFlags,
 
-    #[arg(long)] haiku: bool,
-    #[arg(long)] opus: bool,
-    #[arg(long)] sonnet: bool,
+    #[arg(long)]
+    haiku: bool,
+    #[arg(long)]
+    opus: bool,
+    #[arg(long)]
+    sonnet: bool,
 }
 
 #[derive(Subcommand)]
 enum Commands {
     /// New session in container
     #[command(alias = "run", alias = "r", alias = "open", alias = "code")]
-    New { #[command(flatten)] flags: SessionFlags },
+    New {
+        #[command(flatten)]
+        flags: SessionFlags,
+    },
     /// Continue last session
     #[command(alias = "cont")]
     Continue { dir: Option<String> },
     /// Session with Claude engine
-    Claude { #[command(flatten)] flags: SessionFlags },
+    Claude {
+        #[command(flatten)]
+        flags: SessionFlags,
+    },
     /// Session with Cursor engine
-    Cursor { #[command(flatten)] flags: SessionFlags },
+    Cursor {
+        #[command(flatten)]
+        flags: SessionFlags,
+    },
     /// Session with OpenCode engine
     #[command(alias = "oc")]
-    Opencode { #[command(flatten)] flags: SessionFlags },
+    Opencode {
+        #[command(flatten)]
+        flags: SessionFlags,
+    },
     /// Resume a session by ID
-    Resume { dir: Option<String>, #[arg(long, num_args = 0..=1, default_missing_value = "1")] resume: Option<String> },
+    Resume {
+        dir: Option<String>,
+        #[arg(long, num_args = 0..=1, default_missing_value = "1")]
+        resume: Option<String>,
+    },
     /// Bash shell inside container
     #[command(alias = "sh")]
     Shell { dir: Option<String> },
     /// Ephemeral session (auto-detect nixos)
     #[command(alias = "l")]
-    Leech { #[command(flatten)] flags: SessionFlags, #[arg(long, short = 's')] shell: bool },
+    Leech {
+        #[command(flatten)]
+        flags: SessionFlags,
+        #[arg(long, short = 's')]
+        shell: bool,
+    },
     /// Lab session (nixos mount)
-    Lab { #[arg(long)] engine: Option<String>, #[arg(long)] model: Option<String>,
-           #[arg(long, num_args = 0..=1, default_missing_value = "1")] resume: Option<String>, #[arg(long)] danger: bool },
+    Lab {
+        #[arg(long)]
+        engine: Option<String>,
+        #[arg(long)]
+        model: Option<String>,
+        #[arg(long, num_args = 0..=1, default_missing_value = "1")]
+        resume: Option<String>,
+        #[arg(long)]
+        danger: bool,
+    },
 
     /// Build Docker image
-    Build { #[arg(long)] danger: bool },
+    Build {
+        #[arg(long)]
+        danger: bool,
+    },
     /// Stop compose containers
     Down,
     /// Stop all + kill strays
     Shutdown,
     /// Remove stopped containers
     #[command(alias = "gc", alias = "prune")]
-    Clean { #[arg(long, short = 'f')] force: bool },
+    Clean {
+        #[arg(long, short = 'f')]
+        force: bool,
+    },
 
     /// Deploy dotfiles via GNU stow
-    Stow { #[arg(default_value = "restow")] action: String, #[arg(long, short = 'r')] reload: bool },
+    Stow {
+        #[arg(default_value = "restow")]
+        action: String,
+        #[arg(long, short = 'r')]
+        reload: bool,
+    },
     /// NixOS operations (switch/test/boot/build)
-    Os { #[command(subcommand)] action: OsAction },
+    Os {
+        #[command(subcommand)]
+        action: OsAction,
+    },
     /// Build and install zion CLIs
     #[command(alias = "install")]
     Update,
     /// Create ~/.zion config
-    Init { #[arg(long)] force: bool },
+    Init {
+        #[arg(long)]
+        force: bool,
+    },
     /// Set default engine
     Set { engine: String },
 
     /// Execute a Claude Code hook
     #[command(alias = "hook")]
-    Hooks { hook: Option<String>, #[arg(long, short = 'l')] list: bool, #[arg(trailing_var_arg = true)] env_overrides: Vec<String> },
+    Hooks {
+        hook: Option<String>,
+        #[arg(long, short = 'l')]
+        list: bool,
+        #[arg(trailing_var_arg = true)]
+        env_overrides: Vec<String>,
+    },
     /// Chrome Relay (CDP)
-    Relay { #[arg(default_value = "start")] action: String },
+    Relay {
+        #[arg(default_value = "start")]
+        action: String,
+    },
     /// Read or add to inbox
     #[command(alias = "ib")]
     Inbox { message: Option<String> },
@@ -86,42 +145,70 @@ enum Commands {
     Man,
     /// Show banner
     #[command(alias = "h")]
-    Help2,
+    Banner,
     /// Claude usage stats
-    Usage { #[arg(long)] waybar: bool, #[arg(long)] json: bool, #[arg(long)] no_cache: bool, #[arg(long)] refresh: bool },
+    Usage {
+        #[arg(long)]
+        waybar: bool,
+        #[arg(long)]
+        json: bool,
+        #[arg(long)]
+        no_cache: bool,
+        #[arg(long)]
+        refresh: bool,
+    },
     /// Print Claude OAuth token
     Token,
 
     /// Interactive status dashboard
     #[command(alias = "st")]
-    Status { #[arg(long, short = 't', default_value = "5")] tick: u64 },
+    Status {
+        #[arg(long, short = 't', default_value = "5")]
+        tick: u64,
+    },
 
     // ── Contractors ──────────────────────────────────────────
     #[command(alias = "ct")]
-    Contractors { #[command(subcommand)] action: ContractorsAction },
+    Contractors {
+        #[command(subcommand)]
+        action: ContractorsAction,
+    },
 
     // ── Git ──────────────────────────────────────────────────
     #[command(alias = "g")]
-    Git { #[command(subcommand)] action: GitAction },
+    Git {
+        #[command(subcommand)]
+        action: GitAction,
+    },
 }
 
 #[derive(Subcommand)]
 enum OsAction {
-    #[command(alias = "sw")] Switch,
-    #[command(alias = "t")] Test,
-    #[command(alias = "b")] Boot,
+    #[command(alias = "sw")]
+    Switch,
+    #[command(alias = "t")]
+    Test,
+    #[command(alias = "b")]
+    Boot,
     Build,
 }
 
 #[derive(Subcommand)]
 enum ContractorsAction {
-    #[command(alias = "r")] Run { name: String, #[arg(long, short = 's')] steps: Option<u32> },
-    #[command(alias = "st", alias = "log")] Status,
+    #[command(alias = "r")]
+    Run {
+        name: String,
+        #[arg(long, short = 's')]
+        steps: Option<u32>,
+    },
+    #[command(alias = "st", alias = "log")]
+    Status,
 }
 
 #[derive(Subcommand)]
 enum GitAction {
-    #[command(alias = "ap")] Append { branch: String },
+    #[command(alias = "ap")]
+    Append { branch: String },
 }
 
 fn main() -> Result<()> {
@@ -129,43 +216,63 @@ fn main() -> Result<()> {
 
     match cli.command {
         // Session
-        Some(Commands::New { flags })      => commands::session::new(flags),
-        Some(Commands::Continue { dir })   => commands::session::cont(dir),
-        Some(Commands::Claude { flags })   => commands::session::engine("claude", flags),
-        Some(Commands::Cursor { flags })   => commands::session::engine("cursor", flags),
+        Some(Commands::New { flags }) => commands::session::new(flags),
+        Some(Commands::Continue { dir }) => commands::session::cont(dir),
+        Some(Commands::Claude { flags }) => commands::session::engine("claude", flags),
+        Some(Commands::Cursor { flags }) => commands::session::engine("cursor", flags),
         Some(Commands::Opencode { flags }) => commands::session::engine("opencode", flags),
         Some(Commands::Resume { dir, resume }) => commands::session::resume(dir, resume),
-        Some(Commands::Shell { dir })      => commands::session::shell(dir),
+        Some(Commands::Shell { dir }) => commands::session::shell(dir),
         Some(Commands::Leech { flags, shell }) => commands::session::leech(flags, shell),
-        Some(Commands::Lab { engine, model, resume, danger }) => commands::session::lab(engine, model, resume, danger),
+        Some(Commands::Lab {
+            engine,
+            model,
+            resume,
+            danger,
+        }) => commands::session::lab(engine, model, resume, danger),
 
         // Docker
-        Some(Commands::Build { danger })   => commands::docker::build(danger),
-        Some(Commands::Down)               => commands::docker::down(),
-        Some(Commands::Shutdown)           => commands::docker::shutdown(),
-        Some(Commands::Clean { force })    => commands::docker::clean(force),
+        Some(Commands::Build { danger }) => commands::docker::build(danger),
+        Some(Commands::Down) => commands::docker::down(),
+        Some(Commands::Shutdown) => commands::docker::shutdown(),
+        Some(Commands::Clean { force }) => commands::docker::clean(force),
 
         // Host
         Some(Commands::Stow { action, reload }) => commands::host::stow(&action, reload),
         Some(Commands::Os { action }) => commands::host::os(match action {
-            OsAction::Switch => "switch", OsAction::Test => "test", OsAction::Boot => "boot", OsAction::Build => "build",
+            OsAction::Switch => "switch",
+            OsAction::Test => "test",
+            OsAction::Boot => "boot",
+            OsAction::Build => "build",
         }),
-        Some(Commands::Update)             => commands::host::update(),
-        Some(Commands::Init { force })     => commands::host::init(force),
-        Some(Commands::Set { engine })     => commands::host::set_engine(&engine),
+        Some(Commands::Update) => commands::host::update(),
+        Some(Commands::Init { force }) => commands::host::init(force),
+        Some(Commands::Set { engine }) => commands::host::set_engine(&engine),
 
         // Tools
-        Some(Commands::Hooks { hook, list, env_overrides }) => commands::tools::hooks(hook, list, env_overrides),
-        Some(Commands::Relay { action })   => commands::tools::relay(&action),
-        Some(Commands::Inbox { message })  => commands::tools::inbox(message),
-        Some(Commands::Outbox)             => commands::tools::outbox(),
-        Some(Commands::Man)                => commands::tools::man(),
-        Some(Commands::Help2)              => commands::tools::help_banner(),
-        Some(Commands::Usage { waybar, no_cache, refresh, .. }) => commands::tools::usage(waybar, no_cache || refresh),
-        Some(Commands::Token)              => commands::tools::token(),
+        Some(Commands::Hooks {
+            hook,
+            list,
+            env_overrides,
+        }) => commands::tools::hooks(hook, list, env_overrides),
+        Some(Commands::Relay { action }) => commands::tools::relay(&action),
+        Some(Commands::Inbox { message }) => commands::tools::inbox(message),
+        Some(Commands::Outbox) => commands::tools::outbox(),
+        Some(Commands::Man) => commands::tools::man(),
+        Some(Commands::Banner) => commands::tools::help_banner(),
+        Some(Commands::Usage {
+            waybar,
+            no_cache,
+            refresh,
+            ..
+        }) => commands::tools::usage(waybar, no_cache || refresh),
+        Some(Commands::Token) => commands::tools::token(),
 
         // Interactive
-        Some(Commands::Status { tick })    => { zion_tui::run_status(tick)?; Ok(()) },
+        Some(Commands::Status { tick }) => {
+            zion_tui::run_status(tick)?;
+            Ok(())
+        }
         // Contractors
         Some(Commands::Contractors { action }) => match action {
             ContractorsAction::Run { name, steps } => commands::contractors::run(&name, steps),
@@ -179,9 +286,13 @@ fn main() -> Result<()> {
         // No subcommand = implicit `new`
         None => {
             let mut flags = cli.flags;
-            if cli.haiku { flags.model = Some("haiku".into()); }
-            else if cli.opus { flags.model = Some("opus".into()); }
-            else if cli.sonnet { flags.model = Some("sonnet".into()); }
+            if cli.haiku {
+                flags.model = Some("haiku".into());
+            } else if cli.opus {
+                flags.model = Some("opus".into());
+            } else if cli.sonnet {
+                flags.model = Some("sonnet".into());
+            }
             commands::session::new(flags)
         }
     }

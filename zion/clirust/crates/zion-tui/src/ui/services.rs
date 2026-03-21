@@ -1,3 +1,5 @@
+//! Render the dockerized-services panel with status, uptime, CPU, and memory.
+
 use ratatui::layout::Rect;
 use ratatui::text::{Line, Span};
 use ratatui::widgets::Paragraph;
@@ -33,7 +35,7 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                 Span::raw(" "),
                 Span::styled("\u{25cb}", theme::down_icon()),
                 Span::raw(" "),
-                Span::styled(format!("{:<16}", svc), style),
+                Span::styled(format!("{svc:<16}"), style),
                 Span::styled("stopped", theme::dim()),
             ]));
         }
@@ -108,17 +110,17 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                 Span::raw(" "),
                 Span::styled(status_icon, status_style),
                 Span::raw(" "),
-                Span::styled(format!("{:<16}", svc), name_style),
-                Span::styled(format!("{:<6}", status_text), theme::uptime()),
+                Span::styled(format!("{svc:<16}"), name_style),
+                Span::styled(format!("{status_text:<6}"), theme::uptime()),
             ];
 
             if !cpu.is_empty() {
-                spans.push(Span::styled(format!("  cpu {:<6}", cpu), theme::cpu()));
+                spans.push(Span::styled(format!("  cpu {cpu:<6}"), theme::cpu()));
                 let mem_short = mem
                     .replace("MiB", "M")
                     .replace("GiB", "G")
                     .replace(" / ", "/");
-                spans.push(Span::styled(format!(" {}", mem_short), theme::mem()));
+                spans.push(Span::styled(format!(" {mem_short}"), theme::mem()));
             }
 
             lines.push(Line::from(spans));
@@ -129,6 +131,7 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
     frame.render_widget(widget, area);
 }
 
+/// Strip the "Up " prefix and abbreviate common duration words for compact display.
 fn format_uptime(status: &str) -> String {
     status
         .strip_prefix("Up ")

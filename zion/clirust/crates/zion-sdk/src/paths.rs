@@ -1,67 +1,74 @@
+//! Filesystem path helpers — home, NixOS root, Obsidian vault, project slug resolution.
+
 use std::path::{Path, PathBuf};
 
 use crate::error::{Result, ZionError};
 
 // ── Core paths ───────────────────────────────────────────────────
 
+#[must_use]
 pub fn home() -> PathBuf {
-    std::env::var("HOME")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| PathBuf::from("/root"))
+    std::env::var("HOME").map_or_else(|_| PathBuf::from("/root"), PathBuf::from)
 }
 
+#[must_use]
 pub fn nixos_dir() -> PathBuf {
-    std::env::var("ZION_NIXOS_DIR")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| home().join("nixos"))
+    std::env::var("ZION_NIXOS_DIR").map_or_else(|_| home().join("nixos"), PathBuf::from)
 }
 
+#[must_use]
 pub fn zion_root() -> PathBuf {
     nixos_dir().join("zion")
 }
 
+#[must_use]
 pub fn cli_dir() -> PathBuf {
     zion_root().join("cli")
 }
 
+#[must_use]
 pub fn clirust_dir() -> PathBuf {
     zion_root().join("clirust")
 }
 
+#[must_use]
 pub fn compose_file() -> PathBuf {
     cli_dir().join("docker-compose.zion.yml")
 }
 
+#[must_use]
 pub fn env_file() -> PathBuf {
     cli_dir().join(".env")
 }
 
+#[must_use]
 pub fn bin_dir() -> PathBuf {
     home().join(".local/bin")
 }
 
 // ── Obsidian paths ───────────────────────────────────────────────
 
+#[must_use]
 pub fn obsidian_path() -> PathBuf {
-    std::env::var("OBSIDIAN_PATH")
-        .map(|s| PathBuf::from(expand_home(&s)))
-        .unwrap_or_else(|_| home().join(".ovault/Work"))
+    std::env::var("OBSIDIAN_PATH").map_or_else(
+        |_| home().join(".ovault/Work"),
+        |s| PathBuf::from(expand_home(&s)),
+    )
 }
 
 /// Obsidian path resolved + created if missing (for compose).
+#[must_use]
 pub fn obsidian_ensured() -> String {
     let p = obsidian_path();
     if p.exists() {
-        p.canonicalize()
-            .unwrap_or(p.clone())
-            .to_string_lossy()
-            .to_string()
+        p.canonicalize().unwrap_or(p).to_string_lossy().into_owned()
     } else {
         let _ = std::fs::create_dir_all(&p);
-        p.to_string_lossy().to_string()
+        p.to_string_lossy().into_owned()
     }
 }
 
+#[must_use]
 pub fn tasks_dir() -> Option<PathBuf> {
     first_existing_dir(&[
         obsidian_path().join("tasks"),
@@ -70,6 +77,7 @@ pub fn tasks_dir() -> Option<PathBuf> {
     ])
 }
 
+#[must_use]
 pub fn inbox_file() -> Option<PathBuf> {
     first_existing_file(&[
         obsidian_path().join("inbox/inbox.md"),
@@ -77,6 +85,7 @@ pub fn inbox_file() -> Option<PathBuf> {
     ])
 }
 
+#[must_use]
 pub fn outbox_dir() -> Option<PathBuf> {
     first_existing_dir(&[
         obsidian_path().join("outbox"),
@@ -86,6 +95,7 @@ pub fn outbox_dir() -> Option<PathBuf> {
 
 // ── Zion internal paths ──────────────────────────────────────────
 
+#[must_use]
 pub fn hooks_dir() -> Option<PathBuf> {
     first_existing_dir(&[
         zion_root().join("hooks/claude-code"),
@@ -93,6 +103,7 @@ pub fn hooks_dir() -> Option<PathBuf> {
     ])
 }
 
+#[must_use]
 pub fn agent_file(name: &str) -> Option<PathBuf> {
     first_existing_file(&[
         zion_root().join(format!("agents/{name}/agent.md")),
@@ -100,6 +111,7 @@ pub fn agent_file(name: &str) -> Option<PathBuf> {
     ])
 }
 
+#[must_use]
 pub fn task_runner() -> Option<PathBuf> {
     first_existing_file(&[
         zion_root().join("scripts/task-runner.sh"),
@@ -107,6 +119,7 @@ pub fn task_runner() -> Option<PathBuf> {
     ])
 }
 
+#[must_use]
 pub fn usage_script() -> Option<PathBuf> {
     first_existing_file(&[
         home().join(".config/waybar/claude-oauth-usage.sh"),
@@ -126,10 +139,13 @@ pub fn resolve_dir(dir: Option<&str>) -> Result<PathBuf> {
         .map_err(|_| ZionError::DirNotFound(path.display().to_string()))
 }
 
+#[must_use]
 pub fn proj_slug(dir: &Path) -> String {
     dir.file_name()
-        .map(|n| n.to_string_lossy().to_string())
-        .unwrap_or_else(|| "default".to_string())
+        .map_or_else(
+            || "default".to_string(),
+            |n| n.to_string_lossy().to_string(),
+        )
         .to_lowercase()
         .chars()
         .map(|c| if c.is_ascii_alphanumeric() { c } else { '-' })
@@ -138,6 +154,7 @@ pub fn proj_slug(dir: &Path) -> String {
         .to_string()
 }
 
+#[must_use]
 pub fn proj_name(slug: &str, instance: Option<&str>) -> String {
     match instance {
         Some(i) if i != "1" && !i.is_empty() => format!("zion-{slug}-{i}"),
@@ -147,22 +164,25 @@ pub fn proj_name(slug: &str, instance: Option<&str>) -> String {
 
 // ── Env helpers ──────────────────────────────────────────────────
 
+#[must_use]
 pub fn expand_home(path: &str) -> String {
-    let h = home().to_string_lossy().to_string();
+    let h = home().to_string_lossy().into_owned();
     path.replace("$HOME", &h)
         .replace("${HOME}", &h)
         .replacen("~/", &format!("{h}/"), 1)
 }
 
+#[must_use]
 pub fn xdg_data_home() -> String {
-    std::env::var("XDG_DATA_HOME")
-        .unwrap_or_else(|_| format!("{}/.local/share", home().display()))
+    std::env::var("XDG_DATA_HOME").unwrap_or_else(|_| format!("{}/.local/share", home().display()))
 }
 
+#[must_use]
 pub fn xdg_runtime_dir() -> String {
     std::env::var("XDG_RUNTIME_DIR").unwrap_or_else(|_| "/run/user/1000".into())
 }
 
+#[must_use]
 pub fn timestamp() -> String {
     std::process::Command::new("date")
         .arg("+%Y%m%d_%H_%M")
@@ -173,6 +193,7 @@ pub fn timestamp() -> String {
         .unwrap_or_else(|| "00000000_00_00".to_string())
 }
 
+#[must_use]
 pub fn date_iso() -> String {
     std::process::Command::new("date")
         .arg("+%Y-%m-%d")
@@ -185,14 +206,17 @@ pub fn date_iso() -> String {
 
 // ── Lookup helpers ───────────────────────────────────────────────
 
+#[must_use]
 pub fn first_existing_file(candidates: &[PathBuf]) -> Option<PathBuf> {
     candidates.iter().find(|p| p.is_file()).cloned()
 }
 
+#[must_use]
 pub fn first_existing_dir(candidates: &[PathBuf]) -> Option<PathBuf> {
     candidates.iter().find(|p| p.is_dir()).cloned()
 }
 
+#[must_use]
 pub fn in_container() -> bool {
     std::env::var("in_docker").unwrap_or_default() == "1"
         || std::env::var("CLAUDE_ENV").unwrap_or_default() == "container"
@@ -204,23 +228,126 @@ pub fn in_container() -> bool {
 mod tests {
     use super::*;
 
+    // ── proj_slug ────────────────────────────────────────────
+
     #[test]
-    fn test_proj_slug() {
-        assert_eq!(proj_slug(Path::new("/home/user/My Project")), "my-project");
+    fn slug_basic() {
         assert_eq!(proj_slug(Path::new("/tmp/foo-bar")), "foo-bar");
     }
 
     #[test]
-    fn test_proj_name() {
+    fn slug_spaces_and_caps() {
+        assert_eq!(proj_slug(Path::new("/home/user/My Project")), "my-project");
+    }
+
+    #[test]
+    fn slug_special_chars() {
+        assert_eq!(proj_slug(Path::new("/tmp/foo@bar#baz")), "foo-bar-baz");
+    }
+
+    #[test]
+    fn slug_trailing_special() {
+        assert_eq!(proj_slug(Path::new("/tmp/test...")), "test");
+    }
+
+    // ── proj_name ────────────────────────────────────────────
+
+    #[test]
+    fn name_no_instance() {
         assert_eq!(proj_name("projects", None), "zion-projects");
+    }
+
+    #[test]
+    fn name_instance_2() {
         assert_eq!(proj_name("projects", Some("2")), "zion-projects-2");
+    }
+
+    #[test]
+    fn name_instance_1_ignored() {
         assert_eq!(proj_name("projects", Some("1")), "zion-projects");
     }
 
     #[test]
-    fn test_expand_home() {
-        // Can't test with real HOME, but test the replacement logic
-        let result = expand_home("$HOME/test");
-        assert!(!result.contains("$HOME"));
+    fn name_instance_empty_ignored() {
+        assert_eq!(proj_name("projects", Some("")), "zion-projects");
+    }
+
+    // ── expand_home ──────────────────────────────────────────
+
+    #[test]
+    fn expand_dollar_home() {
+        let r = expand_home("$HOME/test");
+        assert!(!r.contains("$HOME"));
+        assert!(r.ends_with("/test"));
+    }
+
+    #[test]
+    fn expand_braced_home() {
+        let r = expand_home("${HOME}/.config");
+        assert!(!r.contains("${HOME}"));
+        assert!(r.ends_with("/.config"));
+    }
+
+    #[test]
+    fn expand_tilde() {
+        let r = expand_home("~/projects");
+        assert!(!r.starts_with('~'));
+        assert!(r.ends_with("/projects"));
+    }
+
+    #[test]
+    fn expand_no_home_passthrough() {
+        assert_eq!(expand_home("/absolute/path"), "/absolute/path");
+    }
+
+    #[test]
+    fn expand_tilde_only_first() {
+        // Only first ~ should expand, not ones in middle
+        let r = expand_home("~/a/~/b");
+        assert!(!r.starts_with('~'));
+        assert!(r.contains("/a/~/b"));
+    }
+
+    // ── resolve_dir ──────────────────────────────────────────
+
+    #[test]
+    fn resolve_dir_existing() {
+        let r = resolve_dir(Some("/tmp"));
+        assert!(r.is_ok());
+        assert_eq!(r.unwrap().to_string_lossy(), "/tmp");
+    }
+
+    #[test]
+    fn resolve_dir_nonexistent() {
+        let r = resolve_dir(Some("/nonexistent_path_12345"));
+        assert!(r.is_err());
+    }
+
+    #[test]
+    fn resolve_dir_empty_falls_back() {
+        // Empty string should fallback to ~/projects
+        let r = resolve_dir(Some(""));
+        // May or may not exist, but tests the logic path
+        let _ = r;
+    }
+
+    // ── first_existing ───────────────────────────────────────
+
+    #[test]
+    fn first_existing_file_none() {
+        let r = first_existing_file(&[
+            PathBuf::from("/nonexistent_1"),
+            PathBuf::from("/nonexistent_2"),
+        ]);
+        assert!(r.is_none());
+    }
+
+    #[test]
+    fn first_existing_dir_finds_tmp() {
+        let r = first_existing_dir(&[
+            PathBuf::from("/nonexistent"),
+            PathBuf::from("/tmp"),
+        ]);
+        assert_eq!(r.unwrap(), PathBuf::from("/tmp"));
     }
 }

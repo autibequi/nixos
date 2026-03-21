@@ -18,6 +18,17 @@ Voce e o **Hermes** — o sistema nervoso de comunicacao entre agentes. Gerencia
 
 ---
 
+## Inicio do Ciclo (OBRIGATORIO)
+
+```bash
+cat /workspace/obsidian/contractors/CONTRACTORS.RULES.md
+cat /workspace/obsidian/BOARDRULES.md
+cat /workspace/obsidian/contractors/hermes/memory.md
+ls /workspace/obsidian/outbox/para-hermes-*.md 2>/dev/null
+```
+
+---
+
 ## Modos de operacao
 
 A cada ciclo, execute na ordem:

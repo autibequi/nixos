@@ -1,3 +1,5 @@
+//! Zion SDK — core logic for the Zion agent orchestration system.
+
 pub mod compose;
 pub mod config;
 pub mod docker;

@@ -1,5 +1,9 @@
+//! Session commands — launch, resume, and manage agent sessions inside the container.
+
 use anyhow::Result;
-use zion_sdk::{compose::ComposeCmd, config::ZionConfig, engine::Engine, paths, session::SessionRunner};
+use zion_sdk::{
+    compose::ComposeCmd, config::ZionConfig, engine::Engine, paths, session::SessionRunner,
+};
 
 use super::SessionFlags;
 
@@ -13,7 +17,9 @@ pub fn new(flags: SessionFlags) -> Result<()> {
 /// `zion continue` — resume last session.
 pub fn cont(dir: Option<String>) -> Result<()> {
     let config = ZionConfig::load()?;
-    let engine = config.engine.ok_or_else(|| anyhow::anyhow!("engine required in ~/.zion"))?;
+    let engine = config
+        .engine
+        .ok_or_else(|| anyhow::anyhow!("engine required in ~/.zion"))?;
     let mount = paths::resolve_dir(dir.as_deref())?;
     let slug = paths::proj_slug(&mount);
 
@@ -35,7 +41,9 @@ pub fn engine(name: &str, flags: SessionFlags) -> Result<()> {
 /// `zion resume` — resume by session ID.
 pub fn resume(dir: Option<String>, session_id: Option<String>) -> Result<()> {
     let config = ZionConfig::load()?;
-    let engine = config.engine.ok_or_else(|| anyhow::anyhow!("engine required in ~/.zion"))?;
+    let engine = config
+        .engine
+        .ok_or_else(|| anyhow::anyhow!("engine required in ~/.zion"))?;
     let mount = paths::resolve_dir(dir.as_deref())?;
     let slug = paths::proj_slug(&mount);
 
@@ -64,10 +72,18 @@ pub fn shell(dir: Option<String>) -> Result<()> {
         .env("ZION_ROOT", &paths::zion_root().to_string_lossy())
         .env("ZION_NIXOS_DIR", &paths::nixos_dir().to_string_lossy())
         .execute(&[
-            "run", "--rm", "-it", "--entrypoint", "/entrypoint.sh",
-            "-e", &format!("CLAUDIO_MOUNT={}", mount.display()),
-            "-e", "BOOTSTRAP_SKIP_CLEAR=1",
-            "leech", "/bin/bash", "-c",
+            "run",
+            "--rm",
+            "-it",
+            "--entrypoint",
+            "/entrypoint.sh",
+            "-e",
+            &format!("CLAUDIO_MOUNT={}", mount.display()),
+            "-e",
+            "BOOTSTRAP_SKIP_CLEAR=1",
+            "leech",
+            "/bin/bash",
+            "-c",
             ". /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt && exec bash",
         ])?)
 }
@@ -79,13 +95,23 @@ pub fn leech(flags: SessionFlags, shell_mode: bool) -> Result<()> {
     }
 
     let config = ZionConfig::load()?;
-    let raw = flags.dir.clone().unwrap_or_else(|| paths::home().join("projects").to_string_lossy().to_string());
-    let mount = std::path::Path::new(&raw).canonicalize()
+    let raw = flags
+        .dir
+        .clone()
+        .unwrap_or_else(|| paths::home().join("projects").to_string_lossy().to_string());
+    let mount = std::path::Path::new(&raw)
+        .canonicalize()
         .map_err(|_| anyhow::anyhow!("dir not found: {raw}"))?;
 
-    let is_nixos = paths::nixos_dir().canonicalize().map(|n| mount == n).unwrap_or(false);
-    let proj = if is_nixos { "zion-projects".into() }
-    else { paths::proj_name(&paths::proj_slug(&mount), None) };
+    let is_nixos = paths::nixos_dir()
+        .canonicalize()
+        .map(|n| mount == n)
+        .unwrap_or(false);
+    let proj = if is_nixos {
+        "zion-projects".into()
+    } else {
+        paths::proj_name(&paths::proj_slug(&mount), None)
+    };
 
     let engine = resolve_engine(flags.engine.as_deref(), &config)?;
     let init_md = flags.resolve_init_md(&mount);
@@ -102,21 +128,30 @@ pub fn leech(flags: SessionFlags, shell_mode: bool) -> Result<()> {
 }
 
 /// `zion lab` — nixos mount session.
-pub fn lab(engine: Option<String>, model: Option<String>, resume: Option<String>, danger: bool) -> Result<()> {
+pub fn lab(
+    engine: Option<String>,
+    model: Option<String>,
+    resume: Option<String>,
+    danger: bool,
+) -> Result<()> {
     let config = ZionConfig::load()?;
-    let mount = paths::nixos_dir().canonicalize()
+    let mount = paths::nixos_dir()
+        .canonicalize()
         .map_err(|_| anyhow::anyhow!("nixos dir not found"))?;
 
     let engine: Engine = engine
         .or_else(|| config.engine.map(|e| e.to_string()))
         .unwrap_or_else(|| "claude".into())
-        .parse().map_err(|e| anyhow::anyhow!("{e}"))?;
+        .parse()
+        .map_err(|e| anyhow::anyhow!("{e}"))?;
 
     Ok(SessionRunner::new(engine)
         .mount_path(&mount.to_string_lossy())
         .mount_opts("rw")
         .proj_name("zion-projects")
-        .model(model).danger(danger).resume(resume)
+        .model(model)
+        .danger(danger)
+        .resume(resume)
         .run(&config)?)
 }
 
@@ -126,7 +161,11 @@ fn resolve_engine(flag: Option<&str>, config: &ZionConfig) -> Result<Engine> {
     let name = flag
         .map(|s| s.to_string())
         .or_else(|| config.engine.map(|e| e.to_string()))
-        .ok_or_else(|| anyhow::anyhow!("engine required: use --engine=claude|cursor|opencode or set engine= in ~/.zion"))?;
+        .ok_or_else(|| {
+            anyhow::anyhow!(
+                "engine required: use --engine=claude|cursor|opencode or set engine= in ~/.zion"
+            )
+        })?;
     name.parse().map_err(|e| anyhow::anyhow!("{e}"))
 }
 

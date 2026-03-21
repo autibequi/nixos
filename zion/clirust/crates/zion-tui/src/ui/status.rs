@@ -1,3 +1,5 @@
+//! Top-level status dashboard: header, sessions, services, and footer layout.
+
 use ratatui::layout::{Constraint, Direction, Layout};
 use ratatui::Frame;
 
@@ -28,7 +30,9 @@ fn dk_services_height(app: &App) -> u16 {
     if count == 0 {
         0
     } else {
-        (count as u16) + 3
+        // saturating cast: service counts will never realistically exceed u16::MAX
+        let count_u16: u16 = count.try_into().unwrap_or(u16::MAX);
+        count_u16.saturating_add(3)
     }
 }
 
@@ -78,9 +82,13 @@ fn render_footer(frame: &mut Frame, app: &App, area: ratatui::layout::Rect) {
     frame.render_widget(widget, area);
 }
 
+/// Return the current wall-clock time as `HH:MM:SS`.
+///
+/// The `chrono` crate is not a dependency of this crate, so we shell out to
+/// the system `date` command rather than adding a heavy time-parsing dependency
+/// just for a single formatted string.
 fn chrono_now() -> String {
     use std::process::Command;
-    // Simple: use date command since we don't have chrono crate
     Command::new("date")
         .arg("+%H:%M:%S")
         .output()
