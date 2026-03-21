@@ -1,7 +1,10 @@
 //! System status collection — agent containers, background sessions, DK services, and stats.
 
+use crate::boot::BootInfo;
 use crate::docker::{self, ContainerStats};
 use crate::error::Result;
+use crate::logs::LogEntry;
+use crate::quota::QuotaInfo;
 
 /// A point-in-time snapshot of the Zion system status.
 #[derive(Debug, Clone, Default)]
@@ -10,6 +13,9 @@ pub struct StatusSnapshot {
     pub background: Vec<SessionInfo>,
     pub dk_services: Vec<DkServiceInfo>,
     pub stats: Vec<ContainerStats>,
+    pub boot: BootInfo,
+    pub quota: QuotaInfo,
+    pub logs: Vec<LogEntry>,
 }
 
 /// Info about a Zion agent/background session.
@@ -41,8 +47,25 @@ pub struct DkServiceInfo {
 
 /// Collect a full status snapshot.
 pub fn collect() -> Result<StatusSnapshot> {
+    // Boot info and logs are cheap — collect immediately
+    let boot = crate::boot::collect();
+    let logs = crate::logs::collect(20);
+
+    // Quota: run script in background thread
+    let quota_handle = std::thread::spawn(|| {
+        crate::paths::usage_script()
+            .map(|p| crate::quota::collect(&p))
+            .unwrap_or_default()
+    });
+
     if !docker::is_available() {
-        return Ok(StatusSnapshot::default());
+        let quota = quota_handle.join().unwrap_or_default();
+        return Ok(StatusSnapshot {
+            boot,
+            quota,
+            logs,
+            ..Default::default()
+        });
     }
 
     // Collect containers in parallel using threads
@@ -54,6 +77,7 @@ pub fn collect() -> Result<StatusSnapshot> {
     let leech_containers = leech_handle.join().unwrap_or_else(|_| Ok(Vec::new()))?;
     let dk_containers = dk_handle.join().unwrap_or_else(|_| Ok(Vec::new()))?;
     let stats = stats_handle.join().unwrap_or_else(|_| Ok(Vec::new()))?;
+    let quota = quota_handle.join().unwrap_or_default();
 
     // Inspect leech containers for TTY + mounts
     let names: Vec<String> = leech_containers.iter().map(|c| c.name.clone()).collect();
@@ -126,6 +150,9 @@ pub fn collect() -> Result<StatusSnapshot> {
         background,
         dk_services,
         stats,
+        boot,
+        quota,
+        logs,
     })
 }
 
