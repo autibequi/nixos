@@ -17,7 +17,7 @@ use crossterm::{
 use ratatui::prelude::*;
 use ratatui::Terminal;
 
-use app::App;
+use app::{App, AppMode};
 use event::{map_key, poll, AppEvent};
 use zion_sdk::{paths, status};
 
@@ -38,6 +38,38 @@ fn bash_cmd() -> std::process::Command {
     }
     // Last resort: whatever `zion` is on PATH
     std::process::Command::new("zion")
+}
+
+/// Run a background (non-interactive) docker command and return an error string if it fails.
+fn run_bg_cmd(svc: &str, env: &str, action: &str) -> Option<String> {
+    let mut cmd = bash_cmd();
+    let args: Vec<&str> = match action {
+        "start" => vec!["docker", svc, "start"],
+        _       => vec!["docker", svc, action],
+    };
+
+    // For start, append --env flag if env is set
+    let env_flag;
+    let mut full_args = args.clone();
+    if action == "start" && !env.is_empty() {
+        env_flag = format!("--env={env}");
+        full_args.push(&env_flag);
+    }
+
+    match cmd.args(&full_args).output() {
+        Err(e) => Some(format!("Could not run command: {e}")),
+        Ok(out) if !out.status.success() => {
+            let stderr = String::from_utf8_lossy(&out.stderr);
+            let stdout = String::from_utf8_lossy(&out.stdout);
+            let detail = if !stderr.is_empty() { stderr } else { stdout };
+            Some(format!(
+                "{action} {svc} failed (exit {:?})\n{}",
+                out.status.code(),
+                detail.trim()
+            ))
+        }
+        Ok(_) => None,
+    }
 }
 
 /// Entry point: run the interactive status TUI.
@@ -71,77 +103,92 @@ pub fn run_status(tick: u64) -> Result<()> {
 
     // Main loop
     loop {
-        // Check for background updates
-        if let Ok(snap) = rx.try_recv() {
-            app.snapshot = snap;
+        // Check for background updates (only in normal mode to avoid flicker during menu)
+        if matches!(app.mode, AppMode::Normal) {
+            if let Ok(snap) = rx.try_recv() {
+                app.snapshot = snap;
+            }
         }
 
         terminal.draw(|frame| {
             ui::status::render(frame, &app);
         })?;
 
-        match poll(Duration::from_secs(1))? {
+        match poll(Duration::from_millis(500))? {
             AppEvent::Key(key) => {
-                if let Some(action) = map_key(key) {
-                    match action {
-                        "quit" => break,
-                        "up" => app.move_up(),
-                        "down" => app.move_down(),
-                        "cycle_env" => app.cycle_env(),
-                        "log_up" => app.log_scroll_up(5),
-                        "log_down" => app.log_scroll_down(5),
-                        "start" => {
-                            let svc = app.current_service().to_string();
-                            let env = app.current_env().to_string();
-                            app.last_action = Some((app.cursor_idx, format!("starting {svc}")));
-                            std::thread::spawn(move || {
-                                let _ = bash_cmd()
-                                    .args(["docker", &svc, "start", &format!("--env={env}")])
-                                    .stdout(std::process::Stdio::null())
-                                    .stderr(std::process::Stdio::null())
-                                    .spawn();
-                            });
+                match &app.mode {
+                    AppMode::Error(_) => {
+                        // Any key dismisses the error
+                        app.clear_error();
+                    }
+                    AppMode::Menu => {
+                        use crossterm::event::KeyCode;
+                        match key.code {
+                            KeyCode::Up | KeyCode::Char('k') => app.menu_prev(),
+                            KeyCode::Down | KeyCode::Char('j') => app.menu_next(),
+                            KeyCode::Esc | KeyCode::Char('q') => app.close_menu(),
+                            KeyCode::Enter => {
+                                let action = app.menu_action();
+                                match action {
+                                    "cancel" => app.close_menu(),
+                                    "start" | "stop" => {
+                                        let svc = app.current_service().to_string();
+                                        let env = app.current_env().to_string();
+                                        app.close_menu();
+                                        let err = run_bg_cmd(&svc, &env, action);
+                                        if let Some(msg) = err {
+                                            app.set_error(msg);
+                                        }
+                                    }
+                                    "logs" | "test" | "shell" => {
+                                        let action = action.to_string();
+                                        let svc = app.current_service().to_string();
+                                        app.close_menu();
+                                        disable_raw_mode()?;
+                                        execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
+
+                                        let result = bash_cmd()
+                                            .args(["docker", &svc, &action])
+                                            .stdin(std::process::Stdio::inherit())
+                                            .stdout(std::process::Stdio::inherit())
+                                            .stderr(std::process::Stdio::inherit())
+                                            .status();
+
+                                        enable_raw_mode()?;
+                                        execute!(terminal.backend_mut(), EnterAlternateScreen)?;
+                                        terminal.clear()?;
+
+                                        if let Ok(snap) = status::collect() {
+                                            app.snapshot = snap;
+                                        }
+
+                                        if let Err(e) = result {
+                                            app.set_error(format!("Failed to run {action}: {e}"));
+                                        }
+                                    }
+                                    _ => app.close_menu(),
+                                }
+                            }
+                            _ => {}
                         }
-                        "stop" => {
-                            let svc = app.current_service().to_string();
-                            app.last_action = Some((app.cursor_idx, format!("stopping {svc}")));
-                            std::thread::spawn(move || {
-                                let _ = bash_cmd()
-                                    .args(["docker", &svc, "stop"])
-                                    .stdout(std::process::Stdio::null())
-                                    .stderr(std::process::Stdio::null())
-                                    .spawn();
-                            });
-                        }
-                        "logs" | "test" | "shell" => {
-                            // Exit TUI, run interactive command, re-enter
-                            disable_raw_mode()?;
-                            execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
-
-                            let svc = app.current_service();
-                            let _ = bash_cmd()
-                                .args(["docker", svc, action])
-                                .stdin(std::process::Stdio::inherit())
-                                .stdout(std::process::Stdio::inherit())
-                                .stderr(std::process::Stdio::inherit())
-                                .status();
-
-                            enable_raw_mode()?;
-                            execute!(terminal.backend_mut(), EnterAlternateScreen)?;
-                            terminal.clear()?;
-
-                            // Refresh data after returning
-                            if let Ok(snap) = status::collect() {
-                                app.snapshot = snap;
+                    }
+                    AppMode::Normal => {
+                        if let Some(action) = map_key(key) {
+                            match action {
+                                "quit" => break,
+                                "up" => app.move_up(),
+                                "down" => app.move_down(),
+                                "cycle_env" => app.cycle_env(),
+                                "log_up" => app.log_scroll_up(5),
+                                "log_down" => app.log_scroll_down(5),
+                                "menu_open" => app.open_menu(),
+                                _ => {}
                             }
                         }
-                        _ => {}
                     }
                 }
             }
-            AppEvent::Tick => {
-                // Tick events handled by background thread + try_recv
-            }
+            AppEvent::Tick => {}
         }
     }
 

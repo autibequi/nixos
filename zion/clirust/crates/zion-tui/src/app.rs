@@ -8,6 +8,23 @@ pub const DK_SERVICES: &[&str] = &["monolito", "bo-container", "front-student"];
 /// Available environments.
 pub const ENVS: &[&str] = &["sand", "local", "prod"];
 
+/// Menu items: (display label, action key).
+pub const MENU_ITEMS: &[(&str, &str)] = &[
+    ("Start",  "start"),
+    ("Stop",   "stop"),
+    ("Logs",   "logs"),
+    ("Test",   "test"),
+    ("Shell",  "shell"),
+    ("Cancel", "cancel"),
+];
+
+/// UI mode.
+pub enum AppMode {
+    Normal,
+    Menu,
+    Error(String),
+}
+
 /// Application state holding the current snapshot and cursor position.
 pub struct App {
     /// Latest status snapshot from the SDK collector.
@@ -20,6 +37,10 @@ pub struct App {
     pub last_action: Option<(usize, String)>,
     /// Lines scrolled up from the bottom in the log panel (0 = bottom).
     pub log_scroll: usize,
+    /// Current UI mode (normal, menu popup, error popup).
+    pub mode: AppMode,
+    /// Selected index in the action menu.
+    pub menu_cursor: usize,
 }
 
 impl App {
@@ -31,7 +52,42 @@ impl App {
             svc_envs: vec![0; DK_SERVICES.len()],
             last_action: None,
             log_scroll: 0,
+            mode: AppMode::Normal,
+            menu_cursor: 0,
         }
+    }
+
+    pub fn open_menu(&mut self) {
+        self.menu_cursor = 0;
+        self.mode = AppMode::Menu;
+    }
+
+    pub fn close_menu(&mut self) {
+        self.mode = AppMode::Normal;
+    }
+
+    pub fn menu_prev(&mut self) {
+        if self.menu_cursor == 0 {
+            self.menu_cursor = MENU_ITEMS.len() - 1;
+        } else {
+            self.menu_cursor -= 1;
+        }
+    }
+
+    pub fn menu_next(&mut self) {
+        self.menu_cursor = (self.menu_cursor + 1) % MENU_ITEMS.len();
+    }
+
+    pub fn menu_action(&self) -> &'static str {
+        MENU_ITEMS[self.menu_cursor].1
+    }
+
+    pub fn set_error(&mut self, msg: String) {
+        self.mode = AppMode::Error(msg);
+    }
+
+    pub fn clear_error(&mut self) {
+        self.mode = AppMode::Normal;
     }
 
     /// Scroll log panel up (towards older entries).
