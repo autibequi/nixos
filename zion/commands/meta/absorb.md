@@ -1,30 +1,23 @@
 # Absorb — Cristalizar a Sessão
 
-Chame depois de uma boa conversa. Lança o **Wanderer** em background no modo ABSORB — ele reflete sobre tudo que aconteceu e persiste o que vale para sempre: memórias Claude, skills Zion, agentes, commands, obsidian.
-
-Não bloqueia sua thread. Wanderer reporta quando terminar via inbox.
+Chame depois de uma boa conversa. Reflete sobre tudo que aconteceu nesta sessão e persiste o que vale: memórias Claude, skills Zion, agentes, commands.
 
 ## Instruções
 
-Lançar o Wanderer em background no modo ABSORB:
+Você (Claude) deve executar o ABSORB diretamente — sem subagente, sem Wanderer. Você tem o contexto completo desta conversa.
 
-```
-Agent(
-  subagent_type="Wanderer",
-  prompt="""Modo: ABSORB — Cristalizar aprendizados da sessão.
+### 1. Revisar a sessão
 
-Você tem acesso ao contexto completo desta conversa. Revise tudo que foi discutido e tente absorver o máximo possível nos lugares certos.
+Olhe para tudo que foi discutido e identifique:
 
-## O que procurar
-
-- **Correções** — algo que Claude fez errado e foi corrigido
+- **Correções** — algo que você fez errado e foi corrigido
 - **Preferências** — como o usuário gosta que as coisas sejam feitas
 - **Decisões de design** — escolhas arquiteturais, convenções, padrões
 - **Conhecimento novo** — sobre o sistema, projeto, usuário
 - **Padrões emergentes** — algo que apareceu 2+ vezes e merece formalizar
 - **Gaps** — skill, command ou agent que deveria existir mas não existe
 
-## Onde persistir cada coisa
+### 2. Persistir o que vale
 
 | O que é | Onde salvar |
 |---------|-------------|
@@ -34,37 +27,40 @@ Você tem acesso ao contexto completo desta conversa. Revise tudo que foi discut
 | Referência externa | `memory/reference_*.md` |
 | Melhoria em skill existente | editar `zion/skills/*/SKILL.md` |
 | Comportamento de agente mudou | editar `zion/agents/*/agent.md` |
-| Insight sobre o vault | `/workspace/obsidian/vault/insights.md` |
 | Regra fundamental | sugerir via inbox (não editar CLAUDE.md direto) |
 
-## Paths importantes
-
+**Paths:**
 - Memórias: `~/.claude/projects/-workspace-mnt/memory/` + `MEMORY.md`
 - Zion skills: `/workspace/mnt/zion/skills/`
 - Zion agents: `/workspace/mnt/zion/agents/`
 - Commands: `/workspace/mnt/stow/.claude/commands/`
 
-## Regras
+### 3. Skills disponíveis (para identificar gaps ou melhorias)
+
+Liste as skills atuais do sistema e avalie se alguma precisa de update ou se falta alguma baseado na sessão:
+
+```bash
+ls /workspace/mnt/zion/skills/
+ls /workspace/mnt/stow/.claude/commands/
+```
+
+### 4. Regras
 
 - Verificar se já existe algo similar antes de criar (não duplicar)
 - Se for memory: atualizar MEMORY.md também
 - Não salvar coisas deriváveis do código ou git
 - Não editar CLAUDE.md diretamente — sugerir via inbox
-- Silêncio é válido — se nada novo emergiu, diga isso
+- Silêncio é válido — se nada novo emergiu, dizer isso
 
-## Ao terminar
+### 5. Reportar
 
-Appenda em `/workspace/obsidian/inbox/inbox.md`:
+Ao final, mostre ao usuário um resumo inline:
 
-### [Wanderer/Absorb] YYYY-MM-DD — Sessão cristalizada
-
-**Memórias Claude:** lista do que foi salvo/atualizado
-**Zion atualizado:** skills/agents/commands modificados
-**Sugestões pendentes:** o que precisa aprovação do usuário
-**Nada novo:** se não havia o que absorver
-""",
-  run_in_background=True
-)
 ```
+## Absorb — Sessão cristalizada
 
-Confirmar ao usuário que o Wanderer foi lançado em background e vai reportar no inbox quando terminar.
+**Memórias salvas/atualizadas:** lista
+**Zion atualizado:** skills/agents/commands modificados
+**Sugestões:** o que precisa aprovação do usuário
+**Nada novo:** se não havia o que absorver
+```

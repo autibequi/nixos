@@ -47,6 +47,11 @@ cat << 'EOF'
     │                                                                │
     │  zion status             status agregado (sessoes/runner)      │
     │                                                                │
+    ├─ INTERNO (systemd) ──────────────────────────────────────────┤
+    │                                                                │
+    │  zion tasks tick     executa contractors vencidos (scheduler) │
+    │  (timer: zion-tick.timer a cada 10min — não chamar direto)     │
+    │                                                                │
     ├─ UTIL ─────────────────────────────────────────────────────────┤
     │                                                                │
     │  zion update             regenera CLI + symlink                │
@@ -69,10 +74,9 @@ cat << 'EOF'
     │  zion claude  = zion new --engine=claude                       │
     │  zion cursor  = zion new --engine=cursor                       │
     │  zion oc      = zion new --engine=opencode                     │
-    │  zion dk      = zion runner                                   │
+    │  zion dk      = zion runner                                    │
     │  zion ct      = zion contractors                               │
     │  zion st      = zion status                                    │
-
     │                                                                │
     └────────────────────────────────────────────────────────────────┘
 EOF
