@@ -1,11 +1,11 @@
-//! Top-level status dashboard: header, sessions, services, boot, quota, logs, footer.
+//! Top-level status dashboard: header, quota, sessions, services, logs, footer.
 
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::Paragraph;
 use ratatui::Frame;
 
-use super::{boot, logs, quota, services, sessions};
+use super::{logs, quota, services, sessions};
 use crate::app::App;
 use crate::theme;
 
@@ -19,28 +19,22 @@ pub fn render(frame: &mut Frame, app: &App) {
         .direction(Direction::Vertical)
         .constraints([
             Constraint::Length(2),           // header
+            Constraint::Length(2),           // quota bars
             Constraint::Length(sessions_h),  // agents + background
             Constraint::Length(services_h),  // dk services
-            Constraint::Length(1),           // separator
-            Constraint::Length(1),           // boot flags
-            Constraint::Length(1),           // separator
-            Constraint::Length(2),           // quota bars
-            Constraint::Length(1),           // separator
+            Constraint::Length(1),           // separator (Logs [svc])
             Constraint::Min(logs_h),         // logs tail
             Constraint::Length(1),           // footer
         ])
         .split(frame.area());
 
     render_header(frame, chunks[0]);
-    sessions::render(frame, app, chunks[1]);
-    services::render(frame, app, chunks[2]);
-    render_separator(frame, "Boot", chunks[3]);
-    boot::render(frame, app, chunks[4]);
-    render_separator(frame, "Quota", chunks[5]);
-    quota::render(frame, app, chunks[6]);
-    render_separator(frame, "Logs", chunks[7]);
-    logs::render(frame, app, chunks[8]);
-    render_footer(frame, app, chunks[9]);
+    quota::render(frame, app, chunks[1]);
+    sessions::render(frame, app, chunks[2]);
+    services::render(frame, app, chunks[3]);
+    render_log_separator(frame, app, chunks[4]);
+    logs::render(frame, app, chunks[5]);
+    render_footer(frame, app, chunks[6]);
 }
 
 fn sessions_height(app: &App) -> u16 {
@@ -67,10 +61,15 @@ fn logs_height(app: &App) -> u16 {
     (app.snapshot.logs.len() as u16).min(8).max(3)
 }
 
-fn render_separator(frame: &mut Frame, label: &str, area: Rect) {
-    let line = Line::from(vec![
-        Span::styled(format!("─ {label} "), theme::dim()),
-    ]);
+fn render_log_separator(frame: &mut Frame, app: &App, area: Rect) {
+    let svc = app.current_service();
+    let scroll = app.log_scroll;
+    let label = if scroll > 0 {
+        format!("─ Logs [{svc}] +{scroll} ─")
+    } else {
+        format!("─ Logs [{svc}] ─")
+    };
+    let line = Line::from(vec![Span::styled(label, theme::dim())]);
     frame.render_widget(Paragraph::new(line), area);
 }
 
@@ -103,6 +102,8 @@ fn render_footer(frame: &mut Frame, app: &App, area: Rect) {
         Span::styled(" test  ", theme::footer_dim()),
         Span::styled("x", theme::footer_key()),
         Span::styled(" shell  ", theme::footer_dim()),
+        Span::styled("[/]", theme::footer_key()),
+        Span::styled(" scroll  ", theme::footer_dim()),
         Span::styled("q", theme::footer_key()),
         Span::styled(" quit  ", theme::footer_dim()),
         Span::styled(format!("[{svc}]"), theme::dim()),
