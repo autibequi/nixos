@@ -1,6 +1,19 @@
 # Absorb — Cristalizar a Sessão
 
+```
+/meta:absorb          → cristalizar: persiste memórias, skills, agentes
+/meta:absorb resumo   → resumo leve da sessão em linguagem simples
+```
+
 Chame depois de uma boa conversa. Reflete sobre tudo que aconteceu nesta sessão e persiste o que vale: memórias Claude, skills Zion, agentes, commands.
+
+---
+
+## Modo `resumo`
+
+Se `$ARGUMENTS` contiver `resumo` ou `imhi`: explicar a sessão cronologicamente como se fosse pra uma criança de 7 anos. Tom carinhoso, frases curtas, ícones visuais. Incluir linha do tempo ASCII, tabela de resultados, barra de progresso e rodapé com "próximo passo" e "pode dormir?". Não persistir nada — só explicar.
+
+---
 
 ## Instruções
 

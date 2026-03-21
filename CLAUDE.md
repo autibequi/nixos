@@ -44,7 +44,7 @@
 
 | Skill | Quando usar |
 |-------|-------------|
-| `meta:linux` — `zion/commands/meta/linux.md` | Pacotes NixOS, módulos, opções, Hyprland, Waybar, dotfiles stow |
+| `linux` — `zion/skills/linux/SKILL.md` | Auto-ativa em zion lab ou menção a NixOS/Hyprland/Waybar/stow/dotfiles |
 
 ---
 

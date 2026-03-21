@@ -1,9 +1,9 @@
 ---
-name: meta:linux
-description: NixOS, Hyprland, Waybar, dotfiles e configuração do sistema Linux. Busca pacotes/opções via mcp-nixos, edita o módulo correto, valida com nh os test. Também cobre stow, keybinds e window rules.
+name: linux
+description: "Auto-ativar quando: zion_edit=1 (zion lab), ou usuário menciona NixOS, Hyprland, Waybar, dotfiles, stow, nix, módulos, pacotes do sistema, keybinds, window rules ou configuração do compositor."
 ---
 
-# meta:linux — Sistema Linux (NixOS + Hyprland + dotfiles)
+# linux — Sistema Linux (NixOS + Hyprland + dotfiles)
 
 Skill unificada para tudo que envolve o sistema Linux: pacotes NixOS, módulos, opções, dotfiles, Hyprland, Waybar, stow.
 

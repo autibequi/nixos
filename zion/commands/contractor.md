@@ -9,6 +9,7 @@ description: Ponto de entrada unificado para contractors — briefing de status,
 /contractor                    → briefing completo (GitHub, repos, tasks, worktrees)
 /contractor call <nome>        → reunião interativa com um contractor
 /contractor worktrees          → dashboard de worktrees
+/contractor suggestions        → revisar propostas de worktrees pendentes
 /contractor <pedido>           → delega à Coruja (plataforma estratégia)
 ```
 
@@ -25,6 +26,7 @@ Parsear `$ARGUMENTS`:
 | vazio / `briefing` / `status` | **→ Briefing** |
 | `call <nome>` | **→ Reunião** |
 | `worktrees` / `worktree` | **→ Worktrees** |
+| `suggestions [list\|next\|accept\|discard\|commit\|reset]` | **→ Suggestions** |
 | qualquer outra coisa | **→ Coruja** |
 
 ---

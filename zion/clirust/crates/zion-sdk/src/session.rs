@@ -111,8 +111,7 @@ impl SessionRunner {
             .clone()
             .unwrap_or_else(|| paths::obsidian_path().to_string_lossy().to_string());
 
-        // Canonicalize obsidian path; if dir doesn't exist, create a placeholder
-        // so docker compose doesn't fail on undefined volume
+        // Resolve obsidian path to absolute; create dir if missing so compose doesn't fail
         let obsidian_path = std::path::Path::new(&obsidian_raw);
         let obsidian = if obsidian_path.exists() {
             obsidian_path
@@ -120,8 +119,12 @@ impl SessionRunner {
                 .map(|p| p.to_string_lossy().to_string())
                 .unwrap_or(obsidian_raw)
         } else {
-            // Create dir so compose doesn't fail with "undefined volume"
-            let _ = std::fs::create_dir_all(&obsidian_raw);
+            if let Err(e) = std::fs::create_dir_all(&obsidian_raw) {
+                eprintln!(
+                    "zion: warning: could not create obsidian dir {}: {}",
+                    obsidian_raw, e
+                );
+            }
             obsidian_raw
         };
 

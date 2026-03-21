@@ -70,6 +70,7 @@
 |--------|-------|-------|--------|
 | scheduler | every10 | haiku | Fila de tasks + processa outbox do CTO |
 | hermes | every10 | haiku | Processa cards Inbox do kanban |
+| assistant | every20 | haiku | Monitora trabalho do Pedro + envia alertas proativos no inbox |
 | doctor | every60 | haiku | Health check + monitoramento de logs |
 | trashman | every60 | haiku | Limpeza + /trash do CTO + assets |
 | coruja | every60 | haiku | Jira/Notion/Grafana READ-ONLY |

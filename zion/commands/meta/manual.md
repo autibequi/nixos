@@ -1,9 +1,19 @@
-# Man — Manual de Skills e Commands
+# Man — Manual de Skills, Commands e Diretrizes
 
-Exibe documentação sobre um skill ou command disponível.
+Exibe documentação sobre um skill ou command disponível. Também gerencia as diretrizes do sistema.
 
 ## Entrada
-- `$ARGUMENTS`: nome do skill/command (ex: `go-worker`, `nixos`, `quick`, `orquestrar-feature`)
+- `$ARGUMENTS`: nome do skill/command, ou `diretrizes [add|rm|edit] ...`
+
+## Modo diretrizes
+
+Se `$ARGUMENTS` começa com `diretrizes`:
+- **`diretrizes`** (sem mais args): ler `/workspace/DIRETRIZES.md` e exibir formatado
+- **`diretrizes add <regra>`**: adicionar nova diretriz na seção apropriada
+- **`diretrizes rm <trecho>`**: remover diretriz que contém o trecho
+- **`diretrizes edit <trecho> → <novo>`**: substituir diretriz
+
+Após qualquer modificação, exibir estado final.
 
 ## Instruções
 

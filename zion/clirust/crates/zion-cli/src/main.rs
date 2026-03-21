@@ -7,7 +7,7 @@ mod output;
 /// Not-yet-ported commands — show a helpful message instead of "dir not found".
 const BASH_ONLY_COMMANDS: &[&str] = &[
     "man", "help", "start", "shell", "sh", "build", "down", "shutdown", "clean", "gc", "prune",
-    "update", "install", "init", "set", "runner", "dk", "docker", "hooks", "hook", "contractors",
+    "init", "set", "runner", "dk", "docker", "hooks", "hook", "contractors",
     "ct", "stow", "os", "leech", "l", "lab", "git", "g", "inbox", "ib", "outbox", "ob", "relay",
     "beta", "resume",
 ];
@@ -173,6 +173,10 @@ enum Commands {
         #[arg(long, short = 't', default_value = "5")]
         tick: u64,
     },
+
+    /// Build and install zionrust binary
+    #[command(alias = "install")]
+    Update,
 }
 
 fn main() -> Result<()> {
@@ -264,6 +268,9 @@ fn main() -> Result<()> {
         }
         Some(Commands::Status { tick }) => {
             commands::status::execute(tick)?;
+        }
+        Some(Commands::Update) => {
+            commands::update::execute()?;
         }
         // No subcommand = implicit `new`
         None => {

@@ -51,7 +51,10 @@ impl ZionConfig {
             cfg.cursor_api_key = cfg.raw.get("CURSOR_API_KEY").cloned();
             cfg.grafana_url = cfg.raw.get("GRAFANA_URL").cloned();
             cfg.grafana_token = cfg.raw.get("GRAFANA_TOKEN").cloned();
-            cfg.obsidian_path = cfg.raw.get("OBSIDIAN_PATH").cloned();
+            cfg.obsidian_path = cfg
+                .raw
+                .get("OBSIDIAN_PATH")
+                .map(|s| crate::paths::expand_home(s));
         }
 
         // Docker GID

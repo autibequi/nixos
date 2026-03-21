@@ -92,6 +92,7 @@ TIMEOUT=$(parse_fm "$CARD_PATH" "timeout")
 MAX_TURNS=$(parse_fm "$CARD_PATH" "max_turns")
 MCP=$(parse_fm "$CARD_PATH" "mcp")
 AGENT=$(parse_fm "$CARD_PATH" "contractor")
+[ -z "$AGENT" ] && AGENT=$(parse_fm "$CARD_PATH" "agent")
 
 MODEL="${MODEL:-haiku}"
 TIMEOUT="${TIMEOUT:-1800}"

@@ -34,8 +34,17 @@ pub fn env_file() -> PathBuf {
 /// Obsidian vault path.
 pub fn obsidian_path() -> PathBuf {
     std::env::var("OBSIDIAN_PATH")
-        .map(PathBuf::from)
+        .map(|s| PathBuf::from(expand_home(&s)))
         .unwrap_or_else(|_| home().join(".ovault/Work"))
+}
+
+/// Expand $HOME and ~ in a path string to the actual home directory.
+pub fn expand_home(path: &str) -> String {
+    let h = home();
+    let home_str = h.to_string_lossy();
+    path.replace("$HOME", &home_str)
+        .replace("${HOME}", &home_str)
+        .replacen("~/", &format!("{}/", home_str), 1)
 }
 
 /// Resolve and canonicalize a mount directory.

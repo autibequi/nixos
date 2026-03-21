@@ -317,6 +317,16 @@ commands:
             arg: steps
             help: "Numero de turnos (default: haiku=20, sonnet=40, opus=60)"
         filename: commands/contractor.sh
+      - name: cron
+        help: "Lê clock: dos agent.md e atualiza zion-contractors.nix + instrui zion switch"
+        filename: commands/contractors_cron.sh
+      - name: work
+        help: "Executa todos os contractor cards vencidos em TODO/ (cards com agent: no frontmatter)"
+        flags:
+          - long: --dry-run
+            short: -n
+            help: "Mostra o que seria executado sem rodar"
+        filename: commands/contractors_work.sh
 
 
   - name: tasks
