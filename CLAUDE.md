@@ -10,10 +10,10 @@
 
 1. `/workspace/host/` existe? → você está em `zion host` (repo NixOS editável em `/workspace/host/`).
 2. `in_docker=1` → **nunca** rodar `nixos-rebuild`/`systemctl`; pedir ao usuário rodar no host.
-3. Em lab mode: `/workspace/host/` é sua zona de evolução — edite skills, hooks, agents, CLI.
+3. Em host mode: `/workspace/host/` é sua zona de evolução — edite skills, hooks, agents, CLI.
 4. Para NixOS/Hyprland → usar skills abaixo. Para "onde editar" → tabela §onde.
 
-### Mapa de /workspace/ (lab mode)
+### Mapa de /workspace/ (host mode)
 
 ```
 /workspace/
@@ -22,7 +22,7 @@
 │   └── self/   ← subfolder nixos/self/ dentro do repo (edite aqui)
 ├── obsidian/   ← vault Obsidian (cérebro persistente)
 ├── logs/       ← logs de containers Docker
-└── host/       ← nixos repo completo do host (~/nixos), writable — SÓ em lab mode
+└── host/       ← nixos repo completo do host (~/nixos), writable — SÓ em host mode
 ```
 
 Em sessão **normal** (sem lab): `/workspace/host/` não existe.
@@ -65,7 +65,7 @@ Em sessão **normal** (sem lab): `/workspace/host/` não existe.
 
 ## Onde editar o quê
 
-> Em lab mode (`zion_edit=1`): os paths abaixo são relativos a `/workspace/host/` (repo NixOS) ou `/workspace/mnt/self/` (pasta zion dentro do repo).
+> Em host mode (`zion_edit=1`): os paths abaixo são relativos a `/workspace/host/` (repo NixOS) ou `/workspace/mnt/self/` (pasta zion dentro do repo).
 > Em sessão normal: estes paths estão em `/workspace/mnt/` se o projeto montado for o repo NixOS.
 
 | Quero alterar… | Onde |

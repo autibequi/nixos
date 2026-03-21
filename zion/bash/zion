@@ -51,7 +51,7 @@ zion_usage() {
   printf "  %s   Deploy dotfiles no host via GNU stow (restow, delete, status).\n" "stow     "
   printf "  %s   Aplica configuração NixOS no host via nh os.\n" "os       "
   printf "  %s   Engatou numa pasta — sessão efêmera (auto-detecta nixos → monta logs).\n" "leech    "
-  printf "  %s   Sessão lab: projeto em /workspace/mnt + ~/nixos em /workspace/host (editável).\n" "lab      "
+  printf "  %s   Sessão lab: projeto em /workspace/mnt + ~/nixos em /workspace/host (editável).\n" "host     "
   printf "  %s   Utilitarios Git. Ex: zion git sandbox\n" "git      "
   printf "  %s   Lista o inbox ou adiciona uma entrada. Sem args: mostra inbox.md. Com texto: adiciona entrada.\n" "inbox    "
   printf "  %s   Lista os arquivos do outbox.\n" "outbox   "
@@ -1428,7 +1428,7 @@ zion_leech_usage() {
 }
 
 # :command.usage
-zion_lab_usage() {
+zion_host_usage() {
   printf "zion host - Sessão lab: projeto em /workspace/mnt + ~/nixos em /workspace/host (editável).\n\n"
 
   printf "%s\n" "Usage:"
@@ -5314,7 +5314,7 @@ zion_leech_command() {
 }
 
 # :command.function
-zion_lab_command() {
+zion_host_command() {
 
   # src/commands/lab.sh
   zion_load_config
@@ -5926,9 +5926,9 @@ parse_requirements() {
       ;;
 
     lab)
-      action="lab"
+      action="host"
       shift
-      zion_lab_parse_requirements "$@"
+      zion_host_parse_requirements "$@"
       shift $#
       ;;
 
@@ -8570,14 +8570,14 @@ zion_leech_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_lab_parse_requirements() {
+zion_host_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        zion_lab_usage
+        zion_host_usage
         exit
         ;;
 
@@ -8589,7 +8589,7 @@ zion_lab_parse_requirements() {
   done
 
   # :command.command_filter
-  action="lab"
+  action="host"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
@@ -9236,7 +9236,7 @@ run() {
     "os boot") zion_os_boot_command ;;
     "os build") zion_os_build_command ;;
     "leech") zion_leech_command ;;
-    "lab") zion_lab_command ;;
+    "host") zion_host_command ;;
     "git") zion_git_command ;;
     "git append") zion_git_append_command ;;
     "inbox") zion_inbox_command ;;
