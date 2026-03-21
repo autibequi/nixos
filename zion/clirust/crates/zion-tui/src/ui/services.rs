@@ -39,14 +39,6 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                 Span::styled("stopped", theme::dim()),
             ]));
 
-            if is_selected {
-                let log_line = app.snapshot.last_log.get(svc).map(|s| s.as_str()).unwrap_or("");
-                let preview = truncate_log(log_line, area.width.saturating_sub(8) as usize);
-                lines.push(Line::from(vec![
-                    Span::raw("       "),
-                    Span::styled(preview, log_level_style(log_line)),
-                ]));
-            }
         }
     } else {
         let any_up = app.snapshot.dk_services.iter().any(|s| s.is_up);
@@ -144,21 +136,6 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
 
             lines.push(Line::from(spans));
 
-            // Inline last-log preview for the selected service
-            if is_selected {
-                let log_line = app
-                    .snapshot
-                    .last_log
-                    .get(svc)
-                    .map(|s| s.as_str())
-                    .unwrap_or("");
-                let preview = truncate_log(log_line, area.width.saturating_sub(8) as usize);
-                let log_style = log_level_style(log_line);
-                lines.push(Line::from(vec![
-                    Span::raw("       "),
-                    Span::styled(preview, log_style),
-                ]));
-            }
         }
     }
 

@@ -42,16 +42,26 @@ fn bash_cmd() -> std::process::Command {
 }
 
 /// Run a background (non-interactive) docker command and return an error string if it fails.
-/// Fire-and-forget stop: spawns `zion runner <svc> stop` without waiting.
-/// Returns immediately; the container will stop in the background (docker gives it up to 10s).
-fn fire_stop(svc: &str) {
-    let mut cmd = bash_cmd();
-    let _ = cmd
-        .args(["runner", svc, "stop"])
+/// Spawn `docker stop --time=5 <name>` without waiting.
+/// Returns immediately; docker will SIGTERM→SIGKILL the container within 5s.
+fn docker_stop_nowait(container_name: &str) {
+    let _ = std::process::Command::new("docker")
+        .args(["stop", "--time=5", container_name])
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .spawn();
+}
+
+/// Run `docker stop --time=5 <name>` and wait for it to finish (max ~5s).
+/// Used before restart so we know the container is gone before starting again.
+fn docker_stop_wait(container_name: &str) {
+    let _ = std::process::Command::new("docker")
+        .args(["stop", "--time=5", container_name])
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .output(); // blocks until docker confirms the container stopped
 }
 
 fn run_bg_cmd(svc: &str, env: &str, action: &str) -> Option<String> {
@@ -177,10 +187,15 @@ pub fn run_status(tick: u64) -> Result<()> {
                                     "cancel" => app.close_menu(),
                                     "stop" => {
                                         let svc = app.current_service().to_string();
+                                        let container = app.snapshot.dk_services.iter()
+                                            .find(|d| d.name.contains(&svc))
+                                            .map(|d| d.name.clone());
                                         app.close_menu();
-                                        // Fire-and-forget: don't block the TUI waiting for
-                                        // docker compose down (can take up to 30s).
-                                        fire_stop(&svc);
+                                        // Fire-and-forget via docker directly (bypasses bash runner).
+                                        // docker stop --time=5 SIGTERM→SIGKILL within 5s.
+                                        if let Some(name) = container {
+                                            std::thread::spawn(move || docker_stop_nowait(&name));
+                                        }
                                     }
                                     "start" => {
                                         let svc = app.current_service().to_string();
@@ -204,6 +219,9 @@ pub fn run_status(tick: u64) -> Result<()> {
                                     "restart" => {
                                         let svc = app.current_service().to_string();
                                         let env = app.current_env().to_string();
+                                        let container = app.snapshot.dk_services.iter()
+                                            .find(|d| d.name.contains(&svc))
+                                            .map(|d| d.name.clone());
                                         app.close_menu();
                                         app.last_action = Some((
                                             app.cursor_idx,
@@ -212,10 +230,10 @@ pub fn run_status(tick: u64) -> Result<()> {
                                         let err_tx = bg_err_tx.clone();
                                         let snap_tx = tx_bg.clone();
                                         std::thread::spawn(move || {
-                                            // Stop fire-and-forget, then wait for docker
-                                            // to SIGKILL the container (default 10s timeout).
-                                            fire_stop(&svc);
-                                            std::thread::sleep(Duration::from_secs(12));
+                                            // Stop via docker directly (max 5s), then start.
+                                            if let Some(name) = container {
+                                                docker_stop_wait(&name);
+                                            }
                                             if let Some(err) = run_bg_cmd(&svc, &env, "start") {
                                                 let _ = err_tx.send(err);
                                             }
@@ -224,7 +242,7 @@ pub fn run_status(tick: u64) -> Result<()> {
                                             }
                                         });
                                     }
-                                    "logs" | "test" | "shell" => {
+                                    "logs" | "test" | "install" | "shell" => {
                                         let action = action.to_string();
                                         let svc = app.current_service().to_string();
                                         app.close_menu();

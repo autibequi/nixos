@@ -12,6 +12,8 @@ pub struct StatusSnapshot {
     pub agents: Vec<SessionInfo>,
     pub background: Vec<SessionInfo>,
     pub dk_services: Vec<DkServiceInfo>,
+    /// Utility containers: zion-reverseproxy and others (not dk, not leech).
+    pub utils: Vec<DkServiceInfo>,
     pub stats: Vec<ContainerStats>,
     pub boot: BootInfo,
     pub quota: QuotaInfo,
@@ -86,10 +88,12 @@ pub fn collect() -> Result<StatusSnapshot> {
     let leech_handle =
         std::thread::spawn(|| docker::list_containers("ancestor=claude-nix-sandbox"));
     let dk_handle = std::thread::spawn(|| docker::list_containers("name=zion-dk-"));
+    let utils_handle = std::thread::spawn(|| docker::list_containers("name=zion-"));
     let stats_handle = std::thread::spawn(docker::get_stats);
 
     let leech_containers = leech_handle.join().unwrap_or_else(|_| Ok(Vec::new()))?;
     let dk_containers = dk_handle.join().unwrap_or_else(|_| Ok(Vec::new()))?;
+    let utils_raw = utils_handle.join().unwrap_or_else(|_| Ok(Vec::new()))?;
     let stats = stats_handle.join().unwrap_or_else(|_| Ok(Vec::new()))?;
     let quota = quota_handle.join().unwrap_or_default();
 
@@ -152,13 +156,22 @@ pub fn collect() -> Result<StatusSnapshot> {
         .map(|c| {
             let is_up = c.status.to_lowercase().starts_with("up");
             let (cpu, mem) = find_stats(&stats, &c.name);
-            DkServiceInfo {
-                name: c.name.clone(),
-                status: c.status.clone(),
-                is_up,
-                cpu,
-                mem,
-            }
+            DkServiceInfo { name: c.name.clone(), status: c.status.clone(), is_up, cpu, mem }
+        })
+        .collect();
+
+    // Utility containers: zion-* excluding dk and leech (agent) containers
+    let dk_names: std::collections::HashSet<&str> =
+        dk_containers.iter().map(|c| c.name.as_str()).collect();
+    let leech_names: std::collections::HashSet<&str> =
+        leech_containers.iter().map(|c| c.name.as_str()).collect();
+    let utils: Vec<DkServiceInfo> = utils_raw
+        .into_iter()
+        .filter(|c| !dk_names.contains(c.name.as_str()) && !leech_names.contains(c.name.as_str()))
+        .map(|c| {
+            let is_up = c.status.to_lowercase().starts_with("up");
+            let (cpu, mem) = find_stats(&stats, &c.name);
+            DkServiceInfo { name: c.name.clone(), status: c.status.clone(), is_up, cpu, mem }
         })
         .collect();
 
@@ -166,6 +179,7 @@ pub fn collect() -> Result<StatusSnapshot> {
         agents,
         background,
         dk_services,
+        utils,
         stats,
         boot,
         quota,

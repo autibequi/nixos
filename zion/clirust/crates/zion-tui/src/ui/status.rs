@@ -5,7 +5,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::Paragraph;
 use ratatui::Frame;
 
-use super::{logs, popup, quota, services, sessions};
+use super::{logs, popup, quota, services, sessions, utils};
 use crate::app::App;
 use crate::theme;
 
@@ -13,6 +13,7 @@ use crate::theme;
 pub fn render(frame: &mut Frame, app: &App) {
     let sessions_h = sessions_height(app);
     let services_h = dk_services_height(app);
+    let utils_h = utils_height(app);
 
     let chunks = Layout::default()
         .direction(Direction::Vertical)
@@ -20,6 +21,7 @@ pub fn render(frame: &mut Frame, app: &App) {
             Constraint::Length(1),           // header (title + time + quota inline)
             Constraint::Length(sessions_h),  // agents + background
             Constraint::Length(services_h),  // dk services
+            Constraint::Length(utils_h),     // utils (reverseproxy, etc.)
             Constraint::Length(1),           // separator (Logs [svc])
             Constraint::Min(0),              // logs — fills all remaining space
             Constraint::Length(1),           // footer
@@ -29,9 +31,10 @@ pub fn render(frame: &mut Frame, app: &App) {
     render_header(frame, app, chunks[0]);
     sessions::render(frame, app, chunks[1]);
     services::render(frame, app, chunks[2]);
-    render_log_separator(frame, app, chunks[3]);
-    logs::render(frame, app, chunks[4]);
-    render_footer(frame, app, chunks[5]);
+    utils::render(frame, app, chunks[3]);
+    render_log_separator(frame, app, chunks[4]);
+    logs::render(frame, app, chunks[5]);
+    render_footer(frame, app, chunks[6]);
 
     // Overlay: menu or error popup (rendered last so it's on top)
     popup::render(frame, app);
@@ -53,8 +56,17 @@ fn dk_services_height(app: &App) -> u16 {
     } else {
         app.snapshot.dk_services.len()
     };
-    // +1 header, +1 inline log preview row for selected service
-    (svc_count as u16) + 2
+    // +1 for group header
+    (svc_count as u16) + 1
+}
+
+fn utils_height(app: &App) -> u16 {
+    if app.snapshot.utils.is_empty() {
+        0
+    } else {
+        // 1 group header + 1 row per util container
+        (app.snapshot.utils.len() as u16) + 1
+    }
 }
 
 fn render_log_separator(frame: &mut Frame, app: &App, area: Rect) {
@@ -65,8 +77,7 @@ fn render_log_separator(frame: &mut Frame, app: &App, area: Rect) {
     } else {
         format!("─ Logs [{svc}] ─")
     };
-    let line = Line::from(vec![Span::styled(label, theme::dim())]);
-    frame.render_widget(Paragraph::new(line), area);
+    frame.render_widget(Paragraph::new(Line::from(vec![Span::styled(label, theme::dim())])), area);
 }
 
 fn render_header(frame: &mut Frame, app: &App, area: Rect) {

@@ -15,6 +15,7 @@ pub const MENU_ITEMS: &[(&str, &str)] = &[
     ("Restart", "restart"),
     ("Logs",    "logs"),
     ("Test",    "test"),
+    ("Install", "install"),
     ("Shell",   "shell"),
     ("Cancel",  "cancel"),
 ];

@@ -38,22 +38,19 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
     let end = total.saturating_sub(scroll_clamped);
     let start = end.saturating_sub(max_lines);
 
-    let visible: Vec<&zion_sdk::logs::LogEntry> = entries[start..end].iter().copied().collect();
-
-    // Pad top with blank lines so log content anchors to the bottom of the area
-    let blank_count = max_lines.saturating_sub(visible.len());
-    let mut lines: Vec<Line> = (0..blank_count).map(|_| Line::raw("")).collect();
-
-    for entry in &visible {
-        let (level, line_text) = detect_level(&entry.line);
-        let level_style = level_style(level);
-        lines.push(Line::from(vec![
-            Span::raw("  "),
-            Span::styled(format!("{:<5}", level), level_style),
-            Span::raw(" "),
-            Span::styled(line_text.to_string(), theme::dim()),
-        ]));
-    }
+    let lines: Vec<Line> = entries[start..end]
+        .iter()
+        .map(|entry| {
+            let (level, line_text) = detect_level(&entry.line);
+            let level_style = level_style(level);
+            Line::from(vec![
+                Span::raw("  "),
+                Span::styled(format!("{:<5}", level), level_style),
+                Span::raw(" "),
+                Span::styled(line_text.to_string(), theme::dim()),
+            ])
+        })
+        .collect();
 
     frame.render_widget(Paragraph::new(lines), area);
 }
