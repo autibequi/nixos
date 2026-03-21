@@ -75,7 +75,22 @@ SSML útil:
 
 Confirmar brevemente o que foi falado. Não exibir o output do espeak (geralmente vazio).
 
-### 5. Experimentação contínua
+### 5. Reescrita fonética
+
+Para nomes estrangeiros ou palavras com pronúncia difícil, reescrever foneticamente no texto antes de passar ao espeak:
+
+- "Michael Jackson" → "Maikou Djéckson"
+- "JavaScript" → "Djava Script"
+- Acentos funcionam: "é", "ã", "ç" influenciam o TTS
+
+Útil quando o espeak mispronuncia nomes próprios anglófonos.
+
+### 6. Limites técnicos conhecidos
+
+- **Teto de velocidade:** espeak-ng ignora valores de `-s` acima de ~450wpm — não aumenta mais além disso
+- **SSML parcial:** nem todas as tags SSML são suportadas; `<break>` e `<emphasis>` funcionam bem
+
+### 7. Experimentação contínua
 
 Ao usar proativamente, testar variações de parâmetros e anotar o que soa melhor.
 Atualizar os defaults neste arquivo quando encontrar configurações superiores.
