@@ -30,9 +30,10 @@ _compose *args:
 build-base:
     DOCKER_BUILDKIT=1 docker build -f Dockerfile.claude.base -t zion-base:latest .
 
-# Build da imagem rápida (requer zion-base:latest)
+# Build da imagem rápida — builda a base automaticamente se não existir
 build:
-    DOCKER_BUILDKIT=1 just _compose build
+    @docker image inspect zion-base:latest > /dev/null 2>&1 || just build-base
+    DOCKER_BUILDKIT=1 just _compose build --pull never
 
 # Para todos os containers do projeto
 down:

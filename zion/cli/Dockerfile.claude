@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1
 # Dockerfile.claude — camada rápida sobre a base pré-baked.
 # Pré-requisito: zion-base:latest buildada com `just build-base`
 FROM zion-base:latest

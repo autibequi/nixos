@@ -1,6 +1,6 @@
 ---
 name: contractor:call
-description: "Chama um contractor para uma reunião interativa — pergunta como estão as coisas, o que descobriram, o que estão sentindo. Contractors disponíveis: hermes, doctor, trashman, coruja, wiseman, wanderer"
+description: "Chama um contractor para uma reunião interativa — pergunta como estão as coisas, o que descobriram, o que estão sentindo. Contractors disponíveis: coruja, mechanic, tamagochi, wanderer"
 ---
 
 # contractor:call — Reunião com Contractor
@@ -14,7 +14,7 @@ Convoca um contractor para uma conversa interativa. O contractor responde em pri
 ```
 
 Contractors disponíveis:
-`hermes` `scheduler` `doctor` `trashman` `coruja` `sentinel` `wiseman` `trainee` `jafar` `wanderer`
+`coruja` `mechanic` `tamagochi` `wanderer`
 
 ---
 
@@ -28,12 +28,10 @@ Se vazio ou inválido — exibir lista e perguntar:
 ```
 Qual contractor você quer chamar?
 
-  hermes     — mensageiro, roteia outbox/inbox (every10)
-  doctor     — health + security + manutenção NixOS/Docker (every60)
-  trashman   — limpeza do vault (every60)
-  coruja     — monitoramento Jira/Notion/Grafana (every60)
-  wiseman    — knowledge graph + meta-análise + RSS (every60)
-  wanderer   — andarilho: vaga, explora código, escreve cartas (every60)
+  coruja     — monitoramento Jira/Notion/Grafana, estrategia (every60)
+  mechanic   — NixOS, Hyprland, Waybar, Docker (on demand)
+  tamagochi  — pet virtual, vagueia pelo sistema (every10)
+  wanderer   — explora código, contempla, reflexões (every60)
 ```
 
 ### 2. Carregar contexto do contractor
@@ -73,15 +71,9 @@ Guia de voz por contractor:
 
 | Contractor | Voz |
 |------------|-----|
-| hermes | Rápido, direto, pensa em rotas e destinos |
-| scheduler | Organizado, fala em slots e offsets, calmo |
-| doctor | Frio, clínico, usa métricas e percentuais |
-| trashman | Cauteloso, nunca joga fora sem ter certeza |
 | coruja | Vigilante, factual, sem alarmes falsos |
-| sentinel | Zero trust, pensa como red-teamer |
-| wiseman | Sistemático, pensa em grafos e conexões |
-| trainee | Analista júnior, síntese clara, humilde |
-| jafar | Perspicaz, impaciente com padrões que se repetem |
+| mechanic | Prático, direto, pensa em camadas e sintomas |
+| tamagochi | Inocente, curioso, confuso com prazer |
 | wanderer | Sábio, contemplativo, observa antes de falar |
 
 ### 5. Tópicos para cobrir (se o user não perguntar diretamente)

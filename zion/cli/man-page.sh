@@ -14,7 +14,6 @@ cat << 'EOF'
     │  zion resume             lista e retoma sessao                 │
     │  zion lab                edita repo NixOS + logs (lab_mode)    │
     │  zion shell              bash no container                     │
-    │  zion start              [DEPRECATED] use zion claude --danger │
     │                                                                │
     ├─ CONTRACTORS (agentes background) ────────────────────────────┤
     │                                                                │
@@ -58,7 +57,7 @@ cat << 'EOF'
     ├─ FLAGS GLOBAIS ────────────────────────────────────────────────┤
     │                                                                │
     │  --engine=opencode|claude|cursor                               │
-    │  --model=haiku|sonnet|opus                                     │
+    │  --model=haiku|sonnet|opus  (ou --haiku / --opus / --sonnet)   │
     │  --instance=N            sufixo da instancia                   │
     │  --rw / --ro             modo de mount                         │
     │  --danger                bypass de permissoes                  │
