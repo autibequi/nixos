@@ -43,16 +43,10 @@ fn bash_cmd() -> std::process::Command {
 /// Run a background (non-interactive) docker command and return an error string if it fails.
 fn run_bg_cmd(svc: &str, env: &str, action: &str) -> Option<String> {
     let mut cmd = bash_cmd();
-    let args: Vec<&str> = match action {
-        "start" => vec!["docker", svc, "start"],
-        _       => vec!["docker", svc, action],
-    };
-
-    // For start, append --env flag if env is set
-    let env_flag;
-    let mut full_args = args.clone();
+    // bash CLI format: zion runner <service> <action> [--env=<env>]
+    let env_flag = format!("--env={env}");
+    let mut full_args: Vec<&str> = vec!["runner", svc, action];
     if action == "start" && !env.is_empty() {
-        env_flag = format!("--env={env}");
         full_args.push(&env_flag);
     }
 
@@ -148,7 +142,7 @@ pub fn run_status(tick: u64) -> Result<()> {
                                         execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
 
                                         let result = bash_cmd()
-                                            .args(["docker", &svc, &action])
+                                            .args(["runner", &svc, &action])
                                             .stdin(std::process::Stdio::inherit())
                                             .stdout(std::process::Stdio::inherit())
                                             .stderr(std::process::Stdio::inherit())
