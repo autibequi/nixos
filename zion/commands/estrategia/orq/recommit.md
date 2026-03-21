@@ -7,13 +7,13 @@ Reorganiza histórico de commits de uma branch pra PR review.
 
 ## Instruções
 
-Spawne o agente **Orquestrador** com o skill `recommit`:
+Spawne o agente **Coruja** com o skill `recommit`:
 
 ```
-Agent subagent_type=Orquestrador prompt="Execute o skill recommit. $ARGUMENTS"
+Agent subagent_type=Coruja prompt="Execute o skill recommit. $ARGUMENTS"
 ```
 
-O Orquestrador vai:
+A Coruja vai:
 1. Perguntar qual repo (se não especificado)
 2. Resetar commits desde fork de main
 3. Ler diff final do código

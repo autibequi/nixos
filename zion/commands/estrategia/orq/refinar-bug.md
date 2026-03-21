@@ -7,13 +7,13 @@ Investiga e refina um card de Bug no Jira.
 
 ## Instruções
 
-Spawne o agente **Orquestrador** com o skill `refinar-bug`:
+Spawne o agente **Coruja** com o skill `refinar-bug`:
 
 ```
-Agent subagent_type=Orquestrador prompt="Execute o skill refinar-bug para: $ARGUMENTS"
+Agent subagent_type=Coruja prompt="Execute o skill refinar-bug para: $ARGUMENTS"
 ```
 
-O Orquestrador vai:
+A Coruja vai:
 1. Ler o card Jira
 2. Investigar repos pertinentes (monolito, bo-container, front-student)
 3. Encontrar referências no código (arquivo, linha, método)

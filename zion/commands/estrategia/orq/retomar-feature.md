@@ -7,13 +7,13 @@ Retoma trabalho em feature iniciada em sessão anterior.
 
 ## Instruções
 
-Spawne o agente **Orquestrador** com o skill `retomar-feature`:
+Spawne o agente **Coruja** com o skill `retomar-feature`:
 
 ```
-Agent subagent_type=Orquestrador prompt="Execute o skill retomar-feature para: $ARGUMENTS"
+Agent subagent_type=Coruja prompt="Execute o skill retomar-feature para: $ARGUMENTS"
 ```
 
-O Orquestrador vai:
+A Coruja vai:
 1. Ler feature folder e arquivos de cada agente
 2. Checar estado git de cada repo (branches, commits, PRs)
 3. Identificar o que foi concluído vs pendente

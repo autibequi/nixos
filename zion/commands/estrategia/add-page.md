@@ -9,8 +9,8 @@ Cria ou modifica page num dos frontends.
 
 | Prefix | Agente | Framework | Tipos |
 |--------|--------|-----------|-------|
-| `bo:` | BoContainer | Vue 2 | list, form, detail, composite |
-| `front:` | FrontStudent | Nuxt 2 | — |
+| `bo:` | Coruja | Vue 2 | list, form, detail, composite |
+| `front:` | Coruja | Nuxt 2 | — |
 
 Se não houver prefix → perguntar: "bo ou front?"
 

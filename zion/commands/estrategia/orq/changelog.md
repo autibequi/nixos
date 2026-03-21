@@ -7,13 +7,13 @@ Gera changelog visual de todas as mudanças na branch atual vs main.
 
 ## Instruções
 
-Spawne o agente **Orquestrador** com o skill `changelog`:
+Spawne o agente **Coruja** com o skill `changelog`:
 
 ```
-Agent subagent_type=Orquestrador prompt="Execute o skill changelog. $ARGUMENTS"
+Agent subagent_type=Coruja prompt="Execute o skill changelog. $ARGUMENTS"
 ```
 
-O Orquestrador vai:
+A Coruja vai:
 1. Diffar cada sub-repositório contra main
 2. Categorizar mudanças por tipo (handlers, services, repos, workers, pages, components, routes)
 3. Apresentar changelog estruturado com nomes de métodos e parâmetros

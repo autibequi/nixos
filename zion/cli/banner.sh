@@ -27,12 +27,12 @@ cat << 'BANNER'
       █   zion lab                                                          █
       █   zion shell                      tasks                             █
       █                                                                     █
-      █  docker                            zion tasks tick                  █
-      █                                    zion tasks tick -d               █
-      █   zion dk run <svc>                zion tasks run <nome>            █
-      █   zion dk stop <svc>               zion tasks run <n> -t N         █
-      █   zion dk logs <svc>               zion tasks list                  █
-      █   zion dk status                   zion tasks new <nome>            █
+      █  docker                            contractors                      █
+      █                                                                     █
+      █   zion dk run <svc>                zion contractors run <nome>      █
+      █   zion dk stop <svc>                                                █
+      █   zion dk logs <svc>              inbox / outbox                   █
+      █   zion dk status                  zion inbox / zion outbox         █
       █   zion dk shell <svc>                                               █
       █                                   meta                              █
       █  container                                                          █

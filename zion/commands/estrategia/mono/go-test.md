@@ -6,7 +6,7 @@ Roda, analisa e debugga testes no monolito Go.
 - `$ARGUMENTS`: app name, file path, test function, "auto" (detecta da branch), ou "coverage <app>"
 
 ## Instruções
-Spawne o agente **Monolito** com o skill `go-test`:
+Spawne o agente **Coruja** com o skill `go-test`:
 ```
-Agent subagent_type=Monolito prompt="Execute o skill go-test para: $ARGUMENTS"
+Agent subagent_type=Coruja prompt="Execute o skill go-test para: $ARGUMENTS"
 ```

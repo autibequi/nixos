@@ -6,7 +6,7 @@ Cria ou modifica repository no monolito Go.
 - `$ARGUMENTS`: descrição do repository ou método
 
 ## Instruções
-Spawne o agente **Monolito** com o skill `go-repository`:
+Spawne o agente **Coruja** com o skill `go-repository`:
 ```
-Agent subagent_type=Monolito prompt="Execute o skill go-repository para: $ARGUMENTS"
+Agent subagent_type=Coruja prompt="Execute o skill go-repository para: $ARGUMENTS"
 ```

@@ -16,17 +16,17 @@ cat << 'EOF'
     │  zion shell              bash no container                     │
     │  zion start              [DEPRECATED] use zion claude --danger │
     │                                                                │
-    ├─ TASKS (kanban TODO/DOING/DONE) ──────────────────────────────┤
+    ├─ CONTRACTORS (agentes background) ────────────────────────────┤
     │                                                                │
-    │  zion tasks tick          executa cards vencidos (local)       │
-    │  zion tasks tick -d       dry-run: lista sem executar          │
-    │  zion tasks run <nome>    executa 1 card específico            │
-    │  zion tasks run <n> -t N  executa com max-turns override       │
-    │  zion tasks list          lista TODO/DOING/DONE                │
-    │  zion tasks list -a       inclui DONE                          │
-    │  zion tasks new <nome>    cria novo card                       │
-    │  zion tasks status        log de execuções                     │
-    │  (systemd timer: zion-tick.timer — a cada 10min)               │
+    │  zion contractors run <nome>   roda contractor agora          │
+    │  zion contractors run <n> -s N sobrescreve steps              │
+    │  /contractor:call              conversa interativa             │
+    │                                                                │
+    ├─ INBOX / OUTBOX ──────────────────────────────────────────────┤
+    │                                                                │
+    │  zion inbox               mostra inbox.md completo            │
+    │  zion inbox "mensagem"    adiciona entrada ao inbox            │
+    │  zion outbox              lista arquivos do outbox             │
     │                                                                │
     ├─ DOCKER (servicos estrategia) ────────────────────────────────┤
     │                                                                │

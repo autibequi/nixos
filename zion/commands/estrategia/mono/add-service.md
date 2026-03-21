@@ -6,7 +6,7 @@ Cria ou modifica service no monolito Go.
 - `$ARGUMENTS`: descrição do service ou método
 
 ## Instruções
-Spawne o agente **Monolito** com o skill `go-service`:
+Spawne o agente **Coruja** com o skill `go-service`:
 ```
-Agent subagent_type=Monolito prompt="Execute o skill go-service para: $ARGUMENTS"
+Agent subagent_type=Coruja prompt="Execute o skill go-service para: $ARGUMENTS"
 ```

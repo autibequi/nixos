@@ -6,7 +6,7 @@ Inspeção multi-perspectiva de feature chain no monolito.
 - `$ARGUMENTS`: PR number, branch, ou "auto" (detecta branch ativa)
 
 ## Instruções
-Spawne o agente **Monolito** com o skill `go-inspector`:
+Spawne o agente **Coruja** com o skill `go-inspector`:
 ```
-Agent subagent_type=Monolito prompt="Execute o skill go-inspector para: $ARGUMENTS"
+Agent subagent_type=Coruja prompt="Execute o skill go-inspector para: $ARGUMENTS"
 ```

@@ -7,13 +7,13 @@ Lê e resolve comentários de review em um PR no GitHub.
 
 ## Instruções
 
-Spawne o agente **Orquestrador** com o skill `review-pr`:
+Spawne o agente **Coruja** com o skill `review-pr`:
 
 ```
-Agent subagent_type=Orquestrador prompt="Execute o skill review-pr para: $ARGUMENTS"
+Agent subagent_type=Coruja prompt="Execute o skill review-pr para: $ARGUMENTS"
 ```
 
-O Orquestrador vai:
+A Coruja vai:
 1. Ler todos os comentários do PR via `gh` CLI
 2. Agrupar por arquivo/tópico
 3. Iterar no código pra resolver cada comentário

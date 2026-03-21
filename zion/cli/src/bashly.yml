@@ -301,86 +301,24 @@ commands:
     filename: commands/worktree.sh
 
   # ── Tasks (card system) ──────────────────────────────────────
-  - name: tasks
-    alias: [t, task]
-    help: "Gerencia tasks (cards em TODO/DOING/DONE)."
+  - name: contractors
+    alias: [ct]
+    help: "Gerencia contractors (agentes background)."
     commands:
       - name: run
-        help: "Executa uma task card pelo nome (sem prefixo de data, sem .md)."
+        alias: [r]
+        help: "Roda um contractor imediatamente (mesmo fluxo do scheduler). Para conversa interativa: /contractor:call"
         args:
           - name: name
             required: true
-            help: "Nome da task (ex: doctor). Busca em TODO/ e DOING/."
+            help: "Nome do contractor (ex: wanderer, tamagochi, mechanic)"
         flags:
-          - long: --max-turns
-            short: -t
-            arg: max_turns
-            help: "Sobrescreve max_turns do frontmatter do card."
-        filename: commands/tasks_run.sh
-      - name: list
-        alias: [ls, status, st, log]
-        help: "Lista cards em TODO/DOING/DONE. Com --log mostra log de execucao."
-        flags:
-          - long: --all
-            short: -a
-            help: "Mostra todas as pastas (TODO + DOING + DONE)"
-          - long: --log
-            short: -l
-            help: "Mostra log de execucao em vez dos cards"
-          - long: --lines
-            short: -n
-            arg: lines
-            default: "20"
-            help: "Linhas do log (default 20, so com --log)"
-        filename: commands/tasks_list.sh
-      - name: new
-        help: "Cria um novo card de task."
-        args:
-          - name: name
-            required: true
-            help: "Nome da task (ex: minha-tarefa)"
-        flags:
-          - long: --model
-            arg: model
-            default: haiku
-            help: "Modelo: haiku | sonnet | opus"
-          - long: --timeout
-            arg: timeout
-            default: "300"
-            help: "Timeout em segundos"
-          - long: --when
-            arg: when
-            help: "Data/hora (YYYYMMDD_HH_MM). Default: agora."
-          - long: --agent
-            arg: agent
-            help: "Nome do agente (carrega memory)"
-        filename: commands/tasks_new.sh
-      - name: tick
-        alias: [tk]
-        help: "Roda um tick local: lista cards vencidos e executa serialmente. Usa #stepsN no card como max_turns (default 30)."
-        flags:
-          - long: --dry-run
-            short: -d
-            help: "Apenas lista o que seria executado, sem rodar."
           - long: --steps
             short: -s
             arg: steps
-            help: "Sobrescreve #stepsN de todos os cards."
-        filename: commands/tasks_tick.sh
+            help: "Numero de turnos (default: haiku=20, sonnet=40, opus=60)"
+        filename: commands/contractor.sh
 
-      - name: agent
-        alias: [ag]
-        help: "Brute-start: roda um agente imediatamente, ignorando o scheduler. Cria card temporário e executa agora."
-        args:
-          - name: name
-            required: true
-            help: "Nome do agente (ex: wanderer, tamagochi, doctor)"
-        flags:
-          - long: --steps
-            short: -s
-            arg: steps
-            help: "Número de turnos (default: derivado do modelo — haiku=20, sonnet=40, opus=60)"
-        filename: commands/tasks_agent.sh
 
   - name: status
     alias: [st]
@@ -490,6 +428,20 @@ commands:
             short: -y
             help: "Pula confirmacao interativa"
         filename: commands/git_sandbox.sh
+
+  - name: inbox
+    alias: [ib]
+    help: "Lista o inbox ou adiciona uma entrada. Sem args: mostra inbox.md. Com texto: adiciona entrada."
+    args:
+      - name: message
+        help: "Mensagem para adicionar ao inbox (opcional)"
+        repeatable: true
+    filename: commands/inbox.sh
+
+  - name: outbox
+    alias: [ob]
+    help: "Lista os arquivos do outbox."
+    filename: commands/outbox.sh
 
   - name: help
     help: Mostra o banner com comandos principais.

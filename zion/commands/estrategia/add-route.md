@@ -9,8 +9,8 @@ Cria ou modifica route num dos frontends.
 
 | Prefix | Agente | Framework |
 |--------|--------|-----------|
-| `bo:` | BoContainer | Vue 2 |
-| `front:` | FrontStudent | Nuxt 2 |
+| `bo:` | Coruja | Vue 2 |
+| `front:` | Coruja | Nuxt 2 |
 
 Se não houver prefix → perguntar: "bo ou front?"
 

@@ -6,7 +6,7 @@ Implementa feature completa no monolito Go (migration → repo → service → h
 - `$ARGUMENTS`: descrição da feature ou card Jira
 
 ## Instruções
-Spawne o agente **Monolito** com o skill `make-feature`:
+Spawne o agente **Coruja** com o skill `make-feature`:
 ```
-Agent subagent_type=Monolito prompt="Execute o skill make-feature para: $ARGUMENTS"
+Agent subagent_type=Coruja prompt="Execute o skill make-feature para: $ARGUMENTS"
 ```

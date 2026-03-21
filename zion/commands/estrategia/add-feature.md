@@ -11,8 +11,8 @@ Extrair target da primeira palavra:
 
 | Prefix | Agente | Framework | Fluxo |
 |--------|--------|-----------|-------|
-| `bo:` | BoContainer | Vue 2 | service → route → component → page |
-| `front:` | FrontStudent | Nuxt 2 | service → component → page |
+| `bo:` | Coruja | Vue 2 | service → route → component → page |
+| `front:` | Coruja | Nuxt 2 | service → component → page |
 
 Se não houver prefix → perguntar: "bo ou front?"
 

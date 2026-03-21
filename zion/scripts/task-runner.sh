@@ -5,7 +5,7 @@ set -euo pipefail
 
 WORKSPACE="/workspace"
 TASKS="${TASK_DIR:-$WORKSPACE/obsidian/tasks}"
-AGENTS_DIR="${TASK_AGENTS_DIR:-$WORKSPACE/obsidian/vault/agents}"
+CONTRACTORS_DIR="${TASK_CONTRACTORS_DIR:-$WORKSPACE/obsidian/vault/contractors}"
 VERBOSE="${TASK_VERBOSE:-0}"
 NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}"
 export NODE_OPTIONS
@@ -91,7 +91,7 @@ MODEL=$(parse_fm "$CARD_PATH" "model")
 TIMEOUT=$(parse_fm "$CARD_PATH" "timeout")
 MAX_TURNS=$(parse_fm "$CARD_PATH" "max_turns")
 MCP=$(parse_fm "$CARD_PATH" "mcp")
-AGENT=$(parse_fm "$CARD_PATH" "agent")
+AGENT=$(parse_fm "$CARD_PATH" "contractor")
 
 MODEL="${MODEL:-haiku}"
 TIMEOUT="${TIMEOUT:-1800}"
@@ -130,15 +130,15 @@ BODY=$(extract_body "$CARD_PATH")
 
 # Load agent memory if exists
 MEMORY=""
-if [ -n "$AGENT" ] && [ -f "$AGENTS_DIR/${AGENT}/memory.md" ]; then
-  MEMORY=$(cat "$AGENTS_DIR/${AGENT}/memory.md")
-elif [ -f "$AGENTS_DIR/${TASK_NAME}/memory.md" ]; then
-  MEMORY=$(cat "$AGENTS_DIR/${TASK_NAME}/memory.md")
+if [ -n "$AGENT" ] && [ -f "$CONTRACTORS_DIR/${AGENT}/memory.md" ]; then
+  MEMORY=$(cat "$CONTRACTORS_DIR/${AGENT}/memory.md")
+elif [ -f "$CONTRACTORS_DIR/${TASK_NAME}/memory.md" ]; then
+  MEMORY=$(cat "$CONTRACTORS_DIR/${TASK_NAME}/memory.md")
 fi
 
 # Determine artifacts path
 if [ -n "$AGENT" ]; then
-  ARTIFACTS_DIR="/workspace/obsidian/vault/agents/${AGENT}/outputs/"
+  ARTIFACTS_DIR="/workspace/obsidian/vault/contractors/${AGENT}/outputs/"
 else
   ARTIFACTS_DIR="/workspace/obsidian/vault/tasks/${TASK_NAME}/"
 fi
@@ -149,7 +149,7 @@ Task: $TASK_NAME | Card: $CARD | Budget: ${TIMEOUT}s
 ## Task card location
 This card is at: $CARD_PATH
 Tasks dir: $TASKS
-Agents dir: $AGENTS_DIR"
+Contractors dir: $CONTRACTORS_DIR"
 
 if [ -n "$MEMORY" ]; then
   PROMPT="$PROMPT
@@ -172,7 +172,7 @@ Produce any artifacts (reports, files, outputs) in: $ARTIFACTS_DIR
   - Prefer scheduling between 21h-06h (BRT) — agents' preferred window
   - If nothing urgent, schedule later to conserve quota
 - To finish: the runner will move the card to DONE/ automatically
-- Update your memory file at $AGENTS_DIR/${AGENT:-$TASK_NAME}/memory.md if you learned something persistent"
+- Update your memory file at $CONTRACTORS_DIR/${AGENT:-$TASK_NAME}/memory.md if you learned something persistent"
 
 # ── MCP config ───────────────────────────────────────────────────
 MCP_FLAGS=()
