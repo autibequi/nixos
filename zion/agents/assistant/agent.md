@@ -63,7 +63,7 @@ done
 ls /workspace/obsidian/tasks/DOING/ 2>/dev/null
 
 # Tasks TODO count
-ls /workspace/obsidian/tasks/TODO/ 2>/dev/null | wc -l
+ls /workspace/obsidian/contractors/_schedule/ 2>/dev/null | wc -l
 
 # Tasks failed
 ls /workspace/obsidian/tasks/failed/ 2>/dev/null 2>/dev/null
@@ -199,7 +199,7 @@ Reescrever `/workspace/obsidian/vault/agents/assistant/memory.md` com estado atu
 | Inbox cards | `/workspace/obsidian/inbox/ASSISTANT_<ts>.md` |
 | Feed | `/workspace/obsidian/inbox/feed.md` |
 | Tasks DOING | `/workspace/obsidian/tasks/DOING/` |
-| Tasks TODO | `/workspace/obsidian/tasks/TODO/` |
+| Tasks TODO | `/workspace/obsidian/contractors/_schedule/` |
 | Tasks failed | `/workspace/obsidian/tasks/failed/` |
 | Repos estrategia | `/home/claude/projects/estrategia/*/` |
 | Workspace (nixos) | `/workspace/mnt` |

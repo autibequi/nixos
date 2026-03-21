@@ -1,10 +1,10 @@
-# Executa todos os contractor cards vencidos em TODO/
-# Um "contractor card" tem campo `agent:` no frontmatter
+# Executa todos os contractor cards vencidos em contractors/_schedule/
+# Um "contractor card" tem campo `agent:` ou `contractor:` no frontmatter
 zion_load_config
 
 ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/zion}"
 OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
-TASKS="${TASK_DIR:-$OBSIDIAN/tasks}"
+SCHEDULE="${SCHEDULE_DIR:-$OBSIDIAN/contractors/_schedule}"
 RUNNER="$ZION_DIR/scripts/task-runner.sh"
 
 # Fallbacks runner
@@ -14,17 +14,17 @@ if [ ! -f "$RUNNER" ]; then
   done
 fi
 
-# Fallbacks tasks
-if [ ! -d "$TASKS" ]; then
-  for try in "$ZION_DIR/../obsidian/tasks" /workspace/obsidian/tasks "$HOME/obsidian/tasks"; do
-    [ -d "$try" ] && TASKS="$try" && break
+# Fallbacks _schedule
+if [ ! -d "$SCHEDULE" ]; then
+  for try in "$OBSIDIAN/contractors/_schedule" /workspace/obsidian/contractors/_schedule "$HOME/obsidian/contractors/_schedule"; do
+    [ -d "$try" ] && SCHEDULE="$try" && break
   done
 fi
 
 DRY_RUN="${args[--dry-run]:-}"
 
-if [ ! -d "$TASKS/TODO" ]; then
-  echo "[work] tasks/TODO nao encontrado: $TASKS/TODO"
+if [ ! -d "$SCHEDULE" ]; then
+  echo "[work] contractors/_schedule nao encontrado: $SCHEDULE"
   exit 1
 fi
 if [ ! -f "$RUNNER" ]; then
@@ -60,7 +60,7 @@ NOW=$(date +%s)
 THRESHOLD=$((NOW + 300))  # 5min de tolerância
 DUE=()
 
-for card_path in "$TASKS/TODO"/*.md; do
+for card_path in "$SCHEDULE"/*.md; do
   [ -f "$card_path" ] || continue
   filename=$(basename "$card_path")
 
@@ -91,7 +91,8 @@ fi
 # Executar em série (evitar estouro de quota)
 for filename in "${DUE[@]}"; do
   echo "[work] → $filename"
-  export TASK_DIR="$TASKS"
+  export TASK_CONTRACTORS_DIR="$(dirname "$SCHEDULE")"
+  export SCHEDULE_DIR="$SCHEDULE"
   bash "$RUNNER" "$filename" || echo "[work] $filename falhou (continuando)"
 done
 

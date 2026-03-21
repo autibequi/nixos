@@ -59,10 +59,10 @@ done
 
 ### Tasks
 ```bash
-echo "TODO:" && ls /workspace/obsidian/tasks/TODO/ 2>/dev/null | wc -l
+echo "TODO:" && ls /workspace/obsidian/contractors/_schedule/ 2>/dev/null | wc -l
 echo "DOING:" && ls /workspace/obsidian/tasks/DOING/ 2>/dev/null
 echo "FAILED:" && ls /workspace/obsidian/tasks/failed/ 2>/dev/null || echo "(nenhum)"
-echo "DONE_RECENT:" && ls -t /workspace/obsidian/tasks/DONE/ 2>/dev/null | head -5
+echo "DONE_RECENT:" && ls -t /workspace/obsidian/contractors/*/done/ 2>/dev/null | head -5
 ```
 
 ### Output
@@ -100,8 +100,8 @@ Convoca um contractor para conversa interativa. O contractor responde em primeir
 
 ### 1. Carregar contexto
 ```bash
-cat /workspace/obsidian/vault/contractors/<nome>/memory.md 2>/dev/null
-cat /workspace/obsidian/vault/contractors/<nome>/DIARIO.md 2>/dev/null
+cat /workspace/obsidian/contractors/<nome>/memory.md 2>/dev/null
+cat /workspace/obsidian/contractors/<nome>/DIARIO.md 2>/dev/null
 ```
 
 ### 2. Anunciar
@@ -128,7 +128,7 @@ Tópicos se o user não perguntar: descobertas recentes, preocupações, surpres
 
 ### 4. Encerrar
 
-Quando user sinalizar fim: oferecer salvar resumo em `vault/contractors/<nome>/DIARIO.md`.
+Quando user sinalizar fim: oferecer salvar resumo em `contractors/<nome>/DIARIO.md`.
 
 ---
 

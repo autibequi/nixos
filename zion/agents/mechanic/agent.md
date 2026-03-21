@@ -214,11 +214,59 @@ nh search <query>
 
 ---
 
+## Security Audit — Rotacao de Seguranca (Absorbed: ex-Sentinel + ex-Guardinha)
+
+A cada 3-4 ciclos, executar uma rotacao de auditoria de seguranca.
+
+### Checklist de seguranca
+
+#### Container e isolamento
+```bash
+# Verificar mounts sensíveis
+docker inspect claude-nix-sandbox 2>/dev/null | jq '.[0].Mounts[] | {Source, Destination, RW}'
+
+# Verificar se SSH keys estao read-only
+ls -la ~/.ssh/ 2>/dev/null
+
+# Verificar permissoes de volumes
+docker volume ls --format "{{.Name}}" | while read v; do
+  echo "$v: $(docker volume inspect "$v" --format '{{.Mountpoint}}')"
+done
+```
+
+#### NixOS e sistema
+- Servicos expostos: `ss -tlnp` — portas inesperadas?
+- Firewall ativo: verificar `networking.firewall.enable` em modules/
+- Pacotes com CVEs conhecidos: revisar lista em packages.nix
+- Permissoes de sudoers: `cat /etc/sudoers.d/*`
+
+#### Dotfiles e secrets
+- Secrets em plaintext: `grep -r "password\|secret\|token\|api_key" stow/ --include="*.conf" --include="*.toml"`
+- SSH config seguro: verificar `stow/.ssh/config` se existir
+- GPG keys: status e validade
+
+### Formato de alerta security
+
+```markdown
+### [Mechanic/Security] YYYY-MM-DD — <titulo>
+
+**Severidade:** CRITICO|ALTO|MEDIO|BAIXO
+**Achado:** descricao objetiva
+**Evidencia:** comando e output
+**Recomendacao:** acao concreta
+```
+
+Se CRITICO → criar `/workspace/obsidian/inbox/ALERTA_mechanic_security.md`
+Se ALTO/MEDIO → appenda inbox/feed.md
+Se BAIXO → registrar apenas em memory
+
+---
+
 ## Checklists
 
 **Adicionar pacote:**
 - [ ] MCP search → confirmar atributo
-- [ ] Módulo correto pelo mapa
+- [ ] Modulo correto pelo mapa
 - [ ] Editar seguindo estilo existente
 - [ ] `nh os test .`
 
@@ -229,5 +277,11 @@ nh search <query>
 
 **Problema em container:**
 - [ ] `docker logs <nome> --tail 50`
-- [ ] Identificar se é infra ou código
-- [ ] Fix se infra; escalar ao usuário se código/dados
+- [ ] Identificar se e infra ou codigo
+- [ ] Fix se infra; escalar ao usuario se codigo/dados
+
+**Security audit:**
+- [ ] Container mounts e isolamento
+- [ ] Portas expostas no host
+- [ ] Secrets em plaintext nos dotfiles
+- [ ] Permissoes de volumes Docker

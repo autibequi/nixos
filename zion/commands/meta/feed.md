@@ -42,14 +42,14 @@ ls /workspace/obsidian/inbox/ALERTA_*.md 2>/dev/null
 ### Tasks ativas e pendentes
 ```bash
 ls /workspace/obsidian/tasks/DOING/ 2>/dev/null
-ls /workspace/obsidian/tasks/TODO/ 2>/dev/null | wc -l
-ls -t /workspace/obsidian/tasks/DONE/ 2>/dev/null | head -5
+ls /workspace/obsidian/contractors/_schedule/ 2>/dev/null | wc -l
+ls -t /workspace/obsidian/contractors/*/done/ 2>/dev/null | head -5
 ```
 
 ### Outputs recentes de contractors (últimas 24h)
 ```bash
-find /workspace/obsidian/vault/contractors/*/outputs/ -newer /tmp/feed_24h_mark -name "*.md" 2>/dev/null \
-  || find /workspace/obsidian/vault/contractors/*/outputs/ -mtime -1 -name "*.md" 2>/dev/null
+find /workspace/obsidian/contractors/*/outputs/ -newer /tmp/feed_24h_mark -name "*.md" 2>/dev/null \
+  || find /workspace/obsidian/contractors/*/outputs/ -mtime -1 -name "*.md" 2>/dev/null
 ```
 Para cada output encontrado: ler primeiras 15 linhas e sumarizar.
 

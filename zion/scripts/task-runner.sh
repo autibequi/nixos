@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # task-runner.sh — Run a single task card
-# Usage: task-runner.sh <filename.md>  (file must be in TODO/ or DOING/)
+# Usage: task-runner.sh <filename.md>  (file must be in _schedule/ or _running/)
 set -euo pipefail
 
 WORKSPACE="/workspace"
-TASKS="${TASK_DIR:-$WORKSPACE/obsidian/tasks}"
-CONTRACTORS_DIR="${TASK_CONTRACTORS_DIR:-$WORKSPACE/obsidian/vault/contractors}"
+OBSIDIAN="${OBSIDIAN_PATH:-$WORKSPACE/obsidian}"
+CONTRACTORS_DIR="${TASK_CONTRACTORS_DIR:-$OBSIDIAN/contractors}"
+SCHEDULE_DIR="${SCHEDULE_DIR:-$CONTRACTORS_DIR/_schedule}"
 VERBOSE="${TASK_VERBOSE:-0}"
 NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}"
 export NODE_OPTIONS
@@ -14,19 +15,20 @@ CARD="${1:?Usage: task-runner.sh <card.md>}"
 CARD_BASE="$(basename "$CARD" .md)"
 
 # ── Find card ────────────────────────────────────────────────────
+RUNNING_DIR="$CONTRACTORS_DIR/_running"
 CARD_PATH=""
-if [ -f "$TASKS/TODO/$CARD" ]; then
-  CARD_PATH="$TASKS/TODO/$CARD"
-elif [ -f "$TASKS/TODO/${CARD}.md" ]; then
-  CARD_PATH="$TASKS/TODO/${CARD}.md"
+if [ -f "$SCHEDULE_DIR/$CARD" ]; then
+  CARD_PATH="$SCHEDULE_DIR/$CARD"
+elif [ -f "$SCHEDULE_DIR/${CARD}.md" ]; then
+  CARD_PATH="$SCHEDULE_DIR/${CARD}.md"
   CARD="${CARD}.md"
-elif [ -f "$TASKS/DOING/$CARD" ]; then
-  CARD_PATH="$TASKS/DOING/$CARD"
-elif [ -f "$TASKS/DOING/${CARD}.md" ]; then
-  CARD_PATH="$TASKS/DOING/${CARD}.md"
+elif [ -f "$RUNNING_DIR/$CARD" ]; then
+  CARD_PATH="$RUNNING_DIR/$CARD"
+elif [ -f "$RUNNING_DIR/${CARD}.md" ]; then
+  CARD_PATH="$RUNNING_DIR/${CARD}.md"
   CARD="${CARD}.md"
 else
-  echo "[runner] card '$CARD' not found in TODO/ or DOING/"
+  echo "[runner] card '$CARD' not found in _schedule/ or _running/"
   exit 1
 fi
 
@@ -48,11 +50,11 @@ if ! mkdir "$LOCKDIR" 2>/dev/null; then
 fi
 trap cleanup_lock EXIT
 
-# ── Move to DOING ────────────────────────────────────────────────
-mkdir -p "$TASKS/DOING" "$TASKS/DONE"
-if [ "$(dirname "$CARD_PATH")" != "$TASKS/DOING" ]; then
-  mv "$CARD_PATH" "$TASKS/DOING/$CARD"
-  CARD_PATH="$TASKS/DOING/$CARD"
+# ── Move to _running ───────────────────────────────────────────────
+mkdir -p "$RUNNING_DIR"
+if [ "$(dirname "$CARD_PATH")" != "$RUNNING_DIR" ]; then
+  mv "$CARD_PATH" "$RUNNING_DIR/$CARD"
+  CARD_PATH="$RUNNING_DIR/$CARD"
 fi
 
 # ── Parse frontmatter ────────────────────────────────────────────
@@ -119,9 +121,9 @@ if [ -x "$USAGE_SCRIPT" ] && [ "$TASK_NAME" != "hermes" ]; then
   WEEK_PCT="${WEEK_PCT%%.*}"  # truncate decimals
   if [ "${WEEK_PCT:-0}" -ge 70 ] 2>/dev/null; then
     echo "[runner] '$TASK_NAME' — QUOTA_HOLD (week=${WEEK_PCT}%), rescheduling +60min"
-    # Move card back to TODO with +60min
+    # Move card back to _schedule with +60min
     NEXT=$(date -d "+60 minutes" +%Y%m%d_%H_%M)
-    mv "$CARD_PATH" "$TASKS/TODO/${NEXT}_${TASK_NAME}.md" 2>/dev/null || true
+    mv "$CARD_PATH" "$SCHEDULE_DIR/${NEXT}_${TASK_NAME}.md" 2>/dev/null || true
     exit 0
   fi
 fi
@@ -139,9 +141,9 @@ fi
 
 # Determine artifacts path
 if [ -n "$AGENT" ]; then
-  ARTIFACTS_DIR="/workspace/obsidian/vault/contractors/${AGENT}/outputs/"
+  ARTIFACTS_DIR="$CONTRACTORS_DIR/${AGENT}/outputs/"
 else
-  ARTIFACTS_DIR="/workspace/obsidian/vault/tasks/${TASK_NAME}/"
+  ARTIFACTS_DIR="$CONTRACTORS_DIR/${TASK_NAME}/outputs/"
 fi
 
 PROMPT="[HEADLESS MODE] Timeout: ${TIMEOUT}s | Time: $(date -u +%Y-%m-%dT%H:%M:%SZ)
@@ -149,7 +151,7 @@ Task: $TASK_NAME | Card: $CARD | Budget: ${TIMEOUT}s
 
 ## Task card location
 This card is at: $CARD_PATH
-Tasks dir: $TASKS
+Schedule dir: $SCHEDULE_DIR
 Contractors dir: $CONTRACTORS_DIR"
 
 if [ -n "$MEMORY" ]; then
@@ -168,11 +170,12 @@ $BODY
 Produce any artifacts (reports, files, outputs) in: $ARTIFACTS_DIR
 
 ## After completing
-- To reschedule: move this card back to TODO/ with a new date prefix (YYYYMMDD_HH_MM_name.md)
+- To reschedule: move this card back to _schedule/ with a new date prefix (YYYYMMDD_HH_MM_name.md)
+  - Path: $SCHEDULE_DIR/
   - YOU choose when to run next (minimum 30 minutes)
   - Prefer scheduling between 21h-06h (BRT) — agents' preferred window
   - If nothing urgent, schedule later to conserve quota
-- To finish: the runner will move the card to DONE/ automatically
+- To finish: the runner will move the card to your done/ folder automatically
 - Update your memory file at $CONTRACTORS_DIR/${AGENT:-$TASK_NAME}/memory.md if you learned something persistent"
 
 # ── MCP config ───────────────────────────────────────────────────
@@ -188,7 +191,7 @@ RUN_START_FMT=$(date -u +"%H:%M:%S UTC")
 echo "[runner] running '$TASK_NAME' (model=$MODEL, timeout=${TIMEOUT}s, turns=$MAX_TURNS, start=$RUN_START_FMT)"
 
 # ── Run ──────────────────────────────────────────────────────────
-LOGDIR="$(dirname "$TASKS")/vault/.ephemeral/cron-logs/$TASK_NAME"
+LOGDIR="$OBSIDIAN/.ephemeral/cron-logs/$TASK_NAME"
 mkdir -p "$LOGDIR"
 # Fix dirs criados como root por execuções anteriores sem -u claude
 if [ ! -w "$LOGDIR" ]; then
@@ -244,12 +247,15 @@ if [ "$STATUS" != "ok" ]; then
   echo "[runner] ---"
 fi
 
-# If agent moved card back to TODO (rescheduled itself), we're done
+# If agent moved card back to _schedule (rescheduled itself), we're done
 if [ ! -f "$CARD_PATH" ]; then
   echo "[runner] '$TASK_NAME' — rescheduled (${RUN_START_FMT} → ${RUN_END_FMT}, ${ELAPSED_FMT})"
   exit 0
 fi
 
-# Otherwise move to DONE
-mv "$CARD_PATH" "$TASKS/DONE/$CARD" 2>/dev/null || true
-echo "[runner] '$TASK_NAME' → DONE ($STATUS, ${RUN_START_FMT} → ${RUN_END_FMT}, ${ELAPSED_FMT})"
+# Otherwise move to contractor's done/ folder
+DONE_AGENT="${AGENT:-$TASK_NAME}"
+DONE_DIR="$CONTRACTORS_DIR/${DONE_AGENT}/done"
+mkdir -p "$DONE_DIR"
+mv "$CARD_PATH" "$DONE_DIR/$CARD" 2>/dev/null || true
+echo "[runner] '$TASK_NAME' → ${DONE_AGENT}/done/ ($STATUS, ${RUN_START_FMT} → ${RUN_END_FMT}, ${ELAPSED_FMT})"

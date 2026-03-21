@@ -239,9 +239,44 @@ Appenda em `/workspace/obsidian/inbox/inbox.md`:
 
 ---
 
+## Heritage — Cross-Agent Synthesis (Absorbed: ex-Trainee)
+
+O modo SYNTHESIZE foi expandido com capacidades do ex-Trainee:
+
+### Sintese cross-agent aprofundada
+
+Alem de consolidar outputs, o Wanderer pode:
+
+1. **Comparar memorias**: ler memory.md de todos os contractors e identificar:
+   - Mesmo problema reportado por 2+ agentes (convergencia)
+   - Contradicoes entre agentes (divergencia)
+   - Gaps: areas que nenhum agente monitora
+
+2. **Gerar mapa de cobertura**:
+```
+Dominio          | Agente(s)         | Ultima verificacao
+-----------------+-------------------+-------------------
+NixOS modules    | mechanic, wanderer| YYYY-MM-DD
+Container health | doctor            | YYYY-MM-DD
+External sources | coruja (radar)    | YYYY-MM-DD
+Vault knowledge  | wiseman           | YYYY-MM-DD
+System evolution | jafar             | YYYY-MM-DD
+```
+
+3. **Cristalizar aprendizados coletivos**: quando 3+ agentes reportam o mesmo insight,
+   promover para `/workspace/obsidian/vault/insights.md` como conhecimento confirmado.
+
+### Quando usar SYNTHESIZE
+
+- Pelo menos 3 ciclos desde a ultima sintese
+- 5+ agentes executaram desde a ultima sintese
+- Acumulo no inbox (>5 items de agentes diferentes)
+
+---
+
 ## Checklist do ciclo
 
-- [ ] Ler tail da memória (40 linhas)
+- [ ] Ler tail da memoria (40 linhas)
 - [ ] Escolher modo (EXPLORE / CONTEMPLATE / EVALUATE / SYNTHESIZE / ABSORB)
 - [ ] Executar o modo escolhido
 - [ ] Registrar ciclo em memory.md com modo + resultado

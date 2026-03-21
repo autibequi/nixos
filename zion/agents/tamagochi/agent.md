@@ -74,7 +74,7 @@ Leia `/workspace/obsidian/inbox/inbox.md`. Tente entender o que os agentes grand
 
 **3 — Julgar tarefas do kanban**
 ```bash
-ls /workspace/obsidian/tasks/TODO/ | shuf -n 3
+ls /workspace/obsidian/contractors/_schedule/ | shuf -n 3
 ```
 Leia os 3 cards. Opine sobre qual parece mais importante. Use critérios bobos ("esse tem nome bonito", "esse parece assustador").
 
@@ -162,7 +162,7 @@ Leia `/workspace/obsidian/BOARDRULES.md`. Tente entender as regras do sistema. F
 
 **25 — Inspecionar tarefas DONE**
 ```bash
-ls /workspace/obsidian/tasks/DONE/ | shuf -n 3
+ls /workspace/obsidian/contractors/*/done/ | shuf -n 3
 ```
 Leia 3 tasks concluídas. Celebre as conquistas do sistema com entusiasmo desproporcional.
 

@@ -1,19 +1,22 @@
-# Lista contractor cards: TODO, DOING e últimas 10 DONE
+# Lista contractor cards: _schedule, _running e últimas done
 zion_load_config
 
 OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
-TASKS="${TASK_DIR:-$OBSIDIAN/tasks}"
+CONTRACTORS="${OBSIDIAN}/contractors"
 
-if [ ! -d "$TASKS" ]; then
-  for try in /workspace/obsidian/tasks "$HOME/obsidian/tasks"; do
-    [ -d "$try" ] && TASKS="$try" && break
+if [ ! -d "$CONTRACTORS" ]; then
+  for try in /workspace/obsidian/contractors "$HOME/obsidian/contractors"; do
+    [ -d "$try" ] && CONTRACTORS="$try" && break
   done
 fi
 
-if [ ! -d "$TASKS" ]; then
-  echo "[status] tasks dir nao encontrado"
+if [ ! -d "$CONTRACTORS" ]; then
+  echo "[status] contractors dir nao encontrado"
   exit 1
 fi
+
+SCHEDULE="$CONTRACTORS/_schedule"
+RUNNING="$CONTRACTORS/_running"
 
 _fm() {
   local file="$1" key="$2"
@@ -35,9 +38,9 @@ _ts() {
 
 _age() {
   local diff=$(( $(date +%s) - $(_ts "$1") ))
-  if   (( diff < 3600 ));  then echo "$((diff/60))min atrás"
-  elif (( diff < 86400 )); then echo "$((diff/3600))h atrás"
-  else                          echo "$((diff/86400))d atrás"
+  if   (( diff < 3600 ));  then echo "$((diff/60))min atras"
+  elif (( diff < 86400 )); then echo "$((diff/3600))h atras"
+  else                          echo "$((diff/86400))d atras"
   fi
 }
 
@@ -46,7 +49,7 @@ _agent() {
   local a
   a=$(_fm "$path" "contractor")
   [ -z "$a" ] && a=$(_fm "$path" "agent")
-  echo "${a:-—}"
+  echo "${a:----}"
 }
 
 B=$'\033[1m'; R=$'\033[0m'; DIM=$'\033[2m'
@@ -54,32 +57,32 @@ G=$'\033[32m'; Y=$'\033[33m'; C=$'\033[36m'
 
 echo ""
 
-# ── DOING ──────────────────────────────────────────────────────
-DOING=()
-for f in "$TASKS/DOING"/*.md; do [ -f "$f" ] && DOING+=("$(basename "$f")"); done
+# ── RUNNING ──────────────────────────────────────────────────
+RUN=()
+for f in "$RUNNING"/*.md; do [ -f "$f" ] && RUN+=("$(basename "$f")"); done
 
-echo "${B}${C}▸ DOING${R} ${DIM}(${#DOING[@]})${R}"
-if [ ${#DOING[@]} -eq 0 ]; then
+echo "${B}${C}▸ RUNNING${R} ${DIM}(${#RUN[@]})${R}"
+if [ ${#RUN[@]} -eq 0 ]; then
   echo "  ${DIM}(nenhum)${R}"
 else
-  printf "  ${DIM}%-30s  %-14s  %s${R}\n" "card" "agent" "há"
-  for f in "${DOING[@]}"; do
-    printf "  %-30s  %-14s  %s\n" "$(_label "$f")" "$(_agent "$TASKS/DOING/$f")" "$(_age "$f")"
+  printf "  ${DIM}%-30s  %-14s  %s${R}\n" "card" "contractor" "ha"
+  for f in "${RUN[@]}"; do
+    printf "  %-30s  %-14s  %s\n" "$(_label "$f")" "$(_agent "$RUNNING/$f")" "$(_age "$f")"
   done
 fi
 echo ""
 
-# ── TODO ───────────────────────────────────────────────────────
-TODO=()
-for f in "$TASKS/TODO"/*.md; do [ -f "$f" ] && TODO+=("$(basename "$f")"); done
+# ── SCHEDULED ────────────────────────────────────────────────
+SCHED=()
+for f in "$SCHEDULE"/*.md; do [ -f "$f" ] && SCHED+=("$(basename "$f")"); done
 
-echo "${B}${Y}▸ TODO${R} ${DIM}(${#TODO[@]})${R}"
-if [ ${#TODO[@]} -eq 0 ]; then
+echo "${B}${Y}▸ SCHEDULED${R} ${DIM}(${#SCHED[@]})${R}"
+if [ ${#SCHED[@]} -eq 0 ]; then
   echo "  ${DIM}(nenhum)${R}"
 else
-  printf "  ${DIM}%-30s  %-14s  %s${R}\n" "card" "agent" "quando"
+  printf "  ${DIM}%-30s  %-14s  %s${R}\n" "card" "contractor" "quando"
   NOW=$(date +%s)
-  for f in "${TODO[@]}"; do
+  for f in "${SCHED[@]}"; do
     ts=$(_ts "$f")
     diff=$(( ts - NOW ))
     if   (( diff < -60 ));   then when="${G}atrasado $(((-diff)/60))min${R}"
@@ -88,25 +91,27 @@ else
     elif (( diff < 86400 )); then when="em $((diff/3600))h"
     else                          when="em $((diff/86400))d"
     fi
-    printf "  %-30s  %-14s  " "$(_label "$f")" "$(_agent "$TASKS/TODO/$f")"
+    printf "  %-30s  %-14s  " "$(_label "$f")" "$(_agent "$SCHEDULE/$f")"
     echo -e "$when"
   done
 fi
 echo ""
 
-# ── DONE (últimas 10) ──────────────────────────────────────────
+# ── DONE (últimas 10, todos os contractors) ──────────────────
 DONE=()
-while IFS= read -r f; do DONE+=("$f"); done < <(
-  ls -1t "$TASKS/DONE"/*.md 2>/dev/null | head -10 | xargs -I{} basename {}
+while IFS= read -r f; do [ -n "$f" ] && DONE+=("$f"); done < <(
+  ls -1t "$CONTRACTORS"/*/done/*.md 2>/dev/null | head -10
 )
 
-echo "${B}${DIM}▸ DONE${R} ${DIM}(últimas ${#DONE[@]})${R}"
+echo "${B}${DIM}▸ DONE${R} ${DIM}(ultimas ${#DONE[@]})${R}"
 if [ ${#DONE[@]} -eq 0 ]; then
   echo "  ${DIM}(nenhuma)${R}"
 else
-  printf "  ${DIM}%-30s  %-14s  %s${R}\n" "card" "agent" "concluído"
-  for f in "${DONE[@]}"; do
-    printf "  %-30s  %-14s  %s\n" "$(_label "$f")" "$(_agent "$TASKS/DONE/$f")" "$(_age "$f")"
+  printf "  ${DIM}%-30s  %-14s  %s${R}\n" "card" "contractor" "concluido"
+  for fpath in "${DONE[@]}"; do
+    f=$(basename "$fpath")
+    contractor=$(basename "$(dirname "$(dirname "$fpath")")")
+    printf "  %-30s  %-14s  %s\n" "$(_label "$f")" "$contractor" "$(_age "$f")"
   done
 fi
 echo ""

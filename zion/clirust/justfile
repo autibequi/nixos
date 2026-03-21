@@ -1,4 +1,4 @@
-bin := "zionrust"
+bin := "zion"
 install_dir := env("HOME") / ".local/bin"
 nix_run := "nix-shell -p rustc cargo clippy rustfmt --run"
 

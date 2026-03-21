@@ -300,9 +300,14 @@ commands:
     alias: [ct]
     help: "Gerencia contractors (agentes background)."
     commands:
+      - name: list
+        alias: [ls]
+        default: force
+        help: "Lista todos os contractors e status."
+        filename: commands/contractors_list.sh
       - name: status
         alias: [st, log]
-        help: "Mostra os últimos 20 jobs com start, duração e status."
+        help: "Mostra _schedule, _running e done recentes."
         filename: commands/contractors_status.sh
       - name: run
         alias: [r]
@@ -318,10 +323,10 @@ commands:
             help: "Numero de turnos (default: haiku=20, sonnet=40, opus=60)"
         filename: commands/contractor.sh
       - name: cron
-        help: "Lê clock: dos agent.md e atualiza zion-contractors.nix + instrui zion switch"
+        help: "Le clock: dos agent.md e atualiza zion-contractors.nix + instrui zion switch"
         filename: commands/contractors_cron.sh
       - name: work
-        help: "Executa todos os contractor cards vencidos em TODO/ (cards com agent: no frontmatter)"
+        help: "Executa todos os contractor cards vencidos em _schedule/"
         flags:
           - long: --dry-run
             short: -n
@@ -331,19 +336,90 @@ commands:
 
   - name: tasks
     alias: [tk]
-    help: "Gerencia tasks do kanban (cards vencidos, execucao serial)."
+    help: "Gerencia tasks do kanban (TODO/DOING/DONE)."
     commands:
-      - name: tick
-        help: "Executa cards vencidos do kanban (mesmo fluxo do zion-tick.service)."
+      - name: list
+        alias: [ls]
+        default: force
+        help: "Lista tasks em TODO/DOING/DONE com cores e atrasos."
+        flags:
+          - long: --all
+            short: -a
+            help: "Inclui DONE (ultimos 20)"
+        filename: commands/tasks_list.sh
+
+      - name: add
+        alias: [new, create]
+        help: "Cria uma task em TODO/ com timestamp."
+        args:
+          - name: title
+            required: true
+            help: "Titulo da task (vira nome do arquivo)"
+        flags:
+          - long: --model
+            short: -m
+            arg: model
+            default: haiku
+            help: "Modelo (haiku|sonnet|opus)"
+          - long: --agent
+            short: -a
+            arg: agent
+            help: "Nome do agente executor (opcional)"
+          - long: --steps
+            short: -s
+            arg: steps
+            default: "30"
+            help: "Numero de turnos (#stepsN)"
+          - long: --when
+            short: -w
+            arg: when
+            help: "Timestamp YYYYMMDD_HH_MM (default: agora)"
+        filename: commands/tasks_add.sh
+
+      - name: run
+        alias: [r, exec]
+        help: "Executa uma task especifica por nome."
+        args:
+          - name: name
+            required: true
+            help: "Nome da task (parte final do filename)"
+        flags:
+          - long: --steps
+            short: -s
+            arg: steps
+            help: "Sobrescreve #stepsN (default: valor do card)"
+        filename: commands/tasks_run.sh
+
+      - name: work
+        alias: [tick]
+        help: "Executa todas as tasks vencidas em TODO/ (equivalente ao tick)."
         flags:
           - long: --dry-run
             short: -n
-            help: "Lista cards vencidos sem executar."
+            help: "Lista tasks vencidas sem executar."
           - long: --steps
             short: -s
             arg: steps
             help: "Sobrescreve #stepsN de todos os cards (default: valor do card ou 30)."
         filename: commands/tasks_tick.sh
+
+      - name: status
+        alias: [st]
+        help: "Resumo rapido: contagens por coluna + overdue."
+        filename: commands/tasks_status.sh
+
+      - name: agent
+        help: "Brute-start: roda um agente imediatamente como task."
+        args:
+          - name: name
+            required: true
+            help: "Nome do agente (ex: wanderer, tamagochi)"
+        flags:
+          - long: --steps
+            short: -s
+            arg: steps
+            help: "Numero de turnos (default: haiku=20, sonnet=40, opus=60)"
+        filename: commands/tasks_agent.sh
 
 
   - name: status

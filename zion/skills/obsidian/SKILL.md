@@ -128,7 +128,7 @@ Usa DataviewJS para stats e Dataview para tabelas:
 ### Stats com DataviewJS
 
 ```javascript
-const todo = dv.pages('"tasks/TODO"').length
+const todo = dv.pages('"contractors/_schedule"').length
 const doing = dv.pages('"tasks/DOING"').length
 ```
 

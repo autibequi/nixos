@@ -5,7 +5,8 @@ zion_load_config
 
 local zion_dir="${ZION_ROOT:-$HOME/nixos/zion}"
 local obsidian="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
-local tasks="$obsidian/tasks"
+local contractors="$obsidian/contractors"
+local schedule="$contractors/_schedule"
 local runner="$zion_dir/scripts/task-runner.sh"
 local agent_file="$zion_dir/agents/${name}/agent.md"
 
@@ -42,18 +43,18 @@ if [ ! -f "$agent_file" ]; then
   exit 1
 fi
 
-# Fallback tasks dir
-if [ ! -d "$tasks" ]; then
+# Fallback contractors dir
+if [ ! -d "$contractors" ]; then
   for try in \
-    "$zion_dir/../obsidian/tasks" \
-    /workspace/obsidian/tasks \
-    "$HOME/obsidian/tasks"; do
-    [ -d "$try" ] && tasks="$try" && break
+    "$obsidian/contractors" \
+    /workspace/obsidian/contractors \
+    "$HOME/obsidian/contractors"; do
+    [ -d "$try" ] && contractors="$try" && schedule="$try/_schedule" && break
   done
 fi
 
-if [ ! -d "$tasks" ]; then
-  echo "Tasks dir nao encontrado."
+if [ ! -d "$contractors" ]; then
+  echo "Contractors dir nao encontrado."
   exit 1
 fi
 
@@ -103,11 +104,11 @@ if [ -z "$steps" ]; then
   esac
 fi
 
-# ── Card temporario em TODO/ ─────────────────────────────────────
+# ── Card temporario em _schedule/ ────────────────────────────────
 WHEN=$(date +%Y%m%d_%H_%M)
 CARD="${WHEN}_${name}.md"
 
-mkdir -p "$tasks/TODO"
+mkdir -p "$schedule"
 {
   echo "---"
   echo "model: $MODEL"
@@ -118,7 +119,7 @@ mkdir -p "$tasks/TODO"
   _agent_body
   echo ""
   echo "#steps${steps}"
-} > "$tasks/TODO/$CARD"
+} > "$schedule/$CARD"
 
 echo "[contractor] '${name}' -> card $CARD"
 echo "[contractor] model=$MODEL  timeout=${TIMEOUT}s  steps=$steps"
@@ -127,8 +128,8 @@ echo ""
 
 rm -rf "/tmp/zion-locks/${WHEN}_${name}.lock" 2>/dev/null || true
 
-export TASK_DIR="$tasks"
-export TASK_AGENTS_DIR="$(dirname "$tasks")/vault/agents"
+export TASK_CONTRACTORS_DIR="$contractors"
+export SCHEDULE_DIR="$schedule"
 export TASK_MAX_TURNS="$steps"
 
 exec "$runner" "$CARD"

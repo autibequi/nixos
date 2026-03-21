@@ -106,67 +106,31 @@ impl SessionRunner {
     }
 
     fn compose(&self, config: &ZionConfig) -> ComposeCmd {
-        let obsidian_raw = config
-            .obsidian_path
-            .clone()
-            .unwrap_or_else(|| paths::obsidian_path().to_string_lossy().to_string());
-
-        // Resolve obsidian path to absolute; create dir if missing so compose doesn't fail
-        let obsidian_path = std::path::Path::new(&obsidian_raw);
-        let obsidian = if obsidian_path.exists() {
-            obsidian_path
-                .canonicalize()
-                .map(|p| p.to_string_lossy().to_string())
-                .unwrap_or(obsidian_raw)
-        } else {
-            if let Err(e) = std::fs::create_dir_all(&obsidian_raw) {
-                eprintln!(
-                    "zion: warning: could not create obsidian dir {}: {}",
-                    obsidian_raw, e
-                );
-            }
-            obsidian_raw
-        };
-
-        let home = paths::home();
         let mut cmd = ComposeCmd::new()
             .project(&self.proj_name)
             .env("CLAUDIO_MOUNT", &self.mount_path)
             .env("CLAUDIO_MOUNT_OPTS", &self.mount_opts)
-            .env("OBSIDIAN_PATH", &obsidian)
-            .env("HOME", &home.to_string_lossy())
+            .env("OBSIDIAN_PATH", &paths::obsidian_ensured())
+            .env("HOME", &paths::home().to_string_lossy())
             .env("DOCKER_GID", &config.docker_gid.to_string())
             .env("JOURNAL_GID", &config.journal_gid.to_string())
-            .env(
-                "ZION_ROOT",
-                &paths::nixos_dir().join("zion").to_string_lossy(),
-            )
+            .env("ZION_ROOT", &paths::zion_root().to_string_lossy())
             .env("ZION_NIXOS_DIR", &paths::nixos_dir().to_string_lossy())
-            .env(
-                "XDG_DATA_HOME",
-                &std::env::var("XDG_DATA_HOME")
-                    .unwrap_or_else(|_| format!("{}/.local/share", home.display())),
-            )
-            .env(
-                "XDG_RUNTIME_DIR",
-                &std::env::var("XDG_RUNTIME_DIR").unwrap_or_else(|_| "/run/user/1000".into()),
-            );
+            .env("XDG_DATA_HOME", &paths::xdg_data_home())
+            .env("XDG_RUNTIME_DIR", &paths::xdg_runtime_dir());
 
         // Forward tokens from config
-        if let Some(ref t) = config.gh_token {
-            cmd = cmd.env("GH_TOKEN", t);
-        }
-        if let Some(ref t) = config.anthropic_api_key {
-            cmd = cmd.env("ANTHROPIC_API_KEY", t);
-        }
-        if let Some(ref t) = config.cursor_api_key {
-            cmd = cmd.env("CURSOR_API_KEY", t);
-        }
-        if let Some(ref t) = config.grafana_url {
-            cmd = cmd.env("GRAFANA_URL", t);
-        }
-        if let Some(ref t) = config.grafana_token {
-            cmd = cmd.env("GRAFANA_TOKEN", t);
+        let tokens = [
+            ("GH_TOKEN", &config.gh_token),
+            ("ANTHROPIC_API_KEY", &config.anthropic_api_key),
+            ("CURSOR_API_KEY", &config.cursor_api_key),
+            ("GRAFANA_URL", &config.grafana_url),
+            ("GRAFANA_TOKEN", &config.grafana_token),
+        ];
+        for (key, val) in tokens {
+            if let Some(v) = val {
+                cmd = cmd.env(key, v);
+            }
         }
 
         cmd
