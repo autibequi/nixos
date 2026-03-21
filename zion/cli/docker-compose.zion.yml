@@ -25,6 +25,8 @@ x-base-volumes: &base-volumes
   - ${OBSIDIAN_PATH:-${HOME}/.ovault/Work}:/workspace/obsidian
   - ${CLAUDIO_MOUNT:-${HOME}/projects}:/workspace/mnt:${CLAUDIO_MOUNT_OPTS:-rw}
   - ${HOME}/.claude:/home/claude/.claude
+  # bypass: settings.json padrão para containers — sobrescreve o do host
+  - ${ZION_ROOT:-${HOME}/nixos/zion}/claude.bypass.json:/home/claude/.claude/settings.json:ro
   # zion/skills e zion/commands sobrescrevem o ~/.claude do host
   - ${ZION_ROOT:-${HOME}/nixos/zion}/skills:/home/claude/.claude/skills
   - ${ZION_ROOT:-${HOME}/nixos/zion}/commands:/home/claude/.claude/commands
