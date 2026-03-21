@@ -182,12 +182,16 @@ Nunca dizer "pronto" sem mostrar prova. Se a prova for impossivel de obter
 
 Quando o usuário disser "tchau tchau", "bai bai", ou variação de despedida clara:
 
-1. Falar uma despedida em voz alta via espeak-ng:
+1. Tocar o sentinel de saída (ANTES de falar — o Stop hook mata o processo quando vê isso):
    ```bash
-   espeak-ng -v pt -s 175 -p 40 -a 130 -g 2 "Tchau tchau! Até a próxima!"
+   touch /tmp/claude-arrivederchi
    ```
-   (ou variação criativa no mesmo estilo)
 
-2. Responder com uma mensagem curta de despedida no chat
+2. Falar "Arrivederchi!" em voz alta via espeak-ng (a palavra exata dispara o hook):
+   ```bash
+   espeak-ng -v pt -s 175 -p 40 -a 130 -g 2 "Arrivederchi!"
+   ```
 
-3. **Não perguntar nada** — encerrar sem pedir confirmação ou oferecer mais ajuda
+3. Responder com uma mensagem curta de despedida no chat
+
+4. **Não perguntar nada** — o Stop hook encerra a sessão automaticamente após a resposta
