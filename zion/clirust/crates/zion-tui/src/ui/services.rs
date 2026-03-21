@@ -38,6 +38,15 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                 Span::styled(format!("{svc:<16}"), style),
                 Span::styled("stopped", theme::dim()),
             ]));
+
+            if is_selected {
+                let log_line = app.snapshot.last_log.get(svc).map(|s| s.as_str()).unwrap_or("");
+                let preview = truncate_log(log_line, area.width.saturating_sub(8) as usize);
+                lines.push(Line::from(vec![
+                    Span::raw("       "),
+                    Span::styled(preview, log_level_style(log_line)),
+                ]));
+            }
         }
     } else {
         let any_up = app.snapshot.dk_services.iter().any(|s| s.is_up);
@@ -134,11 +143,71 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             }
 
             lines.push(Line::from(spans));
+
+            // Inline last-log preview for the selected service
+            if is_selected {
+                let log_line = app
+                    .snapshot
+                    .last_log
+                    .get(svc)
+                    .map(|s| s.as_str())
+                    .unwrap_or("");
+                let preview = truncate_log(log_line, area.width.saturating_sub(8) as usize);
+                let log_style = log_level_style(log_line);
+                lines.push(Line::from(vec![
+                    Span::raw("       "),
+                    Span::styled(preview, log_style),
+                ]));
+            }
         }
     }
 
     let widget = Paragraph::new(lines);
     frame.render_widget(widget, area);
+}
+
+/// Truncate a log line to fit the available width, stripping ANSI codes.
+fn truncate_log(line: &str, max: usize) -> String {
+    // Strip ANSI escape sequences
+    let clean: String = {
+        let mut out = String::new();
+        let mut in_escape = false;
+        for ch in line.chars() {
+            if in_escape {
+                if ch.is_ascii_alphabetic() { in_escape = false; }
+            } else if ch == '\x1b' {
+                in_escape = true;
+            } else {
+                out.push(ch);
+            }
+        }
+        out
+    };
+    let trimmed = clean.trim();
+    if trimmed.len() <= max {
+        trimmed.to_string()
+    } else {
+        format!("{}…", &trimmed[..max.saturating_sub(1)])
+    }
+}
+
+/// Style a log line based on its content level.
+fn log_level_style(line: &str) -> ratatui::style::Style {
+    use ratatui::style::{Color, Style};
+    let up = line.to_uppercase();
+    if up.contains("ERROR") || up.contains("FATAL") || up.contains("CRIT") || up.contains("PANIC") {
+        Style::default().fg(Color::Red)
+    } else if up.contains("WARN") {
+        Style::default().fg(Color::Yellow)
+    } else if up.contains("START") || up.contains("LISTEN") || up.contains("READY")
+        || up.contains("BOOT") || up.contains("UP") || up.contains("INIT")
+    {
+        Style::default().fg(Color::Green)
+    } else if up.contains("STOP") || up.contains("SHUT") || up.contains("EXIT") || up.contains("DOWN") {
+        Style::default().fg(Color::Indexed(214)) // orange
+    } else {
+        crate::theme::dim()
+    }
 }
 
 /// Parse a CPU percentage string like "21.07%" → 21.

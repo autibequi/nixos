@@ -84,6 +84,7 @@ pub fn run_status(tick: u64) -> Result<()> {
 
     // Background data refresh channel
     let (tx, rx) = mpsc::channel();
+    let tx_bg = tx.clone(); // clone for action-triggered refreshes
     let refresh_interval = Duration::from_secs(tick);
 
     std::thread::spawn(move || loop {
@@ -95,8 +96,16 @@ pub fn run_status(tick: u64) -> Result<()> {
         }
     });
 
+    // Background command error channel (for non-blocking start/stop)
+    let (bg_err_tx, bg_err_rx) = mpsc::channel::<String>();
+
     // Main loop
     loop {
+        // Check for background command errors
+        if let Ok(err) = bg_err_rx.try_recv() {
+            app.set_error(err);
+        }
+
         // Check for background updates (only in normal mode to avoid flicker during menu)
         if matches!(app.mode, AppMode::Normal) {
             if let Ok(snap) = rx.try_recv() {
@@ -128,11 +137,24 @@ pub fn run_status(tick: u64) -> Result<()> {
                                     "start" | "stop" => {
                                         let svc = app.current_service().to_string();
                                         let env = app.current_env().to_string();
+                                        let action_str = action.to_string();
                                         app.close_menu();
-                                        let err = run_bg_cmd(&svc, &env, action);
-                                        if let Some(msg) = err {
-                                            app.set_error(msg);
-                                        }
+                                        app.last_action = Some((
+                                            app.cursor_idx,
+                                            format!("{}ing {}…", action_str, svc),
+                                        ));
+                                        // Run non-blocking — TUI stays live, logs update each tick
+                                        let err_tx = bg_err_tx.clone();
+                                        let snap_tx = tx_bg.clone();
+                                        std::thread::spawn(move || {
+                                            if let Some(err) = run_bg_cmd(&svc, &env, &action_str) {
+                                                let _ = err_tx.send(err);
+                                            }
+                                            // Force immediate snapshot refresh when done
+                                            if let Ok(snap) = status::collect() {
+                                                let _ = snap_tx.send(snap);
+                                            }
+                                        });
                                     }
                                     "logs" | "test" | "shell" => {
                                         let action = action.to_string();

@@ -16,6 +16,8 @@ pub struct StatusSnapshot {
     pub boot: BootInfo,
     pub quota: QuotaInfo,
     pub logs: Vec<LogEntry>,
+    /// Last log line per service name (for inline preview in services panel).
+    pub last_log: std::collections::HashMap<String, String>,
 }
 
 /// Info about a Zion agent/background session.
@@ -51,6 +53,15 @@ pub fn collect() -> Result<StatusSnapshot> {
     let boot = crate::boot::collect();
     let logs = crate::logs::collect(20);
 
+    // Last log line per service (for inline preview)
+    let last_log: std::collections::HashMap<String, String> =
+        ["monolito", "bo-container", "front-student"]
+            .iter()
+            .filter_map(|&svc| {
+                crate::logs::last_line(svc).map(|line| (svc.to_string(), line))
+            })
+            .collect();
+
     // Quota: run script in background thread
     let quota_handle = std::thread::spawn(|| {
         crate::paths::usage_script()
@@ -64,6 +75,7 @@ pub fn collect() -> Result<StatusSnapshot> {
             boot,
             quota,
             logs,
+            last_log,
             ..Default::default()
         });
     }
@@ -153,6 +165,7 @@ pub fn collect() -> Result<StatusSnapshot> {
         boot,
         quota,
         logs,
+        last_log,
     })
 }
 
