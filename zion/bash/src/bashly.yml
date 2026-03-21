@@ -427,8 +427,8 @@ commands:
         default: contexto.md
     filename: commands/leech.sh
 
-  - name: lab
-    help: "Sessão lab: projeto em /workspace/mnt + ~/nixos em /workspace/host (editável)."
+  - name: host
+    help: "Sessão host: projeto em /workspace/mnt + ~/nixos em /workspace/host (editável)."
     args:
       - name: dir
         help: "Diretório do projeto (default ~/projects)"
@@ -449,7 +449,7 @@ commands:
         default: contexto.md
       - long: --rw
       - long: --ro
-    filename: commands/lab.sh
+    filename: commands/host.sh
 
   # ── Git helpers ───────────────────────────────────────────
   - name: git

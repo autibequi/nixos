@@ -14,7 +14,7 @@ local agent_file="$zion_dir/agents/${name}/agent.md"
 # Fallback runner paths
 if [ ! -f "$runner" ]; then
   for try in \
-    "/workspace/mnt/zion/scripts/task-runner.sh" \
+    "/workspace/mnt/self/scripts/task-runner.sh" \
     "/workspace/nixos/self/scripts/task-runner.sh"; do
     [ -f "$try" ] && runner="$try" && break
   done
@@ -28,7 +28,7 @@ fi
 # Fallback agent.md paths
 if [ ! -f "$agent_file" ]; then
   for try in \
-    "/workspace/mnt/zion/agents/${name}/agent.md" \
+    "/workspace/mnt/self/agents/${name}/agent.md" \
     "/workspace/nixos/self/agents/${name}/agent.md"; do
     [ -f "$try" ] && agent_file="$try" && break
   done
@@ -141,7 +141,7 @@ else
     echo "[run] '$name' nao encontrado como agente nem task"
     echo ""
     echo "Agentes disponiveis:"
-    for try in "$zion_dir/agents" "/workspace/mnt/zion/agents"; do
+    for try in "$zion_dir/agents" "/workspace/mnt/self/agents"; do
       [ -d "$try" ] && ls "$try" | sed 's/^/  /' && break
     done
     echo ""

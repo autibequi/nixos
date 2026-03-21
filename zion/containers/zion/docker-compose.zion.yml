@@ -20,7 +20,7 @@ x-env-base: &env-base
 x-extra-hosts: &extra-hosts
   - "host.docker.internal:host-gateway"
 
-# /workspace: zion (/zion), obsidian e o projeto (mnt). Nixos e logs só em zion lab.
+# /workspace: zion (/zion), obsidian e o projeto (mnt). Nixos e logs só em zion host.
 x-base-volumes: &base-volumes
   - ${ZION_ROOT:-${HOME}/nixos/self}:/workspace/self
   - ${OBSIDIAN_PATH:-${HOME}/.ovault/Work}:/workspace/obsidian

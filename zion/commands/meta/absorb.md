@@ -243,15 +243,15 @@ Identifique:
 
 **Paths:**
 - Memórias: `~/.claude/projects/-workspace-mnt/memory/` + `MEMORY.md`
-- Zion skills: `/workspace/mnt/zion/skills/`
-- Zion agents: `/workspace/mnt/zion/agents/`
-- Commands: `/workspace/mnt/zion/commands/`
+- Zion skills: `/workspace/mnt/self/skills/`
+- Zion agents: `/workspace/mnt/self/agents/`
+- Commands: `/workspace/mnt/self/commands/`
 
 ### 3. Skills disponíveis (para identificar gaps ou melhorias)
 
 ```bash
-ls /workspace/mnt/zion/skills/
-ls /workspace/mnt/zion/commands/
+ls /workspace/mnt/self/skills/
+ls /workspace/mnt/self/commands/
 ```
 
 ### 4. Regras

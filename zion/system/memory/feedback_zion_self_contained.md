@@ -9,7 +9,7 @@ type: feedback
 **Why:** O Zion é um monorepo que deve rodar de forma isolada e reutilizável. Tudo que o Zion precisa está dentro dele.
 
 **How to apply:** Quando criando skills, comandos CLI, ou configurações do Zion:
-- Use caminhos relativos a `/workspace/mnt/zion/` (ou `~/nixos/self/` no host)
+- Use caminhos relativos a `/workspace/mnt/self/` (ou `~/nixos/self/` no host)
 - Skills ficam em `zion/skills/<skill-name>/SKILL.md`
 - Agentes ficam em `zion/agents/<agent-name>/agent.md`
 - Compose files e configs Docker ficam em `zion/containers/<service>/`

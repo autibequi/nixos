@@ -1429,11 +1429,11 @@ zion_leech_usage() {
 
 # :command.usage
 zion_lab_usage() {
-  printf "zion lab - Sessão lab: projeto em /workspace/mnt + ~/nixos em /workspace/host (editável).\n\n"
+  printf "zion host - Sessão lab: projeto em /workspace/mnt + ~/nixos em /workspace/host (editável).\n\n"
 
   printf "%s\n" "Usage:"
-  printf "  zion lab [DIR] [OPTIONS]\n"
-  printf "  zion lab --help | -h\n"
+  printf "  zion host [DIR] [OPTIONS]\n"
+  printf "  zion host --help | -h\n"
   echo
 
   # :command.long_usage
@@ -4072,7 +4072,7 @@ zion_hooks_command() {
   for _d in \
     "/zion/hooks/claude-code" \
     "${ZION_ROOT:-${HOME}/nixos/self}/hooks/claude-code" \
-    "/workspace/mnt/zion/hooks/claude-code"; do
+    "/workspace/mnt/self/hooks/claude-code"; do
     [[ -d "$_d" ]] && HOOKS_DIR="$_d" && break
   done
 
@@ -4151,7 +4151,7 @@ zion_auto_command() {
 
   # Fallbacks runner
   if [ ! -f "$RUNNER" ]; then
-    for try in /workspace/mnt/zion /workspace/nixos/self; do
+    for try in /workspace/mnt/self /workspace/nixos/self; do
       [ -f "$try/scripts/task-runner.sh" ] && RUNNER="$try/scripts/task-runner.sh" && break
     done
   fi
@@ -4319,7 +4319,7 @@ zion_run_command() {
   # Fallback runner paths
   if [ ! -f "$runner" ]; then
     for try in \
-      "/workspace/mnt/zion/scripts/task-runner.sh" \
+      "/workspace/mnt/self/scripts/task-runner.sh" \
       "/workspace/nixos/self/scripts/task-runner.sh"; do
       [ -f "$try" ] && runner="$try" && break
     done
@@ -4333,7 +4333,7 @@ zion_run_command() {
   # Fallback agent.md paths
   if [ ! -f "$agent_file" ]; then
     for try in \
-      "/workspace/mnt/zion/agents/${name}/agent.md" \
+      "/workspace/mnt/self/agents/${name}/agent.md" \
       "/workspace/nixos/self/agents/${name}/agent.md"; do
       [ -f "$try" ] && agent_file="$try" && break
     done
@@ -4446,7 +4446,7 @@ zion_run_command() {
       echo "[run] '$name' nao encontrado como agente nem task"
       echo ""
       echo "Agentes disponiveis:"
-      for try in "$zion_dir/agents" "/workspace/mnt/zion/agents"; do
+      for try in "$zion_dir/agents" "/workspace/mnt/self/agents"; do
         [ -d "$try" ] && ls "$try" | sed 's/^/  /' && break
       done
       echo ""
@@ -4496,7 +4496,7 @@ zion_agents_list_command() {
 
   ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/zion}"
   # Fallback
-  for try in /workspace/mnt/zion /workspace/nixos/self; do
+  for try in /workspace/mnt/self /workspace/nixos/self; do
     [ -d "$try/agents" ] && ZION_DIR="$try" && break
   done
 
@@ -4551,7 +4551,7 @@ zion_agents_phone_command() {
   OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
 
   # Fallback agents dir
-  for try in /workspace/mnt/zion /workspace/nixos/self; do
+  for try in /workspace/mnt/self /workspace/nixos/self; do
     [ -d "$try/agents" ] && ZION_DIR="$try" && break
   done
 
@@ -4608,7 +4608,7 @@ zion_agents_phone_command() {
   echo "    /meta:phone call ${AGENT}"
   echo ""
 
-  exec zion lab
+  exec zion host
 
 }
 

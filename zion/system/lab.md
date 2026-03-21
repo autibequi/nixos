@@ -7,8 +7,10 @@ Ativa o diálogo de laboratório entre Claude externo (eu, falando com o user) e
 ```
 User ──► Claude EXTERNO (eu, esta sessão)
               │
-              ├── /workspace/self/      ← meu source code
-              ├── /workspace/mnt/       ← nixos repo (mesma coisa, editável)
+              ├── /workspace/self/      ← meu source code (~/nixos/self)
+              ├── /workspace/mnt/       ← projeto atual (nixos repo em lab)
+              │   └── self/             ← subfolder nixos/self/ editável
+              ├── /workspace/host/      ← nixos repo completo (SÓ em lab)
               ├── /workspace/obsidian/  ← cérebro persistente
               │
               └── spawn ──► Claude INTERNO (analysis mode, haiku)
@@ -20,14 +22,14 @@ User ──► Claude EXTERNO (eu, esta sessão)
 ```
 
 **Importante**: modificar o Claude interno NÃO modifica meu código.
-O interno é efêmero — apenas eu (externo) persistir mudanças em `/workspace/mnt/zion/`.
+O interno é efêmero — apenas eu (externo) persistir mudanças em `/workspace/mnt/self/`.
 
 ## Como invocar o Claude interno
 
 ```bash
 SYSFILE=$(mktemp /tmp/lab-sys-XXXX.md)
 ZION_ANALYSIS_MODE=1 HEADLESS=1 IN_DOCKER=1 CLAUDE_ENV=container \
-  /workspace/mnt/zion/hooks/claude-code/session-start.sh 2>/dev/null > "$SYSFILE"
+  /workspace/mnt/self/hooks/claude-code/session-start.sh 2>/dev/null > "$SYSFILE"
 
 HEADLESS=1 timeout 120 claude \
   --permission-mode bypassPermissions \
@@ -45,23 +47,25 @@ rm -f "$SYSFILE"
 
 | Path | O que é | Editável? |
 |------|---------|-----------|
-| `/workspace/self/` | source zion (symlink de `/workspace/mnt/zion/`) | sim via mnt |
+| `/workspace/self/` | código Zion montado de `~/nixos/self` | sim via mnt/self |
 | `/workspace/mnt/` | nixos repo do host montado rw | sim |
-| `/workspace/mnt/zion/` | **fonte da verdade** — hooks, skills, agents, scripts | sim |
+| `/workspace/mnt/self/` | **fonte da verdade** — hooks, skills, agents, scripts | sim |
+| `/workspace/host/` | nixos repo completo (`~/nixos`) — **SÓ em lab mode** | sim (writable) |
 | `/workspace/obsidian/` | vault Obsidian, persistente entre sessões | sim |
 | `/workspace/obsidian/tasks/` | kanban TODO/DOING/DONE | sim |
 | `/workspace/obsidian/vault/agents/` | memória e outputs dos agentes | sim |
 | `/workspace/obsidian/vault/.ephemeral/cron-logs/` | logs de execução por agente | leitura |
+| `/workspace/logs/` | logs de containers Docker | sim |
 | `/home/claude/.claude/` | config Claude Code (memórias, hooks, skills montados) | sim |
-| `/home/claude/.nix-profile/bin/claude` | Claude CLI v2.1.79 | — |
+| `/home/claude/.nix-profile/bin/claude` | Claude CLI | — |
 | `/tmp/zion-locks/` | locks de tasks (atomic mkdir) | runtime |
 | `/var/run/docker.sock` | Docker socket — GID 131, eu tenho GID 1000+190 | **sem acesso** |
 
-## Limitações desta sessão (zion lab sem restart)
+## Limitações desta sessão (zion host sem restart)
 
 - **Sem Docker**: socket precisa GID 131, não estou no grupo
 - `zion tasks run X` requer Docker → precisa rodar no host
-- `zion lab` do host spawna container com `group_add: [131]` — ao reiniciar terei acesso
+- `zion host` do host spawna container com `group_add: [131]` — ao reiniciar terei acesso
 - O que posso fazer: Claude interno direto, editar arquivos, rodar scripts, task-runner.sh
 
 ## Workflow lab
@@ -69,7 +73,7 @@ rm -f "$SYSFILE"
 1. **Identificar hipótese**: algo no sistema que quer testar/melhorar
 2. **Spawn interno**: invocar haiku com contexto específico e tarefa delimitada
 3. **Observar output**: o interno age, eu leio resultado
-4. **Aplicar se válido**: eu (externo) edito `/workspace/mnt/zion/` com o que o interno descobriu
+4. **Aplicar se válido**: eu (externo) edito `/workspace/mnt/self/` com o que o interno descobriu
 5. **Iterar**: re-spawn com hipótese refinada
 
 ## Exemplos de uso

@@ -1,6 +1,6 @@
 ---
 name: linux
-description: "Auto-ativar quando: zion_edit=1 (zion lab), ou usuário menciona NixOS, Hyprland, Waybar, dotfiles, stow, nix, módulos, pacotes do sistema, keybinds, window rules ou configuração do compositor."
+description: "Auto-ativar quando: zion_edit=1 (zion host), ou usuário menciona NixOS, Hyprland, Waybar, dotfiles, stow, nix, módulos, pacotes do sistema, keybinds, window rules ou configuração do compositor."
 ---
 
 # linux — Sistema Linux (NixOS + Hyprland + dotfiles)

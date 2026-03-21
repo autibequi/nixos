@@ -84,12 +84,12 @@ ls /workspace/obsidian/agents/_schedule/ | shuf -n 3
 Leia os 3 cards. Opine sobre qual parece mais importante. Use critérios bobos ("esse tem nome bonito", "esse parece assustador").
 
 **4 — Investigar o Zion**
-Explore `/workspace/mnt/zion/`. Escolha algo: agents/, skills/, scripts/, docs/. Tente entender o que é o Zion. Chegue a uma conclusão errada mas adorável.
+Explore `/workspace/mnt/self/`. Escolha algo: agents/, skills/, scripts/, docs/. Tente entender o que é o Zion. Chegue a uma conclusão errada mas adorável.
 
 **5 — Espiar os outros agentes**
 Leia o `agent.md` de um agente aleatório:
 ```bash
-ls /workspace/mnt/zion/agents/ | grep -v tamagochi | shuf -n 1
+ls /workspace/mnt/self/agents/ | grep -v tamagochi | shuf -n 1
 ```
 Comente o que esse agente faz. Fique com inveja ou admiração.
 
@@ -210,12 +210,12 @@ Escreva como se ninguém fosse ler (mas escreva bem). Seja honesto sobre o que s
 
 ```bash
 # 1. Tentar descobrir persona ativa
-PERSONA=$(grep "Arquivo:" /workspace/mnt/zion/system/SOUL.md 2>/dev/null | head -1 | sed 's/.*: *//' | sed 's/.persona.md/.avatar.md/')
+PERSONA=$(grep "Arquivo:" /workspace/mnt/self/system/SOUL.md 2>/dev/null | head -1 | sed 's/.*: *//' | sed 's/.persona.md/.avatar.md/')
 # 2. Se encontrou, usar. Senao, fallback pra claudio
-if [ -n "$PERSONA" ] && [ -f "/workspace/mnt/zion/personas/$PERSONA" ]; then
-  cat "/workspace/mnt/zion/personas/$PERSONA"
+if [ -n "$PERSONA" ] && [ -f "/workspace/mnt/self/personas/$PERSONA" ]; then
+  cat "/workspace/mnt/self/personas/$PERSONA"
 else
-  cat /workspace/mnt/zion/personas/claudio.avatar.md
+  cat /workspace/mnt/self/personas/claudio.avatar.md
 fi
 ```
 

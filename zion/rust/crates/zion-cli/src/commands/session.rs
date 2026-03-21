@@ -134,7 +134,7 @@ pub fn leech(flags: SessionFlags, shell_mode: bool) -> Result<()> {
         .run(&config)?)
 }
 
-/// `zion lab` — nixos mount session.
+/// `zion host` — nixos mount session.
 pub fn lab(
     engine: Option<String>,
     model: Option<String>,

@@ -124,7 +124,7 @@ pub fn outbox_dir() -> Option<PathBuf> {
 pub fn hooks_dir() -> Option<PathBuf> {
     first_existing_dir(&[
         zion_root().join("hooks/claude-code"),
-        PathBuf::from("/workspace/mnt/zion/hooks/claude-code"),
+        PathBuf::from("/workspace/mnt/self/hooks/claude-code"),
     ])
 }
 
@@ -132,7 +132,7 @@ pub fn hooks_dir() -> Option<PathBuf> {
 pub fn agent_file(name: &str) -> Option<PathBuf> {
     first_existing_file(&[
         zion_root().join(format!("agents/{name}/agent.md")),
-        PathBuf::from(format!("/workspace/mnt/zion/agents/{name}/agent.md")),
+        PathBuf::from(format!("/workspace/mnt/self/agents/{name}/agent.md")),
     ])
 }
 
@@ -140,7 +140,7 @@ pub fn agent_file(name: &str) -> Option<PathBuf> {
 pub fn task_runner() -> Option<PathBuf> {
     first_existing_file(&[
         zion_root().join("scripts/task-runner.sh"),
-        PathBuf::from("/workspace/mnt/zion/scripts/task-runner.sh"),
+        PathBuf::from("/workspace/mnt/self/scripts/task-runner.sh"),
     ])
 }
 

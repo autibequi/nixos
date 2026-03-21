@@ -8,10 +8,24 @@
 
 ## Checklist ao abrir
 
-1. `/workspace/lab/` existe? → você está em `zion lab` (repo NixOS editável em `/workspace/lab/`).
+1. `/workspace/host/` existe? → você está em `zion host` (repo NixOS editável em `/workspace/host/`).
 2. `in_docker=1` → **nunca** rodar `nixos-rebuild`/`systemctl`; pedir ao usuário rodar no host.
-3. Em lab mode: `/workspace/lab/` é sua zona de evolução — edite skills, hooks, agents, CLI.
+3. Em lab mode: `/workspace/host/` é sua zona de evolução — edite skills, hooks, agents, CLI.
 4. Para NixOS/Hyprland → usar skills abaixo. Para "onde editar" → tabela §onde.
+
+### Mapa de /workspace/ (lab mode)
+
+```
+/workspace/
+├── self/       ← código Zion (~/nixos/self montado; fonte da verdade de skills/hooks/agents)
+├── mnt/        ← projeto atual (nixos repo em lab, ou outro projeto)
+│   └── self/   ← subfolder nixos/self/ dentro do repo (edite aqui)
+├── obsidian/   ← vault Obsidian (cérebro persistente)
+├── logs/       ← logs de containers Docker
+└── host/       ← nixos repo completo do host (~/nixos), writable — SÓ em lab mode
+```
+
+Em sessão **normal** (sem lab): `/workspace/host/` não existe.
 
 ---
 
@@ -45,13 +59,13 @@
 
 | Skill | Quando usar |
 |-------|-------------|
-| `linux` — `zion/skills/linux/SKILL.md` | Auto-ativa em zion lab ou menção a NixOS/Hyprland/Waybar/stow/dotfiles |
+| `linux` — `zion/skills/linux/SKILL.md` | Auto-ativa em zion host ou menção a NixOS/Hyprland/Waybar/stow/dotfiles |
 
 ---
 
 ## Onde editar o quê
 
-> Em lab mode (`zion_edit=1`): os paths abaixo são relativos a `/workspace/lab/` (repo NixOS).
+> Em lab mode (`zion_edit=1`): os paths abaixo são relativos a `/workspace/host/` (repo NixOS) ou `/workspace/mnt/self/` (pasta zion dentro do repo).
 > Em sessão normal: estes paths estão em `/workspace/mnt/` se o projeto montado for o repo NixOS.
 
 | Quero alterar… | Onde |
@@ -117,7 +131,7 @@ Breakroom (memoria/estado): `/workspace/obsidian/agents/<nome>/memory.md`
 ## Armadilhas
 
 - `nixos-rebuild`/`systemctl` no container → nao afeta o host. Pedir ao usuario.
-- Em `zion lab`: repo NixOS esta em `/workspace/lab/`, projeto em `/workspace/mnt`.
+- Em `zion host`: repo NixOS completo em `/workspace/host/` (writable); self (zion) em `/workspace/self/` e `/workspace/mnt/self/`.
 - Keybinds/Waybar: fonte da verdade e `stow/.config/`, nao modulos NixOS.
 - Apos mudar `bashly.yml`/`commands/*.sh`: sempre `bashly generate`.
 - Obsidian: ler BOARDRULES.md antes de modificar qualquer coisa no vault.

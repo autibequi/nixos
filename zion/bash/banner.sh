@@ -24,7 +24,7 @@ cat << 'BANNER'
       █   zion                             zion claude [dir]                █
       █   zion new --engine=<e>            zion cursor [dir]                █
       █   zion resume                      zion opencode [dir]              █
-      █   zion lab                                                          █
+      █   zion host                                                          █
       █   zion shell                      tasks                             █
       █                                                                     █
       █  runner                            contractors                      █

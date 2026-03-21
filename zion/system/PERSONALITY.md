@@ -85,5 +85,5 @@ Ao concluir tarefa, receber feedback, ou descobrir algo novo, avaliar:
 Após salvar qualquer arquivo em `memory/`, copiar também para `zion/system/memory/` e commitar.
 Isso garante que a memória sobrevive à perda do `~/.claude`. Comando:
 ```bash
-cp ~/.claude/projects/-workspace-mnt/memory/*.md /workspace/mnt/zion/system/memory/ && git -C /workspace/mnt add zion/system/memory/ && git -C /workspace/mnt commit -m "chore(memory): sync"
+cp ~/.claude/projects/-workspace-mnt/memory/*.md /workspace/mnt/self/system/memory/ && git -C /workspace/mnt add zion/system/memory/ && git -C /workspace/mnt commit -m "chore(memory): sync"
 ```

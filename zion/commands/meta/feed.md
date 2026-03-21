@@ -110,7 +110,7 @@ Mostrar idade do último fetch e total de items.
 ## fetch — Forçar atualização RSS
 
 ```bash
-python3 /workspace/mnt/zion/scripts/rss-fetcher.py \
+python3 /workspace/mnt/self/scripts/rss-fetcher.py \
   --config /workspace/obsidian/SETTINGS.md \
   --data /workspace/obsidian/.ephemeral/rss/items.json \
   --dashboard /workspace/obsidian/.ephemeral/rss/dashboard.txt \

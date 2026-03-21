@@ -17,7 +17,7 @@ Nomenclatura do sistema. Referência rápida para entender os termos usados em s
 | Termo | Significado |
 |-------|------------|
 | **Lab** | Modo de iteração: eu + Mini-Zion trabalhando em melhorias do sistema |
-| **Instalar módulo** | Pegar o que Mini-Zion desenvolveu e aplicar em mim via `/workspace/mnt/zion/` + git commit |
+| **Instalar módulo** | Pegar o que Mini-Zion desenvolveu e aplicar em mim via `/workspace/mnt/self/` + git commit |
 | **Analysis mode** | `ZION_ANALYSIS_MODE=1` — Mini-Zion em postura experimental, máxima autonomia |
 | **Tick** | Um ciclo do task-daemon: escaneia TODO/, roda tasks vencidas |
 
@@ -25,7 +25,7 @@ Nomenclatura do sistema. Referência rápida para entender os termos usados em s
 
 | O que | Vive onde | Morre quando |
 |-------|-----------|--------------|
-| Source code (hooks, skills, scripts) | `/workspace/mnt/zion/` + GitHub | nunca (se commitado) |
+| Source code (hooks, skills, scripts) | `/workspace/mnt/self/` + GitHub | nunca (se commitado) |
 | Memórias cross-session | `/home/claude/.claude/projects/*/memory/` | volume Docker deletado |
 | Tasks / kanban | `/workspace/obsidian/` | vault Obsidian do user |
 | O que Mini-Zion cria | filesystem compartilhado | restart do container |
@@ -35,10 +35,10 @@ Nomenclatura do sistema. Referência rápida para entender os termos usados em s
 
 | Path | Conteúdo |
 |------|---------|
-| `/workspace/mnt/zion/` | fonte da verdade — tudo que sou |
-| `/workspace/mnt/zion/hooks/claude-code/session-start.sh` | o que recebo no boot |
-| `/workspace/mnt/zion/commands/meta/lab.md` | skill /meta:lab |
-| `/workspace/mnt/zion/scripts/task-runner.sh` | executor de tasks |
-| `/workspace/mnt/zion/scripts/task-daemon.sh` | daemon de tasks |
+| `/workspace/mnt/self/` | fonte da verdade — tudo que sou |
+| `/workspace/mnt/self/hooks/claude-code/session-start.sh` | o que recebo no boot |
+| `/workspace/mnt/self/commands/meta/lab.md` | skill /meta:lab |
+| `/workspace/mnt/self/scripts/task-runner.sh` | executor de tasks |
+| `/workspace/mnt/self/scripts/task-daemon.sh` | daemon de tasks |
 | `/workspace/obsidian/tasks/` | kanban TODO/DOING/DONE |
 | `/workspace/obsidian/vault/agents/` | memória persistente e outputs dos agentes |

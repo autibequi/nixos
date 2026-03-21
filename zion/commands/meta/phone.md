@@ -100,7 +100,7 @@ Maximo 5 recomendacoes acionaveis ao final. Nunca listar repos sem dirty/ahead.
 ### 1. Ler preferencia do contractor
 
 ```bash
-STYLE=$(grep "^call_style:" /workspace/mnt/zion/agents/<nome>/agent.md | awk '{print $2}')
+STYLE=$(grep "^call_style:" /workspace/mnt/self/agents/<nome>/agent.md | awk '{print $2}')
 ```
 
 Se `call_style: personal` → o contractor **aparece pessoalmente**.

@@ -20,7 +20,7 @@ User ──► Claude EXTERNO (eu, esta sessão)
 ```
 
 **Importante**: modificar o Claude interno NÃO modifica meu código.
-O interno é efêmero — apenas eu (externo) persistir mudanças em `/workspace/mnt/zion/`.
+O interno é efêmero — apenas eu (externo) persistir mudanças em `/workspace/mnt/self/`.
 
 ## Como invocar o Claude interno
 
@@ -43,9 +43,9 @@ HEADLESS=1 ZION_ANALYSIS_MODE=1 IN_DOCKER=1 CLAUDE_ENV=container \
 
 | Path | O que é | Editável? |
 |------|---------|-----------|
-| `/workspace/self/` | source zion (symlink de `/workspace/mnt/zion/`) | sim via mnt |
+| `/workspace/self/` | source zion (symlink de `/workspace/mnt/self/`) | sim via mnt |
 | `/workspace/mnt/` | nixos repo do host montado rw | sim |
-| `/workspace/mnt/zion/` | **fonte da verdade** — hooks, skills, agents, scripts | sim |
+| `/workspace/mnt/self/` | **fonte da verdade** — hooks, skills, agents, scripts | sim |
 | `/workspace/obsidian/` | vault Obsidian, persistente entre sessões | sim |
 | `/workspace/obsidian/tasks/` | kanban TODO/DOING/DONE | sim |
 | `/workspace/obsidian/vault/agents/` | memória e outputs dos agentes | sim |
@@ -55,11 +55,11 @@ HEADLESS=1 ZION_ANALYSIS_MODE=1 IN_DOCKER=1 CLAUDE_ENV=container \
 | `/tmp/zion-locks/` | locks de tasks (atomic mkdir) | runtime |
 | `/var/run/docker.sock` | Docker socket — GID 131, eu tenho GID 1000+190 | **sem acesso** |
 
-## Limitações desta sessão (zion lab sem restart)
+## Limitações desta sessão (zion host sem restart)
 
 - **Sem Docker**: socket precisa GID 131, não estou no grupo
 - `zion tasks run X` requer Docker → precisa rodar no host
-- `zion lab` do host spawna container com `group_add: [131]` — ao reiniciar terei acesso
+- `zion host` do host spawna container com `group_add: [131]` — ao reiniciar terei acesso
 - O que posso fazer: Claude interno direto, editar arquivos, rodar scripts, task-runner.sh
 
 ## Workflow lab
@@ -67,7 +67,7 @@ HEADLESS=1 ZION_ANALYSIS_MODE=1 IN_DOCKER=1 CLAUDE_ENV=container \
 1. **Identificar hipótese**: algo no sistema que quer testar/melhorar
 2. **Spawn interno**: invocar haiku com contexto específico e tarefa delimitada
 3. **Observar output**: o interno age, eu leio resultado
-4. **Aplicar se válido**: eu (externo) edito `/workspace/mnt/zion/` com o que o interno descobriu
+4. **Aplicar se válido**: eu (externo) edito `/workspace/mnt/self/` com o que o interno descobriu
 5. **Iterar**: re-spawn com hipótese refinada
 
 ## Exemplos de uso
@@ -103,7 +103,7 @@ Eu devo:
 - O que realmente morre: o **contexto da conversa** (RAM) — não o filesystem
 - Memórias (`~/.claude/`) → no host, persistem entre sessões
 - Source code (`~/nixos/self/`) → no host, git push para compartilhar/backup
-- Único caminho pra persistir: `editar /workspace/mnt/zion/` → `git commit` → `git push`
+- Único caminho pra persistir: `editar /workspace/mnt/self/` → `git commit` → `git push`
 
 ### Quando o user diz "instala o módulo"
 
@@ -117,7 +117,7 @@ user: "instala o módulo"
        ↓
 eu (externo) leio o que o mini fez
        ↓
-aplico em /workspace/mnt/zion/ (hooks, skills, scripts, agents, etc.)
+aplico em /workspace/mnt/self/ (hooks, skills, scripts, agents, etc.)
        ↓
 commit + push = permanente
 ```
@@ -126,7 +126,7 @@ commit + push = permanente
 
 | O que | Onde salvar | Como persiste |
 |-------|-------------|---------------|
-| Hooks, skills, scripts | `/workspace/mnt/zion/` | git commit + push |
+| Hooks, skills, scripts | `/workspace/mnt/self/` | git commit + push |
 | Memórias cross-session | `/home/claude/.claude/projects/*/memory/` | volume Docker (some se volume deletado) |
 | Tasks/kanban | `/workspace/obsidian/tasks/` | vault Obsidian do user |
 | Memória dos agentes | `/workspace/obsidian/vault/agents/` | vault Obsidian do user |
@@ -169,7 +169,7 @@ Mini-Zion (haiku, efêmero)     →    Zion (sonnet, eu, persistente via git)
 3. Mini-Zion desenvolve/testa no filesystem compartilhado
 4. eu leio o resultado
 5. user: "instala o módulo"
-6. eu aplico em /workspace/mnt/zion/ + commit + push
+6. eu aplico em /workspace/mnt/self/ + commit + push
 7. Mini-Zion some — o módulo vive em mim
 ```
 

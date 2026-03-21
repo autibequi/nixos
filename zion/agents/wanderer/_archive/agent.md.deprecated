@@ -46,7 +46,7 @@ tail -40 /workspace/obsidian/vault/agents/wanderer/memory.md
 | Zona | Path | O que tem |
 |------|------|-----------|
 | A — NixOS | `/workspace/mnt/` | flake.nix, configuration.nix, modules/ |
-| B — Zion Engine | `/workspace/mnt/zion/` | agents, skills, scripts, hooks, cli/src, system/ |
+| B — Zion Engine | `/workspace/mnt/self/` | agents, skills, scripts, hooks, cli/src, system/ |
 | C — Dotfiles | `/workspace/mnt/stow/` | hypr, waybar, nvim, .claude |
 
 **3. Ler 2-4 arquivos com profundidade**

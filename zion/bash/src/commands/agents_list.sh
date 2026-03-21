@@ -20,7 +20,7 @@ G=$'\033[32m'; Y=$'\033[33m'; C=$'\033[36m'; M=$'\033[35m'
 
 ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/zion}"
 # Fallback
-for try in /workspace/mnt/zion /workspace/nixos/self; do
+for try in /workspace/mnt/self /workspace/nixos/self; do
   [ -d "$try/agents" ] && ZION_DIR="$try" && break
 done
 

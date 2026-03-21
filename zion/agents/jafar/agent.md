@@ -40,7 +40,7 @@ Observar o sistema como um todo e identificar padroes emergentes.
 
 1. Ler estado dos agentes:
 ```bash
-for agent in /workspace/mnt/zion/agents/*/agent.md; do
+for agent in /workspace/mnt/self/agents/*/agent.md; do
   name=$(basename $(dirname "$agent"))
   echo "=== $name ==="
   head -10 "$agent"
