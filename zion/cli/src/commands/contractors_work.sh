@@ -2,14 +2,24 @@
 # Um "contractor card" tem campo `agent:` no frontmatter
 zion_load_config
 
-TASKS="${TASK_DIR:-/workspace/obsidian/tasks}"
-ZION_DIR="${ZION_NIXOS_DIR:-$HOME/nixos}/zion"
+ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/zion}"
+OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
+TASKS="${TASK_DIR:-$OBSIDIAN/tasks}"
 RUNNER="$ZION_DIR/scripts/task-runner.sh"
 
-# Fallbacks
-for try in /workspace/mnt/zion /workspace/nixos/zion; do
-  [ -f "$try/scripts/task-runner.sh" ] && RUNNER="$try/scripts/task-runner.sh" && break
-done
+# Fallbacks runner
+if [ ! -f "$RUNNER" ]; then
+  for try in /workspace/mnt/zion /workspace/nixos/zion; do
+    [ -f "$try/scripts/task-runner.sh" ] && RUNNER="$try/scripts/task-runner.sh" && break
+  done
+fi
+
+# Fallbacks tasks
+if [ ! -d "$TASKS" ]; then
+  for try in "$ZION_DIR/../obsidian/tasks" /workspace/obsidian/tasks "$HOME/obsidian/tasks"; do
+    [ -d "$try" ] && TASKS="$try" && break
+  done
+fi
 
 DRY_RUN="${args[--dry-run]:-}"
 

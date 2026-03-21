@@ -8,7 +8,7 @@ mod output;
 const BASH_ONLY_COMMANDS: &[&str] = &[
     "man", "help", "start", "shell", "sh", "build", "down", "shutdown", "clean", "gc", "prune",
     "init", "set", "runner", "dk", "docker", "hooks", "hook", "contractors",
-    "ct", "stow", "os", "leech", "l", "lab", "git", "g", "inbox", "ib", "outbox", "ob", "relay",
+    "ct", "stow", "leech", "l", "lab", "git", "g", "inbox", "ib", "outbox", "ob", "relay",
     "beta", "resume",
 ];
 
@@ -174,9 +174,30 @@ enum Commands {
         tick: u64,
     },
 
-    /// Build and install zionrust binary
+    /// Build and install zion CLIs (bash + rust)
     #[command(alias = "install")]
     Update,
+
+    /// NixOS operations (nh os switch/test/boot/build)
+    Os {
+        #[command(subcommand)]
+        action: OsAction,
+    },
+}
+
+#[derive(Subcommand)]
+enum OsAction {
+    /// nh os switch (apply immediately)
+    #[command(alias = "sw")]
+    Switch,
+    /// nh os test (apply without making default)
+    #[command(alias = "t")]
+    Test,
+    /// nh os boot (apply on next boot)
+    #[command(alias = "b")]
+    Boot,
+    /// nh os build (compile only, don't apply)
+    Build,
 }
 
 fn main() -> Result<()> {
@@ -271,6 +292,15 @@ fn main() -> Result<()> {
         }
         Some(Commands::Update) => {
             commands::update::execute()?;
+        }
+        Some(Commands::Os { action }) => {
+            let act = match action {
+                OsAction::Switch => "switch",
+                OsAction::Test => "test",
+                OsAction::Boot => "boot",
+                OsAction::Build => "build",
+            };
+            commands::os::execute(act)?;
         }
         // No subcommand = implicit `new`
         None => {

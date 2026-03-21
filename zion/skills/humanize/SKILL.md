@@ -1,4 +1,7 @@
-Remove signs of AI-generated writing from text. Use when editing or reviewing text to make it sound more natural and human-written.
+---
+name: humanize
+description: "Auto-ativar quando: usuário pede para humanizar, desviar de padrões de IA, tornar texto mais natural, remover traços de ChatGPT, ou revisar escrita para soar humana."
+---
 
 # Humanizer: Remove AI Writing Patterns
 
