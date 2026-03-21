@@ -300,6 +300,10 @@ commands:
     alias: [ct]
     help: "Gerencia contractors (agentes background)."
     commands:
+      - name: status
+        alias: [st, log]
+        help: "Mostra os últimos 20 jobs com start, duração e status."
+        filename: commands/contractors_status.sh
       - name: run
         alias: [r]
         help: "Roda um contractor imediatamente (mesmo fluxo do scheduler). Para conversa interativa: /contractor:call"
