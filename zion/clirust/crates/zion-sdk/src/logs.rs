@@ -10,39 +10,50 @@ pub struct LogEntry {
     pub line: String,
 }
 
-/// Collect the last `n` lines across all known service log files.
+const SERVICES: &[&str] = &["monolito", "bo-container", "front-student"];
+
+/// Resolve the log root directory: container path first, then host XDG path.
+fn log_root() -> PathBuf {
+    // Inside container
+    let container = PathBuf::from("/workspace/logs/docker");
+    if container.exists() {
+        return container;
+    }
+
+    // Host: XDG_DATA_HOME or ~/.local/share
+    let xdg = std::env::var("XDG_DATA_HOME")
+        .unwrap_or_else(|_| {
+            let home = std::env::var("HOME").unwrap_or_else(|_| "/root".into());
+            format!("{home}/.local/share")
+        });
+    PathBuf::from(xdg).join("zion/logs/dockerized")
+}
+
+/// Collect the last `n` lines per service, merging into a flat list.
 #[must_use]
 pub fn collect(n: usize) -> Vec<LogEntry> {
-    let log_root = PathBuf::from("/workspace/logs/docker");
-    let services = ["monolito", "bo-container", "front-student"];
+    let root = log_root();
+    let mut all: Vec<LogEntry> = Vec::new();
 
-    let mut all: Vec<(std::time::SystemTime, LogEntry)> = Vec::new();
-
-    for svc in &services {
-        let path = log_root.join(svc).join("service.log");
-        if !path.exists() {
-            continue;
-        }
+    for svc in SERVICES {
+        let path = root.join(svc).join("service.log");
         for line in tail_file(&path, n) {
-            all.push((
-                std::time::SystemTime::UNIX_EPOCH,
-                LogEntry {
-                    service: svc.to_string(),
-                    line,
-                },
-            ));
+            all.push(LogEntry {
+                service: svc.to_string(),
+                line,
+            });
         }
     }
 
-    // Return last `n` entries across all services
+    // Keep last `n` entries overall
     if all.len() > n {
         all.drain(..all.len() - n);
     }
 
-    all.into_iter().map(|(_, e)| e).collect()
+    all
 }
 
-/// Read the last `n` lines from a file efficiently.
+/// Read the last `n` lines from a file efficiently (reads tail chunk only).
 fn tail_file(path: &Path, n: usize) -> Vec<String> {
     let Ok(mut file) = std::fs::File::open(path) else {
         return Vec::new();
@@ -56,8 +67,7 @@ fn tail_file(path: &Path, n: usize) -> Vec<String> {
         return Vec::new();
     }
 
-    // Walk backwards to find the nth newline
-    let chunk = 8192u64.min(size);
+    let chunk = 16384u64.min(size);
     let start = size.saturating_sub(chunk);
     if file.seek(SeekFrom::Start(start)).is_err() {
         return Vec::new();
@@ -65,29 +75,16 @@ fn tail_file(path: &Path, n: usize) -> Vec<String> {
 
     let mut buf = String::new();
     if file.read_to_string(&mut buf).is_err() {
-        return Vec::new();
+        // Try lossy
+        let mut raw = Vec::new();
+        let _ = file.seek(SeekFrom::Start(start));
+        if file.read_to_end(&mut raw).is_err() {
+            return Vec::new();
+        }
+        buf = String::from_utf8_lossy(&raw).into_owned();
     }
 
     let lines: Vec<&str> = buf.lines().collect();
     let skip = lines.len().saturating_sub(n);
-    lines[skip..]
-        .iter()
-        .map(|l| l.to_string())
-        .collect()
-}
-
-/// Read last `n` lines from a host journal log file (plain text, one entry per line).
-#[must_use]
-pub fn collect_host(n: usize) -> Vec<LogEntry> {
-    let path = PathBuf::from("/workspace/logs/host/journal/system.log");
-    if !path.exists() {
-        return Vec::new();
-    }
-    tail_file(&path, n)
-        .into_iter()
-        .map(|line| LogEntry {
-            service: "host".to_string(),
-            line,
-        })
-        .collect()
+    lines[skip..].iter().map(|l| l.to_string()).collect()
 }

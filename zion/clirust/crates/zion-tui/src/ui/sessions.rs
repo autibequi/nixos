@@ -88,10 +88,12 @@ fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[Session
         ];
 
         if session.is_up && !session.cpu.is_empty() {
-            spans.push(Span::styled(
-                format!("  cpu {:<6}", session.cpu),
-                theme::cpu(),
-            ));
+            let cpu_pct = parse_pct(&session.cpu);
+            let cpu_bar = mini_bar(cpu_pct, 6);
+            let cpu_style = pct_color(cpu_pct);
+            spans.push(Span::raw("  "));
+            spans.push(Span::styled(cpu_bar, cpu_style));
+            spans.push(Span::styled(format!(" {:<6}", session.cpu.trim()), theme::cpu()));
             let mem_short = shorten_mem(&session.mem);
             spans.push(Span::styled(format!(" {mem_short}"), theme::mem()));
         }
@@ -109,6 +111,23 @@ fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[Session
 
         lines.push(Line::from(spans));
     }
+}
+
+fn parse_pct(s: &str) -> u8 {
+    s.trim().trim_end_matches('%').parse::<f32>().map(|f| f as u8).unwrap_or(0)
+}
+
+fn pct_color(pct: u8) -> ratatui::style::Style {
+    use ratatui::style::{Color, Style};
+    if pct >= 80 { Style::default().fg(Color::Red) }
+    else if pct >= 50 { Style::default().fg(Color::Yellow) }
+    else { Style::default().fg(Color::Green) }
+}
+
+fn mini_bar(pct: u8, width: usize) -> String {
+    let filled = (pct as usize * width) / 100;
+    let empty = width.saturating_sub(filled);
+    format!("{}{}", "█".repeat(filled), "░".repeat(empty))
 }
 
 /// Strip the "Up " prefix and abbreviate common duration words for compact display.

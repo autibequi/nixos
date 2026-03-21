@@ -31,40 +31,54 @@ pub fn collect(script_path: &std::path::Path) -> QuotaInfo {
 }
 
 /// Parse `44%` and `49%` from the script output line.
+///
+/// Handles both formats:
+/// - `󱙺 5h:44% 7d:49% ex:100%`  (compact, actual output)
+/// - `5h: ━━━━ 44%  7d: ━━━━ 49%`  (spaced, older format)
 fn parse_percentages(text: &str) -> (u8, u8) {
-    // Look for patterns like "5h: ... 44%  7d: ... 49%"
     let mut pct_5h = 0u8;
     let mut pct_7d = 0u8;
 
     for line in text.lines() {
-        if line.contains("5h:") && line.contains("7d:") {
+        if !line.contains("5h:") || !line.contains("7d:") {
+            continue;
+        }
+
+        // Try compact format: `5h:44%`
+        for token in line.split_whitespace() {
+            if let Some(rest) = token.strip_prefix("5h:") {
+                if let Some(n) = parse_pct(rest) {
+                    pct_5h = n;
+                }
+            } else if let Some(rest) = token.strip_prefix("7d:") {
+                if let Some(n) = parse_pct(rest) {
+                    pct_7d = n;
+                }
+            }
+        }
+
+        // If compact didn't work, try spaced format: `5h:` then next token with `%`
+        if pct_5h == 0 && pct_7d == 0 {
             let parts: Vec<&str> = line.split_whitespace().collect();
             let mut after_5h = false;
             let mut after_7d = false;
             for token in &parts {
-                if *token == "5h:" {
-                    after_5h = true;
-                    after_7d = false;
-                    continue;
-                }
-                if *token == "7d:" {
-                    after_7d = true;
-                    after_5h = false;
-                    continue;
-                }
-                if after_5h {
-                    if let Some(n) = parse_pct(token) {
-                        pct_5h = n;
-                        after_5h = false;
+                match *token {
+                    "5h:" => { after_5h = true; after_7d = false; }
+                    "7d:" => { after_7d = true; after_5h = false; }
+                    t if after_5h => {
+                        if let Some(n) = parse_pct(t) { pct_5h = n; after_5h = false; }
                     }
-                }
-                if after_7d {
-                    if let Some(n) = parse_pct(token) {
-                        pct_7d = n;
-                        after_7d = false;
+                    t if after_7d => {
+                        if let Some(n) = parse_pct(t) { pct_7d = n; after_7d = false; }
                     }
+                    _ => {}
                 }
             }
+        }
+
+        if pct_5h > 0 || pct_7d > 0 {
+            break;
         }
     }
 
@@ -90,7 +104,15 @@ mod tests {
     use super::*;
 
     #[test]
-    fn parse_basic() {
+    fn parse_compact() {
+        let line = "󱙺 5h:44% 7d:49% ex:100%";
+        let (a, b) = parse_percentages(line);
+        assert_eq!(a, 44);
+        assert_eq!(b, 49);
+    }
+
+    #[test]
+    fn parse_spaced() {
         let line = "  Claude OAuth  5h: ━━━━────── 44%  7d: ━━━━━━━━━━──────────── 49%  ex: 100%";
         let (a, b) = parse_percentages(line);
         assert_eq!(a, 44);
