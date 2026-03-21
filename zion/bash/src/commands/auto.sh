@@ -42,7 +42,7 @@ card_epoch() {
   if [[ "$name" =~ ^([0-9]{4})([0-9]{2})([0-9]{2})_([0-9]{2})_([0-9]{2})_ ]]; then
     local y="${BASH_REMATCH[1]}" mo="${BASH_REMATCH[2]}" d="${BASH_REMATCH[3]}"
     local h="${BASH_REMATCH[4]}" mi="${BASH_REMATCH[5]}"
-    date -d "${y}-${mo}-${d} ${h}:${mi}:00" +%s 2>/dev/null || echo 0
+    TZ=UTC date -d "${y}-${mo}-${d} ${h}:${mi}:00" +%s 2>/dev/null || echo 0
   else
     echo 0
   fi

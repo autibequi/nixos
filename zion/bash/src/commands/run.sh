@@ -94,7 +94,7 @@ if [ -f "$agent_file" ]; then
     esac
   fi
 
-  WHEN=$(date +%Y%m%d_%H_%M)
+  WHEN=$(date -u +%Y%m%d_%H_%M)
   CARD="${WHEN}_${name}.md"
 
   mkdir -p "$schedule"

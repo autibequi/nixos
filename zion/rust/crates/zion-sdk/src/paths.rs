@@ -213,7 +213,7 @@ pub fn xdg_runtime_dir() -> String {
 #[must_use]
 pub fn timestamp() -> String {
     std::process::Command::new("date")
-        .arg("+%Y%m%d_%H_%M")
+        .args(["-u", "+%Y%m%d_%H_%M"])
         .output()
         .ok()
         .and_then(|o| String::from_utf8(o.stdout).ok())
