@@ -9,6 +9,7 @@ x-env-base: &env-base
   CLAUDE_ENV: container
   WAYLAND_DISPLAY: ${WAYLAND_DISPLAY:-wayland-1}
   XDG_RUNTIME_DIR: /run/user/1000
+  PULSE_SERVER: unix:/run/user/1000/pulse/native
   DISABLE_AUTOUPDATER: false
   # Docker autonomy: host paths for container→host translation
   ZION_NIXOS_DIR: ${HOME}/nixos
@@ -46,6 +47,7 @@ x-base-volumes: &base-volumes
   - ${ZION_ROOT:-${HOME}/nixos/zion}/.opencode:/home/claude/.config/opencode
   - ${HOME}/projects:/home/claude/projects
   - ${XDG_RUNTIME_DIR:-/run/user/1000}/${WAYLAND_DISPLAY:-wayland-1}:/run/user/1000/${WAYLAND_DISPLAY:-wayland-1}
+  - ${XDG_RUNTIME_DIR:-/run/user/1000}/pulse:/run/user/1000/pulse
   # Host /proc e /etc (observabilidade)
   - /proc/meminfo:/host/proc/meminfo:ro
   - /proc/loadavg:/host/proc/loadavg:ro

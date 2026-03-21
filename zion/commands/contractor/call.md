@@ -1,6 +1,6 @@
 ---
 name: contractor:call
-description: "Chama um contractor para uma reunião interativa — pergunta como estão as coisas, o que descobriram, o que estão sentindo. Contractors disponíveis: hermes, scheduler, doctor, trashman, coruja, sentinel, wiseman, trainee, jafar, wanderer"
+description: "Chama um contractor para uma reunião interativa — pergunta como estão as coisas, o que descobriram, o que estão sentindo. Contractors disponíveis: hermes, doctor, trashman, coruja, wiseman, wanderer"
 ---
 
 # contractor:call — Reunião com Contractor
@@ -29,15 +29,11 @@ Se vazio ou inválido — exibir lista e perguntar:
 Qual contractor você quer chamar?
 
   hermes     — mensageiro, roteia outbox/inbox (every10)
-  scheduler  — escalonamento de tasks (every10)
-  doctor     — health check do sistema (every60)
+  doctor     — health + security + manutenção NixOS/Docker (every60)
   trashman   — limpeza do vault (every60)
   coruja     — monitoramento Jira/Notion/Grafana (every60)
-  sentinel   — segurança e hardening (every60)
-  wiseman    — knowledge graph + repo audit (every60)
-  trainee    — síntese cross-contractor (every60)
-  jafar      — meta-análise + propostas (every60)
-  wanderer   — exploração de código (every120)
+  wiseman    — knowledge graph + meta-análise + RSS (every60)
+  wanderer   — andarilho: vaga, explora código, escreve cartas (every60)
 ```
 
 ### 2. Carregar contexto do contractor

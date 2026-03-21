@@ -109,7 +109,7 @@ fi
 # ── Credit check (skip for scheduler — haiku, essential) ────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 USAGE_SCRIPT="$SCRIPT_DIR/claude-ai-usage.sh"
-if [ -x "$USAGE_SCRIPT" ] && [ "$TASK_NAME" != "scheduler" ]; then
+if [ -x "$USAGE_SCRIPT" ] && [ "$TASK_NAME" != "hermes" ]; then
   USAGE_JSON=$("$USAGE_SCRIPT" --json 2>/dev/null || echo "{}")
   WEEK_PCT=$(echo "$USAGE_JSON" | jq -r '
     [.weekly_limits[]? // .weeklyLimits[]? // .limits[]? // empty]

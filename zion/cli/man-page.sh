@@ -51,13 +51,12 @@ cat << 'EOF'
     │  zion destroy            remove containers + volumes           │
     │  zion clean              remove sessoes paradas (gc, prune)    │
     │                                                                │
-    ├─ TASKS ────────────────────────────────────────────────────────┤
+    ├─ META ─────────────────────────────────────────────────────────┤
     │                                                                │
-    │  zion new-task <nome>    cria task no kanban                   │
     │  zion status             status agregado (sessoes/docker)      │
     │  zion worktree [svc]     lista worktrees interativamente       │
     │                                                                │
-    ├─ META ─────────────────────────────────────────────────────────┤
+    ├─ UTIL ─────────────────────────────────────────────────────────┤
     │                                                                │
     │  zion update             regenera CLI + symlink                │
     │  zion init               cria ~/.zion config                   │
@@ -80,7 +79,7 @@ cat << 'EOF'
     │  zion cursor  = zion new --engine=cursor                       │
     │  zion oc      = zion new --engine=opencode                     │
     │  zion dk      = zion docker                                    │
-    │  zion t       = zion tasks                                     │
+    │  zion ct      = zion contractors                               │
     │  zion st      = zion status                                    │
     │  zion wt      = zion worktree                                  │
     │                                                                │

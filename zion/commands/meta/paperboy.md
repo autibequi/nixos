@@ -1,6 +1,9 @@
-# Paperboy — Curador Pessoal de RSS
+# meta:paperboy — DEPRECATED
 
-Controla o paperboy: ver digest, status, preferencias, forcar execucao.
+> **Paperboy foi aposentado.** Use `/meta:rss` para todas as operações de RSS.
+> O wiseman agora gerencia feeds, digest e recomendações contextuais.
+
+---
 
 ## Entrada
 - `$ARGUMENTS`: subcomando — `show`, `status`, `prefs`, `fetch`, `config` — default: `show`
