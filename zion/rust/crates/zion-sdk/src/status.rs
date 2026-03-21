@@ -104,7 +104,7 @@ pub fn collect() -> Result<StatusSnapshot> {
     let mount_checks = [
         ("/workspace/mnt", "mnt"),
         ("/workspace/obsidian", "obs"),
-        ("/workspace/zion", "zion"),
+        ("/workspace/self", "zion"),
         ("/workspace/logs/docker", "logs"),
     ];
 

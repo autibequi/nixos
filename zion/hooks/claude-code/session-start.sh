@@ -35,7 +35,7 @@ HEADLESS="${HEADLESS:-0}"
 [ -z "${IN_DOCKER:-}" ] && IN_DOCKER="0"
 { [ "$CLAUDE_ENV" = "container" ] || [ -f "/.dockerenv" ]; } && IN_DOCKER="1"
 [ -z "${ZION_EDIT:-}" ] && ZION_EDIT="0"
-[ -d "/workspace/lab" ] && ZION_EDIT="1"
+[ -d "/workspace/host" ] && ZION_EDIT="1"
 
 # Env overrides vencem sobre defaults de arquivo (util para testes com zion hooks)
 [ -n "$_OV_PERSONALITY" ] && PERSONALITY="${_OV_PERSONALITY^^}"
@@ -59,7 +59,7 @@ echo "autocommit=$AUTOCOMMIT     # ON=commita sem perguntar | OFF=PROIBIDO commi
 echo "autojarvis=$AUTOJARVIS     # ON=JARVIS no dashboard"
 echo "beta=$BETA                 # ON=beta overrides ativos | OFF=normal"
 echo "in_docker=$IN_DOCKER       # 1=container | 0=host"
-echo "zion_edit=$ZION_EDIT       # 1=lab mode: /workspace/lab editável | 0=projeto externo"
+echo "zion_edit=$ZION_EDIT       # 1=lab mode: /workspace/host editável | 0=projeto externo"
 echo "zion_debug=$ZION_DEBUG     # ON=contexto completo (DIRETRIZES+persona+avatar) | OFF=lite mode"
 echo "headless=$HEADLESS         # 1=worker sem supervisão | 0=interativo"
 echo "analysis_mode=$ANALYSIS_MODE  # 1=modo experimento isolado (proativo, self-modify, debug livre)"
@@ -80,7 +80,7 @@ echo "---/BOOT---"
 # ────────────────────────────────────────────────────────────────
 if [ "$ZION_DEBUG" = "OFF" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
   LITE_MD="$WS/zion/system/LITE.md"
-  [ -f "$LITE_MD" ] || LITE_MD="/workspace/zion/system/LITE.md"
+  [ -f "$LITE_MD" ] || LITE_MD="/workspace/self/system/LITE.md"
   if [ -f "$LITE_MD" ]; then
     echo "---LITE---"
     cat "$LITE_MD"
@@ -93,7 +93,7 @@ fi
 # ────────────────────────────────────────────────────────────────
 if [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ] && [ "$ZION_DEBUG" = "ON" ]; then
   DIRETRIZES="$WS/zion/system/DIRETRIZES.md"
-  [ -f "$DIRETRIZES" ] || DIRETRIZES="/workspace/zion/system/DIRETRIZES.md"
+  [ -f "$DIRETRIZES" ] || DIRETRIZES="/workspace/self/system/DIRETRIZES.md"
   if [ -f "$DIRETRIZES" ]; then
     echo "---DIRETRIZES---"
     cat "$DIRETRIZES"
@@ -118,7 +118,7 @@ Para comandos de sistema, pedir ao usuário rodar no host.
 Superpoderes: todo Nixpkgs disponível via `nix-shell -p <pkg>`.
 
 Estrutura /workspace:
-  /workspace/zion/          engine dos agentes (prompts, scripts, skills, personas)
+  /workspace/self/          engine dos agentes (prompts, scripts, skills, personas)
   /workspace/mnt/           ZONA DE TRABALHO — pasta do host attachada (rw)
                             pode ser ~/nixos, ~/projects/ com vários repos, etc.
                             aqui você lê, edita e commita código
@@ -133,7 +133,7 @@ Estrutura /workspace:
   /workspace/dockerized/    configs docker dos serviços (Dockerfile, compose, .env)
   /workspace/.hive-mind/    área efêmera compartilhada entre containers (locks, sinais)
 
-Se zion_edit=1: lab mode — /workspace/lab/ contém o repo NixOS+Zion (editável).
+Se zion_edit=1: lab mode — /workspace/host/ contém o repo NixOS+Zion (editável).
 Se zion_edit=0: /workspace/mnt é um projeto externo do usuário.
 DOCKER
   if [ "$ZION_EDIT" = "1" ]; then
@@ -141,13 +141,13 @@ DOCKER
 
 LAB MODE (zion_edit=1):
   /workspace/mnt  = Projeto do usuário (zona de trabalho normal — igual zion new)
-  /workspace/lab/ = NixOS+Zion source (~/nixos) — EDITÁVEL para auto-aperfeiçoamento
+  /workspace/host/ = NixOS+Zion source (~/nixos) — EDITÁVEL para auto-aperfeiçoamento
                     (modules/, configuration.nix, flake.nix, stow/, zion/)
                     Use para melhorar skills, hooks, prompts, agents, CLI do Zion.
                     Mudanças aqui afetam o sistema e as próximas sessões.
-  /workspace/zion = Bind mount de ~/nixos/zion (mesmo conteúdo que /workspace/lab/zion)
+  /workspace/self = Bind mount de ~/nixos/self (mesmo conteúdo que /workspace/host/zion)
 
-REGRA: /workspace/lab/ é sua zona de evolução. Edite-a quando identificar melhorias
+REGRA: /workspace/host/ é sua zona de evolução. Edite-a quando identificar melhorias
        em skills, agents, hooks ou prompts. Commits vão pro repo NixOS do host.
 ZION_REPOS
   fi
@@ -232,7 +232,7 @@ fi
 #     Gerado em bash → stderr (terminal). Sem instruções pro Claude.
 # ────────────────────────────────────────────────────────────────
 if [ "$ZION_EDIT" = "1" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
-  _lab_dir="/workspace/lab"
+  _lab_dir="/workspace/host"
   _worktrees=$(git -C "$_lab_dir" worktree list 2>/dev/null | wc -l | tr -d ' ')
   _inbox=$(wc -l < /workspace/obsidian/tasks/inbox/inbox.md 2>/dev/null || echo "?")
   _uptime=$(awk '{h=int($1/3600); m=int(($1%3600)/60); printf "%dh %dm", h, m}' /proc/uptime 2>/dev/null || echo "?")
@@ -281,16 +281,16 @@ if [ "$ZION_EDIT" = "1" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ];
     printf "  %-12s .........  OK    [  56ms]\n" "PERSONALITY"
     printf "  %-12s .........  OK    [  19ms]  %s files\n" "MEMORY" "$_mem_count"
     printf "  %-12s .........  OK    [ 142ms]\n" "API_USAGE"
-    _usage_file="/workspace/lab/.ephemeral/usage-bar.txt"
+    _usage_file="/workspace/host/.ephemeral/usage-bar.txt"
     [ -f "$_usage_file" ] || _usage_file="$WS/.ephemeral/usage-bar.txt"
     [ -f "$_usage_file" ] || _usage_file="$HOME/.claude/.ephemeral/usage-bar.txt"
     [ -f "$_usage_file" ] && printf "  %40s%s\n" "" "$(tail -1 "$_usage_file")"
 
     # ── Token mini-summary ──────────────────────────────────────
-    _c_dir=$(wc -c < "/workspace/zion/system/DIRETRIZES.md" 2>/dev/null || echo 0)
-    _c_self=$(wc -c < "/workspace/zion/system/SELF.md" 2>/dev/null || echo 0)
-    _c_pers=$(wc -c < "/workspace/zion/personas/GLaDOS.persona.md" 2>/dev/null || echo 0)
-    _c_avat=$(wc -c < "/workspace/zion/personas/avatar/glados.md" 2>/dev/null || echo 0)
+    _c_dir=$(wc -c < "/workspace/self/system/DIRETRIZES.md" 2>/dev/null || echo 0)
+    _c_self=$(wc -c < "/workspace/self/system/SELF.md" 2>/dev/null || echo 0)
+    _c_pers=$(wc -c < "/workspace/self/personas/GLaDOS.persona.md" 2>/dev/null || echo 0)
+    _c_avat=$(wc -c < "/workspace/self/personas/avatar/glados.md" 2>/dev/null || echo 0)
     _tk_nosso=$(( (_c_dir + _c_self + _c_pers + _c_avat + 7000) * 10 / 35 ))
     _tk_cc=18000
     _tk_chat=800

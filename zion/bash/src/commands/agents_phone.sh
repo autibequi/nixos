@@ -7,7 +7,7 @@ ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/zion}"
 OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
 
 # Fallback agents dir
-for try in /workspace/mnt/zion /workspace/nixos/zion; do
+for try in /workspace/mnt/zion /workspace/nixos/self; do
   [ -d "$try/agents" ] && ZION_DIR="$try" && break
 done
 

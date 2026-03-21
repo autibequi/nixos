@@ -14,4 +14,4 @@ elif [ -f "$BIN" ]; then
   echo "binario removido: $BIN"
 fi
 
-echo "zion desinstalado. Para reinstalar: cd ~/nixos/zion/bash && ./zion update"
+echo "zion desinstalado. Para reinstalar: cd ~/nixos/self/bash && ./zion update"

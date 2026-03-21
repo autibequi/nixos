@@ -15,11 +15,11 @@ resume="${args['--resume']:-}"
 init_md="$(zion_initial_md "$mount_path")"
 [[ -n "$init_md" ]] && engine_args+=" --init-md=$init_md"
 
-# Lab volumes: nixos repo at /workspace/lab (writable) + host journal
+# Lab volumes: nixos repo at /workspace/host (writable) + host journal
 nixos_dir="${ZION_NIXOS_DIR:-$HOME/nixos}"
 nixos_real="$(cd "$nixos_dir" 2>/dev/null && pwd)" \
   || { echo "zion: nixos dir não encontrado: $nixos_dir" >&2; exit 1; }
-extra_volumes="-v ${nixos_real}:/workspace/lab:rw"
+extra_volumes="-v ${nixos_real}:/workspace/host:rw"
 extra_volumes+=" -v /var/log/journal:/workspace/logs/host/journal:ro"
 
 zion_session_run "$engine" "$proj_name" "$mount_path" "$mount_opts" "$engine_args" "$extra_volumes"

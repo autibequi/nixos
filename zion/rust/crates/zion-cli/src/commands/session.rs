@@ -84,7 +84,7 @@ pub fn shell(dir: Option<String>) -> Result<()> {
             "leech",
             "/bin/bash",
             "-c",
-            ". /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt && exec bash",
+            ". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec bash",
         ])?)
 }
 

@@ -397,6 +397,6 @@ html = html.replace('{{TOTAL_CH}}', str(total_ch))
 html = html.replace('{{TREE_HTML}}', tree_html)
 
 b64 = base64.b64encode(html.encode()).decode()
-subprocess.run(['python3', '/workspace/zion/scripts/chrome-relay.py', 'nav',
+subprocess.run(['python3', '/workspace/self/scripts/chrome-relay.py', 'nav',
     f'data:text/html;base64,{b64}'])
 ```

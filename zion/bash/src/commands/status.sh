@@ -51,7 +51,7 @@ local _stats_pid=$!
 
 # ── Background: quota Claude (atualiza a cada 60s) ────────────
 _run_quota_bg() {
-  local usage_script="${ZION_ROOT:-$HOME/nixos/zion}/scripts/claude-ai-usage.sh"
+  local usage_script="${ZION_ROOT:-$HOME/nixos/self}/scripts/claude-ai-usage.sh"
   while true; do
     { [ -x "$usage_script" ] && "$usage_script" 2>/dev/null | tail -2 | sed 's/^/  /' || true; } \
       > "${_quota_file}.new" 2>/dev/null \
@@ -154,7 +154,7 @@ _do_status_render() {
     local dest_mounts
     dest_mounts=$(echo "$_inspect_cache" | awk -F'|' -v n="$name" '$1==n {print $3}' | head -1)
     local vols=()
-    for v_entry in "/workspace/mnt:mnt" "/workspace/obsidian:obs" "/workspace/zion:zion" "/workspace/logs/docker:logs"; do
+    for v_entry in "/workspace/mnt:mnt" "/workspace/obsidian:obs" "/workspace/self:zion" "/workspace/logs/docker:logs"; do
       local vp="${v_entry%%:*}" vn="${v_entry##*:}"
       if echo "$dest_mounts" | grep -qw "$vp"; then
         vols+=("${GREEN}${vn}${RESET}")
@@ -204,7 +204,7 @@ _do_status_render() {
   _print_agent_group "agents" "$_agent_rows"
   _print_agent_group "background" "$_bg_rows"
 
-  source "${ZION_ROOT:-$HOME/nixos/zion}/clibash/src/lib/docker_status_impl.sh" 2>/dev/null || true
+  source "${ZION_ROOT:-$HOME/nixos/self}/clibash/src/lib/docker_status_impl.sh" 2>/dev/null || true
   if declare -f _zion_dk_status >/dev/null 2>&1; then
     _zion_dk_status "" 1
   fi

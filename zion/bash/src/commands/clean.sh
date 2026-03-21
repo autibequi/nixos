@@ -19,5 +19,5 @@ fi
 
 echo ""
 echo "=== Containers órfãos (criados pelo compose mas sem projeto) ==="
-docker compose -f "${ZION_ROOT:-$HOME/nixos/zion}/container/docker-compose.zion.yml" \
+docker compose -f "${ZION_ROOT:-$HOME/nixos/self}/container/docker-compose.zion.yml" \
   ps --all 2>/dev/null | grep -v "NAME" | grep -v "running" || echo "  Nenhum."

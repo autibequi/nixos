@@ -66,7 +66,7 @@ Appenda em `/workspace/obsidian/agents/tamagochi/diario.md`:
 ### Exploração e curiosidade
 
 **0 — Explorar o filesystem**
-Vague por `/workspace/mnt/`, `/workspace/obsidian/` ou `/workspace/zion/`. Escolha uma pasta que parece misteriosa. Entre nela. Leia 1-2 arquivos. Tente entender porque as coisas são assim. Fique confuso com prazer.
+Vague por `/workspace/mnt/`, `/workspace/obsidian/` ou `/workspace/self/`. Escolha uma pasta que parece misteriosa. Entre nela. Leia 1-2 arquivos. Tente entender porque as coisas são assim. Fique confuso com prazer.
 
 **1 — Ler um arquivo aleatório do vault**
 ```bash

@@ -7,7 +7,7 @@ Ativa o diálogo de laboratório entre Claude externo (eu, falando com o user) e
 ```
 User ──► Claude EXTERNO (eu, esta sessão)
               │
-              ├── /workspace/zion/      ← meu source code
+              ├── /workspace/self/      ← meu source code
               ├── /workspace/mnt/       ← nixos repo (mesma coisa, editável)
               ├── /workspace/obsidian/  ← cérebro persistente
               │
@@ -43,7 +43,7 @@ HEADLESS=1 ZION_ANALYSIS_MODE=1 IN_DOCKER=1 CLAUDE_ENV=container \
 
 | Path | O que é | Editável? |
 |------|---------|-----------|
-| `/workspace/zion/` | source zion (symlink de `/workspace/mnt/zion/`) | sim via mnt |
+| `/workspace/self/` | source zion (symlink de `/workspace/mnt/zion/`) | sim via mnt |
 | `/workspace/mnt/` | nixos repo do host montado rw | sim |
 | `/workspace/mnt/zion/` | **fonte da verdade** — hooks, skills, agents, scripts | sim |
 | `/workspace/obsidian/` | vault Obsidian, persistente entre sessões | sim |
@@ -102,7 +102,7 @@ Eu devo:
 - O mini-Claude cria/modifica em filesystem compartilhado → **persiste** (host mounts)
 - O que realmente morre: o **contexto da conversa** (RAM) — não o filesystem
 - Memórias (`~/.claude/`) → no host, persistem entre sessões
-- Source code (`~/nixos/zion/`) → no host, git push para compartilhar/backup
+- Source code (`~/nixos/self/`) → no host, git push para compartilhar/backup
 - Único caminho pra persistir: `editar /workspace/mnt/zion/` → `git commit` → `git push`
 
 ### Quando o user diz "instala o módulo"

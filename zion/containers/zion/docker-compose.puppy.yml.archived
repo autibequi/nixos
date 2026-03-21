@@ -1,5 +1,5 @@
 x-env-base: &env-base
-  PATH: /home/claude/.local/bin:/home/claude/.nix-profile/bin:/workspace/zion/cli:/usr/bin:/bin
+  PATH: /home/claude/.local/bin:/home/claude/.nix-profile/bin:/workspace/self/cli:/usr/bin:/bin
   ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
   CURSOR_API_KEY: ${CURSOR_API_KEY:-}
   CLAUDE_SESSION: ${CLAUDE_SESSION:-}
@@ -24,21 +24,21 @@ x-extra-hosts: &extra-hosts
   - "host.docker.internal:host-gateway"
 
 x-base-volumes: &base-volumes
-  - ${ZION_ROOT:-${HOME}/nixos/zion}:/workspace/zion
+  - ${ZION_ROOT:-${HOME}/nixos/self}:/workspace/self
   - ${OBSIDIAN_PATH:-${HOME}/.ovault/Work}:/workspace/obsidian
   - ${CLAUDIO_MOUNT:-${HOME}/projects}:/workspace/mnt:${CLAUDIO_MOUNT_OPTS:-rw}
   - ${HOME}/.claude:/home/claude/.claude
-  - ${ZION_ROOT:-${HOME}/nixos/zion}/skills:/home/claude/.claude/skills
-  - ${ZION_ROOT:-${HOME}/nixos/zion}/commands:/home/claude/.claude/commands
-  - ${ZION_ROOT:-${HOME}/nixos/zion}/agents:/home/claude/.claude/agents
-  - ${ZION_ROOT:-${HOME}/nixos/zion}/hooks/claude-code:/home/claude/.claude/hooks:ro
-  - ${ZION_ROOT:-${HOME}/nixos/zion}/scripts:/home/claude/.claude/scripts
+  - ${ZION_ROOT:-${HOME}/nixos/self}/skills:/home/claude/.claude/skills
+  - ${ZION_ROOT:-${HOME}/nixos/self}/commands:/home/claude/.claude/commands
+  - ${ZION_ROOT:-${HOME}/nixos/self}/agents:/home/claude/.claude/agents
+  - ${ZION_ROOT:-${HOME}/nixos/self}/hooks/claude-code:/home/claude/.claude/hooks:ro
+  - ${ZION_ROOT:-${HOME}/nixos/self}/scripts:/home/claude/.claude/scripts
   - ${HOME}/.claude.json:/home/claude/.claude.json
   - ${HOME}/.cursor:/home/claude/.cursor
-  - ${ZION_ROOT:-${HOME}/nixos/zion}/skills:/home/claude/.cursor/skills
-  - ${ZION_ROOT:-${HOME}/nixos/zion}/commands:/home/claude/.cursor/rules
+  - ${ZION_ROOT:-${HOME}/nixos/self}/skills:/home/claude/.cursor/skills
+  - ${ZION_ROOT:-${HOME}/nixos/self}/commands:/home/claude/.cursor/rules
   - cursor_config:/home/claude/.config/cursor
-  - ${ZION_ROOT:-${HOME}/nixos/zion}/.opencode:/home/claude/.config/opencode
+  - ${ZION_ROOT:-${HOME}/nixos/self}/.opencode:/home/claude/.config/opencode
   - ${HOME}/projects:/home/claude/projects
   - ${XDG_RUNTIME_DIR:-/run/user/1000}/${WAYLAND_DISPLAY:-wayland-1}:/run/user/1000/${WAYLAND_DISPLAY:-wayland-1}
   - /proc/meminfo:/host/proc/meminfo:ro
@@ -72,7 +72,7 @@ services:
     network_mode: host
     working_dir: /workspace/mnt
     entrypoint: ["/entrypoint.sh"]
-    command: ["/bin/bash", "-c", "mkdir -p /workspace/obsidian/agents/cron 2>/dev/null; sleep 30 && exec /workspace/zion/scripts/task-daemon.sh"]
+    command: ["/bin/bash", "-c", "mkdir -p /workspace/obsidian/agents/cron 2>/dev/null; sleep 30 && exec /workspace/self/scripts/task-daemon.sh"]
     restart: unless-stopped
     group_add:
       - "${DOCKER_GID:-999}"

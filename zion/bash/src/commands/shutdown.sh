@@ -3,8 +3,8 @@
 
 zion_load_config
 
-compose_zion="${ZION_ROOT:-$HOME/nixos/zion}/container/docker-compose.zion.yml"
-compose_puppy="${ZION_ROOT:-$HOME/nixos/zion}/container/docker-compose.puppy.yml"
+compose_zion="${ZION_ROOT:-$HOME/nixos/self}/container/docker-compose.zion.yml"
+compose_puppy="${ZION_ROOT:-$HOME/nixos/self}/container/docker-compose.puppy.yml"
 
 echo "Stopping compose-tracked containers..."
 docker compose -f "$compose_zion" down 2>/dev/null || true

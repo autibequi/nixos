@@ -3,7 +3,7 @@ local name="${args[name]}"
 local steps="${args[--steps]:-}"
 zion_load_config
 
-local zion_dir="${ZION_ROOT:-$HOME/nixos/zion}"
+local zion_dir="${ZION_ROOT:-$HOME/nixos/self}"
 local obsidian="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
 local runner="$zion_dir/scripts/task-runner.sh"
 local agents="$obsidian/agents"
@@ -15,7 +15,7 @@ local agent_file="$zion_dir/agents/${name}/agent.md"
 if [ ! -f "$runner" ]; then
   for try in \
     "/workspace/mnt/zion/scripts/task-runner.sh" \
-    "/workspace/nixos/zion/scripts/task-runner.sh"; do
+    "/workspace/nixos/self/scripts/task-runner.sh"; do
     [ -f "$try" ] && runner="$try" && break
   done
 fi
@@ -29,7 +29,7 @@ fi
 if [ ! -f "$agent_file" ]; then
   for try in \
     "/workspace/mnt/zion/agents/${name}/agent.md" \
-    "/workspace/nixos/zion/agents/${name}/agent.md"; do
+    "/workspace/nixos/self/agents/${name}/agent.md"; do
     [ -f "$try" ] && agent_file="$try" && break
   done
 fi

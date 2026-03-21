@@ -204,7 +204,7 @@ impl SessionRunner {
 
         let claude_args_str = claude_args.join(" ");
         let bash_cmd = format!(
-            ". /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude {claude_args_str}"
+            ". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude {claude_args_str}"
         );
 
         let vol_args = self.volume_args();
@@ -255,11 +255,11 @@ impl SessionRunner {
 
         let cursor_cmd = if let Some(ref resume) = self.resume {
             format!(
-                ". /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt; {agent_check}exec agent {agent_flags_str} --resume={resume}"
+                ". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt; {agent_check}exec agent {agent_flags_str} --resume={resume}"
             )
         } else if let Some(ref init_file) = self.init_md {
             format!(
-                ". /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt; {agent_check}\
+                ". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt; {agent_check}\
                 if [ -f \"/workspace/mnt/{init_file}\" ]; then \
                 p=$(sed -e 's/\\\\\\\\/\\\\\\\\\\\\\\\\/g' -e 's/\"/\\\\\"/g' \"/workspace/mnt/{init_file}\"); \
                 exec agent {agent_flags_str} \"$p\"; \
@@ -267,7 +267,7 @@ impl SessionRunner {
             )
         } else {
             format!(
-                ". /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt; {agent_check}exec agent {agent_flags_str}"
+                ". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt; {agent_check}exec agent {agent_flags_str}"
             )
         };
 

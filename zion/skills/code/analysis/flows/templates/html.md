@@ -228,5 +228,5 @@ Para diagrama único (--modo leitura ou --modo escrita), omitir a seção não u
 # 1. Escrever HTML em /tmp/flows.html
 # 2. Encodar em base64 e abrir no Chrome
 HTML_B64=$(base64 -w 0 /tmp/flows.html)
-python3 /workspace/zion/scripts/chrome-relay.py nav "data:text/html;base64,${HTML_B64}"
+python3 /workspace/self/scripts/chrome-relay.py nav "data:text/html;base64,${HTML_B64}"
 ```

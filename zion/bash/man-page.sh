@@ -12,7 +12,7 @@ cat << 'EOF'
     │  zion                    continua ultima sessao                │
     │  zion new --engine=<e>   nova sessao interativa                │
     │  zion resume             lista e retoma sessao                 │
-    │  zion lab [dir]          sessao + /workspace/lab editavel      │
+    │  zion lab [dir]          sessao + /workspace/host editavel      │
     │  zion shell              bash no container                     │
     │                                                                │
     ├─ CONTRACTORS (agentes background) ────────────────────────────┤

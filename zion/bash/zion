@@ -51,7 +51,7 @@ zion_usage() {
   printf "  %s   Deploy dotfiles no host via GNU stow (restow, delete, status).\n" "stow     "
   printf "  %s   Aplica configuração NixOS no host via nh os.\n" "os       "
   printf "  %s   Engatou numa pasta — sessão efêmera (auto-detecta nixos → monta logs).\n" "leech    "
-  printf "  %s   Sessão lab: projeto em /workspace/mnt + ~/nixos em /workspace/lab (editável).\n" "lab      "
+  printf "  %s   Sessão lab: projeto em /workspace/mnt + ~/nixos em /workspace/host (editável).\n" "lab      "
   printf "  %s   Utilitarios Git. Ex: zion git sandbox\n" "git      "
   printf "  %s   Lista o inbox ou adiciona uma entrada. Sem args: mostra inbox.md. Com texto: adiciona entrada.\n" "inbox    "
   printf "  %s   Lista os arquivos do outbox.\n" "outbox   "
@@ -1429,7 +1429,7 @@ zion_leech_usage() {
 
 # :command.usage
 zion_lab_usage() {
-  printf "zion lab - Sessão lab: projeto em /workspace/mnt + ~/nixos em /workspace/lab (editável).\n\n"
+  printf "zion lab - Sessão lab: projeto em /workspace/mnt + ~/nixos em /workspace/host (editável).\n\n"
 
   printf "%s\n" "Usage:"
   printf "  zion lab [DIR] [OPTIONS]\n"
@@ -2117,7 +2117,7 @@ zion_session_run() {
 
       zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes $analysis_env \
         --entrypoint /entrypoint.sh -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" leech \
-        /bin/bash -c ". /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
+        /bin/bash -c ". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
       ;;
 
     cursor)
@@ -2132,7 +2132,7 @@ zion_session_run() {
       cursor_envs+=(-e "BOOTSTRAP_SKIP_CLEAR=1")
 
       local agent_check='agent --version >/dev/null 2>&1 || { echo "zion: cursor-agent nao funciona (versao expirada ou imagem desatualizada). Rode: zion build" >&2; exit 1; }; '
-      local cursor_cmd=". /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt; ${agent_check}"
+      local cursor_cmd=". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt; ${agent_check}"
 
       # Resume (takes priority over init-md)
       if [[ "$engine_args" == *"--resume="* ]]; then
@@ -3662,7 +3662,7 @@ zion_shell_command() {
     -e "CLAUDIO_MOUNT=$mount_path" \
     -e "BOOTSTRAP_SKIP_CLEAR=1" \
     leech \
-    /bin/bash -c ". /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt && exec bash"
+    /bin/bash -c ". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec bash"
 
 }
 
@@ -3819,8 +3819,8 @@ zion_down_command() {
   # src/commands/down.sh
   # Para todos os containers do projeto (zion sessions + puppy)
   zion_load_config
-  compose_zion="${ZION_ROOT:-$HOME/nixos/zion}/container/docker-compose.zion.yml"
-  compose_puppy="${ZION_ROOT:-$HOME/nixos/zion}/container/docker-compose.puppy.yml"
+  compose_zion="${ZION_ROOT:-$HOME/nixos/self}/container/docker-compose.zion.yml"
+  compose_puppy="${ZION_ROOT:-$HOME/nixos/self}/container/docker-compose.puppy.yml"
 
   echo "Stopping zion session containers..."
   docker compose -f "$compose_zion" down 2>/dev/null || true
@@ -3841,8 +3841,8 @@ zion_shutdown_command() {
 
   zion_load_config
 
-  compose_zion="${ZION_ROOT:-$HOME/nixos/zion}/container/docker-compose.zion.yml"
-  compose_puppy="${ZION_ROOT:-$HOME/nixos/zion}/container/docker-compose.puppy.yml"
+  compose_zion="${ZION_ROOT:-$HOME/nixos/self}/container/docker-compose.zion.yml"
+  compose_puppy="${ZION_ROOT:-$HOME/nixos/self}/container/docker-compose.puppy.yml"
 
   echo "Stopping compose-tracked containers..."
   docker compose -f "$compose_zion" down 2>/dev/null || true
@@ -3888,7 +3888,7 @@ zion_clean_command() {
 
   echo ""
   echo "=== Containers órfãos (criados pelo compose mas sem projeto) ==="
-  docker compose -f "${ZION_ROOT:-$HOME/nixos/zion}/container/docker-compose.zion.yml" \
+  docker compose -f "${ZION_ROOT:-$HOME/nixos/self}/container/docker-compose.zion.yml" \
     ps --all 2>/dev/null | grep -v "NAME" | grep -v "running" || echo "  Nenhum."
 
 }
@@ -4071,7 +4071,7 @@ zion_hooks_command() {
   HOOKS_DIR=""
   for _d in \
     "/zion/hooks/claude-code" \
-    "${ZION_ROOT:-${HOME}/nixos/zion}/hooks/claude-code" \
+    "${ZION_ROOT:-${HOME}/nixos/self}/hooks/claude-code" \
     "/workspace/mnt/zion/hooks/claude-code"; do
     [[ -d "$_d" ]] && HOOKS_DIR="$_d" && break
   done
@@ -4151,7 +4151,7 @@ zion_auto_command() {
 
   # Fallbacks runner
   if [ ! -f "$RUNNER" ]; then
-    for try in /workspace/mnt/zion /workspace/nixos/zion; do
+    for try in /workspace/mnt/zion /workspace/nixos/self; do
       [ -f "$try/scripts/task-runner.sh" ] && RUNNER="$try/scripts/task-runner.sh" && break
     done
   fi
@@ -4308,7 +4308,7 @@ zion_run_command() {
   local steps="${args[--steps]:-}"
   zion_load_config
 
-  local zion_dir="${ZION_ROOT:-$HOME/nixos/zion}"
+  local zion_dir="${ZION_ROOT:-$HOME/nixos/self}"
   local obsidian="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
   local runner="$zion_dir/scripts/task-runner.sh"
   local agents="$obsidian/agents"
@@ -4320,7 +4320,7 @@ zion_run_command() {
   if [ ! -f "$runner" ]; then
     for try in \
       "/workspace/mnt/zion/scripts/task-runner.sh" \
-      "/workspace/nixos/zion/scripts/task-runner.sh"; do
+      "/workspace/nixos/self/scripts/task-runner.sh"; do
       [ -f "$try" ] && runner="$try" && break
     done
   fi
@@ -4334,7 +4334,7 @@ zion_run_command() {
   if [ ! -f "$agent_file" ]; then
     for try in \
       "/workspace/mnt/zion/agents/${name}/agent.md" \
-      "/workspace/nixos/zion/agents/${name}/agent.md"; do
+      "/workspace/nixos/self/agents/${name}/agent.md"; do
       [ -f "$try" ] && agent_file="$try" && break
     done
   fi
@@ -4496,7 +4496,7 @@ zion_agents_list_command() {
 
   ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/zion}"
   # Fallback
-  for try in /workspace/mnt/zion /workspace/nixos/zion; do
+  for try in /workspace/mnt/zion /workspace/nixos/self; do
     [ -d "$try/agents" ] && ZION_DIR="$try" && break
   done
 
@@ -4551,7 +4551,7 @@ zion_agents_phone_command() {
   OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
 
   # Fallback agents dir
-  for try in /workspace/mnt/zion /workspace/nixos/zion; do
+  for try in /workspace/mnt/zion /workspace/nixos/self; do
     [ -d "$try/agents" ] && ZION_DIR="$try" && break
   done
 
@@ -4904,7 +4904,7 @@ zion_status_command() {
 
   # ── Background: quota Claude (atualiza a cada 60s) ────────────
   _run_quota_bg() {
-    local usage_script="${ZION_ROOT:-$HOME/nixos/zion}/scripts/claude-ai-usage.sh"
+    local usage_script="${ZION_ROOT:-$HOME/nixos/self}/scripts/claude-ai-usage.sh"
     while true; do
       { [ -x "$usage_script" ] && "$usage_script" 2>/dev/null | tail -2 | sed 's/^/  /' || true; } \
         > "${_quota_file}.new" 2>/dev/null \
@@ -5007,7 +5007,7 @@ zion_status_command() {
       local dest_mounts
       dest_mounts=$(echo "$_inspect_cache" | awk -F'|' -v n="$name" '$1==n {print $3}' | head -1)
       local vols=()
-      for v_entry in "/workspace/mnt:mnt" "/workspace/obsidian:obs" "/workspace/zion:zion" "/workspace/logs/docker:logs"; do
+      for v_entry in "/workspace/mnt:mnt" "/workspace/obsidian:obs" "/workspace/self:zion" "/workspace/logs/docker:logs"; do
         local vp="${v_entry%%:*}" vn="${v_entry##*:}"
         if echo "$dest_mounts" | grep -qw "$vp"; then
           vols+=("${GREEN}${vn}${RESET}")
@@ -5057,7 +5057,7 @@ zion_status_command() {
     _print_agent_group "agents" "$_agent_rows"
     _print_agent_group "background" "$_bg_rows"
 
-    source "${ZION_ROOT:-$HOME/nixos/zion}/clibash/src/lib/docker_status_impl.sh" 2>/dev/null || true
+    source "${ZION_ROOT:-$HOME/nixos/self}/clibash/src/lib/docker_status_impl.sh" 2>/dev/null || true
     if declare -f _zion_dk_status >/dev/null 2>&1; then
       _zion_dk_status "" 1
     fi
@@ -5290,7 +5290,7 @@ zion_leech_command() {
       -e "CLAUDIO_MOUNT=$mount_path" \
       -e "BOOTSTRAP_SKIP_CLEAR=1" \
       leech \
-      /bin/bash -c ". /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt && exec bash"
+      /bin/bash -c ". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec bash"
     exit 0
   fi
 
@@ -5334,11 +5334,11 @@ zion_lab_command() {
   init_md="$(zion_initial_md "$mount_path")"
   [[ -n "$init_md" ]] && engine_args+=" --init-md=$init_md"
 
-  # Lab volumes: nixos repo at /workspace/lab (writable) + host journal
+  # Lab volumes: nixos repo at /workspace/host (writable) + host journal
   nixos_dir="${ZION_NIXOS_DIR:-$HOME/nixos}"
   nixos_real="$(cd "$nixos_dir" 2>/dev/null && pwd)" \
     || { echo "zion: nixos dir não encontrado: $nixos_dir" >&2; exit 1; }
-  extra_volumes="-v ${nixos_real}:/workspace/lab:rw"
+  extra_volumes="-v ${nixos_real}:/workspace/host:rw"
   extra_volumes+=" -v /var/log/journal:/workspace/logs/host/journal:ro"
 
   zion_session_run "$engine" "$proj_name" "$mount_path" "$mount_opts" "$engine_args" "$extra_volumes"
@@ -5586,7 +5586,7 @@ zion_uninstall_command() {
     echo "binario removido: $BIN"
   fi
 
-  echo "zion desinstalado. Para reinstalar: cd ~/nixos/zion/bash && ./zion update"
+  echo "zion desinstalado. Para reinstalar: cd ~/nixos/self/bash && ./zion update"
 
 }
 

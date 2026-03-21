@@ -11,9 +11,9 @@
 > Se `personality=OFF` → operar em modo neutro (sem persona), mas manter comportamento operacional normal.
 > Se `personality=ON` → aplicar persona e avatar conforme injetado em `---PERSONA---`.
 >
-> **Personas** ficam em `/workspace/zion/personas/*.persona.md`. A ativa e definida em `/workspace/zion/system/SOUL.md`.
+> **Personas** ficam em `/workspace/self/personas/*.persona.md`. A ativa e definida em `/workspace/self/system/SOUL.md`.
 >
-> **ZION LAB:** se `zion_edit=1`, a PRIMEIRA coisa na saudacao (antes do bloco de units) e uma linha em destaque: `⬡ ZION LAB` — indica que `/workspace/lab/` (repo nixos) esta montado e editavel para auto-aperfeicoamento.
+> **ZION LAB:** se `zion_edit=1`, a PRIMEIRA coisa na saudacao (antes do bloco de units) e uma linha em destaque: `⬡ ZION LAB` — indica que `/workspace/host/` (repo nixos) esta montado e editavel para auto-aperfeicoamento.
 >
 > **Briefing sob demanda:** na primeira resposta, saudar com personalidade e **oferecer** o briefing (variar a frase, nunca igual). So rodar `/jarvis` se o user confirmar ou pedir.
 >

@@ -22,7 +22,7 @@ Uso:
            with open('/tmp/<REPO>_diff_annotated.html', 'rb') as f:
                html = f.read().decode()
            sys.argv = ['chrome-relay.py', 'nav', 'about:blank']
-           exec(open('/workspace/zion/scripts/chrome-relay.py').read())
+           exec(open('/workspace/self/scripts/chrome-relay.py').read())
            EOF
 
            python3 - << 'EOF'
@@ -31,7 +31,7 @@ Uso:
                html = f.read().decode()
            js = "document.open();document.write(atob('" + base64.b64encode(html.encode()).decode() + "'));document.close();"
            sys.argv = ['chrome-relay.py', 'inject', js]
-           exec(open('/workspace/zion/scripts/chrome-relay.py').read())
+           exec(open('/workspace/self/scripts/chrome-relay.py').read())
            EOF
 
 Funcionalidades do viewer:

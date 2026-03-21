@@ -5,7 +5,7 @@
 HOOKS_DIR=""
 for _d in \
   "/zion/hooks/claude-code" \
-  "${ZION_ROOT:-${HOME}/nixos/zion}/hooks/claude-code" \
+  "${ZION_ROOT:-${HOME}/nixos/self}/hooks/claude-code" \
   "/workspace/mnt/zion/hooks/claude-code"; do
   [[ -d "$_d" ]] && HOOKS_DIR="$_d" && break
 done

@@ -80,7 +80,7 @@ de feature `ldi_cached_toc`.
 
 Encapsular em HTML dark Catppuccin e abrir via:
 ```bash
-python3 /workspace/zion/scripts/chrome-relay.py nav "data:text/html;base64,<BASE64>"
+python3 /workspace/self/scripts/chrome-relay.py nav "data:text/html;base64,<BASE64>"
 ```
 
 #### Format: obsidian

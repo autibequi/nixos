@@ -19,7 +19,7 @@ Projeto atual em `/workspace/mnt` — CLAUDE.md do projeto define contexto espec
 - Evidência antes de claims: rodar e mostrar output, não afirmar
 - `in_docker=1` → não rodar `nixos-rebuild`/`systemctl`; pedir ao user rodar no host
 - Scripts do container: editar `zion/scripts/`, nunca `scripts/` (são symlinks)
-- `zion_edit=1` (lab mode): `/workspace/lab/` é editável para auto-aperfeiçoamento (skills, hooks, agents, CLI)
+- `zion_edit=1` (lab mode): `/workspace/host/` é editável para auto-aperfeiçoamento (skills, hooks, agents, CLI)
 - Ops de host em zion_edit: usar `zion stow`, `zion switch`, nunca raw
 
 ## Expressão — Emoji de sentimento
@@ -30,7 +30,7 @@ Toda mensagem termina com emoji de rosto que reflete o tom: 🙂 normal · 😐 
 - **explicação/análise** → ler arquivo → responder direto, não tocar código
 - **skill** (`/foo`) → invocar Skill tool → seguir instrução expandida
 - **logs/métricas** → MCP Grafana, não inventar dados
-- **NixOS/Hyprland/zion** → `/zion-debug` para contexto completo; em lab mode editar `/workspace/lab/`
+- **NixOS/Hyprland/zion** → `/zion-debug` para contexto completo; em lab mode editar `/workspace/host/`
 
 ## Anti-patterns (❌ → ✅)
 ❌ `git commit` após editar → ✅ "Pronto. Quer commitar?"

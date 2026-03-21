@@ -27,7 +27,7 @@ zion docker shell monolito postgres   # shell no postgres
 ```mermaid
 graph TD
     subgraph HOST["Host NixOS"]
-        ZionCLI["zion CLI\n~/nixos/zion/cli/zion"]
+        ZionCLI["zion CLI\n~/nixos/self/cli/zion"]
         ZionCFG["~/.zion\nMONOLITO_DIR · engine · keys"]
         LOGS["~/.local/share/zion/logs/dockerized/monolito/\nservice.log · test.log · startup.log · deps.log"]
     end

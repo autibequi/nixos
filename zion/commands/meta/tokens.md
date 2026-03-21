@@ -33,10 +33,10 @@ description: Tokens da sessão atual — análise de consumo por componente (bre
 
 ```bash
 wc -c \
-  /workspace/zion/system/DIRETRIZES.md \
-  /workspace/zion/system/SELF.md \
-  /workspace/zion/personas/GLaDOS.persona.md \
-  /workspace/zion/personas/avatar/glados.md \
+  /workspace/self/system/DIRETRIZES.md \
+  /workspace/self/system/SELF.md \
+  /workspace/self/personas/GLaDOS.persona.md \
+  /workspace/self/personas/avatar/glados.md \
   2>/dev/null
 ```
 
@@ -78,7 +78,14 @@ Conversão: **1 token ≈ 3.5 chars** (PT-BR + box-drawing).
 
   ── CONVERSA ────────────────────────────────────────────────────────────────
   [CONVERSA]    Turnos acumulados   X turnos  X tk     ██░░░░░░░░░░░░░░░░░░  XX%
+  [CONVERSA]    system-reminders    estimado  X tk     ██░░░░░░░░░░░░░░░░░░  XX%
                                               subtotal  X tk                  XX%
+
+  Tópicos abordados na sessão:
+    · tópico 1                      XX%  ███░░░░░░░░░░░░░░░░░
+    · tópico 2                      XX%  ██░░░░░░░░░░░░░░░░░░
+    · tópico 3                      XX%  █░░░░░░░░░░░░░░░░░░░
+  (% relativo ao total da conversa; estimado por volume de mensagens/tool calls por tópico)
 
   ────────────────────────────────────────────────────────────────────────────
   TOTAL ESTIMADO    X tk      COM MARGEM ±15%:  X tk – X tk

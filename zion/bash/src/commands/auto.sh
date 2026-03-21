@@ -9,7 +9,7 @@ TASKS="$OBSIDIAN/tasks"
 
 # Fallbacks runner
 if [ ! -f "$RUNNER" ]; then
-  for try in /workspace/mnt/zion /workspace/nixos/zion; do
+  for try in /workspace/mnt/zion /workspace/nixos/self; do
     [ -f "$try/scripts/task-runner.sh" ] && RUNNER="$try/scripts/task-runner.sh" && break
   done
 fi

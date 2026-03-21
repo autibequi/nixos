@@ -124,16 +124,16 @@ cursor://file//home/pedrinho/<caminho>:<linha>:<coluna>
 | Container | Host |
 |-----------|------|
 | `/workspace/mnt/` | `/home/pedrinho/` |
-| `/home/claude/.claude/scripts/` | `/home/pedrinho/nixos/zion/scripts/` |
-| `/home/claude/.claude/skills/` | `/home/pedrinho/nixos/zion/skills/` |
-| `/home/claude/.claude/commands/` | `/home/pedrinho/nixos/zion/commands/` |
-| `/home/claude/.claude/agents/` | `/home/pedrinho/nixos/zion/agents/` |
-| `/home/claude/.claude/hooks/` | `/home/pedrinho/nixos/zion/hooks/claude-code/` |
-| `/zion/` | `/home/pedrinho/nixos/zion/` |
+| `/home/claude/.claude/scripts/` | `/home/pedrinho/nixos/self/scripts/` |
+| `/home/claude/.claude/skills/` | `/home/pedrinho/nixos/self/skills/` |
+| `/home/claude/.claude/commands/` | `/home/pedrinho/nixos/self/commands/` |
+| `/home/claude/.claude/agents/` | `/home/pedrinho/nixos/self/agents/` |
+| `/home/claude/.claude/hooks/` | `/home/pedrinho/nixos/self/hooks/claude-code/` |
+| `/zion/` | `/home/pedrinho/nixos/self/` |
 
 Exemplos:
 - `/workspace/mnt/nixos/CLAUDE.md:10:1` → `cursor://file//home/pedrinho/nixos/CLAUDE.md:10:1`
-- `/home/claude/.claude/scripts/statusline.sh:42:1` → `cursor://file//home/pedrinho/nixos/zion/scripts/statusline.sh:42:1`
+- `/home/claude/.claude/scripts/statusline.sh:42:1` → `cursor://file//home/pedrinho/nixos/self/scripts/statusline.sh:42:1`
 
 **Regras:**
 - Sempre incluir linha e coluna (`:linha:coluna`) — sem isso o Cursor não abre na posição certa

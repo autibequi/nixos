@@ -1,6 +1,6 @@
 # Memory Index
 
-- [feedback_zion_self_contained.md](feedback_zion_self_contained.md) — Zion must be self-contained: only use files from /nixos/zion, never reference stow/.claude/ or external paths
+- [feedback_zion_self_contained.md](feedback_zion_self_contained.md) — Zion must be self-contained: only use files from /nixos/self, never reference stow/.claude/ or external paths
 - [project_dockerizer.md](project_dockerizer.md) — Sistema zion docker run/install/logs para monolito e outros serviços estratégia (inclui debug remoto)
 - [feedback_docker_install.md](feedback_docker_install.md) — SSH mount, TTY, go mod download -x: lições do zion docker install
 - [feedback_docker_debug.md](feedback_docker_debug.md) — dlv remoto em Docker + Cursor: 7 lições (binário path, ptrace, substitutePath, dlv dap vs exec)

@@ -74,7 +74,7 @@ Usar template de `templates/html.md`, substituindo os placeholders dos diagramas
 
 ```bash
 HTML=$(cat /tmp/flows_diagram.html | base64 -w 0)
-python3 /workspace/zion/scripts/chrome-relay.py nav "data:text/html;base64,${HTML}"
+python3 /workspace/self/scripts/chrome-relay.py nav "data:text/html;base64,${HTML}"
 ```
 
 ## Convenções visuais

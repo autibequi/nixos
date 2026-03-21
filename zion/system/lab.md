@@ -7,7 +7,7 @@ Ativa o diálogo de laboratório entre Claude externo (eu, falando com o user) e
 ```
 User ──► Claude EXTERNO (eu, esta sessão)
               │
-              ├── /workspace/zion/      ← meu source code
+              ├── /workspace/self/      ← meu source code
               ├── /workspace/mnt/       ← nixos repo (mesma coisa, editável)
               ├── /workspace/obsidian/  ← cérebro persistente
               │
@@ -45,7 +45,7 @@ rm -f "$SYSFILE"
 
 | Path | O que é | Editável? |
 |------|---------|-----------|
-| `/workspace/zion/` | source zion (symlink de `/workspace/mnt/zion/`) | sim via mnt |
+| `/workspace/self/` | source zion (symlink de `/workspace/mnt/zion/`) | sim via mnt |
 | `/workspace/mnt/` | nixos repo do host montado rw | sim |
 | `/workspace/mnt/zion/` | **fonte da verdade** — hooks, skills, agents, scripts | sim |
 | `/workspace/obsidian/` | vault Obsidian, persistente entre sessões | sim |

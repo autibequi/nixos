@@ -114,7 +114,7 @@ basename <arquivo> .vue
 Gerar HTML com o mesmo conteúdo usando `<pre>` com ansi2html ou CSS inline para cores.
 Abrir via:
 ```bash
-python3 /workspace/zion/scripts/chrome-relay.py nav "data:text/html;base64,<BASE64>"
+python3 /workspace/self/scripts/chrome-relay.py nav "data:text/html;base64,<BASE64>"
 ```
 
 ## Regras de exibição

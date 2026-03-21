@@ -12,4 +12,4 @@ zion_compose_cmd -p "$proj_name" run --rm -it \
   -e "CLAUDIO_MOUNT=$mount_path" \
   -e "BOOTSTRAP_SKIP_CLEAR=1" \
   leech \
-  /bin/bash -c ". /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt && exec bash"
+  /bin/bash -c ". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec bash"

@@ -428,7 +428,7 @@ commands:
     filename: commands/leech.sh
 
   - name: lab
-    help: "Sessão lab: projeto em /workspace/mnt + ~/nixos em /workspace/lab (editável)."
+    help: "Sessão lab: projeto em /workspace/mnt + ~/nixos em /workspace/host (editável)."
     args:
       - name: dir
         help: "Diretório do projeto (default ~/projects)"

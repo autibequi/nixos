@@ -30,7 +30,7 @@ if [[ -n "${args['--shell']:-}" ]]; then
     -e "CLAUDIO_MOUNT=$mount_path" \
     -e "BOOTSTRAP_SKIP_CLEAR=1" \
     leech \
-    /bin/bash -c ". /workspace/zion/scripts/bootstrap.sh; cd /workspace/mnt && exec bash"
+    /bin/bash -c ". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec bash"
   exit 0
 fi
 
