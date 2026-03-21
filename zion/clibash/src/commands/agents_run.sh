@@ -1,0 +1,135 @@
+# Roda um agente imediatamente — mesmo fluxo de execucao do scheduler
+local name="${args[name]}"
+local steps="${args[--steps]:-}"
+zion_load_config
+
+local zion_dir="${ZION_ROOT:-$HOME/nixos/zion}"
+local obsidian="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
+local agents="$obsidian/agents"
+local schedule="$agents/_schedule"
+local runner="$zion_dir/scripts/task-runner.sh"
+local agent_file="$zion_dir/agents/${name}/agent.md"
+
+# Fallback runner paths
+if [ ! -f "$runner" ]; then
+  for try in \
+    "/workspace/mnt/zion/scripts/task-runner.sh" \
+    "/workspace/nixos/zion/scripts/task-runner.sh"; do
+    [ -f "$try" ] && runner="$try" && break
+  done
+fi
+
+# Fallback agent.md paths
+if [ ! -f "$agent_file" ]; then
+  for try in \
+    "/workspace/mnt/zion/agents/${name}/agent.md" \
+    "/workspace/nixos/zion/agents/${name}/agent.md"; do
+    [ -f "$try" ] && agent_file="$try" && break
+  done
+fi
+
+if [ ! -f "$agent_file" ]; then
+  echo "Agente '${name}' nao encontrado."
+  for try in \
+    "$zion_dir/agents" \
+    "/workspace/mnt/zion/agents" \
+    "/workspace/nixos/zion/agents"; do
+    if [ -d "$try" ]; then
+      echo "Agentes disponiveis:"
+      ls "$try" | sed 's/^/  /'
+      break
+    fi
+  done
+  exit 1
+fi
+
+# Fallback agents dir
+if [ ! -d "$agents" ]; then
+  for try in \
+    "$obsidian/agents" \
+    /workspace/obsidian/agents \
+    "$HOME/obsidian/agents"; do
+    [ -d "$try" ] && agents="$try" && schedule="$try/_schedule" && break
+  done
+fi
+
+if [ ! -d "$agents" ]; then
+  echo "Agents dir nao encontrado."
+  exit 1
+fi
+
+# ── Parse frontmatter do agent.md ───────────────────────────────
+_parse_agent_fm() {
+  local key="$1"
+  local in_fm=0
+  while IFS= read -r line; do
+    if [ "$line" = "---" ]; then
+      [ "$in_fm" = "1" ] && break
+      in_fm=1; continue
+    fi
+    [ "$in_fm" = "1" ] || continue
+    case "$line" in
+      "${key}:"*) echo "${line#*: }" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'; return ;;
+    esac
+  done < "$agent_file"
+}
+
+_agent_body() {
+  local in_fm=0 past_fm=0
+  while IFS= read -r line; do
+    [ "$past_fm" = "1" ] && { echo "$line"; continue; }
+    if [ "$line" = "---" ]; then
+      [ "$in_fm" = "1" ] && past_fm=1 && continue
+      in_fm=1; continue
+    fi
+  done < "$agent_file"
+}
+
+MODEL=$(_parse_agent_fm "model")
+MODEL="${MODEL:-sonnet}"
+
+# Timeout por modelo
+case "$MODEL" in
+  haiku)  TIMEOUT=900  ;;
+  opus)   TIMEOUT=3600 ;;
+  *)      TIMEOUT=1800 ;;
+esac
+
+# Steps por modelo (se nao passado via --steps)
+if [ -z "$steps" ]; then
+  case "$MODEL" in
+    haiku)  steps=20 ;;
+    opus)   steps=60 ;;
+    *)      steps=40 ;;
+  esac
+fi
+
+# ── Card temporario em _schedule/ ────────────────────────────────
+WHEN=$(date +%Y%m%d_%H_%M)
+CARD="${WHEN}_${name}.md"
+
+mkdir -p "$schedule"
+{
+  echo "---"
+  echo "model: $MODEL"
+  echo "timeout: $TIMEOUT"
+  echo "mcp: false"
+  echo "agent: $name"
+  echo "---"
+  _agent_body
+  echo ""
+  echo "#steps${steps}"
+} > "$schedule/$CARD"
+
+echo "[agents] '${name}' -> card $CARD"
+echo "[agents] model=$MODEL  timeout=${TIMEOUT}s  steps=$steps"
+echo "[agents] agent.md: $agent_file"
+echo ""
+
+rm -rf "/tmp/zion-locks/${WHEN}_${name}.lock" 2>/dev/null || true
+
+export TASK_CONTRACTORS_DIR="$agents"
+export SCHEDULE_DIR="$schedule"
+export TASK_MAX_TURNS="$steps"
+
+exec "$runner" "$CARD"

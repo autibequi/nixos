@@ -13,8 +13,8 @@ description: Central dos contractors — briefing de status, ligar para qualquer
 /meta:phone <pedido>           → delega a Coruja (plataforma estrategia)
 ```
 
-Contractors: `coruja` `mechanic` `tamagochi` `wanderer` `assistant`
-             `doctor` `hermes` `jafar` `wiseman` `paperboy` `tasker`
+Agentes: `coruja` `mechanic` `tamagochi` `wanderer` `assistant`
+         `doctor` `hermes` `jafar` `wiseman` `paperboy` `tasker`
 
 ---
 

@@ -51,8 +51,8 @@
     ./modules/work.nix
     ./modules/virt.nix
 
-    # Zion contractors — timers individuais por contractor
-    ./modules/zion-contractors.nix
+    # Zion agents — timers de execucao dos agentes background
+    ./modules/zion-agents.nix
 
   ];
 }

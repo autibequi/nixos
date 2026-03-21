@@ -6,6 +6,7 @@ mod theme;
 mod ui;
 
 use std::io;
+use std::process::Stdio;
 use std::sync::mpsc;
 use std::time::Duration;
 
@@ -41,6 +42,18 @@ fn bash_cmd() -> std::process::Command {
 }
 
 /// Run a background (non-interactive) docker command and return an error string if it fails.
+/// Fire-and-forget stop: spawns `zion runner <svc> stop` without waiting.
+/// Returns immediately; the container will stop in the background (docker gives it up to 10s).
+fn fire_stop(svc: &str) {
+    let mut cmd = bash_cmd();
+    let _ = cmd
+        .args(["runner", svc, "stop"])
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn();
+}
+
 fn run_bg_cmd(svc: &str, env: &str, action: &str) -> Option<String> {
     let mut cmd = bash_cmd();
     // bash CLI format: zion runner <service> <action> [--env=<env>]
@@ -162,19 +175,25 @@ pub fn run_status(tick: u64) -> Result<()> {
                                 let action = app.menu_action();
                                 match action {
                                     "cancel" => app.close_menu(),
-                                    "start" | "stop" => {
+                                    "stop" => {
+                                        let svc = app.current_service().to_string();
+                                        app.close_menu();
+                                        // Fire-and-forget: don't block the TUI waiting for
+                                        // docker compose down (can take up to 30s).
+                                        fire_stop(&svc);
+                                    }
+                                    "start" => {
                                         let svc = app.current_service().to_string();
                                         let env = app.current_env().to_string();
-                                        let action_str = action.to_string();
                                         app.close_menu();
                                         app.last_action = Some((
                                             app.cursor_idx,
-                                            format!("{}ing {}…", action_str, svc),
+                                            format!("starting {}…", svc),
                                         ));
                                         let err_tx = bg_err_tx.clone();
                                         let snap_tx = tx_bg.clone();
                                         std::thread::spawn(move || {
-                                            if let Some(err) = run_bg_cmd(&svc, &env, &action_str) {
+                                            if let Some(err) = run_bg_cmd(&svc, &env, "start") {
                                                 let _ = err_tx.send(err);
                                             }
                                             if let Ok(snap) = status::collect() {
@@ -193,8 +212,10 @@ pub fn run_status(tick: u64) -> Result<()> {
                                         let err_tx = bg_err_tx.clone();
                                         let snap_tx = tx_bg.clone();
                                         std::thread::spawn(move || {
-                                            // stop first (ignore error — may already be stopped)
-                                            run_bg_cmd(&svc, &env, "stop");
+                                            // Stop fire-and-forget, then wait for docker
+                                            // to SIGKILL the container (default 10s timeout).
+                                            fire_stop(&svc);
+                                            std::thread::sleep(Duration::from_secs(12));
                                             if let Some(err) = run_bg_cmd(&svc, &env, "start") {
                                                 let _ = err_tx.send(err);
                                             }

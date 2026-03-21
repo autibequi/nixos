@@ -26,38 +26,38 @@ zion_usage() {
   echo
   # :command.usage_commands
   printf "%s\n" "Commands:"
-  printf "  %s   Continua a última sessão.\n" "continue   "
-  printf "  %s   Nova sessão no container. Exige --engine (ou engine= em ~/.zion). (default)\n" "new        "
-  printf "  %s   Abre bash no container com o projeto montado.\n" "shell      "
-  printf "  %s   Mostra lista de sessões e permite escolher qual retomar.\n" "resume     "
-  printf "  %s   [DEPRECATED] Use 'zion new --engine=claude --danger'. Mantido por compatibilidade.\n" "start      "
-  printf "  %s   Nova sessão Claude ou consultar uso. Sem subcomando = nova sessão.\n" "claude     "
-  printf "  %s   Atalho: nova sessão com engine Cursor (= zion new --engine=cursor).\n" "cursor     "
-  printf "  %s   Atalho: nova sessão com engine OpenCode (= zion new --engine=opencode).\n" "opencode   "
-  printf "  %s   Build da imagem Docker do leech (claude-nix-sandbox).\n" "build      "
-  printf "  %s   Para todos os containers do projeto.\n" "down       "
-  printf "  %s   Para containers do compose + mata qualquer stray com nome zion/claude/puppy.\n" "shutdown   "
-  printf "  %s   Remove sessoes Zion paradas/exited e containers orfaos.\n" "clean      "
-  printf "  %s   Regenera CLI (bashly) e instala/atualiza symlink em ~/.local/bin.\n" "update     "
-  printf "  %s   Cria ~/.zion a partir de config.example (não sobrescreve se já existir).\n" "init       "
-  printf "  %s   Define engine padrão em ~/.zion (engine= claude | opencode | cursor).\n" "set        "
-  printf "  %s   Gerencia servicos. Ex: zion runner monolito start | zion runner monolito logs\n" "runner     "
-  printf "  %s   Executa um hook do Claude Code e mostra o que seria injetado.\n" "hooks      "
-  printf "  %s   Gerencia contractors (agentes background).\n" "contractors"
-  printf "  %s   Gerencia tasks do kanban (TODO/DOING/DONE).\n" "tasks      "
-  printf "  %s   Status agregado: sessoes e docker services. Atualiza a cada 30s por padrao.\n" "status     "
-  printf "  %s   Deploy dotfiles no host via GNU stow (restow, delete, status).\n" "stow       "
-  printf "  %s   Aplica configuração NixOS no host via nh os.\n" "os         "
-  printf "  %s   Engatou numa pasta — sessão efêmera (auto-detecta nixos → monta logs).\n" "leech      "
-  printf "  %s   Abre sessão lab: ~/nixos em /workspace/mnt + /workspace/logs (lab_mode=1).\n" "lab        "
-  printf "  %s   Utilitarios Git. Ex: zion git sandbox\n" "git        "
-  printf "  %s   Lista o inbox ou adiciona uma entrada. Sem args: mostra inbox.md. Com texto: adiciona entrada.\n" "inbox      "
-  printf "  %s   Lista os arquivos do outbox.\n" "outbox     "
-  printf "  %s   Mostra o banner com comandos principais.\n" "help       "
-  printf "  %s   Documentacao completa de todos os comandos e flags.\n" "man        "
-  printf "  %s   Chrome Relay — inicia Chrome no host com CDP para o agent conectar.\n" "relay      "
-  printf "  %s   Toggle do modo BETA (beta overrides). Liga/desliga observacao da sessao.\n" "beta       "
-  printf "  %s   Remove o symlink do zion de ~/.local/bin (desinstala do PATH).\n" "uninstall  "
+  printf "  %s   Continua a última sessão.\n" "continue "
+  printf "  %s   Nova sessão no container. Exige --engine (ou engine= em ~/.zion). (default)\n" "new      "
+  printf "  %s   Abre bash no container com o projeto montado.\n" "shell    "
+  printf "  %s   Mostra lista de sessões e permite escolher qual retomar.\n" "resume   "
+  printf "  %s   [DEPRECATED] Use 'zion new --engine=claude --danger'. Mantido por compatibilidade.\n" "start    "
+  printf "  %s   Nova sessão Claude ou consultar uso. Sem subcomando = nova sessão.\n" "claude   "
+  printf "  %s   Atalho: nova sessão com engine Cursor (= zion new --engine=cursor).\n" "cursor   "
+  printf "  %s   Atalho: nova sessão com engine OpenCode (= zion new --engine=opencode).\n" "opencode "
+  printf "  %s   Build da imagem Docker do leech (claude-nix-sandbox).\n" "build    "
+  printf "  %s   Para todos os containers do projeto.\n" "down     "
+  printf "  %s   Para containers do compose + mata qualquer stray com nome zion/claude/puppy.\n" "shutdown "
+  printf "  %s   Remove sessoes Zion paradas/exited e containers orfaos.\n" "clean    "
+  printf "  %s   Regenera CLI (bashly) e instala/atualiza symlink em ~/.local/bin.\n" "update   "
+  printf "  %s   Cria ~/.zion a partir de config.example (não sobrescreve se já existir).\n" "init     "
+  printf "  %s   Define engine padrão em ~/.zion (engine= claude | opencode | cursor).\n" "set      "
+  printf "  %s   Gerencia servicos. Ex: zion runner monolito start | zion runner monolito logs\n" "runner   "
+  printf "  %s   Executa um hook do Claude Code e mostra o que seria injetado.\n" "hooks    "
+  printf "  %s   Gerencia agentes background.\n" "agents   "
+  printf "  %s   Gerencia tasks do kanban (TODO/DOING/DONE).\n" "tasks    "
+  printf "  %s   Status agregado: sessoes e docker services. Atualiza a cada 30s por padrao.\n" "status   "
+  printf "  %s   Deploy dotfiles no host via GNU stow (restow, delete, status).\n" "stow     "
+  printf "  %s   Aplica configuração NixOS no host via nh os.\n" "os       "
+  printf "  %s   Engatou numa pasta — sessão efêmera (auto-detecta nixos → monta logs).\n" "leech    "
+  printf "  %s   Abre sessão lab: ~/nixos em /workspace/mnt + /workspace/logs (lab_mode=1).\n" "lab      "
+  printf "  %s   Utilitarios Git. Ex: zion git sandbox\n" "git      "
+  printf "  %s   Lista o inbox ou adiciona uma entrada. Sem args: mostra inbox.md. Com texto: adiciona entrada.\n" "inbox    "
+  printf "  %s   Lista os arquivos do outbox.\n" "outbox   "
+  printf "  %s   Mostra o banner com comandos principais.\n" "help     "
+  printf "  %s   Documentacao completa de todos os comandos e flags.\n" "man      "
+  printf "  %s   Chrome Relay — inicia Chrome no host com CDP para o agent conectar.\n" "relay    "
+  printf "  %s   Toggle do modo BETA (beta overrides). Liga/desliga observacao da sessao.\n" "beta     "
+  printf "  %s   Remove o symlink do zion de ~/.local/bin (desinstala do PATH).\n" "uninstall"
   echo
 
   # :command.long_usage
@@ -948,22 +948,23 @@ zion_hooks_usage() {
 }
 
 # :command.usage
-zion_contractors_usage() {
-  printf "zion contractors - Gerencia contractors (agentes background).\n\n"
-  printf "Alias: ct\n"
+zion_agents_usage() {
+  printf "zion agents - Gerencia agentes background.\n\n"
+  printf "Alias: ag, a\n"
   echo
 
   printf "%s\n" "Usage:"
-  printf "  zion contractors [COMMAND]\n"
-  printf "  zion contractors [COMMAND] --help | -h\n"
+  printf "  zion agents [COMMAND]\n"
+  printf "  zion agents [COMMAND] --help | -h\n"
   echo
   # :command.usage_commands
   printf "%s\n" "Commands:"
-  printf "  %s   Lista todos os contractors e status. (default)\n" "list  "
-  printf "  %s   Mostra _schedule, _running e done recentes.\n" "status"
-  printf "  %s   Roda um contractor imediatamente (mesmo fluxo do scheduler). Para conversa interativa: /contractor:call\n" "run   "
-  printf "  %s   Le clock: dos agent.md e atualiza zion-contractors.nix + instrui zion switch\n" "cron  "
-  printf "  %s   Executa todos os contractor cards vencidos em _schedule/\n" "work  "
+  printf "  %s   Lista todos os agentes e status. (default)\n" "list "
+  printf "  %s   Abre uma conversa com um agente. Sem nome: lista disponiveis.\n" "phone"
+  printf "  %s   Mostra _schedule, _running e execucoes recentes.\n" "log  "
+  printf "  %s   Roda um agente imediatamente em background (mesmo fluxo do scheduler).\n" "run  "
+  printf "  %s   Executa todos os agent cards vencidos em _schedule/\n" "work "
+  printf "  %s   Le clock: dos agent.md e atualiza zion-agents.nix + instrui zion switch\n" "cron "
   echo
 
   # :command.long_usage
@@ -979,14 +980,14 @@ zion_contractors_usage() {
 }
 
 # :command.usage
-zion_contractors_list_usage() {
-  printf "zion contractors list - Lista todos os contractors e status.\n\n"
+zion_agents_list_usage() {
+  printf "zion agents list - Lista todos os agentes e status.\n\n"
   printf "Alias: ls\n"
   echo
 
   printf "%s\n" "Usage:"
-  printf "  zion contractors [list]\n"
-  printf "  zion contractors list --help | -h\n"
+  printf "  zion agents [list]\n"
+  printf "  zion agents list --help | -h\n"
   echo
 
   # :command.long_usage
@@ -1002,14 +1003,45 @@ zion_contractors_list_usage() {
 }
 
 # :command.usage
-zion_contractors_status_usage() {
-  printf "zion contractors status - Mostra _schedule, _running e done recentes.\n\n"
-  printf "Alias: st, log\n"
+zion_agents_phone_usage() {
+  printf "zion agents phone - Abre uma conversa com um agente. Sem nome: lista disponiveis.\n\n"
+  printf "Alias: p, call\n"
   echo
 
   printf "%s\n" "Usage:"
-  printf "  zion contractors status\n"
-  printf "  zion contractors status --help | -h\n"
+  printf "  zion agents phone [NAME]\n"
+  printf "  zion agents phone --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "Arguments:"
+
+    # :argument.usage
+    printf "  %s\n" "NAME"
+    printf "    Nome do agente (ex: wanderer, tamagochi, mechanic)\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_agents_log_usage() {
+  printf "zion agents log - Mostra _schedule, _running e execucoes recentes.\n\n"
+  printf "Alias: st, status\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  zion agents log\n"
+  printf "  zion agents log --help | -h\n"
   echo
 
   # :command.long_usage
@@ -1025,14 +1057,14 @@ zion_contractors_status_usage() {
 }
 
 # :command.usage
-zion_contractors_run_usage() {
-  printf "zion contractors run - Roda um contractor imediatamente (mesmo fluxo do scheduler). Para conversa interativa: /contractor:call\n\n"
+zion_agents_run_usage() {
+  printf "zion agents run - Roda um agente imediatamente em background (mesmo fluxo do scheduler).\n\n"
   printf "Alias: r\n"
   echo
 
   printf "%s\n" "Usage:"
-  printf "  zion contractors run NAME [OPTIONS]\n"
-  printf "  zion contractors run --help | -h\n"
+  printf "  zion agents run NAME [OPTIONS]\n"
+  printf "  zion agents run --help | -h\n"
   echo
 
   # :command.long_usage
@@ -1055,40 +1087,21 @@ zion_contractors_run_usage() {
 
     # :argument.usage
     printf "  %s\n" "NAME"
-    printf "    Nome do contractor (ex: wanderer, tamagochi, mechanic)\n"
+    printf "    Nome do agente (ex: wanderer, tamagochi, mechanic)\n"
     echo
 
   fi
 }
 
 # :command.usage
-zion_contractors_cron_usage() {
-  printf "zion contractors cron - Le clock: dos agent.md e atualiza zion-contractors.nix + instrui zion switch\n\n"
-
-  printf "%s\n" "Usage:"
-  printf "  zion contractors cron\n"
-  printf "  zion contractors cron --help | -h\n"
+zion_agents_work_usage() {
+  printf "zion agents work - Executa todos os agent cards vencidos em _schedule/\n\n"
+  printf "Alias: w\n"
   echo
 
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-zion_contractors_work_usage() {
-  printf "zion contractors work - Executa todos os contractor cards vencidos em _schedule/\n\n"
-
   printf "%s\n" "Usage:"
-  printf "  zion contractors work [OPTIONS]\n"
-  printf "  zion contractors work --help | -h\n"
+  printf "  zion agents work [OPTIONS]\n"
+  printf "  zion agents work --help | -h\n"
   echo
 
   # :command.long_usage
@@ -1100,6 +1113,27 @@ zion_contractors_work_usage() {
     printf "  %s\n" "--dry-run, -n"
     printf "    Mostra o que seria executado sem rodar\n"
     echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_agents_cron_usage() {
+  printf "zion agents cron - Le clock: dos agent.md e atualiza zion-agents.nix + instrui zion switch\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  zion agents cron\n"
+  printf "  zion agents cron --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
 
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
@@ -4296,10 +4330,10 @@ zion_hooks_command() {
 }
 
 # :command.function
-zion_contractors_list_command() {
+zion_agents_list_command() {
 
-  # src/commands/contractors_list.sh
-  # Lista todos os contractors e mostra _schedule/_running
+  # src/commands/agents_list.sh
+  # Lista todos os agentes e mostra _schedule/_running
   zion_load_config
 
   OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
@@ -4312,7 +4346,7 @@ zion_contractors_list_command() {
   fi
 
   if [ ! -d "$AGENTS" ]; then
-    echo "[contractors] dir nao encontrado"
+    echo "[agents] dir nao encontrado"
     exit 1
   fi
 
@@ -4326,27 +4360,26 @@ zion_contractors_list_command() {
   done
 
   echo ""
-  echo "${B}${M}  CONTRACTORS${R}"
+  echo "${B}${M}  AGENTS${R}"
   echo ""
 
   for dir in "$AGENTS"/*/; do
     name=$(basename "$dir")
     [[ "$name" == _* ]] && continue
 
-    # Check if has agent.md (active) or just vault data (archived)
     has_agent=""
     [ -f "$ZION_DIR/agents/$name/agent.md" ] && has_agent=1
 
-    # Count done
     done_count=$(ls "$dir/done/"*.md 2>/dev/null | wc -l | tr -d ' ')
 
-    # Check if has memory
     has_mem=""
     [ -f "$dir/memory.md" ] && has_mem="mem"
 
     if [ -n "$has_agent" ]; then
       model=$(awk '/^---/{fm++} fm==1 && /^model:/{print $2; exit}' "$ZION_DIR/agents/$name/agent.md" 2>/dev/null)
-      printf "  ${G}%-18s${R}  ${DIM}%-8s  done=%-3s  %s${R}\n" "$name" "${model:-?}" "$done_count" "$has_mem"
+      call_style=$(awk '/^---/{fm++} fm==1 && /^call_style:/{print $2; exit}' "$ZION_DIR/agents/$name/agent.md" 2>/dev/null)
+      call_style="${call_style:-phone}"
+      printf "  ${G}%-18s${R}  ${DIM}%-8s  done=%-3s  %-8s  %s${R}\n" "$name" "${model:-?}" "$done_count" "$call_style" "$has_mem"
     else
       printf "  ${DIM}%-18s  archived  done=%-3s  %s${R}\n" "$name" "$done_count" "$has_mem"
     fi
@@ -4358,16 +4391,91 @@ zion_contractors_list_command() {
 
   echo ""
   echo "  ${Y}scheduled: ${sched}${R}  ${C}running: ${running}${R}"
-  echo "  ${DIM}use 'zion contractors status' for details${R}"
+  echo "  ${DIM}zion agents log  — detalhes de execucao${R}"
+  echo "  ${DIM}zion agents phone <nome>  — conversar com um agente${R}"
   echo ""
 
 }
 
 # :command.function
-zion_contractors_status_command() {
+zion_agents_phone_command() {
 
-  # src/commands/contractors_status.sh
-  # Lista contractor cards: _schedule, _running e últimas done
+  # src/commands/agents_phone.sh
+  # Abre uma sessao de conversa com um agente via /meta:phone call
+  zion_load_config
+
+  AGENT="${args[name]:-}"
+
+  ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/zion}"
+  OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
+
+  # Fallback agents dir
+  for try in /workspace/mnt/zion /workspace/nixos/zion; do
+    [ -d "$try/agents" ] && ZION_DIR="$try" && break
+  done
+
+  # Lista agentes disponiveis
+  list_agents() {
+    AGENTS_DIR="$ZION_DIR/agents"
+    for dir in "$AGENTS_DIR"/*/; do
+      name=$(basename "$dir")
+      [[ "$name" == _* ]] && continue
+      [ -f "$dir/agent.md" ] || continue
+      model=$(awk '/^---/{fm++} fm==1 && /^model:/{print $2; exit}' "$dir/agent.md" 2>/dev/null)
+      call_style=$(awk '/^---/{fm++} fm==1 && /^call_style:/{print $2; exit}' "$dir/agent.md" 2>/dev/null)
+      call_style="${call_style:-phone}"
+      printf "  %-16s  %-8s  %s\n" "$name" "${model:-?}" "$call_style"
+    done
+  }
+
+  if [ -z "$AGENT" ]; then
+    echo ""
+    echo "  Agentes disponíveis:"
+    echo ""
+    list_agents
+    echo ""
+    echo "  Uso: zion agents phone <nome>"
+    echo "  Dentro do Claude Code: /meta:phone call <nome>"
+    echo ""
+    exit 0
+  fi
+
+  # Verificar se agente existe
+  AGENT_FILE="$ZION_DIR/agents/${AGENT}/agent.md"
+  if [ ! -f "$AGENT_FILE" ]; then
+    echo "Agente '${AGENT}' nao encontrado."
+    echo ""
+    list_agents
+    exit 1
+  fi
+
+  CALL_STYLE=$(awk '/^---/{fm++} fm==1 && /^call_style:/{print $2; exit}' "$AGENT_FILE" 2>/dev/null)
+  CALL_STYLE="${CALL_STYLE:-phone}"
+
+  echo ""
+  if [ "$CALL_STYLE" = "personal" ]; then
+    echo "  Convocando ${AGENT}..."
+    echo ""
+  else
+    echo "  Ligando para ${AGENT}..."
+    echo ""
+    echo "    bip...    bip...    bip..."
+    echo ""
+  fi
+
+  echo "  Abrindo sessao. Na sessao, use:"
+  echo "    /meta:phone call ${AGENT}"
+  echo ""
+
+  exec zion lab
+
+}
+
+# :command.function
+zion_agents_log_command() {
+
+  # src/commands/agents_log.sh
+  # Lista execucoes de agents: _schedule, _running e done recentes
   zion_load_config
 
   OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
@@ -4380,7 +4488,7 @@ zion_contractors_status_command() {
   fi
 
   if [ ! -d "$AGENTS" ]; then
-    echo "[status] agents dir nao encontrado"
+    echo "[log] agents dir nao encontrado"
     exit 1
   fi
 
@@ -4416,8 +4524,8 @@ zion_contractors_status_command() {
   _agent() {
     local path="$1"
     local a
-    a=$(_fm "$path" "contractor")
-    [ -z "$a" ] && a=$(_fm "$path" "agent")
+    a=$(_fm "$path" "agent")
+    [ -z "$a" ] && a=$(_fm "$path" "contractor")
     echo "${a:----}"
   }
 
@@ -4434,7 +4542,7 @@ zion_contractors_status_command() {
   if [ ${#RUN[@]} -eq 0 ]; then
     echo "  ${DIM}(nenhum)${R}"
   else
-    printf "  ${DIM}%-30s  %-14s  %s${R}\n" "card" "contractor" "ha"
+    printf "  ${DIM}%-30s  %-14s  %s${R}\n" "card" "agent" "ha"
     for f in "${RUN[@]}"; do
       printf "  %-30s  %-14s  %s\n" "$(_label "$f")" "$(_agent "$RUNNING/$f")" "$(_age "$f")"
     done
@@ -4449,7 +4557,7 @@ zion_contractors_status_command() {
   if [ ${#SCHED[@]} -eq 0 ]; then
     echo "  ${DIM}(nenhum)${R}"
   else
-    printf "  ${DIM}%-30s  %-14s  %s${R}\n" "card" "contractor" "quando"
+    printf "  ${DIM}%-30s  %-14s  %s${R}\n" "card" "agent" "quando"
     NOW=$(date +%s)
     for f in "${SCHED[@]}"; do
       ts=$(_ts "$f")
@@ -4480,8 +4588,7 @@ zion_contractors_status_command() {
     for fpath in "${DONE[@]}"; do
       f=$(basename "$fpath")
       agent=$(basename "$(dirname "$(dirname "$fpath")")")
-      printf "  %-30s  %-14s  %s
-  " "$(_label "$f")" "$agent" "$(_age "$f")" "$(_age "$f")"
+      printf "  %-30s  %-14s  %s\n" "$(_label "$f")" "$agent" "$(_age "$f")"
     done
   fi
   echo ""
@@ -4489,10 +4596,10 @@ zion_contractors_status_command() {
 }
 
 # :command.function
-zion_contractors_run_command() {
+zion_agents_run_command() {
 
-  # src/commands/contractor.sh
-  # Roda um contractor imediatamente — mesmo fluxo de execucao do scheduler
+  # src/commands/agents_run.sh
+  # Roda um agente imediatamente — mesmo fluxo de execucao do scheduler
   local name="${args[name]}"
   local steps="${args[--steps]:-}"
   zion_load_config
@@ -4523,13 +4630,13 @@ zion_contractors_run_command() {
   fi
 
   if [ ! -f "$agent_file" ]; then
-    echo "Contractor '${name}' nao encontrado."
+    echo "Agente '${name}' nao encontrado."
     for try in \
       "$zion_dir/agents" \
       "/workspace/mnt/zion/agents" \
       "/workspace/nixos/zion/agents"; do
       if [ -d "$try" ]; then
-        echo "Contractors disponiveis:"
+        echo "Agentes disponiveis:"
         ls "$try" | sed 's/^/  /'
         break
       fi
@@ -4615,9 +4722,9 @@ zion_contractors_run_command() {
     echo "#steps${steps}"
   } > "$schedule/$CARD"
 
-  echo "[contractor] '${name}' -> card $CARD"
-  echo "[contractor] model=$MODEL  timeout=${TIMEOUT}s  steps=$steps"
-  echo "[contractor] agent.md: $agent_file"
+  echo "[agents] '${name}' -> card $CARD"
+  echo "[agents] model=$MODEL  timeout=${TIMEOUT}s  steps=$steps"
+  echo "[agents] agent.md: $agent_file"
   echo ""
 
   rm -rf "/tmp/zion-locks/${WHEN}_${name}.lock" 2>/dev/null || true
@@ -4631,21 +4738,126 @@ zion_contractors_run_command() {
 }
 
 # :command.function
-zion_contractors_cron_command() {
+zion_agents_work_command() {
 
-  # src/commands/contractors_cron.sh
-  # Lê clock: dos agent.md e atualiza zion-contractors.nix
+  # src/commands/agents_work.sh
+  # Executa todos os agent cards vencidos em agents/_schedule/
+  zion_load_config
+
+  ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/zion}"
+  OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
+  SCHEDULE="${SCHEDULE_DIR:-$OBSIDIAN/agents/_schedule}"
+  RUNNER="$ZION_DIR/scripts/task-runner.sh"
+
+  # Fallbacks runner
+  if [ ! -f "$RUNNER" ]; then
+    for try in /workspace/mnt/zion /workspace/nixos/zion; do
+      [ -f "$try/scripts/task-runner.sh" ] && RUNNER="$try/scripts/task-runner.sh" && break
+    done
+  fi
+
+  # Fallbacks _schedule
+  if [ ! -d "$SCHEDULE" ]; then
+    for try in "$OBSIDIAN/agents/_schedule" /workspace/obsidian/agents/_schedule "$HOME/obsidian/agents/_schedule"; do
+      [ -d "$try" ] && SCHEDULE="$try" && break
+    done
+  fi
+
+  DRY_RUN="${args[--dry-run]:-}"
+
+  if [ ! -d "$SCHEDULE" ]; then
+    echo "[agents] agents/_schedule nao encontrado: $SCHEDULE"
+    exit 1
+  fi
+  if [ ! -f "$RUNNER" ]; then
+    echo "[agents] task-runner nao encontrado: $RUNNER"
+    exit 1
+  fi
+
+  # Parse data do nome do card: YYYYMMDD_HH_MM_name.md → epoch
+  card_epoch() {
+    local name="$1"
+    if [[ "$name" =~ ^([0-9]{4})([0-9]{2})([0-9]{2})_([0-9]{2})_([0-9]{2})_ ]]; then
+      local y="${BASH_REMATCH[1]}" mo="${BASH_REMATCH[2]}" d="${BASH_REMATCH[3]}"
+      local h="${BASH_REMATCH[4]}" mi="${BASH_REMATCH[5]}"
+      date -d "${y}-${mo}-${d} ${h}:${mi}:00" +%s 2>/dev/null || echo 0
+    else
+      echo 0
+    fi
+  }
+
+  # Checar se card tem agent: ou contractor: no frontmatter
+  is_agent_card() {
+    local file="$1"
+    local in_fm=0
+    while IFS= read -r line; do
+      [ "$line" = "---" ] && { [ "$in_fm" = "1" ] && break; in_fm=1; continue; }
+      [ "$in_fm" = "1" ] || continue
+      case "$line" in agent:* | contractor:*) return 0 ;; esac
+    done < "$file"
+    return 1
+  }
+
+  NOW=$(date +%s)
+  THRESHOLD=$((NOW + 300))  # 5min de tolerancia
+  DUE=()
+
+  for card_path in "$SCHEDULE"/*.md; do
+    [ -f "$card_path" ] || continue
+    filename=$(basename "$card_path")
+
+    ts=$(card_epoch "$filename")
+    [ "$ts" -eq 0 ] && continue
+    [ "$ts" -gt "$THRESHOLD" ] && continue
+
+    is_agent_card "$card_path" || continue
+
+    AGENT=$(awk '/^---/{fm++} fm==1 && /^(agent|contractor):/{print $2}' "$card_path")
+    DELTA=$(( (NOW - ts) / 60 ))
+    echo "[work] due: $filename  agent=$AGENT  atraso=${DELTA}min"
+    DUE+=("$filename")
+  done
+
+  if [ ${#DUE[@]} -eq 0 ]; then
+    echo "[work] nenhum agent card vencido."
+    exit 0
+  fi
+
+  echo "[work] ${#DUE[@]} card(s) para executar"
+
+  if [ -n "$DRY_RUN" ]; then
+    echo "[work] --dry-run: nao executando"
+    exit 0
+  fi
+
+  # Executar em serie (evitar estouro de quota)
+  for filename in "${DUE[@]}"; do
+    echo "[work] → $filename"
+    export TASK_CONTRACTORS_DIR="$(dirname "$SCHEDULE")"
+    export SCHEDULE_DIR="$SCHEDULE"
+    bash "$RUNNER" "$filename" || echo "[work] $filename falhou (continuando)"
+  done
+
+  echo "[work] concluido"
+
+}
+
+# :command.function
+zion_agents_cron_command() {
+
+  # src/commands/agents_cron.sh
+  # Le clock: dos agent.md e atualiza zion-agents.nix
   zion_load_config
 
   ZION_DIR="${ZION_NIXOS_DIR:-$HOME/nixos}/zion"
-  NIX_FILE="${ZION_NIXOS_DIR:-$HOME/nixos}/modules/zion-contractors.nix"
+  NIX_FILE="${ZION_NIXOS_DIR:-$HOME/nixos}/modules/zion-agents.nix"
   AGENTS_DIR="$ZION_DIR/agents"
 
   # Fallbacks
   for try in /workspace/mnt/zion /workspace/nixos/zion; do
     [ -d "$try" ] && AGENTS_DIR="$try/agents" && break
   done
-  for try in /workspace/mnt/modules/zion-contractors.nix /workspace/nixos/modules/zion-contractors.nix; do
+  for try in /workspace/mnt/modules/zion-agents.nix /workspace/nixos/modules/zion-agents.nix; do
     [ -f "$try" ] && NIX_FILE="$try" && break
   done
 
@@ -4654,7 +4866,7 @@ zion_contractors_cron_command() {
     exit 1
   fi
   if [ ! -f "$NIX_FILE" ]; then
-    echo "zion-contractors.nix nao encontrado"
+    echo "zion-agents.nix nao encontrado"
     exit 1
   fi
 
@@ -4684,13 +4896,13 @@ zion_contractors_cron_command() {
   done < <(find "$AGENTS_DIR" -maxdepth 1 -mindepth 1 -type d | sort)
 
   if [ ${#SCHEDULED[@]} -eq 0 ]; then
-    echo "Nenhum contractor com campo clock: encontrado."
+    echo "Nenhum agente com campo clock: encontrado."
     exit 0
   fi
 
   # Gerar bloco scheduled para o .nix
-  BLOCK="  # Contractors com timer automatico: { name, onBootSec, onActiveSec }"$'\n'
-  BLOCK+="  # Gerado por \`zion contractors cron\` -- edite clock: nos agent.md e rode o comando"$'\n'
+  BLOCK="  # Agents com timer automatico: { name, onBootSec, onActiveSec }"$'\n'
+  BLOCK+="  # Gerado por \`zion agents cron\` -- edite clock: nos agent.md e rode o comando"$'\n'
   BLOCK+="  scheduled = ["$'\n'
   for entry in "${SCHEDULED[@]}"; do
     read -r name boot_min minutes <<< "$entry"
@@ -4701,7 +4913,7 @@ zion_contractors_cron_command() {
   # Substituir bloco scheduled no .nix
   TMPFILE=$(mktemp)
   awk -v block="$BLOCK" '
-    /^  # Contractors com timer/ { in_block=1 }
+    /^  # Agents com timer/ { in_block=1 }
     in_block && /^  \];/ {
       print block
       in_block=0
@@ -4713,119 +4925,13 @@ zion_contractors_cron_command() {
   if ! diff -q "$NIX_FILE" "$TMPFILE" > /dev/null 2>&1; then
     cp "$TMPFILE" "$NIX_FILE"
     echo ""
-    echo "zion-contractors.nix atualizado."
+    echo "zion-agents.nix atualizado."
     echo "Rode: zion switch"
   else
     echo ""
     echo "Nenhuma mudanca necessaria."
   fi
   rm -f "$TMPFILE"
-
-}
-
-# :command.function
-zion_contractors_work_command() {
-
-  # src/commands/contractors_work.sh
-  # Executa todos os contractor cards vencidos em contractors/_schedule/
-  # Um "contractor card" tem campo `agent:` ou `contractor:` no frontmatter
-  zion_load_config
-
-  ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/zion}"
-  OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
-  SCHEDULE="${SCHEDULE_DIR:-$OBSIDIAN/agents/_schedule}"
-  RUNNER="$ZION_DIR/scripts/task-runner.sh"
-
-  # Fallbacks runner
-  if [ ! -f "$RUNNER" ]; then
-    for try in /workspace/mnt/zion /workspace/nixos/zion; do
-      [ -f "$try/scripts/task-runner.sh" ] && RUNNER="$try/scripts/task-runner.sh" && break
-    done
-  fi
-
-  # Fallbacks _schedule
-  if [ ! -d "$SCHEDULE" ]; then
-    for try in "$OBSIDIAN/agents/_schedule" /workspace/obsidian/agents/_schedule "$HOME/obsidian/agents/_schedule"; do
-      [ -d "$try" ] && SCHEDULE="$try" && break
-    done
-  fi
-
-  DRY_RUN="${args[--dry-run]:-}"
-
-  if [ ! -d "$SCHEDULE" ]; then
-    echo "[work] agents/_schedule nao encontrado: $SCHEDULE"
-    exit 1
-  fi
-  if [ ! -f "$RUNNER" ]; then
-    echo "[work] task-runner nao encontrado: $RUNNER"
-    exit 1
-  fi
-
-  # Parse data do nome do card: YYYYMMDD_HH_MM_name.md → epoch
-  card_epoch() {
-    local name="$1"
-    if [[ "$name" =~ ^([0-9]{4})([0-9]{2})([0-9]{2})_([0-9]{2})_([0-9]{2})_ ]]; then
-      local y="${BASH_REMATCH[1]}" mo="${BASH_REMATCH[2]}" d="${BASH_REMATCH[3]}"
-      local h="${BASH_REMATCH[4]}" mi="${BASH_REMATCH[5]}"
-      date -d "${y}-${mo}-${d} ${h}:${mi}:00" +%s 2>/dev/null || echo 0
-    else
-      echo 0
-    fi
-  }
-
-  # Checar se card tem agent: ou contractor: no frontmatter
-  is_contractor_card() {
-    local file="$1"
-    local in_fm=0
-    while IFS= read -r line; do
-      [ "$line" = "---" ] && { [ "$in_fm" = "1" ] && break; in_fm=1; continue; }
-      [ "$in_fm" = "1" ] || continue
-      case "$line" in agent:* | contractor:*) return 0 ;; esac
-    done < "$file"
-    return 1
-  }
-
-  NOW=$(date +%s)
-  THRESHOLD=$((NOW + 300))  # 5min de tolerância
-  DUE=()
-
-  for card_path in "$SCHEDULE"/*.md; do
-    [ -f "$card_path" ] || continue
-    filename=$(basename "$card_path")
-
-    ts=$(card_epoch "$filename")
-    [ "$ts" -eq 0 ] && continue
-    [ "$ts" -gt "$THRESHOLD" ] && continue
-
-    is_contractor_card "$card_path" || continue
-
-    AGENT=$(awk '/^---/{fm++} fm==1 && /^(agent|contractor):/{print $2}' "$card_path")
-    DELTA=$(( (NOW - ts) / 60 ))
-    echo "[work] due: $filename  agent=$AGENT  atraso=${DELTA}min"
-    DUE+=("$filename")
-  done
-
-  if [ ${#DUE[@]} -eq 0 ]; then
-    echo "[work] nenhum contractor card vencido."
-    exit 0
-  fi
-
-  echo "[work] ${#DUE[@]} card(s) para executar"
-
-  if [ -n "$DRY_RUN" ]; then
-    echo "[work] --dry-run: nao executando"
-    exit 0
-  fi
-
-  # Executar em série (evitar estouro de quota)
-  for filename in "${DUE[@]}"; do
-    echo "[work] → $filename"
-    export TASK_CONTRACTORS_DIR="$(dirname "$SCHEDULE")"
-    export SCHEDULE_DIR="$SCHEDULE"
-    bash "$RUNNER" "$filename" || echo "[work] $filename falhou (continuando)"
-  done
-
-  echo "[work] concluido"
 
 }
 
@@ -6436,10 +6542,10 @@ parse_requirements() {
       shift $#
       ;;
 
-    contractors | ct)
-      action="contractors"
+    agents | ag | a)
+      action="agents"
       shift
-      zion_contractors_parse_requirements "$@"
+      zion_agents_parse_requirements "$@"
       shift $#
       ;;
 
@@ -8128,14 +8234,14 @@ zion_hooks_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_contractors_parse_requirements() {
+zion_agents_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        zion_contractors_usage
+        zion_agents_usage
         exit
         ;;
 
@@ -8154,42 +8260,49 @@ zion_contractors_parse_requirements() {
     list | ls)
       action="list"
       shift
-      zion_contractors_list_parse_requirements "$@"
+      zion_agents_list_parse_requirements "$@"
       shift $#
       ;;
 
-    status | st | log)
-      action="status"
+    phone | p | call)
+      action="phone"
       shift
-      zion_contractors_status_parse_requirements "$@"
+      zion_agents_phone_parse_requirements "$@"
+      shift $#
+      ;;
+
+    log | st | status)
+      action="log"
+      shift
+      zion_agents_log_parse_requirements "$@"
       shift $#
       ;;
 
     run | r)
       action="run"
       shift
-      zion_contractors_run_parse_requirements "$@"
+      zion_agents_run_parse_requirements "$@"
+      shift $#
+      ;;
+
+    work | w)
+      action="work"
+      shift
+      zion_agents_work_parse_requirements "$@"
       shift $#
       ;;
 
     cron)
       action="cron"
       shift
-      zion_contractors_cron_parse_requirements "$@"
-      shift $#
-      ;;
-
-    work)
-      action="work"
-      shift
-      zion_contractors_work_parse_requirements "$@"
+      zion_agents_cron_parse_requirements "$@"
       shift $#
       ;;
 
     # :command.command_fallback
     *)
       action="list"
-      zion_contractors_list_parse_requirements "$@"
+      zion_agents_list_parse_requirements "$@"
       shift $#
       ;;
 
@@ -8219,14 +8332,14 @@ zion_contractors_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_contractors_list_parse_requirements() {
+zion_agents_list_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        zion_contractors_list_usage
+        zion_agents_list_usage
         exit
         ;;
 
@@ -8238,7 +8351,7 @@ zion_contractors_list_parse_requirements() {
   done
 
   # :command.command_filter
-  action="contractors list"
+  action="agents list"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
@@ -8264,14 +8377,14 @@ zion_contractors_list_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_contractors_status_parse_requirements() {
+zion_agents_phone_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        zion_contractors_status_usage
+        zion_agents_phone_usage
         exit
         ;;
 
@@ -8283,7 +8396,58 @@ zion_contractors_status_parse_requirements() {
   done
 
   # :command.command_filter
-  action="contractors status"
+  action="agents phone"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        # :argument.case
+        if [[ -z ${args['name']+x} ]]; then
+          args['name']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_agents_log_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_agents_log_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="agents log"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
@@ -8309,14 +8473,14 @@ zion_contractors_status_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_contractors_run_parse_requirements() {
+zion_agents_run_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        zion_contractors_run_usage
+        zion_agents_run_usage
         exit
         ;;
 
@@ -8328,7 +8492,7 @@ zion_contractors_run_parse_requirements() {
   done
 
   # :command.command_filter
-  action="contractors run"
+  action="agents run"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
@@ -8372,7 +8536,7 @@ zion_contractors_run_parse_requirements() {
 
   # :command.required_args_filter
   if [[ -z ${args['name']+x} ]]; then
-    printf "missing required argument: NAME\nusage: zion contractors run NAME [OPTIONS]\n" >&2
+    printf "missing required argument: NAME\nusage: zion agents run NAME [OPTIONS]\n" >&2
 
     exit 1
   fi
@@ -8380,14 +8544,14 @@ zion_contractors_run_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_contractors_cron_parse_requirements() {
+zion_agents_work_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        zion_contractors_cron_usage
+        zion_agents_work_usage
         exit
         ;;
 
@@ -8399,12 +8563,19 @@ zion_contractors_cron_parse_requirements() {
   done
 
   # :command.command_filter
-  action="contractors cron"
+  action="agents work"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
+      # :flag.case
+      --dry-run | -n)
+
+        # :flag.case_no_arg
+        args['--dry-run']=1
+        shift
+        ;;
 
       -?*)
         printf "invalid option: %s\n" "$key" >&2
@@ -8425,14 +8596,14 @@ zion_contractors_cron_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_contractors_work_parse_requirements() {
+zion_agents_cron_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        zion_contractors_work_usage
+        zion_agents_cron_usage
         exit
         ;;
 
@@ -8444,19 +8615,12 @@ zion_contractors_work_parse_requirements() {
   done
 
   # :command.command_filter
-  action="contractors work"
+  action="agents cron"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
-      # :flag.case
-      --dry-run | -n)
-
-        # :flag.case_no_arg
-        args['--dry-run']=1
-        shift
-        ;;
 
       -?*)
         printf "invalid option: %s\n" "$key" >&2
@@ -10140,12 +10304,13 @@ run() {
     "set") zion_set_command ;;
     "runner") zion_runner_command ;;
     "hooks") zion_hooks_command ;;
-    "contractors") zion_contractors_command ;;
-    "contractors list") zion_contractors_list_command ;;
-    "contractors status") zion_contractors_status_command ;;
-    "contractors run") zion_contractors_run_command ;;
-    "contractors cron") zion_contractors_cron_command ;;
-    "contractors work") zion_contractors_work_command ;;
+    "agents") zion_agents_command ;;
+    "agents list") zion_agents_list_command ;;
+    "agents phone") zion_agents_phone_command ;;
+    "agents log") zion_agents_log_command ;;
+    "agents run") zion_agents_run_command ;;
+    "agents work") zion_agents_work_command ;;
+    "agents cron") zion_agents_cron_command ;;
     "tasks") zion_tasks_command ;;
     "tasks list") zion_tasks_list_command ;;
     "tasks add") zion_tasks_add_command ;;

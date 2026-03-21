@@ -101,10 +101,12 @@ Breakroom (memoria/estado): `/workspace/obsidian/agents/<nome>/memory.md`
 
 | Operacao | Comando |
 |----------|---------|
-| Listar agents | `zion contractors` |
-| Status detalhado | `zion contractors status` |
-| Rodar um agent | `zion contractors run <nome>` |
-| Executar cards vencidos | `zion contractors work` |
+| Listar agents | `zion agents` |
+| Ver execucoes | `zion agents log` |
+| Conversar com agent | `zion agents phone <nome>` |
+| Rodar um agent | `zion agents run <nome>` |
+| Executar cards vencidos | `zion agents work` |
+| Sync timers NixOS | `zion agents cron` + `zion switch` |
 | Listar tasks | `zion tasks` |
 | Criar task | `zion tasks add <titulo>` |
 | Executar tasks vencidas | `zion tasks work` |

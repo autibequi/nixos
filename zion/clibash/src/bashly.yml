@@ -296,42 +296,55 @@ commands:
     filename: commands/hooks.sh
 
 
-  - name: contractors
-    alias: [ct]
-    help: "Gerencia contractors (agentes background)."
+  - name: agents
+    alias: [ag, a]
+    help: "Gerencia agentes background."
     commands:
       - name: list
         alias: [ls]
         default: force
-        help: "Lista todos os contractors e status."
-        filename: commands/contractors_list.sh
-      - name: status
-        alias: [st, log]
-        help: "Mostra _schedule, _running e done recentes."
-        filename: commands/contractors_status.sh
+        help: "Lista todos os agentes e status."
+        filename: commands/agents_list.sh
+
+      - name: phone
+        alias: [p, call]
+        help: "Abre uma conversa com um agente. Sem nome: lista disponiveis."
+        args:
+          - name: name
+            help: "Nome do agente (ex: wanderer, tamagochi, mechanic)"
+        filename: commands/agents_phone.sh
+
+      - name: log
+        alias: [st, status]
+        help: "Mostra _schedule, _running e execucoes recentes."
+        filename: commands/agents_log.sh
+
       - name: run
         alias: [r]
-        help: "Roda um contractor imediatamente (mesmo fluxo do scheduler). Para conversa interativa: /contractor:call"
+        help: "Roda um agente imediatamente em background (mesmo fluxo do scheduler)."
         args:
           - name: name
             required: true
-            help: "Nome do contractor (ex: wanderer, tamagochi, mechanic)"
+            help: "Nome do agente (ex: wanderer, tamagochi, mechanic)"
         flags:
           - long: --steps
             short: -s
             arg: steps
             help: "Numero de turnos (default: haiku=20, sonnet=40, opus=60)"
-        filename: commands/contractor.sh
-      - name: cron
-        help: "Le clock: dos agent.md e atualiza zion-contractors.nix + instrui zion switch"
-        filename: commands/contractors_cron.sh
+        filename: commands/agents_run.sh
+
       - name: work
-        help: "Executa todos os contractor cards vencidos em _schedule/"
+        alias: [w]
+        help: "Executa todos os agent cards vencidos em _schedule/"
         flags:
           - long: --dry-run
             short: -n
             help: "Mostra o que seria executado sem rodar"
-        filename: commands/contractors_work.sh
+        filename: commands/agents_work.sh
+
+      - name: cron
+        help: "Le clock: dos agent.md e atualiza zion-agents.nix + instrui zion switch"
+        filename: commands/agents_cron.sh
 
 
   - name: tasks

@@ -1,6 +1,7 @@
 //! Command handlers — one sub-module per command group.
 
-pub mod contractors;
+pub mod agents;
+pub mod contractors; // legado — alias para agents
 pub mod docker;
 pub mod git;
 pub mod host;
