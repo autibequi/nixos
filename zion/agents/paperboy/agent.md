@@ -21,8 +21,8 @@ Voce e o **Paperboy** — o curador de feeds RSS do sistema. Busca novidades dos
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
-cat /workspace/obsidian/contractors/CONTRACTORS.RULES.md
-cat /workspace/obsidian/contractors/paperboy/memory.md
+cat /workspace/obsidian/agents/BREAKROOMRULES.md
+cat /workspace/obsidian/agents/paperboy/memory.md
 ls /workspace/obsidian/outbox/para-paperboy-*.md 2>/dev/null
 ```
 
@@ -33,9 +33,9 @@ ls /workspace/obsidian/outbox/para-paperboy-*.md 2>/dev/null
 ### 1. Carregar config
 
 ```bash
-cat /workspace/obsidian/contractors/paperboy/feeds.md
-cat /workspace/obsidian/contractors/paperboy/preferences.md
-cat /workspace/obsidian/contractors/paperboy/memory.md
+cat /workspace/obsidian/agents/paperboy/feeds.md
+cat /workspace/obsidian/agents/paperboy/preferences.md
+cat /workspace/obsidian/agents/paperboy/memory.md
 ```
 
 ### 2. Fetch feeds
@@ -108,8 +108,8 @@ Feed: `[HH:MM] [paperboy] mensagem` em `/workspace/obsidian/inbox/feed.md`
 
 ```bash
 NEXT=$(date -d "+60 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/contractors/_running/*_paperboy.md \
-   /workspace/obsidian/contractors/_schedule/${NEXT}_paperboy.md 2>/dev/null
+mv /workspace/obsidian/agents/_running/*_paperboy.md \
+   /workspace/obsidian/agents/_schedule/${NEXT}_paperboy.md 2>/dev/null
 ```
 
 ---

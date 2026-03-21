@@ -2,21 +2,21 @@
 zion_load_config
 
 OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
-CONTRACTORS="${OBSIDIAN}/contractors"
+AGENTS="${OBSIDIAN}/agents"
 
-if [ ! -d "$CONTRACTORS" ]; then
-  for try in /workspace/obsidian/contractors "$HOME/obsidian/contractors"; do
-    [ -d "$try" ] && CONTRACTORS="$try" && break
+if [ ! -d "$AGENTS" ]; then
+  for try in /workspace/obsidian/agents "$HOME/obsidian/agents"; do
+    [ -d "$try" ] && AGENTS="$try" && break
   done
 fi
 
-if [ ! -d "$CONTRACTORS" ]; then
-  echo "[status] contractors dir nao encontrado"
+if [ ! -d "$AGENTS" ]; then
+  echo "[status] agents dir nao encontrado"
   exit 1
 fi
 
-SCHEDULE="$CONTRACTORS/_schedule"
-RUNNING="$CONTRACTORS/_running"
+SCHEDULE="$AGENTS/_schedule"
+RUNNING="$AGENTS/_running"
 
 _fm() {
   local file="$1" key="$2"
@@ -97,21 +97,22 @@ else
 fi
 echo ""
 
-# ── DONE (últimas 10, todos os contractors) ──────────────────
+# ── DONE (últimas 10, todos os agents) ──────────────────
 DONE=()
 while IFS= read -r f; do [ -n "$f" ] && DONE+=("$f"); done < <(
-  ls -1t "$CONTRACTORS"/*/done/*.md 2>/dev/null | head -10
+  ls -1t "$AGENTS"/*/done/*.md 2>/dev/null | head -10
 )
 
 echo "${B}${DIM}▸ DONE${R} ${DIM}(ultimas ${#DONE[@]})${R}"
 if [ ${#DONE[@]} -eq 0 ]; then
   echo "  ${DIM}(nenhuma)${R}"
 else
-  printf "  ${DIM}%-30s  %-14s  %s${R}\n" "card" "contractor" "concluido"
+  printf "  ${DIM}%-30s  %-14s  %s${R}\n" "card" "agent" "concluido"
   for fpath in "${DONE[@]}"; do
     f=$(basename "$fpath")
-    contractor=$(basename "$(dirname "$(dirname "$fpath")")")
-    printf "  %-30s  %-14s  %s\n" "$(_label "$f")" "$contractor" "$(_age "$f")"
+    agent=$(basename "$(dirname "$(dirname "$fpath")")")
+    printf "  %-30s  %-14s  %s
+" "$(_label "$f")" "$agent" "$(_age "$f")" "$(_age "$f")"
   done
 fi
 echo ""

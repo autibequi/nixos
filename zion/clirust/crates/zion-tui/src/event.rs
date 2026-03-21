@@ -1,6 +1,6 @@
 //! Input event polling and key-to-action mapping.
 
-use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyModifiers};
+use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use std::time::Duration;
 
 /// Events produced by the event loop.
@@ -15,7 +15,10 @@ pub enum AppEvent {
 pub fn poll(tick_rate: Duration) -> std::io::Result<AppEvent> {
     if event::poll(tick_rate)? {
         if let Event::Key(key) = event::read()? {
-            return Ok(AppEvent::Key(key));
+            // Ignore key release / repeat to avoid double-firing
+            if key.kind == KeyEventKind::Press {
+                return Ok(AppEvent::Key(key));
+            }
         }
     }
     Ok(AppEvent::Tick)
@@ -33,13 +36,9 @@ pub fn map_key(key: KeyEvent) -> Option<&'static str> {
         KeyCode::Up | KeyCode::Char('k') => Some("up"),
         KeyCode::Down | KeyCode::Char('j') => Some("down"),
         KeyCode::Char('e') => Some("cycle_env"),
-        KeyCode::Char('s') => Some("start"),
-        KeyCode::Char('S') => Some("stop"),
-        KeyCode::Char('l') => Some("logs"),
-        KeyCode::Char('t') => Some("test"),
-        KeyCode::Char('x') => Some("shell"),
         KeyCode::Char('[') | KeyCode::PageUp => Some("log_up"),
         KeyCode::Char(']') | KeyCode::PageDown => Some("log_down"),
+        KeyCode::Enter => Some("menu_open"),
         _ => None,
     }
 }

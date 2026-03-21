@@ -5,8 +5,8 @@ zion_load_config
 
 local zion_dir="${ZION_ROOT:-$HOME/nixos/zion}"
 local obsidian="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
-local contractors="$obsidian/contractors"
-local schedule="$contractors/_schedule"
+local agents="$obsidian/agents"
+local schedule="$agents/_schedule"
 local runner="$zion_dir/scripts/task-runner.sh"
 local agent_file="$zion_dir/agents/${name}/agent.md"
 
@@ -43,18 +43,18 @@ if [ ! -f "$agent_file" ]; then
   exit 1
 fi
 
-# Fallback contractors dir
-if [ ! -d "$contractors" ]; then
+# Fallback agents dir
+if [ ! -d "$agents" ]; then
   for try in \
-    "$obsidian/contractors" \
-    /workspace/obsidian/contractors \
-    "$HOME/obsidian/contractors"; do
-    [ -d "$try" ] && contractors="$try" && schedule="$try/_schedule" && break
+    "$obsidian/agents" \
+    /workspace/obsidian/agents \
+    "$HOME/obsidian/agents"; do
+    [ -d "$try" ] && agents="$try" && schedule="$try/_schedule" && break
   done
 fi
 
-if [ ! -d "$contractors" ]; then
-  echo "Contractors dir nao encontrado."
+if [ ! -d "$agents" ]; then
+  echo "Agents dir nao encontrado."
   exit 1
 fi
 
@@ -128,7 +128,7 @@ echo ""
 
 rm -rf "/tmp/zion-locks/${WHEN}_${name}.lock" 2>/dev/null || true
 
-export TASK_CONTRACTORS_DIR="$contractors"
+export TASK_CONTRACTORS_DIR="$agents"
 export SCHEDULE_DIR="$schedule"
 export TASK_MAX_TURNS="$steps"
 

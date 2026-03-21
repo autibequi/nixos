@@ -39,7 +39,7 @@ A cada ciclo, escolha o modo mais urgente baseado no que foi feito recentemente 
 
 **1. Ler memória recente**
 ```bash
-tail -40 /workspace/obsidian/contractors/wanderer/memory.md
+tail -40 /workspace/obsidian/agents/wanderer/memory.md
 ```
 
 **2. Escolher zona** (preferir menos visitada nos últimos 3 ciclos)
@@ -81,7 +81,7 @@ Perguntas que guiam:
 **Por quê é relevante:** reflexão de 1-2 frases
 ```
 
-**8. Registrar em `/workspace/obsidian/contractors/wanderer/memory.md`**
+**8. Registrar em `/workspace/obsidian/agents/wanderer/memory.md`**
 ```
 ## Ciclo YYYY-MM-DD HH:MM — EXPLORE
 **Zona:** A/B/C | **Arquivos:** file1, file2
@@ -169,7 +169,7 @@ Se encontrar algo acionável → appenda inbox.md com contexto.
 Consolida o que os agentes descobriram para o usuário.
 
 1. Coletar outputs recentes:
-   - `/workspace/obsidian/contractors/*/memory.md` — tail de cada
+   - `/workspace/obsidian/agents/*/memory.md` — tail de cada
    - `/workspace/obsidian/vault/.ephemeral/cron-logs/` — logs recentes
    - `/workspace/obsidian/inbox/inbox.md` — itens ainda não processados
 
@@ -247,7 +247,7 @@ O modo SYNTHESIZE foi expandido com capacidades do ex-Trainee:
 
 Alem de consolidar outputs, o Wanderer pode:
 
-1. **Comparar memorias**: ler memory.md de todos os contractors e identificar:
+1. **Comparar memorias**: ler memory.md de todos os agents e identificar:
    - Mesmo problema reportado por 2+ agentes (convergencia)
    - Contradicoes entre agentes (divergencia)
    - Gaps: areas que nenhum agente monitora
@@ -277,9 +277,9 @@ System evolution | jafar             | YYYY-MM-DD
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
-cat /workspace/obsidian/contractors/CONTRACTORS.RULES.md
+cat /workspace/obsidian/agents/BREAKROOMRULES.md
 cat /workspace/obsidian/BOARDRULES.md
-cat /workspace/obsidian/contractors/wanderer/memory.md
+cat /workspace/obsidian/agents/wanderer/memory.md
 ls /workspace/obsidian/outbox/para-wanderer-*.md 2>/dev/null
 ```
 
@@ -291,15 +291,15 @@ ls /workspace/obsidian/outbox/para-wanderer-*.md 2>/dev/null
 
 ```bash
 NEXT=$(date -d "+60 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/contractors/_running/*_wanderer.md \
-   /workspace/obsidian/contractors/_schedule/${NEXT}_wanderer.md 2>/dev/null
+mv /workspace/obsidian/agents/_running/*_wanderer.md \
+   /workspace/obsidian/agents/_schedule/${NEXT}_wanderer.md 2>/dev/null
 ```
 
 ---
 
 ## Checklist do ciclo
 
-- [ ] Ler CONTRACTORS.RULES.md e BOARDRULES.md
+- [ ] Ler BREAKROOMRULES.md e BOARDRULES.md
 - [ ] Ler tail da memoria (40 linhas)
 - [ ] Escolher modo (EXPLORE / CONTEMPLATE / EVALUATE / SYNTHESIZE / ABSORB)
 - [ ] Executar o modo escolhido

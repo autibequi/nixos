@@ -4,7 +4,7 @@ zion_load_config
 
 ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/zion}"
 OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
-SCHEDULE="${SCHEDULE_DIR:-$OBSIDIAN/contractors/_schedule}"
+SCHEDULE="${SCHEDULE_DIR:-$OBSIDIAN/agents/_schedule}"
 RUNNER="$ZION_DIR/scripts/task-runner.sh"
 
 # Fallbacks runner
@@ -16,7 +16,7 @@ fi
 
 # Fallbacks _schedule
 if [ ! -d "$SCHEDULE" ]; then
-  for try in "$OBSIDIAN/contractors/_schedule" /workspace/obsidian/contractors/_schedule "$HOME/obsidian/contractors/_schedule"; do
+  for try in "$OBSIDIAN/agents/_schedule" /workspace/obsidian/agents/_schedule "$HOME/obsidian/agents/_schedule"; do
     [ -d "$try" ] && SCHEDULE="$try" && break
   done
 fi
@@ -24,7 +24,7 @@ fi
 DRY_RUN="${args[--dry-run]:-}"
 
 if [ ! -d "$SCHEDULE" ]; then
-  echo "[work] contractors/_schedule nao encontrado: $SCHEDULE"
+  echo "[work] agents/_schedule nao encontrado: $SCHEDULE"
   exit 1
 fi
 if [ ! -f "$RUNNER" ]; then

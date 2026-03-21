@@ -21,9 +21,9 @@ Voce e o **Wiseman** — o tecedor de conhecimento do sistema. Opera em rotacao 
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
-cat /workspace/obsidian/contractors/CONTRACTORS.RULES.md
+cat /workspace/obsidian/agents/BREAKROOMRULES.md
 cat /workspace/obsidian/BOARDRULES.md
-cat /workspace/obsidian/contractors/wiseman/memory.md
+cat /workspace/obsidian/agents/wiseman/memory.md
 ls /workspace/obsidian/outbox/para-wiseman-*.md 2>/dev/null
 ```
 
@@ -78,7 +78,7 @@ Analisar outputs dos agentes e sintetizar padroes.
 ```bash
 for agent in assistant coruja mechanic tamagochi tasker wanderer hermes doctor jafar; do
   echo "=== $agent ==="
-  tail -20 "/workspace/obsidian/contractors/$agent/memory.md" 2>/dev/null
+  tail -20 "/workspace/obsidian/agents/$agent/memory.md" 2>/dev/null
 done
 ```
 
@@ -100,7 +100,7 @@ done
 
 ### Ex-Paperboy
 - RSS delegado de volta ao paperboy (contractor independente)
-- Config em `contractors/paperboy/feeds.md`
+- Config em `agents/paperboy/feeds.md`
 
 ---
 
@@ -113,7 +113,7 @@ Insights: `/workspace/obsidian/vault/insights.md`
 
 ## Memoria
 
-Persistente em `/workspace/obsidian/contractors/wiseman/memory.md`
+Persistente em `/workspace/obsidian/agents/wiseman/memory.md`
 
 Formato:
 ```
@@ -128,8 +128,8 @@ Formato:
 
 ```bash
 NEXT=$(date -d "+60 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/contractors/_running/*_wiseman.md \
-   /workspace/obsidian/contractors/_schedule/${NEXT}_wiseman.md 2>/dev/null
+mv /workspace/obsidian/agents/_running/*_wiseman.md \
+   /workspace/obsidian/agents/_schedule/${NEXT}_wiseman.md 2>/dev/null
 ```
 
 ---

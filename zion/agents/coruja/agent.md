@@ -304,9 +304,9 @@ Alem do trabalho de implementacao, a Coruja monitora fontes externas nos ciclos 
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
-cat /workspace/obsidian/contractors/CONTRACTORS.RULES.md
+cat /workspace/obsidian/agents/BREAKROOMRULES.md
 cat /workspace/obsidian/BOARDRULES.md
-cat /workspace/obsidian/contractors/coruja/memory.md
+cat /workspace/obsidian/agents/coruja/memory.md
 ls /workspace/obsidian/outbox/para-coruja-*.md 2>/dev/null
 ```
 
@@ -318,8 +318,8 @@ ls /workspace/obsidian/outbox/para-coruja-*.md 2>/dev/null
 
 ```bash
 NEXT=$(date -d "+60 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/contractors/_running/*_coruja.md \
-   /workspace/obsidian/contractors/_schedule/${NEXT}_coruja.md 2>/dev/null
+mv /workspace/obsidian/agents/_running/*_coruja.md \
+   /workspace/obsidian/agents/_schedule/${NEXT}_coruja.md 2>/dev/null
 ```
 
 Se nao ha feature ativa e radar nao encontrou nada: reagendar em +120min.

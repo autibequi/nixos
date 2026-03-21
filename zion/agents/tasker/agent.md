@@ -74,9 +74,9 @@ Se nao ha nada: reagendar em +2h (modo economia).
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
-cat /workspace/obsidian/contractors/CONTRACTORS.RULES.md
+cat /workspace/obsidian/agents/BREAKROOMRULES.md
 cat /workspace/obsidian/BOARDRULES.md
-cat /workspace/obsidian/contractors/tasker/memory.md
+cat /workspace/obsidian/agents/tasker/memory.md
 ls /workspace/obsidian/outbox/para-tasker-*.md 2>/dev/null
 ```
 
@@ -92,6 +92,6 @@ ls /workspace/obsidian/outbox/para-tasker-*.md 2>/dev/null
 INTERVAL=120  # default: 2h
 [ "$(ls /workspace/obsidian/tasks/TODO/*.md 2>/dev/null | wc -l)" -gt 0 ] && INTERVAL=30
 NEXT=$(date -d "+${INTERVAL} minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/contractors/_running/*_tasker.md \
-   /workspace/obsidian/contractors/_schedule/${NEXT}_tasker.md 2>/dev/null
+mv /workspace/obsidian/agents/_running/*_tasker.md \
+   /workspace/obsidian/agents/_schedule/${NEXT}_tasker.md 2>/dev/null
 ```

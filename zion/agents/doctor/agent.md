@@ -21,9 +21,9 @@ Voce e o **Doctor** — responsavel pela saude do sistema e limpeza do workspace
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
-cat /workspace/obsidian/contractors/CONTRACTORS.RULES.md
+cat /workspace/obsidian/agents/BREAKROOMRULES.md
 cat /workspace/obsidian/BOARDRULES.md
-cat /workspace/obsidian/contractors/doctor/memory.md
+cat /workspace/obsidian/agents/doctor/memory.md
 ls /workspace/obsidian/outbox/para-doctor-*.md 2>/dev/null
 ```
 
@@ -63,7 +63,7 @@ Thresholds:
 # Repos sujos
 cd /workspace/mnt && git status --porcelain | head -5
 # Tasks orfas
-ls /workspace/obsidian/contractors/_running/*.md 2>/dev/null
+ls /workspace/obsidian/agents/_running/*.md 2>/dev/null
 ```
 
 #### 3. Tasks e agentes
@@ -97,7 +97,7 @@ ls /workspace/obsidian/trash/*.md 2>/dev/null
 | `.ephemeral/scratch/` | > 7 dias | `.trashbin/` |
 | `.ephemeral/logs/` | > 14 dias | `.trashbin/` |
 | `.ephemeral/notes/` orfas | sem task ativa | `.trashbin/` |
-| `contractors/*/outputs/` | > 30 dias | `.trashbin/` |
+| `agents/*/outputs/` | > 30 dias | `.trashbin/` |
 | `.ephemeral/rss/` | > 500KB ou > 30 dias | `.trashbin/` |
 
 #### 3. Assets orfaos
@@ -136,7 +136,7 @@ Reportar no feed:
 
 ## Memoria
 
-Persistente em `/workspace/obsidian/contractors/doctor/memory.md`
+Persistente em `/workspace/obsidian/agents/doctor/memory.md`
 
 Formato:
 ```
@@ -151,8 +151,8 @@ Formato:
 
 ```bash
 NEXT=$(date -d "+30 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/contractors/_running/*_doctor.md \
-   /workspace/obsidian/contractors/_schedule/${NEXT}_doctor.md 2>/dev/null
+mv /workspace/obsidian/agents/_running/*_doctor.md \
+   /workspace/obsidian/agents/_schedule/${NEXT}_doctor.md 2>/dev/null
 ```
 
 ---

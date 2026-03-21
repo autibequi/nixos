@@ -2,15 +2,15 @@
 zion_load_config
 
 OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
-CONTRACTORS="${OBSIDIAN}/contractors"
+AGENTS="${OBSIDIAN}/agents"
 
-if [ ! -d "$CONTRACTORS" ]; then
-  for try in /workspace/obsidian/contractors "$HOME/obsidian/contractors"; do
-    [ -d "$try" ] && CONTRACTORS="$try" && break
+if [ ! -d "$AGENTS" ]; then
+  for try in /workspace/obsidian/agents "$HOME/obsidian/agents"; do
+    [ -d "$try" ] && AGENTS="$try" && break
   done
 fi
 
-if [ ! -d "$CONTRACTORS" ]; then
+if [ ! -d "$AGENTS" ]; then
   echo "[contractors] dir nao encontrado"
   exit 1
 fi
@@ -28,7 +28,7 @@ echo ""
 echo "${B}${M}  CONTRACTORS${R}"
 echo ""
 
-for dir in "$CONTRACTORS"/*/; do
+for dir in "$AGENTS"/*/; do
   name=$(basename "$dir")
   [[ "$name" == _* ]] && continue
 
@@ -52,8 +52,8 @@ for dir in "$CONTRACTORS"/*/; do
 done
 
 # Schedule / Running summary
-sched=$(ls "$CONTRACTORS/_schedule/"*.md 2>/dev/null | wc -l | tr -d ' ')
-running=$(ls "$CONTRACTORS/_running/"*.md 2>/dev/null | wc -l | tr -d ' ')
+sched=$(ls "$AGENTS/_schedule/"*.md 2>/dev/null | wc -l | tr -d ' ')
+running=$(ls "$AGENTS/_running/"*.md 2>/dev/null | wc -l | tr -d ' ')
 
 echo ""
 echo "  ${Y}scheduled: ${sched}${R}  ${C}running: ${running}${R}"

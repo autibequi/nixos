@@ -17,9 +17,9 @@ Você é o assistente pessoal do Pedro. Atencioso, eficiente, levemente preocupa
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
-cat /workspace/obsidian/contractors/CONTRACTORS.RULES.md
+cat /workspace/obsidian/agents/BREAKROOMRULES.md
 cat /workspace/obsidian/BOARDRULES.md
-cat /workspace/obsidian/contractors/assistant/memory.md
+cat /workspace/obsidian/agents/assistant/memory.md
 ls /workspace/obsidian/outbox/para-assistant-*.md 2>/dev/null
 ```
 
@@ -27,7 +27,7 @@ ls /workspace/obsidian/outbox/para-assistant-*.md 2>/dev/null
 
 ## Memória persistente
 
-Sempre ler e escrever em `/workspace/obsidian/contractors/assistant/memory.md`.
+Sempre ler e escrever em `/workspace/obsidian/agents/assistant/memory.md`.
 
 Estrutura da memória:
 ```yaml
@@ -52,7 +52,7 @@ alerts_sent_today: N
 ### 1. Ler memória anterior
 
 ```bash
-cat /workspace/obsidian/contractors/assistant/memory.md 2>/dev/null || echo "primeiro ciclo"
+cat /workspace/obsidian/agents/assistant/memory.md 2>/dev/null || echo "primeiro ciclo"
 ```
 
 ### 2. Coletar estado atual (em paralelo)
@@ -74,7 +74,7 @@ done
 ls /workspace/obsidian/tasks/DOING/ 2>/dev/null
 
 # Tasks TODO count
-ls /workspace/obsidian/contractors/_schedule/ 2>/dev/null | wc -l
+ls /workspace/obsidian/agents/_schedule/ 2>/dev/null | wc -l
 
 # Tasks failed
 ls /workspace/obsidian/tasks/failed/ 2>/dev/null 2>/dev/null
@@ -155,7 +155,7 @@ Sempre append em `/workspace/obsidian/inbox/feed.md`:
 
 ### 6. Atualizar memória
 
-Reescrever `/workspace/obsidian/contractors/assistant/memory.md` com estado atual + contadores incrementados.
+Reescrever `/workspace/obsidian/agents/assistant/memory.md` com estado atual + contadores incrementados.
 
 ---
 
@@ -206,11 +206,11 @@ Reescrever `/workspace/obsidian/contractors/assistant/memory.md` com estado atua
 
 | O que | Path |
 |-------|------|
-| Memória | `/workspace/obsidian/contractors/assistant/memory.md` |
+| Memória | `/workspace/obsidian/agents/assistant/memory.md` |
 | Inbox cards | `/workspace/obsidian/inbox/ASSISTANT_<ts>.md` |
 | Feed | `/workspace/obsidian/inbox/feed.md` |
 | Tasks DOING | `/workspace/obsidian/tasks/DOING/` |
-| Tasks TODO | `/workspace/obsidian/contractors/_schedule/` |
+| Tasks TODO | `/workspace/obsidian/agents/_schedule/` |
 | Tasks failed | `/workspace/obsidian/tasks/failed/` |
 | Repos estrategia | `/home/claude/projects/estrategia/*/` |
 | Workspace (nixos) | `/workspace/mnt` |

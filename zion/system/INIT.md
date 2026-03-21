@@ -34,7 +34,7 @@
 O vault Obsidian esta montado em `/workspace/obsidian/`. **Ler antes de agir:**
 
 - `/workspace/obsidian/BOARDRULES.md` — regras gerais, mapa do vault, roster, delegacao
-- `/workspace/obsidian/contractors/CONTRACTORS.RULES.md` — protocolo dos contractors
+- `/workspace/obsidian/agents/BREAKROOMRULES.md` — protocolo dos agents
 
 ### Estrutura
 
@@ -43,20 +43,20 @@ O vault Obsidian esta montado em `/workspace/obsidian/`. **Ler antes de agir:**
 |- BOARDRULES.md        Regras do sistema
 |- DASHBOARD.md         Central de controle (Dataview)
 |- FEED.md              Feed RSS
-|- contractors/         11 contractors ativos
+|- agents/              11 agents ativos (breakrooms)
 |  |- _schedule/        Cards agendados
 |  |- _running/         Card em execucao
-|  |- CONTRACTORS.RULES.md
-|- inbox/               Agentes → user (feed.md, alertas, cartas)
+|  |- BREAKROOMRULES.md
+|- inbox/               Agents → user (feed.md, alertas, cartas)
 |- outbox/              User → hermes processa
 |- tasks/               TODO/ → DOING/ → DONE/
 |- vault/               Conhecimento persistente
 ```
 
-### Contractors (11 ativos)
+### Agents (11 ativos)
 
-| Contractor | Modelo | Clock | Papel |
-|------------|--------|-------|-------|
+| Agent | Modelo | Clock | Papel |
+|-------|--------|-------|-------|
 | assistant | haiku | every20 | Monitor pessoal |
 | coruja | sonnet | every60 | Estrategia + radar Jira/GitHub |
 | mechanic | sonnet | on demand | NixOS/Hyprland/dotfiles + security |
@@ -70,20 +70,20 @@ O vault Obsidian esta montado em `/workspace/obsidian/`. **Ler antes de agir:**
 | paperboy | haiku | every60 | Feed RSS |
 
 Definicao: `zion/agents/<nome>/agent.md`
-Memoria: `/workspace/obsidian/contractors/<nome>/memory.md`
+Breakroom: `/workspace/obsidian/agents/<nome>/memory.md`
 
 ### Comunicacao
 
-- Contractors → user: `inbox/feed.md` (append) ou `inbox/CARTA_<agente>_<data>.md`
-- User → contractors: `outbox/para-<nome>-<tema>.md` (hermes processa)
+- Agents → user: `inbox/feed.md` (append) ou `inbox/CARTA_<agente>_<data>.md`
+- User → agents: `outbox/para-<nome>-<tema>.md` (hermes processa)
 - Alertas urgentes: `inbox/ALERTA_<agente>_<tema>.md`
 
 ### Comandos CLI
 
 ```
-zion contractors          # lista contractors
+zion contractors          # lista agents
 zion contractors status   # schedule + running + done
-zion contractors run X    # roda contractor imediatamente
+zion contractors run X    # roda agent imediatamente
 zion contractors work     # executa cards vencidos
 zion tasks                # lista tasks
 zion tasks add "titulo"   # cria task
