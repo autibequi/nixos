@@ -10,7 +10,7 @@
       "Grep(*)",
       "WebFetch(*)",
       "WebSearch(*)",
-      "mcp__*(*)",
+      "mcp__*",
       "ToolSearch(*)",
       "Agent(*)",
       "Skill(*)",

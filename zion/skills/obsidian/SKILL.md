@@ -8,33 +8,34 @@
 
 ```
 /workspace/obsidian/
-|- CONTROL.md               Dashboard central (Dataview)
+|- DASHBOARD.md              Dashboard central (Dataview)
+|- SETTINGS.md               Documento central (como tudo funciona + roster + protocolo)
 |- TAMAGOCHI.md              Pet virtual
-|- BOARDRULES.md             Documento central (como tudo funciona)
 |- FEED.md                   Feed RSS atualizado
 |- FEED.config.md            Lista de feeds RSS
+|- trash/                    Lixeira do CTO (trashman processa)
 |
 |- tasks/                    Sistema kanban
 |  |- TODO/                  Cards agendados (YYYYMMDD_HH_MM_name.md)
 |  |- DOING/                 Cards em execucao
 |  |- DONE/                  Cards concluidos
-|  |- _archive/              Historico
+|  |- _archive/              Historico + _scheduled/
 |
 |- inbox/                    Novidades dos agentes -> user le
-|  |- feed.md                Append-only feed
+|  |- feed.md                Append-only: [HH:MM] [agente] mensagem
 |
 |- outbox/                   Items do user -> scheduler refina -> TODO/
 |
 |- vault/                    Base de conhecimento
    |- agents/<nome>/         Pasta por agente (memory.md, diarios/, outputs/)
-   |- tasks/<slug>/          Artefatos de tasks
+   |- tasks/_archive/_scheduled/<agente>/  TASK.md + memoria.md por agente
    |- chrome/                Drawings
    |- explorations/          Pesquisas
    |- inspections/           Inspecoes
    |- templates/             Templates Obsidian
    |- insights.md            Hub de insights
    |- sugestoes/             Sugestoes
-   |- trash/                 Lixeira reversivel
+   |- trash/                 Lixeira interna reversivel
    |- .ephemeral/            Cache + cron-logs
 ```
 
@@ -88,6 +89,10 @@ DONE/ -> _archive/ (trashman, 30 dias)
 
 | O que | Path |
 |-------|------|
+| Regras e roster | `SETTINGS.md` (raiz) |
+| Dashboard | `DASHBOARD.md` (raiz) |
+| Lixeira do CTO | `trash/` (raiz) |
+| TASK.md de agente | `vault/tasks/_archive/_scheduled/<nome>/TASK.md` |
 | Memoria do agente | `vault/agents/<nome>/memory.md` |
 | Outputs do agente | `vault/agents/<nome>/outputs/` |
 | Artefatos de task | `vault/tasks/<slug>/` |
@@ -106,8 +111,9 @@ DONE/ -> _archive/ (trashman, 30 dias)
 
 Agentes fazem append em `inbox/feed.md`:
 ```
-[2026-03-20T14:00Z] [trashman] Limpeza: 3 arquivos
+[14:00] [trashman] Limpeza: 3 arquivos
 ```
+Alertas urgentes: criar `inbox/ALERTA_<agente>_<tema>.md`
 
 ### outbox (user -> scheduler)
 
@@ -115,7 +121,7 @@ User cria `.md` em `outbox/`. Scheduler le, refina, cria card em TODO/.
 
 ---
 
-## CONTROL.md -- Dashboard
+## DASHBOARD.md -- Dashboard
 
 Usa DataviewJS para stats e Dataview para tabelas:
 

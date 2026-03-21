@@ -64,27 +64,31 @@
 - Com argumento: exibe help detalhado do skill/command (ex: `/manual go-worker`)
 - Match parcial funciona (ex: `worker` encontra `go-worker`)
 
-## Sistema de Tasks (14 recorrentes)
+## Sistema de Tasks (12 agentes recorrentes)
 
-| Task | Clock | Model | Função |
-|------|-------|-------|--------|
-| processar-inbox | every10 | haiku | Processa coluna Inbox do THINKINGS |
-| doctor | every10 | haiku | Health check |
-| vigiar-logs | every10 | haiku | Monitora logs |
-| radar | every60 | haiku | Jira/Notion |
-| avaliar | every60 | sonnet | Repo + projetos + knowledge |
-| sumarizer | every60 | sonnet | Sintetiza insights + reunião de agentes |
-| trashman | every60 | haiku | Arquiva arquivos velhos/órfãos |
-| trashman-clean-assets | every60 | haiku | Limpa imagens não referenciadas |
-| evolucao | every240 | sonnet | Meta-análise + docs |
-| wiseman | every240 | haiku | Conexões entre notas do Obsidian |
-| propositor | every240 | sonnet | Propõe mudanças via worktree |
-| guardinha | every240 | sonnet | Auditoria de segurança |
-| tamagochi | every240 | haiku | — |
+| Agente | Clock | Model | Função |
+|--------|-------|-------|--------|
+| scheduler | every10 | haiku | Fila de tasks + processa outbox do CTO |
+| hermes | every10 | haiku | Processa cards Inbox do kanban |
+| doctor | every60 | haiku | Health check + monitoramento de logs |
+| trashman | every60 | haiku | Limpeza + /trash do CTO + assets |
+| coruja | every60 | haiku | Jira/Notion/Grafana READ-ONLY |
+| wiseman | every60 | sonnet | Knowledge graph + repo audit (A/B/C) |
+| trainee | every60 | sonnet | Síntese cross-agente + reunião de agentes |
+| jafar | every60 | sonnet | Meta-análise + propostas + liaison CTO |
 | paperboy | every60 | haiku | Curador pessoal de RSS |
+| guardinha | every60 | sonnet | Auditoria de segurança |
+| tamagochi | every60 | haiku | Pet virtual |
+| sentinel | every60 | sonnet | Segurança do sistema |
+| wanderer | every120 | sonnet | Explora o código + escreve carta ao CTO |
 
-Workers: **every10** (10 min) + **every60** (1h) + **every240** (4h).
-Detalhes em `/workspace/obsidian/docs/task-system.md`. Tags de modelo em `/workspace/obsidian/docs/operational-reference.md`.
+Workers: **every10** (2 agentes) + **every60** (10 agentes) + **every120** (1 agente).
+
+Escalonamento (offsets UTC):
+`:00` doctor | `:05` trashman | `:10` coruja | `:15` wiseman | `:20` trainee | `:30` jafar | `:35` paperboy | `:40` guardinha | `:45` tamagochi | `:50` sentinel
+
+TASK.md e memória em `/workspace/obsidian/vault/tasks/_archive/_scheduled/<agente>/`.
+SETTINGS em `/workspace/obsidian/SETTINGS.md` — protocolo de comunicação e roster completo.
 
 ## Inbox
 User adiciona card na coluna "Inbox" do THINKINGS no Obsidian (texto livre) → worker every10 processa a cada 10 min → cria task + card formatado no Backlog.
@@ -140,6 +144,21 @@ Path: `/workspace/.hive-mind/` — efêmero, compartilhado entre containers (bin
 - **Concluído**: mover com link pro resultado
 
 O THINKINGS é memória compartilhada entre sessões, mecanismo de orquestração entre agentes, e visibilidade pro user no Obsidian.
+
+## wisdom — Capturador de Ideias (sempre ligado)
+
+**Comportamento obrigatório, automático, sem o usuário pedir:**
+
+Enquanto a conversa acontece, monitorar por ideias que poderiam virar skill, comando, hook, automação ou melhoria no hive. Quando perceber uma:
+- Invocar `wisdom` via Task tool (haiku, async)
+- Não anunciar, não bloquear, não interromper o fluxo
+- O haiku pensa sobre a ideia e escreve um card em `obsidian/inbox/IDEIA_wisdom_<ts>.md`
+
+**Gatilhos típicos:** "seria legal ter um comando que...", mesma operação manual repetida, padrão recorrente sem automação, integração nova mencionada de passagem, extensão de agente sugerida implicitamente.
+
+Ver `zion/skills/wisdom/SKILL.md` para o prompt completo do haiku e formato do card.
+
+---
 
 ## Evolução Contínua
 **`/contemplate-memories`** — introspecção profunda sobre conversas recentes. Extrai aprendizados para memórias, SOUL.md, CLAUDE.md, skills, e limpeza do THINKINGS. Rodar periodicamente ou após sessões longas com feedback significativo.

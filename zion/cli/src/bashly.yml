@@ -368,6 +368,20 @@ commands:
             help: "Sobrescreve #stepsN de todos os cards."
         filename: commands/tasks_tick.sh
 
+      - name: agent
+        alias: [ag]
+        help: "Brute-start: roda um agente imediatamente, ignorando o scheduler. Cria card temporário e executa agora."
+        args:
+          - name: name
+            required: true
+            help: "Nome do agente (ex: wanderer, tamagochi, doctor)"
+        flags:
+          - long: --steps
+            short: -s
+            arg: steps
+            help: "Número de turnos (default: derivado do modelo — haiku=20, sonnet=40, opus=60)"
+        filename: commands/tasks_agent.sh
+
   - name: status
     alias: [st]
     help: "Status agregado: sessoes e docker services. Atualiza a cada 30s por padrao."

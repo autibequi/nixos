@@ -123,7 +123,7 @@ FrontStudent (Nuxt 2 specialist)
 3. Mantenha a seção "Protocolo de Execução" e "Regras Invariantes"
 4. Adicione sua seção de especialização (skills, convenções, stack específica)
 5. Sobrescreva apenas o que for diferente do base
-6. Documente em BOARDRULES qual é o escopo do novo agente
+6. Documente em SETTINGS.md qual é o escopo do novo agente
 
 ### O que pode ser sobrescrito
 
