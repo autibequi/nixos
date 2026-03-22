@@ -35,6 +35,9 @@
     "deny": [],
     "defaultMode": "bypassPermissions"
   },
+  "env": {
+    "TZ": "UTC+3"
+  },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": ["nixos"],
   "hooks": {

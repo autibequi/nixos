@@ -231,27 +231,31 @@ Identifique:
 
 ### 2. Persistir o que vale
 
+> **REGRA CRÍTICA:** APENAS `/workspace/self/` persiste entre sessões.
+> `/home/claude/.claude/` e `/workspace/host/` são read-only — não tentar escrever lá.
+> Se não conseguir salvar em `/workspace/self/`, emitir AVISO explícito ao usuário.
+
 | O que é | Onde salvar |
 |---------|-------------|
-| Correção de comportamento | `~/.claude/projects/-workspace-mnt/memory/feedback_*.md` |
-| Preferência do usuário | `memory/user_*.md` |
-| Contexto de projeto | `memory/project_*.md` |
-| Referência externa | `memory/reference_*.md` |
-| Melhoria em skill existente | editar `skills/*/SKILL.md` |
-| Comportamento de agente mudou | editar `zion/agents/*/agent.md` |
+| Correção de comportamento | `/workspace/self/system/memory/feedback_*.md` |
+| Preferência do usuário | `/workspace/self/system/memory/user_*.md` |
+| Contexto de projeto | `/workspace/self/system/memory/project_*.md` |
+| Referência externa | `/workspace/self/system/memory/reference_*.md` |
+| Melhoria em skill existente | editar `/workspace/self/skills/*/SKILL.md` |
+| Comportamento de agente mudou | editar `/workspace/self/agents/*/agent.md` |
 | Regra fundamental | sugerir via inbox (não editar CLAUDE.md direto) |
 
 **Paths:**
-- Memórias: `~/.claude/projects/-workspace-mnt/memory/` + `MEMORY.md`
-- Zion skills: `/workspace/mnt/self/skills/`
-- Zion agents: `/workspace/mnt/self/agents/`
-- Commands: `/workspace/mnt/self/commands/`
+- Memórias: `/workspace/self/system/memory/` + `MEMORY.md`
+- Skills: `/workspace/self/skills/`
+- Agents: `/workspace/self/agents/`
+- Commands: `/workspace/self/commands/`
 
 ### 3. Skills disponíveis (para identificar gaps ou melhorias)
 
 ```bash
-ls /workspace/mnt/self/skills/
-ls /workspace/mnt/self/commands/
+ls /workspace/self/skills/
+ls /workspace/self/commands/
 ```
 
 ### 4. Regras

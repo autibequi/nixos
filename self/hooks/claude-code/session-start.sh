@@ -81,6 +81,10 @@ if [ "$AUTOCOMMIT" = "OFF" ]; then
   echo "REGRA: autocommit=OFF — NÃO fazer git commit por iniciativa própria."
   echo "       Esperar o usuário pedir explicitamente antes de commitar qualquer coisa."
 fi
+echo "REGRA: persistência → APENAS /workspace/self/ sobrevive entre sessões."
+echo "       Configs, memórias, traços de comportamento: SEMPRE salvar em /workspace/self/."
+echo "       /home/claude/.claude/ e /workspace/host/ são read-only — não tentar escrever lá."
+echo "       Se não conseguir persistir em /workspace/self/, emitir AVISO explícito ao usuário."
 echo "---/BOOT---"
 
 # ────────────────────────────────────────────────────────────────
