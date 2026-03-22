@@ -37,24 +37,10 @@ enum Commands {
     /// Continue last session
     #[command(alias = "cont")]
     Continue { dir: Option<String> },
-    /// Session with Claude engine (default: new session)
+    /// Claude tools (usage, token)
     Claude {
         #[command(subcommand)]
         action: Option<ClaudeAction>,
-
-        #[command(flatten)]
-        flags: SessionFlags,
-    },
-    /// Session with Cursor engine
-    Cursor {
-        #[command(flatten)]
-        flags: SessionFlags,
-    },
-    /// Session with OpenCode engine
-    #[command(alias = "oc")]
-    Opencode {
-        #[command(flatten)]
-        flags: SessionFlags,
     },
     /// Resume a session by ID
     Resume {
@@ -139,9 +125,6 @@ enum Commands {
         #[arg(default_value = "start")]
         action: String,
     },
-    /// Read or add to inbox
-    #[command(alias = "ib")]
-    Inbox { message: Option<String> },
     /// List outbox files
     #[command(alias = "ob")]
     Outbox,
@@ -210,12 +193,6 @@ enum Commands {
         action: Option<TasksAction>,
     },
 
-    // ── Git ─────────────────────────────────────────────────────
-    #[command(alias = "g")]
-    Git {
-        #[command(subcommand)]
-        action: GitAction,
-    },
 }
 
 #[derive(Subcommand)]
@@ -271,12 +248,6 @@ enum TasksAction {
     },
 }
 
-#[derive(Subcommand)]
-enum GitAction {
-    #[command(alias = "ap")]
-    Append { branch: String },
-}
-
 fn main() -> Result<()> {
     let cli = Cli::parse();
 
@@ -284,17 +255,15 @@ fn main() -> Result<()> {
         // Session
         Some(Commands::New { flags }) => commands::session::new(flags),
         Some(Commands::Continue { dir }) => commands::session::cont(dir),
-        Some(Commands::Claude { action, flags }) => match action {
+        Some(Commands::Claude { action }) => match action {
             Some(ClaudeAction::Usage {
                 waybar,
                 no_cache,
                 refresh,
             }) => commands::tools::usage(waybar, no_cache || refresh),
             Some(ClaudeAction::Token) => commands::tools::token(),
-            None => commands::session::engine("claude", flags),
+            None => commands::tools::usage(false, false),
         },
-        Some(Commands::Cursor { flags }) => commands::session::engine("cursor", flags),
-        Some(Commands::Opencode { flags }) => commands::session::engine("opencode", flags),
         Some(Commands::Resume { dir, resume }) => commands::session::resume(dir, resume),
         Some(Commands::Shell { dir }) => commands::session::shell(dir),
         Some(Commands::Leech { flags, shell }) => commands::session::leech(flags, shell),
@@ -330,7 +299,6 @@ fn main() -> Result<()> {
             env_overrides,
         }) => commands::tools::hooks(hook, list, env_overrides),
         Some(Commands::Relay { action }) => commands::tools::relay(&action),
-        Some(Commands::Inbox { message }) => commands::tools::inbox(message),
         Some(Commands::Outbox) => commands::tools::outbox(),
         Some(Commands::Man) => commands::tools::man(),
         Some(Commands::Banner) => commands::tools::help_banner(),
@@ -380,11 +348,6 @@ fn main() -> Result<()> {
             TasksAction::Status { tick } => {
                 exec::bash_delegate(&["tasks", "status", "--tick", &tick])
             }
-        },
-
-        // Git
-        Some(Commands::Git { action }) => match action {
-            GitAction::Append { branch } => commands::git::append(&branch),
         },
 
         // No subcommand = implicit `new`

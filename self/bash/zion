@@ -30,10 +30,7 @@ zion_usage() {
   printf "  %s   Nova sessão no container. Exige --engine (ou engine= em ~/.zion). (default)\n" "new      "
   printf "  %s   Abre bash no container com o projeto montado.\n" "shell    "
   printf "  %s   Mostra lista de sessões e permite escolher qual retomar.\n" "resume   "
-  printf "  %s   [DEPRECATED] Use 'zion new --engine=claude --danger'. Mantido por compatibilidade.\n" "start    "
-  printf "  %s   Nova sessão Claude ou consultar uso. Sem subcomando = nova sessão.\n" "claude   "
-  printf "  %s   Atalho: nova sessão com engine Cursor (= zion new --engine=cursor).\n" "cursor   "
-  printf "  %s   Atalho: nova sessão com engine OpenCode (= zion new --engine=opencode).\n" "opencode "
+  printf "  %s   Ferramentas Claude: usage, token.\n" "claude   "
   printf "  %s   Build da imagem Docker do leech (claude-nix-sandbox).\n" "build    "
   printf "  %s   Para todos os containers do projeto.\n" "down     "
   printf "  %s   Para containers do compose + mata qualquer stray com nome zion/claude/puppy.\n" "shutdown "
@@ -53,13 +50,10 @@ zion_usage() {
   printf "  %s   Aplica configuração NixOS no host via nh os.\n" "os       "
   printf "  %s   Engatou numa pasta — sessão efêmera (auto-detecta nixos → monta logs).\n" "leech    "
   printf "  %s   Sessão host: projeto em /workspace/mnt + ~/nixos em /workspace/host (editável).\n" "host     "
-  printf "  %s   Utilitarios Git. Ex: zion git sandbox\n" "git      "
-  printf "  %s   Lista o inbox ou adiciona uma entrada. Sem args: mostra inbox.md. Com texto: adiciona entrada.\n" "inbox    "
   printf "  %s   Lista os arquivos do outbox.\n" "outbox   "
   printf "  %s   Mostra o banner com comandos principais.\n" "help     "
   printf "  %s   Documentacao completa de todos os comandos e flags.\n" "man      "
   printf "  %s   Chrome Relay — inicia Chrome no host com CDP para o agent conectar.\n" "relay    "
-  printf "  %s   Toggle do modo BETA (beta overrides). Liga/desliga observacao da sessao.\n" "beta     "
   printf "  %s   Remove o symlink do zion de ~/.local/bin (desinstala do PATH).\n" "uninstall"
   echo
 
@@ -331,46 +325,16 @@ zion_resume_usage() {
 }
 
 # :command.usage
-zion_start_usage() {
-  printf "zion start - [DEPRECATED] Use 'zion new --engine=claude --danger'. Mantido por compatibilidade.\n\n"
-
-  printf "%s\n" "Usage:"
-  printf "  zion start [DIR]\n"
-  printf "  zion start --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
-    echo
-
-    # :command.usage_args
-    printf "%s\n" "Arguments:"
-
-    # :argument.usage
-    printf "  %s\n" "DIR"
-    printf "    Diretório do projeto (default ~/projects)\n"
-    echo
-
-  fi
-}
-
-# :command.usage
 zion_claude_usage() {
-  printf "zion claude - Nova sessão Claude ou consultar uso. Sem subcomando = nova sessão.\n\n"
+  printf "zion claude - Ferramentas Claude: usage, token.\n\n"
 
   printf "%s\n" "Usage:"
-  printf "  zion claude COMMAND\n"
+  printf "  zion claude [COMMAND]\n"
   printf "  zion claude [COMMAND] --help | -h\n"
   echo
   # :command.usage_commands
   printf "%s\n" "Commands:"
-  printf "  %s   Nova sessão com engine Claude (= zion new --engine=claude). (default)\n" "new  "
-  printf "  %s   Estatísticas de uso Claude (API OAuth / claude.ai).\n" "usage"
+  printf "  %s   Estatísticas de uso Claude (API OAuth / claude.ai). (default)\n" "usage"
   printf "  %s   Imprime o OAuth access token do Claude (util para curl manual).\n" "token"
   echo
 
@@ -387,79 +351,13 @@ zion_claude_usage() {
 }
 
 # :command.usage
-zion_claude_new_usage() {
-  printf "zion claude new - Nova sessão com engine Claude (= zion new --engine=claude).\n\n"
-
-  printf "%s\n" "Usage:"
-  printf "  zion claude [new] [DIR] [OPTIONS]\n"
-  printf "  zion claude new --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_flags
-    # :flag.usage
-    printf "  %s\n" "--init-md FILE"
-    printf "\n"
-    printf "    %s\n" "Default: contexto.md"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--danger"
-    printf "\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--resume SESSION_ID"
-    printf "\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--model MODEL"
-    printf "\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--instance ID"
-    printf "\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--rw"
-    printf "\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--ro"
-    printf "\n"
-    echo
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
-    echo
-
-    # :command.usage_args
-    printf "%s\n" "Arguments:"
-
-    # :argument.usage
-    printf "  %s\n" "DIR"
-    printf "    Diretório do projeto (default ~/projects)\n"
-    echo
-
-  fi
-}
-
-# :command.usage
 zion_claude_usage_usage() {
   printf "zion claude usage - Estatísticas de uso Claude (API OAuth / claude.ai).\n\n"
   printf "Alias: u\n"
   echo
 
   printf "%s\n" "Usage:"
-  printf "  zion claude usage [OPTIONS]\n"
+  printf "  zion claude [usage] [OPTIONS]\n"
   printf "  zion claude usage --help | -h\n"
   echo
 
@@ -514,140 +412,6 @@ zion_claude_token_usage() {
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
     printf "    Show this help\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-zion_cursor_usage() {
-  printf "zion cursor - Atalho: nova sessão com engine Cursor (= zion new --engine=cursor).\n\n"
-
-  printf "%s\n" "Usage:"
-  printf "  zion cursor [DIR] [OPTIONS]\n"
-  printf "  zion cursor --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_flags
-    # :flag.usage
-    printf "  %s\n" "--init-md FILE"
-    printf "\n"
-    printf "    %s\n" "Default: contexto.md"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--danger"
-    printf "\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--resume SESSION_ID"
-    printf "\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--model MODEL"
-    printf "\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--instance ID"
-    printf "\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--rw"
-    printf "\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--ro"
-    printf "\n"
-    echo
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
-    echo
-
-    # :command.usage_args
-    printf "%s\n" "Arguments:"
-
-    # :argument.usage
-    printf "  %s\n" "DIR"
-    printf "    Diretório do projeto (default ~/projects)\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-zion_opencode_usage() {
-  printf "zion opencode - Atalho: nova sessão com engine OpenCode (= zion new --engine=opencode).\n\n"
-  printf "Alias: oc\n"
-  echo
-
-  printf "%s\n" "Usage:"
-  printf "  zion opencode [DIR] [OPTIONS]\n"
-  printf "  zion opencode --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_flags
-    # :flag.usage
-    printf "  %s\n" "--init-md FILE"
-    printf "\n"
-    printf "    %s\n" "Default: contexto.md"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--danger"
-    printf "\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--resume SESSION_ID"
-    printf "\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--model MODEL"
-    printf "\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--instance ID"
-    printf "\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--rw"
-    printf "\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--ro"
-    printf "\n"
-    echo
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
-    echo
-
-    # :command.usage_args
-    printf "%s\n" "Arguments:"
-
-    # :argument.usage
-    printf "  %s\n" "DIR"
-    printf "    Diretório do projeto (default ~/projects)\n"
     echo
 
   fi
@@ -1579,106 +1343,6 @@ zion_host_usage() {
 }
 
 # :command.usage
-zion_git_usage() {
-  printf "zion git - Utilitarios Git. Ex: zion git sandbox\n\n"
-  printf "Alias: g\n"
-  echo
-
-  printf "%s\n" "Usage:"
-  printf "  zion git COMMAND\n"
-  printf "  zion git [COMMAND] --help | -h\n"
-  echo
-  # :command.usage_commands
-  printf "%s\n" "Commands:"
-  printf "  %s   Merge da branch atual em <BRANCH> (recriada limpa do remote), push e volta.\n" "append"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-zion_git_append_usage() {
-  printf "zion git append - Merge da branch atual em <BRANCH> (recriada limpa do remote), push e volta.\n\n"
-  printf "Alias: ap\n"
-  echo
-
-  printf "%s\n" "Usage:"
-  printf "  zion git append BRANCH [OPTIONS]\n"
-  printf "  zion git append --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_flags
-    # :flag.usage
-    printf "  %s\n" "--no-push"
-    printf "    Nao faz push (apenas merge local)\n"
-    echo
-
-    # :flag.usage
-    printf "  %s\n" "--yes, -y"
-    printf "    Pula confirmacao interativa\n"
-    echo
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
-    echo
-
-    # :command.usage_args
-    printf "%s\n" "Arguments:"
-
-    # :argument.usage
-    printf "  %s\n" "BRANCH"
-    printf "    Branch destino (ex: sandbox, staging)\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-zion_inbox_usage() {
-  printf "zion inbox - Lista o inbox ou adiciona uma entrada. Sem args: mostra inbox.md. Com texto: adiciona entrada.\n\n"
-  printf "Alias: ib\n"
-  echo
-
-  printf "%s\n" "Usage:"
-  printf "  zion inbox [MESSAGE...]\n"
-  printf "  zion inbox --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
-    echo
-
-    # :command.usage_args
-    printf "%s\n" "Arguments:"
-
-    # :argument.usage
-    printf "  %s\n" "MESSAGE..."
-    printf "    Mensagem para adicionar ao inbox (opcional)\n"
-    echo
-
-  fi
-}
-
-# :command.usage
 zion_outbox_usage() {
   printf "zion outbox - Lista os arquivos do outbox.\n\n"
   printf "Alias: ob\n"
@@ -1769,27 +1433,6 @@ zion_relay_usage() {
     printf "    Acao: start (default), stop, status\n"
     printf "    %s\n" "Allowed: start, stop, status"
     printf "    %s\n" "Default: start"
-    echo
-
-  fi
-}
-
-# :command.usage
-zion_beta_usage() {
-  printf "zion beta - Toggle do modo BETA (beta overrides). Liga/desliga observacao da sessao.\n\n"
-
-  printf "%s\n" "Usage:"
-  printf "  zion beta\n"
-  printf "  zion beta --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
     echo
 
   fi
@@ -3778,26 +3421,6 @@ zion_resume_command() {
 }
 
 # :command.function
-zion_start_command() {
-
-  # src/commands/start.sh
-  echo "# This file is located at 'src/commands/start.sh'."
-  echo "# It contains the implementation for the 'zion start' command."
-  echo "# The code you write here will be wrapped by a function named 'zion_start_command()'."
-  echo "# Feel free to edit this file; your changes will persist when regenerating."
-  inspect_args
-
-}
-
-# :command.function
-zion_claude_new_command() {
-
-  # src/commands/engine_claude.sh
-  zion_launch_session "claude"
-
-}
-
-# :command.function
 zion_claude_usage_command() {
 
   # src/commands/claude_usage.sh
@@ -3869,22 +3492,6 @@ zion_claude_token_command() {
 }
 
 # :command.function
-zion_cursor_command() {
-
-  # src/commands/engine_cursor.sh
-  zion_launch_session "cursor"
-
-}
-
-# :command.function
-zion_opencode_command() {
-
-  # src/commands/engine_opencode.sh
-  zion_launch_session "opencode"
-
-}
-
-# :command.function
 zion_build_command() {
 
   # src/commands/build.sh
@@ -3892,6 +3499,16 @@ zion_build_command() {
 
   build_args=()
   [[ -n "${args['--danger']:-}" ]] && build_args+=(--no-cache)
+
+  # Auto-build zion-base:latest if not present locally (required by Dockerfile.claude)
+  if ! docker image inspect zion-base:latest > /dev/null 2>&1; then
+    echo "zion-base:latest not found — building from Dockerfile.claude.base..."
+    base_ctx="${zion_container_dir:-${HOME}/nixos/self/containers/zion}"
+    docker build "${build_args[@]}" \
+      -f "${base_ctx}/Dockerfile.claude.base" \
+      -t zion-base:latest \
+      "${base_ctx}" || { echo "Error: failed to build zion-base:latest"; exit 1; }
+  fi
 
   echo "Building claude-nix-sandbox image..."
   zion_compose_cmd build "${build_args[@]}" leech
@@ -5720,9 +5337,11 @@ zion_os_boot_command() {
 zion_os_build_command() {
 
   # src/commands/os_build.sh
-  zion_load_config
-  nixos_dir="${ZION_NIXOS_DIR:-${HOST_NIXOS_DIR:-$HOME/nixos}}"
-  exec nh os build "$nixos_dir"
+  echo "# This file is located at 'src/commands/os_build.sh'."
+  echo "# It contains the implementation for the 'zion os build' command."
+  echo "# The code you write here will be wrapped by a function named 'zion_os_build_command()'."
+  echo "# Feel free to edit this file; your changes will persist when regenerating."
+  inspect_args
 
 }
 
@@ -5814,61 +5433,6 @@ zion_host_command() {
   extra_volumes+=" -v /var/log/journal:/workspace/logs/host/journal:ro"
 
   zion_session_run "$engine" "$proj_name" "$mount_path" "$mount_opts" "$engine_args" "$extra_volumes"
-
-}
-
-# :command.function
-zion_git_append_command() {
-
-  # src/commands/git_sandbox.sh
-  # zion git append — cria commit de append no branch atual
-  # Alias legado de git sandbox
-  zion_load_config
-  local cwd="${args[dir]:-$(pwd)}"
-  cd "$cwd" || { echo "zion: dir not found: $cwd" >&2; exit 1; }
-  exec git add -A && git commit -m "chore: append $(date +%Y%m%d_%H%M)"
-
-}
-
-# :command.function
-zion_inbox_command() {
-
-  # src/commands/inbox.sh
-  # Lista o inbox ou adiciona uma entrada
-  local obsidian="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
-  local inbox_file="$obsidian/inbox/inbox.md"
-
-  # Fallback path
-  if [ ! -f "$inbox_file" ]; then
-    for try in "/workspace/obsidian/inbox/inbox.md" "$HOME/obsidian/inbox/inbox.md"; do
-      [ -f "$try" ] && inbox_file="$try" && break
-    done
-  fi
-
-  message="${args[message]*}"
-
-  if [ -z "$message" ]; then
-    # Sem args: mostrar inbox
-    if [ -f "$inbox_file" ]; then
-      cat "$inbox_file"
-    else
-      echo "Inbox nao encontrado: $inbox_file"
-      exit 1
-    fi
-  else
-    # Com texto: adicionar entrada
-    if [ ! -f "$inbox_file" ]; then
-      echo "Inbox nao encontrado: $inbox_file"
-      exit 1
-    fi
-    DATE=$(date +%Y-%m-%d)
-    cat >> "$inbox_file" << ENTRY
-
-
-${message}
-ENTRY
-    echo "Adicionado ao inbox."
-  fi
 
 }
 
@@ -6023,18 +5587,6 @@ zion_relay_command() {
       exit 1
       ;;
   esac
-
-}
-
-# :command.function
-zion_beta_command() {
-
-  # src/commands/beta.sh
-  echo "# This file is located at 'src/commands/beta.sh'."
-  echo "# It contains the implementation for the 'zion beta' command."
-  echo "# The code you write here will be wrapped by a function named 'zion_beta_command()'."
-  echo "# Feel free to edit this file; your changes will persist when regenerating."
-  inspect_args
 
 }
 
@@ -6250,31 +5802,10 @@ parse_requirements() {
       shift $#
       ;;
 
-    start)
-      action="start"
-      shift
-      zion_start_parse_requirements "$@"
-      shift $#
-      ;;
-
     claude)
       action="claude"
       shift
       zion_claude_parse_requirements "$@"
-      shift $#
-      ;;
-
-    cursor)
-      action="cursor"
-      shift
-      zion_cursor_parse_requirements "$@"
-      shift $#
-      ;;
-
-    opencode | oc)
-      action="opencode"
-      shift
-      zion_opencode_parse_requirements "$@"
       shift $#
       ;;
 
@@ -6411,20 +5942,6 @@ parse_requirements() {
       shift $#
       ;;
 
-    git | g)
-      action="git"
-      shift
-      zion_git_parse_requirements "$@"
-      shift $#
-      ;;
-
-    inbox | ib)
-      action="inbox"
-      shift
-      zion_inbox_parse_requirements "$@"
-      shift $#
-      ;;
-
     outbox | ob)
       action="outbox"
       shift
@@ -6450,13 +5967,6 @@ parse_requirements() {
       action="relay"
       shift
       zion_relay_parse_requirements "$@"
-      shift $#
-      ;;
-
-    beta)
-      action="beta"
-      shift
-      zion_beta_parse_requirements "$@"
       shift $#
       ;;
 
@@ -6816,57 +6326,6 @@ zion_resume_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_start_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_start_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="start"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        # :argument.case
-        if [[ -z ${args['dir']+x} ]]; then
-          args['dir']=$1
-          shift
-        else
-          printf "invalid argument: %s\n" "$key" >&2
-          exit 1
-        fi
-
-        ;;
-
-    esac
-  done
-
-}
-
-# :command.parse_requirements
 zion_claude_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
@@ -6890,13 +6349,6 @@ zion_claude_parse_requirements() {
 
   case $action in
 
-    new)
-      action="new"
-      shift
-      zion_claude_new_parse_requirements "$@"
-      shift $#
-      ;;
-
     usage | u)
       action="usage"
       shift
@@ -6912,14 +6364,9 @@ zion_claude_parse_requirements() {
       ;;
 
     # :command.command_fallback
-    "")
-      zion_claude_usage >&2
-      exit 1
-      ;;
-
     *)
-      action="new"
-      zion_claude_new_parse_requirements "$@"
+      action="usage"
+      zion_claude_usage_parse_requirements "$@"
       shift $#
       ;;
 
@@ -6945,139 +6392,6 @@ zion_claude_parse_requirements() {
 
     esac
   done
-
-}
-
-# :command.parse_requirements
-zion_claude_new_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_claude_new_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="claude new"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      # :flag.case
-      --init-md)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--init-md']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--init-md requires an argument: --init-md FILE" >&2
-          exit 1
-        fi
-        ;;
-
-      # :flag.case
-      --danger)
-
-        # :flag.case_no_arg
-        args['--danger']=1
-        shift
-        ;;
-
-      # :flag.case
-      --resume)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--resume']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--resume requires an argument: --resume SESSION_ID" >&2
-          exit 1
-        fi
-        ;;
-
-      # :flag.case
-      --model)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--model']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--model requires an argument: --model MODEL" >&2
-          exit 1
-        fi
-        ;;
-
-      # :flag.case
-      --instance)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--instance']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--instance requires an argument: --instance ID" >&2
-          exit 1
-        fi
-        ;;
-
-      # :flag.case
-      --rw)
-
-        # :flag.case_no_arg
-        args['--rw']=1
-        shift
-        ;;
-
-      # :flag.case
-      --ro)
-
-        # :flag.case_no_arg
-        args['--ro']=1
-        shift
-        ;;
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        # :argument.case
-        if [[ -z ${args['dir']+x} ]]; then
-          args['dir']=$1
-          shift
-        else
-          printf "invalid argument: %s\n" "$key" >&2
-          exit 1
-        fi
-
-        ;;
-
-    esac
-  done
-
-  # :command.default_assignments
-  [[ -n ${args['--init-md']:-} ]] || args['--init-md']="contexto.md"
 
 }
 
@@ -7199,272 +6513,6 @@ zion_claude_token_parse_requirements() {
 
     esac
   done
-
-}
-
-# :command.parse_requirements
-zion_cursor_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_cursor_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="cursor"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      # :flag.case
-      --init-md)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--init-md']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--init-md requires an argument: --init-md FILE" >&2
-          exit 1
-        fi
-        ;;
-
-      # :flag.case
-      --danger)
-
-        # :flag.case_no_arg
-        args['--danger']=1
-        shift
-        ;;
-
-      # :flag.case
-      --resume)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--resume']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--resume requires an argument: --resume SESSION_ID" >&2
-          exit 1
-        fi
-        ;;
-
-      # :flag.case
-      --model)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--model']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--model requires an argument: --model MODEL" >&2
-          exit 1
-        fi
-        ;;
-
-      # :flag.case
-      --instance)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--instance']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--instance requires an argument: --instance ID" >&2
-          exit 1
-        fi
-        ;;
-
-      # :flag.case
-      --rw)
-
-        # :flag.case_no_arg
-        args['--rw']=1
-        shift
-        ;;
-
-      # :flag.case
-      --ro)
-
-        # :flag.case_no_arg
-        args['--ro']=1
-        shift
-        ;;
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        # :argument.case
-        if [[ -z ${args['dir']+x} ]]; then
-          args['dir']=$1
-          shift
-        else
-          printf "invalid argument: %s\n" "$key" >&2
-          exit 1
-        fi
-
-        ;;
-
-    esac
-  done
-
-  # :command.default_assignments
-  [[ -n ${args['--init-md']:-} ]] || args['--init-md']="contexto.md"
-
-}
-
-# :command.parse_requirements
-zion_opencode_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_opencode_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="opencode"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      # :flag.case
-      --init-md)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--init-md']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--init-md requires an argument: --init-md FILE" >&2
-          exit 1
-        fi
-        ;;
-
-      # :flag.case
-      --danger)
-
-        # :flag.case_no_arg
-        args['--danger']=1
-        shift
-        ;;
-
-      # :flag.case
-      --resume)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--resume']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--resume requires an argument: --resume SESSION_ID" >&2
-          exit 1
-        fi
-        ;;
-
-      # :flag.case
-      --model)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--model']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--model requires an argument: --model MODEL" >&2
-          exit 1
-        fi
-        ;;
-
-      # :flag.case
-      --instance)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--instance']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--instance requires an argument: --instance ID" >&2
-          exit 1
-        fi
-        ;;
-
-      # :flag.case
-      --rw)
-
-        # :flag.case_no_arg
-        args['--rw']=1
-        shift
-        ;;
-
-      # :flag.case
-      --ro)
-
-        # :flag.case_no_arg
-        args['--ro']=1
-        shift
-        ;;
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        # :argument.case
-        if [[ -z ${args['dir']+x} ]]; then
-          args['dir']=$1
-          shift
-        else
-          printf "invalid argument: %s\n" "$key" >&2
-          exit 1
-        fi
-
-        ;;
-
-    esac
-  done
-
-  # :command.default_assignments
-  [[ -n ${args['--init-md']:-} ]] || args['--init-md']="contexto.md"
 
 }
 
@@ -9338,199 +8386,6 @@ zion_host_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_git_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_git_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action=${1:-}
-
-  case $action in
-    -*) ;;
-
-    append | ap)
-      action="append"
-      shift
-      zion_git_append_parse_requirements "$@"
-      shift $#
-      ;;
-
-    # :command.command_fallback
-    "")
-      zion_git_usage >&2
-      exit 1
-      ;;
-
-    *)
-      printf "invalid command: %s\n" "$action" >&2
-      exit 1
-      ;;
-
-  esac
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        printf "invalid argument: %s\n" "$key" >&2
-        exit 1
-
-        ;;
-
-    esac
-  done
-
-}
-
-# :command.parse_requirements
-zion_git_append_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_git_append_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="git append"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      # :flag.case
-      --no-push)
-
-        # :flag.case_no_arg
-        args['--no-push']=1
-        shift
-        ;;
-
-      # :flag.case
-      --yes | -y)
-
-        # :flag.case_no_arg
-        args['--yes']=1
-        shift
-        ;;
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        # :argument.case
-        if [[ -z ${args['branch']+x} ]]; then
-          args['branch']=$1
-          shift
-        else
-          printf "invalid argument: %s\n" "$key" >&2
-          exit 1
-        fi
-
-        ;;
-
-    esac
-  done
-
-  # :command.required_args_filter
-  if [[ -z ${args['branch']+x} ]]; then
-    printf "missing required argument: BRANCH\nusage: zion git append BRANCH [OPTIONS]\n" >&2
-
-    exit 1
-  fi
-
-}
-
-# :command.parse_requirements
-zion_inbox_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_inbox_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="inbox"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_repeatable
-        # :argument.case_repeatable
-        escaped="$(printf '%q' "$1")"
-        if [[ -z ${args['message']+x} ]]; then
-          args['message']="$escaped"
-        else
-          args['message']="${args['message']} $escaped"
-
-        fi
-        shift
-
-        ;;
-
-    esac
-  done
-
-}
-
-# :command.parse_requirements
 zion_outbox_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
@@ -9726,51 +8581,6 @@ zion_relay_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_beta_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_beta_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="beta"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        printf "invalid argument: %s\n" "$key" >&2
-        exit 1
-
-        ;;
-
-    esac
-  done
-
-}
-
-# :command.parse_requirements
 zion_uninstall_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
@@ -9839,13 +8649,9 @@ run() {
     "new") zion_new_command ;;
     "shell") zion_shell_command ;;
     "resume") zion_resume_command ;;
-    "start") zion_start_command ;;
     "claude") zion_claude_command ;;
-    "claude new") zion_claude_new_command ;;
     "claude usage") zion_claude_usage_command ;;
     "claude token") zion_claude_token_command ;;
-    "cursor") zion_cursor_command ;;
-    "opencode") zion_opencode_command ;;
     "build") zion_build_command ;;
     "down") zion_down_command ;;
     "shutdown") zion_shutdown_command ;;
@@ -9874,14 +8680,10 @@ run() {
     "os build") zion_os_build_command ;;
     "leech") zion_leech_command ;;
     "host") zion_host_command ;;
-    "git") zion_git_command ;;
-    "git append") zion_git_append_command ;;
-    "inbox") zion_inbox_command ;;
     "outbox") zion_outbox_command ;;
     "help") zion_help_command ;;
     "man") zion_man_command ;;
     "relay") zion_relay_command ;;
-    "beta") zion_beta_command ;;
     "uninstall") zion_uninstall_command ;;
   esac
 }

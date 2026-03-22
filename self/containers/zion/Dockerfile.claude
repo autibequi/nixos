@@ -4,7 +4,19 @@ FROM zion-base:latest
 
 # Entrypoint: inicia nix-daemon como root, cria dirs essenciais como claude, depois delega via gosu
 RUN printf '#!/bin/bash\n\
-nix-daemon &\n\
+# Garantir /etc/passwd e /etc/group existem (imagem pode ser antiga)\n\
+if [ ! -f /etc/passwd ]; then\n\
+  echo "root:x:0:0:root:/root:/bin/bash" > /etc/passwd\n\
+  echo "claude:x:1000:1000::/home/claude:/bin/bash" >> /etc/passwd\n\
+fi\n\
+if [ ! -f /etc/group ]; then\n\
+  echo "root:x:0:" > /etc/group\n\
+  echo "claude:x:1000:" >> /etc/group\n\
+fi\n\
+# Garantir entrada do claude no passwd/group\n\
+grep -q "^claude:" /etc/passwd || echo "claude:x:1000:1000::/home/claude:/bin/bash" >> /etc/passwd\n\
+grep -q "^claude:" /etc/group  || echo "claude:x:1000:" >> /etc/group\n\
+HOME=/root nix-daemon &\n\
 sleep 1\n\
 # Garantir dirs essenciais com dono correto antes de trocar usuario\n\
 mkdir -p /workspace/.ephemeral/locks /workspace/.ephemeral/notes /workspace/.ephemeral/scratch /tmp/zion-locks\n\
