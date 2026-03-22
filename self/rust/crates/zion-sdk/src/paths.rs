@@ -18,7 +18,7 @@ pub fn nixos_dir() -> PathBuf {
 
 #[must_use]
 pub fn zion_root() -> PathBuf {
-    nixos_dir().join("zion")
+    nixos_dir().join("self")
 }
 
 #[must_use]
