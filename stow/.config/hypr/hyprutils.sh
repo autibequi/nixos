@@ -127,6 +127,23 @@ hypr_reload() {
     notify-send "Hyprland reloaded" -u low
 }
 
+# Colresize without wrap: stops at min (0.2) and max (1.0) instead of cycling
+# Usage: colresize_no_wrap + | colresize_no_wrap -
+# NOTE: activewindow.size is in logical px; monitors.width is physical px — must divide by scale
+colresize_no_wrap() {
+    local direction="$1"
+    local win_w mon_info mon_w
+    win_w=$(hyprctl -j activewindow | jaq -r '.size[0]')
+    mon_info=$(hyprctl -j monitors | jaq -r '.[] | select(.focused == true) | "\(.width) \(.scale)"')
+    mon_w=$(awk "BEGIN { split(\"$mon_info\", a); printf \"%d\", a[1] / a[2] }")
+    if [ "$direction" = "+" ]; then
+        awk "BEGIN { exit !($win_w / $mon_w >= 0.85) }" && return
+    else
+        awk "BEGIN { exit !($win_w / $mon_w <= 0.22) }" && return
+    fi
+    hyprctl dispatch layoutmsg "colresize ${direction}conf"
+}
+
 # Dispatcher: allows calling any function by name
 # Usage: ./hyprutils.sh workspace_switch 1
 if [ $# -gt 0 ]; then
