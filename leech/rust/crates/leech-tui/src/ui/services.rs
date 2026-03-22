@@ -41,6 +41,7 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             let is_selected = i == app.cursor_idx;
             let is_last_svc = i == DK_SERVICES.len() - 1;
             let svc_branch = if is_last_svc { "\u{2514}\u{2500}" } else { "\u{251c}\u{2500}" };
+            let vert_pad   = if is_last_svc { "  " } else { "\u{2502} " };
             let marker = if is_selected { "\u{25b6}" } else { " " };
             let style = if is_selected { theme::selected() } else { theme::dim() };
 
@@ -61,7 +62,9 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                 let is_last = di == service_dep_names(svc).len() - 1;
                 let tree = if is_last { "└─" } else { "├─" };
                 lines.push(Line::from(vec![
-                    Span::raw("          "),
+                    Span::raw("  "),
+                    Span::styled(vert_pad.to_string(), theme::tree_branch()),
+                    Span::raw("    "),
                     Span::styled(tree, theme::tree_branch()),
                     Span::raw(" "),
                     Span::styled("\u{25cb}", theme::down_icon()),
@@ -92,6 +95,7 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             let is_selected = i == app.cursor_idx;
             let is_last_svc = i == DK_SERVICES.len() - 1;
             let svc_branch = if is_last_svc { "\u{2514}\u{2500}" } else { "\u{251c}\u{2500}" };
+            let vert_pad   = if is_last_svc { "  " } else { "\u{2502} " };
             let marker = if is_selected { "\u{25b6}" } else { " " };
 
             // Find matching dk_service (main app container: leech-dk-{svc}-app)
@@ -214,7 +218,9 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                     _ => ("\u{25cb}", theme::down_icon(), "stopped".to_string(), String::new(), String::new()),
                 };
                 let mut dep_spans = vec![
-                    Span::raw("          "),
+                    Span::raw("  "),
+                    Span::styled(vert_pad.to_string(), theme::tree_branch()),
+                    Span::raw("    "),
                     Span::styled(tree, theme::tree_branch()),
                     Span::raw(" "),
                     Span::styled(dep_icon, dep_style),
