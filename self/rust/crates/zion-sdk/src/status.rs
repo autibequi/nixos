@@ -12,6 +12,8 @@ pub struct StatusSnapshot {
     pub agents: Vec<SessionInfo>,
     pub background: Vec<SessionInfo>,
     pub dk_services: Vec<DkServiceInfo>,
+    /// Leech agent containers (projects-leech-run-*), shown under "projects".
+    pub leech: Vec<DkServiceInfo>,
     /// Utility containers: zion-reverseproxy and others (not dk, not leech).
     pub utils: Vec<DkServiceInfo>,
     pub stats: Vec<ContainerStats>,
@@ -165,9 +167,26 @@ pub fn collect() -> Result<StatusSnapshot> {
         dk_containers.iter().map(|c| c.name.as_str()).collect();
     let leech_names: std::collections::HashSet<&str> =
         leech_containers.iter().map(|c| c.name.as_str()).collect();
-    let utils: Vec<DkServiceInfo> = utils_raw
+
+    // Detect leech containers by name pattern (catches containers not found by ancestor filter)
+    let is_leech_name = |name: &str| name.contains("leech-run-");
+
+    let (leech_extra, true_utils): (Vec<_>, Vec<_>) = utils_raw
         .into_iter()
         .filter(|c| !dk_names.contains(c.name.as_str()) && !leech_names.contains(c.name.as_str()))
+        .partition(|c| is_leech_name(&c.name));
+
+    let leech: Vec<DkServiceInfo> = leech_extra
+        .into_iter()
+        .map(|c| {
+            let is_up = c.status.to_lowercase().starts_with("up");
+            let (cpu, mem) = find_stats(&stats, &c.name);
+            DkServiceInfo { name: c.name.clone(), status: c.status.clone(), is_up, cpu, mem }
+        })
+        .collect();
+
+    let utils: Vec<DkServiceInfo> = true_utils
+        .into_iter()
         .map(|c| {
             let is_up = c.status.to_lowercase().starts_with("up");
             let (cpu, mem) = find_stats(&stats, &c.name);
@@ -179,6 +198,7 @@ pub fn collect() -> Result<StatusSnapshot> {
         agents,
         background,
         dk_services,
+        leech,
         utils,
         stats,
         boot,

@@ -29,6 +29,18 @@
 
 ---
 
+## Canal ~/.zion
+
+`~/.zion` é o canal de comunicação rápida host ↔ agente.
+
+- **Formato:** `KEY=value` (linhas `#` ignoradas)
+- **Boot:** lido pelo hook `session-start.sh` → injetado como `---ZION---` no contexto
+- **Containers:** montado como `~/.zion` no zion e `/.zion` nos containers de app
+- **Uso:** edite direto no host para passar strings, mensagens ou overrides de config ao agente
+- **Exemplo:** `MESSAGE=revisa o PR do monolito antes de qualquer coisa`
+
+---
+
 ## Obsidian — Cerebro do Sistema
 
 O vault Obsidian esta montado em `/workspace/obsidian/`. **Ler antes de agir:**

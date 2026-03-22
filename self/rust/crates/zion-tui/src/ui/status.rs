@@ -50,9 +50,9 @@ fn sessions_height(app: &App) -> u16 {
     (rows as u16).max(1)
 }
 
-fn dk_services_height(_app: &App) -> u16 {
-    // Always DK_SERVICES.len() rows + 1 group header — render iterates DK_SERVICES, not the snapshot.
-    (crate::app::DK_SERVICES.len() as u16) + 1
+fn dk_services_height(app: &App) -> u16 {
+    // 1 group header + DK_SERVICES rows + leech agent rows
+    (crate::app::DK_SERVICES.len() as u16) + 1 + (app.snapshot.leech.len() as u16)
 }
 
 fn utils_height(app: &App) -> u16 {

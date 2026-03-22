@@ -254,8 +254,9 @@ enum AgentsAction {
     Phone {
         name: Option<String>,
     },
-    /// Mostra _schedule, _running e execucoes recentes
-    Log,
+    /// Activity log: fila + historico de execucoes
+    #[command(alias = "log", alias = "st")]
+    Status,
 }
 
 #[derive(Subcommand)]
@@ -365,7 +366,7 @@ fn main() -> Result<()> {
         // Agents
         Some(Commands::Agents { action }) => match action.unwrap_or(AgentsAction::List) {
             AgentsAction::List => exec::bash_delegate(&["agents"]),
-            AgentsAction::Log => commands::agents::log(),
+            AgentsAction::Status => commands::agents::log(),
             AgentsAction::Phone { name } => {
                 let mut args = vec!["agents".to_string(), "phone".to_string()];
                 if let Some(n) = name { args.push(n); }

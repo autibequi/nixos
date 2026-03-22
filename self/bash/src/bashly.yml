@@ -351,8 +351,9 @@ commands:
             help: "Nome do agente (ex: wanderer, tamagochi, mechanic)"
         filename: commands/agents_phone.sh
 
-      - name: log
-        help: "Activity log dos agents (agents/_logs/activity/). Com nome: filtra por agent."
+      - name: status
+        alias: [st, log]
+        help: "Activity log: fila (running/scheduled) + historico de execucoes."
         args:
           - name: agent
             help: "Filtrar por agent (ex: coruja, hermes). Sem arg: todos."

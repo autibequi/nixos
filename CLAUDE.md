@@ -37,6 +37,7 @@ Em sessão **normal** (sem lab): `/workspace/host/` não existe.
 | **Zion** | CLI `zion`, container `claude-nix-sandbox`, skills, hooks → código em `self/` |
 | **Puppy** | Workers background: `puppy-daemon.sh`, `puppy-runner.sh` → agent em `self/agents/puppy-runner/` |
 | **Zion CLI** | Gerado por bashly: `self/bash/src/bashly.yml` + `commands/*.sh` → após mudar: `bashly generate` |
+| **~/.zion** | Canal de comunicação rápida host ↔ containers. KEY=value lido no boot → `---ZION---`. Montado em todos os containers como `~/.zion` (zion) e `/.zion` (app containers). |
 
 ---
 

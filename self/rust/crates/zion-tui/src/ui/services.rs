@@ -137,6 +137,46 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             lines.push(Line::from(spans));
 
         }
+
+        // Leech agent containers grouped under "projects"
+        for leech in &app.snapshot.leech {
+            let short_name = leech
+                .name
+                .strip_prefix("zion-projects-leech-run-")
+                .or_else(|| leech.name.strip_prefix("zion-projects-"))
+                .unwrap_or(&leech.name);
+
+            let (status_icon, status_style, uptime) = if leech.is_up {
+                ("\u{25cf}", theme::up_icon(), format_uptime(&leech.status))
+            } else {
+                ("\u{25cb}", theme::down_icon(), "stopped".to_string())
+            };
+
+            let mut spans = vec![
+                Span::raw("  "),
+                Span::raw("  "),
+                Span::styled(status_icon, status_style),
+                Span::raw(" "),
+                Span::styled(format!("{short_name:<16}"), theme::name()),
+                Span::styled(format!("{uptime:<6}"), theme::uptime()),
+            ];
+
+            if leech.is_up && !leech.cpu.is_empty() {
+                let cpu_pct = parse_pct(&leech.cpu);
+                let cpu_bar = mini_bar(cpu_pct, 6);
+                let cpu_style = pct_color(cpu_pct);
+                let mem_short = leech.mem.replace("MiB", "M").replace("GiB", "G").replace(" / ", "/");
+                spans.push(Span::raw("  "));
+                spans.push(Span::styled(cpu_bar, cpu_style));
+                spans.push(Span::styled(format!(" {:<6}", leech.cpu.trim()), theme::cpu()));
+                let mem_bar = mem_bar_from_str(&leech.mem);
+                spans.push(Span::raw(" "));
+                spans.push(Span::styled(mem_bar, theme::mem()));
+                spans.push(Span::styled(format!(" {mem_short}"), theme::dim()));
+            }
+
+            lines.push(Line::from(spans));
+        }
     }
 
     let widget = Paragraph::new(lines);

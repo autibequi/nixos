@@ -75,6 +75,20 @@ fi
 echo "---/BOOT---"
 
 # ────────────────────────────────────────────────────────────────
+# 2. ZION CONFIG (~/.zion) — canal de comunicação rápida
+# ────────────────────────────────────────────────────────────────
+ZION_FILE="$HOME/.zion"
+[ -f "$ZION_FILE" ] || ZION_FILE="/.zion"
+if [ -f "$ZION_FILE" ]; then
+  _zion_content=$(grep -v '^#' "$ZION_FILE" | grep -v '^$' | grep '=.' 2>/dev/null || true)
+  if [ -n "$_zion_content" ]; then
+    echo "---ZION---"
+    echo "$_zion_content"
+    echo "---/ZION---"
+  fi
+fi
+
+# ────────────────────────────────────────────────────────────────
 # 2.5 LITE MODE — projetos externos (zion_edit=0)
 #     Substitui BOOTSTRAP + DIRETRIZES + SELF + PERSONALITY com prompt mínimo
 # ────────────────────────────────────────────────────────────────

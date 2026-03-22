@@ -1134,7 +1134,7 @@ zion_agents_phone_usage() {
 }
 
 # :command.usage
-zion_agents_log_usage() {
+zion_agents_status_usage() {
   printf "zion agents log - Activity log dos agents (agents/_logs/activity/). Com nome: filtra por agent.\n\n"
 
   printf "%s\n" "Usage:"
@@ -4800,7 +4800,7 @@ zion_agents_phone_command() {
 }
 
 # :command.function
-zion_agents_log_command() {
+zion_agents_status_command() {
 
   # src/commands/agents_log.sh
 zion_load_config
@@ -8284,10 +8284,10 @@ zion_agents_parse_requirements() {
       shift $#
       ;;
 
-    log)
-      action="log"
+    status | st | log)
+      action="agents status"
       shift
-      zion_agents_log_parse_requirements "$@"
+      zion_agents_status_parse_requirements "$@"
       shift $#
       ;;
 
@@ -8420,14 +8420,14 @@ zion_agents_phone_parse_requirements() {
 }
 
 # :command.parse_requirements
-zion_agents_log_parse_requirements() {
+zion_agents_status_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
       --help | -h)
         long_usage=yes
-        zion_agents_log_usage
+        zion_agents_status_usage
         exit
         ;;
 
@@ -8439,7 +8439,7 @@ zion_agents_log_parse_requirements() {
   done
 
   # :command.command_filter
-  action="agents log"
+  action="agents status"
 
   # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
@@ -8518,8 +8518,8 @@ zion_tasks_parse_requirements() {
 
   case $action in
 
-    log)
-      action="log"
+    status | st | log)
+      action="agents status"
       shift
       zion_tasks_log_parse_requirements "$@"
       shift $#
@@ -9859,7 +9859,8 @@ run() {
     "agents") zion_agents_command ;;
     "agents list") zion_agents_list_command ;;
     "agents phone") zion_agents_phone_command ;;
-    "agents log") zion_agents_log_command ;;
+    "agents status") zion_agents_status_command ;;
+    "agents log") zion_agents_status_command ;;
     "tasks") zion_tasks_command ;;
     "tasks log") zion_tasks_log_command ;;
     "tasks status") zion_tasks_status_command ;;

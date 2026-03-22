@@ -12,6 +12,8 @@ services:
       - ./env/${APP_ENV:-sand}.env
     volumes:
       - ${MONOLITO_DIR}/configuration:/go/app/configuration:ro
+      # Canal de comunicação rápida host ↔ container
+      - ${HOME}/.zion:/.zion:rw
     networks:
       - default
     restart: unless-stopped
