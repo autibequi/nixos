@@ -3,6 +3,9 @@
 # Node: npm install (node_modules/ fica no projeto)
 #
 # Uso: _leech_dk_install <service> <env> <worktree>
+#
+# SSH: prefere SSH agent socket (SSH_AUTH_SOCK) — chave privada nunca entra no container.
+# Fallback: monta ~/.ssh como volume read-only (comportamento legado).
 
 _leech_dk_install() {
   local service="$1"
@@ -24,6 +27,23 @@ _leech_dk_install() {
 
   leech_ensure_log_dir "$log_dir"
 
+  # ── SSH: agent socket (prefere) vs chave raw (fallback) ──────────────────────
+  # Com agent socket: chave privada NUNCA entra no container — mais seguro.
+  # Fallback para chave raw quando SSH_AUTH_SOCK nao disponivel.
+  local ssh_vol_args=()
+  local ssh_setup_script
+  if [[ -n "${SSH_AUTH_SOCK:-}" && -S "$SSH_AUTH_SOCK" ]]; then
+    ssh_vol_args=(
+      -v "$SSH_AUTH_SOCK:/ssh-agent.sock"
+      -e SSH_AUTH_SOCK=/ssh-agent.sock
+    )
+    ssh_setup_script='mkdir -p /root/.ssh && ssh-keyscan github.com >> /root/.ssh/known_hosts 2>/dev/null'
+  else
+    local ssh_dir="${HOST_SSH_DIR:-$HOME/.ssh}"
+    ssh_vol_args=(-v "$ssh_dir:/ssh-host:ro")
+    ssh_setup_script='mkdir -p /root/.ssh && cp /ssh-host/* /root/.ssh/ 2>/dev/null || true && chmod 700 /root/.ssh && chmod 600 /root/.ssh/* 2>/dev/null || true && ssh-keyscan github.com >> /root/.ssh/known_hosts 2>/dev/null'
+  fi
+
   # Detectar tipo de servico
   _is_node_service() {
     [[ -f "$dir/package.json" ]]
@@ -42,12 +62,11 @@ _leech_dk_install() {
     _leech_header "docker install  $service (Node)  [env=$env]"
     printf "  \033[2mimage: %s  •  logs: %s/install.log\033[0m\n\n" "$node_image" "$log_dir"
 
-    local ssh_dir="${HOST_SSH_DIR:-$HOME/.ssh}"
     local npmrc="${HOST_NPMRC:-$HOME/.npmrc}"
     docker run \
       --rm \
       -it \
-      -v "$ssh_dir:/ssh-host:ro" \
+      "${ssh_vol_args[@]}" \
       -v "$npmrc:/npmrc-host:ro" \
       -v "$dir:/app" \
       -e NPM_TOKEN="${NPM_TOKEN:-}" \
@@ -57,37 +76,33 @@ _leech_dk_install() {
       -e HOST_GID="$host_gid" \
       -w "/app" \
       "$node_image" \
-      sh -c '
+      sh -c "
         set -e
 
         apk add --no-cache git openssh-client ca-certificates python3 make g++ \
           autoconf automake libtool nasm pkgconfig
 
-        mkdir -p /root/.ssh
-        cp /ssh-host/* /root/.ssh/ 2>/dev/null || true
-        chmod 700 /root/.ssh
-        chmod 600 /root/.ssh/* 2>/dev/null || true
-        ssh-keyscan github.com >> /root/.ssh/known_hosts 2>/dev/null
+        ${ssh_setup_script}
 
         # .npmrc: host tem prioridade; fallback para NPM_TOKEN env
         if [ -f /npmrc-host ]; then
           cp /npmrc-host /root/.npmrc
-        elif [ -n "$NPM_TOKEN" ]; then
-          echo "//npm.pkg.github.com/:_authToken=${NPM_TOKEN}" > /root/.npmrc
+        elif [ -n \"\$NPM_TOKEN\" ]; then
+          echo \"//npm.pkg.github.com/:_authToken=\${NPM_TOKEN}\" > /root/.npmrc
         fi
-        echo "@estrategiahq:registry=https://npm.pkg.github.com/estrategiahq" >> /root/.npmrc
+        echo \"@estrategiahq:registry=https://npm.pkg.github.com/estrategiahq\" >> /root/.npmrc
 
-        echo "[1/2] Instalando dependencias (npm install)..."
+        echo \"[1/2] Instalando dependencias (npm install)...\"
         npm install
-        chown -R "$HOST_UID:$HOST_GID" /app/node_modules 2>/dev/null || true
+        chown -R \"\$HOST_UID:\$HOST_GID\" /app/node_modules 2>/dev/null || true
 
-        echo "[2/2] Recompilando bindings nativos para Alpine/musl (compilando do fonte)..."
+        echo \"[2/2] Recompilando bindings nativos para Alpine/musl (compilando do fonte)...\"
         rm -rf node_modules/node-sass/vendor/
         npm rebuild node-sass || true
 
-        echo ""
-        echo "Dependencias instaladas! node_modules/ gerado no projeto."
-      ' 2>&1 | tee "$log_dir/install.log"
+        echo \"\"
+        echo \"Dependencias instaladas! node_modules/ gerado no projeto.\"
+      " 2>&1 | tee "$log_dir/install.log"
 
     if [[ "${PIPESTATUS[0]}" -eq 0 ]]; then
       # Adicionar node_modules/ ao .git/info/exclude local para nao sujar o git do projeto
@@ -119,7 +134,7 @@ _leech_dk_install() {
   docker run \
     --rm \
     -it \
-    -v "${HOST_SSH_DIR:-$HOME/.ssh}:/ssh-host:ro" \
+    "${ssh_vol_args[@]}" \
     -v "$dir:/go/app" \
     -v "leech-go-mod-cache:/go/pkg/mod" \
     -v "leech-go-build-cache:/root/.cache/go-build" \
@@ -131,33 +146,29 @@ _leech_dk_install() {
     -e HOST_GID="$host_gid" \
     -w "/go/app" \
     "golang:1.24.4-alpine" \
-    sh -c '
+    sh -c "
       set -e
 
-      mkdir -p /root/.ssh
-      cp /ssh-host/* /root/.ssh/ 2>/dev/null || true
-      chmod 700 /root/.ssh
-      chmod 600 /root/.ssh/* 2>/dev/null || true
+      ${ssh_setup_script}
 
-      echo "[1/4] Instalando ferramentas..."
+      echo \"[1/4] Instalando ferramentas...\"
       apk add --no-cache git gcc musl-dev librdkafka-dev ca-certificates openssh-client
 
-      git config --global url."git@github.com:estrategiahq".insteadOf "https://github.com/estrategiahq"
-      ssh-keyscan -t rsa github.com >> /root/.ssh/known_hosts 2>/dev/null
+      git config --global url.\"git@github.com:estrategiahq\".insteadOf \"https://github.com/estrategiahq\"
 
-      echo "[2/4] Download de modulos Go (pode demorar)..."
+      echo \"[2/4] Download de modulos Go (pode demorar)...\"
       go mod download
 
-      echo "[3/4] Limpando modulos..."
+      echo \"[3/4] Limpando modulos...\"
       go mod tidy
 
-      echo "[4/4] Vendoring dependencias (workspace)..."
+      echo \"[4/4] Vendoring dependencias (workspace)...\"
       go work vendor
-      chown -R "$HOST_UID:$HOST_GID" /go/app/vendor 2>/dev/null || true
+      chown -R \"\$HOST_UID:\$HOST_GID\" /go/app/vendor 2>/dev/null || true
 
-      echo ""
-      echo "Dependencias instaladas! vendor/ gerado no projeto."
-    ' 2>&1 | tee "$log_dir/install.log"
+      echo \"\"
+      echo \"Dependencias instaladas! vendor/ gerado no projeto.\"
+    " 2>&1 | tee "$log_dir/install.log"
 
   if [[ "${PIPESTATUS[0]}" -eq 0 ]]; then
     # Adicionar vendor/ ao .git/info/exclude local para nao sujar o git do projeto
