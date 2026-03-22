@@ -16,3 +16,5 @@
 - [feedback_timezone_container.md](feedback_timezone_container.md) — Container sem tzdata: usar TZ=UTC+3 (POSIX) para UTC-3 (Brasília), não America/Sao_Paulo
 - [reference_zion_git_commit.md](reference_zion_git_commit.md) — Git repo do Zion em /workspace/host/.git — read-only no container, commit deve ser feito no host
 - [reference_claude_process_nix.md](reference_claude_process_nix.md) — Processo Claude Code no nix = .claude-unwrapped; contar só linhas com pts/ no docker top
+- [feedback_hyprctl_pixels.md](feedback_hyprctl_pixels.md) — monitors[].width = pixels físicos; activewindow.size[] = pixels lógicos — dividir pelo .scale antes de comparar frações
+- [reference_hyprscroller_config.md](reference_hyprscroller_config.md) — Opções confirmadas/inexistentes do hyprscroller; workarounds shell para focus_wrap e colresize_no_wrap
