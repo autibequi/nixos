@@ -127,6 +127,23 @@ hypr_reload() {
     notify-send "Hyprland reloaded" -u low
 }
 
+# Focus left/right without wrap: stops at leftmost/rightmost column in the workspace
+# Usage: focus_no_wrap l | focus_no_wrap r
+focus_no_wrap() {
+    local direction="$1"
+    local win_info win_x ws_id count
+    win_info=$(hyprctl -j activewindow | jaq -r '"\(.at[0]) \(.workspace.id)"')
+    win_x=$(echo "$win_info" | cut -d' ' -f1)
+    ws_id=$(echo "$win_info" | cut -d' ' -f2)
+    if [ "$direction" = "r" ]; then
+        count=$(hyprctl -j clients | jaq "[.[] | select(.workspace.id == $ws_id) | select(.at[0] > $win_x)] | length")
+    else
+        count=$(hyprctl -j clients | jaq "[.[] | select(.workspace.id == $ws_id) | select(.at[0] < $win_x)] | length")
+    fi
+    [ "$count" -eq 0 ] && return
+    hyprctl dispatch layoutmsg "focus $direction"
+}
+
 # Colresize without wrap: stops at min (0.2) and max (1.0) instead of cycling
 # Usage: colresize_no_wrap + | colresize_no_wrap -
 # NOTE: activewindow.size is in logical px; monitors.width is physical px — must divide by scale
