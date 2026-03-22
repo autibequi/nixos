@@ -85,7 +85,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.claude
-    image: claude-nix-sandbox
+    image: leech
     cpus: "14.4"
     mem_limit: 12g
     memswap_limit: 12g

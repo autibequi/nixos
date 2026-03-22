@@ -31,7 +31,7 @@ zion_usage() {
   printf "  %s   Abre bash no container com o projeto montado.\n" "shell    "
   printf "  %s   Mostra lista de sessões e permite escolher qual retomar.\n" "resume   "
   printf "  %s   Ferramentas Claude: usage, token.\n" "claude   "
-  printf "  %s   Build da imagem Docker do leech (claude-nix-sandbox).\n" "build    "
+  printf "  %s   Build da imagem Docker do leech (leech).\n" "build    "
   printf "  %s   Para todos os containers do projeto.\n" "down     "
   printf "  %s   Para containers do compose + mata qualquer stray com nome zion/claude/puppy.\n" "shutdown "
   printf "  %s   Remove sessoes Zion paradas/exited e containers orfaos.\n" "clean    "
@@ -424,7 +424,7 @@ zion_claude_token_usage() {
 
 # :command.usage
 zion_build_usage() {
-  printf "zion build - Build da imagem Docker do leech (claude-nix-sandbox).\n\n"
+  printf "zion build - Build da imagem Docker do leech (leech).\n\n"
 
   printf "%s\n" "Usage:"
   printf "  zion build [OPTIONS]\n"
@@ -1851,24 +1851,22 @@ zion_session_run() {
         printf '\033[2J\033[H\033[?25l\n'
         printf "  \033[2m[ .. ]\033[0m  \033[2miniciando zion...\033[0m\n"
       fi
-      # Shared container: se não há volumes extras (ex: zion host), reusa container existente.
-      # Primeiro zion new sobe o container (up -d); os seguintes entram via exec.
-      # Todos compartilham o mesmo pool de RAM/CPU — sem multiplicar recursos.
+      # Nome canônico do container: leech-{slug} (ex: leech-projects, leech-nixos-host)
+      local leech_name="leech-${proj_name#zion-}"
+      # Shared container: se não há volumes extras, reusa container existente via exec.
       if [[ -z "$extra_volumes" ]]; then
-        # docker ps direto com label filter: evita parsear compose YAML (5x mais rápido que compose ps)
         local cid
-        cid=$(docker ps -q \
-          --filter "label=com.docker.compose.project=${proj_name}" \
-          --filter "label=com.docker.compose.service=leech" \
-          2>/dev/null | head -1)
+        cid=$(docker ps -q --filter "name=^/${leech_name}$" 2>/dev/null | head -1)
         if [[ -z "$cid" ]]; then
-          # Container não existe: sobe via compose (precisa do YAML) e entra com bootstrap.
+          # Container não existe: sobe via compose e renomeia para nome canônico.
           zion_compose_cmd -p "$proj_name" up -d leech
-          # Re-fetch cid após up (container recém-criado)
-          cid=$(docker ps -q \
-            --filter "label=com.docker.compose.project=${proj_name}" \
-            --filter "label=com.docker.compose.service=leech" \
-            2>/dev/null | head -1)
+          local auto_name
+          auto_name=$(docker ps -f "label=com.docker.compose.project=${proj_name}" \
+            -f "label=com.docker.compose.service=leech" \
+            -f "label=com.docker.compose.oneoff=False" \
+            --format "{{.Names}}" | head -1)
+          [[ -n "$auto_name" ]] && docker rename "$auto_name" "$leech_name" 2>/dev/null || true
+          cid=$(docker ps -q --filter "name=^/${leech_name}$" 2>/dev/null | head -1)
           docker exec -it $analysis_env \
             -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" "$cid" \
             /bin/bash -c "${launch_cmd}"
@@ -1879,8 +1877,11 @@ zion_session_run() {
             /bin/bash -c "cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
         fi
       else
-        # Fallback run --rm quando há volumes extras (ex: zion leech/host)
-        zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes $analysis_env \
+        # run --rm com nome curto: leech-{6chars}
+        local short_id
+        short_id=$(tr -dc 'a-z0-9' < /dev/urandom 2>/dev/null | head -c 6 || date +%s | tail -c 6)
+        zion_compose_cmd -p "$proj_name" run --rm -it --name "leech-${short_id}" \
+          $extra_volumes $analysis_env \
           --entrypoint /entrypoint.sh -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" leech \
           /bin/bash -c "${launch_cmd}"
       fi
@@ -1998,7 +1999,7 @@ _zion_dk_build() {
 
     # docker build direto — evita Bake que tenta resolver imagens locais remotamente
     local image_name
-    image_name=$(docker compose -f "$compose" config --format json 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); svc=list(d['services'].values())[0]; print(svc.get('image','claude-nix-sandbox'))" 2>/dev/null || echo "claude-nix-sandbox")
+    image_name=$(docker compose -f "$compose" config --format json 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); svc=list(d['services'].values())[0]; print(svc.get('image','leech'))" 2>/dev/null || echo "leech")
     DOCKER_BUILDKIT=1 docker build \
       -f "$dockerfile" \
       -t "$image_name" \
@@ -3539,17 +3540,17 @@ zion_build_command() {
   build_args=()
   [[ -n "${args['--danger']:-}" ]] && build_args+=(--no-cache)
 
-  # Auto-build zion-base:latest if not present locally (required by Dockerfile.claude)
-  if ! docker image inspect zion-base:latest > /dev/null 2>&1; then
-    echo "zion-base:latest not found — building from Dockerfile.claude.base..."
+  # Auto-build leech-base:latest if not present locally (required by Dockerfile.claude)
+  if ! docker image inspect leech-base:latest > /dev/null 2>&1; then
+    echo "leech-base:latest not found — building from Dockerfile.claude.base..."
     base_ctx="${zion_container_dir:-${HOME}/nixos/self/containers/zion}"
     docker build "${build_args[@]}" \
       -f "${base_ctx}/Dockerfile.claude.base" \
-      -t zion-base:latest \
-      "${base_ctx}" || { echo "Error: failed to build zion-base:latest"; exit 1; }
+      -t leech-base:latest \
+      "${base_ctx}" || { echo "Error: failed to build leech-base:latest"; exit 1; }
   fi
 
-  echo "Building claude-nix-sandbox image..."
+  echo "Building leech image..."
   zion_compose_cmd build "${build_args[@]}" leech
 
 }
@@ -3562,8 +3563,8 @@ zion_down_command() {
   zion_load_config
 
   # Shared leech containers: cada projeto sobe com -p <slug> e fica persistente.
-  # docker stop para todos os containers de imagem claude-nix-sandbox rodando.
-  leech_ids=$(docker ps -q --filter "ancestor=claude-nix-sandbox" 2>/dev/null)
+  # docker stop para todos os containers de imagem leech rodando.
+  leech_ids=$(docker ps -q --filter "ancestor=leech" 2>/dev/null)
   if [[ -n "$leech_ids" ]]; then
     echo "Stopping shared leech containers..."
     # shellcheck disable=SC2086
@@ -5084,7 +5085,7 @@ zion_status_command() {
     _f_leech=$(mktemp); _f_dk=$(mktemp)
 
     docker ps -a \
-      --filter "ancestor=claude-nix-sandbox" \
+      --filter "ancestor=leech" \
       --filter "name=leech" \
       --format "{{.Names}}\t{{.Status}}\t{{.Ports}}" \
       > "$_f_leech" 2>/dev/null &

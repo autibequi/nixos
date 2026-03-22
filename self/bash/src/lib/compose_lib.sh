@@ -324,24 +324,22 @@ zion_session_run() {
         printf '\033[2J\033[H\033[?25l\n'
         printf "  \033[2m[ .. ]\033[0m  \033[2miniciando zion...\033[0m\n"
       fi
-      # Shared container: se não há volumes extras (ex: zion host), reusa container existente.
-      # Primeiro zion new sobe o container (up -d); os seguintes entram via exec.
-      # Todos compartilham o mesmo pool de RAM/CPU — sem multiplicar recursos.
+      # Nome canônico do container: leech-{slug} (ex: leech-projects, leech-nixos-host)
+      local leech_name="leech-${proj_name#zion-}"
+      # Shared container: se não há volumes extras, reusa container existente via exec.
       if [[ -z "$extra_volumes" ]]; then
-        # docker ps direto com label filter: evita parsear compose YAML (5x mais rápido que compose ps)
         local cid
-        cid=$(docker ps -q \
-          --filter "label=com.docker.compose.project=${proj_name}" \
-          --filter "label=com.docker.compose.service=leech" \
-          2>/dev/null | head -1)
+        cid=$(docker ps -q --filter "name=^/${leech_name}$" 2>/dev/null | head -1)
         if [[ -z "$cid" ]]; then
-          # Container não existe: sobe via compose (precisa do YAML) e entra com bootstrap.
+          # Container não existe: sobe via compose e renomeia para nome canônico.
           zion_compose_cmd -p "$proj_name" up -d leech
-          # Re-fetch cid após up (container recém-criado)
-          cid=$(docker ps -q \
-            --filter "label=com.docker.compose.project=${proj_name}" \
-            --filter "label=com.docker.compose.service=leech" \
-            2>/dev/null | head -1)
+          local auto_name
+          auto_name=$(docker ps -f "label=com.docker.compose.project=${proj_name}" \
+            -f "label=com.docker.compose.service=leech" \
+            -f "label=com.docker.compose.oneoff=False" \
+            --format "{{.Names}}" | head -1)
+          [[ -n "$auto_name" ]] && docker rename "$auto_name" "$leech_name" 2>/dev/null || true
+          cid=$(docker ps -q --filter "name=^/${leech_name}$" 2>/dev/null | head -1)
           docker exec -it $analysis_env \
             -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" "$cid" \
             /bin/bash -c "${launch_cmd}"
@@ -352,8 +350,11 @@ zion_session_run() {
             /bin/bash -c "cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
         fi
       else
-        # Fallback run --rm quando há volumes extras (ex: zion leech/host)
-        zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes $analysis_env \
+        # run --rm com nome curto: leech-{6chars}
+        local short_id
+        short_id=$(tr -dc 'a-z0-9' < /dev/urandom 2>/dev/null | head -c 6 || date +%s | tail -c 6)
+        zion_compose_cmd -p "$proj_name" run --rm -it --name "leech-${short_id}" \
+          $extra_volumes $analysis_env \
           --entrypoint /entrypoint.sh -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" leech \
           /bin/bash -c "${launch_cmd}"
       fi

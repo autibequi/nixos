@@ -42,7 +42,7 @@ _zion_dk_build() {
 
     # docker build direto — evita Bake que tenta resolver imagens locais remotamente
     local image_name
-    image_name=$(docker compose -f "$compose" config --format json 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); svc=list(d['services'].values())[0]; print(svc.get('image','claude-nix-sandbox'))" 2>/dev/null || echo "claude-nix-sandbox")
+    image_name=$(docker compose -f "$compose" config --format json 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); svc=list(d['services'].values())[0]; print(svc.get('image','leech'))" 2>/dev/null || echo "leech")
     DOCKER_BUILDKIT=1 docker build \
       -f "$dockerfile" \
       -t "$image_name" \

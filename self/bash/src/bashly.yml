@@ -126,7 +126,7 @@ commands:
 
   # ── Container (build / down / destroy) ─────────────────────
   - name: build
-    help: Build da imagem Docker do leech (claude-nix-sandbox).
+    help: Build da imagem Docker do leech (leech).
     flags:
       - long: --danger
         help: "Força rebuild sem cache (--no-cache)"

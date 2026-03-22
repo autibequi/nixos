@@ -19,6 +19,9 @@ fi
 BOOTSTRAP_SH="$WS/scripts/bootstrap.sh"
 [ -x "$BOOTSTRAP_SH" ] && "$BOOTSTRAP_SH" >&2
 
+# ── Clear lazy-context locks da sessão anterior ──────────────────
+rm -f /tmp/zion-ctx-loaded /tmp/zion-ctx-loaded.pending
+
 # ── Resolve flags ────────────────────────────────────────────────
 # 1. Salva overrides de processo (maior prioridade — ex: PERSONALITY=OFF zion run)
 _OV_PERSONALITY="${PERSONALITY:-}"
@@ -98,18 +101,10 @@ if [ -f "$_ZION_DISPLAY" ]; then
 fi
 
 # ────────────────────────────────────────────────────────────────
-# 2.5 LITE MODE — projetos externos (zion_edit=0)
-#     Substitui BOOTSTRAP + DIRETRIZES + SELF + PERSONALITY com prompt mínimo
+# 2.5 LITE + ENV + OBSIDIAN — lazy-load via user-prompt-submit.sh
+#     Injetados no primeiro prompt complexo ou no segundo prompt (após pergunta simples).
+#     Poupa ~1000 tokens em perguntas rápidas/conversacionais.
 # ────────────────────────────────────────────────────────────────
-if [ "$ZION_DEBUG" = "OFF" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
-  LITE_MD="$WS/zion/system/LITE.md"
-  [ -f "$LITE_MD" ] || LITE_MD="/workspace/self/system/LITE.md"
-  if [ -f "$LITE_MD" ]; then
-    echo "---LITE---"
-    cat "$LITE_MD"
-    echo "---/LITE---"
-  fi
-fi
 
 # ────────────────────────────────────────────────────────────────
 # 3. DIRETRIZES operacionais — apenas zion_debug=ON
@@ -130,79 +125,8 @@ fi
 # SELF.md (~640 tk) movido pra lazy-load. Carregado sob demanda por skills de persona.
 
 # ────────────────────────────────────────────────────────────────
-# 5. CONTEXTO DE AMBIENTE (dinâmico: docker vs host)
+# 5. ENV + 5.5 OBSIDIAN — lazy-load via user-prompt-submit.sh
 # ────────────────────────────────────────────────────────────────
-echo "---ENV---"
-if [ "$IN_DOCKER" = "1" ]; then
-  cat <<'DOCKER'
-Você está DENTRO de um container Docker (in_docker=1).
-NÃO executar: nixos-rebuild, nh os switch, systemctl — não afeta o host.
-Para comandos de sistema, pedir ao usuário rodar no host.
-Superpoderes: todo Nixpkgs disponível via `nix-shell -p <pkg>`.
-
-Estrutura /workspace:
-  /workspace/self/          engine dos agentes (prompts, scripts, skills, personas)
-  /workspace/mnt/           ZONA DE TRABALHO — pasta do host attachada (rw)
-                            pode ser ~/nixos, ~/projects/ com vários repos, etc.
-                            aqui você lê, edita e commita código
-  /workspace/obsidian/      CÉREBRO PERSISTENTE entre execuções
-                            o usuário acessa no Obsidian — use para notas,
-                            kanban, resultados, memória cross-session
-  /workspace/logs/          logs attachados pelo usuário
-    host/journal/           logs do sistema host (journald)
-    docker/monolito/        logs do monolito Go
-    docker/bo-container/    logs do BO Container
-    docker/front-student/   logs do Front Student
-  /workspace/dockerized/    configs docker dos serviços (Dockerfile, compose, .env)
-  /workspace/.hive-mind/    área efêmera compartilhada entre containers (locks, sinais)
-
-Se zion_edit=1: lab mode — /workspace/host/ contém o repo NixOS+Zion (editável).
-Se zion_edit=0: /workspace/mnt é um projeto externo do usuário.
-DOCKER
-  if [ "$ZION_EDIT" = "1" ]; then
-    cat <<'ZION_REPOS'
-
-LAB MODE (zion_edit=1):
-  /workspace/mnt  = Projeto do usuário (zona de trabalho normal — igual zion new)
-  /workspace/host/ = NixOS+Zion source (~/nixos) — EDITÁVEL para auto-aperfeiçoamento
-                    (modules/, configuration.nix, flake.nix, stow/, zion/)
-                    Use para melhorar skills, hooks, prompts, agents, CLI do Zion.
-                    Mudanças aqui afetam o sistema e as próximas sessões.
-  /workspace/self = Bind mount de ~/nixos/self (mesmo conteúdo que /workspace/host/zion)
-
-REGRA: /workspace/host/ é sua zona de evolução. Edite-a quando identificar melhorias
-       em skills, agents, hooks ou prompts. Commits vão pro repo NixOS do host.
-ZION_REPOS
-  fi
-  if [ "$HEADLESS" = "1" ]; then
-    echo ""
-    echo "Modo HEADLESS (headless=1):"
-    echo "  autonomia total — não esperar input, não fazer perguntas"
-    echo "  maximizar progresso dentro do timeout"
-    echo "  ciclos curtos: executar → salvar parcial → continuar"
-    echo "  sem output decorativo, foco em execução e persistência"
-  fi
-else
-  echo "Você está NO HOST, fora do Docker (in_docker=0)."
-  echo "  pode executar nixos-rebuild, nh os switch, systemctl normalmente"
-  echo "  os paths /workspace/* não existem aqui"
-  echo "  WS = raiz do repo NixOS no host"
-fi
-echo "---/ENV---"
-
-# ────────────────────────────────────────────────────────────────
-# 5.5 OBSIDIAN SKILL — referência no boot (qualquer modo)
-#     Skill `obsidian` é obrigatória para qualquer interação com /workspace/obsidian/
-#     Sub-skills: board, agentroom, graph, dataview
-# ────────────────────────────────────────────────────────────────
-echo "---OBSIDIAN---"
-echo "REGRA: para interagir com /workspace/obsidian/ carregar skill \`obsidian\`."
-echo "Skill composta — sub-skills em /workspace/self/skills/obsidian/:"
-echo "  board.md      — mapa do vault, tasks, roster, delegacao, quota"
-echo "  agentroom.md  — protocolo agents: scheduling, memory, ciclo"
-echo "  graph.md      — manter grafo Ctrl+G: frontmatter, hubs, wiseman"
-echo "  dataview.md   — queries Dataview/DataviewJS"
-echo "---/OBSIDIAN---"
 
 # ────────────────────────────────────────────────────────────────
 # 6. API USAGE / cota (sempre)
@@ -317,6 +241,7 @@ if [ "$ZION_EDIT" = "1" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ];
     [ $(( RANDOM % 3 )) -eq 0 ] && printf "  %-12s ..ʕ·ᴥ·ʔ..  LIER [   1ms]\n" "DIGNITY"
     printf "  %-12s .........  OK    [  56ms]\n" "PERSONALITY"
     printf "  %-12s .........  OK    [  19ms]  %s files\n" "MEMORY" "$_mem_count"
+    printf "  %-12s .........  LAZY  [prompt→1]\n" "LITE+ENV"
     printf "  %-12s .........  OK    [ 142ms]\n" "API_USAGE"
     _usage_file="/workspace/host/.ephemeral/usage-bar.txt"
     [ -f "$_usage_file" ] || _usage_file="$WS/.ephemeral/usage-bar.txt"

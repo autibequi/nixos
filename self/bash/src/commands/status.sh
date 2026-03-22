@@ -70,7 +70,7 @@ _do_status_render() {
   _f_leech=$(mktemp); _f_dk=$(mktemp)
 
   docker ps -a \
-    --filter "ancestor=claude-nix-sandbox" \
+    --filter "ancestor=leech" \
     --filter "name=leech" \
     --format "{{.Names}}\t{{.Status}}\t{{.Ports}}" \
     > "$_f_leech" 2>/dev/null &
