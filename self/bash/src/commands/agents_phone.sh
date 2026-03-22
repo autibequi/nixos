@@ -3,7 +3,7 @@ zion_load_config
 
 AGENT="${args[name]:-}"
 
-ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/zion}"
+ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/self}"
 OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
 
 # Fallback agents dir

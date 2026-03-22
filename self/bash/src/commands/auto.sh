@@ -1,7 +1,7 @@
 # Executa agents e tasks vencidos — timer systemd (10min)
 zion_load_config
 
-ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/zion}"
+ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/self}"
 OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
 RUNNER="$ZION_DIR/scripts/task-runner.sh"
 SCHEDULE="${SCHEDULE_DIR:-$OBSIDIAN/agents/_schedule}"

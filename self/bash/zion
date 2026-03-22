@@ -4256,7 +4256,7 @@ zion_tick_command() {
   # Executa agents e tasks vencidos — timer systemd (10min)
   zion_load_config
 
-  ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/zion}"
+  ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/self}"
   OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
   RUNNER="$ZION_DIR/scripts/task-runner.sh"
   SCHEDULE="${SCHEDULE_DIR:-$OBSIDIAN/agents/_schedule}"
@@ -4711,7 +4711,7 @@ zion_agents_list_command() {
   B=$'\033[1m'; R=$'\033[0m'; DIM=$'\033[2m'
   G=$'\033[32m'; Y=$'\033[33m'; C=$'\033[36m'; M=$'\033[35m'
 
-  ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/zion}"
+  ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/self}"
   # Fallback
   for try in /workspace/mnt/self /workspace/nixos/self; do
     [ -d "$try/agents" ] && ZION_DIR="$try" && break
@@ -4764,7 +4764,7 @@ zion_agents_phone_command() {
 
   AGENT="${args[name]:-}"
 
-  ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/zion}"
+  ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/self}"
   OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
 
   # Fallback agents dir
