@@ -1,3 +1,8 @@
+---
+name: code/debug
+description: "Debugging sistematico em 4 fases: reproduzir, hipoteses, isolar, verificar. Nunca chutar fix sem evidencia."
+---
+
 # Skill: debug — Debugging Sistematico
 
 > 4 fases para encontrar causa raiz. Nunca chutar fix sem evidencia.

@@ -18,7 +18,7 @@ Skill composta com 3 sub-skills por tipo de saida. **Fonte da verdade** para qua
 | `design-system.md` | Palette, tokens, box drawing, regras, Catppuccin CSS, Mermaid theme | **Sempre** — ler antes de qualquer output. Parte 1=terminal, Parte 2=web |
 | `ascii.md` | 18 templates de representacao terminal | Default. Inline, rapido, sem dependencia. |
 | `chrome.md` | Relay + Mermaid + HTML | Interativo, grandes, coloridos. Precisa relay. |
-| `obsidian.md` | Relatorios + Dataview | Artefatos persistentes no vault. |
+| `meta/obsidian` | Relatorios + Dataview | Artefatos persistentes no vault (skill separada). |
 
 ## Regra de decisao
 
@@ -32,7 +32,7 @@ Precisa de visualizacao?
     │     └─ verificar relay → usar chrome.md
     │
     └── Precisa persistir como artefato? (relatorios, inspecoes)
-          └─ usar obsidian.md
+          └─ usar meta/obsidian
 ```
 
 ## Para agentes e skills externos

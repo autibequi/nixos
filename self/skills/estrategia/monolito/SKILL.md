@@ -1,6 +1,6 @@
 ---
-name: monolito
-description: Skill composta do monolito Go (Estrategia) — indice das sub-skills de implementacao + ferramentas de suporte (grafana para debug, linux para ambiente, goodpractices para qualidade). Carregar quando o repo ativo for o monolito.
+name: estrategia/monolito
+description: Skill composta do monolito Go (Estrategia) — indice das sub-skills de implementacao + referencia a ferramentas de suporte (grafana, zion/linux, code/goodpractices). Carregar quando o repo ativo for o monolito.
 ---
 
 # Monolito — Skill Composta
@@ -36,14 +36,14 @@ Datasources do monolito:
 
 ### linux — ambiente local
 
-Carregar skill `linux` quando:
+Carregar skill `zion/linux` quando:
 - Problemas com o ambiente Docker local (`zion docker run monolito`)
 - Questoes de rede, disco, processos, recursos do host
 - Conflito de portas, volumes corrompidos, permissoes
 
 ### goodpractices — qualidade de codigo
 
-Auto-ativa em qualquer trabalho de implementacao. Reforcar quando:
+Carregar skill `code/goodpractices` quando:
 - Revisar PR do monolito
 - Code review de servicos Go
 - Verificar patterns de service/handler/repo antes de criar novo
@@ -71,7 +71,7 @@ Auto-ativa em qualquer trabalho de implementacao. Reforcar quando:
 
 ## Contexto de ambiente local
 
-Ver skill `container-fy` para levantar o monolito localmente via `zion docker`.
+Ver skill `zion/container` para levantar o monolito localmente via `zion docker`.
 
 Erros nao-criticos conhecidos:
 - `ERRO no Client Coruja-AI` — env faltando, sobe normal

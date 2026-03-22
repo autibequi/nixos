@@ -64,7 +64,7 @@ Append ciclo novo no topo. Manter 5-10 ciclos.
 
 **Antes de criar qualquer card que envolva implementacao de codigo ou feature:**
 
-1. Carregar skill `refinar` (`/workspace/self/skills/refinar/SKILL.md`)
+1. Carregar skill `refinar` (`/workspace/self/skills/thinking/refine/SKILL.md`)
 2. Investigar o codebase alvo (ondas: estrutura → padroes → pontos de extensao)
 3. Mapear camadas de dependencia
 4. Montar backlog ordenado com tasks TX: dimensionadas para ~25min cada

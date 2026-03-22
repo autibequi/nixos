@@ -1,5 +1,5 @@
 ---
-name: linux
+name: zion/linux
 description: "Auto-ativar quando: zion_edit=1 (zion host), usuário menciona NixOS, Hyprland, Waybar, dotfiles, stow, nix, módulos, pacotes do sistema, keybinds, window rules, configuração do compositor, OU quando reclama de problema no computador (lento, travando, crash, rede, disco, processo morto, boot, etc.)."
 ---
 

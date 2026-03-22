@@ -35,6 +35,9 @@ pub struct SessionInfo {
     pub mounts: Vec<MountStatus>,
     /// Host path bound to /workspace/mnt (the project directory).
     pub mnt_path: String,
+    /// Number of active `claude` processes running inside the container.
+    /// > 1 means multiple exec sessions sharing the same container.
+    pub session_count: usize,
 }
 
 #[derive(Debug, Clone)]
@@ -115,6 +118,19 @@ pub fn collect() -> Result<StatusSnapshot> {
     let mut agents = Vec::new();
     let mut background = Vec::new();
 
+    // Count claude procs in parallel for all running leech containers
+    let proc_counts: std::collections::HashMap<String, usize> = {
+        let handles: Vec<_> = leech_containers
+            .iter()
+            .filter(|c| c.status.to_lowercase().starts_with("up"))
+            .map(|c| {
+                let name = c.name.clone();
+                std::thread::spawn(move || (name.clone(), docker::count_claude_procs(&name)))
+            })
+            .collect();
+        handles.into_iter().filter_map(|h| h.join().ok()).collect()
+    };
+
     for container in &leech_containers {
         let is_up = container.status.to_lowercase().starts_with("up");
 
@@ -136,6 +152,7 @@ pub fn collect() -> Result<StatusSnapshot> {
 
         // Find stats
         let (cpu, mem) = find_stats(&stats, &container.name);
+        let session_count = proc_counts.get(&container.name).copied().unwrap_or(0);
 
         let info = SessionInfo {
             name: container.name.clone(),
@@ -145,6 +162,7 @@ pub fn collect() -> Result<StatusSnapshot> {
             mem,
             mounts,
             mnt_path,
+            session_count,
         };
 
         if is_tty {

@@ -1,5 +1,5 @@
 ---
-name: refinar
+name: thinking/refine
 description: "Usar quando receber um problema grande/spec complexa para implementar. Ensina a investigar, mapear, e quebrar em tasks pequenas antes de escrever qualquer codigo. Generico — funciona para app, backend, CLI, agent card."
 ---
 

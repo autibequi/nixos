@@ -1,3 +1,8 @@
+---
+name: code/flutter
+description: "Knowledge-base do app doings (Flutter/Dart) — stack, estrutura, padroes Drift/Provider, comandos uteis."
+---
+
 # Skill: Flutter — doings app
 
 > Conhecimento acumulado pelo agente doings-auto.

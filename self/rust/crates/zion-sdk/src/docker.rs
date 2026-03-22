@@ -141,6 +141,29 @@ pub fn get_stats() -> Result<Vec<ContainerStats>> {
     Ok(stats)
 }
 
+/// Count running `claude` processes inside a container via `docker top`.
+/// Returns 0 if the container is not running or docker top fails.
+pub fn count_claude_procs(container: &str) -> usize {
+    let output = Command::new("docker")
+        .args(["top", container])
+        .output()
+        .unwrap_or_else(|_| std::process::Output {
+            status: std::process::ExitStatus::default(),
+            stdout: Vec::new(),
+            stderr: Vec::new(),
+        });
+
+    if !output.status.success() {
+        return 0;
+    }
+
+    String::from_utf8_lossy(&output.stdout)
+        .lines()
+        .skip(1) // skip header row
+        .filter(|line| line.contains("/bin/claude"))
+        .count()
+}
+
 /// Check if Docker is accessible.
 #[must_use]
 pub fn is_available() -> bool {

@@ -71,7 +71,7 @@ fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[Session
 
         let uptime = format_uptime(&session.status);
         // Use mnt_path (host path bound to /workspace/mnt) as identifier; fall back to container name
-        let ident = if !session.mnt_path.is_empty() {
+        let base_ident = if !session.mnt_path.is_empty() {
             shorten_path(&session.mnt_path)
         } else {
             session
@@ -81,6 +81,12 @@ fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[Session
                 .or_else(|| session.name.strip_prefix("zion-"))
                 .unwrap_or(&session.name)
                 .to_string()
+        };
+        // Show ×N badge when multiple claude sessions share the same container
+        let ident = if session.session_count > 1 {
+            format!("{base_ident} ×{}", session.session_count)
+        } else {
+            base_ident
         };
 
         let mut spans = vec![

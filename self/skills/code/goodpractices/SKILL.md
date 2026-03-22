@@ -1,5 +1,5 @@
 ---
-name: goodpractices
+name: code/goodpractices
 description: "Auto-ativar quando: usuário fala de desenvolvimento, programação, implementar feature, criar endpoint, modificar código, fazer PR, debugar, testar, refatorar — qualquer trabalho em código em qualquer projeto."
 ---
 

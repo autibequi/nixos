@@ -1,5 +1,5 @@
 ---
-name: art/ascii
+name: meta/art/ascii
 description: Catalogo completo de representacoes ASCII para terminal. Fluxos, caixas, tabelas, arvores, graficos. Referencia central — qualquer skill que precise desenhar no terminal usa estes templates.
 ---
 

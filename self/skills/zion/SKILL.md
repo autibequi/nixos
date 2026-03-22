@@ -12,6 +12,7 @@ Skills sobre o sistema Zion em si: containers, CLI, logs, ambiente, lab mode.
 | Sub-skill | Quando usar |
 |---|---|
 | `zion/container` | Dockerizar novo servico integrado ao Zion OU operar servicos existentes via `zion docker` |
+| `zion/linux` | NixOS, Hyprland, Waybar, dotfiles, stow, debug de host — tudo de sistema Linux |
 
 ## O que e o Zion (contexto rapido)
 

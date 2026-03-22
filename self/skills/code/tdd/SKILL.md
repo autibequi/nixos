@@ -1,3 +1,8 @@
+---
+name: code/tdd
+description: "Test-Driven Development — RED-GREEN-REFACTOR. Teste antes de codigo. Sem excecoes."
+---
+
 # Skill: tdd — Test-Driven Development
 
 > RED-GREEN-REFACTOR. Teste antes de codigo. Sem excecoes.
@@ -91,5 +96,5 @@ Voltar ao passo 1 para o proximo requisito/comportamento.
 | Skill | Relacao |
 |-------|---------|
 | `monolito/go-test` | Complementar — go-test roda/analisa testes existentes; tdd governa a sequencia de criacao |
-| `tools/debug` | Bug fix com TDD: Fase 1 do debug (reproduzir) = RED do TDD (teste que falha reproduzindo o bug) |
+| `code/debug` | Bug fix com TDD: Fase 1 do debug (reproduzir) = RED do TDD (teste que falha reproduzindo o bug) |
 | `orquestrador/orquestrar-feature` | Orquestrador despacha subagentes; se mode=TDD, subagentes usam esta skill |

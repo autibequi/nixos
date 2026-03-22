@@ -1,5 +1,5 @@
 ---
-name: humanize
+name: meta/humanize
 description: "Auto-ativar quando: usuário pede para humanizar, desviar de padrões de IA, tornar texto mais natural, remover traços de ChatGPT, ou revisar escrita para soar humana."
 ---
 
