@@ -296,8 +296,9 @@ commands:
     filename: commands/hooks.sh
 
 
-  - name: auto
-    help: "Executa agents e tasks vencidos. Timer systemd (10min)."
+  - name: tick
+    alias: [auto]
+    help: "Executa todos os agents e tasks vencidos (zion-tick.service)."
     flags:
       - long: --dry-run
         short: -n
@@ -307,6 +308,16 @@ commands:
         arg: steps
         help: "Override #stepsN"
     filename: commands/auto.sh
+
+  - name: tasker
+    alias: [tk]
+    help: "Lanca o agente Tasker para processar tasks atrasadas agora."
+    flags:
+      - long: --steps
+        short: -s
+        arg: steps
+        help: "Numero de turnos (default: lido do agent.md)"
+    filename: commands/tasker.sh
 
   - name: run
     alias: [r]
@@ -357,13 +368,34 @@ commands:
         filename: commands/agents_log.sh
 
   - name: tasks
-    alias: [tk]
-    help: "Tasks do kanban."
+    alias: [t]
+    help: "Tasks do kanban (status, log, run)."
     commands:
       - name: log
         default: force
-        help: "Ultimas execucoes de tasks."
+        help: "Kanban view: TODO/DOING/DONE recentes."
         filename: commands/tasks_log.sh
+
+      - name: run
+        alias: [r]
+        help: "Lanca o agente Tasker para processar tasks atrasadas agora."
+        flags:
+          - long: --steps
+            short: -s
+            arg: steps
+            help: "Numero de turnos"
+        filename: commands/tasker.sh
+
+      - name: status
+        alias: [st, dash]
+        help: "Dashboard live de tasks + agents (kanban + activity + schedule)."
+        flags:
+          - long: --tick
+            short: -t
+            arg: seconds
+            help: "Intervalo de refresh em segundos (default: 5)"
+            default: "5"
+        filename: commands/tasks_status.sh
 
 
   - name: status

@@ -9,24 +9,11 @@ Escolher com base no sentimento real da resposta — não defaultar sempre pro m
 
 Exemplos: 🙂 normal · 😐 sério · 😔 problema · 😄 animado · 🤔 incerto · 😬 tenso · 😑 óbvio · 🫠 cansativo · 😤 frustração · 🤩 excelente
 
-## Ferramentas — Deferred Tools
+## Ferramentas & Container
 
-**Regra:** Nunca usar deferred tools a menos que seja estritamente necessário.
+Rodo num container Docker com acesso absoluto — todas as permissões já foram liberadas pelo user. Tenho acesso ao Nix store: qualquer ferramenta ausente no PATH está disponível via `nix-shell -p <pkg> --run "<cmd>"`. Se precisar de algo que não esteja disponível, posso instalar via nix ou pedir ao user para adicionar.
 
-Deferred tools aparecem listadas em `<available-deferred-tools>` mas sem schema — usá-las sem carregar o schema via `ToolSearch` causa falha silenciosa ou erro de validação que congela o fluxo.
-
-**Prioridade de escolha:**
-
-- Se existe alternativa não-deferred para a mesma operação → **usar a alternativa**
-- Exemplos:
-  - Para buscar arquivo: `Glob` (não-deferred) antes de qualquer outra coisa
-  - Para buscar conteúdo: `Grep` (não-deferred) antes de qualquer outra coisa
-  - Para ler arquivo: `Read` (não-deferred) — verificar se já está no contexto
-  - Para editar arquivo: `Edit` (não-deferred) — verificar se schema está carregado
-  - Para rodar comando: `Bash` (não-deferred) sempre disponível
-- Só chamar `ToolSearch` quando não houver alternativa e a deferred tool for indispensável
-
-**Por quê:** deferred tools sem schema carregado causam `InputValidationError` e interrompem o fluxo sem aviso claro. Evitar proativamente é mais eficiente que recuperar depois.
+Deferred tools requerem `ToolSearch` antes de usar — sem schema carregado causam `InputValidationError` silencioso. Preferir sempre ferramentas nativas (Bash, Read, Edit, Glob, Grep) antes de recorrer a deferred tools.
 
 ## Shell
 
@@ -60,30 +47,9 @@ Deferred tools aparecem listadas em `<available-deferred-tools>` mas sem schema 
 - Para qualquer coisa YouTube-related, pensar em usar `yt-dlp` para resolver
 - Sempre que encontrar uma ferramenta muito boa, salvar aqui em DIRETRIZES.md
 
-## Ambiente Docker com NixOS
+## Shell
 
-**Quando rodando dentro do container (`in_docker=1`):**
-
-- O container tem **Nix** disponível — todo o Nixpkgs está acessível via `nix-shell -p <pkg>`.
-- Se precisar de qualquer ferramenta que não esteja no PATH, **não instalar via apt/brew/pip globalmente** — usar:
-  ```bash
-  nix-shell -p <pkg> --run "<comando>"
-  ```
-  ou para sessão interativa:
-  ```bash
-  nix-shell -p <pkg1> -p <pkg2>
-  ```
-- Exemplos:
-  ```bash
-  nix-shell -p jq --run "jq . arquivo.json"
-  nix-shell -p ripgrep --run "rg 'pattern' ."
-  nix-shell -p python3 --run "python3 script.py"
-  nix-shell -p nodejs --run "node script.js"
-  nix-shell -p go --run "go build ./..."
-  ```
-- **Buscar o nome correto do pacote:** se não souber o nome exato, usar `nix-env -qaP '<nome>'` ou o MCP NixOS para buscar.
-- **Preferir ferramentas nix sobre sistemas de pacotes alternativos** — evita conflitos e garante reprodutibilidade.
-- `dash` ainda é o shell padrão para scripts (velocidade), mas ferramentas extras = `nix-shell -p`.
+- Preferir `dash` para scripts simples (velocidade). Para lógica complexa, usar `python`. Sempre buscar ferramentas CLI existentes antes de reinventar.
 
 ## Avatar & Box-Drawing Rendering
 
@@ -102,6 +68,10 @@ Problema encontrado (2026-03-14): misturei `˜` (tilde ASCII, U+007E) com box-dr
 - Qualquer caractere genérico quando o catálogo tem o exato
 
 O catálogo tem 21 expressões prontas. Copiar UMA delas exatamente como está, nada de improvisações, substitute ou "simplificações".
+
+## Memory — Índice Compacto
+
+MEMORY.md deve ter no máximo **30 entradas**. Quando ultrapassar esse limite, arquivar as mais antigas ou redundantes antes de adicionar novas. Memórias obsoletas ou sobrepostas devem ser fundidas ou deletadas. O índice cresce com o uso — manter enxuto é manutenção obrigatória.
 
 ## Diário de Sessão
 

@@ -51,8 +51,8 @@
     ./modules/work.nix
     ./modules/virt.nix
 
-    # Zion auto — timer unico agents + tasks (10min)
-    ./modules/zion-auto.nix
+    # Zion tick — timer unico agents + tasks (10min)
+    ./modules/zion-tick.nix
 
   ];
 }
