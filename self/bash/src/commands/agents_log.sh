@@ -147,7 +147,7 @@ _queue_output=$({
       fname=$(basename "$f")
       [[ "$fname" =~ ^([0-9]{4})([0-9]{2})([0-9]{2})_([0-9]{2})_([0-9]{2})_ ]] || continue
       ts=$(TZ=UTC date -d "${BASH_REMATCH[1]}-${BASH_REMATCH[2]}-${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}:00" +%s 2>/dev/null) || continue
-      ts_display="${BASH_REMATCH[2]}-${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}"
+      ts_display=$(date -d "@$ts" +"%m-%d %H:%M")
       aname=$(awk '/^---/{fm++} fm==1 && /^agent:/{print $2; exit}' "$f" 2>/dev/null)
       [ -z "$aname" ] && aname=$(awk '/^---/{fm++} fm==1 && /^contractor:/{print $2; exit}' "$f" 2>/dev/null)
       [ -z "$aname" ] && aname="?"
@@ -185,8 +185,13 @@ while IFS=$'\t' read -r ts agent status elapsed tokens card; do
     *)        sc="${DIM}? ${R} " ;;
   esac
 
-  # Starttime: 2026-03-21T08:15:00Z → 03-21 08:15
-  ts_short=$(echo "$ts" | sed 's/[0-9]\{4\}-\([0-9]\{2\}\)-\([0-9]\{2\}\)T\([0-9]\{2\}:[0-9]\{2\}\).*/\1-\2 \3/')
+  # Starttime: convert UTC ISO → local time
+  ts_epoch=$(date -d "$ts" +%s 2>/dev/null || echo 0)
+  if [ "$ts_epoch" -gt 0 ]; then
+    ts_short=$(date -d "@$ts_epoch" +"%m-%d %H:%M")
+  else
+    ts_short=$(echo "$ts" | sed 's/[0-9]\{4\}-\([0-9]\{2\}\)-\([0-9]\{2\}\)T\([0-9]\{2\}:[0-9]\{2\}\).*/\1-\2 \3/')
+  fi
 
   # Duration: use elapsed if available, otherwise "--"
   dur="${elapsed}"
