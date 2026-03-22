@@ -5,8 +5,8 @@
   "spacing": 0,
   "margin": 0,
   "modules-left": [
-    "custom/leech",
     "idle_inhibitor",
+    "custom/leech",
     "hyprland/workspaces"
     // "hyprland/window"
   ],
@@ -175,8 +175,8 @@
   "idle_inhibitor": {
     "format": "{icon}",
     "format-icons": {
-      "activated": "󰈈 ",
-      "deactivated": "󰈉 "
+      "activated": "󰃰 ",
+      "deactivated": "󰃱 "
     },
     "tooltip": true
   },

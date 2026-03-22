@@ -83,6 +83,7 @@ x-base-volumes: &base-volumes
 
 services:
   docker-proxy:
+    container_name: docker-proxy
     # Proxy granular: só /logs (GET) + /restart (POST) + info/ping/version
     # docker inspect bloqueado — env vars de containers nunca expostos
     image: nginx:alpine
