@@ -11,6 +11,7 @@ description: Análise de código da branch atual — diff interativo, objetos po
 /code flows      → diagrama de fluxo no Chrome
 /code report     → relatório consolidado da branch
 /code inspect    → inspeção leve de qualidade
+/code review     → review completo de PR (JIRA + escopo + fluxo + validação + veredito)
 /code            → sem argumento: mostra este menu
 ```
 
@@ -27,6 +28,7 @@ Parsear `$ARGUMENTS` (primeira palavra):
 | `flows` | **3. Flows** |
 | `report` | **4. Report** |
 | `inspect` / `inspection` | **5. Inspect** |
+| `review` | **6. Review** |
 | vazio | Mostrar menu acima |
 
 ---
@@ -70,3 +72,11 @@ Resumo: relatório completo da branch atual — objetos por camada + stats de ad
 Ler `zion/skills/code/inspection/SKILL.md` e seguir as instruções.
 
 Resumo: inspeção estática leve da branch atual — error handling, nil checks, contratos BFF/front, response shapes. Output com ✅ / ⚠️ / 🔴 por arquivo. Mais rápido que pr-inspector.
+
+---
+
+## 6. Review — Review Completo de PR
+
+Ler `zion/skills/code/review/SKILL.md` e seguir as instruções.
+
+Resumo: pipeline automatico de review em 5 fases — contexto JIRA, escopo por camada, diagrama de fluxo ASCII, validacao de codigo, veredito final. Tudo inline no terminal, sem Chrome relay.
