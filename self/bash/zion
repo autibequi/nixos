@@ -47,7 +47,7 @@ zion_usage() {
   printf "  %s   Lanca o agente Tasker para processar tasks atrasadas agora.\n" "tasker   "
   printf "  %s   Roda um agente ou task imediatamente.\n" "run      "
   printf "  %s   Gerencia agentes background.\n" "agents   "
-  printf "  %s   Tasks do kanban (status, log, run).\n" "tasks    "
+  printf "  %s   Tasks do kanban (status, log).\n" "tasks    "
   printf "  %s   Status agregado: sessoes e docker services. Atualiza a cada 30s por padrao.\n" "status   "
   printf "  %s   Deploy dotfiles no host via GNU stow (restow, delete, status).\n" "stow     "
   printf "  %s   Aplica configuração NixOS no host via nh os.\n" "os       "
@@ -1176,7 +1176,7 @@ zion_agents_log_usage() {
 
 # :command.usage
 zion_tasks_usage() {
-  printf "zion tasks - Tasks do kanban (status, log, run).\n\n"
+  printf "zion tasks - Tasks do kanban (status, log).\n\n"
   printf "Alias: t\n"
   echo
 
@@ -1187,7 +1187,6 @@ zion_tasks_usage() {
   # :command.usage_commands
   printf "%s\n" "Commands:"
   printf "  %s   Kanban view: TODO/DOING/DONE recentes. (default)\n" "log   "
-  printf "  %s   Lanca o agente Tasker para processar tasks atrasadas agora.\n" "run   "
   printf "  %s   Dashboard live de tasks + agents (kanban + activity + schedule).\n" "status"
   echo
 
@@ -1215,35 +1214,6 @@ zion_tasks_log_usage() {
   # :command.long_usage
   if [[ -n "$long_usage" ]]; then
     printf "%s\n" "Options:"
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-zion_tasks_run_usage() {
-  printf "zion tasks run - Lanca o agente Tasker para processar tasks atrasadas agora.\n\n"
-  printf "Alias: r\n"
-  echo
-
-  printf "%s\n" "Usage:"
-  printf "  zion tasks run [OPTIONS]\n"
-  printf "  zion tasks run --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_flags
-    # :flag.usage
-    printf "  %s\n" "--steps, -s STEPS"
-    printf "    Numero de turnos\n"
-    echo
 
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
@@ -4971,42 +4941,62 @@ echo ""
 printf "  ${DIM}%-14s  %-8s  %-12s  %-4s  %s${R}\n" "starttime" "duration" "agent" "st" "topic"
 echo "  ${DIM}$(printf '─%.0s' {1..80})${R}"
 
-# ── Scheduled (proximos) ──────────────────────────────────────────
-SCHEDULE_DIR="$AGENTS/_schedule"
-if [ -d "$SCHEDULE_DIR" ]; then
-  NOW=$(date +%s)
-  _sched_count=0
-  while IFS='|' read -r _diff aname when card_label; do
-    (( _sched_count >= 10 )) && break
-    _sched_count=$(( _sched_count + 1 ))
-    if [[ "$when" == atrasado* ]]; then sc="${Y}>>>${R}"
-    else                               sc="${C}..${R} "; fi
-    printf "  %-14s  %-8s  %-12s  " "$when" "--" "$aname"
-    printf "%-6b  " "$sc"
-    printf "%s\n" "$card_label"
-  done < <(
-    for f in "$SCHEDULE_DIR"/*.md; do
-      [ -f "$f" ] || continue
-      fname=$(basename "$f")
-      [[ "$fname" =~ ^([0-9]{4})([0-9]{2})([0-9]{2})_([0-9]{2})_([0-9]{2})_ ]] || continue
-      ts=$(TZ=UTC date -d "${BASH_REMATCH[1]}-${BASH_REMATCH[2]}-${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}:00" +%s 2>/dev/null) || continue
-      diff=$(( ts - NOW ))
-      if   (( diff < -86400 )); then when="atrasado $(((-diff)/3600))h"
-      elif (( diff < 0 ));      then when="atrasado $(((-diff)/60))min"
-      elif (( diff == 0 ));     then when="agora"
-      elif (( diff < 3600 ));   then when="em $((diff/60))min"
-      elif (( diff < 86400 ));  then when="em $((diff/3600))h$(( (diff%3600)/60 ))min"
-      else                           when="em $((diff/86400))d"; fi
-      aname=$(awk '/^---/{fm++} fm==1 && /^agent:/{print $2; exit}' "$f" 2>/dev/null)
-      [ -z "$aname" ] && aname=$(awk '/^---/{fm++} fm==1 && /^contractor:/{print $2; exit}' "$f" 2>/dev/null)
-      [ -z "$aname" ] && aname="?"
-      card_label=$(echo "$fname" | sed 's/^[0-9]\{8\}_[0-9]\{2\}_[0-9]\{2\}_//; s/\.md$//')
-      echo "$diff|$aname|$when|$card_label"
-    done | sort -t'|' -k1,1n
-  )
-  if (( _sched_count > 0 )); then
+# ── Running + Scheduled (proximos 10) ─────────────────────────────
+_queue_count=0
+NOW=$(date +%s)
+
+_parse_card() {
+  local f="$1" state="$2"
+  local fname=$(basename "$f")
+  [[ "$fname" =~ ^([0-9]{4})([0-9]{2})([0-9]{2})_([0-9]{2})_([0-9]{2})_ ]] || return
+  local ts=$(TZ=UTC date -d "${BASH_REMATCH[1]}-${BASH_REMATCH[2]}-${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}:00" +%s 2>/dev/null) || return
+  local diff=$(( ts - NOW ))
+  local when
+  if [ "$state" = "running" ]; then
+    local elapsed=$(( NOW - ts ))
+    if   (( elapsed < 60 ));   then when="rodando ${elapsed}s"
+    elif (( elapsed < 3600 )); then when="rodando $((elapsed/60))min"
+    else                            when="rodando $((elapsed/3600))h"; fi
+  elif (( diff < -86400 )); then when="atrasado $(((-diff)/3600))h"
+  elif (( diff < 0 ));      then when="atrasado $(((-diff)/60))min"
+  elif (( diff == 0 ));     then when="agora"
+  elif (( diff < 3600 ));   then when="em $((diff/60))min"
+  elif (( diff < 86400 ));  then when="em $((diff/3600))h$(( (diff%3600)/60 ))min"
+  else                           when="em $((diff/86400))d"; fi
+  local aname=$(awk '/^---/{fm++} fm==1 && /^agent:/{print $2; exit}' "$f" 2>/dev/null)
+  [ -z "$aname" ] && aname=$(awk '/^---/{fm++} fm==1 && /^contractor:/{print $2; exit}' "$f" 2>/dev/null)
+  [ -z "$aname" ] && aname="?"
+  local card_label=$(echo "$fname" | sed 's/^[0-9]\{8\}_[0-9]\{2\}_[0-9]\{2\}_//; s/\.md$//')
+  local sort_key=$diff
+  [ "$state" = "running" ] && sort_key=$(( -999999 - elapsed ))
+  echo "$sort_key|$aname|$when|$card_label|$state"
+}
+
+{
+  RUNNING_DIR="$AGENTS/_running"
+  SCHEDULE_DIR="$AGENTS/_schedule"
+  [ -d "$RUNNING_DIR" ] && for f in "$RUNNING_DIR"/*.md; do [ -f "$f" ] && _parse_card "$f" "running"; done
+  [ -d "$SCHEDULE_DIR" ] && for f in "$SCHEDULE_DIR"/*.md; do [ -f "$f" ] && _parse_card "$f" "sched"; done
+} | sort -t'|' -k1,1n | head -10 | while IFS='|' read -r _sk aname when card_label state; do
+  _queue_count=$(( _queue_count + 1 ))
+  case "$state" in
+    running) sc="${G}>>>${R}" ;;
+    sched)
+      if [[ "$when" == atrasado* ]]; then sc="${Y}>>>${R}"
+      else sc="${C}..${R} "; fi ;;
+  esac
+  printf "  %-14s  %-8s  %-12s  " "$when" "--" "$aname"
+  printf "%-6b  " "$sc"
+  printf "%s\n" "$card_label"
+done
+
+# Separator if we printed any queue items
+if [ -d "$AGENTS/_running" ] || [ -d "$AGENTS/_schedule" ]; then
+  local _has_items=0
+  [ -f "$AGENTS/_running"/*.md 2>/dev/null ] && _has_items=1
+  [ -f "$AGENTS/_schedule"/*.md 2>/dev/null ] && _has_items=1
+  ls "$AGENTS/_running"/*.md "$AGENTS/_schedule"/*.md 2>/dev/null | grep -q . && \
     echo "  ${DIM}$(printf -- '-%.0s' {1..80})${R}"
-  fi
 fi
 
 # ── Past entries ──────────────────────────────────────────────────
@@ -5156,110 +5146,6 @@ zion_tasks_log_command() {
     done
   fi
   echo ""
-
-}
-
-# :command.function
-zion_tasks_run_command() {
-
-  # src/commands/tasker.sh
-  # Lanca o agente Tasker para processar tasks atrasadas agora
-  # Equivalente a: zion run tasker
-  zion_load_config
-
-  steps="${args[--steps]:-}"
-
-  zion_dir="${ZION_ROOT:-$HOME/nixos/self}"
-  obsidian="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
-  runner="$zion_dir/scripts/task-runner.sh"
-  agents="$obsidian/agents"
-  schedule="$agents/_schedule"
-  agent_file="$zion_dir/agents/tasker/agent.md"
-
-  # Fallback runner
-  if [ ! -f "$runner" ]; then
-    for try in "/workspace/mnt/self/scripts/task-runner.sh" "/workspace/self/scripts/task-runner.sh"; do
-      [ -f "$try" ] && runner="$try" && break
-    done
-  fi
-
-  # Fallback agent.md
-  if [ ! -f "$agent_file" ]; then
-    for try in "/workspace/mnt/self/agents/tasker/agent.md" "/workspace/self/agents/tasker/agent.md"; do
-      [ -f "$try" ] && agent_file="$try" && break
-    done
-  fi
-
-  # Fallback agents dir
-  if [ ! -d "$agents" ]; then
-    for try in /workspace/obsidian/agents "$HOME/obsidian/agents"; do
-      [ -d "$try" ] && agents="$try" && schedule="$try/_schedule" && break
-    done
-  fi
-
-  if [ ! -f "$runner" ]; then
-    echo "[tasker] task-runner nao encontrado"
-    exit 1
-  fi
-
-  if [ ! -f "$agent_file" ]; then
-    echo "[tasker] agent.md nao encontrado: $agent_file"
-    exit 1
-  fi
-
-  # Ler model e max_turns do agent.md
-  _fm_val() {
-    local key="$1"
-    awk '/^---/{fm++} fm==1 && /^'"$key"':/{gsub(/^[^:]*:[[:space:]]*/,""); print; exit}' "$agent_file" 2>/dev/null
-  }
-
-  MODEL=$(_fm_val "model"); MODEL="${MODEL:-sonnet}"
-  MAX_TURNS=$(_fm_val "max_turns"); MAX_TURNS="${MAX_TURNS:-15}"
-  MCP=$(_fm_val "mcp"); MCP="${MCP:-false}"
-  TIMEOUT=1800
-  case "$MODEL" in haiku) TIMEOUT=900 ;; opus) TIMEOUT=3600 ;; esac
-
-  [ -n "$steps" ] && MAX_TURNS="$steps"
-
-  # Corpo do agente (abaixo do frontmatter)
-  _agent_body() {
-    local in_fm=0 past_fm=0
-    while IFS= read -r line; do
-      [ "$past_fm" = "1" ] && { echo "$line"; continue; }
-      if [ "$line" = "---" ]; then
-        [ "$in_fm" = "1" ] && past_fm=1 && continue
-        in_fm=1; continue
-      fi
-    done < "$agent_file"
-  }
-
-  WHEN=$(date -u +%Y%m%d_%H_%M)
-  CARD="${WHEN}_tasker.md"
-
-  mkdir -p "$schedule"
-  {
-    echo "---"
-    echo "model: $MODEL"
-    echo "timeout: $TIMEOUT"
-    echo "mcp: $MCP"
-    echo "agent: tasker"
-    echo "---"
-    _agent_body
-    echo ""
-    echo "#steps${MAX_TURNS}"
-  } > "$schedule/$CARD"
-
-  echo "[tasker] agent=tasker  model=$MODEL  turns=$MAX_TURNS  timeout=${TIMEOUT}s"
-  echo "[tasker] card: $CARD"
-  echo ""
-
-  rm -rf "/tmp/zion-locks/${WHEN}_tasker.lock" 2>/dev/null || true
-
-  export TASK_CONTRACTORS_DIR="$agents"
-  export SCHEDULE_DIR="$schedule"
-  export TASK_MAX_TURNS="$MAX_TURNS"
-
-  exec "$runner" "$CARD"
 
 }
 
@@ -8659,13 +8545,6 @@ zion_tasks_parse_requirements() {
       shift $#
       ;;
 
-    run | r)
-      action="run"
-      shift
-      zion_tasks_run_parse_requirements "$@"
-      shift $#
-      ;;
-
     status | st | dash)
       action="status"
       shift
@@ -8731,64 +8610,6 @@ zion_tasks_log_parse_requirements() {
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        printf "invalid argument: %s\n" "$key" >&2
-        exit 1
-
-        ;;
-
-    esac
-  done
-
-}
-
-# :command.parse_requirements
-zion_tasks_run_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_tasks_run_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="tasks run"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      # :flag.case
-      --steps | -s)
-
-        # :flag.case_arg
-        if [[ -n ${2+x} ]]; then
-          args['--steps']="$2"
-          shift
-          shift
-        else
-          printf "%s\n" "--steps requires an argument: --steps, -s STEPS" >&2
-          exit 1
-        fi
-        ;;
 
       -?*)
         printf "invalid option: %s\n" "$key" >&2

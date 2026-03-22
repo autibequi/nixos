@@ -56,67 +56,50 @@ Se Chrome offline, imprimir ASCII diretamente no terminal.
 
 ### Tabela de flags (Chrome + ASCII)
 
+**REGRA DE LAYOUT**: emoji sempre na coluna mais à esquerda para alinhamento consistente.
+
+Formato tabela Markdown:
 ```
-  FLAGS DE CONTROLE — SESSÃO ATUAL
-  ────────────────────────────────────────────────────────────────
-  Flag            Mecanismo                       Default   Agora
-  ────────────────────────────────────────────────────────────────
-  personality     .ephemeral/personality-off       ON        🔵 ON
-  autocommit      .ephemeral/auto-commit            OFF       🔴 OFF
-  autojarvis      .ephemeral/auto-jarvis            OFF       🔴 OFF
-  beta            .ephemeral/beta-mode              OFF       🔴 OFF
-  zion_debug      .ephemeral/zion-debug             OFF       🔴 OFF
-  headless        env HEADLESS                      0         🔴 0
-  in_docker       /.dockerenv / CLAUDE_ENV          0         🔵 1
-  zion_edit       /workspace/host existe?           0         🔴 0
-  analysis_mode   env ZION_ANALYSIS_MODE            0         🔴 0
-  agent_mode      env AGENT_NAME / TASK_NAME        0         🔴 0
+|     | Flag | Mecanismo | Default | Valor |
+|-----|------|-----------|---------|-------|
+| 🔵 | `personality` | `.ephemeral/personality-off` | ON | ON |
+| 🔴 | `autocommit`  | `.ephemeral/auto-commit`     | OFF | OFF |
+...
 ```
 
 Substituir valores reais detectados na sessão.
 
 ### Pipeline vertical (Chrome + ASCII)
 
+**REGRA DE LAYOUT**: emoji no início de cada linha, antes do conector `├─`.
+
 ```
-  PIPELINE DE LOADING
-  ─────────────────────────────────────────────────────────────────
+🚀 START
+│
+🔵 ├─[SEMPRE]────────────────────── BOOT FLAGS
+│      datetime · personality · autocommit · in_docker · zion_edit...
+│
+🔵 ├─[zion_debug=OFF + interativo]── LITE.md                    ← ATIVO
+🔴 │                                 DIRETRIZES.md              ← requer zion_debug=ON
+│
+🔵 ├─[SEMPRE]────────────────────── ENV CONTEXT
+│
+🔴 ├─[usage-bar.txt existe]─────────  API USAGE                 ← arquivo ausente
+│
+🔴 ├─[AGENT_NAME ou TASK_NAME]──────  AGENT MODE                ← inativo
+│
+🔵 ├─[SEMPRE]────────────────────── MEMORY RESTORE (N arquivos)
+│
+🔴 ├─[zion_edit=1 + interativo]─────  BOOT DISPLAY              ← requer lab mode
+│
+🔴 ├─[beta=ON]───────────────────────  BETA OVERRIDES
+│
+🔴 └─[ZION_ANALYSIS_MODE=1]──────────  ANALYSIS MODE
 
-  🚀 START
-  │
-  ├─[SEMPRE]──────────────────────────── 🔵 BOOT FLAGS
-  │   datetime · personality · autocommit · in_docker · zion_edit...
-  │
-  ├─[zion_debug=OFF + interativo]──────── 🔵/🔴 LITE.md  ou  DIRETRIZES.md
-  │   [🔵 LITE]   persona mínima, sem avatar, sem operacional
-  │   [🔴 DIRETRIZES] requer zion_debug=ON
-  │
-  ├─[SEMPRE]──────────────────────────── 🔵 ENV CONTEXT
-  │   docker vs host · /workspace paths · headless rules
-  │
-  ├─[usage-bar.txt existe]─────────────── 🔵/🔴 API USAGE
-  │   regras de cota 70% / 85% / 95%
-  │
-  ├─[AGENT_NAME ou TASK_NAME]──────────── 🔴 AGENT/TASK MODE
-  │   diretrizes de execução autônoma
-  │
-  ├─[SEMPRE]──────────────────────────── 🔵 MEMORY RESTORE
-  │   repõe MEMORY.md se ausente do live path
-  │
-  ├─[zion_edit=1 + interativo]─────────── 🔴 BOOT DISPLAY
-  │   banner ZION LAB · git · inbox · tokens → stderr
-  │
-  ├─[beta=ON]─────────────────────────── 🔴 BETA OVERRIDES
-  │   yandere layer + missão de observação
-  │
-  └─[ZION_ANALYSIS_MODE=1]─────────────── 🔴 ANALYSIS MODE
-      experimento isolado · autonomia total
-
-  ── LAZY-LOAD (não carregados — disponíveis sob demanda) ─────────
-  ⚪ SELF.md         ~640 tokens  — via skill
-  ⚪ PERSONALITY.md  ~3.1k tokens — inclui avatar GLaDOS
+── LAZY-LOAD ─────────────────────────────────────────────────────────
+⚪  SELF.md         ~640 tokens  — não carregado
+⚪  PERSONALITY.md  ~3.1k tokens — não carregado (inclui avatar GLaDOS)
 ```
-
-Colorir cada linha com o status real detectado na sessão.
 
 ### Recomendações (sempre no final)
 
