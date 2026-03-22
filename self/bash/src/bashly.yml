@@ -361,6 +361,13 @@ commands:
       - name: build
         help: "nh os build (só compila, não aplica)"
         filename: commands/os_build.sh
+      - name: update
+        alias: [u]
+        help: "nix flake update (atualiza inputs do flake)"
+        filename: commands/os_update.sh
+        args:
+          - name: input
+            help: "Input específico a atualizar (ex: nixpkgs). Sem arg: atualiza tudo."
 
   - name: leech
     alias: [l]
