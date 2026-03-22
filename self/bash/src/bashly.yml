@@ -152,13 +152,6 @@ commands:
     help: Regenera CLI (bashly) e instala/atualiza symlink em ~/.local/bin.
     filename: commands/update.sh
 
-  - name: init
-    help: Cria ~/.zion a partir de config.example (não sobrescreve se já existir).
-    flags:
-      - long: --force
-        help: Sobrescreve ~/.zion se já existir
-    filename: commands/init.sh
-
   - name: set
     help: "Define engine padrão em ~/.zion (engine= claude | opencode | cursor)."
     args:
@@ -419,6 +412,11 @@ commands:
       - long: --rw
       - long: --ro
     filename: commands/host.sh
+
+  - name: inbox
+    alias: [ib]
+    help: "Lista os arquivos do inbox."
+    filename: commands/inbox.sh
 
   - name: outbox
     alias: [ob]
