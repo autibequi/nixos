@@ -65,6 +65,9 @@ dark_theme() {
             --transition-fps 60 \
             --transition-duration 0.3
     fi
+
+    # Regenerate centralized colors
+    command -v leech-theme-apply >/dev/null 2>&1 && leech-theme-apply dark || true
 }
 
 light_theme() {
@@ -83,6 +86,9 @@ light_theme() {
             --transition-fps 60 \
             --transition-duration 0.3
     fi
+
+    # Regenerate centralized colors
+    command -v leech-theme-apply >/dev/null 2>&1 && leech-theme-apply light || true
 }
 
 toggle_theme() {

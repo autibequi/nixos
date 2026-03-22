@@ -22,7 +22,9 @@ services:
       - "4004:4004"
       - "2345:2345"
     networks:
-      - default
+      default:
+        aliases:
+          - api.local.estrategia-sandbox.com.br
     restart: unless-stopped
 
 networks:

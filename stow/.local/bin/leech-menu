@@ -4,31 +4,69 @@ set -euo pipefail
 
 HYPRUTILS="$HOME/.config/hypr/hyprutils.sh"
 
-# Helper: pipe options to anyrun stdin, return selected line
+# Helper: pipe options to rofi dmenu, return selected line
 _select() {
-    printf '%s\n' "$@" | anyrun --plugins libstdin.so 2>/dev/null
+    printf '%s\n' "$@" | rofi -dmenu -i -p "" \
+        -theme-str 'window { width: 300px; }' \
+        -theme-str 'listview { lines: 8; }' \
+        -theme-str '* { font: "JetBrainsMono Nerd Font 13"; }'
+}
+
+# List installed .desktop apps (cached, fast)
+APPS_CACHE="/tmp/leech-menu-apps.cache"
+_list_apps() {
+    # Rebuild cache if older than 60s or missing
+    if [ ! -f "$APPS_CACHE" ] || [ "$(( $(date +%s) - $(stat -c %Y "$APPS_CACHE") ))" -gt 60 ]; then
+        grep -rh '^Name=' \
+            /run/current-system/sw/share/applications/*.desktop \
+            "$HOME/.local/share/applications"/*.desktop \
+            2>/dev/null \
+        | cut -d= -f2- | sort -u | sed 's/^/  /' > "$APPS_CACHE"
+    fi
+    cat "$APPS_CACHE"
 }
 
 # ── Main Menu ──────────────────────────────────────────────
 menu_main() {
-    local choice
-    choice=$(_select \
-        "󰀻 Apps" \
+    local categories apps choice
+
+    categories=$(printf '%s\n' \
         " Capture" \
         " Toggle" \
         " Style" \
         "󱙺 Leech" \
         "⏻ System"
+    )
+
+    apps=$(_list_apps)
+
+    choice=$(printf '%s\n%s\n' "$categories" "$apps" \
+        | rofi -dmenu -i -p "Menu" \
+            -theme-str 'window { width: 400px; }' \
+            -theme-str 'listview { lines: 12; }' \
+            -theme-str '* { font: "JetBrainsMono Nerd Font 13"; }'
     ) || return 0
 
+    # Check if it's a category
     case "$choice" in
-        *Apps)     exec anyrun ;;
-        *Capture)  menu_capture ;;
-        *Toggle)   menu_toggle ;;
-        *Style)    menu_style ;;
-        *Leech)    menu_leech ;;
-        *System)   menu_system ;;
+        *Capture)  menu_capture; return ;;
+        *Toggle)   menu_toggle; return ;;
+        *Style)    menu_style; return ;;
+        *Leech)    menu_leech; return ;;
+        *System)   menu_system; return ;;
     esac
+
+    # Otherwise it's an app — find matching .desktop and launch
+    local app_name="${choice#  }"
+    local desktop_file
+    desktop_file=$(grep -rl "^Name=$app_name$" \
+        /run/current-system/sw/share/applications/ \
+        "$HOME/.local/share/applications/" \
+        2>/dev/null | head -1)
+    if [ -n "$desktop_file" ]; then
+        gtk-launch "$(basename "$desktop_file" .desktop)" &
+        disown
+    fi
 }
 
 # ── Capture ────────────────────────────────────────────────
@@ -109,7 +147,7 @@ menu_wallpaper() {
     fi
 
     local choice
-    choice=$(find "$dir" -type f \( -name '*.jpg' -o -name '*.png' -o -name '*.webp' \) -printf '%f\n' | sort | anyrun --plugins libstdin.so 2>/dev/null) || return 0
+    choice=$(find "$dir" -type f \( -name '*.jpg' -o -name '*.png' -o -name '*.webp' \) -printf '%f\n' | sort | rofi -dmenu -i -p "Wallpaper") || return 0
     [ -z "$choice" ] && return
 
     swww img "$dir/$choice" --transition-type fade --transition-fps 60 --transition-duration 0.3
