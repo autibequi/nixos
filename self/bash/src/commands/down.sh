@@ -1,12 +1,13 @@
-# Para todos os containers do projeto (zion sessions + puppy)
+# Para todos os containers zion (sessions compartilhadas + puppy)
 zion_load_config
-compose_zion="${ZION_ROOT:-$HOME/nixos/self}/container/docker-compose.zion.yml"
-compose_puppy="${ZION_ROOT:-$HOME/nixos/self}/container/docker-compose.puppy.yml"
 
-echo "Stopping zion session containers..."
-docker compose -f "$compose_zion" down 2>/dev/null || true
-
-echo "Stopping puppy container..."
-docker compose -f "$compose_puppy" down 2>/dev/null || true
+# Shared leech containers: cada projeto sobe com -p <slug> e fica persistente.
+# docker stop para todos os containers de imagem claude-nix-sandbox rodando.
+leech_ids=$(docker ps -q --filter "ancestor=claude-nix-sandbox" 2>/dev/null)
+if [[ -n "$leech_ids" ]]; then
+  echo "Stopping shared leech containers..."
+  # shellcheck disable=SC2086
+  docker stop $leech_ids 2>/dev/null || true
+fi
 
 echo "Done."

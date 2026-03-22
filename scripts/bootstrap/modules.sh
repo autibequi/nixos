@@ -71,15 +71,29 @@ osc8_link() {
 
 # ── Export for submodules ─────────────────────────────────────────────────────
 export WS KANBAN SCHEDULED TODAY now COLS LINS BOOTSTRAP_BANNER AUTOJARVIS_FLAG IS_CONTAINER
+# Exporta paleta de cores para subshells paralelas
+export R B DIM P_GREEN P_AMBER P_CYAN P_MAGENTA P_RED P_DIM ON OFF
+export CYAN GREEN YELLOW RED ORANGE BLUE WHITE MAGENTA GRAY
 
 # ── Source dashboard modules ──────────────────────────────────────────────────
 BOOTSTRAP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-source "$BOOTSTRAP_DIR/tree.dashboard.sh"       || echo -e "${P_RED}  ✗ tree load failed${R}"
-source "$BOOTSTRAP_DIR/header.dashboard.sh"     || echo -e "${P_RED}  ✗ header load failed${R}"
-source "$BOOTSTRAP_DIR/scheduler.dashboard.sh"  || echo -e "${P_RED}  ✗ scheduler load failed${R}"
-source "$BOOTSTRAP_DIR/github.dashboard.sh"     || echo -e "${P_RED}  ✗ github load failed${R}"
-source "$BOOTSTRAP_DIR/rss.dashboard.sh"        || echo -e "${P_RED}  ✗ rss load failed${R}"
+source "$BOOTSTRAP_DIR/tree.dashboard.sh"   || echo -e "${P_RED}  ✗ tree load failed${R}"
+source "$BOOTSTRAP_DIR/header.dashboard.sh" || echo -e "${P_RED}  ✗ header load failed${R}"
+
+# Módulos lentos em paralelo — cada um captura output em tempfile
+_t_sched=$(mktemp /tmp/zion-boot-sched.XXXXXX)
+_t_gh=$(mktemp /tmp/zion-boot-gh.XXXXXX)
+_t_rss=$(mktemp /tmp/zion-boot-rss.XXXXXX)
+
+(source "$BOOTSTRAP_DIR/scheduler.dashboard.sh" 2>/dev/null) > "$_t_sched" &  _pid_sched=$!
+(source "$BOOTSTRAP_DIR/github.dashboard.sh"    2>/dev/null) > "$_t_gh"    &  _pid_gh=$!
+(source "$BOOTSTRAP_DIR/rss.dashboard.sh"       2>/dev/null) > "$_t_rss"   &  _pid_rss=$!
+
+wait "$_pid_sched" "$_pid_gh" "$_pid_rss" 2>/dev/null
+
+cat "$_t_sched" "$_t_gh" "$_t_rss" 2>/dev/null
+rm -f "$_t_sched" "$_t_gh" "$_t_rss"
 
 # ── Footer ────────────────────────────────────────────────────────────────────
 echo -e "${P_DIM}$(printf '─%.0s' $(seq 1 80))${R}"

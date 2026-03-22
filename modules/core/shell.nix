@@ -60,6 +60,7 @@ in
     shellAliases = sharedAliases;
 
     shellInit = ''
+      fpath=(~/.config/zsh/completions $fpath)
       source ~/.config/zsh/init.sh
     '';
   };

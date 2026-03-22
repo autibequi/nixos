@@ -12,6 +12,3 @@ esac
 export PATH="/home/pedrinho/nixos/stow/.local/bin:$PATH"
 alias claudio=zion
 
-# Completions
-fpath=(~/.config/zsh/completions $fpath)
-autoload -Uz compinit && compinit

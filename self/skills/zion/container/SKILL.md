@@ -1,11 +1,11 @@
 ---
-name: container-fy
-description: Docker completo para o Zion — dockerizar novo servico (gerar Dockerfile/compose/envs) OU operar servicos existentes (monolito, bo-container, front-student) via `zion docker`. Funde runner + dockerizer.
+name: zion/container
+description: Dockerizar um novo servico no ecossistema Zion — gerar Dockerfile/compose/envs e integrar com zion docker (logs em /workspace/logs, aparece no zion status, registrado no CLI). Tambem cobre operar servicos existentes (monolito, bo-container, front-student).
 ---
 
-# Skill: container-fy
+# Skill: zion/container
 
-Tudo sobre Docker no Zion: gerar infraestrutura para novos projetos e operar os servicos ja existentes.
+Criar e operar containers integrados ao ecossistema Zion: logs persistentes, visibilidade no `zion docker status`, registro no CLI, rede compartilhada.
 
 ## Quando usar
 
