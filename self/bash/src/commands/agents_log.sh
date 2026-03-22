@@ -136,62 +136,42 @@ echo ""
 printf "  ${DIM}%-14s  %-8s  %-12s  %-4s  %s${R}\n" "starttime" "duration" "agent" "st" "topic"
 echo "  ${DIM}$(printf '─%.0s' {1..80})${R}"
 
-# ── Running + Scheduled (proximos 10) ─────────────────────────────
-_queue_count=0
+# ── Queue: running + scheduled (proximos 10) ──────────────────────
 NOW=$(date +%s)
+_queue_output=$({
+  for dir_state in "$AGENTS/_running:running" "$AGENTS/_schedule:sched"; do
+    dir="${dir_state%%:*}"; state="${dir_state##*:}"
+    [ -d "$dir" ] || continue
+    for f in "$dir"/*.md; do
+      [ -f "$f" ] || continue
+      fname=$(basename "$f")
+      [[ "$fname" =~ ^([0-9]{4})([0-9]{2})([0-9]{2})_([0-9]{2})_([0-9]{2})_ ]] || continue
+      ts=$(TZ=UTC date -d "${BASH_REMATCH[1]}-${BASH_REMATCH[2]}-${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}:00" +%s 2>/dev/null) || continue
+      ts_display="${BASH_REMATCH[2]}-${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}"
+      aname=$(awk '/^---/{fm++} fm==1 && /^agent:/{print $2; exit}' "$f" 2>/dev/null)
+      [ -z "$aname" ] && aname=$(awk '/^---/{fm++} fm==1 && /^contractor:/{print $2; exit}' "$f" 2>/dev/null)
+      [ -z "$aname" ] && aname="?"
+      card_label=$(echo "$fname" | sed 's/^[0-9]\{8\}_[0-9]\{2\}_[0-9]\{2\}_//; s/\.md$//')
+      echo "$ts|$ts_display|$aname|$card_label|$state"
+    done
+  done
+} | sort -t'|' -k1,1rn | head -10)
 
-_parse_card() {
-  local f="$1" state="$2"
-  local fname=$(basename "$f")
-  [[ "$fname" =~ ^([0-9]{4})([0-9]{2})([0-9]{2})_([0-9]{2})_([0-9]{2})_ ]] || return
-  local ts=$(TZ=UTC date -d "${BASH_REMATCH[1]}-${BASH_REMATCH[2]}-${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}:00" +%s 2>/dev/null) || return
-  local diff=$(( ts - NOW ))
-  local when
-  if [ "$state" = "running" ]; then
-    local elapsed=$(( NOW - ts ))
-    if   (( elapsed < 60 ));   then when="rodando ${elapsed}s"
-    elif (( elapsed < 3600 )); then when="rodando $((elapsed/60))min"
-    else                            when="rodando $((elapsed/3600))h"; fi
-  elif (( diff < -86400 )); then when="atrasado $(((-diff)/3600))h"
-  elif (( diff < 0 ));      then when="atrasado $(((-diff)/60))min"
-  elif (( diff == 0 ));     then when="agora"
-  elif (( diff < 3600 ));   then when="em $((diff/60))min"
-  elif (( diff < 86400 ));  then when="em $((diff/3600))h$(( (diff%3600)/60 ))min"
-  else                           when="em $((diff/86400))d"; fi
-  local aname=$(awk '/^---/{fm++} fm==1 && /^agent:/{print $2; exit}' "$f" 2>/dev/null)
-  [ -z "$aname" ] && aname=$(awk '/^---/{fm++} fm==1 && /^contractor:/{print $2; exit}' "$f" 2>/dev/null)
-  [ -z "$aname" ] && aname="?"
-  local card_label=$(echo "$fname" | sed 's/^[0-9]\{8\}_[0-9]\{2\}_[0-9]\{2\}_//; s/\.md$//')
-  local sort_key=$diff
-  [ "$state" = "running" ] && sort_key=$(( -999999 - elapsed ))
-  echo "$sort_key|$aname|$when|$card_label|$state"
-}
-
-{
-  RUNNING_DIR="$AGENTS/_running"
-  SCHEDULE_DIR="$AGENTS/_schedule"
-  [ -d "$RUNNING_DIR" ] && for f in "$RUNNING_DIR"/*.md; do [ -f "$f" ] && _parse_card "$f" "running"; done
-  [ -d "$SCHEDULE_DIR" ] && for f in "$SCHEDULE_DIR"/*.md; do [ -f "$f" ] && _parse_card "$f" "sched"; done
-} | sort -t'|' -k1,1n | head -10 | while IFS='|' read -r _sk aname when card_label state; do
-  _queue_count=$(( _queue_count + 1 ))
-  case "$state" in
-    running) sc="${G}>>>${R}" ;;
-    sched)
-      if [[ "$when" == atrasado* ]]; then sc="${Y}>>>${R}"
-      else sc="${C}..${R} "; fi ;;
-  esac
-  printf "  %-14s  %-8s  %-12s  " "$when" "--" "$aname"
-  printf "%-6b  " "$sc"
-  printf "%s\n" "$card_label"
-done
-
-# Separator if we printed any queue items
-if [ -d "$AGENTS/_running" ] || [ -d "$AGENTS/_schedule" ]; then
-  local _has_items=0
-  [ -f "$AGENTS/_running"/*.md 2>/dev/null ] && _has_items=1
-  [ -f "$AGENTS/_schedule"/*.md 2>/dev/null ] && _has_items=1
-  ls "$AGENTS/_running"/*.md "$AGENTS/_schedule"/*.md 2>/dev/null | grep -q . && \
-    echo "  ${DIM}$(printf -- '-%.0s' {1..80})${R}"
+if [ -n "$_queue_output" ]; then
+  while IFS='|' read -r _ts ts_display aname card_label state; do
+    diff=$(( _ts - NOW ))
+    if [ "$state" = "running" ] || (( diff < 0 )); then
+      # Overdue or stuck running → red
+      printf "  ${RED}%-14s${R}  %-8s  %-12s  " "$ts_display" "--" "$aname"
+      printf "${RED}!!${R}   "
+    else
+      # Future → cyan
+      printf "  ${C}%-14s${R}  %-8s  %-12s  " "$ts_display" "--" "$aname"
+      printf "${C}..${R}   "
+    fi
+    printf "%s\n" "$card_label"
+  done <<< "$_queue_output"
+  echo "  ${DIM}$(printf -- '-%.0s' {1..80})${R}"
 fi
 
 # ── Past entries ──────────────────────────────────────────────────

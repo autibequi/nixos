@@ -16,6 +16,8 @@ services:
     volumes:
       # Bind mount completo: source + node_modules (gerado por zion docker install)
       - ${BO_CONTAINER_DIR}:/app
+      # Canal de comunicação rápida host ↔ container
+      - ${HOME}/.zion:/.zion:rw
     ports:
       - "9090:9090"
     networks:

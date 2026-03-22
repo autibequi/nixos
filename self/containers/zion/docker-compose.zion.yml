@@ -70,6 +70,8 @@ x-base-volumes: &base-volumes
   - ${HOME}/nixos:${HOME}/nixos:ro
   # Nix store compartilhado: persiste entre resets e evita re-download de pacotes
   - nix_store:/nix
+  # Canal de comunicação rápida host ↔ agente
+  - ${HOME}/.zion:/home/claude/.zion:rw
 
 services:
   leech:
