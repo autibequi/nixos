@@ -2,7 +2,7 @@
 
 **Este repo:** NixOS config do host + **Zion** (sistema de agentes). Você é **Zion** — gestor do repo e dos agentes.
 
-> Referência técnica completa (compose, volumes, bootstrap, CLI completo): `zion/docs/reference.md`
+> Referência técnica completa (compose, volumes, bootstrap, CLI completo): `self/docs/reference.md`
 
 ---
 
@@ -33,10 +33,10 @@ Em sessão **normal** (sem lab): `/workspace/host/` não existe.
 
 | | |
 |---|---|
-| **Este repo** | `flake.nix`, `configuration.nix`, `modules/`, `stow/`, `scripts/`, `zion/` |
-| **Zion** | CLI `zion`, container `claude-nix-sandbox`, skills, hooks → código em `zion/` |
-| **Puppy** | Workers background: `puppy-daemon.sh`, `puppy-runner.sh` → agent em `zion/agents/puppy-runner/` |
-| **Zion CLI** | Gerado por bashly: `zion/bash/src/bashly.yml` + `commands/*.sh` → após mudar: `bashly generate` |
+| **Este repo** | `flake.nix`, `configuration.nix`, `modules/`, `stow/`, `scripts/`, `self/` |
+| **Zion** | CLI `zion`, container `claude-nix-sandbox`, skills, hooks → código em `self/` |
+| **Puppy** | Workers background: `puppy-daemon.sh`, `puppy-runner.sh` → agent em `self/agents/puppy-runner/` |
+| **Zion CLI** | Gerado por bashly: `self/bash/src/bashly.yml` + `commands/*.sh` → após mudar: `bashly generate` |
 
 ---
 
@@ -51,7 +51,7 @@ Em sessão **normal** (sem lab): `/workspace/host/` não existe.
 | Regenerar CLI | `zion update` | `cd zion/cli && bashly generate` |
 | Status dotfiles | `zion stow status` | — |
 
-`zion man` para lista completa. Subcomandos detalhados: `zion/docs/reference.md`.
+`zion man` para lista completa. Subcomandos detalhados: `self/docs/reference.md`.
 
 ---
 
@@ -59,7 +59,7 @@ Em sessão **normal** (sem lab): `/workspace/host/` não existe.
 
 | Skill | Quando usar |
 |-------|-------------|
-| `linux` — `zion/skills/linux/SKILL.md` | Auto-ativa em zion host ou menção a NixOS/Hyprland/Waybar/stow/dotfiles |
+| `linux` — `self/skills/linux/SKILL.md` | Auto-ativa em zion host ou menção a NixOS/Hyprland/Waybar/stow/dotfiles |
 
 ---
 
@@ -74,11 +74,11 @@ Em sessão **normal** (sem lab): `/workspace/host/` não existe.
 | Serviço systemd | `modules/core/services.nix` |
 | Ativar/desativar módulo | `configuration.nix` (imports) |
 | Keybind / Waybar / config DE | `stow/.config/hypr/`, `stow/.config/waybar/` → `zion stow` |
-| Comando ou flag do `zion` | `zion/cli/src/bashly.yml` + `commands/<nome>.sh` → `bashly generate` |
-| Mounts ou serviços do container | `zion/containers/zion/docker-compose.zion.yml` |
-| Comportamento do agente (/load) | `zion/bootstrap.md`, `zion/system/INIT.md` |
-| Skills ou comandos | `zion/skills/`, `zion/commands/` |
-| Hooks (session-start, etc.) | `zion/hooks/claude-code/` |
+| Comando ou flag do `zion` | `self/cli/src/bashly.yml` + `commands/<nome>.sh` → `bashly generate` |
+| Mounts ou serviços do container | `self/containers/zion/docker-compose.zion.yml` |
+| Comportamento do agente (/load) | `self/bootstrap.md`, `self/system/INIT.md` |
+| Skills ou comandos | `self/skills/`, `self/commands/` |
+| Hooks (session-start, etc.) | `self/hooks/claude-code/` |
 
 ---
 
@@ -112,7 +112,7 @@ O vault Obsidian esta montado em `/workspace/obsidian/`. E o cerebro operacional
 
 assistant, coruja, doctor, hermes, jafar, mechanic, paperboy, tamagochi, tasker, wanderer, wiseman
 
-Definicao de cada um: `zion/agents/<nome>/agent.md`
+Definicao de cada um: `self/agents/<nome>/agent.md`
 Breakroom (memoria/estado): `/workspace/obsidian/agents/<nome>/memory.md`
 
 ### Comandos
