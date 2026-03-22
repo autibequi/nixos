@@ -51,6 +51,8 @@ pub struct DkServiceInfo {
     pub is_up: bool,
     pub cpu: String,
     pub mem: String,
+    /// Host path bound to /workspace/mnt (populated for leech containers).
+    pub mnt_path: String,
 }
 
 /// Collect a full status snapshot.
@@ -158,7 +160,7 @@ pub fn collect() -> Result<StatusSnapshot> {
         .map(|c| {
             let is_up = c.status.to_lowercase().starts_with("up");
             let (cpu, mem) = find_stats(&stats, &c.name);
-            DkServiceInfo { name: c.name.clone(), status: c.status.clone(), is_up, cpu, mem }
+            DkServiceInfo { name: c.name.clone(), status: c.status.clone(), is_up, cpu, mem, mnt_path: String::new() }
         })
         .collect();
 
@@ -176,12 +178,21 @@ pub fn collect() -> Result<StatusSnapshot> {
         .filter(|c| !dk_names.contains(c.name.as_str()) && !leech_names.contains(c.name.as_str()))
         .partition(|c| is_leech_name(&c.name));
 
+    // Inspect leech_extra to get mnt_path
+    let leech_extra_names: Vec<String> = leech_extra.iter().map(|c| c.name.clone()).collect();
+    let leech_inspect = docker::inspect_containers(&leech_extra_names).unwrap_or_default();
+
     let leech: Vec<DkServiceInfo> = leech_extra
         .into_iter()
         .map(|c| {
             let is_up = c.status.to_lowercase().starts_with("up");
             let (cpu, mem) = find_stats(&stats, &c.name);
-            DkServiceInfo { name: c.name.clone(), status: c.status.clone(), is_up, cpu, mem }
+            let mnt_path = leech_inspect
+                .iter()
+                .find(|(n, _, _, _)| *n == c.name.trim_start_matches('/'))
+                .map(|(_, _, _, mnt)| mnt.clone())
+                .unwrap_or_default();
+            DkServiceInfo { name: c.name.clone(), status: c.status.clone(), is_up, cpu, mem, mnt_path }
         })
         .collect();
 
@@ -190,7 +201,7 @@ pub fn collect() -> Result<StatusSnapshot> {
         .map(|c| {
             let is_up = c.status.to_lowercase().starts_with("up");
             let (cpu, mem) = find_stats(&stats, &c.name);
-            DkServiceInfo { name: c.name.clone(), status: c.status.clone(), is_up, cpu, mem }
+            DkServiceInfo { name: c.name.clone(), status: c.status.clone(), is_up, cpu, mem, mnt_path: String::new() }
         })
         .collect();
 

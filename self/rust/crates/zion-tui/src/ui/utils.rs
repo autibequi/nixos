@@ -33,24 +33,76 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
         let display_name = u.name.strip_prefix("zion-").unwrap_or(&u.name);
 
         let mut spans = vec![
-            Span::raw("   "),
+            Span::raw("     "),
             Span::styled(status_icon, status_style),
             Span::raw(" "),
-            Span::styled(format!("{display_name:<16}"), theme::name()),
-            Span::styled(format!("{status_text:<6}"), theme::uptime()),
+            Span::styled(format!("{display_name:<20}"), theme::name()),
+            Span::raw(" "),
+            Span::styled(format!("{status_text:<5}"), theme::uptime()),
         ];
 
         if !u.cpu.is_empty() {
+            let cpu_pct = parse_pct(&u.cpu);
+            let cpu_bar = mini_bar(cpu_pct, 6);
+            let cpu_style = pct_color(cpu_pct);
+            let mem_short = u.mem
+                .replace("MiB", "M")
+                .replace("GiB", "G")
+                .replace(" / ", "/");
+            let mem_bar = mem_bar_from_str(&u.mem);
             spans.push(Span::raw("  "));
-            spans.push(Span::styled(u.cpu.trim().to_string(), theme::cpu()));
-            spans.push(Span::raw("  "));
-            spans.push(Span::styled(u.mem.trim().to_string(), theme::dim()));
+            spans.push(Span::styled(cpu_bar, cpu_style));
+            spans.push(Span::styled(format!(" {:<6}", u.cpu.trim()), theme::cpu()));
+            spans.push(Span::raw(" "));
+            spans.push(Span::styled(mem_bar, theme::mem()));
+            spans.push(Span::styled(format!(" {mem_short}"), theme::dim()));
         }
 
         lines.push(Line::from(spans));
     }
 
     frame.render_widget(Paragraph::new(lines), area);
+}
+
+fn parse_pct(s: &str) -> u8 {
+    s.trim().trim_end_matches('%').parse::<f32>().map(|f| f as u8).unwrap_or(0)
+}
+
+fn pct_color(pct: u8) -> ratatui::style::Style {
+    use ratatui::style::{Color, Style};
+    if pct >= 80 { Style::default().fg(Color::Red) }
+    else if pct >= 50 { Style::default().fg(Color::Yellow) }
+    else { Style::default().fg(Color::Green) }
+}
+
+fn mini_bar(pct: u8, width: usize) -> String {
+    let filled = (pct as usize * width) / 100;
+    let empty = width.saturating_sub(filled);
+    format!("{}{}", "█".repeat(filled), "░".repeat(empty))
+}
+
+fn mem_bar_from_str(mem: &str) -> String {
+    let parts: Vec<&str> = mem.split('/').collect();
+    if parts.len() != 2 { return String::new(); }
+    let used = parse_bytes(parts[0].trim());
+    let total = parse_bytes(parts[1].trim());
+    if total == 0 { return String::new(); }
+    let pct = ((used * 100) / total).min(100) as u8;
+    mini_bar(pct, 6)
+}
+
+fn parse_bytes(s: &str) -> u64 {
+    let s = s.replace("GiB", "G").replace("MiB", "M").replace("kB", "K");
+    if let Some(v) = s.strip_suffix('G') {
+        return (v.trim().parse::<f64>().unwrap_or(0.0) * 1024.0 * 1024.0 * 1024.0) as u64;
+    }
+    if let Some(v) = s.strip_suffix('M') {
+        return (v.trim().parse::<f64>().unwrap_or(0.0) * 1024.0 * 1024.0) as u64;
+    }
+    if let Some(v) = s.strip_suffix('K') {
+        return (v.trim().parse::<f64>().unwrap_or(0.0) * 1024.0) as u64;
+    }
+    s.trim().parse::<u64>().unwrap_or(0)
 }
 
 fn format_uptime(status: &str) -> String {

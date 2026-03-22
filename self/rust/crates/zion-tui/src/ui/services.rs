@@ -30,13 +30,14 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             };
 
             lines.push(Line::from(vec![
-                Span::raw("  "),
+                Span::raw("   "),
                 Span::styled(marker.to_string(), style),
                 Span::raw(" "),
                 Span::styled("\u{25cb}", theme::down_icon()),
                 Span::raw(" "),
-                Span::styled(format!("{svc:<16}"), style),
-                Span::styled("stopped", theme::dim()),
+                Span::styled(format!("{svc:<20}"), style),
+                Span::raw(" "),
+                Span::styled("stop ", theme::dim()),
             ]));
 
         }
@@ -106,13 +107,14 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             };
 
             let mut spans = vec![
-                Span::raw("  "),
+                Span::raw("   "),
                 Span::styled(marker.to_string(), marker_style),
                 Span::raw(" "),
                 Span::styled(status_icon, status_style),
                 Span::raw(" "),
-                Span::styled(format!("{svc:<16}"), name_style),
-                Span::styled(format!("{status_text:<6}"), theme::uptime()),
+                Span::styled(format!("{svc:<20}"), name_style),
+                Span::raw(" "),
+                Span::styled(format!("{status_text:<5}"), theme::uptime()),
             ];
 
             if !cpu.is_empty() {
@@ -138,45 +140,6 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
 
         }
 
-        // Leech agent containers grouped under "projects"
-        for leech in &app.snapshot.leech {
-            let short_name = leech
-                .name
-                .strip_prefix("zion-projects-leech-run-")
-                .or_else(|| leech.name.strip_prefix("zion-projects-"))
-                .unwrap_or(&leech.name);
-
-            let (status_icon, status_style, uptime) = if leech.is_up {
-                ("\u{25cf}", theme::up_icon(), format_uptime(&leech.status))
-            } else {
-                ("\u{25cb}", theme::down_icon(), "stopped".to_string())
-            };
-
-            let mut spans = vec![
-                Span::raw("  "),
-                Span::raw("  "),
-                Span::styled(status_icon, status_style),
-                Span::raw(" "),
-                Span::styled(format!("{short_name:<16}"), theme::name()),
-                Span::styled(format!("{uptime:<6}"), theme::uptime()),
-            ];
-
-            if leech.is_up && !leech.cpu.is_empty() {
-                let cpu_pct = parse_pct(&leech.cpu);
-                let cpu_bar = mini_bar(cpu_pct, 6);
-                let cpu_style = pct_color(cpu_pct);
-                let mem_short = leech.mem.replace("MiB", "M").replace("GiB", "G").replace(" / ", "/");
-                spans.push(Span::raw("  "));
-                spans.push(Span::styled(cpu_bar, cpu_style));
-                spans.push(Span::styled(format!(" {:<6}", leech.cpu.trim()), theme::cpu()));
-                let mem_bar = mem_bar_from_str(&leech.mem);
-                spans.push(Span::raw(" "));
-                spans.push(Span::styled(mem_bar, theme::mem()));
-                spans.push(Span::styled(format!(" {mem_short}"), theme::dim()));
-            }
-
-            lines.push(Line::from(spans));
-        }
     }
 
     let widget = Paragraph::new(lines);
@@ -239,6 +202,76 @@ fn parse_bytes(s: &str) -> u64 {
         return (v.trim().parse::<f64>().unwrap_or(0.0) * 1024.0) as u64;
     }
     s.trim().parse::<u64>().unwrap_or(0)
+}
+
+/// Render the leeches section — Zion instances attached to a project folder.
+pub fn render_leeches(frame: &mut Frame, app: &App, area: Rect) {
+    let mut lines = Vec::new();
+
+    let any_up = app.snapshot.leech.iter().any(|l| l.is_up);
+    let icon = if any_up { "\u{25cf}" } else { "\u{25cb}" };
+    let icon_style = if any_up { theme::up_icon() } else { theme::down_icon() };
+
+    lines.push(Line::from(vec![
+        Span::styled(icon, icon_style),
+        Span::raw(" "),
+        Span::styled("leeches", theme::group_label()),
+    ]));
+
+    for leech in &app.snapshot.leech {
+        let ident = if !leech.mnt_path.is_empty() {
+            shorten_path(&leech.mnt_path)
+        } else {
+            leech
+                .name
+                .strip_prefix("zion-projects-leech-run-")
+                .or_else(|| leech.name.strip_prefix("zion-projects-"))
+                .unwrap_or(&leech.name)
+                .to_string()
+        };
+
+        let (status_icon, status_style, uptime) = if leech.is_up {
+            ("\u{25cf}", theme::up_icon(), format_uptime(&leech.status))
+        } else {
+            ("\u{25cb}", theme::down_icon(), "stop ".to_string())
+        };
+
+        let mut spans = vec![
+            Span::raw("     "),
+            Span::styled(status_icon, status_style),
+            Span::raw(" "),
+            Span::styled(format!("{ident:<20}"), theme::name()),
+            Span::raw(" "),
+            Span::styled(format!("{uptime:<5}"), theme::uptime()),
+        ];
+
+        if leech.is_up && !leech.cpu.is_empty() {
+            let cpu_pct = parse_pct(&leech.cpu);
+            let cpu_bar = mini_bar(cpu_pct, 6);
+            let cpu_style = pct_color(cpu_pct);
+            let mem_short = leech.mem.replace("MiB", "M").replace("GiB", "G").replace(" / ", "/");
+            let mem_bar = mem_bar_from_str(&leech.mem);
+            spans.push(Span::raw("  "));
+            spans.push(Span::styled(cpu_bar, cpu_style));
+            spans.push(Span::styled(format!(" {:<6}", leech.cpu.trim()), theme::cpu()));
+            spans.push(Span::raw(" "));
+            spans.push(Span::styled(mem_bar, theme::mem()));
+            spans.push(Span::styled(format!(" {mem_short}"), theme::dim()));
+        }
+
+        lines.push(Line::from(spans));
+    }
+
+    frame.render_widget(Paragraph::new(lines), area);
+}
+
+fn shorten_path(p: &str) -> String {
+    let home = std::env::var("HOME").unwrap_or_default();
+    if !home.is_empty() && p.starts_with(&home) {
+        format!("~{}", &p[home.len()..])
+    } else {
+        p.to_string()
+    }
 }
 
 /// Strip the "Up " prefix and abbreviate common duration words for compact display.

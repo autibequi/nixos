@@ -13,6 +13,7 @@ use crate::theme;
 pub fn render(frame: &mut Frame, app: &App) {
     let sessions_h = sessions_height(app);
     let services_h = dk_services_height(app);
+    let leeches_h = leeches_height(app);
     let utils_h = utils_height(app);
 
     let chunks = Layout::default()
@@ -20,7 +21,8 @@ pub fn render(frame: &mut Frame, app: &App) {
         .constraints([
             Constraint::Length(1),           // header (title + time + quota inline)
             Constraint::Length(sessions_h),  // agents + background
-            Constraint::Length(services_h),  // dk services
+            Constraint::Length(leeches_h),   // leech Zion instances
+            Constraint::Length(services_h),  // dk services (projects)
             Constraint::Length(utils_h),     // utils (reverseproxy, etc.)
             Constraint::Length(1),           // separator (Logs [svc])
             Constraint::Min(0),              // logs — fills all remaining space
@@ -30,11 +32,12 @@ pub fn render(frame: &mut Frame, app: &App) {
 
     render_header(frame, app, chunks[0]);
     sessions::render(frame, app, chunks[1]);
-    services::render(frame, app, chunks[2]);
-    utils::render(frame, app, chunks[3]);
-    render_log_separator(frame, app, chunks[4]);
-    logs::render(frame, app, chunks[5]);
-    render_footer(frame, app, chunks[6]);
+    services::render_leeches(frame, app, chunks[2]);
+    services::render(frame, app, chunks[3]);
+    utils::render(frame, app, chunks[4]);
+    render_log_separator(frame, app, chunks[5]);
+    logs::render(frame, app, chunks[6]);
+    render_footer(frame, app, chunks[7]);
 
     // Overlay: menu or error popup (rendered last so it's on top)
     popup::render(frame, app);
@@ -51,8 +54,17 @@ fn sessions_height(app: &App) -> u16 {
 }
 
 fn dk_services_height(app: &App) -> u16 {
-    // 1 group header + DK_SERVICES rows + leech agent rows
-    (crate::app::DK_SERVICES.len() as u16) + 1 + (app.snapshot.leech.len() as u16)
+    // 1 group header + DK_SERVICES rows
+    (crate::app::DK_SERVICES.len() as u16) + 1
+}
+
+fn leeches_height(app: &App) -> u16 {
+    if app.snapshot.leech.is_empty() {
+        0
+    } else {
+        // 1 group header + 1 row per leech container
+        (app.snapshot.leech.len() as u16) + 1
+    }
 }
 
 fn utils_height(app: &App) -> u16 {

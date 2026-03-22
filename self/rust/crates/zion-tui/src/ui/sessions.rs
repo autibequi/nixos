@@ -70,11 +70,18 @@ fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[Session
         };
 
         let uptime = format_uptime(&session.status);
-        let short_name = session
-            .name
-            .strip_prefix("zion-projects-leech-run-")
-            .or_else(|| session.name.strip_prefix("zion-projects-"))
-            .unwrap_or(&session.name);
+        // Use mnt_path (host path bound to /workspace/mnt) as identifier; fall back to container name
+        let ident = if !session.mnt_path.is_empty() {
+            shorten_path(&session.mnt_path)
+        } else {
+            session
+                .name
+                .strip_prefix("zion-projects-leech-run-")
+                .or_else(|| session.name.strip_prefix("zion-projects-"))
+                .or_else(|| session.name.strip_prefix("zion-"))
+                .unwrap_or(&session.name)
+                .to_string()
+        };
 
         let mut spans = vec![
             Span::raw("  "),
@@ -82,9 +89,9 @@ fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[Session
             Span::raw(" "),
             Span::styled(icon, icon_style),
             Span::raw(" "),
+            Span::styled(format!("{ident:<20}"), theme::name()),
+            Span::raw(" "),
             Span::styled(format!("{uptime:<5}"), theme::uptime()),
-            Span::raw("  "),
-            Span::styled(format!("{short_name:<12}"), theme::name()),
         ];
 
         if session.is_up && !session.cpu.is_empty() {
@@ -98,15 +105,13 @@ fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[Session
             spans.push(Span::styled(format!(" {mem_short}"), theme::mem()));
         }
 
-        // Mounts
-        spans.push(Span::raw("  "));
-        for mount in &session.mounts {
-            let style = if mount.present {
-                theme::mount_present()
-            } else {
-                theme::mount_absent()
-            };
-            spans.push(Span::styled(format!("{} ", mount.label), style));
+        // Active mounts only
+        let active: Vec<_> = session.mounts.iter().filter(|m| m.present).collect();
+        if !active.is_empty() {
+            spans.push(Span::raw("  "));
+            for mount in active {
+                spans.push(Span::styled(format!("{} ", mount.label), theme::mount_present()));
+            }
         }
 
         lines.push(Line::from(spans));
@@ -156,4 +161,14 @@ fn shorten_mem(mem: &str) -> String {
     mem.replace("MiB", "M")
         .replace("GiB", "G")
         .replace(" / ", "/")
+}
+
+/// Shorten an absolute path by replacing $HOME with `~`.
+fn shorten_path(p: &str) -> String {
+    let home = std::env::var("HOME").unwrap_or_default();
+    if !home.is_empty() && p.starts_with(&home) {
+        format!("~{}", &p[home.len()..])
+    } else {
+        p.to_string()
+    }
 }

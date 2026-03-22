@@ -14,7 +14,10 @@ BOOT_PID=$!
 
 # Splash desativado via ZION_SPLASH=0 (setar em ~/.zion ou passar --no-splash)
 if [[ "${ZION_SPLASH:-1}" == "0" ]]; then
+  printf '\033[2J\033[H'
+  _wait "loading agent..."
   wait "$BOOT_PID" 2>/dev/null || true
+  printf '\033[2J\033[H'
   cd /workspace/mnt
   exec /home/claude/.nix-profile/bin/claude "$@"
 fi
