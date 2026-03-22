@@ -369,22 +369,12 @@ commands:
 
   - name: tasks
     alias: [t]
-    help: "Tasks do kanban (status, log, run)."
+    help: "Tasks do kanban (status, log)."
     commands:
       - name: log
         default: force
         help: "Kanban view: TODO/DOING/DONE recentes."
         filename: commands/tasks_log.sh
-
-      - name: run
-        alias: [r]
-        help: "Lanca o agente Tasker para processar tasks atrasadas agora."
-        flags:
-          - long: --steps
-            short: -s
-            arg: steps
-            help: "Numero de turnos"
-        filename: commands/tasker.sh
 
       - name: status
         alias: [st, dash]

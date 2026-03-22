@@ -75,7 +75,6 @@ fi
 if [ ! -d "$ACTIVITY_DIR" ]; then
   echo "${DIM}[log] nenhum activity log ainda${R}"
   echo "      Pasta esperada: $ACTIVITY_DIR"
-  echo "      Agents geram entradas automaticamente ao rodar."
   exit 0
 fi
 
@@ -97,15 +96,23 @@ if [ ${#LOG_FILES[@]} -eq 0 ]; then
   exit 0
 fi
 
-MERGED=$(cat "${LOG_FILES[@]}" 2>/dev/null | sort -r | head -"$TAIL")
+# Merge runs (exclude note lines) + notes index
+MERGED=$(grep -h $'\tok\t\|$\ttimeout\t\|$\tfail\t\|$\tmigrated\t' "${LOG_FILES[@]}" 2>/dev/null | sort -r | head -"$TAIL")
 
 if [ -z "$MERGED" ]; then
   echo "${DIM}(nenhuma entrada ainda)${R}"
   exit 0
 fi
 
+# Build notes lookup: agent -> last note text
+declare -A NOTES
+for lf in "${LOG_FILES[@]}"; do
+  aname=$(basename "$lf")
+  n=$(grep $'\tnote\t' "$lf" 2>/dev/null | tail -1 | cut -f3-)
+  [ -n "$n" ] && NOTES[$aname]="$n"
+done
 
-# ── Last tick info ────────────────────────────────────────────────────────────
+# ── Last tick info ────────────────────────────────────────────────
 _tick_info=""
 _last_tick=$(journalctl -u zion-tick.service --no-pager -n 1 -o short-iso 2>/dev/null | grep -v "^--\|^Journal\|^Hint" | awk '{print $1}' | grep -E '^[0-9]{4}-' | tail -1)
 if [ -n "$_last_tick" ]; then
@@ -126,10 +133,10 @@ fi
 echo ""
 echo "${B}${C}▸ ACTIVITY LOG${R}${DIM} (ultimas $TAIL | $([ -n "$FILTER" ] && echo "agent=$FILTER" || echo "todos"))${R}${_tick_info}"
 echo ""
-printf "  ${DIM}%-14s  %-12s  %-9s  %-6s  %-22s  %s${R}\n" "datetime" "agent" "status" "time" "tokens" "card"
-echo "  ${DIM}$(printf '─%.0s' {1..92})${R}"
+printf "  ${DIM}%-14s  %-8s  %-12s  %-4s  %s${R}\n" "starttime" "duration" "agent" "st" "topic"
+echo "  ${DIM}$(printf '─%.0s' {1..80})${R}"
 
-# ── Scheduled (proximos) ──────────────────────────────────────────────────────
+# ── Scheduled (proximos) ──────────────────────────────────────────
 SCHEDULE_DIR="$AGENTS/_schedule"
 if [ -d "$SCHEDULE_DIR" ]; then
   NOW=$(date +%s)
@@ -137,11 +144,11 @@ if [ -d "$SCHEDULE_DIR" ]; then
   while IFS='|' read -r _diff aname when card_label; do
     (( _sched_count >= 10 )) && break
     _sched_count=$(( _sched_count + 1 ))
-    if [[ "$when" == atrasado* ]]; then sc="${Y}sched${R}    "
-    else                               sc="${C}sched${R}    "; fi
-    printf "  %-14s  %-12s  " "$when" "$aname"
-    printf "%-17b  " "$sc"
-    printf "%-6s  %-22s  %s\n" "--" "--" "$card_label"
+    if [[ "$when" == atrasado* ]]; then sc="${Y}>>>${R}"
+    else                               sc="${C}..${R} "; fi
+    printf "  %-14s  %-8s  %-12s  " "$when" "--" "$aname"
+    printf "%-6b  " "$sc"
+    printf "%s\n" "$card_label"
   done < <(
     for f in "$SCHEDULE_DIR"/*.md; do
       [ -f "$f" ] || continue
@@ -163,23 +170,43 @@ if [ -d "$SCHEDULE_DIR" ]; then
     done | sort -t'|' -k1,1n
   )
   if (( _sched_count > 0 )); then
-    echo "  ${DIM}$(printf -- '-%.0s' {1..92})${R}"
+    echo "  ${DIM}$(printf -- '-%.0s' {1..80})${R}"
   fi
 fi
 
-# ── Past entries ──────────────────────────────────────────────────────────────
+# ── Past entries ──────────────────────────────────────────────────
 while IFS=$'\t' read -r ts agent status elapsed tokens card; do
+  # Status icon (compact)
   case "$status" in
-    ok)      sc="${G}ok${R}      " ;;
-    timeout) sc="${Y}timeout${R} " ;;
-    fail)    sc="${RED}fail${R}    " ;;
-    *)       sc="${DIM}${status:-?}${R}" ;;
+    ok)       sc="${G}ok${R} " ;;
+    timeout)  sc="${Y}to${R} " ;;
+    fail)     sc="${RED}!!${R} " ;;
+    migrated) sc="${DIM}--${R} " ;;
+    *)        sc="${DIM}? ${R} " ;;
   esac
-  ts_short=$(echo "$ts" | sed 's/[0-9]\{4\}-\([0-9]\{2\}\)-\([0-9]\{2\}\)T\([0-9]\{2\}:[0-9]\{2\}\).*/\1-\2 \3Z/')
-  card_short=$(echo "$card" | sed 's/^[0-9]\{8\}_[0-9]\{2\}_[0-9]\{2\}_//')
-  printf "  %-14s  %-12s  " "$ts_short" "$agent"
-  printf "%-17b  " "$sc"
-  printf "%-6s  %-22s  %s\n" "$elapsed" "${tokens:-—}" "$card_short"
+
+  # Starttime: 2026-03-21T08:15:00Z → 03-21 08:15
+  ts_short=$(echo "$ts" | sed 's/[0-9]\{4\}-\([0-9]\{2\}\)-\([0-9]\{2\}\)T\([0-9]\{2\}:[0-9]\{2\}\).*/\1-\2 \3/')
+
+  # Duration: use elapsed if available, otherwise "--"
+  dur="${elapsed}"
+  [[ "$dur" == "—" || -z "$dur" ]] && dur="--"
+
+  # Topic: try note for this agent, else derive from card name
+  topic=""
+  # If card name differs from agent name, it IS the topic (e.g. task cards)
+  card_clean=$(echo "$card" | sed 's/^[0-9]\{8\}_[0-9]\{2\}_[0-9]\{2\}_//')
+  if [ "$card_clean" != "$agent" ] && [ -n "$card_clean" ]; then
+    topic="$card_clean"
+  fi
+  # If we have a note for this agent, prefer it
+  [ -n "${NOTES[$agent]:-}" ] && topic="${NOTES[$agent]}"
+  # For migrated entries, show tokens field if it says "migrated"
+  [[ "$status" == "migrated" ]] && [ -z "$topic" ] && topic="${DIM}(historico)${R}"
+
+  printf "  %-14s  %-8s  %-12s  " "$ts_short" "$dur" "$agent"
+  printf "%-6b  " "$sc"
+  printf "%s\n" "$topic"
 done <<< "$MERGED"
 
 echo ""

@@ -262,12 +262,6 @@ enum AgentsAction {
 enum TasksAction {
     /// Kanban view: TODO/DOING/DONE
     Log,
-    /// Lanca o agente Tasker para processar tasks atrasadas
-    #[command(alias = "r")]
-    Run {
-        #[arg(long, short = 's')]
-        steps: Option<u32>,
-    },
     /// Dashboard live de tasks + agents
     #[command(alias = "st", alias = "dash")]
     Status {
@@ -382,9 +376,6 @@ fn main() -> Result<()> {
         // Tasks
         Some(Commands::Tasks { action }) => match action.unwrap_or(TasksAction::Log) {
             TasksAction::Log => commands::agents::tasks_log(),
-            TasksAction::Run { steps } => {
-                exec::bash_delegate_with_flags("tasker", &[], steps.map(|s| s.to_string()).as_deref())
-            }
             TasksAction::Status { tick } => {
                 exec::bash_delegate(&["tasks", "status", "--tick", &tick])
             }
