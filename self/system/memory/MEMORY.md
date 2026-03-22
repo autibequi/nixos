@@ -11,3 +11,5 @@
 - [feedback_zion_scripts_source.md](feedback_zion_scripts_source.md) — Scripts do container: fonte da verdade é zion/scripts/; scripts/ contém symlinks. Nunca editar scripts/ esperando afetar o container
 - [feedback_autocommit.md](feedback_autocommit.md) — Nunca commitar automaticamente sem o usuário pedir; respeitar flag auto-commit
 - [feedback_zion_cli_commands.md](feedback_zion_cli_commands.md) — Em zion host: sempre usar `zion stow`, `zion switch`, `zion man`. Nunca comandos raw.
+- [feedback_container_readonly.md](feedback_container_readonly.md) — /home/claude/.claude/ e /workspace/host/ são read-only no container — persistir APENAS em /workspace/self/
+- [feedback_timezone_container.md](feedback_timezone_container.md) — Container sem tzdata: usar TZ=UTC+3 (POSIX) para UTC-3 (Brasília), não America/Sao_Paulo
