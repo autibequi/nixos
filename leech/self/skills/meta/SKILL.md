@@ -15,3 +15,4 @@ Skills de meta-ferramentas: representacao visual, humanizacao de texto, gestao d
 | `meta/humanize` | Humanizar texto — remover padroes de IA |
 | `meta/obsidian` | Vault Obsidian — board, agentroom, graph, dataview |
 | `meta/cleanup` | Limpar debris de sessão — tentativas fracassadas, código morto, experimentos revertidos |
+| `meta/webview` | Acessar URL e ver renderizado — Chrome relay (visual), WebFetch (texto), CDP eval (DOM) |

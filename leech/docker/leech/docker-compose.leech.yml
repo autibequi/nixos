@@ -2,6 +2,8 @@ x-env-base: &env-base
   # Tokens e boot flags vêm de ~/.leech (sourced pelo entrypoint + todos os hooks)
   PATH: /home/claude/.local/bin:/home/claude/.nix-profile/bin:/home/claude/.local/bin:/usr/bin:/bin
   CLAUDE_ENV: container
+  # Docker via proxy seguro (sem socket direto — EXEC e BUILD bloqueados)
+  DOCKER_HOST: tcp://localhost:2375
   WAYLAND_DISPLAY: ${WAYLAND_DISPLAY:-wayland-1}
   XDG_RUNTIME_DIR: /run/user/1000
   PULSE_SERVER: unix:/run/user/1000/pulse/native
@@ -64,8 +66,7 @@ x-base-volumes: &base-volumes
   - /sys/block:/host/sys/block:ro
   # Logs de servicos Docker (leech docker run/test) — acessiveis pelo agente
   - ${XDG_DATA_HOME:-${HOME}/.local/share}/leech/logs/dockerized:/workspace/logs/docker:rw
-  # Docker socket — permite agente gerenciar containers (leech docker run/install/logs)
-  - /var/run/docker.sock:/var/run/docker.sock
+  # Docker socket removido — agente usa proxy tcp://localhost:2375 (ver service docker-proxy)
   # Dockerized configs — agente pode editar docker-compose, .env, etc.
   - ${HOME}/.local/share/leech/containers:/workspace/dockerized
   # Dados locais do Leech (usage cache, estado compartilhado host↔container)
@@ -81,6 +82,20 @@ x-base-volumes: &base-volumes
   - ${HOME}/.leech:/home/claude/.leech:rw
 
 services:
+  docker-proxy:
+    # Proxy granular: só /logs (GET) + /restart (POST) + info/ping/version
+    # docker inspect bloqueado — env vars de containers nunca expostos
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      # Apenas localhost — não expõe para rede externa
+      - "127.0.0.1:2375:2375"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./docker-socket-filter.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - default
+
   leech:
     build:
       context: .
@@ -94,8 +109,9 @@ services:
     working_dir: /workspace/mnt
     entrypoint: ["/entrypoint.sh"]
     command: ["/bin/bash", "-c", "sleep infinity"]
+    depends_on:
+      - docker-proxy
     group_add:
-      - "${DOCKER_GID:-999}"
       - "${JOURNAL_GID:-62}"
     cap_drop:
       - NET_RAW

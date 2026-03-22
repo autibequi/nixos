@@ -450,6 +450,15 @@ commands:
         default: start
     filename: commands/relay.sh
 
+  - name: caffeine
+    help: "Mantem o computador acordado para acesso remoto (bloqueia sleep/idle/lid)."
+    args:
+      - name: action
+        help: "Acao: start (default), stop, status, poweroff"
+        allowed: [start, stop, status, poweroff]
+        default: start
+    filename: commands/caffeine.sh
+
   - name: uninstall
     help: "Remove o symlink do leech de ~/.local/bin (desinstala do PATH)."
     filename: commands/uninstall.sh

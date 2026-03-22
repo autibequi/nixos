@@ -54,11 +54,11 @@ proxy:
 
 # Regenera leech CLI (bashly) + instala symlink + bootstrap
 install:
-    just --justfile leech/cli/Justfile --working-directory leech/cli install
+    just --justfile leech/bash/Justfile --working-directory leech/bash install
 
 # Regenera binário apenas
 gen:
-    just --justfile leech/cli/Justfile --working-directory leech/cli gen
+    just --justfile leech/bash/Justfile --working-directory leech/bash gen
 
 # Atualiza só o bootstrap (leech/scripts → scripts/)
 bootstrap:
@@ -67,12 +67,12 @@ bootstrap:
 
 # Simula boot session-start (dry run)
 dry *args="":
-    just --justfile leech/cli/Justfile --working-directory leech/cli dry {{args}}
+    just --justfile leech/bash/Justfile --working-directory leech/bash dry {{args}}
 
 # Lint dos scripts do CLI
 lint:
-    just --justfile leech/cli/Justfile --working-directory leech/cli lint
+    just --justfile leech/bash/Justfile --working-directory leech/bash lint
 
 # Watch: regenera ao salvar src/
 watch:
-    just --justfile leech/cli/Justfile --working-directory leech/cli watch
+    just --justfile leech/bash/Justfile --working-directory leech/bash watch
