@@ -69,6 +69,42 @@ card_steps() {
 NOW=$(date +%s)
 AGENT_THRESHOLD=$((NOW + 300))   # 5min tolerancia
 TASK_THRESHOLD=$((NOW + 600))    # 10min tolerancia
+RUNNING_DIR="$(dirname "$SCHEDULE")/_running"
+
+# ── rescue orphans from _running/ (before scan) ──────────────
+ORPHAN_COUNT=0
+if [ -d "$RUNNING_DIR" ] && [ -z "$DRY_RUN" ]; then
+  mkdir -p "$SCHEDULE"
+  for card_path in "$RUNNING_DIR"/*.md; do
+    [ -f "$card_path" ] || continue
+    filename=$(basename "$card_path")
+    base="${filename%.md}"
+    [ -d "/tmp/zion-locks/${base}.lock" ] && continue
+    ts=$(card_epoch "$filename")
+    [ "$ts" -eq 0 ] && continue
+    elapsed=$(( (NOW - ts) / 60 ))
+    [ "$elapsed" -lt 30 ] && continue
+    AGENT=$(awk '/^---/{fm++} fm==1 && /^(agent|contractor):/{print $2}' "$card_path")
+    echo "[auto] orphan: $filename  agent=$AGENT  stuck=${elapsed}min → _schedule"
+    mv "$card_path" "$SCHEDULE/$filename" 2>/dev/null || true
+    ORPHAN_COUNT=$((ORPHAN_COUNT + 1))
+  done
+  [ "$ORPHAN_COUNT" -gt 0 ] && echo "[auto] rescued $ORPHAN_COUNT orphan(s)"
+elif [ -d "$RUNNING_DIR" ] && [ -n "$DRY_RUN" ]; then
+  for card_path in "$RUNNING_DIR"/*.md; do
+    [ -f "$card_path" ] || continue
+    filename=$(basename "$card_path")
+    base="${filename%.md}"
+    [ -d "/tmp/zion-locks/${base}.lock" ] && continue
+    ts=$(card_epoch "$filename")
+    [ "$ts" -eq 0 ] && continue
+    elapsed=$(( (NOW - ts) / 60 ))
+    [ "$elapsed" -lt 30 ] && continue
+    AGENT=$(awk '/^---/{fm++} fm==1 && /^(agent|contractor):/{print $2}' "$card_path")
+    echo "[auto] orphan (dry-run): $filename  agent=$AGENT  stuck=${elapsed}min"
+    ORPHAN_COUNT=$((ORPHAN_COUNT + 1))
+  done
+fi
 
 # ── scan agents/_schedule/ ─────────────────────────────────────
 AGENT_DUE=()
