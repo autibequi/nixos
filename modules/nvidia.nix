@@ -28,7 +28,7 @@
     nvidiaPersistenced = false;
     powerManagement = {
       enable = true;
-      finegrained = true;
+      finegrained = false; # RTD3 incompatível com PRIME offload + s2idle — causa NVRM callback error no resume e trava
     };
 
 

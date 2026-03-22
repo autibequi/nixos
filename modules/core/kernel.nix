@@ -55,7 +55,7 @@
     "transparent_hugepage=madvise"
 
     # Nvidia
-    "nvidia.NVreg_DynamicPowerManagement=0x02"
+    # NVreg_DynamicPowerManagement=0x02 removido — conflita com finegrained=false e causa freeze no suspend
     "nvidia-drm.fbdev=1"
     "nvidia-drm.modeset=1"
 
