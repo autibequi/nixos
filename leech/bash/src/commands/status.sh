@@ -204,7 +204,7 @@ _do_status_render() {
   _print_agent_group "agents" "$_agent_rows"
   _print_agent_group "background" "$_bg_rows"
 
-  source "${LEECH_ROOT:-$HOME/nixos/leech/self}/clibash/src/lib/docker_status_impl.sh" 2>/dev/null || true
+  source "$leech_bash_dir/src/lib/docker_status_impl.sh" 2>/dev/null || true
   if declare -f _leech_dk_status >/dev/null 2>&1; then
     _leech_dk_status "" 1
   fi

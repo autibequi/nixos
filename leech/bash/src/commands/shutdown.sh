@@ -3,8 +3,8 @@
 
 leech_load_config
 
-compose_leech="${LEECH_ROOT:-$HOME/nixos/leech/self}/container/docker-compose.leech.yml"
-compose_puppy="${LEECH_ROOT:-$HOME/nixos/leech/self}/container/docker-compose.puppy.yml"
+compose_leech="$leech_compose_file"
+compose_puppy="${leech_container_dir}/docker-compose.puppy.yml"
 
 echo "Stopping compose-tracked containers..."
 docker compose -f "$compose_leech" down 2>/dev/null || true

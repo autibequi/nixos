@@ -3616,8 +3616,8 @@ leech_shutdown_command() {
 
   leech_load_config
 
-  compose_leech="${LEECH_ROOT:-$HOME/nixos/self}/container/docker-compose.leech.yml"
-  compose_puppy="${LEECH_ROOT:-$HOME/nixos/self}/container/docker-compose.puppy.yml"
+  compose_leech="$leech_compose_file"
+  compose_puppy="${leech_container_dir}/docker-compose.puppy.yml"
 
   echo "Stopping compose-tracked containers..."
   docker compose -f "$compose_leech" down 2>/dev/null || true
@@ -3663,7 +3663,7 @@ leech_clean_command() {
 
   echo ""
   echo "=== Containers órfãos (criados pelo compose mas sem projeto) ==="
-  docker compose -f "${LEECH_ROOT:-$HOME/nixos/self}/container/docker-compose.leech.yml" \
+  docker compose -f "$leech_compose_file" \
     ps --all 2>/dev/null | grep -v "NAME" | grep -v "running" || echo "  Nenhum."
 
 }
@@ -3906,7 +3906,7 @@ leech_tick_command() {
   # Executa agents e tasks vencidos — timer systemd (10min)
   leech_load_config
 
-  LEECH_DIR="${LEECH_ROOT:-${LEECH_NIXOS_DIR:-$HOME/nixos}/self}"
+  LEECH_DIR="${LEECH_ROOT:-${LEECH_NIXOS_DIR:-$HOME/nixos}/leech/self}"
   OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
   RUNNER="$LEECH_DIR/scripts/task-runner.sh"
   SCHEDULE="${SCHEDULE_DIR:-$OBSIDIAN/agents/_schedule}"
@@ -4108,7 +4108,7 @@ leech_tasker_command() {
 
   steps="${args[--steps]:-}"
 
-  leech_dir="${LEECH_ROOT:-$HOME/nixos/self}"
+  leech_dir="${LEECH_ROOT:-$HOME/nixos/leech/self}"
   obsidian="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
   runner="$leech_dir/scripts/task-runner.sh"
   agents="$obsidian/agents"
@@ -4211,7 +4211,7 @@ leech_run_command() {
   local steps="${args[--steps]:-}"
   leech_load_config
 
-  local leech_dir="${LEECH_ROOT:-$HOME/nixos/self}"
+  local leech_dir="${LEECH_ROOT:-$HOME/nixos/leech/self}"
   local obsidian="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
   local runner="$leech_dir/scripts/task-runner.sh"
   local agents="$obsidian/agents"
@@ -5098,7 +5098,7 @@ leech_status_command() {
 
   # ── Background: quota Claude (atualiza a cada 60s) ────────────
   _run_quota_bg() {
-    local usage_script="${LEECH_ROOT:-$HOME/nixos/self}/scripts/claude-ai-usage.sh"
+    local usage_script="${LEECH_ROOT:-$HOME/nixos/leech/self}/scripts/claude-ai-usage.sh"
     while true; do
       { [ -x "$usage_script" ] && "$usage_script" 2>/dev/null | tail -2 | sed 's/^/  /' || true; } \
         > "${_quota_file}.new" 2>/dev/null \
@@ -5251,7 +5251,7 @@ leech_status_command() {
     _print_agent_group "agents" "$_agent_rows"
     _print_agent_group "background" "$_bg_rows"
 
-    source "${LEECH_ROOT:-$HOME/nixos/self}/clibash/src/lib/docker_status_impl.sh" 2>/dev/null || true
+    source "$leech_bash_dir/src/lib/docker_status_impl.sh" 2>/dev/null || true
     if declare -f _leech_dk_status >/dev/null 2>&1; then
       _leech_dk_status "" 1
     fi
