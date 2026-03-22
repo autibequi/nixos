@@ -14,3 +14,5 @@
 - [feedback_zion_cli_commands.md](feedback_zion_cli_commands.md) — Em zion host: sempre usar `zion stow`, `zion switch`, `zion man`. Nunca comandos raw.
 - [feedback_container_readonly.md](feedback_container_readonly.md) — /home/claude/.claude/ e /workspace/host/ são read-only no container — persistir APENAS em /workspace/self/
 - [feedback_timezone_container.md](feedback_timezone_container.md) — Container sem tzdata: usar TZ=UTC+3 (POSIX) para UTC-3 (Brasília), não America/Sao_Paulo
+- [reference_zion_git_commit.md](reference_zion_git_commit.md) — Git repo do Zion em /workspace/host/.git — read-only no container, commit deve ser feito no host
+- [reference_claude_process_nix.md](reference_claude_process_nix.md) — Processo Claude Code no nix = .claude-unwrapped; contar só linhas com pts/ no docker top

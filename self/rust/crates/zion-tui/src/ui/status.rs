@@ -43,13 +43,17 @@ pub fn render(frame: &mut Frame, app: &App) {
 fn sessions_height(app: &App) -> u16 {
     fn group_height(sessions: &[zion_sdk::status::SessionInfo]) -> usize {
         if sessions.is_empty() { return 0; }
-        // 1 group header + 1 folder sub-header per unique mnt_path + 1 session row each
-        let mut folders = std::collections::HashSet::new();
+        // Group by folder to know per-folder session count
+        let mut folder_counts: std::collections::HashMap<&str, usize> =
+            std::collections::HashMap::new();
         for s in sessions {
-            let key = if s.mnt_path.is_empty() { &s.name } else { &s.mnt_path };
-            folders.insert(key.as_str());
+            let key = if s.mnt_path.is_empty() { s.name.as_str() } else { s.mnt_path.as_str() };
+            *folder_counts.entry(key).or_insert(0) += 1;
         }
-        1 + folders.len() + sessions.len()
+        // 1 group header
+        // Per folder: 1 folder sub-header + 1 counter line + session rows only if >1
+        let multi_sessions: usize = folder_counts.values().map(|&n| if n > 1 { n } else { 0 }).sum();
+        1 + folder_counts.len() * 2 + multi_sessions
     }
     let agents_h = group_height(&app.snapshot.agents);
     let bg_h = group_height(&app.snapshot.background);

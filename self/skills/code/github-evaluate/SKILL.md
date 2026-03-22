@@ -126,36 +126,36 @@ Avaliar o dev em **10 dimensoes** com evidencia direta dos PRs:
 
 ### Fase 5 — Comparativo com Benchmarks
 
-Comparar com os 5 devs de referencia do time Estrategia (todos L4, monolito Go):
+Comparar com os devs de referencia do time Estrategia (monolito Go):
 
 ```
 Washington (washington-guedes)  — Arquiteto Meticuloso
   Layer: +++++ | Errors: ++++ | Tests: ++++ | Reviews: +++++ | Observability: +++++
   Marca: uma funcao por arquivo, prefixo mp, interfaces preventivas, logging impecavel
-  Nivel real: L4 alto / borderline L5
+  Nivel: L4+
 
 Pedro Castro (pedrohlcastro)    — Operador Pragmatico Full-Stack
   Layer: +++  | Errors: +++  | Tests: ++   | Reviews: ++++  | Production: +++++
   Marca: fail-soft intencional, opera Go+JS+infra, pensa em prod antes de codigo
-  Nivel real: L4 Staff — generalista senior, ve o sistema inteiro
+  Nivel: Staff — generalista senior, ve o sistema inteiro
 
 Molina (eduardmolina)           — Simplificador Cirurgico
   Layer: ++++ | Errors: ++++ | Tests: +++  | Reviews: ++++  | Simplification: +++++
   Marca: remove abstracoes mortas, PRs cirurgicos, bounds safety em reviews
-  Nivel real: L4 solido
+  Nivel: L4
 
 Marquesini (joaopmarquesini)    — Incrementalista Mobile
   Layer: ++++ | Errors: ++++ | Tests: ++   | Reviews: +++   | Speed: +++++
   Marca: request struct inline, Swagger completo, iteracao rapida, BFF mobile
-  Nivel real: L4
+  Nivel: L4
 
 William / RafaelUnltd           — Engenheiro de Qualidade Sistematico
   Layer: +++++ | Errors: +++++ | Tests: +++++ | Reviews: ++++ | Go Idioms: +++++
   Marca: sentinel errors, named error vars em goroutines, testes de seguranca, bloqueia sem testes
-  Nivel real: L4 alto — qualidade mais madura do time
+  Nivel: L4
 ```
 
-### Fase 6 — Geracao do Relatorio
+### Fase 6 — Geracao do Relatorio Individual
 
 Salvar em **dois locais**:
 
@@ -166,15 +166,63 @@ O vault eh a fonte de verdade para comparacoes futuras entre devs. Usar nome rea
 
 Relatorios existentes no vault servem como referencia para comparacoes na matriz de competencias. Ao gerar um novo report, ler os existentes em `vault/peer-reports/` para incluir dados atualizados na matriz comparativa.
 
+Reports individuais devem ter frontmatter Obsidian:
+```yaml
+---
+title: "Avaliacao: <Nome> (<repo>)"
+date: YYYY-MM-DDT00:00:00Z
+type: peer-report
+related:
+  - "[[_ranking]]"
+---
+```
+
+### Fase 7 — Atualizar Ranking Comparativo (`_ranking.md`)
+
+Apos cada avaliacao, **atualizar** `/workspace/obsidian/vault/peer-reports/<org>/_ranking.md` com o novo dev incluido.
+
+O ranking usa **Mermaid charts** (nao ASCII art):
+
+1. **Score Total** — `xychart-beta` bar + `line "Mediana"` como referencia
+2. **Fingerprint** — `xychart-beta` com 1 `line` por dev, overlay completo de todas as dimensoes. Este eh o grafico principal — mostra picos (forcas) e vales (gaps) de cada dev simultaneamente.
+3. **Duelos por tier** — top tier (bar) vs mid tier (line) para legibilidade
+4. **Arquetipos** — `quadrantChart` com 2 eixos complementares
+5. **Saude do time** — `xychart-beta` bar com media por dimensao + `line "Baseline L4"`
+6. **Gap para proximo nivel** — `xychart-beta` bar ordenado por gap
+
+Cada grafico deve ter um **callout Obsidian** (`> [!example]+`, `> [!tip]+`, `> [!warning]+`) interpretando os dados.
+
+Tabelas markdown para: lideres por dimensao, pares complementares, evolucao e potencial.
+
+Frontmatter do ranking:
+```yaml
+---
+title: "Ranking — Time <org> (<repo>)"
+date: YYYY-MM-DDT00:00:00Z
+type: ranking
+related:
+  - "[[Dev1]]"
+  - "[[Dev2]]"
+---
+```
+
 ---
 
-## Formato do Relatorio
+## Formato do Relatorio Individual
 
 ```markdown
-# Avaliacao: <username> (<repo>)
+---
+title: "Avaliacao: <Nome> (<repo>)"
+date: YYYY-MM-DDT00:00:00Z
+type: peer-report
+related:
+  - "[[_ranking]]"
+---
+
+# Avaliacao: <username> / <Nome> (<repo>)
 
 > Baseado em N PRs merged + M review comments (data)
-> Nivel avaliado: LX | Arquetipos detectados: [...]
+> Nivel avaliado: LX | Arquetipo: <titulo>
 
 ---
 
@@ -196,22 +244,18 @@ Relatorios existentes no vault servem como referencia para comparacoes na matriz
 
 ---
 
-## Matriz de Competencias
+## Scores
 
-| Dimensao | <username> | Washington | Pedro | Molina | Marquesini | William |
-|----------|:----------:|:----------:|:-----:|:------:|:----------:|:-------:|
-| Layer    | ++++       | +++++      | +++   | ++++   | ++++       | +++++ |
-| Errors   | ++++       | ++++       | +++   | ++++   | ++++       | +++++ |
-| Tests    | +++        | ++++       | ++    | +++    | ++         | +++++ |
-| Reviews  | +++        | +++++      | ++++  | ++++   | +++        | ++++ |
-| Observ   | +++        | +++++      | +++   | ++     | +++        | ++++ |
-| Simplif  | ++++       | +++        | ++++  | +++++  | +++        | +++ |
-| Prod     | ++++       | ++++       | +++++ | ++++   | +++        | ++++ |
-| Idioms   | ++++       | ++++       | +++   | +++    | +++        | +++++ |
-
-## Arquetipos Detectados
-
-<Qual(is) arquetipo(s) mais se aproxima>
+| Dimensao | Score |
+|----------|:-----:|
+| Layer Separation | ++++ |
+| Error Handling | ++++ |
+| Testing Rigor | +++ |
+| Code Review Depth | +++ |
+| Observability | +++ |
+| Simplification | ++++ |
+| Production Thinking | ++++ |
+| Go Idioms | ++++ |
 
 ## Pontos Fortes
 - <com evidencia de PR especifico>
@@ -219,13 +263,12 @@ Relatorios existentes no vault servem como referencia para comparacoes na matriz
 ## Areas de Crescimento
 - <com sugestao concreta referenciando o que os benchmarks fazem>
 
-## Complementaridade no Time
-<Como esse dev complementa ou sobrepoe com os benchmarks>
-
 ---
 
 *Gerado em YYYY-MM-DD | Fonte: GitHub PRs + Review Comments (<repo>)*
 ```
+
+A **Matriz de Competencias** comparativa nao fica mais no report individual — fica no `_ranking.md` como Mermaid charts (Fase 7).
 
 ---
 

@@ -80,38 +80,80 @@ fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[Session
 
         // Sessions within this folder
         let total = group.len();
-        for (i, session) in group.iter().enumerate() {
-            let is_last = i == total - 1;
-            let branch = if is_last { "\u{2514}\u{2500}" } else { "\u{251c}\u{2500}" };
-            let sess_icon = if session.is_up { "\u{25cf}" } else { "\u{25cb}" };
-            let sess_icon_style = if session.is_up { theme::up_icon() } else { theme::down_icon() };
-            let uptime = format_uptime(&session.status);
-            let ident = session.short_id.clone();
+        let agent_count: usize = group.iter().map(|s| s.session_count.max(1)).sum();
+        let count_label = if agent_count == 1 { "1 agente".to_string() } else { format!("{agent_count} agentes") };
 
+        if total == 1 {
+            // Single agent: counter line with inline stats, no separate session row
+            let session = &group[0];
+            let uptime = format_uptime(&session.status);
             let mut spans = vec![
                 Span::raw("  "),
                 Span::styled(vert_pad.to_string(), theme::tree_branch()),
-                Span::styled(branch.to_string(), theme::tree_branch()),
-                Span::raw(" "),
-                Span::styled(sess_icon, sess_icon_style),
-                Span::raw(" "),
-                Span::styled(format!("{ident:<12}"), theme::dim()),
-                Span::raw(" "),
-                Span::styled(format!("{uptime:<5}"), theme::uptime()),
+                Span::raw("  "),
+                Span::styled(count_label, theme::dim()),
+                Span::raw("  "),
+                Span::styled(uptime, theme::uptime()),
             ];
-
             if session.is_up && !session.cpu.is_empty() {
                 let cpu_pct = parse_pct(&session.cpu);
                 let cpu_bar = mini_bar(cpu_pct, 6);
-                let cpu_style = pct_color(cpu_pct);
+                let mem_pct = parse_mem_pct(&session.mem);
+                let mem_bar = mini_bar(mem_pct, 6);
+                let mem_used = mem_used_only(&session.mem);
                 spans.push(Span::raw("  "));
-                spans.push(Span::styled(cpu_bar, cpu_style));
+                spans.push(Span::styled(cpu_bar, theme::up_icon()));
                 spans.push(Span::styled(format!(" {:<6}", session.cpu.trim()), theme::cpu()));
-                let mem_short = shorten_mem(&session.mem);
-                spans.push(Span::styled(format!(" {mem_short}"), theme::mem()));
+                spans.push(Span::raw("  "));
+                spans.push(Span::styled(mem_bar, theme::mem()));
+                spans.push(Span::styled(format!(" {mem_used}"), theme::mem()));
             }
-
             lines.push(Line::from(spans));
+        } else {
+            // Multiple agents: counter line + individual session rows
+            lines.push(Line::from(vec![
+                Span::raw("  "),
+                Span::styled(vert_pad.to_string(), theme::tree_branch()),
+                Span::raw("  "),
+                Span::styled(count_label, theme::dim()),
+            ]));
+
+            for (i, session) in group.iter().enumerate() {
+                let is_last = i == total - 1;
+                let branch = if is_last { "\u{2514}\u{2500}" } else { "\u{251c}\u{2500}" };
+                let sess_icon = if session.is_up { "\u{25cf}" } else { "\u{25cb}" };
+                let sess_icon_style = if session.is_up { theme::up_icon() } else { theme::down_icon() };
+                let uptime = format_uptime(&session.status);
+                let ident = session.short_id.clone();
+
+                let mut spans = vec![
+                    Span::raw("  "),
+                    Span::styled(vert_pad.to_string(), theme::tree_branch()),
+                    Span::styled(branch.to_string(), theme::tree_branch()),
+                    Span::raw(" "),
+                    Span::styled(sess_icon, sess_icon_style),
+                    Span::raw(" "),
+                    Span::styled(format!("{ident:<12}"), theme::dim()),
+                    Span::raw(" "),
+                    Span::styled(format!("{uptime:<5}"), theme::uptime()),
+                ];
+
+                if session.is_up && !session.cpu.is_empty() {
+                    let cpu_pct = parse_pct(&session.cpu);
+                    let cpu_bar = mini_bar(cpu_pct, 6);
+                    let mem_pct = parse_mem_pct(&session.mem);
+                    let mem_bar = mini_bar(mem_pct, 6);
+                    let mem_used = mem_used_only(&session.mem);
+                    spans.push(Span::raw("  "));
+                    spans.push(Span::styled(cpu_bar, theme::up_icon()));
+                    spans.push(Span::styled(format!(" {:<6}", session.cpu.trim()), theme::cpu()));
+                    spans.push(Span::raw("  "));
+                    spans.push(Span::styled(mem_bar, theme::mem()));
+                    spans.push(Span::styled(format!(" {mem_used}"), theme::mem()));
+                }
+
+                lines.push(Line::from(spans));
+            }
         }
     }
 }
@@ -154,11 +196,37 @@ fn format_uptime(status: &str) -> String {
         .to_string()
 }
 
-/// Shorten memory strings by replacing verbose unit names with single-letter suffixes.
-fn shorten_mem(mem: &str) -> String {
-    mem.replace("MiB", "M")
+/// Returns only the used portion of a memory string (strips the limit).
+fn mem_used_only(mem: &str) -> String {
+    mem.split('/').next().unwrap_or(mem)
+        .replace("MiB", "M")
         .replace("GiB", "G")
-        .replace(" / ", "/")
+        .trim()
+        .to_string()
+}
+
+/// Parse memory percentage from docker MemUsage string (e.g. "346.2MiB / 12GiB").
+fn parse_mem_pct(mem: &str) -> u8 {
+    let parts: Vec<&str> = mem.split('/').collect();
+    if parts.len() != 2 { return 0; }
+    let used = parse_mem_bytes(parts[0].trim());
+    let limit = parse_mem_bytes(parts[1].trim());
+    if limit == 0 { return 0; }
+    ((used as f64 / limit as f64 * 100.0) as u8).min(100)
+}
+
+fn parse_mem_bytes(s: &str) -> u64 {
+    let s = s.trim();
+    if let Some(n) = s.strip_suffix("GiB").or_else(|| s.strip_suffix("G")) {
+        return (n.parse::<f64>().unwrap_or(0.0) * 1024.0 * 1024.0 * 1024.0) as u64;
+    }
+    if let Some(n) = s.strip_suffix("MiB").or_else(|| s.strip_suffix("M")) {
+        return (n.parse::<f64>().unwrap_or(0.0) * 1024.0 * 1024.0) as u64;
+    }
+    if let Some(n) = s.strip_suffix("kB").or_else(|| s.strip_suffix("k")) {
+        return (n.parse::<f64>().unwrap_or(0.0) * 1024.0) as u64;
+    }
+    s.parse::<u64>().unwrap_or(0)
 }
 
 /// Shorten an absolute path by replacing $HOME with `~`.

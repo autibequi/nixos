@@ -160,7 +160,8 @@ pub fn count_claude_procs(container: &str) -> usize {
     String::from_utf8_lossy(&output.stdout)
         .lines()
         .skip(1) // skip header row
-        .filter(|line| line.contains("/bin/claude"))
+        // Match .claude-unwrapped (nix store path) with an active PTY — filters out subprocesses
+        .filter(|line| line.contains(".claude-unwrapped") && line.contains("pts/"))
         .count()
 }
 
