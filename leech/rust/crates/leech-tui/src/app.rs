@@ -112,35 +112,61 @@ impl App {
         self.log_scroll = self.log_scroll.saturating_sub(n);
     }
 
+    /// Total navigable items: dk services + utils.
+    pub fn total_items(&self) -> usize {
+        DK_SERVICES.len() + self.snapshot.utils.len()
+    }
+
+    /// Whether the cursor is currently on a utils item.
+    pub fn is_utils_selected(&self) -> bool {
+        self.cursor_idx >= DK_SERVICES.len()
+    }
+
     /// Return the name of the currently selected service.
     pub fn current_service(&self) -> &str {
-        DK_SERVICES[self.cursor_idx]
+        if self.cursor_idx < DK_SERVICES.len() {
+            DK_SERVICES[self.cursor_idx]
+        } else {
+            let ui = self.cursor_idx - DK_SERVICES.len();
+            let name = &self.snapshot.utils[ui].name;
+            name.strip_prefix("leech-").unwrap_or(name)
+        }
     }
 
     /// Return the currently selected environment string for the active service.
     pub fn current_env(&self) -> &str {
-        ENVS[self.svc_envs[self.cursor_idx]]
+        if self.cursor_idx < DK_SERVICES.len() {
+            ENVS[self.svc_envs[self.cursor_idx]]
+        } else {
+            ""
+        }
     }
 
-    /// Move the cursor up, wrapping to the last service.
+    /// Move the cursor up, wrapping to the last item.
     pub fn move_up(&mut self) {
+        let total = self.total_items();
+        if total == 0 { return; }
         if self.cursor_idx == 0 {
-            self.cursor_idx = DK_SERVICES.len() - 1;
+            self.cursor_idx = total - 1;
         } else {
             self.cursor_idx -= 1;
         }
         self.log_scroll = 0;
     }
 
-    /// Move the cursor down, wrapping to the first service.
+    /// Move the cursor down, wrapping to the first item.
     pub fn move_down(&mut self) {
-        self.cursor_idx = (self.cursor_idx + 1) % DK_SERVICES.len();
+        let total = self.total_items();
+        if total == 0 { return; }
+        self.cursor_idx = (self.cursor_idx + 1) % total;
         self.log_scroll = 0;
     }
 
-    /// Cycle the selected environment for the current service.
+    /// Cycle the selected environment for the current service (only for dk services).
     pub fn cycle_env(&mut self) {
-        let idx = self.cursor_idx;
-        self.svc_envs[idx] = (self.svc_envs[idx] + 1) % ENVS.len();
+        if self.cursor_idx < DK_SERVICES.len() {
+            let idx = self.cursor_idx;
+            self.svc_envs[idx] = (self.svc_envs[idx] + 1) % ENVS.len();
+        }
     }
 }

@@ -196,9 +196,15 @@ pub fn run_status(tick: u64) -> Result<()> {
                                     "stop" => {
                                         let svc = app.current_service().to_string();
                                         let idx = app.cursor_idx;
-                                        let container = app.snapshot.dk_services.iter()
-                                            .find(|d| d.name.contains(&svc))
-                                            .map(|d| d.name.clone());
+                                        let container = if app.is_utils_selected() {
+                                            app.snapshot.utils.iter()
+                                                .find(|u| u.name.contains(&svc))
+                                                .map(|u| u.name.clone())
+                                        } else {
+                                            app.snapshot.dk_services.iter()
+                                                .find(|d| d.name.contains(&svc))
+                                                .map(|d| d.name.clone())
+                                        };
                                         app.close_menu();
                                         app.last_action = Some((idx, format!("stopping {}…", svc)));
                                         let done_tx = bg_done_tx.clone();
@@ -239,9 +245,15 @@ pub fn run_status(tick: u64) -> Result<()> {
                                         let svc = app.current_service().to_string();
                                         let env = app.current_env().to_string();
                                         let idx = app.cursor_idx;
-                                        let container = app.snapshot.dk_services.iter()
-                                            .find(|d| d.name.contains(&svc))
-                                            .map(|d| d.name.clone());
+                                        let container = if app.is_utils_selected() {
+                                            app.snapshot.utils.iter()
+                                                .find(|u| u.name.contains(&svc))
+                                                .map(|u| u.name.clone())
+                                        } else {
+                                            app.snapshot.dk_services.iter()
+                                                .find(|d| d.name.contains(&svc))
+                                                .map(|d| d.name.clone())
+                                        };
                                         app.close_menu();
                                         app.last_action = Some((
                                             idx,

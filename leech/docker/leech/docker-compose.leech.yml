@@ -86,7 +86,6 @@ services:
       context: .
       dockerfile: Dockerfile.claude
     image: leech
-    cpus: "14.4"
     mem_limit: 12g
     memswap_limit: 12g
     network_mode: host

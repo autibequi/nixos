@@ -5,7 +5,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::Paragraph;
 use ratatui::Frame;
 
-use crate::app::App;
+use crate::app::{App, DK_SERVICES};
 use crate::theme;
 
 /// Render the utils group (leech-* containers that are not dk or agent).
@@ -22,7 +22,11 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
         Span::styled("utils", theme::group_label()),
     ]));
 
-    for u in &app.snapshot.utils {
+    let utils_count = app.snapshot.utils.len();
+    for (i, u) in app.snapshot.utils.iter().enumerate() {
+        let is_selected = app.cursor_idx == DK_SERVICES.len() + i;
+        let is_last = i == utils_count - 1;
+        let branch = if is_last { "\u{2514}\u{2500}" } else { "\u{251c}\u{2500}" };
         let (status_icon, status_style, status_text) = if u.is_up {
             ("\u{25cf}", theme::up_icon(), format_uptime(&u.status))
         } else {
@@ -31,12 +35,19 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
 
         // Strip "leech-" prefix for compact display
         let display_name = u.name.strip_prefix("leech-").unwrap_or(&u.name);
+        let marker = if is_selected { "\u{25b6}" } else { " " };
+        let name_style = if is_selected { theme::selected() } else { theme::name() };
+        let marker_style = if is_selected { theme::selected() } else { theme::dim() };
 
         let mut spans = vec![
-            Span::raw("     "),
+            Span::raw("  "),
+            Span::styled(branch.to_string(), theme::tree_branch()),
+            Span::raw(" "),
+            Span::styled(marker.to_string(), marker_style),
+            Span::raw(" "),
             Span::styled(status_icon, status_style),
             Span::raw(" "),
-            Span::styled(format!("{display_name:<20}"), theme::name()),
+            Span::styled(format!("{display_name:<18}"), name_style),
             Span::raw(" "),
             Span::styled(format!("{status_text:<5}"), theme::uptime()),
         ];
@@ -45,17 +56,15 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             let cpu_pct = parse_pct(&u.cpu);
             let cpu_bar = mini_bar(cpu_pct, 6);
             let cpu_style = pct_color(cpu_pct);
-            let mem_short = u.mem
-                .replace("MiB", "M")
-                .replace("GiB", "G")
-                .replace(" / ", "/");
+            let mem_used = u.mem.split('/').next().unwrap_or(&u.mem)
+                .replace("MiB", "M").replace("GiB", "G").trim().to_string();
             let mem_bar = mem_bar_from_str(&u.mem);
             spans.push(Span::raw("  "));
             spans.push(Span::styled(cpu_bar, cpu_style));
             spans.push(Span::styled(format!(" {:<6}", u.cpu.trim()), theme::cpu()));
             spans.push(Span::raw(" "));
             spans.push(Span::styled(mem_bar, theme::mem()));
-            spans.push(Span::styled(format!(" {mem_short}"), theme::dim()));
+            spans.push(Span::styled(format!(" {mem_used}"), theme::mem()));
         }
 
         lines.push(Line::from(spans));

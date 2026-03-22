@@ -11,6 +11,7 @@ leech_docker_service_dir() {
     monolito-worker)  var_name="MONOLITO_DIR" ;;
     bo-container)     var_name="BO_CONTAINER_DIR" ;;
     front-student)    var_name="FRONT_STUDENT_DIR" ;;
+    reverseproxy)     echo "${leech_nixos_dir}/leech/docker/reverseproxy"; return 0 ;;
     *) echo ""; return 1 ;;
   esac
   local dir="${!var_name}"
@@ -89,7 +90,7 @@ leech_docker_free_port() {
 
 # Lista servicos conhecidos
 leech_docker_known_services() {
-  echo "monolito monolito-worker bo-container front-student"
+  echo "monolito monolito-worker bo-container front-student reverseproxy"
 }
 
 # Valida que o servico existe e tem config

@@ -39,20 +39,20 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
 
         for (i, &svc) in DK_SERVICES.iter().enumerate() {
             let is_selected = i == app.cursor_idx;
+            let is_last_svc = i == DK_SERVICES.len() - 1;
+            let svc_branch = if is_last_svc { "\u{2514}\u{2500}" } else { "\u{251c}\u{2500}" };
             let marker = if is_selected { "\u{25b6}" } else { " " };
-            let style = if is_selected {
-                theme::selected()
-            } else {
-                theme::dim()
-            };
+            let style = if is_selected { theme::selected() } else { theme::dim() };
 
             lines.push(Line::from(vec![
-                Span::raw("   "),
+                Span::raw("  "),
+                Span::styled(svc_branch.to_string(), theme::tree_branch()),
+                Span::raw(" "),
                 Span::styled(marker.to_string(), style),
                 Span::raw(" "),
                 Span::styled("\u{25cb}", theme::down_icon()),
                 Span::raw(" "),
-                Span::styled(format!("{svc:<20}"), style),
+                Span::styled(format!("{svc:<18}"), style),
                 Span::raw(" "),
                 Span::styled("stop ", theme::dim()),
             ]));
@@ -61,8 +61,8 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                 let is_last = di == service_dep_names(svc).len() - 1;
                 let tree = if is_last { "└─" } else { "├─" };
                 lines.push(Line::from(vec![
-                    Span::raw("        "),
-                    Span::styled(tree, theme::dim()),
+                    Span::raw("          "),
+                    Span::styled(tree, theme::tree_branch()),
                     Span::raw(" "),
                     Span::styled("\u{25cb}", theme::down_icon()),
                     Span::raw(" "),
@@ -90,6 +90,8 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
 
         for (i, &svc) in DK_SERVICES.iter().enumerate() {
             let is_selected = i == app.cursor_idx;
+            let is_last_svc = i == DK_SERVICES.len() - 1;
+            let svc_branch = if is_last_svc { "\u{2514}\u{2500}" } else { "\u{251c}\u{2500}" };
             let marker = if is_selected { "\u{25b6}" } else { " " };
 
             // Find matching dk_service (main app container: leech-dk-{svc}-app)
@@ -122,12 +124,14 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                     .map(|(_, s)| s.as_str())
                     .unwrap_or("…");
                 let spans = vec![
-                    Span::raw("   "),
+                    Span::raw("  "),
+                    Span::styled(svc_branch.to_string(), theme::tree_branch()),
+                    Span::raw(" "),
                     Span::styled(marker.to_string(), marker_style),
                     Span::raw(" "),
                     Span::styled(frame, theme::pending_icon()),
                     Span::raw(" "),
-                    Span::styled(format!("{svc:<20}"), name_style),
+                    Span::styled(format!("{svc:<18}"), name_style),
                     Span::raw(" "),
                     Span::styled(format!("{:<5}", "…"), theme::pending_icon()),
                     Span::raw("  "),
@@ -166,12 +170,14 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             };
 
             let mut spans = vec![
-                Span::raw("   "),
+                Span::raw("  "),
+                Span::styled(svc_branch.to_string(), theme::tree_branch()),
+                Span::raw(" "),
                 Span::styled(marker.to_string(), marker_style),
                 Span::raw(" "),
                 Span::styled(status_icon, status_style),
                 Span::raw(" "),
-                Span::styled(format!("{svc:<20}"), name_style),
+                Span::styled(format!("{svc:<18}"), name_style),
                 Span::raw(" "),
                 Span::styled(format!("{status_text:<5}"), theme::uptime()),
             ];
@@ -180,19 +186,15 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                 let cpu_pct = parse_pct(&cpu);
                 let cpu_bar = mini_bar(cpu_pct, 6);
                 let cpu_style = pct_color(cpu_pct);
+                let mem_used = mem.split('/').next().unwrap_or(&mem)
+                    .replace("MiB", "M").replace("GiB", "G").trim().to_string();
+                let mem_bar = mem_bar_from_str(&mem);
                 spans.push(Span::raw("  "));
                 spans.push(Span::styled(cpu_bar, cpu_style));
                 spans.push(Span::styled(format!(" {cpu:<6}", cpu = cpu.trim()), theme::cpu()));
-
-                let mem_short = mem
-                    .replace("MiB", "M")
-                    .replace("GiB", "G")
-                    .replace(" / ", "/");
-                // Parse used/total for memory bar
-                let mem_bar = mem_bar_from_str(&mem);
                 spans.push(Span::raw(" "));
                 spans.push(Span::styled(mem_bar, theme::mem()));
-                spans.push(Span::styled(format!(" {mem_short}"), theme::dim()));
+                spans.push(Span::styled(format!(" {mem_used}"), theme::mem()));
             }
 
             lines.push(Line::from(spans));
@@ -212,8 +214,8 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                     _ => ("\u{25cb}", theme::down_icon(), "stopped".to_string(), String::new(), String::new()),
                 };
                 let mut dep_spans = vec![
-                    Span::raw("        "),
-                    Span::styled(tree, theme::dim()),
+                    Span::raw("          "),
+                    Span::styled(tree, theme::tree_branch()),
                     Span::raw(" "),
                     Span::styled(dep_icon, dep_style),
                     Span::raw(" "),
@@ -225,14 +227,15 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                     let cpu_pct = parse_pct(&dep_cpu);
                     let cpu_bar = mini_bar(cpu_pct, 6);
                     let cpu_style = pct_color(cpu_pct);
+                    let dep_mem_used = dep_mem.split('/').next().unwrap_or(&dep_mem)
+                        .replace("MiB", "M").replace("GiB", "G").trim().to_string();
+                    let mem_bar = mem_bar_from_str(&dep_mem);
                     dep_spans.push(Span::raw("  "));
                     dep_spans.push(Span::styled(cpu_bar, cpu_style));
                     dep_spans.push(Span::styled(format!(" {:<6}", dep_cpu.trim()), theme::cpu()));
-                    let mem_short = dep_mem.replace("MiB", "M").replace("GiB", "G").replace(" / ", "/");
-                    let mem_bar = mem_bar_from_str(&dep_mem);
                     dep_spans.push(Span::raw(" "));
                     dep_spans.push(Span::styled(mem_bar, theme::mem()));
-                    dep_spans.push(Span::styled(format!(" {mem_short}"), theme::dim()));
+                    dep_spans.push(Span::styled(format!(" {dep_mem_used}"), theme::mem()));
                 }
                 lines.push(Line::from(dep_spans));
             }
@@ -348,14 +351,15 @@ pub fn render_leeches(frame: &mut Frame, app: &App, area: Rect) {
             let cpu_pct = parse_pct(&leech.cpu);
             let cpu_bar = mini_bar(cpu_pct, 6);
             let cpu_style = pct_color(cpu_pct);
-            let mem_short = leech.mem.replace("MiB", "M").replace("GiB", "G").replace(" / ", "/");
+            let mem_used = leech.mem.split('/').next().unwrap_or(&leech.mem)
+                .replace("MiB", "M").replace("GiB", "G").trim().to_string();
             let mem_bar = mem_bar_from_str(&leech.mem);
             spans.push(Span::raw("  "));
             spans.push(Span::styled(cpu_bar, cpu_style));
             spans.push(Span::styled(format!(" {:<6}", leech.cpu.trim()), theme::cpu()));
             spans.push(Span::raw(" "));
             spans.push(Span::styled(mem_bar, theme::mem()));
-            spans.push(Span::styled(format!(" {mem_short}"), theme::dim()));
+            spans.push(Span::styled(format!(" {mem_used}"), theme::mem()));
         }
 
         lines.push(Line::from(spans));

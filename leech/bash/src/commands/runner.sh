@@ -4,7 +4,33 @@ case "$svc" in
   mono) svc="monolito" ;;
   bo)   svc="bo-container" ;;
   front|fs) svc="front-student" ;;
+  rp|proxy) svc="reverseproxy" ;;
 esac
+
+# Reverseproxy: tratamento especial (sem source dir, sem env file)
+if [[ "$svc" == "reverseproxy" ]]; then
+  _RP_DIR="${leech_nixos_dir}/leech/docker/reverseproxy"
+  _RP_PROJECT="leech-dk-reverseproxy"
+  case "${args[action]}" in
+    start)
+      leech_docker_ensure_reverseproxy
+      ;;
+    stop)
+      docker compose -f "$_RP_DIR/docker-compose.yml" -p "$_RP_PROJECT" down 2>/dev/null
+      ;;
+    restart)
+      docker compose -f "$_RP_DIR/docker-compose.yml" -p "$_RP_PROJECT" down 2>/dev/null
+      leech_docker_ensure_reverseproxy
+      ;;
+    logs)
+      docker logs -f leech-reverseproxy
+      ;;
+    *)
+      echo "Acao nao suportada para reverseproxy: ${args[action]}" >&2
+      ;;
+  esac
+  exit 0
+fi
 
 _env="${args[--env]:-sand}"
 _worktree="${args[--worktree]:-}"

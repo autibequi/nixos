@@ -91,9 +91,9 @@ fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[Session
                 Span::raw("  "),
                 Span::styled(vert_pad.to_string(), theme::tree_branch()),
                 Span::raw("  "),
-                Span::styled(count_label, theme::dim()),
+                Span::styled(format!("{:<20}", count_label), theme::dim()),
                 Span::raw("  "),
-                Span::styled(uptime, theme::uptime()),
+                Span::styled(format!("{:<5}", uptime), theme::uptime()),
             ];
             if session.is_up && !session.cpu.is_empty() {
                 let cpu_pct = parse_pct(&session.cpu);
