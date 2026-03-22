@@ -2,36 +2,22 @@
 # Pré-requisito: zion-base:latest buildada com `just build-base`
 FROM zion-base:latest
 
-# Entrypoint: inicia nix-daemon como root, cria dirs essenciais como claude, depois delega via gosu
+# Garantir que o usuário claude existe nos arquivos de sistema (build time — /etc pode ser
+# read-only em runtime no nixos/nix). O compose já cuida do docker socket via group_add.
+RUN mkdir -p /etc /home/claude && \
+    { grep -q "^root:" /etc/passwd 2>/dev/null || echo "root:x:0:0:root:/root:/bin/sh" >> /etc/passwd; } && \
+    { grep -q "^claude:" /etc/passwd 2>/dev/null || echo "claude:x:1000:1000::/home/claude:/bin/bash" >> /etc/passwd; } && \
+    { grep -q "^root:" /etc/group 2>/dev/null || echo "root:x:0:" >> /etc/group; } && \
+    { grep -q "^claude:" /etc/group 2>/dev/null || echo "claude:x:1000:" >> /etc/group; } && \
+    chown 1000:1000 /home/claude
+
+# Entrypoint: inicia nix-daemon como root, cria dirs essenciais, delega via gosu
 RUN printf '#!/bin/bash\n\
-# Garantir /etc/passwd e /etc/group existem (imagem pode ser antiga)\n\
-if [ ! -f /etc/passwd ]; then\n\
-  echo "root:x:0:0:root:/root:/bin/bash" > /etc/passwd\n\
-  echo "claude:x:1000:1000::/home/claude:/bin/bash" >> /etc/passwd\n\
-fi\n\
-if [ ! -f /etc/group ]; then\n\
-  echo "root:x:0:" > /etc/group\n\
-  echo "claude:x:1000:" >> /etc/group\n\
-fi\n\
-# Garantir entrada do claude no passwd/group\n\
-grep -q "^claude:" /etc/passwd || echo "claude:x:1000:1000::/home/claude:/bin/bash" >> /etc/passwd\n\
-grep -q "^claude:" /etc/group  || echo "claude:x:1000:" >> /etc/group\n\
 HOME=/root nix-daemon &\n\
 sleep 1\n\
-# Garantir dirs essenciais com dono correto antes de trocar usuario\n\
 mkdir -p /workspace/.ephemeral/locks /workspace/.ephemeral/notes /workspace/.ephemeral/scratch /tmp/zion-locks\n\
-chown -R claude:claude /workspace/.ephemeral /tmp/zion-locks 2>/dev/null || true\n\
-chown -R claude:claude /workspace/obsidian/agents/cron 2>/dev/null || true\n\
-# Adicionar claude ao grupo do docker socket dinamicamente (GID varia por host)\n\
-if [ -S /var/run/docker.sock ]; then\n\
-  DOCKER_GID=$(stat -c %%g /var/run/docker.sock)\n\
-  if ! getent group "$DOCKER_GID" > /dev/null 2>&1; then\n\
-    echo "dockerhost:x:${DOCKER_GID}:claude" >> /etc/group\n\
-  else\n\
-    DOCKER_GROUP=$(getent group "$DOCKER_GID" | cut -d: -f1)\n\
-    sed -i "s/^${DOCKER_GROUP}:x:${DOCKER_GID}:.*/${DOCKER_GROUP}:x:${DOCKER_GID}:claude/" /etc/group\n\
-  fi\n\
-fi\n\
+chown -R 1000:1000 /workspace/.ephemeral /tmp/zion-locks 2>/dev/null || true\n\
+chown -R 1000:1000 /workspace/obsidian/agents/cron 2>/dev/null || true\n\
 exec gosu claude "$@"\n' > /entrypoint.sh && \
     chmod +x /entrypoint.sh
 

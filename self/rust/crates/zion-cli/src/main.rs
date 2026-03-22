@@ -103,11 +103,6 @@ enum Commands {
     /// Build and install zion CLIs
     #[command(alias = "install")]
     Update,
-    /// Create ~/.zion config
-    Init {
-        #[arg(long)]
-        force: bool,
-    },
     /// Set default engine
     Set { engine: String },
 
@@ -125,6 +120,9 @@ enum Commands {
         #[arg(default_value = "start")]
         action: String,
     },
+    /// List inbox files
+    #[command(alias = "ib")]
+    Inbox,
     /// List outbox files
     #[command(alias = "ob")]
     Outbox,
@@ -289,7 +287,8 @@ fn main() -> Result<()> {
             OsAction::Build => "build",
         }),
         Some(Commands::Update) => commands::host::update(),
-        Some(Commands::Init { force }) => commands::host::init(force),
+        // inbox/outbox delegate to bash
+        Some(Commands::Inbox) => exec::bash_delegate(&["inbox"]),
         Some(Commands::Set { engine }) => commands::host::set_engine(&engine),
 
         // Tools

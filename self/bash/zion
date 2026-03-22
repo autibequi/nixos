@@ -5437,6 +5437,35 @@ zion_host_command() {
 }
 
 # :command.function
+zion_inbox_command() {
+
+  # src/commands/inbox.sh
+# Lista o inbox
+local obsidian="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
+local inbox_dir="$obsidian/inbox"
+
+# Fallback path
+if [ ! -d "$inbox_dir" ]; then
+  for try in "/workspace/obsidian/inbox" "$HOME/obsidian/inbox"; do
+    [ -d "$try" ] && inbox_dir="$try" && break
+  done
+fi
+
+if [ ! -d "$inbox_dir" ]; then
+  echo "Inbox nao encontrado: $inbox_dir"
+  exit 1
+fi
+
+files=$(ls -1 "$inbox_dir" 2>/dev/null)
+if [ -z "$files" ]; then
+  echo "Inbox vazio."
+else
+  echo "Inbox ($inbox_dir):"
+  echo "$files" | sed 's/^/  /'
+fi
+
+}
+
 zion_outbox_command() {
 
   # src/commands/outbox.sh
@@ -8387,6 +8416,17 @@ zion_host_parse_requirements() {
 }
 
 # :command.parse_requirements
+zion_inbox_parse_requirements() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --help | -h) printf "zion inbox - Lista os arquivos do inbox.\n\nUsage: zion inbox\n"; exit ;;
+      *) printf "invalid argument: %s\n" "$1" >&2; exit 1 ;;
+    esac
+    shift
+  done
+  action="inbox"
+}
+
 zion_outbox_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
@@ -8658,7 +8698,6 @@ run() {
     "shutdown") zion_shutdown_command ;;
     "clean") zion_clean_command ;;
     "update") zion_update_command ;;
-    "init") zion_init_command ;;
     "set") zion_set_command ;;
     "runner") zion_runner_command ;;
     "hooks") zion_hooks_command ;;
@@ -8681,6 +8720,7 @@ run() {
     "os build") zion_os_build_command ;;
     "leech") zion_leech_command ;;
     "host") zion_host_command ;;
+    "inbox") zion_inbox_command ;;
     "outbox") zion_outbox_command ;;
     "help") zion_help_command ;;
     "man") zion_man_command ;;
