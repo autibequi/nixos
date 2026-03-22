@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: ${MONOLITO_DIR}
-      dockerfile: ${ZION_NIXOS_DIR}/zion/containers/monolito/Dockerfile
+      dockerfile: ${ZION_NIXOS_DIR}/self/containers/monolito/Dockerfile
     container_name: zion-dk-monolito-app
     cpus: "14.4"
     mem_limit: 6g

@@ -1,7 +1,7 @@
 services:
   app:
     build:
-      dockerfile: ${ZION_NIXOS_DIR}/zion/containers/monolito/Dockerfile.debug
+      dockerfile: ${ZION_NIXOS_DIR}/self/containers/monolito/Dockerfile.debug
     cpus: "14.4"
     mem_limit: 6g
     memswap_limit: 6g

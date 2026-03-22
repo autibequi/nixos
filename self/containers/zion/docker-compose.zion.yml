@@ -19,7 +19,7 @@ x-extra-hosts: &extra-hosts
 x-base-volumes: &base-volumes
   - ${ZION_ROOT:-${HOME}/nixos/self}:/workspace/self
   - ${OBSIDIAN_PATH:-${HOME}/.ovault/Work}:/workspace/obsidian
-  - ${CLAUDIO_MOUNT:-${HOME}/projects}:/workspace/mnt:${CLAUDIO_MOUNT_OPTS:-rw}
+  - ${CLAUDIO_MOUNT:-${HOME}/nixos}:/workspace/mnt:${CLAUDIO_MOUNT_OPTS:-rw}
   - ${HOME}/.claude:/home/claude/.claude
   # bypass: settings.json padrão para containers — sobrescreve o do host
   - ${ZION_ROOT:-${HOME}/nixos/self}/claude.bypass.json:/home/claude/.claude/settings.json:ro
@@ -111,6 +111,12 @@ services:
       GIT_AUTHOR_EMAIL: pedro.correa@estrategia.com
       GIT_COMMITTER_NAME: Zion
       GIT_COMMITTER_EMAIL: zion@autibequi.com
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    tmpfs:
+      - /tmp:size=512m,mode=1777
     extra_hosts: *extra-hosts
     volumes: *base-volumes
 

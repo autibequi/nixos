@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: ${FRONT_STUDENT_DIR}
-      dockerfile: ${ZION_NIXOS_DIR}/zion/containers/front-student/Dockerfile
+      dockerfile: ${ZION_NIXOS_DIR}/self/containers/front-student/Dockerfile
     container_name: zion-dk-front-student-app
     cpus: "14.4"
     mem_limit: 4g

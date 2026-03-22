@@ -14,6 +14,7 @@ description: "Auto-ativar quando: qualquer interacao com /workspace/obsidian/ â€
 |---|---|---|
 | **board** | `board.md` | Qualquer interacao com o vault: mapa, tasks, agents, delegacao, quota |
 | **agentroom** | `agentroom.md` | Agents interagindo com `/obsidian/agents/`: scheduling, memory, ciclo |
+| **law** | `law.md` | A Lei do Zion: 9 leis obrigatorias + penalidades. Wiseman fiscaliza. |
 | **graph** | `graph.md` | Manter o grafo Ctrl+G: frontmatter, related, hubs, wiseman |
 | **dataview** | `dataview.md` | Queries Dataview/DataviewJS no DASHBOARD.md e notas |
 

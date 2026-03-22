@@ -1,11 +1,14 @@
 # Agentroom — Protocolo dos Agents
 
+> **A Lei completa (9 leis + penalidades):** `self/skills/meta/obsidian/law.md`
+> Wiseman le e fiscaliza. Agentes sao responsaveis por conhecer a lei.
+
 ## Regra Zero — Self-Scheduling
 
 **Nao reagendar = morrer.** Ao final de CADA ciclo:
 
 ```bash
-NEXT=$(date -d "+N minutes" +%Y%m%d_%H_%M)
+NEXT=$(date -u -d "+N minutes" +%Y%m%d_%H_%M)
 mv /workspace/obsidian/agents/_running/*_SEUNOME.md \
    /workspace/obsidian/agents/_schedule/${NEXT}_SEUNOME.md 2>/dev/null
 ```
@@ -13,6 +16,30 @@ mv /workspace/obsidian/agents/_running/*_SEUNOME.md \
 - SEMPRE reagendar, mesmo se falhar
 - Quota >= 70%: intervalo 2x
 - On-demand: +24h heartbeat
+
+## _schedule/ — Contrato do Scheduler
+
+`agents/_schedule/` e a fila de execucao do sistema. **Apenas agentes** — nenhuma task avulsa.
+
+**Invariante obrigatoria:** todo agente com `clock:` definido em seu `agent.md` DEVE ter exatamente **um** card em `_schedule/` a qualquer momento — mesmo que seja para daqui a 1 ano.
+
+```
+_schedule/
+└── YYYYMMDD_HH_MM_<nome-do-agente>.md   ← um por agente
+```
+
+- Formato do nome: `YYYYMMDD_HH_MM_<nome>.md`
+- Um card por agente — o proximo agendamento. Nao acumular multiplos.
+- Agentes `on-demand` (mechanic, tasker): nao precisam de card permanente — so aparecem quando alguem os agenda
+- O scheduler (tick) ordena por timestamp e executa os vencidos
+
+**Auto-agendamento correto:**
+```bash
+NEXT=$(date -u -d "+N minutes" +%Y%m%d_%H_%M)
+# Move o card atual (que esta em _running/) para _schedule/ com novo timestamp
+mv /workspace/obsidian/agents/_running/*_SEUNOME.md \
+   /workspace/obsidian/agents/_schedule/${NEXT}_SEUNOME.md 2>/dev/null
+```
 
 ## Inicio do Ciclo
 

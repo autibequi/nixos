@@ -112,9 +112,17 @@
     "net.core.netdev_max_backlog" = 16384;
     "net.ipv4.tcp_fastopen" = 3;
 
-    # Inotify: suficiente para IDEs e file watchers (padrão é 8192)
-    "fs.inotify.max_user_watches" = 524288;
-    "fs.inotify.max_user_instances" = 1024; # padrão 128, insuficiente com containers + IDEs
+    # Reutiliza sockets TIME_WAIT — containers fazendo muitas conexões curtas (HTTP, DB).
+    "net.ipv4.tcp_tw_reuse" = 1;
+
+    # Containers Go/Node usam mmap intensamente. Default 65530 estoura com 5+ containers.
+    "vm.max_map_count" = 1048576;
+
+    # Inotify: múltiplos containers uid 1000 compartilham este limite no host.
+    # Com 5+ containers cada um rodando Claude Code + file watchers, 1024 instances
+    # e 524288 watches não são suficientes — aumentado para aguentar carga paralela.
+    "fs.inotify.max_user_watches" = 2097152;
+    "fs.inotify.max_user_instances" = 8192;
 
     # Permite containers rootless (Podman) bindarem portas baixas (80, 443, etc.)
     "net.ipv4.ip_unprivileged_port_start" = 0;

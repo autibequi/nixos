@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: ${BO_CONTAINER_DIR}
-      dockerfile: ${ZION_NIXOS_DIR}/zion/containers/bo-container/Dockerfile
+      dockerfile: ${ZION_NIXOS_DIR}/self/containers/bo-container/Dockerfile
     container_name: zion-dk-bo-container-app
     cpus: "14.4"
     mem_limit: 4g

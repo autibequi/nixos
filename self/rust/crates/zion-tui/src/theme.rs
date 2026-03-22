@@ -95,3 +95,13 @@ pub fn footer_key() -> Style {
 pub fn footer_dim() -> Style {
     Style::default().fg(GRAY)
 }
+
+/// Yellow style for a pending / transitioning state icon.
+pub fn pending_icon() -> Style {
+    Style::default().fg(YELLOW)
+}
+
+/// Dark-gray style for a pending action label.
+pub fn pending_label() -> Style {
+    Style::default().fg(GRAY)
+}

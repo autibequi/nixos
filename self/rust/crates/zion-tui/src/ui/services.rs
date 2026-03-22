@@ -8,6 +8,10 @@ use ratatui::Frame;
 use crate::app::{App, DK_SERVICES};
 use crate::theme;
 
+/// Spinner frames for pending actions (◐◓◑◒ cycling ~1s).
+const SPINNER: &[&str] = &["◐", "◓", "◑", "◒"];
+
+
 /// Render dockerized services panel.
 pub fn render(frame: &mut Frame, app: &App, area: Rect) {
     let mut lines = Vec::new();
@@ -67,6 +71,43 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                 .iter()
                 .find(|d| d.name.contains(svc));
 
+            // Check if there's a pending action for this service
+            let is_pending = matches!(&app.last_action, Some((idx, _)) if *idx == i);
+
+            let name_style = if is_selected {
+                theme::selected()
+            } else {
+                theme::name()
+            };
+            let marker_style = if is_selected {
+                theme::selected()
+            } else {
+                theme::dim()
+            };
+
+            if is_pending {
+                let frame = SPINNER[(app.render_tick as usize / 2) % SPINNER.len()];
+                let action_label = app
+                    .last_action
+                    .as_ref()
+                    .map(|(_, s)| s.as_str())
+                    .unwrap_or("…");
+                let spans = vec![
+                    Span::raw("   "),
+                    Span::styled(marker.to_string(), marker_style),
+                    Span::raw(" "),
+                    Span::styled(frame, theme::pending_icon()),
+                    Span::raw(" "),
+                    Span::styled(format!("{svc:<20}"), name_style),
+                    Span::raw(" "),
+                    Span::styled(format!("{:<5}", "…"), theme::pending_icon()),
+                    Span::raw("  "),
+                    Span::styled(action_label.to_string(), theme::pending_label()),
+                ];
+                lines.push(Line::from(spans));
+                continue;
+            }
+
             let (status_icon, status_style, status_text, cpu, mem) = if let Some(d) = dk {
                 if d.is_up {
                     (
@@ -93,17 +134,6 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                     String::new(),
                     String::new(),
                 )
-            };
-
-            let name_style = if is_selected {
-                theme::selected()
-            } else {
-                theme::name()
-            };
-            let marker_style = if is_selected {
-                theme::selected()
-            } else {
-                theme::dim()
             };
 
             let mut spans = vec![

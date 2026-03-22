@@ -149,12 +149,19 @@ pub fn run_status(tick: u64) -> Result<()> {
 
     // Background command error channel (for non-blocking start/stop)
     let (bg_err_tx, bg_err_rx) = mpsc::channel::<String>();
+    // Signals action completion so the UI can clear the pending indicator.
+    let (bg_done_tx, bg_done_rx) = mpsc::channel::<usize>();
 
     // Main loop
     loop {
         // Check for background command errors
         if let Ok(err) = bg_err_rx.try_recv() {
             app.set_error(err);
+        }
+
+        // Clear pending spinner when action completes
+        if let Ok(idx) = bg_done_rx.try_recv() {
+            app.clear_action_for(idx);
         }
 
         // Check for background updates (only in normal mode to avoid flicker during menu)
@@ -167,6 +174,7 @@ pub fn run_status(tick: u64) -> Result<()> {
         terminal.draw(|frame| {
             ui::status::render(frame, &app);
         })?;
+        app.render_tick = app.render_tick.wrapping_add(1);
 
         match poll(Duration::from_millis(500))? {
             AppEvent::Key(key) => {
@@ -187,30 +195,41 @@ pub fn run_status(tick: u64) -> Result<()> {
                                     "cancel" => app.close_menu(),
                                     "stop" => {
                                         let svc = app.current_service().to_string();
+                                        let idx = app.cursor_idx;
                                         let container = app.snapshot.dk_services.iter()
                                             .find(|d| d.name.contains(&svc))
                                             .map(|d| d.name.clone());
                                         app.close_menu();
-                                        // Fire-and-forget via docker directly (bypasses bash runner).
-                                        // docker stop --time=5 SIGTERM→SIGKILL within 5s.
-                                        if let Some(name) = container {
-                                            std::thread::spawn(move || docker_stop_nowait(&name));
-                                        }
+                                        app.last_action = Some((idx, format!("stopping {}…", svc)));
+                                        let done_tx = bg_done_tx.clone();
+                                        let snap_tx = tx_bg.clone();
+                                        std::thread::spawn(move || {
+                                            if let Some(name) = container {
+                                                docker_stop_wait(&name);
+                                            }
+                                            let _ = done_tx.send(idx);
+                                            if let Ok(snap) = zion_sdk::status::collect() {
+                                                let _ = snap_tx.send(snap);
+                                            }
+                                        });
                                     }
                                     "start" => {
                                         let svc = app.current_service().to_string();
                                         let env = app.current_env().to_string();
+                                        let idx = app.cursor_idx;
                                         app.close_menu();
                                         app.last_action = Some((
-                                            app.cursor_idx,
+                                            idx,
                                             format!("starting {}…", svc),
                                         ));
                                         let err_tx = bg_err_tx.clone();
                                         let snap_tx = tx_bg.clone();
+                                        let done_tx = bg_done_tx.clone();
                                         std::thread::spawn(move || {
                                             if let Some(err) = run_bg_cmd(&svc, &env, "start") {
                                                 let _ = err_tx.send(err);
                                             }
+                                            let _ = done_tx.send(idx);
                                             if let Ok(snap) = status::collect() {
                                                 let _ = snap_tx.send(snap);
                                             }
@@ -219,16 +238,18 @@ pub fn run_status(tick: u64) -> Result<()> {
                                     "restart" => {
                                         let svc = app.current_service().to_string();
                                         let env = app.current_env().to_string();
+                                        let idx = app.cursor_idx;
                                         let container = app.snapshot.dk_services.iter()
                                             .find(|d| d.name.contains(&svc))
                                             .map(|d| d.name.clone());
                                         app.close_menu();
                                         app.last_action = Some((
-                                            app.cursor_idx,
+                                            idx,
                                             format!("restarting {}…", svc),
                                         ));
                                         let err_tx = bg_err_tx.clone();
                                         let snap_tx = tx_bg.clone();
+                                        let done_tx = bg_done_tx.clone();
                                         std::thread::spawn(move || {
                                             // Stop via docker directly (max 5s), then start.
                                             if let Some(name) = container {
@@ -237,6 +258,7 @@ pub fn run_status(tick: u64) -> Result<()> {
                                             if let Some(err) = run_bg_cmd(&svc, &env, "start") {
                                                 let _ = err_tx.send(err);
                                             }
+                                            let _ = done_tx.send(idx);
                                             if let Ok(snap) = status::collect() {
                                                 let _ = snap_tx.send(snap);
                                             }

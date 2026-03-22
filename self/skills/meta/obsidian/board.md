@@ -2,6 +2,9 @@
 
 > Fonte unica de verdade para interagir com `/workspace/obsidian/`.
 > Quando qualquer regra do sistema mudar, atualizar este arquivo primeiro — antes de avisar os agentes.
+>
+> **A Lei do Zion** (regras obrigatorias e penalidades): `self/skills/meta/obsidian/law.md`
+> Wiseman e o fiscal da lei — roda modo ENFORCE a cada 5 ciclos.
 
 ## Mapa do Vault
 

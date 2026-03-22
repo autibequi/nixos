@@ -37,6 +37,8 @@ pub struct App {
     pub svc_envs: Vec<usize>,
     /// Most recent action label for display: `(service_idx, description)`.
     pub last_action: Option<(usize, String)>,
+    /// Incremented on every draw cycle — used to animate the pending-action spinner.
+    pub render_tick: u64,
     /// Lines scrolled up from the bottom in the log panel (0 = bottom).
     pub log_scroll: usize,
     /// Current UI mode (normal, menu popup, error popup).
@@ -53,6 +55,7 @@ impl App {
             cursor_idx: 0,
             svc_envs: vec![0; DK_SERVICES.len()],
             last_action: None,
+            render_tick: 0,
             log_scroll: 0,
             mode: AppMode::Normal,
             menu_cursor: 0,
@@ -90,6 +93,13 @@ impl App {
 
     pub fn clear_error(&mut self) {
         self.mode = AppMode::Normal;
+    }
+
+    /// Clear a pending action by service index.
+    pub fn clear_action_for(&mut self, idx: usize) {
+        if matches!(&self.last_action, Some((i, _)) if *i == idx) {
+            self.last_action = None;
+        }
     }
 
     /// Scroll log panel up (towards older entries).
