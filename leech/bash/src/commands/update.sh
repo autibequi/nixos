@@ -1,5 +1,5 @@
 # Regenera CLI, instala symlink e atualiza bootstrap
-cli_dir="$leech_compose_dir"
+cli_dir="$leech_bash_dir"
 nixos_dir="$leech_nixos_dir"
 bin_dest="${HOME}/.local/bin/leech"
 log_file="$(mktemp /tmp/leech-update-XXXXXX.log)"
@@ -48,7 +48,7 @@ _symlink() {
 }
 
 _bootstrap() {
-  local src="$nixos_dir/self/scripts/bootstrap-dashboard.sh"
+  local src="$nixos_dir/leech/self/scripts/bootstrap-dashboard.sh"
   if [[ -f "$src" ]]; then
     install -m 755 "$src" "$nixos_dir/scripts/bootstrap.sh"
   fi

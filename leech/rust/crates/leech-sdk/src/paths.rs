@@ -18,12 +18,12 @@ pub fn nixos_dir() -> PathBuf {
 
 #[must_use]
 pub fn leech_root() -> PathBuf {
-    nixos_dir().join("self")
+    nixos_dir().join("leech/self")
 }
 
 #[must_use]
 pub fn bash_dir() -> PathBuf {
-    leech_root().join("bash")
+    nixos_dir().join("leech/bash")
 }
 
 /// Backward-compatible alias for [`bash_dir`].
@@ -34,12 +34,12 @@ pub fn cli_dir() -> PathBuf {
 
 #[must_use]
 pub fn container_dir() -> PathBuf {
-    leech_root().join("containers/leech")
+    nixos_dir().join("leech/docker/leech")
 }
 
 #[must_use]
 pub fn rust_dir() -> PathBuf {
-    leech_root().join("rust")
+    nixos_dir().join("leech/rust")
 }
 
 #[must_use]
@@ -124,7 +124,7 @@ pub fn outbox_dir() -> Option<PathBuf> {
 pub fn hooks_dir() -> Option<PathBuf> {
     first_existing_dir(&[
         leech_root().join("hooks/claude-code"),
-        PathBuf::from("/workspace/mnt/self/hooks/claude-code"),
+        PathBuf::from("/workspace/mnt/leech/self/hooks/claude-code"),
     ])
 }
 
@@ -132,7 +132,7 @@ pub fn hooks_dir() -> Option<PathBuf> {
 pub fn agent_file(name: &str) -> Option<PathBuf> {
     first_existing_file(&[
         leech_root().join(format!("agents/{name}/agent.md")),
-        PathBuf::from(format!("/workspace/mnt/self/agents/{name}/agent.md")),
+        PathBuf::from(format!("/workspace/mnt/leech/self/agents/{name}/agent.md")),
     ])
 }
 
@@ -140,7 +140,7 @@ pub fn agent_file(name: &str) -> Option<PathBuf> {
 pub fn task_runner() -> Option<PathBuf> {
     first_existing_file(&[
         leech_root().join("scripts/task-runner.sh"),
-        PathBuf::from("/workspace/mnt/self/scripts/task-runner.sh"),
+        PathBuf::from("/workspace/mnt/leech/self/scripts/task-runner.sh"),
     ])
 }
 

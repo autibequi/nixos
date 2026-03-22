@@ -6,7 +6,7 @@ build_args=()
 # Auto-build leech-base:latest if not present locally (required by Dockerfile.claude)
 if ! docker image inspect leech-base:latest > /dev/null 2>&1; then
   echo "leech-base:latest not found — building from Dockerfile.claude.base..."
-  base_ctx="${leech_container_dir:-${HOME}/nixos/self/containers/leech}"
+  base_ctx="${leech_container_dir:-${HOME}/nixos/leech/docker/leech}"
   docker build "${build_args[@]}" \
     -f "${base_ctx}/Dockerfile.claude.base" \
     -t leech-base:latest \

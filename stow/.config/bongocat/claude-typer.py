@@ -4,7 +4,7 @@ claude-typer — daemon que simula teclas pro BongoCat enquanto o Claude está a
 
 Fluxo:
   - Cria um teclado virtual via uinput chamado "claude-bongo"
-  - Fica monitorando /tmp/zion-hive-mind/bongo-active
+  - Fica monitorando /tmp/leech-hive-mind/bongo-active
   - Quando o arquivo existe: manda keypresses (space) a cada ~150ms
   - Quando não existe: fica em idle polling
 
@@ -17,7 +17,7 @@ import sys
 import time
 import signal
 
-SIGNAL_FILE = "/tmp/zion-hive-mind/bongo-active"
+SIGNAL_FILE = "/tmp/leech-hive-mind/bongo-active"
 KEYPRESS_INTERVAL = 0.15  # segundos entre teclas simuladas
 
 

@@ -3,7 +3,7 @@ local name="${args[name]}"
 local steps="${args[--steps]:-}"
 leech_load_config
 
-local leech_dir="${LEECH_ROOT:-$HOME/nixos/self}"
+local leech_dir="${LEECH_ROOT:-$HOME/nixos/leech/self}"
 local obsidian="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
 local runner="$leech_dir/scripts/task-runner.sh"
 local agents="$obsidian/agents"
@@ -14,8 +14,8 @@ local agent_file="$leech_dir/agents/${name}/agent.md"
 # Fallback runner paths
 if [ ! -f "$runner" ]; then
   for try in \
-    "/workspace/mnt/self/scripts/task-runner.sh" \
-    "/workspace/nixos/self/scripts/task-runner.sh"; do
+    "/workspace/mnt/leech/self/scripts/task-runner.sh" \
+    "/workspace/nixos/leech/self/scripts/task-runner.sh"; do
     [ -f "$try" ] && runner="$try" && break
   done
 fi
@@ -28,8 +28,8 @@ fi
 # Fallback agent.md paths
 if [ ! -f "$agent_file" ]; then
   for try in \
-    "/workspace/mnt/self/agents/${name}/agent.md" \
-    "/workspace/nixos/self/agents/${name}/agent.md"; do
+    "/workspace/mnt/leech/self/agents/${name}/agent.md" \
+    "/workspace/nixos/leech/self/agents/${name}/agent.md"; do
     [ -f "$try" ] && agent_file="$try" && break
   done
 fi
@@ -141,7 +141,7 @@ else
     echo "[run] '$name' nao encontrado como agente nem task"
     echo ""
     echo "Agentes disponiveis:"
-    for try in "$leech_dir/agents" "/workspace/mnt/self/agents"; do
+    for try in "$leech_dir/agents" "/workspace/mnt/leech/self/agents"; do
       [ -d "$try" ] && ls "$try" | sed 's/^/  /' && break
     done
     echo ""

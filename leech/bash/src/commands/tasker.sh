@@ -4,7 +4,7 @@ leech_load_config
 
 steps="${args[--steps]:-}"
 
-leech_dir="${LEECH_ROOT:-$HOME/nixos/self}"
+leech_dir="${LEECH_ROOT:-$HOME/nixos/leech/self}"
 obsidian="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
 runner="$leech_dir/scripts/task-runner.sh"
 agents="$obsidian/agents"
@@ -13,14 +13,14 @@ agent_file="$leech_dir/agents/tasker/agent.md"
 
 # Fallback runner
 if [ ! -f "$runner" ]; then
-  for try in "/workspace/mnt/self/scripts/task-runner.sh" "/workspace/self/scripts/task-runner.sh"; do
+  for try in "/workspace/mnt/leech/self/scripts/task-runner.sh" "/workspace/self/scripts/task-runner.sh"; do
     [ -f "$try" ] && runner="$try" && break
   done
 fi
 
 # Fallback agent.md
 if [ ! -f "$agent_file" ]; then
-  for try in "/workspace/mnt/self/agents/tasker/agent.md" "/workspace/self/agents/tasker/agent.md"; do
+  for try in "/workspace/mnt/leech/self/agents/tasker/agent.md" "/workspace/self/agents/tasker/agent.md"; do
     [ -f "$try" ] && agent_file="$try" && break
   done
 fi

@@ -23,8 +23,8 @@ leech_docker_service_dir() {
 leech_docker_config_dir() {
   local service="$1"
   case "$service" in
-    monolito-worker) echo "${leech_nixos_dir}/self/containers/monolito" ;;
-    *)               echo "${leech_nixos_dir}/self/containers/${service}" ;;
+    monolito-worker) echo "${leech_nixos_dir}/leech/docker/monolito" ;;
+    *)               echo "${leech_nixos_dir}/leech/docker/${service}" ;;
   esac
 }
 
@@ -277,7 +277,7 @@ leech_docker_list_all_worktrees() {
 
 # --- Reverse Proxy (sobe/desce automaticamente com servicos estrategia) ---
 
-_REVERSEPROXY_DIR="${leech_nixos_dir}/self/containers/reverseproxy"
+_REVERSEPROXY_DIR="${leech_nixos_dir}/leech/docker/reverseproxy"
 _REVERSEPROXY_PROJECT="leech-dk-reverseproxy"
 
 # Sobe o reverse proxy se ainda nao estiver rodando.

@@ -10,8 +10,8 @@ export HOME="${_leech_resolved_home:-$HOME}"
 unset _leech_resolved_home
 
 leech_nixos_dir="${LEECH_NIXOS_DIR:-$HOME/nixos}"
-leech_bash_dir="$leech_nixos_dir/self/bash"
-leech_container_dir="$leech_nixos_dir/self/containers/leech"
+leech_bash_dir="$leech_nixos_dir/leech/bash"
+leech_container_dir="$leech_nixos_dir/leech/docker/leech"
 leech_compose_file="$leech_container_dir/docker-compose.leech.yml"
 leech_compose_dir="$leech_container_dir"
 # Config do usuário: engine padrão e chaves (GH_TOKEN, ANTHROPIC_API_KEY)

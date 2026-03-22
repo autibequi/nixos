@@ -1,44 +1,64 @@
-# Zion — Glossário
+# Leech — Glossario
 
-Nomenclatura do sistema. Referência rápida para entender os termos usados em skills, hooks e conversas.
+Nomenclatura do sistema. Referencia rapida para entender os termos usados em skills, hooks e conversas.
 
-## Agentes e instâncias
+## Sistema
 
-| Termo | O que é |
+| Termo | O que e |
 |-------|---------|
-| **Zion** | O sistema como um todo — CLI, hooks, skills, agentes, scripts |
-| **Eu / Claude externo** | Claude sonnet rodando nesta sessão interativa |
-| **Mini-Zion** | Claude haiku spawned por mim — efêmero, usado como maquete de desenvolvimento |
+| **Leech** | O sistema como um todo — CLI, hooks, skills, agentes, scripts (antes chamado Zion) |
+| **leech** | Comando CLI (`~/.local/bin/leech`). Alias: `zion` |
+| **~/.leech** | Canal de comunicacao rapida host <-> containers (KEY=value, sourced no boot) |
+
+## Agentes e instancias
+
+| Termo | O que e |
+|-------|---------|
+| **Eu / Claude externo** | Claude sonnet rodando nesta sessao interativa |
+| **Mini-Leech** | Claude haiku spawned por mim — efemero, usado como maquete de desenvolvimento |
 | **Puppy** | Container persistente que roda o task-daemon em background |
-| **Agente** | Claude headless rodando uma task card específica (scheduler, doctor, radar...) |
+| **Agente** | Claude headless rodando uma task card especifica (hermes, keeper, mechanic...) |
 
-## Workflows
+## Convencoes de nome
 
-| Termo | Significado |
-|-------|------------|
-| **Lab** | Modo de iteração: eu + Mini-Zion trabalhando em melhorias do sistema |
-| **Instalar módulo** | Pegar o que Mini-Zion desenvolveu e aplicar em mim via `/workspace/mnt/self/` + git commit |
-| **Analysis mode** | `ZION_ANALYSIS_MODE=1` — Mini-Zion em postura experimental, máxima autonomia |
-| **Tick** | Um ciclo do task-daemon: escaneia TODO/, roda tasks vencidas |
-
-## Persistência
-
-| O que | Vive onde | Morre quando |
-|-------|-----------|--------------|
-| Source code (hooks, skills, scripts) | `/workspace/mnt/self/` + GitHub | nunca (se commitado) |
-| Memórias cross-session | `/home/claude/.claude/projects/*/memory/` | volume Docker deletado |
-| Tasks / kanban | `/workspace/obsidian/` | vault Obsidian do user |
-| O que Mini-Zion cria | filesystem compartilhado | restart do container |
-| Contexto desta sessão (RAM) | processo Claude Code | fim da conversa — única coisa que realmente some |
+| Prefixo/Pattern | Significado |
+|-----------------|-------------|
+| `leech-dk-<service>` | Container Docker de servico (ex: leech-dk-monolito-app) |
+| `leech-<slug>` | Sessao Claude ativa (proj_name em paths.rs) |
+| `LEECH_*` | Env vars do sistema (LEECH_NIXOS_DIR, LEECH_ROOT, LEECH_ENGINE, LEECH_MODEL, LEECH_EDIT, LEECH_DEBUG, LEECH_SPLASH) |
+| `leech-tick` | Systemd timer/service (roda a cada 10min) |
 
 ## Paths essenciais
 
-| Path | Conteúdo |
+| Path | Conteudo |
 |------|---------|
-| `/workspace/mnt/self/` | fonte da verdade — tudo que sou |
-| `/workspace/mnt/self/hooks/claude-code/session-start.sh` | o que recebo no boot |
-| `/workspace/mnt/self/commands/meta/lab.md` | skill /meta:lab |
-| `/workspace/mnt/self/scripts/task-runner.sh` | executor de tasks |
-| `/workspace/mnt/self/scripts/task-daemon.sh` | daemon de tasks |
-| `/workspace/obsidian/tasks/` | kanban TODO/DOING/DONE |
-| `/workspace/obsidian/vault/agents/` | memória persistente e outputs dos agentes |
+| `leech/self/` | Fonte da verdade — identidade, agents, commands, hooks, personas, scripts, skills, system |
+| `leech/bash/` | CLI bashly (source + generated) |
+| `leech/rust/` | CLI Rust (leech-cli, leech-sdk, leech-tui) |
+| `leech/docker/` | Docker compose, Dockerfiles, entrypoints |
+| `~/.local/bin/leech` | Binario CLI (symlink) |
+| `~/.leech` | Config channel host <-> container |
+| `~/.local/share/leech/` | Logs, estado, cache |
+| `/tmp/leech-hive-mind` | Socket Docker compartilhado |
+| `/tmp/leech-locks/` | Locks de concorrencia de tasks |
+| `/workspace/obsidian/` | Vault Obsidian (cerebro operacional) |
+
+## Persistencia
+
+| O que | Vive onde | Morre quando |
+|-------|-----------|--------------|
+| Source code (hooks, skills, scripts) | `leech/self/` + GitHub | nunca (se commitado) |
+| Memorias cross-session | `/home/claude/.claude/projects/*/memory/` | volume Docker deletado |
+| Tasks / kanban | `/workspace/obsidian/` | vault Obsidian do user |
+| Contexto desta sessao (RAM) | processo Claude Code | fim da conversa |
+
+## Backward compat
+
+| Antigo | Novo | Nota |
+|--------|------|------|
+| `zion` (CLI) | `leech` | alias `zion=leech` em init.sh |
+| `~/.zion` | `~/.leech` | |
+| `ZION_*` env vars | `LEECH_*` | |
+| `zion-dk-*` containers | `leech-dk-*` | |
+| `zion-tick` systemd | `leech-tick` | |
+| GIT_COMMITTER_NAME | Zion | **mantido** (nao muda) |

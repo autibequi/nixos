@@ -6,7 +6,7 @@ HOOKS_DIR=""
 for _d in \
   "/leech/hooks/claude-code" \
   "${LEECH_ROOT:-${HOME}/nixos/self}/hooks/claude-code" \
-  "/workspace/mnt/self/hooks/claude-code"; do
+  "/workspace/mnt/leech/self/hooks/claude-code"; do
   [[ -d "$_d" ]] && HOOKS_DIR="$_d" && break
 done
 

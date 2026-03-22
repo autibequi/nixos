@@ -1,7 +1,7 @@
 # Executa agents e tasks vencidos — timer systemd (10min)
 leech_load_config
 
-LEECH_DIR="${LEECH_ROOT:-${LEECH_NIXOS_DIR:-$HOME/nixos}/self}"
+LEECH_DIR="${LEECH_ROOT:-${LEECH_NIXOS_DIR:-$HOME/nixos}/leech/self}"
 OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
 RUNNER="$LEECH_DIR/scripts/task-runner.sh"
 SCHEDULE="${SCHEDULE_DIR:-$OBSIDIAN/agents/_schedule}"

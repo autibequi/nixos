@@ -1,7 +1,7 @@
 # Para containers, remove imagens e volumes do projeto
 leech_load_config
-compose_leech="${LEECH_ROOT:-$HOME/nixos/self}/container/docker-compose.leech.yml"
-compose_puppy="${LEECH_ROOT:-$HOME/nixos/self}/container/docker-compose.puppy.yml"
+compose_leech="${LEECH_ROOT:-$HOME/nixos/leech/self}/container/docker-compose.leech.yml"
+compose_puppy="${LEECH_ROOT:-$HOME/nixos/leech/self}/container/docker-compose.puppy.yml"
 
 echo "Destroying leech session containers + volumes..."
 docker compose -f "$compose_leech" down --volumes --remove-orphans 2>/dev/null || true

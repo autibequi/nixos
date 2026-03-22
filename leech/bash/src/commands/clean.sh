@@ -19,5 +19,5 @@ fi
 
 echo ""
 echo "=== Containers órfãos (criados pelo compose mas sem projeto) ==="
-docker compose -f "${LEECH_ROOT:-$HOME/nixos/self}/container/docker-compose.leech.yml" \
+docker compose -f "${LEECH_ROOT:-$HOME/nixos/leech/self}/container/docker-compose.leech.yml" \
   ps --all 2>/dev/null | grep -v "NAME" | grep -v "running" || echo "  Nenhum."

@@ -6,7 +6,7 @@ if [[ "${IS_CONTAINER:-0}" -eq 1 ]]; then
   _SCHED_VAULT="$WS/obsidian"
   _SCHED_EPH="$WS/host/.ephemeral"
 else
-  _SCHED_VAULT="${HOME}/.ovault/Zion"
+  _SCHED_VAULT="${HOME}/.ovault/Work"
   _SCHED_EPH="${HOME}/nixos/.ephemeral"
 fi
 

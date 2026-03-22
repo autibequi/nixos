@@ -14,4 +14,4 @@ elif [ -f "$BIN" ]; then
   echo "binario removido: $BIN"
 fi
 
-echo "leech desinstalado. Para reinstalar: cd ~/nixos/self/bash && ./leech update"
+echo "leech desinstalado. Para reinstalar: cd ~/nixos/leech/bash && ./leech update"

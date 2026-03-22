@@ -8,7 +8,7 @@ case ":$PATH:" in
 esac
 # pnpm end
 
-# Zion CLI (make install)
+# Leech CLI (make install)
 export PATH="/home/pedrinho/nixos/stow/.local/bin:$PATH"
-alias claudio=zion
+alias claudio=leech
 

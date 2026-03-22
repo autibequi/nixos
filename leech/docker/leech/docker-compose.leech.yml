@@ -1,6 +1,6 @@
 x-env-base: &env-base
   # Tokens e boot flags vêm de ~/.leech (sourced pelo entrypoint + todos os hooks)
-  PATH: /home/claude/.local/bin:/home/claude/.nix-profile/bin:/workspace/self/bash:/usr/bin:/bin
+  PATH: /home/claude/.local/bin:/home/claude/.nix-profile/bin:/home/claude/.local/bin:/usr/bin:/bin
   CLAUDE_ENV: container
   WAYLAND_DISPLAY: ${WAYLAND_DISPLAY:-wayland-1}
   XDG_RUNTIME_DIR: /run/user/1000
@@ -17,29 +17,29 @@ x-extra-hosts: &extra-hosts
 
 # /workspace: leech (/leech), obsidian e o projeto (mnt). Nixos e logs só em leech host.
 x-base-volumes: &base-volumes
-  - ${LEECH_ROOT:-${HOME}/nixos/self}:/workspace/self
+  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}:/workspace/self
   - ${OBSIDIAN_PATH:-${HOME}/.ovault/Work}:/workspace/obsidian
   - ${CLAUDIO_MOUNT:-${HOME}/nixos}:/workspace/mnt:${CLAUDIO_MOUNT_OPTS:-rw}
   - ${HOME}/.claude:/home/claude/.claude
   # bypass: settings.json padrão para containers — sobrescreve o do host
-  - ${LEECH_ROOT:-${HOME}/nixos/self}/claude.bypass.json:/home/claude/.claude/settings.json:ro
+  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/claude.bypass.json:/home/claude/.claude/settings.json:ro
   # leech/skills e leech/commands sobrescrevem o ~/.claude do host
-  - ${LEECH_ROOT:-${HOME}/nixos/self}/skills:/home/claude/.claude/skills
-  - ${LEECH_ROOT:-${HOME}/nixos/self}/commands:/home/claude/.claude/commands
-  - ${LEECH_ROOT:-${HOME}/nixos/self}/agents:/home/claude/.claude/agents
+  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/skills:/home/claude/.claude/skills
+  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/commands:/home/claude/.claude/commands
+  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/agents:/home/claude/.claude/agents
   # Hooks: leech/hooks/claude-code (bootstrap não wiped — stow/.claude/hooks está vazio)
-  - ${LEECH_ROOT:-${HOME}/nixos/self}/hooks/claude-code:/home/claude/.claude/hooks:ro
-  - ${LEECH_ROOT:-${HOME}/nixos/self}/scripts:/home/claude/.claude/scripts
+  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/hooks/claude-code:/home/claude/.claude/hooks:ro
+  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/scripts:/home/claude/.claude/scripts
   - ${HOME}/.claude.json:/home/claude/.claude.json
   # Cursor: credenciais do host + skills/commands/rules do leech
   - ${HOME}/.cursor:/home/claude/.cursor
-  - ${LEECH_ROOT:-${HOME}/nixos/self}/skills:/home/claude/.cursor/skills
-  - ${LEECH_ROOT:-${HOME}/nixos/self}/commands:/home/claude/.cursor/commands
-  - ${LEECH_ROOT:-${HOME}/nixos/self}/commands:/home/claude/.cursor/rules
+  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/skills:/home/claude/.cursor/skills
+  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/commands:/home/claude/.cursor/commands
+  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/commands:/home/claude/.cursor/rules
   # cursor_config: volume nomeado (chmod pelo agent causa EPERM em bind mount)
   - cursor_config:/home/claude/.config/cursor
   # opencode
-  - ${LEECH_ROOT:-${HOME}/nixos/self}/.opencode:/home/claude/.config/opencode
+  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/.opencode:/home/claude/.config/opencode
   - ${HOME}/projects:/home/claude/projects
   - ${XDG_RUNTIME_DIR:-/run/user/1000}/${WAYLAND_DISPLAY:-wayland-1}:/run/user/1000/${WAYLAND_DISPLAY:-wayland-1}
   - ${XDG_RUNTIME_DIR:-/run/user/1000}/pulse:/run/user/1000/pulse

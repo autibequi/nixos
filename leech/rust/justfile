@@ -1,4 +1,4 @@
-bin := "zion"
+bin := "leech"
 install_dir := env("HOME") / ".local/bin"
 nix_run := "nix-shell -p rustc cargo clippy rustfmt --run"
 
