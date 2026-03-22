@@ -223,18 +223,62 @@ impl SessionRunner {
         };
 
         let vol_args = self.volume_args();
-        let mut args: Vec<&str> = vec!["run", "--rm", "-it"];
 
-        // Extra volumes (e.g. journal mount)
+        // Shared container reuse: only when no extra volumes (those need isolated containers).
+        if vol_args.is_empty() && !self.analysis_mode {
+            let leech_name = format!(
+                "leech-{}",
+                self.proj_name.strip_prefix("zion-").unwrap_or(&self.proj_name)
+            );
+
+            // Find or create the persistent shared container.
+            let cid = match crate::docker::find_running_container(&leech_name) {
+                Some(cid) => cid,
+                None => {
+                    self.compose(config).execute(&["up", "-d", "leech"])?;
+                    if let Some(auto_name) =
+                        crate::docker::find_compose_container(&self.proj_name, "leech")
+                    {
+                        crate::docker::rename_container(&auto_name, &leech_name);
+                    }
+                    match crate::docker::find_running_container(&leech_name) {
+                        Some(cid) => cid,
+                        None => {
+                            // Persistent approach failed — fall back to ephemeral run.
+                            let mut args: Vec<&str> =
+                                vec!["run", "--rm", "-it", "--entrypoint", "/entrypoint.sh"];
+                            let mount_env = format!("CLAUDIO_MOUNT={}", self.mount_path);
+                            args.extend(["-e", &mount_env, "-e", "BOOTSTRAP_SKIP_CLEAR=1"]);
+                            args.extend(["leech", "/bin/bash", "-c", &bash_cmd]);
+                            return self.compose(config).execute(&args);
+                        }
+                    }
+                }
+            };
+
+            // Exec into the shared container (replaces current process — preserves TTY).
+            let mut env_pairs: Vec<(&str, &str)> = vec![("CLAUDIO_MOUNT", &self.mount_path)];
+            if self.resume.is_none() {
+                env_pairs.push(("BOOTSTRAP_SKIP_CLEAR", "1"));
+            }
+            let exec_cmd = if self.no_splash || self.resume.is_some() {
+                format!(
+                    "cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude {claude_args_str}"
+                )
+            } else {
+                bash_cmd
+            };
+            return crate::docker::exec_replace(&cid, &env_pairs, &exec_cmd);
+        }
+
+        // Fallback: ephemeral run (extra volumes or analysis mode require isolated container).
+        let mut args: Vec<&str> = vec!["run", "--rm", "-it"];
         for a in &vol_args {
             args.push(a);
         }
-
-        // Analysis mode env
         if self.analysis_mode {
             args.extend(["-e", "ZION_ANALYSIS_MODE=1"]);
         }
-
         args.extend(["--entrypoint", "/entrypoint.sh"]);
         let mount_env = format!("CLAUDIO_MOUNT={}", self.mount_path);
         args.extend(["-e", &mount_env, "-e", "BOOTSTRAP_SKIP_CLEAR=1"]);

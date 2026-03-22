@@ -37,11 +37,7 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
 fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[SessionInfo]) {
     let any_up = sessions.iter().any(|s| s.is_up);
     let icon = if any_up { "\u{25cf}" } else { "\u{25cb}" };
-    let icon_style = if any_up {
-        theme::up_icon()
-    } else {
-        theme::down_icon()
-    };
+    let icon_style = if any_up { theme::up_icon() } else { theme::down_icon() };
 
     lines.push(Line::from(vec![
         Span::styled(icon, icon_style),
@@ -49,78 +45,74 @@ fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[Session
         Span::styled(label.to_string(), theme::group_label()),
     ]));
 
-    let total = sessions.len();
-    for (i, session) in sessions.iter().enumerate() {
-        let is_last = i == total - 1;
-        let branch = if is_last {
-            "\u{2514}\u{2500}"
-        } else {
-            "\u{251c}\u{2500}"
-        };
+    // Group sessions by mnt_path (preserve insertion order)
+    let mut folders: Vec<String> = Vec::new();
+    let mut by_folder: std::collections::HashMap<String, Vec<&SessionInfo>> =
+        std::collections::HashMap::new();
+    for s in sessions {
+        let key = if s.mnt_path.is_empty() { s.name.clone() } else { s.mnt_path.clone() };
+        if !by_folder.contains_key(&key) {
+            folders.push(key.clone());
+        }
+        by_folder.entry(key).or_default().push(s);
+    }
 
-        let icon = if session.is_up {
-            "\u{25cf}"
-        } else {
-            "\u{25cb}"
-        };
-        let icon_style = if session.is_up {
-            theme::up_icon()
-        } else {
-            theme::down_icon()
-        };
+    let folder_count = folders.len();
+    for (fi, folder_key) in folders.iter().enumerate() {
+        let group = &by_folder[folder_key];
+        let is_last_folder = fi == folder_count - 1;
+        let folder_branch = if is_last_folder { "\u{2514}\u{2500}" } else { "\u{251c}\u{2500}" };
+        let vert_pad   = if is_last_folder { "  " } else { "\u{2502} " };
 
-        let uptime = format_uptime(&session.status);
-        // Use mnt_path (host path bound to /workspace/mnt) as identifier; fall back to container name
-        let base_ident = if !session.mnt_path.is_empty() {
-            shorten_path(&session.mnt_path)
-        } else {
-            session
-                .name
-                .strip_prefix("zion-projects-leech-run-")
-                .or_else(|| session.name.strip_prefix("zion-projects-"))
-                .or_else(|| session.name.strip_prefix("zion-"))
-                .unwrap_or(&session.name)
-                .to_string()
-        };
-        // Show ×N badge when multiple claude sessions share the same container
-        let ident = if session.session_count > 1 {
-            format!("{base_ident} ×{}", session.session_count)
-        } else {
-            base_ident
-        };
-
-        let mut spans = vec![
+        // Folder sub-header
+        let folder_label = shorten_path(folder_key);
+        let folder_any_up = group.iter().any(|s| s.is_up);
+        let folder_icon = if folder_any_up { "\u{25cf}" } else { "\u{25cb}" };
+        let folder_icon_style = if folder_any_up { theme::up_icon() } else { theme::down_icon() };
+        lines.push(Line::from(vec![
             Span::raw("  "),
-            Span::styled(branch.to_string(), theme::tree_branch()),
+            Span::styled(folder_branch.to_string(), theme::tree_branch()),
             Span::raw(" "),
-            Span::styled(icon, icon_style),
+            Span::styled(folder_icon, folder_icon_style),
             Span::raw(" "),
-            Span::styled(format!("{ident:<20}"), theme::name()),
-            Span::raw(" "),
-            Span::styled(format!("{uptime:<5}"), theme::uptime()),
-        ];
+            Span::styled(folder_label, theme::name()),
+        ]));
 
-        if session.is_up && !session.cpu.is_empty() {
-            let cpu_pct = parse_pct(&session.cpu);
-            let cpu_bar = mini_bar(cpu_pct, 6);
-            let cpu_style = pct_color(cpu_pct);
-            spans.push(Span::raw("  "));
-            spans.push(Span::styled(cpu_bar, cpu_style));
-            spans.push(Span::styled(format!(" {:<6}", session.cpu.trim()), theme::cpu()));
-            let mem_short = shorten_mem(&session.mem);
-            spans.push(Span::styled(format!(" {mem_short}"), theme::mem()));
-        }
+        // Sessions within this folder
+        let total = group.len();
+        for (i, session) in group.iter().enumerate() {
+            let is_last = i == total - 1;
+            let branch = if is_last { "\u{2514}\u{2500}" } else { "\u{251c}\u{2500}" };
+            let sess_icon = if session.is_up { "\u{25cf}" } else { "\u{25cb}" };
+            let sess_icon_style = if session.is_up { theme::up_icon() } else { theme::down_icon() };
+            let uptime = format_uptime(&session.status);
+            let ident = session.short_id.clone();
 
-        // Active mounts only
-        let active: Vec<_> = session.mounts.iter().filter(|m| m.present).collect();
-        if !active.is_empty() {
-            spans.push(Span::raw("  "));
-            for mount in active {
-                spans.push(Span::styled(format!("{} ", mount.label), theme::mount_present()));
+            let mut spans = vec![
+                Span::raw("  "),
+                Span::styled(vert_pad.to_string(), theme::tree_branch()),
+                Span::styled(branch.to_string(), theme::tree_branch()),
+                Span::raw(" "),
+                Span::styled(sess_icon, sess_icon_style),
+                Span::raw(" "),
+                Span::styled(format!("{ident:<12}"), theme::dim()),
+                Span::raw(" "),
+                Span::styled(format!("{uptime:<5}"), theme::uptime()),
+            ];
+
+            if session.is_up && !session.cpu.is_empty() {
+                let cpu_pct = parse_pct(&session.cpu);
+                let cpu_bar = mini_bar(cpu_pct, 6);
+                let cpu_style = pct_color(cpu_pct);
+                spans.push(Span::raw("  "));
+                spans.push(Span::styled(cpu_bar, cpu_style));
+                spans.push(Span::styled(format!(" {:<6}", session.cpu.trim()), theme::cpu()));
+                let mem_short = shorten_mem(&session.mem);
+                spans.push(Span::styled(format!(" {mem_short}"), theme::mem()));
             }
-        }
 
-        lines.push(Line::from(spans));
+            lines.push(Line::from(spans));
+        }
     }
 }
 

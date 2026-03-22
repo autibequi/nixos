@@ -164,6 +164,52 @@ pub fn count_claude_procs(container: &str) -> usize {
         .count()
 }
 
+/// Find the CID of a running container by exact name. Returns None if not found.
+pub fn find_running_container(name: &str) -> Option<String> {
+    let filter = format!("name=^/{name}$");
+    let output = Command::new("docker")
+        .args(["ps", "-q", "--filter", &filter])
+        .output()
+        .ok()?;
+    let cid = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    if cid.is_empty() { None } else { Some(cid) }
+}
+
+/// Find the name of a compose-managed persistent (oneoff=False) container for a service.
+pub fn find_compose_container(project: &str, service: &str) -> Option<String> {
+    let output = Command::new("docker")
+        .args([
+            "ps",
+            "--filter", &format!("label=com.docker.compose.project={project}"),
+            "--filter", &format!("label=com.docker.compose.service={service}"),
+            "--filter", "label=com.docker.compose.oneoff=False",
+            "--format", "{{.Names}}",
+        ])
+        .output()
+        .ok()?;
+    let name = String::from_utf8_lossy(&output.stdout).lines().next()?.to_string();
+    if name.is_empty() { None } else { Some(name) }
+}
+
+/// Rename a container. Silently ignores errors (container may already have the target name).
+pub fn rename_container(old: &str, new: &str) {
+    let _ = Command::new("docker").args(["rename", old, new]).output();
+}
+
+/// Replace the current process with `docker exec -it` into a container.
+/// Passes env vars and runs bash_cmd inside the container.
+pub fn exec_replace(cid: &str, env: &[(&str, &str)], bash_cmd: &str) -> Result<()> {
+    use std::os::unix::process::CommandExt;
+    let mut cmd = Command::new("docker");
+    cmd.arg("exec").arg("-it");
+    for (k, v) in env {
+        cmd.arg("-e").arg(format!("{k}={v}"));
+    }
+    cmd.args([cid, "/bin/bash", "-c", bash_cmd]);
+    let err = cmd.exec(); // replaces the process; only returns on error
+    Err(ZionError::Docker(format!("docker exec failed: {err}")))
+}
+
 /// Check if Docker is accessible.
 #[must_use]
 pub fn is_available() -> bool {

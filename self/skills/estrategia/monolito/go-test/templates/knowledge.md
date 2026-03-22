@@ -120,7 +120,67 @@ for _, tt := range tests {
 - Handlers testados via httptest + echo context
 - Permissões mockadas no context do teste
 
+## Padroes Avancados (William / time LDI)
+
+### Integration tests com Postgres real (`pgtest`)
+Preferir integration tests com DB real ao inves de mock de repo. Spin up via `pgtest` com migrations reais.
+
+```go
+func TestUpdatePDF(t *testing.T) {
+    db := pgtest.NewDB(t)
+    setup.Migrate(db)
+    defer setup.Teardown(t)
+
+    repo := course_chapter.NewRepository(db)
+    // ... criar fixtures reais
+}
+```
+
+### `.Maybe()` em mocks condicionais
+Para mocks que podem ou NAO ser chamados dependendo da ordem de execucao:
+```go
+mockContentService.On("GetOne", mock.Anything, content).Return(pdf, nil).Maybe()
+```
+Sem `.Maybe()`, o testify falha se o mock nao for chamado.
+
+### Validar o que NAO mudou
+Asserts de campos imutraveis previnem regressoes silenciosas:
+```go
+assert.Equal(t, updated.ID, before.ID)          // ID nao mudou
+assert.Equal(t, updated.CourseID, before.CourseID)  // CourseID nao mudou
+assert.NotEqual(t, updated.MyDocsPdfID, before.MyDocsPdfID) // isso sim mudou
+```
+
+### Testes de seguranca
+Para endpoints que nao devem vazar dados de usuarios desconhecidos:
+```go
+// Verifica que response 200 mesmo para email desconhecido (anti-enumeration)
+res := t.DoRequest(echo.POST, "/auth/passwordless/request", ...)
+t.Equal(http.StatusOK, res.StatusCode)
+// Confirma que nenhum codigo foi gerado no cache
+var attempts []map[string]interface{}
+t.NoError(t.GetRedisInterface().GetData(context.Background(), emailKey, &attempts))
+t.Equal(false, attempts[0]["succeeded"])
+```
+
+### Mock values reais > `mock.Anything`
+`mock.Anything` em tudo torna o teste inutil — nao valida o contrato.
+```go
+// ERRADO — nao valida que o ID correto foi passado
+mock.On("GetByID", mock.Anything, mock.Anything).Return(...)
+
+// CERTO — valida que o ID especifico foi passado
+mock.On("GetByID", mock.Anything, expectedID).Return(...)
+```
+
+### Subtests descritivos (ingles, behavior-focused)
+```go
+t.Run("should return error when pdf is not found", func(t *testing.T) { ... })
+t.Run("should update pdf id when content is valid pdf", func(t *testing.T) { ... })
+// NAO: t.Run("test1", ...) ou t.Run("erro", ...)
+```
+
 ---
 
-*Última atualização: 2026-03-15 — criação inicial*
+*Última atualização: 2026-03-22 — padroes avancados do time LDI/William*
 *Atualizar este arquivo após cada sessão de debug/teste significativa.*

@@ -165,6 +165,103 @@ O import necessario e:
 ## Logging
 
 ```go
-elogger.InfoErr(ctx, err).Msg("contexto: mensagem curta em portugues")
+// Erro esperado (user error, not found, conflito) — InfoErr, sem Stack
+elogger.InfoErr(ctx, err).Str("course_id", id).Msg("curso nao encontrado")
+
+// Erro inesperado (falha de infra, panic catch) — ErrorErr COM Stack
 elogger.ErrorErr(ctx, err).Stack().Msg("contexto: erro critico com stack")
+
+// NUNCA usar Msgf com interpolacao — sempre campos estruturados
+// ERRADO: elogger.Info(ctx).Msgf("buscando curso %s do user %s", courseID, userID)
+// CERTO:
+elogger.Info(ctx).Str("course_id", courseID).Str("user_id", userID).Msg("buscando curso")
+
+// Progresso em operacoes longas (batch, migration):
+elogger.Info(ctx).Int("current", cnt).Int("total", len(items)).Msg("processando lote")
+```
+
+## Sentinel Errors (padrao do time)
+
+Definir erros de dominio como variaveis package-level. Nunca comparar por string.
+
+```go
+// No package structs/ do dominio:
+var (
+    ErrPDFNotFound      = errors.New("pdf not found")
+    ErrContentIsNotPDF  = errors.New("content is not a pdf")
+    ErrItemDuplicated   = errors.New("item already exists in course")
+)
+
+// No service — retornar o sentinel:
+if pdf == nil {
+    return entities.Chapter{}, ErrPDFNotFound
+}
+
+// No handler — mapear sentinel para HTTP com errors.Is:
+if errors.Is(err, ldiStructs.ErrPDFNotFound) {
+    return errors.HTTPError{Status: http.StatusNotFound, Message: common_errors.ErrNotFound.Error(), Tag: "PDF_NOT_FOUND"}
+}
+// NUNCA expor err.Error() direto na response — vaza detalhes internos
+```
+
+## Concorrencia com errgroup (padrao do time)
+
+Sempre usar `errgroup` para fan-out. Nunca goroutine raw com channel.
+Variaveis de erro DEVEM ter nome unico dentro de cada goroutine (evita bug de closure).
+
+```go
+var favoriteIDsMap, completedIDsMap map[string]bool
+eg := errgroup.Group{}
+
+eg.Go(func() error {
+    favorites, errGetFavorites := h.getFavoriteLdiIds(ctx)
+    if errGetFavorites != nil {
+        elogger.InfoErr(ctx, errGetFavorites).Msg("falha ao buscar favoritos")
+        return errGetFavorites
+    }
+    favoriteIDsMap = favorites // write apos retorno, antes do eg.Wait()
+    return nil
+})
+
+eg.Go(func() error {
+    completed, errGetCompleted := h.getCompletedLdiIds(ctx)
+    if errGetCompleted != nil {
+        return errGetCompleted
+    }
+    completedIDsMap = completed
+    return nil
+})
+
+if err := eg.Wait(); err != nil {
+    // single error path
+}
+```
+
+## Empty slice vs nil (critico para mobile)
+
+```go
+// API consumers (especialmente mobile) esperam [] e nao null
+if chapters == nil {
+    chapters = []ChapterDetails{}
+}
+
+// Ao retornar listas vazias apos filtro:
+return []structs.MyItem{}, nil  // nunca return nil, nil
+```
+
+## Retry com backoff
+
+```go
+maxAttempts := 3
+var lastErr error
+for attempt := 1; attempt <= maxAttempts; attempt++ {
+    if err := s.repo.Increment(ctx, id); err != nil {
+        lastErr = err
+        elogger.InfoErr(ctx, err).Int("attempt", attempt).Msg("retry increment")
+        time.Sleep(time.Duration(attempt) * 2 * time.Second)
+        continue
+    }
+    return nil
+}
+return lastErr
 ```

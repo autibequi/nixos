@@ -28,6 +28,8 @@ pub struct StatusSnapshot {
 #[derive(Debug, Clone)]
 pub struct SessionInfo {
     pub name: String,
+    /// Short display identifier derived from container name (e.g. "975096e6").
+    pub short_id: String,
     pub status: String,
     pub is_up: bool,
     pub cpu: String,
@@ -38,6 +40,15 @@ pub struct SessionInfo {
     /// Number of active `claude` processes running inside the container.
     /// > 1 means multiple exec sessions sharing the same container.
     pub session_count: usize,
+}
+
+fn container_short_id(name: &str) -> String {
+    // "zion-projects-leech-run-975096e652b6" → "975096e6"
+    if let Some(suffix) = name.split("leech-run-").nth(1) {
+        return suffix.chars().take(8).collect();
+    }
+    // canonical "leech-projects" — last segment after last '-'
+    name.rsplit('-').next().unwrap_or(name).to_string()
 }
 
 #[derive(Debug, Clone)]
@@ -93,7 +104,7 @@ pub fn collect() -> Result<StatusSnapshot> {
 
     // Collect containers in parallel using threads
     let leech_handle =
-        std::thread::spawn(|| docker::list_containers("ancestor=claude-nix-sandbox"));
+        std::thread::spawn(|| docker::list_containers("ancestor=leech"));
     let dk_handle = std::thread::spawn(|| docker::list_containers("name=zion-dk-"));
     let utils_handle = std::thread::spawn(|| docker::list_containers("name=zion-"));
     let stats_handle = std::thread::spawn(docker::get_stats);
@@ -156,6 +167,7 @@ pub fn collect() -> Result<StatusSnapshot> {
 
         let info = SessionInfo {
             name: container.name.clone(),
+            short_id: container_short_id(&container.name),
             status: container.status.clone(),
             is_up,
             cpu,
@@ -196,23 +208,42 @@ pub fn collect() -> Result<StatusSnapshot> {
         .filter(|c| !dk_names.contains(c.name.as_str()) && !leech_names.contains(c.name.as_str()))
         .partition(|c| is_leech_name(&c.name));
 
-    // Inspect leech_extra to get mnt_path
+    // Inspect leech_extra to get TTY + mnt_path, then merge into agents/background
     let leech_extra_names: Vec<String> = leech_extra.iter().map(|c| c.name.clone()).collect();
     let leech_inspect = docker::inspect_containers(&leech_extra_names).unwrap_or_default();
 
-    let leech: Vec<DkServiceInfo> = leech_extra
-        .into_iter()
-        .map(|c| {
-            let is_up = c.status.to_lowercase().starts_with("up");
-            let (cpu, mem) = find_stats(&stats, &c.name);
-            let mnt_path = leech_inspect
-                .iter()
-                .find(|(n, _, _, _)| *n == c.name.trim_start_matches('/'))
-                .map(|(_, _, _, mnt)| mnt.clone())
-                .unwrap_or_default();
-            DkServiceInfo { name: c.name.clone(), status: c.status.clone(), is_up, cpu, mem, mnt_path }
-        })
-        .collect();
+    for c in leech_extra {
+        let is_up = c.status.to_lowercase().starts_with("up");
+        let (cpu, mem) = find_stats(&stats, &c.name);
+        let (is_tty, mount_str, mnt_path) = leech_inspect
+            .iter()
+            .find(|(n, _, _, _)| n == c.name.trim_start_matches('/'))
+            .map_or((true, "", String::new()), |(_, tty, mounts, mnt)| {
+                (*tty, mounts.as_str(), mnt.clone())
+            });
+        let mounts: Vec<MountStatus> = mount_checks
+            .iter()
+            .map(|(path, label)| MountStatus {
+                label: (*label).to_string(),
+                present: mount_str.contains(path),
+            })
+            .collect();
+        let session_count = proc_counts.get(&c.name).copied().unwrap_or(0);
+        let info = SessionInfo {
+            name: c.name.clone(),
+            short_id: container_short_id(&c.name),
+            status: c.status.clone(),
+            is_up,
+            cpu,
+            mem,
+            mounts,
+            mnt_path,
+            session_count,
+        };
+        if is_tty { agents.push(info); } else { background.push(info); }
+    }
+
+    let leech: Vec<DkServiceInfo> = Vec::new();
 
     let utils: Vec<DkServiceInfo> = true_utils
         .into_iter()

@@ -32,12 +32,31 @@ Para cada arquivo `.go` modificado:
 - [ ] Não tem lógica de negócio direta (delega para service)?
 - [ ] Imports não têm pacotes não utilizados?
 - [ ] `@Router`, `@Summary`, `@Tags` presentes se é handler público?
+- [ ] Error response usa `common_errors.ErrNotFound.Error()` — nunca `err.Error()` direto (vaza detalhes internos)?
+- [ ] Error response tem `Tag` especifica por dominio? (`COURSE_NOT_FOUND` > generico `INTERNAL_ERROR`)
+- [ ] Request struct tem `validate:"required"` nos campos obrigatorios?
+- [ ] Response retorna `[]` ao inves de `null` para arrays vazios? (mobile quebra com null)
+- [ ] `vertical := appcontext.GetVertical(ctx)` presente antes de acessar services?
 
 **Checklist services:**
 - [ ] Retorna `error` em todos os paths de falha?
-- [ ] Goroutines têm `WaitGroup` ou canal de controle?
-- [ ] Nil checks antes de dereferênciar ponteiros?
+- [ ] Goroutines usam `errgroup` (nao goroutine raw com channel)?
+- [ ] Variaveis de erro em goroutines tem nome unico? (`errGetX`, `errGetY` — evita bug de closure)
+- [ ] Nil checks antes de dereferênciar ponteiros? (`field == nil || *field == ""`)
 - [ ] Contexto (`ctx`) passado até o repositório?
+- [ ] `defer newrelic.FromContext(ctx).StartSegment(...).End()` na primeira linha?
+- [ ] Sentinel errors definidos como `var Err* = errors.New(...)` no package?
+- [ ] `elogger.InfoErr` para erros esperados, `elogger.ErrorErr` para inesperados?
+- [ ] Campos de log sao `.Str()`, `.Int()`, `.Any()` — nunca `Msgf` com interpolação?
+- [ ] Cache em background via `async.Background` (nao bloqueia response)?
+- [ ] Audit log presente em mutacoes? Falha do audit eh blocking?
+
+**Checklist repositories:**
+- [ ] Query nova tem indice correspondente?
+- [ ] Tipo no Redis bate com tipo no Go? (`int` vs `int64` causa scan error)
+- [ ] `clause.OnConflict` correto para upsert?
+- [ ] Array index apos `strings.Split` — length garantido?
+- [ ] Fullscan em tabela que pode crescer? Paginar?
 
 **Como inspecionar:**
 ```bash

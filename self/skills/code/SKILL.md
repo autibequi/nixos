@@ -17,5 +17,6 @@ Skills de trabalho com codigo: analise, debug, teste, review, inspecao, boas pra
 | `code/goodpractices` | Boas praticas de dev — auto-ativa em qualquer trabalho de codigo |
 | `code/inspection` | Inspecao de qualidade de codigo |
 | `code/report` | Relatorio consolidado de analise |
+| `code/peer-reviews` | Simula review dos 5 peers do monolito (Washington, Pedro Castro, Molina, Marquesini, William) |
 | `code/review` | Code review (chama inspection internamente) |
 | `code/tdd` | Test-Driven Development — RED-GREEN-REFACTOR |

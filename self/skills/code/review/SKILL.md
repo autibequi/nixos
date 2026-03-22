@@ -319,18 +319,29 @@ Criterio de recomendacao:
 
 ---
 
+## Fase 5b — PEER REVIEWS (opcional)
+
+Se o user pedir revisao completa ou `/code review --peers`, rodar `code/peer-reviews` apos o veredito. Isso adiciona 5 perspectivas de devs reais do time (Washington, Pedro Castro, Molina, Marquesini, William) com foco em bugs reais, padroes do time, e cobertura maxima.
+
+Ver `code/peer-reviews/SKILL.md` para detalhes de cada perspectiva.
+
+---
+
 ## Relacao com outras skills
 
 ```
-/code review     → este pipeline: contexto + escopo + fluxo + validacao + veredito
-                   (roda tudo de uma vez, output ASCII, rapido)
+/code review        → este pipeline: contexto + escopo + fluxo + validacao + veredito
+                      (roda tudo de uma vez, output ASCII, rapido)
 
-/code inspect    → inspecao leve rapida (so validacao, sem JIRA/fluxo)
+/code peer-reviews  → 5 perspectivas simuladas dos peers (maximo de cobertura de bugs)
+                      (pode rodar standalone ou como fase 5b do review)
 
-pr-inspector     → walkthrough interativo categoria por categoria COM o dev
-                   (mais profundo, mais lento, mais colaborativo)
+/code inspect       → inspecao leve rapida (so validacao, sem JIRA/fluxo)
 
-review-pr        → resolver comentarios ja existentes no PR (GitHub)
+pr-inspector        → walkthrough interativo categoria por categoria COM o dev
+                      (mais profundo, mais lento, mais colaborativo)
+
+review-pr           → resolver comentarios ja existentes no PR (GitHub)
 ```
 
 ---

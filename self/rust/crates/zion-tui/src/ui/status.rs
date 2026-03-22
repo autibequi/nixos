@@ -13,15 +13,13 @@ use crate::theme;
 pub fn render(frame: &mut Frame, app: &App) {
     let sessions_h = sessions_height(app);
     let services_h = dk_services_height(app);
-    let leeches_h = leeches_height(app);
     let utils_h = utils_height(app);
 
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
             Constraint::Length(1),           // header (title + time + quota inline)
-            Constraint::Length(sessions_h),  // agents + background
-            Constraint::Length(leeches_h),   // leech Zion instances
+            Constraint::Length(sessions_h),  // agents + background (grouped by folder)
             Constraint::Length(services_h),  // dk services (projects)
             Constraint::Length(utils_h),     // utils (reverseproxy, etc.)
             Constraint::Length(1),           // separator (Logs [svc])
@@ -32,39 +30,36 @@ pub fn render(frame: &mut Frame, app: &App) {
 
     render_header(frame, app, chunks[0]);
     sessions::render(frame, app, chunks[1]);
-    services::render_leeches(frame, app, chunks[2]);
-    services::render(frame, app, chunks[3]);
-    utils::render(frame, app, chunks[4]);
-    render_log_separator(frame, app, chunks[5]);
-    logs::render(frame, app, chunks[6]);
-    render_footer(frame, app, chunks[7]);
+    services::render(frame, app, chunks[2]);
+    utils::render(frame, app, chunks[3]);
+    render_log_separator(frame, app, chunks[4]);
+    logs::render(frame, app, chunks[5]);
+    render_footer(frame, app, chunks[6]);
 
     // Overlay: menu or error popup (rendered last so it's on top)
     popup::render(frame, app);
 }
 
 fn sessions_height(app: &App) -> u16 {
-    let n = app.snapshot.agents.len() + app.snapshot.background.len();
-    // group header per group + rows + 1 blank between groups
-    let groups = (if app.snapshot.agents.is_empty() { 0 } else { 1 })
-        + (if app.snapshot.background.is_empty() { 0 } else { 1 });
-    let between = if groups == 2 { 1 } else { 0 };
-    let rows = n + groups + between;
-    (rows as u16).max(1)
+    fn group_height(sessions: &[zion_sdk::status::SessionInfo]) -> usize {
+        if sessions.is_empty() { return 0; }
+        // 1 group header + 1 folder sub-header per unique mnt_path + 1 session row each
+        let mut folders = std::collections::HashSet::new();
+        for s in sessions {
+            let key = if s.mnt_path.is_empty() { &s.name } else { &s.mnt_path };
+            folders.insert(key.as_str());
+        }
+        1 + folders.len() + sessions.len()
+    }
+    let agents_h = group_height(&app.snapshot.agents);
+    let bg_h = group_height(&app.snapshot.background);
+    let between = if agents_h > 0 && bg_h > 0 { 1 } else { 0 };
+    ((agents_h + bg_h + between) as u16).max(1)
 }
 
 fn dk_services_height(app: &App) -> u16 {
     // 1 group header + DK_SERVICES rows
     (crate::app::DK_SERVICES.len() as u16) + 1
-}
-
-fn leeches_height(app: &App) -> u16 {
-    if app.snapshot.leech.is_empty() {
-        0
-    } else {
-        // 1 group header + 1 row per leech container
-        (app.snapshot.leech.len() as u16) + 1
-    }
 }
 
 fn utils_height(app: &App) -> u16 {
