@@ -19,6 +19,7 @@ pub struct SessionRunner {
     resume: Option<String>,
     init_md: Option<String>,
     analysis_mode: bool,
+    no_splash: bool,
     instance: Option<String>,
     extra_volumes: Vec<String>,
 }
@@ -35,6 +36,7 @@ impl SessionRunner {
             resume: None,
             init_md: None,
             analysis_mode: false,
+            no_splash: false,
             instance: None,
             extra_volumes: Vec::new(),
         }
@@ -85,6 +87,12 @@ impl SessionRunner {
     #[must_use]
     pub fn analysis_mode(mut self, enabled: bool) -> Self {
         self.analysis_mode = enabled;
+        self
+    }
+
+    #[must_use]
+    pub fn no_splash(mut self, enabled: bool) -> Self {
+        self.no_splash = enabled;
         self
     }
 
@@ -207,9 +215,12 @@ impl SessionRunner {
         }
 
         let claude_args_str = claude_args.join(" ");
-        let bash_cmd = format!(
-            "bash /workspace/self/scripts/zion-agent-launch.sh {claude_args_str}"
-        );
+        // --no-splash: pula o script de loading, faz bootstrap inline e abre claude direto
+        let bash_cmd = if self.no_splash {
+            format!(". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude {claude_args_str}")
+        } else {
+            format!("bash /workspace/self/scripts/zion-agent-launch.sh {claude_args_str}")
+        };
 
         let vol_args = self.volume_args();
         let mut args: Vec<&str> = vec!["run", "--rm", "-it"];

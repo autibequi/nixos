@@ -123,6 +123,11 @@ zion_usage() {
     printf "    Modo análise: injeta prompt experimental no container (proativo,\n    self-modifying, debug livre sem output pro user).\n"
     echo
 
+    # :flag.usage
+    printf "  %s\n" "--no-splash"
+    printf "    Desativa o loading screen de inicialização (equivalente a ZION_SPLASH=0 em\n    ~/.zion).\n"
+    echo
+
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
     printf "    Show this help\n"
@@ -1839,9 +1844,11 @@ zion_session_run() {
       # Session name = mounted folder (shown in header and statusline)
       [[ -n "$mount_path" ]] && claude_args+=" --name ${mount_path##*/}"
 
+      local launch_cmd="bash /workspace/self/scripts/zion-agent-launch.sh ${claude_args}"
+      [[ -n "${args['--no-splash']:-}" ]] && launch_cmd=". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
       zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes $analysis_env \
         --entrypoint /entrypoint.sh -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" leech \
-        /bin/bash -c "bash /workspace/self/scripts/zion-agent-launch.sh ${claude_args}"
+        /bin/bash -c "${launch_cmd}"
       printf '\033[?25h'
       ;;
 
@@ -5813,6 +5820,14 @@ parse_requirements() {
 
         # :flag.case_no_arg
         args['--analysis-mode']=1
+        shift
+        ;;
+
+      # :flag.case
+      --no-splash)
+
+        # :flag.case_no_arg
+        args['--no-splash']=1
         shift
         ;;
 

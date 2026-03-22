@@ -151,6 +151,7 @@ pub fn relay(action: &str) -> Result<()> {
 // ── inbox ────────────────────────────────────────────────────────
 
 /// `zion inbox` — print the inbox, or append a message to it.
+#[allow(dead_code)]
 pub fn inbox(message: Option<String>) -> Result<()> {
     let file = paths::inbox_file().ok_or_else(|| anyhow::anyhow!("inbox not found"))?;
     match message {

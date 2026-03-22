@@ -32,6 +32,7 @@ pub fn cont(dir: Option<String>) -> Result<()> {
 }
 
 /// `zion claude` / `zion cursor` / `zion opencode` — forced engine.
+#[allow(dead_code)]
 pub fn engine(name: &str, flags: SessionFlags) -> Result<()> {
     let config = ZionConfig::load()?;
     let engine: Engine = name.parse().map_err(|e| anyhow::anyhow!("{e}"))?;
@@ -194,5 +195,6 @@ fn launch(engine: Engine, flags: SessionFlags, config: &ZionConfig) -> Result<()
         .resume(flags.resume)
         .init_md(init_md)
         .analysis_mode(flags.analysis_mode)
+        .no_splash(flags.no_splash)
         .run(config)?)
 }

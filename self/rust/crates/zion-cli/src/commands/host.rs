@@ -53,6 +53,7 @@ pub fn os(action: &str) -> Result<()> {
 // ── init ─────────────────────────────────────────────────────────
 
 /// `zion init` — create the `~/.zion` config file from a template.
+#[allow(dead_code)]
 pub fn init(force: bool) -> Result<()> {
     let dest = paths::home().join(".zion");
     if dest.exists() && !force {

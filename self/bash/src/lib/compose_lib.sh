@@ -317,9 +317,11 @@ zion_session_run() {
       # Session name = mounted folder (shown in header and statusline)
       [[ -n "$mount_path" ]] && claude_args+=" --name ${mount_path##*/}"
 
+      local launch_cmd="bash /workspace/self/scripts/zion-agent-launch.sh ${claude_args}"
+      [[ -n "${args['--no-splash']:-}" ]] && launch_cmd=". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
       zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes $analysis_env \
         --entrypoint /entrypoint.sh -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" leech \
-        /bin/bash -c "bash /workspace/self/scripts/zion-agent-launch.sh ${claude_args}"
+        /bin/bash -c "${launch_cmd}"
       printf '\033[?25h'
       ;;
 

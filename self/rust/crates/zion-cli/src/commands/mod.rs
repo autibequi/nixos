@@ -41,6 +41,9 @@ pub struct SessionFlags {
     /// Analysis mode
     #[arg(long, short = 'A')]
     pub analysis_mode: bool,
+    /// Desativa o loading screen de inicialização (equiv. a ZION_SPLASH=0 em ~/.zion)
+    #[arg(long)]
+    pub no_splash: bool,
 }
 
 impl SessionFlags {

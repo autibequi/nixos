@@ -40,6 +40,9 @@ flags:
   - long: --analysis-mode
     short: -A
     help: "Modo análise: injeta prompt experimental no container (proativo, self-modifying, debug livre sem output pro user)."
+
+  - long: --no-splash
+    help: "Desativa o loading screen de inicialização (equivalente a ZION_SPLASH=0 em ~/.zion)."
 commands:
   - name: continue
     alias: [cont]

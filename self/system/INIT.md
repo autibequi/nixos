@@ -49,15 +49,14 @@
 
 ## Obsidian — Cerebro do Sistema
 
-O vault Obsidian esta montado em `/workspace/obsidian/`. **Regras no sistema Zion — ler antes de agir:**
+O vault Obsidian esta montado em `/workspace/obsidian/`.
 
-- `/workspace/self/system/BOARDRULES.md` — regras gerais, mapa do vault, roster, delegacao
-  _(necessario para qualquer interacao com `/workspace/obsidian/`)_
-- `/workspace/self/system/BREAKROOMRULES.md` — protocolo dos agents
-  _(necessario para qualquer interacao com `/workspace/obsidian/agents/`)_
+**Regras injetadas automaticamente no boot** via `---OBSIDIAN_RULES---`:
+- `obsidian:rules:board` — mapa do vault, roster, delegacao, tasks, escalonamento
+- `obsidian:rules:agentroom` — protocolo dos agents: self-scheduling, memory, ciclo
 
-Os stubs `/workspace/obsidian/BOARDRULES.md` e `/workspace/obsidian/agents/BREAKROOMRULES.md`
-existem apenas para o grafo do Obsidian — o conteudo real esta nos paths acima.
+Skills em: `/workspace/self/skills/obsidian/rules/board.md` e `agentroom.md`
+Nao e necessario ler nenhum arquivo separado — as regras ja estao no contexto de boot.
 
 ### Estrutura
 

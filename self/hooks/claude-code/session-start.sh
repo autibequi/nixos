@@ -191,6 +191,20 @@ fi
 echo "---/ENV---"
 
 # ────────────────────────────────────────────────────────────────
+# 5.5 OBSIDIAN SKILL — referência no boot (qualquer modo)
+#     Skill `obsidian` é obrigatória para qualquer interação com /workspace/obsidian/
+#     Sub-skills: board, agentroom, graph, dataview
+# ────────────────────────────────────────────────────────────────
+echo "---OBSIDIAN---"
+echo "REGRA: para interagir com /workspace/obsidian/ carregar skill \`obsidian\`."
+echo "Skill composta — sub-skills em /workspace/self/skills/obsidian/:"
+echo "  board.md      — mapa do vault, tasks, roster, delegacao, quota"
+echo "  agentroom.md  — protocolo agents: scheduling, memory, ciclo"
+echo "  graph.md      — manter grafo Ctrl+G: frontmatter, hubs, wiseman"
+echo "  dataview.md   — queries Dataview/DataviewJS"
+echo "---/OBSIDIAN---"
+
+# ────────────────────────────────────────────────────────────────
 # 6. API USAGE / cota (sempre)
 # ────────────────────────────────────────────────────────────────
 # Tenta gerar o usage-bar: nixos repo (stow path) ou fallback ~/.claude
