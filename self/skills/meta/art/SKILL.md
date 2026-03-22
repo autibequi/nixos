@@ -7,13 +7,18 @@ description: Biblioteca central de representacoes visuais do Zion + controle do 
 
 Skill composta com 3 sub-skills por tipo de saida. **Fonte da verdade** para qualquer representacao visual no sistema e para o controle do Chrome relay (CDP).
 
+## Design System
+
+**Ler `design-system.md` PRIMEIRO** — palette de cores testada, tokens semanticos, emojis proibidos, regras de composicao. Fonte da verdade para qualquer output visual.
+
 ## Sub-skills
 
-| Arquivo | Saida | Quando usar |
+| Arquivo | Conteudo | Quando usar |
 |---|---|---|
-| `ascii.md` | Terminal | Sempre que possivel. Default. Inline, rapido, sem dependencia. |
-| `chrome.md` | Chrome relay | Controle do browser (nav, show, tabs, speak) + templates visuais (Mermaid, arvore, HTML). Precisa relay ativo. |
-| `obsidian.md` | Vault Obsidian | Relatorios persistentes, artefatos, dashboards Dataview. |
+| `design-system.md` | Palette, tokens, box drawing, regras, Catppuccin CSS, Mermaid theme | **Sempre** — ler antes de qualquer output. Parte 1=terminal, Parte 2=web |
+| `ascii.md` | 18 templates de representacao terminal | Default. Inline, rapido, sem dependencia. |
+| `chrome.md` | Relay + Mermaid + HTML | Interativo, grandes, coloridos. Precisa relay. |
+| `obsidian.md` | Relatorios + Dataview | Artefatos persistentes no vault. |
 
 ## Regra de decisao
 
@@ -41,14 +46,25 @@ Se voce e um agente ou skill que precisa desenhar algo:
 
 ## Catalogo rapido (o que temos)
 
-### ASCII (terminal)
-- Fluxo de handler (mini-guia horizontal + deep-dive vertical)
-- Mapa de caixas (black boxes com IN/OUT)
-- Diagrama multi-path (read + write + guard)
-- Logica interna (if/else, errgroup, loop, graceful degradation)
-- Tabelas de status (ok/!!/XX)
-- Graficos de barra horizontal
-- Arvore de arquivos
+### ASCII (terminal) — 18 tipos
+- 1 Fluxo de handler (mini-guia horizontal + deep-dive vertical)
+- 2 Mapa de caixas (black boxes com IN/OUT)
+- 3 Logica interna (if/else, errgroup, loop, graceful degradation)
+- 4 Diagrama multi-path (read + write + guard)
+- 5 Tabelas de status (ok/!!/XX)
+- 6 Graficos de barra horizontal
+- 7 Arvore de arquivos
+- 8 Headers de secao
+- 9 Tabela comparativa (antes/depois)
+- 10 Sequencia temporal (timeline)
+- 11 Diagrama de entidade/struct
+- 12 Mapa de dependencias (quem chama quem)
+- 13 Diff inline (antes/depois no mesmo bloco)
+- 14 Matriz de cobertura (testes vs objetos)
+- 15 Fluxo de estado (state machine)
+- 16 Calendario/sprint
+- 17 Kanban compacto
+- 18 Grafico de proporcao (pizza horizontal)
 
 ### Chrome (relay) — inclui controle completo do browser
 - Verificacao de disponibilidade + regra de decisao

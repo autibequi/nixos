@@ -326,6 +326,333 @@ Simbolos: `+` novo, `~` modificado, `x` removido
 
 ---
 
+## 9. Tabela Comparativa (antes/depois)
+
+```
+  Campo          Antes              Depois
+  ─────────────  ─────────────────  ─────────────────
+  Cache          nenhum             JSONB + Redis
+  Endpoint       GET /course        GET /course + GET /toc
+  Latencia       ~800ms             ~50ms (cache hit)
+  Worker         nao existia        HandleBuildCourseToc
+```
+
+Usar para changelogs, reviews, explicar impacto de mudancas.
+
+---
+
+## 10. Sequencia Temporal (timeline)
+
+```
+  t0  [Browser]     GET /toc
+  t1  [Handler]     getInteractiveCourse ─── 12ms
+  t2  [Handler]     GetCachedStructure ───── 3ms  (HIT)
+  t3  [Handler]     filtro trial ─────────── 1ms
+  t4  [Response]    200 OK ───────────────── 16ms total
+      ├────────────┼────────────┼────────────┤
+      0           5ms         10ms         16ms
+```
+
+Usar para explicar latencia, debug de performance, sequencia de eventos.
+
+---
+
+## 11. Diagrama de Entidade/Struct
+
+```
+  ┌─────────────────────────────────┐
+  │  Course (ldi.courses)           │
+  ├─────────────────────────────────┤
+  │  id                    string   │
+  │  name                  string   │
+  │  slug                  string   │
+  │  published             bool     │
+  │+ content_tree_cache    JSONB    │ ◄── novo
+  │+ cache_updated_at      TSTZ    │ ◄── novo
+  └─────────────────────────────────┘
+       │ 1:N
+       ▼
+  ┌─────────────────────────────────┐
+  │  CourseChapter                  │
+  ├─────────────────────────────────┤
+  │  chapter_id            string   │
+  │  course_id             string   │
+  │  name                  string   │
+  └─────────────────────────────────┘
+```
+
+Simbolos: `+` campo novo, `~` campo alterado, `-` campo removido.
+Relacoes: `1:N`, `1:1`, `N:N` com setas `│ ▼`.
+
+---
+
+## 12. Mapa de Dependencias (quem chama quem)
+
+```
+  BuildAndSaveContentTree
+    ├── GetCourseChapters
+    │     ├── courseRepo.GetOne
+    │     ├── chapterRepo.GetAllFromCourse
+    │     └── getChapterItems  (x3 parallel)
+    │           ├── chapterItemRepo.GetAllFromChapters
+    │           └── itemRepo.GetBlockTypeCounts
+    ├── courseRepo.SaveCache (Redis)
+    └── courseRepo.UpdateProperties (JSONB)
+```
+
+Usar para entender profundidade de chamadas, identificar N+1, mapear blast radius.
+
+---
+
+## 13. Diff Inline (antes/depois no mesmo bloco)
+
+```
+  services/course/service.go
+  ┊ 45 │- func NewService(repo, chapterRepo) Service {
+  ┊ 45 │+ func NewService(repo, chapterRepo, toggler) Service {
+  ┊ 48 │+   toggler: toggler,
+  ┊ 52 │  }
+```
+
+Simbolos: `-` linha removida, `+` linha adicionada, ` ` (espaco) linha inalterada.
+Usar para mostrar mudancas pontuais sem abrir diff inteiro.
+
+---
+
+## 14. Matriz de Cobertura (testes vs objetos)
+
+```
+                           unit  integ  mock
+  BuildAndSave              ✓      ·      ✓
+  GetOrBuildCachedTOC       ✓      ·      ✓
+  TriggerByCourseIDs        ✓      ·      ✓
+  CheckTocRebuild           ✓      ·      ✓
+  HandleBuildCourseToc      ✓      ·      ·
+  GetCourseStructure        ·      ·      ·   ◄── gap
+```
+
+Simbolos: `✓` tem, `·` nao tem. Marcar gaps com `◄──`.
+Usar em pr-inspector fase validacao, code review fase testes.
+
+---
+
+## 15. Fluxo de Estado (state machine)
+
+```
+  [IDLE] ──publish──→ [REBUILDING] ──done──→ [CACHED]
+    ▲                      │                    │
+    │                      │ fail               │ invalidate
+    │                      ▼                    │
+    └──────────────── [FAILED] ◄────────────────┘
+```
+
+Estados em `[COLCHETES]`, transicoes com setas nomeadas.
+Usar para explicar ciclos de vida, workflows, feature flags.
+
+---
+
+## 16. Calendario/Sprint (timeline horizontal)
+
+```
+  Sprint 42
+  ├── Seg  migration + entity
+  ├── Ter  repo + service core
+  ├── Qua  handler BFF + worker
+  ├── Qui  triggers + guards nos BO handlers
+  └── Sex  testes + fix CI
+```
+
+Usar para planejamento, breakdown de tarefas, retrospectiva.
+
+---
+
+## 17. Kanban Compacto
+
+```
+  TODO              DOING             DONE
+  ─────────────     ─────────────     ─────────────
+  teste integ       fix CI flaky      migration
+  doc swagger       worker DLQ        entity
+                                      repo cache
+                                      service core
+                                      handler BFF
+```
+
+3 colunas fixas. Itens empilhados. Usar para status de feature, tasks de agentes.
+
+---
+
+## 18. Grafico de Proporcao (pizza horizontal)
+
+```
+  Distribuicao dos 117 arquivos:
+  ██████████████████░░░░  services    40%  (47)
+  ████████░░░░░░░░░░░░░░  structs     18%  (21)
+  ██████░░░░░░░░░░░░░░░░  handlers    14%  (16)
+  ████░░░░░░░░░░░░░░░░░░  tests       10%  (12)
+  ████░░░░░░░░░░░░░░░░░░  mocks        9%  (11)
+  ██░░░░░░░░░░░░░░░░░░░░  outros       9%  (10)
+```
+
+Barra de 22 chars. `█` proporcional ao %. Usar para distribuicao de arquivos, cobertura, risco.
+
+---
+
+## Palette de Emojis (cores no terminal)
+
+O terminal Catppuccin Mocha renderiza tudo em amber monocromo EXCETO alguns emojis que mantem cor propria. Esta palette foi testada e validada — so usar emojis desta lista.
+
+### REGRA: emojis que NAO funcionam (viram listrado/amber)
+
+NAO usar: 🟢 🟡 🟠 🟣 🟥 🟧 🟨 🟩 🟦 🟪 ❗ ❓ ⭐ ‼️
+
+### Status / Resultado
+
+| Emoji | Cor real | Significado | Quando usar |
+|-------|---------|-------------|-------------|
+| 💚 | verde | OK / passou / limpo | Check que passou, item completo |
+| 🧡 | laranja | Warning / atencao | Nao bloqueia mas merece revisao |
+| 🔴 | vermelho | Blocker / erro | Deve ser corrigido, bloqueia aprovacao |
+| ⚪ | neutro | Pendente / nao verificado | Ainda nao inspecionado |
+| 💙 | azul | Novo / adicionado | Arquivo ou funcao nova |
+| 🔶 | laranja | Modificado | Arquivo ou funcao alterada |
+| 🔵 | teal | Info / referencia | Contexto, sem acao necessaria |
+
+### Camadas / Tipos
+
+| Emoji | Significado | Quando usar |
+|-------|-------------|-------------|
+| 🔹 | Migration / DB | Tabelas, colunas, SQL |
+| 🔸 | Entity / struct | Tipos, modelos de dados |
+| 🔹 | Repository / repo | Acesso a dados, queries |
+| ⚙️ | Service | Logica de negocio |
+| 🚪 | Handler / endpoint | Porta de entrada HTTP |
+| 👷 | Worker / async | Jobs SQS, background |
+| 🧪 | Teste | Test files, cobertura |
+| 📋 | Config | YAML, env, feature flags |
+
+### Recursos / Infra
+
+| Emoji | Significado | Quando usar |
+|-------|-------------|-------------|
+| ⚡ | Redis / cache rapido | Cache volatil |
+| 💾 | JSONB / persist | Cache duradouro, banco |
+| 📨 | SQS / fila | Mensagens async |
+| 🔒 | Guard / protecao | Locks, checks antes de acao |
+
+### Barras coloridas
+
+Usar diamantes coloridos + quadrado preto para barras com cor real:
+```
+  🔷🔷🔷🔷🔷⬛⬛⬛  62%  (azul)
+  🔶🔶🔶⬛⬛⬛⬛⬛  37%  (laranja)
+  🔴🔴⬛⬛⬛⬛⬛⬛  25%  (vermelho)
+```
+
+Para barras sem cor: `██░░░░` (unicode block chars)
+
+### Exemplos com emojis testados
+
+**Mapa de caixas:**
+```
+  #   Camada  Nome                     Status
+  1   🔹     add content_tree_cache   💙 nova
+  2   🔸     Course (2 campos)        🔶 mod
+  3   🔹     cache.go + SaveCache     💙 nova
+  4   ⚙️     BuildAndSaveContentTree  💙 nova
+  5   🚪     GET /toc                 💙 novo
+  6   👷     HandleBuildCourseToc     💙 novo
+  7   🧪     build_test.go           💙 novo
+```
+
+**Checklist de inspecao:**
+```
+  💚 ctx propagado ate o repo (L22)
+  💚 Error handling em todos os paths (L23, L35)
+  🔴 Goroutine sem sync — go SaveToJSONB (L38)
+  🧡 log.Printf em vez de elogger (2 ocorrencias)
+```
+
+**Veredito:**
+```
+  🔴 Blockers:    2
+  🧡 Warnings:    4
+  💚 Clean:       12 checks OK
+```
+
+**Fluxo com emojis:**
+```
+  🚪 Handler GET /toc
+    │
+    ├── ⚡ cache HIT → Response
+    │
+    └── ⚡ cache MISS
+          │
+          ▼
+        ⚙️ BuildAndSaveContentTree
+          ├── ⚡ save Redis (graceful)
+          ├── 💾 save JSONB (graceful)
+          └── Response
+```
+
+**Matriz de cobertura:**
+```
+                          🧪unit  🧪integ  mock
+  ⚙️ BuildAndSave          💚      ⚪       💚
+  ⚙️ GetOrBuildCachedTOC   💚      ⚪       💚
+  ⚙️ TriggerByCourseIDs    💚      ⚪       💚
+  👷 HandleBuildCourseToc   💚      ⚪       ⚪
+  🚪 GetCourseStructure    ⚪      ⚪       ⚪  ◄── 🔴 gap
+```
+
+**Arvore de arquivos:**
+```
+  apps/ldi/
+  ├── 🔹 migration/
+  │   └── 💙 2026030512_add_content_tree.sql
+  ├── 🔸 entities/
+  │   └── 🔶 course.go
+  ├── ⚙️ services/course/
+  │   ├── 💙 build_and_save_content_tree.go
+  │   ├── 💙 get_course_toc_complete.go
+  │   └── 🔶 getCourseChapters.go
+  ├── 🚪 handlers/
+  │   └── 💙 get_course_structure.go
+  └── 👷 handlers/course/
+      └── 💙 worker.go
+```
+
+**State machine:**
+```
+  ⚪ IDLE ──publish──→ 🔶 REBUILDING ──done──→ 💚 CACHED
+    ▲                       │                     │
+    │                       │ fail                │ invalidate
+    │                       ▼                     │
+    └─────────────────── 🔴 FAILED ◄─────────────┘
+```
+
+**Kanban:**
+```
+  ⚪ TODO            🔵 DOING           💚 DONE
+  ─────────────      ─────────────      ─────────────
+  🧪 teste integ    🔧 fix CI flaky    🔹 migration
+  📋 doc swagger    👷 worker DLQ      🔸 entity
+                                        🔹 repo cache
+                                        ⚙️ service core
+                                        🚪 handler BFF
+```
+
+**Grafico de proporcao:**
+```
+  ⚙️ services  🔷🔷🔷🔷🔷🔷🔷🔷⬛⬛  40%  (47)
+  🔸 structs   🔷🔷🔷🔷⬛⬛⬛⬛⬛⬛  18%  (21)
+  🚪 handlers  🔶🔶🔶⬛⬛⬛⬛⬛⬛⬛  14%  (16)
+  🧪 tests     🔷🔷⬛⬛⬛⬛⬛⬛⬛⬛  10%  (12)
+  📋 outros    🔷⬛⬛⬛⬛⬛⬛⬛⬛⬛   9%  (10)
+```
+
+---
+
 ## Convencoes visuais
 
 | Simbolo | Significado |
@@ -339,6 +666,13 @@ Simbolos: `+` novo, `~` modificado, `x` removido
 | `→` | Seta de fluxo horizontal |
 | `(async)` | Operacao assincrona |
 | `──HIT──→ / └─MISS─→` | Resultado de cache check |
-| `+ / ~ / x` | Novo / modificado / removido |
-| `[ok] / [!!] / [XX]` | Passou / warning / blocker |
-| `█ / ░` | Barra cheia / barra vazia |
+| `+ / ~ / x` | Novo / modificado / removido (modo texto) |
+| `[ok] / [!!] / [XX]` | Passou / warning / blocker (modo texto) |
+| `█ / ░` | Barra cheia / vazia (monocromo) |
+| `🔷 / ⬛` | Barra cheia / vazia (azul) |
+| `🔶 / ⬛` | Barra cheia / vazia (laranja) |
+| `🔴 / ⬛` | Barra cheia / vazia (vermelho) |
+| 💚 🧡 🔴 ⚪ | OK / warning / blocker / pendente |
+| 💙 🔶 | Novo / modificado |
+| 🔹🔸⚙️🚪👷🧪📋 | Camada (db/entity/svc/handler/worker/test/config) |
+| ⚡💾📨🔒 | Recurso (Redis/JSONB/SQS/guard) |

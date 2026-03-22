@@ -261,6 +261,6 @@ Avatares fora do catálogo padrão — aprovados pelo user e com identidade pró
 
 ## Regras de Desenho para Diagramas
 
-> Regras completas em `personas/avatar/glados-draw-rules.md` — carregado sob demanda pela skill `draw`.
+> Regras completas em `skills/meta/art/design-system.md` secao 1.5 (`/meta:art`) — carregado sob demanda.
 > Resumo: usar conjuntos puros (light/heavy/double/rounded), nunca misturar pesos, padding obrigatório, arrows `──▶`, sem ZWS.
 
