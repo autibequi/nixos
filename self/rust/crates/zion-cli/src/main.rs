@@ -73,8 +73,9 @@ enum Commands {
         #[arg(long, short = 's')]
         shell: bool,
     },
-    /// Lab session (nixos mount)
-    Lab {
+    /// Host session (nixos mount at /workspace/host)
+    #[command(alias = "lab")]
+    Host {
         #[arg(long)]
         engine: Option<String>,
         #[arg(long)]
@@ -170,11 +171,18 @@ enum Commands {
         tick: u64,
     },
 
-    // ── Auto (timer systemd) ────────────────────────────────────
-    /// Execute agents e tasks vencidos (timer systemd 10min)
-    Auto {
+    // ── Tick (timer systemd) ─────────────────────────────────────
+    /// Execute todos os agents e tasks vencidos (zion-tick.service)
+    #[command(alias = "auto")]
+    Tick {
         #[arg(long, short = 'n')]
         dry_run: bool,
+        #[arg(long, short = 's')]
+        steps: Option<u32>,
+    },
+
+    /// Lanca o agente Tasker para processar tasks atrasadas
+    Tasker {
         #[arg(long, short = 's')]
         steps: Option<u32>,
     },
@@ -196,7 +204,7 @@ enum Commands {
     },
 
     // ── Tasks ───────────────────────────────────────────────────
-    #[command(alias = "tk")]
+    #[command(alias = "t")]
     Tasks {
         #[command(subcommand)]
         action: Option<TasksAction>,
@@ -252,8 +260,20 @@ enum AgentsAction {
 
 #[derive(Subcommand)]
 enum TasksAction {
-    /// Ultimas execucoes de tasks
+    /// Kanban view: TODO/DOING/DONE
     Log,
+    /// Lanca o agente Tasker para processar tasks atrasadas
+    #[command(alias = "r")]
+    Run {
+        #[arg(long, short = 's')]
+        steps: Option<u32>,
+    },
+    /// Dashboard live de tasks + agents
+    #[command(alias = "st", alias = "dash")]
+    Status {
+        #[arg(long, short = 't', default_value = "5")]
+        tick: String,
+    },
 }
 
 #[derive(Subcommand)]
@@ -283,7 +303,7 @@ fn main() -> Result<()> {
         Some(Commands::Resume { dir, resume }) => commands::session::resume(dir, resume),
         Some(Commands::Shell { dir }) => commands::session::shell(dir),
         Some(Commands::Leech { flags, shell }) => commands::session::leech(flags, shell),
-        Some(Commands::Lab {
+        Some(Commands::Host {
             engine,
             model,
             resume,
@@ -333,9 +353,14 @@ fn main() -> Result<()> {
             Ok(())
         }
 
-        // Auto — delegates to bash CLI
-        Some(Commands::Auto { dry_run, steps }) => {
+        // Tick — delegates to bash CLI
+        Some(Commands::Tick { dry_run, steps }) => {
             commands::agents::auto(dry_run, steps)
+        }
+
+        // Tasker — delegates to bash CLI
+        Some(Commands::Tasker { steps }) => {
+            exec::bash_delegate_with_flags("tasker", &[], steps.map(|s| s.to_string()).as_deref())
         }
 
         // Run — delegates to bash CLI
@@ -357,6 +382,12 @@ fn main() -> Result<()> {
         // Tasks
         Some(Commands::Tasks { action }) => match action.unwrap_or(TasksAction::Log) {
             TasksAction::Log => commands::agents::tasks_log(),
+            TasksAction::Run { steps } => {
+                exec::bash_delegate_with_flags("tasker", &[], steps.map(|s| s.to_string()).as_deref())
+            }
+            TasksAction::Status { tick } => {
+                exec::bash_delegate(&["tasks", "status", "--tick", &tick])
+            }
         },
 
         // Git

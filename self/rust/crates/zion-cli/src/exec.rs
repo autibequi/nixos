@@ -71,6 +71,17 @@ pub fn bash_delegate(args: &[&str]) -> Result<()> {
     run(&bash_cli.to_string_lossy(), args)
 }
 
+/// Delegate to bash CLI with optional --steps flag.
+pub fn bash_delegate_with_flags(cmd: &str, args: &[&str], steps: Option<&str>) -> Result<()> {
+    let mut all: Vec<&str> = vec![cmd];
+    all.extend_from_slice(args);
+    if let Some(s) = steps {
+        all.push("--steps");
+        all.push(s);
+    }
+    bash_delegate(&all)
+}
+
 /// Bail if running inside container.
 pub fn require_host() -> Result<()> {
     if zion_sdk::paths::in_container() {

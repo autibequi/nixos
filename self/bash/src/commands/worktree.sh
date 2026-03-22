@@ -13,7 +13,7 @@ WHITE='\033[37m'
 
 filter_service="${args[service]:-}"
 
-# ── 1. Coletar worktrees de todos os servicos ───────────────────────────────
+# -- 1. Coletar worktrees de todos os servicos -------------------------------
 declare -a wt_entries=()   # "service|worktree_name|path|branch"
 declare -a wt_display=()   # display string para selecao
 
@@ -44,7 +44,7 @@ if [[ ${#wt_entries[@]} -eq 0 ]]; then
   exit 0
 fi
 
-# ── 2. Listar worktrees ─────────────────────────────────────────────────────
+# -- 2. Listar worktrees -----------------------------------------------------
 echo ""
 echo -e "${BOLD}${MAGENTA}  Worktrees${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}"
 echo ""
@@ -67,7 +67,7 @@ for i in "${!wt_entries[@]}"; do
 done
 echo ""
 
-# ── 3. Escolher worktree ────────────────────────────────────────────────────
+# -- 3. Escolher worktree ----------------------------------------------------
 echo -en "${BOLD}Worktree [1-${#wt_entries[@]}]: ${RESET}"
 read -r wt_choice
 
@@ -88,10 +88,10 @@ if [[ "$chosen_path" != "$main_dir" ]]; then
 fi
 
 echo ""
-echo -e "  Selecionado: ${BOLD}${chosen_svc}${RESET} → ${CYAN}${chosen_wt}${RESET} ${DIM}[${chosen_branch}]${RESET}"
+echo -e "  Selecionado: ${BOLD}${chosen_svc}${RESET} -> ${CYAN}${chosen_wt}${RESET} ${DIM}[${chosen_branch}]${RESET}"
 echo ""
 
-# ── 4. Escolher comando ─────────────────────────────────────────────────────
+# -- 4. Escolher comando -----------------------------------------------------
 cmds=("run" "shell" "logs" "stop" "restart" "install" "flush" "status")
 echo -e "${BOLD}Comando:${RESET}"
 for i in "${!cmds[@]}"; do
@@ -108,7 +108,7 @@ fi
 
 chosen_cmd="${cmds[$((cmd_choice - 1))]}"
 
-# ── 5. Montar comando e deixar usuario confirmar ────────────────────────────
+# -- 5. Montar comando e deixar usuario confirmar ----------------------------
 final_cmd="zion docker ${chosen_cmd} ${chosen_svc}${wt_flag}"
 
 echo ""
@@ -120,6 +120,6 @@ if [[ -z "$edited_cmd" ]]; then
   exit 0
 fi
 
-# ── 6. Executar ──────────────────────────────────────────────────────────────
+# -- 6. Executar --------------------------------------------------------------
 echo ""
 eval "$edited_cmd"
