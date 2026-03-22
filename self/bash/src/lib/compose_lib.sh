@@ -335,15 +335,20 @@ zion_session_run() {
           --filter "label=com.docker.compose.service=leech" \
           2>/dev/null | head -1)
         if [[ -z "$cid" ]]; then
-          # Container não existe: sobe e entra com bootstrap completo (dashboard, etc.)
+          # Container não existe: sobe via compose (precisa do YAML) e entra com bootstrap.
           zion_compose_cmd -p "$proj_name" up -d leech
-          zion_compose_cmd -p "$proj_name" exec -it $analysis_env \
-            -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" leech \
+          # Re-fetch cid após up (container recém-criado)
+          cid=$(docker ps -q \
+            --filter "label=com.docker.compose.project=${proj_name}" \
+            --filter "label=com.docker.compose.service=leech" \
+            2>/dev/null | head -1)
+          docker exec -it $analysis_env \
+            -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" "$cid" \
             /bin/bash -c "${launch_cmd}"
         else
-          # Container já quente: pula bootstrap (sem dashboard/github/rss), entra direto no claude
-          zion_compose_cmd -p "$proj_name" exec -it $analysis_env \
-            -e "CLAUDIO_MOUNT=$mount_path" leech \
+          # Container já quente: docker exec direto (sem parsear compose YAML).
+          docker exec -it $analysis_env \
+            -e "CLAUDIO_MOUNT=$mount_path" "$cid" \
             /bin/bash -c "cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
         fi
       else

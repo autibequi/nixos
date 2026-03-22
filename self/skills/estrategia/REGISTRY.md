@@ -24,6 +24,7 @@ estrategiahq
 
 | Skill | Path | Descricao |
 |---|---|---|
+| estrategia/platform-context | `estrategia/platform-context/` | Contexto compartilhado dos 3 repos (stacks, design system, multi-tenant, convencoes) |
 | estrategia/glance | `estrategia/glance/` | Arvore visual dos arquivos modificados vs main nos 3 repos |
 | estrategia/jira | `estrategia/jira/` | Ler card Jira completo com todos os campos — mapa de custom fields, chamada MCP correta, extracao ADF |
 | estrategia/grafana | `estrategia/grafana/` | Query logs Loki e dashboards Grafana — servicos, patterns de debug, integracao com workflow |

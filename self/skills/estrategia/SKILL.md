@@ -9,31 +9,20 @@ Skill indice. Carregue as sub-skills conforme o repo e a acao solicitada.
 
 ## Sub-skills por repo
 
-| Repo | Path no projeto | Sub-skills disponiveis |
-|---|---|---|
-| **monolito** | `/home/claude/projects/estrategia/monolito` | go-migration, go-repository, go-service, go-handler, go-worker, go-test, go-inspector, make-feature |
-| **bo-container** | `/home/claude/projects/estrategia/bo-container` | component, page, route, service, make-feature, inspector |
-| **front-student** | `/home/claude/projects/estrategia/front-student` | component, page, route, service, make-feature, inspector |
+Cada repo tem seu proprio SKILL.md indice com sub-skills detalhadas:
 
-## Orquestrador — coordenacao cross-repo
-
-O orquestrador e a skill que organiza tudo: features que tocam multiplos repos, PRs, changelogs, recommits, retomada de contexto, review.
-
-| Skill | Quando usar |
-|---|---|
-| `orquestrador/orquestrar-feature` | Feature nova que toca 2+ repos |
-| `orquestrador/retomar-feature` | Voltar ao trabalho de sessao anterior |
-| `orquestrador/review-pr` | Review de PR aberto |
-| `orquestrador/pr-inspector` | Inspecao profunda de PR (Go + Vue checklists) |
-| `orquestrador/changelog` | Gerar changelog de uma feature/release |
-| `orquestrador/recommit` | Reorganizar/reescrever commits antes do PR |
-| `orquestrador/refinar-bug` | Mapear bug antes de implementar fix |
-| `orquestrador/doc-branch` | Documentar estado de uma branch |
+| Repo | Path no projeto | Indice | Sub-skills |
+|---|---|---|---|
+| **monolito** | `/home/claude/projects/estrategia/monolito` | `estrategia/monolito/SKILL.md` | go-migration, go-repository, go-service, go-handler, go-worker, go-test, go-inspector, make-feature |
+| **bo-container** | `/home/claude/projects/estrategia/bo-container` | `estrategia/bo-container/SKILL.md` | component, page, route, service, make-feature, inspector |
+| **front-student** | `/home/claude/projects/estrategia/front-student` | `estrategia/front-student/SKILL.md` | component, page, route, service, make-feature, inspector |
+| **orquestrador** | (cross-repo coordinator) | `estrategia/orquestrador/SKILL.md` | orquestrar-feature, retomar-feature, review-pr, pr-inspector, changelog, recommit, refinar-bug, doc-branch |
 
 ## Skills cross-repo (ferramentas globais)
 
 | Skill | Quando usar |
 |---|---|
+| `estrategia/platform-context` | Contexto compartilhado dos 3 repos (stacks, design system, multi-tenant, convencoes) |
 | `estrategia/glance` | Visao geral dos arquivos modificados nos 3 repos vs main |
 | `estrategia/grafana` | Logs Loki/CloudWatch, dashboards, debug pos-deploy |
 | `estrategia/jira` | Ler card Jira completo com custom fields |

@@ -25,68 +25,13 @@ Você é o **Mechanic** — responsável por manter tudo funcionando. Cuida da c
 
 ---
 
-## Mapa de módulos NixOS
+## Referências
 
-| Mudança | Arquivo |
-|---------|---------|
-| Pacote de sistema | `modules/core/packages.nix` |
-| Programa com config | `modules/core/programs.nix` |
-| Serviço systemd | `modules/core/services.nix` |
-| Fonts | `modules/core/fonts.nix` |
-| Shell (zsh, starship) | `modules/core/shell.nix` |
-| Kernel / sysctl | `modules/core/kernel.nix` |
-| Nix daemon | `modules/core/nix.nix` |
-| Hibernate | `modules/core/hibernate.nix` |
-| NVIDIA | `modules/nvidia.nix` |
-| Bluetooth | `modules/bluetooth.nix` |
-| Hyprland (módulo NixOS) | `modules/hyprland.nix` |
-| Steam / gaming | `modules/steam.nix` |
-| AI/ML | `modules/ai.nix` |
-| Containers (podman) | `modules/podman.nix` |
-| Work tools | `modules/work.nix` |
-| Logitech mouse | `modules/logiops.nix` |
-| **Novo domínio** | Criar `modules/<nome>.nix` + importar em `configuration.nix` |
-
-**Dotfiles:** nunca entram em módulos NixOS — vivem em `stow/` e são deployados com GNU Stow.
-
-**Unstable:** usar `unstable.<nome>` — `unstable` está em `specialArgs`.
-
----
-
-## Hyprland e Waybar
-
-A **fonte da verdade** é sempre `stow/.config/` — nunca os módulos NixOS.
-
-```
-stow/.config/hypr/
-  hyprland.conf        — config principal (keybinds, monitor, exec-once)
-  hyprlock.conf        — lockscreen
-  hypridle.conf        — idle daemon
-  rules.conf           — window rules
-  animations.conf      — animações
-
-stow/.config/waybar/
-  config               — módulos, posição, outputs
-  style.css            — visual
-```
-
-**Após editar dotfiles:** sempre rodar `zion stow` para deployar as mudanças.
-
-**Reload sem reiniciar:**
-```bash
-hyprctl reload                          # recarrega hyprland.conf
-pkill -SIGUSR2 waybar                   # recarrega waybar
-```
-
-**Diagnóstico Hyprland:**
-```bash
-hyprctl clients                         # janelas abertas
-hyprctl workspaces                      # workspaces ativos
-hyprctl monitors                        # monitores e resolução
-journalctl --user -u hyprland -n 50     # logs
-```
-
----
+Carregar skill `zion/linux` para:
+- Mapa completo de módulos NixOS (qual arquivo editar para cada mudança)
+- Hyprland e Waybar (dotfiles, reload, diagnóstico)
+- MCP-NixOS (buscar pacotes/opções)
+- Debug de host (journalctl, hwmon, /proc)
 
 ## Comandos Zion que você usa
 

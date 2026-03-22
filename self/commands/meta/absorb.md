@@ -55,7 +55,7 @@ Para cada item encontrado na Fase 1:
 | Padrão do projeto específico (ex: como modais funcionam neste repo) | `memory/project_*.md` |
 | Convenção de código que se repete | skill relevante do projeto |
 | Comportamento corrigido de Claude | `memory/feedback_*.md` |
-| Workflow de investigação/debug que funcionou | `zion/skills/tools/debug/SKILL.md` ou nova skill |
+| Workflow de investigação/debug que funcionou | `skills/code/debug/SKILL.md` ou nova skill |
 | Contrato de componente / API key insight | skill do projeto |
 | Gap confirmado (algo que deveria existir como skill/command mas não existe) | criar skill/command ou registrar em inbox |
 
@@ -149,7 +149,7 @@ Para cada prompt/skill importante, traga o CONTEUDO (nao apenas o nome).
 ```
 Agent subagent_type=Explore prompt="
 Mapeie as skills e capacidades atuais do Zion:
-1. Todos os SKILL.md em /zion/skills/ — nome e descricao
+1. Todos os SKILL.md em /skills/ — nome e descricao
 2. Commands em /zion/commands/ — nome e proposito
 3. /zion/system/DIRETRIZES.md — regras cross-cutting
 4. /zion/agents/ — agentes disponiveis
@@ -237,7 +237,7 @@ Identifique:
 | Preferência do usuário | `memory/user_*.md` |
 | Contexto de projeto | `memory/project_*.md` |
 | Referência externa | `memory/reference_*.md` |
-| Melhoria em skill existente | editar `zion/skills/*/SKILL.md` |
+| Melhoria em skill existente | editar `skills/*/SKILL.md` |
 | Comportamento de agente mudou | editar `zion/agents/*/agent.md` |
 | Regra fundamental | sugerir via inbox (não editar CLAUDE.md direto) |
 

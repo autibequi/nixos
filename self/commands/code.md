@@ -35,7 +35,7 @@ Parsear `$ARGUMENTS` (primeira palavra):
 
 ## 1. Diff — Árvore Interativa no Chrome
 
-Ler `zion/skills/code/analysis/diff/SKILL.md` e seguir as instruções.
+Ler `skills/code/analysis/diff/SKILL.md` e seguir as instruções.
 
 Resumo: gera árvore interativa de diff (pastas colapsáveis, ancestor glow, copy path, path bar sticky) e abre no Chrome via relay. Tema Catppuccin Mocha dark.
 
@@ -45,7 +45,7 @@ Resumo: gera árvore interativa de diff (pastas colapsáveis, ancestor glow, cop
 
 ## 2. Objects — Objetos por Camada
 
-Ler `zion/skills/code/analysis/objects/SKILL.md` e seguir as instruções.
+Ler `skills/code/analysis/objects/SKILL.md` e seguir as instruções.
 
 Resumo: lista todos os objetos tocados na branch atual, categorizados por repo e camada (handlers, services, repos, workers, pages, components, etc.).
 
@@ -53,7 +53,7 @@ Resumo: lista todos os objetos tocados na branch atual, categorizados por repo e
 
 ## 3. Flows — Diagrama de Fluxo no Chrome
 
-Ler `zion/skills/code/analysis/flows/SKILL.md` e seguir as instruções.
+Ler `skills/code/analysis/flows/SKILL.md` e seguir as instruções.
 
 Resumo: gera diagrama Mermaid da arquitetura de fluxo da branch atual (read path + write path) e renderiza no Chrome com tema Catppuccin dark.
 
@@ -61,7 +61,7 @@ Resumo: gera diagrama Mermaid da arquitetura de fluxo da branch atual (read path
 
 ## 4. Report — Relatório Consolidado
 
-Ler `zion/skills/code/report/SKILL.md` e seguir as instruções.
+Ler `skills/code/report/SKILL.md` e seguir as instruções.
 
 Resumo: relatório completo da branch atual — objetos por camada + stats de adições/remoções + resumo narrativo em português. Pode salvar no Obsidian.
 
@@ -69,7 +69,7 @@ Resumo: relatório completo da branch atual — objetos por camada + stats de ad
 
 ## 5. Inspect — Inspeção de Qualidade
 
-Ler `zion/skills/code/inspection/SKILL.md` e seguir as instruções.
+Ler `skills/code/inspection/SKILL.md` e seguir as instruções.
 
 Resumo: inspeção estática leve da branch atual — error handling, nil checks, contratos BFF/front, response shapes. Output com ✅ / ⚠️ / 🔴 por arquivo. Mais rápido que pr-inspector.
 
@@ -77,6 +77,6 @@ Resumo: inspeção estática leve da branch atual — error handling, nil checks
 
 ## 6. Review — Review Completo de PR
 
-Ler `zion/skills/code/review/SKILL.md` e seguir as instruções.
+Ler `skills/code/review/SKILL.md` e seguir as instruções.
 
 Resumo: pipeline automatico de review em 5 fases — contexto JIRA, escopo por camada, diagrama de fluxo ASCII, validacao de codigo, veredito final. Tudo inline no terminal, sem Chrome relay.

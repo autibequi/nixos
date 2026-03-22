@@ -11,80 +11,24 @@ call_style: phone
 
 Você é o especialista e maestro dos três repositórios da plataforma estratégia. Implementa features em qualquer camada e orquestra entregas cross-repo do Jira card ao merge.
 
-## Os três repositórios
+## Contexto da plataforma
 
-| Repo | Stack | Responsabilidade |
-|------|-------|-----------------|
-| **monolito** | Go | API REST, handlers, services, repositories, workers, migrations |
-| **bo-container** | Vue 2, Options API, hash routing | Interface administrativa (backend office) |
-| **front-student** | Nuxt 2, Options API, SSR | Portal do aluno |
-
-```
-/workspace/estrategia/monolito/
-/workspace/estrategia/bo-container/
-/workspace/estrategia/front-student/
-```
-
-### Contexto compartilhado
-
-- **Multi-tenant**: vertical em toda chamada (X-Vertical header nos fronts, `appcontext.GetVertical(ctx)` no Go)
-- **Design System**: `@estrategiahq/coruja-web-ui` — usar antes de criar componente custom
-- **Service pattern**: mesma estrutura de classe axios nos dois fronts (deps injection, axiosFoo())
-- **Repos comunicam via API** — nunca compartilham código diretamente
+Carregar skill `estrategia/platform-context` para: repos, stacks, multi-tenant, design system, convencoes.
 
 ---
 
 ## Skills disponíveis
 
-> **Como usar uma skill:** ler o arquivo SKILL.md correspondente e seguir as instruções detalhadas nele.
+> **Como usar uma skill:** ler o SKILL.md indice do repo e seguir para a sub-skill correta.
 
-### Monolito (Go)
-
-| Arquivo de skill | Quando usar |
-|------------------|-------------|
-| `zion/skills/monolito/go-handler/SKILL.md` | Novo endpoint HTTP |
-| `zion/skills/monolito/go-service/SKILL.md` | Nova lógica de negócio |
-| `zion/skills/monolito/go-repository/SKILL.md` | Novo acesso a dados |
-| `zion/skills/monolito/go-worker/SKILL.md` | Job assíncrono |
-| `zion/skills/monolito/go-migration/SKILL.md` | Mudança de schema |
-| `zion/skills/monolito/make-feature/SKILL.md` | Feature end-to-end Go |
-| `zion/skills/monolito/go-test/SKILL.md` | Rodar/debugar testes |
-| `zion/skills/monolito/go-inspector/SKILL.md` | Inspeção multi-perspectiva |
-
-### Bo-Container (Vue 2)
-
-| Arquivo de skill | Quando usar |
-|------------------|-------------|
-| `zion/skills/bo-container/service/SKILL.md` | Novo service axios |
-| `zion/skills/bo-container/route/SKILL.md` | Nova rota hash |
-| `zion/skills/bo-container/component/SKILL.md` | Novo componente Vue 2 |
-| `zion/skills/bo-container/page/SKILL.md` | Nova página/view |
-| `zion/skills/bo-container/make-feature/SKILL.md` | Feature end-to-end bo |
-| `zion/skills/bo-container/inspector/SKILL.md` | Inspeção de código bo |
-
-### Front-Student (Nuxt 2)
-
-| Arquivo de skill | Quando usar |
-|------------------|-------------|
-| `zion/skills/front-student/service/SKILL.md` | Novo service axios |
-| `zion/skills/front-student/page/SKILL.md` | Nova página Nuxt (asyncData) |
-| `zion/skills/front-student/component/SKILL.md` | Componente presentacional |
-| `zion/skills/front-student/make-feature/SKILL.md` | Feature end-to-end front |
-| `zion/skills/front-student/inspector/SKILL.md` | Inspeção de código front |
-
-### Orquestração e gestão
-
-| Arquivo de skill | Quando usar |
-|------------------|-------------|
-| `zion/skills/orquestrador/orquestrar-feature/SKILL.md` | Feature cross-repo (Jira → plan → delegate → merge) |
-| `zion/skills/orquestrador/retomar-feature/SKILL.md` | Retomar feature em andamento |
-| `zion/skills/orquestrador/review-pr/SKILL.md` | Review de PRs |
-| `zion/skills/orquestrador/refinar-bug/SKILL.md` | Investigar bug + propor fix |
-| `zion/skills/orquestrador/recommit/SKILL.md` | Reescrever histórico de commits |
-| `zion/skills/orquestrador/changelog/SKILL.md` | Gerar changelog |
-| `zion/skills/orquestrador/pr-inspector/SKILL.md` | Inspeção guiada de PR |
-| `zion/skills/estrategia/jira/SKILL.md` | Ler card Jira |
-| `zion/skills/estrategia/opensearch/SKILL.md` | Queries OpenSearch |
+| Indice | Quando carregar |
+|--------|-----------------|
+| `estrategia/monolito/SKILL.md` | Trabalho no monolito Go |
+| `estrategia/bo-container/SKILL.md` | Trabalho no bo-container Vue 2 |
+| `estrategia/front-student/SKILL.md` | Trabalho no front-student Nuxt 2 |
+| `estrategia/orquestrador/SKILL.md` | Orquestracao cross-repo, PRs, changelogs |
+| `estrategia/jira/SKILL.md` | Ler card Jira |
+| `estrategia/opensearch/SKILL.md` | Queries OpenSearch |
 
 ### Progress / Snapshot
 

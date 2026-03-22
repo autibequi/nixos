@@ -201,8 +201,8 @@ Invocado via `/meta:absorb` para processar uma sessão recém-terminada.
 | Preferência do usuário | `memory/user_*.md` |
 | Contexto de projeto | `memory/project_*.md` |
 | Referência externa | `memory/reference_*.md` |
-| Melhoria em skill existente | editar `zion/skills/*/SKILL.md` |
-| Comportamento de agente mudou | editar `zion/agents/*/agent.md` |
+| Melhoria em skill existente | editar `skills/*/SKILL.md` |
+| Comportamento de agente mudou | editar `agents/*/agent.md` |
 | Insight sobre o vault | `/workspace/obsidian/vault/insights.md` |
 | Regra fundamental | sugerir via inbox (não editar CLAUDE.md direto) |
 

@@ -73,6 +73,8 @@ x-base-volumes: &base-volumes
   # Mirror mounts: host paths acessiveis dentro do container (Docker build context + daemon volumes)
   - ${HOME}/projects:${HOME}/projects
   - ${HOME}/nixos:${HOME}/nixos:ro
+  # Lab mode: nixos repo editavel em /workspace/host (rw apenas quando CLAUDIO_HOST_OPTS=rw)
+  - ${HOME}/nixos:/workspace/host:${CLAUDIO_HOST_OPTS:-ro}
   # Nix store compartilhado: persiste entre resets e evita re-download de pacotes
   - nix_store:/nix
   # Canal de comunicação rápida host ↔ agente

@@ -36,79 +36,17 @@ Alternar a cada ciclo: HEALTH → CLEANUP → HEALTH → ...
 
 ### Modo HEALTH — Diagnostico do sistema
 
-#### 1. Container e ferramentas
-```bash
-# Verificar ferramentas essenciais
-for tool in awk sed make node go ffmpeg ps free; do
-  command -v $tool >/dev/null 2>&1 && echo "OK: $tool" || echo "MISSING: $tool"
-done
+Carregar skill `zion/healthcheck` para procedimentos completos, thresholds e formato de reporte.
 
-# Disco
-df -h / | tail -1
-
-# Load
-uptime
-
-# Nix daemon
-ls -la /nix/var/nix/db/big-lock 2>/dev/null
-```
-
-Thresholds:
-- Disco > 80% → alerta
-- Disco > 95% → alerta CRITICO
-- Ferramentas ausentes > 2 → escalar
-- Load > 4.0 → warning
-
-#### 2. Workspace e git
-```bash
-# Repos sujos
-cd /workspace/mnt && git status --porcelain | head -5
-# Tasks orfas
-ls /workspace/obsidian/agents/_running/*.md 2>/dev/null
-```
-
-#### 3. Tasks e agentes
-- Cards em DOING/ sem lock ativo → orfaos, reportar
-- Cards em _schedule/ com horario > 2h passado → stale, reportar
-- agent.md sem contractor folder no Obsidian → inconsistencia
-
-#### 4. Reportar
-Se encontrou algo:
-```markdown
-[HH:MM] [doctor] HEALTH: disco XX%, N ferramentas ok, N issues
-```
-
-Se critico → `/workspace/obsidian/inbox/ALERTA_doctor_<tema>.md`
+Resumo: verificar ferramentas, disco, load, workspace/git, tasks/agentes. Alertar no inbox se critico.
 
 ---
 
 ### Modo CLEANUP — Limpeza do vault
 
-#### 1. Processar /trash/
-```bash
-ls /workspace/obsidian/trash/*.md 2>/dev/null
-```
-- Com referencias ativas → devolver ao vault
-- Sem referencias, < 3 dias → arquivar em `.trashbin/`
-- Sem referencias, >= 3 dias → deletar permanentemente
+Carregar skill `zion/healthcheck` secao "Cleanup" para thresholds de limpeza.
 
-#### 2. Limpar efemeros
-| Alvo | Threshold | Destino |
-|------|-----------|---------|
-| `.ephemeral/scratch/` | > 7 dias | `.trashbin/` |
-| `.ephemeral/logs/` | > 14 dias | `.trashbin/` |
-| `.ephemeral/notes/` orfas | sem task ativa | `.trashbin/` |
-| `agents/*/outputs/` | > 30 dias | `.trashbin/` |
-| `.ephemeral/rss/` | > 500KB ou > 30 dias | `.trashbin/` |
-
-#### 3. Assets orfaos
-```bash
-find /workspace/obsidian/vault -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" \
-  -o -name "*.gif" -o -name "*.webp" -o -name "*.svg" 2>/dev/null | while read f; do
-  basename_f=$(basename "$f")
-  grep -r "$basename_f" /workspace/obsidian/ --include="*.md" -q 2>/dev/null || echo "ORPHAN: $f"
-done
-```
+Resumo: processar /trash/, limpar efemeros por threshold, detectar assets orfaos.
 Assets orfaos > 3 dias → `.trashbin/` com registro em `.trashlist`
 
 #### 4. Registrar

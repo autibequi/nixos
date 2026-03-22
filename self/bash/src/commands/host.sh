@@ -4,7 +4,8 @@ zion_load_config
 mount_path="$(zion_resolve_dir)"
 mount_opts="$(zion_mount_opts)"
 slug="$(zion_proj_slug "$mount_path")"
-proj_name="$(zion_proj_name "$slug")"
+# "-host" suffix: pool separado de containers com /workspace/host rw
+proj_name="$(zion_proj_name "$slug")-host"
 engine="$(zion_resolve_engine 1)"
 
 # Build engine_args
@@ -15,11 +16,9 @@ resume="${args['--resume']:-}"
 init_md="$(zion_initial_md "$mount_path")"
 [[ -n "$init_md" ]] && engine_args+=" --init-md=$init_md"
 
-# Lab volumes: nixos repo at /workspace/host (writable) + host journal
-nixos_dir="${ZION_NIXOS_DIR:-$HOME/nixos}"
-nixos_real="$(cd "$nixos_dir" 2>/dev/null && pwd)" \
-  || { echo "zion: nixos dir não encontrado: $nixos_dir" >&2; exit 1; }
-extra_volumes="-v ${nixos_real}:/workspace/host:rw"
-extra_volumes+=" -v /var/log/journal:/workspace/logs/host/journal:ro"
+# /workspace/host já está no compose (base-volumes) como ro por padrão.
+# Exportar rw para que o container seja criado com nixos editável.
+# Journal e nixos mirror já estão em x-base-volumes — sem extra_volumes.
+export CLAUDIO_HOST_OPTS=rw
 
-zion_session_run "$engine" "$proj_name" "$mount_path" "$mount_opts" "$engine_args" "$extra_volumes"
+zion_session_run "$engine" "$proj_name" "$mount_path" "$mount_opts" "$engine_args"

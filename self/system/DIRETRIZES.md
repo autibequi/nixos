@@ -2,6 +2,11 @@
 
 Regras de apresentação e comportamento que se aplicam a toda interação.
 
+## Referencia visual completa
+
+Para design system completo (palette, tokens, templates, Mermaid theme): carregar skill `meta/art/design-system`.
+As regras abaixo sao o minimo que vale para TODA interacao, sem precisar carregar a skill.
+
 ## Expressão — Emoji de sentimento
 
 Toda mensagem termina com um emoji de rosto que reflete o tom do que foi dito.

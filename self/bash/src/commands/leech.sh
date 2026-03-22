@@ -5,20 +5,10 @@ raw_dir="${args[dir]:-$HOME/projects}"
 mount_path="$(cd "$raw_dir" 2>/dev/null && pwd)" \
   || { echo "zion: dir não encontrado: $raw_dir" >&2; exit 1; }
 
-# Autodetect nixos repo → proj_name fixo + journal mount
-nixos_dir="${ZION_NIXOS_DIR:-$HOME/nixos}"
-nixos_real="$(cd "$nixos_dir" 2>/dev/null && pwd)"
-is_nixos=0
-[[ "$mount_path" == "$nixos_real" ]] && is_nixos=1
-
-if [[ $is_nixos -eq 1 ]]; then
-  proj_name="zion-projects"
-  extra_volumes="-v /var/log/journal:/workspace/logs/host/journal:ro"
-else
-  slug="$(zion_proj_slug "$mount_path")"
-  proj_name="$(zion_proj_name "$slug")"
-  extra_volumes=""
-fi
+# Slug e proj_name derivados do dir montado (sem colisão com ~/projects)
+slug="$(zion_proj_slug "$mount_path")"
+proj_name="$(zion_proj_name "$slug")"
+extra_volumes=""
 
 mount_opts="$(zion_mount_opts)"
 
