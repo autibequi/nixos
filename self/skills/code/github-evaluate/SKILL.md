@@ -268,10 +268,10 @@ Ao avaliar um dev novo, **ler todos os reports existentes** no vault para:
 | Dev | Layer | Errors | Tests | Reviews | Observ | Simplif | Prod | Idioms | Nivel | Arquetipo |
 |-----|:-----:|:------:|:-----:|:-------:|:------:|:-------:|:----:|:------:|:-----:|-----------|
 | Washington | +++++ | ++++ | ++++ | +++++ | +++++ | +++ | ++++ | ++++ | L4+ | Arquiteto Meticuloso |
-| Pedro Castro | +++ | +++ | ++ | ++++ | +++ | ++++ | +++++ | +++ | L4 Staff | Operador Pragmatico |
+| Pedro Castro | +++ | +++ | ++ | ++++ | +++ | ++++ | +++++ | +++ | Staff | Operador Pragmatico |
 | Molina | ++++ | ++++ | +++ | ++++ | ++ | +++++ | ++++ | +++ | L4 | Simplificador Cirurgico |
 | Marquesini | ++++ | ++++ | ++ | +++ | +++ | +++ | +++ | +++ | L4 | Incrementalista Mobile |
-| William | +++++ | +++++ | +++++ | ++++ | ++++ | +++ | ++++ | +++++ | L4+ | Eng. Qualidade Sistematico |
+| William | +++++ | +++++ | +++++ | ++++ | ++++ | +++ | ++++ | +++++ | L4 | Eng. Qualidade Sistematico |
 | Pedrinho | ++++ | ++++ | +++ | ++++ | +++ | ++++ | ++++ | ++++ | L3+ | Arquiteto Consciente |
 | Ronan | +++ | +++ | + | + | ++ | +++ | +++ | +++ | L3-L4 | Pragmatico-Incrementalista |
 
