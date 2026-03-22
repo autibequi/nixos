@@ -5844,12 +5844,6 @@ parse_requirements() {
       shift $#
       ;;
 
-    init)
-      action="init"
-      shift
-      zion_init_parse_requirements "$@"
-      shift $#
-      ;;
 
     set)
       action="set"
@@ -5939,6 +5933,13 @@ parse_requirements() {
       action="host"
       shift
       zion_host_parse_requirements "$@"
+      shift $#
+      ;;
+
+    inbox | ib)
+      action="inbox"
+      shift
+      zion_inbox_parse_requirements "$@"
       shift $#
       ;;
 
