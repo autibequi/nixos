@@ -1,36 +1,23 @@
-# Lista o inbox ou adiciona uma entrada
+# Lista o inbox
 local obsidian="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
-local inbox_file="$obsidian/inbox/inbox.md"
+local inbox_dir="$obsidian/inbox"
 
 # Fallback path
-if [ ! -f "$inbox_file" ]; then
-  for try in "/workspace/obsidian/inbox/inbox.md" "$HOME/obsidian/inbox/inbox.md"; do
-    [ -f "$try" ] && inbox_file="$try" && break
+if [ ! -d "$inbox_dir" ]; then
+  for try in "/workspace/obsidian/inbox" "$HOME/obsidian/inbox"; do
+    [ -d "$try" ] && inbox_dir="$try" && break
   done
 fi
 
-message="${args[message]*}"
+if [ ! -d "$inbox_dir" ]; then
+  echo "Inbox nao encontrado: $inbox_dir"
+  exit 1
+fi
 
-if [ -z "$message" ]; then
-  # Sem args: mostrar inbox
-  if [ -f "$inbox_file" ]; then
-    cat "$inbox_file"
-  else
-    echo "Inbox nao encontrado: $inbox_file"
-    exit 1
-  fi
+files=$(ls -1 "$inbox_dir" 2>/dev/null)
+if [ -z "$files" ]; then
+  echo "Inbox vazio."
 else
-  # Com texto: adicionar entrada
-  if [ ! -f "$inbox_file" ]; then
-    echo "Inbox nao encontrado: $inbox_file"
-    exit 1
-  fi
-  DATE=$(date +%Y-%m-%d)
-  cat >> "$inbox_file" << ENTRY
-
-### [user] ${DATE} — nota
-
-${message}
-ENTRY
-  echo "Adicionado ao inbox."
+  echo "Inbox ($inbox_dir):"
+  echo "$files" | sed 's/^/  /'
 fi
