@@ -107,7 +107,7 @@ fi
 
 # ── Last tick info ────────────────────────────────────────────────────────────
 _tick_info=""
-_last_tick=$(journalctl -u zion-auto.service --no-pager -n 1 -o short-iso 2>/dev/null | grep -v "^--\|^Journal\|^Hint" | awk '{print $1}' | grep -E '^[0-9]{4}-' | tail -1)
+_last_tick=$(journalctl -u zion-tick.service --no-pager -n 1 -o short-iso 2>/dev/null | grep -v "^--\|^Journal\|^Hint" | awk '{print $1}' | grep -E '^[0-9]{4}-' | tail -1)
 if [ -n "$_last_tick" ]; then
   _tick_epoch=$(date -d "$_last_tick" +%s 2>/dev/null || echo 0)
   if [ "$_tick_epoch" -gt 0 ]; then

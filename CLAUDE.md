@@ -119,12 +119,14 @@ Breakroom (memoria/estado): `/workspace/obsidian/agents/<nome>/memory.md`
 
 | Operacao | Comando |
 |----------|---------|
-| Timer automatico (10min) | `zion auto` (systemd timer) |
+| Tick (todos agents+tasks) | `zion tick` (systemd timer 10min) |
 | Rodar agent ou task | `zion run <nome> [-s N]` |
+| Lanca tasker (tasks) | `zion tasker` ou `zion tasks run` |
 | Listar agents | `zion agents` |
-| Ver execucoes agents | `zion agents log` |
+| Activity log agents | `zion agents log` |
 | Conversar com agent | `zion agents phone <nome>` |
-| Ver execucoes tasks | `zion tasks log` |
+| Dashboard tasks | `zion tasks status` |
+| Kanban tasks | `zion tasks log` |
 
 ---
 
