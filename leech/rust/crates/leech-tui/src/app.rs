@@ -162,10 +162,17 @@ impl App {
         self.log_scroll = 0;
     }
 
-    /// Cycle the selected environment for the current service (only for dk services).
+    /// Cycle the selected environment for the current service (only when stopped).
     pub fn cycle_env(&mut self) {
-        if self.cursor_idx < DK_SERVICES.len() {
-            let idx = self.cursor_idx;
+        if self.cursor_idx >= DK_SERVICES.len() {
+            return;
+        }
+        let idx = self.cursor_idx;
+        let svc = DK_SERVICES[idx];
+        let app_container = format!("leech-dk-{svc}-app");
+        let is_running = self.snapshot.dk_services.iter()
+            .any(|d| d.name == app_container && d.is_up);
+        if !is_running {
             self.svc_envs[idx] = (self.svc_envs[idx] + 1) % ENVS.len();
         }
     }

@@ -5,7 +5,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::Paragraph;
 use ratatui::Frame;
 
-use crate::app::{App, DK_SERVICES};
+use crate::app::{App, DK_SERVICES, ENVS};
 use crate::theme;
 
 /// Spinner frames for pending actions (◐◓◑◒ cycling ~1s).
@@ -44,6 +44,7 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             let vert_pad   = if is_last_svc { "  " } else { "\u{2502} " };
             let marker = if is_selected { "\u{25b6}" } else { " " };
             let style = if is_selected { theme::selected() } else { theme::dim() };
+            let env = ENVS[app.svc_envs[i]];
 
             lines.push(Line::from(vec![
                 Span::raw("  "),
@@ -53,7 +54,8 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                 Span::raw(" "),
                 Span::styled("\u{25cb}", theme::down_icon()),
                 Span::raw(" "),
-                Span::styled(format!("{svc:<18}"), style),
+                Span::styled(format!("{svc:<14}"), style),
+                Span::styled(format!(" {env:<4}"), theme::dim()),
                 Span::raw(" "),
                 Span::styled("stop ", theme::dim()),
             ]));
@@ -127,6 +129,7 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                     .as_ref()
                     .map(|(_, s)| s.as_str())
                     .unwrap_or("…");
+                let env = ENVS[app.svc_envs[i]];
                 let spans = vec![
                     Span::raw("  "),
                     Span::styled(svc_branch.to_string(), theme::tree_branch()),
@@ -135,7 +138,8 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                     Span::raw(" "),
                     Span::styled(frame, theme::pending_icon()),
                     Span::raw(" "),
-                    Span::styled(format!("{svc:<18}"), name_style),
+                    Span::styled(format!("{svc:<14}"), name_style),
+                    Span::styled(format!(" {env:<4}"), theme::dim()),
                     Span::raw(" "),
                     Span::styled(format!("{:<5}", "…"), theme::pending_icon()),
                     Span::raw("  "),
@@ -173,6 +177,7 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                 )
             };
 
+            let env = ENVS[app.svc_envs[i]];
             let mut spans = vec![
                 Span::raw("  "),
                 Span::styled(svc_branch.to_string(), theme::tree_branch()),
@@ -181,7 +186,8 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                 Span::raw(" "),
                 Span::styled(status_icon, status_style),
                 Span::raw(" "),
-                Span::styled(format!("{svc:<18}"), name_style),
+                Span::styled(format!("{svc:<14}"), name_style),
+                Span::styled(format!(" {env:<4}"), theme::dim()),
                 Span::raw(" "),
                 Span::styled(format!("{status_text:<5}"), theme::uptime()),
             ];
