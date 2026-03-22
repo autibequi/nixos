@@ -37,6 +37,9 @@ with lib;
   # HyprIdle
   services.hypridle.enable = true;
 
+  # Register librsvg as gdk-pixbuf SVG loader (fixes SVG icons in rofi, waybar, etc)
+  programs.gdk-pixbuf.modulePackages = [ pkgs.librsvg ];
+
   environment.systemPackages = with pkgs; [
     zenity
     hyprpicker
@@ -65,6 +68,9 @@ with lib;
 
     # hyprcursor
     rose-pine-hyprcursor
+
+    # SVG icon rendering (needed by rofi show-icons with Papirus)
+    librsvg
 
     # Dark/Light Theme Toggle - GTK theming
     glib # gsettings CLI

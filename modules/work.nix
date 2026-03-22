@@ -78,6 +78,10 @@
 
     127.0.0.1 api.local.estrategia-sandbox.com.br
     127.0.0.1 admin.local.estrategia-sandbox.com.br
+    127.0.0.1 carreiras-juridicas.local.estrategia-sandbox.com.br
+    127.0.0.1 concursos.local.estrategia-sandbox.com.br
+    127.0.0.1 medicina.local.estrategia-sandbox.com.br
+    127.0.0.1 militares.local.estrategia-sandbox.com.br
 
     127.0.0.1 local.estrategia.com
 

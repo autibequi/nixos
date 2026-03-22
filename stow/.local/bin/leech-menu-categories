@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# rofi script mode: outputs category entries for leech-menu combi
+# When rofi selects one, it prints the selection to stdout and exits
+
+if [ -z "${1:-}" ]; then
+    # First call: list categories
+    echo " Capture"
+    echo " Toggle"
+    echo " Style"
+    echo "󱙺 Leech"
+    echo "⏻ System"
+else
+    # Second call: user selected something — launch submenu
+    case "$1" in
+        *Capture)  leech-menu capture ;;
+        *Toggle)   leech-menu toggle ;;
+        *Style)    leech-menu style ;;
+        *Leech)    leech-menu leech ;;
+        *System)   leech-menu system ;;
+    esac
+fi
