@@ -1,11 +1,6 @@
 x-env-base: &env-base
+  # Tokens e boot flags vêm de ~/.zion (sourced pelo entrypoint + todos os hooks)
   PATH: /home/claude/.local/bin:/home/claude/.nix-profile/bin:/workspace/self/bash:/usr/bin:/bin
-  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
-  CURSOR_API_KEY: ${CURSOR_API_KEY:-}
-  CLAUDE_SESSION: ${CLAUDE_SESSION:-}
-  GH_TOKEN: ${GH_TOKEN:-}
-  GRAFANA_URL: ${GRAFANA_URL:-}
-  GRAFANA_TOKEN: ${GRAFANA_TOKEN:-}
   CLAUDE_ENV: container
   WAYLAND_DISPLAY: ${WAYLAND_DISPLAY:-wayland-1}
   XDG_RUNTIME_DIR: /run/user/1000

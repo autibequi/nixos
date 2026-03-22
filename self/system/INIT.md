@@ -39,30 +39,44 @@
 - **Uso:** edite direto no host para passar strings, mensagens ou overrides de config ao agente
 - **Exemplo:** `MESSAGE=revisa o PR do monolito antes de qualquer coisa`
 
+### Flags conhecidas do ~/.zion
+
+| Flag | Valores | Significado |
+|------|---------|-------------|
+| `RELAY_ONLINE` | `true`/`false` | Chrome com CDP (porta 9222) aberto no host. **Sempre confirmar com live check** antes de usar o relay: `python3 /workspace/self/scripts/chrome-relay.py status`. Flag é dica do usuario; live check é fonte da verdade. |
+
 ---
 
 ## Obsidian — Cerebro do Sistema
 
-O vault Obsidian esta montado em `/workspace/obsidian/`. **Ler antes de agir:**
+O vault Obsidian esta montado em `/workspace/obsidian/`. **Regras no sistema Zion — ler antes de agir:**
 
-- `/workspace/obsidian/BOARDRULES.md` — regras gerais, mapa do vault, roster, delegacao
-- `/workspace/obsidian/agents/BREAKROOMRULES.md` — protocolo dos agents
+- `/workspace/self/system/BOARDRULES.md` — regras gerais, mapa do vault, roster, delegacao
+  _(necessario para qualquer interacao com `/workspace/obsidian/`)_
+- `/workspace/self/system/BREAKROOMRULES.md` — protocolo dos agents
+  _(necessario para qualquer interacao com `/workspace/obsidian/agents/`)_
+
+Os stubs `/workspace/obsidian/BOARDRULES.md` e `/workspace/obsidian/agents/BREAKROOMRULES.md`
+existem apenas para o grafo do Obsidian — o conteudo real esta nos paths acima.
 
 ### Estrutura
 
 ```
 /workspace/obsidian/
-|- BOARDRULES.md        Regras do sistema
+|- BOARDRULES.md        Stub → /workspace/self/system/BOARDRULES.md
 |- DASHBOARD.md         Central de controle (Dataview)
 |- FEED.md              Feed RSS
+|- projects/            Projetos de trabalho + negocio
 |- agents/              11 agents ativos (breakrooms)
 |  |- _schedule/        Cards agendados
 |  |- _running/         Card em execucao
-|  |- BREAKROOMRULES.md
+|  |- BREAKROOMRULES.md Stub → /workspace/self/system/BREAKROOMRULES.md
 |- inbox/               Agents → user (feed.md, alertas, cartas)
 |- outbox/              User → hermes processa
 |- tasks/               TODO/ → DOING/ → DONE/
 |- vault/               Conhecimento persistente
+   |- WISEMAN.md        Grafo do sistema (wiseman atualiza)
+   |- insights.md       Hub de insights cross-agent
 ```
 
 ### Agents (11 ativos)
@@ -108,9 +122,21 @@ zion tasks work           # executa tasks vencidas
 - **Interativo**: Author=Pedrinho, Committer=Claudinho
 - **Worker**: Author=Buchecha, Committer=Buchecha
 
-## Flags Efemeras
-- **auto-commit**: `.ephemeral/auto-commit` — commita sem perguntar
-- **personality-off**: `.ephemeral/personality-off` — modo neutro
+## Boot flags
+
+Todas as flags vivem em `~/.zion` — editável pelo usuário e por qualquer agente:
+
+| Flag | Default | Significado |
+|---|---|---|
+| `PERSONALITY` | `ON` | ON=persona ativa \| OFF=modo neutro |
+| `AUTOCOMMIT` | `OFF` | ON=commita sem perguntar |
+| `BETA` | `OFF` | ON=modo observação científica |
+| `ZION_DEBUG` | `OFF` | ON=DIRETRIZES+persona+avatar no boot |
+| `HEADLESS` | `0` | 1=worker autônomo |
+| `ZION_ANALYSIS_MODE` | `0` | 1=experimento isolado |
+| `MESSAGE` | `` | mensagem livre para o agente no boot |
+
+Edite `~/.zion` → efeito no próximo boot da sessão. `.ephemeral/` flag files foram removidos.
 
 ## Cota API
 - Carregamento no boot via `---API_USAGE---`

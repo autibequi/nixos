@@ -20,24 +20,30 @@ BOOTSTRAP_SH="$WS/scripts/bootstrap.sh"
 [ -x "$BOOTSTRAP_SH" ] && "$BOOTSTRAP_SH" >&2
 
 # ── Resolve flags ────────────────────────────────────────────────
-# Salva overrides de env antes de computar defaults dos arquivos
+# 1. Salva overrides de processo (maior prioridade — ex: PERSONALITY=OFF zion run)
 _OV_PERSONALITY="${PERSONALITY:-}"
 _OV_AUTOCOMMIT="${AUTOCOMMIT:-}"
 _OV_AUTOJARVIS="${AUTOJARVIS:-}"
 
-PERSONALITY="ON"; [ -f "$WS/.ephemeral/personality-off" ] && PERSONALITY="OFF"
-AUTOCOMMIT="OFF"; [ -f "$WS/.ephemeral/auto-commit" ]    && AUTOCOMMIT="ON"
-AUTOJARVIS="OFF"; [ -f "$WS/.ephemeral/auto-jarvis" ]    && AUTOJARVIS="ON"
-BETA="OFF";       [ -f "$WS/.ephemeral/beta-mode" ]      && BETA="ON"
-ZION_DEBUG="OFF"; [ -f "$WS/.ephemeral/zion-debug" ]     && ZION_DEBUG="ON"
-ANALYSIS_MODE="${ZION_ANALYSIS_MODE:-0}"
+# 2. Carrega ~/.zion (fonte central — usuário e agentes escrevem aqui)
+_ZION_FILE="${HOME:-/home/claude}/.zion"
+[ -f "$_ZION_FILE" ] || _ZION_FILE="/.zion"
+[ -f "$_ZION_FILE" ] && { set -a; source "$_ZION_FILE" 2>/dev/null || true; set +a; }
+
+# 3. Defaults para o que não foi setado em ~/.zion
+PERSONALITY="${PERSONALITY:-ON}"
+AUTOCOMMIT="${AUTOCOMMIT:-OFF}"
+AUTOJARVIS="${AUTOJARVIS:-OFF}"
+BETA="${BETA:-OFF}"
+ZION_DEBUG="${ZION_DEBUG:-OFF}"
 HEADLESS="${HEADLESS:-0}"
+ANALYSIS_MODE="${ZION_ANALYSIS_MODE:-0}"
 [ -z "${IN_DOCKER:-}" ] && IN_DOCKER="0"
 { [ "$CLAUDE_ENV" = "container" ] || [ -f "/.dockerenv" ]; } && IN_DOCKER="1"
 [ -z "${ZION_EDIT:-}" ] && ZION_EDIT="0"
 [ -d "/workspace/host" ] && ZION_EDIT="1"
 
-# Env overrides vencem sobre defaults de arquivo (util para testes com zion hooks)
+# 4. Overrides de processo vencem sobre ~/.zion
 [ -n "$_OV_PERSONALITY" ] && PERSONALITY="${_OV_PERSONALITY^^}"
 [ -n "$_OV_AUTOCOMMIT"  ] && AUTOCOMMIT="${_OV_AUTOCOMMIT^^}"
 [ -n "$_OV_AUTOJARVIS"  ] && AUTOJARVIS="${_OV_AUTOJARVIS^^}"
@@ -77,10 +83,13 @@ echo "---/BOOT---"
 # ────────────────────────────────────────────────────────────────
 # 2. ZION CONFIG (~/.zion) — canal de comunicação rápida
 # ────────────────────────────────────────────────────────────────
-ZION_FILE="$HOME/.zion"
-[ -f "$ZION_FILE" ] || ZION_FILE="/.zion"
-if [ -f "$ZION_FILE" ]; then
-  _zion_content=$(grep -v '^#' "$ZION_FILE" | grep -v '^$' | grep '=.' 2>/dev/null || true)
+_ZION_DISPLAY="${HOME:-/home/claude}/.zion"
+[ -f "$_ZION_DISPLAY" ] || _ZION_DISPLAY="/.zion"
+if [ -f "$_ZION_DISPLAY" ]; then
+  # Mostra apenas chaves não-sensíveis com valor definido
+  _zion_content=$(grep -v '^#' "$_ZION_DISPLAY" | grep -v '^$' | grep '=.' \
+    | grep -vE '^(ANTHROPIC_API_KEY|GH_TOKEN|GRAFANA_TOKEN|CURSOR_API_KEY|CLAUDE_SESSION|DANGER|GH_TOKEN)=' \
+    2>/dev/null || true)
   if [ -n "$_zion_content" ]; then
     echo "---ZION---"
     echo "$_zion_content"

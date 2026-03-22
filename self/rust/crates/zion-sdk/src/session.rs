@@ -184,6 +184,10 @@ impl SessionRunner {
         if let Some(ref resume) = self.resume {
             if resume == "1" || resume.is_empty() {
                 claude_args.push("--resume".to_string());
+            } else if resume.contains(' ') {
+                // Single-quote para preservar espaços ao expandir em bash -c
+                let escaped = resume.replace('\'', r"'\''");
+                claude_args.push(format!("'--resume={escaped}'"));
             } else {
                 claude_args.push(format!("--resume={resume}"));
             }
@@ -204,7 +208,7 @@ impl SessionRunner {
 
         let claude_args_str = claude_args.join(" ");
         let bash_cmd = format!(
-            ". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude {claude_args_str}"
+            "bash /workspace/self/scripts/zion-agent-launch.sh {claude_args_str}"
         );
 
         let vol_args = self.volume_args();

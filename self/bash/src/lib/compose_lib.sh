@@ -297,11 +297,11 @@ zion_session_run() {
       # Resume
       if [[ "$engine_args" == *"--resume="* ]]; then
         local resume_id="${engine_args#*--resume=}"
-        resume_id="${resume_id%% *}"
         if [[ "$resume_id" == "1" ]]; then
           claude_args+=" --resume"
         else
-          claude_args+=" --resume=$resume_id"
+          # printf %q preserva espaços no nome da sessão ao expandir em bash -c
+          claude_args+=" --resume=$(printf '%q' "$resume_id")"
         fi
       elif [[ "$engine_args" == *"--resume"* ]]; then
         claude_args+=" --resume"
@@ -319,7 +319,8 @@ zion_session_run() {
 
       zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes $analysis_env \
         --entrypoint /entrypoint.sh -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" leech \
-        /bin/bash -c ". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
+        /bin/bash -c "bash /workspace/self/scripts/zion-agent-launch.sh ${claude_args}"
+      printf '\033[?25h'
       ;;
 
     cursor)

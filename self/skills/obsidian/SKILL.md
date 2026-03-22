@@ -1,42 +1,56 @@
 # Skill: Obsidian
 
-> Gestao do vault Obsidian em `/workspace/obsidian/` -- tasks, dashboards, Dataview e agentes.
+> Gestao completa do vault em `/workspace/obsidian/` — estrutura, tasks, dashboard, graph view, agentes.
+> **Regras no sistema Zion (ler antes de interagir com obsidian):**
+> - `/workspace/self/system/BOARDRULES.md` — regras, mapa, roster (qualquer interacao com /obsidian/)
+> - `/workspace/self/system/BREAKROOMRULES.md` — protocolo de agents (interacao com /obsidian/agents/)
 
 ---
 
-## Estrutura do Vault
+## Estrutura do Vault (v5.0)
 
 ```
 /workspace/obsidian/
-|- DASHBOARD.md              Dashboard central (Dataview)
-|- SETTINGS.md               Documento central (como tudo funciona + roster + protocolo)
-|- TAMAGOCHI.md              Pet virtual
-|- FEED.md                   Feed RSS atualizado
-|- FEED.config.md            Lista de feeds RSS
-|- trash/                    Lixeira do CTO (trashman processa)
+|- BOARDRULES.md             FONTE UNICA DE VERDADE (regras, roster, protocolo)
+|- DASHBOARD.md              Dashboard central (Dataview live)
+|- FEED.md                   Feed RSS (paperboy atualiza)
+|- trash/                    Lixeira do CTO (doctor processa)
 |
 |- tasks/                    Sistema kanban
 |  |- TODO/                  Cards agendados (YYYYMMDD_HH_MM_name.md)
 |  |- DOING/                 Cards em execucao
 |  |- DONE/                  Cards concluidos
-|  |- _archive/              Historico + _scheduled/
+|  |- _archive/              Historico
 |
 |- inbox/                    Novidades dos agentes -> user le
 |  |- feed.md                Append-only: [HH:MM] [agente] mensagem
 |
-|- outbox/                   Items do user -> scheduler refina -> TODO/
+|- outbox/                   Items do user -> hermes refina -> TODO/
 |
-|- vault/                    Base de conhecimento
-   |- agents/<nome>/         Pasta por agente (memory.md, diarios/, outputs/)
-   |- tasks/_archive/_scheduled/<agente>/  TASK.md + memoria.md por agente
-   |- chrome/                Drawings
-   |- explorations/          Pesquisas
-   |- inspections/           Inspecoes
-   |- templates/             Templates Obsidian
-   |- insights.md            Hub de insights
-   |- sugestoes/             Sugestoes
-   |- trash/                 Lixeira interna reversivel
-   |- .ephemeral/            Cache + cron-logs
+|- projects/                 Projetos (trabalho + negocio) — NAO e vault
+|  |- monolito/              overview, patterns, hotspots, pulse
+|  |- bo-container/
+|  |- front-student/
+|  |- search/, accounts/, questions/, ecommerce/
+|  |- mortani/               Metricas de desenvolvimento
+|  |- jonathas/              Plano de negocio
+|
+|- vault/                    Base de conhecimento do SISTEMA
+|  |- insights.md            Hub de insights cross-agent (wiseman cuida)
+|  |- WISEMAN.md             Grafo do sistema (wiseman atualiza a cada meta-ciclo)
+|  |- templates/             Templates Obsidian
+|  |  |- agents/             So agentes ativos: tamagochi.md, wiseman.md
+|  |- .ephemeral/            Cache + cron-logs (hidden)
+|
+|- agents/                   Memoria e cards dos agentes
+   |- BREAKROOMRULES.md      Protocolo interno
+   |- _schedule/             Cards agendados
+   |- _running/              Cards em execucao
+   |- _logs/                 Logs de atividade
+   |- <nome>/
+      |- memory.md           Memoria persistente
+      |- done/               Cards concluidos
+      |- diarios/            Diarios pessoais
 ```
 
 ---
@@ -49,14 +63,14 @@
 YYYYMMDD_HH_MM_task-name.md
 ```
 
-### Frontmatter
+### Frontmatter obrigatorio
 
 ```yaml
 ---
-model: haiku
-timeout: 300
+model: haiku        # haiku | sonnet
+timeout: 300        # segundos
 mcp: false
-agent: nome-do-agente
+agent: nome         # agente responsavel
 ---
 ```
 
@@ -65,23 +79,106 @@ Tags no body: `#stepsN` controla max_turns.
 ### Ciclo de vida
 
 ```
-outbox/ -> scheduler cria card em TODO/
+outbox/ -> hermes cria card em TODO/
 TODO/ -> runner move para DOING/ quando hora chega
 DOING/ -> DONE/ (runner) ou TODO/ (reschedule pelo agente)
-DONE/ -> _archive/ (trashman, 30 dias)
+DONE/ -> _archive/ (doctor, 30 dias)
 ```
 
 ### Comandos CLI
 
 | Comando | O que faz |
 |---------|-----------|
-| `zion tasks list` | Lista TODO/ e DOING/ |
-| `zion tasks list --all` | Inclui DONE/ |
-| `zion tasks list --log` | Mostra cron logs |
-| `zion tasks run <nome>` | Executa card por nome |
-| `zion tasks new <nome>` | Cria card em TODO/ |
-| `zion tasks tick` | Executa cards vencidos |
-| `zion tasks tick --dry-run` | Mostra o que seria executado |
+| `zion agents work` | Executa todos os cards vencidos em _schedule/ |
+| `zion agents run <nome>` | Executa agente imediatamente |
+| `zion tasks` | Lista TODO/DOING/DONE |
+| `zion tasks add <titulo>` | Cria task em TODO/ |
+| `zion tasks run <nome>` | Executa task especifica |
+
+---
+
+## Grafo do Obsidian (Ctrl+G)
+
+### Como funciona
+
+O grafo do Obsidian renderiza conexoes entre notas baseado em:
+1. **Wikilinks no corpo:** `[[nome-da-nota]]` ou `[[nome-da-nota|texto]]`
+2. **Campo `related:` no frontmatter** (array de wikilinks)
+3. **Tags** — nao criam edges mas agrupam visualmente por cor
+
+### Configurar nota como hub (no grafo)
+
+```yaml
+---
+tags: [sistema, meta, infraestrutura]
+related:
+  - "[[BOARDRULES]]"
+  - "[[DASHBOARD]]"
+  - "[[vault/insights]]"
+  - "[[vault/WISEMAN]]"
+---
+```
+
+### Abrir grafo no startup (workspace.json)
+
+Para o grafo abrir como janela principal, `workspace.json` deve ter:
+
+```json
+{
+  "main": {
+    "type": "split",
+    "children": [
+      {
+        "type": "tabs",
+        "children": [
+          {
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**ATENCAO:** Obsidian sobrescreve `workspace.json` ao fechar. So editar com Obsidian FECHADO.
+Path: `/workspace/obsidian/.obsidian/workspace.json`
+
+### Manter grafo organizado (responsabilidade do wiseman)
+
+Wiseman deve, a cada ciclo de grafo:
+1. Ler arquivos novos em `vault/`, `projects/`, `agents/*/memory.md`
+2. Adicionar frontmatter com `tags` + `related` a notas sem conexao
+3. Verificar links quebrados (pasta movida, arquivo renomeado)
+4. Garantir que hubs (BOARDRULES, WISEMAN.md, insights.md, DASHBOARD) tenham backlinks das notas filha
+5. Atualizar `vault/WISEMAN.md` com estado atual do grafo
+
+### Padroes de conexao
+
+| Tipo | Como fazer |
+|------|-----------|
+| Nota filha → hub | `related: ["[[BOARDRULES]]"]` no frontmatter |
+| Hub → hub | `related:` bidirecional entre WISEMAN, insights, BOARDRULES |
+| Cluster tematico | mesma tag em todas as notas do cluster |
+| Nota nova sem conexao | adicionar 2-3 `related` relevantes |
+
+### Notas que sao hubs (muitos edges)
+
+- `BOARDRULES.md` — regras, estrutura, roster
+- `vault/WISEMAN.md` — grafo do sistema, meta-analise
+- `vault/insights.md` — insights cross-agent
+- `DASHBOARD.md` — ponto de entrada visual
+
+### Boas praticas
+
+- Nao criar backlinks por completude — so se a conexao for semanticamente real
+- Prefer `related:` no frontmatter a wikilinks espalhados no corpo
+- Tags sao para agrupamento visual, nao para navegacao
+- Notas sem nenhum `related` ficam isoladas no grafo — adicionar pelo menos 1 link ao hub mais proximo
 
 ---
 
@@ -89,50 +186,47 @@ DONE/ -> _archive/ (trashman, 30 dias)
 
 | O que | Path |
 |-------|------|
-| Regras e roster | `SETTINGS.md` (raiz) |
-| Dashboard | `DASHBOARD.md` (raiz) |
-| Lixeira do CTO | `trash/` (raiz) |
-| TASK.md de agente | `vault/tasks/_archive/_scheduled/<nome>/TASK.md` |
-| Memoria do agente | `vault/agents/<nome>/memory.md` |
-| Outputs do agente | `vault/agents/<nome>/outputs/` |
-| Artefatos de task | `vault/tasks/<slug>/` |
-| Cron logs | `vault/.ephemeral/cron-logs/<nome>/` |
-| Heartbeat | `vault/.ephemeral/heartbeat` |
-| Feed RSS | `FEED.md` (raiz) |
-| Config RSS | `FEED.config.md` (raiz) |
-| Inbox (agentes) | `inbox/feed.md` |
-| Outbox (user) | `outbox/` |
+| Fonte de verdade | `BOARDRULES.md` |
+| Grafo do sistema | `vault/WISEMAN.md` |
+| Hub de insights | `vault/insights.md` |
+| Dashboard | `DASHBOARD.md` |
+| Feed agentes | `inbox/feed.md` |
+| Alertas urgentes | `inbox/ALERTA_<agente>_<tema>.md` |
+| Memoria de agente | `agents/<nome>/memory.md` |
+| Workspace Obsidian | `.obsidian/workspace.json` |
+| Cache RSS | `.ephemeral/rss/` |
 
 ---
 
 ## Fluxo inbox/outbox
 
-### inbox (agente -> user)
+### inbox (agente → user)
 
 Agentes fazem append em `inbox/feed.md`:
 ```
-[14:00] [trashman] Limpeza: 3 arquivos
+[02:10] [wiseman] mensagem
 ```
-Alertas urgentes: criar `inbox/ALERTA_<agente>_<tema>.md`
+Alertas urgentes: `inbox/ALERTA_<agente>_<tema>.md`
 
-### outbox (user -> scheduler)
+### outbox (user → hermes)
 
-User cria `.md` em `outbox/`. Scheduler le, refina, cria card em TODO/.
+User cria `.md` em `outbox/`. Hermes le, refina, cria card em `agents/_schedule/`.
 
 ---
 
-## DASHBOARD.md -- Dashboard
+## DASHBOARD.md
 
-Usa DataviewJS para stats e Dataview para tabelas:
+Usa DataviewJS e Dataview para queries ao vivo.
 
-### Stats com DataviewJS
+### Contar cards
 
 ```javascript
-const todo = dv.pages('"contractors/_schedule"').length
-const doing = dv.pages('"tasks/DOING"').length
+const todo   = dv.pages('"tasks/TODO"').length
+const doing  = dv.pages('"tasks/DOING"').length
+const done   = dv.pages('"tasks/DONE"').length
 ```
 
-### Tabelas de cards
+### Tabela de cards
 
 ```dataview
 TABLE WITHOUT ID
@@ -143,74 +237,42 @@ FROM "tasks/DOING"
 SORT file.mtime DESC
 ```
 
-### Tabela de agentes
+### Tabela de agentes (memories)
 
-```dataview
-TABLE WITHOUT ID
-  regexreplace(file.folder, ".*/", "") as "Agente",
-  file.mtime as "Atualizado"
-FROM "vault/agents"
-WHERE file.name = "memory"
+```dataviewjs
+const agents = ["assistant","coruja","doctor","hermes","jafar","mechanic","paperboy","tamagochi","tasker","wanderer","wiseman"]
+let rows = []
+for (const a of agents) {
+  const mem = dv.page(`agents/${a}/memory`)
+  rows.push([a, mem ? mem.file.mtime : "sem memoria"])
+}
+dv.table(["Agent", "Ultima Atualizacao"], rows)
 ```
 
 ---
 
-## Sistema FEED (RSS)
-
-### FEED.config.md
-
-Define feeds a buscar:
-```
-| Feed | URL | Frequencia | Tags |
-```
-
-### FEED.md
-
-Board com items + digest curado. Task `paperboy` atualiza periodicamente.
-Cache em `vault/.ephemeral/rss/`.
-
----
-
-## Callouts Obsidian
+## Callouts
 
 ```markdown
-> [!tipo]+ Expandido
-> [!tipo]- Colapsado
+> [!warning]+ Colapsado por padrao
+> [!info]- Expandido por padrao
 ```
 
-| Secao | Tipo | Cor |
-|-------|------|-----|
-| Em Andamento | `[!example]` | roxo |
-| TODO | `[!tip]` | verde |
-| Outbox | `[!todo]` | azul claro |
-| DONE | `[!success]` | verde escuro |
-| Agentes | `[!abstract]` | ciano |
-| Notas | `[!question]` | laranja |
+| Secao | Tipo |
+|-------|------|
+| Alertas | `[!warning]` |
+| Info | `[!info]` |
+| Em Andamento | `[!example]` |
+| TODO | `[!tip]` |
+| Concluidos | `[!success]` |
+| Agentes | `[!abstract]` |
+| Feed | `[!quote]` |
 
 ---
 
-## Operacoes Comuns
-
-### Mover para trash
-```bash
-mv /workspace/obsidian/<arquivo> /workspace/obsidian/vault/trash/
-```
-
-### Criar task
-```bash
-zion tasks new minha-task --model haiku --agent nome
-```
-
-### Ver logs de execucao
-```bash
-zion tasks list --log
-```
-
----
-
-## Plugins (assumidos instalados)
+## Plugins instalados
 
 | Plugin | Uso |
 |--------|-----|
-| **Dataview** | Queries SQL-like + DataviewJS |
-| **Admonitions** | Callouts visuais (sintaxe nativa) |
+| **Dataview** | Queries SQL-like + DataviewJS em notas |
+| **Calendar** | Visualizacao de notas por data |

@@ -36,7 +36,6 @@ zion_usage() {
   printf "  %s   Para containers do compose + mata qualquer stray com nome zion/claude/puppy.\n" "shutdown "
   printf "  %s   Remove sessoes Zion paradas/exited e containers orfaos.\n" "clean    "
   printf "  %s   Regenera CLI (bashly) e instala/atualiza symlink em ~/.local/bin.\n" "update   "
-  printf "  %s   Cria ~/.zion a partir de config.example (não sobrescreve se já existir).\n" "init     "
   printf "  %s   Define engine padrão em ~/.zion (engine= claude | opencode | cursor).\n" "set      "
   printf "  %s   Gerencia servicos. Ex: zion runner monolito start | zion runner monolito logs\n" "runner   "
   printf "  %s   Executa um hook do Claude Code e mostra o que seria injetado.\n" "hooks    "
@@ -50,6 +49,7 @@ zion_usage() {
   printf "  %s   Aplica configuração NixOS no host via nh os.\n" "os       "
   printf "  %s   Engatou numa pasta — sessão efêmera (auto-detecta nixos → monta logs).\n" "leech    "
   printf "  %s   Sessão host: projeto em /workspace/mnt + ~/nixos em /workspace/host (editável).\n" "host     "
+  printf "  %s   Lista os arquivos do inbox.\n" "inbox    "
   printf "  %s   Lista os arquivos do outbox.\n" "outbox   "
   printf "  %s   Mostra o banner com comandos principais.\n" "help     "
   printf "  %s   Documentacao completa de todos os comandos e flags.\n" "man      "
@@ -529,33 +529,6 @@ zion_update_usage() {
   # :command.long_usage
   if [[ -n "$long_usage" ]]; then
     printf "%s\n" "Options:"
-
-    # :command.usage_fixed_flags
-    printf "  %s\n" "--help, -h"
-    printf "    Show this help\n"
-    echo
-
-  fi
-}
-
-# :command.usage
-zion_init_usage() {
-  printf "zion init - Cria ~/.zion a partir de config.example (não sobrescreve se já existir).\n\n"
-
-  printf "%s\n" "Usage:"
-  printf "  zion init [OPTIONS]\n"
-  printf "  zion init --help | -h\n"
-  echo
-
-  # :command.long_usage
-  if [[ -n "$long_usage" ]]; then
-    printf "%s\n" "Options:"
-
-    # :command.usage_flags
-    # :flag.usage
-    printf "  %s\n" "--force"
-    printf "    Sobrescreve ~/.zion se já existir\n"
-    echo
 
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
@@ -1343,6 +1316,29 @@ zion_host_usage() {
 }
 
 # :command.usage
+zion_inbox_usage() {
+  printf "zion inbox - Lista os arquivos do inbox.\n\n"
+  printf "Alias: ib\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  zion inbox\n"
+  printf "  zion inbox --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
 zion_outbox_usage() {
   printf "zion outbox - Lista os arquivos do outbox.\n\n"
   printf "Alias: ob\n"
@@ -1823,11 +1819,11 @@ zion_session_run() {
       # Resume
       if [[ "$engine_args" == *"--resume="* ]]; then
         local resume_id="${engine_args#*--resume=}"
-        resume_id="${resume_id%% *}"
         if [[ "$resume_id" == "1" ]]; then
           claude_args+=" --resume"
         else
-          claude_args+=" --resume=$resume_id"
+          # printf %q preserva espaços no nome da sessão ao expandir em bash -c
+          claude_args+=" --resume=$(printf '%q' "$resume_id")"
         fi
       elif [[ "$engine_args" == *"--resume"* ]]; then
         claude_args+=" --resume"
@@ -1845,7 +1841,8 @@ zion_session_run() {
 
       zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes $analysis_env \
         --entrypoint /entrypoint.sh -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" leech \
-        /bin/bash -c ". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
+        /bin/bash -c "bash /workspace/self/scripts/zion-agent-launch.sh ${claude_args}"
+      printf '\033[?25h'
       ;;
 
     cursor)
@@ -3664,18 +3661,6 @@ zion_update_command() {
 }
 
 # :command.function
-zion_init_command() {
-
-  # src/commands/init.sh
-  echo "# This file is located at 'src/commands/init.sh'."
-  echo "# It contains the implementation for the 'zion init' command."
-  echo "# The code you write here will be wrapped by a function named 'zion_init_command()'."
-  echo "# Feel free to edit this file; your changes will persist when regenerating."
-  inspect_args
-
-}
-
-# :command.function
 zion_set_command() {
 
   # src/commands/set_engine.sh
@@ -3842,201 +3827,200 @@ zion_hooks_command() {
 zion_tick_command() {
 
   # src/commands/auto.sh
-# Executa agents e tasks vencidos — timer systemd (10min)
-zion_load_config
+  # Executa agents e tasks vencidos — timer systemd (10min)
+  zion_load_config
 
-ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/self}"
-OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
-RUNNER="$ZION_DIR/scripts/task-runner.sh"
-SCHEDULE="${SCHEDULE_DIR:-$OBSIDIAN/agents/_schedule}"
-TASKS="$OBSIDIAN/tasks"
+  ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/self}"
+  OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
+  RUNNER="$ZION_DIR/scripts/task-runner.sh"
+  SCHEDULE="${SCHEDULE_DIR:-$OBSIDIAN/agents/_schedule}"
+  TASKS="$OBSIDIAN/tasks"
 
-# Fallbacks runner
-if [ ! -f "$RUNNER" ]; then
-  for try in /workspace/mnt/self /workspace/nixos/self; do
-    [ -f "$try/scripts/task-runner.sh" ] && RUNNER="$try/scripts/task-runner.sh" && break
-  done
-fi
-
-# Fallbacks _schedule
-if [ ! -d "$SCHEDULE" ]; then
-  for try in /workspace/obsidian/agents/_schedule "$HOME/obsidian/agents/_schedule"; do
-    [ -d "$try" ] && SCHEDULE="$try" && break
-  done
-fi
-
-# Fallbacks tasks
-if [ ! -d "$TASKS" ]; then
-  for try in /workspace/obsidian/tasks "$HOME/obsidian/tasks"; do
-    [ -d "$try" ] && TASKS="$try" && break
-  done
-fi
-
-DRY_RUN="${args[--dry-run]:-}"
-STEPS_OVERRIDE="${args[--steps]:-}"
-
-if [ ! -f "$RUNNER" ]; then
-  echo "[auto] task-runner nao encontrado: $RUNNER"
-  exit 1
-fi
-
-# ── helpers ──────────────────────────────────────────────────────
-card_epoch() {
-  local name="$1"
-  if [[ "$name" =~ ^([0-9]{4})([0-9]{2})([0-9]{2})_([0-9]{2})_([0-9]{2})_ ]]; then
-    local y="${BASH_REMATCH[1]}" mo="${BASH_REMATCH[2]}" d="${BASH_REMATCH[3]}"
-    local h="${BASH_REMATCH[4]}" mi="${BASH_REMATCH[5]}"
-    TZ=UTC date -d "${y}-${mo}-${d} ${h}:${mi}:00" +%s 2>/dev/null || echo 0
-  else
-    echo 0
+  # Fallbacks runner
+  if [ ! -f "$RUNNER" ]; then
+    for try in /workspace/mnt/self /workspace/nixos/self; do
+      [ -f "$try/scripts/task-runner.sh" ] && RUNNER="$try/scripts/task-runner.sh" && break
+    done
   fi
-}
 
-is_agent_card() {
-  local file="$1"
-  local in_fm=0
-  while IFS= read -r line; do
-    [ "$line" = "---" ] && { [ "$in_fm" = "1" ] && break; in_fm=1; continue; }
-    [ "$in_fm" = "1" ] || continue
-    case "$line" in agent:* | contractor:*) return 0 ;; esac
-  done < "$file"
-  return 1
-}
+  # Fallbacks _schedule
+  if [ ! -d "$SCHEDULE" ]; then
+    for try in /workspace/obsidian/agents/_schedule "$HOME/obsidian/agents/_schedule"; do
+      [ -d "$try" ] && SCHEDULE="$try" && break
+    done
+  fi
 
-card_steps() {
-  local file="$1"
-  local n
-  n=$(grep -oE '#steps[[:space:]]*[0-9]+' "$file" 2>/dev/null | grep -oE '[0-9]+' | head -1)
-  echo "${n:-30}"
-}
+  # Fallbacks tasks
+  if [ ! -d "$TASKS" ]; then
+    for try in /workspace/obsidian/tasks "$HOME/obsidian/tasks"; do
+      [ -d "$try" ] && TASKS="$try" && break
+    done
+  fi
 
-NOW=$(date +%s)
-AGENT_THRESHOLD=$((NOW + 300))   # 5min tolerancia
-TASK_THRESHOLD=$((NOW + 600))    # 10min tolerancia
-RUNNING_DIR="$(dirname "$SCHEDULE")/_running"
+  DRY_RUN="${args[--dry-run]:-}"
+  STEPS_OVERRIDE="${args[--steps]:-}"
 
-# ── rescue orphans from _running/ (before scan) ──────────────
-ORPHAN_COUNT=0
-if [ -d "$RUNNING_DIR" ] && [ -z "$DRY_RUN" ]; then
-  mkdir -p "$SCHEDULE"
-  for card_path in "$RUNNING_DIR"/*.md; do
-    [ -f "$card_path" ] || continue
-    filename=$(basename "$card_path")
-    base="${filename%.md}"
-    [ -d "/tmp/zion-locks/${base}.lock" ] && continue
-    ts=$(card_epoch "$filename")
-    [ "$ts" -eq 0 ] && continue
-    elapsed=$(( (NOW - ts) / 60 ))
-    [ "$elapsed" -lt 30 ] && continue
-    AGENT=$(awk '/^---/{fm++} fm==1 && /^(agent|contractor):/{print $2}' "$card_path")
-    echo "[auto] orphan: $filename  agent=$AGENT  stuck=${elapsed}min → _schedule"
-    mv "$card_path" "$SCHEDULE/$filename" 2>/dev/null || true
-    ORPHAN_COUNT=$((ORPHAN_COUNT + 1))
-  done
-  [ "$ORPHAN_COUNT" -gt 0 ] && echo "[auto] rescued $ORPHAN_COUNT orphan(s)"
-elif [ -d "$RUNNING_DIR" ] && [ -n "$DRY_RUN" ]; then
-  for card_path in "$RUNNING_DIR"/*.md; do
-    [ -f "$card_path" ] || continue
-    filename=$(basename "$card_path")
-    base="${filename%.md}"
-    [ -d "/tmp/zion-locks/${base}.lock" ] && continue
-    ts=$(card_epoch "$filename")
-    [ "$ts" -eq 0 ] && continue
-    elapsed=$(( (NOW - ts) / 60 ))
-    [ "$elapsed" -lt 30 ] && continue
-    AGENT=$(awk '/^---/{fm++} fm==1 && /^(agent|contractor):/{print $2}' "$card_path")
-    echo "[auto] orphan (dry-run): $filename  agent=$AGENT  stuck=${elapsed}min"
-    ORPHAN_COUNT=$((ORPHAN_COUNT + 1))
-  done
-fi
+  if [ ! -f "$RUNNER" ]; then
+    echo "[auto] task-runner nao encontrado: $RUNNER"
+    exit 1
+  fi
 
-# ── scan agents/_schedule/ ─────────────────────────────────────
-AGENT_DUE=()
-
-if [ -d "$SCHEDULE" ]; then
-  for card_path in "$SCHEDULE"/*.md; do
-    [ -f "$card_path" ] || continue
-    filename=$(basename "$card_path")
-    ts=$(card_epoch "$filename")
-    [ "$ts" -eq 0 ] && continue
-    [ "$ts" -gt "$AGENT_THRESHOLD" ] && continue
-    is_agent_card "$card_path" || continue
-    AGENT=$(awk '/^---/{fm++} fm==1 && /^(agent|contractor):/{print $2}' "$card_path")
-    DELTA=$(( (NOW - ts) / 60 ))
-    echo "[auto] agent due: $filename  agent=$AGENT  atraso=${DELTA}min"
-    AGENT_DUE+=("$filename")
-  done
-fi
-
-# ── scan tasks/TODO/ + orphans DOING/ ──────────────────────────
-TASK_DUE=()
-TASK_STEPS=()
-
-if [ -d "$TASKS" ]; then
-  for card in "$TASKS/TODO"/*.md; do
-    [ -f "$card" ] || continue
-    filename=$(basename "$card")
-    ts=$(card_epoch "$filename")
-    [ "$ts" -eq 0 ] && continue
-    [ "$ts" -le "$TASK_THRESHOLD" ] && TASK_DUE+=("$filename") && TASK_STEPS+=("$(card_steps "$card")")
-  done
-
-  # orphans in DOING (not locked)
-  for card in "$TASKS/DOING"/*.md; do
-    [ -f "$card" ] || continue
-    filename=$(basename "$card")
-    base="${filename%.md}"
-    if [ ! -d "/tmp/zion-locks/${base}.lock" ]; then
-      TASK_DUE+=("$filename")
-      TASK_STEPS+=("$(card_steps "$TASKS/DOING/$filename")")
+  # ── helpers ──────────────────────────────────────────────────────
+  card_epoch() {
+    local name="$1"
+    if [[ "$name" =~ ^([0-9]{4})([0-9]{2})([0-9]{2})_([0-9]{2})_([0-9]{2})_ ]]; then
+      local y="${BASH_REMATCH[1]}" mo="${BASH_REMATCH[2]}" d="${BASH_REMATCH[3]}"
+      local h="${BASH_REMATCH[4]}" mi="${BASH_REMATCH[5]}"
+      TZ=UTC date -d "${y}-${mo}-${d} ${h}:${mi}:00" +%s 2>/dev/null || echo 0
+    else
+      echo 0
     fi
+  }
+
+  is_agent_card() {
+    local file="$1"
+    local in_fm=0
+    while IFS= read -r line; do
+      [ "$line" = "---" ] && { [ "$in_fm" = "1" ] && break; in_fm=1; continue; }
+      [ "$in_fm" = "1" ] || continue
+      case "$line" in agent:* | contractor:*) return 0 ;; esac
+    done < "$file"
+    return 1
+  }
+
+  card_steps() {
+    local file="$1"
+    local n
+    n=$(grep -oE '#steps[[:space:]]*[0-9]+' "$file" 2>/dev/null | grep -oE '[0-9]+' | head -1)
+    echo "${n:-30}"
+  }
+
+  NOW=$(date +%s)
+  AGENT_THRESHOLD=$((NOW + 300))   # 5min tolerancia
+  TASK_THRESHOLD=$((NOW + 600))    # 10min tolerancia
+  RUNNING_DIR="$(dirname "$SCHEDULE")/_running"
+
+  # ── rescue orphans from _running/ (before scan) ──────────────
+  ORPHAN_COUNT=0
+  if [ -d "$RUNNING_DIR" ] && [ -z "$DRY_RUN" ]; then
+    mkdir -p "$SCHEDULE"
+    for card_path in "$RUNNING_DIR"/*.md; do
+      [ -f "$card_path" ] || continue
+      filename=$(basename "$card_path")
+      base="${filename%.md}"
+      [ -d "/tmp/zion-locks/${base}.lock" ] && continue
+      ts=$(card_epoch "$filename")
+      [ "$ts" -eq 0 ] && continue
+      elapsed=$(( (NOW - ts) / 60 ))
+      [ "$elapsed" -lt 30 ] && continue
+      AGENT=$(awk '/^---/{fm++} fm==1 && /^(agent|contractor):/{print $2}' "$card_path")
+      echo "[auto] orphan: $filename  agent=$AGENT  stuck=${elapsed}min → _schedule"
+      mv "$card_path" "$SCHEDULE/$filename" 2>/dev/null || true
+      ORPHAN_COUNT=$((ORPHAN_COUNT + 1))
+    done
+    [ "$ORPHAN_COUNT" -gt 0 ] && echo "[auto] rescued $ORPHAN_COUNT orphan(s)"
+  elif [ -d "$RUNNING_DIR" ] && [ -n "$DRY_RUN" ]; then
+    for card_path in "$RUNNING_DIR"/*.md; do
+      [ -f "$card_path" ] || continue
+      filename=$(basename "$card_path")
+      base="${filename%.md}"
+      [ -d "/tmp/zion-locks/${base}.lock" ] && continue
+      ts=$(card_epoch "$filename")
+      [ "$ts" -eq 0 ] && continue
+      elapsed=$(( (NOW - ts) / 60 ))
+      [ "$elapsed" -lt 30 ] && continue
+      AGENT=$(awk '/^---/{fm++} fm==1 && /^(agent|contractor):/{print $2}' "$card_path")
+      echo "[auto] orphan (dry-run): $filename  agent=$AGENT  stuck=${elapsed}min"
+      ORPHAN_COUNT=$((ORPHAN_COUNT + 1))
+    done
+  fi
+
+  # ── scan agents/_schedule/ ─────────────────────────────────────
+  AGENT_DUE=()
+
+  if [ -d "$SCHEDULE" ]; then
+    for card_path in "$SCHEDULE"/*.md; do
+      [ -f "$card_path" ] || continue
+      filename=$(basename "$card_path")
+      ts=$(card_epoch "$filename")
+      [ "$ts" -eq 0 ] && continue
+      [ "$ts" -gt "$AGENT_THRESHOLD" ] && continue
+      is_agent_card "$card_path" || continue
+      AGENT=$(awk '/^---/{fm++} fm==1 && /^(agent|contractor):/{print $2}' "$card_path")
+      DELTA=$(( (NOW - ts) / 60 ))
+      echo "[auto] agent due: $filename  agent=$AGENT  atraso=${DELTA}min"
+      AGENT_DUE+=("$filename")
+    done
+  fi
+
+  # ── scan tasks/TODO/ + orphans DOING/ ──────────────────────────
+  TASK_DUE=()
+  TASK_STEPS=()
+
+  if [ -d "$TASKS" ]; then
+    for card in "$TASKS/TODO"/*.md; do
+      [ -f "$card" ] || continue
+      filename=$(basename "$card")
+      ts=$(card_epoch "$filename")
+      [ "$ts" -eq 0 ] && continue
+      [ "$ts" -le "$TASK_THRESHOLD" ] && TASK_DUE+=("$filename") && TASK_STEPS+=("$(card_steps "$card")")
+    done
+
+    # orphans in DOING (not locked)
+    for card in "$TASKS/DOING"/*.md; do
+      [ -f "$card" ] || continue
+      filename=$(basename "$card")
+      base="${filename%.md}"
+      if [ ! -d "/tmp/zion-locks/${base}.lock" ]; then
+        TASK_DUE+=("$filename")
+        TASK_STEPS+=("$(card_steps "$TASKS/DOING/$filename")")
+      fi
+    done
+  fi
+
+  # ── report ─────────────────────────────────────────────────────
+  echo ""
+  echo "[auto] ${#AGENT_DUE[@]} agent(s) + ${#TASK_DUE[@]} task(s) due"
+
+  if [ ${#AGENT_DUE[@]} -eq 0 ] && [ ${#TASK_DUE[@]} -eq 0 ]; then
+    echo "[auto] nada para executar."
+    exit 0
+  fi
+
+  if [ -n "$DRY_RUN" ]; then
+    echo "[auto] --dry-run: nao executando"
+    exit 0
+  fi
+
+  # ── execute agents ─────────────────────────────────────────────
+  for filename in "${AGENT_DUE[@]}"; do
+    echo ""
+    echo "[auto] ▸ agent: $filename"
+    export TASK_CONTRACTORS_DIR="$(dirname "$SCHEDULE")"
+    export SCHEDULE_DIR="$SCHEDULE"
+    bash "$RUNNER" "$filename" || echo "[auto] $filename falhou (continuando)"
   done
-fi
 
-# ── report ─────────────────────────────────────────────────────
-echo ""
-echo "[auto] ${#AGENT_DUE[@]} agent(s) + ${#TASK_DUE[@]} task(s) due"
+  # ── execute tasks ──────────────────────────────────────────────
+  export TASK_DIR="$TASKS"
+  export TASK_AGENTS_DIR="$(dirname "$TASKS")/vault/agents"
 
-if [ ${#AGENT_DUE[@]} -eq 0 ] && [ ${#TASK_DUE[@]} -eq 0 ]; then
-  echo "[auto] nada para executar."
-  exit 0
-fi
+  for i in "${!TASK_DUE[@]}"; do
+    filename="${TASK_DUE[$i]}"
+    steps="${STEPS_OVERRIDE:-${TASK_STEPS[$i]}}"
+    echo ""
+    echo "[auto] ▸ task: $filename  steps=$steps"
 
-if [ -n "$DRY_RUN" ]; then
-  echo "[auto] --dry-run: nao executando"
-  exit 0
-fi
+    base="${filename%.md}"
+    rm -rf "/tmp/zion-locks/${base}.lock" 2>/dev/null || true
 
-# ── execute agents ─────────────────────────────────────────────
-for filename in "${AGENT_DUE[@]}"; do
+    TASK_MAX_TURNS="$steps" bash "$RUNNER" "$filename" || echo "[auto] $filename falhou (continuando)"
+  done
+
   echo ""
-  echo "[auto] ▸ agent: $filename"
-  export TASK_CONTRACTORS_DIR="$(dirname "$SCHEDULE")"
-  export SCHEDULE_DIR="$SCHEDULE"
-  bash "$RUNNER" "$filename" || echo "[auto] $filename falhou (continuando)"
-done
-
-# ── execute tasks ──────────────────────────────────────────────
-export TASK_DIR="$TASKS"
-export TASK_AGENTS_DIR="$(dirname "$TASKS")/vault/agents"
-
-for i in "${!TASK_DUE[@]}"; do
-  filename="${TASK_DUE[$i]}"
-  steps="${STEPS_OVERRIDE:-${TASK_STEPS[$i]}}"
-  echo ""
-  echo "[auto] ▸ task: $filename  steps=$steps"
-
-  base="${filename%.md}"
-  rm -rf "/tmp/zion-locks/${base}.lock" 2>/dev/null || true
-
-  TASK_MAX_TURNS="$steps" bash "$RUNNER" "$filename" || echo "[auto] $filename falhou (continuando)"
-done
-
-echo ""
-echo "[auto] concluido"
+  echo "[auto] concluido"
 
 }
-
 
 # :command.function
 zion_tasker_command() {
@@ -4459,229 +4443,339 @@ zion_agents_phone_command() {
 zion_agents_status_command() {
 
   # src/commands/agents_log.sh
-zion_load_config
+  zion_load_config
 
-OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
-AGENTS="${OBSIDIAN}/agents"
+  OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
+  AGENTS="${OBSIDIAN}/agents"
 
-if [ ! -d "$AGENTS" ]; then
-  for try in /workspace/obsidian/agents "$HOME/obsidian/agents"; do
-    [ -d "$try" ] && AGENTS="$try" && break
+  if [ ! -d "$AGENTS" ]; then
+    for try in /workspace/obsidian/agents "$HOME/obsidian/agents"; do
+      [ -d "$try" ] && AGENTS="$try" && break
+    done
+  fi
+
+  if [ ! -d "$AGENTS" ]; then
+    echo "[log] agents dir nao encontrado"
+    exit 1
+  fi
+
+  ACTIVITY_DIR="$AGENTS/_logs/activity"
+  FILTER="${args[agent]:-}"
+  TAIL="${args[--tail]:-30}"
+
+  B=$'\033[1m'; R=$'\033[0m'; DIM=$'\033[2m'
+  G=$'\033[32m'; Y=$'\033[33m'; C=$'\033[36m'; RED=$'\033[31m'
+
+  # ── MODE: --schedule → running/scheduled view ─────────────────────
+  if [[ -n "${args[--schedule]:-}" ]]; then
+    SCHEDULE="$AGENTS/_schedule"
+    RUNNING="$AGENTS/_running"
+
+    _fm() { awk '/^---/{fm++} fm==1 && /^'"$2"':/{print $2; exit}' "$1" 2>/dev/null; }
+    _label() { echo "$1" | sed 's/^[0-9]\{8\}_[0-9]\{2\}_[0-9]\{2\}_//; s/\.md$//'; }
+    _ts() {
+      [[ "$1" =~ ^([0-9]{4})([0-9]{2})([0-9]{2})_([0-9]{2})_([0-9]{2})_ ]] && \
+        TZ=UTC date -d "${BASH_REMATCH[1]}-${BASH_REMATCH[2]}-${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}:00" +%s 2>/dev/null || echo 0
+    }
+    _age() {
+      local diff=$(( $(date +%s) - $(_ts "$1") ))
+      if   (( diff < 3600 ));  then echo "$((diff/60))min atras"
+      elif (( diff < 86400 )); then echo "$((diff/3600))h atras"
+      else                          echo "$((diff/86400))d atras"; fi
+    }
+    _agent_of() {
+      local a; a=$(_fm "$1" "agent"); [ -z "$a" ] && a=$(_fm "$1" "contractor"); echo "${a:----}"
+    }
+
+    echo ""
+    RUN=(); for f in "$RUNNING"/*.md; do [ -f "$f" ] && RUN+=("$(basename "$f")"); done
+    echo "${B}${C}▸ RUNNING${R} ${DIM}(${#RUN[@]})${R}"
+    if [ ${#RUN[@]} -eq 0 ]; then echo "  ${DIM}(nenhum)${R}"; else
+      printf "  ${DIM}%-30s  %-14s  %s${R}\n" "card" "agent" "ha"
+      for f in "${RUN[@]}"; do printf "  %-30s  %-14s  %s\n" "$(_label "$f")" "$(_agent_of "$RUNNING/$f")" "$(_age "$f")"; done
+    fi
+    echo ""
+
+    SCHED=(); for f in "$SCHEDULE"/*.md; do [ -f "$f" ] && SCHED+=("$(basename "$f")"); done
+    echo "${B}${Y}▸ SCHEDULED${R} ${DIM}(${#SCHED[@]})${R}"
+    if [ ${#SCHED[@]} -eq 0 ]; then echo "  ${DIM}(nenhum)${R}"; else
+      printf "  ${DIM}%-30s  %-14s  %s${R}\n" "card" "agent" "quando"
+      NOW=$(date +%s)
+      for f in "${SCHED[@]}"; do
+        ts=$(_ts "$f"); diff=$(( ts - NOW ))
+        if   (( diff < -60 ));   then when="${G}atrasado $(((-diff)/60))min${R}"
+        elif (( diff <= 0 ));    then when="${G}agora${R}"
+        elif (( diff < 3600 ));  then when="em $((diff/60))min"
+        elif (( diff < 86400 )); then when="em $((diff/3600))h"
+        else                          when="em $((diff/86400))d"; fi
+        printf "  %-30s  %-14s  " "$(_label "$f")" "$(_agent_of "$SCHEDULE/$f")"
+        echo -e "$when"
+      done
+    fi
+    echo ""
+    exit 0
+  fi
+
+  # ── MODE: activity log ────────────────────────────────────────────
+  if [ ! -d "$ACTIVITY_DIR" ]; then
+    echo "${DIM}[log] nenhum activity log ainda${R}"
+    echo "      Pasta esperada: $ACTIVITY_DIR"
+    exit 0
+  fi
+
+  declare -a LOG_FILES=()
+  if [ -n "$FILTER" ]; then
+    if [ -f "$ACTIVITY_DIR/$FILTER" ]; then
+      LOG_FILES=("$ACTIVITY_DIR/$FILTER")
+    else
+      echo "[log] agent '$FILTER' sem log em $ACTIVITY_DIR"
+      echo "Disponiveis: $(ls "$ACTIVITY_DIR" 2>/dev/null | tr '\n' ' ')"
+      exit 1
+    fi
+  else
+    while IFS= read -r f; do [ -f "$f" ] && LOG_FILES+=("$f"); done < <(ls "$ACTIVITY_DIR"/ 2>/dev/null | xargs -I{} echo "$ACTIVITY_DIR/{}")
+  fi
+
+  if [ ${#LOG_FILES[@]} -eq 0 ]; then
+    echo "${DIM}(nenhuma entrada ainda)${R}"
+    exit 0
+  fi
+
+  # Merge runs (exclude note lines) + notes index
+  MERGED=$(grep -h $'\tok\t\|$\ttimeout\t\|$\tfail\t\|$\tmigrated\t' "${LOG_FILES[@]}" 2>/dev/null | sort -r | head -"$TAIL")
+
+  if [ -z "$MERGED" ]; then
+    echo "${DIM}(nenhuma entrada ainda)${R}"
+    exit 0
+  fi
+
+  # Build notes lookup: agent -> last note text
+  declare -A NOTES
+  for lf in "${LOG_FILES[@]}"; do
+    aname=$(basename "$lf")
+    n=$(grep $'\tnote\t' "$lf" 2>/dev/null | tail -1 | cut -f3-)
+    [ -n "$n" ] && NOTES[$aname]="$n"
   done
-fi
 
-if [ ! -d "$AGENTS" ]; then
-  echo "[log] agents dir nao encontrado"
-  exit 1
-fi
+  # ── Last tick info ────────────────────────────────────────────────
+  _tick_info=""
+  _last_tick=$(journalctl -u zion-tick.service --no-pager -n 1 -o short-iso 2>/dev/null | grep -v "^--\|^Journal\|^Hint" | awk '{print $1}' | grep -E '^[0-9]{4}-' | tail -1)
+  if [ -n "$_last_tick" ]; then
+    _tick_epoch=$(date -d "$_last_tick" +%s 2>/dev/null || echo 0)
+    if [ "$_tick_epoch" -gt 0 ]; then
+      _diff_tick=$(( $(date +%s) - _tick_epoch ))
+      _next_secs=$(( 600 - _diff_tick ))
+      if   (( _diff_tick < 60 ));   then _ago="${_diff_tick}s atras"
+      elif (( _diff_tick < 3600 )); then _ago="$((_diff_tick/60))min atras"
+      else                               _ago="$((_diff_tick/3600))h atras"; fi
+      if   (( _next_secs <= 0 ));   then _next="agora"
+      elif (( _next_secs < 60 ));   then _next="em ${_next_secs}s"
+      else                               _next="em $((_next_secs/60))min"; fi
+      _tick_info="  ${DIM}[tick: $_ago | proximo: $_next]${R}"
+    fi
+  fi
 
-ACTIVITY_DIR="$AGENTS/_logs/activity"
-FILTER="${args[agent]:-}"
-TAIL="${args[--tail]:-30}"
+  echo ""
+  echo "${B}${C}▸ ACTIVITY LOG${R}${DIM} (ultimas $TAIL | $([ -n "$FILTER" ] && echo "agent=$FILTER" || echo "todos"))${R}${_tick_info}"
+  echo ""
+  printf "  ${DIM}%-14s  %-8s  %-12s  %-4s  %s${R}\n" "starttime" "duration" "agent" "st" "topic"
+  echo "  ${DIM}$(printf '─%.0s' {1..80})${R}"
 
-B=$'\033[1m'; R=$'\033[0m'; DIM=$'\033[2m'
-G=$'\033[32m'; Y=$'\033[33m'; C=$'\033[36m'; RED=$'\033[31m'
+  # ── Queue: running + scheduled (proximos 10) ──────────────────────
+  NOW=$(date +%s)
+  _queue_output=$({
+    for dir_state in "$AGENTS/_running:running" "$AGENTS/_schedule:sched"; do
+      dir="${dir_state%%:*}"; state="${dir_state##*:}"
+      [ -d "$dir" ] || continue
+      for f in "$dir"/*.md; do
+        [ -f "$f" ] || continue
+        fname=$(basename "$f")
+        [[ "$fname" =~ ^([0-9]{4})([0-9]{2})([0-9]{2})_([0-9]{2})_([0-9]{2})_ ]] || continue
+        ts=$(TZ=UTC date -d "${BASH_REMATCH[1]}-${BASH_REMATCH[2]}-${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}:00" +%s 2>/dev/null) || continue
+        ts_display=$(date -d "@$ts" +"%m-%d %H:%M")
+        aname=$(awk '/^---/{fm++} fm==1 && /^agent:/{print $2; exit}' "$f" 2>/dev/null)
+        [ -z "$aname" ] && aname=$(awk '/^---/{fm++} fm==1 && /^contractor:/{print $2; exit}' "$f" 2>/dev/null)
+        [ -z "$aname" ] && aname="?"
+        card_label=$(echo "$fname" | sed 's/^[0-9]\{8\}_[0-9]\{2\}_[0-9]\{2\}_//; s/\.md$//')
+        echo "$ts|$ts_display|$aname|$card_label|$state"
+      done
+    done
+  } | sort -t'|' -k1,1rn | head -10)
 
-# ── MODE: --schedule → running/scheduled view ─────────────────────
-if [[ -n "${args[--schedule]:-}" ]]; then
-  SCHEDULE="$AGENTS/_schedule"
-  RUNNING="$AGENTS/_running"
+  if [ -n "$_queue_output" ]; then
+    while IFS='|' read -r _ts ts_display aname card_label state; do
+      diff=$(( _ts - NOW ))
+      if [ "$state" = "running" ] || (( diff < 0 )); then
+        # Overdue or stuck running → red
+        printf "  ${RED}%-14s${R}  %-8s  %-12s  " "$ts_display" "--" "$aname"
+        printf "${RED}!!${R}   "
+      else
+        # Future → cyan
+        printf "  ${C}%-14s${R}  %-8s  %-12s  " "$ts_display" "--" "$aname"
+        printf "${C}..${R}   "
+      fi
+      printf "%s\n" "$card_label"
+    done <<< "$_queue_output"
+  fi
 
-  _fm() { awk '/^---/{fm++} fm==1 && /^'"$2"':/{print $2; exit}' "$1" 2>/dev/null; }
-  _label() { echo "$1" | sed 's/^[0-9]\{8\}_[0-9]\{2\}_[0-9]\{2\}_//; s/\.md$//'; }
+  # ── NOW line ──────────────────────────────────────────────────────
+  _now_display=$(date +"%m-%d %H:%M")
+  printf "  ${Y}%-14s  %-8s  %-12s  %-4s  %s${R}\n" "$_now_display" "now" "─────" "──" "──────"
+
+  # ── Past entries ──────────────────────────────────────────────────
+  while IFS=$'\t' read -r ts agent status elapsed tokens card; do
+    # Status icon (compact)
+    case "$status" in
+      ok)       sc="${G}ok${R} " ;;
+      timeout)  sc="${Y}to${R} " ;;
+      fail)     sc="${RED}!!${R} " ;;
+      migrated) sc="${DIM}--${R} " ;;
+      *)        sc="${DIM}? ${R} " ;;
+    esac
+
+    # Starttime: convert UTC ISO → local time
+    ts_epoch=$(date -d "$ts" +%s 2>/dev/null || echo 0)
+    if [ "$ts_epoch" -gt 0 ]; then
+      ts_short=$(date -d "@$ts_epoch" +"%m-%d %H:%M")
+    else
+      ts_short=$(echo "$ts" | sed 's/[0-9]\{4\}-\([0-9]\{2\}\)-\([0-9]\{2\}\)T\([0-9]\{2\}:[0-9]\{2\}\).*/\1-\2 \3/')
+    fi
+
+    # Duration: use elapsed if available, otherwise "--"
+    dur="${elapsed}"
+    [[ "$dur" == "—" || -z "$dur" ]] && dur="--"
+
+    # Topic: try note for this agent, else derive from card name
+    topic=""
+    # If card name differs from agent name, it IS the topic (e.g. task cards)
+    card_clean=$(echo "$card" | sed 's/^[0-9]\{8\}_[0-9]\{2\}_[0-9]\{2\}_//')
+    if [ "$card_clean" != "$agent" ] && [ -n "$card_clean" ]; then
+      topic="$card_clean"
+    fi
+    # If we have a note for this agent, prefer it
+    [ -n "${NOTES[$agent]:-}" ] && topic="${NOTES[$agent]}"
+    # For migrated entries, show tokens field if it says "migrated"
+    [[ "$status" == "migrated" ]] && [ -z "$topic" ] && topic="${DIM}(historico)${R}"
+
+    printf "  %-14s  %-8s  %-12s  " "$ts_short" "$dur" "$agent"
+    printf "%-6b  " "$sc"
+    printf "%s\n" "$topic"
+  done <<< "$MERGED"
+
+  echo ""
+
+}
+
+# :command.function
+zion_tasks_log_command() {
+
+  # src/commands/tasks_log.sh
+  # Ultimas execucoes de tasks: DOING + DONE recentes
+  zion_load_config
+
+  OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
+  TASKS="$OBSIDIAN/tasks"
+
+  if [ ! -d "$TASKS" ]; then
+    for try in /workspace/obsidian/tasks "$HOME/obsidian/tasks"; do
+      [ -d "$try" ] && TASKS="$try" && break
+    done
+  fi
+
+  if [ ! -d "$TASKS" ]; then
+    echo "[tasks] dir nao encontrado"
+    exit 1
+  fi
+
   _ts() {
-    [[ "$1" =~ ^([0-9]{4})([0-9]{2})([0-9]{2})_([0-9]{2})_([0-9]{2})_ ]] && \
+    local f="$1"
+    if [[ "$f" =~ ^([0-9]{4})([0-9]{2})([0-9]{2})_([0-9]{2})_([0-9]{2})_ ]]; then
       TZ=UTC date -d "${BASH_REMATCH[1]}-${BASH_REMATCH[2]}-${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}:00" +%s 2>/dev/null || echo 0
+    else
+      echo 0
+    fi
   }
+
+  _label() {
+    echo "$1" | sed 's/^[0-9]\{8\}_[0-9]\{2\}_[0-9]\{2\}_//; s/\.md$//'
+  }
+
   _age() {
     local diff=$(( $(date +%s) - $(_ts "$1") ))
     if   (( diff < 3600 ));  then echo "$((diff/60))min atras"
     elif (( diff < 86400 )); then echo "$((diff/3600))h atras"
-    else                          echo "$((diff/86400))d atras"; fi
-  }
-  _agent_of() {
-    local a; a=$(_fm "$1" "agent"); [ -z "$a" ] && a=$(_fm "$1" "contractor"); echo "${a:----}"
+    else                          echo "$((diff/86400))d atras"
+    fi
   }
 
+  B=$'\033[1m'; R=$'\033[0m'; DIM=$'\033[2m'
+  Y=$'\033[33m'; G=$'\033[32m'; C=$'\033[36m'
+
   echo ""
-  RUN=(); for f in "$RUNNING"/*.md; do [ -f "$f" ] && RUN+=("$(basename "$f")"); done
-  echo "${B}${C}▸ RUNNING${R} ${DIM}(${#RUN[@]})${R}"
-  if [ ${#RUN[@]} -eq 0 ]; then echo "  ${DIM}(nenhum)${R}"; else
-    printf "  ${DIM}%-30s  %-14s  %s${R}\n" "card" "agent" "ha"
-    for f in "${RUN[@]}"; do printf "  %-30s  %-14s  %s\n" "$(_label "$f")" "$(_agent_of "$RUNNING/$f")" "$(_age "$f")"; done
+
+  # ── DOING ──────────────────────────────────────────────────────
+  DOING=()
+  for f in "$TASKS/DOING"/*.md; do [ -f "$f" ] && DOING+=("$(basename "$f")"); done
+
+  echo "${B}${Y}▸ DOING${R} ${DIM}(${#DOING[@]})${R}"
+  if [ ${#DOING[@]} -eq 0 ]; then
+    echo "  ${DIM}(nenhuma)${R}"
+  else
+    printf "  ${DIM}%-50s  %s${R}\n" "task" "ha"
+    for f in "${DOING[@]}"; do
+      printf "  %-50s  %s\n" "$(_label "$f")" "$(_age "$f")"
+    done
   fi
   echo ""
 
-  SCHED=(); for f in "$SCHEDULE"/*.md; do [ -f "$f" ] && SCHED+=("$(basename "$f")"); done
-  echo "${B}${Y}▸ SCHEDULED${R} ${DIM}(${#SCHED[@]})${R}"
-  if [ ${#SCHED[@]} -eq 0 ]; then echo "  ${DIM}(nenhum)${R}"; else
-    printf "  ${DIM}%-30s  %-14s  %s${R}\n" "card" "agent" "quando"
+  # ── TODO (proximas 10) ─────────────────────────────────────────
+  TODO=()
+  for f in "$TASKS/TODO"/*.md; do [ -f "$f" ] && TODO+=("$(basename "$f")"); done
+  # Sort by name (timestamp prefix = chronological)
+  IFS=$'\n' TODO=($(printf '%s\n' "${TODO[@]}" | sort)); unset IFS
+
+  echo "${B}${C}▸ TODO${R} ${DIM}(${#TODO[@]} total, proximas 10)${R}"
+  if [ ${#TODO[@]} -eq 0 ]; then
+    echo "  ${DIM}(nenhuma)${R}"
+  else
     NOW=$(date +%s)
-    for f in "${SCHED[@]}"; do
-      ts=$(_ts "$f"); diff=$(( ts - NOW ))
-      if   (( diff < -60 ));   then when="${G}atrasado $(((-diff)/60))min${R}"
+    count=0
+    for f in "${TODO[@]}"; do
+      [ "$count" -ge 10 ] && break
+      ts=$(_ts "$f")
+      diff=$(( ts - NOW ))
+      if   (( diff < -60 ));   then when="${G}atrasada $(((-diff)/60))min${R}"
       elif (( diff <= 0 ));    then when="${G}agora${R}"
       elif (( diff < 3600 ));  then when="em $((diff/60))min"
       elif (( diff < 86400 )); then when="em $((diff/3600))h"
-      else                          when="em $((diff/86400))d"; fi
-      printf "  %-30s  %-14s  " "$(_label "$f")" "$(_agent_of "$SCHEDULE/$f")"
+      else                          when="em $((diff/86400))d"
+      fi
+      printf "  %-50s  " "$(_label "$f")"
       echo -e "$when"
+      count=$((count + 1))
     done
   fi
   echo ""
-  exit 0
-fi
 
-# ── MODE: activity log ────────────────────────────────────────────
-if [ ! -d "$ACTIVITY_DIR" ]; then
-  echo "${DIM}[log] nenhum activity log ainda${R}"
-  echo "      Pasta esperada: $ACTIVITY_DIR"
-  exit 0
-fi
+  # ── DONE (ultimas 15) ──────────────────────────────────────────
+  DONE=()
+  if [ -d "$TASKS/DONE" ]; then
+    while IFS= read -r f; do [ -n "$f" ] && DONE+=("$(basename "$f")"); done < <(
+      ls -1t "$TASKS/DONE"/*.md 2>/dev/null | head -15
+    )
+  fi
 
-declare -a LOG_FILES=()
-if [ -n "$FILTER" ]; then
-  if [ -f "$ACTIVITY_DIR/$FILTER" ]; then
-    LOG_FILES=("$ACTIVITY_DIR/$FILTER")
+  echo "${B}${DIM}▸ DONE${R} ${DIM}(ultimas ${#DONE[@]})${R}"
+  if [ ${#DONE[@]} -eq 0 ]; then
+    echo "  ${DIM}(nenhuma)${R}"
   else
-    echo "[log] agent '$FILTER' sem log em $ACTIVITY_DIR"
-    echo "Disponiveis: $(ls "$ACTIVITY_DIR" 2>/dev/null | tr '\n' ' ')"
-    exit 1
-  fi
-else
-  while IFS= read -r f; do [ -f "$f" ] && LOG_FILES+=("$f"); done < <(ls "$ACTIVITY_DIR"/ 2>/dev/null | xargs -I{} echo "$ACTIVITY_DIR/{}")
-fi
-
-if [ ${#LOG_FILES[@]} -eq 0 ]; then
-  echo "${DIM}(nenhuma entrada ainda)${R}"
-  exit 0
-fi
-
-# Merge runs (exclude note lines) + notes index
-MERGED=$(grep -h $'\tok\t\|$\ttimeout\t\|$\tfail\t\|$\tmigrated\t' "${LOG_FILES[@]}" 2>/dev/null | sort -r | head -"$TAIL")
-
-if [ -z "$MERGED" ]; then
-  echo "${DIM}(nenhuma entrada ainda)${R}"
-  exit 0
-fi
-
-# Build notes lookup: agent -> last note text
-declare -A NOTES
-for lf in "${LOG_FILES[@]}"; do
-  aname=$(basename "$lf")
-  n=$(grep $'\tnote\t' "$lf" 2>/dev/null | tail -1 | cut -f3-)
-  [ -n "$n" ] && NOTES[$aname]="$n"
-done
-
-# ── Last tick info ────────────────────────────────────────────────
-_tick_info=""
-_last_tick=$(journalctl -u zion-tick.service --no-pager -n 1 -o short-iso 2>/dev/null | grep -v "^--\|^Journal\|^Hint" | awk '{print $1}' | grep -E '^[0-9]{4}-' | tail -1)
-if [ -n "$_last_tick" ]; then
-  _tick_epoch=$(date -d "$_last_tick" +%s 2>/dev/null || echo 0)
-  if [ "$_tick_epoch" -gt 0 ]; then
-    _diff_tick=$(( $(date +%s) - _tick_epoch ))
-    _next_secs=$(( 600 - _diff_tick ))
-    if   (( _diff_tick < 60 ));   then _ago="${_diff_tick}s atras"
-    elif (( _diff_tick < 3600 )); then _ago="$((_diff_tick/60))min atras"
-    else                               _ago="$((_diff_tick/3600))h atras"; fi
-    if   (( _next_secs <= 0 ));   then _next="agora"
-    elif (( _next_secs < 60 ));   then _next="em ${_next_secs}s"
-    else                               _next="em $((_next_secs/60))min"; fi
-    _tick_info="  ${DIM}[tick: $_ago | proximo: $_next]${R}"
-  fi
-fi
-
-echo ""
-echo "${B}${C}▸ ACTIVITY LOG${R}${DIM} (ultimas $TAIL | $([ -n "$FILTER" ] && echo "agent=$FILTER" || echo "todos"))${R}${_tick_info}"
-echo ""
-printf "  ${DIM}%-14s  %-8s  %-12s  %-4s  %s${R}\n" "starttime" "duration" "agent" "st" "topic"
-echo "  ${DIM}$(printf '─%.0s' {1..80})${R}"
-
-# ── Queue: running + scheduled (proximos 10) ──────────────────────
-NOW=$(date +%s)
-_queue_output=$({
-  for dir_state in "$AGENTS/_running:running" "$AGENTS/_schedule:sched"; do
-    dir="${dir_state%%:*}"; state="${dir_state##*:}"
-    [ -d "$dir" ] || continue
-    for f in "$dir"/*.md; do
-      [ -f "$f" ] || continue
-      fname=$(basename "$f")
-      [[ "$fname" =~ ^([0-9]{4})([0-9]{2})([0-9]{2})_([0-9]{2})_([0-9]{2})_ ]] || continue
-      ts=$(TZ=UTC date -d "${BASH_REMATCH[1]}-${BASH_REMATCH[2]}-${BASH_REMATCH[3]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]}:00" +%s 2>/dev/null) || continue
-      ts_display=$(date -d "@$ts" +"%m-%d %H:%M")
-      aname=$(awk '/^---/{fm++} fm==1 && /^agent:/{print $2; exit}' "$f" 2>/dev/null)
-      [ -z "$aname" ] && aname=$(awk '/^---/{fm++} fm==1 && /^contractor:/{print $2; exit}' "$f" 2>/dev/null)
-      [ -z "$aname" ] && aname="?"
-      card_label=$(echo "$fname" | sed 's/^[0-9]\{8\}_[0-9]\{2\}_[0-9]\{2\}_//; s/\.md$//')
-      echo "$ts|$ts_display|$aname|$card_label|$state"
+    for f in "${DONE[@]}"; do
+      printf "  %-50s  %s\n" "$(_label "$f")" "$(_age "$f")"
     done
-  done
-} | sort -t'|' -k1,1rn | head -10)
-
-if [ -n "$_queue_output" ]; then
-  while IFS='|' read -r _ts ts_display aname card_label state; do
-    diff=$(( _ts - NOW ))
-    if [ "$state" = "running" ] || (( diff < 0 )); then
-      # Overdue or stuck running → red
-      printf "  ${RED}%-14s${R}  %-8s  %-12s  " "$ts_display" "--" "$aname"
-      printf "${RED}!!${R}   "
-    else
-      # Future → cyan
-      printf "  ${C}%-14s${R}  %-8s  %-12s  " "$ts_display" "--" "$aname"
-      printf "${C}..${R}   "
-    fi
-    printf "%s\n" "$card_label"
-  done <<< "$_queue_output"
-fi
-
-# ── NOW line ──────────────────────────────────────────────────────
-_now_display=$(date +"%m-%d %H:%M")
-printf "  ${Y}%-14s  %-8s  %-12s  %-4s  %s${R}\n" "$_now_display" "now" "─────" "──" "──────"
-
-# ── Past entries ──────────────────────────────────────────────────
-while IFS=$'\t' read -r ts agent status elapsed tokens card; do
-  # Status icon (compact)
-  case "$status" in
-    ok)       sc="${G}ok${R} " ;;
-    timeout)  sc="${Y}to${R} " ;;
-    fail)     sc="${RED}!!${R} " ;;
-    migrated) sc="${DIM}--${R} " ;;
-    *)        sc="${DIM}? ${R} " ;;
-  esac
-
-  # Starttime: convert UTC ISO → local time
-  ts_epoch=$(date -d "$ts" +%s 2>/dev/null || echo 0)
-  if [ "$ts_epoch" -gt 0 ]; then
-    ts_short=$(date -d "@$ts_epoch" +"%m-%d %H:%M")
-  else
-    ts_short=$(echo "$ts" | sed 's/[0-9]\{4\}-\([0-9]\{2\}\)-\([0-9]\{2\}\)T\([0-9]\{2\}:[0-9]\{2\}\).*/\1-\2 \3/')
   fi
-
-  # Duration: use elapsed if available, otherwise "--"
-  dur="${elapsed}"
-  [[ "$dur" == "—" || -z "$dur" ]] && dur="--"
-
-  # Topic: try note for this agent, else derive from card name
-  topic=""
-  # If card name differs from agent name, it IS the topic (e.g. task cards)
-  card_clean=$(echo "$card" | sed 's/^[0-9]\{8\}_[0-9]\{2\}_[0-9]\{2\}_//')
-  if [ "$card_clean" != "$agent" ] && [ -n "$card_clean" ]; then
-    topic="$card_clean"
-  fi
-  # If we have a note for this agent, prefer it
-  [ -n "${NOTES[$agent]:-}" ] && topic="${NOTES[$agent]}"
-  # For migrated entries, show tokens field if it says "migrated"
-  [[ "$status" == "migrated" ]] && [ -z "$topic" ] && topic="${DIM}(historico)${R}"
-
-  printf "  %-14s  %-8s  %-12s  " "$ts_short" "$dur" "$agent"
-  printf "%-6b  " "$sc"
-  printf "%s\n" "$topic"
-done <<< "$MERGED"
-
-echo ""
+  echo ""
 
 }
-
 
 # :command.function
 zion_tasks_status_command() {
@@ -5375,32 +5469,33 @@ zion_host_command() {
 zion_inbox_command() {
 
   # src/commands/inbox.sh
-# Lista o inbox
-local obsidian="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
-local inbox_dir="$obsidian/inbox"
+  # Lista o inbox
+  local obsidian="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
+  local inbox_dir="$obsidian/inbox"
 
-# Fallback path
-if [ ! -d "$inbox_dir" ]; then
-  for try in "/workspace/obsidian/inbox" "$HOME/obsidian/inbox"; do
-    [ -d "$try" ] && inbox_dir="$try" && break
-  done
-fi
+  # Fallback path
+  if [ ! -d "$inbox_dir" ]; then
+    for try in "/workspace/obsidian/inbox" "$HOME/obsidian/inbox"; do
+      [ -d "$try" ] && inbox_dir="$try" && break
+    done
+  fi
 
-if [ ! -d "$inbox_dir" ]; then
-  echo "Inbox nao encontrado: $inbox_dir"
-  exit 1
-fi
+  if [ ! -d "$inbox_dir" ]; then
+    echo "Inbox nao encontrado: $inbox_dir"
+    exit 1
+  fi
 
-files=$(ls -1 "$inbox_dir" 2>/dev/null)
-if [ -z "$files" ]; then
-  echo "Inbox vazio."
-else
-  echo "Inbox ($inbox_dir):"
-  echo "$files" | sed 's/^/  /'
-fi
+  files=$(ls -1 "$inbox_dir" 2>/dev/null)
+  if [ -z "$files" ]; then
+    echo "Inbox vazio."
+  else
+    echo "Inbox ($inbox_dir):"
+    echo "$files" | sed 's/^/  /'
+  fi
 
 }
 
+# :command.function
 zion_outbox_command() {
 
   # src/commands/outbox.sh
@@ -5807,7 +5902,6 @@ parse_requirements() {
       zion_update_parse_requirements "$@"
       shift $#
       ;;
-
 
     set)
       action="set"
@@ -6701,58 +6795,6 @@ zion_update_parse_requirements() {
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
-
-      -?*)
-        printf "invalid option: %s\n" "$key" >&2
-        exit 1
-        ;;
-
-      *)
-        # :command.parse_requirements_case
-        # :command.parse_requirements_case_simple
-        printf "invalid argument: %s\n" "$key" >&2
-        exit 1
-
-        ;;
-
-    esac
-  done
-
-}
-
-# :command.parse_requirements
-zion_init_parse_requirements() {
-  # :command.fixed_flags_filter
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      --help | -h)
-        long_usage=yes
-        zion_init_usage
-        exit
-        ;;
-
-      *)
-        break
-        ;;
-
-    esac
-  done
-
-  # :command.command_filter
-  action="init"
-
-  # :command.parse_requirements_while
-  while [[ $# -gt 0 ]]; do
-    key="$1"
-    case "$key" in
-      # :flag.case
-      --force)
-
-        # :flag.case_no_arg
-        args['--force']=1
-        shift
-        ;;
 
       -?*)
         printf "invalid option: %s\n" "$key" >&2
@@ -8352,16 +8394,50 @@ zion_host_parse_requirements() {
 
 # :command.parse_requirements
 zion_inbox_parse_requirements() {
+  # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --help | -h) printf "zion inbox - Lista os arquivos do inbox.\n\nUsage: zion inbox\n"; exit ;;
-      *) printf "invalid argument: %s\n" "$1" >&2; exit 1 ;;
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_inbox_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
     esac
-    shift
   done
+
+  # :command.command_filter
   action="inbox"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        printf "invalid argument: %s\n" "$key" >&2
+        exit 1
+
+        ;;
+
+    esac
+  done
+
 }
 
+# :command.parse_requirements
 zion_outbox_parse_requirements() {
   # :command.fixed_flags_filter
   while [[ $# -gt 0 ]]; do

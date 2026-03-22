@@ -26,7 +26,7 @@ Detectar valores atuais das flags a partir do contexto de boot injetado no iníc
 ### 2. Detectar flags e estado real
 
 Para cada flag, determinar:
-- **Mecanismo de ativação** (qual arquivo `.ephemeral/`, variável de env, ou path)
+- **Mecanismo de ativação** (`~/.zion KEY=` ou variável de processo)
 - **Default** (o que acontece sem intervenção)
 - **Valor nesta sessão** (ON/OFF/0/1/string)
 - **Status**: 🔵 ativo · 🔴 inativo · ⚪ lazy (existe mas não carregado)
@@ -62,8 +62,8 @@ Formato tabela Markdown:
 ```
 |     | Flag | Mecanismo | Default | Valor |
 |-----|------|-----------|---------|-------|
-| 🔵 | `personality` | `.ephemeral/personality-off` | ON | ON |
-| 🔴 | `autocommit`  | `.ephemeral/auto-commit`     | OFF | OFF |
+| 🔵 | `personality` | `~/.zion PERSONALITY=` | ON | ON |
+| 🔴 | `autocommit`  | `~/.zion AUTOCOMMIT=`     | OFF | OFF |
 ...
 ```
 
@@ -115,7 +115,7 @@ Avaliar e exibir recomendações baseadas no estado atual:
 
   · zion_debug=OFF → PERSONALITY e avatar não carregados
     Se precisar do avatar ou persona completa:
-    touch WS/.ephemeral/zion-debug && reiniciar sessão
+    Editar ~/.zion → ZION_DEBUG=ON
 
   · SELF.md não carregado (lazy)
     Se a sessão envolver introspecção ou auto-modificação do sistema:
@@ -127,7 +127,7 @@ Avaliar e exibir recomendações baseadas no estado atual:
 
   · autocommit=OFF (padrão saudável)
     Commits manuais — comportamento correto para sessões interativas.
-    Para workers autônomos: touch WS/.ephemeral/auto-commit
+    Para workers autônomos: Editar ~/.zion → AUTOCOMMIT=ON
 
   · beta=OFF, analysis_mode=OFF
     Sessão limpa, sem overrides experimentais.
@@ -137,7 +137,7 @@ Avaliar e exibir recomendações baseadas no estado atual:
 
   COMANDOS ÚTEIS
   ─────────────────────────────────────────────────────────────────
-  Ativar modo completo:    touch WS/.ephemeral/zion-debug
+  Ativar modo completo:    Editar ~/.zion → ZION_DEBUG=ON
   Ativar lab mode:         zion lab
   Carregar personality:    invocar skill meta:personality (se existir)
   Ver uso de contexto:     /meta:context:usage

@@ -11,20 +11,8 @@ RUN mkdir -p /etc /home/claude && \
     { grep -q "^claude:" /etc/group 2>/dev/null || echo "claude:x:1000:" >> /etc/group; } && \
     chown 1000:1000 /home/claude
 
-# Entrypoint: inicia nix-daemon como root, cria dirs essenciais, delega via setpriv.
-# setpriv (util-linux) troca UID/GID sem precisar de /etc/passwd — robusto mesmo
-# quando o NixOS recria /etc em runtime sem o usuário claude.
-RUN printf '#!/bin/bash\n\
-HOME=/root nix-daemon &\n\
-sleep 1\n\
-mkdir -p /workspace/.ephemeral/locks /workspace/.ephemeral/notes /workspace/.ephemeral/scratch /tmp/zion-locks /home/claude\n\
-chown -R 1000:1000 /workspace/.ephemeral /tmp/zion-locks /home/claude 2>/dev/null || true\n\
-chown -R 1000:1000 /workspace/obsidian/agents/cron 2>/dev/null || true\n\
-export HOME=/home/claude\n\
-export USER=claude\n\
-export LOGNAME=claude\n\
-exec setpriv --reuid=1000 --regid=1000 --keep-groups "$@"\n' > /entrypoint.sh && \
-    chmod +x /entrypoint.sh
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 # Container roda como root por default para que /entrypoint.sh possa iniciar nix-daemon.
 # gosu no entrypoint cuida da troca para claude. docker exec usa -u claude explicitamente.
