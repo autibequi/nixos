@@ -61,9 +61,13 @@ fn sessions_height(app: &App) -> u16 {
     ((agents_h + bg_h + between) as u16).max(1)
 }
 
-fn dk_services_height(app: &App) -> u16 {
-    // 1 group header + DK_SERVICES rows
-    (crate::app::DK_SERVICES.len() as u16) + 1
+fn dk_services_height(_app: &App) -> u16 {
+    // 1 group header + service rows + dep sub-rows per service
+    let dep_rows: usize = crate::app::DK_SERVICES
+        .iter()
+        .map(|&svc| services::service_dep_count(svc))
+        .sum();
+    (crate::app::DK_SERVICES.len() as u16) + 1 + dep_rows as u16
 }
 
 fn utils_height(app: &App) -> u16 {

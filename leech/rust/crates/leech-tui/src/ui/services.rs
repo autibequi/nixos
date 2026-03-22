@@ -12,6 +12,19 @@ use crate::theme;
 const SPINNER: &[&str] = &["◐", "◓", "◑", "◒"];
 
 
+/// Dep container suffixes for each service (shown as sub-rows).
+fn service_dep_names(svc: &str) -> &'static [&'static str] {
+    match svc {
+        "monolito" => &["postgres", "redis", "localstack"],
+        _ => &[],
+    }
+}
+
+/// Number of dep rows for a given service (used by height calculation).
+pub fn service_dep_count(svc: &str) -> usize {
+    service_dep_names(svc).len()
+}
+
 /// Render dockerized services panel.
 pub fn render(frame: &mut Frame, app: &App, area: Rect) {
     let mut lines = Vec::new();
@@ -44,6 +57,21 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                 Span::styled("stop ", theme::dim()),
             ]));
 
+            for (di, &dep) in service_dep_names(svc).iter().enumerate() {
+                let is_last = di == service_dep_names(svc).len() - 1;
+                let tree = if is_last { "└─" } else { "├─" };
+                lines.push(Line::from(vec![
+                    Span::raw("        "),
+                    Span::styled(tree, theme::dim()),
+                    Span::raw(" "),
+                    Span::styled("\u{25cb}", theme::down_icon()),
+                    Span::raw(" "),
+                    Span::styled(format!("{dep:<14}"), theme::dim()),
+                    Span::raw(" "),
+                    Span::styled("stopped", theme::uptime()),
+                ]));
+            }
+
         }
     } else {
         let any_up = app.snapshot.dk_services.iter().any(|s| s.is_up);
@@ -64,12 +92,13 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             let is_selected = i == app.cursor_idx;
             let marker = if is_selected { "\u{25b6}" } else { " " };
 
-            // Find matching dk_service
+            // Find matching dk_service (main app container: leech-dk-{svc}-app)
+            let app_container = format!("leech-dk-{svc}-app");
             let dk = app
                 .snapshot
                 .dk_services
                 .iter()
-                .find(|d| d.name.contains(svc));
+                .find(|d| d.name == app_container);
 
             // Check if there's a pending action for this service
             let is_pending = matches!(&app.last_action, Some((idx, _)) if *idx == i);
@@ -167,6 +196,46 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             }
 
             lines.push(Line::from(spans));
+
+            // Dep sub-rows (postgres, redis, localstack, …)
+            let deps = service_dep_names(svc);
+            for (di, &dep) in deps.iter().enumerate() {
+                let is_last = di == deps.len() - 1;
+                let tree = if is_last { "└─" } else { "├─" };
+                let dep_container = format!("leech-dk-{svc}-{dep}");
+                let dep_info = app.snapshot.dk_services.iter().find(|d| d.name == dep_container);
+                let (dep_icon, dep_style, dep_status, dep_cpu, dep_mem) = match dep_info {
+                    Some(d) if d.is_up => (
+                        "\u{25cf}", theme::up_icon(), format_uptime(&d.status),
+                        d.cpu.clone(), d.mem.clone(),
+                    ),
+                    _ => ("\u{25cb}", theme::down_icon(), "stopped".to_string(), String::new(), String::new()),
+                };
+                let mut dep_spans = vec![
+                    Span::raw("        "),
+                    Span::styled(tree, theme::dim()),
+                    Span::raw(" "),
+                    Span::styled(dep_icon, dep_style),
+                    Span::raw(" "),
+                    Span::styled(format!("{dep:<14}"), theme::dim()),
+                    Span::raw(" "),
+                    Span::styled(format!("{dep_status:<5}"), theme::uptime()),
+                ];
+                if !dep_cpu.is_empty() {
+                    let cpu_pct = parse_pct(&dep_cpu);
+                    let cpu_bar = mini_bar(cpu_pct, 6);
+                    let cpu_style = pct_color(cpu_pct);
+                    dep_spans.push(Span::raw("  "));
+                    dep_spans.push(Span::styled(cpu_bar, cpu_style));
+                    dep_spans.push(Span::styled(format!(" {:<6}", dep_cpu.trim()), theme::cpu()));
+                    let mem_short = dep_mem.replace("MiB", "M").replace("GiB", "G").replace(" / ", "/");
+                    let mem_bar = mem_bar_from_str(&dep_mem);
+                    dep_spans.push(Span::raw(" "));
+                    dep_spans.push(Span::styled(mem_bar, theme::mem()));
+                    dep_spans.push(Span::styled(format!(" {mem_short}"), theme::dim()));
+                }
+                lines.push(Line::from(dep_spans));
+            }
 
         }
 

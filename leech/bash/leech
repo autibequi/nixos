@@ -2561,7 +2561,7 @@ leech_docker_service_host_ports() {
   case "$1" in
     front-student)   echo "3005" ;;
     bo-container)    echo "9090" ;;
-    monolito)        echo "4004 2345" ;;
+    monolito)        echo "4004 2345 5432 6379 4566" ;;
     monolito-worker) echo "" ;;
     *) echo "" ;;
   esac
