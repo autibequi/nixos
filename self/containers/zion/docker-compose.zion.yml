@@ -52,6 +52,16 @@ x-base-volumes: &base-volumes
   - /run/current-system:/host/run/current-system:ro
   - /etc/os-release:/host/etc/os-release:ro
   - /tmp/zion-hive-mind:/workspace/.hive-mind
+  # Logs do host — observabilidade e debug de sistema
+  - /var/log/journal:/workspace/logs/host/journal:ro
+  - /run/log/journal:/workspace/logs/host/journal-runtime:ro
+  - /var/log:/workspace/logs/host/var-log:ro
+  - /var/lib/systemd/coredump:/workspace/logs/host/coredump:ro
+  # Hardware/kernel state (sem senhas)
+  - /sys/class/hwmon:/host/sys/class/hwmon:ro
+  - /sys/class/thermal:/host/sys/class/thermal:ro
+  - /sys/class/net:/host/sys/class/net:ro
+  - /sys/block:/host/sys/block:ro
   # Logs de servicos Docker (zion docker run/test) — acessiveis pelo agente
   - ${XDG_DATA_HOME:-${HOME}/.local/share}/zion/logs/dockerized:/workspace/logs/docker:rw
   # Docker socket — permite agente gerenciar containers (zion docker run/install/logs)

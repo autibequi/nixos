@@ -17,6 +17,10 @@
   # https://discourse.nixos.org/t/psa-for-those-with-hibernation-issues-on-nvidia/61834
   boot.extraModprobeConfig = ''
     options nvidia_modeset vblank_sem_control=0
+    # Preserva memória de vídeo durante suspend/hibernate — evita freeze pós-resume
+    # (nvidia-modeset ACPI backlight hang após s2idle)
+    options nvidia NVreg_PreserveVideoMemoryAllocations=1
+    options nvidia NVreg_TemporaryFilePath=/tmp
   '';
   
   hardware.nvidia = {

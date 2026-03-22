@@ -26,6 +26,19 @@
   };
   networking.firewall.checkReversePath = "loose";
 
+  # SSH — acessível apenas na rede local (192.168.0.0/16)
+  services.openssh = {
+    enable = true;
+    openFirewall = false; # não abre publicamente
+    settings = {
+      PasswordAuthentication = true;
+      PermitRootLogin = "no";
+    };
+  };
+  networking.firewall.extraCommands = ''
+    iptables -A nixos-fw -s 192.168.0.0/16 -p tcp --dport 22 -j nixos-fw-accept
+  '';
+
   # LM Studio API Server (disabled — lms binary segfaults, needs manual install)
   services.lmstudio.enable = false;
 }

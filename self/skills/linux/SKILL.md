@@ -1,13 +1,130 @@
 ---
 name: linux
-description: "Auto-ativar quando: zion_edit=1 (zion host), ou usuário menciona NixOS, Hyprland, Waybar, dotfiles, stow, nix, módulos, pacotes do sistema, keybinds, window rules ou configuração do compositor."
+description: "Auto-ativar quando: zion_edit=1 (zion host), usuário menciona NixOS, Hyprland, Waybar, dotfiles, stow, nix, módulos, pacotes do sistema, keybinds, window rules, configuração do compositor, OU quando reclama de problema no computador (lento, travando, crash, rede, disco, processo morto, boot, etc.)."
 ---
 
-# linux — Sistema Linux (NixOS + Hyprland + dotfiles)
+# linux — Sistema Linux (NixOS + Hyprland + dotfiles + Debug de Host)
 
-Skill unificada para tudo que envolve o sistema Linux: pacotes NixOS, módulos, opções, dotfiles, Hyprland, Waybar, stow.
+Skill unificada para tudo que envolve o sistema Linux: pacotes NixOS, módulos, opções, dotfiles, Hyprland, Waybar, stow — e debug autônomo do host do Pedro.
 
-## Passo 0 — Plan Mode Obrigatório
+## DEBUG DE HOST — Investigação Autônoma
+
+Quando o Pedro reclamar de qualquer problema no computador (lento, travando, crash, rede, disco, processo morto, login quebrado, etc.):
+
+**Regra principal: investigar primeiro, perguntar o mínimo.**
+Usar os mounts disponíveis para chegar com diagnóstico, não com perguntas.
+
+### Mounts disponíveis para debug
+
+```
+/workspace/logs/host/
+  journal/          → journald persistente  → journalctl -D /workspace/logs/host/journal
+  journal-runtime/  → journald boot atual   → journalctl -D /workspace/logs/host/journal-runtime
+  var-log/          → syslog, auth.log, Xorg.log, kern.log, etc.
+  coredump/         → crash dumps (coredumpctl --directory=... ou ler diretamente)
+
+/host/sys/class/
+  hwmon/            → temperaturas, tensões, RPM fans (cat thermal_zone*/temp)
+  thermal/          → thermal zones, throttling
+  net/              → bytes/erros por interface (cat eth0/statistics/*)
+
+/host/sys/block/    → I/O queue por disco (cat sda/stat, sda/queue/*)
+
+/host/proc/         → meminfo, cpuinfo, loadavg, uptime, vmstat, diskstats (arquivos individuais)
+```
+
+**Também disponível** (network_mode: host):
+- `ss -tlnp` — sockets do host
+- `ip a`, `ip route` — interfaces do host
+- `ping`, `curl` — conectividade do host
+
+**NÃO disponível sem ajuda do Pedro:**
+- `dmesg` live (pedir: `dmesg -T | tail -100`)
+- `strace`/`perf` em processos host (CAP_SYS_PTRACE e CAP_PERFMON dropados)
+- `top`/`htop` do host (PID namespace isolado — pedir output se necessário)
+
+### Metodologia de investigação
+
+```
+1. Entender o sintoma pela descrição do Pedro
+2. Classificar: crash / lentidão / rede / disco / memória / serviço
+3. Ir direto ao source correto (tabela abaixo)
+4. Ler, correlacionar, formar hipótese
+5. Apresentar diagnóstico + causa provável + fix proposto
+   → Se fix for NixOS: editar módulo + pedir `zion os switch`
+   → Se fix for config: editar dotfile + `zion stow`
+   → Se precisar de info que não tenho: pedir UMA coisa específica
+```
+
+### Sources por tipo de problema
+
+| Sintoma | Onde olhar primeiro |
+|---------|---------------------|
+| Crash de processo / app | `/workspace/logs/host/coredump/` + `journalctl -D journal -b -1` |
+| Serviço não sobe | `journalctl -D journal -u <servico> -n 100` |
+| Boot com erro | `journalctl -D journal -b -1 -p err` |
+| Kernel panic / OOM | `journalctl -D journal -k \| grep -E "oom\|killed\|panic"` |
+| Lentidão geral | `/host/proc/loadavg` + `/host/proc/meminfo` + `/host/proc/vmstat` |
+| CPU alta / throttling | `/host/sys/class/thermal/` + `/host/sys/class/hwmon/` |
+| Disco cheio / lento | `/host/sys/block/*/stat` + `/workspace/logs/host/var-log/syslog` |
+| Rede quebrada | `ss -tlnp` + `ip a` + `/host/sys/class/net/*/statistics/` |
+| Temperatura / fan | `/host/sys/class/hwmon/hwmon*/temp*_input` (valor em milligraus) |
+| Auth / sudo / SSH | `/workspace/logs/host/var-log/auth.log` |
+| Xorg / Wayland / GPU | `/workspace/logs/host/var-log/` + `journalctl -D journal -u sddm` |
+
+### Comandos journalctl úteis (sempre usar -D)
+
+```bash
+# Boot anterior completo com erros
+journalctl -D /workspace/logs/host/journal -b -1 -p err --no-pager
+
+# Últimas 2 horas
+journalctl -D /workspace/logs/host/journal --since "2h ago" --no-pager
+
+# Serviço específico
+journalctl -D /workspace/logs/host/journal -u nome-servico -n 200 --no-pager
+
+# Kernel (hardware, driver, OOM)
+journalctl -D /workspace/logs/host/journal -k --no-pager | grep -E "error|fail|warn|oom|killed"
+
+# Crash dump listing
+ls -lh /workspace/logs/host/coredump/
+```
+
+### Leitura de hardware (sys)
+
+```bash
+# Temperaturas (em milligraus Celsius → dividir por 1000)
+for f in /host/sys/class/hwmon/hwmon*/temp*_input; do
+  label=$(cat "${f%_input}_label" 2>/dev/null || echo "$f")
+  echo "$label: $(( $(cat $f) / 1000 ))°C"
+done
+
+# Thermal zones (throttling)
+for z in /host/sys/class/thermal/thermal_zone*; do
+  echo "$(cat $z/type): $(cat $z/temp)m°C — $(cat $z/policy 2>/dev/null)"
+done
+
+# I/O de disco
+cat /host/sys/block/sda/stat   # ou nvme0n1
+
+# Net stats por interface
+cat /host/sys/class/net/enp*/statistics/rx_bytes
+cat /host/sys/class/net/enp*/statistics/tx_bytes
+```
+
+### Fix via NixOS (zion_edit=1)
+
+Quando o diagnóstico indica fix de configuração do sistema:
+1. Editar o módulo correto em `/workspace/mnt/` (tabela de módulos abaixo)
+2. Dizer ao Pedro: **"editei X, rode `zion os switch` para aplicar"**
+3. Se quiser testar antes sem persistir: pedir `nh os test .`
+
+**Nunca rodar `nh os switch` ou `nixos-rebuild` dentro do container.**
+
+---
+
+## Passo 0 — Plan Mode Obrigatório (mudanças de config)
 
 Chamar `EnterPlanMode` imediatamente antes de qualquer ação.
 Sair apenas após aprovação explícita do dev.
