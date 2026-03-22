@@ -19,4 +19,5 @@ Skills de trabalho com codigo: analise, debug, teste, review, inspecao, boas pra
 | `code/report` | Relatorio consolidado de analise |
 | `code/peer-reviews` | Simula review dos 5 peers do monolito (Washington, Pedro Castro, Molina, Marquesini, William) |
 | `code/review` | Code review (chama inspection internamente) |
+| `code/github-evaluate` | Avalia dev GitHub via PRs + reviews, relatorio no inbox com benchmarks |
 | `code/tdd` | Test-Driven Development — RED-GREEN-REFACTOR |
