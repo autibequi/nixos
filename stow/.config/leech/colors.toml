@@ -1,0 +1,35 @@
+# Leech Theme — OLED Dark
+# Source of truth for all component colors.
+# Run `leech-theme-apply` after editing.
+
+[meta]
+name = "oled-dark"
+
+[palette]
+bg         = "#000000"
+bg-surface = "#111111"
+bg-overlay = "#1a1a1a"
+fg         = "#ffffff"
+fg-muted   = "#a1a1aa"
+fg-subtle  = "#636e72"
+accent     = "#7c3aed"
+accent-alt = "#00ff41"
+red        = "#ff0000"
+yellow     = "#ffe761"
+green      = "#008000"
+blue       = "#0c4abf"
+orange     = "#ff8c00"
+purple     = "#9b59b6"
+
+[wallpaper]
+path = "~/assets/wallpapers/the-wild-hunt-of-odin.jpg"
+
+[gtk]
+theme  = "adw-gtk3-dark"
+scheme = "prefer-dark"
+
+[alacritty]
+import = "~/.config/alacritty/dark-theme.toml"
+
+[border]
+active = "rgba(7c3aedff) rgba(00ff41ff) 45deg"

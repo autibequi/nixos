@@ -40,6 +40,8 @@ with lib;
   environment.systemPackages = with pkgs; [
     zenity
     hyprpicker
+    inputs.anyrun.packages.${pkgs.system}.anyrun-with-all-plugins
+    wf-recorder
     hyprpolkitagent
     cheese
 

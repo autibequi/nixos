@@ -12,10 +12,6 @@
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     home-manager.url = "github:nix-community/home-manager/release-25.11"; # Home Manager
     claude-code.url = "github:sadjow/claude-code-nix";
-    anyrun = {
-      url = "github:anyrun-org/anyrun";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
 
   };
 
@@ -29,7 +25,6 @@
       home-manager,
       chaotic,
       claude-code,
-      anyrun,
       ...
     }@inputs:
       let

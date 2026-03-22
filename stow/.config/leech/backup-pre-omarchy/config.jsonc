@@ -1,17 +1,14 @@
 {
   "layer": "bottom",
   "position": "bottom",
-  "height": 26,
   "spacing": 0,
   "margin": 0,
   "modules-left": [
-    "custom/leech",
     "idle_inhibitor",
     "hyprland/workspaces"
     // "hyprland/window"
   ],
   "modules-center": [
-    "custom/screenrecord",
     "custom/swaync",
     "clock",
     "battery"
@@ -23,45 +20,12 @@
     "pulseaudio",
     "backlight",
     "network",
-    "group/tray-expander",
+    "tray",
     "bluetooth"
   ],
   "tray": {
     "icon-size": 14,
-    "spacing": 2
-  },
-  "custom/leech": {
-    "format": "{}",
-    "exec": "echo '{\"text\":\" 󱙺 \",\"tooltip\":\"Leech Menu (MOD3+Space)\",\"class\":\"\"}'",
-    "return-type": "json",
-    "interval": "once",
-    "on-click": "leech-menu",
-    "on-click-right": "anyrun"
-  },
-  "custom/screenrecord": {
-    "exec": "[ -f /tmp/screenrecord.pid ] && echo '{\"text\":\"󰑊 REC\",\"tooltip\":\"Recording... click to stop\",\"class\":\"active\"}' || echo '{\"text\":\"\",\"tooltip\":\"\",\"class\":\"\"}'",
-    "return-type": "json",
-    "interval": 2,
-    "signal": 9,
-    "format": "{}",
-    "on-click": "screenrecord-toggle"
-  },
-  "group/tray-expander": {
-    "orientation": "horizontal",
-    "drawer": {
-      "transition-duration": 300,
-      "children-class": "tray-drawer",
-      "transition-left-to-right": false
-    },
-    "modules": [
-      "custom/tray-toggle",
-      "tray"
-    ]
-  },
-  "custom/tray-toggle": {
-    "format": "",
-    "tooltip-format": "Expand tray",
-    "interval": "once"
+    "spacing": 2,
   },
   "power-profiles-daemon": {
     "format": "{icon}",

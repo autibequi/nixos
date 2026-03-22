@@ -1,7 +1,5 @@
-@import url("colors.css");
-
 /*========================================================*
- *                   BASE PALETTE (fallback)              *
+ *                   BASE PALETTE                        *
  *========================================================*/
 @define-color color-black #000000;
 @define-color color-white #ffffff;
@@ -79,9 +77,6 @@ window#waybar {
 #custom-ram-bar,
 #custom-claude-usage,
 #custom-obsidian-sync,
-#custom-leech,
-#custom-screenrecord,
-#custom-tray-toggle,
 #bluetooth,
 #tray {
     margin: 0;
@@ -355,46 +350,4 @@ window#waybar {
     -gtk-icon-effect: highlight;
     color: @color-white;
     border-bottom-color: @color-white;
-}
-
-/*========================================================*
- *                   LEECH MENU ICON                      *
- *========================================================*/
-#custom-leech {
-    padding: 0 4px;
-    color: @main-text;
-    min-width: 14px;
-}
-
-#custom-leech:hover {
-    color: @main-bg;
-    background-color: @main-text;
-}
-
-/*========================================================*
- *                  SCREENRECORD INDICATOR                *
- *========================================================*/
-#custom-screenrecord {
-    color: @main-text;
-    padding: 0 2px;
-    min-width: 0;
-}
-
-#custom-screenrecord.active {
-    color: @color-red;
-    animation: urgent-pulse 0.6s ease-in-out infinite alternate;
-}
-
-/*========================================================*
- *                   TRAY EXPANDER                        *
- *========================================================*/
-#custom-tray-toggle {
-    padding: 0 2px;
-    color: @main-text;
-    min-width: 10px;
-}
-
-#custom-tray-toggle:hover {
-    color: @main-bg;
-    background-color: @main-text;
 }

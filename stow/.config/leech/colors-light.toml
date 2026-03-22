@@ -1,0 +1,35 @@
+# Leech Theme — Light
+# Source of truth for all component colors (light variant).
+# Run `leech-theme-apply` after editing.
+
+[meta]
+name = "light"
+
+[palette]
+bg         = "#fafafa"
+bg-surface = "#f0f0f0"
+bg-overlay = "#e8e8e8"
+fg         = "#1a1a1a"
+fg-muted   = "#636e72"
+fg-subtle  = "#a1a1aa"
+accent     = "#7c3aed"
+accent-alt = "#008000"
+red        = "#cc0000"
+yellow     = "#b8860b"
+green      = "#006400"
+blue       = "#0c4abf"
+orange     = "#cc7000"
+purple     = "#7b2d8e"
+
+[wallpaper]
+path = "~/assets/wallpapers/the-death-of-socrates.jpg"
+
+[gtk]
+theme  = "adw-gtk3"
+scheme = "prefer-light"
+
+[alacritty]
+import = "~/.config/alacritty/light-theme.toml"
+
+[border]
+active = "rgba(7c3aedff) rgba(008000ff) 45deg"
