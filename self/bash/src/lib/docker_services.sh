@@ -23,8 +23,8 @@ zion_docker_service_dir() {
 zion_docker_config_dir() {
   local service="$1"
   case "$service" in
-    monolito-worker) echo "${zion_nixos_dir}/zion/containers/monolito" ;;
-    *)               echo "${zion_nixos_dir}/zion/containers/${service}" ;;
+    monolito-worker) echo "${zion_nixos_dir}/self/containers/monolito" ;;
+    *)               echo "${zion_nixos_dir}/self/containers/${service}" ;;
   esac
 }
 
@@ -277,7 +277,7 @@ zion_docker_list_all_worktrees() {
 
 # --- Reverse Proxy (sobe/desce automaticamente com servicos estrategia) ---
 
-_REVERSEPROXY_DIR="${zion_nixos_dir}/zion/containers/reverseproxy"
+_REVERSEPROXY_DIR="${zion_nixos_dir}/self/containers/reverseproxy"
 _REVERSEPROXY_PROJECT="zion-dk-reverseproxy"
 
 # Sobe o reverse proxy se ainda nao estiver rodando.

@@ -48,7 +48,7 @@ _symlink() {
 }
 
 _bootstrap() {
-  local src="$nixos_dir/zion/scripts/bootstrap-dashboard.sh"
+  local src="$nixos_dir/self/scripts/bootstrap-dashboard.sh"
   if [[ -f "$src" ]]; then
     install -m 755 "$src" "$nixos_dir/scripts/bootstrap.sh"
   fi

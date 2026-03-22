@@ -1537,8 +1537,8 @@ export HOME="${_zion_resolved_home:-$HOME}"
 unset _zion_resolved_home
 
 zion_nixos_dir="${ZION_NIXOS_DIR:-$HOME/nixos}"
-zion_bash_dir="$zion_nixos_dir/zion/bash"
-zion_container_dir="$zion_nixos_dir/zion/containers/zion"
+zion_bash_dir="$zion_nixos_dir/self/bash"
+zion_container_dir="$zion_nixos_dir/self/containers/zion"
 zion_compose_file="$zion_container_dir/docker-compose.zion.yml"
 zion_compose_dir="$zion_container_dir"
 # Config do usuário: engine padrão e chaves (GH_TOKEN, ANTHROPIC_API_KEY)
@@ -2446,8 +2446,8 @@ zion_docker_service_dir() {
 zion_docker_config_dir() {
   local service="$1"
   case "$service" in
-    monolito-worker) echo "${zion_nixos_dir}/zion/containers/monolito" ;;
-    *)               echo "${zion_nixos_dir}/zion/containers/${service}" ;;
+    monolito-worker) echo "${zion_nixos_dir}/self/containers/monolito" ;;
+    *)               echo "${zion_nixos_dir}/self/containers/${service}" ;;
   esac
 }
 
@@ -2700,7 +2700,7 @@ zion_docker_list_all_worktrees() {
 
 # --- Reverse Proxy (sobe/desce automaticamente com servicos estrategia) ---
 
-_REVERSEPROXY_DIR="${zion_nixos_dir}/zion/containers/reverseproxy"
+_REVERSEPROXY_DIR="${zion_nixos_dir}/self/containers/reverseproxy"
 _REVERSEPROXY_PROJECT="zion-dk-reverseproxy"
 
 # Sobe o reverse proxy se ainda nao estiver rodando.
@@ -3653,7 +3653,7 @@ zion_update_command() {
   }
 
   _bootstrap() {
-    local src="$nixos_dir/zion/scripts/bootstrap-dashboard.sh"
+    local src="$nixos_dir/self/scripts/bootstrap-dashboard.sh"
     if [[ -f "$src" ]]; then
       install -m 755 "$src" "$nixos_dir/scripts/bootstrap.sh"
     fi

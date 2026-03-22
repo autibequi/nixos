@@ -10,8 +10,8 @@ export HOME="${_zion_resolved_home:-$HOME}"
 unset _zion_resolved_home
 
 zion_nixos_dir="${ZION_NIXOS_DIR:-$HOME/nixos}"
-zion_bash_dir="$zion_nixos_dir/zion/bash"
-zion_container_dir="$zion_nixos_dir/zion/containers/zion"
+zion_bash_dir="$zion_nixos_dir/self/bash"
+zion_container_dir="$zion_nixos_dir/self/containers/zion"
 zion_compose_file="$zion_container_dir/docker-compose.zion.yml"
 zion_compose_dir="$zion_container_dir"
 # Config do usuário: engine padrão e chaves (GH_TOKEN, ANTHROPIC_API_KEY)

@@ -153,6 +153,8 @@ Repos e paths (mesmo de `code/analysis/objects`):
 
 Gerar diagrama ASCII inline (NAO Mermaid, NAO Chrome — puro terminal).
 
+**Ler `skills/art/ascii.md`** (skill `/meta:art`) para padroes e convencoes visuais.
+
 Ler os arquivos novos/modificados dos handlers e services para entender:
 - Read path: request → handler → service → cache/repo → response
 - Write path: trigger → queue/worker → service → persist

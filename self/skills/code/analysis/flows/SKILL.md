@@ -15,7 +15,13 @@ Defaults: `--repo all`, `--modo full`
 
 ## Templates
 
-Ler `templates/html.md` para o template HTML completo com Mermaid CDN e tema Catppuccin.
+| Template | Quando usar |
+|---|---|
+| `templates/html.md` | Mermaid no Chrome (interativo, colorido) — default do `/code flows` |
+| `templates/ascii.md` | ASCII no terminal — DEPRECADO, migrado para `skills/art/ascii.md` (`/meta:art`) |
+
+Para Chrome: ler `templates/html.md` para o template HTML completo com Mermaid CDN e tema Catppuccin.
+Para terminal: ler `skills/art/ascii.md` (skill `/meta:art`) — fonte da verdade para todos os diagramas ASCII.
 
 ## Passo 1 — Detectar arquivos modificados
 
