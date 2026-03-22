@@ -1846,6 +1846,11 @@ zion_session_run() {
 
       local launch_cmd="bash /workspace/self/scripts/zion-agent-launch.sh ${claude_args}"
       [[ -n "${args['--no-splash']:-}" ]] && launch_cmd=". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
+      # Pre-splash no host: aparece imediatamente antes do container subir
+      if [[ -z "${args['--no-splash']:-}" ]]; then
+        printf '\033[2J\033[H\033[?25l\n'
+        printf "  \033[2m[ .. ]\033[0m  \033[2miniciando zion...\033[0m\n"
+      fi
       zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes $analysis_env \
         --entrypoint /entrypoint.sh -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" leech \
         /bin/bash -c "${launch_cmd}"

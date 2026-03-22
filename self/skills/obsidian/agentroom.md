@@ -59,3 +59,23 @@ Append ciclo novo no topo. Manter 5-10 ciclos.
 - Nunca commitar sem CTO pedir
 - Nunca mover cards DOING/DONE
 - Datas absolutas, nunca relativas
+
+## Criacao de cards com backlog de implementacao
+
+**Antes de criar qualquer card que envolva implementacao de codigo ou feature:**
+
+1. Carregar skill `refinar` (`/workspace/self/skills/refinar/SKILL.md`)
+2. Investigar o codebase alvo (ondas: estrutura → padroes → pontos de extensao)
+3. Mapear camadas de dependencia
+4. Montar backlog ordenado com tasks TX: dimensionadas para ~25min cada
+5. So entao criar o card com o backlog embutido
+
+**Regra de madrugada (21h-6h UTC):**
+Cards de implementacao devem ser agendados para rodar na madrugada — tokens de baixo custo, sem competicao de quota, tempo de reflexao aproveitado.
+Ao criar um card pesado: `NEXT=$(date -u -d "tomorrow 02:00" +%Y%m%d_%H_%M)` ou horario de madrugada mais proximo.
+
+**Sinal de que o backlog esta pronto:**
+- Cada task tem resultado verificavel
+- A ordem respeita as camadas (dados → estado → UI → polish)
+- Nenhuma task tem mais de 3 arquivos novos
+- Existe skill de dominio para acumulo de conhecimento entre ciclos
