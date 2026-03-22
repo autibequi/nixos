@@ -221,7 +221,7 @@ Atualizar checklist: marcar Fase 1 como completa.
 
 Quando o dev pedir para ver um handler ou fluxo especifico, usar o template ASCII de 2 niveis.
 
-**Ler `skills/art/ascii.md`** (skill `/meta:art`) para o catalogo completo de padroes:
+**Ler `skills/meta/art/ascii.md`** (skill `/meta:art`) para o catalogo completo de padroes:
 - Mini-guia horizontal (overview em 1 linha) — secao 1a
 - Deep-dive vertical (caixas com logica interna) — secao 1b + 3
 - Convencoes visuais (simbolos, setas) — tabela final

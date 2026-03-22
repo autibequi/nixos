@@ -1,14 +1,61 @@
 ---
-name: art/chrome
-description: Templates de visualizacao via Chrome relay (CDP). Mermaid, arvore interativa, HTML livre. Precisa relay ativo (python3 chrome-relay.py status).
+name: meta/art/chrome
+description: Chrome relay completo — controle do browser via CDP (nav, show, tabs, speak, present) + templates visuais (Mermaid, arvore interativa, HTML livre). Fonte da verdade para qualquer uso do Chrome relay.
 ---
 
-# Chrome — Visualizacoes via Relay
+# Chrome Relay — Controle + Visualizacoes
 
-Precisa relay ativo. Verificar antes:
+---
+
+## 0. Relay — Verificacao e Comandos
+
+### Verificar disponibilidade
+
+**Antes de qualquer acao**, fazer o live check:
+
 ```bash
 python3 /workspace/self/scripts/chrome-relay.py status 2>&1
 ```
+
+### Regra de decisao
+
+```
+RELAY_ONLINE=true  + live check OK   → usar normalmente
+RELAY_ONLINE=true  + live check FAIL → avisar: "Chrome nao responde — reiniciar relay?"
+RELAY_ONLINE=false + live check OK   → usar (flag desatualizado)
+RELAY_ONLINE=false + live check FAIL → nao usar, notificar se relevante
+```
+
+Sempre preferir o live check sobre o flag `RELAY_ONLINE` em `~/.zion`.
+
+Se Chrome nao rodando: `chromium --remote-debugging-port=9222`
+
+### Comandos do relay
+
+| Comando | O que faz |
+|---------|-----------|
+| `status` | Mostra status do relay (Chrome + servidor) |
+| `nav <url>` | Navega o Chrome para a URL |
+| `nav "data:text/html;base64,<B64>"` | Abre HTML inline |
+| `show <arquivo>` | Serve conteudo local (Mermaid/Markdown) |
+| `tabs` | Lista abas abertas |
+| `speak <texto>` | Sintetiza voz via espeak-ng |
+| `present` | Modo apresentacao visual (arvores, diagramas, antes/depois) |
+
+### Speak (voz)
+
+```bash
+python3 /workspace/self/scripts/chrome-relay.py speak "<texto>"
+```
+Defaults: `-v pt -s 175 -p 40 -a 130 -g 2`
+Se espeak-ng nao no PATH: `nix-shell -p espeak-ng --run '...'`
+
+### Proatividade
+
+O relay pode ser usado SEM o usuario pedir. Se uma visualizacao no Chrome ajudaria, usar automaticamente — desde que o live check confirme disponibilidade. Exemplos:
+- Explicando arquitetura → Mermaid flowchart
+- Analisando logs → abrir dashboard Grafana
+- Comparando opcoes → tabela/diagrama rico
 
 ---
 

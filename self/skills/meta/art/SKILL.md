@@ -1,18 +1,18 @@
 ---
-name: art
-description: Biblioteca central de representacoes visuais do Zion. 3 modos de saida (ASCII terminal, Chrome relay, Obsidian). Qualquer skill ou agente que precise desenhar algo referencia esta skill. Use /meta:art para consultar templates disponiveis.
+name: meta/art
+description: Biblioteca central de representacoes visuais do Zion + controle do Chrome relay. 3 modos de saida (ASCII terminal, Chrome relay, Obsidian). Qualquer skill ou agente que precise desenhar algo ou usar o Chrome referencia esta skill.
 ---
 
 # /meta:art — Biblioteca Visual do Zion
 
-Skill composta com 3 sub-skills por tipo de saida. **Fonte da verdade** para qualquer representacao visual no sistema.
+Skill composta com 3 sub-skills por tipo de saida. **Fonte da verdade** para qualquer representacao visual no sistema e para o controle do Chrome relay (CDP).
 
 ## Sub-skills
 
 | Arquivo | Saida | Quando usar |
 |---|---|---|
 | `ascii.md` | Terminal | Sempre que possivel. Default. Inline, rapido, sem dependencia. |
-| `chrome.md` | Chrome relay | Outputs grandes, interativos, coloridos. Precisa relay ativo. |
+| `chrome.md` | Chrome relay | Controle do browser (nav, show, tabs, speak) + templates visuais (Mermaid, arvore, HTML). Precisa relay ativo. |
 | `obsidian.md` | Vault Obsidian | Relatorios persistentes, artefatos, dashboards Dataview. |
 
 ## Regra de decisao
@@ -50,10 +50,13 @@ Se voce e um agente ou skill que precisa desenhar algo:
 - Graficos de barra horizontal
 - Arvore de arquivos
 
-### Chrome (relay)
+### Chrome (relay) — inclui controle completo do browser
+- Verificacao de disponibilidade + regra de decisao
+- Comandos: nav, show, tabs, speak, present
 - Diagrama Mermaid (flowchart com tema Catppuccin)
 - Arvore de diff interativa (collapse, glow, breadcrumb)
 - HTML livre (base64 → chrome-relay.py)
+- Voz (espeak-ng via relay)
 
 ### Obsidian (vault)
 - Relatorio de inspecao (frontmatter + findings)
