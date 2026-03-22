@@ -157,7 +157,14 @@ William / RafaelUnltd           — Engenheiro de Qualidade Sistematico
 
 ### Fase 6 — Geracao do Relatorio
 
-Salvar em `/workspace/obsidian/inbox/EVAL_<username>_<repo>.md`
+Salvar em **dois locais**:
+
+1. **Inbox (notificacao):** `/workspace/obsidian/inbox/EVAL_<username>_<repo>.md`
+2. **Vault (referencia permanente):** `/workspace/obsidian/vault/peer-reports/<org>/<Nome>.md`
+
+O vault eh a fonte de verdade para comparacoes futuras entre devs. Usar nome real (PascalCase) como filename. Se o dev ja tem report no vault, **atualizar** o existente (nao duplicar).
+
+Relatorios existentes no vault servem como referencia para comparacoes na matriz de competencias. Ao gerar um novo report, ler os existentes em `vault/peer-reports/` para incluir dados atualizados na matriz comparativa.
 
 ---
 
@@ -241,3 +248,33 @@ Usar 3 agentes paralelos para acelerar:
 3. **Agente Sintese** — recebe output dos 2 anteriores, gera relatorio final
 
 Cada agente recebe esta skill como contexto para saber as dimensoes e o formato esperado.
+
+---
+
+## Persistencia e Comparacoes
+
+Todos os relatorios gerados ficam permanentemente em:
+```
+/workspace/obsidian/vault/peer-reports/<org>/<Nome>.md
+```
+
+Ao avaliar um dev novo, **ler todos os reports existentes** no vault para:
+- Incluir na matriz comparativa
+- Calibrar scores relativos (nao inflar/deflacionar)
+- Identificar complementaridades no time
+
+### Scores de Referencia (estrategiahq/monolito)
+
+| Dev | Layer | Errors | Tests | Reviews | Observ | Simplif | Prod | Idioms | Nivel | Arquetipo |
+|-----|:-----:|:------:|:-----:|:-------:|:------:|:-------:|:----:|:------:|:-----:|-----------|
+| Washington | +++++ | ++++ | ++++ | +++++ | +++++ | +++ | ++++ | ++++ | L4+ | Arquiteto Meticuloso |
+| Pedro Castro | +++ | +++ | ++ | ++++ | +++ | ++++ | +++++ | +++ | L4 Staff | Operador Pragmatico |
+| Molina | ++++ | ++++ | +++ | ++++ | ++ | +++++ | ++++ | +++ | L4 | Simplificador Cirurgico |
+| Marquesini | ++++ | ++++ | ++ | +++ | +++ | +++ | +++ | +++ | L4 | Incrementalista Mobile |
+| William | +++++ | +++++ | +++++ | ++++ | ++++ | +++ | ++++ | +++++ | L4+ | Eng. Qualidade Sistematico |
+| Pedrinho | ++++ | ++++ | +++ | ++++ | +++ | ++++ | ++++ | ++++ | L3+ | Arquiteto Consciente |
+| Ronan | +++ | +++ | + | + | ++ | +++ | +++ | +++ | L3-L4 | Pragmatico-Incrementalista |
+
+**Mediana do time (L4):** Layer ++++, Errors ++++, Tests +++, Reviews ++++, Observ +++, Simplif +++, Prod ++++, Idioms +++
+
+Use esta tabela como baseline ao avaliar novos devs. Atualize-a quando novos reports forem gerados.
