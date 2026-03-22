@@ -11,8 +11,9 @@ description: Análise de código da branch atual — diff interativo, objetos po
 /code flows      → diagrama de fluxo no Chrome
 /code report     → relatório consolidado da branch
 /code inspect    → inspeção leve de qualidade
-/code review     → review completo de PR (JIRA + escopo + fluxo + validação + veredito)
-/code            → sem argumento: mostra este menu
+/code review         → review completo de PR (JIRA + escopo + fluxo + validação + veredito)
+/code peer-reviews   → simula review dos 5 peers do monolito (Washington, Pedro, Molina, Marquesini, William)
+/code                → sem argumento: mostra este menu
 ```
 
 ---
@@ -29,6 +30,7 @@ Parsear `$ARGUMENTS` (primeira palavra):
 | `report` | **4. Report** |
 | `inspect` / `inspection` | **5. Inspect** |
 | `review` | **6. Review** |
+| `peer-reviews` / `peers` | **7. Peer Reviews** |
 | vazio | Mostrar menu acima |
 
 ---
@@ -80,3 +82,13 @@ Resumo: inspeção estática leve da branch atual — error handling, nil checks
 Ler `skills/code/review/SKILL.md` e seguir as instruções.
 
 Resumo: pipeline automatico de review em 5 fases — contexto JIRA, escopo por camada, diagrama de fluxo ASCII, validacao de codigo, veredito final. Tudo inline no terminal, sem Chrome relay.
+
+---
+
+## 7. Peer Reviews — Simulacao dos 5 Peers
+
+Ler `skills/code/peer-reviews/SKILL.md` e seguir as instruções.
+
+Resumo: simula o olhar de 5 devs reais do monolito (Washington, Pedro Castro, Molina, Marquesini, William) sobre o diff atual. Cada um revisa com sua perspectiva e prioridades documentadas a partir de PRs reais. Maximo de cobertura de bugs antes de abrir PR.
+
+Aceita `--dev washington|pedro|molina|marquesini|william` para rodar so uma perspectiva.
