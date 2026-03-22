@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: ${FRONT_STUDENT_DIR}
-      dockerfile: ${LEECH_NIXOS_DIR}/self/containers/front-student/Dockerfile
+      dockerfile: ${LEECH_NIXOS_DIR}/leech/docker/front-student/Dockerfile
     container_name: leech-dk-front-student-app
     cpus: "14.4"
     mem_limit: 4g

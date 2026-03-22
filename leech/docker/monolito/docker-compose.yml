@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: ${MONOLITO_DIR}
-      dockerfile: ${LEECH_NIXOS_DIR}/self/containers/monolito/Dockerfile
+      dockerfile: ${LEECH_NIXOS_DIR}/leech/docker/monolito/Dockerfile
     container_name: leech-dk-monolito-app
     cpus: "14.4"
     mem_limit: 6g
