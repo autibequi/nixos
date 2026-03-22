@@ -1,5 +1,5 @@
-# Status agregado: sessão zion + dockerized services + cota
-zion_load_config
+# Status agregado: sessão leech + dockerized services + cota
+leech_load_config
 
 local RESET='\033[0m'
 local BOLD='\033[1m'
@@ -51,7 +51,7 @@ local _stats_pid=$!
 
 # ── Background: quota Claude (atualiza a cada 60s) ────────────
 _run_quota_bg() {
-  local usage_script="${ZION_ROOT:-$HOME/nixos/self}/scripts/claude-ai-usage.sh"
+  local usage_script="${LEECH_ROOT:-$HOME/nixos/self}/scripts/claude-ai-usage.sh"
   while true; do
     { [ -x "$usage_script" ] && "$usage_script" 2>/dev/null | tail -2 | sed 's/^/  /' || true; } \
       > "${_quota_file}.new" 2>/dev/null \
@@ -76,13 +76,13 @@ _do_status_render() {
     > "$_f_leech" 2>/dev/null &
   local _pid_leech=$!
 
-  docker ps -a --filter "name=zion-dk-" \
+  docker ps -a --filter "name=leech-dk-" \
     --format "{{.Names}}\t{{.Status}}\t{{.Ports}}" \
     > "$_f_dk" 2>/dev/null &
   local _pid_dk=$!
 
   # Header enquanto coleta
-  echo -e "${BOLD}${MAGENTA}  Zion Status${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}  ${DIM}$(TZ=UTC date '+%H:%M') UTC${RESET}\n"
+  echo -e "${BOLD}${MAGENTA}  Leech Status${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}  ${DIM}$(TZ=UTC date '+%H:%M') UTC${RESET}\n"
 
   # Quota: lê do arquivo de background (instantâneo)
   cat "$_quota_file" 2>/dev/null || true
@@ -103,8 +103,8 @@ _do_status_render() {
   # Stats: lê do arquivo de background (instantâneo)
   local _sess_stats_cache
   _sess_stats_cache=$(cat "$_stats_file" 2>/dev/null || true)
-  export _ZION_SHARED_STATS="$_sess_stats_cache"
-  export _ZION_SHARED_DK_ROWS="$_all_dk_rows"
+  export _LEECH_SHARED_STATS="$_sess_stats_cache"
+  export _LEECH_SHARED_DK_ROWS="$_all_dk_rows"
 
   # ── Batch docker inspect: TTY + mounts num único request ─────
   local _leech_names=()
@@ -146,15 +146,15 @@ _do_status_render() {
     local uptime_pad
     uptime_pad=$(printf "%-${_A_UPTIME_W}s" "$uptime_raw")
 
-    local short="${name#zion-projects-leech-run-}"
-    short="${short#zion-projects-}"
+    local short="${name#leech-projects-leech-run-}"
+    short="${short#leech-projects-}"
     local name_pad
     name_pad=$(printf "%-${_A_NAME_W}s" "$short")
 
     local dest_mounts
     dest_mounts=$(echo "$_inspect_cache" | awk -F'|' -v n="$name" '$1==n {print $3}' | head -1)
     local vols=()
-    for v_entry in "/workspace/mnt:mnt" "/workspace/obsidian:obs" "/workspace/self:zion" "/workspace/logs/docker:logs"; do
+    for v_entry in "/workspace/mnt:mnt" "/workspace/obsidian:obs" "/workspace/self:leech" "/workspace/logs/docker:logs"; do
       local vp="${v_entry%%:*}" vn="${v_entry##*:}"
       if echo "$dest_mounts" | grep -qw "$vp"; then
         vols+=("${GREEN}${vn}${RESET}")
@@ -204,9 +204,9 @@ _do_status_render() {
   _print_agent_group "agents" "$_agent_rows"
   _print_agent_group "background" "$_bg_rows"
 
-  source "${ZION_ROOT:-$HOME/nixos/self}/clibash/src/lib/docker_status_impl.sh" 2>/dev/null || true
-  if declare -f _zion_dk_status >/dev/null 2>&1; then
-    _zion_dk_status "" 1
+  source "${LEECH_ROOT:-$HOME/nixos/self}/clibash/src/lib/docker_status_impl.sh" 2>/dev/null || true
+  if declare -f _leech_dk_status >/dev/null 2>&1; then
+    _leech_dk_status "" 1
   fi
   echo ""
 
@@ -235,7 +235,7 @@ _update_header() {
   done
   printf '\033[?25l'
   printf '\033[2;1H'  # linha 2, col 1 (sempre o header)
-  printf "  ${BOLD}${MAGENTA}Zion Status${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}  ${DIM}$(TZ=UTC date '+%H:%M') UTC  ${_ind}${RESET}\033[K"
+  printf "  ${BOLD}${MAGENTA}Leech Status${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}  ${DIM}$(TZ=UTC date '+%H:%M') UTC  ${_ind}${RESET}\033[K"
   printf '\033[?25h'
 }
 
@@ -278,13 +278,13 @@ while true; do
             break
             ;;
           s)
-            zion docker "$_cursor_svc" start --env="${_svc_env[$_cursor_svc]:-sand}" &>/dev/null &
+            leech docker "$_cursor_svc" start --env="${_svc_env[$_cursor_svc]:-sand}" &>/dev/null &
             _svc_action[$_cursor_svc]="iniciando"
             _svc_action_ts[$_cursor_svc]=$(date +%s)
             break
             ;;
           S)
-            zion docker "$_cursor_svc" stop &>/dev/null &
+            leech docker "$_cursor_svc" stop &>/dev/null &
             _svc_action[$_cursor_svc]="parando"
             _svc_action_ts[$_cursor_svc]=$(date +%s)
             break
@@ -292,7 +292,7 @@ while true; do
           l)
             trap - INT
             printf "\033[2J\033[H"
-            zion docker "$_cursor_svc" logs || true
+            leech docker "$_cursor_svc" logs || true
             trap 'exit 0' INT TERM
             printf "\033[2J\033[H"
             break
@@ -300,7 +300,7 @@ while true; do
           t)
             trap - INT
             printf "\033[2J\033[H"
-            zion docker "$_cursor_svc" test || true
+            leech docker "$_cursor_svc" test || true
             trap 'exit 0' INT TERM
             printf "\033[2J\033[H"
             break
@@ -308,7 +308,7 @@ while true; do
           x)
             trap - INT
             printf "\033[2J\033[H"
-            zion docker "$_cursor_svc" shell || true
+            leech docker "$_cursor_svc" shell || true
             trap 'exit 0' INT TERM
             printf "\033[2J\033[H"
             break

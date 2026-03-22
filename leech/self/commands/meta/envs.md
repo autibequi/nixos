@@ -1,28 +1,28 @@
 ---
 name: meta:envs
-description: "Lista todas as variáveis de ~/.zion — tokens mascarados com ruído aleatório, flags e semáforos visíveis."
+description: "Lista todas as variáveis de ~/.leech — tokens mascarados com ruído aleatório, flags e semáforos visíveis."
 ---
 
 # /meta:envs — Variáveis de Ambiente Centralizadas
 
-Exibe o conteúdo de `~/.zion` organizado por seção.
+Exibe o conteúdo de `~/.leech` organizado por seção.
 Valores sensíveis (tokens, keys, senhas) são mascarados com ruído aleatório gerado na hora.
 
 ```
 /meta:envs          → lista completa com mascaramento
 /meta:envs raw      → mostra chaves sem valores (só existência)
-/meta:envs set KEY=VALUE → define ou atualiza uma variável em ~/.zion
-/meta:envs unset KEY     → remove uma variável de ~/.zion
+/meta:envs set KEY=VALUE → define ou atualiza uma variável em ~/.leech
+/meta:envs unset KEY     → remove uma variável de ~/.leech
 ```
 
 ---
 
 ## Execução
 
-### 1. Ler e parsear ~/.zion
+### 1. Ler e parsear ~/.leech
 
 ```bash
-cat ~/.zion 2>/dev/null || cat /.zion 2>/dev/null || echo "(arquivo não encontrado)"
+cat ~/.leech 2>/dev/null || cat /.leech 2>/dev/null || echo "(arquivo não encontrado)"
 ```
 
 ### 2. Gerar tabela mascarada
@@ -46,7 +46,7 @@ CLAUDE_SESSION     DANGER    _KEY  _TOKEN  _SECRET  _PASSWORD  _PAT
 **Chaves não-sensíveis** (mostrar valor real):
 ```
 engine  model_*  PERSONALITY  AUTOCOMMIT  AUTOJARVIS  BETA
-ZION_DEBUG  HEADLESS  ZION_ANALYSIS_MODE  MESSAGE  TASK_LOCK
+LEECH_DEBUG  HEADLESS  LEECH_ANALYSIS_MODE  MESSAGE  TASK_LOCK
 ACTIVE_AGENT  NOTE  OBSIDIAN_PATH  CLAUDIO_NIXOS_DIR  GRAFANA_URL
 ```
 
@@ -55,7 +55,7 @@ ACTIVE_AGENT  NOTE  OBSIDIAN_PATH  CLAUDIO_NIXOS_DIR  GRAFANA_URL
 Imprimir no terminal em ASCII com seções:
 
 ```
-~/.zion — Variáveis de Ambiente Centralizadas
+~/.leech — Variáveis de Ambiente Centralizadas
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 TOKENS
@@ -80,42 +80,42 @@ BOOT FLAGS
   AUTOCOMMIT          OFF
   AUTOJARVIS          OFF
   BETA                OFF
-  ZION_DEBUG          OFF
+  LEECH_DEBUG          OFF
   HEADLESS            0
-  ZION_ANALYSIS_MODE  0
+  LEECH_ANALYSIS_MODE  0
 
 SEMÁFOROS / COMUNICAÇÃO
   MESSAGE                                        (vazio)
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  arquivo: ~/.zion    tokens: 3/6 definidos    flags: 7 ativas
+  arquivo: ~/.leech    tokens: 3/6 definidos    flags: 7 ativas
 ```
 
 ### Subcomando `set`
 
 Se `args = set KEY=VALUE`:
-1. Verificar se KEY já existe em `~/.zion`
+1. Verificar se KEY já existe em `~/.leech`
    - Se sim: substituir a linha com `sed -i`
    - Se não: append na seção adequada (inferir pela categoria do KEY)
-2. Confirmar: `KEY atualizado em ~/.zion`
+2. Confirmar: `KEY atualizado em ~/.leech`
 
 ```bash
 # Exemplo: atualizar PERSONALITY
-sed -i "s/^PERSONALITY=.*/PERSONALITY=OFF/" ~/.zion
+sed -i "s/^PERSONALITY=.*/PERSONALITY=OFF/" ~/.leech
 ```
 
 ### Subcomando `unset`
 
 Se `args = unset KEY`:
 ```bash
-sed -i "s/^KEY=.*/KEY=/" ~/.zion   # limpa valor mas mantém a linha
+sed -i "s/^KEY=.*/KEY=/" ~/.leech   # limpa valor mas mantém a linha
 ```
 
 ---
 
 ## Notas
 
-- `~/.zion` é sourced por TODOS os hooks e pelo entrypoint do container
-- Mountado em todos os containers: `~/.zion` (zion) e `/.zion` (app containers)
+- `~/.leech` é sourced por TODOS os hooks e pelo entrypoint do container
+- Mountado em todos os containers: `~/.leech` (leech) e `/.leech` (app containers)
 - Alterações tomam efeito no próximo boot da sessão
-- Para efeito imediato no processo atual: `source ~/.zion`
+- Para efeito imediato no processo atual: `source ~/.leech`

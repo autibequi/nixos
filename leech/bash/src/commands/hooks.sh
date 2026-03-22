@@ -1,11 +1,11 @@
 # src/commands/hooks.sh
-# zion hooks <hook> [KEY=VALUE...] — Executa um hook e mostra o output (preview do que seria injetado).
+# leech hooks <hook> [KEY=VALUE...] — Executa um hook e mostra o output (preview do que seria injetado).
 # Util para debug de session-start, pre-tool-use, user-prompt-submit, etc. sem abrir uma sessao completa.
 
 HOOKS_DIR=""
 for _d in \
-  "/zion/hooks/claude-code" \
-  "${ZION_ROOT:-${HOME}/nixos/self}/hooks/claude-code" \
+  "/leech/hooks/claude-code" \
+  "${LEECH_ROOT:-${HOME}/nixos/self}/hooks/claude-code" \
   "/workspace/mnt/self/hooks/claude-code"; do
   [[ -d "$_d" ]] && HOOKS_DIR="$_d" && break
 done
@@ -37,7 +37,7 @@ done
 
 if [[ -z "$HOOK_FILE" ]]; then
   echo "hooks: hook '$HOOK' não encontrado em $HOOKS_DIR" >&2
-  echo "Use 'zion hooks --list' para ver disponíveis." >&2
+  echo "Use 'leech hooks --list' para ver disponíveis." >&2
   exit 1
 fi
 

@@ -2,8 +2,8 @@ services:
   worker:
     build:
       context: ${MONOLITO_DIR}
-      dockerfile: ${ZION_NIXOS_DIR}/self/containers/monolito/Dockerfile.worker
-    container_name: zion-dk-monolito-worker
+      dockerfile: ${LEECH_NIXOS_DIR}/self/containers/monolito/Dockerfile.worker
+    container_name: leech-dk-monolito-worker
     cpus: "14.4"
     mem_limit: 4g
     memswap_limit: 4g
@@ -13,7 +13,7 @@ services:
     volumes:
       - ${MONOLITO_DIR}/configuration:/go/app/configuration:ro
       # Canal de comunicação rápida host ↔ container
-      - ${HOME}/.zion:/.zion:rw
+      - ${HOME}/.leech:/.leech:rw
     networks:
       - default
     restart: unless-stopped

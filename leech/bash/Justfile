@@ -1,14 +1,14 @@
-# Zion CLI — dev tooling
+# Leech CLI — dev tooling
 # Uso: just <recipe>
 # Requer: just, bashly, bash
 
 set shell := ["bash", "-c"]
 
-nixos_dir    := env_var_or_default("ZION_NIXOS_DIR", env_var("HOME") + "/nixos")
+nixos_dir    := env_var_or_default("LEECH_NIXOS_DIR", env_var("HOME") + "/nixos")
 cli_dir      := justfile_directory()
-bin_dest     := nixos_dir + "/stow/.local/bin/zion"
-hooks_dir    := nixos_dir + "/zion/hooks/claude-code"
-compose_file := cli_dir + "/docker-compose.zion.yml"
+bin_dest     := nixos_dir + "/stow/.local/bin/leech"
+hooks_dir    := nixos_dir + "/leech/hooks/claude-code"
+compose_file := cli_dir + "/docker-compose.leech.yml"
 env_file     := cli_dir + "/.env"
 
 # Lista receitas disponíveis
@@ -45,21 +45,21 @@ destroy:
 
 # ── Build ─────────────────────────────────────────────────────────────────
 
-# Regenera o binário zion (bashly generate)
+# Regenera o binário leech (bashly generate)
 gen:
     LANG=en_US.UTF-8 RUBYOPT="-E utf-8" bashly generate
 
-# Regenera + instala symlink + atualiza bootstrap (= zion update)
+# Regenera + instala symlink + atualiza bootstrap (= leech update)
 install: gen
     mkdir -p "$(dirname "{{bin_dest}}")"
     @if [[ ! -L "{{bin_dest}}" ]]; then \
-        ln -sf "{{cli_dir}}/zion" "{{bin_dest}}"; \
+        ln -sf "{{cli_dir}}/leech" "{{bin_dest}}"; \
         echo "[install] symlink criado: {{bin_dest}}"; \
     else \
         echo "[install] regenerado (symlink ja existe)"; \
     fi
-    @if [[ -f "{{nixos_dir}}/zion/scripts/bootstrap-dashboard.sh" ]]; then \
-        install -m 755 "{{nixos_dir}}/zion/scripts/bootstrap-dashboard.sh" "{{nixos_dir}}/scripts/bootstrap.sh"; \
+    @if [[ -f "{{nixos_dir}}/leech/scripts/bootstrap-dashboard.sh" ]]; then \
+        install -m 755 "{{nixos_dir}}/leech/scripts/bootstrap-dashboard.sh" "{{nixos_dir}}/scripts/bootstrap.sh"; \
         echo "[install] bootstrap.sh atualizado"; \
     fi
 
@@ -73,9 +73,9 @@ dry hook="session-start" *overrides="":
     fi
     @echo '{"session_id":"dry-run","prompt":"startup"}' | bash "{{hooks_dir}}/{{hook}}.sh"
 
-# Simula boot em modo zion_edit (com ZION_EDIT=1)
+# Simula boot em modo leech_edit (com LEECH_EDIT=1)
 dry-edit:
-    @just dry session-start ZION_EDIT=1
+    @just dry session-start LEECH_EDIT=1
 
 # Simula boot em modo debug
 dry-debug:

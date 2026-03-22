@@ -1,1 +1,1 @@
-zion_launch_session "opencode"
+leech_launch_session "opencode"

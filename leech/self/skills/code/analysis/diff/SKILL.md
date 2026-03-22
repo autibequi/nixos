@@ -103,10 +103,10 @@ Salvar o HTML em `/tmp/chrome-relay/diff.html` e navegar via relay:
 
 ```bash
 cp /tmp/<repo>_diff_annotated.html /tmp/chrome-relay/diff.html
-python3 /workspace/self/scripts/chrome-relay.py nav "http://zion:8766/diff.html"
+python3 /workspace/self/scripts/chrome-relay.py nav "http://leech:8766/diff.html"
 ```
 
-O servidor do relay já serve `/tmp/chrome-relay/` em `http://zion:8766/` — UTF-8 correto, sem limites de tamanho, sem servidor extra.
+O servidor do relay já serve `/tmp/chrome-relay/` em `http://leech:8766/` — UTF-8 correto, sem limites de tamanho, sem servidor extra.
 
 ---
 

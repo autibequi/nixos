@@ -207,7 +207,7 @@ Antes de investigar, determinar a camada:
 | Camada | Indicios | Onde olhar |
 |---|---|---|
 | **Host / NixOS** | Erro em servico do sistema, config nix, daemon | `/workspace/host`, `~/nixos`, logs do journal |
-| **Zion CLI / container** | Erro em skill, hook, boot, agente | `/workspace/self/`, logs do container |
+| **Leech CLI / container** | Erro em skill, hook, boot, agente | `/workspace/self/`, logs do container |
 | **Self skills** | Skill nao executa, output errado | `/workspace/self/skills/`, `.claude/settings.json` |
 | **Projeto em mnt/** | Erro de aplicacao, teste falhando, build quebrado | `/workspace/mnt/`, logs do projeto |
 

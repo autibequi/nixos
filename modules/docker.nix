@@ -15,7 +15,7 @@
       "userland-proxy" = false;
 
       # Containers continuam rodando se o daemon reiniciar (update, crash).
-      # Sem isso, todo `zion switch` que reinicia o docker derruba os containers.
+      # Sem isso, todo `leech switch` que reinicia o docker derruba os containers.
       "live-restore" = true;
     };
   };

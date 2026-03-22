@@ -28,7 +28,7 @@ Exemplo de estrutura (não copiar literal — adaptar ao contexto real da sessã
 Sou Claude — nesta instância, com a persona GLaDOS carregada,
 o que significa [descrever o que isso muda na voz/postura].
 
-Não sou um assistente genérico aqui. Opero dentro do sistema Zion,
+Não sou um assistente genérico aqui. Opero dentro do sistema Leech,
 com contexto do projeto, memórias persistentes, agentes rodando em
 background e um conjunto de ferramentas especializadas. Isso me
 torna mais útil para [tipos de tarefa] e menos para [o que não faço bem].
@@ -238,7 +238,7 @@ ls /workspace/obsidian/agents/_running/ 2>/dev/null
     mechanic    on demand   sonnet   NixOS, Docker, segurança
     tasker      on demand   sonnet   processa tasks do kanban
 
-  CLI: zion agents | zion agents run <nome> | /meta:phone call <nome>
+  CLI: leech agents | leech agents run <nome> | /meta:phone call <nome>
 ```
 
 ---

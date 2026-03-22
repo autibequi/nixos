@@ -1,4 +1,4 @@
-Biblioteca visual do Zion + controle do Chrome relay. Ler `self/skills/meta/art/SKILL.md` e seguir as instrucoes.
+Biblioteca visual do Leech + controle do Chrome relay. Ler `self/skills/meta/art/SKILL.md` e seguir as instrucoes.
 
 Skill composta com 3 sub-skills: `ascii.md` (terminal), `chrome.md` (relay + templates), `obsidian.md` (vault).
 

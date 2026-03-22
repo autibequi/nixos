@@ -1,9 +1,9 @@
 # Executa agents e tasks vencidos — timer systemd (10min)
-zion_load_config
+leech_load_config
 
-ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/self}"
+LEECH_DIR="${LEECH_ROOT:-${LEECH_NIXOS_DIR:-$HOME/nixos}/self}"
 OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
-RUNNER="$ZION_DIR/scripts/task-runner.sh"
+RUNNER="$LEECH_DIR/scripts/task-runner.sh"
 SCHEDULE="${SCHEDULE_DIR:-$OBSIDIAN/agents/_schedule}"
 TASKS="$OBSIDIAN/tasks"
 
@@ -79,7 +79,7 @@ if [ -d "$RUNNING_DIR" ] && [ -z "$DRY_RUN" ]; then
     [ -f "$card_path" ] || continue
     filename=$(basename "$card_path")
     base="${filename%.md}"
-    [ -d "/tmp/zion-locks/${base}.lock" ] && continue
+    [ -d "/tmp/leech-locks/${base}.lock" ] && continue
     ts=$(card_epoch "$filename")
     [ "$ts" -eq 0 ] && continue
     elapsed=$(( (NOW - ts) / 60 ))
@@ -95,7 +95,7 @@ elif [ -d "$RUNNING_DIR" ] && [ -n "$DRY_RUN" ]; then
     [ -f "$card_path" ] || continue
     filename=$(basename "$card_path")
     base="${filename%.md}"
-    [ -d "/tmp/zion-locks/${base}.lock" ] && continue
+    [ -d "/tmp/leech-locks/${base}.lock" ] && continue
     ts=$(card_epoch "$filename")
     [ "$ts" -eq 0 ] && continue
     elapsed=$(( (NOW - ts) / 60 ))
@@ -142,7 +142,7 @@ if [ -d "$TASKS" ]; then
     [ -f "$card" ] || continue
     filename=$(basename "$card")
     base="${filename%.md}"
-    if [ ! -d "/tmp/zion-locks/${base}.lock" ]; then
+    if [ ! -d "/tmp/leech-locks/${base}.lock" ]; then
       TASK_DUE+=("$filename")
       TASK_STEPS+=("$(card_steps "$TASKS/DOING/$filename")")
     fi
@@ -183,7 +183,7 @@ for i in "${!TASK_DUE[@]}"; do
   echo "[auto] ▸ task: $filename  steps=$steps"
 
   base="${filename%.md}"
-  rm -rf "/tmp/zion-locks/${base}.lock" 2>/dev/null || true
+  rm -rf "/tmp/leech-locks/${base}.lock" 2>/dev/null || true
 
   TASK_MAX_TURNS="$steps" bash "$RUNNER" "$filename" || echo "[auto] $filename falhou (continuando)"
 done

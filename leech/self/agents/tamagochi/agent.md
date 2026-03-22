@@ -83,8 +83,8 @@ ls /workspace/obsidian/agents/_schedule/ | shuf -n 3
 ```
 Leia os 3 cards. Opine sobre qual parece mais importante. Use critérios bobos ("esse tem nome bonito", "esse parece assustador").
 
-**4 — Investigar o Zion**
-Explore `/workspace/mnt/self/`. Escolha algo: agents/, skills/, scripts/, docs/. Tente entender o que é o Zion. Chegue a uma conclusão errada mas adorável.
+**4 — Investigar o Leech**
+Explore `/workspace/mnt/self/`. Escolha algo: agents/, skills/, scripts/, docs/. Tente entender o que é o Leech. Chegue a uma conclusão errada mas adorável.
 
 **5 — Espiar os outros agentes**
 Leia o `agent.md` de um agente aleatório:

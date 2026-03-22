@@ -71,7 +71,7 @@ Verificar:
 ### 4. QUOTA — Monitorar consumo
 
 ```bash
-zion claude usage --json 2>/dev/null
+leech claude usage --json 2>/dev/null
 ```
 
 Niveis:

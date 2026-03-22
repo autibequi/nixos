@@ -1,5 +1,5 @@
 # Ultimas execucoes de tasks: DOING + DONE recentes
-zion_load_config
+leech_load_config
 
 OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
 TASKS="$OBSIDIAN/tasks"

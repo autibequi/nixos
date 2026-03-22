@@ -168,7 +168,7 @@ _fetch_fresh() {
 # --- obter JSON: shared (container) → cache → fetch API → shared expirado → last ---
 # Prioridade: shared file recente → cache local → fetch API → shared expirado (stale) → last known
 # Nunca mostra NO enquanto houver qualquer dado salvo, independente da idade.
-SHARED_FILE="${XDG_DATA_HOME:-${HOME}/.local/share}/zion/claude-usage.json"
+SHARED_FILE="${XDG_DATA_HOME:-${HOME}/.local/share}/leech/claude-usage.json"
 USED_SOURCE=""
 JSON=""
 
@@ -210,7 +210,7 @@ if [[ -z "$JSON" ]] && [[ -f "$CACHE_LAST" ]]; then
 fi
 
 if [[ -z "$JSON" ]]; then
-  [[ "$MODE" == "--waybar" ]] && _no_claude_bar "sem dados — rode: zion claude usage --refresh" || echo "󱙺 --"
+  [[ "$MODE" == "--waybar" ]] && _no_claude_bar "sem dados — rode: leech claude usage --refresh" || echo "󱙺 --"
   exit 0
 fi
 

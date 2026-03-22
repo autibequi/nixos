@@ -1,15 +1,15 @@
 # Roda um agente ou task imediatamente
 local name="${args[name]}"
 local steps="${args[--steps]:-}"
-zion_load_config
+leech_load_config
 
-local zion_dir="${ZION_ROOT:-$HOME/nixos/self}"
+local leech_dir="${LEECH_ROOT:-$HOME/nixos/self}"
 local obsidian="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
-local runner="$zion_dir/scripts/task-runner.sh"
+local runner="$leech_dir/scripts/task-runner.sh"
 local agents="$obsidian/agents"
 local schedule="$agents/_schedule"
 local tasks="$obsidian/tasks"
-local agent_file="$zion_dir/agents/${name}/agent.md"
+local agent_file="$leech_dir/agents/${name}/agent.md"
 
 # Fallback runner paths
 if [ ! -f "$runner" ]; then
@@ -114,7 +114,7 @@ if [ -f "$agent_file" ]; then
   echo "[run] model=$MODEL  timeout=${TIMEOUT}s  steps=$steps"
   echo ""
 
-  rm -rf "/tmp/zion-locks/${WHEN}_${name}.lock" 2>/dev/null || true
+  rm -rf "/tmp/leech-locks/${WHEN}_${name}.lock" 2>/dev/null || true
 
   export TASK_CONTRACTORS_DIR="$agents"
   export SCHEDULE_DIR="$schedule"
@@ -141,7 +141,7 @@ else
     echo "[run] '$name' nao encontrado como agente nem task"
     echo ""
     echo "Agentes disponiveis:"
-    for try in "$zion_dir/agents" "/workspace/mnt/self/agents"; do
+    for try in "$leech_dir/agents" "/workspace/mnt/self/agents"; do
       [ -d "$try" ] && ls "$try" | sed 's/^/  /' && break
     done
     echo ""
@@ -154,7 +154,7 @@ else
   echo "[run] task: $CARD"
 
   local base="${CARD%.md}"
-  rm -rf "/tmp/zion-locks/${base}.lock" 2>/dev/null || true
+  rm -rf "/tmp/leech-locks/${base}.lock" 2>/dev/null || true
 
   export TASK_DIR="$tasks"
   export TASK_AGENTS_DIR="$(dirname "$tasks")/vault/agents"

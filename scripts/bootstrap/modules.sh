@@ -82,9 +82,9 @@ source "$BOOTSTRAP_DIR/tree.dashboard.sh"   || echo -e "${P_RED}  ✗ tree load 
 source "$BOOTSTRAP_DIR/header.dashboard.sh" || echo -e "${P_RED}  ✗ header load failed${R}"
 
 # Módulos lentos em paralelo — cada um captura output em tempfile
-_t_sched=$(mktemp /tmp/zion-boot-sched.XXXXXX)
-_t_gh=$(mktemp /tmp/zion-boot-gh.XXXXXX)
-_t_rss=$(mktemp /tmp/zion-boot-rss.XXXXXX)
+_t_sched=$(mktemp /tmp/leech-boot-sched.XXXXXX)
+_t_gh=$(mktemp /tmp/leech-boot-gh.XXXXXX)
+_t_rss=$(mktemp /tmp/leech-boot-rss.XXXXXX)
 
 (source "$BOOTSTRAP_DIR/scheduler.dashboard.sh" 2>/dev/null) > "$_t_sched" &  _pid_sched=$!
 (source "$BOOTSTRAP_DIR/github.dashboard.sh"    2>/dev/null) > "$_t_gh"    &  _pid_gh=$!

@@ -1,0 +1,325 @@
+//! Leech TUI — interactive terminal dashboard using ratatui.
+
+mod app;
+mod event;
+mod theme;
+mod ui;
+
+use std::io;
+use std::process::Stdio;
+use std::sync::mpsc;
+use std::time::Duration;
+
+use anyhow::Result;
+use crossterm::{
+    execute,
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+};
+use ratatui::prelude::*;
+use ratatui::Terminal;
+
+use app::{App, AppMode};
+use event::{map_key, poll, AppEvent};
+use leech_sdk::{paths, status};
+
+/// Build a `Command` for the bash CLI (`leech-bash` or fallback to `leech`).
+///
+/// On the host, the bash CLI is at `~/.local/bin/leech-bash`.
+/// Inside a container, it lives directly on PATH as `leech`.
+fn bash_cmd() -> std::process::Command {
+    // Prefer leech-bash (installed by `leech update`)
+    let candidates = [
+        paths::bin_dir().join("leech-bash"),
+        paths::bash_dir().join("leech"),
+    ];
+    for p in &candidates {
+        if p.exists() {
+            return std::process::Command::new(p);
+        }
+    }
+    // Last resort: whatever `leech` is on PATH
+    std::process::Command::new("leech")
+}
+
+/// Run a background (non-interactive) docker command and return an error string if it fails.
+/// Spawn `docker stop --time=5 <name>` without waiting.
+/// Returns immediately; docker will SIGTERM→SIGKILL the container within 5s.
+fn docker_stop_nowait(container_name: &str) {
+    let _ = std::process::Command::new("docker")
+        .args(["stop", "--time=5", container_name])
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn();
+}
+
+/// Run `docker stop --time=5 <name>` and wait for it to finish (max ~5s).
+/// Used before restart so we know the container is gone before starting again.
+fn docker_stop_wait(container_name: &str) {
+    let _ = std::process::Command::new("docker")
+        .args(["stop", "--time=5", container_name])
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .output(); // blocks until docker confirms the container stopped
+}
+
+fn run_bg_cmd(svc: &str, env: &str, action: &str) -> Option<String> {
+    let mut cmd = bash_cmd();
+    // bash CLI format: leech runner <service> <action> [--env=<env>]
+    let env_flag = format!("--env={env}");
+    let mut full_args: Vec<&str> = vec!["runner", svc, action];
+    if action == "start" && !env.is_empty() {
+        full_args.push(&env_flag);
+    }
+
+    match cmd.args(&full_args).output() {
+        Err(e) => Some(format!("Could not run command: {e}")),
+        Ok(out) if !out.status.success() => {
+            let stderr = String::from_utf8_lossy(&out.stderr);
+            let stdout = String::from_utf8_lossy(&out.stdout);
+            let raw = if !stderr.is_empty() { stderr } else { stdout };
+            let detail = clean_cmd_output(&raw);
+            Some(format!("{action} {svc} failed\n{detail}"))
+        }
+        Ok(_) => None,
+    }
+}
+
+/// Strip ANSI codes + \r, filter empty lines, cap at 10 lines for popup display.
+fn clean_cmd_output(s: &str) -> String {
+    let normalized = s.replace("\r\n", "\n").replace('\r', "\n");
+    // Strip ANSI escape sequences (CSI: \x1b[...X)
+    let mut out = String::with_capacity(normalized.len());
+    let mut chars = normalized.chars().peekable();
+    while let Some(ch) = chars.next() {
+        if ch == '\x1b' {
+            match chars.peek() {
+                Some('[') => {
+                    chars.next();
+                    // skip until final byte 0x40–0x7e
+                    for c in chars.by_ref() {
+                        if ('\x40'..='\x7e').contains(&c) { break; }
+                    }
+                }
+                _ => { chars.next(); }
+            }
+        } else {
+            out.push(ch);
+        }
+    }
+    let lines: Vec<&str> = out
+        .lines()
+        .map(str::trim)
+        .filter(|l| !l.is_empty())
+        .collect();
+    let start = lines.len().saturating_sub(10);
+    lines[start..].join("\n")
+}
+
+/// Entry point: run the interactive status TUI.
+pub fn run_status(tick: u64) -> Result<()> {
+    // Setup terminal
+    enable_raw_mode()?;
+    let mut stdout = io::stdout();
+    execute!(stdout, EnterAlternateScreen)?;
+    let backend = CrosstermBackend::new(stdout);
+    let mut terminal = Terminal::new(backend)?;
+
+    let mut app = App::new();
+
+    // Initial data collection
+    if let Ok(snap) = status::collect() {
+        app.snapshot = snap;
+    }
+
+    // Background data refresh channel
+    let (tx, rx) = mpsc::channel();
+    let tx_bg = tx.clone(); // clone for action-triggered refreshes
+    let refresh_interval = Duration::from_secs(tick);
+
+    std::thread::spawn(move || loop {
+        std::thread::sleep(refresh_interval);
+        if let Ok(snap) = status::collect() {
+            if tx.send(snap).is_err() {
+                break;
+            }
+        }
+    });
+
+    // Background command error channel (for non-blocking start/stop)
+    let (bg_err_tx, bg_err_rx) = mpsc::channel::<String>();
+    // Signals action completion so the UI can clear the pending indicator.
+    let (bg_done_tx, bg_done_rx) = mpsc::channel::<usize>();
+
+    // Main loop
+    loop {
+        // Check for background command errors
+        if let Ok(err) = bg_err_rx.try_recv() {
+            app.set_error(err);
+        }
+
+        // Clear pending spinner when action completes
+        if let Ok(idx) = bg_done_rx.try_recv() {
+            app.clear_action_for(idx);
+        }
+
+        // Check for background updates (only in normal mode to avoid flicker during menu)
+        if matches!(app.mode, AppMode::Normal) {
+            if let Ok(snap) = rx.try_recv() {
+                app.snapshot = snap;
+            }
+        }
+
+        terminal.draw(|frame| {
+            ui::status::render(frame, &app);
+        })?;
+        app.render_tick = app.render_tick.wrapping_add(1);
+
+        match poll(Duration::from_millis(500))? {
+            AppEvent::Key(key) => {
+                match &app.mode {
+                    AppMode::Error(_) => {
+                        // Any key dismisses the error
+                        app.clear_error();
+                    }
+                    AppMode::Menu => {
+                        use crossterm::event::KeyCode;
+                        match key.code {
+                            KeyCode::Up | KeyCode::Char('k') => app.menu_prev(),
+                            KeyCode::Down | KeyCode::Char('j') => app.menu_next(),
+                            KeyCode::Esc | KeyCode::Char('q') => app.close_menu(),
+                            KeyCode::Enter => {
+                                let action = app.menu_action();
+                                match action {
+                                    "cancel" => app.close_menu(),
+                                    "stop" => {
+                                        let svc = app.current_service().to_string();
+                                        let idx = app.cursor_idx;
+                                        let container = app.snapshot.dk_services.iter()
+                                            .find(|d| d.name.contains(&svc))
+                                            .map(|d| d.name.clone());
+                                        app.close_menu();
+                                        app.last_action = Some((idx, format!("stopping {}…", svc)));
+                                        let done_tx = bg_done_tx.clone();
+                                        let snap_tx = tx_bg.clone();
+                                        std::thread::spawn(move || {
+                                            if let Some(name) = container {
+                                                docker_stop_wait(&name);
+                                            }
+                                            let _ = done_tx.send(idx);
+                                            if let Ok(snap) = leech_sdk::status::collect() {
+                                                let _ = snap_tx.send(snap);
+                                            }
+                                        });
+                                    }
+                                    "start" => {
+                                        let svc = app.current_service().to_string();
+                                        let env = app.current_env().to_string();
+                                        let idx = app.cursor_idx;
+                                        app.close_menu();
+                                        app.last_action = Some((
+                                            idx,
+                                            format!("starting {}…", svc),
+                                        ));
+                                        let err_tx = bg_err_tx.clone();
+                                        let snap_tx = tx_bg.clone();
+                                        let done_tx = bg_done_tx.clone();
+                                        std::thread::spawn(move || {
+                                            if let Some(err) = run_bg_cmd(&svc, &env, "start") {
+                                                let _ = err_tx.send(err);
+                                            }
+                                            let _ = done_tx.send(idx);
+                                            if let Ok(snap) = status::collect() {
+                                                let _ = snap_tx.send(snap);
+                                            }
+                                        });
+                                    }
+                                    "restart" => {
+                                        let svc = app.current_service().to_string();
+                                        let env = app.current_env().to_string();
+                                        let idx = app.cursor_idx;
+                                        let container = app.snapshot.dk_services.iter()
+                                            .find(|d| d.name.contains(&svc))
+                                            .map(|d| d.name.clone());
+                                        app.close_menu();
+                                        app.last_action = Some((
+                                            idx,
+                                            format!("restarting {}…", svc),
+                                        ));
+                                        let err_tx = bg_err_tx.clone();
+                                        let snap_tx = tx_bg.clone();
+                                        let done_tx = bg_done_tx.clone();
+                                        std::thread::spawn(move || {
+                                            // Stop via docker directly (max 5s), then start.
+                                            if let Some(name) = container {
+                                                docker_stop_wait(&name);
+                                            }
+                                            if let Some(err) = run_bg_cmd(&svc, &env, "start") {
+                                                let _ = err_tx.send(err);
+                                            }
+                                            let _ = done_tx.send(idx);
+                                            if let Ok(snap) = status::collect() {
+                                                let _ = snap_tx.send(snap);
+                                            }
+                                        });
+                                    }
+                                    "logs" | "test" | "install" | "shell" => {
+                                        let action = action.to_string();
+                                        let svc = app.current_service().to_string();
+                                        app.close_menu();
+                                        disable_raw_mode()?;
+                                        execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
+
+                                        let result = bash_cmd()
+                                            .args(["runner", &svc, &action])
+                                            .stdin(std::process::Stdio::inherit())
+                                            .stdout(std::process::Stdio::inherit())
+                                            .stderr(std::process::Stdio::inherit())
+                                            .status();
+
+                                        enable_raw_mode()?;
+                                        execute!(terminal.backend_mut(), EnterAlternateScreen)?;
+                                        terminal.clear()?;
+
+                                        if let Ok(snap) = status::collect() {
+                                            app.snapshot = snap;
+                                        }
+
+                                        if let Err(e) = result {
+                                            app.set_error(format!("Failed to run {action}: {e}"));
+                                        }
+                                    }
+                                    _ => app.close_menu(),
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+                    AppMode::Normal => {
+                        if let Some(action) = map_key(key) {
+                            match action {
+                                "quit" => break,
+                                "up" => app.move_up(),
+                                "down" => app.move_down(),
+                                "cycle_env" => app.cycle_env(),
+                                "log_up" => app.log_scroll_up(5),
+                                "log_down" => app.log_scroll_down(5),
+                                "menu_open" => app.open_menu(),
+                                _ => {}
+                            }
+                        }
+                    }
+                }
+            }
+            AppEvent::Tick => {}
+        }
+    }
+
+    // Restore terminal
+    disable_raw_mode()?;
+    execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
+    terminal.show_cursor()?;
+
+    Ok(())
+}

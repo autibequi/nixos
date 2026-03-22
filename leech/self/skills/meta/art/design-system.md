@@ -1,9 +1,9 @@
 ---
 name: meta/art/design-system
-description: Design system visual do Zion. Palette testada, tokens semanticos, box drawing, regras de desenho, Catppuccin theme, Nerd Font icons. Dividido em TERMINAL (ASCII) e WEB (Chrome relay). Fonte da verdade — ler ANTES de desenhar qualquer coisa.
+description: Design system visual do Leech. Palette testada, tokens semanticos, box drawing, regras de desenho, Catppuccin theme, Nerd Font icons. Dividido em TERMINAL (ASCII) e WEB (Chrome relay). Fonte da verdade — ler ANTES de desenhar qualquer coisa.
 ---
 
-# Design System — Zion
+# Design System — Leech
 
 Terminal: Catppuccin Mocha dark, JetBrainsMono Nerd Font.
 Browser: Chrome relay via CDP, tema Catppuccin CSS.

@@ -1,9 +1,9 @@
 ---
 name: meta/art
-description: Biblioteca central de representacoes visuais do Zion + controle do Chrome relay. 3 modos de saida (ASCII terminal, Chrome relay, Obsidian). Qualquer skill ou agente que precise desenhar algo ou usar o Chrome referencia esta skill.
+description: Biblioteca central de representacoes visuais do Leech + controle do Chrome relay. 3 modos de saida (ASCII terminal, Chrome relay, Obsidian). Qualquer skill ou agente que precise desenhar algo ou usar o Chrome referencia esta skill.
 ---
 
-# /meta:art — Biblioteca Visual do Zion
+# /meta:art — Biblioteca Visual do Leech
 
 Skill composta com 3 sub-skills por tipo de saida. **Fonte da verdade** para qualquer representacao visual no sistema e para o controle do Chrome relay (CDP).
 

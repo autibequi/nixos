@@ -1,13 +1,13 @@
-# zion claude usage — Estatísticas de uso Claude (OAuth / claude.ai).
+# leech claude usage — Estatísticas de uso Claude (OAuth / claude.ai).
 # Delega para o script do waybar; saída no formato que o usage bar consome (--waybar) ou JSON bruto.
-# Uso: zion claude usage [--waybar] [--json] [--refresh]
+# Uso: leech claude usage [--waybar] [--json] [--refresh]
 
 # Resolve o script: repo (stow) ou deploy em ~/.config/waybar
-zion_nixos_dir="${ZION_NIXOS_DIR:-$HOME/nixos}"
+leech_nixos_dir="${LEECH_NIXOS_DIR:-$HOME/nixos}"
 usage_script=""
 for candidate in \
   "$HOME/.config/waybar/claude-oauth-usage.sh" \
-  "$zion_nixos_dir/stow/.config/waybar/claude-oauth-usage.sh" \
+  "$leech_nixos_dir/stow/.config/waybar/claude-oauth-usage.sh" \
   "$HOME/nixos/stow/.config/waybar/claude-oauth-usage.sh" \
   "/workspace/mnt/stow/.config/waybar/claude-oauth-usage.sh"; do
   if [[ -x "$candidate" ]] || [[ -f "$candidate" ]]; then
@@ -17,7 +17,7 @@ for candidate in \
 done
 
 if [[ -z "$usage_script" ]] || [[ ! -f "$usage_script" ]]; then
-  echo "zion claude usage: script não encontrado (procure em ~/.config/waybar/claude-oauth-usage.sh ou repo stow)" >&2
+  echo "leech claude usage: script não encontrado (procure em ~/.config/waybar/claude-oauth-usage.sh ou repo stow)" >&2
   exit 1
 fi
 

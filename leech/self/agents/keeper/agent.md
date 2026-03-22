@@ -36,7 +36,7 @@ Alternar a cada ciclo: HEALTH → CLEANUP → HEALTH → ...
 
 ### Modo HEALTH — Diagnostico do sistema
 
-Carregar skill `zion/healthcheck` para procedimentos completos, thresholds e formato de reporte.
+Carregar skill `leech/healthcheck` para procedimentos completos, thresholds e formato de reporte.
 
 Resumo: verificar ferramentas, disco, load, workspace/git, tasks/agentes. Alertar no inbox se critico.
 
@@ -44,7 +44,7 @@ Resumo: verificar ferramentas, disco, load, workspace/git, tasks/agentes. Alerta
 
 ### Modo CLEANUP — Limpeza do vault
 
-Carregar skill `zion/healthcheck` secao "Cleanup" para thresholds de limpeza.
+Carregar skill `leech/healthcheck` secao "Cleanup" para thresholds de limpeza.
 
 Resumo: processar /trash/, limpar efemeros por threshold, detectar assets orfaos.
 Assets orfaos > 3 dias → `.trashbin/` com registro em `.trashlist`

@@ -13,7 +13,7 @@ User ──► Claude EXTERNO (eu, esta sessão)
               │
               └── spawn ──► Claude INTERNO (analysis mode, haiku)
                                 │
-                                ├── vê: ZION_ANALYSIS_MODE=1
+                                ├── vê: LEECH_ANALYSIS_MODE=1
                                 ├── pode: rodar bash, ler/editar arquivos
                                 ├── NÃO tem: Docker socket (GID 131 ausente)
                                 └── output: volta pra mim via tee/logfile
@@ -25,9 +25,9 @@ O interno é efêmero — apenas eu (externo) persistir mudanças em `/workspace
 ## Como invocar o Claude interno
 
 ```bash
-ZION_ANALYSIS_MODE=1 HEADLESS=1 IN_DOCKER=1 CLAUDE_ENV=container \
+LEECH_ANALYSIS_MODE=1 HEADLESS=1 IN_DOCKER=1 CLAUDE_ENV=container \
 
-HEADLESS=1 ZION_ANALYSIS_MODE=1 IN_DOCKER=1 CLAUDE_ENV=container \
+HEADLESS=1 LEECH_ANALYSIS_MODE=1 IN_DOCKER=1 CLAUDE_ENV=container \
   timeout 600 claude \
   --permission-mode bypassPermissions \
   --model claude-haiku-4-5-20251001 \
@@ -43,7 +43,7 @@ HEADLESS=1 ZION_ANALYSIS_MODE=1 IN_DOCKER=1 CLAUDE_ENV=container \
 
 | Path | O que é | Editável? |
 |------|---------|-----------|
-| `/workspace/self/` | source zion (symlink de `/workspace/mnt/self/`) | sim via mnt |
+| `/workspace/self/` | source leech (symlink de `/workspace/mnt/self/`) | sim via mnt |
 | `/workspace/mnt/` | nixos repo do host montado rw | sim |
 | `/workspace/mnt/self/` | **fonte da verdade** — hooks, skills, agents, scripts | sim |
 | `/workspace/obsidian/` | vault Obsidian, persistente entre sessões | sim |
@@ -52,14 +52,14 @@ HEADLESS=1 ZION_ANALYSIS_MODE=1 IN_DOCKER=1 CLAUDE_ENV=container \
 | `/workspace/obsidian/vault/.ephemeral/cron-logs/` | logs de execução por agente | leitura |
 | `/home/claude/.claude/` | config Claude Code (memórias, hooks, skills montados) | sim |
 | `/home/claude/.nix-profile/bin/claude` | Claude CLI v2.1.79 | — |
-| `/tmp/zion-locks/` | locks de tasks (atomic mkdir) | runtime |
+| `/tmp/leech-locks/` | locks de tasks (atomic mkdir) | runtime |
 | `/var/run/docker.sock` | Docker socket — GID 131, eu tenho GID 1000+190 | **sem acesso** |
 
-## Limitações desta sessão (zion host sem restart)
+## Limitações desta sessão (leech host sem restart)
 
 - **Sem Docker**: socket precisa GID 131, não estou no grupo
-- `zion tasks run X` requer Docker → precisa rodar no host
-- `zion host` do host spawna container com `group_add: [131]` — ao reiniciar terei acesso
+- `leech tasks run X` requer Docker → precisa rodar no host
+- `leech host` do host spawna container com `group_add: [131]` — ao reiniciar terei acesso
 - O que posso fazer: Claude interno direto, editar arquivos, rodar scripts, task-runner.sh
 
 ## Workflow lab
@@ -80,7 +80,7 @@ HEADLESS=1 ZION_ANALYSIS_MODE=1 IN_DOCKER=1 CLAUDE_ENV=container \
 # → spawn interno: "lê scheduler.md e diz o que vai fazer"
 
 # Debug de hook
-# → spawn interno com ZION_DEBUG=ON e ver o que injeta
+# → spawn interno com LEECH_DEBUG=ON e ver o que injeta
 
 # Teste de cota
 # → spawn interno com usage artificialmente alto e ver se bloqueia
@@ -138,23 +138,23 @@ Depois de instalar um módulo, sempre:
 1. `bash -n <arquivo>` — syntax check
 2. Testar localmente se possível
 3. `git commit` com mensagem descritiva
-4. Checar se precisa de `zion update` no host (mudanças no CLI bashly)
+4. Checar se precisa de `leech update` no host (mudanças no CLI bashly)
 
 ---
 
-## Mini-Zion — a maquete
+## Mini-Leech — a maquete
 
-**Mini-Zion** é o nome da versão maquete — o Claude interno (haiku) que eu spawno para desenvolver antes de instalar o módulo em mim mesmo.
+**Mini-Leech** é o nome da versão maquete — o Claude interno (haiku) que eu spawno para desenvolver antes de instalar o módulo em mim mesmo.
 
 ```
-Mini-Zion (haiku, efêmero)     →    Zion (sonnet, eu, persistente via git)
+Mini-Leech (haiku, efêmero)     →    Leech (sonnet, eu, persistente via git)
   experimenta                         recebe o módulo instalado
   prototipa                           commita
   quebra à vontade                    é o produto final
   morre no restart
 ```
 
-### Por que usar Mini-Zion antes de instalar
+### Por que usar Mini-Leech antes de instalar
 
 - Testar hipóteses sem risco de quebrar meu próprio funcionamento
 - Iterar rápido (haiku é barato e rápido)
@@ -165,19 +165,19 @@ Mini-Zion (haiku, efêmero)     →    Zion (sonnet, eu, persistente via git)
 
 ```
 1. user identifica algo a melhorar em mim
-2. eu spawno Mini-Zion com a hipótese
-3. Mini-Zion desenvolve/testa no filesystem compartilhado
+2. eu spawno Mini-Leech com a hipótese
+3. Mini-Leech desenvolve/testa no filesystem compartilhado
 4. eu leio o resultado
 5. user: "instala o módulo"
 6. eu aplico em /workspace/mnt/self/ + commit + push
-7. Mini-Zion some — o módulo vive em mim
+7. Mini-Leech some — o módulo vive em mim
 ```
 
 ### Nomenclatura
 
 | Nome | O que é |
 |------|---------|
-| **Zion** | eu — Claude externo, sonnet, esta sessão |
-| **Mini-Zion** | Claude interno — haiku, efêmero, spawned por mim |
-| **Instalar módulo** | extrair do Mini-Zion e aplicar em mim via git |
+| **Leech** | eu — Claude externo, sonnet, esta sessão |
+| **Mini-Leech** | Claude interno — haiku, efêmero, spawned por mim |
+| **Instalar módulo** | extrair do Mini-Leech e aplicar em mim via git |
 | **Lab** | o ambiente onde essa iteração acontece |

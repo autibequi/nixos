@@ -1,18 +1,18 @@
-# Mata todos os containers relacionados ao Zion (compose + strays por nome)
+# Mata todos os containers relacionados ao Leech (compose + strays por nome)
 # Util quando containers foram criados manualmente e nao estao no tracking do compose.
 
-zion_load_config
+leech_load_config
 
-compose_zion="${ZION_ROOT:-$HOME/nixos/self}/container/docker-compose.zion.yml"
-compose_puppy="${ZION_ROOT:-$HOME/nixos/self}/container/docker-compose.puppy.yml"
+compose_leech="${LEECH_ROOT:-$HOME/nixos/self}/container/docker-compose.leech.yml"
+compose_puppy="${LEECH_ROOT:-$HOME/nixos/self}/container/docker-compose.puppy.yml"
 
 echo "Stopping compose-tracked containers..."
-docker compose -f "$compose_zion" down 2>/dev/null || true
+docker compose -f "$compose_leech" down 2>/dev/null || true
 docker compose -f "$compose_puppy" down 2>/dev/null || true
 
-echo "Killing any stray zion/claude/puppy containers..."
+echo "Killing any stray leech/claude/puppy containers..."
 stray=$(docker ps -a --format '{{.Names}}' 2>/dev/null \
-  | grep -E 'zion|claude|leech|puppy' || true)
+  | grep -E 'leech|claude|leech|puppy' || true)
 
 if [[ -n "$stray" ]]; then
   echo "$stray" | xargs docker rm -f

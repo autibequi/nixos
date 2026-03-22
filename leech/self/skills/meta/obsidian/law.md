@@ -1,4 +1,4 @@
-# A Lei do Zion
+# A Lei do Leech
 
 > Fonte unica de verdade das regras obrigatorias do sistema.
 > Todo agente deve obedecer. Wiseman fiscaliza e corrige violacoes.
@@ -106,7 +106,7 @@ mv /workspace/obsidian/agents/_running/*_SEUNOME.md \
 | >= 95% | encerrar imediatamente | encerrar imediatamente |
 
 - Noturno (21h-6h UTC): tokens livres, agentes podem usar intervalos normais
-- Antes de iniciar ciclo pesado: verificar quota em `~/.zion`
+- Antes de iniciar ciclo pesado: verificar quota em `~/.leech`
 
 ---
 

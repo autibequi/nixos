@@ -1,10 +1,10 @@
 # Para containers, remove imagens e volumes do projeto
-zion_load_config
-compose_zion="${ZION_ROOT:-$HOME/nixos/self}/container/docker-compose.zion.yml"
-compose_puppy="${ZION_ROOT:-$HOME/nixos/self}/container/docker-compose.puppy.yml"
+leech_load_config
+compose_leech="${LEECH_ROOT:-$HOME/nixos/self}/container/docker-compose.leech.yml"
+compose_puppy="${LEECH_ROOT:-$HOME/nixos/self}/container/docker-compose.puppy.yml"
 
-echo "Destroying zion session containers + volumes..."
-docker compose -f "$compose_zion" down --volumes --remove-orphans 2>/dev/null || true
+echo "Destroying leech session containers + volumes..."
+docker compose -f "$compose_leech" down --volumes --remove-orphans 2>/dev/null || true
 
 echo "Destroying puppy container + volumes..."
 docker compose -f "$compose_puppy" down --volumes --remove-orphans 2>/dev/null || true

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Hook: PostToolUse
-_ZION_FILE="${HOME:-/home/claude}/.zion"; [ -f "$_ZION_FILE" ] || _ZION_FILE="/.zion"
-[ -f "$_ZION_FILE" ] && { set -a; source "$_ZION_FILE" 2>/dev/null || true; set +a; }
+_LEECH_FILE="${HOME:-/home/claude}/.leech"; [ -f "$_LEECH_FILE" ] || _LEECH_FILE="/.leech"
+[ -f "$_LEECH_FILE" ] && { set -a; source "$_LEECH_FILE" 2>/dev/null || true; set +a; }
 
 # Hook: PostToolUse — monitoramento de contexto
 # stdout → system-reminder (Claude vê)
@@ -14,7 +14,7 @@ read -r TOKENS_USED TOKENS_MAX < <(echo "$INPUT" | jq -r '[.context_tokens_used 
 [ -z "$TOKENS_USED" ] || [ -z "$TOKENS_MAX" ] || [ "$TOKENS_MAX" -eq 0 ] && exit 0
 
 REMAINING_PCT=$(( (TOKENS_MAX - TOKENS_USED) * 100 / TOKENS_MAX ))
-DEBOUNCE="/tmp/.zion-context-warn"
+DEBOUNCE="/tmp/.leech-context-warn"
 
 if [ "$REMAINING_PCT" -le 25 ]; then
   echo "⚠️ CONTEXTO CRÍTICO: ${REMAINING_PCT}% restante (${TOKENS_USED}/${TOKENS_MAX} tokens). ENCERRE a tarefa atual, faça commit e inicie nova sessão."

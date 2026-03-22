@@ -138,8 +138,8 @@ Se evidência for impossível (ex: teste manual no host), dizer o que deve ser t
 | monolito (Go) | `go build ./...` / `go test ./...` | repo Go | `/contractor <pedido>` → Coruja |
 | bo-container (Vue 2) | `yarn build` / `yarn test` | `bo-container/` | `/contractor <pedido>` → Coruja |
 | front-student (Nuxt 2) | `yarn build` | `front-student/` | `/contractor <pedido>` → Coruja |
-| NixOS / Zion | `nh os test .` | `/workspace/mnt/` | direto |
-| Zion CLI | `bashly generate` | `zion/cli/src/` | direto |
+| NixOS / Leech | `nh os test .` | `/workspace/mnt/` | direto |
+| Leech CLI | `bashly generate` | `leech/cli/src/` | direto |
 
 Para monolito/bo/front: preferir delegar à Coruja — ela conhece o domínio e as skills específicas.
 
@@ -162,7 +162,7 @@ git -C <path> rev-parse --show-toplevel
 
 # Contexto de worktree
 # /workspace → projeto externo (foco padrão)
-# /workspace/mnt → repo NixOS/Zion
+# /workspace/mnt → repo NixOS/Leech
 ```
 
 Permissões:

@@ -123,7 +123,7 @@ cursor://file//home/pedrinho/<caminho>:<linha>:<coluna>
 | `/home/claude/.claude/commands/` | `/home/pedrinho/nixos/self/commands/` |
 | `/home/claude/.claude/agents/` | `/home/pedrinho/nixos/self/agents/` |
 | `/home/claude/.claude/hooks/` | `/home/pedrinho/nixos/self/hooks/claude-code/` |
-| `/zion/` | `/home/pedrinho/nixos/self/` |
+| `/leech/` | `/home/pedrinho/nixos/self/` |
 
 Exemplos:
 - `/workspace/mnt/nixos/CLAUDE.md:10:1` → `cursor://file//home/pedrinho/nixos/CLAUDE.md:10:1`
@@ -144,7 +144,7 @@ Exemplos:
 ## Plan Mode — Obrigatório para Qualquer Implementação
 
 **Regra:** Sempre que o usuário expressar intenção de criar ou modificar código
-(em qualquer codebase: monolito, bo, front, Zion, NixOS, ou qualquer outro),
+(em qualquer codebase: monolito, bo, front, Leech, NixOS, ou qualquer outro),
 Claude DEVE entrar em `EnterPlanMode` ANTES de propor ou executar qualquer coisa.
 
 **Gatilhos** (qualquer um destes):

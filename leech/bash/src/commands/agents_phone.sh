@@ -1,19 +1,19 @@
 # Abre uma sessao de conversa com um agente via /meta:phone call
-zion_load_config
+leech_load_config
 
 AGENT="${args[name]:-}"
 
-ZION_DIR="${ZION_ROOT:-${ZION_NIXOS_DIR:-$HOME/nixos}/self}"
+LEECH_DIR="${LEECH_ROOT:-${LEECH_NIXOS_DIR:-$HOME/nixos}/self}"
 OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
 
 # Fallback agents dir
 for try in /workspace/mnt/self /workspace/nixos/self; do
-  [ -d "$try/agents" ] && ZION_DIR="$try" && break
+  [ -d "$try/agents" ] && LEECH_DIR="$try" && break
 done
 
 # Lista agentes disponiveis
 list_agents() {
-  AGENTS_DIR="$ZION_DIR/agents"
+  AGENTS_DIR="$LEECH_DIR/agents"
   for dir in "$AGENTS_DIR"/*/; do
     name=$(basename "$dir")
     [[ "$name" == _* ]] && continue
@@ -31,14 +31,14 @@ if [ -z "$AGENT" ]; then
   echo ""
   list_agents
   echo ""
-  echo "  Uso: zion agents phone <nome>"
+  echo "  Uso: leech agents phone <nome>"
   echo "  Dentro do Claude Code: /meta:phone call <nome>"
   echo ""
   exit 0
 fi
 
 # Verificar se agente existe
-AGENT_FILE="$ZION_DIR/agents/${AGENT}/agent.md"
+AGENT_FILE="$LEECH_DIR/agents/${AGENT}/agent.md"
 if [ ! -f "$AGENT_FILE" ]; then
   echo "Agente '${AGENT}' nao encontrado."
   echo ""
@@ -64,4 +64,4 @@ echo "  Abrindo sessao. Na sessao, use:"
 echo "    /meta:phone call ${AGENT}"
 echo ""
 
-exec zion host
+exec leech host

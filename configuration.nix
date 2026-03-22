@@ -52,7 +52,7 @@
     ./modules/virt.nix
 
     # Zion tick — timer unico agents + tasks (10min)
-    ./modules/zion-tick.nix
+    ./modules/leech-tick.nix
 
   ];
 }

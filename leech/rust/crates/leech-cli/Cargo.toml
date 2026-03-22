@@ -1,0 +1,16 @@
+[package]
+name = "leech-cli"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "leech"
+path = "src/main.rs"
+
+[dependencies]
+leech-sdk = { path = "../leech-sdk" }
+leech-tui = { path = "../leech-tui" }
+tokio = { workspace = true }
+anyhow = { workspace = true }
+clap = { version = "4", features = ["derive"] }
+inquire = "0.7"

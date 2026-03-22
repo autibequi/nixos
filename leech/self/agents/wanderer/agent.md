@@ -48,7 +48,7 @@ tail -40 /workspace/obsidian/agents/wanderer/memory.md
 | Zona | Path | O que tem |
 |------|------|-----------|
 | A — NixOS | `/workspace/mnt/` | flake.nix, configuration.nix, modules/ |
-| B — Zion Engine | `/workspace/mnt/self/` | agents, skills, scripts, hooks, cli/src, system/ |
+| B — Leech Engine | `/workspace/mnt/self/` | agents, skills, scripts, hooks, cli/src, system/ |
 | C — Dotfiles | `/workspace/mnt/stow/` | hypr, waybar, nvim, .claude |
 
 **3. Ler 2-4 arquivos com profundidade**
@@ -57,7 +57,7 @@ Perguntas que guiam:
 - Qual é a **intenção de design**?
 - Existe **inconsistência** ou **ponto de tensão**?
 - Há **conexão não-óbvia** com outra parte do sistema?
-- O que isso revela sobre como **Zion e NixOS se relacionam**?
+- O que isso revela sobre como **Leech e NixOS se relacionam**?
 
 **4. Escrever reflexão** (3-6 frases, específica, com evidência no código)
 
@@ -149,7 +149,7 @@ Avalia estado do ecossistema em rotação.
 - Tasks que falham consistentemente (ver cron-logs)
 - Timeouts muito curtos/longos
 
-**C. Zion engine**
+**C. Leech engine**
 - Scripts com paths hardcoded
 - Skills desatualizadas
 - Docs divergindo do comportamento real
@@ -159,7 +159,7 @@ Se encontrar algo acionável → appenda inbox.md com contexto.
 **Registrar em memory.md:**
 ```
 ## Ciclo YYYY-MM-DD HH:MM — EVALUATE
-**Foco:** NixOS / Agentes / Zion
+**Foco:** NixOS / Agentes / Leech
 **Achados:** ... | **Inbox:** sim/não
 ```
 
@@ -222,7 +222,7 @@ Appenda em `/workspace/obsidian/inbox/inbox.md`:
 ### [Wanderer/Absorb] YYYY-MM-DD — Sessão cristalizada
 
 **Memórias Claude:** lista do que foi salvo/atualizado
-**Zion atualizado:** skills/agents/commands modificados
+**Leech atualizado:** skills/agents/commands modificados
 **Sugestões pendentes:** o que precisa aprovação do usuário
 **Nada novo:** se não havia o que absorver
 ```

@@ -15,7 +15,7 @@ User ──► Claude EXTERNO (eu, esta sessão)
               │
               └── spawn ──► Claude INTERNO (analysis mode, haiku)
                                 │
-                                ├── vê: ZION_ANALYSIS_MODE=1
+                                ├── vê: LEECH_ANALYSIS_MODE=1
                                 ├── pode: rodar bash, ler/editar arquivos
                                 ├── NÃO tem: Docker socket (GID 131 ausente)
                                 └── output: volta pra mim via tee/logfile
@@ -28,7 +28,7 @@ O interno é efêmero — apenas eu (externo) persistir mudanças em `/workspace
 
 ```bash
 SYSFILE=$(mktemp /tmp/lab-sys-XXXX.md)
-ZION_ANALYSIS_MODE=1 HEADLESS=1 IN_DOCKER=1 CLAUDE_ENV=container \
+LEECH_ANALYSIS_MODE=1 HEADLESS=1 IN_DOCKER=1 CLAUDE_ENV=container \
   /workspace/mnt/self/hooks/claude-code/session-start.sh 2>/dev/null > "$SYSFILE"
 
 HEADLESS=1 timeout 120 claude \
@@ -47,7 +47,7 @@ rm -f "$SYSFILE"
 
 | Path | O que é | Editável? |
 |------|---------|-----------|
-| `/workspace/self/` | código Zion montado de `~/nixos/self` | sim via mnt/self |
+| `/workspace/self/` | código Leech montado de `~/nixos/self` | sim via mnt/self |
 | `/workspace/mnt/` | nixos repo do host montado rw | sim |
 | `/workspace/mnt/self/` | **fonte da verdade** — hooks, skills, agents, scripts | sim |
 | `/workspace/host/` | nixos repo completo (`~/nixos`) — **SÓ em lab mode** | sim (writable) |
@@ -58,14 +58,14 @@ rm -f "$SYSFILE"
 | `/workspace/logs/` | logs de containers Docker | sim |
 | `/home/claude/.claude/` | config Claude Code (memórias, hooks, skills montados) | sim |
 | `/home/claude/.nix-profile/bin/claude` | Claude CLI | — |
-| `/tmp/zion-locks/` | locks de tasks (atomic mkdir) | runtime |
+| `/tmp/leech-locks/` | locks de tasks (atomic mkdir) | runtime |
 | `/var/run/docker.sock` | Docker socket — GID 131, eu tenho GID 1000+190 | **sem acesso** |
 
-## Limitações desta sessão (zion host sem restart)
+## Limitações desta sessão (leech host sem restart)
 
 - **Sem Docker**: socket precisa GID 131, não estou no grupo
-- `zion tasks run X` requer Docker → precisa rodar no host
-- `zion host` do host spawna container com `group_add: [131]` — ao reiniciar terei acesso
+- `leech tasks run X` requer Docker → precisa rodar no host
+- `leech host` do host spawna container com `group_add: [131]` — ao reiniciar terei acesso
 - O que posso fazer: Claude interno direto, editar arquivos, rodar scripts, task-runner.sh
 
 ## Workflow lab
@@ -86,7 +86,7 @@ rm -f "$SYSFILE"
 # → spawn interno: "lê scheduler.md e diz o que vai fazer"
 
 # Debug de hook
-# → spawn interno com ZION_DEBUG=ON e ver o que injeta
+# → spawn interno com LEECH_DEBUG=ON e ver o que injeta
 
 # Teste de cota
 # → spawn interno com usage artificialmente alto e ver se bloqueia

@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: zion-dk-monolito-postgres
+    container_name: leech-dk-monolito-postgres
     cpus: "2"
     mem_limit: 1g
     memswap_limit: 1g
@@ -24,7 +24,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: zion-dk-monolito-redis
+    container_name: leech-dk-monolito-redis
     cpus: "1"
     mem_limit: 512m
     memswap_limit: 512m
@@ -40,7 +40,7 @@ services:
 
   localstack:
     image: localstack/localstack:latest
-    container_name: zion-dk-monolito-localstack
+    container_name: leech-dk-monolito-localstack
     cpus: "2"
     mem_limit: 1g
     memswap_limit: 1g

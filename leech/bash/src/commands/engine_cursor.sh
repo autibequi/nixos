@@ -1,1 +1,1 @@
-zion_launch_session "cursor"
+leech_launch_session "cursor"

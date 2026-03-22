@@ -7,7 +7,7 @@
 /meta:absorb elogio        → extração profunda: honrar sessão e preservar legado para gerações futuras
 ```
 
-Chame depois de uma boa conversa. Reflete sobre tudo que aconteceu nesta sessão e persiste o que vale: memórias Claude, skills Zion, agentes, commands.
+Chame depois de uma boa conversa. Reflete sobre tudo que aconteceu nesta sessão e persiste o que vale: memórias Claude, skills Leech, agentes, commands.
 
 **Detecção automática de elogio:** se `$ARGUMENTS` estiver vazio mas a mensagem do usuário que invocou contiver palavras como `parabéns`, `parabenizando`, `foi bem`, `boa sessão`, `elogio`, `honrar`, `legado`, `muito bom`, `excelente contexto` — ativar modo `elogio` automaticamente.
 
@@ -99,7 +99,7 @@ Encerrar com uma linha que reconheça o usuário por ter tido a visão de preser
 
 ## Modo `steal <url>`
 
-Se `$ARGUMENTS` começar com `steal`: inspecionar a fonte, comparar com skills existentes do Zion e apresentar relatório de impacto.
+Se `$ARGUMENTS` começar com `steal`: inspecionar a fonte, comparar com skills existentes do Leech e apresentar relatório de impacto.
 
 ### Fase 1 — Reconhecimento (identificar a fonte)
 
@@ -144,15 +144,15 @@ Para cada prompt/skill importante, traga o CONTEUDO (nao apenas o nome).
 1. Usar WebSearch para encontrar o repo/site oficial
 2. Se repo GitHub → **1B**; se só docs → WebFetch e extrair funcionalidades
 
-### Fase 2 — Inventario do Zion (paralela com Fase 1)
+### Fase 2 — Inventario do Leech (paralela com Fase 1)
 
 ```
 Agent subagent_type=Explore prompt="
-Mapeie as skills e capacidades atuais do Zion:
+Mapeie as skills e capacidades atuais do Leech:
 1. Todos os SKILL.md em /skills/ — nome e descricao
-2. Commands em /zion/commands/ — nome e proposito
-3. /zion/system/DIRETRIZES.md — regras cross-cutting
-4. /zion/agents/ — agentes disponiveis
+2. Commands em /leech/commands/ — nome e proposito
+3. /leech/system/DIRETRIZES.md — regras cross-cutting
+4. /leech/agents/ — agentes disponiveis
 "
 ```
 
@@ -164,7 +164,7 @@ Para cada funcionalidade encontrada na fonte:
 
 | Classificação | Significado |
 |---------------|-------------|
-| **ROUBAR** | Gap real, alto valor, sem conflito. Adaptar pro Zion. |
+| **ROUBAR** | Gap real, alto valor, sem conflito. Adaptar pro Leech. |
 | **MELHORAR** | Já temos, mas a versão deles tem tricks melhores. Absorver ideias. |
 | **IGNORAR** | Já temos equivalente ou é irrelevante. |
 | **PERIGOSO** | Conflita com enforcement/orquestração existente. |
@@ -177,12 +177,12 @@ Para cada funcionalidade encontrada na fonte:
 ## Fonte
 <titulo, URL, descricao curta>
 
-## ROUBAR (implementar no Zion)
+## ROUBAR (implementar no Leech)
 | # | Funcionalidade | Impacto | Esforco |
-Para cada item: o que roubar, prompt roubado, onde no Zion, risco
+Para cada item: o que roubar, prompt roubado, onde no Leech, risco
 
 ## MELHORAR (absorver tricks nos existentes)
-| # | Skill Zion | O que melhorar | Trick da fonte |
+| # | Skill Leech | O que melhorar | Trick da fonte |
 
 ## IGNORAR / PERIGOSO
 <tabelas resumidas>
@@ -208,7 +208,7 @@ O que quer roubar?
 ### Fase 6 — Execução
 
 - Criar worktree se >3 arquivos mudarem
-- Adaptar prompts — nunca copiar 1:1, sempre adaptar pro formato Zion
+- Adaptar prompts — nunca copiar 1:1, sempre adaptar pro formato Leech
 - Se "salvar pra depois": `/workspace/obsidian/_agent/steal-reports/<nome>.md`
 
 **Regras steal:** nunca instalar plugins externos direto; prompts são o ouro; context budget importa; domain > generic; limpar `/tmp/` após uso.
@@ -272,7 +272,7 @@ ls /workspace/self/commands/
 ## Absorb — Sessão cristalizada
 
 **Memórias salvas/atualizadas:** lista
-**Zion atualizado:** skills/agents/commands modificados
+**Leech atualizado:** skills/agents/commands modificados
 **Sugestões:** o que precisa aprovação do usuário
 **Nada novo:** se não havia o que absorver
 ```

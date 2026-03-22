@@ -5,13 +5,13 @@ Config Docker versionada para o bo-container (Vue 2 + Quasar 1.x).
 ## Uso
 
 ```bash
-zion docker run bo-container              # sandbox (default)
-zion docker run bo-container --env=local  # dev local (aponta para monolito local)
-zion docker run bo-container --env=qa     # QA
-zion docker logs bo-container -f          # follow logs
-zion docker stop bo-container             # para o container
-zion docker shell bo-container            # shell no container
-zion docker flush bo-container            # remove container + imagem + volumes
+leech docker run bo-container              # sandbox (default)
+leech docker run bo-container --env=local  # dev local (aponta para monolito local)
+leech docker run bo-container --env=qa     # QA
+leech docker logs bo-container -f          # follow logs
+leech docker stop bo-container             # para o container
+leech docker shell bo-container            # shell no container
+leech docker flush bo-container            # remove container + imagem + volumes
 ```
 
 ## Pre-requisitos
@@ -19,10 +19,10 @@ zion docker flush bo-container            # remove container + imagem + volumes
 ### 1. NPM_TOKEN (obrigatorio)
 
 O bo-container usa pacotes privados `@estrategiahq/*` no GitHub Package Registry.
-Configure em `~/.zion` ou no ambiente:
+Configure em `~/.leech` ou no ambiente:
 
 ```bash
-# ~/.zion
+# ~/.leech
 NPM_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
@@ -43,7 +43,7 @@ Verificar: `ssh-add -l` deve listar a chave.
 ## Primeira execucao
 
 ```bash
-zion docker run bo-container
+leech docker run bo-container
 ```
 
 O `docker compose build` vai:
@@ -63,8 +63,8 @@ Os `node_modules` ficam num volume anonimo preservado entre restarts.
 ## Atualizar dependencias (apos mudar package.json)
 
 ```bash
-zion docker flush bo-container
-zion docker run bo-container
+leech docker flush bo-container
+leech docker run bo-container
 ```
 
 O flush remove o volume de node_modules. O proximo `run` reinstala tudo.
@@ -74,14 +74,14 @@ O flush remove o volume de node_modules. O proximo `run` reinstala tudo.
 ```mermaid
 graph TD
     subgraph HOST["Host NixOS"]
-        ZionCLI["zion CLI"]
-        ZionCFG["~/.zion\nBO_CONTAINER_DIR · NPM_TOKEN"]
-        LOGS["~/.local/share/zion/logs/dockerized/bo-container/\nservice.log · test.log · startup.log"]
+        LeechCLI["leech CLI"]
+        LeechCFG["~/.leech\nBO_CONTAINER_DIR · NPM_TOKEN"]
+        LOGS["~/.local/share/leech/logs/dockerized/bo-container/\nservice.log · test.log · startup.log"]
         SSHAgent["SSH Agent\n(git+ssh deps)"]
     end
 
-    subgraph COMPOSE["Docker Compose — zion-dk-bo-container"]
-        APP["app container\nzion-dk-bo-container-app\n:9090 HTTPS (Quasar dev)"]
+    subgraph COMPOSE["Docker Compose — leech-dk-bo-container"]
+        APP["app container\nleech-dk-bo-container-app\n:9090 HTTPS (Quasar dev)"]
         NM[("node_modules volume\n(anonimo — preservado)")]
     end
 
@@ -89,9 +89,9 @@ graph TD
         DF["Dockerfile\nnode:14-alpine\nnpm install (SSH + NPM_TOKEN)"]
     end
 
-    ZionCFG --> ZionCLI
+    LeechCFG --> LeechCLI
     SSHAgent -->|"--mount=type=ssh"| DF
-    ZionCLI -->|"docker run bo-container"| APP
+    LeechCLI -->|"docker run bo-container"| APP
     APP --> DF
     APP --- NM
     APP -->|"bind mount src/"| HOST
@@ -107,7 +107,7 @@ graph TD
 
 ## Path do projeto
 
-Configurar em `~/.zion`:
+Configurar em `~/.leech`:
 ```bash
 BO_CONTAINER_DIR="$HOME/projects/estrategia/bo-container"
 ```
@@ -123,6 +123,6 @@ BO_CONTAINER_DIR="$HOME/projects/estrategia/bo-container"
 
 ## Logs
 
-- Host: `~/.local/share/zion/logs/dockerized/bo-container/`
+- Host: `~/.local/share/leech/logs/dockerized/bo-container/`
 - Container (agente): `/workspace/logs/docker/bo-container/`
 - Arquivos: `service.log`, `test.log`, `startup.log`

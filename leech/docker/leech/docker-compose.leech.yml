@@ -1,0 +1,130 @@
+x-env-base: &env-base
+  # Tokens e boot flags vêm de ~/.leech (sourced pelo entrypoint + todos os hooks)
+  PATH: /home/claude/.local/bin:/home/claude/.nix-profile/bin:/workspace/self/bash:/usr/bin:/bin
+  CLAUDE_ENV: container
+  WAYLAND_DISPLAY: ${WAYLAND_DISPLAY:-wayland-1}
+  XDG_RUNTIME_DIR: /run/user/1000
+  PULSE_SERVER: unix:/run/user/1000/pulse/native
+  DISABLE_AUTOUPDATER: false
+  # Docker autonomy: host paths for container→host translation
+  LEECH_NIXOS_DIR: ${HOME}/nixos
+  HOST_HOME: ${HOME}
+  HOST_PROJECTS_DIR: ${HOME}/projects
+  HOST_NIXOS_DIR: ${HOME}/nixos
+
+x-extra-hosts: &extra-hosts
+  - "host.docker.internal:host-gateway"
+
+# /workspace: leech (/leech), obsidian e o projeto (mnt). Nixos e logs só em leech host.
+x-base-volumes: &base-volumes
+  - ${LEECH_ROOT:-${HOME}/nixos/self}:/workspace/self
+  - ${OBSIDIAN_PATH:-${HOME}/.ovault/Work}:/workspace/obsidian
+  - ${CLAUDIO_MOUNT:-${HOME}/nixos}:/workspace/mnt:${CLAUDIO_MOUNT_OPTS:-rw}
+  - ${HOME}/.claude:/home/claude/.claude
+  # bypass: settings.json padrão para containers — sobrescreve o do host
+  - ${LEECH_ROOT:-${HOME}/nixos/self}/claude.bypass.json:/home/claude/.claude/settings.json:ro
+  # leech/skills e leech/commands sobrescrevem o ~/.claude do host
+  - ${LEECH_ROOT:-${HOME}/nixos/self}/skills:/home/claude/.claude/skills
+  - ${LEECH_ROOT:-${HOME}/nixos/self}/commands:/home/claude/.claude/commands
+  - ${LEECH_ROOT:-${HOME}/nixos/self}/agents:/home/claude/.claude/agents
+  # Hooks: leech/hooks/claude-code (bootstrap não wiped — stow/.claude/hooks está vazio)
+  - ${LEECH_ROOT:-${HOME}/nixos/self}/hooks/claude-code:/home/claude/.claude/hooks:ro
+  - ${LEECH_ROOT:-${HOME}/nixos/self}/scripts:/home/claude/.claude/scripts
+  - ${HOME}/.claude.json:/home/claude/.claude.json
+  # Cursor: credenciais do host + skills/commands/rules do leech
+  - ${HOME}/.cursor:/home/claude/.cursor
+  - ${LEECH_ROOT:-${HOME}/nixos/self}/skills:/home/claude/.cursor/skills
+  - ${LEECH_ROOT:-${HOME}/nixos/self}/commands:/home/claude/.cursor/commands
+  - ${LEECH_ROOT:-${HOME}/nixos/self}/commands:/home/claude/.cursor/rules
+  # cursor_config: volume nomeado (chmod pelo agent causa EPERM em bind mount)
+  - cursor_config:/home/claude/.config/cursor
+  # opencode
+  - ${LEECH_ROOT:-${HOME}/nixos/self}/.opencode:/home/claude/.config/opencode
+  - ${HOME}/projects:/home/claude/projects
+  - ${XDG_RUNTIME_DIR:-/run/user/1000}/${WAYLAND_DISPLAY:-wayland-1}:/run/user/1000/${WAYLAND_DISPLAY:-wayland-1}
+  - ${XDG_RUNTIME_DIR:-/run/user/1000}/pulse:/run/user/1000/pulse
+  # Host /proc e /etc (observabilidade)
+  - /proc/meminfo:/host/proc/meminfo:ro
+  - /proc/loadavg:/host/proc/loadavg:ro
+  - /proc/uptime:/host/proc/uptime:ro
+  - /proc/cpuinfo:/host/proc/cpuinfo:ro
+  - /proc/version:/host/proc/version:ro
+  - /run/current-system:/host/run/current-system:ro
+  - /etc/os-release:/host/etc/os-release:ro
+  - /tmp/leech-hive-mind:/workspace/.hive-mind
+  # Logs do host — observabilidade e debug de sistema
+  - /var/log/journal:/workspace/logs/host/journal:ro
+  - /run/log/journal:/workspace/logs/host/journal-runtime:ro
+  - /var/log:/workspace/logs/host/var-log:ro
+  - /var/lib/systemd/coredump:/workspace/logs/host/coredump:ro
+  # Hardware/kernel state (sem senhas)
+  - /sys/class/hwmon:/host/sys/class/hwmon:ro
+  - /sys/class/thermal:/host/sys/class/thermal:ro
+  - /sys/class/net:/host/sys/class/net:ro
+  - /sys/block:/host/sys/block:ro
+  # Logs de servicos Docker (leech docker run/test) — acessiveis pelo agente
+  - ${XDG_DATA_HOME:-${HOME}/.local/share}/leech/logs/dockerized:/workspace/logs/docker:rw
+  # Docker socket — permite agente gerenciar containers (leech docker run/install/logs)
+  - /var/run/docker.sock:/var/run/docker.sock
+  # Dockerized configs — agente pode editar docker-compose, .env, etc.
+  - ${HOME}/.local/share/leech/containers:/workspace/dockerized
+  # Dados locais do Leech (usage cache, estado compartilhado host↔container)
+  - ${XDG_DATA_HOME:-${HOME}/.local/share}/leech:/home/claude/.local/share/leech
+  # Mirror mounts: host paths acessiveis dentro do container (Docker build context + daemon volumes)
+  - ${HOME}/projects:${HOME}/projects
+  - ${HOME}/nixos:${HOME}/nixos:ro
+  # Lab mode: nixos repo editavel em /workspace/host (rw apenas quando CLAUDIO_HOST_OPTS=rw)
+  - ${HOME}/nixos:/workspace/host:${CLAUDIO_HOST_OPTS:-ro}
+  # Nix store compartilhado: persiste entre resets e evita re-download de pacotes
+  - nix_store:/nix
+  # Canal de comunicação rápida host ↔ agente
+  - ${HOME}/.leech:/home/claude/.leech:rw
+
+services:
+  leech:
+    build:
+      context: .
+      dockerfile: Dockerfile.claude
+    image: leech
+    cpus: "14.4"
+    mem_limit: 12g
+    memswap_limit: 12g
+    network_mode: host
+    stdin_open: true
+    tty: true
+    working_dir: /workspace/mnt
+    entrypoint: ["/entrypoint.sh"]
+    command: ["/bin/bash", "-c", "sleep infinity"]
+    group_add:
+      - "${DOCKER_GID:-999}"
+      - "${JOURNAL_GID:-62}"
+    cap_drop:
+      - NET_RAW
+      - SYS_PTRACE
+      - SYS_RAWIO
+      - MKNOD
+      - AUDIT_WRITE
+      - NET_BIND_SERVICE
+    environment:
+      <<: *env-base
+      GIT_AUTHOR_NAME: Pedrinho
+      GIT_AUTHOR_EMAIL: pedro.correa@estrategia.com
+      GIT_COMMITTER_NAME: Zion
+      GIT_COMMITTER_EMAIL: zion@autibequi.com
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    tmpfs:
+      - /tmp:size=512m,mode=1777
+    extra_hosts: *extra-hosts
+    volumes: *base-volumes
+
+volumes:
+  cursor_config:
+  nix_store:
+
+networks:
+  default:
+    name: nixos_default
+    external: true

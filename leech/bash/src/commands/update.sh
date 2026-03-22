@@ -1,8 +1,8 @@
 # Regenera CLI, instala symlink e atualiza bootstrap
-cli_dir="$zion_compose_dir"
-nixos_dir="$zion_nixos_dir"
-bin_dest="${HOME}/.local/bin/zion"
-log_file="$(mktemp /tmp/zion-update-XXXXXX.log)"
+cli_dir="$leech_compose_dir"
+nixos_dir="$leech_nixos_dir"
+bin_dest="${HOME}/.local/bin/leech"
+log_file="$(mktemp /tmp/leech-update-XXXXXX.log)"
 trap 'rm -f "$log_file"' EXIT
 
 _run_step() {
@@ -41,10 +41,10 @@ _gen() {
 }
 
 _symlink() {
-  local old_dest="$nixos_dir/stow/.local/bin/zion"
+  local old_dest="$nixos_dir/stow/.local/bin/leech"
   [[ -L "$old_dest" ]] && rm -f "$old_dest"
   mkdir -p "$(dirname "$bin_dest")"
-  ln -sf "$cli_dir/zion" "$bin_dest"
+  ln -sf "$cli_dir/leech" "$bin_dest"
 }
 
 _bootstrap() {
@@ -54,7 +54,7 @@ _bootstrap() {
   fi
 }
 
-printf "\033[1mAtualizando zion...\033[0m\n"
+printf "\033[1mAtualizando leech...\033[0m\n"
 _run_step 1 3 "Gerando CLI"           _gen
 _run_step 2 3 "Instalando symlink"    _symlink
 _run_step 3 3 "Atualizando bootstrap" _bootstrap

@@ -13,13 +13,13 @@ Config Docker versionada para o monolito Go da estrategia.
 ## Uso
 
 ```bash
-zion docker run monolito              # sandbox (default)
-zion docker run monolito --env=local  # dev local
-zion docker run monolito --debug      # com Delve em :2345 (attach via Cursor/VS Code)
-zion docker logs monolito -f          # follow logs
-zion docker stop monolito             # para tudo
-zion docker shell monolito            # shell no app
-zion docker shell monolito postgres   # shell no postgres
+leech docker run monolito              # sandbox (default)
+leech docker run monolito --env=local  # dev local
+leech docker run monolito --debug      # com Delve em :2345 (attach via Cursor/VS Code)
+leech docker logs monolito -f          # follow logs
+leech docker stop monolito             # para tudo
+leech docker shell monolito            # shell no app
+leech docker shell monolito postgres   # shell no postgres
 ```
 
 ## Arquitetura
@@ -27,15 +27,15 @@ zion docker shell monolito postgres   # shell no postgres
 ```mermaid
 graph TD
     subgraph HOST["Host NixOS"]
-        ZionCLI["zion CLI\n~/nixos/self/cli/zion"]
-        ZionCFG["~/.zion\nMONOLITO_DIR · engine · keys"]
-        LOGS["~/.local/share/zion/logs/dockerized/monolito/\nservice.log · test.log · startup.log · deps.log"]
+        LeechCLI["leech CLI\n~/nixos/self/cli/leech"]
+        LeechCFG["~/.leech\nMONOLITO_DIR · engine · keys"]
+        LOGS["~/.local/share/leech/logs/dockerized/monolito/\nservice.log · test.log · startup.log · deps.log"]
     end
 
-    subgraph COMPOSE["Docker Compose — zion-dk-monolito"]
+    subgraph COMPOSE["Docker Compose — leech-dk-monolito"]
         direction TB
-        APP["app container\nzion-dk-monolito-app\n:4004 HTTP  :2345 Delve"]
-        subgraph DEPS["deps — zion-dk-monolito-deps"]
+        APP["app container\nleech-dk-monolito-app\n:4004 HTTP  :2345 Delve"]
+        subgraph DEPS["deps — leech-dk-monolito-deps"]
             PG["postgres :5432"]
             RD["redis :6379"]
             LS["localstack :4566 SQS·S3"]
@@ -51,9 +51,9 @@ graph TD
         LC[".vscode/launch.json\n[DOCKER] Attach to monolito\nrequest=attach mode=remote :2345\nsubstitutePath: workspace→/go/app"]
     end
 
-    ZionCFG --> ZionCLI
-    ZionCLI -->|"docker run monolito"| APP
-    ZionCLI -->|"--debug overlay"| DFD
+    LeechCFG --> LeechCLI
+    LeechCLI -->|"docker run monolito"| APP
+    LeechCLI -->|"--debug overlay"| DFD
     APP --> DF
     APP --> PG & RD & LS
     APP -->|"nohup logs"| LOGS
@@ -65,13 +65,13 @@ graph TD
 ```mermaid
 sequenceDiagram
     actor Dev
-    participant CLI as zion CLI
+    participant CLI as leech CLI
     participant Compose as Docker Compose
     participant App as monolito-app
     participant DLV as Delve :2345
     participant Cursor
 
-    Dev->>CLI: zion docker run monolito --debug
+    Dev->>CLI: leech docker run monolito --debug
     CLI->>Compose: build Dockerfile.debug
     Note over Compose: golang:alpine runtime<br/>go install dlv → /go/bin/dlv<br/>SYS_PTRACE + apparmor:unconfined
     Compose->>App: up --force-recreate
@@ -92,7 +92,7 @@ sequenceDiagram
 
 1. Subir em modo debug:
    ```bash
-   zion docker run monolito --debug
+   leech docker run monolito --debug
    ```
 2. Aguardar `API server listening at: [::]:2345` nos logs
 3. No Cursor/VS Code: F5 → `[DOCKER] Attach to monolito`
@@ -113,7 +113,7 @@ sequenceDiagram
 
 ## Path do projeto
 
-Configurar em `~/.zion`:
+Configurar em `~/.leech`:
 ```bash
 MONOLITO_DIR="$HOME/projects/estrategia/monolito"
 ```
@@ -121,13 +121,13 @@ MONOLITO_DIR="$HOME/projects/estrategia/monolito"
 ## Detalhes tecnicos
 
 - Go 1.24.4, `CGO_ENABLED=1`, `-tags musl` (necessario para librdkafka)
-- Build usa `vendor/` (gerado por `zion docker install monolito`)
+- Build usa `vendor/` (gerado por `leech docker install monolito`)
 - Entrypoints: `./cmd/server/main.go` e `./cmd/worker/main.go`
 - 6 verticais: concursos, medicina, oab, vestibulares, militares, carreiras-juridicas
 - Erros normais no boot (nao criticos): Coruja-AI endpoint, cloudfront private key, Toggler JSON
 
 ## Logs
 
-- Host: `~/.local/share/zion/logs/dockerized/monolito/`
+- Host: `~/.local/share/leech/logs/dockerized/monolito/`
 - Container (agente): `/workspace/logs/docker/monolito/`
 - Arquivos: `service.log`, `test.log`, `startup.log`, `deps.log`, `install.log`

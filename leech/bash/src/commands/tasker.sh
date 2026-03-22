@@ -1,15 +1,15 @@
 # Lanca o agente Tasker para processar tasks atrasadas agora
-# Equivalente a: zion run tasker
-zion_load_config
+# Equivalente a: leech run tasker
+leech_load_config
 
 steps="${args[--steps]:-}"
 
-zion_dir="${ZION_ROOT:-$HOME/nixos/self}"
+leech_dir="${LEECH_ROOT:-$HOME/nixos/self}"
 obsidian="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
-runner="$zion_dir/scripts/task-runner.sh"
+runner="$leech_dir/scripts/task-runner.sh"
 agents="$obsidian/agents"
 schedule="$agents/_schedule"
-agent_file="$zion_dir/agents/tasker/agent.md"
+agent_file="$leech_dir/agents/tasker/agent.md"
 
 # Fallback runner
 if [ ! -f "$runner" ]; then
@@ -88,7 +88,7 @@ echo "[tasker] agent=tasker  model=$MODEL  turns=$MAX_TURNS  timeout=${TIMEOUT}s
 echo "[tasker] card: $CARD"
 echo ""
 
-rm -rf "/tmp/zion-locks/${WHEN}_tasker.lock" 2>/dev/null || true
+rm -rf "/tmp/leech-locks/${WHEN}_tasker.lock" 2>/dev/null || true
 
 export TASK_CONTRACTORS_DIR="$agents"
 export SCHEDULE_DIR="$schedule"

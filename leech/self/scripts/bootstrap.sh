@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Zion: bootstrap do agente no container.
+# Leech: bootstrap do agente no container.
 # Delega para o bootstrap do repo NixOS. No container, mounts ficam sob /workspace (nixos, obsidian, logs, mount).
 
-# Repo NixOS: em /workspace/nixos (scheduler) ou em /workspace/mnt (zion host-edit). Symlink /workspace/host para compatibilidade.
+# Repo NixOS: em /workspace/nixos (scheduler) ou em /workspace/mnt (leech host-edit). Symlink /workspace/host para compatibilidade.
 if [[ -d /workspace/nixos ]] && [[ -d /workspace ]] && [[ ! -e /workspace/host ]]; then
   ln -sfn /workspace/nixos /workspace/host 2>/dev/null || true
 elif [[ -d /workspace/mnt ]] && [[ -f /workspace/mnt/CLAUDE.md ]] && [[ -d /workspace ]] && [[ ! -e /workspace/host ]]; then
@@ -20,7 +20,7 @@ for base in /workspace/nixos /workspace/mnt; do
 done
 
 if [[ -z "${_ret:-}" ]]; then
-  echo "[zion bootstrap] scripts/bootstrap.sh do repo NixOS não encontrado; continuando sem dashboard." >&2
+  echo "[leech bootstrap] scripts/bootstrap.sh do repo NixOS não encontrado; continuando sem dashboard." >&2
   _ret=0
 fi
 

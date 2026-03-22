@@ -1,10 +1,10 @@
-zion_load_config
+leech_load_config
 
-mount_path="$(zion_resolve_dir)"
-mount_opts="$(zion_mount_opts)"
-slug="$(zion_proj_slug "$mount_path")"
-proj_name="$(zion_proj_name "$slug")"
-engine="$(zion_resolve_engine 1)"
+mount_path="$(leech_resolve_dir)"
+mount_opts="$(leech_mount_opts)"
+slug="$(leech_proj_slug "$mount_path")"
+proj_name="$(leech_proj_name "$slug")"
+engine="$(leech_resolve_engine 1)"
 
 session_id="${args['--resume']:-}"
 
@@ -16,4 +16,4 @@ else
   engine_args="--continue"
 fi
 
-zion_session_run "$engine" "$proj_name" "$mount_path" "$mount_opts" "$engine_args"
+leech_session_run "$engine" "$proj_name" "$mount_path" "$mount_opts" "$engine_args"

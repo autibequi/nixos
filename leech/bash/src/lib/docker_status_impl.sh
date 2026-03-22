@@ -1,10 +1,10 @@
 # docker_status_impl.sh — status dos servicos Docker.
 #
-# Uso: _zion_dk_status <service>
+# Uso: _leech_dk_status <service>
 # Se service for vazio, mostra todos os servicos.
-# Usa _ZION_SHARED_STATS e _ZION_SHARED_DK_ROWS se disponíveis (evita refetch).
+# Usa _LEECH_SHARED_STATS e _LEECH_SHARED_DK_ROWS se disponíveis (evita refetch).
 
-_zion_dk_status() {
+_leech_dk_status() {
   local service="${1:-}"
 
   # Cores
@@ -30,8 +30,8 @@ _zion_dk_status() {
 
   # Usa cache compartilhado se disponível, senão busca
   local _stats_cache
-  if [[ -n "${_ZION_SHARED_STATS:-}" ]]; then
-    _stats_cache="$_ZION_SHARED_STATS"
+  if [[ -n "${_LEECH_SHARED_STATS:-}" ]]; then
+    _stats_cache="$_LEECH_SHARED_STATS"
   else
     _stats_cache=$(docker stats --no-stream \
       --format "{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" 2>/dev/null || true)
@@ -39,10 +39,10 @@ _zion_dk_status() {
 
   # all_dk_rows: usa cache compartilhado se disponível
   local _all_dk_rows
-  if [[ -n "${_ZION_SHARED_DK_ROWS:-}" ]]; then
-    _all_dk_rows="$_ZION_SHARED_DK_ROWS"
+  if [[ -n "${_LEECH_SHARED_DK_ROWS:-}" ]]; then
+    _all_dk_rows="$_LEECH_SHARED_DK_ROWS"
   else
-    _all_dk_rows=$(docker ps -a --filter "name=zion-dk-" \
+    _all_dk_rows=$(docker ps -a --filter "name=leech-dk-" \
       --format "{{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || true)
   fi
 
@@ -184,7 +184,7 @@ _zion_dk_status() {
   print_service_tree() {
     local svc="$1"
     local project
-    project=$(zion_docker_project_name "$svc")  # zion-dk-<svc>
+    project=$(leech_docker_project_name "$svc")  # leech-dk-<svc>
 
     local main_rows deps_rows
     main_rows=$(echo "$_all_dk_rows" | grep -E "^${project}-" | grep -vE "^${project}-deps-" | grep -vE "^${project}-wt-" || true)
@@ -242,7 +242,7 @@ _zion_dk_status() {
             | sed 's/^[^=]*=//' | head -1)
         fi
         local _svc_dir
-        _svc_dir=$(zion_docker_service_dir "$svc" 2>/dev/null || true)
+        _svc_dir=$(leech_docker_service_dir "$svc" 2>/dev/null || true)
         [[ -n "$_svc_dir" && -d "$_svc_dir" ]] && \
           branch_label=$(git -C "$_svc_dir" branch --show-current 2>/dev/null || true)
         # Salva no cache (via dynamic scoping — arrays declarados em status.sh)
@@ -306,7 +306,7 @@ _zion_dk_status() {
     print_service_tree "$service"
   else
     local no_header="${2:-0}"
-    [[ "$no_header" -eq 0 ]] && echo -e "\n${BOLD}${MAGENTA}  Zion Docker${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}\n"
+    [[ "$no_header" -eq 0 ]] && echo -e "\n${BOLD}${MAGENTA}  Leech Docker${RESET}  ${DIM}$(date '+%H:%M:%S')${RESET}\n"
     local services_list="monolito bo-container front-student"
     for svc in $services_list; do
       echo ""
@@ -315,9 +315,9 @@ _zion_dk_status() {
 
     # Reverse proxy
     local rp_row
-    rp_row=$(docker ps -a --filter "name=zion-reverseproxy" \
+    rp_row=$(docker ps -a --filter "name=leech-reverseproxy" \
       --format "{{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null \
-      | grep "^zion-reverseproxy	" | head -1)
+      | grep "^leech-reverseproxy	" | head -1)
     if [[ -n "$rp_row" ]]; then
       echo ""
       IFS=$'\t' read -r _rp_name rp_status rp_ports <<< "$rp_row"

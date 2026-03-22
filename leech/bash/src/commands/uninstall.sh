@@ -1,8 +1,8 @@
-# Remove o symlink do zion de ~/.local/bin
-BIN="${HOME}/.local/bin/zion"
+# Remove o symlink do leech de ~/.local/bin
+BIN="${HOME}/.local/bin/leech"
 
 if [ ! -e "$BIN" ] && [ ! -L "$BIN" ]; then
-  echo "zion nao instalado em $BIN"
+  echo "leech nao instalado em $BIN"
   exit 0
 fi
 
@@ -14,4 +14,4 @@ elif [ -f "$BIN" ]; then
   echo "binario removido: $BIN"
 fi
 
-echo "zion desinstalado. Para reinstalar: cd ~/nixos/self/bash && ./zion update"
+echo "leech desinstalado. Para reinstalar: cd ~/nixos/self/bash && ./leech update"

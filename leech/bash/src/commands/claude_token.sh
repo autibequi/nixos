@@ -1,5 +1,5 @@
-# zion claude token — Imprime o OAuth access token do Claude.
-# Util para curl manual: TOKEN=$(zion claude token)
+# leech claude token — Imprime o OAuth access token do Claude.
+# Util para curl manual: TOKEN=$(leech claude token)
 
 CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
 CREDS="${CLAUDE_DIR}/.credentials.json"

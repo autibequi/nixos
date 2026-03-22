@@ -1,7 +1,7 @@
 services:
   reverseproxy:
     image: nginx:alpine
-    container_name: zion-reverseproxy
+    container_name: leech-reverseproxy
     network_mode: "host"
     restart: unless-stopped
     volumes:

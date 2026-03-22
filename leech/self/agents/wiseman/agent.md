@@ -158,7 +158,7 @@ EOF
 ```
 
 - **Lei 3 (timestamp errado):** renomear card para timestamp correto
-- **Lei 7 (quota):** ler quota em `~/.zion` e reagendar agentes sonnet com intervalo correto
+- **Lei 7 (quota):** ler quota em `~/.leech` e reagendar agentes sonnet com intervalo correto
 - **Outros:** registrar alerta em `inbox/ALERTA_wiseman_enforce-YYYY-MM-DD.md`
 
 **Relatorio obrigatorio ao final do ENFORCE:**

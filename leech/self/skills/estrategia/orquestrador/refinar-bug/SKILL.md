@@ -1,6 +1,6 @@
 ---
 name: orquestrador/refinar-bug
-description: Use when the developer wants to refine a Bug card in Jira. Reads the card, investigates the relevant repositories (monolito, bo-container, front-student — only those pertinent to the bug), finds code references (file, line, method), and fills the "Sugestão de Implementação" field (resolved by name via the Jira names map) with a structured ADF template including a "refined by Zion" ASCII banner.
+description: Use when the developer wants to refine a Bug card in Jira. Reads the card, investigates the relevant repositories (monolito, bo-container, front-student — only those pertinent to the bug), finds code references (file, line, method), and fills the "Sugestão de Implementação" field (resolved by name via the Jira names map) with a structured ADF template including a "refined by Leech" ASCII banner.
 ---
 
 # refinar-bug: Refinar Card de Bug no Jira
@@ -177,7 +177,7 @@ Para **cada arquivo relevante**, registrar:
 ### Estrutura do conteúdo
 
 ```
-[Banner ASCII "refined by Zion"]
+[Banner ASCII "refined by Leech"]
 
 1. Descrição da Solução
    [O que precisa ser feito para corrigir o bug — 2-5 frases]

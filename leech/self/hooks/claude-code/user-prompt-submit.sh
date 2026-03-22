@@ -5,20 +5,20 @@
 #   - Prompt simples (curto, sem keywords de task): adia contexto para próxima mensagem
 #   - Prompt complexo (task/código): injeta imediatamente
 #   - Segunda mensagem em diante: sempre injeta se ainda não injetou
-#   - Headless/Agent/zion_debug: injeta imediatamente, sem lazy
+#   - Headless/Agent/leech_debug: injeta imediatamente, sem lazy
 #
-# stdout → system-reminder (Claude vê) | /tmp/zion-ctx-loaded = lock de sessão
+# stdout → system-reminder (Claude vê) | /tmp/leech-ctx-loaded = lock de sessão
 
-# ── Load .zion ────────────────────────────────────────────────────────────────
-_ZION_FILE="${HOME:-/home/claude}/.zion"; [ -f "$_ZION_FILE" ] || _ZION_FILE="/.zion"
-[ -f "$_ZION_FILE" ] && { set -a; source "$_ZION_FILE" 2>/dev/null || true; set +a; }
+# ── Load .leech ────────────────────────────────────────────────────────────────
+_LEECH_FILE="${HOME:-/home/claude}/.leech"; [ -f "$_LEECH_FILE" ] || _LEECH_FILE="/.leech"
+[ -f "$_LEECH_FILE" ] && { set -a; source "$_LEECH_FILE" 2>/dev/null || true; set +a; }
 
 HEADLESS="${HEADLESS:-0}"
-ZION_DEBUG="${ZION_DEBUG:-OFF}"
+LEECH_DEBUG="${LEECH_DEBUG:-OFF}"
 AGENT_MODE="0"
 { [ -n "${AGENT_NAME:-}" ] || [ -n "${TASK_NAME:-}" ]; } && AGENT_MODE="1"
 
-CTX_LOCK="/tmp/zion-ctx-loaded"
+CTX_LOCK="/tmp/leech-ctx-loaded"
 PENDING="${CTX_LOCK}.pending"
 
 # Já injetou nessa sessão → skip
@@ -35,13 +35,13 @@ else
   WS="$(pwd)"
 fi
 { [ "${CLAUDE_ENV:-}" = "container" ] || [ -f "/.dockerenv" ]; } && IN_DOCKER="1" || IN_DOCKER="${IN_DOCKER:-0}"
-[ -d "/workspace/host" ] && ZION_EDIT="1" || ZION_EDIT="${ZION_EDIT:-0}"
+[ -d "/workspace/host" ] && LEECH_EDIT="1" || LEECH_EDIT="${LEECH_EDIT:-0}"
 
 # ── Injeta LITE + ENV + OBSIDIAN ──────────────────────────────────────────────
 inject_full_context() {
   # LITE
-  if [ "$ZION_DEBUG" = "OFF" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
-    LITE_MD="$WS/zion/system/LITE.md"
+  if [ "$LEECH_DEBUG" = "OFF" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
+    LITE_MD="$WS/leech/system/LITE.md"
     [ -f "$LITE_MD" ] || LITE_MD="/workspace/self/system/LITE.md"
     if [ -f "$LITE_MD" ]; then
       echo "---LITE---"
@@ -75,23 +75,23 @@ Estrutura /workspace:
   /workspace/dockerized/    configs docker dos serviços (Dockerfile, compose, .env)
   /workspace/.hive-mind/    área efêmera compartilhada entre containers (locks, sinais)
 
-Se zion_edit=1: lab mode — /workspace/host/ contém o repo NixOS+Zion (editável).
-Se zion_edit=0: /workspace/mnt é um projeto externo do usuário.
+Se leech_edit=1: lab mode — /workspace/host/ contém o repo NixOS+Leech (editável).
+Se leech_edit=0: /workspace/mnt é um projeto externo do usuário.
 DOCKER
-    if [ "$ZION_EDIT" = "1" ]; then
-      cat <<'ZION_REPOS'
+    if [ "$LEECH_EDIT" = "1" ]; then
+      cat <<'LEECH_REPOS'
 
-LAB MODE (zion_edit=1):
-  /workspace/mnt  = Projeto do usuário (zona de trabalho normal — igual zion new)
-  /workspace/host/ = NixOS+Zion source (~/nixos) — EDITÁVEL para auto-aperfeiçoamento
-                    (modules/, configuration.nix, flake.nix, stow/, zion/)
-                    Use para melhorar skills, hooks, prompts, agents, CLI do Zion.
+LAB MODE (leech_edit=1):
+  /workspace/mnt  = Projeto do usuário (zona de trabalho normal — igual leech new)
+  /workspace/host/ = NixOS+Leech source (~/nixos) — EDITÁVEL para auto-aperfeiçoamento
+                    (modules/, configuration.nix, flake.nix, stow/, leech/)
+                    Use para melhorar skills, hooks, prompts, agents, CLI do Leech.
                     Mudanças aqui afetam o sistema e as próximas sessões.
-  /workspace/self = Bind mount de ~/nixos/self (mesmo conteúdo que /workspace/host/zion)
+  /workspace/self = Bind mount de ~/nixos/self (mesmo conteúdo que /workspace/host/leech)
 
 REGRA: /workspace/host/ é sua zona de evolução. Edite-a quando identificar melhorias
        em skills, agents, hooks ou prompts. Commits vão pro repo NixOS do host.
-ZION_REPOS
+LEECH_REPOS
     fi
     if [ "$HEADLESS" = "1" ]; then
       echo ""

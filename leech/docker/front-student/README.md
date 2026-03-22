@@ -5,13 +5,13 @@ Config Docker versionada para o front-student (Nuxt 2 + Vue 2).
 ## Uso
 
 ```bash
-zion docker run front-student              # sandbox (default)
-zion docker run front-student --env=local  # dev local (aponta para monolito local)
-zion docker run front-student --env=qa     # QA
-zion docker logs front-student -f          # follow logs
-zion docker stop front-student             # para o container
-zion docker shell front-student            # shell no container
-zion docker flush front-student            # remove container + imagem + volumes
+leech docker run front-student              # sandbox (default)
+leech docker run front-student --env=local  # dev local (aponta para monolito local)
+leech docker run front-student --env=qa     # QA
+leech docker logs front-student -f          # follow logs
+leech docker stop front-student             # para o container
+leech docker shell front-student            # shell no container
+leech docker flush front-student            # remove container + imagem + volumes
 ```
 
 ## Pre-requisitos
@@ -19,10 +19,10 @@ zion docker flush front-student            # remove container + imagem + volumes
 ### 1. NPM_TOKEN (obrigatorio)
 
 O front-student usa pacotes privados `@estrategiahq/*` no GitHub Package Registry.
-Configure em `~/.zion` ou no ambiente:
+Configure em `~/.leech` ou no ambiente:
 
 ```bash
-# ~/.zion
+# ~/.leech
 NPM_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
@@ -43,8 +43,8 @@ Verificar: `ssh-add -l` deve listar a chave.
 ## Primeira execucao
 
 ```bash
-zion docker install front-student
-zion docker run front-student
+leech docker install front-student
+leech docker run front-student
 ```
 
 O `install` roda `npm install` com SSH + NPM_TOKEN no container.
@@ -57,21 +57,21 @@ O `run` sobe o Nuxt dev server na porta 8082.
 O source `${FRONT_STUDENT_DIR}` e montado como bind mount.
 Salvar qualquer arquivo aciona o HMR automaticamente.
 
-Os `node_modules` ficam no projeto (gerados por `zion docker install`).
+Os `node_modules` ficam no projeto (gerados por `leech docker install`).
 
 ## Atualizar dependencias (apos mudar package.json)
 
 ```bash
-zion docker install front-student
-zion docker restart front-student
+leech docker install front-student
+leech docker restart front-student
 ```
 
 Ou flush completo:
 
 ```bash
-zion docker flush front-student
-zion docker install front-student
-zion docker run front-student
+leech docker flush front-student
+leech docker install front-student
+leech docker run front-student
 ```
 
 ## Arquitetura
@@ -79,22 +79,22 @@ zion docker run front-student
 ```mermaid
 graph TD
     subgraph HOST["Host NixOS"]
-        ZionCLI["zion CLI"]
-        ZionCFG["~/.zion\nFRONT_STUDENT_DIR · NPM_TOKEN"]
-        LOGS["~/.local/share/zion/logs/dockerized/front-student/\nservice.log · test.log · startup.log"]
+        LeechCLI["leech CLI"]
+        LeechCFG["~/.leech\nFRONT_STUDENT_DIR · NPM_TOKEN"]
+        LOGS["~/.local/share/leech/logs/dockerized/front-student/\nservice.log · test.log · startup.log"]
         SSHAgent["SSH Agent\n(git+ssh deps)"]
     end
 
-    subgraph COMPOSE["Docker Compose — zion-dk-front-student"]
-        APP["app container\nzion-dk-front-student-app\n:8082 HTTP (Nuxt dev)"]
+    subgraph COMPOSE["Docker Compose — leech-dk-front-student"]
+        APP["app container\nleech-dk-front-student-app\n:8082 HTTP (Nuxt dev)"]
     end
 
     subgraph BUILD["Build (docker compose build)"]
         DF["Dockerfile\nnode:20-alpine"]
     end
 
-    ZionCFG --> ZionCLI
-    ZionCLI -->|"docker run front-student"| APP
+    LeechCFG --> LeechCLI
+    LeechCLI -->|"docker run front-student"| APP
     APP --> DF
     APP -->|"bind mount src/"| HOST
     APP -->|"nohup logs"| LOGS
@@ -109,7 +109,7 @@ graph TD
 
 ## Path do projeto
 
-Configurar em `~/.zion`:
+Configurar em `~/.leech`:
 ```bash
 FRONT_STUDENT_DIR="$HOME/projects/estrategia/front-student"
 ```
@@ -124,6 +124,6 @@ FRONT_STUDENT_DIR="$HOME/projects/estrategia/front-student"
 
 ## Logs
 
-- Host: `~/.local/share/zion/logs/dockerized/front-student/`
+- Host: `~/.local/share/leech/logs/dockerized/front-student/`
 - Container (agente): `/workspace/logs/docker/front-student/`
 - Arquivos: `service.log`, `test.log`, `startup.log`

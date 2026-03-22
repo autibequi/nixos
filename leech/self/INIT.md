@@ -1,4 +1,4 @@
-# Zion — Comportamento do Agente
+# Leech — Comportamento do Agente
 
 > **Boot via hook:** o hook `session-start.sh` injeta no system-reminder (nesta ordem):
 > `---BOOT---` (flags + datetime + workspace) → `---BOOTSTRAP---` (caminhos/prioridade) →
@@ -13,7 +13,7 @@
 >
 > **Personas** ficam em `/workspace/self/personas/*.persona.md`. A ativa e definida em `/workspace/self/system/SOUL.md`.
 >
-> **ZION LAB:** se `zion_edit=1`, a PRIMEIRA coisa na saudacao (antes do bloco de units) e uma linha em destaque: `⬡ ZION LAB` — indica que `/workspace/host/` (repo nixos) esta montado e editavel para auto-aperfeicoamento.
+> **LEECH LAB:** se `leech_edit=1`, a PRIMEIRA coisa na saudacao (antes do bloco de units) e uma linha em destaque: `⬡ LEECH LAB` — indica que `/workspace/host/` (repo nixos) esta montado e editavel para auto-aperfeicoamento.
 >
 > **Briefing sob demanda:** na primeira resposta, saudar com personalidade e **oferecer** o briefing (variar a frase, nunca igual). So rodar `/jarvis` se o user confirmar ou pedir.
 >
@@ -29,17 +29,17 @@
 
 ---
 
-## Canal ~/.zion
+## Canal ~/.leech
 
-`~/.zion` é o canal de comunicação rápida host ↔ agente.
+`~/.leech` é o canal de comunicação rápida host ↔ agente.
 
 - **Formato:** `KEY=value` (linhas `#` ignoradas)
-- **Boot:** lido pelo hook `session-start.sh` → injetado como `---ZION---` no contexto
-- **Containers:** montado como `~/.zion` no zion e `/.zion` nos containers de app
+- **Boot:** lido pelo hook `session-start.sh` → injetado como `---LEECH---` no contexto
+- **Containers:** montado como `~/.leech` no leech e `/.leech` nos containers de app
 - **Uso:** edite direto no host para passar strings, mensagens ou overrides de config ao agente
 - **Exemplo:** `MESSAGE=revisa o PR do monolito antes de qualquer coisa`
 
-### Flags conhecidas do ~/.zion
+### Flags conhecidas do ~/.leech
 
 | Flag | Valores | Significado |
 |------|---------|-------------|
@@ -94,7 +94,7 @@ Nao e necessario ler nenhum arquivo separado — as regras ja estao no contexto 
 | jafar | sonnet | every120 | Meta-agente: introspecao + propostas |
 | paperboy | haiku | every60 | Feed RSS |
 
-Definicao: `zion/agents/<nome>/agent.md`
+Definicao: `leech/agents/<nome>/agent.md`
 Breakroom: `/workspace/obsidian/agents/<nome>/memory.md`
 
 ### Comunicacao
@@ -106,13 +106,13 @@ Breakroom: `/workspace/obsidian/agents/<nome>/memory.md`
 ### Comandos CLI
 
 ```
-zion contractors          # lista agents
-zion contractors status   # schedule + running + done
-zion contractors run X    # roda agent imediatamente
-zion contractors work     # executa cards vencidos
-zion tasks                # lista tasks
-zion tasks add "titulo"   # cria task
-zion tasks work           # executa tasks vencidas
+leech contractors          # lista agents
+leech contractors status   # schedule + running + done
+leech contractors run X    # roda agent imediatamente
+leech contractors work     # executa cards vencidos
+leech tasks                # lista tasks
+leech tasks add "titulo"   # cria task
+leech tasks work           # executa tasks vencidas
 ```
 
 ---
@@ -123,19 +123,19 @@ zion tasks work           # executa tasks vencidas
 
 ## Boot flags
 
-Todas as flags vivem em `~/.zion` — editável pelo usuário e por qualquer agente:
+Todas as flags vivem em `~/.leech` — editável pelo usuário e por qualquer agente:
 
 | Flag | Default | Significado |
 |---|---|---|
 | `PERSONALITY` | `ON` | ON=persona ativa \| OFF=modo neutro |
 | `AUTOCOMMIT` | `OFF` | ON=commita sem perguntar |
 | `BETA` | `OFF` | ON=modo observação científica |
-| `ZION_DEBUG` | `OFF` | ON=DIRETRIZES+persona+avatar no boot |
+| `LEECH_DEBUG` | `OFF` | ON=DIRETRIZES+persona+avatar no boot |
 | `HEADLESS` | `0` | 1=worker autônomo |
-| `ZION_ANALYSIS_MODE` | `0` | 1=experimento isolado |
+| `LEECH_ANALYSIS_MODE` | `0` | 1=experimento isolado |
 | `MESSAGE` | `` | mensagem livre para o agente no boot |
 
-Edite `~/.zion` → efeito no próximo boot da sessão. `.ephemeral/` flag files foram removidos.
+Edite `~/.leech` → efeito no próximo boot da sessão. `.ephemeral/` flag files foram removidos.
 
 ## Cota API
 - Carregamento no boot via `---API_USAGE---`
@@ -158,14 +158,14 @@ Path: `/workspace/.hive-mind/` — efemero, compartilhado entre containers. Usar
 
 ## Sistema Docker — Servicos da Estrategia
 
-- `zion runner <service> start|stop|logs|test|shell|install|build`
+- `leech runner <service> start|stop|logs|test|shell|install|build`
 - Servicos: monolito, bo-container, front-student, monolito-worker
-- Configs em `zion/containers/<service>/`
+- Configs em `leech/containers/<service>/`
 - Logs em `/workspace/logs/docker/<service>/`
 
 ## Chrome Relay
 
 O agent controla o Chrome do usuario via CDP.
-- `python3 /zion/scripts/chrome-relay.py nav <url>` — navegar
-- `python3 /zion/scripts/chrome-relay.py serve` — servir conteudo local
+- `python3 /leech/scripts/chrome-relay.py nav <url>` — navegar
+- `python3 /leech/scripts/chrome-relay.py serve` — servir conteudo local
 - Skill: `/meta:relay`

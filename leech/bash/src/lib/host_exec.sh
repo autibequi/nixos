@@ -3,7 +3,7 @@
 # Dentro do container, usa um container temporário com --pid=host + nsenter
 # para rodar comandos no namespace do host. No host, executa diretamente.
 
-_zion_host_exec() {
+_leech_host_exec() {
   if [[ "${CLAUDE_ENV:-}" != "container" ]]; then
     # No host: executar diretamente
     eval "$@"
@@ -14,7 +14,7 @@ _zion_host_exec() {
   local host_user
   host_user=$(basename "$host_home")
 
-  echo "[zion] Executando no host via nsenter..."
+  echo "[leech] Executando no host via nsenter..."
   docker run --rm -i \
     --privileged \
     --pid=host \

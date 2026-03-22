@@ -1,1 +1,1 @@
-../zion/scripts/worktree-manager.sh
+../leech/self/scripts/worktree-manager.sh

@@ -84,7 +84,7 @@
     127.0.0.1 redis
     127.0.0.1 postgres
 
-    127.0.0.1 zion
+    127.0.0.1 leech
   '';
 
   # Cloudflare Warp

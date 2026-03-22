@@ -16,13 +16,13 @@ _debug="${args[--debug]:-}"
 
 case "${args[action]}" in
   start)
-    _zion_dk_run "$svc" "$_env" "$_debug" "$_worktree" "$_vertical" "1"
+    _leech_dk_run "$svc" "$_env" "$_debug" "$_worktree" "$_vertical" "1"
     ;;
   stop)
-    _zion_dk_stop "$svc" "$_worktree"
+    _leech_dk_stop "$svc" "$_worktree"
     ;;
   logs)
-    _zion_dk_logs "$svc" "1" "$_tail" "$_worktree"
+    _leech_dk_logs "$svc" "1" "$_tail" "$_worktree"
     ;;
   test)
     if [[ -z "$_cmd" ]]; then
@@ -31,18 +31,18 @@ case "${args[action]}" in
         *)        _cmd="yarn test" ;;
       esac
     fi
-    _zion_dk_shell "$svc" "app" "$_cmd" "$_worktree"
+    _leech_dk_shell "$svc" "app" "$_cmd" "$_worktree"
     ;;
   shell)
-    _zion_dk_shell "$svc" "$_container" "$_cmd" "$_worktree"
+    _leech_dk_shell "$svc" "$_container" "$_cmd" "$_worktree"
     ;;
   install)
-    _zion_dk_install "$svc" "$_env" "$_worktree"
+    _leech_dk_install "$svc" "$_env" "$_worktree"
     ;;
   build)
-    _zion_dk_build "$svc" "$_worktree"
+    _leech_dk_build "$svc" "$_worktree"
     ;;
   flush)
-    _zion_dk_flush "$svc" "$_worktree"
+    _leech_dk_flush "$svc" "$_worktree"
     ;;
 esac

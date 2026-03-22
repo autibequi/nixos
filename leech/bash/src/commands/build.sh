@@ -1,4 +1,4 @@
-zion_load_config
+leech_load_config
 
 build_args=()
 [[ -n "${args['--danger']:-}" ]] && build_args+=(--no-cache)
@@ -6,7 +6,7 @@ build_args=()
 # Auto-build leech-base:latest if not present locally (required by Dockerfile.claude)
 if ! docker image inspect leech-base:latest > /dev/null 2>&1; then
   echo "leech-base:latest not found — building from Dockerfile.claude.base..."
-  base_ctx="${zion_container_dir:-${HOME}/nixos/self/containers/zion}"
+  base_ctx="${leech_container_dir:-${HOME}/nixos/self/containers/leech}"
   docker build "${build_args[@]}" \
     -f "${base_ctx}/Dockerfile.claude.base" \
     -t leech-base:latest \
@@ -14,4 +14,4 @@ if ! docker image inspect leech-base:latest > /dev/null 2>&1; then
 fi
 
 echo "Building leech image..."
-zion_compose_cmd build "${build_args[@]}" leech
+leech_compose_cmd build "${build_args[@]}" leech

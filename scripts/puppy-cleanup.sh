@@ -1,1 +1,0 @@
-../zion/scripts/puppy-cleanup.sh

@@ -2,7 +2,7 @@
 # Dockerfile.claude.base — imagem base lenta (nixpkgs + cursor CLI)
 # Rebuildar apenas quando mudar pacotes nix ou cursor.
 # Build: just build-base
-# Tag:   zion-base:latest
+# Tag:   leech-base:latest
 
 # Stage 0: Cursor CLI (Debian FHS)
 FROM debian:bookworm-slim AS cursor-cli

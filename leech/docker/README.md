@@ -1,4 +1,4 @@
-# Zion Dockerized Services
+# Leech Dockerized Services
 
 Configs Docker versionadas para servicos da estrategia. Cada servico tem seu proprio diretorio com compose, Dockerfile, env files e scripts de init.
 
@@ -13,18 +13,18 @@ Configs Docker versionadas para servicos da estrategia. Cada servico tem seu pro
 ## Uso
 
 ```bash
-zion docker run monolito --env=sand    # levanta app + deps
-zion docker logs monolito -f           # follow logs
-zion docker status                     # lista containers rodando
-zion docker stop monolito              # para tudo
-zion docker shell monolito             # shell no container app
-zion docker restart monolito --env=qa  # restart com outro env
+leech docker run monolito --env=sand    # levanta app + deps
+leech docker logs monolito -f           # follow logs
+leech docker status                     # lista containers rodando
+leech docker stop monolito              # para tudo
+leech docker shell monolito             # shell no container app
+leech docker restart monolito --env=qa  # restart com outro env
 ```
 
 ## Estrutura
 
 ```
-zion/containers/
+leech/containers/
 ├── _shared/networks.yml         # networks compartilhadas
 ├── monolito/
 │   ├── docker-compose.yml       # app + worker
@@ -37,7 +37,7 @@ zion/containers/
 
 ## Config
 
-Paths dos projetos em `~/.zion`:
+Paths dos projetos em `~/.leech`:
 ```bash
 MONOLITO_DIR="$HOME/projects/estrategia/monolito"
 BO_CONTAINER_DIR="$HOME/projects/estrategia/bo-container"

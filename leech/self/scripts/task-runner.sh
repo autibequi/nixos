@@ -33,7 +33,7 @@ else
 fi
 
 # ── Lock (atomic via mkdir) ──────────────────────────────────────
-LOCKDIR="/tmp/zion-locks/${CARD_BASE}.lock"
+LOCKDIR="/tmp/leech-locks/${CARD_BASE}.lock"
 mkdir -p "$(dirname "$LOCKDIR")"
 cleanup_lock() { rm -rf "$LOCKDIR" 2>/dev/null || true; }
 if ! mkdir "$LOCKDIR" 2>/dev/null; then
@@ -99,7 +99,7 @@ AGENT=$(parse_fm "$CARD_PATH" "contractor")
 MODEL="${MODEL:-haiku}"
 TIMEOUT="${TIMEOUT:-1800}"
 MAX_TURNS="${MAX_TURNS:-12}"
-# CLI override: TASK_MAX_TURNS env var (from zion tasks run --max-turns N)
+# CLI override: TASK_MAX_TURNS env var (from leech tasks run --max-turns N)
 [ -n "${TASK_MAX_TURNS:-}" ] && MAX_TURNS="$TASK_MAX_TURNS"
 
 # ── Extract task name (strip date prefix) ────────────────────────
@@ -181,7 +181,7 @@ Produce any artifacts (reports, files, outputs) in: $ARTIFACTS_DIR
 # ── MCP config ───────────────────────────────────────────────────
 MCP_FLAGS=()
 if [ "$MCP" = "false" ] || [ "$MCP" = "off" ]; then
-  no_mcp="/tmp/zion-no-mcp.json"
+  no_mcp="/tmp/leech-no-mcp.json"
   [ -f "$no_mcp" ] || echo '{"mcpServers":{}}' > "$no_mcp"
   MCP_FLAGS=(--mcp-config "$no_mcp")
 fi
@@ -197,7 +197,7 @@ mkdir -p "$LOGDIR"
 if [ ! -w "$LOGDIR" ]; then
   chmod 755 "$LOGDIR" 2>/dev/null || true
   # Se ainda não tem acesso, usar /tmp como fallback
-  LOGDIR="/tmp/zion-runs/$TASK_NAME"
+  LOGDIR="/tmp/leech-runs/$TASK_NAME"
   mkdir -p "$LOGDIR"
 fi
 LOGFILE="$LOGDIR/$(date +%Y-%m-%d_%H-%M).log"

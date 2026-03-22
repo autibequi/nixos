@@ -66,17 +66,17 @@ if [[ ${#TOPIC} -ge 40 ]]; then
   TOPIC="${TOPIC:0:37}..."
 fi
 
-# Zion (sessões) e Puppy (workers): pastas em .ephemeral/agents/* com .live recente
+# Leech (sessões) e Puppy (workers): pastas em .ephemeral/agents/* com .live recente
 WORKERS=0
 BOCECHAS=0
 WS="${WORKSPACE_DIR:-/workspace}"
 # .ephemeral/agents fica no repo NixOS (em /workspace/nixos quando montado)
-# zion_* = sessões interativas; puppy_* = workers em background
+# leech_* = sessões interativas; puppy_* = workers em background
 AGENTS_DIR="/workspace/nixos/.ephemeral/agents"
 LIVE_MAX_AGE=900
 if [[ -d "$AGENTS_DIR" ]]; then
   now_sec=$(date +%s)
-  for dir in "$AGENTS_DIR"/zion_*/ "$AGENTS_DIR"/puppy_*/; do
+  for dir in "$AGENTS_DIR"/leech_*/ "$AGENTS_DIR"/puppy_*/; do
     [[ "$dir" == *"*"* ]] && continue
     [[ -d "$dir" ]] || continue
     [[ -f "$dir/.live" ]] || continue
@@ -207,7 +207,7 @@ EXTRA=""
 [[ -n "$LINES_STR" ]] && EXTRA=" | ${LINES_STR}"
 
 # Status line: modelo primeiro; métricas à esquerda
-RIGHT="Zion 󱙺 ${MODEL_SIZE} ${CTX_STR}${WT_STR}${MOUNT_STR}"
+RIGHT="Leech 󱙺 ${MODEL_SIZE} ${CTX_STR}${WT_STR}${MOUNT_STR}"
 
 # Terminal title via OSC (stderr)
 printf '\033]0;Claude: %s\007' "$TOPIC" >&2

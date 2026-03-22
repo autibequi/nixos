@@ -1,1 +1,1 @@
-bash "$zion_bash_dir/banner.sh" 2>/dev/null
+bash "$leech_bash_dir/banner.sh" 2>/dev/null

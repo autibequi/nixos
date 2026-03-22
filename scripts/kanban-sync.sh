@@ -1,1 +1,0 @@
-../zion/scripts/kanban-sync.sh

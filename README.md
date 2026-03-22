@@ -1,6 +1,6 @@
-# NixOS + Zion
+# NixOS + Leech
 
-Flake-based NixOS configuration for an ASUS Zephyrus G14 (AMD Ryzen + NVIDIA RTX 4060 mobile), with Zion (agent launcher + container) and Puppy workers (background task runners).
+Flake-based NixOS configuration for an ASUS Zephyrus G14 (AMD Ryzen + NVIDIA RTX 4060 mobile), with Leech (agent launcher + container) and Puppy workers (background task runners).
 
 ## Structure
 

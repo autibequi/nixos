@@ -1,6 +1,6 @@
 # src/commands/worktree.sh
 # Lista worktrees dos servicos Docker e permite escolher worktree + comando interativamente.
-zion_load_config
+leech_load_config
 
 RESET='\033[0m'
 BOLD='\033[1m'
@@ -21,7 +21,7 @@ services="monolito bo-container front-student"
 [[ -n "$filter_service" ]] && services="$filter_service"
 
 for svc in $services; do
-  dir=$(zion_docker_service_dir "$svc" 2>/dev/null)
+  dir=$(leech_docker_service_dir "$svc" 2>/dev/null)
   [[ ! -d "$dir" ]] && continue
 
   while IFS= read -r line; do
@@ -58,7 +58,7 @@ for i in "${!wt_entries[@]}"; do
     current_svc="$svc"
   fi
   # Marcar main/principal
-  local_dir=$(zion_docker_service_dir "$svc" 2>/dev/null)
+  local_dir=$(leech_docker_service_dir "$svc" 2>/dev/null)
   if [[ "$wt_path" == "$local_dir" ]]; then
     echo -e "    ${GREEN}$((i+1)))${RESET} ${WHITE}${wt_name}${RESET}  ${DIM}${branch}${RESET}  ${YELLOW}(main)${RESET}"
   else
@@ -81,7 +81,7 @@ idx=$((wt_choice - 1))
 IFS='|' read -r chosen_svc chosen_wt chosen_path chosen_branch <<< "${wt_entries[$idx]}"
 
 # Se escolheu o main dir, nao precisa de --worktree
-main_dir=$(zion_docker_service_dir "$chosen_svc" 2>/dev/null)
+main_dir=$(leech_docker_service_dir "$chosen_svc" 2>/dev/null)
 wt_flag=""
 if [[ "$chosen_path" != "$main_dir" ]]; then
   wt_flag=" --worktree=$chosen_wt"
@@ -109,7 +109,7 @@ fi
 chosen_cmd="${cmds[$((cmd_choice - 1))]}"
 
 # -- 5. Montar comando e deixar usuario confirmar ----------------------------
-final_cmd="zion docker ${chosen_cmd} ${chosen_svc}${wt_flag}"
+final_cmd="leech docker ${chosen_cmd} ${chosen_svc}${wt_flag}"
 
 echo ""
 echo -e "${DIM}Edite o comando se necessario e pressione Enter para executar:${RESET}"

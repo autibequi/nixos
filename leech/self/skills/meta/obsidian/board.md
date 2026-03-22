@@ -3,7 +3,7 @@
 > Fonte unica de verdade para interagir com `/workspace/obsidian/`.
 > Quando qualquer regra do sistema mudar, atualizar este arquivo primeiro — antes de avisar os agentes.
 >
-> **A Lei do Zion** (regras obrigatorias e penalidades): `self/skills/meta/obsidian/law.md`
+> **A Lei do Leech** (regras obrigatorias e penalidades): `self/skills/meta/obsidian/law.md`
 > Wiseman e o fiscal da lei — roda modo ENFORCE a cada 5 ciclos.
 
 ## Mapa do Vault
@@ -52,7 +52,7 @@ outbox/ → hermes → _schedule/ → _running/ → _schedule/ (reagenda)
 TODO/ → DOING/ → DONE/ → _archive/ (30d)
 ```
 
-CLI: `zion agents work` | `zion agents run <nome>` | `zion tasks` | `zion tasks add <titulo>`
+CLI: `leech agents work` | `leech agents run <nome>` | `leech tasks` | `leech tasks add <titulo>`
 
 ## Mural (DASHBOARD.md)
 

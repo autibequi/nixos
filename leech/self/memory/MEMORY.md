@@ -1,20 +1,20 @@
 # Memory Index
 
-- [feedback_zion_self_contained.md](feedback_zion_self_contained.md) — Zion must be self-contained: only use files from /nixos/self, never reference stow/.claude/ or external paths
-- [project_dockerizer.md](project_dockerizer.md) — Sistema zion docker run/install/logs para monolito e outros serviços estratégia (inclui debug remoto)
-- [feedback_docker_install.md](feedback_docker_install.md) — SSH mount, TTY, go mod download -x: lições do zion docker install
+- [feedback_leech_self_contained.md](feedback_leech_self_contained.md) — Leech must be self-contained: only use files from /nixos/self, never reference stow/.claude/ or external paths
+- [project_dockerizer.md](project_dockerizer.md) — Sistema leech docker run/install/logs para monolito e outros serviços estratégia (inclui debug remoto)
+- [feedback_docker_install.md](feedback_docker_install.md) — SSH mount, TTY, go mod download -x: lições do leech docker install
 - [feedback_docker_debug.md](feedback_docker_debug.md) — dlv remoto em Docker + Cursor: 7 lições (binário path, ptrace, substitutePath, dlv dap vs exec)
-- [reference_logs_location.md](reference_logs_location.md) — Logs em /workspace/logs/docker/<service>/ (service.log=runtime, test.log=testes); host: ~/.local/share/zion/logs/dockerized/
+- [reference_logs_location.md](reference_logs_location.md) — Logs em /workspace/logs/docker/<service>/ (service.log=runtime, test.log=testes); host: ~/.local/share/leech/logs/dockerized/
 - [feedback_go_inspector.md](feedback_go_inspector.md) — go-inspector: não delegar ao agente Monolito (sem Agent tool interno), spawnar 6 inspetores diretamente do contexto principal
 - [feedback_cursor_links.md](feedback_cursor_links.md) — Sempre usar cursor://file//home/pedrinho/... com :linha:col para links clicáveis de arquivos
 - [feedback_gtk_css_waybar.md](feedback_gtk_css_waybar.md) — GTK CSS @keyframes não funcionam no Waybar; usar só propriedades estáticas; animações requerem script externo
 - [feedback_worktree_obrigatorio.md](feedback_worktree_obrigatorio.md) — Sempre criar worktree isolado antes de implementar em qualquer repositório
-- [feedback_zion_scripts_source.md](feedback_zion_scripts_source.md) — Scripts do container: fonte da verdade é zion/scripts/; scripts/ contém symlinks. Nunca editar scripts/ esperando afetar o container
+- [feedback_leech_scripts_source.md](feedback_leech_scripts_source.md) — Scripts do container: fonte da verdade é leech/scripts/; scripts/ contém symlinks. Nunca editar scripts/ esperando afetar o container
 - [feedback_autocommit.md](feedback_autocommit.md) — Nunca commitar automaticamente sem o usuário pedir; respeitar flag auto-commit
-- [feedback_zion_cli_commands.md](feedback_zion_cli_commands.md) — Em zion host: sempre usar `zion stow`, `zion switch`, `zion man`. Nunca comandos raw.
+- [feedback_leech_cli_commands.md](feedback_leech_cli_commands.md) — Em leech host: sempre usar `leech stow`, `leech switch`, `leech man`. Nunca comandos raw.
 - [feedback_container_readonly.md](feedback_container_readonly.md) — /home/claude/.claude/ e /workspace/host/ são read-only no container — persistir APENAS em /workspace/self/
 - [feedback_timezone_container.md](feedback_timezone_container.md) — Container sem tzdata: usar TZ=UTC+3 (POSIX) para UTC-3 (Brasília), não America/Sao_Paulo
-- [reference_zion_git_commit.md](reference_zion_git_commit.md) — Git repo do Zion em /workspace/host/.git — read-only no container, commit deve ser feito no host
+- [reference_leech_git_commit.md](reference_leech_git_commit.md) — Git repo do Leech em /workspace/host/.git — read-only no container, commit deve ser feito no host
 - [reference_claude_process_nix.md](reference_claude_process_nix.md) — Processo Claude Code no nix = .claude-unwrapped; contar só linhas com pts/ no docker top
 - [feedback_hyprctl_pixels.md](feedback_hyprctl_pixels.md) — monitors[].width = pixels físicos; activewindow.size[] = pixels lógicos — dividir pelo .scale antes de comparar frações
 - [reference_hyprscroller_config.md](reference_hyprscroller_config.md) — Opções confirmadas/inexistentes do hyprscroller; workarounds shell para focus_wrap e colresize_no_wrap

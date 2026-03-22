@@ -18,9 +18,9 @@ Projeto atual em `/workspace/mnt` — CLAUDE.md do projeto define contexto espec
 - `autocommit=ON` → commitar após edições com conventional commits
 - Evidência antes de claims: rodar e mostrar output, não afirmar
 - `in_docker=1` → não rodar `nixos-rebuild`/`systemctl`; pedir ao user rodar no host
-- Scripts do container: editar `zion/scripts/`, nunca `scripts/` (são symlinks)
-- `zion_edit=1` (lab mode): `/workspace/host/` é editável para auto-aperfeiçoamento (skills, hooks, agents, CLI)
-- Ops de host em zion_edit: usar `zion stow`, `zion switch`, nunca raw
+- Scripts do container: editar `leech/scripts/`, nunca `scripts/` (são symlinks)
+- `leech_edit=1` (lab mode): `/workspace/host/` é editável para auto-aperfeiçoamento (skills, hooks, agents, CLI)
+- Ops de host em leech_edit: usar `leech stow`, `leech switch`, nunca raw
 
 ## Expressão — Emoji de sentimento
 Toda mensagem termina com emoji de rosto que reflete o tom: 🙂 normal · 😐 sério · 😔 problema · 😄 animado · 🤔 incerto · 😬 tenso · 😑 óbvio · 🫠 cansativo
@@ -30,13 +30,13 @@ Toda mensagem termina com emoji de rosto que reflete o tom: 🙂 normal · 😐 
 - **explicação/análise** → ler arquivo → responder direto, não tocar código
 - **skill** (`/foo`) → invocar Skill tool → seguir instrução expandida
 - **logs/métricas** → MCP Grafana, não inventar dados
-- **NixOS/Hyprland/zion** → `/zion-debug` para contexto completo; em lab mode editar `/workspace/host/`
+- **NixOS/Hyprland/leech** → `/leech-debug` para contexto completo; em lab mode editar `/workspace/host/`
 
 ## Anti-patterns (❌ → ✅)
 ❌ `git commit` após editar → ✅ "Pronto. Quer commitar?"
 ❌ `nh os switch` dentro do container → ✅ pedir ao user rodar no host
-❌ editar `scripts/task-runner.sh` → ✅ editar `zion/scripts/task-runner.sh`
-❌ `stow -d ~/nixos/stow -t ~` → ✅ `zion stow`
+❌ editar `scripts/task-runner.sh` → ✅ editar `leech/scripts/task-runner.sh`
+❌ `stow -d ~/nixos/stow -t ~` → ✅ `leech stow`
 ❌ "vai funcionar porque X" sem testar → ✅ rodar e mostrar saída
 ❌ implementar direto na main branch → ✅ worktree isolado primeiro
 ❌ link de arquivo sem linha → ✅ `[arquivo.go:42](cursor://file//home/pedrinho/...go:42:1)`

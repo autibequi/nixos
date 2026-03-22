@@ -26,7 +26,7 @@ Detectar valores atuais das flags a partir do contexto de boot injetado no iníc
 ### 2. Detectar flags e estado real
 
 Para cada flag, determinar:
-- **Mecanismo de ativação** (`~/.zion KEY=` ou variável de processo)
+- **Mecanismo de ativação** (`~/.leech KEY=` ou variável de processo)
 - **Default** (o que acontece sem intervenção)
 - **Valor nesta sessão** (ON/OFF/0/1/string)
 - **Status**: 🔵 ativo · 🔴 inativo · ⚪ lazy (existe mas não carregado)
@@ -62,8 +62,8 @@ Formato tabela Markdown:
 ```
 |     | Flag | Mecanismo | Default | Valor |
 |-----|------|-----------|---------|-------|
-| 🔵 | `personality` | `~/.zion PERSONALITY=` | ON | ON |
-| 🔴 | `autocommit`  | `~/.zion AUTOCOMMIT=`     | OFF | OFF |
+| 🔵 | `personality` | `~/.leech PERSONALITY=` | ON | ON |
+| 🔴 | `autocommit`  | `~/.leech AUTOCOMMIT=`     | OFF | OFF |
 ...
 ```
 
@@ -77,10 +77,10 @@ Substituir valores reais detectados na sessão.
 🚀 START
 │
 🔵 ├─[SEMPRE]────────────────────── BOOT FLAGS
-│      datetime · personality · autocommit · in_docker · zion_edit...
+│      datetime · personality · autocommit · in_docker · leech_edit...
 │
-🔵 ├─[zion_debug=OFF + interativo]── LITE.md                    ← ATIVO
-🔴 │                                 DIRETRIZES.md              ← requer zion_debug=ON
+🔵 ├─[leech_debug=OFF + interativo]── LITE.md                    ← ATIVO
+🔴 │                                 DIRETRIZES.md              ← requer leech_debug=ON
 │
 🔵 ├─[SEMPRE]────────────────────── ENV CONTEXT
 │
@@ -90,11 +90,11 @@ Substituir valores reais detectados na sessão.
 │
 🔵 ├─[SEMPRE]────────────────────── MEMORY RESTORE (N arquivos)
 │
-🔴 ├─[zion_edit=1 + interativo]─────  BOOT DISPLAY              ← requer lab mode
+🔴 ├─[leech_edit=1 + interativo]─────  BOOT DISPLAY              ← requer lab mode
 │
 🔴 ├─[beta=ON]───────────────────────  BETA OVERRIDES
 │
-🔴 └─[ZION_ANALYSIS_MODE=1]──────────  ANALYSIS MODE
+🔴 └─[LEECH_ANALYSIS_MODE=1]──────────  ANALYSIS MODE
 
 ── LAZY-LOAD ─────────────────────────────────────────────────────────
 ⚪  SELF.md         ~640 tokens  — não carregado
@@ -113,21 +113,21 @@ Avaliar e exibir recomendações baseadas no estado atual:
 
   Exemplos de recomendações possíveis:
 
-  · zion_debug=OFF → PERSONALITY e avatar não carregados
+  · leech_debug=OFF → PERSONALITY e avatar não carregados
     Se precisar do avatar ou persona completa:
-    Editar ~/.zion → ZION_DEBUG=ON
+    Editar ~/.leech → LEECH_DEBUG=ON
 
   · SELF.md não carregado (lazy)
     Se a sessão envolver introspecção ou auto-modificação do sistema:
     invocar skill que carrega SELF.md explicitamente
 
-  · in_docker=1 + zion_edit=0 → /workspace/host não montado
-    Lab mode inativo. Para editar NixOS/Zion diretamente:
-    zion lab (monta /workspace/host)
+  · in_docker=1 + leech_edit=0 → /workspace/host não montado
+    Lab mode inativo. Para editar NixOS/Leech diretamente:
+    leech lab (monta /workspace/host)
 
   · autocommit=OFF (padrão saudável)
     Commits manuais — comportamento correto para sessões interativas.
-    Para workers autônomos: Editar ~/.zion → AUTOCOMMIT=ON
+    Para workers autônomos: Editar ~/.leech → AUTOCOMMIT=ON
 
   · beta=OFF, analysis_mode=OFF
     Sessão limpa, sem overrides experimentais.
@@ -137,8 +137,8 @@ Avaliar e exibir recomendações baseadas no estado atual:
 
   COMANDOS ÚTEIS
   ─────────────────────────────────────────────────────────────────
-  Ativar modo completo:    Editar ~/.zion → ZION_DEBUG=ON
-  Ativar lab mode:         zion lab
+  Ativar modo completo:    Editar ~/.leech → LEECH_DEBUG=ON
+  Ativar lab mode:         leech lab
   Carregar personality:    invocar skill meta:personality (se existir)
   Ver uso de contexto:     /meta:context:usage
   Cristalizar sessão:      /meta:absorb

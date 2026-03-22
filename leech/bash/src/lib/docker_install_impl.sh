@@ -2,27 +2,27 @@
 # Go:   go mod download + vendor (vendor/ fica no projeto)
 # Node: npm install (node_modules/ fica no projeto)
 #
-# Uso: _zion_dk_install <service> <env> <worktree>
+# Uso: _leech_dk_install <service> <env> <worktree>
 
-_zion_dk_install() {
+_leech_dk_install() {
   local service="$1"
   local env="${2:-sand}"
   local worktree="${3:-}"
 
-  zion_docker_validate_service "$service" || return 1
-  zion_docker_init_worktree "$service" "$worktree" || return 1
+  leech_docker_validate_service "$service" || return 1
+  leech_docker_init_worktree "$service" "$worktree" || return 1
 
   # Exportar e fixar paths para container→host translation
-  zion_docker_export_dirs "$service"
-  _zion_dk_container_fixup
+  leech_docker_export_dirs "$service"
+  _leech_dk_container_fixup
 
   local dir config_dir log_dir
-  dir=$(zion_docker_effective_dir "$service")
-  config_dir=$(zion_docker_config_dir "$service")
-  log_dir=$(zion_docker_log_dir "$service")
-  [[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
+  dir=$(leech_docker_effective_dir "$service")
+  config_dir=$(leech_docker_config_dir "$service")
+  log_dir=$(leech_docker_log_dir "$service")
+  [[ -n "$_LEECH_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_LEECH_DK_WORKTREE}"
 
-  zion_ensure_log_dir "$log_dir"
+  leech_ensure_log_dir "$log_dir"
 
   # Detectar tipo de servico
   _is_node_service() {
@@ -39,7 +39,7 @@ _zion_dk_install() {
     host_uid="$(id -u)"
     host_gid="$(id -g)"
 
-    _zion_header "docker install  $service (Node)  [env=$env]"
+    _leech_header "docker install  $service (Node)  [env=$env]"
     printf "  \033[2mimage: %s  •  logs: %s/install.log\033[0m\n\n" "$node_image" "$log_dir"
 
     local ssh_dir="${HOST_SSH_DIR:-$HOME/.ssh}"
@@ -98,7 +98,7 @@ _zion_dk_install() {
           echo 'node_modules/' >> "$exclude_file"
         fi
       fi
-      printf "\n  \033[32m\033[1mFeito!\033[0m  Rode: zion docker %s server start --env=%s\n\n" "$service" "$env"
+      printf "\n  \033[32m\033[1mFeito!\033[0m  Rode: leech docker %s server start --env=%s\n\n" "$service" "$env"
     else
       printf "\n  \033[31mInstalacao falhou.\033[0m  Verifique: %s/install.log\n\n" "$log_dir"
       return 1
@@ -112,7 +112,7 @@ _zion_dk_install() {
   host_uid="$(id -u)"
   host_gid="$(id -g)"
 
-  _zion_header "docker install  $service (Go)  [env=$env]"
+  _leech_header "docker install  $service (Go)  [env=$env]"
   printf "  \033[2mlogs: %s/install.log\033[0m\n\n" "$log_dir"
 
   # Roda docker run e grava em arquivo simultaneamente (preserva cores com script)
@@ -121,8 +121,8 @@ _zion_dk_install() {
     -it \
     -v "${HOST_SSH_DIR:-$HOME/.ssh}:/ssh-host:ro" \
     -v "$dir:/go/app" \
-    -v "zion-go-mod-cache:/go/pkg/mod" \
-    -v "zion-go-build-cache:/root/.cache/go-build" \
+    -v "leech-go-mod-cache:/go/pkg/mod" \
+    -v "leech-go-build-cache:/root/.cache/go-build" \
     -e GOPATH=/go \
     -e GOPRIVATE="github.com/estrategiahq" \
     -e TERM=xterm-256color \
@@ -168,7 +168,7 @@ _zion_dk_install() {
         echo 'vendor/' >> "$exclude_file"
       fi
     fi
-    printf "\n  \033[32m\033[1mFeito!\033[0m  Rode: zion docker %s server start --env=%s\n\n" "$service" "$env"
+    printf "\n  \033[32m\033[1mFeito!\033[0m  Rode: leech docker %s server start --env=%s\n\n" "$service" "$env"
   else
     printf "\n  \033[31mInstalacao falhou.\033[0m  Verifique: %s/install.log\n\n" "$log_dir"
     return 1

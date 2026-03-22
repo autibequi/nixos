@@ -2,62 +2,62 @@ cat << 'EOF'
 
     ┌─ ENGINE SHORTCUTS ────────────────────────────────────────────┐
     │                                                                │
-    │  zion claude [dir]       nova sessao com Claude                │
-    │  zion cursor [dir]       nova sessao com Cursor                │
-    │  zion opencode [dir]     nova sessao com OpenCode (alias: oc)  │
-    │  zion ask [prompt]       envia prompt ao Puppy (alias query)   │
+    │  leech claude [dir]       nova sessao com Claude                │
+    │  leech cursor [dir]       nova sessao com Cursor                │
+    │  leech opencode [dir]     nova sessao com OpenCode (alias: oc)  │
+    │  leech ask [prompt]       envia prompt ao Puppy (alias query)   │
     │                                                                │
     ├─ SESSIONS (--haiku / --opus / --sonnet em todos) ───────────────┤
     │                                                                │
-    │  zion                    continua ultima sessao                │
-    │  zion new --engine=<e>   nova sessao interativa                │
-    │  zion resume             lista e retoma sessao                 │
-    │  zion host [dir]          sessao + /workspace/host editavel      │
-    │  zion shell              bash no container                     │
+    │  leech                    continua ultima sessao                │
+    │  leech new --engine=<e>   nova sessao interativa                │
+    │  leech resume             lista e retoma sessao                 │
+    │  leech host [dir]          sessao + /workspace/host editavel      │
+    │  leech shell              bash no container                     │
     │                                                                │
     ├─ CONTRACTORS (agentes background) ────────────────────────────┤
     │                                                                │
-    │  zion contractors run <nome>   roda contractor agora          │
-    │  zion contractors run <n> -s N sobrescreve steps              │
+    │  leech contractors run <nome>   roda contractor agora          │
+    │  leech contractors run <n> -s N sobrescreve steps              │
     │  /contractor:call              conversa interativa             │
     │                                                                │
     ├─ INBOX / OUTBOX ──────────────────────────────────────────────┤
     │                                                                │
-    │  zion inbox               mostra inbox.md completo            │
-    │  zion inbox "mensagem"    adiciona entrada ao inbox            │
-    │  zion outbox              lista arquivos do outbox             │
+    │  leech inbox               mostra inbox.md completo            │
+    │  leech inbox "mensagem"    adiciona entrada ao inbox            │
+    │  leech outbox              lista arquivos do outbox             │
     │                                                                │
     ├─ RUNNER (servicos estrategia) ────────────────────────────────┤
     │                                                                │
-    │  zion runner monolito start/stop/logs/shell/build/install      │
-    │  zion runner monolito-worker start/stop/logs/shell             │
-    │  zion runner bo-container start/stop/logs/shell                │
-    │  zion runner front-student start/stop/logs/shell               │
+    │  leech runner monolito start/stop/logs/shell/build/install      │
+    │  leech runner monolito-worker start/stop/logs/shell             │
+    │  leech runner bo-container start/stop/logs/shell                │
+    │  leech runner front-student start/stop/logs/shell               │
     │                                                                │
     │  Aliases: mono, mw, bo, front | Flags: --env --debug           │
-    │  Alias: zion dk                                                │
+    │  Alias: leech dk                                                │
     │                                                                │
     ├─ CONTAINER ───────────────────────────────────────────────────┤
     │                                                                │
-    │  zion build              build da imagem docker                │
-    │  zion down               para todos os containers              │
-    │  zion clean              remove sessoes paradas (gc, prune)    │
+    │  leech build              build da imagem docker                │
+    │  leech down               para todos os containers              │
+    │  leech clean              remove sessoes paradas (gc, prune)    │
     │                                                                │
     ├─ META ─────────────────────────────────────────────────────────┤
     │                                                                │
-    │  zion status             status agregado (sessoes/runner)      │
+    │  leech status             status agregado (sessoes/runner)      │
     │                                                                │
     ├─ INTERNO (systemd) ──────────────────────────────────────────┤
     │                                                                │
-    │  zion tasks tick     executa contractors vencidos (scheduler) │
-    │  (timer: zion-tick.timer a cada 10min — não chamar direto)     │
+    │  leech tasks tick     executa contractors vencidos (scheduler) │
+    │  (timer: leech-tick.timer a cada 10min — não chamar direto)     │
     │                                                                │
     ├─ UTIL ─────────────────────────────────────────────────────────┤
     │                                                                │
-    │  zion update             regenera CLI + symlink                │
-    │  zion init               cria ~/.zion config                   │
-    │  zion help               banner                                │
-    │  zion man                esta pagina                           │
+    │  leech update             regenera CLI + symlink                │
+    │  leech init               cria ~/.leech config                   │
+    │  leech help               banner                                │
+    │  leech man                esta pagina                           │
     │                                                                │
     ├─ FLAGS GLOBAIS ────────────────────────────────────────────────┤
     │                                                                │
@@ -71,12 +71,12 @@ cat << 'EOF'
     │                                                                │
     ├─ ALIASES ──────────────────────────────────────────────────────┤
     │                                                                │
-    │  zion claude  = zion new --engine=claude                       │
-    │  zion cursor  = zion new --engine=cursor                       │
-    │  zion oc      = zion new --engine=opencode                     │
-    │  zion dk      = zion runner                                    │
-    │  zion ct      = zion contractors                               │
-    │  zion st      = zion status                                    │
+    │  leech claude  = leech new --engine=claude                       │
+    │  leech cursor  = leech new --engine=cursor                       │
+    │  leech oc      = leech new --engine=opencode                     │
+    │  leech dk      = leech runner                                    │
+    │  leech ct      = leech contractors                               │
+    │  leech st      = leech status                                    │
     │                                                                │
     └────────────────────────────────────────────────────────────────┘
 EOF

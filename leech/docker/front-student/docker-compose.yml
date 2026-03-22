@@ -2,8 +2,8 @@ services:
   app:
     build:
       context: ${FRONT_STUDENT_DIR}
-      dockerfile: ${ZION_NIXOS_DIR}/self/containers/front-student/Dockerfile
-    container_name: zion-dk-front-student-app
+      dockerfile: ${LEECH_NIXOS_DIR}/self/containers/front-student/Dockerfile
+    container_name: leech-dk-front-student-app
     cpus: "14.4"
     mem_limit: 4g
     memswap_limit: 4g
@@ -16,10 +16,10 @@ services:
       - NPM_SCRIPT_ENV=${NPM_SCRIPT_ENV:-dev}
     tty: true
     volumes:
-      # Bind mount completo: source + node_modules (gerado por zion docker install)
+      # Bind mount completo: source + node_modules (gerado por leech docker install)
       - ${FRONT_STUDENT_DIR}:/app
       # Canal de comunicação rápida host ↔ container
-      - ${HOME}/.zion:/.zion:rw
+      - ${HOME}/.leech:/.leech:rw
     ports:
       - "3005:3005"
     extra_hosts:

@@ -1,5 +1,5 @@
 # Dashboard live: tasks kanban + agents activity + schedule
-zion_load_config
+leech_load_config
 
 OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
 TASKS_DIR="$OBSIDIAN/tasks"
@@ -49,7 +49,7 @@ _render() {
 
   # ── Header ──────────────────────────────────────────────────────
   local ts_now=$(date -u +"%H:%M:%S UTC")
-  printf "${B}${C}  ZION TASKS DASHBOARD${R}  ${DIM}%s  (refresh: %ss  q=sair)${R}\n" "$ts_now" "$TICK"
+  printf "${B}${C}  LEECH TASKS DASHBOARD${R}  ${DIM}%s  (refresh: %ss  q=sair)${R}\n" "$ts_now" "$TICK"
   printf "${DIM}%*s${R}\n" "$cols" "" | tr ' ' '─'
 
   # ── DOING ───────────────────────────────────────────────────────
@@ -164,7 +164,7 @@ _render() {
 
   # ── Footer ──────────────────────────────────────────────────────
   printf "\n  ${DIM}%*s${R}\n" "$cols" "" | tr ' ' '─'
-  printf "  ${DIM}zion tasker${R} — lanca tasker agora    ${DIM}zion tick${R} — roda todos os agents\n"
+  printf "  ${DIM}leech tasker${R} — lanca tasker agora    ${DIM}leech tick${R} — roda todos os agents\n"
   printf '\033[?25l'  # hide cursor
 }
 

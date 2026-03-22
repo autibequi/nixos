@@ -1,4 +1,4 @@
-# NixOS + Zion — root justfile
+# NixOS + Leech — root justfile
 # Uso: just <recipe>
 # Requer: just, nh, stow, docker
 
@@ -48,31 +48,31 @@ restow:
 
 # Sobe reverse proxy (docker)
 proxy:
-    docker compose -f zion/dockerized/reverseproxy/docker-compose.yml -p zion-dk-reverseproxy up -d
+    docker compose -f leech/dockerized/reverseproxy/docker-compose.yml -p leech-dk-reverseproxy up -d
 
-# ── Zion CLI ───────────────────────────────────────────────────────────────
+# ── Leech CLI ───────────────────────────────────────────────────────────────
 
-# Regenera zion CLI (bashly) + instala symlink + bootstrap
+# Regenera leech CLI (bashly) + instala symlink + bootstrap
 install:
-    just --justfile zion/cli/Justfile --working-directory zion/cli install
+    just --justfile leech/cli/Justfile --working-directory leech/cli install
 
 # Regenera binário apenas
 gen:
-    just --justfile zion/cli/Justfile --working-directory zion/cli gen
+    just --justfile leech/cli/Justfile --working-directory leech/cli gen
 
-# Atualiza só o bootstrap (zion/scripts → scripts/)
+# Atualiza só o bootstrap (leech/scripts → scripts/)
 bootstrap:
-    install -m 755 zion/scripts/bootstrap-dashboard.sh scripts/bootstrap.sh
+    install -m 755 leech/scripts/bootstrap-dashboard.sh scripts/bootstrap.sh
     @echo "[just] scripts/bootstrap.sh atualizado"
 
 # Simula boot session-start (dry run)
 dry *args="":
-    just --justfile zion/cli/Justfile --working-directory zion/cli dry {{args}}
+    just --justfile leech/cli/Justfile --working-directory leech/cli dry {{args}}
 
 # Lint dos scripts do CLI
 lint:
-    just --justfile zion/cli/Justfile --working-directory zion/cli lint
+    just --justfile leech/cli/Justfile --working-directory leech/cli lint
 
 # Watch: regenera ao salvar src/
 watch:
-    just --justfile zion/cli/Justfile --working-directory zion/cli watch
+    just --justfile leech/cli/Justfile --working-directory leech/cli watch

@@ -1,6 +1,6 @@
 # Dockerfile.claude — camada rápida sobre a base pré-baked.
-# Pré-requisito: zion-base:latest buildada com `just build-base`
-FROM zion-base:latest
+# Pré-requisito: leech-base:latest buildada com `just build-base`
+FROM leech-base:latest
 
 # Garantir que o usuário claude existe nos arquivos de sistema (build time — /etc pode ser
 # read-only em runtime no nixos/nix). O compose já cuida do docker socket via group_add.

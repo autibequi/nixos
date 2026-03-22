@@ -1,5 +1,5 @@
-# Para todos os containers zion (sessions compartilhadas + puppy)
-zion_load_config
+# Para todos os containers leech (sessions compartilhadas + puppy)
+leech_load_config
 
 # Shared leech containers: cada projeto sobe com -p <slug> e fica persistente.
 # docker stop para todos os containers de imagem leech rodando.

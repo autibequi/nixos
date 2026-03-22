@@ -2,38 +2,38 @@
 # Sem cmd: exec no container rodando (app ou container especificado).
 # Com cmd: roda one-off dev container (golang:alpine + make) com source montado.
 #
-# Uso: _zion_dk_shell <service> <container> <cmd> <worktree>
+# Uso: _leech_dk_shell <service> <container> <cmd> <worktree>
 
-_zion_dk_shell() {
+_leech_dk_shell() {
   local service="$1"
   local container="${2:-app}"
   local cmd="${3:-}"
   local worktree="${4:-}"
 
-  zion_docker_validate_service "$service" || return 1
-  zion_docker_init_worktree "$service" "$worktree" || return 1
+  leech_docker_validate_service "$service" || return 1
+  leech_docker_init_worktree "$service" "$worktree" || return 1
 
   # Exportar e fixar paths para container→host translation
-  zion_docker_export_dirs "$service"
-  _zion_dk_container_fixup
+  leech_docker_export_dirs "$service"
+  _leech_dk_container_fixup
 
   local dir project compose
-  dir=$(zion_docker_effective_dir "$service")
-  project=$(zion_docker_effective_project "$service")
-  compose=$(zion_docker_compose_file "$service")
+  dir=$(leech_docker_effective_dir "$service")
+  project=$(leech_docker_effective_project "$service")
+  compose=$(leech_docker_compose_file "$service")
 
   if [[ -n "$cmd" ]]; then
     # Modo dev: one-off container golang com source montado + make + ferramentas
     local host_uid host_gid log_dir log_file
     host_uid="$(id -u)"
     host_gid="$(id -g)"
-    log_dir="$(zion_docker_log_dir "$service")"
-    [[ -n "$_ZION_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_ZION_DK_WORKTREE}"
+    log_dir="$(leech_docker_log_dir "$service")"
+    [[ -n "$_LEECH_DK_WORKTREE" ]] && log_dir="${log_dir}/wt-${_LEECH_DK_WORKTREE}"
     log_file="$log_dir/test.log"
-    zion_ensure_log_dir "$log_dir"
+    leech_ensure_log_dir "$log_dir"
 
     echo "=== [$service] exec: $cmd ===" | tee "$log_file"
-    [[ -n "$_ZION_DK_WORKTREE" ]] && echo "  worktree: $_ZION_DK_WORKTREE ($dir)" | tee -a "$log_file"
+    [[ -n "$_LEECH_DK_WORKTREE" ]] && echo "  worktree: $_LEECH_DK_WORKTREE ($dir)" | tee -a "$log_file"
     echo "  logs: $log_file"
     docker run \
       --rm \
@@ -41,8 +41,8 @@ _zion_dk_shell() {
       -v "$dir:/go/app" \
       -v "$log_dir:/workspace/logs" \
       -v /var/run/docker.sock:/var/run/docker.sock \
-      -v "zion-go-mod-cache:/go/pkg/mod" \
-      -v "zion-go-build-cache:/root/.cache/go-build" \
+      -v "leech-go-mod-cache:/go/pkg/mod" \
+      -v "leech-go-build-cache:/root/.cache/go-build" \
       -e GOPATH=/go \
       -e GOPRIVATE="github.com/estrategiahq" \
       -e TERM=xterm-256color \
@@ -60,16 +60,16 @@ _zion_dk_shell() {
     local host_uid host_gid log_dir
     host_uid="$(id -u)"
     host_gid="$(id -g)"
-    log_dir="$(zion_docker_log_dir "$service")"
-    zion_ensure_log_dir "$log_dir"
+    log_dir="$(leech_docker_log_dir "$service")"
+    leech_ensure_log_dir "$log_dir"
 
     docker run \
       --rm \
       -it \
       -v "$dir:/go/app" \
       -v /var/run/docker.sock:/var/run/docker.sock \
-      -v "zion-go-mod-cache:/go/pkg/mod" \
-      -v "zion-go-build-cache:/root/.cache/go-build" \
+      -v "leech-go-mod-cache:/go/pkg/mod" \
+      -v "leech-go-build-cache:/root/.cache/go-build" \
       -e GOPATH=/go \
       -e GOPRIVATE="github.com/estrategiahq" \
       -e TERM=xterm-256color \

@@ -1,5 +1,5 @@
-zion_load_config
-nixos_dir="${ZION_NIXOS_DIR:-${HOST_NIXOS_DIR:-$HOME/nixos}}"
+leech_load_config
+nixos_dir="${LEECH_NIXOS_DIR:-${HOST_NIXOS_DIR:-$HOME/nixos}}"
 input="${args[input]:-}"
 
 if [[ -n "$input" ]]; then

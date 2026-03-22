@@ -1,38 +1,38 @@
-# Shared helpers for zion CLI (compose file, mount path, project names).
-# Sourced by generated script. Uses ZION_NIXOS_DIR, OBSIDIAN_PATH, args, flag_*.
+# Shared helpers for leech CLI (compose file, mount path, project names).
+# Sourced by generated script. Uses LEECH_NIXOS_DIR, OBSIDIAN_PATH, args, flag_*.
 # Toda a lógica de container vive em container/; scripts CLI vivem em clibash/.
 
 # Garante HOME correto ANTES de qualquer path ser definido.
 # Nix pode sobrescrever HOME para /root quando HOME nao pertence ao usuario atual.
 # Fallback para HOME original se getent e tilde expansion falharem (comum no NixOS).
-_zion_resolved_home="$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f6 || eval echo ~"$(id -un)" 2>/dev/null)"
-export HOME="${_zion_resolved_home:-$HOME}"
-unset _zion_resolved_home
+_leech_resolved_home="$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f6 || eval echo ~"$(id -un)" 2>/dev/null)"
+export HOME="${_leech_resolved_home:-$HOME}"
+unset _leech_resolved_home
 
-zion_nixos_dir="${ZION_NIXOS_DIR:-$HOME/nixos}"
-zion_bash_dir="$zion_nixos_dir/self/bash"
-zion_container_dir="$zion_nixos_dir/self/containers/zion"
-zion_compose_file="$zion_container_dir/docker-compose.zion.yml"
-zion_compose_dir="$zion_container_dir"
+leech_nixos_dir="${LEECH_NIXOS_DIR:-$HOME/nixos}"
+leech_bash_dir="$leech_nixos_dir/self/bash"
+leech_container_dir="$leech_nixos_dir/self/containers/leech"
+leech_compose_file="$leech_container_dir/docker-compose.leech.yml"
+leech_compose_dir="$leech_container_dir"
 # Config do usuário: engine padrão e chaves (GH_TOKEN, ANTHROPIC_API_KEY)
-zion_config_file="${ZION_CONFIG:-$HOME/.zion}"
-zion_env_file="$zion_container_dir/.env"
-zion_obsidian_path="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
+leech_config_file="${LEECH_CONFIG:-$HOME/.leech}"
+leech_env_file="$leech_container_dir/.env"
+leech_obsidian_path="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
 
-# Carrega ~/.zion (KEY=value, sourceável) e exporta para o compose/container.
+# Carrega ~/.leech (KEY=value, sourceável) e exporta para o compose/container.
 # Flags --engine e --model na linha de comando sempre sobrescrevem estes valores.
-zion_load_config() {
-  if [[ -f "$zion_config_file" ]]; then
+leech_load_config() {
+  if [[ -f "$leech_config_file" ]]; then
     # shellcheck source=/dev/null
-    source "$zion_config_file"
-    [[ -n "${engine:-}" ]] && export ZION_ENGINE="$engine"
-    [[ -n "${model:-}" ]] && export ZION_MODEL="$model"
+    source "$leech_config_file"
+    [[ -n "${engine:-}" ]] && export LEECH_ENGINE="$engine"
+    [[ -n "${model:-}" ]] && export LEECH_MODEL="$model"
     # Modelos por engine (model_claude=, model_opencode=, model_cursor=)
-    [[ -n "${model_claude:-}" ]]   && export ZION_MODEL_CLAUDE="$model_claude"
-    [[ -n "${model_opencode:-}" ]] && export ZION_MODEL_OPENCODE="$model_opencode"
-    [[ -n "${model_cursor:-}" ]]   && export ZION_MODEL_CURSOR="$model_cursor"
+    [[ -n "${model_claude:-}" ]]   && export LEECH_MODEL_CLAUDE="$model_claude"
+    [[ -n "${model_opencode:-}" ]] && export LEECH_MODEL_OPENCODE="$model_opencode"
+    [[ -n "${model_cursor:-}" ]]   && export LEECH_MODEL_CURSOR="$model_cursor"
     if [[ -n "${DANGER:-${danger:-}}" ]] && [[ "${DANGER:-${danger:-}}" != "0" ]] && [[ "${DANGER:-${danger:-}}" != "false" ]]; then
-      export ZION_DANGER=1
+      export LEECH_DANGER=1
     fi
     [[ -n "${GH_TOKEN:-}" ]] && export GH_TOKEN
     [[ -n "${ANTHROPIC_API_KEY:-}" ]] && export ANTHROPIC_API_KEY
@@ -41,7 +41,7 @@ zion_load_config() {
     [[ -n "${GRAFANA_TOKEN:-}" ]] && export GRAFANA_TOKEN
     if [[ -n "${OBSIDIAN_PATH:-}" ]]; then
       export OBSIDIAN_PATH
-      zion_obsidian_path="$OBSIDIAN_PATH"
+      leech_obsidian_path="$OBSIDIAN_PATH"
     fi
   fi
   # Docker GID para group_add no compose (agente precisa acessar /var/run/docker.sock)
@@ -55,20 +55,20 @@ zion_load_config() {
   fi
   export JOURNAL_GID="${JOURNAL_GID:-62}"
   # Path absoluto e ~ expandido para o compose (YAML não expande ~)
-  zion_obsidian_path="${zion_obsidian_path/#\~/$HOME}"
-  [[ -d "$zion_obsidian_path" ]] && zion_obsidian_path="$(cd "$zion_obsidian_path" && pwd)"
-  export OBSIDIAN_PATH="$zion_obsidian_path"
+  leech_obsidian_path="${leech_obsidian_path/#\~/$HOME}"
+  [[ -d "$leech_obsidian_path" ]] && leech_obsidian_path="$(cd "$leech_obsidian_path" && pwd)"
+  export OBSIDIAN_PATH="$leech_obsidian_path"
 }
 
 # Engine: opencode | claude | cursor. Se required=1 e vazio, reclama e sai.
-# Ordem: --engine= na linha de comando sobrescreve ~/.zion (ZION_ENGINE).
-zion_resolve_engine() {
+# Ordem: --engine= na linha de comando sobrescreve ~/.leech (LEECH_ENGINE).
+leech_resolve_engine() {
   local required="${1:-0}"
-  local e="${args['--engine']:-${flag_engine:-$ZION_ENGINE}}"  # flag > config
+  local e="${args['--engine']:-${flag_engine:-$LEECH_ENGINE}}"  # flag > config
   e="${e,,}"
   if [[ -z "$e" ]]; then
     if [[ "$required" == "1" ]]; then
-      echo "zion: --engine=opencode|claude|cursor é obrigatório (ou defina engine= em ~/.zion)" >&2
+      echo "leech: --engine=opencode|claude|cursor é obrigatório (ou defina engine= em ~/.leech)" >&2
       exit 1
     fi
     return 0
@@ -76,74 +76,74 @@ zion_resolve_engine() {
   case "$e" in
     opencode|claude|cursor) echo "$e" ;;
     *)
-      echo "zion: engine inválido: $e (use opencode, claude ou cursor)" >&2
+      echo "leech: engine inválido: $e (use opencode, claude ou cursor)" >&2
       exit 1
       ;;
   esac
 }
 # Paths usados pelos comandos worker/logs/status/new/reset (equiv. makefile)
-zion_nixos_logs="$zion_nixos_dir/logs"
-zion_nixos_scripts="$zion_nixos_dir/scripts"
-zion_vault_dir="${zion_vault_dir:-$zion_nixos_dir/vault}"
-zion_ephemeral="$zion_nixos_dir/.ephemeral"
+leech_nixos_logs="$leech_nixos_dir/logs"
+leech_nixos_scripts="$leech_nixos_dir/scripts"
+leech_vault_dir="${leech_vault_dir:-$leech_nixos_dir/vault}"
+leech_ephemeral="$leech_nixos_dir/.ephemeral"
 
-# Compose + env para invocar docker/podman (executar com cwd = zion_compose_dir ou -f)
-zion_compose_cmd() {
-  local cmd=(docker compose -f "$zion_compose_file")
-  [[ -f "$zion_env_file" ]] && cmd+=(--env-file "$zion_env_file")
+# Compose + env para invocar docker/podman (executar com cwd = leech_compose_dir ou -f)
+leech_compose_cmd() {
+  local cmd=(docker compose -f "$leech_compose_file")
+  [[ -f "$leech_env_file" ]] && cmd+=(--env-file "$leech_env_file")
   "${cmd[@]}" "$@"
 }
 
 # Resolve mount directory: named arg "dir" (bashly uses args['dir']) or default ~/projects
-zion_resolve_dir() {
+leech_resolve_dir() {
   local dir="${args[dir]:-$HOME/projects}"
   if [[ -n "$dir" ]]; then
-    (cd "$dir" 2>/dev/null && pwd) || { echo "zion: dir not found: $dir" >&2; exit 1; }
+    (cd "$dir" 2>/dev/null && pwd) || { echo "leech: dir not found: $dir" >&2; exit 1; }
   else
     echo "$HOME/projects"
   fi
 }
 
 # Slug from dir basename (lowercase, alphanumeric + hyphen)
-zion_proj_slug() {
+leech_proj_slug() {
   local d="$1"
   basename "$d" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/-*$//'
 }
 
-# Project name for agent sessions (Zion)
-zion_proj_name() {
+# Project name for agent sessions (Leech)
+leech_proj_name() {
   local slug="$1"
   local instance="${args['--instance']:-${flag_instance:-}}"
-  local name="zion-${slug}"
+  local name="leech-${slug}"
   [[ -n "$instance" && "$instance" != "1" ]] && name="${name}-${instance}"
   echo "$name"
 }
 
 # Project name for opencode (persistent sandbox)
-zion_proj_name_open() {
+leech_proj_name_open() {
   local slug="$1"
-  echo "zion-${slug}-open"
+  echo "leech-${slug}-open"
 }
 
 # Mount opts: --rw (default for run) or --ro
-zion_mount_opts() {
+leech_mount_opts() {
   if [[ -n "${args['--rw']:-${flag_rw:-}}" ]]; then echo "rw"; elif [[ -n "${args['--ro']:-${flag_ro:-}}" ]]; then echo "ro"; else echo "rw"; fi
 }
 
 # --init-md: path do markdown inicial (relativo ao mount); vazio se arquivo não existe
-# Valor vem de flag_init_md (run seta de args) ou ZION_INITIAL_MD. Default contexto.md é no bashly (--init-md sem arg).
-zion_initial_md() {
+# Valor vem de flag_init_md (run seta de args) ou LEECH_INITIAL_MD. Default contexto.md é no bashly (--init-md sem arg).
+leech_initial_md() {
   local mount="${1:-}"
-  local f="${flag_init_md:-${ZION_INITIAL_MD:-}}"
+  local f="${flag_init_md:-${LEECH_INITIAL_MD:-}}"
   [[ -z "$f" ]] && return 0
   local full="$mount/$f"
   [[ -f "$full" ]] && echo "$f" || echo ""
 }
 
 # --danger: sufixo/args de bypass de permissões por engine (vazio se flag não setada).
-# Config ~/.zion: DANGER=true deixa danger sempre ligado.
-zion_danger_flag() {
-  if [[ -z "${flag_danger:-${args['--danger']:-${ZION_DANGER:-}}}" ]]; then
+# Config ~/.leech: DANGER=true deixa danger sempre ligado.
+leech_danger_flag() {
+  if [[ -z "${flag_danger:-${args['--danger']:-${LEECH_DANGER:-}}}" ]]; then
     echo ""
     return 0
   fi
@@ -156,7 +156,7 @@ zion_danger_flag() {
 }
 
 # Converte shorthand de modelo para o ID completo (uso interno).
-zion_resolve_model_id() {
+leech_resolve_model_id() {
   local m="${1,,}"
   case "$m" in
     haiku)   echo "claude-haiku-4-5-20251001" ;;
@@ -169,56 +169,56 @@ zion_resolve_model_id() {
 
 # Model flag para binários que aceitam --model=<id> (claude, cursor/agent).
 # Aceita engine como argumento opcional para usar o modelo por engine.
-# Ordem: --model= (CLI) > model_<engine>= (~/.zion) > model= (~/.zion).
-zion_model_flag() {
+# Ordem: --model= (CLI) > model_<engine>= (~/.leech) > model= (~/.leech).
+leech_model_flag() {
   local engine="${1:-}"
   local cli_flag="${args['--model']:-${flag_model:-}}"
   local per_engine=""
   case "${engine,,}" in
-    claude)   per_engine="${ZION_MODEL_CLAUDE:-}" ;;
-    opencode) per_engine="${ZION_MODEL_OPENCODE:-}" ;;
-    cursor)   per_engine="${ZION_MODEL_CURSOR:-}" ;;
+    claude)   per_engine="${LEECH_MODEL_CLAUDE:-}" ;;
+    opencode) per_engine="${LEECH_MODEL_OPENCODE:-}" ;;
+    cursor)   per_engine="${LEECH_MODEL_CURSOR:-}" ;;
   esac
-  local m="${cli_flag:-${per_engine:-$ZION_MODEL}}"
+  local m="${cli_flag:-${per_engine:-$LEECH_MODEL}}"
   local id
-  id="$(zion_resolve_model_id "$m")"
+  id="$(leech_resolve_model_id "$m")"
   [[ -n "$id" ]] && echo "--model $id" || echo ""
 }
 
 # Resolve model ID bruto (sem flag prefix) para engines como opencode que usam env var.
-# Ordem: --model= (CLI) > model_opencode= (~/.zion) > model= (~/.zion).
-zion_model_id() {
+# Ordem: --model= (CLI) > model_opencode= (~/.leech) > model= (~/.leech).
+leech_model_id() {
   local engine="${1:-}"
   local cli_flag="${args['--model']:-${flag_model:-}}"
   local per_engine=""
   case "${engine,,}" in
-    claude)   per_engine="${ZION_MODEL_CLAUDE:-}" ;;
-    opencode) per_engine="${ZION_MODEL_OPENCODE:-}" ;;
-    cursor)   per_engine="${ZION_MODEL_CURSOR:-}" ;;
+    claude)   per_engine="${LEECH_MODEL_CLAUDE:-}" ;;
+    opencode) per_engine="${LEECH_MODEL_OPENCODE:-}" ;;
+    cursor)   per_engine="${LEECH_MODEL_CURSOR:-}" ;;
   esac
-  local m="${cli_flag:-${per_engine:-$ZION_MODEL}}"
-  zion_resolve_model_id "$m"
+  local m="${cli_flag:-${per_engine:-$LEECH_MODEL}}"
+  leech_resolve_model_id "$m"
 }
 
 # ── Compose env helper ──────────────────────────────────────────────────────
 # Exporta as variáveis necessárias para o compose expandir volumes.
-# Chamado internamente por zion_session_run; pode ser usado diretamente.
-zion_compose_env() {
+# Chamado internamente por leech_session_run; pode ser usado diretamente.
+leech_compose_env() {
   export HOME="${HOME:-$(eval echo ~"$(id -un)")}"
   export CLAUDIO_MOUNT="$1"
   export CLAUDIO_MOUNT_OPTS="$2"
-  export OBSIDIAN_PATH="$zion_obsidian_path"
+  export OBSIDIAN_PATH="$leech_obsidian_path"
 }
 
 # ── Unified session runner ──────────────────────────────────────────────────
 # Centraliza o dispatch de engine (opencode/claude/cursor) para todas as sessões.
 #
 # Uso:
-#   zion_session_run <engine> <proj_name> <mount_path> <mount_opts> <mode> [engine_args] [extra_volumes]
+#   leech_session_run <engine> <proj_name> <mount_path> <mount_opts> <mode> [engine_args] [extra_volumes]
 #
 # Parâmetros:
 #   engine        - opencode | claude | cursor
-#   proj_name     - nome do projeto compose (ex: zion-projects)
+#   proj_name     - nome do projeto compose (ex: leech-projects)
 #   mount_path    - path absoluto do projeto no host
 #   mount_opts    - rw | ro
 #   mode          - engine_args string com flags específicas do engine:
@@ -228,18 +228,18 @@ zion_compose_env() {
 #
 # O mode "persistent" (up -d + exec) é usado quando opencode precisa de leech persistente.
 # Demais engines usam "run --rm -it" (efêmero).
-zion_session_run() {
+leech_session_run() {
   local engine="$1"
   local proj_name="$2"
   local mount_path="$3"
   local mount_opts="$4"
   local engine_args="${5:-}"
   local extra_volumes="${6:-}"
-  # Analysis mode: passa ZION_ANALYSIS_MODE=1 pro container via env
+  # Analysis mode: passa LEECH_ANALYSIS_MODE=1 pro container via env
   local analysis_env=""
-  [[ -n "${flag_analysis_mode:-${args['--analysis-mode']:-}}" ]] && analysis_env="-e ZION_ANALYSIS_MODE=1"
+  [[ -n "${flag_analysis_mode:-${args['--analysis-mode']:-}}" ]] && analysis_env="-e LEECH_ANALYSIS_MODE=1"
 
-  zion_compose_env "$mount_path" "$mount_opts"
+  leech_compose_env "$mount_path" "$mount_opts"
 
   local danger model
 
@@ -252,11 +252,11 @@ zion_session_run() {
 
       # Model
       local _oc_model
-      _oc_model="$(zion_model_id opencode)"
+      _oc_model="$(leech_model_id opencode)"
       [[ -n "$_oc_model" ]] && oc_envs+=(-e "OPENCODE_MODEL=$_oc_model")
 
       # Danger
-      [[ -n "${flag_danger:-${args['--danger']:-${ZION_DANGER:-}}}" ]] && oc_envs+=(-e "OPENCODE_PERMISSION_BYPASS=1")
+      [[ -n "${flag_danger:-${args['--danger']:-${LEECH_DANGER:-}}}" ]] && oc_envs+=(-e "OPENCODE_PERMISSION_BYPASS=1")
 
       # Init-md
       if [[ "$engine_args" == *"--init-md="* ]]; then
@@ -274,19 +274,19 @@ zion_session_run() {
 
       # Opencode: persistent (up + exec) for new; ephemeral (run) for continue/resume
       if [[ "$engine_args" == *"--continue"* ]] || [[ "$engine_args" == *"--resume"* ]]; then
-        zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes $analysis_env \
+        leech_compose_cmd -p "$proj_name" run --rm -it $extra_volumes $analysis_env \
           --entrypoint /entrypoint.sh "${oc_envs[@]}" leech \
           /bin/bash -c 'cd /workspace/mnt && opencode'
       else
-        zion_compose_cmd -p "$proj_name" up -d leech
-        zion_compose_cmd -p "$proj_name" exec -it -u claude \
+        leech_compose_cmd -p "$proj_name" up -d leech
+        leech_compose_cmd -p "$proj_name" exec -it -u claude \
           $analysis_env "${oc_envs[@]}" leech bash -c 'cd /workspace/mnt && exec opencode'
       fi
       ;;
 
     claude)
-      model="$(zion_model_flag claude)"
-      danger="$(zion_danger_flag claude)"
+      model="$(leech_model_flag claude)"
+      danger="$(leech_danger_flag claude)"
 
       # Build claude CLI args
       local claude_args="${model}${danger}"
@@ -317,22 +317,22 @@ zion_session_run() {
       # Session name = mounted folder (shown in header and statusline)
       [[ -n "$mount_path" ]] && claude_args+=" --name ${mount_path##*/}"
 
-      local launch_cmd="bash /workspace/self/scripts/zion-agent-launch.sh ${claude_args}"
+      local launch_cmd="bash /workspace/self/scripts/leech-agent-launch.sh ${claude_args}"
       [[ -n "${args['--no-splash']:-}" ]] && launch_cmd=". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
       # Pre-splash no host: aparece imediatamente antes do container subir
       if [[ -z "${args['--no-splash']:-}" ]]; then
         printf '\033[2J\033[H\033[?25l\n'
-        printf "  \033[2m[ .. ]\033[0m  \033[2miniciando zion...\033[0m\n"
+        printf "  \033[2m[ .. ]\033[0m  \033[2miniciando leech...\033[0m\n"
       fi
       # Nome canônico do container: leech-{slug} (ex: leech-projects, leech-nixos-host)
-      local leech_name="leech-${proj_name#zion-}"
+      local leech_name="leech-${proj_name#leech-}"
       # Shared container: se não há volumes extras, reusa container existente via exec.
       if [[ -z "$extra_volumes" ]]; then
         local cid
         cid=$(docker ps -q --filter "name=^/${leech_name}$" 2>/dev/null | head -1)
         if [[ -z "$cid" ]]; then
           # Container não existe: sobe via compose e renomeia para nome canônico.
-          zion_compose_cmd -p "$proj_name" up -d leech
+          leech_compose_cmd -p "$proj_name" up -d leech
           local auto_name
           auto_name=$(docker ps -f "label=com.docker.compose.project=${proj_name}" \
             -f "label=com.docker.compose.service=leech" \
@@ -353,7 +353,7 @@ zion_session_run() {
         # run --rm com nome curto: leech-{6chars}
         local short_id
         short_id=$(tr -dc 'a-z0-9' < /dev/urandom 2>/dev/null | head -c 6 || date +%s | tail -c 6)
-        zion_compose_cmd -p "$proj_name" run --rm -it --name "leech-${short_id}" \
+        leech_compose_cmd -p "$proj_name" run --rm -it --name "leech-${short_id}" \
           $extra_volumes $analysis_env \
           --entrypoint /entrypoint.sh -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" leech \
           /bin/bash -c "${launch_cmd}"
@@ -362,8 +362,8 @@ zion_session_run() {
       ;;
 
     cursor)
-      danger="$(zion_danger_flag cursor)"
-      model="$(zion_model_flag cursor)"
+      danger="$(leech_danger_flag cursor)"
+      model="$(leech_model_flag cursor)"
       local name_flag=""
       [[ -n "$mount_path" ]] && name_flag=" --name ${mount_path##*/}"
       local agent_flags="${danger}${model:+ $model}${name_flag}"
@@ -372,7 +372,7 @@ zion_session_run() {
       cursor_envs+=(-e "CLAUDIO_MOUNT=$mount_path")
       cursor_envs+=(-e "BOOTSTRAP_SKIP_CLEAR=1")
 
-      local agent_check='agent --version >/dev/null 2>&1 || { echo "zion: cursor-agent nao funciona (versao expirada ou imagem desatualizada). Rode: zion build" >&2; exit 1; }; '
+      local agent_check='agent --version >/dev/null 2>&1 || { echo "leech: cursor-agent nao funciona (versao expirada ou imagem desatualizada). Rode: leech build" >&2; exit 1; }; '
       local cursor_cmd=". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt; ${agent_check}"
 
       # Resume (takes priority over init-md)
@@ -394,35 +394,35 @@ zion_session_run() {
         cursor_cmd+='exec agent'"${agent_flags}"
       fi
 
-      zion_compose_cmd -p "$proj_name" run --rm -it $extra_volumes $analysis_env \
+      leech_compose_cmd -p "$proj_name" run --rm -it $extra_volumes $analysis_env \
         --entrypoint /entrypoint.sh "${cursor_envs[@]}" leech \
         /bin/bash -c "$cursor_cmd"
       ;;
 
     *)
-      echo "zion: engine inválido: $engine (use opencode|claude|cursor)" >&2
+      echo "leech: engine inválido: $engine (use opencode|claude|cursor)" >&2
       exit 1
       ;;
   esac
 }
 
-# Helper: lança sessão com engine forçado — usado por zion cursor/opencode/claude new
-# Uso: zion_launch_session <engine>
-zion_launch_session() {
+# Helper: lança sessão com engine forçado — usado por leech cursor/opencode/claude new
+# Uso: leech_launch_session <engine>
+leech_launch_session() {
   local forced_engine="$1"
   args['--engine']="$forced_engine"
-  zion_load_config
+  leech_load_config
   local mount_path engine engine_args init_md
-  mount_path="$(zion_resolve_dir)"
+  mount_path="$(leech_resolve_dir)"
   local mount_opts slug proj_name
-  mount_opts="$(zion_mount_opts)"
-  slug="$(zion_proj_slug "$mount_path")"
-  proj_name="$(zion_proj_name "$slug")"
-  engine="$(zion_resolve_engine 1)"
+  mount_opts="$(leech_mount_opts)"
+  slug="$(leech_proj_slug "$mount_path")"
+  proj_name="$(leech_proj_name "$slug")"
+  engine="$(leech_resolve_engine 1)"
   engine_args=""
   local resume="${args['--resume']:-}"
   [[ -n "$resume" ]] && engine_args+=" --resume=$resume"
-  init_md="$(zion_initial_md "$mount_path")"
+  init_md="$(leech_initial_md "$mount_path")"
   [[ -n "$init_md" ]] && engine_args+=" --init-md=$init_md"
-  zion_session_run "$engine" "$proj_name" "$mount_path" "$mount_opts" "$engine_args"
+  leech_session_run "$engine" "$proj_name" "$mount_path" "$mount_opts" "$engine_args"
 }

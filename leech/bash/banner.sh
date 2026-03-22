@@ -21,25 +21,25 @@ cat << 'BANNER'
       █                                                                     █
       █  sessions                         engine shortcuts                  █
       █                                                                     █
-      █   zion                             zion claude [dir]                █
-      █   zion new --engine=<e>            zion cursor [dir]                █
-      █   zion resume                      zion opencode [dir]              █
-      █   zion host                                                          █
-      █   zion shell                      tasks                             █
+      █   leech                             leech claude [dir]                █
+      █   leech new --engine=<e>            leech cursor [dir]                █
+      █   leech resume                      leech opencode [dir]              █
+      █   leech host                                                          █
+      █   leech shell                      tasks                             █
       █                                                                     █
       █  runner                            contractors                      █
       █                                                                     █
-      █   zion runner mono start           zion contractors run <nome>      █
-      █   zion runner mw start                                              █
-      █   zion runner mono logs           inbox / outbox                   █
-      █   zion runner mono shell          zion inbox / zion outbox         █
-      █   Alias: zion dk                                                   █
+      █   leech runner mono start           leech contractors run <nome>      █
+      █   leech runner mw start                                              █
+      █   leech runner mono logs           inbox / outbox                   █
+      █   leech runner mono shell          leech inbox / leech outbox         █
+      █   Alias: leech dk                                                   █
       █                                   meta                              █
       █  container                                                          █
-      █                                    zion status                      █
-      █   zion build                       zion clean                       █
-      █   zion down                        zion update                      █
-      █   zion destroy                     zion man                         █
+      █                                    leech status                      █
+      █   leech build                       leech clean                       █
+      █   leech down                        leech update                      █
+      █   leech destroy                     leech man                         █
       █                                                                     █
       ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 BANNER

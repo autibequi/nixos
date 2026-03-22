@@ -114,7 +114,7 @@
 ## https://docs.rs/regex/latest/regex/#syntax
 history_filter = [
   "^claude",
-  "^zion",
+  "^leech",
   "^claudinho",
   "^claudio",
   "^clau ",

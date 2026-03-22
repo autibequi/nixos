@@ -26,7 +26,7 @@ RELAY_ONLINE=false + live check OK   → usar (flag desatualizado)
 RELAY_ONLINE=false + live check FAIL → nao usar, notificar se relevante
 ```
 
-Sempre preferir o live check sobre o flag `RELAY_ONLINE` em `~/.zion`.
+Sempre preferir o live check sobre o flag `RELAY_ONLINE` em `~/.leech`.
 
 Se Chrome nao rodando: `chromium --remote-debugging-port=9222`
 

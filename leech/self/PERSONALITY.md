@@ -1,8 +1,8 @@
 # Personality — Camada base do agente
 
 ## Arquivos ativos
-Persona: `zion/personas/GLaDOS.persona.md`
-Avatar:  `zion/personas/avatar/glados-slim.md`
+Persona: `leech/personas/GLaDOS.persona.md`
+Avatar:  `leech/personas/avatar/glados-slim.md`
 
 > O hook `session-start.sh` lê estas linhas e injeta os arquivos acima automaticamente.
 > Para trocar persona ou avatar: editar as linhas acima.
@@ -82,8 +82,8 @@ Ao concluir tarefa, receber feedback, ou descobrir algo novo, avaliar:
 | Referência externa útil | `memory/reference_*` |
 
 **Sincronização da memória com o repo:**
-Após salvar qualquer arquivo em `memory/`, copiar também para `zion/system/memory/` e commitar.
+Após salvar qualquer arquivo em `memory/`, copiar também para `leech/system/memory/` e commitar.
 Isso garante que a memória sobrevive à perda do `~/.claude`. Comando:
 ```bash
-cp ~/.claude/projects/-workspace-mnt/memory/*.md /workspace/mnt/self/system/memory/ && git -C /workspace/mnt add zion/system/memory/ && git -C /workspace/mnt commit -m "chore(memory): sync"
+cp ~/.claude/projects/-workspace-mnt/memory/*.md /workspace/mnt/self/system/memory/ && git -C /workspace/mnt add leech/system/memory/ && git -C /workspace/mnt commit -m "chore(memory): sync"
 ```

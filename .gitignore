@@ -1,14 +1,14 @@
 # secrets (injected into container) e config local
-# legacy paths (claudinho → zion)
+# legacy paths (claudinho → leech)
 claudinho/.env
 claudinho/claudio-cli/.claudio
-zion/cli/.env
-zion/cli/zion
-stow/.local/bin/zion
+leech/cli/.env
+leech/cli/leech
+stow/.local/bin/leech
 
-# zion docker environment files — NEVER commit real secrets to git
-zion/dockerized/**/env/*.env
-!zion/dockerized/**/env/*.env.example
+# leech docker environment files — NEVER commit real secrets to git
+leech/dockerized/**/env/*.env
+!leech/dockerized/**/env/*.env.example
 
 # agent
 tmp/
@@ -74,3 +74,4 @@ workbench/*
 .env
 
 .weblive
+.cursor/

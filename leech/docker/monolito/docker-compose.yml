@@ -2,8 +2,8 @@ services:
   app:
     build:
       context: ${MONOLITO_DIR}
-      dockerfile: ${ZION_NIXOS_DIR}/self/containers/monolito/Dockerfile
-    container_name: zion-dk-monolito-app
+      dockerfile: ${LEECH_NIXOS_DIR}/self/containers/monolito/Dockerfile
+    container_name: leech-dk-monolito-app
     cpus: "14.4"
     mem_limit: 6g
     memswap_limit: 6g
@@ -17,7 +17,7 @@ services:
       - ${MONOLITO_DIR}/configuration:/go/app/configuration:ro
       - /var/run/docker.sock:/var/run/docker.sock
       # Canal de comunicação rápida host ↔ container
-      - ${HOME}/.zion:/.zion:rw
+      - ${HOME}/.leech:/.leech:rw
     ports:
       - "4004:4004"
       - "2345:2345"

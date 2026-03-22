@@ -1,6 +1,6 @@
 ---
 name: estrategia/monolito
-description: Skill composta do monolito Go (Estrategia) — indice das sub-skills de implementacao + referencia a ferramentas de suporte (grafana, zion/linux, code/goodpractices). Carregar quando o repo ativo for o monolito.
+description: Skill composta do monolito Go (Estrategia) — indice das sub-skills de implementacao + referencia a ferramentas de suporte (grafana, leech/linux, code/goodpractices). Carregar quando o repo ativo for o monolito.
 ---
 
 # Monolito — Skill Composta
@@ -36,8 +36,8 @@ Datasources do monolito:
 
 ### linux — ambiente local
 
-Carregar skill `zion/linux` quando:
-- Problemas com o ambiente Docker local (`zion docker run monolito`)
+Carregar skill `leech/linux` quando:
+- Problemas com o ambiente Docker local (`leech docker run monolito`)
 - Questoes de rede, disco, processos, recursos do host
 - Conflito de portas, volumes corrompidos, permissoes
 
@@ -71,7 +71,7 @@ Carregar skill `code/goodpractices` quando:
 
 ## Contexto de ambiente local
 
-Ver skill `zion/container` para levantar o monolito localmente via `zion docker`.
+Ver skill `leech/container` para levantar o monolito localmente via `leech docker`.
 
 Erros nao-criticos conhecidos:
 - `ERRO no Client Coruja-AI` — env faltando, sobe normal

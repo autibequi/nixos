@@ -1,6 +1,6 @@
 ---
 name: meta:context:contemplate
-description: Relatório contemplativo — extrapola o contexto atual, imagina o que pode ser construído e propõe uma visão de crescimento do sistema Zion.
+description: Relatório contemplativo — extrapola o contexto atual, imagina o que pode ser construído e propõe uma visão de crescimento do sistema Leech.
 ---
 
 # /meta:context:contemplate — Contemplar o Contexto
@@ -86,7 +86,7 @@ Com base nos arquivos lidos, tool calls feitos e padrões observados, inferir o 
 ```
   ── EXTRAPOLAÇÕES ────────────────────────────────────────────────
 
-  Sobre o sistema Zion:
+  Sobre o sistema Leech:
     · [inferência baseada nos arquivos lidos]
     · [padrão arquitetural que ficou visível]
     · [decisão de design que pode ser questionada]

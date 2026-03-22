@@ -1,8 +1,8 @@
-# zion relay — Inicia Chrome no host com CDP para o agent conectar
-zion_load_config
+# leech relay — Inicia Chrome no host com CDP para o agent conectar
+leech_load_config
 
 RELAY_PORT=9222
-RELAY_PROFILE="/tmp/zion-relay"
+RELAY_PROFILE="/tmp/leech-relay"
 RELAY_URL="http://localhost:${RELAY_PORT}"
 
 GREEN='\033[32m'
@@ -89,13 +89,13 @@ case "$action" in
       tabs=$(curl -sf "${RELAY_URL}/json" 2>/dev/null | python3 -c "import sys,json; tabs=json.load(sys.stdin); print(len([t for t in tabs if t.get('type')=='page']))" 2>/dev/null || echo "?")
       echo -e "${GREEN}● relay ativo${RESET}  pid=${pid}  port=${RELAY_PORT}  abas=${tabs}"
     else
-      echo -e "${RED}○ relay inativo${RESET}  (use: zion relay start)"
+      echo -e "${RED}○ relay inativo${RESET}  (use: leech relay start)"
     fi
     ;;
 
   *)
-    echo "zion relay: acao invalida '${action}'" >&2
-    echo "  uso: zion relay [start|stop|status]" >&2
+    echo "leech relay: acao invalida '${action}'" >&2
+    echo "  uso: leech relay [start|stop|status]" >&2
     exit 1
     ;;
 esac

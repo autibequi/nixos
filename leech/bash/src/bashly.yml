@@ -1,8 +1,8 @@
-name: zion
-help: ZION - agent orchestration system
+name: leech
+help: LEECH - agent orchestration system
 version: "1.0"
 environment_variables:
-  - name: ZION_NIXOS_DIR
+  - name: LEECH_NIXOS_DIR
     help: "Raiz do repo NixOS (default $HOME/nixos)"
   - name: OBSIDIAN_PATH
     help: "Caminho do vault Obsidian (default $HOME/.ovault/Work)"
@@ -10,7 +10,7 @@ environment_variables:
 flags:
   - long: --engine
     arg: engine
-    help: "Engine da sessão/worker: opencode | claude | cursor (obrigatório em run se não estiver em ~/.zion)"
+    help: "Engine da sessão/worker: opencode | claude | cursor (obrigatório em run se não estiver em ~/.leech)"
   - long: --model
     arg: model
     help: "Modelo Claude: haiku | opus (default: sonnet)"
@@ -22,7 +22,7 @@ flags:
     help: "Shortcut: --model sonnet"
   - long: --instance
     arg: id
-    help: "Sufixo da instância (ex. 2 = zion-projeto-2)"
+    help: "Sufixo da instância (ex. 2 = leech-projeto-2)"
   - long: --rw
     help: Montar projeto em read-write (default para run)
   - long: --ro
@@ -35,14 +35,14 @@ flags:
     help: "Arquivo markdown inicial carregado por todos os engines (default: contexto.md no projeto). Claude: --append-system-prompt-file; Cursor: prompt com @file; OpenCode: env."
   - long: --resume
     arg: session_id
-    help: "Retoma sessão: cursor/agent usa --resume=UUID; claude usa --resume; opencode: env ZION_RESUME_SESSION."
+    help: "Retoma sessão: cursor/agent usa --resume=UUID; claude usa --resume; opencode: env LEECH_RESUME_SESSION."
 
   - long: --analysis-mode
     short: -A
     help: "Modo análise: injeta prompt experimental no container (proativo, self-modifying, debug livre sem output pro user)."
 
   - long: --no-splash
-    help: "Desativa o loading screen de inicialização (equivalente a ZION_SPLASH=0 em ~/.zion)."
+    help: "Desativa o loading screen de inicialização (equivalente a LEECH_SPLASH=0 em ~/.leech)."
 commands:
   - name: continue
     alias: [cont]
@@ -55,7 +55,7 @@ commands:
   - name: new
     alias: [open, code]
     default: force
-    help: Nova sessão no container. Exige --engine (ou engine= em ~/.zion).
+    help: Nova sessão no container. Exige --engine (ou engine= em ~/.leech).
     args:
       - name: dir
         help: "Diretório do projeto (default ~/projects)"
@@ -75,9 +75,9 @@ commands:
       - long: --rw
       - long: --ro
     examples:
-      - zion new --engine=claude
-      - zion new --engine=cursor ~/projects
-      - zion run --engine=opencode ~/meu-projeto
+      - leech new --engine=claude
+      - leech new --engine=cursor ~/projects
+      - leech run --engine=opencode ~/meu-projeto
     filename: commands/new_session.sh
 
   - name: shell
@@ -137,13 +137,13 @@ commands:
     filename: commands/down.sh
 
   - name: shutdown
-    help: "Para containers do compose + mata qualquer stray com nome zion/claude/puppy."
+    help: "Para containers do compose + mata qualquer stray com nome leech/claude/puppy."
     filename: commands/shutdown.sh
 
 
   - name: clean
     alias: [gc, prune]
-    help: "Remove sessoes Zion paradas/exited e containers orfaos."
+    help: "Remove sessoes Leech paradas/exited e containers orfaos."
     flags:
       - long: --force
         short: -f
@@ -156,7 +156,7 @@ commands:
     filename: commands/update.sh
 
   - name: set
-    help: "Define engine padrão em ~/.zion (engine= claude | opencode | cursor)."
+    help: "Define engine padrão em ~/.leech (engine= claude | opencode | cursor)."
     args:
       - name: engine
         required: true
@@ -168,7 +168,7 @@ commands:
   # aliases:  mono    | bo           | front/fs      |
   - name: runner
     alias: [dk]
-    help: "Gerencia servicos. Ex: zion runner monolito start | zion runner monolito logs"
+    help: "Gerencia servicos. Ex: leech runner monolito start | leech runner monolito logs"
     args:
       - name: service
         required: true
@@ -228,7 +228,7 @@ commands:
 
   - name: tick
     alias: [auto]
-    help: "Executa todos os agents e tasks vencidos (zion-tick.service)."
+    help: "Executa todos os agents e tasks vencidos (leech-tick.service)."
     flags:
       - long: --dry-run
         short: -n
@@ -381,7 +381,7 @@ commands:
         help: "Bash interativo em vez de engine AI"
       - long: --engine
         arg: engine
-        help: "Engine: opencode | claude | cursor (default: ~/.zion)"
+        help: "Engine: opencode | claude | cursor (default: ~/.leech)"
       - long: --model
         arg: model
         help: "Modelo Claude: haiku | sonnet | opus"
@@ -407,7 +407,7 @@ commands:
     flags:
       - long: --engine
         arg: engine
-        help: "Engine: opencode | claude | cursor (default: ~/.zion)"
+        help: "Engine: opencode | claude | cursor (default: ~/.leech)"
       - long: --resume
         arg: session_id
         help: "Retoma sessão (UUID ou 1 para última)"
@@ -451,5 +451,5 @@ commands:
     filename: commands/relay.sh
 
   - name: uninstall
-    help: "Remove o symlink do zion de ~/.local/bin (desinstala do PATH)."
+    help: "Remove o symlink do leech de ~/.local/bin (desinstala do PATH)."
     filename: commands/uninstall.sh
