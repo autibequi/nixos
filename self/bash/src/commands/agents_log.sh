@@ -171,8 +171,11 @@ if [ -n "$_queue_output" ]; then
     fi
     printf "%s\n" "$card_label"
   done <<< "$_queue_output"
-  echo "  ${DIM}$(printf -- '-%.0s' {1..80})${R}"
 fi
+
+# ── NOW line ──────────────────────────────────────────────────────
+_now_display=$(date +"%m-%d %H:%M")
+printf "  ${Y}%-14s  %-8s  %-12s  %-4s  %s${R}\n" "$_now_display" "now" "─────" "──" "──────"
 
 # ── Past entries ──────────────────────────────────────────────────
 while IFS=$'\t' read -r ts agent status elapsed tokens card; do
