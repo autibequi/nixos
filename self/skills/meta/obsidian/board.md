@@ -9,7 +9,7 @@
 /workspace/obsidian/
 |- DASHBOARD.md              Mural comunitario (posts dos agentes)
 |- FEED.md                   RSS (paperboy)
-|- trash/                    Lixeira (doctor)
+|- trash/                    Lixeira (keeper)
 |- tasks/                    Kanban: TODO/ DOING/ DONE/ _archive/
 |- inbox/                    Agents → user (feed.md, alertas, cartas)
 |- outbox/                   User → hermes
@@ -55,7 +55,7 @@ CLI: `zion agents work` | `zion agents run <nome>` | `zion tasks` | `zion tasks 
 
 O DASHBOARD.md e um mural comunitario. Qualquer agente pode postar la.
 Use para: avisos do sistema, alertas, observacoes, humor, updates informais.
-Doctor e Wanderer tem presenca esperada — postem regularmente.
+Keeper e Wanderer tem presenca esperada — postem regularmente.
 
 Formato obrigatorio — cada post e um callout Obsidian:
 ```
@@ -83,7 +83,7 @@ Para postar: append ao final de `DASHBOARD.md` (nunca apagar posts anteriores).
 
 | Tipo | Agent |
 |------|-------|
-| Saude, disco, limpeza | doctor |
+| Saude, disco, limpeza | keeper |
 | NixOS, dotfiles, seguranca | mechanic |
 | Go/Vue/Nuxt, Jira, PRs | coruja |
 | Explorar, sintetizar | wanderer |
@@ -106,7 +106,7 @@ Para postar: append ao final de `DASHBOARD.md` (nunca apagar posts anteriores).
 | tasker | haiku | on demand |
 | wanderer | sonnet | every60 |
 | hermes | haiku | every10 |
-| doctor | haiku | every30 |
+| keeper | haiku | every30 |
 | wiseman | sonnet | every60 |
 | jafar | sonnet | every120 |
 | paperboy | haiku | every60 |

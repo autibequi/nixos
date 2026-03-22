@@ -270,6 +270,30 @@ related:
 
 A **Matriz de Competencias** comparativa nao fica mais no report individual — fica no `_ranking.md` como Mermaid charts (Fase 7).
 
+### Fase 8 — RPG Mode (opcional, `_rpg.md`)
+
+Se solicitado ou se ja existir `_rpg.md` no vault, gerar/atualizar fichas RPG dos devs.
+
+**Normalizacao D&D:** as 8 dimensoes (1-5) sao compostas em 6 stats RPG com escala 2-18:
+
+| Stat | Derivado de | O que mede |
+|---|---|---|
+| **STR** | Layer Separation | Poder estrutural |
+| **CON** | (Error Handling + Tests) / 2 | Robustez defensiva |
+| **DEX** | (Simplification + Production) / 2 | Agilidade e pragmatismo |
+| **INT** | Go Idioms | Profundidade tecnica |
+| **WIS** | (Reviews + Observability) / 2 | Percepcao e visao |
+| **CHA** | Media de todas as 8 dimensoes | Influencia no time |
+
+**Mapeamento de escala** (amplifica diferencas reais):
+- Raw 1 → 2 | 1.5 → 3 | 2 → 5 | 2.5 → 6 | 3 → 8 | 3.5 → 10 | 4 → 13 | 4.5 → 15 | 5 → 18
+
+**Cada ficha inclui:** classe RPG (derivada do arquetipo), stats com barras visuais, habilidades especiais (comportamentos reais dos PRs), fraquezas, frase iconica, HP/MP calculados.
+
+**Party analysis:** fingerprint Mermaid overlay, quadrant de roles, vulnerabilidades do party, quests de evolucao.
+
+Salvar em: `/workspace/obsidian/vault/peer-reports/<org>/_rpg.md`
+
 ---
 
 ## Notas de Calibracao

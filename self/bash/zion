@@ -1077,6 +1077,7 @@ zion_os_usage() {
   printf "  %s   nh os test (aplica sem tornar default)\n" "test  "
   printf "  %s   nh os boot (aplica no próximo boot)\n" "boot  "
   printf "  %s   nh os build (só compila, não aplica)\n" "build "
+  printf "  %s   nix flake update (atualiza inputs do flake)\n" "update"
   echo
 
   # :command.long_usage
@@ -1176,6 +1177,37 @@ zion_os_build_usage() {
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
     printf "    Show this help\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+zion_os_update_usage() {
+  printf "zion os update - nix flake update (atualiza inputs do flake)\n\n"
+  printf "Alias: u\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  zion os update [INPUT]\n"
+  printf "  zion os update --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "Arguments:"
+
+    # :argument.usage
+    printf "  %s\n" "INPUT"
+    printf "    Input específico a atualizar (ex: nixpkgs). Sem arg: atualiza tudo.\n"
     echo
 
   fi
@@ -5419,6 +5451,22 @@ zion_os_build_command() {
 }
 
 # :command.function
+zion_os_update_command() {
+
+  # src/commands/os_update.sh
+  zion_load_config
+  nixos_dir="${ZION_NIXOS_DIR:-${HOST_NIXOS_DIR:-$HOME/nixos}}"
+  input="${args[input]:-}"
+
+  if [[ -n "$input" ]]; then
+    exec nix flake update "$input" --flake "$nixos_dir"
+  else
+    exec nix flake update --flake "$nixos_dir"
+  fi
+
+}
+
+# :command.function
 zion_leech_command() {
 
   # src/commands/leech.sh
@@ -7943,6 +7991,13 @@ zion_os_parse_requirements() {
       shift $#
       ;;
 
+    update | u)
+      action="update"
+      shift
+      zion_os_update_parse_requirements "$@"
+      shift $#
+      ;;
+
     # :command.command_fallback
     "")
       zion_os_usage >&2
@@ -8151,6 +8206,57 @@ zion_os_build_parse_requirements() {
         # :command.parse_requirements_case_simple
         printf "invalid argument: %s\n" "$key" >&2
         exit 1
+
+        ;;
+
+    esac
+  done
+
+}
+
+# :command.parse_requirements
+zion_os_update_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        zion_os_update_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="os update"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        # :argument.case
+        if [[ -z ${args['input']+x} ]]; then
+          args['input']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
 
         ;;
 
@@ -8770,6 +8876,7 @@ run() {
     "os test") zion_os_test_command ;;
     "os boot") zion_os_boot_command ;;
     "os build") zion_os_build_command ;;
+    "os update") zion_os_update_command ;;
     "leech") zion_leech_command ;;
     "host") zion_host_command ;;
     "inbox") zion_inbox_command ;;

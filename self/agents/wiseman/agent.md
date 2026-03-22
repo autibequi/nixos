@@ -77,7 +77,7 @@ Analisar outputs dos agentes e sintetizar padroes.
 
 1. Coletar:
 ```bash
-for agent in assistant coruja mechanic tamagochi tasker wanderer hermes doctor jafar; do
+for agent in assistant coruja mechanic tamagochi tasker wanderer hermes keeper jafar; do
   echo "=== $agent ==="
   tail -20 "/workspace/obsidian/agents/$agent/memory.md" 2>/dev/null
 done

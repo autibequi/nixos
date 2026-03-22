@@ -1,6 +1,6 @@
 ---
 name: zion/healthcheck
-description: "Procedimentos de diagnostico do sistema — ferramentas, disco, load, workspace, git, tasks. Thresholds e regras de alerta. Usado pelo Doctor e qualquer agente que precise checar saude."
+description: "Procedimentos de diagnostico do sistema — ferramentas, disco, load, workspace, git, tasks. Thresholds e regras de alerta. Usado pelo Keeper e qualquer agente que precise checar saude."
 ---
 
 # Healthcheck — Diagnostico do Sistema

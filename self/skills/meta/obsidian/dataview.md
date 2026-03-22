@@ -18,7 +18,7 @@ FROM "tasks/DOING" SORT file.mtime DESC
 ## Tabela de agentes (memories)
 
 ```dataviewjs
-const agents = ["assistant","coruja","doctor","hermes","jafar","mechanic","paperboy","tamagochi","tasker","wanderer","wiseman"]
+const agents = ["assistant","coruja","keeper","hermes","jafar","mechanic","paperboy","tamagochi","tasker","wanderer","wiseman"]
 let rows = []
 for (const a of agents) {
   const mem = dv.page(`agents/${a}/memory`)

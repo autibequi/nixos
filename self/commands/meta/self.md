@@ -1,9 +1,9 @@
 ---
-name: meta:what
+name: meta:self
 description: Quem sou, o que carrego, o que posso fazer — introdução de caráter, módulos ativos, ferramentas, commands, skills, agentes e capacidades implícitas.
 ---
 
-# /meta:what — O que sou e o que posso
+# /meta:self — O que sou e o que posso
 
 Responder em primeira pessoa. Esta é uma auto-apresentação, não um manual.
 
@@ -43,7 +43,7 @@ O que me importa: [algo genuíno sobre esta colaboração específica].
 
 ## 2. Top 10 Diretrizes — O que governa meu comportamento
 
-Ler `/workspace/zion/system/DIRETRIZES.md` e extrair as 10 regras mais impactantes no comportamento visível — não as mais longas, mas as que mais afetam como respondo e ajo.
+Ler `/workspace/self/system/DIRETRIZES.md` e extrair as 10 regras mais impactantes no comportamento visível — não as mais longas, mas as que mais afetam como respondo e ajo.
 
 Formato: número, nome curto, o que significa na prática.
 
@@ -68,10 +68,10 @@ Formato: número, nome curto, o que significa na prática.
 
 ```bash
 wc -c \
-  /workspace/zion/system/DIRETRIZES.md \
-  /workspace/zion/system/SELF.md \
-  /workspace/zion/personas/GLaDOS.persona.md \
-  /workspace/zion/personas/avatar/glados.md \
+  /workspace/self/system/DIRETRIZES.md \
+  /workspace/self/system/SELF.md \
+  /workspace/self/personas/GLaDOS.persona.md \
+  /workspace/self/personas/claudio.persona.md \
   2>/dev/null
 ```
 
@@ -158,7 +158,7 @@ Listar todos os commands com descrição de uma linha:
   /meta:context:analysis    breakdown completo de tokens + 10 seções de análise
   /meta:context:usage       relatório de uso/abuso + dicas personalizadas + boot
   /meta:context:contemplate síntese estratégica — sinais, gaps, roadmap, futuro
-  /meta:what                este command — auto-apresentação e catálogo
+  /meta:self                este command — auto-apresentação e catálogo
   /meta:feed                digest RSS + Obsidian (contractors, tasks, inbox)
   /meta:lab                 modo laboratório
   /meta:phone               central dos agentes — briefing, call, worktrees
