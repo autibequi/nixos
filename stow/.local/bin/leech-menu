@@ -21,7 +21,7 @@ _list_apps() {
             /run/current-system/sw/share/applications/*.desktop \
             "$HOME/.local/share/applications"/*.desktop \
             2>/dev/null \
-        | cut -d= -f2- | sort -u | sed 's/^/  /' > "$APPS_CACHE"
+        | cut -d= -f2- | sort -u | sed 's/^/ /' > "$APPS_CACHE"
     fi
     cat "$APPS_CACHE"
 }
