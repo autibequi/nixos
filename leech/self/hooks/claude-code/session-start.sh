@@ -108,6 +108,14 @@ echo "       /workspace/obsidian/  — SEMPRE rw — vault Obsidian (cérebro co
 echo "       /workspace/host/      — ro por default, rw com --host (host_attached=1)"
 echo "       /home/claude/.claude/ — read-only — não tentar escrever lá"
 echo "       Configs, memórias, traços de comportamento: salvar em /workspace/self/"
+echo ""
+echo "REGRA: 4 patas montadas — sempre disponíveis nesta sessão:"
+echo "       /workspace/self/     — EU: skills, hooks, agents, scripts do Leech"
+echo "       /workspace/mnt/      — PROJETOS: código-fonte para trabalhar"
+echo "       /workspace/obsidian/ — CÉREBRO: vault, tasks, inbox, boards"
+echo "       /workspace/logs/     — LOGS: containers, host, systemd, serviços"
+echo "  IMPORTANTE: antes de pedir ao usuário para gerar/mostrar logs,"
+echo "  SEMPRE verificar /workspace/logs/ — os logs já estão lá."
 echo "---/BOOT---"
 
 # ────────────────────────────────────────────────────────────────

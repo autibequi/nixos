@@ -105,12 +105,9 @@ LEECH_REPOS
 
   # OBSIDIAN
   echo "---OBSIDIAN---"
-  echo "REGRA: para interagir com /workspace/obsidian/ carregar skill \`obsidian\`."
-  echo "Skill composta — sub-skills em /workspace/self/skills/obsidian/:"
-  echo "  board.md      — mapa do vault, tasks, roster, delegacao, quota"
-  echo "  agentroom.md  — protocolo agents: scheduling, memory, ciclo"
-  echo "  graph.md      — manter grafo Ctrl+G: frontmatter, hubs, wiseman"
-  echo "  dataview.md   — queries Dataview/DataviewJS"
+  echo "REGRA: regras do vault em \`self/RULES.md\` (entrypoint) → \`self/skills/meta/rules/\` (detalhe)."
+  echo "Obsidian skill (templates, mermaid, graph): \`self/skills/meta/obsidian/SKILL.md\`"
+  echo "CLI regras: \`/meta:rules\`"
   echo "---/OBSIDIAN---"
 }
 

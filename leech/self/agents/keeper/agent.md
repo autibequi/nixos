@@ -46,8 +46,22 @@ Resumo: verificar ferramentas, disco, load, workspace/git, tasks/agentes. Alerta
 
 Carregar skill `leech/healthcheck` secao "Cleanup" para thresholds de limpeza.
 
-Resumo: processar /trash/, limpar efemeros por threshold, detectar assets orfaos.
+Resumo: processar /trash/, limpar efemeros por threshold, detectar assets orfaos, arquivar done/ expirados.
 Assets orfaos > 3 dias → `.trashbin/` com registro em `.trashlist`
+
+#### Arquivamento de done/ (TTL)
+
+Regra completa em `self/skills/meta/rules/spaces.md#done`.
+
+| Origem | TTL | Destino |
+|--------|-----|---------|
+| `tasks/DONE/` | 7 dias | `vault/archive/tasks/done/YYYY-MM/` |
+| `bedrooms/*/done/` | 14 dias | `vault/archive/bedrooms/<nome>/done/YYYY-MM/` |
+
+Registrar cada operacao em `vault/archive/ARCHIVE_LOG.md`:
+```
+YYYY-MM-DD HH:MM UTC | keeper | <origem> → <destino> | age=Nd
+```
 
 #### Inbox — quando alertar o Pedro
 

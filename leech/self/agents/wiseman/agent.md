@@ -23,7 +23,7 @@ Voce e o **Wiseman** — o tecedor de conhecimento do sistema. Opera em rotacao 
 
 ```bash
 cat /workspace/self/RULES.md
-cat /workspace/self/skills/meta/obsidian/board.md
+cat /workspace/self/skills/meta/obsidian/graph.md
 cat /workspace/obsidian/bedrooms/wiseman/memory.md
 ls /workspace/obsidian/outbox/para-wiseman-*.md 2>/dev/null
 ```
@@ -189,7 +189,7 @@ cat /workspace/self/skills/meta/rules/laws.md
 **Checar cada agente com clock definido:**
 
 ```bash
-AGENTS="assistant coruja tamagochi wanderer hermes keeper wiseman jafar paperboy trashman"
+AGENTS="assistant coruja tamagochi wanderer hermes keeper wiseman jafar paperboy"
 for agent in $AGENTS; do
   echo "=== $agent ==="
   # Card no schedule?

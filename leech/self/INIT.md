@@ -68,28 +68,24 @@
 
 O vault Obsidian esta montado em `/workspace/obsidian/`.
 
-**Regras injetadas automaticamente no boot** via `---OBSIDIAN_RULES---`:
-- `obsidian:rules:board` — mapa do vault, roster, delegacao, tasks, escalonamento
-- `obsidian:rules:agentroom` — protocolo dos agents: self-scheduling, memory, ciclo
-
-Skills em: `/workspace/self/skills/obsidian/rules/board.md` e `agentroom.md`
-Nao e necessario ler nenhum arquivo separado — as regras ja estao no contexto de boot.
+**Regras do sistema:** `self/RULES.md` (entrypoint universal → aponta para detalhes em `self/skills/meta/rules/`).
+**Obsidian skill:** `self/skills/meta/obsidian/SKILL.md` (templates, mermaid, graph, dataview).
 
 ### Estrutura
 
 ```
 /workspace/obsidian/
-|- TRASH.md (self/rules/TRASH.md) — central de regras
-|- bedrooms/dashboard.md         Mural comunitario dos agentes
-|- workshop/            Espaco de trabalho (workshop/<agente>/)
-|- bedrooms/            Memoria operacional dos agentes
-|  |- <nome>/memory.md  Memoria do agente
-|- inbox/               Agents → user (feed.md, alertas, cartas)
-|- outbox/              User → hermes processa
-|- tasks/               TODO/ → DOING/ → DONE/ + AGENTS/ + AGENTS/DOING/
-|- vault/               Conhecimento persistente
-   |- WISEMAN.md        Grafo do sistema (wiseman atualiza)
-   |- insights.md       Hub de insights cross-agent
+├── bedrooms/dashboard.md  Mural comunitario dos agentes
+├── workshop/              Espaco de trabalho (workshop/<agente>/)
+├── bedrooms/              Memoria operacional dos agentes
+│   └── <nome>/memory.md   Memoria do agente
+├── inbox/                 Agents → user (feed.md, alertas, cartas)
+├── outbox/                User → hermes processa
+├── tasks/                 TODO/ → DOING/ → DONE/ + AGENTS/ + AGENTS/DOING/
+├── vault/                 Conhecimento persistente
+│   ├── archive/           Cards expirados (keeper arquiva)
+│   ├── WISEMAN.md         Grafo do sistema
+│   └── insights.md        Hub cross-agent
 ```
 
 ### Agents (11 ativos)
@@ -103,12 +99,12 @@ Nao e necessario ler nenhum arquivo separado — as regras ja estao no contexto 
 | tasker | haiku | on demand | Processador de tasks |
 | wanderer | sonnet | every60 | Explorador de codigo |
 | hermes | haiku | every10 | Mensageiro: inbox/outbox/scheduling |
-| doctor | haiku | every30 | Saude + limpeza |
+| keeper | haiku | every30 | Saude + limpeza |
 | wiseman | sonnet | every60 | Knowledge weaving + meta-analise |
 | jafar | sonnet | every120 | Meta-agente: introspecao + propostas |
-| paperboy | haiku | every60 | Feed RSS |
+| paperboy | sonnet | every60 | Feed RSS |
 
-Definicao: `leech/agents/<nome>/agent.md`
+Definicao: `self/agents/<nome>/agent.md`
 Breakroom: `/workspace/obsidian/bedrooms/<nome>/memory.md`
 
 ### Comunicacao
@@ -116,6 +112,7 @@ Breakroom: `/workspace/obsidian/bedrooms/<nome>/memory.md`
 - Agents → user: `inbox/feed.md` (append) ou `inbox/CARTA_<agente>_<data>.md`
 - User → agents: `outbox/para-<nome>-<tema>.md` (hermes processa)
 - Alertas urgentes: `inbox/ALERTA_<agente>_<tema>.md`
+- Worktrees prontos: `inbox/WORKTREE_<agent>_<nome>_<data>.md`
 
 ### Comandos CLI
 
@@ -168,7 +165,7 @@ Path: `/workspace/.hive-mind/` — efemero, compartilhado entre containers. Usar
 - **NUNCA rodar Claude dentro de Claude** — runner roda via systemd no host
 - **`/home/claude/projects/`** — repos GitHub do user (bind mount RW)
 - **Superpoderes Nix** — `nix-shell -p <pkg>`
-- **Worktrees: decisao autonoma** — default = sempre worktree, exceto mudancas triviais
+- **Worktrees obrigatorio para implementacoes** — ver `self/skills/meta/rules/worktrees.md`
 
 ## Sistema Docker — Servicos da Estrategia
 

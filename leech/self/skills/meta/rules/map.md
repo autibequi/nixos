@@ -27,7 +27,7 @@ Estrutura de diretorios do `/workspace/obsidian/`.
 │   ├── WISEMAN.md        grafo do sistema
 │   ├── logs/agents.md    execucoes de agentes (append-only)
 │   └── logs/tasks.md     lifecycle de tasks (append-only)
-├── vault/archive/        arquivamento de cards expirados (trashman)
+├── vault/archive/        arquivamento de cards expirados (keeper)
 │   ├── ARCHIVE_LOG.md    audit trail de tudo que foi arquivado
 │   ├── tasks/done/YYYY-MM/   cards de tasks/DONE expirados (TTL 7d)
 │   └── bedrooms/<nome>/done/YYYY-MM/  cards de bedrooms expirados (TTL 14d)

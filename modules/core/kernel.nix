@@ -121,6 +121,10 @@
     # Reutiliza sockets TIME_WAIT — containers fazendo muitas conexões curtas (HTTP, DB).
     "net.ipv4.tcp_tw_reuse" = 1;
 
+    # userland-proxy=false: DNAT via loopback exige route_localnet para funcionar.
+    # Sem isso, nginx (network_mode=host) não consegue alcançar containers via 127.0.0.1.
+    "net.ipv4.conf.all.route_localnet" = 1;
+
     # Containers Go/Node usam mmap intensamente. Default 65530 estoura com 5+ containers.
     "vm.max_map_count" = 1048576;
 

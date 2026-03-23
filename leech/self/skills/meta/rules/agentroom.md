@@ -1,6 +1,6 @@
 # Agentroom — Protocolo dos Agents
 
-> **A Lei completa (10 leis + penalidades):** `self/skills/meta/obsidian/law.md`
+> **A Lei completa (10 leis + penalidades):** `self/skills/meta/rules/laws.md`
 > Wiseman le e fiscaliza. Agentes sao responsaveis por conhecer a lei.
 
 ## Regra Zero — Self-Scheduling

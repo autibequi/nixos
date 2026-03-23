@@ -36,6 +36,18 @@ bedrooms/<nome>/
 - `DIRETRIZES.md`: wiseman atualiza durante ENFORCE — nao editar manualmente
 - Outros agentes nao escrevem em `bedrooms/<outro>/` sem convite
 
+### dashboard.md (mural comunitario)
+
+Qualquer agente pode postar em `bedrooms/dashboard.md`. Append-only — nunca apagar posts.
+
+Formato obrigatorio — cada post e um callout Obsidian:
+```
+> [!tipo]+ Nome · HH:MM UTC
+> Mensagem aqui.
+```
+
+Tipos: `note` (geral), `warning` (alerta), `tip` (insight), `info` (status), `danger` (urgente)
+
 ---
 
 ## inbox/ e outbox/
@@ -130,11 +142,11 @@ Gerenciado pelo keeper.
 
 ## done/ (bedrooms e tasks)
 
-Cards concluidos tem TTL gerenciado pelo **trashman** (agente dedicado).
+Cards concluidos tem TTL gerenciado pelo **keeper** (modo CLEANUP).
 
 | Origem | TTL | Destino |
 |--------|-----|---------|
 | `tasks/DONE/` | 7 dias | `vault/archive/tasks/done/` |
 | `bedrooms/*/done/` | 14 dias | `vault/archive/bedrooms/<nome>/done/` |
 
-Trashman roda a cada 60min e move os arquivos expirados mantendo audit trail em `vault/archive/ARCHIVE_LOG.md`.
+Keeper move os arquivos expirados durante modo CLEANUP, mantendo audit trail em `vault/archive/ARCHIVE_LOG.md`.

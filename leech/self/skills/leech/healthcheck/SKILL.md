@@ -51,20 +51,13 @@ ls /workspace/obsidian/tasks/AGENTS/DOING/*.md 2>/dev/null
 
 ## 5. Cleanup — thresholds de limpeza
 
-| Alvo | Threshold | Destino |
-|------|-----------|---------|
-| `/trash/*.md` sem refs, < 3d | arquivar | `.trashbin/` |
-| `/trash/*.md` sem refs, >= 3d | deletar | permanente |
-| `.ephemeral/scratch/` | > 7 dias | `.trashbin/` |
-| `.ephemeral/logs/` | > 14 dias | `.trashbin/` |
-| `.ephemeral/notes/` orfas | sem task ativa | `.trashbin/` |
-| `agents/*/outputs/` | > 30 dias | `.trashbin/` |
-| `.ephemeral/rss/` | > 500KB ou > 30 dias | `.trashbin/` |
+**Fonte da verdade:** `self/skills/meta/rules/spaces.md` (secoes trash/ e done/).
+Consultar la para thresholds atualizados — nao duplicar aqui.
 
 ## 6. Formato de reporte
 
 ```markdown
-[HH:MM] [doctor] HEALTH: disco XX%, N ferramentas ok, N issues
+[HH:MM] [keeper] HEALTH: disco XX%, N ferramentas ok, N issues
 ```
 
-Se critico → criar `/workspace/obsidian/inbox/ALERTA_doctor_<tema>.md`
+Se critico → criar `/workspace/obsidian/inbox/ALERTA_keeper_<tema>.md`
