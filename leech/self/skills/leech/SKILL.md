@@ -15,6 +15,7 @@ Skills sobre o sistema Leech em si: containers, CLI, logs, ambiente.
 | `leech/linux` | NixOS, Hyprland, Waybar, dotfiles, stow, debug de host — tudo de sistema Linux |
 | `leech/healthcheck` | Diagnostico do sistema — ferramentas, disco, load, workspace, git, tasks, cleanup |
 | `leech/upgrade` | Implementar e depurar uma feature do Leech de forma autonoma — worktree isolado, testes sem supervisao, entrega de branch pronto |
+| `leech/worktree` | Sessoes multi-repo para features da Estrategia — `leech wt new/switch/list/close` |
 
 ## O que e o Leech (contexto rapido)
 

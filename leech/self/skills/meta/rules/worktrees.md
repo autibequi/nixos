@@ -5,6 +5,32 @@ updated: 2026-03-23T16:00Z
 
 # Worktrees — Regra Universal de Implementacao
 
+**Existem dois tipos de worktree no sistema. Use o correto para cada contexto.**
+
+---
+
+## Tipo 1 — Sessoes multi-repo do usuario (`leech wt`)
+
+Para features da Estrategia que tocam multiplos repos. Gerenciado pelo CTO via CLI.
+
+```bash
+leech wt new FUK2-12345     # CTO cria
+leech wt FUK2-12345         # CTO ativa/switch
+leech wt main               # CTO volta pra main
+```
+
+Path: `/workspace/mnt/worktree/<sessao>/<repo>/`
+
+**Agentes trabalham dentro dessas sessoes** — editar em
+`/workspace/mnt/worktree/<sessao>/<repo>/` quando designados pelo CTO.
+Para apresentar o trabalho: `leech wt <sessao-do-agente>` notifica o CTO via inbox.
+
+Ver: `leech/worktree` skill para o fluxo completo.
+
+---
+
+## Tipo 2 — Propostas de agentes (`git worktree` manual)
+
 **Todo agente que implementar mudancas em codigo ou configs DEVE usar worktree.**
 Nunca editar diretamente na branch principal. Nunca commitar. Apresentar ao CTO no final.
 

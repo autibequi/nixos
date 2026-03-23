@@ -35,24 +35,28 @@ estrategiahq
 ### 1. Antes de qualquer implementacao: buscar trabalho existente
 
 ```bash
+# Ver sessoes multi-repo abertas
+leech wt
+
 # Buscar pelo codigo Jira em branches locais e remotas
 git branch -a | grep -i "<FUK2-XXXXX>"
 
-# Verificar worktrees abertas
-git worktree list
-
-# Verificar pastas irmas ao repo
-ls /workspace/mnt/estrategia/ | grep -i "<FUK2-XXXXX>"
+# Verificar worktrees abertas de uma sessao
+ls /workspace/mnt/worktree/ | grep -i "<FUK2-XXXXX>"
 ```
 
-Se ja existir branch ou worktree → continuar de la, nao criar novo.
+Se ja existir sessao → `leech wt FUK2-XXXXX` para ativar, nao criar novo.
 
-### 2. Decidir: branch ou worktree?
+### 2. Decidir: branch ou sessao multi-repo?
 
 | Situacao | Usar |
 |---|---|
-| **Bug fix / correcao pontual** (sem feature nova, sem migration, ~1-3 arquivos) | Branch simples: `git checkout -b FUK2-XXXXX/descricao-curta` |
-| **Feature nova / refactoring multi-camada / migration / worker** | Worktree isolado: `git worktree add -b FUK2-XXXXX/descricao-curta ../monolito-FUK2-XXXXX main` |
+| **Bug fix / correcao pontual** (~1-3 arquivos, 1 repo) | Branch simples: `git checkout -b FUK2-XXXXX/descricao-curta` |
+| **Feature multi-repo** (toca monolito + bo/front) | Sessao: `leech wt new FUK2-XXXXX` |
+| **Feature single-repo complexa** (migration, refactor multi-camada) | Sessao so nesse repo: `leech wt new FUK2-XXXXX` (skip outros na confirmacao) |
+
+**Sessao `leech wt`** cria worktrees em `/workspace/mnt/worktree/FUK2-XXXXX/<repo>/`
+para todos os repos da Estrategia. Ver skill `leech/worktree` para o fluxo completo.
 
 ### 3. Nomenclatura obrigatoria
 
