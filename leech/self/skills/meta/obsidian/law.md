@@ -21,8 +21,26 @@ mv /workspace/obsidian/tasks/AGENTS/DOING/*_SEUNOME.md \
    /workspace/obsidian/tasks/AGENTS/${NEXT}_SEUNOME.md 2>/dev/null
 ```
 
+### Estrutura de tasks/ — imutavel
+
+```
+tasks/
+├── AGENTS/        ← UNICO lugar para cards de agendamento de agentes
+│   └── DOING/     ← runner move o card aqui durante execucao
+├── TODO/          ← Kanban humano (Pedro) — tasks pendentes
+├── DOING/         ← Kanban humano (Pedro) — tasks em progresso
+└── DONE/          ← Kanban humano (Pedro) — tasks concluidas
+```
+
+**PROIBIDO para qualquer agente:**
+- Criar subpastas em `tasks/` (ex: `tasks/<nome>/`, `tasks/<nome>/done/`)
+- Salvar outputs, relatorios ou qualquer dado em `tasks/`
+- Cards concluidos vao para `bedrooms/<nome>/done/` — NUNCA para `tasks/<nome>/done/`
+
 **Violacao:** agente com clock que nao tem card em `tasks/AGENTS/` nem em `tasks/AGENTS/DOING/`.
 **Correcao wiseman:** criar card de recuperacao em `tasks/AGENTS/` para daqui +5min.
+**Violacao (subpasta):** qualquer pasta em `tasks/` que nao seja AGENTS, TODO, DOING ou DONE.
+**Correcao wiseman:** mover conteudo para `bedrooms/<agente>/done/` + deletar pasta + alerta inbox.
 
 ---
 
@@ -78,6 +96,8 @@ mv /workspace/obsidian/tasks/AGENTS/DOING/*_SEUNOME.md \
 
 - Agentes NAO leem nem escrevem na memoria de outros agentes
 - Excecao: wiseman pode ler memoria de qualquer agente (modo META/ENFORCE)
+- **Agentes NUNCA criam subpastas em `tasks/`** — outputs e historicos de ciclo vao em `bedrooms/<nome>/done/`
+- Dados que nao sao cards de agendamento nao pertencem a `tasks/` em nenhuma hipotese
 
 **Violacao:** arquivo de memoria de agente A com `updated:` mais recente do que o ultimo ciclo do agente A.
 
