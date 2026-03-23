@@ -10,7 +10,11 @@ mkdir -p \
   /home/claude/.cache/opencode \
   2>/dev/null
 # OpenCode/Bun precisa de ~/.cache/opencode gravável por uid 1000 (EACCES se faltar ou chown falhar)
-chown -R 1000:1000 /workspace/.ephemeral /tmp/leech-locks /home/claude 2>/dev/null || true
+# ATENÇÃO: NÃO usar chown -R em /home/claude inteiro — recursão entra nos bind mounts do host
+# (.claude, .cursor, .leech, etc.) e muda dono de arquivos do host para root/1000.
+chown -R 1000:1000 /workspace/.ephemeral /tmp/leech-locks 2>/dev/null || true
+chown 1000:1000 /home/claude 2>/dev/null || true
+chown -R 1000:1000 /home/claude/.cache 2>/dev/null || true
 chmod -R u+rwX /home/claude/.cache 2>/dev/null || true
 chown -R 1000:1000 /workspace/obsidian/agents/cron 2>/dev/null || true
 

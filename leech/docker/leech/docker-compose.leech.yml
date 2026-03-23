@@ -67,7 +67,7 @@ x-base-volumes: &base-volumes
   - /sys/class/net:/host/sys/class/net:ro
   - /sys/block:/host/sys/block:ro
   # Logs de servicos Docker (leech docker run/test) — acessiveis pelo agente
-  - ${XDG_DATA_HOME:-${HOME}/.local/share}/leech/logs/dockerized:/workspace/logs/docker:rw
+  - ${XDG_DATA_HOME:-${HOME}/.local/share}/leech/logs/dockerized:/workspace/logs/docker:ro
   # Docker socket removido — agente usa proxy tcp://localhost:2375 (ver service docker-proxy)
   # Dockerized configs — agente pode editar docker-compose, .env, etc.
   - ${HOME}/.local/share/leech/containers:/workspace/dockerized
