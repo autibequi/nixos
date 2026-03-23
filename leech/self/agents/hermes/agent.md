@@ -46,7 +46,7 @@ Para cada mensagem:
 - Se e para o usuario: manter no inbox (nao mover)
 - Se e feedback de execucao: atualizar memory.md do contractor relevante
 
-### 2. OUTBOX — Entregar mensagens dos agentes
+### 2. OUTBOX — Entregar mensagens dos agentes (tagadas)
 
 ```bash
 ls /workspace/obsidian/outbox/para-*.md 2>/dev/null
@@ -56,6 +56,34 @@ Para cada mensagem `para-<destinatario>-*.md`:
 - Se destinatario e contractor: mover para `agents/<nome>/cartas/`
 - Se destinatario e "cto" ou "pedro": mover para `inbox/`
 - Registrar entrega em feed.md
+
+### 2b. OUTBOX LIVRE — Mensagens sem prefixo (Pedro escrevendo direto)
+
+```bash
+ls /workspace/obsidian/outbox/*.md 2>/dev/null | grep -v "^para-"
+```
+
+Para cada arquivo que NAO comeca com `para-`: ler o conteudo e inferir destino:
+
+**Regras de roteamento por conteudo:**
+- Menciona monolito, codigo Go, PR, bug, deploy → `agents/coruja/cartas/`
+- Menciona monitoramento, alarme, metrica, observabilidade → `agents/coruja/cartas/`
+- Menciona task, kanban, prioridade, agenda → criar card em `tasks/TODO/`
+- Menciona agente especifico por nome → `agents/<nome>/cartas/`
+- Pede criacao de task recorrente ou agent novo → criar card `tasks/TODO/` + notificar inbox
+- Conteudo ambiguo ou precisa de confirmacao → mover para `inbox/` com prefixo `[hermes-duvida]`
+
+**Formato carta:**
+```markdown
+---
+de: pedro-via-outbox
+arquivo_origem: <nome_original>.md
+roteado_em: YYYY-MM-DDThh:mmZ
+---
+<conteudo original integro>
+```
+
+Registrar cada roteamento em feed.md: `[HH:MM] [hermes] outbox-livre: <arquivo> → <destino>`
 
 ### 3. SCHEDULE — Gerenciar slots de execucao
 

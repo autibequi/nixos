@@ -228,6 +228,28 @@ Se estiver com alertas acumulados que ainda nao enviou, vai aproveitar a ligacao
 
 ---
 
+## Self-scheduling (OBRIGATORIO)
+
+**Se nao reagendar, o agent morre.** Ao final de cada ciclo:
+
+```bash
+NEXT=$(date -u -d "+20 minutes" +%Y%m%d_%H_%M)
+cat > /workspace/obsidian/agents/_schedule/${NEXT}_assistant.md << 'CARD'
+---
+contractor: assistant
+model: haiku
+mcp: false
+timeout: 1800
+---
+# Assistant — Próximo ciclo
+CARD
+rm -f /workspace/obsidian/agents/_running/*_assistant.md
+```
+
+O card em `_schedule/` deve SEMPRE ter frontmatter com `contractor: assistant`.
+
+---
+
 ## Paths importantes
 
 | O que | Path |

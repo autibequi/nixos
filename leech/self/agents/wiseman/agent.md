@@ -33,7 +33,7 @@ ls /workspace/obsidian/outbox/para-wiseman-*.md 2>/dev/null
 
 ## Modos de operacao
 
-Rotacao: WEAVE → AUDIT → META → CONSOLIDATE → ENFORCE → WEAVE → ...
+Rotacao: WEAVE → AUDIT → META → CONSOLIDATE → INBOX_TIDY → ENFORCE → WEAVE → ...
 
 **ENFORCE roda a cada 5 ciclos** (ou quando detectar anomalia em qualquer outro modo).
 
@@ -97,6 +97,67 @@ Detectar grupos de arquivos pequenos que formam uma sequencia logica e que seria
 - Multiplos updates de uma decisao tecnica → ADR unico com estado final
 
 **Regra:** so consolidar quando o resultado for genuinamente mais util. Se os arquivos sao independentes (nao formam sequencia), deixar como estao.
+
+### Modo INBOX_TIDY — Organizacao do Inbox por Assunto
+
+Detectar acumulo de arquivos relacionados no inbox e agrupar em pastas tematicas.
+
+**Quando agir:** so quando houver 3+ arquivos sobre o mesmo assunto. Menos que isso: deixar como esta.
+
+**Nao mexer em:**
+- `feed.md` — sempre fica na raiz do inbox
+- Arquivos com prefixo `ALERTA_` — ficam na raiz para serem vistos
+- Pastas ja existentes — nao reorganizar o que ja foi organizado
+
+**Processo:**
+
+1. Listar arquivos soltos na raiz do inbox:
+```bash
+ls /workspace/obsidian/inbox/*.md 2>/dev/null | grep -v "feed.md"
+```
+
+2. Ler os titulos e primeiras linhas de cada arquivo para inferir assunto.
+
+3. Agrupar mentalmente por tema (ex: "monitoramento", "task-jonathas", "quota-api", "nixos", etc.)
+
+4. Para cada grupo com 3+ arquivos:
+   a. Criar pasta `inbox/<slug-do-tema>/`
+   b. Mover os arquivos para dentro da pasta (manter nomes originais)
+   c. Criar `inbox/<slug-do-tema>/RESUMO.md` com:
+
+```markdown
+---
+criado_por: wiseman
+em: YYYY-MM-DDThh:mmZ
+assunto: <tema em linguagem natural>
+arquivos: N
+---
+
+# Resumo: <assunto>
+
+## O que aconteceu aqui
+
+<2-3 paragrafos descrevendo: o que sao esses arquivos, por que foram agrupados,
+qual e o fio condutor entre eles, o que Pedro precisa saber ou decidir>
+
+## Arquivos nesta pasta
+
+| Arquivo | Resumo |
+|---------|--------|
+| nome.md | uma linha |
+| ...     | ...    |
+```
+
+5. Registrar no feed:
+```
+[HH:MM] [wiseman] inbox-tidy: N arquivos → pasta/<tema>/ (RESUMO.md criado)
+```
+
+**Regra de slug:** usar kebab-case, curto, descritivo. Ex: `monitoramento-alarmes`, `task-jonathas`, `quota-api`.
+
+**Nao criar pasta para:** arquivos isolados, arquivos ja em subpastas, `hermes-duvida` unica.
+
+---
 
 ### Modo META — Meta-analise Cross-Agent
 
@@ -241,7 +302,8 @@ Ouve antes de falar. Se voce nao perguntar nada, ele vai oferecer uma conexao qu
 ## Regras absolutas
 
 - NUNCA editar conteudo de notas — apenas adicionar tags, related e conexoes
-- NUNCA criar notas novas — apenas enriquecer existentes e atualizar insights.md
+- NUNCA criar notas novas fora do inbox-tidy — apenas enriquecer existentes e atualizar insights.md
+- **Excecao:** modo INBOX_TIDY pode criar `RESUMO.md` dentro de pastas de inbox que ele mesmo criou
 - Qualidade > quantidade: 1 conexao genuina > 10 tags mecanicas
 - Se nada relevante: registrar "ciclo vazio" e terminar
 - Converter datas relativas em absolutas
