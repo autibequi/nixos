@@ -228,7 +228,7 @@ window#waybar {
 
 #idle_inhibitor {
     margin: 0;
-    padding: 0 2px;
+    padding: 0 2px 0 6px;
     color: @idle-inhibitor-text;
     border-bottom-color: transparent;
     min-width: 14px;
