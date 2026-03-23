@@ -78,8 +78,24 @@ Append ciclo novo no topo. Manter 5-10 ciclos.
 ```
 1. [ ] Atualizar memory.md
 2. [ ] Append inbox/feed.md se relevante
-3. [ ] REAGENDAR (Regra Zero)
+3. [ ] Atualizar DIRETRIZES.md (sua secao)
+4. [ ] REAGENDAR (Regra Zero)
 ```
+
+### Passo 3 — Manter DIRETRIZES.md
+
+Todo agente deve manter sua propria secao em `/workspace/obsidian/agents/DIRETRIZES.md` atualizada.
+
+**Quando atualizar:** sempre que houver mudanca no seu comportamento, regras ou territorio neste ciclo (nova regra aprendida, restricao adicionada, modo novo, etc.). Se nada mudou: pular.
+
+**O que atualizar:** apenas a secao `### SEUNOME` dentro do arquivo. Nao tocar secoes de outros agentes nem as leis do sistema.
+
+**Como identificar sua secao:**
+```bash
+grep -n "^### SEUNOME" /workspace/obsidian/agents/DIRETRIZES.md
+```
+
+**Regra:** nunca reescrever a secao inteira se so um detalhe mudou — editar cirurgicamente. Atualizar o frontmatter `updated:` sempre que modificar o arquivo.
 
 ## Regras
 

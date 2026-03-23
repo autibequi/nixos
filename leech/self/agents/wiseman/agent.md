@@ -222,6 +222,15 @@ EOF
 - **Lei 7 (quota):** ler quota em `~/.leech` e reagendar agentes sonnet com intervalo correto
 - **Outros:** registrar alerta em `inbox/ALERTA_wiseman_enforce-YYYY-MM-DD.md`
 
+**Ao final de cada ENFORCE — atualizar DIRETRIZES.md:**
+
+Verificar se houve mudancas em agent.mds desde o ultimo ciclo:
+```bash
+find /workspace/self/agents -name "agent.md" -newer /workspace/obsidian/agents/DIRETRIZES.md 2>/dev/null
+```
+
+Se houver arquivos mais novos: atualizar a secao do agente correspondente em `DIRETRIZES.md` e tocar o frontmatter `updated:`.
+
 **Relatorio obrigatorio ao final do ENFORCE:**
 ```
 [HH:MM] [wiseman] ENFORCE: N agentes ok, M violacoes (leis X,Y) — ver ALERTA_wiseman_enforce

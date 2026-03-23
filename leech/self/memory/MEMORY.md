@@ -18,3 +18,4 @@
 - [reference_claude_process_nix.md](reference_claude_process_nix.md) — Processo Claude Code no nix = .claude-unwrapped; contar só linhas com pts/ no docker top
 - [feedback_hyprctl_pixels.md](feedback_hyprctl_pixels.md) — monitors[].width = pixels físicos; activewindow.size[] = pixels lógicos — dividir pelo .scale antes de comparar frações
 - [reference_hyprscroller_config.md](reference_hyprscroller_config.md) — Opções confirmadas/inexistentes do hyprscroller; workarounds shell para focus_wrap e colresize_no_wrap
+- [project_agent_schedule_frontmatter.md](project_agent_schedule_frontmatter.md) — Cards em _schedule/ precisam de frontmatter YAML com contractor:/agent: ou são ignorados pelo tick (debug: head -3 ~/.ovault/Work/agents/_schedule/*.md)
