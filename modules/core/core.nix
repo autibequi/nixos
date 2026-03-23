@@ -47,6 +47,10 @@
     cpu.amd.updateMicrocode = true;
   };
 
+  # /tmp em RAM — com 46GB+ RAM é gratuito e acelera builds/temp
+  boot.tmp.useTmpfs = true;
+  boot.tmp.tmpfsSize = "8G";
+
   # Add local bin to PATH
   environment.localBinInPath = true;
 

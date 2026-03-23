@@ -1,0 +1,5 @@
+(
+    prefix: Some("tr"),
+    language_delimiter: Some(">"),
+    max_entries: Some(3),
+)

@@ -18,6 +18,7 @@
     rofi-emoji
 
     killall
+    swww
     # apps
     onlyoffice-desktopeditors # office space apps
     sidequest # for oculus sideloading

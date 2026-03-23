@@ -2,7 +2,7 @@ Config(
     x: Fraction(0.5), // Centralizado horizontalmente
     y: Fraction(0.5), // Centralizado verticalmente
     width: Absolute(700), // Ligeiramente mais compacto para efeito de "caixa flutuante"
-    height: Absolute(400), // Altura reduzida para reforçar o visual flutuante
+    height: Absolute(500),
     hide_icons: false,
     ignore_exclusive_zones: true, // Sobrepõe tudo, sempre visível
     layer: Top, // Prioridade máxima de exibição
@@ -12,12 +12,16 @@ Config(
     max_entries: Some(10), // Ajuste para visual mais limpo
     plugins: [
         "libapplications.so",
+        "libhyprland_windows.so",
         "libshell.so",
         "libwebsearch.so",
         "librink.so",
+        "libkidex.so",
         "libsymbols.so",
+        "libtranslate.so",
+        "libdictionary.so",
     ],
-    border_radius: Some(22), // Bordas ainda mais suaves para efeito flutuante
-    shadow: Some(true), // Sombra acentuada para destacar a caixa
-    opacity: Some(0.94), // Mais transparência para reforçar o efeito flutuante
+    border_radius: Some(22),
+    shadow: Some(true),
+    opacity: Some(0.94),
 )

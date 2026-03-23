@@ -41,4 +41,10 @@
 
   # LM Studio API Server (disabled — lms binary segfaults, needs manual install)
   services.lmstudio.enable = false;
+
+  # WiFi sem power saving — elimina spikes de latência de 100-400ms
+  networking.networkmanager.wifi.powersave = false;
+
+  # IRQ balance explícito — distribui IRQs nos cores AMD; CachyOS não ativa no NixOS por padrão
+  services.irqbalance.enable = true;
 }

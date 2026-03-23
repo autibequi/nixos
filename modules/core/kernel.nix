@@ -132,6 +132,10 @@
 
     # Permite containers rootless (Podman) bindarem portas baixas (80, 443, etc.)
     "net.ipv4.ip_unprivileged_port_start" = 0;
+
+    # kswapd acorda mais cedo (evita cliff de reclaim), desativa boost que causa spikes
+    "vm.watermark_scale_factor" = 125;
+    "vm.watermark_boost_factor" = 0;
   };
 
   # Configurar compressão.

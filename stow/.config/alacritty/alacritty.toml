@@ -1,6 +1,7 @@
 # Alacritty — config principal
 # Otimizado para múltiplas instâncias abertas simultaneamente
 
+[general]
 import = ["~/.config/alacritty/dark-theme.toml"]
 
 [window]

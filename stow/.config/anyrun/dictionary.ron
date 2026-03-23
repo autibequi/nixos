@@ -1,0 +1,4 @@
+(
+    prefix: Some("def"),
+    max_entries: Some(3),
+)

@@ -62,8 +62,8 @@ dark_theme() {
     if [ -f "$WALLPAPER_DARK" ]; then
         swww img "$WALLPAPER_DARK" \
             --transition-type fade \
-            --transition-fps 60 \
-            --transition-duration 0.3
+            --transition-fps 30 \
+            --transition-duration 1.2
     fi
 
     # Regenerate centralized colors
@@ -83,8 +83,8 @@ light_theme() {
     if [ -f "$WALLPAPER_LIGHT" ]; then
         swww img "$WALLPAPER_LIGHT" \
             --transition-type fade \
-            --transition-fps 60 \
-            --transition-duration 0.3
+            --transition-fps 30 \
+            --transition-duration 1.2
     fi
 
     # Regenerate centralized colors
