@@ -14,9 +14,7 @@ graph TB
         L["Leech"]
         subgraph APP["Project Containers"]
             direction LR
-            MONO["monolito"]
-            BO["bo"]
-            FRONT["front-student"]
+            MONO["monolito"] ~~~ BO["bo"] ~~~ FRONT["front-student"]
         end
     end
 
@@ -25,7 +23,7 @@ graph TB
         PROJ[("~/projects/estrategia")]
     end
 
-    USER -->|agent instance| L
+    USER -->|multiple agent instances| L
     USER --> APP
     CHROME -.->|relay| L
     VOLS --> CONTAINERS
