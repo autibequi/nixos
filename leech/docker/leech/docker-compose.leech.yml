@@ -2,6 +2,8 @@ x-env-base: &env-base
   # Tokens e boot flags vêm de ~/.leech (sourced pelo entrypoint + todos os hooks)
   PATH: /home/claude/.local/bin:/home/claude/.nix-profile/bin:/home/claude/.local/bin:/usr/bin:/bin
   CLAUDE_ENV: container
+  # Cache (Bun/OpenCode, etc.) — volume efémero já com chown no entrypoint; evita EACCES em ~/.cache
+  XDG_CACHE_HOME: /workspace/.ephemeral/cache
   # Docker via proxy seguro (sem socket direto — EXEC e BUILD bloqueados)
   DOCKER_HOST: tcp://localhost:2375
   WAYLAND_DISPLAY: ${WAYLAND_DISPLAY:-wayland-1}

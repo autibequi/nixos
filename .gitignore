@@ -74,4 +74,8 @@ workbench/*
 .env
 
 .weblive
-.cursor/
+# Cursor: regras versionadas; espelho do session-start é gerado localmente
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
+.cursor/session-boot.md

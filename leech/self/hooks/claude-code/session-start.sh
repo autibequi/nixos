@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Hook: SessionStart — injeta boot context pro Claude via stdout
-# stdout → system-reminder (Claude vê) | stderr → terminal do user (dashboard visual)
+# stdout → system-reminder (Claude vê) | stderr → terminal (só display host_attached, se ativo)
 
 # ── Detecta workspace ────────────────────────────────────────────
 if [ -d "/workspace/nixos" ] && [ -f "/workspace/nixos/CLAUDE.md" ]; then
@@ -15,12 +15,22 @@ else
   [ -f "$_dir/CLAUDE.md" ] && WS="$_dir" || WS="$(pwd)"
 fi
 
-# ── Dashboard visual pro user (stderr) ──────────────────────────
-BOOTSTRAP_SH="$WS/scripts/bootstrap.sh"
-[ -x "$BOOTSTRAP_SH" ] && "$BOOTSTRAP_SH" >&2
-
 # ── Clear lazy-context locks da sessão anterior ──────────────────
 rm -f /tmp/leech-ctx-loaded /tmp/leech-ctx-loaded.pending
+
+# ── Cursor: espelha todo o stdout deste hook para ficheiro na raiz do projeto ──
+# Preferimos $WS/.cursor/; se for RO (ex.: /workspace/host), fallback para /workspace/mnt
+# (regra em .cursor/rules/ manda o agente ler; gitignore só o .md gerado)
+CURSOR_BOOT=""
+for _c in "$WS/.cursor/session-boot.md" "/workspace/mnt/.cursor/session-boot.md"; do
+  _d="$(dirname "$_c")"
+  if mkdir -p "$_d" 2>/dev/null && : >"$_c" 2>/dev/null; then
+    rm -f "$_c"
+    CURSOR_BOOT="$_c"
+    break
+  fi
+done
+[ -n "$CURSOR_BOOT" ] && exec > >(tee "$CURSOR_BOOT")
 
 # ── Resolve flags ────────────────────────────────────────────────
 # 1. Salva overrides de processo (maior prioridade — ex: PERSONALITY=OFF leech run)
@@ -249,7 +259,7 @@ if [ "$HOST_ATTACHED" = "1" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1
     printf "\n"
     printf "  %-12s .........  OK    [  12ms]\n" "BOOT"
     printf "  %-12s .........  OK    [   8ms]  docker\n" "ENV"
-    printf "  %-12s .........  OK    [  88ms]\n" "BOOTSTRAP"
+    printf "  %-12s .........  OK    [  88ms]\n" "SESSION"
     printf "  %-12s .........  OK    [  23ms]  %s  ↑%s  %s dirty\n" "GIT" "$_git_branch" "$_git_ahead" "$_git_dirty"
     printf "  %-12s .........  OK    [  34ms]\n" "DIRETRIZES"
     printf "  %-12s .........  OK    [  21ms]\n" "SELF"
