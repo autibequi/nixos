@@ -5,7 +5,7 @@ description: Skill composta do sistema Leech — infraestrutura, containers, CLI
 
 # Leech — Skill Composta
 
-Skills sobre o sistema Leech em si: containers, CLI, logs, ambiente, lab mode.
+Skills sobre o sistema Leech em si: containers, CLI, logs, ambiente.
 
 ## Sub-skills
 

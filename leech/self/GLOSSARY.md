@@ -25,7 +25,8 @@ Nomenclatura do sistema. Referencia rapida para entender os termos usados em ski
 |-----------------|-------------|
 | `leech-dk-<service>` | Container Docker de servico (ex: leech-dk-monolito-app) |
 | `leech-<slug>` | Sessao Claude ativa (proj_name em paths.rs) |
-| `LEECH_*` | Env vars do sistema (LEECH_NIXOS_DIR, LEECH_ROOT, LEECH_ENGINE, LEECH_MODEL, LEECH_EDIT, LEECH_DEBUG, LEECH_SPLASH) |
+| `LEECH_*` | Env vars do sistema (LEECH_NIXOS_DIR, LEECH_ROOT, LEECH_ENGINE, LEECH_MODEL, LEECH_DEBUG, LEECH_SPLASH) |
+| `HOST_ATTACHED` | 1 quando --host ativo (~/nixos rw em /workspace/host). Substitui antigo LEECH_EDIT. |
 | `leech-tick` | Systemd timer/service (roda a cada 10min) |
 
 ## Paths essenciais

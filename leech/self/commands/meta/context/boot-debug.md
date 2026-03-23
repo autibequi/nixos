@@ -77,7 +77,7 @@ Substituir valores reais detectados na sessão.
 🚀 START
 │
 🔵 ├─[SEMPRE]────────────────────── BOOT FLAGS
-│      datetime · personality · autocommit · in_docker · leech_edit...
+│      datetime · personality · autocommit · in_docker · host_attached...
 │
 🔵 ├─[leech_debug=OFF + interativo]── LITE.md                    ← ATIVO
 🔴 │                                 DIRETRIZES.md              ← requer leech_debug=ON
@@ -90,7 +90,7 @@ Substituir valores reais detectados na sessão.
 │
 🔵 ├─[SEMPRE]────────────────────── MEMORY RESTORE (N arquivos)
 │
-🔴 ├─[leech_edit=1 + interativo]─────  BOOT DISPLAY              ← requer lab mode
+🔴 ├─[host_attached=1 + interativo]─────  BOOT DISPLAY              ← requer --host
 │
 🔴 ├─[beta=ON]───────────────────────  BETA OVERRIDES
 │
@@ -121,9 +121,9 @@ Avaliar e exibir recomendações baseadas no estado atual:
     Se a sessão envolver introspecção ou auto-modificação do sistema:
     invocar skill que carrega SELF.md explicitamente
 
-  · in_docker=1 + leech_edit=0 → /workspace/host não montado
+  · in_docker=1 + host_attached=0 → /workspace/host não montado
     Lab mode inativo. Para editar NixOS/Leech diretamente:
-    leech lab (monta /workspace/host)
+    leech --host (monta /workspace/host)
 
   · autocommit=OFF (padrão saudável)
     Commits manuais — comportamento correto para sessões interativas.
@@ -138,7 +138,7 @@ Avaliar e exibir recomendações baseadas no estado atual:
   COMANDOS ÚTEIS
   ─────────────────────────────────────────────────────────────────
   Ativar modo completo:    Editar ~/.leech → LEECH_DEBUG=ON
-  Ativar lab mode:         leech lab
+  Ativar --host:         leech --host
   Carregar personality:    invocar skill meta:personality (se existir)
   Ver uso de contexto:     /meta:context:usage
   Cristalizar sessão:      /meta:absorb

@@ -15,14 +15,13 @@
 
 ### Mapa de /workspace/
 
-```
-/workspace/
-├── self/       ← código-fonte do Leech (~/nixos/leech/self; skills, hooks, agents, scripts)
-├── mnt/        ← ZONA DE TRABALHO — projeto do usuário (~/projects, ~/nixos, etc.)
-├── obsidian/   ← vault Obsidian — cérebro persistente, sempre editável por qualquer agente
-├── logs/       ← logs de containers Docker e do sistema host
-└── host/       ← repo NixOS completo (~/nixos), editável — disponível com --host ou mount_host=true
-```
+| Path | Permissão | O que é |
+|------|-----------|---------|
+| `/workspace/self/` | **sempre rw** | Engine Leech (skills, hooks, agents, scripts) |
+| `/workspace/obsidian/` | **sempre rw** | Vault Obsidian — cérebro compartilhado entre agentes |
+| `/workspace/mnt/` | **sempre rw** | Zona de trabalho — projeto do host |
+| `/workspace/host/` | **ro** default, **rw** com `--host` | Repo NixOS completo (`~/nixos`) |
+| `/workspace/logs/` | ro | Logs Docker e sistema host |
 
 Ativar host: `leech --host`, `leech new --host`, ou `mount_host=true` em `~/.leech`.
 

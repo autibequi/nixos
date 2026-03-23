@@ -35,7 +35,8 @@ else
   WS="$(pwd)"
 fi
 { [ "${CLAUDE_ENV:-}" = "container" ] || [ -f "/.dockerenv" ]; } && IN_DOCKER="1" || IN_DOCKER="${IN_DOCKER:-0}"
-[ -d "/workspace/host" ] && LEECH_EDIT="1" || LEECH_EDIT="${LEECH_EDIT:-0}"
+HOST_ATTACHED="${HOST_ATTACHED:-0}"
+{ [ "$HOST_ATTACHED" = "1" ] || { [ -d "/workspace/host" ] && [ -w "/workspace/host" ]; }; } && HOST_ATTACHED="1"
 
 # ── Injeta LITE + ENV + OBSIDIAN ──────────────────────────────────────────────
 inject_full_context() {
@@ -59,24 +60,17 @@ NÃO executar: nixos-rebuild, nh os switch, systemctl — não afeta o host.
 Para comandos de sistema, pedir ao usuário rodar no host.
 Superpoderes: todo Nixpkgs disponível via `nix-shell -p <pkg>`.
 
-Estrutura /workspace:
-  /workspace/self/          engine dos agentes (prompts, scripts, skills, personas)
-  /workspace/mnt/           ZONA DE TRABALHO — pasta do host attachada (rw)
-                            pode ser ~/nixos, ~/projects/ com vários repos, etc.
-                            aqui você lê, edita e commita código
-  /workspace/obsidian/      CÉREBRO PERSISTENTE entre execuções
-                            o usuário acessa no Obsidian — use para notas,
-                            kanban, resultados, memória cross-session
-  /workspace/logs/          logs attachados pelo usuário
-    host/journal/           logs do sistema host (journald)
-    docker/monolito/        logs do monolito Go
-    docker/bo-container/    logs do BO Container
-    docker/front-student/   logs do Front Student
+Estrutura /workspace — permissões:
+  /workspace/self/          SEMPRE rw — engine Leech (skills, hooks, agents, scripts)
+  /workspace/obsidian/      SEMPRE rw — vault Obsidian (cérebro compartilhado, todos os agentes)
+  /workspace/mnt/           SEMPRE rw — zona de trabalho (projeto do host)
+  /workspace/host/          ro default, rw com --host — repo NixOS (~/nixos)
+  /workspace/logs/          logs do host e serviços Docker
   /workspace/dockerized/    configs docker dos serviços (Dockerfile, compose, .env)
-  /workspace/.hive-mind/    área efêmera compartilhada entre containers (locks, sinais)
+  /workspace/.hive-mind/    área efêmera compartilhada entre containers
 
-Se host_attached=1: /workspace/host/ contém o repo NixOS+Leech (editável, ~/nixos).
-Se host_attached=0: /workspace/mnt é um projeto externo do usuário.
+host_attached=1 (--host ou mount_host=true): /workspace/host/ é rw — editar NixOS+Leech.
+host_attached=0: /workspace/host/ existe mas é read-only.
 DOCKER
     if [ "$HOST_ATTACHED" = "1" ]; then
       cat <<'LEECH_REPOS'

@@ -47,6 +47,21 @@
 
 ---
 
+## Workspace — Permissões
+
+| Path | Permissão | Descrição |
+|------|-----------|-----------|
+| `/workspace/self/` | **sempre rw** | Engine Leech — skills, hooks, agents, scripts |
+| `/workspace/obsidian/` | **sempre rw** | Vault Obsidian — cérebro compartilhado |
+| `/workspace/mnt/` | **sempre rw** | Zona de trabalho — projeto do host |
+| `/workspace/host/` | ro default, **rw com `--host`** | Repo NixOS (`~/nixos`) |
+
+- `host_attached=1`: `/workspace/host/` editável — edite NixOS, dotfiles, CLI
+- `host_attached=0`: `/workspace/host/` é read-only (pode ler, não pode escrever)
+- `/workspace/self/` e `/workspace/obsidian/` são **sempre editáveis** por qualquer agente
+
+---
+
 ## Obsidian — Cerebro do Sistema
 
 O vault Obsidian esta montado em `/workspace/obsidian/`.

@@ -92,10 +92,12 @@ if [ "$MOBILE" = "1" ]; then
   echo "  - Sem tabelas largas; usar listas verticais"
   echo "  - Diagramas: vertical em vez de horizontal"
 fi
-echo "REGRA: persistência → APENAS /workspace/self/ sobrevive entre sessões."
-echo "       Configs, memórias, traços de comportamento: SEMPRE salvar em /workspace/self/."
-echo "       /home/claude/.claude/ é read-only — não tentar escrever lá."
-echo "       Se não conseguir persistir em /workspace/self/, emitir AVISO explícito ao usuário."
+echo "REGRA: persistência entre sessões:"
+echo "       /workspace/self/      — SEMPRE rw — engine Leech (skills, hooks, agents, scripts)"
+echo "       /workspace/obsidian/  — SEMPRE rw — vault Obsidian (cérebro compartilhado)"
+echo "       /workspace/host/      — ro por default, rw com --host (host_attached=1)"
+echo "       /home/claude/.claude/ — read-only — não tentar escrever lá"
+echo "       Configs, memórias, traços de comportamento: salvar em /workspace/self/"
 echo "---/BOOT---"
 
 # ────────────────────────────────────────────────────────────────
