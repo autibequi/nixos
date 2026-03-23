@@ -30,6 +30,8 @@ leech_usage() {
   printf "  %s   Nova sessão no container. Exige --engine (ou engine= em ~/.leech). (default)\n" "new      "
   printf "  %s   Abre bash no container com o projeto montado.\n" "shell    "
   printf "  %s   Mostra lista de sessões e permite escolher qual retomar.\n" "resume   "
+  printf "  %s   Nova sessão com engine Cursor (atalho para leech new --engine=cursor).\n" "cursor   "
+  printf "  %s   Nova sessão com engine OpenCode (atalho para leech new --engine=opencode).\n" "opencode "
   printf "  %s   Ferramentas Claude: usage, token.\n" "claude   "
   printf "  %s   Build da imagem Docker do leech (leech).\n" "build    "
   printf "  %s   Para todos os containers do projeto.\n" "down     "
@@ -333,6 +335,150 @@ leech_resume_usage() {
     # :flag.usage
     printf "  %s\n" "--resume SESSION_ID"
     printf "    UUID da sessão (opcional; sem isso mostra lista)\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--host"
+    printf "    Monta ~/nixos em /workspace/host (rw)\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "Arguments:"
+
+    # :argument.usage
+    printf "  %s\n" "DIR"
+    printf "    Diretório do projeto (default ~/projects)\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+leech_cursor_usage() {
+  printf "leech cursor - Nova sessão com engine Cursor (atalho para leech new --engine=cursor).\n\n"
+
+  printf "%s\n" "Usage:"
+  printf "  leech cursor [DIR] [OPTIONS]\n"
+  printf "  leech cursor --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--init-md FILE"
+    printf "\n"
+    printf "    %s\n" "Default: contexto.md"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--danger"
+    printf "\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--resume SESSION_ID"
+    printf "\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--model MODEL"
+    printf "\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--instance ID"
+    printf "\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--rw"
+    printf "\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--ro"
+    printf "\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--host"
+    printf "    Monta ~/nixos em /workspace/host (rw)\n"
+    echo
+
+    # :command.usage_fixed_flags
+    printf "  %s\n" "--help, -h"
+    printf "    Show this help\n"
+    echo
+
+    # :command.usage_args
+    printf "%s\n" "Arguments:"
+
+    # :argument.usage
+    printf "  %s\n" "DIR"
+    printf "    Diretório do projeto (default ~/projects)\n"
+    echo
+
+  fi
+}
+
+# :command.usage
+leech_opencode_usage() {
+  printf "leech opencode - Nova sessão com engine OpenCode (atalho para leech new --engine=opencode).\n\n"
+  printf "Alias: oc\n"
+  echo
+
+  printf "%s\n" "Usage:"
+  printf "  leech opencode [DIR] [OPTIONS]\n"
+  printf "  leech opencode --help | -h\n"
+  echo
+
+  # :command.long_usage
+  if [[ -n "$long_usage" ]]; then
+    printf "%s\n" "Options:"
+
+    # :command.usage_flags
+    # :flag.usage
+    printf "  %s\n" "--init-md FILE"
+    printf "\n"
+    printf "    %s\n" "Default: contexto.md"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--danger"
+    printf "\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--resume SESSION_ID"
+    printf "\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--model MODEL"
+    printf "\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--instance ID"
+    printf "\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--rw"
+    printf "\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--ro"
+    printf "\n"
     echo
 
     # :flag.usage
@@ -1730,6 +1876,8 @@ leech_resolve_model_id() {
 # Model flag para binários que aceitam --model=<id> (claude, cursor/agent).
 # Aceita engine como argumento opcional para usar o modelo por engine.
 # Ordem: --model= (CLI) > model_<engine>= (~/.leech) > model= (~/.leech).
+# Cursor: NÃO faz fallback para model= global — sonnet/haiku/opus viram IDs Claude
+# (claude-*), que o binário `agent` não aceita. Use só model_cursor= ou --model com ID do Cursor.
 leech_model_flag() {
   local engine="${1:-}"
   local cli_flag="${args['--model']:-${flag_model:-}}"
@@ -1740,9 +1888,24 @@ leech_model_flag() {
     cursor)   per_engine="${LEECH_MODEL_CURSOR:-}" ;;
   esac
   local m="${cli_flag:-${per_engine:-$LEECH_MODEL}}"
-  local id
-  id="$(leech_resolve_model_id "$m")"
-  [[ -n "$id" ]] && echo "--model $id" || echo ""
+  case "${engine,,}" in
+    cursor) m="${cli_flag:-$per_engine}" ;;
+  esac
+
+  case "${engine,,}" in
+    cursor)
+      [[ -z "$m" ]] && echo "" && return
+      case "${m,,}" in
+        haiku | opus | sonnet) echo "" ;;
+        *) echo "--model $m" ;;
+      esac
+      ;;
+    *)
+      local id
+      id="$(leech_resolve_model_id "$m")"
+      [[ -n "$id" ]] && echo "--model $id" || echo ""
+      ;;
+  esac
 }
 
 # Resolve model ID bruto (sem flag prefix) para engines como opencode que usam env var.
@@ -1944,9 +2107,7 @@ leech_session_run() {
     cursor)
       danger="$(leech_danger_flag cursor)"
       model="$(leech_model_flag cursor)"
-      local name_flag=""
-      [[ -n "$mount_path" ]] && name_flag=" --name ${mount_path##*/}"
-      local agent_flags="${danger}${model:+ $model}${name_flag}"
+      local agent_flags="${danger}${model:+ $model}"
 
       local cursor_envs=()
       cursor_envs+=(-e "CLAUDIO_MOUNT=$mount_path")
@@ -3515,6 +3676,22 @@ leech_resume_command() {
 }
 
 # :command.function
+leech_cursor_command() {
+
+  # src/commands/engine_cursor.sh
+  leech_launch_session "cursor"
+
+}
+
+# :command.function
+leech_opencode_command() {
+
+  # src/commands/engine_opencode.sh
+  leech_launch_session "opencode"
+
+}
+
+# :command.function
 leech_claude_usage_command() {
 
   # src/commands/claude_usage.sh
@@ -3594,11 +3771,18 @@ leech_build_command() {
   build_args=()
   [[ -n "${args['--danger']:-}" ]] && build_args+=(--no-cache)
 
-  # Auto-build leech-base:latest if not present locally (required by Dockerfile.claude)
-  if ! docker image inspect leech-base:latest > /dev/null 2>&1; then
-    echo "leech-base:latest not found — building from Dockerfile.claude.base..."
-    base_ctx="${leech_container_dir:-${HOME}/nixos/leech/docker/leech}"
+  base_ctx="${leech_container_dir:-${HOME}/nixos/leech/docker/leech}"
+
+  # --danger força rebuild da base (cursor-agent expira — use quando agent sair silenciosamente)
+  if [[ -n "${args['--danger']:-}" ]]; then
+    echo "leech-base:latest — rebuild forçado (--danger)..."
     docker build "${build_args[@]}" \
+      -f "${base_ctx}/Dockerfile.claude.base" \
+      -t leech-base:latest \
+      "${base_ctx}" || { echo "Error: failed to build leech-base:latest"; exit 1; }
+  elif ! docker image inspect leech-base:latest > /dev/null 2>&1; then
+    echo "leech-base:latest not found — building from Dockerfile.claude.base..."
+    docker build \
       -f "${base_ctx}/Dockerfile.claude.base" \
       -t leech-base:latest \
       "${base_ctx}" || { echo "Error: failed to build leech-base:latest"; exit 1; }
@@ -6121,6 +6305,20 @@ parse_requirements() {
       shift $#
       ;;
 
+    cursor)
+      action="cursor"
+      shift
+      leech_cursor_parse_requirements "$@"
+      shift $#
+      ;;
+
+    opencode | oc)
+      action="opencode"
+      shift
+      leech_opencode_parse_requirements "$@"
+      shift $#
+      ;;
+
     claude)
       action="claude"
       shift
@@ -6671,6 +6869,288 @@ leech_resume_parse_requirements() {
 
     esac
   done
+
+}
+
+# :command.parse_requirements
+leech_cursor_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        leech_cursor_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="cursor"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --init-md)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--init-md']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--init-md requires an argument: --init-md FILE" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --danger)
+
+        # :flag.case_no_arg
+        args['--danger']=1
+        shift
+        ;;
+
+      # :flag.case
+      --resume)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--resume']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--resume requires an argument: --resume SESSION_ID" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --model)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--model']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--model requires an argument: --model MODEL" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --instance)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--instance']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--instance requires an argument: --instance ID" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --rw)
+
+        # :flag.case_no_arg
+        args['--rw']=1
+        shift
+        ;;
+
+      # :flag.case
+      --ro)
+
+        # :flag.case_no_arg
+        args['--ro']=1
+        shift
+        ;;
+
+      # :flag.case
+      --host)
+
+        # :flag.case_no_arg
+        args['--host']=1
+        shift
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        # :argument.case
+        if [[ -z ${args['dir']+x} ]]; then
+          args['dir']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
+
+        ;;
+
+    esac
+  done
+
+  # :command.default_assignments
+  [[ -n ${args['--init-md']:-} ]] || args['--init-md']="contexto.md"
+
+}
+
+# :command.parse_requirements
+leech_opencode_parse_requirements() {
+  # :command.fixed_flags_filter
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      --help | -h)
+        long_usage=yes
+        leech_opencode_usage
+        exit
+        ;;
+
+      *)
+        break
+        ;;
+
+    esac
+  done
+
+  # :command.command_filter
+  action="opencode"
+
+  # :command.parse_requirements_while
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case "$key" in
+      # :flag.case
+      --init-md)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--init-md']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--init-md requires an argument: --init-md FILE" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --danger)
+
+        # :flag.case_no_arg
+        args['--danger']=1
+        shift
+        ;;
+
+      # :flag.case
+      --resume)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--resume']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--resume requires an argument: --resume SESSION_ID" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --model)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--model']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--model requires an argument: --model MODEL" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --instance)
+
+        # :flag.case_arg
+        if [[ -n ${2+x} ]]; then
+          args['--instance']="$2"
+          shift
+          shift
+        else
+          printf "%s\n" "--instance requires an argument: --instance ID" >&2
+          exit 1
+        fi
+        ;;
+
+      # :flag.case
+      --rw)
+
+        # :flag.case_no_arg
+        args['--rw']=1
+        shift
+        ;;
+
+      # :flag.case
+      --ro)
+
+        # :flag.case_no_arg
+        args['--ro']=1
+        shift
+        ;;
+
+      # :flag.case
+      --host)
+
+        # :flag.case_no_arg
+        args['--host']=1
+        shift
+        ;;
+
+      -?*)
+        printf "invalid option: %s\n" "$key" >&2
+        exit 1
+        ;;
+
+      *)
+        # :command.parse_requirements_case
+        # :command.parse_requirements_case_simple
+        # :argument.case
+        if [[ -z ${args['dir']+x} ]]; then
+          args['dir']=$1
+          shift
+        else
+          printf "invalid argument: %s\n" "$key" >&2
+          exit 1
+        fi
+
+        ;;
+
+    esac
+  done
+
+  # :command.default_assignments
+  [[ -n ${args['--init-md']:-} ]] || args['--init-md']="contexto.md"
 
 }
 
@@ -8984,6 +9464,8 @@ run() {
     "new") leech_new_command ;;
     "shell") leech_shell_command ;;
     "resume") leech_resume_command ;;
+    "cursor") leech_cursor_command ;;
+    "opencode") leech_opencode_command ;;
     "claude") leech_claude_command ;;
     "claude usage") leech_claude_usage_command ;;
     "claude token") leech_claude_token_command ;;

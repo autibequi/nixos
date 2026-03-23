@@ -19,7 +19,7 @@ graph TB
     end
 
     subgraph HOST["Host"]
-        VOLS["/self  ·  /obsidian  ·  /logs  ·  ~/.leech  ·  nix_store"]
+        VOLS["/self  ·  /obsidian  ·  /logs  ·  ~/.leech"]
         PROJ[("~/projects/estrategia")]
     end
 

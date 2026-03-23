@@ -76,8 +76,8 @@ x-base-volumes: &base-volumes
   - ${HOME}/nixos:${HOME}/nixos:ro
   # Lab mode: nixos repo editavel em /workspace/host (rw apenas quando CLAUDIO_HOST_OPTS=rw)
   - ${HOME}/nixos:/workspace/host:${CLAUDIO_HOST_OPTS:-ro}
-  # Nix store compartilhado: persiste entre resets e evita re-download de pacotes
-  - nix_store:/nix
+  # NÃO montar volume em /nix: volume vazio substitui o store da imagem → /bin/bash quebra
+  # (symlink para /nix/store) e o kernel acusa "exec /entrypoint.sh: no such file or directory".
   # Canal de comunicação rápida host ↔ agente
   - ${HOME}/.leech:/home/claude/.leech:rw
 
@@ -137,7 +137,6 @@ services:
 
 volumes:
   cursor_config:
-  nix_store:
 
 networks:
   default:

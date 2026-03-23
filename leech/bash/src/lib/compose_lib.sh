@@ -174,6 +174,8 @@ leech_resolve_model_id() {
 # Model flag para binários que aceitam --model=<id> (claude, cursor/agent).
 # Aceita engine como argumento opcional para usar o modelo por engine.
 # Ordem: --model= (CLI) > model_<engine>= (~/.leech) > model= (~/.leech).
+# Cursor: NÃO faz fallback para model= global — sonnet/haiku/opus viram IDs Claude
+# (claude-*), que o binário `agent` não aceita. Use só model_cursor= ou --model com ID do Cursor.
 leech_model_flag() {
   local engine="${1:-}"
   local cli_flag="${args['--model']:-${flag_model:-}}"
@@ -184,9 +186,24 @@ leech_model_flag() {
     cursor)   per_engine="${LEECH_MODEL_CURSOR:-}" ;;
   esac
   local m="${cli_flag:-${per_engine:-$LEECH_MODEL}}"
-  local id
-  id="$(leech_resolve_model_id "$m")"
-  [[ -n "$id" ]] && echo "--model $id" || echo ""
+  case "${engine,,}" in
+    cursor) m="${cli_flag:-$per_engine}" ;;
+  esac
+
+  case "${engine,,}" in
+    cursor)
+      [[ -z "$m" ]] && echo "" && return
+      case "${m,,}" in
+        haiku | opus | sonnet) echo "" ;;
+        *) echo "--model $m" ;;
+      esac
+      ;;
+    *)
+      local id
+      id="$(leech_resolve_model_id "$m")"
+      [[ -n "$id" ]] && echo "--model $id" || echo ""
+      ;;
+  esac
 }
 
 # Resolve model ID bruto (sem flag prefix) para engines como opencode que usam env var.
@@ -388,9 +405,7 @@ leech_session_run() {
     cursor)
       danger="$(leech_danger_flag cursor)"
       model="$(leech_model_flag cursor)"
-      local name_flag=""
-      [[ -n "$mount_path" ]] && name_flag=" --name ${mount_path##*/}"
-      local agent_flags="${danger}${model:+ $model}${name_flag}"
+      local agent_flags="${danger}${model:+ $model}"
 
       local cursor_envs=()
       cursor_envs+=(-e "CLAUDIO_MOUNT=$mount_path")
