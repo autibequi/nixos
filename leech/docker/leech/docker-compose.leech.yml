@@ -110,8 +110,7 @@ services:
     working_dir: /workspace/mnt
     entrypoint: ["/entrypoint.sh"]
     command: ["/bin/bash", "-c", "sleep infinity"]
-    depends_on:
-      - docker-proxy
+    # docker-proxy roda como container standalone — sem depends_on (evita conflito entre projetos compose)
     group_add:
       - "${JOURNAL_GID:-62}"
     cap_drop:

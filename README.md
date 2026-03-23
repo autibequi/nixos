@@ -6,35 +6,30 @@ Flake-based NixOS configuration for an ASUS Zephyrus G14 (AMD Ryzen + NVIDIA RTX
 
 ```mermaid
 graph TB
-    subgraph SHARED["Recursos Compartilhados"]
-        direction LR
-        SSELF["/self<br/>skills · hooks · agents"]
-        SOBS["/obsidian<br/>vault"]
-        SLOGS["/logs<br/>docker + journal"]
-        SHOST["/host<br/>nixos repo"]
-        SCH["~/.leech<br/>canal rápido"]
-        SNIX["nix_store"]
-    end
-
+    USER(("user"))
     CHROME(["Chrome<br/>CDP relay"])
 
-    subgraph L12["  "]
+    subgraph CONTAINERS["Leech Containers"]
         direction LR
-        L1["Leech 1"]
-        L2["Leech 2"]
+        L["Leech"]
+        subgraph APP["Project Containers"]
+            direction LR
+            MONO["monolito"]
+            BO["bo"]
+            FRONT["front-student"]
+        end
     end
 
-    L3["Leech 3<br/>host mode"]
+    subgraph HOST["Host"]
+        VOLS["/self  ·  /obsidian  ·  /logs  ·  ~/.leech  ·  nix_store"]
+        PROJ[("~/projects/estrategia")]
+    end
 
-    SHARED --> L1 & L2 & L3
-    CHROME -.->|relay| L1
-
-    PROJ[("~/projects/estrategia<br/>monolito · bo · front-student")]
-    NIXOS[("~/nixos<br/>NixOS config + leech")]
-
-    L1 & L2 -- /workspace/mnt --> PROJ
-    L3 -- /workspace/mnt --> NIXOS
-    L3 -- /workspace/host rw --> NIXOS
+    USER -->|agent instance| L
+    USER --> APP
+    CHROME -.->|relay| L
+    VOLS --> CONTAINERS
+    CONTAINERS --> PROJ
 ```
 
 ## Structure

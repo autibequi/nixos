@@ -69,7 +69,7 @@ fn run_bg_cmd(svc: &str, env: &str, action: &str) -> Option<String> {
     // bash CLI format: leech runner <service> <action> [--env=<env>]
     let env_flag = format!("--env={env}");
     let mut full_args: Vec<&str> = vec!["runner", svc, action];
-    if (action == "start" || action == "start-hotreload") && !env.is_empty()() {
+    if (action == "start" || action == "start-hotreload") && !env.is_empty() {
         full_args.push(&env_flag);
     }
 

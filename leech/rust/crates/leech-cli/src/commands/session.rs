@@ -112,7 +112,7 @@ pub fn shell(dir: Option<String>, host: bool) -> Result<()> {
 /// `leech leech` — ephemeral session with auto-detect.
 pub fn leech(flags: SessionFlags, shell_mode: bool) -> Result<()> {
     if shell_mode {
-        return shell(flags.dir);
+        return shell(flags.dir, flags.host);
     }
 
     let config = LeechConfig::load()?;

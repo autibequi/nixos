@@ -24,9 +24,6 @@ struct Cli {
     opus: bool,
     #[arg(long)]
     sonnet: bool,
-    /// Monta ~/nixos em /workspace/host (rw) — editar NixOS/Leech na sessão
-    #[arg(long)]
-    host: bool,
 }
 
 #[derive(Subcommand)]
@@ -352,9 +349,6 @@ fn main() -> Result<()> {
                 flags.model = Some("opus".into());
             } else if cli.sonnet {
                 flags.model = Some("sonnet".into());
-            }
-            if cli.host {
-                flags.host = true;
             }
             commands::session::new(flags)
         }
