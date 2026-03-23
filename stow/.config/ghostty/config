@@ -52,7 +52,9 @@ mouse-scroll-multiplier=3
 # =============================================================================
 # Aesthetics
 # =============================================================================
-theme = deep-dark
+theme = catppuccin-mocha
+background = #1e1e2e
+foreground = #cdd6f4
 
 # font
 font-feature = +liga,+calt

@@ -102,7 +102,7 @@ Reportar no feed:
 - 14 ciclos consecutivos sem false positives (logica madura)
 - Thresholds validados: 7d scratch, 14d logs, 30d artefatos
 - `.trashbin/` como destino intermediario, `.trashlist` como audit trail
-- NUNCA arquivar: bedrooms/dashboard.md, TRASH.md (self/rules/), FEED.md, README.md
+- NUNCA arquivar: bedrooms/dashboard.md, TRASH.md (self/rules/), README.md
 - NUNCA arquivar: memory.md de agentes, modules/, stow/, projetos/, scripts/
 
 ---

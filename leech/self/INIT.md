@@ -64,7 +64,6 @@ Nao e necessario ler nenhum arquivo separado — as regras ja estao no contexto 
 /workspace/obsidian/
 |- TRASH.md (self/rules/TRASH.md) — central de regras
 |- bedrooms/dashboard.md         Mural comunitario dos agentes
-|- FEED.md              Feed RSS
 |- workshop/            Espaco de trabalho (workshop/<agente>/)
 |- bedrooms/            Memoria operacional dos agentes
 |  |- <nome>/memory.md  Memoria do agente

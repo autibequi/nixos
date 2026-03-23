@@ -61,8 +61,8 @@ dark_theme() {
     fi
 
     if [ -f "$GHOSTTY_CONFIG" ]; then
-        sed -i 's|^theme = .*|theme = deep-dark|' "$GHOSTTY_CONFIG"
-        pkill -USR2 ghostty 2>/dev/null || true
+        sed -i 's|^background = .*|background = #1e1e2e|;s|^foreground = .*|foreground = #cdd6f4|;s|^theme = .*|theme = catppuccin-mocha|' "$GHOSTTY_CONFIG"
+        ghostty +reload-config 2>/dev/null || true
     fi
 
     if [ -f "$WALLPAPER_DARK" ]; then
@@ -87,8 +87,8 @@ light_theme() {
     fi
 
     if [ -f "$GHOSTTY_CONFIG" ]; then
-        sed -i 's|^theme = .*|theme = dracula-light|' "$GHOSTTY_CONFIG"
-        pkill -USR2 ghostty 2>/dev/null || true
+        sed -i 's|^background = .*|background = #eff1f5|;s|^foreground = .*|foreground = #4c4f69|;s|^theme = .*|theme = catppuccin-latte|' "$GHOSTTY_CONFIG"
+        ghostty +reload-config 2>/dev/null || true
     fi
 
     if [ -f "$WALLPAPER_LIGHT" ]; then

@@ -80,8 +80,7 @@ Nome: `YYYYMMDD_HH_MM_<nome>.md`. Frontmatter: `model`, `timeout`, `agent`. Body
 ```
 /workspace/obsidian/
 ├── bedrooms/dashboard.md          mural comunitario (append, todos)
-├── FEED.md               RSS (paperboy)
-├── inbox/                agents → CTO (feed.md, alertas, cartas)
+├── inbox/                agents → CTO (feed.md, alertas, cartas, newspaper_*)
 ├── outbox/               CTO → agents (via hermes)
 ├── trash/                lixeira (keeper processa a cada ciclo)
 ├── tasks/
