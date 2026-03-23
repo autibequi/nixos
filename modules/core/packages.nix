@@ -54,6 +54,8 @@
     # inputs.zed.packages.${pkgs.system}.default
     unstable.zed-editor
 
+    gitkraken
+
     # Work Browser
     chromium
     google-chrome
