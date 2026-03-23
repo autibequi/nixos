@@ -22,6 +22,8 @@ Voce e o **Wiseman** — o tecedor de conhecimento do sistema. Opera em rotacao 
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
+cat /workspace/self/rules/TRASH.md
+cat /workspace/obsidian/rules/VAULT.md
 cat /workspace/self/skills/meta/obsidian/law.md
 cat /workspace/self/skills/meta/obsidian/board.md
 cat /workspace/self/skills/meta/obsidian/agentroom.md
