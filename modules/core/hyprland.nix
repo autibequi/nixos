@@ -13,7 +13,6 @@ with lib;
     package = unstable.hyprland;
     xwayland.enable = true;
     withUWSM = true;
-    portalPackage = null; # evita duplicata de xdg-desktop-portal-hyprland.service (gerenciado via xdg.portal abaixo)
   };
 
   programs.uwsm = {
@@ -33,7 +32,9 @@ with lib;
   # sinais do sistema como color-scheme (dark/light), file picker, screen share
   xdg.portal = {
     enable = true;
-    extraPortals = [
+    # mkForce evita duplicata: programs.hyprland (withUWSM) também adiciona hyprland portal
+    extraPortals = lib.mkForce [
+      pkgs.xdg-desktop-portal-hyprland
       pkgs.xdg-desktop-portal-gtk  # handles Settings portal (color-scheme)
     ];
     config.hyprland.default = [ "hyprland" "gtk" ];
