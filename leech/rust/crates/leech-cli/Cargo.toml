@@ -10,6 +10,7 @@ path = "src/main.rs"
 [dependencies]
 leech-sdk = { path = "../leech-sdk" }
 leech-tui = { path = "../leech-tui" }
+leech-tui-v2 = { path = "../leech-tui-v2" }
 tokio = { workspace = true }
 anyhow = { workspace = true }
 clap = { version = "4", features = ["derive"] }

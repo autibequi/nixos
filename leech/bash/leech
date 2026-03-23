@@ -5538,7 +5538,7 @@ leech_status_command() {
     done
 
     # Calcula linhas disponíveis para log (overhead fixo → estável entre renders)
-    local _term_h; _term_h=$(tput lines 2>/dev/null || echo 24)
+    local _term_h="${LINES:-$(tput lines 2>/dev/null || echo 24)}"
     local _log_lines=$(( _term_h - 22 ))
     [[ "$_log_lines" -lt 3 ]] && _log_lines=3
     [[ "$_log_lines" -gt 12 ]] && _log_lines=12
@@ -5565,7 +5565,7 @@ leech_status_command() {
 
   # Alternate screen: posicionamento absoluto, sem tracking de linhas
   _render_frame() {
-    _do_status_render > "$_tmpfile"
+    _do_status_render > "$_tmpfile" 2>/dev/null
     # Buffer completo → uma escrita só (minimiza flickering)
     local _buf; _buf=$(mktemp)
     {
@@ -5589,8 +5589,8 @@ leech_status_command() {
     printf '\033[?25h'
   }
 
-  # Entrar em alternate screen (preserva conteudo do terminal ao sair)
-  printf '\033[?1049h\033[H\033[2J'
+  # Entrar em alternate screen e esconder cursor imediatamente
+  printf '\033[?1049h\033[H\033[2J\033[?25l'
 
   while true; do
     _render_frame
@@ -5614,14 +5614,39 @@ leech_status_command() {
               _cursor_svc="${_svc_list[$_cursor_idx]}"
               break
               ;;
-            '[M')  # X10 mouse event (scroll wheel) — drena 3 bytes e ignora
-              read -t 0.05 -rsn3 2>/dev/null || true
+            '[M')  # X10 mouse event — parseia scroll, drena o resto
+              local _btn="" _mx="" _my=""
+              read -t 0.05 -rsn1 _btn 2>/dev/null || true
+              read -t 0.05 -rsn1 _mx  2>/dev/null || true
+              read -t 0.05 -rsn1 _my  2>/dev/null || true
+              # Scroll up = byte 96 (0x60), scroll down = byte 97 (0x61)
+              if [[ "$_btn" == $'\x60' ]]; then
+                _cursor_idx=$(( (_cursor_idx - 1 + ${#_svc_list[@]}) % ${#_svc_list[@]} ))
+                _cursor_svc="${_svc_list[$_cursor_idx]}"
+                break
+              elif [[ "$_btn" == $'\x61' ]]; then
+                _cursor_idx=$(( (_cursor_idx + 1) % ${#_svc_list[@]} ))
+                _cursor_svc="${_svc_list[$_cursor_idx]}"
+                break
+              fi
               ;;
-            '[<')  # SGR mouse event — drena até 'M' ou 'm'
-              local _sgr=""
+            '[<')  # SGR mouse event — parseia scroll, drena o resto
+              local _sgr_data=""
+              local _c
               while read -t 0.05 -rsn1 _c 2>/dev/null; do
+                _sgr_data+="$_c"
                 [[ "$_c" == 'M' || "$_c" == 'm' ]] && break
               done
+              # 64;<x>;<y>M = scroll up, 65;<x>;<y>M = scroll down
+              if [[ "$_sgr_data" == 64\;*M ]]; then
+                _cursor_idx=$(( (_cursor_idx - 1 + ${#_svc_list[@]}) % ${#_svc_list[@]} ))
+                _cursor_svc="${_svc_list[$_cursor_idx]}"
+                break
+              elif [[ "$_sgr_data" == 65\;*M ]]; then
+                _cursor_idx=$(( (_cursor_idx + 1) % ${#_svc_list[@]} ))
+                _cursor_svc="${_svc_list[$_cursor_idx]}"
+                break
+              fi
               ;;
           esac
         else

@@ -98,7 +98,12 @@ print_screen_with_notes() {
 
 print_screen_to_clipboard() {
     mkdir -p ~/Pictures/Screenshots
-    grim -g "$(slurp)" - | tee ~/Pictures/Screenshots/$(date +%Y%m%d_%H%M%S).png | wl-copy
+    local outfile=~/Pictures/Screenshots/$(date +%Y%m%d_%H%M%S).png
+    if grim -g "$(slurp)" - | tee "$outfile" | wl-copy; then
+        notify-send -a "Screenshot" "Capturado" "Copiado para clipboard" -u low
+    else
+        notify-send -a "Screenshot" "Falhou" "grim ou wl-copy retornou erro" -u critical
+    fi
 }
 
 print_screen_full_then_crop() {

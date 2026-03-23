@@ -13,6 +13,7 @@ with lib;
     package = unstable.hyprland;
     xwayland.enable = true;
     withUWSM = true;
+    portalPackage = null; # evita duplicata de xdg-desktop-portal-hyprland.service (gerenciado via xdg.portal abaixo)
   };
 
   programs.uwsm = {

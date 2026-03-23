@@ -388,6 +388,7 @@ dependencies = [
  "inquire",
  "leech-sdk",
  "leech-tui",
+ "leech-tui-v2",
  "tokio",
 ]
 
@@ -403,6 +404,17 @@ dependencies = [
 
 [[package]]
 name = "leech-tui"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "crossterm 0.28.1",
+ "leech-sdk",
+ "ratatui",
+ "tokio",
+]
+
+[[package]]
+name = "leech-tui-v2"
 version = "0.1.0"
 dependencies = [
  "anyhow",

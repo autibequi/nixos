@@ -302,7 +302,7 @@ fn main() -> Result<()> {
 
         // Interactive
         Some(Commands::Status { tick }) => {
-            leech_tui::run_status(tick)?;
+            leech_tui_v2::run_status(tick)?;
             Ok(())
         }
 
