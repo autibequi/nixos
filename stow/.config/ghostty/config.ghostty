@@ -51,20 +51,7 @@ mouse-scroll-multiplier=3
 
 # =============================================================================
 # Aesthetics
-# =============================================================================
-theme = light:catppuccin-latte,dark:catppuccin-mocha
-
-# font
-font-feature = +liga,+calt
-font-family = "FiraCode Nerd Font"
-font-size = 14
-
-# Efeitos de Transparência - Wallpaper-only background effect
-# Note: Para efeito só do wallpaper, configure Blur My Shell extension
-# Desabilitar transparência para economizar bateria (compositor usa menos GPU)
-unfocused-split-opacity = 0.70
-
-split-divider-color = #2d3748
+theme = dark:Horizon,light:Horizon Bright
 
 # Cursor
 cursor-style = block

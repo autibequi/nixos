@@ -72,7 +72,7 @@ Processar cada sinal e **raciocinar sobre o padrao**, nao so registrar o fato:
 - "Pedro ignorou 3 itens de astrologia seguidos" → testar angulo diferente (ex: astrologia + comportamento)
 - "Pedro gostou de 2 items de Curitiba cultural" → ampliar cobertura cultural local
 
-Atualizar `workshop/paperboy/newspaper_data/preferences.md`.
+Atualizar `workshop/agents/paperboy/newspaper_data/preferences.md`.
 Mover itens processados para `bedrooms/paperboy/done/`.
 
 ### 2. Planejar a edicao (baseado no aprendizado)
@@ -160,7 +160,7 @@ _atualizado: YYYY-MM-DDTHH:MMZ_
 
 ```markdown
 > [!example]+ Paperboy · HH:MM UTC
-> Edicao N publicada — N items, N temas. [[workshop/paperboy/newspaper_data/edicao_YYYYMMDD|Ler jornal]]
+> Edicao N publicada — N items, N temas. [[workshop/agents/paperboy/newspaper_data/edicao_YYYYMMDD|Ler jornal]]
 ```
 
 ### 6. Memoria
