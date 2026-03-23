@@ -4,7 +4,6 @@
 
 THEME_STATE_FILE="${HOME}/.cache/hyprland/hyprutils_theme_state"
 ALACRITTY_CONFIG="${HOME}/.config/alacritty/alacritty.toml"
-GHOSTTY_CONFIG="${HOME}/.config/ghostty/config"
 WALLPAPER_DARK="${HOME}/assets/wallpapers/the-wild-hunt-of-odin.jpg"
 WALLPAPER_LIGHT="${HOME}/assets/wallpapers/the-death-of-socrates.jpg"
 
@@ -60,11 +59,6 @@ dark_theme() {
         sed -i 's|import = \["~/.config/alacritty/light-theme.toml"\]|import = ["~/.config/alacritty/dark-theme.toml"]|g' "$ALACRITTY_CONFIG"
     fi
 
-    if [ -f "$GHOSTTY_CONFIG" ]; then
-        sed -i 's|^background = .*|background = #1e1e2e|;s|^foreground = .*|foreground = #cdd6f4|;s|^theme = .*|theme = catppuccin-mocha|' "$GHOSTTY_CONFIG"
-        ghostty +reload-config 2>/dev/null || true
-    fi
-
     if [ -f "$WALLPAPER_DARK" ]; then
         swww img "$WALLPAPER_DARK" \
             --transition-type fade \
@@ -84,11 +78,6 @@ light_theme() {
 
     if [ -f "$ALACRITTY_CONFIG" ]; then
         sed -i 's|import = \["~/.config/alacritty/dark-theme.toml"\]|import = ["~/.config/alacritty/light-theme.toml"]|g' "$ALACRITTY_CONFIG"
-    fi
-
-    if [ -f "$GHOSTTY_CONFIG" ]; then
-        sed -i 's|^background = .*|background = #eff1f5|;s|^foreground = .*|foreground = #4c4f69|;s|^theme = .*|theme = catppuccin-latte|' "$GHOSTTY_CONFIG"
-        ghostty +reload-config 2>/dev/null || true
     fi
 
     if [ -f "$WALLPAPER_LIGHT" ]; then

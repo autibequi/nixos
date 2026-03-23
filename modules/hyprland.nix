@@ -28,6 +28,17 @@ with lib;
   # Habilitar serviço para compilar schemas
   programs.dconf.enable = true;
 
+  # XDG Desktop Portal — necessário para apps (Ghostty, Firefox, etc.) receberem
+  # sinais do sistema como color-scheme (dark/light), file picker, screen share
+  xdg.portal = {
+    enable = true;
+    extraPortals = [
+      pkgs.xdg-desktop-portal-hyprland
+      pkgs.xdg-desktop-portal-gtk  # handles Settings portal (color-scheme)
+    ];
+    config.hyprland.default = [ "hyprland" "gtk" ];
+  };
+
   # GNOME Keyring - gerenciamento de secrets/senhas/SSH keys
   security.polkit.enable = true;
   services.gnome.gnome-keyring.enable = true;
