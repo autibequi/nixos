@@ -1,6 +1,8 @@
 //! Application state and navigation logic (TEA pattern).
 
-use leech_sdk::status::StatusSnapshot;
+use std::path::PathBuf;
+
+use leech_sdk::{paths, status::StatusSnapshot};
 
 /// Service list for navigation.
 pub const DK_SERVICES: &[&str] = &["monolito", "bo-container", "front-student"];
@@ -47,19 +49,53 @@ pub struct App {
     pub menu_cursor: usize,
 }
 
+/// Path where per-service env choices are persisted between TUI sessions.
+fn state_path() -> PathBuf {
+    paths::home().join(".config/leech/tui-envs")
+}
+
+/// Load per-service env indices from disk. Falls back to all-zero on any error.
+fn load_svc_envs() -> Vec<usize> {
+    let mut envs = vec![0usize; DK_SERVICES.len()];
+    let Ok(content) = std::fs::read_to_string(state_path()) else { return envs };
+    for line in content.lines() {
+        if let Some((svc, env)) = line.split_once('=') {
+            if let Some(svc_idx) = DK_SERVICES.iter().position(|&s| s == svc) {
+                if let Some(env_idx) = ENVS.iter().position(|&e| e == env) {
+                    envs[svc_idx] = env_idx;
+                }
+            }
+        }
+    }
+    envs
+}
+
 impl App {
-    /// Create a new [`App`] with default state.
+    /// Create a new [`App`], restoring per-service env choices from disk.
     pub fn new() -> Self {
         Self {
             snapshot: StatusSnapshot::default(),
             cursor_idx: 0,
-            svc_envs: vec![0; DK_SERVICES.len()],
+            svc_envs: load_svc_envs(),
             last_action: None,
             render_tick: 0,
             log_scroll: 0,
             mode: AppMode::Normal,
             menu_cursor: 0,
         }
+    }
+
+    /// Persist current per-service env choices to disk (silent on error).
+    pub fn save_envs(&self) {
+        let path = state_path();
+        if let Some(parent) = path.parent() {
+            let _ = std::fs::create_dir_all(parent);
+        }
+        let content = DK_SERVICES.iter().enumerate()
+            .map(|(i, svc)| format!("{}={}", svc, ENVS[self.svc_envs[i]]))
+            .collect::<Vec<_>>()
+            .join("\n");
+        let _ = std::fs::write(path, content);
     }
 
     pub fn open_menu(&mut self) {

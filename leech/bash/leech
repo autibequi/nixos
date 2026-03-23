@@ -2301,9 +2301,18 @@ _leech_dk_flush() {
 # src/lib/docker_install_impl.sh
 # docker_install_impl.sh — instala dependencias de um servico usando SSH do host.
 # Go:   go mod download + vendor (vendor/ fica no projeto)
-# Node: npm install (node_modules/ fica no projeto)
+# Node: npm/pnpm/bun install (node_modules/ fica no projeto via bind mount)
 #
 # Uso: _leech_dk_install <service> <env> <worktree>
+#
+# Package manager (Node): auto-detectado pelo lockfile presente no projeto.
+#   bun.lockb       → bun  (imagem oven/bun:alpine)
+#   pnpm-lock.yaml  → pnpm (node image + pnpm + volume leech-pnpm-store)
+#   package-lock.json (default) → npm  (node image + volume leech-npm-cache-nodeN)
+# Override: LEECH_PKG_MANAGER=npm|pnpm|bun
+# Node 14: forca npm (bun/pnpm incompativeis com node-sass em musl)
+#
+# Smart skip: se node_modules/.leech-install-hash == sha256(lockfile), pula install.
 
 _leech_dk_install() {
   local service="$1"
@@ -2335,13 +2344,68 @@ _leech_dk_install() {
     # Detectar versao do Node requerida (engines.node no package.json)
     local node_version
     node_version=$(node -e "const p=require('$dir/package.json'); const v=(p.engines&&p.engines.node)||'20'; console.log(v.match(/\d+/)[0])" 2>/dev/null || echo "20")
-    local node_image="node:${node_version}-alpine"
+
+    # Detectar package manager: override > lockfile existente > npm
+    local pkg_manager="${LEECH_PKG_MANAGER:-}"
+    if [[ -z "$pkg_manager" ]]; then
+      if [[ -f "$dir/bun.lockb" ]];        then pkg_manager="bun"
+      elif [[ -f "$dir/pnpm-lock.yaml" ]]; then pkg_manager="pnpm"
+      else                                      pkg_manager="npm"
+      fi
+    fi
+
+    # Node 14: forcado npm — bun/pnpm incompativeis com node-sass em musl/Alpine
+    if [[ "$node_version" == "14" && "$pkg_manager" != "npm" ]]; then
+      printf "  \033[33mNode 14 detectado: forcando npm (compatibilidade node-sass/musl)\033[0m\n"
+      pkg_manager="npm"
+    fi
+
+    # Lockfile de referencia para hash
+    local lockfile="$dir/package-lock.json"
+    [[ "$pkg_manager" == "pnpm" ]] && lockfile="$dir/pnpm-lock.yaml"
+    [[ "$pkg_manager" == "bun"  ]] && lockfile="$dir/bun.lockb"
+
+    # Smart skip: se node_modules/.leech-install-hash == sha256(lockfile), pula
+    local sentinel="$dir/node_modules/.leech-install-hash"
+    if [[ -d "$dir/node_modules" && -f "$sentinel" && -f "$lockfile" ]]; then
+      local current_hash stored_hash
+      current_hash=$(sha256sum "$lockfile" 2>/dev/null | cut -d' ' -f1)
+      stored_hash=$(cat "$sentinel" 2>/dev/null)
+      if [[ -n "$current_hash" && "$current_hash" == "$stored_hash" ]]; then
+        _leech_header "docker install  $service (Node ${node_version} / ${pkg_manager})  [env=$env]"
+        printf "  \033[32mnode_modules ja esta atualizado\033[0m (hash identico, pulando install)\n"
+        printf "  Rode: leech docker %s server start --env=%s\n\n" "$service" "$env"
+        return 0
+      fi
+    fi
+
+    # Imagem e volumes de cache por package manager
+    local node_image cache_vol cache_mount
+    case "$pkg_manager" in
+      bun)
+        node_image="oven/bun:alpine"
+        cache_vol="leech-bun-cache"
+        cache_mount="/root/.bun/install/cache"
+        ;;
+      pnpm)
+        node_image="node:${node_version}-alpine"
+        cache_vol="leech-pnpm-store"
+        cache_mount="/pnpm-store"
+        ;;
+      npm)
+        node_image="node:${node_version}-alpine"
+        cache_vol="leech-npm-cache-node${node_version}"
+        cache_mount="/root/.npm"
+        ;;
+    esac
+
     local host_uid host_gid
     host_uid="$(id -u)"
     host_gid="$(id -g)"
 
-    _leech_header "docker install  $service (Node)  [env=$env]"
-    printf "  \033[2mimage: %s  •  logs: %s/install.log\033[0m\n\n" "$node_image" "$log_dir"
+    _leech_header "docker install  $service (Node ${node_version} / ${pkg_manager})  [env=$env]"
+    printf "  \033[2mimage: %s  cache: %s  •  logs: %s/install.log\033[0m\n\n" \
+      "$node_image" "$cache_vol" "$log_dir"
 
     local ssh_dir="${HOST_SSH_DIR:-$HOME/.ssh}"
     local npmrc="${HOST_NPMRC:-$HOME/.npmrc}"
@@ -2351,11 +2415,13 @@ _leech_dk_install() {
       -v "$ssh_dir:/ssh-host:ro" \
       -v "$npmrc:/npmrc-host:ro" \
       -v "$dir:/app" \
+      -v "${cache_vol}:${cache_mount}" \
       -e NPM_TOKEN="${NPM_TOKEN:-}" \
       -e TERM=xterm-256color \
       -e COLORTERM=truecolor \
       -e HOST_UID="$host_uid" \
       -e HOST_GID="$host_gid" \
+      -e PKG_MANAGER="$pkg_manager" \
       -w "/app" \
       "$node_image" \
       sh -c '
@@ -2370,7 +2436,7 @@ _leech_dk_install() {
         chmod 600 /root/.ssh/* 2>/dev/null || true
         ssh-keyscan github.com >> /root/.ssh/known_hosts 2>/dev/null
 
-        # .npmrc: host tem prioridade; fallback para NPM_TOKEN env
+        # Autenticacao npm/github packages
         if [ -f /npmrc-host ]; then
           cp /npmrc-host /root/.npmrc
         elif [ -n "$NPM_TOKEN" ]; then
@@ -2378,26 +2444,50 @@ _leech_dk_install() {
         fi
         echo "@estrategiahq:registry=https://npm.pkg.github.com/estrategiahq" >> /root/.npmrc
 
-        echo "[1/2] Instalando dependencias (npm install)..."
-        npm install
-        chown -R "$HOST_UID:$HOST_GID" /app/node_modules 2>/dev/null || true
+        case "$PKG_MANAGER" in
+          bun)
+            echo "[1/2] Instalando dependencias (bun install)..."
+            bun install
+            ;;
+          pnpm)
+            echo "[1/2] Instalando pnpm + dependencias..."
+            npm install -g pnpm --prefer-offline --quiet
+            pnpm install --store-dir /pnpm-store --no-frozen-lockfile
+            ;;
+          npm)
+            echo "[1/2] Instalando dependencias (npm install)..."
+            npm install
 
-        echo "[2/2] Recompilando bindings nativos para Alpine/musl (compilando do fonte)..."
-        rm -rf node_modules/node-sass/vendor/
-        npm rebuild node-sass || true
+            echo "[2/2] Recompilando bindings nativos para Alpine/musl..."
+            rm -rf node_modules/node-sass/vendor/ 2>/dev/null || true
+            npm rebuild node-sass 2>/dev/null || true
+            ;;
+        esac
+
+        # Sentinel hash para smart skip na proxima chamada
+        LOCKFILE="package-lock.json"
+        [ "$PKG_MANAGER" = "pnpm" ] && LOCKFILE="pnpm-lock.yaml"
+        [ "$PKG_MANAGER" = "bun"  ] && LOCKFILE="bun.lockb"
+        if [ -f "$LOCKFILE" ]; then
+          sha256sum "$LOCKFILE" | cut -d" " -f1 > node_modules/.leech-install-hash
+        fi
+
+        chown -R "$HOST_UID:$HOST_GID" /app/node_modules 2>/dev/null || true
 
         echo ""
         echo "Dependencias instaladas! node_modules/ gerado no projeto."
       ' 2>&1 | tee "$log_dir/install.log"
 
     if [[ "${PIPESTATUS[0]}" -eq 0 ]]; then
-      # Adicionar node_modules/ ao .git/info/exclude local para nao sujar o git do projeto
+      # Adicionar artefatos ao .git/info/exclude local
       local exclude_file="$dir/.git/info/exclude"
       if [[ -f "$dir/.git/info/exclude" ]] || [[ -d "$dir/.git" ]]; then
         mkdir -p "$dir/.git/info"
-        if ! grep -qxF 'node_modules/' "$exclude_file" 2>/dev/null; then
-          echo 'node_modules/' >> "$exclude_file"
-        fi
+        for entry in 'node_modules/' 'pnpm-lock.yaml' 'bun.lockb'; do
+          if ! grep -qxF "$entry" "$exclude_file" 2>/dev/null; then
+            echo "$entry" >> "$exclude_file"
+          fi
+        done
       fi
       printf "\n  \033[32m\033[1mFeito!\033[0m  Rode: leech docker %s server start --env=%s\n\n" "$service" "$env"
     else
@@ -3878,7 +3968,7 @@ leech_clean_command() {
 leech_update_command() {
 
   # src/commands/update.sh
-  # Regenera CLI, instala symlink e atualiza bootstrap
+  # Regenera CLI (leech + zion), instala symlinks, bootstrap e Rust
   cli_dir="$leech_bash_dir"
   nixos_dir="$leech_nixos_dir"
   bin_bash="${HOME}/.local/bin/leech-bash"
@@ -3917,29 +4007,59 @@ leech_update_command() {
     fi
   }
 
-  _gen() {
-    cd "$cli_dir" && LANG=en_US.UTF-8 RUBYOPT="-E utf-8" bashly generate
+  # Helper: roda bashly generate em um diretório (usa gem, nix-shell ou sistema)
+  _bashly_run() {
+    local dir="$1"
+    [[ -d "$dir" && -f "$dir/src/bashly.yml" ]] || return 0
+    if command -v bashly &>/dev/null; then
+      (cd "$dir" && LANG=en_US.UTF-8 RUBYOPT="-E utf-8" bashly generate)
+    elif command -v nix-shell &>/dev/null; then
+      nix-shell -p bashly --run "cd '$dir' && LANG=en_US.UTF-8 RUBYOPT='-E utf-8' bashly generate"
+    fi
+  }
+
+  _gen_leech() {
+    _bashly_run "$cli_dir"
     bash -n "$cli_dir/leech" || {
-      echo "bashly gerou script invalido (bash -n falhou). Nao sobrescrevendo ~/.local/bin/leech." >&2
+      echo "bashly gerou script invalido (bash -n falhou)." >&2
       exit 1
     }
   }
 
-  _symlink() {
-    local old_dest="$nixos_dir/stow/.local/bin/leech"
-    [[ -L "$old_dest" ]] && rm -f "$old_dest"
+  _gen_zion() {
+    # Fonte do zion CLI (quando disponível no repo)
+    local zion_src_dir="$nixos_dir/self/containers/zion"
+    _bashly_run "$zion_src_dir"
+    return 0  # best-effort
+  }
+
+  _symlinks() {
+    # leech-bash
+    local old_leech="$nixos_dir/stow/.local/bin/leech"
+    [[ -L "$old_leech" ]] && rm -f "$old_leech"
     mkdir -p "$(dirname "$bin_bash")"
     rm -f "$bin_bash"
     ln -sf "$cli_dir/leech" "$bin_bash"
+    # zion → prefere self/containers/zion/zion, fallback leech/bash/zion
+    local bin_zion="${HOME}/.local/bin/zion"
+    local old_zion="$nixos_dir/stow/.local/bin/zion"
+    [[ -L "$old_zion" ]] && rm -f "$old_zion"
+    local zion_bin="$nixos_dir/self/containers/zion/zion"
+    [[ -f "$zion_bin" ]] || zion_bin="$cli_dir/zion"
+    [[ -f "$zion_bin" ]] && ln -sf "$zion_bin" "$bin_zion"
   }
 
   _rust() {
     local rust_dir="$nixos_dir/leech/rust"
     [[ -d "$rust_dir" ]] || return 0
     if command -v cargo &>/dev/null; then
-      cargo build --release -p leech-cli || exit 1
+      cd "$rust_dir" && cargo build --release -p leech-cli || exit 1
+    elif command -v nix-shell &>/dev/null; then
+      nix-shell -p rustc -p cargo --run \
+        "cd '$rust_dir' && cargo build --release -p leech-cli" || exit 1
     else
-      nix-shell -p rustc -p cargo --run 'cargo build --release -p leech-cli' || exit 1
+      echo "cargo nao encontrado — instale rust para rebuildar o binario leech" >&2
+      return 0
     fi
     rm -f "$bin_rust"
     cp "$rust_dir/target/release/leech" "$bin_rust"
@@ -3947,16 +4067,16 @@ leech_update_command() {
 
   _bootstrap() {
     local src="$nixos_dir/leech/self/scripts/bootstrap-dashboard.sh"
-    if [[ -f "$src" ]]; then
-      install -m 755 "$src" "$nixos_dir/scripts/bootstrap.sh"
-    fi
+    [[ -f "$src" ]] && install -m 755 "$src" "$nixos_dir/scripts/bootstrap.sh"
+    return 0
   }
 
   printf "\033[1mAtualizando leech...\033[0m\n"
-  _run_step 1 4 "Gerando bash CLI"        _gen
-  _run_step 2 4 "Instalando bash CLI"     _symlink
-  _run_step 3 4 "Atualizando bootstrap"   _bootstrap
-  _run_step 4 4 "Building leech (rust)"   _rust
+  _run_step 1 5 "Gerando leech bash CLI"  _gen_leech
+  _run_step 2 5 "Gerando zion bash CLI"   _gen_zion
+  _run_step 3 5 "Instalando symlinks"     _symlinks
+  _run_step 4 5 "Atualizando bootstrap"   _bootstrap
+  _run_step 5 5 "Building leech (rust)"   _rust
   printf "  \033[32m\033[1mFeito!\033[0m\n"
 
 }

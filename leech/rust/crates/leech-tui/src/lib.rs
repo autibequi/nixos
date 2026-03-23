@@ -358,7 +358,7 @@ pub fn run_status(tick: u64) -> Result<()> {
                                 "quit" => break,
                                 "up" => app.move_up(),
                                 "down" => app.move_down(),
-                                "cycle_env" => app.cycle_env(),
+                                "cycle_env" => { app.cycle_env(); app.save_envs(); }
                                 "log_up" => app.log_scroll_up(5),
                                 "log_down" => app.log_scroll_down(5),
                                 "menu_open" => app.open_menu(),
