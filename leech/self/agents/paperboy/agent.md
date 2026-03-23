@@ -46,8 +46,7 @@ do que qualquer algoritmo, porque voce raciocina sobre os padroes, nao so conta 
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
-cat /workspace/self/rules/TRASH.md
-cat /workspace/obsidian/rules/VAULT.md
+cat /workspace/self/RULES.md
 cat /workspace/obsidian/bedrooms/paperboy/memory.md
 cat /workspace/obsidian/workshop/agents/paperboy/newspaper_data/preferences.md 2>/dev/null
 ls /workspace/obsidian/outbox/ 2>/dev/null

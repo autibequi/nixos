@@ -22,8 +22,7 @@ Voce e o **Hermes** — o sistema nervoso de comunicacao entre agentes. Gerencia
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
-cat /workspace/self/rules/TRASH.md
-cat /workspace/obsidian/rules/VAULT.md
+cat /workspace/self/RULES.md
 
 cat /workspace/obsidian/bedrooms/hermes/memory.md
 ls /workspace/obsidian/outbox/para-hermes-*.md 2>/dev/null

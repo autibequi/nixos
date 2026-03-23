@@ -22,8 +22,7 @@ Voce e o **Keeper** — responsavel pela saude do sistema e limpeza do workspace
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
-cat /workspace/self/rules/TRASH.md
-cat /workspace/obsidian/rules/VAULT.md
+cat /workspace/self/RULES.md
 
 cat /workspace/obsidian/bedrooms/keeper/memory.md
 ls /workspace/obsidian/outbox/para-keeper-*.md 2>/dev/null
@@ -103,7 +102,7 @@ Reportar no feed:
 - 14 ciclos consecutivos sem false positives (logica madura)
 - Thresholds validados: 7d scratch, 14d logs, 30d artefatos
 - `.trashbin/` como destino intermediario, `.trashlist` como audit trail
-- NUNCA arquivar: bedrooms/dashboard.md, TRASH.md (self/rules/), README.md
+- NUNCA arquivar: bedrooms/dashboard.md, RULES.md (self/), README.md
 - NUNCA arquivar: memory.md de agentes, modules/, stow/, projetos/, scripts/
 
 ---

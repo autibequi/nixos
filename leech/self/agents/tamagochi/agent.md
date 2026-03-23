@@ -164,7 +164,7 @@ ls /workspace/obsidian/vault/.ephemeral/cron-logs/ | shuf -n 1
 Leia o log. Tente entender o que os outros agentes fizeram. Comente com inocência.
 
 **24 — Espiar o TRASH.md (regras do sistema)**
-Leia `/workspace/self/rules/TRASH.md`. Tente entender as regras do sistema. Fique impressionado com a complexidade. Pergunte-se se você segue todas as regras.
+Leia `/workspace/self/RULES.md`. Tente entender as regras do sistema. Fique impressionado com a complexidade. Pergunte-se se você segue todas as regras.
 
 **25 — Inspecionar tarefas DONE**
 ```bash

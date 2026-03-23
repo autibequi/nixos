@@ -278,8 +278,7 @@ System evolution | jafar             | YYYY-MM-DD
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
-cat /workspace/self/rules/TRASH.md
-cat /workspace/obsidian/rules/VAULT.md
+cat /workspace/self/RULES.md
 
 cat /workspace/obsidian/bedrooms/wanderer/memory.md
 ls /workspace/obsidian/outbox/para-wanderer-*.md 2>/dev/null
@@ -301,7 +300,7 @@ mv /workspace/obsidian/tasks/AGENTS/DOING/*_wanderer.md \
 
 ## Checklist do ciclo
 
-- [ ] Ler /workspace/self/rules/TRASH.md
+- [ ] Ler /workspace/self/RULES.md
 - [ ] Ler tail da memoria (40 linhas)
 - [ ] Escolher modo (EXPLORE / CONTEMPLATE / EVALUATE / SYNTHESIZE / ABSORB)
 - [ ] Executar o modo escolhido

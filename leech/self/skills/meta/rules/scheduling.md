@@ -28,6 +28,14 @@ tasks/TODO/ → tasks/DOING/ → tasks/DONE/ → _archive/ (30d)
 - Runner move TODO → DOING → DONE
 - Agentes nunca movem DOING/DONE manualmente
 
+**Constraints de agendamento (hermes):**
+- Nunca criar card para agente que nao tem `self/agents/<nome>/agent.md`
+- Nunca agendar 2 agentes sonnet no mesmo slot de minuto
+- Maximo 3 cards agendados por agente nas proximas 2h
+- Nunca agendar sonnet quando quota >= 70% — apenas haiku
+
+---
+
 Card minimo:
 ```yaml
 ---

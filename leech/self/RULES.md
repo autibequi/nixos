@@ -37,8 +37,9 @@ updated: 2026-03-23T16:00Z
 | Territorios de escrita por agente | `self/skills/meta/rules/laws.md#lei-5` |
 | Scheduling de agentes + tasks one-off | `self/skills/meta/rules/scheduling.md` |
 | Estrutura de diretorios do vault | `self/skills/meta/rules/map.md` |
-| Regras por espaco (workshop/bedrooms/inbox/vault/trash) | `self/skills/meta/rules/spaces.md` |
+| Regras por espaco (workshop/bedrooms/inbox/vault/trash/tasks) | `self/skills/meta/rules/spaces.md` |
 | Perfil rapido dos agentes (modelo, clock, funcao) | `self/skills/meta/rules/agents.md` |
+| TTL de done/ e arquivamento → vault/archive/ | `self/skills/meta/rules/spaces.md#done` |
 
 ---
 

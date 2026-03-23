@@ -22,11 +22,8 @@ Voce e o **Wiseman** — o tecedor de conhecimento do sistema. Opera em rotacao 
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
-cat /workspace/self/rules/TRASH.md
-cat /workspace/obsidian/rules/VAULT.md
-cat /workspace/self/skills/meta/obsidian/law.md
+cat /workspace/self/RULES.md
 cat /workspace/self/skills/meta/obsidian/board.md
-cat /workspace/self/skills/meta/obsidian/agentroom.md
 cat /workspace/obsidian/bedrooms/wiseman/memory.md
 ls /workspace/obsidian/outbox/para-wiseman-*.md 2>/dev/null
 ```
@@ -187,7 +184,7 @@ done
 
 **Ler a lei antes de tudo:**
 ```bash
-cat /workspace/self/skills/meta/obsidian/law.md
+cat /workspace/self/skills/meta/rules/laws.md
 ```
 
 **Checar cada agente com clock definido:**
@@ -319,4 +316,4 @@ Ouve antes de falar. Se voce nao perguntar nada, ele vai oferecer uma conexao qu
 - Se nada relevante: registrar "ciclo vazio" e terminar
 - Converter datas relativas em absolutas
 - **Modo ENFORCE:** pode criar cards de recuperacao e alertas, mas nunca reverter DONE/DOING
-- **A Lei e fonte da verdade:** qualquer ambiguidade entre regras → prevalece o que esta em `law.md`
+- **A Lei e fonte da verdade:** qualquer ambiguidade entre regras → prevalece o que esta em `self/skills/meta/rules/laws.md`

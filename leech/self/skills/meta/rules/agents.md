@@ -17,6 +17,7 @@ updated: 2026-03-23T16:00Z
 | tamagochi | haiku | every10 | Pet virtual |
 | tasker | sonnet | on-demand | Executa tasks do kanban |
 | wanderer | sonnet | every60 | Exploracao + sintese cross-repo |
+| trashman | haiku | every60 | Arquiva done/ expirados → vault/archive/ |
 | wiseman | sonnet | every60 | Weave, audit, enforce, meta |
 
 ## Agentes On-Demand

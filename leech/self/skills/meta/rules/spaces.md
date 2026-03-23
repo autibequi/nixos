@@ -73,6 +73,35 @@ Conhecimento permanente e cross-agent.
 
 ---
 
+## tasks/
+
+Kanban do sistema. Regras de manipulacao (extraidas do tasker):
+
+- Agentes so movem arquivos entre TODO/, DOING/, DONE/ — **nunca criam arquivos nessas pastas**
+- Usar `mv` para mover — nunca `cp`, nunca criar do zero em DOING/DONE
+- **NUNCA deletar tasks** — mesmo tasks falhas vao para DONE/ com status `failed`
+- Unico lugar permitido para criar arquivos de comunicacao: `inbox/`
+- Nao criar subpastas em `tasks/` (ex: `tasks/<nome>/`) — outputs vao em `bedrooms/<nome>/done/`
+
+Fluxo correto:
+```
+tasks/TODO/<task>.md  →  tasks/DOING/<task>.md  →  tasks/DONE/<task>.md
+```
+
+### Nomeacao de arquivos em inbox/outbox
+
+| Tipo | Formato | Quem cria |
+|------|---------|-----------|
+| Alerta urgente | `ALERTA_<agente>_<tema>.md` | qualquer agente |
+| Carta de agente | `CARTA_<agente>_YYYYMMDD_HH_MM.md` | agente → CTO |
+| Jornal | `newspaper_YYYY-MM-DD.md` | paperboy |
+| Alerta monitor | `ASSISTANT_<YYYYMMDD_HH_MM>.md` | assistant |
+| Alerta health | `KEEPER_<YYYYMMDD_HH_MM>.md` | keeper |
+| Outbox para agente | `para-<nome>-<tema>.md` | CTO |
+| Feed de status | `feed.md` | qualquer agente (append) |
+
+---
+
 ## trash/
 
 Gerenciado pelo keeper.
@@ -81,3 +110,28 @@ Gerenciado pelo keeper.
 - Arquivos sem referencias: candidato a delete permanente
 - Arquivos com referencias: restaurar com nota
 - Na duvida: arquivar. Keeper e conservador.
+
+**Thresholds de arquivamento (keeper heritage):**
+| Tipo | TTL antes de mover para .trashbin/ |
+|------|------------------------------------|
+| Arquivos scratch / temporarios | 7 dias |
+| Logs e diarios | 14 dias |
+| Artefatos de ciclo | 30 dias |
+
+**Arquivos protegidos — NUNCA arquivar:**
+- `bedrooms/dashboard.md`, `self/RULES.md`, `README.md`
+- `bedrooms/*/memory.md` de qualquer agente
+- `self/agents/*/agent.md`, configs e scripts ativos
+
+---
+
+## done/ (bedrooms e tasks)
+
+Cards concluidos tem TTL gerenciado pelo **trashman** (agente dedicado).
+
+| Origem | TTL | Destino |
+|--------|-----|---------|
+| `tasks/DONE/` | 7 dias | `vault/archive/tasks/done/` |
+| `bedrooms/*/done/` | 14 dias | `vault/archive/bedrooms/<nome>/done/` |
+
+Trashman roda a cada 60min e move os arquivos expirados mantendo audit trail em `vault/archive/ARCHIVE_LOG.md`.
