@@ -114,8 +114,10 @@ if [ -n "$_last_tick" ]; then
   fi
 fi
 
+_filter_hint="todos"
+[ -n "$FILTER" ] && _filter_hint="agent=$FILTER"
 echo ""
-echo "${B}${C}▸ ACTIVITY LOG${R}${DIM} (ultimas $TAIL | $([ -n "$FILTER" ] && echo "agent=$FILTER" || echo "todos"))${R}${_tick_info}"
+echo "${B}${C}▸ ACTIVITY LOG${R}${DIM} (ultimas $TAIL | ${_filter_hint})${R}${_tick_info}"
 echo ""
 printf "  ${DIM}%-14s  %-8s  %-12s  %-4s  %s${R}\n" "starttime" "duration" "agent" "st" "topic"
 echo "  ${DIM}$(printf '─%.0s' {1..80})${R}"

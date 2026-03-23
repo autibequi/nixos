@@ -278,7 +278,7 @@ commands:
     filename: commands/run.sh
 
   - name: agents
-    alias: [ag, a]
+    alias: [ag, a, agent]
     help: "Gerencia agentes background."
     commands:
       - name: list

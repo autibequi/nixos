@@ -38,6 +38,10 @@ _run_step() {
 
 _gen() {
   cd "$cli_dir" && LANG=en_US.UTF-8 RUBYOPT="-E utf-8" bashly generate
+  bash -n "$cli_dir/leech" || {
+    echo "bashly gerou script invalido (bash -n falhou). Nao sobrescrevendo ~/.local/bin/leech." >&2
+    exit 1
+  }
 }
 
 _symlink() {
