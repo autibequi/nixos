@@ -5,6 +5,37 @@ use leech_sdk::status::StatusSnapshot;
 pub const DK_SERVICES: &[&str] = &["monolito", "bo-container", "front-student"];
 pub const ENVS: &[&str]        = &["sand", "local", "prod"];
 
+fn svc_envs_path() -> std::path::PathBuf {
+    let base = std::env::var("XDG_CONFIG_HOME")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|_| {
+            let home = std::env::var("HOME").unwrap_or_default();
+            std::path::PathBuf::from(home).join(".config")
+        });
+    base.join("leech").join("tui-envs")
+}
+
+pub fn load_svc_envs() -> Vec<usize> {
+    if let Ok(data) = std::fs::read_to_string(svc_envs_path()) {
+        let envs: Vec<usize> = data.lines()
+            .filter_map(|l| l.trim().parse().ok())
+            .collect();
+        if envs.len() == DK_SERVICES.len() {
+            return envs;
+        }
+    }
+    vec![0; DK_SERVICES.len()]
+}
+
+pub fn save_svc_envs(envs: &[usize]) {
+    let path = svc_envs_path();
+    if let Some(parent) = path.parent() {
+        let _ = std::fs::create_dir_all(parent);
+    }
+    let data = envs.iter().map(|n| n.to_string()).collect::<Vec<_>>().join("\n");
+    let _ = std::fs::write(path, data);
+}
+
 pub const MENU_ITEMS: &[(&str, &str)] = &[
     ("Start",         "start"),
     ("Stop",          "stop"),
@@ -38,7 +69,7 @@ impl App {
         Self {
             snapshot:    StatusSnapshot::default(),
             cursor_idx:  0,
-            svc_envs:    vec![0; DK_SERVICES.len()],
+            svc_envs:    load_svc_envs(),
             last_action: None,
             render_tick: 0,
             log_scroll:  0,
@@ -128,6 +159,7 @@ impl App {
             .any(|d| d.name == app_container && d.is_up);
         if !is_running {
             self.svc_envs[idx] = (self.svc_envs[idx] + 1) % ENVS.len();
+            save_svc_envs(&self.svc_envs);
         }
     }
 }

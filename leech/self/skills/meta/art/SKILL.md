@@ -65,6 +65,7 @@ Se voce e um agente ou skill que precisa desenhar algo:
 - 16 Calendario/sprint
 - 17 Kanban compacto
 - 18 Grafico de proporcao (pizza horizontal)
+- 19 Stacked bar vertical / termômetro (3 variantes: grossa, zoom, duplo painel) — usar em breakdowns de budget/tokens
 
 ### Chrome (relay) — inclui controle completo do browser
 - Verificacao de disponibilidade + regra de decisao

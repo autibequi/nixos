@@ -67,6 +67,8 @@ pub struct DkServiceInfo {
     pub mem: String,
     /// Host path bound to /workspace/mnt (populated for leech containers).
     pub mnt_path: String,
+    /// APP_ENV value detected from running container (empty when stopped).
+    pub env: String,
 }
 
 /// Collect a full status snapshot.
@@ -184,13 +186,21 @@ pub fn collect() -> Result<StatusSnapshot> {
         }
     }
 
+    // Detect APP_ENV for running app containers (leech-dk-*-app)
+    let running_app_names: Vec<String> = dk_containers.iter()
+        .filter(|c| c.status.to_lowercase().starts_with("up") && c.name.ends_with("-app"))
+        .map(|c| c.name.clone())
+        .collect();
+    let app_envs = docker::get_dk_app_envs(&running_app_names);
+
     // DK services
     let dk_services: Vec<DkServiceInfo> = dk_containers
         .iter()
         .map(|c| {
             let is_up = c.status.to_lowercase().starts_with("up");
             let (cpu, mem) = find_stats(&stats, &c.name);
-            DkServiceInfo { name: c.name.clone(), status: c.status.clone(), is_up, cpu, mem, mnt_path: String::new() }
+            let env = app_envs.get(&c.name).cloned().unwrap_or_default();
+            DkServiceInfo { name: c.name.clone(), status: c.status.clone(), is_up, cpu, mem, mnt_path: String::new(), env }
         })
         .collect();
 
@@ -250,7 +260,7 @@ pub fn collect() -> Result<StatusSnapshot> {
         .map(|c| {
             let is_up = c.status.to_lowercase().starts_with("up");
             let (cpu, mem) = find_stats(&stats, &c.name);
-            DkServiceInfo { name: c.name.clone(), status: c.status.clone(), is_up, cpu, mem, mnt_path: String::new() }
+            DkServiceInfo { name: c.name.clone(), status: c.status.clone(), is_up, cpu, mem, mnt_path: String::new(), env: String::new() }
         })
         .collect();
 

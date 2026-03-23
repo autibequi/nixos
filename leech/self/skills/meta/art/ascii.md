@@ -653,6 +653,88 @@ Para barras sem cor: `██░░░░` (unicode block chars)
 
 ---
 
+## 19. Stacked Bar Vertical (Termômetro)
+
+Para mostrar proporção de budget/capacidade com múltiplas camadas empilhadas.
+
+### Variante A — escala grossa (visão geral, 1 linha = 10k)
+
+```
+╔════╗ 200k
+║    ║
+║    ║
+║    ║  livre / disponível
+║    ║  ~176k  88%
+║    ║
+╠════╣ ←24k
+║▓▓▓▓║  camada pesada    18k   9%
+╠════╣ ←6k ─────────────────────
+║░░░░║  sub-camada A     2.9k  1.5%
+║▒▒▒▒║  sub-camada B     1.5k  0.8%
+║····║  sub-camada C     0.8k  0.4%
+║····║  sub-camada D     0.7k  0.4%
+╚════╝ 0k
+       ──────────────────────────
+       grupo inferior    ~6k   3%
+       overhead total   ~24k  12%
+```
+
+### Variante B — escala fina (1 linha = 2k, zoom no overhead)
+
+```
+╔══════╗ 24k
+║      ║ 24k
+╠══════╣ ←22k
+║▓▓▓▓▓▓║ 22k  Claude Code sys
+║▓▓▓▓▓▓║ 20k  ·
+║▓▓▓▓▓▓║ 18k  ·
+║▓▓▓▓▓▓║ 16k  ·
+║▓▓▓▓▓▓║ 14k  ·
+║▓▓▓▓▓▓║ 12k  ·
+║▓▓▓▓▓▓║ 10k  ·
+║▓▓▓▓▓▓║  8k  ·   18k total  9%
+╠══════╣ ← 6k ──────────────────
+║░░░░░░║  6k  MEMORY.md   2.9k
+║░░    ║  4k  ·
+╠══════╣ ← 3k
+║▒▒▒▒  ║  3k  CLAUDE.md   1.5k
+╠══════╣ ← 1.5k
+║····  ║  1.5k SKILLS      0.8k
+║·     ║  0.8k BOOT+LEECH  0.7k
+╚══════╝  0k
+          ──────────────────────
+          nosso boot   ~6k   3%
+          total        ~24k  12%
+          livre        ~176k 88%
+```
+
+### Variante C — duplo painel (macro + zoom lado a lado)
+
+```
+  200k ╔══╗      24k ╔══════╗
+       ║  ║          ║▓▓▓▓▓▓║ CC sys  18k
+       ║  ║   zoom   ╠══════╣
+       ║  ║  ──────► ║░░░░░░║ MEM    2.9k
+       ║  ║          ║▒▒▒▒  ║ CL.MD  1.5k
+  24k  ╠══╣          ║····  ║ SKL    0.8k
+       ║▓▓║          ║·     ║ BOOT   0.7k
+   6k  ╠══╣       0k ╚══════╝
+       ║░▒║
+    0k ╚══╝
+```
+
+**Regras de construção:**
+- **Variante A:** visão rápida, 1 linha ≈ 10k — use quando o livre domina e detalhe é secundário
+- **Variante B:** zoom no overhead, 1 linha ≈ 2k — use quando quer detalhar os grupos menores
+- **Variante C:** duplo painel — macro (escala total) + micro (zoom) lado a lado
+- Preenchimento: `▓▓` pesado / `░░` médio / `▒▒` leve / `··` mínimo / vazio = livre/disponível
+- Marcadores laterais: `←Nk` nos pontos de divisão entre grupos
+- Rodapé: totais por grupo + % do budget total
+
+**Quando usar:** distribuição de tokens, memória, storage, budget de qualquer recurso com escala grande onde 1-2 itens dominam e o restante é detalhe.
+
+---
+
 ## Convencoes visuais
 
 | Simbolo | Significado |

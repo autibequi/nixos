@@ -211,6 +211,37 @@ pub fn exec_replace(cid: &str, env: &[(&str, &str)], bash_cmd: &str) -> Result<(
     Err(LeechError::Docker(format!("docker exec failed: {err}")))
 }
 
+/// Batch-inspect a list of containers to extract their APP_ENV value.
+/// Returns a map of container_name → env string (empty if not found).
+pub fn get_dk_app_envs(names: &[String]) -> std::collections::HashMap<String, String> {
+    if names.is_empty() {
+        return std::collections::HashMap::new();
+    }
+    let mut cmd = Command::new("docker");
+    cmd.args(["inspect", "--format", "{{.Name}}|{{range .Config.Env}}{{.}} {{end}}"]);
+    for n in names {
+        cmd.arg(n);
+    }
+    let output = match cmd.output() {
+        Ok(o) => o,
+        Err(_) => return std::collections::HashMap::new(),
+    };
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let mut map = std::collections::HashMap::new();
+    for line in stdout.lines() {
+        let parts: Vec<&str> = line.splitn(2, '|').collect();
+        if parts.len() != 2 { continue; }
+        let name = parts[0].trim_start_matches('/').to_string();
+        for env_var in parts[1].split_whitespace() {
+            if let Some(val) = env_var.strip_prefix("APP_ENV=") {
+                map.insert(name, val.to_string());
+                break;
+            }
+        }
+    }
+    map
+}
+
 /// Check if Docker is accessible.
 #[must_use]
 pub fn is_available() -> bool {

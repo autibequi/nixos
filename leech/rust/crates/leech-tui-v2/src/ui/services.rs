@@ -48,7 +48,8 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
         if is_pending {
             let frame_ch     = SPINNER[(app.render_tick as usize / 2) % SPINNER.len()];
             let action_label = app.last_action.as_ref().map(|(_, s)| s.as_str()).unwrap_or("…");
-            let env          = ENVS[app.svc_envs[i]];
+            let running_env  = dk.and_then(|d| if d.is_up && !d.env.is_empty() { Some(d.env.as_str()) } else { None });
+            let env          = running_env.unwrap_or(ENVS[app.svc_envs[i]]);
             lines.push(Line::from(vec![
                 Span::raw("  "),
                 Span::styled(svc_branch.to_string(), theme::tree_branch()),
@@ -79,7 +80,13 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                  String::new(), String::new())
             };
 
-        let env = ENVS[app.svc_envs[i]];
+        // Show the real running env (from APP_ENV) when container is up,
+        // otherwise show the selected env for the next start.
+        let env = if let Some(d) = dk {
+            if d.is_up && !d.env.is_empty() { d.env.as_str() } else { ENVS[app.svc_envs[i]] }
+        } else {
+            ENVS[app.svc_envs[i]]
+        };
         let mut spans = vec![
             Span::raw("  "),
             Span::styled(svc_branch.to_string(), theme::tree_branch()),

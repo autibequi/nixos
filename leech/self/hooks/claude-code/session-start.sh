@@ -136,6 +136,37 @@ if [ -f "$_LEECH_DISPLAY" ]; then
 fi
 
 # ────────────────────────────────────────────────────────────────
+# 2.3 SKILLS TREE — árvore de skills disponíveis (não headless/agent)
+# ────────────────────────────────────────────────────────────────
+if [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
+  _SELF_DIR="/workspace/self"
+  if [ -d "$_SELF_DIR" ]; then
+    echo "---SKILLS---"
+    echo "base: $_SELF_DIR"
+    find "$_SELF_DIR" -name "*.md" | sort \
+      | grep -vE '/(bash|rust|container|node_modules|templates)/' \
+      | grep -vE '^memory/' \
+      | sed "s|$_SELF_DIR/||" \
+      | python3 -c "
+import sys
+lines = sys.stdin.read().splitlines()
+prev_parts = []
+for line in lines:
+    parts = line.split('/')
+    for i, part in enumerate(parts):
+        if i >= len(prev_parts) or prev_parts[i] != part:
+            indent = '  ' * i
+            if i < len(parts) - 1:
+                print(f'{indent}{part}/')
+            else:
+                print(f'{indent}└─ {part}')
+    prev_parts = parts
+"
+    echo "---/SKILLS---"
+  fi
+fi
+
+# ────────────────────────────────────────────────────────────────
 # 2.5 LITE + ENV + OBSIDIAN — lazy-load via user-prompt-submit.sh
 #     Injetados no primeiro prompt complexo ou no segundo prompt (após pergunta simples).
 #     Poupa ~1000 tokens em perguntas rápidas/conversacionais.

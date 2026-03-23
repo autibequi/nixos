@@ -63,45 +63,39 @@ Conversão: **1 token ≈ 3.5 chars** (PT-BR + box-drawing).
 
 ### 4. Infográfico
 
+Usar **stacked bar vertical** (ascii.md §19, Variante C — duplo painel):
+
 ```
   BREAKDOWN DE TOKENS — sessão atual
+  budget total: 200k
 
-  Dono          Componente          Chars     Tokens   Barra (20)            %
+  200k ╔══╗        Xk ╔══════════╗
+       ║  ║           ║▓▓▓▓▓▓▓▓▓▓║ CC sys    ~18k
+       ║  ║  zoom     ║▓▓▓▓▓▓▓▓▓▓║ tools     ~5k
+       ║  ║  ──────►  ╠══════════╣
+       ║  ║           ║░░░░░░░░  ║ MEMORY.md  Xk
+       ║  ║           ║▒▒▒▒▒▒    ║ CLAUDE.md  Xk
+       ║  ║           ║▒▒▒▒      ║ SKILLS     Xk
+  Xk   ╠══╣           ║··        ║ BOOT/LEECH Xk
+       ║▓▓║           ╠══════════╣
+       ║░▒║           ║██████████║ CONVERSA   Xk
+   Xk  ╠══╣        0k ╚══════════╝
+       ║██║
+    0k ╚══╝
 
-  ── NOSSO ──────────────────────────────────────────────────────────────────
-  [NOSSO]       DIRETRIZES.md       X chars   X tk     ████████░░░░░░░░░░░░  XX%
-  [NOSSO]       GLaDOS.persona      X chars   X tk     █████░░░░░░░░░░░░░░░  XX%
-  [NOSSO]       SELF.md             X chars   X tk     ██░░░░░░░░░░░░░░░░░░  XX%
-  [NOSSO]       MEMORY.md           estimado  X tk     ░░░░░░░░░░░░░░░░░░░░  XX%
-                                              subtotal  X tk                  XX%
-
-  ── CLAUDE CODE ─────────────────────────────────────────────────────────────
-  [CLAUDE CODE] System prompt       estimado  X tk     ████████████████████  XX%
-  [CLAUDE CODE] Schema tools        estimado  X tk     ████████░░░░░░░░░░░░  XX%
-  [CLAUDE CODE] Deferred tools      estimado  X tk     █████░░░░░░░░░░░░░░░  XX%
-  [CLAUDE CODE] Skills list         estimado  X tk     ███░░░░░░░░░░░░░░░░░  XX%
-                                              subtotal  X tk                  XX%
-
-  ── CONVERSA ────────────────────────────────────────────────────────────────
-  [CONVERSA]    Turnos acumulados   X turnos  X tk     ██░░░░░░░░░░░░░░░░░░  XX%
-  [CONVERSA]    system-reminders    estimado  X tk     ██░░░░░░░░░░░░░░░░░░  XX%
-                                              subtotal  X tk                  XX%
-
-  Tópicos abordados na sessão:
-    · tópico 1                      XX%  ███░░░░░░░░░░░░░░░░░
-    · tópico 2                      XX%  ██░░░░░░░░░░░░░░░░░░
-    · tópico 3                      XX%  █░░░░░░░░░░░░░░░░░░░
-  (% relativo ao total da conversa; estimado por volume de mensagens/tool calls por tópico)
-
-  ────────────────────────────────────────────────────────────────────────────
-  TOTAL ESTIMADO    X tk      COM MARGEM ±15%:  X tk – X tk
-```
-
-Resumo por dono:
-```
-  NOSSO         ████████░░░░░░░░░░░░  XX%  (~X tk)
-  CLAUDE CODE   ██████████████░░░░░░  XX%  (~X tk)
-  CONVERSA      ██░░░░░░░░░░░░░░░░░░  XX%  (~X tk)
+  ── detalhes ─────────────────────────────────────────────────
+  Componente         Chars     k        %
+  ─────────────────────────────────────────────────────────────
+  CC sistema         estimado  ~18k     9%
+  CC tools/schema    estimado  ~5k      2.5%
+  MEMORY.md          X chars   Xk       X%
+  CLAUDE.md          X chars   Xk       X%
+  SKILLS tree        X chars   Xk       X%
+  BOOT+LEECH         X chars   Xk       X%
+  Conversa (N turns) estimado  Xk       X%
+  ─────────────────────────────────────────────────────────────
+  TOTAL ESTIMADO               Xk       X%   (de 200k)
+  livre p/ conversa            Xk       X%
 ```
 
 ---

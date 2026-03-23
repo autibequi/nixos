@@ -285,8 +285,17 @@ fn find_container(app: &App, svc: &str) -> Option<String> {
             .find(|u| u.name.contains(svc))
             .map(|u| u.name.clone())
     } else {
+        // Prefer the exact app container (leech-dk-<svc>-app) to avoid
+        // accidentally stopping a dep (postgres/redis/localstack).
+        let app_name = format!("leech-dk-{svc}-app");
         app.snapshot.dk_services.iter()
-            .find(|d| d.name.contains(svc))
+            .find(|d| d.name == app_name)
             .map(|d| d.name.clone())
+            .or_else(|| {
+                // Fallback: any container whose name ends with -<svc>-app
+                app.snapshot.dk_services.iter()
+                    .find(|d| d.name.ends_with(&format!("-{svc}-app")))
+                    .map(|d| d.name.clone())
+            })
     }
 }
