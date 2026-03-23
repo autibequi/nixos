@@ -289,11 +289,11 @@
     "on-click": "alacritty -e bash -c 'claude-statusbar --plan max20; read'"
   },
   "custom/claude-usage": {
-    "exec": "zion claude usage --waybar 2>/dev/null || echo \"{\\\"text\\\":\\\" 󱙺 --\\\",\\\"tooltip\\\":\\\"Claude: erro ao rodar script\\\",\\\"class\\\":\\\"\\\"}\"",
+    "exec": "leech claude usage --waybar 2>/dev/null || echo \"{\\\"text\\\":\\\" 󱙺 --\\\",\\\"tooltip\\\":\\\"Claude: erro ao rodar script\\\",\\\"class\\\":\\\"\\\"}\"",
     "return-type": "json",
     "interval": 120,
     "signal": 8,
-    "on-click": "zion claude usage --waybar --refresh; pkill -RTMIN+8 waybar",
+    "on-click": "leech claude usage --waybar --refresh; pkill -RTMIN+8 waybar",
     "format": "{}",
     "tooltip": true,
     "escape": false
