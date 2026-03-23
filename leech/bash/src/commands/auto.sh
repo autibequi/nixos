@@ -4,28 +4,37 @@ leech_load_config
 LEECH_DIR="${LEECH_ROOT:-${LEECH_NIXOS_DIR:-$HOME/nixos}/leech/self}"
 OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
 RUNNER="$LEECH_DIR/scripts/task-runner.sh"
-SCHEDULE="${SCHEDULE_DIR:-$OBSIDIAN/agents/_schedule}"
+SCHEDULE="${SCHEDULE_DIR:-$OBSIDIAN/tasks/AGENTS}"
 TASKS="$OBSIDIAN/tasks"
 
 # Fallbacks runner
 if [ ! -f "$RUNNER" ]; then
-  for try in /workspace/mnt/self /workspace/nixos/self; do
-    [ -f "$try/scripts/task-runner.sh" ] && RUNNER="$try/scripts/task-runner.sh" && break
-  done
+  _resolve_runner() {
+    local t; for t in /workspace/mnt/leech/self /workspace/self /workspace/nixos/self; do
+      [ -f "$t/scripts/task-runner.sh" ] && echo "$t/scripts/task-runner.sh" && return
+    done
+  }
+  RUNNER="$(_resolve_runner)"
 fi
 
-# Fallbacks _schedule
+# Fallbacks schedule
 if [ ! -d "$SCHEDULE" ]; then
-  for try in /workspace/obsidian/agents/_schedule "$HOME/obsidian/agents/_schedule"; do
-    [ -d "$try" ] && SCHEDULE="$try" && break
-  done
+  _resolve_schedule() {
+    local t; for t in /workspace/obsidian/tasks/AGENTS "$HOME/.ovault/Work/tasks/AGENTS"; do
+      [ -d "$t" ] && echo "$t" && return
+    done
+  }
+  SCHEDULE="$(_resolve_schedule)"
 fi
 
 # Fallbacks tasks
 if [ ! -d "$TASKS" ]; then
-  for try in /workspace/obsidian/tasks "$HOME/obsidian/tasks"; do
-    [ -d "$try" ] && TASKS="$try" && break
-  done
+  _resolve_tasks() {
+    local t; for t in /workspace/obsidian/tasks "$HOME/.ovault/Work/tasks"; do
+      [ -d "$t" ] && echo "$t" && return
+    done
+  }
+  TASKS="$(_resolve_tasks)"
 fi
 
 DRY_RUN="${args[--dry-run]:-}"

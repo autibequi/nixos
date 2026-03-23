@@ -1,20 +1,25 @@
 leech_load_config
 
 OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
-AGENTS="${OBSIDIAN}/agents"
-
-if [ ! -d "$AGENTS" ]; then
-  for try in /workspace/obsidian/agents "$HOME/obsidian/agents"; do
-    [ -d "$try" ] && AGENTS="$try" && break
+# Resolve obsidian dir (host vs container)
+_resolve_obsidian() {
+  local t
+  for t in "$1" /workspace/obsidian "$HOME/.ovault/Work"; do
+    [ -d "$t/tasks" ] && echo "$t" && return
   done
-fi
+  echo "$1"
+}
+OBSIDIAN="$(_resolve_obsidian "$OBSIDIAN")"
 
-if [ ! -d "$AGENTS" ]; then
-  echo "[log] agents dir nao encontrado"
+AGENTS_SCHEDULE="$OBSIDIAN/tasks/AGENTS"
+AGENTS_RUNNING="$OBSIDIAN/tasks/AGENTS/DOING"
+BEDROOMS="$OBSIDIAN/bedrooms"
+ACTIVITY_LOG="$OBSIDIAN/vault/logs/agents.md"
+
+if [ ! -d "$OBSIDIAN/tasks" ]; then
+  echo "[log] obsidian tasks dir nao encontrado ($OBSIDIAN/tasks)"
   exit 1
 fi
-
-ACTIVITY_DIR="$AGENTS/_logs/activity"
 FILTER="${args[agent]:-}"
 TAIL="${args[--tail]:-30}"
 
@@ -23,8 +28,8 @@ G=$'\033[32m'; Y=$'\033[33m'; C=$'\033[36m'; RED=$'\033[31m'
 
 # ── MODE: --schedule → running/scheduled view ─────────────────────
 if [[ -n "${args[--schedule]:-}" ]]; then
-  SCHEDULE="$AGENTS/_schedule"
-  RUNNING="$AGENTS/_running"
+  SCHEDULE="$AGENTS_SCHEDULE"
+  RUNNING="$AGENTS_RUNNING"
 
   _fm() { awk '/^---/{fm++} fm==1 && /^'"$2"':/{print $2; exit}' "$1" 2>/dev/null; }
   _label() { echo "$1" | sed 's/^[0-9]\{8\}_[0-9]\{2\}_[0-9]\{2\}_//; s/\.md$//'; }
@@ -72,45 +77,24 @@ if [[ -n "${args[--schedule]:-}" ]]; then
 fi
 
 # ── MODE: activity log ────────────────────────────────────────────
-if [ ! -d "$ACTIVITY_DIR" ]; then
+if [ ! -f "$ACTIVITY_LOG" ]; then
   echo "${DIM}[log] nenhum activity log ainda${R}"
-  echo "      Pasta esperada: $ACTIVITY_DIR"
+  echo "      Esperado: $ACTIVITY_LOG"
   exit 0
 fi
 
-declare -a LOG_FILES=()
+# Parse markdown table: | Timestamp | Agente | Status | Duracao | Tokens | Card |
+# Filter by agent if requested, take last N entries
 if [ -n "$FILTER" ]; then
-  if [ -f "$ACTIVITY_DIR/$FILTER" ]; then
-    LOG_FILES=("$ACTIVITY_DIR/$FILTER")
-  else
-    echo "[log] agent '$FILTER' sem log em $ACTIVITY_DIR"
-    echo "Disponiveis: $(ls "$ACTIVITY_DIR" 2>/dev/null | tr '\n' ' ')"
-    exit 1
-  fi
+  MERGED=$(grep "^|" "$ACTIVITY_LOG" | grep -v "^| Timestamp\|^|---" | grep "| $FILTER |" | tail -"$TAIL" | tac)
 else
-  while IFS= read -r f; do [ -f "$f" ] && LOG_FILES+=("$f"); done < <(ls "$ACTIVITY_DIR"/ 2>/dev/null | xargs -I{} echo "$ACTIVITY_DIR/{}")
+  MERGED=$(grep "^|" "$ACTIVITY_LOG" | grep -v "^| Timestamp\|^|---" | tail -"$TAIL" | tac)
 fi
-
-if [ ${#LOG_FILES[@]} -eq 0 ]; then
-  echo "${DIM}(nenhuma entrada ainda)${R}"
-  exit 0
-fi
-
-# Merge runs (exclude note lines) + notes index
-MERGED=$(grep -h $'\tok\t\|$\ttimeout\t\|$\tfail\t\|$\tmigrated\t' "${LOG_FILES[@]}" 2>/dev/null | sort -r | head -"$TAIL")
 
 if [ -z "$MERGED" ]; then
   echo "${DIM}(nenhuma entrada ainda)${R}"
   exit 0
 fi
-
-# Build notes lookup: agent -> last note text
-declare -A NOTES
-for lf in "${LOG_FILES[@]}"; do
-  aname=$(basename "$lf")
-  n=$(grep $'\tnote\t' "$lf" 2>/dev/null | tail -1 | cut -f3-)
-  [ -n "$n" ] && NOTES[$aname]="$n"
-done
 
 # ── Last tick info ────────────────────────────────────────────────
 _tick_info=""
@@ -139,7 +123,7 @@ echo "  ${DIM}$(printf '─%.0s' {1..80})${R}"
 # ── Queue: running + scheduled (proximos 10) ──────────────────────
 NOW=$(date +%s)
 _queue_output=$({
-  for dir_state in "$AGENTS/_running:running" "$AGENTS/_schedule:sched"; do
+  for dir_state in "$AGENTS_RUNNING:running" "$AGENTS_SCHEDULE:sched"; do
     dir="${dir_state%%:*}"; state="${dir_state##*:}"
     [ -d "$dir" ] || continue
     for f in "$dir"/*.md; do
@@ -177,14 +161,22 @@ fi
 _now_display=$(date +"%m-%d %H:%M")
 printf "  ${Y}%-14s  %-8s  %-12s  %-4s  %s${R}\n" "$_now_display" "now" "─────" "──" "──────"
 
-# ── Past entries ──────────────────────────────────────────────────
-while IFS=$'\t' read -r ts agent status elapsed tokens card; do
-  # Status icon (compact)
+# ── Past entries (from markdown table) ───────────────────────────
+while IFS='|' read -r _ ts agent status dur tokens card _; do
+  # Trim whitespace
+  ts="${ts## }"; ts="${ts%% }"
+  agent="${agent## }"; agent="${agent%% }"
+  status="${status## }"; status="${status%% }"
+  dur="${dur## }"; dur="${dur%% }"
+  card="${card## }"; card="${card%% }"
+
+  [ -z "$ts" ] && continue
+
+  # Status icon
   case "$status" in
     ok)       sc="${G}ok${R} " ;;
     timeout)  sc="${Y}to${R} " ;;
     fail)     sc="${RED}!!${R} " ;;
-    migrated) sc="${DIM}--${R} " ;;
     *)        sc="${DIM}? ${R} " ;;
   esac
 
@@ -193,24 +185,14 @@ while IFS=$'\t' read -r ts agent status elapsed tokens card; do
   if [ "$ts_epoch" -gt 0 ]; then
     ts_short=$(date -d "@$ts_epoch" +"%m-%d %H:%M")
   else
-    ts_short=$(echo "$ts" | sed 's/[0-9]\{4\}-\([0-9]\{2\}\)-\([0-9]\{2\}\)T\([0-9]\{2\}:[0-9]\{2\}\).*/\1-\2 \3/')
+    ts_short="$ts"
   fi
 
-  # Duration: use elapsed if available, otherwise "--"
-  dur="${elapsed}"
   [[ "$dur" == "—" || -z "$dur" ]] && dur="--"
 
-  # Topic: try note for this agent, else derive from card name
-  topic=""
-  # If card name differs from agent name, it IS the topic (e.g. task cards)
-  card_clean=$(echo "$card" | sed 's/^[0-9]\{8\}_[0-9]\{2\}_[0-9]\{2\}_//')
-  if [ "$card_clean" != "$agent" ] && [ -n "$card_clean" ]; then
-    topic="$card_clean"
-  fi
-  # If we have a note for this agent, prefer it
-  [ -n "${NOTES[$agent]:-}" ] && topic="${NOTES[$agent]}"
-  # For migrated entries, show tokens field if it says "migrated"
-  [[ "$status" == "migrated" ]] && [ -z "$topic" ] && topic="${DIM}(historico)${R}"
+  # Card name as topic
+  topic=$(echo "$card" | sed 's/^[0-9]\{8\}_[0-9]\{2\}_[0-9]\{2\}_//; s/\.md$//')
+  [ "$topic" = "$agent" ] && topic=""
 
   printf "  %-14s  %-8s  %-12s  " "$ts_short" "$dur" "$agent"
   printf "%-6b  " "$sc"
