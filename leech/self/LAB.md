@@ -50,7 +50,7 @@ rm -f "$SYSFILE"
 | `/workspace/self/` | código Leech montado de `~/nixos/self` | sim via mnt/self |
 | `/workspace/mnt/` | nixos repo do host montado rw | sim |
 | `/workspace/mnt/self/` | **fonte da verdade** — hooks, skills, agents, scripts | sim |
-| `/workspace/host/` | nixos repo completo (`~/nixos`) — **SÓ em lab mode** | sim (writable) |
+| `/workspace/host/` | nixos repo (`~/nixos`) — ro default, **rw com --host** | rw com host_attached=1 |
 | `/workspace/obsidian/` | vault Obsidian, persistente entre sessões | sim |
 | `/workspace/obsidian/tasks/` | kanban TODO/DOING/DONE | sim |
 | `/workspace/obsidian/vault/agents/` | memória e outputs dos agentes | sim |
@@ -61,11 +61,11 @@ rm -f "$SYSFILE"
 | `/tmp/leech-locks/` | locks de tasks (atomic mkdir) | runtime |
 | `/var/run/docker.sock` | Docker socket — GID 131, eu tenho GID 1000+190 | **sem acesso** |
 
-## Limitações desta sessão (leech host sem restart)
+## Limitações desta sessão (--host sem restart)
 
 - **Sem Docker**: socket precisa GID 131, não estou no grupo
 - `leech tasks run X` requer Docker → precisa rodar no host
-- `leech host` do host spawna container com `group_add: [131]` — ao reiniciar terei acesso
+- `leech --host` do host spawna container com `group_add: [131]` — ao reiniciar terei acesso
 - O que posso fazer: Claude interno direto, editar arquivos, rodar scripts, task-runner.sh
 
 ## Workflow lab
