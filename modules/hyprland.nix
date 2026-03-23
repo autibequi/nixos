@@ -33,7 +33,6 @@ with lib;
   xdg.portal = {
     enable = true;
     extraPortals = [
-      pkgs.xdg-desktop-portal-hyprland
       pkgs.xdg-desktop-portal-gtk  # handles Settings portal (color-scheme)
     ];
     config.hyprland.default = [ "hyprland" "gtk" ];

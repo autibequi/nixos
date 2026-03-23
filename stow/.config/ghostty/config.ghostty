@@ -51,7 +51,7 @@ mouse-scroll-multiplier=3
 
 # =============================================================================
 # Aesthetics
-theme = dark:Horizon,light:Horizon Bright
+theme = dark:IR Black,light:iTerm2 Light Background
 
 # Cursor
 cursor-style = block
