@@ -329,12 +329,16 @@ leech_session_run() {
       # Shared container: se não há volumes extras, reusa container existente via exec.
       if [[ -z "$extra_volumes" ]]; then
         local cid
-        # Busca por CLAUDIO_MOUNT — ignora nome, garante 1 container por diretório
-        cid=$(docker ps -q --filter "label=com.docker.compose.service=leech" 2>/dev/null \
-          | xargs -r -I{} docker inspect {} \
-              --format '{{.Id}} {{range .Config.Env}}{{.}} {{end}}' 2>/dev/null \
-          | awk -v mp="CLAUDIO_MOUNT=${mount_path}" \
-              '$0 ~ mp {print substr($1,1,12); exit}')
+        # Busca por nome canônico primeiro (rápido) — funciona mesmo sem CLAUDIO_MOUNT no env
+        cid=$(docker ps -q --filter "name=^/${leech_name}$" 2>/dev/null | head -1)
+        # Fallback: busca por CLAUDIO_MOUNT — garante 1 container por diretório mesmo com nome diferente
+        if [[ -z "$cid" ]]; then
+          cid=$(docker ps -q --filter "label=com.docker.compose.service=leech" 2>/dev/null \
+            | xargs -r -I{} docker inspect {} \
+                --format '{{.Id}} {{range .Config.Env}}{{.}} {{end}}' 2>/dev/null \
+            | awk -v mp="CLAUDIO_MOUNT=${mount_path}" \
+                '$0 ~ mp {print substr($1,1,12); exit}')
+        fi
         if [[ -z "$cid" ]]; then
           # Container não existe: sobe via compose e renomeia para nome canônico.
           leech_compose_cmd -p "$proj_name" up -d leech

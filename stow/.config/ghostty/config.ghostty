@@ -2,11 +2,12 @@
 # Configurações de Shell
 # =============================================================================
 # initial-command = fastfetch
-# shell-integration = detect
+shell-integration = detect
 shell-integration-features = no-cursor
 scrollback-limit = 10000
-# link-url = true  # desabilitado: escaneia URLs em cada output, overhead em outputs grandes
+link-url = true
 linux-cgroup=single-instance
+gtk-single-instance = true
 
 # =============================================================================
 # Configurações
@@ -48,10 +49,18 @@ mouse-hide-while-typing = true
 copy-on-select = true
 mouse-scroll-multiplier=3
 # minimum-contrast=3 # melhora legibilidade mas estraga os temas
+resize-overlay = never
 
 # =============================================================================
 # Aesthetics
-theme = dark:IR Black,light:iTerm2 Light Background
+theme = dark:catppuccin-mocha,light:catppuccin-latte
+
+# Font
+font-feature = calt
+bold-is-bright = true
+
+# Images (Kitty Graphics Protocol — yazi, etc.)
+image-storage-limit = 320000000
 
 # Cursor
 cursor-style = block

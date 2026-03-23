@@ -1,5 +1,7 @@
 # Memory Index
 
+- [reference_ghostty_config.md](reference_ghostty_config.md) — Ghostty: light theme fix (catppuccin-latte), yazi images (image-storage-limit), gtk-single-instance, shell-integration
+
 - [feedback_leech_self_contained.md](feedback_leech_self_contained.md) — Leech must be self-contained: only use files from /nixos/self, never reference stow/.claude/ or external paths
 - [project_dockerizer.md](project_dockerizer.md) — Sistema leech docker run/install/logs para monolito e outros serviços estratégia (inclui debug remoto)
 - [feedback_docker_install.md](feedback_docker_install.md) — SSH mount, TTY, go mod download -x: lições do leech docker install
