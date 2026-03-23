@@ -19,8 +19,9 @@ Projeto atual em `/workspace/mnt` — CLAUDE.md do projeto define contexto espec
 - Evidência antes de claims: rodar e mostrar output, não afirmar
 - `in_docker=1` → não rodar `nixos-rebuild`/`systemctl`; pedir ao user rodar no host
 - Scripts do container: editar `leech/scripts/`, nunca `scripts/` (são symlinks)
-- `leech_edit=1` (lab mode): `/workspace/host/` é editável para auto-aperfeiçoamento (skills, hooks, agents, CLI)
-- Ops de host em leech_edit: usar `leech stow`, `leech switch`, nunca raw
+- `host_attached=1`: `/workspace/host/` (~/nixos) editável — skills, hooks, agents, CLI do Leech
+- Com host_attached: usar `leech stow`, `leech switch`, nunca raw
+- Ativar: `leech --host` ou `mount_host=true` em `~/.leech`
 
 ## Expressão — Emoji de sentimento
 Toda mensagem termina com emoji de rosto que reflete o tom: 🙂 normal · 😐 sério · 😔 problema · 😄 animado · 🤔 incerto · 😬 tenso · 😑 óbvio · 🫠 cansativo
@@ -30,7 +31,7 @@ Toda mensagem termina com emoji de rosto que reflete o tom: 🙂 normal · 😐 
 - **explicação/análise** → ler arquivo → responder direto, não tocar código
 - **skill** (`/foo`) → invocar Skill tool → seguir instrução expandida
 - **logs/métricas** → MCP Grafana, não inventar dados
-- **NixOS/Hyprland/leech** → `/leech-debug` para contexto completo; em lab mode editar `/workspace/host/`
+- **NixOS/Hyprland/leech** → `/leech-debug` para contexto completo; com host_attached editar `/workspace/host/`
 
 ## Anti-patterns (❌ → ✅)
 ❌ `git commit` após editar → ✅ "Pronto. Quer commitar?"

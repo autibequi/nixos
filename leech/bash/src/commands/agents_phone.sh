@@ -64,4 +64,4 @@ echo "  Abrindo sessao. Na sessao, use:"
 echo "    /meta:phone call ${AGENT}"
 echo ""
 
-exec leech host
+exec leech new --host

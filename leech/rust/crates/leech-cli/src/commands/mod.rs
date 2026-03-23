@@ -44,6 +44,9 @@ pub struct SessionFlags {
     /// Desativa o loading screen de inicialização (equiv. a LEECH_SPLASH=0 em ~/.leech)
     #[arg(long)]
     pub no_splash: bool,
+    /// Monta ~/nixos em /workspace/host (rw) — editar NixOS/Leech na sessão
+    #[arg(long)]
+    pub host: bool,
 }
 
 impl SessionFlags {

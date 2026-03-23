@@ -45,7 +45,9 @@ CLI principal: `leech <comando>`
 - Para comandos de sistema: pedir ao usuario rodar no host
 - `nix-shell -p <pkg>` disponivel no container para qualquer pacote Nixpkgs
 - Scripts: editar `leech/scripts/` (fonte da verdade), nunca `scripts/` (sao symlinks)
-- `leech_edit=1` (lab mode): `/workspace/host/` editavel — skills, hooks, agents, CLI
+- `host_attached=1`: `/workspace/host/` editavel — skills, hooks, agents, CLI do Leech
+- Ativar: `leech --host`, `leech new --host`, ou `mount_host=true` em `~/.leech`
+- `/workspace/obsidian/` sempre editavel por qualquer agente (sem precisar de --host)
 
 ## Logs — onde ficam
 

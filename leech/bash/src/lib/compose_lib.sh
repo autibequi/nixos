@@ -43,6 +43,10 @@ leech_load_config() {
       export OBSIDIAN_PATH
       leech_obsidian_path="$OBSIDIAN_PATH"
     fi
+    # mount_host=true em ~/.leech ativa /workspace/host rw em qualquer sessão
+    if [[ -n "${mount_host:-}" ]] && [[ "${mount_host:-}" != "0" ]] && [[ "${mount_host:-}" != "false" ]]; then
+      export LEECH_MOUNT_HOST=1
+    fi
   fi
   # Docker GID para group_add no compose (agente precisa acessar /var/run/docker.sock)
   if [[ -z "${DOCKER_GID:-}" ]] && [[ -S /var/run/docker.sock ]]; then
@@ -241,6 +245,17 @@ leech_session_run() {
 
   leech_compose_env "$mount_path" "$mount_opts"
 
+  # ── Host mode: --host flag ou mount_host=true em ~/.leech ──────────────────
+  # Monta ~/nixos em /workspace/host:rw e injeta HOST_ATTACHED=1 no container.
+  local host_env=""
+  local _host_active="${args['--host']:-${flag_host:-${LEECH_MOUNT_HOST:-}}}"
+  if [[ -n "$_host_active" ]] && [[ "$_host_active" != "0" ]]; then
+    export CLAUDIO_HOST_OPTS=rw
+    proj_name="${proj_name}-host"
+    leech_name="leech-${proj_name#leech-}"
+    host_env="-e HOST_ATTACHED=1"
+  fi
+
   local danger model
 
   case "$engine" in
@@ -349,12 +364,12 @@ leech_session_run() {
             --format "{{.Names}}" | head -1)
           [[ -n "$auto_name" ]] && docker rename "$auto_name" "$leech_name" 2>/dev/null || true
           cid=$(docker ps -q --filter "name=^/${leech_name}$" 2>/dev/null | head -1)
-          docker exec -it $analysis_env \
+          docker exec -it $analysis_env $host_env \
             -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" "$cid" \
             /bin/bash -c "${launch_cmd}"
         else
           # Container já quente: docker exec direto (sem parsear compose YAML).
-          docker exec -it $analysis_env \
+          docker exec -it $analysis_env $host_env \
             -e "CLAUDIO_MOUNT=$mount_path" "$cid" \
             /bin/bash -c "cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
         fi
@@ -363,7 +378,7 @@ leech_session_run() {
         local short_id
         short_id=$(tr -dc 'a-z0-9' < /dev/urandom 2>/dev/null | head -c 6 || date +%s | tail -c 6)
         leech_compose_cmd -p "$proj_name" run --rm -it --name "leech-${short_id}" \
-          $extra_volumes $analysis_env \
+          $extra_volumes $analysis_env $host_env \
           --entrypoint /entrypoint.sh -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" leech \
           /bin/bash -c "${launch_cmd}"
       fi
@@ -403,7 +418,7 @@ leech_session_run() {
         cursor_cmd+='exec agent'"${agent_flags}"
       fi
 
-      leech_compose_cmd -p "$proj_name" run --rm -it $extra_volumes $analysis_env \
+      leech_compose_cmd -p "$proj_name" run --rm -it $extra_volumes $analysis_env $host_env \
         --entrypoint /entrypoint.sh "${cursor_envs[@]}" leech \
         /bin/bash -c "$cursor_cmd"
       ;;

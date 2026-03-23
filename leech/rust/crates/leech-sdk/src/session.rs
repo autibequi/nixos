@@ -22,6 +22,8 @@ pub struct SessionRunner {
     no_splash: bool,
     instance: Option<String>,
     extra_volumes: Vec<String>,
+    /// host mode: monta ~/nixos em /workspace/host:rw, injeta HOST_ATTACHED=1
+    host: bool,
 }
 
 impl SessionRunner {
@@ -39,6 +41,7 @@ impl SessionRunner {
             no_splash: false,
             instance: None,
             extra_volumes: Vec::new(),
+            host: false,
         }
     }
 
@@ -108,6 +111,12 @@ impl SessionRunner {
         self
     }
 
+    #[must_use]
+    pub fn host(mut self, enabled: bool) -> Self {
+        self.host = enabled;
+        self
+    }
+
     /// Resolve all parameters from config + CLI overrides and launch the session.
     pub fn run(self, config: &LeechConfig) -> Result<()> {
         let model_id = model::resolve_model(self.model.as_deref(), self.engine, config);
@@ -153,6 +162,11 @@ impl SessionRunner {
             .env("LEECH_NIXOS_DIR", &paths::nixos_dir().to_string_lossy())
             .env("XDG_DATA_HOME", &paths::xdg_data_home())
             .env("XDG_RUNTIME_DIR", &paths::xdg_runtime_dir());
+
+        // Host mode: monta ~/nixos em /workspace/host:rw
+        if self.host {
+            cmd = cmd.env("CLAUDIO_HOST_OPTS", "rw");
+        }
 
         // Forward tokens from config
         let tokens = [
@@ -261,6 +275,9 @@ impl SessionRunner {
             if self.resume.is_none() {
                 env_pairs.push(("BOOTSTRAP_SKIP_CLEAR", "1"));
             }
+            if self.host {
+                env_pairs.push(("HOST_ATTACHED", "1"));
+            }
             let exec_cmd = if self.no_splash || self.resume.is_some() {
                 format!(
                     "cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude {claude_args_str}"
@@ -278,6 +295,9 @@ impl SessionRunner {
         }
         if self.analysis_mode {
             args.extend(["-e", "LEECH_ANALYSIS_MODE=1"]);
+        }
+        if self.host {
+            args.extend(["-e", "HOST_ATTACHED=1"]);
         }
         args.extend(["--entrypoint", "/entrypoint.sh"]);
         let mount_env = format!("CLAUDIO_MOUNT={}", self.mount_path);

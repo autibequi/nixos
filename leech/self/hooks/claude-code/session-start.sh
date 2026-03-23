@@ -44,8 +44,10 @@ ANALYSIS_MODE="${LEECH_ANALYSIS_MODE:-0}"
 MOBILE="${MOBILE:-0}"
 [ -z "${IN_DOCKER:-}" ] && IN_DOCKER="0"
 { [ "$CLAUDE_ENV" = "container" ] || [ -f "/.dockerenv" ]; } && IN_DOCKER="1"
-[ -z "${LEECH_EDIT:-}" ] && LEECH_EDIT="0"
-[ -d "/workspace/host" ] && LEECH_EDIT="1"
+# host_attached: 1 quando --host foi passado (HOST_ATTACHED=1 injetado pelo leech CLI)
+# ou quando /workspace/host existe e é writable (detecção de fallback)
+[ -z "${HOST_ATTACHED:-}" ] && HOST_ATTACHED="0"
+{ [ "$HOST_ATTACHED" = "1" ] || { [ -d "/workspace/host" ] && [ -w "/workspace/host" ]; }; } && HOST_ATTACHED="1"
 
 # 4. Overrides de processo vencem sobre ~/.leech
 [ -n "$_OV_PERSONALITY" ] && PERSONALITY="${_OV_PERSONALITY^^}"
@@ -69,7 +71,7 @@ echo "autocommit=$AUTOCOMMIT     # ON=commita sem perguntar | OFF=PROIBIDO commi
 echo "autojarvis=$AUTOJARVIS     # ON=JARVIS no dashboard"
 echo "beta=$BETA                 # ON=beta overrides ativos | OFF=normal"
 echo "in_docker=$IN_DOCKER       # 1=container | 0=host"
-echo "leech_edit=$LEECH_EDIT       # 1=lab mode: /workspace/host editável | 0=projeto externo"
+echo "host_attached=$HOST_ATTACHED   # 1=NixOS host editável em /workspace/host | 0=sessão normal"
 echo "leech_debug=$LEECH_DEBUG     # ON=contexto completo (DIRETRIZES+persona+avatar) | OFF=lite mode"
 echo "headless=$HEADLESS         # 1=worker sem supervisão | 0=interativo"
 echo "analysis_mode=$ANALYSIS_MODE  # 1=modo experimento isolado (proativo, self-modify, debug livre)"
@@ -92,7 +94,7 @@ if [ "$MOBILE" = "1" ]; then
 fi
 echo "REGRA: persistência → APENAS /workspace/self/ sobrevive entre sessões."
 echo "       Configs, memórias, traços de comportamento: SEMPRE salvar em /workspace/self/."
-echo "       /home/claude/.claude/ e /workspace/host/ são read-only — não tentar escrever lá."
+echo "       /home/claude/.claude/ é read-only — não tentar escrever lá."
 echo "       Se não conseguir persistir em /workspace/self/, emitir AVISO explícito ao usuário."
 echo "---/BOOT---"
 
@@ -202,10 +204,10 @@ if [ -d "$REPO_MEMORY" ] && [ ! -f "$LIVE_MEMORY/MEMORY.md" ]; then
 fi
 
 # ────────────────────────────────────────────────────────────────
-# 8.5 BOOT DISPLAY — apenas leech_edit=1
+# 8.5 BOOT DISPLAY — apenas host_attached=1
 #     Gerado em bash → stderr (terminal). Sem instruções pro Claude.
 # ────────────────────────────────────────────────────────────────
-if [ "$LEECH_EDIT" = "1" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
+if [ "$HOST_ATTACHED" = "1" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
   _lab_dir="/workspace/host"
   _worktrees=$(git -C "$_lab_dir" worktree list 2>/dev/null | wc -l | tr -d ' ')
   _inbox=$(wc -l < /workspace/obsidian/tasks/inbox/inbox.md 2>/dev/null || echo "?")
@@ -217,7 +219,7 @@ if [ "$LEECH_EDIT" = "1" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]
   _mem_count=$(ls "$HOME/.claude/projects/-workspace-mnt/memory/"*.md 2>/dev/null | wc -l | tr -d ' ')
   _h_off=$([ "$HEADLESS" = "1" ] && echo "ON" || echo "OFF")
   _d_on=$([ "$IN_DOCKER" = "1" ] && echo "ON" || echo "OFF")
-  _z_on=$([ "$LEECH_EDIT" = "1" ] && echo "ON" || echo "OFF")
+  _z_on=$([ "$HOST_ATTACHED" = "1" ] && echo "ON" || echo "OFF")
 
   {
     printf "\n"
@@ -235,7 +237,7 @@ if [ "$LEECH_EDIT" = "1" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]
     printf "\n"
     printf "  %-22s %s\n" "headless"    "$_h_off"
     printf "  %-22s %s\n" "in_docker"   "$_d_on"
-    printf "  %-22s %s\n" "leech_edit"   "$_z_on"
+    printf "  %-22s %s\n" "host_attached" "$_z_on"
     printf "  %-22s %s\n" "autocommit"  "$AUTOCOMMIT"
     printf "  %-22s %s\n" "personality" "$PERSONALITY"
     printf "\n"

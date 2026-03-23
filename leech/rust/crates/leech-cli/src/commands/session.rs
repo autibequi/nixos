@@ -15,18 +15,24 @@ pub fn new(flags: SessionFlags) -> Result<()> {
 }
 
 /// `leech continue` — resume last session.
-pub fn cont(dir: Option<String>) -> Result<()> {
+pub fn cont(dir: Option<String>, host: bool) -> Result<()> {
     let config = LeechConfig::load()?;
     let engine = config
         .engine
         .ok_or_else(|| anyhow::anyhow!("engine required in ~/.leech"))?;
     let mount = paths::resolve_dir(dir.as_deref())?;
     let slug = paths::proj_slug(&mount);
+    let proj = if host || config.mount_host {
+        format!("{}-host", paths::proj_name(&slug, None))
+    } else {
+        paths::proj_name(&slug, None)
+    };
 
     Ok(SessionRunner::new(engine)
         .mount_path(&mount.to_string_lossy())
         .mount_opts("rw")
-        .proj_name(&paths::proj_name(&slug, None))
+        .proj_name(&proj)
+        .host(host || config.mount_host)
         .resume(Some("1".into()))
         .run(&config)?)
 }
@@ -40,30 +46,42 @@ pub fn engine(name: &str, flags: SessionFlags) -> Result<()> {
 }
 
 /// `leech resume` — resume by session ID.
-pub fn resume(dir: Option<String>, session_id: Option<String>) -> Result<()> {
+pub fn resume(dir: Option<String>, session_id: Option<String>, host: bool) -> Result<()> {
     let config = LeechConfig::load()?;
     let engine = config
         .engine
         .ok_or_else(|| anyhow::anyhow!("engine required in ~/.leech"))?;
     let mount = paths::resolve_dir(dir.as_deref())?;
     let slug = paths::proj_slug(&mount);
+    let proj = if host || config.mount_host {
+        format!("{}-host", paths::proj_name(&slug, None))
+    } else {
+        paths::proj_name(&slug, None)
+    };
 
     Ok(SessionRunner::new(engine)
         .mount_path(&mount.to_string_lossy())
         .mount_opts("rw")
-        .proj_name(&paths::proj_name(&slug, None))
+        .proj_name(&proj)
+        .host(host || config.mount_host)
         .resume(Some(session_id.unwrap_or_else(|| "1".into())))
         .run(&config)?)
 }
 
 /// `leech shell` — bash inside container.
-pub fn shell(dir: Option<String>) -> Result<()> {
+pub fn shell(dir: Option<String>, host: bool) -> Result<()> {
     let config = LeechConfig::load()?;
+    let host_active = host || config.mount_host;
     let mount = paths::resolve_dir(dir.as_deref())?;
     let slug = paths::proj_slug(&mount);
+    let proj = if host_active {
+        format!("{}-host", paths::proj_name(&slug, None))
+    } else {
+        paths::proj_name(&slug, None)
+    };
 
-    Ok(ComposeCmd::new()
-        .project(&paths::proj_name(&slug, None))
+    let mut cmd = ComposeCmd::new()
+        .project(&proj)
         .env("CLAUDIO_MOUNT", &mount.to_string_lossy())
         .env("CLAUDIO_MOUNT_OPTS", "rw")
         .env("OBSIDIAN_PATH", &paths::obsidian_ensured())
@@ -71,22 +89,24 @@ pub fn shell(dir: Option<String>) -> Result<()> {
         .env("DOCKER_GID", &config.docker_gid.to_string())
         .env("JOURNAL_GID", &config.journal_gid.to_string())
         .env("LEECH_ROOT", &paths::leech_root().to_string_lossy())
-        .env("LEECH_NIXOS_DIR", &paths::nixos_dir().to_string_lossy())
-        .execute(&[
-            "run",
-            "--rm",
-            "-it",
-            "--entrypoint",
-            "/entrypoint.sh",
-            "-e",
-            &format!("CLAUDIO_MOUNT={}", mount.display()),
-            "-e",
-            "BOOTSTRAP_SKIP_CLEAR=1",
-            "leech",
-            "/bin/bash",
-            "-c",
-            ". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec bash",
-        ])?)
+        .env("LEECH_NIXOS_DIR", &paths::nixos_dir().to_string_lossy());
+    if host_active {
+        cmd = cmd.env("CLAUDIO_HOST_OPTS", "rw");
+    }
+
+    let host_attached_env = format!("HOST_ATTACHED={}", if host_active { "1" } else { "0" });
+    let mount_env = format!("CLAUDIO_MOUNT={}", mount.display());
+    let mut args = vec![
+        "run", "--rm", "-it", "--entrypoint", "/entrypoint.sh",
+        "-e", &mount_env, "-e", "BOOTSTRAP_SKIP_CLEAR=1",
+        "-e", &host_attached_env,
+        "leech", "/bin/bash", "-c",
+        ". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec bash",
+    ];
+    if host_active {
+        // insert before "leech" to pass HOST_ATTACHED — already in args above
+    }
+    Ok(cmd.execute(&args)?)
 }
 
 /// `leech leech` — ephemeral session with auto-detect.
@@ -135,37 +155,6 @@ pub fn leech(flags: SessionFlags, shell_mode: bool) -> Result<()> {
         .run(&config)?)
 }
 
-/// `leech host` — nixos mount session.
-pub fn lab(
-    engine: Option<String>,
-    model: Option<String>,
-    resume: Option<String>,
-    danger: bool,
-) -> Result<()> {
-    let config = LeechConfig::load()?;
-    let mount = paths::nixos_dir()
-        .canonicalize()
-        .map_err(|_| anyhow::anyhow!("nixos dir not found"))?;
-
-    let engine: Engine = engine
-        .or_else(|| config.engine.map(|e| e.to_string()))
-        .unwrap_or_else(|| "claude".into())
-        .parse()
-        .map_err(|e| anyhow::anyhow!("{e}"))?;
-
-    Ok(SessionRunner::new(engine)
-        .mount_path(&mount.to_string_lossy())
-        .mount_opts("rw")
-        .proj_name("leech-projects")
-        .model(model)
-        .danger(danger)
-        .resume(resume)
-        .extra_volumes(vec![
-            "/var/log/journal:/workspace/logs/host/journal:ro".into(),
-        ])
-        .run(&config)?)
-}
-
 // ── Internal ─────────────────────────────────────────────────────
 
 fn resolve_engine(flag: Option<&str>, config: &LeechConfig) -> Result<Engine> {
@@ -181,15 +170,21 @@ fn resolve_engine(flag: Option<&str>, config: &LeechConfig) -> Result<Engine> {
 }
 
 fn launch(engine: Engine, flags: SessionFlags, config: &LeechConfig) -> Result<()> {
+    let host_active = flags.host || config.mount_host;
     let mount = paths::resolve_dir(flags.dir.as_deref())?;
     let slug = paths::proj_slug(&mount);
-    let proj = paths::proj_name(&slug, flags.instance.as_deref());
+    let proj = if host_active {
+        format!("{}-host", paths::proj_name(&slug, flags.instance.as_deref()))
+    } else {
+        paths::proj_name(&slug, flags.instance.as_deref())
+    };
     let init_md = flags.resolve_init_md(&mount);
 
     Ok(SessionRunner::new(engine)
         .mount_path(&mount.to_string_lossy())
         .mount_opts(flags.mount_opts())
         .proj_name(&proj)
+        .host(host_active)
         .model(flags.model)
         .danger(flags.danger)
         .resume(flags.resume)

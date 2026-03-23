@@ -181,15 +181,17 @@ pub fn update() -> Result<()> {
         if !clirust.exists() {
             return Ok(());
         }
-        let ok = Command::new("nix-shell")
-            .args(["-p", "rustc", "cargo", "--run", "cargo build --release"])
+        // Tenta: 1) cargo direto (rustup ou nix package), 2) nix-shell como fallback
+        let cargo_ok = Command::new("cargo")
+            .args(["build", "--release", "-p", "leech-cli"])
             .current_dir(&clirust)
             .output()
             .map(|o| o.status.success())
             .unwrap_or(false);
-        if !ok {
-            let s = Command::new("cargo")
-                .args(["build", "--release"])
+        if !cargo_ok {
+            let s = Command::new("nix-shell")
+                .args(["-p", "rustc", "-p", "cargo", "--run",
+                       "cargo build --release -p leech-cli"])
                 .current_dir(&clirust)
                 .output()?;
             if !s.status.success() {

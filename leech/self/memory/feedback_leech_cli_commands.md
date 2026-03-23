@@ -1,14 +1,14 @@
 ---
 name: feedback_leech_cli_commands
-description: Em leech host, sempre usar comandos leech (leech stow, leech switch) em vez de comandos raw. Consultar leech man para referência completa.
+description: Com host_attached=1, sempre usar comandos leech (leech stow, leech switch) em vez de comandos raw. Consultar leech man para referência completa.
 type: feedback
 ---
 
-Em sessão `leech host`, nunca usar comandos raw quando há equivalente `leech`.
+Com `host_attached=1` (`leech --host`), nunca usar comandos raw quando há equivalente `leech`.
 
 **Why:** O CLI leech unifica operações de host (stow, nh os, hyprctl) com tratamento correto de container vs host via `_leech_host_exec`. Comandos raw não funcionam dentro do container ou são menos seguros.
 
-**How to apply:** Ao sugerir operações de host em leech host, usar sempre a tabela abaixo. Para ver lista completa: `leech man`.
+**How to apply:** Ao sugerir operações de host com host_attached, usar sempre a tabela abaixo. Para ver lista completa: `leech man`.
 
 | Operação | Usar | Nunca |
 |----------|------|-------|

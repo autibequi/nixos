@@ -1,6 +1,6 @@
 ---
 name: leech/linux
-description: "Auto-ativar quando: leech_edit=1 (leech host), usuário menciona NixOS, Hyprland, Waybar, dotfiles, stow, nix, módulos, pacotes do sistema, keybinds, window rules, configuração do compositor, OU quando reclama de problema no computador (lento, travando, crash, rede, disco, processo morto, boot, etc.)."
+description: "Auto-ativar quando: host_attached=1, usuário menciona NixOS, Hyprland, Waybar, dotfiles, stow, nix, módulos, pacotes do sistema, keybinds, window rules, configuração do compositor, OU quando reclama de problema no computador (lento, travando, crash, rede, disco, processo morto, boot, etc.)."
 ---
 
 # linux — Sistema Linux (NixOS + Hyprland + dotfiles + Debug de Host)
@@ -113,7 +113,7 @@ cat /host/sys/class/net/enp*/statistics/rx_bytes
 cat /host/sys/class/net/enp*/statistics/tx_bytes
 ```
 
-### Fix via NixOS (leech_edit=1)
+### Fix via NixOS (host_attached=1)
 
 Quando o diagnóstico indica fix de configuração do sistema:
 1. Editar o módulo correto em `/workspace/mnt/` (tabela de módulos abaixo)

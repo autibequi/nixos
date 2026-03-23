@@ -13,8 +13,8 @@
 - [feedback_worktree_obrigatorio.md](feedback_worktree_obrigatorio.md) — Sempre criar worktree isolado antes de implementar em qualquer repositório
 - [feedback_leech_scripts_source.md](feedback_leech_scripts_source.md) — Scripts do container: fonte da verdade é leech/scripts/; scripts/ contém symlinks. Nunca editar scripts/ esperando afetar o container
 - [feedback_autocommit.md](feedback_autocommit.md) — Nunca commitar automaticamente sem o usuário pedir; respeitar flag auto-commit
-- [feedback_leech_cli_commands.md](feedback_leech_cli_commands.md) — Em leech host: sempre usar `leech stow`, `leech switch`, `leech man`. Nunca comandos raw.
-- [feedback_container_readonly.md](feedback_container_readonly.md) — /home/claude/.claude/ e /workspace/host/ são read-only no container — persistir APENAS em /workspace/self/
+- [feedback_leech_cli_commands.md](feedback_leech_cli_commands.md) — Com host_attached=1: sempre usar `leech stow`, `leech switch`, `leech man`. Nunca comandos raw.
+- [feedback_container_readonly.md](feedback_container_readonly.md) — /home/claude/.claude/ é read-only no container — persistir APENAS em /workspace/self/ ou /workspace/obsidian/
 - [feedback_timezone_container.md](feedback_timezone_container.md) — Container sem tzdata: usar TZ=UTC+3 (POSIX) para UTC-3 (Brasília), não America/Sao_Paulo
 - [reference_leech_git_commit.md](reference_leech_git_commit.md) — Git repo do Leech em /workspace/host/.git — read-only no container, commit deve ser feito no host
 - [reference_claude_process_nix.md](reference_claude_process_nix.md) — Processo Claude Code no nix = .claude-unwrapped; contar só linhas com pts/ no docker top

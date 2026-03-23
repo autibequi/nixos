@@ -75,22 +75,22 @@ Estrutura /workspace:
   /workspace/dockerized/    configs docker dos serviços (Dockerfile, compose, .env)
   /workspace/.hive-mind/    área efêmera compartilhada entre containers (locks, sinais)
 
-Se leech_edit=1: lab mode — /workspace/host/ contém o repo NixOS+Leech (editável).
-Se leech_edit=0: /workspace/mnt é um projeto externo do usuário.
+Se host_attached=1: /workspace/host/ contém o repo NixOS+Leech (editável, ~/nixos).
+Se host_attached=0: /workspace/mnt é um projeto externo do usuário.
 DOCKER
-    if [ "$LEECH_EDIT" = "1" ]; then
+    if [ "$HOST_ATTACHED" = "1" ]; then
       cat <<'LEECH_REPOS'
 
-LAB MODE (leech_edit=1):
-  /workspace/mnt  = Projeto do usuário (zona de trabalho normal — igual leech new)
-  /workspace/host/ = NixOS+Leech source (~/nixos) — EDITÁVEL para auto-aperfeiçoamento
-                    (modules/, configuration.nix, flake.nix, stow/, leech/)
-                    Use para melhorar skills, hooks, prompts, agents, CLI do Leech.
-                    Mudanças aqui afetam o sistema e as próximas sessões.
-  /workspace/self = Bind mount de ~/nixos/self (mesmo conteúdo que /workspace/host/leech)
+HOST ATTACHED (host_attached=1):
+  /workspace/mnt   = Projeto do usuário (zona de trabalho — igual leech new)
+  /workspace/host/ = NixOS+Leech source (~/nixos) — EDITÁVEL
+                     modules/, configuration.nix, flake.nix, stow/, leech/
+                     Edite para melhorar skills, hooks, prompts, agents, CLI.
+                     Mudanças aqui afetam o sistema e as próximas sessões.
+  /workspace/self  = ~/nixos/leech/self (mesma fonte que /workspace/host/leech/self)
+  /workspace/obsidian = vault Obsidian — sempre editável por qualquer agente
 
-REGRA: /workspace/host/ é sua zona de evolução. Edite-a quando identificar melhorias
-       em skills, agents, hooks ou prompts. Commits vão pro repo NixOS do host.
+REGRA: /workspace/host/ é sua zona de evolução. Commits vão pro repo NixOS do host.
 LEECH_REPOS
     fi
     if [ "$HEADLESS" = "1" ]; then

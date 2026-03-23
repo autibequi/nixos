@@ -24,6 +24,8 @@ pub struct LeechConfig {
     pub obsidian_path: Option<String>,
     pub docker_gid: u32,
     pub journal_gid: u32,
+    /// mount_host=true em ~/.leech — ativa /workspace/host:rw em toda sessão
+    pub mount_host: bool,
     raw: HashMap<String, String>,
 }
 
@@ -57,6 +59,10 @@ impl LeechConfig {
                 .raw
                 .get("OBSIDIAN_PATH")
                 .map(|s| crate::paths::expand_home(s));
+            cfg.mount_host = cfg
+                .raw
+                .get("mount_host")
+                .is_some_and(|v| v != "0" && v != "false");
         }
 
         // Docker GID

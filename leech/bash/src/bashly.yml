@@ -43,6 +43,10 @@ flags:
 
   - long: --no-splash
     help: "Desativa o loading screen de inicialização (equivalente a LEECH_SPLASH=0 em ~/.leech)."
+
+  - long: --host
+    help: "Monta ~/nixos em /workspace/host (rw) para editar NixOS/Leech. Equivalente a mount_host=true em ~/.leech."
+
 commands:
   - name: continue
     alias: [cont]
@@ -50,6 +54,9 @@ commands:
     args:
       - name: dir
         help: "Diretório do projeto (default ~/projects)"
+    flags:
+      - long: --host
+        help: "Monta ~/nixos em /workspace/host (rw)"
     filename: commands/continue.sh
 
   - name: new
@@ -74,10 +81,12 @@ commands:
         arg: id
       - long: --rw
       - long: --ro
+      - long: --host
+        help: "Monta ~/nixos em /workspace/host (rw)"
     examples:
       - leech new --engine=claude
       - leech new --engine=cursor ~/projects
-      - leech run --engine=opencode ~/meu-projeto
+      - leech new --engine=claude --host
     filename: commands/new_session.sh
 
   - name: shell
@@ -86,6 +95,9 @@ commands:
     args:
       - name: dir
         help: "Diretório do projeto (default ~/projects)"
+    flags:
+      - long: --host
+        help: "Monta ~/nixos em /workspace/host (rw)"
     filename: commands/shell.sh
 
   - name: resume
@@ -97,6 +109,8 @@ commands:
       - long: --resume
         arg: session_id
         help: "UUID da sessão (opcional; sem isso mostra lista)"
+      - long: --host
+        help: "Monta ~/nixos em /workspace/host (rw)"
     filename: commands/resume.sh
 
 
@@ -397,31 +411,9 @@ commands:
       - long: --init-md
         arg: file
         default: contexto.md
+      - long: --host
+        help: "Monta ~/nixos em /workspace/host (rw)"
     filename: commands/leech.sh
-
-  - name: host
-    help: "Sessão host: projeto em /workspace/mnt + ~/nixos em /workspace/host (editável)."
-    args:
-      - name: dir
-        help: "Diretório do projeto (default ~/projects)"
-    flags:
-      - long: --engine
-        arg: engine
-        help: "Engine: opencode | claude | cursor (default: ~/.leech)"
-      - long: --resume
-        arg: session_id
-        help: "Retoma sessão (UUID ou 1 para última)"
-      - long: --model
-        arg: model
-        help: "Modelo Claude: haiku | sonnet | opus (default: sonnet)"
-      - long: --danger
-        help: "Bypass de permissões no engine"
-      - long: --init-md
-        arg: file
-        default: contexto.md
-      - long: --rw
-      - long: --ro
-    filename: commands/host.sh
 
   - name: inbox
     alias: [ib]

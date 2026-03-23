@@ -24,6 +24,9 @@ struct Cli {
     opus: bool,
     #[arg(long)]
     sonnet: bool,
+    /// Monta ~/nixos em /workspace/host (rw) — editar NixOS/Leech na sessão
+    #[arg(long)]
+    host: bool,
 }
 
 #[derive(Subcommand)]
@@ -36,7 +39,11 @@ enum Commands {
     },
     /// Continue last session
     #[command(alias = "cont")]
-    Continue { dir: Option<String> },
+    Continue {
+        dir: Option<String>,
+        #[arg(long)]
+        host: bool,
+    },
     /// Claude tools (usage, token)
     Claude {
         #[command(subcommand)]
@@ -47,10 +54,16 @@ enum Commands {
         dir: Option<String>,
         #[arg(long, num_args = 0..=1, default_missing_value = "1")]
         resume: Option<String>,
+        #[arg(long)]
+        host: bool,
     },
     /// Bash shell inside container
     #[command(alias = "sh")]
-    Shell { dir: Option<String> },
+    Shell {
+        dir: Option<String>,
+        #[arg(long)]
+        host: bool,
+    },
     /// Ephemeral session (auto-detect nixos)
     #[command(alias = "l")]
     Leech {
@@ -59,19 +72,6 @@ enum Commands {
         #[arg(long, short = 's')]
         shell: bool,
     },
-    /// Host session (nixos mount at /workspace/host)
-    #[command(alias = "lab")]
-    Host {
-        #[arg(long)]
-        engine: Option<String>,
-        #[arg(long)]
-        model: Option<String>,
-        #[arg(long, num_args = 0..=1, default_missing_value = "1")]
-        resume: Option<String>,
-        #[arg(long)]
-        danger: bool,
-    },
-
     /// Build Docker image
     Build {
         #[arg(long)]
@@ -252,7 +252,7 @@ fn main() -> Result<()> {
     match cli.command {
         // Session
         Some(Commands::New { flags }) => commands::session::new(flags),
-        Some(Commands::Continue { dir }) => commands::session::cont(dir),
+        Some(Commands::Continue { dir, host }) => commands::session::cont(dir, host),
         Some(Commands::Claude { action }) => match action {
             Some(ClaudeAction::Usage {
                 waybar,
@@ -262,15 +262,9 @@ fn main() -> Result<()> {
             Some(ClaudeAction::Token) => commands::tools::token(),
             None => commands::tools::usage(false, false),
         },
-        Some(Commands::Resume { dir, resume }) => commands::session::resume(dir, resume),
-        Some(Commands::Shell { dir }) => commands::session::shell(dir),
+        Some(Commands::Resume { dir, resume, host }) => commands::session::resume(dir, resume, host),
+        Some(Commands::Shell { dir, host }) => commands::session::shell(dir, host),
         Some(Commands::Leech { flags, shell }) => commands::session::leech(flags, shell),
-        Some(Commands::Host {
-            engine,
-            model,
-            resume,
-            danger,
-        }) => commands::session::lab(engine, model, resume, danger),
 
         // Docker
         Some(Commands::Build { danger }) => commands::docker::build(danger),
@@ -358,6 +352,9 @@ fn main() -> Result<()> {
                 flags.model = Some("opus".into());
             } else if cli.sonnet {
                 flags.model = Some("sonnet".into());
+            }
+            if cli.host {
+                flags.host = true;
             }
             commands::session::new(flags)
         }

@@ -13,7 +13,7 @@
 >
 > **Personas** ficam em `/workspace/self/personas/*.persona.md`. A ativa e definida em `/workspace/self/system/SOUL.md`.
 >
-> **LEECH LAB:** se `leech_edit=1`, a PRIMEIRA coisa na saudacao (antes do bloco de units) e uma linha em destaque: `⬡ LEECH LAB` — indica que `/workspace/host/` (repo nixos) esta montado e editavel para auto-aperfeicoamento.
+> **HOST ATTACHED:** se `host_attached=1`, a PRIMEIRA coisa na saudacao (antes do bloco de units) e uma linha em destaque: `⬡ HOST ATTACHED` — indica que `/workspace/host/` (repo nixos) esta montado e editavel para auto-aperfeicoamento.
 >
 > **Briefing sob demanda:** na primeira resposta, saudar com personalidade e **oferecer** o briefing (variar a frase, nunca igual). So rodar `/jarvis` se o user confirmar ou pedir.
 >

@@ -8,24 +8,23 @@
 
 ## Checklist ao abrir
 
-1. `/workspace/host/` existe? → você está em `leech host` (repo NixOS editável em `/workspace/host/`).
+1. `host_attached=1`? → `/workspace/host/` está disponível com o repo NixOS editável.
 2. `in_docker=1` → **nunca** rodar `nixos-rebuild`/`systemctl`; pedir ao usuário rodar no host.
-3. Em host mode: `/workspace/host/` é sua zona de evolução — edite skills, hooks, agents, CLI.
+3. Com `host_attached=1`: `/workspace/host/` é sua zona de evolução — edite skills, hooks, agents, CLI.
 4. Para NixOS/Hyprland → usar skills abaixo. Para "onde editar" → tabela §onde.
 
-### Mapa de /workspace/ (host mode)
+### Mapa de /workspace/
 
 ```
 /workspace/
-├── self/       ← código Leech (~/nixos/self montado; fonte da verdade de skills/hooks/agents)
-├── mnt/        ← projeto atual (nixos repo em lab, ou outro projeto)
-│   └── self/   ← subfolder nixos/self/ dentro do repo (edite aqui)
-├── obsidian/   ← vault Obsidian (cérebro persistente)
-├── logs/       ← logs de containers Docker
-└── host/       ← nixos repo completo do host (~/nixos), writable — SÓ em host mode
+├── self/       ← código-fonte do Leech (~/nixos/leech/self; skills, hooks, agents, scripts)
+├── mnt/        ← ZONA DE TRABALHO — projeto do usuário (~/projects, ~/nixos, etc.)
+├── obsidian/   ← vault Obsidian — cérebro persistente, sempre editável por qualquer agente
+├── logs/       ← logs de containers Docker e do sistema host
+└── host/       ← repo NixOS completo (~/nixos), editável — disponível com --host ou mount_host=true
 ```
 
-Em sessão **normal** (sem lab): `/workspace/host/` não existe.
+Ativar host: `leech --host`, `leech new --host`, ou `mount_host=true` em `~/.leech`.
 
 ---
 
@@ -60,13 +59,13 @@ Em sessão **normal** (sem lab): `/workspace/host/` não existe.
 
 | Skill | Quando usar |
 |-------|-------------|
-| `linux` — `self/skills/linux/SKILL.md` | Auto-ativa em leech host ou menção a NixOS/Hyprland/Waybar/stow/dotfiles |
+| `linux` — `self/skills/linux/SKILL.md` | Auto-ativa em host_attached=1 ou menção a NixOS/Hyprland/Waybar/stow/dotfiles |
 
 ---
 
 ## Onde editar o quê
 
-> Em host mode (`leech_edit=1`): os paths abaixo são relativos a `/workspace/host/` (repo NixOS) ou `/workspace/mnt/self/` (pasta leech dentro do repo).
+> Com `host_attached=1`: paths relativos a `/workspace/host/` (repo NixOS) ou `/workspace/self/` (leech).
 > Em sessão normal: estes paths estão em `/workspace/mnt/` se o projeto montado for o repo NixOS.
 
 | Quero alterar… | Onde |
@@ -134,7 +133,7 @@ Breakroom (memoria/estado): `/workspace/obsidian/agents/<nome>/memory.md`
 ## Armadilhas
 
 - `nixos-rebuild`/`systemctl` no container → nao afeta o host. Pedir ao usuario.
-- Em `leech host`: repo NixOS completo em `/workspace/host/` (writable); self (leech) em `/workspace/self/` e `/workspace/mnt/self/`.
+- Com `--host`: repo NixOS em `/workspace/host/` (writable); self (leech) em `/workspace/self/`.
 - Keybinds/Waybar: fonte da verdade e `stow/.config/`, nao modulos NixOS.
 - Apos mudar `bashly.yml`/`commands/*.sh`: sempre `bashly generate`.
 - Obsidian: ler BOARDRULES.md antes de modificar qualquer coisa no vault.
