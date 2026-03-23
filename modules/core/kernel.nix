@@ -61,6 +61,12 @@
 
     # AMD
     "amd_pstate=active" # active/guided/passive - active é muito mais rápido e responsivo
+
+    # Containers: reduz contention de timer lock em multicore (vários containers = vários threads)
+    "skew_tick=1"
+
+    # Desativa zswap — com 48GB RAM + 62GB swap real, comprimir swap em RAM é custo sem benefício
+    "zswap.enabled=0"
   ];
 
   boot.blacklistedKernelModules = [

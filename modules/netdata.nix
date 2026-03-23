@@ -11,13 +11,13 @@
       global = {
         # Histórico de 7 dias (em segundos)
         "history" = "604800";
-        # Coleta a cada 1 segundo
-        "update every" = "1";
+        # Coleta a cada 10s (era 1s — maior vilão de CPU+I/O do sistema)
+        "update every" = "10";
         # Usar dbengine para histórico em disco
         "memory mode" = "dbengine";
-        # Espaço em disco para métricas (MB)
-        "page cache size" = "64";
-        "dbengine multihost disk space" = "512";
+        # Espaço em disco para métricas (MB) — reduzido pra poupar I/O
+        "page cache size" = "32";
+        "dbengine multihost disk space" = "256";
       };
       web = {
         "default port" = "19999";

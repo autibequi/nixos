@@ -26,8 +26,8 @@
     ./modules/bluetooth.nix
     ./modules/plymouth.nix
     ./modules/ai.nix
-    ./modules/whisper-ptt.nix
-    ./modules/bongocat.nix
+    # ./modules/whisper-ptt.nix  # on-demand: descomente quando quiser PTT
+    # ./modules/bongocat.nix     # fun mas desnecessário
     ./modules/steam.nix
     ./modules/containers.nix
 

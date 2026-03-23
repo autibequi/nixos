@@ -17,7 +17,7 @@
       "nixpkgs"
       "-L" # print build logs
     ];
-    dates = "16:00";
+    dates = "02:30";       # era 16:00 — rebuild diário no meio do expediente é péssimo
     randomizedDelaySec = "15min";
   };
 

@@ -29,10 +29,12 @@ in
 
   environment.systemPackages = [ claude-typer-script ];
 
-  # Serviço systemd user que roda o daemon
+  # Serviço systemd user que roda o daemon — desativado (polling Python em background)
+  # Para reativar: trocar enable = false por wantedBy = [ "default.target" ]
   systemd.user.services.claude-typer = {
     description = "Claude BongoCat Typer Daemon";
-    wantedBy = [ "default.target" ];
+    enable = false;
+    wantedBy = [];
     after = [ "graphical-session-pre.target" ];
     partOf = [ "graphical-session.target" ];
 
