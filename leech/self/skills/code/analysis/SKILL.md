@@ -14,3 +14,4 @@ Sub-skills de analise de codigo da branch atual.
 | `code/analysis/diff` | Diff interativo vs main |
 | `code/analysis/flows` | Diagrama de fluxo entre camadas (handler→service→repo) |
 | `code/analysis/objects` | Mapa de objetos por camada |
+| `code/analysis/componentes` | Diagrama ASCII de componentes — PRODUCE/CONSUME/ENDPOINTS com emojis e comentários de produto |

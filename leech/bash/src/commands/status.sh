@@ -210,6 +210,50 @@ _do_status_render() {
   fi
   echo ""
 
+  # ── Log tail do serviço selecionado ───────────────────────────
+  local _log_dir
+  if [[ "${CLAUDE_ENV:-}" == "container" ]]; then
+    _log_dir="/workspace/logs/docker/${_cursor_svc}"
+  else
+    _log_dir="${XDG_DATA_HOME:-$HOME/.local/share}/leech/logs/dockerized/${_cursor_svc}"
+  fi
+
+  # Prefere wt-* subdir mais recente (worktree ativo)
+  local _log_file="${_log_dir}/service.log"
+  local _best_mtime=0
+  [[ -f "$_log_file" ]] && _best_mtime=$(stat -c %Y "$_log_file" 2>/dev/null || echo 0)
+  for _wt_dir in "${_log_dir}"/wt-*/; do
+    local _wt_log="${_wt_dir}service.log"
+    if [[ -f "$_wt_log" ]]; then
+      local _wt_mtime
+      _wt_mtime=$(stat -c %Y "$_wt_log" 2>/dev/null || echo 0)
+      if [[ "$_wt_mtime" -gt "$_best_mtime" ]]; then
+        _best_mtime="$_wt_mtime"
+        _log_file="$_wt_log"
+      fi
+    fi
+  done
+
+  # Calcula linhas disponíveis para log (overhead fixo → estável entre renders)
+  local _term_h; _term_h=$(tput lines 2>/dev/null || echo 24)
+  local _log_lines=$(( _term_h - 22 ))
+  [[ "$_log_lines" -lt 3 ]] && _log_lines=3
+  [[ "$_log_lines" -gt 12 ]] && _log_lines=12
+
+  echo -e "${DIM}─ logs [${_cursor_svc}] ────────────────────────────────${RESET}"
+  if [[ -f "$_log_file" ]] && [[ -s "$_log_file" ]]; then
+    tail -n "$_log_lines" "$_log_file" \
+      | tr -d '\r' \
+      | sed 's/\x1b\[[0-9;]*[mKHJABCDsu]//g; s/\x1b\[[?][0-9]*[hl]//g; s/\x1b[()]//g' \
+      | grep -v '^[[:space:]]*$' \
+      | tail -n "$_log_lines" \
+      | while IFS= read -r _logline; do
+          echo -e "  ${DIM}${_logline}${RESET}"
+        done
+  else
+    echo -e "  ${DIM}sem logs${RESET}"
+  fi
+
   # Rodapé interativo
   echo -e "${DIM}──────────────────────────────────────────────────${RESET}"
   local _cenv="${_svc_env[$_cursor_svc]:-sand}"
@@ -219,12 +263,15 @@ _do_status_render() {
 # Alternate screen: posicionamento absoluto, sem tracking de linhas
 _render_frame() {
   _do_status_render > "$_tmpfile"
-  printf '\033[?25l\033[H'  # esconde cursor, vai pro topo
-  while IFS= read -r _line; do
-    printf '\r%s\033[K\n' "$_line"
-  done < "$_tmpfile"
-  printf '\033[J'   # limpa resto da tela
-  printf '\033[?25h'
+  # Buffer completo → uma escrita só (minimiza flickering)
+  local _buf; _buf=$(mktemp)
+  {
+    printf '\033[?25l\033[H'
+    awk '{printf "\r%s\033[K\n", $0}' "$_tmpfile"
+    printf '\033[J\033[?25h'
+  } > "$_buf"
+  cat "$_buf"
+  rm -f "$_buf"
 }
 
 _update_header() {
@@ -250,19 +297,28 @@ while true; do
     local _key=""
     if read -t 1 -rsn1 _key 2>/dev/null; then
       if [[ "$_key" == $'\033' ]]; then
-        # Sequencia de escape (setas)
+        # Sequencia de escape (setas ou mouse)
         local _seq=""
         read -t 0.1 -rsn2 _seq 2>/dev/null || true
         case "$_seq" in
-          '[A')  # Up
+          '[A')  # Up arrow
             _cursor_idx=$(( (_cursor_idx - 1 + ${#_svc_list[@]}) % ${#_svc_list[@]} ))
             _cursor_svc="${_svc_list[$_cursor_idx]}"
             break
             ;;
-          '[B')  # Down
+          '[B')  # Down arrow
             _cursor_idx=$(( (_cursor_idx + 1) % ${#_svc_list[@]} ))
             _cursor_svc="${_svc_list[$_cursor_idx]}"
             break
+            ;;
+          '[M')  # X10 mouse event (scroll wheel) — drena 3 bytes e ignora
+            read -t 0.05 -rsn3 2>/dev/null || true
+            ;;
+          '[<')  # SGR mouse event — drena até 'M' ou 'm'
+            local _sgr=""
+            while read -t 0.05 -rsn1 _c 2>/dev/null; do
+              [[ "$_c" == 'M' || "$_c" == 'm' ]] && break
+            done
             ;;
         esac
       else

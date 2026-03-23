@@ -77,10 +77,54 @@ fn strip_ansi(s: &str) -> String {
     String::from_utf8_lossy(&out).into_owned()
 }
 
+/// Find the most recently modified `service.log` for a service.
+/// Checks both the base path and any `wt-*/` worktree subdirectories, returning
+/// the one with the newest mtime. This handles the case where a worktree is active
+/// and the bash runner writes to `<log_dir>/wt-<worktree>/service.log` instead
+/// of the base path.
+fn active_log_path(root: &Path, svc: &str) -> Option<PathBuf> {
+    use std::time::SystemTime;
+
+    let svc_dir = root.join(svc);
+    let base_log = svc_dir.join("service.log");
+
+    let base_entry = base_log
+        .metadata()
+        .ok()
+        .and_then(|m| m.modified().ok())
+        .map(|t| (base_log.clone(), t));
+
+    // Check wt-* subdirectories for a more recent service.log
+    let wt_best = std::fs::read_dir(&svc_dir)
+        .ok()
+        .into_iter()
+        .flatten()
+        .flatten()
+        .filter(|e| {
+            e.file_type().map(|t| t.is_dir()).unwrap_or(false)
+                && e.file_name().to_str().map(|n| n.starts_with("wt-")).unwrap_or(false)
+        })
+        .filter_map(|e| {
+            let p = e.path().join("service.log");
+            let t = p.metadata().ok()?.modified().ok()?;
+            Some((p, t))
+        })
+        .max_by_key(|(_, t)| *t);
+
+    match (base_entry, wt_best) {
+        (Some((bp, bt)), Some((wp, wt))) => {
+            if wt > bt { Some(wp) } else { Some(bp) }
+        }
+        (Some((bp, _)), None) => Some(bp),
+        (None, Some((wp, _))) => Some(wp),
+        (None, None) => None,
+    }
+}
+
 /// Read only the very last non-empty line of a service's log file.
 #[must_use]
 pub fn last_line(svc: &str) -> Option<String> {
-    let path = log_root().join(svc).join("service.log");
+    let path = active_log_path(&log_root(), svc)?;
     tail_file(&path, 5)
         .into_iter()
         .rev()
@@ -94,7 +138,7 @@ pub fn collect(n: usize) -> Vec<LogEntry> {
     let mut all: Vec<LogEntry> = Vec::new();
 
     for svc in SERVICES {
-        let path = root.join(svc).join("service.log");
+        let Some(path) = active_log_path(&root, svc) else { continue };
         for line in tail_file(&path, n) {
             all.push(LogEntry {
                 service: svc.to_string(),

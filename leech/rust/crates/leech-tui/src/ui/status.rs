@@ -11,9 +11,14 @@ use crate::theme;
 
 /// Render the full status dashboard.
 pub fn render(frame: &mut Frame, app: &App) {
-    let sessions_h = sessions_height(app);
     let services_h = dk_services_height(app);
     let utils_h = utils_height(app);
+
+    // Cap sessions_h so logs always gets at least 5 lines.
+    // Fixed overhead: header(1) + services + utils + separator(1) + footer(1) + min_logs(5)
+    const MIN_LOGS: u16 = 5;
+    let fixed = 1u16 + services_h + utils_h + 1 + 1 + MIN_LOGS;
+    let sessions_h = sessions_height(app).min(frame.area().height.saturating_sub(fixed));
 
     let chunks = Layout::default()
         .direction(Direction::Vertical)
