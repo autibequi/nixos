@@ -12,7 +12,13 @@ if [[ "$svc" == "reverseproxy" ]]; then
   _RP_DIR="${leech_nixos_dir}/leech/docker/reverseproxy"
   _RP_PROJECT="leech-dk-reverseproxy"
   case "${args[action]}" in
-    start)
+    start-hotreload)
+    _leech_dk_run "" "" "" "" "" "1" "1"
+    ;;
+  start-hotreload)
+    _leech_dk_run "" "" "" "" "" "1" "1"
+    ;;
+  start)
       leech_docker_ensure_reverseproxy
       ;;
     stop)
@@ -41,6 +47,12 @@ _tail="${args[--tail]:-100}"
 _debug="${args[--debug]:-}"
 
 case "${args[action]}" in
+  start-hotreload)
+    _leech_dk_run "" "" "" "" "" "1" "1"
+    ;;
+  start-hotreload)
+    _leech_dk_run "" "" "" "" "" "1" "1"
+    ;;
   start)
     _leech_dk_run "$svc" "$_env" "$_debug" "$_worktree" "$_vertical" "1"
     ;;

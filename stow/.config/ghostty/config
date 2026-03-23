@@ -3,13 +3,10 @@
 # =============================================================================
 # initial-command = fastfetch
 # shell-integration = detect
-shell-integration-features = true
 shell-integration-features = no-cursor
-scrollback-limit = 100
-link-url = true
-# not imeplemented yet
-# link = true
-linux-cgroup=always
+scrollback-limit = 10000
+# link-url = true  # desabilitado: escaneia URLs em cada output, overhead em outputs grandes
+linux-cgroup=single-instance
 
 # =============================================================================
 # Configurações
@@ -49,48 +46,37 @@ gtk-titlebar-hide-when-maximized = true
 focus-follows-mouse = true
 mouse-hide-while-typing = true
 copy-on-select = true
-mouse-scroll-multiplier=0.01
+mouse-scroll-multiplier=3
 # minimum-contrast=3 # melhora legibilidade mas estraga os temas
-
-# Misc
-clipboard-trim-trailing-spaces = true
 
 # =============================================================================
 # Aesthetics
 # =============================================================================
-# Theme - Dark purple Dracula theme with light fallback
-# theme = light:Dracula+,dark:Dracula
-theme = light:Belafonte Day,dark:Dracula
+theme = deep-dark
 
 # font
-font-feature = all
+font-feature = +liga,+calt
 font-family = "FiraCode Nerd Font"
 font-size = 14
 
 # Efeitos de Transparência - Wallpaper-only background effect
 # Note: Para efeito só do wallpaper, configure Blur My Shell extension
 # Desabilitar transparência para economizar bateria (compositor usa menos GPU)
-background-opacity = 1.0
-background-blur-radius = 0
 unfocused-split-opacity = 0.70
-bold-is-bright=true
 
-# Dark purple Dracula-inspired colors
-split-divider-color = #6272a4
-selection-foreground = #f8f8f2
-selection-background = #44475a
-# selection-invert-fg-bg = true
+split-divider-color = #2d3748
 
-# Cursor - Purple accent
+# Cursor
 cursor-style = block
 cursor-click-to-move = true
 cursor-style-blink = false
-cursor-color = #bd93f9
 
 # =============================================================================
 # Shortcuts
 # =============================================================================
 # Atalhos para novas abas e janelas
+keybind = ctrl+shift+r=reload_config
+
 keybind = ctrl+shift+t=new_tab
 keybind = ctrl+shift+n=new_window
 keybind = ctrl+shift+w=close_tab

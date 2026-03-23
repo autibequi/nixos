@@ -55,7 +55,6 @@ with lib;
     # dunst # Notifications
     swaynotificationcenter # Notifications
     grim # Screenshots
-    hyprshot # Screenshots
     slurp # Screen selection
     swayimg # Image viewer for Wayland
     wl-clipboard # Clipboard management

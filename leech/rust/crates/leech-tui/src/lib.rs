@@ -69,7 +69,7 @@ fn run_bg_cmd(svc: &str, env: &str, action: &str) -> Option<String> {
     // bash CLI format: leech runner <service> <action> [--env=<env>]
     let env_flag = format!("--env={env}");
     let mut full_args: Vec<&str> = vec!["runner", svc, action];
-    if action == "start" && !env.is_empty() {
+    if (action == "start" || action == "start-hotreload") && !env.is_empty()() {
         full_args.push(&env_flag);
     }
 
@@ -233,6 +233,50 @@ pub fn run_status(tick: u64) -> Result<()> {
                                         let done_tx = bg_done_tx.clone();
                                         std::thread::spawn(move || {
                                             if let Some(err) = run_bg_cmd(&svc, &env, "start") {
+                                                let _ = err_tx.send(err);
+                                            }
+                                            let _ = done_tx.send(idx);
+                                            if let Ok(snap) = status::collect() {
+                                                let _ = snap_tx.send(snap);
+                                            }
+                                        });
+                                    }
+                                    "start-hotreload" => {
+                                        let svc = app.current_service().to_string();
+                                        let env = app.current_env().to_string();
+                                        let idx = app.cursor_idx;
+                                        app.close_menu();
+                                        app.last_action = Some((
+                                            idx,
+                                            format!("hotreload {}…", svc),
+                                        ));
+                                        let err_tx = bg_err_tx.clone();
+                                        let snap_tx = tx_bg.clone();
+                                        let done_tx = bg_done_tx.clone();
+                                        std::thread::spawn(move || {
+                                            if let Some(err) = run_bg_cmd(&svc, &env, "start-hotreload") {
+                                                let _ = err_tx.send(err);
+                                            }
+                                            let _ = done_tx.send(idx);
+                                            if let Ok(snap) = status::collect() {
+                                                let _ = snap_tx.send(snap);
+                                            }
+                                        });
+                                    }
+                                    "start-hotreload" => {
+                                        let svc = app.current_service().to_string();
+                                        let env = app.current_env().to_string();
+                                        let idx = app.cursor_idx;
+                                        app.close_menu();
+                                        app.last_action = Some((
+                                            idx,
+                                            format!("hotreload {}…", svc),
+                                        ));
+                                        let err_tx = bg_err_tx.clone();
+                                        let snap_tx = tx_bg.clone();
+                                        let done_tx = bg_done_tx.clone();
+                                        std::thread::spawn(move || {
+                                            if let Some(err) = run_bg_cmd(&svc, &env, "start-hotreload") {
                                                 let _ = err_tx.send(err);
                                             }
                                             let _ = done_tx.send(idx);

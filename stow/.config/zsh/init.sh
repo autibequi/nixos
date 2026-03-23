@@ -16,7 +16,11 @@ fi
 # Shell tool init
 eval "$(starship init zsh)"
 eval "$(zoxide init zsh)"
-eval "$(atuin init zsh)"
+eval "$(atuin init zsh --disable-up-arrow)"
+
+# fzf keybindings (Ctrl+T = file, Alt+C = cd, Ctrl+R handled by atuin)
+[[ -f /run/current-system/sw/share/fzf/key-bindings.zsh ]] && \
+  source /run/current-system/sw/share/fzf/key-bindings.zsh
 
 # Sources
 source ~/.config/hypr/hyprutils.sh

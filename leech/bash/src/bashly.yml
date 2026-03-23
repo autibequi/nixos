@@ -175,7 +175,7 @@ commands:
         help: "monolito | bo-container | front-student | monolito-worker (aliases: mono, bo, front, mw)"
       - name: action
         default: "start"
-        allowed: [start, stop, logs, test, shell, install, build, flush]
+        allowed: [start, start-hotreload, stop, logs, test, shell, install, build, flush]
         help: "Acao (default: start)"
     flags:
       - long: --env

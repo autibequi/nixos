@@ -12,14 +12,14 @@ Config(
     max_entries: Some(10), // Ajuste para visual mais limpo
     plugins: [
         "libapplications.so",
-        "libshell.so",
         "libwebsearch.so",
         "librink.so",
+        "libshell.so",
         "libsymbols.so",
         "libtranslate.so",
         "libdictionary.so",
     ],
-    border_radius: Some(22),
-    shadow: Some(true),
-    opacity: Some(0.94),
+    border_radius: Some(12),
+    shadow: Some(false),
+    opacity: Some(1.0),
 )

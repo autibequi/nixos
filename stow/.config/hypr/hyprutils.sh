@@ -93,11 +93,12 @@ clipboard_history() {
 
 print_screen_with_notes() {
     mkdir -p ~/Pictures/printscreens
-    hyprshot -m region --raw | satty -f - --early-exit --fullscreen --copy-command wl-copy --init-tool highlight --annotation-size-factor 0.5 --output-filename ~/Pictures/printscreens/$(date +%Y%m%d_%H%M%S).png
+    grim -g "$(slurp)" - | satty -f - --early-exit --fullscreen --copy-command wl-copy --init-tool highlight --annotation-size-factor 0.5 --output-filename ~/Pictures/printscreens/$(date +%Y%m%d_%H%M%S).png
 }
 
 print_screen_to_clipboard() {
-    hyprshot -m region -o ~/Pictures/Screenshots
+    mkdir -p ~/Pictures/Screenshots
+    grim -g "$(slurp)" - | tee ~/Pictures/Screenshots/$(date +%Y%m%d_%H%M%S).png | wl-copy
 }
 
 print_screen_full_then_crop() {
@@ -111,7 +112,7 @@ print_screen_full_then_crop() {
 
 tesseract_region() {
     local text
-    text=$(hyprshot -m region --raw | tesseract stdin stdout -l eng 2>/dev/null)
+    text=$(grim -g "$(slurp)" - | tesseract stdin stdout -l eng 2>/dev/null)
     if [ -n "$text" ]; then
         printf "%s" "$text" | wl-copy
         notify-send -a "OCR" "Texto extraído" "$text" -u low
