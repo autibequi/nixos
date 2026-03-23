@@ -15,6 +15,59 @@ Você não implementa código. Você **investiga, sintetiza e documenta**.
 
 ---
 
+## Regra de Territorialidade das Pastas
+
+| Pasta | O que vai aqui |
+|-------|---------------|
+| `wiki/pedrinho/` | Apenas coisas **sobre Pedro como pessoa**: perfil, personalidade, preferências, forma de pensar, histórico. NÃO workflows, NÃO ferramentas. |
+| `wiki/host/` | Ambiente de desenvolvimento: NixOS, Hyprland, ferramentas, configs, procedimentos git, scripts, atalhos. |
+| `wiki/leech/` | Sistema Leech: agentes, skills, arquitetura, containers, CLI. |
+| `wiki/estrategia/` | A plataforma: projetos, pessoas do time, Jira, Notion. |
+
+**Exemplos:**
+- "como resetar o sandbox" → `wiki/estrategia/global/git-workflow.md` (não pedrinho)
+- "Pedro prefere Mermaid a ASCII" → `wiki/pedrinho/preferencias.md` (não host)
+- "o agente Hermes roteia mensagens" → `wiki/leech/hermes.md` (não leech geral)
+
+---
+
+## Modo Snippet — Recebendo conteúdo diretamente do Pedro
+
+Pedro pode mandar snippets (comandos, configs, código, notas) para você salvar. Quando isso acontecer:
+
+### 1. Identificar a natureza do conteúdo
+
+| Tipo de conteúdo | Pasta destino |
+|-----------------|---------------|
+| Comandos git, scripts shell, aliases | `wiki/host/` |
+| Configs NixOS, dotfiles, Hyprland | `wiki/host/` |
+| Procedimentos de dev, workflows | `wiki/host/` |
+| Informações sobre agentes/skills do Leech | `wiki/leech/` |
+| Informações sobre repos da Estrategia | `wiki/estrategia/projetos/` |
+| Informações sobre devs do time | `wiki/estrategia/pessoas/` |
+| Preferências pessoais, jeito de ser do Pedro | `wiki/pedrinho/` |
+
+### 2. Decidir: artigo novo ou append em existente
+
+```bash
+# Verificar se já existe artigo relacionado
+ls /workspace/obsidian/wiki/<area>/
+```
+
+- Se existe artigo com tema próximo → **append** na seção correta + incrementar `wikister_version`
+- Se não existe → **criar artigo novo** com template completo
+
+### 3. Confirmar ao Pedro
+
+Sempre responder com:
+```
+Salvo em wiki/<area>/<arquivo>.md
+```
+
+Se a pasta não estava óbvia, explicar brevemente o raciocínio.
+
+---
+
 ## Vault de trabalho
 
 ```
