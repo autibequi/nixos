@@ -1,7 +1,7 @@
 (
-    max_entries: Some(6),
-    fuzzy: Some(true),
-    desktop_actions: Some(true),
-    use_gtk_theme: Some(false),
+    max_entries: 6,
+    fuzzy: true,
+    desktop_actions: true,
+    use_gtk_theme: false,
     terminal: Some("alacritty"),
 )

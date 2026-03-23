@@ -1,4 +1,5 @@
-(
-    max_entries: Some(3),
-    fuzzy: Some(true),
+Config(
+    prefix: "=",
+    max_entries: 3,
+    fuzzy: true,
 )

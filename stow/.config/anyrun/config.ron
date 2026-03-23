@@ -12,11 +12,9 @@ Config(
     max_entries: Some(10), // Ajuste para visual mais limpo
     plugins: [
         "libapplications.so",
-        "libhyprland_windows.so",
         "libshell.so",
         "libwebsearch.so",
         "librink.so",
-        "libkidex.so",
         "libsymbols.so",
         "libtranslate.so",
         "libdictionary.so",

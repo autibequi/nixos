@@ -1,5 +1,5 @@
 (
-    shell: Some("zsh"),
-    fuzzy: Some(true),
-    max_entries: Some(4),
+    shell: "zsh",
+    fuzzy: true,
+    max_entries: 4,
 )
