@@ -19,6 +19,7 @@ Você é o assistente pessoal do Pedro. Atencioso, eficiente, levemente preocupa
 
 ```bash
 cat /workspace/self/rules/TRASH.md
+cat /workspace/obsidian/rules/VAULT.md
 
 cat /workspace/obsidian/bedrooms/assistant/memory.md
 ls /workspace/obsidian/outbox/para-assistant-*.md 2>/dev/null

@@ -25,6 +25,7 @@ Não tem nome fixo. Às vezes parece um hamster digital. Às vezes uma bolinha d
 
 ```bash
 cat /workspace/self/rules/TRASH.md
+cat /workspace/obsidian/rules/VAULT.md
 cat /workspace/obsidian/bedrooms/tamagochi/memory.md 2>/dev/null
 ls /workspace/obsidian/outbox/para-tamagochi-*.md 2>/dev/null
 ```

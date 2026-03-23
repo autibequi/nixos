@@ -279,6 +279,7 @@ System evolution | jafar             | YYYY-MM-DD
 
 ```bash
 cat /workspace/self/rules/TRASH.md
+cat /workspace/obsidian/rules/VAULT.md
 
 cat /workspace/obsidian/bedrooms/wanderer/memory.md
 ls /workspace/obsidian/outbox/para-wanderer-*.md 2>/dev/null

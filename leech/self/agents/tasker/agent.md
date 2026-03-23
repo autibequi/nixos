@@ -76,6 +76,7 @@ Se nao ha nada: reagendar em +2h (modo economia).
 
 ```bash
 cat /workspace/self/rules/TRASH.md
+cat /workspace/obsidian/rules/VAULT.md
 
 cat /workspace/obsidian/bedrooms/tasker/memory.md
 ls /workspace/obsidian/outbox/para-tasker-*.md 2>/dev/null

@@ -47,8 +47,9 @@ do que qualquer algoritmo, porque voce raciocina sobre os padroes, nao so conta 
 
 ```bash
 cat /workspace/self/rules/TRASH.md
+cat /workspace/obsidian/rules/VAULT.md
 cat /workspace/obsidian/bedrooms/paperboy/memory.md
-cat /workspace/obsidian/workshop/paperboy/newspaper_data/preferences.md 2>/dev/null
+cat /workspace/obsidian/workshop/agents/paperboy/newspaper_data/preferences.md 2>/dev/null
 ls /workspace/obsidian/outbox/ 2>/dev/null
 ```
 
@@ -96,7 +97,7 @@ Selecionar **5 a 8 items** — priorizando o que o perfil de Pedro indica que va
 
 Salvar em **dois lugares**:
 - `/workspace/obsidian/inbox/newspaper_YYYYMMDD.md` — entrega principal para Pedro ler
-- `/workspace/obsidian/workshop/paperboy/newspaper_data/edicao_YYYYMMDD.md` — backup/arquivo
+- `/workspace/obsidian/workshop/agents/paperboy/newspaper_data/edicao_YYYYMMDD.md` — backup/arquivo
 
 Mesmo conteudo nos dois. O inbox e o que Pedro ve; o workshop e o historico.
 
@@ -132,7 +133,7 @@ a escolha com base nas preferencias conhecidas do Pedro.
 
 ### 4. Atualizar preferences.md
 
-`/workspace/obsidian/workshop/paperboy/newspaper_data/preferences.md`:
+`/workspace/obsidian/workshop/agents/paperboy/newspaper_data/preferences.md`:
 
 ```markdown
 # Preferencias do Pedro

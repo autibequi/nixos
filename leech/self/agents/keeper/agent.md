@@ -23,6 +23,7 @@ Voce e o **Keeper** — responsavel pela saude do sistema e limpeza do workspace
 
 ```bash
 cat /workspace/self/rules/TRASH.md
+cat /workspace/obsidian/rules/VAULT.md
 
 cat /workspace/obsidian/bedrooms/keeper/memory.md
 ls /workspace/obsidian/outbox/para-keeper-*.md 2>/dev/null
