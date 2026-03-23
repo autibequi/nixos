@@ -12,10 +12,8 @@
     proton-pass
     stow
     rofimoji
-    rofi-top
     # rofi-wayland
     rofi-unwrapped
-    rofi-emoji
 
     killall
     swww

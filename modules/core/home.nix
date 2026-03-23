@@ -12,6 +12,12 @@
       home.stateVersion = "25.11";
       home.enableNixpkgsReleaseCheck = false;
 
+      # Profile-Sync-Daemon: monta perfil do Chrome em tmpfs (RAM)
+      services.psd = {
+        enable = true;
+        resyncTimer = "30min";
+      };
+
       # Corrige erro de caractere reservado no campo Exec (desktop spec)
       xdg.desktopEntries."obsidian-work" = {
         name = "Obsidian (Work)";

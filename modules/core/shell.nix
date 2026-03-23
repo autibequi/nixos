@@ -35,20 +35,6 @@ in
     autosuggestions.strategy = [ "match_prev_cmd" ];
     autosuggestions.highlightStyle = "fg=10";
 
-    ohMyZsh.plugins = [
-      "git"
-      "sudo"
-      "history"
-      "history-substring-search"
-      "completion"
-      "colored-man-pages"
-      "colored-ls"
-      "command-not-found"
-      "extract"
-      "fzf"
-      "zoxide"
-    ];
-
     syntaxHighlighting.highlighters = [
       "main"
       "brackets"
@@ -62,6 +48,7 @@ in
     shellInit = ''
       fpath=(~/.config/zsh/completions $fpath)
       source ~/.config/zsh/init.sh
+      eval "$(sheldon source)"
     '';
   };
 
@@ -149,6 +136,8 @@ in
     # node
     pnpm
     nodejs
+
+    sheldon # fast zsh plugin manager (replaces oh-my-zsh)
 
     # Media
     yt-dlp

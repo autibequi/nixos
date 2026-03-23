@@ -1,0 +1,19 @@
+shell = "zsh"
+
+[plugins.ohmyzsh-sudo]
+github = "ohmyzsh/ohmyzsh"
+dir = "plugins/sudo"
+use = ["*.plugin.zsh"]
+
+[plugins.ohmyzsh-extract]
+github = "ohmyzsh/ohmyzsh"
+dir = "plugins/extract"
+use = ["*.plugin.zsh"]
+
+[plugins.ohmyzsh-colored-man-pages]
+github = "ohmyzsh/ohmyzsh"
+dir = "plugins/colored-man-pages"
+use = ["*.plugin.zsh"]
+
+[plugins.history-substring-search]
+github = "zsh-users/zsh-history-substring-search"
