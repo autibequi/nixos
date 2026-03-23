@@ -6,25 +6,41 @@
 
 {
   environment.systemPackages = with pkgs; [
-    bashly
-    jq # scripts de waybar e sistema usam jq diretamente (sem herdar alias jq=jaq do shell)
 
-    proton-pass
+    # ── Sistema ────────────────────────────────────────
+    bashly
+    jq # waybar/scripts usam jq diretamente (sem herdar alias jq=jaq do shell)
+    killall
     stow
+    tailscale
+
+    # ── Desktop / Wayland ──────────────────────────────
+    swww
     rofimoji
     # rofi-wayland
     rofi-unwrapped
-
-    killall
-    swww
-    # apps
-    onlyoffice-desktopeditors # office space apps
-    sidequest # for oculus sideloading
-    blanket # Noise
-    papers # PDFS
     flameshot # PrintScreens
-    unstable.obsidian # Md Notes
-    claude-code # AI coding assistant
+
+    # ── Aparência ──────────────────────────────────────
+    banana-cursor # my boss saw it, it okay
+    apple-cursor  # to when my boss regret beeing okay
+    papirus-icon-theme
+
+    # ── Browsers ───────────────────────────────────────
+    chromium
+    google-chrome
+    vivaldi
+    vivaldi-ffmpeg-codecs
+    # servo # rust browser
+    # inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
+
+    # ── Editores / Dev ─────────────────────────────────
+    unstable.zed-editor
+    # inputs.zed.packages.${pkgs.system}.default
+    gitkraken
+
+    # ── AI / Claude ────────────────────────────────────
+    claude-code
     (python3Packages.buildPythonApplication rec {
       pname = "claude-statusbar";
       version = "1.3.1";
@@ -39,75 +55,50 @@
       propagatedBuildInputs = [ ];
       doCheck = false;
     })
-    mpv # media/shoes/chocolate player
-    foliate # ePub reader
-    fragments # torrent client
-    discord # chattery
-    # unstable.stremio # streaming
 
-    # Aesthetics
-    banana-cursor # my boss saw it, it okay
-    apple-cursor # to when my boss regret beeing okay
-    papirus-icon-theme # Icons
+    # ── Produtividade ──────────────────────────────────
+    proton-pass
+    unstable.obsidian
+    onlyoffice-desktopeditors
+    papers  # PDFs
 
-    # ZED EDITOR (nightly via flake)
-    # inputs.zed.packages.${pkgs.system}.default
-    unstable.zed-editor
+    # ── Midia ──────────────────────────────────────────
+    mpv
+    foliate  # ePub reader
+    blanket  # Noise
+    # unstable.stremio
 
-    gitkraken
-
-    # Work Browser
-    chromium
-    google-chrome
-    # servo # rust browser
-    # inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
-    vivaldi
-    vivaldi-ffmpeg-codecs
-
-    # art
-    # krita
-
-    # benchmark
-    geekbench
-    fio # I/O benchmark (CrystalDiskMark-style sequential)
-    nvtopPackages.full # AMD GPU monitoring
-
-    # Games
-    # retroarchFull
-    godot
-
-    # Terminal
+    # ── Terminal ───────────────────────────────────────
     cool-retro-term
-    espeak-ng # TTS for terminal bell
-    sox # audio recording (Claude Code /voice)
+    espeak-ng  # TTS for terminal bell
+    sox        # audio recording (Claude Code /voice)
 
-    # should be working (but its not)
+    # ── Benchmark / Monitoramento ──────────────────────
+    geekbench
+    fio                  # I/O benchmark (CrystalDiskMark-style)
+    nvtopPackages.full   # AMD GPU monitoring
+
+    # ── Games / 3D ─────────────────────────────────────
+    godot
+    # retroarchFull
+
+    # ── Hardware / Misc ────────────────────────────────
+    sidequest  # Oculus sideloading
     # cura
     # ventoy-full-qt
-
-    # ---------------
-    # Checking out
     # openrgb_git
-    # evil-helix_git
-    tailscale
-    # ISO
-    # ventoy-full-qt
-
-    # Windows Nomopoly Mitigations:
     # winboat
 
-    # voxtype-vulkan-unwrapped
-    # inputs.voxtype.packages.${pkgs.system}.vulkan
-
-    # Fun
+    # ── Fun ────────────────────────────────────────────
     unstable.wayland-bongocat
     pokemonsay
     fortune
 
+    # ── Testando ───────────────────────────────────────
+    # evil-helix_git
     # unstable.howdy
-
-    # Google Antigravity (agentic IDE)
     # inputs.antigravity-nix.packages.${pkgs.system}.default
+    # inputs.voxtype.packages.${pkgs.system}.vulkan
   ];
   # permittedInsecurePackages = [
   #   "ventoy-qt5-1.1.05"

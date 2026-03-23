@@ -2,57 +2,51 @@
   ...
 }:
 {
-  # Importa Setup do Usuario
   imports = [
-    # Hardware Configurations
-    ./hardware.nix
 
-    # Core Modules
+    # ── Hardware ───────────────────────────────────────
+    ./hardware.nix
+    ./modules/hardware/asus.nix
+    ./modules/hardware/nvidia.nix
+
+    # ── Core ───────────────────────────────────────────
     ./modules/core/nix.nix
     ./modules/core/core.nix
-    ./modules/core/services.nix
-    ./modules/core/programs.nix
-    ./modules/core/packages.nix
-    ./modules/core/fonts.nix
-    ./modules/core/shell.nix
     ./modules/core/kernel.nix
+    ./modules/core/shell.nix
+    ./modules/core/fonts.nix
+    ./modules/core/programs.nix
+    ./modules/core/services.nix
+    ./modules/core/packages.nix
     ./modules/core/hibernate.nix
+    ./modules/core/bluetooth.nix
+    ./modules/core/logiops.nix
+    ./modules/core/plymouth.nix
+    ./modules/core/greetd.nix
+    ./modules/core/hyprland.nix
+    ./modules/core/obsidian-sync.nix
+    ./modules/core/leech-tick.nix
+    ./modules/core/work.nix
 
-    # Greeter
-    ./modules/greetd.nix
+    # ── Services ───────────────────────────────────────
+    ./modules/services/ai.nix
+    ./modules/services/containers.nix
+    ./modules/services/lmstudio.nix
+    ./modules/services/netdata.nix
+    ./modules/services/steam.nix
+    ./modules/services/virt.nix
 
-    # Stable Modules
-    ./modules/logiops.nix
-    ./modules/bluetooth.nix
-    ./modules/plymouth.nix
-    ./modules/ai.nix
-    # ./modules/whisper-ptt.nix  # on-demand: descomente quando quiser PTT
-    # ./modules/bongocat.nix     # fun mas desnecessário
-    ./modules/steam.nix
-    ./modules/containers.nix
-
-    # Hardware Specific
-    ./modules/asus.nix
-    ./modules/nvidia.nix
-
-    # Desktop Environments
-    ./modules/hyprland.nix
-
-    # Monitoring
-    ./modules/netdata.nix
-
-    # Obsidian Sync (headless)
-    ./modules/obsidian-sync.nix
-
-    # LM Studio Server
-    ./modules/lmstudio.nix
-
-    # Other Modules
-    ./modules/work.nix
-    ./modules/virt.nix
-
-    # Leech tick — timer unico agents + tasks (10min)
-    ./modules/leech-tick.nix
+    # ── Experiments ────────────────────────────────────
+    # ./modules/experiments/whisper-ptt.nix  # on-demand: PTT
+    # ./modules/experiments/bongocat.nix     # fun mas desnecessário
+    # ./modules/experiments/tlp.nix
+    # ./modules/experiments/flatpak.nix
+    # ./modules/experiments/cosmic.nix
+    # ./modules/experiments/kde.nix
+    # ./modules/experiments/openclaw.nix
+    # ./modules/experiments/docker.nix       # use containers.nix
+    # ./modules/experiments/podman.nix       # use containers.nix
+    # ./modules/experiments/gnome/core.nix
 
   ];
 }
