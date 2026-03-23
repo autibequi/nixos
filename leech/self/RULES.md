@@ -40,6 +40,7 @@ updated: 2026-03-23T16:00Z
 | Regras por espaco (workshop/bedrooms/inbox/vault/trash/tasks) | `self/skills/meta/rules/spaces.md` |
 | Perfil rapido dos agentes (modelo, clock, funcao) | `self/skills/meta/rules/agents.md` |
 | TTL de done/ e arquivamento → vault/archive/ | `self/skills/meta/rules/spaces.md#done` |
+| Implementacao via worktree (todos os agentes) | `self/skills/meta/rules/worktrees.md` |
 
 ---
 

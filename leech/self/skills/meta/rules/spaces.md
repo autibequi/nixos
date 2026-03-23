@@ -69,7 +69,9 @@ Conhecimento permanente e cross-agent.
 
 - Nao criar arquivos soltos em `vault/` — usar subpastas
 - Logs sao append-only — nunca editar linhas existentes
-- `.ephemeral/` e temporario — keeper pode limpar sem aviso
+- `.ephemeral/` e temporario — keeper limpa por threshold:
+  - `cron-logs/`: arquivos > 7 dias
+  - `.trashbin/`: entradas > 30 dias (registro em `.trashlist` permanece)
 
 ---
 
@@ -98,6 +100,7 @@ tasks/TODO/<task>.md  →  tasks/DOING/<task>.md  →  tasks/DONE/<task>.md
 | Alerta monitor | `ASSISTANT_<YYYYMMDD_HH_MM>.md` | assistant |
 | Alerta health | `KEEPER_<YYYYMMDD_HH_MM>.md` | keeper |
 | Outbox para agente | `para-<nome>-<tema>.md` | CTO |
+| Proposta de worktree | `WORKTREE_<agent>_<nome>_<YYYYMMDD>.md` | agente implementador |
 | Feed de status | `feed.md` | qualquer agente (append) |
 
 ---

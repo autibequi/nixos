@@ -19,6 +19,7 @@ Detalhes ficam aqui e sao carregados sob demanda.
 | `map.md` | Mapa de diretorios do vault |
 | `spaces.md` | Regras por espaco: workshop, bedrooms, inbox, vault, trash |
 | `agents.md` | Perfil rapido dos 11 agentes (modelo, clock, funcao) |
+| `worktrees.md` | Regra universal de implementacao via worktree — fluxo, naming, apresentacao ao CTO |
 
 ## Uso via CLI
 

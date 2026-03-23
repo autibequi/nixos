@@ -58,7 +58,7 @@ find /workspace/obsidian/vault -name "*.md" -mmin -120 -type f 2>/dev/null | hea
 
 ### Modo AUDIT — Auditoria de Repos
 
-Revisar estado do repositorio NixOS e sugestoes pendentes.
+Revisar estado do repositorio NixOS e worktrees pendentes de review.
 
 1. NixOS (`/workspace/mnt/`):
    - Imports comentados em `configuration.nix`
@@ -66,10 +66,9 @@ Revisar estado do repositorio NixOS e sugestoes pendentes.
    - Opcoes deprecated em modules/
    - Dotfiles divergindo de stow/
 
-2. Sugestoes (`vault/sugestoes/`):
-   - Quantas pendentes vs revisadas
-   - Sugestoes > 14 dias sem review → flag
-   - Sugestoes duplicadas → consolidar
+2. Worktrees pendentes de review (`inbox/WORKTREE_*.md`):
+   - Listar propostas pendentes ha > 7 dias sem resposta
+   - Flag no inbox se acumulo > 5 worktrees nao revisados
 
 3. Reportar achados acionaveis no inbox.
 
@@ -190,7 +189,7 @@ cat /workspace/self/skills/meta/rules/laws.md
 **Checar cada agente com clock definido:**
 
 ```bash
-AGENTS="assistant coruja tamagochi wanderer hermes keeper wiseman jafar paperboy"
+AGENTS="assistant coruja tamagochi wanderer hermes keeper wiseman jafar paperboy trashman"
 for agent in $AGENTS; do
   echo "=== $agent ==="
   # Card no schedule?
