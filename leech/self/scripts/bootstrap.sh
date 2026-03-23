@@ -2,7 +2,7 @@
 # Leech: bootstrap do agente no container.
 # Delega para o bootstrap do repo NixOS. No container, mounts ficam sob /workspace (nixos, obsidian, logs, mount).
 
-# Repo NixOS: em /workspace/nixos (scheduler) ou em /workspace/mnt (leech host-edit). Symlink /workspace/host para compatibilidade.
+# Repo NixOS: em /workspace/nixos (scheduler) ou em /workspace/mnt (--host). Symlink /workspace/host para compatibilidade.
 if [[ -d /workspace/nixos ]] && [[ -d /workspace ]] && [[ ! -e /workspace/host ]]; then
   ln -sfn /workspace/nixos /workspace/host 2>/dev/null || true
 elif [[ -d /workspace/mnt ]] && [[ -f /workspace/mnt/CLAUDE.md ]] && [[ -d /workspace ]] && [[ ! -e /workspace/host ]]; then

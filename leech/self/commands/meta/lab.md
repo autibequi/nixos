@@ -55,11 +55,11 @@ HEADLESS=1 LEECH_ANALYSIS_MODE=1 IN_DOCKER=1 CLAUDE_ENV=container \
 | `/tmp/leech-locks/` | locks de tasks (atomic mkdir) | runtime |
 | `/var/run/docker.sock` | Docker socket — GID 131, eu tenho GID 1000+190 | **sem acesso** |
 
-## Limitações desta sessão (leech host sem restart)
+## Limitações desta sessão (--host sem restart)
 
 - **Sem Docker**: socket precisa GID 131, não estou no grupo
 - `leech tasks run X` requer Docker → precisa rodar no host
-- `leech host` do host spawna container com `group_add: [131]` — ao reiniciar terei acesso
+- `leech --host` do host spawna container com `group_add: [131]` — ao reiniciar terei acesso
 - O que posso fazer: Claude interno direto, editar arquivos, rodar scripts, task-runner.sh
 
 ## Workflow lab

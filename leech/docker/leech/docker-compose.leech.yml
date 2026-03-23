@@ -17,7 +17,7 @@ x-env-base: &env-base
 x-extra-hosts: &extra-hosts
   - "host.docker.internal:host-gateway"
 
-# /workspace: leech (/leech), obsidian e o projeto (mnt). Nixos e logs só em leech host.
+# /workspace: self (leech engine), obsidian (vault), mnt (projeto), host (nixos repo, ro/rw via --host).
 x-base-volumes: &base-volumes
   - ${LEECH_ROOT:-${HOME}/nixos/leech/self}:/workspace/self
   - ${OBSIDIAN_PATH:-${HOME}/.ovault/Work}:/workspace/obsidian
