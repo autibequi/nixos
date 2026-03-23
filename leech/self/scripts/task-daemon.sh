@@ -8,9 +8,12 @@
 set -euo pipefail
 
 WORKSPACE="/workspace"
-TASKS="$WORKSPACE/obsidian/tasks"
-LOGFILE="$WORKSPACE/obsidian/vault/.ephemeral/cron-logs/daemon.log"
+OBSIDIAN="$WORKSPACE/obsidian"
+TASKS="$OBSIDIAN/tasks"
+AGENTS_DIR="$TASKS/AGENTS"
+LOGFILE="$OBSIDIAN/vault/.ephemeral/cron-logs/daemon.log"
 LOCKFILE="/tmp/leech-locks/daemon.lock"
+TASKS_LOG="$OBSIDIAN/vault/logs/tasks.md"
 
 TICK_INTERVAL="${TASK_TICK_INTERVAL:-300}"
 SINGLE_TICK="${TASK_SINGLE_TICK:-0}"
@@ -20,9 +23,20 @@ DRY_RUN=0
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 RUNNER="$SCRIPT_DIR/task-runner.sh"
 
-mkdir -p "$WORKSPACE/obsidian/vault/.ephemeral/cron-logs" "/tmp/leech-locks" "$TASKS/TODO" "$TASKS/DOING" "$TASKS/DONE"
+mkdir -p "$OBSIDIAN/vault/.ephemeral/cron-logs" "$OBSIDIAN/vault/logs" \
+         "/tmp/leech-locks" "$TASKS/TODO" "$TASKS/DOING" "$TASKS/DONE" \
+         "$AGENTS_DIR" "$AGENTS_DIR/DOING"
 
 log() { echo "[daemon:$(date +%H:%M:%S)] $*"; }
+
+log_task() {
+  local task="$1" event="$2" status="${3:-}" duration="${4:-}"
+  mkdir -p "$(dirname "$TASKS_LOG")"
+  printf "| %s | %s | %s | %s | %s |\n" \
+    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    "$task" "$event" "$status" "$duration" \
+    >> "$TASKS_LOG"
+}
 
 # Rotate log if > 500KB
 if [ -f "$LOGFILE" ] && [ "$(stat -c%s "$LOGFILE" 2>/dev/null || echo 0)" -gt 512000 ]; then
@@ -74,7 +88,20 @@ run_tick() {
     fi
   done
 
-  # Also run anything stuck in DOING (recovery)
+  # Scan tasks/AGENTS/ for agent cards
+  for card in "$AGENTS_DIR"/*.md; do
+    [ -f "$card" ] || continue
+    local filename; filename=$(basename "$card")
+    local card_ts; card_ts=$(card_epoch "$filename")
+    if [ "$card_ts" -eq 0 ]; then continue; fi
+    if [ "$card_ts" -le "$threshold" ]; then
+      due+=("agents:$filename")
+      local delta=$(( (card_ts - now) / 60 ))
+      log "  due (agent): $filename (${delta}min)"
+    fi
+  done
+
+  # Recovery: tasks/DOING orphans
   for card in "$TASKS/DOING"/*.md; do
     [ -f "$card" ] || continue
     local filename; filename=$(basename "$card")
@@ -82,6 +109,17 @@ run_tick() {
     if [ ! -d "/tmp/leech-locks/${card_base}.lock" ]; then
       due+=("$filename")
       log "  orphan: $filename (in DOING but not locked)"
+    fi
+  done
+
+  # Recovery: tasks/AGENTS/DOING orphans
+  for card in "$AGENTS_DIR/DOING"/*.md; do
+    [ -f "$card" ] || continue
+    local filename; filename=$(basename "$card")
+    local card_base; card_base=$(basename "$filename" .md)
+    if [ ! -d "/tmp/leech-locks/${card_base}.lock" ]; then
+      due+=("agents:$filename")
+      log "  orphan (agent): $filename (in AGENTS/DOING but not locked)"
     fi
   done
 
@@ -98,9 +136,30 @@ run_tick() {
     return 0
   fi
 
-  for filename in "${due[@]}"; do
-    log "Running: $filename"
-    "$RUNNER" "$filename" || log "  $filename finished with error"
+  for entry in "${due[@]}"; do
+    local is_agent=0
+    local filename="$entry"
+    if [[ "$entry" == agents:* ]]; then
+      is_agent=1
+      filename="${entry#agents:}"
+    fi
+    local task_name="$filename"
+    if [[ "$task_name" =~ ^[0-9]{8}_[0-9]{2}_[0-9]{2}_(.*).md$ ]]; then
+      task_name="${BASH_REMATCH[1]}"
+    fi
+    log "Running: $filename (agent=$is_agent)"
+    log_task "$task_name" "start" "" ""
+    local t0=$SECONDS
+    if [ "$is_agent" = "1" ]; then
+      SCHEDULE_DIR="$AGENTS_DIR" \
+      RUNNING_DIR="$AGENTS_DIR/DOING" \
+        "$RUNNER" "$filename" || log "  $filename finished with error"
+    else
+      "$RUNNER" "$filename" || log "  $filename finished with error"
+    fi
+    local elapsed=$(( SECONDS - t0 ))
+    local dur="$((elapsed/60))m$((elapsed%60))s"
+    log_task "$task_name" "done" "ok" "$dur"
   done
 
   log "=== Tick done ==="

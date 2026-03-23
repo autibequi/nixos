@@ -251,9 +251,9 @@ Se BAIXO → registrar apenas em memory
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
-cat /workspace/obsidian/agents/BREAKROOMRULES.md
-cat /workspace/obsidian/BOARDRULES.md
-cat /workspace/obsidian/agents/mechanic/memory.md
+cat /workspace/self/rules/TRASH.md
+
+cat /workspace/obsidian/bedrooms/mechanic/memory.md
 ls /workspace/obsidian/outbox/para-mechanic-*.md 2>/dev/null
 ```
 
@@ -265,8 +265,8 @@ ls /workspace/obsidian/outbox/para-mechanic-*.md 2>/dev/null
 
 ```bash
 NEXT=$(date -d "+24 hours" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/agents/_running/*_mechanic.md \
-   /workspace/obsidian/agents/_schedule/${NEXT}_mechanic.md 2>/dev/null
+mv /workspace/obsidian/tasks/AGENTS/DOING/*_mechanic.md \
+   /workspace/obsidian/tasks/AGENTS/${NEXT}_mechanic.md 2>/dev/null
 ```
 
 Mechanic e on-demand mas DEVE manter heartbeat de 24h.

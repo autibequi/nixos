@@ -13,7 +13,7 @@ Conexoes entre notas via:
 ---
 tags: [sistema, meta]
 related:
-  - "[[DASHBOARD]]"
+  - "[[bedrooms/dashboard]]"
   - "[[vault/insights]]"
   - "[[vault/WISEMAN]]"
 ---
@@ -40,7 +40,7 @@ A cada ciclo:
 
 - `vault/WISEMAN.md` — grafo do sistema
 - `vault/insights.md` — insights cross-agent
-- `DASHBOARD.md` — ponto de entrada
+- `bedrooms/dashboard.md` — ponto de entrada
 
 ## Boas praticas
 

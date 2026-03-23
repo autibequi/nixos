@@ -13,10 +13,10 @@ description: "Auto-ativar quando: qualquer interacao com /workspace/obsidian/ â€
 | Sub-skill | Arquivo | Quando usar |
 |---|---|---|
 | **board** | `board.md` | Qualquer interacao com o vault: mapa, tasks, agents, delegacao, quota |
-| **agentroom** | `agentroom.md` | Agents interagindo com `/obsidian/agents/`: scheduling, memory, ciclo |
+| **agentroom** | `agentroom.md` | Agents interagindo com `/obsidian/bedrooms/`: scheduling, memory, ciclo |
 | **law** | `law.md` | A Lei do Leech: 9 leis obrigatorias + penalidades. Wiseman fiscaliza. |
 | **graph** | `graph.md` | Manter o grafo Ctrl+G: frontmatter, related, hubs, wiseman |
-| **dataview** | `dataview.md` | Queries Dataview/DataviewJS no DASHBOARD.md e notas |
+| **dataview** | `dataview.md` | Queries Dataview/DataviewJS no bedrooms/dashboard.md e notas |
 
 Carregar as que forem relevantes para a task.
 
@@ -70,7 +70,7 @@ SORT last_run DESC
 
 ### 3. Card de Agente
 
-Path: `obsidian/agents/<nome>/memory.md`
+Path: `obsidian/bedrooms/<nome>/memory.md`
 
 ```yaml
 ---
@@ -83,7 +83,7 @@ next_schedule: 2026-03-22T15:00:00Z
 
 ### 4. Artefato de Projeto
 
-Path: `obsidian/projects/<nome>/`
+Path: `obsidian/workshop/<nome>/`
 
 ```yaml
 ---

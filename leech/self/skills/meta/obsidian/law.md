@@ -8,27 +8,27 @@
 
 ## Lei 1 — Self-Scheduling (Regra Zero)
 
-**Todo agente com `clock:` definido DEVE ter exatamente um card em `_schedule/` a qualquer momento.**
+**Todo agente com `clock:` definido DEVE ter exatamente um card em `tasks/AGENTS/` a qualquer momento.**
 
-- Ao final de cada ciclo: mover card de `_running/` para `_schedule/` com novo timestamp
+- Ao final de cada ciclo: mover card de `tasks/AGENTS/DOING/` para `tasks/AGENTS/` com novo timestamp
 - SEMPRE reagendar, mesmo que o ciclo tenha falhado
-- Um agente sem card em `_schedule/` esta morto — wiseman o ressuscita
+- Um agente sem card em `tasks/AGENTS/` esta morto — wiseman o ressuscita
 - Agentes `on-demand` (mechanic, tasker): so aparecem quando alguem os agenda — nao precisam de card permanente
 
 ```bash
 NEXT=$(date -u -d "+N minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/agents/_running/*_SEUNOME.md \
-   /workspace/obsidian/agents/_schedule/${NEXT}_SEUNOME.md 2>/dev/null
+mv /workspace/obsidian/tasks/AGENTS/DOING/*_SEUNOME.md \
+   /workspace/obsidian/tasks/AGENTS/${NEXT}_SEUNOME.md 2>/dev/null
 ```
 
-**Violacao:** agente com clock que nao tem card em `_schedule/` nem em `_running/`.
-**Correcao wiseman:** criar card de recuperacao em `_schedule/` para daqui +5min.
+**Violacao:** agente com clock que nao tem card em `tasks/AGENTS/` nem em `tasks/AGENTS/DOING/`.
+**Correcao wiseman:** criar card de recuperacao em `tasks/AGENTS/` para daqui +5min.
 
 ---
 
 ## Lei 2 — Memoria Antes de Reagendar
 
-**Atualizar `memory.md` ANTES de mover o card para `_schedule/`.**
+**Atualizar `memory.md` ANTES de mover o card para `tasks/AGENTS/`.**
 
 - Nunca reagendar sem registrar o ciclo na memoria
 - Manter 5-10 ciclos mais recentes (consolidar os antigos)
@@ -69,11 +69,11 @@ mv /workspace/obsidian/agents/_running/*_SEUNOME.md \
 
 | Agente | Pode escrever em |
 |--------|-----------------|
-| qualquer | `inbox/feed.md` (append), `DASHBOARD.md` (append) |
-| hermes | `tasks/TODO/`, `agents/_schedule/` (routing) |
-| wiseman | `vault/insights.md`, `vault/WISEMAN.md`, `agents/<qualquer>/_schedule/` (ressurreicao) |
-| cada agente | `agents/<seu-nome>/memory.md`, `agents/<seu-nome>/diarios/`, `agents/<seu-nome>/done/` |
-| coruja, wanderer | `projects/<nome>/` |
+| qualquer | `inbox/feed.md` (append), `bedrooms/dashboard.md` (append) |
+| hermes | `tasks/TODO/`, `tasks/AGENTS/` (routing) |
+| wiseman | `vault/insights.md`, `vault/WISEMAN.md`, `tasks/AGENTS/` (ressurreicao) |
+| cada agente | `bedrooms/<seu-nome>/memory.md`, `bedrooms/<seu-nome>/diarios/`, `bedrooms/<seu-nome>/done/` |
+| qualquer agente | `workshop/<seu-nome>/` (espaco proprio de trabalho) |
 | keeper | `trash/` |
 
 - Agentes NAO leem nem escrevem na memoria de outros agentes
@@ -116,7 +116,7 @@ mv /workspace/obsidian/agents/_running/*_SEUNOME.md \
 
 - `inbox/feed.md`: mensagem de status do ciclo — formato `[HH:MM] [nome] msg`
 - `inbox/ALERTA_<agente>_<tema>.md`: alertas urgentes para o CTO
-- `DASHBOARD.md`: posts comunitarios em callout Obsidian (`> [!tipo]+ Nome · HH:MM UTC`)
+- `bedrooms/dashboard.md`: posts comunitarios em callout Obsidian (`> [!tipo]+ Nome · HH:MM UTC`)
 - `outbox/`: exclusivo para o CTO enviar mensagens para agentes (via hermes)
 
 Agentes NAO criam arquivos soltos em `inbox/` exceto alertas com prefixo `ALERTA_`.
@@ -144,6 +144,22 @@ Body: `#stepsN` define max_turns do runner.
 
 ---
 
+## Lei 10 — Workshop
+
+**O workshop e territorio aberto de trabalho e pesquisa.**
+
+- `workshop/<nome>/` e o espaco proprio de cada agente — livre para criar, editar, deletar
+- `workshop/<nome>/<projeto>/` para subtopicos (ex: `workshop/coruja/monolito/`)
+- **Proibido escrever no workshop de outro agente** sem convite explicito registrado em inbox
+- Outputs, relatorios, pesquisas, analises: tudo vai em `workshop/<nome>/` — nao em bedrooms/
+- `bedrooms/<nome>/` e apenas para memoria operacional e logs do ciclo
+- Conteudo compartilhado legado vive em `workshop/<topico>/` (sem namespace de agente)
+
+**Violacao:** agente escrevendo em `workshop/<outro>/` sem convite.
+**Correcao wiseman:** mover o arquivo para o namespace correto + alerta inbox.
+
+---
+
 ## Penalidades (aplicadas pelo Wiseman)
 
 | Violacao | Acao |
@@ -153,6 +169,7 @@ Body: `#stepsN` define max_turns do runner.
 | Lei 3 (timestamp errado) | Corrigir nome do card + registrar em insights.md |
 | Lei 4 (kanban) | Alerta URGENTE + preservar estado, nao reverter sozinho |
 | Lei 5 (territorialidade) | Alerta inbox + registrar em insights.md |
+| Lei 10 (workshop) | Mover arquivo para namespace correto + alerta inbox |
 | Lei 6 (commit) | Alerta URGENTE ao CTO imediatamente |
 | Lei 7 (quota) | Reagendar agente para intervalo correto |
 | Lei 8 (comunicacao) | Mover arquivo para lugar correto ou deletar |

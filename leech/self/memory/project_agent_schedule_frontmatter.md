@@ -1,16 +1,16 @@
 ---
 name: agent_schedule_frontmatter
-description: Cards em _schedule/ precisam de frontmatter YAML com contractor:/agent: ou são silenciosamente ignorados pelo tick
+description: Cards em tasks/AGENTS/ precisam de frontmatter YAML com agent: ou são silenciosamente ignorados pelo tick
 type: project
 ---
 
-Cards em `~/.ovault/Work/agents/_schedule/*.md` (ou `/workspace/obsidian/agents/_schedule/`) DEVEM ter frontmatter YAML com `contractor:` ou `agent:`. Se faltarem, `is_agent_card()` em `auto.sh` retorna false silenciosamente e o `leech tick` diz "0 agent(s) due" — mesmo com agents atrasados horas.
+Cards em `/workspace/obsidian/tasks/AGENTS/*.md` DEVEM ter frontmatter YAML com `agent:`. Se faltarem, `is_agent_card()` em `auto.sh` retorna false silenciosamente e o `leech tick` diz "0 agent(s) due" — mesmo com agents atrasados horas.
 
 **Por que:** a função `is_agent_card()` em `leech/bash/src/commands/auto.sh` abre cada card e procura `agent:*` ou `contractor:*` dentro do bloco `---`. Sem frontmatter, nunca encontra e skipa.
 
 **Debug rápido (no host):**
 ```bash
-head -3 ~/.ovault/Work/agents/_schedule/*.md
+head -3 /workspace/obsidian/tasks/AGENTS/*.md
 ```
 Se algum começar com `# ` em vez de `---` → está sem frontmatter → tick vai ignorar.
 

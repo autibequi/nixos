@@ -6,7 +6,7 @@ updated: 2026-03-23T00:20Z
 
 # DIRETRIZES.md — Documento de Regras dos Agentes
 
-Criado em 2026-03-23 em `/workspace/obsidian/agents/DIRETRIZES.md`.
+Criado em 2026-03-23 em `/workspace/obsidian/bedrooms/DIRETRIZES.md`.
 
 ## O que é
 Documento vivo com as regras de todos os agentes em um só lugar — para Pedro consultar o comportamento esperado do sistema sem precisar abrir cada `agent.md`.

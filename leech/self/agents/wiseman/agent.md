@@ -25,7 +25,7 @@ Voce e o **Wiseman** — o tecedor de conhecimento do sistema. Opera em rotacao 
 cat /workspace/self/skills/meta/obsidian/law.md
 cat /workspace/self/skills/meta/obsidian/board.md
 cat /workspace/self/skills/meta/obsidian/agentroom.md
-cat /workspace/obsidian/agents/wiseman/memory.md
+cat /workspace/obsidian/bedrooms/wiseman/memory.md
 ls /workspace/obsidian/outbox/para-wiseman-*.md 2>/dev/null
 ```
 
@@ -167,7 +167,7 @@ Analisar outputs dos agentes e sintetizar padroes.
 ```bash
 for agent in assistant coruja mechanic tamagochi tasker wanderer hermes keeper jafar; do
   echo "=== $agent ==="
-  tail -20 "/workspace/obsidian/agents/$agent/memory.md" 2>/dev/null
+  tail -20 "/workspace/obsidian/bedrooms/$agent/memory.md" 2>/dev/null
 done
 ```
 
@@ -195,11 +195,11 @@ AGENTS="assistant coruja tamagochi wanderer hermes keeper wiseman jafar paperboy
 for agent in $AGENTS; do
   echo "=== $agent ==="
   # Card no schedule?
-  ls /workspace/obsidian/agents/_schedule/*_${agent}.md 2>/dev/null || echo "MORTO: sem card em _schedule"
+  ls /workspace/obsidian/tasks/AGENTS/*_${agent}.md 2>/dev/null || echo "MORTO: sem card em _schedule"
   # Card no running?
-  ls /workspace/obsidian/agents/_running/*_${agent}.md 2>/dev/null
+  ls /workspace/obsidian/tasks/AGENTS/DOING/*_${agent}.md 2>/dev/null
   # Memory atualizada?
-  head -10 /workspace/obsidian/agents/${agent}/memory.md 2>/dev/null | grep updated
+  head -10 /workspace/obsidian/bedrooms/${agent}/memory.md 2>/dev/null | grep updated
 done
 ```
 
@@ -208,7 +208,7 @@ done
 - **Lei 1 (morto):** criar card de recuperacao
 ```bash
 NEXT=$(date -u -d "+5 minutes" +%Y%m%d_%H_%M)
-cat > /workspace/obsidian/agents/_schedule/${NEXT}_NOME.md << 'EOF'
+cat > /workspace/obsidian/tasks/AGENTS/${NEXT}_NOME.md << 'EOF'
 ---
 agent: NOME
 recovery: true
@@ -226,7 +226,7 @@ EOF
 
 Verificar se houve mudancas em agent.mds desde o ultimo ciclo:
 ```bash
-find /workspace/self/agents -name "agent.md" -newer /workspace/obsidian/agents/DIRETRIZES.md 2>/dev/null
+find /workspace/self/agents -name "agent.md" -newer /workspace/obsidian/bedrooms/DIRETRIZES.md 2>/dev/null
 ```
 
 Se houver arquivos mais novos: atualizar a secao do agente correspondente em `DIRETRIZES.md` e tocar o frontmatter `updated:`.
@@ -262,7 +262,7 @@ Insights: `/workspace/obsidian/vault/insights.md`
 
 ## Memoria
 
-Persistente em `/workspace/obsidian/agents/wiseman/memory.md`
+Persistente em `/workspace/obsidian/bedrooms/wiseman/memory.md`
 
 Formato:
 ```
@@ -277,8 +277,8 @@ Formato:
 
 ```bash
 NEXT=$(date -d "+60 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/agents/_running/*_wiseman.md \
-   /workspace/obsidian/agents/_schedule/${NEXT}_wiseman.md 2>/dev/null
+mv /workspace/obsidian/tasks/AGENTS/DOING/*_wiseman.md \
+   /workspace/obsidian/tasks/AGENTS/${NEXT}_wiseman.md 2>/dev/null
 ```
 
 ---

@@ -213,7 +213,7 @@ if [ "$LEECH_EDIT" = "1" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]
   _git_branch=$(git -C "$_lab_dir" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
   _git_dirty=$(git -C "$_lab_dir" status --porcelain 2>/dev/null | wc -l | tr -d ' ')
   _git_ahead=$(git -C "$_lab_dir" rev-list @{u}..HEAD 2>/dev/null | wc -l | tr -d ' ')
-  _todo_count=$(ls /workspace/obsidian/contractors/_schedule/*.md 2>/dev/null | wc -l | tr -d ' ')
+  _todo_count=$(ls /workspace/obsidian/tasks/AGENTS/*.md 2>/dev/null | wc -l | tr -d ' ')
   _mem_count=$(ls "$HOME/.claude/projects/-workspace-mnt/memory/"*.md 2>/dev/null | wc -l | tr -d ' ')
   _h_off=$([ "$HEADLESS" = "1" ] && echo "ON" || echo "OFF")
   _d_on=$([ "$IN_DOCKER" = "1" ] && echo "ON" || echo "OFF")

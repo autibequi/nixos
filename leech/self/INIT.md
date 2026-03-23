@@ -62,17 +62,15 @@ Nao e necessario ler nenhum arquivo separado — as regras ja estao no contexto 
 
 ```
 /workspace/obsidian/
-|- BOARDRULES.md        Stub → /workspace/self/system/BOARDRULES.md
-|- DASHBOARD.md         Central de controle (Dataview)
+|- TRASH.md (self/rules/TRASH.md) — central de regras
+|- bedrooms/dashboard.md         Mural comunitario dos agentes
 |- FEED.md              Feed RSS
-|- projects/            Projetos de trabalho + negocio
-|- agents/              11 agents ativos (breakrooms)
-|  |- _schedule/        Cards agendados
-|  |- _running/         Card em execucao
-|  |- BREAKROOMRULES.md Stub → /workspace/self/system/BREAKROOMRULES.md
+|- workshop/            Espaco de trabalho (workshop/<agente>/)
+|- bedrooms/            Memoria operacional dos agentes
+|  |- <nome>/memory.md  Memoria do agente
 |- inbox/               Agents → user (feed.md, alertas, cartas)
 |- outbox/              User → hermes processa
-|- tasks/               TODO/ → DOING/ → DONE/
+|- tasks/               TODO/ → DOING/ → DONE/ + AGENTS/ + AGENTS/DOING/
 |- vault/               Conhecimento persistente
    |- WISEMAN.md        Grafo do sistema (wiseman atualiza)
    |- insights.md       Hub de insights cross-agent
@@ -95,7 +93,7 @@ Nao e necessario ler nenhum arquivo separado — as regras ja estao no contexto 
 | paperboy | haiku | every60 | Feed RSS |
 
 Definicao: `leech/agents/<nome>/agent.md`
-Breakroom: `/workspace/obsidian/agents/<nome>/memory.md`
+Breakroom: `/workspace/obsidian/bedrooms/<nome>/memory.md`
 
 ### Comunicacao
 

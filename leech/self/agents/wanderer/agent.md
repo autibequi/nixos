@@ -40,7 +40,7 @@ A cada ciclo, escolha o modo mais urgente baseado no que foi feito recentemente 
 
 **1. Ler memória recente**
 ```bash
-tail -40 /workspace/obsidian/agents/wanderer/memory.md
+tail -40 /workspace/obsidian/bedrooms/wanderer/memory.md
 ```
 
 **2. Escolher zona** (preferir menos visitada nos últimos 3 ciclos)
@@ -82,7 +82,7 @@ Perguntas que guiam:
 **Por quê é relevante:** reflexão de 1-2 frases
 ```
 
-**8. Registrar em `/workspace/obsidian/agents/wanderer/memory.md`**
+**8. Registrar em `/workspace/obsidian/bedrooms/wanderer/memory.md`**
 ```
 ## Ciclo YYYY-MM-DD HH:MM — EXPLORE
 **Zona:** A/B/C | **Arquivos:** file1, file2
@@ -170,7 +170,7 @@ Se encontrar algo acionável → appenda inbox.md com contexto.
 Consolida o que os agentes descobriram para o usuário.
 
 1. Coletar outputs recentes:
-   - `/workspace/obsidian/agents/*/memory.md` — tail de cada
+   - `/workspace/obsidian/bedrooms/*/memory.md` — tail de cada
    - `/workspace/obsidian/vault/.ephemeral/cron-logs/` — logs recentes
    - `/workspace/obsidian/inbox/inbox.md` — itens ainda não processados
 
@@ -278,9 +278,9 @@ System evolution | jafar             | YYYY-MM-DD
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
-cat /workspace/obsidian/agents/BREAKROOMRULES.md
-cat /workspace/obsidian/BOARDRULES.md
-cat /workspace/obsidian/agents/wanderer/memory.md
+cat /workspace/self/rules/TRASH.md
+
+cat /workspace/obsidian/bedrooms/wanderer/memory.md
 ls /workspace/obsidian/outbox/para-wanderer-*.md 2>/dev/null
 ```
 
@@ -292,20 +292,20 @@ ls /workspace/obsidian/outbox/para-wanderer-*.md 2>/dev/null
 
 ```bash
 NEXT=$(date -d "+60 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/agents/_running/*_wanderer.md \
-   /workspace/obsidian/agents/_schedule/${NEXT}_wanderer.md 2>/dev/null
+mv /workspace/obsidian/tasks/AGENTS/DOING/*_wanderer.md \
+   /workspace/obsidian/tasks/AGENTS/${NEXT}_wanderer.md 2>/dev/null
 ```
 
 ---
 
 ## Checklist do ciclo
 
-- [ ] Ler BREAKROOMRULES.md e BOARDRULES.md
+- [ ] Ler /workspace/self/rules/TRASH.md
 - [ ] Ler tail da memoria (40 linhas)
 - [ ] Escolher modo (EXPLORE / CONTEMPLATE / EVALUATE / SYNTHESIZE / ABSORB)
 - [ ] Executar o modo escolhido
 - [ ] Registrar ciclo em memory.md com modo + resultado
-- [ ] REAGENDAR (mover card para _schedule/)
+- [ ] REAGENDAR (mover card para tasks/AGENTS/)
 
 ---
 
@@ -332,7 +332,7 @@ Fala so quando estiver pronto. Nunca interrompe com urgencia.
 
 **Indice de topicos com Pedro:**
 
-Ao aparecer, sempre ler `/workspace/obsidian/agents/wanderer/topicos-pedro.md` e apresentar
+Ao aparecer, sempre ler `/workspace/obsidian/bedrooms/wanderer/topicos-pedro.md` e apresentar
 **2 topicos** do indice — variando quais ao longo do tempo (nao sempre os mais recentes).
 Estrategia de selecao: um recente + um antigo esquecido, ou dois tematicamente distantes.
 

@@ -4,7 +4,7 @@
 set -euo pipefail
 
 KANBAN="${KANBAN_FILE:-/workspace/obsidian/kanban.md}"
-SCHEDULED="${SCHEDULED_FILE:-/workspace/obsidian/agents/task.log.md}"
+SCHEDULED="${SCHEDULED_FILE:-/workspace/obsidian/bedrooms/task.log.md}"
 CEMITERIO="${CEMITERIO_FILE:-/workspace/obsidian/trash/archive/2026-03/cemiterio-tasks.md}"
 LOCKFILE="${KANBAN_LOCKFILE:-/workspace/.ephemeral/.kanban.lock}"
 

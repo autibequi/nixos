@@ -104,11 +104,11 @@ Criar o artefato de contexto seguindo o formato de `templates/output.md`. Inclui
 
 ### Definições dos inspetores:
 Ler os arquivos de definição:
-- `/workspace/obsidian/agents/inspectors/claude.md`
-- `/workspace/obsidian/agents/inspectors/documentation.md`
-- `/workspace/obsidian/agents/inspectors/qa.md`
-- `/workspace/obsidian/agents/inspectors/namer.md`
-- `/workspace/obsidian/agents/inspectors/simplifier.md`
+- `/workspace/obsidian/bedrooms/inspectors/claude.md`
+- `/workspace/obsidian/bedrooms/inspectors/documentation.md`
+- `/workspace/obsidian/bedrooms/inspectors/qa.md`
+- `/workspace/obsidian/bedrooms/inspectors/namer.md`
+- `/workspace/obsidian/bedrooms/inspectors/simplifier.md`
 
 ## Passo 2f — Inspector de Contrato Frontend ← → Backend (pré-inspeção paralela)
 
@@ -119,7 +119,7 @@ Se o diff tocar em handlers BO, BFF ou structs de response, spawnar um `inspecto
 ```
 Agent subagent_type=Explore run_in_background=true prompt="
 Você é o inspector-contrato para [bo-container|front-student].
-Definição completa: <conteúdo de /workspace/obsidian/agents/inspectors/contrato.md>
+Definição completa: <conteúdo de /workspace/obsidian/bedrooms/inspectors/contrato.md>
 
 Contexto (handlers modificados, structs de response, novos endpoints):
 <extraído do diff e do 00-contexto.md>
@@ -159,7 +159,7 @@ Usar o Agent tool com `run_in_background: true` para cada inspector. Todos receb
 ```
 Agent subagent_type=Explore run_in_background=true prompt="
 Você é o **inspector-claude**. Sua definição completa:
-<definição do obsidian/agents/inspectors/claude.md>
+<definição do obsidian/bedrooms/inspectors/claude.md>
 
 Contexto coletado (PR/JIRA/Notion):
 <conteúdo do 00-contexto.md>
@@ -195,7 +195,7 @@ Após consolidar findings dos 5 primeiros:
 ```
 Agent subagent_type=Monolito isolation=worktree prompt="
 Você é o **inspector-simplifier**. Sua definição completa:
-<definição do obsidian/agents/inspectors/simplifier.md>
+<definição do obsidian/bedrooms/inspectors/simplifier.md>
 
 Contexto: os inspetores anteriores encontraram estes findings:
 <findings consolidados>
@@ -303,7 +303,7 @@ Sempre inserir no topo (mais recente primeiro).
 Para cada um dos inspetores que rodou:
 
 1. Leia o resultado que o inspector produziu
-2. Leia o arquivo atual do inspector em `/workspace/obsidian/agents/inspectors/<nome>.md`
+2. Leia o arquivo atual do inspector em `/workspace/obsidian/bedrooms/inspectors/<nome>.md`
 3. Avalie: o inspector encontrou algo que ainda não está documentado na sua definição?
    - Novo pattern do monolito
    - Armadilha nova descoberta no diff

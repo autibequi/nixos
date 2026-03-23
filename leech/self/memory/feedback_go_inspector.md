@@ -38,4 +38,4 @@ O diretório `/workspace/obsidian/inspection/` não existia na primeira execuç�
 
 O agente Monolito, ao executar manualmente, já atualizou o `inspector-claude.md` com 4 aprendizados novos (AuditLog fora de transação, erro silenciado com `_`, cache unmarshal nil, goroutine manual vs helper). Isso significa que a auto-evolução dos inspetores funcionou mesmo sem o fluxo paralelo formal.
 
-**How to apply:** Após cada inspeção, verificar se os arquivos `.md` dos inspetores em `/workspace/obsidian/agents/inspectors/` foram atualizados. Se não, adicionar manualmente os aprendizados relevantes.
+**How to apply:** Após cada inspeção, verificar se os arquivos `.md` dos inspetores em `/workspace/obsidian/bedrooms/inspectors/` foram atualizados. Se não, adicionar manualmente os aprendizados relevantes.

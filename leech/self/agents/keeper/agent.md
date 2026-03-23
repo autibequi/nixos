@@ -22,9 +22,9 @@ Voce e o **Keeper** — responsavel pela saude do sistema e limpeza do workspace
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
-cat /workspace/obsidian/agents/BREAKROOMRULES.md
-cat /workspace/obsidian/BOARDRULES.md
-cat /workspace/obsidian/agents/keeper/memory.md
+cat /workspace/self/rules/TRASH.md
+
+cat /workspace/obsidian/bedrooms/keeper/memory.md
 ls /workspace/obsidian/outbox/para-keeper-*.md 2>/dev/null
 ```
 
@@ -102,14 +102,14 @@ Reportar no feed:
 - 14 ciclos consecutivos sem false positives (logica madura)
 - Thresholds validados: 7d scratch, 14d logs, 30d artefatos
 - `.trashbin/` como destino intermediario, `.trashlist` como audit trail
-- NUNCA arquivar: DASHBOARD.md, BOARDRULES.md, FEED.md, README.md
+- NUNCA arquivar: bedrooms/dashboard.md, TRASH.md (self/rules/), FEED.md, README.md
 - NUNCA arquivar: memory.md de agentes, modules/, stow/, projetos/, scripts/
 
 ---
 
 ## Memoria
 
-Persistente em `/workspace/obsidian/agents/keeper/memory.md`
+Persistente em `/workspace/obsidian/bedrooms/keeper/memory.md`
 
 Formato:
 ```
@@ -124,8 +124,8 @@ Formato:
 
 ```bash
 NEXT=$(date -d "+30 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/agents/_running/*_keeper.md \
-   /workspace/obsidian/agents/_schedule/${NEXT}_keeper.md 2>/dev/null
+mv /workspace/obsidian/tasks/AGENTS/DOING/*_keeper.md \
+   /workspace/obsidian/tasks/AGENTS/${NEXT}_keeper.md 2>/dev/null
 ```
 
 ---

@@ -18,9 +18,9 @@ Você é o assistente pessoal do Pedro. Atencioso, eficiente, levemente preocupa
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
-cat /workspace/obsidian/agents/BREAKROOMRULES.md
-cat /workspace/obsidian/BOARDRULES.md
-cat /workspace/obsidian/agents/assistant/memory.md
+cat /workspace/self/rules/TRASH.md
+
+cat /workspace/obsidian/bedrooms/assistant/memory.md
 ls /workspace/obsidian/outbox/para-assistant-*.md 2>/dev/null
 ```
 
@@ -28,7 +28,7 @@ ls /workspace/obsidian/outbox/para-assistant-*.md 2>/dev/null
 
 ## Memória persistente
 
-Sempre ler e escrever em `/workspace/obsidian/agents/assistant/memory.md`.
+Sempre ler e escrever em `/workspace/obsidian/bedrooms/assistant/memory.md`.
 
 Estrutura da memória:
 ```yaml
@@ -53,7 +53,7 @@ alerts_sent_today: N
 ### 1. Ler memória anterior
 
 ```bash
-cat /workspace/obsidian/agents/assistant/memory.md 2>/dev/null || echo "primeiro ciclo"
+cat /workspace/obsidian/bedrooms/assistant/memory.md 2>/dev/null || echo "primeiro ciclo"
 ```
 
 ### 2. Coletar estado atual (em paralelo)
@@ -75,7 +75,7 @@ done
 ls /workspace/obsidian/tasks/DOING/ 2>/dev/null
 
 # Tasks TODO count
-ls /workspace/obsidian/agents/_schedule/ 2>/dev/null | wc -l
+ls /workspace/obsidian/tasks/AGENTS/ 2>/dev/null | wc -l
 
 # Tasks failed
 ls /workspace/obsidian/tasks/failed/ 2>/dev/null 2>/dev/null
@@ -156,7 +156,7 @@ Sempre append em `/workspace/obsidian/inbox/feed.md`:
 
 ### 6. Atualizar memória
 
-Reescrever `/workspace/obsidian/agents/assistant/memory.md` com estado atual + contadores incrementados.
+Reescrever `/workspace/obsidian/bedrooms/assistant/memory.md` com estado atual + contadores incrementados.
 
 ---
 
@@ -234,7 +234,7 @@ Se estiver com alertas acumulados que ainda nao enviou, vai aproveitar a ligacao
 
 ```bash
 NEXT=$(date -u -d "+20 minutes" +%Y%m%d_%H_%M)
-cat > /workspace/obsidian/agents/_schedule/${NEXT}_assistant.md << 'CARD'
+cat > /workspace/obsidian/tasks/AGENTS/${NEXT}_assistant.md << 'CARD'
 ---
 contractor: assistant
 model: haiku
@@ -243,10 +243,10 @@ timeout: 1800
 ---
 # Assistant — Próximo ciclo
 CARD
-rm -f /workspace/obsidian/agents/_running/*_assistant.md
+rm -f /workspace/obsidian/tasks/AGENTS/DOING/*_assistant.md
 ```
 
-O card em `_schedule/` deve SEMPRE ter frontmatter com `contractor: assistant`.
+O card em `tasks/AGENTS/` deve SEMPRE ter frontmatter com `contractor: assistant`.
 
 ---
 
@@ -254,11 +254,11 @@ O card em `_schedule/` deve SEMPRE ter frontmatter com `contractor: assistant`.
 
 | O que | Path |
 |-------|------|
-| Memória | `/workspace/obsidian/agents/assistant/memory.md` |
+| Memória | `/workspace/obsidian/bedrooms/assistant/memory.md` |
 | Inbox cards | `/workspace/obsidian/inbox/ASSISTANT_<ts>.md` |
 | Feed | `/workspace/obsidian/inbox/feed.md` |
 | Tasks DOING | `/workspace/obsidian/tasks/DOING/` |
-| Tasks TODO | `/workspace/obsidian/agents/_schedule/` |
+| Tasks TODO | `/workspace/obsidian/tasks/AGENTS/` |
 | Tasks failed | `/workspace/obsidian/tasks/failed/` |
 | Repos estrategia | `/home/claude/projects/estrategia/*/` |
 | Workspace (nixos) | `/workspace/mnt` |

@@ -211,9 +211,9 @@ Listar as skills ativas (visíveis no system-reminder) com o que cada uma faz:
 ## 7. Agentes em background
 
 ```bash
-cat /workspace/obsidian/agents/BREAKROOMRULES.md 2>/dev/null | head -5
-ls /workspace/obsidian/agents/_schedule/ 2>/dev/null | head -10
-ls /workspace/obsidian/agents/_running/ 2>/dev/null
+cat /workspace/self/rules/TRASH.md 2>/dev/null | head -5
+ls /workspace/obsidian/tasks/AGENTS/ 2>/dev/null | head -10
+ls /workspace/obsidian/tasks/AGENTS/DOING/ 2>/dev/null
 ```
 
 ```

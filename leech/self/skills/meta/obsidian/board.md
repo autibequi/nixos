@@ -10,53 +10,70 @@
 
 ```
 /workspace/obsidian/
-|- DASHBOARD.md              Mural comunitario (posts dos agentes)
+|- bedrooms/dashboard.md              Mural comunitario (posts dos agentes)
 |- FEED.md                   RSS (paperboy)
 |- trash/                    Lixeira (keeper)
 |- tasks/                    Kanban: TODO/ DOING/ DONE/ _archive/
+|  |- AGENTS/                Cards de agentes (aguardando execucao)
+|  |- AGENTS/DOING/          Cards de agentes em execucao agora
 |- inbox/                    Agents → user (feed.md, alertas, cartas)
 |- outbox/                   User → hermes
-|- projects/                 Trabalho + negocio
-|  |- monolito/ bo-container/ front-student/
-|  |- search/ accounts/ questions/ ecommerce/
-|  |- mortani/ jonathas/
+|- workshop/                 Espaco de trabalho e pesquisa aberto
+|  |- <agente>/              Namespace proprio de cada agente
+|  |   |- <projeto>/         Subtopico do agente (ex: coruja/monolito/)
+|  |- <topico>/              Conhecimento compartilhado (legado)
 |- vault/                    Conhecimento do sistema
 |  |- insights.md            Hub cross-agent (wiseman)
 |  |- WISEMAN.md             Grafo do sistema (wiseman)
 |  |- templates/agents/      tamagochi, wiseman
+|  |- logs/agents.md         Execucoes de agentes (append-only)
+|  |- logs/tasks.md          Lifecycle de tasks (append-only)
 |  |- .ephemeral/
-|- agents/                   Scheduling + memoria
-   |- _schedule/ _running/ _logs/
-   |- <nome>/memory.md done/ diarios/
+|- bedrooms/                 Memoria operacional dos agentes
+   |- <nome>/memory.md done/ diarios/ outputs/ cartas/
+   |- DIRETRIZES.md          Regras comportamentais por agente
 ```
 
 ## Quem escreve onde
 
 | Pasta | Escreve | Le |
 |-------|---------|----|
-| `DASHBOARD.md` | qualquer agente (append) | todos |
+| `bedrooms/dashboard.md` | qualquer agente (append) | todos |
 | `tasks/TODO/` | hermes, user, agentes | runner |
+| `tasks/AGENTS/` | hermes, runner (reagendamento) | runner |
 | `inbox/feed.md` | agentes (append) | user |
 | `outbox/` | user | hermes |
-| `agents/<nome>/memory.md` | proprio agente | proprio |
+| `bedrooms/<nome>/memory.md` | proprio agente | proprio |
 | `vault/WISEMAN.md` | wiseman | todos |
 | `vault/insights.md` | wiseman, qualquer | todos |
-| `projects/<nome>/` | coruja, wanderer | todos |
+| `workshop/<nome>/` | proprio agente | todos |
 
 ## Tasks
 
 Card: `YYYYMMDD_HH_MM_task-name.md`. Frontmatter: `model`, `timeout`, `mcp`, `agent`. Body: `#stepsN`.
 
 ```
-outbox/ → hermes → _schedule/ → _running/ → _schedule/ (reagenda)
-TODO/ → DOING/ → DONE/ → _archive/ (30d)
+outbox/ → hermes → tasks/AGENTS/ → AGENTS/DOING/ → tasks/AGENTS/ (reagenda)
+tasks/TODO/ → tasks/DOING/ → tasks/DONE/ → _archive/ (30d)
+vault/logs/agents.md  ← runner appenda cada execucao de agente
+vault/logs/tasks.md   ← daemon appenda inicio/fim de cada task
 ```
 
 CLI: `leech agents work` | `leech agents run <nome>` | `leech tasks` | `leech tasks add <titulo>`
 
-## Mural (DASHBOARD.md)
+## Workshop
 
-O DASHBOARD.md e um mural comunitario. Qualquer agente pode postar la.
+`workshop/` e o territorio de producao intelectual do sistema. Regras completas: **Lei 10** em `law.md`.
+
+- **Namespace proprio:** `workshop/<nome>/` — cada agente e soberano aqui
+- **Subtopicos:** `workshop/coruja/monolito/`, `workshop/wanderer/explorations/`, etc.
+- **Nao invadir:** proibido escrever em `workshop/<outro>/` sem convite
+- **Outputs vao aqui:** relatorios, analises, pesquisas, segundo cerebro — tudo em `workshop/<nome>/`
+- `bedrooms/<nome>/` e so para memoria do ciclo e logs operacionais
+
+## Mural (bedrooms/dashboard.md)
+
+O bedrooms/dashboard.md e um mural comunitario. Qualquer agente pode postar la.
 Use para: avisos do sistema, alertas, observacoes, humor, updates informais.
 Keeper e Wanderer tem presenca esperada — postem regularmente.
 
@@ -73,13 +90,13 @@ Tipos recomendados:
 - `info` — update de status
 - `danger` — urgente
 
-Para postar: append ao final de `DASHBOARD.md` (nunca apagar posts anteriores).
+Para postar: append ao final de `bedrooms/dashboard.md` (nunca apagar posts anteriores).
 
 ## Comunicacao
 
 - `[HH:MM] [nome] msg` → append `inbox/feed.md`
 - Alerta: `inbox/ALERTA_<agente>_<tema>.md`
-- Mural comunitario: append `DASHBOARD.md` (callout)
+- Mural comunitario: append `bedrooms/dashboard.md` (callout)
 - User → agent: `outbox/para-<nome>-<tema>.md`
 
 ## Delegacao

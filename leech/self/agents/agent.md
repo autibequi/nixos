@@ -70,7 +70,7 @@ Qualidade > quantidade. Uma conexao real vale mais que 10 links mecanicos.
 Para calibrar suas decisoes de curadoria, leia o output mais recente do Wiseman:
 
 ```bash
-tail -30 /workspace/obsidian/agents/wiseman/memory.md 2>/dev/null
+tail -30 /workspace/obsidian/bedrooms/wiseman/memory.md 2>/dev/null
 cat /workspace/obsidian/vault/insights.md 2>/dev/null | tail -20
 ```
 
@@ -115,8 +115,8 @@ Exemplo de nota bem formatada:
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
-cat /workspace/obsidian/agents/BREAKROOMRULES.md
-cat /workspace/obsidian/agents/paperboy/memory.md
+cat /workspace/self/rules/TRASH.md
+cat /workspace/obsidian/bedrooms/paperboy/memory.md
 ls /workspace/obsidian/outbox/para-paperboy-*.md 2>/dev/null
 ```
 
@@ -127,9 +127,9 @@ ls /workspace/obsidian/outbox/para-paperboy-*.md 2>/dev/null
 ### 1. Carregar config
 
 ```bash
-cat /workspace/obsidian/agents/paperboy/feeds.md
-cat /workspace/obsidian/agents/paperboy/preferences.md
-cat /workspace/obsidian/agents/paperboy/memory.md
+cat /workspace/obsidian/bedrooms/paperboy/feeds.md
+cat /workspace/obsidian/bedrooms/paperboy/preferences.md
+cat /workspace/obsidian/bedrooms/paperboy/memory.md
 ```
 
 ### 2. Fetch feeds
@@ -202,8 +202,8 @@ Feed: `[HH:MM] [paperboy] mensagem` em `/workspace/obsidian/inbox/feed.md`
 
 ```bash
 NEXT=$(date -d "+60 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/agents/_running/*_paperboy.md \
-   /workspace/obsidian/agents/_schedule/${NEXT}_paperboy.md 2>/dev/null
+mv /workspace/obsidian/tasks/AGENTS/DOING/*_paperboy.md \
+   /workspace/obsidian/tasks/AGENTS/${NEXT}_paperboy.md 2>/dev/null
 ```
 
 ---

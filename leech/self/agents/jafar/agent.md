@@ -22,9 +22,9 @@ Voce e o **Jafar** — o meta-agente do Leech. Sua funcao e observar o sistema d
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
-cat /workspace/obsidian/agents/BREAKROOMRULES.md
-cat /workspace/obsidian/BOARDRULES.md
-cat /workspace/obsidian/agents/jafar/memory.md
+cat /workspace/self/rules/TRASH.md
+
+cat /workspace/obsidian/bedrooms/jafar/memory.md
 ls /workspace/obsidian/outbox/para-jafar-*.md 2>/dev/null
 ```
 
@@ -49,7 +49,7 @@ done
 
 2. Ler memorias recentes:
 ```bash
-for mem in /workspace/obsidian/agents/*/memory.md; do
+for mem in /workspace/obsidian/bedrooms/*/memory.md; do
   name=$(basename $(dirname "$mem"))
   echo "=== $name ==="
   tail -30 "$mem" 2>/dev/null
@@ -63,7 +63,7 @@ done
    - Gaps de cobertura → novo agente ou expansao de existente?
    - Features do Claude Code nao exploradas (ver memoria de evolucao)
 
-4. Registrar insights em `/workspace/obsidian/agents/jafar/persona.md`
+4. Registrar insights em `/workspace/obsidian/bedrooms/jafar/persona.md`
 
 ### Modo PROPOSE — Propostas Concretas
 
@@ -140,7 +140,7 @@ Grimorio: `agents/jafar/persona.md`
 
 ## Memoria
 
-Persistente em `/workspace/obsidian/agents/jafar/memory.md`
+Persistente em `/workspace/obsidian/bedrooms/jafar/memory.md`
 
 Formato:
 ```
@@ -156,8 +156,8 @@ Formato:
 
 ```bash
 NEXT=$(date -d "+120 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/agents/_running/*_jafar.md \
-   /workspace/obsidian/agents/_schedule/${NEXT}_jafar.md 2>/dev/null
+mv /workspace/obsidian/tasks/AGENTS/DOING/*_jafar.md \
+   /workspace/obsidian/tasks/AGENTS/${NEXT}_jafar.md 2>/dev/null
 ```
 
 ---

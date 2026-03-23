@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # task-runner.sh — Run a single task card
-# Usage: task-runner.sh <filename.md>  (file must be in _schedule/ or _running/)
+# Usage: task-runner.sh <filename.md>  (file must be in tasks/AGENTS/ or tasks/AGENTS/DOING/)
 set -euo pipefail
 
 WORKSPACE="/workspace"
 OBSIDIAN="${OBSIDIAN_PATH:-$WORKSPACE/obsidian}"
-CONTRACTORS_DIR="${TASK_CONTRACTORS_DIR:-$OBSIDIAN/contractors}"
-SCHEDULE_DIR="${SCHEDULE_DIR:-$CONTRACTORS_DIR/_schedule}"
+CONTRACTORS_DIR="${TASK_CONTRACTORS_DIR:-$OBSIDIAN/bedrooms}"
+SCHEDULE_DIR="${SCHEDULE_DIR:-$OBSIDIAN/tasks/AGENTS}"
 VERBOSE="${TASK_VERBOSE:-0}"
 NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}"
 export NODE_OPTIONS
@@ -15,7 +15,7 @@ CARD="${1:?Usage: task-runner.sh <card.md>}"
 CARD_BASE="$(basename "$CARD" .md)"
 
 # ── Find card ────────────────────────────────────────────────────
-RUNNING_DIR="$CONTRACTORS_DIR/_running"
+RUNNING_DIR="${RUNNING_DIR:-$OBSIDIAN/tasks/AGENTS/DOING}"
 CARD_PATH=""
 if [ -f "$SCHEDULE_DIR/$CARD" ]; then
   CARD_PATH="$SCHEDULE_DIR/$CARD"
@@ -28,7 +28,7 @@ elif [ -f "$RUNNING_DIR/${CARD}.md" ]; then
   CARD_PATH="$RUNNING_DIR/${CARD}.md"
   CARD="${CARD}.md"
 else
-  echo "[runner] card '$CARD' not found in _schedule/ or _running/"
+  echo "[runner] card '$CARD' not found in tasks/AGENTS/ or tasks/AGENTS/DOING/"
   exit 1
 fi
 
@@ -170,7 +170,7 @@ $BODY
 Produce any artifacts (reports, files, outputs) in: $ARTIFACTS_DIR
 
 ## After completing
-- To reschedule: move this card back to _schedule/ with a new date prefix (YYYYMMDD_HH_MM_name.md)
+- To reschedule: move this card back to tasks/AGENTS/ with a new date prefix (YYYYMMDD_HH_MM_name.md)
   - Path: $SCHEDULE_DIR/
   - YOU choose when to run next (minimum 30 minutes)
   - Prefer scheduling between 21h-06h (BRT) — agents' preferred window
@@ -251,19 +251,19 @@ fi
 DONE_AGENT="${AGENT:-$TASK_NAME}"
 _write_activity_log() {
   local agent="$1"
-  local activity_dir="$OBSIDIAN/agents/_logs/activity"
-  mkdir -p "$activity_dir"
+  local log_file="$OBSIDIAN/vault/logs/agents.md"
+  mkdir -p "$(dirname "$log_file")"
   local tok_str="in=${TOK_IN:-0} out=${TOK_OUT:-0}"
   [ -n "$TOK_CACHE" ] && tok_str+=" cache=${TOK_CACHE}"
   local card_label="${CARD%.md}"
-  printf "%s\t%s\t%s\t%s\t%s\t%s\n" \
+  printf "| %s | %s | %s | %s | %s | %s |\n" \
     "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
     "$agent" \
     "$STATUS" \
     "$ELAPSED_FMT" \
     "$tok_str" \
     "$card_label" \
-    >> "$activity_dir/$agent"
+    >> "$log_file"
 }
 
 if [ ! -f "$CARD_PATH" ]; then

@@ -60,10 +60,10 @@ done
 
 ### Tasks
 ```bash
-echo "TODO:" && ls /workspace/obsidian/contractors/_schedule/ 2>/dev/null | wc -l
-echo "DOING:" && ls /workspace/obsidian/tasks/DOING/ 2>/dev/null
-echo "FAILED:" && ls /workspace/obsidian/tasks/failed/ 2>/dev/null || echo "(nenhum)"
-echo "DONE_RECENT:" && ls -t /workspace/obsidian/contractors/*/done/ 2>/dev/null | head -5
+echo "AGENTS_QUEUED:" && ls /workspace/obsidian/tasks/AGENTS/ 2>/dev/null | wc -l
+echo "AGENTS_DOING:" && ls /workspace/obsidian/tasks/AGENTS/DOING/ 2>/dev/null
+echo "TASKS_DOING:" && ls /workspace/obsidian/tasks/DOING/ 2>/dev/null
+echo "DONE_RECENT:" && ls -t /workspace/obsidian/bedrooms/*/done/ 2>/dev/null | head -5
 ```
 
 ### Output
@@ -129,8 +129,8 @@ Nao exibir banner de telefone. O contractor entra na conversa como se estivesse 
 ### 3. Carregar contexto (em ambos os casos)
 
 ```bash
-cat /workspace/obsidian/agents/<nome>/memory.md 2>/dev/null | tail -40
-cat /workspace/obsidian/agents/<nome>/DIARIO.md 2>/dev/null | tail -20
+cat /workspace/obsidian/bedrooms/<nome>/memory.md 2>/dev/null | tail -40
+cat /workspace/obsidian/bedrooms/<nome>/DIARIO.md 2>/dev/null | tail -20
 ```
 
 ### 4. Incorporar o contractor
