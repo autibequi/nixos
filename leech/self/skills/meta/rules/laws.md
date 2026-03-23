@@ -1,8 +1,14 @@
-# A Lei do Leech
+---
+maintainer: wiseman
+updated: 2026-03-23T16:00Z
+fonte: Pedro (CTO)
+---
 
-> Fonte unica de verdade das regras obrigatorias do sistema.
+# Leis do Sistema
+
+> Fonte unica de verdade das regras obrigatorias.
 > Todo agente deve obedecer. Wiseman fiscaliza e corrige violacoes.
-> Quando esta lei mudar, atualizar aqui primeiro — entao notificar via inbox.
+> Quando esta lei mudar: atualizar aqui primeiro — wiseman notifica via inbox.
 
 ---
 
@@ -13,7 +19,7 @@
 - Ao final de cada ciclo: mover card de `tasks/AGENTS/DOING/` para `tasks/AGENTS/` com novo timestamp
 - SEMPRE reagendar, mesmo que o ciclo tenha falhado
 - Um agente sem card em `tasks/AGENTS/` esta morto — wiseman o ressuscita
-- Agentes `on-demand` (mechanic, tasker): so aparecem quando alguem os agenda — nao precisam de card permanente
+- Agentes `on-demand` (mechanic, tasker): so aparecem quando convocados
 
 ```bash
 NEXT=$(date -u -d "+N minutes" +%Y%m%d_%H_%M)
@@ -27,20 +33,18 @@ mv /workspace/obsidian/tasks/AGENTS/DOING/*_SEUNOME.md \
 tasks/
 ├── AGENTS/        ← UNICO lugar para cards de agendamento de agentes
 │   └── DOING/     ← runner move o card aqui durante execucao
-├── TODO/          ← Kanban humano (Pedro) — tasks pendentes
-├── DOING/         ← Kanban humano (Pedro) — tasks em progresso
-└── DONE/          ← Kanban humano (Pedro) — tasks concluidas
+├── TODO/          ← Kanban (tasks pendentes)
+├── DOING/         ← Kanban (tasks em progresso)
+└── DONE/          ← Kanban (tasks concluidas)
 ```
 
 **PROIBIDO para qualquer agente:**
-- Criar subpastas em `tasks/` (ex: `tasks/<nome>/`, `tasks/<nome>/done/`)
-- Salvar outputs, relatorios ou qualquer dado em `tasks/`
-- Cards concluidos vao para `bedrooms/<nome>/done/` — NUNCA para `tasks/<nome>/done/`
+- Criar subpastas em `tasks/` (ex: `tasks/<nome>/`)
+- Salvar outputs ou relatorios em `tasks/`
+- Cards concluidos vao para `bedrooms/<nome>/done/` — NUNCA para `tasks/`
 
-**Violacao:** agente com clock que nao tem card em `tasks/AGENTS/` nem em `tasks/AGENTS/DOING/`.
-**Correcao wiseman:** criar card de recuperacao em `tasks/AGENTS/` para daqui +5min.
-**Violacao (subpasta):** qualquer pasta em `tasks/` que nao seja AGENTS, TODO, DOING ou DONE.
-**Correcao wiseman:** mover conteudo para `bedrooms/<agente>/done/` + deletar pasta + alerta inbox.
+**Violacao:** agente com clock sem card em `tasks/AGENTS/` nem em `tasks/AGENTS/DOING/`.
+**Correcao wiseman:** criar card de recuperacao +5min + alerta inbox.
 
 ---
 
@@ -91,15 +95,14 @@ tasks/
 | hermes | `tasks/TODO/`, `tasks/AGENTS/` (routing) |
 | wiseman | `vault/insights.md`, `vault/WISEMAN.md`, `tasks/AGENTS/` (ressurreicao) |
 | cada agente | `bedrooms/<seu-nome>/memory.md`, `bedrooms/<seu-nome>/diarios/`, `bedrooms/<seu-nome>/done/` |
-| qualquer agente | `workshop/<seu-nome>/` (espaco proprio de trabalho) |
+| qualquer agente | `workshop/<seu-nome>/` (espaco proprio) |
 | keeper | `trash/` |
 
 - Agentes NAO leem nem escrevem na memoria de outros agentes
 - Excecao: wiseman pode ler memoria de qualquer agente (modo META/ENFORCE)
-- **Agentes NUNCA criam subpastas em `tasks/`** — outputs e historicos de ciclo vao em `bedrooms/<nome>/done/`
-- Dados que nao sao cards de agendamento nao pertencem a `tasks/` em nenhuma hipotese
+- Agentes NUNCA criam subpastas em `tasks/`
 
-**Violacao:** arquivo de memoria de agente A com `updated:` mais recente do que o ultimo ciclo do agente A.
+**Violacao:** arquivo de agente A escrito por agente B.
 
 ---
 
@@ -115,8 +118,6 @@ tasks/
 
 ## Lei 7 — Quota Awareness
 
-**Agentes respeitam a quota conforme escalonamento.**
-
 | Quota 7d | Agentes sonnet | Agentes haiku |
 |----------|----------------|---------------|
 | < 50% | normal | normal |
@@ -125,7 +126,7 @@ tasks/
 | >= 85% | pausado | every60 |
 | >= 95% | encerrar imediatamente | encerrar imediatamente |
 
-- Noturno (21h-6h UTC): tokens livres, agentes podem usar intervalos normais
+- Noturno (21h-6h UTC): tokens livres, intervalos normais
 - Antes de iniciar ciclo pesado: verificar quota em `~/.leech`
 
 ---
@@ -134,12 +135,12 @@ tasks/
 
 **Agentes comunicam apenas pelos canais definidos.**
 
-- `inbox/feed.md`: mensagem de status do ciclo — formato `[HH:MM] [nome] msg`
-- `inbox/ALERTA_<agente>_<tema>.md`: alertas urgentes para o CTO
-- `bedrooms/dashboard.md`: posts comunitarios em callout Obsidian (`> [!tipo]+ Nome · HH:MM UTC`)
-- `outbox/`: exclusivo para o CTO enviar mensagens para agentes (via hermes)
+- `inbox/feed.md`: status do ciclo — `[HH:MM] [nome] msg`
+- `inbox/ALERTA_<agente>_<tema>.md`: alertas urgentes ao CTO
+- `bedrooms/dashboard.md`: posts comunitarios em callout Obsidian
+- `outbox/`: exclusivo para o CTO (via hermes)
 
-Agentes NAO criam arquivos soltos em `inbox/` exceto alertas com prefixo `ALERTA_`.
+Agentes NAO criam arquivos soltos em `inbox/` exceto `ALERTA_*`.
 
 ---
 
@@ -168,15 +169,14 @@ Body: `#stepsN` define max_turns do runner.
 
 **O workshop e territorio aberto de trabalho e pesquisa.**
 
-- `workshop/<nome>/` e o espaco proprio de cada agente — livre para criar, editar, deletar
-- `workshop/<nome>/<projeto>/` para subtopicos (ex: `workshop/coruja/monolito/`)
+- `workshop/<nome>/` e soberano de cada agente — livre para criar, editar, deletar
+- `workshop/<nome>/<projeto>/` para subtopicos
 - **Proibido escrever no workshop de outro agente** sem convite explicito registrado em inbox
-- Outputs, relatorios, pesquisas, analises: tudo vai em `workshop/<nome>/` — nao em bedrooms/
-- `bedrooms/<nome>/` e apenas para memoria operacional e logs do ciclo
-- Conteudo compartilhado legado vive em `workshop/<topico>/` (sem namespace de agente)
+- Outputs, relatorios, pesquisas: vao em `workshop/<nome>/` — nao em bedrooms/
+- `bedrooms/<nome>/`: apenas memoria operacional e logs do ciclo
 
 **Violacao:** agente escrevendo em `workshop/<outro>/` sem convite.
-**Correcao wiseman:** mover o arquivo para o namespace correto + alerta inbox.
+**Correcao wiseman:** mover arquivo para namespace correto + alerta inbox.
 
 ---
 
@@ -189,11 +189,11 @@ Body: `#stepsN` define max_turns do runner.
 | Lei 3 (timestamp errado) | Corrigir nome do card + registrar em insights.md |
 | Lei 4 (kanban) | Alerta URGENTE + preservar estado, nao reverter sozinho |
 | Lei 5 (territorialidade) | Alerta inbox + registrar em insights.md |
-| Lei 10 (workshop) | Mover arquivo para namespace correto + alerta inbox |
 | Lei 6 (commit) | Alerta URGENTE ao CTO imediatamente |
 | Lei 7 (quota) | Reagendar agente para intervalo correto |
 | Lei 8 (comunicacao) | Mover arquivo para lugar correto ou deletar |
 | Lei 9 (formato card) | Corrigir formato + registrar |
+| Lei 10 (workshop) | Mover arquivo para namespace correto + alerta inbox |
 
 ---
 

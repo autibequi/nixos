@@ -17,3 +17,4 @@ Skills de meta-ferramentas: representacao visual, humanizacao de texto, gestao d
 | `meta/cleanup` | Limpar debris de sessão — tentativas fracassadas, código morto, experimentos revertidos |
 | `meta/webview` | Acessar URL e ver renderizado — Chrome relay (visual), WebFetch (texto), CDP eval (DOM) |
 | `meta/wiki` | Wiki command (`/meta:wiki`): dashboard de cobertura, add/remove tópicos, busca nos artigos |
+| `meta/rules` | Regras do sistema — leis, territorios, agentes, scheduling, vault |
