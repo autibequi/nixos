@@ -66,6 +66,7 @@
     mpv
     foliate  # ePub reader
     blanket  # Noise
+    fragments  # GTK4 torrent client (magnet links + notificações)
     # unstable.stremio
 
     # ── Terminal ───────────────────────────────────────
