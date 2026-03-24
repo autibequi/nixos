@@ -135,7 +135,7 @@ services:
         soft: 65536
         hard: 65536
     tmpfs:
-      - /tmp:size=512m,mode=1777
+      - /tmp:size=4g,mode=1777
     extra_hosts: *extra-hosts
     volumes: *base-volumes
 
