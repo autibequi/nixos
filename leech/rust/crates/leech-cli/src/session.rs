@@ -162,7 +162,10 @@ impl SessionRunner {
         );
 
         let mut args: Vec<String> = vec![
-            "run".into(), "--rm".into(), "-it".into(),
+            "run".into(),
+            "--init".into(),
+            "--rm".into(),
+            "-it".into(),
             "--network".into(), "host".into(),
             "--workdir".into(), "/workspace/ghost".into(),
             "--entrypoint".into(), "/entrypoint.sh".into(),
@@ -338,8 +341,13 @@ impl SessionRunner {
                         Some(cid) => cid,
                         None => {
                             // Persistent approach failed — fall back to ephemeral run.
-                            let mut args: Vec<&str> =
-                                vec!["run", "--rm", "-it", "--entrypoint", "/entrypoint.sh"];
+                            let mut args: Vec<&str> = vec![
+                                "run",
+                                "--rm",
+                                "-it",
+                                "--entrypoint",
+                                "/entrypoint.sh",
+                            ];
                             let mount_env = format!("CLAUDIO_MOUNT={}", self.mount_path);
                             args.extend(["-e", &mount_env, "-e", "BOOTSTRAP_SKIP_CLEAR=1"]);
                             args.extend(["leech", "/bin/bash", "-c", &bash_cmd]);

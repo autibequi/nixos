@@ -97,7 +97,11 @@ pub fn shell(dir: Option<String>, host: bool) -> Result<()> {
     let host_attached_env = format!("HOST_ATTACHED={}", if host_active { "1" } else { "0" });
     let mount_env = format!("CLAUDIO_MOUNT={}", mount.display());
     let mut args = vec![
-        "run", "--rm", "-it", "--entrypoint", "/entrypoint.sh",
+        "run",
+        "--rm",
+        "-it",
+        "--entrypoint",
+        "/entrypoint.sh",
         "-e", &mount_env, "-e", "BOOTSTRAP_SKIP_CLEAR=1",
         "-e", &host_attached_env,
         "leech", "/bin/bash", "-c",

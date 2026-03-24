@@ -108,6 +108,8 @@ services:
     image: leech
     mem_limit: 12g
     memswap_limit: 12g
+    # tini como PID1: reap de zombies (bash/agent)
+    init: true
     network_mode: host
     stdin_open: true
     tty: true

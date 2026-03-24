@@ -433,7 +433,7 @@ fn do_shell(
 
     let mut docker = Command::new("docker");
     docker
-        .args(["run", "--rm"])
+        .args(["run", "--init", "--rm"])
         .args(["-v", &format!("{src}:/go/app")])
         .args(["-v", "/var/run/docker.sock:/var/run/docker.sock"])
         .args(["-v", "leech-go-mod-cache:/go/pkg/mod"])
@@ -526,7 +526,7 @@ fn do_install(
 
         let npm_token = std::env::var("NPM_TOKEN").unwrap_or_default();
         let status = Command::new("docker")
-            .args(["run", "--rm", "-it"])
+            .args(["run", "--init", "--rm", "-it"])
             .args(["-v", &format!("{ssh_dir}:/ssh-host:ro")])
             .args(["-v", &format!("{npmrc}:/npmrc-host:ro")])
             .args(["-v", &format!("{src}:/app")])
@@ -569,7 +569,7 @@ fn do_install(
         );
 
         let status = Command::new("docker")
-            .args(["run", "--rm", "-it"])
+            .args(["run", "--init", "--rm", "-it"])
             .args(["-v", &format!("{ssh_dir}:/ssh-host:ro")])
             .args(["-v", &format!("{src}:/go/app")])
             .args(["-v", "leech-go-mod-cache:/go/pkg/mod"])
