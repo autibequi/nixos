@@ -36,6 +36,17 @@ pub const BANNER: &str = "\
 \x1b[2m  ── full reference below · leech man for docs ─────────────\x1b[0m
 ";
 
+pub const CLEANUP_AFTER: &str = "\
+\x1b[33m  Aviso:\x1b[0m --reap envia SIGTERM ao \x1b[1mpai\x1b[0m dos zombies (só processos; \x1b[32mnão apaga arquivos\x1b[0m). \
+Pede confirmação; use --yes para pular.
+
+\x1b[2m  leech cleanup              lista pais com zombies bash (stack dev)\x1b[0m
+\x1b[2m  leech cleanup --all        todos os pais\x1b[0m
+\x1b[2m  leech cleanup --reap       resumo + confirmação + SIGTERM\x1b[0m
+\x1b[2m  leech cleanup --reap -y    SIGTERM sem perguntar\x1b[0m
+\x1b[2m  leech cleanup --min 5      só pais com ≥5 zombies\x1b[0m
+";
+
 pub const MAIN_AFTER: &str = "\
 \x1b[2m  leech man          full documentation\x1b[0m";
 

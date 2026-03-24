@@ -48,11 +48,6 @@ pub fn capture_lines(program: &str, args: &[&str]) -> Result<Vec<String>> {
         .collect())
 }
 
-/// Run bash script file interactively.
-pub fn bash_script(path: &std::path::Path) -> Result<()> {
-    run("bash", &[&path.to_string_lossy()])
-}
-
 /// Run and ignore exit code (fire-and-forget).
 pub fn fire(program: &str, args: &[&str]) {
     let _ = Command::new(program)

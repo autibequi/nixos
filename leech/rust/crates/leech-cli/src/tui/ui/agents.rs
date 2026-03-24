@@ -293,7 +293,7 @@ fn render_pods_box(frame: &mut Frame, app: &App, area: Rect) {
     frame.render_widget(block, area);
 
     // Collect running pods grouped by mnt_path, sum session_count
-    let mut pods: Vec<(String, usize)> = {
+    let pods: Vec<(String, usize)> = {
         let mut map: std::collections::HashMap<String, usize> =
             std::collections::HashMap::new();
         for s in app.snapshot.agents.iter().chain(app.snapshot.background.iter()) {

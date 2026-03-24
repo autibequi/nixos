@@ -83,8 +83,6 @@ fn strip_ansi(s: &str) -> String {
 /// and the bash runner writes to `<log_dir>/wt-<worktree>/service.log` instead
 /// of the base path.
 fn active_log_path(root: &Path, svc: &str) -> Option<PathBuf> {
-    use std::time::SystemTime;
-
     let svc_dir = root.join(svc);
     let base_log = svc_dir.join("service.log");
 

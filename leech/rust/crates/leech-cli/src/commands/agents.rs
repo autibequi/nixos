@@ -360,13 +360,6 @@ fn days_to_date(days: u64) -> (u64, u64, u64) {
     (y, m, d)
 }
 
-fn now_epoch() -> u64 {
-    std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_secs()
-}
-
 /// Extract content below the YAML frontmatter.
 fn extract_body(content: &str) -> String {
     let mut in_fm = false;
@@ -390,14 +383,3 @@ fn extract_body(content: &str) -> String {
     body
 }
 
-/// Extract `#stepsN` from card content.
-fn extract_steps(content: &str) -> Option<u32> {
-    for line in content.lines() {
-        if let Some(rest) = line.strip_prefix("#steps") {
-            if let Ok(n) = rest.trim().parse() {
-                return Some(n);
-            }
-        }
-    }
-    None
-}

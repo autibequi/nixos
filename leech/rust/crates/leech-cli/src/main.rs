@@ -19,6 +19,7 @@ use commands::SessionFlags;
     about = "LEECH — agent orchestration system",
     before_help = help::BANNER,
     after_help = help::MAIN_AFTER,
+    subcommand_precedence_over_arg = true,
 )]
 struct Cli {
     #[command(subcommand)]
@@ -98,6 +99,21 @@ enum Commands {
     Clean {
         #[arg(long, short = 'f')]
         force: bool,
+    },
+    /// Zombies bash: listar pais e opcionalmente SIGTERM (host Linux; não apaga arquivos)
+    #[command(alias = "zombies", alias = "clean-up", after_help = help::CLEANUP_AFTER)]
+    Cleanup {
+        /// SIGTERM nos processos pai que acumulam zombies (resumo + confirmação; --yes pula)
+        #[arg(long)]
+        reap: bool,
+        /// Confirmar --reap sem perguntar (scripts)
+        #[arg(long, short = 'y')]
+        yes: bool,
+        #[arg(long, default_value_t = 1)]
+        min: usize,
+        /// Listar todos os pais (não só stack dev)
+        #[arg(long)]
+        all: bool,
     },
 
     /// Deploy dotfiles via GNU stow
@@ -371,6 +387,9 @@ fn main() -> Result<()> {
         Some(Commands::Stop) => commands::docker::down(),
         Some(Commands::Shutdown) => commands::docker::shutdown(),
         Some(Commands::Clean { force }) => commands::docker::clean(force),
+        Some(Commands::Cleanup { reap, yes, min, all }) => {
+            commands::cleanup::run(reap, min, all, yes)
+        },
 
         // Host
         Some(Commands::Stow { action, reload }) => commands::host::stow(&action, reload),
@@ -509,6 +528,14 @@ fn main() -> Result<()> {
 
         // No subcommand = implicit `new`
         None => {
+            if matches!(cli.flags.dir.as_deref(), Some("cleanup" | "clean-up")) {
+                anyhow::bail!(
+                    "o token \"{}\" foi interpretado como pasta de projeto (sessão implícita), não como subcomando.\n\
+                     Isto acontece quando o binário foi compilado sem `Commands::Cleanup` + braço em `main.rs` — o Clap trata a palavra como o positional `dir`.\n\
+                     Corrige `crates/leech-cli/src/main.rs` (variante `Cleanup` e `commands::cleanup::run`) e volta a `just install` / `cargo build --release`.",
+                    cli.flags.dir.as_deref().unwrap_or("")
+                );
+            }
             let mut flags = cli.flags;
             if cli.haiku {
                 flags.model = Some("haiku".into());

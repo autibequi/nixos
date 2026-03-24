@@ -96,7 +96,7 @@ pub fn shell(dir: Option<String>, host: bool) -> Result<()> {
 
     let host_attached_env = format!("HOST_ATTACHED={}", if host_active { "1" } else { "0" });
     let mount_env = format!("CLAUDIO_MOUNT={}", mount.display());
-    let mut args = vec![
+    let args = vec![
         "run",
         "--rm",
         "-it",
