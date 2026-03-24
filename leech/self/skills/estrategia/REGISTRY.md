@@ -24,7 +24,8 @@ estrategiahq
 
 | Skill | Path | Descricao |
 |---|---|---|
-| estrategia/platform-context | `estrategia/platform-context/` | Contexto compartilhado dos 3 repos (stacks, design system, multi-tenant, convencoes) |
+| estrategia/ecosystem-map | `estrategia/ecosystem-map/` | **Mapa de todos os 19 repos** — stack, proposito, paths e tabela de pistas-para-repo. Usar quando o bug/feature envolve repos fora do trio monolito/bo/front-student. |
+| estrategia/platform-context | `estrategia/platform-context/` | Contexto compartilhado dos 3 repos principais (stacks, design system, multi-tenant, convencoes) |
 | estrategia/glance | `estrategia/glance/` | Arvore visual dos arquivos modificados vs main nos 3 repos |
 | estrategia/jira | `estrategia/jira/` | Ler card Jira completo com todos os campos — mapa de custom fields, chamada MCP correta, extracao ADF |
 | estrategia/grafana | `estrategia/grafana/` | Query logs Loki e dashboards Grafana — servicos, patterns de debug, integracao com workflow |

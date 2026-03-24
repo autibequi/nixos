@@ -1,13 +1,15 @@
 ---
 name: orquestrador/refinar-bug
-description: Use when the developer wants to refine a Bug card in Jira. Reads the card, investigates the relevant repositories (monolito, bo-container, front-student — only those pertinent to the bug), finds code references (file, line, method), and fills the "Sugestão de Implementação" field (resolved by name via the Jira names map) with a structured ADF template including a "refined by Leech" ASCII banner.
+description: Use when the developer wants to refine a Bug card in Jira. Reads the card, investigates the relevant repositories (any of the 19 repos in the Estrategia ecosystem — not just the core 3), finds code references (file, line, method), and fills the "Sugestão de Implementação" field with a structured ADF template. Uses estrategia/ecosystem-map to route to the correct repos when the bug involves mobile, search, ecommerce, accounts, webcasts, etc.
 ---
 
 # refinar-bug: Refinar Card de Bug no Jira
 
 ## Objetivo
 
-Investigar os repositórios relevantes para um card de Bug (pode ser 1, 2 ou 3 repos dependendo do contexto), encontrar referências de código (arquivo, linha, método), e preencher o campo "Sugestão de Implementação" (resolvido pelo nome via `names` map) no Jira com um template estruturado em ADF.
+Investigar os repositórios relevantes para um card de Bug (qualquer repo do ecossistema Estratégia — pode ser 1 ou mais), encontrar referências de código (arquivo, linha, método), e preencher o campo "Sugestão de Implementação" (resolvido pelo nome via `names` map) no Jira com um template estruturado em ADF.
+
+**Ecossistema completo:** ver `estrategia/ecosystem-map` para o mapa dos 19 repos com stack, proposito e tabela de pistas-para-repo.
 
 ## Inputs
 
@@ -130,21 +132,30 @@ A partir da description, summary, comments e custom fields, extrair:
 
 ### 3b — Determinar repos a investigar
 
-Analisar as pistas do card para decidir **quais repos investigar** (e quais ignorar):
+**PRIMEIRO:** Ler `estrategia/ecosystem-map` quando o card envolver qualquer horizontal fora do trio principal (mobile, busca, ecommerce, questoes, accounts, webcast, toggler, user-access). O ecosystem-map tem a tabela definitiva de pistas → repos para todos os 19 repos.
+
+Tabela resumida para os casos mais comuns:
 
 | Pista no card | Repos a investigar |
 |---|---|
-| "BO", "backoffice", "operador", "professor" | `bo-container/` + `monolito/` |
-| "aluno", "área do aluno", "front" | `front-student/` + `monolito/` |
+| "BO", "backoffice", "operador", "professor" | `bo-container/` + `monolito/apps/bo/` |
+| "aluno", "área do aluno", "front" | `front-student/` + `monolito/apps/bff/` |
+| "APP", "mobile", "aplicativo", "iOS", "Android" | `mobile-estrategia-educacional/` + `monolito/apps/bff_mobile/` |
+| "LDI", "capitulo", "item", "bloco", "video LDI" | `monolito/apps/ldi/` + `front-student/modules/ldi-poc/` |
+| "questao", "caderno", "simulado" | `monolito/apps/questoes/` + `questions/` |
+| "compra", "pedido", "produto", "cupom" | `ecommerce/` + `monolito/apps/ecommerce/` |
+| "busca", "search", "OpenSearch", "indexacao" | `search/` + `monolito/apps/search/` |
+| "webcast", "live", "streaming" | `WebCasts/` |
 | API, endpoint, dados, DB, migration, worker | `monolito/` somente |
 | Bug visual, CSS, layout, componente | Frontend afetado somente |
-| Sem pista clara | Começar pelo `monolito/`, expandir se necessário |
+| Sem pista clara | Comecar pelo `monolito/`, expandir se necessario |
 
-**Exemplos de decisão:**
-- Bug "aluno não consegue ver certificado" → `front-student/` + `monolito/` (ignora `bo-container/`)
-- Bug "erro ao salvar no backoffice" → `bo-container/` + `monolito/` (ignora `front-student/`)
+**Exemplos de decisao:**
+- Bug "aluno nao consegue ver certificado" → `front-student/` + `monolito/apps/bff/`
+- Bug "erro ao salvar no backoffice" → `bo-container/` + `monolito/apps/bo/`
+- Bug "video nao carrega no app" → `mobile-estrategia-educacional/` + `monolito/apps/bff_mobile/` + `monolito/apps/ldi/`
 - Bug "migration falhou" → `monolito/` somente
-- Bug "botão não funciona na tela X" → investigar o frontend relevante, adicionar `monolito/` só se a causa parecer ser do backend
+- Bug "botao nao funciona na tela X" → investigar o frontend relevante, adicionar `monolito/` so se a causa parecer ser do backend
 
 ### 3c — Busca em ondas
 
