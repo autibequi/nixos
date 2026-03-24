@@ -192,7 +192,7 @@ enum Commands {
     Runner {
         service: String,
         action: String,
-        #[arg(long, default_value = "sand")]
+        #[arg(long, default_value = "local")]
         env: String,
         #[arg(long)]
         worktree: Option<String>,

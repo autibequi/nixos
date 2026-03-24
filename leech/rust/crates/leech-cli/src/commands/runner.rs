@@ -4,6 +4,11 @@ use anyhow::{bail, Result};
 use leech_cli::runner as svc;
 use std::process::{Command, Stdio};
 
+/// No-op SIGINT handler: parent ignores the signal without propagating SIG_IGN to children.
+/// Unlike SIG_IGN, a custom handler is NOT inherited by exec'd child processes (they get SIG_DFL).
+#[cfg(unix)]
+extern "C" fn noop_sigint(_: libc::c_int) {}
+
 /// Runner options passed from CLI.
 pub struct RunnerOpts<'a> {
     pub env: &'a str,
@@ -209,7 +214,7 @@ fn do_start(
     eprintln!("\n  \x1b[2m[Ctrl+C para sair — container continua]\x1b[0m\n");
 
     #[cfg(unix)]
-    let _prev = unsafe { libc::signal(libc::SIGINT, libc::SIG_IGN) };
+    let _prev = unsafe { libc::signal(libc::SIGINT, noop_sigint as libc::sighandler_t) };
 
     let _ = compose_cmd(compose, project, env_vars)
         .args(["logs", "-f", "--no-log-prefix", "--tail", "50"])
@@ -300,7 +305,7 @@ fn do_logs(
         eprintln!("  \x1b[2m[Ctrl+C para sair — container continua]\x1b[0m\n");
 
         #[cfg(unix)]
-        let _prev = unsafe { libc::signal(libc::SIGINT, libc::SIG_IGN) };
+        let _prev = unsafe { libc::signal(libc::SIGINT, noop_sigint as libc::sighandler_t) };
 
         let _ = Command::new("docker")
             .args([
@@ -330,7 +335,7 @@ fn do_logs(
             eprintln!("=== Container parado. Mostrando log gravado ===");
 
             #[cfg(unix)]
-            let _prev = unsafe { libc::signal(libc::SIGINT, libc::SIG_IGN) };
+            let _prev = unsafe { libc::signal(libc::SIGINT, noop_sigint as libc::sighandler_t) };
 
             let _ = Command::new("tail")
                 .args(["-f", "-n", &tail_str])

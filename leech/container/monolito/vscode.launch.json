@@ -1,0 +1,56 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "[API][SAND] Run in debug",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/cmd/server/main.go",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env.sandbox",
+      "dlvPath": "dlv"
+    },
+    {
+      "name": "[WORKER][SAND] Run in debug",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/cmd/worker/main.go",
+      "envFile": "${workspaceFolder}/.env.sandbox",
+      "dlvPath": "dlv"
+    },
+    {
+      "name": "[LOCAL] Run in debug",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/cmd/server/main.go",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.local.env",
+      "dlvPath": "dlv"
+    },
+    {
+      "name": "[PROD] Run in debug",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/cmd/server/main.go",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.prod.env",
+      "dlvPath": "dlv"
+      // "dlvFlags": ["--no-break-on-startup"],
+      // "buildFlags": ["-ldflags=\"-s -w\""]
+    },
+    {
+      "name": "[DOCKER] Attach to monolito",
+      "type": "go",
+      "request": "attach",
+      "mode": "remote",
+      "debugAdapter": "legacy",
+      "port": 2345,
+      "host": "127.0.0.1",
+      "showLog": true
+    }
+  ]
+}

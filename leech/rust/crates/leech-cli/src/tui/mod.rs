@@ -4,6 +4,11 @@
 #[cfg(unix)]
 extern crate libc;
 
+/// No-op SIGINT handler: parent ignores the signal without propagating SIG_IGN to children.
+/// Unlike SIG_IGN, a custom handler is NOT inherited by exec'd child processes (they get SIG_DFL).
+#[cfg(unix)]
+extern "C" fn noop_sigint(_: libc::c_int) {}
+
 mod app;
 mod event;
 mod theme;
@@ -283,9 +288,11 @@ pub fn run_status(tick: u64) -> Result<()> {
 
                                         // Ignore SIGINT in this process so Ctrl+C only kills the
                                         // child (docker logs / shell) and returns us to the TUI.
+                                        // Uses a no-op handler (not SIG_IGN) so children inherit
+                                        // SIG_DFL and can be killed by Ctrl+C normally.
                                         #[cfg(unix)]
                                         let _prev_sigint = unsafe {
-                                            libc::signal(libc::SIGINT, libc::SIG_IGN)
+                                            libc::signal(libc::SIGINT, noop_sigint as libc::sighandler_t)
                                         };
 
                                         let result = leech_cmd()

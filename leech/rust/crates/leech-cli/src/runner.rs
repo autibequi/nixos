@@ -174,7 +174,7 @@ pub fn compose_env_vars(
     // NPM_SCRIPT_ENV mapping
     let npm_env = match env {
         "sand" => "sandbox",
-        "local" => "devbox",
+        "local" => "local",
         other => other,
     };
     vars.push(("NPM_SCRIPT_ENV".into(), npm_env.into()));

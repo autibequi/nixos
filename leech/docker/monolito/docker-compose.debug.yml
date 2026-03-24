@@ -1,7 +1,7 @@
 services:
   app:
     build:
-      dockerfile: ${LEECH_NIXOS_DIR}/self/containers/monolito/Dockerfile.debug
+      dockerfile: ${LEECH_NIXOS_DIR}/leech/docker/monolito/Dockerfile.debug
     cpus: "14.4"
     # ptrace is required for delve to work inside Docker
     security_opt:
