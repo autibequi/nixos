@@ -1,7 +1,7 @@
 //! Agent and task commands — native Rust implementation with optional JSON output.
 
 use anyhow::{bail, Result};
-use leech_sdk::{agents, executor, paths, tasks};
+use leech_cli::{agents, executor, paths, tasks};
 use std::process::Command;
 
 // ── Agents ────────────────────────────────────────────────────────────────────

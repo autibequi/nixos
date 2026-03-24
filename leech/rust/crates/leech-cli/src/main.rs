@@ -375,7 +375,7 @@ fn main() -> Result<()> {
         // Interactive
         Some(Commands::Status { tick, json }) => {
             if json {
-                let snap = leech_sdk::status::collect()?;
+                let snap = leech_cli::status::collect()?;
                 println!("{}", serde_json::to_string_pretty(&snap)?);
                 Ok(())
             } else {
@@ -386,7 +386,7 @@ fn main() -> Result<()> {
 
         // Worktree
         Some(Commands::Worktree { service, json }) => {
-            let worktrees = leech_sdk::worktree::list_worktrees(service.as_deref());
+            let worktrees = leech_cli::worktree::list_worktrees(service.as_deref());
             if json {
                 println!("{}", serde_json::to_string_pretty(&worktrees)?);
             } else {

@@ -1,7 +1,7 @@
 //! Docker commands — build, stop, and clean container infrastructure.
 
 use anyhow::Result;
-use leech_sdk::{compose::ComposeCmd, paths};
+use leech_cli::{compose::ComposeCmd, paths};
 
 /// `leech build` — build Docker image.
 pub fn build(no_cache: bool) -> Result<()> {

@@ -43,7 +43,7 @@ pub fn render(frame: &mut Frame, app: &App) {
 }
 
 fn sessions_height(app: &App) -> u16 {
-    fn group_height(sessions: &[leech_sdk::status::SessionInfo]) -> usize {
+    fn group_height(sessions: &[leech_cli::status::SessionInfo]) -> usize {
         if sessions.is_empty() { return 0; }
         let mut folder_counts: std::collections::HashMap<&str, usize> =
             std::collections::HashMap::new();

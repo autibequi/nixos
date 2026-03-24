@@ -1,7 +1,7 @@
 //! Session commands — launch, resume, and manage agent sessions inside the container.
 
 use anyhow::Result;
-use leech_sdk::{
+use leech_cli::{
     compose::ComposeCmd, config::LeechConfig, engine::Engine, paths, session::SessionRunner,
 };
 

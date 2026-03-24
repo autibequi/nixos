@@ -64,7 +64,7 @@ pub fn fire(program: &str, args: &[&str]) {
 
 /// Bail if running inside container.
 pub fn require_host() -> Result<()> {
-    if leech_sdk::paths::in_container() {
+    if leech_cli::paths::in_container() {
         bail!("this command must run on the host, not inside a container");
     }
     Ok(())

@@ -14,7 +14,7 @@ use crate::theme;
 pub fn render(frame: &mut Frame, app: &App, area: Rect) {
     let svc = app.current_service();
 
-    let entries: Vec<&leech_sdk::logs::LogEntry> = app
+    let entries: Vec<&leech_cli::logs::LogEntry> = app
         .snapshot
         .logs
         .iter()

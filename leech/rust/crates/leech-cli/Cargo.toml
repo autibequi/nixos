@@ -3,17 +3,22 @@ name = "leech-cli"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+name = "leech_cli"
+path = "src/lib.rs"
+
 [[bin]]
 name = "leech"
 path = "src/main.rs"
 
 [dependencies]
-leech-sdk = { path = "../leech-sdk" }
 leech-tui = { path = "../leech-tui" }
 tokio = { workspace = true }
 anyhow = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
 clap = { version = "4", features = ["derive"] }
 clap_complete = "4"
 inquire = "0.7"
-serde_json = { workspace = true }
 libc = "0.2"

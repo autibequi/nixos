@@ -3,6 +3,13 @@
 # Usage: task-runner.sh <filename.md>  (file must be in tasks/AGENTS/ or tasks/AGENTS/DOING/)
 set -euo pipefail
 
+# Se rodando como root, re-exec como uid 1000 (claude) para evitar arquivos root-owned nos volumes
+if [ "$(id -u)" = "0" ]; then
+  exec setpriv --reuid=1000 --regid=1000 --keep-groups \
+    env USER=claude LOGNAME=claude HOME=/home/claude \
+    "$0" "$@"
+fi
+
 WORKSPACE="/workspace"
 OBSIDIAN="${OBSIDIAN_PATH:-$WORKSPACE/obsidian}"
 CONTRACTORS_DIR="${TASK_CONTRACTORS_DIR:-$OBSIDIAN/bedrooms}"

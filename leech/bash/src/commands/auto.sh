@@ -160,11 +160,21 @@ if [ -n "$DRY_RUN" ]; then
 fi
 
 # ── tick agent (despacha agentes) ──────────────────────────────
+_run_claude() {
+  if [ "$(id -u)" = "0" ]; then
+    setpriv --reuid=1000 --regid=1000 --keep-groups \
+      env USER=claude LOGNAME=claude HOME=/home/claude \
+      claude "$@"
+  else
+    claude "$@"
+  fi
+}
+
 if [ -f "$TICK_AGENT" ]; then
   echo ""
   echo "[auto] ▸ tick"
   TICK_PROMPT=$(awk 'BEGIN{fm=0} /^---/{fm++; next} fm>=2{print}' "$TICK_AGENT")
-  HEADLESS=1 timeout 300 claude \
+  HEADLESS=1 timeout 300 _run_claude \
     --permission-mode bypassPermissions \
     --model haiku \
     --max-turns 20 \

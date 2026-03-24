@@ -3,7 +3,7 @@
 use std::process::{Command, Stdio};
 
 use anyhow::{bail, Result};
-use leech_sdk::paths;
+use leech_cli::paths;
 
 // ── hooks ────────────────────────────────────────────────────────
 

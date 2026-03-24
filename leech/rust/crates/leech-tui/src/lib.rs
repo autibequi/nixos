@@ -25,8 +25,8 @@ use ratatui::Terminal;
 
 use app::{App, AppMode};
 use event::{map_key, poll, AppEvent};
-use leech_sdk::paths;
-use leech_sdk::status::StatusSnapshot;
+use leech_cli::paths;
+use leech_cli::status::StatusSnapshot;
 
 // ── CLI helpers ───────────────────────────────────────────────────────────────
 

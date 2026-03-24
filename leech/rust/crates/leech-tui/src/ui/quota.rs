@@ -7,7 +7,7 @@ use ratatui::Frame;
 
 use crate::app::App;
 use crate::theme;
-use leech_sdk::quota;
+use leech_cli::quota;
 
 /// Compact inline spans for the header line.
 pub fn header_spans(app: &App) -> Vec<Span<'static>> {

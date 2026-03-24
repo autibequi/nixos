@@ -4,7 +4,7 @@ use std::io::Write;
 use std::process::Command;
 
 use anyhow::{bail, Result};
-use leech_sdk::paths;
+use leech_cli::paths;
 
 // ── stow ─────────────────────────────────────────────────────────
 

@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-leech-sdk = { path = "../leech-sdk" }
+leech-cli = { path = "../leech-cli" }
 serde_json = { workspace = true }
 tokio = { workspace = true }
 anyhow = { workspace = true }

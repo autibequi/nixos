@@ -1,7 +1,7 @@
 //! Service runner — orchestrates Docker Compose start/stop/logs/shell/install/test/build/flush.
 
 use anyhow::{bail, Result};
-use leech_sdk::runner as svc;
+use leech_cli::runner as svc;
 use std::process::{Command, Stdio};
 
 /// Runner options passed from CLI.
@@ -464,7 +464,7 @@ fn do_install(
     let src = src_dir.to_string_lossy();
     let uid = get_uid();
     let gid = get_gid();
-    let home = leech_sdk::paths::home();
+    let home = leech_cli::paths::home();
 
     if svc::is_node_service(svc) {
         let node_ver = detect_node_version(src_dir).unwrap_or(20);
@@ -712,7 +712,7 @@ fn ensure_reverseproxy() {
         return;
     }
 
-    let rp_dir = leech_sdk::paths::nixos_dir().join("leech/docker/reverseproxy");
+    let rp_dir = leech_cli::paths::nixos_dir().join("leech/docker/reverseproxy");
     if !rp_dir.exists() {
         return;
     }

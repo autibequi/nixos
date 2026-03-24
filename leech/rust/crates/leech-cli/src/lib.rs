@@ -1,4 +1,4 @@
-//! Leech SDK — core logic for the Leech agent orchestration system.
+//! Leech — core logic for the Leech agent orchestration system.
 
 pub mod agents;
 pub mod boot;
@@ -14,6 +14,6 @@ pub mod paths;
 pub mod quota;
 pub mod runner;
 pub mod session;
-pub mod worktree;
 pub mod status;
 pub mod tasks;
+pub mod worktree;

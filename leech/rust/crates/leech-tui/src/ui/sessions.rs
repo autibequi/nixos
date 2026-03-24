@@ -7,7 +7,7 @@ use ratatui::Frame;
 
 use crate::app::App;
 use crate::theme;
-use leech_sdk::status::SessionInfo;
+use leech_cli::status::SessionInfo;
 
 pub fn render(frame: &mut Frame, app: &App, area: Rect) {
     let mut lines = Vec::new();

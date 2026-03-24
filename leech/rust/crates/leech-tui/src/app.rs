@@ -1,8 +1,8 @@
 //! Application state and navigation logic (TEA pattern).
 
-pub use leech_sdk::agents::{AgentInfo, AgentLogEntry};
-use leech_sdk::status::StatusSnapshot;
-pub use leech_sdk::worktree::WorktreeInfo;
+pub use leech_cli::agents::{AgentInfo, AgentLogEntry};
+use leech_cli::status::StatusSnapshot;
+pub use leech_cli::worktree::WorktreeInfo;
 
 pub const DK_SERVICES: &[&str] = &["monolito", "bo-container", "front-student"];
 pub const ENVS: &[&str]        = &["sand", "local", "prod"];
@@ -59,7 +59,7 @@ pub fn save_svc_envs(envs: &[usize]) {
     let _ = std::fs::write(path, data);
 }
 
-// Agent types and loaders are provided by leech-sdk::agents — imported at top.
+// Agent types and loaders are provided by leech_cli::agents — imported at top.
 
 // ── App state ─────────────────────────────────────────────────────────────────
 
