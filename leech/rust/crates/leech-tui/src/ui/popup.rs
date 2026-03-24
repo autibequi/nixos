@@ -1,31 +1,33 @@
-//! Overlay popups: action menu and error dialog.
+//! Overlay popups: action menu (rounded borders) and error dialog.
 
 use ratatui::layout::Rect;
-use ratatui::style::{Color, Style};
 use ratatui::text::{Line, Span};
-use ratatui::widgets::{Block, Borders, Clear, List, ListItem, ListState, Paragraph};
+use ratatui::widgets::{Block, BorderType, Borders, Clear, List, ListItem, ListState, Paragraph};
 use ratatui::Frame;
 
 use crate::app::{App, AppMode, MENU_ITEMS};
 use crate::theme;
+use super::agents;
+use super::worktree;
 
-/// Render the active popup (menu or error) on top of the dashboard.
 pub fn render(frame: &mut Frame, app: &App) {
     match &app.mode {
-        AppMode::Menu => render_menu(frame, app),
-        AppMode::Error(msg) => render_error(frame, &msg.clone()),
-        AppMode::Normal => {}
+        AppMode::Menu         => render_menu(frame, app),
+        AppMode::Error(msg)   => render_error(frame, &msg.clone()),
+        AppMode::AgentPanel    => agents::render(frame, app),
+        AppMode::WorktreePanel => worktree::render(frame, app),
+        AppMode::Normal        => {}
     }
 }
 
 fn render_menu(frame: &mut Frame, app: &App) {
-    let svc = app.current_service();
-    let env = app.current_env();
+    let svc   = app.current_service();
+    let env   = app.current_env();
     let title = format!(" {svc} [{env}] ");
 
-    let height = (MENU_ITEMS.len() as u16) + 2; // items + top/bottom border
-    let width = 24u16;
-    let area = centered_rect(width, height, frame.area());
+    let height = (MENU_ITEMS.len() as u16) + 2;
+    let width  = 26u16;
+    let area   = centered_rect(width, height, frame.area());
 
     frame.render_widget(Clear, area);
 
@@ -38,7 +40,14 @@ fn render_menu(frame: &mut Frame, app: &App) {
     state.select(Some(app.menu_cursor));
 
     let list = List::new(items)
-        .block(Block::default().borders(Borders::ALL).title(title))
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .title(title)
+                .title_style(theme::header())
+                .border_style(theme::separator()),
+        )
         .highlight_style(theme::selected())
         .highlight_symbol("> ");
 
@@ -48,20 +57,22 @@ fn render_menu(frame: &mut Frame, app: &App) {
 fn render_error(frame: &mut Frame, msg: &str) {
     let lines: Vec<&str> = msg.lines().collect();
     let height = (lines.len() as u16 + 2).max(4);
-    let width = 62u16.min(frame.area().width.saturating_sub(4));
-    let area = centered_rect(width, height, frame.area());
+    let width  = 64u16.min(frame.area().width.saturating_sub(4));
+    let area   = centered_rect(width, height, frame.area());
 
     frame.render_widget(Clear, area);
 
     let text_lines: Vec<Line> = lines
         .iter()
-        .map(|l| Line::from(vec![Span::raw(format!(" {l}"))])  )
+        .map(|l| Line::from(vec![Span::raw(format!(" {l}"))]))
         .collect();
 
     let block = Block::default()
         .borders(Borders::ALL)
+        .border_type(BorderType::Rounded)
         .title(" Error ")
-        .border_style(Style::default().fg(Color::Red));
+        .title_style(theme::down_icon())
+        .border_style(theme::down_icon());
 
     frame.render_widget(Paragraph::new(text_lines).block(block), area);
 }

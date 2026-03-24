@@ -1,107 +1,53 @@
-//! Color palette and reusable [`Style`] constructors for the TUI.
+//! Catppuccin Mocha color palette and reusable [`Style`] constructors for the TUI.
 
 use ratatui::style::{Color, Modifier, Style};
 
-/// Cyberpunk magenta — used for primary headers.
-pub const MAGENTA: Color = Color::Magenta;
-/// Green — indicates a running / healthy state.
-pub const GREEN: Color = Color::Green;
-/// Red — indicates a stopped / error state.
-pub const RED: Color = Color::Red;
-/// Yellow — used for CPU metrics and selected items.
-pub const YELLOW: Color = Color::Yellow;
-/// Cyan — used for memory metrics and group labels.
-pub const CYAN: Color = Color::Cyan;
-/// Blue — used for tree branch decorations.
-pub const BLUE: Color = Color::Blue;
-/// Orange (256-colour index 214) — used for uptime values.
-pub const ORANGE: Color = Color::Indexed(214);
-/// White — default text colour for service names.
-pub const WHITE: Color = Color::White;
-/// Dark gray — used for dim / secondary text.
-pub const GRAY: Color = Color::DarkGray;
+// ── Catppuccin Mocha palette ─────────────────────────────────────────────────
+pub const MAUVE: Color    = Color::Rgb(203, 166, 247); // headers / primary
+pub const GREEN: Color    = Color::Rgb(166, 227, 161); // up / healthy
+pub const RED: Color      = Color::Rgb(243, 139, 168); // down / error
+pub const PEACH: Color    = Color::Rgb(250, 179, 135); // uptime
+pub const YELLOW: Color   = Color::Rgb(249, 226, 175); // cpu metrics
+pub const SKY: Color      = Color::Rgb(137, 220, 235); // mem metrics
+pub const BLUE: Color     = Color::Rgb(137, 180, 250); // selected rows
+pub const LAVENDER: Color = Color::Rgb(180, 190, 254); // group labels
+pub const TEXT: Color     = Color::Rgb(205, 214, 244); // normal text
+pub const OVERLAY0: Color = Color::Rgb(108, 112, 134); // dim / secondary
+pub const SURFACE1: Color = Color::Rgb(69,  71,  90);  // tree branches / borders
 
-/// Bold magenta header style.
+// ── Style constructors ────────────────────────────────────────────────────────
+
 pub fn header() -> Style {
-    Style::default().fg(MAGENTA).add_modifier(Modifier::BOLD)
+    Style::default().fg(MAUVE).add_modifier(Modifier::BOLD)
 }
+pub fn up_icon() -> Style    { Style::default().fg(GREEN) }
+pub fn down_icon() -> Style  { Style::default().fg(RED) }
+pub fn uptime() -> Style     { Style::default().fg(PEACH) }
+pub fn name() -> Style       { Style::default().fg(TEXT) }
+pub fn cpu() -> Style        { Style::default().fg(YELLOW) }
+pub fn mem() -> Style        { Style::default().fg(SKY) }
+pub fn dim() -> Style        { Style::default().fg(OVERLAY0) }
+pub fn separator() -> Style  { Style::default().fg(SURFACE1) }
 
-/// Green style for "up" status icons.
-pub fn up_icon() -> Style {
-    Style::default().fg(GREEN)
-}
-
-/// Red style for "down" status icons.
-pub fn down_icon() -> Style {
-    Style::default().fg(RED)
-}
-
-/// Orange style for uptime values.
-pub fn uptime() -> Style {
-    Style::default().fg(ORANGE)
-}
-
-/// White style for service/session names.
-pub fn name() -> Style {
-    Style::default().fg(WHITE)
-}
-
-/// Yellow style for CPU metric values.
-pub fn cpu() -> Style {
-    Style::default().fg(YELLOW)
-}
-
-/// Cyan style for memory metric values.
-pub fn mem() -> Style {
-    Style::default().fg(CYAN)
-}
-
-/// Dark-gray style for secondary / decorative text.
-pub fn dim() -> Style {
-    Style::default().fg(GRAY)
-}
-
-/// Bold cyan style for group labels.
 pub fn group_label() -> Style {
-    Style::default().fg(CYAN).add_modifier(Modifier::BOLD)
+    Style::default().fg(LAVENDER).add_modifier(Modifier::BOLD)
 }
-
-/// Blue style for tree-branch characters.
-pub fn tree_branch() -> Style {
-    Style::default().fg(BLUE)
-}
-
-/// Green style for a mount that is present.
-pub fn mount_present() -> Style {
-    Style::default().fg(GREEN)
-}
-
-/// Red style for a mount that is absent.
-pub fn mount_absent() -> Style {
-    Style::default().fg(RED)
-}
-
-/// Bold yellow style for the currently selected row.
+pub fn tree_branch() -> Style { Style::default().fg(SURFACE1) }
 pub fn selected() -> Style {
-    Style::default().fg(YELLOW).add_modifier(Modifier::BOLD)
+    Style::default().fg(BLUE).add_modifier(Modifier::BOLD)
 }
+pub fn footer_key() -> Style  { Style::default().fg(GREEN) }
+pub fn footer_dim() -> Style  { Style::default().fg(OVERLAY0) }
+pub fn pending_icon() -> Style { Style::default().fg(YELLOW) }
+pub fn pending_label() -> Style { Style::default().fg(OVERLAY0) }
 
-/// Green style for footer key hints.
-pub fn footer_key() -> Style {
-    Style::default().fg(GREEN)
-}
-
-/// Dark-gray style for footer description text.
-pub fn footer_dim() -> Style {
-    Style::default().fg(GRAY)
-}
-
-/// Yellow style for a pending / transitioning state icon.
-pub fn pending_icon() -> Style {
-    Style::default().fg(YELLOW)
-}
-
-/// Dark-gray style for a pending action label.
-pub fn pending_label() -> Style {
-    Style::default().fg(GRAY)
+/// Quota percentage colour: red ≥ 85%, yellow ≥ 70%, green otherwise.
+pub fn pct_color(pct: u8) -> Style {
+    if pct >= 85 {
+        Style::default().fg(RED)
+    } else if pct >= 70 {
+        Style::default().fg(YELLOW)
+    } else {
+        Style::default().fg(GREEN)
+    }
 }

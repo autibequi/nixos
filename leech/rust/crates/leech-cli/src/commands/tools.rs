@@ -188,24 +188,16 @@ pub fn outbox() -> Result<()> {
 
 // ── man / help ───────────────────────────────────────────────────
 
-/// `leech man` — open the full man-page script, or fall back to `--help`.
+/// `leech man` — GNU-style man page.
 pub fn man() -> Result<()> {
-    let s = paths::cli_dir().join("man-page.sh");
-    if s.exists() {
-        crate::exec::bash_script(&s)
-    } else {
-        crate::exec::run(&std::env::current_exe()?.to_string_lossy(), &["--help"])
-    }
+    crate::help::man_page();
+    Ok(())
 }
 
-/// `leech banner` — display the Leech ASCII banner, or fall back to `--help`.
+/// `leech banner` — display the Leech ASCII banner.
 pub fn help_banner() -> Result<()> {
-    let s = paths::cli_dir().join("banner.sh");
-    if s.exists() {
-        crate::exec::bash_script(&s)
-    } else {
-        crate::exec::run(&std::env::current_exe()?.to_string_lossy(), &["--help"])
-    }
+    println!("{}", crate::help::BANNER);
+    Ok(())
 }
 
 // ── claude usage / token ─────────────────────────────────────────

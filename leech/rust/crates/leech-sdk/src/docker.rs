@@ -14,7 +14,7 @@ pub struct ContainerInfo {
 }
 
 /// CPU/memory stats for a container.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct ContainerStats {
     pub name: String,
     pub cpu: String,

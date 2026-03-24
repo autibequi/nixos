@@ -1,15 +1,25 @@
 //! Leech CLI — command-line interface for the Leech agent orchestration system.
+//!
+//! DIRECTIVE: When adding or changing commands, update help.rs too.
+//! Every command needs: about, long_about (if complex), and after_help with examples.
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 
 mod commands;
 mod exec;
+mod help;
 
 use commands::SessionFlags;
 
 #[derive(Parser)]
-#[command(name = "leech", version, about = "LEECH - agent orchestration system")]
+#[command(
+    name = "leech",
+    version,
+    about = "LEECH — agent orchestration system",
+    before_help = help::BANNER,
+    after_help = help::MAIN_AFTER,
+)]
 struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
@@ -42,6 +52,7 @@ enum Commands {
         host: bool,
     },
     /// Claude tools (usage, token)
+    #[command(before_help = help::CLAUDE_BEFORE)]
     Claude {
         #[command(subcommand)]
         action: Option<ClaudeAction>,
@@ -86,6 +97,7 @@ enum Commands {
     },
 
     /// Deploy dotfiles via GNU stow
+    #[command(before_help = help::STOW_BEFORE)]
     Stow {
         #[arg(default_value = "restow")]
         action: String,
@@ -93,6 +105,7 @@ enum Commands {
         reload: bool,
     },
     /// NixOS operations (switch/test/boot/build)
+    #[command(before_help = help::OS_BEFORE)]
     Os {
         #[command(subcommand)]
         action: OsAction,
@@ -143,15 +156,48 @@ enum Commands {
     Token,
 
     /// Interactive status dashboard
-    #[command(alias = "st")]
+    #[command(alias = "st", before_help = help::STATUS_BEFORE)]
     Status {
         #[arg(long, short = 't', default_value = "5")]
         tick: u64,
+        #[arg(long)]
+        json: bool,
+    },
+
+    // ── Worktree ─────────────────────────────────────────────────
+    /// List git worktrees across services
+    #[command(alias = "wt", before_help = help::WORKTREE_BEFORE)]
+    Worktree {
+        service: Option<String>,
+        #[arg(long)]
+        json: bool,
+    },
+
+    // ── Runner (service orchestration) ──────────────────────────
+    /// Service orchestration (start/stop/logs/shell/install/test/build/flush)
+    #[command(alias = "docker", before_help = help::RUNNER_BEFORE)]
+    Runner {
+        service: String,
+        action: String,
+        #[arg(long, default_value = "sand")]
+        env: String,
+        #[arg(long)]
+        worktree: Option<String>,
+        #[arg(long, default_value = "carreiras-juridicas")]
+        vertical: String,
+        #[arg(long, default_value = "app")]
+        container: String,
+        #[arg(long)]
+        cmd: Option<String>,
+        #[arg(long, default_value = "100")]
+        tail: u32,
+        #[arg(long)]
+        debug: bool,
     },
 
     // ── Tick (timer systemd) ─────────────────────────────────────
-    /// Execute todos os agents e tasks vencidos (leech-tick.service)
-    #[command(alias = "auto")]
+    /// Auto-execute due agents + tasks (systemd timer)
+    #[command(alias = "auto", before_help = help::TICK_BEFORE)]
     Tick {
         #[arg(long, short = 'n')]
         dry_run: bool,
@@ -166,8 +212,8 @@ enum Commands {
     },
 
     // ── Run (agent or task) ─────────────────────────────────────
-    /// Roda um agente ou task imediatamente
-    #[command(alias = "r")]
+    /// Run an agent or task immediately
+    #[command(alias = "r", before_help = help::RUN_BEFORE)]
     Run {
         name: String,
         #[arg(long, short = 's')]
@@ -175,14 +221,16 @@ enum Commands {
     },
 
     // ── Agents ──────────────────────────────────────────────────
-    #[command(alias = "ag", alias = "a")]
+    /// Agent management (list, phone, status)
+    #[command(alias = "ag", alias = "a", before_help = help::AGENTS_BEFORE)]
     Agents {
         #[command(subcommand)]
         action: Option<AgentsAction>,
     },
 
     // ── Tasks ───────────────────────────────────────────────────
-    #[command(alias = "t")]
+    /// Task kanban (DOING/TODO/DONE)
+    #[command(alias = "t", before_help = help::TASKS_BEFORE)]
     Tasks {
         #[command(subcommand)]
         action: Option<TasksAction>,
@@ -220,7 +268,10 @@ enum OsAction {
 enum AgentsAction {
     /// Lista todos os agentes e status
     #[command(alias = "ls")]
-    List,
+    List {
+        #[arg(long)]
+        json: bool,
+    },
     /// Conversa interativa com um agente
     #[command(alias = "p", alias = "call")]
     Phone {
@@ -228,13 +279,20 @@ enum AgentsAction {
     },
     /// Activity log: fila + historico de execucoes
     #[command(alias = "log", alias = "st")]
-    Status,
+    Status {
+        name: Option<String>,
+        #[arg(long)]
+        json: bool,
+    },
 }
 
 #[derive(Subcommand)]
 enum TasksAction {
     /// Kanban view: TODO/DOING/DONE
-    Log,
+    Log {
+        #[arg(long)]
+        json: bool,
+    },
     /// Dashboard live de tasks + agents
     #[command(alias = "st", alias = "dash")]
     Status {
@@ -278,8 +336,7 @@ fn main() -> Result<()> {
             OsAction::Build => "build",
         }),
         Some(Commands::Update) => commands::host::update(),
-        // inbox/outbox delegate to bash
-        Some(Commands::Inbox) => exec::bash_delegate(&["inbox"]),
+        Some(Commands::Inbox) => commands::tools::inbox(None),
         Some(Commands::Set { engine }) => commands::host::set_engine(&engine),
 
         // Tools
@@ -301,9 +358,58 @@ fn main() -> Result<()> {
         Some(Commands::Token) => commands::tools::token(),
 
         // Interactive
-        Some(Commands::Status { tick }) => {
-            leech_tui_v2::run_status(tick)?;
+        Some(Commands::Status { tick, json }) => {
+            if json {
+                let snap = leech_sdk::status::collect()?;
+                println!("{}", serde_json::to_string_pretty(&snap)?);
+                Ok(())
+            } else {
+                leech_tui::run_status(tick)?;
+                Ok(())
+            }
+        }
+
+        // Worktree
+        Some(Commands::Worktree { service, json }) => {
+            let worktrees = leech_sdk::worktree::list_worktrees(service.as_deref());
+            if json {
+                println!("{}", serde_json::to_string_pretty(&worktrees)?);
+            } else {
+                if worktrees.is_empty() {
+                    println!("Nenhum worktree encontrado.");
+                } else {
+                    let mut last_svc = "";
+                    for wt in &worktrees {
+                        if wt.service != last_svc {
+                            if !last_svc.is_empty() { println!(); }
+                            println!("  \x1b[1m\x1b[36m{}\x1b[0m", wt.service);
+                            last_svc = &wt.service;
+                        }
+                        let main = if wt.is_main { " \x1b[33m(main)\x1b[0m" } else { "" };
+                        println!(
+                            "    \x1b[32m{:<20}\x1b[0m  \x1b[2m[{}]\x1b[0m{}",
+                            wt.name, wt.branch, main
+                        );
+                    }
+                    println!();
+                }
+            }
             Ok(())
+        }
+
+        // Runner — native Rust service orchestration
+        Some(Commands::Runner {
+            service, action, env, worktree, vertical, container, cmd, tail, debug,
+        }) => {
+            commands::runner::run(&service, &action, &commands::runner::RunnerOpts {
+                env: &env,
+                worktree: worktree.as_deref(),
+                vertical: &vertical,
+                container: &container,
+                cmd: cmd.as_deref(),
+                tail,
+                debug,
+            })
         }
 
         // Tick — delegates to bash CLI
@@ -311,9 +417,9 @@ fn main() -> Result<()> {
             commands::agents::auto(dry_run, steps)
         }
 
-        // Tasker — delegates to bash CLI
+        // Tasker — shortcut for `leech run tasker`
         Some(Commands::Tasker { steps }) => {
-            exec::bash_delegate_with_flags("tasker", &[], steps.map(|s| s.to_string()).as_deref())
+            commands::agents::run_unified("tasker", steps)
         }
 
         // Run — delegates to bash CLI
@@ -322,21 +428,20 @@ fn main() -> Result<()> {
         }
 
         // Agents
-        Some(Commands::Agents { action }) => match action.unwrap_or(AgentsAction::List) {
-            AgentsAction::List => exec::bash_delegate(&["agents"]),
-            AgentsAction::Status => commands::agents::log(),
+        Some(Commands::Agents { action }) => match action.unwrap_or(AgentsAction::List { json: false }) {
+            AgentsAction::List { json } => commands::agents::list(json),
+            AgentsAction::Status { name, json } => commands::agents::agent_log(name.as_deref(), json),
             AgentsAction::Phone { name } => {
-                let mut args = vec!["agents".to_string(), "phone".to_string()];
-                if let Some(n) = name { args.push(n); }
-                exec::bash_delegate(&args.iter().map(|s| s.as_str()).collect::<Vec<_>>())
+                commands::agents::phone(name.as_deref())
             },
         },
 
         // Tasks
-        Some(Commands::Tasks { action }) => match action.unwrap_or(TasksAction::Log) {
-            TasksAction::Log => commands::agents::tasks_log(),
-            TasksAction::Status { tick } => {
-                exec::bash_delegate(&["tasks", "status", "--tick", &tick])
+        Some(Commands::Tasks { action }) => match action.unwrap_or(TasksAction::Log { json: false }) {
+            TasksAction::Log { json } => commands::agents::tasks_log(json),
+            TasksAction::Status { tick: _ } => {
+                // Show kanban view (live dashboard available via `leech status` TUI)
+                commands::agents::tasks_log(false)
             }
         },
 

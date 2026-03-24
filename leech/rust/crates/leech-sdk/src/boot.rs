@@ -2,7 +2,7 @@
 //! When running on the host (no session active), flags will be empty strings.
 
 /// Snapshot of the boot flags injected by `session-start.sh`.
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct BootInfo {
     pub datetime: String,
     pub personality: String,
