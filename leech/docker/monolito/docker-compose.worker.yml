@@ -5,8 +5,6 @@ services:
       dockerfile: ${LEECH_NIXOS_DIR}/self/containers/monolito/Dockerfile.worker
     container_name: leech-dk-monolito-worker
     cpus: "14.4"
-    mem_limit: 4g
-    memswap_limit: 4g
     env_file:
       - ${MONOLITO_DIR}/.env.${APP_ENV_FILE:-sandbox}
       - ./env/${APP_ENV:-sand}.env

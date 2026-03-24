@@ -3,8 +3,6 @@ services:
     build:
       dockerfile: ${LEECH_NIXOS_DIR}/self/containers/monolito/Dockerfile.debug
     cpus: "14.4"
-    mem_limit: 6g
-    memswap_limit: 6g
     # ptrace is required for delve to work inside Docker
     security_opt:
       - apparmor:unconfined

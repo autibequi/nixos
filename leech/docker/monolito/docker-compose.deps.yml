@@ -3,8 +3,6 @@ services:
     image: postgres:16-alpine
     container_name: leech-dk-monolito-postgres
     cpus: "2"
-    mem_limit: 1g
-    memswap_limit: 1g
     environment:
       POSTGRES_USER: ${DB_USER:-estrategia}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-estrategia}
@@ -26,8 +24,6 @@ services:
     image: redis:7-alpine
     container_name: leech-dk-monolito-redis
     cpus: "1"
-    mem_limit: 512m
-    memswap_limit: 512m
     ports:
       - "6379:6379"
     healthcheck:
@@ -42,8 +38,6 @@ services:
     image: localstack/localstack:latest
     container_name: leech-dk-monolito-localstack
     cpus: "2"
-    mem_limit: 1g
-    memswap_limit: 1g
     environment:
       SERVICES: sqs,s3
       DEFAULT_REGION: us-east-1

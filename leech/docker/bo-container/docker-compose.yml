@@ -5,8 +5,6 @@ services:
       dockerfile: ${LEECH_NIXOS_DIR}/leech/docker/bo-container/Dockerfile
     container_name: leech-dk-bo-container-app
     cpus: "14.4"
-    mem_limit: 4g
-    memswap_limit: 4g
     env_file:
       - ./env/${APP_ENV_FILE:-sandbox}.env
     environment:
