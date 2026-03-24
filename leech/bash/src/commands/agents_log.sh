@@ -11,7 +11,7 @@ _resolve_obsidian() {
 }
 OBSIDIAN="$(_resolve_obsidian "$OBSIDIAN")"
 
-AGENTS_SCHEDULE="$OBSIDIAN/agents/_schedule"
+AGENTS_SCHEDULE="$OBSIDIAN/agents/_waiting"
 AGENTS_RUNNING="$OBSIDIAN/agents/_working"
 BEDROOMS="$OBSIDIAN/bedrooms"
 ACTIVITY_LOG="$OBSIDIAN/vault/logs/agents.md"

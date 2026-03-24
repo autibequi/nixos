@@ -128,6 +128,9 @@ impl SessionRunner {
 
     /// Resolve all parameters from config + CLI overrides and launch the session.
     pub fn run(self, config: &LeechConfig) -> Result<()> {
+        if self.ghost {
+            return self.run_ghost(config);
+        }
         let model_id = model::resolve_model(self.model.as_deref(), self.engine, config);
         let danger = self.danger || config.danger;
 
@@ -136,6 +139,67 @@ impl SessionRunner {
             Engine::Cursor => self.run_cursor(model_id, danger, config),
             Engine::OpenCode => self.run_opencode(model_id, danger, config),
         }
+    }
+
+    /// Ghost mode: `docker run` direto com volumes mínimos — só /workspace/ghost visível.
+    fn run_ghost(&self, config: &LeechConfig) -> Result<()> {
+        let model_id = model::resolve_model(self.model.as_deref(), self.engine, config);
+        let ghost_path = &self.mount_path;
+        let leech_root = paths::leech_root().to_string_lossy().into_owned();
+        let home = paths::home().to_string_lossy().into_owned();
+
+        let mut claude_args: Vec<String> = Vec::new();
+        if let Some(ref id) = model_id {
+            claude_args.push("--model".to_string());
+            claude_args.push(id.clone());
+        }
+        claude_args.push("--name".to_string());
+        claude_args.push("ghost".to_string());
+        let claude_args_str = claude_args.join(" ");
+
+        let bash_cmd = format!(
+            ". /workspace/self/scripts/bootstrap.sh; \
+             cd /workspace/ghost && exec /home/claude/.nix-profile/bin/claude {claude_args_str}"
+        );
+
+        let mut args: Vec<String> = vec![
+            "run".into(), "--rm".into(), "-it".into(),
+            "--network".into(), "host".into(),
+            "--workdir".into(), "/workspace/ghost".into(),
+            "--entrypoint".into(), "/entrypoint.sh".into(),
+            // Volumes mínimos — só o necessário para Claude Code funcionar
+            "-v".into(), format!("{leech_root}:/workspace/self"),
+            "-v".into(), format!("{ghost_path}:/workspace/ghost:rw"),
+            "-v".into(), format!("{home}/.claude:/home/claude/.claude"),
+            "-v".into(), format!("{leech_root}/claude.bypass.json:/home/claude/.claude/settings.json:ro"),
+            "-v".into(), format!("{leech_root}/skills:/home/claude/.claude/skills"),
+            "-v".into(), format!("{leech_root}/commands:/home/claude/.claude/commands"),
+            "-v".into(), format!("{leech_root}/agents:/home/claude/.claude/agents"),
+            "-v".into(), format!("{leech_root}/hooks/claude-code:/home/claude/.claude/hooks:ro"),
+            "-v".into(), format!("{leech_root}/scripts:/home/claude/.claude/scripts"),
+            "-v".into(), format!("{home}/.claude.json:/home/claude/.claude.json"),
+            "-v".into(), format!("{home}/.leech:/home/claude/.leech:rw"),
+            // Env vars essenciais
+            "-e".into(), "CLAUDE_ENV=container".into(),
+            "-e".into(), "GHOST_IN_THE_SHELL=ON".into(),
+            "-e".into(), format!("CLAUDIO_MOUNT={ghost_path}"),
+            "-e".into(), "BOOTSTRAP_SKIP_CLEAR=1".into(),
+            "-e".into(), "XDG_CACHE_HOME=/workspace/.ephemeral/cache".into(),
+            "-e".into(), "DOCKER_HOST=tcp://localhost:2375".into(),
+        ];
+
+        // Tokens opcionais
+        if let Some(ref t) = config.anthropic_api_key {
+            args.extend(["-e".into(), format!("ANTHROPIC_API_KEY={t}")]);
+        }
+        if let Some(ref t) = config.gh_token {
+            args.extend(["-e".into(), format!("GH_TOKEN={t}")]);
+        }
+
+        args.extend(["leech".into(), "/bin/bash".into(), "-c".into(), bash_cmd]);
+
+        let args_ref: Vec<&str> = args.iter().map(String::as_str).collect();
+        crate::docker::exec_replace_docker(&args_ref)
     }
 
     /// Convenience: resolve dir/slug/proj_name from a directory path.

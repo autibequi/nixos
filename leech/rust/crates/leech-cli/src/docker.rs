@@ -197,6 +197,16 @@ pub fn rename_container(old: &str, new: &str) {
     let _ = Command::new("docker").args(["rename", old, new]).output();
 }
 
+/// Replace the current process with `docker run` using the given args directly.
+/// Used for ghost mode where we bypass docker-compose entirely.
+pub fn exec_replace_docker(args: &[&str]) -> Result<()> {
+    use std::os::unix::process::CommandExt;
+    let mut cmd = Command::new("docker");
+    cmd.args(args);
+    let err = cmd.exec();
+    Err(LeechError::Docker(format!("docker run failed: {err}")))
+}
+
 /// Replace the current process with `docker exec -it` into a container.
 /// Passes env vars and runs bash_cmd inside the container.
 pub fn exec_replace(cid: &str, env: &[(&str, &str)], bash_cmd: &str) -> Result<()> {
