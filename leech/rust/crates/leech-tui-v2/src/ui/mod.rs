@@ -1,5 +1,6 @@
 //! UI rendering modules.
 
+pub mod agents;
 pub mod logs;
 pub mod popup;
 pub mod quota;

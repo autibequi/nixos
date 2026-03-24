@@ -27,6 +27,46 @@ pub fn load_svc_envs() -> Vec<usize> {
     vec![0; DK_SERVICES.len()]
 }
 
+/// Read task titles from the vault's tasks/AGENTS directory (or tasks dir).
+/// Returns filenames (without .md) or the first `# heading` found in each file.
+pub fn load_agent_tasks() -> Vec<String> {
+    let candidates = [
+        leech_sdk::paths::tasks_dir().map(|p| p.join("AGENTS")),
+        leech_sdk::paths::tasks_dir(),
+    ];
+    for dir_opt in &candidates {
+        let Some(dir) = dir_opt else { continue };
+        if !dir.is_dir() { continue; }
+        let mut titles: Vec<String> = std::fs::read_dir(dir)
+            .into_iter()
+            .flatten()
+            .flatten()
+            .filter_map(|e| {
+                let path = e.path();
+                if path.extension().and_then(|x| x.to_str()) != Some("md") { return None; }
+                // Try first `# ` heading, fall back to filename stem.
+                let title = std::fs::read_to_string(&path).ok()
+                    .and_then(|s| {
+                        s.lines()
+                            .find(|l| l.starts_with("# "))
+                            .map(|l| l.trim_start_matches("# ").trim().to_string())
+                    })
+                    .unwrap_or_else(|| {
+                        path.file_stem()
+                            .map(|n| n.to_string_lossy().into_owned())
+                            .unwrap_or_default()
+                    });
+                if title.is_empty() { None } else { Some(title) }
+            })
+            .collect();
+        if !titles.is_empty() {
+            titles.sort();
+            return titles;
+        }
+    }
+    Vec::new()
+}
+
 pub fn save_svc_envs(envs: &[usize]) {
     let path = svc_envs_path();
     if let Some(parent) = path.parent() {
@@ -51,33 +91,40 @@ pub enum AppMode {
     Normal,
     Menu,
     Error(String),
+    AgentPanel,
 }
 
 pub struct App {
-    pub snapshot:    StatusSnapshot,
-    pub cursor_idx:  usize,
-    pub svc_envs:    Vec<usize>,
-    pub last_action: Option<(usize, String)>,
-    pub render_tick: u64,
-    pub log_scroll:  usize,
-    pub mode:        AppMode,
-    pub menu_cursor: usize,
+    pub snapshot:     StatusSnapshot,
+    pub cursor_idx:   usize,
+    pub svc_envs:     Vec<usize>,
+    pub last_action:  Option<(usize, String)>,
+    pub render_tick:  u64,
+    pub log_scroll:   usize,
+    pub mode:         AppMode,
+    pub menu_cursor:  usize,
     /// Throttle mouse scroll: only act on every 2nd event.
-    scroll_tick:     u8,
+    scroll_tick:      u8,
+    /// Cursor position inside the agent panel.
+    pub agent_cursor: usize,
+    /// Task titles loaded when the agent panel opens.
+    pub agent_tasks:  Vec<String>,
 }
 
 impl App {
     pub fn new() -> Self {
         Self {
-            snapshot:    StatusSnapshot::default(),
-            cursor_idx:  0,
-            svc_envs:    load_svc_envs(),
-            last_action: None,
-            render_tick: 0,
-            log_scroll:  0,
-            mode:        AppMode::Normal,
-            menu_cursor: 0,
-            scroll_tick: 0,
+            snapshot:     StatusSnapshot::default(),
+            cursor_idx:   0,
+            svc_envs:     load_svc_envs(),
+            last_action:  None,
+            render_tick:  0,
+            log_scroll:   0,
+            mode:         AppMode::Normal,
+            menu_cursor:  0,
+            scroll_tick:  0,
+            agent_cursor: 0,
+            agent_tasks:  Vec::new(),
         }
     }
 
@@ -157,6 +204,41 @@ impl App {
         if total == 0 { return; }
         self.cursor_idx = (self.cursor_idx + 1) % total;
         self.log_scroll = 0;
+    }
+
+    // ── Agent panel ───────────────────────────────────────────────────────────
+
+    pub fn open_agents(&mut self) {
+        self.agent_cursor = 0;
+        self.agent_tasks  = load_agent_tasks();
+        self.mode         = AppMode::AgentPanel;
+    }
+
+    pub fn close_agents(&mut self) { self.mode = AppMode::Normal; }
+
+    pub fn agent_count(&self) -> usize {
+        self.snapshot.agents.len() + self.snapshot.background.len()
+    }
+
+    pub fn agents_move_up(&mut self) {
+        let total = self.agent_count();
+        if total == 0 { return; }
+        if self.agent_cursor == 0 { self.agent_cursor = total - 1; }
+        else { self.agent_cursor -= 1; }
+    }
+
+    pub fn agents_move_down(&mut self) {
+        let total = self.agent_count();
+        if total == 0 { return; }
+        self.agent_cursor = (self.agent_cursor + 1) % total;
+    }
+
+    /// Returns the Docker container name of the currently selected agent.
+    pub fn selected_agent_container(&self) -> Option<String> {
+        self.snapshot.agents.iter()
+            .chain(self.snapshot.background.iter())
+            .nth(self.agent_cursor)
+            .map(|s| s.name.clone())
     }
 
     pub fn cycle_env(&mut self) {

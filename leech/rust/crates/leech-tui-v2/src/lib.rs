@@ -269,17 +269,44 @@ pub fn run_status(tick: u64) -> Result<()> {
                         }
                     }
 
+                    AppMode::AgentPanel => {
+                        use crossterm::event::KeyCode;
+                        match key.code {
+                            KeyCode::Esc
+                            | KeyCode::Char('q')
+                            | KeyCode::Char('a') => app.close_agents(),
+                            KeyCode::Up   | KeyCode::Char('k') => app.agents_move_up(),
+                            KeyCode::Down | KeyCode::Char('j') => app.agents_move_down(),
+                            KeyCode::Enter => {
+                                if let Some(cname) = app.selected_agent_container() {
+                                    app.close_agents();
+                                    let snap_tx = tx_bg.clone();
+                                    let done_tx = bg_done_tx.clone();
+                                    std::thread::spawn(move || {
+                                        docker_stop_wait(&cname);
+                                        let _ = done_tx.send(usize::MAX);
+                                        if let Ok(snap) = leech_sdk::status::collect() {
+                                            let _ = snap_tx.send(snap);
+                                        }
+                                    });
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+
                     AppMode::Normal => {
                         if let Some(action) = map_key(key) {
                             match action {
-                                "quit"      => break,
-                                "up"        => app.move_up(),
-                                "down"      => app.move_down(),
-                                "cycle_env" => app.cycle_env(),
-                                "log_up"    => app.log_scroll_up(5),
-                                "log_down"  => app.log_scroll_down(5),
-                                "menu_open" => app.open_menu(),
-                                _           => {}
+                                "quit"        => break,
+                                "up"          => app.move_up(),
+                                "down"        => app.move_down(),
+                                "cycle_env"   => app.cycle_env(),
+                                "log_up"      => app.log_scroll_up(5),
+                                "log_down"    => app.log_scroll_down(5),
+                                "menu_open"   => app.open_menu(),
+                                "agents_open" => app.open_agents(),
+                                _             => {}
                             }
                         }
                     }

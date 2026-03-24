@@ -7,12 +7,14 @@ use ratatui::Frame;
 
 use crate::app::{App, AppMode, MENU_ITEMS};
 use crate::theme;
+use super::agents;
 
 pub fn render(frame: &mut Frame, app: &App) {
     match &app.mode {
-        AppMode::Menu        => render_menu(frame, app),
-        AppMode::Error(msg)  => render_error(frame, &msg.clone()),
-        AppMode::Normal      => {}
+        AppMode::Menu         => render_menu(frame, app),
+        AppMode::Error(msg)   => render_error(frame, &msg.clone()),
+        AppMode::AgentPanel   => agents::render(frame, app),
+        AppMode::Normal       => {}
     }
 }
 

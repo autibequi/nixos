@@ -35,6 +35,7 @@ pub fn map_key(key: KeyEvent) -> Option<&'static str> {
         KeyCode::Char('[') | KeyCode::PageUp   => Some("log_up"),
         KeyCode::Char(']') | KeyCode::PageDown => Some("log_down"),
         KeyCode::Enter => Some("menu_open"),
+        KeyCode::Char('a') => Some("agents_open"),
         _ => None,
     }
 }
