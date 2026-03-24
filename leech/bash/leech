@@ -2538,8 +2538,6 @@ _leech_dk_logs() {
       trap '' INT
       ( trap - INT; exec docker compose -f "$compose" -p "$project" logs --no-log-prefix $ARGS )
       trap - INT
-      echo
-      leech status
     else
       docker compose -f "$compose" -p "$project" logs --no-log-prefix $ARGS
     fi
@@ -2549,8 +2547,6 @@ _leech_dk_logs() {
       trap '' INT
       ( trap - INT; exec tail -f "$log_dir/service.log" )
       trap - INT
-      echo
-      leech status
     else
       tail -n "$tail_lines" "$log_dir/service.log"
     fi
@@ -4298,7 +4294,10 @@ leech_tick_command() {
     --model haiku \
     --max-turns 20 \
     -p "$TICK_PROMPT" \
-    --add-dir "$HOME" 2>&1 || echo "[tick] falhou"
+    --add-dir "$HOME" \
+    --add-dir /workspace/self \
+    --add-dir /workspace/host \
+    --add-dir /workspace/obsidian 2>&1 || echo "[tick] falhou"
 
 }
 
@@ -5606,7 +5605,7 @@ leech_status_command() {
               break
               ;;
             l)
-              trap - INT
+              trap '' INT
               printf "\033[2J\033[H"
               leech docker "$_cursor_svc" logs || true
               trap 'exit 0' INT TERM
@@ -5614,7 +5613,7 @@ leech_status_command() {
               break
               ;;
             t)
-              trap - INT
+              trap '' INT
               printf "\033[2J\033[H"
               leech docker "$_cursor_svc" test || true
               trap 'exit 0' INT TERM
@@ -5622,7 +5621,7 @@ leech_status_command() {
               break
               ;;
             x)
-              trap - INT
+              trap '' INT
               printf "\033[2J\033[H"
               leech docker "$_cursor_svc" shell || true
               trap 'exit 0' INT TERM

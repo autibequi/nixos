@@ -407,68 +407,24 @@ impl SessionRunner {
         if let Some(ref resume) = self.resume {
             agent_flags.push(format!("--resume={resume}"));
         }
-        if !self.mount_path.is_empty() {
-            if let Some(name) = std::path::Path::new(&self.mount_path).file_name() {
-                agent_flags.push("--name".to_string());
-                agent_flags.push(name.to_string_lossy().to_string());
-            }
-        }
 
         let agent_flags_str = agent_flags.join(" ");
 
-        // cursor-agent must run as user 1000 (setpriv), same as cursor-login.
-        // Running as root causes the agent to exit immediately with no output.
-        // Note: cursor-agent expires periodically — rebuild with `leech build --danger` if it exits silently.
+        // cursor_cmd: alinhado com bash (compose_lib.sh).
+        // Sem setpriv aqui — entrypoint.sh cuida da troca para user 1000.
+        // docker exec bypassa o entrypoint: USER/HOME/setpriv não são configurados
+        // e cursor-agent sai silenciosamente quando roda como root.
         let cursor_cmd = format!(
-            "chown 1000:1000 /home/claude/.config/cursor 2>/dev/null || true; \
+            ". /workspace/self/scripts/bootstrap.sh; \
              cd /workspace/mnt; \
              agent --version >/dev/null 2>&1 || {{ echo \"leech: cursor-agent expirou ou nao instalado. Rode: leech build --danger\" >&2; exit 1; }}; \
-             exec setpriv --reuid=1000 --regid=1000 --keep-groups agent {agent_flags_str}"
+             exec agent {agent_flags_str}"
         );
 
         let vol_args = self.volume_args();
 
-        // Shared container reuse: same pattern as run_claude.
-        if vol_args.is_empty() && !self.analysis_mode {
-            let leech_name = format!(
-                "leech-{}",
-                self.proj_name.strip_prefix("leech-").unwrap_or(&self.proj_name)
-            );
-
-            let cid = match crate::docker::find_running_container(&leech_name) {
-                Some(cid) => cid,
-                None => {
-                    self.compose(config).execute(&["up", "-d", "leech"])?;
-                    if let Some(auto_name) =
-                        crate::docker::find_compose_container(&self.proj_name, "leech")
-                    {
-                        crate::docker::rename_container(&auto_name, &leech_name);
-                    }
-                    match crate::docker::find_running_container(&leech_name) {
-                        Some(cid) => cid,
-                        None => {
-                            let mut args: Vec<&str> =
-                                vec!["run", "--rm", "-it", "--entrypoint", "/entrypoint.sh"];
-                            let mount_env = format!("CLAUDIO_MOUNT={}", self.mount_path);
-                            args.extend(["-e", &mount_env, "-e", "BOOTSTRAP_SKIP_CLEAR=1"]);
-                            args.extend(["leech", "/bin/bash", "-c", &cursor_cmd]);
-                            return self.compose(config).execute(&args);
-                        }
-                    }
-                }
-            };
-
-            let mut env_pairs: Vec<(&str, &str)> = vec![("CLAUDIO_MOUNT", &self.mount_path)];
-            if self.resume.is_none() {
-                env_pairs.push(("BOOTSTRAP_SKIP_CLEAR", "1"));
-            }
-            if self.host {
-                env_pairs.push(("HOST_ATTACHED", "1"));
-            }
-            return crate::docker::exec_replace(&cid, &env_pairs, &cursor_cmd);
-        }
-
-        // Fallback: ephemeral run (extra volumes or analysis mode require isolated container).
+        // Cursor sempre usa ephemeral run com entrypoint.sh (não shared container + exec).
+        // entrypoint.sh faz setpriv + configura HOME/USER/env antes de rodar o agent.
         let mut args: Vec<&str> = vec!["run", "--rm", "-it"];
         for a in &vol_args {
             args.push(a);
