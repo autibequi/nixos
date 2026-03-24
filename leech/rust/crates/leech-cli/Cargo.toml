@@ -13,6 +13,7 @@ leech-tui = { path = "../leech-tui" }
 tokio = { workspace = true }
 anyhow = { workspace = true }
 clap = { version = "4", features = ["derive"] }
+clap_complete = "4"
 inquire = "0.7"
 serde_json = { workspace = true }
 libc = "0.2"
