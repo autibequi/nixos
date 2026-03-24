@@ -191,7 +191,7 @@ fi
 # Icone: alerta se excedeu 200k, senão robot normal
 [[ "$EXCEEDS" == "true" ]] && ICON="󰀦" || ICON="󱙺"
 # Cachorrinho ao lado do robo quando /workspace/host estiver montado rw (host mode)
-[[ -w "/workspace/host" ]] && ICON="● 󰩃 ${ICON}"
+[[ -w "/workspace/host" ]] && ICON="󰩃 ${ICON}"
 
 # Composicao final
 RIGHT="${ICON} ${MODEL_SIZE} ${CTX_STR}${CACHE_STR}${COST_STR}${WT_STR}${MOUNT_STR}"
