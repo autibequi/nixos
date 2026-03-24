@@ -73,7 +73,7 @@ enum Commands {
         host: bool,
     },
     /// Ephemeral session (auto-detect nixos)
-    #[command(alias = "l")]
+    #[command(alias = "l", hide = true)]
     Leech {
         #[command(flatten)]
         flags: SessionFlags,
@@ -86,7 +86,8 @@ enum Commands {
         danger: bool,
     },
     /// Stop compose containers
-    Down,
+    #[command(alias = "down")]
+    Stop,
     /// Stop all + kill strays
     Shutdown,
     /// Remove stopped containers
@@ -110,14 +111,15 @@ enum Commands {
         #[command(subcommand)]
         action: OsAction,
     },
-    /// Build and install leech CLIs
-    #[command(alias = "install")]
+    /// Build and install leech CLI
+    #[command(alias = "install", hide = true)]
     Update,
     /// Set default engine
+    #[command(hide = true)]
     Set { engine: String },
 
     /// Execute a Claude Code hook
-    #[command(alias = "hook")]
+    #[command(alias = "hook", hide = true)]
     Hooks {
         hook: Option<String>,
         #[arg(long, short = 'l')]
@@ -134,12 +136,12 @@ enum Commands {
     #[command(alias = "ib")]
     Inbox,
     /// List outbox files
-    #[command(alias = "ob")]
+    #[command(alias = "ob", hide = true)]
     Outbox,
     /// Full documentation
     Man,
     /// Show banner
-    #[command(alias = "h")]
+    #[command(alias = "h", hide = true)]
     Banner,
     /// Generate shell completions (source dynamically: eval "$(leech completions zsh)")
     #[command(hide = true)]
@@ -148,6 +150,7 @@ enum Commands {
         shell: clap_complete::Shell,
     },
     /// Claude usage stats (alias for `claude usage`)
+    #[command(hide = true)]
     Usage {
         #[arg(long)]
         waybar: bool,
@@ -159,6 +162,7 @@ enum Commands {
         refresh: bool,
     },
     /// Print Claude OAuth token (alias for `claude token`)
+    #[command(hide = true)]
     Token,
 
     /// Interactive status dashboard
@@ -211,7 +215,8 @@ enum Commands {
         steps: Option<u32>,
     },
 
-    /// Lanca o agente Tasker para processar tasks atrasadas
+    /// Shortcut for 'leech run tasker'
+    #[command(hide = true)]
     Tasker {
         #[arg(long, short = 's')]
         steps: Option<u32>,
@@ -329,7 +334,7 @@ fn main() -> Result<()> {
 
         // Docker
         Some(Commands::Build { danger }) => commands::docker::build(danger),
-        Some(Commands::Down) => commands::docker::down(),
+        Some(Commands::Stop) => commands::docker::down(),
         Some(Commands::Shutdown) => commands::docker::shutdown(),
         Some(Commands::Clean { force }) => commands::docker::clean(force),
 
