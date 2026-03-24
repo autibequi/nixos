@@ -275,6 +275,7 @@ leech_session_run() {
 
   # ── Ghost mode: --ghost flag ─────────────────────────────────────────────────
   # Sessão isolada em obsidian/ghost/ — monta em /workspace/ghost, GHOST_IN_THE_SHELL=ON
+  # /workspace/self NÃO é montado (compose file separado sem self volume).
   local _ghost_active="${args['--ghost']:-${flag_ghost:-}}"
   if [[ -n "$_ghost_active" ]] && [[ "$_ghost_active" != "0" ]]; then
     local _obs_path="${OBSIDIAN_PATH:-${HOME}/.ovault/Work}"
@@ -286,6 +287,8 @@ leech_session_run() {
     # Injeta env e volume extra (reusa vars existentes para compatibilidade com os paths docker run/exec abaixo)
     host_env="${host_env} -e GHOST_IN_THE_SHELL=ON"
     extra_volumes="${extra_volumes} -v ${_ghost_dir}:/workspace/ghost:rw"
+    # Usa compose file sem /workspace/self para ocultar o source do Leech
+    leech_compose_file="$leech_container_dir/docker-compose.ghost.yml"
   fi
 
   local danger model
@@ -366,9 +369,9 @@ leech_session_run() {
 
       local launch_cmd="bash /workspace/self/scripts/leech-agent-launch.sh ${claude_args}"
       [[ -n "${args['--no-splash']:-}" ]] && launch_cmd=". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
-      # Ghost mode: sempre sem splash, cd direto para /workspace/ghost
+      # Ghost mode: sempre sem splash, cd direto para /workspace/ghost (sem bootstrap — self não montado)
       [[ -n "${_ghost_active:-}" ]] && [[ "${_ghost_active}" != "0" ]] && \
-        launch_cmd=". /workspace/self/scripts/bootstrap.sh; cd /workspace/ghost && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
+        launch_cmd="cd /workspace/ghost && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
       # Pre-splash no host: aparece imediatamente antes do container subir
       if [[ -z "${args['--no-splash']:-}" ]]; then
         printf '\033[2J\033[H\033[?25l\n'

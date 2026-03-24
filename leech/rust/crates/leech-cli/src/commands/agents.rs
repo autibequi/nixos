@@ -291,147 +291,38 @@ pub fn run_unified(name: &str, steps: Option<u32>) -> Result<()> {
     }
 }
 
-/// `leech auto/tick` — execute due agents + tasks.
-pub fn auto(dry_run: bool, steps: Option<u32>) -> Result<()> {
-    let now = now_epoch();
-
-    // ── Rescue orphans from _running/ ────────────────────────────
-    if let Some(schedule) = paths::schedule_dir() {
-        let running_dir = schedule.parent().unwrap_or(&schedule).join("_working");
-        if running_dir.is_dir() {
-            for entry in std::fs::read_dir(&running_dir).into_iter().flatten().flatten() {
-                let fname = entry.file_name().to_string_lossy().into_owned();
-                if !fname.ends_with(".md") { continue; }
-                let base = fname.trim_end_matches(".md");
-                let lock = format!("/tmp/leech-locks/{base}.lock");
-                if std::path::Path::new(&lock).is_dir() { continue; }
-                let ts = agents::parse_task_stem(base).map(|(t, _)| t).unwrap_or(0);
-                if ts == 0 { continue; }
-                let elapsed_min = now.saturating_sub(ts) / 60;
-                if elapsed_min < 30 { continue; }
-                eprintln!("[auto] orphan: {fname}  stuck={elapsed_min}min → _waiting");
-                if !dry_run {
-                    let _ = std::fs::rename(
-                        running_dir.join(&fname),
-                        schedule.join(&fname),
-                    );
-                }
-            }
-        }
-    }
-
-    // ── Scan schedule for due agent cards ────────────────────────
-    let threshold = now + 300; // 5min tolerance
-    let mut agent_due: Vec<String> = Vec::new();
-
-    if let Some(schedule) = paths::schedule_dir() {
-        if schedule.is_dir() {
-            for entry in std::fs::read_dir(&schedule).into_iter().flatten().flatten() {
-                let fname = entry.file_name().to_string_lossy().into_owned();
-                if !fname.ends_with(".md") { continue; }
-                let stem = fname.trim_end_matches(".md");
-                let ts = agents::parse_task_stem(stem).map(|(t, _)| t).unwrap_or(0);
-                if ts == 0 || ts > threshold { continue; }
-                // Check if it's an agent card (has agent: field)
-                if let Ok(content) = std::fs::read_to_string(entry.path()) {
-                    if agents::frontmatter_field(&content, "agent").is_some() {
-                        let delta = (now as i64 - ts as i64) / 60;
-                        eprintln!("[auto] agent due: {fname}  atraso={delta}min");
-                        agent_due.push(fname);
-                    }
-                }
-            }
-        }
-    }
-
-    // ── Scan tasks/TODO for due tasks ────────────────────────────
-    let task_threshold = now + 600; // 10min tolerance
-    let mut task_due: Vec<(String, u32)> = Vec::new();
-
-    if let Some(tasks_dir) = paths::tasks_dir() {
-        for subdir in &["TODO", "DOING"] {
-            let dir = tasks_dir.join(subdir);
-            if !dir.is_dir() { continue; }
-            for entry in std::fs::read_dir(&dir).into_iter().flatten().flatten() {
-                let fname = entry.file_name().to_string_lossy().into_owned();
-                if !fname.ends_with(".md") { continue; }
-                let stem = fname.trim_end_matches(".md");
-
-                if *subdir == "DOING" {
-                    // Orphan in DOING (not locked)
-                    let lock = format!("/tmp/leech-locks/{stem}.lock");
-                    if std::path::Path::new(&lock).is_dir() { continue; }
-                } else {
-                    let ts = agents::parse_task_stem(stem).map(|(t, _)| t).unwrap_or(0);
-                    if ts == 0 || ts > task_threshold { continue; }
-                }
-
-                let card_steps = std::fs::read_to_string(entry.path())
-                    .ok()
-                    .and_then(|c| extract_steps(&c))
-                    .unwrap_or(30);
-                task_due.push((fname, card_steps));
-            }
-        }
-    }
-
-    eprintln!(
-        "\n[auto] {} agent(s) + {} task(s) due",
-        agent_due.len(),
-        task_due.len()
-    );
-
-    if agent_due.is_empty() && task_due.is_empty() {
-        eprintln!("[auto] nada para executar.");
-        return Ok(());
-    }
+/// `leech auto/tick` — aciona o tick agent, que cuida de tudo.
+pub fn auto(dry_run: bool, _steps: Option<u32>) -> Result<()> {
+    let tick_agent = paths::agent_file("tick")
+        .ok_or_else(|| anyhow::anyhow!("[tick] agents/tick/agent.md nao encontrado"))?;
 
     if dry_run {
-        eprintln!("[auto] --dry-run: nao executando");
+        eprintln!("[tick] --dry-run: tick agent em {}", tick_agent.display());
         return Ok(());
     }
 
-    // ── Execute agents ───────────────────────────────────────────
-    if let Some(schedule) = paths::schedule_dir() {
-        let agents_root = schedule.parent().unwrap_or(&schedule);
-        let working_dir = agents_root.join("_working");
-        let contractors_dir = paths::obsidian_path().join("bedrooms");
-        for fname in &agent_due {
-            eprintln!("\n[auto] ▸ agent: {fname}");
-            std::env::set_var("TASK_CONTRACTORS_DIR", &contractors_dir);
-            std::env::set_var("SCHEDULE_DIR", &schedule);
-            std::env::set_var("RUNNING_DIR", &working_dir);
-            if let Err(e) = executor::run_card(fname) {
-                eprintln!("[auto] {fname} falhou: {e} (continuando)");
-            }
-        }
+    let content = std::fs::read_to_string(&tick_agent)?;
+    let prompt = extract_body(&content);
+
+    let status = Command::new("timeout")
+        .arg("300")
+        .arg("claude")
+        .args([
+            "--permission-mode", "bypassPermissions",
+            "--model", "haiku",
+            "--max-turns", "20",
+            "-p", &prompt,
+            "--add-dir", &paths::home().to_string_lossy(),
+        ])
+        .env("HEADLESS", "1")
+        .current_dir(paths::home())
+        .status()
+        .map_err(|e| anyhow::anyhow!("[tick] falhou ao executar claude: {e}"))?;
+
+    if !status.success() {
+        eprintln!("[tick] falhou (exit={:?})", status.code());
     }
 
-    // ── Execute tasks ────────────────────────────────────────────
-    if let Some(tasks_dir) = paths::tasks_dir() {
-        let contractors_dir = tasks_dir.parent()
-            .map(|p| p.join("vault/agents"))
-            .unwrap_or_default();
-
-        for (fname, card_steps) in &task_due {
-            let effective_steps = steps.unwrap_or(*card_steps);
-            eprintln!("\n[auto] ▸ task: {fname}  steps={effective_steps}");
-
-            let base = fname.trim_end_matches(".md");
-            let _ = std::fs::remove_dir_all(format!("/tmp/leech-locks/{base}.lock"));
-
-            std::env::set_var("SCHEDULE_DIR", tasks_dir.join("AGENTS"));
-            std::env::set_var("RUNNING_DIR", tasks_dir.join("DOING"));
-            std::env::set_var("TASK_CONTRACTORS_DIR", &contractors_dir);
-            std::env::set_var("TASK_MAX_TURNS", effective_steps.to_string());
-
-            if let Err(e) = executor::run_card(fname) {
-                eprintln!("[auto] {fname} falhou: {e} (continuando)");
-            }
-        }
-    }
-
-    eprintln!("\n[auto] concluido");
     Ok(())
 }
 
