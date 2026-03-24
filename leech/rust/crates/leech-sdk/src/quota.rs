@@ -1,7 +1,7 @@
 //! Claude API quota — parses the output of `claude-oauth-usage.sh`.
 
 /// API usage snapshot with bar-ready percentages.
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct QuotaInfo {
     /// Usage percentage for the last 5 hours (0–100).
     pub pct_5h: u8,

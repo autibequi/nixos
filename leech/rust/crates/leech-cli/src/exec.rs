@@ -62,26 +62,6 @@ pub fn fire(program: &str, args: &[&str]) {
         .status();
 }
 
-/// Delegate to the bash CLI (leech/bash/leech) with the given args.
-pub fn bash_delegate(args: &[&str]) -> Result<()> {
-    let bash_cli = leech_sdk::paths::bash_dir().join("leech");
-    if !bash_cli.exists() {
-        bail!("bash CLI not found at {}", bash_cli.display());
-    }
-    run(&bash_cli.to_string_lossy(), args)
-}
-
-/// Delegate to bash CLI with optional --steps flag.
-pub fn bash_delegate_with_flags(cmd: &str, args: &[&str], steps: Option<&str>) -> Result<()> {
-    let mut all: Vec<&str> = vec![cmd];
-    all.extend_from_slice(args);
-    if let Some(s) = steps {
-        all.push("--steps");
-        all.push(s);
-    }
-    bash_delegate(&all)
-}
-
 /// Bail if running inside container.
 pub fn require_host() -> Result<()> {
     if leech_sdk::paths::in_container() {

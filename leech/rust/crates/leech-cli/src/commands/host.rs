@@ -115,55 +115,15 @@ pub fn set_engine(engine: &str) -> Result<()> {
 
 const SPINNER: &[&str] = &["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
-/// `leech update` — regenerate bash CLI, install symlinks, and build the Rust binary.
+/// `leech update` — build the Rust binary and install it.
 pub fn update() -> Result<()> {
     let nixos = paths::nixos_dir();
-    let cli = paths::cli_dir();
     let clirust = paths::rust_dir();
     let bin = paths::bin_dir();
 
     println!("\x1b[1mAtualizando leech...\x1b[0m");
 
-    step(1, 4, "Gerando bash CLI", || {
-        // Try bashly directly; fallback to nix-shell if not in PATH.
-        let direct = Command::new("bashly")
-            .arg("generate")
-            .current_dir(&cli)
-            .env("LANG", "en_US.UTF-8")
-            .env("RUBYOPT", "-E utf-8")
-            .output();
-
-        let s = match direct {
-            Ok(out) => out,
-            Err(_) => Command::new("nix-shell")
-                .args(["-p", "bashly", "--run", "bashly generate"])
-                .current_dir(&cli)
-                .env("LANG", "en_US.UTF-8")
-                .env("RUBYOPT", "-E utf-8")
-                .output()?,
-        };
-        if !s.status.success() {
-            bail!(
-                "bashly generate failed:\n{}",
-                String::from_utf8_lossy(&s.stderr)
-            );
-        }
-        Ok(())
-    })?;
-
-    step(2, 4, "Instalando bash CLI", || {
-        std::fs::create_dir_all(&bin)?;
-        let old = nixos.join("stow/.local/bin/leech");
-        if old.is_symlink() {
-            let _ = std::fs::remove_file(&old);
-        }
-        let dest = bin.join("leech-bash");
-        let _ = std::fs::remove_file(&dest);
-        std::os::unix::fs::symlink(cli.join("leech"), &dest)?;
-        Ok(())
-    })?;
-
-    step(3, 4, "Atualizando bootstrap", || {
+    step(1, 2, "Atualizando bootstrap", || {
         let src = nixos.join("leech/scripts/bootstrap-dashboard.sh");
         let dst = nixos.join("scripts/bootstrap.sh");
         if src.exists() {
@@ -177,7 +137,7 @@ pub fn update() -> Result<()> {
         Ok(())
     })?;
 
-    step(4, 4, "Building leech (rust)", || {
+    step(2, 2, "Building leech (rust)", || {
         if !clirust.exists() {
             return Ok(());
         }

@@ -1,164 +1,182 @@
 //! Application state and navigation logic (TEA pattern).
 
-use std::path::PathBuf;
+pub use leech_sdk::agents::{AgentInfo, AgentLogEntry};
+use leech_sdk::status::StatusSnapshot;
+pub use leech_sdk::worktree::WorktreeInfo;
 
-use leech_sdk::{paths, status::StatusSnapshot};
-
-/// Service list for navigation.
 pub const DK_SERVICES: &[&str] = &["monolito", "bo-container", "front-student"];
+pub const ENVS: &[&str]        = &["sand", "local", "prod"];
 
-/// Available environments.
-pub const ENVS: &[&str] = &["sand", "local", "prod"];
+pub const AGENT_MENU_ITEMS: &[(&str, &str)] = &[
+    ("Run now",      "run"),
+    ("Phone",        "phone"),
+    ("Status / log", "status"),
+    ("Cancel",       "cancel"),
+];
 
-/// Menu items: (display label, action key).
-pub const MENU_ITEMS: &[(&str, &str)] = &[
+pub const WT_MENU_ITEMS: &[(&str, &str)] = &[
     ("Start",   "start"),
     ("Stop",    "stop"),
     ("Restart", "restart"),
     ("Logs",    "logs"),
-    ("Test",    "test"),
-    ("Install", "install"),
     ("Shell",   "shell"),
+    ("Install", "install"),
+    ("Test",    "test"),
+    ("Flush",   "flush"),
     ("Cancel",  "cancel"),
 ];
 
-/// UI mode.
+// ── svc-env persistence ───────────────────────────────────────────────────────
+
+fn svc_envs_path() -> std::path::PathBuf {
+    let base = std::env::var("XDG_CONFIG_HOME")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|_| {
+            let home = std::env::var("HOME").unwrap_or_default();
+            std::path::PathBuf::from(home).join(".config")
+        });
+    base.join("leech").join("tui-envs")
+}
+
+pub fn load_svc_envs() -> Vec<usize> {
+    if let Ok(data) = std::fs::read_to_string(svc_envs_path()) {
+        let envs: Vec<usize> = data.lines()
+            .filter_map(|l| l.trim().parse().ok())
+            .collect();
+        if envs.len() == DK_SERVICES.len() {
+            return envs;
+        }
+    }
+    vec![0; DK_SERVICES.len()]
+}
+
+pub fn save_svc_envs(envs: &[usize]) {
+    let path = svc_envs_path();
+    if let Some(parent) = path.parent() {
+        let _ = std::fs::create_dir_all(parent);
+    }
+    let data = envs.iter().map(|n| n.to_string()).collect::<Vec<_>>().join("\n");
+    let _ = std::fs::write(path, data);
+}
+
+// Agent types and loaders are provided by leech-sdk::agents — imported at top.
+
+// ── App state ─────────────────────────────────────────────────────────────────
+
+pub const MENU_ITEMS: &[(&str, &str)] = &[
+    ("Start",    "start"),
+    ("Stop",     "stop"),
+    ("Restart",  "restart"),
+    ("Logs",     "logs"),
+    ("Test",     "test"),
+    ("Install",  "install"),
+    ("Shell",    "shell"),
+    ("Cancel",   "cancel"),
+];
+
 pub enum AppMode {
     Normal,
     Menu,
     Error(String),
+    AgentPanel,
+    WorktreePanel,
 }
 
-/// Application state holding the current snapshot and cursor position.
 pub struct App {
-    /// Latest status snapshot from the SDK collector.
-    pub snapshot: StatusSnapshot,
-    /// Index of the currently selected service in [`DK_SERVICES`].
-    pub cursor_idx: usize,
-    /// Per-service selected environment index into [`ENVS`].
-    pub svc_envs: Vec<usize>,
-    /// Most recent action label for display: `(service_idx, description)`.
-    pub last_action: Option<(usize, String)>,
-    /// Incremented on every draw cycle — used to animate the pending-action spinner.
-    pub render_tick: u64,
-    /// Lines scrolled up from the bottom in the log panel (0 = bottom).
-    pub log_scroll: usize,
-    /// Current UI mode (normal, menu popup, error popup).
-    pub mode: AppMode,
-    /// Selected index in the action menu.
-    pub menu_cursor: usize,
-}
-
-/// Path where per-service env choices are persisted between TUI sessions.
-fn state_path() -> PathBuf {
-    paths::home().join(".config/leech/tui-envs")
-}
-
-/// Load per-service env indices from disk. Falls back to all-zero on any error.
-fn load_svc_envs() -> Vec<usize> {
-    let mut envs = vec![0usize; DK_SERVICES.len()];
-    let Ok(content) = std::fs::read_to_string(state_path()) else { return envs };
-    for line in content.lines() {
-        if let Some((svc, env)) = line.split_once('=') {
-            if let Some(svc_idx) = DK_SERVICES.iter().position(|&s| s == svc) {
-                if let Some(env_idx) = ENVS.iter().position(|&e| e == env) {
-                    envs[svc_idx] = env_idx;
-                }
-            }
-        }
-    }
-    envs
+    pub snapshot:          StatusSnapshot,
+    pub cursor_idx:        usize,
+    pub svc_envs:          Vec<usize>,
+    pub last_action:       Option<(usize, String)>,
+    pub render_tick:       u64,
+    pub log_scroll:        usize,
+    pub mode:              AppMode,
+    pub menu_cursor:       usize,
+    scroll_tick:           u8,
+    pub agent_cursor:      usize,
+    pub agent_list:        Vec<AgentInfo>,
+    /// Whether the per-agent action sub-menu is open.
+    pub agent_menu:        bool,
+    pub agent_menu_cursor: usize,
+    /// Log entries loaded for the currently-selected agent; non-empty = log view active.
+    pub agent_log:         Vec<AgentLogEntry>,
+    /// Name shown in log view header.
+    pub agent_log_name:    String,
+    // ── Worktree panel ──
+    pub wt_list:           Vec<WorktreeInfo>,
+    pub wt_cursor:         usize,
+    pub wt_menu:           bool,
+    pub wt_menu_cursor:    usize,
 }
 
 impl App {
-    /// Create a new [`App`], restoring per-service env choices from disk.
     pub fn new() -> Self {
         Self {
-            snapshot: StatusSnapshot::default(),
-            cursor_idx: 0,
-            svc_envs: load_svc_envs(),
-            last_action: None,
-            render_tick: 0,
-            log_scroll: 0,
-            mode: AppMode::Normal,
-            menu_cursor: 0,
+            snapshot:          StatusSnapshot::default(),
+            cursor_idx:        0,
+            svc_envs:          load_svc_envs(),
+            last_action:       None,
+            render_tick:       0,
+            log_scroll:        0,
+            mode:              AppMode::Normal,
+            menu_cursor:       0,
+            scroll_tick:       0,
+            agent_cursor:      0,
+            agent_list:        Vec::new(),
+            agent_menu:        false,
+            agent_menu_cursor: 0,
+            agent_log:         Vec::new(),
+            agent_log_name:    String::new(),
+            wt_list:           Vec::new(),
+            wt_cursor:         0,
+            wt_menu:           false,
+            wt_menu_cursor:    0,
         }
     }
 
-    /// Persist current per-service env choices to disk (silent on error).
-    pub fn save_envs(&self) {
-        let path = state_path();
-        if let Some(parent) = path.parent() {
-            let _ = std::fs::create_dir_all(parent);
-        }
-        let content = DK_SERVICES.iter().enumerate()
-            .map(|(i, svc)| format!("{}={}", svc, ENVS[self.svc_envs[i]]))
-            .collect::<Vec<_>>()
-            .join("\n");
-        let _ = std::fs::write(path, content);
-    }
+    // ── Service menu ──────────────────────────────────────────────────────────
 
     pub fn open_menu(&mut self) {
         self.menu_cursor = 0;
         self.mode = AppMode::Menu;
     }
-
-    pub fn close_menu(&mut self) {
-        self.mode = AppMode::Normal;
-    }
+    pub fn close_menu(&mut self) { self.mode = AppMode::Normal; }
 
     pub fn menu_prev(&mut self) {
-        if self.menu_cursor == 0 {
-            self.menu_cursor = MENU_ITEMS.len() - 1;
-        } else {
-            self.menu_cursor -= 1;
-        }
+        if self.menu_cursor == 0 { self.menu_cursor = MENU_ITEMS.len() - 1; }
+        else { self.menu_cursor -= 1; }
     }
-
     pub fn menu_next(&mut self) {
         self.menu_cursor = (self.menu_cursor + 1) % MENU_ITEMS.len();
     }
+    pub fn menu_action(&self) -> &'static str { MENU_ITEMS[self.menu_cursor].1 }
 
-    pub fn menu_action(&self) -> &'static str {
-        MENU_ITEMS[self.menu_cursor].1
-    }
+    pub fn set_error(&mut self, msg: String)  { self.mode = AppMode::Error(msg); }
+    pub fn clear_error(&mut self)             { self.mode = AppMode::Normal; }
 
-    pub fn set_error(&mut self, msg: String) {
-        self.mode = AppMode::Error(msg);
-    }
-
-    pub fn clear_error(&mut self) {
-        self.mode = AppMode::Normal;
-    }
-
-    /// Clear a pending action by service index.
     pub fn clear_action_for(&mut self, idx: usize) {
         if matches!(&self.last_action, Some((i, _)) if *i == idx) {
             self.last_action = None;
         }
     }
 
-    /// Scroll log panel up (towards older entries).
+    // ── Scroll ────────────────────────────────────────────────────────────────
+
+    pub fn allow_mouse_scroll(&mut self) -> bool {
+        self.scroll_tick = self.scroll_tick.wrapping_add(1);
+        self.scroll_tick % 2 == 0
+    }
     pub fn log_scroll_up(&mut self, n: usize) {
         self.log_scroll = self.log_scroll.saturating_add(n);
     }
-
-    /// Scroll log panel down (towards newer entries).
     pub fn log_scroll_down(&mut self, n: usize) {
         self.log_scroll = self.log_scroll.saturating_sub(n);
     }
 
-    /// Total navigable items: dk services + utils.
-    pub fn total_items(&self) -> usize {
-        DK_SERVICES.len() + self.snapshot.utils.len()
-    }
+    // ── Main cursor ───────────────────────────────────────────────────────────
 
-    /// Whether the cursor is currently on a utils item.
-    pub fn is_utils_selected(&self) -> bool {
-        self.cursor_idx >= DK_SERVICES.len()
-    }
+    pub fn total_items(&self) -> usize { DK_SERVICES.len() + self.snapshot.utils.len() }
+    pub fn is_utils_selected(&self) -> bool { self.cursor_idx >= DK_SERVICES.len() }
 
-    /// Return the name of the currently selected service.
     pub fn current_service(&self) -> &str {
         if self.cursor_idx < DK_SERVICES.len() {
             DK_SERVICES[self.cursor_idx]
@@ -168,29 +186,18 @@ impl App {
             name.strip_prefix("leech-").unwrap_or(name)
         }
     }
-
-    /// Return the currently selected environment string for the active service.
     pub fn current_env(&self) -> &str {
         if self.cursor_idx < DK_SERVICES.len() {
             ENVS[self.svc_envs[self.cursor_idx]]
-        } else {
-            ""
-        }
+        } else { "" }
     }
-
-    /// Move the cursor up, wrapping to the last item.
     pub fn move_up(&mut self) {
         let total = self.total_items();
         if total == 0 { return; }
-        if self.cursor_idx == 0 {
-            self.cursor_idx = total - 1;
-        } else {
-            self.cursor_idx -= 1;
-        }
+        if self.cursor_idx == 0 { self.cursor_idx = total - 1; }
+        else { self.cursor_idx -= 1; }
         self.log_scroll = 0;
     }
-
-    /// Move the cursor down, wrapping to the first item.
     pub fn move_down(&mut self) {
         let total = self.total_items();
         if total == 0 { return; }
@@ -198,11 +205,8 @@ impl App {
         self.log_scroll = 0;
     }
 
-    /// Cycle the selected environment for the current service (only when stopped).
     pub fn cycle_env(&mut self) {
-        if self.cursor_idx >= DK_SERVICES.len() {
-            return;
-        }
+        if self.cursor_idx >= DK_SERVICES.len() { return; }
         let idx = self.cursor_idx;
         let svc = DK_SERVICES[idx];
         let app_container = format!("leech-dk-{svc}-app");
@@ -210,6 +214,116 @@ impl App {
             .any(|d| d.name == app_container && d.is_up);
         if !is_running {
             self.svc_envs[idx] = (self.svc_envs[idx] + 1) % ENVS.len();
+            save_svc_envs(&self.svc_envs);
         }
+    }
+
+    // ── Agent panel ───────────────────────────────────────────────────────────
+
+    pub fn open_agents(&mut self, agents: Vec<AgentInfo>) {
+        self.agent_cursor      = 0;
+        self.agent_menu        = false;
+        self.agent_menu_cursor = 0;
+        self.agent_list        = agents;
+        self.mode              = AppMode::AgentPanel;
+    }
+    pub fn close_agents(&mut self) {
+        self.agent_menu = false;
+        self.mode       = AppMode::Normal;
+    }
+
+    pub fn agents_move_up(&mut self) {
+        let n = self.agent_list.len();
+        if n == 0 { return; }
+        if self.agent_cursor == 0 { self.agent_cursor = n - 1; }
+        else { self.agent_cursor -= 1; }
+    }
+    pub fn agents_move_down(&mut self) {
+        let n = self.agent_list.len();
+        if n == 0 { return; }
+        self.agent_cursor = (self.agent_cursor + 1) % n;
+    }
+
+    pub fn selected_agent_name(&self) -> Option<&str> {
+        self.agent_list.get(self.agent_cursor).map(|a| a.name.as_str())
+    }
+
+    // ── Agent sub-menu ────────────────────────────────────────────────────────
+
+    pub fn open_agent_menu(&mut self) {
+        self.agent_menu        = true;
+        self.agent_menu_cursor = 0;
+    }
+    pub fn close_agent_menu(&mut self) { self.agent_menu = false; }
+
+    pub fn open_agent_log(&mut self, name: &str, entries: Vec<AgentLogEntry>) {
+        self.agent_log_name = name.to_string();
+        self.agent_log      = entries;
+        self.agent_menu     = false;
+    }
+    pub fn close_agent_log(&mut self) {
+        self.agent_log.clear();
+        self.agent_log_name.clear();
+    }
+
+    pub fn agent_menu_prev(&mut self) {
+        if self.agent_menu_cursor == 0 {
+            self.agent_menu_cursor = AGENT_MENU_ITEMS.len() - 1;
+        } else {
+            self.agent_menu_cursor -= 1;
+        }
+    }
+    pub fn agent_menu_next(&mut self) {
+        self.agent_menu_cursor = (self.agent_menu_cursor + 1) % AGENT_MENU_ITEMS.len();
+    }
+    pub fn agent_menu_action(&self) -> &'static str {
+        AGENT_MENU_ITEMS[self.agent_menu_cursor].1
+    }
+
+    // ── Worktree panel ───────────────────────────────────────────────────────
+
+    pub fn open_worktrees(&mut self, worktrees: Vec<WorktreeInfo>) {
+        self.wt_cursor      = 0;
+        self.wt_menu        = false;
+        self.wt_menu_cursor = 0;
+        self.wt_list        = worktrees;
+        self.mode            = AppMode::WorktreePanel;
+    }
+    pub fn close_worktrees(&mut self) {
+        self.wt_menu = false;
+        self.mode    = AppMode::Normal;
+    }
+
+    pub fn wt_move_up(&mut self) {
+        let n = self.wt_list.len();
+        if n == 0 { return; }
+        if self.wt_cursor == 0 { self.wt_cursor = n - 1; }
+        else { self.wt_cursor -= 1; }
+    }
+    pub fn wt_move_down(&mut self) {
+        let n = self.wt_list.len();
+        if n == 0 { return; }
+        self.wt_cursor = (self.wt_cursor + 1) % n;
+    }
+
+    pub fn selected_wt(&self) -> Option<&WorktreeInfo> {
+        self.wt_list.get(self.wt_cursor)
+    }
+
+    pub fn open_wt_menu(&mut self) {
+        self.wt_menu        = true;
+        self.wt_menu_cursor = 0;
+    }
+    pub fn close_wt_menu(&mut self) { self.wt_menu = false; }
+
+    pub fn wt_menu_prev(&mut self) {
+        if self.wt_menu_cursor == 0 { self.wt_menu_cursor = WT_MENU_ITEMS.len() - 1; }
+        else { self.wt_menu_cursor -= 1; }
+    }
+    pub fn wt_menu_next(&mut self) {
+        self.wt_menu_cursor = (self.wt_menu_cursor + 1) % WT_MENU_ITEMS.len();
+    }
+    pub fn wt_menu_action(&self) -> &'static str {
+        WT_MENU_ITEMS[self.wt_menu_cursor].1
     }
 }

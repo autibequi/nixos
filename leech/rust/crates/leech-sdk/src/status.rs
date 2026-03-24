@@ -7,7 +7,7 @@ use crate::logs::LogEntry;
 use crate::quota::QuotaInfo;
 
 /// A point-in-time snapshot of the Leech system status.
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct StatusSnapshot {
     pub agents: Vec<SessionInfo>,
     pub background: Vec<SessionInfo>,
@@ -25,7 +25,7 @@ pub struct StatusSnapshot {
 }
 
 /// Info about a Leech agent/background session.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct SessionInfo {
     pub name: String,
     /// Short display identifier derived from container name (e.g. "975096e6").
@@ -51,14 +51,14 @@ fn container_short_id(name: &str) -> String {
     name.rsplit('-').next().unwrap_or(name).to_string()
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct MountStatus {
     pub label: String,
     pub present: bool,
 }
 
 /// Info about a dockerized service (leech-dk-*).
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct DkServiceInfo {
     pub name: String,
     pub status: String,
