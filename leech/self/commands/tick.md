@@ -1,133 +1,108 @@
 # /tick — Despachante Central
 
-> Sem conversa. Sem output desnecessário. Ler DASHBOARD, decidir, despachar, logar.
+**EXECUÇÃO AUTÔNOMA. Não perguntar nada. Não explicar o que vai fazer. Executar agora e reportar ao final.**
 
 ---
 
-## Fase 1 — Verificar Quota
+## EXECUTE AGORA
+
+### 1. Quota
 
 ```bash
-cat /workspace/host/.ephemeral/usage-bar.txt 2>/dev/null | head -3
+cat /workspace/host/.ephemeral/usage-bar.txt 2>/dev/null | head -5
 ```
 
-Extrair `pct=` da linha `---API_USAGE---`. Regras:
-- `pct > 90`: SKIP total — logar e encerrar
-- `pct > 85 e <= 90`: despachar só #haiku
-- `pct <= 85`: despachar todos (#haiku + #sonnet + #opus)
+Extrair `pct=` da linha `---API_USAGE---`. Guardar como PCT.
 
----
+- PCT > 90 → SKIP: ir direto para o Log e encerrar
+- PCT > 85 → despachar só #haiku
+- PCT <= 85 → despachar todos
 
-## Fase 2 — Ler DASHBOARD
+### 2. Ler DASHBOARD
 
 ```bash
 cat /workspace/obsidian/bedrooms/DASHBOARD.md
 ```
 
-Parsear o kanban:
-- **SLEEPING**: cards com `- [ ] **nome**`
-- **WORKING**: cards em execução
-- **DONE**: cards idle
-- **WAITING**: cards aguardando usuário (não tocar — são decisão humana)
+### 3. Garantir todos os agentes têm card
 
----
-
-## Fase 3 — Garantir Todos os Agentes Têm Card
-
-Listar todos os agentes conhecidos:
 ```bash
 ls /workspace/self/agents/
 ```
 
-Para cada agente sem card no DASHBOARD: adicionar na coluna SLEEPING com as tags corretas do seu `agent.md` (extrair `model:` do frontmatter para #modelo, `clock:` para #schedule).
-
-Formato de card novo:
+Para cada agente sem card em nenhuma coluna do DASHBOARD: criar card em SLEEPING:
 ```
-- [ ] **nome** #modelo #schedule `last:TIMESTAMP_AGORA`
+- [ ] **nome** #modelo #ever60min `last:TIMESTAMP_AGORA`
 ```
+(extrair `model:` do frontmatter de `agents/nome/agent.md` para determinar #modelo)
 
-Timestamp: `$(date -u +%Y-%m-%dT%H:%MZ)`
+### 4. Identificar quem despachar
 
----
+**SLEEPING com schedule vencido:**
+- Extrair `#everNmin` ou `#everday` do card
+- Extrair timestamp `last:TIMESTAMP`
+- Calcular: `now_epoch - last_epoch >= intervalo_segundos`
+- `#on-demand` → NUNCA despachar
 
-## Fase 4 — Identificar Agentes a Despachar
-
-### A. SLEEPING com schedule vencido
-
-Para cada card em SLEEPING com `#everXmin` ou `#everday`:
-- Extrair o timestamp `` `last:TIMESTAMP` ``
-- Calcular se vencido: `now - last >= schedule_interval`
-- Se vencido E modelo permitido pela quota → **adicionar à lista de despacho**
-- `#on-demand`: NUNCA despachar automaticamente
-
-### B. WORKING mortos (> 1h sem lock)
-
-Para cada card em WORKING com `` `started:TIMESTAMP` ``:
+**WORKING mortos (>1h):**
 ```bash
-# Verificar locks ativos
 ls /tmp/leech-locks/ 2>/dev/null
 ```
-- Se `now - started >= 3600s` E sem lock ativo em `/tmp/leech-locks/` → tratar como morto
-- Mover card de volta para SLEEPING e adicionar à lista de despacho
+- Card em WORKING com `started:TIMESTAMP` onde `now - started >= 3600s` e sem lock ativo → morto, re-despachar
 
----
+### 5. Atualizar DASHBOARD
 
-## Fase 5 — Atualizar DASHBOARD
+Para cada agente a despachar: editar DASHBOARD.md movendo card de SLEEPING→WORKING.
+Substituir `` `last:TIMESTAMP` `` por `` `started:TIMESTAMP_AGORA` ``
 
-Para cada agente na lista de despacho:
-- Mover card de SLEEPING → WORKING no DASHBOARD.md
-- Substituir `` `last:TIMESTAMP` `` por `` `started:TIMESTAMP_AGORA` ``
+Fazer tudo em uma edição consolidada.
 
-Editar DASHBOARD.md com as mudanças acumuladas (uma edição consolidada).
-
----
-
-## Fase 6 — Logar Início
+### 6. Log de início
 
 ```bash
-NOW=$(date -u +%Y-%m-%dT%H:%MZ)
-LISTA="agente1,agente2,agente3"
-echo "| $NOW | tick | start | ${N} agents: $LISTA |" \
+echo "| $(date -u +%Y-%m-%dT%H:%MZ) | tick | start | N agents: lista |" \
+  >> /workspace/obsidian/bedrooms/_logs/ticker.md
+```
+
+### 7. Despachar
+
+Prompt exato para cada agente: **`EXECUTE MODO AUTONOMO`**
+
+- `#haiku` → lançar em paralelo (múltiplos Agent tool calls na mesma mensagem)
+- `#sonnet` / `#opus` → `run_in_background=true`, grupos de 2
+
+Se PCT > 90: pular esta etapa.
+Se PCT > 85: lançar apenas #haiku.
+
+### 8. Log de fim
+
+```bash
+echo "| $(date -u +%Y-%m-%dT%H:%MZ) | tick | end | ok |" \
+  >> /workspace/obsidian/bedrooms/_logs/ticker.md
+```
+
+Se skip:
+```bash
+echo "| $(date -u +%Y-%m-%dT%H:%MZ) | tick | skip | pct=${PCT}% > 90 |" \
   >> /workspace/obsidian/bedrooms/_logs/ticker.md
 ```
 
 ---
 
-## Fase 7 — Despachar em Paralelo
+## RELATÓRIO FINAL
 
-Prompt para cada agente: `"EXECUTE MODO AUTONOMO"`
+Ao terminar, imprimir apenas:
 
-**Agentes #haiku** — lançar em paralelo (uma mensagem, múltiplos tool calls Agent):
-- Usar `subagent_type` do agente (ou inferir pelo model)
-- Não usar `run_in_background` para haiku (são rápidos)
-
-**Agentes #sonnet e #opus** — `run_in_background=true`, grupos de 2 para não sobrecarregar
-
-Se pct > 85: lançar apenas agentes #haiku.
-Se pct > 90: SKIP, não lançar nenhum.
-
----
-
-## Fase 8 — Logar Fim
-
-```bash
-NOW=$(date -u +%Y-%m-%dT%H:%MZ)
-echo "| $NOW | tick | end | ok |" \
-  >> /workspace/obsidian/bedrooms/_logs/ticker.md
+```
+TICK [HH:MMZ] pct=XX%
+━━━━━━━━━━━━━━━━━━━━━
+dispatched : N agents
+  haiku    : nome, nome, nome
+  sonnet   : nome, nome
+  skipped  : nome (#on-demand), nome (#quota)
+  mortos   : nome (resgatado)
+━━━━━━━━━━━━━━━━━━━━━
+status     : ok | skip | partial
 ```
 
-Se SKIP por quota:
-```bash
-echo "| $NOW | tick | skip | pct=${PCT}% > 90 |" \
-  >> /workspace/obsidian/bedrooms/_logs/ticker.md
-```
-
----
-
-## Regras Absolutas
-
-- NUNCA tocar cards em WAITING (são para o usuário)
-- NUNCA commitar
-- NUNCA despachar agentes #on-demand automaticamente
-- Se agente falhar no despacho: continuar com os demais, logar o erro
-- Ciclo vazio (nenhum vencido, nenhum morto) = encerrar silenciosamente após logar
-- Sempre encerrar com log de fim
+Nenhum outro texto. Nenhuma pergunta. Nenhuma explicação.

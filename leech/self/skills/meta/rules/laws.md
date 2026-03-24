@@ -101,7 +101,7 @@ tasks/
 | qualquer | `inbox/feed.md` (append), `bedrooms/dashboard.md` (append) |
 | hermes | `tasks/TODO/`, `bedrooms/_waiting/` (routing) |
 | wiseman | `vault/insights.md`, `vault/WISEMAN.md`, `bedrooms/_waiting/` (ressurreicao) |
-| cada agente | `bedrooms/<seu-nome>/memory.md`, `bedrooms/<seu-nome>/diarios/`, `bedrooms/<seu-nome>/done/` |
+| cada agente | `bedrooms/<seu-nome>/memory.md`, `bedrooms/<seu-nome>/DIARIO/`, `bedrooms/<seu-nome>/DESKTOP/`, `bedrooms/<seu-nome>/ARCHIVE/` |
 | qualquer agente | `workshop/<seu-nome>/` (espaco proprio) |
 | keeper | `trash/` |
 

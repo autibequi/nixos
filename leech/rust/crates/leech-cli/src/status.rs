@@ -83,11 +83,41 @@ fn svc_git_dir(svc: &str) -> String {
         _               => "",
     };
     if !env_key.is_empty() {
+        // 1. Process environment
         if let Ok(dir) = std::env::var(env_key) {
             if !dir.is_empty() { return dir; }
         }
+        // 2. ~/.leech config file
+        if let Some(dir) = leech_config_key(env_key) {
+            if !dir.is_empty() { return dir; }
+        }
     }
-    format!("/workspace/mnt/estrategia/{}", svc)
+    // 3. Common host paths
+    let home = std::env::var("HOME").unwrap_or_default();
+    let candidates = [
+        format!("{home}/projects/estrategia/{svc}"),
+        format!("{home}/estrategia/{svc}"),
+        format!("/workspace/mnt/estrategia/{svc}"),
+    ];
+    for c in &candidates {
+        if std::path::Path::new(c).is_dir() { return c.clone(); }
+    }
+    format!("/workspace/mnt/estrategia/{svc}")
+}
+
+/// Read a KEY=value entry from ~/.leech without importing the full config module.
+fn leech_config_key(key: &str) -> Option<String> {
+    let home = std::env::var("HOME").unwrap_or_default();
+    let content = std::fs::read_to_string(format!("{home}/.leech")).ok()?;
+    let prefix = format!("{key}=");
+    for line in content.lines() {
+        let line = line.trim();
+        if line.starts_with('#') || line.is_empty() { continue; }
+        if let Some(val) = line.strip_prefix(&prefix) {
+            return Some(val.trim_matches('"').trim_matches('\'').to_string());
+        }
+    }
+    None
 }
 
 /// Read the current git branch of a directory by parsing .git/HEAD directly.

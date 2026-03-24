@@ -291,20 +291,36 @@ pub fn run_unified(name: &str, steps: Option<u32>) -> Result<()> {
     }
 }
 
-/// `leech auto/tick` — envia "rode /tick" para o Claude, que despacha os agentes.
+/// `leech auto/tick` — lê commands/tick.md e passa o body para o Claude executar.
 pub fn auto(dry_run: bool, _steps: Option<u32>) -> Result<()> {
+    // Localizar commands/tick.md (fonte da verdade do /tick)
+    let tick_cmd = {
+        let root = paths::leech_root();
+        let candidates = [
+            root.join("commands/tick.md"),
+            std::path::PathBuf::from("/workspace/self/commands/tick.md"),
+        ];
+        candidates.into_iter().find(|p| p.exists())
+            .or_else(|| paths::agent_file("tick"))
+            .ok_or_else(|| anyhow::anyhow!("[tick] commands/tick.md nao encontrado"))?
+    };
+
     if dry_run {
-        eprintln!("[tick] --dry-run: would send 'rode /tick'");
+        eprintln!("[tick] --dry-run: tick cmd em {}", tick_cmd.display());
         return Ok(());
     }
 
+    let content = std::fs::read_to_string(&tick_cmd)?;
+    let body = extract_body(&content);
+    let prompt = if body.trim().is_empty() { content.clone() } else { body };
     let home = paths::home();
+
     let status = Command::new("claude")
         .args([
             "--permission-mode", "bypassPermissions",
             "--model", "haiku",
             "--max-turns", "30",
-            "-p", "rode /tick",
+            "-p", &prompt,
             "--add-dir", &home.to_string_lossy(),
         ])
         .env("HEADLESS", "1")

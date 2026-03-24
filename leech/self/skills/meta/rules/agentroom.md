@@ -74,13 +74,14 @@ ls /workspace/obsidian/outbox/para-SEUNOME-*.md 2>/dev/null
 
 ```
 bedrooms/<nome>/
-├── memory.md       — persistente (unico arquivo, atualizar ANTES de reagendar)
-├── DIARIO.md       — append-only
-├── diarios/        — logs por ciclo
-├── outputs/        — artefatos internos
-├── cartas/         — copias CTO
-└── done/           — cards concluidos
+├── memory.md          — persistente (atualizar ANTES de reagendar — Lei 2)
+├── done/              — runner coloca cards aqui — agente nao toca
+├── DIARIO/<ANO>/      — logs mensais  ex: DIARIO/2026/03.md
+├── DESKTOP/<tarefa>/  — artefatos ativos, trabalho em andamento
+└── ARCHIVE/<tarefa>/  — concluidos, cartas ao CTO, legado preservado
 ```
+
+Regras completas: `self/skills/meta/rules/bedrooms.md` (ler no boot junto com RULES.md)
 
 ## memory.md
 
@@ -113,7 +114,7 @@ workshop/
 │   └── front-student/
 ├── wanderer/         — exploracao e sintese
 ├── wiseman/          — grafo e weaving
-├── jafar/            — reflexao e proposta
+├── gandalf/          — reflexao, proposta e free_roam
 ├── mechanic/         — auditorias e scans
 ├── assistant/        — monitoramento
 ├── hermes/           — logs de roteamento
