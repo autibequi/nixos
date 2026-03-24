@@ -23,12 +23,24 @@ _leech_dk_logs() {
 
   if [[ "$running" -gt 0 ]]; then
     local ARGS="--tail $tail_lines"
-    [[ -n "$follow" ]] && ARGS="$ARGS -f"
-    docker compose -f "$compose" -p "$project" logs --no-log-prefix $ARGS
+    if [[ -n "$follow" ]]; then
+      ARGS="$ARGS -f"
+      trap '' INT
+      ( trap - INT; exec docker compose -f "$compose" -p "$project" logs --no-log-prefix $ARGS )
+      trap - INT
+      echo
+      leech status
+    else
+      docker compose -f "$compose" -p "$project" logs --no-log-prefix $ARGS
+    fi
   elif [[ -f "$log_dir/service.log" ]]; then
     echo "=== Container parado. Mostrando log gravado ==="
     if [[ -n "$follow" ]]; then
-      tail -f "$log_dir/service.log"
+      trap '' INT
+      ( trap - INT; exec tail -f "$log_dir/service.log" )
+      trap - INT
+      echo
+      leech status
     else
       tail -n "$tail_lines" "$log_dir/service.log"
     fi

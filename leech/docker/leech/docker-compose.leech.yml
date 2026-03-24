@@ -75,7 +75,7 @@ x-base-volumes: &base-volumes
   - ${XDG_DATA_HOME:-${HOME}/.local/share}/leech:/home/claude/.local/share/leech
   # Mirror mounts: host paths acessiveis dentro do container (Docker build context + daemon volumes)
   - ${HOME}/projects:${HOME}/projects
-  - ${HOME}/nixos:${HOME}/nixos:ro
+  - ${HOME}/nixos:${HOME}/nixos:${CLAUDIO_HOST_OPTS:-ro}
   # Lab mode: nixos repo editavel em /workspace/host (rw apenas quando CLAUDIO_HOST_OPTS=rw)
   - ${HOME}/nixos:/workspace/host:${CLAUDIO_HOST_OPTS:-ro}
   # NÃO montar volume em /nix: volume vazio substitui o store da imagem → /bin/bash quebra

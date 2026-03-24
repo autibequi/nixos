@@ -147,5 +147,9 @@ _leech_dk_run() {
   printf "\033]0;%s\007" "$label"                    # título da aba/janela
   printf "\033k%s\033\\" "$label" 2>/dev/null || true # pane tmux
 
-  docker compose $COMPOSE_ARGS logs -f --no-log-prefix --tail 50
+  trap '' INT
+  ( trap - INT; exec docker compose $COMPOSE_ARGS logs -f --no-log-prefix --tail 50 )
+  trap - INT
+  echo
+  leech status
 }

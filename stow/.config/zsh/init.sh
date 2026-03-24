@@ -6,7 +6,7 @@ source ~/secrets.sh
 
 # Claude Code — esconde do history
 HISTORY_IGNORE="(claude*|leech|leech*|zion|zion*|puppy*)"
-alias zion=leech
+alias zion="leech status"
 
 # Pula init interativo em automação (Claude Code, dumb terminals, etc)
 if [[ -n "$CLAUDECODE" || "$TERM" == "dumb" ]]; then
