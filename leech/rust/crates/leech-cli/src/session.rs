@@ -418,7 +418,7 @@ impl SessionRunner {
             ". /workspace/self/scripts/bootstrap.sh; \
              cd /workspace/mnt; \
              agent --version >/dev/null 2>&1 || {{ echo \"leech: cursor-agent expirou ou nao instalado. Rode: leech build --danger\" >&2; exit 1; }}; \
-             exec agent {agent_flags_str}"
+             printf '\\033[H\\033[2J'; exec agent {agent_flags_str}"
         );
 
         let vol_args = self.volume_args();

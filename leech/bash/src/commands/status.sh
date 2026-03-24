@@ -371,7 +371,7 @@ while true; do
             break
             ;;
           l)
-            trap '' INT
+            trap ':' INT
             printf "\033[2J\033[H"
             leech docker "$_cursor_svc" logs || true
             trap 'exit 0' INT TERM
@@ -379,7 +379,7 @@ while true; do
             break
             ;;
           t)
-            trap '' INT
+            trap ':' INT
             printf "\033[2J\033[H"
             leech docker "$_cursor_svc" test || true
             trap 'exit 0' INT TERM
@@ -387,7 +387,7 @@ while true; do
             break
             ;;
           x)
-            trap '' INT
+            trap ':' INT
             printf "\033[2J\033[H"
             leech docker "$_cursor_svc" shell || true
             trap 'exit 0' INT TERM

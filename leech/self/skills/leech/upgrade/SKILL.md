@@ -37,10 +37,9 @@ Implementar features no Leech de forma autonoma dentro do container. Criar workt
 
 | Tipo | Onde editar | Worktree? |
 |------|-------------|-----------|
-| CLI — novo comando ou flag | `/workspace/host/leech/bash/src/` | Sim |
-| CLI — logica de comando existente | `/workspace/host/leech/bash/src/commands/` | Sim |
+| CLI — novo comando ou flag | `/workspace/host/leech/rust/crates/leech-cli/src/` | Sim |
+| CLI — logica de comando existente | `/workspace/host/leech/rust/crates/leech-cli/src/commands/` | Sim |
 | Docker — compose, Dockerfile | `/workspace/host/leech/docker/` | Sim |
-| Rust TUI | `/workspace/host/leech/rust/` | Sim |
 | Agente — comportamento, schedule, model | `/workspace/self/agents/<nome>/agent.md` | Nao |
 | Skill — criar ou atualizar | `/workspace/self/skills/` | Nao |
 | Hook — pre/post-tool, session-start | `/workspace/self/hooks/claude-code/` | Nao |
@@ -58,55 +57,41 @@ git -C /workspace/host worktree add /tmp/leech-upgrade-<feature> -b feat/leech-<
 
 ### 2. Mapear o que precisa mudar
 
-Para CLI, identificar:
-- Novo comando? Adicionar em `bashly.yml` + criar `src/commands/<nome>.sh`
-- Nova flag global? Adicionar em `bashly.yml` em `flags:`
-- Logica de comando existente? Editar o `.sh` correspondente em `src/commands/`
-- Funcao compartilhada? Editar ou criar em `src/lib/`
+Para CLI Rust, identificar:
+- Novo comando? Adicionar variante em `enum Commands` em `main.rs` + dispatch + funcao em `commands/`
+- Nova flag global? Adicionar em `Cli` struct
+- Logica de comando existente? Editar o `.rs` correspondente em `commands/`
+- Atualizar exemplos em `help.rs` (DIRECTIVE: obrigatorio a cada mudanca)
 
 Ler o comando mais proximo para entender padrao:
 ```bash
-# ver comandos existentes como referencia
-ls /tmp/leech-upgrade-<feature>/leech/bash/src/commands/
+ls /tmp/leech-upgrade-<feature>/leech/rust/crates/leech-cli/src/commands/
 ```
 
 ### 3. Implementar
 
-Editar os arquivos no worktree em `/tmp/leech-upgrade-<feature>/leech/bash/src/`.
-
-Se `bashly.yml` foi alterado (novo comando, nova flag), regenerar o CLI:
-```bash
-nix-shell -p bashly --run \
-  "cd /tmp/leech-upgrade-<feature>/leech/bash && bashly generate"
-```
+Editar os arquivos no worktree em `/tmp/leech-upgrade-<feature>/leech/rust/crates/leech-cli/src/`.
 
 ### 4. Testar
 
 ```bash
-# Executar o CLI gerado diretamente
-bash /tmp/leech-upgrade-<feature>/leech/bash/leech <comando> <args>
+# Compilar
+nix-shell -p rustc cargo --run \
+  "cd /tmp/leech-upgrade-<feature>/leech/rust && cargo build --release -p leech-cli 2>&1 | tail -5"
 
-# Checar sintaxe de um arquivo
-bash -n /tmp/leech-upgrade-<feature>/leech/bash/src/commands/<arquivo>.sh
-
-# Testar funcao de lib em isolamento
-source /tmp/leech-upgrade-<feature>/leech/bash/src/lib/<lib>.sh
-<funcao> <args>
-
-# Ver help do novo comando
-bash /tmp/leech-upgrade-<feature>/leech/bash/leech <comando> --help
+# Executar o binario diretamente
+/tmp/leech-upgrade-<feature>/leech/rust/target/release/leech <comando> --help
+/tmp/leech-upgrade-<feature>/leech/rust/target/release/leech <comando> <args>
 ```
 
-Para testes que precisariam do Docker (ex: `leech docker run`), testar a logica sem side effects:
+Para testes que precisariam do Docker (ex: `leech runner mono status`), testar a logica sem side effects:
 ```bash
-# Simular env sem docker real
-DOCKER_HOST=invalid bash /tmp/.../leech/bash/leech docker status 2>&1
-# Verificar que o codigo correto e executado (error esperado do docker, nao de sintaxe)
+DOCKER_HOST=invalid /tmp/.../leech/rust/target/release/leech runner mono status 2>&1
 ```
 
 ### 5. Iterar ate funcionar
 
-Corrigir, regenerar se necessario, re-testar. Repetir ate todos os casos passarem.
+Corrigir, re-compilar, re-testar. Repetir ate todos os casos passarem.
 
 ### 6. Commitar no worktree
 
@@ -196,8 +181,8 @@ proximo:
 ## Regras de ouro
 
 - **Nunca editar main** do `/workspace/host` diretamente — sempre worktree
-- **Sempre testar antes de declarar pronto** — minimo: `bash -n` + 1 teste funcional
-- **bashly.yml alterado?** Obrigatorio rodar `bashly generate` e testar o binario gerado
+- **Sempre testar antes de declarar pronto** — minimo: compilar + `leech <cmd> --help` + 1 teste funcional
+- **main.rs alterado?** Obrigatorio atualizar `help.rs` (DIRECTIVE no topo do arquivo)
 - **Nunca chamar** `leech stow`, `leech switch` ou `leech os` de dentro do container
 - **Indices de skills**: ao criar/mover skill, atualizar SKILL.md do namespace pai
 - **Nao pedir ao usuario para rodar comandos** — se precisar testar algo, encontrar forma de testar autonomamente
@@ -208,16 +193,17 @@ proximo:
 
 ### Adicionar novo comando ao CLI
 
-1. Criar `src/commands/<nome>.sh` com a logica
-2. Adicionar entrada em `bashly.yml` sob `commands:`
-3. Rodar `bashly generate`
-4. Testar: `bash leech <nome> --help` e `bash leech <nome> <args>`
+1. Adicionar funcao em `commands/<modulo>.rs` (ou criar novo modulo)
+2. Adicionar variante em `enum Commands` em `main.rs`
+3. Adicionar dispatch no `match` de `main.rs`
+4. Adicionar exemplos em `help.rs` (DIRECTIVE obrigatorio)
+5. Compilar e testar: `leech <nome> --help` e `leech <nome> <args>`
 
 ### Modificar comando existente
 
-1. Editar `src/commands/<nome>.sh`
-2. Se mudou assinatura: atualizar `bashly.yml` e regenerar
-3. Testar comportamento antigo + novo
+1. Editar `commands/<modulo>.rs`
+2. Se mudou assinatura: atualizar `main.rs` + `help.rs`
+3. Compilar e testar comportamento antigo + novo
 
 ### Adicionar novo agente
 
@@ -236,11 +222,10 @@ proximo:
 ## Capacidades disponiveis no container
 
 ```bash
-# Executar CLI leech do host (worktree ou main)
-bash /workspace/host/leech/bash/leech <cmd>
-
-# Regenerar CLI apos mudancas no bashly.yml
-nix-shell -p bashly --run "cd <worktree>/leech/bash && bashly generate"
+# Compilar e testar CLI Rust (worktree ou main)
+nix-shell -p rustc cargo --run \
+  "cd <worktree>/leech/rust && cargo build --release -p leech-cli 2>&1 | tail -5"
+<worktree>/leech/rust/target/release/leech <cmd>
 
 # Instalar qualquer ferramenta on-the-fly
 nix-shell -p <pacote> --run "<cmd>"

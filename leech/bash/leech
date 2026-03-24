@@ -2535,18 +2535,14 @@ _leech_dk_logs() {
     local ARGS="--tail $tail_lines"
     if [[ -n "$follow" ]]; then
       ARGS="$ARGS -f"
-      trap '' INT
-      ( trap - INT; exec docker compose -f "$compose" -p "$project" logs --no-log-prefix $ARGS )
-      trap - INT
+      docker compose -f "$compose" -p "$project" logs --no-log-prefix $ARGS || true
     else
       docker compose -f "$compose" -p "$project" logs --no-log-prefix $ARGS
     fi
   elif [[ -f "$log_dir/service.log" ]]; then
     echo "=== Container parado. Mostrando log gravado ==="
     if [[ -n "$follow" ]]; then
-      trap '' INT
-      ( trap - INT; exec tail -f "$log_dir/service.log" )
-      trap - INT
+      tail -f "$log_dir/service.log" || true
     else
       tail -n "$tail_lines" "$log_dir/service.log"
     fi
@@ -5605,7 +5601,7 @@ leech_status_command() {
               break
               ;;
             l)
-              trap '' INT
+              trap ':' INT
               printf "\033[2J\033[H"
               leech docker "$_cursor_svc" logs || true
               trap 'exit 0' INT TERM
@@ -5613,7 +5609,7 @@ leech_status_command() {
               break
               ;;
             t)
-              trap '' INT
+              trap ':' INT
               printf "\033[2J\033[H"
               leech docker "$_cursor_svc" test || true
               trap 'exit 0' INT TERM
@@ -5621,7 +5617,7 @@ leech_status_command() {
               break
               ;;
             x)
-              trap '' INT
+              trap ':' INT
               printf "\033[2J\033[H"
               leech docker "$_cursor_svc" shell || true
               trap 'exit 0' INT TERM

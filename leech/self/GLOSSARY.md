@@ -34,10 +34,10 @@ Nomenclatura do sistema. Referencia rapida para entender os termos usados em ski
 | Path | Conteudo |
 |------|---------|
 | `leech/self/` | Fonte da verdade — identidade, agents, commands, hooks, personas, scripts, skills, system |
-| `leech/bash/` | CLI bashly (source + generated) |
-| `leech/rust/` | CLI Rust (leech-cli, leech-sdk, leech-tui) |
+| `leech/bash/` | CLI bash legado (mantido para referência, não é o ativo) |
+| `leech/rust/` | CLI Rust ativo — fonte da verdade do leech CLI |
 | `leech/docker/` | Docker compose, Dockerfiles, entrypoints |
-| `~/.local/bin/leech` | Binario CLI (symlink) |
+| `~/.local/bin/leech` | Binario CLI Rust (instalado via `just install`) |
 | `~/.leech` | Config channel host <-> container |
 | `~/.local/share/leech/` | Logs, estado, cache |
 | `/tmp/leech-hive-mind` | Socket Docker compartilhado |
