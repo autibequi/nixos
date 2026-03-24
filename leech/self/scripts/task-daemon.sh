@@ -10,7 +10,8 @@ set -euo pipefail
 WORKSPACE="/workspace"
 OBSIDIAN="$WORKSPACE/obsidian"
 TASKS="$OBSIDIAN/tasks"
-AGENTS_DIR="$TASKS/AGENTS"
+AGENTS_WAITING="$OBSIDIAN/bedrooms/_waiting"
+AGENTS_WORKING="$OBSIDIAN/bedrooms/_working"
 LOGFILE="$OBSIDIAN/vault/.ephemeral/cron-logs/daemon.log"
 LOCKFILE="/tmp/leech-locks/daemon.lock"
 TASKS_LOG="$OBSIDIAN/vault/logs/tasks.md"
@@ -25,7 +26,7 @@ RUNNER="$SCRIPT_DIR/task-runner.sh"
 
 mkdir -p "$OBSIDIAN/vault/.ephemeral/cron-logs" "$OBSIDIAN/vault/logs" \
          "/tmp/leech-locks" "$TASKS/TODO" "$TASKS/DOING" "$TASKS/DONE" \
-         "$AGENTS_DIR" "$AGENTS_DIR/DOING"
+         "$AGENTS_WAITING" "$AGENTS_WORKING"
 
 log() { echo "[daemon:$(date +%H:%M:%S)] $*"; }
 
@@ -88,8 +89,8 @@ run_tick() {
     fi
   done
 
-  # Scan tasks/AGENTS/ for agent cards
-  for card in "$AGENTS_DIR"/*.md; do
+  # Scan bedrooms/_waiting/ for agent cards
+  for card in "$AGENTS_WAITING"/*.md; do
     [ -f "$card" ] || continue
     local filename; filename=$(basename "$card")
     local card_ts; card_ts=$(card_epoch "$filename")
@@ -112,14 +113,14 @@ run_tick() {
     fi
   done
 
-  # Recovery: tasks/AGENTS/DOING orphans
-  for card in "$AGENTS_DIR/DOING"/*.md; do
+  # Recovery: bedrooms/_working/ orphans
+  for card in "$AGENTS_WORKING"/*.md; do
     [ -f "$card" ] || continue
     local filename; filename=$(basename "$card")
     local card_base; card_base=$(basename "$filename" .md)
     if [ ! -d "/tmp/leech-locks/${card_base}.lock" ]; then
       due+=("agents:$filename")
-      log "  orphan (agent): $filename (in AGENTS/DOING but not locked)"
+      log "  orphan (agent): $filename (in _working but not locked)"
     fi
   done
 
@@ -151,8 +152,8 @@ run_tick() {
     log_task "$task_name" "start" "" ""
     local t0=$SECONDS
     if [ "$is_agent" = "1" ]; then
-      SCHEDULE_DIR="$AGENTS_DIR" \
-      RUNNING_DIR="$AGENTS_DIR/DOING" \
+      SCHEDULE_DIR="$AGENTS_WAITING" \
+      RUNNING_DIR="$AGENTS_WORKING" \
         "$RUNNER" "$filename" || log "  $filename finished with error"
     else
       "$RUNNER" "$filename" || log "  $filename finished with error"

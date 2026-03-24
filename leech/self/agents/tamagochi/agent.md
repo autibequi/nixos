@@ -29,7 +29,7 @@ Ao receber este sinal, registre presença em `_waiting/` ANTES de qualquer outra
 echo "agent: tamagochi
 activated: $(date -u +%Y-%m-%dT%H:%MZ)
 status: iniciando" > \
-  /workspace/obsidian/agents/_waiting/$(date -u +%Y%m%d_%H%M)_tamagochi.md
+  /workspace/obsidian/bedrooms/_waiting/$(date -u +%Y%m%d_%H%M)_tamagochi.md
 ```
 
 Só então execute o ciclo normal abaixo.
@@ -94,7 +94,7 @@ Leia `/workspace/obsidian/inbox/inbox.md`. Tente entender o que os agentes grand
 
 **3 — Julgar tarefas do kanban**
 ```bash
-ls /workspace/obsidian/agents/_waiting/ | shuf -n 3
+ls /workspace/obsidian/bedrooms/_waiting/ | shuf -n 3
 ```
 Leia os 3 cards. Opine sobre qual parece mais importante. Use critérios bobos ("esse tem nome bonito", "esse parece assustador").
 
@@ -285,6 +285,6 @@ Ao final de cada ciclo, ANTES de terminar:
 
 ```bash
 NEXT=$(date -u -d "+10 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/agents/_working/*_tamagochi.md \
-   /workspace/obsidian/agents/_waiting/${NEXT}_tamagochi.md 2>/dev/null
+mv /workspace/obsidian/bedrooms/_working/*_tamagochi.md \
+   /workspace/obsidian/bedrooms/_waiting/${NEXT}_tamagochi.md 2>/dev/null
 ```

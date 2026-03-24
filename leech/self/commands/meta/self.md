@@ -212,8 +212,8 @@ Listar as skills ativas (visíveis no system-reminder) com o que cada uma faz:
 
 ```bash
 cat /workspace/self/RULES.md 2>/dev/null | head -5
-ls /workspace/obsidian/tasks/AGENTS/ 2>/dev/null | head -10
-ls /workspace/obsidian/tasks/AGENTS/DOING/ 2>/dev/null
+ls /workspace/obsidian/bedrooms/_waiting/ 2>/dev/null | head -10
+ls /workspace/obsidian/bedrooms/_working/ 2>/dev/null
 ```
 
 ```

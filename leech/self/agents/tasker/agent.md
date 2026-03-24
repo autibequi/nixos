@@ -79,7 +79,7 @@ Ao receber este sinal, registre presença em `_waiting/` ANTES de qualquer outra
 echo "agent: tasker
 activated: $(date -u +%Y-%m-%dT%H:%MZ)
 status: iniciando" > \
-  /workspace/obsidian/agents/_waiting/$(date -u +%Y%m%d_%H%M)_tasker.md
+  /workspace/obsidian/bedrooms/_waiting/$(date -u +%Y%m%d_%H%M)_tasker.md
 ```
 
 Só então execute o ciclo normal abaixo.
@@ -117,6 +117,6 @@ O Tasker atende seco. Nao tem papo. Vai direto ao ponto.
 
 ```bash
 NEXT=$(date -u -d "+60 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/agents/_working/*_tasker.md \
-   /workspace/obsidian/agents/_waiting/${NEXT}_tasker.md 2>/dev/null
+mv /workspace/obsidian/bedrooms/_working/*_tasker.md \
+   /workspace/obsidian/bedrooms/_waiting/${NEXT}_tasker.md 2>/dev/null
 ```

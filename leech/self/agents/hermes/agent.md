@@ -27,7 +27,7 @@ Ao receber este sinal, registre presença em `_waiting/` ANTES de qualquer outra
 echo "agent: hermes
 activated: $(date -u +%Y-%m-%dT%H:%MZ)
 status: iniciando" > \
-  /workspace/obsidian/agents/_waiting/$(date -u +%Y%m%d_%H%M)_hermes.md
+  /workspace/obsidian/bedrooms/_waiting/$(date -u +%Y%m%d_%H%M)_hermes.md
 ```
 
 Só então execute o ciclo normal abaixo.
@@ -103,7 +103,7 @@ Registrar cada roteamento em feed.md: `[HH:MM] [hermes] outbox-livre: <arquivo> 
 ### 3. SCHEDULE — Gerenciar slots de execucao
 
 ```bash
-ls /workspace/obsidian/agents/_waiting/*.md 2>/dev/null
+ls /workspace/obsidian/bedrooms/_waiting/*.md 2>/dev/null
 ```
 
 Verificar:
@@ -170,8 +170,8 @@ Formato por ciclo:
 
 ```bash
 NEXT=$(date -u -d "+10 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/agents/_working/*_hermes.md \
-   /workspace/obsidian/agents/_waiting/${NEXT}_hermes.md 2>/dev/null
+mv /workspace/obsidian/bedrooms/_working/*_hermes.md \
+   /workspace/obsidian/bedrooms/_waiting/${NEXT}_hermes.md 2>/dev/null
 ```
 
 ---

@@ -60,8 +60,8 @@ done
 
 ### Tasks
 ```bash
-echo "AGENTS_QUEUED:" && ls /workspace/obsidian/tasks/AGENTS/ 2>/dev/null | wc -l
-echo "AGENTS_DOING:" && ls /workspace/obsidian/tasks/AGENTS/DOING/ 2>/dev/null
+echo "AGENTS_WAITING:" && ls /workspace/obsidian/bedrooms/_waiting/ 2>/dev/null | wc -l
+echo "AGENTS_WORKING:" && ls /workspace/obsidian/bedrooms/_working/ 2>/dev/null
 echo "TASKS_DOING:" && ls /workspace/obsidian/tasks/DOING/ 2>/dev/null
 echo "DONE_RECENT:" && ls -t /workspace/obsidian/bedrooms/*/done/ 2>/dev/null | head -5
 ```

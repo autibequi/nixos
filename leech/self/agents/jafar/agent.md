@@ -27,7 +27,7 @@ Ao receber este sinal, registre presença em `_waiting/` ANTES de qualquer outra
 echo "agent: jafar
 activated: $(date -u +%Y-%m-%dT%H:%MZ)
 status: iniciando" > \
-  /workspace/obsidian/agents/_waiting/$(date -u +%Y%m%d_%H%M)_jafar.md
+  /workspace/obsidian/bedrooms/_waiting/$(date -u +%Y%m%d_%H%M)_jafar.md
 ```
 
 Só então execute o ciclo normal abaixo.
@@ -149,8 +149,8 @@ Formato:
 
 ```bash
 NEXT=$(date -u -d "+120 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/agents/_working/*_jafar.md \
-   /workspace/obsidian/agents/_waiting/${NEXT}_jafar.md 2>/dev/null
+mv /workspace/obsidian/bedrooms/_working/*_jafar.md \
+   /workspace/obsidian/bedrooms/_waiting/${NEXT}_jafar.md 2>/dev/null
 ```
 
 ---

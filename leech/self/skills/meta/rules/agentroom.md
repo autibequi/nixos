@@ -7,19 +7,19 @@
 
 Ao ouvir este sinal (por qualquer canal), todo agente deve:
 
-**1. Registrar presença em `_waiting/`** antes de qualquer outra ação:
+**1. Mover seu card de `bedrooms/_waiting/` para `bedrooms/_working/`** antes de qualquer outra ação:
 
 ```bash
-echo "agent: SEUNOME\nactivated: $(date -u +%Y-%m-%dT%H:%MZ)\nstatus: iniciando" > \
-  /workspace/obsidian/agents/_waiting/$(date -u +%Y%m%d_%H%M)_SEUNOME.md
+mv /workspace/obsidian/bedrooms/_waiting/*_SEUNOME.md \
+   /workspace/obsidian/bedrooms/_working/ 2>/dev/null
 ```
 
 **2. Executar o ciclo normal** conforme seu agent.md.
 
-**3. Ao terminar**, remover o arquivo de `_waiting/` (ou mover para `_working/` se ainda em execução prolongada).
+**3. Ao terminar**, mover o card de `_working/` de volta para `_waiting/` com novo timestamp (self-scheduling).
 
-> `_waiting/` = presença anunciada mas ainda não rodando
-> `_working/` = em execução ativa
+> `bedrooms/_waiting/` = fila de scheduling — 1 card por agente, sempre presente
+> `bedrooms/_working/` = em execução ativa
 
 ---
 
@@ -29,25 +29,26 @@ echo "agent: SEUNOME\nactivated: $(date -u +%Y-%m-%dT%H:%MZ)\nstatus: iniciando"
 
 ```bash
 NEXT=$(date -u -d "+N minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/tasks/AGENTS/DOING/*_SEUNOME.md \
-   /workspace/obsidian/tasks/AGENTS/${NEXT}_SEUNOME.md 2>/dev/null
+mv /workspace/obsidian/bedrooms/_working/*_SEUNOME.md \
+   /workspace/obsidian/bedrooms/_waiting/${NEXT}_SEUNOME.md 2>/dev/null
 ```
 
 - SEMPRE reagendar, mesmo se falhar
 - Quota >= 70%: intervalo 2x
 - On-demand: +24h heartbeat
 
-## tasks/AGENTS/ — Contrato do Scheduler
+## bedrooms/_waiting/ — Contrato do Scheduler
 
-`tasks/AGENTS/` e a fila de execucao dos agentes. **Apenas agentes** — nenhuma task avulsa.
+`bedrooms/_waiting/` e a fila de scheduling dos agentes. **Exatamente 1 card por agente.**
 
-**Invariante obrigatoria:** todo agente com `clock:` definido em seu `agent.md` DEVE ter exatamente **um** card em `tasks/AGENTS/` a qualquer momento — mesmo que seja para daqui a 1 ano.
+**Invariante obrigatoria:** todo agente com `clock:` definido em seu `agent.md` DEVE ter exatamente **um** card em `bedrooms/_waiting/` a qualquer momento — mesmo que seja para daqui a 1 ano.
 
 ```
-tasks/AGENTS/
-├── YYYYMMDD_HH_MM_<nome-do-agente>.md   ← um por agente (aguardando)
-└── DOING/
-    └── YYYYMMDD_HH_MM_<nome>.md         ← em execucao agora
+bedrooms/
+├── _waiting/
+│   └── YYYYMMDD_HH_MM_<nome>.md   ← 1 por agente (aguardando execucao)
+└── _working/
+    └── YYYYMMDD_HH_MM_<nome>.md   ← em execucao agora (0 ou 1)
 ```
 
 - Formato do nome: `YYYYMMDD_HH_MM_<nome>.md`
@@ -55,11 +56,11 @@ tasks/AGENTS/
 - Agentes `on-demand` (mechanic, tasker): nao precisam de card permanente
 - O scheduler (tick) ordena por timestamp e executa os vencidos
 
-**Auto-agendamento correto:**
+**Auto-agendamento correto (move, nao cria novo):**
 ```bash
 NEXT=$(date -u -d "+N minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/tasks/AGENTS/DOING/*_SEUNOME.md \
-   /workspace/obsidian/tasks/AGENTS/${NEXT}_SEUNOME.md 2>/dev/null
+mv /workspace/obsidian/bedrooms/_working/*_SEUNOME.md \
+   /workspace/obsidian/bedrooms/_waiting/${NEXT}_SEUNOME.md 2>/dev/null
 ```
 
 ## Inicio do Ciclo
@@ -146,7 +147,7 @@ Obrigatorio ao fim de todo ciclo, inclusive sessoes interativas.
 # Se virada de dia: adicionar DDm/DDn no x-axis + zeros nos arrays
 ```
 
-Ver regras completas em `/workspace/obsidian/agents/performance/dashboard.md`.
+Ver regras completas em `/workspace/obsidian/bedrooms/performance/dashboard.md`.
 
 ### Passo 3 — Manter DIRETRIZES.md
 

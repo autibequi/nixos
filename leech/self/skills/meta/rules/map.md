@@ -16,9 +16,7 @@ Estrutura de diretorios do `/workspace/obsidian/`.
 ├── tasks/
 │   ├── TODO/             tasks one-off aguardando
 │   ├── DOING/            tasks em execucao
-│   ├── DONE/             tasks concluidas
-│   ├── AGENTS/           cards de agentes aguardando execucao
-│   └── AGENTS/DOING/     cards de agentes em execucao
+│   └── DONE/             tasks concluidas
 ├── workshop/             espaco de trabalho aberto
 │   ├── <agente>/         namespace proprio de cada agente
 │   └── <topico>/         conhecimento compartilhado (legado)
@@ -31,7 +29,10 @@ Estrutura de diretorios do `/workspace/obsidian/`.
 │   ├── ARCHIVE_LOG.md    audit trail de tudo que foi arquivado
 │   ├── tasks/done/YYYY-MM/   cards de tasks/DONE expirados (TTL 7d)
 │   └── bedrooms/<nome>/done/YYYY-MM/  cards de bedrooms expirados (TTL 14d)
-└── bedrooms/             memoria operacional
+└── bedrooms/             memoria operacional + scheduling
+    ├── _waiting/         fila de scheduling (1 card por agente, sempre)
+    ├── _working/         agente em execucao agora (0 ou 1 card)
+    ├── performance/      metricas de quota e tokens
     ├── <nome>/memory.md  memoria do agente
     ├── <nome>/done/      cards concluidos
     ├── <nome>/diarios/   logs por ciclo

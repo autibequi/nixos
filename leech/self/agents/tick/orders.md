@@ -19,7 +19,7 @@ acao: mover card de volta para _waiting com timestamp NOW para rodar no proximo 
 
 ```bash
 NOW=$(date +%s)
-for f in /workspace/obsidian/agents/_working/*.md; do
+for f in /workspace/obsidian/bedrooms/_working/*.md; do
   [ -f "$f" ] || continue
   fname=$(basename "$f")
   base="${fname%.md}"
@@ -30,7 +30,7 @@ for f in /workspace/obsidian/agents/_working/*.md; do
   age=$(( NOW - ts ))
   (( age >= 7200 )) || continue
   new_name="$(date -u +%Y%m%d_%H_%M)_$(echo "$fname" | sed 's/^[0-9]\{8\}_[0-9]\{2\}_[0-9]\{2\}_//')"
-  mv "$f" "/workspace/obsidian/agents/_waiting/$new_name"
+  mv "$f" "/workspace/obsidian/bedrooms/_waiting/$new_name"
   echo "[$(date -u +%H:%M)] [tick] rescue: $fname → _waiting/$new_name (preso ${age}s)" \
     >> /workspace/obsidian/inbox/feed.md
 done

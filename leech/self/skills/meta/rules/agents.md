@@ -21,7 +21,7 @@ updated: 2026-03-23T16:00Z
 
 ## Agentes On-Demand
 
-Mechanic e tasker nao tem card permanente em `tasks/AGENTS/`. So aparecem quando convocados via outbox.
+Mechanic e tasker nao tem card permanente em `bedrooms/_waiting/`. So aparecem quando convocados via outbox.
 
 ## Delegacao — quem faz o que
 

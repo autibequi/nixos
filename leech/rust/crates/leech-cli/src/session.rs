@@ -158,8 +158,7 @@ impl SessionRunner {
         let claude_args_str = claude_args.join(" ");
 
         let bash_cmd = format!(
-            ". /workspace/self/scripts/bootstrap.sh; \
-             cd /workspace/ghost && exec /home/claude/.nix-profile/bin/claude {claude_args_str}"
+            "cd /workspace/ghost && exec /home/claude/.nix-profile/bin/claude {claude_args_str}"
         );
 
         let mut args: Vec<String> = vec![
@@ -168,7 +167,7 @@ impl SessionRunner {
             "--workdir".into(), "/workspace/ghost".into(),
             "--entrypoint".into(), "/entrypoint.sh".into(),
             // Volumes mínimos — só o necessário para Claude Code funcionar
-            "-v".into(), format!("{leech_root}:/workspace/self"),
+            // /workspace/self NÃO é montado — ghost não tem acesso ao source do Leech
             "-v".into(), format!("{ghost_path}:/workspace/ghost:rw"),
             "-v".into(), format!("{home}/.claude:/home/claude/.claude"),
             "-v".into(), format!("{leech_root}/claude.bypass.json:/home/claude/.claude/settings.json:ro"),

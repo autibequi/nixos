@@ -42,7 +42,7 @@ ls /workspace/obsidian/inbox/ALERTA_*.md 2>/dev/null
 ### Tasks ativas e pendentes
 ```bash
 ls /workspace/obsidian/tasks/DOING/ 2>/dev/null
-ls /workspace/obsidian/tasks/AGENTS/ 2>/dev/null | wc -l
+ls /workspace/obsidian/bedrooms/_waiting/ 2>/dev/null | wc -l
 ls -t /workspace/obsidian/bedrooms/*/done/ 2>/dev/null | head -5
 ```
 

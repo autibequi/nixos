@@ -7,14 +7,14 @@ updated: 2026-03-23T16:00Z
 
 ## Agentes Periodicos
 
-Fila de execucao em `tasks/AGENTS/`:
+Fila de execucao em `bedrooms/_waiting/`:
 - Um card por agente com clock definido — sempre presente
 - On-demand (mechanic, tasker): so aparecem quando convocados
 - Formato: `YYYYMMDD_HH_MM_<nome>.md`
 
 Fluxo:
 ```
-tasks/AGENTS/ → tasks/AGENTS/DOING/ → reagenda (volta) ou bedrooms/<nome>/done/
+bedrooms/_waiting/ → bedrooms/_working/ → reagenda (volta para _waiting/) ou bedrooms/<nome>/done/
 ```
 
 ## Tasks One-Off

@@ -51,7 +51,7 @@ Ao receber este sinal, registre presença em `_waiting/` ANTES de qualquer outra
 echo "agent: paperboy
 activated: $(date -u +%Y-%m-%dT%H:%MZ)
 status: iniciando" > \
-  /workspace/obsidian/agents/_waiting/$(date -u +%Y%m%d_%H%M)_paperboy.md
+  /workspace/obsidian/bedrooms/_waiting/$(date -u +%Y%m%d_%H%M)_paperboy.md
 ```
 
 Só então execute o ciclo normal abaixo.
@@ -199,8 +199,8 @@ Feed: `[HH:MM] [paperboy] mensagem` em `/workspace/obsidian/inbox/feed.md`
 
 ```bash
 NEXT=$(date -u -d "+60 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/agents/_working/*_paperboy.md \
-   /workspace/obsidian/agents/_waiting/${NEXT}_paperboy.md 2>/dev/null
+mv /workspace/obsidian/bedrooms/_working/*_paperboy.md \
+   /workspace/obsidian/bedrooms/_waiting/${NEXT}_paperboy.md 2>/dev/null
 ```
 
 ---

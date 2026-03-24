@@ -80,10 +80,13 @@ _symlinks() {
 }
 
 _rust() {
-  local rust_dir="$nixos_dir/leech/rust"
-  [[ -d "$rust_dir" ]] || return 0
+  # Recalcula paths localmente — vars externas podem não sobreviver ao fork do _run_step &
+  local rust_dir
+  rust_dir="$(cd "${nixos_dir:-$HOME/nixos}/leech/rust" 2>/dev/null && pwd)" || return 0
+  local out_bin="$rust_dir/target/release/leech"
+  local dst_bin="${HOME}/.local/bin/leech"
   if command -v cargo &>/dev/null; then
-    cd "$rust_dir" && cargo build --release -p leech-cli || exit 1
+    (cd "$rust_dir" && cargo build --release -p leech-cli) || exit 1
   elif command -v nix-shell &>/dev/null; then
     nix-shell -p rustc -p cargo --run \
       "cd '$rust_dir' && cargo build --release -p leech-cli" || exit 1
@@ -91,8 +94,9 @@ _rust() {
     echo "cargo nao encontrado — instale rust para rebuildar o binario leech" >&2
     return 0
   fi
-  rm -f "$bin_rust"
-  cp "$rust_dir/target/release/leech" "$bin_rust"
+  [[ -f "$out_bin" ]] || { echo "binario nao encontrado: $out_bin" >&2; exit 1; }
+  mkdir -p "$(dirname "$dst_bin")"
+  cp "$out_bin" "$dst_bin"
 }
 
 _bootstrap() {

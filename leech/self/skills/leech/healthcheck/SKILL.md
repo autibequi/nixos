@@ -39,14 +39,14 @@ ls -la /nix/var/nix/db/big-lock 2>/dev/null
 # Repos sujos
 cd /workspace/mnt && git status --porcelain | head -5
 
-# Tasks orfas em tasks/AGENTS/DOING/
-ls /workspace/obsidian/tasks/AGENTS/DOING/*.md 2>/dev/null
+# Agentes orfaos em bedrooms/_working/
+ls /workspace/obsidian/bedrooms/_working/*.md 2>/dev/null
 ```
 
 ## 4. Tasks e agentes
 
 - Cards em DOING/ sem lock ativo → orfaos, reportar
-- Cards em tasks/AGENTS/ com horario > 2h passado → stale, reportar
+- Cards em bedrooms/_waiting/ com horario > 2h passado → stale, reportar
 - agent.md sem contractor folder no Obsidian → inconsistencia
 
 ## 5. Cleanup — thresholds de limpeza

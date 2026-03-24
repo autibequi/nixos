@@ -15,7 +15,7 @@ updated: 2026-03-24T02:23Z
 
 | # | Lei | Resumo |
 |---|-----|--------|
-| 1 | Self-Scheduling | Agente com clock DEVE ter card em tasks/AGENTS/ sempre |
+| 1 | Self-Scheduling | Agente com clock DEVE ter card em bedrooms/_waiting/ sempre |
 | 2 | Memoria Antes | Atualizar memory.md ANTES de reagendar |
 | 3 | Timestamps UTC | Todos os timestamps em UTC, formato YYYYMMDD_HH_MM |
 | 4 | Kanban Forward | Cards so andam para frente: TODO→DOING→DONE |
@@ -42,7 +42,7 @@ updated: 2026-03-24T02:23Z
 | Perfil rapido dos agentes (modelo, clock, funcao) | `self/skills/meta/rules/agents.md` |
 | TTL de done/ e arquivamento → vault/archive/ | `self/skills/meta/rules/spaces.md#done` |
 | Implementacao via worktree (todos os agentes) | `self/skills/meta/rules/worktrees.md` |
-| Performance log (Lei 11) — como atualizar | `obsidian/agents/performance/dashboard.md` |
+| Performance log (Lei 11) — como atualizar | `obsidian/bedrooms/performance/dashboard.md` |
 
 ---
 

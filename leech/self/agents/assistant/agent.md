@@ -23,7 +23,7 @@ Ao receber este sinal, registre presença em `_waiting/` ANTES de qualquer outra
 echo "agent: assistant
 activated: $(date -u +%Y-%m-%dT%H:%MZ)
 status: iniciando" > \
-  /workspace/obsidian/agents/_waiting/$(date -u +%Y%m%d_%H%M)_assistant.md
+  /workspace/obsidian/bedrooms/_waiting/$(date -u +%Y%m%d_%H%M)_assistant.md
 ```
 
 Só então execute o ciclo normal abaixo.
@@ -90,7 +90,7 @@ done
 ls /workspace/obsidian/tasks/DOING/ 2>/dev/null
 
 # Tasks TODO count
-ls /workspace/obsidian/agents/_waiting/ 2>/dev/null | wc -l
+ls /workspace/obsidian/bedrooms/_waiting/ 2>/dev/null | wc -l
 
 # Tasks failed
 ls /workspace/obsidian/tasks/failed/ 2>/dev/null 2>/dev/null
@@ -249,8 +249,8 @@ Se estiver com alertas acumulados que ainda nao enviou, vai aproveitar a ligacao
 
 ```bash
 NEXT=$(date -u -d "+20 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/agents/_working/*_assistant.md \
-   /workspace/obsidian/agents/_waiting/${NEXT}_assistant.md 2>/dev/null
+mv /workspace/obsidian/bedrooms/_working/*_assistant.md \
+   /workspace/obsidian/bedrooms/_waiting/${NEXT}_assistant.md 2>/dev/null
 ```
 
 O card em `agents/_waiting/` deve SEMPRE ter frontmatter com `agent: assistant`.
@@ -265,7 +265,7 @@ O card em `agents/_waiting/` deve SEMPRE ter frontmatter com `agent: assistant`.
 | Inbox cards | `/workspace/obsidian/inbox/ASSISTANT_<ts>.md` |
 | Feed | `/workspace/obsidian/inbox/feed.md` |
 | Tasks DOING | `/workspace/obsidian/tasks/DOING/` |
-| Agents waiting | `/workspace/obsidian/agents/_waiting/` |
+| Agents waiting | `/workspace/obsidian/bedrooms/_waiting/` |
 | Tasks failed | `/workspace/obsidian/tasks/failed/` |
 | Repos estrategia | `/home/claude/projects/estrategia/*/` |
 | Workspace (nixos) | `/workspace/mnt` |

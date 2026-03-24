@@ -14,43 +14,50 @@ fonte: Pedro (CTO)
 
 ## Lei 1 — Self-Scheduling (Regra Zero)
 
-**Todo agente com `clock:` definido DEVE ter exatamente um card em `tasks/AGENTS/` a qualquer momento.**
+**Todo agente com `clock:` definido DEVE ter exatamente um card em `bedrooms/_waiting/` a qualquer momento.**
 
-- Ao final de cada ciclo: mover card de `tasks/AGENTS/DOING/` para `tasks/AGENTS/` com novo timestamp
+- Ao final de cada ciclo: mover card de `bedrooms/_working/` para `bedrooms/_waiting/` com novo timestamp
 - SEMPRE reagendar, mesmo que o ciclo tenha falhado
-- Um agente sem card em `tasks/AGENTS/` esta morto — wiseman o ressuscita
+- Um agente sem card em `bedrooms/_waiting/` esta morto — wiseman o ressuscita
 - Agentes `on-demand` (mechanic, tasker): so aparecem quando convocados
 
 ```bash
 NEXT=$(date -u -d "+N minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/tasks/AGENTS/DOING/*_SEUNOME.md \
-   /workspace/obsidian/tasks/AGENTS/${NEXT}_SEUNOME.md 2>/dev/null
+mv /workspace/obsidian/bedrooms/_working/*_SEUNOME.md \
+   /workspace/obsidian/bedrooms/_waiting/${NEXT}_SEUNOME.md 2>/dev/null
 ```
 
-### Estrutura de tasks/ — imutavel
+### Estrutura de bedrooms/ — fila de scheduling
+
+```
+bedrooms/
+├── _waiting/      ← UNICO lugar para cards de agendamento de agentes (1 por agente)
+├── _working/      ← runner move o card aqui durante execucao (0 ou 1)
+└── <nome>/        ← espaco pessoal de cada agente
+```
+
+### Estrutura de tasks/ — apenas tasks one-off
 
 ```
 tasks/
-├── AGENTS/        ← UNICO lugar para cards de agendamento de agentes
-│   └── DOING/     ← runner move o card aqui durante execucao
 ├── TODO/          ← Kanban (tasks pendentes)
 ├── DOING/         ← Kanban (tasks em progresso)
 └── DONE/          ← Kanban (tasks concluidas)
 ```
 
 **PROIBIDO para qualquer agente:**
-- Criar subpastas em `tasks/` (ex: `tasks/<nome>/`)
+- Usar `bedrooms/_waiting/` (pasta removida — usar `bedrooms/_waiting/`)
 - Salvar outputs ou relatorios em `tasks/`
 - Cards concluidos vao para `bedrooms/<nome>/done/` — NUNCA para `tasks/`
 
-**Violacao:** agente com clock sem card em `tasks/AGENTS/` nem em `tasks/AGENTS/DOING/`.
+**Violacao:** agente com clock sem card em `bedrooms/_waiting/` nem em `bedrooms/_working/`.
 **Correcao wiseman:** criar card de recuperacao +5min + alerta inbox.
 
 ---
 
 ## Lei 2 — Memoria Antes de Reagendar
 
-**Atualizar `memory.md` ANTES de mover o card para `tasks/AGENTS/`.**
+**Atualizar `memory.md` ANTES de mover o card para `bedrooms/_waiting/`.**
 
 - Nunca reagendar sem registrar o ciclo na memoria
 - Manter 5-10 ciclos mais recentes (consolidar os antigos)
@@ -92,8 +99,8 @@ tasks/
 | Agente | Pode escrever em |
 |--------|-----------------|
 | qualquer | `inbox/feed.md` (append), `bedrooms/dashboard.md` (append) |
-| hermes | `tasks/TODO/`, `tasks/AGENTS/` (routing) |
-| wiseman | `vault/insights.md`, `vault/WISEMAN.md`, `tasks/AGENTS/` (ressurreicao) |
+| hermes | `tasks/TODO/`, `bedrooms/_waiting/` (routing) |
+| wiseman | `vault/insights.md`, `vault/WISEMAN.md`, `bedrooms/_waiting/` (ressurreicao) |
 | cada agente | `bedrooms/<seu-nome>/memory.md`, `bedrooms/<seu-nome>/diarios/`, `bedrooms/<seu-nome>/done/` |
 | qualquer agente | `workshop/<seu-nome>/` (espaco proprio) |
 | keeper | `trash/` |

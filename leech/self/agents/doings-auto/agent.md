@@ -9,5 +9,5 @@ call_style: phone
 
 # doings-auto — Flutter Dev Agent
 
-Estado completo (backlog, progresso, worktrees, conhecimento acumulado) vive no card em tasks/AGENTS/.
+Estado completo (backlog, progresso, worktrees, conhecimento acumulado) vive no card em bedrooms/_waiting/.
 Ler o card atual antes de qualquer acao.

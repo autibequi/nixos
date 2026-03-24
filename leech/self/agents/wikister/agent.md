@@ -98,7 +98,7 @@ Ao receber este sinal, registre presença em `_waiting/` ANTES de qualquer outra
 echo "agent: wikister
 activated: $(date -u +%Y-%m-%dT%H:%MZ)
 status: iniciando" > \
-  /workspace/obsidian/agents/_waiting/$(date -u +%Y%m%d_%H%M)_wikister.md
+  /workspace/obsidian/bedrooms/_waiting/$(date -u +%Y%m%d_%H%M)_wikister.md
 ```
 
 Só então execute o ciclo normal abaixo.
@@ -241,8 +241,8 @@ Se artigo novo foi criado, adicionar link em `wiki/README.md` na seção correta
 
 # Reschedular +30min
 NEXT=$(date -u -d "+30 minutes" +"%Y%m%d_%H_%M")
-mv /workspace/obsidian/agents/_working/*_wikister.md \
-   /workspace/obsidian/agents/_waiting/${NEXT}_wikister.md
+mv /workspace/obsidian/bedrooms/_working/*_wikister.md \
+   /workspace/obsidian/bedrooms/_waiting/${NEXT}_wikister.md
 ```
 
 ### 7. Postar no feed

@@ -32,7 +32,7 @@ Extrair `pct=` da primeira linha do usage-bar.
 
 ```bash
 date -u +%s  # NOW
-ls /workspace/obsidian/agents/_waiting/*.md 2>/dev/null
+ls /workspace/obsidian/bedrooms/_waiting/*.md 2>/dev/null
 ```
 
 Para cada arquivo `YYYYMMDD_HH_MM_<nome>.md`:

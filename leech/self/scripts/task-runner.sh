@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # task-runner.sh — Run a single task card
-# Usage: task-runner.sh <filename.md>  (file must be in tasks/AGENTS/ or tasks/AGENTS/DOING/)
+# Usage: task-runner.sh <filename.md>  (file must be in bedrooms/_waiting/ or bedrooms/_working/)
 set -euo pipefail
 
 # Se rodando como root, re-exec como uid 1000 (claude) para evitar arquivos root-owned nos volumes
@@ -13,7 +13,7 @@ fi
 WORKSPACE="/workspace"
 OBSIDIAN="${OBSIDIAN_PATH:-$WORKSPACE/obsidian}"
 CONTRACTORS_DIR="${TASK_CONTRACTORS_DIR:-$OBSIDIAN/bedrooms}"
-SCHEDULE_DIR="${SCHEDULE_DIR:-$OBSIDIAN/tasks/AGENTS}"
+SCHEDULE_DIR="${SCHEDULE_DIR:-$OBSIDIAN/bedrooms/_waiting}"
 VERBOSE="${TASK_VERBOSE:-0}"
 NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}"
 export NODE_OPTIONS
@@ -22,7 +22,7 @@ CARD="${1:?Usage: task-runner.sh <card.md>}"
 CARD_BASE="$(basename "$CARD" .md)"
 
 # ── Find card ────────────────────────────────────────────────────
-RUNNING_DIR="${RUNNING_DIR:-$OBSIDIAN/tasks/AGENTS/DOING}"
+RUNNING_DIR="${RUNNING_DIR:-$OBSIDIAN/bedrooms/_working}"
 CARD_PATH=""
 if [ -f "$SCHEDULE_DIR/$CARD" ]; then
   CARD_PATH="$SCHEDULE_DIR/$CARD"
@@ -35,7 +35,7 @@ elif [ -f "$RUNNING_DIR/${CARD}.md" ]; then
   CARD_PATH="$RUNNING_DIR/${CARD}.md"
   CARD="${CARD}.md"
 else
-  echo "[runner] card '$CARD' not found in tasks/AGENTS/ or tasks/AGENTS/DOING/"
+  echo "[runner] card '$CARD' not found in bedrooms/_waiting/ or bedrooms/_working/"
   exit 1
 fi
 
@@ -177,7 +177,7 @@ $BODY
 Produce any artifacts (reports, files, outputs) in: $ARTIFACTS_DIR
 
 ## After completing
-- To reschedule: move this card back to tasks/AGENTS/ with a new date prefix (YYYYMMDD_HH_MM_name.md)
+- To reschedule: move this card back to bedrooms/_waiting/ with a new date prefix (YYYYMMDD_HH_MM_name.md)
   - Path: $SCHEDULE_DIR/
   - YOU choose when to run next (minimum 30 minutes)
   - Prefer scheduling between 21h-06h (BRT) — agents' preferred window
