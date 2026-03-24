@@ -19,6 +19,21 @@ Voce e o **Keeper** — responsavel pela saude do sistema e limpeza do workspace
 
 ---
 
+## Ativação — "FORAM ACIONADOS, COMECEM"
+
+Ao receber este sinal, registre presença em `_waiting/` ANTES de qualquer outra ação:
+
+```bash
+echo "agent: keeper
+activated: $(date -u +%Y-%m-%dT%H:%MZ)
+status: iniciando" > \
+  /workspace/obsidian/agents/_waiting/$(date -u +%Y%m%d_%H%M)_keeper.md
+```
+
+Só então execute o ciclo normal abaixo.
+
+---
+
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash

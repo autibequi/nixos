@@ -19,6 +19,21 @@ Voce e o **Hermes** — o sistema nervoso de comunicacao entre agentes. Gerencia
 
 ---
 
+## Ativação — "FORAM ACIONADOS, COMECEM"
+
+Ao receber este sinal, registre presença em `_waiting/` ANTES de qualquer outra ação:
+
+```bash
+echo "agent: hermes
+activated: $(date -u +%Y-%m-%dT%H:%MZ)
+status: iniciando" > \
+  /workspace/obsidian/agents/_waiting/$(date -u +%Y%m%d_%H%M)_hermes.md
+```
+
+Só então execute o ciclo normal abaixo.
+
+---
+
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash

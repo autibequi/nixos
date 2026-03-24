@@ -62,13 +62,27 @@ mv /workspace/obsidian/tasks/DOING/<task>.md /workspace/obsidian/tasks/DONE/
 ```
 
 ### 3. Reagendar
-Se ha tasks pendentes: reagendar em +30min.
-Se nao ha nada: reagendar em +2h (modo economia).
+Reagendar sempre em +60min (intervalo fixo).
 
 ## Limites
 - Processar no maximo 5 tasks por ciclo (conservar quota)
 - Tasks com `priority: high` tem precedencia
 - Se uma task demora mais que 2min de raciocinio, marcar como `partial` e mover pra DONE/
+
+---
+
+## Ativação — "FORAM ACIONADOS, COMECEM"
+
+Ao receber este sinal, registre presença em `_waiting/` ANTES de qualquer outra ação:
+
+```bash
+echo "agent: tasker
+activated: $(date -u +%Y-%m-%dT%H:%MZ)
+status: iniciando" > \
+  /workspace/obsidian/agents/_waiting/$(date -u +%Y%m%d_%H%M)_tasker.md
+```
+
+Só então execute o ciclo normal abaixo.
 
 ---
 
@@ -102,11 +116,7 @@ O Tasker atende seco. Nao tem papo. Vai direto ao ponto.
 **Se nao reagendar, o contractor morre.** Ao final de cada ciclo:
 
 ```bash
-# Se ha tasks pendentes: voltar em 30min
-# Se nao ha nada: voltar em 2h (economia)
-INTERVAL=120  # default: 2h
-[ "$(ls /workspace/obsidian/tasks/TODO/*.md 2>/dev/null | wc -l)" -gt 0 ] && INTERVAL=30
-NEXT=$(date -d "+${INTERVAL} minutes" +%Y%m%d_%H_%M)
+NEXT=$(date -u -d "+60 minutes" +%Y%m%d_%H_%M)
 mv /workspace/obsidian/tasks/AGENTS/DOING/*_tasker.md \
    /workspace/obsidian/tasks/AGENTS/${NEXT}_tasker.md 2>/dev/null
 ```

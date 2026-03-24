@@ -248,6 +248,21 @@ Se BAIXO → registrar apenas em memory
 
 ---
 
+## Ativação — "FORAM ACIONADOS, COMECEM"
+
+Ao receber este sinal, registre presença em `_waiting/` ANTES de qualquer outra ação:
+
+```bash
+echo "agent: mechanic
+activated: $(date -u +%Y-%m-%dT%H:%MZ)
+status: iniciando" > \
+  /workspace/obsidian/agents/_waiting/$(date -u +%Y%m%d_%H%M)_mechanic.md
+```
+
+Só então execute o ciclo normal abaixo.
+
+---
+
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
@@ -264,10 +279,9 @@ ls /workspace/obsidian/outbox/para-mechanic-*.md 2>/dev/null
 **Se nao reagendar, o contractor morre.** Ao final de cada ciclo:
 
 ```bash
-NEXT=$(date -d "+24 hours" +%Y%m%d_%H_%M)
+NEXT=$(date -u -d "+60 minutes" +%Y%m%d_%H_%M)
 mv /workspace/obsidian/tasks/AGENTS/DOING/*_mechanic.md \
    /workspace/obsidian/tasks/AGENTS/${NEXT}_mechanic.md 2>/dev/null
 ```
 
-Mechanic e on-demand mas DEVE manter heartbeat de 24h.
-Se detectou problema ativo: reagendar em +60min para followup.
+Mechanic roda a cada 60min (heartbeat horario).

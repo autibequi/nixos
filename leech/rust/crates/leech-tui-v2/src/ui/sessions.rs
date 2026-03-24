@@ -97,7 +97,7 @@ fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[Session
                 let mem_used = mem_used_only(&session.mem);
                 spans.push(Span::raw("  "));
                 spans.push(Span::styled(cpu_bar, theme::up_icon()));
-                spans.push(Span::styled(format!(" {:<6}", session.cpu.trim()), theme::cpu()));
+                spans.push(Span::styled(format!(" {:>6}", session.cpu.trim()), theme::cpu()));
                 spans.push(Span::raw("  "));
                 spans.push(Span::styled(mem_bar, theme::mem()));
                 spans.push(Span::styled(format!(" {mem_used}"), theme::mem()));
@@ -139,7 +139,7 @@ fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[Session
                     let mem_used = mem_used_only(&session.mem);
                     spans.push(Span::raw("  "));
                     spans.push(Span::styled(cpu_bar, theme::up_icon()));
-                    spans.push(Span::styled(format!(" {:<6}", session.cpu.trim()), theme::cpu()));
+                    spans.push(Span::styled(format!(" {:>6}", session.cpu.trim()), theme::cpu()));
                     spans.push(Span::raw("  "));
                     spans.push(Span::styled(mem_bar, theme::mem()));
                     spans.push(Span::styled(format!(" {mem_used}"), theme::mem()));

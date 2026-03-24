@@ -9,6 +9,8 @@ x-env-base: &env-base
   WAYLAND_DISPLAY: ${WAYLAND_DISPLAY:-wayland-1}
   XDG_RUNTIME_DIR: /run/user/1000
   PULSE_SERVER: unix:/run/user/1000/pulse/native
+  EDITOR: vim
+  VISUAL: vim
   DISABLE_AUTOUPDATER: false
   # Docker autonomy: host paths for container→host translation
   LEECH_NIXOS_DIR: ${HOME}/nixos

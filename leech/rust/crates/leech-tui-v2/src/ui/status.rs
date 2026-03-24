@@ -13,17 +13,19 @@ use crate::theme;
 pub fn render(frame: &mut Frame, app: &App) {
     let services_h = dk_services_height(app);
     let utils_h    = utils_height(app);
+    let quota_h: u16 = if app.snapshot.quota.pct_5h > 0 || app.snapshot.quota.pct_7d > 0 { 2 } else { 0 };
 
     // Cap sessions_h so logs always gets at least MIN_LOGS content lines
     // + 1 for the Block top border.
     const MIN_LOGS: u16 = 5;
-    let fixed = 1u16 + services_h + utils_h + 1 + MIN_LOGS + 1;
+    let fixed = 1u16 + quota_h + services_h + utils_h + 1 + MIN_LOGS + 1;
     let sessions_h = sessions_height(app).min(frame.area().height.saturating_sub(fixed));
 
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
             Constraint::Length(1),           // header
+            Constraint::Length(quota_h),     // claude usage banner
             Constraint::Length(sessions_h),  // agents + background
             Constraint::Length(services_h),  // dk services
             Constraint::Length(utils_h),     // utils
@@ -33,11 +35,12 @@ pub fn render(frame: &mut Frame, app: &App) {
         .split(frame.area());
 
     render_header(frame, app, chunks[0]);
-    sessions::render(frame, app, chunks[1]);
-    services::render(frame, app, chunks[2]);
-    utils::render(frame, app, chunks[3]);
-    logs::render(frame, app, chunks[4]);
-    render_footer(frame, app, chunks[5]);
+    quota::render(frame, app, chunks[1]);
+    sessions::render(frame, app, chunks[2]);
+    services::render(frame, app, chunks[3]);
+    utils::render(frame, app, chunks[4]);
+    logs::render(frame, app, chunks[5]);
+    render_footer(frame, app, chunks[6]);
 
     popup::render(frame, app);
 }
@@ -74,15 +77,14 @@ fn utils_height(app: &App) -> u16 {
     else { (app.snapshot.utils.len() as u16) + 1 }
 }
 
-fn render_header(frame: &mut Frame, app: &App, area: Rect) {
+fn render_header(frame: &mut Frame, _app: &App, area: Rect) {
     let now = utc_time_str();
-    let mut spans = vec![
+    let spans = vec![
         Span::raw("  "),
         Span::styled("Leech Status", theme::header()),
         Span::raw("  "),
         Span::styled(now, theme::dim()),
     ];
-    spans.extend(quota::header_spans(app));
     frame.render_widget(Paragraph::new(Line::from(spans)), area);
 }
 

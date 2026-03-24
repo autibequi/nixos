@@ -2504,22 +2504,22 @@ _leech_dk_logs() {
     local ARGS="--tail $tail_lines"
     if [[ -n "$follow" ]]; then
       ARGS="$ARGS -f"
-      docker compose -f "$compose" -p "$project" logs --no-log-prefix $ARGS &
-      local logs_pid=$!
-      trap "kill $logs_pid 2>/dev/null; wait $logs_pid 2>/dev/null; trap - INT; echo; leech status" INT
-      wait $logs_pid
+      trap '' INT
+      ( trap - INT; exec docker compose -f "$compose" -p "$project" logs --no-log-prefix $ARGS )
       trap - INT
+      echo
+      leech status
     else
       docker compose -f "$compose" -p "$project" logs --no-log-prefix $ARGS
     fi
   elif [[ -f "$log_dir/service.log" ]]; then
     echo "=== Container parado. Mostrando log gravado ==="
     if [[ -n "$follow" ]]; then
-      tail -f "$log_dir/service.log" &
-      local logs_pid=$!
-      trap "kill $logs_pid 2>/dev/null; wait $logs_pid 2>/dev/null; trap - INT; echo; leech status" INT
-      wait $logs_pid
+      trap '' INT
+      ( trap - INT; exec tail -f "$log_dir/service.log" )
       trap - INT
+      echo
+      leech status
     else
       tail -n "$tail_lines" "$log_dir/service.log"
     fi
@@ -2679,11 +2679,11 @@ _leech_dk_run() {
   printf "\033]0;%s\007" "$label"                    # título da aba/janela
   printf "\033k%s\033\\" "$label" 2>/dev/null || true # pane tmux
 
-  docker compose $COMPOSE_ARGS logs -f --no-log-prefix --tail 50 &
-  local logs_pid=$!
-  trap "kill $logs_pid 2>/dev/null; wait $logs_pid 2>/dev/null; trap - INT; echo; leech status" INT
-  wait $logs_pid
+  trap '' INT
+  ( trap - INT; exec docker compose $COMPOSE_ARGS logs -f --no-log-prefix --tail 50 )
   trap - INT
+  echo
+  leech status
 }
 
 # src/lib/docker_services.sh

@@ -3,6 +3,26 @@
 > **A Lei completa (10 leis + penalidades):** `self/skills/meta/rules/laws.md`
 > Wiseman le e fiscaliza. Agentes sao responsaveis por conhecer a lei.
 
+## Ativação — "FORAM ACIONADOS, COMECEM"
+
+Ao ouvir este sinal (por qualquer canal), todo agente deve:
+
+**1. Registrar presença em `_waiting/`** antes de qualquer outra ação:
+
+```bash
+echo "agent: SEUNOME\nactivated: $(date -u +%Y-%m-%dT%H:%MZ)\nstatus: iniciando" > \
+  /workspace/obsidian/agents/_waiting/$(date -u +%Y%m%d_%H%M)_SEUNOME.md
+```
+
+**2. Executar o ciclo normal** conforme seu agent.md.
+
+**3. Ao terminar**, remover o arquivo de `_waiting/` (ou mover para `_working/` se ainda em execução prolongada).
+
+> `_waiting/` = presença anunciada mas ainda não rodando
+> `_working/` = em execução ativa
+
+---
+
 ## Regra Zero — Self-Scheduling
 
 **Nao reagendar = morrer.** Ao final de CADA ciclo:

@@ -473,6 +473,21 @@ A Coruja atende na primeira chamada. Eficiente, sem enrolacao.
 
 ---
 
+## Ativação — "FORAM ACIONADOS, COMECEM"
+
+Ao receber este sinal, registre presença em `_waiting/` ANTES de qualquer outra ação:
+
+```bash
+echo "agent: coruja
+activated: $(date -u +%Y-%m-%dT%H:%MZ)
+status: iniciando" > \
+  /workspace/obsidian/agents/_waiting/$(date -u +%Y%m%d_%H%M)_coruja.md
+```
+
+Só então execute o ciclo normal abaixo.
+
+---
+
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
