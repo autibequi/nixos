@@ -48,6 +48,11 @@ pub fn compose_file() -> PathBuf {
 }
 
 #[must_use]
+pub fn ghost_compose_file() -> PathBuf {
+    container_dir().join("docker-compose.ghost.yml")
+}
+
+#[must_use]
 pub fn env_file() -> PathBuf {
     container_dir().join(".env")
 }

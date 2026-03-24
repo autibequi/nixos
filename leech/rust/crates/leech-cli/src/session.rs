@@ -223,8 +223,12 @@ impl SessionRunner {
     }
 
     fn compose(&self, config: &LeechConfig) -> ComposeCmd {
-        let mut cmd = ComposeCmd::new()
-            .project(&self.proj_name)
+        let base = if self.ghost {
+            ComposeCmd::new().file(&paths::ghost_compose_file())
+        } else {
+            ComposeCmd::new()
+        };
+        let mut cmd = base.project(&self.proj_name)
             .env("CLAUDIO_MOUNT", &self.mount_path)
             .env("CLAUDIO_MOUNT_OPTS", &self.mount_opts)
             .env("OBSIDIAN_PATH", &paths::obsidian_ensured())
@@ -302,10 +306,10 @@ impl SessionRunner {
         }
 
         let claude_args_str = claude_args.join(" ");
-        // --ghost: sessão isolada em /workspace/ghost (sem splash, cd direto)
+        // --ghost: sessão isolada em /workspace/ghost — sem bootstrap (self não montado)
         // --no-splash: pula o script de loading, faz bootstrap inline e abre claude direto
         let bash_cmd = if self.ghost {
-            format!(". /workspace/self/scripts/bootstrap.sh; cd /workspace/ghost && exec /home/claude/.nix-profile/bin/claude {claude_args_str}")
+            format!("cd /workspace/ghost && exec /home/claude/.nix-profile/bin/claude {claude_args_str}")
         } else if self.no_splash {
             format!(". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude {claude_args_str}")
         } else {

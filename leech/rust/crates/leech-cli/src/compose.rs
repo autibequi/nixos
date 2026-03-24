@@ -34,6 +34,12 @@ impl ComposeCmd {
     }
 
     #[must_use]
+    pub fn file(mut self, path: &std::path::Path) -> Self {
+        self.compose_file = path.to_string_lossy().into_owned();
+        self
+    }
+
+    #[must_use]
     pub fn project(mut self, name: &str) -> Self {
         self.project = Some(name.to_string());
         self
