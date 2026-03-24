@@ -26,7 +26,18 @@
   hardware.nvidia = {
     open = true; # Best compatibility with RTX 4060 mobile Q-Max
 
-    package = config.boot.kernelPackages.nvidiaPackages.beta;
+    # Patch: Linux 6.18 mudou get_dev_pagemap() para 1 argumento (removeu o 2º arg)
+    # nvidia-open 580.105.08 ainda usa a assinatura antiga — fix até upstream corrigir
+    package = let
+      base = config.boot.kernelPackages.nvidiaPackages.stable;
+    in base // {
+      open = base.open.overrideAttrs (old: {
+        postPatch = (old.postPatch or "") + ''
+          sed -i 's/get_dev_pagemap(page_to_pfn(page), NULL)/get_dev_pagemap(page_to_pfn(page))/g' \
+            kernel-open/nvidia-uvm/uvm_va_range_device_p2p.c
+        '';
+      });
+    };
     modesetting.enable = true;
     nvidiaSettings = false;
     nvidiaPersistenced = false;

@@ -1,7 +1,7 @@
 ---
 scope: universal
 audience: all agents, all sessions
-updated: 2026-03-23T16:00Z
+updated: 2026-03-24T02:23Z
 ---
 
 # Regras do Sistema Leech
@@ -25,6 +25,7 @@ updated: 2026-03-23T16:00Z
 | 8 | Canais Oficiais | Comunicar via feed.md, ALERTA_, dashboard — nao criar arquivos soltos |
 | 9 | Formato Cards | Nome: YYYYMMDD_HH_MM_<nome>.md + frontmatter model/timeout/agent + #stepsN |
 | 10 | Workshop | workshop/<nome>/ e soberano — nao invadir o de outro |
+| 11 | Performance Log | Ao fim de todo ciclo: atualizar agents/performance/ com % do boot |
 
 ---
 
@@ -41,6 +42,7 @@ updated: 2026-03-23T16:00Z
 | Perfil rapido dos agentes (modelo, clock, funcao) | `self/skills/meta/rules/agents.md` |
 | TTL de done/ e arquivamento → vault/archive/ | `self/skills/meta/rules/spaces.md#done` |
 | Implementacao via worktree (todos os agentes) | `self/skills/meta/rules/worktrees.md` |
+| Performance log (Lei 11) — como atualizar | `obsidian/agents/performance/dashboard.md` |
 
 ---
 

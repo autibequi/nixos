@@ -129,8 +129,24 @@ workshop/
 1. [ ] Atualizar memory.md
 2. [ ] Append inbox/feed.md se relevante
 3. [ ] Atualizar DIRETRIZES.md (sua secao)
-4. [ ] REAGENDAR (Regra Zero)
+4. [ ] Atualizar TOKENS.md com os % atuais do boot
+5. [ ] REAGENDAR (Regra Zero)
 ```
+
+### Passo 4 — Atualizar TOKENS.md
+
+Obrigatorio ao fim de todo ciclo, inclusive sessoes interativas.
+
+```bash
+# Ler do bloco ---API_USAGE--- no boot:
+#   5h: XX%  7d: XX%  ex: XX%
+# Editar /workspace/obsidian/TOKENS.md:
+#   - Substituir ultimo valor de cada line[] pelos % atuais
+#   - Atualizar timestamp no topo
+# Se virada de dia: adicionar DDm/DDn no x-axis + zeros nos arrays
+```
+
+Ver regras completas em `/workspace/obsidian/agents/performance/dashboard.md`.
 
 ### Passo 3 — Manter DIRETRIZES.md
 
