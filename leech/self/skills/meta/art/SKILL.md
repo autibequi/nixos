@@ -72,7 +72,8 @@ Se voce e um agente ou skill que precisa desenhar algo:
 - Comandos: nav, show, tabs, speak, present
 - Diagrama Mermaid (flowchart com tema Catppuccin)
 - Arvore de diff interativa (collapse, glow, breadcrumb)
-- HTML livre (base64 → chrome-relay.py)
+- **Code diff side-by-side** — diff2html-cli dark + JetBrains Mono → ver `code/analysis/diff/codediff.md`
+- HTML livre com CDN (diff2html, Chart.js, Mermaid, D3, DataTables...)
 - Voz (espeak-ng via relay)
 
 ### Obsidian (vault)

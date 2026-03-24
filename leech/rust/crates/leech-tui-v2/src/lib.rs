@@ -271,27 +271,96 @@ pub fn run_status(tick: u64) -> Result<()> {
 
                     AppMode::AgentPanel => {
                         use crossterm::event::KeyCode;
-                        match key.code {
-                            KeyCode::Esc
-                            | KeyCode::Char('q')
-                            | KeyCode::Char('a') => app.close_agents(),
-                            KeyCode::Up   | KeyCode::Char('k') => app.agents_move_up(),
-                            KeyCode::Down | KeyCode::Char('j') => app.agents_move_down(),
-                            KeyCode::Enter => {
-                                if let Some(cname) = app.selected_agent_container() {
-                                    app.close_agents();
-                                    let snap_tx = tx_bg.clone();
-                                    let done_tx = bg_done_tx.clone();
-                                    std::thread::spawn(move || {
-                                        docker_stop_wait(&cname);
-                                        let _ = done_tx.send(usize::MAX);
-                                        if let Ok(snap) = leech_sdk::status::collect() {
-                                            let _ = snap_tx.send(snap);
-                                        }
-                                    });
+                        if !app.agent_log.is_empty() {
+                            // Log view — any key closes it
+                            match key.code {
+                                KeyCode::Esc | KeyCode::Char('q') | KeyCode::Enter => {
+                                    app.close_agent_log();
                                 }
+                                _ => {}
                             }
-                            _ => {}
+                        } else if app.agent_menu {
+                            // ── Agent action sub-menu ──────────────────────
+                            match key.code {
+                                KeyCode::Esc | KeyCode::Char('q') => app.close_agent_menu(),
+                                KeyCode::Up   | KeyCode::Char('k') => app.agent_menu_prev(),
+                                KeyCode::Down | KeyCode::Char('j') => app.agent_menu_next(),
+                                KeyCode::Enter => {
+                                    let action = app.agent_menu_action().to_string();
+                                    let name   = app.selected_agent_name()
+                                        .unwrap_or("").to_string();
+                                    app.close_agent_menu();
+
+                                    match action.as_str() {
+                                        "cancel" => {}
+
+                                        "run" => {
+                                            // Non-interactive background run
+                                            let err_tx = bg_err_tx.clone();
+                                            std::thread::spawn(move || {
+                                                let mut cmd = bash_cmd();
+                                                let out = cmd.args(["run", &name]).output();
+                                                match out {
+                                                    Err(e) => { let _ = err_tx.send(format!("run {name}: {e}")); }
+                                                    Ok(o) if !o.status.success() => {
+                                                        let msg = String::from_utf8_lossy(&o.stderr);
+                                                        let _ = err_tx.send(clean_output(&msg));
+                                                    }
+                                                    Ok(_) => {}
+                                                }
+                                            });
+                                        }
+
+                                        "phone" => {
+                                            // Replace TUI process with a new leech session
+                                            app.close_agents();
+                                            disable_raw_mode()?;
+                                            execute!(terminal.backend_mut(), LeaveAlternateScreen, DisableMouseCapture)?;
+                                            terminal.show_cursor()?;
+
+                                            #[cfg(unix)]
+                                            use std::os::unix::process::CommandExt;
+                                            #[cfg(unix)]
+                                            {
+                                                let err = bash_cmd()
+                                                    .args(["agents", "phone", &name])
+                                                    .exec();
+                                                // Only reached if exec failed
+                                                enable_raw_mode()?;
+                                                execute!(terminal.backend_mut(), EnterAlternateScreen, EnableMouseCapture)?;
+                                                terminal.clear()?;
+                                                app.set_error(format!("Failed to launch: {err}"));
+                                            }
+                                            #[cfg(not(unix))]
+                                            {
+                                                enable_raw_mode()?;
+                                                execute!(terminal.backend_mut(), EnterAlternateScreen, EnableMouseCapture)?;
+                                                terminal.clear()?;
+                                                app.set_error("phone not supported on non-unix".into());
+                                            }
+                                        }
+
+                                        "status" => {
+                                            // Show activity log inline in the TUI
+                                            app.open_agent_log(&name);
+                                        }
+
+                                        _ => {}
+                                    }
+                                }
+                                _ => {}
+                            }
+                        } else {
+                            // ── Agent list navigation ──────────────────────
+                            match key.code {
+                                KeyCode::Esc
+                                | KeyCode::Char('q')
+                                | KeyCode::Char('a') => app.close_agents(),
+                                KeyCode::Up   | KeyCode::Char('k') => app.agents_move_up(),
+                                KeyCode::Down | KeyCode::Char('j') => app.agents_move_down(),
+                                KeyCode::Enter => app.open_agent_menu(),
+                                _ => {}
+                            }
                         }
                     }
 

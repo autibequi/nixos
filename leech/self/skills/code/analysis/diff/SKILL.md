@@ -13,12 +13,13 @@ description: Renderiza árvore interativa de diff no Chrome — pastas colapsáv
 
 Defaults: `--repos all` (detecta todos com diff), `--compare origin/main`
 
-## Templates
+## Sub-skills
 
-| Arquivo | Quando usar |
-|---|---|
-| `templates/generator.py` | Árvore única flat de todo o diff com anotações |
-| `templates/generator_by_layer.py` | Diff segregado por camada (Handlers, Services, Repos...) |
+| Arquivo | O que faz | Quando usar |
+|---|---|---|
+| `codediff.md` | **Code diff side-by-side** — diff2html-cli, tema dark, JetBrains Mono | Ver linhas +/- reais, code walk, review |
+| `templates/generator.py` | Árvore interativa flat com anotações | Navegar quais arquivos mudaram |
+| `templates/generator_by_layer.py` | Árvore segregada por camada | Quais handlers/services/repos foram tocados |
 
 ---
 

@@ -1,195 +1,265 @@
-//! Agent & Tasks panel popup — shows running sessions and vault task queue.
+//! Agent panel popup — all configured agents sorted by next execution,
+//! with an action sub-menu (Run / Phone / Status).
 
-use ratatui::layout::{Constraint, Direction, Layout, Rect};
+use ratatui::layout::Rect;
 use ratatui::text::{Line, Span};
-use ratatui::widgets::{Block, BorderType, Borders, Clear, Paragraph};
+use ratatui::widgets::{Block, BorderType, Borders, Clear, List, ListItem, ListState, Paragraph};
 use ratatui::Frame;
 
-use crate::app::App;
+use crate::app::{App, AGENT_MENU_ITEMS};
 use crate::theme;
 
 pub fn render(frame: &mut Frame, app: &App) {
     let area  = popup_rect(frame.area());
-    let inner = Block::default()
+
+    if !app.agent_log.is_empty() {
+        render_log_view(frame, app, area);
+        return;
+    }
+
+    let block = Block::default()
         .borders(Borders::ALL)
         .border_type(BorderType::Rounded)
-        .title(" Agents & Tasks ")
+        .title(" Agents ")
         .title_style(theme::header())
-        .border_style(theme::separator())
-        .inner(area);
+        .border_style(theme::separator());
+    let inner = block.inner(area);
 
     frame.render_widget(Clear, area);
-    frame.render_widget(
-        Block::default()
-            .borders(Borders::ALL)
-            .border_type(BorderType::Rounded)
-            .title(" Agents & Tasks ")
-            .title_style(theme::header())
-            .border_style(theme::separator()),
-        area,
-    );
+    frame.render_widget(block, area);
 
-    // Split inner area: agents / divider / tasks / footer
-    let task_rows = (app.agent_tasks.len() as u16 + 1).max(2);
-    let agent_rows = (app.agent_count() as u16 + 1).max(2);
-    let chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([
-            Constraint::Length(agent_rows),
-            Constraint::Length(task_rows),
-            Constraint::Min(0),
-            Constraint::Length(1),
-        ])
-        .split(inner);
+    render_list(frame, app, inner);
 
-    render_agents(frame, app, chunks[0]);
-    render_tasks(frame, app, chunks[1]);
-    render_footer(frame, chunks[3]);
+    if app.agent_menu {
+        render_agent_menu(frame, app, area);
+    }
 }
 
-fn render_agents(frame: &mut Frame, app: &App, area: Rect) {
-    let all_sessions: Vec<_> = app.snapshot.agents.iter()
-        .chain(app.snapshot.background.iter())
+// ── Agent list ────────────────────────────────────────────────────────────────
+
+fn render_list(frame: &mut Frame, app: &App, area: Rect) {
+    if app.agent_list.is_empty() {
+        frame.render_widget(
+            Paragraph::new(Line::from(vec![
+                Span::raw("  "),
+                Span::styled("no agent cards found", theme::dim()),
+            ])),
+            area,
+        );
+        return;
+    }
+
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+
+    // Reserve 1 line for footer
+    let list_h  = area.height.saturating_sub(1) as usize;
+    let total   = app.agent_list.len();
+
+    // Scroll to keep cursor visible
+    let offset = if app.agent_cursor >= list_h {
+        app.agent_cursor + 1 - list_h
+    } else {
+        0
+    };
+
+    let mut lines: Vec<Line> = app.agent_list.iter().enumerate()
+        .skip(offset)
+        .take(list_h)
+        .map(|(i, a)| {
+            let is_sel     = i == app.agent_cursor;
+            let marker     = if is_sel { "\u{25b6}" } else { " " };
+            let mk_style   = if is_sel { theme::selected() } else { theme::dim() };
+            let nm_style   = if is_sel { theme::selected() } else { theme::name() };
+
+            // Status icon: task pending = green dot, on-demand = hollow, else dim dot
+            let (icon, ic_style) = if a.next_task_ts.is_some() {
+                ("\u{25cf}", theme::up_icon())
+            } else if a.clock_mins.is_some() {
+                ("\u{25cf}", theme::dim())
+            } else {
+                ("\u{25cb}", theme::dim())
+            };
+
+            // Schedule column
+            let sched = schedule_str(a, now);
+
+            // Task badge
+            let badge = if a.task_count > 0 {
+                format!(" [{}]", a.task_count)
+            } else {
+                String::new()
+            };
+
+            Line::from(vec![
+                Span::raw("  "),
+                Span::styled(marker,                      mk_style),
+                Span::raw(" "),
+                Span::styled(icon,                        ic_style),
+                Span::raw(" "),
+                Span::styled(format!("{:<14}", a.name),   nm_style),
+                Span::styled(format!(" {:<6}", a.model),  theme::dim()),
+                Span::raw("  "),
+                Span::styled(format!("{:<22}", sched),    theme::uptime()),
+                Span::styled(badge,                       theme::pending_label()),
+            ])
+        })
         .collect();
 
-    let any_up    = all_sessions.iter().any(|s| s.is_up);
-    let hdr_icon  = if any_up { "\u{25cf}" } else { "\u{25cb}" };
-    let hdr_style = if any_up { theme::up_icon() } else { theme::down_icon() };
-    let count_str = format!("  ({} running)", all_sessions.iter().filter(|s| s.is_up).count());
-
-    let mut lines = vec![Line::from(vec![
-        Span::styled(hdr_icon, hdr_style),
-        Span::raw(" "),
-        Span::styled("Agents", theme::group_label()),
-        Span::styled(count_str, theme::dim()),
-    ])];
-
-    if all_sessions.is_empty() {
-        lines.push(Line::from(vec![
-            Span::raw("  "),
-            Span::styled("no active sessions", theme::dim()),
-        ]));
-    }
-
-    for (i, s) in all_sessions.iter().enumerate() {
-        let is_sel    = i == app.agent_cursor;
-        let marker    = if is_sel { "\u{25b6}" } else { " " };
-        let icon      = if s.is_up { "\u{25cf}" } else { "\u{25cb}" };
-        let mk_style  = if is_sel { theme::selected() } else { theme::dim() };
-        let nm_style  = if is_sel { theme::selected() } else { theme::name() };
-        let ic_style  = if s.is_up { theme::up_icon() } else { theme::down_icon() };
-
-        // Short project path: last 2 path components or just the last
-        let proj = short_path(&s.mnt_path);
-
-        let uptime = format_uptime(&s.status);
-
-        let mut spans = vec![
-            Span::raw("  "),
-            Span::styled(marker, mk_style),
-            Span::raw(" "),
-            Span::styled(icon, ic_style),
-            Span::raw(" "),
-            Span::styled(format!("{:<8}", s.short_id), nm_style),
-            Span::raw("  "),
-            Span::styled(format!("{:<20}", proj), theme::dim()),
-            Span::raw("  "),
-            Span::styled(format!("{:<6}", uptime), theme::uptime()),
-        ];
-
-        if s.is_up && !s.cpu.is_empty() {
-            spans.push(Span::raw("  "));
-            spans.push(Span::styled(format!("{:>6}", s.cpu.trim()), theme::cpu()));
-            spans.push(Span::raw("  "));
-            let mem = s.mem.split('/').next().unwrap_or(&s.mem)
-                .replace("MiB", "M").replace("GiB", "G").trim().to_string();
-            spans.push(Span::styled(format!("{:<7}", mem), theme::mem()));
-        }
-
-        if s.session_count > 0 {
-            spans.push(Span::styled(
-                format!(" [{}×]", s.session_count),
-                theme::dim(),
-            ));
-        }
-
-        lines.push(Line::from(spans));
-    }
+    // Footer hint
+    let scroll_hint = if total > list_h {
+        format!("  {}/{}", app.agent_cursor + 1, total)
+    } else {
+        String::new()
+    };
+    lines.push(Line::from(vec![
+        Span::styled("  \u{2191}\u{2193}", theme::footer_dim()),
+        Span::styled(" nav  ", theme::footer_dim()),
+        Span::styled("Enter", theme::footer_key()),
+        Span::styled(" actions  ", theme::footer_dim()),
+        Span::styled("a/Esc", theme::footer_key()),
+        Span::styled(" close", theme::footer_dim()),
+        Span::styled(scroll_hint, theme::dim()),
+    ]));
 
     frame.render_widget(Paragraph::new(lines), area);
 }
 
-fn render_tasks(frame: &mut Frame, app: &App, area: Rect) {
-    let any    = !app.agent_tasks.is_empty();
-    let icon   = if any { "\u{25cf}" } else { "\u{25cb}" };
-    let istyle = if any { theme::up_icon() } else { theme::dim() };
+// ── Action sub-menu ───────────────────────────────────────────────────────────
 
-    let mut lines = vec![Line::from(vec![
-        Span::styled(icon, istyle),
-        Span::raw(" "),
-        Span::styled("Tasks", theme::group_label()),
-        Span::styled(format!("  ({} queued)", app.agent_tasks.len()), theme::dim()),
-    ])];
+fn render_agent_menu(frame: &mut Frame, app: &App, parent: Rect) {
+    let name = app.selected_agent_name().unwrap_or("agent");
+    let title = format!(" {} ", name);
 
-    if app.agent_tasks.is_empty() {
+    let height = AGENT_MENU_ITEMS.len() as u16 + 2;
+    let width  = 22u16;
+    // Place bottom-right inside parent popup
+    let x = parent.x + parent.width.saturating_sub(width + 2);
+    let y = parent.y + parent.height.saturating_sub(height + 2);
+    let area = Rect::new(x, y, width, height);
+
+    frame.render_widget(Clear, area);
+
+    let items: Vec<ListItem> = AGENT_MENU_ITEMS
+        .iter()
+        .map(|(label, _)| ListItem::new(format!("  {label}")))
+        .collect();
+
+    let mut state = ListState::default();
+    state.select(Some(app.agent_menu_cursor));
+
+    let list = List::new(items)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_type(BorderType::Rounded)
+                .title(title)
+                .title_style(theme::header())
+                .border_style(theme::separator()),
+        )
+        .highlight_style(theme::selected())
+        .highlight_symbol("> ");
+
+    frame.render_stateful_widget(list, area, &mut state);
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+fn schedule_str(a: &crate::app::AgentInfo, now: u64) -> String {
+    if let Some(ts) = a.next_task_ts {
+        if ts <= now {
+            "overdue".into()
+        } else {
+            let diff = ts - now;
+            format!("in {}", fmt_duration(diff))
+        }
+    } else if let Some(m) = a.clock_mins {
+        if m < 60 {
+            format!("every {m}min")
+        } else {
+            format!("every {}h", m / 60)
+        }
+    } else {
+        "on-demand".into()
+    }
+}
+
+fn fmt_duration(secs: u64) -> String {
+    let h   = secs / 3600;
+    let m   = (secs % 3600) / 60;
+    if h > 0 { format!("{h}h{m:02}min") } else { format!("{m}min") }
+}
+
+// ── Agent log view ────────────────────────────────────────────────────────────
+
+fn render_log_view(frame: &mut Frame, app: &App, area: Rect) {
+    let title = format!(" {} — log ", app.agent_log_name);
+    let block = Block::default()
+        .borders(Borders::ALL)
+        .border_type(BorderType::Rounded)
+        .title(title)
+        .title_style(theme::header())
+        .border_style(theme::separator());
+    let inner = block.inner(area);
+
+    frame.render_widget(Clear, area);
+    frame.render_widget(block, area);
+
+    let mut lines: Vec<Line> = Vec::new();
+
+    // Header
+    lines.push(Line::from(vec![
+        Span::styled("  ", theme::dim()),
+        Span::styled(format!("{:<14}", "started"),  theme::dim()),
+        Span::styled(format!("  {:<8}", "dur"),     theme::dim()),
+        Span::styled(format!("  {:<5}", "st"),      theme::dim()),
+        Span::styled("  topic", theme::dim()),
+    ]));
+
+    if app.agent_log.is_empty() {
         lines.push(Line::from(vec![
             Span::raw("  "),
-            Span::styled("no tasks found", theme::dim()),
+            Span::styled("no log entries yet", theme::dim()),
         ]));
     } else {
-        for title in &app.agent_tasks {
+        let max_rows = inner.height.saturating_sub(3) as usize; // header + footer
+        for entry in app.agent_log.iter().take(max_rows) {
+            let (st_span, st_style) = match entry.status.as_str() {
+                "ok"      => ("ok  ", theme::up_icon()),
+                "fail"    => ("fail", theme::down_icon()),
+                "timeout" => ("to  ", theme::dim()),
+                other     => (other, theme::dim()),
+            };
             lines.push(Line::from(vec![
-                Span::raw("    "),
-                Span::styled("\u{2022} ", theme::dim()),
-                Span::styled(title.clone(), theme::name()),
+                Span::raw("  "),
+                Span::styled(format!("{:<14}", entry.ts_short), theme::uptime()),
+                Span::raw("  "),
+                Span::styled(format!("{:<8}", entry.duration),  theme::dim()),
+                Span::raw("  "),
+                Span::styled(format!("{:<4}", st_span),         st_style),
+                Span::raw("  "),
+                Span::styled(entry.card.clone(),                theme::name()),
             ]));
         }
     }
 
-    frame.render_widget(Paragraph::new(lines), area);
-}
-
-fn render_footer(frame: &mut Frame, area: Rect) {
-    let line = Line::from(vec![
-        Span::styled("  \u{2191}\u{2193}", theme::footer_dim()),
-        Span::styled(" nav  ", theme::footer_dim()),
-        Span::styled("Enter", theme::footer_key()),
-        Span::styled(" stop agent  ", theme::footer_dim()),
-        Span::styled("a / Esc", theme::footer_key()),
+    // Footer hint
+    lines.push(Line::from(vec![
+        Span::styled("  Esc", theme::footer_key()),
+        Span::styled(" / ", theme::footer_dim()),
+        Span::styled("q", theme::footer_key()),
         Span::styled(" close", theme::footer_dim()),
-    ]);
-    frame.render_widget(Paragraph::new(line), area);
+    ]));
+
+    frame.render_widget(Paragraph::new(lines), inner);
 }
 
 fn popup_rect(r: Rect) -> Rect {
-    let width  = (r.width  * 4 / 5).min(80).max(50);
-    let height = (r.height * 3 / 4).min(40).max(12);
+    let width  = (r.width  * 4 / 5).min(72).max(50);
+    let height = (r.height * 5 / 6).min(36).max(12);
     let x = r.x + r.width.saturating_sub(width) / 2;
     let y = r.y + r.height.saturating_sub(height) / 2;
     Rect::new(x, y, width.min(r.width), height.min(r.height))
-}
-
-fn short_path(path: &str) -> String {
-    if path.is_empty() { return "—".into(); }
-    let parts: Vec<&str> = path.trim_end_matches('/').rsplitn(2, '/').collect();
-    parts[0].to_string()
-}
-
-fn format_uptime(status: &str) -> String {
-    if status.to_lowercase().starts_with("up") {
-        status
-            .trim_start_matches("Up ")
-            .trim_start_matches("up ")
-            .replace("About an hour", "~1h")
-            .replace(" seconds", "s")
-            .replace(" minutes", "min")
-            .replace(" hours", "h")
-            .replace(" days", "d")
-            .split(" (")
-            .next()
-            .unwrap_or("")
-            .to_string()
-    } else {
-        "stopped".into()
-    }
 }

@@ -106,14 +106,91 @@ Placeholders: `{{BRANCH_NAME}}`, `{{REPO_NAME}}`, `{{TOTAL_FILES}}`, `{{TOTAL_A}
 
 ---
 
-## 3. HTML Livre
+## 3. HTML Livre com CDN
 
-Para qualquer visualizacao custom, gerar HTML e abrir:
+Para qualquer visualizacao custom, gerar HTML e abrir via servidor local (porta 8766):
 
 ```bash
-# Gerar HTML em /tmp/custom.html
-HTML_B64=$(base64 -w 0 /tmp/custom.html)
-python3 /workspace/self/scripts/chrome-relay.py nav "data:text/html;base64,${HTML_B64}"
+# Escrever HTML em /tmp/chrome-relay/<nome>.html
+# (servidor em http://127.0.0.1:8766/ serve /tmp/chrome-relay/)
+python3 /workspace/self/scripts/chrome-relay.py nav "http://127.0.0.1:8766/<nome>.html"
+```
+
+> Se o servidor nao estiver rodando: `cd /tmp/chrome-relay && python3 -m http.server 8766 &`
+> Preferir servidor HTTP a `data:text/html;base64,` — evita OSError (argumento longo) e problemas com UTF-8.
+
+### Bibliotecas CDN disponiveis (usar livremente)
+
+Qualquer lib pode ser importada via `<script src="...">` ou `<link rel="stylesheet" href="...">`.
+Abaixo as mais uteis para visualizacoes no relay:
+
+#### Diff / Codigo
+| Lib | CDN | Quando usar |
+|-----|-----|-------------|
+| **diff2html** | `https://cdn.jsdelivr.net/npm/diff2html/bundles/...` | Render de git diff unificado ou split — perfeito para code review |
+| **highlight.js** | `https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/...` | Syntax highlight de qualquer linguagem |
+| **monaco-editor** | `https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/...` | Editor/diff view completo (pesado, usar so se necessario) |
+
+#### Graficos / Dados
+| Lib | CDN | Quando usar |
+|-----|-----|-------------|
+| **Chart.js** | `https://cdn.jsdelivr.net/npm/chart.js` | Graficos de linha, barra, pizza — metricas e logs |
+| **D3.js** | `https://cdn.jsdelivr.net/npm/d3@7` | Grafos, trees, layouts customizados |
+| **Mermaid** | `https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js` | Flowcharts, sequence diagrams, ER |
+| **Plotly** | `https://cdn.plot.ly/plotly-latest.min.js` | Graficos interativos (hover, zoom, pan) |
+
+#### Tabelas / Listas
+| Lib | CDN | Quando usar |
+|-----|-----|-------------|
+| **DataTables** | `https://cdn.datatables.net/1.13.7/...` | Tabelas com sort/filter/search — logs, listas de issues |
+| **Fuse.js** | `https://cdn.jsdelivr.net/npm/fuse.js@7` | Busca fuzzy client-side em listas grandes |
+
+#### UI / Layout
+| Lib | CDN | Quando usar |
+|-----|-----|-------------|
+| **Tailwind CSS** | `https://cdn.tailwindcss.com` | Layout rapido sem CSS custom |
+| **Shoelace** | `https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2/...` | Web components prontos (tabs, cards, badges) |
+
+### Exemplo: diff2html (usado em code review)
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/diff2html/bundles/css/diff2html.min.css">
+<script src="https://cdn.jsdelivr.net/npm/diff2html/bundles/js/diff2html-ui.min.js"></script>
+<div id="diff"></div>
+<script>
+const diff2htmlUi = new Diff2HtmlUI(document.getElementById('diff'), diffStr, {
+  outputFormat: 'side-by-side',  // ou 'line-by-line'
+  highlight: true,
+  matching: 'lines',
+});
+diff2htmlUi.draw();
+diff2htmlUi.highlightCode();
+</script>
+```
+
+### Exemplo: Chart.js (metricas, logs)
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<canvas id="chart"></canvas>
+<script>
+new Chart(document.getElementById('chart'), {
+  type: 'bar',
+  data: { labels: [...], datasets: [{ data: [...], backgroundColor: '#89b4fa' }] },
+  options: { plugins: { legend: { display: false } } }
+});
+</script>
+```
+
+### Exemplo: Mermaid (flowchart inline)
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ theme: 'dark', startOnLoad: true });</script>
+<div class="mermaid">
+flowchart LR
+  A --> B --> C
+</div>
 ```
 
 ### Tema Catppuccin (copiar em qualquer HTML custom)
