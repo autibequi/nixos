@@ -62,6 +62,8 @@ pub struct App {
     pub log_scroll:  usize,
     pub mode:        AppMode,
     pub menu_cursor: usize,
+    /// Throttle mouse scroll: only act on every 2nd event.
+    scroll_tick:     u8,
 }
 
 impl App {
@@ -75,6 +77,7 @@ impl App {
             log_scroll:  0,
             mode:        AppMode::Normal,
             menu_cursor: 0,
+            scroll_tick: 0,
         }
     }
 
@@ -103,6 +106,12 @@ impl App {
         if matches!(&self.last_action, Some((i, _)) if *i == idx) {
             self.last_action = None;
         }
+    }
+
+    /// Returns true every 2nd call — used to throttle mouse scroll events.
+    pub fn allow_mouse_scroll(&mut self) -> bool {
+        self.scroll_tick = self.scroll_tick.wrapping_add(1);
+        self.scroll_tick % 2 == 0
     }
 
     pub fn log_scroll_up(&mut self, n: usize) {

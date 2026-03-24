@@ -3,7 +3,7 @@
 use ratatui::layout::Rect;
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
-use ratatui::widgets::{Block, Borders, Paragraph};
+use ratatui::widgets::{Block, Borders, Paragraph, Scrollbar, ScrollbarOrientation, ScrollbarState};
 use ratatui::Frame;
 use ratatui::layout::Alignment;
 
@@ -76,6 +76,18 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
         .collect();
 
     frame.render_widget(Paragraph::new(lines), inner);
+
+    // Scrollbar on the right edge of the inner area
+    if total > max_lines {
+        let mut scrollbar_state = ScrollbarState::new(total.saturating_sub(max_lines))
+            .position(total.saturating_sub(max_lines).saturating_sub(scroll));
+        frame.render_stateful_widget(
+            Scrollbar::new(ScrollbarOrientation::VerticalRight)
+                .style(theme::dim()),
+            inner,
+            &mut scrollbar_state,
+        );
+    }
 }
 
 // ── ANSI parser ───────────────────────────────────────────────────────────────

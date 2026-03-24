@@ -1,6 +1,9 @@
 //! Leech TUI v2 — ratatui dashboard with Catppuccin Mocha theme,
 //! mouse-scrollable logs, and ANSI color passthrough.
 
+#[cfg(unix)]
+extern crate libc;
+
 mod app;
 mod event;
 mod theme;
@@ -133,8 +136,12 @@ pub fn run_status(tick: u64) -> Result<()> {
             AppEvent::Mouse(mouse) => {
                 if matches!(app.mode, AppMode::Normal) {
                     match mouse.kind {
-                        MouseEventKind::ScrollUp   => app.log_scroll_up(3),
-                        MouseEventKind::ScrollDown => app.log_scroll_down(3),
+                        MouseEventKind::ScrollUp => {
+                            if app.allow_mouse_scroll() { app.log_scroll_up(1); }
+                        }
+                        MouseEventKind::ScrollDown => {
+                            if app.allow_mouse_scroll() { app.log_scroll_down(1); }
+                        }
                         _ => {}
                     }
                 }
@@ -227,12 +234,23 @@ pub fn run_status(tick: u64) -> Result<()> {
                                         disable_raw_mode()?;
                                         execute!(terminal.backend_mut(), LeaveAlternateScreen, DisableMouseCapture)?;
 
+                                        // Ignore SIGINT in this process so Ctrl+C only kills the
+                                        // child (docker logs / shell) and returns us to the TUI.
+                                        #[cfg(unix)]
+                                        let _prev_sigint = unsafe {
+                                            libc::signal(libc::SIGINT, libc::SIG_IGN)
+                                        };
+
                                         let result = bash_cmd()
                                             .args(["runner", &svc, &action])
                                             .stdin(Stdio::inherit())
                                             .stdout(Stdio::inherit())
                                             .stderr(Stdio::inherit())
                                             .status();
+
+                                        // Restore default SIGINT handler.
+                                        #[cfg(unix)]
+                                        unsafe { libc::signal(libc::SIGINT, libc::SIG_DFL); }
 
                                         enable_raw_mode()?;
                                         execute!(terminal.backend_mut(), EnterAlternateScreen, EnableMouseCapture)?;

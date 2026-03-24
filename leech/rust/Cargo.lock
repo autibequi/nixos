@@ -420,6 +420,7 @@ dependencies = [
  "anyhow",
  "crossterm 0.28.1",
  "leech-sdk",
+ "libc",
  "ratatui",
  "tokio",
 ]

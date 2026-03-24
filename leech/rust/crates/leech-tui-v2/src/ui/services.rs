@@ -10,6 +10,17 @@ use crate::theme;
 
 const SPINNER: &[&str] = &["◐", "◓", "◑", "◒"];
 
+/// Abbreviate / truncate env names to at most 5 chars for consistent column width.
+fn abbrev_env(env: &str) -> &str {
+    match env {
+        "sandbox"    => "sand",
+        "production" => "prod",
+        "devbox"     => "dev",
+        s if s.len() <= 5 => s,
+        s            => &s[..5],
+    }
+}
+
 fn service_dep_names(svc: &str) -> &'static [&'static str] {
     match svc {
         "monolito" => &["postgres", "redis", "localstack"],
@@ -48,8 +59,9 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
         if is_pending {
             let frame_ch     = SPINNER[(app.render_tick as usize / 2) % SPINNER.len()];
             let action_label = app.last_action.as_ref().map(|(_, s)| s.as_str()).unwrap_or("…");
-            let running_env  = dk.and_then(|d| if d.is_up && !d.env.is_empty() { Some(d.env.as_str()) } else { None });
-            let env          = running_env.unwrap_or(ENVS[app.svc_envs[i]]);
+            let raw_env      = dk.and_then(|d| if d.is_up && !d.env.is_empty() { Some(d.env.as_str()) } else { None })
+                                 .unwrap_or(ENVS[app.svc_envs[i]]);
+            let env          = abbrev_env(raw_env);
             lines.push(Line::from(vec![
                 Span::raw("  "),
                 Span::styled(svc_branch.to_string(), theme::tree_branch()),
@@ -59,7 +71,7 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                 Span::styled(frame_ch, theme::pending_icon()),
                 Span::raw(" "),
                 Span::styled(format!("{svc:<14}"), name_style),
-                Span::styled(format!(" {env:<4}"), theme::dim()),
+                Span::styled(format!(" {env:<5}"), theme::dim()),
                 Span::raw("  "),
                 Span::styled(action_label.to_string(), theme::pending_label()),
             ]));
@@ -82,11 +94,12 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
 
         // Show the real running env (from APP_ENV) when container is up,
         // otherwise show the selected env for the next start.
-        let env = if let Some(d) = dk {
+        let raw_env = if let Some(d) = dk {
             if d.is_up && !d.env.is_empty() { d.env.as_str() } else { ENVS[app.svc_envs[i]] }
         } else {
             ENVS[app.svc_envs[i]]
         };
+        let env = abbrev_env(raw_env);
         let mut spans = vec![
             Span::raw("  "),
             Span::styled(svc_branch.to_string(), theme::tree_branch()),
@@ -96,9 +109,8 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             Span::styled(status_icon, status_style),
             Span::raw(" "),
             Span::styled(format!("{svc:<14}"), name_style),
-            Span::styled(format!(" {env:<4}"), theme::dim()),
-            Span::raw(" "),
-            Span::styled(format!("{status_text:<5}"), theme::uptime()),
+            Span::styled(format!(" {env:<5}"), theme::dim()),
+            Span::styled(format!(" {status_text:<5}"), theme::uptime()),
         ];
 
         if !cpu_str.is_empty() {
@@ -110,8 +122,8 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             let mem_bar  = mem_bar_from_str(&mem_str);
             spans.push(Span::raw("  "));
             spans.push(Span::styled(cpu_bar, cpu_sty));
-            spans.push(Span::styled(format!(" {:<6}", cpu_str.trim()), theme::cpu()));
-            spans.push(Span::raw(" "));
+            spans.push(Span::styled(format!(" {:>6}", cpu_str.trim()), theme::cpu()));
+            spans.push(Span::raw("  "));
             spans.push(Span::styled(mem_bar, theme::mem()));
             spans.push(Span::styled(format!(" {mem_used}"), theme::mem()));
         }
@@ -119,6 +131,8 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
         lines.push(Line::from(spans));
 
         // Dep sub-rows
+        // PREFIX for dep rows has 4 more chars than main rows (deeper indent).
+        // To align bars: dep gets "   " (3 sp) instead of env(6)+space(1)=7 → net -4 = 3.
         let deps = service_dep_names(svc);
         for (di, &dep) in deps.iter().enumerate() {
             let is_last        = di == deps.len() - 1;
@@ -143,7 +157,7 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                 Span::styled(d_icon, d_sty),
                 Span::raw(" "),
                 Span::styled(format!("{dep:<14}"), theme::dim()),
-                Span::raw(" "),
+                Span::raw("   "),  // 3 sp aligns bars with main rows (no env col here)
                 Span::styled(format!("{d_status:<5}"), theme::uptime()),
             ];
             if !d_cpu.is_empty() {
@@ -155,8 +169,8 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                 let mem_bar  = mem_bar_from_str(&d_mem);
                 dep_spans.push(Span::raw("  "));
                 dep_spans.push(Span::styled(cpu_bar, cpu_sty));
-                dep_spans.push(Span::styled(format!(" {:<6}", d_cpu.trim()), theme::cpu()));
-                dep_spans.push(Span::raw(" "));
+                dep_spans.push(Span::styled(format!(" {:>6}", d_cpu.trim()), theme::cpu()));
+                dep_spans.push(Span::raw("  "));
                 dep_spans.push(Span::styled(mem_bar, theme::mem()));
                 dep_spans.push(Span::styled(format!(" {mem_used}"), theme::mem()));
             }
