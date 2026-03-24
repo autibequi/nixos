@@ -10,10 +10,11 @@ use crate::app::{App, AGENT_MENU_ITEMS};
 use crate::theme;
 
 pub fn render(frame: &mut Frame, app: &App) {
-    let area  = popup_rect(frame.area());
+    let (area, pods_area) = popup_rects(frame.area());
 
     if !app.agent_log.is_empty() {
         render_log_view(frame, app, area);
+        render_pods_box(frame, app, pods_area);
         return;
     }
 
@@ -33,6 +34,8 @@ pub fn render(frame: &mut Frame, app: &App) {
     if app.agent_menu {
         render_agent_menu(frame, app, area);
     }
+
+    render_pods_box(frame, app, pods_area);
 }
 
 // ── Agent list ────────────────────────────────────────────────────────────────
@@ -256,10 +259,85 @@ fn render_log_view(frame: &mut Frame, app: &App, area: Rect) {
     frame.render_widget(Paragraph::new(lines), inner);
 }
 
-fn popup_rect(r: Rect) -> Rect {
-    let width  = (r.width  * 4 / 5).min(72).max(50);
-    let height = (r.height * 5 / 6).min(36).max(12);
+/// Returns (main_area, pods_area).
+/// pods_area is a 3-line box immediately below the main popup.
+fn popup_rects(r: Rect) -> (Rect, Rect) {
+    const PODS_H: u16 = 3;
+    const GAP:    u16 = 1;
+    let width   = (r.width  * 4 / 5).min(72).max(50);
+    let total_h = (r.height * 5 / 6).min(36 + PODS_H + GAP).max(12);
+    let main_h  = total_h.saturating_sub(PODS_H + GAP);
     let x = r.x + r.width.saturating_sub(width) / 2;
-    let y = r.y + r.height.saturating_sub(height) / 2;
-    Rect::new(x, y, width.min(r.width), height.min(r.height))
+    let y = r.y + r.height.saturating_sub(total_h) / 2;
+    let main  = Rect::new(x, y, width.min(r.width), main_h.min(r.height));
+    let pods_y = y + main_h + GAP;
+    let pods  = Rect::new(x, pods_y, width.min(r.width),
+        PODS_H.min(r.height.saturating_sub(pods_y.saturating_sub(r.y))));
+    (main, pods)
+}
+
+// ── Pods summary box ──────────────────────────────────────────────────────────
+
+fn render_pods_box(frame: &mut Frame, app: &App, area: Rect) {
+    if area.height == 0 { return; }
+
+    let block = Block::default()
+        .borders(Borders::ALL)
+        .border_type(BorderType::Rounded)
+        .title(" pods ")
+        .title_style(theme::dim())
+        .border_style(theme::separator());
+    let inner = block.inner(area);
+
+    frame.render_widget(Clear, area);
+    frame.render_widget(block, area);
+
+    // Collect running pods grouped by mnt_path, sum session_count
+    let mut pods: Vec<(String, usize)> = {
+        let mut map: std::collections::HashMap<String, usize> =
+            std::collections::HashMap::new();
+        for s in app.snapshot.agents.iter().chain(app.snapshot.background.iter()) {
+            if !s.is_up { continue; }
+            let key = pod_short_name(&s.mnt_path, &s.name);
+            *map.entry(key).or_insert(0) += s.session_count.max(1);
+        }
+        let mut v: Vec<_> = map.into_iter().collect();
+        v.sort_by(|a, b| a.0.cmp(&b.0));
+        v
+    };
+
+    let line = if pods.is_empty() {
+        Line::from(vec![
+            Span::raw("  "),
+            Span::styled("no running pods", theme::dim()),
+        ])
+    } else {
+        let pod_count = pods.len();
+        let total_inst: usize = pods.iter().map(|(_, n)| n).sum();
+        let mut spans: Vec<Span> = vec![
+            Span::styled(
+                format!("  {} pod{}  {} inst  •  ",
+                    pod_count,
+                    if pod_count == 1 { "" } else { "s" },
+                    total_inst),
+                theme::dim()),
+        ];
+        for (i, (name, count)) in pods.iter().enumerate() {
+            if i > 0 { spans.push(Span::styled("  ", theme::dim())); }
+            spans.push(Span::styled(name.clone(), theme::name()));
+            spans.push(Span::styled(format!(" ×{count}"), theme::uptime()));
+        }
+        Line::from(spans)
+    };
+
+    frame.render_widget(Paragraph::new(vec![line]), inner);
+}
+
+fn pod_short_name(mnt_path: &str, fallback: &str) -> String {
+    if mnt_path.is_empty() {
+        // use last segment of container name
+        return fallback.rsplit('-').next().unwrap_or(fallback).to_string();
+    }
+    // ~/projects/monolito → "monolito"
+    mnt_path.rsplit('/').next().unwrap_or(mnt_path).to_string()
 }

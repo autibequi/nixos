@@ -211,7 +211,8 @@ pub fn collect() -> Result<StatusSnapshot> {
         leech_containers.iter().map(|c| c.name.as_str()).collect();
 
     // Detect leech containers by name pattern (catches containers not found by ancestor filter)
-    let is_leech_name = |name: &str| name.contains("leech-run-");
+    // Also catches leech-projects / leech-projects-host (agent infra, not utils)
+    let is_leech_name = |name: &str| name.contains("leech-run-") || name.contains("-projects");
 
     let (leech_extra, true_utils): (Vec<_>, Vec<_>) = utils_raw
         .into_iter()

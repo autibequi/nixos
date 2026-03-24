@@ -3113,9 +3113,9 @@ _leech_dk_container_fixup() {
 }
 
 # src/lib/docker_shell_impl.sh
-# docker_shell_impl.sh — abre shell interativo ou executa comando com Go toolchain.
-# Sem cmd: exec no container rodando (app ou container especificado).
-# Com cmd: roda one-off dev container (golang:alpine + make) com source montado.
+# docker_shell_impl.sh — abre shell interativo ou executa comando.
+# Monolito: one-off container golang:alpine com source montado + toolchain.
+# Node (bo-container, front-student): docker exec no container rodando com sh -l.
 #
 # Uso: _leech_dk_shell <service> <container> <cmd> <worktree>
 
@@ -3137,8 +3137,20 @@ _leech_dk_shell() {
   project=$(leech_docker_effective_project "$service")
   compose=$(leech_docker_compose_file "$service")
 
+  # Serviços Node: exec no container rodando (tem npm, node_modules/.bin no PATH via sh -l)
+  if [[ "$service" == "bo-container" || "$service" == "front-student" ]]; then
+    local container_name="${project}-${container}"
+    if [[ -n "$cmd" ]]; then
+      echo "=== [$service] exec: $cmd ==="
+      docker exec -it "$container_name" sh -l -c "$cmd"
+    else
+      docker exec -it "$container_name" sh -l
+    fi
+    return $?
+  fi
+
+  # Monolito: one-off container golang com source montado + make + ferramentas
   if [[ -n "$cmd" ]]; then
-    # Modo dev: one-off container golang com source montado + make + ferramentas
     local host_uid host_gid log_dir log_file
     host_uid="$(id -u)"
     host_gid="$(id -g)"
@@ -3171,7 +3183,6 @@ _leech_dk_shell() {
       "golang:1.24.4-alpine" \
       sh -c "apk add --no-cache make gcc musl-dev librdkafka-dev ca-certificates docker-cli > /dev/null 2>&1 && $cmd && chown -R \"$HOST_UID:$HOST_GID\" /go/app 2>/dev/null || true" 2>&1 | tee -a "$log_file"
   else
-    # Modo interativo: one-off container com source montado + Go toolchain + make
     local host_uid host_gid log_dir
     host_uid="$(id -u)"
     host_gid="$(id -g)"

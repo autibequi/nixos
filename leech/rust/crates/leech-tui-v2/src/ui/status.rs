@@ -94,6 +94,8 @@ fn render_footer(frame: &mut Frame, app: &App, area: Rect) {
         Span::styled(" nav  ", theme::footer_dim()),
         Span::styled("Enter", theme::footer_key()),
         Span::styled(" menu  ", theme::footer_dim()),
+        Span::styled("a", theme::footer_key()),
+        Span::styled(" agents  ", theme::footer_dim()),
         Span::styled("e", theme::footer_key()),
         Span::styled(format!("[{env}]"), theme::dim()),
         Span::styled("  scroll", theme::footer_dim()),
