@@ -144,13 +144,29 @@ fn do_start(
 
     // 4. Build
     eprintln!("\x1b[2m[3/4] Building image...\x1b[0m");
-    let startup_log = log_dir.join("startup.log");
+    let debug_compose = svc::service_config_dir(svc).join("docker-compose.debug.yml");
+    let debug_flag    = debug_compose.to_string_lossy().into_owned();
+    let use_debug     = opts.debug && debug_compose.exists();
+    let startup_log   = log_dir.join("startup.log");
     let log_file = std::fs::OpenOptions::new()
         .create(true)
         .write(true)
         .truncate(true)
         .open(&startup_log)?;
-    let status = compose_cmd(compose, project, env_vars)
+    let mut build_cmd = if use_debug {
+        let mut c = Command::new("docker");
+        c.args([
+            "compose",
+            "-f", &compose.to_string_lossy(),
+            "-f", &debug_flag,
+            "-p", project,
+        ]);
+        for (k, v) in env_vars { c.env(k, v); }
+        c
+    } else {
+        compose_cmd(compose, project, env_vars)
+    };
+    let status = build_cmd
         .args(["build"])
         .env("DOCKER_BUILDKIT", "1")
         .stdout(log_file.try_clone()?)
@@ -169,11 +185,22 @@ fn do_start(
         .create(true)
         .append(true)
         .open(&startup_log)?;
-    let mut compose_args = vec!["up", "-d", "--force-recreate", "--remove-orphans"];
-    if opts.debug {
-        // debug compose overlay handled by user (docker-compose.debug.yml)
-    }
-    let status = compose_cmd(compose, project, env_vars)
+    let compose_args = vec!["up", "-d", "--force-recreate", "--remove-orphans"];
+    let mut up_cmd = if use_debug {
+        eprintln!("\x1b[35m[debug] overlay: {}\x1b[0m", debug_compose.display());
+        let mut c = Command::new("docker");
+        c.args([
+            "compose",
+            "-f", &compose.to_string_lossy(),
+            "-f", &debug_flag,
+            "-p", project,
+        ]);
+        for (k, v) in env_vars { c.env(k, v); }
+        c
+    } else {
+        compose_cmd(compose, project, env_vars)
+    };
+    let status = up_cmd
         .args(&compose_args)
         .stdout(log_file.try_clone()?)
         .stderr(log_file)

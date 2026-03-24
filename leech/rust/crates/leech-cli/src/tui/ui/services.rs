@@ -100,6 +100,7 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             ENVS[app.svc_envs[i]]
         };
         let env = abbrev_env(raw_env);
+        let debug_on = app.svc_debug.get(i).copied().unwrap_or(false);
         let mut spans = vec![
             Span::raw("  "),
             Span::styled(svc_branch.to_string(), theme::tree_branch()),
@@ -112,6 +113,9 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             Span::styled(format!(" {env:<5}"), theme::dim()),
             Span::styled(format!(" {status_text:<5}"), theme::uptime()),
         ];
+        if debug_on {
+            spans.push(Span::styled(" [dbg]", theme::pending_label()));
+        }
 
         if !cpu_str.is_empty() {
             let cpu_pct  = parse_pct(&cpu_str);

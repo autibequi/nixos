@@ -101,12 +101,15 @@ fn docker_stop_wait(container_name: &str) {
         .output();
 }
 
-fn run_bg_cmd(svc: &str, env: &str, action: &str) -> Option<String> {
+fn run_bg_cmd(svc: &str, env: &str, action: &str, debug: bool) -> Option<String> {
     let mut cmd = leech_cmd();
     let env_flag = format!("--env={env}");
     let mut args: Vec<&str> = vec!["runner", svc, action];
     if (action == "start" || action == "start-hotreload") && !env.is_empty() {
         args.push(&env_flag);
+    }
+    if debug {
+        args.push("--debug");
     }
     match cmd.args(&args).output() {
         Err(e) => Some(format!("Could not run command: {e}")),
@@ -232,13 +235,20 @@ pub fn run_status(tick: u64) -> Result<()> {
                                         });
                                     }
 
+                                    "debug" => {
+                                        app.toggle_debug();
+                                        app.close_menu();
+                                    }
+
                                     "start" | "start-hotreload" => {
                                         let action = action.to_string();
                                         let svc    = app.current_service().to_string();
                                         let env    = app.current_env().to_string();
+                                        let debug  = app.is_debug();
                                         let idx    = app.cursor_idx;
                                         let label  = match action.as_str() {
                                             "start-hotreload" => format!("hotreload {svc}…"),
+                                            _ if debug        => format!("starting {svc} [dbg]…"),
                                             _                 => format!("starting {svc}…"),
                                         };
                                         app.close_menu();
@@ -247,7 +257,7 @@ pub fn run_status(tick: u64) -> Result<()> {
                                         let snap_tx = tx_bg.clone();
                                         let done_tx = bg_done_tx.clone();
                                         std::thread::spawn(move || {
-                                            if let Some(err) = run_bg_cmd(&svc, &env, &action) {
+                                            if let Some(err) = run_bg_cmd(&svc, &env, &action, debug) {
                                                 let _ = err_tx.send(err);
                                             }
                                             let _ = done_tx.send(idx);
@@ -260,6 +270,7 @@ pub fn run_status(tick: u64) -> Result<()> {
                                     "restart" => {
                                         let svc    = app.current_service().to_string();
                                         let env    = app.current_env().to_string();
+                                        let debug  = app.is_debug();
                                         let idx    = app.cursor_idx;
                                         let cname  = find_container(&app, &svc);
                                         app.close_menu();
@@ -269,7 +280,7 @@ pub fn run_status(tick: u64) -> Result<()> {
                                         let done_tx = bg_done_tx.clone();
                                         std::thread::spawn(move || {
                                             if let Some(name) = cname { docker_stop_wait(&name); }
-                                            if let Some(err) = run_bg_cmd(&svc, &env, "start") {
+                                            if let Some(err) = run_bg_cmd(&svc, &env, "start", debug) {
                                                 let _ = err_tx.send(err);
                                             }
                                             let _ = done_tx.send(idx);

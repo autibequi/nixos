@@ -16,3 +16,4 @@ alias claudio=leech
 # Dynamic completions (always in sync with CLI)
 eval "$(leech completions zsh)"
 compdef zion=leech
+export PATH="$HOME/.local/bin:$PATH"

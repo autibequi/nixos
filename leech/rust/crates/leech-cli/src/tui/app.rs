@@ -59,19 +59,53 @@ pub fn save_svc_envs(envs: &[usize]) {
     let _ = std::fs::write(path, data);
 }
 
+// ── svc-debug persistence ─────────────────────────────────────────────────────
+
+fn svc_debug_path() -> std::path::PathBuf {
+    let base = std::env::var("XDG_CONFIG_HOME")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|_| {
+            let home = std::env::var("HOME").unwrap_or_default();
+            std::path::PathBuf::from(home).join(".config")
+        });
+    base.join("leech").join("tui-debug")
+}
+
+pub fn load_svc_debug() -> Vec<bool> {
+    if let Ok(data) = std::fs::read_to_string(svc_debug_path()) {
+        let flags: Vec<bool> = data.lines()
+            .filter_map(|l| match l.trim() { "1" => Some(true), "0" => Some(false), _ => None })
+            .collect();
+        if flags.len() == DK_SERVICES.len() {
+            return flags;
+        }
+    }
+    vec![false; DK_SERVICES.len()]
+}
+
+pub fn save_svc_debug(flags: &[bool]) {
+    let path = svc_debug_path();
+    if let Some(parent) = path.parent() {
+        let _ = std::fs::create_dir_all(parent);
+    }
+    let data = flags.iter().map(|b| if *b { "1" } else { "0" }).collect::<Vec<_>>().join("\n");
+    let _ = std::fs::write(path, data);
+}
+
 // Agent types and loaders are provided by crate::agents — imported at top.
 
 // ── App state ─────────────────────────────────────────────────────────────────
 
 pub const MENU_ITEMS: &[(&str, &str)] = &[
-    ("Start",    "start"),
-    ("Stop",     "stop"),
-    ("Restart",  "restart"),
-    ("Logs",     "logs"),
-    ("Test",     "test"),
-    ("Install",  "install"),
-    ("Shell",    "shell"),
-    ("Cancel",   "cancel"),
+    ("Start",        "start"),
+    ("Stop",         "stop"),
+    ("Restart",      "restart"),
+    ("Logs",         "logs"),
+    ("Test",         "test"),
+    ("Install",      "install"),
+    ("Shell",        "shell"),
+    ("Toggle Debug", "debug"),
+    ("Cancel",       "cancel"),
 ];
 
 pub enum AppMode {
@@ -86,6 +120,7 @@ pub struct App {
     pub snapshot:          StatusSnapshot,
     pub cursor_idx:        usize,
     pub svc_envs:          Vec<usize>,
+    pub svc_debug:         Vec<bool>,
     pub last_action:       Option<(usize, String)>,
     pub render_tick:       u64,
     pub log_scroll:        usize,
@@ -114,6 +149,7 @@ impl App {
             snapshot:          StatusSnapshot::default(),
             cursor_idx:        0,
             svc_envs:          load_svc_envs(),
+            svc_debug:         load_svc_debug(),
             last_action:       None,
             render_tick:       0,
             log_scroll:        0,
@@ -203,6 +239,17 @@ impl App {
         if total == 0 { return; }
         self.cursor_idx = (self.cursor_idx + 1) % total;
         self.log_scroll = 0;
+    }
+
+    pub fn toggle_debug(&mut self) {
+        if self.cursor_idx >= DK_SERVICES.len() { return; }
+        let idx = self.cursor_idx;
+        self.svc_debug[idx] = !self.svc_debug[idx];
+        save_svc_debug(&self.svc_debug);
+    }
+
+    pub fn is_debug(&self) -> bool {
+        self.cursor_idx < DK_SERVICES.len() && self.svc_debug[self.cursor_idx]
     }
 
     pub fn cycle_env(&mut self) {

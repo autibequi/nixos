@@ -33,7 +33,15 @@ fn render_menu(frame: &mut Frame, app: &App) {
 
     let items: Vec<ListItem> = MENU_ITEMS
         .iter()
-        .map(|(label, _)| ListItem::new(format!("  {label}")))
+        .map(|(label, action)| {
+            let text = if *action == "debug" {
+                let on = app.cursor_idx < app.svc_debug.len() && app.svc_debug[app.cursor_idx];
+                format!("  Debug: {}", if on { "ON " } else { "OFF" })
+            } else {
+                format!("  {label}")
+            };
+            ListItem::new(text)
+        })
         .collect();
 
     let mut state = ListState::default();
