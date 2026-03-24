@@ -14,7 +14,7 @@ pub fn build(no_cache: bool) -> Result<()> {
     Ok(ComposeCmd::new().execute(&args)?)
 }
 
-/// `leech down` — stop compose containers.
+/// `leech stop` — stop compose containers.
 pub fn down() -> Result<()> {
     let leech = paths::leech_root();
     println!("Stopping leech containers...");
@@ -27,13 +27,6 @@ pub fn down() -> Result<()> {
             "down",
         ],
     );
-    let puppy = leech.join("containers/leech/docker-compose.puppy.yml");
-    if puppy.exists() {
-        crate::exec::fire(
-            "docker",
-            &["compose", "-f", &puppy.to_string_lossy(), "down"],
-        );
-    }
     println!("Done.");
     Ok(())
 }
@@ -48,7 +41,7 @@ pub fn shutdown() -> Result<()> {
         .map(|s| s.as_str())
         .filter(|n| {
             let l = n.to_lowercase();
-            l.contains("leech") || l.contains("claude") || l.contains("leech") || l.contains("puppy")
+            l.contains("leech") || l.contains("claude")
         })
         .collect();
     if strays.is_empty() {
