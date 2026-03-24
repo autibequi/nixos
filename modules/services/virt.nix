@@ -8,9 +8,13 @@
   virtualisation.libvirtd = {
     enable = true;
 
-    # QEMU (25.11: OVMF vem por padrão, submodule removido)
     qemu = {
       package = pkgs.qemu_kvm;
+      # Aponta libvirt para os JSON descriptors de firmware do QEMU
+      # (NixOS não expõe /usr/share/qemu/firmware — necessário para Secure Boot)
+      verbatimConfig = ''
+        firmware_dir = "${pkgs.qemu_kvm}/share/qemu/firmware"
+      '';
       # TPM virtual (Windows 11 exige)
       swtpm.enable = true;
     };

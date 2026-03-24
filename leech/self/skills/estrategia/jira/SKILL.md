@@ -5,6 +5,16 @@ description: Lê um card Jira da Estrategia com TODOS os campos relevantes. Use 
 
 # estrategia/jira: Ler Card Jira Completo
 
+## Gatilhos — quando usar OBRIGATORIAMENTE
+
+Invocar esta skill sempre que o usuário enviar qualquer um dos formatos abaixo:
+
+- URL completa: `https://estrategia.atlassian.net/browse/FUK2-XXXXX`
+- Chave do card: `FUK2-12273`, `FUK2-XXXX`, ou qualquer `<PROJETO>-<NÚMERO>`
+- Pedido de refinamento: "refine essa", "analisa esse card", "sugestão de implementação"
+
+**Nunca** sair investigando o codebase ou escrevendo sugestão sem antes ler a skill completa.
+
 ## Objetivo
 
 Ler um card Jira do projeto Estrategia extraindo **todos** os campos relevantes de uma vez, sem precisar de múltiplas chamadas ou tentativas.
