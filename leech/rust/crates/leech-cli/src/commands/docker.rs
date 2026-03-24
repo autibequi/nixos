@@ -4,10 +4,35 @@ use anyhow::Result;
 use leech_cli::{compose::ComposeCmd, paths};
 
 /// `leech build` — build Docker image.
-pub fn build(no_cache: bool) -> Result<()> {
-    println!("Building claude-nix-sandbox image...");
+/// With `--danger`: rebuild leech-base:latest first (refreshes cursor-agent, nix packages).
+pub fn build(danger: bool) -> Result<()> {
+    let base_ctx = paths::container_dir();
+
+    if danger {
+        println!("leech-base:latest — rebuild forçado (--danger)...");
+        let status = std::process::Command::new("docker")
+            .args([
+                "build",
+                "--no-cache",
+                "-f",
+                &base_ctx.join("Dockerfile.claude.base").to_string_lossy(),
+                "-t",
+                "leech-base:latest",
+                &base_ctx.to_string_lossy(),
+            ])
+            .stdin(std::process::Stdio::inherit())
+            .stdout(std::process::Stdio::inherit())
+            .stderr(std::process::Stdio::inherit())
+            .status()
+            .map_err(|e| anyhow::anyhow!("docker build leech-base failed: {e}"))?;
+        if !status.success() {
+            anyhow::bail!("Error: failed to build leech-base:latest");
+        }
+    }
+
+    println!("Building leech image...");
     let mut args = vec!["build"];
-    if no_cache {
+    if danger {
         args.push("--no-cache");
     }
     args.push("leech");

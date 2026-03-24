@@ -404,6 +404,9 @@ impl SessionRunner {
             agent_flags.push("--model".to_string());
             agent_flags.push(id.clone());
         }
+        if let Some(ref resume) = self.resume {
+            agent_flags.push(format!("--resume={resume}"));
+        }
         if !self.mount_path.is_empty() {
             if let Some(name) = std::path::Path::new(&self.mount_path).file_name() {
                 agent_flags.push("--name".to_string());
@@ -412,25 +415,16 @@ impl SessionRunner {
         }
 
         let agent_flags_str = agent_flags.join(" ");
-        let agent_check = r#"agent --version >/dev/null 2>&1 || { echo "leech: cursor-agent nao funciona (versao expirada ou imagem desatualizada). Rode: leech build" >&2; exit 1; }; "#;
 
-        let cursor_cmd = if let Some(ref resume) = self.resume {
-            format!(
-                ". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt; {agent_check}exec agent {agent_flags_str} --resume={resume}"
-            )
-        } else if let Some(ref init_file) = self.init_md {
-            format!(
-                ". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt; {agent_check}\
-                if [ -f \"/workspace/mnt/{init_file}\" ]; then \
-                p=$(sed -e 's/\\\\\\\\/\\\\\\\\\\\\\\\\/g' -e 's/\"/\\\\\"/g' \"/workspace/mnt/{init_file}\"); \
-                exec agent {agent_flags_str} \"$p\"; \
-                else exec agent {agent_flags_str}; fi"
-            )
-        } else {
-            format!(
-                ". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt; {agent_check}exec agent {agent_flags_str}"
-            )
-        };
+        // cursor-agent must run as user 1000 (setpriv), same as cursor-login.
+        // Running as root causes the agent to exit immediately with no output.
+        // Note: cursor-agent expires periodically — rebuild with `leech build --danger` if it exits silently.
+        let cursor_cmd = format!(
+            "chown 1000:1000 /home/claude/.config/cursor 2>/dev/null || true; \
+             cd /workspace/mnt; \
+             agent --version >/dev/null 2>&1 || {{ echo \"leech: cursor-agent expirou ou nao instalado. Rode: leech build --danger\" >&2; exit 1; }}; \
+             exec setpriv --reuid=1000 --regid=1000 --keep-groups agent {agent_flags_str}"
+        );
 
         let vol_args = self.volume_args();
 
@@ -471,8 +465,7 @@ impl SessionRunner {
             if self.host {
                 env_pairs.push(("HOST_ATTACHED", "1"));
             }
-            let exec_cmd = cursor_cmd.clone();
-            return crate::docker::exec_replace(&cid, &env_pairs, &exec_cmd);
+            return crate::docker::exec_replace(&cid, &env_pairs, &cursor_cmd);
         }
 
         // Fallback: ephemeral run (extra volumes or analysis mode require isolated container).

@@ -6,12 +6,12 @@ services:
     container_name: leech-dk-front-student-app
     cpus: "14.4"
     env_file:
-      - ./env/${APP_ENV_FILE:-sandbox}.env
+      - ./env/${APP_ENV_FILE:-local}.env
     environment:
       - FORCE_COLOR=1
       - TERM=xterm-256color
       - VERTICAL=${VERTICAL:-carreiras-juridicas}
-      - NPM_SCRIPT_ENV=${NPM_SCRIPT_ENV:-dev}
+      - NPM_SCRIPT_ENV=${NPM_SCRIPT_ENV:-local}
     tty: true
     volumes:
       # Bind mount completo: source + node_modules (gerado por leech docker install)
