@@ -67,6 +67,79 @@ pub fn hooks(hook: Option<String>, list: bool, env_overrides: Vec<String>) -> Re
     Ok(())
 }
 
+// ── sentinel ─────────────────────────────────────────────────────
+
+const SENTINEL_PID: &str = "/tmp/leech-sentinel.pid";
+
+/// `leech sentinel` — keep the machine awake via systemd-inhibit.
+pub fn sentinel(action: &str) -> Result<()> {
+    match action {
+        "start" => {
+            if let Some(pid) = sentinel_pid() {
+                println!("\x1b[32m● sentinel ja ativo\x1b[0m  pid={pid}");
+                return Ok(());
+            }
+            println!("\x1b[36m→ ativando sentinel\x1b[0m  (bloqueia sleep + idle + lid-close)");
+            let child = std::process::Command::new("systemd-inhibit")
+                .args([
+                    "--what=sleep:idle:handle-lid-switch",
+                    "--who=Leech Sentinel",
+                    "--why=Remote access active",
+                    "--mode=block",
+                    "sleep", "infinity",
+                ])
+                .stdout(std::process::Stdio::null())
+                .stderr(std::process::Stdio::null())
+                .spawn()?;
+            let pid = child.id();
+            std::fs::write(SENTINEL_PID, pid.to_string())?;
+            std::thread::sleep(std::time::Duration::from_millis(500));
+            if sentinel_pid().is_some() {
+                println!("\x1b[32m● sentinel ativo\x1b[0m  pid={pid}");
+                println!("\x1b[2m  pare com:     leech sentinel stop\x1b[0m");
+                println!("\x1b[2m  desligue com: leech sentinel poweroff\x1b[0m");
+            } else {
+                let _ = std::fs::remove_file(SENTINEL_PID);
+                anyhow::bail!("sentinel falhou ao iniciar");
+            }
+        }
+        "stop" => match sentinel_pid() {
+            None => println!("\x1b[2msentinel nao esta ativo\x1b[0m"),
+            Some(pid) => {
+                crate::exec::fire("kill", &[&pid.to_string()]);
+                let _ = std::fs::remove_file(SENTINEL_PID);
+                println!("\x1b[33m○ sentinel desativado\x1b[0m  pid={pid}");
+            }
+        },
+        "status" => match sentinel_pid() {
+            Some(pid) => println!("\x1b[32m● sentinel ativo\x1b[0m  pid={pid}"),
+            None => println!("\x1b[31m○ sentinel inativo\x1b[0m  (use: leech sentinel start)"),
+        },
+        "poweroff" => {
+            if let Some(pid) = sentinel_pid() {
+                crate::exec::fire("kill", &[&pid.to_string()]);
+                let _ = std::fs::remove_file(SENTINEL_PID);
+            }
+            println!("\x1b[1m\x1b[31mdesligando o computador...\x1b[0m");
+            std::thread::sleep(std::time::Duration::from_secs(1));
+            crate::exec::fire("systemctl", &["poweroff"]);
+        }
+        _ => anyhow::bail!("sentinel: acao invalida '{action}' (use start|stop|status|poweroff)"),
+    }
+    Ok(())
+}
+
+fn sentinel_pid() -> Option<u32> {
+    let pid: u32 = std::fs::read_to_string(SENTINEL_PID).ok()?.trim().parse().ok()?;
+    // Verify process is alive
+    std::process::Command::new("kill")
+        .args(["-0", &pid.to_string()])
+        .output()
+        .ok()
+        .filter(|o| o.status.success())?;
+    Some(pid)
+}
+
 // ── relay ────────────────────────────────────────────────────────
 
 const RELAY_PORT: u16 = 9222;

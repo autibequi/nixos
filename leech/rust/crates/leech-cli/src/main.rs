@@ -234,6 +234,25 @@ enum Commands {
         steps: Option<u32>,
     },
 
+    // ── Sentinel ─────────────────────────────────────────────────
+    /// Keep machine awake for remote access (systemd-inhibit)
+    #[command(alias = "caffeine")]
+    Sentinel {
+        #[arg(default_value = "start")]
+        action: String,
+    },
+
+    /// Destroy containers + volumes + leech image (full reset)
+    Destroy,
+
+    // ── Git ──────────────────────────────────────────────────────
+    /// Git utilities
+    #[command(alias = "g", hide = true)]
+    Git {
+        #[command(subcommand)]
+        action: GitAction,
+    },
+
     // ── Agents ──────────────────────────────────────────────────
     /// Agent management (list, phone, status)
     #[command(alias = "ag", alias = "a", before_help = help::AGENTS_BEFORE)]
@@ -313,6 +332,16 @@ enum TasksAction {
         #[arg(long, short = 't', default_value = "5")]
         tick: String,
     },
+}
+
+#[derive(Subcommand)]
+enum GitAction {
+    /// Stage all + commit with timestamp
+    Append {
+        branch: Option<String>,
+    },
+    /// Stage all + commit (sandbox shortcut)
+    Sandbox,
 }
 
 fn main() -> Result<()> {
@@ -430,7 +459,19 @@ fn main() -> Result<()> {
             })
         }
 
-        // Tick — delegates to bash CLI
+        // Sentinel / caffeine
+        Some(Commands::Sentinel { action }) => commands::tools::sentinel(&action),
+
+        // Destroy
+        Some(Commands::Destroy) => commands::docker::destroy(),
+
+        // Git
+        Some(Commands::Git { action }) => match action {
+            GitAction::Append { branch } => commands::git::append(branch.as_deref().unwrap_or("")),
+            GitAction::Sandbox => commands::git::sandbox(),
+        },
+
+        // Tick
         Some(Commands::Tick { dry_run, steps }) => {
             commands::agents::auto(dry_run, steps)
         }

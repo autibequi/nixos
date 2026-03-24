@@ -6,15 +6,19 @@ use std::process::Command;
 /// `leech git append` — stage all + commit with timestamp.
 #[allow(dead_code)]
 pub fn append(_branch: &str) -> Result<()> {
-    let stamp = chrono_stamp();
-    let msg = format!("chore: append {stamp}");
+    git_commit("chore", "append")
+}
 
-    Command::new("git")
-        .args(["add", "-A"])
-        .status()?;
-    Command::new("git")
-        .args(["commit", "-m", &msg])
-        .status()?;
+/// `leech git sandbox` — stage all + commit with timestamp (sandbox shortcut).
+pub fn sandbox() -> Result<()> {
+    git_commit("chore", "sandbox")
+}
+
+fn git_commit(prefix: &str, label: &str) -> Result<()> {
+    let stamp = chrono_stamp();
+    let msg = format!("{prefix}: {label} {stamp}");
+    Command::new("git").args(["add", "-A"]).status()?;
+    Command::new("git").args(["commit", "-m", &msg]).status()?;
     Ok(())
 }
 

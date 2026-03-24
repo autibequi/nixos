@@ -80,6 +80,30 @@ pub fn shutdown() -> Result<()> {
     Ok(())
 }
 
+/// `leech destroy` — remove containers, volumes, and leech image (full reset).
+pub fn destroy() -> Result<()> {
+    let leech = paths::leech_root();
+    let compose = leech.join("containers/leech/docker-compose.leech.yml");
+    let compose_s = compose.to_string_lossy();
+
+    println!("Destroying leech session containers + volumes...");
+    crate::exec::fire(
+        "docker",
+        &["compose", "-f", &compose_s, "down", "--volumes", "--remove-orphans"],
+    );
+
+    println!("Removing leech image...");
+    let s = std::process::Command::new("docker")
+        .args(["image", "rm", "leech"])
+        .output()?;
+    if !s.status.success() {
+        println!("  (image not found or in use)");
+    }
+
+    println!("Done.");
+    Ok(())
+}
+
 /// `leech clean` — remove stopped containers.
 pub fn clean(force: bool) -> Result<()> {
     println!("=== Stopped Leech containers ===");

@@ -265,6 +265,8 @@ pub fn man_page() {
         "Stop all containers + kill strays.");
     man_cmd("clean, gc, prune", "[-f]",
         "Remove stopped containers.");
+    man_cmd("destroy", "",
+        "Destroy containers + volumes + leech image (full reset).");
 
     println!("\x1b[1mTOOL COMMANDS\x1b[0m");
     man_cmd("status, st", "[-t SECS] [--json]",
@@ -281,6 +283,10 @@ pub fn man_page() {
         "Execute or list Claude Code hooks.");
     man_cmd("relay", "[start|stop|status]",
         "Chrome DevTools Protocol relay.");
+    man_cmd("sentinel, caffeine", "[start|stop|status|poweroff]",
+        "Keep machine awake via systemd-inhibit (remote access).");
+    man_cmd("git sandbox", "",
+        "Stage all + commit with timestamp.");
     man_cmd("man", "",
         "This page.");
 

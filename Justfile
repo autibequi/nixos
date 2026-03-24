@@ -52,27 +52,22 @@ proxy:
 
 # ── Leech CLI ───────────────────────────────────────────────────────────────
 
-# Regenera leech CLI (bashly) + instala symlink + bootstrap
+# Compila e instala leech Rust CLI em ~/.local/bin/leech
 install:
-    just --justfile leech/bash/Justfile --working-directory leech/bash install
-
-# Regenera binário apenas
-gen:
-    just --justfile leech/bash/Justfile --working-directory leech/bash gen
+    cargo build --release --manifest-path leech/rust/Cargo.toml -p leech-cli
+    install -m 755 leech/rust/target/release/leech {{nixos_dir}}/stow/.local/bin/leech
+    install -m 755 leech/scripts/bootstrap-dashboard.sh {{nixos_dir}}/scripts/bootstrap.sh
+    @echo "[just] leech instalado em {{nixos_dir}}/stow/.local/bin/leech"
 
 # Atualiza só o bootstrap (leech/scripts → scripts/)
 bootstrap:
     install -m 755 leech/scripts/bootstrap-dashboard.sh scripts/bootstrap.sh
     @echo "[just] scripts/bootstrap.sh atualizado"
 
-# Simula boot session-start (dry run)
-dry *args="":
-    just --justfile leech/bash/Justfile --working-directory leech/bash dry {{args}}
+# Build sem instalar
+build-cli:
+    cargo build --release --manifest-path leech/rust/Cargo.toml -p leech-cli
 
-# Lint dos scripts do CLI
-lint:
-    just --justfile leech/bash/Justfile --working-directory leech/bash lint
-
-# Watch: regenera ao salvar src/
-watch:
-    just --justfile leech/bash/Justfile --working-directory leech/bash watch
+# Instala CLI bash legado (emergência)
+install-bash:
+    just --justfile leech/bash/Justfile --working-directory leech/bash install
