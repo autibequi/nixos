@@ -90,7 +90,7 @@ done
 ls /workspace/obsidian/tasks/DOING/ 2>/dev/null
 
 # Tasks TODO count
-ls /workspace/obsidian/tasks/AGENTS/ 2>/dev/null | wc -l
+ls /workspace/obsidian/agents/_waiting/ 2>/dev/null | wc -l
 
 # Tasks failed
 ls /workspace/obsidian/tasks/failed/ 2>/dev/null 2>/dev/null
@@ -249,19 +249,11 @@ Se estiver com alertas acumulados que ainda nao enviou, vai aproveitar a ligacao
 
 ```bash
 NEXT=$(date -u -d "+20 minutes" +%Y%m%d_%H_%M)
-cat > /workspace/obsidian/tasks/AGENTS/${NEXT}_assistant.md << 'CARD'
----
-contractor: assistant
-model: haiku
-mcp: false
-timeout: 1800
----
-# Assistant — Próximo ciclo
-CARD
-rm -f /workspace/obsidian/tasks/AGENTS/DOING/*_assistant.md
+mv /workspace/obsidian/agents/_working/*_assistant.md \
+   /workspace/obsidian/agents/_waiting/${NEXT}_assistant.md 2>/dev/null
 ```
 
-O card em `tasks/AGENTS/` deve SEMPRE ter frontmatter com `contractor: assistant`.
+O card em `agents/_waiting/` deve SEMPRE ter frontmatter com `agent: assistant`.
 
 ---
 
@@ -273,7 +265,7 @@ O card em `tasks/AGENTS/` deve SEMPRE ter frontmatter com `contractor: assistant
 | Inbox cards | `/workspace/obsidian/inbox/ASSISTANT_<ts>.md` |
 | Feed | `/workspace/obsidian/inbox/feed.md` |
 | Tasks DOING | `/workspace/obsidian/tasks/DOING/` |
-| Tasks TODO | `/workspace/obsidian/tasks/AGENTS/` |
+| Agents waiting | `/workspace/obsidian/agents/_waiting/` |
 | Tasks failed | `/workspace/obsidian/tasks/failed/` |
 | Repos estrategia | `/home/claude/projects/estrategia/*/` |
 | Workspace (nixos) | `/workspace/mnt` |

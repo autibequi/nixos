@@ -48,6 +48,9 @@ pub struct SessionFlags {
     /// Monta ~/nixos em /workspace/host (rw) — editar NixOS/Leech na sessão
     #[arg(long)]
     pub host: bool,
+    /// Ghost in the Shell — sessão isolada em obsidian/ghost/, monta /workspace/ghost
+    #[arg(long)]
+    pub ghost: bool,
 }
 
 impl SessionFlags {

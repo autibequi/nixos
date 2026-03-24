@@ -5,8 +5,8 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, BorderType, Borders, Clear, List, ListItem, ListState, Paragraph};
 use ratatui::Frame;
 
-use crate::app::{App, WT_MENU_ITEMS};
-use crate::theme;
+use crate::tui::app::{App, WT_MENU_ITEMS};
+use crate::tui::theme;
 
 pub fn render(frame: &mut Frame, app: &App) {
     let area = popup_rect(frame.area());

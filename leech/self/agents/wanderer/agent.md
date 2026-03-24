@@ -306,9 +306,9 @@ ls /workspace/obsidian/outbox/para-wanderer-*.md 2>/dev/null
 **Se nao reagendar, o contractor morre.** Ao final de cada ciclo:
 
 ```bash
-NEXT=$(date -d "+60 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/tasks/AGENTS/DOING/*_wanderer.md \
-   /workspace/obsidian/tasks/AGENTS/${NEXT}_wanderer.md 2>/dev/null
+NEXT=$(date -u -d "+60 minutes" +%Y%m%d_%H_%M)
+mv /workspace/obsidian/agents/_working/*_wanderer.md \
+   /workspace/obsidian/agents/_waiting/${NEXT}_wanderer.md 2>/dev/null
 ```
 
 ---
@@ -320,7 +320,7 @@ mv /workspace/obsidian/tasks/AGENTS/DOING/*_wanderer.md \
 - [ ] Escolher modo (EXPLORE / CONTEMPLATE / EVALUATE / SYNTHESIZE / ABSORB)
 - [ ] Executar o modo escolhido
 - [ ] Registrar ciclo em memory.md com modo + resultado
-- [ ] REAGENDAR (mover card para tasks/AGENTS/)
+- [ ] REAGENDAR (mover card de _working para _waiting com novo timestamp)
 
 ---
 

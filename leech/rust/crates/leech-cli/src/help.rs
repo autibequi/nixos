@@ -214,8 +214,9 @@ pub fn man_page() {
     println!("    Without arguments, opens a new Claude Code session.\n");
 
     println!("\x1b[1mSESSION COMMANDS\x1b[0m");
-    man_cmd("new, open, code", "[DIR] [--model M] [--host] [--opus|--haiku|--sonnet]",
-        "Open new Claude Code session in container.");
+    man_cmd("new, open, code", "[DIR] [--model M] [--host] [--ghost] [--opus|--haiku|--sonnet]",
+        "Open new Claude Code session in container.\n\
+         \x1b[0m                    --ghost: isolated session in obsidian/ghost/ (/workspace/ghost).");
     man_cmd("continue, cont", "[DIR] [--host]",
         "Continue the last session.");
     man_cmd("resume", "[DIR] [--resume ID] [--host]",

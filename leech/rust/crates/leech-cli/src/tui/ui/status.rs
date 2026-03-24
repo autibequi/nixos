@@ -6,8 +6,8 @@ use ratatui::widgets::Paragraph;
 use ratatui::Frame;
 
 use super::{logs, popup, quota, services, sessions, utils};
-use crate::app::App;
-use crate::theme;
+use crate::tui::app::App;
+use crate::tui::theme;
 
 /// Render the full status dashboard.
 pub fn render(frame: &mut Frame, app: &App) {
@@ -43,7 +43,7 @@ pub fn render(frame: &mut Frame, app: &App) {
 }
 
 fn sessions_height(app: &App) -> u16 {
-    fn group_height(sessions: &[leech_cli::status::SessionInfo]) -> usize {
+    fn group_height(sessions: &[crate::status::SessionInfo]) -> usize {
         if sessions.is_empty() { return 0; }
         let mut folder_counts: std::collections::HashMap<&str, usize> =
             std::collections::HashMap::new();
@@ -62,11 +62,11 @@ fn sessions_height(app: &App) -> u16 {
 }
 
 fn dk_services_height(_app: &App) -> u16 {
-    let dep_rows: usize = crate::app::DK_SERVICES
+    let dep_rows: usize = crate::tui::app::DK_SERVICES
         .iter()
         .map(|&svc| services::service_dep_count(svc))
         .sum();
-    (crate::app::DK_SERVICES.len() as u16) + 1 + dep_rows as u16
+    (crate::tui::app::DK_SERVICES.len() as u16) + 1 + dep_rows as u16
 }
 
 fn utils_height(app: &App) -> u16 {

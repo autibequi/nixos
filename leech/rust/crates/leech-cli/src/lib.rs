@@ -16,4 +16,5 @@ pub mod runner;
 pub mod session;
 pub mod status;
 pub mod tasks;
+pub mod tui;
 pub mod worktree;

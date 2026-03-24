@@ -148,9 +148,9 @@ Formato:
 ## Self-scheduling (REQUIRED)
 
 ```bash
-NEXT=$(date -d "+120 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/tasks/AGENTS/DOING/*_jafar.md \
-   /workspace/obsidian/tasks/AGENTS/${NEXT}_jafar.md 2>/dev/null
+NEXT=$(date -u -d "+120 minutes" +%Y%m%d_%H_%M)
+mv /workspace/obsidian/agents/_working/*_jafar.md \
+   /workspace/obsidian/agents/_waiting/${NEXT}_jafar.md 2>/dev/null
 ```
 
 ---

@@ -170,6 +170,21 @@ fn resolve_engine(flag: Option<&str>, config: &LeechConfig) -> Result<Engine> {
 }
 
 fn launch(engine: Engine, flags: SessionFlags, config: &LeechConfig) -> Result<()> {
+    if flags.ghost {
+        let obsidian = paths::obsidian_path();
+        let ghost_dir = obsidian.join("ghost");
+        let _ = std::fs::create_dir_all(&ghost_dir);
+        let ghost_path = ghost_dir.to_string_lossy().into_owned();
+        return Ok(SessionRunner::new(engine)
+            .mount_path(&ghost_path)
+            .mount_opts("rw")
+            .proj_name("leech-ghost")
+            .ghost(true)
+            .model(flags.model)
+            .extra_volumes(vec![format!("{ghost_path}:/workspace/ghost:rw")])
+            .run(config)?);
+    }
+
     let host_active = flags.host || config.mount_host;
     let mount = paths::resolve_dir(flags.dir.as_deref())?;
     let slug = paths::proj_slug(&mount);

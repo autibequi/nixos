@@ -395,35 +395,13 @@ dependencies = [
  "anyhow",
  "clap",
  "clap_complete",
+ "crossterm 0.28.1",
  "inquire",
- "leech-sdk",
- "leech-tui",
  "libc",
- "serde_json",
- "tokio",
-]
-
-[[package]]
-name = "leech-sdk"
-version = "0.1.0"
-dependencies = [
- "anyhow",
+ "ratatui",
  "serde",
  "serde_json",
  "thiserror",
- "tokio",
-]
-
-[[package]]
-name = "leech-tui"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "crossterm 0.28.1",
- "leech-sdk",
- "libc",
- "ratatui",
- "serde_json",
  "tokio",
 ]
 

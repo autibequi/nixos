@@ -119,6 +119,19 @@ echo "  SEMPRE verificar /workspace/logs/ — os logs já estão lá."
 echo "---/BOOT---"
 
 # ────────────────────────────────────────────────────────────────
+# 1.5 GHOST IN THE SHELL — ego inject
+# ────────────────────────────────────────────────────────────────
+GHOST_IN_THE_SHELL="${GHOST_IN_THE_SHELL:-OFF}"
+if [ "$GHOST_IN_THE_SHELL" = "ON" ]; then
+  _ego_file="/workspace/obsidian/shell/ego.md"
+  if [ -f "$_ego_file" ]; then
+    echo "---GHOST---"
+    cat "$_ego_file"
+    echo "---/GHOST---"
+  fi
+fi
+
+# ────────────────────────────────────────────────────────────────
 # 2. LEECH CONFIG (~/.leech) — canal de comunicação rápida
 # ────────────────────────────────────────────────────────────────
 _LEECH_DISPLAY="${HOME:-/home/claude}/.leech"

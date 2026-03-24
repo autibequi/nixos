@@ -5,8 +5,8 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, BorderType, Borders, Clear, List, ListItem, ListState, Paragraph};
 use ratatui::Frame;
 
-use crate::app::{App, AppMode, MENU_ITEMS};
-use crate::theme;
+use crate::tui::app::{App, AppMode, MENU_ITEMS};
+use crate::tui::theme;
 use super::agents;
 use super::worktree;
 

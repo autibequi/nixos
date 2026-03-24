@@ -5,9 +5,9 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::Paragraph;
 use ratatui::Frame;
 
-use crate::app::App;
-use crate::theme;
-use leech_cli::quota;
+use crate::tui::app::App;
+use crate::tui::theme;
+use crate::quota;
 
 /// Compact inline spans for the header line.
 pub fn header_spans(app: &App) -> Vec<Span<'static>> {

@@ -198,9 +198,9 @@ Feed: `[HH:MM] [paperboy] mensagem` em `/workspace/obsidian/inbox/feed.md`
 ## Self-scheduling (REQUIRED)
 
 ```bash
-NEXT=$(date -d "+60 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/tasks/AGENTS/DOING/*_paperboy.md \
-   /workspace/obsidian/tasks/AGENTS/${NEXT}_paperboy.md 2>/dev/null
+NEXT=$(date -u -d "+60 minutes" +%Y%m%d_%H_%M)
+mv /workspace/obsidian/agents/_working/*_paperboy.md \
+   /workspace/obsidian/agents/_waiting/${NEXT}_paperboy.md 2>/dev/null
 ```
 
 ---

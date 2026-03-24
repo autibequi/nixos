@@ -25,8 +25,8 @@ use ratatui::Terminal;
 
 use app::{App, AppMode};
 use event::{map_key, poll, AppEvent};
-use leech_cli::paths;
-use leech_cli::status::StatusSnapshot;
+use crate::paths;
+use crate::status::StatusSnapshot;
 
 // ── CLI helpers ───────────────────────────────────────────────────────────────
 
@@ -444,7 +444,7 @@ pub fn run_status(tick: u64) -> Result<()> {
 
                                             let mut cmd = leech_cmd();
                                             cmd.args(["runner", &wt.service, &action]);
-                                            if let Some(ref wt_name) = wt_flag {
+                                            if let Some(wt_name) = wt_flag.as_deref() {
                                                 cmd.args(["--worktree", wt_name]);
                                             }
                                             let _ = cmd.stdin(Stdio::inherit())
@@ -466,7 +466,7 @@ pub fn run_status(tick: u64) -> Result<()> {
                                             std::thread::spawn(move || {
                                                 let mut cmd = leech_cmd();
                                                 cmd.args(["runner", &wt.service, &action]);
-                                                if let Some(ref wt_name) = wt_flag {
+                                                if let Some(wt_name) = wt_flag.as_deref() {
                                                     cmd.args(["--worktree", wt_name]);
                                                 }
                                                 match cmd.output() {

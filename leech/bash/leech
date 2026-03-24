@@ -135,6 +135,11 @@ leech_usage() {
     printf "    Monta ~/nixos em /workspace/host (rw) para editar NixOS/Leech. Equivalente a\n    mount_host=true em ~/.leech.\n"
     echo
 
+    # :flag.usage
+    printf "  %s\n" "--ghost"
+    printf "    Ghost in the Shell — sessão isolada em obsidian/ghost/ (monta em\n    /workspace/ghost, injeta GHOST_IN_THE_SHELL=ON).\n"
+    echo
+
     # :command.usage_fixed_flags
     printf "  %s\n" "--help, -h"
     printf "    Show this help\n"
@@ -256,6 +261,11 @@ leech_new_usage() {
     # :flag.usage
     printf "  %s\n" "--host"
     printf "    Monta ~/nixos em /workspace/host (rw)\n"
+    echo
+
+    # :flag.usage
+    printf "  %s\n" "--ghost"
+    printf "    Ghost in the Shell — sessão isolada em obsidian/ghost/\n"
     echo
 
     # :command.usage_fixed_flags
@@ -1975,6 +1985,21 @@ leech_session_run() {
     host_env="-e HOST_ATTACHED=1"
   fi
 
+  # ── Ghost mode: --ghost flag ─────────────────────────────────────────────────
+  # Sessão isolada em obsidian/ghost/ — monta em /workspace/ghost, GHOST_IN_THE_SHELL=ON
+  local _ghost_active="${args['--ghost']:-${flag_ghost:-}}"
+  if [[ -n "$_ghost_active" ]] && [[ "$_ghost_active" != "0" ]]; then
+    local _obs_path="${OBSIDIAN_PATH:-${HOME}/.ovault/Work}"
+    local _ghost_dir="${_obs_path}/ghost"
+    mkdir -p "$_ghost_dir"
+    mount_path="$_ghost_dir"
+    proj_name="leech-ghost"
+    leech_name="leech-ghost"
+    # Injeta env e volume extra (reusa vars existentes para compatibilidade com os paths docker run/exec abaixo)
+    host_env="${host_env} -e GHOST_IN_THE_SHELL=ON"
+    extra_volumes="${extra_volumes} -v ${_ghost_dir}:/workspace/ghost:rw"
+  fi
+
   local danger model
 
   case "$engine" in
@@ -2053,6 +2078,9 @@ leech_session_run() {
 
       local launch_cmd="bash /workspace/self/scripts/leech-agent-launch.sh ${claude_args}"
       [[ -n "${args['--no-splash']:-}" ]] && launch_cmd=". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
+      # Ghost mode: sempre sem splash, cd direto para /workspace/ghost
+      [[ -n "${_ghost_active:-}" ]] && [[ "${_ghost_active}" != "0" ]] && \
+        launch_cmd=". /workspace/self/scripts/bootstrap.sh; cd /workspace/ghost && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
       # Pre-splash no host: aparece imediatamente antes do container subir
       if [[ -z "${args['--no-splash']:-}" ]]; then
         printf '\033[2J\033[H\033[?25l\n'
@@ -4229,7 +4257,8 @@ leech_tick_command() {
   LEECH_DIR="${LEECH_ROOT:-${LEECH_NIXOS_DIR:-$HOME/nixos}/leech/self}"
   OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
   RUNNER="$LEECH_DIR/scripts/task-runner.sh"
-  SCHEDULE="${SCHEDULE_DIR:-$OBSIDIAN/tasks/AGENTS}"
+  SCHEDULE="${SCHEDULE_DIR:-$OBSIDIAN/agents/_waiting}"
+  WORKING="${WORKING_DIR:-$OBSIDIAN/agents/_working}"
   TASKS="$OBSIDIAN/tasks"
 
   # Fallbacks runner
@@ -4245,11 +4274,21 @@ leech_tick_command() {
   # Fallbacks schedule
   if [ ! -d "$SCHEDULE" ]; then
     _resolve_schedule() {
-      local t; for t in /workspace/obsidian/tasks/AGENTS "$HOME/.ovault/Work/tasks/AGENTS"; do
+      local t; for t in /workspace/obsidian/agents/_waiting "$HOME/.ovault/Work/agents/_waiting"; do
         [ -d "$t" ] && echo "$t" && return
       done
     }
     SCHEDULE="$(_resolve_schedule)"
+  fi
+
+  # Fallbacks working
+  if [ ! -d "$WORKING" ]; then
+    _resolve_working() {
+      local t; for t in /workspace/obsidian/agents/_working "$HOME/.ovault/Work/agents/_working"; do
+        [ -d "$t" ] && echo "$t" && return
+      done
+    }
+    WORKING="$(_resolve_working)"
   fi
 
   # Fallbacks tasks
@@ -4303,9 +4342,9 @@ leech_tick_command() {
   NOW=$(date +%s)
   AGENT_THRESHOLD=$((NOW + 300))   # 5min tolerancia
   TASK_THRESHOLD=$((NOW + 600))    # 10min tolerancia
-  RUNNING_DIR="$(dirname "$SCHEDULE")/_running"
+  RUNNING_DIR="$WORKING"
 
-  # ── rescue orphans from _running/ (before scan) ──────────────
+  # ── rescue orphans from _working/ (before scan) ──────────────
   ORPHAN_COUNT=0
   if [ -d "$RUNNING_DIR" ] && [ -z "$DRY_RUN" ]; then
     mkdir -p "$SCHEDULE"
@@ -4319,7 +4358,7 @@ leech_tick_command() {
       elapsed=$(( (NOW - ts) / 60 ))
       [ "$elapsed" -lt 30 ] && continue
       AGENT=$(awk '/^---/{fm++} fm==1 && /^(agent|contractor):/{print $2}' "$card_path")
-      echo "[auto] orphan: $filename  agent=$AGENT  stuck=${elapsed}min → _schedule"
+      echo "[auto] orphan: $filename  agent=$AGENT  stuck=${elapsed}min → _working"
       mv "$card_path" "$SCHEDULE/$filename" 2>/dev/null || true
       ORPHAN_COUNT=$((ORPHAN_COUNT + 1))
     done
@@ -4858,14 +4897,14 @@ leech_agents_status_command() {
   _resolve_obsidian() {
     local t
     for t in "$1" /workspace/obsidian "$HOME/.ovault/Work"; do
-      [ -d "$t/tasks" ] && echo "$t" && return
+      [ -d "$t/agents" ] && echo "$t" && return
     done
     echo "$1"
   }
   OBSIDIAN="$(_resolve_obsidian "$OBSIDIAN")"
 
-  AGENTS_SCHEDULE="$OBSIDIAN/tasks/AGENTS"
-  AGENTS_RUNNING="$OBSIDIAN/tasks/AGENTS/DOING"
+  AGENTS_SCHEDULE="$OBSIDIAN/agents/_schedule"
+  AGENTS_RUNNING="$OBSIDIAN/agents/_working"
   BEDROOMS="$OBSIDIAN/bedrooms"
   ACTIVITY_LOG="$OBSIDIAN/vault/logs/agents.md"
 
@@ -6416,6 +6455,14 @@ parse_requirements() {
         shift
         ;;
 
+      # :flag.case
+      --ghost)
+
+        # :flag.case_no_arg
+        args['--ghost']=1
+        shift
+        ;;
+
       *)
         break
         ;;
@@ -6868,6 +6915,14 @@ leech_new_parse_requirements() {
 
         # :flag.case_no_arg
         args['--host']=1
+        shift
+        ;;
+
+      # :flag.case
+      --ghost)
+
+        # :flag.case_no_arg
+        args['--ghost']=1
         shift
         ;;
 

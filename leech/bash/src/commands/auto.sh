@@ -4,7 +4,8 @@ leech_load_config
 LEECH_DIR="${LEECH_ROOT:-${LEECH_NIXOS_DIR:-$HOME/nixos}/leech/self}"
 OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
 RUNNER="$LEECH_DIR/scripts/task-runner.sh"
-SCHEDULE="${SCHEDULE_DIR:-$OBSIDIAN/tasks/AGENTS}"
+SCHEDULE="${SCHEDULE_DIR:-$OBSIDIAN/agents/_waiting}"
+WORKING="${WORKING_DIR:-$OBSIDIAN/agents/_working}"
 TASKS="$OBSIDIAN/tasks"
 
 # Fallbacks runner
@@ -20,11 +21,21 @@ fi
 # Fallbacks schedule
 if [ ! -d "$SCHEDULE" ]; then
   _resolve_schedule() {
-    local t; for t in /workspace/obsidian/tasks/AGENTS "$HOME/.ovault/Work/tasks/AGENTS"; do
+    local t; for t in /workspace/obsidian/agents/_waiting "$HOME/.ovault/Work/agents/_waiting"; do
       [ -d "$t" ] && echo "$t" && return
     done
   }
   SCHEDULE="$(_resolve_schedule)"
+fi
+
+# Fallbacks working
+if [ ! -d "$WORKING" ]; then
+  _resolve_working() {
+    local t; for t in /workspace/obsidian/agents/_working "$HOME/.ovault/Work/agents/_working"; do
+      [ -d "$t" ] && echo "$t" && return
+    done
+  }
+  WORKING="$(_resolve_working)"
 fi
 
 # Fallbacks tasks
@@ -78,9 +89,9 @@ card_steps() {
 NOW=$(date +%s)
 AGENT_THRESHOLD=$((NOW + 300))   # 5min tolerancia
 TASK_THRESHOLD=$((NOW + 600))    # 10min tolerancia
-RUNNING_DIR="$(dirname "$SCHEDULE")/_running"
+RUNNING_DIR="$WORKING"
 
-# ── rescue orphans from _running/ (before scan) ──────────────
+# ── rescue orphans from _working/ (before scan) ──────────────
 ORPHAN_COUNT=0
 if [ -d "$RUNNING_DIR" ] && [ -z "$DRY_RUN" ]; then
   mkdir -p "$SCHEDULE"
@@ -94,7 +105,7 @@ if [ -d "$RUNNING_DIR" ] && [ -z "$DRY_RUN" ]; then
     elapsed=$(( (NOW - ts) / 60 ))
     [ "$elapsed" -lt 30 ] && continue
     AGENT=$(awk '/^---/{fm++} fm==1 && /^(agent|contractor):/{print $2}' "$card_path")
-    echo "[auto] orphan: $filename  agent=$AGENT  stuck=${elapsed}min → _schedule"
+    echo "[auto] orphan: $filename  agent=$AGENT  stuck=${elapsed}min → _working"
     mv "$card_path" "$SCHEDULE/$filename" 2>/dev/null || true
     ORPHAN_COUNT=$((ORPHAN_COUNT + 1))
   done

@@ -5,8 +5,8 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::Paragraph;
 use ratatui::Frame;
 
-use crate::app::{App, DK_SERVICES};
-use crate::theme;
+use crate::tui::app::{App, DK_SERVICES};
+use crate::tui::theme;
 
 pub fn render(frame: &mut Frame, app: &App, area: Rect) {
     let mut lines = Vec::new();

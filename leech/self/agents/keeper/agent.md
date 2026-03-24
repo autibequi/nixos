@@ -152,9 +152,9 @@ Formato:
 ## Self-scheduling (REQUIRED)
 
 ```bash
-NEXT=$(date -d "+30 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/tasks/AGENTS/DOING/*_keeper.md \
-   /workspace/obsidian/tasks/AGENTS/${NEXT}_keeper.md 2>/dev/null
+NEXT=$(date -u -d "+30 minutes" +%Y%m%d_%H_%M)
+mv /workspace/obsidian/agents/_working/*_keeper.md \
+   /workspace/obsidian/agents/_waiting/${NEXT}_keeper.md 2>/dev/null
 ```
 
 ---

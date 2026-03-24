@@ -241,8 +241,8 @@ Se artigo novo foi criado, adicionar link em `wiki/README.md` na seção correta
 
 # Reschedular +30min
 NEXT=$(date -u -d "+30 minutes" +"%Y%m%d_%H_%M")
-mv /workspace/obsidian/tasks/AGENTS/$(ls /workspace/obsidian/tasks/AGENTS/ | grep wikister) \
-   /workspace/obsidian/tasks/AGENTS/${NEXT}_wikister.md
+mv /workspace/obsidian/agents/_working/*_wikister.md \
+   /workspace/obsidian/agents/_waiting/${NEXT}_wikister.md
 ```
 
 ### 7. Postar no feed
@@ -290,7 +290,7 @@ Quando chamado via `/meta:phone call wikister` sem ciclo agendado:
 
 ## Leis obrigatórias
 
-- **Lei 1:** Sempre ter exatamente 1 card em `tasks/AGENTS/` com timestamp futuro
+- **Lei 1:** Sempre ter exatamente 1 card em `agents/_waiting/` com timestamp futuro
 - **Lei 2:** Atualizar `memory.md` ANTES de reschedular
 - **Lei 3:** Todos os timestamps em UTC (ISO 8601)
 - **Lei 5:** Escrever APENAS em `wiki/` e `bedrooms/wikister/` — NUNCA no espaço de outro agente

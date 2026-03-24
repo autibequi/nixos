@@ -7,14 +7,14 @@ use ratatui::widgets::{Block, Borders, Paragraph, Scrollbar, ScrollbarOrientatio
 use ratatui::Frame;
 use ratatui::layout::Alignment;
 
-use crate::app::App;
-use crate::theme;
+use crate::tui::app::App;
+use crate::tui::theme;
 
 /// Render the logs panel for the currently selected service.
 pub fn render(frame: &mut Frame, app: &App, area: Rect) {
     let svc = app.current_service();
 
-    let entries: Vec<&leech_cli::logs::LogEntry> = app
+    let entries: Vec<&crate::logs::LogEntry> = app
         .snapshot
         .logs
         .iter()

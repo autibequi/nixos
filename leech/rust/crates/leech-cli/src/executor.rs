@@ -35,10 +35,10 @@ pub fn run_card(card_name: &str) -> Result<(), String> {
         .unwrap_or_else(|_| obsidian.join("bedrooms"));
     let schedule_dir = std::env::var("SCHEDULE_DIR")
         .map(PathBuf::from)
-        .unwrap_or_else(|_| obsidian.join("tasks/AGENTS"));
+        .unwrap_or_else(|_| obsidian.join("agents/_waiting"));
     let running_dir = std::env::var("RUNNING_DIR")
         .map(PathBuf::from)
-        .unwrap_or_else(|_| obsidian.join("tasks/AGENTS/DOING"));
+        .unwrap_or_else(|_| obsidian.join("agents/_working"));
 
     // ── Find card ────────────────────────────────────────────────
     let card = normalize_card_name(card_name);
@@ -66,7 +66,7 @@ pub fn run_card(card_name: &str) -> Result<(), String> {
     // Cleanup on any exit path
     let _lock_guard = LockGuard(lock_dir.clone());
 
-    // ── Move to _running ─────────────────────────────────────────
+    // ── Move to _working ─────────────────────────────────────────
     let _ = std::fs::create_dir_all(&running_dir);
     let running_path = running_dir.join(&card);
     if card_path.parent() != Some(running_dir.as_path()) {
@@ -232,7 +232,7 @@ pub fn run_card(card_name: &str) -> Result<(), String> {
 
     // ── Finish ───────────────────────────────────────────────────
     if !card_path.exists() {
-        // Agent rescheduled itself (moved card back to _schedule)
+        // Agent rescheduled itself (moved card to _waiting)
         eprintln!("[runner] '{task_name}' — rescheduled ({elapsed_fmt})");
         return Ok(());
     }
@@ -358,7 +358,7 @@ fn build_prompt(
         "\n\n## Artifacts\n\
          Produce any artifacts (reports, files, outputs) in: {}\n\n\
          ## After completing\n\
-         - To reschedule: move this card back to tasks/AGENTS/ with a new date prefix (YYYYMMDD_HH_MM_name.md)\n\
+         - To reschedule: move this card from agents/_working/ to agents/_waiting/ with a new date prefix (YYYYMMDD_HH_MM_name.md)\n\
          - Path: {}/\n\
          - YOU choose when to run next (minimum 30 minutes)\n\
          - Prefer scheduling between 21h-06h (BRT) — agents' preferred window\n\

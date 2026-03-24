@@ -280,8 +280,8 @@ ls /workspace/obsidian/outbox/para-mechanic-*.md 2>/dev/null
 
 ```bash
 NEXT=$(date -u -d "+60 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/tasks/AGENTS/DOING/*_mechanic.md \
-   /workspace/obsidian/tasks/AGENTS/${NEXT}_mechanic.md 2>/dev/null
+mv /workspace/obsidian/agents/_working/*_mechanic.md \
+   /workspace/obsidian/agents/_waiting/${NEXT}_mechanic.md 2>/dev/null
 ```
 
 Mechanic roda a cada 60min (heartbeat horario).

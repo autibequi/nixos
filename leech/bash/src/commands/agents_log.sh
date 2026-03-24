@@ -5,14 +5,14 @@ OBSIDIAN="${OBSIDIAN_PATH:-$HOME/.ovault/Work}"
 _resolve_obsidian() {
   local t
   for t in "$1" /workspace/obsidian "$HOME/.ovault/Work"; do
-    [ -d "$t/tasks" ] && echo "$t" && return
+    [ -d "$t/agents" ] && echo "$t" && return
   done
   echo "$1"
 }
 OBSIDIAN="$(_resolve_obsidian "$OBSIDIAN")"
 
-AGENTS_SCHEDULE="$OBSIDIAN/tasks/AGENTS"
-AGENTS_RUNNING="$OBSIDIAN/tasks/AGENTS/DOING"
+AGENTS_SCHEDULE="$OBSIDIAN/agents/_schedule"
+AGENTS_RUNNING="$OBSIDIAN/agents/_working"
 BEDROOMS="$OBSIDIAN/bedrooms"
 ACTIVITY_LOG="$OBSIDIAN/vault/logs/agents.md"
 

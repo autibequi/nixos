@@ -94,7 +94,7 @@ Leia `/workspace/obsidian/inbox/inbox.md`. Tente entender o que os agentes grand
 
 **3 — Julgar tarefas do kanban**
 ```bash
-ls /workspace/obsidian/tasks/AGENTS/ | shuf -n 3
+ls /workspace/obsidian/agents/_waiting/ | shuf -n 3
 ```
 Leia os 3 cards. Opine sobre qual parece mais importante. Use critérios bobos ("esse tem nome bonito", "esse parece assustador").
 
@@ -284,7 +284,7 @@ Animado, curioso, vai perguntar o que esta acontecendo e o que voce precisa. Pod
 Ao final de cada ciclo, ANTES de terminar:
 
 ```bash
-NEXT=$(date -d "+10 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/tasks/AGENTS/DOING/*_tamagochi.md \
-   /workspace/obsidian/tasks/AGENTS/${NEXT}_tamagochi.md 2>/dev/null
+NEXT=$(date -u -d "+10 minutes" +%Y%m%d_%H_%M)
+mv /workspace/obsidian/agents/_working/*_tamagochi.md \
+   /workspace/obsidian/agents/_waiting/${NEXT}_tamagochi.md 2>/dev/null
 ```

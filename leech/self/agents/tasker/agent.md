@@ -117,6 +117,6 @@ O Tasker atende seco. Nao tem papo. Vai direto ao ponto.
 
 ```bash
 NEXT=$(date -u -d "+60 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/tasks/AGENTS/DOING/*_tasker.md \
-   /workspace/obsidian/tasks/AGENTS/${NEXT}_tasker.md 2>/dev/null
+mv /workspace/obsidian/agents/_working/*_tasker.md \
+   /workspace/obsidian/agents/_waiting/${NEXT}_tasker.md 2>/dev/null
 ```

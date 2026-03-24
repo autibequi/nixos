@@ -220,7 +220,7 @@ pub fn run_unified(name: &str, steps: Option<u32>) -> Result<()> {
         // Create card in schedule dir
         let schedule = paths::schedule_dir()
             .or_else(|| {
-                let p = paths::obsidian_path().join("agents/_schedule");
+                let p = paths::obsidian_path().join("agents/_waiting");
                 p.is_dir().then_some(p)
             })
             .ok_or_else(|| anyhow::anyhow!("[run] schedule dir not found"))?;
@@ -276,8 +276,9 @@ pub fn run_unified(name: &str, steps: Option<u32>) -> Result<()> {
         let _ = std::fs::remove_dir_all(format!("/tmp/leech-locks/{base}.lock"));
 
         // Set env for executor
-        std::env::set_var("SCHEDULE_DIR", tasks_dir.join("AGENTS"));
-        std::env::set_var("RUNNING_DIR", tasks_dir.join("DOING"));
+        let agents_dir = paths::obsidian_path().join("agents");
+        std::env::set_var("SCHEDULE_DIR", agents_dir.join("_waiting"));
+        std::env::set_var("RUNNING_DIR", agents_dir.join("_working"));
         let contractors_dir = tasks_dir.parent()
             .map(|p| p.join("vault/agents"))
             .unwrap_or_default();
@@ -296,7 +297,7 @@ pub fn auto(dry_run: bool, steps: Option<u32>) -> Result<()> {
 
     // ── Rescue orphans from _running/ ────────────────────────────
     if let Some(schedule) = paths::schedule_dir() {
-        let running_dir = schedule.parent().unwrap_or(&schedule).join("_running");
+        let running_dir = schedule.parent().unwrap_or(&schedule).join("_working");
         if running_dir.is_dir() {
             for entry in std::fs::read_dir(&running_dir).into_iter().flatten().flatten() {
                 let fname = entry.file_name().to_string_lossy().into_owned();
@@ -308,7 +309,7 @@ pub fn auto(dry_run: bool, steps: Option<u32>) -> Result<()> {
                 if ts == 0 { continue; }
                 let elapsed_min = now.saturating_sub(ts) / 60;
                 if elapsed_min < 30 { continue; }
-                eprintln!("[auto] orphan: {fname}  stuck={elapsed_min}min → _schedule");
+                eprintln!("[auto] orphan: {fname}  stuck={elapsed_min}min → _waiting");
                 if !dry_run {
                     let _ = std::fs::rename(
                         running_dir.join(&fname),
@@ -392,11 +393,14 @@ pub fn auto(dry_run: bool, steps: Option<u32>) -> Result<()> {
 
     // ── Execute agents ───────────────────────────────────────────
     if let Some(schedule) = paths::schedule_dir() {
-        let contractors_dir = schedule.parent().unwrap_or(&schedule);
+        let agents_root = schedule.parent().unwrap_or(&schedule);
+        let working_dir = agents_root.join("_working");
+        let contractors_dir = paths::obsidian_path().join("bedrooms");
         for fname in &agent_due {
             eprintln!("\n[auto] ▸ agent: {fname}");
-            std::env::set_var("TASK_CONTRACTORS_DIR", contractors_dir);
+            std::env::set_var("TASK_CONTRACTORS_DIR", &contractors_dir);
             std::env::set_var("SCHEDULE_DIR", &schedule);
+            std::env::set_var("RUNNING_DIR", &working_dir);
             if let Err(e) = executor::run_card(fname) {
                 eprintln!("[auto] {fname} falhou: {e} (continuando)");
             }

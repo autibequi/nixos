@@ -6,8 +6,8 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, BorderType, Borders, Clear, List, ListItem, ListState, Paragraph};
 use ratatui::Frame;
 
-use crate::app::{App, AGENT_MENU_ITEMS};
-use crate::theme;
+use crate::tui::app::{App, AGENT_MENU_ITEMS};
+use crate::tui::theme;
 
 pub fn render(frame: &mut Frame, app: &App) {
     let (area, pods_area) = popup_rects(frame.area());
@@ -170,7 +170,7 @@ fn render_agent_menu(frame: &mut Frame, app: &App, parent: Rect) {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-fn schedule_str(a: &crate::app::AgentInfo, now: u64) -> String {
+fn schedule_str(a: &crate::tui::app::AgentInfo, now: u64) -> String {
     if let Some(ts) = a.next_task_ts {
         if ts <= now {
             "overdue".into()

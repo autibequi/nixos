@@ -379,7 +379,7 @@ fn main() -> Result<()> {
                 println!("{}", serde_json::to_string_pretty(&snap)?);
                 Ok(())
             } else {
-                leech_tui::run_status(tick)?;
+                leech_cli::tui::run_status(tick)?;
                 Ok(())
             }
         }

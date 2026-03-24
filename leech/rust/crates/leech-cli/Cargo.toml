@@ -12,7 +12,6 @@ name = "leech"
 path = "src/main.rs"
 
 [dependencies]
-leech-tui = { path = "../leech-tui" }
 tokio = { workspace = true }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
@@ -22,3 +21,5 @@ clap = { version = "4", features = ["derive"] }
 clap_complete = "4"
 inquire = "0.7"
 libc = "0.2"
+ratatui = "0.29"
+crossterm = "0.28"

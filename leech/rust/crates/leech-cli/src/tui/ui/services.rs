@@ -5,8 +5,8 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::Paragraph;
 use ratatui::Frame;
 
-use crate::app::{App, DK_SERVICES, ENVS};
-use crate::theme;
+use crate::tui::app::{App, DK_SERVICES, ENVS};
+use crate::tui::theme;
 
 const SPINNER: &[&str] = &["◐", "◓", "◑", "◒"];
 

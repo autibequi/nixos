@@ -96,9 +96,9 @@ pub fn tasks_dir() -> Option<PathBuf> {
 pub fn schedule_dir() -> Option<PathBuf> {
     first_existing_dir(&[
         std::env::var("SCHEDULE_DIR").ok().map(PathBuf::from).unwrap_or_default(),
-        obsidian_path().join("agents/_schedule"),
-        PathBuf::from("/workspace/obsidian/agents/_schedule"),
-        home().join("obsidian/agents/_schedule"),
+        obsidian_path().join("agents/_waiting"),
+        PathBuf::from("/workspace/obsidian/agents/_waiting"),
+        home().join("obsidian/agents/_waiting"),
     ].into_iter().filter(|p| !p.as_os_str().is_empty()).collect::<Vec<_>>())
 }
 

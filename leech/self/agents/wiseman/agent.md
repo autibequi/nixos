@@ -208,9 +208,9 @@ AGENTS="assistant coruja tamagochi wanderer hermes keeper wiseman jafar paperboy
 for agent in $AGENTS; do
   echo "=== $agent ==="
   # Card no schedule?
-  ls /workspace/obsidian/tasks/AGENTS/*_${agent}.md 2>/dev/null || echo "MORTO: sem card em _schedule"
-  # Card no running?
-  ls /workspace/obsidian/tasks/AGENTS/DOING/*_${agent}.md 2>/dev/null
+  ls /workspace/obsidian/agents/_waiting/*_${agent}.md 2>/dev/null || echo "MORTO: sem card em _waiting"
+  # Card no working?
+  ls /workspace/obsidian/agents/_working/*_${agent}.md 2>/dev/null
   # Memory atualizada?
   head -10 /workspace/obsidian/bedrooms/${agent}/memory.md 2>/dev/null | grep updated
 done
@@ -221,11 +221,11 @@ done
 - **Lei 1 (morto):** criar card de recuperacao
 ```bash
 NEXT=$(date -u -d "+5 minutes" +%Y%m%d_%H_%M)
-cat > /workspace/obsidian/tasks/AGENTS/${NEXT}_NOME.md << 'EOF'
+cat > /workspace/obsidian/agents/_waiting/${NEXT}_NOME.md << 'EOF'
 ---
 agent: NOME
 recovery: true
-reason: "wiseman ENFORCE: sem card em _schedule"
+reason: "wiseman ENFORCE: sem card em _waiting"
 ---
 #steps3
 EOF
@@ -289,9 +289,9 @@ Formato:
 ## Self-scheduling (REQUIRED)
 
 ```bash
-NEXT=$(date -d "+60 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/tasks/AGENTS/DOING/*_wiseman.md \
-   /workspace/obsidian/tasks/AGENTS/${NEXT}_wiseman.md 2>/dev/null
+NEXT=$(date -u -d "+60 minutes" +%Y%m%d_%H_%M)
+mv /workspace/obsidian/agents/_working/*_wiseman.md \
+   /workspace/obsidian/agents/_waiting/${NEXT}_wiseman.md 2>/dev/null
 ```
 
 ---

@@ -47,6 +47,9 @@ flags:
   - long: --host
     help: "Monta ~/nixos em /workspace/host (rw) para editar NixOS/Leech. Equivalente a mount_host=true em ~/.leech."
 
+  - long: --ghost
+    help: "Ghost in the Shell — sessão isolada em obsidian/ghost/ (monta em /workspace/ghost, injeta GHOST_IN_THE_SHELL=ON)."
+
 commands:
   - name: continue
     alias: [cont]
@@ -83,6 +86,8 @@ commands:
       - long: --ro
       - long: --host
         help: "Monta ~/nixos em /workspace/host (rw)"
+      - long: --ghost
+        help: "Ghost in the Shell — sessão isolada em obsidian/ghost/"
     examples:
       - leech new --engine=claude
       - leech new --engine=cursor ~/projects

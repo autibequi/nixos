@@ -509,9 +509,9 @@ Após ler a memory, decidir:
 **Se nao reagendar, o contractor morre.** Ao final de cada ciclo:
 
 ```bash
-NEXT=$(date -d "+60 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/tasks/AGENTS/DOING/*_coruja.md \
-   /workspace/obsidian/tasks/AGENTS/${NEXT}_coruja.md 2>/dev/null
+NEXT=$(date -u -d "+60 minutes" +%Y%m%d_%H_%M)
+mv /workspace/obsidian/agents/_working/*_coruja.md \
+   /workspace/obsidian/agents/_waiting/${NEXT}_coruja.md 2>/dev/null
 ```
 
 Se nao ha feature ativa e radar nao encontrou nada: reagendar em +120min.

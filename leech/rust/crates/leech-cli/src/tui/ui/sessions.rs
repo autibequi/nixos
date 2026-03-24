@@ -5,9 +5,9 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::Paragraph;
 use ratatui::Frame;
 
-use crate::app::App;
-use crate::theme;
-use leech_cli::status::SessionInfo;
+use crate::tui::app::App;
+use crate::tui::theme;
+use crate::status::SessionInfo;
 
 pub fn render(frame: &mut Frame, app: &App, area: Rect) {
     let mut lines = Vec::new();

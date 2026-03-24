@@ -24,6 +24,8 @@ pub struct SessionRunner {
     extra_volumes: Vec<String>,
     /// host mode: monta ~/nixos em /workspace/host:rw, injeta HOST_ATTACHED=1
     host: bool,
+    /// ghost mode: sessão isolada em obsidian/ghost, injeta GHOST_IN_THE_SHELL=ON
+    ghost: bool,
 }
 
 impl SessionRunner {
@@ -42,6 +44,7 @@ impl SessionRunner {
             instance: None,
             extra_volumes: Vec::new(),
             host: false,
+            ghost: false,
         }
     }
 
@@ -114,6 +117,12 @@ impl SessionRunner {
     #[must_use]
     pub fn host(mut self, enabled: bool) -> Self {
         self.host = enabled;
+        self
+    }
+
+    #[must_use]
+    pub fn ghost(mut self, enabled: bool) -> Self {
+        self.ghost = enabled;
         self
     }
 
@@ -229,8 +238,11 @@ impl SessionRunner {
         }
 
         let claude_args_str = claude_args.join(" ");
+        // --ghost: sessão isolada em /workspace/ghost (sem splash, cd direto)
         // --no-splash: pula o script de loading, faz bootstrap inline e abre claude direto
-        let bash_cmd = if self.no_splash {
+        let bash_cmd = if self.ghost {
+            format!(". /workspace/self/scripts/bootstrap.sh; cd /workspace/ghost && exec /home/claude/.nix-profile/bin/claude {claude_args_str}")
+        } else if self.no_splash {
             format!(". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude {claude_args_str}")
         } else {
             format!("bash /workspace/self/scripts/leech-agent-launch.sh {claude_args_str}")
@@ -298,6 +310,9 @@ impl SessionRunner {
         }
         if self.host {
             args.extend(["-e", "HOST_ATTACHED=1"]);
+        }
+        if self.ghost {
+            args.extend(["-e", "GHOST_IN_THE_SHELL=ON"]);
         }
         args.extend(["--entrypoint", "/entrypoint.sh"]);
         let mount_env = format!("CLAUDIO_MOUNT={}", self.mount_path);
