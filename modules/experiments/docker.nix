@@ -20,6 +20,12 @@
     };
   };
 
+  # Allow Docker containers to reach the host on port 443/80 (needed for SSR → nginx reverse proxy)
+  networking.firewall.extraInputRules = ''
+    iifname "br-*" tcp dport { 80, 443 } accept
+    iifname "docker0" tcp dport { 80, 443 } accept
+  '';
+
   # Install docker-compose and lazydocker
   environment.systemPackages = with pkgs; [
     docker-compose

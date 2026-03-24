@@ -17,6 +17,9 @@ chown 1000:1000 /home/claude 2>/dev/null || true
 chown -R 1000:1000 /home/claude/.cache 2>/dev/null || true
 chmod -R u+rwX /home/claude/.cache 2>/dev/null || true
 chown -R 1000:1000 /workspace/obsidian/agents/cron 2>/dev/null || true
+# cursor-agent precisa escrever em ~/.config/cursor (token de login)
+mkdir -p /home/claude/.config/cursor 2>/dev/null || true
+chown 1000:1000 /home/claude/.config/cursor 2>/dev/null || true
 
 export HOME=/home/claude
 export USER=claude

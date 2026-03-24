@@ -42,8 +42,8 @@ x-base-volumes: &base-volumes
   - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/skills:/home/claude/.cursor/skills
   - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/commands:/home/claude/.cursor/commands
   - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/commands:/home/claude/.cursor/rules
-  # cursor_config: volume nomeado (chmod pelo agent causa EPERM em bind mount)
-  - cursor_config:/home/claude/.config/cursor
+  # cursor_config: bind mount do host — token do `agent login` persiste entre sessões
+  - ${HOME}/.config/cursor:/home/claude/.config/cursor
   # opencode
   - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/.opencode:/home/claude/.config/opencode
   - ${HOME}/projects:/home/claude/projects
@@ -138,9 +138,6 @@ services:
       - /tmp:size=512m,mode=1777
     extra_hosts: *extra-hosts
     volumes: *base-volumes
-
-volumes:
-  cursor_config:
 
 networks:
   default:
