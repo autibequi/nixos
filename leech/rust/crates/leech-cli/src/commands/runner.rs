@@ -18,6 +18,8 @@ pub struct RunnerOpts<'a> {
     pub cmd: Option<&'a str>,
     pub tail: u32,
     pub debug: bool,
+    /// Start container and return immediately without following logs live.
+    pub detach: bool,
 }
 
 /// Main entry point — resolve service, dispatch action.
@@ -225,9 +227,13 @@ fn do_start(
     let _ = std::fs::write(&pid_file, child.id().to_string());
 
     eprintln!(
-        "\x1b[32m✓ {} pronto\x1b[0m  [env={}]",
-        svc, opts.env
+        "\x1b[32m✓ {} pronto\x1b[0m  [env={}]{}",
+        svc, opts.env, if use_debug { "  \x1b[35m[DEBUG]\x1b[0m" } else { "" }
     );
+    if use_debug {
+        eprintln!("  \x1b[33m[DEBUG]\x1b[0m Delve aguardando attach em localhost:2345");
+        eprintln!("  \x1b[33m[DEBUG]\x1b[0m VS Code: use a config 'Attach to monolito'");
+    }
     eprintln!(
         "  \x1b[2mLogs: leech runner {} logs\x1b[0m",
         svc
@@ -236,6 +242,10 @@ fn do_start(
         "  \x1b[2mArquivo: {}/service.log\x1b[0m",
         log_dir.display()
     );
+
+    if opts.detach {
+        return Ok(());
+    }
 
     // Follow logs live (Ctrl+C exits but container keeps running)
     eprintln!("\n  \x1b[2m[Ctrl+C para sair — container continua]\x1b[0m\n");

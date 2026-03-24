@@ -133,13 +133,13 @@ _leech_dk_run() {
 
   # detach: sair sem seguir logs
   if [[ -n "$detach" ]]; then
-    printf "  \033[2mLogs: leech docker %s logs -f\033[0m\n" "$service"
+    printf "  \033[2mLogs: leech runner %s logs\033[0m\n" "$service"
     printf "  \033[2mArquivo: %s/service.log\033[0m\n\n" "$log_dir"
     return 0
   fi
 
   # seguir logs ao vivo (Ctrl+C sai mas container continua)
-  printf "  \033[2m[Ctrl+C para sair — container continua] reconectar: leech docker %s logs -f\033[0m\n" "$service"
+  printf "  \033[2m[Ctrl+C para sair — container continua] reconectar: leech runner %s logs\033[0m\n" "$service"
   printf "  \033[2m%s\033[0m\n\n" "─────────────────────────────────────────"
 
   # Identificador no título do terminal (aba/janela e pane tmux)

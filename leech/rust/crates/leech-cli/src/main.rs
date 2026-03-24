@@ -206,6 +206,8 @@ enum Commands {
         tail: u32,
         #[arg(long)]
         debug: bool,
+        #[arg(long)]
+        detach: bool,
     },
 
     // ── Tick (timer systemd) ─────────────────────────────────────
@@ -446,7 +448,7 @@ fn main() -> Result<()> {
 
         // Runner — native Rust service orchestration
         Some(Commands::Runner {
-            service, action, env, worktree, vertical, container, cmd, tail, debug,
+            service, action, env, worktree, vertical, container, cmd, tail, debug, detach,
         }) => {
             commands::runner::run(&service, &action, &commands::runner::RunnerOpts {
                 env: &env,
@@ -456,6 +458,7 @@ fn main() -> Result<()> {
                 cmd: cmd.as_deref(),
                 tail,
                 debug,
+                detach,
             })
         }
 

@@ -107,6 +107,7 @@ fn run_bg_cmd(svc: &str, env: &str, action: &str, debug: bool) -> Option<String>
     let mut args: Vec<&str> = vec!["runner", svc, action];
     if (action == "start" || action == "start-hotreload") && !env.is_empty() {
         args.push(&env_flag);
+        args.push("--detach");
     }
     if debug {
         args.push("--debug");
@@ -486,6 +487,9 @@ pub fn run_status(tick: u64) -> Result<()> {
                                                 cmd.args(["runner", &wt.service, &action]);
                                                 if let Some(wt_name) = wt_flag.as_deref() {
                                                     cmd.args(["--worktree", wt_name]);
+                                                }
+                                                if matches!(action.as_str(), "start" | "start-hotreload") {
+                                                    cmd.arg("--detach");
                                                 }
                                                 match cmd.output() {
                                                     Err(e) => { let _ = err_tx.send(format!("{action}: {e}")); }
