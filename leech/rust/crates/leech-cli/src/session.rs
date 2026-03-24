@@ -433,16 +433,62 @@ impl SessionRunner {
         };
 
         let vol_args = self.volume_args();
-        let mut args: Vec<&str> = vec!["run", "--rm", "-it"];
 
+        // Shared container reuse: same pattern as run_claude.
+        if vol_args.is_empty() && !self.analysis_mode {
+            let leech_name = format!(
+                "leech-{}",
+                self.proj_name.strip_prefix("leech-").unwrap_or(&self.proj_name)
+            );
+
+            let cid = match crate::docker::find_running_container(&leech_name) {
+                Some(cid) => cid,
+                None => {
+                    self.compose(config).execute(&["up", "-d", "leech"])?;
+                    if let Some(auto_name) =
+                        crate::docker::find_compose_container(&self.proj_name, "leech")
+                    {
+                        crate::docker::rename_container(&auto_name, &leech_name);
+                    }
+                    match crate::docker::find_running_container(&leech_name) {
+                        Some(cid) => cid,
+                        None => {
+                            let mut args: Vec<&str> =
+                                vec!["run", "--rm", "-it", "--entrypoint", "/entrypoint.sh"];
+                            let mount_env = format!("CLAUDIO_MOUNT={}", self.mount_path);
+                            args.extend(["-e", &mount_env, "-e", "BOOTSTRAP_SKIP_CLEAR=1"]);
+                            args.extend(["leech", "/bin/bash", "-c", &cursor_cmd]);
+                            return self.compose(config).execute(&args);
+                        }
+                    }
+                }
+            };
+
+            let mut env_pairs: Vec<(&str, &str)> = vec![("CLAUDIO_MOUNT", &self.mount_path)];
+            if self.resume.is_none() {
+                env_pairs.push(("BOOTSTRAP_SKIP_CLEAR", "1"));
+            }
+            if self.host {
+                env_pairs.push(("HOST_ATTACHED", "1"));
+            }
+            let exec_cmd = cursor_cmd.clone();
+            return crate::docker::exec_replace(&cid, &env_pairs, &exec_cmd);
+        }
+
+        // Fallback: ephemeral run (extra volumes or analysis mode require isolated container).
+        let mut args: Vec<&str> = vec!["run", "--rm", "-it"];
         for a in &vol_args {
             args.push(a);
         }
-
         if self.analysis_mode {
             args.extend(["-e", "LEECH_ANALYSIS_MODE=1"]);
         }
-
+        if self.host {
+            args.extend(["-e", "HOST_ATTACHED=1"]);
+        }
+        if self.ghost {
+            args.extend(["-e", "GHOST_IN_THE_SHELL=ON"]);
+        }
         args.extend(["--entrypoint", "/entrypoint.sh"]);
         let mount_env = format!("CLAUDIO_MOUNT={}", self.mount_path);
         args.extend(["-e", &mount_env, "-e", "BOOTSTRAP_SKIP_CLEAR=1"]);

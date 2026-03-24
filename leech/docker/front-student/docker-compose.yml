@@ -18,6 +18,8 @@ services:
       - ${FRONT_STUDENT_DIR}:/app
       # Canal de comunicação rápida host ↔ container
       - ${HOME}/.leech:/.leech:rw
+    extra_hosts:
+      - "api.local.estrategia-sandbox.com.br:host-gateway"
     ports:
       - "3005:3005"
     networks:
