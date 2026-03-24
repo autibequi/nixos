@@ -58,6 +58,9 @@ leech_load_config() {
     JOURNAL_GID=$(getent group systemd-journal 2>/dev/null | cut -d: -f3)
   fi
   export JOURNAL_GID="${JOURNAL_GID:-62}"
+  # UID/GID do host: arquivos em bind mounts batem com o usuário (evita tudo como root ou 1000 fixo)
+  export LEECH_CONTAINER_UID="${LEECH_CONTAINER_UID:-$(id -u)}"
+  export LEECH_CONTAINER_GID="${LEECH_CONTAINER_GID:-$(id -g)}"
   # Path absoluto e ~ expandido para o compose (YAML não expande ~)
   leech_obsidian_path="${leech_obsidian_path/#\~/$HOME}"
   [[ -d "$leech_obsidian_path" ]] && leech_obsidian_path="$(cd "$leech_obsidian_path" && pwd)"

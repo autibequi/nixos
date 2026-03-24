@@ -48,7 +48,7 @@ restow:
 
 # Sobe reverse proxy (docker)
 proxy:
-    docker compose -f leech/dockerized/reverseproxy/docker-compose.yml -p leech-dk-reverseproxy up -d
+	docker compose -f leech/docker/reverseproxy/docker-compose.yml -p leech-dk-reverseproxy up -d
 
 # ── Leech CLI ───────────────────────────────────────────────────────────────
 

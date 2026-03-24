@@ -1,4 +1,7 @@
 #!/bin/bash
+# Alinhar com o usuário do host (bind mounts gravam UID/GID numéricos).
+RUN_UID="${LEECH_CONTAINER_UID:-1000}"
+RUN_GID="${LEECH_CONTAINER_GID:-1000}"
 
 HOME=/root nix-daemon > /dev/null 2>&1 &
 
@@ -9,17 +12,17 @@ mkdir -p \
   /home/claude \
   /home/claude/.cache/opencode \
   2>/dev/null
-# OpenCode/Bun precisa de ~/.cache/opencode gravável por uid 1000 (EACCES se faltar ou chown falhar)
+# OpenCode/Bun precisa de ~/.cache/opencode gravável pelo RUN_UID (EACCES se faltar ou chown falhar)
 # ATENÇÃO: NÃO usar chown -R em /home/claude inteiro — recursão entra nos bind mounts do host
 # (.claude, .cursor, .leech, etc.) e muda dono de arquivos do host para root/1000.
-chown -R 1000:1000 /workspace/.ephemeral /tmp/leech-locks 2>/dev/null || true
-chown 1000:1000 /home/claude 2>/dev/null || true
-chown -R 1000:1000 /home/claude/.cache 2>/dev/null || true
+chown -R "${RUN_UID}:${RUN_GID}" /workspace/.ephemeral /tmp/leech-locks 2>/dev/null || true
+chown "${RUN_UID}:${RUN_GID}" /home/claude 2>/dev/null || true
+chown -R "${RUN_UID}:${RUN_GID}" /home/claude/.cache 2>/dev/null || true
 chmod -R u+rwX /home/claude/.cache 2>/dev/null || true
-chown -R 1000:1000 /workspace/obsidian/agents/cron 2>/dev/null || true
+chown -R "${RUN_UID}:${RUN_GID}" /workspace/obsidian/agents/cron 2>/dev/null || true
 # cursor-agent precisa escrever em ~/.config/cursor (token de login)
 mkdir -p /home/claude/.config/cursor 2>/dev/null || true
-chown 1000:1000 /home/claude/.config/cursor 2>/dev/null || true
+chown "${RUN_UID}:${RUN_GID}" /home/claude/.config/cursor 2>/dev/null || true
 
 export HOME=/home/claude
 export USER=claude
@@ -32,8 +35,8 @@ _session_hook="/home/claude/.claude/hooks/session-start.sh"
 [ -f "$_session_hook" ] || _session_hook="/workspace/self/hooks/claude-code/session-start.sh"
 if [ -f "$_session_hook" ]; then
   HOME=/home/claude USER=claude LOGNAME=claude \
-    setpriv --reuid=1000 --regid=1000 --keep-groups \
+    setpriv --reuid="${RUN_UID}" --regid="${RUN_GID}" --keep-groups \
     /bin/bash "$_session_hook" >/dev/null 2>&1 || true
 fi
 
-exec setpriv --reuid=1000 --regid=1000 --keep-groups "$@"
+exec setpriv --reuid="${RUN_UID}" --regid="${RUN_GID}" --keep-groups "$@"
