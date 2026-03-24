@@ -291,31 +291,24 @@ pub fn run_unified(name: &str, steps: Option<u32>) -> Result<()> {
     }
 }
 
-/// `leech auto/tick` — aciona o tick agent, que cuida de tudo.
+/// `leech auto/tick` — envia "rode /tick" para o Claude, que despacha os agentes.
 pub fn auto(dry_run: bool, _steps: Option<u32>) -> Result<()> {
-    let tick_agent = paths::agent_file("tick")
-        .ok_or_else(|| anyhow::anyhow!("[tick] agents/tick/agent.md nao encontrado"))?;
-
     if dry_run {
-        eprintln!("[tick] --dry-run: tick agent em {}", tick_agent.display());
+        eprintln!("[tick] --dry-run: would send 'rode /tick'");
         return Ok(());
     }
 
-    let content = std::fs::read_to_string(&tick_agent)?;
-    let prompt = extract_body(&content);
-
-    let status = Command::new("timeout")
-        .arg("300")
-        .arg("claude")
+    let home = paths::home();
+    let status = Command::new("claude")
         .args([
             "--permission-mode", "bypassPermissions",
             "--model", "haiku",
-            "--max-turns", "20",
-            "-p", &prompt,
-            "--add-dir", &paths::home().to_string_lossy(),
+            "--max-turns", "30",
+            "-p", "rode /tick",
+            "--add-dir", &home.to_string_lossy(),
         ])
         .env("HEADLESS", "1")
-        .current_dir(paths::home())
+        .current_dir(&home)
         .status()
         .map_err(|e| anyhow::anyhow!("[tick] falhou ao executar claude: {e}"))?;
 

@@ -10,7 +10,7 @@ esac
 
 # Leech CLI
 export PATH="/home/pedrinho/nixos/stow/.local/bin:$PATH"
-alias zion=leech
+alias zion=leech --host
 alias claudio=leech
 
 # Dynamic completions (always in sync with CLI)
