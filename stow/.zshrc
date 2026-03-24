@@ -8,7 +8,11 @@ case ":$PATH:" in
 esac
 # pnpm end
 
-# Leech CLI (make install)
+# Leech CLI
 export PATH="/home/pedrinho/nixos/stow/.local/bin:$PATH"
+alias zion=leech
 alias claudio=leech
 
+# Dynamic completions (always in sync with CLI)
+eval "$(leech completions zsh)"
+compdef zion=leech
