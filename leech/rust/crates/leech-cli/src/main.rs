@@ -4,7 +4,7 @@
 //! Every command needs: about, long_about (if complex), and after_help with examples.
 
 use anyhow::Result;
-use clap::{Parser, Subcommand};
+use clap::{CommandFactory, Parser, Subcommand};
 
 mod commands;
 mod exec;
@@ -141,6 +141,12 @@ enum Commands {
     /// Show banner
     #[command(alias = "h")]
     Banner,
+    /// Generate shell completions (source dynamically: eval "$(leech completions zsh)")
+    #[command(hide = true)]
+    Completions {
+        /// Shell: bash, zsh, fish, elvish
+        shell: clap_complete::Shell,
+    },
     /// Claude usage stats (alias for `claude usage`)
     Usage {
         #[arg(long)]
@@ -349,6 +355,10 @@ fn main() -> Result<()> {
         Some(Commands::Outbox) => commands::tools::outbox(),
         Some(Commands::Man) => commands::tools::man(),
         Some(Commands::Banner) => commands::tools::help_banner(),
+        Some(Commands::Completions { shell }) => {
+            clap_complete::generate(shell, &mut Cli::command(), "leech", &mut std::io::stdout());
+            Ok(())
+        }
         Some(Commands::Usage {
             waybar,
             no_cache,
