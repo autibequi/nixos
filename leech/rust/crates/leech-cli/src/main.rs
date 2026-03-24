@@ -439,7 +439,8 @@ fn main() -> Result<()> {
 
         // Worktree
         Some(Commands::Worktree { service, json }) => {
-            let worktrees = leech_cli::worktree::list_worktrees(service.as_deref());
+            let svc = service.as_deref().filter(|s| *s != "list");
+            let worktrees = leech_cli::worktree::list_worktrees(svc);
             if json {
                 println!("{}", serde_json::to_string_pretty(&worktrees)?);
             } else {

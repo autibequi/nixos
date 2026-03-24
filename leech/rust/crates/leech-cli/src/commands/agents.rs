@@ -314,6 +314,8 @@ pub fn auto(dry_run: bool, _steps: Option<u32>) -> Result<()> {
     let body = extract_body(&content);
     let prompt = if body.trim().is_empty() { content.clone() } else { body };
     let home = paths::home();
+    let obsidian = paths::obsidian_path();
+    let self_dir = paths::leech_root();
 
     let status = Command::new("claude")
         .args([
@@ -322,8 +324,12 @@ pub fn auto(dry_run: bool, _steps: Option<u32>) -> Result<()> {
             "--max-turns", "30",
             "-p", &prompt,
             "--add-dir", &home.to_string_lossy(),
+            "--add-dir", &obsidian.to_string_lossy(),
+            "--add-dir", &self_dir.to_string_lossy(),
         ])
         .env("HEADLESS", "1")
+        .env("LEECH_OBSIDIAN", &obsidian)
+        .env("LEECH_SELF", &self_dir)
         .current_dir(&home)
         .status()
         .map_err(|e| anyhow::anyhow!("[tick] falhou ao executar claude: {e}"))?;

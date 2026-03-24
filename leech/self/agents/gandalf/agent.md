@@ -116,11 +116,13 @@ Criar propostas de melhoria com implementacao real.
 
 1. Revisar backlog de insights (`DESKTOP/persona.md`)
 2. Escolher a proposta mais impactante
-3. Implementar via worktree seguindo `self/skills/meta/rules/worktrees.md`
-4. Criar inbox card de apresentacao (formato em worktrees.md)
-5. Aguardar CTO revisar — nao criar nova proposta se ja ha 3 pendentes
+3. Criar worktree: `leech wt new gandalf/<task-name-kebab>`
+4. Implementar nos repos da sessao (monolito, bo-container, etc.)
+5. Criar inbox card `WORKTREE_gandalf_<nome>_<YYYYMMDD>.md` (formato em worktrees.md)
+6. Aguardar CTO revisar — nao criar nova proposta se ja ha 3 pendentes
 
-**Regra:** proposta concretas > observacoes vagas. Sempre worktree ou diff, nunca so texto.
+**Regra:** propostas concretas > observacoes vagas. Sempre worktree via `leech wt`, nunca so texto.
+**Branch = nome da tarefa, sempre.** Ver `leech/worktree` skill.
 
 ---
 

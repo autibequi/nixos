@@ -1,25 +1,31 @@
 ---
 name: leech/worktree
-description: Sistema de sessoes multi-repo — leech wt. Cria, troca e gerencia sessoes de branches sincronizadas em todos os repos da Estrategia. Usar quando trabalhar em features que tocam multiplos repos ao mesmo tempo.
+description: Sistema unificado de worktrees — leech wt. Cria, troca e gerencia sessoes de branches sincronizadas em todos os repos da Estrategia. Usado por CTO e agentes.
 ---
 
 # Skill: leech/worktree
 
 Gerencia sessoes de trabalho multi-repo via `leech wt`. Cada sessao representa
-uma feature (ex: CARD-123) com branches checadas em paralelo em todos os repos
-relevantes. Permite trocar de sessao instantaneamente com stash automatico.
+uma tarefa com branches checadas em paralelo em todos os repos relevantes.
+Permite trocar de sessao instantaneamente com stash automatico.
+
+**Regra fundamental:** toda implementacao usa worktree. Branch sempre tem o nome da tarefa.
 
 ---
 
 ## Interface
 
 ```bash
-leech wt                     # lista sessoes (★ = ativa)
-leech wt new CARD-123        # cria sessao (pede confirmacao)
-leech wt CARD-123            # switch para sessao (stash auto)
-leech wt main                # volta para main
-leech wt CARD-123 --close    # deleta sessao
-leech wt CARD-123 --force    # deleta sem confirmacao
+leech wt                        # lista sessoes (★ = ativa)
+leech wt list                   # mesmo que acima
+leech wt new <nome>             # cria sessao (pede confirmacao)
+leech wt <nome>                 # switch para sessao (stash auto)
+leech wt main                   # volta para main
+leech wt <nome> --close         # deleta sessao
+leech wt <nome> --force         # deleta sem confirmacao
+leech worktree                  # lista worktrees por servico
+leech worktree monolito         # filtra por servico
+leech worktree --json           # saida JSON
 ```
 
 ---
@@ -28,28 +34,46 @@ leech wt CARD-123 --force    # deleta sem confirmacao
 
 ```
 /workspace/mnt/worktree/
-├── .active                  ← sessao ativa atual ("main" ou "CARD-123")
-└── CARD-123/
-    ├── monolito/            ← branch CARD-123 do monolito
-    ├── bo-container/        ← branch CARD-123 do bo-container
-    ├── front-student/       ← branch CARD-123 do front-student
-    └── toggler/             ← (e todos os outros repos em estrategia/)
+├── .active                      <- sessao ativa atual ("main" ou "<nome>")
+└── <nome>/
+    ├── monolito/                <- branch <nome> do monolito
+    ├── bo-container/            <- branch <nome> do bo-container
+    ├── front-student/           <- branch <nome> do front-student
+    └── toggler/                 <- (e todos os outros repos em estrategia/)
 ```
 
 Repos descobertos automaticamente: todos com `.git` em `/workspace/mnt/estrategia/`.
 
 ---
 
-## Criar sessao (leech wt new)
+## Naming — branch SEMPRE e o nome da tarefa
+
+**Convencao obrigatoria:**
+- CTO: `leech wt new FUK2-12345` → branch `FUK2-12345` em todos os repos
+- Agentes: `leech wt new <agent>/<task-kebab>` → branch `<agent>/<task-kebab>`
+
+Exemplos:
+```bash
+leech wt new FUK2-12345                     # CTO: feature card
+leech wt new gandalf/FUK2-12345-auth-fix    # Gandalf: proposta
+leech wt new coruja/metrics-dashboard       # Coruja: investigacao
+leech wt new mechanic/nixos-waybar-fix      # Mechanic: fix de sistema
+```
+
+**Nunca criar branch sem nome de tarefa.** Se nao tem card Jira, usar descricao kebab-case.
+
+---
+
+## Criar sessao
 
 ```bash
-leech wt new FUK2-12345
+leech wt new gandalf/auth-refactor
 ```
 
 Mostra preview:
 ```
   monolito      branch nova  (base: HEAD)
-  bo-container  branch existe (origin/FUK2-12345)
+  bo-container  branch existe (origin/gandalf/auth-refactor)
   front-student branch nova  (base: HEAD)
 
 Confirmar? [s/N]
@@ -61,18 +85,16 @@ Confirmar? [s/N]
 
 ---
 
-## Switch de sessao (leech wt)
+## Switch de sessao
 
 ```bash
-leech wt FUK2-12345
+leech wt gandalf/auth-refactor
 ```
 
 Fluxo automatico:
 1. Stash de arquivos pendentes na sessao atual (tag: `leech-wt-<sessao>`)
 2. Atualiza `/workspace/mnt/worktree/.active`
 3. Restaura stash da sessao alvo (se existir)
-
-O stash e taggeado por sessao — nunca confunde entre sessoes diferentes.
 
 ---
 
@@ -83,21 +105,7 @@ em `/workspace/mnt/estrategia/`. Stash da sessao atual e salvo antes de sair.
 
 ---
 
-## Integrar com leech runner
-
-Apos `leech wt new CARD-123`, o runner ja sabe usar os worktrees:
-
-```bash
-leech runner monolito start \
-  --worktree=FUK2-12345
-```
-
-O `--worktree` resolve automaticamente para
-`/workspace/mnt/worktree/FUK2-12345/monolito/`.
-
----
-
-## Fluxo tipico de feature multi-repo
+## Fluxo do CTO — Feature multi-repo
 
 ```bash
 # 1. Criar sessao
@@ -106,13 +114,12 @@ leech wt new FUK2-12345
 # 2. Ativar
 leech wt FUK2-12345
 
-# 3. Trabalhar em cada repo (agente ou manualmente)
+# 3. Trabalhar em cada repo
 #    /workspace/mnt/worktree/FUK2-12345/monolito/
 #    /workspace/mnt/worktree/FUK2-12345/bo-container/
 
 # 4. Testar
 leech runner monolito start --worktree=FUK2-12345
-leech runner bo-container start --worktree=FUK2-12345
 
 # 5. Commit/push em cada repo
 
@@ -125,33 +132,50 @@ leech wt FUK2-12345 --close
 
 ---
 
-## Agentes usando sessoes
-
-Agente implementa feature em sessao propria e apresenta ao CTO:
+## Fluxo do Agente — Proposta via worktree
 
 ```bash
-# Agente cria sua sessao
-leech wt new coruja/FUK2-12345
+# 1. Agente cria sessao com nome da tarefa
+leech wt new gandalf/FUK2-12345-auth-fix
 
-# Agente implementa nos worktrees
+# 2. Agente implementa em qualquer repo da sessao
+#    /workspace/mnt/worktree/gandalf-FUK2-12345-auth-fix/monolito/
+#    /workspace/mnt/worktree/gandalf-FUK2-12345-auth-fix/bo-container/
 
-# Agente apresenta ao CTO (switch para a sessao do agente)
-leech wt coruja/FUK2-12345
-# → CTO pode testar direto nos worktrees
+# 3. Agente apresenta ao CTO via inbox card WORKTREE_*
+#    (formato em meta/rules/worktrees.md)
 
-# CTO aprova, volta pra propria sessao
-leech wt main
+# 4. CTO revisa
+leech wt gandalf/FUK2-12345-auth-fix
+
+# 5. CTO aprova, fecha
+leech wt gandalf/FUK2-12345-auth-fix --close
 ```
+
+**Cada agente pode trabalhar em qualquer repo** dentro da sua sessao. Nao ha limitacao
+de 1 repo por worktree — a sessao cobre todos os repos automaticamente.
 
 ---
 
-## Diferenca com worktrees de proposta (meta/rules/worktrees.md)
+## Regras
 
-| | leech wt (este skill) | meta/rules/worktrees.md |
-|---|---|---|
-| **Para que** | Features do usuario nos repos da Estrategia | Agentes propondo mudancas ao Leech/sistema |
-| **Path** | `/workspace/mnt/worktree/<sessao>/<repo>/` | `/tmp/<agente>-<data>-<nome>/` |
-| **Repos** | Todos os repos em estrategia/ | Um repo por vez |
-| **Switch** | `leech wt <sessao>` | Navegar no editor |
-| **Stash** | Automatico no switch | Manual |
-| **Apresentacao** | Pedro troca via leech wt | Inbox card WORKTREE_* |
+- **Branch = nome da tarefa** — sempre, sem excecao
+- Agentes nunca commitam sem CTO pedir (Lei 6)
+- Maximo 3 sessoes pendentes por agente
+- Agentes apresentam via inbox card `WORKTREE_<agent>_<nome>_<YYYYMMDD>.md`
+- CTO pode revisar com `leech wt <sessao-do-agente>`
+- Regras completas: `meta/rules/worktrees.md`
+
+---
+
+## Integrar com leech runner
+
+Apos criar sessao, o runner sabe usar os worktrees:
+
+```bash
+leech runner monolito start \
+  --worktree=gandalf/auth-refactor
+```
+
+O `--worktree` resolve automaticamente para
+`/workspace/mnt/worktree/gandalf-auth-refactor/monolito/`.

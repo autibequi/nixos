@@ -1,4 +1,7 @@
 {
+  "env": {
+    "TZ": "UTC+3"
+  },
   "includeGitInstructions": false,
   "permissions": {
     "allow": [
@@ -35,16 +38,57 @@
     "deny": [],
     "defaultMode": "bypassPermissions"
   },
-  "env": {
-    "TZ": "UTC+3"
-  },
   "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": ["nixos"],
+  "enabledMcpjsonServers": [
+    "nixos"
+  ],
   "hooks": {
-    "SessionStart": [{"matcher": "startup","hooks": [{"type": "command","command": "~/.claude/hooks/session-start.sh"}]}],
-    "PreToolUse": [{"matcher": ".*","hooks": [{"type": "command","command": "~/.claude/hooks/pre-tool-use.sh"}]}],
-    "PostToolUse": [{"matcher": ".*","hooks": [{"type": "command","command": "~/.claude/hooks/post-tool-use.sh"}]}],
-    "Stop": [{"hooks": [{"type": "command","command": "[ -f /tmp/claude-arrivederchi ] && rm -f /tmp/claude-arrivederchi && kill $PPID || true"}]}]
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/pre-tool-use.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/post-tool-use.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f /tmp/claude-arrivederchi ] && rm -f /tmp/claude-arrivederchi && kill $PPID || true"
+          }
+        ]
+      }
+    ]
   },
-  "statusLine": {"type": "command","command": "~/.claude/scripts/statusline.sh"}
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/scripts/statusline.sh"
+  }
 }

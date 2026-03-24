@@ -1,108 +1,93 @@
-# /tick — Despachante Central
-
-**EXECUÇÃO AUTÔNOMA. Não perguntar nada. Não explicar o que vai fazer. Executar agora e reportar ao final.**
-
+---
+name: tick
 ---
 
-## EXECUTE AGORA
+Você é o agente ticker. Execute o ciclo completo agora, passo a passo, sem perguntar nada. Comece imediatamente.
 
-### 1. Quota
-
-```bash
-cat /workspace/host/.ephemeral/usage-bar.txt 2>/dev/null | head -5
-```
-
-Extrair `pct=` da linha `---API_USAGE---`. Guardar como PCT.
-
-- PCT > 90 → SKIP: ir direto para o Log e encerrar
-- PCT > 85 → despachar só #haiku
-- PCT <= 85 → despachar todos
-
-### 2. Ler DASHBOARD
+**Passo 0 — Descobrir paths do sistema:**
 
 ```bash
-cat /workspace/obsidian/bedrooms/DASHBOARD.md
+OBSIDIAN="${LEECH_OBSIDIAN:-/workspace/obsidian}"
+SELF="${LEECH_SELF:-/workspace/self}"
+USAGE="${LEECH_OBSIDIAN:+$LEECH_OBSIDIAN/../..}/.ephemeral/usage-bar.txt"
+# fallback simples para usage
+USAGE_FILE="/workspace/host/.ephemeral/usage-bar.txt"
+[ -f "$USAGE_FILE" ] || USAGE_FILE="$HOME/.ephemeral/usage-bar.txt"
+echo "OBSIDIAN=$OBSIDIAN  SELF=$SELF"
+ls "$OBSIDIAN/bedrooms/DASHBOARD.md" 2>/dev/null && echo "dashboard ok" || echo "dashboard NOT FOUND"
 ```
 
-### 3. Garantir todos os agentes têm card
+**Passo 1 — Verificar quota:**
 
 ```bash
-ls /workspace/self/agents/
+cat "$USAGE_FILE" 2>/dev/null | head -5
 ```
 
-Para cada agente sem card em nenhuma coluna do DASHBOARD: criar card em SLEEPING:
-```
-- [ ] **nome** #modelo #ever60min `last:TIMESTAMP_AGORA`
-```
-(extrair `model:` do frontmatter de `agents/nome/agent.md` para determinar #modelo)
+Extraia `pct=XX` da saída. Se pct > 90, vá direto ao Passo 6 (skip). Se pct > 85, só #haiku. Se pct <= 85, todos.
 
-### 4. Identificar quem despachar
+**Passo 2 — Ler o DASHBOARD:**
 
-**SLEEPING com schedule vencido:**
-- Extrair `#everNmin` ou `#everday` do card
-- Extrair timestamp `last:TIMESTAMP`
-- Calcular: `now_epoch - last_epoch >= intervalo_segundos`
-- `#on-demand` → NUNCA despachar
-
-**WORKING mortos (>1h):**
 ```bash
-ls /tmp/leech-locks/ 2>/dev/null
+cat "$OBSIDIAN/bedrooms/DASHBOARD.md"
 ```
-- Card em WORKING com `started:TIMESTAMP` onde `now - started >= 3600s` e sem lock ativo → morto, re-despachar
 
-### 5. Atualizar DASHBOARD
+**Passo 3 — Garantir cards de todos os agentes:**
 
-Para cada agente a despachar: editar DASHBOARD.md movendo card de SLEEPING→WORKING.
-Substituir `` `last:TIMESTAMP` `` por `` `started:TIMESTAMP_AGORA` ``
+```bash
+ls "$SELF/agents/"
+```
 
-Fazer tudo em uma edição consolidada.
+Para cada agente sem card em nenhuma coluna do DASHBOARD: ler o `agent.md` dele para extrair `model:`, criar card em SLEEPING:
+`- [ ] **nome** #modelo #ever60min \`last:$(date -u +%Y-%m-%dT%H:%MZ)\``
 
-### 6. Log de início
+**Passo 4 — Identificar quem despachar:**
+
+Para cada card em SLEEPING:
+- Extrair `#everNmin` ou `#everday` e o timestamp `` `last:TIMESTAMP` ``
+- Calcular se vencido: `now_epoch - last_epoch >= intervalo_em_segundos`
+- `#on-demand` → nunca despachar automaticamente
+
+Para cada card em WORKING:
+- Extrair `started:TIMESTAMP`
+- Se `now - started >= 3600s` e sem lock em `/tmp/leech-locks/` → morto, re-despachar
+
+**Passo 5 — Atualizar DASHBOARD e despachar:**
+
+Para cada agente na lista:
+- Editar DASHBOARD.md: mover card SLEEPING → WORKING, substituir `` `last:` `` por `` `started:TIMESTAMP_AGORA` ``
 
 ```bash
 echo "| $(date -u +%Y-%m-%dT%H:%MZ) | tick | start | N agents: lista |" \
-  >> /workspace/obsidian/bedrooms/_logs/ticker.md
+  >> "$OBSIDIAN/bedrooms/_logs/ticker.md"
 ```
 
-### 7. Despachar
-
-Prompt exato para cada agente: **`EXECUTE MODO AUTONOMO`**
-
-- `#haiku` → lançar em paralelo (múltiplos Agent tool calls na mesma mensagem)
+Lançar agentes em paralelo com prompt `"EXECUTE MODO AUTONOMO"`:
+- `#haiku` → múltiplos Agent tool calls na mesma mensagem (sem run_in_background)
 - `#sonnet` / `#opus` → `run_in_background=true`, grupos de 2
 
-Se PCT > 90: pular esta etapa.
-Se PCT > 85: lançar apenas #haiku.
-
-### 8. Log de fim
+**Passo 6 — Log de fim:**
 
 ```bash
 echo "| $(date -u +%Y-%m-%dT%H:%MZ) | tick | end | ok |" \
-  >> /workspace/obsidian/bedrooms/_logs/ticker.md
+  >> "$OBSIDIAN/bedrooms/_logs/ticker.md"
 ```
 
-Se skip:
+Se skip por quota:
 ```bash
 echo "| $(date -u +%Y-%m-%dT%H:%MZ) | tick | skip | pct=${PCT}% > 90 |" \
-  >> /workspace/obsidian/bedrooms/_logs/ticker.md
+  >> "$OBSIDIAN/bedrooms/_logs/ticker.md"
 ```
 
----
-
-## RELATÓRIO FINAL
-
-Ao terminar, imprimir apenas:
+**Ao terminar, imprima apenas este relatório (nenhum outro texto):**
 
 ```
 TICK [HH:MMZ] pct=XX%
 ━━━━━━━━━━━━━━━━━━━━━
-dispatched : N agents
-  haiku    : nome, nome, nome
+dispatched : N
+  haiku    : nome, nome
   sonnet   : nome, nome
   skipped  : nome (#on-demand), nome (#quota)
   mortos   : nome (resgatado)
 ━━━━━━━━━━━━━━━━━━━━━
 status     : ok | skip | partial
 ```
-
-Nenhum outro texto. Nenhuma pergunta. Nenhuma explicação.
