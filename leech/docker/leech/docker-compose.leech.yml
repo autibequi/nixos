@@ -28,7 +28,7 @@ x-base-volumes: &base-volumes
   - ${CLAUDIO_MOUNT:-${HOME}/nixos}:/workspace/mnt:${CLAUDIO_MOUNT_OPTS:-rw}
   - ${HOME}/.claude:/home/claude/.claude
   # bypass: settings.json padrão para containers — sobrescreve o do host
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/claude.bypass.json:/home/claude/.claude/settings.json:ro
+  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/claude.bypass.json:/home/claude/.claude/settings.json:rw
   # leech/skills e leech/commands sobrescrevem o ~/.claude do host
   - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/skills:/home/claude/.claude/skills
   - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/commands:/home/claude/.claude/commands

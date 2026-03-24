@@ -22,7 +22,7 @@ x-base-volumes: &base-volumes
   - ${OBSIDIAN_PATH:-${HOME}/.ovault/Work}:/workspace/obsidian
   - ${CLAUDIO_MOUNT:-${HOME}/nixos}:/workspace/mnt:${CLAUDIO_MOUNT_OPTS:-rw}
   - ${HOME}/.claude:/home/claude/.claude
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/claude.bypass.json:/home/claude/.claude/settings.json:ro
+  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/claude.bypass.json:/home/claude/.claude/settings.json:rw
   - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/skills:/home/claude/.claude/skills
   - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/commands:/home/claude/.claude/commands
   - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/agents:/home/claude/.claude/agents
