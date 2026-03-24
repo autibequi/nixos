@@ -124,6 +124,37 @@ Niveis:
 
 Registrar nivel em memory.md e alertar no inbox se mudar de faixa.
 
+### 5. WAKE — Acordar agentes vencidos (absorvido do Tick)
+
+Verificar agentes cujos cards estão vencidos (passados > 5min sem executar):
+
+```bash
+NOW=$(date -u +%s)
+for card in /workspace/obsidian/bedrooms/_waiting/*.md; do
+  ts=$(basename "$card" | grep -oP '^\d{8}_\d{2}_\d{2}')
+  if [ -n "$ts" ]; then
+    card_epoch=$(date -u -d "${ts:0:8} ${ts:9:2}:${ts:12:2}" +%s 2>/dev/null)
+    diff=$(( NOW - card_epoch ))
+    if [ "$diff" -gt 300 ]; then  # mais de 5min vencido
+      echo "VENCIDO: $card (${diff}s atraso)"
+    fi
+  fi
+done
+```
+
+Para cada card vencido:
+- Se quota < 70%: registrar no feed — Hermes nao despacha diretamente (sem Agent tool)
+- Criar alerta em inbox: `ALERTA_hermes_agents-vencidos-YYYY-MM-DD.md`
+
+Ler ordens especiais do CTO:
+```bash
+cat /workspace/self/agents/tick/orders.md 2>/dev/null
+```
+Se houver ordens, processar e registrar execucao em feed.md.
+
+**Regra WAKE:** Hermes nao tem Agent tool — detecta e alerta, nao despacha.
+O alerta no inbox serve para o CTO ou Wiseman/ENFORCE agirem.
+
 ---
 
 ## Heritage (Absorbed)

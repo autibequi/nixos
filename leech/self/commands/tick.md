@@ -131,5 +131,3 @@ echo "| $NOW | tick | skip | pct=${PCT}% > 90 |" \
 - Se agente falhar no despacho: continuar com os demais, logar o erro
 - Ciclo vazio (nenhum vencido, nenhum morto) = encerrar silenciosamente após logar
 - Sempre encerrar com log de fim
-
-#steps30

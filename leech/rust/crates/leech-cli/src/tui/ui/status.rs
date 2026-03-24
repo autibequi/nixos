@@ -1,6 +1,7 @@
 //! Top-level status dashboard: header, sessions, services, utils, logs, footer.
 
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
+use ratatui::style::{Color, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::Paragraph;
 use ratatui::Frame;
@@ -15,9 +16,9 @@ pub fn render(frame: &mut Frame, app: &App) {
     let utils_h    = utils_height(app);
 
     // Cap sessions_h so logs always gets at least MIN_LOGS content lines
-    // + 1 for the Block top border.
+    // + 2 for the Block top+bottom border (Borders::ALL).
     const MIN_LOGS: u16 = 5;
-    let fixed = 1u16 + services_h + utils_h + 1 + MIN_LOGS + 1;
+    let fixed = 1u16 + services_h + utils_h + 2 + MIN_LOGS + 1;
     let sessions_h = sessions_height(app).min(frame.area().height.saturating_sub(fixed));
 
     let chunks = Layout::default()
@@ -76,11 +77,20 @@ fn utils_height(app: &App) -> u16 {
 
 fn render_header(frame: &mut Frame, app: &App, area: Rect) {
     let now = utc_time_str();
+    let elapsed = app.snapshot_at.elapsed().as_secs();
+    let (stale_text, stale_style) = if elapsed >= 15 {
+        (format!(" [stale {}s]", elapsed), Style::default().fg(Color::Rgb(243, 139, 168))) // red
+    } else if elapsed >= 5 {
+        (format!(" ⟳ {}s", elapsed), Style::default().fg(Color::Rgb(249, 226, 175))) // yellow
+    } else {
+        (format!(" ⟳ {}s", elapsed), theme::dim().fg(Color::Rgb(108, 112, 134))) // dim
+    };
     let mut spans = vec![
         Span::raw("  "),
         Span::styled("Leech Status", theme::header()),
         Span::raw("  "),
         Span::styled(now, theme::dim()),
+        Span::styled(stale_text, stale_style),
     ];
     spans.extend(quota::header_spans(app));
     frame.render_widget(Paragraph::new(Line::from(spans)), area);
@@ -89,6 +99,11 @@ fn render_header(frame: &mut Frame, app: &App, area: Rect) {
 fn render_footer(frame: &mut Frame, app: &App, area: Rect) {
     let env = app.current_env();
     let svc = app.current_service();
+    let dbg_indicator = if app.is_debug() {
+        Span::styled(" [dbg]", Style::default().fg(Color::Rgb(249, 226, 175)))
+    } else {
+        Span::raw("")
+    };
     let line = Line::from(vec![
         Span::styled("  ↑↓", theme::footer_dim()),
         Span::styled(" nav  ", theme::footer_dim()),
@@ -98,6 +113,9 @@ fn render_footer(frame: &mut Frame, app: &App, area: Rect) {
         Span::styled(" agents  ", theme::footer_dim()),
         Span::styled("e", theme::footer_key()),
         Span::styled(format!("[{env}]"), theme::dim()),
+        Span::styled("  d", theme::footer_key()),
+        Span::styled(" debug", theme::footer_dim()),
+        dbg_indicator,
         Span::styled("  scroll", theme::footer_dim()),
         Span::styled(" mouse/[/]", theme::footer_key()),
         Span::styled("  ", theme::footer_dim()),

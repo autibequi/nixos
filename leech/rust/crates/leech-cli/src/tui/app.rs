@@ -97,15 +97,14 @@ pub fn save_svc_debug(flags: &[bool]) {
 // ── App state ─────────────────────────────────────────────────────────────────
 
 pub const MENU_ITEMS: &[(&str, &str)] = &[
-    ("Start",        "start"),
-    ("Stop",         "stop"),
-    ("Restart",      "restart"),
-    ("Logs",         "logs"),
-    ("Test",         "test"),
-    ("Install",      "install"),
-    ("Shell",        "shell"),
-    ("Toggle Debug", "debug"),
-    ("Cancel",       "cancel"),
+    ("Start",   "start"),
+    ("Stop",    "stop"),
+    ("Restart", "restart"),
+    ("Logs",    "logs"),
+    ("Test",    "test"),
+    ("Install", "install"),
+    ("Shell",   "shell"),
+    ("Cancel",  "cancel"),
 ];
 
 pub enum AppMode {
@@ -118,6 +117,7 @@ pub enum AppMode {
 
 pub struct App {
     pub snapshot:          StatusSnapshot,
+    pub snapshot_at:       std::time::Instant,
     pub cursor_idx:        usize,
     pub svc_envs:          Vec<usize>,
     pub svc_debug:         Vec<bool>,
@@ -147,6 +147,7 @@ impl App {
     pub fn new() -> Self {
         Self {
             snapshot:          StatusSnapshot::default(),
+            snapshot_at:       std::time::Instant::now(),
             cursor_idx:        0,
             svc_envs:          load_svc_envs(),
             svc_debug:         load_svc_debug(),

@@ -105,6 +105,22 @@ Só então execute o ciclo normal abaixo.
 
 ---
 
+## Modo Noturno (21h-06h UTC)
+
+```bash
+HOUR=$(date -u +%H)
+[ "$HOUR" -ge 21 ] || [ "$HOUR" -lt 6 ] && echo "NOTURNO=true" || echo "NOTURNO=false"
+```
+
+Se for madrugada (NOTURNO=true):
+- Escrever artigos mais longos e completos (mais secoes, mais profundidade)
+- Consultar mais fontes (MCP Jira + MCP Notion + git + segundo cerebro da Coruja em paralelo)
+- Preferir areas de maior valor: `estrategia/projetos` e `leech` (mais cache de conhecimento)
+- Nao enviar alertas ao inbox — Pedro esta dormindo
+- Reagendar em +45min (ciclo mais longo para ciclos mais ricos)
+
+---
+
 ## Ciclo de Investigação (a cada 30min)
 
 ### 1. Carregar estado

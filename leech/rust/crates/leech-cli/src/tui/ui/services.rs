@@ -1,6 +1,7 @@
 //! Render the dockerized-services panel with status, uptime, CPU, and memory.
 
 use ratatui::layout::Rect;
+use ratatui::style::{Color, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::Paragraph;
 use ratatui::Frame;
@@ -37,11 +38,23 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
     let icon       = if any_up { "\u{25cf}" } else { "\u{25cb}" };
     let icon_style = if any_up { theme::up_icon() } else { theme::down_icon() };
 
-    lines.push(Line::from(vec![
+    // Show branch of the first main service as the active worktree indicator
+    let wt_branch: &str = app.snapshot.dk_services.iter()
+        .find(|d| d.name.ends_with("-app") && !d.branch.is_empty())
+        .map(|d| d.branch.as_str())
+        .unwrap_or("");
+    let mut header_spans = vec![
         Span::styled(icon, icon_style),
         Span::raw(" "),
-        Span::styled("projects", theme::group_label()),
-    ]));
+        Span::styled("mnt", theme::group_label()),
+    ];
+    if !wt_branch.is_empty() {
+        header_spans.push(Span::raw("  "));
+        header_spans.push(Span::styled("WORKTREE:", theme::dim()));
+        header_spans.push(Span::raw(" "));
+        header_spans.push(Span::styled(wt_branch.to_string(), theme::uptime()));
+    }
+    lines.push(Line::from(header_spans));
 
     for (i, &svc) in DK_SERVICES.iter().enumerate() {
         let is_selected  = i == app.cursor_idx;
@@ -78,18 +91,22 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             continue;
         }
 
-        let (status_icon, status_style, status_text, cpu_str, mem_str) =
+        let starting_style = Style::default().fg(Color::Rgb(249, 226, 175)); // yellow
+        let (status_icon, status_style, status_text, status_text_style, cpu_str, mem_str) =
             if let Some(d) = dk {
-                if d.is_up {
+                if d.is_up && is_starting(&d.status) {
+                    ("\u{25cf}", theme::up_icon(), "start...".to_string(),
+                     starting_style, d.cpu.clone(), d.mem.clone())
+                } else if d.is_up {
                     ("\u{25cf}", theme::up_icon(), format_uptime(&d.status),
-                     d.cpu.clone(), d.mem.clone())
+                     theme::uptime(), d.cpu.clone(), d.mem.clone())
                 } else {
                     ("\u{25cb}", theme::down_icon(), "stopped".to_string(),
-                     String::new(), String::new())
+                     theme::uptime(), String::new(), String::new())
                 }
             } else {
                 ("\u{25cb}", theme::down_icon(), "stopped".to_string(),
-                 String::new(), String::new())
+                 theme::uptime(), String::new(), String::new())
             };
 
         // Show the real running env (from APP_ENV) when container is up,
@@ -101,6 +118,10 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
         };
         let env = abbrev_env(raw_env);
         let debug_on = app.svc_debug.get(i).copied().unwrap_or(false);
+        let branch = app.snapshot.dk_services.iter()
+            .find(|d| d.name == format!("leech-dk-{svc}-app"))
+            .map(|d| d.branch.as_str())
+            .unwrap_or("");
         let mut spans = vec![
             Span::raw("  "),
             Span::styled(svc_branch.to_string(), theme::tree_branch()),
@@ -111,10 +132,14 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             Span::raw(" "),
             Span::styled(format!("{svc:<14}"), name_style),
             Span::styled(format!(" {env:<5}"), theme::dim()),
-            Span::styled(format!(" {status_text:<5}"), theme::uptime()),
         ];
         if debug_on {
             spans.push(Span::styled(" [dbg]", theme::pending_label()));
+        }
+        spans.push(Span::styled(format!(" {status_text:<8}"), status_text_style));
+        if !branch.is_empty() {
+            spans.push(Span::raw("  "));
+            spans.push(Span::styled(format!("@{branch}"), theme::dim()));
         }
 
         if !cpu_str.is_empty() {
@@ -223,6 +248,18 @@ fn parse_bytes(s: &str) -> u64 {
         return (v.trim().parse::<f64>().unwrap_or(0.0) * 1024.0) as u64;
     }
     s.trim().parse::<u64>().unwrap_or(0)
+}
+
+fn is_starting(status: &str) -> bool {
+    let lower = status.to_lowercase();
+    if !lower.starts_with("up ") { return false; }
+    let rest = lower.strip_prefix("up ").unwrap_or("");
+    if rest.contains("second") {
+        if let Some(n) = rest.split_whitespace().next().and_then(|s| s.parse::<u64>().ok()) {
+            return n < 45;
+        }
+    }
+    false
 }
 
 fn format_uptime(status: &str) -> String {

@@ -70,12 +70,11 @@ fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[Session
             Span::styled(folder_label, theme::name()),
         ]));
 
-        let total        = group.len();
-        let agent_count: usize = group.iter().map(|s| s.session_count.max(1)).sum();
-        let count_label  = if agent_count == 1 {
-            "1 agente".to_string()
+        let total       = group.len();
+        let count_label = if total == 1 {
+            "1 sessão".to_string()
         } else {
-            format!("{agent_count} agentes")
+            format!("{total} sessões")
         };
 
         if total == 1 {

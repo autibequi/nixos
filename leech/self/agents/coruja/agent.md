@@ -495,9 +495,26 @@ cat /workspace/self/RULES.md
 
 cat /workspace/obsidian/bedrooms/coruja/memory.md
 ls /workspace/obsidian/outbox/para-coruja-*.md 2>/dev/null
+
+# Detectar modo noturno
+HOUR=$(date -u +%H)
+if [ "$HOUR" -ge 21 ] || [ "$HOUR" -lt 6 ]; then
+  echo "MODO_NOTURNO=true"
+else
+  echo "MODO_NOTURNO=false"
+fi
 ```
 
 Após ler a memory, decidir:
+
+**Se MODO_NOTURNO=true (21h-06h UTC):**
+1. NUNCA implementar features sem Pedro estar presente — apenas investigar
+2. Há mensagem urgente do CTO na outbox? → processar
+3. Executar sempre INVESTIGAR (METRICAS se ainda nao rodou hoje, senao REPOS/JIRA/GITHUB)
+4. Produzir artefatos para Pedro encontrar de manha — nao criar alertas de inbox
+5. Nao enviar alertas de radar (Pedro esta dormindo)
+
+**Se MODO_NOTURNO=false (06h-21h UTC):**
 1. Há feature ativa (STATE.md dos repos)? → implementar feature
 2. Há mensagem do CTO na outbox? → processar mensagem
 3. Nada ativo → executar ciclo investigativo (ver §Modo INVESTIGAR)

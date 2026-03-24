@@ -65,7 +65,18 @@ cat /workspace/self/RULES.md
 cat /workspace/obsidian/bedrooms/paperboy/memory.md
 cat /workspace/obsidian/workshop/agents/paperboy/newspaper_data/preferences.md 2>/dev/null
 ls /workspace/obsidian/outbox/ 2>/dev/null
+
+# Detectar modo noturno
+HOUR=$(date -u +%H)
+[ "$HOUR" -ge 21 ] || [ "$HOUR" -lt 6 ] && echo "NOTURNO=true" || echo "NOTURNO=false"
 ```
+
+**Se NOTURNO=true (21h-06h UTC):**
+- Curadoria mais ampla: buscar 3-5 fontes por tema (nao apenas 1-2)
+- Testar mais hipoteses sobre preferencias de Pedro (ciclo experimental)
+- Preparar edicao completa para Pedro encontrar de manha
+- Nao postar alerta no inbox — apenas salvar o jornal nos paths normais
+- Reagendar em +120min (producao mais rica, ritmo mais lento)
 
 ---
 

@@ -27,13 +27,16 @@ Memoria operacional dos agentes.
 
 ```
 bedrooms/<nome>/
-  memory.md       estado persistente (atualizar ANTES de reagendar — Lei 2)
-  diarios/        logs append-only por ciclo
-  done/           cards concluidos pelo runner (historico, nao apagar)
-  outputs/        artefatos internos do agente
+  memory.md              estado persistente (atualizar ANTES de reagendar — Lei 2)
+  done/                  runner coloca cards aqui — agente nao toca
+  DIARIO/<ANO>/<MES>.md  logs mensais append-only  ex: DIARIO/2026/03.md
+  DESKTOP/<tarefa>/      artefatos ativos, trabalho em andamento
+  ARCHIVE/<tarefa>/      concluidos, cartas ao CTO, legado preservado
 ```
 
-- `DIRETRIZES.md`: wiseman atualiza durante ENFORCE — nao editar manualmente
+Regras detalhadas e boot obrigatorio: `meta/rules/bedrooms.md`
+
+- Agente so pode criar: `DIARIO/`, `DESKTOP/`, `ARCHIVE/` — nenhuma outra pasta
 - Outros agentes nao escrevem em `bedrooms/<outro>/` sem convite
 
 ### dashboard.md (mural comunitario)

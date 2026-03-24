@@ -69,6 +69,49 @@ pub struct DkServiceInfo {
     pub mnt_path: String,
     /// APP_ENV value detected from running container (empty when stopped).
     pub env: String,
+    /// Current git branch of the service's source directory (empty if undetectable).
+    #[serde(default)]
+    pub branch: String,
+}
+
+/// Return the source directory for a given service name, checking env vars first.
+fn svc_git_dir(svc: &str) -> String {
+    let env_key = match svc {
+        "monolito"      => "MONOLITO_DIR",
+        "bo-container"  => "BO_CONTAINER_DIR",
+        "front-student" => "FRONT_STUDENT_DIR",
+        _               => "",
+    };
+    if !env_key.is_empty() {
+        if let Ok(dir) = std::env::var(env_key) {
+            if !dir.is_empty() { return dir; }
+        }
+    }
+    format!("/workspace/mnt/estrategia/{}", svc)
+}
+
+/// Read the current git branch of a directory by parsing .git/HEAD directly.
+fn read_git_branch(dir: &str) -> String {
+    let dot_git = std::path::Path::new(dir).join(".git");
+    let head_path = if dot_git.is_dir() {
+        dot_git.join("HEAD")
+    } else if dot_git.is_file() {
+        // git worktree: .git is a file with "gitdir: /real/.git/worktrees/name"
+        let content = std::fs::read_to_string(&dot_git).unwrap_or_default();
+        if let Some(rest) = content.strip_prefix("gitdir: ") {
+            std::path::PathBuf::from(rest.trim()).join("HEAD")
+        } else {
+            return String::new();
+        }
+    } else {
+        return String::new();
+    };
+    let content = std::fs::read_to_string(head_path).unwrap_or_default();
+    content
+        .strip_prefix("ref: refs/heads/")
+        .unwrap_or("")
+        .trim()
+        .to_string()
 }
 
 /// Collect a full status snapshot.
@@ -200,7 +243,16 @@ pub fn collect() -> Result<StatusSnapshot> {
             let is_up = c.status.to_lowercase().starts_with("up");
             let (cpu, mem) = find_stats(&stats, &c.name);
             let env = app_envs.get(&c.name).cloned().unwrap_or_default();
-            DkServiceInfo { name: c.name.clone(), status: c.status.clone(), is_up, cpu, mem, mnt_path: String::new(), env }
+            // Read git branch only for main app containers (not deps like postgres/redis)
+            let branch = if c.name.ends_with("-app") {
+                let svc = c.name
+                    .strip_prefix("leech-dk-").unwrap_or("")
+                    .strip_suffix("-app").unwrap_or("");
+                read_git_branch(&svc_git_dir(svc))
+            } else {
+                String::new()
+            };
+            DkServiceInfo { name: c.name.clone(), status: c.status.clone(), is_up, cpu, mem, mnt_path: String::new(), env, branch }
         })
         .collect();
 
@@ -261,7 +313,7 @@ pub fn collect() -> Result<StatusSnapshot> {
         .map(|c| {
             let is_up = c.status.to_lowercase().starts_with("up");
             let (cpu, mem) = find_stats(&stats, &c.name);
-            DkServiceInfo { name: c.name.clone(), status: c.status.clone(), is_up, cpu, mem, mnt_path: String::new(), env: String::new() }
+            DkServiceInfo { name: c.name.clone(), status: c.status.clone(), is_up, cpu, mem, mnt_path: String::new(), env: String::new(), branch: String::new() }
         })
         .collect();
 

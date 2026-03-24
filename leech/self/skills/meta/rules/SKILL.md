@@ -18,7 +18,8 @@ Detalhes ficam aqui e sao carregados sob demanda.
 | `scheduling.md` | Scheduling de agentes + tasks one-off |
 | `map.md` | Mapa de diretorios do vault |
 | `spaces.md` | Regras por espaco: workshop, bedrooms, inbox, vault, trash |
-| `agents.md` | Perfil rapido dos 11 agentes (modelo, clock, funcao) |
+| `agents.md` | Perfil rapido dos agentes (modelo, clock, funcao) |
+| `bedrooms.md` | Regras do quarto — pastas permitidas (DIARIO/DESKTOP/ARCHIVE), boot obrigatorio |
 | `worktrees.md` | Regra universal de implementacao via worktree — fluxo, naming, apresentacao ao CTO |
 
 ## Uso via CLI

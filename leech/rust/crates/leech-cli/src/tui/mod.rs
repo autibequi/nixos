@@ -181,7 +181,10 @@ pub fn run_status(tick: u64) -> Result<()> {
         if let Ok(idx) = bg_done_rx.try_recv() { app.clear_action_for(idx); }
 
         if matches!(app.mode, AppMode::Normal) {
-            if let Ok(snap) = rx.try_recv() { app.snapshot = snap; }
+            if let Ok(snap) = rx.try_recv() {
+                app.snapshot = snap;
+                app.snapshot_at = std::time::Instant::now();
+            }
         }
 
         terminal.draw(|frame| { ui::status::render(frame, &app); })?;
@@ -522,7 +525,10 @@ pub fn run_status(tick: u64) -> Result<()> {
                     }
 
                     AppMode::Normal => {
-                        if let Some(action) = map_key(key) {
+                        use crossterm::event::KeyCode;
+                        if key.code == KeyCode::Char('d') {
+                            app.toggle_debug();
+                        } else if let Some(action) = map_key(key) {
                             match action {
                                 "quit"           => break,
                                 "up"             => app.move_up(),

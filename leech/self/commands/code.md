@@ -6,14 +6,16 @@ description: Análise de código da branch atual — diff interativo, objetos po
 # /code — Análise de Código
 
 ```
-/code diff       → árvore interativa de arquivos no Chrome
-/code objects    → objetos modificados por camada
-/code flows      → diagrama de fluxo no Chrome
-/code report     → relatório consolidado da branch
-/code inspect    → inspeção leve de qualidade
+/code diff           → árvore interativa de arquivos no Chrome
+/code objects        → objetos modificados por camada
+/code flows          → diagrama de fluxo no Chrome
+/code report         → relatório consolidado da branch
+/code inspect        → inspeção leve de qualidade
 /code review         → review completo de PR (JIRA + escopo + fluxo + validação + veredito)
-/code peer-reviews   → simula review dos 5 peers do monolito (Washington, Pedro, Molina, Marquesini, William)
-/code                → sem argumento: mostra este menu
+/code peer-reviews   → simula review dos 5 peers do monolito
+/code gh-review      → review de PR via GitHub API (sem branch local)
+/code github-evaluate → avaliar dev por histórico de PRs no GitHub
+/code               → sem argumento: mostra este menu
 ```
 
 ---
@@ -31,6 +33,8 @@ Parsear `$ARGUMENTS` (primeira palavra):
 | `inspect` / `inspection` | **5. Inspect** |
 | `review` | **6. Review** |
 | `peer-reviews` / `peers` | **7. Peer Reviews** |
+| `gh-review` | **8. GH Review** |
+| `github-evaluate` / `evaluate` | **9. GitHub Evaluate** |
 | vazio | Mostrar menu acima |
 
 ---

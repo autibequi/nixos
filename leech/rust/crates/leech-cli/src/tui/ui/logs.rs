@@ -24,7 +24,7 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
     let total = entries.len();
     let scroll = app.log_scroll.min(total.saturating_sub(1));
 
-    // ── Block with top border only (acts as the separator line) ───────────────
+    // ── Block with full border ─────────────────────────────────────────────────
     let pos_label = if total > 0 {
         format!(" {}/{} ", total - scroll, total)
     } else {
@@ -33,7 +33,7 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
     let title = format!(" Logs [{}]{}", svc, if scroll > 0 { format!(" +{scroll}") } else { String::new() });
 
     let block = Block::default()
-        .borders(Borders::TOP)
+        .borders(Borders::ALL)
         .title(title)
         .title_style(theme::dim())
         .border_style(theme::separator());

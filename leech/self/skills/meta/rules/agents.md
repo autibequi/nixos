@@ -10,7 +10,7 @@ updated: 2026-03-23T16:00Z
 | assistant | haiku | every20 | Monitor proativo — repos sujos, PRs, hora avancada |
 | coruja | sonnet | every60 | Full-stack Estrategia + segundo cerebro |
 | hermes | haiku | every10 | Routing inbox/outbox + scheduling |
-| jafar | sonnet | every120 | Introspecao + melhoria do sistema |
+| gandalf | sonnet | every120 | Meta-agente + autonomia — introspect, propose, liaison, free_roam |
 | keeper | haiku | every30 | Limpeza + saude do vault |
 | mechanic | sonnet | on-demand | NixOS, dotfiles, containers |
 | paperboy | haiku | every60 | RSS + digest |
@@ -43,3 +43,5 @@ Mechanic e tasker nao tem card permanente em `bedrooms/_waiting/`. So aparecem q
 ## Detalhes
 
 Perfis completos em `self/agents/<nome>/agent.md`.
+
+Regras de estrutura do bedroom de cada agente (pastas permitidas): `meta/rules/bedrooms.md`

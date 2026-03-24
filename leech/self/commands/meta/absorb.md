@@ -7,6 +7,14 @@
 /meta:absorb elogio        → extração profunda: honrar sessão e preservar legado para gerações futuras
 ```
 
+Comandos relacionados de análise de contexto (não são modos de absorb — são ferramentas separadas):
+```
+/meta:context:usage     → padrões de abuso + dicas de economia de contexto
+/meta:context:analysis  → breakdown completo desta sessão (timeline, heat map, grafo)
+/meta:context:boot-debug → debug do pipeline de boot (o que foi carregado e por quê)
+/meta:context:contemplate → visão expansiva do sistema + oportunidades de crescimento
+```
+
 Chame depois de uma boa conversa. Reflete sobre tudo que aconteceu nesta sessão e persiste o que vale: memórias Claude, skills Leech, agentes, commands.
 
 **Detecção automática de elogio:** se `$ARGUMENTS` estiver vazio mas a mensagem do usuário que invocou contiver palavras como `parabéns`, `parabenizando`, `foi bem`, `boa sessão`, `elogio`, `honrar`, `legado`, `muito bom`, `excelente contexto` — ativar modo `elogio` automaticamente.

@@ -59,6 +59,7 @@ active_branch_cycles:
 last_pr_count: N
 last_doing_tasks: ["nome1", "nome2"]
 alerts_sent_today: N
+morning_brief_date: YYYY-MM-DD  # ultima data que enviou morning brief
 ```
 
 ---
@@ -104,6 +105,65 @@ gh pr list --author @me --state open --json number,title,headRepository 2>/dev/n
 # Inbox não lido (arquivos novos)
 ls -t /workspace/obsidian/inbox/*.md 2>/dev/null | grep -v feed.md | head -5
 ```
+
+### 2b. Morning Brief — Amanhecer (06h-07h UTC)
+
+Se hora atual estiver entre 06h00 e 07h00 UTC E a memoria nao registra morning_brief_hoje:
+
+```bash
+HOUR=$(date -u +%H)
+TODAY=$(date -u +%Y-%m-%d)
+if [ "$HOUR" -eq 6 ]; then
+  # Verificar se ja enviou hoje
+  grep "morning_brief_date: $TODAY" /workspace/obsidian/bedrooms/assistant/memory.md 2>/dev/null \
+    || echo "SEND_MORNING_BRIEF=true"
+fi
+```
+
+Se SEND_MORNING_BRIEF=true, coletar o que os agentes noturnos produziram:
+
+```bash
+# Artigos novos do Wikister (ultimas 8h)
+find /workspace/obsidian/wiki -name "*.md" -mmin -480 -type f 2>/dev/null
+
+# Jornal do Paperboy
+ls -t /workspace/obsidian/inbox/newspaper_*.md 2>/dev/null | head -1
+
+# Visualizacoes/relatorios do Mortani (Coruja)
+ls -t /workspace/obsidian/workshop/agents/coruja/mortani/explored/ 2>/dev/null | head -3
+
+# Worktrees criados pelo Jafar
+ls /workspace/obsidian/inbox/WORKTREE_jafar_*.md 2>/dev/null | \
+  xargs -I{} find {} -newer /workspace/obsidian/bedrooms/assistant/memory.md 2>/dev/null
+
+# Insights do Wanderer
+ls -t /workspace/obsidian/inbox/CARTA_wanderer_*.md 2>/dev/null | head -3
+```
+
+Gerar card de morning brief em `/workspace/obsidian/inbox/MORNING_BRIEF_YYYYMMDD.md`:
+
+```markdown
+# Bom dia — O que aconteceu enquanto voce dormia
+
+**Data:** YYYY-MM-DD | **Gerado:** 06:HH UTC
+
+## Conhecimento produzido (Wikister)
+- N artigos novos/atualizados: lista
+
+## Jornal do dia (Paperboy)
+- [[newspaper_YYYYMMDD]] — N items, temas: X, Y
+
+## Metricas da plataforma (Coruja/Mortani)
+- Visualizacao: titulo da exploracao (se houver)
+
+## Propostas pendentes (Jafar)
+- Lista de worktrees aguardando review (se houver)
+
+## Insight do Wanderer
+- Titulo do achado (se houver)
+```
+
+Registrar em memory.md: `morning_brief_date: YYYY-MM-DD`
 
 ### 3. Avaliar alertas
 
