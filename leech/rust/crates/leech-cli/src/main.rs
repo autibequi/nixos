@@ -84,6 +84,9 @@ enum Commands {
     Build {
         #[arg(long)]
         danger: bool,
+        /// Alias for --danger: rebuild base image without cache (refreshes cursor-agent)
+        #[arg(long)]
+        no_cache: bool,
     },
     /// Stop compose containers
     #[command(alias = "down")]
@@ -333,7 +336,7 @@ fn main() -> Result<()> {
         Some(Commands::Leech { flags, shell }) => commands::session::leech(flags, shell),
 
         // Docker
-        Some(Commands::Build { danger }) => commands::docker::build(danger),
+        Some(Commands::Build { danger, no_cache }) => commands::docker::build(danger || no_cache),
         Some(Commands::Stop) => commands::docker::down(),
         Some(Commands::Shutdown) => commands::docker::shutdown(),
         Some(Commands::Clean { force }) => commands::docker::clean(force),
