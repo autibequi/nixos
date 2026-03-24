@@ -38,4 +38,7 @@ HEADLESS=1 timeout 300 _run_claude \
   --model haiku \
   --max-turns 20 \
   -p "$TICK_PROMPT" \
-  --add-dir "$HOME" 2>&1 || echo "[tick] falhou"
+  --add-dir "$HOME" \
+  --add-dir /workspace/self \
+  --add-dir /workspace/host \
+  --add-dir /workspace/obsidian 2>&1 || echo "[tick] falhou"

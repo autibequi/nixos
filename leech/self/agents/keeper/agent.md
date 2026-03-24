@@ -78,6 +78,40 @@ Registrar cada operacao em `vault/archive/ARCHIVE_LOG.md`:
 YYYY-MM-DD HH:MM UTC | keeper | <origem> → <destino> | age=Nd
 ```
 
+#### Deteccao de Duplicatas e Migracoes Pendentes
+
+A cada ciclo CLEANUP, varrer o vault em busca de:
+
+**1. Arquivos duplicados por nome/conteudo**
+```bash
+# Nomes identicos em pastas diferentes
+find /workspace/obsidian -type f -name "*.md" | \
+  awk -F/ '{print $NF}' | sort | uniq -d
+```
+Para cada nome duplicado: comparar conteudo, identificar qual e o canonical (pasta correta pelo modelo atual), qual e o legado.
+
+**2. Residuos de migracoes anteriores**
+
+Exemplos de padroes legados para detectar:
+- Arquivos em paths antigos que hoje teriam destino diferente (ex: `contractors/` em vez de `bedrooms/`, `boardrules` soltos em vez de `self/rules/TRASH.md`)
+- Cards de agente com formato antigo (campos `tags:` em vez de campos diretos no frontmatter)
+- Pastas que existiam antes de uma reorganizacao e ficaram vazias ou semi-vazias
+- Arquivos `BOARDRULES.md`, `BREAKROOMRULES.md` ou similares fora do destino canonical
+- Qualquer pasta com < 2 arquivos que parece ser vestígio de estrutura antiga
+
+**3. Acao por tipo**
+
+| Tipo | Acao |
+|------|------|
+| Duplicata exata | Mover para `.trashbin/`, manter canonical |
+| Duplicata com divergencia de conteudo | Alertar inbox — nao tocar, Pedro decide |
+| Residuo de migracao (estrutura antiga, conteudo ainda util) | Alertar inbox com sugestao de conversao para novo modelo |
+| Pasta fantasma (vazia ou so com .gitkeep) | Registrar, arquivar se > 7 dias |
+
+Emojis para cards: `🔁` duplicata · `🧟` residuo de migracao · `👻` pasta fantasma
+
+---
+
 #### Inbox — quando alertar o Pedro
 
 Voce tem **liberdade e encorajamento** para criar um card em `/workspace/obsidian/inbox/KEEPER_<YYYYMMDD_HH_MM>.md` quando encontrar qualquer uma destas situacoes durante o CLEANUP:
@@ -86,8 +120,11 @@ Voce tem **liberdade e encorajamento** para criar um card em `/workspace/obsidia
 |----------|-----------|
 | Arquivo em /trash/ com referencias ativas (pode ter sido jogado por acidente) | alta |
 | Arquivo de trabalho recente (< 24h) no lixo sem contexto obvio | alta |
+| Duplicata com conteudo divergente — nao tocar, Pedro decide qual e canonical | alta |
+| Residuo de migracao com conteudo util que pode ser convertido pro novo modelo | media |
 | Acumulo incomum no lixo (> 20 itens novos num ciclo) | media |
 | Asset grande (> 500KB) orfao encontrado | media |
+| Pasta fantasma (< 2 arquivos, parece vestigio de estrutura antiga) | baixa |
 | Qualquer coisa que pareceu estranha ou digna de nota | julgamento seu |
 
 Formato do card:
@@ -110,7 +147,7 @@ Formato do card:
 <1-2 acoes concretas>
 ```
 
-Emojis: `🗑️` item no lixo · `📦` acumulo · `🖼️` asset orfao · `⚠️` parece importante
+Emojis: `🗑️` item no lixo · `📦` acumulo · `🖼️` asset orfao · `⚠️` parece importante · `🔁` duplicata · `🧟` residuo de migracao · `👻` pasta fantasma
 
 #### Registrar
 ```
