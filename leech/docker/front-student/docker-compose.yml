@@ -20,6 +20,9 @@ services:
       - ${HOME}/.leech:/.leech:rw
     ports:
       - "3005:3005"
+    extra_hosts:
+      # Roteia *.local.estrategia-sandbox.com.br para o nginx do host (gateway nixos_default)
+      - "api.local.estrategia-sandbox.com.br:172.19.0.1"
     networks:
       - default
     restart: unless-stopped
