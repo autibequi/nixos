@@ -368,37 +368,50 @@ pub fn auto(dry_run: bool, _steps: Option<u32>) -> Result<()> {
 
 // ── Ask ───────────────────────────────────────────────────────────────────────
 
-/// `leech ask <agent> <question>` — one-shot question to an agent.
-pub fn ask(agent_name: &str, question: &str, model_override: Option<&str>) -> Result<()> {
-    let agent_file = paths::agent_file(agent_name)
-        .ok_or_else(|| anyhow::anyhow!("Agente '{}' nao encontrado.", agent_name))?;
-
-    let content = std::fs::read_to_string(&agent_file)?;
-    let agent_model = agents::frontmatter_field(&content, "model")
-        .unwrap_or_else(|| "haiku".into());
-    let model = model_override.unwrap_or(&agent_model);
-
-    let body = extract_body(&content);
+/// `leech ask [agent] <question>` — one-shot question to an agent or default model.
+pub fn ask(agent_name: Option<&str>, question: &str, model_override: Option<&str>) -> Result<()> {
     let obsidian = paths::obsidian_path();
     let self_dir = paths::leech_root();
     let home = paths::home();
 
-    let prompt = format!(
-        "{agent_name}, você foi questionado pelo usuário:\n\n\
-         > {question}\n\n\
-         Responda diretamente, de forma clara e objetiva. \
-         Esta é uma sessão oneshot — não faça perguntas de volta, \
-         não explique o ambiente. Apenas responda.\n\n\
-         --- contexto do agente ---\n\
-         {body}"
-    );
+    let (model_str, prompt, label) = match agent_name {
+        Some(name) => {
+            let agent_file = paths::agent_file(name)
+                .ok_or_else(|| anyhow::anyhow!("Agente '{}' nao encontrado.", name))?;
+            let content = std::fs::read_to_string(&agent_file)?;
+            let agent_model = agents::frontmatter_field(&content, "model")
+                .unwrap_or_else(|| "haiku".into());
+            let model = model_override.unwrap_or(&agent_model).to_string();
+            let body = extract_body(&content);
+            let prompt = format!(
+                "{name}, você foi questionado pelo usuário:\n\n\
+                 > {question}\n\n\
+                 Responda diretamente, de forma clara e objetiva. \
+                 Esta é uma sessão oneshot — não faça perguntas de volta, \
+                 não explique o ambiente. Apenas responda.\n\n\
+                 --- contexto do agente ---\n\
+                 {body}"
+            );
+            (model, prompt, format!("{name}"))
+        }
+        None => {
+            let model = model_override.unwrap_or("haiku").to_string();
+            let prompt = format!(
+                "Responda diretamente, de forma clara e objetiva. \
+                 Esta é uma sessão oneshot — não faça perguntas de volta. \
+                 Apenas responda.\n\n\
+                 > {question}"
+            );
+            (model, prompt, "default".to_string())
+        }
+    };
 
-    eprintln!("[ask] {agent_name} ({model}) — pergunta: {question}");
+    eprintln!("[ask] {label} ({model_str}) — {question}");
 
     let status = Command::new("claude")
         .args([
             "--permission-mode", "bypassPermissions",
-            "--model", model,
+            "--model", &model_str,
             "--max-turns", "10",
             "-p", &prompt,
             "--add-dir", &home.to_string_lossy(),

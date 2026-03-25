@@ -447,8 +447,17 @@ class ContentHandler(BaseHTTPRequestHandler):
         elif self.path == "/health":
             self._bytes(b'{"ok":true}', "application/json")
         else:
-            self.send_response(404)
-            self.end_headers()
+            fname = os.path.basename(self.path.split("?")[0])
+            fpath = os.path.join(CONTENT_DIR, fname)
+            if fname and os.path.isfile(fpath):
+                ext = os.path.splitext(fname)[1].lstrip(".").lower()
+                ct = {"html": "text/html", "js": "text/javascript",
+                      "css": "text/css", "json": "application/json"}.get(ext, "application/octet-stream")
+                with open(fpath, "rb") as f:
+                    self._bytes(f.read(), ct + "; charset=utf-8")
+            else:
+                self.send_response(404)
+                self.end_headers()
 
     def _bytes(self, data, ct, status=200):
         self.send_response(status)

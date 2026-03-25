@@ -95,16 +95,18 @@ pub const AGENTS_BEFORE: &str = "\
 // ── Ask ──────────────────────────────────────────────────────────────────────
 
 pub const ASK_BEFORE: &str = "\
-\x1b[35m  ask\x1b[0m  \x1b[2moneshot question to an agent\x1b[0m
+\x1b[35m  ask\x1b[0m  \x1b[2moneshot question — to an agent or default model\x1b[0m
 
 \x1b[2m  ── common usage ──────────────────────────────────────────\x1b[0m
 
-    leech ask coruja o que tem no radar hoje?   \x1b[2mcoruja responde direto\x1b[0m
+    leech ask como faço um for em bash?         \x1b[2msem agente — modelo padrão\x1b[0m
+    leech ask coruja o que tem no radar hoje?   \x1b[2mcoruja responde\x1b[0m
     leech ask wiseman resume os insights        \x1b[2mwiseman responde\x1b[0m
     leech ask hermes status das tasks           \x1b[2mhermes responde\x1b[0m
     leech ask coruja -m sonnet analise profunda \x1b[2mforçar modelo\x1b[0m
 
-\x1b[2m  O agente recebe: \"<nome>, você foi questionado pelo usuário: <pergunta>\"\x1b[0m
+\x1b[2m  Se o primeiro token for nome de agente conhecido: carrega contexto do agente.\x1b[0m
+\x1b[2m  Caso contrário: envia pergunta direto ao modelo padrão (haiku).\x1b[0m
 \x1b[2m  Roda headless com max-turns=10. Para conversa interativa: leech agents phone.\x1b[0m
 
 \x1b[2m  ─────────────────────────────────────────────────────────\x1b[0m

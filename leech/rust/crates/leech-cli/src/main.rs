@@ -289,12 +289,12 @@ enum Commands {
     },
 
     // ── Ask ─────────────────────────────────────────────────────
-    /// One-shot question to an agent
+    /// One-shot question — to an agent or directly to the default model
     #[command(before_help = help::ASK_BEFORE)]
     Ask {
-        /// Nome do agente (ex: coruja, hermes, wiseman)
-        agent: String,
-        /// A pergunta para o agente
+        /// Agente (opcional) ou primeira palavra da pergunta
+        agent: Option<String>,
+        /// Resto da pergunta
         #[arg(trailing_var_arg = true)]
         question: Vec<String>,
         /// Forçar modelo (haiku, sonnet, opus)
@@ -562,10 +562,22 @@ fn main() -> Result<()> {
             commands::agents::run_unified(&name, steps)
         }
 
-        // Ask
+        // Ask — primeiro token pode ser nome de agente ou parte da pergunta
         Some(Commands::Ask { agent, question, model }) => {
-            let q = question.join(" ");
-            commands::agents::ask(&agent, &q, model.as_deref())
+            let (resolved_agent, q) = match agent {
+                Some(ref a) if leech_cli::paths::agent_file(a).is_some() => {
+                    (Some(a.as_str()), question.join(" "))
+                }
+                Some(ref a) => {
+                    // não é agente — junta tudo como pergunta
+                    let mut parts = vec![a.as_str()];
+                    let rest: Vec<&str> = question.iter().map(|s| s.as_str()).collect();
+                    parts.extend(rest);
+                    (None, parts.join(" "))
+                }
+                None => (None, question.join(" ")),
+            };
+            commands::agents::ask(resolved_agent, &q, model.as_deref())
         }
 
         // Agents

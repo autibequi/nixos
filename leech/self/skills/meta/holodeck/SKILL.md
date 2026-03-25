@@ -73,13 +73,35 @@ Ver template completo em `templates/flowchart.md`.
 
 ---
 
+## mermaid.html — Template fullscreen
+
+Para visualizacao dedicada (100% da tela, sem header, fit por largura):
+
+```bash
+# 1. Copiar o template
+cp /workspace/self/skills/meta/holodeck/templates/mermaid.html /tmp/chrome-relay/<nome>.html
+
+# 2. Substituir o placeholder pelo conteudo mermaid
+#    Editar /tmp/chrome-relay/<nome>.html:
+#    Trocar <!-- MERMAID_DIAGRAM_HERE --> pelo diagrama (sem as crases do bloco)
+
+# 3. Abrir no Chrome
+python3 /workspace/self/scripts/chrome-relay.py nav "http://leech:8765/<nome>.html"
+```
+
+Controles: `scroll` = zoom centrado no cursor · `drag` = pan · sem reset button (usar scroll pra voltar)
+
+---
+
 ## HTML Livre com CDN
 
 Para visualizacoes custom, escrever HTML em `/tmp/chrome-relay/<nome>.html` e navegar:
 
 ```bash
-python3 /workspace/self/scripts/chrome-relay.py nav "http://127.0.0.1:8765/<nome>.html"
+python3 /workspace/self/scripts/chrome-relay.py nav "http://leech:8765/<nome>.html"
 ```
+
+O relay serve arquivos estaticos de `/tmp/chrome-relay/` automaticamente.
 
 ### Bibliotecas CDN disponiveis
 

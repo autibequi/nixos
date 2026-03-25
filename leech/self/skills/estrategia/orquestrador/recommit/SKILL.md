@@ -114,6 +114,32 @@ Ler e entender todas as mudanças feitas desde o fork:
 - Não criar commits enormes com muitos arquivos desrelacionados — quebrar em partes lógicas
 - Arquivos de configuração/registro (rotas, imports) vão junto com a feature que os necessita
 
+## Passo 4.5 — Apresentar plano e aguardar confirmação (OBRIGATÓRIO antes de commitar)
+
+Após analisar e categorizar todas as mudanças, apresentar o plano completo ao dev **antes de criar qualquer commit**:
+
+```
+Plano de commits — N commits:
+
+1. [JIRA-ID] tipo: descrição
+   Arquivos:
+   - caminho/arquivo1.go
+   - caminho/arquivo2.go
+
+2. [JIRA-ID] tipo: descrição
+   Arquivos:
+   - ...
+
+...
+
+Confirma? (sim/não)
+```
+
+**PARAR AQUI e aguardar "sim" explícito.** Só após confirmação prosseguir para o Passo 5.
+- Respostas ambíguas ("ok", "pode ser", "talvez") = tratar como "não"
+- O dev pode pedir ajustes no plano — incorporar e reapresentar antes de commitar
+- Nunca começar a commitar sem aprovação explícita
+
 ## Passo 5 — Criar os commits reorganizados
 
 Para cada grupo lógico, na ordem cronológica definida:
