@@ -45,8 +45,8 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             Span::raw(" "),
             Span::styled(status_icon, status_style),
             Span::raw(" "),
-            Span::styled(format!("{display_name:<18}"), name_style),
-            Span::raw(" "),
+            Span::styled(format!("{display_name:<28}"), name_style),
+            Span::raw("  "),
             Span::styled(format!("{status_text:<5}"), theme::uptime()),
         ];
 
@@ -59,10 +59,10 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             let mem_bar  = mem_bar_from_str(&u.mem);
             spans.push(Span::raw("  "));
             spans.push(Span::styled(cpu_bar, cpu_sty));
-            spans.push(Span::styled(format!(" {:<6}", u.cpu.trim()), theme::cpu()));
-            spans.push(Span::raw(" "));
+            spans.push(Span::styled(format!("  {:>6}", u.cpu.trim()), theme::cpu()));
+            spans.push(Span::raw("  "));
             spans.push(Span::styled(mem_bar, theme::mem()));
-            spans.push(Span::styled(format!(" {mem_used}"), theme::mem()));
+            spans.push(Span::styled(format!("  {mem_used}"), theme::mem()));
         }
 
         lines.push(Line::from(spans));

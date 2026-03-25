@@ -15,13 +15,12 @@ updated: 2026-03-23T16:00Z
 | mechanic | sonnet | on-demand | NixOS, dotfiles, containers |
 | paperboy | haiku | every60 | RSS + digest |
 | tamagochi | haiku | every10 | Pet virtual |
-| ~~tasker~~ | — | APOSENTADO | Substituido pelo Hermes (2026-03-24) |
 | wanderer | sonnet | every60 | Exploracao + sintese cross-repo |
 | wiseman | sonnet | every60 | Weave, audit, enforce, meta |
 
 ## Agentes On-Demand
 
-Mechanic e tasker nao tem card permanente em `bedrooms/_waiting/`. So aparecem quando convocados via outbox.
+Mechanic nao tem card permanente no SCHEDULE. So aparece quando convocado via outbox.
 
 ## Delegacao — quem faz o que
 

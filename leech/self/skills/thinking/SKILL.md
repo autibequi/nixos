@@ -1,41 +1,59 @@
 ---
 name: thinking
-description: Skill de destrinchamento de problema — ler card Jira, investigar codebase, mapear camadas, quebrar em tasks atomicas e apresentar visualmente para validacao antes de qualquer implementacao. Usa meta:art para o output. Sub-skill: thinking/refine.
+description: Entrypoint universal para qualquer problema — dispatcher que roteia para investigate, brainstorm, refine ou code/debug conforme o tipo. Nunca sair fazendo sem entender primeiro.
 ---
 
-# thinking — Destrinchar Problema Antes de Implementar
+# thinking — Entrypoint Universal
 
-> Nunca sair fazendo. Entender primeiro. Apresentar. Validar. Depois implementar.
+> Todo problema entra aqui. thinking orquestra o pipeline certo para cada situação.
 
-Skill composta para resolver problemas de forma estruturada. O output e sempre visual (via `meta:art`) e precisa de validacao do usuario antes de qualquer codigo ser escrito.
+## Dispatcher — tipo de problema → ação
+
+| Tipo de problema | Ação |
+|---|---|
+| Qualquer coisa | **Sempre começar por `thinking/investigate`** (coletar dados antes de pensar) |
+| Feature / card Jira | Fluxo thinking (passos 1-7) → `thinking/refine` |
+| Bug / stack trace | → `code/debug` |
+| Pedido vago | Clarificar → rotear |
+| Análise de código | → `code/analysis` |
+| Preso / loop / sem causa clara | → `thinking/brainstorm` (automático) |
 
 ## Sub-skills
 
 | Arquivo | Quando usar |
 |---|---|
+| `investigate` | **Sempre primeiro** — coletar logs, código, relatos, histórico |
+| `brainstorm` | Quando preso ou em loop — gerar e validar teorias |
 | `refine` | Quebrar feature/spec em tasks atomicas ordenadas por camada |
 
 ---
 
-## Fluxo principal
+## Pipeline completo
 
 ```
-Problema/Card recebido
+Problema chega
         │
+        ▼
+[0] investigate          — coletar logs, código, relatos, histórico
+        │                   (thinking/investigate — SEMPRE primeiro)
         ▼
 [1] Ler e entender       — Jira card, spec, descricao do usuario
         │
         ▼
-[2] Investigar           — codebase, padroes existentes, camadas
+[2] Investigar codebase  — padroes existentes, camadas, pontos de extensao
         │
         ▼
 [3] Mapear               — dependencias, riscos, decisoes em aberto
         │
+        ├─── preso? loop? ──▶ [brainstorm] — gerar e validar teorias
+        │                      (thinking/brainstorm — automático)
         ▼
 [4] Apresentar           — visual via meta:art (ASCII ou Chrome)
         │
         ▼
 [5] Validar              — usuario aprova, ajusta, ou rejeita
+        │
+        ├─── é bug com causa clara? ──▶ code/debug → fix
         │
         ▼
 [6] Refinar tasks        — invocar thinking/refine → backlog atomico
@@ -159,102 +177,15 @@ So apos backlog aprovado. Seguir a ordem das tasks. Nao pular camadas.
 
 | Situacao | Acao |
 |---|---|
-| Card Jira recebido para implementar | **Obrigatorio** — rodar thinking completo |
+| Card Jira recebido para implementar | **Obrigatorio** — pipeline completo (investigate → thinking → refine) |
 | Feature com mais de 2 arquivos | **Obrigatorio** |
 | Pedido vago ("faz um sistema de X") | **Obrigatorio** — clarificar antes de refinar |
-| Bug complexo sem causa clara | **Obrigatorio** — rodar modo debug (ver secao abaixo) |
-| Log ou stack trace recebido | **Obrigatorio** — rodar modo debug |
-| Duvida sobre onde esta o problema | **Obrigatorio** — localizar camada antes de investigar |
-| Hotfix urgente (<1 arquivo, causa clara) | Dispensavel |
+| Bug / stack trace / log recebido | investigate → code/debug |
+| Preso ou em loop de hipóteses | → `thinking/brainstorm` (automático) |
+| Duvida sobre onde esta o problema | investigate primeiro, depois thinking |
+| Hotfix urgente (<1 arquivo, causa clara) | Dispensavel — ir direto para code/debug |
 
-> **Regra:** sempre que houver log, erro ou duvida sobre onde esta o problema — acionar thinking antes de qualquer acao.
-
----
-
-## Modo Debug — Quando ha log ou duvida
-
-Fluxo especifico para debugging. Complementa `code/debug` adicionando localizacao de camada e validacao de logs.
-
-```
-Log / erro / duvida recebido
-        │
-        ▼
-[D1] Localizar          — em qual camada/ambiente esta o problema?
-        │
-        ▼
-[D2] Verificar acesso   — ha logs disponiveis? onde?
-        │
-        ▼
-[D3] Ler os logs        — extrair evidencias concretas
-        │
-        ▼
-[D4] Ler o codigo       — estado atual do codigo que quebrou
-        │
-        ▼
-[D5] Validar            — o log corresponde ao codigo lido?
-        │
-        ▼
-[D6] Hipoteses          — mapear causas prováveis com evidencia
-        │
-        ▼
-[D7] Apresentar         — visual via meta:art + validar com usuario
-```
-
-### D1 — Localizar: onde esta o problema?
-
-Antes de investigar, determinar a camada:
-
-| Camada | Indicios | Onde olhar |
-|---|---|---|
-| **Host / NixOS** | Erro em servico do sistema, config nix, daemon | `/workspace/host`, `~/nixos`, logs do journal |
-| **Leech CLI / container** | Erro em skill, hook, boot, agente | `/workspace/self/`, logs do container |
-| **Self skills** | Skill nao executa, output errado | `/workspace/self/skills/`, `.claude/settings.json` |
-| **Projeto em mnt/** | Erro de aplicacao, teste falhando, build quebrado | `/workspace/mnt/`, logs do projeto |
-
-Nao investigar todas as camadas — escolher a mais provavel e ir fundo.
-
-### D2 — Verificar acesso a logs
-
-```bash
-# Container / Docker
-docker logs <container> --tail 100
-ls /workspace/logs/docker/
-
-# Aplicacao Go (monolito)
-tail -f /workspace/logs/docker/<servico>.log
-
-# Servicos do host (read-only)
-ls /workspace/logs/host/var-log/
-ls /workspace/logs/host/journal/
-
-# Docker Compose
-docker compose logs --tail 50 <servico>
-```
-
-Se nao ha logs: pedir ao usuario antes de avancar.
-
-### D3 — Ler os logs
-
-Extrair do log:
-- **Mensagem de erro exata** — copiar literal, nao parafrear
-- **Timestamp** — quando ocorreu, com que frequencia
-- **Stack trace / goroutine** — qual funcao / linha
-- **Contexto** — linhas anteriores ao erro (o que aconteceu antes)
-
-### D4 — Ler o codigo que quebrou
-
-Com a linha/funcao identificada no log:
-- Ler o arquivo e a funcao referenciada
-- Verificar o estado atual (pode ter mudado desde o log)
-- `git log --oneline -10` — houve mudanca recente?
-
-### D5 — Validar correspondencia log x codigo
-
-- O erro no log faz sentido dado o codigo atual?
-- O codigo mudou desde o log? (novo deploy pode ter corrigido ou piorado)
-- A linha apontada no stack trace existe e tem a logica esperada?
-
-Se log e codigo divergem (codigo mudou): verificar se o problema ainda existe antes de propor qualquer fix.
+> **Regra:** sempre que houver qualquer problema — começar por `thinking/investigate` para coletar dados. Depois pensar.
 
 ---
 

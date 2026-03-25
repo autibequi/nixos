@@ -8,7 +8,7 @@
 ## DASHBOARD — Fonte da Verdade
 
 O arquivo `/workspace/obsidian/bedrooms/DASHBOARD.md` é o kanban central de gestão de agentes.
-Todo agente tem um card lá. O Ticker garante isso.
+Todo agente tem um card lá. O Hermes garante isso.
 
 ### Colunas
 
@@ -27,7 +27,7 @@ Todo agente tem um card lá. O Ticker garante isso.
 
 - `#haiku` / `#sonnet` / `#opus` — modelo de execução
 - `#ever10min` / `#ever20min` / `#ever30min` / `#ever60min` / `#everday` — frequência
-- `#on-demand` — só roda quando explicitamente chamado (ticker não dispara)
+- `#on-demand` — só roda quando explicitamente chamado (hermes não dispara)
 - `` `last:TIMESTAMP` `` — última vez que o agente concluiu um ciclo (UTC)
 - `` `started:TIMESTAMP` `` — quando o agente está em WORKING (substitui `last:`)
 
@@ -59,7 +59,7 @@ Todo agente tem um card lá. O Ticker garante isso.
 ### Se Não Há Nada a Fazer
 
 - Mover card para **DONE** com nota curta: `` `idle:2026-03-24T22:14Z` ``
-- Ticker vai mover de volta para SLEEPING no próximo ciclo se houver schedule
+- Hermes vai mover de volta para SLEEPING no próximo ciclo se houver schedule
 
 ### Para Mostrar Algo ao Usuário
 
@@ -72,19 +72,19 @@ Todo agente tem um card lá. O Ticker garante isso.
 
 ## Tags de Controle
 
-Tags no card definem como o ticker e o executor se comportam:
+Tags no card definem como o hermes e o executor se comportam:
 
 | Tag | Efeito |
 |-----|--------|
 | `#haiku` | Executa como modelo haiku |
 | `#sonnet` | Executa como modelo sonnet |
 | `#opus` | Executa como modelo opus |
-| `#ever10min` | Ticker dispara a cada 10min |
-| `#ever20min` | Ticker dispara a cada 20min |
-| `#ever30min` | Ticker dispara a cada 30min |
-| `#ever60min` | Ticker dispara a cada 60min |
-| `#everday` | Ticker dispara uma vez por dia |
-| `#on-demand` | Ticker NÃO dispara — só roda via chamada explícita |
+| `#ever10min` | Hermes dispara a cada 10min |
+| `#ever20min` | Hermes dispara a cada 20min |
+| `#ever30min` | Hermes dispara a cada 30min |
+| `#ever60min` | Hermes dispara a cada 60min |
+| `#everday` | Hermes dispara uma vez por dia |
+| `#on-demand` | Hermes NÃO dispara — só roda via chamada explícita |
 | `#stepsN` | Override de max_turns (ex: `#steps30`) |
 
 ---
@@ -112,7 +112,7 @@ Append-only. Cada agente registra início e fim:
 ```
 
 ### `bedrooms/_logs/ticker.md`
-Gerenciado pelo ticker. Não escrever aqui diretamente.
+Gerenciado pelo hermes. Não escrever aqui diretamente.
 
 ### `bedrooms/performance/`
 Obrigatório ao fim de cada ciclo (Lei 11). Ler `self/skills/meta/rules/laws.md` para detalhes.

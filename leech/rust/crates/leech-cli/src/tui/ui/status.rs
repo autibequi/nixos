@@ -6,7 +6,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::Paragraph;
 use ratatui::Frame;
 
-use super::{logs, popup, quota, services, sessions, utils};
+use super::{logs, popup, services, sessions, utils};
 use crate::tui::app::App;
 use crate::tui::theme;
 
@@ -51,8 +51,8 @@ fn sessions_height(app: &App) -> u16 {
             let key = if s.mnt_path.is_empty() { s.name.as_str() } else { s.mnt_path.as_str() };
             folder_set.insert(key);
         }
-        // 1 group-header + 2 rows per folder (folder-header + stats/count line)
-        1 + folder_set.len() * 2
+        // 1 group-header + 1 row per folder (combined name+stats line)
+        1 + folder_set.len()
     }
     let agents_h = group_height(&app.snapshot.agents);
     let bg_h     = group_height(&app.snapshot.background);
@@ -83,24 +83,26 @@ fn render_header(frame: &mut Frame, app: &App, area: Rect) {
     } else {
         (format!(" ⟳ {}s", elapsed), theme::dim().fg(Color::Rgb(108, 112, 134))) // dim
     };
-    let left: Vec<Span<'static>> = vec![
+    let mut spans: Vec<Span<'static>> = vec![
         Span::raw("  "),
-        Span::styled("Leech Status", theme::header()),
+        Span::styled("Zion Dashboard", theme::header()),
         Span::raw("  "),
         Span::styled(now, theme::dim()),
         Span::styled(stale_text, stale_style),
     ];
-    let right = quota::header_spans(app);
-    if right.is_empty() {
-        frame.render_widget(Paragraph::new(Line::from(left)), area);
-        return;
+
+    let q = &app.snapshot.quota;
+    if q.pct_5h > 0 || q.pct_7d > 0 {
+        let bar_5h = crate::quota::bar(q.pct_5h, 6);
+        let bar_7d = crate::quota::bar(q.pct_7d, 6);
+        spans.push(Span::styled("  - Claude Usage ", theme::dim()));
+        spans.push(Span::styled("5h", theme::dim()));
+        spans.push(Span::styled(bar_5h, theme::pct_color(q.pct_5h)));
+        spans.push(Span::raw(" "));
+        spans.push(Span::styled("7d", theme::dim()));
+        spans.push(Span::styled(bar_7d, theme::pct_color(q.pct_7d)));
     }
-    let left_w: usize = left.iter().map(|s| s.content.chars().count()).sum();
-    let right_w = quota::header_spans_width(app);
-    let pad = (area.width as usize).saturating_sub(left_w + right_w);
-    let mut spans = left;
-    spans.push(Span::raw(" ".repeat(pad)));
-    spans.extend(right);
+
     frame.render_widget(Paragraph::new(Line::from(spans)), area);
 }
 

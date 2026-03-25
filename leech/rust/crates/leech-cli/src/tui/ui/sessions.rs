@@ -55,27 +55,11 @@ fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[Session
         let group           = &by_folder[folder_key];
         let is_last_folder  = fi == folder_count - 1;
         let folder_branch   = if is_last_folder { "\u{2514}\u{2500}" } else { "\u{251c}\u{2500}" };
-        let vert_pad        = if is_last_folder { "  " } else { "\u{2502} " };
 
         let folder_label    = shorten_path(folder_key);
         let folder_any_up   = group.iter().any(|s| s.is_up);
         let folder_icon     = if folder_any_up { "\u{25cf}" } else { "\u{25cb}" };
         let folder_icon_sty = if folder_any_up { theme::up_icon() } else { theme::down_icon() };
-        // Use branch from first session that has one
-        let branch = group.iter().map(|s| s.branch.as_str()).find(|b| !b.is_empty()).unwrap_or("");
-        let mut folder_spans = vec![
-            Span::raw("  "),
-            Span::styled(folder_branch.to_string(), theme::tree_branch()),
-            Span::raw(" "),
-            Span::styled(folder_icon, folder_icon_sty),
-            Span::raw(" "),
-            Span::styled(folder_label, theme::name()),
-        ];
-        if !branch.is_empty() {
-            folder_spans.push(Span::raw("  "));
-            folder_spans.push(Span::styled(format!("@{branch}"), theme::dim()));
-        }
-        lines.push(Line::from(folder_spans));
 
         let total       = group.len();
         let count_label = if total == 1 {
@@ -84,25 +68,25 @@ fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[Session
             format!("{total} sessões")
         };
 
-        // All folder sizes (single or multi) render as one stats line (collapsed view).
         let uptime = group.iter()
             .filter(|s| s.is_up)
             .map(|s| format_uptime(&s.status))
             .next()
             .unwrap_or_else(|| "stop".to_string());
-        let any_up_sess = group.iter().any(|s| s.is_up);
 
+        // Single combined line: ├─ ● name (padded)  uptime  cpu_bar  cpu%  mem_bar  mem     N sessões
         let mut spans = vec![
             Span::raw("  "),
-            Span::styled(vert_pad.to_string(), theme::tree_branch()),
-            Span::raw("  "),
-            Span::styled(format!("{:<20}", count_label), theme::dim()),
+            Span::styled(folder_branch.to_string(), theme::tree_branch()),
+            Span::raw(" "),
+            Span::styled(folder_icon, folder_icon_sty),
+            Span::raw(" "),
+            Span::styled(format!("{:<28}", folder_label), theme::name()),
             Span::raw("  "),
             Span::styled(format!("{:<5}", uptime), theme::uptime()),
         ];
 
-        if any_up_sess {
-            // Aggregate CPU (sum) and memory (sum used / sum limit)
+        if folder_any_up {
             let total_cpu: f32 = group.iter()
                 .filter_map(|s| s.cpu.trim().trim_end_matches('%').parse::<f32>().ok())
                 .sum();
@@ -135,6 +119,9 @@ fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[Session
             spans.push(Span::styled(mem_bar, theme::mem()));
             spans.push(Span::styled(format!("  {mem_used_str}"), theme::mem()));
         }
+
+        spans.push(Span::raw("     "));
+        spans.push(Span::styled(count_label, theme::dim()));
 
         lines.push(Line::from(spans));
     }

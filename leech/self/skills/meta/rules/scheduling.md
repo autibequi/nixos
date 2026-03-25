@@ -9,7 +9,7 @@ updated: 2026-03-23T16:00Z
 
 Fila de execucao em `bedrooms/_waiting/`:
 - Um card por agente com clock definido — sempre presente
-- On-demand (mechanic, tasker): so aparecem quando convocados
+- On-demand (mechanic): so aparece quando convocado
 - Formato: `YYYYMMDD_HH_MM_<nome>.md`
 
 Fluxo:

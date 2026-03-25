@@ -38,23 +38,11 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
     let icon       = if any_up { "\u{25cf}" } else { "\u{25cb}" };
     let icon_style = if any_up { theme::up_icon() } else { theme::down_icon() };
 
-    // Show branch of the first main service as the active worktree indicator
-    let wt_branch: &str = app.snapshot.dk_services.iter()
-        .find(|d| d.name.ends_with("-app") && !d.branch.is_empty())
-        .map(|d| d.branch.as_str())
-        .unwrap_or("");
-    let mut header_spans = vec![
+    lines.push(Line::from(vec![
         Span::styled(icon, icon_style),
         Span::raw(" "),
         Span::styled("mnt", theme::group_label()),
-    ];
-    if !wt_branch.is_empty() {
-        header_spans.push(Span::raw("  "));
-        header_spans.push(Span::styled("WORKTREE:", theme::dim()));
-        header_spans.push(Span::raw(" "));
-        header_spans.push(Span::styled(wt_branch.to_string(), theme::uptime()));
-    }
-    lines.push(Line::from(header_spans));
+    ]));
 
     for (i, &svc) in DK_SERVICES.iter().enumerate() {
         let is_selected  = i == app.cursor_idx;
@@ -122,6 +110,11 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             .find(|d| d.name == format!("leech-dk-{svc}-app"))
             .map(|d| d.branch.as_str())
             .unwrap_or("");
+        let flags_str = if debug_on {
+            format!("[{env}][dbg]")
+        } else {
+            format!("[{env}]")
+        };
         let mut spans = vec![
             Span::raw("  "),
             Span::styled(svc_branch.to_string(), theme::tree_branch()),
@@ -130,17 +123,11 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             Span::raw(" "),
             Span::styled(status_icon, status_style),
             Span::raw(" "),
-            Span::styled(format!("{svc:<14}"), name_style),
-            Span::styled(format!(" {env:<5}"), theme::dim()),
+            Span::styled(format!("{flags_str:<11}"), theme::dim()),
+            Span::styled(format!("{svc:<17}"), name_style),
+            Span::raw("  "),
+            Span::styled(format!("{:<5}", status_text), status_text_style),
         ];
-        if debug_on {
-            spans.push(Span::styled(" [dbg]", theme::pending_label()));
-        }
-        spans.push(Span::styled(format!(" {status_text:<8}"), status_text_style));
-        if !branch.is_empty() {
-            spans.push(Span::raw("  "));
-            spans.push(Span::styled(format!("@{branch}"), theme::dim()));
-        }
 
         if !cpu_str.is_empty() {
             let cpu_pct  = parse_pct(&cpu_str);
@@ -151,10 +138,16 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
             let mem_bar  = mem_bar_from_str(&mem_str);
             spans.push(Span::raw("  "));
             spans.push(Span::styled(cpu_bar, cpu_sty));
-            spans.push(Span::styled(format!(" {:>6}", cpu_str.trim()), theme::cpu()));
+            spans.push(Span::styled(format!("  {:>6}", cpu_str.trim()), theme::cpu()));
             spans.push(Span::raw("  "));
             spans.push(Span::styled(mem_bar, theme::mem()));
-            spans.push(Span::styled(format!(" {mem_used}"), theme::mem()));
+            spans.push(Span::styled(format!("  {mem_used}"), theme::mem()));
+        }
+
+        // Branch at the end
+        if !branch.is_empty() {
+            spans.push(Span::raw("    "));
+            spans.push(Span::styled(format!("@{branch}"), theme::dim()));
         }
 
         lines.push(Line::from(spans));
@@ -185,8 +178,8 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                 Span::raw(" "),
                 Span::styled(d_icon, d_sty),
                 Span::raw(" "),
-                Span::styled(format!("{dep:<14}"), theme::dim()),
-                Span::raw("   "),  // 3 sp aligns bars with main rows (no env col here)
+                Span::styled(format!("{dep:<20}"), theme::dim()),
+                Span::raw("  "),
                 Span::styled(format!("{d_status:<5}"), theme::uptime()),
             ];
             if !d_cpu.is_empty() {
@@ -198,10 +191,10 @@ pub fn render(frame: &mut Frame, app: &App, area: Rect) {
                 let mem_bar  = mem_bar_from_str(&d_mem);
                 dep_spans.push(Span::raw("  "));
                 dep_spans.push(Span::styled(cpu_bar, cpu_sty));
-                dep_spans.push(Span::styled(format!(" {:>6}", d_cpu.trim()), theme::cpu()));
+                dep_spans.push(Span::styled(format!("  {:>6}", d_cpu.trim()), theme::cpu()));
                 dep_spans.push(Span::raw("  "));
                 dep_spans.push(Span::styled(mem_bar, theme::mem()));
-                dep_spans.push(Span::styled(format!(" {mem_used}"), theme::mem()));
+                dep_spans.push(Span::styled(format!("  {mem_used}"), theme::mem()));
             }
             lines.push(Line::from(dep_spans));
         }

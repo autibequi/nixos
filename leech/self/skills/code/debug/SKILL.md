@@ -1,11 +1,12 @@
 ---
 name: code/debug
-description: "Debugging sistematico — ativado automaticamente ao ver stack trace ou bug report. Fluxo: leitura → localização → rastreio+logs → hipótese → fix mínimo → verificação."
+description: "Sub-skill de execução do fix — chamada pelo pipeline thinking quando a causa do bug já está identificada. Fluxo: rastreio+logs → hipótese → fix mínimo → verificação."
 ---
 
-# Skill: debug — Debugging Sistematico
+# Skill: debug — Execução do Fix
 
-> Ativada automaticamente ao receber stack trace, erro de execucao, ou bug report.
+> Invocada pelo pipeline `thinking` após investigate identificar a área do problema.
+> Pode ser usada diretamente se o contexto já está claro (hotfix, causa óbvia).
 > Nunca chutar fix sem evidencia. Sempre conectar todos os pontos antes de agir.
 
 ---

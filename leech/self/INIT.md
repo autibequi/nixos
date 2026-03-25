@@ -88,7 +88,7 @@ O vault Obsidian esta montado em `/workspace/obsidian/`.
 │   └── insights.md        Hub cross-agent
 ```
 
-### Agents (11 ativos)
+### Agents (10 ativos)
 
 | Agent | Modelo | Clock | Papel |
 |-------|--------|-------|-------|
@@ -96,7 +96,6 @@ O vault Obsidian esta montado em `/workspace/obsidian/`.
 | coruja | sonnet | every60 | Estrategia + radar Jira/GitHub |
 | mechanic | sonnet | on demand | NixOS/Hyprland/dotfiles + security |
 | tamagochi | haiku | every10 | Pet virtual |
-| tasker | haiku | on demand | Processador de tasks |
 | wanderer | sonnet | every60 | Explorador de codigo |
 | hermes | haiku | every10 | Mensageiro: inbox/outbox/scheduling |
 | keeper | haiku | every30 | Saude + limpeza |
