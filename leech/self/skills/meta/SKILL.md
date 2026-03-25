@@ -19,4 +19,4 @@ Skills de meta-ferramentas: representacao visual, humanizacao de texto, gestao d
 | `meta/wiki` | Wiki command (`/meta:wiki`): dashboard de cobertura, add/remove tópicos, busca nos artigos |
 | `meta/rules` | Regras do sistema — leis, territorios, agentes, scheduling, vault |
 | `meta/executor` | Executor paralelo — despachar multiplos agentes como subagentes simultaneos |
-| `meta/tmux` | Shell do host via tmux socket — nixos-rebuild, hyprctl, qualquer binário do host |
+| `meta/tty` | Shell do host via tmux socket — nixos-rebuild, hyprctl, diagnóstico, controle total com aviso de segurança |

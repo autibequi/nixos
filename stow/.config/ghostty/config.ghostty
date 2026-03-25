@@ -61,9 +61,6 @@ font-size = 13
 font-feature = calt
 bold-is-bright = true
 
-# Images (Kitty Graphics Protocol — yazi, etc.)
-image-storage-limit = 128000000  # 128 MiB
-
 # Cursor
 cursor-style = block
 cursor-click-to-move = true
