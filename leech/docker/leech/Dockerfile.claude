@@ -4,12 +4,18 @@ FROM leech-base:latest
 
 # Garantir que o usuário claude existe nos arquivos de sistema (build time — /etc pode ser
 # read-only em runtime no nixos/nix). O compose já cuida do docker socket via group_add.
-RUN mkdir -p /etc /home/claude && \
+RUN mkdir -p /etc /home/claude /home/claude/.claude && \
     { grep -q "^root:" /etc/passwd 2>/dev/null || echo "root:x:0:0:root:/root:/bin/sh" >> /etc/passwd; } && \
     { grep -q "^claude:" /etc/passwd 2>/dev/null || echo "claude:x:1000:1000::/home/claude:/bin/bash" >> /etc/passwd; } && \
     { grep -q "^root:" /etc/group 2>/dev/null || echo "root:x:0:" >> /etc/group; } && \
     { grep -q "^claude:" /etc/group 2>/dev/null || echo "claude:x:1000:" >> /etc/group; } && \
-    chown 1000:1000 /home/claude
+    chown -R 1000:1000 /home/claude
+
+# Ghost mode: CLAUDE.md baked na imagem com persona Ghost.
+# Sessoes normais sobrescrevem via bind mount de ~/.claude do host.
+# Ghost nao monta ~/.claude inteiro — usa este arquivo diretamente.
+COPY ghost.CLAUDE.md /home/claude/.claude/CLAUDE.md
+RUN chown 1000:1000 /home/claude/.claude/CLAUDE.md
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

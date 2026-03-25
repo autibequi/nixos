@@ -172,7 +172,9 @@ impl SessionRunner {
             // Volumes mínimos — só o necessário para Claude Code funcionar
             // /workspace/self NÃO é montado — ghost não tem acesso ao source do Leech
             "-v".into(), format!("{ghost_path}:/workspace/ghost:rw"),
-            "-v".into(), format!("{home}/.claude:/home/claude/.claude"),
+            // ~/.claude NÃO montado — ghost usa CLAUDE.md baked na imagem (sem GLaDOS).
+            // Sessions persistidas em /workspace/ghost/.claude/projects para sobreviver entre runs.
+            "-v".into(), format!("{ghost_path}/.claude/projects:/home/claude/.claude/projects"),
             "-v".into(), format!("{leech_root}/claude.bypass.json:/home/claude/.claude/settings.json:ro"),
             "-v".into(), format!("{leech_root}/skills:/home/claude/.claude/skills"),
             "-v".into(), format!("{leech_root}/commands:/home/claude/.claude/commands"),
