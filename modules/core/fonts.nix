@@ -12,6 +12,7 @@
       nerd-fonts.jetbrains-mono
       nerd-fonts.fira-code
       nerd-fonts.iosevka
+      nerd-fonts.caskaydia-cove
       fira-code
       jetbrains-mono
       meslo-lgs-nf # Font for p10k theme
