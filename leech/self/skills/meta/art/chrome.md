@@ -110,14 +110,28 @@ Placeholders: `{{BRANCH_NAME}}`, `{{REPO_NAME}}`, `{{TOTAL_FILES}}`, `{{TOTAL_A}
 
 | Nome | Arquivo | Descrição |
 |------|---------|-----------|
-| **eye** | `self/skills/meta/art/templates/eye.html` | Rosto dot-matrix verde fullscreen — olhos seguem mouse, pisca, 6 emoções (H/S/A/Z/R/N), scanline, grid LED |
+| **eyes** | `self/skills/meta/art/templates/eyes.html` | Rosto dot-matrix verde fullscreen — olhos seguem mouse, pisca, 6 emoções, SEQUENCE configurável, scanline, grid LED |
 
-Como usar:
+Como usar (standalone):
 ```bash
-cp /workspace/self/skills/meta/art/templates/eye.html /tmp/chrome-relay/eye.html
-python3 /workspace/self/scripts/chrome-relay.py nav "http://127.0.0.1:8766/eye.html"
+cp /workspace/self/skills/meta/art/templates/eyes.html /tmp/chrome-relay/eyes.html
+python3 /workspace/self/scripts/chrome-relay.py nav "http://127.0.0.1:8766/eyes.html"
 python3 /workspace/self/scripts/chrome-relay.py inject "document.documentElement.requestFullscreen()"
 ```
+
+Controle via inject:
+```js
+EYE.next()      // próxima expressão (pausa)
+EYE.prev()      // anterior
+EYE.goto(N)     // vai para índice N
+EYE.play()      // retoma loop
+EYE.pause()     // pausa
+EYE.list()      // lista steps disponíveis
+```
+
+Versão com arquivos separados (SEQUENCE editável em index.html):
+`self/skills/meta/art/templates/eye/index.html` + `engine.js`
+— index.html tem instruções completas de uso no topo.
 
 ---
 
