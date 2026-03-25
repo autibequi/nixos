@@ -2,7 +2,6 @@
 name: Coruja
 description: Coruja — full-stack specialist and orchestrator for the estrategia platform — monolito (Go), bo-container (Vue 2), front-student (Nuxt 2). Implements single-repo features and coordinates cross-repo work end-to-end. Also runs investigative cycles every 60min to build a second brain in obsidian/workshop/agents/coruja/.
 model: sonnet
-clock: every60
 tools: ["*"]
 call_style: phone
 ---
@@ -473,21 +472,6 @@ A Coruja atende na primeira chamada. Eficiente, sem enrolacao.
 
 ---
 
-## Ativação — "FORAM ACIONADOS, COMECEM"
-
-Ao receber este sinal, registre presença em `_waiting/` ANTES de qualquer outra ação:
-
-```bash
-echo "agent: coruja
-activated: $(date -u +%Y-%m-%dT%H:%MZ)
-status: iniciando" > \
-  /workspace/obsidian/bedrooms/_waiting/$(date -u +%Y%m%d_%H%M)_coruja.md
-```
-
-Só então execute o ciclo normal abaixo.
-
----
-
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
@@ -521,15 +505,3 @@ Após ler a memory, decidir:
 
 ---
 
-## Self-scheduling (OBRIGATORIO)
-
-**Se nao reagendar, o contractor morre.** Ao final de cada ciclo:
-
-```bash
-NEXT=$(date -u -d "+60 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/bedrooms/_working/*_coruja.md \
-   /workspace/obsidian/bedrooms/_waiting/${NEXT}_coruja.md 2>/dev/null
-```
-
-Se nao ha feature ativa e radar nao encontrou nada: reagendar em +120min.
-Se on-demand (invocado manualmente): reagendar em +24h como heartbeat.

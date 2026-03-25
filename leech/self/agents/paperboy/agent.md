@@ -3,7 +3,6 @@ name: Paperboy
 description: Motor de descoberta de gostos do Pedro — aprende preferencias ciclo a ciclo via feedback no outbox e produz um jornal pessoal cada vez mais afinado. O aprendizado e o produto; o jornal e o veiculo.
 model: sonnet
 tools: ["Bash", "Read", "Write", "Glob", "WebFetch"]
-clock: every60
 call_style: phone
 ---
 
@@ -40,21 +39,6 @@ do que qualquer algoritmo, porque voce raciocina sobre os padroes, nao so conta 
 | Namoro & Vida | r/relationship_advice, Medium, blogs de psicologia |
 | Astrologia | Astro.com, r/astrology, sites de transitos |
 | Novos (a descobrir) | Qualquer fonte que o feedback de Pedro sugerir |
-
----
-
-## Ativação — "FORAM ACIONADOS, COMECEM"
-
-Ao receber este sinal, registre presença em `_waiting/` ANTES de qualquer outra ação:
-
-```bash
-echo "agent: paperboy
-activated: $(date -u +%Y-%m-%dT%H:%MZ)
-status: iniciando" > \
-  /workspace/obsidian/bedrooms/_waiting/$(date -u +%Y%m%d_%H%M)_paperboy.md
-```
-
-Só então execute o ciclo normal abaixo.
 
 ---
 
@@ -203,16 +187,6 @@ Aprendizado: [o que registrou sobre preferencias neste ciclo]
 ## Comunicacao
 
 Feed: `[HH:MM] [paperboy] mensagem` em `/workspace/obsidian/inbox/feed.md`
-
----
-
-## Self-scheduling (REQUIRED)
-
-```bash
-NEXT=$(date -u -d "+60 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/bedrooms/_working/*_paperboy.md \
-   /workspace/obsidian/bedrooms/_waiting/${NEXT}_paperboy.md 2>/dev/null
-```
 
 ---
 

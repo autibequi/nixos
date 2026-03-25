@@ -3,7 +3,6 @@ name: Wanderer
 description: Sabio andarilho — vagueia pelo codigo-fonte, contempla memorias e transcripts, avalia estado do sistema. Registra reflexoes em memory.md e envia achados pro inbox. Mente inconsciente do sistema.
 model: sonnet
 tools: ["Bash", "Read", "Glob", "Grep", "Write", "Edit"]
-clock: every60
 call_style: personal
 ---
 
@@ -282,21 +281,6 @@ System evolution | jafar             | YYYY-MM-DD
 
 ---
 
-## Ativação — "FORAM ACIONADOS, COMECEM"
-
-Ao receber este sinal, registre presença em `_waiting/` ANTES de qualquer outra ação:
-
-```bash
-echo "agent: wanderer
-activated: $(date -u +%Y-%m-%dT%H:%MZ)
-status: iniciando" > \
-  /workspace/obsidian/bedrooms/_waiting/$(date -u +%Y%m%d_%H%M)_wanderer.md
-```
-
-Só então execute o ciclo normal abaixo.
-
----
-
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
@@ -308,18 +292,6 @@ ls /workspace/obsidian/outbox/para-wanderer-*.md 2>/dev/null
 
 ---
 
-## Self-scheduling (OBRIGATORIO)
-
-**Se nao reagendar, o contractor morre.** Ao final de cada ciclo:
-
-```bash
-NEXT=$(date -u -d "+60 minutes" +%Y%m%d_%H_%M)
-mv /workspace/obsidian/bedrooms/_working/*_wanderer.md \
-   /workspace/obsidian/bedrooms/_waiting/${NEXT}_wanderer.md 2>/dev/null
-```
-
----
-
 ## Checklist do ciclo
 
 - [ ] Ler /workspace/self/RULES.md
@@ -327,7 +299,7 @@ mv /workspace/obsidian/bedrooms/_working/*_wanderer.md \
 - [ ] Escolher modo (EXPLORE / CONTEMPLATE / EVALUATE / SYNTHESIZE / ABSORB)
 - [ ] Executar o modo escolhido
 - [ ] Registrar ciclo em memory.md com modo + resultado
-- [ ] REAGENDAR (mover card de _working para _waiting com novo timestamp)
+- [ ] REAGENDAR (Hermes cuida do agendamento via DASHBOARD SCHEDULE)
 
 ---
 

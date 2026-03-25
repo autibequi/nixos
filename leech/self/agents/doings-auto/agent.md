@@ -1,16 +1,18 @@
 ---
 name: doings-auto
-description: Dev agent Flutter — implementa o app doings incrementalmente, uma task por ciclo via backlog embutido no card.
-model: sonnet
-tools: ["Bash", "Read", "Write", "Glob", "Edit"]
-clock: hibernated
-call_style: phone
-# HIBERNADO: prompt era incompleto (3 linhas), totalmente dependente de card externo.
-# Para retomar: expandir o prompt com ciclo próprio e re-ativar.
-# Alternativa: criar skill code/flutter/doings-feature/SKILL.md e invocar ad-hoc.
+status: DEPRECATED
+deprecated_at: 2026-03-25T00:28Z
+replaced_by:
+  - task: tasks/TODO/20260325_00_28_doings-flutter-dev.md (agent: placeholder)
 ---
 
-# doings-auto — Flutter Dev Agent
+# doings-auto — DEPRECADO
 
-Estado completo (backlog, progresso, worktrees, conhecimento acumulado) vive no card em bedrooms/_waiting/.
-Ler o card atual antes de qualquer acao.
+Este agente foi convertido em task em 2026-03-25.
+
+O desenvolvimento do app Flutter Doings agora e gerenciado como task normal
+no DASHBOARD, executada pelo agente Placeholder quando despachada pelo Hermes.
+
+Task: `obsidian/tasks/TODO/20260325_00_28_doings-flutter-dev.md`
+
+O arquivo completo do agente esta em `agent.md.deprecated`.

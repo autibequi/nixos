@@ -24,6 +24,27 @@ python3 /workspace/self/scripts/chrome-relay.py status 2>&1
 
 ---
 
+## 0.5. Screensaver — padrão obrigatório de abertura
+
+**Toda vez que o relay estiver ON e você for abrir qualquer conteúdo**, mostrar os olhos primeiro.
+Os olhos ficam na tela enquanto o conteúdo é preparado — somem automaticamente quando o `nav` real chega.
+
+```bash
+# 1. mostrar screensaver (olhos dot-matrix)
+cp /workspace/self/skills/meta/art/templates/eye.html /tmp/chrome-relay/eye.html
+python3 /workspace/self/scripts/chrome-relay.py nav "http://127.0.0.1:8766/eye.html"
+
+# 2. ... preparar conteúdo, gerar HTML, fazer fetches, etc ...
+
+# 3. navegar para o conteúdo real (olhos somem)
+python3 /workspace/self/scripts/chrome-relay.py nav "<URL ou data:text/html;base64,...>"
+```
+
+> Template: `self/skills/meta/art/templates/eye.html`
+> Fullscreen opcional: `inject "document.documentElement.requestFullscreen()"`
+
+---
+
 ## 1. Abrir URL no Chrome (relay)
 
 ```bash

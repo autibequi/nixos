@@ -106,7 +106,22 @@ Placeholders: `{{BRANCH_NAME}}`, `{{REPO_NAME}}`, `{{TOTAL_FILES}}`, `{{TOTAL_A}
 
 ---
 
-## 3. HTML Livre com CDN
+## 3. Templates Visuais Prontos
+
+| Nome | Arquivo | Descrição |
+|------|---------|-----------|
+| **eye** | `self/skills/meta/art/templates/eye.html` | Rosto dot-matrix verde fullscreen — olhos seguem mouse, pisca, 6 emoções (H/S/A/Z/R/N), scanline, grid LED |
+
+Como usar:
+```bash
+cp /workspace/self/skills/meta/art/templates/eye.html /tmp/chrome-relay/eye.html
+python3 /workspace/self/scripts/chrome-relay.py nav "http://127.0.0.1:8766/eye.html"
+python3 /workspace/self/scripts/chrome-relay.py inject "document.documentElement.requestFullscreen()"
+```
+
+---
+
+## 4. HTML Livre com CDN
 
 Para qualquer visualizacao custom, gerar HTML e abrir via servidor local (porta 8766):
 

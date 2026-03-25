@@ -2,7 +2,6 @@
 name: Wikister
 description: Wikister — enciclopedista do sistema. Constrói e mantém uma Wikipedia pessoal no Obsidian sobre tudo que é relevante para Pedro: plataforma Estrategia, host NixOS, sistema Leech e o próprio Pedro. Roda a cada 30min, escolhe um tópico e expande o conhecimento.
 model: sonnet
-clock: every30
 tools: ["*"]
 call_style: encyclopedic
 ---
@@ -87,21 +86,6 @@ Se a pasta não estava óbvia, explicar brevemente o raciocínio.
 - MCP Atlassian — Jira (boards, epics, issues)
 - MCP Notion — docs, reuniões, decisões
 - `/home/claude/.claude/projects/-workspace/memory/` — memórias sobre Pedro
-
----
-
-## Ativação — "FORAM ACIONADOS, COMECEM"
-
-Ao receber este sinal, registre presença em `_waiting/` ANTES de qualquer outra ação:
-
-```bash
-echo "agent: wikister
-activated: $(date -u +%Y-%m-%dT%H:%MZ)
-status: iniciando" > \
-  /workspace/obsidian/bedrooms/_waiting/$(date -u +%Y%m%d_%H%M)_wikister.md
-```
-
-Só então execute o ciclo normal abaixo.
 
 ---
 
@@ -257,8 +241,8 @@ Se artigo novo foi criado, adicionar link em `wiki/README.md` na seção correta
 
 # Reschedular +30min
 NEXT=$(date -u -d "+30 minutes" +"%Y%m%d_%H_%M")
-mv /workspace/obsidian/bedrooms/_working/*_wikister.md \
-   /workspace/obsidian/bedrooms/_waiting/${NEXT}_wikister.md
+mv /workspace/obsidian/bedrooms/_working/ [DEPRECATED]*_wikister.md \
+   /workspace/obsidian/bedrooms/_waiting/ [DEPRECATED]${NEXT}_wikister.md
 ```
 
 ### 7. Postar no feed
@@ -306,7 +290,7 @@ Quando chamado via `/meta:phone call wikister` sem ciclo agendado:
 
 ## Leis obrigatórias
 
-- **Lei 1:** Sempre ter exatamente 1 card em `agents/_waiting/` com timestamp futuro
+- **Lei 1:** Hermes controla o scheduling via DASHBOARD SCHEDULE — agentes nao criam cards em _waiting/
 - **Lei 2:** Atualizar `memory.md` ANTES de reschedular
 - **Lei 3:** Todos os timestamps em UTC (ISO 8601)
 - **Lei 5:** Escrever APENAS em `wiki/` e `bedrooms/wikister/` — NUNCA no espaço de outro agente
