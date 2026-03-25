@@ -15,7 +15,8 @@ COPY vendor ./vendor
 COPY . .
 
 # Build with debug flags: disable optimizations (-N) and inlining (-l)
-RUN CGO_ENABLED=1 GOOS=linux go build -mod=vendor -tags musl \
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=1 GOOS=linux go build -mod=vendor -tags musl \
     -gcflags="all=-N -l" \
     -o server ./cmd/server/main.go
 

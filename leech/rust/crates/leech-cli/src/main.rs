@@ -263,6 +263,13 @@ enum Commands {
     /// Destroy containers + volumes + leech image (full reset)
     Destroy,
 
+    /// Shared tmux session (host ↔ container)
+    #[command(alias = "tm")]
+    Tmux {
+        #[command(subcommand)]
+        action: TmuxAction,
+    },
+
     // ── Git ──────────────────────────────────────────────────────
     /// Git utilities
     #[command(alias = "g", hide = true)]
@@ -350,6 +357,23 @@ enum TasksAction {
         #[arg(long, short = 't', default_value = "5")]
         tick: String,
     },
+}
+
+#[derive(Subcommand)]
+enum TmuxAction {
+    /// Start server + session, attach interactively, kill server on exit (host only)
+    Serve,
+    /// Attach to existing shared session (container → host)
+    Open,
+    /// Send command to shared session and capture output
+    Run {
+        #[arg(trailing_var_arg = true)]
+        cmd: Vec<String>,
+    },
+    /// Capture current pane output
+    Capture,
+    /// Show server + session status
+    Status,
 }
 
 #[derive(Subcommand)]
@@ -487,6 +511,15 @@ fn main() -> Result<()> {
 
         // Destroy
         Some(Commands::Destroy) => commands::docker::destroy(),
+
+        // Tmux
+        Some(Commands::Tmux { action }) => match action {
+            TmuxAction::Serve   => commands::tmux::serve(),
+            TmuxAction::Open    => commands::tmux::open(),
+            TmuxAction::Run { cmd } => commands::tmux::run(&cmd),
+            TmuxAction::Capture => commands::tmux::capture(),
+            TmuxAction::Status  => commands::tmux::status(),
+        },
 
         // Git
         Some(Commands::Git { action }) => match action {

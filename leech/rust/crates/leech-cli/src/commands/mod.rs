@@ -7,6 +7,7 @@ pub mod git;
 pub mod host;
 pub mod runner;
 pub mod session;
+pub mod tmux;
 pub mod tools;
 
 use clap::Args;

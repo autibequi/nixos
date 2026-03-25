@@ -16,7 +16,8 @@ COPY vendor ./vendor
 COPY . .
 
 # Build usando vendor — sem acesso a rede, sem SSH
-RUN CGO_ENABLED=1 GOOS=linux go build -mod=vendor -tags musl -o server ./cmd/server/main.go
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=1 GOOS=linux go build -mod=vendor -tags musl -o server ./cmd/server/main.go
 
 FROM alpine:latest AS runtime
 
