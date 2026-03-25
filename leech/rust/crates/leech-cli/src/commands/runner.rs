@@ -368,15 +368,33 @@ fn do_logs(
         }
     } else {
         let svc_log = log_dir.join("service.log");
-        if svc_log.exists() {
-            eprintln!("=== Container parado. Mostrando log gravado ===");
+        let startup_log = log_dir.join("startup.log");
+
+        // Pick the most recently modified log so build failures are visible
+        let svc_t = svc_log.metadata().ok().and_then(|m| m.modified().ok());
+        let startup_t = startup_log.metadata().ok().and_then(|m| m.modified().ok());
+        let log_to_show: Option<(std::path::PathBuf, &str)> = match (svc_t, startup_t) {
+            (Some(sv), Some(st)) => {
+                if st > sv {
+                    Some((startup_log, "startup/build"))
+                } else {
+                    Some((svc_log, "runtime"))
+                }
+            }
+            (Some(_), None) => Some((svc_log, "runtime")),
+            (None, Some(_)) => Some((startup_log, "startup/build")),
+            (None, None) => None,
+        };
+
+        if let Some((log_path, label)) = log_to_show {
+            eprintln!("=== Container parado. Mostrando log gravado [{}] ===", label);
 
             #[cfg(unix)]
             let _prev = unsafe { libc::signal(libc::SIGINT, noop_sigint as libc::sighandler_t) };
 
             let _ = Command::new("tail")
                 .args(["-f", "-n", &tail_str])
-                .arg(&svc_log)
+                .arg(&log_path)
                 .stdin(Stdio::inherit())
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit())
