@@ -50,7 +50,8 @@ x-base-volumes: &base-volumes
   - ${XDG_RUNTIME_DIR:-/run/user/1000}/${WAYLAND_DISPLAY:-wayland-1}:/run/user/1000/${WAYLAND_DISPLAY:-wayland-1}
   - ${XDG_RUNTIME_DIR:-/run/user/1000}/pulse:/run/user/1000/pulse
   # Tmux compartilhado host ↔ container (leech tmux run/capture)
-  - ${XDG_RUNTIME_DIR:-/run/user/1000}/zion-tmux.sock:/run/user/1000/zion-tmux.sock:rw
+  # Diretório (não arquivo) evita inode stale ao recriar socket
+  - ${XDG_RUNTIME_DIR:-/run/user/1000}/zion-tmux:/run/user/1000/zion-tmux:rw
   # Host /proc e /etc (observabilidade)
   - /proc/meminfo:/host/proc/meminfo:ro
   - /proc/loadavg:/host/proc/loadavg:ro

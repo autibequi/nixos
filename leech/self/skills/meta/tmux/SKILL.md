@@ -1,80 +1,132 @@
 ---
 name: meta/tmux
-description: "Tmux compartilhado host ↔ container — rodar comandos no shell do host, capturar output, nixos-rebuild, hyprctl, qualquer binário do host."
+description: "Controle do shell do host via tmux socket — como pedir acesso, conectar, executar comandos, capturar output. Inclui aviso de segurança obrigatório ao oferecer acesso."
 ---
 
-# meta/tmux — Host Shell via Tmux
+# meta/tmux — Controle do Host via Tmux
 
-Acesso ao shell do host através do socket tmux compartilhado.  
-Socket: `/run/user/1000/zion-tmux.sock` | Sessão: `main`
+Acesso ao shell do host através do socket tmux compartilhado.
 
----
-
-## Verificar disponibilidade
-
-```bash
-leech tmux status
+```
+container (eu)                         host (Pedro)
+     │                                      │
+     │  tmux send-keys → socket  ──────→   │  leech tmux serve
+     │  tmux capture-pane ←─────────────   │  (sessão ativa)
 ```
 
-Se offline: `leech tmux serve` (no host — comando interativo, mantém sessão aberta).
+Socket: `/run/user/1000/zion-tmux/tmux.sock` | Sessão: `main`
 
 ---
 
-## Rodar comando no host
+## Como pedir acesso ao host
 
-```bash
-leech tmux run <comando>
-```
+Quando precisar executar algo no host, pedir assim:
 
-Exemplos:
-```bash
-leech tmux run "sudo nixos-rebuild switch"
-leech tmux run "hyprctl reload"
-leech tmux run "systemctl --user restart waybar"
-leech tmux run "nvidia-smi"
-leech tmux run "pkill -f 'ob sync'"
-```
+> "Para isso eu precisaria de acesso ao seu terminal. Você pode rodar `leech tmux serve` em um terminal no host e me avisar? **Atenção: isso me dá controle direto do seu shell — qualquer comando que eu enviar roda com suas permissões. Feche a sessão quando terminar.**"
 
-O comando é enviado via `send-keys` e o output capturado automaticamente (~500ms delay).
+**Sempre avisar sobre o risco antes de pedir.** Não pedir silenciosamente.
 
 ---
 
-## Capturar output atual do pane
+## Quando oferecer proativamente
 
-```bash
-leech tmux capture
-```
+Oferecer acesso tmux quando:
+- Usuário está tentando diagnosticar problema no host (GPU, memória, processos)
+- Usuário precisa aplicar config NixOS (`nixos-rebuild switch`)
+- Usuário quer recarregar Hyprland, Waybar, etc.
+- Usuário quer matar processo específico no host
+- Qualquer binário que só existe no host (não no container)
 
-Útil depois de comandos longos — captura o estado atual da tela.
-
----
-
-## Padrão para comandos com output longo
-
-```bash
-# Enviar
-leech tmux run "sudo nixos-rebuild switch 2>&1 | tail -20"
-# Aguardar e capturar novamente se necessário
-leech tmux capture
-```
+**Sempre com o aviso de segurança.** Nunca solicitar acesso sem avisar o risco.
 
 ---
 
-## Quando usar
+## Verificar se está disponível
 
-| Situação | Comando |
-|---|---|
-| Aplicar NixOS config | `leech tmux run "sudo nixos-rebuild switch"` |
-| Reload Hyprland | `leech tmux run "hyprctl reload"` |
-| Matar processo | `leech tmux run "pkill -f <nome>"` |
-| Ver GPU | `leech tmux run "nvidia-smi"` |
-| Qualquer binário do host | `leech tmux run "<cmd>"` |
+```bash
+# Dentro do container — via nix-shell (tmux não está instalado nativamente)
+nix-shell -p tmux --run \
+  "tmux -S /run/user/1000/zion-tmux/tmux.sock list-sessions" 2>/dev/null \
+  | grep -v "^copying\|^these\|^warning\|fetched\|/nix/store"
+```
+
+Se retornar `main: 1 windows ... (attached)` → canal aberto, pode usar.
+Se retornar `no server running` → pedir ao usuário `leech tmux serve`.
+
+---
+
+## Executar comando no host
+
+```bash
+# Enviar comando
+nix-shell -p tmux --run \
+  "tmux -S /run/user/1000/zion-tmux/tmux.sock send-keys -t main 'COMANDO' Enter" \
+  2>/dev/null | grep -v "^copying\|^these\|^warning\|fetched\|/nix/store"
+
+# Aguardar e capturar output
+sleep 2
+nix-shell -p tmux --run \
+  "tmux -S /run/user/1000/zion-tmux/tmux.sock capture-pane -t main -p -S -50" \
+  2>/dev/null | grep -v "^copying\|^these\|^warning\|fetched\|/nix/store"
+```
+
+Para comandos longos (nixos-rebuild, etc.) aumentar o `sleep` ou capturar novamente.
+
+---
+
+## Controle de panes
+
+```bash
+SOCK="tmux -S /run/user/1000/zion-tmux/tmux.sock"
+
+# Split vertical
+nix-shell -p tmux --run "$SOCK split-window -v -t main"
+
+# Split horizontal
+nix-shell -p tmux --run "$SOCK split-window -h -t main"
+
+# Matar pane específico (0 = cima/esquerda, 1 = baixo/direita)
+nix-shell -p tmux --run "$SOCK kill-pane -t main.1"
+
+# Mandar comando para pane específico
+nix-shell -p tmux --run "$SOCK send-keys -t main.0 'COMANDO' Enter"
+```
+
+---
+
+## Exemplos reais
+
+```bash
+# Diagnóstico de sistema
+send: 'fastfetch'
+send: 'nvidia-smi'
+send: 'free -h'
+send: 'ps aux --sort=-%cpu | head -10'
+
+# NixOS
+send: 'sudo nixos-rebuild switch'   # aguardar ~60s antes de capturar
+
+# Hyprland / desktop
+send: 'hyprctl reload'
+send: 'systemctl --user restart waybar'
+send: 'pkill -f "ob sync"'
+```
+
+---
+
+## Segurança
+
+O socket tem restrições ativas via hooks tmux:
+- `after-new-window` → kill-window (sem janelas ocultas)
+- `after-new-session` → kill-session (sem sessões paralelas escondidas)
+
+Ainda assim, **o acesso é irrestrito dentro do pane ativo**. Qualquer `sudo` vai rodar com as permissões do Pedro. Tratar com cuidado — nunca enviar comandos destrutivos sem confirmação explícita.
 
 ---
 
 ## Limitações
 
-- Output capturado tem delay fixo de 500ms — comandos longos precisam de `capture` extra
-- Comandos interativos (vim, btop) não funcionam via `run` — são para `open` no host
-- `leech tmux serve` é para o **host** — inicia servidor + sessão interativa; quando sai, mata o servidor
-- `leech tmux open` é para o **container** — conecta a uma sessão serve já rodando no host
+- Delay fixo ~500ms no `run` — comandos longos precisam de `capture` extra depois
+- Comandos interativos (vim, btop, top) não funcionam via send-keys
+- Container usa `nix-shell -p tmux` em cada chamada — lento na primeira (download), rápido depois (cache)
+- `leech tmux install` instala tmux permanentemente no nix profile do container (evita o nix-shell overhead)

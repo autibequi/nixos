@@ -361,6 +361,8 @@ enum TasksAction {
 
 #[derive(Subcommand)]
 enum TmuxAction {
+    /// Install tmux into nix profile (run once inside container)
+    Install,
     /// Start server + session, attach interactively, kill server on exit (host only)
     Serve,
     /// Attach to existing shared session (container → host)
@@ -514,6 +516,7 @@ fn main() -> Result<()> {
 
         // Tmux
         Some(Commands::Tmux { action }) => match action {
+            TmuxAction::Install => commands::tmux::install(),
             TmuxAction::Serve   => commands::tmux::serve(),
             TmuxAction::Open    => commands::tmux::open(),
             TmuxAction::Run { cmd } => commands::tmux::run(&cmd),

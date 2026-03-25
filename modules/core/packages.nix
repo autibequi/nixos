@@ -70,6 +70,7 @@
     # unstable.stremio
 
     # ── Terminal ───────────────────────────────────────
+    tmux
     cool-retro-term
     espeak-ng  # TTS for terminal bell
     sox        # audio recording (Claude Code /voice)
