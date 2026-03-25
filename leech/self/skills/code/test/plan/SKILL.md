@@ -111,10 +111,13 @@ Novas tags podem ser criadas se nenhuma existente encaixar — manter no formato
 - `[TAG]` descrição em linguagem natural do cenário → resultado esperado
 ```
 
-Marcar com 🔴 os cenários que:
-- cobrem o caminho crítico da feature (fluxo principal sem o qual a feature não funciona)
-- cobrem erros que chegam ao usuário (409, 500, dados corrompidos)
-- cobrem comportamentos que são fáceis de implementar errado (prioridades, deduplicação, nil checks em structs aninhadas)
+Marcar cada cenário com um color code de prioridade:
+
+| Cor | Quando usar |
+|---|---|
+| 🔴 | Crítico — cobre o caminho principal da feature, erros que chegam ao usuário (409/500/dados corrompidos), ou comportamentos fáceis de implementar errado (prioridades, deduplicação, nil checks aninhados) |
+| 🟡 | Interessante — edge case que vale testar, comportamento de fronteira não óbvio, cobertura secundária de uma regra importante |
+| 🔵 | Meh — cobertura defensiva, caso improvável, comportamento trivial que provavelmente nunca quebra na prática |
 
 ## Passo 6 — Verificar se há regra de negócio fora de serviços
 
