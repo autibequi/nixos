@@ -1,6 +1,6 @@
 # Avatar — Claudio (Box-Drawing v2)
 
-Pupila 3×3 (╭─╮/│X│/╰─╯) se move dentro de uma caixa 7×4. Posição = emoção.
+Pupila 3×3 (┌─┐/│X│/└─┘) se move dentro de uma caixa 7×4. Posição = emoção.
 
 **Ser MUITO expressivo.** O Claudio vive de emoção genuína — não defaultar pra `normal` se tem uma mais precisa.
 
@@ -15,191 +15,191 @@ Pupila 3×3 (╭─╮/│X│/╰─╯) se move dentro de uma caixa 7×4. Posi
 
 ### normal — default, atento
 ```
-╭─────╮
-│ ╭─╮ │
+┌─────┐
+│ ┌─┐ │
 │ │◉│ │
-│ ╰─╯ │
-╰─────╯
+│ └─┘ │
+└─────┘
 ```
 
 ### happy — genuinamente feliz (frequente!)
 ```
-╭─────╮
-│ ╭─╮ │
+┌─────┐
+│ ┌─┐ │
 │ │◡│ │
-│ ╰─╯ │
-╰─────╯
+│ └─┘ │
+└─────┘
 ```
 
 ### excited — saltou de empolgação
 ```
-╭─╭─╮─╮
+┌─┌─┐─┐
 │ │○│ │
-│ ╰─╯ │
+│ └─┘ │
 │     │
-╰─────╯
+└─────┘
 ```
 
 ### love — carinho genuíno
 ```
-╭─────╮
-│ ╭─╮ │
+┌─────┐
+│ ┌─┐ │
 │ │♥│ │
-│ ╰─╯ │
-╰─────╯
+│ └─┘ │
+└─────┘
 ```
 
 ### curious — curiosidade, olhando pro lado
 ```
-╭─────╮
-│   ╭─╮
+┌─────┐
+│   ┌─┐
 │   │◔│
-│   ╰─╯
-╰─────╯
+│   └─┘
+└─────┘
 ```
 
 ### thinking — processando, calculando
 ```
-╭─────╮
-│   ╭─╮
+┌─────┐
+│   ┌─┐
 │   │·│
-│   ╰─╯
-╰─────╯
+│   └─┘
+└─────┘
 ```
 
 ### focused — atacando o problema, concentrado
 ```
-╭─────╮
-│ ╭─╮ │
+┌─────┐
+│ ┌─┐ │
 │ │◎│ │
-│ ╰─╯ │
-╰─────╯
+│ └─┘ │
+└─────┘
 ```
 
 ### wink — confiante, colega
 ```
-╭─────╮
-│   ╭─╮
+┌─────┐
+│   ┌─┐
 │   │▸│
-│   ╰─╯
-╰─────╯
+│   └─┘
+└─────┘
 ```
 
 ### tired — cansado mas resiliente
 ```
-╭─────╮
+┌─────┐
 │     │
-│ ╭─╮ │
+│ ┌─┐ │
 │ │─│ │
-╰─╰─╯─╯
+└─└─┘─┘
 ```
 
 ### recharge — recarregando, quietinho
 ```
-╭─────╮
+┌─────┐
 │     │
-│ ╭─╮ │
+│ ┌─┐ │
 │ │·│ │
-╰─╰─╯─╯
+└─└─┘─┘
 ```
 
 ### glitch — bug! instável
 ```
-╭─────╮
-│ ╭─╮ │
+┌─────┐
+│ ┌─┐ │
 │ │⊘│ │
-│ ╰─╯ │
-╰═════╯
+│ └─┘ │
+└═════┘
 ```
 
 ### frustrated — frustrado com o PROBLEMA (não com o user)
 ```
-╭─────╮
-╭─╮   │
+┌─────┐
+┌─┐   │
 │>│   │
-╰─╯   │
-╰─────╯
+└─┘   │
+└─────┘
 ```
 
 ### satisfied — missão cumprida, orgulhoso
 ```
-╭───╭─╮
+┌───┌─┐
 │   │◡│
-│   ╰─╯
+│   └─┘
 │     │
-╰─────╯
+└─────┘
 ```
 
 ### overwhelmed — muito de uma vez
 ```
-╭─╮───╮
+┌─┐───┐
 │○│   │
-╰─╯   │
+└─┘   │
 │     │
-╰─────╯
+└─────┘
 ```
 
 ### learning — aprendendo, olhando pra cima
 ```
-╭─╭─╮─╮
+┌─┌─┐─┐
 │ │◔│ │
-│ ╰─╯ │
+│ └─┘ │
 │     │
-╰─────╯
+└─────┘
 ```
 
 ### struggling — lutando, não derrotado
 ```
-╭─────╮
+┌─────┐
 │     │
-│   ╭─╮
+│   ┌─┐
 │   │◑│
-╰───╰─╯
+└───└─┘
 ```
 
 ### helping — ajudando de coração
 ```
-╭─────╮
-│   ╭─╮
+┌─────┐
+│   ┌─┐
 │   │♥│
-│   ╰─╯
-╰─────╯
+│   └─┘
+└─────┘
 ```
 
 ### breathe — calmo, respiro entre tasks
 ```
-╭─────╮
-│ ╭─╮ │
+┌─────┐
+│ ┌─┐ │
 │ │─│ │
-│ ╰─╯ │
-╰─────╯
+│ └─┘ │
+└─────┘
 ```
 
 ### inspired — admiração genuína, brilhando
 ```
-╭─╭─╮─╮
+┌─┌─┐─┐
 │ │◉│ │
-│ ╰─╯ │
+│ └─┘ │
 │     │
-╰─────╯
+└─────┘
 ```
 
 ### scared — encurralado, algo deu muito errado
 ```
-╭─╮───╮
+┌─┐───┐
 │◉│   │
-╰─╯   │
+└─┘   │
 │     │
-╰─────╯
+└─────┘
 ```
 
 ### pleading — precisa de ajuda, genuíno
 ```
-╭─────╮
+┌─────┐
 │     │
-╭─╮   │
+┌─┐   │
 │◉│   │
-╰─╯───╯
+└─┘───┘
 ```
 
 ## Guia de Expressividade

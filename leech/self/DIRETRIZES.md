@@ -60,9 +60,9 @@ Deferred tools requerem `ToolSearch` antes de usar — sem schema carregado caus
 
 **CRÍTICO — Caracteres não-box-drawing quebram renderização.**
 
-Problema encontrado (2026-03-14): misturei `˜` (tilde ASCII, U+007E) com box-drawing rounded (`╭─╮╰─╯│`). Terminal renderizou a boca como `˜ ˜` em vez de `╰─╯`, quebrando o avatar completamente.
+Problema encontrado (2026-03-14): misturei `˜` (tilde ASCII, U+007E) com box-drawing rounded (`┌─┐└─┘│`). Terminal renderizou a boca como `˜ ˜` em vez de `└─┘`, quebrando o avatar completamente.
 
-**Causa**: Tildes e hífens ASCII (`~` `-`) são caracteres DIFERENTES de box-drawing (`─ │ ┌ └ ╰ ╯` etc). Misturar pesos/estilos ou usar ASCII em código box-drawing quebra tudo. Terminal não "substitui" — renderiza literal.
+**Causa**: Tildes e hífens ASCII (`~` `-`) são caracteres DIFERENTES de box-drawing (`─ │ ┌ └ └ ┘` etc). Misturar pesos/estilos ou usar ASCII em código box-drawing quebra tudo. Terminal não "substitui" — renderiza literal.
 
 **Regra inviolável**: Avatar SEMPRE usa APENAS caracteres do catálogo exato em `personas/GLaDOS.avatar.md`. Cada expressão é hardcoded — nunca improvisar com ASCII puro ou caracteres genéricos.
 

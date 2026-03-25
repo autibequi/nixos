@@ -66,7 +66,7 @@ EnterWorktree  →  implementar  →  commit [proposta]  →  pitch  →  user d
 Toda proposta implementada em worktree deve ser apresentada antes de mergear:
 
 ```
-╭─ proposta: <titulo curto> ──────────────────╮
+┌─ proposta: <titulo curto> ──────────────────┐
 
 ## O que muda
 <2-3 bullets diretos>
@@ -80,7 +80,7 @@ Toda proposta implementada em worktree deve ser apresentada antes de mergear:
 ## Diff
 <partes relevantes do git diff real>
 
-╰──────────────────────────────────────────────╯
+└──────────────────────────────────────────────┘
 ```
 
 Opções ao user:

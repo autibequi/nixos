@@ -132,7 +132,7 @@ Monocromo: `████░░░░`
 LIGHT:   ┌─┬─┐  ├─┼─┤  └─┴─┘   │
 HEAVY:   ┏━┳━┓  ┣━╋━┫  ┗━┻━┛   ┃
 DOUBLE:  ╔═╦═╗  ╠═╬═╣  ╚═╩═╝   ║
-ROUNDED: ╭─────╮  ╰─────╯       │  (sem juncoes)
+ROUNDED: ┌─────┐  └─────┘       │  (sem juncoes)
 TRANSIT: ┡━━━━━┩  (heavy→light)
 ```
 
@@ -143,7 +143,7 @@ TRANSIT: ┡━━━━━┩  (heavy→light)
 | Light | `┌┐└┘` | `─ │` | `├┤┬┴┼` | Default — diagramas, tabelas |
 | Heavy | `┏┓┗┛` | `━ ┃` | `┣┫┳┻╋` | Headers, destaque |
 | Double | `╔╗╚╝` | `═ ║` | `╠╣╦╩╬` | Enfase maxima |
-| Rounded | `╭╮╰╯` | `─ │` | nenhuma | Boxes simples |
+| Rounded | `┌┐└┘` | `─ │` | nenhuma | Boxes simples |
 
 ### Dashed / Dotted
 
@@ -154,7 +154,7 @@ TRANSIT: ┡━━━━━┩  (heavy→light)
 ### Regras de desenho
 
 **R1 — Conjuntos puros.** Cada diagrama usa UM peso. Misturar = gaps.
-- Proibido: `╭─╮` com `├┤` (rounded nao tem juncoes)
+- Proibido: `┌─┐` com `├┤` (rounded nao tem juncoes)
 - Proibido: `┏━┓` header com `│` body (pesos diferentes)
 - Excecao: heavy header + light body com `┡┩`:
 

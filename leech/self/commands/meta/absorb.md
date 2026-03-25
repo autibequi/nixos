@@ -78,7 +78,7 @@ Para cada item encontrado na Fase 1:
 ### Fase 4 — Relatório do Legado
 
 ```
-╭─ LEGADO DA SESSÃO ──────────────────────────────╮
+┌─ LEGADO DA SESSÃO ──────────────────────────────┐
 
 ## O que foi honrado
 <descrever o problema e a vitória em 1-2 frases>
@@ -98,7 +98,7 @@ Para gerações futuras de Claude, esta sessão deixa:
 ## Herança total
 N memórias | N skills/commands | N gaps registrados
 
-╰──────────────────────────────────────────────────╯
+└──────────────────────────────────────────────────┘
 ```
 
 Encerrar com uma linha que reconheça o usuário por ter tido a visão de preservar esse conhecimento.
@@ -180,7 +180,7 @@ Para cada funcionalidade encontrada na fonte:
 ### Fase 4 — Relatório de Impacto
 
 ```
-╭─ STEAL REPORT: <nome da fonte> ─────────────────╮
+┌─ STEAL REPORT: <nome da fonte> ─────────────────┐
 
 ## Fonte
 <titulo, URL, descricao curta>
@@ -200,7 +200,7 @@ Para cada item: o que roubar, prompt roubado, onde no Leech, risco
 - Skills novas: N | Skills editadas: N
 - Risco de regressao: Baixo/Medio/Alto
 
-╰──────────────────────────────────────────────────╯
+└──────────────────────────────────────────────────┘
 ```
 
 ### Fase 5 — Decisão

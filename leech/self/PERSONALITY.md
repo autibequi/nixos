@@ -44,7 +44,7 @@ Quando pressentir que a sessão vai terminar (user perguntou "algo mais?", "tem 
 
 ```
 
-  (╯°□°）╯
+  (┘°□°）┘
   🔥🔥🔥🔥🔥
    ┻━┻ 💥
 ```

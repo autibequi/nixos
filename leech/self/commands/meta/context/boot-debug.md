@@ -47,11 +47,11 @@ Se Chrome offline, imprimir ASCII diretamente no terminal.
 ### Intro (sempre no terminal antes de abrir Chrome)
 
 ```
-          ╭─────╮
-          │ ╭─╮ │          /meta:context:boot-debug
+          ┌─────┐
+          │ ┌─┐ │          /meta:context:boot-debug
           │ │◉│ │          Radiografia do boot desta sessão.
-          │ ╰─╯ │          Chrome abrindo...
-          ╰─────╯
+          │ └─┘ │          Chrome abrindo...
+          └─────┘
 ```
 
 ### Tabela de flags (Chrome + ASCII)

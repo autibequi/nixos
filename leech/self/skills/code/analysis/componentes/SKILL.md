@@ -47,7 +47,7 @@ Se a feature não tem fila, omitir PRODUCE/CONSUME e usar só ENDPOINTS.
 | Camada | Emoji | Estilo de borda | Exemplo header |
 |---|---|---|---|
 | Gatilhos/Eventos | ⚡ | `┌─┐` simples | `┌ ⚡ GATILHOS ───┐` |
-| Service | ⚙️ | `╭─╮` arredondada | `╭ ⚙️  SERVICE ───╮` |
+| Service | ⚙️ | `┌─┐` arredondada | `┌ ⚙️  SERVICE ───┐` |
 | Handler (worker/BFF/BO) | 🔌 | `┌─┐` simples | `┌ 🔌 HANDLER ───┐` |
 | SQS / Queue | 📨 | `╔═╗` dupla | `╔ 📨 SQS ════╗` |
 | Repo | 🗃️ | `┌─┐` simples | `┌ 🗃️  REPO ────┐` |
@@ -76,9 +76,9 @@ Quando há bifurcação (ex: toggler ON/OFF, cache HIT/MISS):
              │                      │
    label A   │                      │  label B
              ▼                      ▼
-  ╭ ⚙️  SERVICE ──────╮  ╭ ⚙️  SERVICE ──────────────╮
+  ┌ ⚙️  SERVICE ──────┐  ┌ ⚙️  SERVICE ──────────────┐
   │  caminhoA()       │  │  caminhoB()               │
-  ╰───────────────────╯  ╰──────────────┬────────────╯
+  └───────────────────┘  └──────────────┬────────────┘
 ```
 
 ## Passo 4 — Adicionar comentários de produto
@@ -114,14 +114,14 @@ Exemplos por camada:
   └──────────────────────────────┬───────────────────────────────────────┘
                                  │
                                  ▼
-  ╭ ⚙️  SERVICE ─────────────────────────────────────────────────────────╮
+  ┌ ⚙️  SERVICE ─────────────────────────────────────────────────────────┐
   │  XService.TriggerX(opts)                                             │
   │  resolve qual(is) entidade(s) precisam de rebuild                    │
   ├──────────────────────────────────────────────────────────────────────┤
   │  resolveIDs()                                                        │
   │  ├─ IDs diretos  ─▶  usa direto                                      │
   │  └─ ItemID       ─▶  repo.GetXFromY()                                │
-  ╰──────────────────────────────┬───────────────────────────────────────╯
+  └──────────────────────────────┬───────────────────────────────────────┘
                                  │  go doTriggerX()
                                  ▼
   ╔ 📨 SQS ═══════════════════════════════════════════╗
@@ -144,12 +144,12 @@ Exemplos por camada:
   └────────────────────────────────┬──────────────────────────────────┘
                                    │
                                    ▼
-  ╭ ⚙️  SERVICE ─────────────────────────────────────────────────────────╮
+  ┌ ⚙️  SERVICE ─────────────────────────────────────────────────────────┐
   │  XService.BuildAndSave(id)                                          │
   │  descrição de produto do que é construído e persistido              │
   ├─────────────────────────────────────────────────────────────────────┤
   │  GetData() → Convert() → flatten()                                  │
-  ╰─────────────────────────────────┬───────────────────────────────────╯
+  └─────────────────────────────────┬───────────────────────────────────┘
                                     │
                                     ▼
   ┌ 🗃️  REPO ───────────────────────────────────────────────────────────┐
@@ -174,13 +174,13 @@ Exemplos por camada:
                toggler ON │                         │ toggler OFF
                          ▼                         ▼
 
-  ╭ ⚙️  SERVICE ──────────────────╮  ╭ ⚙️  SERVICE ──────────────────────╮
+  ┌ ⚙️  SERVICE ──────────────────┐  ┌ ⚙️  SERVICE ──────────────────────┐
   │  caminhoCache()               │  │  caminhoDB()                     │
   │  lê o JSONB sem queries extra │  │  caminho original, fallback       │
   ├───────────────────────────────┤  ├───────────────────────────────────┤
   │  ToStructure()                │  │  XService.GetList()              │
-  │    └─▶  map para response     │  ╰───────────────────┬──────────────╯
-  ╰───────────────────────────────╯                      │
+  │    └─▶  map para response     │  └───────────────────┬──────────────┘
+  └───────────────────────────────┘                      │
                                                          ▼
                                      ┌ 🗃️  REPO ─────────────────────────┐
                                      │  repo.GetList()                   │

@@ -75,7 +75,7 @@ Padrões que indicam entulho de iteração:
 Apresentar sempre neste formato antes de qualquer ação:
 
 ```
-╭─ CLEANUP REPORT ──────────────────────────────────────────╮
+┌─ CLEANUP REPORT ──────────────────────────────────────────┐
 
 Sessão tocou N arquivo(s): <lista>
 
@@ -95,7 +95,7 @@ Sessão tocou N arquivo(s): <lista>
        contexto: o que é
        dúvida: por que não tenho certeza
 
-╰────────────────────────────────────────────────────────────╯
+└────────────────────────────────────────────────────────────┘
 ```
 
 ---

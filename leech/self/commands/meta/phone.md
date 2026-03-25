@@ -68,7 +68,7 @@ echo "DONE_RECENT:" && ls -t /workspace/obsidian/bedrooms/*/done/ 2>/dev/null | 
 
 ### Output
 ```
-╭─ Briefing DD/MM/YYYY ─────────────────────────────────────╮
+┌─ Briefing DD/MM/YYYY ─────────────────────────────────────┐
 
  GitHub
   PRs meus abertos: N  |  Aguardando review: N
@@ -86,7 +86,7 @@ echo "DONE_RECENT:" && ls -t /workspace/obsidian/bedrooms/*/done/ 2>/dev/null | 
  Atencao
   alertas relevantes
 
-╰────────────────────────────────────────────────────────────╯
+└────────────────────────────────────────────────────────────┘
 ```
 
 Maximo 5 recomendacoes acionaveis ao final. Nunca listar repos sem dirty/ahead.
