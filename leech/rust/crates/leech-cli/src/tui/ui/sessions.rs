@@ -61,14 +61,21 @@ fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[Session
         let folder_any_up   = group.iter().any(|s| s.is_up);
         let folder_icon     = if folder_any_up { "\u{25cf}" } else { "\u{25cb}" };
         let folder_icon_sty = if folder_any_up { theme::up_icon() } else { theme::down_icon() };
-        lines.push(Line::from(vec![
+        // Use branch from first session that has one
+        let branch = group.iter().map(|s| s.branch.as_str()).find(|b| !b.is_empty()).unwrap_or("");
+        let mut folder_spans = vec![
             Span::raw("  "),
             Span::styled(folder_branch.to_string(), theme::tree_branch()),
             Span::raw(" "),
             Span::styled(folder_icon, folder_icon_sty),
             Span::raw(" "),
             Span::styled(folder_label, theme::name()),
-        ]));
+        ];
+        if !branch.is_empty() {
+            folder_spans.push(Span::raw("  "));
+            folder_spans.push(Span::styled(format!("@{branch}"), theme::dim()));
+        }
+        lines.push(Line::from(folder_spans));
 
         let total       = group.len();
         let count_label = if total == 1 {

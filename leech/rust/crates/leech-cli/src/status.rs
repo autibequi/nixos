@@ -40,6 +40,9 @@ pub struct SessionInfo {
     /// Number of active `claude` processes running inside the container.
     /// > 1 means multiple exec sessions sharing the same container.
     pub session_count: usize,
+    /// Current git branch of mnt_path (empty if undetectable).
+    #[serde(default)]
+    pub branch: String,
 }
 
 fn container_short_id(name: &str) -> String {
@@ -74,6 +77,18 @@ pub struct DkServiceInfo {
     pub branch: String,
 }
 
+/// Expand `$HOME` and `~` prefixes in a path string.
+fn expand_home(path: &str) -> String {
+    let home = std::env::var("HOME").unwrap_or_default();
+    if let Some(rest) = path.strip_prefix("$HOME") {
+        return format!("{home}{rest}");
+    }
+    if let Some(rest) = path.strip_prefix('~') {
+        return format!("{home}{rest}");
+    }
+    path.to_string()
+}
+
 /// Return the source directory for a given service name, checking env vars first.
 fn svc_git_dir(svc: &str) -> String {
     let env_key = match svc {
@@ -85,11 +100,11 @@ fn svc_git_dir(svc: &str) -> String {
     if !env_key.is_empty() {
         // 1. Process environment
         if let Ok(dir) = std::env::var(env_key) {
-            if !dir.is_empty() { return dir; }
+            if !dir.is_empty() { return expand_home(&dir); }
         }
         // 2. ~/.leech config file
         if let Some(dir) = leech_config_key(env_key) {
-            if !dir.is_empty() { return dir; }
+            if !dir.is_empty() { return expand_home(&dir); }
         }
     }
     // 3. Common host paths
@@ -240,6 +255,7 @@ pub fn collect() -> Result<StatusSnapshot> {
         let (cpu, mem) = find_stats(&stats, &container.name);
         let session_count = proc_counts.get(&container.name).copied().unwrap_or(0);
 
+        let branch = read_git_branch(&mnt_path);
         let info = SessionInfo {
             name: container.name.clone(),
             short_id: container_short_id(&container.name),
@@ -250,6 +266,7 @@ pub fn collect() -> Result<StatusSnapshot> {
             mounts,
             mnt_path,
             session_count,
+            branch,
         };
 
         if is_tty {
@@ -322,6 +339,7 @@ pub fn collect() -> Result<StatusSnapshot> {
             })
             .collect();
         let session_count = proc_counts.get(&c.name).copied().unwrap_or(0);
+        let branch = read_git_branch(&mnt_path);
         let info = SessionInfo {
             name: c.name.clone(),
             short_id: container_short_id(&c.name),
@@ -332,6 +350,7 @@ pub fn collect() -> Result<StatusSnapshot> {
             mounts,
             mnt_path,
             session_count,
+            branch,
         };
         if is_tty { agents.push(info); } else { background.push(info); }
     }
