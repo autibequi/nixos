@@ -550,20 +550,21 @@ fn do_install(
             .args(["-v", &format!("{src}:/app")])
             .args(["-e", &format!("NPM_TOKEN={npm_token}")])
             .args(["-e", "TERM=xterm-256color"])
+            .args(["-e", "CI=true"])
             .args(["-e", &format!("HOST_UID={uid}")])
             .args(["-e", &format!("HOST_GID={gid}")])
             .args(["-w", "/app"])
             .arg(&image)
             .args(["sh", "-c", "\
                 set -e; \
-                apk add --no-cache git openssh-client ca-certificates python3 make g++; \
+                apk add --no-cache git openssh-client ca-certificates python3 make g++ autoconf automake libtool nasm pkgconfig; \
                 mkdir -p /root/.ssh; cp /ssh-host/* /root/.ssh/ 2>/dev/null || true; \
                 chmod 700 /root/.ssh; chmod 600 /root/.ssh/* 2>/dev/null || true; \
                 ssh-keyscan github.com >> /root/.ssh/known_hosts 2>/dev/null; \
                 [ -f /npmrc-host ] && cp /npmrc-host /root/.npmrc || true; \
                 echo '@estrategiahq:registry=https://npm.pkg.github.com/estrategiahq' >> /root/.npmrc; \
                 echo '[1/2] Instalando dependencias (npm install)...'; \
-                npm install; \
+                npm install --no-progress; \
                 chown -R \"$HOST_UID:$HOST_GID\" /app/node_modules 2>/dev/null || true; \
                 echo ''; echo 'Dependencias instaladas!'"])
             .stdin(Stdio::inherit())
