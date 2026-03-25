@@ -4,7 +4,7 @@
 # initial-command = fastfetch
 shell-integration = detect
 shell-integration-features = no-cursor
-scrollback-limit = 10000
+scrollback-limit = 3000
 link-url = true
 linux-cgroup=single-instance
 gtk-single-instance = true
@@ -62,7 +62,7 @@ font-feature = calt
 bold-is-bright = true
 
 # Images (Kitty Graphics Protocol — yazi, etc.)
-image-storage-limit = 320000000
+image-storage-limit = 64000000  # 64 MiB — suficiente pro yazi
 
 # Cursor
 cursor-style = block
