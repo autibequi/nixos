@@ -46,15 +46,13 @@ pub fn render(frame: &mut Frame, app: &App) {
 fn sessions_height(app: &App) -> u16 {
     fn group_height(sessions: &[crate::status::SessionInfo]) -> usize {
         if sessions.is_empty() { return 0; }
-        let mut folder_counts: std::collections::HashMap<&str, usize> =
-            std::collections::HashMap::new();
+        let mut folder_set = std::collections::HashSet::new();
         for s in sessions {
             let key = if s.mnt_path.is_empty() { s.name.as_str() } else { s.mnt_path.as_str() };
-            *folder_counts.entry(key).or_insert(0) += 1;
+            folder_set.insert(key);
         }
-        let multi_sessions: usize = folder_counts.values()
-            .map(|&n| if n > 1 { n } else { 0 }).sum();
-        1 + folder_counts.len() * 2 + multi_sessions
+        // 1 group-header + 2 rows per folder (folder-header + stats/count line)
+        1 + folder_set.len() * 2
     }
     let agents_h = group_height(&app.snapshot.agents);
     let bg_h     = group_height(&app.snapshot.background);
@@ -85,14 +83,24 @@ fn render_header(frame: &mut Frame, app: &App, area: Rect) {
     } else {
         (format!(" ⟳ {}s", elapsed), theme::dim().fg(Color::Rgb(108, 112, 134))) // dim
     };
-    let mut spans = vec![
+    let left: Vec<Span<'static>> = vec![
         Span::raw("  "),
         Span::styled("Leech Status", theme::header()),
         Span::raw("  "),
         Span::styled(now, theme::dim()),
         Span::styled(stale_text, stale_style),
     ];
-    spans.extend(quota::header_spans(app));
+    let right = quota::header_spans(app);
+    if right.is_empty() {
+        frame.render_widget(Paragraph::new(Line::from(left)), area);
+        return;
+    }
+    let left_w: usize = left.iter().map(|s| s.content.chars().count()).sum();
+    let right_w = quota::header_spans_width(app);
+    let pad = (area.width as usize).saturating_sub(left_w + right_w);
+    let mut spans = left;
+    spans.push(Span::raw(" ".repeat(pad)));
+    spans.extend(right);
     frame.render_widget(Paragraph::new(Line::from(spans)), area);
 }
 

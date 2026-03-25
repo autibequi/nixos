@@ -77,81 +77,60 @@ fn render_group(lines: &mut Vec<Line<'static>>, label: &str, sessions: &[Session
             format!("{total} sessões")
         };
 
-        if total == 1 {
-            let session = &group[0];
-            let uptime  = format_uptime(&session.status);
-            let mut spans = vec![
-                Span::raw("  "),
-                Span::styled(vert_pad.to_string(), theme::tree_branch()),
-                Span::raw("  "),
-                Span::styled(format!("{:<20}", count_label), theme::dim()),
-                Span::raw("  "),
-                Span::styled(format!("{:<5}", uptime), theme::uptime()),
-            ];
-            if session.is_up && !session.cpu.is_empty() {
-                let cpu_pct = parse_pct(&session.cpu);
-                let cpu_bar = mini_bar(cpu_pct, 6);
-                let mem_pct = parse_mem_pct(&session.mem);
-                let mem_bar = mini_bar(mem_pct, 6);
-                let mem_used = mem_used_only(&session.mem);
-                spans.push(Span::raw("  "));
-                spans.push(Span::styled(cpu_bar, theme::up_icon()));
-                spans.push(Span::styled(format!(" {:<6}", session.cpu.trim()), theme::cpu()));
-                spans.push(Span::raw("  "));
-                spans.push(Span::styled(mem_bar, theme::mem()));
-                spans.push(Span::styled(format!(" {mem_used}"), theme::mem()));
-            }
-            lines.push(Line::from(spans));
-        } else {
-            lines.push(Line::from(vec![
-                Span::raw("  "),
-                Span::styled(vert_pad.to_string(), theme::tree_branch()),
-                Span::raw("  "),
-                Span::styled(count_label, theme::dim()),
-            ]));
+        // All folder sizes (single or multi) render as one stats line (collapsed view).
+        let uptime = group.iter()
+            .filter(|s| s.is_up)
+            .map(|s| format_uptime(&s.status))
+            .next()
+            .unwrap_or_else(|| "stop".to_string());
+        let any_up_sess = group.iter().any(|s| s.is_up);
 
-            for (i, session) in group.iter().enumerate() {
-                let is_last   = i == total - 1;
-                let branch    = if is_last { "\u{2514}\u{2500}" } else { "\u{251c}\u{2500}" };
-                let sess_icon = if session.is_up { "\u{25cf}" } else { "\u{25cb}" };
-                let sess_sty  = if session.is_up { theme::up_icon() } else { theme::down_icon() };
-                let uptime    = format_uptime(&session.status);
-                let ident     = session.short_id.clone();
+        let mut spans = vec![
+            Span::raw("  "),
+            Span::styled(vert_pad.to_string(), theme::tree_branch()),
+            Span::raw("  "),
+            Span::styled(format!("{:<20}", count_label), theme::dim()),
+            Span::raw("  "),
+            Span::styled(format!("{:<5}", uptime), theme::uptime()),
+        ];
 
-                let mut spans = vec![
-                    Span::raw("  "),
-                    Span::styled(vert_pad.to_string(), theme::tree_branch()),
-                    Span::styled(branch.to_string(), theme::tree_branch()),
-                    Span::raw(" "),
-                    Span::styled(sess_icon, sess_sty),
-                    Span::raw(" "),
-                    Span::styled(format!("{ident:<12}"), theme::dim()),
-                    Span::raw(" "),
-                    Span::styled(format!("{uptime:<5}"), theme::uptime()),
-                ];
+        if any_up_sess {
+            // Aggregate CPU (sum) and memory (sum used / sum limit)
+            let total_cpu: f32 = group.iter()
+                .filter_map(|s| s.cpu.trim().trim_end_matches('%').parse::<f32>().ok())
+                .sum();
+            let cpu_pct = total_cpu.min(100.0) as u8;
+            let cpu_bar = mini_bar(cpu_pct, 6);
+            let cpu_display = if total > 1 {
+                format!("{:.2}%", total_cpu)
+            } else {
+                group[0].cpu.trim().to_string()
+            };
 
-                if session.is_up && !session.cpu.is_empty() {
-                    let cpu_pct  = parse_pct(&session.cpu);
-                    let cpu_bar  = mini_bar(cpu_pct, 6);
-                    let mem_pct  = parse_mem_pct(&session.mem);
-                    let mem_bar  = mini_bar(mem_pct, 6);
-                    let mem_used = mem_used_only(&session.mem);
-                    spans.push(Span::raw("  "));
-                    spans.push(Span::styled(cpu_bar, theme::up_icon()));
-                    spans.push(Span::styled(format!(" {:<6}", session.cpu.trim()), theme::cpu()));
-                    spans.push(Span::raw("  "));
-                    spans.push(Span::styled(mem_bar, theme::mem()));
-                    spans.push(Span::styled(format!(" {mem_used}"), theme::mem()));
-                }
+            let total_used: u64 = group.iter().map(|s| parse_mem_used(s.mem.as_str())).sum();
+            let total_limit: u64 = group.iter().map(|s| parse_mem_limit(s.mem.as_str())).sum();
+            let mem_pct = if total_limit > 0 {
+                ((total_used as f64 / total_limit as f64 * 100.0) as u8).min(100)
+            } else {
+                0
+            };
+            let mem_bar = mini_bar(mem_pct, 6);
+            let mem_used_str = if total > 1 {
+                fmt_bytes(total_used)
+            } else {
+                mem_used_only(&group[0].mem)
+            };
 
-                lines.push(Line::from(spans));
-            }
+            spans.push(Span::raw("  "));
+            spans.push(Span::styled(cpu_bar, theme::up_icon()));
+            spans.push(Span::styled(format!("  {cpu_display}"), theme::cpu()));
+            spans.push(Span::raw("  "));
+            spans.push(Span::styled(mem_bar, theme::mem()));
+            spans.push(Span::styled(format!("  {mem_used_str}"), theme::mem()));
         }
-    }
-}
 
-fn parse_pct(s: &str) -> u8 {
-    s.trim().trim_end_matches('%').parse::<f32>().map(|f| f as u8).unwrap_or(0)
+        lines.push(Line::from(spans));
+    }
 }
 
 fn mini_bar(pct: u8, width: usize) -> String {
@@ -167,10 +146,15 @@ fn format_uptime(status: &str) -> String {
         .strip_prefix("Up ").or_else(|| status.strip_prefix("up "))
         .unwrap_or(status)
         .replace("About an hour", "~1h")
+        .replace("About a minute", "~1m")
         .replace(" seconds", "s")
-        .replace(" minutes", "min")
+        .replace(" second", "s")
+        .replace(" minutes", "m")
+        .replace(" minute", "m")
         .replace(" hours", "h")
+        .replace(" hour", "h")
         .replace(" days", "d")
+        .replace(" day", "d")
         .split(" (").next().unwrap_or("").to_string()
 }
 
@@ -178,15 +162,6 @@ fn mem_used_only(mem: &str) -> String {
     mem.split('/').next().unwrap_or(mem)
         .replace("MiB", "M").replace("GiB", "G")
         .trim().to_string()
-}
-
-fn parse_mem_pct(mem: &str) -> u8 {
-    let parts: Vec<&str> = mem.split('/').collect();
-    if parts.len() != 2 { return 0; }
-    let used  = parse_mem_bytes(parts[0].trim());
-    let limit = parse_mem_bytes(parts[1].trim());
-    if limit == 0 { return 0; }
-    ((used as f64 / limit as f64 * 100.0) as u8).min(100)
 }
 
 fn parse_mem_bytes(s: &str) -> u64 {
@@ -201,6 +176,28 @@ fn parse_mem_bytes(s: &str) -> u64 {
         return (n.parse::<f64>().unwrap_or(0.0) * 1024.0) as u64;
     }
     s.parse::<u64>().unwrap_or(0)
+}
+
+fn parse_mem_used(mem: &str) -> u64 {
+    parse_mem_bytes(mem.split('/').next().unwrap_or("").trim())
+}
+
+fn parse_mem_limit(mem: &str) -> u64 {
+    let parts: Vec<&str> = mem.split('/').collect();
+    if parts.len() < 2 { return 0; }
+    parse_mem_bytes(parts[1].trim())
+}
+
+fn fmt_bytes(bytes: u64) -> String {
+    const GB: u64 = 1024 * 1024 * 1024;
+    const MB: u64 = 1024 * 1024;
+    if bytes >= GB {
+        format!("{:.2}G", bytes as f64 / GB as f64)
+    } else if bytes >= MB {
+        format!("{:.0}M", bytes as f64 / MB as f64)
+    } else {
+        format!("{bytes}B")
+    }
 }
 
 fn shorten_path(p: &str) -> String {

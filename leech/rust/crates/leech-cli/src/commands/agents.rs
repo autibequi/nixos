@@ -312,10 +312,25 @@ pub fn auto(dry_run: bool, _steps: Option<u32>) -> Result<()> {
 
     let content = std::fs::read_to_string(&tick_cmd)?;
     let body = extract_body(&content);
-    let prompt = if body.trim().is_empty() { content.clone() } else { body };
+    let tick_body = if body.trim().is_empty() { content.as_str() } else { body.as_str() };
     let home = paths::home();
     let obsidian = paths::obsidian_path();
     let self_dir = paths::leech_root();
+
+    // Injetar contexto mínimo do sistema antes do prompt do tick
+    let prompt = format!(
+        "Você é o agente autônomo do sistema Leech.\n\
+         OBSIDIAN={obsidian}\n\
+         SELF={self_dir}\n\
+         HEADLESS=1 — execute sem perguntar nada, sem explicar o ambiente.\n\n\
+         {tick_body}",
+        obsidian = obsidian.display(),
+        self_dir = self_dir.display(),
+    );
+
+    let t0 = std::time::Instant::now();
+    let started_at = utc_stamp();
+    eprintln!("[tick] {} — iniciando", started_at);
 
     let status = Command::new("claude")
         .args([
@@ -334,8 +349,18 @@ pub fn auto(dry_run: bool, _steps: Option<u32>) -> Result<()> {
         .status()
         .map_err(|e| anyhow::anyhow!("[tick] falhou ao executar claude: {e}"))?;
 
-    if !status.success() {
-        eprintln!("[tick] falhou (exit={:?})", status.code());
+    let elapsed = t0.elapsed();
+    let secs = elapsed.as_secs();
+    let duration = if secs >= 60 {
+        format!("{}m{}s", secs / 60, secs % 60)
+    } else {
+        format!("{}s", secs)
+    };
+
+    if status.success() {
+        eprintln!("[tick] ok — durou {}", duration);
+    } else {
+        eprintln!("[tick] falhou (exit={:?}) — durou {}", status.code(), duration);
     }
 
     Ok(())
