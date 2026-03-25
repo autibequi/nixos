@@ -1,9 +1,9 @@
 ---
-name: estrategia/jira
+name: coruja/jira
 description: Lê um card Jira da Estrategia com TODOS os campos relevantes. Use quando precisar ler, exibir ou analisar um card Jira (ex: FUK2-12090). Documenta a chamada MCP correta, o mapa de campos customizados, e como extrair texto de ADF.
 ---
 
-# estrategia/jira: Ler Card Jira Completo
+# coruja/jira: Ler Card Jira Completo
 
 ## Gatilhos — quando usar OBRIGATORIAMENTE
 

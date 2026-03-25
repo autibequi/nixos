@@ -12,7 +12,7 @@ description: Entrypoint universal para qualquer problema — dispatcher que rote
 | Tipo de problema | Ação |
 |---|---|
 | Qualquer coisa | **Sempre começar por `thinking/investigate`** (coletar dados antes de pensar) |
-| Feature / card Jira | Fluxo thinking (passos 1-7) → `thinking/refine` |
+| Feature / card Jira | Fluxo thinking (passos 1-7) → `thinking/refine` — ler card com `coruja/jira` |
 | Bug / stack trace | → `code/debug` |
 | Pedido vago | Clarificar → rotear |
 | Análise de código | → `code/analysis` |
@@ -187,10 +187,10 @@ So apos backlog aprovado. Seguir a ordem das tasks. Nao pular camadas.
 | Ferramenta / Skill | Quando usar |
 |---|---|
 | `code/debug` | Debugging sistematico (4 fases: reproduzir, hipoteses, isolar, verificar) |
-| `estrategia/grafana` | Metricas, latencia, erros em producao/staging |
-| `estrategia/opensearch` | Busca em logs centralizados por trace_id ou mensagem de erro |
-| `estrategia/jira` | Ler card, historico, comentarios, repro steps reportados |
-| `estrategia/glance` | Overview rapido do estado dos repos e servicos |
+| `coruja/grafana` | Metricas, latencia, erros em producao/staging |
+| `coruja/opensearch` | Busca em logs centralizados por trace_id ou mensagem de erro |
+| `coruja/jira` | Ler card, historico, comentarios, repro steps reportados |
+| `coruja/glance` | Overview rapido do estado dos repos e servicos |
 | `code/analysis` | Entender fluxo de codigo, dependencias entre camadas |
 | `code/inspect` | Inspecionar arquivo/funcao especifica em detalhe |
 | `thinking/refine` | Quebrar investigacao em tasks atomicas apos entender o problema |

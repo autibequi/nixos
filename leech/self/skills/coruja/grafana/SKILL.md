@@ -1,5 +1,5 @@
 ---
-name: estrategia/grafana
+name: coruja/grafana
 description: Navegar logs e dashboards Grafana da Estrategia. Datasources: Loki (K8s workers) + CloudWatch (ECS apps). Use apos deploy, debug de bugs, ou investigacao de erros.
 ---
 

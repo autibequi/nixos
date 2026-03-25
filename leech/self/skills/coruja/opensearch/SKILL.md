@@ -1,9 +1,9 @@
 ---
-name: estrategia/opensearch
+name: coruja/opensearch
 description: Consulta o cluster OpenSearch da Estrategia. Use quando precisar montar queries, explorar índices, debugar busca, ou gerar links para o Dev Console. Contém mapeamento completo de todos os índices e exemplos prontos.
 ---
 
-# estrategia/opensearch: Consultar Cluster OpenSearch
+# coruja/opensearch: Consultar Cluster OpenSearch
 
 ## Objetivo
 

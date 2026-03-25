@@ -1,5 +1,5 @@
 ---
-name: estrategia/ecosystem-map
+name: coruja/ecosystem-map
 description: "Mapa completo de todos os repositorios da Estrategia Educacional — 19 projetos com stack, proposito, responsabilidade e paths. Usar ao refinar cards Jira que envolvam repos fora do trio principal (monolito/bo/front-student), ou quando a pista do bug nao se encaixa nos 3 repos conhecidos."
 ---
 

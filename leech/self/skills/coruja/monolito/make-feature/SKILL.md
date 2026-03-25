@@ -17,7 +17,7 @@ Exceção: se invocado dentro de fluxo Orquestrador já aprovado, pular.
 
 ## Pré-requisito — Branch ou Worktree
 
-Ver regras globais em `estrategia/REGISTRY.md` → seção **Git Flow — Branch vs Worktree**.
+Ver regras globais em `coruja/REGISTRY.md` → seção **Git Flow — Branch vs Worktree**.
 
 ---
 
@@ -40,7 +40,7 @@ Somente após responder essas perguntas iniciar a implementação.
 
 ## Skills Aninhadas — Onde Encontrá-las
 
-As skills abaixo estão em `.claude/skills/estrategia/monolito/`:
+As skills abaixo estão em `skills/coruja/monolito/`:
 
 - `monolito/go-migration`
 - `monolito/go-repository`

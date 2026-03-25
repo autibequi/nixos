@@ -9,7 +9,7 @@ description: Use when the developer wants to refine a Bug card in Jira. Reads th
 
 Investigar os repositórios relevantes para um card de Bug (qualquer repo do ecossistema Estratégia — pode ser 1 ou mais), encontrar referências de código (arquivo, linha, método), e preencher o campo "Sugestão de Implementação" (resolvido pelo nome via `names` map) no Jira com um template estruturado em ADF.
 
-**Ecossistema completo:** ver `estrategia/ecosystem-map` para o mapa dos 19 repos com stack, proposito e tabela de pistas-para-repo.
+**Ecossistema completo:** ver `coruja/ecosystem-map` para o mapa dos 19 repos com stack, proposito e tabela de pistas-para-repo.
 
 ## Inputs
 
@@ -132,7 +132,7 @@ A partir da description, summary, comments e custom fields, extrair:
 
 ### 3b — Determinar repos a investigar
 
-**PRIMEIRO:** Ler `estrategia/ecosystem-map` quando o card envolver qualquer horizontal fora do trio principal (mobile, busca, ecommerce, questoes, accounts, webcast, toggler, user-access). O ecosystem-map tem a tabela definitiva de pistas → repos para todos os 19 repos.
+**PRIMEIRO:** Ler `coruja/ecosystem-map` quando o card envolver qualquer horizontal fora do trio principal (mobile, busca, ecommerce, questoes, accounts, webcast, toggler, user-access). O ecosystem-map tem a tabela definitiva de pistas → repos para todos os 19 repos.
 
 Tabela resumida para os casos mais comuns:
 

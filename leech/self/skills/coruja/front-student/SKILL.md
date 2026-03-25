@@ -1,5 +1,5 @@
 ---
-name: estrategia/front-student
+name: coruja/front-student
 description: "Skill composta do front-student (Nuxt 2) — app do aluno da Estrategia. Indice das sub-skills de implementacao. Carregar quando o repo ativo for front-student."
 ---
 

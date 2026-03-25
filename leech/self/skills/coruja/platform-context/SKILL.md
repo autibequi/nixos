@@ -1,5 +1,5 @@
 ---
-name: estrategia/platform-context
+name: coruja/platform-context
 description: "Contexto compartilhado dos 3 repos da Estrategia — stacks, design system, multi-tenant, convencoes de comunicacao. Carregar quando precisar de visao geral da plataforma."
 ---
 

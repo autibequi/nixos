@@ -1,5 +1,5 @@
 ---
-name: estrategia/bo-container
+name: coruja/bo-container
 description: "Skill composta do bo-container (Vue 2 + Quasar) — admin panel da Estrategia. Indice das sub-skills de implementacao. Carregar quando o repo ativo for bo-container."
 ---
 

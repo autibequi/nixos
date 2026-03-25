@@ -1,9 +1,9 @@
 ---
-name: estrategia/glance
+name: coruja/glance
 description: Visão rápida do estado atual dos 3 repos (monolito, bo-container, front-student) vs main. Mostra árvore de arquivos modificados com trilha visual de chapter/toc em roxo. Use quando o user precisar se localizar no trabalho em andamento — "o que tá mexido?", "onde estou?", "quais repos toquei?".
 ---
 
-# estrategia/glance — Mapa do Trabalho em Andamento
+# coruja/glance — Mapa do Trabalho em Andamento
 
 ## Objetivo
 

@@ -1,5 +1,5 @@
 ---
-name: estrategia/orquestrador
+name: coruja/orquestrador
 description: "Skill composta do orquestrador — coordenacao cross-repo de features, PRs, changelogs, recommits e retomada de contexto. Carregar quando o trabalho envolve mais de 1 repo ou precisa de coordenacao."
 ---
 
