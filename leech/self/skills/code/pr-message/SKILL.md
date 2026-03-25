@@ -1,6 +1,6 @@
 ---
 name: code/pr-message
-description: Gera mensagem de PR estruturada a partir do diff da branch atual contra main — lista o que foi implementado, cenários de teste (happy/sad) e dependências. Sempre escopo branch atual → main, sem misturar branches.
+description: Gera mensagem de PR estruturada a partir do diff da branch atual contra main — busca card Jira em paralelo para contexto do motivador, lista o que foi implementado como solução, cenários de teste (happy/sad) e dependências. Sempre escopo branch atual → main.
 ---
 
 # code/pr-message — Mensagem de PR
@@ -9,30 +9,44 @@ Gera um documento markdown pronto para colar na descrição do PR, baseado **exc
 
 ## Processo
 
-### Passo 1 — Identificar branch e repo
+### Passo 1 — Identificar branch, ticket e repo (em paralelo com Passo 2)
 
 ```bash
 cd /workspace/mnt/estrategia/monolito   # ou o repo ativo
-git branch --show-current
+git branch --show-current               # extrai o ticket do nome da branch (ex: FUK2-11746)
 git log --oneline origin/main..HEAD
 ```
 
-### Passo 2 — Coletar diff (apenas adições)
+Extrair o ticket ID do nome da branch (padrão `FUK2-XXXXX/...`).
+
+### Passo 2 — Buscar card Jira (em paralelo com Passo 1)
+
+Usar `mcp__claude_ai_Atlassian__getJiraIssue` com o ticket extraído da branch.
+
+Extrair do card:
+- **Título** do card
+- **Descrição** / motivador (por que esse card existe — problema, dor, contexto de negócio)
+- **URL** do card para a seção de Referências
+
+### Passo 3 — Coletar diff (apenas adições)
 
 ```bash
-# Commits adicionados vs main
 git log --oneline origin/main..HEAD
-
-# Arquivos alterados com stats
 git diff origin/main...HEAD --stat
-
-# Configs e infra relevantes (SQS, worker, migration)
 git diff origin/main...HEAD -- configuration/ libs/worker/ '*.sql'
 ```
 
-Focar apenas no que **entra** na main — ignorar arquivos removidos ou mocks que não revelam comportamento novo.
+Focar apenas no que **entra** na main — ignorar mocks e arquivos removidos.
 
-### Passo 3 — Montar seção "O que foi implementado"
+### Passo 4 — Montar seção "Contexto"
+
+Com base no card Jira, escrever 2–4 linhas em prosa descrevendo:
+- Qual era o problema ou oportunidade
+- Qual era o impacto (performance, UX, consistência, etc.)
+
+Tom: objetivo, sem jargão de processo.
+
+### Passo 5 — Montar seção "Solução"
 
 Listar em bullets agrupados por camada, na ordem:
 1. Migration (se houver)
@@ -44,16 +58,16 @@ Listar em bullets agrupados por camada, na ordem:
 7. Handler BO
 8. Testes unitários relevantes
 
+Tom: "para resolver isso, fizemos X" — conectar cada decisão técnica ao problema descrito no Contexto.
+
 Formato de cada bullet:
 ```
-- **<Camada>**: <descrição objetiva do que foi adicionado/alterado>
+- **<Camada>**: <o que foi feito e por quê resolve o problema>
 ```
 
-### Passo 4 — Montar tabela de testes
+### Passo 6 — Montar tabela de testes
 
 Incluir apenas Happy Path e Sad Path. Sem testes de integração complexos.
-
-Formato da tabela:
 
 | Cenário | Ação | Esperado |
 |---------|------|----------|
@@ -65,7 +79,7 @@ Regras:
 - Sad path: erros esperados com tratamento correto (409, 500, fallback, etc.)
 - Sem checkboxes — tabela simples e copiável
 
-### Passo 5 — Montar tabela de dependências
+### Passo 7 — Montar tabela de dependências
 
 Incluir apenas dependências externas ao código (infra, config, toggler).
 
@@ -76,18 +90,22 @@ Incluir apenas dependências externas ao código (infra, config, toggler).
 | Toggler | ... | Criar desligado (safe by default) |
 | Wiring | ... | Incluso no PR |
 
-### Passo 6 — Output final
+### Passo 8 — Output final
 
-Markdown simples, copiável. Sem diagramas. Sem headers de seção extras além dos três padrão.
+Markdown simples, copiável. Sem diagramas.
 
 Estrutura obrigatória:
 
 ```markdown
-# <TICKET> — <Título da Feature>
+# <TICKET> — <Título>
 
-## O que foi implementado
+## Contexto
 
-- **<Camada>**: ...
+<2–4 linhas descrevendo o problema/motivador vindo do Jira>
+
+## Solução
+
+- **<Camada>**: <o que foi feito conectado ao problema>
 
 ## Como testar
 
@@ -100,6 +118,10 @@ Estrutura obrigatória:
 | Tipo | Item | Necessário antes do deploy? |
 |------|------|----------------------------|
 ...
+
+# Referências
+
+- [<TICKET> — <Título do card>](<URL do Jira>)
 ```
 
 ## Exemplo de output real
@@ -107,15 +129,19 @@ Estrutura obrigatória:
 ```markdown
 # FUK2-11746 — TOC Async Builder (content_tree_cache)
 
-## O que foi implementado
+## Contexto
 
-- **Migration**: Colunas `content_tree_cache` e `content_tree_cache_updated_at` em `ldi.courses`
+A construção do sumário de cursos (TOC) era feita sincronamente a cada request do BFF, consultando múltiplas tabelas do banco para montar a árvore de capítulos e itens. Em cursos grandes isso gerava latência perceptível e carga desnecessária no banco a cada visualização de curso pelo aluno.
+
+## Solução
+
+- **Migration**: Colunas `content_tree_cache` e `content_tree_cache_updated_at` em `ldi.courses` para persistir o TOC pré-computado
 - **Entity**: Campo `ContentTreeCache` na entidade `Course` + structs (`CachedContentTree`, `ErrTocRebuildRunning`, `BuildCourseTocMessage`)
-- **Repository**: `GetItemIDsByCourseIDs` para resolver IDs de itens de um curso
-- **Service**: `BuildAndSaveContentTree`, `TriggerTocRebuild`, `CheckTocRebuildConflict` no CourseService; propagação de `TriggerTocRebuild` em mutations de chapter, course_chapter e item
-- **Worker**: Handler `LDI.BuildCourseToc` registrado em todos os ambientes (local, qa, sandbox, prod)
-- **Handler BFF**: Serve TOC do cache quando toggler ativo; build síncrono se cache vazio; fallback para DB se toggler desligado
-- **Handler BO**: Retorna `409 Conflict` com `{"jobs": [...]}` se rebuild em andamento
+- **Repository**: `GetItemIDsByCourseIDs` para resolver IDs de itens de um curso durante o build do cache
+- **Service**: `BuildAndSaveContentTree` computa e persiste o TOC; `TriggerTocRebuild` envia rebuild assíncrono via SQS sempre que o conteúdo muda; `CheckTocRebuildConflict` evita rebuilds simultâneos
+- **Worker**: Handler `LDI.BuildCourseToc` processa a fila de rebuild em todos os ambientes (local, qa, sandbox, prod)
+- **Handler BFF**: Serve o TOC direto do cache quando toggler ativo, eliminando as queries ao banco; build síncrono como fallback se cache vazio; fallback para DB se toggler desligado
+- **Handler BO**: Retorna `409 Conflict` com `{"jobs": [...]}` se um rebuild já estiver em andamento, evitando race conditions
 
 ## Como testar
 
@@ -136,6 +162,10 @@ Estrutura obrigatória:
 | Fila SQS | `LDI.BuildCourseToc` + `LDI.BuildCourseTocDLQ` (qa, sandbox, prod) | ✅ Sim |
 | Toggler | `vertical/{vertical}/features/ldi_cached_toc_enabled` | Criar desligado (safe by default) |
 | Wiring | `sqsClient` injetado no `CourseService`; `courseService` injetado no `ChapterService` | Incluso no PR |
+
+# Referências
+
+- [FUK2-11746 — TOC Async Builder](https://estrategia.atlassian.net/browse/FUK2-11746)
 ```
 
 ## Flags opcionais
