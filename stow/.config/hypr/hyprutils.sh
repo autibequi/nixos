@@ -99,10 +99,14 @@ print_screen_with_notes() {
 print_screen_to_clipboard() {
     mkdir -p ~/Pictures/Screenshots
     local outfile=~/Pictures/Screenshots/$(date +%Y%m%d_%H%M%S).png
-    if grim -g "$(slurp)" - | tee "$outfile" | wl-copy; then
+    local region
+    region=$(slurp) || return 0  # Escape cancela silenciosamente
+    if grim -g "$region" "$outfile"; then
+        wl-copy --type image/png < "$outfile" & disown
         notify-send -a "Screenshot" "Capturado" "Copiado para clipboard" -u low
     else
-        notify-send -a "Screenshot" "Falhou" "grim ou wl-copy retornou erro" -u critical
+        notify-send -a "Screenshot" "Falhou" "grim retornou erro" -u critical
+        rm -f "$outfile"
     fi
 }
 
