@@ -2,7 +2,7 @@
   "env": {
     "TZ": "UTC+3"
   },
-  "includeGitInstructions": false,
+  "includeGitInstructions": true,
   "permissions": {
     "allow": [
       "Bash(*)",
@@ -90,5 +90,6 @@
   "statusLine": {
     "type": "command",
     "command": "~/.claude/scripts/statusline.sh"
-  }
+  },
+  "model": "sonnet[1m]"
 }
