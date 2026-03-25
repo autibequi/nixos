@@ -1,3 +1,131 @@
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  DOT MATRIX EYE — Como usar (leia antes de qualquer coisa)                  ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+ARQUIVOS:
+  index.html  — este arquivo: configuração da sequência (SEQUENCE)
+  engine.js   — motor de animação (não precisa editar)
+
+PARA ABRIR NO CHROME (relay):
+  cp /workspace/self/skills/meta/art/templates/eye/index.html /tmp/chrome-relay/eye/index.html
+  cp /workspace/self/skills/meta/art/templates/eye/engine.js  /tmp/chrome-relay/eye/engine.js
+  python3 /workspace/self/scripts/chrome-relay.py nav "http://127.0.0.1:8766/eye/index.html"
+  python3 /workspace/self/scripts/chrome-relay.py inject "document.documentElement.requestFullscreen()"
+
+  Ou use o standalone: eyes.html (mesmo diretório, arquivo único sem dependências)
+  python3 /workspace/self/scripts/chrome-relay.py nav "http://127.0.0.1:8766/eyes.html"
+
+CONTROLE VIA INJECT (após abrir):
+  EYE.next()       — próxima expressão (pausa automaticamente)
+  EYE.prev()       — expressão anterior
+  EYE.goto(N)      — vai para índice N da SEQUENCE
+  EYE.play()       — retoma o loop automático
+  EYE.pause()      — pausa no step atual
+  EYE.toggle()     — alterna pausa/play
+  EYE.emotion('X') — força emoção manualmente (não avança o step)
+  EYE.list()       — retorna string com índice e nome de cada step
+  EYE.seq([...])   — substitui a SEQUENCE inteira em runtime
+
+TECLADO (com o Chrome em foco):
+  SPACE            — pause/resume
+  H S A Z R N      — happy, sad, angry, sleepy, surprised, neutral (manual)
+  F                — fullscreen
+
+EMOÇÕES DISPONÍVEIS:
+  neutral          — olho retangular, íris circular, pupila segue mouse
+  happy            — arco ^ (estilo ^.^)
+  sad              — arco v
+  angry            — sobrancelha inclinada pra dentro, glitch
+  surprised        — escala maior + íris extra ring
+  sleepy           — pálpebra semi-fechada, pupila baixa
+
+NOTA: shake/glitch só aparecem animados — parecem neutros se pausado no seqT=0.
+Para ver shake: EYE.play() por ~1s, depois EYE.pause().
+
+PARA CUSTOMIZAR: edite o array SEQUENCE abaixo. Cada campo está documentado.
+-->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Dot Matrix Eye</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#020904; height:100vh; overflow:hidden; cursor:none; }
+  #info      { position:fixed; bottom:14px; left:50%; transform:translateX(-50%);
+               font:10px 'Courier New',monospace; color:#1a3a1a; letter-spacing:0.2em; }
+  #step-label{ position:fixed; top:14px; right:18px;
+               font:10px 'Courier New',monospace; color:#1a4a1a; letter-spacing:0.15em; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="info">SPACE=pause · H S A Z R=emoção manual · F=fullscreen</div>
+<div id="step-label">—</div>
+
+<script>
+// ╔══════════════════════════════════════════════════════════════════════════╗
+// ║  SEQUENCE — ÚNICO LUGAR PARA CONTROLAR AS EXPRESSÕES E ANIMAÇÕES        ║
+// ╚══════════════════════════════════════════════════════════════════════════╝
+//
+// Cada objeto é um "passo". A sequência loopa. Para uma expressão fixa: 1 item.
+//
+// CAMPOS:
+//
+//   name      string  — label de debug (canto superior direito)
+//   dur       number  — duração em ms
+//
+//   emotion   string  — forma dos olhos:
+//               'neutral'   → retângulo com íris circular e pupila
+//               'happy'     → arco ^ (olho fechado para cima, estilo ^.^)
+//               'sad'       → arco v (olho fechado para baixo)
+//               'angry'     → retângulo + sobrancelha inclinada para dentro
+//               'surprised' → retângulo maior + íris grande + ring extra
+//               'sleepy'    → pálpebra semi-fechada, pupila baixa
+//
+//   scale     number  — zoom do rosto inteiro:
+//               1.0 = normal · 2.0 = zoom in (rosto 2× maior) · 0.5 = zoom out
+//
+//   shakeX    number  — amplitude do shake horizontal em células de grid
+//   shakeY    number  — amplitude do shake vertical em células de grid
+//   shakeHz   number  — velocidade do shake em ciclos/segundo (padrão: 8)
+//
+//   twistAmp  number  — ondulação horizontal das colunas (em células)
+//               0 = sem distorção · 5 = ondulação forte
+//   twistFreq number  — nº de ondas verticais (ex: 2 = 2 ondas, 6 = muitas ondas)
+//   twistFlow number  — velocidade que a onda flui para baixo (0 = estática, 2 = rápida)
+//
+//   glitch    number  — prob de dots aleatórios piscarem por frame:
+//               0 = limpo · 0.1 = glitch moderado · 0.3 = caos total
+//
+//   ease      string  — curva de transição desde o step anterior:
+//               'linear' · 'in' · 'out' · 'inout' · 'bounce' · 'elastic'
+//
+// ── PARA ADICIONAR UMA EXPRESSÃO: copie qualquer linha e ajuste os valores ──
+// ── PARA PAUSAR NA EXPRESSÃO:     use dur alto, ex: dur: 99999              ──
+// ── PARA SEQUÊNCIA DE 1 SÓ:       deixe apenas 1 item no array             ──
+
+window.SEQUENCE = [
+  //  name               dur     emotion        scale  shX  shY  shHz  twAmp twFreq twFlow glitch  ease
+  { name:'idle',         dur:1000, emotion:'neutral',   scale:1.00, shakeX:0,   shakeY:0,   shakeHz:8,  twistAmp:0, twistFreq:2, twistFlow:0,   glitch:0,    ease:'linear'  },
+  { name:'zoom-in',      dur:450,  emotion:'surprised', scale:1.85, shakeX:0,   shakeY:0,   shakeHz:8,  twistAmp:0, twistFreq:2, twistFlow:0,   glitch:0,    ease:'out'     },
+  { name:'hold-big',     dur:500,  emotion:'surprised', scale:1.85, shakeX:0,   shakeY:0,   shakeHz:8,  twistAmp:0, twistFreq:2, twistFlow:0,   glitch:0.02, ease:'linear'  },
+  { name:'zoom-out',     dur:450,  emotion:'neutral',   scale:0.50, shakeX:0,   shakeY:0,   shakeHz:8,  twistAmp:0, twistFreq:2, twistFlow:0,   glitch:0,    ease:'bounce'  },
+  { name:'recover',      dur:400,  emotion:'neutral',   scale:1.00, shakeX:0,   shakeY:0,   shakeHz:8,  twistAmp:0, twistFreq:2, twistFlow:0,   glitch:0,    ease:'elastic' },
+  { name:'shake-angry',  dur:550,  emotion:'angry',     scale:1.00, shakeX:2.5, shakeY:0.8, shakeHz:10, twistAmp:0, twistFreq:2, twistFlow:0,   glitch:0.05, ease:'linear'  },
+  { name:'idle2',        dur:500,  emotion:'neutral',   scale:1.00, shakeX:0,   shakeY:0,   shakeHz:8,  twistAmp:0, twistFreq:2, twistFlow:0,   glitch:0,    ease:'out'     },
+  { name:'twist',        dur:900,  emotion:'neutral',   scale:1.00, shakeX:0,   shakeY:0,   shakeHz:8,  twistAmp:5, twistFreq:3, twistFlow:1.2, glitch:0,    ease:'inout'   },
+  { name:'untwist',      dur:400,  emotion:'neutral',   scale:1.00, shakeX:0,   shakeY:0,   shakeHz:8,  twistAmp:0, twistFreq:3, twistFlow:0,   glitch:0,    ease:'out'     },
+  { name:'happy-bounce', dur:650,  emotion:'happy',     scale:1.10, shakeX:0,   shakeY:2.0, shakeHz:5,  twistAmp:0, twistFreq:2, twistFlow:0,   glitch:0,    ease:'bounce'  },
+  { name:'idle3',        dur:600,  emotion:'happy',     scale:1.00, shakeX:0,   shakeY:0,   shakeHz:8,  twistAmp:0, twistFreq:2, twistFlow:0,   glitch:0,    ease:'out'     },
+  { name:'glitch',       dur:380,  emotion:'neutral',   scale:1.00, shakeX:1.5, shakeY:0,   shakeHz:14, twistAmp:3, twistFreq:6, twistFlow:2.0, glitch:0.20, ease:'linear'  },
+  { name:'sad',          dur:900,  emotion:'sad',       scale:0.88, shakeX:0,   shakeY:0,   shakeHz:8,  twistAmp:0, twistFreq:2, twistFlow:0,   glitch:0,    ease:'in'      },
+  { name:'sleepy',       dur:1000, emotion:'sleepy',    scale:0.92, shakeX:0,   shakeY:0,   shakeHz:8,  twistAmp:0, twistFreq:2, twistFlow:0,   glitch:0,    ease:'inout'   },
+  { name:'wake',         dur:350,  emotion:'neutral',   scale:1.05, shakeX:0,   shakeY:0,   shakeHz:8,  twistAmp:0, twistFreq:2, twistFlow:0,   glitch:0,    ease:'elastic' },
+];
+</script>
+<script>
 // engine.js — Dot Matrix Eye — Motor de animação
 // Espera window.SEQUENCE definido pelo index.html antes de carregar.
 // Não edite este arquivo para mudar expressões — edite o SEQUENCE em index.html.
@@ -356,3 +484,7 @@
     list:   ()       => SEQ.map((s,i) => `${i}: ${s.name}`).join('\n'),
   };
 })();
+
+</script>
+</body>
+</html>

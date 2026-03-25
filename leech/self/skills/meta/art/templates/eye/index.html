@@ -1,3 +1,50 @@
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  DOT MATRIX EYE — Como usar (leia antes de qualquer coisa)                  ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+ARQUIVOS:
+  index.html  — este arquivo: configuração da sequência (SEQUENCE)
+  engine.js   — motor de animação (não precisa editar)
+
+PARA ABRIR NO CHROME (relay):
+  cp /workspace/self/skills/meta/art/templates/eye/index.html /tmp/chrome-relay/eye/index.html
+  cp /workspace/self/skills/meta/art/templates/eye/engine.js  /tmp/chrome-relay/eye/engine.js
+  python3 /workspace/self/scripts/chrome-relay.py nav "http://127.0.0.1:8766/eye/index.html"
+  python3 /workspace/self/scripts/chrome-relay.py inject "document.documentElement.requestFullscreen()"
+
+  Ou use o standalone: eyes.html (mesmo diretório, arquivo único sem dependências)
+  python3 /workspace/self/scripts/chrome-relay.py nav "http://127.0.0.1:8766/eyes.html"
+
+CONTROLE VIA INJECT (após abrir):
+  EYE.next()       — próxima expressão (pausa automaticamente)
+  EYE.prev()       — expressão anterior
+  EYE.goto(N)      — vai para índice N da SEQUENCE
+  EYE.play()       — retoma o loop automático
+  EYE.pause()      — pausa no step atual
+  EYE.toggle()     — alterna pausa/play
+  EYE.emotion('X') — força emoção manualmente (não avança o step)
+  EYE.list()       — retorna string com índice e nome de cada step
+  EYE.seq([...])   — substitui a SEQUENCE inteira em runtime
+
+TECLADO (com o Chrome em foco):
+  SPACE            — pause/resume
+  H S A Z R N      — happy, sad, angry, sleepy, surprised, neutral (manual)
+  F                — fullscreen
+
+EMOÇÕES DISPONÍVEIS:
+  neutral          — olho retangular, íris circular, pupila segue mouse
+  happy            — arco ^ (estilo ^.^)
+  sad              — arco v
+  angry            — sobrancelha inclinada pra dentro, glitch
+  surprised        — escala maior + íris extra ring
+  sleepy           — pálpebra semi-fechada, pupila baixa
+
+NOTA: shake/glitch só aparecem animados — parecem neutros se pausado no seqT=0.
+Para ver shake: EYE.play() por ~1s, depois EYE.pause().
+
+PARA CUSTOMIZAR: edite o array SEQUENCE abaixo. Cada campo está documentado.
+-->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
