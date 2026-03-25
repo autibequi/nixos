@@ -23,7 +23,7 @@
     "pulseaudio",
     "backlight",
     "network",
-    "group/tray-expander",
+    "tray",
     "bluetooth"
   ],
   "tray": {
