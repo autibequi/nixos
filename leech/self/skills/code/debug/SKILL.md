@@ -1,20 +1,58 @@
 ---
 name: code/debug
-description: "Debugging sistematico em 4 fases: reproduzir, hipoteses, isolar, verificar. Nunca chutar fix sem evidencia."
+description: "Debugging sistematico — ativado automaticamente ao ver stack trace ou bug report. Fluxo: leitura → localização → rastreio+logs → hipótese → fix mínimo → verificação."
 ---
 
 # Skill: debug — Debugging Sistematico
 
-> 4 fases para encontrar causa raiz. Nunca chutar fix sem evidencia.
+> Ativada automaticamente ao receber stack trace, erro de execucao, ou bug report.
+> Nunca chutar fix sem evidencia. Sempre conectar todos os pontos antes de agir.
 
 ---
 
 ## Quando usar
 
+- Stack trace recebido na conversa
 - Bug reportado (Jira, user, CI)
 - Teste falhando sem causa obvia
 - Comportamento inesperado em producao/staging
 - Incidente ou regressao
+
+## Contexto do projeto — ler antes de debugar
+
+Antes de iniciar o fluxo, verificar se existem arquivos `.md` no projeto que descrevem
+arquitetura, convenções de debug, ou detalhes de infraestrutura:
+
+```
+Glob: **/*.md (no projeto atual)
+Priorizar: README.md, ARCHITECTURE.md, DEBUG.md, CONTRIBUTING.md, docs/
+```
+
+Esses arquivos podem conter:
+- Como rodar testes localmente
+- Onde ficam os logs da aplicacao
+- Flags de ambiente relevantes
+- Convenções específicas do projeto
+
+Se encontrar algo útil: absorver antes de continuar o fluxo.
+
+## Fluxo — Stack Trace recebido
+
+Quando o user manda um stack trace diretamente:
+
+1. **Leitura** — tipo de erro, mensagem principal, linha que importa (geralmente nao e a primeira)
+2. **Localização** — Grep pelo arquivo/funcao do stack → Read das linhas ao redor
+3. **Rastreio da cadeia** — subir chamadas ate a origem real
+   - Checar proativamente `/workspace/logs/<nome-da-aplicacao>/` — logs da execucao atual ja estao la
+   - Ler ultimos logs sem perguntar ao user — determinar se sao uteis
+   - Combinar stack + logs + codigo antes de continuar
+4. **Hipotese** — conectar TODOS os pontos (stack + logs + codigo)
+   - Todos os arquivos relevantes devem ser lidos e validados antes de assumir que a solucao esta correta
+   - Nao assumir causa sem evidencia em cada camada
+5. **Fix** — diff minimo, menor mudanca possivel, sem reformatar nada fora do escopo
+6. **Verificacao** — rodar testes/lint apos o fix (especifico por projeto — ver secao Dominio abaixo)
+
+---
 
 ## Fase 1 — REPRODUZIR
 
