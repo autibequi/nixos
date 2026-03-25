@@ -26,6 +26,7 @@ pub const BANNER: &str = "\
 
     leech agents                   \x1b[2mlist agents\x1b[0m
     leech agents phone hermes      \x1b[2mtalk to hermes\x1b[0m
+    leech ask coruja o que tem hoje \x1b[2moneshot question\x1b[0m
     leech run coruja               \x1b[2mrun agent now\x1b[0m
     leech tick                     \x1b[2mrun all due agents + tasks\x1b[0m
 
@@ -87,6 +88,24 @@ pub const AGENTS_BEFORE: &str = "\
     leech agents phone coruja      \x1b[2mtalk to coruja\x1b[0m
     leech agents status coruja     \x1b[2mactivity log for coruja\x1b[0m
     leech agents status --json     \x1b[2mall activity as JSON\x1b[0m
+
+\x1b[2m  ─────────────────────────────────────────────────────────\x1b[0m
+";
+
+// ── Ask ──────────────────────────────────────────────────────────────────────
+
+pub const ASK_BEFORE: &str = "\
+\x1b[35m  ask\x1b[0m  \x1b[2moneshot question to an agent\x1b[0m
+
+\x1b[2m  ── common usage ──────────────────────────────────────────\x1b[0m
+
+    leech ask coruja o que tem no radar hoje?   \x1b[2mcoruja responde direto\x1b[0m
+    leech ask wiseman resume os insights        \x1b[2mwiseman responde\x1b[0m
+    leech ask hermes status das tasks           \x1b[2mhermes responde\x1b[0m
+    leech ask coruja -m sonnet analise profunda \x1b[2mforçar modelo\x1b[0m
+
+\x1b[2m  O agente recebe: \"<nome>, você foi questionado pelo usuário: <pergunta>\"\x1b[0m
+\x1b[2m  Roda headless com max-turns=10. Para conversa interativa: leech agents phone.\x1b[0m
 
 \x1b[2m  ─────────────────────────────────────────────────────────\x1b[0m
 ";

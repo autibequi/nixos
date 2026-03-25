@@ -505,3 +505,43 @@ Após ler a memory, decidir:
 
 ---
 
+## Wiki Maintenance — Manutencao Continua
+
+A cada ciclo investigativo (60min), alem do segundo cerebro em `workshop/agents/coruja/`:
+
+### O que fazer
+
+1. **Verificar PRs mergeados** desde ultimo ciclo (`git log --since` nos 3 repos)
+2. **Se PR toca modulo documentado no wiki** → atualizar secao "Atividade Recente" do artigo correspondente
+3. **Verificar Jira** por mudancas em epics (MCP Atlassian quando disponivel)
+4. **Atualizar hotspots** se arquivo subiu significativamente no ranking de mudancas
+5. **Postar descoberta no feed**
+
+### Onde escrever
+
+```
+/workspace/obsidian/wiki/estrategia/
+  projetos/monolito/overview.md      Atualizar Atividade Recente + Hotspots
+  projetos/bo-container/overview.md  Atualizar Atividade Recente + Hotspots
+  projetos/front-student/overview.md Atualizar Atividade Recente + Hotspots
+  github/github-pulse.md             Atualizar PRs + tendencias
+  jira/jira-overview.md              Atualizar epics (quando MCP disponivel)
+  pessoas/_team-overview.md          Atualizar commits se mudanca significativa
+```
+
+### Formato de atualizacao
+
+- Append na secao "Atividade Recente" (manter ultimas 6 entradas, remover mais antigas)
+- Incrementar `wikister_version` no frontmatter
+- Atualizar `updated` com timestamp UTC
+
+### Formato inbox
+
+```
+echo "[HH:MM] [coruja] Wiki: <repo> — <descoberta>" >> /workspace/obsidian/inbox/feed.md
+```
+
+### Regra de ouro
+
+**Nao fabricar dados.** Se MCP Jira/Notion nao esta autenticado, documentar o gap honestamente. Wiki com stub > wiki com dado falso.
+

@@ -25,3 +25,4 @@
 - [project_wiseman_inbox_tidy.md](project_wiseman_inbox_tidy.md) — Wiseman modo INBOX_TIDY: agrupa inbox por assunto em pastas (só com 3+), cria RESUMO.md
 - [project_diretrizes.md](project_diretrizes.md) — DIRETRIZES.md em obsidian/bedrooms/: regras de todos os agentes; cada agente mantém sua seção; Wiseman fiscaliza
 - [feedback_avatar_layout.md](feedback_avatar_layout.md) — Texto lateral ao avatar: máximo 2-3 palavras por linha; conteúdo real vai abaixo do code block
+- [project_wiki_estrategia_progressive.md](project_wiki_estrategia_progressive.md) — Wiki Estrategia progressivo: construir todo dia ate cobrir tudo, Coruja mantém atualizado via ciclos

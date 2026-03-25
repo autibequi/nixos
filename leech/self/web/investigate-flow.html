@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>thinking/investigate — Flow</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    padding: 32px;
+    min-height: 100vh;
+  }
+  h1 {
+    font-size: 1.4rem;
+    color: #cba6f7;
+    margin-bottom: 6px;
+    letter-spacing: 0.05em;
+  }
+  .subtitle {
+    font-size: 0.82rem;
+    color: #6c7086;
+    margin-bottom: 36px;
+  }
+  .diagram-wrap {
+    background: #181825;
+    border: 1px solid #313244;
+    border-radius: 12px;
+    padding: 32px;
+    overflow-x: auto;
+  }
+  .mermaid { display: flex; justify-content: center; }
+  .mermaid svg { max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<h1>thinking / investigate</h1>
+<p class="subtitle">Pipeline de coleta de dados — executado antes de qualquer hipótese</p>
+
+<div class="diagram-wrap">
+<div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {
+  'primaryColor': '#313244',
+  'primaryTextColor': '#cdd6f4',
+  'primaryBorderColor': '#45475a',
+  'lineColor': '#7f849c',
+  'secondaryColor': '#1e1e2e',
+  'tertiaryColor': '#181825',
+  'background': '#1e1e2e',
+  'nodeBorder': '#45475a',
+  'clusterBkg': '#181825',
+  'titleColor': '#cba6f7',
+  'edgeLabelBackground': '#1e1e2e',
+  'fontFamily': 'JetBrains Mono, monospace'
+}}}%%
+
+flowchart TD
+    START([" 🎫 Problema recebido\ncard Jira / bug / pedido "])
+    START --> CTX
+
+    subgraph CTX["① Contexto da plataforma"]
+        direction LR
+        MONO["🟦 monolito\nGo · handlers\nservices · repos"]
+        BO["🟧 bo-container\nVue 2 · Quasar\nadmin"]
+        FRONT["🟩 front-student\nNuxt 2 · SSR\nportal aluno"]
+    end
+
+    CTX --> LOCATE
+
+    subgraph LOCATE["② Localizar a camada"]
+        direction TB
+        TREE["📂 árvore de localização\nmonolito / bo / front\ninfra / host"]
+        TREE --> PICK["escolher 1 camada\nmais provável\n↓ ir fundo"]
+    end
+
+    LOCATE --> COLLECT
+
+    subgraph COLLECT["③ Coletar evidências"]
+        direction TB
+        LOGS["📋 logs\n/workspace/logs/&lt;app&gt;/\n↳ últimas 200 linhas\n↳ sem perguntar"]
+        CODE["📁 código\narquivos do stack trace\nou da feature"]
+        JIRA["🎫 estrategia/jira\nextrair todos os campos\nrepro steps · comentários"]
+        GIT["📜 histórico\ngit log -20\ndiff HEAD~1\nblame"]
+        EXTRA["🔍 extras\nGrafana · OpenSearch\nprints do usuário"]
+    end
+
+    LOGS & CODE & JIRA & GIT & EXTRA --> SUMMARY
+
+    SUMMARY["📊 sumário estruturado\nlogs · código · relato · histórico · lacunas\n⚠️  sem hipótese ainda"]
+
+    SUMMARY --> RULE
+
+    RULE{{"🔒 Regra de ouro\nSó coletar.\nNão concluir nada aqui."}}
+
+    RULE --> NEXT
+
+    NEXT([" → passar para thinking\nentender · mapear · hipotetizar "])
+
+    style START fill:#7c3aed,color:#fff,stroke:#6d28d9
+    style NEXT fill:#065f46,color:#fff,stroke:#047857
+    style SUMMARY fill:#1e3a5f,color:#cdd6f4,stroke:#2563eb
+    style RULE fill:#78350f,color:#fde68a,stroke:#d97706
+    style MONO fill:#1d4ed8,color:#fff,stroke:#2563eb
+    style BO fill:#92400e,color:#fff,stroke:#d97706
+    style FRONT fill:#065f46,color:#fff,stroke:#047857
+    style LOGS fill:#312e81,color:#c7d2fe,stroke:#4338ca
+    style CODE fill:#312e81,color:#c7d2fe,stroke:#4338ca
+    style JIRA fill:#312e81,color:#c7d2fe,stroke:#4338ca
+    style GIT fill:#312e81,color:#c7d2fe,stroke:#4338ca
+    style EXTRA fill:#312e81,color:#c7d2fe,stroke:#4338ca
+    style PICK fill:#1c1917,color:#d6d3d1,stroke:#57534e
+    style TREE fill:#1c1917,color:#d6d3d1,stroke:#57534e
+</div>
+</div>
+
+<script>
+  mermaid.initialize({ startOnLoad: true, securityLevel: 'loose' });
+</script>
+</body>
+</html>

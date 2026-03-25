@@ -273,9 +273,27 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     #content th, #content td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; text-align: left; }
     #content th { background: var(--bg); font-weight: 600; }
     .mermaid {
-      margin: 1.25rem 0; padding: 1rem;
+      position: relative; overflow: hidden; cursor: grab;
+      margin: 1.25rem 0; padding: 0;
       background: var(--bg); border-radius: 8px; border: 1px solid var(--border);
+      user-select: none; -webkit-user-select: none; touch-action: none;
     }
+    .mermaid.panning { cursor: grabbing; }
+    .mermaid svg { display: block; transform-origin: 0 0; will-change: transform; margin: 1rem; }
+    .z-hint {
+      position: absolute; bottom: 6px; right: 10px; pointer-events: none;
+      font: 500 0.6rem/1 'JetBrains Mono', monospace; color: var(--text-muted);
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .mermaid:hover .z-hint { opacity: 1; }
+    .z-reset {
+      position: absolute; top: 7px; right: 8px; z-index: 5;
+      font: 500 0.65rem 'JetBrains Mono', monospace; color: var(--text-muted);
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 2px 8px; border-radius: 4px; cursor: pointer;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .mermaid:hover .z-reset { opacity: 1; }
   </style>
 </head>
 <body>
@@ -317,7 +335,82 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       if (typeof mermaid !== 'undefined') {
         try { await mermaid.run({ nodes: el.querySelectorAll('.mermaid'), suppressErrors: true }); }
         catch (e) { console.warn('mermaid', e); }
+        setTimeout(function() {
+          el.querySelectorAll('.mermaid').forEach(makeZoomable);
+        }, 80);
       }
+    }
+
+    function makeZoomable(box) {
+      if (box.dataset.z) return;
+      var svg = box.querySelector('svg');
+      if (!svg) return;
+      box.dataset.z = '1';
+
+      /* fix SVG sizing so it doesn't collapse */
+      var nat = svg.getBoundingClientRect();
+      if (nat.height < 20) { setTimeout(function(){ box.dataset.z=''; makeZoomable(box); }, 150); return; }
+      box.style.minHeight = Math.max(nat.height + 32, 120) + 'px';
+
+      /* hint + reset */
+      var hint = document.createElement('div');
+      hint.className = 'z-hint'; hint.textContent = 'scroll = zoom  \xb7  drag = pan';
+      var btn = document.createElement('button');
+      btn.className = 'z-reset'; btn.textContent = '\u27f3 reset';
+      box.appendChild(hint); box.appendChild(btn);
+
+      var s=1, tx=0, ty=0;
+      function put() { svg.style.transform = 'translate('+tx+'px,'+ty+'px) scale('+s+')'; }
+
+      btn.addEventListener('click', function(e) { e.stopPropagation(); s=1; tx=0; ty=0; put(); });
+
+      /* zoom on wheel */
+      box.addEventListener('wheel', function(e) {
+        e.preventDefault(); e.stopPropagation();
+        var r = box.getBoundingClientRect();
+        var mx = e.clientX - r.left, my = e.clientY - r.top;
+        var f = e.deltaY < 0 ? 1.12 : 0.89;
+        var ns = Math.min(Math.max(s * f, 0.08), 15);
+        tx = mx - (mx - tx) * (ns / s);
+        ty = my - (my - ty) * (ns / s);
+        s = ns; put();
+      }, { passive: false });
+
+      /* drag with pointer capture */
+      var px, py, ptx, pty;
+      box.addEventListener('pointerdown', function(e) {
+        if (e.button && e.button !== 0) return;
+        box.setPointerCapture(e.pointerId);
+        px = e.clientX; py = e.clientY; ptx = tx; pty = ty;
+        box.classList.add('panning'); e.preventDefault();
+      });
+      box.addEventListener('pointermove', function(e) {
+        if (!box.hasPointerCapture(e.pointerId)) return;
+        tx = ptx + (e.clientX - px); ty = pty + (e.clientY - py); put();
+      });
+      box.addEventListener('pointerup', function(e) {
+        box.releasePointerCapture(e.pointerId);
+        box.classList.remove('panning');
+      });
+      box.addEventListener('pointercancel', function(e) {
+        box.releasePointerCapture(e.pointerId);
+        box.classList.remove('panning');
+      });
+
+      /* pinch zoom (touch) */
+      var ptrs = {};
+      box.addEventListener('pointerdown', function(e) { ptrs[e.pointerId] = {x:e.clientX,y:e.clientY}; });
+      box.addEventListener('pointermove', function(e) {
+        ptrs[e.pointerId] = {x:e.clientX,y:e.clientY};
+        var ids = Object.keys(ptrs);
+        if (ids.length === 2) {
+          var a = ptrs[ids[0]], b = ptrs[ids[1]];
+          var nd = Math.hypot(a.x-b.x, a.y-b.y);
+          if (box._pd) { s = Math.min(Math.max(s * nd/box._pd, 0.08), 15); put(); }
+          box._pd = nd;
+        }
+      });
+      box.addEventListener('pointerup', function(e) { delete ptrs[e.pointerId]; if(!Object.keys(ptrs).length) box._pd=0; });
     }
 
     // SSE — live reload

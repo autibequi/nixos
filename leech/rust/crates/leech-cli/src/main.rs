@@ -288,6 +288,20 @@ enum Commands {
         action: Option<AgentsAction>,
     },
 
+    // ── Ask ─────────────────────────────────────────────────────
+    /// One-shot question to an agent
+    #[command(before_help = help::ASK_BEFORE)]
+    Ask {
+        /// Nome do agente (ex: coruja, hermes, wiseman)
+        agent: String,
+        /// A pergunta para o agente
+        #[arg(trailing_var_arg = true)]
+        question: Vec<String>,
+        /// Forçar modelo (haiku, sonnet, opus)
+        #[arg(long, short = 'm')]
+        model: Option<String>,
+    },
+
     // ── Tasks ───────────────────────────────────────────────────
     /// Task kanban (DOING/TODO/DONE)
     #[command(alias = "t", before_help = help::TASKS_BEFORE)]
@@ -546,6 +560,12 @@ fn main() -> Result<()> {
         // Run — delegates to bash CLI
         Some(Commands::Run { name, steps }) => {
             commands::agents::run_unified(&name, steps)
+        }
+
+        // Ask
+        Some(Commands::Ask { agent, question, model }) => {
+            let q = question.join(" ");
+            commands::agents::ask(&agent, &q, model.as_deref())
         }
 
         // Agents

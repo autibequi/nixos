@@ -366,6 +366,58 @@ pub fn auto(dry_run: bool, _steps: Option<u32>) -> Result<()> {
     Ok(())
 }
 
+// ── Ask ───────────────────────────────────────────────────────────────────────
+
+/// `leech ask <agent> <question>` — one-shot question to an agent.
+pub fn ask(agent_name: &str, question: &str, model_override: Option<&str>) -> Result<()> {
+    let agent_file = paths::agent_file(agent_name)
+        .ok_or_else(|| anyhow::anyhow!("Agente '{}' nao encontrado.", agent_name))?;
+
+    let content = std::fs::read_to_string(&agent_file)?;
+    let agent_model = agents::frontmatter_field(&content, "model")
+        .unwrap_or_else(|| "haiku".into());
+    let model = model_override.unwrap_or(&agent_model);
+
+    let body = extract_body(&content);
+    let obsidian = paths::obsidian_path();
+    let self_dir = paths::leech_root();
+    let home = paths::home();
+
+    let prompt = format!(
+        "{agent_name}, você foi questionado pelo usuário:\n\n\
+         > {question}\n\n\
+         Responda diretamente, de forma clara e objetiva. \
+         Esta é uma sessão oneshot — não faça perguntas de volta, \
+         não explique o ambiente. Apenas responda.\n\n\
+         --- contexto do agente ---\n\
+         {body}"
+    );
+
+    eprintln!("[ask] {agent_name} ({model}) — pergunta: {question}");
+
+    let status = Command::new("claude")
+        .args([
+            "--permission-mode", "bypassPermissions",
+            "--model", model,
+            "--max-turns", "10",
+            "-p", &prompt,
+            "--add-dir", &home.to_string_lossy(),
+            "--add-dir", &obsidian.to_string_lossy(),
+            "--add-dir", &self_dir.to_string_lossy(),
+        ])
+        .env("HEADLESS", "1")
+        .env("LEECH_OBSIDIAN", &obsidian)
+        .env("LEECH_SELF", &self_dir)
+        .current_dir(&home)
+        .status()
+        .map_err(|e| anyhow::anyhow!("[ask] falhou ao executar claude: {e}"))?;
+
+    if !status.success() {
+        anyhow::bail!("[ask] claude saiu com erro (exit={:?})", status.code());
+    }
+    Ok(())
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 fn utc_stamp() -> String {
