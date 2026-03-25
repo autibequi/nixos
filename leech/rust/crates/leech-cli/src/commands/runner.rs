@@ -18,6 +18,8 @@ pub struct RunnerOpts<'a> {
     pub cmd: Option<&'a str>,
     pub tail: u32,
     pub debug: bool,
+    /// Hot-reload mode via air (mounts source, rebuilds on .go changes).
+    pub dev: bool,
     /// Start container and return immediately without following logs live.
     pub detach: bool,
 }
@@ -149,6 +151,9 @@ fn do_start(
     let debug_compose = svc::debug_compose_file(svc);
     let debug_flag    = debug_compose.to_string_lossy().into_owned();
     let use_debug     = opts.debug && debug_compose.exists();
+    let dev_compose   = svc::dev_compose_file(svc);
+    let dev_flag      = dev_compose.to_string_lossy().into_owned();
+    let use_dev       = opts.dev && dev_compose.exists();
     let startup_log   = log_dir.join("startup.log");
     let log_file = std::fs::OpenOptions::new()
         .create(true)
@@ -161,6 +166,16 @@ fn do_start(
             "compose",
             "-f", &compose.to_string_lossy(),
             "-f", &debug_flag,
+            "-p", project,
+        ]);
+        for (k, v) in env_vars { c.env(k, v); }
+        c
+    } else if use_dev {
+        let mut c = Command::new("docker");
+        c.args([
+            "compose",
+            "-f", &compose.to_string_lossy(),
+            "-f", &dev_flag,
             "-p", project,
         ]);
         for (k, v) in env_vars { c.env(k, v); }
@@ -199,6 +214,17 @@ fn do_start(
         ]);
         for (k, v) in env_vars { c.env(k, v); }
         c
+    } else if use_dev {
+        eprintln!("\x1b[36m[dev] overlay: {}\x1b[0m", dev_compose.display());
+        let mut c = Command::new("docker");
+        c.args([
+            "compose",
+            "-f", &compose.to_string_lossy(),
+            "-f", &dev_flag,
+            "-p", project,
+        ]);
+        for (k, v) in env_vars { c.env(k, v); }
+        c
     } else {
         compose_cmd(compose, project, env_vars)
     };
@@ -226,13 +252,20 @@ fn do_start(
         .spawn()?;
     let _ = std::fs::write(&pid_file, child.id().to_string());
 
-    eprintln!(
-        "\x1b[32m✓ {} pronto\x1b[0m  [env={}]{}",
-        svc, opts.env, if use_debug { "  \x1b[35m[DEBUG]\x1b[0m" } else { "" }
-    );
+    let mode_tag = if use_debug {
+        "  \x1b[35m[DEBUG]\x1b[0m"
+    } else if use_dev {
+        "  \x1b[36m[DEV]\x1b[0m"
+    } else {
+        ""
+    };
+    eprintln!("\x1b[32m✓ {} pronto\x1b[0m  [env={}]{}", svc, opts.env, mode_tag);
     if use_debug {
         eprintln!("  \x1b[33m[DEBUG]\x1b[0m Delve aguardando attach em localhost:2345");
         eprintln!("  \x1b[33m[DEBUG]\x1b[0m VS Code: use a config 'Attach to monolito'");
+    }
+    if use_dev {
+        eprintln!("  \x1b[36m[DEV]\x1b[0m air watching *.go — rebuild em ~2s apos mudanca");
     }
     eprintln!(
         "  \x1b[2mLogs: leech runner {} logs\x1b[0m",

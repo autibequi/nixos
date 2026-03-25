@@ -83,6 +83,11 @@ pub fn debug_compose_file(svc: &str) -> PathBuf {
     }
 }
 
+/// Dev (hot-reload) overlay compose file path.
+pub fn dev_compose_file(svc: &str) -> PathBuf {
+    service_config_dir(svc).join("docker-compose.dev.yml")
+}
+
 /// Deps compose file path.
 pub fn deps_compose_file(svc: &str) -> PathBuf {
     service_config_dir(svc).join("docker-compose.deps.yml")

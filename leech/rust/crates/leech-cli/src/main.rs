@@ -223,6 +223,8 @@ enum Commands {
         #[arg(long)]
         debug: bool,
         #[arg(long)]
+        dev: bool,
+        #[arg(long)]
         detach: bool,
     },
 
@@ -494,7 +496,7 @@ fn main() -> Result<()> {
 
         // Runner — native Rust service orchestration
         Some(Commands::Runner {
-            service, action, env, worktree, vertical, container, cmd, tail, debug, detach,
+            service, action, env, worktree, vertical, container, cmd, tail, debug, dev, detach,
         }) => {
             commands::runner::run(&service, &action, &commands::runner::RunnerOpts {
                 env: &env,
@@ -504,6 +506,7 @@ fn main() -> Result<()> {
                 cmd: cmd.as_deref(),
                 tail,
                 debug,
+                dev,
                 detach,
             })
         }
