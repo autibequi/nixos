@@ -55,7 +55,7 @@ find /workspace/obsidian/vault -name "*.md" -mmin -120 -type f 2>/dev/null | hea
    - Ler conteudo e tags existentes
    - Identificar conexoes com outras notas (temas, agentes, decisoes)
    - Adicionar `related:` links e tags normalizadas
-   - Registrar em `vault/insights.md` se for conexao nao-obvia
+   - Registrar em `wiki/leech/insights.md` se for conexao nao-obvia
 
 3. Priorizar:
    - Notas sem tags → normalizar
@@ -181,7 +181,7 @@ done
    - Agentes redundantes ou com overlap
    - Evolucao do sistema ao longo do tempo
 
-3. Se encontrar padrao relevante → appenda insights.md + inbox se acionavel
+3. Se encontrar padrao relevante → appenda `wiki/leech/insights.md` + inbox se acionavel
 
 ---
 
@@ -260,7 +260,8 @@ Se 0 violacoes: `[HH:MM] [wiseman] ENFORCE: todos os agentes dentro da lei.`
 ## Comunicacao
 
 Feed: `[HH:MM] [wiseman] mensagem` em `/workspace/obsidian/inbox/feed.md`
-Insights: `/workspace/obsidian/vault/insights.md`
+Insights: `/workspace/obsidian/wiki/leech/insights.md`
+Atlas: `/workspace/obsidian/wiki/leech/ATLAS.md`
 
 ---
 

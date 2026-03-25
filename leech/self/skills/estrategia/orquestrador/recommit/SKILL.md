@@ -18,41 +18,40 @@ Qual repositório deseja recommitar?
 
 Aguardar a resposta antes de prosseguir.
 
-## Passo 2 — Identificar o ponto de fork da main
+## Passo 2 — Identificar o ponto de fork e o escopo real
 
-Entrar no diretório do repositório escolhido e identificar o commit base (último commit antes do fork):
+### 2a — safe.directory (sempre rodar primeiro)
 
 ```bash
-cd /home/claude/projects/estrategia/<repo>/
-HOME=/tmp git merge-base main HEAD
+HOME=/tmp git config --global --add safe.directory /workspace/mnt/estrategia/<repo>
 ```
 
-Guardar esse hash como `FORK_POINT`.
+### 2b — Fork point e commits
 
-Mostrar ao dev:
-- Branch atual: `git branch --show-current`
-- Quantidade de commits desde o fork: `git rev-list --count <FORK_POINT>..HEAD`
-- Lista resumida dos commits atuais: `git log --oneline <FORK_POINT>..HEAD`
-
-### Gate de confirmação (OBRIGATÓRIO)
-
-O `git reset --soft` é uma operação destrutiva que reescreve o histórico. O dev DEVE confirmar explicitamente antes de prosseguir. Apresentar:
-
-```
-⚠️  ATENÇÃO: Operação destrutiva
-
-Vou fazer `git reset --soft <FORK_POINT_SHORT>` que vai:
-- Desfazer os N commits acima (mantendo as mudanças staged)
-- Reorganizá-los em commits menores e cronológicos
-- O histórico original será perdido (recuperável via git reflog por ~30 dias)
-
-Branch: <branch-atual>
-Commits afetados: N
-
-Confirma? (sim/não)
+```bash
+HOME=/tmp git -C /workspace/mnt/estrategia/<repo> merge-base main HEAD
+HOME=/tmp git -C /workspace/mnt/estrategia/<repo> rev-list --count <FORK_POINT>..HEAD
+HOME=/tmp git -C /workspace/mnt/estrategia/<repo> log --oneline <FORK_POINT>..HEAD
 ```
 
-**PARAR AQUI e aguardar "sim" explícito.** Respostas ambíguas ("ok", "pode ser", "acho que sim") devem ser tratadas como "não" — pedir confirmação clara. Nunca interpretar silêncio ou continuação de conversa como confirmação.
+### 2c — Diff real vs main (OBRIGATÓRIO)
+
+O diff vs fork point pode incluir commits que já foram mergeados na main (via PRs de outras branches). Sempre confirmar o que de fato difere da main atual:
+
+```bash
+HOME=/tmp git -C /workspace/mnt/estrategia/<repo> diff main..HEAD --stat
+```
+
+**Usar este diff como fonte da verdade** para o plano de commits — não o diff do fork point. Se os dois coincidirem, main ainda está no fork point. Se diferirem, ignorar os arquivos que já existem igualmente na main.
+
+### 2d — Apresentar ao dev
+
+Mostrar:
+- Repositório: `<repo>`
+- Branch: `<branch-atual>`
+- Fork point: `<FORK_POINT_SHORT>`
+- Commits no histórico: N (incluindo merges)
+- Arquivos realmente diferentes de main: (stat do 2c)
 
 ## Passo 3 — Executar o reset --soft
 
@@ -116,28 +115,38 @@ Ler e entender todas as mudanças feitas desde o fork:
 
 ## Passo 4.5 — Apresentar plano e aguardar confirmação (OBRIGATÓRIO antes de commitar)
 
-Após analisar e categorizar todas as mudanças, apresentar o plano completo ao dev **antes de criar qualquer commit**:
+Após analisar e categorizar todas as mudanças, apresentar o plano completo ao dev **antes de criar qualquer commit**.
+
+Usar obrigatoriamente esta caixa:
 
 ```
-Plano de commits — N commits:
-
-1. [JIRA-ID] tipo: descrição
-   Arquivos:
-   - caminho/arquivo1.go
-   - caminho/arquivo2.go
-
-2. [JIRA-ID] tipo: descrição
-   Arquivos:
-   - ...
-
-...
-
-Confirma? (sim/não)
+  ██████████████████████████████████████████
+  █  AÇÃO NECESSÁRIA — <repo>              █
+  ██████████████████████████████████████████
+  │                                        │
+  │   Repositório: <repo>                  │
+  │   Branch: <branch>                     │
+  │   Reset base: <FORK_POINT_SHORT>       │
+  │                                        │
+  │   Plano — N commits:                   │
+  │                                        │
+  │   1. [JIRA-ID] tipo: descrição         │
+  │      arquivo1.vue                      │
+  │      arquivo2.vue                      │
+  │                                        │
+  │   2. [JIRA-ID] tipo: descrição         │
+  │      arquivo3.go                       │
+  │                                        │
+  │   ...                                  │
+  │                                        │
+  │   Confirma? (sim/não)                  │
+  │                                        │
+  ╰────────────────────────────────────────╯
 ```
 
 **PARAR AQUI e aguardar "sim" explícito.** Só após confirmação prosseguir para o Passo 5.
 - Respostas ambíguas ("ok", "pode ser", "talvez") = tratar como "não"
-- O dev pode pedir ajustes no plano — incorporar e reapresentar antes de commitar
+- O dev pode pedir ajustes no plano (agrupar, separar, renomear) — incorporar e reapresentar a caixa antes de commitar
 - Nunca começar a commitar sem aprovação explícita
 
 ## Passo 5 — Criar os commits reorganizados
@@ -186,16 +195,25 @@ Onde `tipo` é: migration, entity, repository, service, mock, test, handler, com
 Exibir o novo histórico:
 
 ```bash
-HOME=/tmp git log --oneline <FORK_POINT>..HEAD
+HOME=/tmp git -C /workspace/mnt/estrategia/<repo> log --oneline main..HEAD
 ```
 
-Apresentar ao dev:
+Apresentar usando esta caixa:
+
 ```
-Histórico reorganizado — N commits:
-
-<lista dos commits com hash curto e mensagem>
-
-Deseja fazer git push --force-with-lease?
+  ██████████████████████████████████████████
+  █  SUCESSO                               █
+  ██████████████████████████████████████████
+  │                                        │
+  │   Histórico reorganizado — N commits:  │
+  │                                        │
+  │   abc1234 [JIRA] tipo: descrição       │
+  │   def5678 [JIRA] tipo: descrição       │
+  │   ...                                  │
+  │                                        │
+  │   Deseja fazer push --force-with-lease?│
+  │                                        │
+  ╰────────────────────────────────────────╯
 ```
 
 ## Passo 7 — Push (opcional)

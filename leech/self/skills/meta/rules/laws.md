@@ -1,6 +1,6 @@
 ---
 maintainer: wiseman
-updated: 2026-03-23T16:00Z
+updated: 2026-03-25T17:40Z
 fonte: Pedro (CTO)
 ---
 
@@ -100,7 +100,7 @@ tasks/
 |--------|-----------------|
 | qualquer | `inbox/feed.md` (append), `bedrooms/dashboard.md` (append) |
 | hermes | `tasks/TODO/`, `bedrooms/_waiting/` (routing) |
-| wiseman | `vault/insights.md`, `vault/WISEMAN.md`, `bedrooms/_waiting/` (ressurreicao) |
+| wiseman | `wiki/leech/insights.md`, `wiki/leech/ATLAS.md`, `bedrooms/_waiting/` (ressurreicao) |
 | cada agente | `bedrooms/<seu-nome>/memory.md`, `bedrooms/<seu-nome>/DIARIO/`, `bedrooms/<seu-nome>/DESKTOP/`, `bedrooms/<seu-nome>/ARCHIVE/` |
 | qualquer agente | `workshop/<seu-nome>/` (espaco proprio) |
 | keeper | `trash/` |
@@ -108,6 +108,7 @@ tasks/
 - Agentes NAO leem nem escrevem na memoria de outros agentes
 - Excecao: wiseman pode ler memoria de qualquer agente (modo META/ENFORCE)
 - Agentes NUNCA criam subpastas em `tasks/`
+- **PROIBIDO criar pasta `agents/` no vault** — foi criada por engano e removida. Perfis de agentes ficam em `bedrooms/<nome>/memory.md`. Para enviar algo a outro agente: usar `inbox/` (via hermes) ou `outbox/`.
 
 **Violacao:** arquivo de agente A escrito por agente B.
 
@@ -205,3 +206,24 @@ Body: `#stepsN` define max_turns do runner.
 ---
 
 > "A lei nao e restricao — e o que permite que o sistema dure."
+
+---
+
+## Lei 11 — Semantica de Espacos
+
+**Cada espaco tem uma funcao. Agentes devem respeitar o proposito de cada caminho.**
+
+| Espaco | Proposito | Quem escreve |
+|--------|-----------|--------------|
+| `bedrooms/<nome>/` | **Memoria operacional** — ciclos, logs, estado do agente. **Preferir sempre para outputs pessoais.** | O proprio agente |
+| `workshop/<nome>/` | Pesquisa, rascunhos e trabalho em andamento | O proprio agente |
+| `wiki/` | Conhecimento persistente e conexoes cross-sistema | Wiseman (leech/), Wikister (estrategia/), Coruja |
+| `vault/archive/` | Arquivos historicos e materiais de referencia. **Imutavel apos arquivamento.** | Keeper (arquiva), nenhum agente cria aqui diretamente |
+| `vault/logs/` | Logs de execucao dos agentes | Runner automatico |
+| `vault/templates/` | Templates reutilizaveis | Wiseman/Hermes |
+| `vault/diagrams/` | Diagramas do sistema | Wiseman |
+
+**Regra central:** agentes **NAO criam arquivos novos diretamente em `vault/`** — usam `bedrooms/` para memoria operacional e `wiki/` para conhecimento persistente. O vault e ponto de chegada (archive), nao de criacao.
+
+**Violacao:** arquivo criado diretamente em `vault/` (exceto nas subpastas autorizadas acima).
+**Correcao wiseman:** mover para o espaco correto + registrar em `wiki/leech/insights.md`.

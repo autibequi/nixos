@@ -22,3 +22,4 @@ Skills de trabalho com codigo: analise, debug, teste, review, inspecao, boas pra
 | `code/github-evaluate` | Avalia dev GitHub via PRs + reviews, relatorio no inbox com benchmarks |
 | `code/tdd` | Test-Driven Development — RED-GREEN-REFACTOR |
 | `code/test/plan` | Plano de testes a partir do diff — levanta serviços/structs afetados, gera cenários Happy/Sad/Weird com tags e prioridade 🔴 |
+| `code/pr-message` | Mensagem de PR estruturada (o que foi feito, happy/sad path, dependências) — sempre escopo branch atual → main |
