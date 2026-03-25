@@ -16,6 +16,75 @@ Sempre como **primeira fase** do pipeline thinking — antes de qualquer anális
 
 ---
 
+## Contexto da plataforma — carregar antes de investigar
+
+Se o problema envolver qualquer repo da Estrategia, carregar `estrategia/platform-context` para entender:
+
+| Repo | Stack | Responsabilidade |
+|---|---|---|
+| **monolito** | Go, GORM, zerolog | API REST — handlers → services → repositories → workers |
+| **bo-container** | Vue 2, Quasar | Interface administrativa (backend office) |
+| **front-student** | Nuxt 2, SSR | Portal do aluno |
+
+Paths dos repos:
+```
+/workspace/mnt/                         ← projeto ativo montado aqui
+/home/claude/projects/estrategia/
+├── monolito/
+├── bo-container/
+└── front-student/
+```
+
+URLs sandbox local:
+```
+http://api.local.estrategia-sandbox.com.br      ← monolito
+http://admin.local.estrategia-sandbox.com.br    ← bo-container
+http://local.estrategia-sandbox.com.br          ← front-student
+```
+
+---
+
+## Árvore de localização — onde está o problema?
+
+Antes de ir fundo, identificar a camada. Usar como mapa:
+
+```
+Problema
+├── monolito (Go)
+│   ├── internal/handlers/        ← entrada HTTP, validação de request
+│   ├── internal/services/        ← lógica de negócio
+│   ├── internal/repositories/    ← acesso ao banco (GORM)
+│   ├── internal/workers/         ← jobs assíncronos
+│   ├── migrations/               ← schema do banco
+│   └── /workspace/logs/docker/monolito/   ← logs runtime
+│
+├── bo-container (Vue 2 + Quasar)
+│   ├── src/pages/                ← telas
+│   ├── src/components/           ← componentes
+│   ├── src/services/             ← chamadas à API
+│   ├── src/store/                ← estado (Vuex)
+│   └── /workspace/logs/docker/bo-container/
+│
+├── front-student (Nuxt 2)
+│   ├── pages/                    ← rotas SSR
+│   ├── components/               ← componentes
+│   ├── services/                 ← chamadas à API
+│   ├── store/                    ← estado (Vuex)
+│   └── /workspace/logs/docker/front-student/
+│
+├── infra / leech
+│   ├── /workspace/self/          ← skills, hooks, agentes
+│   └── /workspace/logs/          ← todos os logs centralizados
+│
+└── host / NixOS
+    ├── /workspace/host/          ← config NixOS (se host_attached=1)
+    └── /workspace/logs/host/     ← journal, var-log
+```
+
+Escolher 1 camada como mais provável e ir fundo — não investigar tudo em paralelo.
+
+---
+
 ## O que levantar
 
 ### Logs da aplicação
