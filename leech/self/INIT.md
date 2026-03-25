@@ -2,6 +2,8 @@
 
 > **Espelho Cursor:** o mesmo stdout do hook é gravado em `.cursor/session-boot.md` (fallback gravável em `/workspace/mnt` se `WS` for read-only). Regra `.cursor/rules/session-boot.mdc` manda o Cursor ler esse ficheiro. No Docker Leech, o **entrypoint** (`leech/docker/leech/entrypoint.sh`) corre o `session-start.sh` uma vez no arranque do container para pré-gerar esse ficheiro.
 >
+> **`ENGINE`:** no `---BOOT---` aparece `engine=CLAUDE | CURSOR | OPENCODE` — runtime atual (Claude Code, Cursor via wrappers, ou `~/.leech`).
+>
 > **Boot via hook:** o hook `session-start.sh` injeta no system-reminder (nesta ordem):
 > `---BOOT---` (flags + datetime + workspace) →
 > `---DIRETRIZES---` (se interativo) → `---SELF---` (se personality=ON) →

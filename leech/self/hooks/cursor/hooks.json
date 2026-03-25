@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "/home/claude/.cursor/leech-hooks/cursor-hook.sh sessionStart"
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": "/home/claude/.cursor/leech-hooks/cursor-hook.sh preToolUse"
+      }
+    ],
+    "postToolUse": [
+      {
+        "command": "/home/claude/.cursor/leech-hooks/cursor-hook.sh postToolUse"
+      }
+    ]
+  }
+}

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# Hook: SessionStart — injeta boot context pro Claude via stdout
-# stdout → system-reminder (Claude vê) | stderr → terminal (só display host_attached, se ativo)
+# Hook: SessionStart — injeta boot context (Claude stdout / Cursor via wrapper JSON)
+# stdout → system-reminder (Claude) | espelho .cursor/session-boot.md | stderr → terminal
+#
+# ENGINE: CLAUDE (default) | CURSOR | OPENCODE — definido pelo ambiente ou ~/.leech após source
 
 # ── Ghost mode — isolamento total ────────────────────────────────
 # Se GHOST_IN_THE_SHELL=ON: injeta só a mensagem e sai. Nada mais.
@@ -22,6 +24,9 @@ GHOST
   exit 0
 fi
 
+# ── Motor (runtime) — antes de ~/.leech; wrapper Cursor exporta ENGINE=CURSOR ──
+export ENGINE="${ENGINE:-CLAUDE}"
+
 # ── Detecta workspace ────────────────────────────────────────────
 if [ -d "/workspace/nixos" ] && [ -f "/workspace/nixos/CLAUDE.md" ]; then
   WS="/workspace/nixos"
@@ -31,7 +36,8 @@ elif [ -d "/workspace" ] && [ -f "/workspace/CLAUDE.md" ]; then
   WS="/workspace"
 else
   _real="$(readlink -f "${BASH_SOURCE[0]}" 2>/dev/null || echo "$0")"
-  _dir="$(cd "$(dirname "$_real")/../../../.." 2>/dev/null && pwd)"
+  # script em …/self/hooks/session-start.sh → ../../ = workspace com CLAUDE.md
+  _dir="$(cd "$(dirname "$_real")/../.." 2>/dev/null && pwd)"
   [ -f "$_dir/CLAUDE.md" ] && WS="$_dir" || WS="$(pwd)"
 fi
 
@@ -62,6 +68,8 @@ _OV_AUTOJARVIS="${AUTOJARVIS:-}"
 _LEECH_FILE="${HOME:-/home/claude}/.leech"
 [ -f "$_LEECH_FILE" ] || _LEECH_FILE="/.leech"
 [ -f "$_LEECH_FILE" ] && { set -a; source "$_LEECH_FILE" 2>/dev/null || true; set +a; }
+# ~/.leech pode definir ENGINE=OPENCODE; sessão Cursor já vem com ENGINE=CURSOR do wrapper
+export ENGINE="${ENGINE:-CLAUDE}"
 
 # 3. Defaults para o que não foi setado em ~/.leech
 PERSONALITY="${PERSONALITY:-ON}"
@@ -111,6 +119,7 @@ echo "mobile=$MOBILE             # 1=saída compacta para celular"
 echo "agent_mode=$AGENT_MODE      # 1=running as named agent or processing a task"
 echo "workspace=$WS"
 [ -n "${LEECH_ROOT:-}" ] && echo "host_self=$LEECH_ROOT"
+echo "engine=$ENGINE   # CLAUDE | CURSOR | OPENCODE — runtime do Leech (hooks, CLI, IDE)"
 echo ""
 if [ "$AUTOCOMMIT" = "OFF" ]; then
   echo "REGRA: autocommit=OFF — NÃO fazer git commit por iniciativa própria."

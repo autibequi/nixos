@@ -2,7 +2,7 @@
 
 O diretório `pr-message/` ao lado é **root:root** neste mount; não foi possível sobrescrever in-place.
 
-**Conteúdo canônico:** `SKILL.md` aqui dentro (idêntico a `/workspace/mnt/.cursor/skills/code/pr-message/SKILL.md`).
+**Conteúdo canônico:** `SKILL.md` aqui dentro (no container Cursor Leech espelha em `~/.cursor/skills/code/pr-message/SKILL.md`).
 
 **No host**, para instalar no path esperado pelo Leech:
 

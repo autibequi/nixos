@@ -179,7 +179,7 @@ impl SessionRunner {
             "-v".into(), format!("{leech_root}/skills:/home/claude/.claude/skills"),
             "-v".into(), format!("{leech_root}/commands:/home/claude/.claude/commands"),
             "-v".into(), format!("{leech_root}/agents:/home/claude/.claude/agents"),
-            "-v".into(), format!("{leech_root}/hooks/claude-code:/home/claude/.claude/hooks:ro"),
+            "-v".into(), format!("{leech_root}/hooks:/home/claude/.claude/hooks:ro"),
             "-v".into(), format!("{leech_root}/scripts:/home/claude/.claude/scripts"),
             "-v".into(), format!("{home}/.claude.json:/home/claude/.claude.json"),
             "-v".into(), format!("{home}/.leech:/home/claude/.leech:rw"),

@@ -3879,9 +3879,9 @@ zion_hooks_command() {
 
   HOOKS_DIR=""
   for _d in \
-    "/zion/hooks/claude-code" \
-    "${ZION_ROOT:-${HOME}/nixos/self}/hooks/claude-code" \
-    "/workspace/mnt/self/hooks/claude-code"; do
+    "/zion/hooks" \
+    "${ZION_ROOT:-${HOME}/nixos/self}/hooks" \
+    "/workspace/mnt/self/hooks"; do
     [[ -d "$_d" ]] && HOOKS_DIR="$_d" && break
   done
 

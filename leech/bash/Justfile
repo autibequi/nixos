@@ -7,7 +7,7 @@ set shell := ["bash", "-c"]
 nixos_dir    := env_var_or_default("LEECH_NIXOS_DIR", env_var("HOME") + "/nixos")
 cli_dir      := justfile_directory()
 bin_dest     := nixos_dir + "/stow/.local/bin/leech"
-hooks_dir    := nixos_dir + "/leech/hooks/claude-code"
+hooks_dir    := nixos_dir + "/leech/hooks"
 compose_file := cli_dir + "/docker-compose.leech.yml"
 env_file     := cli_dir + "/.env"
 

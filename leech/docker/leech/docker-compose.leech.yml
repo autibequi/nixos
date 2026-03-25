@@ -33,12 +33,16 @@ x-base-volumes: &base-volumes
   - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/skills:/home/claude/.claude/skills
   - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/commands:/home/claude/.claude/commands
   - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/agents:/home/claude/.claude/agents
-  # Hooks: leech/hooks/claude-code (bootstrap não wiped — stow/.claude/hooks está vazio)
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/hooks/claude-code:/home/claude/.claude/hooks:ro
+  # Hooks: leech/hooks → Claude; leech/hooks/cursor → ~/.cursor/leech-hooks
+  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/hooks:/home/claude/.claude/hooks:ro
   - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/scripts:/home/claude/.claude/scripts
   - ${HOME}/.claude.json:/home/claude/.claude.json
   # Cursor: credenciais do host + skills/commands/rules do leech
   - ${HOME}/.cursor:/home/claude/.cursor
+  # Cursor: só subpasta hooks/cursor (cursor-hook + hooks.json) → leech-hooks
+  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/hooks/cursor:/home/claude/.cursor/leech-hooks:ro
+  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/hooks/cursor/hooks.json:/home/claude/.cursor/hooks.json:ro
+  # Mesma árvore que ~/.claude/skills — montagem total em ~/.cursor/skills (substitui o dir no container)
   - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/skills:/home/claude/.cursor/skills
   - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/commands:/home/claude/.cursor/commands
   - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/commands:/home/claude/.cursor/rules

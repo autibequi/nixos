@@ -4180,9 +4180,9 @@ leech_hooks_command() {
 
   HOOKS_DIR=""
   for _d in \
-    "/leech/hooks/claude-code" \
-    "${LEECH_ROOT:-${HOME}/nixos/self}/hooks/claude-code" \
-    "/workspace/mnt/leech/self/hooks/claude-code"; do
+    "/leech/hooks" \
+    "${LEECH_ROOT:-${HOME}/nixos/self}/hooks" \
+    "/workspace/mnt/leech/self/hooks"; do
     [[ -d "$_d" ]] && HOOKS_DIR="$_d" && break
   done
 

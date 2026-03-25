@@ -128,8 +128,8 @@ pub fn outbox_dir() -> Option<PathBuf> {
 #[must_use]
 pub fn hooks_dir() -> Option<PathBuf> {
     first_existing_dir(&[
-        leech_root().join("hooks/claude-code"),
-        PathBuf::from("/workspace/mnt/leech/self/hooks/claude-code"),
+        leech_root().join("hooks"),
+        PathBuf::from("/workspace/mnt/leech/self/hooks"),
     ])
 }
 

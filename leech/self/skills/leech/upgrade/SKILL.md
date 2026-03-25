@@ -27,7 +27,7 @@ Implementar features no Leech de forma autonoma dentro do container. Criar workt
 /workspace/self/                runtime engine (sempre rw, sem worktree necessario)
 ├── skills/                     namespace de skills
 ├── agents/                     cards de agentes (frontmatter + instrucoes)
-├── hooks/claude-code/          hooks pre/pos tool e session-start
+├── hooks/                      hooks (Claude + Cursor + ENGINE)
 └── scripts/                    scripts utilitarios bash/python
 ```
 
@@ -42,7 +42,7 @@ Implementar features no Leech de forma autonoma dentro do container. Criar workt
 | Docker — compose, Dockerfile | `/workspace/host/leech/docker/` | Sim |
 | Agente — comportamento, schedule, model | `/workspace/self/agents/<nome>/agent.md` | Nao |
 | Skill — criar ou atualizar | `/workspace/self/skills/` | Nao |
-| Hook — pre/post-tool, session-start | `/workspace/self/hooks/claude-code/` | Nao |
+| Hook — pre/post-tool, session-start | `/workspace/self/hooks/` | Nao |
 | Script utilitario | `/workspace/self/scripts/` | Nao |
 
 ---
@@ -139,7 +139,7 @@ Atualizar SEMPRE o SKILL.md do namespace pai (adicionar linha na tabela).
 # Testar simulando context vars
 CLAUDE_TOOL_NAME=Bash \
 CLAUDE_TOOL_INPUT='{"command":"ls"}' \
-bash /workspace/self/hooks/claude-code/pre-tool-use.sh
+bash /workspace/self/hooks/pre-tool-use.sh
 ```
 
 ### Script

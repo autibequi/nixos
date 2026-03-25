@@ -31,7 +31,7 @@ x-base-volumes: &base-volumes
   - ${ZION_ROOT:-${HOME}/nixos/self}/skills:/home/claude/.claude/skills
   - ${ZION_ROOT:-${HOME}/nixos/self}/commands:/home/claude/.claude/commands
   - ${ZION_ROOT:-${HOME}/nixos/self}/agents:/home/claude/.claude/agents
-  - ${ZION_ROOT:-${HOME}/nixos/self}/hooks/claude-code:/home/claude/.claude/hooks:ro
+  - ${ZION_ROOT:-${HOME}/nixos/self}/hooks:/home/claude/.claude/hooks:ro
   - ${ZION_ROOT:-${HOME}/nixos/self}/scripts:/home/claude/.claude/scripts
   - ${HOME}/.claude.json:/home/claude/.claude.json
   - ${HOME}/.cursor:/home/claude/.cursor

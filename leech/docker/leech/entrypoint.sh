@@ -32,7 +32,7 @@ if [ -f /home/claude/.leech ]; then set -a; . /home/claude/.leech 2>/dev/null ||
 # Mesmo stdout do hook session-start → .cursor/session-boot.md (tee dentro do hook).
 # Corre no arranque do container para o Cursor ter o ficheiro antes da primeira sessão Claude Code.
 _session_hook="/home/claude/.claude/hooks/session-start.sh"
-[ -f "$_session_hook" ] || _session_hook="/workspace/self/hooks/claude-code/session-start.sh"
+[ -f "$_session_hook" ] || _session_hook="/workspace/self/hooks/session-start.sh"
 if [ -f "$_session_hook" ]; then
   HOME=/home/claude USER=claude LOGNAME=claude \
     setpriv --reuid="${RUN_UID}" --regid="${RUN_GID}" --keep-groups \

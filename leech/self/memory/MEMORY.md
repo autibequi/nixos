@@ -88,5 +88,7 @@
 - [feedback_error_debug_flow.md](feedback_error_debug_flow.md) — Fluxo ao receber stack trace: leitura → localização → rastreio+logs em /workspace/logs/<app>/ → hipótese conectando todos os pontos → fix mínimo → verificação
 - [feedback_boot_var_injection.md](feedback_boot_var_injection.md) — BOOT: adicionar dados como linha simples (echo "var=val"), nunca envolver em bloco REGRA
 - [reference_container_host_paths.md](reference_container_host_paths.md) — Env vars com paths reais do host: CLAUDIO_MOUNT→/workspace/mnt, LEECH_ROOT→/workspace/self (exposto como host_self no boot)
+- [reference_pr_message_skill.md](reference_pr_message_skill.md) — Skill code/pr-message: template PR (JIRA URL pura, tabelas), espelhos mnt/self/host/leech, chown se subpasta root
 - [project_base_interface.md](project_base_interface.md) — BASE_INTERFACE.md em /workspace/self/: 4 templates mandatórios (ERRO/SUCESSO/AÇÃO NECESSÁRIA/INFO) com regra de bordas
 - [feedback_box_code_no_borders.md](feedback_box_code_no_borders.md) — Código dentro de caixas ASCII: SEM bordas laterais │ — usuário copia com mouse, borda quebra o paste
+- [reference_leech_hooks_cursor.md](reference_leech_hooks_cursor.md) — Hooks Leech unificados em `self/hooks/`, subpasta `hooks/cursor/` só pro Cursor, `ENGINE`, mounts Docker, skills em `~/.cursor/skills`

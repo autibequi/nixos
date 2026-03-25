@@ -122,7 +122,7 @@ cursor://file//home/pedrinho/<caminho>:<linha>:<coluna>
 | `/home/claude/.claude/skills/` | `/home/pedrinho/nixos/self/skills/` |
 | `/home/claude/.claude/commands/` | `/home/pedrinho/nixos/self/commands/` |
 | `/home/claude/.claude/agents/` | `/home/pedrinho/nixos/self/agents/` |
-| `/home/claude/.claude/hooks/` | `/home/pedrinho/nixos/self/hooks/claude-code/` |
+| `/home/claude/.claude/hooks/` | `/home/pedrinho/nixos/self/hooks/` |
 | `/leech/` | `/home/pedrinho/nixos/self/` |
 
 Exemplos:

@@ -29,7 +29,7 @@ O interno é efêmero — apenas eu (externo) persistir mudanças em `/workspace
 ```bash
 SYSFILE=$(mktemp /tmp/lab-sys-XXXX.md)
 LEECH_ANALYSIS_MODE=1 HEADLESS=1 IN_DOCKER=1 CLAUDE_ENV=container \
-  /workspace/mnt/self/hooks/claude-code/session-start.sh 2>/dev/null > "$SYSFILE"
+  /workspace/mnt/self/hooks/session-start.sh 2>/dev/null > "$SYSFILE"
 
 HEADLESS=1 timeout 120 claude \
   --permission-mode bypassPermissions \
