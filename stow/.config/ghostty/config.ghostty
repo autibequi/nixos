@@ -62,7 +62,7 @@ font-feature = calt
 bold-is-bright = true
 
 # Images (Kitty Graphics Protocol — yazi, etc.)
-image-storage-limit = 64000000  # 64 MiB — suficiente pro yazi
+image-storage-limit = 128000000  # 128 MiB
 
 # Cursor
 cursor-style = block

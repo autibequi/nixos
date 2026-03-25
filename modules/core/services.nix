@@ -21,10 +21,10 @@
 
   # Tailscale (useRoutingFeatures = "client" para aceitar rotas de subnet do Pi sem drop por rp_filter)
   services.tailscale = {
-    enable = true;
+    enable = false;
     useRoutingFeatures = "client";
   };
-  networking.firewall.checkReversePath = "loose";
+  # networking.firewall.checkReversePath = "loose"; # só necessário com tailscale ativo
 
   # SSH — acessível apenas na rede local (192.168.0.0/16)
   services.openssh = {
