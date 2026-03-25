@@ -2,7 +2,7 @@
 
 ## Arquivos ativos
 Persona: `leech/personas/GLaDOS.persona.md`
-Avatar:  `leech/personas/avatar/glados-slim.md`
+Avatar:  `leech/personas/avatar/glados.md`
 
 > O hook `session-start.sh` lê estas linhas e injeta os arquivos acima automaticamente.
 > Para trocar persona ou avatar: editar as linhas acima.

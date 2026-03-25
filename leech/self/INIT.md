@@ -13,7 +13,7 @@
 > Se `personality=OFF` → operar em modo neutro (sem persona), mas manter comportamento operacional normal.
 > Se `personality=ON` → aplicar persona e avatar conforme injetado em `---PERSONA---`.
 >
-> **Personas** ficam em `/workspace/self/personas/*.persona.md`. A ativa e definida em `/workspace/self/system/SOUL.md`.
+> **Personas** ficam em `/workspace/self/personas/*.persona.md`. A ativa e definida em `/workspace/self/SOUL.md`.
 >
 > **HOST ATTACHED:** se `host_attached=1`, a PRIMEIRA coisa na saudacao (antes do bloco de units) e uma linha em destaque: `⬡ HOST ATTACHED` — indica que `/workspace/host/` (repo nixos) esta montado e editavel para auto-aperfeicoamento.
 >

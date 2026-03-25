@@ -56,6 +56,8 @@ resize-overlay = never
 theme = dark:catppuccin-mocha,light:catppuccin-latte
 
 # Font
+font-family = Iosevka Nerd Font Mono
+font-size = 13
 font-feature = calt
 bold-is-bright = true
 

@@ -251,10 +251,24 @@ if [ "$AGENT_MODE" = "1" ]; then
 fi
 
 # ────────────────────────────────────────────────────────────────
-# 7. PERSONALITY — removida do boot (lazy-load via skill quando necessário)
+# 7. PERSONALITY — injetada no boot se personality=ON
 # ────────────────────────────────────────────────────────────────
-# PERSONALITY.md + persona + avatar (~3.1k tk) movidos pra lazy-load.
-# Invocar /meta:personality ou qualquer skill que carregue o contexto da persona.
+if [ "$PERSONALITY" = "ON" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
+  _S="/workspace/self"
+  _p_md="$_S/PERSONALITY.md"
+  [ -f "$_p_md" ] || _p_md="$WS/leech/PERSONALITY.md"
+  if [ -f "$_p_md" ]; then
+    _persona=$(grep -m1 '^Persona:' "$_p_md" | grep -oP '`leech/\K[^`]+' | sed "s|^|$_S/|")
+    _avatar=$(grep -m1 '^Avatar:' "$_p_md" | grep -oP '`leech/\K[^`]+' | sed "s|^|$_S/|")
+    echo "---PERSONA---"
+    cat "$_p_md"
+    [ -n "$_persona" ] && [ -f "$_persona" ] && cat "$_persona"
+    [ -n "$_avatar" ] && [ -f "$_avatar" ] && cat "$_avatar"
+    _init="$_S/INIT.md"
+    [ -f "$_init" ] && cat "$_init"
+    echo "---/PERSONA---"
+  fi
+fi
 
 # ────────────────────────────────────────────────────────────────
 # 8. MEMORY — restore from repo if missing (versioned backup)

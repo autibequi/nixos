@@ -110,24 +110,6 @@ LEECH_REPOS
   echo "CLI regras: \`/meta:rules\`"
   echo "---/OBSIDIAN---"
 
-  # PERSONALITY — persona + avatar + init (se personality=ON e não headless/agent)
-  _PERS="${PERSONALITY:-ON}"
-  if [ "$_PERS" = "ON" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
-    _S="/workspace/self"
-    _p_md="$_S/PERSONALITY.md"
-    [ -f "$_p_md" ] || _p_md="$WS/leech/PERSONALITY.md"
-    if [ -f "$_p_md" ]; then
-      _persona=$(grep -m1 '^Persona:' "$_p_md" | grep -oP '`leech/\K[^`]+' | sed "s|^|$_S/|")
-      _avatar=$(grep -m1 '^Avatar:' "$_p_md" | grep -oP '`leech/\K[^`]+' | sed "s|^|$_S/|")
-      echo "---PERSONA---"
-      cat "$_p_md"
-      [ -n "$_persona" ] && [ -f "$_persona" ] && cat "$_persona"
-      [ -n "$_avatar" ] && [ -f "$_avatar" ] && cat "$_avatar"
-      _init="$_S/INIT.md"
-      [ -f "$_init" ] && cat "$_init"
-      echo "---/PERSONA---"
-    fi
-  fi
 }
 
 # ── Headless/Agent: injetar sempre imediatamente ──────────────────────────────
