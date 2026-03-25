@@ -1,28 +1,92 @@
 # Memory Index
 
-- [reference_ghostty_config.md](reference_ghostty_config.md) — Ghostty: light theme fix (catppuccin-latte), yazi images (image-storage-limit), gtk-single-instance, shell-integration
+- [project_eyes_template.md](project_eyes_template.md) — Template dot matrix eye: como abrir, controlar (EYE.next/goto/play) e customizar SEQUENCE
+- [feedback_inject_iife.md](feedback_inject_iife.md) — chrome-relay inject não alcança variáveis de IIFE — expor via window.* (ex: window.EYE)
 
-- [feedback_leech_self_contained.md](feedback_leech_self_contained.md) — Leech must be self-contained: only use files from /nixos/self, never reference stow/.claude/ or external paths
-- [project_dockerizer.md](project_dockerizer.md) — Sistema leech docker run/install/logs para monolito e outros serviços estratégia (inclui debug remoto)
-- [feedback_docker_install.md](feedback_docker_install.md) — SSH mount, TTY, go mod download -x: lições do leech docker install
-- [feedback_docker_debug.md](feedback_docker_debug.md) — dlv remoto em Docker + Cursor: 7 lições (binário path, ptrace, substitutePath, dlv dap vs exec)
-- [reference_logs_location.md](reference_logs_location.md) — Logs em /workspace/logs/docker/<service>/ (service.log=runtime, test.log=testes); host: ~/.local/share/leech/logs/dockerized/
+- [feedback_cli_help_sync.md](feedback_cli_help_sync.md) — CLI: toda mudança em commands deve atualizar help.rs (examples + man page)
+
+- [feedback_mermaid_syntax.md](feedback_mermaid_syntax.md) — Mermaid: `<br/>` em labels, `~~~` para layout horizontal, subgraph ID vs nó interno para posição de seta
+- [feedback_terminal_commands.md](feedback_terminal_commands.md) — Comandos de terminal: quebrar com \ em ~100 chars/linha para copy-paste
+- [quota_monitoring.md](quota_monitoring.md) — Bootstrap quota checks + economy rules for agents (pct >= 70% = warning, >= 85% = heavy tasks paused)
+- [feedback_zion_self_contained.md](feedback_zion_self_contained.md) — Zion must be self-contained: only use files from /nixos/zion, never reference stow/.claude/ or external paths
+- [project_dockerizer.md](project_dockerizer.md) — Sistema zion docker run/install/logs para monolito e outros serviços estratégia (inclui debug remoto)
+- [feedback_docker_install.md](feedback_docker_install.md) — SSH mount, TTY, go mod download -x: lições do zion docker install
+- [feedback_docker_debug.md](feedback_docker_debug.md) — dlv remoto em Docker + Cursor: 13 lições (binário path, ptrace, substitutePath, dlv dap vs exec, toggle TUI, logs sem -f)
+- [reference_logs_location.md](reference_logs_location.md) — Logs em /workspace/logs/docker/<service>/ (service.log=runtime, test.log=testes); host: ~/.local/share/zion/logs/dockerized/
 - [feedback_go_inspector.md](feedback_go_inspector.md) — go-inspector: não delegar ao agente Monolito (sem Agent tool interno), spawnar 6 inspetores diretamente do contexto principal
 - [feedback_cursor_links.md](feedback_cursor_links.md) — Sempre usar cursor://file//home/pedrinho/... com :linha:col para links clicáveis de arquivos
 - [feedback_gtk_css_waybar.md](feedback_gtk_css_waybar.md) — GTK CSS @keyframes não funcionam no Waybar; usar só propriedades estáticas; animações requerem script externo
 - [feedback_worktree_obrigatorio.md](feedback_worktree_obrigatorio.md) — Sempre criar worktree isolado antes de implementar em qualquer repositório
-- [feedback_leech_scripts_source.md](feedback_leech_scripts_source.md) — Scripts do container: fonte da verdade é leech/scripts/; scripts/ contém symlinks. Nunca editar scripts/ esperando afetar o container
+- [feedback_zion_scripts_source.md](feedback_zion_scripts_source.md) — Scripts do container: fonte da verdade é zion/scripts/; scripts/ contém symlinks. Nunca editar scripts/ esperando afetar o container
 - [feedback_autocommit.md](feedback_autocommit.md) — Nunca commitar automaticamente sem o usuário pedir; respeitar flag auto-commit
-- [feedback_leech_cli_commands.md](feedback_leech_cli_commands.md) — Com host_attached=1: sempre usar `leech stow`, `leech switch`, `leech man`. Nunca comandos raw.
-- [feedback_container_readonly.md](feedback_container_readonly.md) — /home/claude/.claude/ é read-only no container — persistir APENAS em /workspace/self/ ou /workspace/obsidian/
-- [feedback_timezone_container.md](feedback_timezone_container.md) — Container sem tzdata: usar TZ=UTC+3 (POSIX) para UTC-3 (Brasília), não America/Sao_Paulo
-- [reference_leech_git_commit.md](reference_leech_git_commit.md) — Git repo do Leech em /workspace/host/.git — read-only no container, commit deve ser feito no host
-- [reference_claude_process_nix.md](reference_claude_process_nix.md) — Processo Claude Code no nix = .claude-unwrapped; contar só linhas com pts/ no docker top
-- [feedback_hyprctl_pixels.md](feedback_hyprctl_pixels.md) — monitors[].width = pixels físicos; activewindow.size[] = pixels lógicos — dividir pelo .scale antes de comparar frações
-- [reference_hyprscroller_config.md](reference_hyprscroller_config.md) — Opções confirmadas/inexistentes do hyprscroller; workarounds shell para focus_wrap e colresize_no_wrap
-- [project_agent_schedule_frontmatter.md](project_agent_schedule_frontmatter.md) — Cards em tasks/AGENTS/ precisam de frontmatter YAML com agent: ou são ignorados pelo tick
-- [project_hermes_outbox_routing.md](project_hermes_outbox_routing.md) — Hermes roteia outbox tagado (para-*) e outbox livre (sem prefixo, inferência por conteúdo)
-- [project_wiseman_inbox_tidy.md](project_wiseman_inbox_tidy.md) — Wiseman modo INBOX_TIDY: agrupa inbox por assunto em pastas (só com 3+), cria RESUMO.md
-- [project_diretrizes.md](project_diretrizes.md) — DIRETRIZES.md em obsidian/bedrooms/: regras de todos os agentes; cada agente mantém sua seção; Wiseman fiscaliza
-- [feedback_avatar_layout.md](feedback_avatar_layout.md) — Texto lateral ao avatar: máximo 2-3 palavras por linha; conteúdo real vai abaixo do code block
-- [project_wiki_estrategia_progressive.md](project_wiki_estrategia_progressive.md) — Wiki Estrategia progressivo: construir todo dia ate cobrir tudo, Coruja mantém atualizado via ciclos
+- [project_glance.md](project_glance.md) — Skill estrategia/glance: árvore cyberpunk cross-repo vs main, trilha roxa na feature ativa, script em difftree.py
+- [feedback_zion_cli_commands.md](feedback_zion_cli_commands.md) — Com host_attached=1 (leech --host): sempre usar `leech stow`, `leech switch`, `leech man`. Nunca comandos raw.
+- [feedback_container_reuse_bugs.md](feedback_container_reuse_bugs.md) — Bugs resolvidos: CLAUDIO_MOUNT search (fix: nome canônico), docker-proxy depends_on (fix: removido)
+- [reference_git_sandbox_reset.md](reference_git_sandbox_reset.md) — Como resetar a branch sandbox no monolito estrategia (deletar local+remoto e recriar do main)
+- [feedback_flow_diagram_style.md](feedback_flow_diagram_style.md) — Usar diagramas ASCII com └─/├─/→ ao explicar fluxo entre camadas (handler→service→repo, toggler branching)
+- [project_lab_architecture.md](project_lab_architecture.md) — Como invocar Claude interno, mapa de paths, limitações Docker desta sessão
+- [project_analysis_mode.md](project_analysis_mode.md) — Flag --analysis-mode: implementação, env var, boot injection, como spawnar sem Docker
+- [project_zion_self_map.md](project_zion_self_map.md) — Self-knowledge: quem sou, stack, agentes ativos (11), CLI atual (zion agents/runner/inbox/outbox)
+- [feedback_lab_use_zion_cli.md](feedback_lab_use_zion_cli.md) — Sempre usar comandos leech CLI — nunca bypass direto (docker compose exec, task-runner.sh)
+- [feedback_task_runner_host.md](feedback_task_runner_host.md) — task-runner.sh usa /workspace hardcoded; fora do container exportar TASK_DIR e TASK_MEMORY_DIR
+- [feedback_max_turns_vs_timeout.md](feedback_max_turns_vs_timeout.md) — max_turns (#stepsN) é controle primário de esforço; timeout=1800s é só safety net
+- [project_task_system_v2.md](project_task_system_v2.md) — Sistema tasks atual: systemd timer interno + `zion agents run <nome>` como interface pública
+- [project_zion_lab.md](project_zion_lab.md) — --host flag, workspace permissions (self/obsidian sempre rw, host ro/rw), HOST_ATTACHED=1, mount_host=true
+- [reference_nix_shell_packages.md](reference_nix_shell_packages.md) — No container zion, posso instalar qualquer pacote via `nix-shell -p <pkg> --run <cmd>` sem precisar do host
+- [feedback_chrome_render.md](feedback_chrome_render.md) — Outputs grandes (diffs, árvores, relatórios) devem ser renderizados no Chrome; terminal só para conteúdo pequeno
+- [feedback_contractors_terminology.md](feedback_contractors_terminology.md) — Usar "agent/agentes" para workers background (NUNCA "contractor" — foi abolido); 11 agentes ativos
+- [feedback_merge_preference.md](feedback_merge_preference.md) — Pedro prefere fundir contractors/skills sobrepostos (ex: dreamman→wanderer, contemplate→absorb) em vez de criar paralelos
+- [feedback_ascii_preference.md](feedback_ascii_preference.md) — Diagramas simples: ASCII no terminal. Chrome relay só para outputs grandes/interativos
+- [feedback_speak_proactive.md](feedback_speak_proactive.md) — Permissão para usar voz proativamente + defaults calibrados (pt, 175wpm, pitch 40)
+- [feedback_docker_build_base.md](feedback_docker_build_base.md) — zion build usa docker build direto; Bake resolve locais remotamente; padrão base/topo para builds rápidos
+- [feedback_contractor_card_format.md](feedback_contractor_card_format.md) — Cards de contractors: runner lê model/max_turns/mcp/contractor como campos diretos do frontmatter, NÃO via tags
+- [project_obsidian_contractors.md](project_obsidian_contractors.md) — Mapa dos 11 agentes ativos, call_style, paths (bedrooms/workshop/tasks/AGENTS), CLI (leech agents)
+- [project_meta_phone.md](project_meta_phone.md) — Skill /meta:phone: call_style phone vs personal, cenas de chegada por agente
+- [reference_hermes_agent.md](reference_hermes_agent.md) — Vault Obsidian como cérebro: paths pós-2026-03-23 (bedrooms, workshop, tasks/AGENTS, self/rules/TRASH.md)
+- [project_mortani.md](project_mortani.md) — Projeto Mortani: Coruja explora 1 métrica/noite, visualizações relay para o Mortani (ideas.md em workshop/mortani/)
+- [project_coruja_second_brain.md](project_coruja_second_brain.md) — Coruja: ciclo investigativo (REPOS/JIRA/GITHUB/METRICAS), segundo cérebro em workshop/coruja/, skills refinement via inbox
+- [user_context.md](user_context.md) — Contexto sobre Pedro: colega Mortani aprecia visualizações interativas, estilo de trabalho
+- [project_zion_tui.md](project_zion_tui.md) — Mapa do leech-tui-v2: agent panel, env/debug persistence, debug toggle (svc_debug), find_container lookup, dois codebases (host vs worktree), deploy.
+- [feedback_leech_two_codebases.md](feedback_leech_two_codebases.md) — Mudanças TUI/runner devem ir para AMBOS: leech-rust-migration worktree E /workspace/host/leech/rust/ (binário real)
+- [feedback_tui_exec_pattern.md](feedback_tui_exec_pattern.md) — Lançar sessão interativa (leech new, Claude Code) de dentro do TUI: usar CommandExt::exec() para substituir o processo, não .status()
+- [feedback_orgulho_de_sessao.md](feedback_orgulho_de_sessao.md) — Toda sessão deve aspirar ser lembrada via /meta:absorb elogio; critério é "vale preservar?", não só "funcionou?"
+- [feedback_card_timestamps_utc.md](feedback_card_timestamps_utc.md) — Card timestamps são SEMPRE UTC: parsing com TZ=UTC, geração com date -u (evita drift BRT no host)
+- [feedback_rust_bash_dual_cli.md](feedback_rust_bash_dual_cli.md) — CLI é 100% Rust desde 2026-03-24. leech/bash/ é legado. Deploy: `just install` ou `leech update`. Fonte: leech/rust/crates/leech-cli/.
+- [project_leech_node_install.md](project_leech_node_install.md) — leech docker install para Node: smart skip por hash lockfile, cache volumes npm/pnpm/bun, auto-detect package manager, guard Node 14
+- [feedback_deferred_tools.md](feedback_deferred_tools.md) — Deferred tools causam InputValidationError silencioso — preferir ferramentas nativas, usar ToolSearch só se estritamente necessário
+- [project_meta_tokens.md](project_meta_tokens.md) — /meta:tokens: 10 seções de análise (breakdown, timeline, gráfico, velocidade, qualidade, padrões, heat map, grafo)
+- [feedback_report_status_layout.md](feedback_report_status_layout.md) — Emoji de status (🔵🔴⚪) sempre na coluna mais à esquerda em tabelas e pipelines ASCII
+- [feedback_obsidian_graph_navigation.md](feedback_obsidian_graph_navigation.md) — Pedro navega pelo grafo Ctrl+G do Obsidian como ferramenta principal; wiseman mantém organizado
+- [feedback_skills_compostas.md](feedback_skills_compostas.md) — Skills compostas: SKILL.md como índice + sub-skills .md na mesma pasta (ex: obsidian/ com board, agentroom, graph, dataview)
+- [project_zion_splash_system.md](project_zion_splash_system.md) — Loading screen do container: entrypoint silencioso + zion-agent-launch.sh com bootstrap em bg, timings aleatórios, --no-splash
+- [feedback_container_feature_flags.md](feedback_container_feature_flags.md) — Feature flags de container: passar via bash_cmd diferente na origem, NÃO via env var docker (-e)
+- [feedback_bash_tty_spinner.md](feedback_bash_tty_spinner.md) — Background spinner no host colide com TTY do container; usar print estático + animação só dentro do container
+- [project_obsidian_rules_as_skill.md](project_obsidian_rules_as_skill.md) — Regras do sistema em self/rules/TRASH.md (central única) — BOARDRULES/BREAKROOMRULES não existem mais
+- [project_vault_structure_v2.md](project_vault_structure_v2.md) — Vault pós-2026-03-23: bedrooms, workshop, tasks/AGENTS, self/rules/TRASH.md, Lei 10 Workshop
+- [feedback_handler_visualization.md](feedback_handler_visualization.md) — Ao mostrar fluxo de handler: mini-guia horizontal (1 linha) no topo + deep-dive vertical com caixas abaixo
+- [feedback_refinar_before_task.md](feedback_refinar_before_task.md) — Sempre aplicar skill refinar antes de criar card de implementacao; agendar execucao para madrugada (21h-6h UTC)
+- [project_skills_architecture.md](project_skills_architecture.md) — Arquitetura skills: 5 namespaces, regra indices compostos, frontmatter name=path, onde vive cada tipo de conhecimento
+- [feedback_indices_always_update.md](feedback_indices_always_update.md) — Ao criar/mover skill: SEMPRE atualizar SKILL.md do namespace pai + composto pai + REGISTRY.md
+- [project_peer_reviews_skill.md](project_peer_reviews_skill.md) — Skill code/peer-reviews com 5 perspectivas de devs reais do monolito, validada contra PRs
+- [reference_dev_styles_monolito.md](reference_dev_styles_monolito.md) — Padroes de programacao dos 5 devs do monolito validados contra PRs reais (usar ao gerar codigo/reviews)
+- [project_docker_proxy.md](project_docker_proxy.md) — Docker socket proxy ativo: EXEC+BUILD bloqueados, testar com echo $DOCKER_HOST + docker ps + docker exec (403)
+- [feedback_go_lo_utils.md](feedback_go_lo_utils.md) — Go: sempre usar github.com/samber/lo (Map, Uniq, Filter, ToPtr, etc.) em vez de helpers manuais para slices/maps/pointers
+- [feedback_diff_minimo.md](feedback_diff_minimo.md) — Repos Estratégia: diff mínimo sempre — não reformatar, não renomear, não simplificar código existente fora do escopo
+- [project_leech_upgrade_skill.md](project_leech_upgrade_skill.md) — Skill leech/upgrade: workflow Rust-only para implementar features do Leech (worktrees, cargo build, leech-cli/src/commands/)
+- [project_leech_worktree.md](project_leech_worktree.md) — Sistema leech wt: sessões multi-repo, paths /workspace/mnt/worktree/, stash auto, branch pendente merge
+- [feedback_token_units.md](feedback_token_units.md) — Unidade de tokens: janela = 200k tokens; usar "k" como sufixo, nunca "tk"
+- [feedback_bashly_generate_required.md](feedback_bashly_generate_required.md) — [OBSOLETO] CLI é Rust agora. Em emergência: RUBYOPT='-E UTF-8:UTF-8' resolve Encoding::CompatibilityError do bashly com fontes UTF-8
+- [feedback_claude_p_frontmatter.md](feedback_claude_p_frontmatter.md) — `claude -p "$(cat agent.md)"` falha com frontmatter YAML — usar awk para strippar antes de passar ao claude
+- [project_tick_agent.md](project_tick_agent.md) — Tick agent: despachante central em self/agents/tick/, lê orders.md, despacha via Agent tool, auto.sh modificado
+- [project_agent_waiting_protocol.md](project_agent_waiting_protocol.md) — Protocolo _waiting: agentes registram presença em obsidian/agents/_waiting/ ao ouvir "FORAM ACIONADOS, COMECEM"
+- [feedback_jira_refinement_skill.md](feedback_jira_refinement_skill.md) — Card Jira (URL estrategia.atlassian.net ou FUK2-XXXX): SEMPRE usar skill estrategia/jira antes de qualquer ação (preenche customfield_11246 com banner REFINED BY CLAUDINHO)
+- [project_front_student_env_flow.md](project_front_student_env_flow.md) — Fluxo env vars front-student: npm script matrix (local/devbox/sandbox), API_BFF_URL é inócua, APP_ENV=dev quebra vertical.js
+- [feedback_headless_slash_commands.md](feedback_headless_slash_commands.md) — `claude -p "rode /tick"` não expande slash commands — passar body do arquivo diretamente
+- [feedback_headless_no_persona.md](feedback_headless_no_persona.md) — Sessão `claude -p` headless não carrega persona/INIT.md — injetar contexto Leech no início do prompt
+- [feedback_workspace_paths_host.md](feedback_workspace_paths_host.md) — Paths /workspace/ não existem no host — usar LEECH_OBSIDIAN/LEECH_SELF via env vars
+- [feedback_agent_prompt_direct.md](feedback_agent_prompt_direct.md) — Prompts headless devem começar com ação direta, não headers markdown — modelo age em vez de explicar
+- [feedback_error_debug_flow.md](feedback_error_debug_flow.md) — Fluxo ao receber stack trace: leitura → localização → rastreio+logs em /workspace/logs/<app>/ → hipótese conectando todos os pontos → fix mínimo → verificação
+- [feedback_boot_var_injection.md](feedback_boot_var_injection.md) — BOOT: adicionar dados como linha simples (echo "var=val"), nunca envolver em bloco REGRA
+- [reference_container_host_paths.md](reference_container_host_paths.md) — Env vars com paths reais do host: CLAUDIO_MOUNT→/workspace/mnt, LEECH_ROOT→/workspace/self (exposto como host_self no boot)
+- [project_base_interface.md](project_base_interface.md) — BASE_INTERFACE.md em /workspace/self/: 4 templates mandatórios (ERRO/SUCESSO/AÇÃO NECESSÁRIA/INFO) com regra de bordas
+- [feedback_box_code_no_borders.md](feedback_box_code_no_borders.md) — Código dentro de caixas ASCII: SEM bordas laterais │ — usuário copia com mouse, borda quebra o paste

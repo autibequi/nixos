@@ -112,27 +112,20 @@ Identificar antes de criar tasks:
 
 ---
 
-## Passo 4 — Apresentar visualmente via meta:art
+## Passo 4 — Apresentar visualmente via meta:holodeck
 
 **Sempre apresentar antes de qualquer implementacao.**
 
-Ler `meta:art` e escolher o formato:
-
-```
-Output cabe no terminal (< 80 linhas)?
-    └─ ASCII: fluxo, mapa de caixas, kanban compacto, tabela
-Output grande / interativo?
-    └─ Chrome relay: Mermaid flowchart, arvore interativa
-```
+Usar `meta:holodeck` — Mermaid flowchart com zoom/drag no Chrome.
 
 ### Formatos recomendados por tipo de problema
 
-| Tipo de problema | Formato meta:art |
+| Tipo de problema | Formato |
 |---|---|
-| Feature nova com multiplas camadas | Diagrama de camadas (caixas IN/OUT) + kanban de tasks |
-| Bug / investigacao | Fluxo de handler + tabela de hipoteses |
-| Refactor | Tabela antes/depois + mapa de dependencias |
-| Feature cross-repo | Mermaid flowchart no Chrome (sequencia entre servicos) |
+| Feature nova com multiplas camadas | Flowchart de camadas (handler→service→repo) |
+| Bug / investigacao | Flowchart do handler com hipoteses marcadas por cor |
+| Refactor | Sequence diagram antes/depois |
+| Feature cross-repo | Sequence diagram entre servicos |
 
 ### O que o output deve conter
 
@@ -218,7 +211,7 @@ grep -r "mensagem exata" /workspace/mnt/  # buscar ocorrencia no codigo
 | Errado | Certo |
 |---|---|
 | Sair implementando sem ler o card completo | Ler todos os campos Jira, inclusive comentarios |
-| Apresentar so texto, sem visual | Sempre usar meta:art — o visual facilita a validacao |
+| Apresentar so texto, sem visual | Sempre usar meta:holodeck — o visual facilita a validacao |
 | Pedir validacao e avancar sem resposta | Parar. Esperar. Nao presumir aprovacao |
 | Refinar sem investigar o codebase | Onda 1-2-3 primeiro, plano depois |
 | Criar tasks grandes ("implementar o modulo X") | Cada task = 1 responsabilidade, resultado verificavel |

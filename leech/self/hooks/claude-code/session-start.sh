@@ -110,6 +110,7 @@ echo "mobile=$MOBILE             # 1=saída compacta para celular"
 [ -n "$TASK_NAME" ] && echo "task_name=$TASK_NAME"
 echo "agent_mode=$AGENT_MODE      # 1=running as named agent or processing a task"
 echo "workspace=$WS"
+[ -n "${LEECH_ROOT:-}" ] && echo "host_self=$LEECH_ROOT"
 echo ""
 if [ "$AUTOCOMMIT" = "OFF" ]; then
   echo "REGRA: autocommit=OFF — NÃO fazer git commit por iniciativa própria."

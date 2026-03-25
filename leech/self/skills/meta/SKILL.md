@@ -12,6 +12,7 @@ Skills de meta-ferramentas: representacao visual, humanizacao de texto, gestao d
 | Sub-skill | Quando usar |
 |---|---|
 | `meta/art` | Biblioteca visual (ASCII, Chrome relay, design system) |
+| `meta/holodeck` | Tela de visualização no Chrome — flowcharts, diffs, dashboards, HTML livre |
 | `meta/humanize` | Humanizar texto — remover padroes de IA |
 | `meta/obsidian` | Vault Obsidian — board, agentroom, graph, dataview |
 | `meta/cleanup` | Limpar debris de sessão — tentativas fracassadas, código morto, experimentos revertidos |

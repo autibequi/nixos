@@ -1,38 +1,43 @@
 ---
 name: meta/art
-description: Biblioteca central de representacoes visuais do Leech + controle do Chrome relay. 3 modos de saida (ASCII terminal, Chrome relay, Obsidian). Qualquer skill ou agente que precise desenhar algo ou usar o Chrome referencia esta skill.
+description: Arte visual do Leech — ASCII terminal, animacoes artisticas no Chrome (eye, glados), voz. Para flowcharts e visualizacoes de dados, usar meta/holodeck.
 ---
 
-# /meta:art — Biblioteca Visual do Leech
+# /meta:art — Arte Visual
 
-Skill composta com 3 sub-skills por tipo de saida. **Fonte da verdade** para qualquer representacao visual no sistema e para o controle do Chrome relay (CDP).
+Skill de arte pura: terminal, animacoes, voz. Nao e para dados nem diagramas.
+
+> **Flowcharts, dashboards, Mermaid com dados?** → `meta/holodeck`
 
 ## Design System
 
-**Ler `design-system.md` PRIMEIRO** — palette de cores testada, tokens semanticos, emojis proibidos, regras de composicao. Fonte da verdade para qualquer output visual.
+**Ler `design-system.md` PRIMEIRO** — palette testada, tokens, emojis proibidos, regras de composicao.
 
 ## Sub-skills
 
 | Arquivo | Conteudo | Quando usar |
 |---|---|---|
-| `design-system.md` | Palette, tokens, box drawing, regras, Catppuccin CSS, Mermaid theme | **Sempre** — ler antes de qualquer output. Parte 1=terminal, Parte 2=web |
-| `ascii.md` | 18 templates de representacao terminal | Default. Inline, rapido, sem dependencia. |
-| `chrome.md` | Relay + Mermaid + HTML | Interativo, grandes, coloridos. Precisa relay. |
-| `meta/obsidian` | Relatorios + Dataview | Artefatos persistentes no vault (skill separada). |
+| `design-system.md` | Palette Catppuccin, tokens, box drawing | Sempre — antes de qualquer output |
+| `ascii.md` | 19 templates de representacao terminal | Default. Sem dependencia. |
+| `chrome.md` | Voz + templates artisticos (eye, glados) | Arte no browser. Precisa relay. |
+| `meta/obsidian` | Relatorios + Dataview | Artefatos persistentes no vault. |
 
 ## Regra de decisao
 
 ```
 Precisa de visualizacao?
     │
-    ├── Cabe no terminal? (< 80 linhas, sem interacao)
-    │     └─ usar ascii.md
+    ├── e dado/flow/diagrama?
+    │     └─ meta/holodeck
     │
-    ├── Precisa de interacao/cores/collapse? (arvores, diagramas grandes)
-    │     └─ verificar relay → usar chrome.md
+    ├── Cabe no terminal? (< 80 linhas)
+    │     └─ ascii.md
     │
-    └── Precisa persistir como artefato? (relatorios, inspecoes)
-          └─ usar meta/obsidian
+    ├── Arte no Chrome? (eye, glados, animacao, voz)
+    │     └─ chrome.md
+    │
+    └── Precisa persistir no vault?
+          └─ meta/obsidian
 ```
 
 ## Para agentes e skills externos
