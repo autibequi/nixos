@@ -2,8 +2,9 @@ services:
   worker:
     build:
       context: ${MONOLITO_DIR}
-      dockerfile: ${LEECH_NIXOS_DIR}/leech/docker/monolito/Dockerfile.worker
+      dockerfile: ${LEECH_NIXOS_DIR}/leech/docker/monolito/Dockerfile
     container_name: leech-dk-monolito-worker-app
+    command: ["./worker"]
     cpus: "14.4"
     env_file:
       - ${MONOLITO_DIR}/.env.${APP_ENV_FILE:-sandbox}

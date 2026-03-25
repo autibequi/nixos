@@ -18,7 +18,10 @@ COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
     CGO_ENABLED=1 GOOS=linux go build -mod=vendor -tags musl \
     -gcflags="all=-N -l" \
-    -o server ./cmd/server/main.go
+    -o server ./cmd/server/main.go && \
+    CGO_ENABLED=1 GOOS=linux go build -mod=vendor -tags musl \
+    -gcflags="all=-N -l" \
+    -o worker ./cmd/worker/main.go
 
 FROM golang:1.24.4-alpine AS runtime
 
@@ -30,6 +33,7 @@ RUN go install github.com/go-delve/delve/cmd/dlv@latest
 WORKDIR /go/app
 
 COPY --from=builder /go/app/server .
+COPY --from=builder /go/app/worker .
 
 EXPOSE 4004 2345
 

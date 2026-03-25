@@ -17,7 +17,8 @@ COPY . .
 
 # Build usando vendor — sem acesso a rede, sem SSH
 RUN --mount=type=cache,target=/root/.cache/go-build \
-    CGO_ENABLED=1 GOOS=linux go build -mod=vendor -tags musl -o server ./cmd/server/main.go
+    CGO_ENABLED=1 GOOS=linux go build -mod=vendor -tags musl -o server ./cmd/server/main.go && \
+    CGO_ENABLED=1 GOOS=linux go build -mod=vendor -tags musl -o worker ./cmd/worker/main.go
 
 FROM alpine:latest AS runtime
 
@@ -26,6 +27,7 @@ RUN apk --no-cache add ca-certificates librdkafka tzdata
 WORKDIR /go/app
 
 COPY --from=builder /go/app/server .
+COPY --from=builder /go/app/worker .
 
 EXPOSE 4004
 
