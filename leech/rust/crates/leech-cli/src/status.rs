@@ -92,7 +92,7 @@ fn expand_home(path: &str) -> String {
 /// Return the source directory for a given service name, checking env vars first.
 fn svc_git_dir(svc: &str) -> String {
     let env_key = match svc {
-        "monolito"      => "MONOLITO_DIR",
+        "monolito" | "monolito-worker" => "MONOLITO_DIR",
         "bo-container"  => "BO_CONTAINER_DIR",
         "front-student" => "FRONT_STUDENT_DIR",
         _               => "",
@@ -167,7 +167,7 @@ pub fn collect() -> Result<StatusSnapshot> {
 
     // Last log line per service (for inline preview)
     let last_log: std::collections::HashMap<String, String> =
-        ["monolito", "bo-container", "front-student"]
+        ["monolito", "monolito-worker", "bo-container", "front-student"]
             .iter()
             .filter_map(|&svc| {
                 crate::logs::last_line(svc).map(|line| (svc.to_string(), line))

@@ -1,0 +1,11 @@
+services:
+  worker:
+    build:
+      dockerfile: ${LEECH_NIXOS_DIR}/leech/docker/monolito/Dockerfile.debug.worker
+    # ptrace is required for delve to work inside Docker
+    security_opt:
+      - apparmor:unconfined
+    cap_add:
+      - SYS_PTRACE
+    ports:
+      - "2346:2346"

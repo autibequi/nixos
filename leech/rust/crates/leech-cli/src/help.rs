@@ -59,6 +59,8 @@ pub const RUNNER_BEFORE: &str = "\
 
     leech runner mono start              \x1b[2mstart monolito (sand)\x1b[0m
     leech runner mono start --env=local  \x1b[2mstart with local env\x1b[0m
+    leech runner mw start                \x1b[2mstart monolito-worker\x1b[0m
+    leech runner mw start --debug        \x1b[2mworker com delve (port 2346)\x1b[0m
     leech runner bo logs                 \x1b[2mfollow bo-container logs\x1b[0m
     leech runner front shell             \x1b[2mshell in front-student\x1b[0m
     leech runner mono test               \x1b[2mmake test\x1b[0m

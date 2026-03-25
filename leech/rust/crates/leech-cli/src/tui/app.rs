@@ -4,7 +4,7 @@ pub use crate::agents::{AgentInfo, AgentLogEntry};
 use crate::status::StatusSnapshot;
 pub use crate::worktree::WorktreeInfo;
 
-pub const DK_SERVICES: &[&str] = &["monolito", "bo-container", "front-student"];
+pub const DK_SERVICES: &[&str] = &["monolito", "monolito-worker", "bo-container", "front-student"];
 pub const ENVS: &[&str]        = &["sand", "local", "prod"];
 
 pub const AGENT_MENU_ITEMS: &[(&str, &str)] = &[

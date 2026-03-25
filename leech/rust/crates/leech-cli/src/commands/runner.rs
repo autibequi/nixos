@@ -146,7 +146,7 @@ fn do_start(
 
     // 4. Build
     eprintln!("\x1b[2m[3/4] Building image...\x1b[0m");
-    let debug_compose = svc::service_config_dir(svc).join("docker-compose.debug.yml");
+    let debug_compose = svc::debug_compose_file(svc);
     let debug_flag    = debug_compose.to_string_lossy().into_owned();
     let use_debug     = opts.debug && debug_compose.exists();
     let startup_log   = log_dir.join("startup.log");

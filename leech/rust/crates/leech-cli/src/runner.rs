@@ -73,6 +73,16 @@ pub fn compose_file(svc: &str) -> PathBuf {
     }
 }
 
+/// Debug overlay compose file path.
+pub fn debug_compose_file(svc: &str) -> PathBuf {
+    let dir = service_config_dir(svc);
+    if svc == "monolito-worker" {
+        dir.join("docker-compose.debug.worker.yml")
+    } else {
+        dir.join("docker-compose.debug.yml")
+    }
+}
+
 /// Deps compose file path.
 pub fn deps_compose_file(svc: &str) -> PathBuf {
     service_config_dir(svc).join("docker-compose.deps.yml")
