@@ -16,7 +16,7 @@
 - [feedback_go_inspector.md](feedback_go_inspector.md) — go-inspector: não delegar ao agente Monolito (sem Agent tool interno), spawnar 6 inspetores diretamente do contexto principal
 - [feedback_cursor_links.md](feedback_cursor_links.md) — Sempre usar cursor://file//home/pedrinho/... com :linha:col para links clicáveis de arquivos
 - [feedback_gtk_css_waybar.md](feedback_gtk_css_waybar.md) — GTK CSS @keyframes não funcionam no Waybar; usar só propriedades estáticas; animações requerem script externo
-- [feedback_worktree_obrigatorio.md](feedback_worktree_obrigatorio.md) — Sempre criar worktree isolado antes de implementar em qualquer repositório
+- [feedback_worktree_opcional.md](feedback_worktree_opcional.md) — Perguntar se o usuário quer usar worktree antes de implementar
 - [feedback_zion_scripts_source.md](feedback_zion_scripts_source.md) — Scripts do container: fonte da verdade é zion/scripts/; scripts/ contém symlinks. Nunca editar scripts/ esperando afetar o container
 - [feedback_autocommit.md](feedback_autocommit.md) — Nunca commitar automaticamente sem o usuário pedir; respeitar flag auto-commit
 - [project_glance.md](project_glance.md) — Skill estrategia/glance: árvore cyberpunk cross-repo vs main, trilha roxa na feature ativa, script em difftree.py

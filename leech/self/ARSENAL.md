@@ -41,7 +41,7 @@ updated: 2026-03-26T02:47Z
 ### Git & Repositórios
 - **EnterPlanMode** — modo de planejamento estruturado antes de implementar
 - **ExitPlanMode** — aprova plano e autoriza implementação
-- **EnterWorktree** — cria branch isolado em `.claude/worktrees/` (obrigatório)
+- **EnterWorktree** — cria branch isolado em `.claude/worktrees/` (opcional, perguntar ao user)
 - **ExitWorktree** — sai de worktree (keep/remove)
 
 ### MCP Tools (via tool schema)

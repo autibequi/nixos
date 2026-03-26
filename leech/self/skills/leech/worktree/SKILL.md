@@ -9,7 +9,7 @@ Gerencia sessoes de trabalho multi-repo via `leech wt`. Cada sessao representa
 uma tarefa com branches checadas em paralelo em todos os repos relevantes.
 Permite trocar de sessao instantaneamente com stash automatico.
 
-**Regra fundamental:** toda implementacao usa worktree. Branch sempre tem o nome da tarefa.
+**Padrão recomendado:** worktree para features grandes ou multi-repo. Para fixes simples, perguntar ao user se prefere isolamento. Branch sempre tem o nome da tarefa quando usado.
 
 ---
 

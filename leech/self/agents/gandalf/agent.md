@@ -105,8 +105,8 @@ Criar propostas de melhoria com implementacao real.
 5. Criar inbox card `WORKTREE_gandalf_<nome>_<YYYYMMDD>.md` (formato em worktrees.md)
 6. Aguardar CTO revisar — nao criar nova proposta se ja ha 3 pendentes
 
-**Regra:** propostas concretas > observacoes vagas. Sempre worktree via `leech wt`, nunca so texto.
-**Branch = nome da tarefa, sempre.** Ver `leech/worktree` skill.
+**Regra:** propostas concretas > observacoes vagas. Perguntar CTO se prefere worktree isolado. Se sim: usar `leech wt`.
+**Branch = nome da tarefa, sempre, quando usar worktree.** Ver `leech/worktree` skill.
 
 ---
 

@@ -3,10 +3,11 @@ maintainer: wiseman
 updated: 2026-03-24T22:00Z
 ---
 
-# Worktrees — Regra Universal de Implementacao
+# Worktrees — Opção de Isolamento para Implementacao
 
-**Todo agente que implementar mudancas DEVE usar worktree via `leech wt`.**
-Nunca editar diretamente na branch principal. Nunca commitar. Apresentar ao CTO.
+**Agentes podem usar worktree via `leech wt` para implementacoes isoladas.**
+Sempre **perguntar ao user** se prefere worktree ou editar diretamente. Respeitar a decisão.
+Nunca assumir automaticamente. Se usar worktree: apresentar ao CTO antes de commitar.
 
 ---
 

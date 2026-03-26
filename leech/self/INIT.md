@@ -190,7 +190,7 @@ Quando o user enviar status-check phrases ("eae", "o que temos", "ta pronto", "e
 - **NUNCA rodar Claude dentro de Claude** — runner roda via systemd no host
 - **`/home/claude/projects/`** — repos GitHub do user (bind mount RW)
 - **Superpoderes Nix** — `nix-shell -p <pkg>`
-- **Worktrees obrigatorio para implementacoes** — ver `self/skills/meta/rules/worktrees.md`
+- **Worktrees opcional para implementacoes** — perguntar ao user se quer usar; ver `self/skills/meta/rules/worktrees.md`
 
 ## Sistema Docker — Servicos da Estrategia
 

@@ -65,7 +65,7 @@ Struct unificada: `LeechConfig` com sub-structs `session`, `runner`, `agents`, `
 
 ---
 
-## Workflow A — CLI / Docker / Rust (worktree obrigatorio)
+## Workflow A — CLI / Docker / Rust (worktree recomendado)
 
 ### 1. Criar worktree isolado
 
@@ -198,7 +198,7 @@ proximo:
 
 ## Regras de ouro
 
-- **Nunca editar main** do `/workspace/host` diretamente — sempre worktree
+- **Para mudancas em CLI/Docker**, considerar worktree para isolamento — perguntar ao user se prefere
 - **Sempre testar antes de declarar pronto** — minimo: compilar + `leech <cmd> --help` + 1 teste funcional
 - **main.rs alterado?** Obrigatorio atualizar `help.rs` (DIRECTIVE no topo do arquivo)
 - **Nunca chamar** `leech stow`, `leech switch` ou `leech os` de dentro do container
