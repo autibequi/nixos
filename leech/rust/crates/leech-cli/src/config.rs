@@ -181,7 +181,13 @@ impl Default for SystemConfig {
 impl LeechConfig {
     /// Load config from all sources: defaults → YAML → env vars → secrets.
     pub fn load() -> anyhow::Result<Self> {
+        let debug = std::env::var("LEECH_DEBUG").map(|v| v == "ON" || v == "1").unwrap_or(false);
         let yaml_path = config_dir().join("config.yaml");
+
+        if debug {
+            let exists = if yaml_path.exists() { "found" } else { "not found" };
+            eprintln!("[config] yaml: {} ({})", yaml_path.display(), exists);
+        }
 
         let mut fig = Figment::new()
             // 1. Built-in defaults
@@ -199,14 +205,25 @@ impl LeechConfig {
             grafana_url: std::env::var("GRAFANA_URL").ok(),
             grafana_token: std::env::var("GRAFANA_TOKEN").ok(),
         };
-        // 4. Secrets from raw env vars (not prefixed — backward compat)
-        let secrets = SecretsConfig {
-            gh_token: std::env::var("GH_TOKEN").ok(),
-            anthropic_api_key: std::env::var("ANTHROPIC_API_KEY").ok(),
-            cursor_api_key: std::env::var("CURSOR_API_KEY").ok(),
-            grafana_url: std::env::var("GRAFANA_URL").ok(),
-            grafana_token: std::env::var("GRAFANA_TOKEN").ok(),
-        };
+
+        if debug {
+            let active: Vec<&str> = [
+                secrets.gh_token.as_ref().map(|_| "GH_TOKEN"),
+                secrets.anthropic_api_key.as_ref().map(|_| "ANTHROPIC_API_KEY"),
+                secrets.cursor_api_key.as_ref().map(|_| "CURSOR_API_KEY"),
+                secrets.grafana_url.as_ref().map(|_| "GRAFANA_URL"),
+                secrets.grafana_token.as_ref().map(|_| "GRAFANA_TOKEN"),
+            ]
+            .into_iter()
+            .flatten()
+            .collect();
+            if active.is_empty() {
+                eprintln!("[config] secrets: none set");
+            } else {
+                eprintln!("[config] secrets: {}", active.join(", "));
+            }
+        }
+
         if secrets.gh_token.is_some()
             || secrets.anthropic_api_key.is_some()
             || secrets.cursor_api_key.is_some()
@@ -222,18 +239,32 @@ impl LeechConfig {
             .and_then(|s| s.parse::<u32>().ok())
             .or_else(docker_socket_gid);
         if let Some(gid) = docker_gid {
+            if debug { eprintln!("[config] docker_gid: {gid}"); }
             fig = fig.merge(Serialized::default("system.docker_gid", &gid));
         }
 
-        // Journal GID from env
+        // 6. Journal GID from env
         if let Some(gid) = std::env::var("JOURNAL_GID")
             .ok()
             .and_then(|s| s.parse::<u32>().ok())
         {
+            if debug { eprintln!("[config] journal_gid: {gid}"); }
             fig = fig.merge(Serialized::default("system.journal_gid", &gid));
         }
 
-        fig.extract().map_err(|e| anyhow::anyhow!("config: {e}"))
+        let cfg: LeechConfig = fig.extract().map_err(|e| anyhow::anyhow!("config: {e}"))?;
+
+        if debug {
+            eprintln!("[config] resolved: engine={:?} env={} model={:?} host={} rw={}",
+                cfg.session.engine,
+                cfg.runner.env,
+                cfg.session.model,
+                cfg.session.host,
+                cfg.session.rw,
+            );
+        }
+
+        Ok(cfg)
     }
 
     // ── Convenience accessors (bridge to old API) ───────────────────────

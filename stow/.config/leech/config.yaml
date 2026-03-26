@@ -1,0 +1,39 @@
+# Leech CLI configuration
+# Priority: CLI flag > env var (LEECH_*) > this file > built-in default
+# Secrets: use env vars (GH_TOKEN, ANTHROPIC_API_KEY) — not this file
+
+# ── Session defaults ─────────────────────────────
+session:
+  engine: claude          # claude | cursor | opencode
+  model: haiku         # haiku | sonnet | opus | full model ID
+  host: true              # mount ~/nixos in /workspace/host
+  rw: true                # mount read-write
+  splash: true            # loading screen
+  # init_md: contexto.md  # initial markdown file
+
+# ── Runner / Services defaults ───────────────────
+runner:
+  env: local              # local | sand | prod
+  debug: false            # attach delve debugger
+  dev: false              # hot-reload with air
+  detach: false           # start and return (no log follow)
+  tail: 100               # log lines to follow
+  vertical: carreiras-juridicas
+  container: app
+
+# ── Agents defaults ──────────────────────────────
+agents:
+  model: haiku            # default model for ask/run
+  steps: 30               # max_turns default
+
+# ── Paths (override auto-detect) ─────────────────
+# paths:
+#   obsidian: ~/.ovault/Work
+#   monolito: ~/projects/estrategia/monolito
+#   bo_container: ~/projects/estrategia/bo-container
+#   front_student: ~/projects/estrategia/front-student
+
+# ── System ───────────────────────────────────────
+# system:
+#   docker_gid: 999       # auto-detect from /var/run/docker.sock
+#   journal_gid: 62

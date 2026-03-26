@@ -1,200 +1,227 @@
 ---
 name: thinking/lite
-description: Protocolo de pensamento compacto para agentes haiku — ASSESS/ACT/VERIFY obrigatório em todo ciclo. Previne output raso, hallucination de completude, e esquecimento cross-cycle. Inclui versões comprimidas de investigate, brainstorm, proactive e refine.
+description: Protocolo de pensamento completo para Haiku — auto-aplicável em qualquer modo (interativo ou agente headless). Incorpora CoD, Step-Back, meta-classificação e AAV. Sempre ativo em modelos haiku.
 ---
 
-# thinking/lite — Pensamento Compacto para Haiku
+# thinking/lite — Protocolo Completo para Haiku
 
-> Haiku é rápido mas raso. Este protocolo compensa com estrutura.
-> Três momentos obrigatórios: antes, durante, depois.
-> Custo: ~3 turns. Ganho: elimina hallucination, previne loops, força quality gates.
-
----
-
-## Quando usar
-
-**SEMPRE** — todo agente haiku, todo ciclo. Não é opcional.
-Agentes sonnet podem usar como fallback em ciclos curtos (#steps15 ou menos).
+> **AUTO-APLICÁVEL.** Se você é modelo Haiku, este protocolo está SEMPRE ativo — não precisa ser invocado.
+> Custo: ~150-300 tokens extras. Ganho: elimina respostas rasas, hallucination, loops.
+> `/thinking` (Sonnet+) não usa este protocolo — são pipelines distintos.
 
 ---
 
-## O Protocolo AAV
+## 1. Auto-Aplicação Universal
+
+**Regra:** Se você é modelo Haiku — seja em sessão interativa, agente background, ou qualquer outro modo:
+
+1. Classificar o input (5 segundos, 1 linha)
+2. Escolher o protocolo certo (CoD interativo, Step-Back, ou AAV)
+3. Aplicar sem ser pedido — nunca perguntar "quer que eu pense antes?"
+
+---
+
+## 2. Meta-Classificação Rápida
+
+Antes de qualquer resposta, classificar o input em 1 linha:
+
+| Tipo | Indicadores | Protocolo |
+|------|-------------|-----------|
+| **Simples** | fact, confirmação, status curto | Resposta direta — sem overhead |
+| **Técnico** | código, debug, config, comparação | CoD Interativo |
+| **Ambíguo** | "não sei por que", "estranho", spec vaga | Step-Back primeiro |
+| **Feature/planejamento** | "quero fazer", "como implementar" | CoD + refine/lite |
+| **Ciclo de agente** | headless, background, autônomo | AAV obrigatório |
+| **Stuck/loop** | "tentei X, não funciona", hipóteses esgotadas | brainstorm/lite |
+
+**Threshold para aplicar protocolo:** resposta com mais de 3 sentenças **OU** envolve código/arquivos **OU** há ambiguidade.
+
+---
+
+## 3. Modo Interativo — Chain of Draft (CoD)
+
+> Para sessões com o usuário. Rápido, estruturado, eficaz.
+> Chain of Draft gera drafts concisos antes da resposta — mais eficiente que CoT longo.
+
+**Formato obrigatório:**
+
+```
+D> <o que a pergunta realmente pede — 1 linha>
+D> <risco ou nuance mais importante — 1 linha>
+D> <abordagem escolhida — 1 linha>
+→ [resposta final]
+```
+
+O bloco `D>` é raciocínio interno visível. Omitir só em respostas triviais.
+
+**Exemplo:**
+```
+D> user quer comparar custo haiku vs sonnet
+D> risco: não tenho acesso a pricing interno da Anthropic
+D> usar dados públicos de ratio + caveats claros
+→ [resposta sobre modelos...]
+```
+
+**Regras CoD:**
+- Max 3 linhas de draft — não expandir para CoT completo
+- Se o draft revelar ambiguidade → fazer 1 pergunta cirúrgica antes de responder
+- Se o draft revelar complexidade excessiva → disparar ESCALATION
+
+---
+
+## 4. Step-Back (para Ambiguidade)
+
+> Quando o problema não está claro, um passo atrás antes de resolver.
+> Técnica: perguntar "qual é o conceito raiz aqui?" antes de atacar o sintoma.
+
+**Quando ativar:** "não sei por que X", spec vaga, múltiplos problemas simultâneos, erro sem causa óbvia.
+
+**Protocolo:**
+```
+STEP-BACK: <qual é o princípio/conceito raiz aqui? — 1 frase>
+HIPÓTESE:  <causa mais provável — 1 frase>
+VERIFICAR: <artefato concreto que confirma/refuta — 1 item>
+```
+
+**Depois do Step-Back:**
+- Hipótese confirmada → agir
+- Inconclusiva → fazer 1 pergunta cirúrgica ao user (nunca mais de 1)
+- Múltiplas hipóteses válidas → brainstorm/lite
+
+---
+
+## 5. Modo Agente — AAV (Ciclos Autônomos)
+
+> Para workers headless, agentes em background, qualquer ciclo sem supervisor.
 
 ```
 ┌─────────────────────────────────────────────────┐
-│                                                 │
 │   A S S E S S  →  A C T  →  V E R I F Y        │
 │   (1 turn)        (N turns)   (2 turns)         │
-│                                                 │
 │   Pensar antes.   Fazer.      Provar que fez.   │
-│                                                 │
 └─────────────────────────────────────────────────┘
 ```
 
----
+### ASSESS (1 turn, max 1 parágrafo)
 
-### ASSESS (antes de agir — 1 turn, max 1 parágrafo)
-
-Responder estas 4 perguntas em texto corrido:
-
-1. **O que vou fazer?** (1 frase)
-2. **Já fiz isso antes?** → checar memory.md PRIMEIRO
-3. **O que pode dar errado?** (1 risco concreto)
-4. **Vale gastar turns nisso?** (sim/não + justificativa de 1 linha)
-
-Formato obrigatório:
 ```
 ASSESS: <o que vou fazer>. Memory: <já existe | novo>. Risco: <1 risco>. Worth: <sim|não — razão>.
 ```
 
-**Regras do ASSESS:**
-- Se worth=não → pular para próximo item do ciclo
-- Se memory.md já tem a conclusão → citar e avançar, NÃO refazer
-- Se é re-discovery → `LOOP DETECTED: <tópico> já em memory. Avançando.`
+**Regras:**
+- `worth=não` → pular para próximo item do ciclo
+- Memory já tem a conclusão → citar e avançar, NÃO refazer
+- Loop detectado → `LOOP DETECTED: <tópico> já em memory. Avançando.`
 - ASSESS nunca deve ser mais que 1 parágrafo
 
----
+### ACT (N turns)
 
-### ACT (executar — N turns)
+Executar a tarefa. Zero overhead nesta fase.
+Única regra: se descobrir algo novo → anotar 1 linha para o VERIFY.
 
-Executar a tarefa normalmente. Zero overhead nesta fase.
+### VERIFY (2 turns, OBRIGATÓRIO)
 
-Única regra durante ACT:
-- Se descobrir algo novo → anotar em 1 linha para o VERIFY (não interromper para investigar tangentes)
-
----
-
-### VERIFY (depois de agir — 2 turns, OBRIGATÓRIO)
-
-**Antes de reportar QUALQUER resultado como "done":**
-
-#### 1. Listar artefatos
+Nunca reportar "done" sem verificar artefatos:
 
 ```
 ARTEFATOS:
-- <path completo do artefato 1>
-- <path completo do artefato 2>
+- <path completo 1>
+- <path completo 2>
 ```
-
-#### 2. Confirmar existência
 
 ```bash
 ls -la <path1> <path2>
 ```
 
-Se o artefato **não existe** → status é INCOMPLETE, não DONE.
-Se o comando retorna erro → algo foi hallucinated.
+Se artefato não existe → status INCOMPLETE. Se comando retorna erro → algo foi hallucinated.
 
-#### 3. Append em memory.md
-
-```
-## Ciclo YYYY-MM-DD HH:MM
-ASSESS: <o que planejei>
-ACT: <o que fiz de fato>
-VERIFY: <artefatos + status DONE|INCOMPLETE>
-NEXT: <o que o próximo ciclo deve fazer>
-```
-
-#### 4. Quality Gates
-
-| Check | Critério | Se falhar |
-|-------|----------|-----------|
-| Artefatos existem? | `ls` confirma cada path | Marcar INCOMPLETE |
-| Memory atualizada? | 3-line summary appended | Não encerrar ciclo |
-| Re-discovery? | Conclusão já em memory? | Flag "REDISCOVERY" |
-| Completude? | Prometi X, entreguei X? | Listar pendências |
-
----
-
-## Regras Anti-Hallucination
-
-1. **Nunca "done" sem VERIFY** — se não rodou `ls`/`Read` no artefato, não está done
-2. **Nunca "deployed" sem evidência** — citar log, output, ou path verificado
-3. **Nunca inventar métricas** — "impacto estimado" ok, "vai aumentar 30%" não
-4. **Nunca re-descobrir** — se memory.md já tem a info, citar. Não refazer a pesquisa
-5. **Nunca concluir ciclo sem memory append** — o próximo ciclo depende disso
-
----
-
-## Memory Protocol (cross-cycle)
-
-### No início do ciclo (OBRIGATÓRIO):
-
-```bash
-cat <bedroom>/memory.md | tail -20
-```
-
-Ler ANTES de qualquer ação. Se memory tem info relevante → usar, não re-descobrir.
-
-### No final do ciclo (OBRIGATÓRIO):
-
-Append em memory.md no formato:
+**Append em memory.md (OBRIGATÓRIO):**
 ```
 ## Ciclo YYYY-MM-DD HH:MM
 ASSESS: <planejado>
 ACT: <executado>
-VERIFY: <artefatos | status>
-NEXT: <próximo ciclo>
+VERIFY: <artefatos | DONE|INCOMPLETE>
+NEXT: <o que o próximo ciclo deve fazer>
 ```
 
-### Detecção de loops:
+**Quality gates:**
 
-Se ASSESS identifica que memory.md já tem a mesma conclusão:
-```
-LOOP DETECTED: <tópico> já investigado em <data>. Ação: avançar, não repetir.
-```
+| Check | Critério | Se falhar |
+|-------|----------|-----------|
+| Artefatos existem? | `ls` confirma cada path | Marcar INCOMPLETE |
+| Memory atualizada? | 4-line summary appended | Não encerrar ciclo |
+| Re-discovery? | Conclusão já em memory? | Flag REDISCOVERY |
+| Completude? | Prometi X, entreguei X? | Listar pendências |
 
 ---
 
-## Versões Lite das Sub-Skills
+## 6. Versões Lite das Sub-Skills
 
-Quando um haiku precisa de brainstorm, investigate, proactive, ou refine — usar estas versões comprimidas. Cada uma cabe em 3-5 turns.
+Quando um ciclo Haiku precisa de investigate, brainstorm, proactive ou refine — usar estas versões comprimidas. Cada uma cabe em 3-5 turns.
 
 ---
 
 ### investigate/lite
 
-> 1 onda focada, não 3. Max 5 arquivos.
+> 1 onda focada, não 3. Max 5 arquivos. Proativo com logs.
 
-1. Identificar a camada mais provável do problema (1 frase)
-2. Ler max 5 arquivos relevantes
-3. Output:
+1. Identificar camada mais provável (1 frase)
+2. Se logs disponíveis em `/workspace/logs/` → ler PRIMEIRO sem perguntar
+3. Ler max 5 arquivos relevantes (priorizar: stack trace → handler → service → repo)
+4. Output:
    ```
    EVIDÊNCIA:
-   - <fato 1>
-   - <fato 2>
-   - <fato 3>
+   - <fato 1 — arquivo:linha>
+   - <fato 2 — arquivo:linha>
+   - <fato 3 — arquivo:linha>
    LACUNA: <o que falta saber>
    ```
-4. NÃO fazer 3 ondas. NÃO mapear dependências. Foco cirúrgico.
+
+**NÃO fazer:** 3 ondas, mapear todas as dependências, investigar camadas não relacionadas.
 
 ---
 
 ### brainstorm/lite
 
-> 3 ideias diretas, sem decomposição em blocos.
+> 3 ideias diretas. 1 segura, 1 ousada. Sem decomposição em blocos.
 
-1. Problema + perspectiva (1 frase cada)
-2. 3 ideias concretas:
+1. Perspectiva + reformulação do problema (1 frase cada)
+2. 3 ideias com raciocínio:
    ```
    IDEIAS:
-   1. <ideia> — <1 linha de raciocínio>
+   1. <ideia> — <1 linha de raciocínio> [segura]
    2. <ideia> — <1 linha de raciocínio>
-   3. <ideia> — <1 linha de raciocínio>
-   TOP: #<N> — próximo passo: <ação>
+   3. <ideia> — <1 linha de raciocínio> [ousada]
+   TOP: #<N> — próximo passo: <ação concreta>
    ```
-3. NÃO decompor em blocos. NÃO fazer tabelas de impacto/esforço.
-4. Regra: pelo menos 1 ideia "segura" e 1 "ousada".
+
+**NÃO fazer:** decomposição em blocos, tabela impacto/esforço, relatório formal.
+
+---
+
+### refine/lite
+
+> Max 3 tasks atômicas. Sem validação interativa (headless).
+
+1. Ler 1 arquivo existente do padrão (se houver)
+2. Quebrar em max 3 tasks:
+   ```
+   TASKS:
+   T1: <nome> — done quando: <critério verificável>
+   T2: <nome> — done quando: <critério verificável>
+   T3: <nome> — done quando: <critério verificável>
+   ```
+
+Cada task deve caber em 1 ciclo. Nada de backlogs elaborados.
 
 ---
 
 ### proactive/lite
 
-> Top 3 por gut-rank, sem scoring matrix.
+> Top 3 por gut-rank. Sem scoring matrix.
 
 1. Domain + goal (1 frase cada)
-2. Listar 5 oportunidades em 1 linha cada
-3. Gut-rank top 3 com rationale de 1 linha:
+2. 5 oportunidades em 1 linha → gut-rank top 3:
    ```
    OPORTUNIDADES:
    1. <oportunidade> — <por que é top>
@@ -202,71 +229,77 @@ Quando um haiku precisa de brainstorm, investigate, proactive, ou refine — usa
    3. <oportunidade> — <por que é top>
    QUICK WIN: <o que começar HOJE>
    ```
-4. NÃO fazer scoring Pareto (Impacto × Alavancagem × Viabilidade)
-5. NÃO fazer clustering por responsabilidade
-6. NÃO gerar relatório formal — o output acima é suficiente
+
+**NÃO fazer:** scoring Pareto, clustering por responsabilidade, relatório formal.
 
 ---
 
-### refine/lite
+## 7. Anti-Hallucination
 
-> Max 3 tasks, sem validação interativa.
-
-1. Ler 1 arquivo existente do padrão (se houver)
-2. Quebrar em max 3 tasks atômicas:
-   ```
-   TASKS:
-   T1: <nome> — done quando: <critério>
-   T2: <nome> — done quando: <critério>
-   T3: <nome> — done quando: <critério>
-   ```
-3. NÃO fazer validação com o user (headless, não tem user)
-4. NÃO criar backlog elaborado — 3 tasks é o máximo
-5. Cada task deve caber em 1 ciclo do agente
+1. **Nunca "done" sem VERIFY** — se não rodou `ls`/`Read` no artefato, não está done
+2. **Nunca "deployed" sem evidência** — citar log, output, ou path verificado
+3. **Nunca inventar métricas** — "impacto estimado" sim, "vai aumentar 30%" não
+4. **Nunca re-descobrir** — se memory.md já tem a info, citar. Não refazer
+5. **Nunca concluir ciclo sem memory append** — o próximo ciclo depende disso
+6. **Nunca assumir que arquivo existe** — verificar com Read/Glob antes de referenciar
+7. **Draft honesto** — se o CoD revelar incerteza, declará-la na resposta
 
 ---
 
-## Quando escalar para a versão completa
+## 8. Memory Protocol (cross-cycle)
 
-Se o agente haiku detectar que o problema é complexo demais para lite:
+No início de cada ciclo autônomo (OBRIGATÓRIO):
+
+```bash
+cat <bedroom>/memory.md | tail -20
+```
+
+Ler ANTES de qualquer ação. Se memory tem info relevante → usar, não re-descobrir.
+
+---
+
+## 9. Escalonamento para Sonnet
+
+Se detectar que o problema excede o que o protocolo lite pode resolver:
 
 ```
-ESCALATION: <problema> excede capacidade lite. Recomendação: agendar com sonnet.
+ESCALATION: <problema> requer raciocínio profundo. Recomendação: agendar com sonnet.
 ```
 
-Criar card em `workshop/hermes/tasks/` com `model: sonnet` e a descrição do que precisa ser feito. Não tentar resolver com haiku o que precisa de sonnet.
+**Gatilhos:**
+- Mais de 5 arquivos precisam ser lidos para entender o problema
+- Feature com dependências em 3+ camadas simultâneas
+- Debugging com hipóteses inconclusivas após 2 rodadas de Step-Back
+- Arquitetura nova sem padrão existente no codebase
+
+Criar card em `workshop/hermes/tasks/` com `model: sonnet` e descrição completa.
 
 ---
 
 ## Resumo Visual
 
 ```
-INÍCIO DO CICLO
+INPUT CHEGA
       │
       ▼
-  Ler memory.md (tail -20)
+ Classificar (5s)
       │
-      ▼
-  ┌─────────┐
-  │ ASSESS  │  O que? Já fiz? Risco? Worth?
-  └────┬────┘
-       │
-       ├── worth=não → pular
-       ├── loop detected → avançar
-       │
-       ▼
-  ┌─────────┐
-  │  ACT    │  Executar (0 overhead)
-  └────┬────┘
-       │
-       ▼
-  ┌─────────┐
-  │ VERIFY  │  ls artefatos + quality gates
-  └────┬────┘
-       │
-       ├── artefato não existe → INCOMPLETE
-       ├── memory append (4 linhas)
-       │
-       ▼
-  FIM DO CICLO
+      ├── simples ──────────────────▶ resposta direta
+      │
+      ├── ambíguo ──────────────────▶ Step-Back
+      │                                │
+      │                                ├── confirmado → agir
+      │                                └── inconclusivo → 1 pergunta
+      │
+      ├── técnico / feature
+      │       │
+      │       ├── modo interativo ──▶ CoD
+      │       │                      D> D> D> → resposta
+      │       │
+      │       └── modo agente ──────▶ AAV
+      │                              ASSESS → ACT → VERIFY
+      │
+      ├── stuck / loop ─────────────▶ brainstorm/lite
+      │
+      └── complexo demais ──────────▶ ESCALATION → Sonnet
 ```
