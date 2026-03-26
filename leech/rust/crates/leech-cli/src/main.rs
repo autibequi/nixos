@@ -39,26 +39,22 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    // ── Session ─────────────────────────────────────────────────
     /// New session in container
-    #[command(alias = "open", alias = "code")]
+    #[command(alias = "open", alias = "code", )]
     New {
         #[command(flatten)]
         flags: SessionFlags,
     },
     /// Continue last session
-    #[command(alias = "cont")]
+    #[command(alias = "cont", )]
     Continue {
         dir: Option<String>,
         #[arg(long)]
         host: bool,
     },
-    /// Claude tools (usage, token)
-    #[command(before_help = help::CLAUDE_BEFORE)]
-    Claude {
-        #[command(subcommand)]
-        action: Option<ClaudeAction>,
-    },
     /// Resume a session by ID
+    #[command()]
     Resume {
         dir: Option<String>,
         #[arg(long, num_args = 0..=1, default_missing_value = "1")]
@@ -67,11 +63,191 @@ enum Commands {
         host: bool,
     },
     /// Bash shell inside container
-    #[command(alias = "sh")]
+    #[command(alias = "sh", )]
     Shell {
         dir: Option<String>,
         #[arg(long)]
         host: bool,
+    },
+    /// One-shot question — to an agent or directly to the default model
+    #[command(before_help = help::ASK_BEFORE, )]
+    Ask {
+        /// Agent (optional) or first word of question
+        agent: Option<String>,
+        /// Rest of the question
+        #[arg(trailing_var_arg = true)]
+        question: Vec<String>,
+        /// Force model (haiku, sonnet, opus)
+        #[arg(long, short = 'm')]
+        model: Option<String>,
+    },
+
+    // ── Agents ──────────────────────────────────────────────────
+    /// Agent management (list, phone, status)
+    #[command(alias = "ag", alias = "a", before_help = help::AGENTS_BEFORE, )]
+    Agents {
+        #[command(subcommand)]
+        action: Option<AgentsAction>,
+    },
+    /// Run an agent or task immediately
+    #[command(alias = "r", before_help = help::RUN_BEFORE, )]
+    Run {
+        name: String,
+        #[arg(long, short = 's')]
+        steps: Option<u32>,
+    },
+    /// Auto-execute due agents + tasks (systemd timer)
+    #[command(alias = "auto", before_help = help::TICK_BEFORE, )]
+    Tick {
+        #[arg(long, short = 'n')]
+        dry_run: bool,
+        #[arg(long, short = 's')]
+        steps: Option<u32>,
+        /// Message to send instead of the scheduling prompt
+        #[arg(trailing_var_arg = true)]
+        message: Vec<String>,
+    },
+    /// Task kanban (DOING/TODO/DONE)
+    #[command(alias = "t", before_help = help::TASKS_BEFORE, )]
+    Tasks {
+        #[command(subcommand)]
+        action: Option<TasksAction>,
+    },
+
+    // ── Services ────────────────────────────────────────────────
+    /// Service orchestration (start/stop/logs/shell/install/test/build/flush)
+    #[command(before_help = help::RUNNER_BEFORE, )]
+    Runner {
+        service: String,
+        action: String,
+        #[arg(long)]
+        env: Option<String>,
+        #[arg(long)]
+        worktree: Option<String>,
+        #[arg(long)]
+        vertical: Option<String>,
+        #[arg(long)]
+        container: Option<String>,
+        #[arg(long)]
+        cmd: Option<String>,
+        #[arg(long)]
+        tail: Option<u32>,
+        #[arg(long)]
+        debug: bool,
+        #[arg(long)]
+        dev: bool,
+        #[arg(long)]
+        detach: bool,
+    },
+    /// List git worktrees across services
+    #[command(alias = "wt", before_help = help::WORKTREE_BEFORE, )]
+    Worktree {
+        service: Option<String>,
+        #[arg(long)]
+        json: bool,
+    },
+    /// Interactive status dashboard
+    #[command(alias = "st", before_help = help::STATUS_BEFORE, )]
+    Status {
+        #[arg(long, short = 't', default_value = "5")]
+        tick: u64,
+        #[arg(long)]
+        json: bool,
+    },
+
+    // ── System ──────────────────────────────────────────────────
+    /// Container lifecycle (build/stop/clean/destroy)
+    #[command()]
+    Docker {
+        #[command(subcommand)]
+        action: DockerAction,
+    },
+    /// NixOS operations (switch/test/boot/build)
+    #[command(before_help = help::OS_BEFORE, )]
+    Os {
+        #[command(subcommand)]
+        action: OsAction,
+    },
+    /// Deploy dotfiles via GNU stow
+    #[command(before_help = help::STOW_BEFORE, )]
+    Stow {
+        #[arg(default_value = "restow")]
+        action: String,
+        #[arg(long, short = 'r')]
+        reload: bool,
+    },
+    /// Show or edit configuration
+    #[command(alias = "cfg", )]
+    Config {
+        #[command(subcommand)]
+        action: Option<ConfigAction>,
+    },
+    /// Chrome Relay (CDP)
+    #[command()]
+    Relay {
+        #[arg(default_value = "start")]
+        action: String,
+    },
+    /// Keep machine awake for remote access (systemd-inhibit)
+    #[command(alias = "caffeine", )]
+    Sentinel {
+        #[arg(default_value = "start")]
+        action: String,
+    },
+    /// Shared tmux session (host ↔ container)
+    #[command(alias = "tm", )]
+    Tmux {
+        #[command(subcommand)]
+        action: TmuxAction,
+    },
+    /// Full documentation
+    #[command()]
+    Man,
+    /// List inbox files
+    #[command(alias = "ib", )]
+    Inbox,
+
+    // ── Hidden aliases (backward compat) ────────────────────────
+    /// Build Docker image (use `docker build`)
+    #[command(hide = true)]
+    Build {
+        #[arg(long)]
+        danger: bool,
+        #[arg(long)]
+        no_cache: bool,
+    },
+    /// Stop compose containers (use `docker stop`)
+    #[command(alias = "down", hide = true)]
+    Stop,
+    /// Stop all + kill strays
+    #[command(hide = true)]
+    Shutdown,
+    /// Remove stopped containers (use `docker clean`)
+    #[command(alias = "gc", alias = "prune", hide = true)]
+    Clean {
+        #[arg(long, short = 'f')]
+        force: bool,
+    },
+    /// Destroy containers + volumes + leech image
+    #[command(hide = true)]
+    Destroy,
+    /// Zombies bash: listar pais e opcionalmente SIGTERM
+    #[command(alias = "zombies", alias = "clean-up", after_help = help::CLEANUP_AFTER, hide = true)]
+    Cleanup {
+        #[arg(long)]
+        reap: bool,
+        #[arg(long, short = 'y')]
+        yes: bool,
+        #[arg(long, default_value_t = 1)]
+        min: usize,
+        #[arg(long)]
+        all: bool,
+    },
+    /// Claude tools (usage, token)
+    #[command(before_help = help::CLAUDE_BEFORE, hide = true)]
+    Claude {
+        #[command(subcommand)]
+        action: Option<ClaudeAction>,
     },
     /// Ephemeral session (auto-detect nixos)
     #[command(alias = "l", hide = true)]
@@ -81,11 +257,67 @@ enum Commands {
         #[arg(long, short = 's')]
         shell: bool,
     },
+    /// Build and install leech CLI
+    #[command(alias = "install", hide = true)]
+    Update,
+    /// Set default engine
+    #[command(hide = true)]
+    Set { engine: String },
+    /// Execute a Claude Code hook
+    #[command(alias = "hook", hide = true)]
+    Hooks {
+        hook: Option<String>,
+        #[arg(long, short = 'l')]
+        list: bool,
+        #[arg(trailing_var_arg = true)]
+        env_overrides: Vec<String>,
+    },
+    /// List outbox files
+    #[command(alias = "ob", hide = true)]
+    Outbox,
+    /// Show banner
+    #[command(alias = "h", hide = true)]
+    Banner,
+    /// Generate shell completions
+    #[command(hide = true)]
+    Completions {
+        shell: clap_complete::Shell,
+    },
+    /// Claude usage stats
+    #[command(hide = true)]
+    Usage {
+        #[arg(long)]
+        waybar: bool,
+        #[arg(long)]
+        json: bool,
+        #[arg(long)]
+        no_cache: bool,
+        #[arg(long)]
+        refresh: bool,
+    },
+    /// Print Claude OAuth token
+    #[command(hide = true)]
+    Token,
+    /// Shortcut for 'leech run tasker'
+    #[command(hide = true)]
+    Tasker {
+        #[arg(long, short = 's')]
+        steps: Option<u32>,
+    },
+    /// Git utilities
+    #[command(alias = "g", hide = true)]
+    Git {
+        #[command(subcommand)]
+        action: GitAction,
+    },
+}
+
+#[derive(Subcommand)]
+enum DockerAction {
     /// Build Docker image
     Build {
         #[arg(long)]
         danger: bool,
-        /// Alias for --danger: rebuild base image without cache (refreshes cursor-agent)
         #[arg(long)]
         no_cache: bool,
     },
@@ -100,219 +332,20 @@ enum Commands {
         #[arg(long, short = 'f')]
         force: bool,
     },
-    /// Zombies bash: listar pais e opcionalmente SIGTERM (host Linux; não apaga arquivos)
-    #[command(alias = "zombies", alias = "clean-up", after_help = help::CLEANUP_AFTER)]
-    Cleanup {
-        /// SIGTERM nos processos pai que acumulam zombies (resumo + confirmação; --yes pula)
-        #[arg(long)]
-        reap: bool,
-        /// Confirmar --reap sem perguntar (scripts)
-        #[arg(long, short = 'y')]
-        yes: bool,
-        #[arg(long, default_value_t = 1)]
-        min: usize,
-        /// Listar todos os pais (não só stack dev)
-        #[arg(long)]
-        all: bool,
-    },
-
-    /// Deploy dotfiles via GNU stow
-    #[command(before_help = help::STOW_BEFORE)]
-    Stow {
-        #[arg(default_value = "restow")]
-        action: String,
-        #[arg(long, short = 'r')]
-        reload: bool,
-    },
-    /// NixOS operations (switch/test/boot/build)
-    #[command(before_help = help::OS_BEFORE)]
-    Os {
-        #[command(subcommand)]
-        action: OsAction,
-    },
-    /// Build and install leech CLI
-    #[command(alias = "install", hide = true)]
-    Update,
-    /// Set default engine
-    #[command(hide = true)]
-    Set { engine: String },
-
-    /// Execute a Claude Code hook
-    #[command(alias = "hook", hide = true)]
-    Hooks {
-        hook: Option<String>,
-        #[arg(long, short = 'l')]
-        list: bool,
-        #[arg(trailing_var_arg = true)]
-        env_overrides: Vec<String>,
-    },
-    /// Chrome Relay (CDP)
-    Relay {
-        #[arg(default_value = "start")]
-        action: String,
-    },
-    /// List inbox files
-    #[command(alias = "ib")]
-    Inbox,
-    /// List outbox files
-    #[command(alias = "ob", hide = true)]
-    Outbox,
-    /// Full documentation
-    Man,
-    /// Show banner
-    #[command(alias = "h", hide = true)]
-    Banner,
-    /// Generate shell completions (source dynamically: eval "$(leech completions zsh)")
-    #[command(hide = true)]
-    Completions {
-        /// Shell: bash, zsh, fish, elvish
-        shell: clap_complete::Shell,
-    },
-    /// Claude usage stats (alias for `claude usage`)
-    #[command(hide = true)]
-    Usage {
-        #[arg(long)]
-        waybar: bool,
-        #[arg(long)]
-        json: bool,
-        #[arg(long)]
-        no_cache: bool,
-        #[arg(long)]
-        refresh: bool,
-    },
-    /// Print Claude OAuth token (alias for `claude token`)
-    #[command(hide = true)]
-    Token,
-
-    /// Interactive status dashboard
-    #[command(alias = "st", before_help = help::STATUS_BEFORE)]
-    Status {
-        #[arg(long, short = 't', default_value = "5")]
-        tick: u64,
-        #[arg(long)]
-        json: bool,
-    },
-
-    // ── Worktree ─────────────────────────────────────────────────
-    /// List git worktrees across services
-    #[command(alias = "wt", before_help = help::WORKTREE_BEFORE)]
-    Worktree {
-        service: Option<String>,
-        #[arg(long)]
-        json: bool,
-    },
-
-    // ── Runner (service orchestration) ──────────────────────────
-    /// Service orchestration (start/stop/logs/shell/install/test/build/flush)
-    #[command(alias = "docker", before_help = help::RUNNER_BEFORE)]
-    Runner {
-        service: String,
-        action: String,
-        #[arg(long, default_value = "local")]
-        env: String,
-        #[arg(long)]
-        worktree: Option<String>,
-        #[arg(long, default_value = "carreiras-juridicas")]
-        vertical: String,
-        #[arg(long, default_value = "app")]
-        container: String,
-        #[arg(long)]
-        cmd: Option<String>,
-        #[arg(long, default_value = "100")]
-        tail: u32,
-        #[arg(long)]
-        debug: bool,
-        #[arg(long)]
-        dev: bool,
-        #[arg(long)]
-        detach: bool,
-    },
-
-    // ── Tick (timer systemd) ─────────────────────────────────────
-    /// Auto-execute due agents + tasks (systemd timer)
-    #[command(alias = "auto", before_help = help::TICK_BEFORE)]
-    Tick {
-        #[arg(long, short = 'n')]
-        dry_run: bool,
-        #[arg(long, short = 's')]
-        steps: Option<u32>,
-        /// Message to send instead of the scheduling prompt
-        #[arg(trailing_var_arg = true)]
-        message: Vec<String>,
-    },
-
-    /// Shortcut for 'leech run tasker'
-    #[command(hide = true)]
-    Tasker {
-        #[arg(long, short = 's')]
-        steps: Option<u32>,
-    },
-
-    // ── Run (agent or task) ─────────────────────────────────────
-    /// Run an agent or task immediately
-    #[command(alias = "r", before_help = help::RUN_BEFORE)]
-    Run {
-        name: String,
-        #[arg(long, short = 's')]
-        steps: Option<u32>,
-    },
-
-    // ── Sentinel ─────────────────────────────────────────────────
-    /// Keep machine awake for remote access (systemd-inhibit)
-    #[command(alias = "caffeine")]
-    Sentinel {
-        #[arg(default_value = "start")]
-        action: String,
-    },
-
-    /// Destroy containers + volumes + leech image (full reset)
+    /// Full reset: containers + volumes + image
     Destroy,
+}
 
-    /// Shared tmux session (host ↔ container)
-    #[command(alias = "tm")]
-    Tmux {
-        #[command(subcommand)]
-        action: TmuxAction,
-    },
-
-    // ── Git ──────────────────────────────────────────────────────
-    /// Git utilities
-    #[command(alias = "g", hide = true)]
-    Git {
-        #[command(subcommand)]
-        action: GitAction,
-    },
-
-    // ── Agents ──────────────────────────────────────────────────
-    /// Agent management (list, phone, status)
-    #[command(alias = "ag", alias = "a", before_help = help::AGENTS_BEFORE)]
-    Agents {
-        #[command(subcommand)]
-        action: Option<AgentsAction>,
-    },
-
-    // ── Ask ─────────────────────────────────────────────────────
-    /// One-shot question — to an agent or directly to the default model
-    #[command(before_help = help::ASK_BEFORE)]
-    Ask {
-        /// Agente (opcional) ou primeira palavra da pergunta
-        agent: Option<String>,
-        /// Resto da pergunta
-        #[arg(trailing_var_arg = true)]
-        question: Vec<String>,
-        /// Forçar modelo (haiku, sonnet, opus)
-        #[arg(long, short = 'm')]
-        model: Option<String>,
-    },
-
-    // ── Tasks ───────────────────────────────────────────────────
-    /// Task kanban (DOING/TODO/DONE)
-    #[command(alias = "t", before_help = help::TASKS_BEFORE)]
-    Tasks {
-        #[command(subcommand)]
-        action: Option<TasksAction>,
-    },
-
+#[derive(Subcommand)]
+enum ConfigAction {
+    /// Show resolved config (all layers merged)
+    Show,
+    /// Open config.yaml in $EDITOR
+    Edit,
+    /// Generate default config.yaml template
+    Init,
+    /// Print config file paths
+    Path,
 }
 
 #[derive(Subcommand)]
@@ -427,7 +460,16 @@ fn main() -> Result<()> {
         Some(Commands::Shell { dir, host }) => commands::session::shell(dir, host),
         Some(Commands::Leech { flags, shell }) => commands::session::leech(flags, shell),
 
-        // Docker
+        // Docker namespace
+        Some(Commands::Docker { action }) => match action {
+            DockerAction::Build { danger, no_cache } => commands::docker::build(danger || no_cache),
+            DockerAction::Stop => commands::docker::down(),
+            DockerAction::Shutdown => commands::docker::shutdown(),
+            DockerAction::Clean { force } => commands::docker::clean(force),
+            DockerAction::Destroy => commands::docker::destroy(),
+        },
+
+        // Docker aliases (hidden, backward compat)
         Some(Commands::Build { danger, no_cache }) => commands::docker::build(danger || no_cache),
         Some(Commands::Stop) => commands::docker::down(),
         Some(Commands::Shutdown) => commands::docker::shutdown(),
@@ -435,6 +477,11 @@ fn main() -> Result<()> {
         Some(Commands::Cleanup { reap, yes, min, all }) => {
             commands::cleanup::run(reap, min, all, yes)
         },
+
+        // Config
+        Some(Commands::Config { action }) => {
+            commands::config_cmd::run(action)
+        }
 
         // Host
         Some(Commands::Stow { action, reload }) => commands::host::stow(&action, reload),
@@ -511,20 +558,21 @@ fn main() -> Result<()> {
             Ok(())
         }
 
-        // Runner — native Rust service orchestration
+        // Runner — service orchestration with config fallback
         Some(Commands::Runner {
             service, action, env, worktree, vertical, container, cmd, tail, debug, dev, detach,
         }) => {
+            let cfg = leech_cli::config::LeechConfig::load()?;
             commands::runner::run(&service, &action, &commands::runner::RunnerOpts {
-                env: &env,
+                env: env.as_deref().unwrap_or(&cfg.runner.env),
                 worktree: worktree.as_deref(),
-                vertical: &vertical,
-                container: &container,
+                vertical: vertical.as_deref().unwrap_or(&cfg.runner.vertical),
+                container: container.as_deref().unwrap_or(&cfg.runner.container),
                 cmd: cmd.as_deref(),
-                tail,
-                debug,
-                dev,
-                detach,
+                tail: tail.unwrap_or(cfg.runner.tail),
+                debug: debug || cfg.runner.debug,
+                dev: dev || cfg.runner.dev,
+                detach: detach || cfg.runner.detach,
             })
         }
 

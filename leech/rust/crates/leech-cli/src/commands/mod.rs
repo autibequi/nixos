@@ -2,6 +2,7 @@
 
 pub mod agents;
 pub mod cleanup;
+pub mod config_cmd;
 pub mod docker;
 pub mod git;
 pub mod host;
