@@ -47,16 +47,46 @@ Antes de qualquer resposta, classificar o input em 1 linha:
 
 **Quando usar:** "onde está", "qual arquivo", "qual rota", "qual função faz X" — qualquer localização de código.
 
-**Protocolo S+++ tier (campeão: B4-V9 — 50.9k / 1 tool / 6.5s / completo — limite físico):**
+**Protocolo OBRIGATÓRIO — S+++ tier (campeões: B4-V9 + SSS-V01 — 50-55k / 1 tool / 6.5-9.5s / completo — limite físico):**
 
 ```
-[1 CALL APENAS — o máximo possível resolvido em 1 grep]
+[REGRA 0: VERIFY ANCHOR — OBRIGATÓRIO ANTES DE TUDO]
+□ Path anchor existe? (ls <path_base> mentalmente)
+□ Arquivo anchor dentro do path? (se possível, listar 1 arquivo esperado)
+□ Termos fazem sentido para o anchor? (mentalizar estrutura)
 
+Se algum falhar → NÃO fazer grep. ESCALATION direto.
+  Exemplo: se anchor é "apps/bo/handlers/" mas procuro em "apps/front/",
+  não pedir grep — avise: "Caminho provável é X. Arquivo pode estar em Y."
+```
+
+```
+[REGRA 1: ANCHOR MAP ANTES DO GREP]
+Declarar onde cada tipo de artefato vive (veja tabela abaixo).
+
+[REGRA 2: GREP COM TODOS OS TERMOS SIMULTÂNEOS]
 Grep "<termo1>\|<termo2>\|<termo3>\|<termo4>" em <path_base>/
 
 → Um único grep com todos os nomes simultaneamente retorna
   arquivos e linhas de todos os itens de uma vez.
 → Com resultado em mãos, responder sem tool calls adicionais.
+
+[REGRA 3: FALLBACK CADEIA PREDEFINIDA]
+Call 1: Grep "<termo_original>"
+Call 2: Grep "<termo_snake_case>"     (se original era camelCase)
+Call 3: Grep "<termo_camelCase>"      (se original era snake_case)
+
+Depois de 3 calls vazios → ESCALATION. NÃO explorar pastas.
+Razão: V02 caiu em loop 43 calls. Fallback ordenado = max 3.
+
+[REGRA 4: TIMEOUT HEURÍSTICO — STOP SEARCHING]
+Se 3 calls consecutivos retornam vazio:
+  → PARE. Não significa fracasso — significa "não em anchor esperado".
+  → Responder com honestidade:
+     "Procurei em <anchor>. Se não encontrado, arquivo pode estar em:
+      <alternativa1>, <alternativa2>. Recomendação: escalate para Sonnet."
+
+Isso previne V06 (F tier — path não encontrado) e V02 loops.
 ```
 
 **Quando usar cada modo:**
@@ -76,11 +106,16 @@ Grep "FuncA\|FuncB\|FuncC\|constD" em /path/base/
 → responder direto com os dados
 ```
 
-**Fallback se 1 call vazio:**
-- Tentar variação de nome no 2º call
-- Se ainda vazio → ESCALATION, não explorar
+**Ordem de Fallback (previne V02 loop infinito):**
 
-**Nota:** B4-V9 atingiu o limite físico (1 tool = mínimo possível para busca em codebase desconhecido). Abaixo disso só com conhecimento 100% pré-injetado.
+| Call | Tática | Exemplo | Quando |
+|------|--------|---------|--------|
+| 1 | Grep termo original | `"HandleDashboard"` | Sempre |
+| 2 | Snake_case | `"handle_dashboard"` | Se call 1 vazio |
+| 3 | CamelCase alternativo | `"handleDashboard"` | Se calls 1-2 vazios |
+| 4+ | **STOP** → ESCALATION | — | Nunca continuar além de 3 |
+
+**Nota:** B4-V9 atingiu o limite físico (1 tool = mínimo possível para busca em codebase desconhecido). Fallback cadeia reduz casos de loop: V02 tinha 43 calls (F tier), fallback = max 3-4.
 
 **Mapa de anchor por tipo de artefato (monolito Estratégia):**
 
@@ -116,8 +151,8 @@ Call 2: Grep "BulkGenerateSnapshot" em container.go
 ## Experimentos — Técnicas Testadas
 
 > Seção de rastreabilidade. Cada técnica tem tier validado em benchmark real.
-> Benchmark: `obsidian/benchmark_llm.md` P1–P4 | Modelo: Haiku 4.5
-> Dados completos: `obsidian/vibefu_bench/thinking-lite/data.md`
+> Benchmark: P1–P4 (localização no monolito Estratégia) | Modelo: Haiku 4.5
+> Dados completos: `/workspace/obsidian/vibefu/sss_bench/` (20 variações + dashboard)
 
 | ID | Técnica | Tier | Tokens | Tools | Completo | Descrição |
 |----|---------|:----:|-------:|------:|:--------:|-----------|
@@ -136,20 +171,34 @@ Call 2: Grep "BulkGenerateSnapshot" em container.go
 
 | ID | Técnica | Tier | Tokens | Tools | Tempo | Completo | Notas |
 |----|---------|:----:|-------:|------:|------:|:--------:|-------|
-| `multigrep-1call` | grep 4 termos simultâneos `\|` | **S+++** | 50.9k | 1 | 6.5s | ✅ | **Campeão absoluto — limite físico** |
-| `calls-pre-planejados` | plano completo antes de executar | **S++** | 52.8k | 3 | 9s | ✅ | Batch 3 campeão |
-| `expertise-injection` | conhecimento do codebase injetado | **S+** | 55.5k | 9 | 19s | ✅ | Robusto sem plano |
-| `s-tier-full` | anchor+budget+opções por item | **S+** | 57.1k | 8 | 11s | ✅ | Batch 2 campeão |
-| `anchor-budget` | anchor+budget sem opções | S | 56.5k | 8 | 26s | ⚠️ | P4 parcial |
-| `anchor-file` | path de arquivo exato | S | 62.8k | 11 | 25s | ✅ | Simples e robusto |
-| `anchor-self-consistency` | anchor+2 opções genéricas | A | 68.8k | 22 | 35s | ✅ | Opções não por item |
-| `budget-self-consistency` | budget+2 opções sem anchor | B | 64.8k | 13 | 41s | ⚠️ | **Aluciou P2** sem anchor |
+| **SSS-V01** | **anchor + multigrep 4 termos** | **S+++** | **55.2k** | **1** | **9.5s** | ✅ | **NOVO CAMPEÃO SSS — Batch confirmou B4-V9** |
+| **SSS-V16** | **expertise + 1 call verify** | **S+** | **54.3k** | **4** | **6.0s** | ✅ | **Expertise bem calibrada com verificação** |
+| `multigrep-1call` | grep 4 termos simultâneos `\|` | **S+++** | 50.9k | 1 | 6.5s | ✅ | B4-V9 (Batch 4) — mantém recorde histórico |
+| `calls-pre-planejados` | plano completo antes de executar | **S++** | 52.8k | 3 | 9s | ✅ | Batch 3 — usar só com anchor calibrado |
+| `expertise-injection` | conhecimento do codebase injetado | **S+** | 55.5k | 9 | 19s | ✅ | Robusto mas exige verificação (V16 confirmou) |
+| `anchor-budget` | anchor+budget sem opções | S | 56.5k | 8 | 26s | ⚠️ | P4 parcial — requer fallback |
+| `anchor-file` | path de arquivo exato | S | 62.8k | 11 | 25s | ✅ | Simples e robusto quando path é fixo |
+| **SSS-V05** | **sparse-read + anchor (RISCO)** | **S++** | **51.8k** | **4** | **5.1s** | ❌ | **Mais rápido MAS P2 linha errada — sparse offset impreciso** |
+| `budget-self-consistency` | budget+2 opções sem anchor | B | 64.8k | 13 | 41s | ⚠️ | **Aluciou P2** sem anchor (V06, V14 confirmaram) |
 
-**Regra derivada dos experimentos:**
-- 1 técnica isolada > 3 técnicas combinadas (V05 confirmou)
+**Regra derivada dos experimentos (SSS Batch confirmou):**
+- 1 técnica isolada > 3 técnicas combinadas (V01, V05 confirmaram)
 - Budget sem anchor = incompleto; anchor sem budget = lento mas completo
-- Minimalismo sem path anchor → hallucination (V08 confirmou)
-- Grep-first sem budget = anti-padrão F tier (V02 confirmou)
+- Minimalismo sem path anchor → hallucination (V14 aluciou, V06 falhou)
+- Sparse-read com offset impreciso = linha errada (V05 P2 errou linha 6 vs 12)
+- Expertise sem verificação = confiança falsa (V16 adicionou 1 call de verificação = S+)
+
+---
+
+## Armadilhas Comuns — Baseado em Falhas SSS (V14, V06, V08, V12)
+
+| Armadilha | Sintoma | Lição |
+|-----------|---------|-------|
+| **Sparse-read sem offset calibrado** | Retorna linha errada | V05 tentou otimizar — resultado: P2 linha 6 em vez de 12. Use `Grep` em vez disso. |
+| **Expertise conflitante** | Label confunde posição no path | V08 e V12 nomearam "expertise" mas o modelo confundiu handlers de diferentes apps. Separar por anchor claro. |
+| **Múltiplas técnicas (4+)** | Desorientação, hallucination | V17 combinou: anchor+plano+multigrep+fmt = 67.1k tokens, 9 tools, C tier. 1 técnica = S tier. |
+| **Plano sem verificação** | Alucinação confiante | V14 e V06 planejaram mas não verificaram anchors com `ls` antes. AAV exige VERIFY. |
+| **Grep sem budget** | Loops infinitos de busca | V02: grep-first sem planejamento = 83.4k tokens, 43 calls, F tier (pior tier). |
 
 ---
 
