@@ -37,3 +37,4 @@ agents:
 # system:
 #   docker_gid: 999       # auto-detect from /var/run/docker.sock
 #   journal_gid: 62
+

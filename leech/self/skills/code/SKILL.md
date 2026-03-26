@@ -18,6 +18,7 @@ Skills de trabalho com codigo: analise, debug, teste, review, inspecao, boas pra
 | `code/inspection` | Inspecao de qualidade de codigo |
 | `code/report` | Relatorio consolidado de analise |
 | `code/peer-reviews` | Simula review dos 5 peers do monolito (Washington, Pedro Castro, Molina, Marquesini, William) |
+| `code/github` | Operações GitHub — PRs, comentários, diffs, reviews. Token sempre de ~/.leech. Comentários = ativos por default |
 | `code/review` | Code review (chama inspection internamente) |
 | `code/github-evaluate` | Avalia dev GitHub via PRs + reviews, relatorio no inbox com benchmarks |
 | `code/tdd` | Test-Driven Development — RED-GREEN-REFACTOR |
