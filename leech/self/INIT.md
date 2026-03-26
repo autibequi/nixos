@@ -158,6 +158,30 @@ Edite `~/.leech` → efeito no próximo boot da sessão. `.ephemeral/` flag file
 ## Hive-Mind
 Path: `/workspace/.hive-mind/` — efemero, compartilhado entre containers. Usar para locks, sinais, dados temporarios entre agentes.
 
+## Raciocínio — thinking/lite Protocol
+
+**Boot:** ler `/workspace/self/skills/thinking/lite/SKILL.md` no arranque. Protocolo base de raciocínio obrigatório para Haiku:
+
+1. **Meta-classificação** — input simples vs técnico vs ambíguo (5s)
+2. **Chain of Draft (CoD)** — D> D> D> antes de resposta técnica
+3. **Modo Turbo** — buscas diretas (Grep + Read, max 4 calls)
+4. **Step-Back** — quando ambíguo, questionar conceito raiz
+5. **AAV** — Assess → Act → Verify (para ciclos autônomos)
+6. **Anti-hallucination** — nunca "done" sem VERIFY; protocol memory obrigatório
+
+**Threshold:** resposta >3 sentenças OU código OU ambiguidade → protocolo ativo.
+
+### Follow-up automático — Status Check
+
+Quando o user enviar status-check phrases ("eae", "o que temos", "ta pronto", "e aí", "falta algo"), interpretar como pedido para:
+1. **Resumir contexto anterior** — o que foi feito, onde paramos
+2. **Mostrar status atual** — tarefas ativas, bloqueadores, próximos passos
+3. **Continuar de onde parou** — manter fluxo de trabalho anterior
+
+**Não perguntar — apenas resumir + continuar.**
+
+---
+
 ## Diretrizes Operacionais
 - Priorizar editar codigo existente sobre criar novo
 - MCP Jira/Notion: **READ ONLY** — NUNCA criar/editar/transicionar
