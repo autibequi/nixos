@@ -149,6 +149,10 @@ impl SessionRunner {
         let home = paths::home().to_string_lossy().into_owned();
 
         let mut claude_args: Vec<String> = Vec::new();
+
+        // Always enable auto mode for Claude sessions launched by Leech
+        claude_args.push("--enable-auto-mode".to_string());
+
         if let Some(ref id) = model_id {
             claude_args.push("--model".to_string());
             claude_args.push(id.clone());
@@ -273,6 +277,9 @@ impl SessionRunner {
         config: &LeechConfig,
     ) -> Result<()> {
         let mut claude_args = Vec::new();
+
+        // Always enable auto mode for Claude sessions launched by Leech
+        claude_args.push("--enable-auto-mode".to_string());
 
         if let Some(ref id) = model_id {
             claude_args.push("--model".to_string());

@@ -19,7 +19,7 @@ if [[ "${LEECH_SPLASH:-1}" == "0" ]]; then
   wait "$BOOT_PID" 2>/dev/null || true
   printf '\033[2J\033[H'
   cd /workspace/mnt
-  exec /home/claude/.nix-profile/bin/claude "$@"
+  exec /home/claude/.nix-profile/bin/claude --enable-auto-mode "$@"
 fi
 
 printf '\033[2J\033[H\033[?25l\n'
@@ -79,4 +79,4 @@ sleep 0.2
 
 printf '\033[?25h\033[2J\033[H'
 cd /workspace/mnt
-exec /home/claude/.nix-profile/bin/claude "$@"
+exec /home/claude/.nix-profile/bin/claude --enable-auto-mode "$@"

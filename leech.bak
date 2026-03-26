@@ -1,0 +1,69 @@
+# Configuração do claudio — copie para ~/.claudio e ajuste (chmod 600 ~/.claudio)
+# Este arquivo é sourceado pelo CLI; use sintaxe shell KEY=value.
+# Nunca commite ~/.claudio (contém tokens).
+
+# ── Engine padrão (obrigatório para `claudio run` se não passar --engine=)
+# opencode = OpenCode TUI
+# claude   = Claude Code no container
+# cursor   = Cursor (por ora mesmo binário que claude no container)
+engine=claude
+
+# ── Tokens (injetados no container; use sempre menor escopo possível)
+# GitHub: Fine-grained PAT com Pull requests / Contents / Issues read-only
+GH_TOKEN=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
+
+# Anthropic (Claude API)
+ANTHROPIC_API_KEY=
+
+# ── Opcionais
+# Caminho do vault Obsidian (default: $HOME/.ovault)
+OBSIDIAN_PATH=$HOME/.ovault/Work
+
+# Raiz do repo NixOS (default: $HOME/nixos)
+CLAUDIO_NIXOS_DIR=$HOME/nixos
+
+DANGER=false
+
+# Por engine (sobrescreve model= para aquele engine)
+#model_claude=claude-sonnet-4-6
+model_claude=haiku
+model_cursor=auto
+
+# GRAFANA
+GRAFANA_URL=https://grafana.platform.estrategia.io
+GRAFANA_TOKEN=glsa_Dev1liT2OaxrEwWqnMytOf0SZlOevSPO_dd205e7d
+
+# ── Zion agent test ────────────────────────────────────────────
+ZION_ESTIVE_AQUI=sim
+
+# ── Chrome Relay ────────────────────────────────────────────────
+# Setar true quando Chrome com CDP (porta 9222) estiver aberto.
+# Agents: SEMPRE confirmar com live check antes de usar:
+#   python3 /workspace/self/scripts/chrome-relay.py status
+# Flag é dica do usuario; live check é fonte da verdade.
+RELAY_ONLINE=true
+ZION_SPLASH=0
+
+# ── Projetos dockerizados ────────────────────────────────────────
+MONOLITO_DIR=$HOME/projects/estrategia/monolito
+BO_CONTAINER_DIR=$HOME/projects/estrategia/bo-container
+FRONT_STUDENT_DIR=$HOME/projects/estrategia/front-student
+
+
+# ── Flags de controle de sessão ─────────────────────────────────
+# mobile=1  → saída compacta para celular (linhas ~50 chars, sem tabelas largas)
+# mobile=0  → saída normal
+mobile=1
+
+HOST_MODE=1
+
+# ── Tick agent flags ─────────────────────────────────────────────
+# Flags passadas ao tick quando executa agents.
+# -rw  → monta self + obsidian em modo leitura/escrita
+TICK_FLAGS=-rw
+
+# ── DMZ paths — sempre montados com -rw ──────────────────────────
+# Paths adicionados automaticamente como --add-dir rw em toda sessão.
+# Separados por : (igual ao PATH)
+DMZ_PATHS=~/projects
+LOGS_DIR=~/.local/share/leech/logs/dockerized
