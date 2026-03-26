@@ -38,7 +38,7 @@
     "deny": [],
     "defaultMode": "bypassPermissions"
   },
-  "model": "sonnet[1m]",
+  "model": "haiku",
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "nixos"
