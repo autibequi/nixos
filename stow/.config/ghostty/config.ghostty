@@ -17,7 +17,11 @@ maximize = true
 # Decorations
 window-decoration = none
 window-inherit-working-directory = true
+<<<<<<< HEAD
 window-save-state = never
+=======
+window-save-state = false
+>>>>>>> f6b12929d71b802b0c382ad9906c3bb0836e117e
 window-padding-x = 10
 window-padding-y = 10
 window-vsync = false
