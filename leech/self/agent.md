@@ -98,6 +98,7 @@ Tags no card definem como o hermes e o executor se comportam:
 5. **Performance** — ao fim de todo ciclo: atualizar `bedrooms/performance/` com dados do boot
 6. **Cards** — nunca deixar card em WORKING ao encerrar (mover para SLEEPING ou DONE)
 7. **Canais** — comunicar via inbox, feed.md ou DASHBOARD (não criar arquivos soltos no raiz)
+8. **Pensamento Obrigatório** — agentes haiku (`#haiku`) DEVEM executar protocolo AAV (`thinking/lite`) em todo ciclo: ASSESS antes de agir, VERIFY antes de encerrar, memory append sempre. Sonnet recomendado em ciclos curtos.
 
 ---
 

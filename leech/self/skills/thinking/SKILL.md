@@ -11,6 +11,7 @@ description: Entrypoint universal para qualquer problema — dispatcher que rote
 
 | Tipo de problema | Ação |
 |---|---|
+| **Agente haiku (qualquer ciclo)** | **Sempre `thinking/lite`** — protocolo AAV obrigatório antes de qualquer ação |
 | Qualquer coisa | **Sempre começar por `thinking/investigate`** (coletar dados antes de pensar) |
 | Feature / card Jira | Fluxo thinking (passos 1-7) → `thinking/refine` — ler card com `coruja/jira` |
 | Bug / stack trace | → `code/debug` |
@@ -27,6 +28,7 @@ description: Entrypoint universal para qualquer problema — dispatcher que rote
 | `brainstorm` | Motor de ideação — recebe problema + perspectiva, decompõe em blocos, gera descobertas. Funciona standalone ou como sub-agente |
 | `refine` | Quebrar feature/spec em tasks atômicas ordenadas por camada |
 | `proactive` | Radar Pareto — filtra os 20% de ações que entregam 80% do valor, agrupa em clusters de responsabilidade, gera conteúdo que se acumula como ativo |
+| `lite` | **Obrigatório para haiku** — protocolo ASSESS/ACT/VERIFY + versões comprimidas de investigate, brainstorm, proactive e refine |
 
 ---
 

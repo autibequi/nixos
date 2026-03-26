@@ -32,9 +32,9 @@ pub fn resolve_model(
 
     // Per-engine config
     let per_engine = match engine {
-        Engine::Claude => config.model_claude.as_deref(),
-        Engine::OpenCode => config.model_opencode.as_deref(),
-        Engine::Cursor => config.model_cursor.as_deref(),
+        Engine::Claude => config.session.model_claude.as_deref(),
+        Engine::OpenCode => config.session.model_opencode.as_deref(),
+        Engine::Cursor => config.session.model_cursor.as_deref(),
     };
     if let Some(m) = per_engine {
         if !m.is_empty() {
@@ -43,7 +43,7 @@ pub fn resolve_model(
     }
 
     // Global config
-    config.model.as_deref().and_then(|m| {
+    config.session.model.as_deref().and_then(|m| {
         if m.is_empty() {
             None
         } else {
@@ -64,8 +64,8 @@ mod tests {
 
     fn config_with(model: Option<&str>, model_claude: Option<&str>) -> LeechConfig {
         let mut cfg = LeechConfig::default();
-        cfg.model = model.map(|s| s.to_string());
-        cfg.model_claude = model_claude.map(|s| s.to_string());
+        cfg.session.model = model.map(|s| s.to_string());
+        cfg.session.model_claude = model_claude.map(|s| s.to_string());
         cfg
     }
 

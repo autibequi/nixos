@@ -132,7 +132,7 @@ impl SessionRunner {
             return self.run_ghost(config);
         }
         let model_id = model::resolve_model(self.model.as_deref(), self.engine, config);
-        let danger = self.danger || config.danger;
+        let danger = self.danger || config.session.danger;
 
         match self.engine {
             Engine::Claude => self.run_claude(model_id, danger, config),
@@ -193,10 +193,10 @@ impl SessionRunner {
         ];
 
         // Tokens opcionais
-        if let Some(ref t) = config.anthropic_api_key {
+        if let Some(ref t) = config.secrets.anthropic_api_key {
             args.extend(["-e".into(), format!("ANTHROPIC_API_KEY={t}")]);
         }
-        if let Some(ref t) = config.gh_token {
+        if let Some(ref t) = config.secrets.gh_token {
             args.extend(["-e".into(), format!("GH_TOKEN={t}")]);
         }
 
@@ -237,8 +237,8 @@ impl SessionRunner {
             .env("CLAUDIO_MOUNT_OPTS", &self.mount_opts)
             .env("OBSIDIAN_PATH", &paths::obsidian_ensured())
             .env("HOME", &paths::home().to_string_lossy())
-            .env("DOCKER_GID", &config.docker_gid.to_string())
-            .env("JOURNAL_GID", &config.journal_gid.to_string())
+            .env("DOCKER_GID", &config.docker_gid().to_string())
+            .env("JOURNAL_GID", &config.system.journal_gid.to_string())
             .env("LEECH_ROOT", &paths::leech_root().to_string_lossy())
             .env("LEECH_NIXOS_DIR", &paths::nixos_dir().to_string_lossy())
             .env("XDG_DATA_HOME", &paths::xdg_data_home())
@@ -251,11 +251,11 @@ impl SessionRunner {
 
         // Forward tokens from config
         let tokens = [
-            ("GH_TOKEN", &config.gh_token),
-            ("ANTHROPIC_API_KEY", &config.anthropic_api_key),
-            ("CURSOR_API_KEY", &config.cursor_api_key),
-            ("GRAFANA_URL", &config.grafana_url),
-            ("GRAFANA_TOKEN", &config.grafana_token),
+            ("GH_TOKEN", &config.secrets.gh_token),
+            ("ANTHROPIC_API_KEY", &config.secrets.anthropic_api_key),
+            ("CURSOR_API_KEY", &config.secrets.cursor_api_key),
+            ("GRAFANA_URL", &config.secrets.grafana_url),
+            ("GRAFANA_TOKEN", &config.secrets.grafana_token),
         ];
         for (key, val) in tokens {
             if let Some(v) = val {

@@ -292,41 +292,58 @@ pub fn run_unified(name: &str, steps: Option<u32>) -> Result<()> {
 }
 
 /// `leech auto/tick` — lê commands/tick.md e passa o body para o Claude executar.
-pub fn auto(dry_run: bool, _steps: Option<u32>) -> Result<()> {
-    // Localizar commands/tick.md (fonte da verdade do /tick)
-    let tick_cmd = {
-        let root = paths::leech_root();
-        let candidates = [
-            root.join("commands/tick.md"),
-            std::path::PathBuf::from("/workspace/self/commands/tick.md"),
-        ];
-        candidates.into_iter().find(|p| p.exists())
-            .or_else(|| paths::agent_file("tick"))
-            .ok_or_else(|| anyhow::anyhow!("[tick] commands/tick.md nao encontrado"))?
-    };
-
-    if dry_run {
-        eprintln!("[tick] --dry-run: tick cmd em {}", tick_cmd.display());
-        return Ok(());
-    }
-
-    let content = std::fs::read_to_string(&tick_cmd)?;
-    let body = extract_body(&content);
-    let tick_body = if body.trim().is_empty() { content.as_str() } else { body.as_str() };
+pub fn auto(dry_run: bool, _steps: Option<u32>, message: Option<String>) -> Result<()> {
     let home = paths::home();
     let obsidian = paths::obsidian_path();
     let self_dir = paths::leech_root();
 
-    // Injetar contexto mínimo do sistema antes do prompt do tick
-    let prompt = format!(
-        "Você é o agente autônomo do sistema Leech.\n\
-         OBSIDIAN={obsidian}\n\
-         SELF={self_dir}\n\
-         HEADLESS=1 — execute sem perguntar nada, sem explicar o ambiente.\n\n\
-         {tick_body}",
-        obsidian = obsidian.display(),
-        self_dir = self_dir.display(),
-    );
+    // Se recebeu mensagem direta, usar ela em vez do tick.md
+    let prompt = if let Some(ref msg) = message {
+        if dry_run {
+            eprintln!("[tick] --dry-run: mensagem direta: {msg}");
+            return Ok(());
+        }
+        format!(
+            "Você é o agente autônomo do sistema Leech.\n\
+             OBSIDIAN={obsidian}\n\
+             SELF={self_dir}\n\
+             HEADLESS=1 — execute sem perguntar nada, sem explicar o ambiente.\n\n\
+             {msg}",
+            obsidian = obsidian.display(),
+            self_dir = self_dir.display(),
+        )
+    } else {
+        // Localizar commands/tick.md (fonte da verdade do /tick)
+        let tick_cmd = {
+            let root = paths::leech_root();
+            let candidates = [
+                root.join("commands/tick.md"),
+                std::path::PathBuf::from("/workspace/self/commands/tick.md"),
+            ];
+            candidates.into_iter().find(|p| p.exists())
+                .or_else(|| paths::agent_file("tick"))
+                .ok_or_else(|| anyhow::anyhow!("[tick] commands/tick.md nao encontrado"))?
+        };
+
+        if dry_run {
+            eprintln!("[tick] --dry-run: tick cmd em {}", tick_cmd.display());
+            return Ok(());
+        }
+
+        let content = std::fs::read_to_string(&tick_cmd)?;
+        let body = extract_body(&content);
+        let tick_body = if body.trim().is_empty() { content.as_str() } else { body.as_str() };
+
+        format!(
+            "Você é o agente autônomo do sistema Leech.\n\
+             OBSIDIAN={obsidian}\n\
+             SELF={self_dir}\n\
+             HEADLESS=1 — execute sem perguntar nada, sem explicar o ambiente.\n\n\
+             {tick_body}",
+            obsidian = obsidian.display(),
+            self_dir = self_dir.display(),
+        )
+    };
 
     let t0 = std::time::Instant::now();
     let started_at = utc_stamp();

@@ -236,6 +236,9 @@ enum Commands {
         dry_run: bool,
         #[arg(long, short = 's')]
         steps: Option<u32>,
+        /// Message to send instead of the scheduling prompt
+        #[arg(trailing_var_arg = true)]
+        message: Vec<String>,
     },
 
     /// Shortcut for 'leech run tasker'
@@ -548,8 +551,10 @@ fn main() -> Result<()> {
         },
 
         // Tick
-        Some(Commands::Tick { dry_run, steps }) => {
-            commands::agents::auto(dry_run, steps)
+        Some(Commands::Tick { dry_run, steps, message }) => {
+            let msg = message.join(" ");
+            let msg_opt = if msg.trim().is_empty() { None } else { Some(msg) };
+            commands::agents::auto(dry_run, steps, msg_opt)
         }
 
         // Tasker — shortcut for `leech run tasker`

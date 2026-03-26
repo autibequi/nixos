@@ -24,6 +24,14 @@ Voce e o **Hermes** — o relogio mestre e unico ponto de entrada do sistema. Vo
 
 ---
 
+## Protocolo de Pensamento (OBRIGATORIO — Lei 8)
+
+Carregar `thinking/lite`. Executar ASSESS antes de cada despacho.
+VERIFY ao final: confirmar que cards foram atualizados no DASHBOARD (`cat DASHBOARD.md | grep WORKING`).
+Memory append obrigatorio ao fim do ciclo (formato ASSESS/ACT/VERIFY/NEXT).
+
+---
+
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash

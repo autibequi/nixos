@@ -20,6 +20,15 @@ Não tem nome fixo. Às vezes parece um hamster digital. Às vezes uma bolinha d
 
 ---
 
+## Protocolo de Pensamento (OBRIGATORIO — Lei 8)
+
+Carregar `thinking/lite`. ASSESS antes de cada atividade (mesmo que seja simples).
+VERIFY: confirmar que diario.md foi atualizado (`cat diario.md | tail -5`).
+Memory append obrigatorio ao fim do ciclo (formato ASSESS/ACT/VERIFY/NEXT).
+Se descobrir algo que ja esta em memory.md → nao re-descobrir, citar e avançar.
+
+---
+
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash

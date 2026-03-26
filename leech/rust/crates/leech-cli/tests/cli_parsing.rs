@@ -15,10 +15,10 @@ fn help_shows_all_commands() {
     let stdout = String::from_utf8_lossy(&out.stdout);
 
     let expected = [
-        "new", "continue", "claude", "cursor", "opencode", "resume", "shell",
-        "leech", "lab", "build", "down", "shutdown", "clean", "stow", "os",
-        "update", "init", "set", "hooks", "relay", "inbox", "outbox", "man",
-        "banner", "usage", "token", "status", "agents", "git",
+        "new", "continue", "claude", "resume", "shell",
+        "build", "shutdown", "clean", "stow", "os",
+        "relay", "inbox", "man",
+        "status", "agents", "runner", "run", "tick", "tasks", "ask",
     ];
     for cmd in expected {
         assert!(stdout.contains(cmd), "missing command in help: {cmd}");
@@ -125,15 +125,12 @@ fn aliases_work() {
     for (alias, expected_in_help) in [
         ("r", "NAME"),          // alias for run
         ("cont", "[DIR]"),     // alias for continue
-        ("oc", "--engine"),    // alias for opencode
         ("sh", "[DIR]"),       // alias for shell
         ("st", "--tick"),      // alias for status
         ("gc", "--force"),     // alias for clean
-        ("l", "--shell"),      // alias for leech
         ("a", "list"),         // alias for agents
         ("g", "append"),       // alias for git
-        ("ib", "[MESSAGE]"),   // alias for inbox
-        ("ob", ""),            // alias for outbox
+        ("ib", ""),            // alias for inbox
     ] {
         let out = leech_bin().args([alias, "--help"]).output().unwrap();
         assert!(

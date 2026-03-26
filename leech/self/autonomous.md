@@ -48,6 +48,24 @@ Se o usuário não deixou instruções específicas, execute seu **ciclo normal*
 
 ---
 
+## Passo 2.5 — Pensar Antes de Agir (OBRIGATÓRIO para haiku)
+
+Se você é um agente haiku (`#haiku` no seu card do DASHBOARD):
+
+**Carregar `thinking/lite` e executar ASSESS antes de qualquer ação.**
+
+```
+ASSESS: <o que vou fazer>. Memory: <já existe | novo>. Risco: <1 risco>. Worth: <sim|não>.
+```
+
+- Se worth=não → pular para próximo item ou encerrar ciclo
+- Se memory.md já tem a conclusão → citar e avançar (não refazer)
+- Se detectar loop → `LOOP DETECTED: <tópico>. Avançando.`
+
+Agentes sonnet: recomendado em ciclos curtos (#steps15 ou menos).
+
+---
+
 ## Passo 3 — Executar
 
 - Use seu bedroom (`bedrooms/SEU_NOME/`) para trabalho detalhado (arquivos, análises, rascunhos)
@@ -58,6 +76,21 @@ Se o usuário não deixou instruções específicas, execute seu **ciclo normal*
 ---
 
 ## Passo 4 — Finalizar
+
+### VERIFY (obrigatório para haiku, recomendado para todos)
+
+Antes de mover seu card:
+1. Listar artefatos criados com path completo
+2. Confirmar existência: `ls -la <path>` para cada um
+3. Se algo não existe → marcar como INCOMPLETE, não DONE
+4. Append em memory.md:
+   ```
+   ## Ciclo YYYY-MM-DD HH:MM
+   ASSESS: <planejado>
+   ACT: <executado>
+   VERIFY: <artefatos | status>
+   NEXT: <próximo ciclo>
+   ```
 
 ### Se completou o ciclo normalmente:
 

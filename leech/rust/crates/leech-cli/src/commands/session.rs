@@ -18,11 +18,11 @@ pub fn new(flags: SessionFlags) -> Result<()> {
 pub fn cont(dir: Option<String>, host: bool) -> Result<()> {
     let config = LeechConfig::load()?;
     let engine = config
-        .engine
-        .ok_or_else(|| anyhow::anyhow!("engine required in ~/.leech"))?;
+        .engine()
+        .ok_or_else(|| anyhow::anyhow!("engine required — set session.engine in config.yaml"))?;
     let mount = paths::resolve_dir(dir.as_deref())?;
     let slug = paths::proj_slug(&mount);
-    let proj = if host || config.mount_host {
+    let proj = if host || config.session.host {
         format!("{}-host", paths::proj_name(&slug, None))
     } else {
         paths::proj_name(&slug, None)
@@ -32,7 +32,7 @@ pub fn cont(dir: Option<String>, host: bool) -> Result<()> {
         .mount_path(&mount.to_string_lossy())
         .mount_opts("rw")
         .proj_name(&proj)
-        .host(host || config.mount_host)
+        .host(host || config.session.host)
         .resume(Some("1".into()))
         .run(&config)?)
 }
@@ -49,11 +49,11 @@ pub fn engine(name: &str, flags: SessionFlags) -> Result<()> {
 pub fn resume(dir: Option<String>, session_id: Option<String>, host: bool) -> Result<()> {
     let config = LeechConfig::load()?;
     let engine = config
-        .engine
-        .ok_or_else(|| anyhow::anyhow!("engine required in ~/.leech"))?;
+        .engine()
+        .ok_or_else(|| anyhow::anyhow!("engine required — set session.engine in config.yaml"))?;
     let mount = paths::resolve_dir(dir.as_deref())?;
     let slug = paths::proj_slug(&mount);
-    let proj = if host || config.mount_host {
+    let proj = if host || config.session.host {
         format!("{}-host", paths::proj_name(&slug, None))
     } else {
         paths::proj_name(&slug, None)
@@ -63,7 +63,7 @@ pub fn resume(dir: Option<String>, session_id: Option<String>, host: bool) -> Re
         .mount_path(&mount.to_string_lossy())
         .mount_opts("rw")
         .proj_name(&proj)
-        .host(host || config.mount_host)
+        .host(host || config.session.host)
         .resume(Some(session_id.unwrap_or_else(|| "1".into())))
         .run(&config)?)
 }
@@ -71,7 +71,7 @@ pub fn resume(dir: Option<String>, session_id: Option<String>, host: bool) -> Re
 /// `leech shell` — bash inside container.
 pub fn shell(dir: Option<String>, host: bool) -> Result<()> {
     let config = LeechConfig::load()?;
-    let host_active = host || config.mount_host;
+    let host_active = host || config.session.host;
     let mount = paths::resolve_dir(dir.as_deref())?;
     let slug = paths::proj_slug(&mount);
     let proj = if host_active {
@@ -86,8 +86,8 @@ pub fn shell(dir: Option<String>, host: bool) -> Result<()> {
         .env("CLAUDIO_MOUNT_OPTS", "rw")
         .env("OBSIDIAN_PATH", &paths::obsidian_ensured())
         .env("HOME", &paths::home().to_string_lossy())
-        .env("DOCKER_GID", &config.docker_gid.to_string())
-        .env("JOURNAL_GID", &config.journal_gid.to_string())
+        .env("DOCKER_GID", &config.docker_gid().to_string())
+        .env("JOURNAL_GID", &config.system.journal_gid.to_string())
         .env("LEECH_ROOT", &paths::leech_root().to_string_lossy())
         .env("LEECH_NIXOS_DIR", &paths::nixos_dir().to_string_lossy());
     if host_active {
@@ -164,10 +164,10 @@ pub fn leech(flags: SessionFlags, shell_mode: bool) -> Result<()> {
 fn resolve_engine(flag: Option<&str>, config: &LeechConfig) -> Result<Engine> {
     let name = flag
         .map(|s| s.to_string())
-        .or_else(|| config.engine.map(|e| e.to_string()))
+        .or_else(|| config.engine().map(|e| e.to_string()))
         .ok_or_else(|| {
             anyhow::anyhow!(
-                "engine required: use --engine=claude|cursor|opencode or set engine= in ~/.leech"
+                "engine required: use --engine=claude|cursor|opencode or set session.engine in config.yaml"
             )
         })?;
     name.parse().map_err(|e| anyhow::anyhow!("{e}"))
@@ -186,7 +186,7 @@ fn launch(engine: Engine, flags: SessionFlags, config: &LeechConfig) -> Result<(
             .run(config)?);
     }
 
-    let host_active = flags.host || config.mount_host;
+    let host_active = flags.host || config.session.host;
     let mount = paths::resolve_dir(flags.dir.as_deref())?;
     let slug = paths::proj_slug(&mount);
     let proj = if host_active {
