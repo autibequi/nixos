@@ -10,6 +10,9 @@ mod commands;
 mod exec;
 mod help;
 
+// Re-export library modules for use in binary commands
+use leech_cli::{agents, executor, paths, tasks};
+
 use commands::SessionFlags;
 
 #[derive(Parser)]
@@ -105,7 +108,7 @@ enum Commands {
         force: bool,
     },
     /// Zombies bash: listar pais e opcionalmente SIGTERM (host Linux; não apaga arquivos)
-    #[command(alias = "zombies", alias = "clean-up", after_help = help::CLEANUP_AFTER)]
+    #[command(alias = "zombies", alias = "clean-up")]
     Cleanup {
         /// SIGTERM nos processos pai que acumulam zombies (resumo + confirmação; --yes pula)
         #[arg(long)]

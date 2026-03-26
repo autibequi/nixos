@@ -4,7 +4,7 @@ use std::io::Write;
 use std::process::Command;
 
 use anyhow::{bail, Result};
-use leech_sdk::paths;
+use leech_cli::paths;
 
 /// Print verbose command log if LEECH_VERBOSE is set.
 fn verbose_cmd(program: &str, args: &[&str]) {

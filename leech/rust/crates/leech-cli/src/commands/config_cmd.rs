@@ -3,7 +3,13 @@
 use anyhow::{bail, Result};
 use leech_cli::config::{self, LeechConfig};
 
-use crate::ConfigAction;
+/// Config subcommand action
+pub enum ConfigAction {
+    Show,
+    Edit,
+    Init,
+    Path,
+}
 
 pub fn run(action: Option<ConfigAction>) -> Result<()> {
     match action {

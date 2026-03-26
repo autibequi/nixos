@@ -56,13 +56,13 @@ proxy:
 install:
     cargo build --release --manifest-path leech/rust/Cargo.toml -p leech-cli
     install -m 755 leech/rust/target/release/leech {{nixos_dir}}/stow/.local/bin/leech
-    install -m 755 leech/scripts/bootstrap-dashboard.sh {{nixos_dir}}/scripts/bootstrap.sh
+    @# install -m 755 leech/scripts/bootstrap-dashboard.sh {{nixos_dir}}/scripts/bootstrap.sh
     @echo "[just] leech instalado em {{nixos_dir}}/stow/.local/bin/leech"
 
 # Atualiza só o bootstrap (leech/scripts → scripts/)
 bootstrap:
-    install -m 755 leech/scripts/bootstrap-dashboard.sh scripts/bootstrap.sh
-    @echo "[just] scripts/bootstrap.sh atualizado"
+    @# install -m 755 leech/scripts/bootstrap-dashboard.sh scripts/bootstrap.sh
+    @echo "[just] bootstrap script não disponível"
 
 # Build sem instalar
 build-cli:

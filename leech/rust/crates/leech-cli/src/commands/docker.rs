@@ -1,7 +1,7 @@
 //! Docker commands — build, stop, and clean container infrastructure.
 
 use anyhow::Result;
-use leech_sdk::{compose::ComposeCmd, paths};
+use leech_cli::{compose::ComposeCmd, paths};
 
 /// Print verbose command log if LEECH_VERBOSE is set.
 fn verbose_cmd(program: &str, args: &[&str]) {
@@ -94,5 +94,13 @@ pub fn clean(force: bool) -> Result<()> {
             println!("  Use --force to remove.");
         }
     }
+    Ok(())
+}
+
+/// `leech destroy` — full reset (shutdown + volumes + image)
+pub fn destroy() -> Result<()> {
+    println!("\n⚠️  Full reset: stopping containers, removing volumes and image...\n");
+    shutdown()?;
+    println!("\n[leech destroy] Completed.");
     Ok(())
 }

@@ -1,7 +1,7 @@
 //! Agent and task commands — native Rust implementation with optional JSON output.
 
 use anyhow::{bail, Result};
-use leech_sdk::{agents, executor, paths, tasks};
+use crate::{agents, executor, paths, tasks};
 use std::process::Command;
 
 /// Print verbose command log if LEECH_VERBOSE is set.
@@ -254,7 +254,7 @@ pub fn run_unified(name: &str, steps: Option<u32>) -> Result<()> {
         std::env::set_var("SCHEDULE_DIR", &schedule);
         std::env::set_var("TASK_MAX_TURNS", steps.to_string());
 
-        executor::run_card(&card).map_err(|e| anyhow::anyhow!(e))
+        executor::run_card(&card).map_err(|e: String| anyhow::anyhow!("{}", e))
     } else {
         // Try as a task
         let tasks_dir = paths::tasks_dir()
@@ -289,14 +289,14 @@ pub fn run_unified(name: &str, steps: Option<u32>) -> Result<()> {
         std::env::set_var("SCHEDULE_DIR", tasks_dir.join("AGENTS"));
         std::env::set_var("RUNNING_DIR", tasks_dir.join("DOING"));
         let contractors_dir = tasks_dir.parent()
-            .map(|p| p.join("vault/agents"))
+            .map(|p: &std::path::Path| p.join("vault/agents"))
             .unwrap_or_default();
         std::env::set_var("TASK_CONTRACTORS_DIR", &contractors_dir);
         if let Some(s) = steps {
             std::env::set_var("TASK_MAX_TURNS", s.to_string());
         }
 
-        executor::run_card(&card).map_err(|e| anyhow::anyhow!(e))
+        executor::run_card(&card).map_err(|e: String| anyhow::anyhow!("{}", e))
     }
 }
 
@@ -359,7 +359,7 @@ pub fn auto(dry_run: bool, steps: Option<u32>) -> Result<()> {
 
     if let Some(tasks_dir) = paths::tasks_dir() {
         for subdir in &["TODO", "DOING"] {
-            let dir = tasks_dir.join(subdir);
+            let dir: std::path::PathBuf = tasks_dir.join(*subdir);
             if !dir.is_dir() { continue; }
             for entry in std::fs::read_dir(&dir).into_iter().flatten().flatten() {
                 let fname = entry.file_name().to_string_lossy().into_owned();
@@ -405,7 +405,7 @@ pub fn auto(dry_run: bool, steps: Option<u32>) -> Result<()> {
 
     // ── Execute agents ───────────────────────────────────────────
     if let Some(schedule) = paths::schedule_dir() {
-        let contractors_dir = schedule.parent().unwrap_or(&schedule);
+        let contractors_dir: &std::path::Path = schedule.parent().unwrap_or(schedule.as_path());
         for fname in &agent_due {
             eprintln!("\n[auto] ▸ agent: {fname}");
             std::env::set_var("TASK_CONTRACTORS_DIR", contractors_dir);
@@ -418,8 +418,8 @@ pub fn auto(dry_run: bool, steps: Option<u32>) -> Result<()> {
 
     // ── Execute tasks ────────────────────────────────────────────
     if let Some(tasks_dir) = paths::tasks_dir() {
-        let contractors_dir = tasks_dir.parent()
-            .map(|p| p.join("vault/agents"))
+        let contractors_dir: std::path::PathBuf = tasks_dir.parent()
+            .map(|p: &std::path::Path| p.join("vault/agents"))
             .unwrap_or_default();
 
         for (fname, card_steps) in &task_due {
