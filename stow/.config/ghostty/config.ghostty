@@ -2,10 +2,10 @@
 # Configurações de Shell
 # =============================================================================
 # initial-command = fastfetch
-shell-integration = detect
+shell-integration = none
 shell-integration-features = no-cursor
-scrollback-limit = 3000
-link-url = true
+scrollback-limit = 1500
+link-url = false
 linux-cgroup=single-instance
 gtk-single-instance = true
 
@@ -17,7 +17,7 @@ maximize = true
 # Decorations
 window-decoration = none
 window-inherit-working-directory = true
-window-save-state = always
+window-save-state = never
 window-padding-x = 10
 window-padding-y = 10
 window-vsync = false
@@ -30,9 +30,9 @@ clipboard-read = allow
 clipboard-paste-protection = true
 clipboard-trim-trailing-spaces = true
 clipboard-paste-bracketed-safe = true
-title-report = true
+title-report = false
 
-click-repeat-interval = 1000
+click-repeat-interval = 2000
 
 # Confirmação e posicionamento
 confirm-close-surface = true
@@ -45,9 +45,9 @@ gtk-titlebar-hide-when-maximized = true
 
 # Mouse
 focus-follows-mouse = true
-mouse-hide-while-typing = true
-copy-on-select = true
-mouse-scroll-multiplier=3
+mouse-hide-while-typing = false
+copy-on-select = false
+mouse-scroll-multiplier = 1
 # minimum-contrast=3 # melhora legibilidade mas estraga os temas
 resize-overlay = never
 
