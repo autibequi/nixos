@@ -3,7 +3,7 @@
   # curent setup g14
   programs.rog-control-center = {
     enable = true;
-    autoStart = true;
+    autoStart = false; # crashava 12x — GUI desabilitado no boot, asusd/supergfxd continuam ativos
   };
 
   services = {
