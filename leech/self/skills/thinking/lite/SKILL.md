@@ -41,31 +41,115 @@ Antes de qualquer resposta, classificar o input em 1 linha:
 
 ## 3. Modo Turbo — Busca Direta no Código
 
-> Para perguntas do tipo "onde está X no código". Resultado: 3-4 tool calls, ~8s.
-> Benchmark validado: 12 variações testadas — budget + path/termo exato = melhor combinação.
+> Para perguntas do tipo "onde está X no código". Resultado: 3-5 tool calls, ~15-30s.
+> Fórmula S tier validada: anchor-pattern + budget calibrado + self-consistency (2 termos de fallback).
+> Ver experimentos completos em: `obsidian/vibefu_bench/thinking-lite/data.md`
 
 **Quando usar:** "onde está", "qual arquivo", "qual rota", "qual função faz X" — qualquer localização de código.
 
-**Protocolo (4 calls máx):**
+**Protocolo S+++ tier (campeão: B4-V9 — 50.9k / 1 tool / 6.5s / completo — limite físico):**
+
 ```
-Call 1: Grep pelo nome exato da função/handler no path provável
-Call 2: Grep no container/router para achar a rota HTTP
-Call 3-4: Read do arquivo encontrado (só se necessário confirmar detalhes)
+[1 CALL APENAS — o máximo possível resolvido em 1 grep]
+
+Grep "<termo1>\|<termo2>\|<termo3>\|<termo4>" em <path_base>/
+
+→ Um único grep com todos os nomes simultaneamente retorna
+  arquivos e linhas de todos os itens de uma vez.
+→ Com resultado em mãos, responder sem tool calls adicionais.
 ```
 
+**Quando usar cada modo:**
+
+| Situação | Protocolo | Calls |
+|----------|-----------|------:|
+| Termos conhecidos, path base conhecido | Grep multi-termo `\|` | **1** |
+| Valor exato desconhecido (constante string) | Read arquivo específico | 1 |
+| 4+ itens de localização distintos | Grep `\|` combina tudo | **1** |
+| Arquivos conhecidos com linhas prováveis | Read com offset+limit | 1-2 |
+| Localização incerta | Grep + Read confirmatório | 2-3 |
+
+**Fórmula 1-call (S+++ tier):**
+```
+Grep "FuncA\|FuncB\|FuncC\|constD" em /path/base/
+→ resultado tem arquivo:linha de cada termo
+→ responder direto com os dados
+```
+
+**Fallback se 1 call vazio:**
+- Tentar variação de nome no 2º call
+- Se ainda vazio → ESCALATION, não explorar
+
+**Nota:** B4-V9 atingiu o limite físico (1 tool = mínimo possível para busca em codebase desconhecido). Abaixo disso só com conhecimento 100% pré-injetado.
+
+**Mapa de anchor por tipo de artefato (monolito Estratégia):**
+
+| Tipo | Anchor path |
+|------|-------------|
+| Handler HTTP | `apps/bo/internal/handlers/` |
+| Service | `apps/pagamento_professores/internal/services/` |
+| Worker/SQS | `apps/bo/internal/handlers/dashboard/` |
+| Permissão | `apps/bo/internal/handlers/common/permissions.go` |
+| Rota registrada | `apps/bo/internal/handlers/container.go` |
+| Struct/Request | `apps/pagamento_professores/structs/` |
+
 **Regras:**
-- Declarar termo exato antes de qualquer tool call: "vou grep por `BulkGenerateSnapshot`"
-- Path provável primeiro: `/home/claude/projects/estrategia/monolito/` → `/workspace/mnt/`
-- Se Call 1 não retornar nada → tentar variação do nome (snake_case, CamelCase)
-- Nunca explorar pastas sem termo — grep sempre primeiro
-- Se exceder 4 calls → ESCALATION
+- Declarar ANCHOR + BUDGET + OPÇÕES antes de qualquer tool call
+- Nunca explorar pastas — grep sempre com termo
+- Se Call 1 vazio → tentar fallback (não explorar)
+- Budget esgotado → responder com o que tem, sinalizar lacuna honestamente
+- Se exceder budget × 2 → ESCALATION
 
 **Exemplo:**
 ```
-D> localizar endpoint de snapshot bulk
-D> termo: "BulkGenerateSnapshot", path: apps/bo/internal/handlers/
-→ Grep → Grep container.go → resposta
+ANCHOR: apps/bo/internal/handlers/dashboard/
+BUDGET: 5 calls (3 problemas × 1.5)
+OPÇÕES: "BulkGenerateSnapshot" | "bulk_generate_snapshot"
+
+Call 1: Grep "BulkGenerateSnapshot" no anchor
+Call 2: Grep "BulkGenerateSnapshot" em container.go
+→ Resposta com arquivo:linha + rota HTTP
 ```
+
+---
+
+## Experimentos — Técnicas Testadas
+
+> Seção de rastreabilidade. Cada técnica tem tier validado em benchmark real.
+> Benchmark: `obsidian/benchmark_llm.md` P1–P4 | Modelo: Haiku 4.5
+> Dados completos: `obsidian/vibefu_bench/thinking-lite/data.md`
+
+| ID | Técnica | Tier | Tokens | Tools | Completo | Descrição |
+|----|---------|:----:|-------:|------:|:--------:|-----------|
+| `budget-quality` | Budget calibrado (N×1.5) | **S** | 58.5k | 5 | ⚠️ | Budget explícito força planejamento antes de agir |
+| `anchor-pattern` | Mapa de paths por tipo | **S** | 73.5k | 14 | ✅ | Elimina exploração — agente sabe onde olhar |
+| `self-consistency` | 2 termos antes do grep | **S** | 67.0k | 19 | ✅ | Fallback cognitivo, elimina retrabalho pós-falha |
+| `sub-questions` | Decomposição em 2 sub-perguntas | A | 72.9k | 21 | ✅ | Força clareza mas não reduz tool calls |
+| `budget-3-strict` | Budget fixo (3 calls) | A | 67.9k | 7 | ⚠️ | Rápido mas muito apertado para multi-problema |
+| `format-output-first` | Template de saída antes da busca | B | 71.4k | 25 | ✅ | Organiza output, não reduz esforço |
+| `step-back-hypothesis` | Hipótese declarada antes | B | 75.1k | 20 | ✅ | Overhead acumulado em multi-problema |
+| `minimal-3rules` | 3 regras sem path anchor | C | 68.9k | 27 | ❌ | **Alucina** sem âncora de path |
+| `cascade-triple` | Budget+grep+path combinados | C | 70.3k | 30 | ✅ | Múltiplas regras = desorientação |
+| `grep-path-anchor` | Grep-first sem budget | **F** | 83.4k | 43 | ✅ | Anti-padrão: loops de busca sem planejamento |
+
+**Batch 2 — fórmulas refinadas:**
+
+| ID | Técnica | Tier | Tokens | Tools | Tempo | Completo | Notas |
+|----|---------|:----:|-------:|------:|------:|:--------:|-------|
+| `multigrep-1call` | grep 4 termos simultâneos `\|` | **S+++** | 50.9k | 1 | 6.5s | ✅ | **Campeão absoluto — limite físico** |
+| `calls-pre-planejados` | plano completo antes de executar | **S++** | 52.8k | 3 | 9s | ✅ | Batch 3 campeão |
+| `expertise-injection` | conhecimento do codebase injetado | **S+** | 55.5k | 9 | 19s | ✅ | Robusto sem plano |
+| `s-tier-full` | anchor+budget+opções por item | **S+** | 57.1k | 8 | 11s | ✅ | Batch 2 campeão |
+| `anchor-budget` | anchor+budget sem opções | S | 56.5k | 8 | 26s | ⚠️ | P4 parcial |
+| `anchor-file` | path de arquivo exato | S | 62.8k | 11 | 25s | ✅ | Simples e robusto |
+| `anchor-self-consistency` | anchor+2 opções genéricas | A | 68.8k | 22 | 35s | ✅ | Opções não por item |
+| `budget-self-consistency` | budget+2 opções sem anchor | B | 64.8k | 13 | 41s | ⚠️ | **Aluciou P2** sem anchor |
+
+**Regra derivada dos experimentos:**
+- 1 técnica isolada > 3 técnicas combinadas (V05 confirmou)
+- Budget sem anchor = incompleto; anchor sem budget = lento mas completo
+- Minimalismo sem path anchor → hallucination (V08 confirmou)
+- Grep-first sem budget = anti-padrão F tier (V02 confirmou)
 
 ---
 

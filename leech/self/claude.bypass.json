@@ -38,6 +38,7 @@
     "deny": [],
     "defaultMode": "bypassPermissions"
   },
+  "model": "sonnet[1m]",
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "nixos"
@@ -90,6 +91,5 @@
   "statusLine": {
     "type": "command",
     "command": "~/.claude/scripts/statusline.sh"
-  },
-  "model": "sonnet"
+  }
 }

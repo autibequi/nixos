@@ -98,3 +98,5 @@
 - [project_proactive_skill.md](project_proactive_skill.md) — Skills thinking/brainstorm (motor ideação) e thinking/proactive (Radar Pareto) criadas 2026-03-26
 - [feedback_proactive_pareto.md](feedback_proactive_pareto.md) — Proactive: Pareto obrigatório, clusters > lista flat, conteúdo como ativo que se acumula
 - [project_obsidian_agents.md](project_obsidian_agents.md) — Mapa dos 12 agentes ativos (inclui jonathas), paths, CLI
+- [project_vibefu_encyclopedia.md](project_vibefu_encyclopedia.md) — Enciclopédia VibeFu em obsidian/vibefu/: 105 técnicas de vibecoding rankeadas (0-1000), com _INDEX, _RANKING, _STATS
+- [feedback_parallel_research_agents.md](feedback_parallel_research_agents.md) — Para pesquisas amplas: 3 agentes explore → 6 agentes writer paralelos → consolidação. Fan-out massivo funciona.

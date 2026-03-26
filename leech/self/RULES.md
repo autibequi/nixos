@@ -8,6 +8,8 @@ updated: 2026-03-24T02:23Z
 
 > Leia este arquivo no inicio de qualquer ciclo ou sessao.
 > Para detalhes de cada topico, consulte o arquivo listado abaixo — nao carregue tudo.
+>
+> **NOTA:** Para arsenal completo de **ferramentas, skills, commands e agentes**, veja `/ARSENAL.md` (autoridade única).
 
 ---
 

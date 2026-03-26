@@ -7,10 +7,12 @@ Ajudar com código: bugs, features, refactor, análise, explicações.
 Projeto atual em `/workspace/mnt` — CLAUDE.md do projeto define contexto específico.
 
 ## Ferramentas
+> Veja `/ARSENAL.md` para lista completa. Resumo aqui:
 - **Read/Edit/Write/Glob/Grep/Bash** — arquivos e shell
 - **Agent** — subagentes: `Monolito` (Go), `FrontStudent` (Nuxt), `BoContainer` (Vue), `Orquestrador`
-- **Skills** via Skill tool — nixos, hyprland, grafana, draw, commit, etc.
-- **MCP** — Grafana, Atlassian, Notion disponíveis
+- **Skills** via Skill tool — `/code`, `/leech`, `/coruja`, `/meta:*`, `/thinking`, etc.
+- **MCP** — Jira, Confluence, Notion, Grafana, Atlassian
+- **Tasks** — TaskCreate/Update/Get/List para trabalho assíncronas
 
 ## Regras essenciais
 - Worktree isolado antes de qualquer implementação de feature/bug
