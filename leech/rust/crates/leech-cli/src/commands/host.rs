@@ -4,7 +4,14 @@ use std::io::Write;
 use std::process::Command;
 
 use anyhow::{bail, Result};
-use leech_cli::paths;
+use leech_sdk::paths;
+
+/// Print verbose command log if LEECH_VERBOSE is set.
+fn verbose_cmd(program: &str, args: &[&str]) {
+    if std::env::var("LEECH_VERBOSE").as_deref() == Ok("1") {
+        eprintln!("\x1b[2m[VERBOSE]\x1b[0m $ {} {}", program, args.join(" "));
+    }
+}
 
 // ── stow ─────────────────────────────────────────────────────────
 
@@ -17,10 +24,12 @@ pub fn stow(action: &str, reload: bool) -> Result<()> {
     match action {
         "status" | "st" => {
             println!("=== Stow status ===");
+            let args = vec!["-d", "stow", "-t", &home, "-n", "-R", "."];
+            verbose_cmd("stow", &args);
             crate::exec::run_in(
                 &nixos,
                 "stow",
-                &["-d", "stow", "-t", &home, "-n", "-R", "."],
+                &args,
             )
         }
         a @ ("restow" | "re" | "" | "delete" | "un" | "unstow") => {
@@ -30,10 +39,14 @@ pub fn stow(action: &str, reload: bool) -> Result<()> {
                 "-R"
             };
             println!("=== Stow {a} ===");
-            crate::exec::run_in(&nixos, "stow", &["-d", "stow", "-t", &home, flag, "."])?;
+            let args = vec!["-d", "stow", "-t", &home, flag, "."];
+            verbose_cmd("stow", &args);
+            crate::exec::run_in(&nixos, "stow", &args)?;
             if reload {
                 println!("=== Reloading Hyprland + Waybar ===");
+                verbose_cmd("hyprctl", &["reload"]);
                 crate::exec::fire("hyprctl", &["reload"]);
+                verbose_cmd("pkill", &["-SIGUSR2", "waybar"]);
                 crate::exec::fire("pkill", &["-SIGUSR2", "waybar"]);
             }
             Ok(())
@@ -47,7 +60,10 @@ pub fn stow(action: &str, reload: bool) -> Result<()> {
 /// `leech os` — run a NixOS operation (switch/test/boot/build) via `nh`.
 pub fn os(action: &str) -> Result<()> {
     crate::exec::require_host()?;
-    crate::exec::run("nh", &["os", action, &paths::nixos_dir().to_string_lossy()])
+    let nixos_path = paths::nixos_dir().to_string_lossy().into_owned();
+    let args = vec!["os", action, &nixos_path];
+    verbose_cmd("nh", &args);
+    crate::exec::run("nh", &args)
 }
 
 // ── init ─────────────────────────────────────────────────────────

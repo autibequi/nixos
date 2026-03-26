@@ -25,10 +25,7 @@ pub const BANNER: &str = "\
     leech runner front shell       \x1b[2mshell in front-student\x1b[0m
 
     leech agents                   \x1b[2mlist agents\x1b[0m
-    leech phone hermes o que tem hoje \x1b[2mligação para hermes\x1b[0m
-    leech phone coruja analisa PR 42  \x1b[2mligação para coruja\x1b[0m
-    leech phones lembra reunião 15h   \x1b[2massistente pessoal\x1b[0m
-    leech ask coruja o que tem hoje \x1b[2moneshot question\x1b[0m
+    leech agents phone hermes      \x1b[2mtalk to hermes\x1b[0m
     leech run coruja               \x1b[2mrun agent now\x1b[0m
     leech tick                     \x1b[2mrun all due agents + tasks\x1b[0m
 
@@ -37,17 +34,6 @@ pub const BANNER: &str = "\
     leech stow                     \x1b[2mdeploy dotfiles\x1b[0m
 
 \x1b[2m  ── full reference below · leech man for docs ─────────────\x1b[0m
-";
-
-pub const CLEANUP_AFTER: &str = "\
-\x1b[33m  Aviso:\x1b[0m --reap envia SIGTERM ao \x1b[1mpai\x1b[0m dos zombies (só processos; \x1b[32mnão apaga arquivos\x1b[0m). \
-Pede confirmação; use --yes para pular.
-
-\x1b[2m  leech cleanup              lista pais com zombies bash (stack dev)\x1b[0m
-\x1b[2m  leech cleanup --all        todos os pais\x1b[0m
-\x1b[2m  leech cleanup --reap       resumo + confirmação + SIGTERM\x1b[0m
-\x1b[2m  leech cleanup --reap -y    SIGTERM sem perguntar\x1b[0m
-\x1b[2m  leech cleanup --min 5      só pais com ≥5 zombies\x1b[0m
 ";
 
 pub const MAIN_AFTER: &str = "\
@@ -62,8 +48,6 @@ pub const RUNNER_BEFORE: &str = "\
 
     leech runner mono start              \x1b[2mstart monolito (sand)\x1b[0m
     leech runner mono start --env=local  \x1b[2mstart with local env\x1b[0m
-    leech runner mw start                \x1b[2mstart monolito-worker\x1b[0m
-    leech runner mw start --debug        \x1b[2mworker com delve (port 2346)\x1b[0m
     leech runner bo logs                 \x1b[2mfollow bo-container logs\x1b[0m
     leech runner front shell             \x1b[2mshell in front-student\x1b[0m
     leech runner mono test               \x1b[2mmake test\x1b[0m
@@ -90,26 +74,6 @@ pub const AGENTS_BEFORE: &str = "\
     leech agents phone coruja      \x1b[2mtalk to coruja\x1b[0m
     leech agents status coruja     \x1b[2mactivity log for coruja\x1b[0m
     leech agents status --json     \x1b[2mall activity as JSON\x1b[0m
-
-\x1b[2m  ─────────────────────────────────────────────────────────\x1b[0m
-";
-
-// ── Ask ──────────────────────────────────────────────────────────────────────
-
-pub const ASK_BEFORE: &str = "\
-\x1b[35m  ask\x1b[0m  \x1b[2moneshot question — to an agent or default model\x1b[0m
-
-\x1b[2m  ── common usage ──────────────────────────────────────────\x1b[0m
-
-    leech ask como faço um for em bash?         \x1b[2msem agente — modelo padrão\x1b[0m
-    leech ask coruja o que tem no radar hoje?   \x1b[2mcoruja responde\x1b[0m
-    leech ask wiseman resume os insights        \x1b[2mwiseman responde\x1b[0m
-    leech ask hermes status das tasks           \x1b[2mhermes responde\x1b[0m
-    leech ask coruja -m sonnet analise profunda \x1b[2mforçar modelo\x1b[0m
-
-\x1b[2m  Se o primeiro token for nome de agente conhecido: carrega contexto do agente.\x1b[0m
-\x1b[2m  Caso contrário: envia pergunta direto ao modelo padrão (haiku).\x1b[0m
-\x1b[2m  Roda headless com max-turns=10. Para conversa interativa: leech agents phone.\x1b[0m
 
 \x1b[2m  ─────────────────────────────────────────────────────────\x1b[0m
 ";
@@ -233,53 +197,6 @@ pub const CLAUDE_BEFORE: &str = "\
 \x1b[2m  ─────────────────────────────────────────────────────────\x1b[0m
 ";
 
-// ── Phone ─────────────────────────────────────────────────────────────────────
-
-pub const PHONE_BEFORE: &str = "\
-\x1b[35m  phone\x1b[0m  \x1b[2mligação telepática para um agente\x1b[0m
-
-\x1b[2m  ── common usage ──────────────────────────────────────────\x1b[0m
-
-    leech phone oi tudo bem?              \x1b[2mmanda para hermes (default)\x1b[0m
-    leech phone hermes o que tem no inbox \x1b[2mliga para hermes\x1b[0m
-    leech phone coruja analisa o PR 42    \x1b[2mliga para coruja\x1b[0m
-    leech phone wiseman o que é saudade?  \x1b[2mliga para wiseman\x1b[0m
-    leech phone tamagochi te amo          \x1b[2mliga para tamagochi\x1b[0m
-
-\x1b[2m  Roda headless com max-turns=10. Para sessão interativa: leech agents phone.\x1b[0m
-
-\x1b[2m  ─────────────────────────────────────────────────────────\x1b[0m
-";
-
-pub const PHONEBOOK_BEFORE: &str = "\
-\x1b[35m  phonebook\x1b[0m  \x1b[2magenda de contatos dos agentes\x1b[0m
-
-\x1b[2m  ── common usage ──────────────────────────────────────────\x1b[0m
-
-    leech phonebook                \x1b[2mlista todos os agentes\x1b[0m
-    leech phonebook hermes         \x1b[2mcartão completo do hermes\x1b[0m
-    leech phonebook coruja         \x1b[2mcartão completo da coruja\x1b[0m
-
-\x1b[2m  aliases: contacts, agenda\x1b[0m
-
-\x1b[2m  ─────────────────────────────────────────────────────────\x1b[0m
-";
-
-pub const PHONES_BEFORE: &str = "\
-\x1b[35m  phones\x1b[0m  \x1b[2massistente pessoal — lembretes, tasks, pesquisas\x1b[0m
-
-\x1b[2m  ── common usage ──────────────────────────────────────────\x1b[0m
-
-    leech phones lembra de ligar pra mãe amanhã às 10h \x1b[2mcria lembrete\x1b[0m
-    leech phones adiciona task revisar PR do monolito   \x1b[2mcria task\x1b[0m
-    leech phones qual a capital da Groenlândia?         \x1b[2mpergunta rápida\x1b[0m
-    leech phones pesquisa como fazer deploy blue-green  \x1b[2mpesquisa\x1b[0m
-
-\x1b[2m  Rota direta para o assistente pessoal. Registra lembretes/tasks no Obsidian.\x1b[0m
-
-\x1b[2m  ─────────────────────────────────────────────────────────\x1b[0m
-";
-
 // ── Man page ─────────────────────────────────────────────────────────────────
 
 /// Full GNU-style man page.
@@ -296,10 +213,15 @@ pub fn man_page() {
     println!("    and an autonomous agent system that runs tasks on a schedule.\n");
     println!("    Without arguments, opens a new Claude Code session.\n");
 
+    println!("\x1b[1mGLOBAL OPTIONS\x1b[0m");
+    println!("    --verbose          Print shell scripts and mounted prompts (env var: LEECH_VERBOSE)");
+    println!("    --opus, --haiku, --sonnet");
+    println!("                       Select Claude model (default: sonnet)");
+    println!("    --host             Mount ~/nixos in /workspace/host (rw) for editing NixOS\n");
+
     println!("\x1b[1mSESSION COMMANDS\x1b[0m");
-    man_cmd("new, open, code", "[DIR] [--model M] [--host] [--ghost] [--opus|--haiku|--sonnet]",
-        "Open new Claude Code session in container.\n\
-         \x1b[0m                    --ghost: isolated session in obsidian/ghost/ (/workspace/ghost).");
+    man_cmd("new, open, code", "[DIR] [--model M] [--host] [--opus|--haiku|--sonnet]",
+        "Open new Claude Code session in container.");
     man_cmd("continue, cont", "[DIR] [--host]",
         "Continue the last session.");
     man_cmd("resume", "[DIR] [--resume ID] [--host]",
@@ -320,15 +242,6 @@ pub fn man_page() {
     println!("\x1b[1mAGENT COMMANDS\x1b[0m");
     man_cmd("agents, ag, a", "[SUBCOMMAND]",
         "Agent management. Subcommands: list, phone, status.");
-    man_cmd("phone, call", "[AGENT] <MENSAGEM>",
-        "Ligação telepática one-shot para um agente (default: hermes).\n\
-         \x1b[0m                    Roda headless com max-turns=10. Mostra duração e quem ligou pra quem.");
-    man_cmd("phonebook, contacts, agenda", "[NOME]",
-        "Agenda de contatos — lista todos os agentes com emoji, modelo, clock e como ligar.\n\
-         \x1b[0m                    Com nome: mostra cartão completo do agente.");
-    man_cmd("phones", "<MENSAGEM>",
-        "Assistente pessoal — cria lembretes/tasks no Obsidian, responde perguntas.\n\
-         \x1b[0m                    Rota direta para o agente assistant (fallback: hermes).");
     man_cmd("run, r", "<NAME> [-s STEPS]",
         "Run an agent or task immediately. Creates card and executes via Claude CLI.");
     man_cmd("tick, auto", "[--dry-run] [-s STEPS]",
@@ -357,8 +270,6 @@ pub fn man_page() {
         "Stop all containers + kill strays.");
     man_cmd("clean, gc, prune", "[-f]",
         "Remove stopped containers.");
-    man_cmd("destroy", "",
-        "Destroy containers + volumes + leech image (full reset).");
 
     println!("\x1b[1mTOOL COMMANDS\x1b[0m");
     man_cmd("status, st", "[-t SECS] [--json]",
@@ -375,10 +286,6 @@ pub fn man_page() {
         "Execute or list Claude Code hooks.");
     man_cmd("relay", "[start|stop|status]",
         "Chrome DevTools Protocol relay.");
-    man_cmd("sentinel, caffeine", "[start|stop|status|poweroff]",
-        "Keep machine awake via systemd-inhibit (remote access).");
-    man_cmd("git sandbox", "",
-        "Stage all + commit with timestamp.");
     man_cmd("man", "",
         "This page.");
 
@@ -392,6 +299,7 @@ pub fn man_page() {
     println!("    q            Quit\n");
 
     println!("\x1b[1mENVIRONMENT\x1b[0m");
+    println!("    LEECH_VERBOSE      Set to 1 to enable verbose output (shell scripts, prompts)");
     println!("    LEECH_NIXOS_DIR    NixOS repo path (default: ~/nixos)");
     println!("    OBSIDIAN_PATH      Obsidian vault path");
     println!("    MONOLITO_DIR       Monolito project path");

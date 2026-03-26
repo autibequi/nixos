@@ -4,6 +4,13 @@ use anyhow::{bail, Result};
 use leech_cli::runner as svc;
 use std::process::{Command, Stdio};
 
+/// Print verbose command log if LEECH_VERBOSE is set.
+fn verbose_cmd(program: &str, args: &[&str]) {
+    if std::env::var("LEECH_VERBOSE").as_deref() == Ok("1") {
+        eprintln!("\x1b[2m[VERBOSE]\x1b[0m $ {} {}", program, args.join(" "));
+    }
+}
+
 /// No-op SIGINT handler: parent ignores the signal without propagating SIG_IGN to children.
 /// Unlike SIG_IGN, a custom handler is NOT inherited by exec'd child processes (they get SIG_DFL).
 #[cfg(unix)]
@@ -93,11 +100,22 @@ fn compose_cmd(
     project: &str,
     env_vars: &[(String, String)],
 ) -> Command {
+    let compose_str = compose_file.to_string_lossy().into_owned();
+    if std::env::var("LEECH_VERBOSE").as_deref() == Ok("1") {
+        let args = vec![
+            "compose",
+            "-f",
+            &compose_str,
+            "-p",
+            project,
+        ];
+        verbose_cmd("docker", &args);
+    }
     let mut cmd = Command::new("docker");
     cmd.args([
         "compose",
         "-f",
-        &compose_file.to_string_lossy(),
+        &compose_str,
         "-p",
         project,
     ]);

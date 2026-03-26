@@ -1,8 +1,15 @@
 //! Agent and task commands — native Rust implementation with optional JSON output.
 
 use anyhow::{bail, Result};
-use leech_cli::{agents, executor, paths, tasks};
+use leech_sdk::{agents, executor, paths, tasks};
 use std::process::Command;
+
+/// Print verbose command log if LEECH_VERBOSE is set.
+fn verbose_log(msg: &str) {
+    if std::env::var("LEECH_VERBOSE").as_deref() == Ok("1") {
+        eprintln!("\x1b[2m[VERBOSE]\x1b[0m {}", msg);
+    }
+}
 
 // ── Agents ────────────────────────────────────────────────────────────────────
 
@@ -220,7 +227,7 @@ pub fn run_unified(name: &str, steps: Option<u32>) -> Result<()> {
         // Create card in schedule dir
         let schedule = paths::schedule_dir()
             .or_else(|| {
-                let p = paths::obsidian_path().join("agents/_waiting");
+                let p = paths::obsidian_path().join("agents/_schedule");
                 p.is_dir().then_some(p)
             })
             .ok_or_else(|| anyhow::anyhow!("[run] schedule dir not found"))?;
@@ -234,6 +241,9 @@ pub fn run_unified(name: &str, steps: Option<u32>) -> Result<()> {
 
         eprintln!("[run] agent '{name}' -> card {card}");
         eprintln!("[run] model={model}  timeout={timeout}s  steps={steps}\n");
+
+        verbose_log(&format!("card_path: {}", schedule.join(&card).display()));
+        verbose_log(&format!("executor_env: TASK_CONTRACTORS_DIR, SCHEDULE_DIR, TASK_MAX_TURNS={steps}"));
 
         // Clean stale lock
         let _ = std::fs::remove_dir_all(format!("/tmp/leech-locks/{when}_{name}.lock"));
@@ -276,9 +286,8 @@ pub fn run_unified(name: &str, steps: Option<u32>) -> Result<()> {
         let _ = std::fs::remove_dir_all(format!("/tmp/leech-locks/{base}.lock"));
 
         // Set env for executor
-        let agents_dir = paths::obsidian_path().join("agents");
-        std::env::set_var("SCHEDULE_DIR", agents_dir.join("_waiting"));
-        std::env::set_var("RUNNING_DIR", agents_dir.join("_working"));
+        std::env::set_var("SCHEDULE_DIR", tasks_dir.join("AGENTS"));
+        std::env::set_var("RUNNING_DIR", tasks_dir.join("DOING"));
         let contractors_dir = tasks_dir.parent()
             .map(|p| p.join("vault/agents"))
             .unwrap_or_default();
@@ -291,486 +300,147 @@ pub fn run_unified(name: &str, steps: Option<u32>) -> Result<()> {
     }
 }
 
-/// `leech auto/tick` — lê commands/tick.md e passa o body para o Claude executar.
-pub fn auto(dry_run: bool, _steps: Option<u32>, message: Option<String>) -> Result<()> {
-    let home = paths::home();
-    let obsidian = paths::obsidian_path();
-    let self_dir = paths::leech_root();
+/// `leech auto/tick` — execute due agents + tasks.
+pub fn auto(dry_run: bool, steps: Option<u32>) -> Result<()> {
+    let now = now_epoch();
 
-    // Se recebeu mensagem direta, usar ela em vez do tick.md
-    let prompt = if let Some(ref msg) = message {
-        if dry_run {
-            eprintln!("[tick] --dry-run: mensagem direta: {msg}");
-            return Ok(());
+    // ── Rescue orphans from _running/ ────────────────────────────
+    if let Some(schedule) = paths::schedule_dir() {
+        let running_dir = schedule.parent().unwrap_or(&schedule).join("_running");
+        if running_dir.is_dir() {
+            for entry in std::fs::read_dir(&running_dir).into_iter().flatten().flatten() {
+                let fname = entry.file_name().to_string_lossy().into_owned();
+                if !fname.ends_with(".md") { continue; }
+                let base = fname.trim_end_matches(".md");
+                let lock = format!("/tmp/leech-locks/{base}.lock");
+                if std::path::Path::new(&lock).is_dir() { continue; }
+                let ts = agents::parse_task_stem(base).map(|(t, _)| t).unwrap_or(0);
+                if ts == 0 { continue; }
+                let elapsed_min = now.saturating_sub(ts) / 60;
+                if elapsed_min < 30 { continue; }
+                eprintln!("[auto] orphan: {fname}  stuck={elapsed_min}min → _schedule");
+                if !dry_run {
+                    let _ = std::fs::rename(
+                        running_dir.join(&fname),
+                        schedule.join(&fname),
+                    );
+                }
+            }
         }
-        format!(
-            "Você é o agente autônomo do sistema Leech.\n\
-             OBSIDIAN={obsidian}\n\
-             SELF={self_dir}\n\
-             HEADLESS=1 — execute sem perguntar nada, sem explicar o ambiente.\n\n\
-             {msg}",
-            obsidian = obsidian.display(),
-            self_dir = self_dir.display(),
-        )
-    } else {
-        // Localizar commands/tick.md (fonte da verdade do /tick)
-        let tick_cmd = {
-            let root = paths::leech_root();
-            let candidates = [
-                root.join("commands/tick.md"),
-                std::path::PathBuf::from("/workspace/self/commands/tick.md"),
-            ];
-            candidates.into_iter().find(|p| p.exists())
-                .or_else(|| paths::agent_file("tick"))
-                .ok_or_else(|| anyhow::anyhow!("[tick] commands/tick.md nao encontrado"))?
-        };
-
-        if dry_run {
-            eprintln!("[tick] --dry-run: tick cmd em {}", tick_cmd.display());
-            return Ok(());
-        }
-
-        let content = std::fs::read_to_string(&tick_cmd)?;
-        let body = extract_body(&content);
-        let tick_body = if body.trim().is_empty() { content.as_str() } else { body.as_str() };
-
-        format!(
-            "Você é o agente autônomo do sistema Leech.\n\
-             OBSIDIAN={obsidian}\n\
-             SELF={self_dir}\n\
-             HEADLESS=1 — execute sem perguntar nada, sem explicar o ambiente.\n\n\
-             {tick_body}",
-            obsidian = obsidian.display(),
-            self_dir = self_dir.display(),
-        )
-    };
-
-    let t0 = std::time::Instant::now();
-    let started_at = utc_stamp();
-    eprintln!("[tick] {} — iniciando", started_at);
-
-    let status = Command::new("claude")
-        .args([
-            "--permission-mode", "bypassPermissions",
-            "--model", "haiku",
-            "--max-turns", "30",
-            "-p", &prompt,
-            "--add-dir", &home.to_string_lossy(),
-            "--add-dir", &obsidian.to_string_lossy(),
-            "--add-dir", &self_dir.to_string_lossy(),
-        ])
-        .env("HEADLESS", "1")
-        .env("LEECH_OBSIDIAN", &obsidian)
-        .env("LEECH_SELF", &self_dir)
-        .current_dir(&home)
-        .status()
-        .map_err(|e| anyhow::anyhow!("[tick] falhou ao executar claude: {e}"))?;
-
-    let elapsed = t0.elapsed();
-    let secs = elapsed.as_secs();
-    let duration = if secs >= 60 {
-        format!("{}m{}s", secs / 60, secs % 60)
-    } else {
-        format!("{}s", secs)
-    };
-
-    if status.success() {
-        eprintln!("[tick] ok — durou {}", duration);
-    } else {
-        eprintln!("[tick] falhou (exit={:?}) — durou {}", status.code(), duration);
     }
 
-    Ok(())
-}
+    // ── Scan schedule for due agent cards ────────────────────────
+    let threshold = now + 300; // 5min tolerance
+    let mut agent_due: Vec<String> = Vec::new();
 
-// ── Ask ───────────────────────────────────────────────────────────────────────
-
-/// `leech ask [agent] <question>` — one-shot question to an agent or default model.
-pub fn ask(agent_name: Option<&str>, question: &str, model_override: Option<&str>) -> Result<()> {
-    let obsidian = paths::obsidian_path();
-    let self_dir = paths::leech_root();
-    let home = paths::home();
-
-    let (model_str, prompt, label) = match agent_name {
-        Some(name) => {
-            let agent_file = paths::agent_file(name)
-                .ok_or_else(|| anyhow::anyhow!("Agente '{}' nao encontrado.", name))?;
-            let content = std::fs::read_to_string(&agent_file)?;
-            let agent_model = agents::frontmatter_field(&content, "model")
-                .unwrap_or_else(|| "haiku".into());
-            let model = model_override.unwrap_or(&agent_model).to_string();
-            let body = extract_body(&content);
-            let prompt = format!(
-                "{name}, você foi questionado pelo usuário:\n\n\
-                 > {question}\n\n\
-                 Responda diretamente, de forma clara e objetiva. \
-                 Esta é uma sessão oneshot — não faça perguntas de volta, \
-                 não explique o ambiente. Apenas responda.\n\n\
-                 --- contexto do agente ---\n\
-                 {body}"
-            );
-            (model, prompt, format!("{name}"))
+    if let Some(schedule) = paths::schedule_dir() {
+        if schedule.is_dir() {
+            for entry in std::fs::read_dir(&schedule).into_iter().flatten().flatten() {
+                let fname = entry.file_name().to_string_lossy().into_owned();
+                if !fname.ends_with(".md") { continue; }
+                let stem = fname.trim_end_matches(".md");
+                let ts = agents::parse_task_stem(stem).map(|(t, _)| t).unwrap_or(0);
+                if ts == 0 || ts > threshold { continue; }
+                // Check if it's an agent card (has agent: field)
+                if let Ok(content) = std::fs::read_to_string(entry.path()) {
+                    if agents::frontmatter_field(&content, "agent").is_some() {
+                        let delta = (now as i64 - ts as i64) / 60;
+                        eprintln!("[auto] agent due: {fname}  atraso={delta}min");
+                        agent_due.push(fname);
+                    }
+                }
+            }
         }
-        None => {
-            let model = model_override.unwrap_or("haiku").to_string();
-            let prompt = format!(
-                "Responda diretamente, de forma clara e objetiva. \
-                 Esta é uma sessão oneshot — não faça perguntas de volta. \
-                 Apenas responda.\n\n\
-                 > {question}"
-            );
-            (model, prompt, "default".to_string())
-        }
-    };
-
-    eprintln!("[ask] {label} ({model_str}) — {question}");
-
-    let status = Command::new("claude")
-        .args([
-            "--permission-mode", "bypassPermissions",
-            "--model", &model_str,
-            "--max-turns", "10",
-            "-p", &prompt,
-            "--add-dir", &home.to_string_lossy(),
-            "--add-dir", &obsidian.to_string_lossy(),
-            "--add-dir", &self_dir.to_string_lossy(),
-        ])
-        .env("HEADLESS", "1")
-        .env("LEECH_OBSIDIAN", &obsidian)
-        .env("LEECH_SELF", &self_dir)
-        .current_dir(&home)
-        .status()
-        .map_err(|e| anyhow::anyhow!("[ask] falhou ao executar claude: {e}"))?;
-
-    if !status.success() {
-        anyhow::bail!("[ask] claude saiu com erro (exit={:?})", status.code());
     }
-    Ok(())
-}
 
-// ── Phone ─────────────────────────────────────────────────────────────────────
+    // ── Scan tasks/TODO for due tasks ────────────────────────────
+    let task_threshold = now + 600; // 10min tolerance
+    let mut task_due: Vec<(String, u32)> = Vec::new();
 
-/// Tema da ligação por agente: (tipo, efeito sonoro)
-fn call_theme(agent: &str) -> (&'static str, &'static str) {
-    match agent {
-        "hermes"    => ("transmissão telepática",  "📡  ...sinal chegando..."),
-        "coruja"    => ("chamado noturno",          "🦉  ...a coruja pousa..."),
-        "tamagochi" => ("interface de alimentação", "🎮  ...tela acende..."),
-        "wanderer"  => ("chamado do vento",         "🌬️  ...sussurro no éter..."),
-        "keeper"    => ("sinal de manutenção",      "🔔  ...alarme interno..."),
-        "wiseman"   => ("consulta ao oráculo",      "📜  ...névoa se dissipa..."),
-        "assistant" => ("ligação direta",           "📱  ...bip... bip... bip..."),
-        "paperboy"  => ("telegrama urgente",        "📰  ...campainha..."),
-        "jafar"     => ("invocação arcana",         "🔮  ...portal se abre..."),
-        "gandalf"   => ("chamado do mago",          "🧙  ...staff bate no chão..."),
-        _           => ("chamada telefônica",       "📞  ...bip... bip... bip..."),
-    }
-}
+    if let Some(tasks_dir) = paths::tasks_dir() {
+        for subdir in &["TODO", "DOING"] {
+            let dir = tasks_dir.join(subdir);
+            if !dir.is_dir() { continue; }
+            for entry in std::fs::read_dir(&dir).into_iter().flatten().flatten() {
+                let fname = entry.file_name().to_string_lossy().into_owned();
+                if !fname.ends_with(".md") { continue; }
+                let stem = fname.trim_end_matches(".md");
 
-/// `leech phonebook [nome]` — agenda completa dos agentes.
-pub fn phonebook(name: Option<&str>) -> Result<()> {
-    let all = agents::load_all_agents();
+                if *subdir == "DOING" {
+                    // Orphan in DOING (not locked)
+                    let lock = format!("/tmp/leech-locks/{stem}.lock");
+                    if std::path::Path::new(&lock).is_dir() { continue; }
+                } else {
+                    let ts = agents::parse_task_stem(stem).map(|(t, _)| t).unwrap_or(0);
+                    if ts == 0 || ts > task_threshold { continue; }
+                }
 
-    // Se pediu um agente específico — cartão de contato completo
-    if let Some(target) = name {
-        let agent_file = paths::agent_file(target)
-            .ok_or_else(|| anyhow::anyhow!("Agente '{}' não encontrado.", target))?;
-        let content = std::fs::read_to_string(&agent_file)?;
-
-        let agent_name = agents::frontmatter_field(&content, "name")
-            .unwrap_or_else(|| target.to_string());
-        let model = agents::frontmatter_field(&content, "model")
-            .unwrap_or_else(|| "?".into());
-        let clock = agents::frontmatter_field(&content, "clock")
-            .unwrap_or_else(|| "on-demand".into());
-        let description = agents::frontmatter_field(&content, "description")
-            .unwrap_or_else(|| "(sem descrição)".into());
-        let call_style = agents::frontmatter_field(&content, "call_style")
-            .unwrap_or_else(|| "phone".into());
-        let tools = agents::frontmatter_field(&content, "tools")
-            .unwrap_or_else(|| "?".into());
-
-        let (call_type, ringing) = call_theme(target);
-        let clock_fmt = clock_display(&clock);
-
-        println!();
-        println!("  ┌─────────────────────────────────────────────────────┐");
-        println!("  │  {}  {:<49}│", contact_emoji(target), agent_name.to_uppercase());
-        println!("  │  {:<53}│", format!("{} · {} · {}", model, clock_fmt, call_type));
-        println!("  └─────────────────────────────────────────────────────┘");
-        println!();
-
-        // Description word-wrapped at ~52 chars
-        for chunk in word_wrap(&description, 52) {
-            println!("  {}", chunk);
+                let card_steps = std::fs::read_to_string(entry.path())
+                    .ok()
+                    .and_then(|c| extract_steps(&c))
+                    .unwrap_or(30);
+                task_due.push((fname, card_steps));
+            }
         }
-        println!();
-        println!("  Estilo:    {}", call_style);
-        println!("  Sinal:     {}", ringing);
-        println!("  Tools:     {}", tools.trim_matches(|c| c == '[' || c == ']'));
-        println!();
-        println!("  Como ligar:  leech phone {} <mensagem>", target);
-        println!("  Sessão:      leech agents phone {}", target);
-        println!();
+    }
+
+    eprintln!(
+        "\n[auto] {} agent(s) + {} task(s) due",
+        agent_due.len(),
+        task_due.len()
+    );
+
+    verbose_log(&format!("agent_due: {:?}", agent_due));
+    verbose_log(&format!("task_due: {:?}", task_due.iter().map(|(n, _)| n).collect::<Vec<_>>()));
+
+    if agent_due.is_empty() && task_due.is_empty() {
+        eprintln!("[auto] nada para executar.");
         return Ok(());
     }
 
-    // Lista completa
-    println!();
-    println!("  \x1b[1m📒  AGENDA LEECH\x1b[0m\x1b[2m                          {} agentes\x1b[0m", all.len());
-    println!();
-    println!(
-        "  \x1b[2m{:<14}  {:<3}  {:<26}  {:<10}  {}\x1b[0m",
-        "NOME", "MOD", "TIPO DE CHAMADA", "CLOCK", "COMO LIGAR"
-    );
-    println!("  \x1b[2m{}\x1b[0m", "─".repeat(80));
-
-    for a in &all {
-        let (call_type, _) = call_theme(&a.name);
-        let emoji = contact_emoji(&a.name);
-        let clock_fmt = a.clock_mins
-            .map(|m| format!("every{}m", m))
-            .unwrap_or_else(|| "on-demand".into());
-        let model_short = match a.model.as_str() {
-            "haiku"  => "hku",
-            "sonnet" => "snt",
-            "opus"   => "ops",
-            other    => &other[..other.len().min(3)],
-        };
-        println!(
-            "  \x1b[32m{:<14}\x1b[0m  \x1b[2m{:<3}  {} {:<24} {:<10}\x1b[0m  leech phone {}",
-            a.name,
-            model_short,
-            emoji,
-            call_type,
-            clock_fmt,
-            a.name,
-        );
+    if dry_run {
+        eprintln!("[auto] --dry-run: nao executando");
+        return Ok(());
     }
-    println!();
-    println!("  \x1b[2mVer detalhes: leech phonebook <nome>\x1b[0m");
-    println!();
-    Ok(())
-}
 
-fn contact_emoji(agent: &str) -> &'static str {
-    match agent {
-        "hermes"    => "📡",
-        "coruja"    => "🦉",
-        "tamagochi" => "🎮",
-        "wanderer"  => "🌬",
-        "keeper"    => "🔔",
-        "wiseman"   => "📜",
-        "assistant" => "📱",
-        "paperboy"  => "📰",
-        "jafar"     => "🔮",
-        "gandalf"   => "🧙",
-        "wikister"  => "📚",
-        "jonathas"  => "🏗",
-        _           => "📞",
-    }
-}
-
-fn clock_display(clock: &str) -> String {
-    if clock == "on-demand" || clock.is_empty() {
-        return "on-demand".into();
-    }
-    // "every30" → "every30m", "30" → "every30m"
-    if clock.starts_with("every") {
-        format!("{}m", clock)
-    } else if let Ok(n) = clock.parse::<u32>() {
-        format!("every{}m", n)
-    } else {
-        clock.to_string()
-    }
-}
-
-fn word_wrap(text: &str, width: usize) -> Vec<String> {
-    let mut lines = Vec::new();
-    let mut current = String::new();
-    for word in text.split_whitespace() {
-        if current.is_empty() {
-            current = word.to_string();
-        } else if current.len() + 1 + word.len() <= width {
-            current.push(' ');
-            current.push_str(word);
-        } else {
-            lines.push(current.clone());
-            current = word.to_string();
+    // ── Execute agents ───────────────────────────────────────────
+    if let Some(schedule) = paths::schedule_dir() {
+        let contractors_dir = schedule.parent().unwrap_or(&schedule);
+        for fname in &agent_due {
+            eprintln!("\n[auto] ▸ agent: {fname}");
+            std::env::set_var("TASK_CONTRACTORS_DIR", contractors_dir);
+            std::env::set_var("SCHEDULE_DIR", &schedule);
+            if let Err(e) = executor::run_card(fname) {
+                eprintln!("[auto] {fname} falhou: {e} (continuando)");
+            }
         }
     }
-    if !current.is_empty() {
-        lines.push(current);
+
+    // ── Execute tasks ────────────────────────────────────────────
+    if let Some(tasks_dir) = paths::tasks_dir() {
+        let contractors_dir = tasks_dir.parent()
+            .map(|p| p.join("vault/agents"))
+            .unwrap_or_default();
+
+        for (fname, card_steps) in &task_due {
+            let effective_steps = steps.unwrap_or(*card_steps);
+            eprintln!("\n[auto] ▸ task: {fname}  steps={effective_steps}");
+
+            let base = fname.trim_end_matches(".md");
+            let _ = std::fs::remove_dir_all(format!("/tmp/leech-locks/{base}.lock"));
+
+            std::env::set_var("SCHEDULE_DIR", tasks_dir.join("AGENTS"));
+            std::env::set_var("RUNNING_DIR", tasks_dir.join("DOING"));
+            std::env::set_var("TASK_CONTRACTORS_DIR", &contractors_dir);
+            std::env::set_var("TASK_MAX_TURNS", effective_steps.to_string());
+
+            if let Err(e) = executor::run_card(fname) {
+                eprintln!("[auto] {fname} falhou: {e} (continuando)");
+            }
+        }
     }
-    lines
-}
 
-/// `leech phone [agente] <mensagem>` — ligação telepática one-shot para um agente.
-pub fn phone_msg(agent_name: &str, message: &str) -> Result<()> {
-    let obsidian = paths::obsidian_path();
-    let self_dir = paths::leech_root();
-    let home = paths::home();
-
-    // Carrega contexto do agente
-    let agent_file = paths::agent_file(agent_name);
-    let (model_str, agent_body) = if let Some(ref path) = agent_file {
-        let content = std::fs::read_to_string(path)?;
-        let model = agents::frontmatter_field(&content, "model")
-            .unwrap_or_else(|| "haiku".into());
-        let body = extract_body(&content);
-        (model, body)
-    } else {
-        ("haiku".into(), String::new())
-    };
-
-    let (call_type, ringing) = call_theme(agent_name);
-    let now_str = utc_stamp();
-
-    // Cabeçalho da chamada
-    eprintln!();
-    eprintln!("  ┌─────────────────────────────────────────────┐");
-    eprintln!("  │  LIGAÇÃO TELEPÁTICA          {}  │", &now_str);
-    eprintln!("  │  De:   Pedrinho                             │");
-    eprintln!("  │  Para: {:<37}│", agent_name);
-    eprintln!("  │  Tipo: {:<37}│", call_type);
-    eprintln!("  └─────────────────────────────────────────────┘");
-    eprintln!();
-    eprintln!("  {}", ringing);
-    eprintln!();
-
-    let prompt = format!(
-        "LIGAÇÃO ENTRANTE — {now_str}\n\
-         De: Pedrinho  →  Para: {agent_name}\n\
-         Tipo: {call_type}\n\
-         ───────────────────────────────────────\n\n\
-         Você está recebendo uma {call_type} do Pedrinho.\n\
-         Ele está dizendo:\n\n\
-         \"{message}\"\n\n\
-         Responda como numa ligação — breve, direto, sem prefácio.\n\
-         - Tarefa ou pedido → confirme o que vai fazer\n\
-         - Pergunta → responda em 1-3 linhas\n\
-         - Lembrete → confirme que registrou\n\
-         Sem 'Claro!', sem 'Entendido!' — vai direto ao ponto.\n\n\
-         --- contexto do agente ---\n\
-         {agent_body}",
-    );
-
-    let t0 = std::time::Instant::now();
-
-    let status = Command::new("claude")
-        .args([
-            "--permission-mode", "bypassPermissions",
-            "--model", &model_str,
-            "--max-turns", "10",
-            "-p", &prompt,
-            "--add-dir", &home.to_string_lossy(),
-            "--add-dir", &obsidian.to_string_lossy(),
-            "--add-dir", &self_dir.to_string_lossy(),
-        ])
-        .env("HEADLESS", "1")
-        .env("LEECH_OBSIDIAN", &obsidian)
-        .env("LEECH_SELF", &self_dir)
-        .current_dir(&home)
-        .status()
-        .map_err(|e| anyhow::anyhow!("[phone] falhou ao executar claude: {e}"))?;
-
-    let elapsed = t0.elapsed();
-    let secs = elapsed.as_secs();
-    let duration = if secs >= 60 {
-        format!("{}m{}s", secs / 60, secs % 60)
-    } else {
-        format!("{}s", secs)
-    };
-
-    eprintln!();
-    eprintln!("  ─────────────────────────────────────────────");
-    eprintln!("  ⏱  {}   Pedrinho → {}", duration, agent_name);
-    eprintln!("  ─────────────────────────────────────────────");
-    eprintln!();
-
-    if !status.success() {
-        anyhow::bail!("[phone] claude saiu com erro (exit={:?})", status.code());
-    }
-    Ok(())
-}
-
-/// `leech phones <mensagem>` — assistente pessoal: lembretes, tasks, pesquisas.
-pub fn phones_msg(message: &str) -> Result<()> {
-    let obsidian = paths::obsidian_path();
-    let self_dir = paths::leech_root();
-    let home = paths::home();
-
-    // Rota para assistant, fallback hermes
-    let target = if paths::agent_file("assistant").is_some() { "assistant" } else { "hermes" };
-
-    let agent_file = paths::agent_file(target);
-    let (model_str, agent_body) = if let Some(ref path) = agent_file {
-        let content = std::fs::read_to_string(path)?;
-        let model = agents::frontmatter_field(&content, "model")
-            .unwrap_or_else(|| "haiku".into());
-        let body = extract_body(&content);
-        (model, body)
-    } else {
-        ("haiku".into(), String::new())
-    };
-
-    let now_str = utc_stamp();
-
-    eprintln!();
-    eprintln!("  📱  Assistente pessoal — {}  →  {}", "Pedrinho", target);
-    eprintln!();
-
-    let prompt = format!(
-        "Você é o assistente pessoal do Pedrinho, recebendo uma solicitação direta.\n\
-         Hora: {now_str}\n\
-         OBSIDIAN={obsidian}\n\n\
-         O Pedrinho disse:\n\
-         \"{message}\"\n\n\
-         Sua função nesta chamada:\n\
-         - Lembrete → crie {obsidian}/inbox/lembrete-{now_str}.md e confirme\n\
-         - Task → adicione em {obsidian}/tasks/TODO/ e confirme\n\
-         - Pergunta → responda em até 3 linhas\n\
-         - Pesquisa → execute e traga o resultado resumido\n\n\
-         Responda em 1-3 linhas confirmando o que foi feito. Direto ao ponto.\n\n\
-         --- contexto ---\n\
-         {agent_body}",
-        obsidian = obsidian.display(),
-    );
-
-    let t0 = std::time::Instant::now();
-
-    let status = Command::new("claude")
-        .args([
-            "--permission-mode", "bypassPermissions",
-            "--model", &model_str,
-            "--max-turns", "15",
-            "-p", &prompt,
-            "--add-dir", &home.to_string_lossy(),
-            "--add-dir", &obsidian.to_string_lossy(),
-            "--add-dir", &self_dir.to_string_lossy(),
-        ])
-        .env("HEADLESS", "1")
-        .env("LEECH_OBSIDIAN", &obsidian)
-        .env("LEECH_SELF", &self_dir)
-        .current_dir(&home)
-        .status()
-        .map_err(|e| anyhow::anyhow!("[phones] falhou ao executar claude: {e}"))?;
-
-    let elapsed = t0.elapsed();
-    let secs = elapsed.as_secs();
-    let duration = if secs >= 60 {
-        format!("{}m{}s", secs / 60, secs % 60)
-    } else {
-        format!("{}s", secs)
-    };
-
-    eprintln!();
-    eprintln!("  ✓  assistente  ⏱ {}", duration);
-    eprintln!();
-
-    if !status.success() {
-        anyhow::bail!("[phones] claude saiu com erro (exit={:?})", status.code());
-    }
+    eprintln!("\n[auto] concluido");
     Ok(())
 }
 
@@ -808,6 +478,13 @@ fn days_to_date(days: u64) -> (u64, u64, u64) {
     (y, m, d)
 }
 
+fn now_epoch() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs()
+}
+
 /// Extract content below the YAML frontmatter.
 fn extract_body(content: &str) -> String {
     let mut in_fm = false;
@@ -831,3 +508,14 @@ fn extract_body(content: &str) -> String {
     body
 }
 
+/// Extract `#stepsN` from card content.
+fn extract_steps(content: &str) -> Option<u32> {
+    for line in content.lines() {
+        if let Some(rest) = line.strip_prefix("#steps") {
+            if let Ok(n) = rest.trim().parse() {
+                return Some(n);
+            }
+        }
+    }
+    None
+}
