@@ -8,7 +8,8 @@ Nomenclatura do sistema. Referencia rapida para entender os termos usados em ski
 |-------|---------|
 | **Leech** | O sistema como um todo — CLI, hooks, skills, agentes, scripts (antes chamado Zion) |
 | **leech** | Comando CLI (`~/.local/bin/leech`). Alias: `zion` |
-| **~/.leech** | Canal de comunicacao rapida host <-> containers (KEY=value, sourced no boot) |
+| **~/.leech** | Tokens e env vars bash-sourceable (legado — config migrou pro YAML) |
+| **config.yaml** | `~/.config/leech/config.yaml` — config estruturado via Figment (session, runner, agents, paths, system) |
 
 ## Agentes e instancias
 
@@ -25,7 +26,7 @@ Nomenclatura do sistema. Referencia rapida para entender os termos usados em ski
 |-----------------|-------------|
 | `leech-dk-<service>` | Container Docker de servico (ex: leech-dk-monolito-app) |
 | `leech-<slug>` | Sessao Claude ativa (proj_name em paths.rs) |
-| `LEECH_*` | Env vars do sistema (LEECH_NIXOS_DIR, LEECH_ROOT, LEECH_ENGINE, LEECH_MODEL, LEECH_DEBUG, LEECH_SPLASH) |
+| `LEECH_*` | Env vars do sistema — Figment mapeia `LEECH_SESSION_ENGINE`, `LEECH_RUNNER_ENV`, etc. para nested config |
 | `HOST_ATTACHED` | 1 quando --host ativo (~/nixos rw em /workspace/host). Substitui antigo LEECH_EDIT. |
 | `leech-tick` | Systemd timer/service (roda a cada 10min) |
 
@@ -38,7 +39,8 @@ Nomenclatura do sistema. Referencia rapida para entender os termos usados em ski
 | `leech/rust/` | CLI Rust ativo — fonte da verdade do leech CLI |
 | `leech/docker/` | Docker compose, Dockerfiles, entrypoints |
 | `~/.local/bin/leech` | Binario CLI Rust (instalado via `just install`) |
-| `~/.leech` | Config channel host <-> container |
+| `~/.leech` | Tokens + env vars legado (bash-sourceable) |
+| `~/.config/leech/config.yaml` | Config YAML estruturado (Figment: session, runner, agents, paths, system) |
 | `~/.local/share/leech/` | Logs, estado, cache |
 | `/tmp/leech-hive-mind` | Socket Docker compartilhado |
 | `/tmp/leech-locks/` | Locks de concorrencia de tasks |

@@ -88,6 +88,8 @@
 - [feedback_error_debug_flow.md](feedback_error_debug_flow.md) — Fluxo ao receber stack trace: leitura → localização → rastreio+logs em /workspace/logs/<app>/ → hipótese conectando todos os pontos → fix mínimo → verificação
 - [feedback_boot_var_injection.md](feedback_boot_var_injection.md) — BOOT: adicionar dados como linha simples (echo "var=val"), nunca envolver em bloco REGRA
 - [reference_container_host_paths.md](reference_container_host_paths.md) — Env vars com paths reais do host: CLAUDIO_MOUNT→/workspace/mnt, LEECH_ROOT→/workspace/self (exposto como host_self no boot)
+- [reference_nixos_kernel_tuning.md](reference_nixos_kernel_tuning.md) — Anti-padrões em kernel.nix para AMD/RAM grande: dirty_ratio sizing, watermark_scale_factor, settings que são no-op (default, mortos com SCX)
+- [reference_hypridle_logind.md](reference_hypridle_logind.md) — Conflito hypridle vs logind IdleAction, ignore_dbus_inhibit quebra inibição de vídeo, gap mínimo lock→suspend
 - [reference_pr_message_skill.md](reference_pr_message_skill.md) — Skill code/pr-message: template PR (JIRA URL pura, tabelas), espelhos mnt/self/host/leech, chown se subpasta root
 - [project_base_interface.md](project_base_interface.md) — BASE_INTERFACE.md em /workspace/self/: 4 templates mandatórios (ERRO/SUCESSO/AÇÃO NECESSÁRIA/INFO) com regra de bordas
 - [feedback_box_code_no_borders.md](feedback_box_code_no_borders.md) — Código dentro de caixas ASCII: SEM bordas laterais │ — usuário copia com mouse, borda quebra o paste

@@ -13,15 +13,19 @@ Implementar features no Leech de forma autonoma dentro do container. Criar workt
 
 ```
 /workspace/host/leech/
-├── bash/
-│   ├── leech                   entrypoint gerado (executavel diretamente)
-│   ├── src/
-│   │   ├── bashly.yml          spec de comandos e flags (fonte da verdade)
-│   │   ├── commands/           implementacao de cada comando (~40 arquivos .sh)
-│   │   └── lib/                bibliotecas compartilhadas
-│   └── Justfile                build tasks (bashly generate, etc)
+├── rust/                       CLI Rust (fonte da verdade)
+│   ├── Cargo.toml              workspace
+│   ├── justfile                build targets (just build, just install)
+│   └── crates/leech-cli/
+│       └── src/
+│           ├── main.rs         Clap enum + dispatch (4 dominios: Session/Agents/Services/System)
+│           ├── help.rs         Banner, man page, before_help blocks
+│           ├── config.rs       Figment config (defaults → YAML → env → CLI)
+│           ├── commands/       handlers (session, agents, runner, docker, host, tools, config_cmd, ...)
+│           ├── tui/            TUI dashboard (ratatui)
+│           └── *.rs            core logic (paths, session, model, agents, compose, executor, ...)
+├── bash/                       legado (mantido para referencia, NAO e o ativo)
 ├── docker/                     docker-compose por servico
-├── rust/                       componentes TUI (zion-tui)
 └── self/                       self-knowledge do sistema
 
 /workspace/self/                runtime engine (sempre rw, sem worktree necessario)
@@ -29,7 +33,21 @@ Implementar features no Leech de forma autonoma dentro do container. Criar workt
 ├── agents/                     cards de agentes (frontmatter + instrucoes)
 ├── hooks/                      hooks (Claude + Cursor + ENGINE)
 └── scripts/                    scripts utilitarios bash/python
+
+~/.config/leech/config.yaml     config estruturado (Figment YAML provider)
+~/.leech                        tokens + env vars (bash-sourceable, legado)
 ```
+
+### Arquitetura de config — Figment layered
+
+```
+Built-in defaults → config.yaml → LEECH_* env vars → CLI flags
+        ↑                ↑              ↑                ↑
+   config.rs         ~/.config/    Env::prefixed     Clap args
+   Default impl      leech/        ("LEECH_")        (Option<T>)
+```
+
+Struct unificada: `LeechConfig` com sub-structs `session`, `runner`, `agents`, `paths`, `system`, `secrets`.
 
 ---
 
@@ -193,17 +211,27 @@ proximo:
 
 ### Adicionar novo comando ao CLI
 
-1. Adicionar funcao em `commands/<modulo>.rs` (ou criar novo modulo)
+1. Adicionar funcao em `commands/<modulo>.rs` (ou criar novo modulo + registrar em `commands/mod.rs`)
 2. Adicionar variante em `enum Commands` em `main.rs`
-3. Adicionar dispatch no `match` de `main.rs`
-4. Adicionar exemplos em `help.rs` (DIRECTIVE obrigatorio)
-5. Compilar e testar: `leech <nome> --help` e `leech <nome> <args>`
+3. Se o comando precisa de defaults configuraveis: usar `Option<T>` nos args + fallback `cfg.runner.*` / `cfg.agents.*`
+4. Adicionar dispatch no `match` de `main.rs`
+5. Adicionar exemplos em `help.rs` (DIRECTIVE obrigatorio)
+6. Compilar e testar: `leech <nome> --help` e `leech <nome> <args>`
 
 ### Modificar comando existente
 
 1. Editar `commands/<modulo>.rs`
 2. Se mudou assinatura: atualizar `main.rs` + `help.rs`
-3. Compilar e testar comportamento antigo + novo
+3. Se adicionou flag com default configuravel: trocar `default_value` por `Option` + fallback `LeechConfig`
+4. Compilar e testar comportamento antigo + novo
+
+### Adicionar campo ao config
+
+1. Adicionar campo na sub-struct relevante em `config.rs` (SessionConfig, RunnerConfig, etc.)
+2. Adicionar `#[serde(default = "...")]` com valor built-in
+3. Atualizar `Default impl` e `display()` em `config.rs`
+4. Atualizar `DEFAULT_TEMPLATE` em `config.rs`
+5. Env var automatica: `LEECH_<SECTION>_<FIELD>` (ex: `LEECH_RUNNER_ENV=sand`)
 
 ### Adicionar novo agente
 
