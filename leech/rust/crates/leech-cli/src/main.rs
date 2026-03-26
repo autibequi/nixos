@@ -207,6 +207,30 @@ enum Commands {
     #[command(alias = "ib", )]
     Inbox,
 
+    // ── Phone ───────────────────────────────────────────────────
+    /// Ligação telepática para um agente (default: hermes)
+    #[command(alias = "call", before_help = help::PHONE_BEFORE)]
+    Phone {
+        /// Nome do agente (opcional — default hermes)
+        agent: Option<String>,
+        /// Mensagem
+        #[arg(trailing_var_arg = true)]
+        message: Vec<String>,
+    },
+    /// Agenda de contatos — lista todos os agentes com info de ligação
+    #[command(alias = "contacts", alias = "agenda", before_help = help::PHONEBOOK_BEFORE)]
+    Phonebook {
+        /// Nome do agente para ver cartão completo (opcional)
+        name: Option<String>,
+    },
+    /// Assistente pessoal — lembretes, tasks, pesquisas rápidas
+    #[command(before_help = help::PHONES_BEFORE)]
+    Phones {
+        /// Mensagem ou pedido
+        #[arg(trailing_var_arg = true)]
+        message: Vec<String>,
+    },
+
     // ── Hidden aliases (backward compat) ────────────────────────
     /// Build Docker image (use `docker build`)
     #[command(hide = true)]
@@ -631,6 +655,33 @@ fn main() -> Result<()> {
                 None => (None, question.join(" ")),
             };
             commands::agents::ask(resolved_agent, &q, model.as_deref())
+        }
+
+        // Phone
+        Some(Commands::Phone { agent, message }) => {
+            let msg = message.join(" ");
+            let (target, final_msg) = match agent {
+                Some(ref a) if leech_cli::paths::agent_file(a).is_some() => {
+                    (a.clone(), msg)
+                }
+                Some(ref a) => {
+                    let full = if msg.is_empty() { a.clone() } else { format!("{a} {msg}") };
+                    ("hermes".to_string(), full)
+                }
+                None => ("hermes".to_string(), msg),
+            };
+            commands::agents::phone_msg(&target, &final_msg)
+        }
+
+        // Phonebook
+        Some(Commands::Phonebook { name }) => {
+            commands::agents::phonebook(name.as_deref())
+        }
+
+        // Phones — assistente pessoal
+        Some(Commands::Phones { message }) => {
+            let msg = message.join(" ");
+            commands::agents::phones_msg(&msg)
         }
 
         // Agents

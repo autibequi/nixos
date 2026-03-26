@@ -28,6 +28,7 @@ Antes de qualquer resposta, classificar o input em 1 linha:
 | Tipo | Indicadores | Protocolo |
 |------|-------------|-----------|
 | **Simples** | fact, confirmação, status curto | Resposta direta — sem overhead |
+| **Localização de código** | "onde está", "qual arquivo", "qual rota" | Modo Turbo |
 | **Técnico** | código, debug, config, comparação | CoD Interativo |
 | **Ambíguo** | "não sei por que", "estranho", spec vaga | Step-Back primeiro |
 | **Feature/planejamento** | "quero fazer", "como implementar" | CoD + refine/lite |
@@ -38,7 +39,37 @@ Antes de qualquer resposta, classificar o input em 1 linha:
 
 ---
 
-## 3. Modo Interativo — Chain of Draft (CoD)
+## 3. Modo Turbo — Busca Direta no Código
+
+> Para perguntas do tipo "onde está X no código". Resultado: 3-4 tool calls, ~8s.
+> Benchmark validado: 12 variações testadas — budget + path/termo exato = melhor combinação.
+
+**Quando usar:** "onde está", "qual arquivo", "qual rota", "qual função faz X" — qualquer localização de código.
+
+**Protocolo (4 calls máx):**
+```
+Call 1: Grep pelo nome exato da função/handler no path provável
+Call 2: Grep no container/router para achar a rota HTTP
+Call 3-4: Read do arquivo encontrado (só se necessário confirmar detalhes)
+```
+
+**Regras:**
+- Declarar termo exato antes de qualquer tool call: "vou grep por `BulkGenerateSnapshot`"
+- Path provável primeiro: `/home/claude/projects/estrategia/monolito/` → `/workspace/mnt/`
+- Se Call 1 não retornar nada → tentar variação do nome (snake_case, CamelCase)
+- Nunca explorar pastas sem termo — grep sempre primeiro
+- Se exceder 4 calls → ESCALATION
+
+**Exemplo:**
+```
+D> localizar endpoint de snapshot bulk
+D> termo: "BulkGenerateSnapshot", path: apps/bo/internal/handlers/
+→ Grep → Grep container.go → resposta
+```
+
+---
+
+## 4. Modo Interativo — Chain of Draft (CoD)
 
 > Para sessões com o usuário. Rápido, estruturado, eficaz.
 > Chain of Draft gera drafts concisos antes da resposta — mais eficiente que CoT longo.
@@ -290,6 +321,9 @@ INPUT CHEGA
       │                                │
       │                                ├── confirmado → agir
       │                                └── inconclusivo → 1 pergunta
+      │
+      ├── localização de código ────▶ Modo Turbo
+      │                              Grep → Grep container → Read (max 4 calls)
       │
       ├── técnico / feature
       │       │

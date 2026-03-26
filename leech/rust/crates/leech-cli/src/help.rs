@@ -25,7 +25,9 @@ pub const BANNER: &str = "\
     leech runner front shell       \x1b[2mshell in front-student\x1b[0m
 
     leech agents                   \x1b[2mlist agents\x1b[0m
-    leech agents phone hermes      \x1b[2mtalk to hermes\x1b[0m
+    leech phone hermes o que tem hoje \x1b[2mligação para hermes\x1b[0m
+    leech phone coruja analisa PR 42  \x1b[2mligação para coruja\x1b[0m
+    leech phones lembra reunião 15h   \x1b[2massistente pessoal\x1b[0m
     leech ask coruja o que tem hoje \x1b[2moneshot question\x1b[0m
     leech run coruja               \x1b[2mrun agent now\x1b[0m
     leech tick                     \x1b[2mrun all due agents + tasks\x1b[0m
@@ -231,6 +233,53 @@ pub const CLAUDE_BEFORE: &str = "\
 \x1b[2m  ─────────────────────────────────────────────────────────\x1b[0m
 ";
 
+// ── Phone ─────────────────────────────────────────────────────────────────────
+
+pub const PHONE_BEFORE: &str = "\
+\x1b[35m  phone\x1b[0m  \x1b[2mligação telepática para um agente\x1b[0m
+
+\x1b[2m  ── common usage ──────────────────────────────────────────\x1b[0m
+
+    leech phone oi tudo bem?              \x1b[2mmanda para hermes (default)\x1b[0m
+    leech phone hermes o que tem no inbox \x1b[2mliga para hermes\x1b[0m
+    leech phone coruja analisa o PR 42    \x1b[2mliga para coruja\x1b[0m
+    leech phone wiseman o que é saudade?  \x1b[2mliga para wiseman\x1b[0m
+    leech phone tamagochi te amo          \x1b[2mliga para tamagochi\x1b[0m
+
+\x1b[2m  Roda headless com max-turns=10. Para sessão interativa: leech agents phone.\x1b[0m
+
+\x1b[2m  ─────────────────────────────────────────────────────────\x1b[0m
+";
+
+pub const PHONEBOOK_BEFORE: &str = "\
+\x1b[35m  phonebook\x1b[0m  \x1b[2magenda de contatos dos agentes\x1b[0m
+
+\x1b[2m  ── common usage ──────────────────────────────────────────\x1b[0m
+
+    leech phonebook                \x1b[2mlista todos os agentes\x1b[0m
+    leech phonebook hermes         \x1b[2mcartão completo do hermes\x1b[0m
+    leech phonebook coruja         \x1b[2mcartão completo da coruja\x1b[0m
+
+\x1b[2m  aliases: contacts, agenda\x1b[0m
+
+\x1b[2m  ─────────────────────────────────────────────────────────\x1b[0m
+";
+
+pub const PHONES_BEFORE: &str = "\
+\x1b[35m  phones\x1b[0m  \x1b[2massistente pessoal — lembretes, tasks, pesquisas\x1b[0m
+
+\x1b[2m  ── common usage ──────────────────────────────────────────\x1b[0m
+
+    leech phones lembra de ligar pra mãe amanhã às 10h \x1b[2mcria lembrete\x1b[0m
+    leech phones adiciona task revisar PR do monolito   \x1b[2mcria task\x1b[0m
+    leech phones qual a capital da Groenlândia?         \x1b[2mpergunta rápida\x1b[0m
+    leech phones pesquisa como fazer deploy blue-green  \x1b[2mpesquisa\x1b[0m
+
+\x1b[2m  Rota direta para o assistente pessoal. Registra lembretes/tasks no Obsidian.\x1b[0m
+
+\x1b[2m  ─────────────────────────────────────────────────────────\x1b[0m
+";
+
 // ── Man page ─────────────────────────────────────────────────────────────────
 
 /// Full GNU-style man page.
@@ -271,6 +320,15 @@ pub fn man_page() {
     println!("\x1b[1mAGENT COMMANDS\x1b[0m");
     man_cmd("agents, ag, a", "[SUBCOMMAND]",
         "Agent management. Subcommands: list, phone, status.");
+    man_cmd("phone, call", "[AGENT] <MENSAGEM>",
+        "Ligação telepática one-shot para um agente (default: hermes).\n\
+         \x1b[0m                    Roda headless com max-turns=10. Mostra duração e quem ligou pra quem.");
+    man_cmd("phonebook, contacts, agenda", "[NOME]",
+        "Agenda de contatos — lista todos os agentes com emoji, modelo, clock e como ligar.\n\
+         \x1b[0m                    Com nome: mostra cartão completo do agente.");
+    man_cmd("phones", "<MENSAGEM>",
+        "Assistente pessoal — cria lembretes/tasks no Obsidian, responde perguntas.\n\
+         \x1b[0m                    Rota direta para o agente assistant (fallback: hermes).");
     man_cmd("run, r", "<NAME> [-s STEPS]",
         "Run an agent or task immediately. Creates card and executes via Claude CLI.");
     man_cmd("tick, auto", "[--dry-run] [-s STEPS]",
