@@ -92,3 +92,7 @@
 - [project_base_interface.md](project_base_interface.md) — BASE_INTERFACE.md em /workspace/self/: 4 templates mandatórios (ERRO/SUCESSO/AÇÃO NECESSÁRIA/INFO) com regra de bordas
 - [feedback_box_code_no_borders.md](feedback_box_code_no_borders.md) — Código dentro de caixas ASCII: SEM bordas laterais │ — usuário copia com mouse, borda quebra o paste
 - [reference_leech_hooks_cursor.md](reference_leech_hooks_cursor.md) — Hooks Leech unificados em `self/hooks/`, subpasta `hooks/cursor/` só pro Cursor, `ENGINE`, mounts Docker, skills em `~/.cursor/skills`
+- [project_jonathas_agent.md](project_jonathas_agent.md) — Agente jonathas: haiku every30min, projeto imobiliário RJ, ciclo proactive autônomo em workshop/jonathas/
+- [project_proactive_skill.md](project_proactive_skill.md) — Skills thinking/brainstorm (motor ideação) e thinking/proactive (Radar Pareto) criadas 2026-03-26
+- [feedback_proactive_pareto.md](feedback_proactive_pareto.md) — Proactive: Pareto obrigatório, clusters > lista flat, conteúdo como ativo que se acumula
+- [project_obsidian_agents.md](project_obsidian_agents.md) — Mapa dos 12 agentes ativos (inclui jonathas), paths, CLI

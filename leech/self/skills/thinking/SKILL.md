@@ -1,6 +1,6 @@
 ---
 name: thinking
-description: Entrypoint universal para qualquer problema — dispatcher que roteia para investigate, brainstorm, refine ou code/debug conforme o tipo. Nunca sair fazendo sem entender primeiro.
+description: Entrypoint universal para qualquer problema — dispatcher que roteia para investigate, brainstorm, refine, proactive ou code/debug conforme o tipo. Nunca sair fazendo sem entender primeiro.
 ---
 
 # thinking — Entrypoint Universal
@@ -17,14 +17,16 @@ description: Entrypoint universal para qualquer problema — dispatcher que rote
 | Pedido vago | Clarificar → rotear |
 | Análise de código | → `code/analysis` |
 | Preso / loop / sem causa clara | → `thinking/brainstorm` (automático) |
+| Oportunidades de negócio / evolução de produto | → `thinking/proactive` |
 
 ## Sub-skills
 
 | Arquivo | Quando usar |
 |---|---|
 | `investigate` | **Sempre primeiro** — coletar logs, código, relatos, histórico |
-| `brainstorm` | Quando preso ou em loop — gerar e validar teorias |
-| `refine` | Quebrar feature/spec em tasks atomicas ordenadas por camada |
+| `brainstorm` | Motor de ideação — recebe problema + perspectiva, decompõe em blocos, gera descobertas. Funciona standalone ou como sub-agente |
+| `refine` | Quebrar feature/spec em tasks atômicas ordenadas por camada |
+| `proactive` | Radar Pareto — filtra os 20% de ações que entregam 80% do valor, agrupa em clusters de responsabilidade, gera conteúdo que se acumula como ativo |
 
 ---
 
@@ -47,6 +49,9 @@ Problema chega
         │
         ├─── preso? loop? ──▶ [brainstorm] — gerar e validar teorias
         │                      (thinking/brainstorm — automático)
+        │
+        ├─── oportunidade? ──▶ [proactive] — radar multi-perspectiva
+        │                      (thinking/proactive — agentes ou user)
         ▼
 [4] Apresentar           — visual via meta:art (ASCII ou Chrome)
         │
@@ -175,6 +180,7 @@ So apos backlog aprovado. Seguir a ordem das tasks. Nao pular camadas.
 | Pedido vago ("faz um sistema de X") | **Obrigatorio** — clarificar antes de refinar |
 | Bug / stack trace / log recebido | investigate → code/debug |
 | Preso ou em loop de hipóteses | → `thinking/brainstorm` (automático) |
+| Oportunidades de negócio / produto | → `thinking/proactive` (agentes ou user) |
 | Duvida sobre onde esta o problema | investigate primeiro, depois thinking |
 | Hotfix urgente (<1 arquivo, causa clara) | Dispensavel — ir direto para code/debug |
 
@@ -194,6 +200,7 @@ So apos backlog aprovado. Seguir a ordem das tasks. Nao pular camadas.
 | `code/analysis` | Entender fluxo de codigo, dependencias entre camadas |
 | `code/inspect` | Inspecionar arquivo/funcao especifica em detalhe |
 | `thinking/refine` | Quebrar investigacao em tasks atomicas apos entender o problema |
+| `thinking/proactive` | Radar de oportunidades quando o contexto pede evolução, não fix |
 
 **Comandos uteis:**
 ```bash
@@ -215,3 +222,4 @@ grep -r "mensagem exata" /workspace/mnt/  # buscar ocorrencia no codigo
 | Pedir validacao e avancar sem resposta | Parar. Esperar. Nao presumir aprovacao |
 | Refinar sem investigar o codebase | Onda 1-2-3 primeiro, plano depois |
 | Criar tasks grandes ("implementar o modulo X") | Cada task = 1 responsabilidade, resultado verificavel |
+| Brainstormar sem perspectiva | Sempre definir a lente antes de gerar ideias |
