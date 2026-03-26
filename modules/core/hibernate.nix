@@ -7,8 +7,7 @@
     HandleLidSwitchDocked = "suspend";
     HandlePowerKey = "suspend";
     HandlePowerKeyLongPress = "poweroff";
-    IdleAction = "suspend-then-hibernate";
-    IdleActionSec = "10min";
+    # Idle gerenciado pelo hypridle — sem IdleAction aqui pra evitar corrida
   };
 
   systemd.sleep.extraConfig = ''
@@ -22,6 +21,5 @@
   boot.kernelParams = [
     "mem_sleep_default=s2idle"
     "acpi.ec_no_wakeup=1"
-    "no_console_suspend"
   ];
 }

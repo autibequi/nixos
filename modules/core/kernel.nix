@@ -95,24 +95,14 @@
 
     # NVMe interno aguenta rajadas de escrita muito bem.
     # Limites mais generosos reduzem stalls de CPU por flush prematuro.
-    "vm.dirty_ratio" = 20; # flush forçado ao atingir 20% da RAM
-    "vm.dirty_background_ratio" = 10; # flush em background começa aos 10%
+    "vm.dirty_ratio" = 10; # flush forçado ao atingir 10% da RAM (~4.8GB em 48GB)
+    "vm.dirty_background_ratio" = 5; # flush em background começa aos 5% (~2.4GB)
 
     # Flush proativo: reduz wakeups e permite que a drive batch writes melhor.
-    "vm.dirty_expire_centisecs" = 3000; # 30s (padrão, explícito)
     "vm.dirty_writeback_centisecs" = 1500; # flush a cada 15s ao invés de 5s
-
-    # sched_autogroup: agrupa processos do mesmo terminal/sessão e aplica
-    # nice diferenciado por grupo — fallback quando SCX não está ativo.
-    "kernel.sched_autogroup_enabled" = 1;
 
     # Desabilita NMI watchdog via sysctl (complementa nmi_watchdog=0 no cmdline).
     "kernel.nmi_watchdog" = 0;
-
-    # Compactação de memória proativa em background: reduz stalls de alocação
-    # de hugepages ao manter memória contígua disponível antecipadamente.
-    # 20 é conservador o suficiente para não interferir com uso interativo.
-    "vm.compaction_proactiveness" = 20;
 
     # Rede: buffers maiores para melhor throughput
     "net.core.netdev_max_backlog" = 16384;
@@ -137,8 +127,9 @@
     # Permite containers rootless (Podman) bindarem portas baixas (80, 443, etc.)
     "net.ipv4.ip_unprivileged_port_start" = 0;
 
-    # kswapd acorda mais cedo (evita cliff de reclaim), desativa boost que causa spikes
-    "vm.watermark_scale_factor" = 125;
+    # kswapd: scale conservador (default=10, 125 era agressivo demais pra 48GB),
+    # desativa boost que causa spikes
+    "vm.watermark_scale_factor" = 50;
     "vm.watermark_boost_factor" = 0;
   };
 

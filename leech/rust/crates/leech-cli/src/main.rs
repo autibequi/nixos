@@ -54,7 +54,7 @@ enum Commands {
         host: bool,
     },
     /// Resume a session by ID
-    #[command()]
+
     Resume {
         dir: Option<String>,
         #[arg(long, num_args = 0..=1, default_missing_value = "1")]
@@ -157,7 +157,7 @@ enum Commands {
 
     // ── System ──────────────────────────────────────────────────
     /// Container lifecycle (build/stop/clean/destroy)
-    #[command()]
+
     Docker {
         #[command(subcommand)]
         action: DockerAction,
@@ -183,7 +183,7 @@ enum Commands {
         action: Option<ConfigAction>,
     },
     /// Chrome Relay (CDP)
-    #[command()]
+
     Relay {
         #[arg(default_value = "start")]
         action: String,
@@ -201,7 +201,7 @@ enum Commands {
         action: TmuxAction,
     },
     /// Full documentation
-    #[command()]
+
     Man,
     /// List inbox files
     #[command(alias = "ib", )]
