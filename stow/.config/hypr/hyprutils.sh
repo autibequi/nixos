@@ -130,6 +130,50 @@ tesseract_region() {
     fi
 }
 
+move_special_workspace_to_monitor() {
+    # Move the currently visible special workspace to the next monitor
+    local current_monitor next_monitor active_special
+    current_monitor=$(_focused_monitor)
+    active_special=$(hyprctl monitors -j | jaq -r ".[] | select(.name == \"$current_monitor\") | .specialWorkspace.name")
+
+    if [ -z "$active_special" ] || [ "$active_special" = "null" ]; then
+        notify-send "Hyprland" "No special workspace visible on $current_monitor" -u low
+        return
+    fi
+
+    # Get next monitor
+    next_monitor=$(hyprctl monitors -j | jaq -r ".[] | select(.focused == false) | .name" | head -1)
+    if [ -z "$next_monitor" ]; then
+        return
+    fi
+
+    # Hide special workspace on current monitor, show on next
+    local ws_name="${active_special#special:}"
+    hyprctl dispatch togglespecialworkspace "$ws_name"
+    hyprctl dispatch focusmonitor "$next_monitor"
+    hyprctl dispatch togglespecialworkspace "$ws_name"
+}
+
+move_normal_workspace_to_monitor() {
+    # Switch to the workspace of the next monitor that's not currently focused
+    local current_monitor next_monitor current_ws next_ws
+    current_monitor=$(_focused_monitor)
+    current_ws=$(hyprctl monitors -j | jaq -r ".[] | select(.name == \"$current_monitor\") | .activeWorkspace.id")
+
+    # Get next monitor
+    next_monitor=$(hyprctl monitors -j | jaq -r ".[] | select(.focused == false) | .name" | head -1)
+    if [ -z "$next_monitor" ]; then
+        return
+    fi
+
+    # Get next monitor's workspace
+    next_ws=$(hyprctl monitors -j | jaq -r ".[] | select(.name == \"$next_monitor\") | .activeWorkspace.id")
+
+    # Switch to next monitor + its workspace
+    hyprctl dispatch focusmonitor "$next_monitor"
+    hyprctl dispatch workspace "$next_ws"
+}
+
 hypr_reload() {
     swaync-client -rs -R
     waybar_refresh
