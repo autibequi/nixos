@@ -30,7 +30,7 @@
 
     # ── Services ───────────────────────────────────────
     ./modules/services/ai.nix
-    ./modules/services/containers.nix
+    # ./modules/services/containers.nix
     ./modules/services/lmstudio.nix
     ./modules/services/netdata.nix
     ./modules/services/steam.nix
@@ -45,7 +45,7 @@
     # ./modules/experiments/kde.nix
     # ./modules/experiments/openclaw.nix
     # ./modules/experiments/docker.nix       # use containers.nix
-    # ./modules/experiments/podman.nix       # use containers.nix
+    ./modules/experiments/podman.nix       # use containers.nix
     # ./modules/experiments/gnome/core.nix
 
   ];
