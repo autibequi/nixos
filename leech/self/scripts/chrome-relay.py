@@ -223,27 +223,22 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       --live: #22c55e;
     }
     * { box-sizing: border-box; }
-    body {
+    html, body {
+      width: 100%; height: 100%; margin: 0; overflow: hidden;
       font-family: 'DM Sans', system-ui, sans-serif;
-      background: var(--bg); color: var(--text);
-      margin: 0; min-height: 100vh; line-height: 1.6;
+      background: var(--bg); color: var(--text); line-height: 1.6;
     }
-    .page { max-width: 52rem; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
-    .brand {
-      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em;
-      text-transform: uppercase; color: var(--text-muted); margin-bottom: 1.5rem;
-      display: flex; align-items: center; gap: 0.5rem;
-    }
-    .brand span { color: var(--accent); }
     .dot {
+      position: fixed; top: 10px; right: 12px; z-index: 99;
       width: 7px; height: 7px; border-radius: 50%;
       background: var(--text-muted); display: inline-block;
     }
     .dot.live { background: var(--live); box-shadow: 0 0 6px var(--live); }
     #content {
-      min-height: 12rem; background: var(--surface);
-      border: 1px solid var(--border); border-radius: 12px;
-      padding: 1.75rem 2rem; box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+      width: 100vw; height: 100vh;
+      display: flex; flex-direction: column;
+      overflow-y: auto;
+      padding: 2rem 3rem;
     }
     /* Markdown styles */
     #content h1 { font-size: 1.75rem; font-weight: 600; margin: 0 0 0.75rem; }
@@ -254,14 +249,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     #content li { margin: 0.25rem 0; }
     #content pre {
       font-family: 'JetBrains Mono', monospace; font-size: 0.875rem;
-      background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+      background: var(--surface); border-radius: 8px;
       padding: 1rem 1.25rem; overflow-x: auto; margin: 0.75rem 0;
     }
     #content code {
       font-family: 'JetBrains Mono', monospace; font-size: 0.875em;
-      background: var(--bg); color: var(--accent); padding: 0.2em 0.45em; border-radius: 4px;
+      color: var(--accent); padding: 0.2em 0.45em; border-radius: 4px;
     }
-    #content pre code { background: none; color: var(--text); padding: 0; }
+    #content pre code { color: var(--text); padding: 0; }
     #content blockquote {
       margin: 0.75rem 0; padding-left: 1rem;
       border-left: 3px solid var(--accent-dim); color: var(--text-muted);
@@ -271,39 +266,41 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     #content hr { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
     #content table { border-collapse: collapse; width: 100%; margin: 0.75rem 0; }
     #content th, #content td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; text-align: left; }
-    #content th { background: var(--bg); font-weight: 600; }
+    #content th { background: var(--surface); font-weight: 600; }
     .mermaid {
       position: relative; overflow: hidden; cursor: grab;
-      margin: 1.25rem 0; padding: 0;
-      background: var(--bg); border-radius: 8px; border: 1px solid var(--border);
+      flex: 1; min-height: 0;
       user-select: none; -webkit-user-select: none; touch-action: none;
     }
+    /* fullscreen: single mermaid fills entire viewport */
+    #content:has(> .mermaid:only-child),
+    #content:has(> div > .mermaid:only-child) {
+      padding: 0;
+    }
+    .mermaid:only-child {
+      width: 100vw; height: 100vh;
+    }
     .mermaid.panning { cursor: grabbing; }
-    .mermaid svg { display: block; transform-origin: 0 0; will-change: transform; margin: 1rem; }
+    .mermaid svg { display: block; transform-origin: 0 0; will-change: transform; }
     .z-hint {
-      position: absolute; bottom: 6px; right: 10px; pointer-events: none;
+      position: absolute; bottom: 12px; right: 16px; pointer-events: none;
       font: 500 0.6rem/1 'JetBrains Mono', monospace; color: var(--text-muted);
       opacity: 0; transition: opacity 0.2s;
     }
     .mermaid:hover .z-hint { opacity: 1; }
     .z-reset {
-      position: absolute; top: 7px; right: 8px; z-index: 5;
+      position: absolute; top: 12px; right: 16px; z-index: 5;
       font: 500 0.65rem 'JetBrains Mono', monospace; color: var(--text-muted);
-      background: var(--surface); border: 1px solid var(--border);
-      padding: 2px 8px; border-radius: 4px; cursor: pointer;
-      opacity: 0; transition: opacity 0.2s;
+      background: rgba(15,15,18,0.7); border: 1px solid var(--border);
+      padding: 3px 10px; border-radius: 4px; cursor: pointer;
+      opacity: 0; transition: opacity 0.2s; backdrop-filter: blur(4px);
     }
     .mermaid:hover .z-reset { opacity: 1; }
   </style>
 </head>
 <body>
-  <div class="page">
-    <div class="brand">
-      <span>Leech</span> Relay
-      <div class="dot" id="dot"></div>
-    </div>
-    <div id="content">Aguardando...</div>
-  </div>
+  <div class="dot" id="dot"></div>
+  <div id="content">Aguardando...</div>
   <script>
     MERMAID_INIT
 
@@ -339,6 +336,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
           el.querySelectorAll('.mermaid').forEach(makeZoomable);
         }, 80);
       }
+      /* auto fullscreen when there is only a mermaid diagram */
+      if (!document.fullscreenElement) {
+        var merms = el.querySelectorAll('.mermaid');
+        var nonEmpty = Array.from(el.children).filter(function(c){ return c.textContent.trim() && !c.classList.contains('mermaid'); });
+        if (merms.length === 1 && nonEmpty.length === 0) {
+          document.documentElement.requestFullscreen().catch(function(){});
+        }
+      }
     }
 
     function makeZoomable(box) {
@@ -350,7 +355,18 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       /* fix SVG sizing so it doesn't collapse */
       var nat = svg.getBoundingClientRect();
       if (nat.height < 20) { setTimeout(function(){ box.dataset.z=''; makeZoomable(box); }, 150); return; }
-      box.style.minHeight = Math.max(nat.height + 32, 120) + 'px';
+      svg.style.margin = '0';
+      /* fit diagram in viewport with padding */
+      var bw = box.offsetWidth || window.innerWidth;
+      var bh = box.offsetHeight || window.innerHeight;
+      var pad = 40;
+      var scaleX = (bw - pad * 2) / nat.width;
+      var scaleY = (bh - pad * 2) / nat.height;
+      s = Math.min(scaleX, scaleY, 1);
+      tx = (bw - nat.width * s) / 2;
+      ty = (bh - nat.height * s) / 2;
+      initS = s; initTx = tx; initTy = ty;
+      put();
 
       /* hint + reset */
       var hint = document.createElement('div');
@@ -359,10 +375,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       btn.className = 'z-reset'; btn.textContent = '\u27f3 reset';
       box.appendChild(hint); box.appendChild(btn);
 
-      var s=1, tx=0, ty=0;
+      var s=1, tx=0, ty=0, initS, initTx, initTy;
       function put() { svg.style.transform = 'translate('+tx+'px,'+ty+'px) scale('+s+')'; }
 
-      btn.addEventListener('click', function(e) { e.stopPropagation(); s=1; tx=0; ty=0; put(); });
+      btn.addEventListener('click', function(e) { e.stopPropagation(); s=initS; tx=initTx; ty=initTy; put(); });
 
       /* zoom on wheel */
       box.addEventListener('wheel', function(e) {

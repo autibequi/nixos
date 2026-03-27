@@ -72,3 +72,41 @@ python3 /workspace/self/scripts/chrome-relay.py nav "http://127.0.0.1:8765/glado
 | `templates/eyes.html` | Rosto completo, 6 emocoes, SEQUENCE configuravel |
 | `templates/eye/` | Versao modular (index.html + engine.js) |
 | `templates/glados.html` | Avatar GLaDOS |
+
+---
+
+## Canvas Colaborativo
+
+Ferramenta de diagramacao interativa — desenhada do zero, sem dependencias.
+Fonte: `host/leech/tools/chrome/canvas/index.html`
+
+```bash
+# Servir e abrir
+cp /workspace/host/leech/tools/chrome/canvas/index.html /tmp/chrome-relay/canvas.html
+python3 /workspace/self/scripts/chrome-relay.py nav "http://leech:8765/canvas.html"
+python3 /workspace/self/scripts/chrome-relay.py inject "document.documentElement.requestFullscreen()"
+```
+
+### Ferramentas do usuario
+- **pen** — desenho livre
+- **node** — nos com label, arrastaveis
+- **edge** — arestas com seta e label entre nos
+- **text** — texto livre posicionavel
+- **erase** — apaga elementos
+
+### API para injecao via relay
+```js
+CANVAS.addNode(x, y, 'Label', '#cor')    // adiciona no
+CANVAS.addEdge('FromLabel', 'ToLabel', 'label aresta')  // conecta nos por label
+CANVAS.addText(x, y, 'texto', '#cor')    // adiciona texto
+CANVAS.layout('circle')                  // auto-layout: 'circle' | 'grid'
+CANVAS.state()                           // retorna JSON com nos, arestas, textos
+CANVAS.clear()                           // limpa tudo
+```
+
+### Fluxo colaborativo
+1. Abrir canvas no Chrome
+2. Usuario interage (move nos, adiciona, desenha)
+3. Injetar `CANVAS.state()` para ver estado atual
+4. Injetar modificacoes em cima do que o usuario fez
+5. Iterar

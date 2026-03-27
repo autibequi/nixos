@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>GLaDOS Canvas</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0f;
+    color: #c8f0d0;
+    font-family: 'Courier New', monospace;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+  }
+  #canvas {
+    position: absolute;
+    top: 0; left: 0;
+    cursor: crosshair;
+  }
+  #toolbar {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    background: rgba(10,10,20,0.9);
+    border: 1px solid #2a4a3a;
+    border-radius: 8px;
+    padding: 8px 12px;
+    z-index: 100;
+  }
+  .tool-btn {
+    background: transparent;
+    border: 1px solid #2a4a3a;
+    color: #c8f0d0;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    transition: all 0.15s;
+  }
+  .tool-btn:hover { background: #1a2a1a; border-color: #4af090; }
+  .tool-btn.active { background: #0f3020; border-color: #4af090; color: #4af090; }
+  #color-picker {
+    width: 32px; height: 32px;
+    border: 1px solid #2a4a3a;
+    border-radius: 4px;
+    cursor: pointer;
+    background: transparent;
+    padding: 2px;
+  }
+  #size-slider {
+    width: 80px;
+    accent-color: #4af090;
+  }
+  #status {
+    position: fixed;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: #4a7a5a;
+    letter-spacing: 0.1em;
+  }
+  #node-label {
+    position: fixed;
+    display: none;
+    background: rgba(10,10,20,0.95);
+    border: 1px solid #4af090;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: #c8f0d0;
+    z-index: 200;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<div id="toolbar">
+  <button class="tool-btn active" id="btn-pen" onclick="setTool('pen')">✏ pen</button>
+  <button class="tool-btn" id="btn-node" onclick="setTool('node')">◉ node</button>
+  <button class="tool-btn" id="btn-edge" onclick="setTool('edge')">─ edge</button>
+  <button class="tool-btn" id="btn-text" onclick="setTool('text')">T text</button>
+  <button class="tool-btn" id="btn-erase" onclick="setTool('erase')">✕ erase</button>
+  <input type="color" id="color-picker" value="#4af090" title="cor">
+  <input type="range" id="size-slider" min="1" max="20" value="2" title="tamanho">
+  <button class="tool-btn" onclick="clearCanvas()">⊘ limpar</button>
+  <button class="tool-btn" onclick="exportState()">↓ export</button>
+</div>
+
+<canvas id="canvas"></canvas>
+<div id="status">— SISTEMA OPERACIONAL — aguardando input —</div>
+<div id="node-label"></div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const status = document.getElementById('status');
+
+// State
+let tool = 'pen';
+let drawing = false;
+let color = '#4af090';
+let size = 2;
+let nodes = [];
+let edges = [];
+let paths = [];
+let texts = [];
+let currentPath = [];
+let edgeStart = null;
+let selectedNode = null;
+let dragging = null;
+let dragOffset = { x: 0, y: 0 };
+
+function resize() {
+  const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  render();
+}
+window.addEventListener('resize', resize);
+resize();
+
+function setTool(t) {
+  tool = t;
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + t)?.classList.add('active');
+  edgeStart = null;
+  setStatus('tool: ' + t);
+}
+
+document.getElementById('color-picker').addEventListener('input', e => { color = e.target.value; });
+document.getElementById('size-slider').addEventListener('input', e => { size = +e.target.value; });
+
+function getPos(e) {
+  const r = canvas.getBoundingClientRect();
+  return { x: (e.clientX || e.touches?.[0]?.clientX) - r.left, y: (e.clientY || e.touches?.[0]?.clientY) - r.top };
+}
+
+function nodeAt(x, y, r = 18) {
+  return nodes.find(n => Math.hypot(n.x - x, n.y - y) < r);
+}
+
+canvas.addEventListener('mousedown', e => {
+  const p = getPos(e);
+  if (tool === 'pen') {
+    drawing = true;
+    currentPath = [{ x: p.x, y: p.y, color, size }];
+  } else if (tool === 'node') {
+    const existing = nodeAt(p.x, p.y);
+    if (existing) {
+      dragging = existing;
+      dragOffset = { x: p.x - existing.x, y: p.y - existing.y };
+    } else {
+      const label = prompt('Label do nó (opcional):') || '';
+      nodes.push({ x: p.x, y: p.y, color, label, id: Date.now() });
+      render();
+    }
+  } else if (tool === 'edge') {
+    const n = nodeAt(p.x, p.y);
+    if (n) {
+      if (!edgeStart) {
+        edgeStart = n;
+        setStatus('edge: selecione o destino');
+      } else if (edgeStart !== n) {
+        edges.push({ from: edgeStart.id, to: n.id, color, label: '' });
+        edgeStart = null;
+        render();
+        setStatus('edge criada');
+      }
+    }
+  } else if (tool === 'text') {
+    const t = prompt('Texto:');
+    if (t) texts.push({ x: p.x, y: p.y, text: t, color, size: Math.max(size * 6, 14) });
+    render();
+  } else if (tool === 'erase') {
+    const n = nodeAt(p.x, p.y);
+    if (n) {
+      nodes = nodes.filter(x => x.id !== n.id);
+      edges = edges.filter(e => e.from !== n.id && e.to !== n.id);
+    } else {
+      paths = paths.filter(path => !path.some(pt => Math.hypot(pt.x - p.x, pt.y - p.y) < 12));
+      texts = texts.filter(t => Math.hypot(t.x - p.x, t.y - p.y) > 20);
+    }
+    render();
+  }
+});
+
+canvas.addEventListener('mousemove', e => {
+  const p = getPos(e);
+  if (drawing && tool === 'pen') {
+    currentPath.push({ x: p.x, y: p.y, color, size });
+    renderPath(currentPath);
+  }
+  if (dragging) {
+    dragging.x = p.x - dragOffset.x;
+    dragging.y = p.y - dragOffset.y;
+    render();
+  }
+});
+
+canvas.addEventListener('mouseup', e => {
+  if (drawing && tool === 'pen' && currentPath.length > 1) {
+    paths.push([...currentPath]);
+  }
+  drawing = false;
+  dragging = null;
+  currentPath = [];
+});
+
+function renderPath(path) {
+  if (path.length < 2) return;
+  ctx.beginPath();
+  ctx.strokeStyle = path[0].color;
+  ctx.lineWidth = path[0].size;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.moveTo(path[0].x, path[0].y);
+  for (let i = 1; i < path.length; i++) ctx.lineTo(path[i].x, path[i].y);
+  ctx.stroke();
+}
+
+function render() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // grid
+  ctx.strokeStyle = 'rgba(40,70,50,0.3)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < canvas.width; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
+  for (let y = 0; y < canvas.height; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
+
+  // paths
+  paths.forEach(p => renderPath(p));
+
+  // edges
+  edges.forEach(e => {
+    const from = nodes.find(n => n.id === e.from);
+    const to = nodes.find(n => n.id === e.to);
+    if (!from || !to) return;
+    ctx.beginPath();
+    ctx.strokeStyle = e.color || '#4af090';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([]);
+    ctx.moveTo(from.x, from.y);
+    ctx.lineTo(to.x, to.y);
+    ctx.stroke();
+    // arrowhead
+    const angle = Math.atan2(to.y - from.y, to.x - from.x);
+    const ar = 12;
+    ctx.beginPath();
+    ctx.fillStyle = e.color || '#4af090';
+    ctx.moveTo(to.x, to.y);
+    ctx.lineTo(to.x - ar * Math.cos(angle - 0.4), to.y - ar * Math.sin(angle - 0.4));
+    ctx.lineTo(to.x - ar * Math.cos(angle + 0.4), to.y - ar * Math.sin(angle + 0.4));
+    ctx.closePath();
+    ctx.fill();
+    // edge label
+    if (e.label) {
+      ctx.fillStyle = '#c8f0d0';
+      ctx.font = '11px Courier New';
+      ctx.fillText(e.label, (from.x + to.x) / 2 + 4, (from.y + to.y) / 2 - 4);
+    }
+  });
+
+  // edge preview
+  if (edgeStart) {
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(74,240,144,0.4)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([5, 5]);
+    ctx.arc(edgeStart.x, edgeStart.y, 20, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // nodes
+  nodes.forEach(n => {
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, 14, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(10,10,20,0.9)';
+    ctx.fill();
+    ctx.strokeStyle = n.color || '#4af090';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // inner dot
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = n.color || '#4af090';
+    ctx.fill();
+    if (n.label) {
+      ctx.fillStyle = '#c8f0d0';
+      ctx.font = '12px Courier New';
+      ctx.textAlign = 'center';
+      ctx.fillText(n.label, n.x, n.y + 26);
+      ctx.textAlign = 'left';
+    }
+  });
+
+  // texts
+  texts.forEach(t => {
+    ctx.fillStyle = t.color || '#c8f0d0';
+    ctx.font = `${t.size}px Courier New`;
+    ctx.fillText(t.text, t.x, t.y);
+  });
+}
+
+function clearCanvas() {
+  if (confirm('Limpar tudo?')) { nodes = []; edges = []; paths = []; texts = []; edgeStart = null; render(); }
+}
+
+function exportState() {
+  const state = { nodes, edges, paths: paths.length, texts };
+  window._CANVAS_STATE = state;
+  console.log('CANVAS_STATE:', JSON.stringify(state));
+  setStatus('estado exportado — ' + nodes.length + ' nós, ' + edges.length + ' arestas');
+  return state;
+}
+
+function setStatus(msg) {
+  status.textContent = '— ' + msg + ' —';
+}
+
+// Exposed API for relay injection
+window.CANVAS = {
+  addNode: (x, y, label, c) => { nodes.push({ x, y, color: c || '#4af090', label: label || '', id: Date.now() + Math.random() }); render(); },
+  addEdge: (fromLabel, toLabel, label) => {
+    const f = nodes.find(n => n.label === fromLabel);
+    const t = nodes.find(n => n.label === toLabel);
+    if (f && t) { edges.push({ from: f.id, to: t.id, color: '#4af090', label: label || '' }); render(); }
+  },
+  addText: (x, y, text, c) => { texts.push({ x, y, text, color: c || '#c8f0d0', size: 14 }); render(); },
+  clear: () => { nodes = []; edges = []; paths = []; texts = []; render(); },
+  state: () => exportState(),
+  layout: (type) => autoLayout(type),
+};
+
+function autoLayout(type = 'circle') {
+  if (nodes.length === 0) return;
+  const cx = canvas.width / 2, cy = canvas.height / 2;
+  if (type === 'circle') {
+    const r = Math.min(canvas.width, canvas.height) * 0.35;
+    nodes.forEach((n, i) => {
+      const angle = (i / nodes.length) * Math.PI * 2 - Math.PI / 2;
+      n.x = cx + r * Math.cos(angle);
+      n.y = cy + r * Math.sin(angle);
+    });
+  } else if (type === 'grid') {
+    const cols = Math.ceil(Math.sqrt(nodes.length));
+    const gap = 100;
+    nodes.forEach((n, i) => {
+      n.x = cx - (cols * gap) / 2 + (i % cols) * gap + gap / 2;
+      n.y = cy - (Math.ceil(nodes.length / cols) * gap) / 2 + Math.floor(i / cols) * gap + gap / 2;
+    });
+  }
+  render();
+}
+
+render();
+setStatus('canvas pronto — ferramentas: pen | node | edge | text | erase');
+</script>
+</body>
+</html>

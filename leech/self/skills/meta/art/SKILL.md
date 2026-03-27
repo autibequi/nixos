@@ -19,7 +19,7 @@ Skill de arte pura: terminal, animacoes, voz. Nao e para dados nem diagramas.
 |---|---|---|
 | `design-system.md` | Palette Catppuccin, tokens, box drawing | Sempre — antes de qualquer output |
 | `ascii.md` | 19 templates de representacao terminal | Default. Sem dependencia. |
-| `chrome.md` | Voz + templates artisticos (eye, glados) | Arte no browser. Precisa relay. |
+| `chrome.md` | Voz + templates artisticos (eye, glados) + **canvas colaborativo** | Arte no browser. Precisa relay. |
 | `meta/obsidian` | Relatorios + Dataview | Artefatos persistentes no vault. |
 
 ## Regra de decisao
@@ -35,6 +35,9 @@ Precisa de visualizacao?
     │
     ├── Arte no Chrome? (eye, glados, animacao, voz)
     │     └─ chrome.md
+    │
+    ├── Diagrama colaborativo interativo? (user + eu iteramos juntos)
+    │     └─ chrome.md → Canvas Colaborativo
     │
     └── Precisa persistir no vault?
           └─ meta/obsidian
@@ -75,9 +78,12 @@ Se voce e um agente ou skill que precisa desenhar algo:
 ### Chrome (relay) — inclui controle completo do browser
 - Verificacao de disponibilidade + regra de decisao
 - Comandos: nav, show, tabs, speak, present
-- Diagrama Mermaid (flowchart com tema Catppuccin) — **zoom + drag built-in** (scroll=zoom, click+drag=pan, ⟳ reset no hover)
+- Diagrama Mermaid (flowchart com tema Catppuccin) — **fullscreen por default** (sem containers), zoom+drag, auto-fullscreen do browser, diagrama centralizado
 - Arvore de diff interativa (collapse, glow, breadcrumb)
 - **Code diff side-by-side** — diff2html-cli dark + JetBrains Mono → ver `code/analysis/diff/codediff.md`
+- **Canvas colaborativo** — diagramacao interativa user+eu em tempo real (`host/leech/tools/chrome/canvas/index.html`)
+  - API: `CANVAS.addNode/addEdge/addText/layout/state/clear`
+  - Fluxo: abrir → user manipula → `CANVAS.state()` → eu itero em cima
 - HTML livre com CDN (diff2html, Chart.js, Mermaid, D3, DataTables...)
 - Voz (espeak-ng via relay)
 

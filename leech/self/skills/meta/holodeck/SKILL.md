@@ -57,39 +57,25 @@ Tudo que pode ser renderizado no holodeck:
 
 ## Flowchart Mermaid — uso rapido
 
-O relay renderiza qualquer `.md` com blocos ` ```mermaid ``` ` e ja injeta zoom/drag automaticamente.
+O relay renderiza qualquer `.md` com blocos ` ```mermaid ``` ` fullscreen, sem containers aninhados.
 
 ```bash
 python3 /workspace/self/scripts/chrome-relay.py show <arquivo.md>
 ```
 
+**Layout default (2026-03-27):**
+- Fullscreen automatico — `100vw × 100vh`, sem `.page` container, sem bordas
+- Diagrama centralizado no viewport ao carregar
+- Auto-fullscreen do browser quando o `.md` tem so um diagrama (sem texto ao redor)
+- Fundo liso `#0f0f12` direto — sem caixas dentro de caixas
+
 Controles na tela:
 - **Scroll** — zoom centrado no cursor
-- **Click + drag** — arrastar o diagrama
-- **⟳ reset** — aparece no hover (canto sup-dir)
+- **Click + drag** — pan
+- **⟳ reset** — aparece no hover (canto sup-dir), restaura posicao central
 - **Pinch** — zoom em touch
 
-Ver template completo em `templates/flowchart.md`.
-
----
-
-## mermaid.html — Template fullscreen
-
-Para visualizacao dedicada (100% da tela, sem header, fit por largura):
-
-```bash
-# 1. Copiar o template
-cp /workspace/self/skills/meta/holodeck/templates/mermaid.html /tmp/chrome-relay/<nome>.html
-
-# 2. Substituir o placeholder pelo conteudo mermaid
-#    Editar /tmp/chrome-relay/<nome>.html:
-#    Trocar <!-- MERMAID_DIAGRAM_HERE --> pelo diagrama (sem as crases do bloco)
-
-# 3. Abrir no Chrome
-python3 /workspace/self/scripts/chrome-relay.py nav "http://leech:8765/<nome>.html"
-```
-
-Controles: `scroll` = zoom centrado no cursor · `drag` = pan · sem reset button (usar scroll pra voltar)
+> `mermaid.html` em `templates/` esta obsoleto para diagramas simples — o `show` ja e fullscreen por padrao.
 
 ---
 
