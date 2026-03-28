@@ -81,3 +81,4 @@ workbench/*
 .cursor/session-boot.md
 
 .local/bin
+*/self/shadow/memory/ 
