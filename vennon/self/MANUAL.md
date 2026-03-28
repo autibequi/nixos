@@ -1,4 +1,4 @@
-# Manual do Sistema Leech — self/
+# Manual do Sistema Vennon — self/
 
 > Mapa completo da estrutura, responsabilidade de cada arquivo e como tudo se conecta.
 
@@ -6,7 +6,7 @@
 
 ## Visao Geral
 
-`/workspace/self/` e o **engine** do Leech — contem tudo que define como o Claude opera:
+`/workspace/self/` e o **engine do Vennon — contem tudo que define como o Claude opera:
 skills, hooks, agentes, scripts, personas e configuracao. No host vive em `~/nixos/self/`.
 
 ---

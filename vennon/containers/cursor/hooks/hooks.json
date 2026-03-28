@@ -3,17 +3,17 @@
   "hooks": {
     "sessionStart": [
       {
-        "command": "/home/claude/.cursor/leech-hooks/cursor-hook.sh sessionStart"
+        "command": "/home/claude/.cursor/vennon-hooks/cursor-hook.sh sessionStart"
       }
     ],
     "preToolUse": [
       {
-        "command": "/home/claude/.cursor/leech-hooks/cursor-hook.sh preToolUse"
+        "command": "/home/claude/.cursor/vennon-hooks/cursor-hook.sh preToolUse"
       }
     ],
     "postToolUse": [
       {
-        "command": "/home/claude/.cursor/leech-hooks/cursor-hook.sh postToolUse"
+        "command": "/home/claude/.cursor/vennon-hooks/cursor-hook.sh postToolUse"
       }
     ]
   }

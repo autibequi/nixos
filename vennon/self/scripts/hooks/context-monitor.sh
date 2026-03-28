@@ -4,9 +4,9 @@
 
 export ENGINE="${ENGINE:-CLAUDE}"
 
-_LEECH_FILE="${HOME:-/home/claude}/.leech"
-[ -f "$_LEECH_FILE" ] || _LEECH_FILE="/.leech"
-[ -f "$_LEECH_FILE" ] && { set -a; source "$_LEECH_FILE" 2>/dev/null || true; set +a; }
+_VENNON_CONFIG="${HOME:-/home/claude}/.leech"
+[ -f "$_VENNON_CONFIG" ] || _VENNON_CONFIG="/.leech"
+[ -f "$_VENNON_CONFIG" ] && { set -a; source "$_VENNON_CONFIG" 2>/dev/null || true; set +a; }
 export ENGINE="${ENGINE:-CLAUDE}"
 
 INPUT=$(cat 2>/dev/null || true)
@@ -21,7 +21,7 @@ if ! [[ "$TOKENS_USED" =~ ^[0-9]+$ ]] || ! [[ "$TOKENS_MAX" =~ ^[0-9]+$ ]] || [ 
 fi
 
 REMAINING_PCT=$(( (TOKENS_MAX - TOKENS_USED) * 100 / TOKENS_MAX ))
-DEBOUNCE="/tmp/.leech-context-warn-${ENGINE:-CLAUDE}"
+DEBOUNCE="/tmp/.vennon-context-warn-${ENGINE:-CLAUDE}"
 WARN=""
 
 if [ "$REMAINING_PCT" -le 25 ]; then

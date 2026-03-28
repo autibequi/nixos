@@ -55,6 +55,15 @@ if [ -f /home/claude/.leech ]; then
     set +a
 fi
 
+# Stow compat: symlinks relativos em ~/.config/ referenciam ../../<projeto>/stow/...
+# No container, HOME=/home/claude mas host home esta em /workspace/home
+# Cria symlinks em /home/claude/ para cada dir top-level do host home
+# (apenas se o path nao existe ainda — nao sobrescreve bind mounts)
+for item in /workspace/home/*/; do
+    base="$(basename "$item")"
+    [ -e "/home/claude/$base" ] || ln -sfn "$item" "/home/claude/$base" 2>/dev/null || true
+done
+
 # Session-start hook
 _session_hook="/home/claude/.claude/hooks/session-start.sh"
 [ -f "$_session_hook" ] || _session_hook="/workspace/self/hooks/claude-code/session-start.sh"

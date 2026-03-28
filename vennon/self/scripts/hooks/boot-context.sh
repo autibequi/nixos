@@ -42,7 +42,7 @@ else
 fi
 
 # ── Clear lazy-context locks da sessão anterior ──────────────────
-rm -f /tmp/leech-ctx-loaded /tmp/leech-ctx-loaded.pending
+rm -f /tmp/vennon-ctx-loaded /tmp/vennon-ctx-loaded.pending
 
 # ── Cursor: espelha todo o stdout deste hook para ficheiro na raiz do projeto ──
 # Preferimos $WS/.cursor/; se for RO (ex.: /workspace/host), fallback para /workspace/home
@@ -65,9 +65,9 @@ _OV_AUTOCOMMIT="${AUTOCOMMIT:-}"
 _OV_AUTOJARVIS="${AUTOJARVIS:-}"
 
 # 2. Carrega ~/.leech (fonte central — usuário e agentes escrevem aqui)
-_LEECH_FILE="${HOME:-/home/claude}/.leech"
-[ -f "$_LEECH_FILE" ] || _LEECH_FILE="/.leech"
-[ -f "$_LEECH_FILE" ] && { set -a; source "$_LEECH_FILE" 2>/dev/null || true; set +a; }
+_VENNON_CONFIG="${HOME:-/home/claude}/.leech"
+[ -f "$_VENNON_CONFIG" ] || _VENNON_CONFIG="/.leech"
+[ -f "$_VENNON_CONFIG" ] && { set -a; source "$_VENNON_CONFIG" 2>/dev/null || true; set +a; }
 # ~/.leech pode definir ENGINE=OPENCODE; sessão Cursor já vem com ENGINE=CURSOR do wrapper
 export ENGINE="${ENGINE:-CLAUDE}"
 
@@ -76,9 +76,9 @@ PERSONALITY="${PERSONALITY:-ON}"
 AUTOCOMMIT="${AUTOCOMMIT:-OFF}"
 AUTOJARVIS="${AUTOJARVIS:-OFF}"
 BETA="${BETA:-OFF}"
-LEECH_DEBUG="${LEECH_DEBUG:-OFF}"
+VENNON_DEBUG="${VENNON_DEBUG:-OFF}"
 HEADLESS="${HEADLESS:-0}"
-ANALYSIS_MODE="${LEECH_ANALYSIS_MODE:-0}"
+ANALYSIS_MODE="${VENNON_ANALYSIS_MODE:-0}"
 MOBILE="${MOBILE:-0}"
 [ -z "${IN_DOCKER:-}" ] && IN_DOCKER="0"
 { [ "$CLAUDE_ENV" = "container" ] || [ -f "/.dockerenv" ]; } && IN_DOCKER="1"
@@ -110,7 +110,7 @@ echo "autojarvis=$AUTOJARVIS     # ON=JARVIS no dashboard"
 echo "beta=$BETA                 # ON=beta overrides ativos | OFF=normal"
 echo "in_docker=$IN_DOCKER       # 1=container | 0=host"
 echo "host_attached=$HOST_ATTACHED   # 1=NixOS host editável em /workspace/host | 0=sessão normal"
-echo "leech_debug=$LEECH_DEBUG     # ON=contexto completo (DIRETRIZES+persona+avatar) | OFF=lite mode"
+echo "leech_debug=$VENNON_DEBUG     # ON=contexto completo (DIRETRIZES+persona+avatar) | OFF=lite mode"
 echo "headless=$HEADLESS         # 1=worker sem supervisão | 0=interativo"
 echo "analysis_mode=$ANALYSIS_MODE  # 1=modo experimento isolado (proativo, self-modify, debug livre)"
 echo "mobile=$MOBILE             # 1=saída compacta para celular"
@@ -118,7 +118,7 @@ echo "mobile=$MOBILE             # 1=saída compacta para celular"
 [ -n "$TASK_NAME" ] && echo "task_name=$TASK_NAME"
 echo "agent_mode=$AGENT_MODE      # 1=running as named agent or processing a task"
 echo "workspace=$WS"
-[ -n "${LEECH_ROOT:-}" ] && echo "host_self=$LEECH_ROOT"
+[ -n "${VENNON_ROOT:-}" ] && echo "host_self=$VENNON_ROOT"
 echo "engine=$ENGINE   # CLAUDE | CURSOR | OPENCODE — runtime do Leech (hooks, CLI, IDE)"
 echo ""
 if [ "$AUTOCOMMIT" = "OFF" ]; then
@@ -139,16 +139,16 @@ echo "---/BOOT---"
 # ────────────────────────────────────────────────────────────────
 # 2. LEECH CONFIG (~/.leech) — canal de comunicação rápida
 # ────────────────────────────────────────────────────────────────
-_LEECH_DISPLAY="${HOME:-/home/claude}/.leech"
-[ -f "$_LEECH_DISPLAY" ] || _LEECH_DISPLAY="/.leech"
-if [ -f "$_LEECH_DISPLAY" ]; then
+_VENNON_DISPLAY="${HOME:-/home/claude}/.leech"
+[ -f "$_VENNON_DISPLAY" ] || _VENNON_DISPLAY="/.leech"
+if [ -f "$_VENNON_DISPLAY" ]; then
   # Mostra apenas chaves não-sensíveis com valor definido
-  _leech_content=$(grep -v '^#' "$_LEECH_DISPLAY" | grep -v '^$' | grep '=.' \
+  _vennon_content=$(grep -v '^#' "$_VENNON_DISPLAY" | grep -v '^$' | grep '=.' \
     | grep -vE '^(ANTHROPIC_API_KEY|GH_TOKEN|GRAFANA_TOKEN|CURSOR_API_KEY|CLAUDE_SESSION|DANGER|GH_TOKEN)=' \
     2>/dev/null || true)
-  if [ -n "$_leech_content" ]; then
+  if [ -n "$_vennon_content" ]; then
     echo "---LEECH---"
-    echo "$_leech_content"
+    echo "$_vennon_content"
     echo "---/LEECH---"
   fi
 fi
@@ -164,8 +164,8 @@ fi
 # ────────────────────────────────────────────────────────────────
 # 3. DIRETRIZES operacionais — apenas leech_debug=ON
 # ────────────────────────────────────────────────────────────────
-if [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ] && [ "$LEECH_DEBUG" = "ON" ]; then
-  DIRETRIZES="$WS/leech/system/DIRETRIZES.md"
+if [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ] && [ "$VENNON_DEBUG" = "ON" ]; then
+  DIRETRIZES="$WS/vennon/self/DIRETRIZES.md"
   [ -f "$DIRETRIZES" ] || DIRETRIZES="/workspace/self/system/DIRETRIZES.md"
   if [ -f "$DIRETRIZES" ]; then
     echo "---DIRETRIZES---"
@@ -246,7 +246,7 @@ fi
 # ────────────────────────────────────────────────────────────────
 # 8. MEMORY — restore from repo if missing (versioned backup)
 # ────────────────────────────────────────────────────────────────
-REPO_MEMORY="$WS/leech/system/memory"
+REPO_MEMORY="$WS/vennon/self/shadow/memory"
 LIVE_MEMORY="$HOME/.claude/projects/-workspace-mnt/memory"
 if [ -d "$REPO_MEMORY" ] && [ ! -f "$LIVE_MEMORY/MEMORY.md" ]; then
   mkdir -p "$LIVE_MEMORY"
@@ -264,7 +264,7 @@ if [ "$HOST_ATTACHED" = "1" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1
 fi
 
 # ────────────────────────────────────────────────────────────────
-# LEECH_DEV removido — conteúdo já está em CLAUDE.md §8 (Leech CLI manutenção).
+# LEECH_DEV removido — conteúdo já está em CLAUDE.md §8 (Vennon CLI manutenção).
 # Carregado sob demanda se necessário.
 
 

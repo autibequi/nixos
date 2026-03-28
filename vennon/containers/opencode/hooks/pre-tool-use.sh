@@ -4,9 +4,9 @@
 
 export ENGINE="${ENGINE:-CLAUDE}"
 
-_LEECH_FILE="${HOME:-/home/claude}/.leech"
-[ -f "$_LEECH_FILE" ] || _LEECH_FILE="/.leech"
-[ -f "$_LEECH_FILE" ] && { set -a; source "$_LEECH_FILE" 2>/dev/null || true; set +a; }
+_CONFIG_FILE="${HOME:-/home/claude}/.leech"
+[ -f "$_CONFIG_FILE" ] || _CONFIG_FILE="/.leech"
+[ -f "$_CONFIG_FILE" ] && { set -a; source "$_CONFIG_FILE" 2>/dev/null || true; set +a; }
 export ENGINE="${ENGINE:-CLAUDE}"
 
 case "$ENGINE" in

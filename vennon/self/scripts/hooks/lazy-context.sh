@@ -7,18 +7,18 @@
 #   - Segunda mensagem em diante: sempre injeta se ainda não injetou
 #   - Headless/Agent/leech_debug: injeta imediatamente, sem lazy
 #
-# stdout → system-reminder (Claude vê) | /tmp/leech-ctx-loaded = lock de sessão
+# stdout → system-reminder (Claude vê) | /tmp/vennon-ctx-loaded = lock de sessão
 
 # ── Load .leech ────────────────────────────────────────────────────────────────
-_LEECH_FILE="${HOME:-/home/claude}/.leech"; [ -f "$_LEECH_FILE" ] || _LEECH_FILE="/.leech"
-[ -f "$_LEECH_FILE" ] && { set -a; source "$_LEECH_FILE" 2>/dev/null || true; set +a; }
+_VENNON_CONFIG="${HOME:-/home/claude}/.leech"; [ -f "$_VENNON_CONFIG" ] || _VENNON_CONFIG="/.leech"
+[ -f "$_VENNON_CONFIG" ] && { set -a; source "$_VENNON_CONFIG" 2>/dev/null || true; set +a; }
 
 HEADLESS="${HEADLESS:-0}"
-LEECH_DEBUG="${LEECH_DEBUG:-OFF}"
+VENNON_DEBUG="${VENNON_DEBUG:-OFF}"
 AGENT_MODE="0"
 { [ -n "${AGENT_NAME:-}" ] || [ -n "${TASK_NAME:-}" ]; } && AGENT_MODE="1"
 
-CTX_LOCK="/tmp/leech-ctx-loaded"
+CTX_LOCK="/tmp/vennon-ctx-loaded"
 PENDING="${CTX_LOCK}.pending"
 
 # Já injetou nessa sessão → skip

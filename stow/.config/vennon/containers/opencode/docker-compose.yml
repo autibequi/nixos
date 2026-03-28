@@ -36,9 +36,6 @@ services:
     - /home/pedrinho/nixos/leech/self/scripts:/home/claude/.claude/scripts
     - /home/pedrinho/.claude.json:/home/claude/.claude.json
     - /home/pedrinho/.claude/projects:/home/claude/.claude/projects
-    - /home/pedrinho/nixos/leech/self/skills:/home/claude/.agents/skills
-    - /home/pedrinho/nixos/leech/self/commands:/home/claude/.agents/commands
-    - /home/pedrinho/nixos/leech/self/ego:/home/claude/.agents/agents
     - /home/pedrinho/.leech:/home/claude/.leech:rw
     - /proc/meminfo:/host/proc/meminfo:ro
     - /proc/loadavg:/host/proc/loadavg:ro
@@ -49,11 +46,10 @@ services:
     - /var/log:/workspace/logs/host/var-log:ro
     - /home/pedrinho/nixos:/workspace/host:rw
     - /home/pedrinho/.config/opencode:/home/claude/.config/opencode
-    - /home/pedrinho/nixos/leech/self/skills:/home/claude/.config/opencode/skills
-    - /home/pedrinho/nixos/leech/self/commands:/home/claude/.config/opencode/commands
     environment:
       CLAUDE_ENV: container
       DOCKER_HOST: tcp://localhost:2375
+      ENGINE: OPENCODE
       GIT_AUTHOR_EMAIL: pedro.correa@estrategia.com
       GIT_AUTHOR_NAME: Pedrinho
       GIT_COMMITTER_EMAIL: pedro.correa@estrategia.com

@@ -42,6 +42,9 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
         env.insert("YAA_TARGET_DIR".into(), target);
     }
 
+    // ENGINE var for hooks (pre-tool-use.sh uses it to decide response format)
+    env.insert("ENGINE".into(), engine.to_uppercase());
+
     // ── Volumes ─────────────────────────────────────────────
     // NOTE: target dir is NOT mounted here — it's handled at exec time via `cd`.
     // This keeps the compose stable so multiple sessions can share one container.
@@ -92,10 +95,8 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
             volumes.push(format!("{self_path}/ego:/home/claude/.cursor/agents"));
         }
         "opencode" => {
-            // OpenCode config + skills
+            // OpenCode config (stow symlinks resolve via entrypoint compat links)
             volumes.push(format!("{home}/.config/opencode:/home/claude/.config/opencode"));
-            volumes.push(format!("{self_path}/skills:/home/claude/.config/opencode/skills"));
-            volumes.push(format!("{self_path}/commands:/home/claude/.config/opencode/commands"));
         }
         _ => {} // claude — no extra mounts needed
     }

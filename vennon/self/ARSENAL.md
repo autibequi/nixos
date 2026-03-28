@@ -83,7 +83,7 @@ Análise de diff, camadas, fluxo de dados, qualidade. Subcommands:
 - `/meta:phone` — central dos 11 agentes (briefing, call direto, dashboard de worktrees)
 - `/meta:feed` — digest unificado (RSS por categoria + Obsidian: contractors, tasks, inbox)
 - `/meta:tamagochi` — interagir com pet virtual
-- `/meta:rules` — regras do sistema Leech (Lei 1-11, scheduling, territorios)
+- `/meta:rules` — regras do sistema Vennon (Lei 1-11, scheduling, territorios)
 
 #### Meta Tools
 - `/meta:relay` — controle Chrome via CDP (nav, show, tabs, speak, present)

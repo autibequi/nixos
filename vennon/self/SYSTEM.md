@@ -1,4 +1,4 @@
-# Leech — Sistema
+# Vennon — Sistema
 
 > Referencia unica de ambiente, paths, CLI e terminologia.
 
@@ -52,14 +52,14 @@ Working dir resolvido via `cd`. Ex: `yaa ~/projects/app` → `cd /workspace/home
 
 | Termo | O que e |
 |-------|---------|
-| **Leech** | O sistema como um todo — CLI, hooks, skills, agentes, scripts |
-| **yaa** | CLI principal (alias: `leech`, `zion`) |
+| **Vennon** | O sistema como um todo — yaa (launcher), deck (TUI), vennon (orquestrador)
+| **yaa** | CLI principal — launcher de sessoes IA |
 | **vennon** | Orquestrador de containers Docker |
 | **deck** | TUI dashboard do host |
 | **~/.leech** | Tokens e env vars (bash-sourceable) |
-| **config.yaml** | `~/.config/leech/config.yaml` — config estruturado |
-| **Mini-Leech** | Claude haiku spawned efemero |
-| **Puppy** | Container persistente com task-daemon |
+| **config.yaml** | `~/.config/vennon/config.yaml` — config estruturado |
+| **Mini-Agent** | Claude haiku spawned efemero |
+| **Worker** | Container persistente em background |
 | **Agente** | Claude headless rodando task card |
 
 ## Obsidian Vault (`/workspace/obsidian/`)

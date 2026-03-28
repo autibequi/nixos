@@ -39,10 +39,10 @@ Se uma persona ou avatar estiver ativa (ex: GLaDOS), **sempre** iniciar a respos
 
 ```bash
 wc -c \
-  /workspace/leech/system/DIRETRIZES.md \
-  /workspace/leech/system/SELF.md \
-  /workspace/leech/personas/GLaDOS.persona.md \
-  /workspace/leech/personas/avatar/glados.md \
+  /workspace/self/system/DIRETRIZES.md \
+  /workspace/self/system/SELF.md \
+  /workspace/self/personas/GLaDOS.persona.md \
+  /workspace/self/personas/avatar/glados.md \
   2>/dev/null
 ```
 
