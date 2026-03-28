@@ -23,7 +23,9 @@ mkdir -p \
   /home/claude/.claude \
   /home/claude/.claude/projects \
   /home/claude/.config/cursor \
+  /home/claude/.config/opencode \
   /home/claude/.cursor \
+  /home/claude/.agents \
   2>/dev/null
 
 # Permissões — NÃO recursivo em /home/claude (bind mounts do host)

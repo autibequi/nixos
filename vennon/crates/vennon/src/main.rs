@@ -27,6 +27,12 @@ enum Commands {
     /// List all available containers
     List,
 
+    /// Build all container images (or one: vennon build <name>)
+    Build {
+        /// Container name (omit for all)
+        name: Option<String>,
+    },
+
     /// Any container: vennon <name> [action] [--args]
     #[command(external_subcommand)]
     Container(Vec<String>),
@@ -77,6 +83,17 @@ fn main() -> Result<()> {
                 }
             }
             Ok(())
+        }
+
+        Commands::Build { name } => {
+            let vennon_dir = config::find_vennon_path()
+                .ok_or_else(|| anyhow::anyhow!("can't find vennon source dir"))?;
+            let justfile = vennon_dir.join("justfile").to_string_lossy().to_string();
+            let wd = vennon_dir.to_string_lossy().to_string();
+            match name {
+                Some(n) => exec::run("just", &["--justfile", &justfile, "--working-directory", &wd, "image", &n]),
+                None => exec::run("just", &["--justfile", &justfile, "--working-directory", &wd, "images"]),
+            }
         }
 
         Commands::Container(args) => {

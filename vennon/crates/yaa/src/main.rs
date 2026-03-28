@@ -113,6 +113,13 @@ enum Commands {
         #[arg(trailing_var_arg = true)]
         args: Vec<String>,
     },
+
+    /// Stop and remove container for an engine (cleanup)
+    Cleanup {
+        /// Engine: claude, cursor, opencode (or "all")
+        #[arg(default_value = "all")]
+        engine: String,
+    },
 }
 
 fn main() -> Result<()> {
@@ -193,6 +200,26 @@ fn main() -> Result<()> {
         Some(Commands::Holodeck { action }) => holodeck::dispatch(&action),
 
         Some(Commands::Tmux { action, args }) => tmux::dispatch(&action, &args),
+
+        Some(Commands::Cleanup { engine }) => {
+            let engines: Vec<&str> = if engine == "all" {
+                vec!["claude", "cursor", "opencode"]
+            } else {
+                vec![engine.as_str()]
+            };
+            for e in &engines {
+                let container = format!("vennon-{e}");
+                println!("Cleaning up {container}...");
+                let _ = exec::run("podman", &["stop", &container]);
+                let _ = exec::run("podman", &["rm", "-f", &container]);
+            }
+            // Also clean the proxy
+            println!("Cleaning up vennon-docker-proxy...");
+            let _ = exec::run("podman", &["stop", "vennon-docker-proxy"]);
+            let _ = exec::run("podman", &["rm", "-f", "vennon-docker-proxy"]);
+            println!("Done.");
+            Ok(())
+        }
 
         None => {
             let config = config::YaaConfig::load()?;

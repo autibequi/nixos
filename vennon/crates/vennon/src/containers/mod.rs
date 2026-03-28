@@ -70,7 +70,10 @@ pub fn start_cmd(name: &str) -> String {
             cmd
         }
         "opencode" => {
-            let mut cmd = format!("cd {workdir} && exec opencode");
+            // Inject AGENTS.md into workdir so opencode reads our context
+            let mut cmd = format!(
+                "cp /workspace/self/scripts/opencode-agents.md {workdir}/AGENTS.md 2>/dev/null; cd {workdir} && exec opencode"
+            );
             if let Some(ref id) = resume_raw {
                 if id == "continue" {
                     cmd.push_str(" --continue");
@@ -81,7 +84,10 @@ pub fn start_cmd(name: &str) -> String {
             cmd
         }
         "cursor" => {
-            let mut cmd = format!("cd {workdir} && exec cursor-agent --force");
+            // Inject AGENTS.md into workdir so cursor-agent reads our context
+            let mut cmd = format!(
+                "cp /workspace/self/scripts/cursor-agents.md {workdir}/AGENTS.md 2>/dev/null; cd {workdir} && exec cursor-agent --force"
+            );
             cmd.push_str(&model_flag);
             if let Some(ref id) = resume_raw {
                 if id == "continue" {

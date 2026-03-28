@@ -27,6 +27,9 @@ services:
     - /home/pedrinho/nixos/leech/self/scripts:/home/claude/.claude/scripts
     - /home/pedrinho/.claude.json:/home/claude/.claude.json
     - /home/pedrinho/.claude/projects:/home/claude/.claude/projects
+    - /home/pedrinho/nixos/leech/self/skills:/home/claude/.agents/skills
+    - /home/pedrinho/nixos/leech/self/commands:/home/claude/.agents/commands
+    - /home/pedrinho/nixos/leech/self/ego:/home/claude/.agents/agents
     - /home/pedrinho/.leech:/home/claude/.leech:rw
     - /proc/meminfo:/host/proc/meminfo:ro
     - /proc/loadavg:/host/proc/loadavg:ro

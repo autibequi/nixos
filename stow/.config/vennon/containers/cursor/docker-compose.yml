@@ -37,13 +37,11 @@ services:
     - /var/log:/workspace/logs/host/var-log:ro
     - /home/pedrinho/nixos:/workspace/host:rw
     - /home/pedrinho/.config/cursor:/home/claude/.config/cursor
-    - /home/pedrinho/.cursor/cli-config.json:/home/claude/.cursor/cli-config.json:ro
+    - /home/pedrinho/.cursor/cli-config.json:/home/claude/.cursor/cli-config.json
     - /home/pedrinho/.cursor/managed:/home/claude/.cursor/managed:ro
     - /home/pedrinho/nixos/leech/self/skills:/home/claude/.cursor/skills
-    - /home/pedrinho/nixos/leech/self/commands:/home/claude/.cursor/commands
-    - /home/pedrinho/nixos/leech/self/ego:/home/claude/.cursor/agents
     - /home/pedrinho/nixos/leech/self/commands:/home/claude/.cursor/rules
-    - /home/pedrinho/nixos/vennon/containers/cursor/hooks:/home/claude/.cursor/leech-hooks:ro
+    - /home/pedrinho/nixos/leech/self/ego:/home/claude/.cursor/agents
     environment:
       CLAUDE_ENV: container
       DOCKER_HOST: tcp://localhost:2375
@@ -55,7 +53,7 @@ services:
       VENNON_GID: '100'
       VENNON_UID: '1000'
       XDG_CACHE_HOME: /workspace/.ephemeral/cache
-      YAA_TARGET_DIR: /home/pedrinho/projects
+      YAA_TARGET_DIR: /home/pedrinho/nixos/vennon
     tmpfs:
     - /tmp:size=512m,mode=1777
     cap_drop:

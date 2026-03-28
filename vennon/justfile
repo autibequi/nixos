@@ -40,6 +40,20 @@ install: build
 uninstall:
     rm -f {{install_dir}}/vennon {{install_dir}}/yaa {{install_dir}}/deck
 
+# Build all container images
+images:
+    podman build -t vennon-leech containers/leech/
+    podman build -t vennon-claude containers/claude/
+    podman build -t vennon-cursor containers/cursor/
+    podman build -t vennon-opencode containers/opencode/
+
+# Build single container image
+image name:
+    podman build -t vennon-{{name}} containers/{{name}}/
+
+# Full install: binaries + images
+all: install images
+
 # Clean
 clean:
     {{nix_run}} "cargo clean"

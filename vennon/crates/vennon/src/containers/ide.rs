@@ -52,8 +52,7 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
         // Mount projects + home for access to any target dir
         format!("{projects}:/workspace/projects:rw"),
         format!("{home}:/workspace/home:rw"),
-        // Claude/IDE config — mount individual dirs, NOT ~/.claude as a whole
-        // (mounting ~/.claude then overriding files inside causes Podman "Not a directory" errors)
+        // Claude Code config
         format!("{self_path}/claude.bypass.json:/home/claude/.claude/settings.json:rw"),
         format!("{self_path}/skills:/home/claude/.claude/skills"),
         format!("{self_path}/commands:/home/claude/.claude/commands"),
@@ -61,8 +60,9 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
         format!("{container_hooks}:/home/claude/.claude/hooks:ro"),
         format!("{self_path}/scripts:/home/claude/.claude/scripts"),
         format!("{home}/.claude.json:/home/claude/.claude.json"),
-        // Claude native state (projects, memory, etc) — persists between sessions
         format!("{home}/.claude/projects:/home/claude/.claude/projects"),
+        // Skills/commands/agents for non-Claude engines: symlinked by entrypoint
+        // (~/.cursor/skills, ~/.agents/skills, ~/.config/opencode/skills → /workspace/self/skills)
         // Communication channel
         format!("{home}/.leech:/home/claude/.leech:rw"),
         // Host observability (ro)
@@ -82,20 +82,20 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
     // Engine-specific mounts
     match engine {
         "cursor" => {
-            // Cursor auth — share host credentials so cursor-agent can authenticate
+            // Cursor auth
             volumes.push(format!("{home}/.config/cursor:/home/claude/.config/cursor"));
-            volumes.push(format!("{home}/.cursor/cli-config.json:/home/claude/.cursor/cli-config.json:ro"));
+            volumes.push(format!("{home}/.cursor/cli-config.json:/home/claude/.cursor/cli-config.json"));
             volumes.push(format!("{home}/.cursor/managed:/home/claude/.cursor/managed:ro"));
-            // Cursor uses ~/.cursor/ for skills/commands/agents (not ~/.claude/)
+            // Cursor skills/rules/agents
             volumes.push(format!("{self_path}/skills:/home/claude/.cursor/skills"));
-            volumes.push(format!("{self_path}/commands:/home/claude/.cursor/commands"));
-            volumes.push(format!("{self_path}/ego:/home/claude/.cursor/agents"));
             volumes.push(format!("{self_path}/commands:/home/claude/.cursor/rules"));
-            volumes.push(format!("{container_hooks}:/home/claude/.cursor/leech-hooks:ro"));
+            volumes.push(format!("{self_path}/ego:/home/claude/.cursor/agents"));
         }
         "opencode" => {
-            // OpenCode config
+            // OpenCode config + skills
             volumes.push(format!("{home}/.config/opencode:/home/claude/.config/opencode"));
+            volumes.push(format!("{self_path}/skills:/home/claude/.config/opencode/skills"));
+            volumes.push(format!("{self_path}/commands:/home/claude/.config/opencode/commands"));
         }
         _ => {} // claude — no extra mounts needed
     }
