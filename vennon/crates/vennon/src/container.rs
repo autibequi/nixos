@@ -49,15 +49,13 @@ fn ensure_image(name: &str, config: &VennonConfig) -> Result<()> {
 fn start(name: &str, compose_path: &std::path::Path, config: &VennonConfig) -> Result<()> {
     ensure_image(name, config)?;
 
-    // Only run compose up if container not already running
-    if find_container(name).is_err() {
-        let compose_str = compose_path.to_string_lossy();
-        let project = format!("vennon-{name}");
-        exec::run(
-            "podman-compose",
-            &["-f", &compose_str, "-p", &project, "up", "-d"],
-        )?;
-    }
+    // Always run compose up — podman-compose recreates if compose changed (e.g. new target dir)
+    let compose_str = compose_path.to_string_lossy();
+    let project = format!("vennon-{name}");
+    exec::run(
+        "podman-compose",
+        &["-f", &compose_str, "-p", &project, "up", "-d"],
+    )?;
 
     let cid = find_container(name)?;
 
@@ -74,14 +72,12 @@ fn start(name: &str, compose_path: &std::path::Path, config: &VennonConfig) -> R
 fn shell(name: &str, compose_path: &std::path::Path, config: &VennonConfig) -> Result<()> {
     ensure_image(name, config)?;
 
-    if find_container(name).is_err() {
-        let compose_str = compose_path.to_string_lossy();
-        let project = format!("vennon-{name}");
-        exec::run(
-            "podman-compose",
-            &["-f", &compose_str, "-p", &project, "up", "-d"],
-        )?;
-    }
+    let compose_str = compose_path.to_string_lossy();
+    let project = format!("vennon-{name}");
+    exec::run(
+        "podman-compose",
+        &["-f", &compose_str, "-p", &project, "up", "-d"],
+    )?;
 
     let cid = find_container(name)?;
 

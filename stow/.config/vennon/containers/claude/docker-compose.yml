@@ -7,7 +7,7 @@ services:
     network_mode: host
     stdin_open: true
     tty: true
-    working_dir: /workspace/home
+    working_dir: /workspace
     entrypoint:
     - /entrypoint.sh
     command:
@@ -15,18 +15,20 @@ services:
     - -c
     - sleep infinity
     volumes:
-    - /home/pedrinho/nixos/leech/self:/workspace/self
+    - /home/pedrinho/nixos/vennon/self:/workspace/self
     - /home/pedrinho/.ovault/Work:/workspace/obsidian
-    - /home/pedrinho/projects:/workspace/projects:rw
-    - /home/pedrinho:/workspace/home:rw
-    - /home/pedrinho/nixos/leech/self/claude.bypass.json:/home/claude/.claude/settings.json:rw
-    - /home/pedrinho/nixos/leech/self/skills:/home/claude/.claude/skills
-    - /home/pedrinho/nixos/leech/self/commands:/home/claude/.claude/commands
-    - /home/pedrinho/nixos/leech/self/ego:/home/claude/.claude/agents
+    - /home/pedrinho/projects:/workspace/target:rw
+    - /home/pedrinho/nixos/vennon/self/claude.bypass.json:/home/claude/.claude/settings.json:rw
+    - /home/pedrinho/nixos/vennon/self/skills:/home/claude/.claude/skills
+    - /home/pedrinho/nixos/vennon/self/commands:/home/claude/.claude/commands
+    - /home/pedrinho/nixos/vennon/self/ego:/home/claude/.claude/agents
     - /home/pedrinho/nixos/vennon/containers/claude/hooks:/home/claude/.claude/hooks:ro
-    - /home/pedrinho/nixos/leech/self/scripts:/home/claude/.claude/scripts
+    - /home/pedrinho/nixos/vennon/self/scripts:/home/claude/.claude/scripts
     - /home/pedrinho/.claude.json:/home/claude/.claude.json
     - /home/pedrinho/.claude/projects:/home/claude/.claude/projects
+    - /home/pedrinho/nixos/vennon/self/skills:/home/claude/.agents/skills
+    - /home/pedrinho/nixos/vennon/self/commands:/home/claude/.agents/commands
+    - /home/pedrinho/nixos/vennon/self/ego:/home/claude/.agents/agents
     - /home/pedrinho/.leech:/home/claude/.leech:rw
     - /proc/meminfo:/host/proc/meminfo:ro
     - /proc/loadavg:/host/proc/loadavg:ro

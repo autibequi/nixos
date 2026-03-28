@@ -34,14 +34,7 @@ chown "${VENNON_UID}:${VENNON_GID}" /home/claude 2>/dev/null || true
 chown -R "${VENNON_UID}:${VENNON_GID}" /home/claude/.cache 2>/dev/null || true
 chmod -R u+rwX /home/claude/.cache 2>/dev/null || true
 
-# Symlink /workspace/target → workdir (convenience)
-TARGET="${YAA_TARGET_DIR:-}"
-if [ -n "$TARGET" ]; then
-  CONTAINER_HOME="/workspace/home"
-  HOST_HOME="${HOME}"
-  MAPPED="${TARGET/#$HOST_HOME/$CONTAINER_HOME}"
-  ln -sfn "$MAPPED" /workspace/target 2>/dev/null || true
-fi
+# /workspace/target is a real bind mount (set in compose)
 
 # Ambiente
 export HOME=/home/claude
@@ -55,14 +48,6 @@ if [ -f /home/claude/.leech ]; then
     set +a
 fi
 
-# Stow compat: symlinks relativos em ~/.config/ referenciam ../../<projeto>/stow/...
-# No container, HOME=/home/claude mas host home esta em /workspace/home
-# Cria symlinks em /home/claude/ para cada dir top-level do host home
-# (apenas se o path nao existe ainda — nao sobrescreve bind mounts)
-for item in /workspace/home/*/; do
-    base="$(basename "$item")"
-    [ -e "/home/claude/$base" ] || ln -sfn "$item" "/home/claude/$base" 2>/dev/null || true
-done
 
 # Session-start hook
 _session_hook="/home/claude/.claude/hooks/session-start.sh"

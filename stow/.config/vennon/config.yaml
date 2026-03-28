@@ -1,5 +1,5 @@
 paths:
-  self: ~/nixos/leech/self
+  self: ~/nixos/vennon/self
   obsidian: ~/.ovault/Work
   projects: ~/projects
   host: ~/nixos

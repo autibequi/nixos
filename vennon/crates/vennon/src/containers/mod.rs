@@ -20,24 +20,9 @@ pub fn get_compose(name: &str, config: &VennonConfig) -> Result<ComposeFile> {
     }
 }
 
-/// Translate a host path to the container path.
-/// ~/anything → /workspace/home/anything (because ~ is mounted at /workspace/home)
+/// Target dir is mounted directly at /workspace/target.
 fn container_workdir() -> String {
-    let home = std::env::var("HOME").unwrap_or_else(|_| "/root".into());
-    let target = std::env::var("YAA_TARGET_DIR").unwrap_or_default();
-
-    if target.is_empty() {
-        return "/workspace/home".into();
-    }
-
-    // If target starts with $HOME, translate to /workspace/home/...
-    if target.starts_with(&home) {
-        let relative = &target[home.len()..];
-        format!("/workspace/home{relative}")
-    } else {
-        // Fallback: might not be accessible inside container
-        "/workspace/home".into()
-    }
+    "/workspace/target".into()
 }
 
 /// Build the exec command for starting an IDE session.
@@ -49,15 +34,11 @@ pub fn start_cmd(name: &str) -> String {
         .map(|m| format!(" --model {m}"))
         .unwrap_or_default();
 
-    let danger = std::env::var("YAA_DANGER").as_deref() == Ok("1");
     let resume_raw = std::env::var("YAA_RESUME").ok().filter(|s| !s.is_empty());
 
     match name {
         "claude" => {
             let mut cmd = format!("cd {workdir} && exec claude");
-            if danger {
-                cmd.push_str(" --dangerously-skip-permissions");
-            }
             cmd.push_str(" --enable-auto-mode");
             cmd.push_str(&model_flag);
             if let Some(ref id) = resume_raw {

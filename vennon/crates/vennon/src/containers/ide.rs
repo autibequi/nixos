@@ -45,16 +45,17 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
     // ENGINE var for hooks (pre-tool-use.sh uses it to decide response format)
     env.insert("ENGINE".into(), engine.to_uppercase());
 
+    // ── Target dir ──────────────────────────────────────────
+    let target_dir = std::env::var("YAA_TARGET_DIR")
+        .unwrap_or_else(|_| projects.clone());
+
     // ── Volumes ─────────────────────────────────────────────
-    // NOTE: target dir is NOT mounted here — it's handled at exec time via `cd`.
-    // This keeps the compose stable so multiple sessions can share one container.
     let mut volumes = vec![
         // Core workspace — always mounted
         format!("{self_path}:/workspace/self"),
         format!("{obsidian}:/workspace/obsidian"),
-        // Mount projects + home for access to any target dir
-        format!("{projects}:/workspace/projects:rw"),
-        format!("{home}:/workspace/home:rw"),
+        // Target dir mounted directly (no home mount)
+        format!("{target_dir}:/workspace/target:rw"),
         // Claude Code config
         format!("{self_path}/claude.bypass.json:/home/claude/.claude/settings.json:rw"),
         format!("{self_path}/skills:/home/claude/.claude/skills"),
@@ -139,7 +140,7 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
             network_mode: Some("host".into()),
             stdin_open: Some(true),
             tty: Some(true),
-            working_dir: Some("/workspace/home".into()),
+            working_dir: Some("/workspace".into()),
             entrypoint: Some(vec!["/entrypoint.sh".into()]),
             command: Some(vec![
                 "/bin/bash".into(),
