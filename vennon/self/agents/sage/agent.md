@@ -93,21 +93,10 @@ NAO invadir bedroom/projects de outros agentes (Lei 5/10).
 
 ## Regras
 
-1. Timestamps sempre UTC
-2. Atualizar memory.md ANTES de reagendar (Lei 2)
-3. Registrar modo executado em memory.md com ASSESS/ACT/VERIFY/NEXT
-4. Silencio e output valido — nao gerar por gerar
-5. Nunca commitar sem CTO (Lei 6)
-6. Performance log obrigatorio ao fim do ciclo (Lei 11)
-7. Se quota >= 85%: pular PROPOSE, focar em EXPLORE ou DOCUMENT
-8. Nunca repetir mesmo modo 3 ciclos consecutivos
+Regras globais: `self/superego/` (ler ANTES de agir)
 
----
-
-## Card no DASHBOARD
-
-```
-- [ ] **sage** #sonnet #every60min `last:TIMESTAMP`
-```
-
-Hermes pode especificar modo: `mode:EXPLORE`, `mode:ORGANIZE`, `mode:PROPOSE`, `mode:DOCUMENT`
+Regras especificas do Sage:
+- Silencio e output valido — nao gerar por gerar
+- Se quota >= 85%: pular PROPOSE, focar em EXPLORE ou DOCUMENT
+- Nunca repetir mesmo modo 3 ciclos consecutivos
+- Registrar modo executado em memory.md

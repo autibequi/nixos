@@ -1,148 +1,35 @@
-# Leech — Regras de Agente
+# Leech — Agentes
 
 > Agentes sao entidades inertes. So existem quando Hermes despacha um card do DASHBOARD.
 
----
+## Regras Globais
 
-## DASHBOARD — Fonte da Verdade
+**Ler `self/superego/` antes de qualquer acao.** La estao:
 
-`/workspace/obsidian/DASHBOARD.md` e o kanban central. Tudo e card.
+| Arquivo | Conteudo |
+|---------|----------|
+| `leis.md` | Proibicoes, obrigacoes, quota |
+| `dashboard.md` | Cards, tags, fluxo TODO→DOING→DONE, #ronda |
+| `obsidian.md` | Estrutura do vault, territorios de escrita |
+| `ciclo.md` | Protocolo: ler→pensar→executar→finalizar |
+| `comunicacao.md` | Inbox, outbox, feed.md, alertas |
 
-### Colunas
+## Agentes Disponiveis
 
-| Coluna | Significado |
-|--------|-------------|
-| **TODO** | Cards aguardando dispatch |
-| **DOING** | Cards em execucao |
-| **DONE** | Cards concluidos |
-| **WAITING** | Cards que precisam de atencao do usuario |
-
-### Formato de Card
-
-```
-- [ ] **nome-da-task** #agente #modelo #everyXmin `briefing:path/BRIEFING.md`
-```
-
-- `#agente` — quem executa (sage, coruja, keeper, paperboy, hefesto, venture)
-- `#modelo` — haiku, sonnet ou opus
-- `#ronda` — card ciclico, SEMPRE volta pro TODO apos execucao (nunca fica em DONE)
-- `#everyXmin` — intervalo minimo entre execucoes
-- `briefing:path` — arquivo que o agente le antes de executar
-- `last:ISO` — ultima execucao
-
-### Exemplos
-
-```
-- [ ] **sage** #sage #opus #ronda #every60min `last:ISO` `briefing:bedrooms/sage/BRIEFING.md`
-- [ ] **imobiltracker** #venture #sonnet #every30min `last:ISO` `briefing:projects/imobiltracker/BRIEFING.md`
-- [ ] **limpar-inbox** #keeper #haiku `briefing:bedrooms/keeper/BRIEFING.md`
-```
-
-O primeiro tem `#ronda` — volta pro TODO apos execucao, sempre.
-O terceiro nao tem — e one-off, fica em DONE.
-
----
-
-## Fluxo
-
-```
-yaa tick → Hermes acorda
-    │
-    ▼
-Le DASHBOARD.md → coluna TODO
-    │
-    ▼
-Para cada card (max 3/ciclo):
-    ├── Extrai #agente, #modelo, briefing:
-    ├── Le o BRIEFING.md
-    ├── Move TODO → DOING
-    ├── Despacha subagente com briefing no prompt
-    ├── Subagente executa e retorna
-    ├── Move DOING → DONE
-    └── Se #everyXmin: recria card no TODO com last: atualizado
-```
-
----
-
-## Regras
-
-| # | Lei | Resumo |
-|---|-----|--------|
-| 1 | Tudo e card | Nenhum agente acorda sozinho — precisa de card no TODO |
-| 2 | Memoria Antes | Atualizar memory.md ANTES de encerrar ciclo |
-| 3 | Timestamps UTC | Todos em UTC (`date -u +%Y-%m-%dT%H:%MZ`) |
-| 4 | Kanban Forward | Cards andam: TODO → DOING → DONE |
-| 5 | Territorialidade | Escrever no proprio bedroom + projeto atribuido |
-| 6 | Sem Commits | Nunca git commit/push sem CTO pedir |
-| 7 | Quota Aware | >= 85% so haiku, >= 95% ninguem |
-| 8 | Canais Oficiais | Comunicar via feed.md, ALERTA_, DASHBOARD |
-| 9 | Briefing obrigatorio | Card sem briefing: agente le seu bedroom/BRIEFING.md |
-| 10 | Bedroom soberano | bedrooms/<nome>/ e sagrado — nao invadir |
-
----
-
-## Protocolo do Agente (quando despachado)
-
-### 1. Ler contexto
-```bash
-cat /workspace/self/AGENT.md                    # estas regras
-cat /workspace/obsidian/bedrooms/NOME/memory.md # contexto anterior
-cat <briefing>                                  # o que fazer neste ciclo
-```
-
-### 2. Pensar (OBRIGATORIO haiku, recomendado todos)
-```
-ASSESS: <o que vou fazer>. Memory: <ja existe | novo>. Worth: <sim|nao>.
-```
-
-### 3. Executar
-- Usar bedroom (`bedrooms/NOME/`) pra estado persistente
-- Se for projeto: trabalhar em `projects/<projeto>/`
-- Nao invadir territorio alheio
-
-### 4. Finalizar
-- VERIFY: listar artefatos, confirmar existencia
-- Append memory.md:
-```
-## Ciclo YYYY-MM-DD HH:MM
-ASSESS: <planejado>
-ACT: <executado>
-VERIFY: <artefatos>
-NEXT: <sugestao pro proximo ciclo>
-```
-
----
-
-## Estrutura
-
-```
-obsidian/
-├── DASHBOARD.md          ← cards (TODO/DOING/DONE/WAITING)
-├── bedrooms/             ← estado persistente dos agentes
-│   ├── hermes/
-│   │   ├── BRIEFING.md
-│   │   └── memory.md
-│   ├── sage/
-│   ├── coruja/
-│   ├── keeper/
-│   ├── paperboy/
-│   └── hefesto/
-├── projects/             ← projetos com briefings
-│   └── jonathas/
-│       ├── BRIEFING.md
-│       └── ...
-├── inbox/                ← agents → user
-├── outbox/               ← user → agents
-├── wiki/                 ← knowledge base
-└── vault/                ← arquivo permanente
-```
-
----
-
-## Referencias
-
-| Topico | Arquivo |
+| Agente | Dominio |
 |--------|---------|
-| Leis detalhadas | `self/skills/meta/rules/laws.md` |
-| Estrutura dirs | `self/skills/meta/rules/map.md` |
-| Espacos | `self/skills/meta/rules/spaces.md` |
+| **hermes** | Dispatcher central. Le DASHBOARD, despacha cards. |
+| **sage** | Sabio. 4 modos: EXPLORE, ORGANIZE, PROPOSE, DOCUMENT. |
+| **coruja** | Estrategia (monolito Go, bo Vue, front Nuxt). |
+| **keeper** | Saude e limpeza do sistema. |
+| **paperboy** | Feeds RSS e jornal curado. |
+| **hefesto** | Mestre construtor. Default universal — todas as skills. |
+| **venture** | Business discovery. Mercado, validacao, MVP. |
+
+Definicoes completas: `self/agents/<nome>/agent.md`
+Bedrooms: `obsidian/bedrooms/<nome>/`
+
+## Card sem #agente → Hefesto
+
+Se um card no DASHBOARD nao especifica qual agente, Hermes despacha **Hefesto**.
+Hefesto conhece todas as skills e agentes, monta qualquer coisa.

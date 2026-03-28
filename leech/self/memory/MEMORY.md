@@ -100,3 +100,8 @@
 - [project_obsidian_agents.md](project_obsidian_agents.md) — Mapa dos 12 agentes ativos (inclui jonathas), paths, CLI
 - [project_vibefu_encyclopedia.md](project_vibefu_encyclopedia.md) — Enciclopédia VibeFu em obsidian/vibefu/: 105 técnicas de vibecoding rankeadas (0-1000), com _INDEX, _RANKING, _STATS
 - [feedback_parallel_research_agents.md](feedback_parallel_research_agents.md) — Para pesquisas amplas: 3 agentes explore → 6 agentes writer paralelos → consolidação. Fan-out massivo funciona.
+- [feedback_parallel_agents.md](feedback_parallel_agents.md) — Sprints paralelos: dividir por pasta (não feature), agente integração roda por último, whitelist de arquivos por agente
+- [feedback_rescue_agent_files.md](feedback_rescue_agent_files.md) — Agentes escrevem em paths deletados durante reorganização — resgatar de /tmp/claude-0/.../tasks/<agentId>.output via JSON
+- [feedback_index_as_entrypoint.md](feedback_index_as_entrypoint.md) — Projetos para terceiros: INDEX.md obrigatório com 7 seções (o quê, números, feito/falta, pastas, 3 caminhos, cenários, glossário)
+- [feedback_projeto_real.md](feedback_projeto_real.md) — "Projeto real": pesquisa extensiva, dados reais, cenários, Mermaid, links Obsidian, guia mastigado, CUIDADOS, agentes autônomos
+- [project_jonathas.md](project_jonathas.md) — Projeto imobiliário Jonathas: SaaS RJ, cunhado Pedro, bot WhatsApp IA, stack Next.js+Express+Neon, lançamento Set-Out 2026
