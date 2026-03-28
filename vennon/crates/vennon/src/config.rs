@@ -134,7 +134,7 @@ pub fn user_ids() -> (u32, u32) {
 // ── Init ────────────────────────────────────────────────────────
 
 const DEFAULT_CONFIG: &str = r#"paths:
-  self: ~/nixos/leech/self
+  self: ~/nixos/vennon/self
   obsidian: ~/.ovault/Work
   projects: ~/projects
   host: ~/nixos

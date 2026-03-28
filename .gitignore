@@ -79,3 +79,4 @@ workbench/*
 !.cursor/rules/
 !.cursor/rules/**
 .cursor/session-boot.md
+

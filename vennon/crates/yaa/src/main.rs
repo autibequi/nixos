@@ -45,6 +45,9 @@ enum Commands {
     /// Create ~/.yaa.yaml with defaults
     Init,
 
+    /// Rebuild and install yaa + vennon (runs just install)
+    Update,
+
     // Future: Agents, Tasks, Stow, Os, Cleanup, etc.
 }
 
@@ -53,6 +56,21 @@ fn main() -> Result<()> {
 
     match cli.command {
         Some(Commands::Init) => config::init(),
+
+        Some(Commands::Update) => {
+            let config = config::YaaConfig::load()?;
+            let vennon_dir = config.vennon_path();
+            exec::run(
+                "just",
+                &[
+                    "--justfile",
+                    &vennon_dir.join("justfile").to_string_lossy(),
+                    "--working-directory",
+                    &vennon_dir.to_string_lossy(),
+                    "install",
+                ],
+            )
+        }
 
         None => {
             // Default: launch session
