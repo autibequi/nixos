@@ -7,13 +7,3 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 # pnpm end
-
-# Leech CLI
-export PATH="/home/pedrinho/nixos/stow/.local/bin:$PATH"
-alias zion='leech --host'
-alias claudio=leech
-
-# Dynamic completions (always in sync with CLI)
-eval "$(leech completions zsh)"
-compdef zion=leech
-export PATH="$HOME/.local/bin:$PATH"

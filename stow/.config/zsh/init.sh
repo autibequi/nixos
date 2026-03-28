@@ -52,5 +52,3 @@ convert_video() {
 }
 
 pokemonsay "$(fortune -s)"
-
-alias zion="leech --host"
