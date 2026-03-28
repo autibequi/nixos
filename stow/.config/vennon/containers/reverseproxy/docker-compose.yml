@@ -1,0 +1,9 @@
+services:
+  reverseproxy:
+    image: docker.io/library/nginx:alpine
+    container_name: vennon-reverseproxy
+    network_mode: "host"
+    restart: unless-stopped
+    volumes:
+      - ${VENNON_SERVICE_DIR}/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ${VENNON_SERVICE_DIR}/certs:/etc/nginx/certs:ro

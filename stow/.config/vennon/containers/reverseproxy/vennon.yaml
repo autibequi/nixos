@@ -1,0 +1,37 @@
+name: reverseproxy
+aliases: [rp, proxy]
+project: vennon-reverseproxy
+
+commands:
+  serve:
+    description: Start reverse proxy
+    compose:
+      files: [docker-compose.yml]
+      action: up -d
+
+  stop:
+    description: Stop reverse proxy
+    compose:
+      files: [docker-compose.yml]
+      action: down
+
+  logs:
+    description: Follow logs
+    args:
+      - name: tail
+        type: int
+        default: 50
+    compose:
+      files: [docker-compose.yml]
+      action: "logs -f --tail {{ tail }}"
+
+  flush:
+    description: Destroy reverse proxy
+    compose:
+      files: [docker-compose.yml]
+      action: "down -v --rmi local"
+
+  certs:
+    description: Generate self-signed SSL certs
+    script: |
+      bash {{ service_dir }}/gen-cert.sh

@@ -1,0 +1,203 @@
+use ratatui::prelude::*;
+use ratatui::widgets::*;
+
+use super::app::{App, AppMode};
+
+// ── Colors ──────────────────────────────────────────────────────
+const GREEN: Color = Color::Rgb(166, 227, 161);
+const RED: Color = Color::Rgb(243, 139, 168);
+const MAUVE: Color = Color::Rgb(203, 166, 247);
+const PEACH: Color = Color::Rgb(250, 179, 135);
+const TEXT: Color = Color::Rgb(205, 214, 244);
+const DIM: Color = Color::Rgb(108, 112, 134);
+const SURFACE: Color = Color::Rgb(30, 30, 46);
+
+pub fn render(frame: &mut Frame, app: &App) {
+    let area = frame.area();
+
+    // Layout: header (1) + containers (dynamic) + logs (rest)
+    let container_height = (app.containers.len() as u16 + 2).min(area.height / 2);
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Length(1),               // header
+            Constraint::Length(container_height), // containers
+            Constraint::Min(5),                  // logs
+            Constraint::Length(1),               // footer
+        ])
+        .split(area);
+
+    render_header(frame, chunks[0]);
+    render_containers(frame, app, chunks[1]);
+    render_logs(frame, app, chunks[2]);
+    render_footer(frame, app, chunks[3]);
+
+    // Menu overlay
+    if matches!(app.mode, AppMode::Menu) {
+        render_menu(frame, app, area);
+    }
+}
+
+fn render_header(frame: &mut Frame, area: Rect) {
+    let text = Line::from(vec![
+        Span::styled(" bridge", Style::default().fg(MAUVE).bold()),
+        Span::styled(" — container dashboard", Style::default().fg(DIM)),
+    ]);
+    frame.render_widget(Paragraph::new(text), area);
+}
+
+fn render_containers(frame: &mut Frame, app: &App, area: Rect) {
+    let rows: Vec<Row> = app
+        .containers
+        .iter()
+        .enumerate()
+        .map(|(i, c)| {
+            let selected = i == app.cursor;
+            let icon = if c.is_up { "●" } else { "○" };
+            let icon_color = if c.is_up { GREEN } else { RED };
+            let name = c.name.strip_prefix("vennon-").unwrap_or(&c.name);
+            let cursor = if selected { "▸" } else { " " };
+
+            let style = if selected {
+                Style::default().fg(TEXT).bg(SURFACE)
+            } else {
+                Style::default().fg(TEXT)
+            };
+
+            Row::new(vec![
+                Cell::from(Span::styled(cursor, Style::default().fg(MAUVE).bold())),
+                Cell::from(Span::styled(icon, Style::default().fg(icon_color))),
+                Cell::from(Span::styled(name, style.bold())),
+                Cell::from(Span::styled(&c.status, Style::default().fg(DIM))),
+                Cell::from(Span::styled(&c.cpu, Style::default().fg(PEACH))),
+                Cell::from(Span::styled(&c.mem, Style::default().fg(MAUVE))),
+            ])
+            .style(style)
+        })
+        .collect();
+
+    let widths = [
+        Constraint::Length(2),   // cursor ▸
+        Constraint::Length(2),   // status icon
+        Constraint::Length(25),  // name
+        Constraint::Length(20),  // status text
+        Constraint::Length(10),  // cpu
+        Constraint::Min(15),    // mem
+    ];
+
+    let table = Table::new(rows, widths)
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .border_style(Style::default().fg(DIM))
+                .title(Span::styled(
+                    " Containers ",
+                    Style::default().fg(MAUVE).bold(),
+                )),
+        )
+        .highlight_style(Style::default().bg(SURFACE));
+
+    frame.render_widget(table, area);
+}
+
+fn render_logs(frame: &mut Frame, app: &App, area: Rect) {
+    let visible_height = area.height.saturating_sub(2) as usize;
+    let start = app.log_scroll;
+    let end = (start + visible_height).min(app.logs.len());
+
+    let lines: Vec<Line> = app.logs[start..end]
+        .iter()
+        .map(|l| {
+            // Color by prefix
+            if l.contains("ERROR") || l.contains("error") || l.contains("ERRO") {
+                Line::from(Span::styled(l.as_str(), Style::default().fg(RED)))
+            } else if l.contains("WARN") || l.contains("warn") {
+                Line::from(Span::styled(l.as_str(), Style::default().fg(PEACH)))
+            } else {
+                Line::from(Span::styled(l.as_str(), Style::default().fg(DIM)))
+            }
+        })
+        .collect();
+
+    let selected_name = app
+        .selected_container()
+        .map(|c| c.name.strip_prefix("vennon-").unwrap_or(&c.name))
+        .unwrap_or("none");
+
+    let block = Block::default()
+        .borders(Borders::ALL)
+        .border_style(Style::default().fg(DIM))
+        .title(Span::styled(
+            format!(" {} [{}/{}] ", selected_name, end, app.logs.len()),
+            Style::default().fg(MAUVE).bold(),
+        ));
+
+    frame.render_widget(Paragraph::new(lines).block(block), area);
+}
+
+fn render_footer(frame: &mut Frame, app: &App, area: Rect) {
+    let hint = match app.mode {
+        AppMode::Normal => "j/k:nav  enter:menu  r:refresh  [/]:scroll  q:quit",
+        AppMode::Menu => "j/k:nav  enter:exec  esc:back",
+    };
+    let count = app.containers.iter().filter(|c| c.is_up).count();
+    let total = app.containers.len();
+
+    let text = Line::from(vec![
+        Span::styled(
+            format!(" {count}/{total} up "),
+            Style::default().fg(GREEN).bold(),
+        ),
+        Span::styled(hint, Style::default().fg(DIM)),
+    ]);
+    frame.render_widget(Paragraph::new(text), area);
+}
+
+fn render_menu(frame: &mut Frame, app: &App, area: Rect) {
+    let container = match app.selected_container() {
+        Some(c) => c,
+        None => return,
+    };
+    let name = container.name.strip_prefix("vennon-").unwrap_or(&container.name);
+
+    let actions = &[
+        ("start", "Start"),
+        ("stop", "Stop"),
+        ("shell", "Shell"),
+        ("build", "Build"),
+        ("flush", "Flush"),
+    ];
+
+    let items: Vec<ListItem> = actions
+        .iter()
+        .enumerate()
+        .map(|(i, (_, label))| {
+            let style = if i == app.menu_cursor {
+                Style::default().fg(MAUVE).bold()
+            } else {
+                Style::default().fg(TEXT)
+            };
+            let prefix = if i == app.menu_cursor { "▸ " } else { "  " };
+            ListItem::new(format!("{prefix}{label}"))
+                .style(style)
+        })
+        .collect();
+
+    let menu_height = actions.len() as u16 + 2;
+    let menu_width = 20;
+    let x = area.width.saturating_sub(menu_width) / 2;
+    let y = area.height.saturating_sub(menu_height) / 2;
+    let menu_area = Rect::new(x, y, menu_width, menu_height);
+
+    let block = Block::default()
+        .borders(Borders::ALL)
+        .border_style(Style::default().fg(MAUVE))
+        .title(Span::styled(
+            format!(" {name} "),
+            Style::default().fg(MAUVE).bold(),
+        ));
+
+    // Clear background
+    frame.render_widget(Clear, menu_area);
+    frame.render_widget(List::new(items).block(block), menu_area);
+}

@@ -1,1 +1,0 @@
-../leech/self/scripts/worktree-manager.sh

@@ -1,12 +1,13 @@
 mod exec;
 mod os;
 mod stow;
+mod tui;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
-#[command(name = "bridge", version, about = "bridge — TUI dashboard + host utilities")]
+#[command(name = "deck", version, about = "deck — container dashboard + host utilities")]
 struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,
@@ -30,7 +31,7 @@ enum Commands {
         action: String,
     },
 
-    /// Rebuild and install all binaries (vennon + yaa + bridge)
+    /// Rebuild and install all binaries
     Update,
 }
 
@@ -39,20 +40,8 @@ fn main() -> Result<()> {
 
     match cli.command {
         Some(Commands::Stow { action, reload }) => stow::run(&action, reload),
-
         Some(Commands::Os { action }) => os::run(&action),
-
         Some(Commands::Update) => exec::run("yaa", &["update"]),
-
-        None => {
-            // TODO: TUI dashboard (migrar de leech-tui)
-            println!("bridge — TUI dashboard (coming soon)");
-            println!();
-            println!("Available commands:");
-            println!("  bridge stow [restow|delete|status]");
-            println!("  bridge os [switch|test|boot]");
-            println!("  bridge update");
-            Ok(())
-        }
+        None => tui::run(),
     }
 }

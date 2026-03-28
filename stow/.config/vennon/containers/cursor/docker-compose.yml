@@ -7,7 +7,7 @@ services:
     network_mode: host
     stdin_open: true
     tty: true
-    working_dir: /workspace/target
+    working_dir: /workspace/home
     entrypoint:
     - /entrypoint.sh
     command:
@@ -15,18 +15,18 @@ services:
     - -c
     - sleep infinity
     volumes:
-    - /home/pedrinho/nixos/vennon/self:/workspace/self
+    - /home/pedrinho/nixos/leech/self:/workspace/self
     - /home/pedrinho/.ovault/Work:/workspace/obsidian
-    - /home/pedrinho/projects:/workspace/target:rw
+    - /home/pedrinho/projects:/workspace/projects:rw
+    - /home/pedrinho:/workspace/home:rw
     - /home/pedrinho/.claude:/home/claude/.claude
-    - /home/pedrinho/nixos/vennon/self/claude.bypass.json:/home/claude/.claude/settings.json:ro
-    - /home/pedrinho/nixos/vennon/self/skills:/home/claude/.claude/skills
-    - /home/pedrinho/nixos/vennon/self/commands:/home/claude/.claude/commands
-    - /home/pedrinho/nixos/vennon/self/agents:/home/claude/.claude/agents
-    - /home/pedrinho/nixos/vennon/self/hooks/claude-code:/home/claude/.claude/hooks:ro
-    - /home/pedrinho/nixos/vennon/self/scripts:/home/claude/.claude/scripts
+    - /home/pedrinho/nixos/leech/self/claude.bypass.json:/home/claude/.claude/settings.json:ro
+    - /home/pedrinho/nixos/leech/self/skills:/home/claude/.claude/skills
+    - /home/pedrinho/nixos/leech/self/commands:/home/claude/.claude/commands
+    - /home/pedrinho/nixos/leech/self/agents:/home/claude/.claude/agents
+    - /home/pedrinho/nixos/leech/self/hooks:/home/claude/.claude/hooks:ro
+    - /home/pedrinho/nixos/leech/self/scripts:/home/claude/.claude/scripts
     - /home/pedrinho/.claude.json:/home/claude/.claude.json
-    - /home/pedrinho/projects:/home/claude/projects
     - /home/pedrinho/.leech:/home/claude/.leech:rw
     - /proc/meminfo:/host/proc/meminfo:ro
     - /proc/loadavg:/host/proc/loadavg:ro
@@ -35,7 +35,6 @@ services:
     - /proc/version:/host/proc/version:ro
     - /var/log/journal:/workspace/logs/host/journal:ro
     - /var/log:/workspace/logs/host/var-log:ro
-    - /home/pedrinho/nixos:/workspace/host:rw
     environment:
       CLAUDE_ENV: container
       DOCKER_HOST: tcp://localhost:2375
@@ -43,7 +42,6 @@ services:
       GIT_AUTHOR_NAME: Pedro Correa
       GIT_COMMITTER_EMAIL: pedro.correa@estrategia.com
       GIT_COMMITTER_NAME: Pedro Correa
-      HOST_ATTACHED: '1'
       PATH: /home/claude/.local/bin:/home/claude/.nix-profile/bin:/root/.nix-profile/bin:/usr/bin:/bin
       VENNON_GID: '100'
       VENNON_UID: '1000'
