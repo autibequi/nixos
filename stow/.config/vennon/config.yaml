@@ -3,7 +3,7 @@ paths:
   obsidian: ~/.ovault/Work
   projects: ~/projects
   host: ~/nixos
-  vennon: ~/nixos/host/vennon
+  vennon: ~/nixos/vennon
 
 settings:
   memory_limit: 12g

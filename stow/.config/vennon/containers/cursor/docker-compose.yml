@@ -39,9 +39,9 @@ services:
       CLAUDE_ENV: container
       DOCKER_HOST: tcp://localhost:2375
       GIT_AUTHOR_EMAIL: pedro.correa@estrategia.com
-      GIT_AUTHOR_NAME: Pedrinho
+      GIT_AUTHOR_NAME: Pedro Correa
       GIT_COMMITTER_EMAIL: pedro.correa@estrategia.com
-      GIT_COMMITTER_NAME: Pedrinho
+      GIT_COMMITTER_NAME: Pedro Correa
       PATH: /home/claude/.local/bin:/home/claude/.nix-profile/bin:/root/.nix-profile/bin:/usr/bin:/bin
       VENNON_GID: '100'
       VENNON_UID: '1000'
@@ -65,7 +65,7 @@ services:
     - 127.0.0.1:2375:2375
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
-    - /home/pedrinho/nixos/host/vennon/containers/leech/docker-socket-filter.conf:/etc/nginx/conf.d/default.conf:ro
+    - /home/pedrinho/nixos/vennon/containers/leech/docker-socket-filter.conf:/etc/nginx/conf.d/default.conf:ro
 networks:
   default:
     external: true
