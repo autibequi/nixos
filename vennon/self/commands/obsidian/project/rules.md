@@ -1,5 +1,5 @@
 ---
-name: briefing-rules
+name: obsidian:project:rules
 description: Regras obrigatorias para todo BRIEFING.md — formato, conteudo minimo, convencoes
 ---
 

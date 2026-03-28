@@ -1,16 +1,17 @@
 # Shell init (sourced from shell.nix)
 # Usage: available in every zsh session after dotfiles stow
 
-# Secrets (sempre carrega, Claude precisa das env vars)
-source ~/secrets.sh
-
-# Claude Code — esconde do history
-HISTORY_IGNORE="(claude*|leech|leech*|zion|zion*|puppy*)"
 
 # Pula init interativo em automação (Claude Code, dumb terminals, etc)
 if [[ -n "$CLAUDECODE" || "$TERM" == "dumb" ]]; then
   return 0
 fi
+
+# Secrets (sempre carrega, Claude precisa das env vars)
+source ~/secrets.sh
+
+# Claude Code — esconde do history
+HISTORY_IGNORE="(claude*|leech|leech*|zion|zion*|puppy*)"
 
 # Shell tool init
 eval "$(starship init zsh)"

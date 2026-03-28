@@ -1,5 +1,5 @@
 ---
-name: meta:project
+name: obsidian:project
 description: Gestao de projetos — criar, regras de briefing, listar. Sub-comandos: new, rules, list.
 ---
 

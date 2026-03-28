@@ -1,5 +1,5 @@
 ---
-name: meta:new-project
+name: obsidian:project:new
 description: Cria um novo projeto com briefing, card no DASHBOARD e pasta em projects/. Wizard passo a passo.
 ---
 
