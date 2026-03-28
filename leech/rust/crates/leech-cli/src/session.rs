@@ -278,10 +278,12 @@ impl SessionRunner {
         danger: bool,
         config: &LeechConfig,
     ) -> Result<()> {
-        let mut claude_args = Vec::new();
+        let home = paths::home().to_string_lossy().into_owned();
+        let leech_root = paths::leech_root().to_string_lossy().into_owned();
+        let obsidian_path = paths::obsidian_ensured();
 
-        // Always enable auto mode for Claude sessions launched by Leech
-        claude_args.push("--enable-auto-mode".to_string());
+        // Build claude arguments
+        let mut claude_args = vec!["--enable-auto-mode".to_string()];
 
         if let Some(ref id) = model_id {
             claude_args.push("--model".to_string());
@@ -296,10 +298,6 @@ impl SessionRunner {
         if let Some(ref resume) = self.resume {
             if resume == "1" || resume.is_empty() {
                 claude_args.push("--resume".to_string());
-            } else if resume.contains(' ') {
-                // Single-quote para preservar espaços ao expandir em bash -c
-                let escaped = resume.replace('\'', r"'\''");
-                claude_args.push(format!("'--resume={escaped}'"));
             } else {
                 claude_args.push(format!("--resume={resume}"));
             }
@@ -319,105 +317,42 @@ impl SessionRunner {
         }
 
         let claude_args_str = claude_args.join(" ");
-        // --ghost: sessão isolada em /workspace/ghost — sem bootstrap (self não montado)
-        // --no-splash: pula o script de loading, faz bootstrap inline e abre claude direto
-        let bash_cmd = if self.ghost {
-            format!("cd /workspace/ghost && exec /home/claude/.nix-profile/bin/claude {claude_args_str}")
-        } else if self.no_splash {
-            format!(". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude {claude_args_str}")
-        } else {
-            format!("bash /workspace/self/scripts/leech-agent-launch.sh {claude_args_str}")
-        };
 
-        let vol_args = self.volume_args();
+        let mount_env = format!("CLAUDIO_MOUNT={}", self.mount_path);
+        let host_attached_env = format!("HOST_ATTACHED={}", if self.host { "1" } else { "0" });
 
-        // Shared container reuse: only when no extra volumes (those need isolated containers).
-        if vol_args.is_empty() && !self.analysis_mode {
-            let leech_name = format!(
-                "leech-{}",
-                self.proj_name.strip_prefix("leech-").unwrap_or(&self.proj_name)
-            );
-
-            // Find or create the persistent shared container.
-            let cid = match crate::docker::find_running_container(&leech_name) {
-                Some(cid) => cid,
-                None => {
-                    self.compose(config).execute(&["up", "-d", "leech"])?;
-                    if let Some(auto_name) =
-                        crate::docker::find_compose_container(&self.proj_name, "leech")
-                    {
-                        crate::docker::rename_container(&auto_name, &leech_name);
-                    }
-                    match crate::docker::find_running_container(&leech_name) {
-                        Some(cid) => cid,
-                        None => {
-                            // Persistent approach failed — fall back to ephemeral podman run with TTY.
-                            let mut cmd = Command::new("podman");
-                            cmd.args(["run", "--rm", "-i", "-t"]);
-
-                            for a in &vol_args {
-                                cmd.arg(a);
-                            }
-                            if self.analysis_mode {
-                                cmd.args(["-e", "LEECH_ANALYSIS_MODE=1"]);
-                            }
-                            if self.host {
-                                cmd.args(["-e", "HOST_ATTACHED=1"]);
-                            }
-                            if self.ghost {
-                                cmd.args(["-e", "GHOST_IN_THE_SHELL=ON"]);
-                            }
-                            cmd.args(["--entrypoint", "/entrypoint.sh"]);
-                            let mount_env = format!("CLAUDIO_MOUNT={}", self.mount_path);
-                            cmd.args(["-e", &mount_env, "-e", "BOOTSTRAP_SKIP_CLEAR=1"]);
-                            cmd.args(["leech", "/bin/bash", "-c", &bash_cmd]);
-
-                            let err = cmd.exec();
-                            return Err(crate::error::LeechError::Docker(format!("podman run failed: {err}")));
-                        }
-                    }
-                }
-            };
-
-            // Exec into the shared container (replaces current process — preserves TTY).
-            let mut env_pairs: Vec<(&str, &str)> = vec![("CLAUDIO_MOUNT", &self.mount_path)];
-            if self.resume.is_none() {
-                env_pairs.push(("BOOTSTRAP_SKIP_CLEAR", "1"));
-            }
-            if self.host {
-                env_pairs.push(("HOST_ATTACHED", "1"));
-            }
-            let exec_cmd = if self.no_splash || self.resume.is_some() {
-                format!(
-                    "cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude {claude_args_str}"
-                )
-            } else {
-                bash_cmd
-            };
-            return crate::docker::exec_replace(&cid, &env_pairs, &exec_cmd);
-        }
-
-        // Fallback: ephemeral run (extra volumes or analysis mode require isolated container).
-        // Use podman run directly without bash wrapper to preserve stdin/stdout/stderr for interactive TTY
+        // Simple: podman run -i -t, directly to claude
         let mut cmd = Command::new("podman");
         cmd.args(["run", "--rm", "-i", "-t"]);
 
-        for a in &vol_args {
-            cmd.arg(a);
-        }
-        if self.analysis_mode {
-            cmd.args(["-e", "LEECH_ANALYSIS_MODE=1"]);
-        }
+        // Volumes
+        cmd.args(["-v", &format!("{}:/workspace/mnt:rw", self.mount_path)]);
+        cmd.args(["-v", &format!("{obsidian_path}:/workspace/obsidian:rw")]);
+        cmd.args(["-v", &format!("{leech_root}:/workspace/self:ro")]);
+        cmd.args(["-v", &format!("{home}/.claude:/home/claude/.claude:rw")]);
+        cmd.args(["-v", &format!("{home}/.leech:/home/claude/.leech:rw")]);
+        cmd.args(["-v", "podman.sock:/run/user/1000/podman/podman.sock"]);
+
         if self.host {
-            cmd.args(["-e", "HOST_ATTACHED=1"]);
+            cmd.args(["-v", &format!("{home}/nixos:/workspace/host:rw")]);
         }
-        if self.ghost {
-            cmd.args(["-e", "GHOST_IN_THE_SHELL=ON"]);
-        }
+
+        // Environment
+        cmd.args(["-e", &mount_env]);
+        cmd.args(["-e", &host_attached_env]);
+        cmd.args(["-e", "BOOTSTRAP_SKIP_CLEAR=1"]);
+        cmd.args(["-e", &format!("DOCKER_GID={}", config.docker_gid())]);
+        cmd.args(["-e", &format!("JOURNAL_GID={}", config.system.journal_gid)]);
+        cmd.args(["-e", &format!("HOME={home}")]);
+        cmd.args(["-e", &format!("LEECH_ROOT={leech_root}")]);
+        cmd.args(["-e", &format!("LEECH_NIXOS_DIR={}", paths::nixos_dir().to_string_lossy())]);
+        cmd.args(["-e", &format!("XDG_DATA_HOME={}", paths::xdg_data_home())]);
+        cmd.args(["-e", &format!("XDG_RUNTIME_DIR={}", paths::xdg_runtime_dir())]);
+
+        // Entrypoint and command
         cmd.args(["--entrypoint", "/entrypoint.sh"]);
-        let mount_env = format!("CLAUDIO_MOUNT={}", self.mount_path);
-        cmd.args(["-e", &mount_env, "-e", "BOOTSTRAP_SKIP_CLEAR=1"]);
-        cmd.args(["leech", "/bin/bash", "-c", &bash_cmd]);
+        cmd.args(["leech", "/bin/bash", "-c"]);
+        cmd.arg(format!("cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude {claude_args_str}"));
 
         let err = cmd.exec();
         Err(crate::error::LeechError::Docker(format!("podman run failed: {err}")))
