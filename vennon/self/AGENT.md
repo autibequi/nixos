@@ -23,19 +23,23 @@
 - [ ] **nome-da-task** #agente #modelo #everyXmin `briefing:path/BRIEFING.md`
 ```
 
-- `#agente` — quem executa (sage, coruja, keeper, paperboy, placeholder)
-- `#modelo` — haiku ou sonnet
-- `#everyXmin` — recorrente (Hermes recria no TODO apos DONE)
+- `#agente` — quem executa (sage, coruja, keeper, paperboy, hefesto, venture)
+- `#modelo` — haiku, sonnet ou opus
+- `#ronda` — card ciclico, SEMPRE volta pro TODO apos execucao (nunca fica em DONE)
+- `#everyXmin` — intervalo minimo entre execucoes
 - `briefing:path` — arquivo que o agente le antes de executar
-- `last:ISO` — ultima execucao (pra cards recorrentes)
+- `last:ISO` — ultima execucao
 
 ### Exemplos
 
 ```
-- [ ] **sage-ronda** #sage #sonnet #every60min `briefing:bedrooms/sage/BRIEFING.md`
-- [ ] **jonathas-ciclo** #placeholder #haiku #every30min `briefing:projects/jonathas/BRIEFING.md`
+- [ ] **sage** #sage #opus #ronda #every60min `last:ISO` `briefing:bedrooms/sage/BRIEFING.md`
+- [ ] **imobiltracker** #venture #sonnet #every30min `last:ISO` `briefing:projects/imobiltracker/BRIEFING.md`
 - [ ] **limpar-inbox** #keeper #haiku `briefing:bedrooms/keeper/BRIEFING.md`
 ```
+
+O primeiro tem `#ronda` — volta pro TODO apos execucao, sempre.
+O terceiro nao tem — e one-off, fica em DONE.
 
 ---
 
@@ -122,7 +126,7 @@ obsidian/
 │   ├── coruja/
 │   ├── keeper/
 │   ├── paperboy/
-│   └── placeholder/
+│   └── hefesto/
 ├── projects/             ← projetos com briefings
 │   └── jonathas/
 │       ├── BRIEFING.md

@@ -57,9 +57,10 @@ Ler coluna `## TODO` do DASHBOARD. Para cada card (maximo 3 por ciclo):
 - [ ] **nome-da-task** #agente #modelo #everyXmin `briefing:path/BRIEFING.md`
 ```
 
-- `#agente` → qual agente despachar (sage, coruja, keeper, paperboy, placeholder)
+- `#agente` → qual agente despachar (sage, coruja, keeper, paperboy, hefesto)
 - `#modelo` → haiku ou sonnet
-- `#everyXmin` → re-agendar apos conclusao (volta pro TODO com `last:` atualizado)
+- `#ronda` → card ciclico, SEMPRE volta pro TODO apos execucao (nunca fica em DONE)
+- `#everyXmin` → intervalo minimo entre execucoes
 - `briefing:path` → ler este arquivo e incluir no prompt do subagente
 
 **Processo de dispatch:**
@@ -97,6 +98,11 @@ f. Apos subagente retornar — OBRIGATORIO, na mesma edicao do DASHBOARD:
 
 **CRITICO:** nunca deixar card em DOING sem agente rodando. Se o Hermes encerrar
 antes de limpar, o proximo tick deve mover DOING → TODO (cleanup).
+
+g. Regra `#ronda`:
+   - Cards com `#ronda` SEMPRE voltam pro TODO apos DONE
+   - Fluxo: TODO → DOING → (executa) → DONE nunca fica — volta direto pro TODO com `last:` atualizado
+   - Cards sem `#ronda` ficam em DONE (tasks avulsas, one-off)
 
 **Registrar:** `[HH:MM] [hermes] dispatch: <nome> → #<agente> #<modelo>`
 
@@ -139,13 +145,19 @@ Cards em DOING com `started:` > 2h atras: mover de volta pro TODO.
 
 ## Inferencia de agente (quando card nao tem #agente)
 
+**Regra: card sem #agente → Hefesto.** Sempre. Hefesto e o mestre construtor,
+conhece todas as skills e agentes, e o default universal.
+
+Se quiser ser mais preciso, pode inferir pelo conteudo:
+
 | Conteudo | Agente |
 |----------|--------|
 | vault, inbox, audit, enforcement | sage |
 | codigo, pr, monolito, go, vue, nuxt | coruja |
 | saude, disco, limpeza, logs | keeper |
 | rss, feeds, jornal | paperboy |
-| qualquer outra coisa | placeholder |
+| mercado, negocio, MVP, discovery | venture |
+| qualquer outra coisa ou duvida | **hefesto** |
 
 ---
 
