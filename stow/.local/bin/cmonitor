@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-# Wrapper para claude-monitor: usa ~/.claude como config (onde Cursor/Claude Code guarda sessão).
-# Sem isso o monitor herda CLAUDE_CONFIG_DIR=.local/share/claude-code e mostra "No active session".
-# Uso: cmonitor [--plan max20] ou cmonitor --help
-export CLAUDE_CONFIG_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
-exec claude-monitor "$@"

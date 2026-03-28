@@ -28,16 +28,13 @@
       },
       "models": {
         "qwen/qwen3-coder-30b": {
-          "name": "Qwen3 Coder 30B"
+          "name": "[CUSTOM] Qwen3 Coder 30B"
         },
         "qwen/qwen3.5-35b-a3b": {
-          "name": "Qwen3.5 35B"
+          "name": "[CUSTOM] Qwen3.5 35B"
         },
         "google/gemma-3-27b": {
-          "name": "Gemma 3 27B"
-        },
-        "text-embedding-nomic-embed-text-v1.5": {
-          "name": "Nomic Embed (embeddings)"
+          "name": "[CUSTOM] Gemma 3 27B"
         }
       }
     }
