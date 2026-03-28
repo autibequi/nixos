@@ -1,5 +1,7 @@
 //! `SessionRunner` builder — constructs and launches docker compose sessions for any engine.
 
+use std::os::unix::process::CommandExt;
+use std::process::Command;
 use crate::compose::ComposeCmd;
 use crate::config::LeechConfig;
 use crate::engine::Engine;
@@ -349,18 +351,29 @@ impl SessionRunner {
                     match crate::docker::find_running_container(&leech_name) {
                         Some(cid) => cid,
                         None => {
-                            // Persistent approach failed — fall back to ephemeral run.
-                            let mut args: Vec<&str> = vec![
-                                "run",
-                                "--rm",
-                                "-it",
-                                "--entrypoint",
-                                "/entrypoint.sh",
-                            ];
+                            // Persistent approach failed — fall back to ephemeral podman run with TTY.
+                            let mut cmd = Command::new("podman");
+                            cmd.args(["run", "--rm", "-i", "-t"]);
+
+                            for a in &vol_args {
+                                cmd.arg(a);
+                            }
+                            if self.analysis_mode {
+                                cmd.args(["-e", "LEECH_ANALYSIS_MODE=1"]);
+                            }
+                            if self.host {
+                                cmd.args(["-e", "HOST_ATTACHED=1"]);
+                            }
+                            if self.ghost {
+                                cmd.args(["-e", "GHOST_IN_THE_SHELL=ON"]);
+                            }
+                            cmd.args(["--entrypoint", "/entrypoint.sh"]);
                             let mount_env = format!("CLAUDIO_MOUNT={}", self.mount_path);
-                            args.extend(["-e", &mount_env, "-e", "BOOTSTRAP_SKIP_CLEAR=1"]);
-                            args.extend(["leech", "/bin/bash", "-c", &bash_cmd]);
-                            return self.compose(config).execute(&args);
+                            cmd.args(["-e", &mount_env, "-e", "BOOTSTRAP_SKIP_CLEAR=1"]);
+                            cmd.args(["leech", "/bin/bash", "-c", &bash_cmd]);
+
+                            let err = cmd.exec();
+                            return Err(crate::error::LeechError::Docker(format!("podman run failed: {err}")));
                         }
                     }
                 }
@@ -385,25 +398,29 @@ impl SessionRunner {
         }
 
         // Fallback: ephemeral run (extra volumes or analysis mode require isolated container).
-        let mut args: Vec<&str> = vec!["run", "--rm", "-it"];
+        // Use podman run directly without bash wrapper to preserve stdin/stdout/stderr for interactive TTY
+        let mut cmd = Command::new("podman");
+        cmd.args(["run", "--rm", "-i", "-t"]);
+
         for a in &vol_args {
-            args.push(a);
+            cmd.arg(a);
         }
         if self.analysis_mode {
-            args.extend(["-e", "LEECH_ANALYSIS_MODE=1"]);
+            cmd.args(["-e", "LEECH_ANALYSIS_MODE=1"]);
         }
         if self.host {
-            args.extend(["-e", "HOST_ATTACHED=1"]);
+            cmd.args(["-e", "HOST_ATTACHED=1"]);
         }
         if self.ghost {
-            args.extend(["-e", "GHOST_IN_THE_SHELL=ON"]);
+            cmd.args(["-e", "GHOST_IN_THE_SHELL=ON"]);
         }
-        args.extend(["--entrypoint", "/entrypoint.sh"]);
+        cmd.args(["--entrypoint", "/entrypoint.sh"]);
         let mount_env = format!("CLAUDIO_MOUNT={}", self.mount_path);
-        args.extend(["-e", &mount_env, "-e", "BOOTSTRAP_SKIP_CLEAR=1"]);
-        args.extend(["leech", "/bin/bash", "-c", &bash_cmd]);
+        cmd.args(["-e", &mount_env, "-e", "BOOTSTRAP_SKIP_CLEAR=1"]);
+        cmd.args(["leech", "/bin/bash", "-c", &bash_cmd]);
 
-        self.compose(config).execute(&args)
+        let err = cmd.exec();
+        Err(crate::error::LeechError::Docker(format!("podman run failed: {err}")))
     }
 
     fn run_cursor(
@@ -441,26 +458,29 @@ impl SessionRunner {
         let vol_args = self.volume_args();
 
         // Cursor sempre usa ephemeral run com entrypoint.sh (não shared container + exec).
-        // entrypoint.sh faz setpriv + configura HOME/USER/env antes de rodar o agent.
-        let mut args: Vec<&str> = vec!["run", "--rm", "-it"];
+        // Use podman run directly without bash wrapper to preserve stdin/stdout/stderr for interactive TTY
+        let mut cmd = Command::new("podman");
+        cmd.args(["run", "--rm", "-i", "-t"]);
+
         for a in &vol_args {
-            args.push(a);
+            cmd.arg(a);
         }
         if self.analysis_mode {
-            args.extend(["-e", "LEECH_ANALYSIS_MODE=1"]);
+            cmd.args(["-e", "LEECH_ANALYSIS_MODE=1"]);
         }
         if self.host {
-            args.extend(["-e", "HOST_ATTACHED=1"]);
+            cmd.args(["-e", "HOST_ATTACHED=1"]);
         }
         if self.ghost {
-            args.extend(["-e", "GHOST_IN_THE_SHELL=ON"]);
+            cmd.args(["-e", "GHOST_IN_THE_SHELL=ON"]);
         }
-        args.extend(["--entrypoint", "/entrypoint.sh"]);
+        cmd.args(["--entrypoint", "/entrypoint.sh"]);
         let mount_env = format!("CLAUDIO_MOUNT={}", self.mount_path);
-        args.extend(["-e", &mount_env, "-e", "BOOTSTRAP_SKIP_CLEAR=1"]);
-        args.extend(["leech", "/bin/bash", "-c", &cursor_cmd]);
+        cmd.args(["-e", &mount_env, "-e", "BOOTSTRAP_SKIP_CLEAR=1"]);
+        cmd.args(["leech", "/bin/bash", "-c", &cursor_cmd]);
 
-        self.compose(config).execute(&args)
+        let err = cmd.exec();
+        Err(crate::error::LeechError::Docker(format!("podman run failed: {err}")))
     }
 
     fn run_opencode(
@@ -510,29 +530,52 @@ impl SessionRunner {
                 "-c".into(),
                 "cd /workspace/mnt && opencode".into(),
             ]);
-            let args_ref: Vec<&str> = args.iter().map(String::as_str).collect();
-            self.compose(config).execute(&args_ref)
+            // Build command carefully to preserve TTY and stdio
+            let mut full_cmd = String::from("exec podman run --rm -i -t");
+
+            for a in &vol_args {
+                full_cmd.push(' ');
+                full_cmd.push_str(a);
+            }
+            if self.analysis_mode {
+                full_cmd.push_str(" -e LEECH_ANALYSIS_MODE=1");
+            }
+            full_cmd.push_str(" --entrypoint /entrypoint.sh");
+            for env in &oc_envs {
+                full_cmd.push_str(&format!(" -e '{}'", env.replace('\'', "'\\''")));
+            }
+            full_cmd.push_str(" leech /bin/bash -c 'cd /workspace/mnt && opencode'");
+
+            let mut cmd = Command::new("/bin/bash");
+            cmd.arg("-c").arg(&full_cmd);
+            let err = cmd.exec();
+            Err(crate::error::LeechError::Docker(format!("podman run failed: {err}")))
         } else {
-            // Persistent: up -d + exec
+            // Persistent: up -d + podman exec (not podman-compose exec, which doesn't support -i/-t)
             self.compose(config).execute(&["up", "-d", "leech"])?;
 
-            let mut args: Vec<String> =
-                vec!["exec".into(), "-it".into(), "-u".into(), "claude".into()];
-            if self.analysis_mode {
-                args.extend(["-e".into(), "LEECH_ANALYSIS_MODE=1".into()]);
+            // Find the container and exec directly using podman
+            let leech_name = format!(
+                "leech-{}",
+                self.proj_name.strip_prefix("leech-").unwrap_or(&self.proj_name)
+            );
+            if let Some(cid) = crate::docker::find_running_container(&leech_name) {
+                let mut env_pairs: Vec<(&str, &str)> = vec![("CLAUDIO_MOUNT", &self.mount_path)];
+                if self.analysis_mode {
+                    env_pairs.push(("LEECH_ANALYSIS_MODE", "1"));
+                }
+                for env in &oc_envs {
+                    if let Some((k, v)) = env.split_once('=') {
+                        env_pairs.push((k, v));
+                    }
+                }
+                let opencode_cmd = "cd /workspace/mnt && exec opencode";
+                return crate::docker::exec_replace(&cid, &env_pairs, opencode_cmd);
             }
-            for env in &oc_envs {
-                args.push("-e".into());
-                args.push(env.clone());
-            }
-            args.extend([
-                "leech".into(),
-                "bash".into(),
-                "-c".into(),
-                "cd /workspace/mnt && exec opencode".into(),
-            ]);
-            let args_ref: Vec<&str> = args.iter().map(String::as_str).collect();
-            self.compose(config).execute(&args_ref)
+            Err(crate::error::LeechError::Docker(format!(
+                "Failed to find container {} after up -d",
+                leech_name
+            )))
         }
     }
 }

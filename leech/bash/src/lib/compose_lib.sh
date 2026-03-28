@@ -48,10 +48,8 @@ leech_load_config() {
       export LEECH_MOUNT_HOST=1
     fi
   fi
-  # Docker GID para group_add no compose (agente precisa acessar /var/run/docker.sock)
-  if [[ -z "${DOCKER_GID:-}" ]] && [[ -S /var/run/docker.sock ]]; then
-    DOCKER_GID=$(stat -c %g /var/run/docker.sock)
-  fi
+  # Leech usa Podman rootless (não precisa Docker GID)
+  # Mantém DOCKER_GID para compatibilidade com outros serviços que possam usar Docker
   export DOCKER_GID="${DOCKER_GID:-999}"
   # Journal GID para group_add no compose (agente precisa ler /var/log/journal)
   if [[ -z "${JOURNAL_GID:-}" ]]; then
@@ -94,11 +92,37 @@ leech_nixos_scripts="$leech_nixos_dir/scripts"
 leech_vault_dir="${leech_vault_dir:-$leech_nixos_dir/vault}"
 leech_ephemeral="$leech_nixos_dir/.ephemeral"
 
-# Compose + env para invocar docker/podman (executar com cwd = leech_compose_dir ou -f)
+# Compose + env para invocar podman-compose (Podman rootless para leech)
 leech_compose_cmd() {
-  local cmd=(docker compose -f "$leech_compose_file")
+  # Exportar variáveis globalmente para que o subprocess (podman-compose) as herde
+  export LEECH_ROOT="${LEECH_ROOT:-$HOME/nixos/leech/self}"
+  export OBSIDIAN_PATH="$leech_obsidian_path"
+  export CLAUDIO_MOUNT="${CLAUDIO_MOUNT:-$HOME/nixos}"
+  export CLAUDIO_MOUNT_OPTS="${CLAUDIO_MOUNT_OPTS:-rw}"
+  export CLAUDIO_HOST_OPTS="${CLAUDIO_HOST_OPTS:-ro}"
+  export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+  export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/1000}"
+  export WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-wayland-1}"
+  export LEECH_CONTAINER_UID="${LEECH_CONTAINER_UID:-1000}"
+  export LEECH_CONTAINER_GID="${LEECH_CONTAINER_GID:-1000}"
+  export DOCKER_GID="${DOCKER_GID:-999}"
+  export JOURNAL_GID="${JOURNAL_GID:-62}"
+
+  local cmd=(podman-compose -f "$leech_compose_file")
   [[ -f "$leech_env_file" ]] && cmd+=(--env-file "$leech_env_file")
-  "${cmd[@]}" "$@"
+
+  # Workaround: podman-compose não suporta `-it` bem; converter para `-i -t`
+  local args=("$@")
+  local converted_args=()
+  for arg in "${args[@]}"; do
+    if [[ "$arg" == "-it" ]]; then
+      converted_args+=(-i -t)
+    else
+      converted_args+=("$arg")
+    fi
+  done
+
+  "${cmd[@]}" "${converted_args[@]}"
 }
 
 # Resolve mount directory: named arg "dir" (bashly uses args['dir']) or default ~/projects
@@ -251,7 +275,7 @@ leech_compose_env() {
 #   extra_volumes - string com volumes extras (ex: "-v /var/log/journal:/workspace/logs/host/journal:ro")
 #
 # O mode "persistent" (up -d + exec) é usado quando opencode precisa de leech persistente.
-# Demais engines usam "run --rm -it" (efêmero).
+# Demais engines usam "run --rm" (efêmero).
 leech_session_run() {
   local engine="$1"
   local proj_name="$2"
@@ -325,15 +349,20 @@ leech_session_run() {
         [[ -n "$resume_id" ]] && oc_envs+=(-e "CLAUDIO_RESUME_SESSION=$resume_id")
       fi
 
-      # Opencode: persistent (up + exec) for new; ephemeral (run) for continue/resume
+      # Opencode: always use up -d + exec (never run --rm which kills container)
       if [[ "$engine_args" == *"--continue"* ]] || [[ "$engine_args" == *"--resume"* ]]; then
-        leech_compose_cmd -p "$proj_name" run --rm -it $extra_volumes $analysis_env \
-          --entrypoint /entrypoint.sh "${oc_envs[@]}" leech \
+        leech_compose_cmd -p "$proj_name" up -d leech
+        sleep 1
+        cid=$(podman ps -q --filter "name=${proj_name}" 2>/dev/null | head -1)
+        [[ -n "$cid" ]] && podman exec -i -t -u claude "${oc_envs[@]}" "$cid" \
           /bin/bash -c 'cd /workspace/mnt && opencode'
       else
+        # Always use up -d + podman exec (never podman-compose exec which doesn't support -it)
         leech_compose_cmd -p "$proj_name" up -d leech
-        leech_compose_cmd -p "$proj_name" exec -it -u claude \
-          $analysis_env "${oc_envs[@]}" leech bash -c 'cd /workspace/mnt && exec opencode'
+        sleep 1
+        cid=$(podman ps -q --filter "name=${proj_name}" 2>/dev/null | head -1)
+        [[ -n "$cid" ]] && podman exec -i -t -u claude $analysis_env "${oc_envs[@]}" "$cid" \
+          /bin/bash -c 'cd /workspace/mnt && exec opencode'
       fi
       ;;
 
@@ -386,41 +415,37 @@ leech_session_run() {
       if [[ -z "$extra_volumes" ]]; then
         local cid
         # Busca por nome canônico primeiro (rápido) — funciona mesmo sem CLAUDIO_MOUNT no env
-        cid=$(docker ps -q --filter "name=^/${leech_name}$" 2>/dev/null | head -1)
+        cid=$(podman ps -q --filter "name=^/${leech_name}$" 2>/dev/null | head -1)
         # Fallback: busca por CLAUDIO_MOUNT — garante 1 container por diretório mesmo com nome diferente
         if [[ -z "$cid" ]]; then
-          cid=$(docker ps -q --filter "label=com.docker.compose.service=leech" 2>/dev/null \
-            | xargs -r -I{} docker inspect {} \
+          cid=$(podman ps -q --filter "label=com.docker.compose.service=leech" 2>/dev/null \
+            | xargs -r -I{} podman inspect {} \
                 --format '{{.Id}} {{range .Config.Env}}{{.}} {{end}}' 2>/dev/null \
             | awk -v mp="CLAUDIO_MOUNT=${mount_path}" \
                 '$0 ~ mp {print substr($1,1,12); exit}')
         fi
         if [[ -z "$cid" ]]; then
-          # Container não existe: sobe via compose e renomeia para nome canônico.
+          # Container não existe: sobe via compose
           leech_compose_cmd -p "$proj_name" up -d leech
-          local auto_name
-          auto_name=$(docker ps -f "label=com.docker.compose.project=${proj_name}" \
-            -f "label=com.docker.compose.service=leech" \
-            -f "label=com.docker.compose.oneoff=False" \
-            --format "{{.Names}}" | head -1)
-          [[ -n "$auto_name" ]] && docker rename "$auto_name" "$leech_name" 2>/dev/null || true
-          cid=$(docker ps -q --filter "name=^/${leech_name}$" 2>/dev/null | head -1)
-          docker exec -it -u claude $analysis_env $host_env \
+          # Para Podman, espera um pouco para o container ficar pronto
+          sleep 1
+          cid=$(podman ps -q --filter "name=${proj_name}" 2>/dev/null | head -1)
+          [[ -n "$cid" ]] && podman exec -i -t -u claude $analysis_env $host_env \
             -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" "$cid" \
             /bin/bash -c "${launch_cmd}"
         else
-          # Container já quente: docker exec direto (sem parsear compose YAML).
-          docker exec -it -u claude $analysis_env $host_env \
+          # Container já quente: podman exec direto (sem parsear compose YAML).
+          podman exec -i -t -u claude $analysis_env $host_env \
             -e "CLAUDIO_MOUNT=$mount_path" "$cid" \
             /bin/bash -c "cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude ${claude_args}"
         fi
       else
-        # run --rm com nome curto: leech-{6chars}
-        local short_id
-        short_id=$(tr -dc 'a-z0-9' < /dev/urandom 2>/dev/null | head -c 6 || date +%s | tail -c 6)
-        leech_compose_cmd -p "$proj_name" run --rm -it --name "leech-${short_id}" \
-          $extra_volumes $analysis_env $host_env \
-          --entrypoint /entrypoint.sh -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" leech \
+        # Extra volumes: use up -d + podman exec (podman-compose run --rm kills container)
+        leech_compose_cmd -p "$proj_name" up -d leech
+        sleep 1
+        cid=$(podman ps -q --filter "name=${proj_name}" 2>/dev/null | head -1)
+        [[ -n "$cid" ]] && podman exec -i -t -u claude $analysis_env $host_env \
+          -e "CLAUDIO_MOUNT=$mount_path" -e "BOOTSTRAP_SKIP_CLEAR=1" "$cid" \
           /bin/bash -c "${launch_cmd}"
       fi
       printf '\033[?25h'
@@ -457,8 +482,11 @@ leech_session_run() {
         cursor_cmd+='exec agent'"${agent_flags}"
       fi
 
-      leech_compose_cmd -p "$proj_name" run --rm -it $extra_volumes $analysis_env $host_env \
-        --entrypoint /entrypoint.sh "${cursor_envs[@]}" leech \
+      # Use up -d + exec (never run --rm which kills container)
+      leech_compose_cmd -p "$proj_name" up -d leech
+      sleep 1
+      cid=$(podman ps -q --filter "name=${proj_name}" 2>/dev/null | head -1)
+      [[ -n "$cid" ]] && podman exec -i -t -u claude $analysis_env $host_env "${cursor_envs[@]}" "$cid" \
         /bin/bash -c "$cursor_cmd"
       ;;
 

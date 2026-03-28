@@ -1,4 +1,4 @@
-//! Docker CLI wrappers — container listing, inspection, stats, and availability check.
+//! Podman CLI wrappers — container listing, inspection, stats, and availability check (Leech uses Podman rootless).
 
 use std::process::Command;
 
@@ -23,7 +23,7 @@ pub struct ContainerStats {
 
 /// List containers matching a filter.
 pub fn list_containers(filter: &str) -> Result<Vec<ContainerInfo>> {
-    let output = Command::new("docker")
+    let output = Command::new("podman")
         .args([
             "ps",
             "-a",
@@ -33,7 +33,7 @@ pub fn list_containers(filter: &str) -> Result<Vec<ContainerInfo>> {
             "{{.Names}}\t{{.Status}}\t{{.Ports}}",
         ])
         .output()
-        .map_err(|e| LeechError::Docker(format!("docker ps: {e}")))?;
+        .map_err(|e| LeechError::Docker(format!("podman ps: {e}")))?;
 
     let stdout = String::from_utf8_lossy(&output.stdout);
     let mut containers = Vec::new();
@@ -64,7 +64,7 @@ pub fn inspect_containers(names: &[String]) -> Result<Vec<(String, bool, String,
         return Ok(Vec::new());
     }
 
-    let mut cmd = Command::new("docker");
+    let mut cmd = Command::new("podman");
     cmd.args([
         "inspect",
         "--format",
@@ -77,7 +77,7 @@ pub fn inspect_containers(names: &[String]) -> Result<Vec<(String, bool, String,
 
     let output = cmd
         .output()
-        .map_err(|e| LeechError::Docker(format!("docker inspect: {e}")))?;
+        .map_err(|e| LeechError::Docker(format!("podman inspect: {e}")))?;
 
     let stdout = String::from_utf8_lossy(&output.stdout);
     let mut results = Vec::new();
@@ -110,7 +110,7 @@ pub fn inspect_containers(names: &[String]) -> Result<Vec<(String, bool, String,
 
 /// Get docker stats (no-stream) for all containers.
 pub fn get_stats() -> Result<Vec<ContainerStats>> {
-    let output = Command::new("docker")
+    let output = Command::new("podman")
         .args([
             "stats",
             "--no-stream",
@@ -118,7 +118,7 @@ pub fn get_stats() -> Result<Vec<ContainerStats>> {
             "{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}",
         ])
         .output()
-        .map_err(|e| LeechError::Docker(format!("docker stats: {e}")))?;
+        .map_err(|e| LeechError::Docker(format!("podman stats: {e}")))?;
 
     let stdout = String::from_utf8_lossy(&output.stdout);
     let mut stats = Vec::new();
@@ -144,7 +144,7 @@ pub fn get_stats() -> Result<Vec<ContainerStats>> {
 /// Count running `claude` processes inside a container via `docker top`.
 /// Returns 0 if the container is not running or docker top fails.
 pub fn count_claude_procs(container: &str) -> usize {
-    let output = Command::new("docker")
+    let output = Command::new("podman")
         .args(["top", container])
         .output()
         .unwrap_or_else(|_| std::process::Output {
@@ -168,7 +168,7 @@ pub fn count_claude_procs(container: &str) -> usize {
 /// Find the CID of a running container by exact name. Returns None if not found.
 pub fn find_running_container(name: &str) -> Option<String> {
     let filter = format!("name=^/{name}$");
-    let output = Command::new("docker")
+    let output = Command::new("podman")
         .args(["ps", "-q", "--filter", &filter])
         .output()
         .ok()?;
@@ -178,7 +178,7 @@ pub fn find_running_container(name: &str) -> Option<String> {
 
 /// Find the name of a compose-managed persistent (oneoff=False) container for a service.
 pub fn find_compose_container(project: &str, service: &str) -> Option<String> {
-    let output = Command::new("docker")
+    let output = Command::new("podman")
         .args([
             "ps",
             "--filter", &format!("label=com.docker.compose.project={project}"),
@@ -194,31 +194,31 @@ pub fn find_compose_container(project: &str, service: &str) -> Option<String> {
 
 /// Rename a container. Silently ignores errors (container may already have the target name).
 pub fn rename_container(old: &str, new: &str) {
-    let _ = Command::new("docker").args(["rename", old, new]).output();
+    let _ = Command::new("podman").args(["rename", old, new]).output();
 }
 
 /// Replace the current process with `docker run` using the given args directly.
 /// Used for ghost mode where we bypass docker-compose entirely.
 pub fn exec_replace_docker(args: &[&str]) -> Result<()> {
     use std::os::unix::process::CommandExt;
-    let mut cmd = Command::new("docker");
+    let mut cmd = Command::new("podman");
     cmd.args(args);
     let err = cmd.exec();
-    Err(LeechError::Docker(format!("docker run failed: {err}")))
+    Err(LeechError::Docker(format!("podman run failed: {err}")))
 }
 
 /// Replace the current process with `docker exec -it` into a container.
 /// Passes env vars and runs bash_cmd inside the container.
 pub fn exec_replace(cid: &str, env: &[(&str, &str)], bash_cmd: &str) -> Result<()> {
     use std::os::unix::process::CommandExt;
-    let mut cmd = Command::new("docker");
-    cmd.arg("exec").arg("-it");
+    let mut cmd = Command::new("podman");
+    cmd.arg("exec").arg("-i").arg("-t");
     for (k, v) in env {
         cmd.arg("-e").arg(format!("{k}={v}"));
     }
     cmd.args([cid, "/bin/bash", "-c", bash_cmd]);
     let err = cmd.exec(); // replaces the process; only returns on error
-    Err(LeechError::Docker(format!("docker exec failed: {err}")))
+    Err(LeechError::Docker(format!("podman exec failed: {err}")))
 }
 
 /// Batch-inspect a list of containers to extract their APP_ENV value.
@@ -227,7 +227,7 @@ pub fn get_dk_app_envs(names: &[String]) -> std::collections::HashMap<String, St
     if names.is_empty() {
         return std::collections::HashMap::new();
     }
-    let mut cmd = Command::new("docker");
+    let mut cmd = Command::new("podman");
     cmd.args(["inspect", "--format", "{{.Name}}|{{range .Config.Env}}{{.}} {{end}}"]);
     for n in names {
         cmd.arg(n);
@@ -255,7 +255,7 @@ pub fn get_dk_app_envs(names: &[String]) -> std::collections::HashMap<String, St
 /// Check if Docker is accessible.
 #[must_use]
 pub fn is_available() -> bool {
-    Command::new("docker")
+    Command::new("podman")
         .args(["info"])
         .stdout(std::process::Stdio::null())
         .stderr(std::process::Stdio::null())

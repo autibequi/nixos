@@ -209,7 +209,7 @@ fn do_start(
         .status()?;
     if !status.success() {
         bail!(
-            "docker compose build falhou — verifique: {}",
+            "podman-compose build falhou — verifique: {}",
             startup_log.display()
         );
     }
@@ -253,7 +253,7 @@ fn do_start(
         .status()?;
     if !status.success() {
         bail!(
-            "docker compose up falhou — verifique: {}",
+            "podman-compose up falhou — verifique: {}",
             startup_log.display()
         );
     }
@@ -476,14 +476,14 @@ fn do_shell(
         let status = if let Some(c) = cmd {
             eprintln!("=== [{svc}] exec: {c} ===");
             Command::new("docker")
-                .args(["exec", "-it", &container_name, "sh", "-l", "-c", c])
+                .args(["exec", "-i", "-t", &container_name, "sh", "-l", "-c", c])
                 .stdin(Stdio::inherit())
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit())
                 .status()?
         } else {
             Command::new("docker")
-                .args(["exec", "-it", &container_name, "sh", "-l"])
+                .args(["exec", "-i", "-t", &container_name, "sh", "-l"])
                 .stdin(Stdio::inherit())
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit())
@@ -549,7 +549,7 @@ fn do_shell(
             .stderr(Stdio::inherit());
     } else {
         docker
-            .arg("-it")
+            /* removed -i -t */
             .arg("golang:1.24.4-alpine")
             .args([
                 "sh",
@@ -595,7 +595,7 @@ fn do_install(
 
         let npm_token = std::env::var("NPM_TOKEN").unwrap_or_default();
         let status = Command::new("docker")
-            .args(["run", "--init", "--rm", "-it"])
+            .args(["run", "--init", "--rm"])
             .args(["-v", &format!("{ssh_dir}:/ssh-host:ro")])
             .args(["-v", &format!("{npmrc}:/npmrc-host:ro")])
             .args(["-v", &format!("{src}:/app")])
@@ -639,7 +639,7 @@ fn do_install(
         );
 
         let status = Command::new("docker")
-            .args(["run", "--init", "--rm", "-it"])
+            .args(["run", "--init", "--rm"])
             .args(["-v", &format!("{ssh_dir}:/ssh-host:ro")])
             .args(["-v", &format!("{src}:/go/app")])
             .args(["-v", "leech-go-mod-cache:/go/pkg/mod"])
@@ -692,7 +692,7 @@ fn do_build(
         .stderr(Stdio::inherit())
         .status()?;
     if !status.success() {
-        bail!("docker compose build falhou");
+        bail!("podman-compose build falhou");
     }
     Ok(())
 }

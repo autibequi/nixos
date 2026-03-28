@@ -4,6 +4,8 @@ use anyhow::Result;
 use leech_cli::{
     compose::ComposeCmd, config::LeechConfig, engine::Engine, paths, session::SessionRunner,
 };
+use std::os::unix::process::CommandExt;
+use std::process::Command;
 
 use super::SessionFlags;
 
@@ -73,44 +75,48 @@ pub fn shell(dir: Option<String>, host: bool) -> Result<()> {
     let config = LeechConfig::load()?;
     let host_active = host || config.session.host;
     let mount = paths::resolve_dir(dir.as_deref())?;
-    let slug = paths::proj_slug(&mount);
-    let proj = if host_active {
-        format!("{}-host", paths::proj_name(&slug, None))
-    } else {
-        paths::proj_name(&slug, None)
-    };
+    let home = paths::home().to_string_lossy().into_owned();
+    let leech_root = paths::leech_root().to_string_lossy().into_owned();
+    let obsidian_path = paths::obsidian_ensured();
 
-    let mut cmd = ComposeCmd::new()
-        .project(&proj)
-        .env("CLAUDIO_MOUNT", &mount.to_string_lossy())
-        .env("CLAUDIO_MOUNT_OPTS", "rw")
-        .env("OBSIDIAN_PATH", &paths::obsidian_ensured())
-        .env("HOME", &paths::home().to_string_lossy())
-        .env("DOCKER_GID", &config.docker_gid().to_string())
-        .env("JOURNAL_GID", &config.system.journal_gid.to_string())
-        .env("LEECH_ROOT", &paths::leech_root().to_string_lossy())
-        .env("LEECH_NIXOS_DIR", &paths::nixos_dir().to_string_lossy());
-    if host_active {
-        cmd = cmd.env("CLAUDIO_HOST_OPTS", "rw");
-    }
-
-    let host_attached_env = format!("HOST_ATTACHED={}", if host_active { "1" } else { "0" });
     let mount_env = format!("CLAUDIO_MOUNT={}", mount.display());
-    let args = vec![
-        "run",
-        "--rm",
-        "-it",
-        "--entrypoint",
-        "/entrypoint.sh",
-        "-e", &mount_env, "-e", "BOOTSTRAP_SKIP_CLEAR=1",
-        "-e", &host_attached_env,
-        "leech", "/bin/bash", "-c",
-        ". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec bash",
-    ];
+    let host_attached_env = format!("HOST_ATTACHED={}", if host_active { "1" } else { "0" });
+
+    // Use podman run directly (podman-compose doesn't support -i -t flags)
+    let mut cmd = Command::new("podman");
+    cmd.args(["run", "--rm", "-i", "-t"]);
+
+    // Volumes
+    cmd.args(["-v", &format!("{}:/workspace/mnt:rw", mount.display())]);
+    cmd.args(["-v", &format!("{obsidian_path}:/workspace/obsidian:rw")]);
+    cmd.args(["-v", &format!("{leech_root}:/workspace/self:ro")]);
+    cmd.args(["-v", &format!("{home}/.claude:/home/claude/.claude:rw")]);
+    cmd.args(["-v", &format!("{home}/.leech:/home/claude/.leech:rw")]);
+    cmd.args(["-v", "podman.sock:/run/user/1000/podman/podman.sock"]);
+
     if host_active {
-        // insert before "leech" to pass HOST_ATTACHED — already in args above
+        cmd.args(["-v", &format!("{home}/nixos:/workspace/host:rw")]);
     }
-    Ok(cmd.execute(&args)?)
+
+    // Environment
+    cmd.args(["-e", &mount_env]);
+    cmd.args(["-e", &host_attached_env]);
+    cmd.args(["-e", "BOOTSTRAP_SKIP_CLEAR=1"]);
+    cmd.args(["-e", &format!("DOCKER_GID={}", config.docker_gid())]);
+    cmd.args(["-e", &format!("JOURNAL_GID={}", config.system.journal_gid)]);
+    cmd.args(["-e", &format!("HOME={home}")]);
+    cmd.args(["-e", &format!("LEECH_ROOT={leech_root}")]);
+    cmd.args(["-e", &format!("LEECH_NIXOS_DIR={}", paths::nixos_dir().to_string_lossy())]);
+    cmd.args(["-e", &format!("XDG_DATA_HOME={}", paths::xdg_data_home())]);
+    cmd.args(["-e", &format!("XDG_RUNTIME_DIR={}", paths::xdg_runtime_dir())]);
+
+    // Entrypoint and command
+    cmd.args(["--entrypoint", "/entrypoint.sh"]);
+    cmd.args(["leech", "/bin/bash", "-c"]);
+    cmd.arg(". /workspace/self/scripts/bootstrap.sh; cd /workspace/mnt && exec bash");
+
+    let err = cmd.exec();
+    Err(anyhow::anyhow!("podman run failed: {err}"))
 }
 
 /// `leech leech` — ephemeral session with auto-detect.

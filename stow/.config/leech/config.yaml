@@ -6,7 +6,7 @@
 session:
   engine: claude          # claude | cursor | opencode
   # model: haiku         # haiku | sonnet | opus | full model ID
-  host: true              # mount ~/nixos in /workspace/host
+  host: false             # mount ~/nixos in /workspace/host
   rw: true                # mount read-write
   splash: true            # loading screen
   # init_md: contexto.md  # initial markdown file

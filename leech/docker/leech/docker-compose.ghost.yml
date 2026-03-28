@@ -2,8 +2,9 @@ x-env-base: &env-base
   PATH: /home/claude/.local/bin:/home/claude/.nix-profile/bin:/home/claude/.local/bin:/usr/bin:/bin
   CLAUDE_ENV: container
   XDG_CACHE_HOME: /workspace/.ephemeral/cache
-  DOCKER_HOST: tcp://localhost:2375
-  WAYLAND_DISPLAY: ${WAYLAND_DISPLAY:-wayland-1}
+  # Podman user socket (rootless)
+  DOCKER_HOST: unix:///run/user/1000/podman/podman.sock
+  WAYLAND_DISPLAY: ${WAYLAND_DISPLAY}
   XDG_RUNTIME_DIR: /run/user/1000
   PULSE_SERVER: unix:/run/user/1000/pulse/native
   EDITOR: vim
@@ -19,27 +20,27 @@ x-extra-hosts: &extra-hosts
 
 # Ghost mode: igual ao leech normal mas SEM /workspace/self (source code oculto do agente).
 x-base-volumes: &base-volumes
-  - ${OBSIDIAN_PATH:-${HOME}/.ovault/Work}:/workspace/obsidian
-  - ${CLAUDIO_MOUNT:-${HOME}/nixos}:/workspace/mnt:${CLAUDIO_MOUNT_OPTS:-rw}
+  - ${OBSIDIAN_PATH}:/workspace/obsidian
+  - ${CLAUDIO_MOUNT}:/workspace/mnt:${CLAUDIO_MOUNT_OPTS}
   - ${HOME}/.claude:/home/claude/.claude
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/claude.bypass.json:/home/claude/.claude/settings.json:rw
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/skills:/home/claude/.claude/skills
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/commands:/home/claude/.claude/commands
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/agents:/home/claude/.claude/agents
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/hooks:/home/claude/.claude/hooks:ro
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/scripts:/home/claude/.claude/scripts
+  - ${LEECH_ROOT}/claude.bypass.json:/home/claude/.claude/settings.json:rw
+  - ${LEECH_ROOT}/skills:/home/claude/.claude/skills
+  - ${LEECH_ROOT}/commands:/home/claude/.claude/commands
+  - ${LEECH_ROOT}/agents:/home/claude/.claude/agents
+  - ${LEECH_ROOT}/hooks:/home/claude/.claude/hooks:ro
+  - ${LEECH_ROOT}/scripts:/home/claude/.claude/scripts
   - ${HOME}/.claude.json:/home/claude/.claude.json
   - ${HOME}/.cursor:/home/claude/.cursor
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/hooks/cursor:/home/claude/.cursor/leech-hooks:ro
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/hooks/cursor/hooks.json:/home/claude/.cursor/hooks.json:ro
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/skills:/home/claude/.cursor/skills
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/commands:/home/claude/.cursor/commands
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/commands:/home/claude/.cursor/rules
+  - ${LEECH_ROOT}/hooks/cursor:/home/claude/.cursor/leech-hooks:ro
+  - ${LEECH_ROOT}/hooks/cursor/hooks.json:/home/claude/.cursor/hooks.json:ro
+  - ${LEECH_ROOT}/skills:/home/claude/.cursor/skills
+  - ${LEECH_ROOT}/commands:/home/claude/.cursor/commands
+  - ${LEECH_ROOT}/commands:/home/claude/.cursor/rules
   - cursor_config:/home/claude/.config/cursor
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/.opencode:/home/claude/.config/opencode
+  - ${LEECH_ROOT}/.opencode:/home/claude/.config/opencode
   - ${HOME}/projects:/home/claude/projects
-  - ${XDG_RUNTIME_DIR:-/run/user/1000}/${WAYLAND_DISPLAY:-wayland-1}:/run/user/1000/${WAYLAND_DISPLAY:-wayland-1}
-  - ${XDG_RUNTIME_DIR:-/run/user/1000}/pulse:/run/user/1000/pulse
+  - ${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:/run/user/1000/${WAYLAND_DISPLAY}
+  - ${XDG_RUNTIME_DIR}/pulse:/run/user/1000/pulse
   - /proc/meminfo:/host/proc/meminfo:ro
   - /proc/loadavg:/host/proc/loadavg:ro
   - /proc/uptime:/host/proc/uptime:ro
@@ -56,12 +57,13 @@ x-base-volumes: &base-volumes
   - /sys/class/thermal:/host/sys/class/thermal:ro
   - /sys/class/net:/host/sys/class/net:ro
   - /sys/block:/host/sys/block:ro
-  - ${XDG_DATA_HOME:-${HOME}/.local/share}/leech/logs/dockerized:/workspace/logs/docker:ro
-  - ${HOME}/.local/share/leech/containers:/workspace/dockerized
-  - ${XDG_DATA_HOME:-${HOME}/.local/share}/leech:/home/claude/.local/share/leech
+  - ${XDG_DATA_HOME}/leech/logs/podmanized:/workspace/logs/podman:ro
+  - /run/user/1000/podman/podman.sock:/run/user/1000/podman/podman.sock
+  - ${HOME}/.local/share/leech/containers:/workspace/podmanized
+  - ${XDG_DATA_HOME}/leech:/home/claude/.local/share/leech
   - ${HOME}/projects:${HOME}/projects
-  - ${HOME}/nixos:${HOME}/nixos:${CLAUDIO_HOST_OPTS:-ro}
-  - ${HOME}/nixos:/workspace/host:${CLAUDIO_HOST_OPTS:-ro}
+  - ${HOME}/nixos:${HOME}/nixos:${CLAUDIO_HOST_OPTS}
+  - ${HOME}/nixos:/workspace/host:${CLAUDIO_HOST_OPTS}
   - ${HOME}/.leech:/home/claude/.leech:rw
 
 services:

@@ -5,6 +5,13 @@ RUN_GID="${LEECH_CONTAINER_GID:-1000}"
 
 HOME=/root nix-daemon > /dev/null 2>&1 &
 
+# Install Claude Code on first boot (once)
+if [ ! -f /home/claude/.claude-installed ]; then
+  mkdir -p /home/claude/.local/bin /home/claude/.local/share
+  (cd /home && curl -fsSL https://claude.ai/install.sh | bash 2>/dev/null || true)
+  touch /home/claude/.claude-installed
+fi
+
 mkdir -p \
   /workspace/.ephemeral/locks /workspace/.ephemeral/notes /workspace/.ephemeral/scratch \
   /workspace/.ephemeral/cache \

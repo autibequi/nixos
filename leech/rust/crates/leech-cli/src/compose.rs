@@ -1,11 +1,11 @@
-//! `ComposeCmd` builder — wraps `docker compose` with file, env-file, project, and env-var support.
+//! `ComposeCmd` builder — wraps `podman-compose` with file, env-file, project, and env-var support.
 
 use std::process::Command;
 
 use crate::error::{Result, LeechError};
 use crate::paths;
 
-/// Builder for `docker compose` commands.
+/// Builder for `podman-compose` commands (Leech uses Podman rootless).
 #[derive(Debug)]
 pub struct ComposeCmd {
     compose_file: String,
@@ -52,9 +52,9 @@ impl ComposeCmd {
     }
 
     /// Build the base Command with compose file, env file, and project.
+    /// Uses podman-compose for Leech (Podman rootless support).
     fn base_command(&self) -> Command {
-        let mut cmd = Command::new("docker");
-        cmd.arg("compose");
+        let mut cmd = Command::new("podman-compose");
         cmd.arg("-f").arg(&self.compose_file);
         if let Some(ef) = &self.env_file {
             cmd.arg("--env-file").arg(ef);
@@ -79,11 +79,11 @@ impl ComposeCmd {
             .stdout(std::process::Stdio::inherit())
             .stderr(std::process::Stdio::inherit())
             .status()
-            .map_err(|e| LeechError::Compose(format!("failed to run docker compose: {e}")))?;
+            .map_err(|e| LeechError::Compose(format!("failed to run podman-compose: {e}")))?;
 
         if !status.success() {
             return Err(LeechError::Compose(format!(
-                "docker compose exited with code {}",
+                "podman-compose exited with code {}",
                 status.code().unwrap_or(-1)
             )));
         }

@@ -4,9 +4,9 @@ x-env-base: &env-base
   CLAUDE_ENV: container
   # Cache (Bun/OpenCode, etc.) — volume efémero já com chown no entrypoint; evita EACCES em ~/.cache
   XDG_CACHE_HOME: /workspace/.ephemeral/cache
-  # Docker via proxy seguro (sem socket direto — EXEC e BUILD bloqueados)
-  DOCKER_HOST: tcp://localhost:2375
-  WAYLAND_DISPLAY: ${WAYLAND_DISPLAY:-wayland-1}
+  # Podman user socket (rootless)
+  DOCKER_HOST: unix:///run/user/1000/podman/podman.sock
+  WAYLAND_DISPLAY: ${WAYLAND_DISPLAY}
   XDG_RUNTIME_DIR: /run/user/1000
   PULSE_SERVER: unix:/run/user/1000/pulse/native
   EDITOR: vim
@@ -23,39 +23,39 @@ x-extra-hosts: &extra-hosts
 
 # /workspace: self (leech engine), obsidian (vault), mnt (projeto), host (nixos repo, ro/rw via --host).
 x-base-volumes: &base-volumes
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}:/workspace/self
-  - ${OBSIDIAN_PATH:-${HOME}/.ovault/Work}:/workspace/obsidian
-  - ${CLAUDIO_MOUNT:-${HOME}/nixos}:/workspace/mnt:${CLAUDIO_MOUNT_OPTS:-rw}
+  - ${LEECH_ROOT}:/workspace/self
+  - ${OBSIDIAN_PATH}:/workspace/obsidian
+  - ${CLAUDIO_MOUNT}:/workspace/mnt:${CLAUDIO_MOUNT_OPTS}
   - ${HOME}/.claude:/home/claude/.claude
   # bypass: settings.json padrão para containers — sobrescreve o do host
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/claude.bypass.json:/home/claude/.claude/settings.json:rw
+  - ${LEECH_ROOT}/claude.bypass.json:/home/claude/.claude/settings.json:rw
   # leech/skills e leech/commands sobrescrevem o ~/.claude do host
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/skills:/home/claude/.claude/skills
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/commands:/home/claude/.claude/commands
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/agents:/home/claude/.claude/agents
+  - ${LEECH_ROOT}/skills:/home/claude/.claude/skills
+  - ${LEECH_ROOT}/commands:/home/claude/.claude/commands
+  - ${LEECH_ROOT}/agents:/home/claude/.claude/agents
   # Hooks: leech/hooks → Claude; leech/hooks/cursor → ~/.cursor/leech-hooks
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/hooks:/home/claude/.claude/hooks:ro
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/scripts:/home/claude/.claude/scripts
+  - ${LEECH_ROOT}/hooks:/home/claude/.claude/hooks:ro
+  - ${LEECH_ROOT}/scripts:/home/claude/.claude/scripts
   - ${HOME}/.claude.json:/home/claude/.claude.json
   # Cursor: credenciais do host + skills/commands/rules do leech
   - ${HOME}/.cursor:/home/claude/.cursor
   # Cursor: só subpasta hooks/cursor (cursor-hook + hooks.json) → leech-hooks
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/hooks/cursor:/home/claude/.cursor/leech-hooks:ro
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/hooks/cursor/hooks.json:/home/claude/.cursor/hooks.json:ro
+  - ${LEECH_ROOT}/hooks/cursor:/home/claude/.cursor/leech-hooks:ro
+  - ${LEECH_ROOT}/hooks/cursor/hooks.json:/home/claude/.cursor/hooks.json:ro
   # Mesma árvore que ~/.claude/skills — montagem total em ~/.cursor/skills (substitui o dir no container)
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/skills:/home/claude/.cursor/skills
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/commands:/home/claude/.cursor/commands
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/commands:/home/claude/.cursor/rules
+  - ${LEECH_ROOT}/skills:/home/claude/.cursor/skills
+  - ${LEECH_ROOT}/commands:/home/claude/.cursor/commands
+  - ${LEECH_ROOT}/commands:/home/claude/.cursor/rules
   # cursor_config: bind mount do host — token do `agent login` persiste entre sessões
   - ${HOME}/.config/cursor:/home/claude/.config/cursor
   # opencode
-  - ${LEECH_ROOT:-${HOME}/nixos/leech/self}/.opencode:/home/claude/.config/opencode
+  - ${LEECH_ROOT}/.opencode:/home/claude/.config/opencode
   - ${HOME}/projects:/home/claude/projects
-  - ${XDG_RUNTIME_DIR:-/run/user/1000}/${WAYLAND_DISPLAY:-wayland-1}:/run/user/1000/${WAYLAND_DISPLAY:-wayland-1}
-  - ${XDG_RUNTIME_DIR:-/run/user/1000}/pulse:/run/user/1000/pulse
+  - ${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}:/run/user/1000/${WAYLAND_DISPLAY}
+  - ${XDG_RUNTIME_DIR}/pulse:/run/user/1000/pulse
   # Tmux compartilhado host ↔ container (leech tmux run/capture)
   # Diretório (não arquivo) evita inode stale ao recriar socket
-  - ${XDG_RUNTIME_DIR:-/run/user/1000}/zion-tmux:/run/user/1000/zion-tmux:rw
+  - ${XDG_RUNTIME_DIR}/zion-tmux:/run/user/1000/zion-tmux:rw
   # Host /proc e /etc (observabilidade)
   - /proc/meminfo:/host/proc/meminfo:ro
   - /proc/loadavg:/host/proc/loadavg:ro
@@ -75,39 +75,25 @@ x-base-volumes: &base-volumes
   - /sys/class/thermal:/host/sys/class/thermal:ro
   - /sys/class/net:/host/sys/class/net:ro
   - /sys/block:/host/sys/block:ro
-  # Logs de servicos Docker (leech docker run/test) — acessiveis pelo agente
-  - ${XDG_DATA_HOME:-${HOME}/.local/share}/leech/logs/dockerized:/workspace/logs/docker:ro
-  # Docker socket removido — agente usa proxy tcp://localhost:2375 (ver service docker-proxy)
-  # Dockerized configs — agente pode editar docker-compose, .env, etc.
-  - ${HOME}/.local/share/leech/containers:/workspace/dockerized
+  # Logs de servicos Podman (leech podman run/test) — acessiveis pelo agente
+  - ${XDG_DATA_HOME}/leech/logs/podmanized:/workspace/logs/podman:ro
+  # Podman socket (rootless user socket)
+  - /run/user/1000/podman/podman.sock:/run/user/1000/podman/podman.sock
+  # Podmanized configs — agente pode editar podman-compose, .env, etc.
+  - ${HOME}/.local/share/leech/containers:/workspace/podmanized
   # Dados locais do Leech (usage cache, estado compartilhado host↔container)
-  - ${XDG_DATA_HOME:-${HOME}/.local/share}/leech:/home/claude/.local/share/leech
+  - ${XDG_DATA_HOME}/leech:/home/claude/.local/share/leech
   # Mirror mounts: host paths acessiveis dentro do container (Docker build context + daemon volumes)
   - ${HOME}/projects:${HOME}/projects
-  - ${HOME}/nixos:${HOME}/nixos:${CLAUDIO_HOST_OPTS:-ro}
+  - ${HOME}/nixos:${HOME}/nixos:${CLAUDIO_HOST_OPTS}
   # Lab mode: nixos repo editavel em /workspace/host (rw apenas quando CLAUDIO_HOST_OPTS=rw)
-  - ${HOME}/nixos:/workspace/host:${CLAUDIO_HOST_OPTS:-ro}
+  - ${HOME}/nixos:/workspace/host:${CLAUDIO_HOST_OPTS}
   # NÃO montar volume em /nix: volume vazio substitui o store da imagem → /bin/bash quebra
   # (symlink para /nix/store) e o kernel acusa "exec /entrypoint.sh: no such file or directory".
   # Canal de comunicação rápida host ↔ agente
   - ${HOME}/.leech:/home/claude/.leech:rw
 
 services:
-  docker-proxy:
-    container_name: docker-proxy
-    # Proxy granular: só /logs (GET) + /restart (POST) + info/ping/version
-    # docker inspect bloqueado — env vars de containers nunca expostos
-    image: nginx:alpine
-    restart: unless-stopped
-    ports:
-      # Apenas localhost — não expõe para rede externa
-      - "127.0.0.1:2375:2375"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./docker-socket-filter.conf:/etc/nginx/conf.d/default.conf:ro
-    networks:
-      - default
-
   leech:
     build:
       context: .
@@ -115,8 +101,6 @@ services:
     image: leech
     mem_limit: 12g
     memswap_limit: 12g
-    # tini como PID1: reap de zombies (bash/agent)
-    init: true
     network_mode: host
     stdin_open: true
     tty: true
