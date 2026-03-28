@@ -8,7 +8,7 @@ nixos_dir    := env_var_or_default("LEECH_NIXOS_DIR", env_var("HOME") + "/nixos"
 cli_dir      := justfile_directory()
 bin_dest     := nixos_dir + "/stow/.local/bin/leech"
 hooks_dir    := nixos_dir + "/leech/hooks"
-compose_file := cli_dir + "/docker-compose.leech.yml"
+compose_file := cli_dir + "/../docker/leech/docker-compose.leech.yml"
 env_file     := cli_dir + "/.env"
 
 # Lista receitas disponíveis
@@ -28,12 +28,12 @@ _compose *args:
 
 # Build da imagem base lenta (nixpkgs + cursor CLI) — rodar só quando mudar pacotes
 build-base:
-    DOCKER_BUILDKIT=1 docker build -f Dockerfile.claude.base -t leech-base:latest .
+    DOCKER_BUILDKIT=1 docker build -f ../docker/leech/Dockerfile.claude.base -t leech-base:latest ../docker/leech
 
 # Build da imagem rápida — builda a base automaticamente se não existir
 build:
     @docker image inspect leech-base:latest > /dev/null 2>&1 || just build-base
-    DOCKER_BUILDKIT=1 docker build -f Dockerfile.claude -t leech .
+    DOCKER_BUILDKIT=1 docker build -f ../docker/leech/Dockerfile.claude -t leech ../docker/leech
 
 # Para todos os containers do projeto
 down:
