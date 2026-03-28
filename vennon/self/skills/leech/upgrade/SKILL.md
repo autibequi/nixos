@@ -58,7 +58,7 @@ Struct unificada: `LeechConfig` com sub-structs `session`, `runner`, `agents`, `
 | CLI — novo comando ou flag | `/workspace/host/leech/rust/crates/leech-cli/src/` | Sim |
 | CLI — logica de comando existente | `/workspace/host/leech/rust/crates/leech-cli/src/commands/` | Sim |
 | Docker — compose, Dockerfile | `/workspace/host/leech/docker/` | Sim |
-| Agente — comportamento, schedule, model | `/workspace/self/agents/<nome>/agent.md` | Nao |
+| Agente — comportamento, schedule, model | `/workspace/self/ego/<nome>/agent.md` | Nao |
 | Skill — criar ou atualizar | `/workspace/self/skills/` | Nao |
 | Hook — pre/post-tool, session-start | `/workspace/self/hooks/` | Nao |
 | Script utilitario | `/workspace/self/scripts/` | Nao |
@@ -129,7 +129,7 @@ Editar diretamente em `/workspace/self/`. Nao precisa de worktree porque `/works
 ```bash
 # Editar card
 # Validar frontmatter obrigatorio
-grep -E '^(model|max_turns|timeout|description)' /workspace/self/agents/<nome>/agent.md
+grep -E '^(model|max_turns|timeout|description)' /workspace/self/ego/<nome>/agent.md
 ```
 
 Campos obrigatorios no frontmatter do agente:
@@ -235,7 +235,7 @@ proximo:
 
 ### Adicionar novo agente
 
-1. Criar `/workspace/self/agents/<nome>/agent.md` com frontmatter completo
+1. Criar `/workspace/self/ego/<nome>/agent.md` com frontmatter completo
 2. Testar card: `yaa agents run <nome>` (ou dry-run verificando o card)
 3. Registrar no vault Obsidian se for agente permanente
 

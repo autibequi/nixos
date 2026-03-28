@@ -121,7 +121,7 @@ cursor://file//home/pedrinho/<caminho>:<linha>:<coluna>
 | `/home/claude/.claude/scripts/` | `/home/pedrinho/nixos/self/scripts/` |
 | `/home/claude/.claude/skills/` | `/home/pedrinho/nixos/self/skills/` |
 | `/home/claude/.claude/commands/` | `/home/pedrinho/nixos/self/commands/` |
-| `/home/claude/.claude/agents/` | `/home/pedrinho/nixos/self/agents/` |
+| `/home/claude/.claude/ego/` | `/home/pedrinho/nixos/self/ego/` |
 | `/home/claude/.claude/hooks/` | `/home/pedrinho/nixos/self/hooks/` |
 | `/workspace/self/` | `/home/pedrinho/nixos/self/` |
 

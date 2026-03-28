@@ -106,4 +106,4 @@ Antes de criar o card no DASHBOARD, verificar:
 - [ ] Tem secao "Prioridade"
 - [ ] Paths estao corretos e arquivos referenciados existem
 - [ ] Card no DASHBOARD aponta pro briefing certo (`briefing:projects/<nome>/BRIEFING.md`)
-- [ ] Agente especificado no card existe em `self/agents/`
+- [ ] Agente especificado no card existe em `self/ego/`

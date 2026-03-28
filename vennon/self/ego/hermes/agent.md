@@ -87,9 +87,15 @@ e. Despachar via Agent tool (FOREGROUND — esperar resultado):
 Agent(
   subagent_type = <agente do card>,
   model = <modelo do card>,
+  description = "Hermes › <AGENTE em maiúsculas> @ <nome-do-card>",
   prompt = <conteudo do briefing> + "Ler memory.md em bedrooms/<agente>/. Registrar ciclo ao final."
 )
 ```
+
+Exemplos de description:
+- card `mudanca-cwb` com agente `hefesto` → `"Hermes › HEFESTO @ mudanca-cwb"`
+- card `keeper` com agente `keeper` → `"Hermes › KEEPER @ keeper"`
+- card `imobiltracker` com agente `venture` → `"Hermes › VENTURE @ imobiltracker"`
 
 f. Apos subagente retornar — OBRIGATORIO, na mesma edicao do DASHBOARD:
    - REMOVER o card da coluna DOING

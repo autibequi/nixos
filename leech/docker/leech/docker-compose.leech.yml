@@ -32,7 +32,7 @@ x-base-volumes: &base-volumes
   # leech/skills e leech/commands sobrescrevem o ~/.claude do host
   - ${LEECH_ROOT}/skills:/home/claude/.claude/skills
   - ${LEECH_ROOT}/commands:/home/claude/.claude/commands
-  - ${LEECH_ROOT}/agents:/home/claude/.claude/agents
+  - ${LEECH_ROOT}/ego:/home/claude/.claude/agents
   # Hooks: leech/hooks → Claude; leech/hooks/cursor → ~/.cursor/leech-hooks
   - ${LEECH_ROOT}/hooks:/home/claude/.claude/hooks:ro
   - ${LEECH_ROOT}/scripts:/home/claude/.claude/scripts

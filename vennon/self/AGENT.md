@@ -26,7 +26,7 @@
 | **hefesto** | Mestre construtor. Default universal — todas as skills. |
 | **venture** | Business discovery. Mercado, validacao, MVP. |
 
-Definicoes completas: `self/agents/<nome>/agent.md`
+Definicoes completas: `self/ego/<nome>/agent.md`
 Bedrooms: `obsidian/bedrooms/<nome>/`
 
 ## Card sem #agente → Hefesto

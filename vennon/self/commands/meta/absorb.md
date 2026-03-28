@@ -160,7 +160,7 @@ Mapeie as skills e capacidades atuais do Leech:
 1. Todos os SKILL.md em /skills/ — nome e descricao
 2. Commands em /leech/commands/ — nome e proposito
 3. /leech/system/DIRETRIZES.md — regras cross-cutting
-4. /leech/agents/ — agentes disponiveis
+4. /leech/ego/ — agentes disponiveis
 "
 ```
 
@@ -250,13 +250,13 @@ Identifique:
 | Contexto de projeto | `/workspace/self/system/memory/project_*.md` |
 | Referência externa | `/workspace/self/system/memory/reference_*.md` |
 | Melhoria em skill existente | editar `/workspace/self/skills/*/SKILL.md` |
-| Comportamento de agente mudou | editar `/workspace/self/agents/*/agent.md` |
+| Comportamento de agente mudou | editar `/workspace/self/ego/*/agent.md` |
 | Regra fundamental | sugerir via inbox (não editar CLAUDE.md direto) |
 
 **Paths:**
 - Memórias: `/workspace/self/system/memory/` + `MEMORY.md`
 - Skills: `/workspace/self/skills/`
-- Agents: `/workspace/self/agents/`
+- Agents: `/workspace/self/ego/`
 - Commands: `/workspace/self/commands/`
 
 ### 3. Skills disponíveis (para identificar gaps ou melhorias)
@@ -280,7 +280,7 @@ ls /workspace/self/commands/
 ## Absorb — Sessão cristalizada
 
 **Memórias salvas/atualizadas:** lista
-**Leech atualizado:** skills/agents/commands modificados
+**Leech atualizado:** skills/ego/commands modificados
 **Sugestões:** o que precisa aprovação do usuário
 **Nada novo:** se não havia o que absorver
 ```

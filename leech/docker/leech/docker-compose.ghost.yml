@@ -26,7 +26,7 @@ x-base-volumes: &base-volumes
   - ${LEECH_ROOT}/claude.bypass.json:/home/claude/.claude/settings.json:rw
   - ${LEECH_ROOT}/skills:/home/claude/.claude/skills
   - ${LEECH_ROOT}/commands:/home/claude/.claude/commands
-  - ${LEECH_ROOT}/agents:/home/claude/.claude/agents
+  - ${LEECH_ROOT}/ego:/home/claude/.claude/agents
   - ${LEECH_ROOT}/hooks:/home/claude/.claude/hooks:ro
   - ${LEECH_ROOT}/scripts:/home/claude/.claude/scripts
   - ${HOME}/.claude.json:/home/claude/.claude.json

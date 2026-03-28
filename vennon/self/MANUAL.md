@@ -174,7 +174,7 @@ Scripts auxiliares usados por outros componentes (task-runner, etc.).
 Tudo que foi removido da estrutura ativa mas preservado pra referencia.
 - `oldself/_archive/core-docs/` — 12 docs antigos que foram consolidados
 - `oldself/skills_archive/` — 18 skills nicho arquivadas
-- `oldself/agents-*` — agentes deprecated
+- `oldself/ego-*` — agentes deprecated
 
 ---
 
@@ -261,5 +261,5 @@ cp self/_archive/core-docs/BOOT.md self/BOOT.md
 mv self/skills/_archive/code-flutter self/skills/code/flutter
 
 # Reativar um agente
-rm self/agents/wanderer/.deprecated
+rm self/ego/wanderer/.deprecated
 ```

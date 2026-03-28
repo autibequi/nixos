@@ -14,7 +14,8 @@ cat /workspace/obsidian/DASHBOARD.md
 Usar Agent tool para despachar Hermes:
 - `subagent_type`: Hermes
 - `model`: sonnet
-- `prompt`: "Ler DASHBOARD.md e processar cards do TODO. Seguir self/agents/hermes/agent.md."
+- `description`: "Hermes › dispatcher @ DASHBOARD"
+- `prompt`: "Ler DASHBOARD.md e processar cards do TODO. Seguir self/ego/hermes/agent.md."
 
 Hermes faz o resto — ele le os cards, extrai #agente e briefing:, e despacha subagentes.
 
