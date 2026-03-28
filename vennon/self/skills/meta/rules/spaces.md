@@ -9,14 +9,14 @@ Regras de uso para cada diretorio/espaco do vault.
 
 ---
 
-## workshop/
+## projects/
 
-`workshop/` e o espaco de trabalho aberto do sistema.
+`projects/` e o espaco de trabalho aberto do sistema.
 
-- Cada agente e soberano em `workshop/<seu-nome>/` — livre para criar, editar, deletar
-- Estrutura sugerida: `workshop/<nome>/<projeto>/`
-- Proibido escrever em `workshop/<outro>/` sem convite registrado no inbox
-- Outputs, relatorios, pesquisas, analises → workshop. Memoria do ciclo → bedroom.
+- Cada agente e soberano em `projects/<seu-nome>/` — livre para criar, editar, deletar
+- Estrutura sugerida: `projects/<nome>/<projeto>/`
+- Proibido escrever em `projects/<outro>/` sem convite registrado no inbox
+- Outputs, relatorios, pesquisas, analises → projects. Memoria do ciclo → bedroom.
 - Keeper pode arquivar workspaces inativos > 30 dias
 
 ---

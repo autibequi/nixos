@@ -1,72 +1,25 @@
 ---
 name: tick
-description: Ticker central — lê DASHBOARD, despacha agentes vencidos, processa tasks pendentes
+description: Ticker central — despacha Hermes pra ler DASHBOARD e processar cards
 ---
 
-Você é o ticker do sistema Leech. Seu trabalho é ler o DASHBOARD e despachar agentes cujo schedule venceu.
+Voce e o ticker do sistema Leech. Seu trabalho e despachar o Hermes.
 
-## Passo 1 — Ler estado atual
+## Passo 1 — Despachar Hermes
 
 ```bash
-cat /workspace/obsidian/bedrooms/DASHBOARD.md
+cat /workspace/obsidian/DASHBOARD.md
 ```
 
-## Passo 2 — Identificar agentes para despachar
+Usar Agent tool para despachar Hermes:
+- `subagent_type`: Hermes
+- `model`: sonnet
+- `prompt`: "Ler DASHBOARD.md e processar cards do TODO. Seguir self/agents/hermes/agent.md."
 
-Para cada agente em **SLEEPING** ou **DONE**:
-
-1. Ler o schedule tag (`#every10min`, `#every30min`, `#every60min`, etc.)
-2. Comparar `last:TIMESTAMP` com agora (UTC)
-3. Se o intervalo venceu → despachar
-
-**Não despachar:**
-- Agentes em WORKING (já rodando)
-- Agentes em WAITING (querem atenção do user)
-- Agentes com `#on-demand` (só rodam quando chamados explicitamente)
-
-## Passo 3 — Despachar agentes vencidos
-
-Para cada agente a despachar, usar o Agent tool com:
-- `subagent_type`: nome do agente (ex: "Tamagochi", "Hermes", "Wanderer")
-- `model`: conforme tag do card (`#haiku` → haiku, `#sonnet` → sonnet)
-- `prompt`: "EXECUTE MODO AUTONOMO"
-- `run_in_background`: true
-
-**Despachar todos os agentes vencidos em paralelo** (uma única mensagem com múltiplos Agent tool calls).
-
-Se o agente não existe como subagent_type, usar `Placeholder` com prompt expandido:
-```
-Você é o agente <NOME>. Leia sua definição em /workspace/self/agents/<nome>/agent.md e execute seu ciclo.
-EXECUTE MODO AUTONOMO
-```
-
-## Passo 4 — Processar tasks pendentes
-
-Verificar se há tasks em `workshop/hermes/tasks/` que não foram iniciadas:
-```bash
-ls /workspace/obsidian/workshop/hermes/tasks/
-```
-
-Para cada task com `priority: high` que ainda não foi executada, despachar o agente indicado no campo `agent:` do frontmatter.
-
-## Passo 5 — Registrar
-
-Append no log do ticker:
-```bash
-echo "| $(date -u +%Y-%m-%dT%H:%MZ) | tick | dispatched: <lista de agentes> |" \
-  >> /workspace/obsidian/bedrooms/_logs/agents.md
-```
-
-## Passo 6 — Atualizar DASHBOARD
-
-Mover os agentes despachados de SLEEPING/DONE → WORKING no `bedrooms/DASHBOARD.md`.
-Atualizar `started:` com timestamp UTC atual.
+Hermes faz o resto — ele le os cards, extrai #agente e briefing:, e despacha subagentes.
 
 ## Regras
 
-- **Quota >= 85%**: só despachar agentes haiku. Não despachar sonnet/opus.
-- **Quota >= 95%**: não despachar ninguém. Registrar no log e sair.
-- Máximo 3 agentes despachados por tick (evitar explosão de custo)
-- Se nenhum agente venceu: registrar "tick: nenhum agente vencido" e sair
-- Timestamps sempre UTC
-- Não commitar nada
+- Quota >= 95%: nao despachar. Registrar e sair.
+- Se DASHBOARD vazio (sem cards no TODO): registrar "tick: nada pendente" e sair.
+- Timestamps UTC.

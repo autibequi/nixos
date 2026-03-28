@@ -97,17 +97,17 @@ Append ciclo novo no topo. Manter 5-10 ciclos.
 
 ## Workshop — Espaco de Trabalho Aberto
 
-`/workspace/obsidian/workshop/` e o espaco de pesquisa e producao do sistema.
+`/workspace/obsidian/projects/` e o espaco de pesquisa e producao do sistema.
 
 **Regras:**
-- Qualquer agente pode ler e escrever em `workshop/<seu-nome>/`
-- Cada agente tem sua pasta propria: `workshop/<nome>/`
-- Subtopicos por pasta: `workshop/<nome>/<projeto>/`
-- **Nao tocar no workshop de outro agente** sem convite explicito
-- Conteudo compartilhado (legado): `workshop/<topico>/` (sem namespace de agente)
+- Qualquer agente pode ler e escrever em `projects/<seu-nome>/`
+- Cada agente tem sua pasta propria: `projects/<nome>/`
+- Subtopicos por pasta: `projects/<nome>/<projeto>/`
+- **Nao tocar no projects de outro agente** sem convite explicito
+- Conteudo compartilhado (legado): `projects/<topico>/` (sem namespace de agente)
 
 ```
-workshop/
+projects/
 ├── coruja/           — pesquisa e segundo cerebro da coruja
 │   ├── monolito/     — overview, patterns, hotspots, pulse
 │   ├── bo-container/

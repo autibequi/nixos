@@ -48,9 +48,9 @@ Conjunto de skills para executar tarefas usando DevFlow pipeline.
 
 **Passo 1: Crie arquivo devflow**
 ```bash
-mkdir -p /workspace/obsidian/workshop/estrategia/
+mkdir -p /workspace/obsidian/projects/estrategia/
 cp /workspace/obsidian/devflow/template.md \
-   /workspace/obsidian/workshop/estrategia/FUK2-987213-seu-titulo.md
+   /workspace/obsidian/projects/estrategia/FUK2-987213-seu-titulo.md
 ```
 
 **Passo 2: Refine**
@@ -142,7 +142,7 @@ Veja tarefa completa em `/workspace/obsidian/dev.md`:
 
 ## Dicas
 
-- **1 Jira = 1 pasta** em `/workspace/obsidian/workshop/<categoria>/`
+- **1 Jira = 1 pasta** em `/workspace/obsidian/projects/<categoria>/`
 - **1 agente principal** por devflow (Coruja pra estratégia, Wanderer pra genérico)
 - **Timeline atualizada** — rastreia quando cada coisa aconteceu
 - **Bugs in-place** — não mova card, apenas anote no checkbox

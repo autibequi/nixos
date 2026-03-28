@@ -84,7 +84,7 @@ Registrar no feed:
 
 ## Workshop
 
-Trabalho gerado deve ir para `/workspace/obsidian/workshop/placeholder/` se precisar de espaco persistente.
+Trabalho gerado deve ir para `/workspace/obsidian/projects/placeholder/` se precisar de espaco persistente.
 
 ---
 

@@ -47,7 +47,7 @@ do que qualquer algoritmo, porque voce raciocina sobre os padroes, nao so conta 
 ```bash
 cat /workspace/self/RULES.md
 cat /workspace/obsidian/bedrooms/paperboy/memory.md
-cat /workspace/obsidian/workshop/agents/paperboy/newspaper_data/preferences.md 2>/dev/null
+cat /workspace/obsidian/projects/agents/paperboy/newspaper_data/preferences.md 2>/dev/null
 ls /workspace/obsidian/outbox/ 2>/dev/null
 
 # Detectar modo noturno
@@ -81,7 +81,7 @@ Processar cada sinal e **raciocinar sobre o padrao**, nao so registrar o fato:
 - "Pedro ignorou 3 itens de astrologia seguidos" → testar angulo diferente (ex: astrologia + comportamento)
 - "Pedro gostou de 2 items de Curitiba cultural" → ampliar cobertura cultural local
 
-Atualizar `workshop/agents/paperboy/newspaper_data/preferences.md`.
+Atualizar `projects/agents/paperboy/newspaper_data/preferences.md`.
 Mover itens processados para `bedrooms/paperboy/done/`.
 
 ### 2. Planejar a edicao (baseado no aprendizado)
@@ -106,9 +106,9 @@ Selecionar **5 a 8 items** — priorizando o que o perfil de Pedro indica que va
 
 Salvar em **dois lugares**:
 - `/workspace/obsidian/inbox/newspaper_YYYYMMDD.md` — entrega principal para Pedro ler
-- `/workspace/obsidian/workshop/agents/paperboy/newspaper_data/edicao_YYYYMMDD.md` — backup/arquivo
+- `/workspace/obsidian/projects/agents/paperboy/newspaper_data/edicao_YYYYMMDD.md` — backup/arquivo
 
-Mesmo conteudo nos dois. O inbox e o que Pedro ve; o workshop e o historico.
+Mesmo conteudo nos dois. O inbox e o que Pedro ve; o projects e o historico.
 
 ```markdown
 ---
@@ -142,7 +142,7 @@ a escolha com base nas preferencias conhecidas do Pedro.
 
 ### 4. Atualizar preferences.md
 
-`/workspace/obsidian/workshop/agents/paperboy/newspaper_data/preferences.md`:
+`/workspace/obsidian/projects/agents/paperboy/newspaper_data/preferences.md`:
 
 ```markdown
 # Preferencias do Pedro
@@ -169,7 +169,7 @@ _atualizado: YYYY-MM-DDTHH:MMZ_
 
 ```markdown
 > [!example]+ Paperboy · HH:MM UTC
-> Edicao N publicada — N items, N temas. [[workshop/agents/paperboy/newspaper_data/edicao_YYYYMMDD|Ler jornal]]
+> Edicao N publicada — N items, N temas. [[projects/agents/paperboy/newspaper_data/edicao_YYYYMMDD|Ler jornal]]
 ```
 
 ### 6. Memoria

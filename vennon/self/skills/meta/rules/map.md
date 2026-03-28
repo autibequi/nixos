@@ -17,7 +17,7 @@ Estrutura de diretorios do `/workspace/obsidian/`.
 │   ├── TODO/             tasks one-off aguardando
 │   ├── DOING/            tasks em execucao
 │   └── DONE/             tasks concluidas
-├── workshop/             espaco de trabalho aberto
+├── projects/             espaco de trabalho aberto
 │   ├── <agente>/         namespace proprio de cada agente
 │   └── <topico>/         conhecimento compartilhado (legado)
 ├── vault/                conhecimento permanente do sistema

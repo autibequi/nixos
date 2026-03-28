@@ -40,17 +40,6 @@ HOST_ATTACHED="${HOST_ATTACHED:-0}"
 
 # ── Injeta LITE + ENV + OBSIDIAN ──────────────────────────────────────────────
 inject_full_context() {
-  # LITE
-  if [ "$LEECH_DEBUG" = "OFF" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
-    LITE_MD="$WS/leech/system/LITE.md"
-    [ -f "$LITE_MD" ] || LITE_MD="/workspace/self/system/LITE.md"
-    if [ -f "$LITE_MD" ]; then
-      echo "---LITE---"
-      cat "$LITE_MD"
-      echo "---/LITE---"
-    fi
-  fi
-
   # ENV
   echo "---ENV---"
   if [ "$IN_DOCKER" = "1" ]; then
@@ -105,7 +94,7 @@ LEECH_REPOS
 
   # OBSIDIAN
   echo "---OBSIDIAN---"
-  echo "REGRA: regras do vault em \`self/RULES.md\` (entrypoint) → \`self/skills/meta/rules/\` (detalhe)."
+  echo "REGRA: regras do vault em \`self/AGENT.md\` (entrypoint) → \`self/skills/meta/rules/\` (detalhe)."
   echo "Obsidian skill (templates, mermaid, graph): \`self/skills/meta/obsidian/SKILL.md\`"
   echo "CLI regras: \`/meta:rules\`"
   echo "---/OBSIDIAN---"

@@ -13,22 +13,20 @@ description: Entrypoint universal para qualquer problema — dispatcher que rote
 |---|---|
 | **Agente haiku (qualquer ciclo)** | **Sempre `thinking/lite`** — protocolo AAV obrigatório antes de qualquer ação |
 | Qualquer coisa | **Sempre começar por `thinking/investigate`** (coletar dados antes de pensar) |
-| Feature / card Jira | Fluxo thinking (passos 1-7) → `thinking/refine` — ler card com `coruja/jira` |
+| Feature / card Jira | Fluxo thinking → `brainstorm --refine` — ler card com `coruja/jira` |
 | Bug / stack trace | → `code/debug` |
 | Pedido vago | Clarificar → rotear |
-| Análise de código | → `code/analysis` |
-| Preso / loop / sem causa clara | → `thinking/brainstorm` (automático) |
-| Oportunidades de negócio / evolução de produto | → `thinking/proactive` |
+| Analise de codigo | → `code/analysis` |
+| Preso / loop / sem causa clara | → `thinking/brainstorm` |
+| Oportunidades / evolucao | → `thinking/brainstorm --proactive` |
 
 ## Sub-skills
 
 | Arquivo | Quando usar |
 |---|---|
-| `investigate` | **Sempre primeiro** — coletar logs, código, relatos, histórico |
-| `brainstorm` | Motor de ideação — recebe problema + perspectiva, decompõe em blocos, gera descobertas. Funciona standalone ou como sub-agente |
-| `refine` | Quebrar feature/spec em tasks atômicas ordenadas por camada |
-| `proactive` | Radar Pareto — filtra os 20% de ações que entregam 80% do valor, agrupa em clusters de responsabilidade, gera conteúdo que se acumula como ativo |
-| `lite` | **Obrigatório para haiku** — protocolo ASSESS/ACT/VERIFY + versões comprimidas de investigate, brainstorm, proactive e refine |
+| `investigate` | **Sempre primeiro** — coletar logs, codigo, relatos, historico |
+| `brainstorm` | Motor de ideacao + refinamento + radar proativo (3 modos: default, --refine, --proactive) |
+| `lite` | **Obrigatorio para haiku** — protocolo ASSESS/ACT/VERIFY |
 
 ---
 

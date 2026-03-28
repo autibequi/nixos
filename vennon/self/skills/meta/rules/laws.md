@@ -102,7 +102,7 @@ tasks/
 | hermes | `tasks/TODO/`, `bedrooms/_waiting/` (routing) |
 | wiseman | `wiki/leech/insights.md`, `wiki/leech/ATLAS.md`, `bedrooms/_waiting/` (ressurreicao) |
 | cada agente | `bedrooms/<seu-nome>/memory.md`, `bedrooms/<seu-nome>/DIARIO/`, `bedrooms/<seu-nome>/DESKTOP/`, `bedrooms/<seu-nome>/ARCHIVE/` |
-| qualquer agente | `workshop/<seu-nome>/` (espaco proprio) |
+| qualquer agente | `projects/<seu-nome>/` (espaco proprio) |
 | keeper | `trash/` |
 
 - Agentes NAO leem nem escrevem na memoria de outros agentes
@@ -175,15 +175,15 @@ Body: `#stepsN` define max_turns do runner.
 
 ## Lei 10 — Workshop
 
-**O workshop e territorio aberto de trabalho e pesquisa.**
+**O projects e territorio aberto de trabalho e pesquisa.**
 
-- `workshop/<nome>/` e soberano de cada agente — livre para criar, editar, deletar
-- `workshop/<nome>/<projeto>/` para subtopicos
-- **Proibido escrever no workshop de outro agente** sem convite explicito registrado em inbox
-- Outputs, relatorios, pesquisas: vao em `workshop/<nome>/` — nao em bedrooms/
+- `projects/<nome>/` e soberano de cada agente — livre para criar, editar, deletar
+- `projects/<nome>/<projeto>/` para subtopicos
+- **Proibido escrever no projects de outro agente** sem convite explicito registrado em inbox
+- Outputs, relatorios, pesquisas: vao em `projects/<nome>/` — nao em bedrooms/
 - `bedrooms/<nome>/`: apenas memoria operacional e logs do ciclo
 
-**Violacao:** agente escrevendo em `workshop/<outro>/` sem convite.
+**Violacao:** agente escrevendo em `projects/<outro>/` sem convite.
 **Correcao wiseman:** mover arquivo para namespace correto + alerta inbox.
 
 ---
@@ -201,7 +201,7 @@ Body: `#stepsN` define max_turns do runner.
 | Lei 7 (quota) | Reagendar agente para intervalo correto |
 | Lei 8 (comunicacao) | Mover arquivo para lugar correto ou deletar |
 | Lei 9 (formato card) | Corrigir formato + registrar |
-| Lei 10 (workshop) | Mover arquivo para namespace correto + alerta inbox |
+| Lei 10 (projects) | Mover arquivo para namespace correto + alerta inbox |
 
 ---
 
@@ -216,7 +216,7 @@ Body: `#stepsN` define max_turns do runner.
 | Espaco | Proposito | Quem escreve |
 |--------|-----------|--------------|
 | `bedrooms/<nome>/` | **Memoria operacional** — ciclos, logs, estado do agente. **Preferir sempre para outputs pessoais.** | O proprio agente |
-| `workshop/<nome>/` | Pesquisa, rascunhos e trabalho em andamento | O proprio agente |
+| `projects/<nome>/` | Pesquisa, rascunhos e trabalho em andamento | O proprio agente |
 | `wiki/` | Conhecimento persistente e conexoes cross-sistema | Wiseman (leech/), Wikister (estrategia/), Coruja |
 | `vault/archive/` | Arquivos historicos e materiais de referencia. **Imutavel apos arquivamento.** | Keeper (arquiva), nenhum agente cria aqui diretamente |
 | `vault/logs/` | Logs de execucao dos agentes | Runner automatico |

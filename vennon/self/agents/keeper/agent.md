@@ -63,7 +63,7 @@ Regra completa em `self/skills/meta/rules/spaces.md#done`.
 
 | Origem | TTL | Destino |
 |--------|-----|---------|
-| `workshop/hermes/tasks/` (done) | 7 dias | `vault/archive/tasks/done/YYYY-MM/` |
+| `projects/hermes/tasks/` (done) | 7 dias | `vault/archive/tasks/done/YYYY-MM/` |
 | `bedrooms/*/done/` | 14 dias | `vault/archive/bedrooms/<nome>/done/YYYY-MM/` |
 
 Registrar cada operacao em `vault/archive/ARCHIVE_LOG.md`:

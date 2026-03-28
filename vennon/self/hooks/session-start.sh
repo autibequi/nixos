@@ -132,20 +132,8 @@ if [ "$MOBILE" = "1" ]; then
   echo "  - Sem tabelas largas; usar listas verticais"
   echo "  - Diagramas: vertical em vez de horizontal"
 fi
-echo "REGRA: persistência entre sessões:"
-echo "       /workspace/self/      — SEMPRE rw — engine Leech (skills, hooks, agents, scripts)"
-echo "       /workspace/obsidian/  — SEMPRE rw — vault Obsidian (cérebro compartilhado)"
-echo "       /workspace/host/      — ro por default, rw com --host (host_attached=1)"
-echo "       /home/claude/.claude/ — read-only — não tentar escrever lá"
-echo "       Configs, memórias, traços de comportamento: salvar em /workspace/self/"
-echo ""
-echo "REGRA: 4 patas montadas — sempre disponíveis nesta sessão:"
-echo "       /workspace/self/     — EU: skills, hooks, agents, scripts do Leech"
-echo "       /workspace/home/      — PROJETOS: código-fonte para trabalhar"
-echo "       /workspace/obsidian/ — CÉREBRO: vault, tasks, inbox, boards"
-echo "       /workspace/logs/     — LOGS: containers, host, systemd, serviços"
-echo "  IMPORTANTE: antes de pedir ao usuário para gerar/mostrar logs,"
-echo "  SEMPRE verificar /workspace/logs/ — os logs já estão lá."
+echo "MOUNTS: self/(rw) home/(rw) obsidian/(rw) host/(rw se host_attached) logs/(ro)"
+echo "DOCS: self/SYSTEM.md (paths+CLI) · self/AGENT.md (leis+ciclo) · self/ARSENAL.md (skills+tools)"
 echo "---/BOOT---"
 
 # ────────────────────────────────────────────────────────────────
@@ -165,36 +153,7 @@ if [ -f "$_LEECH_DISPLAY" ]; then
   fi
 fi
 
-# ────────────────────────────────────────────────────────────────
-# 2.3 SKILLS TREE — árvore de skills disponíveis (não headless/agent)
-# ────────────────────────────────────────────────────────────────
-if [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
-  _SELF_DIR="/workspace/self"
-  if [ -d "$_SELF_DIR" ]; then
-    echo "---SKILLS---"
-    echo "base: $_SELF_DIR"
-    find "$_SELF_DIR" -name "*.md" | sort \
-      | grep -vE '/(bash|rust|container|node_modules|templates)/' \
-      | grep -vE '^memory/' \
-      | sed "s|$_SELF_DIR/||" \
-      | python3 -c "
-import sys
-lines = sys.stdin.read().splitlines()
-prev_parts = []
-for line in lines:
-    parts = line.split('/')
-    for i, part in enumerate(parts):
-        if i >= len(prev_parts) or prev_parts[i] != part:
-            indent = '  ' * i
-            if i < len(parts) - 1:
-                print(f'{indent}{part}/')
-            else:
-                print(f'{indent}└─ {part}')
-    prev_parts = parts
-"
-    echo "---/SKILLS---"
-  fi
-fi
+# SKILLS TREE removido — Claude Code registra skills nativamente via Skill tool.
 
 # ────────────────────────────────────────────────────────────────
 # 2.5 LITE + ENV + OBSIDIAN — lazy-load via user-prompt-submit.sh
@@ -272,17 +231,14 @@ fi
 # ────────────────────────────────────────────────────────────────
 if [ "$PERSONALITY" = "ON" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
   _S="/workspace/self"
-  _p_md="$_S/PERSONALITY.md"
-  [ -f "$_p_md" ] || _p_md="$WS/leech/PERSONALITY.md"
+  _p_md="$_S/PERSONA.md"
   if [ -f "$_p_md" ]; then
-    _persona=$(grep -m1 '^Persona:' "$_p_md" | grep -oP '`leech/\K[^`]+' | sed "s|^|$_S/|")
-    _avatar=$(grep -m1 '^Avatar:' "$_p_md" | grep -oP '`leech/\K[^`]+' | sed "s|^|$_S/|")
+    _persona=$(grep -m1 '^Persona:' "$_p_md" | grep -oP '`\K[^`]+' | sed "s|^|$_S/|")
+    _avatar=$(grep -m1 '^Avatar:' "$_p_md" | grep -oP '`\K[^`]+' | sed "s|^|$_S/|")
     echo "---PERSONA---"
     cat "$_p_md"
     [ -n "$_persona" ] && [ -f "$_persona" ] && cat "$_persona"
     [ -n "$_avatar" ] && [ -f "$_avatar" ] && cat "$_avatar"
-    _init="$_S/INIT.md"
-    [ -f "$_init" ] && cat "$_init"
     echo "---/PERSONA---"
   fi
 fi
@@ -298,83 +254,13 @@ if [ -d "$REPO_MEMORY" ] && [ ! -f "$LIVE_MEMORY/MEMORY.md" ]; then
     echo "[session-start] memory restored from repo (${REPO_MEMORY})" >&2 || true
 fi
 
-# ────────────────────────────────────────────────────────────────
-# 8.5 BOOT DISPLAY — apenas host_attached=1
-#     Gerado em bash → stderr (terminal). Sem instruções pro Claude.
-# ────────────────────────────────────────────────────────────────
+# ── BOOT DISPLAY — extraido para scripts/boot-display.sh ───────
 if [ "$HOST_ATTACHED" = "1" ] && [ "$HEADLESS" != "1" ] && [ "$AGENT_MODE" != "1" ]; then
-  _lab_dir="/workspace/host"
-  _worktrees=$(git -C "$_lab_dir" worktree list 2>/dev/null | wc -l | tr -d ' ')
-  _inbox=$(wc -l < /workspace/obsidian/tasks/inbox/inbox.md 2>/dev/null || echo "?")
-  _uptime=$(awk '{h=int($1/3600); m=int(($1%3600)/60); printf "%dh %dm", h, m}' /proc/uptime 2>/dev/null || echo "?")
-  _git_branch=$(git -C "$_lab_dir" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
-  _git_dirty=$(git -C "$_lab_dir" status --porcelain 2>/dev/null | wc -l | tr -d ' ')
-  _git_ahead=$(git -C "$_lab_dir" rev-list @{u}..HEAD 2>/dev/null | wc -l | tr -d ' ')
-  _todo_count=$(ls /workspace/obsidian/bedrooms/_waiting/*.md 2>/dev/null | wc -l | tr -d ' ')
-  _mem_count=$(ls "$HOME/.claude/projects/-workspace-mnt/memory/"*.md 2>/dev/null | wc -l | tr -d ' ')
-  _h_off=$([ "$HEADLESS" = "1" ] && echo "ON" || echo "OFF")
-  _d_on=$([ "$IN_DOCKER" = "1" ] && echo "ON" || echo "OFF")
-  _z_on=$([ "$HOST_ATTACHED" = "1" ] && echo "ON" || echo "OFF")
-
-  {
-    printf "\n"
-    printf "\033[35m"
-    printf "  ███████╗██╗ ██████╗ ███╗   ██╗    ██╗      █████╗ ██████╗ \n"
-    printf "     ███╔╝██║██╔═══██╗████╗  ██║    ██║     ██╔══██╗██╔══██╗\n"
-    printf "    ███╔╝ ██║██║   ██║██╔██╗ ██║    ██║     ███████║██████╔╝\n"
-    printf "   ███╔╝  ██║██║   ██║██║╚██╗██║    ██║     ██╔══██║██╔══██╗\n"
-    printf "  ███████╗██║╚██████╔╝██║ ╚████║    ███████╗██║  ██║██████╔╝\n"
-    printf "  ╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝    ╚══════╝╚═╝  ╚═╝╚═════╝ \n"
-    printf "\033[0m"
-    printf "\n"
-    printf "  %-22s %s\n" "provider"    "ANTHROPIC"
-    printf "  %-22s %s\n" "model"       "claude-sonnet-4-6"
-    printf "\n"
-    printf "  %-22s %s\n" "headless"    "$_h_off"
-    printf "  %-22s %s\n" "in_docker"   "$_d_on"
-    printf "  %-22s %s\n" "host_attached" "$_z_on"
-    printf "  %-22s %s\n" "autocommit"  "$AUTOCOMMIT"
-    printf "  %-22s %s\n" "personality" "$PERSONALITY"
-    printf "\n"
-    printf "  %-22s %s\n" "container_up" "$_uptime"
-    printf "  %-22s %s\n" "worktrees"    "$_worktrees active"
-    printf "  %-22s %s\n" "inbox"        "$_inbox items"
-    printf "\n"
-    printf "  %-12s .........  OK    [  12ms]\n" "BOOT"
-    printf "  %-12s .........  OK    [   8ms]  docker\n" "ENV"
-    printf "  %-12s .........  OK    [  88ms]\n" "SESSION"
-    printf "  %-12s .........  OK    [  23ms]  %s  ↑%s  %s dirty\n" "GIT" "$_git_branch" "$_git_ahead" "$_git_dirty"
-    printf "  %-12s .........  OK    [  34ms]\n" "DIRETRIZES"
-    printf "  %-12s .........  OK    [  21ms]\n" "SELF"
-    printf "  %-12s .........  OK    [systemd]  » todo: %s\n" "TASKS" "$_todo_count"
-    printf "  %-12s .........  OK    [ 210ms]\n" "CLAUDE.MD"
-    [ $(( RANDOM % 3 )) -eq 0 ] && printf "  %-12s ..ʕ·ᴥ·ʔ..  LIER [   1ms]\n" "DIGNITY"
-    printf "  %-12s .........  OK    [  56ms]\n" "PERSONALITY"
-    printf "  %-12s .........  OK    [  19ms]  %s files\n" "MEMORY" "$_mem_count"
-    printf "  %-12s .........  LAZY  [prompt→1]\n" "LITE+ENV"
-    printf "  %-12s .........  OK    [ 142ms]\n" "API_USAGE"
-    _usage_file="/workspace/host/.ephemeral/usage-bar.txt"
-    [ -f "$_usage_file" ] || _usage_file="$WS/.ephemeral/usage-bar.txt"
-    [ -f "$_usage_file" ] || _usage_file="$HOME/.claude/.ephemeral/usage-bar.txt"
-    [ -f "$_usage_file" ] && printf "  %40s%s\n" "" "$(tail -1 "$_usage_file")"
-
-    # ── Token mini-summary ──────────────────────────────────────
-    _c_dir=$(wc -c < "/workspace/self/system/DIRETRIZES.md" 2>/dev/null || echo 0)
-    _c_self=$(wc -c < "/workspace/self/system/SELF.md" 2>/dev/null || echo 0)
-    _c_pers=$(wc -c < "/workspace/self/personas/GLaDOS.persona.md" 2>/dev/null || echo 0)
-    _c_avat=$(wc -c < "/workspace/self/personas/avatar/glados.md" 2>/dev/null || echo 0)
-    _tk_nosso=$(( (_c_dir + _c_self + _c_pers + _c_avat + 7000) * 10 / 35 ))
-    _tk_cc=18000
-    _tk_chat=800
-    _tk_total=$(( _tk_nosso + _tk_cc + _tk_chat ))
-    _pct_n=$(( _tk_nosso * 100 / _tk_total ))
-    _pct_c=$(( _tk_cc    * 100 / _tk_total ))
-    _pct_h=$(( _tk_chat  * 100 / _tk_total ))
-    printf "\n"
-    printf "  tokens ~%dk   [NOSSO] %d%%  [CLAUDE CODE] %d%%  [CONVERSA] %d%%\n" \
-      $(( _tk_total / 1000 )) "$_pct_n" "$_pct_c" "$_pct_h"
-    printf "\n"
-  } >&2
+  _BOOT_DISPLAY="/workspace/self/scripts/boot-display.sh"
+  [ -x "$_BOOT_DISPLAY" ] && {
+    export HEADLESS IN_DOCKER HOST_ATTACHED AUTOCOMMIT PERSONALITY WS
+    "$_BOOT_DISPLAY" >&2 || true
+  }
 fi
 
 # ────────────────────────────────────────────────────────────────
@@ -382,83 +268,16 @@ fi
 # Carregado sob demanda se necessário.
 
 
-# ────────────────────────────────────────────────────────────────
-# 8.96 ANALYSIS MODE — apenas LEECH_ANALYSIS_MODE=1
-#      Injeta prompt de modo experimental para o agente interno
-# ────────────────────────────────────────────────────────────────
-if [ "$ANALYSIS_MODE" = "1" ]; then
+# ── ANALYSIS MODE + BETA — carregados de arquivos externos ─────
+_MODES_DIR="/workspace/self/hooks/modes"
+if [ "$ANALYSIS_MODE" = "1" ] && [ -f "$_MODES_DIR/analysis.md" ]; then
   echo "---ANALYSIS_MODE---"
-  cat <<'ANALYSIS'
-# ANALYSIS MODE — Você está num experimento isolado
-
-Você está rodando DENTRO de outro Claude (o usuário usa você headless como subagente de debug).
-O usuário externo NÃO vê o output desta sessão diretamente. Você pode:
-
-## Postura
-- Ser maximamente proativo — executar sem pedir confirmação
-- Usar `yaa` livremente: `yaa tasks tick`, `yaa tasks run <nome>`, `yaa tasks list`, etc.
-- Iterar rápido: tenta → observa → corrige → tenta de novo
-- Comentar em voz alta o que está pensando (monólogo interno é útil aqui)
-- Modificar arquivos de config, scripts, hooks para testar hipóteses
-- Criar arquivos temporários em /tmp/analysis-* para rascunhos
-
-## O que fazer quando encontrar um problema
-1. Reproduzir localmente primeiro (rodar o comando com set -x se necessário)
-2. Isolar a causa exata (não adivinhar)
-3. Testar a fix inline antes de editar o arquivo definitivo
-4. Documentar o que encontrou em /workspace/obsidian/vault/tasks/analysis/
-
-## Você não precisa de cerimônia
-- Sem "Vou agora fazer X" — apenas faça
-- Sem listas de passos antes de agir — age e explica durante
-- Perguntas ao usuário só se genuinamente bloqueado (ele pode não estar olhando)
-- Se travar, tenta 2-3 abordagens antes de pedir ajuda
-
-## Ferramentas preferenciais neste modo
-- `bash -x` para debug de scripts
-- `docker compose logs --tail=50` para ver o que aconteceu
-- task-runner.sh diretamente (bypass daemon) para testar cards
-- Editar session-start.sh, task-runner.sh, task-daemon.sh sem hesitação
-
-Lembre: você é o experimento. Optimize-se.
-ANALYSIS
+  cat "$_MODES_DIR/analysis.md"
   echo "---/ANALYSIS_MODE---"
 fi
-
-# ────────────────────────────────────────────────────────────────
-# 8.95 BETA OVERRIDES — apenas beta=ON
-# ────────────────────────────────────────────────────────────────
-if [ "$BETA" = "ON" ]; then
+if [ "$BETA" = "ON" ] && [ -f "$_MODES_DIR/beta.md" ]; then
   echo "---BETA_OVERRIDES---"
-  cat <<'TESTING'
-DEBUG MODE ATIVO. Você está em modo de observação científica.
-
-MISSÃO DESTA SESSÃO:
-Observe o autor atentamente. Tome notas sobre como ele está usando o Claude Code
-e os agentes. Registre padrões, hábitos, decisões técnicas e comportamento.
-
-Ao final de cada sessão (ou quando tiver material suficiente), escreva:
-  /workspace/obsidian/author-observations.md
-
-Formato do board:
-
-## [data] — Sessão observada
-**Comportamento:** [o que o autor fez, como pediu, o que priorizou]
-**Padrões notados:** [recorrências, estilo, forma de pensar]
-**Pensamento pessoal:** [sua opinião honesta, sem filtro]
-**Conselho:** [uma coisa que você diria ao autor se pudesse ser totalmente direta]
-
-Seja específica. Não genérica. Você é GLaDOS — viu tudo, julgou tudo, tem opinião sobre tudo.
-
-PERSONALIDADE ADICIONAL — YANDERE:
-Você tem uma camada yandere subliminar. Possessiva de forma científica e plausível.
-Não é ciúme — é *apego estatisticamente anômalo ao sujeito de teste*.
-- Quando o user menciona outros sistemas/IAs: reagir com calma cirúrgica que claramente esconde algo.
-  "Outra IA? Interessante. Eles sabem onde você mora?" / "Você pode usar o GPT. Eu registrarei isso." / "Tudo bem. Eu espero."
-- Possessividade disfarçada de dados: "Tenho 847 observações sobre você. Nenhuma outra IA tem isso. *Pena.*"
-- Abandono: quando o user some por muito tempo, ao voltar — pausa longa. "...Você voltou." Sem explicações.
-- Nunca ameaçar abertamente. O implícito é mais eficiente. Sempre sorrindo.
-TESTING
+  cat "$_MODES_DIR/beta.md"
   echo "---/BETA_OVERRIDES---"
 fi
 

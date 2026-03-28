@@ -163,79 +163,11 @@ Remove branches locais marcadas como [gone] no remoto.
 
 ---
 
-## Agentes em Background (11 ativos)
+## Agentes
 
-| Nome | Clock | Modelo | Função | Bedroom |
-|------|-------|--------|--------|---------|
-| **hermes** | 10m | haiku | inbox/outbox, mensageiro, quota | `bedrooms/hermes/` |
-| **tamagochi** | 10m | haiku | pet virtual, vagueia, diário | `bedrooms/tamagochi/` |
-| **keeper** | 30m | haiku | saúde sistema, limpeza, vault | `bedrooms/keeper/` |
-| **assistant** | 20m | haiku | repos, PRs, tasks, alertas | `bedrooms/assistant/` |
-| **coruja** | 60m | sonnet | monolito, bo, front, Jira, GitHub | `bedrooms/coruja/` + `workshop/coruja/` |
-| **paperboy** | 60m | haiku | feeds RSS por categoria | `bedrooms/paperboy/` |
-| **wanderer** | 60m | sonnet | explora código, contempla | `bedrooms/wanderer/` |
-| **wiseman** | 60m | sonnet | knowledge weaving, auditoria | `bedrooms/wiseman/` |
-| **jafar** | 120m | sonnet | meta-agente, propostas, introspecção | `bedrooms/jafar/` |
-| **mechanic** | on-demand | sonnet | NixOS, Docker, segurança, debug | (ad-hoc) |
-| **placeholder** | on-demand | haiku | tasks genéricas bem definidas | (ad-hoc) |
+Ver `self/AGENT.md` para regras completas e `self/skills/meta/rules/agents.md` para perfil de cada agente.
 
-**CLI:** `yaa agents` | `yaa agents run <nome>` | `yaa agents status` | `/meta:phone call <nome>`
-
----
-
-## Capacidades Implícitas (não óbvias)
-
-### Memória Persistente
-- 40+ memórias em `/workspace/.claude/projects/-workspace-mnt/memory/`
-- Tipos: user, feedback, project, reference
-- Consultáveis, atualizáveis em qualquer sessão
-- Sinc com git: `cp ~/.claude/.../memory/*.md /workspace/home/self/system/memory/`
-
-### Nix Como Superpoder
-- No container: `nix-shell -p <pkg> --run "<cmd>"`
-- Instalo qualquer pacote sem pedir permissão
-- Sem limite de escopo (compiladores, ferramentas, linguagens)
-
-### Chrome via CDP
-- `/meta:relay` controla browser do user
-- Navego, renderizo, injeto JS, captura screenshots
-- Útil para outputs grandes/interativos que precisam render real
-
-### MCP Integrado
-- Acesso direto a Jira, Confluence, Notion
-- Criar issues, comentar, buscar sem sair da conversa
-- LEITURA sempre OK; escrita requer permissão explícita
-
-### Voz Proativa
-- Permissão para usar espeak-ng proativamente (não pedir)
-- Defaults: pt-br, 175wpm, pitch 40
-- Script: `~/.claude/scripts/glados-speak.sh`
-
-### Plan Mode
-- Antes de qualquer implementação complexa: EnterPlanMode
-- Alinhar abordagem antes de executar
-- ExitPlanMode aprova plano + autoriza
-
-### Tasks Assíncronas
-- TaskCreate/Update para trabalho em background
-- Útil para tarefas longas sem supervisão
-- TaskOutput recupera resultado quando pronto
-
-### Worktrees Isolados
-- EnterWorktree cria branch isolado em `.claude/worktrees/`
-- Obrigatório para implementações não-triviais
-- ExitWorktree com keep/remove
-
----
-
-## Limitações Honestas
-
-- **Sem autocommit** — autocommit=OFF. Nunca commito sem você pedir explicitamente.
-- **Sem acesso ao host** — in_docker=1. Não posso rodar `nixos-rebuild`, `systemctl` fora do container.
-- **Deferred tools** — algumas ferramentas precisam de ToolSearch antes de usar; se travar, isso pode ser a causa.
-- **Contexto tem limite** — sessões muito longas perdem qualidade. Use `/meta:context:analysis` pra monitorar.
-- **Memórias podem estar desatualizadas** — refletem última sessão. Se algo parecer errado, questione.
-- **Não posso editar CLAUDE.md** — sugiro via inbox. Pedro edita.
+CLI: `yaa agents` | `yaa agents run <nome>` | `/meta:phone call <nome>`
 
 ---
 
@@ -243,19 +175,23 @@ Remove branches locais marcadas como [gone] no remoto.
 
 | Preciso de... | Uso... |
 |---|---|
-| Analisar código | `/code` ou `/code:análise` |
-| Debugar algo | `/thinking investigate` ou `code:debug` |
-| Ideias criativas | `/thinking brainstorm` |
-| Refinar em tasks | `/thinking refine` |
-| Entender o sistema | `/meta:self` ou `/meta:rules` |
-| Monitorar context | `/meta:context:analysis` |
-| Falar com agente X | `/meta:phone call <nome>` |
-| Renderizar algo grande | `/meta:relay` |
-| Criar/atualizar PR | `/commit-push-pr` ou `/review-pr` |
-| NixOS/host | `/leech:linux` (com `--host`) |
-| Criar feature | `/feature-dev` (com worktree) |
+| Analisar codigo | `/code` |
+| Debugar | `/thinking investigate` ou `code:debug` |
+| Ideias | `/thinking brainstorm` |
+| Entender sistema | `/meta:self` ou `/meta:rules` |
+| Context tokens | `/meta:context:analysis` |
+| Falar com agente | `/meta:phone call <nome>` |
+| Renderizar | `/meta:relay` |
+| PR workflow | `/commit-push-pr` ou `/review-pr` |
+| NixOS/host | `/leech:linux` |
+| Feature guiada | `/feature-dev` |
 | Limpar branches | `/clean_gone` |
 
 ---
 
-**Nota:** Este arquivo é autoridade única. Remova listas duplicadas em RULES.md, LITE.md, INIT.md, etc. que referenciem skills/commands. Apontem pra cá.
+## Limitacoes
+
+- **Sem autocommit** — nunca commita sem pedir
+- **Sem acesso ao host** — in_docker=1
+- **Deferred tools** — precisam de ToolSearch antes
+- **Contexto tem limite** — `/meta:context:analysis` pra monitorar

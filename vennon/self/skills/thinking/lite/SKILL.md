@@ -436,7 +436,7 @@ ESCALATION: <problema> requer raciocínio profundo. Recomendação: agendar com 
 - Debugging com hipóteses inconclusivas após 2 rodadas de Step-Back
 - Arquitetura nova sem padrão existente no codebase
 
-Criar card em `workshop/hermes/tasks/` com `model: sonnet` e descrição completa.
+Criar card em `projects/hermes/tasks/` com `model: sonnet` e descrição completa.
 
 ---
 

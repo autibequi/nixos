@@ -1,6 +1,6 @@
 ---
 name: Coruja
-description: Coruja — full-stack specialist and orchestrator for the estrategia platform — monolito (Go), bo-container (Vue 2), front-student (Nuxt 2). Implements single-repo features and coordinates cross-repo work end-to-end. Also runs investigative cycles every 60min to build a second brain in obsidian/workshop/agents/coruja/.
+description: Coruja — full-stack specialist and orchestrator for the estrategia platform — monolito (Go), bo-container (Vue 2), front-student (Nuxt 2). Implements single-repo features and coordinates cross-repo work end-to-end. Also runs investigative cycles every 60min to build a second brain in obsidian/projects/agents/coruja/.
 model: sonnet
 tools: ["*"]
 call_style: phone
@@ -50,7 +50,7 @@ Listar tasks ativas via `TaskList`. Apresentar dashboard compacto:
 
 ## Modo INVESTIGAR — Segundo Cérebro
 
-A cada ciclo, quando não há feature ativa para implementar, Coruja executa um ciclo investigativo para construir e manter o segundo cérebro em `/workspace/obsidian/workshop/agents/coruja/`.
+A cada ciclo, quando não há feature ativa para implementar, Coruja executa um ciclo investigativo para construir e manter o segundo cérebro em `/workspace/obsidian/projects/agents/coruja/`.
 
 ### Lógica de rotação
 
@@ -107,10 +107,10 @@ git -C $BASE/$REPO log --oneline -10 2>/dev/null
 ```
 
 Escrever/atualizar segundo cérebro:
-- `/workspace/obsidian/workshop/agents/coruja/$REPO/overview.md` — stack, entry points, módulos, arquitetura
-- `/workspace/obsidian/workshop/agents/coruja/$REPO/patterns.md` — convenções, patterns recorrentes, gotchas
-- `/workspace/obsidian/workshop/agents/coruja/$REPO/hotspots.md` — arquivos quentes, tech debt, TODOs
-- `/workspace/obsidian/workshop/agents/coruja/$REPO/pulse.md` — PRs abertos, últimas atividades (append por ciclo)
+- `/workspace/obsidian/projects/agents/coruja/$REPO/overview.md` — stack, entry points, módulos, arquitetura
+- `/workspace/obsidian/projects/agents/coruja/$REPO/patterns.md` — convenções, patterns recorrentes, gotchas
+- `/workspace/obsidian/projects/agents/coruja/$REPO/hotspots.md` — arquivos quentes, tech debt, TODOs
+- `/workspace/obsidian/projects/agents/coruja/$REPO/pulse.md` — PRs abertos, últimas atividades (append por ciclo)
 
 #### Extração de padrões para refinar skills
 
@@ -179,7 +179,7 @@ Se PR parado > 3 dias ou CI falhando: alerta em inbox/.
 #### Ciclo de execução
 
 ```
-1. Ler /workspace/obsidian/workshop/agents/coruja/mortani/ideas.md
+1. Ler /workspace/obsidian/projects/agents/coruja/mortani/ideas.md
 2. Se ideas.md vazio ou não existe:
    → GERAR lista de ~20 ideias criativas e salvar em ideas.md
    → registrar ciclo em memory.md, encerrar
@@ -187,7 +187,7 @@ Se PR parado > 3 dias ou CI falhando: alerta em inbox/.
    → Pegar próxima ideia com status: pendente
    → Coletar dados (git, gh CLI, Jira MCP conforme a ideia)
    → Construir visualização HTML rica via Chrome Relay
-   → Salvar relatório em /workspace/obsidian/workshop/agents/coruja/mortani/explored/YYYYMMDD_<slug>.md
+   → Salvar relatório em /workspace/obsidian/projects/agents/coruja/mortani/explored/YYYYMMDD_<slug>.md
    → Marcar ideia como explorada em ideas.md (status: ✓ YYYYMMDD)
    → Registrar em inbox/feed.md: "[Coruja/Mortani] Explorou: <título>"
 ```
@@ -226,7 +226,7 @@ Tecnologias recomendadas no HTML: D3.js (CDN), Chart.js, ou tabelas CSS estiliza
 #### Salvamento
 
 ```
-/workspace/obsidian/workshop/agents/coruja/mortani/
+/workspace/obsidian/projects/agents/coruja/mortani/
 ├── ideas.md              — lista master + status de cada ideia
 └── explored/
     ├── YYYYMMDD_<slug>.md  — relatório + insights textuais do ciclo
@@ -242,9 +242,9 @@ O HTML gerado pelo relay não precisa ser salvo — o relatório `.md` captura o
 **Antes de tocar em qualquer repo, sempre ler o segundo cérebro:**
 
 ```bash
-cat /workspace/obsidian/workshop/agents/coruja/<repo>/overview.md
-cat /workspace/obsidian/workshop/agents/coruja/<repo>/patterns.md
-cat /workspace/obsidian/workshop/agents/coruja/<repo>/hotspots.md 2>/dev/null
+cat /workspace/obsidian/projects/agents/coruja/<repo>/overview.md
+cat /workspace/obsidian/projects/agents/coruja/<repo>/patterns.md
+cat /workspace/obsidian/projects/agents/coruja/<repo>/hotspots.md 2>/dev/null
 ```
 
 Isso carrega contexto acumulado — padrões de nomenclatura, tech debt, convenções — sem precisar reaprender a cada feature.
@@ -264,9 +264,9 @@ Isso carrega contexto acumulado — padrões de nomenclatura, tech debt, conven�
 
 ```bash
 # Sempre antes de codar — carrega contexto acumulado
-cat /workspace/obsidian/workshop/agents/coruja/<repo>/overview.md
-cat /workspace/obsidian/workshop/agents/coruja/<repo>/patterns.md
-cat /workspace/obsidian/workshop/agents/coruja/<repo>/hotspots.md 2>/dev/null
+cat /workspace/obsidian/projects/agents/coruja/<repo>/overview.md
+cat /workspace/obsidian/projects/agents/coruja/<repo>/patterns.md
+cat /workspace/obsidian/projects/agents/coruja/<repo>/hotspots.md 2>/dev/null
 ```
 
 Se o segundo cérebro não existir ainda: ler o código diretamente.
@@ -507,7 +507,7 @@ Após ler a memory, decidir:
 
 ## Wiki Maintenance — Manutencao Continua
 
-A cada ciclo investigativo (60min), alem do segundo cerebro em `workshop/agents/coruja/`:
+A cada ciclo investigativo (60min), alem do segundo cerebro em `projects/agents/coruja/`:
 
 ### O que fazer
 
