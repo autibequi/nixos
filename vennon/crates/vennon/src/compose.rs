@@ -75,6 +75,14 @@ pub fn write_compose(compose: &ComposeFile, output: &Path) -> Result<()> {
     if let Some(parent) = output.parent() {
         std::fs::create_dir_all(parent)?;
     }
+    // Only write if content changed — avoids podman-compose recreation from timestamp
+    if output.exists() {
+        if let Ok(existing) = std::fs::read_to_string(output) {
+            if existing == yaml {
+                return Ok(());
+            }
+        }
+    }
     std::fs::write(output, yaml)?;
     Ok(())
 }

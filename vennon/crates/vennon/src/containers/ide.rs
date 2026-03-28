@@ -10,16 +10,10 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
     let (uid, gid) = config::user_ids();
     let git = config::git_env();
 
-    // YAA_* env vars override config defaults
-    let self_path = std::env::var("YAA_SELF_DIR")
-        .unwrap_or_else(|_| config.self_path().to_string_lossy().to_string());
-    let obsidian = std::env::var("YAA_OBSIDIAN_DIR")
-        .unwrap_or_else(|_| config.obsidian_path().to_string_lossy().to_string());
-    let target = std::env::var("YAA_TARGET_DIR")
-        .unwrap_or_else(|_| config.host_path().to_string_lossy().to_string());
-    let host_dir = std::env::var("YAA_HOST_DIR")
-        .unwrap_or_else(|_| config.host_path().to_string_lossy().to_string());
-    let host_enabled = std::env::var("YAA_HOST_ENABLED").as_deref() == Ok("1");
+    // Stable paths — these NEVER change between sessions (compose stays stable)
+    let self_path = config.self_path().to_string_lossy().to_string();
+    let obsidian = config.obsidian_path().to_string_lossy().to_string();
+    let host_dir = config.host_path().to_string_lossy().to_string();
     let projects = config.projects_path().to_string_lossy().to_string();
 
     let image = format!("vennon-{engine}:latest");
@@ -36,9 +30,6 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
     env.insert("DOCKER_HOST".into(), "tcp://localhost:2375".into());
     env.insert("VENNON_UID".into(), uid.to_string());
     env.insert("VENNON_GID".into(), gid.to_string());
-    if host_enabled {
-        env.insert("HOST_ATTACHED".into(), "1".into());
-    }
 
     for (k, v) in &git {
         env.insert(k.clone(), v.clone());
@@ -76,10 +67,8 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
         "/var/log:/workspace/logs/host/var-log:ro".into(),
     ];
 
-    // --host: mount host dir at /workspace/host (rw)
-    if host_enabled {
-        volumes.push(format!("{host_dir}:/workspace/host:rw"));
-    }
+    // Host dir always mounted (stable compose — no recreation between sessions)
+    volumes.push(format!("{host_dir}:/workspace/host:rw"));
 
     // ── Services ────────────────────────────────────────────
     let mut services = BTreeMap::new();

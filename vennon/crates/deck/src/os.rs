@@ -10,6 +10,7 @@ pub fn run(action: &str) -> Result<()> {
         "test" | "t" => exec::run("nh", &["os", "test", &nixos]),
         "boot" | "b" => exec::run("nh", &["os", "boot", &nixos]),
         "build" => exec::run("nh", &["os", "build", &nixos]),
-        _ => bail!("unknown os action: {action}\nValid: switch, test, boot, build"),
+        "update" | "up" => exec::run("nh", &["os", "switch", "--update", &nixos]),
+        _ => bail!("unknown os action: {action}\nValid: switch, test, boot, build, update"),
     }
 }
