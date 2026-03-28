@@ -167,7 +167,7 @@ fn main() -> Result<()> {
 
         Some(Commands::Tick) => {
             let config = config::YaaConfig::load()?;
-            phone::call("hermes", Some("hora de rodar o ciclo — dispatch dos agentes vencidos"), &config)
+            phone::call("hermes", Some("Ciclo automatico. Execute com autonomia total: limpe travados, desbloqueie o que puder, despache vencidos, processe inbox/outbox. Nao pergunte — execute."), &config)
         }
 
         Some(Commands::Usage { engine, waybar, statusline, refresh, json, debug }) => {
