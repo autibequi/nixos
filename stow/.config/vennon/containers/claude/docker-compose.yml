@@ -47,7 +47,6 @@ services:
       VENNON_GID: '100'
       VENNON_UID: '1000'
       XDG_CACHE_HOME: /workspace/.ephemeral/cache
-      YAA_TARGET_DIR: /home/pedrinho/projects
     tmpfs:
     - /tmp:size=512m,mode=1777
     cap_drop:
