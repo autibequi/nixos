@@ -1,0 +1,1 @@
+/workspace/host/vennon/target/release/vennon: /workspace/host/vennon/src/compose.rs /workspace/host/vennon/src/config.rs /workspace/host/vennon/src/container.rs /workspace/host/vennon/src/containers/claude.rs /workspace/host/vennon/src/containers/mod.rs /workspace/host/vennon/src/exec.rs /workspace/host/vennon/src/main.rs

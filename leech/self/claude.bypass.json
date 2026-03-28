@@ -36,9 +36,8 @@
       "ReadMcpResourceTool(*)"
     ],
     "deny": [],
-    "defaultMode": "bypassPermissions"
+    "defaultMode": "auto"
   },
-  "model": "sonnet",
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "nixos"
@@ -91,5 +90,6 @@
   "statusLine": {
     "type": "command",
     "command": "~/.claude/scripts/statusline.sh"
-  }
+  },
+  "skipAutoPermissionPrompt": true
 }

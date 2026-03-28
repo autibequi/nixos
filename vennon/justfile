@@ -1,0 +1,49 @@
+bin := "vennon"
+install_dir := env("HOME") / ".local/bin"
+nix_run := "nix-shell -p rustc cargo clippy rustfmt --run"
+
+# Build release binary
+build:
+    {{nix_run}} "cargo build --release"
+
+# Build debug binary
+dev:
+    {{nix_run}} "cargo build"
+
+# Run all tests
+test:
+    {{nix_run}} "cargo test"
+
+# Lint with clippy
+clippy:
+    {{nix_run}} "cargo clippy -- -W clippy::all"
+
+# Format code
+fmt:
+    {{nix_run}} "cargo fmt"
+
+# Check formatting without modifying
+fmt-check:
+    {{nix_run}} "cargo fmt --check"
+
+# Full check: build + test + clippy + fmt
+check: build test clippy fmt-check
+
+# Install binary to ~/.local/bin
+install: build
+    mkdir -p {{install_dir}}
+    install -m 755 target/release/{{bin}} {{install_dir}}/{{bin}}
+    @echo "installed {{install_dir}}/{{bin}}"
+
+# Uninstall binary
+uninstall:
+    rm -f {{install_dir}}/{{bin}}
+    @echo "removed {{install_dir}}/{{bin}}"
+
+# Clean build artifacts
+clean:
+    {{nix_run}} "cargo clean"
+
+# Show help
+help:
+    {{nix_run}} "cargo run --release -- --help"
