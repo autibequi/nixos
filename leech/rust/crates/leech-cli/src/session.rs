@@ -278,10 +278,6 @@ impl SessionRunner {
         danger: bool,
         config: &LeechConfig,
     ) -> Result<()> {
-        let home = paths::home().to_string_lossy().into_owned();
-        let leech_root = paths::leech_root().to_string_lossy().into_owned();
-        let obsidian_path = paths::obsidian_ensured();
-
         // Build claude arguments
         let mut claude_args = vec!["--enable-auto-mode".to_string()];
 
@@ -318,44 +314,28 @@ impl SessionRunner {
 
         let claude_args_str = claude_args.join(" ");
 
-        let mount_env = format!("CLAUDIO_MOUNT={}", self.mount_path);
-        let host_attached_env = format!("HOST_ATTACHED={}", if self.host { "1" } else { "0" });
+        // Always use compose to create container with all volumes (skills, .claude, etc.)
+        // Then exec into it — fast on second run, correct mounts every time
+        self.compose(config).execute(&["up", "-d", "leech"])?;
 
-        // Simple: podman run -i -t, directly to claude
+        // Find the container created by compose
+        let cid = crate::docker::find_compose_container(&self.proj_name, "leech")
+            .ok_or_else(|| crate::error::LeechError::Docker(
+                "Failed to find leech container after compose up".into()
+            ))?;
+
+        // Exec into container with full TTY
         let mut cmd = Command::new("podman");
-        cmd.args(["run", "--rm", "-i", "-t"]);
-
-        // Volumes
-        cmd.args(["-v", &format!("{}:/workspace/mnt:rw", self.mount_path)]);
-        cmd.args(["-v", &format!("{obsidian_path}:/workspace/obsidian:rw")]);
-        cmd.args(["-v", &format!("{leech_root}:/workspace/self:ro")]);
-        cmd.args(["-v", &format!("{home}/.claude:/home/claude/.claude:rw")]);
-        cmd.args(["-v", &format!("{home}/.leech:/home/claude/.leech:rw")]);
-        cmd.args(["-v", "podman.sock:/run/user/1000/podman/podman.sock"]);
-
+        cmd.args(["exec", "-i", "-t"]);
+        cmd.args(["-e", &format!("CLAUDIO_MOUNT={}", self.mount_path)]);
         if self.host {
-            cmd.args(["-v", &format!("{home}/nixos:/workspace/host:rw")]);
+            cmd.args(["-e", "HOST_ATTACHED=1"]);
         }
-
-        // Environment
-        cmd.args(["-e", &mount_env]);
-        cmd.args(["-e", &host_attached_env]);
-        cmd.args(["-e", "BOOTSTRAP_SKIP_CLEAR=1"]);
-        cmd.args(["-e", &format!("DOCKER_GID={}", config.docker_gid())]);
-        cmd.args(["-e", &format!("JOURNAL_GID={}", config.system.journal_gid)]);
-        cmd.args(["-e", &format!("HOME={home}")]);
-        cmd.args(["-e", &format!("LEECH_ROOT={leech_root}")]);
-        cmd.args(["-e", &format!("LEECH_NIXOS_DIR={}", paths::nixos_dir().to_string_lossy())]);
-        cmd.args(["-e", &format!("XDG_DATA_HOME={}", paths::xdg_data_home())]);
-        cmd.args(["-e", &format!("XDG_RUNTIME_DIR={}", paths::xdg_runtime_dir())]);
-
-        // Entrypoint and command
-        cmd.args(["--entrypoint", "/entrypoint.sh"]);
-        cmd.args(["leech", "/bin/bash", "-c"]);
+        cmd.args([&cid, "/bin/bash", "-c"]);
         cmd.arg(format!("cd /workspace/mnt && exec /home/claude/.nix-profile/bin/claude {claude_args_str}"));
 
         let err = cmd.exec();
-        Err(crate::error::LeechError::Docker(format!("podman run failed: {err}")))
+        Err(crate::error::LeechError::Docker(format!("podman exec failed: {err}")))
     }
 
     fn run_cursor(

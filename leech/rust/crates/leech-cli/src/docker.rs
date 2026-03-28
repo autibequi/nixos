@@ -176,14 +176,13 @@ pub fn find_running_container(name: &str) -> Option<String> {
     if cid.is_empty() { None } else { Some(cid) }
 }
 
-/// Find the name of a compose-managed persistent (oneoff=False) container for a service.
+/// Find the name of a compose-managed container for a service.
 pub fn find_compose_container(project: &str, service: &str) -> Option<String> {
     let output = Command::new("podman")
         .args([
             "ps",
             "--filter", &format!("label=com.docker.compose.project={project}"),
             "--filter", &format!("label=com.docker.compose.service={service}"),
-            "--filter", "label=com.docker.compose.oneoff=False",
             "--format", "{{.Names}}",
         ])
         .output()
