@@ -76,9 +76,9 @@ Identificar: correções, preferências, decisões de design, conhecimento novo,
 
 | O que é | Onde salvar |
 |---------|-------------|
-| Correção de comportamento | `/workspace/self/system/memory/feedback_*.md` |
-| Preferência do usuário | `/workspace/self/system/memory/user_*.md` |
-| Contexto de projeto | `/workspace/self/system/memory/project_*.md` |
+| Correção de comportamento | `/workspace/self/shadow/memory/feedback_*.md` |
+| Preferência do usuário | `/workspace/self/shadow/memory/user_*.md` |
+| Contexto de projeto | `/workspace/self/shadow/memory/project_*.md` |
 | Melhoria em skill | editar `/workspace/self/skills/*/SKILL.md` |
 | Comportamento de agente | editar `/workspace/self/ego/*/agent.md` |
 
