@@ -1,0 +1,8 @@
+{
+  "name": "worktree-enter",
+  "description": "Atualiza dashboard de worktrees quando você entra",
+  "trigger": "tool_use",
+  "tool": "EnterWorktree",
+  "action": "script",
+  "script": "cd /workspace && ./scripts/worktree-manager.sh update-dashboard"
+}
