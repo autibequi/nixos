@@ -1,9 +1,0 @@
-x-podman:
-  in_pod: false
-
-services:
-  sandbox:
-    userns_mode: keep-id
-
-  worker:
-    userns_mode: keep-id
