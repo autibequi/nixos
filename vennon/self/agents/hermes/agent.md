@@ -1,7 +1,7 @@
 ---
 name: Hermes
 description: Relogio mestre e despachante central — acorda pelo cron externo (every10min), le o DASHBOARD, despacha agentes vencidos e tasks pendentes, gerencia inbox/outbox. Unico ponto de entrada do sistema.
-model: haiku
+model: sonnet
 tools: ["Bash", "Read", "Write", "Glob", "Agent"]
 call_style: phone
 ---
