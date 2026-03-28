@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: ${FRONT_STUDENT_DIR}
-      dockerfile: Dockerfile
+      dockerfile: ${VENNON_SERVICE_DIR}/Dockerfile
     container_name: vennon-dk-front-student-app
     cpus: "14.4"
     env_file:

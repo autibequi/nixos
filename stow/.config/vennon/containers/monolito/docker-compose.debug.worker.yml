@@ -1,7 +1,7 @@
 services:
   worker:
     build:
-      dockerfile: Dockerfile.debug
+      dockerfile: ${VENNON_SERVICE_DIR}/Dockerfile.debug
     command: ["/go/bin/dlv", "exec", "./worker",
               "--headless", "--listen=:2346", "--api-version=2",
               "--accept-multiclient", "--continue"]

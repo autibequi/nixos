@@ -1,7 +1,7 @@
 services:
   app:
     build:
-      dockerfile: Dockerfile.dev
+      dockerfile: ${VENNON_SERVICE_DIR}/Dockerfile.dev
     volumes:
       - ${MONOLITO_DIR}:/go/app
       - leech-go-build-cache:/root/.cache/go-build

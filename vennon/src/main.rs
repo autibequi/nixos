@@ -57,21 +57,17 @@ fn main() -> Result<()> {
         Commands::Init => config::init(),
 
         Commands::Update => {
-            // Try config first, fallback to finding justfile relative to binary
-            let vennon_dir = config::VennonConfig::load()
-                .map(|c| c.vennon_path())
-                .or_else(|_| {
-                    // Fallback: binary is in target/release/ or ~/.local/bin/
-                    // Look for justfile in common locations
-                    let candidates = [
-                        config::expand_path("~/nixos/vennon"),
-                        config::expand_path("~/nixos/host/vennon"),
-                    ];
-                    candidates
-                        .into_iter()
-                        .find(|p| p.join("justfile").exists())
-                        .ok_or_else(|| anyhow::anyhow!("can't find vennon source dir"))
-                })?;
+            // Find vennon source: try known paths first, then config
+            let candidates = [
+                config::expand_path("~/nixos/vennon"),
+                config::expand_path("~/nixos/host/vennon"),
+            ];
+            let vennon_dir = candidates
+                .iter()
+                .find(|p| p.join("justfile").exists())
+                .cloned()
+                .or_else(|| config::VennonConfig::load().ok().map(|c| c.vennon_path()))
+                .ok_or_else(|| anyhow::anyhow!("can't find vennon source dir (no justfile found)"))?;
             exec::run(
                 "just",
                 &[

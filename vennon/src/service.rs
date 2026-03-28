@@ -111,6 +111,13 @@ fn run_compose(
 
     // Environment variables for compose
     let mut env_vars: Vec<(String, String)> = vec![];
+
+    // VENNON_SERVICE_DIR — where Dockerfiles and env/ live
+    env_vars.push((
+        "VENNON_SERVICE_DIR".into(),
+        service_dir.to_string_lossy().to_string(),
+    ));
+
     if let Some(src) = manifest.source_path() {
         // Export source dir as SERVICE_DIR (e.g., MONOLITO_DIR)
         let var_name = format!("{}_DIR", manifest.name.to_uppercase().replace('-', "_"));
@@ -121,10 +128,14 @@ fn run_compose(
         env_vars.push((k.clone(), v));
     }
 
-    // Run podman-compose with env vars
+    // Also inject HOME (needed by compose files referencing ${HOME})
+    env_vars.push(("HOME".into(), config::home().to_string_lossy().to_string()));
+
+    // Run podman-compose with env vars (inherit parent env + overlay ours)
     let args_refs: Vec<&str> = compose_args.iter().map(|s| s.as_str()).collect();
     let mut cmd = std::process::Command::new("podman-compose");
     cmd.args(&args_refs);
+    // Inherit all parent env vars first, then overlay ours
     for (k, v) in &env_vars {
         cmd.env(k, v);
     }

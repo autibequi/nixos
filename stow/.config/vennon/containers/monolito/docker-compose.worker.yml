@@ -2,7 +2,7 @@ services:
   worker:
     build:
       context: ${MONOLITO_DIR}
-      dockerfile: Dockerfile
+      dockerfile: ${VENNON_SERVICE_DIR}/Dockerfile
     container_name: vennon-dk-monolito-worker-app
     command: ["./worker"]
     cpus: "14.4"

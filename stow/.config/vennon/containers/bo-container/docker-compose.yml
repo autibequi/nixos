@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: ${BO_CONTAINER_DIR}
-      dockerfile: Dockerfile
+      dockerfile: ${VENNON_SERVICE_DIR}/Dockerfile
     container_name: vennon-dk-bo-container-app
     cpus: "14.4"
     env_file:

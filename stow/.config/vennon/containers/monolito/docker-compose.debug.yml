@@ -1,7 +1,7 @@
 services:
   app:
     build:
-      dockerfile: Dockerfile.debug
+      dockerfile: ${VENNON_SERVICE_DIR}/Dockerfile.debug
     cpus: "14.4"
     # ptrace is required for delve to work inside Docker
     security_opt:
