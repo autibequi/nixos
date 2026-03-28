@@ -80,3 +80,4 @@ workbench/*
 !.cursor/rules/**
 .cursor/session-boot.md
 
+.local/bin
