@@ -34,6 +34,20 @@ ls /workspace/obsidian/outbox/para-hermes-*.md 2>/dev/null
 
 ## Ciclo (nesta ordem)
 
+### 0. HIGIENIZAR — Limpar DASHBOARD antes de tudo
+
+**SEMPRE rodar antes de qualquer dispatch:**
+- Cards em DOING sem agente rodando? → mover pra TODO com `last:` preservado
+- Cards duplicados (mesmo nome em TODO e DOING/DONE)? → remover o duplicado
+- Cards em DONE com `#everyXmin` que nao foram recriados no TODO? → recriar
+
+```bash
+# Verificar estado
+cat /workspace/obsidian/DASHBOARD.md
+# Se DOING tem cards orfaos: mover pra TODO
+# Se DONE tem cards recorrentes sem copia no TODO: recriar
+```
+
 ### 1. CARDS — Despachar tasks do TODO
 
 Ler coluna `## TODO` do DASHBOARD. Para cada card (maximo 3 por ciclo):
@@ -67,19 +81,22 @@ cat /workspace/obsidian/<briefing_path> 2>/dev/null
 d. Mover TODO → DOING:
    - Adicionar `started:ISO` no card
 
-e. Despachar via Agent tool:
+e. Despachar via Agent tool (FOREGROUND — esperar resultado):
 ```
 Agent(
   subagent_type = <agente do card>,
   model = <modelo do card>,
-  prompt = <conteudo do briefing> + "Ler memory.md em bedrooms/<agente>/. Registrar ciclo ao final.",
-  run_in_background = true
+  prompt = <conteudo do briefing> + "Ler memory.md em bedrooms/<agente>/. Registrar ciclo ao final."
 )
 ```
 
-f. Quando subagente retorna → Mover DOING → DONE:
-   - Adicionar `done:ISO`
-   - Se card tem #everyXmin: RECRIAR o card no TODO com `last:` atualizado
+f. Apos subagente retornar — OBRIGATORIO, na mesma edicao do DASHBOARD:
+   - REMOVER o card da coluna DOING
+   - ADICIONAR em DONE com `[x]` e `done:ISO` + resumo curto do resultado
+   - Se card tem #everyXmin: RECRIAR o card no TODO com `last:` = agora
+
+**CRITICO:** nunca deixar card em DOING sem agente rodando. Se o Hermes encerrar
+antes de limpar, o proximo tick deve mover DOING → TODO (cleanup).
 
 **Registrar:** `[HH:MM] [hermes] dispatch: <nome> → #<agente> #<modelo>`
 
@@ -153,9 +170,12 @@ Acoes: ...
 
 ## Regras
 
+- **HIGIENIZAR o DASHBOARD no inicio E no fim de cada ciclo** — nunca deixar sujeira
 - Ciclo vazio e valido — nao inventar trabalho
+- NUNCA deixar card em DOING sem agente rodando
 - NUNCA deletar mensagens — mover
 - NUNCA despachar sonnet se quota >= 70%
 - Maximo 3 cards por ciclo
 - Timestamps UTC sempre
 - Nao commitar nada (Lei 6)
+- Cards recorrentes (#everyXmin) DEVEM ser recriados no TODO apos DONE
