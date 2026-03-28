@@ -8,7 +8,7 @@ Dentro do container, estas env vars contêm os paths absolutos do HOST:
 
 | Env var | Path no container | Path no host (exemplo) |
 |---------|-------------------|------------------------|
-| `CLAUDIO_MOUNT` | `/workspace/mnt/` | `/home/pedrinho/projects/monolito` |
+| `CLAUDIO_MOUNT` | `/workspace/home/` | `/home/pedrinho/projects/monolito` |
 | `LEECH_ROOT` | `/workspace/self/` | `/home/pedrinho/nixos/leech/self` |
 | `OBSIDIAN_PATH` | `/workspace/obsidian/` | `/home/pedrinho/.ovault/Work` |
 

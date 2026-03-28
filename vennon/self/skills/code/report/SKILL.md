@@ -19,7 +19,7 @@ Defaults: `--branch auto` (detecta branch atual), `--format terminal`
 
 ```bash
 # Para cada repo
-cd /workspace/mnt/estrategia/<repo>/
+cd /workspace/home/estrategia/<repo>/
 HOME=/tmp git branch --show-current
 ```
 

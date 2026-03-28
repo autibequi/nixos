@@ -46,8 +46,8 @@ WS=/workspace source /workspace/stow/.claude/scripts/gh-status.sh && gh_status_f
 
 ### Repos locais
 ```bash
-git -C /workspace/mnt status --short | head -10
-git -C /workspace/mnt worktree list | head -20
+git -C /workspace/home status --short | head -10
+git -C /workspace/home worktree list | head -20
 
 for repo in /home/claude/projects/estrategia/*/; do
   name=$(basename "$repo")
@@ -100,7 +100,7 @@ Maximo 5 recomendacoes acionaveis ao final. Nunca listar repos sem dirty/ahead.
 ### 1. Ler preferencia do contractor
 
 ```bash
-STYLE=$(grep "^call_style:" /workspace/mnt/self/agents/<nome>/agent.md | awk '{print $2}')
+STYLE=$(grep "^call_style:" /workspace/home/self/agents/<nome>/agent.md | awk '{print $2}')
 ```
 
 Se `call_style: personal` → o contractor **aparece pessoalmente**.
@@ -168,7 +168,7 @@ Oferecer salvar resumo em `agents/<nome>/DIARIO.md`.
 Dashboard de worktrees isolados:
 
 ```bash
-git -C /workspace/mnt worktree list
+git -C /workspace/home worktree list
 ```
 
 Mostrar:

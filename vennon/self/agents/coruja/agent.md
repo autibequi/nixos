@@ -35,9 +35,9 @@ Quando o pedido for "progress", "status" ou "o que tá rolando":
 
 ```bash
 # Coletar em paralelo:
-cat /workspace/mnt/estrategia/monolito/STATE.md
-cat /workspace/mnt/estrategia/bo-container/STATE.md
-cat /workspace/mnt/estrategia/front-student/STATE.md
+cat /workspace/home/estrategia/monolito/STATE.md
+cat /workspace/home/estrategia/bo-container/STATE.md
+cat /workspace/home/estrategia/front-student/STATE.md
 ```
 
 Listar tasks ativas via `TaskList`. Apresentar dashboard compacto:

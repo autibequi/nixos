@@ -1,24 +1,24 @@
 ---
 name: Dockerizer — estado atual
-description: Sistema leech docker run/install/logs para monolito e outros serviços estratégia
+description: Sistema vennon run/install/logs para monolito e outros serviços estratégia
 type: project
 ---
 
 Sistema de dockerização versionado em `/leech/containers/<service>/` (montado do nixos do host).
 
-**Why:** User quer levantar monolito/bo-container/front-student via `leech docker run <service>` sem precisar ir ao host manualmente. Agente lê logs em `/workspace/logs/docker/<service>/service.log`.
+**Why:** User quer levantar monolito/bo-container/front-student via `vennon run <service>` sem precisar ir ao host manualmente. Agente lê logs em `/workspace/logs/docker/<service>/service.log`.
 
 ## bo-container — detalhes técnicos
 
 - Node 14 Alpine, Quasar 1.x + Vue 2
-- `npm install` durante `docker compose build` (sem `leech docker install` separado)
+- `npm install` durante `docker compose build` (sem `vennon install` separado)
 - SSH agent do host via `--mount=type=ssh` no Dockerfile (para `frontend-libs` git+ssh)
 - `NPM_TOKEN` como build arg para `@estrategiahq/*` packages (GitHub Package Registry)
 - Dev server HTTPS em `:9090` (hardcoded no quasar.conf.js)
 - `LOCAL_BO_CONTAINER_HOST=0.0.0.0` para bind em todas interfaces
 - Hot-reload: bind mount de `${BO_CONTAINER_DIR}:/app` + volume anônimo em `/app/node_modules`
 - Sem deps compose (sem postgres/redis)
-- Para atualizar node_modules: `leech docker flush bo-container && leech docker run bo-container`
+- Para atualizar node_modules: `vennon flush bo-container && vennon run bo-container`
 
 **How to apply:** Quando falar de docker, containers, ou levantar serviços da estratégia — este sistema já existe e está funcionando.
 
@@ -35,21 +35,21 @@ Sistema de dockerização versionado em `/leech/containers/<service>/` (montado 
 
 ## CLI commands
 
-- `leech docker run <service> [--env=sand] [--detach] [--debug]` — levanta + mostra logs
-- `leech docker stop <service>`
-- `leech docker logs <service> [-f] [--tail=100]`
-- `leech docker status [service]`
-- `leech docker shell <service> [container]`
-- `leech docker restart <service>`
-- `leech docker flush <service>`
-- `leech docker install <service>`
+- `vennon run <service> [--env=sand] [--detach] [--debug]` — levanta + mostra logs
+- `vennon stop <service>`
+- `vennon logs <service> [-f] [--tail=100]`
+- `vennon status [service]`
+- `vennon shell <service> [container]`
+- `vennon restart <service>`
+- `vennon flush <service>`
+- `vennon install <service>`
 
 ## Monolito — detalhes técnicos
 
 - Go 1.24.4, CGO_ENABLED=1, -tags musl (librdkafka)
 - Entrypoints: `./cmd/server/main.go` (porta 4004) e `./cmd/worker/main.go`
 - `go.work` workspace com módulos filhos
-- Vendor via `go work vendor` (gerado por `leech docker install`)
+- Vendor via `go work vendor` (gerado por `vennon install`)
 - Health: GET /health
 - 6 verticais: concursos, medicina, oab, vestibulares, militares, carreiras-juridicas
 
@@ -59,7 +59,7 @@ Sistema de dockerização versionado em `/leech/containers/<service>/` (montado 
 - `Falha ao realizar parse da chave privada para assinar cloudfront` — env faltando, não bloqueia boot
 - `Toggler: unexpected end of JSON input` — bate a cada ~1min, usa cache, não critico
 
-## Debug remoto (leech docker run monolito --debug)
+## Debug remoto (vennon run monolito --debug)
 
 - Dockerfile.debug: build com `-gcflags="all=-N -l"` + `/go/bin/dlv exec ./server --headless --listen=:2345 --api-version=2 --accept-multiclient --continue`
 - docker-compose.debug.yml: SYS_PTRACE + apparmor:unconfined (obrigatório para dlv funcionar em Docker)

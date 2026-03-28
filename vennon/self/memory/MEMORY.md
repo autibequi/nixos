@@ -20,7 +20,7 @@
 - [feedback_zion_scripts_source.md](feedback_zion_scripts_source.md) — Scripts do container: fonte da verdade é zion/scripts/; scripts/ contém symlinks. Nunca editar scripts/ esperando afetar o container
 - [feedback_autocommit.md](feedback_autocommit.md) — Nunca commitar automaticamente sem o usuário pedir; respeitar flag auto-commit
 - [project_glance.md](project_glance.md) — Skill estrategia/glance: árvore cyberpunk cross-repo vs main, trilha roxa na feature ativa, script em difftree.py
-- [feedback_zion_cli_commands.md](feedback_zion_cli_commands.md) — Com host_attached=1 (leech --host): sempre usar `leech stow`, `leech switch`, `leech man`. Nunca comandos raw.
+- [feedback_zion_cli_commands.md](feedback_zion_cli_commands.md) — Com host_attached=1 (leech --host): sempre usar `deck stow`, `leech switch`, `yaa man`. Nunca comandos raw.
 - [feedback_container_reuse_bugs.md](feedback_container_reuse_bugs.md) — Bugs resolvidos: CLAUDIO_MOUNT search (fix: nome canônico), docker-proxy depends_on (fix: removido)
 - [reference_git_sandbox_reset.md](reference_git_sandbox_reset.md) — Como resetar a branch sandbox no monolito estrategia (deletar local+remoto e recriar do main)
 - [feedback_flow_diagram_style.md](feedback_flow_diagram_style.md) — Usar diagramas ASCII com └─/├─/→ ao explicar fluxo entre camadas (handler→service→repo, toggler branching)
@@ -40,7 +40,7 @@
 - [feedback_speak_proactive.md](feedback_speak_proactive.md) — Permissão para usar voz proativamente + defaults calibrados (pt, 175wpm, pitch 40)
 - [feedback_docker_build_base.md](feedback_docker_build_base.md) — zion build usa docker build direto; Bake resolve locais remotamente; padrão base/topo para builds rápidos
 - [feedback_contractor_card_format.md](feedback_contractor_card_format.md) — Cards de contractors: runner lê model/max_turns/mcp/contractor como campos diretos do frontmatter, NÃO via tags
-- [project_obsidian_contractors.md](project_obsidian_contractors.md) — Mapa dos 11 agentes ativos, call_style, paths (bedrooms/workshop/tasks/AGENTS), CLI (leech agents)
+- [project_obsidian_contractors.md](project_obsidian_contractors.md) — Mapa dos 11 agentes ativos, call_style, paths (bedrooms/workshop/tasks/AGENTS), CLI (yaa agents)
 - [project_meta_phone.md](project_meta_phone.md) — Skill /meta:phone: call_style phone vs personal, cenas de chegada por agente
 - [reference_hermes_agent.md](reference_hermes_agent.md) — Vault Obsidian como cérebro: paths pós-2026-03-23 (bedrooms, workshop, tasks/AGENTS, self/rules/TRASH.md)
 - [project_mortani.md](project_mortani.md) — Projeto Mortani: Coruja explora 1 métrica/noite, visualizações relay para o Mortani (ideas.md em workshop/mortani/)
@@ -48,11 +48,11 @@
 - [user_context.md](user_context.md) — Contexto sobre Pedro: colega Mortani aprecia visualizações interativas, estilo de trabalho
 - [project_zion_tui.md](project_zion_tui.md) — Mapa do leech-tui-v2: agent panel, env/debug persistence, debug toggle (svc_debug), find_container lookup, dois codebases (host vs worktree), deploy.
 - [feedback_leech_two_codebases.md](feedback_leech_two_codebases.md) — Mudanças TUI/runner devem ir para AMBOS: leech-rust-migration worktree E /workspace/host/leech/rust/ (binário real)
-- [feedback_tui_exec_pattern.md](feedback_tui_exec_pattern.md) — Lançar sessão interativa (leech new, Claude Code) de dentro do TUI: usar CommandExt::exec() para substituir o processo, não .status()
+- [feedback_tui_exec_pattern.md](feedback_tui_exec_pattern.md) — Lançar sessão interativa (yaa, Claude Code) de dentro do TUI: usar CommandExt::exec() para substituir o processo, não .status()
 - [feedback_orgulho_de_sessao.md](feedback_orgulho_de_sessao.md) — Toda sessão deve aspirar ser lembrada via /meta:absorb elogio; critério é "vale preservar?", não só "funcionou?"
 - [feedback_card_timestamps_utc.md](feedback_card_timestamps_utc.md) — Card timestamps são SEMPRE UTC: parsing com TZ=UTC, geração com date -u (evita drift BRT no host)
-- [feedback_rust_bash_dual_cli.md](feedback_rust_bash_dual_cli.md) — CLI é 100% Rust desde 2026-03-24. leech/bash/ é legado. Deploy: `just install` ou `leech update`. Fonte: leech/rust/crates/leech-cli/.
-- [project_leech_node_install.md](project_leech_node_install.md) — leech docker install para Node: smart skip por hash lockfile, cache volumes npm/pnpm/bun, auto-detect package manager, guard Node 14
+- [feedback_rust_bash_dual_cli.md](feedback_rust_bash_dual_cli.md) — CLI é 100% Rust desde 2026-03-24. leech/bash/ é legado. Deploy: `just install` ou `yaa update`. Fonte: leech/rust/crates/leech-cli/.
+- [project_leech_node_install.md](project_leech_node_install.md) — vennon install para Node: smart skip por hash lockfile, cache volumes npm/pnpm/bun, auto-detect package manager, guard Node 14
 - [feedback_deferred_tools.md](feedback_deferred_tools.md) — Deferred tools causam InputValidationError silencioso — preferir ferramentas nativas, usar ToolSearch só se estritamente necessário
 - [project_meta_tokens.md](project_meta_tokens.md) — /meta:tokens: 10 seções de análise (breakdown, timeline, gráfico, velocidade, qualidade, padrões, heat map, grafo)
 - [feedback_report_status_layout.md](feedback_report_status_layout.md) — Emoji de status (🔵🔴⚪) sempre na coluna mais à esquerda em tabelas e pipelines ASCII
@@ -73,7 +73,7 @@
 - [feedback_go_lo_utils.md](feedback_go_lo_utils.md) — Go: sempre usar github.com/samber/lo (Map, Uniq, Filter, ToPtr, etc.) em vez de helpers manuais para slices/maps/pointers
 - [feedback_diff_minimo.md](feedback_diff_minimo.md) — Repos Estratégia: diff mínimo sempre — não reformatar, não renomear, não simplificar código existente fora do escopo
 - [project_leech_upgrade_skill.md](project_leech_upgrade_skill.md) — Skill leech/upgrade: workflow Rust-only para implementar features do Leech (worktrees, cargo build, leech-cli/src/commands/)
-- [project_leech_worktree.md](project_leech_worktree.md) — Sistema leech wt: sessões multi-repo, paths /workspace/mnt/worktree/, stash auto, branch pendente merge
+- [project_leech_worktree.md](project_leech_worktree.md) — Sistema leech wt: sessões multi-repo, paths /workspace/home/worktree/, stash auto, branch pendente merge
 - [feedback_token_units.md](feedback_token_units.md) — Unidade de tokens: janela = 200k tokens; usar "k" como sufixo, nunca "tk"
 - [feedback_bashly_generate_required.md](feedback_bashly_generate_required.md) — [OBSOLETO] CLI é Rust agora. Em emergência: RUBYOPT='-E UTF-8:UTF-8' resolve Encoding::CompatibilityError do bashly com fontes UTF-8
 - [feedback_claude_p_frontmatter.md](feedback_claude_p_frontmatter.md) — `claude -p "$(cat agent.md)"` falha com frontmatter YAML — usar awk para strippar antes de passar ao claude
@@ -87,7 +87,7 @@
 - [feedback_agent_prompt_direct.md](feedback_agent_prompt_direct.md) — Prompts headless devem começar com ação direta, não headers markdown — modelo age em vez de explicar
 - [feedback_error_debug_flow.md](feedback_error_debug_flow.md) — Fluxo ao receber stack trace: leitura → localização → rastreio+logs em /workspace/logs/<app>/ → hipótese conectando todos os pontos → fix mínimo → verificação
 - [feedback_boot_var_injection.md](feedback_boot_var_injection.md) — BOOT: adicionar dados como linha simples (echo "var=val"), nunca envolver em bloco REGRA
-- [reference_container_host_paths.md](reference_container_host_paths.md) — Env vars com paths reais do host: CLAUDIO_MOUNT→/workspace/mnt, LEECH_ROOT→/workspace/self (exposto como host_self no boot)
+- [reference_container_host_paths.md](reference_container_host_paths.md) — Env vars com paths reais do host: CLAUDIO_MOUNT→/workspace/home, LEECH_ROOT→/workspace/self (exposto como host_self no boot)
 - [reference_nixos_kernel_tuning.md](reference_nixos_kernel_tuning.md) — Anti-padrões em kernel.nix para AMD/RAM grande: dirty_ratio sizing, watermark_scale_factor, settings que são no-op (default, mortos com SCX)
 - [reference_hypridle_logind.md](reference_hypridle_logind.md) — Conflito hypridle vs logind IdleAction, ignore_dbus_inhibit quebra inibição de vídeo, gap mínimo lock→suspend
 - [reference_pr_message_skill.md](reference_pr_message_skill.md) — Skill code/pr-message: template PR (JIRA URL pura, tabelas), espelhos mnt/self/host/leech, chown se subpasta root

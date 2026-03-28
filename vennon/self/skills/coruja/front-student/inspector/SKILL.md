@@ -76,7 +76,7 @@ services/          ← services globais (usados em múltiplos módulos)
 
 ```bash
 # Ver o diff do backend para entender a nova shape
-cd /workspace/mnt/estrategia/monolito
+cd /workspace/home/estrategia/monolito
 git diff main...HEAD -- apps/bff/internal/handlers/ | grep -A 20 "type.*Response\|type.*DTO"
 ```
 

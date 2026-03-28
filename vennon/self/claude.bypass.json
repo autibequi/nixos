@@ -91,5 +91,8 @@
     "type": "command",
     "command": "~/.claude/scripts/statusline.sh"
   },
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": true,
+  "plugins": [
+    "claude-plugins-official/superpowers"
+  ]
 }

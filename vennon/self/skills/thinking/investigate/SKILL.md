@@ -28,7 +28,7 @@ Se o problema envolver qualquer repo da Estrategia, carregar `estrategia/platfor
 
 Paths dos repos:
 ```
-/workspace/mnt/                         ← projeto ativo montado aqui
+/workspace/home/                         ← projeto ativo montado aqui
 /home/claude/projects/estrategia/
 ├── monolito/
 ├── bo-container/

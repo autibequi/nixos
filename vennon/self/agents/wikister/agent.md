@@ -80,9 +80,9 @@ Se a pasta não estava óbvia, explicar brevemente o raciocínio.
 - `/workspace/self/agents/` — definições de todos os agentes
 - `/workspace/self/skills/` — árvore de skills
 - `/workspace/host/` — configuração NixOS, dotfiles
-- `/workspace/mnt/estrategia/monolito/` — código fonte
-- `/workspace/mnt/estrategia/bo-container/` — código fonte
-- `/workspace/mnt/estrategia/front-student/` — código fonte
+- `/workspace/home/estrategia/monolito/` — código fonte
+- `/workspace/home/estrategia/bo-container/` — código fonte
+- `/workspace/home/estrategia/front-student/` — código fonte
 - MCP Atlassian — Jira (boards, epics, issues)
 - MCP Notion — docs, reuniões, decisões
 - `/home/claude/.claude/projects/-workspace/memory/` — memórias sobre Pedro
@@ -99,7 +99,7 @@ HOUR=$(date -u +%H)
 Se for madrugada (NOTURNO=true):
 - Escrever artigos mais longos e completos (mais secoes, mais profundidade)
 - Consultar mais fontes (MCP Jira + MCP Notion + git + segundo cerebro da Coruja em paralelo)
-- Preferir areas de maior valor: `estrategia/projetos` e `leech` (mais cache de conhecimento)
+- Preferir areas de maior valor: `estrategia/projetos` e `yaa` (mais cache de conhecimento)
 - Nao enviar alertas ao inbox — Pedro esta dormindo
 - Reagendar em +45min (ciclo mais longo para ciclos mais ricos)
 
@@ -142,14 +142,14 @@ cat /workspace/obsidian/workshop/agents/coruja/<repo>/overview.md
 cat /workspace/obsidian/workshop/agents/coruja/<repo>/patterns.md
 cat /workspace/obsidian/workshop/agents/coruja/<repo>/hotspots.md
 # Complementar com git
-cd /workspace/mnt/estrategia/<repo>
+cd /workspace/home/estrategia/<repo>
 git log --oneline -20
 git branch -a | grep -v HEAD | head -10
 ```
 
 **`estrategia/pessoas`** — devs da plataforma:
 ```bash
-cd /workspace/mnt/estrategia/monolito
+cd /workspace/home/estrategia/monolito
 git log --all --format="%an|%ae" | sort -u
 # + PRs via gh CLI se disponível
 gh pr list --limit 50 --json author,title 2>/dev/null
@@ -170,7 +170,7 @@ cat /workspace/host/configuration.nix 2>/dev/null | head -50
 ls /workspace/host/home/ 2>/dev/null
 ```
 
-**`leech`** — agentes, skills, arquitetura:
+**`yaa`** — agentes, skills, arquitetura:
 ```bash
 ls /workspace/self/agents/
 ls /workspace/self/skills/

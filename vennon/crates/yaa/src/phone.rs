@@ -58,26 +58,36 @@ pub fn call(agent_name: &str, message: Option<&str>, config: &YaaConfig) -> Resu
     let start = Instant::now();
     let start_time = now_hhmm();
 
-    // Find agent file
+    // Find agent file: try agents/<name>/agent.md, then agents/<name>.md
     let agents_dir = config.vennon_path().join("self/agents");
-    let agent_file = agents_dir.join(format!("{agent_name}.md"));
-    if !agent_file.exists() {
-        // Try with path variations
-        let alt = agents_dir.join(agent_name);
-        if !alt.exists() {
-            // List available agents
+    let candidates = [
+        agents_dir.join(agent_name).join("agent.md"),  // agents/hermes/agent.md
+        agents_dir.join(format!("{agent_name}.md")),    // agents/hermes.md
+    ];
+    let agent_file = candidates.iter().find(|p| p.exists());
+
+    let agent_file = match agent_file {
+        Some(f) => f.clone(),
+        None => {
             let mut available = vec![];
             if let Ok(entries) = std::fs::read_dir(&agents_dir) {
                 for e in entries.flatten() {
-                    let name = e.file_name().to_string_lossy().to_string();
-                    if name.ends_with(".md") {
-                        available.push(name.trim_end_matches(".md").to_string());
+                    if e.path().is_dir() {
+                        if e.path().join("agent.md").exists() {
+                            available.push(e.file_name().to_string_lossy().to_string());
+                        }
+                    } else {
+                        let name = e.file_name().to_string_lossy().to_string();
+                        if name.ends_with(".md") {
+                            available.push(name.trim_end_matches(".md").to_string());
+                        }
                     }
                 }
             }
+            available.sort();
             bail!("agent not found: {agent_name}\nAvailable: {}", available.join(", "));
         }
-    }
+    };
 
     let contents = std::fs::read_to_string(&agent_file)?;
     let (fm, body) = parse_frontmatter(&contents);

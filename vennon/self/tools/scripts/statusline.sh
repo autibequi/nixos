@@ -184,8 +184,8 @@ WT_STR=""
 MOUNT_STR=""
 if [[ -n "${CLAUDIO_MOUNT:-}" ]]; then
   MOUNT_STR=" @ ${CLAUDIO_MOUNT}"
-elif [[ -d "/workspace/mnt" ]] && [[ -n "$(ls -A /workspace/mnt 2>/dev/null)" ]]; then
-  MOUNT_STR=" @ /workspace/mnt"
+elif [[ -d "/workspace/home" ]] && [[ -n "$(ls -A /workspace/home 2>/dev/null)" ]]; then
+  MOUNT_STR=" @ /workspace/home"
 fi
 
 # Ghost mode: substitui tudo por fantasminha

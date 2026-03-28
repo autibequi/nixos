@@ -8,7 +8,7 @@ Ativa o diálogo de laboratório entre Claude externo (eu, falando com o user) e
 User ──► Claude EXTERNO (eu, esta sessão)
               │
               ├── /workspace/self/      ← meu source code (~/nixos/self)
-              ├── /workspace/mnt/       ← projeto atual (nixos repo em lab)
+              ├── /workspace/home/       ← projeto atual (nixos repo em lab)
               │   └── self/             ← subfolder nixos/self/ editável
               ├── /workspace/host/      ← nixos repo completo (SÓ em lab)
               ├── /workspace/obsidian/  ← cérebro persistente
@@ -22,14 +22,14 @@ User ──► Claude EXTERNO (eu, esta sessão)
 ```
 
 **Importante**: modificar o Claude interno NÃO modifica meu código.
-O interno é efêmero — apenas eu (externo) persistir mudanças em `/workspace/mnt/self/`.
+O interno é efêmero — apenas eu (externo) persistir mudanças em `/workspace/home/self/`.
 
 ## Como invocar o Claude interno
 
 ```bash
 SYSFILE=$(mktemp /tmp/lab-sys-XXXX.md)
 LEECH_ANALYSIS_MODE=1 HEADLESS=1 IN_DOCKER=1 CLAUDE_ENV=container \
-  /workspace/mnt/self/hooks/session-start.sh 2>/dev/null > "$SYSFILE"
+  /workspace/home/self/hooks/session-start.sh 2>/dev/null > "$SYSFILE"
 
 HEADLESS=1 timeout 120 claude \
   --permission-mode bypassPermissions \
@@ -48,8 +48,8 @@ rm -f "$SYSFILE"
 | Path | O que é | Editável? |
 |------|---------|-----------|
 | `/workspace/self/` | código Leech montado de `~/nixos/self` | sim via mnt/self |
-| `/workspace/mnt/` | nixos repo do host montado rw | sim |
-| `/workspace/mnt/self/` | **fonte da verdade** — hooks, skills, agents, scripts | sim |
+| `/workspace/home/` | nixos repo do host montado rw | sim |
+| `/workspace/home/self/` | **fonte da verdade** — hooks, skills, agents, scripts | sim |
 | `/workspace/host/` | nixos repo (`~/nixos`) — ro default, **rw com --host** | rw com host_attached=1 |
 | `/workspace/obsidian/` | vault Obsidian, persistente entre sessões | sim |
 | `/workspace/obsidian/tasks/` | kanban TODO/DOING/DONE | sim |
@@ -64,7 +64,7 @@ rm -f "$SYSFILE"
 ## Limitações desta sessão (--host sem restart)
 
 - **Sem Docker**: socket precisa GID 131, não estou no grupo
-- `leech tasks run X` requer Docker → precisa rodar no host
+- `yaa tasks run X` requer Docker → precisa rodar no host
 - `leech --host` do host spawna container com `group_add: [131]` — ao reiniciar terei acesso
 - O que posso fazer: Claude interno direto, editar arquivos, rodar scripts, task-runner.sh
 
@@ -73,7 +73,7 @@ rm -f "$SYSFILE"
 1. **Identificar hipótese**: algo no sistema que quer testar/melhorar
 2. **Spawn interno**: invocar haiku com contexto específico e tarefa delimitada
 3. **Observar output**: o interno age, eu leio resultado
-4. **Aplicar se válido**: eu (externo) edito `/workspace/mnt/self/` com o que o interno descobriu
+4. **Aplicar se válido**: eu (externo) edito `/workspace/home/self/` com o que o interno descobriu
 5. **Iterar**: re-spawn com hipótese refinada
 
 ## Exemplos de uso

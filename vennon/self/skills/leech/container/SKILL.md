@@ -1,16 +1,16 @@
 ---
 name: leech/container
-description: Dockerizar um novo servico no ecossistema Leech — gerar Dockerfile/compose/envs e integrar com leech docker (logs em /workspace/logs, aparece no leech status, registrado no CLI). Tambem cobre operar servicos existentes (monolito, bo-container, front-student).
+description: Dockerizar um novo servico no ecossistema Leech — gerar Dockerfile/compose/envs e integrar com vennon (logs em /workspace/logs, aparece no deck, registrado no CLI). Tambem cobre operar servicos existentes (monolito, bo-container, front-student).
 ---
 
 # Skill: leech/container
 
-Criar e operar containers integrados ao ecossistema Leech: logs persistentes, visibilidade no `leech docker status`, registro no CLI, rede compartilhada.
+Criar e operar containers integrados ao ecossistema Leech: logs persistentes, visibilidade no `vennon status`, registro no CLI, rede compartilhada.
 
 ## Quando usar
 
 - Dockerizar um projeto novo (gerar Dockerfile, compose, envs, registrar no CLI)
-- Levantar / parar / debugar servicos existentes (`leech docker run/stop/logs/...`)
+- Levantar / parar / debugar servicos existentes (`vennon run/stop/logs/...`)
 - Investigar problemas de container (logs, shell, status)
 - Configurar debug remoto Go + dlv + Cursor
 
@@ -133,14 +133,14 @@ services:
 ### CLI `leech docker`
 
 ```bash
-leech docker run <service> [--env=sand] [--detach] [--debug]
-leech docker stop <service>
-leech docker logs <service> [-f] [--tail=100]
-leech docker status [service]
-leech docker shell <service> [container]
-leech docker restart <service>
-leech docker flush <service>      # remove volumes anonimos
-leech docker install <service>    # go work vendor / npm install
+vennon run <service> [--env=sand] [--detach] [--debug]
+vennon stop <service>
+vennon logs <service> [-f] [--tail=100]
+vennon status [service]
+vennon shell <service> [container]
+vennon restart <service>
+vennon flush <service>      # remove volumes anonimos
+vennon install <service>    # go work vendor / npm install
 ```
 
 ### Logs no container
@@ -169,14 +169,14 @@ Host: `~/.local/share/leech/logs/<service>/`
 
 #### bo-container
 - Node 14 Alpine, Quasar 1.x + Vue 2
-- npm install durante `docker compose build` (sem `leech docker install`)
+- npm install durante `docker compose build` (sem `vennon install`)
 - SSH agent via `--mount=type=ssh` (para `frontend-libs` git+ssh)
 - `NPM_TOKEN` como build arg (GitHub Package Registry)
 - Dev server HTTPS em `:9090` (hardcoded no quasar.conf.js)
 - `LOCAL_BO_CONTAINER_HOST=0.0.0.0`
 - Hot-reload: bind mount source + volume anonimo em `/app/node_modules`
 - Sem deps compose
-- Para atualizar node_modules: `leech docker flush bo-container && leech docker run bo-container`
+- Para atualizar node_modules: `vennon flush bo-container && vennon run bo-container`
 
 ---
 
@@ -238,7 +238,7 @@ services:
 - Usar `substitutePath` (nao `remotePath`/`localRoot` — deprecated)
 - Nao usar `"debugAdapter": "dlv-dap"` — usar modo JSON-RPC legado
 - "Type 'dlv help'" no Debug Console = conectado com sucesso (nao e erro)
-- Logs do servidor → `leech docker logs`, nao no Debug Console
+- Logs do servidor → `vennon logs`, nao no Debug Console
 
 ---
 

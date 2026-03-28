@@ -112,7 +112,7 @@ Reutilizar logica de `code/analysis/objects/SKILL.md` internamente.
 
 Para cada repo ativo:
 ```bash
-cd /workspace/mnt/estrategia/<repo>/
+cd /workspace/home/estrategia/<repo>/
 git diff origin/main --name-status
 git diff origin/main --stat
 ```
@@ -143,9 +143,9 @@ Output ASCII:
 Simbolos: `+` novo (A), `~` modificado (M), `x` removido (D).
 
 Repos e paths (mesmo de `code/analysis/objects`):
-- `monolito`    → `/workspace/mnt/estrategia/monolito/`
-- `bo`          → `/workspace/mnt/estrategia/bo-container/`
-- `front`       → `/workspace/mnt/estrategia/front-student/`
+- `monolito`    → `/workspace/home/estrategia/monolito/`
+- `bo`          → `/workspace/home/estrategia/bo-container/`
+- `front`       → `/workspace/home/estrategia/front-student/`
 
 ---
 

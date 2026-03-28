@@ -30,7 +30,7 @@ Exemplos:
 
 ```
 1. Criar sessao:    leech wt new <agent>/<task>
-2. Implementar:     nos repos dentro de /workspace/mnt/worktree/<sessao>/
+2. Implementar:     nos repos dentro de /workspace/home/worktree/<sessao>/
 3. Apresentar:      inbox card WORKTREE_<agent>_<nome>_<YYYYMMDD>.md
 4. CTO revisa:      leech wt <agent>/<task>
 5. CTO aprova:      leech wt <agent>/<task> --close
@@ -48,7 +48,7 @@ Cria branch `gandalf/auth-refactor` em todos os repos (monolito, bo-container, f
 
 Path no disco:
 ```
-/workspace/mnt/worktree/gandalf-auth-refactor/
+/workspace/home/worktree/gandalf-auth-refactor/
 ├── monolito/
 ├── bo-container/
 ├── front-student/

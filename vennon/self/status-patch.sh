@@ -157,7 +157,7 @@ _do_status_render() {
     local dest_mounts
     dest_mounts=$(echo "$_inspect_cache" | awk -F'|' -v n="$name" '$1==n {print $3}' | head -1)
     local vols=()
-    for v_entry in "/workspace/mnt:mnt" "/workspace/obsidian:obs" "/workspace/self:leech" "/workspace/logs/docker:logs"; do
+    for v_entry in "/workspace/home:mnt" "/workspace/obsidian:obs" "/workspace/self:leech" "/workspace/logs/docker:logs"; do
       local vp="${v_entry%%:*}" vn="${v_entry##*:}"
       if echo "$dest_mounts" | grep -qw "$vp"; then
         vols+=("${GREEN}${vn}${RESET}")
@@ -347,13 +347,13 @@ while true; do
             break
             ;;
           s)
-            leech runner "$_cursor_svc" start --env="${_svc_env[$_cursor_svc]:-sand}" &>/dev/null &
+            vennon "$_cursor_svc" start --env="${_svc_env[$_cursor_svc]:-sand}" &>/dev/null &
             _svc_action[$_cursor_svc]="iniciando"
             _svc_action_ts[$_cursor_svc]=$(date +%s)
             break
             ;;
           S)
-            leech runner "$_cursor_svc" stop &>/dev/null &
+            vennon "$_cursor_svc" stop &>/dev/null &
             _svc_action[$_cursor_svc]="parando"
             _svc_action_ts[$_cursor_svc]=$(date +%s)
             break
@@ -361,7 +361,7 @@ while true; do
           l)
             trap - INT
             printf "\033[2J\033[H"
-            leech runner "$_cursor_svc" logs || true
+            vennon "$_cursor_svc" logs || true
             trap 'exit 0' INT TERM
             printf "\033[2J\033[H"
             break
@@ -369,7 +369,7 @@ while true; do
           t)
             trap - INT
             printf "\033[2J\033[H"
-            leech runner "$_cursor_svc" test || true
+            vennon "$_cursor_svc" test || true
             trap 'exit 0' INT TERM
             printf "\033[2J\033[H"
             break
@@ -377,7 +377,7 @@ while true; do
           x)
             trap - INT
             printf "\033[2J\033[H"
-            leech runner "$_cursor_svc" shell || true
+            vennon "$_cursor_svc" shell || true
             trap 'exit 0' INT TERM
             printf "\033[2J\033[H"
             break

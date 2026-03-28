@@ -43,7 +43,7 @@ leech wt
 git branch -a | grep -i "<FUK2-XXXXX>"
 
 # Verificar worktrees abertas de uma sessao
-ls /workspace/mnt/worktree/ | grep -i "<FUK2-XXXXX>"
+ls /workspace/home/worktree/ | grep -i "<FUK2-XXXXX>"
 ```
 
 Se ja existir sessao → `leech wt FUK2-XXXXX` para ativar, nao criar novo.
@@ -56,7 +56,7 @@ Se ja existir sessao → `leech wt FUK2-XXXXX` para ativar, nao criar novo.
 | **Feature multi-repo** (toca monolito + bo/front) | Sessao: `leech wt new FUK2-XXXXX` |
 | **Feature single-repo complexa** (migration, refactor multi-camada) | Sessao so nesse repo: `leech wt new FUK2-XXXXX` (skip outros na confirmacao) |
 
-**Sessao `leech wt`** cria worktrees em `/workspace/mnt/worktree/FUK2-XXXXX/<repo>/`
+**Sessao `leech wt`** cria worktrees em `/workspace/home/worktree/FUK2-XXXXX/<repo>/`
 para todos os repos da Estrategia. Ver skill `leech/worktree` para o fluxo completo.
 
 ### 3. Nomenclatura obrigatoria

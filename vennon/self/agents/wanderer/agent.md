@@ -53,9 +53,9 @@ tail -40 /workspace/obsidian/bedrooms/wanderer/memory.md
 
 | Zona | Path | O que tem |
 |------|------|-----------|
-| A — NixOS | `/workspace/mnt/` | flake.nix, configuration.nix, modules/ |
-| B — Leech Engine | `/workspace/mnt/self/` | agents, skills, scripts, hooks, cli/src, system/ |
-| C — Dotfiles | `/workspace/mnt/stow/` | hypr, waybar, nvim, .claude |
+| A — NixOS | `/workspace/home/` | flake.nix, configuration.nix, modules/ |
+| B — Leech Engine | `/workspace/home/self/` | agents, skills, scripts, hooks, cli/src, system/ |
+| C — Dotfiles | `/workspace/home/stow/` | hypr, waybar, nvim, .claude |
 
 **3. Ler 2-4 arquivos com profundidade**
 
@@ -143,7 +143,7 @@ Minera transcripts recentes e efêmeros para extrair aprendizados persistentes.
 
 Avalia estado do ecossistema em rotação.
 
-**A. Repositório NixOS** (`/workspace/mnt/`)
+**A. Repositório NixOS** (`/workspace/home/`)
 - Imports comentados em `configuration.nix`
 - Configs desatualizadas, options deprecated
 - Dotfiles divergindo do stow/

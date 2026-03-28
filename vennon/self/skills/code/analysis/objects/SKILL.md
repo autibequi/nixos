@@ -22,16 +22,16 @@ Ler `templates/layers.md` para as regras de path→layer por repositório.
 Para cada repo ativo (conforme `--repo`):
 
 ```bash
-cd /workspace/mnt/estrategia/<repo>/
+cd /workspace/home/estrategia/<repo>/
 git diff origin/main --name-status
 ```
 
 Formato de saída: `M\tpath/to/file.go` ou `A\tpath/to/file.go`
 
 Repos e paths:
-- `monolito`    → `/workspace/mnt/estrategia/monolito/`
-- `bo`          → `/workspace/mnt/estrategia/bo-container/`
-- `front`       → `/workspace/mnt/estrategia/front-student/`
+- `monolito`    → `/workspace/home/estrategia/monolito/`
+- `bo`          → `/workspace/home/estrategia/bo-container/`
+- `front`       → `/workspace/home/estrategia/front-student/`
 
 ## Passo 2 — Classificar por camada
 

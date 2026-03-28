@@ -179,7 +179,7 @@ Remove branches locais marcadas como [gone] no remoto.
 | **mechanic** | on-demand | sonnet | NixOS, Docker, segurança, debug | (ad-hoc) |
 | **placeholder** | on-demand | haiku | tasks genéricas bem definidas | (ad-hoc) |
 
-**CLI:** `leech agents` | `leech agents run <nome>` | `leech agents status` | `/meta:phone call <nome>`
+**CLI:** `yaa agents` | `yaa agents run <nome>` | `yaa agents status` | `/meta:phone call <nome>`
 
 ---
 
@@ -189,7 +189,7 @@ Remove branches locais marcadas como [gone] no remoto.
 - 40+ memórias em `/workspace/.claude/projects/-workspace-mnt/memory/`
 - Tipos: user, feedback, project, reference
 - Consultáveis, atualizáveis em qualquer sessão
-- Sinc com git: `cp ~/.claude/.../memory/*.md /workspace/mnt/self/system/memory/`
+- Sinc com git: `cp ~/.claude/.../memory/*.md /workspace/home/self/system/memory/`
 
 ### Nix Como Superpoder
 - No container: `nix-shell -p <pkg> --run "<cmd>"`

@@ -59,7 +59,7 @@ Nomenclatura do sistema. Referencia rapida para entender os termos usados em ski
 
 | Antigo | Novo | Nota |
 |--------|------|------|
-| `zion` (CLI) | `leech` | alias `zion=leech` em init.sh |
+| `zion` (CLI) | `yaa` | alias `zion=leech` em init.sh |
 | `~/.zion` | `~/.leech` | |
 | `ZION_*` env vars | `LEECH_*` | |
 | `zion-dk-*` containers | `leech-dk-*` | |

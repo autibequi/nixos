@@ -14,12 +14,12 @@ Correto:
 ```
   │   Descrição em texto:                  │   ← COM borda
   │                                        │
-     leech run coruja                          ← SEM borda
+     yaa phone coruja                          ← SEM borda
      just install                              ← SEM borda
   │                                        │
 ```
 
 Errado (não fazer):
 ```
-  │   leech run coruja                     │   ← borda atrapalha copy
+  │   yaa phone coruja                     │   ← borda atrapalha copy
 ```

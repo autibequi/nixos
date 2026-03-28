@@ -8,7 +8,7 @@ Ativa o diálogo de laboratório entre Claude externo (eu, falando com o user) e
 User ──► Claude EXTERNO (eu, esta sessão)
               │
               ├── /workspace/self/      ← meu source code
-              ├── /workspace/mnt/       ← nixos repo (mesma coisa, editável)
+              ├── /workspace/home/       ← nixos repo (mesma coisa, editável)
               ├── /workspace/obsidian/  ← cérebro persistente
               │
               └── spawn ──► Claude INTERNO (analysis mode, haiku)
@@ -20,7 +20,7 @@ User ──► Claude EXTERNO (eu, esta sessão)
 ```
 
 **Importante**: modificar o Claude interno NÃO modifica meu código.
-O interno é efêmero — apenas eu (externo) persistir mudanças em `/workspace/mnt/self/`.
+O interno é efêmero — apenas eu (externo) persistir mudanças em `/workspace/home/self/`.
 
 ## Como invocar o Claude interno
 
@@ -32,7 +32,7 @@ HEADLESS=1 LEECH_ANALYSIS_MODE=1 IN_DOCKER=1 CLAUDE_ENV=container \
   --permission-mode bypassPermissions \
   --model claude-haiku-4-5-20251001 \
   --max-turns 10 \
-  --add-dir /workspace/mnt \
+  --add-dir /workspace/home \
   -p "SEU_PROMPT_AQUI" 2>&1
 
 ```
@@ -43,9 +43,9 @@ HEADLESS=1 LEECH_ANALYSIS_MODE=1 IN_DOCKER=1 CLAUDE_ENV=container \
 
 | Path | O que é | Editável? |
 |------|---------|-----------|
-| `/workspace/self/` | source leech (symlink de `/workspace/mnt/self/`) | sim via mnt |
-| `/workspace/mnt/` | nixos repo do host montado rw | sim |
-| `/workspace/mnt/self/` | **fonte da verdade** — hooks, skills, agents, scripts | sim |
+| `/workspace/self/` | source leech (symlink de `/workspace/home/self/`) | sim via mnt |
+| `/workspace/home/` | nixos repo do host montado rw | sim |
+| `/workspace/home/self/` | **fonte da verdade** — hooks, skills, agents, scripts | sim |
 | `/workspace/obsidian/` | vault Obsidian, persistente entre sessões | sim |
 | `/workspace/obsidian/tasks/` | kanban TODO/DOING/DONE | sim |
 | `/workspace/obsidian/vault/agents/` | memória e outputs dos agentes | sim |
@@ -58,7 +58,7 @@ HEADLESS=1 LEECH_ANALYSIS_MODE=1 IN_DOCKER=1 CLAUDE_ENV=container \
 ## Limitações desta sessão (--host sem restart)
 
 - **Sem Docker**: socket precisa GID 131, não estou no grupo
-- `leech tasks run X` requer Docker → precisa rodar no host
+- `yaa tasks run X` requer Docker → precisa rodar no host
 - `leech --host` do host spawna container com `group_add: [131]` — ao reiniciar terei acesso
 - O que posso fazer: Claude interno direto, editar arquivos, rodar scripts, task-runner.sh
 
@@ -67,7 +67,7 @@ HEADLESS=1 LEECH_ANALYSIS_MODE=1 IN_DOCKER=1 CLAUDE_ENV=container \
 1. **Identificar hipótese**: algo no sistema que quer testar/melhorar
 2. **Spawn interno**: invocar haiku com contexto específico e tarefa delimitada
 3. **Observar output**: o interno age, eu leio resultado
-4. **Aplicar se válido**: eu (externo) edito `/workspace/mnt/self/` com o que o interno descobriu
+4. **Aplicar se válido**: eu (externo) edito `/workspace/home/self/` com o que o interno descobriu
 5. **Iterar**: re-spawn com hipótese refinada
 
 ## Exemplos de uso
@@ -103,7 +103,7 @@ Eu devo:
 - O que realmente morre: o **contexto da conversa** (RAM) — não o filesystem
 - Memórias (`~/.claude/`) → no host, persistem entre sessões
 - Source code (`~/nixos/self/`) → no host, git push para compartilhar/backup
-- Único caminho pra persistir: `editar /workspace/mnt/self/` → `git commit` → `git push`
+- Único caminho pra persistir: `editar /workspace/home/self/` → `git commit` → `git push`
 
 ### Quando o user diz "instala o módulo"
 
@@ -117,7 +117,7 @@ user: "instala o módulo"
        ↓
 eu (externo) leio o que o mini fez
        ↓
-aplico em /workspace/mnt/self/ (hooks, skills, scripts, agents, etc.)
+aplico em /workspace/home/self/ (hooks, skills, scripts, agents, etc.)
        ↓
 commit + push = permanente
 ```
@@ -126,7 +126,7 @@ commit + push = permanente
 
 | O que | Onde salvar | Como persiste |
 |-------|-------------|---------------|
-| Hooks, skills, scripts | `/workspace/mnt/self/` | git commit + push |
+| Hooks, skills, scripts | `/workspace/home/self/` | git commit + push |
 | Memórias cross-session | `/home/claude/.claude/projects/*/memory/` | volume Docker (some se volume deletado) |
 | Tasks/kanban | `/workspace/obsidian/tasks/` | vault Obsidian do user |
 | Memória dos agentes | `/workspace/obsidian/vault/agents/` | vault Obsidian do user |
@@ -138,7 +138,7 @@ Depois de instalar um módulo, sempre:
 1. `bash -n <arquivo>` — syntax check
 2. Testar localmente se possível
 3. `git commit` com mensagem descritiva
-4. Checar se precisa de `leech update` no host (mudanças no CLI bashly)
+4. Checar se precisa de `yaa update` no host (mudanças no CLI bashly)
 
 ---
 
@@ -169,7 +169,7 @@ Mini-Leech (haiku, efêmero)     →    Leech (sonnet, eu, persistente via git)
 3. Mini-Leech desenvolve/testa no filesystem compartilhado
 4. eu leio o resultado
 5. user: "instala o módulo"
-6. eu aplico em /workspace/mnt/self/ + commit + push
+6. eu aplico em /workspace/home/self/ + commit + push
 7. Mini-Leech some — o módulo vive em mim
 ```
 

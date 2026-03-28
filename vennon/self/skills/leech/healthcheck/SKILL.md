@@ -37,7 +37,7 @@ ls -la /nix/var/nix/db/big-lock 2>/dev/null
 
 ```bash
 # Repos sujos
-cd /workspace/mnt && git status --porcelain | head -5
+cd /workspace/home && git status --porcelain | head -5
 
 # Agentes orfaos em bedrooms/_working/
 ls /workspace/obsidian/bedrooms/_working/*.md 2>/dev/null

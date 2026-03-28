@@ -4,7 +4,7 @@ description: /home/claude/.claude/ e /workspace/host/ são read-only no containe
 type: feedback
 ---
 
-No container Leech, apenas `/workspace/self/`, `/workspace/mnt/` e `/workspace/obsidian/` são montados com escrita (rw). Os outros são read-only:
+No container Leech, apenas `/workspace/self/`, `/workspace/home/` e `/workspace/obsidian/` são montados com escrita (rw). Os outros são read-only:
 
 - `/home/claude/.claude/` → read-only (ro)
 - `/workspace/host/` → read-only (ro)

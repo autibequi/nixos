@@ -33,6 +33,6 @@ type: project
 | Dashboard operacional | `/workspace/obsidian/bedrooms/DASHBOARD.md` |
 
 ## CLI
-- `leech agents run <nome>` — roda imediato
-- `leech tick` — processa agents + tasks due
-- `leech agents work` — executa cards vencidos
+- `yaa agents run <nome>` — roda imediato
+- `yaa tick` — processa agents + tasks due
+- `yaa agents work` — executa cards vencidos

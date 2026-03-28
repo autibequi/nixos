@@ -51,8 +51,8 @@ Usar os mounts disponíveis para chegar com diagnóstico, não com perguntas.
 3. Ir direto ao source correto (tabela abaixo)
 4. Ler, correlacionar, formar hipótese
 5. Apresentar diagnóstico + causa provável + fix proposto
-   → Se fix for NixOS: editar módulo + pedir `leech os switch`
-   → Se fix for config: editar dotfile + `leech stow`
+   → Se fix for NixOS: editar módulo + pedir `deck os switch`
+   → Se fix for config: editar dotfile + `deck stow`
    → Se precisar de info que não tenho: pedir UMA coisa específica
 ```
 
@@ -116,8 +116,8 @@ cat /host/sys/class/net/enp*/statistics/tx_bytes
 ### Fix via NixOS (host_attached=1)
 
 Quando o diagnóstico indica fix de configuração do sistema:
-1. Editar o módulo correto em `/workspace/mnt/` (tabela de módulos abaixo)
-2. Dizer ao Pedro: **"editei X, rode `leech os switch` para aplicar"**
+1. Editar o módulo correto em `/workspace/home/` (tabela de módulos abaixo)
+2. Dizer ao Pedro: **"editei X, rode `deck os switch` para aplicar"**
 3. Se quiser testar antes sem persistir: pedir `nh os test .`
 
 **Nunca rodar `nh os switch` ou `nixos-rebuild` dentro do container.**
@@ -180,7 +180,7 @@ Se MCP indisponível: `nh search <query>`.
 | Login greeter | `modules/greetd.nix` |
 | Boot splash | `modules/plymouth.nix` |
 | Logitech mouse | `modules/logiops.nix` |
-| **Keybinds / windowrules / Waybar** | `stow/.config/hypr/` → `leech stow` |
+| **Keybinds / windowrules / Waybar** | `stow/.config/hypr/` → `deck stow` |
 
 **Pacotes unstable:** usar `unstable.pkgs.<name>` — disponível em todos os módulos via `specialArgs`.
 
@@ -229,7 +229,7 @@ Layer 2: Dotfile Configs (stow/.config/hypr/*.conf)
 
 **Regra de ouro:**
 - Instalar/habilitar Hyprland, plugins → `modules/hyprland.nix` → `nh os test .`
-- Keybinds, windowrules, Waybar, animações → `stow/.config/hypr/` → `leech stow` → `hyprctl reload`
+- Keybinds, windowrules, Waybar, animações → `stow/.config/hypr/` → `deck stow` → `hyprctl reload`
 
 Nunca editar `~/.config/hypr/` diretamente — é symlink. Fonte: `stow/.config/hypr/`.
 
@@ -250,7 +250,7 @@ Nunca editar `~/.config/hypr/` diretamente — é symlink. Fonte: `stow/.config/
 ```bash
 # 1. Editar stow/.config/hypr/
 # 2. Deploy
-leech stow
+deck stow
 # 3. Recarregar
 hyprctl reload
 ```
@@ -274,6 +274,6 @@ hyprctl reload
 | Aplicar permanentemente | `nh os switch .` (só se user pedir) |
 | Buscar pacotes | `mcp__nixos__nix search packages <query>` |
 | Buscar opções | `mcp__nixos__nix search options <query>` |
-| Deploy dotfiles | `leech stow` |
+| Deploy dotfiles | `deck stow` |
 | Reload Hyprland | `hyprctl reload` |
 | Logs Hyprland | `journalctl -xe --grep=hypr` |

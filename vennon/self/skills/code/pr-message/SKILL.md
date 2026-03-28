@@ -58,7 +58,7 @@ https://estrategia.atlassian.net/browse/<TICKET>
 ### 1) Repo e ticket
 
 ```bash
-cd /workspace/mnt/estrategia/<monolito|bo-container|front-student>
+cd /workspace/home/estrategia/<monolito|bo-container|front-student>
 git branch --show-current
 git fetch origin main 2>/dev/null; git log --oneline origin/main..HEAD
 ```

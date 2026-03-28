@@ -20,7 +20,7 @@ Motivo: o usuário copia com mouse. Borda no código quebra o copy.
   │                                        │
   │   Compilar e instalar o binário:       │   ← texto: COM borda
   │                                        │
-     cd ~/nixos/leech/rust                     ← código: SEM borda
+     cd ~/nixos/vennon                     ← código: SEM borda
      just install                              ← código: SEM borda
   │                                        │
   ╰────────────────────────────────────────╯
@@ -128,10 +128,10 @@ Exemplo real:
   █  AÇÃO NECESSÁRIA                       █
   ██████████████████████████████████████████
   │                                        │
-  │   leech ask compilado — instalar no    │
+  │   yaa compilado — instalar no    │
   │   host para ativar o binário.          │
   │                                        │
-     cd ~/nixos/leech/rust
+     cd ~/nixos/vennon
      just install
   │                                        │
   ╰────────────────────────────────────────╯

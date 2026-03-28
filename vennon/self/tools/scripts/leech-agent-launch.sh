@@ -18,7 +18,7 @@ if [[ "${LEECH_SPLASH:-1}" == "0" ]]; then
   _wait "loading agent..."
   wait "$BOOT_PID" 2>/dev/null || true
   printf '\033[2J\033[H'
-  cd /workspace/mnt
+  cd /workspace/home
   exec /home/claude/.nix-profile/bin/claude --enable-auto-mode "$@"
 fi
 
@@ -78,5 +78,5 @@ _ok "agente pronto"
 sleep 0.2
 
 printf '\033[?25h\033[2J\033[H'
-cd /workspace/mnt
+cd /workspace/home
 exec /home/claude/.nix-profile/bin/claude --enable-auto-mode "$@"

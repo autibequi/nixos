@@ -182,7 +182,7 @@ Socket criado pelo `leech tmux serve` (usuário `pedrinho`, uid 1000) com `srw--
 `Command::new("tmux")` falha com ENOENT. **Solução:** `tmux_bin()` procura em `/run/current-system/sw/bin/tmux` primeiro. No container: `nix-shell -p tmux --run "tmux ..."` ou `leech tmux install` para instalar permanentemente.
 
 ### Container precisa ser reiniciado após mudança no compose
-Se o mount mudou (arquivo → diretório), o container precisa de `leech stop && leech new` para aplicar. Não adianta só recriar o socket.
+Se o mount mudou (arquivo → diretório), o container precisa de `vennon claude stop && yaa` para aplicar. Não adianta só recriar o socket.
 
 ### nix-shell overhead
 Primeira execução de `nix-shell -p tmux` baixa ~65 MiB do cache.nixos.org — demora ~10-30s. Depois fica em cache no nix store do container. `leech tmux install` instala permanentemente no nix profile e elimina esse overhead.

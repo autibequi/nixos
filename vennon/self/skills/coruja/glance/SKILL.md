@@ -14,7 +14,7 @@ com destaque visual para arquivos relacionados à feature ativa.
 
 Escreve o script abaixo em `/tmp/glance.py` e roda com `python3 /tmp/glance.py`.
 
-Alternativamente: o script já existe em `/workspace/mnt/estrategia/difftree.py`.
+Alternativamente: o script já existe em `/workspace/home/estrategia/difftree.py`.
 
 ---
 
@@ -25,9 +25,9 @@ import subprocess
 from collections import defaultdict
 
 REPOS = [
-    ('monolito',      '/workspace/mnt/estrategia/monolito',      '\033[96m',            '\033[38;5;39m'),
-    ('front-student', '/workspace/mnt/estrategia/front-student',  '\033[38;5;213m',      '\033[38;5;198m'),
-    ('bo-container',  '/workspace/mnt/estrategia/bo-container',   '\033[38;5;118m',      '\033[38;5;82m'),
+    ('monolito',      '/workspace/home/estrategia/monolito',      '\033[96m',            '\033[38;5;39m'),
+    ('front-student', '/workspace/home/estrategia/front-student',  '\033[38;5;213m',      '\033[38;5;198m'),
+    ('bo-container',  '/workspace/home/estrategia/bo-container',   '\033[38;5;118m',      '\033[38;5;82m'),
 ]
 
 R        = '\033[0m'

@@ -45,10 +45,10 @@ fi
 rm -f /tmp/leech-ctx-loaded /tmp/leech-ctx-loaded.pending
 
 # ── Cursor: espelha todo o stdout deste hook para ficheiro na raiz do projeto ──
-# Preferimos $WS/.cursor/; se for RO (ex.: /workspace/host), fallback para /workspace/mnt
+# Preferimos $WS/.cursor/; se for RO (ex.: /workspace/host), fallback para /workspace/home
 # (regra em .cursor/rules/ manda o agente ler; gitignore só o .md gerado)
 CURSOR_BOOT=""
-for _c in "$WS/.cursor/session-boot.md" "/workspace/mnt/.cursor/session-boot.md"; do
+for _c in "$WS/.cursor/session-boot.md" "/workspace/home/.cursor/session-boot.md"; do
   _d="$(dirname "$_c")"
   if mkdir -p "$_d" 2>/dev/null && : >"$_c" 2>/dev/null; then
     rm -f "$_c"
@@ -59,7 +59,7 @@ done
 [ -n "$CURSOR_BOOT" ] && exec > >(tee "$CURSOR_BOOT")
 
 # ── Resolve flags ────────────────────────────────────────────────
-# 1. Salva overrides de processo (maior prioridade — ex: PERSONALITY=OFF leech run)
+# 1. Salva overrides de processo (maior prioridade — ex: PERSONALITY=OFF yaa phone)
 _OV_PERSONALITY="${PERSONALITY:-}"
 _OV_AUTOCOMMIT="${AUTOCOMMIT:-}"
 _OV_AUTOJARVIS="${AUTOJARVIS:-}"
@@ -141,7 +141,7 @@ echo "       Configs, memórias, traços de comportamento: salvar em /workspace/
 echo ""
 echo "REGRA: 4 patas montadas — sempre disponíveis nesta sessão:"
 echo "       /workspace/self/     — EU: skills, hooks, agents, scripts do Leech"
-echo "       /workspace/mnt/      — PROJETOS: código-fonte para trabalhar"
+echo "       /workspace/home/      — PROJETOS: código-fonte para trabalhar"
 echo "       /workspace/obsidian/ — CÉREBRO: vault, tasks, inbox, boards"
 echo "       /workspace/logs/     — LOGS: containers, host, systemd, serviços"
 echo "  IMPORTANTE: antes de pedir ao usuário para gerar/mostrar logs,"
@@ -396,7 +396,7 @@ O usuário externo NÃO vê o output desta sessão diretamente. Você pode:
 
 ## Postura
 - Ser maximamente proativo — executar sem pedir confirmação
-- Usar `leech` livremente: `leech tasks tick`, `leech tasks run <nome>`, `leech tasks list`, etc.
+- Usar `yaa` livremente: `yaa tasks tick`, `yaa tasks run <nome>`, `yaa tasks list`, etc.
 - Iterar rápido: tenta → observa → corrige → tenta de novo
 - Comentar em voz alta o que está pensando (monólogo interno é útil aqui)
 - Modificar arquivos de config, scripts, hooks para testar hipóteses

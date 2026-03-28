@@ -23,7 +23,7 @@ Ver regras globais em `coruja/REGISTRY.md` → seção **Git Flow — Branch vs 
 
 ## Passo 0 — Entender o escopo antes de escrever qualquer código
 
-Ler `/workspace/mnt/estrategia/monolito/STATE.md` para verificar posição atual, decisões técnicas anteriores e blockers conhecidos.
+Ler `/workspace/home/estrategia/monolito/STATE.md` para verificar posição atual, decisões técnicas anteriores e blockers conhecidos.
 
 Antes de começar, responder:
 
@@ -159,7 +159,7 @@ make test-<app>
 
 Não declarar a funcionalidade completa antes de todos passarem.
 
-Após a verificação passar: atualizar `/workspace/mnt/estrategia/monolito/STATE.md` com a feature implementada, decisões técnicas relevantes (ex: arquitetura escolhida, motivo de não usar cache, cross-app patterns), e qualquer blocker encontrado.
+Após a verificação passar: atualizar `/workspace/home/estrategia/monolito/STATE.md` com a feature implementada, decisões técnicas relevantes (ex: arquitetura escolhida, motivo de não usar cache, cross-app patterns), e qualquer blocker encontrado.
 
 ## Cross-App Dependencies
 

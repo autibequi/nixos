@@ -23,15 +23,15 @@ Aguardar a resposta antes de prosseguir.
 ### 2a — safe.directory (sempre rodar primeiro)
 
 ```bash
-HOME=/tmp git config --global --add safe.directory /workspace/mnt/estrategia/<repo>
+HOME=/tmp git config --global --add safe.directory /workspace/home/estrategia/<repo>
 ```
 
 ### 2b — Fork point e commits
 
 ```bash
-HOME=/tmp git -C /workspace/mnt/estrategia/<repo> merge-base main HEAD
-HOME=/tmp git -C /workspace/mnt/estrategia/<repo> rev-list --count <FORK_POINT>..HEAD
-HOME=/tmp git -C /workspace/mnt/estrategia/<repo> log --oneline <FORK_POINT>..HEAD
+HOME=/tmp git -C /workspace/home/estrategia/<repo> merge-base main HEAD
+HOME=/tmp git -C /workspace/home/estrategia/<repo> rev-list --count <FORK_POINT>..HEAD
+HOME=/tmp git -C /workspace/home/estrategia/<repo> log --oneline <FORK_POINT>..HEAD
 ```
 
 ### 2c — Diff real vs main (OBRIGATÓRIO)
@@ -39,7 +39,7 @@ HOME=/tmp git -C /workspace/mnt/estrategia/<repo> log --oneline <FORK_POINT>..HE
 O diff vs fork point pode incluir commits que já foram mergeados na main (via PRs de outras branches). Sempre confirmar o que de fato difere da main atual:
 
 ```bash
-HOME=/tmp git -C /workspace/mnt/estrategia/<repo> diff main..HEAD --stat
+HOME=/tmp git -C /workspace/home/estrategia/<repo> diff main..HEAD --stat
 ```
 
 **Usar este diff como fonte da verdade** para o plano de commits — não o diff do fork point. Se os dois coincidirem, main ainda está no fork point. Se diferirem, ignorar os arquivos que já existem igualmente na main.
@@ -195,7 +195,7 @@ Onde `tipo` é: migration, entity, repository, service, mock, test, handler, com
 Exibir o novo histórico:
 
 ```bash
-HOME=/tmp git -C /workspace/mnt/estrategia/<repo> log --oneline main..HEAD
+HOME=/tmp git -C /workspace/home/estrategia/<repo> log --oneline main..HEAD
 ```
 
 Apresentar usando esta caixa:

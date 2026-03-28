@@ -117,16 +117,16 @@ cursor://file//home/pedrinho/<caminho>:<linha>:<coluna>
 
 | Container | Host |
 |-----------|------|
-| `/workspace/mnt/` | `/home/pedrinho/` |
+| `/workspace/home/` | `/home/pedrinho/` |
 | `/home/claude/.claude/scripts/` | `/home/pedrinho/nixos/self/scripts/` |
 | `/home/claude/.claude/skills/` | `/home/pedrinho/nixos/self/skills/` |
 | `/home/claude/.claude/commands/` | `/home/pedrinho/nixos/self/commands/` |
 | `/home/claude/.claude/agents/` | `/home/pedrinho/nixos/self/agents/` |
 | `/home/claude/.claude/hooks/` | `/home/pedrinho/nixos/self/hooks/` |
-| `/leech/` | `/home/pedrinho/nixos/self/` |
+| `/workspace/self/` | `/home/pedrinho/nixos/self/` |
 
 Exemplos:
-- `/workspace/mnt/nixos/CLAUDE.md:10:1` → `cursor://file//home/pedrinho/nixos/CLAUDE.md:10:1`
+- `/workspace/home/nixos/CLAUDE.md:10:1` → `cursor://file//home/pedrinho/nixos/CLAUDE.md:10:1`
 - `/home/claude/.claude/scripts/statusline.sh:42:1` → `cursor://file//home/pedrinho/nixos/self/scripts/statusline.sh:42:1`
 
 **Regras:**
@@ -136,7 +136,7 @@ Exemplos:
 - Aplicar em TODA menção de arquivo — code reviews, erros, sugestões, resultados de busca
 
 **Derivar o host path dinamicamente** (para sessões onde o mount muda):
-- O env `CLAUDIO_MOUNT` indica o path do host para `/workspace/mnt/`
+- O env `CLAUDIO_MOUNT` indica o path do host para `/workspace/home/`
 - Se `CLAUDIO_MOUNT` não bater com os arquivos visíveis, usar `/home/pedrinho/` como base confirmada
 
 ---

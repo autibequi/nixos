@@ -238,7 +238,7 @@ ls /workspace/obsidian/bedrooms/_working/ 2>/dev/null
     mechanic    on demand   sonnet   NixOS, Docker, segurança
     tasker      on demand   sonnet   processa tasks do kanban
 
-  CLI: leech agents | leech agents run <nome> | /meta:phone call <nome>
+  CLI: yaa agents | yaa agents run <nome> | /meta:phone call <nome>
 ```
 
 ---

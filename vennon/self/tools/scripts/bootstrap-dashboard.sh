@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # CLAUDINHO startup — modular dashboard
-# Fonte: leech/scripts/bootstrap-dashboard.sh — copiado para scripts/bootstrap.sh por make install / leech update
+# Fonte: leech/scripts/bootstrap-dashboard.sh — copiado para scripts/bootstrap.sh por make install / yaa update
 # Mounts sob /workspace: nixos, obsidian, logs, mount (não na raiz).
 set -uo pipefail
 

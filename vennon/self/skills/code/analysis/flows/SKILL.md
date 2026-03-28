@@ -25,7 +25,7 @@ Para terminal: ler `skills/meta/art/ascii.md` (skill `/meta:art`) — fonte da v
 ## Passo 1 — Detectar arquivos modificados
 
 ```bash
-cd /workspace/mnt/estrategia/monolito/
+cd /workspace/home/estrategia/monolito/
 git diff origin/main --name-only
 ```
 

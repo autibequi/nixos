@@ -102,9 +102,9 @@ nix-shell -p rustc cargo --run \
 /tmp/leech-upgrade-<feature>/leech/rust/target/release/leech <comando> <args>
 ```
 
-Para testes que precisariam do Docker (ex: `leech runner mono status`), testar a logica sem side effects:
+Para testes que precisariam do Docker (ex: `vennon mono status`), testar a logica sem side effects:
 ```bash
-DOCKER_HOST=invalid /tmp/.../leech/rust/target/release/leech runner mono status 2>&1
+DOCKER_HOST=invalid /tmp/.../leech/rust/target/release/vennon mono status 2>&1
 ```
 
 ### 5. Iterar ate funcionar
@@ -190,7 +190,7 @@ testado:
   - [outros testes realizados]
 
 proximo:
-  Pedro roda `leech stow` no host para aplicar (mudancas CLI/docker)
+  Pedro roda `deck stow` no host para aplicar (mudancas CLI/docker)
   OU merge do branch via /commit-push-pr
 ```
 
@@ -201,7 +201,7 @@ proximo:
 - **Para mudancas em CLI/Docker**, considerar worktree para isolamento — perguntar ao user se prefere
 - **Sempre testar antes de declarar pronto** — minimo: compilar + `leech <cmd> --help` + 1 teste funcional
 - **main.rs alterado?** Obrigatorio atualizar `help.rs` (DIRECTIVE no topo do arquivo)
-- **Nunca chamar** `leech stow`, `leech switch` ou `leech os` de dentro do container
+- **Nunca chamar** `deck stow`, `leech switch` ou `leech os` de dentro do container
 - **Indices de skills**: ao criar/mover skill, atualizar SKILL.md do namespace pai
 - **Nao pedir ao usuario para rodar comandos** — se precisar testar algo, encontrar forma de testar autonomamente
 
@@ -236,7 +236,7 @@ proximo:
 ### Adicionar novo agente
 
 1. Criar `/workspace/self/agents/<nome>/agent.md` com frontmatter completo
-2. Testar card: `leech agents run <nome>` (ou dry-run verificando o card)
+2. Testar card: `yaa agents run <nome>` (ou dry-run verificando o card)
 3. Registrar no vault Obsidian se for agente permanente
 
 ### Criar nova skill

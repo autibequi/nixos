@@ -8,7 +8,7 @@ Logs de monitoramento ficam em `/workspace/logs/` (disponível em todas as sess�
 
 **Estrutura no agente (`/workspace/logs/docker/<service>/`):**
 - `service.log` — logs do servidor em runtime (streaming do docker compose)
-- `test.log` — output completo dos testes (`leech docker <service> test`)
+- `test.log` — output completo dos testes (`vennon <service> test`)
 - `startup.log` — log do build e up inicial
 - `deps.log` — log das dependências (postgres, redis)
 - `install.log` — log do install de dependências

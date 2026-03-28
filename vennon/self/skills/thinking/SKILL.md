@@ -210,7 +210,7 @@ git log --oneline -20              # mudancas recentes
 git diff HEAD~1                    # o que mudou no ultimo commit
 git blame <arquivo>                # quem tocou qual linha quando
 docker logs <container> --tail 100 # logs do container
-grep -r "mensagem exata" /workspace/mnt/  # buscar ocorrencia no codigo
+grep -r "mensagem exata" /workspace/home/  # buscar ocorrencia no codigo
 ```
 
 ---

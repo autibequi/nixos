@@ -13,7 +13,7 @@ Sempre que referenciar um arquivo ao usuário, usar link clicável do Cursor:
 **Why:** O usuário usa Cursor no host. Links clicáveis abrem o arquivo direto na posição. Verificado que `cursor://file//home/pedrinho/nixos/CLAUDE.md:10:5` abre corretamente.
 
 **How to apply:**
-- Container `/workspace/mnt/` = Host `/home/pedrinho/`
+- Container `/workspace/home/` = Host `/home/pedrinho/`
 - Sempre incluir `:linha:col` — mínimo `:1:1` quando linha desconhecida
 - Aplicar em TODA menção de arquivo: resultados de busca, erros, code review, sugestões
 - Formato: `[arquivo.go:42](cursor://file//home/pedrinho/estrategia/monolito/arquivo.go:42:1)`

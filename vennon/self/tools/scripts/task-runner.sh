@@ -106,7 +106,7 @@ AGENT=$(parse_fm "$CARD_PATH" "contractor")
 MODEL="${MODEL:-haiku}"
 TIMEOUT="${TIMEOUT:-1800}"
 MAX_TURNS="${MAX_TURNS:-12}"
-# CLI override: TASK_MAX_TURNS env var (from leech tasks run --max-turns N)
+# CLI override: TASK_MAX_TURNS env var (from yaa tasks run --max-turns N)
 [ -n "${TASK_MAX_TURNS:-}" ] && MAX_TURNS="$TASK_MAX_TURNS"
 
 # ── Extract task name (strip date prefix) ────────────────────────

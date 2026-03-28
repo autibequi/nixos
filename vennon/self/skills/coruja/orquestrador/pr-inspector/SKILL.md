@@ -421,19 +421,19 @@ Para cada import, referencia ou path no PR:
 ### Go:
 ```bash
 # Verificar se pacote importado existe
-ls /workspace/mnt/estrategia/monolito/<import_path> 2>/dev/null
+ls /workspace/home/estrategia/monolito/<import_path> 2>/dev/null
 
 # Verificar se interface/tipo referenciado existe
-grep -r "type <TypeName> " /workspace/mnt/estrategia/monolito/apps/<app>/
+grep -r "type <TypeName> " /workspace/home/estrategia/monolito/apps/<app>/
 ```
 
 ### Vue/Nuxt:
 ```bash
 # Verificar se componente existe
-find /workspace/mnt/estrategia/<repo>/src/ -name "<ComponentName>.vue" 2>/dev/null
+find /workspace/home/estrategia/<repo>/src/ -name "<ComponentName>.vue" 2>/dev/null
 
 # Verificar se service existe
-find /workspace/mnt/estrategia/<repo>/src/ -path "*/services/<ServiceName>*" 2>/dev/null
+find /workspace/home/estrategia/<repo>/src/ -path "*/services/<ServiceName>*" 2>/dev/null
 ```
 
 Reportar:

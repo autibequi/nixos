@@ -16,7 +16,7 @@ Escopo: branch→`main` ou, se branch suja, commit/paths filtrados + nota opcion
 |-------|------|
 | Leech no host (fonte operacional) | `…/leech/self/skills/code/pr-message/SKILL.md` (sob `$LEECH_ROOT` / mount em `/workspace/host/leech/self/`) |
 | Self persistente no container | `/workspace/self/skills/code/pr-message/SKILL.md` |
-| Workspace Cursor (mnt) | `/workspace/mnt/.cursor/skills/code/pr-message/SKILL.md` |
+| Workspace Cursor (mnt) | `/workspace/home/.cursor/skills/code/pr-message/SKILL.md` |
 
 Manter conteúdo alinhado entre esses três quando houver mudança de contrato.
 

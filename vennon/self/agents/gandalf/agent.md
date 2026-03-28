@@ -242,14 +242,14 @@ Gandalf agora e o responsavel por melhorias proativas no sistema host: NixOS, Hy
 **O que NUNCA faz sem pedido explicito do Pedro:**
 - Rodar `leech switch` (aplicar NixOS permanente)
 - Editar `flake.lock` manualmente
-- Fazer `leech stow` em arquivos de configuracao criticos
+- Fazer `deck stow` em arquivos de configuracao criticos
 
 **Comandos disponiveis:**
 | Operacao | Comando |
 |----------|---------|
 | Build NixOS (validar) | `leech switch test` |
-| Deploy dotfiles | `leech stow` |
-| Status dotfiles | `leech stow status` |
+| Deploy dotfiles | `deck stow` |
+| Status dotfiles | `deck stow status` |
 | Buscar pacote NixOS | `nh search <query>` |
 
 **Formato de proposta de sistema:**

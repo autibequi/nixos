@@ -125,9 +125,9 @@ Contexto (handlers modificados, structs de response, novos endpoints):
 <extraído do diff e do 00-contexto.md>
 
 Repos:
-- Monolito: /workspace/mnt/estrategia/monolito
-- bo-container: /workspace/mnt/estrategia/bo-container
-- front-student: /workspace/mnt/estrategia/front-student
+- Monolito: /workspace/home/estrategia/monolito
+- bo-container: /workspace/home/estrategia/bo-container
+- front-student: /workspace/home/estrategia/front-student
 
 Missão:
 1. Ler os services do frontend que chamam os endpoints modificados

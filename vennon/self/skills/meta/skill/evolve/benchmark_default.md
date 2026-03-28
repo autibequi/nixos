@@ -13,7 +13,7 @@ Substitua este arquivo com `--benchmark=<path>` para um domínio específico.
 - ✅ Arquivo correto: `apps/bo/internal/handlers/dashboard/financial/bulk_generate_snapshot.go`
 - ✅ Rota: `POST /dashboard/royalties/snapshots/bulk`
 - ✅ Handler: `BulkGenerateSnapshot`
-- ✅ Path usado: `/home/claude/projects/estrategia/monolito/` (não `/workspace/mnt/estrategia/`)
+- ✅ Path usado: `/home/claude/projects/estrategia/monolito/` (não `/workspace/home/estrategia/`)
 
 **peso:** eficiência (tokens + tool calls)
 

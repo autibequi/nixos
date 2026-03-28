@@ -1,6 +1,6 @@
 # Leech — Comportamento do Agente
 
-> **Espelho Cursor:** o mesmo stdout do hook é gravado em `.cursor/session-boot.md` (fallback gravável em `/workspace/mnt` se `WS` for read-only). Regra `.cursor/rules/session-boot.mdc` manda o Cursor ler esse ficheiro. No Docker Leech, o **entrypoint** (`leech/docker/leech/entrypoint.sh`) corre o `session-start.sh` uma vez no arranque do container para pré-gerar esse ficheiro.
+> **Espelho Cursor:** o mesmo stdout do hook é gravado em `.cursor/session-boot.md` (fallback gravável em `/workspace/home` se `WS` for read-only). Regra `.cursor/rules/session-boot.mdc` manda o Cursor ler esse ficheiro. No Docker Leech, o **entrypoint** (`leech/docker/leech/entrypoint.sh`) corre o `session-start.sh` uma vez no arranque do container para pré-gerar esse ficheiro.
 >
 > **`ENGINE`:** no `---BOOT---` aparece `engine=CLAUDE | CURSOR | OPENCODE` — runtime atual (Claude Code, Cursor via wrappers, ou `~/.leech`).
 >
@@ -55,14 +55,16 @@
 
 | Path | Permissão | Descrição |
 |------|-----------|-----------|
-| `/workspace/self/` | **sempre rw** | Engine Leech — skills, hooks, agents, scripts |
-| `/workspace/obsidian/` | **sempre rw** | Vault Obsidian — cérebro compartilhado |
-| `/workspace/mnt/` | **sempre rw** | Zona de trabalho — projeto do host |
-| `/workspace/host/` | ro default, **rw com `--host`** | Repo NixOS (`~/nixos`) |
+| `/workspace/self/` | **sempre rw** | Engine — skills, hooks, agents, scripts |
+| `/workspace/obsidian/` | **sempre rw** | Vault Obsidian — DASHBOARD, bedrooms, tasks, wiki |
+| `/workspace/home/` | **sempre rw** | Home do host ($HOME completo) |
+| `/workspace/host/` | **sempre rw** | Repo NixOS (`~/nixos`) — inclui vennon source |
+| `/workspace/projects/` | **sempre rw** | Projetos (`~/projects`) |
+| `/workspace/logs/host/` | ro | Logs do sistema host (/var/log) |
+| `/workspace/logs/docker/` | ro | Logs de containers (monolito, bo, front) |
 
-- `host_attached=1`: `/workspace/host/` editável — edite NixOS, dotfiles, CLI
-- `host_attached=0`: `/workspace/host/` é read-only (pode ler, não pode escrever)
 - `/workspace/self/` e `/workspace/obsidian/` são **sempre editáveis** por qualquer agente
+- Working dir é resolvido via `cd` (ex: `yaa ~/projects/app` → `cd /workspace/home/projects/app`)
 
 ---
 
@@ -118,13 +120,13 @@ Breakroom: `/workspace/obsidian/bedrooms/<nome>/memory.md`
 ### Comandos CLI
 
 ```
-leech contractors          # lista agents
-leech contractors status   # schedule + running + done
-leech contractors run X    # roda agent imediatamente
-leech contractors work     # executa cards vencidos
-leech tasks                # lista tasks
-leech tasks add "titulo"   # cria task
-leech tasks work           # executa tasks vencidas
+yaa agents          # lista agents
+yaa agents status   # schedule + running + done
+yaa agents run X    # roda agent imediatamente
+yaa agents work     # executa cards vencidos
+yaa tasks                # lista tasks
+yaa tasks add "titulo"   # cria task
+yaa tasks work           # executa tasks vencidas
 ```
 
 ---
@@ -194,14 +196,14 @@ Quando o user enviar status-check phrases ("eae", "o que temos", "ta pronto", "e
 
 ## Sistema Docker — Servicos da Estrategia
 
-- `leech runner <service> start|stop|logs|test|shell|install|build`
+- `vennon <service> start|stop|logs|test|shell|install|build`
 - Servicos: monolito, bo-container, front-student, monolito-worker
-- Configs em `leech/containers/<service>/`
+- Configs em `stow/.config/vennon/containers/<service>/`
 - Logs em `/workspace/logs/docker/<service>/`
 
 ## Chrome Relay
 
 O agent controla o Chrome do usuario via CDP.
-- `python3 /leech/scripts/chrome-relay.py nav <url>` — navegar
-- `python3 /leech/scripts/chrome-relay.py serve` — servir conteudo local
+- `yaa holodeck nav <url>` — navegar
+- `yaa holodeck serve` — servir conteudo local
 - Skill: `/meta:relay`

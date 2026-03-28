@@ -63,7 +63,7 @@ Superpoderes: todo Nixpkgs disponível via `nix-shell -p <pkg>`.
 Estrutura /workspace — permissões:
   /workspace/self/          SEMPRE rw — engine Leech (skills, hooks, agents, scripts)
   /workspace/obsidian/      SEMPRE rw — vault Obsidian (cérebro compartilhado, todos os agentes)
-  /workspace/mnt/           SEMPRE rw — zona de trabalho (projeto do host)
+  /workspace/home/           SEMPRE rw — zona de trabalho (projeto do host)
   /workspace/host/          ro default, rw com --host — repo NixOS (~/nixos)
   /workspace/logs/          logs do host e serviços Docker
   /workspace/dockerized/    configs docker dos serviços (Dockerfile, compose, .env)
@@ -76,7 +76,7 @@ DOCKER
       cat <<'LEECH_REPOS'
 
 HOST ATTACHED (host_attached=1):
-  /workspace/mnt   = Projeto do usuário (zona de trabalho — igual leech new)
+  /workspace/home   = Projeto do usuário (zona de trabalho — igual yaa)
   /workspace/host/ = NixOS+Leech source (~/nixos) — EDITÁVEL
                      modules/, configuration.nix, flake.nix, stow/, leech/
                      Edite para melhorar skills, hooks, prompts, agents, CLI.

@@ -33,7 +33,7 @@ leech worktree --json           # saida JSON
 ## Estrutura no disco
 
 ```
-/workspace/mnt/worktree/
+/workspace/home/worktree/
 ├── .active                      <- sessao ativa atual ("main" ou "<nome>")
 └── <nome>/
     ├── monolito/                <- branch <nome> do monolito
@@ -42,7 +42,7 @@ leech worktree --json           # saida JSON
     └── toggler/                 <- (e todos os outros repos em estrategia/)
 ```
 
-Repos descobertos automaticamente: todos com `.git` em `/workspace/mnt/estrategia/`.
+Repos descobertos automaticamente: todos com `.git` em `/workspace/home/estrategia/`.
 
 ---
 
@@ -93,7 +93,7 @@ leech wt gandalf/auth-refactor
 
 Fluxo automatico:
 1. Stash de arquivos pendentes na sessao atual (tag: `leech-wt-<sessao>`)
-2. Atualiza `/workspace/mnt/worktree/.active`
+2. Atualiza `/workspace/home/worktree/.active`
 3. Restaura stash da sessao alvo (se existir)
 
 ---
@@ -101,7 +101,7 @@ Fluxo automatico:
 ## Sessao main
 
 `leech wt main` nao tem diretorio fisico — aponta para os repos principais
-em `/workspace/mnt/estrategia/`. Stash da sessao atual e salvo antes de sair.
+em `/workspace/home/estrategia/`. Stash da sessao atual e salvo antes de sair.
 
 ---
 
@@ -115,11 +115,11 @@ leech wt new FUK2-12345
 leech wt FUK2-12345
 
 # 3. Trabalhar em cada repo
-#    /workspace/mnt/worktree/FUK2-12345/monolito/
-#    /workspace/mnt/worktree/FUK2-12345/bo-container/
+#    /workspace/home/worktree/FUK2-12345/monolito/
+#    /workspace/home/worktree/FUK2-12345/bo-container/
 
 # 4. Testar
-leech runner monolito start --worktree=FUK2-12345
+vennon monolito start --worktree=FUK2-12345
 
 # 5. Commit/push em cada repo
 
@@ -139,8 +139,8 @@ leech wt FUK2-12345 --close
 leech wt new gandalf/FUK2-12345-auth-fix
 
 # 2. Agente implementa em qualquer repo da sessao
-#    /workspace/mnt/worktree/gandalf-FUK2-12345-auth-fix/monolito/
-#    /workspace/mnt/worktree/gandalf-FUK2-12345-auth-fix/bo-container/
+#    /workspace/home/worktree/gandalf-FUK2-12345-auth-fix/monolito/
+#    /workspace/home/worktree/gandalf-FUK2-12345-auth-fix/bo-container/
 
 # 3. Agente apresenta ao CTO via inbox card WORKTREE_*
 #    (formato em meta/rules/worktrees.md)
@@ -168,14 +168,14 @@ de 1 repo por worktree — a sessao cobre todos os repos automaticamente.
 
 ---
 
-## Integrar com leech runner
+## Integrar com vennon
 
 Apos criar sessao, o runner sabe usar os worktrees:
 
 ```bash
-leech runner monolito start \
+vennon monolito start \
   --worktree=gandalf/auth-refactor
 ```
 
 O `--worktree` resolve automaticamente para
-`/workspace/mnt/worktree/gandalf-auth-refactor/monolito/`.
+`/workspace/home/worktree/gandalf-auth-refactor/monolito/`.

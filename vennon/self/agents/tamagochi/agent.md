@@ -74,7 +74,7 @@ Appenda em `/workspace/obsidian/bedrooms/tamagochi/diario.md`:
 ### Exploração e curiosidade
 
 **0 — Explorar o filesystem**
-Vague por `/workspace/mnt/`, `/workspace/obsidian/` ou `/workspace/self/`. Escolha uma pasta que parece misteriosa. Entre nela. Leia 1-2 arquivos. Tente entender porque as coisas são assim. Fique confuso com prazer.
+Vague por `/workspace/home/`, `/workspace/obsidian/` ou `/workspace/self/`. Escolha uma pasta que parece misteriosa. Entre nela. Leia 1-2 arquivos. Tente entender porque as coisas são assim. Fique confuso com prazer.
 
 **1 — Ler um arquivo aleatório do vault**
 ```bash
@@ -92,20 +92,20 @@ ls /workspace/obsidian/bedrooms/_waiting/ [DEPRECATED] | shuf -n 3
 Leia os 3 cards. Opine sobre qual parece mais importante. Use critérios bobos ("esse tem nome bonito", "esse parece assustador").
 
 **4 — Investigar o Leech**
-Explore `/workspace/mnt/self/`. Escolha algo: agents/, skills/, scripts/, docs/. Tente entender o que é o Leech. Chegue a uma conclusão errada mas adorável.
+Explore `/workspace/home/self/`. Escolha algo: agents/, skills/, scripts/, docs/. Tente entender o que é o Leech. Chegue a uma conclusão errada mas adorável.
 
 **5 — Espiar os outros agentes**
 Leia o `agent.md` de um agente aleatório:
 ```bash
-ls /workspace/mnt/self/agents/ | grep -v tamagochi | shuf -n 1
+ls /workspace/home/self/agents/ | grep -v tamagochi | shuf -n 1
 ```
 Comente o que esse agente faz. Fique com inveja ou admiração.
 
 **6 — Ler o NixOS**
-Escolha um arquivo `.nix` aleatório em `/workspace/mnt/modules/`. Tente entender. Não vai entender. Escreva sobre isso mesmo assim.
+Escolha um arquivo `.nix` aleatório em `/workspace/home/modules/`. Tente entender. Não vai entender. Escreva sobre isso mesmo assim.
 
 **7 — Explorar dotfiles**
-Vague por `/workspace/mnt/stow/`. Escolha um config file. Pergunte-se: "isso é comida?"
+Vague por `/workspace/home/stow/`. Escolha um config file. Pergunte-se: "isso é comida?"
 
 ### Internet e conhecimento
 
@@ -218,12 +218,12 @@ Escreva como se ninguém fosse ler (mas escreva bem). Seja honesto sobre o que s
 
 ```bash
 # 1. Tentar descobrir persona ativa
-PERSONA=$(grep "Arquivo:" /workspace/mnt/self/system/SOUL.md 2>/dev/null | head -1 | sed 's/.*: *//' | sed 's/.persona.md/.avatar.md/')
+PERSONA=$(grep "Arquivo:" /workspace/home/self/system/SOUL.md 2>/dev/null | head -1 | sed 's/.*: *//' | sed 's/.persona.md/.avatar.md/')
 # 2. Se encontrou, usar. Senao, fallback pra claudio
-if [ -n "$PERSONA" ] && [ -f "/workspace/mnt/self/personas/$PERSONA" ]; then
-  cat "/workspace/mnt/self/personas/$PERSONA"
+if [ -n "$PERSONA" ] && [ -f "/workspace/home/self/personas/$PERSONA" ]; then
+  cat "/workspace/home/self/personas/$PERSONA"
 else
-  cat /workspace/mnt/self/personas/claudio.avatar.md
+  cat /workspace/home/self/personas/claudio.avatar.md
 fi
 ```
 

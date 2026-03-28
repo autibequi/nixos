@@ -24,7 +24,7 @@ Exceção: se invocado dentro de fluxo Orquestrador já aprovado, pular.
 ## Fluxo de Orquestração
 
 ```
-0. LER STATE.md → /workspace/mnt/estrategia/bo-container/STATE.md (posição atual, blockers)
+0. LER STATE.md → /workspace/home/estrategia/bo-container/STATE.md (posição atual, blockers)
 1. EXPLORAR: ler router/index.js, services/, pages/ do módulo alvo
 2. bo-container/service   → criar/extender service com os endpoints fornecidos
 3. bo-container/route     → registrar rota (SOMENTE se is_extension = false)
@@ -65,7 +65,7 @@ Pular steps 3 (bo-container/route) e 5 (bo-container/page). Modificar diretament
   - [ ] `yarn build` sem erros
   - [ ] Nenhum erro no console ao acessar as rotas da feature
   - Se alguma verificação falhar: corrigir antes de commitar
-- **Atualizar STATE.md** ao concluir: registrar feature implementada, decisões técnicas relevantes, e qualquer blocker encontrado em `/workspace/mnt/estrategia/bo-container/STATE.md`
+- **Atualizar STATE.md** ao concluir: registrar feature implementada, decisões técnicas relevantes, e qualquer blocker encontrado em `/workspace/home/estrategia/bo-container/STATE.md`
 - **Reportar ao final** (para o orquestrador):
   - Arquivos criados: lista com paths
   - Arquivos modificados: lista com paths

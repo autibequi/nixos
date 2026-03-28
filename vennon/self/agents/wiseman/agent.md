@@ -66,7 +66,7 @@ find /workspace/obsidian/vault -name "*.md" -mmin -120 -type f 2>/dev/null | hea
 
 Revisar estado do repositorio NixOS e worktrees pendentes de review.
 
-1. NixOS (`/workspace/mnt/`):
+1. NixOS (`/workspace/home/`):
    - Imports comentados em `configuration.nix`
    - TODOs/FIXMEs no codigo
    - Opcoes deprecated em modules/

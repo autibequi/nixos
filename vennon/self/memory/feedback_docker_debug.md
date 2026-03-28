@@ -4,7 +4,7 @@ description: Lições de como configurar Delve para debug remoto Go em Docker co
 type: feedback
 ---
 
-**Regras aprendidas ao implementar `leech docker run monolito --debug`:**
+**Regras aprendidas ao implementar `vennon run monolito --debug`:**
 
 1. **dlv binário fica em `/go/bin/dlv`, não `/root/go/bin/dlv`**
    Na imagem `golang:alpine`, `go install` instala em `$GOPATH/bin = /go/bin`.
@@ -27,7 +27,7 @@ type: feedback
 
 6. **Debug Console "Type 'dlv help' for list of commands." = conectado com sucesso**
    Não é erro. É a mensagem normal do dlv quando o debugger está attached.
-   Logs do servidor continuam no terminal do `leech docker logs`, não no Debug Console.
+   Logs do servidor continuam no terminal do `vennon logs`, não no Debug Console.
 
 7. **Imagem de debug deve ser golang:alpine no runtime (não alpine puro)**
    `alpine:latest` não tem Go, então não dá pra instalar dlv.
