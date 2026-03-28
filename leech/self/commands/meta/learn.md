@@ -1,10 +1,10 @@
-# Absorb — Cristalizar a Sessão / Roubar Projetos Externos
+# Learn — Cristalizar a Sessão / Roubar Projetos Externos
 
 ```
-/meta:absorb               → cristalizar: persiste memórias, skills, agentes
-/meta:absorb resumo        → resumo leve da sessão em linguagem simples
-/meta:absorb steal <url>   → roubar funcionalidades de projeto externo (YouTube, GitHub, texto)
-/meta:absorb elogio        → extração profunda: honrar sessão e preservar legado para gerações futuras
+/meta:learn               → cristalizar: aplica conhecimento da sessão em self/ (skills, commands, comportamentos)
+/meta:learn resumo        → resumo leve da sessão em linguagem simples
+/meta:learn steal <url>   → roubar funcionalidades de projeto externo (YouTube, GitHub, texto)
+/meta:learn elogio        → extração profunda: honrar sessão e preservar legado para gerações futuras
 ```
 
 Comandos relacionados de análise de contexto (não são modos de absorb — são ferramentas separadas):
