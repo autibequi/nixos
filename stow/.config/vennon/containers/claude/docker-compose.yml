@@ -62,6 +62,7 @@ services:
     - NET_BIND_SERVICE
     extra_hosts:
     - host.docker.internal:host-gateway
+    userns_mode: keep-id
   docker-proxy:
     image: docker.io/library/nginx:alpine
     container_name: vennon-docker-proxy

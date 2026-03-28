@@ -86,6 +86,7 @@ pub fn launch(config: &YaaConfig, opts: SessionOpts) -> Result<()> {
         SessionMode::Shell => println!("Mode: shell"),
         SessionMode::New => {}
     }
+    println!("Starting container (first run may take ~30s)...");
     println!();
 
     // Pass config to vennon via env vars

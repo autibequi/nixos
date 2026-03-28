@@ -94,5 +94,4 @@
     "type": "command",
     "command": "~/.claude/scripts/statusline.sh"
   },
-  "skipAutoPermissionPrompt": true
 }

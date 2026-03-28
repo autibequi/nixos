@@ -49,7 +49,7 @@ fn ensure_image(name: &str, config: &VennonConfig) -> Result<()> {
 fn start(name: &str, compose_path: &std::path::Path, config: &VennonConfig) -> Result<()> {
     ensure_image(name, config)?;
 
-    // Always run compose up — podman-compose recreates if compose changed (e.g. new target dir)
+    // Always run compose up — recreates if compose changed (e.g. new target dir)
     let compose_str = compose_path.to_string_lossy();
     let project = format!("vennon-{name}");
     exec::run(
@@ -84,14 +84,7 @@ fn shell(name: &str, compose_path: &std::path::Path, config: &VennonConfig) -> R
     let cmd = containers::shell_cmd();
     exec::exec_replace(
         "podman",
-        &[
-            "exec",
-            "-it",
-            &cid,
-            "/bin/bash",
-            "-c",
-            &cmd,
-        ],
+        &["exec", "-it", &cid, "/bin/bash", "-c", &cmd],
     );
 }
 
@@ -116,14 +109,8 @@ fn flush(name: &str, compose_path: &std::path::Path) -> Result<()> {
     exec::run(
         "podman-compose",
         &[
-            "-f",
-            &compose_str,
-            "-p",
-            &project,
-            "down",
-            "-v",
-            "--rmi",
-            "local",
+            "-f", &compose_str, "-p", &project,
+            "down", "-v", "--rmi", "local",
         ],
     )?;
     println!("Flushed.");
