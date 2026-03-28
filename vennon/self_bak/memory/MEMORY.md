@@ -94,9 +94,15 @@
 - [project_base_interface.md](project_base_interface.md) — BASE_INTERFACE.md em /workspace/self/: 4 templates mandatórios (ERRO/SUCESSO/AÇÃO NECESSÁRIA/INFO) com regra de bordas
 - [feedback_box_code_no_borders.md](feedback_box_code_no_borders.md) — Código dentro de caixas ASCII: SEM bordas laterais │ — usuário copia com mouse, borda quebra o paste
 - [reference_leech_hooks_cursor.md](reference_leech_hooks_cursor.md) — Hooks Leech unificados em `self/hooks/`, subpasta `hooks/cursor/` só pro Cursor, `ENGINE`, mounts Docker, skills em `~/.cursor/skills`
-- [project_jonathas_agent.md](project_jonathas_agent.md) — Agente jonathas: haiku every30min, projeto imobiliário RJ, ciclo proactive autônomo em workshop/jonathas/
+- [project_venture_agent.md](project_venture_agent.md) — Agente venture: Sonnet every60, investidor+construtor, pipeline Discovery 10 fases (mercado→concorrencia→modelo→SWOT→cenarios→produto→roadmap→mastigado→fullstrategy→index)
 - [project_proactive_skill.md](project_proactive_skill.md) — Skills thinking/brainstorm (motor ideação) e thinking/proactive (Radar Pareto) criadas 2026-03-26
 - [feedback_proactive_pareto.md](feedback_proactive_pareto.md) — Proactive: Pareto obrigatório, clusters > lista flat, conteúdo como ativo que se acumula
 - [project_obsidian_agents.md](project_obsidian_agents.md) — Mapa dos 12 agentes ativos (inclui jonathas), paths, CLI
 - [project_vibefu_encyclopedia.md](project_vibefu_encyclopedia.md) — Enciclopédia VibeFu em obsidian/vibefu/: 105 técnicas de vibecoding rankeadas (0-1000), com _INDEX, _RANKING, _STATS
 - [feedback_parallel_research_agents.md](feedback_parallel_research_agents.md) — Para pesquisas amplas: 3 agentes explore → 6 agentes writer paralelos → consolidação. Fan-out massivo funciona.
+- [project_jonathas.md](../system/memory/project_jonathas.md) — Projeto Jonathas: SaaS imobiliário RJ, bot WhatsApp IA, R$149/mes, parceiro Trip Imóveis, meta R$10k/mes
+- [feedback_parallel_agents.md](../system/memory/feedback_parallel_agents.md) — Sprint paralelo: dividir por PASTA não por feature, agent integrador roda por último
+- [feedback_projeto_real.md](../system/memory/feedback_projeto_real.md) — Projetos reais: pesquisa extensiva, dados reais, Mermaid, mastigado, CUIDADOS, stubs, INDEX organizado
+- [feedback_rescue_agent_files.md](../system/memory/feedback_rescue_agent_files.md) — Agentes background escrevem em paths deletados — resgatar dos logs, nunca reorganizar com agentes rodando
+- [feedback_index_as_entrypoint.md](../system/memory/feedback_index_as_entrypoint.md) — INDEX.md como ponto de entrada para terceiros: 3 caminhos (entender/executar/codar) + glossario
+- [project_venture_agent.md](project_venture_agent.md) — Agente venture: Sonnet every60, investidor+construtor, pipeline Discovery 10 fases (mercado→concorrencia→modelo→SWOT→cenarios→produto→roadmap→mastigado→fullstrategy→index)
