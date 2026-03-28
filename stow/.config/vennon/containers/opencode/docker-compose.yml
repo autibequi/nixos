@@ -51,9 +51,9 @@ services:
       DOCKER_HOST: tcp://localhost:2375
       ENGINE: OPENCODE
       GIT_AUTHOR_EMAIL: pedro.correa@estrategia.com
-      GIT_AUTHOR_NAME: Pedrinho
+      GIT_AUTHOR_NAME: Pedro Correa
       GIT_COMMITTER_EMAIL: pedro.correa@estrategia.com
-      GIT_COMMITTER_NAME: Pedrinho
+      GIT_COMMITTER_NAME: Pedro Correa
       PATH: /home/claude/.local/bin:/home/claude/.nix-profile/bin:/root/.nix-profile/bin:/usr/bin:/bin
       VENNON_GID: '100'
       VENNON_UID: '1000'

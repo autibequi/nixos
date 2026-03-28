@@ -1,6 +1,6 @@
 ---
 name: vennon
-description: "Auto-ativar quando: usuario menciona vennon, deck, yaa, leech CLI, containers Docker, worktrees, upgrade do Leech, build Rust, servicos (monolito, bo-container, front-student), docker-compose, debug remoto dlv, sessoes multi-repo."
+description: "Auto-ativar quando: usuario menciona vennon, deck, yaa, leech CLI, containers Docker, worktrees, upgrade do vennon, build Rust, servicos (monolito, bo-container, front-student), docker-compose, debug remoto dlv, sessoes multi-repo."
 ---
 
 # vennon — CLI, Containers e Worktrees
@@ -44,7 +44,7 @@ Skill unificada para o ecossistema de ferramentas do Leech: CLI Rust (yaa/deck/v
 Built-in defaults -> config.yaml -> LEECH_* env vars -> CLI flags
         ^                ^              ^                ^
    config.rs         ~/.config/    Env::prefixed     Clap args
-   Default impl      leech/        ("LEECH_")        (Option<T>)
+   Default impl      leech/        ("VENNON_")        (Option<T>)
 ```
 
 Struct unificada: `LeechConfig` com sub-structs `session`, `runner`, `agents`, `paths`, `system`, `secrets`.

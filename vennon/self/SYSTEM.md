@@ -52,15 +52,16 @@ Working dir resolvido via `cd`. Ex: `yaa ~/projects/app` → `cd /workspace/home
 
 | Termo | O que e |
 |-------|---------|
-| **Vennon** | O sistema como um todo — yaa (launcher), deck (TUI), vennon (orquestrador)
-| **yaa** | CLI principal — launcher de sessoes IA |
-| **vennon** | Orquestrador de containers Docker |
-| **deck** | TUI dashboard do host |
-| **~/.leech** | Tokens e env vars (bash-sourceable) |
-| **config.yaml** | `~/.config/vennon/config.yaml` — config estruturado |
-| **Mini-Agent** | Claude haiku spawned efemero |
-| **Worker** | Container persistente em background |
-| **Agente** | Claude headless rodando task card |
+| **yaa** | CLI do usuario — lanca sessoes IA (`yaa .`, `yaa --engine=cursor`, `yaa tick`) |
+| **vennon** | Orquestrador de containers — gera compose, monta volumes, gerencia imagens |
+| **deck** | TUI dashboard — stow, NixOS rebuild, status |
+| **self/** | Engine do sistema — skills, ego, superego, shadow, commands, scripts |
+| **~/.leech** | Canal host ↔ container — tokens, env vars, flags (bash-sourceable) |
+| **config.yaml** | `~/.config/vennon/config.yaml` — paths, settings, engine default |
+| **Agente (ego)** | Entidade inerte — so existe quando Hermes despacha um card |
+| **DASHBOARD** | Kanban em obsidian — TODO/DOING/DONE/WAITING, tudo e card |
+| **Briefing** | Instrucoes pra um agente — vive em bedrooms/ ou projects/ |
+| **#ronda** | Card ciclico — volta pro TODO apos execucao |
 
 ## Obsidian Vault (`/workspace/obsidian/`)
 

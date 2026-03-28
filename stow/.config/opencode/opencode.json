@@ -19,6 +19,12 @@
     "doom_loop": "allow",
     "skill": "allow"
   },
+  "skills": {
+    "paths": [
+      "/home/claude/.claude/skills",
+      "/home/claude/.agents/skills"
+    ]
+  },
   "provider": {
     "lmstudio": {
       "npm": "@ai-sdk/openai-compatible",

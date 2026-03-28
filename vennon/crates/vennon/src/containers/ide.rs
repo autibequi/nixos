@@ -64,8 +64,10 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
         format!("{self_path}/scripts:/home/claude/.claude/scripts"),
         format!("{home}/.claude.json:/home/claude/.claude.json"),
         format!("{home}/.claude/projects:/home/claude/.claude/projects"),
-        // Skills/commands/agents for non-Claude engines: symlinked by entrypoint
-        // (~/.cursor/skills, ~/.agents/skills, ~/.config/opencode/skills → /workspace/self/skills)
+        // Universal agent standard — works for Cursor, OpenCode, Codex, etc.
+        format!("{self_path}/skills:/home/claude/.agents/skills"),
+        format!("{self_path}/commands:/home/claude/.agents/commands"),
+        format!("{self_path}/ego:/home/claude/.agents/agents"),
         // Communication channel
         format!("{home}/.leech:/home/claude/.leech:rw"),
         // Host observability (ro)
