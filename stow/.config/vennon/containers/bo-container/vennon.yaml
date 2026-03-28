@@ -1,0 +1,78 @@
+name: bo-container
+aliases: [bo]
+project: vennon-dk-bo-container
+source: ~/projects/estrategia/bo-container
+
+enums:
+  env:
+    values: [local, sand, devbox, qa, prod]
+    default: sand
+    map:
+      sand: sandbox
+
+ports: [9090]
+
+commands:
+  serve:
+    description: Start bo-container
+    args:
+      - name: env
+        enum: env
+    compose:
+      files: [docker-compose.yml]
+      env_file: "env/{{ env | map }}.env"
+      action: up -d
+
+  stop:
+    description: Stop bo-container
+    compose:
+      files: [docker-compose.yml]
+      action: down
+
+  test:
+    description: Run tests
+    exec:
+      container: app
+      command: "yarn test"
+
+  shell:
+    description: Interactive shell
+    args:
+      - name: cmd
+        type: string
+        default: /bin/bash
+    exec:
+      container: app
+      command: "{{ cmd }}"
+
+  install:
+    description: Install npm dependencies
+    script: |
+      podman run --rm -it \
+        -v {{ source }}:/app \
+        -v {{ home }}/.ssh:/root/.ssh:ro \
+        -e NPM_TOKEN={{ NPM_TOKEN }} \
+        node:14-alpine sh -c \
+        "cd /app && npm install --no-progress"
+
+  logs:
+    description: Follow logs
+    args:
+      - name: tail
+        type: int
+        default: 100
+    compose:
+      files: [docker-compose.yml]
+      action: "logs -f --tail {{ tail }}"
+
+  build:
+    description: Build docker image
+    compose:
+      files: [docker-compose.yml]
+      action: build
+
+  flush:
+    description: Destroy everything
+    compose:
+      files: [docker-compose.yml]
+      action: "down -v --rmi local"

@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: vennon-dk-monolito-postgres
+    cpus: "2"
+    environment:
+      POSTGRES_USER: ${DB_USER:-estrategia}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-estrategia}
+      POSTGRES_DB: ${DB_NAME:-estrategia}
+    volumes:
+      - monolito-pgdata:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-estrategia}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - default
+
+  redis:
+    image: redis:7-alpine
+    container_name: vennon-dk-monolito-redis
+    cpus: "1"
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - default
+
+  localstack:
+    image: localstack/localstack:latest
+    container_name: vennon-dk-monolito-localstack
+    cpus: "2"
+    environment:
+      SERVICES: sqs,s3
+      DEFAULT_REGION: us-east-1
+    ports:
+      - "4566:4566"
+    networks:
+      - default
+
+volumes:
+  monolito-pgdata:
+
+networks:
+  default:
+    name: nixos_default
+    external: true

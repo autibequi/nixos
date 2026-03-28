@@ -1,0 +1,47 @@
+# syntax=docker/dockerfile:1
+# Debug image: builds without optimizations and runs via delve for remote debugging.
+# Usage: leech docker run monolito --debug
+# Attach: VS Code DAP on localhost:2345
+
+FROM golang:1.24.4-alpine AS builder
+
+RUN apk add --no-cache ca-certificates git gcc libc-dev librdkafka-dev
+
+WORKDIR /go/app
+
+COPY go.work* ./
+COPY go.mod go.sum ./
+COPY vendor ./vendor
+COPY . .
+
+# Build with debug flags: disable optimizations (-N) and inlining (-l)
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=1 GOOS=linux go build -mod=vendor -tags musl \
+    -gcflags="all=-N -l" \
+    -o server ./cmd/server/main.go && \
+    CGO_ENABLED=1 GOOS=linux go build -mod=vendor -tags musl \
+    -gcflags="all=-N -l" \
+    -o worker ./cmd/worker/main.go
+
+FROM golang:1.24.4-alpine AS runtime
+
+RUN apk --no-cache add ca-certificates librdkafka tzdata
+
+# Install delve
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
+
+WORKDIR /go/app
+
+COPY --from=builder /go/app/server .
+COPY --from=builder /go/app/worker .
+
+EXPOSE 4004 2345
+
+# --headless: no terminal UI
+# --listen: DAP port
+# --api-version=2: newer protocol (required for VS Code)
+# --accept-multiclient: allow reconnecting after disconnect
+# --continue: start execution without waiting for attach
+CMD ["/go/bin/dlv", "exec", "./server", \
+     "--headless", "--listen=:2345", "--api-version=2", \
+     "--accept-multiclient", "--continue"]

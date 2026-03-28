@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Holodeck — Mermaid</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100vw; height: 100vh;
+    overflow: hidden;
+    background: #1e1e2e;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  #wrap {
+    width: 100vw; height: 100vh;
+    display: flex; align-items: flex-start; justify-content: center;
+    overflow: hidden;
+    position: relative;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+  }
+  #wrap.panning { cursor: grabbing; }
+  #diagram { transform-origin: 0 0; position: absolute; top: 0; left: 0; }
+  #hint {
+    position: fixed; bottom: 14px; right: 16px;
+    color: #45475a;
+    font: 11px 'JetBrains Mono', monospace;
+    pointer-events: none;
+    letter-spacing: 0.03em;
+  }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="diagram" class="mermaid">
+MERMAID_DIAGRAM_HERE
+  </div>
+</div>
+<div id="hint">scroll = zoom &nbsp;&middot;&nbsp; drag = pan</div>
+<script>
+mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+
+mermaid.run().then(function() { setTimeout(init, 120); });
+
+function init() {
+  var wrap = document.getElementById('wrap');
+  var diag = document.getElementById('diagram');
+  var svg  = diag && diag.querySelector('svg');
+  if (!svg) { setTimeout(init, 150); return; }
+
+  var sw = svg.getBoundingClientRect().width;
+  var sh = svg.getBoundingClientRect().height;
+  if (sw < 10) { setTimeout(init, 150); return; }
+
+  var s  = Math.min((window.innerWidth / sw) * 0.98, (window.innerHeight / sh) * 0.98);
+  var tx = (window.innerWidth  - sw * s) / 2;
+  var ty = Math.max((window.innerHeight - sh * s) / 2, 10);
+
+  function put() {
+    diag.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + s + ')';
+  }
+  put();
+
+  wrap.addEventListener('wheel', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    var rect = wrap.getBoundingClientRect();
+    var mx = e.clientX - rect.left;
+    var my = e.clientY - rect.top;
+    var f  = e.deltaY < 0 ? 1.12 : 0.87;
+    var ns = Math.min(Math.max(s * f, 0.05), 20);
+    tx = mx - (mx - tx) * (ns / s);
+    ty = my - (my - ty) * (ns / s);
+    s  = ns;
+    put();
+  }, { passive: false });
+
+  var dragging = false, ox = 0, oy = 0;
+  wrap.addEventListener('pointerdown', function(e) {
+    dragging = true; ox = e.clientX - tx; oy = e.clientY - ty;
+    wrap.setPointerCapture(e.pointerId);
+    wrap.classList.add('panning');
+  });
+  wrap.addEventListener('pointermove', function(e) {
+    if (!dragging) return;
+    tx = e.clientX - ox; ty = e.clientY - oy;
+    put();
+  });
+  wrap.addEventListener('pointerup', function() {
+    dragging = false; wrap.classList.remove('panning');
+  });
+  wrap.addEventListener('pointercancel', function() {
+    dragging = false; wrap.classList.remove('panning');
+  });
+}
+</script>
+</body>
+</html>

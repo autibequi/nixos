@@ -3,8 +3,8 @@ use std::collections::BTreeMap;
 use crate::compose::{ComposeFile, Network, Service};
 use crate::config::{self, VennonConfig};
 
-/// Build the docker-compose structure for the claude container.
-pub fn compose(config: &VennonConfig) -> ComposeFile {
+/// Build the docker-compose structure for an IDE container (claude/opencode/cursor).
+pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
     let home = config::home().to_string_lossy().to_string();
     let self_path = config.self_path().to_string_lossy().to_string();
     let obsidian = config.obsidian_path().to_string_lossy().to_string();
@@ -12,6 +12,9 @@ pub fn compose(config: &VennonConfig) -> ComposeFile {
     let projects = config.projects_path().to_string_lossy().to_string();
     let (uid, gid) = config::user_ids();
     let git = config::git_env();
+
+    let image = format!("vennon-{engine}:latest");
+    let container_name = format!("vennon-{engine}");
 
     // ── Environment ─────────────────────────────────────────
     let mut env = BTreeMap::new();
@@ -35,7 +38,7 @@ pub fn compose(config: &VennonConfig) -> ComposeFile {
         format!("{self_path}:/workspace/self"),
         format!("{obsidian}:/workspace/obsidian"),
         format!("{host}:/workspace/target:rw"),
-        // Claude config
+        // Claude/IDE config
         format!("{home}/.claude:/home/claude/.claude"),
         format!("{self_path}/claude.bypass.json:/home/claude/.claude/settings.json:ro"),
         format!("{self_path}/skills:/home/claude/.claude/skills"),
@@ -62,7 +65,7 @@ pub fn compose(config: &VennonConfig) -> ComposeFile {
     // ── Services ────────────────────────────────────────────
     let mut services = BTreeMap::new();
 
-    // Docker socket proxy — filter config lives in vennon source repo
+    // Docker socket proxy
     let filter_path = config
         .vennon_path()
         .join("containers/leech/docker-socket-filter.conf")
@@ -84,12 +87,12 @@ pub fn compose(config: &VennonConfig) -> ComposeFile {
         },
     );
 
-    // Claude container
+    // IDE container
     services.insert(
-        "claude".into(),
+        engine.into(),
         Service {
-            image: Some("vennon-claude:latest".into()),
-            container_name: Some("vennon-claude".into()),
+            image: Some(image),
+            container_name: Some(container_name),
             mem_limit: Some(config.settings.memory_limit.clone()),
             memswap_limit: Some(config.settings.memory_limit.clone()),
             network_mode: Some("host".into()),

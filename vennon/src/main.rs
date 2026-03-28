@@ -3,8 +3,10 @@ mod config;
 mod container;
 mod containers;
 mod exec;
+mod manifest;
+mod service;
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
@@ -22,12 +24,30 @@ enum Commands {
     /// Rebuild and install vennon binary (runs just install)
     Update,
 
-    /// Claude container
+    /// Claude Code container
     Claude {
         /// Action: start (default), build, stop, flush, shell
         #[arg(default_value = "start")]
         action: String,
     },
+
+    /// OpenCode container
+    Opencode {
+        /// Action: start (default), build, stop, flush, shell
+        #[arg(default_value = "start")]
+        action: String,
+    },
+
+    /// Cursor container
+    Cursor {
+        /// Action: start (default), build, stop, flush, shell
+        #[arg(default_value = "start")]
+        action: String,
+    },
+
+    /// Service containers (monolito, bo-container, front-student, ...)
+    #[command(external_subcommand)]
+    Service(Vec<String>),
 }
 
 fn main() -> Result<()> {
@@ -37,9 +57,21 @@ fn main() -> Result<()> {
         Commands::Init => config::init(),
 
         Commands::Update => {
-            let config = config::VennonConfig::load()?;
-            let vennon_dir = config.vennon_path();
-            println!("Rebuilding vennon from {}...", vennon_dir.display());
+            // Try config first, fallback to finding justfile relative to binary
+            let vennon_dir = config::VennonConfig::load()
+                .map(|c| c.vennon_path())
+                .or_else(|_| {
+                    // Fallback: binary is in target/release/ or ~/.local/bin/
+                    // Look for justfile in common locations
+                    let candidates = [
+                        config::expand_path("~/nixos/vennon"),
+                        config::expand_path("~/nixos/host/vennon"),
+                    ];
+                    candidates
+                        .into_iter()
+                        .find(|p| p.join("justfile").exists())
+                        .ok_or_else(|| anyhow::anyhow!("can't find vennon source dir"))
+                })?;
             exec::run(
                 "just",
                 &[
@@ -55,6 +87,32 @@ fn main() -> Result<()> {
         Commands::Claude { action } => {
             let config = config::VennonConfig::load()?;
             container::dispatch("claude", &action, &config)
+        }
+
+        Commands::Opencode { action } => {
+            let config = config::VennonConfig::load()?;
+            container::dispatch("opencode", &action, &config)
+        }
+
+        Commands::Cursor { action } => {
+            let config = config::VennonConfig::load()?;
+            container::dispatch("cursor", &action, &config)
+        }
+
+        Commands::Service(args) => {
+            if args.is_empty() {
+                bail!("usage: vennon <service> <command> [--args]");
+            }
+
+            let config = config::VennonConfig::load()?;
+            let svc_name = &args[0];
+            let command = args.get(1).map(|s| s.as_str()).unwrap_or("serve");
+            let rest: Vec<String> = if args.len() > 2 { args[2..].to_vec() } else { vec![] };
+
+            // Find manifest by name or alias
+            let (dir, m) = manifest::find(svc_name)?;
+
+            service::run(&dir, &m, command, &rest, &config)
         }
     }
 }

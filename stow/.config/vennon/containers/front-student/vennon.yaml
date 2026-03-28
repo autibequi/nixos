@@ -1,0 +1,98 @@
+name: front-student
+aliases: [front, fs]
+project: vennon-dk-front-student
+source: ~/projects/estrategia/front-student
+
+enums:
+  env:
+    values: [local, sand, devbox, qa, prod]
+    default: local
+    map:
+      sand: sandbox
+
+  vertical:
+    values: [carreiras-juridicas, concursos, medicina, oab, vestibulares, militares]
+    default: carreiras-juridicas
+
+ports: [3005]
+
+commands:
+  serve:
+    description: Start front-student
+    args:
+      - name: env
+        enum: env
+      - name: vertical
+        enum: vertical
+    compose:
+      files: [docker-compose.yml]
+      env_file: "env/{{ env | map }}.env"
+      env:
+        VERTICAL: "{{ vertical }}"
+        NPM_SCRIPT_ENV: "{{ env | map }}"
+      action: up -d
+
+  stop:
+    description: Stop front-student
+    compose:
+      files: [docker-compose.yml]
+      action: down
+
+  worker:
+    description: Run worker
+    args:
+      - name: env
+        enum: env
+      - name: vertical
+        enum: vertical
+    exec:
+      container: app
+      command: "npm run worker:{{ env | map }}:{{ vertical }}"
+
+  test:
+    description: Run tests
+    exec:
+      container: app
+      command: "yarn test"
+
+  shell:
+    description: Interactive shell
+    args:
+      - name: cmd
+        type: string
+        default: /bin/bash
+    exec:
+      container: app
+      command: "{{ cmd }}"
+
+  install:
+    description: Install npm dependencies
+    script: |
+      podman run --rm -it \
+        -v {{ source }}:/app \
+        -v {{ home }}/.ssh:/root/.ssh:ro \
+        -e NPM_TOKEN={{ NPM_TOKEN }} \
+        node:20-alpine sh -c \
+        "cd /app && npm install --no-progress"
+
+  logs:
+    description: Follow logs
+    args:
+      - name: tail
+        type: int
+        default: 100
+    compose:
+      files: [docker-compose.yml]
+      action: "logs -f --tail {{ tail }}"
+
+  build:
+    description: Build docker image
+    compose:
+      files: [docker-compose.yml]
+      action: build
+
+  flush:
+    description: Destroy everything
+    compose:
+      files: [docker-compose.yml]
+      action: "down -v --rmi local"

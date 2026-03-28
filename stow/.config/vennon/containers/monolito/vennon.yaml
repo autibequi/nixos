@@ -1,0 +1,110 @@
+name: monolito
+aliases: [mono]
+project: vennon-dk-monolito
+source: ~/projects/estrategia/monolito
+
+enums:
+  env:
+    values: [local, sand, devbox, qa, prod]
+    default: local
+    map:
+      sand: sandbox
+
+ports: [4004, 2345, 5432, 6379, 4566]
+
+commands:
+  serve:
+    description: Start monolito + dependencies
+    args:
+      - name: env
+        enum: env
+      - name: debug
+        type: bool
+        default: false
+      - name: dev
+        type: bool
+        default: false
+      - name: detach
+        type: bool
+        default: false
+    compose:
+      files:
+        - docker-compose.yml
+        - docker-compose.deps.yml
+        - if: debug
+          file: docker-compose.debug.yml
+        - if: dev
+          file: docker-compose.dev.yml
+      env_file: "env/{{ env | map }}.env"
+      action: up -d
+
+  stop:
+    description: Stop monolito
+    compose:
+      files: [docker-compose.yml, docker-compose.deps.yml]
+      action: down
+
+  test:
+    description: Run tests
+    args:
+      - name: cmd
+        type: string
+        default: "make test"
+    exec:
+      container: app
+      command: "{{ cmd }}"
+
+  shell:
+    description: Interactive shell
+    args:
+      - name: container
+        type: string
+        default: app
+      - name: cmd
+        type: string
+        default: /bin/bash
+    exec:
+      container: "{{ container }}"
+      command: "{{ cmd }}"
+
+  install:
+    description: Install Go dependencies
+    script: |
+      podman run --rm -it \
+        -v {{ source }}:/go/app \
+        -v {{ home }}/.ssh:/root/.ssh:ro \
+        -e GOPRIVATE=github.com/estrategiahq \
+        golang:1.26.1-alpine sh -c \
+        "cd /go/app && go mod download && go mod tidy && go work vendor"
+
+  logs:
+    description: Follow logs
+    args:
+      - name: tail
+        type: int
+        default: 100
+    compose:
+      files: [docker-compose.yml]
+      action: "logs -f --tail {{ tail }}"
+
+  build:
+    description: Build docker image
+    compose:
+      files: [docker-compose.yml]
+      action: build
+
+  flush:
+    description: Destroy everything (containers + volumes + images)
+    compose:
+      files: [docker-compose.yml, docker-compose.deps.yml]
+      action: "down -v --rmi local"
+
+  worker:
+    description: Start worker process
+    args:
+      - name: env
+        enum: env
+    compose:
+      files: [docker-compose.worker.yml, docker-compose.deps.yml]
+      env_file: "env/{{ env | map }}.env"
+      action: up -d

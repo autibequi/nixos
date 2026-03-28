@@ -1,0 +1,32 @@
+services:
+  app:
+    build:
+      context: ${FRONT_STUDENT_DIR}
+      dockerfile: Dockerfile
+    container_name: vennon-dk-front-student-app
+    cpus: "14.4"
+    env_file:
+      - ./env/${APP_ENV_FILE:-local}.env
+    environment:
+      - FORCE_COLOR=1
+      - TERM=xterm-256color
+      - VERTICAL=${VERTICAL:-carreiras-juridicas}
+      - NPM_SCRIPT_ENV=${NPM_SCRIPT_ENV:-local}
+    tty: true
+    volumes:
+      # Bind mount completo: source + node_modules (gerado por leech docker install)
+      - ${FRONT_STUDENT_DIR}:/app
+      # Canal de comunicação rápida host ↔ container
+      - ${HOME}/.leech:/.leech:rw
+    extra_hosts:
+      - "api.local.estrategia-sandbox.com.br:host-gateway"
+    ports:
+      - "3005:3005"
+    networks:
+      - default
+    restart: unless-stopped
+
+networks:
+  default:
+    name: nixos_default
+    external: true

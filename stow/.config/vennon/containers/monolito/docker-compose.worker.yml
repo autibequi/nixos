@@ -1,0 +1,23 @@
+services:
+  worker:
+    build:
+      context: ${MONOLITO_DIR}
+      dockerfile: Dockerfile
+    container_name: vennon-dk-monolito-worker-app
+    command: ["./worker"]
+    cpus: "14.4"
+    env_file:
+      - ${MONOLITO_DIR}/.env.${APP_ENV_FILE:-sandbox}
+      - ./env/${APP_ENV:-sand}.env
+    volumes:
+      - ${MONOLITO_DIR}/configuration:/go/app/configuration:ro
+      # Canal de comunicação rápida host ↔ container
+      - ${HOME}/.leech:/.leech:rw
+    networks:
+      - default
+    restart: unless-stopped
+
+networks:
+  default:
+    name: nixos_default
+    external: true
