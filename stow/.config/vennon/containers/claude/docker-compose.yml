@@ -21,6 +21,7 @@ services:
     - /home/pedrinho:/workspace/home:rw
     - /home/pedrinho/.claude:/home/claude/.claude
     - /home/pedrinho/nixos/vennon/self/claude.bypass.json:/home/claude/.claude/settings.json:ro
+    - /home/pedrinho/nixos/vennon/self/settings.local.json:/home/claude/.claude/settings.local.json:rw
     - /home/pedrinho/nixos/vennon/self/skills:/home/claude/.claude/skills
     - /home/pedrinho/nixos/vennon/self/commands:/home/claude/.claude/commands
     - /home/pedrinho/nixos/vennon/self/agents:/home/claude/.claude/agents

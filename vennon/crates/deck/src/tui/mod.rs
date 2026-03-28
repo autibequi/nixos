@@ -56,6 +56,7 @@ fn run_loop(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, app: &mut App
                         KeyCode::Up | KeyCode::Char('k') => app.prev(),
                         KeyCode::Enter => app.open_menu(),
                         KeyCode::Char('r') => app.refresh()?,
+                        KeyCode::Tab => app.switch_tab(),
                         KeyCode::Char('[') | KeyCode::PageUp => app.scroll_logs_up(),
                         KeyCode::Char(']') | KeyCode::PageDown => app.scroll_logs_down(),
                         _ => {}

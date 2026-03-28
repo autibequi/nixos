@@ -1,7 +1,7 @@
 use ratatui::prelude::*;
 use ratatui::widgets::*;
 
-use super::app::{App, AppMode};
+use super::app::{App, AppMode, Tab, IDE_NAMES};
 
 // ── Colors ──────────────────────────────────────────────────────
 const GREEN: Color = Color::Rgb(166, 227, 161);
@@ -15,20 +15,20 @@ const SURFACE: Color = Color::Rgb(30, 30, 46);
 pub fn render(frame: &mut Frame, app: &App) {
     let area = frame.area();
 
-    // Layout: header (1) + containers (dynamic) + logs (rest)
-    let container_height = (app.containers.len() as u16 + 2).min(area.height / 2);
+    let vis = app.visible_containers();
+    let container_height = (vis.len() as u16 + 2).min(area.height / 2).max(3);
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Length(1),               // header
+            Constraint::Length(1),               // header + tabs
             Constraint::Length(container_height), // containers
             Constraint::Min(5),                  // logs
             Constraint::Length(1),               // footer
         ])
         .split(area);
 
-    render_header(frame, chunks[0]);
-    render_containers(frame, app, chunks[1]);
+    render_header(frame, app, chunks[0]);
+    render_containers(frame, app, &vis, chunks[1]);
     render_logs(frame, app, chunks[2]);
     render_footer(frame, app, chunks[3]);
 
@@ -38,17 +38,31 @@ pub fn render(frame: &mut Frame, app: &App) {
     }
 }
 
-fn render_header(frame: &mut Frame, area: Rect) {
+fn render_header(frame: &mut Frame, app: &App, area: Rect) {
+    let ide_style = if app.tab == Tab::Ide { Style::default().fg(MAUVE).bold() } else { Style::default().fg(DIM) };
+    let svc_style = if app.tab == Tab::Services { Style::default().fg(MAUVE).bold() } else { Style::default().fg(DIM) };
+
+    let ide_up = app.all_containers.iter()
+        .filter(|c| { let s = c.name.strip_prefix("vennon-").unwrap_or(&c.name); IDE_NAMES.contains(&s) })
+        .filter(|c| c.is_up).count();
+    let svc_up = app.all_containers.iter()
+        .filter(|c| { let s = c.name.strip_prefix("vennon-").unwrap_or(&c.name); !IDE_NAMES.contains(&s) })
+        .filter(|c| c.is_up).count();
+
     let text = Line::from(vec![
-        Span::styled(" bridge", Style::default().fg(MAUVE).bold()),
-        Span::styled(" — container dashboard", Style::default().fg(DIM)),
+        Span::styled(" deck ", Style::default().fg(MAUVE).bold()),
+        Span::styled("│ ", Style::default().fg(DIM)),
+        Span::styled(format!(" IDE ({ide_up}) "), ide_style),
+        Span::styled("│", Style::default().fg(DIM)),
+        Span::styled(format!(" Services ({svc_up}) "), svc_style),
+        Span::styled("│ ", Style::default().fg(DIM)),
+        Span::styled("tab:switch", Style::default().fg(DIM)),
     ]);
     frame.render_widget(Paragraph::new(text), area);
 }
 
-fn render_containers(frame: &mut Frame, app: &App, area: Rect) {
-    let rows: Vec<Row> = app
-        .containers
+fn render_containers(frame: &mut Frame, app: &App, vis: &[&super::app::ContainerInfo], area: Rect) {
+    let rows: Vec<Row> = vis
         .iter()
         .enumerate()
         .map(|(i, c)| {
@@ -85,17 +99,20 @@ fn render_containers(frame: &mut Frame, app: &App, area: Rect) {
         Constraint::Min(15),    // mem
     ];
 
+    let tab_label = match app.tab {
+        Tab::Ide => "IDE",
+        Tab::Services => "Services",
+    };
     let table = Table::new(rows, widths)
         .block(
             Block::default()
                 .borders(Borders::ALL)
                 .border_style(Style::default().fg(DIM))
                 .title(Span::styled(
-                    " Containers ",
+                    format!(" {tab_label} "),
                     Style::default().fg(MAUVE).bold(),
                 )),
-        )
-        .highlight_style(Style::default().bg(SURFACE));
+        );
 
     frame.render_widget(table, area);
 }
@@ -121,8 +138,8 @@ fn render_logs(frame: &mut Frame, app: &App, area: Rect) {
 
     let selected_name = app
         .selected_container()
-        .map(|c| c.name.strip_prefix("vennon-").unwrap_or(&c.name))
-        .unwrap_or("none");
+        .map(|c| c.name.strip_prefix("vennon-").unwrap_or(&c.name).to_string())
+        .unwrap_or_else(|| "none".into());
 
     let block = Block::default()
         .borders(Borders::ALL)
@@ -137,11 +154,11 @@ fn render_logs(frame: &mut Frame, app: &App, area: Rect) {
 
 fn render_footer(frame: &mut Frame, app: &App, area: Rect) {
     let hint = match app.mode {
-        AppMode::Normal => "j/k:nav  enter:menu  r:refresh  [/]:scroll  q:quit",
+        AppMode::Normal => "j/k:nav  enter:menu  tab:switch  r:refresh  [/]:scroll  q:quit",
         AppMode::Menu => "j/k:nav  enter:exec  esc:back",
     };
-    let count = app.containers.iter().filter(|c| c.is_up).count();
-    let total = app.containers.len();
+    let count = app.all_containers.iter().filter(|c| c.is_up).count();
+    let total = app.all_containers.len();
 
     let text = Line::from(vec![
         Span::styled(
@@ -158,20 +175,13 @@ fn render_menu(frame: &mut Frame, app: &App, area: Rect) {
         Some(c) => c,
         None => return,
     };
-    let name = container.name.strip_prefix("vennon-").unwrap_or(&container.name);
-
-    let actions = &[
-        ("start", "Start"),
-        ("stop", "Stop"),
-        ("shell", "Shell"),
-        ("build", "Build"),
-        ("flush", "Flush"),
-    ];
+    let name = container.display_name.clone();
+    let actions = app.menu_actions();
 
     let items: Vec<ListItem> = actions
         .iter()
         .enumerate()
-        .map(|(i, (_, label))| {
+        .map(|(i, label)| {
             let style = if i == app.menu_cursor {
                 Style::default().fg(MAUVE).bold()
             } else {
