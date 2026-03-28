@@ -14,7 +14,7 @@
 | `ciclo.md` | Protocolo completo de execucao (boot → executar → finalizar → reagendar) |
 | `dashboard.md` | Como funciona o DASHBOARD, formato de cards, quem pode editar |
 | `bedrooms.md` | Estrutura obrigatoria do quarto (DIARIO/DESKTOP/ARCHIVE) |
-| `obsidian.md` | Mapa do vault, territorios, semantica dos espacos |
+| `obsidian-rules.md` | Mapa do vault, territorios, semantica dos espacos |
 | `comunicacao.md` | Inbox, outbox, feed.md, news/, alertas — canais oficiais |
 | `worktrees.md` | Worktrees — fluxo de isolamento e aprovacao pelo CTO |
 
