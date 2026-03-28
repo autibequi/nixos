@@ -57,7 +57,7 @@ Cada subagente recebe contexto autonomo — ele NAO herda o contexto do despacha
 Voce e o <nome>. Contexto: <2-3 linhas do estado atual relevante>.
 Tarefa: <acao especifica e delimitada>.
 Output esperado: <o que retornar ao final — formato, destino>.
-Regras: ler RULES.md + bedrooms.md no boot. Reagendar ao fim.
+Regras: ler superego/leis.md + superego/bedrooms.md no boot. Reagendar ao fim.
 ```
 
 **Exemplo — analise noturna:**

@@ -9,7 +9,7 @@ updated: 2026-03-26T02:47Z
 
 > Índice compilado de TUDO que posso fazer em uma sessão.
 > Autoridade única — remova duplicatas em outros arquivos que referenciem isto.
-> Injetar no boot assim como RULES.md é injetado.
+> Injetar no boot junto com `self/superego/leis.md`.
 
 ---
 
@@ -165,7 +165,7 @@ Remove branches locais marcadas como [gone] no remoto.
 
 ## Agentes
 
-Ver `self/AGENT.md` para regras completas e `self/skills/meta/rules/agents.md` para perfil de cada agente.
+Ver `self/AGENT.md` para regras completas e `self/superego/README.md` para indice das regras do sistema.
 
 CLI: `yaa agents` | `yaa agents run <nome>` | `/meta:phone call <nome>`
 

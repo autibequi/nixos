@@ -105,3 +105,5 @@
 - [feedback_index_as_entrypoint.md](feedback_index_as_entrypoint.md) — Projetos para terceiros: INDEX.md obrigatório com 7 seções (o quê, números, feito/falta, pastas, 3 caminhos, cenários, glossário)
 - [feedback_projeto_real.md](feedback_projeto_real.md) — "Projeto real": pesquisa extensiva, dados reais, cenários, Mermaid, links Obsidian, guia mastigado, CUIDADOS, agentes autônomos
 - [project_jonathas.md](project_jonathas.md) — Projeto imobiliário Jonathas: SaaS RJ, cunhado Pedro, bot WhatsApp IA, stack Next.js+Express+Neon, lançamento Set-Out 2026
+- [feedback_present_plan_before_bulk_ops.md](feedback_present_plan_before_bulk_ops.md) — Apresentar tabela de plano antes de executar ops em lote em self/ (renomear, remover, mesclar múltiplos arquivos)
+- [project_grande_refatoracao.md](project_grande_refatoracao.md) — Refatoração 2026-03-28 parcialmente concluída: AGENT.md/PERSONA.md/SOUL.md/RULES.md/INIT.md/GLOSSARY.md ainda precisam ser finalizados

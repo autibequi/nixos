@@ -1,18 +1,18 @@
 ---
 name: meta/obsidian
-description: "Interacao com /workspace/obsidian/ — templates, mermaid, graph, dataview. Regras do vault vivem em self/skills/meta/rules/ (nao aqui)."
+description: "Interacao com /workspace/obsidian/ — templates, mermaid, graph, dataview. Regras do vault vivem em self/superego/ (nao aqui)."
 ---
 
 # Skill: meta/obsidian
 
 > Tudo sobre o vault em `/workspace/obsidian/`.
-> **Regras de interacao:** `self/RULES.md` (entrypoint) → `self/skills/meta/rules/` (detalhe)
+> **Regras de interacao:** `self/superego/README.md` (entrypoint) → `self/superego/` (detalhe)
 
 ## Sub-skills
 
 | Sub-skill | Arquivo | Quando usar |
 |---|---|---|
-| **rules** | `self/skills/meta/rules/` | Todas as regras do sistema — ver `/meta:rules` |
+| **rules** | `self/superego/` | Todas as regras do sistema — ver `/superego` |
 | **graph** | `graph.md` | Manter o grafo Ctrl+G: frontmatter, related, hubs, wiseman |
 | **dataview** | `dataview.md` | Queries Dataview/DataviewJS no dashboard e notas |
 

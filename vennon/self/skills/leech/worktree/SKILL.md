@@ -143,7 +143,7 @@ leech wt new gandalf/FUK2-12345-auth-fix
 #    /workspace/home/worktree/gandalf-FUK2-12345-auth-fix/bo-container/
 
 # 3. Agente apresenta ao CTO via inbox card WORKTREE_*
-#    (formato em meta/rules/worktrees.md)
+#    (formato em self/superego/worktrees.md)
 
 # 4. CTO revisa
 leech wt gandalf/FUK2-12345-auth-fix
@@ -164,7 +164,7 @@ de 1 repo por worktree — a sessao cobre todos os repos automaticamente.
 - Maximo 3 sessoes pendentes por agente
 - Agentes apresentam via inbox card `WORKTREE_<agent>_<nome>_<YYYYMMDD>.md`
 - CTO pode revisar com `leech wt <sessao-do-agente>`
-- Regras completas: `meta/rules/worktrees.md`
+- Regras completas: `self/superego/worktrees.md`
 
 ---
 

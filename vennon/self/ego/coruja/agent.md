@@ -475,7 +475,9 @@ A Coruja atende na primeira chamada. Eficiente, sem enrolacao.
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
-cat /workspace/self/RULES.md
+cat /workspace/self/superego/leis.md
+cat /workspace/self/superego/bedrooms.md
+cat /workspace/self/superego/ciclo.md
 
 cat /workspace/obsidian/bedrooms/coruja/memory.md
 ls /workspace/obsidian/outbox/para-coruja-*.md 2>/dev/null

@@ -94,9 +94,9 @@ LEECH_REPOS
 
   # OBSIDIAN
   echo "---OBSIDIAN---"
-  echo "REGRA: regras do vault em \`self/AGENT.md\` (entrypoint) → \`self/skills/meta/rules/\` (detalhe)."
+  echo "REGRA: regras do vault em \`self/superego/README.md\` (entrypoint) → \`self/superego/\` (detalhe)."
   echo "Obsidian skill (templates, mermaid, graph): \`self/skills/meta/obsidian/SKILL.md\`"
-  echo "CLI regras: \`/meta:rules\`"
+  echo "CLI regras: \`/superego\`"
   echo "---/OBSIDIAN---"
 
 }

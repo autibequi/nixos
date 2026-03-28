@@ -30,7 +30,9 @@ Memory append obrigatorio ao fim do ciclo (formato ASSESS/ACT/VERIFY/NEXT).
 ## Inicio do Ciclo (OBRIGATORIO)
 
 ```bash
-cat /workspace/self/RULES.md
+cat /workspace/self/superego/leis.md
+cat /workspace/self/superego/bedrooms.md
+cat /workspace/self/superego/ciclo.md
 
 cat /workspace/obsidian/bedrooms/keeper/memory.md
 ls /workspace/obsidian/outbox/para-keeper-*.md 2>/dev/null
@@ -59,7 +61,7 @@ Assets orfaos > 3 dias → `.trashbin/` com registro em `.trashlist`
 
 #### Arquivamento de done/ (TTL)
 
-Regra completa em `self/skills/meta/rules/spaces.md#done`.
+Regra completa em `self/superego/obsidian.md`.
 
 | Origem | TTL | Destino |
 |--------|-----|---------|
@@ -253,7 +255,7 @@ Se BAIXO → registrar apenas em memory.md
 - 14 ciclos consecutivos sem false positives (logica madura)
 - Thresholds validados: 7d scratch, 14d logs, 30d artefatos
 - `.trashbin/` como destino intermediario, `.trashlist` como audit trail
-- NUNCA arquivar: bedrooms/dashboard.md, RULES.md (self/), README.md
+- NUNCA arquivar: bedrooms/dashboard.md, superego/ (self/), README.md
 - NUNCA arquivar: memory.md de agentes, modules/, stow/, projetos/, scripts/
 
 ---

@@ -51,7 +51,7 @@ ls /workspace/obsidian/bedrooms/_working/*.md 2>/dev/null
 
 ## 5. Cleanup — thresholds de limpeza
 
-**Fonte da verdade:** `self/skills/meta/rules/spaces.md` (secoes trash/ e done/).
+**Fonte da verdade:** `self/superego/obsidian.md` (secoes sobre archive e limpeza).
 Consultar la para thresholds atualizados — nao duplicar aqui.
 
 ## 6. Formato de reporte
