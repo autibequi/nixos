@@ -1,0 +1,8 @@
+[Unit]
+Description=Yaa Tick — dispatch agentes vencidos via Hermes
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/yaa tick
+Environment=HOME=%h
+Environment=PATH=%h/.local/bin:%h/.nix-profile/bin:/run/current-system/sw/bin:/usr/bin:/bin

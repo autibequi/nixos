@@ -93,6 +93,13 @@
   },
   "skipAutoPermissionPrompt": true,
   "plugins": [
-    "claude-plugins-official/superpowers"
+    "claude-plugins-official/superpowers",
+    "gopls-lsp",
+    "context7",
+    "github",
+    "skill-creator",
+    "claude-code-setup",
+    "atlassian",
+    "coderabbit"
   ]
 }

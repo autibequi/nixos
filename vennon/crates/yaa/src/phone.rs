@@ -112,25 +112,39 @@ pub fn call(agent_name: &str, message: Option<&str>, config: &YaaConfig) -> Resu
     let tmp = format!("/tmp/yaa-phone-{agent_name}.md");
     std::fs::write(&tmp, &prompt)?;
 
-    // Exec: claude -p "$(cat /tmp/...)" inside container
-    // First ensure container is running
-    let _ = exec::run("vennon", &["claude", "start"]);
-
-    // Find container
+    // Ensure container is running (without exec-replacing into it)
     let cid = exec::capture("podman", &["ps", "-q", "--filter", "name=vennon-claude"])?;
-    if cid.is_empty() {
-        bail!("claude container not running");
-    }
+    let cid = if cid.is_empty() {
+        // Container not running — start it via compose (not vennon start which does exec)
+        let _ = std::process::Command::new("podman-compose")
+            .args(["-f", &format!("{}/.config/vennon/containers/claude/docker-compose.yml",
+                std::env::var("HOME").unwrap_or_default()),
+                "-p", "vennon-claude", "up", "-d"])
+            .status();
+        // Retry find
+        let cid2 = exec::capture("podman", &["ps", "-q", "--filter", "name=vennon-claude"])?;
+        if cid2.is_empty() {
+            bail!("claude container not running — start with `yaa .` first");
+        }
+        cid2
+    } else {
+        cid
+    };
     let cid = cid.lines().next().unwrap_or(&cid).trim();
 
-    // Run claude -p inside container with the prompt
+    // Copy prompt file into container, then run claude -p
+    let container_tmp = format!("/tmp/yaa-phone-{agent_name}.md");
+    let _ = std::process::Command::new("podman")
+        .args(["cp", &tmp, &format!("{cid}:{container_tmp}")])
+        .status();
+
     let claude_cmd = format!(
-        "cd /workspace/target && claude -p \"$(cat {tmp})\" --model {model} --max-turns {max_turns}"
+        "cd /workspace/home && claude -p \"$(cat {container_tmp})\" --model {model} --max-turns {max_turns} --verbose < /dev/null"
     );
 
     let result = std::process::Command::new("podman")
-        .args(["exec", "-it", cid, "/bin/bash", "-c", &claude_cmd])
-        .stdin(std::process::Stdio::inherit())
+        .args(["exec", cid, "/bin/bash", "-c", &claude_cmd])
+        .stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::inherit())
         .stderr(std::process::Stdio::inherit())
         .status();
