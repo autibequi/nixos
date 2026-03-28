@@ -32,10 +32,10 @@
   },
   "custom/leech": {
     "format": "{}",
-    "exec": "echo '{\"text\":\" 󱙺 \",\"tooltip\":\"Leech Menu (MOD3+Space)\",\"class\":\"\"}'",
+    "exec": "echo '{\"text\":\" 󱙺 \",\"tooltip\":\"Vennon (MOD3+Space)\",\"class\":\"\"}'",
     "return-type": "json",
     "interval": "once",
-    "on-click": "leech-menu",
+    "on-click": "ghostty -e deck",
     "on-click-right": "anyrun"
   },
   "custom/screenrecord": {
@@ -289,11 +289,12 @@
     "on-click": "alacritty -e bash -c 'claude-statusbar --plan max20; read'"
   },
   "custom/claude-usage": {
-    "exec": "leech claude usage --waybar 2>/dev/null || echo \"{\\\"text\\\":\\\" 󱙺 --\\\",\\\"tooltip\\\":\\\"Claude: erro ao rodar script\\\",\\\"class\\\":\\\"\\\"}\"",
+    "exec": "yaa usage claude --waybar 2>/dev/null || echo \"{\\\"text\\\":\\\" 󱙺 --\\\",\\\"tooltip\\\":\\\"Claude: erro ao rodar script\\\",\\\"class\\\":\\\"\\\"}\"",
     "return-type": "json",
     "interval": 120,
     "signal": 8,
-    "on-click": "leech claude usage --waybar --refresh; pkill -RTMIN+8 waybar",
+    "on-click": "xdg-open https://claude.ai/settings/usage",
+    "on-click-right": "yaa usage claude --refresh; pkill -RTMIN+8 waybar",
     "format": "{}",
     "tooltip": true,
     "escape": false
