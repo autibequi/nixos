@@ -31,11 +31,7 @@ pub fn start_cmd(name: &str) -> String {
 
     let danger = std::env::var("YAA_DANGER").as_deref() == Ok("1");
 
-    let resume_flag = std::env::var("YAA_RESUME")
-        .ok()
-        .filter(|s| !s.is_empty())
-        .map(|id| format!(" --resume {id}"))
-        .unwrap_or_default();
+    let resume_raw = std::env::var("YAA_RESUME").ok().filter(|s| !s.is_empty());
 
     match name {
         "claude" => {
@@ -45,17 +41,38 @@ pub fn start_cmd(name: &str) -> String {
             }
             cmd.push_str(" --enable-auto-mode");
             cmd.push_str(&model_flag);
-            cmd.push_str(&resume_flag);
+            if let Some(ref id) = resume_raw {
+                if id == "continue" {
+                    cmd.push_str(" --continue");
+                } else {
+                    cmd.push_str(&format!(" --resume {id}"));
+                }
+            }
             cmd
         }
         "opencode" => {
             let mut cmd = "cd /workspace/target && exec opencode".to_string();
-            cmd.push_str(&resume_flag);
+            // opencode: --continue resumes last, --resume <id> for specific
+            if let Some(ref id) = resume_raw {
+                if id == "continue" {
+                    cmd.push_str(" --continue");
+                } else {
+                    cmd.push_str(&format!(" --resume {id}"));
+                }
+            }
             cmd
         }
         "cursor" => {
-            let mut cmd = format!("cd /workspace/target && exec cursor-agent --force{model_flag}");
-            cmd.push_str(&resume_flag);
+            let mut cmd = "cd /workspace/target && exec cursor-agent --force".to_string();
+            cmd.push_str(&model_flag);
+            // cursor: --resume <id> for specific session
+            if let Some(ref id) = resume_raw {
+                if id == "continue" {
+                    cmd.push_str(" --resume");
+                } else {
+                    cmd.push_str(&format!(" --resume {id}"));
+                }
+            }
             cmd
         }
         _ => "cd /workspace/target && exec bash".into(),

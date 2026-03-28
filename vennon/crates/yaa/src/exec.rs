@@ -15,6 +15,16 @@ pub fn run(program: &str, args: &[&str]) -> Result<()> {
     Ok(())
 }
 
+/// Run a command and capture stdout as trimmed String.
+pub fn capture(program: &str, args: &[&str]) -> Result<String> {
+    let output = Command::new(program)
+        .args(args)
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::null())
+        .output()?;
+    Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
+}
+
 /// Replace current process with the given command.
 #[cfg(unix)]
 pub fn exec_replace(program: &str, args: &[&str]) -> ! {

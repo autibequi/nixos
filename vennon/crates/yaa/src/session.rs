@@ -104,10 +104,12 @@ pub fn launch(config: &YaaConfig, opts: SessionOpts) -> Result<()> {
     // Resume/continue flags
     match &opts.mode {
         SessionMode::Resume(id) => {
+            // --resume <id> or --resume (picker)
             std::env::set_var("YAA_RESUME", id.as_deref().unwrap_or("1"));
         }
         SessionMode::Continue => {
-            std::env::set_var("YAA_RESUME", "1");
+            // --continue (last conversation)
+            std::env::set_var("YAA_RESUME", "continue");
         }
         _ => {}
     }

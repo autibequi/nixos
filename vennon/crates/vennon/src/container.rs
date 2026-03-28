@@ -130,27 +130,25 @@ fn flush(name: &str, compose_path: &std::path::Path) -> Result<()> {
     Ok(())
 }
 
-/// Build the container image(s).
+/// Build the container image(s). Always rebuilds base + child.
 fn build(name: &str, config: &VennonConfig) -> Result<()> {
     let vennon_dir = config.vennon_path();
 
-    // Always build base first if missing
-    if !image_exists("vennon-leech") {
-        println!("Building vennon-leech (base)...");
-        let leech_ctx = vennon_dir.join("containers/leech");
-        let leech_dockerfile = leech_ctx.join("Dockerfile");
-        exec::run(
-            "podman",
-            &[
-                "build",
-                "-t",
-                "vennon-leech",
-                "-f",
-                &leech_dockerfile.to_string_lossy(),
-                &leech_ctx.to_string_lossy(),
-            ],
-        )?;
-    }
+    // Always rebuild base (podman layer cache handles skipping unchanged layers)
+    println!("Building vennon-leech (base)...");
+    let leech_ctx = vennon_dir.join("containers/leech");
+    let leech_dockerfile = leech_ctx.join("Dockerfile");
+    exec::run(
+        "podman",
+        &[
+            "build",
+            "-t",
+            "vennon-leech",
+            "-f",
+            &leech_dockerfile.to_string_lossy(),
+            &leech_ctx.to_string_lossy(),
+        ],
+    )?;
 
     // Build specific image
     let image_name = format!("vennon-{name}");

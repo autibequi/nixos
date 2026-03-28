@@ -1,6 +1,8 @@
 mod config;
 mod exec;
+mod holodeck;
 mod session;
+mod tmux;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
@@ -52,6 +54,23 @@ enum Commands {
     /// Continue last session
     Continue,
 
+    /// Chrome holodeck (CDP fullscreen for agent control)
+    Holodeck {
+        /// Action: start (default), stop, status
+        #[arg(default_value = "start")]
+        action: String,
+    },
+
+    /// Shared tmux session (host ↔ container)
+    Tmux {
+        /// Action: serve, open, run, capture, status
+        #[arg(default_value = "status")]
+        action: String,
+        /// Command to run (for 'run' action)
+        #[arg(trailing_var_arg = true)]
+        args: Vec<String>,
+    },
+
     // Future: Agents, Tasks, Stow, Os, Cleanup, etc.
 }
 
@@ -99,6 +118,10 @@ fn main() -> Result<()> {
                 mode: session::SessionMode::Resume(session_id),
             })
         }
+
+        Some(Commands::Holodeck { action }) => holodeck::dispatch(&action),
+
+        Some(Commands::Tmux { action, args }) => tmux::dispatch(&action, &args),
 
         Some(Commands::Continue) => {
             let config = config::YaaConfig::load()?;
