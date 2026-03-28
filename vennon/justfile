@@ -1,12 +1,11 @@
-bin := "vennon"
 install_dir := env("HOME") / ".local/bin"
 nix_run := "nix-shell -p rustc cargo clippy rustfmt --run"
 
-# Build release binary
+# Build both binaries (release)
 build:
     {{nix_run}} "cargo build --release"
 
-# Build debug binary
+# Build debug
 dev:
     {{nix_run}} "cargo build"
 
@@ -14,36 +13,32 @@ dev:
 test:
     {{nix_run}} "cargo test"
 
-# Lint with clippy
+# Lint
 clippy:
     {{nix_run}} "cargo clippy -- -W clippy::all"
 
-# Format code
+# Format
 fmt:
     {{nix_run}} "cargo fmt"
 
-# Check formatting without modifying
+# Check formatting
 fmt-check:
     {{nix_run}} "cargo fmt --check"
 
-# Full check: build + test + clippy + fmt
+# Full check
 check: build test clippy fmt-check
 
-# Install binary to ~/.local/bin
+# Install both binaries to ~/.local/bin
 install: build
     mkdir -p {{install_dir}}
-    install -m 755 target/release/{{bin}} {{install_dir}}/{{bin}}
-    @echo "installed {{install_dir}}/{{bin}}"
+    install -m 755 target/release/vennon {{install_dir}}/vennon
+    install -m 755 target/release/yaa {{install_dir}}/yaa
+    @echo "installed vennon + yaa → {{install_dir}}"
 
-# Uninstall binary
+# Uninstall
 uninstall:
-    rm -f {{install_dir}}/{{bin}}
-    @echo "removed {{install_dir}}/{{bin}}"
+    rm -f {{install_dir}}/vennon {{install_dir}}/yaa
 
-# Clean build artifacts
+# Clean
 clean:
     {{nix_run}} "cargo clean"
-
-# Show help
-help:
-    {{nix_run}} "cargo run --release -- --help"

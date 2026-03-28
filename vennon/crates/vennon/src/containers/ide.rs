@@ -4,14 +4,23 @@ use crate::compose::{ComposeFile, Network, Service};
 use crate::config::{self, VennonConfig};
 
 /// Build the docker-compose structure for an IDE container (claude/opencode/cursor).
+/// Reads YAA_* env vars set by yaa for target dir, host mount, model, etc.
 pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
     let home = config::home().to_string_lossy().to_string();
-    let self_path = config.self_path().to_string_lossy().to_string();
-    let obsidian = config.obsidian_path().to_string_lossy().to_string();
-    let host = config.host_path().to_string_lossy().to_string();
-    let projects = config.projects_path().to_string_lossy().to_string();
     let (uid, gid) = config::user_ids();
     let git = config::git_env();
+
+    // YAA_* env vars override config defaults
+    let self_path = std::env::var("YAA_SELF_DIR")
+        .unwrap_or_else(|_| config.self_path().to_string_lossy().to_string());
+    let obsidian = std::env::var("YAA_OBSIDIAN_DIR")
+        .unwrap_or_else(|_| config.obsidian_path().to_string_lossy().to_string());
+    let target = std::env::var("YAA_TARGET_DIR")
+        .unwrap_or_else(|_| config.host_path().to_string_lossy().to_string());
+    let host_dir = std::env::var("YAA_HOST_DIR")
+        .unwrap_or_else(|_| config.host_path().to_string_lossy().to_string());
+    let host_enabled = std::env::var("YAA_HOST_ENABLED").as_deref() == Ok("1");
+    let projects = config.projects_path().to_string_lossy().to_string();
 
     let image = format!("vennon-{engine}:latest");
     let container_name = format!("vennon-{engine}");
@@ -27,17 +36,20 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
     env.insert("DOCKER_HOST".into(), "tcp://localhost:2375".into());
     env.insert("VENNON_UID".into(), uid.to_string());
     env.insert("VENNON_GID".into(), gid.to_string());
+    if host_enabled {
+        env.insert("HOST_ATTACHED".into(), "1".into());
+    }
 
     for (k, v) in &git {
         env.insert(k.clone(), v.clone());
     }
 
     // ── Volumes ─────────────────────────────────────────────
-    let volumes = vec![
-        // Core workspace
+    let mut volumes = vec![
+        // Core workspace — always mounted
         format!("{self_path}:/workspace/self"),
         format!("{obsidian}:/workspace/obsidian"),
-        format!("{host}:/workspace/target:rw"),
+        format!("{target}:/workspace/target:rw"),
         // Claude/IDE config
         format!("{home}/.claude:/home/claude/.claude"),
         format!("{self_path}/claude.bypass.json:/home/claude/.claude/settings.json:ro"),
@@ -61,6 +73,11 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
         "/var/log/journal:/workspace/logs/host/journal:ro".into(),
         "/var/log:/workspace/logs/host/var-log:ro".into(),
     ];
+
+    // --host: mount host dir at /workspace/host (rw)
+    if host_enabled {
+        volumes.push(format!("{host_dir}:/workspace/host:rw"));
+    }
 
     // ── Services ────────────────────────────────────────────
     let mut services = BTreeMap::new();

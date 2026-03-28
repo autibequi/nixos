@@ -1,0 +1,15 @@
+[package]
+name = "yaa"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "yaa"
+path = "src/main.rs"
+
+[dependencies]
+clap = { workspace = true }
+serde = { workspace = true }
+serde_yaml = { workspace = true }
+anyhow = { workspace = true }
+libc = { workspace = true }

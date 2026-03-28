@@ -1,13 +1,8 @@
-[package]
-name = "vennon"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+resolver = "2"
+members = ["crates/vennon", "crates/yaa"]
 
-[[bin]]
-name = "vennon"
-path = "src/main.rs"
-
-[dependencies]
+[workspace.dependencies]
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 serde_yaml = "0.9"
