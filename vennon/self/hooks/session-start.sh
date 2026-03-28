@@ -269,7 +269,7 @@ fi
 
 
 # ── ANALYSIS MODE + BETA — carregados de arquivos externos ─────
-_MODES_DIR="/workspace/self/hooks/modes"
+_MODES_DIR="/workspace/self/shadow/modes"
 if [ "$ANALYSIS_MODE" = "1" ] && [ -f "$_MODES_DIR/analysis.md" ]; then
   echo "---ANALYSIS_MODE---"
   cat "$_MODES_DIR/analysis.md"

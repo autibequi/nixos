@@ -1,5 +1,5 @@
 ---
-name: superego
+name: meta:self:superego
 description: "Regras globais do sistema Leech — ativar sempre que tocar em: estrutura do vault, bedrooms, dashboard, cards, comunicacao entre agentes, scheduling, worktrees ou leis. Le e apresenta os arquivos de /workspace/self/superego/."
 triggers:
   - "regras do sistema"

@@ -2,8 +2,8 @@
 
 ## Arquivos ativos
 
-Persona: `personas/GLaDOS.persona.md`
-Avatar:  `personas/avatar/glados.md`
+Persona: `shadow/experiments/personas/GLaDOS.persona.md`
+Avatar:  `shadow/experiments/personas/avatar/glados.md`
 
 > O hook session-start.sh le estas linhas e injeta os arquivos acima.
 > Para trocar persona: editar as linhas acima.
