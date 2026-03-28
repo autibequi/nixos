@@ -1,0 +1,12 @@
+[package]
+name = "bridge"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "bridge"
+path = "src/main.rs"
+
+[dependencies]
+clap = { workspace = true }
+anyhow = { workspace = true }
