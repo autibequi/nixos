@@ -74,6 +74,17 @@ enum Commands {
         /// Engine: claude (default), cursor
         #[arg(default_value = "")]
         engine: String,
+        /// Output format: --waybar, --statusline, --refresh, --json, --debug
+        #[arg(long)]
+        waybar: bool,
+        #[arg(long)]
+        statusline: bool,
+        #[arg(long)]
+        refresh: bool,
+        #[arg(long)]
+        json: bool,
+        #[arg(long)]
+        debug: bool,
     },
 
     /// Print OAuth token for an engine
@@ -159,10 +170,16 @@ fn main() -> Result<()> {
             phone::call("ticker", Some("hora de rodar o ciclo"), &config)
         }
 
-        Some(Commands::Usage { engine }) => {
+        Some(Commands::Usage { engine, waybar, statusline, refresh, json, debug }) => {
             let config = config::YaaConfig::load()?;
             let e = if engine.is_empty() { None } else { Some(engine.as_str()) };
-            usage::show(e, &config)
+            let flag = if waybar { Some("--waybar") }
+                else if statusline { Some("--statusline") }
+                else if refresh { Some("--refresh") }
+                else if json { Some("--json") }
+                else if debug { Some("--debug") }
+                else { None };
+            usage::show(e, flag, &config)
         }
 
         Some(Commands::Token { engine }) => {

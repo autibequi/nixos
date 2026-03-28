@@ -2,11 +2,11 @@ use anyhow::Result;
 
 use crate::config::{self, YaaConfig};
 
-pub fn show(engine: Option<&str>, config: &YaaConfig) -> Result<()> {
+pub fn show(engine: Option<&str>, flag: Option<&str>, config: &YaaConfig) -> Result<()> {
     let engine = engine.unwrap_or(&config.session.engine);
 
     match engine {
-        "claude" => claude_usage(),
+        "claude" => claude_usage(flag),
         "cursor" => {
             println!("Cursor: check usage at cursor.com/settings");
             Ok(())
@@ -22,58 +22,43 @@ pub fn show(engine: Option<&str>, config: &YaaConfig) -> Result<()> {
     }
 }
 
-fn claude_usage() -> Result<()> {
+fn claude_usage(flag: Option<&str>) -> Result<()> {
     let home = config::home();
-    let creds_path = home.join(".claude/.credentials.json");
+    let candidates = [
+        config::expand_path("~/nixos/vennon/self/scripts/claude-oauth-usage.sh"),
+        config::expand_path("~/nixos/leech/self/scripts/claude-oauth-usage.sh"),
+        config::expand_path("~/nixos/vennon/self/scripts/claude-ai-usage.sh"),
+        config::expand_path("~/nixos/leech/self/scripts/claude-ai-usage.sh"),
+        home.join(".claude/scripts/claude-oauth-usage.sh"),
+        home.join(".claude/scripts/claude-ai-usage.sh"),
+    ];
 
-    if !creds_path.exists() {
-        println!("No Claude credentials found at {}", creds_path.display());
-        println!("Run `claude` first to authenticate.");
+    if let Some(script) = candidates.iter().find(|p| p.exists()) {
+        let mut args: Vec<&str> = vec![script.to_str().unwrap_or("")];
+        if let Some(f) = flag {
+            args.push(f);
+        }
+
+        let status = std::process::Command::new("bash")
+            .args(&args)
+            .stdin(std::process::Stdio::inherit())
+            .stdout(std::process::Stdio::inherit())
+            .stderr(std::process::Stdio::inherit())
+            .status()?;
+        if !status.success() {
+            eprintln!("Script exited with {status}");
+        }
         return Ok(());
     }
 
-    let contents = std::fs::read_to_string(&creds_path)?;
-
-    // Parse credentials — find accessToken
-    // Format: {"claudeAiOauth":{"accessToken":"...","expiresAt":"...",...}}
-    let token = extract_json_field(&contents, "accessToken");
-
-    match token {
-        Some(t) => {
-            // Use the Claude usage API
-            let status = std::process::Command::new("curl")
-                .args([
-                    "-s",
-                    "-H", &format!("Authorization: Bearer {t}"),
-                    "-H", "Content-Type: application/json",
-                    "https://api.claude.ai/api/organizations",
-                ])
-                .stdout(std::process::Stdio::piped())
-                .stderr(std::process::Stdio::null())
-                .output()?;
-
-            let body = String::from_utf8_lossy(&status.stdout);
-
-            if body.contains("error") || body.is_empty() {
-                println!("Claude: token may be expired. Re-authenticate with `claude`.");
-            } else {
-                // Pretty print the response
-                println!("Claude API response:");
-                println!("{body}");
-            }
-        }
-        None => {
-            println!("Could not extract token from {}", creds_path.display());
+    // No script found
+    if flag == Some("--waybar") {
+        println!(r#"{{"text":" 󱙺 --","tooltip":"usage script not found","class":""}}"#);
+    } else {
+        println!("No usage script found. Searched:");
+        for c in &candidates {
+            println!("  {}", c.display());
         }
     }
-
     Ok(())
-}
-
-/// Simple JSON field extraction (avoids serde_json dependency).
-fn extract_json_field<'a>(json: &'a str, field: &str) -> Option<&'a str> {
-    let pattern = format!("\"{}\":\"", field);
-    let start = json.find(&pattern)? + pattern.len();
-    let end = json[start..].find('"')? + start;
-    Some(&json[start..end])
 }
