@@ -223,64 +223,66 @@ O que quer roubar?
 
 ---
 
-## Modo padrão (cristalizar sessão)
+## Modo padrão (cristalizar sessão → self/)
 
-Você (Claude) deve executar diretamente — sem subagente. Você tem o contexto completo desta conversa.
+Você (Claude) executa diretamente — sem subagente. Você tem o contexto completo desta conversa.
 
-### 1. Revisar a sessão
+**Objetivo:** extrair o máximo da sessão e aplicar diretamente em `self/` como skills, commands e comportamentos. O usuário valida vendo o repositório — não pedir aprovação antes de agir.
 
-Identifique:
-- **Correções** — algo que você fez errado e foi corrigido
-- **Preferências** — como o usuário gosta que as coisas sejam feitas
-- **Decisões de design** — escolhas arquiteturais, convenções, padrões
-- **Conhecimento novo** — sobre o sistema, projeto, usuário
-- **Padrões emergentes** — algo que apareceu 2+ vezes e merece formalizar
-- **Gaps** — skill, command ou agent que deveria existir mas não existe
+### 1. Minerar a sessão
 
-### 2. Persistir o que vale
+Varrer a conversa inteira procurando:
 
-> **REGRA CRÍTICA:** APENAS `/workspace/self/` persiste entre sessões.
-> `/home/claude/.claude/` e `/workspace/host/` são read-only — não tentar escrever lá.
-> Se não conseguir salvar em `/workspace/self/`, emitir AVISO explícito ao usuário.
+| O que procurar | Exemplos |
+|----------------|----------|
+| **Workflows** que funcionaram | sequência de investigação, forma de debug, padrão de exploração |
+| **Comportamentos** aprovados | abordagem que o usuário não questionou ou elogiou |
+| **Correções** feitas | algo que você fez errado e foi corrigido / reformulado |
+| **Padrões emergentes** | algo que apareceu 2+ vezes e merece formalizar |
+| **Conhecimento de sistema** | como algo funciona no Leech/projeto que não estava documentado |
+| **Gaps identificados** | skill/command que deveria existir mas não existe |
 
-| O que é | Onde salvar |
-|---------|-------------|
-| Correção de comportamento | `/workspace/self/system/memory/feedback_*.md` |
-| Preferência do usuário | `/workspace/self/system/memory/user_*.md` |
-| Contexto de projeto | `/workspace/self/system/memory/project_*.md` |
-| Referência externa | `/workspace/self/system/memory/reference_*.md` |
-| Melhoria em skill existente | editar `/workspace/self/skills/*/SKILL.md` |
-| Comportamento de agente mudou | editar `/workspace/self/agents/*/agent.md` |
-| Regra fundamental | sugerir via inbox (não editar CLAUDE.md direto) |
-
-**Paths:**
-- Memórias: `/workspace/self/system/memory/` + `MEMORY.md`
-- Skills: `/workspace/self/skills/`
-- Agents: `/workspace/self/agents/`
-- Commands: `/workspace/self/commands/`
-
-### 3. Skills disponíveis (para identificar gaps ou melhorias)
+### 2. Mapear o que já existe
 
 ```bash
-ls /workspace/self/skills/
-ls /workspace/self/commands/
+ls /workspace/host/leech/self/skills/
+ls /workspace/host/leech/self/commands/
 ```
 
-### 4. Regras
+Para cada item minerado, verificar se já existe skill/command que pode ser melhorado. Não duplicar.
 
-- Verificar se já existe algo similar antes de criar (não duplicar)
-- Se for memory: atualizar MEMORY.md também
-- Não salvar coisas deriváveis do código ou git
-- Não editar CLAUDE.md diretamente — sugerir via inbox
-- Silêncio é válido — se nada novo emergiu, dizer isso
+### 3. Agir — editar ou criar em self/
 
-### 5. Reportar
+**Não perguntar — fazer.** Para cada item relevante:
+
+| Tipo | Ação |
+|------|------|
+| Melhoria em skill existente | Editar o SKILL.md correspondente — adicionar seção, exemplo, regra |
+| Novo workflow | Criar nova skill em `self/skills/<namespace>/` ou subskill |
+| Novo comando | Criar `self/commands/<nome>.md` |
+| Comportamento de agente | Editar `self/agents/<nome>/agent.md` |
+| Regra cross-cutting | Editar `self/DIRETRIZES.md` ou `self/AGENT.md` conforme o caso |
+
+**Paths canônicos:**
+- Skills: `/workspace/host/leech/self/skills/`
+- Commands: `/workspace/host/leech/self/commands/`
+- Agents: `/workspace/host/leech/self/agents/`
+- Core docs: `/workspace/host/leech/self/`
+
+### 4. Reportar o que foi feito
 
 ```
-## Absorb — Sessão cristalizada
+## Absorb — Sessão aplicada em self/
 
-**Memórias salvas/atualizadas:** lista
-**Leech atualizado:** skills/agents/commands modificados
-**Sugestões:** o que precisa aprovação do usuário
-**Nada novo:** se não havia o que absorver
+### Modificado
+- [editado] path/arquivo.md — o que foi adicionado/mudado
+
+### Criado
+- [novo] path/arquivo.md — o que é e por que
+
+### Gaps (sem solução agora)
+- descrição do que deveria existir mas não foi criado
+
+### Nada novo
+(se a sessão não gerou conhecimento novo para self/)
 ```
