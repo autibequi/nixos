@@ -20,9 +20,29 @@ pub fn get_compose(name: &str, config: &VennonConfig) -> Result<ComposeFile> {
     }
 }
 
+/// Translate a host path to the container path.
+/// ~/anything → /workspace/home/anything (because ~ is mounted at /workspace/home)
+fn container_workdir() -> String {
+    let home = std::env::var("HOME").unwrap_or_else(|_| "/root".into());
+    let target = std::env::var("YAA_TARGET_DIR").unwrap_or_default();
+
+    if target.is_empty() {
+        return "/workspace/home".into();
+    }
+
+    // If target starts with $HOME, translate to /workspace/home/...
+    if target.starts_with(&home) {
+        let relative = &target[home.len()..];
+        format!("/workspace/home{relative}")
+    } else {
+        // Fallback: might not be accessible inside container
+        "/workspace/home".into()
+    }
+}
+
 /// Build the exec command for starting an IDE session.
-/// Reads YAA_MODEL, YAA_DANGER, YAA_RESUME env vars.
 pub fn start_cmd(name: &str) -> String {
+    let workdir = container_workdir();
     let model_flag = std::env::var("YAA_MODEL")
         .ok()
         .filter(|s| !s.is_empty())
@@ -30,12 +50,11 @@ pub fn start_cmd(name: &str) -> String {
         .unwrap_or_default();
 
     let danger = std::env::var("YAA_DANGER").as_deref() == Ok("1");
-
     let resume_raw = std::env::var("YAA_RESUME").ok().filter(|s| !s.is_empty());
 
     match name {
         "claude" => {
-            let mut cmd = "cd /workspace/target && exec claude".to_string();
+            let mut cmd = format!("cd {workdir} && exec claude");
             if danger {
                 cmd.push_str(" --dangerously-skip-permissions");
             }
@@ -51,8 +70,7 @@ pub fn start_cmd(name: &str) -> String {
             cmd
         }
         "opencode" => {
-            let mut cmd = "cd /workspace/target && exec opencode".to_string();
-            // opencode: --continue resumes last, --resume <id> for specific
+            let mut cmd = format!("cd {workdir} && exec opencode");
             if let Some(ref id) = resume_raw {
                 if id == "continue" {
                     cmd.push_str(" --continue");
@@ -63,9 +81,8 @@ pub fn start_cmd(name: &str) -> String {
             cmd
         }
         "cursor" => {
-            let mut cmd = "cd /workspace/target && exec cursor-agent --force".to_string();
+            let mut cmd = format!("cd {workdir} && exec cursor-agent --force");
             cmd.push_str(&model_flag);
-            // cursor: --resume <id> for specific session
             if let Some(ref id) = resume_raw {
                 if id == "continue" {
                     cmd.push_str(" --resume");
@@ -75,11 +92,12 @@ pub fn start_cmd(name: &str) -> String {
             }
             cmd
         }
-        _ => "cd /workspace/target && exec bash".into(),
+        _ => format!("cd {workdir} && exec bash"),
     }
 }
 
 /// Build the shell command (zsh with fallback to bash).
-pub fn shell_cmd() -> &'static str {
-    "cd /workspace/target && exec zsh || exec bash"
+pub fn shell_cmd() -> String {
+    let workdir = container_workdir();
+    format!("cd {workdir} && exec zsh || exec bash")
 }

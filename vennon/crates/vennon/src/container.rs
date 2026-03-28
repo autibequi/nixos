@@ -49,6 +49,8 @@ fn ensure_image(name: &str, config: &VennonConfig) -> Result<()> {
 fn start(name: &str, compose_path: &std::path::Path, config: &VennonConfig) -> Result<()> {
     ensure_image(name, config)?;
 
+    check_dir_conflict(name)?;
+
     let compose_str = compose_path.to_string_lossy();
     let project = format!("vennon-{name}");
 
@@ -73,6 +75,8 @@ fn start(name: &str, compose_path: &std::path::Path, config: &VennonConfig) -> R
 fn shell(name: &str, compose_path: &std::path::Path, config: &VennonConfig) -> Result<()> {
     ensure_image(name, config)?;
 
+    check_dir_conflict(name)?;
+
     let compose_str = compose_path.to_string_lossy();
     let project = format!("vennon-{name}");
     exec::run(
@@ -82,6 +86,7 @@ fn shell(name: &str, compose_path: &std::path::Path, config: &VennonConfig) -> R
 
     let cid = find_container(name)?;
 
+    let cmd = containers::shell_cmd();
     exec::exec_replace(
         "podman",
         &[
@@ -90,7 +95,7 @@ fn shell(name: &str, compose_path: &std::path::Path, config: &VennonConfig) -> R
             &cid,
             "/bin/bash",
             "-c",
-            containers::shell_cmd(),
+            &cmd,
         ],
     );
 }
@@ -172,6 +177,47 @@ fn build(name: &str, config: &VennonConfig) -> Result<()> {
 }
 
 // ── Helpers ─────────────────────────────────────────────────────
+
+/// Abort if a container is already running with a different YAA_TARGET_DIR.
+/// Prevents silently killing an active session when opening yaa in a new directory.
+fn check_dir_conflict(name: &str) -> Result<()> {
+    let container_name = format!("vennon-{name}");
+    let running = exec::capture(
+        "podman",
+        &["ps", "-q", "--filter", &format!("name={container_name}")],
+    )?;
+    if running.is_empty() {
+        return Ok(());
+    }
+
+    let env_output = exec::capture(
+        "podman",
+        &[
+            "inspect",
+            "--format",
+            "{{range .Config.Env}}{{.}}\n{{end}}",
+            &container_name,
+        ],
+    )?;
+
+    let existing_target = env_output
+        .lines()
+        .find_map(|line| line.strip_prefix("YAA_TARGET_DIR=").map(str::to_string))
+        .unwrap_or_default();
+
+    if existing_target.is_empty() {
+        return Ok(());
+    }
+
+    let new_target = std::env::var("YAA_TARGET_DIR").unwrap_or_default();
+    if existing_target != new_target {
+        bail!(
+            "Container vennon-{name} is already running with a different directory:\n  running:   {existing_target}\n  requested: {new_target}\n\nStop the active session first:\n  vennon {name} stop"
+        );
+    }
+
+    Ok(())
+}
 
 fn find_container(name: &str) -> Result<String> {
     let container_name = format!("vennon-{name}");

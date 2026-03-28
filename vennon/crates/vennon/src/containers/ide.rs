@@ -45,11 +45,15 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
     }
 
     // ── Volumes ─────────────────────────────────────────────
+    // NOTE: target dir is NOT mounted here — it's handled at exec time via `cd`.
+    // This keeps the compose stable so multiple sessions can share one container.
     let mut volumes = vec![
         // Core workspace — always mounted
         format!("{self_path}:/workspace/self"),
         format!("{obsidian}:/workspace/obsidian"),
-        format!("{target}:/workspace/target:rw"),
+        // Mount projects + home for access to any target dir
+        format!("{projects}:/workspace/projects:rw"),
+        format!("{home}:/workspace/home:rw"),
         // Claude/IDE config
         format!("{home}/.claude:/home/claude/.claude"),
         format!("{self_path}/claude.bypass.json:/home/claude/.claude/settings.json:ro"),
@@ -59,8 +63,6 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
         format!("{self_path}/hooks:/home/claude/.claude/hooks:ro"),
         format!("{self_path}/scripts:/home/claude/.claude/scripts"),
         format!("{home}/.claude.json:/home/claude/.claude.json"),
-        // Projects
-        format!("{projects}:/home/claude/projects"),
         // Communication channel
         format!("{home}/.leech:/home/claude/.leech:rw"),
         // Host observability (ro)
@@ -115,7 +117,7 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
             network_mode: Some("host".into()),
             stdin_open: Some(true),
             tty: Some(true),
-            working_dir: Some("/workspace/target".into()),
+            working_dir: Some("/workspace/home".into()),
             entrypoint: Some(vec!["/entrypoint.sh".into()]),
             command: Some(vec![
                 "/bin/bash".into(),

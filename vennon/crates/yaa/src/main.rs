@@ -1,9 +1,11 @@
 mod config;
 mod exec;
 mod holodeck;
+mod man;
 mod phone;
 mod session;
 mod tmux;
+mod token;
 mod usage;
 
 use anyhow::Result;
@@ -73,6 +75,16 @@ enum Commands {
         #[arg(default_value = "")]
         engine: String,
     },
+
+    /// Print OAuth token for an engine
+    Token {
+        /// Engine: claude (default)
+        #[arg(default_value = "")]
+        engine: String,
+    },
+
+    /// Full documentation
+    Man,
 
     /// Chrome holodeck (CDP for agent control)
     Holodeck {
@@ -152,6 +164,14 @@ fn main() -> Result<()> {
             let e = if engine.is_empty() { None } else { Some(engine.as_str()) };
             usage::show(e, &config)
         }
+
+        Some(Commands::Token { engine }) => {
+            let config = config::YaaConfig::load()?;
+            let e = if engine.is_empty() { None } else { Some(engine.as_str()) };
+            token::show(e, &config)
+        }
+
+        Some(Commands::Man) => man::show(),
 
         Some(Commands::Holodeck { action }) => holodeck::dispatch(&action),
 
