@@ -1,8 +1,10 @@
 mod config;
 mod exec;
 mod holodeck;
+mod phone;
 mod session;
 mod tmux;
+mod usage;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
@@ -39,7 +41,7 @@ enum Commands {
     /// Create ~/.yaa.yaml with defaults
     Init,
 
-    /// Rebuild and install yaa + vennon (runs just install)
+    /// Rebuild and install yaa + vennon + bridge (runs just install)
     Update,
 
     /// Open interactive shell (zsh) inside the container
@@ -54,7 +56,25 @@ enum Commands {
     /// Continue last session
     Continue,
 
-    /// Chrome holodeck (CDP fullscreen for agent control)
+    /// Call an agent (interactive session with timer)
+    Phone {
+        /// Agent name
+        agent: String,
+        /// Optional message to send
+        message: Option<String>,
+    },
+
+    /// Run tick cycle (calls ticker agent)
+    Tick,
+
+    /// Show API usage for an engine
+    Usage {
+        /// Engine: claude (default), cursor
+        #[arg(default_value = "")]
+        engine: String,
+    },
+
+    /// Chrome holodeck (CDP for agent control)
     Holodeck {
         /// Action: start (default), stop, status
         #[arg(default_value = "start")]
@@ -70,8 +90,6 @@ enum Commands {
         #[arg(trailing_var_arg = true)]
         args: Vec<String>,
     },
-
-    // Future: Agents, Tasks, Stow, Os, Cleanup, etc.
 }
 
 fn main() -> Result<()> {
@@ -98,53 +116,52 @@ fn main() -> Result<()> {
         Some(Commands::Shell) => {
             let config = config::YaaConfig::load()?;
             session::launch(&config, session::SessionOpts {
-                dir: cli.dir,
-                engine: cli.engine,
-                model: cli.model,
-                host: cli.host,
-                danger: cli.danger,
-                mode: session::SessionMode::Shell,
+                dir: cli.dir, engine: cli.engine, model: cli.model,
+                host: cli.host, danger: cli.danger, mode: session::SessionMode::Shell,
             })
         }
 
         Some(Commands::Resume { session_id }) => {
             let config = config::YaaConfig::load()?;
             session::launch(&config, session::SessionOpts {
-                dir: cli.dir,
-                engine: cli.engine,
-                model: cli.model,
-                host: cli.host,
-                danger: cli.danger,
-                mode: session::SessionMode::Resume(session_id),
+                dir: cli.dir, engine: cli.engine, model: cli.model,
+                host: cli.host, danger: cli.danger, mode: session::SessionMode::Resume(session_id),
             })
+        }
+
+        Some(Commands::Continue) => {
+            let config = config::YaaConfig::load()?;
+            session::launch(&config, session::SessionOpts {
+                dir: cli.dir, engine: cli.engine, model: cli.model,
+                host: cli.host, danger: cli.danger, mode: session::SessionMode::Continue,
+            })
+        }
+
+        Some(Commands::Phone { agent, message }) => {
+            let config = config::YaaConfig::load()?;
+            phone::call(&agent, message.as_deref(), &config)
+        }
+
+        Some(Commands::Tick) => {
+            let config = config::YaaConfig::load()?;
+            phone::call("ticker", Some("hora de rodar o ciclo"), &config)
+        }
+
+        Some(Commands::Usage { engine }) => {
+            let config = config::YaaConfig::load()?;
+            let e = if engine.is_empty() { None } else { Some(engine.as_str()) };
+            usage::show(e, &config)
         }
 
         Some(Commands::Holodeck { action }) => holodeck::dispatch(&action),
 
         Some(Commands::Tmux { action, args }) => tmux::dispatch(&action, &args),
 
-        Some(Commands::Continue) => {
-            let config = config::YaaConfig::load()?;
-            session::launch(&config, session::SessionOpts {
-                dir: cli.dir,
-                engine: cli.engine,
-                model: cli.model,
-                host: cli.host,
-                danger: cli.danger,
-                mode: session::SessionMode::Continue,
-            })
-        }
-
         None => {
-            // Default: new session
             let config = config::YaaConfig::load()?;
             session::launch(&config, session::SessionOpts {
-                dir: cli.dir,
-                engine: cli.engine,
-                model: cli.model,
-                host: cli.host,
-                danger: cli.danger,
-                mode: session::SessionMode::New,
+                dir: cli.dir, engine: cli.engine, model: cli.model,
+                host: cli.host, danger: cli.danger, mode: session::SessionMode::New,
             })
         }
     }
