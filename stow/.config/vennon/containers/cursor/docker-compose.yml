@@ -19,14 +19,14 @@ services:
     - /home/pedrinho/.ovault/Work:/workspace/obsidian
     - /home/pedrinho/projects:/workspace/projects:rw
     - /home/pedrinho:/workspace/home:rw
-    - /home/pedrinho/.claude:/home/claude/.claude
-    - /home/pedrinho/nixos/leech/self/claude.bypass.json:/home/claude/.claude/settings.json:ro
+    - /home/pedrinho/nixos/leech/self/claude.bypass.json:/home/claude/.claude/settings.json:rw
     - /home/pedrinho/nixos/leech/self/skills:/home/claude/.claude/skills
     - /home/pedrinho/nixos/leech/self/commands:/home/claude/.claude/commands
-    - /home/pedrinho/nixos/leech/self/agents:/home/claude/.claude/agents
-    - /home/pedrinho/nixos/leech/self/hooks:/home/claude/.claude/hooks:ro
+    - /home/pedrinho/nixos/leech/self/ego:/home/claude/.claude/agents
+    - /home/pedrinho/nixos/vennon/containers/cursor/hooks:/home/claude/.claude/hooks:ro
     - /home/pedrinho/nixos/leech/self/scripts:/home/claude/.claude/scripts
     - /home/pedrinho/.claude.json:/home/claude/.claude.json
+    - /home/pedrinho/.claude/projects:/home/claude/.claude/projects
     - /home/pedrinho/.leech:/home/claude/.leech:rw
     - /proc/meminfo:/host/proc/meminfo:ro
     - /proc/loadavg:/host/proc/loadavg:ro
@@ -35,17 +35,27 @@ services:
     - /proc/version:/host/proc/version:ro
     - /var/log/journal:/workspace/logs/host/journal:ro
     - /var/log:/workspace/logs/host/var-log:ro
+    - /home/pedrinho/nixos:/workspace/host:rw
+    - /home/pedrinho/.config/cursor:/home/claude/.config/cursor
+    - /home/pedrinho/.cursor/cli-config.json:/home/claude/.cursor/cli-config.json:ro
+    - /home/pedrinho/.cursor/managed:/home/claude/.cursor/managed:ro
+    - /home/pedrinho/nixos/leech/self/skills:/home/claude/.cursor/skills
+    - /home/pedrinho/nixos/leech/self/commands:/home/claude/.cursor/commands
+    - /home/pedrinho/nixos/leech/self/ego:/home/claude/.cursor/agents
+    - /home/pedrinho/nixos/leech/self/commands:/home/claude/.cursor/rules
+    - /home/pedrinho/nixos/vennon/containers/cursor/hooks:/home/claude/.cursor/leech-hooks:ro
     environment:
       CLAUDE_ENV: container
       DOCKER_HOST: tcp://localhost:2375
       GIT_AUTHOR_EMAIL: pedro.correa@estrategia.com
-      GIT_AUTHOR_NAME: Pedro Correa
+      GIT_AUTHOR_NAME: Pedrinho
       GIT_COMMITTER_EMAIL: pedro.correa@estrategia.com
-      GIT_COMMITTER_NAME: Pedro Correa
+      GIT_COMMITTER_NAME: Pedrinho
       PATH: /home/claude/.local/bin:/home/claude/.nix-profile/bin:/root/.nix-profile/bin:/usr/bin:/bin
       VENNON_GID: '100'
       VENNON_UID: '1000'
       XDG_CACHE_HOME: /workspace/.ephemeral/cache
+      YAA_TARGET_DIR: /home/pedrinho/projects
     tmpfs:
     - /tmp:size=512m,mode=1777
     cap_drop:

@@ -13,13 +13,17 @@ if [ "$VENNON_UID" != "1000" ]; then
     sed -i "s/^claude:x:1000:/claude:x:${VENNON_GID}:/" /etc/group 2>/dev/null || true
 fi
 
-# Dirs efêmeros
+# Dirs efêmeros + claude config
 mkdir -p \
   /workspace/.ephemeral/locks /workspace/.ephemeral/notes /workspace/.ephemeral/scratch \
   /workspace/.ephemeral/cache \
   /tmp/vennon-locks \
   /home/claude \
   /home/claude/.cache \
+  /home/claude/.claude \
+  /home/claude/.claude/projects \
+  /home/claude/.config/cursor \
+  /home/claude/.cursor \
   2>/dev/null
 
 # Permissões — NÃO recursivo em /home/claude (bind mounts do host)
@@ -27,6 +31,15 @@ chown -R "${VENNON_UID}:${VENNON_GID}" /workspace/.ephemeral /tmp/vennon-locks 2
 chown "${VENNON_UID}:${VENNON_GID}" /home/claude 2>/dev/null || true
 chown -R "${VENNON_UID}:${VENNON_GID}" /home/claude/.cache 2>/dev/null || true
 chmod -R u+rwX /home/claude/.cache 2>/dev/null || true
+
+# Symlink /workspace/target → workdir (convenience)
+TARGET="${YAA_TARGET_DIR:-}"
+if [ -n "$TARGET" ]; then
+  CONTAINER_HOME="/workspace/home"
+  HOST_HOME="${HOME}"
+  MAPPED="${TARGET/#$HOST_HOME/$CONTAINER_HOME}"
+  ln -sfn "$MAPPED" /workspace/target 2>/dev/null || true
+fi
 
 # Ambiente
 export HOME=/home/claude

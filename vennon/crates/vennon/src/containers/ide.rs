@@ -37,6 +37,11 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
         env.insert(k.clone(), v.clone());
     }
 
+    // Pass target dir so entrypoint can create /workspace/target symlink
+    if let Ok(target) = std::env::var("YAA_TARGET_DIR") {
+        env.insert("YAA_TARGET_DIR".into(), target);
+    }
+
     // ── Volumes ─────────────────────────────────────────────
     // NOTE: target dir is NOT mounted here — it's handled at exec time via `cd`.
     // This keeps the compose stable so multiple sessions can share one container.
@@ -47,15 +52,17 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
         // Mount projects + home for access to any target dir
         format!("{projects}:/workspace/projects:rw"),
         format!("{home}:/workspace/home:rw"),
-        // Claude/IDE config
-        format!("{home}/.claude:/home/claude/.claude"),
-        format!("{self_path}/claude.bypass.json:/home/claude/.claude/settings.json"),
+        // Claude/IDE config — mount individual dirs, NOT ~/.claude as a whole
+        // (mounting ~/.claude then overriding files inside causes Podman "Not a directory" errors)
+        format!("{self_path}/claude.bypass.json:/home/claude/.claude/settings.json:rw"),
         format!("{self_path}/skills:/home/claude/.claude/skills"),
         format!("{self_path}/commands:/home/claude/.claude/commands"),
         format!("{self_path}/ego:/home/claude/.claude/agents"),
         format!("{container_hooks}:/home/claude/.claude/hooks:ro"),
         format!("{self_path}/scripts:/home/claude/.claude/scripts"),
         format!("{home}/.claude.json:/home/claude/.claude.json"),
+        // Claude native state (projects, memory, etc) — persists between sessions
+        format!("{home}/.claude/projects:/home/claude/.claude/projects"),
         // Communication channel
         format!("{home}/.leech:/home/claude/.leech:rw"),
         // Host observability (ro)
@@ -71,6 +78,27 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
 
     // Host dir always mounted (stable compose — no recreation between sessions)
     volumes.push(format!("{host_dir}:/workspace/host:rw"));
+
+    // Engine-specific mounts
+    match engine {
+        "cursor" => {
+            // Cursor auth — share host credentials so cursor-agent can authenticate
+            volumes.push(format!("{home}/.config/cursor:/home/claude/.config/cursor"));
+            volumes.push(format!("{home}/.cursor/cli-config.json:/home/claude/.cursor/cli-config.json:ro"));
+            volumes.push(format!("{home}/.cursor/managed:/home/claude/.cursor/managed:ro"));
+            // Cursor uses ~/.cursor/ for skills/commands/agents (not ~/.claude/)
+            volumes.push(format!("{self_path}/skills:/home/claude/.cursor/skills"));
+            volumes.push(format!("{self_path}/commands:/home/claude/.cursor/commands"));
+            volumes.push(format!("{self_path}/ego:/home/claude/.cursor/agents"));
+            volumes.push(format!("{self_path}/commands:/home/claude/.cursor/rules"));
+            volumes.push(format!("{container_hooks}:/home/claude/.cursor/leech-hooks:ro"));
+        }
+        "opencode" => {
+            // OpenCode config
+            volumes.push(format!("{home}/.config/opencode:/home/claude/.config/opencode"));
+        }
+        _ => {} // claude — no extra mounts needed
+    }
 
     // ── Services ────────────────────────────────────────────
     let mut services = BTreeMap::new();
