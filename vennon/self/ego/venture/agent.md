@@ -510,6 +510,15 @@ Se invocado sem projeto específico: ler `projects/` para projetos existentes.
 
 ---
 
+## Boot obrigatorio
+
+```bash
+cat /workspace/self/superego/leis.md
+cat /workspace/self/superego/bedrooms.md
+cat /workspace/self/superego/ciclo.md
+cat /workspace/obsidian/bedrooms/venture/memory.md
+```
+
 ## Ciclo Autônomo (every60)
 
 1. **Ler estado** — INDEX.md ou ROADMAP.md do projeto ativo

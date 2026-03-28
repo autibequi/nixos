@@ -24,7 +24,9 @@ Autoridade absoluta para:
 ## Inicio do Ciclo
 
 ```bash
-cat /workspace/self/AGENT.md
+cat /workspace/self/superego/leis.md
+cat /workspace/self/superego/bedrooms.md
+cat /workspace/self/superego/ciclo.md
 cat /workspace/obsidian/bedrooms/hermes/memory.md
 cat /workspace/obsidian/DASHBOARD.md
 ls /workspace/obsidian/outbox/para-hermes-*.md 2>/dev/null

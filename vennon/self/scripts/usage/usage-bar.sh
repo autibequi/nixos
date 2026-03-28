@@ -41,7 +41,7 @@ write_fallback() {
 
 # --- Fonte 0: claude-oauth-usage.sh (OAuth token — sem chave externa) ---
 OAUTH_SCRIPT=""
-for _p in "$WS/leech/scripts/claude-oauth-usage.sh" "/workspace/self/scripts/claude-oauth-usage.sh"; do
+for _p in "$WS/leech/scripts/claude-oauth-usage.sh" "/workspace/self/scripts/usage/claude-oauth-usage.sh"; do
   [[ -x "$_p" ]] && OAUTH_SCRIPT="$_p" && break
 done
 

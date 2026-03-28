@@ -25,12 +25,10 @@ pub fn show(engine: Option<&str>, flag: Option<&str>, config: &YaaConfig) -> Res
 fn claude_usage(flag: Option<&str>) -> Result<()> {
     let home = config::home();
     let candidates = [
-        config::expand_path("~/nixos/vennon/self/scripts/claude-oauth-usage.sh"),
-        config::expand_path("~/nixos/leech/self/scripts/claude-oauth-usage.sh"),
-        config::expand_path("~/nixos/vennon/self/scripts/claude-ai-usage.sh"),
-        config::expand_path("~/nixos/leech/self/scripts/claude-ai-usage.sh"),
-        home.join(".claude/scripts/claude-oauth-usage.sh"),
-        home.join(".claude/scripts/claude-ai-usage.sh"),
+        config::expand_path("~/nixos/vennon/self/scripts/usage/claude-oauth-usage.sh"),
+        config::expand_path("~/nixos/vennon/self/scripts/usage/claude-ai-usage.sh"),
+        home.join(".claude/scripts/usage/claude-oauth-usage.sh"),
+        home.join(".claude/scripts/usage/claude-ai-usage.sh"),
     ];
 
     if let Some(script) = candidates.iter().find(|p| p.exists()) {

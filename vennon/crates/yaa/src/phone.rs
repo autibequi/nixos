@@ -58,11 +58,11 @@ pub fn call(agent_name: &str, message: Option<&str>, config: &YaaConfig) -> Resu
     let start = Instant::now();
     let start_time = now_hhmm();
 
-    // Find agent file: try agents/<name>/agent.md, then agents/<name>.md
-    let agents_dir = config.vennon_path().join("self/agents");
+    // Find agent file: try ego/<name>/agent.md, then ego/<name>.md
+    let agents_dir = config.vennon_path().join("self/ego");
     let candidates = [
-        agents_dir.join(agent_name).join("agent.md"),  // agents/hermes/agent.md
-        agents_dir.join(format!("{agent_name}.md")),    // agents/hermes.md
+        agents_dir.join(agent_name).join("agent.md"),  // ego/hermes/agent.md
+        agents_dir.join(format!("{agent_name}.md")),    // ego/hermes.md
     ];
     let agent_file = candidates.iter().find(|p| p.exists());
 

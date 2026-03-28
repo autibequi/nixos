@@ -16,6 +16,8 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
     let host_dir = config.host_path().to_string_lossy().to_string();
     let projects = config.projects_path().to_string_lossy().to_string();
 
+    let vennon_path = config.vennon_path().to_string_lossy().to_string();
+    let container_hooks = format!("{vennon_path}/containers/{engine}/hooks");
     let image = format!("vennon-{engine}:latest");
     let container_name = format!("vennon-{engine}");
 
@@ -50,8 +52,8 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
         format!("{self_path}/claude.bypass.json:/home/claude/.claude/settings.json"),
         format!("{self_path}/skills:/home/claude/.claude/skills"),
         format!("{self_path}/commands:/home/claude/.claude/commands"),
-        format!("{self_path}/agents:/home/claude/.claude/agents"),
-        format!("{self_path}/hooks:/home/claude/.claude/hooks:ro"),
+        format!("{self_path}/ego:/home/claude/.claude/agents"),
+        format!("{container_hooks}:/home/claude/.claude/hooks:ro"),
         format!("{self_path}/scripts:/home/claude/.claude/scripts"),
         format!("{home}/.claude.json:/home/claude/.claude.json"),
         // Communication channel
