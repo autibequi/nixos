@@ -56,7 +56,7 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
         format!("{self_path}/skills:/home/claude/.claude/skills"),
         format!("{self_path}/commands:/home/claude/.claude/commands"),
         format!("{self_path}/agents:/home/claude/.claude/agents"),
-        format!("{self_path}/hooks/claude-code:/home/claude/.claude/hooks:ro"),
+        format!("{self_path}/hooks:/home/claude/.claude/hooks:ro"),
         format!("{self_path}/scripts:/home/claude/.claude/scripts"),
         format!("{home}/.claude.json:/home/claude/.claude.json"),
         // Projects

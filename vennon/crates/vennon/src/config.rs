@@ -65,6 +65,24 @@ pub fn containers_dir() -> PathBuf {
     config_dir().join("containers")
 }
 
+/// Find the vennon source directory (repo with containers/ and justfile).
+/// Tries: config, then known paths.
+pub fn find_vennon_path() -> Option<PathBuf> {
+    // Try config first
+    if let Ok(cfg) = VennonConfig::load() {
+        let p = cfg.vennon_path();
+        if p.join("containers").exists() {
+            return Some(p);
+        }
+    }
+    // Fallback to known paths
+    let candidates = [
+        expand_path("~/nixos/vennon"),
+        expand_path("~/nixos/host/vennon"),
+    ];
+    candidates.into_iter().find(|p| p.join("containers").exists())
+}
+
 /// Expand ~ and $HOME in a path string.
 pub fn expand_path(p: &str) -> PathBuf {
     let home_str = home().to_string_lossy().to_string();

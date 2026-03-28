@@ -3,14 +3,20 @@ use anyhow::{bail, Result};
 use crate::config::{self, YaaConfig};
 use crate::exec;
 
+pub enum SessionMode {
+    New,
+    Shell,
+    Resume(Option<String>),  // optional session ID
+    Continue,                 // resume last
+}
+
 pub struct SessionOpts {
     pub dir: Option<String>,
     pub engine: Option<String>,
     pub model: Option<String>,
     pub host: bool,
-    pub shell: bool,
-    pub resume: bool,
     pub danger: bool,
+    pub mode: SessionMode,
 }
 
 /// Launch a session: resolve engine/model, call vennon, attach.
@@ -55,8 +61,11 @@ pub fn launch(config: &YaaConfig, opts: SessionOpts) -> Result<()> {
         bail!("directory not found: {}", dir.display());
     }
 
-    // Action
-    let action = if opts.shell { "shell" } else { "start" };
+    // Determine vennon action
+    let action = match &opts.mode {
+        SessionMode::Shell => "shell",
+        _ => "start",
+    };
 
     // Log
     println!("Engine: {engine}");
@@ -67,10 +76,16 @@ pub fn launch(config: &YaaConfig, opts: SessionOpts) -> Result<()> {
     if host {
         println!("Host: {} → /workspace/host", config.host_path().display());
     }
+    match &opts.mode {
+        SessionMode::Resume(Some(id)) => println!("Resume: {id}"),
+        SessionMode::Resume(None) => println!("Resume: (pick)"),
+        SessionMode::Continue => println!("Continue: last session"),
+        SessionMode::Shell => println!("Mode: shell"),
+        SessionMode::New => {}
+    }
     println!();
 
     // Pass config to vennon via env vars
-    // Vennon's IDE compose reads these to configure volumes and exec command
     let dir_str = dir.to_string_lossy().to_string();
     let host_path = config.host_path().to_string_lossy().to_string();
     let obsidian = config.obsidian_path().to_string_lossy().to_string();
@@ -81,11 +96,21 @@ pub fn launch(config: &YaaConfig, opts: SessionOpts) -> Result<()> {
     std::env::set_var("YAA_HOST_ENABLED", if host { "1" } else { "0" });
     std::env::set_var("YAA_OBSIDIAN_DIR", &obsidian);
     std::env::set_var("YAA_SELF_DIR", &vennon_self);
+    std::env::set_var("YAA_DANGER", if danger { "1" } else { "0" });
     if let Some(ref m) = model {
         std::env::set_var("YAA_MODEL", m);
     }
-    std::env::set_var("YAA_DANGER", if danger { "1" } else { "0" });
 
-    // Call vennon <engine> <action>
+    // Resume/continue flags
+    match &opts.mode {
+        SessionMode::Resume(id) => {
+            std::env::set_var("YAA_RESUME", id.as_deref().unwrap_or("1"));
+        }
+        SessionMode::Continue => {
+            std::env::set_var("YAA_RESUME", "1");
+        }
+        _ => {}
+    }
+
     exec::exec_replace("vennon", &[engine, action]);
 }

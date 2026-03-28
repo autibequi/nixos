@@ -35,14 +35,51 @@ RUN nix profile install \
     nixpkgs#espeak-ng \
     nixpkgs#yt-dlp
 
+# Layer 3: shell (zsh + powerlevel10k)
+RUN nix profile install \
+    nixpkgs#zsh \
+    nixpkgs#zsh-powerlevel10k \
+    nixpkgs#zsh-autosuggestions \
+    nixpkgs#zsh-syntax-highlighting \
+    nixpkgs#fzf \
+    nixpkgs#eza \
+    nixpkgs#bat \
+    nixpkgs#ripgrep \
+    nixpkgs#fd
+
 # User claude (UID/GID ajustáveis via entrypoint)
-RUN echo "claude:x:1000:1000::/home/claude:/bin/bash" >> /etc/passwd && \
+RUN echo "claude:x:1000:1000::/home/claude:/bin/zsh" >> /etc/passwd && \
     echo "claude:x:1000:" >> /etc/group && \
     echo "systemd-journal:x:190:claude" >> /etc/group && \
-    mkdir -p /home/claude/.claude /home/claude/.local/bin /home/claude/.config && \
+    mkdir -p /home/claude/.claude /home/claude/.local/bin /home/claude/.config /home/claude/.cache && \
     cp -r /root/.nix-profile /home/claude/.nix-profile && \
     chown -R 1000:1000 /home/claude && \
-    ln -sf /root/.nix-profile/bin/bash /bin/bash
+    ln -sf /root/.nix-profile/bin/bash /bin/bash && \
+    ln -sf /root/.nix-profile/bin/zsh /bin/zsh
+
+# Zsh config with powerlevel10k
+RUN ZSH_PLUGINS="/home/claude/.nix-profile/share" && \
+    echo '# Powerlevel10k instant prompt' > /home/claude/.zshrc && \
+    echo 'if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then' >> /home/claude/.zshrc && \
+    echo '  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"' >> /home/claude/.zshrc && \
+    echo 'fi' >> /home/claude/.zshrc && \
+    echo '' >> /home/claude/.zshrc && \
+    echo 'source '"$ZSH_PLUGINS"'/zsh-powerlevel10k/powerlevel10k.zsh-theme' >> /home/claude/.zshrc && \
+    echo 'source '"$ZSH_PLUGINS"'/zsh-autosuggestions/zsh-autosuggestions.zsh' >> /home/claude/.zshrc && \
+    echo 'source '"$ZSH_PLUGINS"'/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh' >> /home/claude/.zshrc && \
+    echo '' >> /home/claude/.zshrc && \
+    echo 'alias ls="eza --icons"' >> /home/claude/.zshrc && \
+    echo 'alias ll="eza -la --icons"' >> /home/claude/.zshrc && \
+    echo 'alias cat="bat --plain"' >> /home/claude/.zshrc && \
+    echo 'alias grep="rg"' >> /home/claude/.zshrc && \
+    echo 'alias find="fd"' >> /home/claude/.zshrc && \
+    echo '' >> /home/claude/.zshrc && \
+    echo 'export HISTSIZE=10000' >> /home/claude/.zshrc && \
+    echo 'export SAVEHIST=10000' >> /home/claude/.zshrc && \
+    echo 'export HISTFILE=~/.zsh_history' >> /home/claude/.zshrc && \
+    echo 'setopt SHARE_HISTORY' >> /home/claude/.zshrc && \
+    echo '[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh' >> /home/claude/.zshrc && \
+    chown 1000:1000 /home/claude/.zshrc
 
 # Cursor CLI + FHS libs (para futuro vennon-cursor)
 RUN mkdir -p /home/claude/.local/share /lib64 /lib/x86_64-linux-gnu

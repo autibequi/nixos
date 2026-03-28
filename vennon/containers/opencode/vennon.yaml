@@ -1,0 +1,5 @@
+name: opencode
+type: ide
+image: vennon-opencode
+dockerfile: containers/opencode/Dockerfile
+start_cmd: "cd /workspace/target && exec opencode"

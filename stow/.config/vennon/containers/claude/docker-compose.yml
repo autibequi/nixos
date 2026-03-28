@@ -23,7 +23,7 @@ services:
     - /home/pedrinho/nixos/vennon/self/skills:/home/claude/.claude/skills
     - /home/pedrinho/nixos/vennon/self/commands:/home/claude/.claude/commands
     - /home/pedrinho/nixos/vennon/self/agents:/home/claude/.claude/agents
-    - /home/pedrinho/nixos/vennon/self/hooks/claude-code:/home/claude/.claude/hooks:ro
+    - /home/pedrinho/nixos/vennon/self/hooks:/home/claude/.claude/hooks:ro
     - /home/pedrinho/nixos/vennon/self/scripts:/home/claude/.claude/scripts
     - /home/pedrinho/.claude.json:/home/claude/.claude.json
     - /home/pedrinho/projects:/home/claude/projects

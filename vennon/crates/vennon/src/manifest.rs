@@ -10,8 +10,16 @@ use crate::config;
 #[derive(Debug, Deserialize)]
 pub struct Manifest {
     pub name: String,
+    #[serde(rename = "type", default)]
+    pub container_type: Option<String>,
     #[serde(default)]
     pub aliases: Vec<String>,
+    #[serde(default)]
+    pub image: Option<String>,
+    #[serde(default)]
+    pub dockerfile: Option<String>,
+    #[serde(default)]
+    pub start_cmd: Option<String>,
     #[serde(default)]
     pub project: Option<String>,
     #[serde(default)]
@@ -90,25 +98,45 @@ impl Manifest {
 
 // ── Discovery ───────────────────────────────────────────────────
 
-/// Scan ~/.config/vennon/containers/ for all vennon.yaml manifests.
-pub fn discover_all() -> Result<Vec<(PathBuf, Manifest)>> {
-    let containers_dir = config::containers_dir();
-    let mut results = vec![];
-
-    if !containers_dir.exists() {
-        return Ok(results);
+/// Scan a directory for vennon.yaml manifests.
+fn scan_dir(dir: &Path, results: &mut Vec<(PathBuf, Manifest)>, seen: &mut Vec<String>) {
+    if !dir.exists() {
+        return;
     }
-
-    for entry in std::fs::read_dir(&containers_dir)? {
-        let entry = entry?;
-        let manifest_path = entry.path().join("vennon.yaml");
-        if manifest_path.exists() {
-            match Manifest::load(&manifest_path) {
-                Ok(m) => results.push((entry.path(), m)),
-                Err(e) => eprintln!("warning: failed to load {}: {e}", manifest_path.display()),
+    if let Ok(entries) = std::fs::read_dir(dir) {
+        for entry in entries.flatten() {
+            let manifest_path = entry.path().join("vennon.yaml");
+            if manifest_path.exists() {
+                match Manifest::load(&manifest_path) {
+                    Ok(m) => {
+                        if !seen.contains(&m.name) {
+                            seen.push(m.name.clone());
+                            results.push((entry.path(), m));
+                        }
+                    }
+                    Err(e) => eprintln!("warning: failed to load {}: {e}", manifest_path.display()),
+                }
             }
         }
     }
+}
+
+/// Discover all manifests from both:
+/// 1. vennon repo: {vennon_path}/containers/ (IDEs)
+/// 2. stow/config: ~/.config/vennon/containers/ (services)
+pub fn discover_all() -> Result<Vec<(PathBuf, Manifest)>> {
+    let mut results = vec![];
+    let mut seen = vec![];
+
+    // 1. Repo containers (IDEs + anything in the repo)
+    let vennon_path = config::find_vennon_path();
+    if let Some(vp) = vennon_path {
+        scan_dir(&vp.join("containers"), &mut results, &mut seen);
+    }
+
+    // 2. Stow/config containers (services)
+    scan_dir(&config::containers_dir(), &mut results, &mut seen);
+
     Ok(results)
 }
 
@@ -120,7 +148,7 @@ pub fn find(name: &str) -> Result<(PathBuf, Manifest)> {
             return Ok((dir, manifest));
         }
     }
-    bail!("unknown service: {name}\nRun `vennon init` or check ~/.config/vennon/containers/")
+    bail!("unknown service: {name}\nAvailable: check containers/ or ~/.config/vennon/containers/")
 }
 
 // ── Arg parsing ─────────────────────────────────────────────────

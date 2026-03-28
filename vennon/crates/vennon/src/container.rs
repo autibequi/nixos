@@ -90,7 +90,7 @@ fn shell(name: &str, compose_path: &std::path::Path, config: &VennonConfig) -> R
             &cid,
             "/bin/bash",
             "-c",
-            "cd /workspace/target && exec bash",
+            containers::shell_cmd(),
         ],
     );
 }

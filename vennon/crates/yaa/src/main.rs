@@ -2,7 +2,7 @@ mod config;
 mod exec;
 mod session;
 
-use anyhow::{bail, Result};
+use anyhow::Result;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
@@ -12,31 +12,23 @@ struct Cli {
     command: Option<Commands>,
 
     /// Engine: claude, opencode, cursor
-    #[arg(long, short = 'e')]
+    #[arg(long, short = 'e', global = true)]
     engine: Option<String>,
 
     /// Model override (e.g. haiku, opus, sonnet)
-    #[arg(long, short = 'm')]
+    #[arg(long, short = 'm', global = true)]
     model: Option<String>,
 
     /// Mount ~/nixos at /workspace/host (rw)
-    #[arg(long)]
+    #[arg(long, global = true)]
     host: bool,
 
-    /// Open bash shell instead of IDE
-    #[arg(long)]
-    shell: bool,
-
-    /// Resume last session
-    #[arg(long)]
-    resume: bool,
-
-    /// Bypass permissions (claude: --dangerously-skip-permissions + --enable-auto-mode)
-    #[arg(long)]
+    /// Bypass permissions (claude: --dangerously-skip-permissions)
+    #[arg(long, global = true)]
     danger: bool,
 
     /// Directory to mount at /workspace/target
-    #[arg()]
+    #[arg(global = true)]
     dir: Option<String>,
 }
 
@@ -47,6 +39,18 @@ enum Commands {
 
     /// Rebuild and install yaa + vennon (runs just install)
     Update,
+
+    /// Open interactive shell (zsh) inside the container
+    Shell,
+
+    /// Resume a specific session by ID
+    Resume {
+        /// Session ID to resume
+        session_id: Option<String>,
+    },
+
+    /// Continue last session
+    Continue,
 
     // Future: Agents, Tasks, Stow, Os, Cleanup, etc.
 }
@@ -72,17 +76,52 @@ fn main() -> Result<()> {
             )
         }
 
-        None => {
-            // Default: launch session
+        Some(Commands::Shell) => {
             let config = config::YaaConfig::load()?;
             session::launch(&config, session::SessionOpts {
                 dir: cli.dir,
                 engine: cli.engine,
                 model: cli.model,
                 host: cli.host,
-                shell: cli.shell,
-                resume: cli.resume,
                 danger: cli.danger,
+                mode: session::SessionMode::Shell,
+            })
+        }
+
+        Some(Commands::Resume { session_id }) => {
+            let config = config::YaaConfig::load()?;
+            session::launch(&config, session::SessionOpts {
+                dir: cli.dir,
+                engine: cli.engine,
+                model: cli.model,
+                host: cli.host,
+                danger: cli.danger,
+                mode: session::SessionMode::Resume(session_id),
+            })
+        }
+
+        Some(Commands::Continue) => {
+            let config = config::YaaConfig::load()?;
+            session::launch(&config, session::SessionOpts {
+                dir: cli.dir,
+                engine: cli.engine,
+                model: cli.model,
+                host: cli.host,
+                danger: cli.danger,
+                mode: session::SessionMode::Continue,
+            })
+        }
+
+        None => {
+            // Default: new session
+            let config = config::YaaConfig::load()?;
+            session::launch(&config, session::SessionOpts {
+                dir: cli.dir,
+                engine: cli.engine,
+                model: cli.model,
+                host: cli.host,
+                danger: cli.danger,
+                mode: session::SessionMode::New,
             })
         }
     }

@@ -1,0 +1,5 @@
+name: cursor
+type: ide
+image: vennon-cursor
+dockerfile: containers/cursor/Dockerfile
+start_cmd: "cd /workspace/target && exec cursor-agent --force"

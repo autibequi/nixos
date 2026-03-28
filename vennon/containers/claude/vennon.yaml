@@ -1,0 +1,5 @@
+name: claude
+type: ide
+image: vennon-claude
+dockerfile: containers/claude/Dockerfile
+start_cmd: "cd /workspace/target && exec claude --enable-auto-mode"
