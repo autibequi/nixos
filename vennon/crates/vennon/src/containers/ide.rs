@@ -47,7 +47,7 @@ pub fn compose(engine: &str, config: &VennonConfig) -> ComposeFile {
         format!("{home}:/workspace/home:rw"),
         // Claude/IDE config
         format!("{home}/.claude:/home/claude/.claude"),
-        format!("{self_path}/claude.bypass.json:/home/claude/.claude/settings.json:ro"),
+        format!("{self_path}/claude.bypass.json:/home/claude/.claude/settings.json"),
         format!("{self_path}/skills:/home/claude/.claude/skills"),
         format!("{self_path}/commands:/home/claude/.claude/commands"),
         format!("{self_path}/agents:/home/claude/.claude/agents"),
