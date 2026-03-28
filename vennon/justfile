@@ -33,12 +33,12 @@ install: build
     mkdir -p {{install_dir}}
     install -m 755 target/release/vennon {{install_dir}}/vennon
     install -m 755 target/release/yaa {{install_dir}}/yaa
-    install -m 755 target/release/bridge {{install_dir}}/bridge
-    @echo "installed vennon + yaa + bridge → {{install_dir}}"
+    install -m 755 target/release/deck {{install_dir}}/deck
+    @echo "installed vennon + yaa + deck → {{install_dir}}"
 
 # Uninstall
 uninstall:
-    rm -f {{install_dir}}/vennon {{install_dir}}/yaa {{install_dir}}/bridge
+    rm -f {{install_dir}}/vennon {{install_dir}}/yaa {{install_dir}}/deck
 
 # Clean
 clean:
