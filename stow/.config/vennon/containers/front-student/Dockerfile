@@ -1,9 +1,15 @@
 # syntax=docker/dockerfile:1
+FROM oven/bun:alpine AS bun-bin
+
 FROM node:20-alpine
 
 # bash — vennon exec/shell usa `podman exec … /bin/bash -c` (ver service.rs)
 RUN apk add --no-cache bash git ca-certificates python3 make g++ \
     autoconf automake libtool nasm pkgconfig
+
+# Gambiarra experimental: bun como runtime no lugar do node
+COPY --from=bun-bin /usr/local/bin/bun /usr/local/bin/bun
+RUN ln -sf /usr/local/bin/bun /usr/local/bin/node
 
 WORKDIR /app
 
