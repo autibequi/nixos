@@ -76,31 +76,77 @@ fn render_header(frame: &mut Frame, app: &App, area: Rect) {
     ];
     let left_line = Line::from(left_spans);
 
-    // Right: systemd dots
-    let systemd = app.systemd_containers();
-    let mut dot_spans: Vec<Span> = vec![];
-    for (i, c) in systemd.iter().enumerate() {
-        if i > 0 {
-            dot_spans.push(Span::styled("  ", Style::default()));
-        }
-        let color = if c.is_up { GREEN } else { RED };
-        dot_spans.push(Span::styled("● ", Style::default().fg(color)));
-        dot_spans.push(Span::styled(c.display_name.as_str(), Style::default().fg(DIM)));
-    }
-    dot_spans.push(Span::styled(" ", Style::default()));
-    let right_line = Line::from(dot_spans).right_aligned();
+    // Right: largura fixa (relógio + dots). Esquerda = todo o resto — senão `Min+Min` esmaga as abas.
+    let right_line = header_right_line(app);
+    let right_w = header_right_column_width(app);
 
-    // Split area: left takes remaining, right is fixed width for dots
-    let right_width = systemd.iter().map(|c| c.display_name.len() as u16 + 4).sum::<u16>().max(1);
     let chunks = Layout::horizontal([
         Constraint::Min(10),
-        Constraint::Length(right_width),
+        Constraint::Length(right_w),
     ])
     .flex(Flex::Legacy)
     .split(area);
 
     frame.render_widget(Paragraph::new(left_line), chunks[0]);
-    frame.render_widget(Paragraph::new(right_line), chunks[1]);
+    frame.render_widget(Paragraph::new(right_line).alignment(Alignment::Right), chunks[1]);
+}
+
+/// Largura em colunas do bloco direito do header (deve bater com `header_right_line`).
+fn header_right_column_width(app: &App) -> u16 {
+    let mut w: u16 = 0;
+    if app.subprocess_degraded {
+        w += 6; // "stale "
+    }
+    w += 1; // spinner ou espaço
+    w += 1; // espaço antes do horário
+    w += 8; // HH:MM:SS ou --:--:--
+    w += 2; // "  " antes das bolinhas
+    let systemd = app.systemd_containers();
+    for (i, c) in systemd.iter().enumerate() {
+        if i > 0 {
+            w += 2;
+        }
+        w += 2; // "● "
+        w += c.display_name.len() as u16;
+    }
+    w += 1; // espaço final
+    w.max(12)
+}
+
+/// `stale?` + spinner + horário · `● buzz` `● tick` (ordem visual: hora antes das bolinhas).
+fn header_right_line(app: &App) -> Line<'_> {
+    let mut spans: Vec<Span<'_>> = Vec::new();
+    if app.subprocess_degraded {
+        spans.push(Span::styled(
+            "stale ",
+            Style::default().fg(PEACH).bold(),
+        ));
+    }
+    if app.refresh_inflight {
+        let spin = REFRESH_SPINNER[(app.spin_tick as usize) % REFRESH_SPINNER.len()];
+        spans.push(Span::styled(spin, Style::default().fg(PEACH).bold()));
+    } else {
+        spans.push(Span::styled(" ", Style::default().fg(DIM)));
+    }
+    spans.push(Span::raw(" "));
+    let time_str: String = app
+        .last_refresh
+        .map(|t| t.with_timezone(&Local).format("%H:%M:%S").to_string())
+        .unwrap_or_else(|| "--:--:--".into());
+    spans.push(Span::styled(time_str, Style::default().fg(DIM)));
+    spans.push(Span::raw("  "));
+
+    let systemd = app.systemd_containers();
+    for (i, c) in systemd.iter().enumerate() {
+        if i > 0 {
+            spans.push(Span::styled("  ", Style::default()));
+        }
+        let color = if c.is_up { GREEN } else { RED };
+        spans.push(Span::styled("● ", Style::default().fg(color)));
+        spans.push(Span::styled(c.display_name.as_str(), Style::default().fg(DIM)));
+    }
+    spans.push(Span::styled(" ", Style::default()));
+    Line::from(spans)
 }
 
 /// Strip total from "31.62MB / 49.77GB" → "31.62MB".
@@ -193,30 +239,6 @@ fn visible_resource_summary(app: &App) -> String {
     format!("Σ {}", parts.join(" · "))
 }
 
-/// Borda inferior do box Services/Agents: opcional `stale`, spinner (1 col fixa) à esquerda do horário local.
-fn container_table_bottom_title(app: &App) -> Line<'static> {
-    let mut spans: Vec<Span<'static>> = Vec::new();
-    if app.subprocess_degraded {
-        spans.push(Span::styled(
-            "stale ",
-            Style::default().fg(PEACH).bold(),
-        ));
-    }
-    if app.refresh_inflight {
-        let spin = REFRESH_SPINNER[(app.spin_tick as usize) % REFRESH_SPINNER.len()];
-        spans.push(Span::styled(spin, Style::default().fg(PEACH).bold()));
-    } else {
-        spans.push(Span::styled(" ", Style::default().fg(DIM)));
-    }
-    spans.push(Span::raw(" "));
-    let time_str: String = app
-        .last_refresh
-        .map(|t| t.with_timezone(&Local).format("%H:%M:%S").to_string())
-        .unwrap_or_else(|| "--:--:--".into());
-    spans.push(Span::styled(time_str, Style::default().fg(DIM)));
-    Line::from(spans).alignment(Alignment::Right)
-}
-
 fn render_containers(frame: &mut Frame, app: &App, vis: &[&super::app::ContainerInfo], area: Rect) {
     let rows: Vec<Row> = vis
         .iter()
@@ -299,8 +321,7 @@ fn render_containers(frame: &mut Frame, app: &App, vis: &[&super::app::Container
                 .title(Span::styled(
                     format!(" {tab_label} "),
                     Style::default().fg(MAUVE).bold(),
-                ))
-                .title_bottom(container_table_bottom_title(app)),
+                )),
         );
 
     frame.render_widget(table, area);

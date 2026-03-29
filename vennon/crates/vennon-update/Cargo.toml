@@ -1,0 +1,13 @@
+[package]
+name = "vennon-update"
+version = "0.1.0"
+edition = "2021"
+description = "Pipeline único de update (build + install + buzz) com UI — só lib, sem binário"
+publish = false
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+anyhow = { workspace = true }
+crossterm = "0.28"

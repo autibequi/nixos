@@ -27,6 +27,22 @@ Sempre que você criar um **template** ou página HTML para o relay:
 
 O mesmo vale para `data:text/html;base64,...` no `nav`: o documento decodificado deve ser **autocontido** da mesma forma.
 
+## Pacote Mermaid (`mermaid/`)
+
+| Ficheiro | Função |
+|----------|--------|
+| `mermaid/base.html` | **Fonte canónica** — diagrama fullscreen, zoom (scroll), pan, pinch, indicador %, botões Copiar/SVG/Reset/ecrã inteiro, atalhos `R` `+` `-` `0` `F`, duplo clique = reset, `prefers-reduced-motion`, `aria-label` nos botões. Placeholders: `MERMAID_TITLE_HERE`, `MERMAID_SUBTITLE_HERE`, `MERMAID_DIAGRAM_HERE`. |
+| `mermaid/template/flow.md` | Exemplo de flowchart + instruções para `show` ou para colar no `base.html`. |
+| `templates/mermaid.html` | Cópia espelhada de `base.html` (atualizar com `cp` após mudanças no base). |
+
+Atalhos (com foco na página, fora de inputs): **R** reset, **+** / **=** zoom in, **-** zoom out, **0** fit, **F** ecrã inteiro. **Duplo clique** na área do diagrama = reset.
+
+**HTML:** não usar comentários `<!-- ... -->` longos com `<`, `</`, `&lt;porta&gt;` ou `--` no meio — o parser pode fechar o comentário cedo e o restante aparece como texto antes do header (layout partido). Documentação fica na SKILL, não em comentários no `.html`.
+
+Relay: `cp mermaid/base.html /tmp/chrome-relay/foo.html` → abrir `http://vennon:<porta>/foo.html` (porta em `chrome-relay.py status`).
+
+No workdir do repositório (`/workspace/target`), `webview/mermaid/base.html` e `webview/mermaid/template/flow.md` são **ligações simbólicas** para os mesmos ficheiros em `self/skills/webview/mermaid/`.
+
 ## Sub-files
 
 | Arquivo | Conteudo | Quando usar |
@@ -35,6 +51,8 @@ O mesmo vale para `data:text/html;base64,...` no `nav`: o documento decodificado
 | `ascii.md` | 19 templates de representacao terminal | Default. Sem dependencia. |
 | `chrome.md` | Voz + templates artisticos (eye, glados) + canvas colaborativo | Arte no browser. Precisa relay. |
 | `webview.md` | Detalhes do webview mode | Referencia |
+| `mermaid/base.html` | HTML único holodeck Mermaid (toolbar + atalhos + export) | Base para diagramas no relay; ver secção **Pacote Mermaid** |
+| `mermaid/template/flow.md` | Exemplo flowchart | Copiar bloco mermaid ou usar com `show` |
 
 ---
 
@@ -225,6 +243,8 @@ body {
 | Visualizacao | Template | Descricao |
 |---|---|---|
 | **Flowchart Mermaid** | `templates/flowchart.md` | Qualquer diagrama — zoom/drag builtin, tema Catppuccin |
+| **Mermaid holodeck (HTML único)** | `mermaid/base.html` | Toolbar, % zoom, copiar código, export SVG, ecrã inteiro, atalhos — ver **Pacote Mermaid** |
+| **Exemplo flow .md** | `mermaid/template/flow.md` | Flowchart de exemplo + uso com `show` |
 | **Code diff side-by-side** | `code/analysis/diff/codediff.md` | diff2html — linhas +/- com syntax highlight |
 | **Arvore de diff interativa** | `code/analysis/diff/templates/interactive-tree.html` | Collapse, glow, breadcrumb |
 | **Flow de codigo** | `code/analysis/flows/templates/html.md` | Mermaid read path + write path |

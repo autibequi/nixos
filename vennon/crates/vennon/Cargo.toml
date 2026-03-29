@@ -13,3 +13,4 @@ serde = { workspace = true }
 serde_yaml = { workspace = true }
 anyhow = { workspace = true }
 libc = { workspace = true }
+vennon-update = { path = "../vennon-update" }

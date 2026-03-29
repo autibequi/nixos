@@ -42,7 +42,7 @@ enum Commands {
     /// Create ~/.yaa.yaml with defaults
     Init,
 
-    /// Rebuild and install yaa + vennon + bridge (runs just install)
+    /// Rebuild and install full stack (mesmo pipeline que `deck update` / `vennon update`)
     Update,
 
     /// Open interactive shell (zsh) inside the container
@@ -120,7 +120,7 @@ fn main() -> Result<()> {
     match cli.command {
         Some(Commands::Init) => config::init(),
 
-        Some(Commands::Update) => exec::run("deck", &["update"]),
+        Some(Commands::Update) => vennon_update::run(),
 
         Some(Commands::Shell) => {
             let config = config::YaaConfig::load()?;

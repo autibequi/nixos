@@ -1,3 +1,8 @@
+//! Pipeline único de update completo: `cargo build --release`, cópia dos binários para `~/.local/bin`,
+//! `buzz.yaml`, systemd user — com a mesma UI (“zion utils update”) em todos os pontos de entrada.
+//!
+//! Chamado por **`deck update`**, **`yaa update`** e **`vennon update`**. Não expõe binário próprio.
+
 use anyhow::{bail, Result};
 use crossterm::{
     cursor,
@@ -13,14 +18,13 @@ use std::time::{Duration, Instant};
 const GREEN: Color = Color::Rgb { r: 166, g: 227, b: 161 };
 const MAUVE: Color = Color::Rgb { r: 203, g: 166, b: 247 };
 const PEACH: Color = Color::Rgb { r: 250, g: 179, b: 135 };
-const RED:   Color = Color::Rgb { r: 243, g: 139, b: 168 };
-const DIM:   Color = Color::Rgb { r: 108, g: 112, b: 134 };
-const TEXT:  Color = Color::Rgb { r: 205, g: 214, b: 244 };
+const RED: Color = Color::Rgb { r: 243, g: 139, b: 168 };
+const DIM: Color = Color::Rgb { r: 108, g: 112, b: 134 };
+const TEXT: Color = Color::Rgb { r: 205, g: 214, b: 244 };
 
 const SPIN: &[&str] = &["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
-// ── Entry point ─────────────────────────────────────────────────
-
+/// Executa o update completo com a UI padronizada (único caminho para `deck` / `yaa` / `vennon`).
 pub fn run() -> Result<()> {
     let vennon_dir = find_vennon_dir();
     let install_dir = home().join(".local/bin");
@@ -48,14 +52,14 @@ pub fn run() -> Result<()> {
 
     // ── Steps ───────────────────────────────────────────────────
     let steps: &[(&str, &str)] = &[
-        ("build",      "cargo build --release"),
-        ("vennon",     "instalando vennon"),
-        ("yaa",        "instalando yaa"),
-        ("deck",       "instalando deck"),
-        ("buzz",       "instalando buzz"),
-        ("buzz-yaml",  "instalando buzz.yaml"),
-        ("buzz-svc",   "reiniciando buzz"),
-        ("tick-svc",   "reiniciando yaa-tick"),
+        ("build", "cargo build --release"),
+        ("vennon", "instalando vennon"),
+        ("yaa", "instalando yaa"),
+        ("deck", "instalando deck"),
+        ("buzz", "instalando buzz"),
+        ("buzz-yaml", "instalando buzz.yaml"),
+        ("buzz-svc", "reiniciando buzz"),
+        ("tick-svc", "reiniciando yaa-tick"),
     ];
 
     // Pre-print all step lines as pending
@@ -103,7 +107,8 @@ pub fn run() -> Result<()> {
                                 // Show compiler errors
                                 if let Some(stderr) = child.stderr.take() {
                                     let err_output = std::io::read_to_string(stderr).unwrap_or_default();
-                                    let errors: Vec<&str> = err_output.lines()
+                                    let errors: Vec<&str> = err_output
+                                        .lines()
                                         .filter(|l| l.contains("error") || l.contains("Error"))
                                         .take(20)
                                         .collect();
@@ -243,8 +248,8 @@ pub fn run() -> Result<()> {
         .status();
 
     for (step_idx, (unit, label)) in [
-        (6usize, ("buzz.service",    steps[6].1)),
-        (7usize, ("yaa-tick.timer",  steps[7].1)),
+        (6usize, ("buzz.service", steps[6].1)),
+        (7usize, ("yaa-tick.timer", steps[7].1)),
     ] {
         let start = Instant::now();
         print_step_spin(&mut out, label, Duration::ZERO, 0)?;
@@ -294,7 +299,10 @@ pub fn run() -> Result<()> {
     out.queue(SetAttribute(Attribute::Reset))?;
     out.queue(SetForegroundColor(DIM))?;
     let total: Duration = results.iter().map(|(_, d)| *d).sum();
-    out.queue(Print(format!("  — vennon · yaa · deck · buzz · serviços  {}\n\n", fmt_dur(total))))?;
+    out.queue(Print(format!(
+        "  — vennon · yaa · deck · buzz · serviços  {}\n\n",
+        fmt_dur(total)
+    )))?;
     out.queue(ResetColor)?;
     out.flush()?;
 
@@ -371,12 +379,10 @@ fn fmt_dur(d: Duration) -> String {
 
 fn set_executable_or_err(path: &PathBuf) -> Result<(), String> {
     use std::os::unix::fs::PermissionsExt;
-    let meta = std::fs::metadata(path)
-        .map_err(|e| format!("stat {}: {e}", path.display()))?;
+    let meta = std::fs::metadata(path).map_err(|e| format!("stat {}: {e}", path.display()))?;
     let mut perms = meta.permissions();
     perms.set_mode(0o755);
-    std::fs::set_permissions(path, perms)
-        .map_err(|e| format!("chmod {}: {e}", path.display()))
+    std::fs::set_permissions(path, perms).map_err(|e| format!("chmod {}: {e}", path.display()))
 }
 
 fn home() -> PathBuf {

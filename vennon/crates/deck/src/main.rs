@@ -3,7 +3,6 @@ mod os;
 mod process;
 mod stow;
 mod tui;
-mod update;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
@@ -33,7 +32,7 @@ enum Commands {
         action: String,
     },
 
-    /// Rebuild and install all binaries
+    /// Rebuild and install full stack (`vennon_update` — mesmo que `yaa update` / `vennon update`)
     Update,
 }
 
@@ -43,7 +42,7 @@ fn main() -> Result<()> {
     match cli.command {
         Some(Commands::Stow { action, reload }) => stow::run(&action, reload),
         Some(Commands::Os { action }) => os::run(&action),
-        Some(Commands::Update) => update::run(),
+        Some(Commands::Update) => vennon_update::run(),
         None => tui::run(),
     }
 }

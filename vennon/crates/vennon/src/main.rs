@@ -20,7 +20,7 @@ enum Commands {
     /// Create ~/.config/vennon/ with config.yaml and container dirs
     Init,
 
-    /// Rebuild and install vennon binary (runs just install)
+    /// Rebuild and install full stack (mesmo pipeline que `deck update` / `yaa update`)
     Update,
 
     /// List all available containers
@@ -43,28 +43,7 @@ fn main() -> Result<()> {
     match cli.command {
         Commands::Init => config::init(),
 
-        Commands::Update => {
-            let candidates = [
-                config::expand_path("~/nixos/vennon"),
-                config::expand_path("~/nixos/host/vennon"),
-            ];
-            let vennon_dir = candidates
-                .iter()
-                .find(|p| p.join("justfile").exists())
-                .cloned()
-                .or_else(|| config::VennonConfig::load().ok().map(|c| c.vennon_path()))
-                .ok_or_else(|| anyhow::anyhow!("can't find vennon source dir"))?;
-            exec::run(
-                "just",
-                &[
-                    "--justfile",
-                    &vennon_dir.join("justfile").to_string_lossy(),
-                    "--working-directory",
-                    &vennon_dir.to_string_lossy(),
-                    "install",
-                ],
-            )
-        }
+        Commands::Update => vennon_update::run(),
 
         Commands::List => {
             let all = manifest::discover_all()?;
