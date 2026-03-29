@@ -66,6 +66,15 @@ Para **separar visualmente** partes do sistema (repos, serviços, filas) e **ain
 - **Estilo por caixa**: `style FS fill:#1e1e2e,stroke:#f5c2e7,stroke-width:2px` — bordas com cores distintas por app/camada.
 - **Exemplo canónico Estrategia** (quatro blocos + fila): `template/flow-subgraphs.md`.
 
+## Um tipo por diagrama (limite do Mermaid)
+
+Isto **não** é política do vennon — é **limite da ferramenta**:
+
+- Um ficheiro / um bloco ` ```mermaid ` define **uma** raiz. Não há como encaixar **sequence** + **class** + **flow** no mesmo parse.
+- **`flowchart`** = caixas (`subgraph`, nós) e arestas; é o tipo para “agrupar em caixinhas e ligar”.
+- **`sequenceDiagram`**, **`classDiagram`**, **`erDiagram`**, **`stateDiagram`**, etc. = **gramáticas próprias** (tempo, UML, ER, estados). Não são substitutos uns dos outros nem se combinam num único diagrama.
+- Para o utilizador **ver vários tipos**: várias figuras (páginas com vários `<div class="mermaid">`, ex. `monolito-multi-tabs.html`, `gallery-all.html`) ou **trocar** o que está no holodeck.
+
 ## Cores e acessibilidade
 
 - Preferir contraste alto texto/fundo (ex.: Catppuccin Mocha: texto `#1e1e2e` em fills claros).

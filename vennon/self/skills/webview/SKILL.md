@@ -59,6 +59,16 @@ No workdir do repositório (`/workspace/target`), `webview/mermaid/base.html` e 
 
 **Flowchart com fronteiras (agentes):** para diagramar **várias** partes do código ou apps (**monolito**, **bo-container**, **front-student**, filas, etc.) na **mesma** figura, usar **`subgraph`** num único `flowchart` e **arestas entre nós** de blocos diferentes — não declarar dois `flowchart` no mesmo `diagram.mmd`. Referência: `mermaid/template/flow-subgraphs.md` e `mermaid/styling-global.md` (secção *Subgrafos — vários fluxos*).
 
+### Mermaid — modelo mental (obrigatório; não “esquecer”)
+
+| Regra | Detalhe |
+|-------|---------|
+| **Um bloco = um tipo** | Cada `diagram.mmd` / cada bloco de código Mermaid tem **exactamente uma** raiz (`flowchart`, `sequenceDiagram`, `classDiagram`, `erDiagram`, `stateDiagram-v2`, …). **Proibido** fundir `flowchart` + `sequenceDiagram` + `classDiagram` no **mesmo** texto — o parser não suporta. |
+| **Flowchart ≠ “desenho universal”** | No **`flowchart`**, o que predomina são **caixinhas**: nós, **`subgraph`**, setas. É o tipo certo para “agrupar e ligar” caixas. |
+| **Outros tipos, outras gramáticas** | **`sequenceDiagram`** = ordem no tempo / mensagens entre lifelines. **`classDiagram`** = classes e relações UML. **`erDiagram`** = entidades e cardinalidade. **`stateDiagram`** = estados e transições. Não são “só caixinhas como o flow”; **não** se misturam com flow num único diagrama. |
+| **Vários tipos no ecrã** | Usar **várias figuras**: `mermaid/gallery-all.html`, `mermaid/monolito-multi-tabs.html` (abas), ou **alternar** o conteúdo do holodeck. O **`base.html` live** mostra **um** diagrama de cada vez. |
+| **Referência** | `mermaid/styling-global.md` — secções *Subgrafos* e *Um tipo por diagrama*. |
+
 ## Sub-files
 
 | Arquivo | Conteudo | Quando usar |
@@ -71,7 +81,8 @@ No workdir do repositório (`/workspace/target`), `webview/mermaid/base.html` e 
 | `mermaid/template/README.md` | **Catálogo** de todos os tipos de diagrama (`.md` por tipo) | Escolher snippet alinhado a monolito / bo-container / front-student |
 | `mermaid/template/*.md` | Inclui `flow-subgraphs` (vários `subgraph` ligados) e os restantes tipos: `flow`, `sequence`, `state`, `class`, `er`, `journey`, `gantt`, `pie`, `gitgraph`, `mindmap`, `timeline`, `quadrant`, `requirement`, `sankey`, `xychart`, `architecture`, `block`, `packet`, `c4-context`, `c4-container`, `c4-component`, `c4-dynamic`, `c4-deployment`, `zenuml` | Copiar bloco `mermaid` para `diagram.mmd` ou usar `chrome-relay.py show` |
 | `mermaid/styling-global.md` | Tema, `%%{init}%%`, `classDef`, subgraph, imagens/ícones, limites | Referência global fora dos exemplos por tipo |
-| `mermaid/README.md` | **Template oficial** — resumo, live SSE, colaboração, link ao catálogo | Ao orientar agentes ou devs sobre qual ficheiro editar |
+| `mermaid/README.md` | **Template oficial** — resumo, live SSE, colaboração, link ao catálogo; `monolito-multi-tabs.html` (vários tipos em abas) | Idem |
+| `mermaid/monolito-multi-tabs.html` | Várias abas, um tipo Mermaid por aba (narrativa monolito) | Comparar tipos sem misturar sintaxe num único `diagram.mmd` |
 | `mermaid/mermaid_live_server.py` | Servidor HTTP + SSE + `POST /mermaid-push` (stdlib Python) | Colaboração em tempo real com `base.html` (SSE ligado por defeito; `?nolive=1` desliga) |
 | `mermaid/mermaid-live-server.mjs` | Variante Node (mesma API) | Se `node` existir no ambiente |
 
