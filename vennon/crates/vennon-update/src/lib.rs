@@ -1,5 +1,5 @@
-//! Pipeline único de update completo: `cargo build --release`, cópia dos binários para `~/.local/bin`,
-//! `buzz.yaml`, systemd user — com a mesma UI (“zion utils update”) em todos os pontos de entrada.
+//! Pipeline único de update completo: `cargo test --workspace`, `cargo build --release`, cópia dos
+//! binários para `~/.local/bin`, `buzz.yaml`, systemd user — com a mesma UI (“zion utils update”).
 //!
 //! Chamado por **`deck update`**, **`yaa update`** e **`vennon update`**. Não expõe binário próprio.
 
@@ -93,6 +93,7 @@ pub fn run() -> Result<()> {
 
     // ── Steps ───────────────────────────────────────────────────
     let steps: &[(&str, &str)] = &[
+        ("test", "cargo test --workspace"),
         ("build", "cargo build --release"),
         ("vennon", "instalando vennon"),
         ("yaa", "instalando yaa"),
@@ -118,13 +119,13 @@ pub fn run() -> Result<()> {
 
     let mut results: Vec<(bool, Duration)> = Vec::new();
 
-    // ── Step 1: cargo build --release ───────────────────────────
+    // ── Step 0: cargo test --workspace ──────────────────────────
     {
         let start = Instant::now();
         let child = Command::new("nix-shell")
-            .args(["-p", "rustc", "cargo", "--run", "cargo build --release"])
+            .args(["-p", "rustc", "cargo", "--run", "cargo test --workspace"])
             .current_dir(&vennon_dir)
-            .stdout(Stdio::null())
+            .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn();
 
@@ -132,7 +133,7 @@ pub fn run() -> Result<()> {
             Err(e) => {
                 print_step_fail(&mut out, steps[0].1, Duration::ZERO)?;
                 cursor_to_end(&mut out, steps.len(), 0)?;
-                bail!("erro ao iniciar nix-shell: {e}");
+                bail!("erro ao iniciar nix-shell (test): {e}");
             }
             Ok(mut child) => {
                 let mut frame = 0usize;
@@ -145,6 +146,74 @@ pub fn run() -> Result<()> {
                                 results.push((true, elapsed));
                             } else {
                                 print_step_fail(&mut out, steps[0].1, elapsed)?;
+                                let mut combined = String::new();
+                                if let Some(mut stdout) = child.stdout.take() {
+                                    let _ =
+                                        std::io::Read::read_to_string(&mut stdout, &mut combined);
+                                }
+                                if let Some(stderr) = child.stderr.take() {
+                                    let err = std::io::read_to_string(stderr).unwrap_or_default();
+                                    combined.push_str(&err);
+                                }
+                                let lines: Vec<&str> = combined.lines().collect();
+                                let start_line = lines.len().saturating_sub(35);
+                                if !lines.is_empty() {
+                                    out.queue(Print("\n"))?;
+                                    out.queue(SetForegroundColor(RED))?;
+                                    for line in &lines[start_line..] {
+                                        out.queue(Print(format!("  {line}\n")))?;
+                                    }
+                                    out.queue(ResetColor)?;
+                                    out.flush()?;
+                                }
+                                cursor_to_end(&mut out, steps.len(), 1)?;
+                                bail!("cargo test falhou (exit {})", status.code().unwrap_or(-1));
+                            }
+                            break;
+                        }
+                        Ok(None) => {
+                            print_step_spin(&mut out, steps[0].1, start.elapsed(), frame)?;
+                            frame = (frame + 1) % SPIN.len();
+                            std::thread::sleep(Duration::from_millis(80));
+                        }
+                        Err(e) => {
+                            print_step_fail(&mut out, steps[0].1, start.elapsed())?;
+                            cursor_to_end(&mut out, steps.len(), 1)?;
+                            bail!("erro ao monitorar testes: {e}");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // ── Step 1: cargo build --release ───────────────────────────
+    {
+        let start = Instant::now();
+        let child = Command::new("nix-shell")
+            .args(["-p", "rustc", "cargo", "--run", "cargo build --release"])
+            .current_dir(&vennon_dir)
+            .stdout(Stdio::null())
+            .stderr(Stdio::piped())
+            .spawn();
+
+        match child {
+            Err(e) => {
+                print_step_fail(&mut out, steps[1].1, Duration::ZERO)?;
+                cursor_to_end(&mut out, steps.len(), 0)?;
+                bail!("erro ao iniciar nix-shell: {e}");
+            }
+            Ok(mut child) => {
+                let mut frame = 0usize;
+                loop {
+                    match child.try_wait() {
+                        Ok(Some(status)) => {
+                            let elapsed = start.elapsed();
+                            if status.success() {
+                                print_step_ok(&mut out, steps[1].1, elapsed)?;
+                                results.push((true, elapsed));
+                            } else {
+                                print_step_fail(&mut out, steps[1].1, elapsed)?;
                                 // Show compiler errors
                                 if let Some(stderr) = child.stderr.take() {
                                     let err_output =
@@ -170,12 +239,12 @@ pub fn run() -> Result<()> {
                             break;
                         }
                         Ok(None) => {
-                            print_step_spin(&mut out, steps[0].1, start.elapsed(), frame)?;
+                            print_step_spin(&mut out, steps[1].1, start.elapsed(), frame)?;
                             frame = (frame + 1) % SPIN.len();
                             std::thread::sleep(Duration::from_millis(80));
                         }
                         Err(e) => {
-                            print_step_fail(&mut out, steps[0].1, start.elapsed())?;
+                            print_step_fail(&mut out, steps[1].1, start.elapsed())?;
                             cursor_to_end(&mut out, steps.len(), 1)?;
                             bail!("erro ao monitorar build: {e}");
                         }
@@ -185,9 +254,9 @@ pub fn run() -> Result<()> {
         }
     }
 
-    // ── Steps 2-4: install binaries ─────────────────────────────
+    // ── Steps 2–5: install binaries ─────────────────────────────
     for (idx, bin) in ["vennon", "yaa", "deck", "buzz"].iter().enumerate() {
-        let step_idx = idx + 1;
+        let step_idx = idx + 2;
         let start = Instant::now();
 
         // Animate the install step briefly
@@ -242,7 +311,7 @@ pub fn run() -> Result<()> {
 
     // ── Step 6: install buzz.yaml to secure location ────────────
     {
-        let step_idx = 5;
+        let step_idx = 6;
         let start = Instant::now();
         print_step_spin(&mut out, steps[step_idx].1, Duration::ZERO, 0)?;
         out.flush()?;
@@ -296,8 +365,8 @@ pub fn run() -> Result<()> {
         .status();
 
     for (step_idx, (unit, label)) in [
-        (6usize, ("buzz.service", steps[6].1)),
-        (7usize, ("yaa-tick.timer", steps[7].1)),
+        (7usize, ("buzz.service", steps[7].1)),
+        (8usize, ("yaa-tick.timer", steps[8].1)),
     ] {
         let start = Instant::now();
         print_step_spin(&mut out, label, Duration::ZERO, 0)?;

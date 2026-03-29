@@ -13,7 +13,7 @@ No workdir do projeto: `webview/mermaid/base.html` → ligação simbólica para
 
 - Título fixo do gráfico: **Holodeck — base.html**
 - Placeholders: `MERMAID_SUBTITLE_HERE`, `MERMAID_DIAGRAM_HERE`
-- Painel **Código**, zoom estilo mapa (+/−), export SVG, relay-ready (CSS/JS inline; Mermaid via CDN)
+- **Drawer** lateral esquerdo **Código** (com backdrop), zoom estilo mapa (+/−), export SVG, relay-ready (CSS/JS inline; Mermaid via CDN)
 
 ## Exemplo em Markdown
 

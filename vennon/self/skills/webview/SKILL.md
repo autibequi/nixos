@@ -31,11 +31,11 @@ O mesmo vale para `data:text/html;base64,...` no `nav`: o documento decodificado
 
 | Ficheiro | Função |
 |----------|--------|
-| `mermaid/base.html` | **Fonte canónica** — título fixo **Holodeck — base.html**; diagrama fullscreen, zoom (scroll), pan, pinch, botões **+ / −** (canto inferior direito, estilo mapa), indicador %, painel **Código** (textarea + Aplicar), SVG/Reset/ecrã inteiro, `Esc` fecha painel, atalhos `R` `+` `-` `0` `F`, duplo clique = reset, `prefers-reduced-motion`, `aria-label` nos botões. Placeholders: `MERMAID_SUBTITLE_HERE`, `MERMAID_DIAGRAM_HERE`. **Nota:** Mermaid não permite arrastar nós/setas no SVG; edição é por texto (painel) ou outra ferramenta (Excalidraw, draw.io). |
+| `mermaid/base.html` | **Fonte canónica** — título fixo **Holodeck — base.html**; diagrama fullscreen, zoom (scroll), pan, pinch, botões **+ / −** (canto inferior direito, estilo mapa), indicador %, **drawer** lateral esquerdo **Código** (textarea + Aplicar, backdrop clicável), SVG/Reset/ecrã inteiro, `Esc` fecha o drawer, atalhos `R` `+` `-` `0` `F`, duplo clique = reset, `prefers-reduced-motion`, `aria-label` nos botões. Placeholders: `MERMAID_SUBTITLE_HERE`, `MERMAID_DIAGRAM_HERE`. **Nota:** Mermaid não permite arrastar nós/setas no SVG; edição é por texto (drawer) ou outra ferramenta (Excalidraw, draw.io). |
 | `mermaid/template/flow.md` | Exemplo de flowchart + instruções para `show` ou para colar no `base.html`. |
 | `templates/mermaid.html` | Cópia espelhada de `base.html` (atualizar com `cp` após mudanças no base). |
 
-Atalhos (com foco na página, fora de inputs): **Esc** fecha o painel de código, **R** reset, **+** / **=** zoom in, **-** zoom out, **0** fit, **F** ecrã inteiro. **Duplo clique** na área do diagrama = reset. O painel **Código** abre-se só pelo botão na barra.
+Atalhos (com foco na página, fora de inputs): **Esc** fecha o drawer de código, **R** reset, **+** / **=** zoom in, **-** zoom out, **0** fit, **F** ecrã inteiro. **Duplo clique** na área do diagrama = reset. O **Código** abre o drawer lateral (botão na barra ou backdrop para fechar).
 
 **HTML:** não usar comentários `<!-- ... -->` longos com `<`, `</`, `&lt;porta&gt;` ou `--` no meio — o parser pode fechar o comentário cedo e o restante aparece como texto antes do header (layout partido). Documentação fica na SKILL, não em comentários no `.html`.
 
@@ -54,8 +54,6 @@ No workdir do repositório (`/workspace/target`), `webview/mermaid/base.html` e 
 | `mermaid/base.html` | HTML único holodeck Mermaid (toolbar + atalhos + export) | Base para diagramas no relay; ver secção **Pacote Mermaid** |
 | `mermaid/template/flow.md` | Exemplo flowchart | Copiar bloco mermaid ou usar com `show` |
 | `mermaid/README.md` | **Template oficial** — resumo e comandos `cp` para o espelho | Ao orientar agentes ou devs sobre qual ficheiro editar |
-| `mermaid/studio/studio.html` | **Studio** — editor+preview, chips Flow/Seq/State/Class/ER, Ctrl+Enter | Segundo template Mermaid; ver `mermaid/studio/README.md` |
-| `mermaid/studio/snippets/*.mmd` | Fragmentos para modelos / sync com `PRESETS` no studio | Evoluir templates para o agente |
 
 ---
 
@@ -247,7 +245,6 @@ body {
 |---|---|---|
 | **Flowchart Mermaid** | `templates/flowchart.md` | Qualquer diagrama — zoom/drag builtin, tema Catppuccin |
 | **Mermaid holodeck (HTML único)** | `mermaid/base.html` | Toolbar, zoom, código, export SVG, ecrã inteiro — ver **Pacote Mermaid** |
-| **Mermaid Studio** | `mermaid/studio/studio.html` | Editor + preview, chips de modelos, snippets em `studio/snippets/` |
 | **Exemplo flow .md** | `mermaid/template/flow.md` | Flowchart de exemplo + uso com `show` |
 | **Code diff side-by-side** | `code/analysis/diff/codediff.md` | diff2html — linhas +/- com syntax highlight |
 | **Arvore de diff interativa** | `code/analysis/diff/templates/interactive-tree.html` | Collapse, glow, breadcrumb |
