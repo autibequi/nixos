@@ -15,27 +15,15 @@ ports: [4004, 2345, 5432, 6379, 4566]
 
 commands:
   serve:
-    description: Start monolito + dependencies
+    description: Start monolito + dependencies (always with dlv)
     args:
       - name: env
         enum: env
-      - name: debug
-        type: bool
-        default: false
-      - name: dev
-        type: bool
-        default: false
-      - name: detach
-        type: bool
-        default: false
     compose:
       files:
         - docker-compose.yml
         - docker-compose.deps.yml
-        - if: debug
-          file: docker-compose.debug.yml
-        - if: dev
-          file: docker-compose.dev.yml
+        - docker-compose.debug.yml
       env_file: "env/{{ env | map }}.env"
       env:
         APP_ENV_FILE: "{{ env | map }}"
@@ -104,12 +92,15 @@ commands:
       action: "down -v --rmi local"
 
   worker:
-    description: Start worker process
+    description: Start worker process (always with dlv)
     args:
       - name: env
         enum: env
     compose:
-      files: [docker-compose.worker.yml, docker-compose.deps.yml]
+      files:
+        - docker-compose.worker.yml
+        - docker-compose.deps.yml
+        - docker-compose.debug.worker.yml
       env_file: "env/{{ env | map }}.env"
       env:
         APP_ENV_FILE: "{{ env | map }}"
