@@ -15,6 +15,8 @@ pub enum ContainerKind {
     Service,
     /// Postgres/Redis/Localstack do stack monolito — só logs no painel, sem menu vennon.
     Sidecar,
+    /// Systemd user services (buzz, yaa-tick) — shown as dots in header, not in table.
+    SystemdService,
 }
 
 /// One enum group from vennon.yaml (e.g. env, vertical).
@@ -62,8 +64,8 @@ impl ContainerInfo {
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum Tab {
-    Ide,
     Services,
+    Agents,
 }
 
 pub enum AppMode {
@@ -98,7 +100,7 @@ impl App {
     pub fn new() -> Self {
         Self {
             mode: AppMode::Normal,
-            tab: Tab::Ide,
+            tab: Tab::Services,
             all_containers: vec![],
             cursor: 0,
             menu_cursor: 0,
@@ -117,12 +119,19 @@ impl App {
     fn visible_containers_slice(all: &[ContainerInfo], tab: Tab) -> Vec<&ContainerInfo> {
         all.iter()
             .filter(|c| {
-                let is_ide = c.kind == ContainerKind::Ide;
                 match tab {
-                    Tab::Ide => is_ide,
-                    Tab::Services => !is_ide,
+                    Tab::Agents => c.kind == ContainerKind::Ide,
+                    Tab::Services => c.kind != ContainerKind::Ide && c.kind != ContainerKind::SystemdService,
                 }
             })
+            .collect()
+    }
+
+    /// Systemd service rows (buzz, tick) — shown as dots in the header.
+    pub fn systemd_containers(&self) -> Vec<&ContainerInfo> {
+        self.all_containers
+            .iter()
+            .filter(|c| c.kind == ContainerKind::SystemdService)
             .collect()
     }
 
@@ -206,8 +215,8 @@ impl App {
 
     pub fn switch_tab(&mut self) {
         self.tab = match self.tab {
-            Tab::Ide => Tab::Services,
-            Tab::Services => Tab::Ide,
+            Tab::Services => Tab::Agents,
+            Tab::Agents => Tab::Services,
         };
         self.cursor = 0;
         self.refresh_logs();
@@ -265,7 +274,7 @@ impl App {
     pub fn menu_actions(&self) -> Vec<String> {
         if let Some(c) = self.selected_container() {
             match c.kind {
-                ContainerKind::Sidecar => vec![],
+                ContainerKind::Sidecar | ContainerKind::SystemdService => vec![],
                 ContainerKind::Ide if c.commands.is_empty() => vec![
                     "start".into(),
                     "stop".into(),
@@ -688,6 +697,11 @@ fn collect_all() -> (Vec<ContainerInfo>, bool) {
         if let Some(hint) = build_hints.get(&c.name) {
             c.last_log = hint.clone();
         }
+    }
+
+    // Systemd service dots (buzz, yaa-tick) — not shown in table, only in header
+    for row in systemd_service_rows() {
+        containers.push(row);
     }
 
     (containers, any_timeout)
@@ -1315,6 +1329,47 @@ fn strip_ansi(s: &str) -> String {
         }
     }
     out
+}
+
+/// Returns (status_label, is_up) for a systemd user unit.
+fn systemctl_status(unit: &str) -> (String, bool) {
+    let output = Command::new("systemctl")
+        .args(["--user", "is-active", unit])
+        .output();
+    match output {
+        Ok(o) => {
+            let s = String::from_utf8_lossy(&o.stdout).trim().to_string();
+            let up = s == "active";
+            (s, up)
+        }
+        Err(_) => ("unknown".into(), false),
+    }
+}
+
+fn systemd_service_rows() -> Vec<ContainerInfo> {
+    let specs = [
+        ("buzz.service", "buzz"),
+        ("yaa-tick.timer", "tick"),
+    ];
+    specs.iter().map(|(unit, label)| {
+        let (status, is_up) = systemctl_status(unit);
+        ContainerInfo {
+            name: unit.to_string(),
+            display_name: label.to_string(),
+            status,
+            is_up,
+            cpu: String::new(),
+            mem: String::new(),
+            env: String::new(),
+            debug: String::new(),
+            vertical: String::new(),
+            last_log: String::new(),
+            enums: vec![],
+            has_debug: false,
+            commands: vec![],
+            kind: ContainerKind::SystemdService,
+        }
+    }).collect()
 }
 
 fn collect_logs_for(container_name: &str) -> (Vec<String>, bool) {

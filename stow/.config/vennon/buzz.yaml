@@ -1,5 +1,5 @@
 socket: ~/.vennon/buzz.sock
-log: ~/.local/share/vennon/logs/bus.log
+log: ~/.local/share/vennon/logs/buzz.log
 
 # Caminho do chrome-relay.py (montado no host via stow)
 # O daemon resolve ~ como HOME do host (/home/pedrinho)

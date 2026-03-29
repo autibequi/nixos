@@ -2,6 +2,7 @@ use ratatui::prelude::*;
 use ratatui::widgets::*;
 
 use super::app::{App, AppMode, ContainerKind, Tab};
+use ratatui::layout::Flex;
 
 // ── Colors ──────────────────────────────────────────────────────
 const GREEN: Color = Color::Rgb(166, 227, 161);
@@ -41,32 +42,58 @@ pub fn render(frame: &mut Frame, app: &App) {
 }
 
 fn render_header(frame: &mut Frame, app: &App, area: Rect) {
-    let ide_style = if app.tab == Tab::Ide { Style::default().fg(MAUVE).bold() } else { Style::default().fg(DIM) };
     let svc_style = if app.tab == Tab::Services { Style::default().fg(MAUVE).bold() } else { Style::default().fg(DIM) };
+    let agents_style = if app.tab == Tab::Agents { Style::default().fg(MAUVE).bold() } else { Style::default().fg(DIM) };
 
-    let ide_up = app
+    let svc_up = app
+        .all_containers
+        .iter()
+        .filter(|c| c.kind != ContainerKind::Ide && c.kind != ContainerKind::SystemdService)
+        .filter(|c| c.is_up)
+        .count();
+    let agents_up = app
         .all_containers
         .iter()
         .filter(|c| c.kind == ContainerKind::Ide)
         .filter(|c| c.is_up)
         .count();
-    let svc_up = app
-        .all_containers
-        .iter()
-        .filter(|c| c.kind != ContainerKind::Ide)
-        .filter(|c| c.is_up)
-        .count();
 
-    let text = Line::from(vec![
+    // Left: tabs
+    let left_line = Line::from(vec![
         Span::styled(" deck ", Style::default().fg(MAUVE).bold()),
         Span::styled("│ ", Style::default().fg(DIM)),
-        Span::styled(format!(" IDE ({ide_up}) "), ide_style),
-        Span::styled("│", Style::default().fg(DIM)),
         Span::styled(format!(" Services ({svc_up}) "), svc_style),
+        Span::styled("│", Style::default().fg(DIM)),
+        Span::styled(format!(" Agents ({agents_up}) "), agents_style),
         Span::styled("│ ", Style::default().fg(DIM)),
         Span::styled("tab:switch", Style::default().fg(DIM)),
     ]);
-    frame.render_widget(Paragraph::new(text), area);
+
+    // Right: systemd dots
+    let systemd = app.systemd_containers();
+    let mut dot_spans: Vec<Span> = vec![];
+    for (i, c) in systemd.iter().enumerate() {
+        if i > 0 {
+            dot_spans.push(Span::styled("  ", Style::default()));
+        }
+        let color = if c.is_up { GREEN } else { RED };
+        dot_spans.push(Span::styled("● ", Style::default().fg(color)));
+        dot_spans.push(Span::styled(c.display_name.as_str(), Style::default().fg(DIM)));
+    }
+    dot_spans.push(Span::styled(" ", Style::default()));
+    let right_line = Line::from(dot_spans).right_aligned();
+
+    // Split area: left takes remaining, right is fixed width for dots
+    let right_width = systemd.iter().map(|c| c.display_name.len() as u16 + 4).sum::<u16>().max(1);
+    let chunks = Layout::horizontal([
+        Constraint::Min(10),
+        Constraint::Length(right_width),
+    ])
+    .flex(Flex::Legacy)
+    .split(area);
+
+    frame.render_widget(Paragraph::new(left_line), chunks[0]);
+    frame.render_widget(Paragraph::new(right_line), chunks[1]);
 }
 
 /// Strip total from "31.62MB / 49.77GB" → "31.62MB".
@@ -152,7 +179,7 @@ fn render_containers(frame: &mut Frame, app: &App, vis: &[&super::app::Container
     ];
 
     let tab_label = match app.tab {
-        Tab::Ide => "IDE",
+        Tab::Agents => "Agents",
         Tab::Services => "Services",
     };
     let table = Table::new(rows, widths)
