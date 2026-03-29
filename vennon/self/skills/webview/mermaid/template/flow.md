@@ -1,17 +1,23 @@
 ---
 name: webview/mermaid/template/flow
-description: Exemplo de flowchart Mermaid para usar com base.html (placeholders) ou com chrome-relay show.
+description: Exemplo de código Mermaid (referência) — colar em diagram.mmd ou no placeholder MERMAID_DIAGRAM_HERE do base.html; não é o caminho principal para mostrar ao utilizador (isso é relay live).
 ---
 
-# Exemplo — Flowchart
+# Exemplo — Flowchart (referência)
 
-Copie o bloco `mermaid` para o placeholder `MERMAID_DIAGRAM_HERE` em `mermaid/base.html`, ou guarde este ficheiro e use:
+## Para que serve neste contexto
 
-```bash
-python3 /workspace/self/scripts/chrome-relay.py show /workspace/self/skills/webview/mermaid/template/flow.md
-```
+| Uso | Papel |
+|-----|--------|
+| **Referência / cópia** | O bloco `mermaid` abaixo é um **modelo** de sintaxe (tema dark, nós estilizados). Copias o interior do bloco para **`diagram.mmd`** ou para **`MERMAID_DIAGRAM_HERE`** em `mermaid/base.html` quando geres HTML a partir do template. |
+| **Não é o fluxo oficial** para “mostrar ao utilizador no vennon” | O caminho **obrigatório** continua a ser **relay live**: `mermaid_live_server.py` + `base.html` + `diagram.mmd` + `relay-nav` (ver `skills/webview/SKILL.md`, **Política obrigatória**). |
+| **Exceção legada** | Podes guardar este ficheiro e correr `chrome-relay.py show …/flow.md` só para **pré-visualização rápida** de um `.md` — **não** substitui o holodeck live. |
 
-## Diagrama (Catppuccin / pipeline)
+Resumo: **`flow.md` = caixa de exemplos / snippet**, não a “app” Mermaid. A ferramenta que construímos é o par **`base.html` + servidor live**.
+
+---
+
+## Diagrama de exemplo (Catppuccin)
 
 ```mermaid
 %%{init: {'theme': 'dark'}}%%
@@ -28,13 +34,19 @@ flowchart TD
   style D fill:#fab387,color:#1e1e2e
 ```
 
-## Placeholders no `base.html`
+## Colar no `base.html`
 
-O nome do gráfico na barra é fixo: **Holodeck — base.html** (título e `document.title`).
+Substitui **`MERMAID_DIAGRAM_HERE`** pelo conteúdo do diagrama **sem** cercas ` ```mermaid ` (só o texto que está dentro do bloco acima).
 
-| Placeholder | Exemplo |
-|-------------|---------|
-| `MERMAID_SUBTITLE_HERE` | Card XYZ · branch `feature/foo` (ou vazio para ocultar) |
-| `MERMAID_DIAGRAM_HERE` | o bloco `flowchart TD` acima (sem fences) |
+## Colar no fluxo live
 
-Para HTML gerado a partir deste `.md`, substitua `MERMAID_SUBTITLE_HERE` por texto real ou deixe vazio para ocultar a linha.
+1. Copia o mesmo texto para **`diagram.mmd`** (na pasta servida pelo `mermaid_live_server.py`).
+2. `POST /mermaid-push` ou grava o ficheiro e deixa o watcher atualizar.
+
+## Pré-visualização pontual (opcional, legado)
+
+```bash
+python3 /workspace/self/scripts/chrome-relay.py show /workspace/self/skills/webview/mermaid/template/flow.md
+```
+
+Isto usa o renderer Markdown do relay, **não** o holodeck com SSE e indicador LIVE.
