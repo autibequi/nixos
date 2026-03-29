@@ -13,6 +13,10 @@ services:
       - VERTICAL=${VERTICAL:-carreiras-juridicas}
       - NPM_SCRIPT_ENV=${NPM_SCRIPT_ENV:-local}
       - PORT=3005
+      # Desabilita call HTTP de telemetria que trava o boot
+      - NUXT_TELEMETRY_DISABLED=1
+      # Mais RAM pro webpack — evita OOM matar o processo silenciosamente
+      - NODE_OPTIONS=--max-old-space-size=4096
     tty: true
     volumes:
       # Bind mount completo: source + node_modules (gerado por vennon docker install)

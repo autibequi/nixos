@@ -28,7 +28,6 @@ services:
       - ${VENNON_SELF}:/workspace/self
       - ${VENNON_OBSIDIAN}:/workspace/obsidian
       - ${VENNON_PROJECTS}:/workspace/projects:rw
-      - ${HOME}:/workspace/home:rw
       - ${VENNON_HOST}:/workspace/host:rw
       # Claude Code — base dir (credentials, history, projects, etc.)
       - ${HOME}/.claude:/home/claude/.claude
