@@ -52,6 +52,16 @@ actions:
         validate:
           - path_under: [~/projects, ~/nixos]
 
+  open-cursor:
+    description: Abrir no Cursor
+    command: cursor {{ path }}
+    args:
+      - name: path
+        type: string
+        required: true
+        validate:
+          - path_under: [~/projects, ~/nixos]
+
   notify:
     description: Notificacao desktop
     command: notify-send "vennon" "{{ message }}"
