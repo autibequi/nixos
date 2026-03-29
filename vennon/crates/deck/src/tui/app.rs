@@ -314,7 +314,9 @@ fn collect_all() -> (Vec<ContainerInfo>, bool) {
     }
 
     // 2. Service containers — discover from vennon list
-    match output_with_timeout(Command::new("vennon").args(["list"]), CMD_TIMEOUT) {
+    let mut cmd = Command::new("vennon");
+    cmd.args(["list"]);
+    match output_with_timeout(cmd, CMD_TIMEOUT) {
         Ok(output) => {
             let stdout = String::from_utf8_lossy(&output.stdout);
             for line in stdout.lines() {
@@ -459,17 +461,9 @@ fn collect_running() -> (HashMap<String, (String, bool, String, String)>, bool) 
     let mut map = HashMap::new();
     let mut timed_out = false;
 
-    match output_with_timeout(
-        Command::new("podman").args([
-            "ps",
-            "-a",
-            "--format",
-            "{{.Names}}\t{{.Status}}",
-            "--filter",
-            "name=vennon",
-        ]),
-        CMD_TIMEOUT,
-    ) {
+    let mut cmd = Command::new("podman");
+    cmd.args(["ps", "-a", "--format", "{{.Names}}\t{{.Status}}", "--filter", "name=vennon"]);
+    match output_with_timeout(cmd, CMD_TIMEOUT) {
         Ok(output) => {
             for line in String::from_utf8_lossy(&output.stdout).lines() {
                 let parts: Vec<&str> = line.split('\t').collect();
@@ -488,15 +482,9 @@ fn collect_running() -> (HashMap<String, (String, bool, String, String)>, bool) 
         Err(_) => {}
     }
 
-    match output_with_timeout(
-        Command::new("podman").args([
-            "stats",
-            "--no-stream",
-            "--format",
-            "{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}",
-        ]),
-        CMD_TIMEOUT,
-    ) {
+    let mut cmd = Command::new("podman");
+    cmd.args(["stats", "--no-stream", "--format", "{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}"]);
+    match output_with_timeout(cmd, CMD_TIMEOUT) {
         Ok(output) => {
             for line in String::from_utf8_lossy(&output.stdout).lines() {
                 let parts: Vec<&str> = line.split('\t').collect();
@@ -618,11 +606,9 @@ fn scan_compose_container_name(path: &Path) -> Option<String> {
 fn collect_logs_for(container_name: &str) -> (Vec<String>, bool) {
     let mut logs = vec![];
     const LOG_TIMEOUT: Duration = Duration::from_secs(8);
-    match output_with_timeout(
-        Command::new("podman")
-            .args(["logs", "--tail", "100", container_name]),
-        LOG_TIMEOUT,
-    ) {
+    let mut cmd = Command::new("podman");
+    cmd.args(["logs", "--tail", "100", container_name]);
+    match output_with_timeout(cmd, LOG_TIMEOUT) {
         Ok(output) => {
             let text = String::from_utf8_lossy(&output.stdout);
             let stderr = String::from_utf8_lossy(&output.stderr);

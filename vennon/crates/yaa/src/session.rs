@@ -55,8 +55,8 @@ pub fn launch(config: &YaaConfig, opts: SessionOpts) -> Result<()> {
             p.canonicalize().unwrap_or(p)
         }
         None => {
-            let cwd = std::env::current_dir().unwrap_or_else(|_| config.projects_path());
-            cwd.canonicalize().unwrap_or(cwd)
+            let p = config.projects_path();
+            p.canonicalize().unwrap_or(p)
         }
     };
 
