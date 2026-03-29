@@ -30,24 +30,13 @@ commands:
       env:
         VERTICAL: "{{ vertical }}"
         NPM_SCRIPT_ENV: "{{ env | map }}"
-      action: up -d
+      action: up -d --force-recreate
 
   stop:
     description: Stop front-student
     compose:
       files: [docker-compose.yml]
       action: down
-
-  worker:
-    description: Run worker
-    args:
-      - name: env
-        enum: env
-      - name: vertical
-        enum: vertical
-    exec:
-      container: app
-      command: "npm run worker:{{ env | map }}:{{ vertical }}"
 
   test:
     description: Run tests

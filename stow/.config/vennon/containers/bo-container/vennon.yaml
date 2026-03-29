@@ -29,7 +29,7 @@ commands:
       env_file: "env/{{ env | map }}.env"
       env:
         VERTICAL: "{{ vertical }}"
-      action: up -d
+      action: up -d --force-recreate
 
   stop:
     description: Stop bo-container

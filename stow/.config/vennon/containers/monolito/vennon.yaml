@@ -37,7 +37,7 @@ commands:
         - if: dev
           file: docker-compose.dev.yml
       env_file: "env/{{ env | map }}.env"
-      action: up -d
+      action: up -d --force-recreate
 
   stop:
     description: Stop monolito
@@ -108,4 +108,4 @@ commands:
     compose:
       files: [docker-compose.worker.yml, docker-compose.deps.yml]
       env_file: "env/{{ env | map }}.env"
-      action: up -d
+      action: up -d --force-recreate
