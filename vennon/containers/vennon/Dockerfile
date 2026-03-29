@@ -81,7 +81,7 @@ RUN ZSH_PLUGINS="/home/claude/.nix-profile/share" && \
     echo '[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh' >> /home/claude/.zshrc && \
     chown 1000:1000 /home/claude/.zshrc
 
-# Cursor CLI + FHS libs (para futuro vennon-cursor)
+# Cursor CLI + FHS libs (vennon-cursor usa o binário da base)
 RUN mkdir -p /home/claude/.local/share /lib64 /lib/x86_64-linux-gnu
 COPY --from=cursor-cli /root/.local/bin/ /home/claude/.local/bin/
 COPY --from=cursor-cli /root/.local/share/ /home/claude/.local/share/

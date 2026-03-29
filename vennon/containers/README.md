@@ -9,12 +9,14 @@ vennon-vennon (base)
 └── vennon-cursor     (cursor já na base)
 ```
 
-## leech/ — Base Image (`vennon-vennon`)
+## vennon/ — Base Image (`vennon-vennon`)
+
+Contexto de build usado por `vennon <ide> build` e `just images`:
 
 ```
-leech/
-├── Dockerfile                  # Multi-stage: cursor CLI (debian) + nix (nixos/nix:latest) → tag `vennon-vennon`
-└── entrypoint.sh               # nix-daemon, dynamic UID/GID, session hooks, setpriv
+vennon/
+├── Dockerfile      # Multi-stage: cursor CLI (debian) + nix (nixos/nix:latest) → tag `vennon-vennon`
+└── entrypoint.sh   # nix-daemon, dynamic UID/GID, session hooks, setpriv
 ```
 
 **Pacotes instalados (3 layers para cache):**
