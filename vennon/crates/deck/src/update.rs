@@ -52,7 +52,7 @@ pub fn run() -> Result<()> {
         ("vennon",     "instalando vennon"),
         ("yaa",        "instalando yaa"),
         ("deck",       "instalando deck"),
-        ("vennon-bus", "instalando vennon-bus"),
+        ("buzz",       "instalando buzz"),
     ];
 
     // Pre-print all step lines as pending
@@ -136,7 +136,7 @@ pub fn run() -> Result<()> {
     }
 
     // ── Steps 2-4: install binaries ─────────────────────────────
-    for (idx, bin) in ["vennon", "yaa", "deck", "vennon-bus"].iter().enumerate() {
+    for (idx, bin) in ["vennon", "yaa", "deck", "buzz"].iter().enumerate() {
         let step_idx = idx + 1;
         let start = Instant::now();
 

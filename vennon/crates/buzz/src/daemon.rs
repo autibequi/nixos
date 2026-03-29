@@ -4,12 +4,12 @@ use std::os::unix::net::{UnixListener, UnixStream};
 use std::time::Instant;
 
 use crate::audit;
-use crate::config::BusConfig;
+use crate::config::BuzzConfig;
 use crate::execute;
 use crate::protocol::{BusRequest, BusResponse};
 use crate::validate;
 
-pub fn run(config: &BusConfig) -> Result<()> {
+pub fn run(config: &BuzzConfig) -> Result<()> {
     let socket_path = config.socket_path();
     let log_path = config.log_path();
 
@@ -43,7 +43,7 @@ pub fn run(config: &BusConfig) -> Result<()> {
         match stream {
             Ok(stream) => {
                 // Re-read config on every request — changes to bus.yaml take effect immediately
-                let actions = crate::config::BusConfig::load()
+                let actions = crate::config::BuzzConfig::load()
                     .map(|c| c.actions)
                     .unwrap_or_else(|_| config.actions.clone());
                 let log_clone = log_path.clone();
