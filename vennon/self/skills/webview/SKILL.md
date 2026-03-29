@@ -49,33 +49,36 @@ Precisa de visualizacao?
 
 ## Relay — Verificacao e Comandos
 
+> **Via buzz (preferido)** — leia a skill `buzz` para detalhes completos.
+> `buzz` é o daemon host; do container, chame `buzz call relay-*`.
+
 **Sempre fazer o live check antes de usar:**
 
 ```bash
-python3 /workspace/self/scripts/chrome-relay.py status 2>&1
+buzz call relay-status
 ```
 
-**Subir o servidor se nao estiver rodando:**
+**Subir o Chrome se nao estiver rodando:**
 ```bash
-nohup python3 /workspace/self/scripts/chrome-relay.py serve > /tmp/relay-server.log 2>&1 &
+buzz call relay-start
 ```
 
 **Regra de decisao:**
 ```
-live check OK   -> usar normalmente
-live check FAIL -> avisar: "Chrome nao responde — reiniciar relay?"
+relay-status OK   -> usar normalmente
+relay-status FAIL -> buzz call relay-start -> tentar de novo
 ```
 
 ### Comandos
 
-| Comando | O que faz |
-|---------|-----------|
-| `status` | Status do relay (Chrome + servidor) |
-| `nav <url>` | Navega o Chrome para a URL |
-| `show <arquivo.md>` | Serve markdown com Mermaid (zoom+drag automatico) |
-| `tabs` | Lista abas abertas |
-| `speak` | Fala via espeak-ng |
-| `present` | Modo apresentacao |
+| buzz call | O que faz |
+|-----------|-----------|
+| `relay-status` | Status do relay (Chrome + servidor) |
+| `relay-nav --url=<url>` | Navega o Chrome para a URL |
+| `relay-show --path=<arquivo.md>` | Serve markdown com Mermaid (zoom+drag automatico) |
+| `relay-tabs` | Lista abas abertas |
+| `relay-stop` | Para Chrome + relay |
+| `relay-inject --js=<js>` | Executa JS no Chrome (retorna resultado) |
 
 ---
 
@@ -84,7 +87,7 @@ live check FAIL -> avisar: "Chrome nao responde — reiniciar relay?"
 O relay renderiza qualquer `.md` com blocos ` ```mermaid ``` ` fullscreen, sem containers aninhados.
 
 ```bash
-python3 /workspace/self/scripts/chrome-relay.py show <arquivo.md>
+buzz call relay-show --path=<arquivo.md>
 ```
 
 **Layout default:**
@@ -239,3 +242,15 @@ Se voce e um agente ou skill que precisa desenhar algo:
 2. Leia o sub-file do tipo de saida que precisa
 3. Use os templates e convencoes documentados
 4. Se criar um novo tipo de visualizacao que ficou bom, adicione aqui
+
+### Abrir o Chrome (dependencia do relay)
+
+Para qualquer output visual no browser, use a skill **buzz**:
+
+```bash
+buzz call relay-start          # sobe Chrome com CDP
+buzz call relay-show --path=<arquivo>   # exibe
+buzz call relay-nav --url=<url>         # navega
+```
+
+Leia `skills/buzz/SKILL.md` para o protocolo completo (verificacao, fluxo, validacoes).

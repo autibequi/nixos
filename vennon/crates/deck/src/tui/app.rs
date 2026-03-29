@@ -1383,7 +1383,7 @@ fn collect_logs_for(container_name: &str) -> (Vec<String>, bool) {
             let stderr = String::from_utf8_lossy(&output.stderr);
             for line in text.lines().chain(stderr.lines()) {
                 let clean = strip_ansi(line);
-                if !clean.trim().is_empty() {
+                if !clean.trim().is_empty() && !clean.contains("buildando...") {
                     logs.push(clean);
                 }
             }

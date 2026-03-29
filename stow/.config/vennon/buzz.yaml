@@ -8,6 +8,18 @@ log: ~/.local/share/vennon/logs/buzz.log
 
 actions:
 
+  # ── Clipboard ─────────────────────────────────────────────────
+
+  clipboard-write:
+    description: Escreve texto no clipboard do host (Wayland)
+    command: bash -c 'printf "%s" "{{ text }}" | wl-copy'
+    args:
+      - name: text
+        type: string
+        required: true
+        validate:
+          - max_length: 10000
+
   # ── Apps ──────────────────────────────────────────────────────
 
   open-editor:
