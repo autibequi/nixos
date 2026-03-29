@@ -103,7 +103,7 @@ fn run_loop(
                 }
             }
             Event::Resize(_, _) => {
-                // Next draw picks up the new size; crossterm queued this so we don't block.
+                terminal.clear()?;
             }
             _ => {}
         }

@@ -603,6 +603,22 @@ fn scan_compose_container_name(path: &Path) -> Option<String> {
     None
 }
 
+fn strip_ansi(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    let mut chars = s.chars().peekable();
+    while let Some(c) = chars.next() {
+        if c == '\x1b' && chars.peek() == Some(&'[') {
+            chars.next();
+            for nc in chars.by_ref() {
+                if nc.is_ascii_alphabetic() { break; }
+            }
+        } else {
+            out.push(c);
+        }
+    }
+    out
+}
+
 fn collect_logs_for(container_name: &str) -> (Vec<String>, bool) {
     let mut logs = vec![];
     const LOG_TIMEOUT: Duration = Duration::from_secs(8);
@@ -613,8 +629,9 @@ fn collect_logs_for(container_name: &str) -> (Vec<String>, bool) {
             let text = String::from_utf8_lossy(&output.stdout);
             let stderr = String::from_utf8_lossy(&output.stderr);
             for line in text.lines().chain(stderr.lines()) {
-                if !line.trim().is_empty() {
-                    logs.push(line.to_string());
+                let clean = strip_ansi(line);
+                if !clean.trim().is_empty() {
+                    logs.push(clean);
                 }
             }
             (logs, false)
