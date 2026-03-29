@@ -49,7 +49,7 @@
     ./modules/core/greetd.nix
     ./modules/core/hyprland.nix
     ./modules/core/obsidian-sync.nix
-    ./modules/core/vennon-tick.nix
+    ./modules/core/leech-tick.nix
     ./modules/core/work.nix
 
     # ── Services ───────────────────────────────────────
