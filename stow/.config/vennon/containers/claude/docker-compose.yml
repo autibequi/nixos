@@ -23,11 +23,11 @@ services:
     - /home/pedrinho/nixos/vennon/self/claude.bypass.json:/home/claude/.claude/settings.json
     - /home/pedrinho/nixos/vennon/self/skills:/home/claude/.claude/skills
     - /home/pedrinho/nixos/vennon/self/commands:/home/claude/.claude/commands
-    - /home/pedrinho/nixos/vennon/self/agents:/home/claude/.claude/agents
+    - /home/pedrinho/nixos/vennon/self/ego:/home/claude/.claude/agents
     - /home/pedrinho/nixos/vennon/self/hooks:/home/claude/.claude/hooks:ro
     - /home/pedrinho/nixos/vennon/self/scripts:/home/claude/.claude/scripts
     - /home/pedrinho/.claude.json:/home/claude/.claude.json
-    - /home/pedrinho/.leech:/home/claude/.leech:rw
+    - /home/pedrinho/.vennon:/home/claude/.vennon:rw
     - /proc/meminfo:/host/proc/meminfo:ro
     - /proc/loadavg:/host/proc/loadavg:ro
     - /proc/uptime:/host/proc/uptime:ro
@@ -38,7 +38,6 @@ services:
     - /home/pedrinho/nixos:/workspace/host:rw
     environment:
       CLAUDE_ENV: container
-      DOCKER_HOST: tcp://localhost:2375
       GIT_AUTHOR_EMAIL: pedro.correa@estrategia.com
       GIT_AUTHOR_NAME: Pedro Correa
       GIT_COMMITTER_EMAIL: pedro.correa@estrategia.com
@@ -58,15 +57,6 @@ services:
     - NET_BIND_SERVICE
     extra_hosts:
     - host.docker.internal:host-gateway
-  docker-proxy:
-    image: docker.io/library/nginx:alpine
-    container_name: vennon-docker-proxy
-    restart: unless-stopped
-    ports:
-    - 127.0.0.1:2375:2375
-    volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
-    - /home/pedrinho/nixos/vennon/containers/leech/docker-socket-filter.conf:/etc/nginx/conf.d/default.conf:ro
 networks:
   default:
     external: true

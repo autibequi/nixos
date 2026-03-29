@@ -1,13 +1,4 @@
 services:
-  docker-proxy:
-    image: docker.io/library/nginx:alpine
-    container_name: vennon-docker-proxy
-    restart: unless-stopped
-    ports:
-    - 127.0.0.1:2375:2375
-    volumes:
-    - /var/run/docker.sock:/var/run/docker.sock
-    - /home/pedrinho/nixos/vennon/containers/vennon/docker-socket-filter.conf:/etc/nginx/conf.d/default.conf:ro
   opencode:
     image: vennon-opencode:latest
     container_name: vennon-opencode
@@ -48,7 +39,6 @@ services:
     - /home/pedrinho/.config/opencode:/home/claude/.config/opencode
     environment:
       CLAUDE_ENV: container
-      DOCKER_HOST: tcp://localhost:2375
       ENGINE: OPENCODE
       GIT_AUTHOR_EMAIL: pedro.correa@estrategia.com
       GIT_AUTHOR_NAME: Pedro Correa
