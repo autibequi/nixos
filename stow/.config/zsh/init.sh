@@ -11,7 +11,7 @@ fi
 source ~/secrets.sh
 
 # Claude Code — esconde do history
-HISTORY_IGNORE="(claude*|leech|leech*|zion|zion*|puppy*)"
+HISTORY_IGNORE="(claude*|vennon|vennon*|zion|zion*|puppy*)"
 
 # Shell tool init
 eval "$(starship init zsh)"

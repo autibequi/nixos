@@ -4,8 +4,8 @@
 
 export ENGINE="${ENGINE:-CLAUDE}"
 
-_VENNON_CONFIG="${HOME:-/home/claude}/.leech"
-[ -f "$_VENNON_CONFIG" ] || _VENNON_CONFIG="/.leech"
+_VENNON_CONFIG="${HOME:-/home/claude}/.vennon"
+[ -f "$_VENNON_CONFIG" ] || _VENNON_CONFIG="/.vennon"
 [ -f "$_VENNON_CONFIG" ] && { set -a; source "$_VENNON_CONFIG" 2>/dev/null || true; set +a; }
 export ENGINE="${ENGINE:-CLAUDE}"
 

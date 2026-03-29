@@ -17,7 +17,7 @@ skills, hooks, agentes, scripts, personas e configuracao. No host vive em `~/nix
 
 | Arquivo | Responsabilidade | Quando ler |
 |---------|-----------------|------------|
-| **SYSTEM.md** | Ambiente: paths, CLI (yaa/vennon/deck), ~/.leech flags, glossario, vault structure, cota API | Boot, orientacao basica |
+| **SYSTEM.md** | Ambiente: paths, CLI (yaa/vennon/deck), ~/.vennon flags, glossario, vault structure, cota API | Boot, orientacao basica |
 | **AGENT.md** | Regras de agente: 11 leis, DASHBOARD protocol, ciclo autonomo (acordar→executar→finalizar→reagendar) | Inicio de qualquer ciclo de agente |
 | **PERSONA.md** | Identidade: pointer pra persona ativa, identidade (Claudinho/Buchecha), papel, iniciativa, auto-evolucao, diario | Boot (injetado se personality=ON) |
 | **DIRETRIZES.md** | Apresentacao: emoji, output, git commits, avatar rules, links Cursor, plan mode, verificacao, despedida + **blocos de interface** (ERRO/SUCESSO/ACAO/INFO) | Toda interacao |
@@ -57,13 +57,13 @@ Executados automaticamente pelo Claude Code em momentos especificos.
 
 | Arquivo | Quando executa | O que faz |
 |---------|---------------|-----------|
-| **session-start.sh** | Inicio da sessao | Injeta boot flags, ~/.leech, API usage, persona. O arquivo mais critico do sistema. |
+| **session-start.sh** | Inicio da sessao | Injeta boot flags, ~/.vennon, API usage, persona. O arquivo mais critico do sistema. |
 | **user-prompt-submit.sh** | A cada mensagem do user | Lazy-load de ENV + OBSIDIAN context (poupa tokens em perguntas simples). |
 | **pre-tool-use.sh** | Antes de cada tool | Pre-processamento leve. |
 | **post-tool-use.sh** | Depois de cada tool | Pos-processamento leve. |
 | **startup-hook.sh** | Startup do container | Inicializacao. |
 | **modes/** | Subpasta | Conteudo injetado condicionalmente: |
-| **modes/analysis.md** | LEECH_ANALYSIS_MODE=1 | Modo experimento isolado (subagente de debug). |
+| **modes/analysis.md** | vennon_ANALYSIS_MODE=1 | Modo experimento isolado (subagente de debug). |
 | **modes/beta.md** | BETA=ON | Modo observacao cientifica + personalidade yandere. |
 
 ### scripts/ — Utilitarios Shell/Python
@@ -108,12 +108,12 @@ skills/
 │   ├── platform-context/ Contexto compartilhado (stacks, convencoes)
 │   └── glance/        Visao visual cross-repo dos diffs
 │
-├── leech/             Infraestrutura do proprio Leech
+├── vennon/             Infraestrutura do proprio vennon
 │   ├── container/     Docker: criar/operar servicos
 │   ├── healthcheck/   Diagnostico do sistema
 │   ├── linux/         NixOS, Hyprland, dotfiles
-│   ├── upgrade/       Implementar features no Leech CLI (Rust)
-│   └── worktree/      Sistema multi-repo via leech wt
+│   ├── upgrade/       Implementar features no vennon CLI (Rust)
+│   └── worktree/      Sistema multi-repo via vennon wt
 │
 ├── meta/              Meta-ferramentas e auto-conhecimento
 │   ├── art/           Visual: ASCII, Chrome relay, design system
@@ -190,7 +190,7 @@ settings.json carrega hooks
 session-start.sh executa:
     ├── Detecta workspace + flags
     ├── Injeta ---BOOT--- (flags, datetime, regras minimas)
-    ├── Injeta ---LEECH--- (~/.leech vars)
+    ├── Injeta ---vennon--- (~/.vennon vars)
     ├── Injeta ---API_USAGE--- (cota)
     ├── Injeta ---PERSONA--- (se personality=ON)
     │   └── PERSONA.md + GLaDOS.persona.md + avatar

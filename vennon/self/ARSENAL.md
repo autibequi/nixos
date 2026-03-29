@@ -89,7 +89,7 @@ Análise de diff, camadas, fluxo de dados, qualidade. Subcommands:
 - `/meta:relay` — controle Chrome via CDP (nav, show, tabs, speak, present)
 - `/meta:webview` — renderizar URL (Chrome relay ou WebFetch)
 - `/meta:cleanup` — revisão e limpeza de sessão
-- `/meta:envs` — lista ~/.leech flags (tokens mascarados, semáforos visíveis)
+- `/meta:envs` — lista ~/.vennon flags (tokens mascarados, semáforos visíveis)
 
 ### /commit — Git
 Criar commit com mensagem interativa. Segue conventional commits.
@@ -136,12 +136,12 @@ Remove branches locais marcadas como [gone] no remoto.
 - **coruja:jira** — Jira workflow (refinement)
 - **coruja:opensearch** — OpenSearch queries
 
-### leech/* — Sistema & Infraestrutura
-- **leech:upgrade** — implementa features do Leech (Rust-only)
-- **leech:worktree** — sistema de worktrees multi-repo
-- **leech:healthcheck** — health checks + diagnóstico
-- **leech:linux** — NixOS, Hyprland, dotfiles
-- **leech:container** — Docker infrastructure, services
+### vennon/* — Sistema & Infraestrutura
+- **vennon:upgrade** — implementa features do vennon (Rust-only)
+- **vennon:worktree** — sistema de worktrees multi-repo
+- **vennon:healthcheck** — health checks + diagnóstico
+- **vennon:linux** — NixOS, Hyprland, dotfiles
+- **vennon:container** — Docker infrastructure, services
 
 ### meta/* — Meta-Ferramentas
 - **meta:art** — visual e relay
@@ -183,7 +183,7 @@ CLI: `yaa agents` | `yaa agents run <nome>` | `/meta:phone call <nome>`
 | Falar com agente | `/meta:phone call <nome>` |
 | Renderizar | `/meta:relay` |
 | PR workflow | `/commit-push-pr` ou `/review-pr` |
-| NixOS/host | `/leech:linux` |
+| NixOS/host | `/vennon:linux` |
 | Feature guiada | `/feature-dev` |
 | Limpar branches | `/clean_gone` |
 

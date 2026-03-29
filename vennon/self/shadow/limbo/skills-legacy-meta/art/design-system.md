@@ -1,9 +1,9 @@
 ---
 name: meta/art/design-system
-description: Design system visual do Leech. Palette testada, tokens semanticos, box drawing, regras de desenho, Catppuccin theme, Nerd Font icons. Dividido em TERMINAL (ASCII) e WEB (Chrome relay). Fonte da verdade — ler ANTES de desenhar qualquer coisa.
+description: Design system visual do vennon. Palette testada, tokens semanticos, box drawing, regras de desenho, Catppuccin theme, Nerd Font icons. Dividido em TERMINAL (ASCII) e WEB (Chrome relay). Fonte da verdade — ler ANTES de desenhar qualquer coisa.
 ---
 
-# Design System — Leech
+# Design System — vennon
 
 Terminal: Catppuccin Mocha dark, JetBrainsMono Nerd Font.
 Browser: Chrome relay via CDP, tema Catppuccin CSS.

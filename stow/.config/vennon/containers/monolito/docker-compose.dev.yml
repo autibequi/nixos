@@ -4,11 +4,11 @@ services:
       dockerfile: ${VENNON_SERVICE_DIR}/Dockerfile.dev
     volumes:
       - ${MONOLITO_DIR}:/go/app
-      - leech-go-build-cache:/root/.cache/go-build
+      - vennon-go-build-cache:/root/.cache/go-build
       - .air.toml:/etc/air.toml:ro
     healthcheck:
       disable: true
 
 volumes:
-  leech-go-build-cache:
-    name: leech-go-build-cache
+  vennon-go-build-cache:
+    name: vennon-go-build-cache

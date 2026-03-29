@@ -1,23 +1,23 @@
 ---
-name: leech
-description: Skill composta do sistema Leech — infraestrutura, containers, CLI, ambiente. Indice das sub-skills de operacao do proprio Leech (nao dos projetos que rodam dentro dele).
+name: vennon
+description: Skill composta do sistema vennon — infraestrutura, containers, CLI, ambiente. Indice das sub-skills de operacao do proprio vennon (nao dos projetos que rodam dentro dele).
 ---
 
-# Leech — Skill Composta
+# vennon — Skill Composta
 
-Skills sobre o sistema Leech em si: containers, CLI, logs, ambiente.
+Skills sobre o sistema vennon em si: containers, CLI, logs, ambiente.
 
 ## Sub-skills
 
 | Sub-skill | Quando usar |
 |---|---|
-| `leech/container` | Dockerizar novo servico integrado ao Leech OU operar servicos existentes via `vennon` |
-| `leech/linux` | NixOS, Hyprland, Waybar, dotfiles, stow, debug de host — tudo de sistema Linux |
-| `leech/healthcheck` | Diagnostico do sistema — ferramentas, disco, load, workspace, git, tasks, cleanup |
-| `leech/upgrade` | Implementar e depurar uma feature do Leech de forma autonoma — worktree isolado, testes sem supervisao, entrega de branch pronto |
-| `leech/worktree` | Sessoes multi-repo para features da Estrategia — `leech wt new/switch/list/close` |
+| `vennon/container` | Dockerizar novo servico integrado ao vennon OU operar servicos existentes via `vennon` |
+| `vennon/linux` | NixOS, Hyprland, Waybar, dotfiles, stow, debug de host — tudo de sistema Linux |
+| `vennon/healthcheck` | Diagnostico do sistema — ferramentas, disco, load, workspace, git, tasks, cleanup |
+| `vennon/upgrade` | Implementar e depurar uma feature do vennon de forma autonoma — worktree isolado, testes sem supervisao, entrega de branch pronto |
+| `vennon/worktree` | Sessoes multi-repo para features da Estrategia — `vennon wt new/switch/list/close` |
 
-## O que e o Leech (contexto rapido)
+## O que e o vennon (contexto rapido)
 
 ```
 /workspace/self/        ← engine: prompts, skills, agents, commands
@@ -29,16 +29,16 @@ Skills sobre o sistema Leech em si: containers, CLI, logs, ambiente.
 
 ## Configuracao — Figment layered
 
-**Prioridade:** CLI flag > env var (`LEECH_*`) > config.yaml > built-in default
+**Prioridade:** CLI flag > env var (`vennon_*`) > config.yaml > built-in default
 
 | Fonte | Path | Conteudo |
 |---|---|---|
-| config.yaml | `~/.config/leech/config.yaml` | Defaults estruturados (session, runner, agents, paths, system) |
-| env vars | `LEECH_SESSION_ENGINE`, `LEECH_RUNNER_ENV`, etc. | Override pontual |
+| config.yaml | `~/.config/vennon/config.yaml` | Defaults estruturados (session, runner, agents, paths, system) |
+| env vars | `vennon_SESSION_ENGINE`, `vennon_RUNNER_ENV`, etc. | Override pontual |
 | secrets | `GH_TOKEN`, `ANTHROPIC_API_KEY` (env vars diretas) | Tokens — nunca no YAML |
-| ~/.leech | `~/.leech` | Legado bash-sourceable (tokens + backward compat) |
+| ~/.vennon | `~/.vennon` | Legado bash-sourceable (tokens + backward compat) |
 
-Gerenciar config: `leech config show|edit|init|path`
+Gerenciar config: `vennon config show|edit|init|path`
 
 ## CLI — 4 dominios
 
@@ -46,11 +46,11 @@ Gerenciar config: `leech config show|edit|init|path`
 | Comando | O que faz |
 |---|---|
 | `yaa` | Nova sessao Claude Code (default) |
-| `leech --opus` | Sessao com modelo Opus |
+| `vennon --opus` | Sessao com modelo Opus |
 | `yaa continue` | Retomar ultima sessao |
-| `leech resume [--resume=ID]` | Retomar por ID |
+| `vennon resume [--resume=ID]` | Retomar por ID |
 | `yaa shell` | Bash no container |
-| `leech ask [agent] pergunta` | Pergunta one-shot |
+| `vennon ask [agent] pergunta` | Pergunta one-shot |
 
 ### Agents
 | Comando | O que faz |
@@ -67,15 +67,15 @@ Gerenciar config: `leech config show|edit|init|path`
 |---|---|
 | `vennon <svc> <action>` | Orquestrar servico Docker (start/stop/logs/shell/test/install/build/flush) |
 | `deck` | Dashboard interativo (TUI) |
-| `leech worktree [svc]` | Listar git worktrees |
+| `vennon worktree [svc]` | Listar git worktrees |
 
 ### System
 | Comando | O que faz |
 |---|---|
-| `vennon build\|stop\|clean\|destroy` | Lifecycle do container Leech |
+| `vennon build\|stop\|clean\|destroy` | Lifecycle do container vennon |
 | `deck os switch\|test\|boot\|build` | Operacoes NixOS |
 | `deck stow [-r]` | Deploy dotfiles |
-| `leech config` | Ver/editar configuracao |
+| `vennon config` | Ver/editar configuracao |
 | `yaa man` | Documentacao completa |
 
 ## Regras de ambiente
@@ -83,9 +83,9 @@ Gerenciar config: `leech config show|edit|init|path`
 - `in_docker=1` → nao executar `nixos-rebuild`, `nh os switch`, `systemctl` — nao afeta o host
 - Para comandos de sistema: pedir ao usuario rodar no host
 - `nix-shell -p <pkg>` disponivel no container para qualquer pacote Nixpkgs
-- Scripts: editar `leech/scripts/` (fonte da verdade), nunca `scripts/` (sao symlinks)
-- `host_attached=1`: `/workspace/host/` editavel — skills, hooks, agents, CLI do Leech
-- Ativar: `leech --host`, `yaa --host`, ou `session.host: true` em `config.yaml`
+- Scripts: editar `vennon/scripts/` (fonte da verdade), nunca `scripts/` (sao symlinks)
+- `host_attached=1`: `/workspace/host/` editavel — skills, hooks, agents, CLI do vennon
+- Ativar: `vennon --host`, `yaa --host`, ou `session.host: true` em `config.yaml`
 - `/workspace/obsidian/` sempre editavel por qualquer agente (sem precisar de --host)
 
 ## Logs — onde ficam
@@ -96,11 +96,11 @@ Gerenciar config: `leech config show|edit|init|path`
 | `/workspace/logs/docker/<service>/startup.log` | Build/startup |
 | `/workspace/logs/docker/<service>/install.log` | go mod / npm |
 
-Host: `~/.local/share/leech/logs/<service>/`
+Host: `~/.local/share/vennon/logs/<service>/`
 
 ## Rede entre containers
 
-Todos os containers Leech usam a rede externa `nixos_default`:
+Todos os containers vennon usam a rede externa `nixos_default`:
 ```yaml
 networks:
   default:
@@ -110,4 +110,4 @@ networks:
 
 ## Adicionar nova sub-skill
 
-Criar `leech/<nome>/SKILL.md` e referenciar nesta tabela.
+Criar `vennon/<nome>/SKILL.md` e referenciar nesta tabela.

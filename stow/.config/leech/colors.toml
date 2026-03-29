@@ -1,6 +1,6 @@
-# Leech Theme — OLED Dark
+# vennon Theme — OLED Dark
 # Source of truth for all component colors.
-# Run `leech-theme-apply` after editing.
+# Run `vennon-theme-apply` after editing.
 
 [meta]
 name = "oled-dark"

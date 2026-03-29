@@ -1,6 +1,6 @@
 ---
 name: self:context:contemplate
-description: Relatório contemplativo — extrapola o contexto atual, imagina o que pode ser construído e propõe uma visão de crescimento do sistema Leech.
+description: Relatório contemplativo — extrapola o contexto atual, imagina o que pode ser construído e propõe uma visão de crescimento do sistema vennon.
 ---
 
 # /self:context:contemplate — Contemplar o Contexto

@@ -209,7 +209,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Leech Relay</title>
+  <title>vennon Relay</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -589,7 +589,7 @@ def cmd_show(args):
         print("FAIL: Could not start content server", file=sys.stderr)
         sys.exit(1)
 
-    url = "http://leech:%d" % port
+    url = "http://vennon:%d" % port
     if cdp_ok():
         ok, msg = cdp_navigate(url)
         print("OK: Serving on %s, Chrome navigated" % url if ok else "Serving on %s but Chrome nav failed: %s" % (url, msg))
@@ -664,7 +664,7 @@ def cmd_serve(args):
         pass
 
     chrome = "OK" if cdp_ok() else "OFF"
-    print("Content server: http://leech:%d (Chrome: %s)" % (port_used, chrome), file=sys.stderr)
+    print("Content server: http://vennon:%d (Chrome: %s)" % (port_used, chrome), file=sys.stderr)
     sys.stderr.flush()
     try:
         server.serve_forever()
@@ -676,7 +676,7 @@ def cmd_serve(args):
 def cmd_start(args=None):
     print("Para iniciar o Chrome relay no host:")
     print("")
-    print("  chromium --remote-debugging-port=9222 --user-data-dir=/tmp/leech-relay &")
+    print("  chromium --remote-debugging-port=9222 --user-data-dir=/tmp/vennon-relay &")
     print("")
     print("Ou com seu perfil normal (agent tera acesso total ao browser):")
     print("")

@@ -84,7 +84,7 @@ Controles na tela:
 Para visualizacoes custom, escrever HTML em `/tmp/chrome-relay/<nome>.html` e navegar:
 
 ```bash
-python3 /workspace/self/scripts/chrome-relay.py nav "http://leech:8765/<nome>.html"
+python3 /workspace/self/scripts/chrome-relay.py nav "http://vennon:8765/<nome>.html"
 ```
 
 O relay serve arquivos estaticos de `/tmp/chrome-relay/` automaticamente.

@@ -9,9 +9,9 @@
 ## Criacao
 
 ```bash
-leech wt new <agente>/<task-kebab>
-# ex: leech wt new coruja/metrics-dashboard
-# ex: leech wt new gandalf/FUK2-12345-auth-fix
+vennon wt new <agente>/<task-kebab>
+# ex: vennon wt new coruja/metrics-dashboard
+# ex: vennon wt new gandalf/FUK2-12345-auth-fix
 ```
 
 Branch = nome da tarefa. Se tem card Jira: usar o ID. Se nao: kebab-case descritivo.
@@ -19,11 +19,11 @@ Branch = nome da tarefa. Se tem card Jira: usar o ID. Se nao: kebab-case descrit
 ## Fluxo obrigatorio
 
 ```
-1. Criar:       leech wt new <agente>/<task>
+1. Criar:       vennon wt new <agente>/<task>
 2. Implementar: repos em /workspace/home/worktree/<sessao>/
 3. Apresentar:  criar inbox/WORKTREE_<agente>_<nome>_<YYYYMMDD>.md
-4. CTO revisa:  leech wt <agente>/<task>
-5. CTO aprova:  leech wt <agente>/<task> --close
+4. CTO revisa:  vennon wt <agente>/<task>
+5. CTO aprova:  vennon wt <agente>/<task> --close
 ```
 
 ## Card de apresentacao (obrigatorio)
@@ -50,17 +50,17 @@ criado: YYYY-MM-DDThh:mmZ
 <motivacao e impacto>
 
 ## Como revisar
-leech wt <agente>/<task>
+vennon wt <agente>/<task>
 
 ## Como aprovar
-leech wt <agente>/<task> --close
+vennon wt <agente>/<task> --close
 ```
 
 ## Limites
 
 - Maximo 3 sessoes pendentes por agente — se atingido, nao criar novos ate CTO revisar
 - Agentes NUNCA fazem `git commit` ou `git push` — apenas criam worktree e apresentam
-- CTO lista sessoes: `leech wt` ou `leech worktree`
+- CTO lista sessoes: `vennon wt` ou `vennon worktree`
 
 ## Quem pode usar
 

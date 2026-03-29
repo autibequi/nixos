@@ -79,7 +79,7 @@ window#waybar {
 #custom-ram-bar,
 #custom-claude-usage,
 #custom-obsidian-sync,
-#custom-leech,
+#custom-vennon,
 #custom-screenrecord,
 #custom-tray-toggle,
 #bluetooth,
@@ -358,15 +358,15 @@ window#waybar {
 }
 
 /*========================================================*
- *                   LEECH MENU ICON                      *
+ *                   vennon MENU ICON                      *
  *========================================================*/
-#custom-leech {
+#custom-vennon {
     padding: 0 4px;
     color: @main-text;
     min-width: 14px;
 }
 
-#custom-leech:hover {
+#custom-vennon:hover {
     color: @main-bg;
     background-color: @main-text;
 }

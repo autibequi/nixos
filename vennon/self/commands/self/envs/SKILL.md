@@ -1,28 +1,28 @@
 ---
 name: self:envs
-description: "Lista todas as variáveis de ~/.leech — tokens mascarados com ruído aleatório, flags e semáforos visíveis."
+description: "Lista todas as variáveis de ~/.vennon — tokens mascarados com ruído aleatório, flags e semáforos visíveis."
 ---
 
 # /self:envs — Variáveis de Ambiente Centralizadas
 
-Exibe o conteúdo de `~/.leech` organizado por seção.
+Exibe o conteúdo de `~/.vennon` organizado por seção.
 Valores sensíveis (tokens, keys, senhas) são mascarados com ruído aleatório gerado na hora.
 
 ```
 /self:envs          → lista completa com mascaramento
 /self:envs raw      → mostra chaves sem valores (só existência)
-/self:envs set KEY=VALUE → define ou atualiza uma variável em ~/.leech
-/self:envs unset KEY     → remove uma variável de ~/.leech
+/self:envs set KEY=VALUE → define ou atualiza uma variável em ~/.vennon
+/self:envs unset KEY     → remove uma variável de ~/.vennon
 ```
 
 ---
 
 ## Execução
 
-### 1. Ler e parsear ~/.leech
+### 1. Ler e parsear ~/.vennon
 
 ```bash
-cat ~/.leech 2>/dev/null || cat /.leech 2>/dev/null || echo "(arquivo não encontrado)"
+cat ~/.vennon 2>/dev/null || cat /.vennon 2>/dev/null || echo "(arquivo não encontrado)"
 ```
 
 ### 2. Gerar tabela mascarada
@@ -46,7 +46,7 @@ CLAUDE_SESSION     DANGER    _KEY  _TOKEN  _SECRET  _PASSWORD  _PAT
 **Chaves não-sensíveis** (mostrar valor real):
 ```
 engine  model_*  PERSONALITY  AUTOCOMMIT  AUTOJARVIS  BETA
-LEECH_DEBUG  HEADLESS  LEECH_ANALYSIS_MODE  MESSAGE  TASK_LOCK
+vennon_DEBUG  HEADLESS  vennon_ANALYSIS_MODE  MESSAGE  TASK_LOCK
 ACTIVE_AGENT  NOTE  OBSIDIAN_PATH  CLAUDIO_NIXOS_DIR  GRAFANA_URL
 ```
 
@@ -55,7 +55,7 @@ ACTIVE_AGENT  NOTE  OBSIDIAN_PATH  CLAUDIO_NIXOS_DIR  GRAFANA_URL
 Imprimir no terminal em ASCII com seções:
 
 ```
-~/.leech — Variáveis de Ambiente Centralizadas
+~/.vennon — Variáveis de Ambiente Centralizadas
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 TOKENS
@@ -74,29 +74,29 @@ BOOT FLAGS
   ...
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  arquivo: ~/.leech    tokens: N/M definidos    flags: N ativas
+  arquivo: ~/.vennon    tokens: N/M definidos    flags: N ativas
 ```
 
 ### Subcomando `set`
 
 Se `args = set KEY=VALUE`:
-1. Verificar se KEY já existe em `~/.leech`
+1. Verificar se KEY já existe em `~/.vennon`
    - Se sim: substituir a linha com `sed -i`
    - Se não: append na seção adequada
-2. Confirmar: `KEY atualizado em ~/.leech`
+2. Confirmar: `KEY atualizado em ~/.vennon`
 
 ### Subcomando `unset`
 
 Se `args = unset KEY`:
 ```bash
-sed -i "s/^KEY=.*/KEY=/" ~/.leech
+sed -i "s/^KEY=.*/KEY=/" ~/.vennon
 ```
 
 ---
 
 ## Notas
 
-- `~/.leech` é sourced por TODOS os hooks e pelo entrypoint do container
-- Mountado em todos os containers: `~/.leech` (leech) e `/.leech` (app containers)
+- `~/.vennon` é sourced por TODOS os hooks e pelo entrypoint do container
+- Mountado em todos os containers: `~/.vennon` (vennon) e `/.vennon` (app containers)
 - Alterações tomam efeito no próximo boot da sessão
-- Para efeito imediato no processo atual: `source ~/.leech`
+- Para efeito imediato no processo atual: `source ~/.vennon`

@@ -78,12 +78,12 @@ python3 /workspace/self/scripts/chrome-relay.py nav "http://127.0.0.1:8765/glado
 ## Canvas Colaborativo
 
 Ferramenta de diagramacao interativa — desenhada do zero, sem dependencias.
-Fonte: `host/leech/tools/chrome/canvas/index.html`
+Fonte: `host/vennon/tools/chrome/canvas/index.html`
 
 ```bash
 # Servir e abrir
-cp /workspace/host/leech/tools/chrome/canvas/index.html /tmp/chrome-relay/canvas.html
-python3 /workspace/self/scripts/chrome-relay.py nav "http://leech:8765/canvas.html"
+cp /workspace/host/vennon/tools/chrome/canvas/index.html /tmp/chrome-relay/canvas.html
+python3 /workspace/self/scripts/chrome-relay.py nav "http://vennon:8765/canvas.html"
 python3 /workspace/self/scripts/chrome-relay.py inject "document.documentElement.requestFullscreen()"
 ```
 

@@ -56,7 +56,7 @@ Meta-agente — identifica melhorias de alto impacto e implementa via worktrees.
 
 Enciclopedista — constroi e mantem wiki pessoal no Obsidian.
 
-- Territorio: `/workspace/obsidian/wiki/` (4 areas: estrategia, host, leech, pedrinho)
+- Territorio: `/workspace/obsidian/wiki/` (4 areas: estrategia, host, vennon, pedrinho)
 - Selecao de topico: queue → areas vazias → #stub → mais antigo
 - Rotacao de areas quando sem queue
 - Usar wikilinks `[[nome]]` para cross-references

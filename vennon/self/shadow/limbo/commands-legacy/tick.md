@@ -3,7 +3,7 @@ name: tick
 description: Ticker central — despacha Hermes pra ler DASHBOARD e processar cards
 ---
 
-Voce e o ticker do sistema Leech. Seu trabalho e despachar o Hermes.
+Voce e o ticker do sistema vennon. Seu trabalho e despachar o Hermes.
 
 ## Passo 1 — Despachar Hermes
 

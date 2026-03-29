@@ -25,7 +25,7 @@ Detectar valores atuais das flags a partir do contexto de boot injetado no iníc
 ### 2. Detectar flags e estado real
 
 Para cada flag, determinar:
-- **Mecanismo de ativação** (`~/.leech KEY=` ou variável de processo)
+- **Mecanismo de ativação** (`~/.vennon KEY=` ou variável de processo)
 - **Default** (o que acontece sem intervenção)
 - **Valor nesta sessão** (ON/OFF/0/1/string)
 - **Status**: ativo / inativo / lazy
@@ -43,8 +43,8 @@ Se Chrome offline, imprimir ASCII diretamente no terminal.
 
 | Flag | Mecanismo | Default | Valor |
 |------|-----------|---------|-------|
-| `personality` | `~/.leech PERSONALITY=` | ON | ON |
-| `autocommit` | `~/.leech AUTOCOMMIT=` | OFF | OFF |
+| `personality` | `~/.vennon PERSONALITY=` | ON | ON |
+| `autocommit` | `~/.vennon AUTOCOMMIT=` | OFF | OFF |
 | ... | ... | ... | ... |
 
 ### Pipeline vertical

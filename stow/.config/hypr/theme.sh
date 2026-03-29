@@ -67,7 +67,7 @@ dark_theme() {
     fi
 
     # Regenerate centralized colors
-    command -v leech-theme-apply >/dev/null 2>&1 && leech-theme-apply dark || true
+    command -v vennon-theme-apply >/dev/null 2>&1 && vennon-theme-apply dark || true
 }
 
 light_theme() {
@@ -88,7 +88,7 @@ light_theme() {
     fi
 
     # Regenerate centralized colors
-    command -v leech-theme-apply >/dev/null 2>&1 && leech-theme-apply light || true
+    command -v vennon-theme-apply >/dev/null 2>&1 && vennon-theme-apply light || true
 }
 
 toggle_theme() {

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Cursor Agent — único entrypoint (sessionStart / preToolUse / postToolUse)
-# Scripts Leech partilhados: ../session-start.sh, ../pre-tool-use.sh, ../post-tool-use.sh
+# Scripts vennon partilhados: ../session-start.sh, ../pre-tool-use.sh, ../post-tool-use.sh
 # hooks.json: .../vennon-hooks/cursor-hook.sh sessionStart
 set -euo pipefail
 export ENGINE=CURSOR

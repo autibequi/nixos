@@ -7,7 +7,7 @@ services:
     - 127.0.0.1:2375:2375
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
-    - /home/pedrinho/nixos/vennon/containers/leech/docker-socket-filter.conf:/etc/nginx/conf.d/default.conf:ro
+    - /home/pedrinho/nixos/vennon/containers/vennon/docker-socket-filter.conf:/etc/nginx/conf.d/default.conf:ro
   opencode:
     image: vennon-opencode:latest
     container_name: vennon-opencode
@@ -24,19 +24,19 @@ services:
     - -c
     - sleep infinity
     volumes:
-    - /home/pedrinho/nixos/leech/self:/workspace/self
+    - /home/pedrinho/nixos/vennon/self:/workspace/self
     - /home/pedrinho/.ovault/Work:/workspace/obsidian
     - /home/pedrinho/projects:/workspace/projects:rw
     - /home/pedrinho:/workspace/home:rw
-    - /home/pedrinho/nixos/leech/self/claude.bypass.json:/home/claude/.claude/settings.json:rw
-    - /home/pedrinho/nixos/leech/self/skills:/home/claude/.claude/skills
-    - /home/pedrinho/nixos/leech/self/commands:/home/claude/.claude/commands
-    - /home/pedrinho/nixos/leech/self/ego:/home/claude/.claude/agents
+    - /home/pedrinho/nixos/vennon/self/claude.bypass.json:/home/claude/.claude/settings.json:rw
+    - /home/pedrinho/nixos/vennon/self/skills:/home/claude/.claude/skills
+    - /home/pedrinho/nixos/vennon/self/commands:/home/claude/.claude/commands
+    - /home/pedrinho/nixos/vennon/self/ego:/home/claude/.claude/agents
     - /home/pedrinho/nixos/vennon/containers/opencode/hooks:/home/claude/.claude/hooks:ro
-    - /home/pedrinho/nixos/leech/self/scripts:/home/claude/.claude/scripts
+    - /home/pedrinho/nixos/vennon/self/scripts:/home/claude/.claude/scripts
     - /home/pedrinho/.claude.json:/home/claude/.claude.json
     - /home/pedrinho/.claude/projects:/home/claude/.claude/projects
-    - /home/pedrinho/.leech:/home/claude/.leech:rw
+    - /home/pedrinho/.vennon:/home/claude/.vennon:rw
     - /proc/meminfo:/host/proc/meminfo:ro
     - /proc/loadavg:/host/proc/loadavg:ro
     - /proc/uptime:/host/proc/uptime:ro

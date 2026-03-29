@@ -1,5 +1,5 @@
-# Leech CLI configuration
-# Priority: CLI flag > env var (LEECH_*) > this file > built-in default
+# vennon CLI configuration
+# Priority: CLI flag > env var (vennon_*) > this file > built-in default
 # Secrets: use env vars (GH_TOKEN, ANTHROPIC_API_KEY) — not this file
 
 # ── Session defaults ─────────────────────────────

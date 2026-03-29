@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # Debug image: builds without optimizations and runs via delve for remote debugging.
-# Usage: leech docker run monolito --debug
+# Usage: vennon docker run monolito --debug
 # Attach: VS Code DAP on localhost:2345
 
 FROM golang:1.24.4-alpine AS builder

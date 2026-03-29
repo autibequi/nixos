@@ -123,10 +123,10 @@ Inspecionar o que é injetado no boot e avaliar o custo-benefício de cada compo
 
 ```bash
 wc -c \
-  /workspace/leech/system/DIRETRIZES.md \
-  /workspace/leech/system/SELF.md \
-  /workspace/leech/personas/GLaDOS.persona.md \
-  /workspace/leech/personas/avatar/glados.md \
+  /workspace/vennon/system/DIRETRIZES.md \
+  /workspace/vennon/system/SELF.md \
+  /workspace/vennon/personas/GLaDOS.persona.md \
+  /workspace/vennon/personas/avatar/glados.md \
   2>/dev/null
 ```
 

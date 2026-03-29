@@ -1,18 +1,18 @@
 { pkgs, ... }:
 let
   user = "pedrinho";
-  leechBin = "/home/${user}/.local/bin/leech";
-  script = pkgs.writeShellScript "leech-tick" ''
-    if [ ! -x "${leechBin}" ]; then
-      echo "leech-tick: ${leechBin} not found, skipping"
+  vennonBin = "/home/${user}/.local/bin/vennon";
+  script = pkgs.writeShellScript "vennon-tick" ''
+    if [ ! -x "${vennonBin}" ]; then
+      echo "vennon-tick: ${vennonBin} not found, skipping"
       exit 0
     fi
     export HOME="/home/${user}"
-    exec "${leechBin}" tick
+    exec "${vennonBin}" tick
   '';
 in {
-  systemd.services.leech-tick = {
-    description = "Leech tick — agents + tasks a cada 10min";
+  systemd.services.vennon-tick = {
+    description = "vennon tick — agents + tasks a cada 10min";
     after = [ "network.target" ];
     serviceConfig = {
       Type = "oneshot";
@@ -25,13 +25,13 @@ in {
     };
   };
 
-  systemd.timers.leech-tick = {
-    description = "Leech tick a cada 10 minutos";
+  systemd.timers.vennon-tick = {
+    description = "vennon tick a cada 10 minutos";
     wantedBy = [ "timers.target" ];
     timerConfig = {
       OnBootSec = "5min";
       OnUnitActiveSec = "10min";
-      Unit = "leech-tick.service";
+      Unit = "vennon-tick.service";
     };
   };
 }

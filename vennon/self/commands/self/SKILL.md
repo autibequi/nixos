@@ -3,7 +3,7 @@ name: self
 description: Introspeccao do sistema — ego (agentes), superego (regras), shadow (inconsciente), skills, context, envs, absorb
 ---
 
-# /self — Sistema Leech
+# /self — Sistema vennon
 
 Sub-comandos:
 
@@ -15,7 +15,7 @@ Sub-comandos:
 | `/self:shadow` | Conteudo do shadow (modes, experiments, legacy) |
 | `/self:skill` | Lista skills disponiveis |
 | `/self:skill:explain` | Explica skill visualmente |
-| `/self:envs` | Flags ~/.leech |
+| `/self:envs` | Flags ~/.vennon |
 | `/self:absorb` | Cristalizar sessao |
 | `/self:context:analysis` | Analise de contexto da sessao |
 | `/self:context:boot-debug` | Debug do pipeline de boot |

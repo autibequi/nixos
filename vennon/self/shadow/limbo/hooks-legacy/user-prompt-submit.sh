@@ -5,20 +5,20 @@
 #   - Prompt simples (curto, sem keywords de task): adia contexto para próxima mensagem
 #   - Prompt complexo (task/código): injeta imediatamente
 #   - Segunda mensagem em diante: sempre injeta se ainda não injetou
-#   - Headless/Agent/leech_debug: injeta imediatamente, sem lazy
+#   - Headless/Agent/vennon_debug: injeta imediatamente, sem lazy
 #
-# stdout → system-reminder (Claude vê) | /tmp/leech-ctx-loaded = lock de sessão
+# stdout → system-reminder (Claude vê) | /tmp/vennon-ctx-loaded = lock de sessão
 
-# ── Load .leech ────────────────────────────────────────────────────────────────
-_LEECH_FILE="${HOME:-/home/claude}/.leech"; [ -f "$_LEECH_FILE" ] || _LEECH_FILE="/.leech"
-[ -f "$_LEECH_FILE" ] && { set -a; source "$_LEECH_FILE" 2>/dev/null || true; set +a; }
+# ── Load .vennon ────────────────────────────────────────────────────────────────
+_vennon_FILE="${HOME:-/home/claude}/.vennon"; [ -f "$_vennon_FILE" ] || _vennon_FILE="/.vennon"
+[ -f "$_vennon_FILE" ] && { set -a; source "$_vennon_FILE" 2>/dev/null || true; set +a; }
 
 HEADLESS="${HEADLESS:-0}"
-LEECH_DEBUG="${LEECH_DEBUG:-OFF}"
+vennon_DEBUG="${vennon_DEBUG:-OFF}"
 AGENT_MODE="0"
 { [ -n "${AGENT_NAME:-}" ] || [ -n "${TASK_NAME:-}" ]; } && AGENT_MODE="1"
 
-CTX_LOCK="/tmp/leech-ctx-loaded"
+CTX_LOCK="/tmp/vennon-ctx-loaded"
 PENDING="${CTX_LOCK}.pending"
 
 # Já injetou nessa sessão → skip
@@ -50,7 +50,7 @@ Para comandos de sistema, pedir ao usuário rodar no host.
 Superpoderes: todo Nixpkgs disponível via `nix-shell -p <pkg>`.
 
 Estrutura /workspace — permissões:
-  /workspace/self/          SEMPRE rw — engine Leech (skills, hooks, agents, scripts)
+  /workspace/self/          SEMPRE rw — engine vennon (skills, hooks, agents, scripts)
   /workspace/obsidian/      SEMPRE rw — vault Obsidian (cérebro compartilhado, todos os agentes)
   /workspace/home/           SEMPRE rw — zona de trabalho (projeto do host)
   /workspace/host/          ro default, rw com --host — repo NixOS (~/nixos)
@@ -58,23 +58,23 @@ Estrutura /workspace — permissões:
   /workspace/dockerized/    configs docker dos serviços (Dockerfile, compose, .env)
   /workspace/.hive-mind/    área efêmera compartilhada entre containers
 
-host_attached=1 (--host ou mount_host=true): /workspace/host/ é rw — editar NixOS+Leech.
+host_attached=1 (--host ou mount_host=true): /workspace/host/ é rw — editar NixOS+vennon.
 host_attached=0: /workspace/host/ existe mas é read-only.
 DOCKER
     if [ "$HOST_ATTACHED" = "1" ]; then
-      cat <<'LEECH_REPOS'
+      cat <<'vennon_REPOS'
 
 HOST ATTACHED (host_attached=1):
   /workspace/home   = Projeto do usuário (zona de trabalho — igual yaa)
-  /workspace/host/ = NixOS+Leech source (~/nixos) — EDITÁVEL
-                     modules/, configuration.nix, flake.nix, stow/, leech/
+  /workspace/host/ = NixOS+vennon source (~/nixos) — EDITÁVEL
+                     modules/, configuration.nix, flake.nix, stow/, vennon/
                      Edite para melhorar skills, hooks, prompts, agents, CLI.
                      Mudanças aqui afetam o sistema e as próximas sessões.
-  /workspace/self  = ~/nixos/leech/self (mesma fonte que /workspace/host/leech/self)
+  /workspace/self  = ~/nixos/vennon/self (mesma fonte que /workspace/host/vennon/self)
   /workspace/obsidian = vault Obsidian — sempre editável por qualquer agente
 
 REGRA: /workspace/host/ é sua zona de evolução. Commits vão pro repo NixOS do host.
-LEECH_REPOS
+vennon_REPOS
     fi
     if [ "$HEADLESS" = "1" ]; then
       echo ""

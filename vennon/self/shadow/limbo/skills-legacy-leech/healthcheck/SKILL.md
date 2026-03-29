@@ -1,5 +1,5 @@
 ---
-name: leech/healthcheck
+name: vennon/healthcheck
 description: "Procedimentos de diagnostico do sistema — ferramentas, disco, load, workspace, git, tasks. Thresholds e regras de alerta. Usado pelo Keeper e qualquer agente que precise checar saude."
 ---
 

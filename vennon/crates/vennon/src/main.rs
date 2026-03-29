@@ -1,4 +1,3 @@
-mod compose;
 mod config;
 mod container;
 mod containers;

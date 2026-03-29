@@ -9,7 +9,7 @@ WORKDIR /go/app
 COPY go.work* ./
 COPY go.mod go.sum ./
 
-# Copy vendor (gerado por: leech docker install monolito)
+# Copy vendor (gerado por: vennon docker install monolito)
 COPY vendor ./vendor
 
 # Copy source

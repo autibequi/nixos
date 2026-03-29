@@ -20,7 +20,7 @@ Comandos relacionados de análise de contexto (não são modos de absorb — sã
 /self:context:contemplate → visão expansiva do sistema + oportunidades de crescimento
 ```
 
-Chame depois de uma boa conversa. Reflete sobre tudo que aconteceu nesta sessão e persiste o que vale: memórias Claude, skills Leech, agentes, commands.
+Chame depois de uma boa conversa. Reflete sobre tudo que aconteceu nesta sessão e persiste o que vale: memórias Claude, skills vennon, agentes, commands.
 
 **Detecção automática de elogio:** se `$ARGUMENTS` estiver vazio mas a mensagem do usuário que invocou contiver palavras como `parabéns`, `parabenizando`, `foi bem`, `boa sessão`, `elogio`, `honrar`, `legado`, `muito bom`, `excelente contexto` — ativar modo `elogio` automaticamente.
 
@@ -83,4 +83,4 @@ Identificar: correções, preferências, decisões de design, conhecimento novo,
 | Comportamento de agente | editar `/workspace/self/ego/*/agent.md` |
 
 ### 3. Reportar
-Memórias salvas, Leech atualizado, sugestões, ou nada novo.
+Memórias salvas, vennon atualizado, sugestões, ou nada novo.

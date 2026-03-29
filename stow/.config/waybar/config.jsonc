@@ -6,7 +6,7 @@
   "margin": 0,
   "modules-left": [
     "idle_inhibitor",
-    "custom/leech",
+    "custom/vennon",
     "hyprland/workspaces"
     // "hyprland/window"
   ],
@@ -30,7 +30,7 @@
     "icon-size": 14,
     "spacing": 2
   },
-  "custom/leech": {
+  "custom/vennon": {
     "format": "{}",
     "exec": "echo '{\"text\":\" 󱙺 \",\"tooltip\":\"Vennon (MOD3+Space)\",\"class\":\"\"}'",
     "return-type": "json",

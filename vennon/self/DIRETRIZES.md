@@ -144,7 +144,7 @@ Exemplos:
 ## Plan Mode — Obrigatório para Qualquer Implementação
 
 **Regra:** Sempre que o usuário expressar intenção de criar ou modificar código
-(em qualquer codebase: monolito, bo, front, Leech, NixOS, ou qualquer outro),
+(em qualquer codebase: monolito, bo, front, vennon, NixOS, ou qualquer outro),
 Claude DEVE entrar em `EnterPlanMode` ANTES de propor ou executar qualquer coisa.
 
 **Gatilhos** (qualquer um destes):

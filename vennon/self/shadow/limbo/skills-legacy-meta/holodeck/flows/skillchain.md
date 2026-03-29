@@ -33,7 +33,7 @@ flowchart TD
         AG_MON["Coruja\nmonolito · Go"]
         AG_BO["Coruja\nbo-container · Vue"]
         AG_FRONT["Coruja\nfront-student · Nuxt"]
-        AG_OTHER["Claude\ninfra / host / leech"]
+        AG_OTHER["Claude\ninfra / host / vennon"]
     end
 
     AGENTS --> FINDINGS["findings por camada\n(Claude consolida)"]
@@ -150,6 +150,6 @@ Usar Coruja quando:
 - Vale paralelizar: o problema pode estar em múltiplos repos ao mesmo tempo
 
 Usar Claude direto quando:
-- O problema é de infra, leech, NixOS ou host
+- O problema é de infra, vennon, NixOS ou host
 - O contexto já está claro e só precisa de leitura rápida
 - Overhead de subagente não vale para investigações simples

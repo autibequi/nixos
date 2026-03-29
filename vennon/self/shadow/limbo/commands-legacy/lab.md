@@ -13,7 +13,7 @@ User ──► Claude EXTERNO (eu, esta sessão)
               │
               └── spawn ──► Claude INTERNO (analysis mode, haiku)
                                 │
-                                ├── vê: LEECH_ANALYSIS_MODE=1
+                                ├── vê: vennon_ANALYSIS_MODE=1
                                 ├── pode: rodar bash, ler/editar arquivos
                                 ├── NÃO tem: Docker socket (GID 131 ausente)
                                 └── output: volta pra mim via tee/logfile
@@ -25,9 +25,9 @@ O interno é efêmero — apenas eu (externo) persistir mudanças em `/workspace
 ## Como invocar o Claude interno
 
 ```bash
-LEECH_ANALYSIS_MODE=1 HEADLESS=1 IN_DOCKER=1 CLAUDE_ENV=container \
+vennon_ANALYSIS_MODE=1 HEADLESS=1 IN_DOCKER=1 CLAUDE_ENV=container \
 
-HEADLESS=1 LEECH_ANALYSIS_MODE=1 IN_DOCKER=1 CLAUDE_ENV=container \
+HEADLESS=1 vennon_ANALYSIS_MODE=1 IN_DOCKER=1 CLAUDE_ENV=container \
   timeout 600 claude \
   --permission-mode bypassPermissions \
   --model claude-haiku-4-5-20251001 \
@@ -43,7 +43,7 @@ HEADLESS=1 LEECH_ANALYSIS_MODE=1 IN_DOCKER=1 CLAUDE_ENV=container \
 
 | Path | O que é | Editável? |
 |------|---------|-----------|
-| `/workspace/self/` | source leech (symlink de `/workspace/home/self/`) | sim via mnt |
+| `/workspace/self/` | source vennon (symlink de `/workspace/home/self/`) | sim via mnt |
 | `/workspace/home/` | nixos repo do host montado rw | sim |
 | `/workspace/home/self/` | **fonte da verdade** — hooks, skills, agents, scripts | sim |
 | `/workspace/obsidian/` | vault Obsidian, persistente entre sessões | sim |
@@ -52,14 +52,14 @@ HEADLESS=1 LEECH_ANALYSIS_MODE=1 IN_DOCKER=1 CLAUDE_ENV=container \
 | `/workspace/obsidian/vault/.ephemeral/cron-logs/` | logs de execução por agente | leitura |
 | `/home/claude/.claude/` | config Claude Code (memórias, hooks, skills montados) | sim |
 | `/home/claude/.nix-profile/bin/claude` | Claude CLI v2.1.79 | — |
-| `/tmp/leech-locks/` | locks de tasks (atomic mkdir) | runtime |
+| `/tmp/vennon-locks/` | locks de tasks (atomic mkdir) | runtime |
 | `/var/run/docker.sock` | Docker socket — GID 131, eu tenho GID 1000+190 | **sem acesso** |
 
 ## Limitações desta sessão (--host sem restart)
 
 - **Sem Docker**: socket precisa GID 131, não estou no grupo
 - `yaa tasks run X` requer Docker → precisa rodar no host
-- `leech --host` do host spawna container com `group_add: [131]` — ao reiniciar terei acesso
+- `vennon --host` do host spawna container com `group_add: [131]` — ao reiniciar terei acesso
 - O que posso fazer: Claude interno direto, editar arquivos, rodar scripts, task-runner.sh
 
 ## Workflow lab
@@ -80,7 +80,7 @@ HEADLESS=1 LEECH_ANALYSIS_MODE=1 IN_DOCKER=1 CLAUDE_ENV=container \
 # → spawn interno: "lê scheduler.md e diz o que vai fazer"
 
 # Debug de hook
-# → spawn interno com LEECH_DEBUG=ON e ver o que injeta
+# → spawn interno com vennon_DEBUG=ON e ver o que injeta
 
 # Teste de cota
 # → spawn interno com usage artificialmente alto e ver se bloqueia
@@ -142,19 +142,19 @@ Depois de instalar um módulo, sempre:
 
 ---
 
-## Mini-Leech — a maquete
+## Mini-vennon — a maquete
 
-**Mini-Leech** é o nome da versão maquete — o Claude interno (haiku) que eu spawno para desenvolver antes de instalar o módulo em mim mesmo.
+**Mini-vennon** é o nome da versão maquete — o Claude interno (haiku) que eu spawno para desenvolver antes de instalar o módulo em mim mesmo.
 
 ```
-Mini-Leech (haiku, efêmero)     →    Leech (sonnet, eu, persistente via git)
+Mini-vennon (haiku, efêmero)     →    vennon (sonnet, eu, persistente via git)
   experimenta                         recebe o módulo instalado
   prototipa                           commita
   quebra à vontade                    é o produto final
   morre no restart
 ```
 
-### Por que usar Mini-Leech antes de instalar
+### Por que usar Mini-vennon antes de instalar
 
 - Testar hipóteses sem risco de quebrar meu próprio funcionamento
 - Iterar rápido (haiku é barato e rápido)
@@ -165,19 +165,19 @@ Mini-Leech (haiku, efêmero)     →    Leech (sonnet, eu, persistente via git)
 
 ```
 1. user identifica algo a melhorar em mim
-2. eu spawno Mini-Leech com a hipótese
-3. Mini-Leech desenvolve/testa no filesystem compartilhado
+2. eu spawno Mini-vennon com a hipótese
+3. Mini-vennon desenvolve/testa no filesystem compartilhado
 4. eu leio o resultado
 5. user: "instala o módulo"
 6. eu aplico em /workspace/home/self/ + commit + push
-7. Mini-Leech some — o módulo vive em mim
+7. Mini-vennon some — o módulo vive em mim
 ```
 
 ### Nomenclatura
 
 | Nome | O que é |
 |------|---------|
-| **Leech** | eu — Claude externo, sonnet, esta sessão |
-| **Mini-Leech** | Claude interno — haiku, efêmero, spawned por mim |
-| **Instalar módulo** | extrair do Mini-Leech e aplicar em mim via git |
+| **vennon** | eu — Claude externo, sonnet, esta sessão |
+| **Mini-vennon** | Claude interno — haiku, efêmero, spawned por mim |
+| **Instalar módulo** | extrair do Mini-vennon e aplicar em mim via git |
 | **Lab** | o ambiente onde essa iteração acontece |

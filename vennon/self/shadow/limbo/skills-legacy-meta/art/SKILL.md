@@ -1,6 +1,6 @@
 ---
 name: meta/art
-description: Arte visual do Leech — ASCII terminal, animacoes artisticas no Chrome (eye, glados), voz. Para flowcharts e visualizacoes de dados, usar meta/holodeck.
+description: Arte visual do vennon — ASCII terminal, animacoes artisticas no Chrome (eye, glados), voz. Para flowcharts e visualizacoes de dados, usar meta/holodeck.
 ---
 
 # /meta:art — Arte Visual
@@ -81,7 +81,7 @@ Se voce e um agente ou skill que precisa desenhar algo:
 - Diagrama Mermaid (flowchart com tema Catppuccin) — **fullscreen por default** (sem containers), zoom+drag, auto-fullscreen do browser, diagrama centralizado
 - Arvore de diff interativa (collapse, glow, breadcrumb)
 - **Code diff side-by-side** — diff2html-cli dark + JetBrains Mono → ver `code/analysis/diff/codediff.md`
-- **Canvas colaborativo** — diagramacao interativa user+eu em tempo real (`host/leech/tools/chrome/canvas/index.html`)
+- **Canvas colaborativo** — diagramacao interativa user+eu em tempo real (`host/vennon/tools/chrome/canvas/index.html`)
   - API: `CANVAS.addNode/addEdge/addText/layout/state/clear`
   - Fluxo: abrir → user manipula → `CANVAS.state()` → eu itero em cima
 - HTML livre com CDN (diff2html, Chart.js, Mermaid, D3, DataTables...)

@@ -41,10 +41,10 @@ export HOME=/home/claude
 export USER=claude
 export LOGNAME=claude
 
-# Source ~/.leech (canal host ↔ container)
-if [ -f /home/claude/.leech ]; then
+# Source ~/.vennon (canal host ↔ container)
+if [ -f /home/claude/.vennon ]; then
     set -a
-    . /home/claude/.leech 2>/dev/null || true
+    . /home/claude/.vennon 2>/dev/null || true
     set +a
 fi
 

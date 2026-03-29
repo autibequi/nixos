@@ -37,7 +37,7 @@ estrategiahq
 
 ```bash
 # Ver sessoes multi-repo abertas
-leech wt
+vennon wt
 
 # Buscar pelo codigo Jira em branches locais e remotas
 git branch -a | grep -i "<FUK2-XXXXX>"
@@ -46,18 +46,18 @@ git branch -a | grep -i "<FUK2-XXXXX>"
 ls /workspace/home/worktree/ | grep -i "<FUK2-XXXXX>"
 ```
 
-Se ja existir sessao → `leech wt FUK2-XXXXX` para ativar, nao criar novo.
+Se ja existir sessao → `vennon wt FUK2-XXXXX` para ativar, nao criar novo.
 
 ### 2. Decidir: branch ou sessao multi-repo?
 
 | Situacao | Usar |
 |---|---|
 | **Bug fix / correcao pontual** (~1-3 arquivos, 1 repo) | Branch simples: `git checkout -b FUK2-XXXXX/descricao-curta` |
-| **Feature multi-repo** (toca monolito + bo/front) | Sessao: `leech wt new FUK2-XXXXX` |
-| **Feature single-repo complexa** (migration, refactor multi-camada) | Sessao so nesse repo: `leech wt new FUK2-XXXXX` (skip outros na confirmacao) |
+| **Feature multi-repo** (toca monolito + bo/front) | Sessao: `vennon wt new FUK2-XXXXX` |
+| **Feature single-repo complexa** (migration, refactor multi-camada) | Sessao so nesse repo: `vennon wt new FUK2-XXXXX` (skip outros na confirmacao) |
 
-**Sessao `leech wt`** cria worktrees em `/workspace/home/worktree/FUK2-XXXXX/<repo>/`
-para todos os repos da Estrategia. Ver skill `leech/worktree` para o fluxo completo.
+**Sessao `vennon wt`** cria worktrees em `/workspace/home/worktree/FUK2-XXXXX/<repo>/`
+para todos os repos da Estrategia. Ver skill `vennon/worktree` para o fluxo completo.
 
 ### 3. Nomenclatura obrigatoria
 

@@ -1,4 +1,4 @@
-# NixOS + Leech — root justfile
+# NixOS + vennon — root justfile
 # Uso: just <recipe>
 # Requer: just, nh, stow, docker
 
@@ -48,26 +48,26 @@ restow:
 
 # Sobe reverse proxy (docker)
 proxy:
-	docker compose -f leech/docker/reverseproxy/docker-compose.yml -p leech-dk-reverseproxy up -d
+	docker compose -f vennon/docker/reverseproxy/docker-compose.yml -p vennon-dk-reverseproxy up -d
 
-# ── Leech CLI ───────────────────────────────────────────────────────────────
+# ── vennon CLI ───────────────────────────────────────────────────────────────
 
-# Compila e instala leech Rust CLI em ~/.local/bin/leech
+# Compila e instala vennon Rust CLI em ~/.local/bin/vennon
 install:
-    cargo build --release --manifest-path leech/rust/Cargo.toml -p leech-cli
-    install -m 755 leech/rust/target/release/leech {{nixos_dir}}/stow/.local/bin/leech
-    @# install -m 755 leech/scripts/bootstrap-dashboard.sh {{nixos_dir}}/scripts/bootstrap.sh
-    @echo "[just] leech instalado em {{nixos_dir}}/stow/.local/bin/leech"
+    cargo build --release --manifest-path vennon/rust/Cargo.toml -p vennon-cli
+    install -m 755 vennon/rust/target/release/vennon {{nixos_dir}}/stow/.local/bin/vennon
+    @# install -m 755 vennon/scripts/bootstrap-dashboard.sh {{nixos_dir}}/scripts/bootstrap.sh
+    @echo "[just] vennon instalado em {{nixos_dir}}/stow/.local/bin/vennon"
 
-# Atualiza só o bootstrap (leech/scripts → scripts/)
+# Atualiza só o bootstrap (vennon/scripts → scripts/)
 bootstrap:
-    @# install -m 755 leech/scripts/bootstrap-dashboard.sh scripts/bootstrap.sh
+    @# install -m 755 vennon/scripts/bootstrap-dashboard.sh scripts/bootstrap.sh
     @echo "[just] bootstrap script não disponível"
 
 # Build sem instalar
 build-cli:
-    cargo build --release --manifest-path leech/rust/Cargo.toml -p leech-cli
+    cargo build --release --manifest-path vennon/rust/Cargo.toml -p vennon-cli
 
 # Instala CLI bash legado (emergência)
 install-bash:
-    just --justfile leech/bash/Justfile --working-directory leech/bash install
+    just --justfile vennon/bash/Justfile --working-directory vennon/bash install

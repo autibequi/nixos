@@ -1,18 +1,24 @@
 use anyhow::{bail, Result};
 
-use crate::compose;
-use crate::config::{self, VennonConfig};
+use crate::config::VennonConfig;
 use crate::containers;
 use crate::exec;
 
 /// Dispatch a container action.
 pub fn dispatch(name: &str, action: &str, config: &VennonConfig) -> Result<()> {
-    // Generate/update compose file
-    let compose_data = containers::get_compose(name, config)?;
-    let compose_path = config::containers_dir()
-        .join(name)
-        .join("docker-compose.yml");
-    compose::write_compose(&compose_data, &compose_path)?;
+    // Set env vars for compose interpolation (${VAR} in docker-compose.yml)
+    containers::ide::set_compose_env(config);
+
+    // Use compose from repo — never generated, never overwritten
+    let compose_path = config.vennon_path()
+        .join(format!("containers/{name}/docker-compose.yml"));
+
+    if !compose_path.exists() {
+        bail!(
+            "compose not found: {}\nExpected at containers/{name}/docker-compose.yml",
+            compose_path.display()
+        );
+    }
 
     match action {
         "start" => start(name, &compose_path, config),
@@ -49,7 +55,7 @@ fn ensure_image(name: &str, config: &VennonConfig) -> Result<()> {
 fn start(name: &str, compose_path: &std::path::Path, config: &VennonConfig) -> Result<()> {
     ensure_image(name, config)?;
 
-    // Always run compose up — recreates if compose changed (e.g. new target dir)
+    // Compose is stable (no dynamic paths) — up -d is a no-op if already running
     let compose_str = compose_path.to_string_lossy();
     let project = format!("vennon-{name}");
     exec::run(
@@ -122,18 +128,18 @@ fn build(name: &str, config: &VennonConfig) -> Result<()> {
     let vennon_dir = config.vennon_path();
 
     // Always rebuild base (podman layer cache handles skipping unchanged layers)
-    println!("Building vennon-leech (base)...");
-    let leech_ctx = vennon_dir.join("containers/leech");
-    let leech_dockerfile = leech_ctx.join("Dockerfile");
+    println!("Building vennon-vennon (base)...");
+    let vennon_ctx = vennon_dir.join("containers/vennon");
+    let vennon_dockerfile = vennon_ctx.join("Dockerfile");
     exec::run(
         "podman",
         &[
             "build",
             "-t",
-            "vennon-leech",
+            "vennon-vennon",
             "-f",
-            &leech_dockerfile.to_string_lossy(),
-            &leech_ctx.to_string_lossy(),
+            &vennon_dockerfile.to_string_lossy(),
+            &vennon_ctx.to_string_lossy(),
         ],
     )?;
 
@@ -159,47 +165,6 @@ fn build(name: &str, config: &VennonConfig) -> Result<()> {
 }
 
 // ── Helpers ─────────────────────────────────────────────────────
-
-/// Abort if a container is already running with a different YAA_TARGET_DIR.
-/// Prevents silently killing an active session when opening yaa in a new directory.
-fn check_dir_conflict(name: &str) -> Result<()> {
-    let container_name = format!("vennon-{name}");
-    let running = exec::capture(
-        "podman",
-        &["ps", "-q", "--filter", &format!("name={container_name}")],
-    )?;
-    if running.is_empty() {
-        return Ok(());
-    }
-
-    let env_output = exec::capture(
-        "podman",
-        &[
-            "inspect",
-            "--format",
-            "{{range .Config.Env}}{{.}}\n{{end}}",
-            &container_name,
-        ],
-    )?;
-
-    let existing_target = env_output
-        .lines()
-        .find_map(|line| line.strip_prefix("YAA_TARGET_DIR=").map(str::to_string))
-        .unwrap_or_default();
-
-    if existing_target.is_empty() {
-        return Ok(());
-    }
-
-    let new_target = std::env::var("YAA_TARGET_DIR").unwrap_or_default();
-    if existing_target != new_target {
-        bail!(
-            "Container vennon-{name} is already running with a different directory:\n  running:   {existing_target}\n  requested: {new_target}\n\nStop the active session first:\n  vennon {name} stop"
-        );
-    }
-
-    Ok(())
-}
 
 fn find_container(name: &str) -> Result<String> {
     let container_name = format!("vennon-{name}");

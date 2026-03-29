@@ -36,10 +36,10 @@ vennon/
 ├── justfile                   # build + install (nix-shell)
 ├── self/                      # engine (skills, hooks, agents, scripts)
 ├── containers/                # Dockerfiles + vennon.yaml (IDEs)
-│   ├── leech/                 # base image (nix + tools)
-│   ├── claude/                # FROM leech + claude-code
-│   ├── opencode/              # FROM leech + opencode
-│   └── cursor/                # FROM leech + cursor
+│   ├── vennon/                 # base image (nix + tools)
+│   ├── claude/                # FROM vennon + claude-code
+│   ├── opencode/              # FROM vennon + opencode
+│   └── cursor/                # FROM vennon + cursor
 ├── crates/
 │   ├── vennon/                # container management
 │   ├── yaa/                   # session + agent orchestrator
@@ -50,7 +50,7 @@ vennon/
 ## Hierarquia de Imagens Docker
 
 ```
-vennon-leech:latest              ← base: nixos/nix + tools + zsh + entrypoint
+vennon-vennon:latest              ← base: nixos/nix + tools + zsh + entrypoint
   ├─ vennon-claude:latest        ← + claude-code
   ├─ vennon-opencode:latest      ← + opencode
   └─ vennon-cursor:latest        ← + cursor (já na base)

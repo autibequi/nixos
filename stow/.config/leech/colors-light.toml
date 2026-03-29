@@ -1,6 +1,6 @@
-# Leech Theme — Light
+# vennon Theme — Light
 # Source of truth for all component colors (light variant).
-# Run `leech-theme-apply` after editing.
+# Run `vennon-theme-apply` after editing.
 
 [meta]
 name = "light"

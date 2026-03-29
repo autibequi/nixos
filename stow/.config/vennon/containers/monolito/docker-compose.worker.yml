@@ -12,7 +12,7 @@ services:
     volumes:
       - ${MONOLITO_DIR}/configuration:/go/app/configuration:ro
       # Canal de comunicação rápida host ↔ container
-      - ${HOME}/.leech:/.leech:rw
+      - ${HOME}/.vennon:/.vennon:rw
     networks:
       - default
     restart: unless-stopped

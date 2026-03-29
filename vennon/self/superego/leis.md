@@ -37,7 +37,7 @@
 
 | Violacao | Acao |
 |----------|------|
-| Invasao de territorio | Alerta inbox + registrar em wiki/leech/insights.md |
+| Invasao de territorio | Alerta inbox + registrar em wiki/vennon/insights.md |
 | Sem reagendamento | Criar card de recuperacao +5min + alerta inbox |
 | Memory desatualizada | Alerta inbox |
 | Commit sem CTO | Alerta URGENTE ao CTO imediatamente |

@@ -1,6 +1,6 @@
-# NixOS + Leech
+# NixOS + vennon
 
-Flake-based NixOS configuration for an ASUS Zephyrus G14 (AMD Ryzen + NVIDIA RTX 4060 mobile), with Leech (agent launcher + container) and Puppy workers (background task runners).
+Flake-based NixOS configuration for an ASUS Zephyrus G14 (AMD Ryzen + NVIDIA RTX 4060 mobile), with vennon (agent launcher + container) and Puppy workers (background task runners).
 
 ## Architecture
 
@@ -9,9 +9,9 @@ graph TB
     USER(("user"))
     CHROME(["Chrome<br/>CDP relay"])
 
-    subgraph CONTAINERS["Leech Containers"]
+    subgraph CONTAINERS["vennon Containers"]
         direction LR
-        L["Leech"]
+        L["vennon"]
         subgraph APP["Project Containers"]
             direction LR
             MONO["monolito"] ~~~ BO["bo"] ~~~ FRONT["front-student"]
@@ -19,7 +19,7 @@ graph TB
     end
 
     subgraph HOST["Host"]
-        VOLS["/self  ·  /obsidian  ·  /logs  ·  ~/.leech"]
+        VOLS["/self  ·  /obsidian  ·  /logs  ·  ~/.vennon"]
         PROJ[("~/projects/estrategia")]
     end
 
@@ -37,16 +37,16 @@ flake.nix            # Flake inputs and nixosConfigurations.nomad output
 configuration.nix    # Module registry (enable/disable features here)
 hardware.nix         # Partition UUIDs (local-only, git skip-worktree'd)
 
-leech/               # Leech system (agent launcher + containers)
-  bash/              # Bashly CLI source (leech command)
+vennon/               # vennon system (agent launcher + containers)
+  bash/              # Bashly CLI source (vennon command)
   docker/            # Docker compose files per service
-    leech/           # Leech container + docker-proxy
+    vennon/           # vennon container + docker-proxy
     monolito/        # Monolito (Go API)
     bo-container/    # Bo (Vue/Quasar)
     front-student/   # Front-student (Nuxt)
     reverseproxy/    # Nginx reverse proxy
   rust/              # Rust CLI entry point
-  self/              # Leech engine: skills, hooks, agents, scripts, commands
+  self/              # vennon engine: skills, hooks, agents, scripts, commands
 
 modules/             # NixOS modules
   core/              # Essential (kernel, nix, packages, services, shell, fonts)
@@ -54,7 +54,7 @@ modules/             # NixOS modules
   nvidia.nix         # NVIDIA PRIME offload (AMD iGPU as default)
   asus.nix           # ASUS Zephyrus hardware support
   docker.nix         # Docker daemon
-  leech-tick.nix     # systemd timer for leech tick
+  vennon-tick.nix     # systemd timer for vennon tick
 
 scripts/             # Host scripts (bootstrap, dashboards, utilities)
 
@@ -75,12 +75,12 @@ stow/                # Dotfiles managed with GNU stow (symlinked into ~)
 ## Commands
 
 ```sh
-leech switch         # Apply NixOS configuration (nh os switch)
-leech switch test    # Build and test without switching
-leech switch boot    # Apply on next boot
-leech stow           # Deploy dotfiles (stow -d ~/nixos/stow -t ~ .)
-leech update         # Regenerate Leech CLI (bashly generate)
-leech man            # Full command reference
+vennon switch         # Apply NixOS configuration (nh os switch)
+vennon switch test    # Build and test without switching
+vennon switch boot    # Apply on next boot
+vennon stow           # Deploy dotfiles (stow -d ~/nixos/stow -t ~ .)
+vennon update         # Regenerate vennon CLI (bashly generate)
+vennon man            # Full command reference
 
 # Flake inputs
 nix flake update     # Update all inputs

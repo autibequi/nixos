@@ -3,16 +3,16 @@
 ## Hierarquia de Imagens
 
 ```
-vennon-leech (base)
+vennon-vennon (base)
 ├── vennon-claude     (+ claude-code)
 ├── vennon-opencode   (+ opencode)
 └── vennon-cursor     (cursor já na base)
 ```
 
-## leech/ — Base Image
+## vennon/ — Base Image
 
 ```
-leech/
+vennon/
 ├── Dockerfile                  # Multi-stage: cursor CLI (debian) + nix (nixos/nix:latest)
 ├── entrypoint.sh               # nix-daemon, dynamic UID/GID, session hooks, setpriv
 └── docker-socket-filter.conf   # nginx proxy: info/ping/version/logs/restart (rest blocked)
@@ -26,7 +26,7 @@ leech/
 **Entrypoint features:**
 - `VENNON_UID`/`VENNON_GID` env vars para UID/GID dinâmico (evita root ownership)
 - nix-daemon em background
-- Source `~/.leech` (canal host ↔ container)
+- Source `~/.vennon` (canal host ↔ container)
 - Session-start hook execution
 - `setpriv` para drop de privilégios
 
@@ -38,7 +38,7 @@ leech/
 
 ```
 claude/
-├── Dockerfile      # FROM vennon-leech + nix install claude-code-nix
+├── Dockerfile      # FROM vennon-vennon + nix install claude-code-nix
 └── vennon.yaml     # type: ide, image: vennon-claude
 ```
 
@@ -46,7 +46,7 @@ claude/
 
 ```
 opencode/
-├── Dockerfile      # FROM vennon-leech + nix install opencode
+├── Dockerfile      # FROM vennon-vennon + nix install opencode
 └── vennon.yaml     # type: ide, image: vennon-opencode
 ```
 
@@ -54,16 +54,16 @@ opencode/
 
 ```
 cursor/
-├── Dockerfile      # FROM vennon-leech (cursor já na base)
+├── Dockerfile      # FROM vennon-vennon (cursor já na base)
 └── vennon.yaml     # type: ide, image: vennon-cursor
 ```
 
 ## Build
 
 ```bash
-vennon claude build   # rebuilda leech (base) + claude
-vennon opencode build # rebuilda leech (base) + opencode
-vennon cursor build   # rebuilda leech (base) + cursor
+vennon claude build   # rebuilda vennon (base) + claude
+vennon opencode build # rebuilda vennon (base) + opencode
+vennon cursor build   # rebuilda vennon (base) + cursor
 ```
 
 A base é sempre rebuildada (podman layer cache cuida de pular unchanged steps).

@@ -39,10 +39,10 @@ Se uma persona ou avatar estiver ativa (ex: GLaDOS), **sempre** iniciar a respos
 
 ```bash
 wc -c \
-  /workspace/leech/system/DIRETRIZES.md \
-  /workspace/leech/system/SELF.md \
-  /workspace/leech/personas/GLaDOS.persona.md \
-  /workspace/leech/personas/avatar/glados.md \
+  /workspace/vennon/system/DIRETRIZES.md \
+  /workspace/vennon/system/SELF.md \
+  /workspace/vennon/personas/GLaDOS.persona.md \
+  /workspace/vennon/personas/avatar/glados.md \
   2>/dev/null
 ```
 
@@ -76,7 +76,7 @@ Usar **stacked bar vertical** (ascii.md §19, Variante C — duplo painel):
        ║  ║           ║░░░░░░░░  ║ MEMORY.md  Xk
        ║  ║           ║▒▒▒▒▒▒    ║ CLAUDE.md  Xk
        ║  ║           ║▒▒▒▒      ║ SKILLS     Xk
-  Xk   ╠══╣           ║··        ║ BOOT/LEECH Xk
+  Xk   ╠══╣           ║··        ║ BOOT/vennon Xk
        ║▓▓║           ╠══════════╣
        ║░▒║           ║██████████║ CONVERSA   Xk
    Xk  ╠══╣        0k ╚══════════╝
@@ -91,7 +91,7 @@ Usar **stacked bar vertical** (ascii.md §19, Variante C — duplo painel):
   MEMORY.md          X chars   Xk       X%
   CLAUDE.md          X chars   Xk       X%
   SKILLS tree        X chars   Xk       X%
-  BOOT+LEECH         X chars   Xk       X%
+  BOOT+vennon         X chars   Xk       X%
   Conversa (N turns) estimado  Xk       X%
   ─────────────────────────────────────────────────────────────
   TOTAL ESTIMADO               Xk       X%   (de 200k)

@@ -79,15 +79,15 @@ if [[ -z "$REPO" || -z "$PR" ]]; then
 fi
 
 # Validar token
-if [[ ! -f "$HOME/.leech" ]]; then
-    echo -e "${RED}❌ Token não encontrado em ~/.leech${NC}"
+if [[ ! -f "$HOME/.vennon" ]]; then
+    echo -e "${RED}❌ Token não encontrado em ~/.vennon${NC}"
     echo "Configure com: gh auth login"
     exit 1
 fi
 
-export GH_TOKEN=$(grep '^GH_TOKEN=' "$HOME/.leech" | cut -d'=' -f2 || echo "")
+export GH_TOKEN=$(grep '^GH_TOKEN=' "$HOME/.vennon" | cut -d'=' -f2 || echo "")
 if [[ -z "$GH_TOKEN" ]]; then
-    echo -e "${RED}❌ GH_TOKEN não encontrado em ~/.leech${NC}"
+    echo -e "${RED}❌ GH_TOKEN não encontrado em ~/.vennon${NC}"
     exit 1
 fi
 

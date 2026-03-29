@@ -1,5 +1,5 @@
 ---
-name: leech/linux
+name: vennon/linux
 description: "Auto-ativar quando: host_attached=1, usuário menciona NixOS, Hyprland, Waybar, dotfiles, stow, nix, módulos, pacotes do sistema, keybinds, window rules, configuração do compositor, OU quando reclama de problema no computador (lento, travando, crash, rede, disco, processo morto, boot, etc.)."
 ---
 

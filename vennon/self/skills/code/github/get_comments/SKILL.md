@@ -1,6 +1,6 @@
 ---
 name: code/github:get_comments
-description: Extrai TODOS os comentários de uma PR — filtro por autor, severidade, formato. Token automático de ~/.leech.
+description: Extrai TODOS os comentários de uma PR — filtro por autor, severidade, formato. Token automático de ~/.vennon.
 type: skill
 ---
 
@@ -104,9 +104,9 @@ O script detecta automaticamente severidade baseado no body do comentário:
 ## Implementação Técnica
 
 ### Autenticação
-Token sempre lido de `~/.leech`:
+Token sempre lido de `~/.vennon`:
 ```bash
-export GH_TOKEN=$(grep '^GH_TOKEN=' ~/.leech | cut -d'=' -f2)
+export GH_TOKEN=$(grep '^GH_TOKEN=' ~/.vennon | cut -d'=' -f2)
 ```
 
 ### API Endpoint

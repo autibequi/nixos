@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Hook: PreToolUse — Claude (stdout vazio) | Cursor/OPENCODE (JSON permission)
-# ENGINE: CLAUDE | CURSOR | OPENCODE (exportado pelo wrapper ou ~/.leech)
+# ENGINE: CLAUDE | CURSOR | OPENCODE (exportado pelo wrapper ou ~/.vennon)
 
 export ENGINE="${ENGINE:-CLAUDE}"
 
-_CONFIG_FILE="${HOME:-/home/claude}/.leech"
-[ -f "$_CONFIG_FILE" ] || _CONFIG_FILE="/.leech"
+_CONFIG_FILE="${HOME:-/home/claude}/.vennon"
+[ -f "$_CONFIG_FILE" ] || _CONFIG_FILE="/.vennon"
 [ -f "$_CONFIG_FILE" ] && { set -a; source "$_CONFIG_FILE" 2>/dev/null || true; set +a; }
 export ENGINE="${ENGINE:-CLAUDE}"
 

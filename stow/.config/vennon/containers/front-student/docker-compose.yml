@@ -14,10 +14,10 @@ services:
       - NPM_SCRIPT_ENV=${NPM_SCRIPT_ENV:-local}
     tty: true
     volumes:
-      # Bind mount completo: source + node_modules (gerado por leech docker install)
+      # Bind mount completo: source + node_modules (gerado por vennon docker install)
       - ${FRONT_STUDENT_DIR}:/app
       # Canal de comunicação rápida host ↔ container
-      - ${HOME}/.leech:/.leech:rw
+      - ${HOME}/.vennon:/.vennon:rw
     extra_hosts:
       - "api.local.estrategia-sandbox.com.br:host-gateway"
     ports:

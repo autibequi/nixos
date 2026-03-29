@@ -1,12 +1,12 @@
-#compdef leech
-# Zsh completion for leech CLI (gerado a partir de bashly.yml)
+#compdef vennon
+# Zsh completion for vennon CLI (gerado a partir de bashly.yml)
 
-_leech_engines() { compadd claude opencode cursor }
-_leech_models()  { compadd haiku sonnet opus }
+_vennon_engines() { compadd claude opencode cursor }
+_vennon_models()  { compadd haiku sonnet opus }
 # Descobre servicos a partir do diretorio dockerized (exclui _shared e reverseproxy)
-_leech_docker_services() {
+_vennon_docker_services() {
   local nixos_dir="${NIXOS_DIR:-$HOME/nixos}"
-  local dockerized_dir="$nixos_dir/leech/dockerized"
+  local dockerized_dir="$nixos_dir/vennon/dockerized"
   if [[ -d "$dockerized_dir" ]]; then
     local services=()
     for d in "$dockerized_dir"/*/; do
@@ -20,12 +20,12 @@ _leech_docker_services() {
     compadd monolito bo-container front-student
   fi
 }
-_leech_docker_envs()     { compadd sand prod qa local }
-_leech_puppy_models()    { compadd haiku sonnet opus }
+_vennon_docker_envs()     { compadd sand prod qa local }
+_vennon_puppy_models()    { compadd haiku sonnet opus }
 
-_leech_session_flags=(
-  '--engine[Engine da sessão]:engine:_leech_engines'
-  '--model[Modelo Claude]:model:_leech_models'
+_vennon_session_flags=(
+  '--engine[Engine da sessão]:engine:_vennon_engines'
+  '--model[Modelo Claude]:model:_vennon_models'
   '--instance[Sufixo da instância]:id'
   '--rw[Montar read-write]'
   '--ro[Montar read-only]'
@@ -34,14 +34,14 @@ _leech_session_flags=(
   '--resume[Retoma sessão]:session_id'
 )
 
-_leech() {
+_vennon() {
   local context state state_descr line
   typeset -A opt_args
 
   _arguments -C \
     '(-h --help)'{-h,--help}'[Ajuda]' \
     '(-v --version)'{-v,--version}'[Versão]' \
-    '1: :_leech_commands' \
+    '1: :_vennon_commands' \
     '*:: :->args'
 
   case $state in
@@ -52,7 +52,7 @@ _leech() {
 
         new|run|r|open|code)
           _arguments \
-            $_leech_session_flags \
+            $_vennon_session_flags \
             ':dir:_files -/' ;;
 
         shell|sh)
@@ -64,13 +64,13 @@ _leech() {
             ':dir:_files -/' ;;
 
         claude)
-          _arguments '1: :_leech_claude_commands' '*:: :->claude_args'
+          _arguments '1: :_vennon_claude_commands' '*:: :->claude_args'
           case $state in
             claude_args)
               case $words[1] in
                 new|'')
                   _arguments \
-                    $_leech_session_flags \
+                    $_vennon_session_flags \
                     ':dir:_files -/' ;;
                 usage|u)
                   _arguments \
@@ -82,42 +82,42 @@ _leech() {
 
         cursor)
           _arguments \
-            $_leech_session_flags \
+            $_vennon_session_flags \
             ':dir:_files -/' ;;
 
         opencode|oc)
           _arguments \
-            $_leech_session_flags \
+            $_vennon_session_flags \
             ':dir:_files -/' ;;
 
         ask)
           _arguments \
             '--headless[Modo headless]' \
             '--timeout[Timeout em segundos]:seconds' \
-            '--model[Modelo]:model:_leech_puppy_models' \
+            '--model[Modelo]:model:_vennon_puppy_models' \
             ':prompt' ;;
 
         set)
-          _arguments ':engine:_leech_engines' ;;
+          _arguments ':engine:_vennon_engines' ;;
 
         new-task|task-new)
           _arguments \
             '--type[Tipo]:type:(pending recurring)' \
-            '--model[Modelo]:model:_leech_models' \
+            '--model[Modelo]:model:_vennon_models' \
             '--clock[Frequência]:clock:(every10 every60)' \
             '--timeout[Timeout]:timeout' \
             ':name' ;;
 
         edit)
           _arguments \
-            '--engine[Engine]:engine:_leech_engines' \
+            '--engine[Engine]:engine:_vennon_engines' \
             '--resume[Retoma sessão]:session_id' ;;
 
         clean|gc|prune)
           _arguments '--force[Sem confirmação]' ;;
 
         puppy|p)
-          _arguments '1: :_leech_puppy_commands' '*:: :->puppy_args'
+          _arguments '1: :_vennon_puppy_commands' '*:: :->puppy_args'
           case $state in
             puppy_args)
               case $words[1] in
@@ -129,24 +129,24 @@ _leech() {
                   _arguments \
                     '--headless[Modo headless]' \
                     '--timeout[Timeout]:seconds' \
-                    '--model[Modelo]:model:_leech_puppy_models' \
+                    '--model[Modelo]:model:_vennon_puppy_models' \
                     ':prompt' ;;
               esac ;;
           esac ;;
 
         docker|dk)
-          _arguments '1: :_leech_docker_services' '*:: :->docker_service_args'
+          _arguments '1: :_vennon_docker_services' '*:: :->docker_service_args'
           case $state in
             docker_service_args)
               local service="$words[1]"
-              _arguments '1: :_leech_docker_service_ops' '*:: :->docker_op_args'
+              _arguments '1: :_vennon_docker_service_ops' '*:: :->docker_op_args'
               case $state in
                 docker_op_args)
                   case $words[1] in
                     install)
                       _arguments \
-                        '--env[Ambiente]:env:_leech_docker_envs' \
-                        '-e[Ambiente]:env:_leech_docker_envs' \
+                        '--env[Ambiente]:env:_vennon_docker_envs' \
+                        '-e[Ambiente]:env:_vennon_docker_envs' \
                         '--worktree[Worktree]:name' '-w[Worktree]:name' ;;
                     shell)
                       _arguments \
@@ -163,14 +163,14 @@ _leech() {
                       _arguments \
                         '--worktree[Worktree]:name' '-w[Worktree]:name' ;;
                     server|worker)
-                      _arguments '1: :_leech_docker_server_ops' '*:: :->server_op_args'
+                      _arguments '1: :_vennon_docker_server_ops' '*:: :->server_op_args'
                       case $state in
                         server_op_args)
                           case $words[1] in
                             start|up)
                               _arguments \
-                                '--env[Ambiente]:env:_leech_docker_envs' \
-                                '-e[Ambiente]:env:_leech_docker_envs' \
+                                '--env[Ambiente]:env:_vennon_docker_envs' \
+                                '-e[Ambiente]:env:_vennon_docker_envs' \
                                 '--detach[Background]' '-d[Background]' \
                                 '--debug[Modo debug]' \
                                 '--worktree[Worktree]:name' '-w[Worktree]:name' \
@@ -185,12 +185,12 @@ _leech() {
           esac ;;
 
         worktree|wt)
-          _arguments ':service:_leech_docker_services' ;;
+          _arguments ':service:_vennon_docker_services' ;;
       esac ;;
   esac
 }
 
-_leech_claude_commands() {
+_vennon_claude_commands() {
   local commands=(
     'new:Nova sessão Claude (padrão)'
     'usage:Estatísticas de uso Claude'
@@ -198,7 +198,7 @@ _leech_claude_commands() {
   _describe 'subcomando claude' commands
 }
 
-_leech_docker_service_ops() {
+_vennon_docker_service_ops() {
   local ops=(
     'install:Instala dependências'
     'shell:Shell no container'
@@ -212,7 +212,7 @@ _leech_docker_service_ops() {
   _describe 'operação' ops
 }
 
-_leech_docker_server_ops() {
+_vennon_docker_server_ops() {
   local ops=(
     'start:Sobe o serviço'
     'stop:Para o serviço'
@@ -220,7 +220,7 @@ _leech_docker_server_ops() {
   _describe 'ação' ops
 }
 
-_leech_commands() {
+_vennon_commands() {
   local commands=(
     'continue:Continua a última sessão'
     'new:Nova sessão no container'
@@ -242,14 +242,14 @@ _leech_commands() {
     'destroy:Para containers e remove imagens'
     'clean:Remove sessões paradas'
     'update:Regenera CLI e atualiza symlink'
-    'init:Cria ~/.leech'
+    'init:Cria ~/.vennon'
     'help:Mostra banner com comandos'
     'man:Documentação completa'
   )
   _describe 'comando' commands
 }
 
-_leech_puppy_commands() {
+_vennon_puppy_commands() {
   local commands=(
     'start:Inicia o container puppy'
     'stop:Para o container puppy'
@@ -265,4 +265,4 @@ _leech_puppy_commands() {
 }
 
 
-_leech "$@"
+_vennon "$@"

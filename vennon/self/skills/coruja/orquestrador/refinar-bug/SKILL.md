@@ -188,7 +188,7 @@ Para **cada arquivo relevante**, registrar:
 ### Estrutura do conteúdo
 
 ```
-[Banner ASCII "refined by Leech"]
+[Banner ASCII "refined by vennon"]
 
 1. Descrição da Solução
    [O que precisa ser feito para corrigir o bug — 2-5 frases]

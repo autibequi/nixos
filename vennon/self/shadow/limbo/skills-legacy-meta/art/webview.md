@@ -130,7 +130,7 @@ curl -sL "<URL>" -o /tmp/pagina.html && wc -l /tmp/pagina.html
 
 - **Docker proxy bloqueado** (`EXEC=0`, `BUILD=0`): `docker exec` retorna 403 — não adianta tentar inspecionar containers internos assim.
 - **CONTAINERS=1** no proxy expõe env vars via `docker inspect` — risco de senha se outros containers rodarem com secrets em env.
-- **Relay status** é mais confiável que a flag `RELAY_ONLINE` no `~/.leech` — sempre fazer live check.
+- **Relay status** é mais confiável que a flag `RELAY_ONLINE` no `~/.vennon` — sempre fazer live check.
 - **data:text/html;base64** funciona para qualquer HTML gerado — não precisa de servidor HTTP.
 - **`docker ps`** funciona mesmo com proxy granular (nginx) desde que `GET /containers/json` esteja liberado.
 

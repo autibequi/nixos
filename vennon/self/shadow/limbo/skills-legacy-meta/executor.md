@@ -39,7 +39,7 @@ coruja analisa jira → wanderer implementa baseado no jira
 
 ```bash
 # 1. Verificar quota — nao disparar se >= 85%
-cat ~/.leech | grep pct
+cat ~/.vennon | grep pct
 
 # 2. Confirmar quais agentes sao relevantes para a tarefa
 # 3. Preparar prompt compacto por agente (ver abaixo)

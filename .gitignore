@@ -1,14 +1,14 @@
 # secrets (injected into container) e config local
-# legacy paths (claudinho → leech)
+# legacy paths (claudinho → vennon)
 claudinho/.env
 claudinho/claudio-cli/.claudio
-leech/cli/.env
-leech/cli/leech
-stow/.local/bin/leech
+vennon/cli/.env
+vennon/cli/vennon
+stow/.local/bin/vennon
 
-# leech docker environment files — NEVER commit real secrets to git
-leech/dockerized/**/env/*.env
-!leech/dockerized/**/env/*.env.example
+# vennon docker environment files — NEVER commit real secrets to git
+vennon/dockerized/**/env/*.env
+!vennon/dockerized/**/env/*.env.example
 
 # agent
 tmp/

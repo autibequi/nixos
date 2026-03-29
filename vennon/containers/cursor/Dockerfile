@@ -1,5 +1,5 @@
-# vennon-cursor — herda de vennon-leech (cursor CLI já na base)
-FROM vennon-leech:latest
+# vennon-cursor — herda de vennon-vennon (cursor CLI já na base)
+FROM vennon-vennon:latest
 
 # Cursor CLI + agent já copiados na imagem base (stage cursor-cli)
 # Verificar que o binário existe

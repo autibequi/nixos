@@ -1,0 +1,73 @@
+services:
+  claude:
+    image: vennon-claude:latest
+    container_name: vennon-claude
+    mem_limit: ${VENNON_MEM:-12g}
+    memswap_limit: ${VENNON_MEM:-12g}
+    network_mode: host
+    stdin_open: true
+    tty: true
+    working_dir: /workspace/projects
+    entrypoint: ["/entrypoint.sh"]
+    command: ["/bin/bash", "-c", "sleep infinity"]
+    environment:
+      PATH: /home/claude/.local/bin:/home/claude/.nix-profile/bin:/root/.nix-profile/bin:/usr/bin:/bin
+      CLAUDE_ENV: container
+      XDG_CACHE_HOME: /workspace/.ephemeral/cache
+      DOCKER_HOST: tcp://localhost:2375
+      VENNON_UID: ${VENNON_UID}
+      VENNON_GID: ${VENNON_GID}
+      GIT_AUTHOR_NAME: ${GIT_AUTHOR_NAME}
+      GIT_AUTHOR_EMAIL: ${GIT_AUTHOR_EMAIL}
+      GIT_COMMITTER_NAME: ${GIT_COMMITTER_NAME}
+      GIT_COMMITTER_EMAIL: ${GIT_COMMITTER_EMAIL}
+      ENGINE: CLAUDE
+    volumes:
+      # Core workspace
+      - ${VENNON_SELF}:/workspace/self
+      - ${VENNON_OBSIDIAN}:/workspace/obsidian
+      - ${VENNON_PROJECTS}:/workspace/projects:rw
+      - ${HOME}:/workspace/home:rw
+      - ${VENNON_HOST}:/workspace/host:rw
+      # Claude Code config
+      - ${VENNON_SELF}/claude.bypass.json:/home/claude/.claude/settings.json:rw
+      - ${VENNON_SELF}/skills:/home/claude/.claude/skills
+      - ${VENNON_SELF}/commands:/home/claude/.claude/commands
+      - ${VENNON_SELF}/ego:/home/claude/.claude/agents
+      - ${VENNON_PATH}/containers/claude/hooks:/home/claude/.claude/hooks:ro
+      - ${VENNON_SELF}/scripts:/home/claude/.claude/scripts
+      - ${HOME}/.claude.json:/home/claude/.claude.json
+      - ${HOME}/.claude/projects:/home/claude/.claude/projects
+      # Universal agent standard
+      - ${VENNON_SELF}/skills:/home/claude/.agents/skills
+      - ${VENNON_SELF}/commands:/home/claude/.agents/commands
+      - ${VENNON_SELF}/ego:/home/claude/.agents/agents
+      # Communication channel
+      - ${HOME}/.vennon:/home/claude/.vennon:rw
+      # Host observability (ro)
+      - /proc/meminfo:/host/proc/meminfo:ro
+      - /proc/loadavg:/host/proc/loadavg:ro
+      - /proc/uptime:/host/proc/uptime:ro
+      - /proc/cpuinfo:/host/proc/cpuinfo:ro
+      - /proc/version:/host/proc/version:ro
+      # Logs (ro)
+      - /var/log/journal:/workspace/logs/host/journal:ro
+      - /var/log:/workspace/logs/host/var-log:ro
+    tmpfs:
+      - /tmp:size=512m,mode=1777
+    cap_drop: [NET_RAW, SYS_PTRACE, SYS_RAWIO, MKNOD, AUDIT_WRITE, NET_BIND_SERVICE]
+    extra_hosts: ["host.docker.internal:host-gateway"]
+
+  docker-proxy:
+    image: docker.io/library/nginx:alpine
+    container_name: vennon-docker-proxy
+    restart: unless-stopped
+    ports: ["127.0.0.1:2375:2375"]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${VENNON_PATH}/containers/leech/docker-socket-filter.conf:/etc/nginx/conf.d/default.conf:ro
+
+networks:
+  default:
+    external: true
+    name: nixos_default

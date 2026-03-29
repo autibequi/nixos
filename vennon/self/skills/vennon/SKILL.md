@@ -1,22 +1,22 @@
 ---
 name: vennon
-description: "Auto-ativar quando: usuario menciona vennon, deck, yaa, leech CLI, containers Docker, worktrees, upgrade do vennon, build Rust, servicos (monolito, bo-container, front-student), docker-compose, debug remoto dlv, sessoes multi-repo."
+description: "Auto-ativar quando: usuario menciona vennon, deck, yaa, vennon CLI, containers Docker, worktrees, upgrade do vennon, build Rust, servicos (monolito, bo-container, front-student), docker-compose, debug remoto dlv, sessoes multi-repo."
 ---
 
 # vennon — CLI, Containers e Worktrees
 
-Skill unificada para o ecossistema de ferramentas do Leech: CLI Rust (yaa/deck/vennon), containers Docker, worktrees multi-repo, e upgrade do proprio Leech.
+Skill unificada para o ecossistema de ferramentas do vennon: CLI Rust (yaa/deck/vennon), containers Docker, worktrees multi-repo, e upgrade do proprio vennon.
 
 ---
 
-## Mapa do Leech
+## Mapa do vennon
 
 ```
-/workspace/host/leech/
+/workspace/host/vennon/
 ├── rust/                       CLI Rust (fonte da verdade)
 │   ├── Cargo.toml              workspace
 │   ├── justfile                build targets (just build, just install)
-│   └── crates/leech-cli/
+│   └── crates/vennon-cli/
 │       └── src/
 │           ├── main.rs         Clap enum + dispatch (4 dominios: Session/Agents/Services/System)
 │           ├── help.rs         Banner, man page, before_help blocks
@@ -34,20 +34,20 @@ Skill unificada para o ecossistema de ferramentas do Leech: CLI Rust (yaa/deck/v
 ├── hooks/                      hooks (Claude + Cursor + ENGINE)
 └── scripts/                    scripts utilitarios bash/python
 
-~/.config/leech/config.yaml     config estruturado (Figment YAML provider)
-~/.leech                        tokens + env vars (bash-sourceable, legado)
+~/.config/vennon/config.yaml     config estruturado (Figment YAML provider)
+~/.vennon                        tokens + env vars (bash-sourceable, legado)
 ```
 
 ### Arquitetura de config — Figment layered
 
 ```
-Built-in defaults -> config.yaml -> LEECH_* env vars -> CLI flags
+Built-in defaults -> config.yaml -> vennon_* env vars -> CLI flags
         ^                ^              ^                ^
    config.rs         ~/.config/    Env::prefixed     Clap args
-   Default impl      leech/        ("VENNON_")        (Option<T>)
+   Default impl      vennon/        ("VENNON_")        (Option<T>)
 ```
 
-Struct unificada: `LeechConfig` com sub-structs `session`, `runner`, `agents`, `paths`, `system`, `secrets`.
+Struct unificada: `vennonConfig` com sub-structs `session`, `runner`, `agents`, `paths`, `system`, `secrets`.
 
 ---
 
@@ -90,10 +90,10 @@ cat package.json | jq '.scripts'
 cat nuxt.config.js | head -20
 ```
 
-#### 2. Gerar `leech/containers/<service>/`
+#### 2. Gerar `vennon/containers/<service>/`
 
 ```
-leech/containers/<service>/
+vennon/containers/<service>/
 ├── Dockerfile               # multi-stage
 ├── Dockerfile.debug         # com dlv (Go)
 ├── docker-compose.yml       # servico principal
@@ -110,9 +110,9 @@ leech/containers/<service>/
 
 #### 3. Registrar no CLI
 
-Editar `leech/cli/src/lib/docker_services.sh`:
-- `leech_docker_service_dir()` — case com var de `~/.leech`
-- `leech_docker_known_services()` — adicionar na lista
+Editar `vennon/cli/src/lib/docker_services.sh`:
+- `vennon_docker_service_dir()` — case com var de `~/.vennon`
+- `vennon_docker_known_services()` — adicionar na lista
 
 ### Templates
 
@@ -190,7 +190,7 @@ services:
 | `/workspace/logs/docker/<service>/deps.log` | dependencias |
 | `/workspace/logs/docker/<service>/install.log` | go mod download |
 
-Host: `~/.local/share/leech/logs/<service>/`
+Host: `~/.local/share/vennon/logs/<service>/`
 
 ### Servicos conhecidos
 
@@ -245,7 +245,7 @@ CMD ["/go/bin/dlv", "exec", "./server",
 services:
   app:
     build:
-      dockerfile: ${LEECH_NIXOS_DIR}/leech/containers/<service>/Dockerfile.debug
+      dockerfile: ${vennon_NIXOS_DIR}/vennon/containers/<service>/Dockerfile.debug
     security_opt:
       - apparmor:unconfined
     cap_add:
@@ -282,28 +282,28 @@ services:
 - Logs em stdout/stderr (docker logging driver captura)
 - Health checks em todo servico
 - Envs por ambiente: sand (default), local, qa, prod — segredos nunca commitados
-- Network: `nixos_default` (external) para comunicacao entre containers Leech
+- Network: `nixos_default` (external) para comunicacao entre containers vennon
 
 ---
 
 ## Worktrees — Sessoes Multi-Repo
 
-Gerencia sessoes de trabalho multi-repo via `leech wt`. Cada sessao representa
+Gerencia sessoes de trabalho multi-repo via `vennon wt`. Cada sessao representa
 uma tarefa com branches checadas em paralelo em todos os repos relevantes.
 
 ### Interface
 
 ```bash
-leech wt                        # lista sessoes (star = ativa)
-leech wt list                   # mesmo que acima
-leech wt new <nome>             # cria sessao (pede confirmacao)
-leech wt <nome>                 # switch para sessao (stash auto)
-leech wt main                   # volta para main
-leech wt <nome> --close         # deleta sessao
-leech wt <nome> --force         # deleta sem confirmacao
-leech worktree                  # lista worktrees por servico
-leech worktree monolito         # filtra por servico
-leech worktree --json           # saida JSON
+vennon wt                        # lista sessoes (star = ativa)
+vennon wt list                   # mesmo que acima
+vennon wt new <nome>             # cria sessao (pede confirmacao)
+vennon wt <nome>                 # switch para sessao (stash auto)
+vennon wt main                   # volta para main
+vennon wt <nome> --close         # deleta sessao
+vennon wt <nome> --force         # deleta sem confirmacao
+vennon worktree                  # lista worktrees por servico
+vennon worktree monolito         # filtra por servico
+vennon worktree --json           # saida JSON
 ```
 
 ### Estrutura no disco
@@ -323,15 +323,15 @@ Repos descobertos automaticamente: todos com `.git` em `/workspace/home/estrateg
 ### Naming — branch SEMPRE e o nome da tarefa
 
 **Convencao obrigatoria:**
-- CTO: `leech wt new FUK2-12345` -> branch `FUK2-12345` em todos os repos
-- Agentes: `leech wt new <agent>/<task-kebab>` -> branch `<agent>/<task-kebab>`
+- CTO: `vennon wt new FUK2-12345` -> branch `FUK2-12345` em todos os repos
+- Agentes: `vennon wt new <agent>/<task-kebab>` -> branch `<agent>/<task-kebab>`
 
 Exemplos:
 ```bash
-leech wt new FUK2-12345                     # CTO: feature card
-leech wt new gandalf/FUK2-12345-auth-fix    # Gandalf: proposta
-leech wt new coruja/metrics-dashboard       # Coruja: investigacao
-leech wt new mechanic/nixos-waybar-fix      # Mechanic: fix de sistema
+vennon wt new FUK2-12345                     # CTO: feature card
+vennon wt new gandalf/FUK2-12345-auth-fix    # Gandalf: proposta
+vennon wt new coruja/metrics-dashboard       # Coruja: investigacao
+vennon wt new mechanic/nixos-waybar-fix      # Mechanic: fix de sistema
 ```
 
 **Nunca criar branch sem nome de tarefa.** Se nao tem card Jira, usar descricao kebab-case.
@@ -339,7 +339,7 @@ leech wt new mechanic/nixos-waybar-fix      # Mechanic: fix de sistema
 ### Criar sessao
 
 ```bash
-leech wt new gandalf/auth-refactor
+vennon wt new gandalf/auth-refactor
 ```
 
 Mostra preview:
@@ -358,17 +358,17 @@ Confirmar? [s/N]
 ### Switch de sessao
 
 ```bash
-leech wt gandalf/auth-refactor
+vennon wt gandalf/auth-refactor
 ```
 
 Fluxo automatico:
-1. Stash de arquivos pendentes na sessao atual (tag: `leech-wt-<sessao>`)
+1. Stash de arquivos pendentes na sessao atual (tag: `vennon-wt-<sessao>`)
 2. Atualiza `/workspace/home/worktree/.active`
 3. Restaura stash da sessao alvo (se existir)
 
 ### Sessao main
 
-`leech wt main` nao tem diretorio fisico — aponta para os repos principais
+`vennon wt main` nao tem diretorio fisico — aponta para os repos principais
 em `/workspace/home/estrategia/`. Stash da sessao atual e salvo antes de sair.
 
 ### Integrar com vennon
@@ -389,20 +389,20 @@ O `--worktree` resolve automaticamente para
 - Agentes nunca commitam sem CTO pedir (Lei 6)
 - Maximo 3 sessoes pendentes por agente
 - Agentes apresentam via inbox card `WORKTREE_<agent>_<nome>_<YYYYMMDD>.md`
-- CTO pode revisar com `leech wt <sessao-do-agente>`
+- CTO pode revisar com `vennon wt <sessao-do-agente>`
 - Regras completas: `self/superego/worktrees.md`
 
 ---
 
-## Upgrade do Leech — Workflow de Desenvolvimento
+## Upgrade do vennon — Workflow de Desenvolvimento
 
 ### Tipo de mudanca — onde trabalhar
 
 | Tipo | Onde editar | Worktree? |
 |------|-------------|-----------|
-| CLI — novo comando ou flag | `/workspace/host/leech/rust/crates/leech-cli/src/` | Sim |
-| CLI — logica de comando existente | `/workspace/host/leech/rust/crates/leech-cli/src/commands/` | Sim |
-| Docker — compose, Dockerfile | `/workspace/host/leech/docker/` | Sim |
+| CLI — novo comando ou flag | `/workspace/host/vennon/rust/crates/vennon-cli/src/` | Sim |
+| CLI — logica de comando existente | `/workspace/host/vennon/rust/crates/vennon-cli/src/commands/` | Sim |
+| Docker — compose, Dockerfile | `/workspace/host/vennon/docker/` | Sim |
 | Agente — comportamento, schedule, model | `/workspace/self/ego/<nome>/agent.md` | Nao |
 | Skill — criar ou atualizar | `/workspace/self/skills/` | Nao |
 | Hook — pre/post-tool, session-start | `/workspace/self/hooks/` | Nao |
@@ -413,7 +413,7 @@ O `--worktree` resolve automaticamente para
 #### 1. Criar worktree isolado
 
 ```bash
-git -C /workspace/host worktree add /tmp/leech-upgrade-<feature> -b feat/leech-<feature>
+git -C /workspace/host worktree add /tmp/vennon-upgrade-<feature> -b feat/vennon-<feature>
 ```
 
 #### 2. Mapear o que precisa mudar
@@ -429,18 +429,18 @@ Para CLI Rust, identificar:
 ```bash
 # Compilar
 nix-shell -p rustc cargo --run \
-  "cd /tmp/leech-upgrade-<feature>/leech/rust && cargo build --release -p leech-cli 2>&1 | tail -5"
+  "cd /tmp/vennon-upgrade-<feature>/vennon/rust && cargo build --release -p vennon-cli 2>&1 | tail -5"
 
 # Executar o binario diretamente
-/tmp/leech-upgrade-<feature>/leech/rust/target/release/leech <comando> --help
-/tmp/leech-upgrade-<feature>/leech/rust/target/release/leech <comando> <args>
+/tmp/vennon-upgrade-<feature>/vennon/rust/target/release/vennon <comando> --help
+/tmp/vennon-upgrade-<feature>/vennon/rust/target/release/vennon <comando> <args>
 ```
 
 #### 4. Commitar no worktree
 
 ```bash
-git -C /tmp/leech-upgrade-<feature> add -A
-git -C /tmp/leech-upgrade-<feature> commit -m "feat(leech): <descricao concisa>"
+git -C /tmp/vennon-upgrade-<feature> add -A
+git -C /tmp/vennon-upgrade-<feature> commit -m "feat(vennon): <descricao concisa>"
 ```
 
 ### Workflow B — Self (agents, skills, hooks, scripts — sem worktree)
@@ -456,13 +456,13 @@ Editar diretamente em `/workspace/self/`. Nao precisa de worktree porque `/works
 3. Se o comando precisa de defaults configuraveis: usar `Option<T>` nos args + fallback `cfg.runner.*` / `cfg.agents.*`
 4. Adicionar dispatch no `match` de `main.rs`
 5. Adicionar exemplos em `help.rs` (DIRECTIVE obrigatorio)
-6. Compilar e testar: `leech <nome> --help` e `leech <nome> <args>`
+6. Compilar e testar: `vennon <nome> --help` e `vennon <nome> <args>`
 
 #### Modificar comando existente
 
 1. Editar `commands/<modulo>.rs`
 2. Se mudou assinatura: atualizar `main.rs` + `help.rs`
-3. Se adicionou flag com default configuravel: trocar `default_value` por `Option` + fallback `LeechConfig`
+3. Se adicionou flag com default configuravel: trocar `default_value` por `Option` + fallback `vennonConfig`
 4. Compilar e testar comportamento antigo + novo
 
 #### Adicionar campo ao config
@@ -471,14 +471,14 @@ Editar diretamente em `/workspace/self/`. Nao precisa de worktree porque `/works
 2. Adicionar `#[serde(default = "...")]` com valor built-in
 3. Atualizar `Default impl` e `display()` em `config.rs`
 4. Atualizar `DEFAULT_TEMPLATE` em `config.rs`
-5. Env var automatica: `LEECH_<SECTION>_<FIELD>` (ex: `LEECH_RUNNER_ENV=sand`)
+5. Env var automatica: `vennon_<SECTION>_<FIELD>` (ex: `vennon_RUNNER_ENV=sand`)
 
 ### Regras de ouro
 
 - **Para mudancas em CLI/Docker**, considerar worktree para isolamento
-- **Sempre testar antes de declarar pronto** — minimo: compilar + `leech <cmd> --help` + 1 teste funcional
+- **Sempre testar antes de declarar pronto** — minimo: compilar + `vennon <cmd> --help` + 1 teste funcional
 - **main.rs alterado?** Obrigatorio atualizar `help.rs` (DIRECTIVE no topo do arquivo)
-- **Nunca chamar** `deck stow`, `leech switch` ou `leech os` de dentro do container
+- **Nunca chamar** `deck stow`, `vennon switch` ou `vennon os` de dentro do container
 - **Indices de skills**: ao criar/mover skill, atualizar SKILL.md do namespace pai
 - **Nao pedir ao usuario para rodar comandos** — se precisar testar algo, encontrar forma de testar autonomamente
 
@@ -487,8 +487,8 @@ Editar diretamente em `/workspace/self/`. Nao precisa de worktree porque `/works
 ```bash
 # Compilar e testar CLI Rust (worktree ou main)
 nix-shell -p rustc cargo --run \
-  "cd <worktree>/leech/rust && cargo build --release -p leech-cli 2>&1 | tail -5"
-<worktree>/leech/rust/target/release/leech <cmd>
+  "cd <worktree>/vennon/rust && cargo build --release -p vennon-cli 2>&1 | tail -5"
+<worktree>/vennon/rust/target/release/vennon <cmd>
 
 # Instalar qualquer ferramenta on-the-fly
 nix-shell -p <pacote> --run "<cmd>"
@@ -508,14 +508,14 @@ git -C /workspace/host worktree list
 PRONTO: <nome da feature>
 
 tipo:     cli | agent | skill | hook | script
-branch:   feat/leech-<feature>      (N/A para mudancas em self/)
-worktree: /tmp/leech-upgrade-<feature>   (N/A para mudancas em self/)
+branch:   feat/vennon-<feature>      (N/A para mudancas em self/)
+worktree: /tmp/vennon-upgrade-<feature>   (N/A para mudancas em self/)
 arquivos: lista dos arquivos modificados
 
 testado:
   - bash -n: OK em todos os .sh
-  - leech <cmd> --help: output correto
-  - leech <cmd> <args>: comportamento esperado
+  - vennon <cmd> --help: output correto
+  - vennon <cmd> <args>: comportamento esperado
 
 proximo:
   Pedro roda `deck stow` no host para aplicar (mudancas CLI/docker)

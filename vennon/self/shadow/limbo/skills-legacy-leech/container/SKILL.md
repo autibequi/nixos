@@ -1,11 +1,11 @@
 ---
-name: leech/container
-description: Dockerizar um novo servico no ecossistema Leech — gerar Dockerfile/compose/envs e integrar com vennon (logs em /workspace/logs, aparece no deck, registrado no CLI). Tambem cobre operar servicos existentes (monolito, bo-container, front-student).
+name: vennon/container
+description: Dockerizar um novo servico no ecossistema vennon — gerar Dockerfile/compose/envs e integrar com vennon (logs em /workspace/logs, aparece no deck, registrado no CLI). Tambem cobre operar servicos existentes (monolito, bo-container, front-student).
 ---
 
-# Skill: leech/container
+# Skill: vennon/container
 
-Criar e operar containers integrados ao ecossistema Leech: logs persistentes, visibilidade no `vennon status`, registro no CLI, rede compartilhada.
+Criar e operar containers integrados ao ecossistema vennon: logs persistentes, visibilidade no `vennon status`, registro no CLI, rede compartilhada.
 
 ## Quando usar
 
@@ -35,10 +35,10 @@ cat nuxt.config.js | head -20
 
 Dependencias externas a detectar: PostgreSQL, Redis, SQS/LocalStack, Elasticsearch.
 
-### 2. Gerar `leech/containers/<service>/`
+### 2. Gerar `vennon/containers/<service>/`
 
 ```
-leech/containers/<service>/
+vennon/containers/<service>/
 ├── Dockerfile               # multi-stage
 ├── Dockerfile.debug         # com dlv (Go)
 ├── docker-compose.yml       # servico principal
@@ -55,9 +55,9 @@ leech/containers/<service>/
 
 ### 3. Registrar no CLI
 
-Editar `leech/cli/src/lib/docker_services.sh`:
-- `leech_docker_service_dir()` — case com var de `~/.leech`
-- `leech_docker_known_services()` — adicionar na lista
+Editar `vennon/cli/src/lib/docker_services.sh`:
+- `vennon_docker_service_dir()` — case com var de `~/.vennon`
+- `vennon_docker_known_services()` — adicionar na lista
 
 ### 4. Templates
 
@@ -130,7 +130,7 @@ services:
 
 ## Modo 2 — Operar servicos existentes
 
-### CLI `leech docker`
+### CLI `vennon docker`
 
 ```bash
 vennon run <service> [--env=sand] [--detach] [--debug]
@@ -152,7 +152,7 @@ vennon install <service>    # go work vendor / npm install
 | `/workspace/logs/docker/<service>/deps.log` | dependencias |
 | `/workspace/logs/docker/<service>/install.log` | go mod download |
 
-Host: `~/.local/share/leech/logs/<service>/`
+Host: `~/.local/share/vennon/logs/<service>/`
 
 ### Servicos conhecidos
 
@@ -211,7 +211,7 @@ CMD ["/go/bin/dlv", "exec", "./server",
 services:
   app:
     build:
-      dockerfile: ${LEECH_NIXOS_DIR}/leech/containers/<service>/Dockerfile.debug
+      dockerfile: ${vennon_NIXOS_DIR}/vennon/containers/<service>/Dockerfile.debug
     security_opt:
       - apparmor:unconfined
     cap_add:
@@ -250,4 +250,4 @@ services:
 - Logs em stdout/stderr (docker logging driver captura)
 - Health checks em todo servico
 - Envs por ambiente: sand (default), local, qa, prod — segredos nunca commitados
-- Network: `nixos_default` (external) para comunicacao entre containers Leech
+- Network: `nixos_default` (external) para comunicacao entre containers vennon

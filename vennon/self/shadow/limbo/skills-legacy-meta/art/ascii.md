@@ -700,7 +700,7 @@ Para mostrar proporção de budget/capacidade com múltiplas camadas empilhadas.
 ║▒▒▒▒  ║  3k  CLAUDE.md   1.5k
 ╠══════╣ ← 1.5k
 ║····  ║  1.5k SKILLS      0.8k
-║·     ║  0.8k BOOT+LEECH  0.7k
+║·     ║  0.8k BOOT+vennon  0.7k
 ╚══════╝  0k
           ──────────────────────
           nosso boot   ~6k   3%

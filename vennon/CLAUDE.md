@@ -2,7 +2,7 @@
 
 ## O que é
 
-Workspace Rust com 3 crates: `vennon` (containers), `yaa` (sessões/agentes), `deck` (TUI/host). Substitui o antigo `leech`. Usa **podman** e **podman-compose** (não docker).
+Workspace Rust com 3 crates: `vennon` (containers), `yaa` (sessões/agentes), `deck` (TUI/host). Substitui o antigo `vennon`. Usa **podman** e **podman-compose** (não docker).
 
 ## Estrutura do código
 
@@ -66,7 +66,7 @@ O manifest.rs scana 2 locais:
 `{{ var }}` substitui pelo valor do arg. `{{ var | map }}` aplica o mapeamento do enum (ex: `sand` → `sandbox`).
 
 ### Entrypoint dinâmico
-`containers/leech/entrypoint.sh` lê `VENNON_UID`/`VENNON_GID` env vars para ajustar user no container (evita root ownership).
+`containers/vennon/entrypoint.sh` lê `VENNON_UID`/`VENNON_GID` env vars para ajustar user no container (evita root ownership).
 
 ## Convenções
 
@@ -78,7 +78,7 @@ O manifest.rs scana 2 locais:
 
 ## Ao modificar
 
-- **Novo IDE**: criar `containers/<name>/Dockerfile` (FROM vennon-leech) + `vennon.yaml`
+- **Novo IDE**: criar `containers/<name>/Dockerfile` (FROM vennon-vennon) + `vennon.yaml`
 - **Novo serviço**: criar em `stow/.config/vennon/containers/<name>/` com vennon.yaml + docker-compose.yml
 - **Novo comando yaa**: adicionar subcommand em `crates/yaa/src/main.rs` + módulo
 - **Novo comando deck**: adicionar subcommand em `crates/deck/src/main.rs` + módulo

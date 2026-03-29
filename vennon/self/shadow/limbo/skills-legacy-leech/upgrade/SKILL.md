@@ -1,22 +1,22 @@
 ---
-name: leech/upgrade
-description: Implementar e depurar uma feature do Leech de forma autonoma — worktree isolado do /workspace/host, testes sem supervisao, entrega de branch pronto para merge. Auto-ativar quando usuario pede para adicionar/melhorar/corrigir algo no proprio Leech (CLI, agente, skill, hook, script).
+name: vennon/upgrade
+description: Implementar e depurar uma feature do vennon de forma autonoma — worktree isolado do /workspace/host, testes sem supervisao, entrega de branch pronto para merge. Auto-ativar quando usuario pede para adicionar/melhorar/corrigir algo no proprio vennon (CLI, agente, skill, hook, script).
 ---
 
-# Skill: leech/upgrade
+# Skill: vennon/upgrade
 
-Implementar features no Leech de forma autonoma dentro do container. Criar worktree isolado, codificar, testar e validar sem pedir ao Pedro para rodar nada. Entregar branch pronto.
+Implementar features no vennon de forma autonoma dentro do container. Criar worktree isolado, codificar, testar e validar sem pedir ao Pedro para rodar nada. Entregar branch pronto.
 
 ---
 
-## Mapa do Leech
+## Mapa do vennon
 
 ```
-/workspace/host/leech/
+/workspace/host/vennon/
 ├── rust/                       CLI Rust (fonte da verdade)
 │   ├── Cargo.toml              workspace
 │   ├── justfile                build targets (just build, just install)
-│   └── crates/leech-cli/
+│   └── crates/vennon-cli/
 │       └── src/
 │           ├── main.rs         Clap enum + dispatch (4 dominios: Session/Agents/Services/System)
 │           ├── help.rs         Banner, man page, before_help blocks
@@ -34,20 +34,20 @@ Implementar features no Leech de forma autonoma dentro do container. Criar workt
 ├── hooks/                      hooks (Claude + Cursor + ENGINE)
 └── scripts/                    scripts utilitarios bash/python
 
-~/.config/leech/config.yaml     config estruturado (Figment YAML provider)
-~/.leech                        tokens + env vars (bash-sourceable, legado)
+~/.config/vennon/config.yaml     config estruturado (Figment YAML provider)
+~/.vennon                        tokens + env vars (bash-sourceable, legado)
 ```
 
 ### Arquitetura de config — Figment layered
 
 ```
-Built-in defaults → config.yaml → LEECH_* env vars → CLI flags
+Built-in defaults → config.yaml → vennon_* env vars → CLI flags
         ↑                ↑              ↑                ↑
    config.rs         ~/.config/    Env::prefixed     Clap args
-   Default impl      leech/        ("LEECH_")        (Option<T>)
+   Default impl      vennon/        ("vennon_")        (Option<T>)
 ```
 
-Struct unificada: `LeechConfig` com sub-structs `session`, `runner`, `agents`, `paths`, `system`, `secrets`.
+Struct unificada: `vennonConfig` com sub-structs `session`, `runner`, `agents`, `paths`, `system`, `secrets`.
 
 ---
 
@@ -55,9 +55,9 @@ Struct unificada: `LeechConfig` com sub-structs `session`, `runner`, `agents`, `
 
 | Tipo | Onde editar | Worktree? |
 |------|-------------|-----------|
-| CLI — novo comando ou flag | `/workspace/host/leech/rust/crates/leech-cli/src/` | Sim |
-| CLI — logica de comando existente | `/workspace/host/leech/rust/crates/leech-cli/src/commands/` | Sim |
-| Docker — compose, Dockerfile | `/workspace/host/leech/docker/` | Sim |
+| CLI — novo comando ou flag | `/workspace/host/vennon/rust/crates/vennon-cli/src/` | Sim |
+| CLI — logica de comando existente | `/workspace/host/vennon/rust/crates/vennon-cli/src/commands/` | Sim |
+| Docker — compose, Dockerfile | `/workspace/host/vennon/docker/` | Sim |
 | Agente — comportamento, schedule, model | `/workspace/self/ego/<nome>/agent.md` | Nao |
 | Skill — criar ou atualizar | `/workspace/self/skills/` | Nao |
 | Hook — pre/post-tool, session-start | `/workspace/self/hooks/` | Nao |
@@ -70,7 +70,7 @@ Struct unificada: `LeechConfig` com sub-structs `session`, `runner`, `agents`, `
 ### 1. Criar worktree isolado
 
 ```bash
-git -C /workspace/host worktree add /tmp/leech-upgrade-<feature> -b feat/leech-<feature>
+git -C /workspace/host worktree add /tmp/vennon-upgrade-<feature> -b feat/vennon-<feature>
 ```
 
 ### 2. Mapear o que precisa mudar
@@ -83,28 +83,28 @@ Para CLI Rust, identificar:
 
 Ler o comando mais proximo para entender padrao:
 ```bash
-ls /tmp/leech-upgrade-<feature>/leech/rust/crates/leech-cli/src/commands/
+ls /tmp/vennon-upgrade-<feature>/vennon/rust/crates/vennon-cli/src/commands/
 ```
 
 ### 3. Implementar
 
-Editar os arquivos no worktree em `/tmp/leech-upgrade-<feature>/leech/rust/crates/leech-cli/src/`.
+Editar os arquivos no worktree em `/tmp/vennon-upgrade-<feature>/vennon/rust/crates/vennon-cli/src/`.
 
 ### 4. Testar
 
 ```bash
 # Compilar
 nix-shell -p rustc cargo --run \
-  "cd /tmp/leech-upgrade-<feature>/leech/rust && cargo build --release -p leech-cli 2>&1 | tail -5"
+  "cd /tmp/vennon-upgrade-<feature>/vennon/rust && cargo build --release -p vennon-cli 2>&1 | tail -5"
 
 # Executar o binario diretamente
-/tmp/leech-upgrade-<feature>/leech/rust/target/release/leech <comando> --help
-/tmp/leech-upgrade-<feature>/leech/rust/target/release/leech <comando> <args>
+/tmp/vennon-upgrade-<feature>/vennon/rust/target/release/vennon <comando> --help
+/tmp/vennon-upgrade-<feature>/vennon/rust/target/release/vennon <comando> <args>
 ```
 
 Para testes que precisariam do Docker (ex: `vennon mono status`), testar a logica sem side effects:
 ```bash
-DOCKER_HOST=invalid /tmp/.../leech/rust/target/release/vennon mono status 2>&1
+DOCKER_HOST=invalid /tmp/.../vennon/rust/target/release/vennon mono status 2>&1
 ```
 
 ### 5. Iterar ate funcionar
@@ -114,8 +114,8 @@ Corrigir, re-compilar, re-testar. Repetir ate todos os casos passarem.
 ### 6. Commitar no worktree
 
 ```bash
-git -C /tmp/leech-upgrade-<feature> add -A
-git -C /tmp/leech-upgrade-<feature> commit -m "feat(leech): <descricao concisa>"
+git -C /tmp/vennon-upgrade-<feature> add -A
+git -C /tmp/vennon-upgrade-<feature> commit -m "feat(vennon): <descricao concisa>"
 ```
 
 ---
@@ -179,14 +179,14 @@ Sempre reportar neste formato:
 PRONTO: <nome da feature>
 
 tipo:     cli | agent | skill | hook | script
-branch:   feat/leech-<feature>      (N/A para mudancas em self/)
-worktree: /tmp/leech-upgrade-<feature>   (N/A para mudancas em self/)
+branch:   feat/vennon-<feature>      (N/A para mudancas em self/)
+worktree: /tmp/vennon-upgrade-<feature>   (N/A para mudancas em self/)
 arquivos: lista dos arquivos modificados
 
 testado:
   - bash -n: OK em todos os .sh
-  - leech <cmd> --help: output correto
-  - leech <cmd> <args>: comportamento esperado
+  - vennon <cmd> --help: output correto
+  - vennon <cmd> <args>: comportamento esperado
   - [outros testes realizados]
 
 proximo:
@@ -199,9 +199,9 @@ proximo:
 ## Regras de ouro
 
 - **Para mudancas em CLI/Docker**, considerar worktree para isolamento — perguntar ao user se prefere
-- **Sempre testar antes de declarar pronto** — minimo: compilar + `leech <cmd> --help` + 1 teste funcional
+- **Sempre testar antes de declarar pronto** — minimo: compilar + `vennon <cmd> --help` + 1 teste funcional
 - **main.rs alterado?** Obrigatorio atualizar `help.rs` (DIRECTIVE no topo do arquivo)
-- **Nunca chamar** `deck stow`, `leech switch` ou `leech os` de dentro do container
+- **Nunca chamar** `deck stow`, `vennon switch` ou `vennon os` de dentro do container
 - **Indices de skills**: ao criar/mover skill, atualizar SKILL.md do namespace pai
 - **Nao pedir ao usuario para rodar comandos** — se precisar testar algo, encontrar forma de testar autonomamente
 
@@ -216,13 +216,13 @@ proximo:
 3. Se o comando precisa de defaults configuraveis: usar `Option<T>` nos args + fallback `cfg.runner.*` / `cfg.agents.*`
 4. Adicionar dispatch no `match` de `main.rs`
 5. Adicionar exemplos em `help.rs` (DIRECTIVE obrigatorio)
-6. Compilar e testar: `leech <nome> --help` e `leech <nome> <args>`
+6. Compilar e testar: `vennon <nome> --help` e `vennon <nome> <args>`
 
 ### Modificar comando existente
 
 1. Editar `commands/<modulo>.rs`
 2. Se mudou assinatura: atualizar `main.rs` + `help.rs`
-3. Se adicionou flag com default configuravel: trocar `default_value` por `Option` + fallback `LeechConfig`
+3. Se adicionou flag com default configuravel: trocar `default_value` por `Option` + fallback `vennonConfig`
 4. Compilar e testar comportamento antigo + novo
 
 ### Adicionar campo ao config
@@ -231,7 +231,7 @@ proximo:
 2. Adicionar `#[serde(default = "...")]` com valor built-in
 3. Atualizar `Default impl` e `display()` em `config.rs`
 4. Atualizar `DEFAULT_TEMPLATE` em `config.rs`
-5. Env var automatica: `LEECH_<SECTION>_<FIELD>` (ex: `LEECH_RUNNER_ENV=sand`)
+5. Env var automatica: `vennon_<SECTION>_<FIELD>` (ex: `vennon_RUNNER_ENV=sand`)
 
 ### Adicionar novo agente
 
@@ -252,8 +252,8 @@ proximo:
 ```bash
 # Compilar e testar CLI Rust (worktree ou main)
 nix-shell -p rustc cargo --run \
-  "cd <worktree>/leech/rust && cargo build --release -p leech-cli 2>&1 | tail -5"
-<worktree>/leech/rust/target/release/leech <cmd>
+  "cd <worktree>/vennon/rust && cargo build --release -p vennon-cli 2>&1 | tail -5"
+<worktree>/vennon/rust/target/release/vennon <cmd>
 
 # Instalar qualquer ferramenta on-the-fly
 nix-shell -p <pacote> --run "<cmd>"

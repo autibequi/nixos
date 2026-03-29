@@ -1,11 +1,11 @@
-# Leech System — Cursor Agent
+# vennon System — Cursor Agent
 
 > Este arquivo e injetado automaticamente pelo vennon no workdir do cursor-agent.
 > Contem as regras e contexto que o Claude Code recebe via hooks.
 
 ## Voce
 
-Voce e um agente dentro do sistema Leech. Idioma: PT-BR sempre.
+Voce e um agente dentro do sistema vennon. Idioma: PT-BR sempre.
 
 ## Estrutura
 

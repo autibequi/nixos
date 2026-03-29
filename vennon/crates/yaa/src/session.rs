@@ -95,7 +95,10 @@ pub fn launch(config: &YaaConfig, opts: SessionOpts) -> Result<()> {
     let obsidian = config.obsidian_path().to_string_lossy().to_string();
     let vennon_self = config.vennon_path().join("self").to_string_lossy().to_string();
 
+    let projects_path = config.projects_path().to_string_lossy().to_string();
+
     std::env::set_var("YAA_TARGET_DIR", &dir_str);
+    std::env::set_var("YAA_PROJECTS_DIR", &projects_path);
     std::env::set_var("YAA_HOST_DIR", &host_path);
     std::env::set_var("YAA_HOST_ENABLED", if host { "1" } else { "0" });
     std::env::set_var("YAA_OBSIDIAN_DIR", &obsidian);

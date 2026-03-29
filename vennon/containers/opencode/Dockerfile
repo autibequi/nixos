@@ -1,5 +1,5 @@
-# vennon-opencode — herda de vennon-leech + instala opencode
-FROM vennon-leech:latest
+# vennon-opencode — herda de vennon-vennon + instala opencode
+FROM vennon-vennon:latest
 
 RUN nix profile install nixpkgs#opencode && \
     cp -r /root/.nix-profile /home/claude/.nix-profile && \

@@ -15,7 +15,7 @@ services:
       - ${MONOLITO_DIR}/configuration:/go/app/configuration:ro
       - /var/run/docker.sock:/var/run/docker.sock
       # Canal de comunicação rápida host ↔ container
-      - ${HOME}/.leech:/.leech:rw
+      - ${HOME}/.vennon:/.vennon:rw
     ports:
       - "4004:4004"
       - "2345:2345"

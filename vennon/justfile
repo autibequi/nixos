@@ -42,7 +42,7 @@ uninstall:
 
 # Build all container images
 images:
-    podman build -t vennon-leech containers/leech/
+    podman build -t vennon-vennon containers/vennon/
     podman build -t vennon-claude containers/claude/
     podman build -t vennon-cursor containers/cursor/
     podman build -t vennon-opencode containers/opencode/

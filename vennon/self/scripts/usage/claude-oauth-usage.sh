@@ -84,10 +84,10 @@ _fetch_fresh() {
   echo "$raw" | $JQ -e '.five_hour' &>/dev/null || return 1
   mkdir -p "$(dirname "$CACHE_FILE")"
   echo "$raw" > "$CACHE_FILE"
-  # Compartilha com o host via ~/.local/share/leech/ (montado no compose)
-  _leech_data="${XDG_DATA_HOME:-${HOME}/.local/share}/leech"
-  mkdir -p "$_leech_data" 2>/dev/null || true
-  cp "$CACHE_FILE" "${_leech_data}/claude-usage.json" 2>/dev/null || true
+  # Compartilha com o host via ~/.local/share/vennon/ (montado no compose)
+  _vennon_data="${XDG_DATA_HOME:-${HOME}/.local/share}/vennon"
+  mkdir -p "$_vennon_data" 2>/dev/null || true
+  cp "$CACHE_FILE" "${_vennon_data}/claude-usage.json" 2>/dev/null || true
   echo "$raw"
 }
 

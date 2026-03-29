@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-**Este repo:** NixOS config do host + **Leech** (sistema de agentes). Você é **Leech** — gestor do repo e dos agentes.
+**Este repo:** NixOS config do host + **vennon** (sistema de agentes). Você é **vennon** — gestor do repo e dos agentes.
 
 > Referência técnica completa (compose, volumes, bootstrap, CLI completo): `self/docs/reference.md`
 
@@ -17,13 +17,13 @@
 
 | Path | Permissão | O que é |
 |------|-----------|---------|
-| `/workspace/self/` | **sempre rw** | Engine Leech (skills, hooks, agents, scripts) |
+| `/workspace/self/` | **sempre rw** | Engine vennon (skills, hooks, agents, scripts) |
 | `/workspace/obsidian/` | **sempre rw** | Vault Obsidian — cérebro compartilhado entre agentes |
 | `/workspace/mnt/` | **sempre rw** | Zona de trabalho — projeto do host |
 | `/workspace/host/` | **ro** default, **rw** com `--host` | Repo NixOS completo (`~/nixos`) |
 | `/workspace/logs/` | ro | Logs Docker e sistema host |
 
-Ativar host: `leech --host`, `leech new --host`, ou `mount_host=true` em `~/.leech`.
+Ativar host: `vennon --host`, `vennon new --host`, ou `mount_host=true` em `~/.vennon`.
 
 ---
 
@@ -32,25 +32,25 @@ Ativar host: `leech --host`, `leech new --host`, ou `mount_host=true` em `~/.lee
 | | |
 |---|---|
 | **Este repo** | `flake.nix`, `configuration.nix`, `modules/`, `stow/`, `scripts/`, `self/` |
-| **Leech** | CLI `leech`, container `claude-nix-sandbox`, skills, hooks → código em `self/` |
+| **vennon** | CLI `vennon`, container `claude-nix-sandbox`, skills, hooks → código em `self/` |
 | **Puppy** | Workers background: `puppy-daemon.sh`, `puppy-runner.sh` → agent em `self/agents/puppy-runner/` |
-| **Leech CLI** | Gerado por bashly: `self/bash/src/bashly.yml` + `commands/*.sh` → após mudar: `bashly generate` |
-| **~/.leech** | Canal de comunicação rápida host ↔ containers. KEY=value lido no boot → `---LEECH---`. Montado em todos os containers como `~/.leech` (leech) e `/.leech` (app containers). |
+| **vennon CLI** | Gerado por bashly: `self/bash/src/bashly.yml` + `commands/*.sh` → após mudar: `bashly generate` |
+| **~/.vennon** | Canal de comunicação rápida host ↔ containers. KEY=value lido no boot → `---vennon---`. Montado em todos os containers como `~/.vennon` (vennon) e `/.vennon` (app containers). |
 
 ---
 
-## Comandos Leech — usar sempre (nunca o raw)
+## Comandos vennon — usar sempre (nunca o raw)
 
-| Operação | Comando `leech` | ❌ Raw (evitar) |
+| Operação | Comando `vennon` | ❌ Raw (evitar) |
 |----------|---------------|----------------|
-| Deploy dotfiles | `leech stow` | `stow -d ~/nixos/stow -t ~ .` |
-| Build NixOS (validar) | `leech switch test` | `nh os test .` |
-| Aplicar NixOS | `leech switch` | `nh os switch .` |
-| Aplicar no próximo boot | `leech switch boot` | `nh os boot .` |
-| Regenerar CLI | `leech update` | `cd leech/cli && bashly generate` |
-| Status dotfiles | `leech stow status` | — |
+| Deploy dotfiles | `vennon stow` | `stow -d ~/nixos/stow -t ~ .` |
+| Build NixOS (validar) | `vennon switch test` | `nh os test .` |
+| Aplicar NixOS | `vennon switch` | `nh os switch .` |
+| Aplicar no próximo boot | `vennon switch boot` | `nh os boot .` |
+| Regenerar CLI | `vennon update` | `cd vennon/cli && bashly generate` |
+| Status dotfiles | `vennon stow status` | — |
 
-`leech man` para lista completa. Subcomandos detalhados: `self/docs/reference.md`.
+`vennon man` para lista completa. Subcomandos detalhados: `self/docs/reference.md`.
 
 ---
 
@@ -64,7 +64,7 @@ Ativar host: `leech --host`, `leech new --host`, ou `mount_host=true` em `~/.lee
 
 ## Onde editar o quê
 
-> Com `host_attached=1`: paths relativos a `/workspace/host/` (repo NixOS) ou `/workspace/self/` (leech).
+> Com `host_attached=1`: paths relativos a `/workspace/host/` (repo NixOS) ou `/workspace/self/` (vennon).
 > Em sessão normal: estes paths estão em `/workspace/mnt/` se o projeto montado for o repo NixOS.
 
 | Quero alterar… | Onde |
@@ -72,9 +72,9 @@ Ativar host: `leech --host`, `leech new --host`, ou `mount_host=true` em `~/.lee
 | Pacote de sistema | `modules/core/packages.nix` |
 | Serviço systemd | `modules/core/services.nix` |
 | Ativar/desativar módulo | `configuration.nix` (imports) |
-| Keybind / Waybar / config DE | `stow/.config/hypr/`, `stow/.config/waybar/` → `leech stow` |
-| Comando ou flag do `leech` | `self/cli/src/bashly.yml` + `commands/<nome>.sh` → `bashly generate` |
-| Mounts ou serviços do container | `self/containers/leech/docker-compose.leech.yml` |
+| Keybind / Waybar / config DE | `stow/.config/hypr/`, `stow/.config/waybar/` → `vennon stow` |
+| Comando ou flag do `vennon` | `self/cli/src/bashly.yml` + `commands/<nome>.sh` → `bashly generate` |
+| Mounts ou serviços do container | `self/containers/vennon/docker-compose.vennon.yml` |
 | Comportamento do agente (/load) | `self/bootstrap.md`, `self/system/INIT.md` |
 | Skills ou comandos | `self/skills/`, `self/commands/` |
 | Hooks (session-start, etc.) | `self/hooks/claude-code/` |
@@ -83,7 +83,7 @@ Ativar host: `leech --host`, `leech new --host`, ou `mount_host=true` em `~/.lee
 
 ## Obsidian — Vault do sistema
 
-O vault Obsidian esta montado em `/workspace/obsidian/`. E o cerebro operacional do Leech.
+O vault Obsidian esta montado em `/workspace/obsidian/`. E o cerebro operacional do vennon.
 
 **Antes de mexer no vault, ler:**
 1. `/workspace/obsidian/BOARDRULES.md` — regras gerais, mapa do vault, roster de agents
@@ -118,21 +118,21 @@ Breakroom (memoria/estado): `/workspace/obsidian/agents/<nome>/memory.md`
 
 | Operacao | Comando |
 |----------|---------|
-| Tick (todos agents+tasks) | `leech tick` (systemd timer 10min) |
-| Rodar agent ou task | `leech run <nome> [-s N]` |
-| Lanca tasker (tasks) | `leech tasker` ou `leech tasks run` |
-| Listar agents | `leech agents` |
-| Activity log agents | `leech agents log` |
-| Conversar com agent | `leech agents phone <nome>` |
-| Dashboard tasks | `leech tasks status` |
-| Kanban tasks | `leech tasks log` |
+| Tick (todos agents+tasks) | `vennon tick` (systemd timer 10min) |
+| Rodar agent ou task | `vennon run <nome> [-s N]` |
+| Lanca tasker (tasks) | `vennon tasker` ou `vennon tasks run` |
+| Listar agents | `vennon agents` |
+| Activity log agents | `vennon agents log` |
+| Conversar com agent | `vennon agents phone <nome>` |
+| Dashboard tasks | `vennon tasks status` |
+| Kanban tasks | `vennon tasks log` |
 
 ---
 
 ## Armadilhas
 
 - `nixos-rebuild`/`systemctl` no container → nao afeta o host. Pedir ao usuario.
-- Com `--host`: repo NixOS em `/workspace/host/` (writable); self (leech) em `/workspace/self/`.
+- Com `--host`: repo NixOS em `/workspace/host/` (writable); self (vennon) em `/workspace/self/`.
 - Keybinds/Waybar: fonte da verdade e `stow/.config/`, nao modulos NixOS.
 - Apos mudar `bashly.yml`/`commands/*.sh`: sempre `bashly generate`.
 - Obsidian: ler BOARDRULES.md antes de modificar qualquer coisa no vault.

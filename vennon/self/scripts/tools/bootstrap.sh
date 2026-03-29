@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Leech: bootstrap do agente no container.
+# vennon: bootstrap do agente no container.
 # Delega para o bootstrap do repo NixOS. No container, mounts ficam sob /workspace (nixos, obsidian, logs, mount).
 
 # Repo NixOS: em /workspace/nixos (scheduler) ou em /workspace/mnt (--host). Symlink /workspace/host para compatibilidade.
@@ -20,7 +20,7 @@ for base in /workspace/nixos /workspace/mnt; do
 done
 
 if [[ -z "${_ret:-}" ]]; then
-  echo "[leech bootstrap] scripts/bootstrap.sh do repo NixOS não encontrado; continuando sem dashboard." >&2
+  echo "[vennon bootstrap] scripts/bootstrap.sh do repo NixOS não encontrado; continuando sem dashboard." >&2
   _ret=0
 fi
 

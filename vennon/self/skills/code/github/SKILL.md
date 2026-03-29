@@ -1,24 +1,24 @@
 ---
 name: code/github
-description: "Operações GitHub — buscar PRs, comentários, diffs, reviews. Token sempre de ~/.leech. Comentários = ativos por default."
+description: "Operações GitHub — buscar PRs, comentários, diffs, reviews. Token sempre de ~/.vennon. Comentários = ativos por default."
 ---
 
 # code/github — Operações GitHub
 
 Skill para interagir com GitHub via CLI (`gh`). Padrões, tokens, e convenções.
 
-## Regra Crítica #1: Token sempre de ~/.leech
+## Regra Crítica #1: Token sempre de ~/.vennon
 
-**SEMPRE** buscar o token de autenticação do arquivo `~/.leech`:
+**SEMPRE** buscar o token de autenticação do arquivo `~/.vennon`:
 
 ```bash
-export GH_TOKEN=$(grep '^GH_TOKEN=' ~/.leech | cut -d'=' -f2)
+export GH_TOKEN=$(grep '^GH_TOKEN=' ~/.vennon | cut -d'=' -f2)
 gh pr view <number> --repo <owner>/<repo> --json title,body,comments
 ```
 
-Não hardcode tokens. Não assume `$GH_TOKEN` já está setado. Leia sempre do arquivo `.leech` na primeira operação.
+Não hardcode tokens. Não assume `$GH_TOKEN` já está setado. Leia sempre do arquivo `.vennon` na primeira operação.
 
-Se `.leech` nao existir, pedir ao user para configurar:
+Se `.vennon` nao existir, pedir ao user para configurar:
 ```bash
 gh auth login
 ```
@@ -59,7 +59,7 @@ Review skipped — Draft detected. Dispare @coderabbitai review...
 
 ### Listar PRs
 ```bash
-export GH_TOKEN=$(grep '^GH_TOKEN=' ~/.leech | cut -d'=' -f2)
+export GH_TOKEN=$(grep '^GH_TOKEN=' ~/.vennon | cut -d'=' -f2)
 gh pr list --repo <owner>/<repo> --state merged --author <username> --limit 10 \
   --json number,title,additions,deletions,changedFiles,createdAt,mergedAt
 ```

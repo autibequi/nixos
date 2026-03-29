@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
-# vennon-leech — imagem base com nix + tools (SEM claude-code/opencode/cursor)
-# Build: podman build -t vennon-leech containers/leech/
+# vennon-vennon — imagem base com nix + tools (SEM claude-code/opencode/cursor)
+# Build: podman build -t vennon-vennon containers/vennon/
 
 # Stage 0: Cursor CLI (FHS — reutilizado por vennon-cursor no futuro)
 FROM debian:bookworm-slim AS cursor-cli

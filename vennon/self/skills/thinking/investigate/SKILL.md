@@ -72,7 +72,7 @@ Problema
 │   ├── store/                    ← estado (Vuex)
 │   └── /workspace/logs/docker/front-student/
 │
-├── infra / leech
+├── infra / vennon
 │   ├── /workspace/self/          ← skills, hooks, agentes
 │   └── /workspace/logs/          ← todos os logs centralizados
 │

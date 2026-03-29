@@ -26,7 +26,7 @@ Detectar valores atuais das flags a partir do contexto de boot injetado no iníc
 ### 2. Detectar flags e estado real
 
 Para cada flag, determinar:
-- **Mecanismo de ativação** (`~/.leech KEY=` ou variável de processo)
+- **Mecanismo de ativação** (`~/.vennon KEY=` ou variável de processo)
 - **Default** (o que acontece sem intervenção)
 - **Valor nesta sessão** (ON/OFF/0/1/string)
 - **Status**: 🔵 ativo · 🔴 inativo · ⚪ lazy (existe mas não carregado)
@@ -62,8 +62,8 @@ Formato tabela Markdown:
 ```
 |     | Flag | Mecanismo | Default | Valor |
 |-----|------|-----------|---------|-------|
-| 🔵 | `personality` | `~/.leech PERSONALITY=` | ON | ON |
-| 🔴 | `autocommit`  | `~/.leech AUTOCOMMIT=`     | OFF | OFF |
+| 🔵 | `personality` | `~/.vennon PERSONALITY=` | ON | ON |
+| 🔴 | `autocommit`  | `~/.vennon AUTOCOMMIT=`     | OFF | OFF |
 ...
 ```
 
@@ -79,8 +79,8 @@ Substituir valores reais detectados na sessão.
 🔵 ├─[SEMPRE]────────────────────── BOOT FLAGS
 │      datetime · personality · autocommit · in_docker · host_attached...
 │
-🔵 ├─[leech_debug=OFF + interativo]── LITE.md                    ← ATIVO
-🔴 │                                 DIRETRIZES.md              ← requer leech_debug=ON
+🔵 ├─[vennon_debug=OFF + interativo]── LITE.md                    ← ATIVO
+🔴 │                                 DIRETRIZES.md              ← requer vennon_debug=ON
 │
 🔵 ├─[SEMPRE]────────────────────── ENV CONTEXT
 │
@@ -94,7 +94,7 @@ Substituir valores reais detectados na sessão.
 │
 🔴 ├─[beta=ON]───────────────────────  BETA OVERRIDES
 │
-🔴 └─[LEECH_ANALYSIS_MODE=1]──────────  ANALYSIS MODE
+🔴 └─[vennon_ANALYSIS_MODE=1]──────────  ANALYSIS MODE
 
 ── LAZY-LOAD ─────────────────────────────────────────────────────────
 ⚪  SELF.md         ~640 tokens  — não carregado
@@ -113,21 +113,21 @@ Avaliar e exibir recomendações baseadas no estado atual:
 
   Exemplos de recomendações possíveis:
 
-  · leech_debug=OFF → PERSONALITY e avatar não carregados
+  · vennon_debug=OFF → PERSONALITY e avatar não carregados
     Se precisar do avatar ou persona completa:
-    Editar ~/.leech → LEECH_DEBUG=ON
+    Editar ~/.vennon → vennon_DEBUG=ON
 
   · SELF.md não carregado (lazy)
     Se a sessão envolver introspecção ou auto-modificação do sistema:
     invocar skill que carrega SELF.md explicitamente
 
   · in_docker=1 + host_attached=0 → /workspace/host não montado
-    Lab mode inativo. Para editar NixOS/Leech diretamente:
-    leech --host (monta /workspace/host)
+    Lab mode inativo. Para editar NixOS/vennon diretamente:
+    vennon --host (monta /workspace/host)
 
   · autocommit=OFF (padrão saudável)
     Commits manuais — comportamento correto para sessões interativas.
-    Para workers autônomos: Editar ~/.leech → AUTOCOMMIT=ON
+    Para workers autônomos: Editar ~/.vennon → AUTOCOMMIT=ON
 
   · beta=OFF, analysis_mode=OFF
     Sessão limpa, sem overrides experimentais.
@@ -137,8 +137,8 @@ Avaliar e exibir recomendações baseadas no estado atual:
 
   COMANDOS ÚTEIS
   ─────────────────────────────────────────────────────────────────
-  Ativar modo completo:    Editar ~/.leech → LEECH_DEBUG=ON
-  Ativar --host:         leech --host
+  Ativar modo completo:    Editar ~/.vennon → vennon_DEBUG=ON
+  Ativar --host:         vennon --host
   Carregar personality:    invocar skill meta:personality (se existir)
   Ver uso de contexto:     /meta:context:usage
   Cristalizar sessão:      /meta:absorb

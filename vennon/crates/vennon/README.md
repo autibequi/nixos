@@ -11,7 +11,7 @@ vennon cursor [start|stop|shell|build|flush]
 ```
 
 - Compose gerado por `containers/ide.rs` com volumes estáveis
-- Imagens: `vennon-leech` (base) → `vennon-claude/opencode/cursor`
+- Imagens: `vennon-vennon` (base) → `vennon-claude/opencode/cursor`
 - `start`: up -d + exec into container
 - `shell`: up -d + exec zsh
 - `build`: rebuilda base + child

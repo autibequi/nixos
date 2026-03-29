@@ -1,9 +1,5 @@
 pub mod ide;
 
-use anyhow::{bail, Result};
-use crate::compose::ComposeFile;
-use crate::config::VennonConfig;
-
 const IDE_ENGINES: &[&str] = &["claude", "opencode", "cursor"];
 
 /// Check if a name is an IDE container.
@@ -11,18 +7,37 @@ pub fn is_ide(name: &str) -> bool {
     IDE_ENGINES.contains(&name)
 }
 
-/// Get the compose template for an IDE container.
-pub fn get_compose(name: &str, config: &VennonConfig) -> Result<ComposeFile> {
-    if is_ide(name) {
-        Ok(ide::compose(name, config))
-    } else {
-        bail!("unknown IDE container: {name}")
-    }
-}
-
-/// Target dir is mounted directly at /workspace/target.
+/// Translate host path to container path.
+/// Checks projects → host → home mounts in order.
 fn container_workdir() -> String {
-    "/workspace/target".into()
+    let target = std::env::var("YAA_TARGET_DIR").unwrap_or_default();
+    let projects = std::env::var("YAA_PROJECTS_DIR").unwrap_or_default();
+    let host_dir = std::env::var("YAA_HOST_DIR").unwrap_or_default();
+    let home = std::env::var("HOME").unwrap_or_else(|_| "/root".into());
+
+    if target.is_empty() {
+        return "/workspace/projects".into();
+    }
+
+    // ~/projects/... → /workspace/projects/...
+    if !projects.is_empty() && target.starts_with(&projects) {
+        let relative = &target[projects.len()..];
+        return format!("/workspace/projects{relative}");
+    }
+
+    // ~/nixos/... → /workspace/host/...
+    if !host_dir.is_empty() && target.starts_with(&host_dir) {
+        let relative = &target[host_dir.len()..];
+        return format!("/workspace/host{relative}");
+    }
+
+    // ~/anything → /workspace/home/anything
+    if target.starts_with(&home) {
+        let relative = &target[home.len()..];
+        return format!("/workspace/home{relative}");
+    }
+
+    "/workspace/projects".into()
 }
 
 /// Build the exec command for starting an IDE session.

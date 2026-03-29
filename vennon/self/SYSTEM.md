@@ -34,16 +34,16 @@ Working dir resolvido via `cd`. Ex: `yaa ~/projects/app` → `cd /workspace/home
 | `deck stow` | Deploy dotfiles |
 | `deck os switch` | NixOS rebuild |
 
-## Canal ~/.leech
+## Canal ~/.vennon
 
-`~/.leech` e o canal de comunicacao rapida host ↔ agente. Formato `KEY=value`.
+`~/.vennon` e o canal de comunicacao rapida host ↔ agente. Formato `KEY=value`.
 
 | Flag | Default | Significado |
 |------|---------|-------------|
 | `PERSONALITY` | `ON` | ON=persona ativa, OFF=modo neutro |
 | `AUTOCOMMIT` | `OFF` | ON=commita sem perguntar |
 | `BETA` | `OFF` | ON=modo observacao |
-| `LEECH_DEBUG` | `OFF` | ON=contexto completo no boot |
+| `vennon_DEBUG` | `OFF` | ON=contexto completo no boot |
 | `HEADLESS` | `0` | 1=worker autonomo |
 | `RELAY_ONLINE` | `false` | Chrome CDP disponivel |
 | `MESSAGE` | (vazio) | Mensagem livre pro agente |
@@ -56,7 +56,7 @@ Working dir resolvido via `cd`. Ex: `yaa ~/projects/app` → `cd /workspace/home
 | **vennon** | Orquestrador de containers — gera compose, monta volumes, gerencia imagens |
 | **deck** | TUI dashboard — stow, NixOS rebuild, status |
 | **self/** | Engine do sistema — skills, ego, superego, shadow, commands, scripts |
-| **~/.leech** | Canal host ↔ container — tokens, env vars, flags (bash-sourceable) |
+| **~/.vennon** | Canal host ↔ container — tokens, env vars, flags (bash-sourceable) |
 | **config.yaml** | `~/.config/vennon/config.yaml` — paths, settings, engine default |
 | **Agente (ego)** | Entidade inerte — so existe quando Hermes despacha um card |
 | **DASHBOARD** | Kanban em obsidian — TODO/DOING/DONE/WAITING, tudo e card |
@@ -84,6 +84,6 @@ Working dir resolvido via `cd`. Ex: `yaa ~/projects/app` → `cd /workspace/home
 ## Boot via Hook
 
 O hook `session-start.sh` injeta no system-reminder (nesta ordem):
-`---BOOT---` (flags) → `---LEECH---` (~/.leech) → `---API_USAGE---` → `---PERSONA---` (se personality=ON)
+`---BOOT---` (flags) → `---vennon---` (~/.vennon) → `---API_USAGE---` → `---PERSONA---` (se personality=ON)
 
 NAO fazer tool calls para ler esses arquivos — ja estao no contexto injetado.

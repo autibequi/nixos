@@ -46,7 +46,7 @@ obsidian/
 | Qualquer | `projects/<seu-nome>/` (soberano) |
 | Sage (DOCUMENT) | `wiki/` |
 | Keeper | `vault/archive/`, `vault/trash/` |
-| Wiseman | `wiki/leech/insights.md`, `wiki/leech/ATLAS.md` |
+| Wiseman | `wiki/vennon/insights.md`, `wiki/vennon/ATLAS.md` |
 | Hermes | `bedrooms/_waiting/` (routing) |
 
 **PROIBIDO:** escrever no bedroom/projeto de outro agente sem convite registrado no inbox.
