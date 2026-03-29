@@ -275,20 +275,17 @@ fn render_footer(frame: &mut Frame, app: &App, area: Rect) {
         AppMode::Normal => "enter:menu  f:follow  q:quit",
         AppMode::Menu => "enter:exec  esc:back",
     };
-    let count = app.all_containers.iter().filter(|c| c.is_up).count();
-    let total = app.all_containers.len();
-
-    let mut parts = vec![Span::styled(
-        format!(" {count}/{total} up "),
-        Style::default().fg(GREEN).bold(),
-    )];
+    let mut parts = vec![];
     if app.subprocess_degraded {
         parts.push(Span::styled(
-            "stale (podman/vennon timeout) ",
+            " stale (podman/vennon timeout) ",
             Style::default().fg(PEACH).bold(),
         ));
     }
-    parts.push(Span::styled(hint, Style::default().fg(DIM)));
+    parts.push(Span::styled(
+        format!(" {hint}"),
+        Style::default().fg(DIM),
+    ));
     let text = Line::from(parts);
     frame.render_widget(Paragraph::new(text), area);
 }

@@ -6,182 +6,132 @@ description: "Auto-ativar quando: usuario quer abrir algo no Chrome, mostrar arq
 # buzz — Container→Host IPC
 
 `buzz` é o daemon que roda no **host** e expõe actions via socket Unix.
-Do container, basta chamar `buzz call <action>` — o daemon executa no host com as permissões do usuário.
+Do **container**, não existe o binário `buzz`: use **Python no socket** (abaixo).
+No **host**, você pode usar `buzz call`, `buzz list`, `buzz status` no shell.
 
-**Socket:** `~/.vennon/buzz.sock` (já montado em todos os containers via `~/.vennon/`)
+**Socket (container):** `~/.vennon/buzz.sock` — em muitos setups montado como `/home/claude/.vennon/buzz.sock`. Se `FileNotFoundError`, confira o path real do mount.
 
 ---
 
-## Como chamar (dentro do container)
-
-> **O binário `buzz` não está instalado no container.** Sempre usar Python via socket Unix diretamente.
+## Cliente Python (obrigatório no container)
 
 ```python
-import socket, json
+import json
+import socket
+
+BUZZ_SOCK = "/home/claude/.vennon/buzz.sock"  # ajuste se seu mount for outro
+
 
 def buzz(action, **args):
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    sock.connect('/home/claude/.vennon/buzz.sock')
-    req = json.dumps({'id': '1', 'action': action, 'args': args, 'source': 'claude'}) + '\n'
+    sock.connect(BUZZ_SOCK)
+    req = json.dumps({"id": "1", "action": action, "args": args, "source": "claude"}) + "\n"
     sock.sendall(req.encode())
     resp = json.loads(sock.recv(65536).decode())
     sock.close()
     return resp
 ```
 
-Uso inline:
+Uso relay (exemplos):
+
+```python
+buzz("relay-status")
+buzz("relay-start")
+buzz("relay-nav", url="http://vennon:8765/pagina.html")
+buzz("relay-show", path="/tmp/minha-viz.md")
+buzz("relay-inject", js="document.title")
+buzz("relay-tabs")
+buzz("relay-stop")
+```
+
+One-liner bash equivalente ao `relay-start`:
+
 ```bash
 python3 -c "
-import socket, json
-sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-sock.connect('/home/claude/.vennon/buzz.sock')
-sock.sendall((json.dumps({'id':'1','action':'relay-start','args':{},'source':'claude'})+'\n').encode())
-print(sock.recv(4096).decode())
-sock.close()
+import json, socket
+s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+s.connect('/home/claude/.vennon/buzz.sock')
+s.sendall((json.dumps({'id':'1','action':'relay-start','args':{},'source':'claude'})+'\n').encode())
+print(s.recv(4096).decode())
+s.close()
 "
 ```
 
-> `buzz call` / `buzz list` / `buzz status` são os comandos do **host**. Do container, sempre via socket Python.
+---
+
+## Relay (Chrome + HTTP no host)
+
+O relay no host conecta ao Chrome via **CDP** e pode servir conteúdo. Para a mesma função **direto do container** (sem depender do buzz), use também `python3 /workspace/self/scripts/chrome-relay.py` — ver skill **webview**.
+
+### Quando usar buzz vs chrome-relay.py
+
+| Situação | Preferência |
+|----------|-------------|
+| Subir Chrome/relay no host, navegar, show | `buzz(...)` com `relay-*` |
+| CDP acessível em `localhost:9222` no container | `chrome-relay.py` (nav, show, status, inject) |
+| Checagem rápida antes de qualquer coisa | `chrome-relay.py status` |
+
+### Fluxo recomendado (container)
+
+1. `python3 /workspace/self/scripts/chrome-relay.py status`
+2. Se **Chrome CDP OFF**: `buzz("relay-start")` **ou** no host iniciar Chromium com `--remote-debugging-port=9222` (ver `chrome-relay.py start`).
+3. Para exibir Markdown/Mermaid: `buzz("relay-show", path="/tmp/arquivo.md")` **ou** `python3 ... chrome-relay.py show /tmp/arquivo.md`
+4. Para **HTML estático**: arquivos em **`/tmp/chrome-relay/`** (nome na URL). A porta HTTP é **8765–8768** (primeira livre); use a porta que `status` mostrar e o host `RELAY_HTTP_HOST` (default `vennon`). Exemplo: `buzz("relay-nav", url="http://vennon:8765/pagina.html")`.
 
 ---
 
-## ★ Relay — O mais importante
+## Outras actions (via `buzz(...)` no container)
 
-O relay conecta o container ao Chrome via CDP (Chrome DevTools Protocol).
-Use para mostrar qualquer coisa visual ao usuário: diagramas, HTML, dashboards.
+| Action | Exemplo |
+|--------|---------|
+| Notificação desktop | `buzz("notify", message="Build concluído")` |
+| Abrir no Zed | `buzz("open-editor", path="/home/pedrinho/projects/meu-app")` |
+| Abrir no VS Code | `buzz("open-vscode", path="/home/pedrinho/projects/meu-app")` |
+| Chrome sem CDP | `buzz("open-chrome", url="https://exemplo.com")` |
+| Status podman | `buzz("podman-status")` |
+| Logs serviço | `buzz("podman-logs", service="monolito", tail=50)` |
 
-### Fluxo obrigatório antes de usar
-
-```bash
-# 1. Verificar se o Chrome já está com CDP ativo
-buzz call relay-status
-
-# 2. Se não estiver: subir o Chrome
-buzz call relay-start
-
-# 3. Agora usar normalmente
-```
-
-### Comandos relay
+**Somente no host (shell):**
 
 ```bash
-# Navegar para uma URL
-buzz call relay-nav --url=https://exemplo.com
-
-# Mostrar arquivo markdown/HTML (com Mermaid, zoom+drag)
-buzz call relay-show --path=/tmp/meu-diagrama.md
-
-# Executar JavaScript no Chrome e capturar resultado
-buzz call relay-inject --js="document.title"
-
-# Listar abas abertas
-buzz call relay-tabs
-
-# Para o Chrome + relay
-buzz call relay-stop
-```
-
-### Fluxo completo — mostrar algo no Chrome
-
-```bash
-# 1. Escrever o conteúdo
-cat > /tmp/minha-viz.md << 'EOF'
-# Título
-
-```mermaid
-graph TD
-  A --> B --> C
-```
-EOF
-
-# 2. Garantir Chrome ativo
-buzz call relay-start
-
-# 3. Exibir
-buzz call relay-show --path=/tmp/minha-viz.md
-```
-
-> O relay serve arquivos de `/tmp/` automaticamente via HTTP em `:8765`.
-> Para HTML livre: escreva em `/tmp/` e use `relay-nav` com `http://vennon:8765/<arquivo>.html`.
-
----
-
-## Outras actions
-
-### Apps
-
-```bash
-# Notificação no desktop do host
 buzz call notify --message="Build concluído"
-
-# Abrir arquivo no Zed
-buzz call open-editor --path=~/projects/meu-app
-
-# Abrir no VS Code
-buzz call open-vscode --path=~/projects/meu-app
-
-# Abrir URL no Chrome (janela normal, sem CDP)
-buzz call open-chrome --url=https://exemplo.com
-```
-
-### Containers (read-only)
-
-```bash
-# Status de todos os containers vennon
-buzz call podman-status
-
-# Logs de um serviço
-buzz call podman-logs --service=monolito --tail=50
-# services válidos: monolito, bo-container, front-student, reverseproxy
 ```
 
 ---
 
-## Paths — como montar caminhos para o host
+## Paths — container → host
 
-O daemon roda no **host** (`/home/pedrinho`). Paths `~/` no buzz.yaml resolvem para o home do host, não do container.
+O daemon roda no **host**. Paths `~/` no buzz resolvem para o home do host.
 
-| No container | No host (passar pro buzz) |
-|---|---|
-| `/workspace/projects/` | `/home/pedrinho/projects/` |
-| `/workspace/host/` | `/home/pedrinho/nixos/` |
-| `/workspace/self/` | `/home/pedrinho/nixos/vennon/self/` |
+| No container | No host (para buzz) |
+|----------------|---------------------|
+| `/workspace/projects/` | `~/projects/` (ex.: `/home/pedrinho/projects/`) |
+| `/workspace/host/` | `~/nixos/` |
+| `/workspace/self/` | caminho nixos/vennon/self no host |
 | `/tmp/arquivo.md` | `/tmp/arquivo.md` (igual) |
 
-**Regra:** substituir `/workspace/projects/` por `/home/pedrinho/projects/` ao montar o path para `open-editor`, `open-vscode`, `relay-show`, etc.
-
-```python
-# Converter path do container para path do host
-def container_to_host(path):
-    return path.replace('/workspace/projects/', '/home/pedrinho/projects/') \
-               .replace('/workspace/host/', '/home/pedrinho/nixos/')
-```
+**Relay show:** paths aceitos pelo daemon incluem `/tmp` e projetos; conteúdo servido para HTML estático deve estar em **`/tmp/chrome-relay/`** para o servidor HTTP do relay local.
 
 ---
 
-## Validações (o daemon rejeita se violar)
+## Validações (daemon)
 
 | Action | Restrição |
 |--------|-----------|
-| `open-editor`, `open-vscode` | path deve estar dentro de `~/projects` ou `~/nixos` |
-| `open-chrome` | URL deve começar com `https://` |
-| `relay-nav` | URL deve começar com `http` |
-| `relay-show` | path deve estar em `~/projects`, `~/nixos` ou `/tmp` |
-| `relay-inject` | JS máximo 5000 chars |
-| `notify` | mensagem máximo 500 chars |
-| `podman-logs` | service deve ser um dos 4 conhecidos |
+| `open-editor`, `open-vscode` | path em `~/projects` ou `~/nixos` |
+| `open-chrome` | URL `https://` |
+| `relay-nav` | URL começa com `http` |
+| `relay-show` | path em `~/projects`, `~/nixos` ou `/tmp` |
+| `relay-inject` | JS máx. 5000 chars |
+| `notify` | mensagem máx. 500 chars |
+| `podman-logs` | service um dos conhecidos (monolito, bo-container, front-student, reverseproxy) |
 
-Se negado, o daemon retorna `status: denied` com o motivo.
+Se negado: resposta com `status: denied` e motivo.
 
 ---
 
-## Quando o daemon não está rodando
-
-```bash
-buzz status   # confirma: "buzz not running"
-```
+## Daemon não está rodando
 
 No host: `systemctl --user start buzz` ou `systemctl --user enable --now buzz`.
 
-O serviço é gerenciado por `~/.config/systemd/user/buzz.service` (stow).
-Config em `~/.config/vennon/buzz.yaml` — relida a cada request, sem restart necessário.
+Config: `~/.config/vennon/buzz.yaml` (relida por request).

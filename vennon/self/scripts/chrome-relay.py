@@ -7,6 +7,7 @@ e controle programatico do browser via Chrome DevTools Protocol.
 
 Requer Chrome/Chromium com --remote-debugging-port=9222 no host.
 Container usa network_mode: host, entao localhost:9222 funciona direto.
+URLs publicas usam RELAY_HTTP_HOST (default vennon); export para outro hostname se o Chrome nao resolver.
 
 Comandos:
   chrome-relay.py nav <url> [title]     — Navega o Chrome para uma URL
@@ -37,6 +38,14 @@ SERVE_PORTS = [8765, 8766, 8767, 8768]
 CONTENT_DIR = os.environ.get("RELAY_CONTENT_DIR", "/tmp/chrome-relay")
 CONTENT_FILE = os.path.join(CONTENT_DIR, "content.md")
 PID_FILE = os.path.join(CONTENT_DIR, ".server.pid")
+# Hostname usado nas URLs que o Chrome abre (deve resolver no browser do usuario).
+# Skills/documentacao usam "vennon"; override com RELAY_HTTP_HOST se necessario (ex.: 127.0.0.1).
+RELAY_HTTP_HOST = os.environ.get("RELAY_HTTP_HOST", "vennon")
+
+
+def relay_public_base(port):
+    """Base URL http://<host>:<port> para navegacao no Chrome."""
+    return "http://%s:%d" % (RELAY_HTTP_HOST, port)
 
 
 # ===========================================================================
@@ -589,7 +598,7 @@ def cmd_show(args):
         print("FAIL: Could not start content server", file=sys.stderr)
         sys.exit(1)
 
-    url = "http://leech:%d" % port
+    url = relay_public_base(port) + "/"
     if cdp_ok():
         ok, msg = cdp_navigate(url)
         print("OK: Serving on %s, Chrome navigated" % url if ok else "Serving on %s but Chrome nav failed: %s" % (url, msg))
@@ -628,6 +637,9 @@ def cmd_status(args=None):
     serve = find_serve_port()
     print("Chrome CDP:     %s" % ("OK (:%d)" % CDP_PORT if chrome else "OFF"))
     print("Content server: %s" % ("OK (:%d)" % serve if serve else "OFF"))
+    print("RELAY_HTTP_HOST: %s" % RELAY_HTTP_HOST)
+    if serve:
+        print("Public base:    %s/" % relay_public_base(serve))
     if chrome:
         tabs = cdp_tabs()
         pages = [t for t in tabs if t.get("type") == "page"]
@@ -664,7 +676,10 @@ def cmd_serve(args):
         pass
 
     chrome = "OK" if cdp_ok() else "OFF"
-    print("Content server: http://leech:%d (Chrome: %s)" % (port_used, chrome), file=sys.stderr)
+    print(
+        "Content server: %s (Chrome: %s)" % (relay_public_base(port_used), chrome),
+        file=sys.stderr,
+    )
     sys.stderr.flush()
     try:
         server.serve_forever()

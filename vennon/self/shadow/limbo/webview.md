@@ -32,7 +32,8 @@ Os olhos ficam na tela enquanto o conteúdo é preparado — somem automaticamen
 ```bash
 # 1. mostrar screensaver (olhos dot-matrix)
 cp /workspace/self/skills/meta/art/templates/eye.html /tmp/chrome-relay/eye.html
-python3 /workspace/self/scripts/chrome-relay.py nav "http://127.0.0.1:8766/eye.html"
+PORT=$(python3 /workspace/self/scripts/chrome-relay.py status 2>/dev/null | sed -n 's/.*Content server: OK (:\([0-9]*\)).*/\1/p')
+python3 /workspace/self/scripts/chrome-relay.py nav "http://127.0.0.1:${PORT}/eye.html"
 
 # 2. ... preparar conteúdo, gerar HTML, fazer fetches, etc ...
 
@@ -41,7 +42,8 @@ python3 /workspace/self/scripts/chrome-relay.py nav "<URL ou data:text/html;base
 ```
 
 > Template: `self/skills/meta/art/templates/eye.html`
-> Fullscreen opcional: `inject "document.documentElement.requestFullscreen()"`
+> Fullscreen opcional: `inject` — `python3 ... chrome-relay.py inject "document.documentElement.requestFullscreen()"`
+> Porta HTTP: 8765–8768 (primeira livre); use `status` para obter `PORT`.
 
 ---
 
@@ -68,27 +70,27 @@ python3 /workspace/self/scripts/chrome-relay.py tabs
 
 ## 2. Inspecionar DOM via CDP (sem ver visualmente)
 
-Avaliar JavaScript na aba ativa:
+Avaliar JavaScript na aba ativa (comando CLI: **`inject`**, não `eval`):
 
 ```bash
-python3 /workspace/self/scripts/chrome-relay.py eval "<JS>"
+python3 /workspace/self/scripts/chrome-relay.py inject "<JS>"
 ```
 
 Exemplos úteis:
 
 ```bash
 # título da página
-python3 /workspace/self/scripts/chrome-relay.py eval "document.title"
+python3 /workspace/self/scripts/chrome-relay.py inject "document.title"
 
 # texto visível
-python3 /workspace/self/scripts/chrome-relay.py eval "document.body.innerText.slice(0,500)"
+python3 /workspace/self/scripts/chrome-relay.py inject "document.body.innerText.slice(0,500)"
 
 # todos os links
-python3 /workspace/self/scripts/chrome-relay.py eval \
-  "Array.from(document.querySelectorAll('a')).map(a=>a.href).join('\n')"
+python3 /workspace/self/scripts/chrome-relay.py inject \
+  "Array.from(document.querySelectorAll('a')).map(a=>a.href).join('\\n')"
 
 # status de um elemento
-python3 /workspace/self/scripts/chrome-relay.py eval \
+python3 /workspace/self/scripts/chrome-relay.py inject \
   "document.querySelector('#meu-seletor')?.textContent"
 ```
 
@@ -142,7 +144,7 @@ curl -sL "<URL>" -o /tmp/pagina.html && wc -l /tmp/pagina.html
 |---|---|
 | Ver página visualmente | relay `nav` |
 | Extrair texto/dados | `WebFetch` |
-| Inspecionar elemento específico | relay `eval` |
+| Inspecionar elemento específico | relay `inject` |
 | Checar HTML source | `curl -s` |
 | Abrir relatório local | relay `nav data:text/html;base64,...` |
 | Relay offline | `WebFetch` ou `curl` |

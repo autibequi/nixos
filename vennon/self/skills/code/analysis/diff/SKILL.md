@@ -100,14 +100,18 @@ python3 /tmp/gen_diff.py > /dev/null
 
 ### Passo 5 — Abrir no Chrome via relay
 
-Salvar o HTML em `/tmp/chrome-relay/diff.html` e navegar via relay:
+Salvar o HTML em `/tmp/chrome-relay/diff.html` e navegar via relay.
+
+Porta HTTP: **8765–8768** (primeira livre). Não fixe um número — leia de `status`:
 
 ```bash
 cp /tmp/<repo>_diff_annotated.html /tmp/chrome-relay/diff.html
-python3 /workspace/self/scripts/chrome-relay.py nav "http://vennon:8766/diff.html"
+PORT=$(python3 /workspace/self/scripts/chrome-relay.py status 2>/dev/null | sed -n 's/.*Content server: OK (:\([0-9]*\)).*/\1/p')
+# Se Content server estiver OFF, subir: nohup python3 /workspace/self/scripts/chrome-relay.py serve >>/tmp/chrome-relay/serve.log 2>&1 &  sleep 1  e repetir PORT=
+python3 /workspace/self/scripts/chrome-relay.py nav "http://127.0.0.1:${PORT}/diff.html"
 ```
 
-O servidor do relay já serve `/tmp/chrome-relay/` em `http://vennon:8766/` — UTF-8 correto, sem limites de tamanho, sem servidor extra.
+Ou use o host público do mesmo `status` (linha `Public base:`) + `diff.html`. O handler do relay serve arquivos em `/tmp/chrome-relay/` por basename — UTF-8 correto, sem `http.server` extra se o servidor do `chrome-relay.py` já estiver ativo.
 
 ---
 
@@ -205,7 +209,7 @@ CHAPTER_KW = ['chapter', 'toc', 'content_tree', 'course_chapter', 'getCourse']
 - `data:text/html` como argumento CLI: `OSError: Argument list too long` para HTMLs grandes
 - `document.write(atob(...))`: encoding Latin-1, quebra caracteres UTF-8 (▾, ├─, ◆)
 - `Blob URL via location.href`: Chrome bloqueia navegacao de `about:blank` para blob
-- **Servidor HTTP local porta 9876**: confiavel, UTF-8 correto, sem limites de tamanho
+- **Servidor HTTP do relay (porta 8765–8768, primeira livre)**: confiável, UTF-8 correto, sem limites de tamanho — ver `chrome-relay.py status`
 
 ### Por que `left: 460px` e nao `margin-left: auto`?
 

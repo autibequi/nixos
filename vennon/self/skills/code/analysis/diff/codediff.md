@@ -22,12 +22,17 @@ mostra *o que* mudou — linhas adicionadas/removidas lado a lado com syntax hig
 git -C /home/claude/projects/estrategia/<REPO> diff origin/main > /tmp/<repo>_full_diff.txt
 ```
 
-### Passo 2 — Garantir servidor HTTP
+### Passo 2 — Garantir servidor HTTP do relay
+
+O `chrome-relay.py` serve `/tmp/chrome-relay/` nas portas **8765–8768** (primeira livre). Não use outra porta manual salvo exceção.
 
 ```bash
-# Checar se já está rodando
-curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8766/ | grep -q 200 || \
-  (cd /tmp/chrome-relay && python3 -m http.server 8766 &>/dev/null &)
+mkdir -p /tmp/chrome-relay
+if ! python3 /workspace/self/scripts/chrome-relay.py status 2>/dev/null | grep -q "Content server: OK"; then
+  nohup python3 /workspace/self/scripts/chrome-relay.py serve >>/tmp/chrome-relay/serve.log 2>&1 &
+  sleep 1
+fi
+PORT=$(python3 /workspace/self/scripts/chrome-relay.py status 2>/dev/null | sed -n 's/.*Content server: OK (:\([0-9]*\)).*/\1/p')
 ```
 
 ### Passo 3 — Gerar HTML com diff2html-cli
@@ -46,8 +51,9 @@ Flags:
 ### Passo 4 — Injetar fonte
 
 ```bash
-python3 /workspace/self/scripts/chrome-relay.py nav "http://127.0.0.1:8766/codediff.html"
+python3 /workspace/self/scripts/chrome-relay.py nav "http://127.0.0.1:${PORT}/codediff.html"
 ```
+(Se o Chrome só resolver o hostname do relay, use `http://vennon:${PORT}/codediff.html` — mesmo `PORT`.)
 
 Depois injetar JetBrains Mono via CDP:
 
@@ -78,10 +84,20 @@ RELAY     = '/workspace/self/scripts/chrome-relay.py'
 # 1. diff
 os.system(f'git -C {REPO_PATH} diff origin/main > {DIFF_TXT}')
 
-# 2. servidor
+# 2. servidor relay (8765-8768)
 os.makedirs('/tmp/chrome-relay', exist_ok=True)
-os.system('curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8766/ | grep -q 200 || '
-          '(cd /tmp/chrome-relay && python3 -m http.server 8766 &>/dev/null &)')
+os.system(
+    "python3 /workspace/self/scripts/chrome-relay.py status 2>/dev/null | grep -q 'Content server: OK' || "
+    "(nohup python3 /workspace/self/scripts/chrome-relay.py serve >>/tmp/chrome-relay/serve.log 2>&1 & sleep 1)"
+)
+import subprocess as sp
+PORT = (
+    sp.check_output(
+        r"""python3 /workspace/self/scripts/chrome-relay.py status 2>/dev/null | sed -n 's/.*Content server: OK (:\([0-9]*\)).*/\1/p'""",
+        shell=True,
+        text=True,
+    ).strip()
+)
 
 # 3. gerar HTML
 os.system(
@@ -91,7 +107,7 @@ os.system(
 )
 
 # 4. abrir
-os.system(f'python3 {RELAY} nav "http://127.0.0.1:8766/codediff.html"')
+os.system(f'python3 {RELAY} nav "http://127.0.0.1:{PORT}/codediff.html"')
 
 # 5. fonte
 os.system(f"""python3 {RELAY} inject "
@@ -112,10 +128,13 @@ print("OK — aberto no Chrome")
 REPO=monolito
 git -C /home/claude/projects/estrategia/$REPO diff origin/main > /tmp/${REPO}_diff.txt && \
 mkdir -p /tmp/chrome-relay && \
+python3 /workspace/self/scripts/chrome-relay.py status 2>/dev/null | grep -q 'Content server: OK' || \
+  (nohup python3 /workspace/self/scripts/chrome-relay.py serve >>/tmp/chrome-relay/serve.log 2>&1 & sleep 1) && \
+PORT=$(python3 /workspace/self/scripts/chrome-relay.py status 2>/dev/null | sed -n 's/.*Content server: OK (:\([0-9]*\)).*/\1/p') && \
 nix-shell -p nodePackages.diff2html-cli --run \
   "diff2html -i file -s side -t html --cs dark -o stdout -- /tmp/${REPO}_diff.txt" \
   2>/dev/null > /tmp/chrome-relay/codediff.html && \
-python3 /workspace/self/scripts/chrome-relay.py nav "http://127.0.0.1:8766/codediff.html" && \
+python3 /workspace/self/scripts/chrome-relay.py nav "http://127.0.0.1:${PORT}/codediff.html" && \
 sleep 1 && \
 python3 /workspace/self/scripts/chrome-relay.py inject \
   "const l=document.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap';document.head.appendChild(l);const s=document.createElement('style');s.textContent='*{font-family:\"JetBrains Mono\",monospace!important}';document.head.appendChild(s);" 2>&1
@@ -128,7 +147,7 @@ python3 /workspace/self/scripts/chrome-relay.py inject \
 | Problema | Causa | Fix |
 |----------|-------|-----|
 | Fonte não aparece | `inject` antes da página carregar | `sleep 1` entre o `nav` e o `inject` |
-| Servidor 404 | `/tmp/chrome-relay/` não servido pelo relay nativo | Subir `python3 -m http.server 8766` em `/tmp/chrome-relay/` |
+| Servidor 404 | Nenhum listener em 8765–8768 | `nohup python3 ... chrome-relay.py serve &` ou ver `status` |
 | Tema dark feio | CSS custom sobrepondo o tema oficial | Usar só `--cs dark` no CLI, sem override manual |
 | `colorScheme: 'dark'` via JS não funcionou bem | CSS specificity — o diff2html-cli gera HTML mais limpo que a API JS | Preferir sempre o CLI ao invés de diff2html via CDN JS |
 | Diff embutido em JS quebra | Backticks no diff quebram template literal JS | Se precisar embutir: usar `base64.b64encode` + `atob()` no browser |
@@ -139,4 +158,4 @@ python3 /workspace/self/scripts/chrome-relay.py inject \
 - `nix-shell` baixa diff2html-cli na primeira vez (~30s), fica em cache depois
 - Arquivo HTML gerado é standalone — pode ser aberto sem servidor se necessário
 - Para ver só um arquivo: usar `git diff origin/main -- <path>` no Passo 1
-- O servidor HTTP na 8766 precisa estar rodando: `cd /tmp/chrome-relay && python3 -m http.server 8766 &`
+- O servidor do relay precisa estar rodando (ver Passo 2); porta na faixa **8765–8768**

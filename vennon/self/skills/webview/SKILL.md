@@ -47,38 +47,53 @@ Precisa de visualizacao?
 
 ---
 
-## Relay — Verificacao e Comandos
+## Relay — fluxo único (agentes no container)
 
-> **Via buzz (preferido)** — leia a skill `buzz` para detalhes completos.
-> `buzz` é o daemon host; do container, chame `buzz call relay-*`.
-
-**Sempre fazer o live check antes de usar:**
+**1. Checagem obrigatória** (CDP + servidor HTTP + host público):
 
 ```bash
-buzz call relay-status
+python3 /workspace/self/scripts/chrome-relay.py status
 ```
 
-**Subir o Chrome se nao estiver rodando:**
-```bash
-buzz call relay-start
-```
+A saída inclui `RELAY_HTTP_HOST` e `Public base:` (URL que o Chrome deve abrir). O hostname default é **`vennon`**; override com `export RELAY_HTTP_HOST=127.0.0.1` (ou outro) se o browser não resolver `vennon`.
 
-**Regra de decisao:**
-```
-relay-status OK   -> usar normalmente
-relay-status FAIL -> buzz call relay-start -> tentar de novo
-```
+**2. Se Chrome CDP estiver OFF**
 
-### Comandos
+- Via host: `buzz("relay-start")` com socket Python — ver skill **buzz**.
+- Ou no host: `chrome-relay.py start` mostra o comando Chromium com `--remote-debugging-port=9222`.
 
-| buzz call | O que faz |
-|-----------|-----------|
-| `relay-status` | Status do relay (Chrome + servidor) |
-| `relay-nav --url=<url>` | Navega o Chrome para a URL |
-| `relay-show --path=<arquivo.md>` | Serve markdown com Mermaid (zoom+drag automatico) |
-| `relay-tabs` | Lista abas abertas |
-| `relay-stop` | Para Chrome + relay |
-| `relay-inject --js=<js>` | Executa JS no Chrome (retorna resultado) |
+Se o container **não** enxergar `localhost:9222`, o CDP não funciona com `chrome-relay.py` até haver port-forward/host network; nesse caso use **só buzz** para relay.
+
+**3. Escolha da ferramenta**
+
+| Ferramenta | Quando |
+|------------|--------|
+| `chrome-relay.py` | CDP OK no container; controle direto (nav, show, inject, status). |
+| `buzz` + `relay-*` | Subir relay no host, paths validados pelo daemon, sem depender de CDP local. |
+
+**4. Conteúdo estático (HTML, imagens, JSON)**
+
+- Diretório servido: **`/tmp/chrome-relay/`** (ou `RELAY_CONTENT_DIR`). Arquivos são expostos como `http://<RELAY_HTTP_HOST>:<porta>/<basename>`.
+- Porta: **8765–8768** (primeira livre). **Não fixe 8765** às cegas — confira `status`.
+- Se **Content server OFF** e você precisar só do HTTP: rode `python3 /workspace/self/scripts/chrome-relay.py serve` em background, ou um `show` de qualquer `.md` para subir o servidor.
+- Navegar: `python3 ... chrome-relay.py nav "http://vennon:<PORTA>/pagina.html"` com `<PORTA>` vinda de `status`.
+
+**5. HTML pequeno sem servidor**
+
+Use `data:text/html;base64,...` com `nav` (ver skill `code/report` e `code/analysis/flows`).
+
+### buzz — mesmas ações (socket Python, não `buzz call`)
+
+| Action | Função |
+|--------|--------|
+| `relay-status` | Relay no host |
+| `relay-start` / `relay-stop` | Chrome + relay |
+| `relay-nav` + `url=` | Navega |
+| `relay-show` + `path=` | Markdown/Mermaid |
+| `relay-tabs` | Abas |
+| `relay-inject` + `js=` | JS na aba |
+
+Detalhes: **`skills/buzz/SKILL.md`**.
 
 ---
 
@@ -87,8 +102,10 @@ relay-status FAIL -> buzz call relay-start -> tentar de novo
 O relay renderiza qualquer `.md` com blocos ` ```mermaid ``` ` fullscreen, sem containers aninhados.
 
 ```bash
-buzz call relay-show --path=<arquivo.md>
+python3 /workspace/self/scripts/chrome-relay.py show /tmp/meu-flow.md
 ```
+
+Ou via buzz (Python): `buzz("relay-show", path="/tmp/meu-flow.md")`.
 
 **Layout default:**
 - Fullscreen automatico — `100vw x 100vh`, sem `.page` container, sem bordas
@@ -106,13 +123,12 @@ Controles na tela:
 
 ## HTML Livre com CDN
 
-Para visualizacoes custom, escrever HTML em `/tmp/chrome-relay/<nome>.html` e navegar:
+1. `mkdir -p /tmp/chrome-relay`
+2. Escrever `pagina.html` (e imagens) em `/tmp/chrome-relay/`
+3. `python3 /workspace/self/scripts/chrome-relay.py status` — usar a **porta** em `Content server: OK (:PORTA)` e o **Public base** (ou montar `http://${RELAY_HTTP_HOST:-vennon}:<PORTA>/pagina.html`)
+4. `python3 /workspace/self/scripts/chrome-relay.py nav "http://vennon:<PORTA>/pagina.html"`
 
-```bash
-python3 /workspace/self/scripts/chrome-relay.py nav "http://vennon:8765/<nome>.html"
-```
-
-O relay serve arquivos estaticos de `/tmp/chrome-relay/` automaticamente.
+O servidor HTTP escuta em `127.0.0.1`; o host público nas URLs é `RELAY_HTTP_HOST` (default `vennon`).
 
 ### Bibliotecas CDN disponiveis
 
@@ -245,12 +261,12 @@ Se voce e um agente ou skill que precisa desenhar algo:
 
 ### Abrir o Chrome (dependencia do relay)
 
-Para qualquer output visual no browser, use a skill **buzz**:
+1. `python3 /workspace/self/scripts/chrome-relay.py status`
+2. Se CDP OFF: skill **buzz** com `relay-start`, ou Chrome no host com `--remote-debugging-port=9222`
+3. `chrome-relay.py show|nav|inject` **ou** `buzz("relay-show", ...)` / `buzz("relay-nav", url=...)`
 
-```bash
-buzz call relay-start          # sobe Chrome com CDP
-buzz call relay-show --path=<arquivo>   # exibe
-buzz call relay-nav --url=<url>         # navega
-```
+Leia `skills/buzz/SKILL.md` para o cliente socket e validações.
 
-Leia `skills/buzz/SKILL.md` para o protocolo completo (verificacao, fluxo, validacoes).
+### Cópia da skill no Cursor
+
+A fonte canônica é `/workspace/self/skills/webview/`. O vennon pode espelhar em `~/.cursor/skills/`; após editar aqui, rode o sync do ambiente se o agente só enxergar a cópia antiga.
