@@ -60,19 +60,13 @@ fn render_header(frame: &mut Frame, app: &App, area: Rect) {
         .count();
 
     // Left: tabs
-    let mut left_spans = vec![
+    let left_spans = vec![
         Span::styled(" deck ", Style::default().fg(MAUVE).bold()),
         Span::styled("│ ", Style::default().fg(DIM)),
         Span::styled(format!(" Services ({svc_up}) "), svc_style),
         Span::styled("│", Style::default().fg(DIM)),
         Span::styled(format!(" Agents ({agents_up}) "), agents_style),
     ];
-    if app.refresh_inflight {
-        const SPINNER: &[&str] = &["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"];
-        let frame = SPINNER[(app.spin_tick as usize) % SPINNER.len()];
-        left_spans.push(Span::styled(" │ ", Style::default().fg(DIM)));
-        left_spans.push(Span::styled(frame, Style::default().fg(PEACH).bold()));
-    }
     let left_line = Line::from(left_spans);
 
     // Right: systemd dots
@@ -286,8 +280,24 @@ fn render_footer(frame: &mut Frame, app: &App, area: Rect) {
         format!(" {hint}"),
         Style::default().fg(DIM),
     ));
-    let text = Line::from(parts);
-    frame.render_widget(Paragraph::new(text), area);
+    let left_line = Line::from(parts);
+
+    if app.refresh_inflight {
+        const SPINNER: &[&str] = &["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+        let spin = SPINNER[(app.spin_tick as usize) % SPINNER.len()];
+        let chunks = Layout::horizontal([Constraint::Min(0), Constraint::Length(1)]).split(area);
+        frame.render_widget(Paragraph::new(left_line), chunks[0]);
+        frame.render_widget(
+            Paragraph::new(Line::from(vec![Span::styled(
+                spin,
+                Style::default().fg(PEACH).bold(),
+            )]))
+            .alignment(Alignment::Right),
+            chunks[1],
+        );
+    } else {
+        frame.render_widget(Paragraph::new(left_line), area);
+    }
 }
 
 fn render_menu(frame: &mut Frame, app: &App, area: Rect) {

@@ -1,6 +1,6 @@
 ---
 name: webview
-description: "Tela de visualizacao no Chrome relay — flowcharts Mermaid com zoom/drag, arvores interativas, dashboards, HTML livre com CDN, ASCII art terminal, animacoes artisticas (eye, glados), voz, canvas colaborativo. Entrypoint para qualquer output visual."
+description: "Tela de visualizacao no Chrome relay — flowcharts Mermaid com zoom/drag, arvores interativas, dashboards, HTML livre com CDN, ASCII art terminal, animacoes artisticas (eye, glados), voz, canvas colaborativo. O agente sobe o relay (relay-start) por iniciativa quando for mostrar algo no browser. Entrypoint para qualquer output visual."
 ---
 
 # webview — Visualizacao e Arte Visual
@@ -49,6 +49,19 @@ Precisa de visualizacao?
 
 ## Relay — fluxo único (agentes no container)
 
+### Iniciativa — abrir o relay sem pedir permissão
+
+Quando você for **mostrar algo no Chrome** (HTML, Mermaid, diff, imagem, dashboard):
+
+1. **Não pergunte** ao usuário se pode “ligar o relay” ou “abrir o Chrome”. É sua responsabilidade deixar o ambiente pronto.
+2. Rode `python3 /workspace/self/scripts/chrome-relay.py status`. Se **Chrome CDP: OFF**, chame **`buzz("relay-start")`** (cliente Python no socket — ver **buzz**) e rode `status` de novo. Só então use `nav`, `show`, `inject`.
+3. Se **Content server: OFF** e você precisar servir arquivos em `/tmp/chrome-relay/`, **suba o servidor por conta própria**: `nohup python3 /workspace/self/scripts/chrome-relay.py serve >>/tmp/chrome-relay/serve.log 2>&1 &` (ou um `show` de qualquer `.md` mínimo) e confira `status` — sem pedir confirmação.
+4. Se após `relay-start` o CDP continuar OFF (falha real no host), **aí sim** explique em uma frase o que falhou; não fique tentando à cega.
+
+Resumo: **iniciativa = status → subir o que faltar → mostrar conteúdo**. O usuário pediu visualização; executar o pipeline é o esperado.
+
+---
+
 **1. Checagem obrigatória** (CDP + servidor HTTP + host público):
 
 ```bash
@@ -57,12 +70,12 @@ python3 /workspace/self/scripts/chrome-relay.py status
 
 A saída inclui `RELAY_HTTP_HOST` e `Public base:` (URL que o Chrome deve abrir). O hostname default é **`vennon`**; override com `export RELAY_HTTP_HOST=127.0.0.1` (ou outro) se o browser não resolver `vennon`.
 
-**2. Se Chrome CDP estiver OFF**
+**2. Se Chrome CDP estiver OFF** (já deveria ter sido tratado na iniciativa acima)
 
-- Via host: `buzz("relay-start")` com socket Python — ver skill **buzz**.
-- Ou no host: `chrome-relay.py start` mostra o comando Chromium com `--remote-debugging-port=9222`.
+- **`buzz("relay-start")`** — preferido no container.
+- Fallback: `python3 /workspace/self/scripts/chrome-relay.py start` mostra o comando Chromium com `--remote-debugging-port=9222` para rodar no host.
 
-Se o container **não** enxergar `localhost:9222`, o CDP não funciona com `chrome-relay.py` até haver port-forward/host network; nesse caso use **só buzz** para relay.
+Se o container **não** enxergar `localhost:9222`, o CDP não funciona com `chrome-relay.py` até haver port-forward/host network; nesse caso use **só buzz** para `relay-nav` / `relay-show`.
 
 **3. Escolha da ferramenta**
 
