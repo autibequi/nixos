@@ -38,6 +38,8 @@
     unstable.zed-editor
     # inputs.zed.packages.${pkgs.system}.default
     gitkraken
+    jujutsu
+    gitoxide
 
     # ── AI / Claude ────────────────────────────────────
     claude-code
