@@ -7,9 +7,9 @@ pub fn is_ide(name: &str) -> bool {
     IDE_ENGINES.contains(&name)
 }
 
-/// Translate host path to container path.
+/// Translate YAA_TARGET_DIR (host path) to a container path.
 /// Checks projects → host → home mounts in order.
-fn container_workdir() -> String {
+fn resolve_target_path() -> String {
     let target = std::env::var("YAA_TARGET_DIR").unwrap_or_default();
     let projects = std::env::var("YAA_PROJECTS_DIR").unwrap_or_default();
     let host_dir = std::env::var("YAA_HOST_DIR").unwrap_or_default();
@@ -40,9 +40,15 @@ fn container_workdir() -> String {
     "/workspace/projects".into()
 }
 
+/// Create symlink /workspace/target → resolved path, then return the setup command prefix.
+fn setup_target() -> String {
+    let resolved = resolve_target_path();
+    format!("ln -sfn {resolved} /workspace/target && cd /workspace/target")
+}
+
 /// Build the exec command for starting an IDE session.
 pub fn start_cmd(name: &str) -> String {
-    let workdir = container_workdir();
+    let setup = setup_target();
     let model_flag = std::env::var("YAA_MODEL")
         .ok()
         .filter(|s| !s.is_empty())
@@ -53,7 +59,7 @@ pub fn start_cmd(name: &str) -> String {
 
     match name {
         "claude" => {
-            let mut cmd = format!("cd {workdir} && exec claude");
+            let mut cmd = format!("{setup} && exec claude");
             cmd.push_str(" --enable-auto-mode");
             cmd.push_str(&model_flag);
             if let Some(ref id) = resume_raw {
@@ -66,9 +72,8 @@ pub fn start_cmd(name: &str) -> String {
             cmd
         }
         "opencode" => {
-            // Inject AGENTS.md into workdir so opencode reads our context
             let mut cmd = format!(
-                "cp /workspace/self/scripts/opencode-agents.md {workdir}/AGENTS.md 2>/dev/null; cd {workdir} && exec opencode"
+                "cp /workspace/self/scripts/opencode-agents.md /workspace/target/AGENTS.md 2>/dev/null; {setup} && exec opencode"
             );
             if let Some(ref id) = resume_raw {
                 if id == "continue" {
@@ -80,9 +85,8 @@ pub fn start_cmd(name: &str) -> String {
             cmd
         }
         "cursor" => {
-            // Inject AGENTS.md into workdir so cursor-agent reads our context
             let mut cmd = format!(
-                "cp /workspace/self/scripts/cursor-agents.md {workdir}/AGENTS.md 2>/dev/null; cd {workdir} && exec cursor-agent --force"
+                "cp /workspace/self/scripts/cursor-agents.md /workspace/target/AGENTS.md 2>/dev/null; {setup} && exec cursor-agent --force"
             );
             cmd.push_str(&model_flag);
             if let Some(ref id) = resume_raw {
@@ -94,12 +98,12 @@ pub fn start_cmd(name: &str) -> String {
             }
             cmd
         }
-        _ => format!("cd {workdir} && exec bash"),
+        _ => format!("{setup} && exec bash"),
     }
 }
 
 /// Build the shell command (zsh with fallback to bash).
 pub fn shell_cmd() -> String {
-    let workdir = container_workdir();
-    format!("cd {workdir} && exec zsh || exec bash")
+    let setup = setup_target();
+    format!("{setup} && exec zsh || exec bash")
 }

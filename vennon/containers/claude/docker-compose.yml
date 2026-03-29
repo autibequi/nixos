@@ -7,7 +7,7 @@ services:
     network_mode: host
     stdin_open: true
     tty: true
-    working_dir: /workspace/projects
+    working_dir: /workspace
     entrypoint: ["/entrypoint.sh"]
     command: ["/bin/bash", "-c", "sleep infinity"]
     environment:
