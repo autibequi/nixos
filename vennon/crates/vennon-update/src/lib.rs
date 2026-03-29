@@ -24,6 +24,22 @@ const TEXT: Color = Color::Rgb { r: 205, g: 214, b: 244 };
 
 const SPIN: &[&str] = &["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
+/// Largura entre `│` e `│` na caixa do título (igual à barra `─` de cima/baixo).
+const BOX_INNER: usize = 38;
+
+fn pad_box_inner(text: &str, width: usize) -> String {
+    let mut s = text.to_string();
+    let n = s.chars().count();
+    if n > width {
+        s = s.chars().take(width).collect();
+    } else {
+        while s.chars().count() < width {
+            s.push(' ');
+        }
+    }
+    s
+}
+
 /// Executa o update completo com a UI padronizada (único caminho para `deck` / `yaa` / `vennon`).
 pub fn run() -> Result<()> {
     let vennon_dir = find_vennon_dir();
@@ -31,21 +47,22 @@ pub fn run() -> Result<()> {
 
     let mut out = io::stdout();
 
-    // ── Header ──────────────────────────────────────────────────
+    // ── Header (│ … │ com exatamente BOX_INNER colunas, alinhado às barras ╭─╮) ──
     out.queue(Print("\n"))?;
     out.queue(SetForegroundColor(DIM))?;
     out.queue(Print("  ╭"))?;
-    out.queue(Print("─".repeat(38)))?;
+    out.queue(Print("─".repeat(BOX_INNER)))?;
     out.queue(Print("╮\n"))?;
-    out.queue(Print("  │  "))?;
+    out.queue(Print("  │"))?;
     out.queue(SetForegroundColor(MAUVE))?;
     out.queue(SetAttribute(Attribute::Bold))?;
-    out.queue(Print("↑  zion utils update"))?;
+    let inner = pad_box_inner("  ↑  zion utils update", BOX_INNER);
+    out.queue(Print(inner))?;
     out.queue(SetAttribute(Attribute::Reset))?;
     out.queue(SetForegroundColor(DIM))?;
-    out.queue(Print("                   │\n"))?;
+    out.queue(Print("│\n"))?;
     out.queue(Print("  ╰"))?;
-    out.queue(Print("─".repeat(38)))?;
+    out.queue(Print("─".repeat(BOX_INNER)))?;
     out.queue(Print("╯\n\n"))?;
     out.queue(ResetColor)?;
     out.flush()?;
@@ -233,8 +250,14 @@ pub fn run() -> Result<()> {
                 out.queue(SetForegroundColor(RED))?;
                 out.queue(Print(format!("       {reason}\n")))?;
                 out.queue(ResetColor)?;
+                out.queue(SetForegroundColor(DIM))?;
+                out.queue(Print(
+                    "       atualização abortada (buzz.yaml é obrigatório neste pipeline).\n",
+                ))?;
+                out.queue(ResetColor)?;
                 out.flush()?;
-                results.push((false, elapsed));
+                cursor_to_end(&mut out, steps.len(), step_idx + 1)?;
+                bail!("buzz.yaml: {reason}");
             }
         }
     }
@@ -287,23 +310,10 @@ pub fn run() -> Result<()> {
         let _ = step_idx;
     }
 
-    // ── Footer ───────────────────────────────────────────────────
+    // ── Tempo total: mesma coluna que os passos (sem linha extra “pronto” / sem separador) ──
     out.queue(Print("\n"))?;
-    out.queue(SetForegroundColor(DIM))?;
-    out.queue(Print("  "))?;
-    out.queue(Print("─".repeat(38)))?;
-    out.queue(Print("\n  "))?;
-    out.queue(SetForegroundColor(GREEN))?;
-    out.queue(SetAttribute(Attribute::Bold))?;
-    out.queue(Print("  ✓  pronto"))?;
-    out.queue(SetAttribute(Attribute::Reset))?;
-    out.queue(SetForegroundColor(DIM))?;
     let total: Duration = results.iter().map(|(_, d)| *d).sum();
-    out.queue(Print(format!(
-        "  — vennon · yaa · deck · buzz · serviços  {}\n\n",
-        fmt_dur(total)
-    )))?;
-    out.queue(ResetColor)?;
+    print_step_ok(&mut out, "Σ total", total)?;
     out.flush()?;
 
     Ok(())
@@ -414,4 +424,37 @@ fn find_vennon_dir() -> PathBuf {
         }
     }
     h.join("nixos/vennon")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::Duration;
+
+    #[test]
+    fn pad_box_inner_pads_to_width() {
+        assert_eq!(pad_box_inner("ab", 4).chars().count(), 4);
+        assert_eq!(pad_box_inner("ab", 4), "ab  ");
+    }
+
+    #[test]
+    fn pad_box_inner_truncates() {
+        assert_eq!(pad_box_inner("abcdefgh", 5), "abcde");
+    }
+
+    #[test]
+    fn fmt_dur_zero_ms() {
+        let s = fmt_dur(Duration::from_millis(12));
+        assert!(s.ends_with("ms"), "got {s}");
+    }
+
+    #[test]
+    fn fmt_dur_seconds() {
+        assert_eq!(fmt_dur(Duration::from_secs(3)), "3s");
+    }
+
+    #[test]
+    fn fmt_dur_minutes() {
+        assert_eq!(fmt_dur(Duration::from_secs(125)), "2m5s");
+    }
 }

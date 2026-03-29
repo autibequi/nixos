@@ -31,11 +31,11 @@ O mesmo vale para `data:text/html;base64,...` no `nav`: o documento decodificado
 
 | Ficheiro | Função |
 |----------|--------|
-| `mermaid/base.html` | **Fonte canónica** — diagrama fullscreen, zoom (scroll), pan, pinch, indicador %, botões Copiar/SVG/Reset/ecrã inteiro, atalhos `R` `+` `-` `0` `F`, duplo clique = reset, `prefers-reduced-motion`, `aria-label` nos botões. Placeholders: `MERMAID_TITLE_HERE`, `MERMAID_SUBTITLE_HERE`, `MERMAID_DIAGRAM_HERE`. |
+| `mermaid/base.html` | **Fonte canónica** — diagrama fullscreen, zoom (scroll), pan, pinch, indicador %, painel **Código** (textarea + Aplicar), Copiar/SVG/Reset/ecrã inteiro, atalhos `S` código `Esc` fecha painel `R` `+` `-` `0` `F`, duplo clique = reset, `prefers-reduced-motion`, `aria-label` nos botões. Placeholders: `MERMAID_TITLE_HERE`, `MERMAID_SUBTITLE_HERE`, `MERMAID_DIAGRAM_HERE`. **Nota:** Mermaid não permite arrastar nós/setas no SVG; edição é por texto (painel) ou outra ferramenta (Excalidraw, draw.io). |
 | `mermaid/template/flow.md` | Exemplo de flowchart + instruções para `show` ou para colar no `base.html`. |
 | `templates/mermaid.html` | Cópia espelhada de `base.html` (atualizar com `cp` após mudanças no base). |
 
-Atalhos (com foco na página, fora de inputs): **R** reset, **+** / **=** zoom in, **-** zoom out, **0** fit, **F** ecrã inteiro. **Duplo clique** na área do diagrama = reset.
+Atalhos (com foco na página, fora de inputs): **S** abre/fecha painel de código, **Esc** fecha o painel, **R** reset, **+** / **=** zoom in, **-** zoom out, **0** fit, **F** ecrã inteiro. **Duplo clique** na área do diagrama = reset.
 
 **HTML:** não usar comentários `<!-- ... -->` longos com `<`, `</`, `&lt;porta&gt;` ou `--` no meio — o parser pode fechar o comentário cedo e o restante aparece como texto antes do header (layout partido). Documentação fica na SKILL, não em comentários no `.html`.
 

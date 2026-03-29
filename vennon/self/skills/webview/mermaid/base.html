@@ -125,6 +125,66 @@
     @media (prefers-reduced-motion: reduce) {
       .z-hint, .z-reset, .hk-btn { transition: none; }
     }
+
+    .hk-source-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      max-height: min(46vh, 480px);
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border-top: 2px solid var(--border);
+      box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.45);
+      transform: translateY(100%);
+      visibility: hidden;
+      transition: transform 0.22s ease, visibility 0.22s;
+    }
+    .hk-source-panel.hk-open {
+      transform: translateY(0);
+      visibility: visible;
+    }
+    .hk-source-head {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.45rem 0.65rem 0.25rem;
+    }
+    .hk-source-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--ctp-mauve);
+    }
+    .hk-source-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .hk-source-help {
+      margin: 0 0.65rem 0.35rem;
+      font-size: 0.68rem;
+      line-height: 1.45;
+      color: var(--text-muted);
+    }
+    .hk-source-ta {
+      flex: 1 1 0;
+      min-height: 0;
+      width: calc(100% - 1.3rem);
+      margin: 0 0.65rem 0.65rem;
+      padding: 0.55rem 0.65rem;
+      font: 0.75rem/1.45 ui-monospace, 'JetBrains Mono', monospace;
+      color: var(--text);
+      background: #12121a;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      resize: vertical;
+      tab-size: 2;
+    }
+    .hk-source-ta:focus {
+      outline: 2px solid rgba(116, 199, 236, 0.45);
+      outline-offset: 1px;
+    }
   </style>
 </head>
 <body>
@@ -136,10 +196,11 @@
     <div class="hk-toolbar">
       <span id="hk-zoom-pct" class="hk-zoom" aria-live="polite" title="Zoom % relativo ao encaixe inicial">100%</span>
       <button type="button" class="hk-btn" id="hk-btn-reset" aria-label="Repor zoom e posição (atalho R)">Reset</button>
+      <button type="button" class="hk-btn" id="hk-btn-source" aria-label="Mostrar ou ocultar código fonte Mermaid (atalho S)">Código</button>
       <button type="button" class="hk-btn" id="hk-btn-copy" aria-label="Copiar código Mermaid">Copiar</button>
       <button type="button" class="hk-btn" id="hk-btn-svg" aria-label="Exportar diagrama como ficheiro SVG">SVG</button>
       <button type="button" class="hk-btn" id="hk-btn-fs" aria-label="Alternar ecrã inteiro (atalho F)">⛶</button>
-      <span class="hk-kbd-hint" title="Atalhos">R reset · +/- zoom · 0 fit · F ecrã · duplo clique no diagrama</span>
+      <span class="hk-kbd-hint" title="Atalhos">S código · R reset · +/- zoom · 0 fit · F ecrã · Esc fecha código</span>
     </div>
   </header>
   <div id="hk-stage">
@@ -147,6 +208,22 @@
 MERMAID_DIAGRAM_HERE
     </div>
   </div>
+
+  <div id="hk-source-panel" class="hk-source-panel" aria-hidden="true" role="region" aria-label="Editor de código Mermaid">
+    <div class="hk-source-head">
+      <span class="hk-source-title">Código Mermaid</span>
+      <div class="hk-source-actions">
+        <button type="button" class="hk-btn" id="hk-btn-apply" aria-label="Aplicar código e redesenhar diagrama">Aplicar</button>
+        <button type="button" class="hk-btn" id="hk-source-close" aria-label="Fechar painel de código">Fechar</button>
+      </div>
+    </div>
+    <p class="hk-source-help">
+      O Mermaid gera o layout automaticamente: não há arrastar nós ou setas no SVG.
+      Edita o texto abaixo e clica <strong>Aplicar</strong> para atualizar. Para desenho livre no browser, usa Excalidraw ou draw.io.
+    </p>
+    <textarea id="hk-mermaid-ta" class="hk-source-ta" spellcheck="false" aria-label="Código fonte do diagrama"></textarea>
+  </div>
+
   <script>
 (function () {
   'use strict';
@@ -177,6 +254,58 @@ MERMAID_DIAGRAM_HERE
   document.querySelectorAll('.mermaid').forEach(function (box, i) {
     sources[i] = box.textContent.trim();
   });
+
+  function getSourcePanel() {
+    return document.getElementById('hk-source-panel');
+  }
+  function getSourceTa() {
+    return document.getElementById('hk-mermaid-ta');
+  }
+  function toggleSourcePanel() {
+    var p = getSourcePanel();
+    var ta = getSourceTa();
+    if (!p || !ta) return;
+    var open = p.classList.toggle('hk-open');
+    p.setAttribute('aria-hidden', open ? 'false' : 'true');
+    if (open) {
+      ta.value = sources.length ? sources[0] : '';
+      setTimeout(function () { ta.focus(); }, 30);
+    }
+  }
+  function closeSourcePanel() {
+    var p = getSourcePanel();
+    if (p) {
+      p.classList.remove('hk-open');
+      p.setAttribute('aria-hidden', 'true');
+    }
+  }
+  async function applyMermaidFromEditor() {
+    var ta = getSourceTa();
+    var text = ta ? ta.value.trim() : '';
+    if (!text) {
+      window.alert('Código vazio.');
+      return;
+    }
+    var stage = document.getElementById('hk-stage');
+    var oldBox = getPrimaryBox();
+    if (!oldBox || !stage) return;
+    sources[0] = text;
+    var newBox = document.createElement('div');
+    newBox.className = 'mermaid';
+    newBox.textContent = text;
+    oldBox.parentNode.replaceChild(newBox, oldBox);
+    try {
+      await mermaid.run({ nodes: [newBox], suppressErrors: false });
+    } catch (err) {
+      console.warn(err);
+      var msg = err && (err.message || err.str || String(err));
+      window.alert('Erro ao desenhar Mermaid: ' + msg);
+      return;
+    }
+    setTimeout(function () {
+      makeZoomable(newBox);
+    }, 100);
+  }
 
   function getPrimaryBox() {
     return document.querySelector('.mermaid');
@@ -338,7 +467,9 @@ MERMAID_DIAGRAM_HERE
   }
 
   function copySources() {
-    var text = sources.join('\n\n---\n\n');
+    var p = getSourcePanel();
+    var ta = getSourceTa();
+    var text = (p && p.classList.contains('hk-open') && ta) ? ta.value : sources.join('\n\n---\n\n');
     if (navigator.clipboard && navigator.clipboard.writeText) {
       return navigator.clipboard.writeText(text);
     }
@@ -378,17 +509,39 @@ MERMAID_DIAGRAM_HERE
     var b = getPrimaryBox();
     if (b && b._holodeck) b._holodeck.reset();
   });
+  document.getElementById('hk-btn-source').addEventListener('click', toggleSourcePanel);
+  document.getElementById('hk-source-close').addEventListener('click', closeSourcePanel);
+  document.getElementById('hk-btn-apply').addEventListener('click', function () {
+    applyMermaidFromEditor();
+  });
   document.getElementById('hk-btn-copy').addEventListener('click', function () {
     copySources().catch(function () {
-      window.prompt('Copiar código Mermaid:', sources.join('\n\n'));
+      var p = getSourcePanel();
+      var ta = getSourceTa();
+      var fallback = (p && p.classList.contains('hk-open') && ta) ? ta.value : sources.join('\n\n');
+      window.prompt('Copiar código Mermaid:', fallback);
     });
   });
   document.getElementById('hk-btn-svg').addEventListener('click', exportSvg);
   document.getElementById('hk-btn-fs').addEventListener('click', toggleFs);
 
   document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      var pEsc = getSourcePanel();
+      if (pEsc && pEsc.classList.contains('hk-open')) {
+        e.preventDefault();
+        closeSourcePanel();
+        return;
+      }
+    }
     var tag = (e.target && e.target.tagName) || '';
     if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable) return;
+
+    if (e.key === 's' || e.key === 'S') {
+      e.preventDefault();
+      toggleSourcePanel();
+      return;
+    }
 
     var b = getPrimaryBox();
     if (!b || !b._holodeck) return;

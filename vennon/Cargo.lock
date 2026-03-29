@@ -278,6 +278,7 @@ dependencies = [
  "clap",
  "crossterm",
  "ratatui",
+ "vennon-update",
 ]
 
 [[package]]
@@ -813,6 +814,15 @@ dependencies = [
  "libc",
  "serde",
  "serde_yaml",
+ "vennon-update",
+]
+
+[[package]]
+name = "vennon-update"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "crossterm",
 ]
 
 [[package]]
@@ -1038,6 +1048,7 @@ dependencies = [
  "libc",
  "serde",
  "serde_yaml",
+ "vennon-update",
 ]
 
 [[package]]
