@@ -53,7 +53,7 @@ Definicoes em `/workspace/self/ego/`. Bedrooms em `/workspace/obsidian/bedrooms/
 | Agente | Funcao |
 |--------|--------|
 | hermes | Dispatcher central |
-| sage | Sabio (explore, organize, propose, document) |
+| gandalf | Sabio (explore, organize, propose, document) |
 | coruja | Estrategia platform |
 | keeper | Saude e limpeza |
 | paperboy | Feeds e jornal |

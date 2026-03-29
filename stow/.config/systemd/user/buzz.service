@@ -6,6 +6,9 @@ Type=simple
 ExecStart=%h/.local/bin/buzz --config %h/.config/vennon/buzz.yaml
 Environment=HOME=%h
 Environment=PATH=%h/.local/bin:%h/.nix-profile/bin:/run/current-system/sw/bin:/usr/bin:/bin
+Environment=WAYLAND_DISPLAY=wayland-1
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus
 Restart=on-failure
 RestartSec=3
 

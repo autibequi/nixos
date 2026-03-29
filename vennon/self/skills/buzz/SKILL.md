@@ -137,6 +137,28 @@ buzz call podman-logs --service=monolito --tail=50
 
 ---
 
+## Paths — como montar caminhos para o host
+
+O daemon roda no **host** (`/home/pedrinho`). Paths `~/` no buzz.yaml resolvem para o home do host, não do container.
+
+| No container | No host (passar pro buzz) |
+|---|---|
+| `/workspace/projects/` | `/home/pedrinho/projects/` |
+| `/workspace/host/` | `/home/pedrinho/nixos/` |
+| `/workspace/self/` | `/home/pedrinho/nixos/vennon/self/` |
+| `/tmp/arquivo.md` | `/tmp/arquivo.md` (igual) |
+
+**Regra:** substituir `/workspace/projects/` por `/home/pedrinho/projects/` ao montar o path para `open-editor`, `open-vscode`, `relay-show`, etc.
+
+```python
+# Converter path do container para path do host
+def container_to_host(path):
+    return path.replace('/workspace/projects/', '/home/pedrinho/projects/') \
+               .replace('/workspace/host/', '/home/pedrinho/nixos/')
+```
+
+---
+
 ## Validações (o daemon rejeita se violar)
 
 | Action | Restrição |

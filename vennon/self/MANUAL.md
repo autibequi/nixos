@@ -42,7 +42,7 @@ Cada subpasta e um agente. Contem `agent.md` com frontmatter (model, clock, max_
 | Agente | Modelo | Clock | O que faz |
 |--------|--------|-------|-----------|
 | **hermes** | sonnet | 10min | Relogio mestre. Le DASHBOARD, despacha agentes vencidos, processa inbox/outbox. Unico ponto de entrada. |
-| **sage** | sonnet | 60min | Sabio do sistema. 4 modos: EXPLORE (vaguear pelo codigo), ORGANIZE (vault tidy + enforcement), PROPOSE (melhorias via worktree), DOCUMENT (wiki no vault). Consolida ex-wanderer/wiseman/gandalf/wikister. |
+| **gandalf** | sonnet | 60min | Sabio do sistema. 4 modos: EXPLORE (vaguear pelo codigo), ORGANIZE (vault tidy + enforcement), PROPOSE (melhorias via worktree), DOCUMENT (wiki no vault). Consolida ex-wanderer/wiseman/jafar/wikister. |
 | **coruja** | sonnet | 60min | Especialista Estrategia. Implementa features nos 3 repos (monolito Go, bo-container Vue, front-student Nuxt). Ciclos investigativos. |
 | **keeper** | haiku | 30min | Saude do sistema. Health checks, limpeza de disco, rotacao de logs, cleanup de assets orfaos. |
 | **paperboy** | haiku | 120min | Motor de descoberta. Aprende preferencias do Pedro via feedback, produz jornal pessoal curado. |
@@ -221,13 +221,13 @@ Hermes le DASHBOARD.md → coluna TODO
     ▼
 Para cada card (max 3/ciclo):
     │
-    Card: **sage-ronda** #sage #sonnet #every60min
-          briefing:bedrooms/sage/BRIEFING.md
+    Card: **gandalf-ronda** #gandalf #sonnet #every60min
+          briefing:bedrooms/gandalf/BRIEFING.md
     │
-    ├── Extrai: #sage, #sonnet, briefing path
+    ├── Extrai: #gandalf, #sonnet, briefing path
     ├── Le BRIEFING.md
     ├── Move TODO → DOING
-    ├── Despacha Agent(subagent_type=sage, model=sonnet, prompt=briefing)
+    ├── Despacha Agent(subagent_type=gandalf, model=sonnet, prompt=briefing)
     │
     ▼
 Agente despachado:

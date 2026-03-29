@@ -59,15 +59,18 @@ fn render_header(frame: &mut Frame, app: &App, area: Rect) {
         .count();
 
     // Left: tabs
-    let left_line = Line::from(vec![
+    let mut left_spans = vec![
         Span::styled(" deck ", Style::default().fg(MAUVE).bold()),
         Span::styled("│ ", Style::default().fg(DIM)),
         Span::styled(format!(" Services ({svc_up}) "), svc_style),
         Span::styled("│", Style::default().fg(DIM)),
         Span::styled(format!(" Agents ({agents_up}) "), agents_style),
-        Span::styled("│ ", Style::default().fg(DIM)),
-        Span::styled("tab:switch", Style::default().fg(DIM)),
-    ]);
+    ];
+    if app.refresh_inflight {
+        left_spans.push(Span::styled(" │ ", Style::default().fg(DIM)));
+        left_spans.push(Span::styled("refreshing…", Style::default().fg(PEACH).bold()));
+    }
+    let left_line = Line::from(left_spans);
 
     // Right: systemd dots
     let systemd = app.systemd_containers();
@@ -130,18 +133,13 @@ fn render_containers(frame: &mut Frame, app: &App, vis: &[&super::app::Container
                 "dbox" | "devb" => MAUVE,
                 _               => DIM,
             };
-            let debug_color = match c.debug.as_str() {
-                "on" | "dbg" => PEACH,
-                _            => DIM,
-            };
             let vert_color = match c.vertical.as_str() {
                 "med"  => MAUVE,
                 "oab"  => GREEN,
                 "conc" => PEACH,
                 _      => DIM,
             };
-            let env_display  = if c.env.is_empty()      { "—".to_string() } else { c.env.clone() };
-            let debug_display = if c.debug.is_empty()   { "—".to_string() } else { c.debug.clone() };
+            let env_display  = if c.env.is_empty() { "—".to_string() } else { c.env.clone() };
             let vert_display = if c.vertical.is_empty() { "—".to_string() } else { c.vertical.clone() };
             let mem_display = mem_used_only(&c.mem);
             let status_display = if !c.last_log.is_empty() {
@@ -156,7 +154,6 @@ fn render_containers(frame: &mut Frame, app: &App, vis: &[&super::app::Container
                 Cell::from(Span::styled(icon, Style::default().fg(icon_color))),
                 Cell::from(Span::styled(name, style.bold())),
                 Cell::from(Span::styled(env_display, Style::default().fg(env_color))),
-                Cell::from(Span::styled(debug_display, Style::default().fg(debug_color))),
                 Cell::from(Span::styled(vert_display, Style::default().fg(vert_color))),
                 Cell::from(Span::styled(&c.cpu, Style::default().fg(PEACH))),
                 Cell::from(Span::styled(mem_display, Style::default().fg(MAUVE))),
@@ -171,7 +168,6 @@ fn render_containers(frame: &mut Frame, app: &App, vis: &[&super::app::Container
         Constraint::Length(2),   // status icon
         Constraint::Length(20),  // name (tree + sidecar label)
         Constraint::Length(5),   // env
-        Constraint::Length(4),   // debug
         Constraint::Length(5),   // vertical
         Constraint::Length(8),   // cpu
         Constraint::Length(9),   // mem (used only)
@@ -240,7 +236,7 @@ fn render_logs(frame: &mut Frame, app: &App, area: Rect) {
 
 fn render_footer(frame: &mut Frame, app: &App, area: Rect) {
     let hint = match app.mode {
-        AppMode::Normal => "j/k:nav  enter:menu  tab:switch  r:refresh  [/]:scroll  q:quit",
+        AppMode::Normal => "j/k:nav  enter:menu  r:refresh  [/]:scroll  q:quit",
         AppMode::Menu => "j/k:nav  enter:exec  esc:back",
     };
     let count = app.all_containers.iter().filter(|c| c.is_up).count();
@@ -250,12 +246,7 @@ fn render_footer(frame: &mut Frame, app: &App, area: Rect) {
         format!(" {count}/{total} up "),
         Style::default().fg(GREEN).bold(),
     )];
-    if app.refresh_inflight {
-        parts.push(Span::styled(
-            "refreshing… ",
-            Style::default().fg(PEACH).bold(),
-        ));
-    } else if app.subprocess_degraded {
+    if app.subprocess_degraded {
         parts.push(Span::styled(
             "stale (podman/vennon timeout) ",
             Style::default().fg(PEACH).bold(),

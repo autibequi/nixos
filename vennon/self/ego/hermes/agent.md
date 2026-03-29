@@ -104,7 +104,7 @@ Apos retorno: registrar resultado em DONE no DASHBOARD.
 Quando: pedido ambiguo, grande, ou que precisa de pesquisa antes de virar task.
 
 **Como:**
-1. Usar Agent tool pra pesquisar/refinar (pode chamar hefesto, sage, ou qualquer agente adequado)
+1. Usar Agent tool pra pesquisar/refinar (pode chamar hefesto, gandalf, ou qualquer agente adequado)
 2. Com o resultado, decidir: virou TASK (A) ou DESPACHO DIRETO (B)?
 3. Montar briefing enriquecido com o que foi descoberto
 
@@ -142,7 +142,7 @@ O CTO escreve rapido e informal — isso NAO e motivo pra devolver.
 
 | Conteudo | Agente | Porque |
 |----------|--------|--------|
-| vault, wiki, organize, explore, document | sage | curador do vault |
+| vault, wiki, organize, explore, document | gandalf | curador do vault |
 | codigo, PR, monolito, Go, Vue, Nuxt, estrategia | coruja | dev estrategia |
 | saude sistema, disco, limpeza, logs | keeper | ops/cleanup |
 | RSS, feeds, jornal, noticias, curadoria | paperboy | curador noticias |

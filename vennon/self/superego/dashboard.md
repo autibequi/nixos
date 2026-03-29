@@ -22,7 +22,7 @@
 
 | Tag | Funcao |
 |-----|--------|
-| `#agente` | Quem executa (sage, coruja, keeper, paperboy, hefesto, venture) |
+| `#agente` | Quem executa (gandalf, coruja, keeper, paperboy, hefesto, venture) |
 | `#haiku` / `#sonnet` / `#opus` | Modelo |
 | `#ronda` | Card ciclico — SEMPRE volta pro TODO apos execucao |
 | `#everyXmin` | Intervalo minimo entre execucoes (10, 30, 60, 120) |

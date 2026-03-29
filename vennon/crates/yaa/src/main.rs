@@ -120,20 +120,7 @@ fn main() -> Result<()> {
     match cli.command {
         Some(Commands::Init) => config::init(),
 
-        Some(Commands::Update) => {
-            let config = config::YaaConfig::load()?;
-            let vennon_dir = config.vennon_path();
-            exec::run(
-                "just",
-                &[
-                    "--justfile",
-                    &vennon_dir.join("justfile").to_string_lossy(),
-                    "--working-directory",
-                    &vennon_dir.to_string_lossy(),
-                    "install",
-                ],
-            )
-        }
+        Some(Commands::Update) => exec::run("deck", &["update"]),
 
         Some(Commands::Shell) => {
             let config = config::YaaConfig::load()?;

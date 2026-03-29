@@ -36,10 +36,10 @@ pub fn run() -> Result<()> {
     out.queue(Print("  │  "))?;
     out.queue(SetForegroundColor(MAUVE))?;
     out.queue(SetAttribute(Attribute::Bold))?;
-    out.queue(Print("↑  vennon update"))?;
+    out.queue(Print("↑  zion utils update"))?;
     out.queue(SetAttribute(Attribute::Reset))?;
     out.queue(SetForegroundColor(DIM))?;
-    out.queue(Print("                       │\n"))?;
+    out.queue(Print("                   │\n"))?;
     out.queue(Print("  ╰"))?;
     out.queue(Print("─".repeat(38)))?;
     out.queue(Print("╯\n\n"))?;
@@ -53,6 +53,8 @@ pub fn run() -> Result<()> {
         ("yaa",        "instalando yaa"),
         ("deck",       "instalando deck"),
         ("buzz",       "instalando buzz"),
+        ("buzz-svc",   "reiniciando buzz"),
+        ("tick-svc",   "reiniciando yaa-tick"),
     ];
 
     // Pre-print all step lines as pending
@@ -190,6 +192,54 @@ pub fn run() -> Result<()> {
         }
     }
 
+    // ── Steps 6-7: restart systemd services ─────────────────────
+    // Reload unit files first (silently) so systemctl doesn't warn mid-line
+    let _ = Command::new("systemctl")
+        .args(["--user", "daemon-reload"])
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status();
+
+    for (step_idx, (unit, label)) in [
+        (5usize, ("buzz.service",    steps[5].1)),
+        (6usize, ("yaa-tick.timer",  steps[6].1)),
+    ] {
+        let start = Instant::now();
+        print_step_spin(&mut out, label, Duration::ZERO, 0)?;
+        out.flush()?;
+
+        let status = Command::new("systemctl")
+            .args(["--user", "restart", unit])
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status();
+
+        let elapsed = start.elapsed();
+        match status {
+            Ok(s) if s.success() => {
+                print_step_ok(&mut out, label, elapsed)?;
+                results.push((true, elapsed));
+            }
+            Ok(s) => {
+                print_step_fail(&mut out, label, elapsed)?;
+                out.queue(SetForegroundColor(RED))?;
+                out.queue(Print(format!("       exit {}\n", s.code().unwrap_or(-1))))?;
+                out.queue(ResetColor)?;
+                out.flush()?;
+                results.push((false, elapsed));
+            }
+            Err(e) => {
+                print_step_fail(&mut out, label, elapsed)?;
+                out.queue(SetForegroundColor(DIM))?;
+                out.queue(Print(format!("       {e}\n")))?;
+                out.queue(ResetColor)?;
+                out.flush()?;
+                results.push((false, elapsed));
+            }
+        }
+        let _ = step_idx;
+    }
+
     // ── Footer ───────────────────────────────────────────────────
     out.queue(Print("\n"))?;
     out.queue(SetForegroundColor(DIM))?;
@@ -202,7 +252,7 @@ pub fn run() -> Result<()> {
     out.queue(SetAttribute(Attribute::Reset))?;
     out.queue(SetForegroundColor(DIM))?;
     let total: Duration = results.iter().map(|(_, d)| *d).sum();
-    out.queue(Print(format!("  — deck + yaa + vennon  {}\n\n", fmt_dur(total))))?;
+    out.queue(Print(format!("  — vennon · yaa · deck · buzz · serviços  {}\n\n", fmt_dur(total))))?;
     out.queue(ResetColor)?;
     out.flush()?;
 

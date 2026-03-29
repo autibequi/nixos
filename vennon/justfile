@@ -35,6 +35,7 @@ install: build
     install -m 755 target/release/yaa {{install_dir}}/yaa
     install -m 755 target/release/deck {{install_dir}}/deck
     install -m 755 target/release/buzz {{install_dir}}/buzz
+    systemctl --user restart buzz || true
     @echo "installed vennon + yaa + deck + buzz → {{install_dir}}"
 
 # Uninstall

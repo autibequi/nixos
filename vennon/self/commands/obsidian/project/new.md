@@ -31,8 +31,8 @@ Apresentar os agentes disponiveis e recomendar com base no tipo:
 | produto (MVP, startup, negocio) | **venture** | Pensa como investidor, valida antes de construir |
 | codigo estrategia (Go/Vue/Nuxt) | **coruja** | Especialista dos 3 repos |
 | codigo generico | **hefesto** | Mestre construtor, todas as skills |
-| pesquisa/analise | **sage** | Modo EXPLORE + DOCUMENT |
-| conteudo/wiki | **sage** | Modo DOCUMENT |
+| pesquisa/analise | **gandalf** | Modo EXPLORE + DOCUMENT |
+| conteudo/wiki | **gandalf** | Modo DOCUMENT |
 | infra/NixOS/docker | **hefesto** | Conhece vennon/linux e vennon/container |
 | saude/limpeza/rotina | **keeper** | Especialista em manutencao |
 | feeds/curadoria | **paperboy** | Motor de descoberta |

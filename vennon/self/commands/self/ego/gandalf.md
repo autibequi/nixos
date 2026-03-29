@@ -1,16 +1,16 @@
 ---
-name: self:ego:sage
-description: "Detalhes do agente sage"
+name: self:ego:gandalf
+description: "Detalhes do agente gandalf"
 ---
 
-# /self:ego:sage — Agente Sage
+# /self:ego:gandalf — Agente Gandalf
 
 Ler os arquivos do agente e exibir detalhes.
 
 ## Executar
 
-1. Ler `/workspace/self/ego/sage/agent.md`
-2. Ler `/workspace/obsidian/bedrooms/sage/memory.md`
+1. Ler `/workspace/self/ego/gandalf/agent.md`
+2. Ler `/workspace/obsidian/bedrooms/gandalf/memory.md`
 3. Extrair e exibir:
    - **Model** — qual modelo o agente usa
    - **Description** — propósito e função

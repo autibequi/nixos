@@ -19,7 +19,7 @@
 | Agente | Dominio |
 |--------|---------|
 | **hermes** | Dispatcher central. Le DASHBOARD, despacha cards. |
-| **sage** | Sabio. 4 modos: EXPLORE, ORGANIZE, PROPOSE, DOCUMENT. |
+| **gandalf** | Sabio. 4 modos: EXPLORE, ORGANIZE, PROPOSE, DOCUMENT. |
 | **coruja** | Estrategia (monolito Go, bo Vue, front Nuxt). |
 | **keeper** | Saude e limpeza do sistema. |
 | **paperboy** | Feeds RSS e jornal curado. |
