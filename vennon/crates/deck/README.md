@@ -9,7 +9,7 @@ deck                # abre dashboard
 ```
 
 **Tabs** (Tab key para alternar):
-- **IDE** — claude, opencode, cursor, docker-proxy
+- **IDE** — claude, opencode, cursor
 - **Services** — monolito, bo-container, front-student, reverseproxy (do vennon.yaml)
 
 **Keys:**

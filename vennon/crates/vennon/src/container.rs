@@ -63,33 +63,11 @@ fn instance_name(base: &str) -> String {
     }
 }
 
-/// Ensure the shared docker-proxy container is running.
-/// Uses a fixed project name so multiple IDE instances share one proxy.
-fn ensure_proxy(compose_path: &std::path::Path) -> Result<()> {
-    let already_running = Command::new("podman")
-        .args(["container", "exists", "vennon-docker-proxy"])
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .map(|s| s.success())
-        .unwrap_or(false);
-
-    if !already_running {
-        let compose_str = compose_path.to_string_lossy();
-        exec::run(
-            "podman-compose",
-            &["-f", &compose_str, "-p", "vennon-proxy", "up", "-d", "docker-proxy"],
-        )?;
-    }
-    Ok(())
-}
-
 /// Start container and exec into the IDE.
 /// Uses exec_replace into a bash wrapper with an EXIT trap so that compose down
 /// runs reliably whether the user types /exit, closes the terminal, or is killed.
 fn start(name: &str, compose_path: &std::path::Path, config: &VennonConfig) -> Result<()> {
     ensure_image(name, config)?;
-    ensure_proxy(compose_path)?;
 
     let compose_str = compose_path.to_string_lossy();
     let project = instance_name(name);
@@ -105,7 +83,6 @@ fn start(name: &str, compose_path: &std::path::Path, config: &VennonConfig) -> R
 /// Open a bash shell inside the container with the same cleanup semantics.
 fn shell(name: &str, compose_path: &std::path::Path, config: &VennonConfig) -> Result<()> {
     ensure_image(name, config)?;
-    ensure_proxy(compose_path)?;
 
     let compose_str = compose_path.to_string_lossy();
     let project = instance_name(name);
@@ -201,7 +178,7 @@ fn running_container(name: &str) -> Option<String> {
     )
     .ok()
     .filter(|s| !s.is_empty())
-    .map(|s| s.lines().next().unwrap_or(s).to_string())
+    .map(|s| s.lines().next().map(str::to_string).unwrap_or(s))
 }
 
 fn find_container(name: &str) -> Result<String> {

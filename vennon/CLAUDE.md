@@ -17,7 +17,7 @@ crates/vennon/src/
 ├── exec.rs           run(), capture(), exec_replace(), clear_screen()
 └── containers/
     ├── mod.rs        is_ide(), get_compose(), start_cmd(), shell_cmd(), container_workdir()
-    └── ide.rs        Compose generation for IDE containers (volumes, env, docker-proxy)
+    └── ide.rs        Compose env for IDE containers (volumes interpolation)
 
 crates/yaa/src/
 ├── main.rs           CLI: [dir], shell, continue, resume, phone, tick, usage, token, man, holodeck, tmux
@@ -70,11 +70,9 @@ O manifest.rs scana 2 locais:
 
 ## Convenções
 
-- Container names: `vennon-claude`, `vennon-opencode`, `vennon-cursor`, `vennon-docker-proxy`
+- Container names: `vennon-claude`, `vennon-opencode`, `vennon-cursor`
 - Service names: `vennon-dk-monolito-app`, `vennon-dk-bo-container-app`, etc
 - Project names: `vennon-claude`, `vennon-dk-monolito`
-- Network: `nixos_default` (external)
-- Docker proxy: nginx em 127.0.0.1:2375 filtrando socket access
 
 ## Ao modificar
 

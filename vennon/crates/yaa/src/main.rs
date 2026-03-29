@@ -213,10 +213,6 @@ fn main() -> Result<()> {
                 let _ = exec::run("podman", &["stop", &container]);
                 let _ = exec::run("podman", &["rm", "-f", &container]);
             }
-            // Also clean the proxy
-            println!("Cleaning up vennon-docker-proxy...");
-            let _ = exec::run("podman", &["stop", "vennon-docker-proxy"]);
-            let _ = exec::run("podman", &["rm", "-f", "vennon-docker-proxy"]);
             println!("Done.");
             Ok(())
         }

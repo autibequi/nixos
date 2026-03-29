@@ -40,7 +40,7 @@ hardware.nix         # Partition UUIDs (local-only, git skip-worktree'd)
 vennon/               # vennon system (agent launcher + containers)
   bash/              # Bashly CLI source (vennon command)
   docker/            # Docker compose files per service
-    vennon/           # vennon container + docker-proxy
+    vennon/           # vennon container stack (IDE compose + Rust CLI)
     monolito/        # Monolito (Go API)
     bo-container/    # Bo (Vue/Quasar)
     front-student/   # Front-student (Nuxt)

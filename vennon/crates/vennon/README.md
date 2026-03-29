@@ -44,4 +44,4 @@ vennon list
 | `compose.rs` | YAML structs + write-if-changed |
 | `exec.rs` | Process helpers (run/capture/exec_replace) |
 | `containers/mod.rs` | IDE engine list, start_cmd(), container_workdir() |
-| `containers/ide.rs` | Compose generation (volumes, env, docker-proxy) |
+| `containers/ide.rs` | Compose env (volumes interpolation) |

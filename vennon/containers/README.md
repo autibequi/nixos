@@ -9,13 +9,12 @@ vennon-vennon (base)
 └── vennon-cursor     (cursor já na base)
 ```
 
-## vennon/ — Base Image
+## leech/ — Base Image (`vennon-vennon`)
 
 ```
-vennon/
-├── Dockerfile                  # Multi-stage: cursor CLI (debian) + nix (nixos/nix:latest)
-├── entrypoint.sh               # nix-daemon, dynamic UID/GID, session hooks, setpriv
-└── docker-socket-filter.conf   # nginx proxy: info/ping/version/logs/restart (rest blocked)
+leech/
+├── Dockerfile                  # Multi-stage: cursor CLI (debian) + nix (nixos/nix:latest) → tag `vennon-vennon`
+└── entrypoint.sh               # nix-daemon, dynamic UID/GID, session hooks, setpriv
 ```
 
 **Pacotes instalados (3 layers para cache):**
@@ -29,10 +28,6 @@ vennon/
 - Source `~/.vennon` (canal host ↔ container)
 - Session-start hook execution
 - `setpriv` para drop de privilégios
-
-**Docker proxy** (nginx em 127.0.0.1:2375):
-- Permitido: info, ping, version, logs (GET), restart (POST)
-- Bloqueado: tudo mais (403)
 
 ## claude/ — Claude Code
 

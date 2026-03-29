@@ -2,7 +2,7 @@ use anyhow::Result;
 use std::collections::HashMap;
 use std::process::Command;
 
-pub const IDE_NAMES: &[&str] = &["claude", "opencode", "cursor", "docker-proxy"];
+pub const IDE_NAMES: &[&str] = &["claude", "opencode", "cursor"];
 
 #[derive(Debug, Clone)]
 pub struct ContainerInfo {
@@ -188,8 +188,8 @@ fn collect_all() -> Vec<ContainerInfo> {
     let mut containers = vec![];
     let running = collect_running();
 
-    // 1. IDE containers — always show claude/opencode/cursor/docker-proxy
-    for name in &["claude", "opencode", "cursor", "docker-proxy"] {
+    // 1. IDE containers — always show claude/opencode/cursor
+    for name in &["claude", "opencode", "cursor"] {
         let podman_name = format!("vennon-{name}");
         let (status, is_up, cpu, mem) = running
             .get(&podman_name)
