@@ -1,9 +1,35 @@
 %%{init: {'theme': 'dark'}}%%
-flowchart TD
-  L[LIVE] --> LZ[Led Zeppelin]
-  L --> PF[Pink Floyd]
-  L --> Q[Queen]
-  style L fill:#cba6f7,color:#1e1e2e
-  style LZ fill:#f38ba8,color:#1e1e2e
-  style PF fill:#89b4fa,color:#1e1e2e
-  style Q fill:#f9e2af,color:#1e1e2e
+flowchart LR
+  subgraph FS["front-student — aluno"]
+    direction TB
+    f1([Página Nuxt]) --> f2[axios BFF]
+    f2 --> f3{rota protegida?}
+    f3 -->|sim| f4[GET /bff/...]
+  end
+
+  subgraph BO["bo-container — operador"]
+    direction TB
+    b1[Quasar UI] --> b2[PATCH /bo/...]
+  end
+
+  subgraph API["Monolito — API"]
+    direction TB
+    m1[Handlers] --> m2[Services]
+    m2 --> m3[(PostgreSQL)]
+  end
+
+  subgraph Q["Assíncrono — fila"]
+    direction TB
+    q1[[SQS]] --> q2[Worker]
+    q2 --> q3[(projeções)]
+  end
+
+  f4 -->|"JWT"| m1
+  b2 -->|"JWT + JSON"| m1
+  m2 -->|"evento"| q1
+  q2 -.->|"opcional"| m2
+
+  style FS fill:#1e1e2e,stroke:#f5c2e7,stroke-width:2px
+  style BO fill:#1e1e2e,stroke:#89b4fa,stroke-width:2px
+  style API fill:#1e1e2e,stroke:#a6e3a1,stroke-width:2px
+  style Q fill:#1e1e2e,stroke:#fab387,stroke-width:2px,color:#e4e4e7

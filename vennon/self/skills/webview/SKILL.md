@@ -44,7 +44,9 @@ O mesmo vale para `data:text/html;base64,...` no `nav`: o documento decodificado
 | Ficheiro | Função |
 |----------|--------|
 | `mermaid/base.html` | **Fonte canónica** — **sem header**; diagrama fullscreen; zoom (scroll), pan, pinch; pilha inferior direita: **+ / − / ⟳ / CODE / SVG / ⛶**; **drawer** esquerdo **Código**; **SSE** a `/mermaid-live` por defeito (`?nolive=1` desliga); **indicador verde LIVE** quando o stream está ativo; export **SVG**; `Esc` fecha o drawer; atalhos `R` `+` `-` `F`, duplo clique = reset. Placeholder: `MERMAID_DIAGRAM_HERE`. |
-| `mermaid/template/flow.md` | Exemplo de flowchart + instruções para `show` ou para colar no `base.html`. |
+| `mermaid/template/README.md` | **Catálogo** de tipos + tabela *quando usar* | Escolher `template/<tipo>.md` antes de inventar sintaxe |
+| `mermaid/template/*.md` | Exemplos Estrategia (monolito, bo-container, front-student) por tipo de diagrama | Copiar para `diagram.mmd` ou `show` |
+| `mermaid/styling-global.md` | Tema, `%%{init}%%`, `classDef`, subgraph, imagens/ícones | Estilo comum a todos os diagramas |
 | `templates/mermaid.html` | Cópia espelhada de `base.html` (atualizar com `cp` após mudanças no base). |
 
 Atalhos (com foco na página, fora de inputs): **Esc** fecha o drawer de código, **R** reset, **+** / **=** zoom in, **-** zoom out, **0** fit, **F** ecrã inteiro. **Duplo clique** na área do diagrama = reset. O **Código** abre o drawer lateral (botão na barra ou backdrop para fechar).
@@ -53,7 +55,9 @@ Atalhos (com foco na página, fora de inputs): **Esc** fecha o drawer de código
 
 **Não** usar `cp mermaid/base.html /tmp/chrome-relay/foo.html` + `nav` como **substituto do fluxo live** para Mermaid ao utilizador: esse HTML **não** tem SSE nem o mesmo contrato de cooperação. Só faz sentido como exceção pontual (ficheiro já copiado, sem agente a gerar HTML novo).
 
-No workdir do repositório (`/workspace/target`), `webview/mermaid/base.html` e `webview/mermaid/template/flow.md` são **ligações simbólicas** para os mesmos ficheiros em `self/skills/webview/mermaid/`.
+No workdir do repositório (`/workspace/target`), `webview/mermaid/base.html` e `webview/mermaid/template/` são **ligações simbólicas** para os mesmos ficheiros em `self/skills/webview/mermaid/` (quando existirem).
+
+**Flowchart com fronteiras (agentes):** para diagramar **várias** partes do código ou apps (**monolito**, **bo-container**, **front-student**, filas, etc.) na **mesma** figura, usar **`subgraph`** num único `flowchart` e **arestas entre nós** de blocos diferentes — não declarar dois `flowchart` no mesmo `diagram.mmd`. Referência: `mermaid/template/flow-subgraphs.md` e `mermaid/styling-global.md` (secção *Subgrafos — vários fluxos*).
 
 ## Sub-files
 
@@ -64,8 +68,10 @@ No workdir do repositório (`/workspace/target`), `webview/mermaid/base.html` e 
 | `chrome.md` | Voz + templates artisticos (eye, glados) + canvas colaborativo | Arte no browser. Precisa relay. |
 | `webview.md` | Detalhes do webview mode | Referencia |
 | `mermaid/base.html` | HTML único Mermaid live (controlo canto + drawer + SSE) | Base para diagramas no relay; ver secção **Pacote Mermaid** |
-| `mermaid/template/flow.md` | Exemplo flowchart | Copiar bloco mermaid ou usar com `show` |
-| `mermaid/README.md` | **Template oficial** — resumo, live SSE, colaboração | Ao orientar agentes ou devs sobre qual ficheiro editar |
+| `mermaid/template/README.md` | **Catálogo** de todos os tipos de diagrama (`.md` por tipo) | Escolher snippet alinhado a monolito / bo-container / front-student |
+| `mermaid/template/*.md` | Inclui `flow-subgraphs` (vários `subgraph` ligados) e os restantes tipos: `flow`, `sequence`, `state`, `class`, `er`, `journey`, `gantt`, `pie`, `gitgraph`, `mindmap`, `timeline`, `quadrant`, `requirement`, `sankey`, `xychart`, `architecture`, `block`, `packet`, `c4-context`, `c4-container`, `c4-component`, `c4-dynamic`, `c4-deployment`, `zenuml` | Copiar bloco `mermaid` para `diagram.mmd` ou usar `chrome-relay.py show` |
+| `mermaid/styling-global.md` | Tema, `%%{init}%%`, `classDef`, subgraph, imagens/ícones, limites | Referência global fora dos exemplos por tipo |
+| `mermaid/README.md` | **Template oficial** — resumo, live SSE, colaboração, link ao catálogo | Ao orientar agentes ou devs sobre qual ficheiro editar |
 | `mermaid/mermaid_live_server.py` | Servidor HTTP + SSE + `POST /mermaid-push` (stdlib Python) | Colaboração em tempo real com `base.html` (SSE ligado por defeito; `?nolive=1` desliga) |
 | `mermaid/mermaid-live-server.mjs` | Variante Node (mesma API) | Se `node` existir no ambiente |
 

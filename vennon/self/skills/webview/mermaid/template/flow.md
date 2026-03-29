@@ -5,6 +5,9 @@ description: Exemplo de código Mermaid (referência) — colar em diagram.mmd o
 
 # Exemplo — Flowchart (referência)
 
+**Índice de todos os tipos:** `template/README.md` · **Tema / cores / estilos globais:** `../styling-global.md`.  
+**Vários fluxos na mesma figura (apps ligados):** `template/flow-subgraphs.md`.
+
 ## Para que serve neste contexto
 
 | Uso | Papel |

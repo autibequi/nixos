@@ -15,6 +15,10 @@ Espelho para compatibilidade de caminhos antigos:
 
 No workdir do projeto: `webview/mermaid/base.html` → ligação simbólica para este ficheiro (quando existir).
 
+## Galeria (todos os templates numa página)
+
+- **`gallery-all.html`** — página estática com **todos** os diagramas dos `template/*.md` (incl. `flow-subgraphs`), empilhados. Serve para **ver tudo de uma vez** e exportar **uma imagem** (Chrome DevTools → *Capture full size screenshot*) ou **PDF** (Imprimir). Abrir no mesmo servidor que serve esta pasta, ex.: `http://127.0.0.1:9876/gallery-all.html`. **Não** substitui o holodeck live (`base.html` + `diagram.mmd`).
+
 ## Conteúdo
 
 - `<title>`: **Mermaid live**; **sem barra superior** — só o diagrama e a pilha de controlos (canto inferior direito).
@@ -56,9 +60,12 @@ node skills/webview/mermaid/mermaid-live-server.mjs --file ./diagram.mmd --stati
 
 **Nota:** não funciona com `file://`. O relay clássico (`chrome-relay.py` + `/tmp/chrome-relay/`) serve HTML estático; o **live** usa **outra porta** (ex. 9876) com o servidor acima.
 
-## Exemplo em Markdown
+## Exemplos em Markdown (catálogo)
 
-Ver `template/flow.md`. Para só diagrama em `.md` sem HTML, usar `chrome-relay.py show` (skill **webview**).
+- **Índice completo** de tipos de diagrama e ficheiros: **`template/README.md`** (flowchart, sequence, state, class, ER, journey, gantt, pie, gitGraph, mindmap, timeline, quadrant, requirement, sankey, xychart, architecture-beta, block-beta, packet, C4×5, ZenUML).
+- **Estilos transversais** (tema, `classDef`, imagens, limites): **`styling-global.md`**.
+
+Para só diagrama em `.md` sem HTML, usar `chrome-relay.py show` (skill **webview**) — um ficheiro por tipo em `template/*.md`.
 
 ## Documentação completa
 

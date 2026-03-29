@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Galeria Mermaid — todos os templates</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 1.5rem; font-family: system-ui, sans-serif;
+      background: #0f0f12; color: #e4e4e7; }
+    h1 { font-size: 1.25rem; margin: 0 0 1rem; }
+    p.hint { color: #71717a; font-size: 0.85rem; margin: 0 0 1.5rem; max-width: 56rem; }
+    section { margin-bottom: 2.5rem; page-break-inside: avoid; }
+    section h2 { font-size: 0.95rem; color: #cba6f7; margin: 0 0 0.75rem;
+      font-weight: 600; }
+    .mermaid { background: #18181c; border: 1px solid #2a2a30; border-radius: 8px;
+      padding: 1rem; overflow: auto; }
+    @media print {
+      body { background: #fff; color: #111; }
+      section { page-break-inside: avoid; }
+      .mermaid { border-color: #ccc; background: #fafafa; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Galeria — templates Mermaid (Estrategia)</h1>
+  <p class="hint">Uma única página com todos os tipos. Para <strong>uma imagem só</strong>: zoom out no browser,
+    captura de ecrã &quot;página inteira&quot; (DevTools → Capture full size screenshot), ou Imprimir → PDF.
+    Não substitui o holodeck live (<code>base.html</code> + <code>diagram.mmd</code>).</p>
+  <section id="flow">
+    <h2>flow</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+flowchart TD
+  A([Entrada]) --> B{Decisão}
+  B -->|sim| C[Fluxo A]
+  B -->|não| D[Fluxo B]
+  C --> E([Saída])
+  D --> E
+
+  style A fill:#cba6f7,color:#1e1e2e
+  style E fill:#a6e3a1,color:#1e1e2e
+  style C fill:#89b4fa,color:#1e1e2e
+  style D fill:#fab387,color:#1e1e2e</div>
+  </section>
+
+  <section id="flow-subgraphs">
+    <h2>flow-subgraphs</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+flowchart LR
+  subgraph FS["front-student — aluno"]
+    direction TB
+    f1([Página Nuxt]) --> f2[axios BFF]
+    f2 --> f3{rota protegida?}
+    f3 -->|sim| f4[GET /bff/...]
+  end
+
+  subgraph BO["bo-container — operador"]
+    direction TB
+    b1[Quasar UI] --> b2[PATCH /bo/...]
+  end
+
+  subgraph API["Monolito — API"]
+    direction TB
+    m1[Handlers] --> m2[Services]
+    m2 --> m3[(PostgreSQL)]
+  end
+
+  subgraph Q["Assíncrono — fila"]
+    direction TB
+    q1[[SQS]] --> q2[Worker]
+    q2 --> q3[(projeções)]
+  end
+
+  f4 -->|"JWT"| m1
+  b2 -->|"JWT + JSON"| m1
+  m2 -->|"evento"| q1
+  q2 -.->|"opcional"| m2
+
+  style FS fill:#1e1e2e,stroke:#f5c2e7,stroke-width:2px
+  style BO fill:#1e1e2e,stroke:#89b4fa,stroke-width:2px
+  style API fill:#1e1e2e,stroke:#a6e3a1,stroke-width:2px
+  style Q fill:#1e1e2e,stroke:#fab387,stroke-width:2px,color:#e4e4e7</div>
+  </section>
+
+  <section id="sequence">
+    <h2>sequence</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+sequenceDiagram
+  autonumber
+  actor Op as Operador BO
+  participant BO as bo-container
+  participant API as Monolito (BFF/BO)
+  participant Q as SQS
+  participant W as Worker
+  participant DB as PostgreSQL
+
+  Op ->> BO: Ação na tela (salvar)
+  BO ->> API: PATCH /bo/... (JWT)
+  API ->> DB: persistência + transação
+  API -->> BO: 200 + payload
+  BO -->> Op: feedback UI
+  API ->> Q: evento assíncrono
+  Q ->> W: mensagem
+  W ->> DB: side effects / projeções</div>
+  </section>
+
+  <section id="state">
+    <h2>state</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+stateDiagram-v2
+  [*] --> Visitante
+  Visitante --> Matriculado: compra / matrícula efetiva
+  Matriculado --> EmProgresso: primeiro acesso ao conteúdo
+  EmProgresso --> Concluido: critérios de conclusão
+  EmProgresso --> Suspenso: política / inadimplência
+  Suspenso --> EmProgresso: regularização
+  Concluido --> [*]
+  note right of Matriculado
+    front-student consulta monolito
+    para regras de liberação
+  end note</div>
+  </section>
+
+  <section id="class">
+    <h2>class</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+classDiagram
+  direction LR
+  class Aluno {
+    +id UUID
+    +email
+  }
+  class Matricula {
+    +id UUID
+    +status
+  }
+  class Produto {
+    +id UUID
+    +nome
+  }
+  class Conteudo {
+    +id UUID
+    +ordem
+  }
+
+  Aluno "1" --> "*" Matricula : possui
+  Produto "1" --> "*" Matricula : cobre
+  Produto "1" --> "*" Conteudo : agrupa
+  Matricula ..> Conteudo : acesso derivado de regras</div>
+  </section>
+
+  <section id="er">
+    <h2>er</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+erDiagram
+  ALUNO ||--o{ MATRICULA : possui
+  PRODUTO ||--o{ MATRICULA : referencia
+  PRODUTO ||--o{ CONTEUDO : contem
+
+  ALUNO {
+    uuid id PK
+    string email
+  }
+  MATRICULA {
+    uuid id PK
+    string status
+    timestamptz criado_em
+  }
+  PRODUTO {
+    uuid id PK
+    string nome
+  }
+  CONTEUDO {
+    uuid id PK
+    int ordem
+  }</div>
+  </section>
+
+  <section id="journey">
+    <h2>journey</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+journey
+  title Jornada — primeiro login e estudo
+  section Autenticação
+    Login ou cadastro: 5: Aluno
+    Aceite de termos: 3: Aluno
+  section Catálogo
+    Navegar produtos: 4: Aluno
+    Ver pré-requisitos: 3: Aluno
+  section Estudo
+    Abrir aula/conteúdo: 5: Aluno
+    Monolito valida liberação: 4: Sistema</div>
+  </section>
+
+  <section id="gantt">
+    <h2>gantt</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+gantt
+  title Entrega feature (exemplo)
+  dateFormat YYYY-MM-DD
+  section Monolito
+  Contrato API e handler     :a1, 2026-04-01, 5d
+  Migração + testes          :a2, after a1, 4d
+  section bo-container
+  Tela e permissões          :b1, 2026-04-03, 6d
+  Integração com API         :b2, after a1, 5d
+  section front-student
+  UX e chamadas BFF          :c1, 2026-04-06, 7d
+  section Go-live
+  Homologação conjunta       :milestone, m1, 2026-04-18, 0d</div>
+  </section>
+
+  <section id="pie">
+    <h2>pie</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+pie showData
+  title Distribuição de requests (exemplo)
+  "front-student (BFF)" : 52
+  "bo-container (BO API)" : 28
+  "Workers / interno" : 12
+  "Outros" : 8</div>
+  </section>
+
+  <section id="gitgraph">
+    <h2>gitgraph</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+gitGraph
+  commit id: "main: baseline"
+  branch feature/ESTR-1234-api
+  checkout feature/ESTR-1234-api
+  commit id: "handler + service"
+  commit id: "testes"
+  checkout main
+  merge feature/ESTR-1234-api
+  commit id: "tag release"</div>
+  </section>
+
+  <section id="mindmap">
+    <h2>mindmap</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+mindmap
+  root((Plataforma Estrategia))
+    Monolito Go
+      Handlers BO
+      Handlers BFF aluno
+      Workers SQS
+      Repositórios / GORM
+    bo-container
+      Quasar
+      Módulos admin
+    front-student
+      Nuxt 2
+      Design system
+    Dados
+      PostgreSQL
+      Filas AWS</div>
+  </section>
+
+  <section id="timeline">
+    <h2>timeline</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+timeline
+  title Marcos (exemplo ilustrativo)
+  section 2024
+    MVP BFF aluno : Monolito expõe endpoints principais
+    BO em Vue 2 : bo-container consolida admin
+  section 2025
+    Filas e workers : SQS para processos assíncronos
+  section 2026
+    Observabilidade : métricas e tracing unificados</div>
+  </section>
+
+  <section id="quadrant">
+    <h2>quadrant</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+quadrantChart
+  title Priorização técnica (exemplo)
+  x-axis Baixo esforço --> Alto esforço
+  y-axis Baixo impacto --> Alto impacto
+  quadrant-1 Quick wins
+  quadrant-2 Projetos estratégicos
+  quadrant-3 Preenchimento / baixa prioridade
+  quadrant-4 Redução de dívida urgente
+  Refator handler monolito: [0.35, 0.72]
+  Melhoria UX bo-container: [0.55, 0.45]
+  Cache BFF front-student: [0.42, 0.68]</div>
+  </section>
+
+  <section id="requirement">
+    <h2>requirement</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+requirementDiagram
+
+requirement r_latency {
+  id: 1
+  text: O monolito deve responder P95 abaixo de 500ms nos endpoints críticos do BFF aluno.
+  risk: high
+  verifymethod: test
+}
+
+requirement r_async {
+  id: 2
+  text: Processos longos devem ser deslocados para workers SQS sem bloquear request HTTP.
+  risk: medium
+  verifymethod: inspection
+}
+
+element monolith {
+  type: system
+  docref: repo monolito
+}
+
+element workers {
+  type: system
+  docref: pacote workers
+}
+
+monolith - satisfies -> r_latency
+workers - satisfies -> r_async</div>
+  </section>
+
+  <section id="sankey">
+    <h2>sankey</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+sankey
+"front-student","Monolito BFF",4200
+"bo-container","Monolito BO",900
+"Monolito BFF","PostgreSQL",2800
+"Monolito BO","PostgreSQL",700
+"Monolito BFF","Filas SQS",800
+"Workers SQS","PostgreSQL",400</div>
+  </section>
+
+  <section id="xychart">
+    <h2>xychart</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+xychart-beta
+  title "Latência P95 — endpoint BFF (exemplo, ms)"
+  x-axis [seg, ter, qua, qui, sex]
+  y-axis "ms" 0 --> 400
+  line [120, 95, 140, 88, 102]</div>
+  </section>
+
+  <section id="architecture">
+    <h2>architecture</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+architecture-beta
+group edge(cloud)[Borda — browsers]
+group core(cloud)[Núcleo — backend]
+
+service fs(server)[front-student] in edge
+service bo(server)[bo-container] in edge
+service api(server)[Monolito API] in core
+service db(database)[PostgreSQL] in core
+service q(disk)[SQS] in core
+
+fs:R --> L:api
+bo:R --> L:api
+api:B --> T:db
+api:R --> L:q</div>
+  </section>
+
+  <section id="block">
+    <h2>block</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+block-beta
+columns 3
+  mono["Monolito Go<br/>handlers + workers"]
+  bo["bo-container<br/>Quasar admin"]
+  fs["front-student<br/>Nuxt aluno"]</div>
+  </section>
+
+  <section id="packet">
+    <h2>packet</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+packet
++16: "Porta origem (ex.)"
++16: "Porta destino (ex.)"
++32: "Sequence / correlação"
++16: "Flags (exemplo)"</div>
+  </section>
+
+  <section id="c4-context">
+    <h2>c4-context</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+C4Context
+title Plataforma Estrategia — contexto (exemplo)
+
+Person(aluno, "Aluno", "Estuda pela web")
+Person(admin, "Operador / instrutor", "Gestão no backoffice")
+System_Ext(email, "Provedor de e-mail", "Notificações transacionais")
+System_Ext(pg, "Gateway de pagamento", "Cobrança (exemplo)")
+
+System(plataforma, "Plataforma Estrategia", "Entrega de conteúdo, matrículas e operações")
+
+Rel(aluno, plataforma, "HTTPS — área do aluno")
+Rel(admin, plataforma, "HTTPS — administração")
+Rel(plataforma, email, "Envia e-mails")
+Rel(plataforma, pg, "Processa pagamentos")</div>
+  </section>
+
+  <section id="c4-container">
+    <h2>c4-container</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+C4Container
+title Plataforma Estrategia — containers (exemplo)
+
+Person(aluno, "Aluno", "Navega no browser")
+Person(admin, "Operador BO", "Painel administrativo")
+
+Container_Boundary(plat, "Plataforma") {
+  Container(fs, "front-student", "Nuxt 2, Vue", "Experiência do aluno")
+  Container(bo, "bo-container", "Vue 2, Quasar", "Backoffice")
+  Container(api, "Monolito", "Go", "APIs BO/BFF, workers")
+  ContainerDb(db, "PostgreSQL", "Dados relacionais")
+  Container(q, "Filas SQS", "AWS", "Processamento assíncrono")
+}
+
+Rel(aluno, fs, "HTTPS", "JSON")
+Rel(admin, bo, "HTTPS", "JSON")
+Rel(fs, api, "HTTPS", "BFF aluno")
+Rel(bo, api, "HTTPS", "API admin")
+Rel(api, db, "TCP", "SQL")
+Rel(api, q, "HTTPS", "mensagens")</div>
+  </section>
+
+  <section id="c4-component">
+    <h2>c4-component</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+C4Component
+title Monolito Go — componentes (exemplo)
+
+Container_Boundary(api, "Monolito — API e workers") {
+  Component(h_bo, "Handlers BO", "Go", "Endpoints administrativos")
+  Component(h_bff, "Handlers BFF aluno", "Go", "Endpoints do aluno")
+  Component(svc, "Services", "Go", "Casos de uso e regras")
+  Component(repo, "Repositories", "Go", "Acesso a dados GORM")
+  Component(w, "Workers SQS", "Go", "Consumidores de fila")
+}
+
+Rel(h_bo, svc, "chama")
+Rel(h_bff, svc, "chama")
+Rel(svc, repo, "persistência")
+Rel(w, svc, "orquestra jobs")</div>
+  </section>
+
+  <section id="c4-dynamic">
+    <h2>c4-dynamic</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+C4Dynamic
+title Fluxo — aluno abre aula (exemplo)
+
+Person(aluno, "Aluno")
+Container(fs, "front-student", "Nuxt")
+Container(api, "Monolito", "Go")
+ContainerDb(db, "PostgreSQL", "Dados")
+
+Rel(aluno, fs, "GET página", "HTTPS")
+Rel(fs, api, "GET /bff/...", "JSON")
+Rel(api, db, "SELECT / regras", "SQL")
+Rel(api, fs, "payload + permissões", "JSON")
+Rel(fs, aluno, "renderiza UI", "HTML")</div>
+  </section>
+
+  <section id="c4-deployment">
+    <h2>c4-deployment</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+C4Deployment
+title Deploy ilustrativo — região e runtime (exemplo)
+
+Deployment_Node(aws, "AWS (exemplo)") {
+  Deployment_Node(vpc, "VPC") {
+    Deployment_Node(ecs, "ECS / tasks") {
+      Container(api, "Monolito", "Go")
+    }
+    Deployment_Node(rds, "RDS") {
+      ContainerDb(db, "PostgreSQL", "Dados")
+    }
+  }
+}
+
+Rel(api, db, "SQL", "TCP")</div>
+  </section>
+
+  <section id="zenuml">
+    <h2>zenuml</h2>
+    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+sequenceDiagram
+  actor Aluno
+  participant API as Monolito
+  participant DB as PostgreSQL
+  Aluno ->> API: POST /bff/checkout
+  API ->> DB: persistir pedido
+  API -->> Aluno: 201 Created</div>
+  </section>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "dark",
+      themeVariables: {
+        primaryColor: "#7c3aed",
+        primaryTextColor: "#e4e4e7",
+        primaryBorderColor: "#2a2a30",
+        lineColor: "#71717a",
+        secondaryColor: "#18181c",
+        tertiaryColor: "#0f0f12"
+      }
+    });
+  </script>
+</body>
+</html>
