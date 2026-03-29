@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Monolito — vários tipos Mermaid (abas)</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f0f12;
+      --surface: #18181c;
+      --border: #2a2a30;
+      --text: #e4e4e7;
+      --muted: #71717a;
+      --accent: #cba6f7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      background: var(--bg); color: var(--text);
+      display: flex; flex-direction: column;
+    }
+    header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    header h1 { font-size: 1.1rem; margin: 0 0 0.35rem; font-weight: 600; }
+    header p { margin: 0; font-size: 0.8rem; color: var(--muted); max-width: 52rem; line-height: 1.45; }
+    .tabs {
+      display: flex; flex-wrap: wrap; gap: 0.35rem;
+      padding: 0.75rem 1rem 0;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .tabs button {
+      font: 500 0.75rem ui-monospace, monospace;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px 6px 0 0;
+      cursor: pointer;
+      border-bottom: none;
+    }
+    .tabs button:hover, .tabs button:focus-visible {
+      color: var(--text);
+      border-color: var(--accent);
+      outline: none;
+    }
+    .tabs button[aria-selected="true"] {
+      color: var(--text);
+      background: var(--surface);
+      border-color: var(--accent);
+      border-bottom: 1px solid var(--surface);
+      margin-bottom: -1px;
+    }
+    .stage {
+      flex: 1;
+      min-height: 0;
+      padding: 1rem;
+      overflow: auto;
+      background: var(--surface);
+    }
+    .panel { display: none; }
+    .panel[aria-hidden="false"] { display: block; }
+    .panel .hint {
+      font-size: 0.78rem; color: var(--muted); margin: 0 0 0.75rem; max-width: 48rem;
+    }
+    .mermaid {
+      background: #141418;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Monolito como base — um tipo Mermaid por separador</h1>
+    <p>
+      Cada <strong>aba</strong> é um <strong>diagrama diferente</strong> (flowchart, sequência, classes, estado, ER).
+      A ligação entre eles é <strong>narrativa</strong>: todos descrevem facetas do mesmo sistema centrado no monolito.
+      O holodeck live (<code>base.html</code> + <code>diagram.mmd</code>) continua a mostrar <strong>um</strong> diagrama de cada vez; esta página é só para comparar tipos lado a lado por abas.
+    </p>
+  </header>
+  <div class="tabs" role="tablist" aria-label="Tipo de diagrama">
+    <button type="button" role="tab" id="tab-0" aria-selected="true" aria-controls="panel-0">flowchart + subgraph</button>
+    <button type="button" role="tab" id="tab-1" aria-selected="false" aria-controls="panel-1">sequenceDiagram</button>
+    <button type="button" role="tab" id="tab-2" aria-selected="false" aria-controls="panel-2">classDiagram</button>
+    <button type="button" role="tab" id="tab-3" aria-selected="false" aria-controls="panel-3">stateDiagram-v2</button>
+    <button type="button" role="tab" id="tab-4" aria-selected="false" aria-controls="panel-4">erDiagram</button>
+  </div>
+  <div class="stage">
+    <section class="panel" id="panel-0" role="tabpanel" aria-labelledby="tab-0" aria-hidden="false">
+      <p class="hint">Visão em caixas: front-student e bo-container ligam ao núcleo do monolito; fila para trabalho assíncrono.</p>
+      <div class="mermaid" id="mmd-0">
+%%{init: {'theme': 'dark'}}%%
+flowchart LR
+  subgraph FS["front-student"]
+    direction TB
+    f1[axios BFF] --> f2[GET /bff/...]
+  end
+  subgraph BO["bo-container"]
+    direction TB
+    b1[Quasar] --> b2[PATCH /bo/...]
+  end
+  subgraph M["Monolito — núcleo"]
+    direction TB
+    h[Handlers] --> s[Services]
+    s --> r[Repositories]
+    s --> e[Publica evento]
+  end
+  subgraph Q["fila"]
+    direction TB
+    q1[[SQS]] --> q2[Worker]
+  end
+  f2 --> h
+  b2 --> h
+  e --> q1
+  q2 -.-> s
+  style M fill:#1e1e2e,stroke:#a6e3a1,stroke-width:2px
+  style FS fill:#1e1e2e,stroke:#f5c2e7,stroke-width:2px
+  style BO fill:#1e1e2e,stroke:#89b4fa,stroke-width:2px
+  style Q fill:#1e1e2e,stroke:#fab387,stroke-width:2px
+      </div>
+    </section>
+    <section class="panel" id="panel-1" role="tabpanel" aria-labelledby="tab-1" aria-hidden="true">
+      <p class="hint">Ordem no tempo: pedido HTTP entra no monolito, persiste, resposta; evento despoleta worker.</p>
+      <div class="mermaid" id="mmd-1">
+%%{init: {'theme': 'dark'}}%%
+sequenceDiagram
+  autonumber
+  actor U as Cliente (browser)
+  participant F as front-student / bo-container
+  participant M as Monolito API
+  participant DB as PostgreSQL
+  participant Q as SQS
+  participant W as Worker (monolito)
+
+  U ->> F: ação (HTTPS)
+  F ->> M: REST / JWT
+  M ->> DB: transação
+  DB -->> M: OK
+  M -->> F: JSON
+  F -->> U: UI
+  M ->> Q: enqueue
+  Q ->> W: mensagem
+  W ->> DB: side effects
+      </div>
+    </section>
+    <section class="panel" id="panel-2" role="tabpanel" aria-labelledby="tab-2" aria-hidden="true">
+      <p class="hint">Modelo lógico: camadas típicas dentro do monolito (nomes ilustrativos).</p>
+      <div class="mermaid" id="mmd-2">
+%%{init: {'theme': 'dark'}}%%
+classDiagram
+  direction LR
+  class Handler {
+    +HandleHTTP()
+  }
+  class Service {
+    +RegraDeNegocio()
+  }
+  class Repository {
+    +QueryGORM()
+  }
+  class EventoDominio {
+    +Payload
+  }
+  Handler --> Service : delega
+  Service --> Repository : persistência
+  Service ..> EventoDominio : emite
+      </div>
+    </section>
+    <section class="panel" id="panel-3" role="tabpanel" aria-labelledby="tab-3" aria-hidden="true">
+      <p class="hint">Estado de um job assíncrono consumido pelo worker do monolito.</p>
+      <div class="mermaid" id="mmd-3">
+%%{init: {'theme': 'dark'}}%%
+stateDiagram-v2
+  [*] --> Pendente
+  Pendente --> EmProcessamento : worker pega mensagem
+  EmProcessamento --> Concluido : sucesso
+  EmProcessamento --> Falha : erro retryable
+  Falha --> Pendente : requeue
+  EmProcessamento --> Morto : erro fatal
+  Concluido --> [*]
+  Morto --> [*]
+      </div>
+    </section>
+    <section class="panel" id="panel-4" role="tabpanel" aria-labelledby="tab-4" aria-hidden="true">
+      <p class="hint">Persistência: entidades que o monolito expõe via repositórios (exemplo genérico).</p>
+      <div class="mermaid" id="mmd-4">
+%%{init: {'theme': 'dark'}}%%
+erDiagram
+  USUARIO ||--o{ MATRICULA : tem
+  PRODUTO ||--o{ MATRICULA : referencia
+  PRODUTO ||--o{ CONTEUDO : contem
+  USUARIO {
+    uuid id PK
+    string email
+  }
+  MATRICULA {
+    uuid id PK
+    string status
+  }
+  PRODUTO {
+    uuid id PK
+    string nome
+  }
+  CONTEUDO {
+    uuid id PK
+    int ordem
+  }
+      </div>
+    </section>
+  </div>
+  <script>
+(function () {
+  'use strict';
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: 'dark',
+    themeVariables: {
+      primaryColor: '#7c3aed',
+      primaryTextColor: '#e4e4e7',
+      primaryBorderColor: '#2a2a30',
+      lineColor: '#71717a',
+      secondaryColor: '#18181c',
+      tertiaryColor: '#0f0f12'
+    }
+  });
+
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
+  var panels = tabs.map(function (_, i) {
+    return document.getElementById('panel-' + i);
+  });
+  var rendered = {};
+
+  function showTab(index) {
+    tabs.forEach(function (t, i) {
+      var on = i === index;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      panels[i].setAttribute('aria-hidden', on ? 'false' : 'true');
+    });
+    runIfNeeded(index);
+  }
+
+  function runIfNeeded(index) {
+    if (rendered[index]) return;
+    var id = 'mmd-' + index;
+    var el = document.getElementById(id);
+    if (!el) return;
+    mermaid.run({ nodes: [el], suppressErrors: false }).then(function () {
+      rendered[index] = true;
+    }).catch(function (e) {
+      console.warn('mermaid tab', index, e);
+      rendered[index] = true;
+    });
+  }
+
+  tabs.forEach(function (tab, i) {
+    tab.addEventListener('click', function () { showTab(i); });
+  });
+
+  runIfNeeded(0);
+})();
+  </script>
+</body>
+</html>

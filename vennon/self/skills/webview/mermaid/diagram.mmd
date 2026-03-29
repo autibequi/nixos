@@ -1,35 +1,114 @@
-%%{init: {'theme': 'dark'}}%%
-flowchart LR
-  subgraph FS["front-student — aluno"]
-    direction TB
-    f1([Página Nuxt]) --> f2[axios BFF]
-    f2 --> f3{rota protegida?}
-    f3 -->|sim| f4[GET /bff/...]
-  end
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1e1e2e",
+    "primaryColor": "#313244",
+    "primaryTextColor": "#cdd6f4",
+    "primaryBorderColor": "#585b70",
+    "secondaryColor": "#181825",
+    "tertiaryColor": "#11111b",
+    "lineColor": "#89b4fa",
+    "edgeLabelBackground": "#181825",
+    "clusterBkg": "#181825",
+    "clusterBorder": "#45475a",
+    "titleColor": "#cdd6f4",
+    "fontFamily": "JetBrains Mono, monospace",
+    "fontSize": "13px"
+  }
+}}%%
+flowchart TD
+    classDef bug fill:#45273a,stroke:#f38ba8,color:#f38ba8,font-weight:bold
+    classDef fix fill:#1e3a2a,stroke:#a6e3a1,color:#a6e3a1,font-weight:bold
+    classDef entity fill:#2a2a3e,stroke:#cba6f7,color:#cba6f7
+    classDef service fill:#1e2a3e,stroke:#89b4fa,color:#89b4fa
+    classDef decision fill:#2a2214,stroke:#f9e2af,color:#f9e2af
+    classDef mode fill:#2a1e2e,stroke:#cba6f7,color:#cdd6f4
+    classDef neutral fill:#313244,stroke:#585b70,color:#cdd6f4
+    classDef active fill:#1e3a2a,stroke:#a6e3a1,color:#a6e3a1
 
-  subgraph BO["bo-container — operador"]
-    direction TB
-    b1[Quasar UI] --> b2[PATCH /bo/...]
-  end
+    TICKET["FUK2-11766\nBloco Apenas Simplificado\nnao exibido corretamente"]:::bug
 
-  subgraph API["Monolito — API"]
-    direction TB
-    m1[Handlers] --> m2[Services]
-    m2 --> m3[(PostgreSQL)]
-  end
+    subgraph ROOT["Contexto - Content Modes"]
+        CM_SO["SIMPLE_ONLY\nApenas Simplificado"]:::mode
+        CM_CO["COMPLETE_ONLY\nApenas Completo"]:::mode
+        CM_EC["EQUAL_CONTENT\nConteudo Igual"]:::mode
+        CM_DC["DIFFERENT_CONTENT\nConteudo Diferente"]:::mode
+    end
 
-  subgraph Q["Assíncrono — fila"]
-    direction TB
-    q1[[SQS]] --> q2[Worker]
-    q2 --> q3[(projeções)]
-  end
+    subgraph BUG["Bug - Antes do Fix"]
+        B1["GetOneWithBlocks\nitera blocks"]:::bug
+        B2{"block.Type == question\ne data vazio?"}:::decision
+        B3["append blocksComplete"]:::bug
+        B4["usa block.IsActive\npara TODOS os tipos\n- ignora SimpleIsActive"]:::bug
+        B1 --> B2
+        B2 -->|nao| B4
+        B4 --> B3
+        B2 -->|sim| SKIP1["skip"]:::neutral
+    end
 
-  f4 -->|"JWT"| m1
-  b2 -->|"JWT + JSON"| m1
-  m2 -->|"evento"| q1
-  q2 -.->|"opcional"| m2
+    subgraph ENT["entities/block.go - novo metodo"]
+        E1["GetResolvedIsActive\ncontentModeView string bool"]:::entity
+        E2{"ContentMode?"}:::decision
+        E3["return SimpleIsActive"]:::fix
+        E4["return IsActive"]:::fix
+        E5{"contentModeView\n== SIMPLE?"}:::decision
+        E6["return SimpleIsActive"]:::fix
+        E7["return IsActive"]:::fix
+        E8["default: return IsActive"]:::neutral
 
-  style FS fill:#1e1e2e,stroke:#f5c2e7,stroke-width:2px
-  style BO fill:#1e1e2e,stroke:#89b4fa,stroke-width:2px
-  style API fill:#1e1e2e,stroke:#a6e3a1,stroke-width:2px
-  style Q fill:#1e1e2e,stroke:#fab387,stroke-width:2px,color:#e4e4e7
+        E1 --> E2
+        E2 -->|SIMPLE_ONLY| E3
+        E2 -->|COMPLETE_ONLY| E4
+        E2 -->|EQUAL_CONTENT| E4
+        E2 -->|DIFFERENT_CONTENT| E5
+        E5 -->|sim| E6
+        E5 -->|nao| E7
+        E2 -->|"?"| E8
+    end
+
+    subgraph SVC["services/item/get_one_with_blocks.go - fix"]
+        S1["GetOneWithBlocks\nitera blocks"]:::service
+        S2{"block.Type == question\ne data vazio?"}:::decision
+        S3["resolveBlockIsActive\nblock"]:::fix
+        S4["append blocksComplete"]:::service
+        S5["cache - return ItemWithBlocks"]:::service
+
+        SVC_FN["func resolveBlockIsActive\nblock Block Block"]:::fix
+        SVC_SW{"block.ContentMode?"}:::decision
+        SVC_A["block.IsActive =\nblock.SimpleIsActive"]:::fix
+        SVC_B["noop\nIsActive ja correto"]:::neutral
+        SVC_C["noop\nfrontend decide\npelo modo do usuario"]:::neutral
+
+        S1 --> S2
+        S2 -->|nao| S3
+        S3 --> S4
+        S4 --> S5
+        S2 -->|sim| SKIP2["skip"]:::neutral
+
+        SVC_FN --> SVC_SW
+        SVC_SW -->|SIMPLE_ONLY| SVC_A
+        SVC_SW -->|COMPLETE_ONLY| SVC_B
+        SVC_SW -->|EQUAL_CONTENT| SVC_B
+        SVC_SW -->|DIFFERENT_CONTENT| SVC_C
+
+        S3 -.->|chama| SVC_FN
+    end
+
+    subgraph RESULT["Resultado - comportamento correto"]
+        R1["block.IsActive reflete\no campo correto por ContentMode"]:::active
+        R2["SIMPLE_ONLY usa SimpleIsActive"]:::fix
+        R3["COMPLETE_ONLY usa IsActive"]:::fix
+        R4["EQUAL_CONTENT usa IsActive"]:::fix
+        R5["DIFFERENT_CONTENT frontend decide"]:::fix
+        R1 --> R2
+        R1 --> R3
+        R1 --> R4
+        R1 --> R5
+    end
+
+    TICKET --> BUG
+    TICKET -->|"fix commit c9153c4"| SVC
+    CM_SO -.->|"bug: tratado como IsActive"| BUG
+    CM_SO -.->|"fix: SimpleIsActive"| ENT
+    SVC --> RESULT
+    ENT -.->|"metodo disponivel\npara outros callers"| RESULT

@@ -19,6 +19,8 @@ No workdir do projeto: `webview/mermaid/base.html` → ligação simbólica para
 
 - **`gallery-all.html`** — página estática com **todos** os diagramas dos `template/*.md` (incl. `flow-subgraphs`), empilhados. Serve para **ver tudo de uma vez** e exportar **uma imagem** (Chrome DevTools → *Capture full size screenshot*) ou **PDF** (Imprimir). Abrir no mesmo servidor que serve esta pasta, ex.: `http://127.0.0.1:9876/gallery-all.html`. **Não** substitui o holodeck live (`base.html` + `diagram.mmd`).
 
+- **`monolito-multi-tabs.html`** — **cinco abas**, cada uma com um **tipo Mermaid diferente** (flowchart+subgraph, sequence, class, state, ER), todos com narrativa centrada no **monolito**. Comparação rápida entre tipos; cada diagrama só renderiza ao abrir a aba (evita problemas com `display:none`). URL típica: `http://127.0.0.1:9876/monolito-multi-tabs.html`.
+
 ## Conteúdo
 
 - `<title>`: **Mermaid live**; **sem barra superior** — só o diagrama e a pilha de controlos (canto inferior direito).
