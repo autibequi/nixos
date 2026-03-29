@@ -69,6 +69,11 @@ fn render_header(frame: &mut Frame, app: &App, area: Rect) {
     frame.render_widget(Paragraph::new(text), area);
 }
 
+/// Strip total from "31.62MB / 49.77GB" → "31.62MB".
+fn mem_used_only(raw: &str) -> String {
+    raw.split('/').next().unwrap_or(raw).trim().to_string()
+}
+
 fn render_containers(frame: &mut Frame, app: &App, vis: &[&super::app::ContainerInfo], area: Rect) {
     let rows: Vec<Row> = vis
         .iter()
@@ -111,32 +116,39 @@ fn render_containers(frame: &mut Frame, app: &App, vis: &[&super::app::Container
             let env_display  = if c.env.is_empty()      { "—".to_string() } else { c.env.clone() };
             let debug_display = if c.debug.is_empty()   { "—".to_string() } else { c.debug.clone() };
             let vert_display = if c.vertical.is_empty() { "—".to_string() } else { c.vertical.clone() };
+            let mem_display = mem_used_only(&c.mem);
+            let status_display = if !c.last_log.is_empty() {
+                c.last_log.clone()
+            } else {
+                c.status.clone()
+            };
 
+            // Order: cursor icon name | flags | cpu mem | status
             Row::new(vec![
                 Cell::from(Span::styled(cursor, Style::default().fg(MAUVE).bold())),
                 Cell::from(Span::styled(icon, Style::default().fg(icon_color))),
                 Cell::from(Span::styled(name, style.bold())),
-                Cell::from(Span::styled(&c.status, Style::default().fg(DIM))),
                 Cell::from(Span::styled(env_display, Style::default().fg(env_color))),
                 Cell::from(Span::styled(debug_display, Style::default().fg(debug_color))),
                 Cell::from(Span::styled(vert_display, Style::default().fg(vert_color))),
                 Cell::from(Span::styled(&c.cpu, Style::default().fg(PEACH))),
-                Cell::from(Span::styled(&c.mem, Style::default().fg(MAUVE))),
+                Cell::from(Span::styled(mem_display, Style::default().fg(MAUVE))),
+                Cell::from(Span::styled(status_display, Style::default().fg(DIM))),
             ])
             .style(style)
         })
         .collect();
 
     let widths = [
-        Constraint::Length(2),   // cursor ▸
+        Constraint::Length(1),   // cursor ▸
         Constraint::Length(2),   // status icon
-        Constraint::Length(28),  // name (tree + sidecar label)
-        Constraint::Length(20),  // status text
-        Constraint::Length(5),   // env (prod/sbox/local)
-        Constraint::Length(5),   // debug (on/off/dbg)
-        Constraint::Length(5),   // vertical (med/oab/conc)
-        Constraint::Length(10),  // cpu
-        Constraint::Min(15),     // mem
+        Constraint::Length(20),  // name (tree + sidecar label)
+        Constraint::Length(5),   // env
+        Constraint::Length(4),   // debug
+        Constraint::Length(5),   // vertical
+        Constraint::Length(8),   // cpu
+        Constraint::Length(9),   // mem (used only)
+        Constraint::Min(10),     // status (fills remaining)
     ];
 
     let tab_label = match app.tab {

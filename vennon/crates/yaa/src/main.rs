@@ -1,6 +1,5 @@
 mod config;
 mod exec;
-mod holodeck;
 mod man;
 mod phone;
 mod session;
@@ -97,13 +96,6 @@ enum Commands {
     /// Full documentation
     Man,
 
-    /// Chrome holodeck (CDP for agent control)
-    Holodeck {
-        /// Action: start (default), stop, status
-        #[arg(default_value = "start")]
-        action: String,
-    },
-
     /// Shared tmux session (host ↔ container)
     Tmux {
         /// Action: serve, open, run, capture, status
@@ -196,8 +188,6 @@ fn main() -> Result<()> {
         }
 
         Some(Commands::Man) => man::show(),
-
-        Some(Commands::Holodeck { action }) => holodeck::dispatch(&action),
 
         Some(Commands::Tmux { action, args }) => tmux::dispatch(&action, &args),
 

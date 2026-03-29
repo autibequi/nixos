@@ -3,7 +3,7 @@ use anyhow::Result;
 use std::collections::HashMap;
 use std::io;
 use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::process::{Command, Stdio};
 use std::sync::mpsc::{self, Receiver, TryRecvError};
 use std::time::Duration;
 
@@ -39,6 +39,8 @@ pub struct ContainerInfo {
     pub debug: String,
     /// Raw VERTICAL value from running container (e.g. "medicina", "oab").
     pub vertical: String,
+    /// Build/status hint from last log line (e.g. "building 33m"). Empty = use podman status.
+    pub last_log: String,
     /// All enums from vennon.yaml (env, vertical, and any future ones).
     pub enums: Vec<EnumGroup>,
     /// Whether the serve command has a --debug bool arg.
@@ -329,6 +331,11 @@ impl App {
             None => return Ok(()),
         };
 
+        // monolito-worker: route commands through monolito
+        if container.display_name == "monolito-worker" {
+            return self.exec_worker_action(action, &container);
+        }
+
         // Debug toggle — special case (bool, not enum)
         if let Some(dbg_val) = action.strip_prefix("debug:") {
             let flag = if dbg_val == "on" { "--debug=true" } else { "--debug=false" };
@@ -357,6 +364,152 @@ impl App {
         let _ = Command::new("vennon")
             .args([&container.display_name, action])
             .status();
+        Ok(())
+    }
+
+    /// Route monolito-worker actions through `vennon monolito worker` / podman.
+    fn exec_worker_action(&self, action: &str, container: &ContainerInfo) -> Result<()> {
+        // Enum param switch → restart worker with new params
+        if let Some(dbg_val) = action.strip_prefix("debug:") {
+            let flag = if dbg_val == "on" { "--debug=true" } else { "--debug=false" };
+            let mut args = vec!["monolito".into(), "worker".into(), flag.into()];
+            self.append_preserved_params(container, Some("debug"), &mut args);
+            let _ = Command::new("vennon").args(&args).status();
+            return Ok(());
+        }
+        if let Some((param_name, param_val)) = action.split_once(':') {
+            let is_known_enum = container.enums.iter().any(|g| g.name == param_name);
+            if is_known_enum {
+                let mut args = vec![
+                    "monolito".into(),
+                    "worker".into(),
+                    format!("--{param_name}={param_val}"),
+                ];
+                self.append_preserved_params(container, Some(param_name), &mut args);
+                let _ = Command::new("vennon").args(&args).status();
+                return Ok(());
+            }
+        }
+        match action {
+            "start" => {
+                let mut args = vec!["monolito".into(), "worker".into()];
+                self.append_preserved_params(container, None, &mut args);
+                let _ = Command::new("vennon").args(&args).status();
+            }
+            "stop" => {
+                let _ = Command::new("podman")
+                    .args(["stop", MONOLITO_WORKER_CONTAINER])
+                    .status();
+            }
+            "logs" => {
+                let _ = Command::new("podman")
+                    .args(["logs", "-f", "--tail", "100", MONOLITO_WORKER_CONTAINER])
+                    .status();
+            }
+            "shell" => {
+                let _ = Command::new("podman")
+                    .args(["exec", "-it", MONOLITO_WORKER_CONTAINER, "/bin/bash"])
+                    .status();
+            }
+            _ => {
+                // Fallback: try as vennon monolito <action>
+                let _ = Command::new("vennon")
+                    .args(["monolito", action])
+                    .status();
+            }
+        }
+        Ok(())
+    }
+
+    /// True for actions that need an interactive terminal (shell).
+    pub fn is_interactive_action(&self, action: &str) -> bool {
+        let action = action.trim_end_matches(" ✓");
+        action == "shell"
+    }
+
+    /// Like exec_action but spawns in background (non-blocking, no terminal needed).
+    pub fn exec_action_bg(&self, action: &str) -> Result<()> {
+        if is_menu_separator(action) {
+            return Ok(());
+        }
+        let action = action.trim_end_matches(" ✓");
+        let container = match self.selected_container() {
+            Some(c) => c,
+            None => return Ok(()),
+        };
+
+        // monolito-worker routing
+        if container.display_name == "monolito-worker" {
+            return self.exec_worker_action_bg(action, &container);
+        }
+
+        // Debug toggle
+        if let Some(dbg_val) = action.strip_prefix("debug:") {
+            let flag = if dbg_val == "on" { "--debug=true" } else { "--debug=false" };
+            let mut args = vec![container.display_name.clone(), "serve".into(), flag.into()];
+            self.append_preserved_params(&container, Some("debug"), &mut args);
+            spawn_silent("vennon", &args);
+            return Ok(());
+        }
+
+        // Generic enum parameter
+        if let Some((param_name, param_val)) = action.split_once(':') {
+            let is_known_enum = container.enums.iter().any(|g| g.name == param_name);
+            if is_known_enum {
+                let mut args = vec![
+                    container.display_name.clone(),
+                    "serve".into(),
+                    format!("--{param_name}={param_val}"),
+                ];
+                self.append_preserved_params(&container, Some(param_name), &mut args);
+                spawn_silent("vennon", &args);
+                return Ok(());
+            }
+        }
+
+        // Plain command
+        spawn_silent("vennon", &[container.display_name.clone(), action.to_string()]);
+        Ok(())
+    }
+
+    /// Background version of exec_worker_action.
+    fn exec_worker_action_bg(&self, action: &str, container: &ContainerInfo) -> Result<()> {
+        if let Some(dbg_val) = action.strip_prefix("debug:") {
+            let flag = if dbg_val == "on" { "--debug=true" } else { "--debug=false" };
+            let mut args = vec!["monolito".into(), "worker".into(), flag.into()];
+            self.append_preserved_params(container, Some("debug"), &mut args);
+            spawn_silent("vennon", &args);
+            return Ok(());
+        }
+        if let Some((param_name, param_val)) = action.split_once(':') {
+            let is_known_enum = container.enums.iter().any(|g| g.name == param_name);
+            if is_known_enum {
+                let mut args = vec![
+                    "monolito".into(),
+                    "worker".into(),
+                    format!("--{param_name}={param_val}"),
+                ];
+                self.append_preserved_params(container, Some(param_name), &mut args);
+                spawn_silent("vennon", &args);
+                return Ok(());
+            }
+        }
+        match action {
+            "start" => {
+                let mut args = vec!["monolito".into(), "worker".into()];
+                self.append_preserved_params(container, None, &mut args);
+                spawn_silent("vennon", &args);
+            }
+            "stop" => {
+                spawn_silent("podman", &["stop".into(), MONOLITO_WORKER_CONTAINER.into()]);
+            }
+            "logs" => {
+                // logs needs terminal — fallback to noop in bg, user uses log panel
+            }
+            _ => {
+                spawn_silent("vennon", &["monolito".into(), action.into()]);
+            }
+        }
         Ok(())
     }
 
@@ -476,6 +629,10 @@ fn collect_all() -> (Vec<ContainerInfo>, bool) {
                 if d.is_empty() { String::new() } else { shorten_vertical(d) }
             };
 
+            // Clone enums/has_debug before moving into ContainerInfo — worker reuses them
+            let worker_enums = if name == "monolito" { manifest.enums.clone() } else { vec![] };
+            let worker_has_debug = if name == "monolito" { manifest.has_debug } else { false };
+
             containers.push(ContainerInfo {
                 name: podman_name,
                 display_name: name.clone(),
@@ -486,6 +643,7 @@ fn collect_all() -> (Vec<ContainerInfo>, bool) {
                 env: env_default,
                 debug: String::new(),
                 vertical: vert_default,
+                last_log: String::new(),
                 enums: manifest.enums,
                 has_debug: manifest.has_debug,
                 commands: manifest.commands,
@@ -493,6 +651,10 @@ fn collect_all() -> (Vec<ContainerInfo>, bool) {
             });
 
             if name == "monolito" {
+                // Worker: separate service entry (not sidecar) with full menu
+                let worker_row = monolito_worker_row(&running, worker_enums, worker_has_debug);
+                containers.push(worker_row);
+
                 for sidecar in monolito_sidecar_rows(&running) {
                     containers.push(sidecar);
                 }
@@ -520,7 +682,108 @@ fn collect_all() -> (Vec<ContainerInfo>, bool) {
         }
     }
 
+    // Detect build status from last log line for running service containers
+    let build_hints = collect_build_hints(&containers);
+    for c in &mut containers {
+        if let Some(hint) = build_hints.get(&c.name) {
+            c.last_log = hint.clone();
+        }
+    }
+
     (containers, any_timeout)
+}
+
+/// Fetch last log line for running service containers and detect build patterns.
+/// Returns map: container_name → display string (e.g. "building 33m").
+fn collect_build_hints(containers: &[ContainerInfo]) -> HashMap<String, String> {
+    let mut hints = HashMap::new();
+    let svc_running: Vec<&ContainerInfo> = containers
+        .iter()
+        .filter(|c| c.is_up && c.kind == ContainerKind::Service)
+        .collect();
+
+    if svc_running.is_empty() {
+        return hints;
+    }
+
+    for c in &svc_running {
+        let mut cmd = Command::new("podman");
+        cmd.args(["logs", "--tail", "1", &c.name]);
+        if let Ok(output) = output_with_timeout(cmd, Duration::from_secs(3)) {
+            let text = String::from_utf8_lossy(&output.stdout);
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            let last_line = text.lines().last()
+                .or_else(|| stderr.lines().last())
+                .unwrap_or("");
+            let clean = strip_ansi(last_line);
+
+            // Match patterns: "buildando... Xm" or "[service] buildando... XmYs"
+            if clean.contains("buildando") {
+                // Extract time from end: "buildando... 33m0s" → "building 33m"
+                if let Some(time_str) = extract_build_time(&clean) {
+                    hints.insert(c.name.clone(), format!("building {time_str}"));
+                } else {
+                    hints.insert(c.name.clone(), "building…".into());
+                }
+            } else if clean.contains("compiling") || clean.contains("Compiling") {
+                hints.insert(c.name.clone(), "compiling…".into());
+            }
+        }
+    }
+    hints
+}
+
+/// Extract time from build progress line like "[front-student] buildando... 33m0s"
+fn extract_build_time(line: &str) -> Option<String> {
+    // Look for pattern: digits followed by 'm' near the end
+    let trimmed = line.trim();
+    // Find last word that looks like a timestamp (e.g., "33m0s", "1m20s")
+    for word in trimmed.split_whitespace().rev() {
+        if word.contains('m') && word.chars().next().map(|c| c.is_ascii_digit()).unwrap_or(false) {
+            // Simplify: "33m0s" → "33m"
+            if let Some(pos) = word.find('m') {
+                return Some(word[..=pos].to_string());
+            }
+        }
+    }
+    None
+}
+
+const MONOLITO_WORKER_CONTAINER: &str = "vennon-dk-monolito-worker-app";
+
+/// Monolito worker as a standalone service row (with full menu).
+fn monolito_worker_row(
+    running: &HashMap<String, (String, bool, String, String)>,
+    enums: Vec<EnumGroup>,
+    has_debug: bool,
+) -> ContainerInfo {
+    let (status, is_up, cpu, mem) = running
+        .get(MONOLITO_WORKER_CONTAINER)
+        .cloned()
+        .unwrap_or_else(|| ("stopped".into(), false, String::new(), String::new()));
+
+    // Reuse monolito enums defaults for display
+    let env_default = enums.iter()
+        .find(|e| e.name == "env")
+        .map(|e| shorten_env(&e.default))
+        .unwrap_or_default();
+
+    ContainerInfo {
+        name: MONOLITO_WORKER_CONTAINER.to_string(),
+        display_name: "monolito-worker".to_string(),
+        status,
+        is_up,
+        cpu,
+        mem,
+        env: env_default,
+        debug: String::new(),
+        vertical: String::new(),
+        last_log: String::new(),
+        enums,
+        has_debug,
+        commands: vec!["start".into(), "stop".into(), "logs".into(), "shell".into()],
+        kind: ContainerKind::Service,
+    }
 }
 
 /// Linhas aninhadas no deck: deps do compose (postgres, redis, localstack).
@@ -548,6 +811,7 @@ fn monolito_sidecar_rows(
             env: String::new(),
             debug: String::new(),
             vertical: String::new(),
+            last_log: String::new(),
             enums: vec![],
             has_debug: false,
             commands: vec![],
@@ -597,6 +861,7 @@ fn ide_row(ide: &str, running: &HashMap<String, (String, bool, String, String)>)
             env: String::new(),
             debug: String::new(),
             vertical: String::new(),
+            last_log: String::new(),
             enums: vec![],
             has_debug: false,
             commands: vec![],
@@ -613,6 +878,7 @@ fn ide_row(ide: &str, running: &HashMap<String, (String, bool, String, String)>)
             env: String::new(),
             debug: String::new(),
             vertical: String::new(),
+            last_log: String::new(),
             enums: vec![],
             has_debug: false,
             commands: vec![],
@@ -739,6 +1005,40 @@ fn collect_container_envs(names: &[String]) -> HashMap<String, (String, String, 
     }
 
     map
+}
+
+/// Spawn a command silently (stdout/stderr → log file) so it doesn't corrupt the TUI.
+/// Logs go to /tmp/deck-action.log for debugging.
+fn spawn_silent(cmd: &str, args: &[String]) {
+    let log_path = "/tmp/deck-action.log";
+    let log_file = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(log_path);
+
+    match log_file {
+        Ok(mut f) => {
+            use std::io::Write;
+            let _ = writeln!(f, "\n--- {} {} ---", cmd, args.join(" "));
+            let stderr_file = std::fs::OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(log_path)
+                .unwrap();
+            let _ = Command::new(cmd)
+                .args(args)
+                .stdout(Stdio::null())
+                .stderr(Stdio::from(stderr_file))
+                .spawn();
+        }
+        Err(_) => {
+            let _ = Command::new(cmd)
+                .args(args)
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
+                .spawn();
+        }
+    }
 }
 
 /// True for menu items that aren't actionable (headers, separators).

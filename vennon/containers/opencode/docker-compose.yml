@@ -47,6 +47,8 @@ services:
       - ${HOME}/.config/opencode:/home/claude/.config/opencode
       # Communication channel
       - ${HOME}/.vennon:/home/claude/.vennon:rw
+      # Bus socket (container→host IPC)
+      - /run/user/1000/vennon-bus:/run/user/1000/vennon-bus:rw
       # Host observability (ro)
       - /proc/meminfo:/host/proc/meminfo:ro
       - /proc/loadavg:/host/proc/loadavg:ro

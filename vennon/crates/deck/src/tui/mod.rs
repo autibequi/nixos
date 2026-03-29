@@ -83,18 +83,23 @@ fn run_loop(
                         KeyCode::Enter => {
                             let action = app.selected_action();
                             if let Some(act) = action {
-                                // Suspend TUI for interactive commands
-                                disable_raw_mode()?;
-                                execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
+                                if app.is_interactive_action(&act) {
+                                    // Suspend TUI for interactive commands (shell)
+                                    disable_raw_mode()?;
+                                    execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
 
-                                let _ = app.exec_action(&act);
+                                    let _ = app.exec_action(&act);
 
-                                // Restore TUI
-                                enable_raw_mode()?;
-                                execute!(terminal.backend_mut(), EnterAlternateScreen)?;
-                                terminal.clear()?;
+                                    // Restore TUI
+                                    enable_raw_mode()?;
+                                    execute!(terminal.backend_mut(), EnterAlternateScreen)?;
+                                    terminal.clear()?;
+                                } else {
+                                    // Non-interactive: spawn in background, stay in TUI
+                                    let _ = app.exec_action_bg(&act);
+                                }
                                 app.close_menu();
-                                app.refresh()?;
+                                app.kick_background_refresh();
                                 *last_auto_refresh = Instant::now();
                             }
                         }

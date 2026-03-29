@@ -1,0 +1,97 @@
+socket: ~/.vennon/bus.sock
+log: ~/.local/share/vennon/logs/bus.log
+
+actions:
+  open-editor:
+    description: Abrir arquivo no Zed
+    command: zeditor {{ path }}
+    args:
+      - name: path
+        type: string
+        required: true
+        validate:
+          - path_under: [~/projects, ~/nixos]
+
+  open-chrome:
+    description: Abrir URL no Chrome
+    command: xdg-open {{ url }}
+    args:
+      - name: url
+        type: string
+        required: true
+        validate:
+          - starts_with: "https://"
+
+  open-vscode:
+    description: Abrir no VS Code
+    command: code {{ path }}
+    args:
+      - name: path
+        type: string
+        required: true
+        validate:
+          - path_under: [~/projects, ~/nixos]
+
+  notify:
+    description: Notificacao desktop
+    command: notify-send "vennon" "{{ message }}"
+    args:
+      - name: message
+        type: string
+        required: true
+        validate:
+          - max_length: 500
+
+  podman-logs:
+    description: Logs de um servico vennon
+    command: podman logs --tail {{ tail }} vennon-dk-{{ service }}-app
+    capture: true
+    args:
+      - name: service
+        type: string
+        required: true
+        validate:
+          - enum: [monolito, bo-container, front-student, reverseproxy]
+      - name: tail
+        type: int
+        default: 100
+
+  podman-status:
+    description: Status dos containers
+    command: podman ps --filter name=vennon
+    capture: true
+
+  holodeck-start:
+    description: Abre Chrome com CDP ativo na porta 9222
+    command: >
+      bash -c '
+        for b in google-chrome-stable google-chrome chromium; do
+          command -v "$b" &>/dev/null && break
+        done;
+        "$b" --remote-debugging-port=9222 --user-data-dir=/tmp/yaa-holodeck
+             --no-first-run --no-default-browser-check about:blank &>/dev/null &
+        for i in $(seq 1 10); do
+          sleep 0.5;
+          curl -sf http://localhost:9222/json/version &>/dev/null && echo "holodeck ready on :9222" && exit 0;
+        done;
+        echo "holodeck timeout" && exit 1
+      '
+    capture: true
+
+  holodeck-stop:
+    description: Fecha o Chrome CDP
+    command: pkill -f "remote-debugging-port=9222" || true
+    capture: true
+
+  holodeck-status:
+    description: Status do Chrome CDP
+    command: >
+      bash -c '
+        if curl -sf http://localhost:9222/json/version &>/dev/null; then
+          tabs=$(curl -s http://localhost:9222/json | grep -c "\"type\":\"page\"" || echo 0);
+          echo "running — ${tabs} tabs";
+        else
+          echo "not running";
+        fi
+      '
+    capture: true

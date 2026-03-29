@@ -34,7 +34,8 @@ install: build
     install -m 755 target/release/vennon {{install_dir}}/vennon
     install -m 755 target/release/yaa {{install_dir}}/yaa
     install -m 755 target/release/deck {{install_dir}}/deck
-    @echo "installed vennon + yaa + deck → {{install_dir}}"
+    install -m 755 target/release/vennon-bus {{install_dir}}/vennon-bus
+    @echo "installed vennon + yaa + deck + vennon-bus → {{install_dir}}"
 
 # Uninstall
 uninstall:

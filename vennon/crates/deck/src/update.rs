@@ -48,10 +48,11 @@ pub fn run() -> Result<()> {
 
     // ── Steps ───────────────────────────────────────────────────
     let steps: &[(&str, &str)] = &[
-        ("build",   "cargo build --release"),
-        ("vennon",  "instalando vennon"),
-        ("yaa",     "instalando yaa"),
-        ("deck",    "instalando deck"),
+        ("build",      "cargo build --release"),
+        ("vennon",     "instalando vennon"),
+        ("yaa",        "instalando yaa"),
+        ("deck",       "instalando deck"),
+        ("vennon-bus", "instalando vennon-bus"),
     ];
 
     // Pre-print all step lines as pending
@@ -76,7 +77,7 @@ pub fn run() -> Result<()> {
             .args(["-p", "rustc", "cargo", "--run", "cargo build --release"])
             .current_dir(&vennon_dir)
             .stdout(Stdio::null())
-            .stderr(Stdio::null())
+            .stderr(Stdio::piped())
             .spawn();
 
         match child {
@@ -96,6 +97,23 @@ pub fn run() -> Result<()> {
                                 results.push((true, elapsed));
                             } else {
                                 print_step_fail(&mut out, steps[0].1, elapsed)?;
+                                // Show compiler errors
+                                if let Some(stderr) = child.stderr.take() {
+                                    let err_output = std::io::read_to_string(stderr).unwrap_or_default();
+                                    let errors: Vec<&str> = err_output.lines()
+                                        .filter(|l| l.contains("error") || l.contains("Error"))
+                                        .take(20)
+                                        .collect();
+                                    if !errors.is_empty() {
+                                        out.queue(Print("\n"))?;
+                                        out.queue(SetForegroundColor(RED))?;
+                                        for line in &errors {
+                                            out.queue(Print(format!("  {line}\n")))?;
+                                        }
+                                        out.queue(ResetColor)?;
+                                        out.flush()?;
+                                    }
+                                }
                                 cursor_to_end(&mut out, steps.len(), 1)?;
                                 bail!("cargo build falhou (exit {})", status.code().unwrap_or(-1));
                             }
@@ -118,7 +136,7 @@ pub fn run() -> Result<()> {
     }
 
     // ── Steps 2-4: install binaries ─────────────────────────────
-    for (idx, bin) in ["vennon", "yaa", "deck"].iter().enumerate() {
+    for (idx, bin) in ["vennon", "yaa", "deck", "vennon-bus"].iter().enumerate() {
         let step_idx = idx + 1;
         let start = Instant::now();
 
