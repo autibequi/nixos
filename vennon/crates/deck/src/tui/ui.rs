@@ -1,7 +1,7 @@
 use ratatui::prelude::*;
 use ratatui::widgets::*;
 
-use super::app::{App, AppMode, Tab, IDE_NAMES};
+use super::app::{App, AppMode, ContainerKind, Tab};
 
 // ── Colors ──────────────────────────────────────────────────────
 const GREEN: Color = Color::Rgb(166, 227, 161);
@@ -16,7 +16,8 @@ pub fn render(frame: &mut Frame, app: &App) {
     let area = frame.area();
 
     let vis = app.visible_containers();
-    let container_height = (vis.len() as u16 + 2).min(area.height / 2).max(3);
+    // Stack monolito + 3 sidecars — precisa de mais linhas visíveis na tabela
+    let container_height = (vis.len() as u16 + 2).min(area.height / 2).max(3).max(8);
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
@@ -42,17 +43,16 @@ fn render_header(frame: &mut Frame, app: &App, area: Rect) {
     let ide_style = if app.tab == Tab::Ide { Style::default().fg(MAUVE).bold() } else { Style::default().fg(DIM) };
     let svc_style = if app.tab == Tab::Services { Style::default().fg(MAUVE).bold() } else { Style::default().fg(DIM) };
 
-    // Use display_name: instance containers are vennon-cursor-nixos etc. (not in IDE_NAMES as a stripped name).
     let ide_up = app
         .all_containers
         .iter()
-        .filter(|c| IDE_NAMES.contains(&c.display_name.as_str()))
+        .filter(|c| c.kind == ContainerKind::Ide)
         .filter(|c| c.is_up)
         .count();
     let svc_up = app
         .all_containers
         .iter()
-        .filter(|c| !IDE_NAMES.contains(&c.display_name.as_str()))
+        .filter(|c| c.kind != ContainerKind::Ide)
         .filter(|c| c.is_up)
         .count();
 
@@ -79,11 +79,15 @@ fn render_containers(frame: &mut Frame, app: &App, vis: &[&super::app::Container
             let name = c.display_name.as_str();
             let cursor = if selected { "▸" } else { " " };
 
-            let style = if selected {
-                Style::default().fg(TEXT).bg(SURFACE)
+            let name_fg = if c.kind == ContainerKind::Sidecar {
+                DIM
             } else {
-                Style::default().fg(TEXT)
+                TEXT
             };
+            let mut style = Style::default().fg(name_fg);
+            if selected {
+                style = style.bg(SURFACE);
+            }
 
             Row::new(vec![
                 Cell::from(Span::styled(cursor, Style::default().fg(MAUVE).bold())),
@@ -100,7 +104,7 @@ fn render_containers(frame: &mut Frame, app: &App, vis: &[&super::app::Container
     let widths = [
         Constraint::Length(2),   // cursor ▸
         Constraint::Length(2),   // status icon
-        Constraint::Length(25),  // name
+        Constraint::Length(28),  // name (tree + sidecar label)
         Constraint::Length(20),  // status text
         Constraint::Length(10),  // cpu
         Constraint::Min(15),    // mem
@@ -146,7 +150,7 @@ fn render_logs(frame: &mut Frame, app: &App, area: Rect) {
     let selected_name = app
         .selected_container()
         .map(|c| {
-            if IDE_NAMES.contains(&c.display_name.as_str()) {
+            if c.kind == ContainerKind::Ide {
                 format!("{} ({})", c.display_name, c.name)
             } else {
                 c.display_name.clone()

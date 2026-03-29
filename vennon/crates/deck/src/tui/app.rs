@@ -5,6 +5,14 @@ use std::process::Command;
 
 pub const IDE_NAMES: &[&str] = &["claude", "opencode", "cursor"];
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ContainerKind {
+    Ide,
+    Service,
+    /// Postgres/Redis/Localstack do stack monolito — só logs no painel, sem menu vennon.
+    Sidecar,
+}
+
 #[derive(Debug, Clone)]
 pub struct ContainerInfo {
     pub name: String,
@@ -14,6 +22,7 @@ pub struct ContainerInfo {
     pub cpu: String,
     pub mem: String,
     pub commands: Vec<String>,
+    pub kind: ContainerKind,
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -54,7 +63,7 @@ impl App {
         self.all_containers
             .iter()
             .filter(|c| {
-                let is_ide = IDE_NAMES.contains(&c.display_name.as_str());
+                let is_ide = c.kind == ContainerKind::Ide;
                 match self.tab {
                     Tab::Ide => is_ide,
                     Tab::Services => !is_ide,
@@ -113,6 +122,9 @@ impl App {
     }
 
     pub fn open_menu(&mut self) {
+        if self.menu_actions().is_empty() {
+            return;
+        }
         if !self.visible_containers().is_empty() {
             self.mode = AppMode::Menu;
             self.menu_cursor = 0;
@@ -140,12 +152,17 @@ impl App {
     /// Get menu actions for the selected container.
     pub fn menu_actions(&self) -> Vec<String> {
         if let Some(c) = self.selected_container() {
-            if c.commands.is_empty() {
-                // IDE default actions
-                vec!["start", "stop", "shell", "build", "flush"]
-                    .into_iter().map(|s| s.to_string()).collect()
-            } else {
-                c.commands.clone()
+            match c.kind {
+                ContainerKind::Sidecar => vec![],
+                ContainerKind::Ide if c.commands.is_empty() => vec![
+                    "start".into(),
+                    "stop".into(),
+                    "shell".into(),
+                    "build".into(),
+                    "flush".into(),
+                ],
+                ContainerKind::Ide => c.commands.clone(),
+                ContainerKind::Service => c.commands.clone(),
             }
         } else {
             vec![]
@@ -228,17 +245,53 @@ fn collect_all() -> Vec<ContainerInfo> {
 
             containers.push(ContainerInfo {
                 name: podman_name,
-                display_name: name,
+                display_name: name.clone(),
                 status,
                 is_up,
                 cpu,
                 mem,
                 commands,
+                kind: ContainerKind::Service,
             });
+
+            if name == "monolito" {
+                for sidecar in monolito_sidecar_rows(&running) {
+                    containers.push(sidecar);
+                }
+            }
         }
     }
 
     containers
+}
+
+/// Linhas aninhadas no deck: deps do compose (postgres, redis, localstack).
+fn monolito_sidecar_rows(
+    running: &HashMap<String, (String, bool, String, String)>,
+) -> Vec<ContainerInfo> {
+    let specs: [(&str, &str); 3] = [
+        ("vennon-dk-monolito-postgres", "  ├ postgres"),
+        ("vennon-dk-monolito-redis", "  ├ redis"),
+        ("vennon-dk-monolito-localstack", "  └ localstack"),
+    ];
+    let mut out = Vec::with_capacity(3);
+    for (podman_name, label) in specs {
+        let (status, is_up, cpu, mem) = running
+            .get(podman_name)
+            .cloned()
+            .unwrap_or_else(|| ("stopped".into(), false, String::new(), String::new()));
+        out.push(ContainerInfo {
+            name: podman_name.to_string(),
+            display_name: label.to_string(),
+            status,
+            is_up,
+            cpu,
+            mem,
+            commands: vec![],
+            kind: ContainerKind::Sidecar,
+        });
+    }
+    out
 }
 
 /// One IDE row: any Podman name `vennon-{ide}` or `vennon-{ide}-<slug>` (yaa instance).
@@ -279,6 +332,7 @@ fn ide_row(ide: &str, running: &HashMap<String, (String, bool, String, String)>)
             cpu: e.2.clone(),
             mem: e.3.clone(),
             commands: vec![],
+            kind: ContainerKind::Ide,
         }
     } else {
         ContainerInfo {
@@ -289,6 +343,7 @@ fn ide_row(ide: &str, running: &HashMap<String, (String, bool, String, String)>)
             cpu: String::new(),
             mem: String::new(),
             commands: vec![],
+            kind: ContainerKind::Ide,
         }
     }
 }
