@@ -10,6 +10,10 @@ enums:
     map:
       sand: sandbox
 
+  vertical:
+    values: [carreiras-juridicas, concursos, medicina, oab, vestibulares, militares]
+    default: carreiras-juridicas
+
 ports: [9090]
 
 commands:
@@ -18,9 +22,13 @@ commands:
     args:
       - name: env
         enum: env
+      - name: vertical
+        enum: vertical
     compose:
       files: [docker-compose.yml]
       env_file: "env/{{ env | map }}.env"
+      env:
+        VERTICAL: "{{ vertical }}"
       action: up -d
 
   stop:

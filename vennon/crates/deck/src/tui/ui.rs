@@ -11,6 +11,7 @@ const PEACH: Color = Color::Rgb(250, 179, 135);
 const TEXT: Color = Color::Rgb(205, 214, 244);
 const DIM: Color = Color::Rgb(108, 112, 134);
 const SURFACE: Color = Color::Rgb(30, 30, 46);
+const YELLOW: Color = Color::Rgb(249, 226, 175);
 
 pub fn render(frame: &mut Frame, app: &App) {
     let area = frame.area();
@@ -89,11 +90,36 @@ fn render_containers(frame: &mut Frame, app: &App, vis: &[&super::app::Container
                 style = style.bg(SURFACE);
             }
 
+            let env_color = match c.env.as_str() {
+                "prod"          => RED,
+                "sand" | "sbox" => YELLOW,
+                "local"         => GREEN,
+                "qa"            => PEACH,
+                "dbox" | "devb" => MAUVE,
+                _               => DIM,
+            };
+            let debug_color = match c.debug.as_str() {
+                "on" | "dbg" => PEACH,
+                _            => DIM,
+            };
+            let vert_color = match c.vertical.as_str() {
+                "med"  => MAUVE,
+                "oab"  => GREEN,
+                "conc" => PEACH,
+                _      => DIM,
+            };
+            let env_display  = if c.env.is_empty()      { "—".to_string() } else { c.env.clone() };
+            let debug_display = if c.debug.is_empty()   { "—".to_string() } else { c.debug.clone() };
+            let vert_display = if c.vertical.is_empty() { "—".to_string() } else { c.vertical.clone() };
+
             Row::new(vec![
                 Cell::from(Span::styled(cursor, Style::default().fg(MAUVE).bold())),
                 Cell::from(Span::styled(icon, Style::default().fg(icon_color))),
                 Cell::from(Span::styled(name, style.bold())),
                 Cell::from(Span::styled(&c.status, Style::default().fg(DIM))),
+                Cell::from(Span::styled(env_display, Style::default().fg(env_color))),
+                Cell::from(Span::styled(debug_display, Style::default().fg(debug_color))),
+                Cell::from(Span::styled(vert_display, Style::default().fg(vert_color))),
                 Cell::from(Span::styled(&c.cpu, Style::default().fg(PEACH))),
                 Cell::from(Span::styled(&c.mem, Style::default().fg(MAUVE))),
             ])
@@ -106,8 +132,11 @@ fn render_containers(frame: &mut Frame, app: &App, vis: &[&super::app::Container
         Constraint::Length(2),   // status icon
         Constraint::Length(28),  // name (tree + sidecar label)
         Constraint::Length(20),  // status text
+        Constraint::Length(5),   // env (prod/sbox/local)
+        Constraint::Length(5),   // debug (on/off/dbg)
+        Constraint::Length(5),   // vertical (med/oab/conc)
         Constraint::Length(10),  // cpu
-        Constraint::Min(15),    // mem
+        Constraint::Min(15),     // mem
     ];
 
     let tab_label = match app.tab {
@@ -210,8 +239,14 @@ fn render_menu(frame: &mut Frame, app: &App, area: Rect) {
         .iter()
         .enumerate()
         .map(|(i, label)| {
+            if label == "---" {
+                return ListItem::new("  ────────────────")
+                    .style(Style::default().fg(DIM));
+            }
             let style = if i == app.menu_cursor {
                 Style::default().fg(MAUVE).bold()
+            } else if label.ends_with(" ✓") {
+                Style::default().fg(GREEN)
             } else {
                 Style::default().fg(TEXT)
             };
@@ -222,7 +257,7 @@ fn render_menu(frame: &mut Frame, app: &App, area: Rect) {
         .collect();
 
     let menu_height = actions.len() as u16 + 2;
-    let menu_width = 20;
+    let menu_width = 30;
     let x = area.width.saturating_sub(menu_width) / 2;
     let y = area.height.saturating_sub(menu_height) / 2;
     let menu_area = Rect::new(x, y, menu_width, menu_height);

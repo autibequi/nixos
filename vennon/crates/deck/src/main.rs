@@ -3,6 +3,7 @@ mod os;
 mod process;
 mod stow;
 mod tui;
+mod update;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
@@ -42,7 +43,7 @@ fn main() -> Result<()> {
     match cli.command {
         Some(Commands::Stow { action, reload }) => stow::run(&action, reload),
         Some(Commands::Os { action }) => os::run(&action),
-        Some(Commands::Update) => exec::run("yaa", &["update"]),
+        Some(Commands::Update) => update::run(),
         None => tui::run(),
     }
 }
