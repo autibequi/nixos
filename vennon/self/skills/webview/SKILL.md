@@ -1,11 +1,13 @@
 ---
 name: webview
-description: "Tela de visualizacao no Chrome relay — flowcharts Mermaid com zoom/drag, arvores interativas, dashboards, HTML livre com CDN, ASCII art terminal, animacoes artisticas (eye, glados), voz, canvas colaborativo. O agente sobe o relay (relay-start) por iniciativa quando for mostrar algo no browser. Entrypoint para qualquer output visual."
+description: "Mostrar no relay — abrir conteudo no Chrome do usuario (HTML, Mermaid, diff, imagens) via chrome-relay e buzz; o agente sobe relay por iniciativa. Alternativa sem browser: ASCII terminal (ascii.md)."
 ---
 
-# webview — Visualizacao e Arte Visual
+# webview — Mostrar no relay
 
-Skill unificada para tudo visual: Chrome relay (Mermaid, diffs, dashboards, arte, voz), ASCII terminal, canvas colaborativo.
+**O que é:** levar qualquer coisa **visual** para o **browser do usuário** usando o **relay** (`chrome-relay.py` no container + Chrome/CDP + HTTP local, e opcionalmente **buzz** no host). Não confundir com o orquestrador de containers — aqui só importa **mostrar no relay**.
+
+Também cobre **ASCII no terminal** quando não precisa de browser — ver `ascii.md`, `design-system.md`, `chrome.md` (arte/voz).
 
 ---
 
@@ -62,20 +64,20 @@ Resumo: **iniciativa = status → subir o que faltar → mostrar conteúdo**. O 
 
 ---
 
-**1. Checagem obrigatória** (CDP + servidor HTTP + host público):
+**1. Checagem obrigatória** (CDP + servidor HTTP + URL pública):
 
 ```bash
 python3 /workspace/self/scripts/chrome-relay.py status
 ```
 
-A saída inclui `RELAY_HTTP_HOST` e `Public base:` (URL que o Chrome deve abrir). O hostname default é **`vennon`**; override com `export RELAY_HTTP_HOST=127.0.0.1` (ou outro) se o browser não resolver `vennon`.
+Use a linha **`Public base:`** como URL raiz (e `RELAY_HTTP_HOST` se precisar ajustar hostname). O default do script é um hostname configurável por env; se o Chrome não resolver, `export RELAY_HTTP_HOST=127.0.0.1` (ou o host que o browser alcançar).
 
 **2. Se Chrome CDP estiver OFF** (já deveria ter sido tratado na iniciativa acima)
 
 - **`buzz("relay-start")`** — preferido no container.
 - Fallback: `python3 /workspace/self/scripts/chrome-relay.py start` mostra o comando Chromium com `--remote-debugging-port=9222` para rodar no host.
 
-Se o container **não** enxergar `localhost:9222`, o CDP não funciona com `chrome-relay.py` até haver port-forward/host network; nesse caso use **só buzz** para `relay-nav` / `relay-show`.
+Se o container **não** enxergar `localhost:9222`, o CDP não funciona com `chrome-relay.py` até haver rede/port-forward adequados; nesse caso use **só buzz** para `relay-nav` / `relay-show`.
 
 **3. Escolha da ferramenta**
 
@@ -86,10 +88,12 @@ Se o container **não** enxergar `localhost:9222`, o CDP não funciona com `chro
 
 **4. Conteúdo estático (HTML, imagens, JSON)**
 
-- Diretório servido: **`/tmp/chrome-relay/`** (ou `RELAY_CONTENT_DIR`). Arquivos são expostos como `http://<RELAY_HTTP_HOST>:<porta>/<basename>`.
-- Porta: **8765–8768** (primeira livre). **Não fixe 8765** às cegas — confira `status`.
-- Se **Content server OFF** e você precisar só do HTTP: rode `python3 /workspace/self/scripts/chrome-relay.py serve` em background, ou um `show` de qualquer `.md` para subir o servidor.
-- Navegar: `python3 ... chrome-relay.py nav "http://vennon:<PORTA>/pagina.html"` com `<PORTA>` vinda de `status`.
+- Diretório servido: **`/tmp/chrome-relay/`** (ou `RELAY_CONTENT_DIR`). Arquivos são expostos como `<Public base><basename>` (ex.: `.../pagina.html`).
+- Porta: **8765–8768** (primeira livre). **Não fixe uma porta** às cegas — use a linha **`Public base:`** de `status` (ou `Content server: OK (:PORTA)`).
+- **Não** use `python3 -m http.server` nas portas **8765–8768**. Outro processo nessa faixa fazia o relay “parecer” ativo na porta errada e o Chrome recebia **404** mesmo com o arquivo em `/tmp/chrome-relay/` (o servidor do `chrome-relay.py` é identificado por `GET /health` → `{"ok":true}`).
+- Servidor **persistente**: `nohup python3 /workspace/self/scripts/chrome-relay.py serve >>/tmp/chrome-relay/serve.log 2>&1 &` e confira `status`. O comando `show` sobe HTTP em thread daemon e o processo pode encerrar em seguida — para HTML estático, prefira `serve` em background.
+- Se **Content server OFF**: suba com `serve` em background ou um `show` de qualquer `.md` mínimo.
+- Navegar: `nav` com **`Public base` + nome do arquivo** (copiar a URL de `status`, não inventar host/porta).
 
 **5. HTML pequeno sem servidor**
 
@@ -138,10 +142,10 @@ Controles na tela:
 
 1. `mkdir -p /tmp/chrome-relay`
 2. Escrever `pagina.html` (e imagens) em `/tmp/chrome-relay/`
-3. `python3 /workspace/self/scripts/chrome-relay.py status` — usar a **porta** em `Content server: OK (:PORTA)` e o **Public base** (ou montar `http://${RELAY_HTTP_HOST:-vennon}:<PORTA>/pagina.html`)
-4. `python3 /workspace/self/scripts/chrome-relay.py nav "http://vennon:<PORTA>/pagina.html"`
+3. `python3 /workspace/self/scripts/chrome-relay.py status` — copiar **`Public base`** e montar `<Public base>pagina.html`
+4. `python3 /workspace/self/scripts/chrome-relay.py nav "<URL completa>"`
 
-O servidor HTTP escuta em `127.0.0.1`; o host público nas URLs é `RELAY_HTTP_HOST` (default `vennon`).
+O servidor HTTP escuta em `127.0.0.1`; o hostname nas URLs vem de `RELAY_HTTP_HOST` (veja `status`).
 
 ### Bibliotecas CDN disponiveis
 
@@ -204,7 +208,7 @@ body {
 
 ## Catalogo de visualizacoes
 
-### Holodeck (relay)
+### No relay (browser)
 
 | Visualizacao | Template | Descricao |
 |---|---|---|
@@ -236,7 +240,7 @@ body {
 - 18 Grafico de proporcao (pizza horizontal)
 - 19 Stacked bar vertical / termometro (3 variantes)
 
-### Chrome (relay) — arte e interacao
+### Relay — arte e interacao
 
 - Verificacao de disponibilidade + regra de decisao
 - Comandos: nav, show, tabs, speak, present
@@ -251,9 +255,9 @@ body {
 
 ---
 
-## Quando usar holodeck vs ASCII
+## Quando usar relay vs ASCII
 
-| Criterio | ASCII | Holodeck (relay) |
+| Criterio | ASCII | Relay (browser) |
 |----------|-------|-----------------|
 | Tamanho | < 80 linhas | > 80 linhas |
 | Interacao | nenhuma | zoom, drag, click, hover |
@@ -280,6 +284,6 @@ Se voce e um agente ou skill que precisa desenhar algo:
 
 Leia `skills/buzz/SKILL.md` para o cliente socket e validações.
 
-### Cópia da skill no Cursor
+### Copia desta skill no Cursor
 
-A fonte canônica é `/workspace/self/skills/webview/`. O vennon pode espelhar em `~/.cursor/skills/`; após editar aqui, rode o sync do ambiente se o agente só enxergar a cópia antiga.
+Fonte: `/workspace/self/skills/webview/`. Se o editor espelhar para `~/.cursor/skills/`, sincronize após editar a fonte.

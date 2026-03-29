@@ -59,11 +59,18 @@ fn run_loop(
         match event::read()? {
             Event::Key(key) => {
                 match app.mode {
+                    AppMode::Help => match key.code {
+                        KeyCode::Esc | KeyCode::Char('q') | KeyCode::Char('?') => {
+                            app.close_help();
+                        }
+                        _ => {}
+                    },
                     AppMode::Normal => match key.code {
                         KeyCode::Char('q') | KeyCode::Esc => return Ok(()),
                         KeyCode::Char('c') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                             return Ok(())
                         }
+                        KeyCode::Char('?') => app.open_help(),
                         KeyCode::Down | KeyCode::Char('j') => app.next(),
                         KeyCode::Up | KeyCode::Char('k') => app.prev(),
                         KeyCode::Enter => app.open_menu(),
@@ -78,6 +85,7 @@ fn run_loop(
                         _ => {}
                     },
                     AppMode::Menu => match key.code {
+                        KeyCode::Char('?') => app.open_help(),
                         KeyCode::Esc | KeyCode::Char('q') => app.close_menu(),
                         KeyCode::Down | KeyCode::Char('j') => app.menu_next(),
                         KeyCode::Up | KeyCode::Char('k') => app.menu_prev(),

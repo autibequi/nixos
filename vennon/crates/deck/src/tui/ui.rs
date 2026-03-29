@@ -5,6 +5,8 @@ use ratatui::widgets::ScrollbarOrientation;
 use super::app::{App, AppMode, ContainerKind, Tab};
 use ratatui::layout::Flex;
 
+const REFRESH_SPINNER: &[&str] = &["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+
 // ── Colors ──────────────────────────────────────────────────────
 const GREEN: Color = Color::Rgb(166, 227, 161);
 const RED: Color = Color::Rgb(243, 139, 168);
@@ -26,19 +28,20 @@ pub fn render(frame: &mut Frame, app: &App) {
         .constraints([
             Constraint::Length(1),               // header + tabs
             Constraint::Length(container_height), // containers
-            Constraint::Min(5),                  // logs
-            Constraint::Length(1),               // footer
+            Constraint::Min(5),                  // logs (full remaining height)
         ])
         .split(area);
 
     render_header(frame, app, chunks[0]);
     render_containers(frame, app, &vis, chunks[1]);
     render_logs(frame, app, chunks[2]);
-    render_footer(frame, app, chunks[3]);
 
     // Menu overlay
     if matches!(app.mode, AppMode::Menu) {
         render_menu(frame, app, area);
+    }
+    if matches!(app.mode, AppMode::Help) {
+        render_help(frame, area);
     }
 }
 
@@ -59,13 +62,16 @@ fn render_header(frame: &mut Frame, app: &App, area: Rect) {
         .filter(|c| c.is_up)
         .count();
 
-    // Left: tabs
+    // Left: tabs + resource summary (visible tab, containers up)
+    let summary = visible_resource_summary(app);
     let left_spans = vec![
         Span::styled(" deck ", Style::default().fg(MAUVE).bold()),
         Span::styled("│ ", Style::default().fg(DIM)),
         Span::styled(format!(" Services ({svc_up}) "), svc_style),
         Span::styled("│", Style::default().fg(DIM)),
         Span::styled(format!(" Agents ({agents_up}) "), agents_style),
+        Span::styled(" │ ", Style::default().fg(DIM)),
+        Span::styled(summary, Style::default().fg(DIM)),
     ];
     let left_line = Line::from(left_spans);
 
@@ -99,6 +105,113 @@ fn render_header(frame: &mut Frame, app: &App, area: Rect) {
 /// Strip total from "31.62MB / 49.77GB" → "31.62MB".
 fn mem_used_only(raw: &str) -> String {
     raw.split('/').next().unwrap_or(raw).trim().to_string()
+}
+
+fn parse_cpu_percent(s: &str) -> Option<f64> {
+    let s = s.trim();
+    if s.is_empty() {
+        return None;
+    }
+    s.trim_end_matches('%').trim().parse().ok()
+}
+
+fn parse_mem_used_bytes(raw: &str) -> Option<u64> {
+    let part = raw.split('/').next()?.trim();
+    if part.is_empty() {
+        return None;
+    }
+    let mut i = 0;
+    let b = part.as_bytes();
+    while i < b.len() && (b[i].is_ascii_digit() || b[i] == b'.') {
+        i += 1;
+    }
+    if i == 0 {
+        return None;
+    }
+    let num: f64 = part[..i].parse().ok()?;
+    let suf = part[i..].trim().to_ascii_lowercase();
+    let mult: f64 = match suf.as_str() {
+        "b" => 1.0,
+        "kb" | "kib" => 1024.0,
+        // podman often prints "MB"/"GB" (decimal SI); treat like MiB/GiB for totals
+        "mb" | "mib" => 1024_f64.powi(2),
+        "gb" | "gib" => 1024_f64.powi(3),
+        "tb" | "tib" => 1024_f64.powi(4),
+        "" => return None,
+        _ => return None,
+    };
+    Some((num * mult) as u64)
+}
+
+fn format_bytes_short(n: u64) -> String {
+    const KB: f64 = 1024.0;
+    const MB: f64 = KB * 1024.0;
+    const GB: f64 = MB * 1024.0;
+    let x = n as f64;
+    if x >= GB {
+        format!("{:.1} GiB", x / GB)
+    } else if x >= MB {
+        format!("{:.1} MiB", x / MB)
+    } else if x >= KB {
+        format!("{:.0} KiB", x / KB)
+    } else {
+        format!("{n} B")
+    }
+}
+
+/// Sum CPU% and memory for visible rows that are up (same scope as the table).
+fn visible_resource_summary(app: &App) -> String {
+    let vis = app.visible_containers();
+    let mut cpu_sum = 0.0;
+    let mut mem_sum: u64 = 0;
+    let mut n_cpu = 0usize;
+    let mut n_mem = 0usize;
+    for c in vis {
+        if !c.is_up {
+            continue;
+        }
+        if let Some(p) = parse_cpu_percent(&c.cpu) {
+            cpu_sum += p;
+            n_cpu += 1;
+        }
+        if let Some(b) = parse_mem_used_bytes(&c.mem) {
+            mem_sum += b;
+            n_mem += 1;
+        }
+    }
+    if n_cpu == 0 && n_mem == 0 {
+        return "Σ —".to_string();
+    }
+    let mut parts: Vec<String> = Vec::new();
+    if n_cpu > 0 {
+        parts.push(format!("{:.1}% CPU", cpu_sum));
+    }
+    if n_mem > 0 {
+        parts.push(format_bytes_short(mem_sum));
+    }
+    format!("Σ {}", parts.join(" · "))
+}
+
+/// Spinner + UTC time (+ stale) on the top border of the Services/Agents table.
+fn container_table_top_right_title(app: &App) -> Line<'static> {
+    let mut spans: Vec<Span<'static>> = Vec::new();
+    if app.subprocess_degraded {
+        spans.push(Span::styled(
+            "stale ",
+            Style::default().fg(PEACH).bold(),
+        ));
+    }
+    if app.refresh_inflight {
+        let spin = REFRESH_SPINNER[(app.spin_tick as usize) % REFRESH_SPINNER.len()];
+        spans.push(Span::styled(spin, Style::default().fg(PEACH).bold()));
+        spans.push(Span::raw(" "));
+    }
+    let time_str: String = app
+        .last_refresh
+        .map(|t| t.format("%H:%M:%S UTC").to_string())
+        .unwrap_or_else(|| "—".into());
+    spans.push(Span::styled(time_str, Style::default().fg(DIM)));
+    Line::from(spans).alignment(Alignment::Right)
 }
 
 fn render_containers(frame: &mut Frame, app: &App, vis: &[&super::app::ContainerInfo], area: Rect) {
@@ -183,7 +296,8 @@ fn render_containers(frame: &mut Frame, app: &App, vis: &[&super::app::Container
                 .title(Span::styled(
                     format!(" {tab_label} "),
                     Style::default().fg(MAUVE).bold(),
-                )),
+                ))
+                .title(container_table_top_right_title(app)),
         );
 
     frame.render_widget(table, area);
@@ -264,40 +378,68 @@ fn render_logs(frame: &mut Frame, app: &App, area: Rect) {
     );
 }
 
-fn render_footer(frame: &mut Frame, app: &App, area: Rect) {
-    let hint = match app.mode {
-        AppMode::Normal => "enter:menu  f:follow  q:quit",
-        AppMode::Menu => "enter:exec  esc:back",
-    };
-    let mut parts = vec![];
-    if app.subprocess_degraded {
-        parts.push(Span::styled(
-            " stale (podman/vennon timeout) ",
-            Style::default().fg(PEACH).bold(),
-        ));
-    }
-    parts.push(Span::styled(
-        format!(" {hint}"),
-        Style::default().fg(DIM),
-    ));
-    let left_line = Line::from(parts);
+fn render_help(frame: &mut Frame, area: Rect) {
+    let lines = vec![
+        Line::from(""),
+        Line::from(vec![Span::styled(
+            " Atalhos ",
+            Style::default().fg(MAUVE).bold(),
+        )]),
+        Line::from(""),
+        Line::from(vec![
+            Span::styled("j / k / ", Style::default().fg(PEACH)),
+            Span::styled("↑ / ↓", Style::default().fg(PEACH)),
+            Span::styled("     navegar na lista", Style::default().fg(DIM)),
+        ]),
+        Line::from(vec![
+            Span::styled("Enter", Style::default().fg(PEACH)),
+            Span::styled("            menu de ações", Style::default().fg(DIM)),
+        ]),
+        Line::from(vec![
+            Span::styled("Tab", Style::default().fg(PEACH)),
+            Span::styled("              alternar Services ↔ Agents", Style::default().fg(DIM)),
+        ]),
+        Line::from(vec![
+            Span::styled("r", Style::default().fg(PEACH)),
+            Span::styled("                atualizar dados", Style::default().fg(DIM)),
+        ]),
+        Line::from(vec![
+            Span::styled("f", Style::default().fg(PEACH)),
+            Span::styled("                follow / pausar logs", Style::default().fg(DIM)),
+        ]),
+        Line::from(vec![
+            Span::styled("[ ]", Style::default().fg(PEACH)),
+            Span::styled("              rolar logs", Style::default().fg(DIM)),
+        ]),
+        Line::from(vec![
+            Span::styled("q / Esc", Style::default().fg(PEACH)),
+            Span::styled("         sair (ou voltar)", Style::default().fg(DIM)),
+        ]),
+        Line::from(vec![
+            Span::styled("?", Style::default().fg(PEACH)),
+            Span::styled("                esta ajuda", Style::default().fg(DIM)),
+        ]),
+        Line::from(""),
+        Line::from(vec![Span::styled(
+            " Esc  ou  q  fecha esta tela ",
+            Style::default().fg(DIM),
+        )]),
+    ];
 
-    if app.refresh_inflight {
-        const SPINNER: &[&str] = &["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
-        let spin = SPINNER[(app.spin_tick as usize) % SPINNER.len()];
-        let chunks = Layout::horizontal([Constraint::Min(0), Constraint::Length(1)]).split(area);
-        frame.render_widget(Paragraph::new(left_line), chunks[0]);
-        frame.render_widget(
-            Paragraph::new(Line::from(vec![Span::styled(
-                spin,
-                Style::default().fg(PEACH).bold(),
-            )]))
-            .alignment(Alignment::Right),
-            chunks[1],
-        );
-    } else {
-        frame.render_widget(Paragraph::new(left_line), area);
-    }
+    let h = lines.len() as u16 + 2;
+    let w = 52u16.min(area.width.saturating_sub(2)).max(42);
+    let h = h.min(area.height.saturating_sub(2));
+    let x = area.x + area.width.saturating_sub(w) / 2;
+    let y = area.y + area.height.saturating_sub(h) / 2;
+    let help_area = Rect::new(x, y, w, h);
+
+    let block = Block::default()
+        .borders(Borders::ALL)
+        .border_style(Style::default().fg(MAUVE))
+        .title(Span::styled(" ajuda ", Style::default().fg(MAUVE).bold()));
+
+    frame.render_widget(Clear, help_area);
+    frame.render_widget(Paragraph::new(lines).block(block), help_area);
 }
 
 fn render_menu(frame: &mut Frame, app: &App, area: Rect) {

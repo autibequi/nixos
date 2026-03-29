@@ -524,13 +524,29 @@ class ThreadedServer(ThreadingMixIn, HTTPServer):
     daemon_threads = True
 
 
+def relay_health_ok(port):
+    """True apenas se for o ContentHandler deste script (GET /health -> {\"ok\":true})."""
+    try:
+        conn = http.client.HTTPConnection("127.0.0.1", port, timeout=0.5)
+        conn.request("GET", "/health")
+        resp = conn.getresponse()
+        body = resp.read().decode().strip()
+        conn.close()
+        return resp.status == 200 and body == '{"ok":true}'
+    except (OSError, TimeoutError):
+        return False
+
+
 def find_serve_port():
+    """Porta do servidor deste relay. Ignora processos estranhos (ex.: `http.server` na mesma porta)."""
     for port in SERVE_PORTS:
         try:
             with socket.create_connection(("127.0.0.1", port), timeout=0.3):
-                return port  # already running
+                pass
         except (ConnectionRefusedError, OSError):
-            pass
+            continue
+        if relay_health_ok(port):
+            return port
     return None
 
 

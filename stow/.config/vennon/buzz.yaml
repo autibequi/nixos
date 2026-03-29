@@ -97,8 +97,8 @@ actions:
   # chrome-relay.py vive em ~/nixos/self/scripts/ (mesmo PATH que o host usa)
 
   relay-start:
-    description: Sobe Chrome com CDP na porta 9222
-    command: bash -c 'curl -sf http://localhost:9222/json/version >/dev/null 2>&1 && echo "CDP already on :9222" && exit 0; for b in google-chrome-stable google-chrome chromium chromium-browser; do command -v "$b" >/dev/null 2>&1 && browser="$b" && break; done; [ -z "$browser" ] && echo "Chrome nao encontrado" >&2 && exit 1; "$browser" --remote-debugging-port=9222 --user-data-dir=/tmp/yaa-holodeck --no-first-run --no-default-browser-check about:blank >/dev/null 2>&1 & for i in 1 2 3 4 5 6 7 8 9 10; do sleep 0.5; curl -sf http://localhost:9222/json/version >/dev/null 2>&1 && echo "Chrome CDP ready :9222" && exit 0; done; echo "timeout" && exit 1'
+    description: Sobe Chrome com CDP na porta 9222 (sem traducao automatica nem bubble restaurar paginas)
+    command: bash -c 'curl -sf http://localhost:9222/json/version >/dev/null 2>&1 && echo "CDP already on :9222" && exit 0; for b in google-chrome-stable google-chrome chromium chromium-browser; do command -v "$b" >/dev/null 2>&1 && browser="$b" && break; done; [ -z "$browser" ] && echo "Chrome nao encontrado" >&2 && exit 1; RELAY_EXTRA="${RELAY_CHROME_FLAGS:---disable-features=Translate --disable-session-crashed-bubble}"; "$browser" --remote-debugging-port=9222 --user-data-dir=/tmp/yaa-holodeck --no-first-run --no-default-browser-check $RELAY_EXTRA about:blank >/dev/null 2>&1 & for i in 1 2 3 4 5 6 7 8 9 10; do sleep 0.5; curl -sf http://localhost:9222/json/version >/dev/null 2>&1 && echo "Chrome CDP ready :9222" && exit 0; done; echo "timeout" && exit 1'
     capture: true
 
   relay-stop:

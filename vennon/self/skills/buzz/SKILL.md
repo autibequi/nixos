@@ -1,6 +1,6 @@
 ---
 name: buzz
-description: "Auto-ativar quando: usuario quer abrir algo no Chrome, mostrar arquivo no browser, navegar URL, enviar notificacao desktop, executar JS no Chrome, abrir editor/vscode, ver status de containers — qualquer coisa que precise sair do container e agir no host."
+description: "Auto-ativar quando: usuario quer abrir algo no Chrome, mostrar no relay, navegar URL, notificacao desktop, JS no Chrome, editor, logs de containers — IPC container→host. Relay visual: ver skill webview; agente chama relay-start por iniciativa."
 ---
 
 # buzz — Container→Host IPC
@@ -37,7 +37,7 @@ Uso relay (exemplos):
 ```python
 buzz("relay-status")
 buzz("relay-start")
-buzz("relay-nav", url="http://vennon:8765/pagina.html")
+buzz("relay-nav", url="http://127.0.0.1:8765/pagina.html")  # URL = Public base do `chrome-relay.py status` + arquivo
 buzz("relay-show", path="/tmp/minha-viz.md")
 buzz("relay-inject", js="document.title")
 buzz("relay-tabs")
@@ -61,7 +61,11 @@ s.close()
 
 ## Relay (Chrome + HTTP no host)
 
-O relay no host conecta ao Chrome via **CDP** e pode servir conteúdo. Para a mesma função **direto do container** (sem depender do buzz), use também `python3 /workspace/self/scripts/chrome-relay.py` — ver skill **webview**.
+O relay no host conecta ao Chrome via **CDP** e pode servir conteúdo. Para **mostrar no relay** a partir do container (incluindo `chrome-relay.py`), ver skill **webview**.
+
+### Iniciativa do agente
+
+Se a tarefa for mostrar algo no browser e o CDP não estiver ativo, **chame `buzz("relay-start")` você mesmo** — não peça ao usuário para “abrir o Chrome” ou “ligar o relay”. Detalhes e ordem (status → start → nav/show): skill **webview**.
 
 ### Quando usar buzz vs chrome-relay.py
 
@@ -74,9 +78,9 @@ O relay no host conecta ao Chrome via **CDP** e pode servir conteúdo. Para a me
 ### Fluxo recomendado (container)
 
 1. `python3 /workspace/self/scripts/chrome-relay.py status`
-2. Se **Chrome CDP OFF**: `buzz("relay-start")` **ou** no host iniciar Chromium com `--remote-debugging-port=9222` (ver `chrome-relay.py start`).
+2. Se **Chrome CDP OFF**: **`buzz("relay-start")` imediatamente** (iniciativa), depois `status` de novo; só se falhar, orientar o host com `chrome-relay.py start`.
 3. Para exibir Markdown/Mermaid: `buzz("relay-show", path="/tmp/arquivo.md")` **ou** `python3 ... chrome-relay.py show /tmp/arquivo.md`
-4. Para **HTML estático**: arquivos em **`/tmp/chrome-relay/`** (nome na URL). A porta HTTP é **8765–8768** (primeira livre); use a porta que `status` mostrar e o host `RELAY_HTTP_HOST` (default `vennon`). Exemplo: `buzz("relay-nav", url="http://vennon:8765/pagina.html")`.
+4. Para **HTML estático**: arquivos em **`/tmp/chrome-relay/`** (nome na URL). Porta **8765–8768**; monte a URL a partir de **`Public base:`** em `chrome-relay.py status`. Exemplo: `buzz("relay-nav", url="http://127.0.0.1:8765/pagina.html")` se for o que o browser alcança.
 
 ---
 

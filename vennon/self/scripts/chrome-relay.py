@@ -42,6 +42,14 @@ PID_FILE = os.path.join(CONTENT_DIR, ".server.pid")
 # Skills/documentacao usam "vennon"; override com RELAY_HTTP_HOST se necessario (ex.: 127.0.0.1).
 RELAY_HTTP_HOST = os.environ.get("RELAY_HTTP_HOST", "vennon")
 
+# Chrome/Chromium: sem oferta de tradução automática nem bubble "restaurar páginas" após encerramento.
+# Sobrescreva com RELAY_CHROME_FLAGS="..." se precisar (valor substitui o default inteiro).
+_RELAY_CHROME_FLAGS_DEFAULT = (
+    "--disable-features=Translate "
+    "--disable-session-crashed-bubble"
+)
+RELAY_CHROME_FLAGS = os.environ.get("RELAY_CHROME_FLAGS", _RELAY_CHROME_FLAGS_DEFAULT)
+
 
 def relay_public_base(port):
     """Base URL http://<host>:<port> para navegacao no Chrome."""
@@ -524,13 +532,29 @@ class ThreadedServer(ThreadingMixIn, HTTPServer):
     daemon_threads = True
 
 
+def relay_health_ok(port):
+    """True apenas se for o ContentHandler deste script (GET /health -> {\"ok\":true})."""
+    try:
+        conn = http.client.HTTPConnection("127.0.0.1", port, timeout=0.5)
+        conn.request("GET", "/health")
+        resp = conn.getresponse()
+        body = resp.read().decode().strip()
+        conn.close()
+        return resp.status == 200 and body == '{"ok":true}'
+    except (OSError, TimeoutError):
+        return False
+
+
 def find_serve_port():
+    """Porta do servidor deste relay. Ignora processos estranhos (ex.: `http.server` na mesma porta)."""
     for port in SERVE_PORTS:
         try:
             with socket.create_connection(("127.0.0.1", port), timeout=0.3):
-                return port  # already running
+                pass
         except (ConnectionRefusedError, OSError):
-            pass
+            continue
+        if relay_health_ok(port):
+            return port
     return None
 
 
@@ -689,14 +713,16 @@ def cmd_serve(args):
 
 
 def cmd_start(args=None):
+    flags = RELAY_CHROME_FLAGS.strip()
     print("Para iniciar o Chrome relay no host:")
     print("")
-    print("  chromium --remote-debugging-port=9222 --user-data-dir=/tmp/leech-relay &")
+    print("  chromium --remote-debugging-port=9222 --user-data-dir=/tmp/leech-relay %s &" % flags)
     print("")
     print("Ou com seu perfil normal (agent tera acesso total ao browser):")
     print("")
-    print("  chromium --remote-debugging-port=9222 &")
+    print("  chromium --remote-debugging-port=9222 %s &" % flags)
     print("")
+    print("Flags padrao (traducao automatica + bubble restaurar paginas): em RELAY_CHROME_FLAGS ou veja o inicio do script.")
     print("Depois, o agent controla via CDP automaticamente.")
 
 

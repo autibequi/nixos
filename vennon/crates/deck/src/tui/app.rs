@@ -1,5 +1,6 @@
 use crate::process::{output_with_timeout, CMD_TIMEOUT};
 use anyhow::Result;
+use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 use std::io;
 use std::path::{Path, PathBuf};
@@ -68,9 +69,11 @@ pub enum Tab {
     Agents,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub enum AppMode {
     Normal,
     Menu,
+    Help,
 }
 
 pub struct App {
@@ -89,6 +92,10 @@ pub struct App {
     pub spin_tick: u8,
     /// True if the last completed refresh hit a subprocess timeout (podman/vennon).
     pub subprocess_degraded: bool,
+    /// Wall-clock UTC when the last snapshot finished applying.
+    pub last_refresh: Option<DateTime<Utc>>,
+    /// Mode to restore when closing the help overlay.
+    pub help_return: AppMode,
     pending_refresh: Option<Receiver<RefreshSnapshot>>,
 }
 
@@ -114,7 +121,26 @@ impl App {
             refresh_inflight: false,
             spin_tick: 0,
             subprocess_degraded: false,
+            last_refresh: None,
+            help_return: AppMode::Normal,
             pending_refresh: None,
+        }
+    }
+
+    pub fn open_help(&mut self) {
+        if matches!(self.mode, AppMode::Help) {
+            return;
+        }
+        self.help_return = match self.mode {
+            AppMode::Menu => AppMode::Menu,
+            AppMode::Normal | AppMode::Help => AppMode::Normal,
+        };
+        self.mode = AppMode::Help;
+    }
+
+    pub fn close_help(&mut self) {
+        if matches!(self.mode, AppMode::Help) {
+            self.mode = self.help_return;
         }
     }
 
@@ -156,6 +182,7 @@ impl App {
         self.subprocess_degraded = snap.had_subprocess_timeout;
         self.refresh_inflight = false;
         self.pending_refresh = None;
+        self.last_refresh = Some(Utc::now());
         let vis = self.visible_containers();
         if self.cursor >= vis.len() && !vis.is_empty() {
             self.cursor = vis.len() - 1;
