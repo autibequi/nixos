@@ -7,6 +7,8 @@ description: "Mostrar no relay — abrir conteudo no Chrome do usuario (HTML, Me
 
 **O que é:** levar qualquer coisa **visual** para o **browser do usuário** usando o **relay** (`chrome-relay.py` no container + Chrome/CDP + HTTP local, e opcionalmente **buzz** no host). Não confundir com o orquestrador de containers — aqui só importa **mostrar no relay**.
 
+**Chrome do relay:** o default inclui flags para **não** oferecer tradução automática e **não** mostrar o bubble de “restaurar páginas” (`RELAY_CHROME_FLAGS` no `chrome-relay.py`; `relay-start` no buzz usa o mesmo par de flags). Override com `export RELAY_CHROME_FLAGS='...'` se precisar.
+
 Também cobre **ASCII no terminal** quando não precisa de browser — ver `ascii.md`, `design-system.md`, `chrome.md` (arte/voz).
 
 ---
@@ -14,6 +16,16 @@ Também cobre **ASCII no terminal** quando não precisa de browser — ver `asci
 ## Design System
 
 **Ler `design-system.md` PRIMEIRO** — palette testada, tokens, emojis proibidos, regras de composicao.
+
+## Templates webview (HTML) — um único arquivo
+
+Sempre que você criar um **template** ou página HTML para o relay:
+
+- **Todo o HTML, todo o CSS e todo o JS** entram no **mesmo ficheiro `.html`**: `<style>...</style>` e `<script>...</script>` inline no documento. **Não** gerar `foo.css` / `foo.js` / `foo.html` separados (evita 404, ordem de load e paths errados).
+- **Exceção**: bibliotecas via **CDN** (`<script src="https://...">`, `<link href="https://...">`) — são dependências remotas, não ficheiros locais extra.
+- **Imagens**: preferir **data URI** em base64 no próprio HTML para ficar tudo num só ficheiro; só usar `src="imagem.png"` ao lado se o binário for grande e o utilizador aceitar dois ficheiros na mesma pasta.
+
+O mesmo vale para `data:text/html;base64,...` no `nav`: o documento decodificado deve ser **autocontido** da mesma forma.
 
 ## Sub-files
 
@@ -141,7 +153,7 @@ Controles na tela:
 ## HTML Livre com CDN
 
 1. `mkdir -p /tmp/chrome-relay`
-2. Escrever `pagina.html` (e imagens) em `/tmp/chrome-relay/`
+2. Escrever **`pagina.html` único** (HTML + CSS + JS inline — ver **Templates webview** acima); CDN só para libs.
 3. `python3 /workspace/self/scripts/chrome-relay.py status` — copiar **`Public base`** e montar `<Public base>pagina.html`
 4. `python3 /workspace/self/scripts/chrome-relay.py nav "<URL completa>"`
 
@@ -272,9 +284,10 @@ body {
 Se voce e um agente ou skill que precisa desenhar algo:
 
 1. **NAO invente seu proprio formato** — consulte esta skill
-2. Leia o sub-file do tipo de saida que precisa
-3. Use os templates e convencoes documentados
-4. Se criar um novo tipo de visualizacao que ficou bom, adicione aqui
+2. **Templates HTML no relay:** um único `.html` com CSS e JS inline (secção **Templates webview**)
+3. Leia o sub-file do tipo de saida que precisa
+4. Use os templates e convencoes documentados
+5. Se criar um novo tipo de visualizacao que ficou bom, adicione aqui
 
 ### Abrir o Chrome (dependencia do relay)
 

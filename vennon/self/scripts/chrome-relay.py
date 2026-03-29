@@ -8,6 +8,7 @@ e controle programatico do browser via Chrome DevTools Protocol.
 Requer Chrome/Chromium com --remote-debugging-port=9222 no host.
 Container usa network_mode: host, entao localhost:9222 funciona direto.
 URLs publicas usam RELAY_HTTP_HOST (default vennon); export para outro hostname se o Chrome nao resolver.
+Flags padrao do Chrome: RELAY_CHROME_FLAGS (sem traducao automatica nem bubble restaurar paginas).
 
 Comandos:
   chrome-relay.py nav <url> [title]     — Navega o Chrome para uma URL
@@ -593,7 +594,11 @@ def cmd_nav(args):
         sys.exit(1)
     if not cdp_ok():
         print("FAIL: Chrome CDP not reachable (localhost:%d)" % CDP_PORT, file=sys.stderr)
-        print("Start Chrome with: chromium --remote-debugging-port=%d" % CDP_PORT, file=sys.stderr)
+        print(
+            "Start Chrome with: chromium --remote-debugging-port=%d %s"
+            % (CDP_PORT, RELAY_CHROME_FLAGS),
+            file=sys.stderr,
+        )
         sys.exit(1)
     ok, msg = cdp_navigate(url)
     print("OK" if ok else "FAIL: %s" % msg)
@@ -637,6 +642,7 @@ def cmd_inject(args):
         sys.exit(1)
     if not cdp_ok():
         print("FAIL: Chrome CDP not reachable", file=sys.stderr)
+        print("Start Chrome with: chromium --remote-debugging-port=%d %s" % (CDP_PORT, RELAY_CHROME_FLAGS), file=sys.stderr)
         sys.exit(1)
     result, err = cdp_eval(js)
     if err:
@@ -648,6 +654,7 @@ def cmd_inject(args):
 def cmd_tabs(args=None):
     if not cdp_ok():
         print("Chrome CDP not reachable", file=sys.stderr)
+        print("Start Chrome with: chromium --remote-debugging-port=%d %s" % (CDP_PORT, RELAY_CHROME_FLAGS), file=sys.stderr)
         sys.exit(1)
     tabs = cdp_tabs()
     for t in tabs:

@@ -1,99 +1,187 @@
+<!--
+  Base Mermaid (holodeck) — fullscreen, zoom (scroll), pan (drag), pinch (touch), reset.
+  Alinhado ao makeZoomable do /workspace/self/scripts/chrome-relay.py.
+
+  Regra: todo CSS e todo JS da página ficam neste arquivo (<style> + <script> inline).
+  Não extrair para .css / .js externos. Única exceção: runtime Mermaid via CDN
+  (biblioteca ~3MB; não embutir no template).
+
+  Uso manual: substitua MERMAID_DIAGRAM_HERE pelo código do diagrama (várias linhas ok).
+  Uso relay: cp para /tmp/chrome-relay/foo.html → http://vennon:<porta>/foo.html
+  Geração: string replace de MERMAID_DIAGRAM_HERE pelo texto Mermaid.
+-->
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<title>Holodeck — Mermaid</title>
-<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body {
-    width: 100vw; height: 100vh;
-    overflow: hidden;
-    background: #1e1e2e;
-    font-family: 'JetBrains Mono', monospace;
-  }
-  #wrap {
-    width: 100vw; height: 100vh;
-    display: flex; align-items: flex-start; justify-content: center;
-    overflow: hidden;
-    position: relative;
-    cursor: grab;
-    touch-action: none;
-    user-select: none;
-  }
-  #wrap.panning { cursor: grabbing; }
-  #diagram { transform-origin: 0 0; position: absolute; top: 0; left: 0; }
-  #hint {
-    position: fixed; bottom: 14px; right: 16px;
-    color: #45475a;
-    font: 11px 'JetBrains Mono', monospace;
-    pointer-events: none;
-    letter-spacing: 0.03em;
-  }
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Holodeck — Mermaid</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f0f12; --surface: #18181c; --border: #2a2a30;
+      --text: #e4e4e7; --text-muted: #71717a;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      width: 100%; height: 100%; margin: 0; overflow: hidden;
+      font-family: system-ui, sans-serif;
+      background: var(--bg); color: var(--text);
+    }
+    #content {
+      width: 100vw; height: 100vh;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      padding: 0;
+    }
+    .mermaid {
+      position: relative; overflow: hidden; cursor: grab;
+      flex: 1; min-height: 0;
+      user-select: none; -webkit-user-select: none; touch-action: none;
+      width: 100vw; height: 100vh;
+    }
+    .mermaid.panning { cursor: grabbing; }
+    .mermaid svg { display: block; transform-origin: 0 0; will-change: transform; }
+    .z-hint {
+      position: absolute; bottom: 12px; right: 16px; pointer-events: none;
+      font: 500 0.65rem/1.3 ui-monospace, monospace; color: var(--text-muted);
+      opacity: 0; transition: opacity 0.2s; white-space: pre;
+    }
+    .mermaid:hover .z-hint { opacity: 1; }
+    .z-reset {
+      position: absolute; top: 12px; right: 16px; z-index: 5;
+      font: 500 0.65rem ui-monospace, monospace; color: var(--text-muted);
+      background: rgba(15,15,18,0.7); border: 1px solid var(--border);
+      padding: 3px 10px; border-radius: 4px; cursor: pointer;
+      opacity: 0; transition: opacity 0.2s; backdrop-filter: blur(4px);
+    }
+    .mermaid:hover .z-reset { opacity: 1; }
+  </style>
 </head>
 <body>
-<div id="wrap">
-  <div id="diagram" class="mermaid">
+  <div id="content">
+    <div class="mermaid">
 MERMAID_DIAGRAM_HERE
+    </div>
   </div>
-</div>
-<div id="hint">scroll = zoom &nbsp;&middot;&nbsp; drag = pan</div>
-<script>
-mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+  <script>
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      themeVariables: {
+        primaryColor: '#7c3aed',
+        primaryTextColor: '#e4e4e7',
+        primaryBorderColor: '#2a2a30',
+        lineColor: '#71717a',
+        secondaryColor: '#18181c',
+        tertiaryColor: '#0f0f12'
+      }
+    });
 
-mermaid.run().then(function() { setTimeout(init, 120); });
+    function makeZoomable(box) {
+      if (box.dataset.z) return;
+      var svg = box.querySelector('svg');
+      if (!svg) return;
+      box.dataset.z = '1';
 
-function init() {
-  var wrap = document.getElementById('wrap');
-  var diag = document.getElementById('diagram');
-  var svg  = diag && diag.querySelector('svg');
-  if (!svg) { setTimeout(init, 150); return; }
+      var s, tx, ty, initS, initTx, initTy;
+      function put() { svg.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + s + ')'; }
 
-  var sw = svg.getBoundingClientRect().width;
-  var sh = svg.getBoundingClientRect().height;
-  if (sw < 10) { setTimeout(init, 150); return; }
+      var nat = svg.getBoundingClientRect();
+      if (nat.height < 20) {
+        setTimeout(function () { box.dataset.z = ''; makeZoomable(box); }, 150);
+        return;
+      }
+      svg.style.margin = '0';
+      var bw = box.offsetWidth || window.innerWidth;
+      var bh = box.offsetHeight || window.innerHeight;
+      var pad = 40;
+      var scaleX = (bw - pad * 2) / nat.width;
+      var scaleY = (bh - pad * 2) / nat.height;
+      s = Math.min(scaleX, scaleY, 1);
+      tx = (bw - nat.width * s) / 2;
+      ty = (bh - nat.height * s) / 2;
+      initS = s; initTx = tx; initTy = ty;
+      put();
 
-  var s  = Math.min((window.innerWidth / sw) * 0.98, (window.innerHeight / sh) * 0.98);
-  var tx = (window.innerWidth  - sw * s) / 2;
-  var ty = Math.max((window.innerHeight - sh * s) / 2, 10);
+      var hint = document.createElement('div');
+      hint.className = 'z-hint';
+      hint.textContent = 'scroll = zoom  ·  drag = pan';
+      var btn = document.createElement('button');
+      btn.className = 'z-reset';
+      btn.textContent = '⟳ reset';
+      box.appendChild(hint);
+      box.appendChild(btn);
 
-  function put() {
-    diag.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + s + ')';
-  }
-  put();
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        s = initS; tx = initTx; ty = initTy;
+        put();
+      });
 
-  wrap.addEventListener('wheel', function(e) {
-    e.preventDefault(); e.stopPropagation();
-    var rect = wrap.getBoundingClientRect();
-    var mx = e.clientX - rect.left;
-    var my = e.clientY - rect.top;
-    var f  = e.deltaY < 0 ? 1.12 : 0.87;
-    var ns = Math.min(Math.max(s * f, 0.05), 20);
-    tx = mx - (mx - tx) * (ns / s);
-    ty = my - (my - ty) * (ns / s);
-    s  = ns;
-    put();
-  }, { passive: false });
+      box.addEventListener('wheel', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var r = box.getBoundingClientRect();
+        var mx = e.clientX - r.left, my = e.clientY - r.top;
+        var f = e.deltaY < 0 ? 1.12 : 0.89;
+        var ns = Math.min(Math.max(s * f, 0.08), 15);
+        tx = mx - (mx - tx) * (ns / s);
+        ty = my - (my - ty) * (ns / s);
+        s = ns;
+        put();
+      }, { passive: false });
 
-  var dragging = false, ox = 0, oy = 0;
-  wrap.addEventListener('pointerdown', function(e) {
-    dragging = true; ox = e.clientX - tx; oy = e.clientY - ty;
-    wrap.setPointerCapture(e.pointerId);
-    wrap.classList.add('panning');
-  });
-  wrap.addEventListener('pointermove', function(e) {
-    if (!dragging) return;
-    tx = e.clientX - ox; ty = e.clientY - oy;
-    put();
-  });
-  wrap.addEventListener('pointerup', function() {
-    dragging = false; wrap.classList.remove('panning');
-  });
-  wrap.addEventListener('pointercancel', function() {
-    dragging = false; wrap.classList.remove('panning');
-  });
-}
-</script>
+      var px, py, ptx, pty;
+      box.addEventListener('pointerdown', function (e) {
+        if (e.button && e.button !== 0) return;
+        box.setPointerCapture(e.pointerId);
+        px = e.clientX; py = e.clientY; ptx = tx; pty = ty;
+        box.classList.add('panning');
+        e.preventDefault();
+      });
+      box.addEventListener('pointermove', function (e) {
+        if (!box.hasPointerCapture(e.pointerId)) return;
+        tx = ptx + (e.clientX - px); ty = pty + (e.clientY - py);
+        put();
+      });
+      box.addEventListener('pointerup', function (e) {
+        box.releasePointerCapture(e.pointerId);
+        box.classList.remove('panning');
+      });
+      box.addEventListener('pointercancel', function (e) {
+        box.releasePointerCapture(e.pointerId);
+        box.classList.remove('panning');
+      });
+
+      var ptrs = {};
+      box.addEventListener('pointerdown', function (e) {
+        ptrs[e.pointerId] = { x: e.clientX, y: e.clientY };
+      });
+      box.addEventListener('pointermove', function (e) {
+        ptrs[e.pointerId] = { x: e.clientX, y: e.clientY };
+        var ids = Object.keys(ptrs);
+        if (ids.length === 2) {
+          var a = ptrs[ids[0]], b = ptrs[ids[1]];
+          var nd = Math.hypot(a.x - b.x, a.y - b.y);
+          if (box._pd) { s = Math.min(Math.max(s * nd / box._pd, 0.08), 15); put(); }
+          box._pd = nd;
+        }
+      });
+      box.addEventListener('pointerup', function (e) {
+        delete ptrs[e.pointerId];
+        if (!Object.keys(ptrs).length) box._pd = 0;
+      });
+    }
+
+    (async function () {
+      try {
+        await mermaid.run({ nodes: document.querySelectorAll('.mermaid'), suppressErrors: true });
+      } catch (e) { console.warn('mermaid', e); }
+      setTimeout(function () {
+        document.querySelectorAll('.mermaid').forEach(makeZoomable);
+      }, 80);
+    })();
+  </script>
 </body>
 </html>

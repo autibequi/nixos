@@ -92,7 +92,7 @@ pub struct App {
     pub spin_tick: u8,
     /// True if the last completed refresh hit a subprocess timeout (podman/vennon).
     pub subprocess_degraded: bool,
-    /// Wall-clock UTC when the last snapshot finished applying.
+    /// Instant when the last snapshot finished applying (UTC internally; UI shows local time).
     pub last_refresh: Option<DateTime<Utc>>,
     /// Mode to restore when closing the help overlay.
     pub help_return: AppMode,

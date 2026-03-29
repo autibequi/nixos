@@ -8,6 +8,7 @@ e controle programatico do browser via Chrome DevTools Protocol.
 Requer Chrome/Chromium com --remote-debugging-port=9222 no host.
 Container usa network_mode: host, entao localhost:9222 funciona direto.
 URLs publicas usam RELAY_HTTP_HOST (default vennon); export para outro hostname se o Chrome nao resolver.
+Flags padrao do Chrome: RELAY_CHROME_FLAGS (sem traducao automatica nem bubble restaurar paginas).
 
 Comandos:
   chrome-relay.py nav <url> [title]     — Navega o Chrome para uma URL
@@ -41,6 +42,14 @@ PID_FILE = os.path.join(CONTENT_DIR, ".server.pid")
 # Hostname usado nas URLs que o Chrome abre (deve resolver no browser do usuario).
 # Skills/documentacao usam "vennon"; override com RELAY_HTTP_HOST se necessario (ex.: 127.0.0.1).
 RELAY_HTTP_HOST = os.environ.get("RELAY_HTTP_HOST", "vennon")
+
+# Chrome/Chromium: sem oferta de tradução automática nem bubble "restaurar páginas" após encerramento.
+# Sobrescreva com RELAY_CHROME_FLAGS="..." se precisar (valor substitui o default inteiro).
+_RELAY_CHROME_FLAGS_DEFAULT = (
+    "--disable-features=Translate "
+    "--disable-session-crashed-bubble"
+)
+RELAY_CHROME_FLAGS = os.environ.get("RELAY_CHROME_FLAGS", _RELAY_CHROME_FLAGS_DEFAULT)
 
 
 def relay_public_base(port):
@@ -585,7 +594,11 @@ def cmd_nav(args):
         sys.exit(1)
     if not cdp_ok():
         print("FAIL: Chrome CDP not reachable (localhost:%d)" % CDP_PORT, file=sys.stderr)
-        print("Start Chrome with: chromium --remote-debugging-port=%d" % CDP_PORT, file=sys.stderr)
+        print(
+            "Start Chrome with: chromium --remote-debugging-port=%d %s"
+            % (CDP_PORT, RELAY_CHROME_FLAGS),
+            file=sys.stderr,
+        )
         sys.exit(1)
     ok, msg = cdp_navigate(url)
     print("OK" if ok else "FAIL: %s" % msg)
@@ -629,6 +642,7 @@ def cmd_inject(args):
         sys.exit(1)
     if not cdp_ok():
         print("FAIL: Chrome CDP not reachable", file=sys.stderr)
+        print("Start Chrome with: chromium --remote-debugging-port=%d %s" % (CDP_PORT, RELAY_CHROME_FLAGS), file=sys.stderr)
         sys.exit(1)
     result, err = cdp_eval(js)
     if err:
@@ -640,6 +654,7 @@ def cmd_inject(args):
 def cmd_tabs(args=None):
     if not cdp_ok():
         print("Chrome CDP not reachable", file=sys.stderr)
+        print("Start Chrome with: chromium --remote-debugging-port=%d %s" % (CDP_PORT, RELAY_CHROME_FLAGS), file=sys.stderr)
         sys.exit(1)
     tabs = cdp_tabs()
     for t in tabs:
@@ -705,14 +720,16 @@ def cmd_serve(args):
 
 
 def cmd_start(args=None):
+    flags = RELAY_CHROME_FLAGS.strip()
     print("Para iniciar o Chrome relay no host:")
     print("")
-    print("  chromium --remote-debugging-port=9222 --user-data-dir=/tmp/leech-relay &")
+    print("  chromium --remote-debugging-port=9222 --user-data-dir=/tmp/leech-relay %s &" % flags)
     print("")
     print("Ou com seu perfil normal (agent tera acesso total ao browser):")
     print("")
-    print("  chromium --remote-debugging-port=9222 &")
+    print("  chromium --remote-debugging-port=9222 %s &" % flags)
     print("")
+    print("Flags padrao (traducao automatica + bubble restaurar paginas): em RELAY_CHROME_FLAGS ou veja o inicio do script.")
     print("Depois, o agent controla via CDP automaticamente.")
 
 

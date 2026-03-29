@@ -3,6 +3,7 @@ use ratatui::widgets::*;
 use ratatui::widgets::ScrollbarOrientation;
 
 use super::app::{App, AppMode, ContainerKind, Tab};
+use chrono::Local;
 use ratatui::layout::Flex;
 
 const REFRESH_SPINNER: &[&str] = &["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
@@ -192,7 +193,7 @@ fn visible_resource_summary(app: &App) -> String {
     format!("Σ {}", parts.join(" · "))
 }
 
-/// Spinner + UTC time (+ stale) on the top border of the Services/Agents table.
+/// Horário local (mesmo fuso do PC) + sufixo de largura fixa (ex-` UTC`) para spinner — sem “pulo” no layout.
 fn container_table_top_right_title(app: &App) -> Line<'static> {
     let mut spans: Vec<Span<'static>> = Vec::new();
     if app.subprocess_degraded {
@@ -201,16 +202,20 @@ fn container_table_top_right_title(app: &App) -> Line<'static> {
             Style::default().fg(PEACH).bold(),
         ));
     }
-    if app.refresh_inflight {
-        let spin = REFRESH_SPINNER[(app.spin_tick as usize) % REFRESH_SPINNER.len()];
-        spans.push(Span::styled(spin, Style::default().fg(PEACH).bold()));
-        spans.push(Span::raw(" "));
-    }
     let time_str: String = app
         .last_refresh
-        .map(|t| t.format("%H:%M:%S UTC").to_string())
-        .unwrap_or_else(|| "—".into());
+        .map(|t| t.with_timezone(&Local).format("%H:%M:%S").to_string())
+        .unwrap_or_else(|| "--:--:--".into());
     spans.push(Span::styled(time_str, Style::default().fg(DIM)));
+    // 4 colunas fixas onde era ` UTC`: espaço + 1 célula (spinner ou espaço) + alinhamento
+    if app.refresh_inflight {
+        let spin = REFRESH_SPINNER[(app.spin_tick as usize) % REFRESH_SPINNER.len()];
+        spans.push(Span::styled(" ", Style::default().fg(DIM)));
+        spans.push(Span::styled(spin, Style::default().fg(PEACH).bold()));
+        spans.push(Span::styled("  ", Style::default().fg(DIM)));
+    } else {
+        spans.push(Span::styled("    ", Style::default().fg(DIM)));
+    }
     Line::from(spans).alignment(Alignment::Right)
 }
 

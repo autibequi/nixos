@@ -3,7 +3,9 @@ mod ui;
 
 use anyhow::Result;
 use crossterm::{
-    event::{self, Event, KeyCode, KeyModifiers},
+    event::{
+        self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyModifiers, MouseEventKind,
+    },
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -14,10 +16,10 @@ use std::time::{Duration, Instant};
 pub use app::{App, AppMode};
 
 pub fn run() -> Result<()> {
-    // Setup terminal (mouse capture disabled — fewer edge cases on Wayland/Hyprland)
+    // Mouse capture: wheel → eventos Mouse::* (scroll só nos logs); sem isso alguns terminais emitem ↑/↓ e movem a lista.
     enable_raw_mode()?;
     let mut stdout = io::stdout();
-    execute!(stdout, EnterAlternateScreen)?;
+    execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
@@ -29,7 +31,7 @@ pub fn run() -> Result<()> {
 
     // Restore terminal
     disable_raw_mode()?;
-    execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
+    execute!(terminal.backend_mut(), DisableMouseCapture, LeaveAlternateScreen)?;
     terminal.show_cursor()?;
 
     result
@@ -95,13 +97,21 @@ fn run_loop(
                                 if app.is_interactive_action(&act) {
                                     // Suspend TUI for interactive commands (shell)
                                     disable_raw_mode()?;
-                                    execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
+                                    execute!(
+                                        terminal.backend_mut(),
+                                        DisableMouseCapture,
+                                        LeaveAlternateScreen
+                                    )?;
 
                                     let _ = app.exec_action(&act);
 
                                     // Restore TUI
                                     enable_raw_mode()?;
-                                    execute!(terminal.backend_mut(), EnterAlternateScreen)?;
+                                    execute!(
+                                        terminal.backend_mut(),
+                                        EnterAlternateScreen,
+                                        EnableMouseCapture
+                                    )?;
                                     terminal.clear()?;
                                 } else {
                                     // Non-interactive: spawn in background, stay in TUI
@@ -114,6 +124,15 @@ fn run_loop(
                         }
                         _ => {}
                     },
+                }
+            }
+            Event::Mouse(me) => {
+                if matches!(app.mode, AppMode::Normal) {
+                    match me.kind {
+                        MouseEventKind::ScrollUp => app.scroll_logs_up(),
+                        MouseEventKind::ScrollDown => app.scroll_logs_down(),
+                        _ => {}
+                    }
                 }
             }
             Event::Resize(_, _) => {
