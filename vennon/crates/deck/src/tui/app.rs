@@ -17,6 +17,14 @@ pub enum ContainerKind {
     Sidecar,
 }
 
+/// One enum group from vennon.yaml (e.g. env, vertical).
+#[derive(Debug, Clone)]
+pub struct EnumGroup {
+    pub name: String,
+    pub values: Vec<String>,
+    pub default: String,
+}
+
 #[derive(Debug, Clone)]
 pub struct ContainerInfo {
     pub name: String,
@@ -31,14 +39,23 @@ pub struct ContainerInfo {
     pub debug: String,
     /// Raw VERTICAL value from running container (e.g. "medicina", "oab").
     pub vertical: String,
-    /// Valid values for --env arg (from vennon.yaml enums.env.values).
-    pub env_values: Vec<String>,
-    /// Valid values for --vertical arg (from vennon.yaml enums.vertical.values).
-    pub vertical_values: Vec<String>,
+    /// All enums from vennon.yaml (env, vertical, and any future ones).
+    pub enums: Vec<EnumGroup>,
     /// Whether the serve command has a --debug bool arg.
     pub has_debug: bool,
     pub commands: Vec<String>,
     pub kind: ContainerKind,
+}
+
+impl ContainerInfo {
+    /// Get current display value for a given enum name (from podman inspect or default).
+    pub fn current_for_enum(&self, enum_name: &str) -> &str {
+        match enum_name {
+            "env" => &self.env,
+            "vertical" => &self.vertical,
+            _ => "",
+        }
+    }
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -214,8 +231,13 @@ impl App {
             return;
         }
         let mut next = (self.menu_cursor + 1) % actions.len();
-        if actions.get(next).map(|a| a.as_str()) == Some("---") {
-            next = (next + 1) % actions.len();
+        // Skip headers and separators
+        for _ in 0..3 {
+            if is_menu_separator(actions.get(next).map(|a| a.as_str()).unwrap_or("")) {
+                next = (next + 1) % actions.len();
+            } else {
+                break;
+            }
         }
         self.menu_cursor = next;
     }
@@ -226,8 +248,13 @@ impl App {
             return;
         }
         let mut prev = self.menu_cursor.checked_sub(1).unwrap_or(actions.len() - 1);
-        if actions.get(prev).map(|a| a.as_str()) == Some("---") {
-            prev = prev.checked_sub(1).unwrap_or(actions.len() - 1);
+        // Skip headers and separators
+        for _ in 0..3 {
+            if is_menu_separator(actions.get(prev).map(|a| a.as_str()).unwrap_or("")) {
+                prev = prev.checked_sub(1).unwrap_or(actions.len() - 1);
+            } else {
+                break;
+            }
         }
         self.menu_cursor = prev;
     }
@@ -247,27 +274,23 @@ impl App {
                 ContainerKind::Ide => c.commands.clone(),
                 ContainerKind::Service => {
                     let mut actions = c.commands.clone();
-                    let has_params = !c.env_values.is_empty()
-                        || c.has_debug
-                        || !c.vertical_values.is_empty();
-                    if has_params {
-                        actions.push("---".into());
+                    // Enum groups — each becomes a labeled section in the menu
+                    for group in &c.enums {
+                        actions.push(format!("# {}", group.name.to_uppercase()));
+                        let current = c.current_for_enum(&group.name);
+                        for v in &group.values {
+                            let short = shorten_param(&group.name, v);
+                            let mark = if short == current { " ✓" } else { "" };
+                            actions.push(format!("{}:{v}{mark}", group.name));
+                        }
                     }
-                    for v in &c.env_values {
-                        let mark = if shorten_env(v) == c.env { " ✓" } else { "" };
-                        actions.push(format!("env:{v}{mark}"));
-                    }
+                    // Debug is a bool arg, not an enum — special group
                     if c.has_debug {
+                        actions.push("# DEBUG".into());
                         let on_mark = if c.debug == "on" { " ✓" } else { "" };
                         let off_mark = if c.debug == "off" || c.debug.is_empty() { " ✓" } else { "" };
                         actions.push(format!("debug:on{on_mark}"));
                         actions.push(format!("debug:off{off_mark}"));
-                    }
-                    if !c.vertical_values.is_empty() {
-                        for v in &c.vertical_values {
-                            let mark = if shorten_vertical(v) == c.vertical { " ✓" } else { "" };
-                            actions.push(format!("vert:{v}{mark}"));
-                        }
                     }
                     actions
                 }
@@ -297,7 +320,7 @@ impl App {
     }
 
     pub fn exec_action(&self, action: &str) -> Result<()> {
-        if action == "---" {
+        if is_menu_separator(action) {
             return Ok(());
         }
         let action = action.trim_end_matches(" ✓");
@@ -306,50 +329,56 @@ impl App {
             None => return Ok(()),
         };
 
-        if let Some(env_val) = action.strip_prefix("env:") {
-            let mut args = vec![container.display_name.clone(), "serve".into(),
-                                format!("--env={env_val}")];
-            if !container.vertical.is_empty() && !container.vertical_values.is_empty() {
-                args.push(format!("--vertical={}", container.vertical));
-            }
-            if container.debug == "on" && container.has_debug {
-                args.push("--debug=true".into());
-            }
-            let _ = Command::new("vennon").args(&args).status();
-            return Ok(());
-        }
-
-        if let Some(vert_val) = action.strip_prefix("vert:") {
-            let mut args = vec![container.display_name.clone(), "serve".into(),
-                                format!("--vertical={vert_val}")];
-            if !container.env.is_empty() && !container.env_values.is_empty() {
-                args.push(format!("--env={}", container.env));
-            }
-            if container.debug == "on" && container.has_debug {
-                args.push("--debug=true".into());
-            }
-            let _ = Command::new("vennon").args(&args).status();
-            return Ok(());
-        }
-
+        // Debug toggle — special case (bool, not enum)
         if let Some(dbg_val) = action.strip_prefix("debug:") {
             let flag = if dbg_val == "on" { "--debug=true" } else { "--debug=false" };
-            let mut args = vec![container.display_name.clone(), "serve".into(),
-                                flag.into()];
-            if !container.env.is_empty() && !container.env_values.is_empty() {
-                args.push(format!("--env={}", container.env));
-            }
-            if !container.vertical.is_empty() && !container.vertical_values.is_empty() {
-                args.push(format!("--vertical={}", container.vertical));
-            }
+            let mut args = vec![container.display_name.clone(), "serve".into(), flag.into()];
+            self.append_preserved_params(&container, Some("debug"), &mut args);
             let _ = Command::new("vennon").args(&args).status();
             return Ok(());
         }
 
+        // Generic enum parameter — matches any "name:value" where name is a known enum
+        if let Some((param_name, param_val)) = action.split_once(':') {
+            let is_known_enum = container.enums.iter().any(|g| g.name == param_name);
+            if is_known_enum {
+                let mut args = vec![
+                    container.display_name.clone(),
+                    "serve".into(),
+                    format!("--{param_name}={param_val}"),
+                ];
+                self.append_preserved_params(&container, Some(param_name), &mut args);
+                let _ = Command::new("vennon").args(&args).status();
+                return Ok(());
+            }
+        }
+
+        // Plain command (serve, stop, logs, etc.)
         let _ = Command::new("vennon")
             .args([&container.display_name, action])
             .status();
         Ok(())
+    }
+
+    /// Append --flag for all other params so switching one doesn't lose the rest.
+    fn append_preserved_params(&self, container: &ContainerInfo, skip: Option<&str>, args: &mut Vec<String>) {
+        for group in &container.enums {
+            if skip == Some(group.name.as_str()) {
+                continue;
+            }
+            let current = container.current_for_enum(&group.name);
+            if !current.is_empty() {
+                // Reverse-lookup: find the full enum value that matches the shortened display
+                let full_val = group.values.iter()
+                    .find(|v| shorten_param(&group.name, v) == current)
+                    .cloned()
+                    .unwrap_or_else(|| current.to_string());
+                args.push(format!("--{}={}", group.name, full_val));
+            }
+        }
+        if skip != Some("debug") && container.debug == "on" && container.has_debug {
+            args.push("--debug=true".into());
+        }
     }
 }
 
@@ -438,15 +467,13 @@ fn collect_all() -> (Vec<ContainerInfo>, bool) {
             let manifest = get_manifest_data(&name);
 
             // Use enum defaults for stopped containers; running ones get overwritten by podman inspect below.
-            let env_default = if manifest.env_default.is_empty() {
-                String::new()
-            } else {
-                shorten_env(&manifest.env_default)
+            let env_default = {
+                let d = manifest.enum_default("env");
+                if d.is_empty() { String::new() } else { shorten_env(d) }
             };
-            let vert_default = if manifest.vertical_default.is_empty() {
-                String::new()
-            } else {
-                shorten_vertical(&manifest.vertical_default)
+            let vert_default = {
+                let d = manifest.enum_default("vertical");
+                if d.is_empty() { String::new() } else { shorten_vertical(d) }
             };
 
             containers.push(ContainerInfo {
@@ -459,8 +486,7 @@ fn collect_all() -> (Vec<ContainerInfo>, bool) {
                 env: env_default,
                 debug: String::new(),
                 vertical: vert_default,
-                env_values: manifest.env_values,
-                vertical_values: manifest.vertical_values,
+                enums: manifest.enums,
                 has_debug: manifest.has_debug,
                 commands: manifest.commands,
                 kind: ContainerKind::Service,
@@ -522,8 +548,7 @@ fn monolito_sidecar_rows(
             env: String::new(),
             debug: String::new(),
             vertical: String::new(),
-            env_values: vec![],
-            vertical_values: vec![],
+            enums: vec![],
             has_debug: false,
             commands: vec![],
             kind: ContainerKind::Sidecar,
@@ -572,8 +597,7 @@ fn ide_row(ide: &str, running: &HashMap<String, (String, bool, String, String)>)
             env: String::new(),
             debug: String::new(),
             vertical: String::new(),
-            env_values: vec![],
-            vertical_values: vec![],
+            enums: vec![],
             has_debug: false,
             commands: vec![],
             kind: ContainerKind::Ide,
@@ -589,8 +613,7 @@ fn ide_row(ide: &str, running: &HashMap<String, (String, bool, String, String)>)
             env: String::new(),
             debug: String::new(),
             vertical: String::new(),
-            env_values: vec![],
-            vertical_values: vec![],
+            enums: vec![],
             has_debug: false,
             commands: vec![],
             kind: ContainerKind::Ide,
@@ -718,6 +741,20 @@ fn collect_container_envs(names: &[String]) -> HashMap<String, (String, String, 
     map
 }
 
+/// True for menu items that aren't actionable (headers, separators).
+fn is_menu_separator(s: &str) -> bool {
+    s == "---" || s.starts_with("# ")
+}
+
+/// Shorten a param value for display, dispatching to the right shortener.
+fn shorten_param(enum_name: &str, v: &str) -> String {
+    match enum_name {
+        "env" => shorten_env(v),
+        "vertical" => shorten_vertical(v),
+        _ => v.to_string(),
+    }
+}
+
 fn shorten_vertical(v: &str) -> String {
     match v.to_lowercase().as_str() {
         "medicina"              => "med".into(),
@@ -743,14 +780,21 @@ fn shorten_env(v: &str) -> String {
 /// Result of parsing a service manifest (vennon.yaml).
 struct ManifestData {
     commands: Vec<String>,
-    env_values: Vec<String>,
-    vertical_values: Vec<String>,
+    /// All enums from the manifest (name, values, default).
+    enums: Vec<EnumGroup>,
     has_debug: bool,
-    env_default: String,
-    vertical_default: String,
 }
 
-/// Parse vennon.yaml and return manifest data including enum defaults.
+impl ManifestData {
+    fn enum_default(&self, name: &str) -> &str {
+        self.enums.iter()
+            .find(|e| e.name == name)
+            .map(|e| e.default.as_str())
+            .unwrap_or("")
+    }
+}
+
+/// Parse vennon.yaml and return manifest data including all enums.
 fn get_manifest_data(name: &str) -> ManifestData {
     let home = std::env::var("HOME").unwrap_or_else(|_| "/root".into());
     let candidates = [
@@ -761,31 +805,18 @@ fn get_manifest_data(name: &str) -> ManifestData {
     for path in &candidates {
         if let Ok(contents) = std::fs::read_to_string(path) {
             let commands = parse_yaml_commands(&contents);
-            let env_values = parse_yaml_enum_values(&contents, "env");
-            let vertical_values = parse_yaml_enum_values(&contents, "vertical");
+            let enums = parse_yaml_all_enums(&contents);
             let has_debug = parse_yaml_serve_has_bool_arg(&contents, "debug");
-            let env_default = parse_yaml_enum_default(&contents, "env").unwrap_or_default();
-            let vertical_default = parse_yaml_enum_default(&contents, "vertical").unwrap_or_default();
             if !commands.is_empty() {
-                return ManifestData {
-                    commands,
-                    env_values,
-                    vertical_values,
-                    has_debug,
-                    env_default,
-                    vertical_default,
-                };
+                return ManifestData { commands, enums, has_debug };
             }
         }
     }
 
     ManifestData {
         commands: vec!["serve".into(), "stop".into(), "logs".into(), "shell".into(), "flush".into()],
-        env_values: vec![],
-        vertical_values: vec![],
+        enums: vec![],
         has_debug: false,
-        env_default: String::new(),
-        vertical_default: String::new(),
     }
 }
 
@@ -813,81 +844,65 @@ fn parse_yaml_commands(contents: &str) -> Vec<String> {
     commands
 }
 
-/// Extract `values:` list for a given enum name in the yaml.
-fn parse_yaml_enum_values(contents: &str, enum_name: &str) -> Vec<String> {
-    // Look for "  <enum_name>:" under "enums:", then collect "values: [...]"
+/// Parse all enums from `enums:` block in vennon.yaml.
+/// Returns a list of (name, values, default) for each enum found.
+fn parse_yaml_all_enums(contents: &str) -> Vec<EnumGroup> {
+    let mut enums = vec![];
     let mut in_enums = false;
-    let mut in_target_enum = false;
-    let mut values = vec![];
+    let mut current_name = String::new();
+    let mut current_values = vec![];
+    let mut current_default = String::new();
 
     for line in contents.lines() {
         if line.starts_with("enums:") {
             in_enums = true;
             continue;
         }
-        if in_enums {
-            // Top-level exit
-            if !line.starts_with(' ') && !line.is_empty() {
-                break;
-            }
-            // "  env:" or "  vertical:"
-            let trimmed = line.trim();
-            if trimmed == format!("{enum_name}:") {
-                in_target_enum = true;
-                continue;
-            }
-            // Another enum at same indent level resets
-            if line.starts_with("  ") && !line.starts_with("   ") && trimmed.ends_with(':') {
-                in_target_enum = false;
-            }
-            if in_target_enum {
-                if let Some(rest) = trimmed.strip_prefix("values:") {
-                    // Inline array: values: [local, sand, prod]
-                    let inner = rest.trim().trim_start_matches('[').trim_end_matches(']');
-                    values = inner.split(',').map(|v| v.trim().to_string())
-                        .filter(|v| !v.is_empty()).collect();
-                    return values;
-                }
-            }
-        }
-    }
-    values
-}
-
-/// Extract `default:` value for a given enum name under `enums:`.
-fn parse_yaml_enum_default(contents: &str, enum_name: &str) -> Option<String> {
-    let mut in_enums = false;
-    let mut in_target_enum = false;
-
-    for line in contents.lines() {
-        if line.starts_with("enums:") {
-            in_enums = true;
+        if !in_enums {
             continue;
         }
-        if in_enums {
-            if !line.starts_with(' ') && !line.is_empty() {
-                break;
+        // Exit enums block
+        if !line.starts_with(' ') && !line.is_empty() {
+            break;
+        }
+        let trimmed = line.trim();
+        // New enum at 2-space indent: "  env:", "  vertical:"
+        if line.starts_with("  ") && !line.starts_with("   ") && trimmed.ends_with(':') && !trimmed.starts_with('#') {
+            // Save previous enum if any
+            if !current_name.is_empty() && !current_values.is_empty() {
+                enums.push(EnumGroup {
+                    name: current_name.clone(),
+                    values: current_values.clone(),
+                    default: current_default.clone(),
+                });
             }
-            let trimmed = line.trim();
-            if trimmed == format!("{enum_name}:") {
-                in_target_enum = true;
-                continue;
-            }
-            // Another enum at same indent level resets
-            if line.starts_with("  ") && !line.starts_with("   ") && trimmed.ends_with(':') {
-                in_target_enum = false;
-            }
-            if in_target_enum {
-                if let Some(rest) = trimmed.strip_prefix("default:") {
-                    let val = rest.trim().to_string();
-                    if !val.is_empty() {
-                        return Some(val);
-                    }
-                }
+            current_name = trimmed.trim_end_matches(':').to_string();
+            current_values.clear();
+            current_default.clear();
+            continue;
+        }
+        // Inside an enum: look for values: and default:
+        if !current_name.is_empty() {
+            if let Some(rest) = trimmed.strip_prefix("values:") {
+                let inner = rest.trim().trim_start_matches('[').trim_end_matches(']');
+                current_values = inner.split(',')
+                    .map(|v| v.trim().to_string())
+                    .filter(|v| !v.is_empty())
+                    .collect();
+            } else if let Some(rest) = trimmed.strip_prefix("default:") {
+                current_default = rest.trim().to_string();
             }
         }
     }
-    None
+    // Save last enum
+    if !current_name.is_empty() && !current_values.is_empty() {
+        enums.push(EnumGroup {
+            name: current_name,
+            values: current_values,
+            default: current_default,
+        });
+    }
+    enums
 }
 
 /// Check if the `serve` command has a bool arg with the given name.

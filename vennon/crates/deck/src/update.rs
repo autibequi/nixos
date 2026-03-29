@@ -128,32 +128,46 @@ pub fn run() -> Result<()> {
 
         let src = vennon_dir.join("target/release").join(bin);
         let dst = install_dir.join(bin);
+        let tmp = install_dir.join(format!(".{bin}.tmp"));
 
-        let result = std::fs::create_dir_all(&install_dir)
-            .map_err(|e| format!("mkdir {}: {e}", install_dir.display()))
-            .and_then(|_| {
-                // Copy to a temp file first, then rename — avoids "text file busy" when
-                // overwriting a running binary (e.g. deck replacing itself).
-                let tmp = dst.with_extension("tmp");
-                std::fs::copy(&src, &tmp)
-                    .map_err(|e| format!("copy {} → {}: {e}", src.display(), tmp.display()))
-                    .and_then(|_| {
-                        set_executable_or_err(&tmp)?;
-                        std::fs::rename(&tmp, &dst)
-                            .map_err(|e| format!("rename → {}: {e}", dst.display()))
-                    })
-            });
+        let reason: Option<String> = 'install: {
+            if !src.exists() {
+                break 'install Some(format!("binário não encontrado: {}", src.display()));
+            }
+            if let Err(e) = std::fs::create_dir_all(&install_dir) {
+                break 'install Some(format!("mkdir {}: {e}", install_dir.display()));
+            }
+            // Copy to hidden tmp in same dir (same fs), set perms, then atomic rename.
+            // Using rename over a running executable works on Linux (old inode stays alive).
+            if let Err(e) = std::fs::copy(&src, &tmp) {
+                break 'install Some(format!("copy: {e}"));
+            }
+            if let Err(e) = set_executable_or_err(&tmp) {
+                let _ = std::fs::remove_file(&tmp);
+                break 'install Some(format!("chmod: {e}"));
+            }
+            if let Err(e) = std::fs::rename(&tmp, &dst) {
+                let _ = std::fs::remove_file(&tmp);
+                break 'install Some(format!("rename: {e}"));
+            }
+            None
+        };
 
         let elapsed = start.elapsed();
-        match result {
-            Ok(_) => {
+        match reason {
+            None => {
                 print_step_ok(&mut out, steps[step_idx].1, elapsed)?;
                 results.push((true, elapsed));
             }
-            Err(reason) => {
+            Some(reason) => {
                 print_step_fail(&mut out, steps[step_idx].1, elapsed)?;
+                // Print detail line inline so it's always visible regardless of cursor state
+                out.queue(SetForegroundColor(RED))?;
+                out.queue(Print(format!("       {reason}\n")))?;
+                out.queue(ResetColor)?;
+                out.flush()?;
                 cursor_to_end(&mut out, steps.len(), step_idx + 1)?;
-                bail!("falhou ao instalar {bin}: {reason}");
+                bail!("falhou ao instalar {bin}");
             }
         }
     }

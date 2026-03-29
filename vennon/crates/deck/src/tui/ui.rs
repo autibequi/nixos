@@ -239,9 +239,10 @@ fn render_menu(frame: &mut Frame, app: &App, area: Rect) {
         .iter()
         .enumerate()
         .map(|(i, label)| {
-            if label == "---" {
-                return ListItem::new("  ────────────────")
-                    .style(Style::default().fg(DIM));
+            // Group header: "# ENV", "# VERTICAL", etc.
+            if let Some(header) = label.strip_prefix("# ") {
+                return ListItem::new(format!(" ─ {header} ─"))
+                    .style(Style::default().fg(MAUVE).bold());
             }
             let style = if i == app.menu_cursor {
                 Style::default().fg(MAUVE).bold()
