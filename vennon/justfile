@@ -12,9 +12,9 @@ build:
 dev:
     {{nix_run}} "cargo build"
 
-# Run all tests
+# Run all tests (todos os crates do workspace)
 test:
-    {{nix_run}} "cargo test"
+    {{nix_run}} "cargo test --workspace"
 
 # Lint
 clippy:

@@ -1,10 +1,10 @@
-<!-- holodeck mermaid base — doc e atalhos em skills/webview/SKILL.md (secção Pacote Mermaid) -->
+<!-- Template Mermaid oficial (vennon/holodeck) — skills/webview/mermaid/README.md · SKILL.md Pacote Mermaid -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MERMAID_TITLE_HERE</title>
+  <title>Holodeck — base.html</title>
   <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
   <style>
     :root {
@@ -81,12 +81,6 @@
       border-color: var(--ctp-mauve);
       outline: none;
     }
-    .hk-kbd-hint {
-      font-size: 0.65rem; color: var(--text-muted);
-      opacity: 0.85;
-      max-width: 14rem; line-height: 1.35;
-    }
-
     #hk-stage {
       flex: 1 1 0;
       min-height: 0;
@@ -107,7 +101,7 @@
     .mermaid.panning { cursor: grabbing; }
     .mermaid svg { display: block; transform-origin: 0 0; will-change: transform; }
     .z-hint {
-      position: absolute; bottom: 10px; right: 12px; pointer-events: none;
+      position: absolute; bottom: 10px; left: 12px; pointer-events: none;
       font: 500 0.62rem/1.3 ui-monospace, monospace; color: var(--text-muted);
       opacity: 0; transition: opacity 0.2s; white-space: pre;
     }
@@ -185,27 +179,62 @@
       outline: 2px solid rgba(116, 199, 236, 0.45);
       outline-offset: 1px;
     }
+
+    .hk-map-controls {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      z-index: 25;
+      display: flex;
+      flex-direction: column;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+      border: 1px solid var(--border);
+    }
+    .hk-map-btn {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      margin: 0;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      background: rgba(24, 24, 28, 0.96);
+      color: var(--text);
+      font: 600 1.2rem/1 ui-sans-serif, sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hk-map-btn:last-child { border-bottom: none; }
+    .hk-map-btn:hover, .hk-map-btn:focus-visible {
+      background: #2a2a32;
+      outline: none;
+    }
   </style>
 </head>
 <body>
   <header class="hk-head">
     <div class="hk-brand">
-      <h1>MERMAID_TITLE_HERE</h1>
+      <h1>Holodeck — base.html</h1>
       <p class="hk-sub" id="hk-sub">MERMAID_SUBTITLE_HERE</p>
     </div>
     <div class="hk-toolbar">
       <span id="hk-zoom-pct" class="hk-zoom" aria-live="polite" title="Zoom % relativo ao encaixe inicial">100%</span>
       <button type="button" class="hk-btn" id="hk-btn-reset" aria-label="Repor zoom e posição (atalho R)">Reset</button>
-      <button type="button" class="hk-btn" id="hk-btn-source" aria-label="Mostrar ou ocultar código fonte Mermaid (atalho S)">Código</button>
-      <button type="button" class="hk-btn" id="hk-btn-copy" aria-label="Copiar código Mermaid">Copiar</button>
+      <button type="button" class="hk-btn" id="hk-btn-source" aria-label="Mostrar ou ocultar código fonte Mermaid">Código</button>
       <button type="button" class="hk-btn" id="hk-btn-svg" aria-label="Exportar diagrama como ficheiro SVG">SVG</button>
       <button type="button" class="hk-btn" id="hk-btn-fs" aria-label="Alternar ecrã inteiro (atalho F)">⛶</button>
-      <span class="hk-kbd-hint" title="Atalhos">S código · R reset · +/- zoom · 0 fit · F ecrã · Esc fecha código</span>
     </div>
   </header>
   <div id="hk-stage">
     <div class="mermaid">
 MERMAID_DIAGRAM_HERE
+    </div>
+    <div class="hk-map-controls" role="toolbar" aria-label="Zoom do diagrama">
+      <button type="button" class="hk-map-btn" id="hk-map-zoom-in" title="Aproximar">+</button>
+      <button type="button" class="hk-map-btn" id="hk-map-zoom-out" title="Afastar">−</button>
     </div>
   </div>
 
@@ -466,16 +495,6 @@ MERMAID_DIAGRAM_HERE
     });
   }
 
-  function copySources() {
-    var p = getSourcePanel();
-    var ta = getSourceTa();
-    var text = (p && p.classList.contains('hk-open') && ta) ? ta.value : sources.join('\n\n---\n\n');
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      return navigator.clipboard.writeText(text);
-    }
-    return Promise.reject();
-  }
-
   function exportSvg() {
     var box = getPrimaryBox();
     if (!box || !box._holodeck) return;
@@ -514,16 +533,17 @@ MERMAID_DIAGRAM_HERE
   document.getElementById('hk-btn-apply').addEventListener('click', function () {
     applyMermaidFromEditor();
   });
-  document.getElementById('hk-btn-copy').addEventListener('click', function () {
-    copySources().catch(function () {
-      var p = getSourcePanel();
-      var ta = getSourceTa();
-      var fallback = (p && p.classList.contains('hk-open') && ta) ? ta.value : sources.join('\n\n');
-      window.prompt('Copiar código Mermaid:', fallback);
-    });
-  });
   document.getElementById('hk-btn-svg').addEventListener('click', exportSvg);
   document.getElementById('hk-btn-fs').addEventListener('click', toggleFs);
+
+  document.getElementById('hk-map-zoom-in').addEventListener('click', function () {
+    var b = getPrimaryBox();
+    if (b && b._holodeck) b._holodeck.zoomIn();
+  });
+  document.getElementById('hk-map-zoom-out').addEventListener('click', function () {
+    var b = getPrimaryBox();
+    if (b && b._holodeck) b._holodeck.zoomOut();
+  });
 
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
@@ -536,12 +556,6 @@ MERMAID_DIAGRAM_HERE
     }
     var tag = (e.target && e.target.tagName) || '';
     if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable) return;
-
-    if (e.key === 's' || e.key === 'S') {
-      e.preventDefault();
-      toggleSourcePanel();
-      return;
-    }
 
     var b = getPrimaryBox();
     if (!b || !b._holodeck) return;

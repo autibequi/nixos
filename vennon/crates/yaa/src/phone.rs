@@ -2,7 +2,7 @@ use anyhow::{bail, Result};
 use std::collections::HashMap;
 use std::time::Instant;
 
-use crate::config::{self, YaaConfig};
+use crate::config::YaaConfig;
 use crate::exec;
 
 /// Parse YAML frontmatter from a markdown file.

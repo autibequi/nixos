@@ -7,6 +7,8 @@ description: Template de flowchart Mermaid para o holodeck — zoom/drag builtin
 
 Zoom + drag estao embutidos no relay. Basta usar `show` com um bloco mermaid.
 
+**Template HTML único (oficial):** `mermaid/base.html` — toolbar, painel código, zoom +/−, título fixo *Holodeck — base.html*; ver `mermaid/README.md`.
+
 ## Como usar
 
 ```bash

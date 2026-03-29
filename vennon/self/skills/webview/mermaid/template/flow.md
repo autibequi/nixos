@@ -28,12 +28,13 @@ flowchart TD
   style D fill:#fab387,color:#1e1e2e
 ```
 
-## Título sugerido para placeholders
+## Placeholders no `base.html`
+
+O nome do gráfico na barra é fixo: **Holodeck — base.html** (título e `document.title`).
 
 | Placeholder | Exemplo |
 |-------------|---------|
-| `MERMAID_TITLE_HERE` | Pipeline — decisão |
-| `MERMAID_SUBTITLE_HERE` | Card XYZ · branch `feature/foo` |
+| `MERMAID_SUBTITLE_HERE` | Card XYZ · branch `feature/foo` (ou vazio para ocultar) |
 | `MERMAID_DIAGRAM_HERE` | o bloco `flowchart TD` acima (sem fences) |
 
 Para HTML gerado a partir deste `.md`, substitua `MERMAID_SUBTITLE_HERE` por texto real ou deixe vazio para ocultar a linha.
