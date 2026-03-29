@@ -29,6 +29,7 @@ commands:
       env_file: "env/{{ env | map }}.env"
       env:
         VERTICAL: "{{ vertical }}"
+        APP_ENV_FILE: "{{ env | map }}"
       action: up -d --force-recreate
 
   stop:

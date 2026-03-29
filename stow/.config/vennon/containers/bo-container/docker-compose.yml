@@ -10,6 +10,7 @@ services:
     environment:
       - FORCE_COLOR=1
       - TERM=xterm-256color
+      - VERTICAL=${VERTICAL:-carreiras-juridicas}
       # Mais RAM pro webpack — evita OOM matar o processo silenciosamente
       - NODE_OPTIONS=--max-old-space-size=4096
     tty: true

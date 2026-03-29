@@ -30,6 +30,7 @@ commands:
       env:
         VERTICAL: "{{ vertical }}"
         NPM_SCRIPT_ENV: "{{ env | map }}"
+        APP_ENV_FILE: "{{ env | map }}"
       action: up -d --force-recreate
 
   stop:

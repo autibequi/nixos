@@ -37,6 +37,9 @@ commands:
         - if: dev
           file: docker-compose.dev.yml
       env_file: "env/{{ env | map }}.env"
+      env:
+        APP_ENV_FILE: "{{ env | map }}"
+        APP_ENV: "{{ env }}"
       action: up -d --force-recreate
 
   stop:
@@ -108,4 +111,7 @@ commands:
     compose:
       files: [docker-compose.worker.yml, docker-compose.deps.yml]
       env_file: "env/{{ env | map }}.env"
+      env:
+        APP_ENV_FILE: "{{ env | map }}"
+        APP_ENV: "{{ env }}"
       action: up -d --force-recreate
