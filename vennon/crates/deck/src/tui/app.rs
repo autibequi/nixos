@@ -190,21 +190,10 @@ fn collect_all() -> Vec<ContainerInfo> {
     let running = collect_running();
 
     // 1. IDE containers — always show claude/opencode/cursor
+    // yaa/vennon uses project vennon-{ide}-{VENNON_INSTANCE}, so match exact name or vennon-{ide}-* .
     for name in &["claude", "opencode", "cursor"] {
-        let podman_name = format!("vennon-{name}");
-        let (status, is_up, cpu, mem) = running
-            .get(&podman_name)
-            .cloned()
-            .unwrap_or_else(|| ("stopped".into(), false, String::new(), String::new()));
-        containers.push(ContainerInfo {
-            name: podman_name,
-            display_name: name.to_string(),
-            status,
-            is_up,
-            cpu,
-            mem,
-            commands: vec![],  // IDE uses default actions
-        });
+        let row = ide_row(name, &running);
+        containers.push(row);
     }
 
     // 2. Service containers — discover from vennon list
@@ -250,6 +239,58 @@ fn collect_all() -> Vec<ContainerInfo> {
     }
 
     containers
+}
+
+/// One IDE row: any Podman name `vennon-{ide}` or `vennon-{ide}-<slug>` (yaa instance).
+fn ide_row(ide: &str, running: &HashMap<String, (String, bool, String, String)>) -> ContainerInfo {
+    let exact = format!("vennon-{ide}");
+    let prefix = format!("vennon-{ide}-");
+
+    let mut matches: Vec<&String> = running
+        .keys()
+        .filter(|k| *k == &exact || k.starts_with(&prefix))
+        .collect();
+    matches.sort();
+
+    let mut chosen: Option<(&String, &(String, bool, String, String))> = None;
+    for k in &matches {
+        if let Some(entry) = running.get(*k) {
+            if entry.1 {
+                chosen = Some((*k, entry));
+                break;
+            }
+        }
+    }
+    if chosen.is_none() {
+        for k in &matches {
+            if let Some(entry) = running.get(*k) {
+                chosen = Some((*k, entry));
+                break;
+            }
+        }
+    }
+
+    if let Some((k, e)) = chosen {
+        ContainerInfo {
+            name: (*k).clone(),
+            display_name: ide.to_string(),
+            status: e.0.clone(),
+            is_up: e.1,
+            cpu: e.2.clone(),
+            mem: e.3.clone(),
+            commands: vec![],
+        }
+    } else {
+        ContainerInfo {
+            name: exact.clone(),
+            display_name: ide.to_string(),
+            status: "stopped".into(),
+            is_up: false,
+            cpu: String::new(),
+            mem: String::new(),
+            commands: vec![],
+        }
+    }
 }
 
 /// Get running containers from podman.

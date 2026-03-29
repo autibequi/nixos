@@ -20,7 +20,7 @@ vennon/
 ```
 
 **Pacotes instalados (3 layers para cache):**
-- Layer 1 (core): coreutils, sed, awk, jq, util-linux, gosu, docker-client, gh, curl
+- Layer 1 (core): coreutils, sed, awk, jq, util-linux, gosu, docker-client, gh (curl vem como dependência)
 - Layer 2 (extras): python3, wl-clipboard, sox, systemd, espeak-ng, yt-dlp
 - Layer 3 (shell): zsh, powerlevel10k, autosuggestions, syntax-highlighting, fzf, eza, bat, ripgrep, fd
 

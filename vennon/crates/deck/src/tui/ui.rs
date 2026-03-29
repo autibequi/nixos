@@ -42,12 +42,19 @@ fn render_header(frame: &mut Frame, app: &App, area: Rect) {
     let ide_style = if app.tab == Tab::Ide { Style::default().fg(MAUVE).bold() } else { Style::default().fg(DIM) };
     let svc_style = if app.tab == Tab::Services { Style::default().fg(MAUVE).bold() } else { Style::default().fg(DIM) };
 
-    let ide_up = app.all_containers.iter()
-        .filter(|c| { let s = c.name.strip_prefix("vennon-").unwrap_or(&c.name); IDE_NAMES.contains(&s) })
-        .filter(|c| c.is_up).count();
-    let svc_up = app.all_containers.iter()
-        .filter(|c| { let s = c.name.strip_prefix("vennon-").unwrap_or(&c.name); !IDE_NAMES.contains(&s) })
-        .filter(|c| c.is_up).count();
+    // Use display_name: instance containers are vennon-cursor-nixos etc. (not in IDE_NAMES as a stripped name).
+    let ide_up = app
+        .all_containers
+        .iter()
+        .filter(|c| IDE_NAMES.contains(&c.display_name.as_str()))
+        .filter(|c| c.is_up)
+        .count();
+    let svc_up = app
+        .all_containers
+        .iter()
+        .filter(|c| !IDE_NAMES.contains(&c.display_name.as_str()))
+        .filter(|c| c.is_up)
+        .count();
 
     let text = Line::from(vec![
         Span::styled(" deck ", Style::default().fg(MAUVE).bold()),
@@ -69,7 +76,7 @@ fn render_containers(frame: &mut Frame, app: &App, vis: &[&super::app::Container
             let selected = i == app.cursor;
             let icon = if c.is_up { "●" } else { "○" };
             let icon_color = if c.is_up { GREEN } else { RED };
-            let name = c.name.strip_prefix("vennon-").unwrap_or(&c.name);
+            let name = c.display_name.as_str();
             let cursor = if selected { "▸" } else { " " };
 
             let style = if selected {
@@ -138,7 +145,13 @@ fn render_logs(frame: &mut Frame, app: &App, area: Rect) {
 
     let selected_name = app
         .selected_container()
-        .map(|c| c.name.strip_prefix("vennon-").unwrap_or(&c.name).to_string())
+        .map(|c| {
+            if IDE_NAMES.contains(&c.display_name.as_str()) {
+                format!("{} ({})", c.display_name, c.name)
+            } else {
+                c.display_name.clone()
+            }
+        })
         .unwrap_or_else(|| "none".into());
 
     let block = Block::default()
