@@ -361,17 +361,20 @@ MERMAID_DIAGRAM_HERE
       bd.setAttribute('aria-hidden', 'true');
     }
   }
-  async function applyMermaidFromEditor() {
-    var ta = getSourceTa();
-    var text = ta ? ta.value.trim() : '';
+  /** opts.skipEmpty: não alertar se vazio; opts.silent: erro só no console (ex.: atualização live) */
+  async function applyMermaidText(text, opts) {
+    opts = opts || {};
+    text = (text || '').trim();
     if (!text) {
-      window.alert('Código vazio.');
+      if (!opts.skipEmpty) window.alert('Código vazio.');
       return;
     }
     var stage = document.getElementById('hk-stage');
     var oldBox = getPrimaryBox();
     if (!oldBox || !stage) return;
     sources[0] = text;
+    var ta = getSourceTa();
+    if (ta) ta.value = text;
     var newBox = document.createElement('div');
     newBox.className = 'mermaid';
     newBox.textContent = text;
@@ -380,13 +383,21 @@ MERMAID_DIAGRAM_HERE
       await mermaid.run({ nodes: [newBox], suppressErrors: false });
     } catch (err) {
       console.warn(err);
-      var msg = err && (err.message || err.str || String(err));
-      window.alert('Erro ao desenhar Mermaid: ' + msg);
+      if (!opts.silent) {
+        var msg = err && (err.message || err.str || String(err));
+        window.alert('Erro ao desenhar Mermaid: ' + msg);
+      }
       return;
     }
     setTimeout(function () {
       makeZoomable(newBox);
     }, 100);
+  }
+
+  async function applyMermaidFromEditor() {
+    var ta = getSourceTa();
+    var text = ta ? ta.value.trim() : '';
+    await applyMermaidText(text, {});
   }
 
   function getPrimaryBox() {
@@ -648,6 +659,37 @@ MERMAID_DIAGRAM_HERE
     setTimeout(function () {
       document.querySelectorAll('.mermaid').forEach(makeZoomable);
     }, 80);
+  })();
+
+  /* Modo live: servidor local envia o texto via SSE (ver mermaid-live-server.mjs). Ex.: ?live=1 */
+  (function () {
+    var params = new URLSearchParams(location.search);
+    var live = params.get('live');
+    if (!live) return;
+    var ssePath = '/mermaid-live';
+    if (live !== '1' && live !== 'true' && live !== 'yes') {
+      ssePath = live.indexOf('/') === 0 ? live : '/' + live;
+    }
+    var last = '';
+    try {
+      var es = new EventSource(ssePath);
+      es.onmessage = function (ev) {
+        try {
+          var payload = JSON.parse(ev.data);
+          var t = payload && typeof payload.text === 'string' ? payload.text : '';
+          if (!t || t === last) return;
+          last = t;
+          applyMermaidText(t, { skipEmpty: true, silent: true });
+        } catch (e) {
+          console.warn('mermaid live', e);
+        }
+      };
+      es.onerror = function () {
+        /* EventSource reconecta sozinho */
+      };
+    } catch (e) {
+      console.warn('mermaid live EventSource', e);
+    }
   })();
 })();
   </script>
