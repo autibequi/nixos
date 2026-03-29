@@ -20,7 +20,9 @@ services:
     networks:
       - default
 
-  redis:
+  # Nome do serviço NÃO pode ser só "redis": Podman costuma colocar "127.0.0.1 redis" em /etc/hosts
+  # do app e isso ganha do DNS da rede — o cliente Go conecta em localhost e falha.
+  monolito-redis:
     image: redis:7-alpine
     container_name: vennon-dk-monolito-redis
     cpus: "1"

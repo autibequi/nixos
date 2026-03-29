@@ -8,7 +8,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
+      monolito-redis:
         condition: service_healthy
       localstack:
         condition: service_started
@@ -16,6 +16,10 @@ services:
       - ${MONOLITO_DIR}/.env.${APP_ENV_FILE:-sandbox}
       - ./env/${APP_ENV:-sand}.env
     environment:
+      # Sobrescreve .env.sandbox do repo (lá costuma ser localhost:6379 — dentro do container quebra).
+      - REDIS_URL=monolito-redis:6379
+      - REDIS_STUDY_TIME_URL=monolito-redis:6379
+      - DB_HOST=postgres
       - DOCKER_HOST=unix:///var/run/docker.sock
       - TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
     volumes:

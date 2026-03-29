@@ -6,7 +6,8 @@ source: ~/projects/estrategia/monolito
 enums:
   env:
     values: [local, sand, devbox, qa, prod]
-    default: local
+    # Padrão sand: evita --env local sem querer (local deixava REDIS sem override vs .env.sandbox).
+    default: sand
     map:
       sand: sandbox
 

@@ -271,7 +271,7 @@ fn monolito_sidecar_rows(
 ) -> Vec<ContainerInfo> {
     let specs: [(&str, &str); 3] = [
         ("vennon-dk-monolito-postgres", "  ├ postgres"),
-        ("vennon-dk-monolito-redis", "  ├ redis"),
+        ("vennon-dk-monolito-redis", "  ├ monolito-redis"),
         ("vennon-dk-monolito-localstack", "  └ localstack"),
     ];
     let mut out = Vec::with_capacity(3);

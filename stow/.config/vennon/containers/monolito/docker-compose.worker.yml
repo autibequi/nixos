@@ -9,13 +9,17 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
+      monolito-redis:
         condition: service_healthy
       localstack:
         condition: service_started
     env_file:
       - ${MONOLITO_DIR}/.env.${APP_ENV_FILE:-sandbox}
       - ./env/${APP_ENV:-sand}.env
+    environment:
+      - REDIS_URL=monolito-redis:6379
+      - REDIS_STUDY_TIME_URL=monolito-redis:6379
+      - DB_HOST=postgres
     volumes:
       - ${MONOLITO_DIR}/configuration:/go/app/configuration:ro
       # Canal de comunicação rápida host ↔ container
