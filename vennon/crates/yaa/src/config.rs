@@ -67,13 +67,27 @@ impl Default for PathsConfig {
     }
 }
 
-fn default_engine() -> String { "claude".into() }
-fn default_agent_model() -> String { "haiku".into() }
-fn default_steps() -> u32 { 30 }
-fn default_vennon() -> String { "~/nixos/vennon".into() }
-fn default_obsidian() -> String { "~/.ovault/Work".into() }
-fn default_projects() -> String { "~/projects".into() }
-fn default_host() -> String { "~/nixos".into() }
+fn default_engine() -> String {
+    "claude".into()
+}
+fn default_agent_model() -> String {
+    "haiku".into()
+}
+fn default_steps() -> u32 {
+    30
+}
+fn default_vennon() -> String {
+    "~/nixos/vennon".into()
+}
+fn default_obsidian() -> String {
+    "~/.ovault/Work".into()
+}
+fn default_projects() -> String {
+    "~/projects".into()
+}
+fn default_host() -> String {
+    "~/nixos".into()
+}
 
 // ── Paths ───────────────────────────────────────────────────────
 

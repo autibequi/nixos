@@ -30,12 +30,12 @@ pub fn output_with_timeout(mut cmd: Command, timeout: Duration) -> io::Result<Ou
     loop {
         match child.try_wait() {
             Ok(Some(status)) => {
-                let stdout = stdout_handle.join().map_err(|_| {
-                    io::Error::new(io::ErrorKind::Other, "stdout reader thread panicked")
-                })?;
-                let stderr = stderr_handle.join().map_err(|_| {
-                    io::Error::new(io::ErrorKind::Other, "stderr reader thread panicked")
-                })?;
+                let stdout = stdout_handle
+                    .join()
+                    .map_err(|_| io::Error::other("stdout reader thread panicked"))?;
+                let stderr = stderr_handle
+                    .join()
+                    .map_err(|_| io::Error::other("stderr reader thread panicked"))?;
                 return Ok(Output {
                     status,
                     stdout,

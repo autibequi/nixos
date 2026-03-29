@@ -50,13 +50,17 @@ fn main() -> Result<()> {
             if all.is_empty() {
                 println!("No containers found.");
             } else {
-                for (dir, m) in &all {
+                for (_dir, m) in &all {
                     let aliases = if m.aliases.is_empty() {
                         String::new()
                     } else {
                         format!(" ({})", m.aliases.join(", "))
                     };
-                    let kind = if containers::is_ide(&m.name) { "ide" } else { "svc" };
+                    let kind = if containers::is_ide(&m.name) {
+                        "ide"
+                    } else {
+                        "svc"
+                    };
                     println!("  [{kind}] {}{aliases}", m.name);
                 }
             }
@@ -69,8 +73,27 @@ fn main() -> Result<()> {
             let justfile = vennon_dir.join("justfile").to_string_lossy().to_string();
             let wd = vennon_dir.to_string_lossy().to_string();
             match name {
-                Some(n) => exec::run("just", &["--justfile", &justfile, "--working-directory", &wd, "image", &n]),
-                None => exec::run("just", &["--justfile", &justfile, "--working-directory", &wd, "images"]),
+                Some(n) => exec::run(
+                    "just",
+                    &[
+                        "--justfile",
+                        &justfile,
+                        "--working-directory",
+                        &wd,
+                        "image",
+                        &n,
+                    ],
+                ),
+                None => exec::run(
+                    "just",
+                    &[
+                        "--justfile",
+                        &justfile,
+                        "--working-directory",
+                        &wd,
+                        "images",
+                    ],
+                ),
             }
         }
 
@@ -82,7 +105,11 @@ fn main() -> Result<()> {
             let config = config::VennonConfig::load()?;
             let name = &args[0];
             let action = args.get(1).map(|s| s.as_str()).unwrap_or_default();
-            let rest: Vec<String> = if args.len() > 2 { args[2..].to_vec() } else { vec![] };
+            let rest: Vec<String> = if args.len() > 2 {
+                args[2..].to_vec()
+            } else {
+                vec![]
+            };
 
             // IDE containers: dispatch through container.rs
             if containers::is_ide(name) {

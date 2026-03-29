@@ -124,26 +124,47 @@ fn main() -> Result<()> {
 
         Some(Commands::Shell) => {
             let config = config::YaaConfig::load()?;
-            session::launch(&config, session::SessionOpts {
-                dir: cli.dir, engine: cli.engine, model: cli.model,
-                host: cli.host, danger: cli.danger, mode: session::SessionMode::Shell,
-            })
+            session::launch(
+                &config,
+                session::SessionOpts {
+                    dir: cli.dir,
+                    engine: cli.engine,
+                    model: cli.model,
+                    host: cli.host,
+                    danger: cli.danger,
+                    mode: session::SessionMode::Shell,
+                },
+            )
         }
 
         Some(Commands::Resume { session_id }) => {
             let config = config::YaaConfig::load()?;
-            session::launch(&config, session::SessionOpts {
-                dir: cli.dir, engine: cli.engine, model: cli.model,
-                host: cli.host, danger: cli.danger, mode: session::SessionMode::Resume(session_id),
-            })
+            session::launch(
+                &config,
+                session::SessionOpts {
+                    dir: cli.dir,
+                    engine: cli.engine,
+                    model: cli.model,
+                    host: cli.host,
+                    danger: cli.danger,
+                    mode: session::SessionMode::Resume(session_id),
+                },
+            )
         }
 
         Some(Commands::Continue) => {
             let config = config::YaaConfig::load()?;
-            session::launch(&config, session::SessionOpts {
-                dir: cli.dir, engine: cli.engine, model: cli.model,
-                host: cli.host, danger: cli.danger, mode: session::SessionMode::Continue,
-            })
+            session::launch(
+                &config,
+                session::SessionOpts {
+                    dir: cli.dir,
+                    engine: cli.engine,
+                    model: cli.model,
+                    host: cli.host,
+                    danger: cli.danger,
+                    mode: session::SessionMode::Continue,
+                },
+            )
         }
 
         Some(Commands::Phone { agent, message }) => {
@@ -156,21 +177,43 @@ fn main() -> Result<()> {
             phone::call("hermes", Some("Ciclo automatico. Execute com autonomia total: limpe travados, desbloqueie o que puder, despache vencidos, processe inbox/outbox. Nao pergunte — execute."), &config)
         }
 
-        Some(Commands::Usage { engine, waybar, statusline, refresh, json, debug }) => {
+        Some(Commands::Usage {
+            engine,
+            waybar,
+            statusline,
+            refresh,
+            json,
+            debug,
+        }) => {
             let config = config::YaaConfig::load()?;
-            let e = if engine.is_empty() { None } else { Some(engine.as_str()) };
-            let flag = if waybar { Some("--waybar") }
-                else if statusline { Some("--statusline") }
-                else if refresh { Some("--refresh") }
-                else if json { Some("--json") }
-                else if debug { Some("--debug") }
-                else { None };
+            let e = if engine.is_empty() {
+                None
+            } else {
+                Some(engine.as_str())
+            };
+            let flag = if waybar {
+                Some("--waybar")
+            } else if statusline {
+                Some("--statusline")
+            } else if refresh {
+                Some("--refresh")
+            } else if json {
+                Some("--json")
+            } else if debug {
+                Some("--debug")
+            } else {
+                None
+            };
             usage::show(e, flag, &config)
         }
 
         Some(Commands::Token { engine }) => {
             let config = config::YaaConfig::load()?;
-            let e = if engine.is_empty() { None } else { Some(engine.as_str()) };
+            let e = if engine.is_empty() {
+                None
+            } else {
+                Some(engine.as_str())
+            };
             token::show(e, &config)
         }
 
@@ -196,10 +239,17 @@ fn main() -> Result<()> {
 
         None => {
             let config = config::YaaConfig::load()?;
-            session::launch(&config, session::SessionOpts {
-                dir: cli.dir, engine: cli.engine, model: cli.model,
-                host: cli.host, danger: cli.danger, mode: session::SessionMode::New,
-            })
+            session::launch(
+                &config,
+                session::SessionOpts {
+                    dir: cli.dir,
+                    engine: cli.engine,
+                    model: cli.model,
+                    host: cli.host,
+                    danger: cli.danger,
+                    mode: session::SessionMode::New,
+                },
+            )
         }
     }
 }

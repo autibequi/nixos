@@ -11,7 +11,8 @@ pub fn dispatch(name: &str, action: &str, config: &VennonConfig) -> Result<()> {
     containers::ide::set_compose_env(config);
 
     // Use compose from repo — never generated, never overwritten
-    let compose_path = config.vennon_path()
+    let compose_path = config
+        .vennon_path()
         .join(format!("containers/{name}/docker-compose.yml"));
 
     if !compose_path.exists() {
@@ -114,8 +115,14 @@ fn flush(name: &str, compose_path: &std::path::Path) -> Result<()> {
     exec::run(
         "podman-compose",
         &[
-            "-f", &compose_str, "-p", &project,
-            "down", "-v", "--rmi", "local",
+            "-f",
+            &compose_str,
+            "-p",
+            &project,
+            "down",
+            "-v",
+            "--rmi",
+            "local",
         ],
     )?;
     println!("Flushed.");
@@ -132,8 +139,11 @@ fn build(name: &str, config: &VennonConfig) -> Result<()> {
     exec::run(
         "podman",
         &[
-            "build", "-t", "vennon-vennon",
-            "-f", &vennon_dockerfile.to_string_lossy(),
+            "build",
+            "-t",
+            "vennon-vennon",
+            "-f",
+            &vennon_dockerfile.to_string_lossy(),
             &vennon_ctx.to_string_lossy(),
         ],
     )?;
@@ -145,8 +155,11 @@ fn build(name: &str, config: &VennonConfig) -> Result<()> {
     exec::run(
         "podman",
         &[
-            "build", "-t", &image_name,
-            "-f", &dockerfile.to_string_lossy(),
+            "build",
+            "-t",
+            &image_name,
+            "-f",
+            &dockerfile.to_string_lossy(),
             &ctx.to_string_lossy(),
         ],
     )?;

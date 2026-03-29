@@ -1,6 +1,6 @@
 use anyhow::Result;
 use std::collections::HashMap;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::config::{expand_path, ActionDef};
 
@@ -36,82 +36,70 @@ pub fn validate_args(
     Ok(resolved)
 }
 
-fn validate_rule(
-    rule: &serde_yaml::Value,
-    value: &str,
-    arg_name: &str,
-) -> Result<(), String> {
-    match rule {
-        serde_yaml::Value::Mapping(m) => {
-            for (key, param) in m {
-                let key_str = key.as_str().unwrap_or("");
-                match key_str {
-                    "path_under" => validate_path_under(value, param, arg_name)?,
-                    "path_exists" => {
-                        if param.as_bool().unwrap_or(false) {
-                            validate_path_exists(value, arg_name)?;
-                        }
-                    }
-                    "starts_with" => {
-                        let prefix = param.as_str().unwrap_or("");
-                        if !value.starts_with(prefix) {
-                            return Err(format!(
-                                "{arg_name}: deve começar com '{prefix}'"
-                            ));
-                        }
-                    }
-                    "enum" => {
-                        if let Some(seq) = param.as_sequence() {
-                            let allowed: Vec<&str> = seq.iter()
-                                .filter_map(|v| v.as_str())
-                                .collect();
-                            if !allowed.contains(&value) {
-                                return Err(format!(
-                                    "{arg_name}: valor '{value}' não permitido. Válidos: {allowed:?}"
-                                ));
-                            }
-                        }
-                    }
-                    "max_length" => {
-                        if let Some(max) = param.as_u64() {
-                            if value.len() as u64 > max {
-                                return Err(format!(
-                                    "{arg_name}: máximo {max} chars, recebeu {}",
-                                    value.len()
-                                ));
-                            }
-                        }
-                    }
-                    "matches" => {
-                        // Simple regex check (no regex crate — just basic patterns)
-                        let pattern = param.as_str().unwrap_or("");
-                        if !simple_match(pattern, value) {
-                            return Err(format!(
-                                "{arg_name}: não casa com padrão '{pattern}'"
-                            ));
-                        }
-                    }
-                    "range" => {
-                        if let Some(seq) = param.as_sequence() {
-                            if seq.len() == 2 {
-                                let min = seq[0].as_i64().unwrap_or(i64::MIN);
-                                let max = seq[1].as_i64().unwrap_or(i64::MAX);
-                                let n: i64 = value.parse().map_err(|_| {
-                                    format!("{arg_name}: não é número")
-                                })?;
-                                if n < min || n > max {
-                                    return Err(format!(
-                                        "{arg_name}: valor {n} fora do range [{min}, {max}]"
-                                    ));
-                                }
-                            }
-                        }
-                    }
-                    _ => {} // Unknown validator: ignore
+fn validate_rule(rule: &serde_yaml::Value, value: &str, arg_name: &str) -> Result<(), String> {
+    let serde_yaml::Value::Mapping(m) = rule else {
+        return Ok(());
+    };
+    for (key, param) in m {
+        let key_str = key.as_str().unwrap_or("");
+        match key_str {
+            "path_under" => validate_path_under(value, param, arg_name)?,
+            "path_exists" => {
+                if param.as_bool().unwrap_or(false) {
+                    validate_path_exists(value, arg_name)?;
                 }
             }
+            "starts_with" => {
+                let prefix = param.as_str().unwrap_or("");
+                if !value.starts_with(prefix) {
+                    return Err(format!("{arg_name}: deve começar com '{prefix}'"));
+                }
+            }
+            "enum" => {
+                if let Some(seq) = param.as_sequence() {
+                    let allowed: Vec<&str> = seq.iter().filter_map(|v| v.as_str()).collect();
+                    if !allowed.contains(&value) {
+                        return Err(format!(
+                            "{arg_name}: valor '{value}' não permitido. Válidos: {allowed:?}"
+                        ));
+                    }
+                }
+            }
+            "max_length" => {
+                if let Some(max) = param.as_u64() {
+                    if value.len() as u64 > max {
+                        return Err(format!(
+                            "{arg_name}: máximo {max} chars, recebeu {}",
+                            value.len()
+                        ));
+                    }
+                }
+            }
+            "matches" => {
+                // Simple regex check (no regex crate — just basic patterns)
+                let pattern = param.as_str().unwrap_or("");
+                if !simple_match(pattern, value) {
+                    return Err(format!("{arg_name}: não casa com padrão '{pattern}'"));
+                }
+            }
+            "range" => {
+                if let Some(seq) = param.as_sequence() {
+                    if seq.len() == 2 {
+                        let min = seq[0].as_i64().unwrap_or(i64::MIN);
+                        let max = seq[1].as_i64().unwrap_or(i64::MAX);
+                        let n: i64 = value
+                            .parse()
+                            .map_err(|_| format!("{arg_name}: não é número"))?;
+                        if n < min || n > max {
+                            return Err(format!(
+                                "{arg_name}: valor {n} fora do range [{min}, {max}]"
+                            ));
+                        }
+                    }
+                }
+            }
+            _ => {} // Unknown validator: ignore
         }
-        _ => {} // Non-mapping rule: ignore
     }
     Ok(())
 }
@@ -122,9 +110,10 @@ fn validate_path_under(
     arg_name: &str,
 ) -> Result<(), String> {
     let dirs = match allowed_dirs.as_sequence() {
-        Some(seq) => seq.iter()
+        Some(seq) => seq
+            .iter()
             .filter_map(|v| v.as_str())
-            .map(|s| expand_path(s))
+            .map(expand_path)
             .collect::<Vec<PathBuf>>(),
         None => return Ok(()),
     };
@@ -133,10 +122,10 @@ fn validate_path_under(
     let expanded = expand_path(value);
     // Use the expanded path directly (don't canonicalize — file may not exist yet)
     // But normalize away .. and . components
-    let normalized = normalize_path(&expanded);
+    let normalized = normalize_path(expanded.as_path());
 
     for dir in &dirs {
-        let norm_dir = normalize_path(dir);
+        let norm_dir = normalize_path(dir.as_path());
         if normalized.starts_with(&norm_dir) {
             return Ok(());
         }
@@ -145,7 +134,9 @@ fn validate_path_under(
     Err(format!(
         "{arg_name}: path '{}' não está dentro dos diretórios permitidos: {:?}",
         value,
-        dirs.iter().map(|d| d.display().to_string()).collect::<Vec<_>>()
+        dirs.iter()
+            .map(|d| d.display().to_string())
+            .collect::<Vec<_>>()
     ))
 }
 
@@ -154,16 +145,21 @@ fn validate_path_exists(value: &str, arg_name: &str) -> Result<(), String> {
     if expanded.exists() {
         Ok(())
     } else {
-        Err(format!("{arg_name}: path não existe: {}", expanded.display()))
+        Err(format!(
+            "{arg_name}: path não existe: {}",
+            expanded.display()
+        ))
     }
 }
 
 /// Normalize a path: resolve `.` and `..` without filesystem access.
-fn normalize_path(path: &PathBuf) -> PathBuf {
+fn normalize_path(path: &Path) -> PathBuf {
     let mut components = Vec::new();
     for comp in path.components() {
         match comp {
-            std::path::Component::ParentDir => { components.pop(); }
+            std::path::Component::ParentDir => {
+                components.pop();
+            }
             std::path::Component::CurDir => {}
             c => components.push(c),
         }
@@ -176,13 +172,22 @@ fn normalize_path(path: &PathBuf) -> PathBuf {
 fn simple_match(pattern: &str, value: &str) -> bool {
     match pattern {
         "^[a-zA-Z0-9_-]+$" => {
-            !value.is_empty() && value.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '-')
+            !value.is_empty()
+                && value
+                    .chars()
+                    .all(|c| c.is_alphanumeric() || c == '_' || c == '-')
         }
         "^[a-zA-Z0-9_.-]+$" => {
-            !value.is_empty() && value.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '.' || c == '-')
+            !value.is_empty()
+                && value
+                    .chars()
+                    .all(|c| c.is_alphanumeric() || c == '_' || c == '.' || c == '-')
         }
         "^[a-zA-Z0-9_./-]+$" => {
-            !value.is_empty() && value.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '.' || c == '-' || c == '/')
+            !value.is_empty()
+                && value
+                    .chars()
+                    .all(|c| c.is_alphanumeric() || c == '_' || c == '.' || c == '-' || c == '/')
         }
         // Fallback: literal contains
         other => value.contains(other),
@@ -202,11 +207,33 @@ fn yaml_to_string(v: &serde_yaml::Value) -> String {
     match v {
         serde_yaml::Value::String(s) => s.clone(),
         serde_yaml::Value::Number(n) => {
-            if let Some(i) = n.as_i64() { i.to_string() }
-            else if let Some(f) = n.as_f64() { f.to_string() }
-            else { n.to_string() }
+            if let Some(i) = n.as_i64() {
+                i.to_string()
+            } else if let Some(f) = n.as_f64() {
+                f.to_string()
+            } else {
+                n.to_string()
+            }
         }
         serde_yaml::Value::Bool(b) => b.to_string(),
         _ => String::new(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    #[test]
+    fn normalize_path_collapses_parent() {
+        let p = PathBuf::from("/a/b/../c");
+        assert_eq!(normalize_path(p.as_path()), PathBuf::from("/a/c"));
+    }
+
+    #[test]
+    fn simple_match_slug() {
+        assert!(simple_match("^[a-zA-Z0-9_-]+$", "foo-bar_1"));
+        assert!(!simple_match("^[a-zA-Z0-9_-]+$", "foo bar"));
     }
 }

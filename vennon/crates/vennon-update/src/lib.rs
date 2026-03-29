@@ -15,12 +15,36 @@ use std::process::{Command, Stdio};
 use std::time::{Duration, Instant};
 
 // ── Catppuccin Mocha ────────────────────────────────────────────
-const GREEN: Color = Color::Rgb { r: 166, g: 227, b: 161 };
-const MAUVE: Color = Color::Rgb { r: 203, g: 166, b: 247 };
-const PEACH: Color = Color::Rgb { r: 250, g: 179, b: 135 };
-const RED: Color = Color::Rgb { r: 243, g: 139, b: 168 };
-const DIM: Color = Color::Rgb { r: 108, g: 112, b: 134 };
-const TEXT: Color = Color::Rgb { r: 205, g: 214, b: 244 };
+const GREEN: Color = Color::Rgb {
+    r: 166,
+    g: 227,
+    b: 161,
+};
+const MAUVE: Color = Color::Rgb {
+    r: 203,
+    g: 166,
+    b: 247,
+};
+const PEACH: Color = Color::Rgb {
+    r: 250,
+    g: 179,
+    b: 135,
+};
+const RED: Color = Color::Rgb {
+    r: 243,
+    g: 139,
+    b: 168,
+};
+const DIM: Color = Color::Rgb {
+    r: 108,
+    g: 112,
+    b: 134,
+};
+const TEXT: Color = Color::Rgb {
+    r: 205,
+    g: 214,
+    b: 244,
+};
 
 const SPIN: &[&str] = &["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
@@ -123,7 +147,8 @@ pub fn run() -> Result<()> {
                                 print_step_fail(&mut out, steps[0].1, elapsed)?;
                                 // Show compiler errors
                                 if let Some(stderr) = child.stderr.take() {
-                                    let err_output = std::io::read_to_string(stderr).unwrap_or_default();
+                                    let err_output =
+                                        std::io::read_to_string(stderr).unwrap_or_default();
                                     let errors: Vec<&str> = err_output
                                         .lines()
                                         .filter(|l| l.contains("error") || l.contains("Error"))
@@ -321,7 +346,12 @@ pub fn run() -> Result<()> {
 
 // ── Step renderers ───────────────────────────────────────────────
 
-fn print_step_spin(out: &mut impl Write, label: &str, elapsed: Duration, frame: usize) -> Result<()> {
+fn print_step_spin(
+    out: &mut impl Write,
+    label: &str,
+    elapsed: Duration,
+    frame: usize,
+) -> Result<()> {
     out.queue(terminal::Clear(terminal::ClearType::CurrentLine))?;
     out.queue(cursor::MoveToColumn(0))?;
     out.queue(SetForegroundColor(PEACH))?;

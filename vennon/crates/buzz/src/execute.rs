@@ -23,7 +23,11 @@ pub fn run_action(action: &ActionDef, args: &HashMap<String, String>) -> Result<
             Ok(Some(stdout))
         } else {
             let msg = if stderr.is_empty() { stdout } else { stderr };
-            anyhow::bail!("exit {}: {}", output.status.code().unwrap_or(-1), msg.trim());
+            anyhow::bail!(
+                "exit {}: {}",
+                output.status.code().unwrap_or(-1),
+                msg.trim()
+            );
         }
     } else {
         // Fire and forget — spawn detached
@@ -41,11 +45,7 @@ pub fn run_action(action: &ActionDef, args: &HashMap<String, String>) -> Result<
 fn render_template(template: &str, args: &HashMap<String, String>) -> String {
     let mut result = template.to_string();
     // Keep replacing until no more {{ }} remain
-    loop {
-        let start = match result.find("{{") {
-            Some(i) => i,
-            None => break,
-        };
+    while let Some(start) = result.find("{{") {
         let end = match result[start..].find("}}") {
             Some(i) => start + i + 2,
             None => break,
@@ -65,7 +65,9 @@ fn shell_escape(s: &str) -> String {
         return "''".into();
     }
     // If the string is simple (alphanumeric + common safe chars), no quoting needed
-    if s.chars().all(|c| c.is_alphanumeric() || matches!(c, '/' | '.' | '-' | '_' | ':')) {
+    if s.chars()
+        .all(|c| c.is_alphanumeric() || matches!(c, '/' | '.' | '-' | '_' | ':'))
+    {
         return s.to_string();
     }
     // Wrap in single quotes, escaping any existing single quotes

@@ -1,5 +1,5 @@
-use anyhow::{bail, Result};
 use crate::exec;
+use anyhow::{bail, Result};
 
 pub fn run(action: &str) -> Result<()> {
     let home = std::env::var("HOME").unwrap_or_else(|_| "/root".into());

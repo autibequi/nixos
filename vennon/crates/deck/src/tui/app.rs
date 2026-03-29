@@ -8,7 +8,12 @@ use std::process::{Command, Stdio};
 use std::sync::mpsc::{self, Receiver, TryRecvError};
 use std::time::Duration;
 
+/// Slugs de IDE usados em nomes `vennon-{ide}` (referência para filtros/TUI).
+#[allow(dead_code)]
 pub const IDE_NAMES: &[&str] = &["claude", "opencode", "cursor"];
+
+/// Linha do `podman ps`: status, up?, cpu, mem.
+type RunningPodRow = (String, bool, String, String);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ContainerKind {
@@ -150,10 +155,10 @@ impl App {
 
     fn visible_containers_slice(all: &[ContainerInfo], tab: Tab) -> Vec<&ContainerInfo> {
         all.iter()
-            .filter(|c| {
-                match tab {
-                    Tab::Agents => c.kind == ContainerKind::Ide,
-                    Tab::Services => c.kind != ContainerKind::Ide && c.kind != ContainerKind::SystemdService,
+            .filter(|c| match tab {
+                Tab::Agents => c.kind == ContainerKind::Ide,
+                Tab::Services => {
+                    c.kind != ContainerKind::Ide && c.kind != ContainerKind::SystemdService
                 }
             })
             .collect()
@@ -339,7 +344,11 @@ impl App {
                     if c.has_debug {
                         actions.push("# DEBUG".into());
                         let on_mark = if c.debug == "on" { " ✓" } else { "" };
-                        let off_mark = if c.debug == "off" || c.debug.is_empty() { " ✓" } else { "" };
+                        let off_mark = if c.debug == "off" || c.debug.is_empty() {
+                            " ✓"
+                        } else {
+                            ""
+                        };
                         actions.push(format!("debug:on{on_mark}"));
                         actions.push(format!("debug:off{off_mark}"));
                     }
@@ -406,7 +415,11 @@ impl App {
 
         // Debug toggle — special case (bool, not enum)
         if let Some(dbg_val) = action.strip_prefix("debug:") {
-            let flag = if dbg_val == "on" { "--debug=true" } else { "--debug=false" };
+            let flag = if dbg_val == "on" {
+                "--debug=true"
+            } else {
+                "--debug=false"
+            };
             let mut args = vec![container.display_name.clone(), "serve".into(), flag.into()];
             self.append_preserved_params(&container, Some("debug"), &mut args);
             let _ = Command::new("vennon").args(&args).status();
@@ -439,7 +452,11 @@ impl App {
     fn exec_worker_action(&self, action: &str, container: &ContainerInfo) -> Result<()> {
         // Enum param switch → restart worker with new params
         if let Some(dbg_val) = action.strip_prefix("debug:") {
-            let flag = if dbg_val == "on" { "--debug=true" } else { "--debug=false" };
+            let flag = if dbg_val == "on" {
+                "--debug=true"
+            } else {
+                "--debug=false"
+            };
             let mut args = vec!["monolito".into(), "worker".into(), flag.into()];
             self.append_preserved_params(container, Some("debug"), &mut args);
             let _ = Command::new("vennon").args(&args).status();
@@ -481,9 +498,7 @@ impl App {
             }
             _ => {
                 // Fallback: try as vennon monolito <action>
-                let _ = Command::new("vennon")
-                    .args(["monolito", action])
-                    .status();
+                let _ = Command::new("vennon").args(["monolito", action]).status();
             }
         }
         Ok(())
@@ -513,7 +528,11 @@ impl App {
 
         // Debug toggle
         if let Some(dbg_val) = action.strip_prefix("debug:") {
-            let flag = if dbg_val == "on" { "--debug=true" } else { "--debug=false" };
+            let flag = if dbg_val == "on" {
+                "--debug=true"
+            } else {
+                "--debug=false"
+            };
             let mut args = vec![container.display_name.clone(), "serve".into(), flag.into()];
             self.append_preserved_params(&container, Some("debug"), &mut args);
             spawn_silent("vennon", &args);
@@ -536,14 +555,21 @@ impl App {
         }
 
         // Plain command
-        spawn_silent("vennon", &[container.display_name.clone(), action.to_string()]);
+        spawn_silent(
+            "vennon",
+            &[container.display_name.clone(), action.to_string()],
+        );
         Ok(())
     }
 
     /// Background version of exec_worker_action.
     fn exec_worker_action_bg(&self, action: &str, container: &ContainerInfo) -> Result<()> {
         if let Some(dbg_val) = action.strip_prefix("debug:") {
-            let flag = if dbg_val == "on" { "--debug=true" } else { "--debug=false" };
+            let flag = if dbg_val == "on" {
+                "--debug=true"
+            } else {
+                "--debug=false"
+            };
             let mut args = vec!["monolito".into(), "worker".into(), flag.into()];
             self.append_preserved_params(container, Some("debug"), &mut args);
             spawn_silent("vennon", &args);
@@ -582,7 +608,12 @@ impl App {
     }
 
     /// Append --flag for all other params so switching one doesn't lose the rest.
-    fn append_preserved_params(&self, container: &ContainerInfo, skip: Option<&str>, args: &mut Vec<String>) {
+    fn append_preserved_params(
+        &self,
+        container: &ContainerInfo,
+        skip: Option<&str>,
+        args: &mut Vec<String>,
+    ) {
         for group in &container.enums {
             if skip == Some(group.name.as_str()) {
                 continue;
@@ -590,7 +621,9 @@ impl App {
             let current = container.current_for_enum(&group.name);
             if !current.is_empty() {
                 // Reverse-lookup: find the full enum value that matches the shortened display
-                let full_val = group.values.iter()
+                let full_val = group
+                    .values
+                    .iter()
                     .find(|v| shorten_param(&group.name, v) == current)
                     .cloned()
                     .unwrap_or_else(|| current.to_string());
@@ -629,11 +662,7 @@ fn logs_for_selection_with_timeout(
             let log_scroll = logs.len().saturating_sub(20);
             (logs, t, log_scroll)
         } else {
-            (
-                vec![format!("{} — not running", c.display_name)],
-                false,
-                0,
-            )
+            (vec![format!("{} — not running", c.display_name)], false, 0)
         }
     } else {
         (vec![], false, 0)
@@ -662,71 +691,87 @@ fn collect_all() -> (Vec<ContainerInfo>, bool) {
         Ok(output) => {
             let stdout = String::from_utf8_lossy(&output.stdout);
             for line in stdout.lines() {
-            // Format: "  [svc] monolito (mono)"
-            if !line.contains("[svc]") {
-                continue;
-            }
-            let name = line
-                .trim()
-                .strip_prefix("[svc] ")
-                .unwrap_or("")
-                .split(' ')
-                .next()
-                .unwrap_or("")
-                .to_string();
-            if name.is_empty() {
-                continue;
-            }
-
-            let podman_name = resolve_service_podman_name(&name, &running);
-
-            let (status, is_up, cpu, mem) = running
-                .get(&podman_name)
-                .cloned()
-                .unwrap_or_else(|| ("stopped".into(), false, String::new(), String::new()));
-
-            let manifest = get_manifest_data(&name);
-
-            // Use enum defaults for stopped containers; running ones get overwritten by podman inspect below.
-            let env_default = {
-                let d = manifest.enum_default("env");
-                if d.is_empty() { String::new() } else { shorten_env(d) }
-            };
-            let vert_default = {
-                let d = manifest.enum_default("vertical");
-                if d.is_empty() { String::new() } else { shorten_vertical(d) }
-            };
-
-            // Clone enums/has_debug before moving into ContainerInfo — worker reuses them
-            let worker_enums = if name == "monolito" { manifest.enums.clone() } else { vec![] };
-            let worker_has_debug = if name == "monolito" { manifest.has_debug } else { false };
-
-            containers.push(ContainerInfo {
-                name: podman_name,
-                display_name: name.clone(),
-                status,
-                is_up,
-                cpu,
-                mem,
-                env: env_default,
-                debug: String::new(),
-                vertical: vert_default,
-                last_log: String::new(),
-                enums: manifest.enums,
-                has_debug: manifest.has_debug,
-                commands: manifest.commands,
-                kind: ContainerKind::Service,
-            });
-
-            if name == "monolito" {
-                // Worker: separate service entry (not sidecar) with full menu
-                let worker_row = monolito_worker_row(&running, worker_enums, worker_has_debug);
-                containers.push(worker_row);
-
-                for sidecar in monolito_sidecar_rows(&running) {
-                    containers.push(sidecar);
+                // Format: "  [svc] monolito (mono)"
+                if !line.contains("[svc]") {
+                    continue;
                 }
-            }
+                let name = line
+                    .trim()
+                    .strip_prefix("[svc] ")
+                    .unwrap_or("")
+                    .split(' ')
+                    .next()
+                    .unwrap_or("")
+                    .to_string();
+                if name.is_empty() {
+                    continue;
+                }
+
+                let podman_name = resolve_service_podman_name(&name, &running);
+
+                let (status, is_up, cpu, mem) = running
+                    .get(&podman_name)
+                    .cloned()
+                    .unwrap_or_else(|| ("stopped".into(), false, String::new(), String::new()));
+
+                let manifest = get_manifest_data(&name);
+
+                // Use enum defaults for stopped containers; running ones get overwritten by podman inspect below.
+                let env_default = {
+                    let d = manifest.enum_default("env");
+                    if d.is_empty() {
+                        String::new()
+                    } else {
+                        shorten_env(d)
+                    }
+                };
+                let vert_default = {
+                    let d = manifest.enum_default("vertical");
+                    if d.is_empty() {
+                        String::new()
+                    } else {
+                        shorten_vertical(d)
+                    }
+                };
+
+                // Clone enums/has_debug before moving into ContainerInfo — worker reuses them
+                let worker_enums = if name == "monolito" {
+                    manifest.enums.clone()
+                } else {
+                    vec![]
+                };
+                let worker_has_debug = if name == "monolito" {
+                    manifest.has_debug
+                } else {
+                    false
+                };
+
+                containers.push(ContainerInfo {
+                    name: podman_name,
+                    display_name: name.clone(),
+                    status,
+                    is_up,
+                    cpu,
+                    mem,
+                    env: env_default,
+                    debug: String::new(),
+                    vertical: vert_default,
+                    last_log: String::new(),
+                    enums: manifest.enums,
+                    has_debug: manifest.has_debug,
+                    commands: manifest.commands,
+                    kind: ContainerKind::Service,
+                });
+
+                if name == "monolito" {
+                    // Worker: separate service entry (not sidecar) with full menu
+                    let worker_row = monolito_worker_row(&running, worker_enums, worker_has_debug);
+                    containers.push(worker_row);
+
+                    for sidecar in monolito_sidecar_rows(&running) {
+                        containers.push(sidecar);
+                    }
+                }
             }
         }
         Err(e) if e.kind() == io::ErrorKind::TimedOut => {
@@ -785,7 +830,9 @@ fn collect_build_hints(containers: &[ContainerInfo]) -> HashMap<String, String> 
         if let Ok(output) = output_with_timeout(cmd, Duration::from_secs(3)) {
             let text = String::from_utf8_lossy(&output.stdout);
             let stderr = String::from_utf8_lossy(&output.stderr);
-            let last_line = text.lines().last()
+            let last_line = text
+                .lines()
+                .last()
                 .or_else(|| stderr.lines().last())
                 .unwrap_or("");
             let clean = strip_ansi(last_line);
@@ -812,7 +859,13 @@ fn extract_build_time(line: &str) -> Option<String> {
     let trimmed = line.trim();
     // Find last word that looks like a timestamp (e.g., "33m0s", "1m20s")
     for word in trimmed.split_whitespace().rev() {
-        if word.contains('m') && word.chars().next().map(|c| c.is_ascii_digit()).unwrap_or(false) {
+        if word.contains('m')
+            && word
+                .chars()
+                .next()
+                .map(|c| c.is_ascii_digit())
+                .unwrap_or(false)
+        {
             // Simplify: "33m0s" → "33m"
             if let Some(pos) = word.find('m') {
                 return Some(word[..=pos].to_string());
@@ -826,7 +879,7 @@ const MONOLITO_WORKER_CONTAINER: &str = "vennon-dk-monolito-worker-app";
 
 /// Monolito worker as a standalone service row (with full menu).
 fn monolito_worker_row(
-    running: &HashMap<String, (String, bool, String, String)>,
+    running: &HashMap<String, RunningPodRow>,
     enums: Vec<EnumGroup>,
     has_debug: bool,
 ) -> ContainerInfo {
@@ -836,7 +889,8 @@ fn monolito_worker_row(
         .unwrap_or_else(|| ("stopped".into(), false, String::new(), String::new()));
 
     // Reuse monolito enums defaults for display
-    let env_default = enums.iter()
+    let env_default = enums
+        .iter()
         .find(|e| e.name == "env")
         .map(|e| shorten_env(&e.default))
         .unwrap_or_default();
@@ -860,9 +914,7 @@ fn monolito_worker_row(
 }
 
 /// Linhas aninhadas no deck: deps do compose (postgres, redis, localstack).
-fn monolito_sidecar_rows(
-    running: &HashMap<String, (String, bool, String, String)>,
-) -> Vec<ContainerInfo> {
+fn monolito_sidecar_rows(running: &HashMap<String, RunningPodRow>) -> Vec<ContainerInfo> {
     let specs: [(&str, &str); 3] = [
         ("vennon-dk-monolito-postgres", "  ├ postgres"),
         ("vennon-dk-monolito-redis", "  ├ monolito-redis"),
@@ -895,7 +947,7 @@ fn monolito_sidecar_rows(
 }
 
 /// One IDE row: any Podman name `vennon-{ide}` or `vennon-{ide}-<slug>` (yaa instance).
-fn ide_row(ide: &str, running: &HashMap<String, (String, bool, String, String)>) -> ContainerInfo {
+fn ide_row(ide: &str, running: &HashMap<String, RunningPodRow>) -> ContainerInfo {
     let exact = format!("vennon-{ide}");
     let prefix = format!("vennon-{ide}-");
 
@@ -905,7 +957,7 @@ fn ide_row(ide: &str, running: &HashMap<String, (String, bool, String, String)>)
         .collect();
     matches.sort();
 
-    let mut chosen: Option<(&String, &(String, bool, String, String))> = None;
+    let mut chosen: Option<(&String, &RunningPodRow)> = None;
     for k in &matches {
         if let Some(entry) = running.get(*k) {
             if entry.1 {
@@ -961,12 +1013,19 @@ fn ide_row(ide: &str, running: &HashMap<String, (String, bool, String, String)>)
 }
 
 /// Get running containers from podman.
-fn collect_running() -> (HashMap<String, (String, bool, String, String)>, bool) {
+fn collect_running() -> (HashMap<String, RunningPodRow>, bool) {
     let mut map = HashMap::new();
     let mut timed_out = false;
 
     let mut cmd = Command::new("podman");
-    cmd.args(["ps", "-a", "--format", "{{.Names}}\t{{.Status}}", "--filter", "name=vennon"]);
+    cmd.args([
+        "ps",
+        "-a",
+        "--format",
+        "{{.Names}}\t{{.Status}}",
+        "--filter",
+        "name=vennon",
+    ]);
     match output_with_timeout(cmd, CMD_TIMEOUT) {
         Ok(output) => {
             for line in String::from_utf8_lossy(&output.stdout).lines() {
@@ -987,7 +1046,12 @@ fn collect_running() -> (HashMap<String, (String, bool, String, String)>, bool) 
     }
 
     let mut cmd = Command::new("podman");
-    cmd.args(["stats", "--no-stream", "--format", "{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}"]);
+    cmd.args([
+        "stats",
+        "--no-stream",
+        "--format",
+        "{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}",
+    ]);
     match output_with_timeout(cmd, CMD_TIMEOUT) {
         Ok(output) => {
             for line in String::from_utf8_lossy(&output.stdout).lines() {
@@ -1008,7 +1072,6 @@ fn collect_running() -> (HashMap<String, (String, bool, String, String)>, bool) 
 
     (map, timed_out)
 }
-
 
 /// Fetch APP_ENV / DEBUG / VERTICAL env vars for running containers via podman inspect.
 /// Returns map: container_name → (env_short, debug_val, vertical_short).
@@ -1130,13 +1193,13 @@ fn shorten_param(enum_name: &str, v: &str) -> String {
 
 fn shorten_vertical(v: &str) -> String {
     match v.to_lowercase().as_str() {
-        "medicina"              => "med".into(),
-        "oab"                   => "oab".into(),
-        "concursos"             => "conc".into(),
-        "vestibulares"          => "vest".into(),
-        "militares"             => "mil".into(),
-        "carreiras-juridicas"   => "cjur".into(),
-        other                   => other.chars().take(4).collect(),
+        "medicina" => "med".into(),
+        "oab" => "oab".into(),
+        "concursos" => "conc".into(),
+        "vestibulares" => "vest".into(),
+        "militares" => "mil".into(),
+        "carreiras-juridicas" => "cjur".into(),
+        other => other.chars().take(4).collect(),
     }
 }
 
@@ -1144,9 +1207,9 @@ fn shorten_env(v: &str) -> String {
     // Values come raw from APP_ENV (vennon enum values: local, sand, devbox, qa, prod)
     match v.to_lowercase().as_str() {
         "production" | "prod" => "prod".into(),
-        "sandbox"             => "sand".into(), // normalise if ever written as "sandbox"
-        "devbox"              => "dbox".into(),
-        other                 => other.chars().take(5).collect(),
+        "sandbox" => "sand".into(), // normalise if ever written as "sandbox"
+        "devbox" => "dbox".into(),
+        other => other.chars().take(5).collect(),
     }
 }
 
@@ -1160,7 +1223,8 @@ struct ManifestData {
 
 impl ManifestData {
     fn enum_default(&self, name: &str) -> &str {
-        self.enums.iter()
+        self.enums
+            .iter()
             .find(|e| e.name == name)
             .map(|e| e.default.as_str())
             .unwrap_or("")
@@ -1181,13 +1245,23 @@ fn get_manifest_data(name: &str) -> ManifestData {
             let enums = parse_yaml_all_enums(&contents);
             let has_debug = parse_yaml_serve_has_bool_arg(&contents, "debug");
             if !commands.is_empty() {
-                return ManifestData { commands, enums, has_debug };
+                return ManifestData {
+                    commands,
+                    enums,
+                    has_debug,
+                };
             }
         }
     }
 
     ManifestData {
-        commands: vec!["serve".into(), "stop".into(), "logs".into(), "shell".into(), "flush".into()],
+        commands: vec![
+            "serve".into(),
+            "stop".into(),
+            "logs".into(),
+            "shell".into(),
+            "flush".into(),
+        ],
         enums: vec![],
         has_debug: false,
     }
@@ -1240,7 +1314,11 @@ fn parse_yaml_all_enums(contents: &str) -> Vec<EnumGroup> {
         }
         let trimmed = line.trim();
         // New enum at 2-space indent: "  env:", "  vertical:"
-        if line.starts_with("  ") && !line.starts_with("   ") && trimmed.ends_with(':') && !trimmed.starts_with('#') {
+        if line.starts_with("  ")
+            && !line.starts_with("   ")
+            && trimmed.ends_with(':')
+            && !trimmed.starts_with('#')
+        {
             // Save previous enum if any
             if !current_name.is_empty() && !current_values.is_empty() {
                 enums.push(EnumGroup {
@@ -1258,7 +1336,8 @@ fn parse_yaml_all_enums(contents: &str) -> Vec<EnumGroup> {
         if !current_name.is_empty() {
             if let Some(rest) = trimmed.strip_prefix("values:") {
                 let inner = rest.trim().trim_start_matches('[').trim_end_matches(']');
-                current_values = inner.split(',')
+                current_values = inner
+                    .split(',')
                     .map(|v| v.trim().to_string())
                     .filter(|v| !v.is_empty())
                     .collect();
@@ -1286,19 +1365,37 @@ fn parse_yaml_serve_has_bool_arg(contents: &str, arg_name: &str) -> bool {
     let mut found_name = false;
 
     for line in contents.lines() {
-        if line.starts_with("commands:") { in_commands = true; continue; }
-        if !in_commands { continue; }
-        if !line.starts_with(' ') && !line.is_empty() { break; }
+        if line.starts_with("commands:") {
+            in_commands = true;
+            continue;
+        }
+        if !in_commands {
+            continue;
+        }
+        if !line.starts_with(' ') && !line.is_empty() {
+            break;
+        }
 
         let trimmed = line.trim();
-        if trimmed == "serve:" { in_serve = true; in_args = false; continue; }
+        if trimmed == "serve:" {
+            in_serve = true;
+            in_args = false;
+            continue;
+        }
         // Another top-level command
         if line.starts_with("  ") && !line.starts_with("   ") && trimmed.ends_with(':') {
-            in_serve = false; in_args = false; found_name = false;
+            in_serve = false;
+            in_args = false;
+            found_name = false;
         }
-        if !in_serve { continue; }
+        if !in_serve {
+            continue;
+        }
 
-        if trimmed == "args:" { in_args = true; continue; }
+        if trimmed == "args:" {
+            in_args = true;
+            continue;
+        }
         if in_args {
             if trimmed == format!("- name: {arg_name}") || trimmed == format!("name: {arg_name}") {
                 found_name = true;
@@ -1318,7 +1415,10 @@ fn parse_yaml_serve_has_bool_arg(contents: &str, arg_name: &str) -> bool {
 /// Podman container name for a service row in the Services tab.
 /// Prefer explicit `container_name:` from docker-compose (e.g. reverseproxy → vennon-reverseproxy),
 /// else fall back to vennon-dk-{name} / vennon-dk-{name}-app / vennon-{name} if present in `running`.
-fn resolve_service_podman_name(service_name: &str, running: &HashMap<String, (String, bool, String, String)>) -> String {
+fn resolve_service_podman_name(
+    service_name: &str,
+    running: &HashMap<String, RunningPodRow>,
+) -> String {
     if let Some(cn) = first_literal_container_name(service_name) {
         return cn;
     }
@@ -1381,7 +1481,9 @@ fn strip_ansi(s: &str) -> String {
         if c == '\x1b' && chars.peek() == Some(&'[') {
             chars.next();
             for nc in chars.by_ref() {
-                if nc.is_ascii_alphabetic() { break; }
+                if nc.is_ascii_alphabetic() {
+                    break;
+                }
             }
         } else {
             out.push(c);
@@ -1406,29 +1508,29 @@ fn systemctl_status(unit: &str) -> (String, bool) {
 }
 
 fn systemd_service_rows() -> Vec<ContainerInfo> {
-    let specs = [
-        ("buzz.service", "buzz"),
-        ("yaa-tick.timer", "tick"),
-    ];
-    specs.iter().map(|(unit, label)| {
-        let (status, is_up) = systemctl_status(unit);
-        ContainerInfo {
-            name: unit.to_string(),
-            display_name: label.to_string(),
-            status,
-            is_up,
-            cpu: String::new(),
-            mem: String::new(),
-            env: String::new(),
-            debug: String::new(),
-            vertical: String::new(),
-            last_log: String::new(),
-            enums: vec![],
-            has_debug: false,
-            commands: vec![],
-            kind: ContainerKind::SystemdService,
-        }
-    }).collect()
+    let specs = [("buzz.service", "buzz"), ("yaa-tick.timer", "tick")];
+    specs
+        .iter()
+        .map(|(unit, label)| {
+            let (status, is_up) = systemctl_status(unit);
+            ContainerInfo {
+                name: unit.to_string(),
+                display_name: label.to_string(),
+                status,
+                is_up,
+                cpu: String::new(),
+                mem: String::new(),
+                env: String::new(),
+                debug: String::new(),
+                vertical: String::new(),
+                last_log: String::new(),
+                enums: vec![],
+                has_debug: false,
+                commands: vec![],
+                kind: ContainerKind::SystemdService,
+            }
+        })
+        .collect()
 }
 
 fn collect_logs_for(container_name: &str) -> (Vec<String>, bool) {
@@ -1453,5 +1555,31 @@ fn collect_logs_for(container_name: &str) -> (Vec<String>, bool) {
             true,
         ),
         Err(_) => (logs, false),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn ide_row_picks_running_container() {
+        let mut running = HashMap::new();
+        running.insert(
+            "vennon-claude".into(),
+            ("Up 2 hours".into(), true, "1%".into(), "512MiB".into()),
+        );
+        let info = ide_row("claude", &running);
+        assert_eq!(info.name, "vennon-claude");
+        assert!(info.is_up);
+        assert_eq!(info.display_name, "claude");
+    }
+
+    #[test]
+    fn ide_row_stopped_when_empty() {
+        let running = HashMap::new();
+        let info = ide_row("cursor", &running);
+        assert_eq!(info.name, "vennon-cursor");
+        assert!(!info.is_up);
     }
 }

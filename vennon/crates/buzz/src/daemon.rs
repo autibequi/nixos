@@ -81,13 +81,17 @@ fn handle_connection(
         }
     };
 
-    eprintln!("[vennon-bus] {} → {} {:?}", req.source, req.action, req.args);
+    eprintln!(
+        "[vennon-bus] {} → {} {:?}",
+        req.source, req.action, req.args
+    );
 
     // Lookup action
     let action = match actions.get(&req.action) {
         Some(a) => a,
         None => {
-            let resp = BusResponse::denied(&req.id, &format!("action desconhecida: {}", req.action));
+            let resp =
+                BusResponse::denied(&req.id, &format!("action desconhecida: {}", req.action));
             audit::log_entry(log_path, &req, &resp, start.elapsed().as_millis() as u64);
             send_response(&stream, &resp)?;
             return Ok(());

@@ -28,7 +28,9 @@ pub struct ActionDef {
 #[derive(Debug, Deserialize, Clone)]
 pub struct ArgDef {
     pub name: String,
+    /// Tipo no YAML (ex.: string); reservado para validação por tipo.
     #[serde(rename = "type", default = "default_type")]
+    #[allow(dead_code)]
     pub arg_type: String,
     #[serde(default)]
     pub required: bool,
@@ -38,9 +40,15 @@ pub struct ArgDef {
     pub validate: Vec<serde_yaml::Value>,
 }
 
-fn default_socket() -> String { "~/.vennon/buzz.sock".into() }
-fn default_log() -> String { "~/.local/share/vennon/logs/buzz.log".into() }
-fn default_type() -> String { "string".into() }
+fn default_socket() -> String {
+    "~/.vennon/buzz.sock".into()
+}
+fn default_log() -> String {
+    "~/.local/share/vennon/logs/buzz.log".into()
+}
+fn default_type() -> String {
+    "string".into()
+}
 
 pub fn expand_path(p: &str) -> PathBuf {
     let home = std::env::var("HOME").unwrap_or_else(|_| "/root".into());
@@ -54,10 +62,9 @@ pub fn expand_path(p: &str) -> PathBuf {
 impl BuzzConfig {
     /// Load from explicit path (e.g. from --config CLI flag).
     pub fn load_from(path: &std::path::Path) -> Result<Self> {
-        let contents = std::fs::read_to_string(path)
-            .with_context(|| format!("reading {}", path.display()))?;
-        serde_yaml::from_str(&contents)
-            .with_context(|| format!("parsing {}", path.display()))
+        let contents =
+            std::fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
+        serde_yaml::from_str(&contents).with_context(|| format!("parsing {}", path.display()))
     }
 
     /// Load from the single secure config path (~/.config/buzz/config.yaml).

@@ -11,9 +11,9 @@ fn parse_frontmatter(contents: &str) -> (HashMap<String, String>, &str) {
     let mut map = HashMap::new();
     let body_start;
 
-    if contents.starts_with("---") {
-        if let Some(end) = contents[3..].find("---") {
-            let fm = &contents[3..3 + end];
+    if let Some(rest) = contents.strip_prefix("---") {
+        if let Some(end) = rest.find("---") {
+            let fm = &rest[..end];
             body_start = 3 + end + 3;
             for line in fm.lines() {
                 if let Some((k, v)) = line.split_once(':') {
@@ -61,8 +61,8 @@ pub fn call(agent_name: &str, message: Option<&str>, config: &YaaConfig) -> Resu
     // Find agent file: try ego/<name>/agent.md, then ego/<name>.md
     let agents_dir = config.vennon_path().join("self/ego");
     let candidates = [
-        agents_dir.join(agent_name).join("agent.md"),  // ego/hermes/agent.md
-        agents_dir.join(format!("{agent_name}.md")),    // ego/hermes.md
+        agents_dir.join(agent_name).join("agent.md"), // ego/hermes/agent.md
+        agents_dir.join(format!("{agent_name}.md")),  // ego/hermes.md
     ];
     let agent_file = candidates.iter().find(|p| p.exists());
 
@@ -85,7 +85,10 @@ pub fn call(agent_name: &str, message: Option<&str>, config: &YaaConfig) -> Resu
                 }
             }
             available.sort();
-            bail!("agent not found: {agent_name}\nAvailable: {}", available.join(", "));
+            bail!(
+                "agent not found: {agent_name}\nAvailable: {}",
+                available.join(", ")
+            );
         }
     };
 
@@ -117,9 +120,17 @@ pub fn call(agent_name: &str, message: Option<&str>, config: &YaaConfig) -> Resu
     let cid = if cid.is_empty() {
         // Container not running — start it via compose (not vennon start which does exec)
         let _ = std::process::Command::new("podman-compose")
-            .args(["-f", &format!("{}/.config/vennon/containers/claude/docker-compose.yml",
-                std::env::var("HOME").unwrap_or_default()),
-                "-p", "vennon-claude", "up", "-d"])
+            .args([
+                "-f",
+                &format!(
+                    "{}/.config/vennon/containers/claude/docker-compose.yml",
+                    std::env::var("HOME").unwrap_or_default()
+                ),
+                "-p",
+                "vennon-claude",
+                "up",
+                "-d",
+            ])
             .status();
         // Retry find
         let cid2 = exec::capture("podman", &["ps", "-q", "--filter", "name=vennon-claude"])?;
@@ -154,7 +165,10 @@ pub fn call(agent_name: &str, message: Option<&str>, config: &YaaConfig) -> Resu
     let end_time = now_hhmm();
     println!();
     println!("\x1b[36m📞 Call ended\x1b[0m");
-    println!("   {start_time} → {end_time} ({})", format_duration(duration));
+    println!(
+        "   {start_time} → {end_time} ({})",
+        format_duration(duration)
+    );
 
     // Cleanup temp
     let _ = std::fs::remove_file(&tmp);
@@ -163,5 +177,25 @@ pub fn call(agent_name: &str, message: Option<&str>, config: &YaaConfig) -> Resu
         Ok(s) if s.success() => Ok(()),
         Ok(s) => bail!("claude exited with {s}"),
         Err(e) => bail!("failed to exec: {e}"),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn frontmatter_parsed() {
+        let md = "---\nfoo: bar\n---\nbody here";
+        let (map, body) = parse_frontmatter(md);
+        assert_eq!(map.get("foo").map(String::as_str), Some("bar"));
+        assert_eq!(body.trim(), "body here");
+    }
+
+    #[test]
+    fn no_frontmatter_returns_full_body() {
+        let (map, body) = parse_frontmatter("just text");
+        assert!(map.is_empty());
+        assert_eq!(body, "just text");
     }
 }

@@ -1,6 +1,6 @@
 use ratatui::prelude::*;
-use ratatui::widgets::*;
 use ratatui::widgets::ScrollbarOrientation;
+use ratatui::widgets::*;
 
 use super::app::{App, AppMode, ContainerKind, Tab};
 use chrono::Local;
@@ -27,9 +27,9 @@ pub fn render(frame: &mut Frame, app: &App) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Length(1),               // header + tabs
+            Constraint::Length(1),                // header + tabs
             Constraint::Length(container_height), // containers
-            Constraint::Min(5),                  // logs (full remaining height)
+            Constraint::Min(5),                   // logs (full remaining height)
         ])
         .split(area);
 
@@ -47,8 +47,16 @@ pub fn render(frame: &mut Frame, app: &App) {
 }
 
 fn render_header(frame: &mut Frame, app: &App, area: Rect) {
-    let svc_style = if app.tab == Tab::Services { Style::default().fg(MAUVE).bold() } else { Style::default().fg(DIM) };
-    let agents_style = if app.tab == Tab::Agents { Style::default().fg(MAUVE).bold() } else { Style::default().fg(DIM) };
+    let svc_style = if app.tab == Tab::Services {
+        Style::default().fg(MAUVE).bold()
+    } else {
+        Style::default().fg(DIM)
+    };
+    let agents_style = if app.tab == Tab::Agents {
+        Style::default().fg(MAUVE).bold()
+    } else {
+        Style::default().fg(DIM)
+    };
 
     let svc_up = app
         .all_containers
@@ -80,15 +88,15 @@ fn render_header(frame: &mut Frame, app: &App, area: Rect) {
     let right_line = header_right_line(app);
     let right_w = header_right_column_width(app);
 
-    let chunks = Layout::horizontal([
-        Constraint::Min(10),
-        Constraint::Length(right_w),
-    ])
-    .flex(Flex::Legacy)
-    .split(area);
+    let chunks = Layout::horizontal([Constraint::Min(10), Constraint::Length(right_w)])
+        .flex(Flex::Legacy)
+        .split(area);
 
     frame.render_widget(Paragraph::new(left_line), chunks[0]);
-    frame.render_widget(Paragraph::new(right_line).alignment(Alignment::Right), chunks[1]);
+    frame.render_widget(
+        Paragraph::new(right_line).alignment(Alignment::Right),
+        chunks[1],
+    );
 }
 
 /// Largura em colunas do bloco direito do header (deve bater com `header_right_line`).
@@ -117,10 +125,7 @@ fn header_right_column_width(app: &App) -> u16 {
 fn header_right_line(app: &App) -> Line<'_> {
     let mut spans: Vec<Span<'_>> = Vec::new();
     if app.subprocess_degraded {
-        spans.push(Span::styled(
-            "stale ",
-            Style::default().fg(PEACH).bold(),
-        ));
+        spans.push(Span::styled("stale ", Style::default().fg(PEACH).bold()));
     }
     if app.refresh_inflight {
         let spin = REFRESH_SPINNER[(app.spin_tick as usize) % REFRESH_SPINNER.len()];
@@ -143,7 +148,10 @@ fn header_right_line(app: &App) -> Line<'_> {
         }
         let color = if c.is_up { GREEN } else { RED };
         spans.push(Span::styled("● ", Style::default().fg(color)));
-        spans.push(Span::styled(c.display_name.as_str(), Style::default().fg(DIM)));
+        spans.push(Span::styled(
+            c.display_name.as_str(),
+            Style::default().fg(DIM),
+        ));
     }
     spans.push(Span::styled(" ", Style::default()));
     Line::from(spans)
@@ -261,21 +269,29 @@ fn render_containers(frame: &mut Frame, app: &App, vis: &[&super::app::Container
             }
 
             let env_color = match c.env.as_str() {
-                "prod"          => RED,
+                "prod" => RED,
                 "sand" | "sbox" => YELLOW,
-                "local"         => GREEN,
-                "qa"            => PEACH,
+                "local" => GREEN,
+                "qa" => PEACH,
                 "dbox" | "devb" => MAUVE,
-                _               => DIM,
+                _ => DIM,
             };
             let vert_color = match c.vertical.as_str() {
-                "med"  => MAUVE,
-                "oab"  => GREEN,
+                "med" => MAUVE,
+                "oab" => GREEN,
                 "conc" => PEACH,
-                _      => DIM,
+                _ => DIM,
             };
-            let env_display  = if c.env.is_empty() { "—".to_string() } else { c.env.clone() };
-            let vert_display = if c.vertical.is_empty() { "—".to_string() } else { c.vertical.clone() };
+            let env_display = if c.env.is_empty() {
+                "—".to_string()
+            } else {
+                c.env.clone()
+            };
+            let vert_display = if c.vertical.is_empty() {
+                "—".to_string()
+            } else {
+                c.vertical.clone()
+            };
             let mem_display = mem_used_only(&c.mem);
             let status_display = if !c.last_log.is_empty() {
                 c.last_log.clone()
@@ -299,42 +315,46 @@ fn render_containers(frame: &mut Frame, app: &App, vis: &[&super::app::Container
         .collect();
 
     let widths = [
-        Constraint::Length(1),   // cursor ▸
-        Constraint::Length(2),   // status icon
-        Constraint::Length(20),  // name (tree + sidecar label)
-        Constraint::Length(5),   // env
-        Constraint::Length(5),   // vertical
-        Constraint::Length(8),   // cpu
-        Constraint::Length(9),   // mem (used only)
-        Constraint::Min(10),     // status (fills remaining)
+        Constraint::Length(1),  // cursor ▸
+        Constraint::Length(2),  // status icon
+        Constraint::Length(20), // name (tree + sidecar label)
+        Constraint::Length(5),  // env
+        Constraint::Length(5),  // vertical
+        Constraint::Length(8),  // cpu
+        Constraint::Length(9),  // mem (used only)
+        Constraint::Min(10),    // status (fills remaining)
     ];
 
     let tab_label = match app.tab {
         Tab::Agents => "Agents",
         Tab::Services => "Services",
     };
-    let table = Table::new(rows, widths)
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .border_style(Style::default().fg(DIM))
-                .title(Span::styled(
-                    format!(" {tab_label} "),
-                    Style::default().fg(MAUVE).bold(),
-                )),
-        );
+    let table = Table::new(rows, widths).block(
+        Block::default()
+            .borders(Borders::ALL)
+            .border_style(Style::default().fg(DIM))
+            .title(Span::styled(
+                format!(" {tab_label} "),
+                Style::default().fg(MAUVE).bold(),
+            )),
+    );
 
     frame.render_widget(table, area);
 }
 
 fn colorize_log_line(l: &str) -> Line<'_> {
-    if l.contains("ERROR") || l.contains("error") || l.contains("ERRO")
-        || l.contains("✗") || l.starts_with("Failed") || l.contains("failed to")
+    if l.contains("ERROR")
+        || l.contains("error")
+        || l.contains("ERRO")
+        || l.contains("✗")
+        || l.starts_with("Failed")
+        || l.contains("failed to")
     {
         Line::from(Span::styled(l, Style::default().fg(RED)))
     } else if l.contains("WARN") || l.contains("warn") {
         Line::from(Span::styled(l, Style::default().fg(PEACH)))
-    } else if l.starts_with('✔') || l.contains("Compiled successfully") || l.contains("pronto em") {
+    } else if l.starts_with('✔') || l.contains("Compiled successfully") || l.contains("pronto em")
+    {
         Line::from(Span::styled(l, Style::default().fg(GREEN)))
     } else if l.starts_with('●') || l.contains('█') {
         Line::from(Span::styled(l, Style::default().fg(MAUVE)))
@@ -386,13 +406,15 @@ fn render_logs(frame: &mut Frame, app: &App, area: Rect) {
         .title(title);
 
     frame.render_widget(
-        Paragraph::new(lines).wrap(Wrap { trim: false }).block(block),
+        Paragraph::new(lines)
+            .wrap(Wrap { trim: false })
+            .block(block),
         area,
     );
 
     // Scrollbar
-    let mut scrollbar_state = ScrollbarState::new(len.saturating_sub(visible_height))
-        .position(app.log_scroll);
+    let mut scrollbar_state =
+        ScrollbarState::new(len.saturating_sub(visible_height)).position(app.log_scroll);
     frame.render_stateful_widget(
         Scrollbar::new(ScrollbarOrientation::VerticalRight)
             .begin_symbol(None)
@@ -421,7 +443,10 @@ fn render_help(frame: &mut Frame, area: Rect) {
         ]),
         Line::from(vec![
             Span::styled("Tab", Style::default().fg(PEACH)),
-            Span::styled("              alternar Services ↔ Agents", Style::default().fg(DIM)),
+            Span::styled(
+                "              alternar Services ↔ Agents",
+                Style::default().fg(DIM),
+            ),
         ]),
         Line::from(vec![
             Span::styled("r", Style::default().fg(PEACH)),
@@ -429,7 +454,10 @@ fn render_help(frame: &mut Frame, area: Rect) {
         ]),
         Line::from(vec![
             Span::styled("f", Style::default().fg(PEACH)),
-            Span::styled("                follow / pausar logs", Style::default().fg(DIM)),
+            Span::styled(
+                "                follow / pausar logs",
+                Style::default().fg(DIM),
+            ),
         ]),
         Line::from(vec![
             Span::styled("[ ]", Style::default().fg(PEACH)),
@@ -491,8 +519,7 @@ fn render_menu(frame: &mut Frame, app: &App, area: Rect) {
                 Style::default().fg(TEXT)
             };
             let prefix = if i == app.menu_cursor { "▸ " } else { "  " };
-            ListItem::new(format!("{prefix}{label}"))
-                .style(style)
+            ListItem::new(format!("{prefix}{label}")).style(style)
         })
         .collect();
 

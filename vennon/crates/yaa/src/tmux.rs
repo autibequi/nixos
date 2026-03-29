@@ -32,9 +32,7 @@ fn tmux_bin() -> Option<&'static str> {
 }
 
 fn require_tmux() -> Result<&'static str> {
-    tmux_bin().ok_or_else(|| {
-        anyhow::anyhow!("tmux not found.\nInstall: nix-shell -p tmux")
-    })
+    tmux_bin().ok_or_else(|| anyhow::anyhow!("tmux not found.\nInstall: nix-shell -p tmux"))
 }
 
 fn tmux_cmd(args: &[&str]) -> Result<std::process::Output> {
@@ -62,19 +60,46 @@ pub fn serve() -> Result<()> {
     let _ = std::fs::set_permissions(SOCKET_DIR, std::fs::Permissions::from_mode(0o777));
 
     if server_running() {
-        let _ = Command::new(bin).args(["-S", SOCKET, "kill-server"]).output();
+        let _ = Command::new(bin)
+            .args(["-S", SOCKET, "kill-server"])
+            .output();
     }
 
     Command::new(bin)
-        .args(["-S", SOCKET, "new-session", "-d", "-s", SESSION, "-x", "220", "-y", "50"])
+        .args([
+            "-S",
+            SOCKET,
+            "new-session",
+            "-d",
+            "-s",
+            SESSION,
+            "-x",
+            "220",
+            "-y",
+            "50",
+        ])
         .output()?;
 
     // Security: block extra windows/sessions
     Command::new(bin)
-        .args(["-S", SOCKET, "set-hook", "-g", "after-new-window", "kill-window"])
+        .args([
+            "-S",
+            SOCKET,
+            "set-hook",
+            "-g",
+            "after-new-window",
+            "kill-window",
+        ])
         .output()?;
     Command::new(bin)
-        .args(["-S", SOCKET, "set-hook", "-g", "after-new-session", "kill-session"])
+        .args([
+            "-S",
+            SOCKET,
+            "set-hook",
+            "-g",
+            "after-new-session",
+            "kill-session",
+        ])
         .output()?;
 
     let _ = std::fs::set_permissions(SOCKET, std::fs::Permissions::from_mode(0o666));
@@ -83,7 +108,9 @@ pub fn serve() -> Result<()> {
         .args(["-S", SOCKET, "attach", "-t", SESSION])
         .status()?;
 
-    let _ = Command::new(bin).args(["-S", SOCKET, "kill-server"]).output();
+    let _ = Command::new(bin)
+        .args(["-S", SOCKET, "kill-server"])
+        .output();
     Ok(())
 }
 
@@ -103,7 +130,18 @@ pub fn open() -> Result<()> {
 
     if !has {
         Command::new(bin)
-            .args(["-S", SOCKET, "new-session", "-d", "-s", SESSION, "-x", "220", "-y", "50"])
+            .args([
+                "-S",
+                SOCKET,
+                "new-session",
+                "-d",
+                "-s",
+                SESSION,
+                "-x",
+                "220",
+                "-y",
+                "50",
+            ])
             .output()?;
     }
 

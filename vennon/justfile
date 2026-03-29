@@ -4,6 +4,17 @@ buzz_cfg_dir   := env("HOME") / ".config/buzz"
 buzz_cfg_dst   := buzz_cfg_dir / "config.yaml"
 nix_run        := "nix-shell -p rustc cargo clippy rustfmt --run"
 
+# Hábito: TEST → build release (mesma ordem que `setup` abaixo)
+# Run all tests (todos os crates do workspace)
+test:
+    {{nix_run}} "cargo test --workspace"
+
+# Setup local: roda testes antes de compilar release (green antes do binário)
+setup: test build
+
+# Setup rápido: testes + build debug
+setup-dev: test dev
+
 # Build both binaries (release)
 build:
     {{nix_run}} "cargo build --release"
@@ -11,10 +22,6 @@ build:
 # Build debug
 dev:
     {{nix_run}} "cargo build"
-
-# Run all tests (todos os crates do workspace)
-test:
-    {{nix_run}} "cargo test --workspace"
 
 # Lint
 clippy:
@@ -28,8 +35,8 @@ fmt:
 fmt-check:
     {{nix_run}} "cargo fmt --check"
 
-# Full check
-check: build test clippy fmt-check
+# Full check: testes primeiro, formato, clippy, build release
+check: test fmt-check clippy build
 
 # Install all binaries to ~/.local/bin
 install: build

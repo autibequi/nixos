@@ -1,7 +1,8 @@
 use anyhow::Result;
 
 pub fn show() -> Result<()> {
-    print!(r#"
+    print!(
+        r#"
 YAA(1)                      Yaa Manual                      YAA(1)
 
 NAME
@@ -100,6 +101,7 @@ COMPANION TOOLS
 SEE ALSO
     vennon(1), bridge(1)
 
-"#);
+"#
+    );
     Ok(())
 }

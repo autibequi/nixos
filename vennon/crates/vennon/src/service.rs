@@ -4,7 +4,7 @@ use std::path::Path;
 
 use crate::config::{self, VennonConfig};
 use crate::exec;
-use crate::manifest::{self, CommandDef, Manifest};
+use crate::manifest::{self, Manifest};
 
 /// Execute a service command from its vennon.yaml manifest.
 pub fn run(
@@ -163,10 +163,16 @@ fn run_exec(
     let project = manifest.project_name();
     // Find container by project + service name
     let full_name = format!("{}-{}", project, container_name);
-    let cid = exec::capture("podman", &["ps", "-q", "--filter", &format!("name={full_name}")])?;
+    let cid = exec::capture(
+        "podman",
+        &["ps", "-q", "--filter", &format!("name={full_name}")],
+    )?;
 
     if cid.is_empty() {
-        bail!("Container {full_name} not running. Start it first with `vennon {} serve`", manifest.name);
+        bail!(
+            "Container {full_name} not running. Start it first with `vennon {} serve`",
+            manifest.name
+        );
     }
 
     let cid = cid.lines().next().unwrap_or(&cid).trim();

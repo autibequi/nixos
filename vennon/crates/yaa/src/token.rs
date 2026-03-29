@@ -19,18 +19,24 @@ fn claude_token() -> Result<()> {
     let creds_path = home.join(".claude/.credentials.json");
 
     if !creds_path.exists() {
-        bail!("No credentials at {}\nRun `claude` first to authenticate.", creds_path.display());
+        bail!(
+            "No credentials at {}\nRun `claude` first to authenticate.",
+            creds_path.display()
+        );
     }
 
     let contents = std::fs::read_to_string(&creds_path)?;
 
     // Extract accessToken from JSON
     let pattern = "\"accessToken\":\"";
-    let start = contents.find(pattern)
+    let start = contents
+        .find(pattern)
         .ok_or_else(|| anyhow::anyhow!("accessToken not found in credentials"))?
         + pattern.len();
-    let end = contents[start..].find('"')
-        .ok_or_else(|| anyhow::anyhow!("malformed credentials"))? + start;
+    let end = contents[start..]
+        .find('"')
+        .ok_or_else(|| anyhow::anyhow!("malformed credentials"))?
+        + start;
 
     println!("{}", &contents[start..end]);
     Ok(())

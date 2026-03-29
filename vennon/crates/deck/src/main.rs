@@ -8,7 +8,11 @@ use anyhow::Result;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
-#[command(name = "deck", version, about = "deck — container dashboard + host utilities")]
+#[command(
+    name = "deck",
+    version,
+    about = "deck — container dashboard + host utilities"
+)]
 struct Cli {
     #[command(subcommand)]
     command: Option<Commands>,

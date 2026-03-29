@@ -7,6 +7,8 @@ use crate::config;
 
 // ── Manifest structs ────────────────────────────────────────────
 
+/// Campos extras vêm do YAML; nem todos são lidos pelo runtime Rust ainda.
+#[allow(dead_code)]
 #[derive(Debug, Deserialize)]
 pub struct Manifest {
     pub name: String,
@@ -42,6 +44,8 @@ pub struct EnumDef {
 
 #[derive(Debug, Deserialize)]
 pub struct CommandDef {
+    /// Documentação no YAML (CLI/help futuro).
+    #[allow(dead_code)]
     pub description: Option<String>,
     #[serde(default)]
     pub args: Vec<ArgDef>,
@@ -55,7 +59,9 @@ pub struct ArgDef {
     pub name: String,
     #[serde(rename = "enum")]
     pub enum_ref: Option<String>,
+    /// Tipo declarado no YAML (validação futura).
     #[serde(rename = "type")]
+    #[allow(dead_code)]
     pub arg_type: Option<String>,
     pub default: Option<serde_yaml::Value>,
 }
@@ -187,10 +193,7 @@ pub fn parse_args(
                     if let Some(enum_ref) = &arg_def.enum_ref {
                         if let Some(e) = enums.get(enum_ref) {
                             if !e.values.contains(&value.to_string()) {
-                                bail!(
-                                    "invalid value '{value}' for --{key}\nValid: {:?}",
-                                    e.values
-                                );
+                                bail!("invalid value '{value}' for --{key}\nValid: {:?}", e.values);
                             }
                         }
                     }
@@ -217,14 +220,8 @@ pub fn render(
 ) -> String {
     let mut result = template.to_string();
 
-    // {{ var | map }} — apply enum mapping
-    let map_re_pattern = "{{ ";
-    // Simple parser: find {{ ... }} blocks
-    loop {
-        let start = match result.find("{{") {
-            Some(i) => i,
-            None => break,
-        };
+    // Simple parser: find {{ ... }} blocks (incl. `{{ var | map }}`)
+    while let Some(start) = result.find("{{") {
         let end = match result[start..].find("}}") {
             Some(i) => start + i + 2,
             None => break,
@@ -240,7 +237,7 @@ pub fn render(
                 .unwrap_or_default();
             // Find the enum that this var references and apply mapping
             let mut mapped = raw_val.clone();
-            for (_, enum_def) in enums {
+            for enum_def in enums.values() {
                 if let Some(m) = enum_def.map.get(&raw_val) {
                     mapped = m.clone();
                     break;

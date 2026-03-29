@@ -6,8 +6,8 @@ use crate::exec;
 pub enum SessionMode {
     New,
     Shell,
-    Resume(Option<String>),  // optional session ID
-    Continue,                 // resume last
+    Resume(Option<String>), // optional session ID
+    Continue,               // resume last
 }
 
 pub struct SessionOpts {
@@ -22,10 +22,7 @@ pub struct SessionOpts {
 /// Launch a session: resolve engine/model, call vennon, attach.
 pub fn launch(config: &YaaConfig, opts: SessionOpts) -> Result<()> {
     // Resolve engine: CLI flag > config
-    let engine = opts
-        .engine
-        .as_deref()
-        .unwrap_or(&config.session.engine);
+    let engine = opts.engine.as_deref().unwrap_or(&config.session.engine);
 
     match engine {
         "claude" | "opencode" | "cursor" => {}
@@ -93,7 +90,11 @@ pub fn launch(config: &YaaConfig, opts: SessionOpts) -> Result<()> {
     let dir_str = dir.to_string_lossy().to_string();
     let host_path = config.host_path().to_string_lossy().to_string();
     let obsidian = config.obsidian_path().to_string_lossy().to_string();
-    let vennon_self = config.vennon_path().join("self").to_string_lossy().to_string();
+    let vennon_self = config
+        .vennon_path()
+        .join("self")
+        .to_string_lossy()
+        .to_string();
 
     let projects_path = config.projects_path().to_string_lossy().to_string();
 

@@ -80,7 +80,9 @@ pub fn find_vennon_path() -> Option<PathBuf> {
         expand_path("~/nixos/vennon"),
         expand_path("~/nixos/host/vennon"),
     ];
-    candidates.into_iter().find(|p| p.join("containers").exists())
+    candidates
+        .into_iter()
+        .find(|p| p.join("containers").exists())
 }
 
 /// Expand ~ and $HOME in a path string.

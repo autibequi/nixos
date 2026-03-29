@@ -54,6 +54,8 @@ No workdir do repositório (`/workspace/target`), `webview/mermaid/base.html` e 
 | `mermaid/base.html` | HTML único holodeck Mermaid (toolbar + atalhos + export) | Base para diagramas no relay; ver secção **Pacote Mermaid** |
 | `mermaid/template/flow.md` | Exemplo flowchart | Copiar bloco mermaid ou usar com `show` |
 | `mermaid/README.md` | **Template oficial** — resumo e comandos `cp` para o espelho | Ao orientar agentes ou devs sobre qual ficheiro editar |
+| `mermaid/studio/studio.html` | **Studio** — editor+preview, chips Flow/Seq/State/Class/ER, Ctrl+Enter | Segundo template Mermaid; ver `mermaid/studio/README.md` |
+| `mermaid/studio/snippets/*.mmd` | Fragmentos para modelos / sync com `PRESETS` no studio | Evoluir templates para o agente |
 
 ---
 
@@ -244,7 +246,8 @@ body {
 | Visualizacao | Template | Descricao |
 |---|---|---|
 | **Flowchart Mermaid** | `templates/flowchart.md` | Qualquer diagrama — zoom/drag builtin, tema Catppuccin |
-| **Mermaid holodeck (HTML único)** | `mermaid/base.html` | Toolbar, % zoom, copiar código, export SVG, ecrã inteiro, atalhos — ver **Pacote Mermaid** |
+| **Mermaid holodeck (HTML único)** | `mermaid/base.html` | Toolbar, zoom, código, export SVG, ecrã inteiro — ver **Pacote Mermaid** |
+| **Mermaid Studio** | `mermaid/studio/studio.html` | Editor + preview, chips de modelos, snippets em `studio/snippets/` |
 | **Exemplo flow .md** | `mermaid/template/flow.md` | Flowchart de exemplo + uso com `show` |
 | **Code diff side-by-side** | `code/analysis/diff/codediff.md` | diff2html — linhas +/- com syntax highlight |
 | **Arvore de diff interativa** | `code/analysis/diff/templates/interactive-tree.html` | Collapse, glow, breadcrumb |

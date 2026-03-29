@@ -25,21 +25,38 @@ pub struct BusResponse {
 
 impl BusResponse {
     pub fn ok(id: &str, output: Option<String>) -> Self {
-        Self { id: id.into(), status: "ok".into(), output, error: None }
+        Self {
+            id: id.into(),
+            status: "ok".into(),
+            output,
+            error: None,
+        }
     }
 
     pub fn denied(id: &str, reason: &str) -> Self {
-        Self { id: id.into(), status: "denied".into(), output: None, error: Some(reason.into()) }
+        Self {
+            id: id.into(),
+            status: "denied".into(),
+            output: None,
+            error: Some(reason.into()),
+        }
     }
 
     pub fn error(id: &str, reason: &str) -> Self {
-        Self { id: id.into(), status: "error".into(), output: None, error: Some(reason.into()) }
+        Self {
+            id: id.into(),
+            status: "error".into(),
+            output: None,
+            error: Some(reason.into()),
+        }
     }
 }
 
 /// Generate a short random ID (no uuid crate needed).
 pub fn gen_id() -> String {
     use std::time::{SystemTime, UNIX_EPOCH};
-    let t = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default();
+    let t = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default();
     format!("{:x}{:04x}", t.as_secs(), t.subsec_millis())
 }

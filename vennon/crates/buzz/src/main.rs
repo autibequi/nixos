@@ -11,7 +11,11 @@ use clap::{Parser, Subcommand};
 use std::collections::HashMap;
 
 #[derive(Parser)]
-#[command(name = "buzz", version, about = "buzz — container→host IPC daemon with YAML permissions")]
+#[command(
+    name = "buzz",
+    version,
+    about = "buzz — container→host IPC daemon with YAML permissions"
+)]
 struct Cli {
     /// Config file (default: ~/.config/vennon/buzz.yaml)
     #[arg(long, short = 'c', global = true)]
@@ -108,10 +112,17 @@ fn main() -> Result<()> {
             for name in names {
                 let action = &config.actions[name];
                 let capture = if action.capture { " [capture]" } else { "" };
-                let args: Vec<String> = action.args.iter().map(|a| {
-                    if a.required { format!("--{}", a.name) }
-                    else { format!("[--{}]", a.name) }
-                }).collect();
+                let args: Vec<String> = action
+                    .args
+                    .iter()
+                    .map(|a| {
+                        if a.required {
+                            format!("--{}", a.name)
+                        } else {
+                            format!("[--{}]", a.name)
+                        }
+                    })
+                    .collect();
                 println!("  {name:<20} {}{capture}", args.join(" "));
                 if !action.description.is_empty() {
                     println!("  {:<20} {}", "", action.description);

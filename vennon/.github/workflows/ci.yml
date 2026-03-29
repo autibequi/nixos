@@ -16,10 +16,13 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
         with:
-          components: clippy
+          components: clippy, rustfmt
+
+      - name: Format (check)
+        run: cargo fmt --all --check
 
       - name: Clippy (workspace)
-        run: cargo clippy --workspace --all-targets
+        run: cargo clippy --workspace --all-targets -- -D warnings
 
       - name: Test (workspace)
         run: cargo test --workspace
