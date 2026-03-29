@@ -171,7 +171,7 @@ def main() -> None:
         f"mermaid-live http://{args.bind}:{args.port}/  file={watch}  static={root}",
         flush=True,
     )
-    print("  SSE GET /mermaid-live   POST /mermaid-push   abrir página com ?live=1", flush=True)
+    print("  SSE GET /mermaid-live   POST /mermaid-push   abrir base.html (SSE por defeito; ?nolive=1 desliga)", flush=True)
     httpd.serve_forever()
 
 

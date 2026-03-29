@@ -11,10 +11,10 @@ No workdir do projeto: `webview/mermaid/base.html` → ligação simbólica para
 
 ## Conteúdo
 
-- Título fixo do gráfico: **Holodeck — base.html**
-- Placeholders: `MERMAID_SUBTITLE_HERE`, `MERMAID_DIAGRAM_HERE`
-- **Drawer** lateral esquerdo **Código** (com backdrop), zoom estilo mapa (+/−), export SVG, relay-ready (CSS/JS inline; Mermaid via CDN)
-- **`?live=1`:** liga SSE a `/mermaid-live` (servidor **mermaid live**) para atualizar o diagrama sem fechar a aba
+- `<title>`: **Mermaid live**; **sem barra superior** — só o diagrama e a pilha de controlos (canto inferior direito).
+- Placeholder de geração: `MERMAID_DIAGRAM_HERE`
+- **Drawer** esquerdo **Código** (textarea + Aplicar); pilha **+ / − / ⟳ / CODE / SVG / PNG / ⛶**; export **SVG** e **PNG**; indicador **verde «LIVE»** no canto quando o SSE está ligado; relay-ready (CSS/JS inline; Mermaid via CDN)
+- **SSE:** o `base.html` liga a `/mermaid-live` por defeito (servidor **mermaid live**). **`?nolive=1`** desliga o EventSource se precisares de HTML estático sem servidor live.
 
 ## Colaboração agente + utilizador (regra de ouro)
 
@@ -42,11 +42,11 @@ python3 skills/webview/mermaid/mermaid_live_server.py \
 node skills/webview/mermaid/mermaid-live-server.mjs --file ./diagram.mmd --static . --port 9876
 ```
 
-1. Abrir no browser **o mesmo origin** que o servidor: `http://127.0.0.1:9876/base.html?live=1`.
+1. Abrir no browser **o mesmo origin** que o servidor: `http://127.0.0.1:9876/base.html`.
 2. Atualizar o gráfico:
    - editar `diagram.mmd` no disco (polling de mtime no servidor Python), ou
    - `curl -sS -X POST http://127.0.0.1:9876/mermaid-push --data-binary @diagram.mmd`
-3. Abrir no relay: `buzz("relay-nav", url="http://127.0.0.1:9876/base.html?live=1")` (requer `127.0.0.1:PORT` alcançável pelo Chrome do host — típico com `network_mode: host`).
+3. Abrir no relay: `buzz("relay-nav", url="http://127.0.0.1:9876/base.html")` (requer `127.0.0.1:PORT` alcançável pelo Chrome do host — típico com `network_mode: host`).
 
 **Nota:** não funciona com `file://`. O relay clássico (`chrome-relay.py` + `/tmp/chrome-relay/`) serve HTML estático; o **live** usa **outra porta** (ex. 9876) com o servidor acima.
 

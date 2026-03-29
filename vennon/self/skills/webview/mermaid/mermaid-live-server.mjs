@@ -10,7 +10,7 @@
  *   node mermaid-live-server.mjs --file ./diagram.mmd --static . --port 9876
  *
  * No browser (mesmo origin que este servidor):
- *   abrir base.html ou demo com ?live=1  → liga a /mermaid-live e redesenha ao receber texto
+ *   abrir base.html → liga a /mermaid-live por defeito (?nolive=1 desliga); redesenha ao receber texto
  *
  * O agente (ou tu) pode atualizar o gráfico sem refresh manual:
  *   curl -sS -X POST http://127.0.0.1:9876/mermaid-push --data-binary @diagram.mmd
@@ -196,5 +196,5 @@ ensureWatch();
 
 server.listen(port, '127.0.0.1', () => {
   console.log(`mermaid-live http://127.0.0.1:${port}/  file=${watchFile}  static=${staticRoot}`);
-  console.log(`  SSE GET /mermaid-live   POST /mermaid-push   abrir página com ?live=1`);
+  console.log(`  SSE GET /mermaid-live   POST /mermaid-push   abrir base.html (?nolive=1 desliga SSE)`);
 });

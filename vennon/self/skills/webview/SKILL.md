@@ -1,6 +1,6 @@
 ---
 name: webview
-description: "Mostrar no relay — abrir conteudo no Chrome (HTML, Mermaid, diff, imagens) via chrome-relay e buzz. Mermaid holodeck live (SSE + POST): cooperacao com o utilizador; antes de editar o desenho, ler estado atual com relay-inject (textarea/SVG), nao so memoria do chat. Alternativa sem browser: ASCII (ascii.md)."
+description: "Mostrar no relay — abrir conteudo no Chrome via chrome-relay e buzz. Mermaid: OBRIGATORIO relay LIVE (mermaid_live_server.py + base.html canónico); PROIBIDO HTML Mermaid ad hoc. Ler estado com relay-inject antes de editar. ASCII: ascii.md."
 ---
 
 # webview — Mostrar no relay
@@ -27,11 +27,23 @@ Sempre que você criar um **template** ou página HTML para o relay:
 
 O mesmo vale para `data:text/html;base64,...` no `nav`: o documento decodificado deve ser **autocontido** da mesma forma.
 
+## Política obrigatória — Mermaid no relay (vennon)
+
+**Sempre que alguém for mostrar um diagrama Mermaid ao utilizador** (incluindo “mostra no relay”, fluxo, arquitetura, organograma):
+
+| Obrigatório | Proibido |
+|-------------|----------|
+| Usar **exclusivamente** o ficheiro canónico **`/workspace/self/skills/webview/mermaid/base.html`** (ou cópia **idêntica** do seu conteúdo). O código Mermaid vai para **`diagram.mmd`** (servido pelo live) **ou** no placeholder **`MERMAID_DIAGRAM_HERE`** ao gerar o HTML a partir do template. | Inventar **HTML/CSS/JS novos do zero** só para renderizar Mermaid (páginas ad hoc, outro `<html>`, outro holodeck, “só um script mermaid no CDN” sem o `base.html`). |
+| Abrir no Chrome via **relay** com o fluxo **live**: **`mermaid_live_server.py`** (ou `mermaid-live-server.mjs`) a servir a **pasta que contém** esse `base.html`, **`diagram.mmd`** atualizado, **`POST /mermaid-push`** quando aplicável, e **`buzz("relay-nav", url="http://127.0.0.1:<porta>/base.html")`** (porta do servidor live, não confundir com só o content server do `chrome-relay.py`). | Substituir este fluxo por uma página HTML criada na conversa ou por ficheiros soltos que não sejam o template oficial. |
+| Seguir a secção **Mermaid Live** abaixo (SSE, inject para estado). | Tratar `chrome-relay.py show` num `.md` como **substituto padrão** para o ambiente vennon — ver exceções na secção **show em .md**. |
+
+**Resumo:** **relay Chrome + servidor Mermaid live + `base.html`** — invariável. Não há “Mermaid rápido” em HTML paralelo.
+
 ## Pacote Mermaid (`mermaid/`)
 
 | Ficheiro | Função |
 |----------|--------|
-| `mermaid/base.html` | **Fonte canónica** — título fixo **Holodeck — base.html**; diagrama fullscreen, zoom (scroll), pan, pinch, botões **+ / −** (canto inferior direito, estilo mapa), indicador %, **drawer** lateral esquerdo **Código** (textarea + Aplicar, backdrop clicável), SVG/Reset/ecrã inteiro, `Esc` fecha o drawer, atalhos `R` `+` `-` `0` `F`, duplo clique = reset, `prefers-reduced-motion`, `aria-label` nos botões. Placeholders: `MERMAID_SUBTITLE_HERE`, `MERMAID_DIAGRAM_HERE`. **Nota:** Mermaid não permite arrastar nós/setas no SVG; edição é por texto (drawer) ou outra ferramenta (Excalidraw, draw.io). |
+| `mermaid/base.html` | **Fonte canónica** — **sem header**; diagrama fullscreen; zoom (scroll), pan, pinch; pilha inferior direita: **+ / − / ⟳ / CODE / SVG / PNG / ⛶**; **drawer** esquerdo **Código**; **SSE** a `/mermaid-live` por defeito (`?nolive=1` desliga); **indicador verde LIVE** quando o stream está ativo; export **SVG** e **PNG**; `Esc` fecha o drawer; atalhos `R` `+` `-` `F`, duplo clique = reset. Placeholder: `MERMAID_DIAGRAM_HERE`. |
 | `mermaid/template/flow.md` | Exemplo de flowchart + instruções para `show` ou para colar no `base.html`. |
 | `templates/mermaid.html` | Cópia espelhada de `base.html` (atualizar com `cp` após mudanças no base). |
 
@@ -39,7 +51,7 @@ Atalhos (com foco na página, fora de inputs): **Esc** fecha o drawer de código
 
 **HTML:** não usar comentários `<!-- ... -->` longos com `<`, `</`, `&lt;porta&gt;` ou `--` no meio — o parser pode fechar o comentário cedo e o restante aparece como texto antes do header (layout partido). Documentação fica na SKILL, não em comentários no `.html`.
 
-Relay: `cp mermaid/base.html /tmp/chrome-relay/foo.html` → abrir `http://vennon:<porta>/foo.html` (porta em `chrome-relay.py status`).
+**Não** usar `cp mermaid/base.html /tmp/chrome-relay/foo.html` + `nav` como **substituto do fluxo live** para Mermaid ao utilizador: esse HTML **não** tem SSE nem o mesmo contrato de cooperação. Só faz sentido como exceção pontual (ficheiro já copiado, sem agente a gerar HTML novo).
 
 No workdir do repositório (`/workspace/target`), `webview/mermaid/base.html` e `webview/mermaid/template/flow.md` são **ligações simbólicas** para os mesmos ficheiros em `self/skills/webview/mermaid/`.
 
@@ -51,29 +63,30 @@ No workdir do repositório (`/workspace/target`), `webview/mermaid/base.html` e 
 | `ascii.md` | 19 templates de representacao terminal | Default. Sem dependencia. |
 | `chrome.md` | Voz + templates artisticos (eye, glados) + canvas colaborativo | Arte no browser. Precisa relay. |
 | `webview.md` | Detalhes do webview mode | Referencia |
-| `mermaid/base.html` | HTML único holodeck Mermaid (toolbar + atalhos + export) | Base para diagramas no relay; ver secção **Pacote Mermaid** |
+| `mermaid/base.html` | HTML único Mermaid live (controlo canto + drawer + SSE) | Base para diagramas no relay; ver secção **Pacote Mermaid** |
 | `mermaid/template/flow.md` | Exemplo flowchart | Copiar bloco mermaid ou usar com `show` |
 | `mermaid/README.md` | **Template oficial** — resumo, live SSE, colaboração | Ao orientar agentes ou devs sobre qual ficheiro editar |
-| `mermaid/mermaid_live_server.py` | Servidor HTTP + SSE + `POST /mermaid-push` (stdlib Python) | Colaboração em tempo real com `base.html?live=1` |
+| `mermaid/mermaid_live_server.py` | Servidor HTTP + SSE + `POST /mermaid-push` (stdlib Python) | Colaboração em tempo real com `base.html` (SSE ligado por defeito; `?nolive=1` desliga) |
 | `mermaid/mermaid-live-server.mjs` | Variante Node (mesma API) | Se `node` existir no ambiente |
 
 ---
 
-## Mermaid Live — colaboração e relay (obrigatório para fluxos iterativos)
+## Mermaid Live — relay obrigatório (visualização + cooperação)
 
 **Ideia:** o diagrama é **ferramenta partilhada** — o utilizador vê no Chrome (relay), pode editar no drawer **Código** ou receber atualizações por SSE; o agente **nunca** assume o desenho só pela memória do chat.
 
 ### Iniciativa do agente
 
-1. Quando o pedido for **mostrar um diagrama Mermaid no relay** *e* houver intenção de **iterar, cooperar ou “ir mexendo”** — preferir o **holodeck live** (`base.html?live=1` + servidor `mermaid_live_server.py`), não apenas copiar HTML estático para `/tmp/chrome-relay/` (esse modo é one-shot, sem sincronização contínua).
-2. Quando o pedido for genérico do tipo **“mostra no relay …”** (árvore, fluxo, organograma) — **abrir o relay** com o Mermaid já gerado: subir ou reutilizar o live, gravar o código, **POST**, **relay-nav** para a URL live (ver pipeline abaixo).
+1. **Qualquer** pedido de **mostrar Mermaid** ao utilizador no ambiente vennon — **sempre** o fluxo **relay live**: `base.html` canónico + `mermaid_live_server.py` + `diagram.mmd` + `relay-nav` (ver pipeline). Não há atalho com HTML novo.
+2. Quando houver **iteração** (“muda isto”, “adiciona nó”) — idem: live + **relay-inject** para ler estado antes de editar.
+3. **Nunca** gerar outra página HTML para Mermaid; **nunca** desviar do `base.html` oficial salvo ordem explícita de manutenção do próprio template.
 
 ### Estado atual — ler antes de editar (não negociável)
 
 - **Fonte de verdade na aba live:** usar **`buzz("relay-inject", js=...)`** para ler o código atual, por exemplo o textarea do holodeck:
   - `document.getElementById('hk-mermaid-ta')` → `.value` (texto Mermaid completo).
   - Se vazio ou inexistente, complementar com texto dos nós no **SVG** (`document.querySelectorAll('.mermaid svg text')` e `foreignObject`).
-- **Fonte no disco:** se o servidor live estiver a servir `diagram.mmd`, podes ler esse ficheiro — mas se o utilizador tiver alterado **só no browser** (drawer **Aplicar**), o disco pode estar desatualizado; **inject na aba live ganha** quando a URL for `.../base.html?live=1`.
+- **Fonte no disco:** se o servidor live estiver a servir `diagram.mmd`, podes ler esse ficheiro — mas se o utilizador tiver alterado **só no browser** (drawer **Aplicar**), o disco pode estar desatualizado; **inject na aba live ganha** quando a URL for o `base.html` servido pelo live (porta típ. 9876).
 - **Proibido:** reescrever o diagrama completo com base **apenas** no histórico da conversa. Sempre: **ler estado atual → aplicar alterações em cima disso**.
 
 ### Pipeline — abrir e manter o live (referência rápida)
@@ -99,21 +112,21 @@ No workdir do repositório (`/workspace/target`), `webview/mermaid/base.html` e 
 4. **Abrir no Chrome** (host com rede compatível com `127.0.0.1:9876`; em setups vennon com `network_mode: host` costuma funcionar):
 
    ```text
-   buzz("relay-nav", url="http://127.0.0.1:9876/base.html?live=1")
+   buzz("relay-nav", url="http://127.0.0.1:9876/base.html")
    ```
 
 5. **Iterações seguintes:** antes de cada alteração, **relay-inject** (textarea/SVG) → editar → gravar `diagram.mmd` → **POST** outra vez (o SSE atualiza a aba sem fechar a janela).
 
 ### Exemplo de pedido em linguagem natural
 
-- *“Mostra no relay a árvore do presidente e ministros atuais”* — pesquisar ou estruturar dados → gerar bloco `flowchart`/`graph` Mermaid válido → escrever `diagram.mmd` → `mermaid-push` → `relay-nav` para `base.html?live=1`. Próximos refinamentos: **sempre** ler estado com inject antes de mudar.
+- *“Mostra no relay a árvore do presidente e ministros atuais”* — pesquisar ou estruturar dados → gerar bloco `flowchart`/`graph` Mermaid válido → escrever `diagram.mmd` → `mermaid-push` → `relay-nav` para `http://127.0.0.1:9876/base.html`. Próximos refinamentos: **sempre** ler estado com inject antes de mudar.
 
-### Live vs HTML estático no `/tmp/chrome-relay`
+### Live vs cópia estática no `/tmp/chrome-relay`
 
 | Modo | Quando |
 |------|--------|
-| **`base.html?live=1` + `mermaid_live_server.py`** | Cooperação, edição pelo utilizador, iterar com o agente sem drift de estado |
-| **`cp base.html /tmp/chrome-relay/foo.html` + `nav`** | Uma visualização pontual, sem SSE |
+| **`base.html` + `mermaid_live_server.py`** (SSE por defeito) | **Único caminho padrão** para Mermaid ao utilizador — cooperação, SSE, indicador LIVE |
+| **`cp base.html` para `/tmp/chrome-relay/` + `nav`** | **Não** usar como padrão; só exceção pontual sem servidor live (sem SSE, sem push) |
 
 Detalhes extra e notas sobre Node vs Python: `mermaid/README.md`.
 
@@ -134,7 +147,7 @@ Precisa de visualizacao?
     |     +- chrome.md
     |
     +-- Diagrama Mermaid iterativo / "mostra no relay" com cooperação?
-    |     +- mermaid_live_server.py + base.html?live=1 + relay-inject (esta skill)
+    |     +- mermaid_live_server.py + base.html + relay-inject (esta skill)
     +-- Diagrama colaborativo interativo? (user + eu iteramos juntos)
     |     +- chrome.md -> Canvas Colaborativo
     |
@@ -209,17 +222,17 @@ Detalhes: **`skills/buzz/SKILL.md`**.
 
 ---
 
-## Flowchart Mermaid — uso rapido
+## `chrome-relay.py show` com ficheiro `.md` — exceção, não o padrão vennon
 
-O relay renderiza qualquer `.md` com blocos ` ```mermaid ``` ` fullscreen, sem containers aninhados.
+O relay pode renderizar um `.md` com blocos ` ```mermaid ``` ` (fullscreen). Isto é **legado / exceção** (ex.: ficheiro já existente no repo, pré-visualização rápida). **Não** substitui o fluxo **relay live + `base.html`** definido na **Política obrigatória** e em **Mermaid Live** quando o agente **mostra** Mermaid ao utilizador no setup vennon.
 
 ```bash
 python3 /workspace/self/scripts/chrome-relay.py show /tmp/meu-flow.md
 ```
 
-Ou via buzz (Python): `buzz("relay-show", path="/tmp/meu-flow.md")`.
+Ou via buzz: `buzz("relay-show", path="/tmp/meu-flow.md")`.
 
-**Layout default:**
+**Layout default (renderer markdown do relay):**
 - Fullscreen automatico — `100vw x 100vh`, sem `.page` container, sem bordas
 - Diagrama centralizado no viewport ao carregar
 - Auto-fullscreen do browser quando o `.md` tem so um diagrama
@@ -247,7 +260,7 @@ O servidor HTTP escuta em `127.0.0.1`; o hostname nas URLs vem de `RELAY_HTTP_HO
 #### Diagramas
 | Lib | CDN | Quando usar |
 |-----|-----|-------------|
-| **Mermaid** | `https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js` | Flowcharts, sequence, ER — use `show` em vez de HTML manual |
+| **Mermaid** | `https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js` | **Não** montar HTML manualmente — obrigatório **`mermaid/base.html`** + relay live; CDN aqui só para contexto de outras páginas não-Mermaid |
 | **D3.js** | `https://cdn.jsdelivr.net/npm/d3@7` | Grafos, trees, layouts customizados |
 
 #### Graficos / Dados
@@ -307,9 +320,9 @@ body {
 
 | Visualizacao | Template | Descricao |
 |---|---|---|
-| **Flowchart Mermaid** | `templates/flowchart.md` | Qualquer diagrama — zoom/drag builtin, tema Catppuccin |
-| **Mermaid holodeck (HTML único)** | `mermaid/base.html` | Toolbar, zoom, código, export SVG, ecrã inteiro — ver **Pacote Mermaid** |
-| **Exemplo flow .md** | `mermaid/template/flow.md` | Flowchart de exemplo + uso com `show` |
+| **Flowchart Mermaid** | `templates/flowchart.md` | Renderer markdown do relay — **não** substitui **Mermaid live + base.html** como padrão vennon |
+| **Mermaid live (obrigatório para agente → utilizador)** | `mermaid/base.html` + `mermaid_live_server.py` | Único holodeck oficial — relay, SSE, SVG/PNG, indicador LIVE — ver **Política obrigatória** |
+| **Exemplo flow .md** | `mermaid/template/flow.md` | Texto de exemplo; colar blocos em `diagram.mmd` ou usar só como referência |
 | **Code diff side-by-side** | `code/analysis/diff/codediff.md` | diff2html — linhas +/- com syntax highlight |
 | **Arvore de diff interativa** | `code/analysis/diff/templates/interactive-tree.html` | Collapse, glow, breadcrumb |
 | **Flow de codigo** | `code/analysis/flows/templates/html.md` | Mermaid read path + write path |

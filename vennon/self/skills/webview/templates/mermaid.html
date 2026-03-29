@@ -1,10 +1,10 @@
-<!-- Template Mermaid oficial (vennon/holodeck) — skills/webview/mermaid/README.md · SKILL.md Pacote Mermaid -->
+<!-- Template Mermaid live (SSE por defeito) — skills/webview/mermaid/README.md -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Holodeck — base.html</title>
+  <title>Mermaid live</title>
   <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
   <style>
     :root {
@@ -38,37 +38,6 @@
       background: var(--bg); color: var(--text);
     }
 
-    .hk-head {
-      flex-shrink: 0;
-      position: relative;
-      z-index: 200;
-      display: flex; align-items: flex-start; justify-content: space-between;
-      gap: 1rem; flex-wrap: wrap;
-      padding: 0.65rem 1rem;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-    }
-    .hk-brand h1 {
-      margin: 0; font-size: 1rem; font-weight: 600;
-      color: var(--ctp-mauve); letter-spacing: 0.02em;
-    }
-    .hk-sub {
-      margin: 0.25rem 0 0; font-size: 0.78rem; color: var(--text-muted);
-      max-width: 48rem;
-    }
-    .hk-sub.hk-hidden { display: none; }
-
-    .hk-toolbar {
-      display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
-    }
-    .hk-zoom {
-      font: 500 0.75rem ui-monospace, monospace;
-      color: var(--ctp-sapphire);
-      min-width: 3.2rem; text-align: right;
-      padding: 0.2rem 0.4rem;
-      border-radius: 4px;
-      background: rgba(116, 199, 236, 0.08);
-    }
     .hk-btn {
       font: 500 0.72rem ui-monospace, monospace;
       color: var(--text-muted);
@@ -108,18 +77,8 @@
       opacity: 0; transition: opacity 0.2s; white-space: pre;
     }
     .mermaid:hover .z-hint { opacity: 1; }
-    .z-reset {
-      position: absolute; top: 10px; right: 12px; z-index: 5;
-      font: 500 0.62rem ui-monospace, monospace; color: var(--text-muted);
-      background: rgba(15,15,18,0.75); border: 1px solid var(--border);
-      padding: 3px 10px; border-radius: 4px; cursor: pointer;
-      opacity: 0; transition: opacity 0.2s; backdrop-filter: blur(4px);
-    }
-    .mermaid:hover .z-reset { opacity: 1; }
-    .z-reset:focus-visible { opacity: 1; outline: 2px solid var(--ctp-sapphire); }
-
     @media (prefers-reduced-motion: reduce) {
-      .z-hint, .z-reset, .hk-btn { transition: none; }
+      .z-hint, .hk-btn { transition: none; }
       .hk-drawer-backdrop, .hk-source-drawer { transition: none; }
     }
 
@@ -142,7 +101,7 @@
     .hk-source-drawer {
       position: fixed;
       left: 0;
-      top: var(--hk-head-h, 52px);
+      top: 0;
       bottom: 0;
       width: min(420px, min(92vw, 100%));
       z-index: 130;
@@ -217,11 +176,12 @@
       overflow: hidden;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
       border: 1px solid var(--border);
+      max-width: min(92vw, 7.5rem);
     }
     .hk-map-btn {
-      width: 38px;
-      height: 38px;
-      padding: 0;
+      min-width: 38px;
+      min-height: 38px;
+      padding: 0 6px;
       margin: 0;
       border: none;
       border-bottom: 1px solid var(--border);
@@ -233,34 +193,75 @@
       align-items: center;
       justify-content: center;
     }
+    .hk-map-btn.hk-map-btn-txt {
+      font: 600 0.62rem/1.15 ui-sans-serif, sans-serif;
+      min-height: 36px;
+      padding: 6px 4px;
+      text-align: center;
+      hyphens: auto;
+    }
+    .hk-map-btn.hk-map-btn-code {
+      font: 700 0.78rem/1 ui-monospace, 'JetBrains Mono', monospace;
+      letter-spacing: 0.06em;
+      min-height: 42px;
+      padding: 8px 6px;
+    }
     .hk-map-btn:last-child { border-bottom: none; }
     .hk-map-btn:hover, .hk-map-btn:focus-visible {
       background: #2a2a32;
       outline: none;
     }
+
+    .hk-live-status {
+      position: fixed;
+      top: 12px;
+      right: 14px;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font: 500 0.65rem/1.2 ui-sans-serif, sans-serif;
+      color: var(--text-muted);
+      pointer-events: none;
+      user-select: none;
+    }
+    .hk-live-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #52525b;
+      box-shadow: 0 0 0 2px rgba(15, 15, 18, 0.9);
+      flex-shrink: 0;
+    }
+    .hk-live-dot.hk-live-on {
+      background: #22c55e;
+      box-shadow: 0 0 0 2px rgba(15, 15, 18, 0.9), 0 0 10px rgba(34, 197, 94, 0.55);
+    }
+    .hk-live-dot.hk-live-wait {
+      background: #eab308;
+    }
+    .hk-live-dot.hk-live-off {
+      background: #71717a;
+    }
   </style>
 </head>
 <body>
-  <header class="hk-head">
-    <div class="hk-brand">
-      <h1>Holodeck — base.html</h1>
-      <p class="hk-sub" id="hk-sub">MERMAID_SUBTITLE_HERE</p>
-    </div>
-    <div class="hk-toolbar">
-      <span id="hk-zoom-pct" class="hk-zoom" aria-live="polite" title="Zoom % relativo ao encaixe inicial">100%</span>
-      <button type="button" class="hk-btn" id="hk-btn-reset" aria-label="Repor zoom e posição (atalho R)">Reset</button>
-      <button type="button" class="hk-btn" id="hk-btn-source" aria-label="Mostrar ou ocultar código fonte Mermaid">Código</button>
-      <button type="button" class="hk-btn" id="hk-btn-svg" aria-label="Exportar diagrama como ficheiro SVG">SVG</button>
-      <button type="button" class="hk-btn" id="hk-btn-fs" aria-label="Alternar ecrã inteiro (atalho F)">⛶</button>
-    </div>
-  </header>
+  <div id="hk-live-status" class="hk-live-status" role="status" aria-live="polite">
+    <span class="hk-live-dot hk-live-off" id="hk-live-dot" title=""></span>
+    <span id="hk-live-label"></span>
+  </div>
   <div id="hk-stage">
     <div class="mermaid">
 MERMAID_DIAGRAM_HERE
     </div>
-    <div class="hk-map-controls" role="toolbar" aria-label="Zoom do diagrama">
+    <div class="hk-map-controls" role="toolbar" aria-label="Controlo do diagrama">
       <button type="button" class="hk-map-btn" id="hk-map-zoom-in" title="Aproximar">+</button>
       <button type="button" class="hk-map-btn" id="hk-map-zoom-out" title="Afastar">−</button>
+      <button type="button" class="hk-map-btn" id="hk-map-reset" title="Repor zoom e posição (atalho R)">⟳</button>
+      <button type="button" class="hk-map-btn hk-map-btn-code" id="hk-map-code" title="Código fonte Mermaid">CODE</button>
+      <button type="button" class="hk-map-btn hk-map-btn-txt" id="hk-map-svg" title="Descarregar diagrama como SVG">SVG</button>
+      <button type="button" class="hk-map-btn hk-map-btn-txt" id="hk-map-png" title="Descarregar diagrama como imagem PNG">PNG</button>
+      <button type="button" class="hk-map-btn hk-map-btn-txt" id="hk-map-fs" title="Ecrã inteiro (F)">⛶</button>
     </div>
   </div>
 
@@ -289,12 +290,6 @@ MERMAID_DIAGRAM_HERE
   var REDUCE_MOTION = typeof window.matchMedia === 'function' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  var sub = document.getElementById('hk-sub');
-  if (sub) {
-    var t = sub.textContent.trim();
-    if (!t || t === 'MERMAID_SUBTITLE_HERE') sub.classList.add('hk-hidden');
-  }
-
   mermaid.initialize({
     startOnLoad: false,
     theme: 'dark',
@@ -322,14 +317,7 @@ MERMAID_DIAGRAM_HERE
   function getSourceTa() {
     return document.getElementById('hk-mermaid-ta');
   }
-  function syncHeadHeight() {
-    var h = document.querySelector('.hk-head');
-    if (h) {
-      document.documentElement.style.setProperty('--hk-head-h', h.offsetHeight + 'px');
-    }
-  }
   function toggleSourcePanel() {
-    syncHeadHeight();
     var p = getSourcePanel();
     var ta = getSourceTa();
     var bd = getBackdrop();
@@ -404,11 +392,7 @@ MERMAID_DIAGRAM_HERE
     return document.querySelector('.mermaid');
   }
 
-  function updateZoomLabel(box) {
-    var el = document.getElementById('hk-zoom-pct');
-    if (!el || !box || !box._holodeck) return;
-    el.textContent = box._holodeck.getScalePct() + '%';
-  }
+  function updateZoomLabel() {}
 
   function makeZoomable(box) {
     if (box.dataset.z) return;
@@ -430,12 +414,10 @@ MERMAID_DIAGRAM_HERE
       return;
     }
     svg.style.margin = '0';
-    var headEl = document.querySelector('.hk-head');
-    var headH = headEl ? headEl.getBoundingClientRect().height : 0;
     var bw = box.offsetWidth || box.getBoundingClientRect().width || window.innerWidth;
     var bh = box.offsetHeight || box.getBoundingClientRect().height;
     if (bh < 64) {
-      bh = Math.max(200, window.innerHeight - headH);
+      bh = Math.max(200, window.innerHeight);
     }
     if (bw < 64) {
       bw = window.innerWidth;
@@ -484,18 +466,7 @@ MERMAID_DIAGRAM_HERE
     var hint = document.createElement('div');
     hint.className = 'z-hint';
     hint.textContent = 'scroll = zoom  ·  drag = pan';
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'z-reset';
-    btn.textContent = '⟳ reset';
-    btn.setAttribute('aria-label', 'Repor zoom e posição ao encaixe inicial');
     box.appendChild(hint);
-    box.appendChild(btn);
-
-    btn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      box._holodeck.reset();
-    });
 
     box.addEventListener('wheel', function (e) {
       e.preventDefault();
@@ -553,7 +524,6 @@ MERMAID_DIAGRAM_HERE
     });
 
     box.addEventListener('dblclick', function (e) {
-      if (e.target.closest('.z-reset')) return;
       e.preventDefault();
       box._holodeck.reset();
     });
@@ -565,6 +535,7 @@ MERMAID_DIAGRAM_HERE
     var svg = box._holodeck.getSvg();
     if (!svg) return;
     var clone = svg.cloneNode(true);
+    clone.removeAttribute('style');
     if (!clone.getAttribute('xmlns')) {
       clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
     }
@@ -580,6 +551,89 @@ MERMAID_DIAGRAM_HERE
     URL.revokeObjectURL(a.href);
   }
 
+  function exportPng() {
+    var box = getPrimaryBox();
+    if (!box || !box._holodeck) return;
+    var svg = box._holodeck.getSvg();
+    if (!svg) return;
+    var clone = svg.cloneNode(true);
+    clone.removeAttribute('style');
+    if (!clone.getAttribute('xmlns')) {
+      clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    }
+    var vb = clone.viewBox && clone.viewBox.baseVal;
+    var w = vb && vb.width > 0 ? vb.width : 800;
+    var h = vb && vb.height > 0 ? vb.height : 600;
+    if (clone.getAttribute('width')) {
+      var pw = parseFloat(clone.getAttribute('width'));
+      if (!isNaN(pw) && pw > 0) w = pw;
+    }
+    if (clone.getAttribute('height')) {
+      var ph = parseFloat(clone.getAttribute('height'));
+      if (!isNaN(ph) && ph > 0) h = ph;
+    }
+    var xml = new XMLSerializer().serializeToString(clone);
+    var svgBlob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' });
+    var url = URL.createObjectURL(svgBlob);
+    var img = new Image();
+    img.onload = function () {
+      URL.revokeObjectURL(url);
+      var scale = 2;
+      var canvas = document.createElement('canvas');
+      canvas.width = Math.ceil(w * scale);
+      canvas.height = Math.ceil(h * scale);
+      var ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.fillStyle = '#0f0f12';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(function (blob) {
+        if (!blob) return;
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'mermaid-diagram.png';
+        a.rel = 'noopener';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+      }, 'image/png');
+    };
+    img.onerror = function () {
+      URL.revokeObjectURL(url);
+      window.alert('Não foi possível gerar PNG a partir do SVG.');
+    };
+    img.src = url;
+  }
+
+  function setLiveIndicator(mode, detail) {
+    var dot = document.getElementById('hk-live-dot');
+    var label = document.getElementById('hk-live-label');
+    if (!dot || !label) return;
+    dot.classList.remove('hk-live-on', 'hk-live-off', 'hk-live-wait');
+    if (mode === 'on') {
+      dot.classList.add('hk-live-on');
+      dot.title = detail || 'Live: ligado ao servidor (stream ativo)';
+      label.textContent = 'LIVE';
+    } else if (mode === 'wait') {
+      dot.classList.add('hk-live-wait');
+      dot.title = detail || 'A ligar…';
+      label.textContent = '…';
+    } else if (mode === 'off') {
+      dot.classList.add('hk-live-off');
+      dot.title = detail || 'Live inativo';
+      label.textContent = '';
+    } else if (mode === 'none') {
+      dot.classList.add('hk-live-off');
+      dot.title = detail || '';
+      label.textContent = '';
+    } else {
+      dot.classList.add('hk-live-off');
+      dot.title = detail || 'Sem stream';
+      label.textContent = '';
+    }
+  }
+
   function toggleFs() {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(function () {});
@@ -588,23 +642,22 @@ MERMAID_DIAGRAM_HERE
     }
   }
 
-  document.getElementById('hk-btn-reset').addEventListener('click', function () {
+  document.getElementById('hk-map-reset').addEventListener('click', function () {
     var b = getPrimaryBox();
     if (b && b._holodeck) b._holodeck.reset();
   });
-  document.getElementById('hk-btn-source').addEventListener('click', toggleSourcePanel);
+  document.getElementById('hk-map-code').addEventListener('click', toggleSourcePanel);
+  document.getElementById('hk-map-svg').addEventListener('click', exportSvg);
+  document.getElementById('hk-map-png').addEventListener('click', exportPng);
+  document.getElementById('hk-map-fs').addEventListener('click', toggleFs);
   document.getElementById('hk-source-close').addEventListener('click', closeSourcePanel);
   var bdEl = getBackdrop();
   if (bdEl) {
     bdEl.addEventListener('click', closeSourcePanel);
   }
-  window.addEventListener('resize', syncHeadHeight);
-  syncHeadHeight();
   document.getElementById('hk-btn-apply').addEventListener('click', function () {
     applyMermaidFromEditor();
   });
-  document.getElementById('hk-btn-svg').addEventListener('click', exportSvg);
-  document.getElementById('hk-btn-fs').addEventListener('click', toggleFs);
 
   document.getElementById('hk-map-zoom-in').addEventListener('click', function () {
     var b = getPrimaryBox();
@@ -661,18 +714,25 @@ MERMAID_DIAGRAM_HERE
     }, 80);
   })();
 
-  /* Modo live: servidor local envia o texto via SSE (ver mermaid-live-server.mjs). Ex.: ?live=1 */
+  /* Live por defeito: SSE /mermaid-live. Desligar com ?nolive=1 */
   (function () {
     var params = new URLSearchParams(location.search);
-    var live = params.get('live');
-    if (!live) return;
+    if (params.get('nolive') === '1' || params.get('nolive') === 'true') {
+      setLiveIndicator('none', 'Stream live desligado (?nolive=1)');
+      return;
+    }
+    setLiveIndicator('wait', 'A ligar ao servidor live…');
     var ssePath = '/mermaid-live';
-    if (live !== '1' && live !== 'true' && live !== 'yes') {
+    var live = params.get('live');
+    if (live && live !== '1' && live !== 'true' && live !== 'yes') {
       ssePath = live.indexOf('/') === 0 ? live : '/' + live;
     }
     var last = '';
     try {
       var es = new EventSource(ssePath);
+      es.onopen = function () {
+        setLiveIndicator('on', 'Live: ligado ao agente / servidor (SSE)');
+      };
       es.onmessage = function (ev) {
         try {
           var payload = JSON.parse(ev.data);
@@ -685,10 +745,11 @@ MERMAID_DIAGRAM_HERE
         }
       };
       es.onerror = function () {
-        /* EventSource reconecta sozinho */
+        setLiveIndicator('wait', 'Ligação em pausa — a reconectar…');
       };
     } catch (e) {
       console.warn('mermaid live EventSource', e);
+      setLiveIndicator('off', 'Não foi possível abrir EventSource');
     }
   })();
 })();
