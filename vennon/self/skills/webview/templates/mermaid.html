@@ -71,14 +71,8 @@
     }
     .mermaid.panning { cursor: grabbing; }
     .mermaid svg { display: block; transform-origin: 0 0; will-change: transform; }
-    .z-hint {
-      position: absolute; bottom: 10px; left: 12px; pointer-events: none;
-      font: 500 0.62rem/1.3 ui-monospace, monospace; color: var(--text-muted);
-      opacity: 0; transition: opacity 0.2s; white-space: pre;
-    }
-    .mermaid:hover .z-hint { opacity: 1; }
     @media (prefers-reduced-motion: reduce) {
-      .z-hint, .hk-btn { transition: none; }
+      .hk-btn { transition: none; }
       .hk-drawer-backdrop, .hk-source-drawer { transition: none; }
     }
 
@@ -260,7 +254,6 @@ MERMAID_DIAGRAM_HERE
       <button type="button" class="hk-map-btn" id="hk-map-reset" title="Repor zoom e posição (atalho R)">⟳</button>
       <button type="button" class="hk-map-btn hk-map-btn-code" id="hk-map-code" title="Código fonte Mermaid">CODE</button>
       <button type="button" class="hk-map-btn hk-map-btn-txt" id="hk-map-svg" title="Descarregar diagrama como SVG">SVG</button>
-      <button type="button" class="hk-map-btn hk-map-btn-txt" id="hk-map-png" title="Descarregar diagrama como imagem PNG">PNG</button>
       <button type="button" class="hk-map-btn hk-map-btn-txt" id="hk-map-fs" title="Ecrã inteiro (F)">⛶</button>
     </div>
   </div>
@@ -463,11 +456,6 @@ MERMAID_DIAGRAM_HERE
       getBox: function () { return box; }
     };
 
-    var hint = document.createElement('div');
-    hint.className = 'z-hint';
-    hint.textContent = 'scroll = zoom  ·  drag = pan';
-    box.appendChild(hint);
-
     box.addEventListener('wheel', function (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -551,61 +539,6 @@ MERMAID_DIAGRAM_HERE
     URL.revokeObjectURL(a.href);
   }
 
-  function exportPng() {
-    var box = getPrimaryBox();
-    if (!box || !box._holodeck) return;
-    var svg = box._holodeck.getSvg();
-    if (!svg) return;
-    var clone = svg.cloneNode(true);
-    clone.removeAttribute('style');
-    if (!clone.getAttribute('xmlns')) {
-      clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    }
-    var vb = clone.viewBox && clone.viewBox.baseVal;
-    var w = vb && vb.width > 0 ? vb.width : 800;
-    var h = vb && vb.height > 0 ? vb.height : 600;
-    if (clone.getAttribute('width')) {
-      var pw = parseFloat(clone.getAttribute('width'));
-      if (!isNaN(pw) && pw > 0) w = pw;
-    }
-    if (clone.getAttribute('height')) {
-      var ph = parseFloat(clone.getAttribute('height'));
-      if (!isNaN(ph) && ph > 0) h = ph;
-    }
-    var xml = new XMLSerializer().serializeToString(clone);
-    var svgBlob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' });
-    var url = URL.createObjectURL(svgBlob);
-    var img = new Image();
-    img.onload = function () {
-      URL.revokeObjectURL(url);
-      var scale = 2;
-      var canvas = document.createElement('canvas');
-      canvas.width = Math.ceil(w * scale);
-      canvas.height = Math.ceil(h * scale);
-      var ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      ctx.fillStyle = '#0f0f12';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob(function (blob) {
-        if (!blob) return;
-        var a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'mermaid-diagram.png';
-        a.rel = 'noopener';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(a.href);
-      }, 'image/png');
-    };
-    img.onerror = function () {
-      URL.revokeObjectURL(url);
-      window.alert('Não foi possível gerar PNG a partir do SVG.');
-    };
-    img.src = url;
-  }
-
   function setLiveIndicator(mode, detail) {
     var dot = document.getElementById('hk-live-dot');
     var label = document.getElementById('hk-live-label');
@@ -648,7 +581,6 @@ MERMAID_DIAGRAM_HERE
   });
   document.getElementById('hk-map-code').addEventListener('click', toggleSourcePanel);
   document.getElementById('hk-map-svg').addEventListener('click', exportSvg);
-  document.getElementById('hk-map-png').addEventListener('click', exportPng);
   document.getElementById('hk-map-fs').addEventListener('click', toggleFs);
   document.getElementById('hk-source-close').addEventListener('click', closeSourcePanel);
   var bdEl = getBackdrop();

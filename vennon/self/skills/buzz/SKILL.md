@@ -79,9 +79,10 @@ Se a tarefa for mostrar algo no browser e o CDP não estiver ativo, **chame `buz
 
 1. `python3 /workspace/self/scripts/chrome-relay.py status`
 2. Se **Chrome CDP OFF**: **`buzz("relay-start")` imediatamente** (iniciativa), depois `status` de novo; só se falhar, orientar o host com `chrome-relay.py start`.
-3. Para exibir Markdown/Mermaid: `buzz("relay-show", path="/tmp/arquivo.md")` **ou** `python3 ... chrome-relay.py show /tmp/arquivo.md`
-4. Para **HTML estático**: arquivos em **`/tmp/chrome-relay/`** (nome na URL). Porta **8765–8768**; monte a URL a partir de **`Public base:`** em `chrome-relay.py status`. Exemplo: `buzz("relay-nav", url="http://127.0.0.1:8765/pagina.html")` se for o que o browser alcança.
-5. **Mermaid holodeck em modo live** (SSE, outro servidor HTTP — ex. `127.0.0.1:9876`): abrir `buzz("relay-nav", url="http://127.0.0.1:9876/base.html")` quando o utilizador quiser **cooperar** no diagrama. Para **ler o estado atual** do desenho na aba (antes de editar): `relay-inject` no textarea `#hk-mermaid-ta` ou nós no SVG — pipeline completo na skill **webview**, secção **Mermaid Live**.
+3. **Abas:** antes de `nav`/`relay-nav`, preferir reutilizar aba **`about:blank`** vazia (`relay-tabs`); se não houver, nova aba. Ver skill **webview**, secção **Abas do Chrome**.
+4. Para exibir Markdown/Mermaid: `buzz("relay-show", path="/tmp/arquivo.md")` **ou** `python3 ... chrome-relay.py show /tmp/arquivo.md`
+5. Para **HTML estático**: arquivos em **`/tmp/chrome-relay/`** (nome na URL). Porta **8765–8768**; monte a URL a partir de **`Public base:`** em `chrome-relay.py status`. Exemplo: `buzz("relay-nav", url="http://127.0.0.1:8765/pagina.html")` se for o que o browser alcança.
+6. **Mermaid** — para mostrar diagrama ao utilizador no vennon é **obrigatório** o **relay live** (`mermaid_live_server.py` + `base.html` canónico; URL típ. `http://127.0.0.1:9876/base.html`). **Não** substituir por HTML Mermaid criado do zero (skill **webview**, **Política obrigatória**). `relay-inject` no `#hk-mermaid-ta` para ler estado antes de editar.
 
 ---
 

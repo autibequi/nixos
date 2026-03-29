@@ -1,5 +1,11 @@
 # Template Mermaid (holodeck) — oficial
 
+## Política (agentes — não negociável)
+
+1. **Mostrar Mermaid ao utilizador** → **sempre** relay **live**: `mermaid_live_server.py` (ou `.mjs`) + **`base.html`** + `diagram.mmd` + `buzz("relay-nav", url="http://127.0.0.1:<porta>/base.html")`.
+2. **Proibido** criar HTML/CSS/JS **novo** para embutir Mermaid; **só** o template canónico `base.html` (placeholder `MERMAID_DIAGRAM_HERE` ou push para `diagram.mmd`).
+3. **`chrome-relay.py show` em `.md`** não substitui o fluxo live no ambiente vennon — ver `skills/webview/SKILL.md`.
+
 **Ficheiro canónico:** `base.html` (nesta pasta).
 
 Espelho para compatibilidade de caminhos antigos:
@@ -13,12 +19,12 @@ No workdir do projeto: `webview/mermaid/base.html` → ligação simbólica para
 
 - `<title>`: **Mermaid live**; **sem barra superior** — só o diagrama e a pilha de controlos (canto inferior direito).
 - Placeholder de geração: `MERMAID_DIAGRAM_HERE`
-- **Drawer** esquerdo **Código** (textarea + Aplicar); pilha **+ / − / ⟳ / CODE / SVG / PNG / ⛶**; export **SVG** e **PNG**; indicador **verde «LIVE»** no canto quando o SSE está ligado; relay-ready (CSS/JS inline; Mermaid via CDN)
+- **Drawer** esquerdo **Código** (textarea + Aplicar); pilha **+ / − / ⟳ / CODE / SVG / ⛶**; export **SVG**; indicador **verde «LIVE»** no canto quando o SSE está ligado; relay-ready (CSS/JS inline; Mermaid via CDN)
 - **SSE:** o `base.html` liga a `/mermaid-live` por defeito (servidor **mermaid live**). **`?nolive=1`** desliga o EventSource se precisares de HTML estático sem servidor live.
 
 ## Colaboração agente + utilizador (regra de ouro)
 
-1. **O utilizador vê no relay** — o agente **abre** o Chrome para o URL do holodeck (live ou estático), não só gera texto na conversa.
+1. **O utilizador vê no relay** — o agente **abre** o Chrome no URL do **live** (`base.html` no servidor Mermaid live), não só gera texto na conversa.
 2. **Estado atual** — antes de **cada** alteração ao desenho, o agente **lê** o que está mesmo no browser:
    - preferência: `buzz("relay-inject", ...)` no textarea `#hk-mermaid-ta` (e SVG se precisar);
    - o utilizador pode ter mudado o diagrama no drawer **sem** gravar o `diagram.mmd` no disco.

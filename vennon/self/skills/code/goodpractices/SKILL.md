@@ -131,7 +131,13 @@ Se evidência for impossível (ex: teste manual no host), dizer o que deve ser t
 
 ---
 
-## 8. Por projeto — onde editar e como verificar
+## 8. Visualização Mermaid (vennon)
+
+Se a tarefa for **mostrar Mermaid** a alguém no browser: **não** gerar HTML novo — seguir **`skills/webview/SKILL.md`** (relay **live** + `mermaid/base.html` + `diagram.mmd`). Isto é política global, não só da Coruja.
+
+---
+
+## 9. Por projeto — onde editar e como verificar
 
 | Projeto | Build/Test | Path raiz | Delegação |
 |---------|-----------|-----------|-----------|
@@ -145,7 +151,7 @@ Para monolito/bo/front: preferir delegar à Coruja — ela conhece o domínio e 
 
 ---
 
-## 9. Segurança — regras invioláveis
+## 10. Segurança — regras invioláveis
 
 - Não introduzir: SQL injection, XSS, command injection, credenciais hardcoded
 - Validar apenas em fronteiras do sistema (input do user, APIs externas)
@@ -154,7 +160,7 @@ Para monolito/bo/front: preferir delegar à Coruja — ela conhece o domínio e 
 
 ---
 
-## 10. Worktree — paths e permissões
+## 11. Worktree — paths e permissões
 
 ```bash
 # Achar raiz do repo em mount aninhado

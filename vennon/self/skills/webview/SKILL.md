@@ -43,7 +43,7 @@ O mesmo vale para `data:text/html;base64,...` no `nav`: o documento decodificado
 
 | Ficheiro | Função |
 |----------|--------|
-| `mermaid/base.html` | **Fonte canónica** — **sem header**; diagrama fullscreen; zoom (scroll), pan, pinch; pilha inferior direita: **+ / − / ⟳ / CODE / SVG / PNG / ⛶**; **drawer** esquerdo **Código**; **SSE** a `/mermaid-live` por defeito (`?nolive=1` desliga); **indicador verde LIVE** quando o stream está ativo; export **SVG** e **PNG**; `Esc` fecha o drawer; atalhos `R` `+` `-` `F`, duplo clique = reset. Placeholder: `MERMAID_DIAGRAM_HERE`. |
+| `mermaid/base.html` | **Fonte canónica** — **sem header**; diagrama fullscreen; zoom (scroll), pan, pinch; pilha inferior direita: **+ / − / ⟳ / CODE / SVG / ⛶**; **drawer** esquerdo **Código**; **SSE** a `/mermaid-live` por defeito (`?nolive=1` desliga); **indicador verde LIVE** quando o stream está ativo; export **SVG**; `Esc` fecha o drawer; atalhos `R` `+` `-` `F`, duplo clique = reset. Placeholder: `MERMAID_DIAGRAM_HERE`. |
 | `mermaid/template/flow.md` | Exemplo de flowchart + instruções para `show` ou para colar no `base.html`. |
 | `templates/mermaid.html` | Cópia espelhada de `base.html` (atualizar com `cp` após mudanças no base). |
 
@@ -141,13 +141,14 @@ Precisa de visualizacao?
     |     +-- Cabe no terminal? (< 80 linhas)
     |     |     +- ascii.md
     |     +-- Precisa interacao (zoom, drag, click)?
-    |           +- Mermaid / HTML no relay
+    |           +- Mermaid? -> OBRIGATORIO live + base.html (ver Politica obrigatoria)
+    |           +- outro HTML (nao Mermaid)? -> relay com template unico (secao Templates webview)
     |
     +-- Arte no Chrome? (eye, glados, animacao, voz)
     |     +- chrome.md
     |
-    +-- Diagrama Mermaid iterativo / "mostra no relay" com cooperação?
-    |     +- mermaid_live_server.py + base.html + relay-inject (esta skill)
+    +-- Qualquer diagrama Mermaid ao utilizador (vennon)?
+    |     +- mermaid_live_server.py + base.html + relay-nav (+ relay-inject se editar)
     +-- Diagrama colaborativo interativo? (user + eu iteramos juntos)
     |     +- chrome.md -> Canvas Colaborativo
     |
@@ -169,6 +170,15 @@ Quando você for **mostrar algo no Chrome** (HTML, Mermaid, diff, imagem, dashbo
 4. Se após `relay-start` o CDP continuar OFF (falha real no host), **aí sim** explique em uma frase o que falhou; não fique tentando à cega.
 
 Resumo: **iniciativa = status → subir o que faltar → mostrar conteúdo**. O usuário pediu visualização; executar o pipeline é o esperado.
+
+### Abas do Chrome — reutilizar `about:blank` vazio
+
+**Vale para todos os fluxos** que mostram algo no relay (Mermaid, HTML, `show`, etc.):
+
+1. Se existir uma aba com URL **`about:blank`** (vazia, sem conteúdo que o utilizador precise manter), **navegar nessa aba** para o URL do conteúdo — **substitui** o destino em vez de deixar um blank extra.
+2. Se **não** existir aba `about:blank` reutilizável, **abrir nova aba** e carregar o URL aí (ou usar o comportamento padrão do `nav`/`relay-nav` que já abre onde for correto).
+
+**Como cumprir:** `python3 .../chrome-relay.py tabs` ou `buzz("relay-tabs")` para listar abas; focar a aba `about:blank` e depois `nav` / `relay-nav` para o URL. Se a ferramenta só navegar na aba ativa, **ativar primeiro** a aba blank. Objetivo: **não acumular** abas vazias quando já há uma para reutilizar.
 
 ---
 
@@ -321,7 +331,7 @@ body {
 | Visualizacao | Template | Descricao |
 |---|---|---|
 | **Flowchart Mermaid** | `templates/flowchart.md` | Renderer markdown do relay — **não** substitui **Mermaid live + base.html** como padrão vennon |
-| **Mermaid live (obrigatório para agente → utilizador)** | `mermaid/base.html` + `mermaid_live_server.py` | Único holodeck oficial — relay, SSE, SVG/PNG, indicador LIVE — ver **Política obrigatória** |
+| **Mermaid live (obrigatório para agente → utilizador)** | `mermaid/base.html` + `mermaid_live_server.py` | Único holodeck oficial — relay, SSE, export SVG, indicador LIVE — ver **Política obrigatória** |
 | **Exemplo flow .md** | `mermaid/template/flow.md` | Texto de exemplo; colar blocos em `diagram.mmd` ou usar só como referência |
 | **Code diff side-by-side** | `code/analysis/diff/codediff.md` | diff2html — linhas +/- com syntax highlight |
 | **Arvore de diff interativa** | `code/analysis/diff/templates/interactive-tree.html` | Collapse, glow, breadcrumb |
@@ -354,13 +364,13 @@ body {
 
 - Verificacao de disponibilidade + regra de decisao
 - Comandos: nav, show, tabs, speak, present
-- Mermaid fullscreen (zoom+drag, tema Catppuccin)
+- Mermaid — **só** via **Mermaid live + base.html** (Política obrigatória); não confundir com o renderer `show` de `.md`
 - Arvore de diff interativa (collapse, glow, breadcrumb)
 - Code diff side-by-side (diff2html-cli dark + JetBrains Mono)
 - Canvas colaborativo — diagramacao interativa user+eu em tempo real
   - API: `CANVAS.addNode/addEdge/addText/layout/state/clear`
   - Fluxo: abrir -> user manipula -> `CANVAS.state()` -> eu itero em cima
-- HTML livre com CDN (diff2html, Chart.js, Mermaid, D3, DataTables...)
+- HTML livre com CDN (diff2html, Chart.js, D3, DataTables…) — **Mermaid** não entra aqui como HTML manual; usar **base.html**
 - Voz (espeak-ng via relay)
 
 ---
@@ -381,11 +391,12 @@ body {
 
 Se voce e um agente ou skill que precisa desenhar algo:
 
-1. **NAO invente seu proprio formato** — consulte esta skill
-2. **Templates HTML no relay:** um único `.html` com CSS e JS inline (secção **Templates webview**)
-3. Leia o sub-file do tipo de saida que precisa
-4. Use os templates e convencoes documentados
-5. Se criar um novo tipo de visualizacao que ficou bom, adicione aqui
+1. **Mermaid** — **obrigatório** seguir **Política obrigatória** e **Mermaid Live**: só `mermaid/base.html` + `mermaid_live_server.py` + relay; **proibido** HTML Mermaid novo.
+2. **NAO invente seu proprio formato** (outros diagramas) — consulte esta skill
+3. **Templates HTML no relay (não Mermaid):** um único `.html` com CSS e JS inline (secção **Templates webview**)
+4. Leia o sub-file do tipo de saida que precisa
+5. Use os templates e convencoes documentados
+6. Se criar um novo tipo de visualizacao que ficou bom, adicione aqui
 
 ### Abrir o Chrome (dependencia do relay)
 
