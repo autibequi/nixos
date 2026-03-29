@@ -193,8 +193,8 @@ fn visible_resource_summary(app: &App) -> String {
     format!("Σ {}", parts.join(" · "))
 }
 
-/// Horário local (mesmo fuso do PC) + sufixo de largura fixa (ex-` UTC`) para spinner — sem “pulo” no layout.
-fn container_table_top_right_title(app: &App) -> Line<'static> {
+/// Borda inferior do box Services/Agents: opcional `stale`, spinner (1 col fixa) à esquerda do horário local.
+fn container_table_bottom_title(app: &App) -> Line<'static> {
     let mut spans: Vec<Span<'static>> = Vec::new();
     if app.subprocess_degraded {
         spans.push(Span::styled(
@@ -202,20 +202,18 @@ fn container_table_top_right_title(app: &App) -> Line<'static> {
             Style::default().fg(PEACH).bold(),
         ));
     }
+    if app.refresh_inflight {
+        let spin = REFRESH_SPINNER[(app.spin_tick as usize) % REFRESH_SPINNER.len()];
+        spans.push(Span::styled(spin, Style::default().fg(PEACH).bold()));
+    } else {
+        spans.push(Span::styled(" ", Style::default().fg(DIM)));
+    }
+    spans.push(Span::raw(" "));
     let time_str: String = app
         .last_refresh
         .map(|t| t.with_timezone(&Local).format("%H:%M:%S").to_string())
         .unwrap_or_else(|| "--:--:--".into());
     spans.push(Span::styled(time_str, Style::default().fg(DIM)));
-    // 4 colunas fixas onde era ` UTC`: espaço + 1 célula (spinner ou espaço) + alinhamento
-    if app.refresh_inflight {
-        let spin = REFRESH_SPINNER[(app.spin_tick as usize) % REFRESH_SPINNER.len()];
-        spans.push(Span::styled(" ", Style::default().fg(DIM)));
-        spans.push(Span::styled(spin, Style::default().fg(PEACH).bold()));
-        spans.push(Span::styled("  ", Style::default().fg(DIM)));
-    } else {
-        spans.push(Span::styled("    ", Style::default().fg(DIM)));
-    }
     Line::from(spans).alignment(Alignment::Right)
 }
 
@@ -302,7 +300,7 @@ fn render_containers(frame: &mut Frame, app: &App, vis: &[&super::app::Container
                     format!(" {tab_label} "),
                     Style::default().fg(MAUVE).bold(),
                 ))
-                .title(container_table_top_right_title(app)),
+                .title_bottom(container_table_bottom_title(app)),
         );
 
     frame.render_widget(table, area);

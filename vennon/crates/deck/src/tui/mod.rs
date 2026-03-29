@@ -129,8 +129,9 @@ fn run_loop(
             Event::Mouse(me) => {
                 if matches!(app.mode, AppMode::Normal) {
                     match me.kind {
-                        MouseEventKind::ScrollUp => app.scroll_logs_up(),
-                        MouseEventKind::ScrollDown => app.scroll_logs_down(),
+                        // 1 linha por tick — menos “sensível” que [/] (5 linhas)
+                        MouseEventKind::ScrollUp => app.scroll_logs_up_by(1),
+                        MouseEventKind::ScrollDown => app.scroll_logs_down_by(1),
                         _ => {}
                     }
                 }

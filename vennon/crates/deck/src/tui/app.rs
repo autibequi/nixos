@@ -362,13 +362,21 @@ impl App {
     }
 
     pub fn scroll_logs_up(&mut self) {
+        self.scroll_logs_up_by(5);
+    }
+
+    pub fn scroll_logs_up_by(&mut self, lines: usize) {
         self.log_follow = false;
-        self.log_scroll = self.log_scroll.saturating_sub(5);
+        self.log_scroll = self.log_scroll.saturating_sub(lines);
     }
 
     pub fn scroll_logs_down(&mut self) {
+        self.scroll_logs_down_by(5);
+    }
+
+    pub fn scroll_logs_down_by(&mut self, lines: usize) {
         let max = self.logs.len().saturating_sub(10);
-        self.log_scroll = (self.log_scroll + 5).min(max);
+        self.log_scroll = (self.log_scroll + lines).min(max);
         if self.log_scroll >= max {
             self.log_follow = true;
         }

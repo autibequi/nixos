@@ -82,3 +82,6 @@ workbench/*
 
 .local/bin
 */self/shadow/memory/ 
+
+# Python
+*.pyc
