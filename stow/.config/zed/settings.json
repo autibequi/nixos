@@ -5,25 +5,42 @@
   // ╚══════════════════════════════════════════════════════════════╝
   // ─── KEYMAP ────────────────────────────────────────────────────
   // Use VS Code keybindings as the base (Ctrl+P, Ctrl+Shift+P, etc.)
+  "rounded_selection": false,
+  "restore_on_file_reopen": false,
+  "autosave": "off",
+  "buffer_font_fallbacks": [
+    "CaskaydiaCove Nerd Font",
+    "FiraCode Nerd Font",
+    "Hack Nerd Font",
+    "UbuntuMono Nerd Font",
+    "Courier New",
+    "monospace"
+  ],
+  "ensure_final_newline_on_save": true,
+  "wrap_guides": [
+    80
+  ],
+  "tab_size": 2,
   "session": {
     "trust_all_worktrees": true
   },
   "agent_buffer_font_size": 15.0,
   "agent_servers": {
-    "cursor": {
-      "type": "registry"
-    },
-    "claude": {
+    "claude-acp": {
+      "type": "registry",
+      "default_config_options": {
+        "model": "default",
+        "mode": "acceptEdits"
+      },
       "favorite_config_option_values": {
         "model": [
           "haiku",
           "opus"
         ]
-      },
-      "default_config_options": {
-        "model": "default",
-        "mode": "acceptEdits"
       }
+    },
+    "cursor": {
+      "type": "registry"
     }
   },
   "file_finder": {
@@ -46,8 +63,8 @@
   "base_keymap": "VSCode",
   // ─── FONTS ─────────────────────────────────────────────────────
   // Editor (buffer) font
-  "buffer_font_family": "JetBrainsMonoNL Nerd Font Mono",
-  "buffer_font_size": 16.0,
+  "buffer_font_family": "JetBrainsMono Nerd Font",
+  "buffer_font_size": 20.0,
   "buffer_font_weight": 600,
   "buffer_line_height": "comfortable",
   "buffer_font_features": {
@@ -63,8 +80,8 @@
   // ─── THEME & APPEARANCE ────────────────────────────────────────
   "theme": {
     "mode": "system",
-    "light": "Dracula Light (Alucard)",
-    "dark": "Dracula"
+    "light": "Ayu Light",
+    "dark": "Ayu Dark"
   },
   "icon_theme": {
     "mode": "system",
@@ -76,15 +93,15 @@
   "unnecessary_code_fade": 0.5,
   // ─── EDITOR CORE ───────────────────────────────────────────────
   // Cursor
-  "cursor_blink": true,
+  "cursor_blink": false,
   "cursor_shape": "bar",
   "hide_mouse": "on_typing",
   // Line numbers (like VS Code's "editor.lineNumbers")
   "relative_line_numbers": "disabled",
-  "current_line_highlight": "all",
+  "current_line_highlight": "gutter",
   "selection_highlight": true,
   // Indentation
-  "hard_tabs": false,
+  "hard_tabs": true,
   "auto_indent_on_paste": true,
   // Wrapping (like VS Code's "editor.wordWrap")
   "soft_wrap": "editor_width",
@@ -102,7 +119,7 @@
   // On-type formatting by LSP
   "use_on_type_format": true,
   // Whitespace rendering (like VS Code's "editor.renderWhitespace")
-  "show_whitespaces": "selection",
+  "show_whitespaces": "none",
   // Scrolling
   "scroll_beyond_last_line": "vertical_scroll_margin",
   "vertical_scroll_margin": 5,
@@ -111,7 +128,7 @@
   "fast_scroll_sensitivity": 5,
   // Sticky scroll (like VS Code's "editor.stickyScroll.enabled")
   "sticky_scroll": {
-    "enabled": true,
+    "enabled": false
   },
   // Inline code actions (like VS Code's lightbulb icon)
   "inline_code_actions": true,
@@ -140,11 +157,7 @@
   // ─── INDENT GUIDES ─────────────────────────────────────────────
   // Like VS Code's "editor.guides.indentation" + "bracketPairs"
   "indent_guides": {
-    "enabled": true,
-    "coloring": "indent_aware",
-    "background_coloring": "indent_aware",
-    "line_width": 2,
-    "active_line_width": 4,
+    "enabled": true
   },
   // ─── SCROLLBAR ─────────────────────────────────────────────────
   "scrollbar": {
@@ -158,10 +171,7 @@
   // ─── MINIMAP ───────────────────────────────────────────────────
   // Like VS Code's "editor.minimap.*"
   "minimap": {
-    "show": "always",
-    "current_line_highlight": "all",
-    "thumb": "always",
-    "thumb_border": "none",
+    "show": "never"
   },
   // ─── TABS & TAB BAR ───────────────────────────────────────────
   "tabs": {
@@ -271,10 +281,7 @@
   // ─── TERMINAL ──────────────────────────────────────────────────
   // Like VS Code's integrated terminal
   "terminal": {
-    "copy_on_select": true,
-    "font_family": "JetBrainsMonoNL Nerd Font Mono",
-    "font_size": 10.0,
-    "font_weight": 500,
+    "max_scroll_history_lines": 800
   },
   // ─── DEBUGGER ──────────────────────────────────────────────────
   "debugger": {
@@ -384,8 +391,36 @@
     "hyprlang": true,
   },
   "file_types": {
-    "Hyprland Config": [
-      "*.conf"
+    "json": [
+      "*.prettierrc",
+      "*.babelrc",
+      "*.postcssrc",
+      "*.eslintrc",
+      "jsonc"
+    ],
+    "shellscript": [
+      "*ctl",
+      "*conf"
+    ],
+    "webpack": [
+      "*conf.js"
+    ],
+    "rust": [
+      "*rs"
+    ],
+    "vue": [
+      "*vue"
+    ],
+    "javascriptreact": [
+      "*.js"
+    ],
+    "html": [
+      "*.html",
+      "*.njk",
+      "*.mustache"
+    ],
+    "postcss": [
+      "*.postcss"
     ]
   },
   // ─── FORMATTING & LINTING ──────────────────────────────────────
