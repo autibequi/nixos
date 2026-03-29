@@ -23,4 +23,9 @@ pub fn set_compose_env(config: &VennonConfig) {
 
     // HOME is already set, but ensure it's available
     std::env::set_var("HOME", &home);
+
+    // Ensure YAA_TARGET_DIR has a value (compose uses it for /workspace/target mount)
+    if std::env::var("YAA_TARGET_DIR").unwrap_or_default().is_empty() {
+        std::env::set_var("YAA_TARGET_DIR", config.projects_path().to_string_lossy().to_string());
+    }
 }

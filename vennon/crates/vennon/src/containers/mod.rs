@@ -7,48 +7,9 @@ pub fn is_ide(name: &str) -> bool {
     IDE_ENGINES.contains(&name)
 }
 
-/// Translate YAA_TARGET_DIR (host path) to a container path.
-/// Checks projects → host → home mounts in order.
-fn resolve_target_path() -> String {
-    let target = std::env::var("YAA_TARGET_DIR").unwrap_or_default();
-    let projects = std::env::var("YAA_PROJECTS_DIR").unwrap_or_default();
-    let host_dir = std::env::var("YAA_HOST_DIR").unwrap_or_default();
-    let home = std::env::var("HOME").unwrap_or_else(|_| "/root".into());
-
-    if target.is_empty() {
-        return "/workspace/projects".into();
-    }
-
-    // ~/projects/... → /workspace/projects/...
-    if !projects.is_empty() && target.starts_with(&projects) {
-        let relative = &target[projects.len()..];
-        return format!("/workspace/projects{relative}");
-    }
-
-    // ~/nixos/... → /workspace/host/...
-    if !host_dir.is_empty() && target.starts_with(&host_dir) {
-        let relative = &target[host_dir.len()..];
-        return format!("/workspace/host{relative}");
-    }
-
-    // ~/anything → /workspace/home/anything
-    if target.starts_with(&home) {
-        let relative = &target[home.len()..];
-        return format!("/workspace/home{relative}");
-    }
-
-    "/workspace/projects".into()
-}
-
-/// Create symlink /workspace/target → resolved path, then return the setup command prefix.
-fn setup_target() -> String {
-    let resolved = resolve_target_path();
-    format!("ln -sfn {resolved} /workspace/target && cd /workspace/target")
-}
-
 /// Build the exec command for starting an IDE session.
+/// Target dir is bind-mounted at /workspace/target by compose.
 pub fn start_cmd(name: &str) -> String {
-    let setup = setup_target();
     let model_flag = std::env::var("YAA_MODEL")
         .ok()
         .filter(|s| !s.is_empty())
@@ -59,7 +20,7 @@ pub fn start_cmd(name: &str) -> String {
 
     match name {
         "claude" => {
-            let mut cmd = format!("{setup} && exec claude");
+            let mut cmd = "cd /workspace/target && exec claude".to_string();
             cmd.push_str(" --enable-auto-mode");
             cmd.push_str(&model_flag);
             if let Some(ref id) = resume_raw {
@@ -72,9 +33,8 @@ pub fn start_cmd(name: &str) -> String {
             cmd
         }
         "opencode" => {
-            let mut cmd = format!(
-                "cp /workspace/self/scripts/opencode-agents.md /workspace/target/AGENTS.md 2>/dev/null; {setup} && exec opencode"
-            );
+            let mut cmd =
+                "cp /workspace/self/scripts/opencode-agents.md /workspace/target/AGENTS.md 2>/dev/null; cd /workspace/target && exec opencode".to_string();
             if let Some(ref id) = resume_raw {
                 if id == "continue" {
                     cmd.push_str(" --continue");
@@ -85,9 +45,8 @@ pub fn start_cmd(name: &str) -> String {
             cmd
         }
         "cursor" => {
-            let mut cmd = format!(
-                "cp /workspace/self/scripts/cursor-agents.md /workspace/target/AGENTS.md 2>/dev/null; {setup} && exec cursor-agent --force"
-            );
+            let mut cmd =
+                "cp /workspace/self/scripts/cursor-agents.md /workspace/target/AGENTS.md 2>/dev/null; cd /workspace/target && exec cursor-agent --force".to_string();
             cmd.push_str(&model_flag);
             if let Some(ref id) = resume_raw {
                 if id == "continue" {
@@ -98,12 +57,11 @@ pub fn start_cmd(name: &str) -> String {
             }
             cmd
         }
-        _ => format!("{setup} && exec bash"),
+        _ => "cd /workspace/target && exec bash".to_string(),
     }
 }
 
 /// Build the shell command (zsh with fallback to bash).
 pub fn shell_cmd() -> String {
-    let setup = setup_target();
-    format!("{setup} && exec zsh || exec bash")
+    "cd /workspace/target && exec zsh || exec bash".to_string()
 }

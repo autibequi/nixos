@@ -1,0 +1,29 @@
+─────────────────────────────────────╯
+
+! pwd
+  ⎿  /workspace/target
+
+! ls -la
+  ⎿  (Bash completed with no output)
+
+! ls -la .
+  ⎿  drwxr-xr-x    - root   21 Mar 13:51 $HOME
+     drwxr-x---    - root    7 Mar 00:44 .android
+     drwxr-xr-x    - root    2 Mar 13:14 .antigravity
+     … +118 lines (ctrl+o to expand)
+
+! ls -la ../target
+  ⎿  drwxr-xr-x    - root   21 Mar 13:51 $HOME
+     drwxr-x---    - root    7 Mar 00:44 .android
+     drwxr-xr-x    - root    2 Mar 13:14 .antigravity
+     … +118 lines (ctrl+o to expand)
+
+! pwd
+  ⎿  /workspace/target
+
+─────────────────────────────────────────────────────────────────────────────
+❯ 
+─────────────────────────────────────────────────────────────────────────────
+  󰩃 󱙺 haiku ░░░░░░ 0/0/200k
+  ⏵⏵ accept edits on (shift+tab to cycle)
+  Found 1 setti

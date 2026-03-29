@@ -23,21 +23,24 @@ services:
       GIT_COMMITTER_EMAIL: ${GIT_COMMITTER_EMAIL}
       ENGINE: OPENCODE
     volumes:
+      # Target dir — the dir passed to yaa, mounted directly
+      - ${YAA_TARGET_DIR}:/workspace/target:rw
       # Core workspace
       - ${VENNON_SELF}:/workspace/self
       - ${VENNON_OBSIDIAN}:/workspace/obsidian
       - ${VENNON_PROJECTS}:/workspace/projects:rw
       - ${HOME}:/workspace/home:rw
       - ${VENNON_HOST}:/workspace/host:rw
-      # Claude Code config
+      # Claude Code — base dir (credentials, history, projects, etc.)
+      - ${HOME}/.claude:/home/claude/.claude
+      - ${HOME}/.claude.json:/home/claude/.claude.json
+      # Claude Code — overrides (more specific mounts win)
       - ${VENNON_SELF}/claude.bypass.json:/home/claude/.claude/settings.json:rw
       - ${VENNON_SELF}/skills:/home/claude/.claude/skills
       - ${VENNON_SELF}/commands:/home/claude/.claude/commands
       - ${VENNON_SELF}/ego:/home/claude/.claude/agents
       - ${VENNON_PATH}/containers/opencode/hooks:/home/claude/.claude/hooks:ro
       - ${VENNON_SELF}/scripts:/home/claude/.claude/scripts
-      - ${HOME}/.claude.json:/home/claude/.claude.json
-      - ${HOME}/.claude/projects:/home/claude/.claude/projects
       # Universal agent standard
       - ${VENNON_SELF}/skills:/home/claude/.agents/skills
       - ${VENNON_SELF}/commands:/home/claude/.agents/commands
