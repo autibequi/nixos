@@ -94,5 +94,6 @@
     "type": "command",
     "command": "~/.claude/scripts/statusline.sh"
   },
-  "skipAutoPermissionPrompt": true
+  "skipAutoPermissionPrompt": true,
+  "model": "sonnet"
 }
