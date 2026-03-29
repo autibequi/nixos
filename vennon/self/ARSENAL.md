@@ -153,6 +153,9 @@ Remove branches locais marcadas como [gone] no remoto.
   - sub: `laws/`, `agentroom/`, `scheduling/`, `map/`, `bedrooms/`, `spaces/`, `worktrees/`
 - **meta:skill** — sobre skills
   - sub: `explain/` (flowchart Mermaid), `evolve/`
+- **meta:orchestrator** — orquestrador de projeto autonomo (astroboy pipeline)
+  - SCAN→ASSESS→DISPATCH→GATE→CLEANUP→REPORT→RESCHEDULE
+  - Ativar quando card tem `#orquestrador` no DASHBOARD
 
 ### thinking/* — Protocolo de Raciocínio (auto-aplicável em Haiku)
 - **thinking:lite** — meta-classificação, CoD, Turbo mode, Step-Back, AAV

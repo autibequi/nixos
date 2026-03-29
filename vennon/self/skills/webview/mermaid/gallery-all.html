@@ -3,249 +3,678 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Galeria Mermaid — todos os templates</title>
+  <title>Galeria Mermaid — todos os tipos</title>
   <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
   <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; padding: 1.5rem; font-family: system-ui, sans-serif;
-      background: #0f0f12; color: #e4e4e7; }
-    h1 { font-size: 1.25rem; margin: 0 0 1rem; }
-    p.hint { color: #71717a; font-size: 0.85rem; margin: 0 0 1.5rem; max-width: 56rem; }
-    section { margin-bottom: 2.5rem; page-break-inside: avoid; }
-    section h2 { font-size: 0.95rem; color: #cba6f7; margin: 0 0 0.75rem;
-      font-weight: 600; }
-    .mermaid { background: #18181c; border: 1px solid #2a2a30; border-radius: 8px;
-      padding: 1rem; overflow: auto; }
-    @media print {
-      body { background: #fff; color: #111; }
-      section { page-break-inside: avoid; }
-      .mermaid { border-color: #ccc; background: #fafafa; }
+    :root {
+      --bg:       #0f0f12;
+      --mantle:   #181825;
+      --surface0: #1e1e2e;
+      --surface1: #313244;
+      --border:   #2a2a30;
+      --text:     #cdd6f4;
+      --subtext:  #a6adc8;
+      --muted:    #585b70;
+      --mauve:    #cba6f7;
+      --blue:     #89b4fa;
+      --sapphire: #74c7ec;
+      --green:    #a6e3a1;
+      --peach:    #fab387;
+      --red:      #f38ba8;
+      --yellow:   #f9e2af;
+      --pink:     #f5c2e7;
+      --teal:     #94e2d5;
+      --lavender: #b4befe;
+      --sidebar:  220px;
     }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      display: flex;
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── sidebar ── */
+    #sidebar {
+      width: var(--sidebar);
+      flex-shrink: 0;
+      background: var(--mantle);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    #sidebar-header {
+      padding: 1rem 0.85rem 0.6rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    #sidebar-header h1 {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--mauve);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    #sidebar-header p {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+    #sidebar nav { padding: 0.5rem 0; }
+    #sidebar nav a {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.32rem 0.85rem;
+      font-size: 0.78rem;
+      color: var(--subtext);
+      text-decoration: none;
+      transition: color 0.12s, background 0.12s;
+      border-left: 2px solid transparent;
+    }
+    #sidebar nav a:hover {
+      color: var(--text);
+      background: rgba(203, 166, 247, 0.06);
+      border-left-color: var(--mauve);
+    }
+    #sidebar nav a .badge {
+      font-size: 0.62rem;
+      padding: 0.1rem 0.35rem;
+      border-radius: 3px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    #sidebar nav .sep {
+      height: 1px;
+      background: var(--border);
+      margin: 0.4rem 0.85rem;
+    }
+
+    /* ── main ── */
+    #main {
+      flex: 1 1 0;
+      min-width: 0;
+      overflow-y: auto;
+      padding: 1.5rem 1.75rem 3rem;
+    }
+    #main-header {
+      margin-bottom: 1.5rem;
+    }
+    #main-header h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    #main-header p {
+      margin-top: 0.3rem;
+      font-size: 0.8rem;
+      color: var(--subtext);
+    }
+
+    /* ── grid ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+      gap: 1.25rem;
+    }
+
+    /* ── card ── */
+    .card {
+      background: var(--surface0);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      cursor: pointer;
+    }
+    .card:hover {
+      border-color: var(--mauve);
+      box-shadow: 0 0 0 1px var(--mauve), 0 4px 24px rgba(203,166,247,0.10);
+    }
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.65rem 0.9rem 0.5rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .card-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.18rem 0.45rem;
+      border-radius: 4px;
+      font-family: ui-monospace, monospace;
+      letter-spacing: 0.04em;
+      flex-shrink: 0;
+    }
+    .card-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-desc {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    .card-body {
+      flex: 1 1 0;
+      min-height: 0;
+      padding: 0.75rem;
+      overflow: hidden;
+      position: relative;
+      height: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card-body .mermaid {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card-body .mermaid svg {
+      max-width: 100%;
+      max-height: 240px;
+      height: auto;
+      width: auto;
+    }
+    .card-footer {
+      padding: 0.4rem 0.9rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-shrink: 0;
+    }
+    .card-footer span {
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
+
+    /* ── modal ── */
+    #modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(10, 10, 15, 0.92);
+      backdrop-filter: blur(3px);
+      flex-direction: column;
+    }
+    #modal-overlay.open { display: flex; }
+    #modal-bar {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.55rem 1rem;
+      background: var(--mantle);
+      border-bottom: 1px solid var(--border);
+    }
+    #modal-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.18rem 0.45rem;
+      border-radius: 4px;
+      font-family: ui-monospace, monospace;
+    }
+    #modal-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    #modal-hint {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-left: 0.5rem;
+    }
+    #modal-close {
+      margin-left: auto;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--subtext);
+      border-radius: 6px;
+      padding: 0.3rem 0.65rem;
+      cursor: pointer;
+      font-size: 0.78rem;
+      transition: color 0.12s, border-color 0.12s;
+    }
+    #modal-close:hover { color: var(--text); border-color: var(--mauve); }
+    #modal-stage {
+      flex: 1 1 0;
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+    }
+    #modal-stage.panning { cursor: grabbing; }
+    #modal-stage .mermaid {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #modal-stage .mermaid svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    #modal-controls {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      z-index: 10;
+    }
+    .mc-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: rgba(24,24,40,0.92);
+      color: var(--text);
+      font: 600 1rem/1 sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .mc-btn:hover { background: var(--surface1); }
+
+    /* color palette for badges */
+    .c-flow     { background: rgba(137,180,250,0.15); color: var(--blue); }
+    .c-sequence { background: rgba(203,166,247,0.15); color: var(--mauve); }
+    .c-state    { background: rgba(166,227,161,0.15); color: var(--green); }
+    .c-class    { background: rgba(250,179,135,0.15); color: var(--peach); }
+    .c-er       { background: rgba(116,199,236,0.15); color: var(--sapphire); }
+    .c-journey  { background: rgba(245,194,231,0.15); color: var(--pink); }
+    .c-gantt    { background: rgba(249,226,175,0.15); color: var(--yellow); }
+    .c-pie      { background: rgba(148,226,213,0.15); color: var(--teal); }
+    .c-git      { background: rgba(180,190,254,0.15); color: var(--lavender); }
+    .c-mindmap  { background: rgba(203,166,247,0.15); color: var(--mauve); }
+    .c-timeline { background: rgba(137,180,250,0.15); color: var(--blue); }
+    .c-quadrant { background: rgba(166,227,161,0.15); color: var(--green); }
+    .c-req      { background: rgba(250,179,135,0.15); color: var(--peach); }
+    .c-sankey   { background: rgba(116,199,236,0.15); color: var(--sapphire); }
+    .c-xy       { background: rgba(249,226,175,0.15); color: var(--yellow); }
+    .c-arch     { background: rgba(148,226,213,0.15); color: var(--teal); }
+    .c-block    { background: rgba(180,190,254,0.15); color: var(--lavender); }
+    .c-packet   { background: rgba(243,139,168,0.15); color: var(--red); }
+    .c-c4       { background: rgba(245,194,231,0.15); color: var(--pink); }
   </style>
 </head>
 <body>
-  <h1>Galeria — templates Mermaid (Estrategia)</h1>
-  <p class="hint">Uma única página com todos os tipos. Para <strong>uma imagem só</strong>: zoom out no browser,
-    captura de ecrã &quot;página inteira&quot; (DevTools → Capture full size screenshot), ou Imprimir → PDF.
-    Não substitui o holodeck live (<code>base.html</code> + <code>diagram.mmd</code>).</p>
-  <section id="flow">
-    <h2>flow</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+
+<div id="sidebar">
+  <div id="sidebar-header">
+    <h1>Mermaid Gallery</h1>
+    <p>25 tipos — clique para zoom</p>
+  </div>
+  <nav>
+    <a href="#flow"><span class="badge c-flow">flowchart</span>Flow</a>
+    <a href="#flow-subgraphs"><span class="badge c-flow">flowchart</span>Subgraphs</a>
+    <div class="sep"></div>
+    <a href="#sequence"><span class="badge c-sequence">sequence</span>Sequence</a>
+    <a href="#state"><span class="badge c-state">state</span>State</a>
+    <a href="#class"><span class="badge c-class">class</span>Class</a>
+    <a href="#er"><span class="badge c-er">er</span>ER</a>
+    <div class="sep"></div>
+    <a href="#journey"><span class="badge c-journey">journey</span>Journey</a>
+    <a href="#gantt"><span class="badge c-gantt">gantt</span>Gantt</a>
+    <a href="#gitgraph"><span class="badge c-git">git</span>Git Graph</a>
+    <a href="#timeline"><span class="badge c-timeline">timeline</span>Timeline</a>
+    <div class="sep"></div>
+    <a href="#pie"><span class="badge c-pie">pie</span>Pie</a>
+    <a href="#xychart"><span class="badge c-xy">xy</span>XY Chart</a>
+    <a href="#sankey"><span class="badge c-sankey">sankey</span>Sankey</a>
+    <a href="#quadrant"><span class="badge c-quadrant">quadrant</span>Quadrant</a>
+    <div class="sep"></div>
+    <a href="#mindmap"><span class="badge c-mindmap">mindmap</span>Mindmap</a>
+    <a href="#requirement"><span class="badge c-req">req</span>Requirement</a>
+    <a href="#architecture"><span class="badge c-arch">arch</span>Architecture</a>
+    <a href="#block"><span class="badge c-block">block</span>Block</a>
+    <a href="#packet"><span class="badge c-packet">packet</span>Packet</a>
+    <div class="sep"></div>
+    <a href="#c4-context"><span class="badge c-c4">C4</span>C4 Context</a>
+    <a href="#c4-container"><span class="badge c-c4">C4</span>C4 Container</a>
+    <a href="#c4-component"><span class="badge c-c4">C4</span>C4 Component</a>
+    <a href="#c4-dynamic"><span class="badge c-c4">C4</span>C4 Dynamic</a>
+    <a href="#c4-deployment"><span class="badge c-c4">C4</span>C4 Deployment</a>
+    <a href="#zenuml"><span class="badge c-sequence">zen</span>ZenUML</a>
+  </nav>
+</div>
+
+<div id="main">
+  <div id="main-header">
+    <h2>Todos os tipos de diagrama Mermaid</h2>
+    <p>Clique em qualquer card para abrir em tela cheia com zoom vetorial. Scroll = zoom, drag = pan, Esc = fechar.</p>
+  </div>
+
+  <div class="grid">
+
+    <div class="card" id="flow" data-type="flowchart" data-color="c-flow" data-title="Flow — Fluxo básico">
+      <div class="card-head">
+        <span class="card-badge c-flow">flowchart</span>
+        <span class="card-title">Flow</span>
+        <span class="card-desc">Fluxos e decisões</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
 flowchart TD
   A([Entrada]) --> B{Decisão}
   B -->|sim| C[Fluxo A]
   B -->|não| D[Fluxo B]
   C --> E([Saída])
   D --> E
-
   style A fill:#cba6f7,color:#1e1e2e
   style E fill:#a6e3a1,color:#1e1e2e
   style C fill:#89b4fa,color:#1e1e2e
-  style D fill:#fab387,color:#1e1e2e</div>
-  </section>
+  style D fill:#fab387,color:#1e1e2e</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
 
-  <section id="flow-subgraphs">
-    <h2>flow-subgraphs</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+    <div class="card" id="flow-subgraphs" data-type="flowchart" data-color="c-flow" data-title="Flow — Subgraphs">
+      <div class="card-head">
+        <span class="card-badge c-flow">flowchart</span>
+        <span class="card-title">Subgraphs</span>
+        <span class="card-desc">Multi-camadas</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
 flowchart LR
-  subgraph FS["front-student — aluno"]
+  subgraph FS["front-student"]
     direction TB
-    f1([Página Nuxt]) --> f2[axios BFF]
-    f2 --> f3{rota protegida?}
+    f1([Nuxt]) --> f2[axios BFF]
+    f2 --> f3{auth?}
     f3 -->|sim| f4[GET /bff/...]
   end
-
-  subgraph BO["bo-container — operador"]
-    direction TB
-    b1[Quasar UI] --> b2[PATCH /bo/...]
-  end
-
-  subgraph API["Monolito — API"]
+  subgraph API["Monolito"]
     direction TB
     m1[Handlers] --> m2[Services]
     m2 --> m3[(PostgreSQL)]
   end
-
-  subgraph Q["Assíncrono — fila"]
+  subgraph Q["Fila"]
     direction TB
     q1[[SQS]] --> q2[Worker]
-    q2 --> q3[(projeções)]
   end
-
-  f4 -->|"JWT"| m1
-  b2 -->|"JWT + JSON"| m1
-  m2 -->|"evento"| q1
-  q2 -.->|"opcional"| m2
-
+  f4 -->|JWT| m1
+  m2 -->|evento| q1
   style FS fill:#1e1e2e,stroke:#f5c2e7,stroke-width:2px
-  style BO fill:#1e1e2e,stroke:#89b4fa,stroke-width:2px
   style API fill:#1e1e2e,stroke:#a6e3a1,stroke-width:2px
-  style Q fill:#1e1e2e,stroke:#fab387,stroke-width:2px,color:#e4e4e7</div>
-  </section>
+  style Q fill:#1e1e2e,stroke:#fab387,stroke-width:2px</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
 
-  <section id="sequence">
-    <h2>sequence</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+    <div class="card" id="sequence" data-type="sequenceDiagram" data-color="c-sequence" data-title="Sequence Diagram">
+      <div class="card-head">
+        <span class="card-badge c-sequence">sequence</span>
+        <span class="card-title">Sequence</span>
+        <span class="card-desc">Chamadas temporais</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
 sequenceDiagram
   autonumber
-  actor Op as Operador BO
+  actor Op as Operador
   participant BO as bo-container
-  participant API as Monolito (BFF/BO)
-  participant Q as SQS
-  participant W as Worker
+  participant API as Monolito
   participant DB as PostgreSQL
+  Op ->> BO: Ação (salvar)
+  BO ->> API: PATCH /bo/...
+  API ->> DB: persistir
+  API -->> BO: 200 OK
+  BO -->> Op: feedback UI</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
 
-  Op ->> BO: Ação na tela (salvar)
-  BO ->> API: PATCH /bo/... (JWT)
-  API ->> DB: persistência + transação
-  API -->> BO: 200 + payload
-  BO -->> Op: feedback UI
-  API ->> Q: evento assíncrono
-  Q ->> W: mensagem
-  W ->> DB: side effects / projeções</div>
-  </section>
-
-  <section id="state">
-    <h2>state</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+    <div class="card" id="state" data-type="stateDiagram-v2" data-color="c-state" data-title="State Diagram">
+      <div class="card-head">
+        <span class="card-badge c-state">state</span>
+        <span class="card-title">State</span>
+        <span class="card-desc">Ciclo de vida</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
 stateDiagram-v2
   [*] --> Visitante
-  Visitante --> Matriculado: compra / matrícula efetiva
-  Matriculado --> EmProgresso: primeiro acesso ao conteúdo
-  EmProgresso --> Concluido: critérios de conclusão
-  EmProgresso --> Suspenso: política / inadimplência
+  Visitante --> Matriculado: compra
+  Matriculado --> EmProgresso: primeiro acesso
+  EmProgresso --> Concluido: critérios OK
+  EmProgresso --> Suspenso: inadimplência
   Suspenso --> EmProgresso: regularização
-  Concluido --> [*]
-  note right of Matriculado
-    front-student consulta monolito
-    para regras de liberação
-  end note</div>
-  </section>
+  Concluido --> [*]</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
 
-  <section id="class">
-    <h2>class</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+    <div class="card" id="class" data-type="classDiagram" data-color="c-class" data-title="Class Diagram">
+      <div class="card-head">
+        <span class="card-badge c-class">class</span>
+        <span class="card-title">Class</span>
+        <span class="card-desc">Modelo de domínio</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
 classDiagram
   direction LR
   class Aluno {
     +id UUID
-    +email
+    +email string
   }
   class Matricula {
     +id UUID
-    +status
+    +status string
   }
   class Produto {
     +id UUID
-    +nome
+    +nome string
   }
-  class Conteudo {
-    +id UUID
-    +ordem
-  }
-
   Aluno "1" --> "*" Matricula : possui
-  Produto "1" --> "*" Matricula : cobre
-  Produto "1" --> "*" Conteudo : agrupa
-  Matricula ..> Conteudo : acesso derivado de regras</div>
-  </section>
+  Produto "1" --> "*" Matricula : cobre</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
 
-  <section id="er">
-    <h2>er</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+    <div class="card" id="er" data-type="erDiagram" data-color="c-er" data-title="ER Diagram">
+      <div class="card-head">
+        <span class="card-badge c-er">er</span>
+        <span class="card-title">ER</span>
+        <span class="card-desc">Esquema relacional</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
 erDiagram
   ALUNO ||--o{ MATRICULA : possui
   PRODUTO ||--o{ MATRICULA : referencia
   PRODUTO ||--o{ CONTEUDO : contem
+  ALUNO { uuid id PK; string email }
+  MATRICULA { uuid id PK; string status }
+  PRODUTO { uuid id PK; string nome }
+  CONTEUDO { uuid id PK; int ordem }</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
 
-  ALUNO {
-    uuid id PK
-    string email
-  }
-  MATRICULA {
-    uuid id PK
-    string status
-    timestamptz criado_em
-  }
-  PRODUTO {
-    uuid id PK
-    string nome
-  }
-  CONTEUDO {
-    uuid id PK
-    int ordem
-  }</div>
-  </section>
-
-  <section id="journey">
-    <h2>journey</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+    <div class="card" id="journey" data-type="journey" data-color="c-journey" data-title="User Journey">
+      <div class="card-head">
+        <span class="card-badge c-journey">journey</span>
+        <span class="card-title">Journey</span>
+        <span class="card-desc">Experiência do usuário</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
 journey
-  title Jornada — primeiro login e estudo
+  title Jornada — primeiro estudo
   section Autenticação
-    Login ou cadastro: 5: Aluno
+    Login: 5: Aluno
     Aceite de termos: 3: Aluno
   section Catálogo
     Navegar produtos: 4: Aluno
-    Ver pré-requisitos: 3: Aluno
   section Estudo
-    Abrir aula/conteúdo: 5: Aluno
-    Monolito valida liberação: 4: Sistema</div>
-  </section>
+    Abrir aula: 5: Aluno
+    Monolito valida: 4: Sistema</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
 
-  <section id="gantt">
-    <h2>gantt</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+    <div class="card" id="gantt" data-type="gantt" data-color="c-gantt" data-title="Gantt Chart">
+      <div class="card-head">
+        <span class="card-badge c-gantt">gantt</span>
+        <span class="card-title">Gantt</span>
+        <span class="card-desc">Planejamento de release</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
 gantt
-  title Entrega feature (exemplo)
+  title Feature (exemplo)
   dateFormat YYYY-MM-DD
   section Monolito
-  Contrato API e handler     :a1, 2026-04-01, 5d
-  Migração + testes          :a2, after a1, 4d
+  Handler + service  :a1, 2026-04-01, 5d
+  Migração + testes  :a2, after a1, 4d
   section bo-container
-  Tela e permissões          :b1, 2026-04-03, 6d
-  Integração com API         :b2, after a1, 5d
+  Tela + permissões  :b1, 2026-04-03, 6d
   section front-student
-  UX e chamadas BFF          :c1, 2026-04-06, 7d
+  UX + BFF           :c1, 2026-04-06, 7d
   section Go-live
-  Homologação conjunta       :milestone, m1, 2026-04-18, 0d</div>
-  </section>
+  Homologação        :milestone, m1, 2026-04-18, 0d</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
 
-  <section id="pie">
-    <h2>pie</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
-pie showData
-  title Distribuição de requests (exemplo)
-  "front-student (BFF)" : 52
-  "bo-container (BO API)" : 28
-  "Workers / interno" : 12
-  "Outros" : 8</div>
-  </section>
-
-  <section id="gitgraph">
-    <h2>gitgraph</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+    <div class="card" id="gitgraph" data-type="gitGraph" data-color="c-git" data-title="Git Graph">
+      <div class="card-head">
+        <span class="card-badge c-git">git</span>
+        <span class="card-title">Git Graph</span>
+        <span class="card-desc">Estratégia de branches</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
 gitGraph
   commit id: "main: baseline"
-  branch feature/ESTR-1234-api
-  checkout feature/ESTR-1234-api
+  branch feature/FUK2-1234
+  checkout feature/FUK2-1234
   commit id: "handler + service"
   commit id: "testes"
   checkout main
-  merge feature/ESTR-1234-api
-  commit id: "tag release"</div>
-  </section>
+  merge feature/FUK2-1234
+  commit id: "tag release"</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
 
-  <section id="mindmap">
-    <h2>mindmap</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+    <div class="card" id="timeline" data-type="timeline" data-color="c-timeline" data-title="Timeline">
+      <div class="card-head">
+        <span class="card-badge c-timeline">timeline</span>
+        <span class="card-title">Timeline</span>
+        <span class="card-desc">Marcos do produto</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
+timeline
+  title Marcos ilustrativos
+  section 2024
+    MVP BFF aluno : Monolito expõe endpoints
+    BO em Vue 2 : bo-container admin
+  section 2025
+    Filas e workers : SQS assíncrono
+  section 2026
+    Observabilidade : métricas e tracing</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
+
+    <div class="card" id="pie" data-type="pie" data-color="c-pie" data-title="Pie Chart">
+      <div class="card-head">
+        <span class="card-badge c-pie">pie</span>
+        <span class="card-title">Pie</span>
+        <span class="card-desc">Distribuição percentual</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
+pie showData
+  title Requests por origem
+  "front-student BFF" : 52
+  "bo-container API" : 28
+  "Workers / interno" : 12
+  "Outros" : 8</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
+
+    <div class="card" id="xychart" data-type="xychart-beta" data-color="c-xy" data-title="XY Chart">
+      <div class="card-head">
+        <span class="card-badge c-xy">xychart</span>
+        <span class="card-title">XY Chart</span>
+        <span class="card-desc">Séries temporais</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
+xychart-beta
+  title "Latência P95 BFF (ms)"
+  x-axis [seg, ter, qua, qui, sex]
+  y-axis "ms" 0 --> 400
+  bar [180, 140, 200, 110, 150]
+  line [120, 95, 140, 88, 102]</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
+
+    <div class="card" id="sankey" data-type="sankey-beta" data-color="c-sankey" data-title="Sankey">
+      <div class="card-head">
+        <span class="card-badge c-sankey">sankey</span>
+        <span class="card-title">Sankey</span>
+        <span class="card-desc">Fluxo de volume</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
+sankey-beta
+"front-student","Monolito BFF",4200
+"bo-container","Monolito BO",900
+"Monolito BFF","PostgreSQL",2800
+"Monolito BO","PostgreSQL",700
+"Monolito BFF","Filas SQS",800
+"Workers SQS","PostgreSQL",400</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
+
+    <div class="card" id="quadrant" data-type="quadrantChart" data-color="c-quadrant" data-title="Quadrant Chart">
+      <div class="card-head">
+        <span class="card-badge c-quadrant">quadrant</span>
+        <span class="card-title">Quadrant</span>
+        <span class="card-desc">Priorização esforço/impacto</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
+quadrantChart
+  title Priorização técnica
+  x-axis Baixo esforço --> Alto esforço
+  y-axis Baixo impacto --> Alto impacto
+  quadrant-1 Quick wins
+  quadrant-2 Estratégicos
+  quadrant-3 Baixa prioridade
+  quadrant-4 Dívida urgente
+  Refator handler: [0.35, 0.72]
+  UX bo-container: [0.55, 0.45]
+  Cache BFF: [0.42, 0.68]</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
+
+    <div class="card" id="mindmap" data-type="mindmap" data-color="c-mindmap" data-title="Mindmap">
+      <div class="card-head">
+        <span class="card-badge c-mindmap">mindmap</span>
+        <span class="card-title">Mindmap</span>
+        <span class="card-desc">Mapa mental</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
 mindmap
-  root((Plataforma Estrategia))
+  root((Plataforma))
     Monolito Go
       Handlers BO
-      Handlers BFF aluno
+      Handlers BFF
       Workers SQS
-      Repositórios / GORM
     bo-container
       Quasar
       Módulos admin
@@ -254,260 +683,417 @@ mindmap
       Design system
     Dados
       PostgreSQL
-      Filas AWS</div>
-  </section>
+      Filas AWS</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
 
-  <section id="timeline">
-    <h2>timeline</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
-timeline
-  title Marcos (exemplo ilustrativo)
-  section 2024
-    MVP BFF aluno : Monolito expõe endpoints principais
-    BO em Vue 2 : bo-container consolida admin
-  section 2025
-    Filas e workers : SQS para processos assíncronos
-  section 2026
-    Observabilidade : métricas e tracing unificados</div>
-  </section>
-
-  <section id="quadrant">
-    <h2>quadrant</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
-quadrantChart
-  title Priorização técnica (exemplo)
-  x-axis Baixo esforço --> Alto esforço
-  y-axis Baixo impacto --> Alto impacto
-  quadrant-1 Quick wins
-  quadrant-2 Projetos estratégicos
-  quadrant-3 Preenchimento / baixa prioridade
-  quadrant-4 Redução de dívida urgente
-  Refator handler monolito: [0.35, 0.72]
-  Melhoria UX bo-container: [0.55, 0.45]
-  Cache BFF front-student: [0.42, 0.68]</div>
-  </section>
-
-  <section id="requirement">
-    <h2>requirement</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+    <div class="card" id="requirement" data-type="requirementDiagram" data-color="c-req" data-title="Requirement Diagram">
+      <div class="card-head">
+        <span class="card-badge c-req">requirement</span>
+        <span class="card-title">Requirement</span>
+        <span class="card-desc">Rastreio de requisitos</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
 requirementDiagram
-
 requirement r_latency {
   id: 1
-  text: O monolito deve responder P95 abaixo de 500ms nos endpoints críticos do BFF aluno.
+  text: P95 abaixo de 500ms no BFF.
   risk: high
   verifymethod: test
 }
-
 requirement r_async {
   id: 2
-  text: Processos longos devem ser deslocados para workers SQS sem bloquear request HTTP.
+  text: Processos longos em workers SQS.
   risk: medium
   verifymethod: inspection
 }
-
-element monolith {
-  type: system
-  docref: repo monolito
-}
-
-element workers {
-  type: system
-  docref: pacote workers
-}
-
+element monolith { type: system }
+element workers { type: system }
 monolith - satisfies -> r_latency
-workers - satisfies -> r_async</div>
-  </section>
+workers - satisfies -> r_async</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
 
-  <section id="sankey">
-    <h2>sankey</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
-sankey
-"front-student","Monolito BFF",4200
-"bo-container","Monolito BO",900
-"Monolito BFF","PostgreSQL",2800
-"Monolito BO","PostgreSQL",700
-"Monolito BFF","Filas SQS",800
-"Workers SQS","PostgreSQL",400</div>
-  </section>
-
-  <section id="xychart">
-    <h2>xychart</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
-xychart-beta
-  title "Latência P95 — endpoint BFF (exemplo, ms)"
-  x-axis [seg, ter, qua, qui, sex]
-  y-axis "ms" 0 --> 400
-  line [120, 95, 140, 88, 102]</div>
-  </section>
-
-  <section id="architecture">
-    <h2>architecture</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+    <div class="card" id="architecture" data-type="architecture-beta" data-color="c-arch" data-title="Architecture">
+      <div class="card-head">
+        <span class="card-badge c-arch">architecture</span>
+        <span class="card-title">Architecture</span>
+        <span class="card-desc">Serviços e recursos</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
 architecture-beta
-group edge(cloud)[Borda — browsers]
-group core(cloud)[Núcleo — backend]
-
+group edge(cloud)[Borda]
+group core(cloud)[Backend]
 service fs(server)[front-student] in edge
 service bo(server)[bo-container] in edge
-service api(server)[Monolito API] in core
+service api(server)[Monolito] in core
 service db(database)[PostgreSQL] in core
 service q(disk)[SQS] in core
-
 fs:R --> L:api
 bo:R --> L:api
 api:B --> T:db
-api:R --> L:q</div>
-  </section>
+api:R --> L:q</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
 
-  <section id="block">
-    <h2>block</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+    <div class="card" id="block" data-type="block-beta" data-color="c-block" data-title="Block Diagram">
+      <div class="card-head">
+        <span class="card-badge c-block">block</span>
+        <span class="card-title">Block</span>
+        <span class="card-desc">Grid com colunas</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
 block-beta
 columns 3
-  mono["Monolito Go<br/>handlers + workers"]
-  bo["bo-container<br/>Quasar admin"]
-  fs["front-student<br/>Nuxt aluno"]</div>
-  </section>
+  mono["Monolito Go\nhandlers + workers"]
+  bo["bo-container\nQuasar admin"]
+  fs["front-student\nNuxt aluno"]
+  db[("PostgreSQL")]
+  sqs[["SQS"]]
+  cache(["Cache"])</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
 
-  <section id="packet">
-    <h2>packet</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
-packet
-+16: "Porta origem (ex.)"
-+16: "Porta destino (ex.)"
-+32: "Sequence / correlação"
-+16: "Flags (exemplo)"</div>
-  </section>
+    <div class="card" id="packet" data-type="packet" data-color="c-packet" data-title="Packet Diagram">
+      <div class="card-head">
+        <span class="card-badge c-packet">packet</span>
+        <span class="card-title">Packet</span>
+        <span class="card-desc">Estrutura de protocolo</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
+packet-beta
+0-7: "Version"
+8-15: "IHL"
+16-31: "Total Length"
+32-47: "Identification"
+48-50: "Flags"
+51-63: "Fragment Offset"
+64-71: "TTL"
+72-79: "Protocol"
+80-95: "Checksum"
+96-127: "Source IP"
+128-159: "Destination IP"</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
 
-  <section id="c4-context">
-    <h2>c4-context</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+    <div class="card" id="c4-context" data-type="C4Context" data-color="c-c4" data-title="C4 — Context">
+      <div class="card-head">
+        <span class="card-badge c-c4">C4</span>
+        <span class="card-title">C4 Context</span>
+        <span class="card-desc">Usuários e sistemas externos</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
 C4Context
-title Plataforma Estrategia — contexto (exemplo)
-
+title Plataforma — contexto
 Person(aluno, "Aluno", "Estuda pela web")
-Person(admin, "Operador / instrutor", "Gestão no backoffice")
-System_Ext(email, "Provedor de e-mail", "Notificações transacionais")
-System_Ext(pg, "Gateway de pagamento", "Cobrança (exemplo)")
+Person(admin, "Operador", "Backoffice")
+System_Ext(email, "E-mail", "Notificações")
+System(plataforma, "Plataforma Estrategia", "Conteúdo e matrículas")
+Rel(aluno, plataforma, "HTTPS")
+Rel(admin, plataforma, "HTTPS")
+Rel(plataforma, email, "Envia e-mails")</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
 
-System(plataforma, "Plataforma Estrategia", "Entrega de conteúdo, matrículas e operações")
-
-Rel(aluno, plataforma, "HTTPS — área do aluno")
-Rel(admin, plataforma, "HTTPS — administração")
-Rel(plataforma, email, "Envia e-mails")
-Rel(plataforma, pg, "Processa pagamentos")</div>
-  </section>
-
-  <section id="c4-container">
-    <h2>c4-container</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+    <div class="card" id="c4-container" data-type="C4Container" data-color="c-c4" data-title="C4 — Container">
+      <div class="card-head">
+        <span class="card-badge c-c4">C4</span>
+        <span class="card-title">C4 Container</span>
+        <span class="card-desc">Apps e containers</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
 C4Container
-title Plataforma Estrategia — containers (exemplo)
-
-Person(aluno, "Aluno", "Navega no browser")
-Person(admin, "Operador BO", "Painel administrativo")
-
+title Plataforma — containers
+Person(aluno, "Aluno")
+Person(admin, "Operador")
 Container_Boundary(plat, "Plataforma") {
-  Container(fs, "front-student", "Nuxt 2, Vue", "Experiência do aluno")
-  Container(bo, "bo-container", "Vue 2, Quasar", "Backoffice")
-  Container(api, "Monolito", "Go", "APIs BO/BFF, workers")
-  ContainerDb(db, "PostgreSQL", "Dados relacionais")
-  Container(q, "Filas SQS", "AWS", "Processamento assíncrono")
+  Container(fs, "front-student", "Nuxt 2")
+  Container(bo, "bo-container", "Quasar")
+  Container(api, "Monolito", "Go")
+  ContainerDb(db, "PostgreSQL", "SQL")
 }
+Rel(aluno, fs, "HTTPS")
+Rel(admin, bo, "HTTPS")
+Rel(fs, api, "BFF")
+Rel(bo, api, "BO API")
+Rel(api, db, "SQL")</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
 
-Rel(aluno, fs, "HTTPS", "JSON")
-Rel(admin, bo, "HTTPS", "JSON")
-Rel(fs, api, "HTTPS", "BFF aluno")
-Rel(bo, api, "HTTPS", "API admin")
-Rel(api, db, "TCP", "SQL")
-Rel(api, q, "HTTPS", "mensagens")</div>
-  </section>
-
-  <section id="c4-component">
-    <h2>c4-component</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+    <div class="card" id="c4-component" data-type="C4Component" data-color="c-c4" data-title="C4 — Component">
+      <div class="card-head">
+        <span class="card-badge c-c4">C4</span>
+        <span class="card-title">C4 Component</span>
+        <span class="card-desc">Componentes internos</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
 C4Component
-title Monolito Go — componentes (exemplo)
-
-Container_Boundary(api, "Monolito — API e workers") {
-  Component(h_bo, "Handlers BO", "Go", "Endpoints administrativos")
-  Component(h_bff, "Handlers BFF aluno", "Go", "Endpoints do aluno")
-  Component(svc, "Services", "Go", "Casos de uso e regras")
-  Component(repo, "Repositories", "Go", "Acesso a dados GORM")
-  Component(w, "Workers SQS", "Go", "Consumidores de fila")
+title Monolito — componentes
+Container_Boundary(api, "Monolito Go") {
+  Component(h_bo, "Handlers BO", "Go")
+  Component(h_bff, "Handlers BFF", "Go")
+  Component(svc, "Services", "Go")
+  Component(repo, "Repositories", "Go/GORM")
+  Component(w, "Workers SQS", "Go")
 }
-
 Rel(h_bo, svc, "chama")
 Rel(h_bff, svc, "chama")
-Rel(svc, repo, "persistência")
-Rel(w, svc, "orquestra jobs")</div>
-  </section>
+Rel(svc, repo, "persiste")
+Rel(w, svc, "orquestra")</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
 
-  <section id="c4-dynamic">
-    <h2>c4-dynamic</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+    <div class="card" id="c4-dynamic" data-type="C4Dynamic" data-color="c-c4" data-title="C4 — Dynamic">
+      <div class="card-head">
+        <span class="card-badge c-c4">C4</span>
+        <span class="card-title">C4 Dynamic</span>
+        <span class="card-desc">Sequência estilo C4</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
 C4Dynamic
-title Fluxo — aluno abre aula (exemplo)
-
+title Aluno abre aula
 Person(aluno, "Aluno")
 Container(fs, "front-student", "Nuxt")
 Container(api, "Monolito", "Go")
-ContainerDb(db, "PostgreSQL", "Dados")
-
+ContainerDb(db, "PostgreSQL")
 Rel(aluno, fs, "GET página", "HTTPS")
 Rel(fs, api, "GET /bff/...", "JSON")
-Rel(api, db, "SELECT / regras", "SQL")
-Rel(api, fs, "payload + permissões", "JSON")
-Rel(fs, aluno, "renderiza UI", "HTML")</div>
-  </section>
+Rel(api, db, "SELECT", "SQL")
+Rel(api, fs, "payload", "JSON")
+Rel(fs, aluno, "renderiza", "HTML")</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
 
-  <section id="c4-deployment">
-    <h2>c4-deployment</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+    <div class="card" id="c4-deployment" data-type="C4Deployment" data-color="c-c4" data-title="C4 — Deployment">
+      <div class="card-head">
+        <span class="card-badge c-c4">C4</span>
+        <span class="card-title">C4 Deployment</span>
+        <span class="card-desc">Ambientes e nós de deploy</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
 C4Deployment
-title Deploy ilustrativo — região e runtime (exemplo)
-
-Deployment_Node(aws, "AWS (exemplo)") {
+title Deploy — região e runtime
+Deployment_Node(aws, "AWS") {
   Deployment_Node(vpc, "VPC") {
-    Deployment_Node(ecs, "ECS / tasks") {
+    Deployment_Node(ecs, "ECS") {
       Container(api, "Monolito", "Go")
     }
     Deployment_Node(rds, "RDS") {
-      ContainerDb(db, "PostgreSQL", "Dados")
+      ContainerDb(db, "PostgreSQL")
     }
   }
 }
+Rel(api, db, "SQL", "TCP")</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
 
-Rel(api, db, "SQL", "TCP")</div>
-  </section>
-
-  <section id="zenuml">
-    <h2>zenuml</h2>
-    <div class="mermaid">%%{init: {'theme': 'dark'}}%%
+    <div class="card" id="zenuml" data-type="sequenceDiagram" data-color="c-sequence" data-title="ZenUML / Sequence">
+      <div class="card-head">
+        <span class="card-badge c-sequence">zenuml</span>
+        <span class="card-title">ZenUML</span>
+        <span class="card-desc">Sequence alternativo</span>
+      </div>
+      <div class="card-body"><div class="mermaid">%%{init: {'theme': 'dark'}}%%
 sequenceDiagram
   actor Aluno
   participant API as Monolito
   participant DB as PostgreSQL
   Aluno ->> API: POST /bff/checkout
   API ->> DB: persistir pedido
-  API -->> Aluno: 201 Created</div>
-  </section>
+  DB -->> API: OK
+  API -->> Aluno: 201 Created</div></div>
+      <div class="card-footer"><span>scroll = zoom · drag = pan</span></div>
+    </div>
 
-  <script>
-    mermaid.initialize({
-      startOnLoad: true,
-      theme: "dark",
-      themeVariables: {
-        primaryColor: "#7c3aed",
-        primaryTextColor: "#e4e4e7",
-        primaryBorderColor: "#2a2a30",
-        lineColor: "#71717a",
-        secondaryColor: "#18181c",
-        tertiaryColor: "#0f0f12"
-      }
-    });
-  </script>
+  </div>
+</div>
+
+<div id="modal-overlay">
+  <div id="modal-bar">
+    <span id="modal-badge" class="card-badge"></span>
+    <span id="modal-title"></span>
+    <span id="modal-hint">scroll = zoom · drag = pan · Esc = fechar</span>
+    <button id="modal-close" type="button">Fechar (Esc)</button>
+  </div>
+  <div id="modal-stage">
+    <div class="mermaid" id="modal-diagram"></div>
+    <div id="modal-controls">
+      <button class="mc-btn" id="mc-in" title="Zoom in">+</button>
+      <button class="mc-btn" id="mc-out" title="Zoom out">−</button>
+      <button class="mc-btn" id="mc-reset" title="Reset">⟳</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: 'dark',
+    themeVariables: {
+      primaryColor: '#7c3aed',
+      primaryTextColor: '#e4e4e7',
+      primaryBorderColor: '#2a2a30',
+      lineColor: '#71717a',
+      secondaryColor: '#18181c',
+      tertiaryColor: '#0f0f12'
+    }
+  });
+
+  /* render all card diagrams */
+  mermaid.run({ nodes: document.querySelectorAll('.card-body .mermaid'), suppressErrors: true });
+
+  /* ── viewBox zoom for modal ── */
+  var modalStage   = document.getElementById('modal-stage');
+  var modalOverlay = document.getElementById('modal-overlay');
+  var modalBadge   = document.getElementById('modal-badge');
+  var modalTitle   = document.getElementById('modal-title');
+  var modalDiagram = document.getElementById('modal-diagram');
+
+  var _svg, _svgX0, _svgY0, _svgW, _svgH;
+  var _cur = { x: 0, y: 0, w: 0, h: 0 };
+  var _init = { x: 0, y: 0, w: 0, h: 0 };
+
+  function stageSz() {
+    return { w: modalStage.offsetWidth || window.innerWidth, h: modalStage.offsetHeight || window.innerHeight };
+  }
+
+  function fitVB() {
+    var sz = stageSz();
+    var pad = 60;
+    var sc = Math.min((sz.w - pad * 2) / _svgW, (sz.h - pad * 2) / _svgH);
+    var vw = sz.w / sc, vh = sz.h / sc;
+    return { x: _svgX0 + (_svgW - vw) / 2, y: _svgY0 + (_svgH - vh) / 2, w: vw, h: vh };
+  }
+
+  function putVB() {
+    if (!_svg) return;
+    _svg.setAttribute('viewBox', _cur.x + ' ' + _cur.y + ' ' + _cur.w + ' ' + _cur.h);
+  }
+
+  function zoomAt(factor, px, py) {
+    var sz = stageSz();
+    px = typeof px === 'number' ? px : sz.w / 2;
+    py = typeof py === 'number' ? py : sz.h / 2;
+    var sx = _cur.x + (px / sz.w) * _cur.w;
+    var sy = _cur.y + (py / sz.h) * _cur.h;
+    var nw = Math.min(Math.max(_cur.w / factor, _svgW / 80), _svgW * 12);
+    var nh = nw * (sz.h / sz.w);
+    _cur.x = sx - (px / sz.w) * nw;
+    _cur.y = sy - (py / sz.h) * nh;
+    _cur.w = nw; _cur.h = nh;
+    putVB();
+  }
+
+  function resetModal() {
+    _cur.x = _init.x; _cur.y = _init.y; _cur.w = _init.w; _cur.h = _init.h;
+    putVB();
+  }
+
+  function initModalSvg() {
+    var svg = modalDiagram.querySelector('svg');
+    if (!svg) { setTimeout(initModalSvg, 80); return; }
+    _svg = svg;
+    var vbAttr = svg.getAttribute('viewBox');
+    var vbp = vbAttr ? vbAttr.trim().split(/[\s,]+/).map(Number) : null;
+    _svgX0 = vbp ? vbp[0] : 0; _svgY0 = vbp ? vbp[1] : 0;
+    _svgW  = vbp ? vbp[2] : svg.getBoundingClientRect().width || 800;
+    _svgH  = vbp ? vbp[3] : svg.getBoundingClientRect().height || 600;
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('height', '100%');
+    svg.style.transform = '';
+    var f = fitVB();
+    _cur.x = f.x; _cur.y = f.y; _cur.w = f.w; _cur.h = f.h;
+    _init.x = f.x; _init.y = f.y; _init.w = f.w; _init.h = f.h;
+    putVB();
+  }
+
+  /* open modal */
+  function openModal(card) {
+    var src = card.querySelector('.mermaid').textContent.trim();
+    var color = card.dataset.color || 'c-flow';
+    var title = card.dataset.title || '';
+    var type  = card.dataset.type  || '';
+
+    modalBadge.className = 'card-badge ' + color;
+    modalBadge.textContent = type;
+    modalTitle.textContent = title;
+
+    modalDiagram.removeAttribute('data-processed');
+    modalDiagram.textContent = src;
+    _svg = null;
+
+    modalOverlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    mermaid.run({ nodes: [modalDiagram], suppressErrors: true }).then(function () {
+      initModalSvg();
+    }).catch(function () { initModalSvg(); });
+  }
+
+  function closeModal() {
+    modalOverlay.classList.remove('open');
+    document.body.style.overflow = '';
+    _svg = null;
+  }
+
+  /* card clicks */
+  document.querySelectorAll('.card').forEach(function (card) {
+    card.addEventListener('click', function () { openModal(card); });
+  });
+
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  modalOverlay.addEventListener('click', function (e) {
+    if (e.target === modalOverlay) closeModal();
+  });
+
+  /* modal wheel zoom */
+  modalStage.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    var r = modalStage.getBoundingClientRect();
+    zoomAt(e.deltaY < 0 ? 1.12 : 1 / 1.12, e.clientX - r.left, e.clientY - r.top);
+  }, { passive: false });
+
+  /* modal pan */
+  var _pdx, _pdy, _pcx, _pcy;
+  modalStage.addEventListener('pointerdown', function (e) {
+    if (e.button && e.button !== 0) return;
+    modalStage.setPointerCapture(e.pointerId);
+    _pdx = e.clientX; _pdy = e.clientY;
+    _pcx = _cur.x;    _pcy = _cur.y;
+    modalStage.classList.add('panning');
+    e.preventDefault();
+  });
+  modalStage.addEventListener('pointermove', function (e) {
+    if (!modalStage.hasPointerCapture(e.pointerId)) return;
+    var sz = stageSz();
+    _cur.x = _pcx - ((e.clientX - _pdx) / sz.w) * _cur.w;
+    _cur.y = _pcy - ((e.clientY - _pdy) / sz.h) * _cur.h;
+    putVB();
+  });
+  modalStage.addEventListener('pointerup',     function (e) { modalStage.releasePointerCapture(e.pointerId); modalStage.classList.remove('panning'); });
+  modalStage.addEventListener('pointercancel', function (e) { modalStage.releasePointerCapture(e.pointerId); modalStage.classList.remove('panning'); });
+
+  /* modal buttons */
+  document.getElementById('mc-in').addEventListener('click',    function () { zoomAt(1.2); });
+  document.getElementById('mc-out').addEventListener('click',   function () { zoomAt(1 / 1.2); });
+  document.getElementById('mc-reset').addEventListener('click', resetModal);
+
+  /* keyboard */
+  document.addEventListener('keydown', function (e) {
+    if (!modalOverlay.classList.contains('open')) return;
+    if (e.key === 'Escape') { e.preventDefault(); closeModal(); return; }
+    if (e.key === 'r' || e.key === 'R' || e.key === '0') { e.preventDefault(); resetModal(); return; }
+    if (e.key === '+' || e.key === '=') { e.preventDefault(); zoomAt(1.15); return; }
+    if (e.key === '-' || e.key === '_') { e.preventDefault(); zoomAt(1 / 1.15); }
+  });
+
+  /* dblclick to reset */
+  modalStage.addEventListener('dblclick', function (e) { e.preventDefault(); resetModal(); });
+
+})();
+</script>
 </body>
 </html>
