@@ -81,8 +81,12 @@ pub struct App {
     pub menu_cursor: usize,
     pub logs: Vec<String>,
     pub log_scroll: usize,
+    /// When true, scroll snaps to the bottom on every refresh.
+    pub log_follow: bool,
     /// True while a background `RefreshSnapshot::collect` is in flight.
     pub refresh_inflight: bool,
+    /// Spinner frame counter — increments every poll cycle while refresh_inflight.
+    pub spin_tick: u8,
     /// True if the last completed refresh hit a subprocess timeout (podman/vennon).
     pub subprocess_degraded: bool,
     pending_refresh: Option<Receiver<RefreshSnapshot>>,
@@ -106,7 +110,9 @@ impl App {
             menu_cursor: 0,
             logs: vec![],
             log_scroll: 0,
+            log_follow: true,
             refresh_inflight: false,
+            spin_tick: 0,
             subprocess_degraded: false,
             pending_refresh: None,
         }
@@ -144,7 +150,9 @@ impl App {
     fn apply_snapshot(&mut self, snap: RefreshSnapshot) {
         self.all_containers = snap.containers;
         self.logs = snap.logs;
-        self.log_scroll = snap.log_scroll;
+        if self.log_follow {
+            self.log_scroll = snap.log_scroll;
+        }
         self.subprocess_degraded = snap.had_subprocess_timeout;
         self.refresh_inflight = false;
         self.pending_refresh = None;
@@ -171,6 +179,9 @@ impl App {
     }
 
     pub fn poll_refresh_done(&mut self) {
+        if self.refresh_inflight {
+            self.spin_tick = self.spin_tick.wrapping_add(1);
+        }
         let Some(rx) = self.pending_refresh.take() else {
             return;
         };
@@ -191,7 +202,9 @@ impl App {
         let (logs, timed_out, scroll) =
             logs_for_selection_with_timeout(&self.all_containers, self.tab, self.cursor);
         self.logs = logs;
-        self.log_scroll = scroll;
+        if self.log_follow {
+            self.log_scroll = scroll;
+        }
         if timed_out {
             self.subprocess_degraded = true;
         }
@@ -322,12 +335,23 @@ impl App {
     }
 
     pub fn scroll_logs_up(&mut self) {
+        self.log_follow = false;
         self.log_scroll = self.log_scroll.saturating_sub(5);
     }
 
     pub fn scroll_logs_down(&mut self) {
         let max = self.logs.len().saturating_sub(10);
         self.log_scroll = (self.log_scroll + 5).min(max);
+        if self.log_scroll >= max {
+            self.log_follow = true;
+        }
+    }
+
+    pub fn toggle_follow(&mut self) {
+        self.log_follow = !self.log_follow;
+        if self.log_follow {
+            self.log_scroll = self.logs.len().saturating_sub(20);
+        }
     }
 
     pub fn exec_action(&self, action: &str) -> Result<()> {
@@ -1376,7 +1400,7 @@ fn collect_logs_for(container_name: &str) -> (Vec<String>, bool) {
     let mut logs = vec![];
     const LOG_TIMEOUT: Duration = Duration::from_secs(8);
     let mut cmd = Command::new("podman");
-    cmd.args(["logs", "--tail", "100", container_name]);
+    cmd.args(["logs", "--tail", "300", container_name]);
     match output_with_timeout(cmd, LOG_TIMEOUT) {
         Ok(output) => {
             let text = String::from_utf8_lossy(&output.stdout);

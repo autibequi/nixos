@@ -1,5 +1,8 @@
-install_dir := env("HOME") / ".local/bin"
-nix_run := "nix-shell -p rustc cargo clippy rustfmt --run"
+install_dir    := env("HOME") / ".local/bin"
+buzz_cfg_src   := env("HOME") / "nixos/stow/.config/vennon/buzz.yaml"
+buzz_cfg_dir   := env("HOME") / ".config/buzz"
+buzz_cfg_dst   := buzz_cfg_dir / "config.yaml"
+nix_run        := "nix-shell -p rustc cargo clippy rustfmt --run"
 
 # Build both binaries (release)
 build:
@@ -35,6 +38,8 @@ install: build
     install -m 755 target/release/yaa {{install_dir}}/yaa
     install -m 755 target/release/deck {{install_dir}}/deck
     install -m 755 target/release/buzz {{install_dir}}/buzz
+    mkdir -p {{buzz_cfg_dir}}
+    install -m 644 {{buzz_cfg_src}} {{buzz_cfg_dst}}
     systemctl --user restart buzz || true
     @echo "installed vennon + yaa + deck + buzz → {{install_dir}}"
 

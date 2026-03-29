@@ -53,6 +53,7 @@ pub fn run() -> Result<()> {
         ("yaa",        "instalando yaa"),
         ("deck",       "instalando deck"),
         ("buzz",       "instalando buzz"),
+        ("buzz-yaml",  "instalando buzz.yaml"),
         ("buzz-svc",   "reiniciando buzz"),
         ("tick-svc",   "reiniciando yaa-tick"),
     ];
@@ -192,7 +193,48 @@ pub fn run() -> Result<()> {
         }
     }
 
-    // ── Steps 6-7: restart systemd services ─────────────────────
+    // ── Step 6: install buzz.yaml to secure location ────────────
+    {
+        let step_idx = 5;
+        let start = Instant::now();
+        print_step_spin(&mut out, steps[step_idx].1, Duration::ZERO, 0)?;
+        out.flush()?;
+
+        let src = home().join("nixos/stow/.config/vennon/buzz.yaml");
+        let dst_dir = home().join(".config/buzz");
+        let dst = dst_dir.join("config.yaml");
+
+        let reason: Option<String> = 'copy: {
+            if !src.exists() {
+                break 'copy Some(format!("não encontrado: {}", src.display()));
+            }
+            if let Err(e) = std::fs::create_dir_all(&dst_dir) {
+                break 'copy Some(format!("mkdir: {e}"));
+            }
+            if let Err(e) = std::fs::copy(&src, &dst) {
+                break 'copy Some(format!("copy: {e}"));
+            }
+            None
+        };
+
+        let elapsed = start.elapsed();
+        match reason {
+            None => {
+                print_step_ok(&mut out, steps[step_idx].1, elapsed)?;
+                results.push((true, elapsed));
+            }
+            Some(reason) => {
+                print_step_fail(&mut out, steps[step_idx].1, elapsed)?;
+                out.queue(SetForegroundColor(RED))?;
+                out.queue(Print(format!("       {reason}\n")))?;
+                out.queue(ResetColor)?;
+                out.flush()?;
+                results.push((false, elapsed));
+            }
+        }
+    }
+
+    // ── Steps 7-8: restart systemd services ─────────────────────
     // Reload unit files first (silently) so systemctl doesn't warn mid-line
     let _ = Command::new("systemctl")
         .args(["--user", "daemon-reload"])
@@ -201,8 +243,8 @@ pub fn run() -> Result<()> {
         .status();
 
     for (step_idx, (unit, label)) in [
-        (5usize, ("buzz.service",    steps[5].1)),
-        (6usize, ("yaa-tick.timer",  steps[6].1)),
+        (6usize, ("buzz.service",    steps[6].1)),
+        (7usize, ("yaa-tick.timer",  steps[7].1)),
     ] {
         let start = Instant::now();
         print_step_spin(&mut out, label, Duration::ZERO, 0)?;

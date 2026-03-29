@@ -74,6 +74,7 @@ fn run_loop(
                         KeyCode::Tab => app.switch_tab(),
                         KeyCode::Char('[') | KeyCode::PageUp => app.scroll_logs_up(),
                         KeyCode::Char(']') | KeyCode::PageDown => app.scroll_logs_down(),
+                        KeyCode::Char('f') => app.toggle_follow(),
                         _ => {}
                     },
                     AppMode::Menu => match key.code {

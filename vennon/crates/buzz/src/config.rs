@@ -60,28 +60,21 @@ impl BuzzConfig {
             .with_context(|| format!("parsing {}", path.display()))
     }
 
-    /// Load from default search paths (stow source → deployed → fallback empty).
+    /// Load from the single secure config path (~/.config/buzz/config.yaml).
+    /// Este é o ÚNICO lugar onde o daemon lê. Nunca lê do stow source.
+    /// Populate via: just install (copia stow source → aqui).
     pub fn load() -> Result<Self> {
-        let candidates = [
-            expand_path("~/nixos/stow/.config/vennon/buzz.yaml"),
-            expand_path("~/.config/vennon/buzz.yaml"),
-        ];
-
-        for path in &candidates {
-            if path.exists() {
-                let contents = std::fs::read_to_string(path)
-                    .with_context(|| format!("reading {}", path.display()))?;
-                let config: Self = serde_yaml::from_str(&contents)
-                    .with_context(|| format!("parsing {}", path.display()))?;
-                return Ok(config);
-            }
+        let path = expand_path("~/.config/buzz/config.yaml");
+        if path.exists() {
+            let contents = std::fs::read_to_string(&path)
+                .with_context(|| format!("reading {}", path.display()))?;
+            return serde_yaml::from_str(&contents)
+                .with_context(|| format!("parsing {}", path.display()));
         }
-
-        Ok(Self {
-            socket: default_socket(),
-            log: default_log(),
-            actions: HashMap::new(),
-        })
+        anyhow::bail!(
+            "buzz config não encontrado em {}. Rode: just install",
+            path.display()
+        )
     }
 
     pub fn socket_path(&self) -> PathBuf {

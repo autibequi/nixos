@@ -1,5 +1,6 @@
 use ratatui::prelude::*;
 use ratatui::widgets::*;
+use ratatui::widgets::ScrollbarOrientation;
 
 use super::app::{App, AppMode, ContainerKind, Tab};
 use ratatui::layout::Flex;
@@ -67,8 +68,10 @@ fn render_header(frame: &mut Frame, app: &App, area: Rect) {
         Span::styled(format!(" Agents ({agents_up}) "), agents_style),
     ];
     if app.refresh_inflight {
+        const SPINNER: &[&str] = &["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"];
+        let frame = SPINNER[(app.spin_tick as usize) % SPINNER.len()];
         left_spans.push(Span::styled(" │ ", Style::default().fg(DIM)));
-        left_spans.push(Span::styled("refreshing…", Style::default().fg(PEACH).bold()));
+        left_spans.push(Span::styled(frame, Style::default().fg(PEACH).bold()));
     }
     let left_line = Line::from(left_spans);
 
@@ -192,6 +195,22 @@ fn render_containers(frame: &mut Frame, app: &App, vis: &[&super::app::Container
     frame.render_widget(table, area);
 }
 
+fn colorize_log_line(l: &str) -> Line<'_> {
+    if l.contains("ERROR") || l.contains("error") || l.contains("ERRO")
+        || l.contains("✗") || l.starts_with("Failed") || l.contains("failed to")
+    {
+        Line::from(Span::styled(l, Style::default().fg(RED)))
+    } else if l.contains("WARN") || l.contains("warn") {
+        Line::from(Span::styled(l, Style::default().fg(PEACH)))
+    } else if l.starts_with('✔') || l.contains("Compiled successfully") || l.contains("pronto em") {
+        Line::from(Span::styled(l, Style::default().fg(GREEN)))
+    } else if l.starts_with('●') || l.contains('█') {
+        Line::from(Span::styled(l, Style::default().fg(MAUVE)))
+    } else {
+        Line::from(Span::styled(l, Style::default().fg(DIM)))
+    }
+}
+
 fn render_logs(frame: &mut Frame, app: &App, area: Rect) {
     let visible_height = area.height.saturating_sub(2) as usize;
     let len = app.logs.len();
@@ -200,16 +219,7 @@ fn render_logs(frame: &mut Frame, app: &App, area: Rect) {
 
     let lines: Vec<Line> = app.logs[start..end]
         .iter()
-        .map(|l| {
-            // Color by prefix
-            if l.contains("ERROR") || l.contains("error") || l.contains("ERRO") {
-                Line::from(Span::styled(l.as_str(), Style::default().fg(RED)))
-            } else if l.contains("WARN") || l.contains("warn") {
-                Line::from(Span::styled(l.as_str(), Style::default().fg(PEACH)))
-            } else {
-                Line::from(Span::styled(l.as_str(), Style::default().fg(DIM)))
-            }
-        })
+        .map(|l| colorize_log_line(l.as_str()))
         .collect();
 
     let selected_name = app
@@ -223,21 +233,47 @@ fn render_logs(frame: &mut Frame, app: &App, area: Rect) {
         })
         .unwrap_or_else(|| "none".into());
 
+    let follow_span = if app.log_follow {
+        Span::styled(" FOLLOW", Style::default().fg(GREEN).bold())
+    } else {
+        Span::styled(" PAUSED", Style::default().fg(DIM))
+    };
+
+    let title = Line::from(vec![
+        Span::styled(
+            format!(" {} [{}/{}]", selected_name, end, app.logs.len()),
+            Style::default().fg(MAUVE).bold(),
+        ),
+        follow_span,
+        Span::raw(" "),
+    ]);
+
     let block = Block::default()
         .borders(Borders::ALL)
         .border_style(Style::default().fg(DIM))
-        .title(Span::styled(
-            format!(" {} [{}/{}] ", selected_name, end, app.logs.len()),
-            Style::default().fg(MAUVE).bold(),
-        ));
+        .title(title);
 
-    frame.render_widget(Paragraph::new(lines).block(block), area);
+    frame.render_widget(
+        Paragraph::new(lines).wrap(Wrap { trim: false }).block(block),
+        area,
+    );
+
+    // Scrollbar
+    let mut scrollbar_state = ScrollbarState::new(len.saturating_sub(visible_height))
+        .position(app.log_scroll);
+    frame.render_stateful_widget(
+        Scrollbar::new(ScrollbarOrientation::VerticalRight)
+            .begin_symbol(None)
+            .end_symbol(None),
+        area,
+        &mut scrollbar_state,
+    );
 }
 
 fn render_footer(frame: &mut Frame, app: &App, area: Rect) {
     let hint = match app.mode {
-        AppMode::Normal => "j/k:nav  enter:menu  r:refresh  [/]:scroll  q:quit",
-        AppMode::Menu => "j/k:nav  enter:exec  esc:back",
+        AppMode::Normal => "enter:menu  f:follow  q:quit",
+        AppMode::Menu => "enter:exec  esc:back",
     };
     let count = app.all_containers.iter().filter(|c| c.is_up).count();
     let total = app.all_containers.len();
