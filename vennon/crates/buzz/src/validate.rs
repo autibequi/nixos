@@ -174,13 +174,19 @@ fn normalize_path(path: &PathBuf) -> PathBuf {
 /// Very basic pattern matching (no regex crate).
 /// Supports: ^...$, [a-zA-Z0-9_-]+, literal match.
 fn simple_match(pattern: &str, value: &str) -> bool {
-    // If pattern is just alphanumeric class check
-    if pattern == "^[a-zA-Z0-9_-]+$" {
-        return !value.is_empty()
-            && value.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '-');
+    match pattern {
+        "^[a-zA-Z0-9_-]+$" => {
+            !value.is_empty() && value.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '-')
+        }
+        "^[a-zA-Z0-9_.-]+$" => {
+            !value.is_empty() && value.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '.' || c == '-')
+        }
+        "^[a-zA-Z0-9_./-]+$" => {
+            !value.is_empty() && value.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '.' || c == '-' || c == '/')
+        }
+        // Fallback: literal contains
+        other => value.contains(other),
     }
-    // Fallback: literal contains
-    value.contains(pattern)
 }
 
 fn json_to_string(v: &serde_json::Value) -> String {

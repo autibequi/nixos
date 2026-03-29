@@ -42,10 +42,13 @@ pub fn run(config: &BusConfig) -> Result<()> {
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
-                let config_clone = config.actions.clone();
+                // Re-read config on every request — changes to bus.yaml take effect immediately
+                let actions = crate::config::BusConfig::load()
+                    .map(|c| c.actions)
+                    .unwrap_or_else(|_| config.actions.clone());
                 let log_clone = log_path.clone();
                 std::thread::spawn(move || {
-                    if let Err(e) = handle_connection(stream, &config_clone, &log_clone) {
+                    if let Err(e) = handle_connection(stream, &actions, &log_clone) {
                         eprintln!("[vennon-bus] connection error: {e}");
                     }
                 });

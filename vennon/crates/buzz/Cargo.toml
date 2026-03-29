@@ -1,10 +1,10 @@
 [package]
-name = "vennon-bus"
+name = "buzz"
 version = "0.1.0"
 edition = "2021"
 
 [[bin]]
-name = "vennon-bus"
+name = "buzz"
 path = "src/main.rs"
 
 [dependencies]

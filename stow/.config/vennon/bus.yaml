@@ -1,7 +1,15 @@
 socket: ~/.vennon/bus.sock
 log: ~/.local/share/vennon/logs/bus.log
 
+# Caminho do chrome-relay.py (montado no host via stow)
+# O daemon resolve ~ como HOME do host (/home/pedrinho)
+# O script fica em ~/nixos/vennon/self/scripts/chrome-relay.py
+# que o host acessa diretamente em ~/.../self/scripts/
+
 actions:
+
+  # ── Apps ──────────────────────────────────────────────────────
+
   open-editor:
     description: Abrir arquivo no Zed
     command: zeditor {{ path }}
@@ -13,7 +21,7 @@ actions:
           - path_under: [~/projects, ~/nixos]
 
   open-chrome:
-    description: Abrir URL no Chrome
+    description: Abrir URL no Chrome (janela normal)
     command: xdg-open {{ url }}
     args:
       - name: url
@@ -42,6 +50,8 @@ actions:
         validate:
           - max_length: 500
 
+  # ── Containers (read-only) ────────────────────────────────────
+
   podman-logs:
     description: Logs de um servico vennon
     command: podman logs --tail {{ tail }} vennon-dk-{{ service }}-app
@@ -57,41 +67,62 @@ actions:
         default: 100
 
   podman-status:
-    description: Status dos containers
+    description: Status dos containers vennon
     command: podman ps --filter name=vennon
     capture: true
 
-  holodeck-start:
-    description: Abre Chrome com CDP ativo na porta 9222
-    command: >
-      bash -c '
-        for b in google-chrome-stable google-chrome chromium; do
-          command -v "$b" &>/dev/null && break
-        done;
-        "$b" --remote-debugging-port=9222 --user-data-dir=/tmp/yaa-holodeck
-             --no-first-run --no-default-browser-check about:blank &>/dev/null &
-        for i in $(seq 1 10); do
-          sleep 0.5;
-          curl -sf http://localhost:9222/json/version &>/dev/null && echo "holodeck ready on :9222" && exit 0;
-        done;
-        echo "holodeck timeout" && exit 1
-      '
+  # ── Relay (Chrome CDP + HTTP server) ─────────────────────────
+  # chrome-relay.py vive em ~/nixos/self/scripts/ (mesmo PATH que o host usa)
+
+  relay-start:
+    description: Sobe Chrome com CDP na porta 9222
+    command: bash -c 'curl -sf http://localhost:9222/json/version >/dev/null 2>&1 && echo "CDP already on :9222" && exit 0; for b in google-chrome-stable google-chrome chromium chromium-browser; do command -v "$b" >/dev/null 2>&1 && browser="$b" && break; done; [ -z "$browser" ] && echo "Chrome nao encontrado" >&2 && exit 1; "$browser" --remote-debugging-port=9222 --user-data-dir=/tmp/yaa-holodeck --no-first-run --no-default-browser-check about:blank >/dev/null 2>&1 & for i in 1 2 3 4 5 6 7 8 9 10; do sleep 0.5; curl -sf http://localhost:9222/json/version >/dev/null 2>&1 && echo "Chrome CDP ready :9222" && exit 0; done; echo "timeout" && exit 1'
     capture: true
 
-  holodeck-stop:
-    description: Fecha o Chrome CDP
-    command: pkill -f "remote-debugging-port=9222" || true
+  relay-stop:
+    description: Para o Chrome CDP e o servidor HTTP
+    command: bash -c 'pkill -f "remote-debugging-port=9222" || true; pkill -f "chrome-relay.py" || true; echo "relay stopped"'
     capture: true
 
-  holodeck-status:
-    description: Status do Chrome CDP
-    command: >
-      bash -c '
-        if curl -sf http://localhost:9222/json/version &>/dev/null; then
-          tabs=$(curl -s http://localhost:9222/json | grep -c "\"type\":\"page\"" || echo 0);
-          echo "running — ${tabs} tabs";
-        else
-          echo "not running";
-        fi
-      '
+  relay-status:
+    description: Status do relay (Chrome + servidor + abas)
+    command: python3 ~/nixos/vennon/self/scripts/chrome-relay.py status
+    capture: true
+
+  relay-nav:
+    description: Navega o relay para uma URL
+    command: python3 ~/nixos/vennon/self/scripts/chrome-relay.py nav {{ url }}
+    capture: true
+    args:
+      - name: url
+        type: string
+        required: true
+        validate:
+          - starts_with: "http"
+
+  relay-show:
+    description: Mostra um arquivo markdown/HTML no relay (com Mermaid)
+    command: python3 ~/nixos/vennon/self/scripts/chrome-relay.py show {{ path }}
+    capture: true
+    args:
+      - name: path
+        type: string
+        required: true
+        validate:
+          - path_under: [~/projects, ~/nixos, /tmp]
+
+  relay-inject:
+    description: Executa JavaScript no Chrome e retorna o resultado
+    command: python3 ~/nixos/vennon/self/scripts/chrome-relay.py inject {{ js }}
+    capture: true
+    args:
+      - name: js
+        type: string
+        required: true
+        validate:
+          - max_length: 5000
+
+  relay-tabs:
+    description: Lista abas abertas no Chrome CDP
+    command: python3 ~/nixos/vennon/self/scripts/chrome-relay.py tabs
     capture: true

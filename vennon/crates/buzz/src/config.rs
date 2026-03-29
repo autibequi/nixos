@@ -1,10 +1,10 @@
 use anyhow::{Context, Result};
 use serde::Deserialize;
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 #[derive(Debug, Deserialize)]
-pub struct BusConfig {
+pub struct BuzzConfig {
     #[serde(default = "default_socket")]
     pub socket: String,
     #[serde(default = "default_log")]
@@ -38,8 +38,8 @@ pub struct ArgDef {
     pub validate: Vec<serde_yaml::Value>,
 }
 
-fn default_socket() -> String { "~/.vennon/bus.sock".into() }
-fn default_log() -> String { "~/.local/share/vennon/logs/bus.log".into() }
+fn default_socket() -> String { "~/.vennon/buzz.sock".into() }
+fn default_log() -> String { "~/.local/share/vennon/logs/buzz.log".into() }
 fn default_type() -> String { "string".into() }
 
 pub fn expand_path(p: &str) -> PathBuf {
@@ -51,11 +51,20 @@ pub fn expand_path(p: &str) -> PathBuf {
     PathBuf::from(expanded)
 }
 
-impl BusConfig {
+impl BuzzConfig {
+    /// Load from explicit path (e.g. from --config CLI flag).
+    pub fn load_from(path: &std::path::Path) -> Result<Self> {
+        let contents = std::fs::read_to_string(path)
+            .with_context(|| format!("reading {}", path.display()))?;
+        serde_yaml::from_str(&contents)
+            .with_context(|| format!("parsing {}", path.display()))
+    }
+
+    /// Load from default search paths (stow source → deployed → fallback empty).
     pub fn load() -> Result<Self> {
         let candidates = [
-            expand_path("~/.config/vennon/bus.yaml"),
-            expand_path("~/nixos/stow/.config/vennon/bus.yaml"),
+            expand_path("~/nixos/stow/.config/vennon/buzz.yaml"),
+            expand_path("~/.config/vennon/buzz.yaml"),
         ];
 
         for path in &candidates {
@@ -68,7 +77,6 @@ impl BusConfig {
             }
         }
 
-        // Fallback: empty config
         Ok(Self {
             socket: default_socket(),
             log: default_log(),

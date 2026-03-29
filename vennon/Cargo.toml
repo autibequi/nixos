@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/vennon", "crates/yaa", "crates/deck", "crates/bus"]
+members = ["crates/vennon", "crates/yaa", "crates/deck", "crates/buzz"]
 
 [workspace.dependencies]
 clap = { version = "4", features = ["derive"] }
