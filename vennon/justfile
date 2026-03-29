@@ -42,14 +42,20 @@ uninstall:
 
 # Build all container images
 images:
-    podman build -t vennon-vennon containers/vennon/
+    podman build -f containers/vennon/vennon.container -t vennon-vennon containers/vennon/
     podman build -t vennon-claude containers/claude/
     podman build -t vennon-cursor containers/cursor/
     podman build -t vennon-opencode containers/opencode/
 
-# Build single container image
+# Build single container image (base usa vennon.container)
 image name:
-    podman build -t vennon-{{name}} containers/{{name}}/
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [[ '{{name}}' == vennon ]]; then
+      podman build -f containers/vennon/vennon.container -t vennon-vennon containers/vennon/
+    else
+      podman build -t vennon-{{name}} containers/{{name}}/
+    fi
 
 # Full install: binaries + images
 all: install images

@@ -1,5 +1,6 @@
 use anyhow::Result;
 use std::collections::HashMap;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 pub const IDE_NAMES: &[&str] = &["claude", "opencode", "cursor"];
@@ -226,11 +227,10 @@ fn collect_all() -> Vec<ContainerInfo> {
                 continue;
             }
 
-            let podman_name = format!("vennon-dk-{name}");
-            // Check both vennon-dk-NAME and vennon-dk-NAME-app patterns
+            let podman_name = resolve_service_podman_name(&name, &running);
+
             let (status, is_up, cpu, mem) = running
                 .get(&podman_name)
-                .or_else(|| running.get(&format!("{podman_name}-app")))
                 .cloned()
                 .unwrap_or_else(|| ("stopped".into(), false, String::new(), String::new()));
 
@@ -238,11 +238,7 @@ fn collect_all() -> Vec<ContainerInfo> {
             let commands = get_manifest_commands(&name);
 
             containers.push(ContainerInfo {
-                name: if running.contains_key(&format!("{podman_name}-app")) {
-                    format!("{podman_name}-app")
-                } else {
-                    podman_name
-                },
+                name: podman_name,
                 display_name: name,
                 status,
                 is_up,
@@ -329,6 +325,65 @@ fn get_manifest_commands(name: &str) -> Vec<String> {
 
     // Fallback
     vec!["serve".into(), "stop".into(), "logs".into(), "shell".into(), "flush".into()]
+}
+
+/// Podman container name for a service row in the Services tab.
+/// Prefer explicit `container_name:` from docker-compose (e.g. reverseproxy → vennon-reverseproxy),
+/// else fall back to vennon-dk-{name} / vennon-dk-{name}-app / vennon-{name} if present in `running`.
+fn resolve_service_podman_name(service_name: &str, running: &HashMap<String, (String, bool, String, String)>) -> String {
+    if let Some(cn) = first_literal_container_name(service_name) {
+        return cn;
+    }
+    let app = format!("vennon-dk-{service_name}-app");
+    let base = format!("vennon-dk-{service_name}");
+    let short = format!("vennon-{service_name}");
+    if running.contains_key(&app) {
+        return app;
+    }
+    if running.contains_key(&base) {
+        return base;
+    }
+    if running.contains_key(&short) {
+        return short;
+    }
+    app
+}
+
+fn service_compose_paths(service_name: &str) -> Vec<PathBuf> {
+    let home = std::env::var("HOME").unwrap_or_else(|_| "/root".into());
+    vec![
+        PathBuf::from(format!(
+            "{home}/.config/vennon/containers/{service_name}/docker-compose.yml"
+        )),
+        PathBuf::from(format!(
+            "{home}/nixos/stow/.config/vennon/containers/{service_name}/docker-compose.yml"
+        )),
+    ]
+}
+
+/// First literal `container_name:` (no `${...}`) in the service compose file.
+fn first_literal_container_name(service_name: &str) -> Option<String> {
+    for path in service_compose_paths(service_name) {
+        if let Some(cn) = scan_compose_container_name(&path) {
+            return Some(cn);
+        }
+    }
+    None
+}
+
+fn scan_compose_container_name(path: &Path) -> Option<String> {
+    let s = std::fs::read_to_string(path).ok()?;
+    for line in s.lines() {
+        let t = line.trim();
+        if let Some(rest) = t.strip_prefix("container_name:") {
+            let v = rest.trim().trim_matches('"').trim_matches('\'');
+            if v.is_empty() || v.contains("${") {
+                continue;
+            }
+            return Some(v.to_string());
+        }
+    }
+    None
 }
 
 fn collect_logs_for(container_name: &str) -> Vec<String> {

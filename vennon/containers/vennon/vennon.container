@@ -1,20 +1,16 @@
 # syntax=docker/dockerfile:1
-# vennon-vennon — imagem base com nix + tools (SEM claude-code/opencode/cursor)
-# Build: podman build -t vennon-vennon containers/vennon/
+# vennon-vennon — base Nix (nixos/nix) + ferramentas comuns.
+# Sem clientes de IDE: claude-code, opencode e cursor-agent ficam nas imagens filhas.
+# Build: podman build -f vennon.container -t vennon-vennon .
+#
+# Nota: a imagem oficial nixos/nix traz o ecossistema Nix (daemon, store); não é
+# uma instalação completa de NixOS com boot/systemd como no metal.
 
-# Stage 0: Cursor CLI (FHS — reutilizado por vennon-cursor no futuro)
-FROM debian:bookworm-slim AS cursor-cli
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && \
-    curl -fsSL https://cursor.com/install | bash && \
-    rm -rf /var/lib/apt/lists/*
-
-# Stage 1: Nix + ferramentas base
 FROM nixos/nix:latest
 
 RUN mkdir -p /etc/nix && \
     echo "experimental-features = nix-command flakes" >> /etc/nix/nix.conf
 
-# Pacotes base — separados em 2 layers para cache eficiente
 # Layer 1: core tools (muda raramente)
 RUN nix profile install \
     nixpkgs#coreutils \
@@ -24,7 +20,8 @@ RUN nix profile install \
     nixpkgs#util-linux \
     nixpkgs#gosu \
     nixpkgs#docker-client \
-    nixpkgs#gh
+    nixpkgs#gh \
+    nixpkgs#curl
 
 # Layer 2: extras (muda mais)
 RUN nix profile install \
@@ -81,20 +78,10 @@ RUN ZSH_PLUGINS="/home/claude/.nix-profile/share" && \
     echo '[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh' >> /home/claude/.zshrc && \
     chown 1000:1000 /home/claude/.zshrc
 
-# Cursor CLI + FHS libs (vennon-cursor usa o binário da base)
-RUN mkdir -p /home/claude/.local/share /lib64 /lib/x86_64-linux-gnu
-COPY --from=cursor-cli /root/.local/bin/ /home/claude/.local/bin/
-COPY --from=cursor-cli /root/.local/share/ /home/claude/.local/share/
-COPY --from=cursor-cli /lib/x86_64-linux-gnu/ld-linux-x86-64.so.2 /lib64/
-COPY --from=cursor-cli /lib/x86_64-linux-gnu/libc.so.6 /lib/x86_64-linux-gnu/libdl.so.2 /lib/x86_64-linux-gnu/libpthread.so.0 /lib/x86_64-linux-gnu/libm.so.6 /lib/x86_64-linux-gnu/
-COPY --from=cursor-cli /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /usr/lib/x86_64-linux-gnu/libgcc_s.so.1 /lib/x86_64-linux-gnu/
-RUN CURSOR_VER="$(ls /home/claude/.local/share/cursor-agent/versions)" && \
-    rm -f /home/claude/.local/bin/agent /home/claude/.local/bin/cursor-agent && \
-    ln -s /home/claude/.local/share/cursor-agent/versions/"$CURSOR_VER"/cursor-agent /home/claude/.local/bin/agent && \
-    ln -s /home/claude/.local/share/cursor-agent/versions/"$CURSOR_VER"/cursor-agent /home/claude/.local/bin/cursor-agent && \
-    chown -R 1000:1000 /home/claude/.local
+# Binários em ~/.local/bin (ex.: mcp-grafana) — clientes de IDE adicionam aqui nas imagens filhas
+RUN mkdir -p /home/claude/.local/share
 
-# mcp-grafana
+# mcp-grafana (compartilhado entre IDEs)
 RUN curl -fsSL "https://github.com/grafana/mcp-grafana/releases/latest/download/mcp-grafana_Linux_x86_64.tar.gz" \
     | tar xz -C /home/claude/.local/bin/ mcp-grafana && \
     chown 1000:1000 /home/claude/.local/bin/mcp-grafana

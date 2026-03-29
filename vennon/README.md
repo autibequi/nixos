@@ -36,10 +36,10 @@ vennon/
 ├── justfile                   # build + install (nix-shell)
 ├── self/                      # engine (skills, hooks, agents, scripts)
 ├── containers/                # Dockerfiles + vennon.yaml (IDEs)
-│   ├── vennon/                 # base image (nix + tools)
-│   ├── claude/                # FROM vennon + claude-code
-│   ├── opencode/              # FROM vennon + opencode
-│   └── cursor/                # FROM vennon + cursor
+│   ├── vennon/                 # base: vennon.container (nix + tools)
+│   ├── claude/                # FROM vennon-vennon + claude-code
+│   ├── opencode/              # FROM vennon-vennon + opencode
+│   └── cursor/                # FROM vennon-vennon + cursor CLI (Debian stage)
 ├── crates/
 │   ├── vennon/                # container management
 │   ├── yaa/                   # session + agent orchestrator
@@ -50,10 +50,10 @@ vennon/
 ## Hierarquia de Imagens Docker
 
 ```
-vennon-vennon:latest              ← base: nixos/nix + tools + zsh + entrypoint
-  ├─ vennon-claude:latest        ← + claude-code
-  ├─ vennon-opencode:latest      ← + opencode
-  └─ vennon-cursor:latest        ← + cursor (já na base)
+vennon-vennon:latest              ← base: nixos/nix + tools + zsh + entrypoint (`vennon.container`)
+  ├─ vennon-claude:latest        ← + claude-code (nix)
+  ├─ vennon-opencode:latest      ← + opencode (nix)
+  └─ vennon-cursor:latest        ← + cursor-agent (Debian/glibc)
 ```
 
 Todas as imagens usam **podman** (não docker).

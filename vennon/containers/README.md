@@ -3,10 +3,10 @@
 ## Hierarquia de Imagens
 
 ```
-vennon-vennon (base)
-├── vennon-claude     (+ claude-code)
-├── vennon-opencode   (+ opencode)
-└── vennon-cursor     (cursor já na base)
+vennon-vennon (base, arquivo vennon.container)
+├── vennon-claude     (+ claude-code via nix)
+├── vennon-opencode   (+ opencode via nix)
+└── vennon-cursor     (+ cursor CLI via stage Debian / glibc)
 ```
 
 ## vennon/ — Base Image (`vennon-vennon`)
@@ -15,12 +15,12 @@ Contexto de build usado por `vennon <ide> build` e `just images`:
 
 ```
 vennon/
-├── Dockerfile      # Multi-stage: cursor CLI (debian) + nix (nixos/nix:latest) → tag `vennon-vennon`
-└── entrypoint.sh   # nix-daemon, dynamic UID/GID, session hooks, setpriv
+├── vennon.container  # Nix (nixos/nix:latest) + ferramentas; tag `vennon-vennon`
+└── entrypoint.sh     # nix-daemon, dynamic UID/GID, session hooks, setpriv
 ```
 
 **Pacotes instalados (3 layers para cache):**
-- Layer 1 (core): coreutils, sed, awk, jq, util-linux, gosu, docker-client, gh
+- Layer 1 (core): coreutils, sed, awk, jq, util-linux, gosu, docker-client, gh, curl
 - Layer 2 (extras): python3, wl-clipboard, sox, systemd, espeak-ng, yt-dlp
 - Layer 3 (shell): zsh, powerlevel10k, autosuggestions, syntax-highlighting, fzf, eza, bat, ripgrep, fd
 
@@ -51,7 +51,7 @@ opencode/
 
 ```
 cursor/
-├── Dockerfile      # FROM vennon-vennon (cursor já na base)
+├── Dockerfile      # FROM vennon-vennon + stage Debian com cursor-agent + libs glibc
 └── vennon.yaml     # type: ide, image: vennon-cursor
 ```
 

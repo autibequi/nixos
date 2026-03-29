@@ -76,7 +76,7 @@ O manifest.rs scana 2 locais:
 
 ## Ao modificar
 
-- **Novo IDE**: criar `containers/<name>/Dockerfile` (FROM vennon-vennon) + `vennon.yaml`
+- **Novo IDE**: criar `containers/<name>/Dockerfile` (`FROM vennon-vennon`) + `vennon.yaml`; base = `containers/vennon/vennon.container`
 - **Novo serviço**: criar em `stow/.config/vennon/containers/<name>/` com vennon.yaml + docker-compose.yml
 - **Novo comando yaa**: adicionar subcommand em `crates/yaa/src/main.rs` + módulo
 - **Novo comando deck**: adicionar subcommand em `crates/deck/src/main.rs` + módulo

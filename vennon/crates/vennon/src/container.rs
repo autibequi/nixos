@@ -128,7 +128,7 @@ fn build(name: &str, config: &VennonConfig) -> Result<()> {
 
     println!("Building vennon-vennon (base)...");
     let vennon_ctx = vennon_dir.join("containers/vennon");
-    let vennon_dockerfile = vennon_ctx.join("Dockerfile");
+    let vennon_dockerfile = vennon_ctx.join("vennon.container");
     exec::run(
         "podman",
         &[
