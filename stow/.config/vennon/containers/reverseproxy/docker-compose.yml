@@ -6,4 +6,18 @@ services:
     restart: unless-stopped
     volumes:
       - ${VENNON_SERVICE_DIR}/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ${VENNON_SERVICE_DIR}/certs:/etc/nginx/certs:ro
+      - ${VENNON_SERVICE_DIR}/certs:/etc/nginx/certs:rw
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        apk add --no-cache openssl -q
+        if ! openssl x509 -checkend 0 -noout -in /etc/nginx/certs/fullchain.pem 2>/dev/null; then
+          echo '[reverseproxy] Gerando certificado SSL auto-assinado...'
+          openssl req -x509 -nodes -days 365 \
+            -newkey rsa:2048 \
+            -keyout /etc/nginx/certs/privkey.pem \
+            -out /etc/nginx/certs/fullchain.pem \
+            -subj '/CN=local.estrategia-sandbox.com.br' \
+            -addext 'subjectAltName=DNS:local.estrategia-sandbox.com.br,DNS:*.local.estrategia-sandbox.com.br,DNS:localhost'
+        fi
+        exec /docker-entrypoint.sh nginx -g 'daemon off;'

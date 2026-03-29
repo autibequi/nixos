@@ -34,4 +34,4 @@ commands:
   certs:
     description: Generate self-signed SSL certs
     script: |
-      bash {{ service_dir }}/gen-cert.sh
+      bash /workspace/target/nixos/stow/.config/vennon/containers/reverseproxy/gen-cert.sh

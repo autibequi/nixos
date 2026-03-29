@@ -41,6 +41,7 @@
     "deny": [],
     "defaultMode": "auto"
   },
+  "model": "sonnet[1m]",
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "nixos"
@@ -94,6 +95,5 @@
     "type": "command",
     "command": "~/.claude/scripts/statusline.sh"
   },
-  "skipAutoPermissionPrompt": true,
-  "model": "sonnet"
+  "skipAutoPermissionPrompt": true
 }
