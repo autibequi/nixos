@@ -1,7 +1,7 @@
 services:
   opencode:
     image: vennon-opencode:latest
-    container_name: vennon-opencode
+    container_name: vennon-opencode-${VENNON_INSTANCE}
     mem_limit: ${VENNON_MEM:-12g}
     memswap_limit: ${VENNON_MEM:-12g}
     network_mode: host

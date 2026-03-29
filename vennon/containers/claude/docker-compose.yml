@@ -1,7 +1,7 @@
 services:
   claude:
     image: vennon-claude:latest
-    container_name: vennon-claude
+    container_name: vennon-claude-${VENNON_INSTANCE}
     mem_limit: ${VENNON_MEM:-12g}
     memswap_limit: ${VENNON_MEM:-12g}
     network_mode: host

@@ -1,4 +1,5 @@
 use anyhow::{bail, Result};
+use std::process::{Command, Stdio};
 
 use crate::config::VennonConfig;
 use crate::containers;
@@ -32,10 +33,10 @@ pub fn dispatch(name: &str, action: &str, config: &VennonConfig) -> Result<()> {
 
 /// Check if a podman image exists locally.
 fn image_exists(name: &str) -> bool {
-    std::process::Command::new("podman")
+    Command::new("podman")
         .args(["image", "exists", name])
-        .stdout(std::process::Stdio::null())
-        .stderr(std::process::Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
         .status()
         .map(|s| s.success())
         .unwrap_or(false)
@@ -51,54 +52,75 @@ fn ensure_image(name: &str, config: &VennonConfig) -> Result<()> {
     Ok(())
 }
 
-/// Start container and exec into it (launches claude code).
+/// Container/project name for this session: vennon-{name}-{VENNON_INSTANCE}.
+/// VENNON_INSTANCE is set by ide::set_compose_env() from the target path slug.
+fn instance_name(base: &str) -> String {
+    let inst = std::env::var("VENNON_INSTANCE").unwrap_or_default();
+    if inst.is_empty() {
+        format!("vennon-{base}")
+    } else {
+        format!("vennon-{base}-{inst}")
+    }
+}
+
+/// Ensure the shared docker-proxy container is running.
+/// Uses a fixed project name so multiple IDE instances share one proxy.
+fn ensure_proxy(compose_path: &std::path::Path) -> Result<()> {
+    let already_running = Command::new("podman")
+        .args(["container", "exists", "vennon-docker-proxy"])
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false);
+
+    if !already_running {
+        let compose_str = compose_path.to_string_lossy();
+        exec::run(
+            "podman-compose",
+            &["-f", &compose_str, "-p", "vennon-proxy", "up", "-d", "docker-proxy"],
+        )?;
+    }
+    Ok(())
+}
+
+/// Start container and exec into the IDE.
+/// Uses exec_replace into a bash wrapper with an EXIT trap so that compose down
+/// runs reliably whether the user types /exit, closes the terminal, or is killed.
 fn start(name: &str, compose_path: &std::path::Path, config: &VennonConfig) -> Result<()> {
     ensure_image(name, config)?;
+    ensure_proxy(compose_path)?;
 
-    // Compose is stable (no dynamic paths) — up -d is a no-op if already running
     let compose_str = compose_path.to_string_lossy();
-    let project = format!("vennon-{name}");
-    exec::run(
-        "podman-compose",
-        &["-f", &compose_str, "-p", &project, "up", "-d"],
-    )?;
-
-    let cid = find_container(name)?;
+    let project = instance_name(name);
+    let cid = ensure_container_running(name, &compose_str, &project)?;
 
     exec::clear_screen();
 
     let cmd = containers::start_cmd(name);
-    exec::exec_replace(
-        "podman",
-        &["exec", "-it", &cid, "/bin/bash", "-c", &cmd],
-    );
+    let bash_cmd = build_exec_with_cleanup(&cid, &cmd, &compose_str, &project);
+    exec::exec_replace("bash", &["-c", &bash_cmd]);
 }
 
-/// Open a bash shell inside the container.
+/// Open a bash shell inside the container with the same cleanup semantics.
 fn shell(name: &str, compose_path: &std::path::Path, config: &VennonConfig) -> Result<()> {
     ensure_image(name, config)?;
+    ensure_proxy(compose_path)?;
 
     let compose_str = compose_path.to_string_lossy();
-    let project = format!("vennon-{name}");
-    exec::run(
-        "podman-compose",
-        &["-f", &compose_str, "-p", &project, "up", "-d"],
-    )?;
-
-    let cid = find_container(name)?;
+    let project = instance_name(name);
+    let cid = ensure_container_running(name, &compose_str, &project)?;
 
     let cmd = containers::shell_cmd();
-    exec::exec_replace(
-        "podman",
-        &["exec", "-it", &cid, "/bin/bash", "-c", &cmd],
-    );
+    let bash_cmd = build_exec_with_cleanup(&cid, &cmd, &compose_str, &project);
+    exec::exec_replace("bash", &["-c", &bash_cmd]);
 }
 
-/// Stop the container.
+/// Stop the container for the current path instance.
 fn stop(name: &str, compose_path: &std::path::Path) -> Result<()> {
     let compose_str = compose_path.to_string_lossy();
-    let project = format!("vennon-{name}");
-    println!("Stopping vennon-{name}...");
+    let project = instance_name(name);
+    println!("Stopping {project}...");
     exec::run(
         "podman-compose",
         &["-f", &compose_str, "-p", &project, "down"],
@@ -107,11 +129,11 @@ fn stop(name: &str, compose_path: &std::path::Path) -> Result<()> {
     Ok(())
 }
 
-/// Destroy container + volumes + local images.
+/// Destroy container + volumes + local images for the current path instance.
 fn flush(name: &str, compose_path: &std::path::Path) -> Result<()> {
     let compose_str = compose_path.to_string_lossy();
-    let project = format!("vennon-{name}");
-    println!("Flushing vennon-{name} (container + volumes)...");
+    let project = instance_name(name);
+    println!("Flushing {project} (container + volumes)...");
     exec::run(
         "podman-compose",
         &[
@@ -127,23 +149,18 @@ fn flush(name: &str, compose_path: &std::path::Path) -> Result<()> {
 fn build(name: &str, config: &VennonConfig) -> Result<()> {
     let vennon_dir = config.vennon_path();
 
-    // Always rebuild base (podman layer cache handles skipping unchanged layers)
     println!("Building vennon-vennon (base)...");
     let vennon_ctx = vennon_dir.join("containers/vennon");
     let vennon_dockerfile = vennon_ctx.join("Dockerfile");
     exec::run(
         "podman",
         &[
-            "build",
-            "-t",
-            "vennon-vennon",
-            "-f",
-            &vennon_dockerfile.to_string_lossy(),
+            "build", "-t", "vennon-vennon",
+            "-f", &vennon_dockerfile.to_string_lossy(),
             &vennon_ctx.to_string_lossy(),
         ],
     )?;
 
-    // Build specific image
     let image_name = format!("vennon-{name}");
     println!("Building {image_name}...");
     let ctx = vennon_dir.join(format!("containers/{name}"));
@@ -151,11 +168,8 @@ fn build(name: &str, config: &VennonConfig) -> Result<()> {
     exec::run(
         "podman",
         &[
-            "build",
-            "-t",
-            &image_name,
-            "-f",
-            &dockerfile.to_string_lossy(),
+            "build", "-t", &image_name,
+            "-f", &dockerfile.to_string_lossy(),
             &ctx.to_string_lossy(),
         ],
     )?;
@@ -166,19 +180,71 @@ fn build(name: &str, config: &VennonConfig) -> Result<()> {
 
 // ── Helpers ─────────────────────────────────────────────────────
 
+/// Returns the CID if the instance container is already running; starts it otherwise.
+fn ensure_container_running(name: &str, compose_str: &str, project: &str) -> Result<String> {
+    if let Some(cid) = running_container(name) {
+        return Ok(cid);
+    }
+    exec::run(
+        "podman-compose",
+        &["-f", compose_str, "-p", project, "up", "-d", name],
+    )?;
+    find_container(name)
+}
+
+/// Returns the container ID if the instance is already running, None otherwise.
+fn running_container(name: &str) -> Option<String> {
+    let container_name = instance_name(name);
+    exec::capture(
+        "podman",
+        &["ps", "-q", "--filter", &format!("name=^{container_name}$")],
+    )
+    .ok()
+    .filter(|s| !s.is_empty())
+    .map(|s| s.lines().next().unwrap_or(s).to_string())
+}
+
 fn find_container(name: &str) -> Result<String> {
-    let container_name = format!("vennon-{name}");
+    let container_name = instance_name(name);
     let cid = exec::capture(
         "podman",
-        &[
-            "ps",
-            "-q",
-            "--filter",
-            &format!("name={container_name}"),
-        ],
+        &["ps", "-q", "--filter", &format!("name=^{container_name}$")],
     )?;
     if cid.is_empty() {
         bail!("Container {container_name} not found. Is it running?");
     }
     Ok(cid.lines().next().unwrap_or(&cid).to_string())
+}
+
+/// Build a bash one-liner that:
+/// 1. Runs `podman exec -it <cid> <cmd>` in the foreground.
+/// 2. On EXIT (normal, SIGHUP, SIGTERM), calls compose down — but only if no
+///    other exec sessions are still active (i.e. another terminal on same path).
+///
+/// Using exec_replace into bash gives reliable SIGHUP handling: bash forwards
+/// the signal to its child (podman exec → container process dies) and then
+/// executes the EXIT trap before it exits.
+fn build_exec_with_cleanup(cid: &str, cmd: &str, compose_str: &str, project: &str) -> String {
+    let cmd_q = shell_single_quote(cmd);
+    let compose_q = shell_single_quote(compose_str);
+    let proj_q = shell_single_quote(project);
+
+    // {{len .ExecIDs}} — Go template; in Rust format strings {{ → { and }} → }
+    format!(
+        "cleanup() {{ \
+            ct=$(podman inspect {cid} --format '{{{{len .ExecIDs}}}}' 2>/dev/null || echo 0); \
+            [ \"$ct\" = \"0\" ] && podman-compose -f {compose_q} -p {proj_q} down >/dev/null 2>&1; \
+        }}; \
+        trap cleanup EXIT; \
+        podman exec -it {cid} /bin/bash -c {cmd_q}",
+        cid = cid,
+        compose_q = compose_q,
+        proj_q = proj_q,
+        cmd_q = cmd_q,
+    )
+}
+
+/// Wrap a string in single quotes, escaping any embedded single quotes.
+fn shell_single_quote(s: &str) -> String {
+    format!("'{}'", s.replace('\'', r"'\''"))
 }

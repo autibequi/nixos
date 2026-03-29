@@ -1,7 +1,7 @@
 services:
   cursor:
     image: vennon-cursor:latest
-    container_name: vennon-cursor
+    container_name: vennon-cursor-${VENNON_INSTANCE}
     mem_limit: ${VENNON_MEM:-12g}
     memswap_limit: ${VENNON_MEM:-12g}
     network_mode: host

@@ -17,11 +17,15 @@ pub fn start_cmd(name: &str) -> String {
         .unwrap_or_default();
 
     let resume_raw = std::env::var("YAA_RESUME").ok().filter(|s| !s.is_empty());
+    let danger = std::env::var("YAA_DANGER").unwrap_or_default() == "1";
 
     match name {
         "claude" => {
             let mut cmd = "cd /workspace/target && exec claude".to_string();
             cmd.push_str(" --enable-auto-mode");
+            if danger {
+                cmd.push_str(" --dangerously-skip-permissions");
+            }
             cmd.push_str(&model_flag);
             if let Some(ref id) = resume_raw {
                 if id == "continue" {

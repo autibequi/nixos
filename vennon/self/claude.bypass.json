@@ -41,7 +41,7 @@
     "deny": [],
     "defaultMode": "auto"
   },
-  "model": "sonnet",
+  "model": "haiku",
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "nixos"
