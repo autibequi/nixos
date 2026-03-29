@@ -28,6 +28,8 @@ deck                # abre dashboard
 - Services aparecem mesmo sem container rodando (status "stopped")
 - Ações interativas (shell, logs) suspendem TUI e restauram ao voltar
 
+**Travamento / “congelou”**: se **nenhuma** tecla responder (incluindo `q`), o processo estava bloqueado em `podman`/`vennon` — com timeouts por comando isso deixa de ser indefinido. Se a UI reage mas os dados parecem velhos, use `r` (refresh em background). O rodapé mostra `refreshing…` ou `stale (podman/vennon timeout)` quando aplicável.
+
 ## Host Utilities
 
 ```bash

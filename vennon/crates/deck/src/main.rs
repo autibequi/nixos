@@ -1,5 +1,6 @@
 mod exec;
 mod os;
+mod process;
 mod stow;
 mod tui;
 

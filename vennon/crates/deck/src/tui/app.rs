@@ -1,7 +1,11 @@
+use crate::process::{output_with_timeout, CMD_TIMEOUT};
 use anyhow::Result;
 use std::collections::HashMap;
+use std::io;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::sync::mpsc::{self, Receiver, TryRecvError};
+use std::time::Duration;
 
 pub const IDE_NAMES: &[&str] = &["claude", "opencode", "cursor"];
 
@@ -44,6 +48,19 @@ pub struct App {
     pub menu_cursor: usize,
     pub logs: Vec<String>,
     pub log_scroll: usize,
+    /// True while a background `RefreshSnapshot::collect` is in flight.
+    pub refresh_inflight: bool,
+    /// True if the last completed refresh hit a subprocess timeout (podman/vennon).
+    pub subprocess_degraded: bool,
+    pending_refresh: Option<Receiver<RefreshSnapshot>>,
+}
+
+/// Result of one full data fetch (containers + logs for current selection).
+pub struct RefreshSnapshot {
+    pub containers: Vec<ContainerInfo>,
+    pub logs: Vec<String>,
+    pub log_scroll: usize,
+    pub had_subprocess_timeout: bool,
 }
 
 impl App {
@@ -56,15 +73,21 @@ impl App {
             menu_cursor: 0,
             logs: vec![],
             log_scroll: 0,
+            refresh_inflight: false,
+            subprocess_degraded: false,
+            pending_refresh: None,
         }
     }
 
     pub fn visible_containers(&self) -> Vec<&ContainerInfo> {
-        self.all_containers
-            .iter()
+        Self::visible_containers_slice(&self.all_containers, self.tab)
+    }
+
+    fn visible_containers_slice(all: &[ContainerInfo], tab: Tab) -> Vec<&ContainerInfo> {
+        all.iter()
             .filter(|c| {
                 let is_ide = c.kind == ContainerKind::Ide;
-                match self.tab {
+                match tab {
                     Tab::Ide => is_ide,
                     Tab::Services => !is_ide,
                 }
@@ -73,27 +96,65 @@ impl App {
     }
 
     pub fn refresh(&mut self) -> Result<()> {
-        self.all_containers = collect_all();
+        let snap = RefreshSnapshot::collect(self.tab, self.cursor);
+        self.apply_snapshot(snap);
+        Ok(())
+    }
+
+    fn apply_snapshot(&mut self, snap: RefreshSnapshot) {
+        self.all_containers = snap.containers;
+        self.logs = snap.logs;
+        self.log_scroll = snap.log_scroll;
+        self.subprocess_degraded = snap.had_subprocess_timeout;
+        self.refresh_inflight = false;
+        self.pending_refresh = None;
         let vis = self.visible_containers();
         if self.cursor >= vis.len() && !vis.is_empty() {
             self.cursor = vis.len() - 1;
         }
-        self.refresh_logs();
-        Ok(())
+    }
+
+    /// Spawn background refresh (no blocking on podman/vennon beyond OS scheduling).
+    pub fn kick_background_refresh(&mut self) {
+        if self.refresh_inflight {
+            return;
+        }
+        let (tx, rx) = mpsc::channel();
+        self.pending_refresh = Some(rx);
+        self.refresh_inflight = true;
+        let tab = self.tab;
+        let cursor = self.cursor;
+        std::thread::spawn(move || {
+            let snap = RefreshSnapshot::collect(tab, cursor);
+            let _ = tx.send(snap);
+        });
+    }
+
+    pub fn poll_refresh_done(&mut self) {
+        let Some(rx) = self.pending_refresh.take() else {
+            return;
+        };
+        match rx.try_recv() {
+            Ok(snap) => {
+                self.apply_snapshot(snap);
+            }
+            Err(TryRecvError::Empty) => {
+                self.pending_refresh = Some(rx);
+            }
+            Err(TryRecvError::Disconnected) => {
+                self.refresh_inflight = false;
+            }
+        }
     }
 
     fn refresh_logs(&mut self) {
-        let vis = self.visible_containers();
-        if let Some(c) = vis.get(self.cursor) {
-            if c.is_up {
-                self.logs = collect_logs_for(&c.name);
-            } else {
-                self.logs = vec![format!("{} — not running", c.display_name)];
-            }
-        } else {
-            self.logs.clear();
+        let (logs, timed_out, scroll) =
+            logs_for_selection_with_timeout(&self.all_containers, self.tab, self.cursor);
+        self.logs = logs;
+        self.log_scroll = scroll;
+        if timed_out {
+            self.subprocess_degraded = true;
         }
-        self.log_scroll = self.logs.len().saturating_sub(20);
     }
 
     pub fn next(&mut self) {
@@ -200,11 +261,50 @@ impl App {
     }
 }
 
+impl RefreshSnapshot {
+    pub fn collect(tab: Tab, cursor: usize) -> Self {
+        let (containers, mut timed_out) = collect_all();
+        let (logs, lt, log_scroll) = logs_for_selection_with_timeout(&containers, tab, cursor);
+        timed_out |= lt;
+        Self {
+            containers,
+            logs,
+            log_scroll,
+            had_subprocess_timeout: timed_out,
+        }
+    }
+}
+
+fn logs_for_selection_with_timeout(
+    containers: &[ContainerInfo],
+    tab: Tab,
+    cursor: usize,
+) -> (Vec<String>, bool, usize) {
+    let vis = App::visible_containers_slice(containers, tab);
+    if let Some(c) = vis.get(cursor) {
+        if c.is_up {
+            let (logs, t) = collect_logs_for(&c.name);
+            let log_scroll = logs.len().saturating_sub(20);
+            (logs, t, log_scroll)
+        } else {
+            (
+                vec![format!("{} — not running", c.display_name)],
+                false,
+                0,
+            )
+        }
+    } else {
+        (vec![], false, 0)
+    }
+}
+
 // ── Data collection ─────────────────────────────────────────────
 
-fn collect_all() -> Vec<ContainerInfo> {
+fn collect_all() -> (Vec<ContainerInfo>, bool) {
+    let mut any_timeout = false;
     let mut containers = vec![];
-    let running = collect_running();
+    let (running, t) = collect_running();
+    any_timeout |= t;
 
     // 1. IDE containers — always show claude/opencode/cursor
     // yaa/vennon uses project vennon-{ide}-{VENNON_INSTANCE}, so match exact name or vennon-{ide}-* .
@@ -214,9 +314,10 @@ fn collect_all() -> Vec<ContainerInfo> {
     }
 
     // 2. Service containers — discover from vennon list
-    if let Ok(output) = Command::new("vennon").args(["list"]).output() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        for line in stdout.lines() {
+    match output_with_timeout(Command::new("vennon").args(["list"]), CMD_TIMEOUT) {
+        Ok(output) => {
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            for line in stdout.lines() {
             // Format: "  [svc] monolito (mono)"
             if !line.contains("[svc]") {
                 continue;
@@ -259,10 +360,15 @@ fn collect_all() -> Vec<ContainerInfo> {
                     containers.push(sidecar);
                 }
             }
+            }
         }
+        Err(e) if e.kind() == io::ErrorKind::TimedOut => {
+            any_timeout = true;
+        }
+        Err(_) => {}
     }
 
-    containers
+    (containers, any_timeout)
 }
 
 /// Linhas aninhadas no deck: deps do compose (postgres, redis, localstack).
@@ -349,39 +455,66 @@ fn ide_row(ide: &str, running: &HashMap<String, (String, bool, String, String)>)
 }
 
 /// Get running containers from podman.
-fn collect_running() -> HashMap<String, (String, bool, String, String)> {
+fn collect_running() -> (HashMap<String, (String, bool, String, String)>, bool) {
     let mut map = HashMap::new();
+    let mut timed_out = false;
 
-    if let Ok(output) = Command::new("podman")
-        .args(["ps", "-a", "--format", "{{.Names}}\t{{.Status}}", "--filter", "name=vennon"])
-        .output()
-    {
-        for line in String::from_utf8_lossy(&output.stdout).lines() {
-            let parts: Vec<&str> = line.split('\t').collect();
-            if parts.len() >= 2 {
-                let is_up = parts[1].starts_with("Up");
-                map.insert(parts[0].to_string(), (parts[1].to_string(), is_up, String::new(), String::new()));
-            }
-        }
-    }
-
-    // Stats for running
-    if let Ok(output) = Command::new("podman")
-        .args(["stats", "--no-stream", "--format", "{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}"])
-        .output()
-    {
-        for line in String::from_utf8_lossy(&output.stdout).lines() {
-            let parts: Vec<&str> = line.split('\t').collect();
-            if parts.len() >= 3 {
-                if let Some(entry) = map.get_mut(parts[0]) {
-                    entry.2 = parts[1].to_string();
-                    entry.3 = parts[2].to_string();
+    match output_with_timeout(
+        Command::new("podman").args([
+            "ps",
+            "-a",
+            "--format",
+            "{{.Names}}\t{{.Status}}",
+            "--filter",
+            "name=vennon",
+        ]),
+        CMD_TIMEOUT,
+    ) {
+        Ok(output) => {
+            for line in String::from_utf8_lossy(&output.stdout).lines() {
+                let parts: Vec<&str> = line.split('\t').collect();
+                if parts.len() >= 2 {
+                    let is_up = parts[1].starts_with("Up");
+                    map.insert(
+                        parts[0].to_string(),
+                        (parts[1].to_string(), is_up, String::new(), String::new()),
+                    );
                 }
             }
         }
+        Err(e) if e.kind() == io::ErrorKind::TimedOut => {
+            timed_out = true;
+        }
+        Err(_) => {}
     }
 
-    map
+    match output_with_timeout(
+        Command::new("podman").args([
+            "stats",
+            "--no-stream",
+            "--format",
+            "{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}",
+        ]),
+        CMD_TIMEOUT,
+    ) {
+        Ok(output) => {
+            for line in String::from_utf8_lossy(&output.stdout).lines() {
+                let parts: Vec<&str> = line.split('\t').collect();
+                if parts.len() >= 3 {
+                    if let Some(entry) = map.get_mut(parts[0]) {
+                        entry.2 = parts[1].to_string();
+                        entry.3 = parts[2].to_string();
+                    }
+                }
+            }
+        }
+        Err(e) if e.kind() == io::ErrorKind::TimedOut => {
+            timed_out = true;
+        }
+        Err(_) => {}
+    }
+
+    (map, timed_out)
 }
 
 /// Get command names from a service's vennon.yaml manifest.
@@ -482,19 +615,28 @@ fn scan_compose_container_name(path: &Path) -> Option<String> {
     None
 }
 
-fn collect_logs_for(container_name: &str) -> Vec<String> {
+fn collect_logs_for(container_name: &str) -> (Vec<String>, bool) {
     let mut logs = vec![];
-    if let Ok(output) = Command::new("podman")
-        .args(["logs", "--tail", "100", container_name])
-        .output()
-    {
-        let text = String::from_utf8_lossy(&output.stdout);
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        for line in text.lines().chain(stderr.lines()) {
-            if !line.trim().is_empty() {
-                logs.push(line.to_string());
+    const LOG_TIMEOUT: Duration = Duration::from_secs(8);
+    match output_with_timeout(
+        Command::new("podman")
+            .args(["logs", "--tail", "100", container_name]),
+        LOG_TIMEOUT,
+    ) {
+        Ok(output) => {
+            let text = String::from_utf8_lossy(&output.stdout);
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            for line in text.lines().chain(stderr.lines()) {
+                if !line.trim().is_empty() {
+                    logs.push(line.to_string());
+                }
             }
+            (logs, false)
         }
+        Err(e) if e.kind() == io::ErrorKind::TimedOut => (
+            vec![format!("(podman logs timeout: {container_name})")],
+            true,
+        ),
+        Err(_) => (logs, false),
     }
-    logs
 }

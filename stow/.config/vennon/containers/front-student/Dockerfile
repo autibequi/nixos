@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1
 FROM node:20-alpine
 
-RUN apk add --no-cache git ca-certificates python3 make g++ \
+# bash — vennon exec/shell usa `podman exec … /bin/bash -c` (ver service.rs)
+RUN apk add --no-cache bash git ca-certificates python3 make g++ \
     autoconf automake libtool nasm pkgconfig
 
 WORKDIR /app

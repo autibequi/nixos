@@ -130,8 +130,9 @@ fn render_containers(frame: &mut Frame, app: &App, vis: &[&super::app::Container
 
 fn render_logs(frame: &mut Frame, app: &App, area: Rect) {
     let visible_height = area.height.saturating_sub(2) as usize;
-    let start = app.log_scroll;
-    let end = (start + visible_height).min(app.logs.len());
+    let len = app.logs.len();
+    let start = app.log_scroll.min(len);
+    let end = (start + visible_height).min(len);
 
     let lines: Vec<Line> = app.logs[start..end]
         .iter()
@@ -177,13 +178,23 @@ fn render_footer(frame: &mut Frame, app: &App, area: Rect) {
     let count = app.all_containers.iter().filter(|c| c.is_up).count();
     let total = app.all_containers.len();
 
-    let text = Line::from(vec![
-        Span::styled(
-            format!(" {count}/{total} up "),
-            Style::default().fg(GREEN).bold(),
-        ),
-        Span::styled(hint, Style::default().fg(DIM)),
-    ]);
+    let mut parts = vec![Span::styled(
+        format!(" {count}/{total} up "),
+        Style::default().fg(GREEN).bold(),
+    )];
+    if app.refresh_inflight {
+        parts.push(Span::styled(
+            "refreshing… ",
+            Style::default().fg(PEACH).bold(),
+        ));
+    } else if app.subprocess_degraded {
+        parts.push(Span::styled(
+            "stale (podman/vennon timeout) ",
+            Style::default().fg(PEACH).bold(),
+        ));
+    }
+    parts.push(Span::styled(hint, Style::default().fg(DIM)));
+    let text = Line::from(parts);
     frame.render_widget(Paragraph::new(text), area);
 }
 
