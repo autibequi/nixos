@@ -6,6 +6,7 @@
 
 {
   environment.systemPackages = with pkgs; [
+    fuse-overlayfs
 
     # ── Sistema ────────────────────────────────────────
     bashly
