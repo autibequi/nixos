@@ -21,7 +21,11 @@ services:
       GIT_COMMITTER_NAME: ${GIT_COMMITTER_NAME}
       GIT_COMMITTER_EMAIL: ${GIT_COMMITTER_EMAIL}
       ENGINE: CLAUDE
+      WAYLAND_DISPLAY: ${WAYLAND_DISPLAY:-wayland-1}
+      XDG_RUNTIME_DIR: /run/user/host
     volumes:
+      # Wayland socket — clipboard access
+      - /run/user/${VENNON_UID}:/run/user/host:ro
       # Target dir — the dir passed to yaa, mounted directly
       - ${YAA_TARGET_DIR}:/workspace/target:rw
       # Core workspace

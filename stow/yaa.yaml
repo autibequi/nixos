@@ -1,8 +1,0 @@
-# Segredos do yaa — manter chmod 600. Vazio = fallback automático (scripts/env).
-# Chaves usadas hoje: claude_web_session → CLAUDE_AI_SESSION_KEY; claude_org_id → CLAUDE_AI_ORG_ID.
-tokens:
-  claude_web_session: ""
-  # UUID (xxxxxxxx-xxxx-...) — copie de ~/.claude/.credentials.json → oauthAccount.organizationUuid
-  claude_org_id: ""
-  github: ""
-  jira: ""

@@ -106,6 +106,16 @@ commands:
       files: [docker-compose.yml, docker-compose.deps.yml]
       action: "down -v --rmi local"
 
+  start:
+    description: Restart monolito (stop + serve + logs)
+    args:
+      - name: env
+        enum: env
+    script: |
+      vennon monolito stop || true
+      vennon monolito serve --env {{ env }}
+      vennon monolito logs
+
   worker:
     description: Start worker process
     args:
