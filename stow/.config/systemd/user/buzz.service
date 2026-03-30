@@ -3,7 +3,7 @@ Description=buzz — host daemon with YAML permissions
 
 [Service]
 Type=simple
-ExecStart=%h/.local/bin/buzz --config %h/.config/vennon/buzz.yaml
+ExecStart=%h/.local/bin/buzz daemon
 Environment=HOME=%h
 Environment=PATH=%h/.local/bin:%h/.nix-profile/bin:/run/current-system/sw/bin:/usr/bin:/bin
 Environment=WAYLAND_DISPLAY=wayland-1
