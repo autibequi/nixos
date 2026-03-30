@@ -6,13 +6,6 @@ services:
     container_name: vennon-dk-monolito-worker-app
     command: ["./worker"]
     cpus: "14.4"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      monolito-redis:
-        condition: service_healthy
-      localstack:
-        condition: service_started
     env_file:
       - ${MONOLITO_DIR}/.env.${APP_ENV_FILE:-sandbox}
       - ./env/${APP_ENV:-sand}.env

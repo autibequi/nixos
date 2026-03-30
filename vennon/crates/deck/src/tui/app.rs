@@ -398,6 +398,11 @@ impl App {
         }
     }
 
+    pub fn enable_follow(&mut self) {
+        self.log_follow = true;
+        self.log_scroll = self.logs.len().saturating_sub(20);
+    }
+
     pub fn exec_action(&self, action: &str) -> Result<()> {
         if is_menu_separator(action) {
             return Ok(());

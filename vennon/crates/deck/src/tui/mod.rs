@@ -98,7 +98,11 @@ fn run_loop(
                         KeyCode::Enter => {
                             let action = app.selected_action();
                             if let Some(act) = action {
-                                if app.is_interactive_action(&act) {
+                                if act.trim_end_matches(" ✓") == "logs" {
+                                    // Show live logs in the deck's own log panel
+                                    app.close_menu();
+                                    app.enable_follow();
+                                } else if app.is_interactive_action(&act) {
                                     // Suspend TUI for interactive commands (shell)
                                     disable_raw_mode()?;
                                     execute!(

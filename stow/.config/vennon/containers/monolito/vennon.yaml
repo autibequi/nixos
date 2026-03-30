@@ -15,7 +15,22 @@ ports: [4004, 2345, 5432, 6379, 4566]
 
 commands:
   serve:
-    description: Start monolito + dependencies (always with dlv)
+    description: Start monolito + dependencies
+    args:
+      - name: env
+        enum: env
+    compose:
+      files:
+        - docker-compose.yml
+        - docker-compose.deps.yml
+      env_file: "env/{{ env | map }}.env"
+      env:
+        APP_ENV_FILE: "{{ env | map }}"
+        APP_ENV: "{{ env }}"
+      action: up -d --force-recreate
+
+  serve:debug:
+    description: Start monolito + dependencies with Delve debugger (port 2345)
     args:
       - name: env
         enum: env
@@ -92,14 +107,36 @@ commands:
       action: "down -v --rmi local"
 
   worker:
-    description: Start worker process (always with dlv)
+    description: Start worker process
     args:
       - name: env
         enum: env
     compose:
       files:
         - docker-compose.worker.yml
-        - docker-compose.deps.yml
+      env_file: "env/{{ env | map }}.env"
+      env:
+        APP_ENV_FILE: "{{ env | map }}"
+        APP_ENV: "{{ env }}"
+      action: up -d --force-recreate
+
+  worker-logs:
+    description: Follow worker logs
+    args:
+      - name: tail
+        type: int
+        default: 100
+    script: |
+      podman logs -f --tail {{ tail }} vennon-dk-monolito-worker-app
+
+  worker:debug:
+    description: Start worker process with Delve debugger (port 2346)
+    args:
+      - name: env
+        enum: env
+    compose:
+      files:
+        - docker-compose.worker.yml
         - docker-compose.debug.worker.yml
       env_file: "env/{{ env | map }}.env"
       env:
