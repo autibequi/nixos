@@ -140,6 +140,12 @@ pick_first_nonzero() {
   echo "0"
 }
 
+# Duas fontes (seven_day vs weekly_limits no JSON web) podem divergir; o primeiro não-zero
+# nem sempre é o do dashboard — usar o maior após pct_raw alinha melhor com Settings > Uso.
+max_pct() {
+  awk -v a="${1:-0}" -v b="${2:-0}" 'BEGIN { a+=0; b+=0; print (a >= b) ? a : b }'
+}
+
 # --- OAuth-shaped ---
 fh=$(norm_line "${JQ_PCT} (.five_hour.utilization // .fiveHour.utilization // 0) | pct_raw")
 sd=$(norm_line "${JQ_PCT} (.seven_day.utilization // .sevenDay.utilization // 0) | pct_raw")
@@ -169,8 +175,8 @@ week_sn=$(norm_line "${JQ_PCT}
   | (.percentage_used // .percentageUsed // .utilization // 0) | pct_raw")
 
 sess_pct=$(pick_first_nonzero "$sess" "$fh")
-semana_pct=$(pick_first_nonzero "$week_all" "$sd")
-sonnet_pct=$(pick_first_nonzero "$week_sn" "$sn_o")
+semana_pct=$(max_pct "$sd" "$week_all")
+sonnet_pct=$(max_pct "$sn_o" "$week_sn")
 
 round() {
   printf '%.0f' "${1:-0}" 2>/dev/null || echo 0
