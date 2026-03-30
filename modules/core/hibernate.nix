@@ -11,11 +11,9 @@
   };
 
   systemd.sleep.extraConfig = ''
-    AllowSuspend=yes
-    AllowHibernation=yes
-    AllowSuspendThenHibernate=yes
-    SuspendState=freeze
-    HibernateDelaySec=30m
+    AllowSuspend=no
+    AllowHibernation=no
+    AllowSuspendThenHibernate=no
   '';
 
   boot.kernelParams = [

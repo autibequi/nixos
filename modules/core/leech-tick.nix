@@ -13,7 +13,8 @@ let
 in {
   systemd.services.vennon-tick = {
     description = "vennon tick — agents + tasks a cada 10min";
-    after = [ "network.target" ];
+    after = [ "network.target" "sleep.target" ];
+    wants = [ "network-online.target" ];
     serviceConfig = {
       Type = "oneshot";
       User = user;
@@ -32,6 +33,7 @@ in {
       OnBootSec = "5min";
       OnUnitActiveSec = "10min";
       Unit = "vennon-tick.service";
+      Persistent = true;  # dispara tick perdido ao voltar do suspend/lock
     };
   };
 }
