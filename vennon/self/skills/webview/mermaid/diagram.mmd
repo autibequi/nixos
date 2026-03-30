@@ -1,24 +1,24 @@
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#313244', 'primaryTextColor': '#cdd6f4', 'primaryBorderColor': '#585b70', 'lineColor': '#6c7086', 'secondaryColor': '#1e1e2e', 'tertiaryColor': '#181825', 'background': '#1e1e2e', 'mainBkg': '#313244', 'nodeBorder': '#585b70', 'clusterBkg': '#181825', 'clusterBorder': '#45475a', 'titleColor': '#cdd6f4', 'edgeLabelBackground': '#1e1e2e', 'fontFamily': 'JetBrains Mono, monospace'}}}%%
 
-flowchart LR
+flowchart TD
 
     %% ══════════════════════════════════════════════
     %%  FRONTEND
     %% ══════════════════════════════════════════════
     subgraph FRONT["🖥️  FRONTEND — bo-container"]
-        direction TB
+        direction LR
 
         subgraph BO_PAGES["📂 pages/ldi/"]
             direction TB
             VC["📄 ViewCourse\nadd_item / move_chapter"]
-            VT["📄 ViewToc\nmove / rename chapter\n+ originalChapterName tracking"]
+            VT["📄 ViewToc\nmove / rename chapter\n+ originalChapterName"]
             PI["📄 PreviewItem\npublish / save item"]
         end
 
         subgraph BO_COMP["🧩 components/PreviewItem/"]
             direction TB
             IE["✏️ ItemEditor\nfix: error.response.data?.jobs"]
-            MTR["🪟 ModalTocRebuilding\nprops: isOpen, jobs: Job[]\n@finished → re-executa operação\n@close → limpa estado"]
+            MTR["🪟 ModalTocRebuilding\nprops: isOpen, jobs: Job[]\n@finished → re-executa\n@close → limpa estado"]
         end
 
         PI -->|"renderiza"| IE
@@ -26,10 +26,10 @@ flowchart LR
     end
 
     %% ══════════════════════════════════════════════
-    %%  BACKEND — monolito
+    %%  BACKEND
     %% ══════════════════════════════════════════════
     subgraph BACK["⚙️  BACKEND — monolito"]
-        direction TB
+        direction LR
 
         subgraph MONO_H["🌐 HTTP Handlers"]
             direction TB
@@ -42,18 +42,17 @@ flowchart LR
             direction TB
             CTRC["🔍 CheckTocRebuildConflict\nin: TocRebuildOpts\nout: nil | ErrTocRebuildRunning{Jobs}"]
             RII["🔎 resolveItemIDs\n• ItemID → direto\n• CourseIDs → GetItemIDsByCourseIDs\n• ChapterID → GetAllFromChapters\nout: []itemID"]
-            TTR["🚀 TriggerTocRebuild\nin: TocRebuildOpts\nout: void (async)"]
-            DTTR["⚙️ doTriggerTocRebuild (goroutine)\n① resolveItemIDs → []itemID\n② GetCourseIDsByItemIDs → []courseID\n③ JobTracking.Create\n④ SQS.Send × courseID"]
+            TTR["🚀 TriggerTocRebuild\nin: TocRebuildOpts → goroutine\nout: void (async)"]
+            DTTR["⚙️ doTriggerTocRebuild\n① resolveItemIDs → []itemID\n② GetCourseIDsByItemIDs → []courseID\n③ JobTracking.Create\n④ SQS.Send × courseID"]
             CTRC --> RII
             TTR -->|"go"| DTTR
-            DTTR --> RII
         end
 
         subgraph MONO_REPO["🗄️  repositories/course/"]
             direction TB
-            GCI["🆕 GetCourseIDsByItemIDs\nJOIN: chapter_items\n  → chapters\n  → course_chapters\n  → courses (ldi_type)\nout: []courseID DISTINCT"]
-            GIIC["📋 GetItemIDsByCourseIDs\nin: []courseID → out: []itemID"]
-            GCFC["🔗 GetCoursesFromChapterItem\nin: itemID → out: []Course"]
+            GCI["🆕 GetCourseIDsByItemIDs\nJOIN: chapter_items\n  → chapters → course_chapters\n  → courses (ldi_type)\nout: []courseID DISTINCT"]
+            GIIC["📋 GetItemIDsByCourseIDs\nin: []courseID\nout: []itemID"]
+            GCFC["🔗 GetCoursesFromChapterItem\nin: itemID\nout: []Course"]
         end
 
         subgraph JT["📊 JobTracking"]
@@ -62,42 +61,38 @@ flowchart LR
             JT_S["🔍 JobTracking.Search\nstatus: running\nrelatedIDs: []itemID\nout: []Job"]
         end
 
-        %% ligações internas BACK
+        %% handlers → services
         H1 & H2 & H3 -->|"① verifica conflito"| CTRC
-        CTRC -->|"409 + Jobs[]"| H1 & H2 & H3
         H1 & H2 & H3 -->|"② dispara rebuild"| TTR
 
+        %% services → repos
         RII -->|"via CourseIDs"| GIIC
         RII -->|"via ItemID"| GCFC
-        GIIC & GCFC -->|"[]itemID"| RII
-
         DTTR -->|"[]itemID"| GCI
-        GCI -->|"[]courseID"| DTTR
 
+        %% services → jobt
         CTRC -->|"busca ativos"| JT_S
-        JT_S -->|"[]Job"| CTRC
         DTTR -->|"cria job"| JT_C
-        JT_C -->|"job.ID"| DTTR
     end
 
     %% ══════════════════════════════════════════════
-    %%  ASYNC — SQS + worker
+    %%  ASYNC
     %% ══════════════════════════════════════════════
     subgraph ASYNC["📬  ASYNC — SQS + worker-monolito"]
-        direction TB
+        direction LR
 
         subgraph SQS_BOX["📬 SQS — LDI.BuildCourseToc"]
             direction TB
-            SQS_S["📤 SQS.Sender\n.ForNamedHandler(BuildCourseTocHandlerName)\n.WithVertical(vertical)\npayload: { course_id, job_id }"]
+            SQS_S["📤 SQS.Sender\npayload: { course_id, job_id }"]
             SQS_R["📥 Consumer\nLDI.BuildCourseTocHandlerName"]
-            SQS_S -->|"enfileira mensagem"| SQS_R
+            SQS_S -->|"enfileira"| SQS_R
         end
 
-        subgraph WORKER["👷  worker-monolito — handlers/course/worker.go"]
+        subgraph WORKER["👷  worker — handlers/course/worker.go"]
             direction TB
-            WH["⚡ HandleBuildCourseToc\nin: ctx, sqs.Message\n→ unmarshal BuildCourseTocMessage\n→ CourseService.BuildAndSaveContentTree\nout: error"]
-            BAST["🌳 BuildAndSaveContentTree\nin: ctx, courseID\n→ reconstrói TOC completo\n→ persiste cache/DB\nout: contentTree, error"]
-            WH_DLQ["💀 HandleBuildCourseTocDLQ\n→ registra falha no JobTracking\nout: nil"]
+            WH["⚡ HandleBuildCourseToc\nin: ctx, sqs.Message\n→ BuildAndSaveContentTree\nout: error"]
+            BAST["🌳 BuildAndSaveContentTree\nin: ctx, courseID\n→ reconstrói TOC completo\nout: contentTree, error"]
+            WH_DLQ["💀 HandleBuildCourseTocDLQ\n→ registra falha\nout: nil"]
             WH -->|"courseID"| BAST
         end
 
@@ -108,20 +103,16 @@ flowchart LR
     %% ══════════════════════════════════════════════
     %%  CONEXÕES ENTRE MEGA BLOCOS
     %% ══════════════════════════════════════════════
-    VC -->|"HTTP req"| H1 & H2
-    VT -->|"HTTP req"| H2
-    PI & IE -->|"HTTP req"| H3
-
+    FRONT -->|"HTTP req"| MONO_H
+    CTRC -->|"409 + Jobs[]"| MTR
     DTTR -->|"1 msg / courseID"| SQS_S
-
-    %% subgraph backgrounds
-    style FRONT fill:#0d1f3a,stroke:#89b4fa,stroke-width:2px,color:#cdd6f4
-    style BACK  fill:#0a2010,stroke:#a6e3a1,stroke-width:3px,color:#cdd6f4
-    style ASYNC fill:#1a0d2e,stroke:#cba6f7,stroke-width:2px,color:#cdd6f4
 
     %% ══════════════════════════════════════════════
     %%  ESTILOS
     %% ══════════════════════════════════════════════
+    style FRONT    fill:#0d1f3a,stroke:#89b4fa,stroke-width:2px,color:#cdd6f4
+    style BACK     fill:#0a2010,stroke:#a6e3a1,stroke-width:3px,color:#cdd6f4
+    style ASYNC    fill:#1a0d2e,stroke:#cba6f7,stroke-width:2px,color:#cdd6f4
     classDef boPage   fill:#1e3a5f,stroke:#89b4fa,color:#cdd6f4
     classDef boComp   fill:#2a1f4e,stroke:#cba6f7,color:#cdd6f4
     classDef handler  fill:#0d4a2a,stroke:#a6e3a1,color:#cdd6f4

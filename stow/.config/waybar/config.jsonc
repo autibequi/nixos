@@ -6,7 +6,7 @@
   "margin": 0,
   "modules-left": [
     "idle_inhibitor",
-    "custom/vennon",
+    // "custom/vennon",
     "hyprland/workspaces"
     // "hyprland/window"
   ],
@@ -289,7 +289,7 @@
     "on-click": "alacritty -e bash -c 'claude-statusbar --plan max20; read'"
   },
   "custom/claude-usage": {
-    "exec": "yaa usage claude --waybar 2>/dev/null || echo \"{\\\"text\\\":\\\" 󱙺 --\\\",\\\"tooltip\\\":\\\"Claude: erro ao rodar script\\\",\\\"class\\\":\\\"\\\"}\"",
+    "exec": "yaa usage claude --waybar 2>/dev/null || echo \"{\\\"text\\\":\\\" 󱙺 --\\\",\\\"tooltip\\\":\\\"Claude: erro ao rodar yaa\\\",\\\"class\\\":\\\"warning\\\"}\"",
     "return-type": "json",
     "interval": 120,
     "signal": 8,
@@ -297,7 +297,8 @@
     "on-click-right": "yaa usage claude --refresh; pkill -RTMIN+8 waybar",
     "format": "{}",
     "tooltip": true,
-    "escape": false
+    "escape": false,
+    "markup": "pango"
   },
   "custom/obsidian-sync": {
     "exec": "$HOME/.config/waybar/obsidian-sync-status.sh",

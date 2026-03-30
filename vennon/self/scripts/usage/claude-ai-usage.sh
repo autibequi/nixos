@@ -1,50 +1,80 @@
 #!/usr/bin/env bash
-# claude-ai-usage.sh — Uso do plano via API web do claude.ai (mesma fonte da tela Settings > Uso).
-# Requer: sessionKey do cookie (login no claude.ai no browser).
-# Ordem de leitura: CLAUDE_AI_SESSION_KEY (env) → ~/.claude/claude-ai-session → ~/.config/claude-ai-session
-# Arquivo: uma linha com o valor do cookie sessionKey — chmod 600.
-# Org ID: CLAUDE_AI_ORG_ID (opcional); senão lido de ~/.claude/.credentials.json ou ~/.claude.json (oauthAccount.organizationUuid).
-# Saída: uma linha para Waybar (sessão % | semana %) ou JSON se --json.
+# claude-ai-usage.sh — Uso via API web claude.ai (Settings > Uso).
+# Modos: (vazio) linha texto | --waybar JSON | --statusline | --json | --debug
 set -euo pipefail
 
+export PATH="/run/current-system/sw/bin:${HOME}/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/usr/bin:/bin:${PATH:-}"
+
+JQ=""
+for _b in jq jaq; do
+  if command -v "$_b" &>/dev/null; then JQ="$_b"; break; fi
+done
+if [[ -z "$JQ" ]]; then
+  for _p in /run/current-system/sw/bin/jq /run/current-system/sw/bin/jaq \
+            "$HOME/.nix-profile/bin/jq" "$HOME/.nix-profile/bin/jaq"; do
+    [[ -x "$_p" ]] && JQ="$_p" && break
+  done
+fi
+
+CURL=""
+for _b in curl xh wget; do
+  if command -v "$_b" &>/dev/null; then CURL="$_b"; break; fi
+done
+
+MODE="${1:-}"
 SESSION_KEY="${CLAUDE_AI_SESSION_KEY:-}"
 CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}"
 
-# Org ID: env → ~/.claude/.credentials.json → ~/.claude.json (oauthAccount.organizationUuid)
 ORG_ID="${CLAUDE_AI_ORG_ID:-}"
-if [[ -z "$ORG_ID" ]] && command -v jq &>/dev/null; then
+if [[ -z "$ORG_ID" ]] && [[ -n "$JQ" ]]; then
   if [[ -f "${CLAUDE_DIR}/.credentials.json" ]]; then
-    ORG_ID=$(jq -r '.organizationUuid // .organization_id // .oauthAccount.organizationUuid // empty' "${CLAUDE_DIR}/.credentials.json" 2>/dev/null)
+    ORG_ID=$($JQ -r '.organizationUuid // .organization_id // .oauthAccount.organizationUuid // empty' "${CLAUDE_DIR}/.credentials.json" 2>/dev/null)
   fi
   if [[ -z "$ORG_ID" || "$ORG_ID" == "null" ]] && [[ -f "${HOME}/.claude.json" ]]; then
-    ORG_ID=$(jq -r '.oauthAccount.organizationUuid // empty' "${HOME}/.claude.json" 2>/dev/null)
+    ORG_ID=$($JQ -r '.oauthAccount.organizationUuid // empty' "${HOME}/.claude.json" 2>/dev/null)
   fi
 fi
 ORG_ID="${ORG_ID:-995ebddd-ab0c-4ef8-aaf1-ad1fee25f624}"
 
-# 1) env 2) ~/.claude/claude-ai-session 3) ~/.claude/.credentials.json (ou credentials.json) 4) ~/.config/...
 if [[ -z "$SESSION_KEY" && -f "${CLAUDE_DIR}/claude-ai-session" ]]; then
   SESSION_KEY=$(head -1 "${CLAUDE_DIR}/claude-ai-session")
 fi
-if [[ -z "$SESSION_KEY" && -f "${CLAUDE_DIR}/.credentials.json" ]] && command -v jq &>/dev/null; then
-  SESSION_KEY=$(jq -r '.sessionKey // .session_key // .cookie_session // .session // empty' "${CLAUDE_DIR}/.credentials.json" 2>/dev/null)
-  # OAuth: claudeAiOauth.accessToken (Claude Code Team/Max credential)
+if [[ -z "$SESSION_KEY" && -f "${CLAUDE_DIR}/.credentials.json" ]] && [[ -n "$JQ" ]]; then
+  SESSION_KEY=$($JQ -r '.sessionKey // .session_key // .cookie_session // .session // empty' "${CLAUDE_DIR}/.credentials.json" 2>/dev/null)
   if [[ -z "$SESSION_KEY" || "$SESSION_KEY" == "null" ]]; then
-    ACCESS_TOKEN=$(jq -r '.claudeAiOauth.accessToken // empty' "${CLAUDE_DIR}/.credentials.json" 2>/dev/null)
+    ACCESS_TOKEN=$($JQ -r '.claudeAiOauth.accessToken // empty' "${CLAUDE_DIR}/.credentials.json" 2>/dev/null)
   fi
 fi
-if [[ -z "$SESSION_KEY" && -z "${ACCESS_TOKEN:-}" && -f "${CLAUDE_DIR}/credentials.json" ]] && command -v jq &>/dev/null; then
-  SESSION_KEY=$(jq -r '.sessionKey // .session_key // .cookie_session // .session // empty' "${CLAUDE_DIR}/credentials.json" 2>/dev/null)
+if [[ -z "$SESSION_KEY" && -z "${ACCESS_TOKEN:-}" && -f "${CLAUDE_DIR}/credentials.json" ]] && [[ -n "$JQ" ]]; then
+  SESSION_KEY=$($JQ -r '.sessionKey // .session_key // .cookie_session // .session // empty' "${CLAUDE_DIR}/credentials.json" 2>/dev/null)
   if [[ -z "$SESSION_KEY" || "$SESSION_KEY" == "null" ]]; then
-    ACCESS_TOKEN=$(jq -r '.claudeAiOauth.accessToken // empty' "${CLAUDE_DIR}/credentials.json" 2>/dev/null)
+    ACCESS_TOKEN=$($JQ -r '.claudeAiOauth.accessToken // empty' "${CLAUDE_DIR}/credentials.json" 2>/dev/null)
   fi
 fi
 if [[ -z "$SESSION_KEY" && -f "${HOME}/.config/claude-ai-session" ]]; then
   SESSION_KEY=$(head -1 "${HOME}/.config/claude-ai-session")
 fi
-[[ -z "$SESSION_KEY" && -z "${ACCESS_TOKEN:-}" ]] && { echo "󱙺 --"; echo "session em CLAUDE_AI_SESSION_KEY ou ${CLAUDE_DIR}/claude-ai-session ou .credentials.json (OAuth)" >&2; exit 0; }
 
-# Build auth headers based on credential type
+_fail_out() {
+  local tip="$1"
+  if [[ "$MODE" == "--waybar" ]]; then
+    $JQ -cn --arg t "$tip" '{text: "󱙺 --", tooltip: $t, class: "warning"}'
+  else
+    echo "󱙺 --"
+    echo "$tip" >&2
+  fi
+}
+
+[[ -z "$SESSION_KEY" && -z "${ACCESS_TOKEN:-}" ]] && {
+  _fail_out "sem session — defina CLAUDE_AI_SESSION_KEY ou ${CLAUDE_DIR}/claude-ai-session"
+  exit 0
+}
+
+[[ -z "$JQ" || -z "$CURL" ]] && {
+  _fail_out "jq ou curl não encontrado"
+  exit 0
+}
+
 AUTH_ARGS=()
 if [[ -n "${ACCESS_TOKEN:-}" ]]; then
   AUTH_ARGS=(-H "Authorization: Bearer ${ACCESS_TOKEN}")
@@ -52,50 +82,165 @@ else
   AUTH_ARGS=(--cookie "sessionKey=${SESSION_KEY}")
 fi
 
-JSON=$(curl -sS --max-time 10 \
-  "https://claude.ai/api/organizations/${ORG_ID}/usage" \
+URL="https://claude.ai/api/organizations/${ORG_ID}/usage"
+RESP=$($CURL -sS --max-time 15 "$URL" \
   -H "Accept: application/json" \
   -H "anthropic-client-platform: web_claude_ai" \
   -H "Content-Type: application/json" \
   "${AUTH_ARGS[@]}" \
-  -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36") || { echo "󱙺 --"; exit 0; }
+  -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
+  -w "\n%{http_code}" 2>/dev/null) || { _fail_out "curl falhou"; exit 0; }
 
-if [[ "${1:-}" == "--json" ]]; then
+HTTP_CODE=$(echo "$RESP" | tail -n1)
+JSON=$(echo "$RESP" | sed '$d')
+
+if [[ "$HTTP_CODE" != "200" ]]; then
+  _fail_out "HTTP ${HTTP_CODE} — org UUID errada ou sessão expirada (não use lastOrg como texto; use oauthAccount.organizationUuid)"
+  [[ "$MODE" != "--waybar" ]] && echo "body: ${JSON:0:300}" >&2
+  exit 0
+fi
+
+if ! echo "$JSON" | $JQ -e . >/dev/null 2>&1; then
+  _fail_out "resposta não é JSON (login/captcha?)"
+  exit 0
+fi
+
+if [[ "$MODE" == "--json" ]]; then
   echo "$JSON"
   exit 0
 fi
 
-# Debug: ver JSON bruto
-if [[ "${1:-}" == "--debug" ]]; then
-  echo "$JSON" | jq . 2>/dev/null || echo "$JSON"
+if [[ "$MODE" == "--debug" ]]; then
+  echo "$JSON" | $JQ . 2>/dev/null || echo "$JSON"
+  echo "--- http=$HTTP_CODE org=$ORG_ID ---" >&2
   exit 0
 fi
 
-# Extrair % usado — API web claude.ai (estrutura pode variar)
-sess_pct=$(echo "$JSON" | jq -r '
-  .current_session.percentage_used // .currentSession.percentageUsed // .usage.current_session.percentage_used // .session_usage.percentage_used // 0
-' 2>/dev/null)
-semana_pct=$(echo "$JSON" | jq -r '
-  [.weekly_limits[]? // .weeklyLimits[]? // .usage.weekly_limits[]? // .limits[]? // empty]
-  | (.[] | select(.name == "all_models" or .name == "allModels" or .identifier == "all_models" or .type == "all")) as $all
-  | if $all then ($all.percentage_used // $all.percentageUsed // 0) else 0 end
-' 2>/dev/null)
-sonnet_pct=$(echo "$JSON" | jq -r '
-  [.weekly_limits[]? // .weeklyLimits[]? // .usage.weekly_limits[]? // .limits[]? // empty]
-  | (.[] | select(.name == "sonnet" or .identifier == "sonnet" or .type == "sonnet")) as $s
-  | if $s then ($s.percentage_used // $s.percentageUsed // 0) else 0 end
-' 2>/dev/null)
+# pct: 0–1 → %; 1–100 → já é %; nunca >100 na saída
+norm_line() {
+  echo "$JSON" | $JQ -r "$1" 2>/dev/null | head -1
+}
 
-# Fallback: qualquer limite semanal (primeiro numérico)
-if [[ -z "$semana_pct" || "$semana_pct" == "null" ]]; then
-  semana_pct=$(echo "$JSON" | jq -r '
-    (.weekly_limits[0] // .weeklyLimits[0] // .limits[0] // {}).percentage_used // .percentageUsed // 0
-  ' 2>/dev/null)
+# Só normaliza fração 0–1 → %; resto passa cru para o awk corrigir escala / limitar a 100
+JQ_PCT='def pct_raw:
+  if . == null or (type != "number") then 0
+  elif . < 0 then 0
+  elif . <= 1 then . * 100
+  else .
+  end;'
+
+pick_first_nonzero() {
+  local v
+  for v in "$@"; do
+    if [[ -n "$v" && "$v" != "null" && "$v" != "0" ]]; then
+      echo "$v"
+      return
+    fi
+  done
+  echo "0"
+}
+
+# --- OAuth-shaped ---
+fh=$(norm_line "${JQ_PCT} (.five_hour.utilization // .fiveHour.utilization // 0) | pct_raw")
+sd=$(norm_line "${JQ_PCT} (.seven_day.utilization // .sevenDay.utilization // 0) | pct_raw")
+sn_o=$(norm_line "${JQ_PCT} (.seven_day_sonnet.utilization // .sevenDaySonnet.utilization // 0) | pct_raw")
+
+# --- Web-shaped ---
+sess=$(norm_line "${JQ_PCT}
+  ( (.usage // .data // {}) as \$u | \$u.current_session.percentage_used // \$u.currentSession.percentageUsed // \$u.session.percentage_used // empty )
+  // .current_session.percentage_used // .currentSession.percentageUsed // .session.percentage_used // 0 | pct_raw")
+
+week_all=$(norm_line "${JQ_PCT}
+  def lim: . as \$r | (\$r.usage // \$r.data // {}) as \$u
+    | [ (\$u.weekly_limits // [])[] , (\$u.weeklyLimits // [])[] , (\$r.weekly_limits // [])[] , (\$r.weeklyLimits // [])[] ]
+    | map(select(type == \"object\"));
+  lim
+  | map(select(.name == \"all_models\" or .name == \"allModels\" or .identifier == \"all_models\" or .type == \"all\"))
+  | first // {}
+  | (.percentage_used // .percentageUsed // .utilization // 0) | pct_raw")
+
+week_sn=$(norm_line "${JQ_PCT}
+  def lim: . as \$r | (\$r.usage // \$r.data // {}) as \$u
+    | [ (\$u.weekly_limits // [])[] , (\$u.weeklyLimits // [])[] , (\$r.weekly_limits // [])[] , (\$r.weeklyLimits // [])[] ]
+    | map(select(type == \"object\"));
+  lim
+  | map(select(.name == \"sonnet\" or .identifier == \"sonnet\" or .type == \"sonnet\"))
+  | first // {}
+  | (.percentage_used // .percentageUsed // .utilization // 0) | pct_raw")
+
+sess_pct=$(pick_first_nonzero "$sess" "$fh")
+semana_pct=$(pick_first_nonzero "$week_all" "$sd")
+sonnet_pct=$(pick_first_nonzero "$week_sn" "$sn_o")
+
+round() {
+  printf '%.0f' "${1:-0}" 2>/dev/null || echo 0
+}
+
+sess_pct=$(round "$sess_pct")
+semana_pct=$(round "$semana_pct")
+sonnet_pct=$(round "$sonnet_pct")
+
+# API costuma mandar inteiros ×10 (320 → 32%) ou ×100 (3200 → 32%). Só escala se os três > 100.
+awk_fix_scale() {
+  awk -v s="$sess_pct" -v w="$semana_pct" -v n="$sonnet_pct" 'function ok(x) { return (x >= 0 && x <= 100) }
+  BEGIN {
+    s+=0; w+=0; n+=0
+    if (s > 100 && w > 100 && n > 100) {
+      s10 = s/10; w10 = w/10; n10 = n/10
+      s100 = s/100; w100 = w/100; n100 = n/100
+      if (ok(s10) && ok(w10) && ok(n10)) { s = s10; w = w10; n = n10 }
+      else if (ok(s100) && ok(w100) && ok(n100)) { s = s100; w = w100; n = n100 }
+    }
+    if (s > 100) s = 100
+    if (w > 100) w = 100
+    if (n > 100) n = 100
+    if (s < 0) s = 0
+    if (w < 0) w = 0
+    if (n < 0) n = 0
+    printf "%.0f %.0f %.0f", s, w, n
+  }'
+}
+read -r sess_pct semana_pct sonnet_pct <<< "$(awk_fix_scale)"
+
+_line() {
+  printf '󱙺 Sessão %s%% | Semana %s%% | Sonnet %s%%' "$sess_pct" "$semana_pct" "$sonnet_pct"
+}
+
+# Mesmo desenho que claude-oauth-usage.sh --waybar (barrinhas Pango no Waybar)
+_color() {
+  local pct="${1:-0}"
+  pct=$((10#$pct)) 2>/dev/null || pct=0
+  (( pct >= 80 )) && echo "#e74c3c" && return
+  (( pct >= 60 )) && echo "#f39c12" && return
+  echo "#2ecc71"
+}
+
+_gauge() {
+  local pct="${1:-0}" color num w=4 filled seg i
+  pct=$((10#$pct)) 2>/dev/null || pct=0
+  (( pct > 100 )) && pct=100
+  color=$(_color "$pct")
+  (( pct >= 100 )) && num="!!" || num=$(printf '%02d' "$pct")
+  filled=$(( pct * w / 100 ))
+  (( filled > w )) && filled=$w
+  seg=""
+  for (( i=0; i<w; i++ )); do (( i < filled )) && seg+="▓" || seg+="░"; done
+  printf '<span background="%s" color="#111111">%s</span><span color="%s">%s</span>' \
+    "$color" "$num" "$color" "$seg"
+}
+
+if [[ "$MODE" == "--waybar" ]]; then
+  text="$(_gauge "$sess_pct") $(_gauge "$semana_pct") $(_gauge "$sonnet_pct")"
+  tip=$(printf "Sessão %s%% — janela atual\nSemana %s%% — limite semanal\nSonnet %s%% — faixa Sonnet\norg %s" \
+    "$sess_pct" "$semana_pct" "$sonnet_pct" "$ORG_ID")
+  $JQ -cn --arg text "$text" --arg tooltip "$tip" --arg class '' \
+    '{text: $text, tooltip: $tooltip, class: $class}'
+  exit 0
 fi
 
-[[ -z "$sess_pct" || "$sess_pct" == "null" ]] && sess_pct=0
-[[ -z "$semana_pct" || "$semana_pct" == "null" ]] && semana_pct=0
-[[ -z "$sonnet_pct" || "$sonnet_pct" == "null" ]] && sonnet_pct=0
+if [[ "$MODE" == "--statusline" ]]; then
+  printf '%s\n' "$(_line)"
+  exit 0
+fi
 
-# Uma linha para Waybar
-printf '󱙺 Sessão %s%% | Semana %s%% | Sonnet %s%%\n' "$sess_pct" "$semana_pct" "$sonnet_pct"
+echo "$(_line)"

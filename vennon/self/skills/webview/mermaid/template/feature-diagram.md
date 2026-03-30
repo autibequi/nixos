@@ -1,6 +1,6 @@
 ---
 name: webview/mermaid/template/feature-diagram
-description: Diagrama de funcionalidade completo — mega blocos FRONTEND / BACKEND / ASYNC com sub-camadas aninhadas verticalmente, nós individuais por método/arquivo, emojis por tipo, cores Catppuccin por camada. Usar quando: diff de branch vs main, PR review, mapeamento de feature cross-repo.
+description: Diagrama de funcionalidade completo — 3 mega blocos TD (FRONTEND / BACKEND / ASYNC), BACKEND interno LR com sub-caixas TB por camada (Handlers | Services | Repos | JobTracking), nós individuais por método/arquivo, emojis por tipo, cores Catppuccin. Usar quando: diff de branch, PR review, mapeamento de feature cross-repo.
 ---
 
 # Template — Feature Diagram (mega blocos)
@@ -20,50 +20,36 @@ Gerar **exatamente** este padrão. Adaptar nós/labels ao conteúdo real, manter
 ## Estrutura obrigatória
 
 ```
-flowchart LR
-  FRONTEND (bo-container / front-student)
-    └── pages/
+flowchart TD                          ← mega blocos empilham TD
+
+  FRONTEND (direction LR)             ← pages e components lado a lado
+    └── pages/ (direction TB)
         └── nó por arquivo .vue
-    └── components/
+    └── components/ (direction TB)
         └── nó por componente relevante
         └── nó por modal de estado
 
-  BACKEND (monolito)
-    └── HTTP Handlers
-        └── nó por endpoint (método + rota + in/out)
-    └── services/
-        └── nó por função pública (assinatura resumida)
-    └── repositories/
-        └── nó por query/método (com JOIN se relevante)
-    └── JobTracking (se existir)
+  BACKEND (direction LR)              ← camadas lado a lado horizontalmente
+    └── HTTP Handlers (direction TB)  ← nós empilham dentro da caixa
+    └── services/ (direction TB)
+    └── repositories/ (direction TB)
+    └── JobTracking (direction TB)    ← se existir
 
-  ASYNC (worker + fila)
-    └── SQS / fila
-        └── nó producer + nó consumer
-    └── worker
-        └── nó por handler + DLQ
-        └── nó do método principal executado
+  ASYNC (direction LR)                ← fila e worker lado a lado
+    └── SQS/fila (direction TB)
+    └── worker (direction TB)
 ```
 
-**Direção:** `flowchart LR` no topo (mega blocos lado a lado).
-**Interno:** `direction TB` em todos os subgraphs (aninhamento vertical).
+**Regra crítica de layout:**
+- `flowchart TD` no topo — mega blocos um abaixo do outro
+- Mega blocos FRONT e ASYNC: `direction LR` (sub-caixas lado a lado)
+- Mega bloco BACK: `direction LR` — as 4 camadas ficam lado a lado horizontalmente
+- Dentro de cada camada: `direction TB` — nós empilham verticalmente
+- **Nunca** conectar subgraph→subgraph (`MONO_H --> MONO_SVC`) — isso quebra o layout. Só conexões nó→nó.
 
 ---
 
 ## Regras de estilo
-
-### Cores por camada (Catppuccin-inspired)
-
-| Camada | classDef | fill | stroke |
-|--------|----------|------|--------|
-| page Vue | `boPage` | `#1e3a5f` | `#89b4fa` (azul) |
-| component Vue | `boComp` | `#2a1f4e` | `#cba6f7` (lilás) |
-| HTTP handler | `handler` | `#0d4a2a` | `#a6e3a1` (verde) |
-| service Go | `service` | `#3d3200` | `#f9e2af` (amarelo) |
-| repository Go | `repo` | `#3d1a00` | `#fab387` (laranja) |
-| JobTracking | `jt` | `#003a4d` | `#74c7ec` (ciano) |
-| SQS | `sqs` | `#251a35` | `#cba6f7` (lilás) |
-| worker | `worker` | `#3a1a1a` | `#f38ba8` (vermelho) |
 
 ### Cores dos mega blocos (via `style`)
 
@@ -73,41 +59,56 @@ style BACK  fill:#0a2010,stroke:#a6e3a1,stroke-width:3px,color:#cdd6f4
 style ASYNC fill:#1a0d2e,stroke:#cba6f7,stroke-width:2px,color:#cdd6f4
 ```
 
+### Cores por camada (classDef)
+
+| Camada | classDef | fill | stroke |
+|--------|----------|------|--------|
+| page Vue | `boPage` | `#1e3a5f` | `#89b4fa` azul |
+| component/modal Vue | `boComp` | `#2a1f4e` | `#cba6f7` lilás |
+| HTTP handler | `handler` | `#0d4a2a` | `#a6e3a1` verde |
+| service Go | `service` | `#3d3200` | `#f9e2af` amarelo |
+| repository Go | `repo` | `#3d1a00` | `#fab387` laranja |
+| JobTracking | `jt` | `#003a4d` | `#74c7ec` ciano |
+| SQS/fila | `sqs` | `#251a35` | `#cba6f7` lilás |
+| worker | `worker` | `#3a1a1a` | `#f38ba8` vermelho |
+
 ### Emojis por tipo de nó
 
 | Tipo | Emoji |
 |------|-------|
 | Página Vue | 📄 |
 | Componente Vue | 🧩 |
-| Modal | 🪟 |
-| HTTP Handler (POST) | ➕ |
-| HTTP Handler (PUT/PATCH) | 🔀 |
-| HTTP Handler (publish) | 📢 |
-| Service (check/validate) | 🔍 |
-| Service (trigger/dispatch) | 🚀 |
-| Service (goroutine) | ⚙️ |
-| Service (resolver interno) | 🔎 |
-| Service (build/compute) | 🌳 |
-| Repository (novo) | 🆕 |
-| Repository (list/get) | 📋 |
-| Repository (join/relation) | 🔗 |
-| JobTracking.Create | ➕ |
-| JobTracking.Search | 🔍 |
+| Modal de estado | 🪟 |
+| HTTP Handler POST | ➕ |
+| HTTP Handler PUT/PATCH | 🔀 |
+| HTTP Handler publish | 📢 |
+| Service check/validate | 🔍 |
+| Service trigger/dispatch | 🚀 |
+| Service goroutine | ⚙️ |
+| Service resolver interno | 🔎 |
+| Service build/compute | 🌳 |
+| Repository novo | 🆕 |
+| Repository list/get | 📋 |
+| Repository join/relation | 🔗 |
+| JobTracking Create | ➕ |
+| JobTracking Search | 🔍 |
 | SQS producer | 📤 |
 | SQS consumer | 📥 |
 | Worker handler | ⚡ |
 | Worker DLQ | 💀 |
 
-### Labels das setas
+### Labels padrão das setas
 
-- Conexão FE→BE: `"HTTP req"`
-- Resposta 409: `"HTTP 409 { jobs[] }"`
-- Verificação de conflito: `"① verifica conflito"`
-- Disparo pós-operação: `"② dispara rebuild"`
-- Goroutine: `"go"`
-- Mensagem de fila: `"1 msg / <entidade>ID"`
-- DLQ: `"falha → DLQ"`
-- Path de resolução: `"via <campo>"` (ex: `"via CourseIDs"`)
+| Seta | Label |
+|------|-------|
+| FE → BE | `"HTTP req"` |
+| BE → FE (erro) | `"409 + Jobs[]"` |
+| Handler → service (check) | `"① verifica conflito"` |
+| Handler → service (trigger) | `"② dispara rebuild"` |
+| Goroutine | `"go"` |
+| BACK → ASYNC | `"1 msg / <entidade>ID"` |
+| Consumer → DLQ | `"falha → DLQ"` |
+| Resolve path | `"via <campo>"` |
 
 ---
 
@@ -116,10 +117,10 @@ style ASYNC fill:#1a0d2e,stroke:#cba6f7,stroke-width:2px,color:#cdd6f4
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#313244', 'primaryTextColor': '#cdd6f4', 'primaryBorderColor': '#585b70', 'lineColor': '#6c7086', 'secondaryColor': '#1e1e2e', 'tertiaryColor': '#181825', 'background': '#1e1e2e', 'mainBkg': '#313244', 'nodeBorder': '#585b70', 'clusterBkg': '#181825', 'clusterBorder': '#45475a', 'titleColor': '#cdd6f4', 'edgeLabelBackground': '#1e1e2e', 'fontFamily': 'JetBrains Mono, monospace'}}}%%
 
-flowchart LR
+flowchart TD
 
     subgraph FRONT["🖥️  FRONTEND — bo-container"]
-        direction TB
+        direction LR
 
         subgraph BO_PAGES["📂 pages/ldi/"]
             direction TB
@@ -138,7 +139,7 @@ flowchart LR
     end
 
     subgraph BACK["⚙️  BACKEND — monolito"]
-        direction TB
+        direction LR
 
         subgraph MONO_H["🌐 HTTP Handlers"]
             direction TB
@@ -154,13 +155,12 @@ flowchart LR
             S4["⚙️ doAction (goroutine)\n① resolveIDs\n② GetRelatedIDs\n③ JobTracking.Create\n④ Queue.Send × id"]
             S1 --> S2
             S3 -->|"go"| S4
-            S4 --> S2
         end
 
         subgraph MONO_REPO["🗄️  repositories/domain/"]
             direction TB
-            R1["🆕 GetRelatedIDsByIDs\nJOIN: table_a → table_b\n→ table_c → table_d\nout: []relatedID DISTINCT"]
-            R2["📋 GetIDsByRelatedIDs\nin: []relatedID → out: []id"]
+            R1["🆕 GetRelatedIDsByIDs\nJOIN: table_a → table_b\n→ table_c\nout: []relatedID DISTINCT"]
+            R2["📋 GetIDsByRelatedIDs\nin: []relatedID\nout: []id"]
         end
 
         subgraph JT["📊 JobTracking"]
@@ -169,24 +169,21 @@ flowchart LR
             JT_S["🔍 JobTracking.Search\nstatus: running\nrelatedIDs: []id\nout: []Job"]
         end
 
+        %% handlers → services (só nó→nó, nunca subgraph→subgraph)
         H1 & H2 -->|"① verifica conflito"| S1
-        S1 -->|"409 + Data[]"| H1 & H2
         H1 & H2 -->|"② dispara ação"| S3
 
+        %% services → repos
         S2 -->|"via FieldB"| R2
-        R2 -->|"[]id"| S2
-
         S4 -->|"[]id"| R1
-        R1 -->|"[]relatedID"| S4
 
+        %% services → jobt
         S1 -->|"busca ativos"| JT_S
-        JT_S -->|"[]Job"| S1
         S4 -->|"cria job"| JT_C
-        JT_C -->|"job.ID"| S4
     end
 
     subgraph ASYNC["📬  ASYNC — fila + worker"]
-        direction TB
+        direction LR
 
         subgraph QUEUE["📬 Fila — DOMAIN.ActionName"]
             direction TB
@@ -197,7 +194,7 @@ flowchart LR
 
         subgraph WORKER["👷  worker — handlers/domain/worker.go"]
             direction TB
-            W1["⚡ HandleAction\nin: ctx, Message\n→ unmarshal payload\n→ Service.Execute\nout: error"]
+            W1["⚡ HandleAction\nin: ctx, Message\n→ Service.Execute\nout: error"]
             W2["🌳 Execute\nin: ctx, entityID\n→ processa e persiste\nout: result, error"]
             W3["💀 HandleActionDLQ\n→ registra falha\nout: nil"]
             W1 -->|"entityID"| W2
@@ -208,8 +205,8 @@ flowchart LR
     end
 
     %% conexões entre mega blocos
-    P1 -->|"HTTP req"| H1
-    P2 -->|"HTTP req"| H2
+    P1 & P2 -->|"HTTP req"| H1
+    S1 -->|"409 + Data[]"| M1
     S4 -->|"1 msg / entityID"| Q_S
 
     %% mega bloco backgrounds
@@ -217,7 +214,6 @@ flowchart LR
     style BACK  fill:#0a2010,stroke:#a6e3a1,stroke-width:3px,color:#cdd6f4
     style ASYNC fill:#1a0d2e,stroke:#cba6f7,stroke-width:2px,color:#cdd6f4
 
-    %% classDefs
     classDef boPage   fill:#1e3a5f,stroke:#89b4fa,color:#cdd6f4
     classDef boComp   fill:#2a1f4e,stroke:#cba6f7,color:#cdd6f4
     classDef handler  fill:#0d4a2a,stroke:#a6e3a1,color:#cdd6f4
@@ -241,17 +237,18 @@ flowchart LR
 
 ## Como gerar a partir de um diff
 
-1. `git diff main...HEAD --stat` → lista de arquivos alterados
-2. `git diff main...HEAD -- <arquivo>` → ver mudanças por arquivo relevante
-3. Ler os arquivos modificados para entender assinaturas, novos métodos, structs
-4. Montar o diagrama com:
-   - **FE** → arquivos `.vue` modificados
-   - **BACK handlers** → arquivos em `handlers/` modificados
-   - **BACK services** → funções novas/alteradas em `services/`
-   - **BACK repos** → métodos novos em `repositories/`
+1. `git diff main...HEAD --stat` → lista arquivos alterados
+2. `git diff main...HEAD -- <arquivo>` → mudanças por arquivo
+3. Ler arquivos modificados para mapear assinaturas, novos métodos, structs
+4. Montar:
+   - **FRONT** → arquivos `.vue` em pages/ e components/
+   - **BACK Handlers** → arquivos em `handlers/` com rota + in/out
+   - **BACK Services** → funções novas/alteradas com assinatura resumida
+   - **BACK Repos** → métodos novos com JOINs se relevante
    - **ASYNC** → se houver SQS, worker, fila
-5. Aplicar `classDef` e `style` conforme tabela acima
-6. Subir no relay: `mermaid_live_server.py` + `mermaid-push` + `relay-nav`
+5. Aplicar `classDef` e `style` da tabela acima
+6. **Nunca** conectar subgraph→subgraph — só nó→nó
+7. Subir no relay: `mermaid_live_server.py` + `mermaid-push` + `relay-nav`
 
 ## Exemplo real
 

@@ -73,7 +73,7 @@ TOOLS
 
 MANAGEMENT
     yaa init
-        Create ~/.yaa.yaml with default configuration.
+        Create ~/.yaa.yaml and ~/yaa.yaml (tokens opcionais, chmod 600).
 
     yaa update
         Rebuild and install vennon + yaa + bridge.
@@ -92,7 +92,13 @@ CONFIGURATION
         paths.obsidian    — obsidian vault
         paths.projects    — default project dir
         paths.host        — host dir for --host flag
-        tokens.*          — API tokens
+
+    ~/yaa.yaml
+        Segredos opcionais (stow). Campo vazio = mesmo fluxo de antes (OAuth, ~/.claude, env).
+        tokens.claude_web_session — sessionKey web (CLAUDE_AI_SESSION_KEY) para uso claude.ai
+        tokens.claude_org_id      — organização (CLAUDE_AI_ORG_ID)
+        tokens.github             — GH_TOKEN (ex.: yaa usage exporta para filhos)
+        tokens.jira               — JIRA_TOKEN
 
 COMPANION TOOLS
     vennon — container management (build, start, stop, flush)

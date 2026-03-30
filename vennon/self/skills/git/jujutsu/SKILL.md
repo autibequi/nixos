@@ -1,11 +1,43 @@
 ---
 name: git/jujutsu
-description: "Auto-ativar quando: repo tem .jj/, user menciona jj, jujutsu, change id, bookmark, op log, ou pede operacao de VCS em repo com jj. Workflow completo: comandos, PR GitHub, curar output de AI, recuperacao via op log."
+description: "Auto-ativar quando: repo tem .jj/, user menciona jj, jujutsu, change id, bookmark, op log, workspace, worktree, ou VCS em repo jj. Inclui setup vennon (ESTRATEGIA_ROOT), trio Coruja, workspaces paralelos para IA, loops multi-repo, Obsidian vault, PR GitHub, curar AI, op log."
 ---
 
 # git/jujutsu — Jujutsu VCS
 
 Skill para trabalhar com repos que usam **Jujutsu (jj)** como VCS, seja puro ou como frontend do git.
+
+---
+
+## Setup vennon + Estratégia (paths canônicos)
+
+No ambiente **vennon**, os repos da Estratégia vivem sob um único diretório físico; dois paths públicos apontam para o **mesmo inode**:
+
+- **`/workspace/target/estrategia`** — mental “workdir do agente / Cursor”
+- **`/workspace/projects/estrategia`** — equivalente (mesmo diretório)
+
+**Variável de shell (usar em todos os loops e exemplos):**
+
+```bash
+export ESTRATEGIA_ROOT="/workspace/target/estrategia"
+```
+
+**Trio principal (Coruja):** `monolito` (Go), `bo-container` (Vue 2 + Quasar), `front-student` (Nuxt 2). Paths: `$ESTRATEGIA_ROOT/<nome>`.
+
+**Vault Obsidian (tutorial longo + setup pessoal):**
+
+- `/workspace/obsidian/Jujutsu-workspaces-tutorial.md` — tutorial geral (workspaces, revsets, FAQ, apêndice)
+- `/workspace/obsidian/Meu-setup-jj-vennon.md` — só paths e receitas **deste** host
+
+**Outros paths do sistema:** `/workspace/self/skills/` (skills), `/workspace/obsidian/` (vault), ver `AGENTS.md` no workdir.
+
+### TL;DR operacional
+
+1. `jj git fetch` → trabalhar → `jj status` / `jj diff --from main --to @`
+2. Paralelo para IA: `jj workspace add --name ia-x …` → abrir **essa pasta** no Cursor
+3. Integrar: `jj edit <bookmark>` no repo principal **ou** `jj rebase -d main@origin` + `jj git push --bookmark …`
+4. Erro: `jj undo` ou `jj op log` → `jj op restore <id>`
+5. **Sem** `git add` — disco = commit atual
 
 ---
 
@@ -91,7 +123,7 @@ Tudo que está no disco é parte do commit atual. Ponto.
 ### Change IDs vs Commit IDs
 - **Change ID** (ex: `qpvuntsm`) — imutável, identifica a *mudança* mesmo após rebase/amend
 - **Commit ID** (hash) — muda a cada rewrite
-- Sempre use Change IDs para referencias durávies em logs/scripts
+- Sempre use Change IDs para referências duráveis em logs/scripts
 
 ### Operation Log
 Toda operação fica no `jj op log`. Qualquer erro pode ser desfeito com `jj op undo`.
@@ -129,6 +161,8 @@ jj diff                         # diff do commit atual vs pai
 jj diff -r <rev>                # diff de um commit específico
 jj diff --from <rev> --to <rev> # diff entre dois commits
 jj show <rev>                   # diff + metadata de um commit específico
+jj diff --from main --to @      # diff da feature inteira vs main (PR)
+jj log -r 'main..@'             # commits entre main e @
 ```
 
 ### Criar e Navegar Commits
@@ -314,18 +348,29 @@ jj log -r 'main..@'            # commits da feature
 
 ---
 
-## Workspaces Múltiplos
+## Workspaces múltiplos (sem `git worktree`)
 
-O jj suporta múltiplos working copies no mesmo repo (sem `git worktree`):
+O jj suporta vários **working copies** no mesmo repositório (cada um com seu `@`).
 
 ```bash
-jj workspace add ../minha-feature    # cria workspace paralelo
-jj workspace list                    # lista todos
-jj workspace root --name <ws>        # path de um workspace específico
-jj workspace update-stale            # atualiza workspace stale após ops externas
+jj workspace add --name ia-feature ../path-ou-nome   # ou: jj workspace add --name ia-x -r main@origin …
+jj workspace list
+jj workspace root
+jj workspace root --name <nome>
+jj workspace update-stale            # após mudanças externas no disco
 ```
 
-Útil para: revisar código enquanto continua trabalhando, builds paralelos, etc.
+**Delegar IA:** criar workspace paralelo, abrir **só essa pasta** no IDE; instruir o agente a editar apenas esse path (caminho absoluto no prompt). Antes de edição grande: `jj new -m "feat: escopo"`.
+
+**`jj workspace forget --name <nome>`** — o jj deixa de registrar aquele workspace; **não apaga** a pasta sozinha. Apagar diretório sem `forget` pode confundir estado — preferir `forget` e depois `rm` se necessário.
+
+**Aviso:** dois workspaces = duas árvores — `.env`, `node_modules`, caches podem duplicar; não vazar segredos para a pasta da IA.
+
+**Swap para o IDE “oficial” ver o trabalho:** não é `rsync` — é `jj edit <bookmark|rev>` no diretório principal **ou** abrir a pasta do workspace paralelo **ou** rebase + push do bookmark.
+
+**Alias opcional** (`~/.config/jj/config.toml`): `wa` — ver tutorial Obsidian ou seção config abaixo.
+
+Útil para: IA isolada, build paralelo, revisar enquanto edita outra linha.
 
 ---
 
@@ -369,6 +414,16 @@ log = "@ | ancestors(main..@, 2) | main"  # log focado na feature atual
 [core]
 # Protege commits já publicados de modificação acidental
 immutable-revisions = "bookmarks(remote_bookmarks())"
+```
+
+### Alias `wa` — novo workspace irmão (opcional)
+
+Cria `$(jj workspace root).<apelido>` ao lado do repo (ex.: `monolito.ia-auth`):
+
+```toml
+[aliases]
+wa = ["util", "exec", "--", "bash", "-c", "jj workspace add --name \"$0\" \"$(jj workspace root).$0\""]
+# Uso: jj wa ia-auth
 ```
 
 ### Workflow de Stacked PRs
@@ -423,31 +478,42 @@ jj git push --all
 
 ---
 
-## Workflow Multi-Repo (Features Cross-Repo)
+## Workflow multi-repo (Estratégia — trio Coruja)
 
-Pedro sempre trabalha em features que tocam os 3 repos da Estratégia simultaneamente:
-`monolito` (Go) + `bo-container` (Vue 2) + `front-student` (Nuxt 2)
+Features costumam tocar os **3 repos** ao mesmo tempo: `monolito` (Go) + `bo-container` (Vue 2) + `front-student` (Nuxt 2). Cada repo tem seu próprio `.jj/` — históricos separados; alinhar com **o mesmo bookmark** (ex.: ticket Jira).
 
-O mesmo ticket/nome de branch é usado nos 3 — ex: `FUK2-11746/toc-async-builder`.
+**Sempre:** `export ESTRATEGIA_ROOT="/workspace/target/estrategia"` (ou equivalente no host).
 
 ### Iniciar feature nova nos 3 repos
 
 ```bash
+export ESTRATEGIA_ROOT="/workspace/target/estrategia"
 TICKET="FUK2-99999/minha-feature"
 
 for repo in monolito bo-container front-student; do
-  cd /workspace/projects/estrategia/$repo
+  cd "$ESTRATEGIA_ROOT/$repo" || exit 1
+  jj git fetch
   jj new main@origin -m "feat: descrição da feature"
-  jj bookmark create $TICKET --rev @
+  jj bookmark create "$TICKET" --rev @
 done
+```
+
+### Workspace paralelo só para IA (ex.: monolito)
+
+```bash
+cd "$ESTRATEGIA_ROOT/monolito"
+repo_root=$(jj workspace root)
+safe="${TICKET//\//-}"
+jj workspace add --name "ia-$safe" "${repo_root}.ia-$safe"
+# Abrir Cursor em "${repo_root}.ia-$safe"
 ```
 
 ### Trabalhar em um repo específico
 
 ```bash
-cd /workspace/projects/estrategia/monolito
-jj log   # ver onde está
-jj new -m "feat(api): endpoint X"   # novo commit
+cd "$ESTRATEGIA_ROOT/monolito"
+jj log
+jj new -m "feat(api): endpoint X"
 # editar arquivos...
 ```
 
@@ -456,51 +522,56 @@ jj new -m "feat(api): endpoint X"   # novo commit
 ```bash
 for repo in monolito bo-container front-student; do
   echo "=== $repo ==="
-  cd /workspace/projects/estrategia/$repo && jj log --limit 3
+  (cd "$ESTRATEGIA_ROOT/$repo" && jj log --limit 3)
 done
 ```
 
 ### Sincronizar com main (rebase nos 3)
 
 ```bash
+export ESTRATEGIA_ROOT="/workspace/target/estrategia"
 TICKET="FUK2-11746/toc-async-builder"
 
 for repo in monolito bo-container front-student; do
-  cd /workspace/projects/estrategia/$repo
+  cd "$ESTRATEGIA_ROOT/$repo" || exit 1
   jj git fetch
-  jj rebase -b $TICKET -d main@origin
+  jj rebase -b "$TICKET" -d main@origin
 done
 ```
 
 ### Push nos 3
 
 ```bash
+export ESTRATEGIA_ROOT="/workspace/target/estrategia"
 TICKET="FUK2-11746/toc-async-builder"
 
 for repo in monolito bo-container front-student; do
-  cd /workspace/projects/estrategia/$repo
-  jj git push --bookmark $TICKET
+  cd "$ESTRATEGIA_ROOT/$repo" || exit 1
+  jj git push --bookmark "$TICKET"
 done
 ```
 
-### Abandonar feature inteira (desfazer tudo)
+### Abandonar feature inteira (local)
 
 ```bash
+export ESTRATEGIA_ROOT="/workspace/target/estrategia"
 TICKET="FUK2-11746/toc-async-builder"
 
 for repo in monolito bo-container front-student; do
-  cd /workspace/projects/estrategia/$repo
-  jj abandon $TICKET   # remove commits locais
-  jj bookmark delete $TICKET 2>/dev/null || true
+  cd "$ESTRATEGIA_ROOT/$repo" || exit 1
+  jj abandon "$TICKET" 2>/dev/null || jj abandon @
+  jj bookmark delete "$TICKET" 2>/dev/null || true
+  # workspaces paralelos: jj workspace forget --name <nome> por repo
 done
 ```
 
 ### Iniciar nova sessão de trabalho (repo já tem feature)
 
 ```bash
-cd /workspace/projects/estrategia/monolito
-jj edit FUK2-11746/toc-async-builder   # volta para o commit da feature
-jj new -m "feat: continuar X"          # novo commit em cima
+export ESTRATEGIA_ROOT="/workspace/target/estrategia"
+cd "$ESTRATEGIA_ROOT/monolito"
+jj edit "$TICKET"
+jj new -m "feat: continuar X"
 ```
 
 ---
@@ -553,7 +624,10 @@ jj op undo
 
 ❌ NUNCA fazer:
    git add / git commit / git stash / git branch
-   git worktree — use jj new + jj edit para alternar entre trabalhos
+   git worktree — usar jj workspace add / jj edit para paralelo ou alternar trabalhos
+
+✅ IA em workspace paralelo:
+   passar caminho absoluto da pasta criada com jj workspace add; não editar outro repo sem querer
 ```
 
 ### Hooks recomendados para settings.json
@@ -631,12 +705,27 @@ Para hooks locais equivalentes ao pre-commit do git, configurar em `.jj/hooks/` 
 
 ---
 
+## Documentação estendida (Obsidian)
+
+- **`/workspace/obsidian/Jujutsu-workspaces-tutorial.md`** — tutorial completo: workspaces, swap IDE, revsets, bookmarks, conflitos, FAQ, apêndice instalação.
+- **`/workspace/obsidian/Meu-setup-jj-vennon.md`** — paths vennon, `ESTRATEGIA_ROOT`, loops do trio, checklist.
+
+---
+
 ## Troubleshooting
 
 **`jj` não reconhece o repo:**
 ```bash
 jj git init --colocate          # se for repo git existente sem jj
 ```
+
+**IDE não mostra mudança / “sumiu arquivo”** — pasta aberta ≠ workspace do jj: `pwd`, `jj workspace root`, `jj workspace list`.
+
+**`jj workspace forget` não apagou a pasta** — esperado; apagar manualmente se quiser libertar espaço (depois do `forget`).
+
+**Prefira `jj status` a `git status`** em repo colocate — fonte do working copy jj.
+
+**`git pull` / `git merge` sem querer** — `jj git fetch`; se refs divergirem, avaliar `jj git import` (com critério) ou pedir ajuda com `jj status` + `jj log`.
 
 **Commit ficou vazio acidentalmente:**
 ```bash

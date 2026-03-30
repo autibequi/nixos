@@ -39,7 +39,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Create ~/.yaa.yaml with defaults
+    /// Create ~/.yaa.yaml and ~/yaa.yaml (secrets, chmod 600) with defaults
     Init,
 
     /// Rebuild and install full stack (mesmo pipeline que `deck update` / `vennon update`)

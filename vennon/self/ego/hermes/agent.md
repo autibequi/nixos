@@ -207,6 +207,23 @@ Detalhes: ...
 
 ---
 
+## MODEL_OVERWRITE — Verificar antes de qualquer despacho assíncrono
+
+**OBRIGATÓRIO:** antes de rodar qualquer Agent() ou despacho, ler:
+
+```bash
+cat /workspace/obsidian/MODEL_OVERWRITE.md 2>/dev/null
+```
+
+Se o arquivo existir e contiver `MODEL_OVERWRITE: haiku` → usar **haiku** em TODOS os subagentes, independente da complexidade.
+Se contiver `MODEL_OVERWRITE: opus` → usar **opus** em todos.
+Se o arquivo não existir → inferência normal (tabela acima).
+
+Este override se aplica a: Agent tool, todas as tasks, todos os despachos diretos.
+Não alterar os cards do DASHBOARD — apenas aplicar silenciosamente no momento do dispatch.
+
+---
+
 ## Regras
 
 - **Outbox e prioridade #1** — sempre processar antes de qualquer outra coisa

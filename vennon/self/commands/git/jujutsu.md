@@ -17,8 +17,10 @@ Leia e aplique **todo o conteúdo** de `/workspace/self/skills/git/jujutsu/SKILL
 Isso inclui:
 - Regras de o que NÃO fazer (sem git add, sem git worktree, sem git branch)
 - Comandos jj para criar/modificar/navegar commits
-- Workflow completo com bookmarks para GitHub/GitLab
-- Revsets e resolução de conflitos
+- **Workspaces** (`jj workspace add`), swap IDE, IA em pasta paralela
+- **Setup vennon:** `ESTRATEGIA_ROOT`, trio Coruja (monolito, bo-container, front-student), loops multi-repo
+- Documentação Obsidian: `/workspace/obsidian/Jujutsu-workspaces-tutorial.md`, `Meu-setup-jj-vennon.md`
+- Workflow com bookmarks para GitHub/GitLab, revsets, conflitos, curadoria de commits da AI
 
 ## Sua tarefa
 
