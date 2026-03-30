@@ -4,7 +4,8 @@ Antes de qualquer ação:
 1. Leia o CLAUDE.md deste repositório. Ele define convenções obrigatórias que você DEVE seguir durante toda a execução.
 2. Leia os arquivos de skills disponíveis para este repositório em `/home/claude/.claude/skills/front-student/*/SKILL.md`. Eles descrevem as skills que você pode invocar e como usá-las.
 
-A branch de trabalho já foi criada pelo orquestrador. Confirme que está nela com `git branch --show-current`. Se não estiver, faça `git checkout <JIRA-ID>/vibed/<descricao-curta>` antes de qualquer edição.
+A branch de trabalho já foi criada pelo orquestrador via jj. Confirme que está nela:
+`jj log -r @ --no-graph -T 'bookmarks'` — se não estiver no bookmark correto, `jj edit <JIRA-ID>/vibed/<descricao-curta>`
 
 Em seguida, leia o arquivo `../<pasta-da-feature>/feature.frontstudent.md` e siga as instruções nele contidas à risca. O arquivo contém tudo que você precisa: contexto, objetivo, estado atual, skill a invocar, endpoints reais do backend e lista de entregas.
 

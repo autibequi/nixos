@@ -3,12 +3,19 @@
 # Extracted from session-start.sh to reduce monolith size.
 
 _lab_dir="/workspace/host"
-_worktrees=$(git -C "$_lab_dir" worktree list 2>/dev/null | wc -l | tr -d ' ')
-_inbox=$(wc -l < /workspace/obsidian/tasks/inbox/inbox.md 2>/dev/null || echo "?")
-_uptime=$(awk '{h=int($1/3600); m=int(($1%3600)/60); printf "%dh %dm", h, m}' /proc/uptime 2>/dev/null || echo "?")
-_git_branch=$(git -C "$_lab_dir" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
-_git_dirty=$(git -C "$_lab_dir" status --porcelain 2>/dev/null | wc -l | tr -d ' ')
-_git_ahead=$(git -C "$_lab_dir" rev-list @{u}..HEAD 2>/dev/null | wc -l | tr -d ' ')
+# Detecta VCS: jj ou git
+if jj -R "$_lab_dir" root >/dev/null 2>&1; then
+  _worktrees=$(jj -R "$_lab_dir" workspace list 2>/dev/null | wc -l | tr -d ' ')
+  _git_branch=$(jj -R "$_lab_dir" log --no-graph -T 'bookmarks.map(|b| b.name()).join(",") ++ "\n"' -r @ 2>/dev/null | head -1 || echo "?")
+  [ -z "$_git_branch" ] && _git_branch=$(jj -R "$_lab_dir" log --no-graph -T 'change_id.short() ++ "\n"' -r @ 2>/dev/null | head -1 || echo "?")
+  _git_dirty=$(jj -R "$_lab_dir" diff --summary 2>/dev/null | wc -l | tr -d ' ')
+  _git_ahead=0
+else
+  _worktrees=$(git -C "$_lab_dir" worktree list 2>/dev/null | wc -l | tr -d ' ')
+  _git_branch=$(git -C "$_lab_dir" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "?")
+  _git_dirty=$(git -C "$_lab_dir" status --porcelain 2>/dev/null | wc -l | tr -d ' ')
+  _git_ahead=$(git -C "$_lab_dir" rev-list @{u}..HEAD 2>/dev/null | wc -l | tr -d ' ')
+fi
 _todo_count=$(ls /workspace/obsidian/bedrooms/_waiting/*.md 2>/dev/null | wc -l | tr -d ' ')
 _mem_count=$(ls "$HOME/.claude/projects/-workspace-mnt/memory/"*.md 2>/dev/null | wc -l | tr -d ' ')
 _h_off=$([ "$HEADLESS" = "1" ] && echo "ON" || echo "OFF")

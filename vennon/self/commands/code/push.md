@@ -1,21 +1,35 @@
 ---
 name: code:push
-allowed-tools: Bash(git checkout --branch:*), Bash(git add:*), Bash(git status:*), Bash(git push:*), Bash(git commit:*), Bash(gh pr create:*)
-description: Commit, push, and open a PR
+description: "Publica o trabalho — usa jj bookmark + jj git push se for repo jj, git push + gh pr se for git."
+allowed-tools: Bash(jj *), Bash(gh pr *), Bash(git add:*), Bash(git push:*), Bash(git commit:*), Bash(git checkout --branch:*)
 ---
 
-## Context
+## Contexto
 
-- Current git status: !`git status`
-- Current git diff (staged and unstaged changes): !`git diff HEAD`
-- Current branch: !`git branch --show-current`
+- É repo jj?: !`[ -d .jj ] && echo yes || echo no`
+- Status: !`jj status 2>/dev/null || git status 2>/dev/null`
+- Log: !`jj log --no-graph -r 'ancestors(@,5)' 2>/dev/null || git log --oneline -5 2>/dev/null`
+- Bookmarks/branches: !`jj bookmark list 2>/dev/null || git branch -v 2>/dev/null`
 
-## Your task
+## Sua tarefa
 
-Based on the above changes:
+**Se for repo jj** (`.jj` existe):
 
-1. Create a new branch if on main
-2. Create a single commit with an appropriate message
-3. Push the branch to origin
-4. Create a pull request using `gh pr create`
-5. You have the capability to call multiple tools in a single response. You MUST do all of the above in a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.
+1. Certifique que o commit tem descrição: `jj describe -m "mensagem"` se necessário
+2. Crie ou mova o bookmark para o commit atual:
+   ```bash
+   jj bookmark create <nome-da-feature>     # se novo
+   # OU
+   jj bookmark set <nome-da-feature>        # se já existe
+   ```
+3. Push:
+   ```bash
+   jj git push --bookmark <nome-da-feature>
+   ```
+4. Abra PR via `gh pr create` se necessário
+
+**Se for repo git** (sem `.jj`):
+
+1. Crie branch se em main, commit, push e `gh pr create`
+
+Baseie o nome do bookmark/branch no contexto do trabalho (ex: `feat/descricao`, `fix/bug`).

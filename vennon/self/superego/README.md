@@ -16,7 +16,6 @@
 | `bedrooms.md` | Estrutura obrigatoria do quarto (DIARIO/DESKTOP/ARCHIVE) |
 | `obsidian-rules.md` | Mapa do vault, territorios, semantica dos espacos |
 | `comunicacao.md` | Inbox, outbox, feed.md, news/, alertas — canais oficiais |
-| `worktrees.md` | Worktrees — fluxo de isolamento e aprovacao pelo CTO |
 
 ---
 

@@ -1,15 +1,14 @@
 ---
 name: meta:phone
-description: Central dos contractors — briefing de status, ligar para qualquer contractor, dashboard de worktrees. /meta:phone call <nome> conecta diretamente; agentes com preferencia pessoal aparecem em vez de atender.
+description: Central dos contractors — briefing de status, ligar para qualquer contractor, status de agentes. /meta:phone call <nome> conecta diretamente; agentes com preferencia pessoal aparecem em vez de atender.
 ---
 
 # /meta:phone — Central de Comunicacao
 
 ```
-/meta:phone                    → briefing completo (GitHub, repos, tasks, worktrees)
+/meta:phone                    → briefing completo (GitHub, repos, tasks)
 /meta:phone call <nome>        → ligar / convocar um contractor
-/meta:phone worktrees          → dashboard de worktrees
-/meta:phone suggestions        → revisar propostas de worktrees pendentes
+/meta:phone suggestions        → revisar propostas pendentes
 /meta:phone <pedido>           → delega a Coruja (plataforma estrategia)
 ```
 
@@ -26,7 +25,6 @@ Parsear `$ARGUMENTS`:
 |-----------|------|
 | vazio / `briefing` / `status` | **→ Briefing** |
 | `call <nome>` | **→ Ligar / Convocar** |
-| `worktrees` / `worktree` | **→ Worktrees** |
 | `suggestions [list\|next\|accept\|discard\|commit\|reset]` | **→ Suggestions** |
 | qualquer outra coisa | **→ Coruja** |
 
@@ -47,7 +45,6 @@ WS=/workspace source /workspace/stow/.claude/scripts/gh-status.sh && gh_status_f
 ### Repos locais
 ```bash
 git -C /workspace/home status --short | head -10
-git -C /workspace/home worktree list | head -20
 
 for repo in /home/claude/projects/estrategia/*/; do
   name=$(basename "$repo")
@@ -79,9 +76,6 @@ echo "DONE_RECENT:" && ls -t /workspace/obsidian/bedrooms/*/done/ 2>/dev/null | 
  Tasks
   DOING: nome-da-task
   TODO: N na fila | Failed: N
-
- Worktrees
-  N ativos | N prunable
 
  Atencao
   alertas relevantes
@@ -160,34 +154,6 @@ Quando user sinalizar fim:
 - Se foi pessoalmente: o contractor se despede com seu jeito proprio.
 
 Oferecer salvar resumo em `agents/<nome>/DIARIO.md`.
-
----
-
-## Worktrees
-
-Dashboard de worktrees isolados:
-
-```bash
-git -C /workspace/home worktree list
-```
-
-Mostrar:
-- **Status atual** — se esta em worktree agora
-- **Worktrees ativos** — branch, tempo ativo, mudancas
-- **Prunable** — orfaos a limpar (`git worktree prune`)
-
-```
-WORKTREES
-
-  Atual: <nome> [<branch>] — entrou ha Xmin, Y arquivos modificados
-
-  Ativos:
-    nome1  [branch]  desde HH:MM
-    nome2  [branch]  desde HH:MM
-
-  Prunable (limpar com git worktree prune):
-    nome3  [branch removida]
-```
 
 ---
 

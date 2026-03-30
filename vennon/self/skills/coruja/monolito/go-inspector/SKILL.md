@@ -1,6 +1,6 @@
 ---
 name: monolito/go-inspector
-description: Inspeção multi-perspectiva de feature chain no monolito. Coleta contexto de PR/JIRA/Notion, spawna 5 inspetores paralelos (claude, documentation, qa, namer, coverage) + inspector-contrato + simplifier sequencial em worktree. Gera relatórios acionáveis em vault/inspections/<tarefa>/ e atualiza o BOARD principal em vault/inspections/BOARD.md.
+description: Inspeção multi-perspectiva de feature chain no monolito. Coleta contexto de PR/JIRA/Notion, spawna 5 inspetores paralelos (claude, documentation, qa, namer, coverage) + inspector-contrato + simplifier sequencial. Gera relatórios acionáveis em vault/inspections/<tarefa>/ e atualiza o BOARD principal em vault/inspections/BOARD.md.
 ---
 
 # go-inspector: Inspeção Multi-Perspectiva
@@ -188,12 +188,12 @@ Aguardar os 5 inspetores + inspector-contrato completarem. Para cada resultado:
    - Severidades diferentes → usar a maior
 4. Agrupar por arquivo para visão consolidada
 
-## Passo 5 — Spawnar simplifier em worktree
+## Passo 5 — Spawnar simplifier
 
 Após consolidar findings dos 5 primeiros:
 
 ```
-Agent subagent_type=Monolito isolation=worktree prompt="
+Agent subagent_type=Monolito prompt="
 Você é o **inspector-simplifier**. Sua definição completa:
 <definição do obsidian/bedrooms/inspectors/simplifier.md>
 
@@ -326,7 +326,7 @@ Formato de entrada em Aprendizados:
 - **Contexto primeiro** — nunca inspecionar sem ter lido PR body, JIRA e Notion (se disponíveis)
 - **Paralelo real** — os 5 inspetores + contrato rodam em background simultaneamente
 - **Simplifier é sequencial** — só roda após os 5 primeiros completarem, recebe findings como input
-- **Worktree isolado** — simplifier opera em cópia isolada, não afeta working directory
+- **Simplifier sequencial** — só roda após os 5 primeiros completarem
 - **Tom construtivo** — findings são sugestões, não ordens
 - **Responder em PT-BR** — todos os artefatos em português
 - **Sempre gerar README + consolidado** — mesmo que a inspeção seja pequena

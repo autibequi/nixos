@@ -31,33 +31,24 @@ estrategiahq
 | coruja/grafana | `coruja/grafana/` | Query logs Loki e dashboards Grafana — servicos, patterns de debug, integracao com workflow |
 | coruja/opensearch | `coruja/opensearch/` | Consultar cluster OpenSearch sandbox — mapeamento de indices, queries DSL, links Dev Console |
 
-## Git Flow — Branch vs Worktree
+## JJ/Git Flow
+
+> **JJ é o único VCS.** Se repo não tem `.jj`: `jj git init --colocate` antes de qualquer operacao.
 
 ### 1. Antes de qualquer implementacao: buscar trabalho existente
 
 ```bash
-# Ver sessoes multi-repo abertas
-vennon wt
-
-# Buscar pelo codigo Jira em branches locais e remotas
-git branch -a | grep -i "<FUK2-XXXXX>"
-
-# Verificar worktrees abertas de uma sessao
-ls /workspace/home/worktree/ | grep -i "<FUK2-XXXXX>"
+jj bookmark list | grep -i "<FUK2-XXXXX>"
 ```
 
-Se ja existir sessao → `vennon wt FUK2-XXXXX` para ativar, nao criar novo.
+Se ja existir bookmark → ir para ele, nao criar novo.
 
-### 2. Decidir: branch ou sessao multi-repo?
+### 2. Criar bookmark
 
-| Situacao | Usar |
+| Situacao | Comando |
 |---|---|
-| **Bug fix / correcao pontual** (~1-3 arquivos, 1 repo) | Branch simples: `git checkout -b FUK2-XXXXX/descricao-curta` |
-| **Feature multi-repo** (toca monolito + bo/front) | Sessao: `vennon wt new FUK2-XXXXX` |
-| **Feature single-repo complexa** (migration, refactor multi-camada) | Sessao so nesse repo: `vennon wt new FUK2-XXXXX` (skip outros na confirmacao) |
-
-**Sessao `vennon wt`** cria worktrees em `/workspace/home/worktree/FUK2-XXXXX/<repo>/`
-para todos os repos da Estrategia. Ver skill `vennon/worktree` para o fluxo completo.
+| **Bug fix / correcao pontual** (~1-3 arquivos, 1 repo) | `jj new main -m "FUK2-XXXXX: desc"` + `jj bookmark create FUK2-XXXXX/descricao-curta` |
+| **Feature multi-repo ou complexa** | `jj new main -m "..."` + `jj bookmark create FUK2-XXXXX/descricao` em cada repo |
 
 ### 3. Nomenclatura obrigatoria
 

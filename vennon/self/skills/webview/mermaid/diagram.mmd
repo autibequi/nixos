@@ -1,114 +1,92 @@
-%%{init: {
-  "theme": "base",
-  "themeVariables": {
-    "background": "#1e1e2e",
-    "primaryColor": "#313244",
-    "primaryTextColor": "#cdd6f4",
-    "primaryBorderColor": "#585b70",
-    "secondaryColor": "#181825",
-    "tertiaryColor": "#11111b",
-    "lineColor": "#89b4fa",
-    "edgeLabelBackground": "#181825",
-    "clusterBkg": "#181825",
-    "clusterBorder": "#45475a",
-    "titleColor": "#cdd6f4",
-    "fontFamily": "JetBrains Mono, monospace",
-    "fontSize": "13px"
-  }
-}}%%
 flowchart TD
-    classDef bug fill:#45273a,stroke:#f38ba8,color:#f38ba8,font-weight:bold
-    classDef fix fill:#1e3a2a,stroke:#a6e3a1,color:#a6e3a1,font-weight:bold
-    classDef entity fill:#2a2a3e,stroke:#cba6f7,color:#cba6f7
-    classDef service fill:#1e2a3e,stroke:#89b4fa,color:#89b4fa
-    classDef decision fill:#2a2214,stroke:#f9e2af,color:#f9e2af
-    classDef mode fill:#2a1e2e,stroke:#cba6f7,color:#cdd6f4
-    classDef neutral fill:#313244,stroke:#585b70,color:#cdd6f4
-    classDef active fill:#1e3a2a,stroke:#a6e3a1,color:#a6e3a1
+    classDef commit fill:#313244,stroke:#89b4fa,color:#cdd6f4
+    classDef working fill:#1e1e2e,stroke:#89b4fa,color:#89b4fa,font-weight:bold
+    classDef cmd fill:#181825,stroke:#a6e3a1,color:#a6e3a1,font-family:monospace,font-size:12px
+    classDef forbidden fill:#2a1a1a,stroke:#f38ba8,color:#f38ba8,font-size:11px
+    classDef bookmark fill:#1e1e2e,stroke:#f9e2af,color:#f9e2af
+    classDef remote fill:#1a1a2e,stroke:#cba6f7,color:#cba6f7
+    classDef oplog fill:#1a1a2e,stroke:#fab387,color:#fab387
+    classDef tip fill:#181825,stroke:#585b70,color:#a6adc8,font-size:11px,font-style:italic
 
-    TICKET["FUK2-11766\nBloco Apenas Simplificado\nnao exibido corretamente"]:::bug
-
-    subgraph ROOT["Contexto - Content Modes"]
-        CM_SO["SIMPLE_ONLY\nApenas Simplificado"]:::mode
-        CM_CO["COMPLETE_ONLY\nApenas Completo"]:::mode
-        CM_EC["EQUAL_CONTENT\nConteudo Igual"]:::mode
-        CM_DC["DIFFERENT_CONTENT\nConteudo Diferente"]:::mode
+    subgraph WKCOPY["💾  Working Copy — sem staging area"]
+        direction TB
+        WC["📄 arquivos no disco"]:::working
+        TIP1["qualquer edição já é parte\ndo commit atual (@)"]:::tip
     end
 
-    subgraph BUG["Bug - Antes do Fix"]
-        B1["GetOneWithBlocks\nitera blocks"]:::bug
-        B2{"block.Type == question\ne data vazio?"}:::decision
-        B3["append blocksComplete"]:::bug
-        B4["usa block.IsActive\npara TODOS os tipos\n- ignora SimpleIsActive"]:::bug
-        B1 --> B2
-        B2 -->|nao| B4
-        B4 --> B3
-        B2 -->|sim| SKIP1["skip"]:::neutral
+    subgraph HISTORY["🔗  Histórico Local"]
+        direction TB
+        A["● A  change:abc123\n'feat: base'"]:::commit
+        B["● B  change:def456\n'feat: helper'"]:::commit
+        AT["◉ @  change:ghi789\n'(sem desc)'  ← working copy"]:::working
+        A --> B --> AT
+
+        BM["🔖 bookmark\nfeat/minha-feature"]:::bookmark
+        BM -.->|aponta para| AT
+
+        SPLIT["jj split\ndivide @ em 2"]:::cmd
+        SQUASH["jj squash\n@ absorve no pai"]:::cmd
+        DESC["jj describe -m 'msg'\natualiza mensagem"]:::cmd
+        NEWC["jj new\nnovo commit acima de @"]:::cmd
+        EDIT["jj edit B\nvolta a editar B\n(@ move pra B)"]:::cmd
     end
 
-    subgraph ENT["entities/block.go - novo metodo"]
-        E1["GetResolvedIsActive\ncontentModeView string bool"]:::entity
-        E2{"ContentMode?"}:::decision
-        E3["return SimpleIsActive"]:::fix
-        E4["return IsActive"]:::fix
-        E5{"contentModeView\n== SIMPLE?"}:::decision
-        E6["return SimpleIsActive"]:::fix
-        E7["return IsActive"]:::fix
-        E8["default: return IsActive"]:::neutral
-
-        E1 --> E2
-        E2 -->|SIMPLE_ONLY| E3
-        E2 -->|COMPLETE_ONLY| E4
-        E2 -->|EQUAL_CONTENT| E4
-        E2 -->|DIFFERENT_CONTENT| E5
-        E5 -->|sim| E6
-        E5 -->|nao| E7
-        E2 -->|"?"| E8
+    subgraph REBASE["♻️  Rebase — automático em descendentes"]
+        direction LR
+        RB1["jj rebase -d main\nmove @ em cima de main"]:::cmd
+        RB2["descendentes\nrebased automaticamente"]:::tip
+        RB1 --> RB2
     end
 
-    subgraph SVC["services/item/get_one_with_blocks.go - fix"]
-        S1["GetOneWithBlocks\nitera blocks"]:::service
-        S2{"block.Type == question\ne data vazio?"}:::decision
-        S3["resolveBlockIsActive\nblock"]:::fix
-        S4["append blocksComplete"]:::service
-        S5["cache - return ItemWithBlocks"]:::service
-
-        SVC_FN["func resolveBlockIsActive\nblock Block Block"]:::fix
-        SVC_SW{"block.ContentMode?"}:::decision
-        SVC_A["block.IsActive =\nblock.SimpleIsActive"]:::fix
-        SVC_B["noop\nIsActive ja correto"]:::neutral
-        SVC_C["noop\nfrontend decide\npelo modo do usuario"]:::neutral
-
-        S1 --> S2
-        S2 -->|nao| S3
-        S3 --> S4
-        S4 --> S5
-        S2 -->|sim| SKIP2["skip"]:::neutral
-
-        SVC_FN --> SVC_SW
-        SVC_SW -->|SIMPLE_ONLY| SVC_A
-        SVC_SW -->|COMPLETE_ONLY| SVC_B
-        SVC_SW -->|EQUAL_CONTENT| SVC_B
-        SVC_SW -->|DIFFERENT_CONTENT| SVC_C
-
-        S3 -.->|chama| SVC_FN
+    subgraph CONFLICTS["⚔️  Conflitos — não bloqueiam"]
+        direction TB
+        CF1["jj rebase\n(mesmo com conflitos)"]:::cmd
+        CF2["conflito fica\nno arquivo como marker"]:::tip
+        CF3["jj resolve\nresolver quando quiser"]:::cmd
+        CF1 --> CF2 --> CF3
     end
 
-    subgraph RESULT["Resultado - comportamento correto"]
-        R1["block.IsActive reflete\no campo correto por ContentMode"]:::active
-        R2["SIMPLE_ONLY usa SimpleIsActive"]:::fix
-        R3["COMPLETE_ONLY usa IsActive"]:::fix
-        R4["EQUAL_CONTENT usa IsActive"]:::fix
-        R5["DIFFERENT_CONTENT frontend decide"]:::fix
-        R1 --> R2
-        R1 --> R3
-        R1 --> R4
-        R1 --> R5
+    subgraph OPLOG["🕐  Operation Log — undo ilimitado"]
+        direction TB
+        OL1["jj op log\nver todo o histórico"]:::oplog
+        OL2["jj undo\ndesfaz última op"]:::oplog
+        OL3["jj op restore ID\nvoltar a qualquer estado"]:::oplog
+        OL1 --- OL2 --- OL3
     end
 
-    TICKET --> BUG
-    TICKET -->|"fix commit c9153c4"| SVC
-    CM_SO -.->|"bug: tratado como IsActive"| BUG
-    CM_SO -.->|"fix: SimpleIsActive"| ENT
-    SVC --> RESULT
-    ENT -.->|"metodo disponivel\npara outros callers"| RESULT
+    subgraph REMOTE["☁️  Remote — GitHub / GitLab"]
+        direction TB
+        GF["jj git fetch\natualizar remotos"]:::remote
+        GP["jj git push\n--bookmark feat/minha-feature"]:::remote
+        PR["gh pr create\nabrir Pull Request"]:::remote
+        GF --> GP --> PR
+    end
+
+    subgraph FORBIDDEN["❌  Comandos inexistentes / proibidos em repos jj"]
+        direction LR
+        F1["git add"]:::forbidden
+        F2["git stash"]:::forbidden
+        F3["git branch"]:::forbidden
+        F4["git worktree"]:::forbidden
+        F5["git commit"]:::forbidden
+    end
+
+    WC -->|"snapshot automático\na cada comando jj"| AT
+    AT --> SPLIT
+    AT --> SQUASH
+    AT --> DESC
+    AT --> NEWC
+    B --> EDIT
+
+    HISTORY -->|"jj rebase"| REBASE
+    HISTORY -->|"conflito ao rebasar"| CONFLICTS
+    HISTORY -->|"algo errou"| OPLOG
+    HISTORY -->|"pronto pra publicar"| REMOTE
+
+    style WKCOPY fill:#0d1117,stroke:#89b4fa
+    style HISTORY fill:#0d1117,stroke:#a6e3a1
+    style REBASE fill:#0d1117,stroke:#fab387
+    style CONFLICTS fill:#0d1117,stroke:#f38ba8
+    style OPLOG fill:#0d1117,stroke:#fab387
+    style REMOTE fill:#0d1117,stroke:#cba6f7
+    style FORBIDDEN fill:#1a0d0d,stroke:#f38ba8

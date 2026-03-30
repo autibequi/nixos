@@ -33,14 +33,22 @@ Skill indice. Carregue as sub-skills conforme o repo e a acao solicitada.
 2. `git remote get-url origin` contem `estrategiahq/<repo>`
 3. User menciona nome do repo → ver tabela acima
 
-## Regras de git (todas as repos)
+## VCS — JJ First (todas as repos)
 
-Ver `coruja/REGISTRY.md` → secao **Git Flow — Branch vs Worktree**.
+Ver `coruja/REGISTRY.md` → secao **JJ/Git Flow**.
 
-Resumo:
-- Bug fix pontual (~1-3 arquivos) → branch simples: `git checkout -b FUK2-XXXXX/descricao`
-- Feature/refactor multi-camada/migration → worktree isolado: `git worktree add -b FUK2-XXXXX/... ../repo-FUK2-XXXXX main`
-- Nomenclatura obrigatoria: `FUK2-XXXXX/descricao-curta-em-kebab`
+**JJ é obrigatório em todos os repos.** Se repo ainda nao tem `.jj`:
+```bash
+jj git init --colocate   # inicializar jj no repo git existente — fazer isso primeiro
+```
+
+Operações de branch/worktree:
+- Nova branch: `jj new main -m "FUK2-XXXXX: descricao"` + `jj bookmark create FUK2-XXXXX/descricao-curta`
+- Trocar branch: `jj edit <bookmark>`
+- Worktree paralelo: `jj workspace add ../path`
+- Push: `jj git push --bookmark FUK2-XXXXX/descricao`
+
+Nomenclatura obrigatoria: `FUK2-XXXXX/descricao-curta-em-kebab`
 
 ## Sandbox local
 

@@ -37,33 +37,32 @@ Exceção: já dentro de fluxo aprovado nessa mesma conversa.
 
 ---
 
-## 3. Worktree isolado para qualquer mudança não-trivial
+## 3. Branch isolado para qualquer mudança não-trivial
 
-Toda mudança que envolva mais de 1 arquivo ou que possa ser proposta (não urgente) deve rodar em worktree isolado.
+Toda mudança que envolva mais de 1 arquivo ou que possa ser proposta (não urgente) deve rodar em branch isolado.
 
-### Quando usar worktree
+### Quando criar branch
 - Feature nova
 - Refactor
 - Mudança com impacto em múltiplos arquivos
 - Qualquer coisa que o user queira ver antes de decidir
 
-### Quando não usar
+### Quando não criar
 - Typo fix trivial em arquivo único
 - Mudança que o user aprovou explicitamente sem review
 
-### Fluxo worktree
+### Fluxo
 ```
-EnterWorktree  →  implementar  →  commit [proposta]  →  pitch  →  user decide
+criar branch  →  implementar  →  commit [proposta]  →  pitch  →  user decide
 ```
 
-**Sessões interativas:** sempre permitido.
-**Tasks autônomas:** só se frontmatter tiver `worktrees: true`.
+Para trabalho paralelo entre repos, usar jj bookmarks/edits (ver skill `git/jujutsu`).
 
 ---
 
 ## 4. Pitch format — apresentar antes de mergear
 
-Toda proposta implementada em worktree deve ser apresentada antes de mergear:
+Toda proposta implementada em branch deve ser apresentada antes de mergear:
 
 ```
 ┌─ proposta: <titulo curto> ──────────────────┐
@@ -84,9 +83,9 @@ Toda proposta implementada em worktree deve ser apresentada antes de mergear:
 ```
 
 Opções ao user:
-- **Aceitar** → `ExitWorktree keep` + `git merge --no-ff <branch>`, limpar worktree
+- **Aceitar** → `git merge --no-ff <branch>`, limpar branch
 - **Aceitar parcial** → cherry-pick seletivo por arquivo/hunk
-- **Descartar** → `ExitWorktree remove`, zero side effects
+- **Descartar** → `git branch -D <branch>`, zero side effects
 
 Mostrar diff REAL — rodar `git diff` de verdade, nunca inventar.
 Se proposta envolver >10 arquivos, avisar antes de implementar.
@@ -127,7 +126,7 @@ Se evidência for impossível (ex: teste manual no host), dizer o que deve ser t
 - `autocommit=ON` → pode commitar após edições
 - `autocommit=OFF` → proibido commitar sem o user pedir
 - `git add` para staging é sempre permitido
-- Commits no worktree: prefixar com `[proposta]` para distinguir de commits definitivos
+- Commits em branch de proposta: prefixar com `[proposta]` para distinguir de commits definitivos
 
 ---
 
@@ -160,18 +159,12 @@ Para monolito/bo/front: preferir delegar à Coruja — ela conhece o domínio e 
 
 ---
 
-## 11. Worktree — paths e permissões
+## 11. Paths de referência
 
 ```bash
 # Achar raiz do repo em mount aninhado
 git -C <path> rev-parse --show-toplevel
 
-# Contexto de worktree
 # /workspace → projeto externo (foco padrão)
 # /workspace/home → repo NixOS/vennon
 ```
-
-Permissões:
-- Sessão interativa → sempre ok
-- Task autônoma → só com `worktrees: true` no frontmatter
-- Se rejeitado: sugerir mudança em texto em `obsidian/sugestoes/`

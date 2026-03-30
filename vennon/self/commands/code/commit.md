@@ -1,18 +1,30 @@
 ---
 name: code:commit
-allowed-tools: Bash(git add:*), Bash(git status:*), Bash(git commit:*)
-description: Create a git commit
+description: "Salva o trabalho atual — usa jj describe se for repo jj, git commit se for repo git."
+allowed-tools: Bash(jj *), Bash(git add:*), Bash(git status:*), Bash(git commit:*)
 ---
 
-## Context
+## Contexto
 
-- Current git status: !`git status`
-- Current git diff (staged and unstaged changes): !`git diff HEAD`
-- Current branch: !`git branch --show-current`
-- Recent commits: !`git log --oneline -10`
+- É repo jj?: !`[ -d .jj ] && echo yes || echo no`
+- Status atual: !`jj status 2>/dev/null || git status 2>/dev/null`
+- Diff atual: !`jj diff 2>/dev/null || git diff HEAD 2>/dev/null`
+- Log recente: !`jj log --no-graph -r 'ancestors(@,3)' 2>/dev/null || git log --oneline -5 2>/dev/null`
 
-## Your task
+## Sua tarefa
 
-Based on the above changes, create a single git commit.
+**Se for repo jj** (`.jj` existe):
+- NÃO use `git add` — não existe staging no jj
+- Se o commit atual já tem mudanças, apenas atualize a descrição:
+  ```bash
+  jj describe -m "mensagem descritiva"
+  ```
+- Se quiser criar um novo ponto de salvamento:
+  ```bash
+  jj new -m "próxima etapa"
+  ```
 
-You have the capability to call multiple tools in a single response. Stage and create the commit using a single message. Do not use any other tools or do anything else. Do not send any other text or messages besides these tool calls.
+**Se for repo git** (sem `.jj`):
+- Stage e commit normalmente com mensagem apropriada
+
+Baseie a mensagem no que foi alterado. Seja conciso e descritivo.

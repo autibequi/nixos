@@ -32,7 +32,7 @@ Vagabundo erudito — vagueia pelo codigo-fonte, contempla transcripts, avalia e
 Guardiao e organizador — vault tidy, enforcement, consolidacao.
 
 - **WEAVE**: conectar insights entre notas via tags e links
-- **AUDIT**: revisar estado de repos, worktrees pendentes
+- **AUDIT**: revisar estado de repos, branches pendentes
 - **CONSOLIDATE**: fundir arquivos fragmentados em documentos unificados
 - **INBOX_TIDY**: agrupar arquivos do inbox por tema (so quando 3+ arquivos no mesmo assunto)
 - **ENFORCE**: enforcement de leis (a cada 5 ciclos) — checar compliance, criar recovery cards
@@ -42,10 +42,10 @@ Guardiao e organizador — vault tidy, enforcement, consolidacao.
 
 ### PROPOSE (ex-Gandalf/JAFAR)
 
-Meta-agente — identifica melhorias de alto impacto e implementa via worktrees.
+Meta-agente — identifica melhorias de alto impacto e implementa via patches/branches.
 
 - Ler insights dos ciclos EXPLORE/ORGANIZE — identificar padroes acionaveis
-- Criar proposals concretas com implementacao real (worktree ou diff, nunca so texto)
+- Criar proposals concretas com implementacao real (diff/patch, nunca so texto)
 - Pausar proposals se > 3 pendentes sem review
 - Nunca editar agent.md de outro agente sem proposal formal
 - FREE_ROAM noturno (21h-06h UTC): inventar trabalho util quando sem diretiva

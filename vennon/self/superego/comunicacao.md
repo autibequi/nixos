@@ -43,4 +43,3 @@ Tipos: `note` (geral), `warning` (alerta), `tip` (insight), `info` (status), `da
 | Novidade/relatorio | `inbox/news/<agente>_YYYYMMDD.md` |
 | Alerta urgente | `ALERTA_<agente>_<tema>.md` |
 | Jornal (paperboy) | `inbox/news/newspaper_YYYYMMDD.md` |
-| Proposta worktree | `WORKTREE_<agent>_<nome>_<YYYYMMDD>.md` |

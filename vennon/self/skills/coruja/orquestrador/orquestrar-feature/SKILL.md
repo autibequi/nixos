@@ -412,9 +412,14 @@ A **descrição curta** deve ser em kebab-case, derivada do título do card, com
 ```bash
 # Para cada repo envolvido (monolito, bo-container, front-student):
 cd /home/claude/projects/estrategia/<repo>/
-git checkout main
-git pull origin main
-git checkout -b <JIRA-ID>/vibed/<descricao-curta>
+
+# Se ainda nao tem .jj, inicializar primeiro
+[ -d .jj ] || jj git init --colocate
+
+# Criar branch via jj (obrigatorio)
+jj git fetch
+jj new main -m "<JIRA-ID>: vibed/<descricao-curta>"
+jj bookmark create <JIRA-ID>/vibed/<descricao-curta>
 ```
 
 Executar sequencialmente para cada submodulo envolvido. Se `main` não existir, usar o branch padrão do repositório.

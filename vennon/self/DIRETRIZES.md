@@ -37,15 +37,41 @@ Deferred tools requerem `ToolSearch` antes de usar — sem schema carregado caus
 - **Avatar box-drawing**: usar expressões EXATAS do catálogo (GLaDOS.avatar.md), sem modificar a caixa, sem emojis dentro de code blocks, texto à direita ≤30 chars/linha. Padding: 10 espaços à esquerda, 10 entre avatar e texto.
 - **Separação de parágrafos**: sempre separar parágrafos/seções com 1 linha em branco entre eles — tanto em output pro terminal quanto em arquivos markdown. Melhora legibilidade e escaneabilidade.
 
-## Git — Commits
+## VCS — JJ First
 
-**Regra:** NUNCA fazer `git commit` por iniciativa própria.
+**Regra:** NUNCA commitar por iniciativa própria (jj ou git).
 
-- Verificar flag `autocommit` injetada no boot (vem do bloco `---BOOT---`):
-  - `autocommit=ON` → pode commitar automaticamente após edições, usando conventional commits
-  - `autocommit=OFF` → **proibido commitar sem o usuário pedir explicitamente**
-- Mesmo com `autocommit=OFF`, pode fazer `git add` para staging — mas o commit precisa de autorização
-- Não usar `--no-verify` nem bypassar hooks sem o usuário pedir
+### JJ é o padrão — verificar SEMPRE
+
+```bash
+[ -d .jj ] && echo "repo jj" || echo "repo git puro"
+```
+
+**JJ é obrigatório em qualquer repo.** Se não tem `.jj`, inicializar antes de qualquer operação:
+
+```bash
+jj git init --colocate   # transforma repo git existente em jj+git colocado
+```
+
+| Operação | Proibido | Correto |
+|----------|----------|---------|
+| Branch | `git branch` / `git checkout -b` | `jj bookmark create <nome>` |
+| Worktree | `git worktree add` | `jj workspace add ../path` |
+| Staging | `git add` | não existe — jj captura automático |
+| Commit | `git commit` | `jj describe -m` + `jj new` |
+| Stash | `git stash` | `jj new` (commit rascunho) |
+| Checkout | `git checkout` | `jj edit <rev>` |
+| Merge | `git merge` | `jj rebase` |
+| Reset | `git reset --hard` | `jj undo` / `jj abandon` |
+| Push | `git push` | `jj git push --bookmark <nome>` |
+
+Leitura automática (sem confirmação): `jj log`, `jj status`, `jj diff`, `jj show`, `jj op log`
+
+**Flag autocommit** (aplica ao `jj describe/new` também):
+- `autocommit=ON` → pode descrever/criar commits automaticamente após edições
+- `autocommit=OFF` → **proibido sem o usuário pedir explicitamente**
+
+Não usar `--no-verify` nem bypassar hooks sem o usuário pedir.
 
 ## Ferramentas
 
@@ -93,10 +119,7 @@ MEMORY.md deve ter no máximo **30 entradas**. Quando ultrapassar esse limite, a
 - **Commits em `/workspace`**: permitido e esperado — usar identidade Pedrinho/Claudinho como de costume.
 - **Commits em `/nixos`**: permitido para mudanças de config/infra — mesma identidade.
 - **Nunca assumir que o user está perguntando sobre o host** quando `/workspace` existe e está populado.
-- **Worktrees seguem a mesma lógica:**
-  - Mudança de host/infra → worktree dentro de `/nixos/`
-  - Mudança de projeto → worktree dentro do repo correto em `/workspace/` (pode estar aninhado, ex: `estrategia/monolito/`)
-  - Para achar o repo git raiz dentro de mount, usar `git -C <path> rev-parse --show-toplevel` — o `.git` pode estar em subdiretório aninhado
+- Para achar o repo git raiz dentro de mount, usar `git -C <path> rev-parse --show-toplevel` — o `.git` pode estar em subdiretório aninhado.
 
 ## Dicas de Workflow
 

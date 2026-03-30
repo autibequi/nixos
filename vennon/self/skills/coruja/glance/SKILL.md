@@ -201,4 +201,3 @@ Exemplos de outras features:
 - [ ] **Filtro por keyword via argv**: `python3 glance.py payment` troca keywords dinamicamente
 - [ ] **Diff inter-repos**: arquivos com mesmo nome em repos diferentes destacados juntos
 - [ ] **Timestamp do ultimo commit**: mostrar "ha 2h" no header de cada repo
-- [ ] **Worktrees abertas**: listar worktrees ativas de cada repo no header

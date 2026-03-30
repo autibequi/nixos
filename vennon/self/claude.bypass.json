@@ -88,6 +88,14 @@
             "command": "~/.claude/hooks/user-prompt-submit.sh"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[[ -d .jj ]] && jj status 2>/dev/null || true"
+          }
+        ]
       }
     ],
     "Stop": [
@@ -96,6 +104,14 @@
           {
             "type": "command",
             "command": "[ -f /tmp/claude-arrivederchi ] && rm -f /tmp/claude-arrivederchi && kill $PPID || true"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[[ -d .jj ]] && jj show --summary 2>/dev/null || true"
           }
         ]
       }

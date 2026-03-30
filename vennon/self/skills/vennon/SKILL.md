@@ -1,11 +1,11 @@
 ---
 name: vennon
-description: "Auto-ativar quando: usuario menciona vennon, deck, yaa, vennon CLI, containers Docker, worktrees, upgrade do vennon, build Rust, servicos (monolito, bo-container, front-student), docker-compose, debug remoto dlv, sessoes multi-repo."
+description: "Auto-ativar quando: usuario menciona vennon, deck, yaa, vennon CLI, containers Docker, upgrade do vennon, build Rust, servicos (monolito, bo-container, front-student), docker-compose, debug remoto dlv."
 ---
 
-# vennon — CLI, Containers e Worktrees
+# vennon — CLI e Containers
 
-Skill unificada para o ecossistema de ferramentas do vennon: CLI Rust (yaa/deck/vennon), containers Docker, worktrees multi-repo, e upgrade do proprio vennon.
+Skill unificada para o ecossistema de ferramentas do vennon: CLI Rust (yaa/deck/vennon), containers Docker, e upgrade do proprio vennon.
 
 ---
 
@@ -28,7 +28,7 @@ Skill unificada para o ecossistema de ferramentas do vennon: CLI Rust (yaa/deck/
 ├── docker/                     docker-compose por servico
 └── self/                       self-knowledge do sistema
 
-/workspace/self/                runtime engine (sempre rw, sem worktree necessario)
+/workspace/self/                runtime engine (sempre rw, editar diretamente)
 ├── skills/                     namespace de skills
 ├── agents/                     cards de agentes (frontmatter + instrucoes)
 ├── hooks/                      hooks (Claude + Cursor + ENGINE)
@@ -286,137 +286,23 @@ services:
 
 ---
 
-## Worktrees — Sessoes Multi-Repo
-
-Gerencia sessoes de trabalho multi-repo via `vennon wt`. Cada sessao representa
-uma tarefa com branches checadas em paralelo em todos os repos relevantes.
-
-### Interface
-
-```bash
-vennon wt                        # lista sessoes (star = ativa)
-vennon wt list                   # mesmo que acima
-vennon wt new <nome>             # cria sessao (pede confirmacao)
-vennon wt <nome>                 # switch para sessao (stash auto)
-vennon wt main                   # volta para main
-vennon wt <nome> --close         # deleta sessao
-vennon wt <nome> --force         # deleta sem confirmacao
-vennon worktree                  # lista worktrees por servico
-vennon worktree monolito         # filtra por servico
-vennon worktree --json           # saida JSON
-```
-
-### Estrutura no disco
-
-```
-/workspace/home/worktree/
-├── .active                      <- sessao ativa atual ("main" ou "<nome>")
-└── <nome>/
-    ├── monolito/                <- branch <nome> do monolito
-    ├── bo-container/            <- branch <nome> do bo-container
-    ├── front-student/           <- branch <nome> do front-student
-    └── toggler/                 <- (e todos os outros repos em estrategia/)
-```
-
-Repos descobertos automaticamente: todos com `.git` em `/workspace/home/estrategia/`.
-
-### Naming — branch SEMPRE e o nome da tarefa
-
-**Convencao obrigatoria:**
-- CTO: `vennon wt new FUK2-12345` -> branch `FUK2-12345` em todos os repos
-- Agentes: `vennon wt new <agent>/<task-kebab>` -> branch `<agent>/<task-kebab>`
-
-Exemplos:
-```bash
-vennon wt new FUK2-12345                     # CTO: feature card
-vennon wt new gandalf/FUK2-12345-auth-fix    # Gandalf: proposta
-vennon wt new coruja/metrics-dashboard       # Coruja: investigacao
-vennon wt new mechanic/nixos-waybar-fix      # Mechanic: fix de sistema
-```
-
-**Nunca criar branch sem nome de tarefa.** Se nao tem card Jira, usar descricao kebab-case.
-
-### Criar sessao
-
-```bash
-vennon wt new gandalf/auth-refactor
-```
-
-Mostra preview:
-```
-  monolito      branch nova  (base: HEAD)
-  bo-container  branch existe (origin/gandalf/auth-refactor)
-  front-student branch nova  (base: HEAD)
-
-Confirmar? [s/N]
-```
-
-- Branch local existente -> usa ela
-- Branch remota existente -> checkout com tracking
-- Branch inexistente -> cria nova a partir de HEAD
-
-### Switch de sessao
-
-```bash
-vennon wt gandalf/auth-refactor
-```
-
-Fluxo automatico:
-1. Stash de arquivos pendentes na sessao atual (tag: `vennon-wt-<sessao>`)
-2. Atualiza `/workspace/home/worktree/.active`
-3. Restaura stash da sessao alvo (se existir)
-
-### Sessao main
-
-`vennon wt main` nao tem diretorio fisico — aponta para os repos principais
-em `/workspace/home/estrategia/`. Stash da sessao atual e salvo antes de sair.
-
-### Integrar com vennon
-
-Apos criar sessao, o runner sabe usar os worktrees:
-
-```bash
-vennon monolito start \
-  --worktree=gandalf/auth-refactor
-```
-
-O `--worktree` resolve automaticamente para
-`/workspace/home/worktree/gandalf-auth-refactor/monolito/`.
-
-### Regras de worktree
-
-- **Branch = nome da tarefa** — sempre, sem excecao
-- Agentes nunca commitam sem CTO pedir (Lei 6)
-- Maximo 3 sessoes pendentes por agente
-- Agentes apresentam via inbox card `WORKTREE_<agent>_<nome>_<YYYYMMDD>.md`
-- CTO pode revisar com `vennon wt <sessao-do-agente>`
-- Regras completas: `self/superego/worktrees.md`
-
----
-
 ## Upgrade do vennon — Workflow de Desenvolvimento
 
 ### Tipo de mudanca — onde trabalhar
 
-| Tipo | Onde editar | Worktree? |
-|------|-------------|-----------|
-| CLI — novo comando ou flag | `/workspace/host/vennon/rust/crates/vennon-cli/src/` | Sim |
-| CLI — logica de comando existente | `/workspace/host/vennon/rust/crates/vennon-cli/src/commands/` | Sim |
-| Docker — compose, Dockerfile | `/workspace/host/vennon/docker/` | Sim |
-| Agente — comportamento, schedule, model | `/workspace/self/ego/<nome>/agent.md` | Nao |
-| Skill — criar ou atualizar | `/workspace/self/skills/` | Nao |
-| Hook — pre/post-tool, session-start | `/workspace/self/hooks/` | Nao |
-| Script utilitario | `/workspace/self/scripts/` | Nao |
+| Tipo | Onde editar |
+|------|-------------|
+| CLI — novo comando ou flag | `/workspace/host/vennon/rust/crates/vennon-cli/src/` |
+| CLI — logica de comando existente | `/workspace/host/vennon/rust/crates/vennon-cli/src/commands/` |
+| Docker — compose, Dockerfile | `/workspace/host/vennon/docker/` |
+| Agente — comportamento, schedule, model | `/workspace/self/ego/<nome>/agent.md` |
+| Skill — criar ou atualizar | `/workspace/self/skills/` |
+| Hook — pre/post-tool, session-start | `/workspace/self/hooks/` |
+| Script utilitario | `/workspace/self/scripts/` |
 
-### Workflow A — CLI / Docker / Rust (worktree recomendado)
+### Workflow A — CLI / Docker / Rust
 
-#### 1. Criar worktree isolado
-
-```bash
-git -C /workspace/host worktree add /tmp/vennon-upgrade-<feature> -b feat/vennon-<feature>
-```
-
-#### 2. Mapear o que precisa mudar
+#### 1. Mapear o que precisa mudar
 
 Para CLI Rust, identificar:
 - Novo comando? Adicionar variante em `enum Commands` em `main.rs` + dispatch + funcao em `commands/`
@@ -429,23 +315,23 @@ Para CLI Rust, identificar:
 ```bash
 # Compilar
 nix-shell -p rustc cargo --run \
-  "cd /tmp/vennon-upgrade-<feature>/vennon/rust && cargo build --release -p vennon-cli 2>&1 | tail -5"
+  "cd /workspace/host/vennon/rust && cargo build --release -p vennon-cli 2>&1 | tail -5"
 
 # Executar o binario diretamente
-/tmp/vennon-upgrade-<feature>/vennon/rust/target/release/vennon <comando> --help
-/tmp/vennon-upgrade-<feature>/vennon/rust/target/release/vennon <comando> <args>
+/workspace/host/vennon/rust/target/release/vennon <comando> --help
+/workspace/host/vennon/rust/target/release/vennon <comando> <args>
 ```
 
-#### 4. Commitar no worktree
+#### 4. Commitar
 
 ```bash
-git -C /tmp/vennon-upgrade-<feature> add -A
-git -C /tmp/vennon-upgrade-<feature> commit -m "feat(vennon): <descricao concisa>"
+git -C /workspace/host add -p
+git -C /workspace/host commit -m "feat(vennon): <descricao concisa>"
 ```
 
-### Workflow B — Self (agents, skills, hooks, scripts — sem worktree)
+### Workflow B — Self (agents, skills, hooks, scripts)
 
-Editar diretamente em `/workspace/self/`. Nao precisa de worktree porque `/workspace/self/` e o runtime vivo da sessao.
+Editar diretamente em `/workspace/self/`. E o runtime vivo da sessao.
 
 ### Casos comuns
 
@@ -475,7 +361,6 @@ Editar diretamente em `/workspace/self/`. Nao precisa de worktree porque `/works
 
 ### Regras de ouro
 
-- **Para mudancas em CLI/Docker**, considerar worktree para isolamento
 - **Sempre testar antes de declarar pronto** — minimo: compilar + `vennon <cmd> --help` + 1 teste funcional
 - **main.rs alterado?** Obrigatorio atualizar `help.rs` (DIRECTIVE no topo do arquivo)
 - **Nunca chamar** `deck stow`, `vennon switch` ou `vennon os` de dentro do container
@@ -485,18 +370,13 @@ Editar diretamente em `/workspace/self/`. Nao precisa de worktree porque `/works
 ### Capacidades disponiveis no container
 
 ```bash
-# Compilar e testar CLI Rust (worktree ou main)
+# Compilar e testar CLI Rust
 nix-shell -p rustc cargo --run \
-  "cd <worktree>/vennon/rust && cargo build --release -p vennon-cli 2>&1 | tail -5"
-<worktree>/vennon/rust/target/release/vennon <cmd>
+  "cd /workspace/host/vennon/rust && cargo build --release -p vennon-cli 2>&1 | tail -5"
+/workspace/host/vennon/rust/target/release/vennon <cmd>
 
 # Instalar qualquer ferramenta on-the-fly
 nix-shell -p <pacote> --run "<cmd>"
-
-# Git worktrees
-git -C /workspace/host worktree add /tmp/<nome> -b <branch>
-git -C /workspace/host worktree remove /tmp/<nome>
-git -C /workspace/host worktree list
 
 # Escrever em self/
 # /workspace/self/ e sempre rw nesta sessao
@@ -509,7 +389,6 @@ PRONTO: <nome da feature>
 
 tipo:     cli | agent | skill | hook | script
 branch:   feat/vennon-<feature>      (N/A para mudancas em self/)
-worktree: /tmp/vennon-upgrade-<feature>   (N/A para mudancas em self/)
 arquivos: lista dos arquivos modificados
 
 testado:

@@ -38,11 +38,11 @@ updated: 2026-03-26T02:47Z
 - **TaskStop** — encerra task em background
 - **TaskOutput** — recupera output de task em background (block=true aguarda)
 
-### Git & Repositórios
+### VCS — JJ First
+- **jj** — VCS padrão do sistema. Branches = bookmarks. Worktrees = workspaces. Skill: `git/jujutsu`
+- **git** — fallback para repos sem `.jj`. Verificar antes: `[ -d .jj ]`
 - **EnterPlanMode** — modo de planejamento estruturado antes de implementar
 - **ExitPlanMode** — aprova plano e autoriza implementação
-- **EnterWorktree** — cria branch isolado em `.claude/worktrees/` (opcional, perguntar ao user)
-- **ExitWorktree** — sai de worktree (keep/remove)
 
 ### MCP Tools (via tool schema)
 - **Jira** — getJiraIssue, editJiraIssue, createJiraIssue, transitionJiraIssue, searchJiraIssuesUsingJql
@@ -80,7 +80,7 @@ Análise de diff, camadas, fluxo de dados, qualidade. Subcommands:
 - `/meta:context:boot-debug` — debug pipeline de boot (o que carregou, lazy-loads, recomendações)
 
 #### Meta Social
-- `/meta:phone` — central dos 11 agentes (briefing, call direto, dashboard de worktrees)
+- `/meta:phone` — central dos 11 agentes (briefing, call direto, status de agentes)
 - `/meta:feed` — digest unificado (RSS por categoria + Obsidian: contractors, tasks, inbox)
 - `/meta:tamagochi` — interagir com pet virtual
 - `/meta:rules` — regras do sistema Vennon (Lei 1-11, scheduling, territorios)
@@ -91,20 +91,20 @@ Análise de diff, camadas, fluxo de dados, qualidade. Subcommands:
 - `/meta:cleanup` — revisão e limpeza de sessão
 - `/meta:envs` — lista ~/.vennon flags (tokens mascarados, semáforos visíveis)
 
-### /commit — Git
-Criar commit com mensagem interativa. Segue conventional commits.
+### /commit — JJ/Git
+Salvar trabalho atual. Se repo jj: `jj describe -m` + `jj new`. Se repo git puro: conventional commit.
 
-### /commit-push-pr — Git Workflow
-Commit + push + abrir PR automaticamente.
+### /commit-push-pr — JJ/Git Workflow
+Commit + push + abrir PR. Se jj: `jj bookmark` + `jj git push` + `gh pr create`.
 
 ### /review-pr — PR Review
 Review especializado usando agentes (5 perspectivas de devs reais).
 
 ### /feature-dev — Guided Development
-Desenvolvimento guiado de feature (worktree, arquitetura, testes).
+Desenvolvimento guiado de feature (arquitetura, testes).
 
-### /clean_gone — Git Cleanup
-Remove branches locais marcadas como [gone] no remoto.
+### /clean_gone — JJ/Git Cleanup
+Remove bookmarks jj ou branches git locais sem rastreamento remoto.
 
 ---
 
@@ -138,7 +138,6 @@ Remove branches locais marcadas como [gone] no remoto.
 
 ### vennon/* — Sistema & Infraestrutura
 - **vennon:upgrade** — implementa features do vennon (Rust-only)
-- **vennon:worktree** — sistema de worktrees multi-repo
 - **vennon:healthcheck** — health checks + diagnóstico
 - **vennon:linux** — NixOS, Hyprland, dotfiles
 - **vennon:container** — Docker infrastructure, services
@@ -150,7 +149,7 @@ Remove branches locais marcadas como [gone] no remoto.
 - **meta:obsidian** — operações no vault
   - sub: `board/`, `agentroom/`, `graph/`, `dataview/`
 - **meta:rules** — regras do sistema (Lei 1-11, territorios, scheduling, spaces)
-  - sub: `laws/`, `agentroom/`, `scheduling/`, `map/`, `bedrooms/`, `spaces/`, `worktrees/`
+  - sub: `laws/`, `agentroom/`, `scheduling/`, `map/`, `bedrooms/`, `spaces/`
 - **meta:skill** — sobre skills
   - sub: `explain/` (flowchart Mermaid), `evolve/`
 - **meta:orchestrator** — orquestrador de projeto autonomo (astroboy pipeline)
@@ -185,10 +184,13 @@ CLI: `yaa agents` | `yaa agents run <nome>` | `/meta:phone call <nome>`
 | Context tokens | `/meta:context:analysis` |
 | Falar com agente | `/meta:phone call <nome>` |
 | Renderizar | `/meta:relay` |
-| PR workflow | `/commit-push-pr` ou `/review-pr` |
+| PR workflow (jj) | `/commit-push-pr` → `jj bookmark` + `jj git push` + `gh pr` |
 | NixOS/host | `/vennon:linux` |
 | Feature guiada | `/feature-dev` |
-| Limpar branches | `/clean_gone` |
+| Limpar bookmarks/branches | `/clean_gone` |
+| Criar branch (jj) | `jj bookmark create feat/nome` |
+| Novo worktree (jj) | `jj workspace add ../path` |
+| Trocar de commit (jj) | `jj edit <rev>` |
 
 ---
 

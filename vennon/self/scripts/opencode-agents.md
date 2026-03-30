@@ -26,7 +26,7 @@ Tambem disponiveis em `~/.cursor/skills/` (montado automaticamente).
 | `code/*` | Analise, debug, review, tdd, goodpractices |
 | `coruja/*` | Estrategia (Go/Vue/Nuxt) |
 | `linux/` | NixOS, Hyprland, dotfiles |
-| `vennon/` | yaa, deck, containers, worktrees |
+| `vennon/` | yaa, deck, containers |
 | `webview/` | Chrome relay, mermaid, templates HTML |
 | `ascii/` | Box-drawing, avatares, design system |
 | `humanize/` | Texto natural |
