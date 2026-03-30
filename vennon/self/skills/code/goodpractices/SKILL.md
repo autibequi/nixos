@@ -83,9 +83,9 @@ Toda proposta implementada em branch deve ser apresentada antes de mergear:
 ```
 
 Opções ao user:
-- **Aceitar** → `git merge --no-ff <branch>`, limpar branch
-- **Aceitar parcial** → cherry-pick seletivo por arquivo/hunk
-- **Descartar** → `git branch -D <branch>`, zero side effects
+- **Aceitar** → `jj rebase -d main` + `jj squash` se necessário, limpar bookmark
+- **Aceitar parcial** → `jj split` para selecionar hunks/arquivos
+- **Descartar** → `jj bookmark delete <nome>` + `jj abandon <rev>`, zero side effects
 
 Mostrar diff REAL — rodar `git diff` de verdade, nunca inventar.
 Se proposta envolver >10 arquivos, avisar antes de implementar.

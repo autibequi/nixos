@@ -206,7 +206,7 @@ Se sim:
 
 ```bash
 cd /home/claude/projects/estrategia/<repo>/
-HOME=/tmp git push origin $(HOME=/tmp git branch --show-current)
+jj git push --bookmark $(jj log -r @ --no-graph -T 'local_bookmarks.map(|b| b.name()).join(" ")' 2>/dev/null)
 ```
 
 ## Regras
