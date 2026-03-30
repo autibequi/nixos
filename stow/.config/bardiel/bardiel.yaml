@@ -1,3 +1,6 @@
 # Paths usados pelo bardiel (update, resolução de repo)
 NIXOS_PATH: ~/nixos
 BARDIEL_PATH: ~/projects/pessoal/bardiel
+OBSIDIAN_PATH: ~/.ovault/Work
+SELF_PATH: ~/projects/pessoal/bardiel/self
+DEFAULT_TARGET_PATH: ~/projects/estrategia
