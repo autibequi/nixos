@@ -183,17 +183,16 @@ sonnet_pct=$(round "$sonnet_pct")
 # API costuma mandar inteiros ×10 (320 → 32%) ou ×100 (3200 → 32%). Só escala se os três > 100.
 awk_fix_scale() {
   awk -v s="$sess_pct" -v w="$semana_pct" -v n="$sonnet_pct" 'function ok(x) { return (x >= 0 && x <= 100) }
+  function fix(v,    v10,v100) {
+    if (v <= 100) return v
+    v10 = v/10; v100 = v/100
+    if (ok(v10)) return v10
+    if (ok(v100)) return v100
+    return 100
+  }
   BEGIN {
     s+=0; w+=0; n+=0
-    if (s > 100 && w > 100 && n > 100) {
-      s10 = s/10; w10 = w/10; n10 = n/10
-      s100 = s/100; w100 = w/100; n100 = n/100
-      if (ok(s10) && ok(w10) && ok(n10)) { s = s10; w = w10; n = n10 }
-      else if (ok(s100) && ok(w100) && ok(n100)) { s = s100; w = w100; n = n100 }
-    }
-    if (s > 100) s = 100
-    if (w > 100) w = 100
-    if (n > 100) n = 100
+    s = fix(s); w = fix(w); n = fix(n)
     if (s < 0) s = 0
     if (w < 0) w = 0
     if (n < 0) n = 0
