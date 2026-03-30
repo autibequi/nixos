@@ -186,6 +186,7 @@ awk_fix_scale() {
   function fix(v,    v10,v100) {
     if (v <= 100) return v
     v10 = v/10; v100 = v/100
+    if (v >= 1000 && ok(v100)) return v100
     if (ok(v10)) return v10
     if (ok(v100)) return v100
     return 100
