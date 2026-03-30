@@ -423,6 +423,88 @@ jj git push --all
 
 ---
 
+## Workflow Multi-Repo (Features Cross-Repo)
+
+Pedro sempre trabalha em features que tocam os 3 repos da Estratégia simultaneamente:
+`monolito` (Go) + `bo-container` (Vue 2) + `front-student` (Nuxt 2)
+
+O mesmo ticket/nome de branch é usado nos 3 — ex: `FUK2-11746/toc-async-builder`.
+
+### Iniciar feature nova nos 3 repos
+
+```bash
+TICKET="FUK2-99999/minha-feature"
+
+for repo in monolito bo-container front-student; do
+  cd /workspace/projects/estrategia/$repo
+  jj new main@origin -m "feat: descrição da feature"
+  jj bookmark create $TICKET --rev @
+done
+```
+
+### Trabalhar em um repo específico
+
+```bash
+cd /workspace/projects/estrategia/monolito
+jj log   # ver onde está
+jj new -m "feat(api): endpoint X"   # novo commit
+# editar arquivos...
+```
+
+### Ver estado dos 3 de uma vez
+
+```bash
+for repo in monolito bo-container front-student; do
+  echo "=== $repo ==="
+  cd /workspace/projects/estrategia/$repo && jj log --limit 3
+done
+```
+
+### Sincronizar com main (rebase nos 3)
+
+```bash
+TICKET="FUK2-11746/toc-async-builder"
+
+for repo in monolito bo-container front-student; do
+  cd /workspace/projects/estrategia/$repo
+  jj git fetch
+  jj rebase -b $TICKET -d main@origin
+done
+```
+
+### Push nos 3
+
+```bash
+TICKET="FUK2-11746/toc-async-builder"
+
+for repo in monolito bo-container front-student; do
+  cd /workspace/projects/estrategia/$repo
+  jj git push --bookmark $TICKET
+done
+```
+
+### Abandonar feature inteira (desfazer tudo)
+
+```bash
+TICKET="FUK2-11746/toc-async-builder"
+
+for repo in monolito bo-container front-student; do
+  cd /workspace/projects/estrategia/$repo
+  jj abandon $TICKET   # remove commits locais
+  jj bookmark delete $TICKET 2>/dev/null || true
+done
+```
+
+### Iniciar nova sessão de trabalho (repo já tem feature)
+
+```bash
+cd /workspace/projects/estrategia/monolito
+jj edit FUK2-11746/toc-async-builder   # volta para o commit da feature
+jj new -m "feat: continuar X"          # novo commit em cima
+```
+
+---
+
 ## Workflow com AI (Claude Code + jj)
 
 ### Por que jj é superior para agentes AI
@@ -433,6 +515,28 @@ jj git push --all
 | `git clean` acidental destroi trabalho | `jj op undo` restaura tudo |
 | Perda de contexto entre sessões | `jj obslog --revision @ --patch` mostra o que mudou |
 | Force-push perigoso | jj só faz force-push quando necessário, de forma segura |
+
+### Ciclo com Pedro (fluxo aprovação/abandono)
+
+```bash
+# 1. Pedro descreve o que quer
+jj new -m "feat: botão de logout"   # ← ANTES de editar qualquer arquivo
+
+# 2. Claude implementa (edita arquivos normalmente)
+
+# 3. Pedro testa
+
+# ✅ Aprovado:
+jj bookmark create feat/logout --rev @
+jj git push --bookmark feat/logout
+
+# ❌ Não gostou — desfaz tudo de uma vez:
+jj abandon     # commit some, arquivos voltam ao estado anterior
+# ou se quiser desfazer a operação inteira (inclusive o jj new):
+jj op undo
+```
+
+> `jj abandon` é o botão de desfazer total. Sem staging pra limpar, sem reset, sem nada.
 
 ### Regras para o agente
 

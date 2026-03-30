@@ -121,5 +121,7 @@
     "type": "command",
     "command": "~/.claude/scripts/statusline.sh"
   },
-  "skipAutoPermissionPrompt": true
+  "effortLevel": "low",
+  "skipAutoPermissionPrompt": true,
+  "model": "sonnet[1m]"
 }

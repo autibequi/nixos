@@ -31,24 +31,33 @@ estrategiahq
 | coruja/grafana | `coruja/grafana/` | Query logs Loki e dashboards Grafana — servicos, patterns de debug, integracao com workflow |
 | coruja/opensearch | `coruja/opensearch/` | Consultar cluster OpenSearch sandbox — mapeamento de indices, queries DSL, links Dev Console |
 
-## JJ/Git Flow
+## JJ Flow
 
-> **JJ é o único VCS.** Se repo não tem `.jj`: `jj git init --colocate` antes de qualquer operacao.
+> Todos os 3 repos já têm jj colocated (`.jj/` + `.git/`). Nenhum setup necessário.
+> Mesmo bookmark name nos 3 repos — features são sempre full-stack.
 
-### 1. Antes de qualquer implementacao: buscar trabalho existente
+### 1. Buscar trabalho existente
 
 ```bash
-jj bookmark list | grep -i "<FUK2-XXXXX>"
+for repo in monolito bo-container front-student; do
+  echo "=== $repo ===" && jj -R /workspace/projects/estrategia/$repo bookmark list | grep -i "<FUK2-XXXXX>"
+done
 ```
 
-Se ja existir bookmark → ir para ele, nao criar novo.
+Se ja existir bookmark → `jj edit <bookmark>`, nao criar novo.
 
-### 2. Criar bookmark
+### 2. Criar bookmark (mesmo nome nos 3)
 
-| Situacao | Comando |
-|---|---|
-| **Bug fix / correcao pontual** (~1-3 arquivos, 1 repo) | `jj new main -m "FUK2-XXXXX: desc"` + `jj bookmark create FUK2-XXXXX/descricao-curta` |
-| **Feature multi-repo ou complexa** | `jj new main -m "..."` + `jj bookmark create FUK2-XXXXX/descricao` em cada repo |
+```bash
+for repo in monolito bo-container front-student; do
+  cd /workspace/projects/estrategia/$repo
+  jj git fetch
+  jj new main -m "FUK2-XXXXX: descricao-curta"
+  jj bookmark create FUK2-XXXXX/descricao-curta
+done
+```
+
+Para bug fix pontual (1 repo só): mesmo fluxo, sem o loop.
 
 ### 3. Nomenclatura obrigatoria
 

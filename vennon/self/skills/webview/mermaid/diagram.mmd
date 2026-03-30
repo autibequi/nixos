@@ -1,92 +1,59 @@
-flowchart TD
-    classDef commit fill:#313244,stroke:#89b4fa,color:#cdd6f4
-    classDef working fill:#1e1e2e,stroke:#89b4fa,color:#89b4fa,font-weight:bold
-    classDef cmd fill:#181825,stroke:#a6e3a1,color:#a6e3a1,font-family:monospace,font-size:12px
-    classDef forbidden fill:#2a1a1a,stroke:#f38ba8,color:#f38ba8,font-size:11px
-    classDef bookmark fill:#1e1e2e,stroke:#f9e2af,color:#f9e2af
-    classDef remote fill:#1a1a2e,stroke:#cba6f7,color:#cba6f7
-    classDef oplog fill:#1a1a2e,stroke:#fab387,color:#fab387
-    classDef tip fill:#181825,stroke:#585b70,color:#a6adc8,font-size:11px,font-style:italic
+%%{init: {'theme': 'dark', 'themeVariables': { 'fontSize': '15px' }}}%%
+flowchart TB
 
-    subgraph WKCOPY["💾  Working Copy — sem staging area"]
-        direction TB
-        WC["📄 arquivos no disco"]:::working
-        TIP1["qualquer edição já é parte\ndo commit atual (@)"]:::tip
+  subgraph USR["Usuário"]
+    direction LR
+    pedro(["Pedro"]) -->|"prompt / feedback"| cli["Claude Code CLI\n(terminal)"]
+  end
+
+  subgraph CTR["Container vennon"]
+    direction TB
+
+    agent["Claude / Agente"]
+
+    subgraph CTOOLS["Ferramentas de relay no container"]
+      direction LR
+      relay_py["chrome-relay.py\nnav / show / inject / tabs / status"]
+      buzz_cli["buzz socket client\nrelay-nav / relay-show / relay-inject"]
+      mmd_srv["mermaid_live_server.py :9876\nPOST /mermaid-push  →  SSE /mermaid-live"]
+      content_srv["Content server :8766\n/tmp/chrome-relay/\nHTML, assets estáticos"]
     end
 
-    subgraph HISTORY["🔗  Histórico Local"]
-        direction TB
-        A["● A  change:abc123\n'feat: base'"]:::commit
-        B["● B  change:def456\n'feat: helper'"]:::commit
-        AT["◉ @  change:ghi789\n'(sem desc)'  ← working copy"]:::working
-        A --> B --> AT
+    agent -->|"Bash / chrome-relay.py"| relay_py
+    agent -->|"buzz(...)"| buzz_cli
+    agent -->|"curl POST /mermaid-push"| mmd_srv
+    relay_py --- content_srv
+  end
 
-        BM["🔖 bookmark\nfeat/minha-feature"]:::bookmark
-        BM -.->|aponta para| AT
+  subgraph HOST["Host"]
+    direction LR
+    cdp["Chrome CDP :9222\nWebSocket DevTools"]
+    buzz_daemon["relay daemon\nbuzz host-side"]
+    chrome["Chrome Browser"]
 
-        SPLIT["jj split\ndivide @ em 2"]:::cmd
-        SQUASH["jj squash\n@ absorve no pai"]:::cmd
-        DESC["jj describe -m 'msg'\natualiza mensagem"]:::cmd
-        NEWC["jj new\nnovo commit acima de @"]:::cmd
-        EDIT["jj edit B\nvolta a editar B\n(@ move pra B)"]:::cmd
-    end
+    cdp -->|"DevTools Protocol"| chrome
+    buzz_daemon -->|"IPC nav / inject / tabs"| chrome
+  end
 
-    subgraph REBASE["♻️  Rebase — automático em descendentes"]
-        direction LR
-        RB1["jj rebase -d main\nmove @ em cima de main"]:::cmd
-        RB2["descendentes\nrebased automaticamente"]:::tip
-        RB1 --> RB2
-    end
+  cli --> agent
+  relay_py -->|"WebSocket CDP"| cdp
+  buzz_cli -->|"Unix socket IPC"| buzz_daemon
+  content_srv -.->|"HTTP GET  assets / HTML"| chrome
+  mmd_srv -.->|"serve base.html"| chrome
+  chrome -->|"SSE subscription\n/mermaid-live"| mmd_srv
 
-    subgraph CONFLICTS["⚔️  Conflitos — não bloqueiam"]
-        direction TB
-        CF1["jj rebase\n(mesmo com conflitos)"]:::cmd
-        CF2["conflito fica\nno arquivo como marker"]:::tip
-        CF3["jj resolve\nresolver quando quiser"]:::cmd
-        CF1 --> CF2 --> CF3
-    end
+  classDef box fill:#313244,stroke:#585b70,color:#cdd6f4
+  classDef entry fill:#cba6f7,color:#1e1e2e,font-weight:bold
+  classDef srv fill:#89b4fa,color:#1e1e2e
+  classDef browser fill:#a6e3a1,color:#1e1e2e,font-weight:bold
 
-    subgraph OPLOG["🕐  Operation Log — undo ilimitado"]
-        direction TB
-        OL1["jj op log\nver todo o histórico"]:::oplog
-        OL2["jj undo\ndesfaz última op"]:::oplog
-        OL3["jj op restore ID\nvoltar a qualquer estado"]:::oplog
-        OL1 --- OL2 --- OL3
-    end
+  class pedro entry
+  class cli,agent box
+  class relay_py,buzz_cli,mmd_srv,content_srv srv
+  class cdp,buzz_daemon box
+  class chrome browser
 
-    subgraph REMOTE["☁️  Remote — GitHub / GitLab"]
-        direction TB
-        GF["jj git fetch\natualizar remotos"]:::remote
-        GP["jj git push\n--bookmark feat/minha-feature"]:::remote
-        PR["gh pr create\nabrir Pull Request"]:::remote
-        GF --> GP --> PR
-    end
-
-    subgraph FORBIDDEN["❌  Comandos inexistentes / proibidos em repos jj"]
-        direction LR
-        F1["git add"]:::forbidden
-        F2["git stash"]:::forbidden
-        F3["git branch"]:::forbidden
-        F4["git worktree"]:::forbidden
-        F5["git commit"]:::forbidden
-    end
-
-    WC -->|"snapshot automático\na cada comando jj"| AT
-    AT --> SPLIT
-    AT --> SQUASH
-    AT --> DESC
-    AT --> NEWC
-    B --> EDIT
-
-    HISTORY -->|"jj rebase"| REBASE
-    HISTORY -->|"conflito ao rebasar"| CONFLICTS
-    HISTORY -->|"algo errou"| OPLOG
-    HISTORY -->|"pronto pra publicar"| REMOTE
-
-    style WKCOPY fill:#0d1117,stroke:#89b4fa
-    style HISTORY fill:#0d1117,stroke:#a6e3a1
-    style REBASE fill:#0d1117,stroke:#fab387
-    style CONFLICTS fill:#0d1117,stroke:#f38ba8
-    style OPLOG fill:#0d1117,stroke:#fab387
-    style REMOTE fill:#0d1117,stroke:#cba6f7
-    style FORBIDDEN fill:#1a0d0d,stroke:#f38ba8
+  style USR fill:#1e1e2e,stroke:#f9e2af,stroke-width:2px,color:#cdd6f4
+  style CTR fill:#1e1e2e,stroke:#89b4fa,stroke-width:2px,color:#cdd6f4
+  style CTOOLS fill:#181825,stroke:#585b70,stroke-width:1px,stroke-dasharray:4 4,color:#a6adc8
+  style HOST fill:#1e1e2e,stroke:#a6e3a1,stroke-width:2px,color:#cdd6f4

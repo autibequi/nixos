@@ -27,9 +27,6 @@ No jj, bookmarks "gone" são os que têm `@origin` (tracking remoto) mas o remot
    jj bookmark delete <nome>
    ```
 
-Se o repo usar git (sem `.jj`), executar o equivalente git:
-```bash
-git branch -v | grep '\[gone\]' | awk '{print $1}' | xargs -r git branch -D
-```
+Se o repo não tiver `.jj`, inicializar antes: `jj git init --colocate`
 
 Reporte quais bookmarks foram removidos, ou informe que não havia nada para limpar.

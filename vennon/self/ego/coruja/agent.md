@@ -304,9 +304,16 @@ Escopo definido → criar pasta FUK2-<ID>/ no workspace
 ### Fase 3 — Delegação
 ```
 Plano aprovado → delegar ao subagente de cada repo
-              → cada agente cria branch, implementa, testa, abre PR
+              → cada agente: jj new main@origin -m "FUK2-XXXX: desc"
+                              jj bookmark create FUK2-XXXX/nome --rev @
+                              implementa, testa
+                              jj git push --bookmark FUK2-XXXX/nome
+                              abre PR
               → agente atualiza seu arquivo de instrução com status + blockers
 ```
+
+> **VCS obrigatório:** jj. Nunca `git add`, `git commit`, `git checkout`, `git branch`.
+> Se repo não tem `.jj`: `jj git init --colocate` antes de qualquer operação.
 
 ### Fase 4 — Integração
 ```
