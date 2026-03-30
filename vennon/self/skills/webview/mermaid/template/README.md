@@ -8,6 +8,7 @@ Cada ficheiro `.md` nesta pasta contém **um tipo de diagrama**, resumo de utili
 
 | Ficheiro | Tipo Mermaid | Quando escolher |
 |----------|----------------|-----------------|
+| [**feature-diagram.md**](feature-diagram.md) | `flowchart LR` + mega blocos | **⭐ Feature completa cross-repo** — FRONTEND / BACKEND / ASYNC, nós por método/arquivo, emojis por tipo, cores Catppuccin por camada. Usar para: diff de branch, PR review, mapeamento de funcionalidade. |
 | [flow.md](flow.md) | `flowchart` / `graph` | Fluxos, decisões, pipelines, arquitetura lógica simples |
 | [flow-subgraphs.md](flow-subgraphs.md) | `flowchart` + **vários `subgraph`** | **Segregar** apps/camadas (ex.: front-student, bo-container, monolito, fila) e **ligar** com arestas |
 | [sequence.md](sequence.md) | `sequenceDiagram` | Chamadas HTTP, filas, ordem temporal entre atores |

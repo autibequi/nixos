@@ -1,59 +1,141 @@
-%%{init: {'theme': 'dark', 'themeVariables': { 'fontSize': '15px' }}}%%
-flowchart TB
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#313244', 'primaryTextColor': '#cdd6f4', 'primaryBorderColor': '#585b70', 'lineColor': '#6c7086', 'secondaryColor': '#1e1e2e', 'tertiaryColor': '#181825', 'background': '#1e1e2e', 'mainBkg': '#313244', 'nodeBorder': '#585b70', 'clusterBkg': '#181825', 'clusterBorder': '#45475a', 'titleColor': '#cdd6f4', 'edgeLabelBackground': '#1e1e2e', 'fontFamily': 'JetBrains Mono, monospace'}}}%%
 
-  subgraph USR["Usuário"]
-    direction LR
-    pedro(["Pedro"]) -->|"prompt / feedback"| cli["Claude Code CLI\n(terminal)"]
-  end
+flowchart LR
 
-  subgraph CTR["Container vennon"]
-    direction TB
+    %% ══════════════════════════════════════════════
+    %%  FRONTEND
+    %% ══════════════════════════════════════════════
+    subgraph FRONT["🖥️  FRONTEND — bo-container"]
+        direction TB
 
-    agent["Claude / Agente"]
+        subgraph BO_PAGES["📂 pages/ldi/"]
+            direction TB
+            VC["📄 ViewCourse\nadd_item / move_chapter"]
+            VT["📄 ViewToc\nmove / rename chapter\n+ originalChapterName tracking"]
+            PI["📄 PreviewItem\npublish / save item"]
+        end
 
-    subgraph CTOOLS["Ferramentas de relay no container"]
-      direction LR
-      relay_py["chrome-relay.py\nnav / show / inject / tabs / status"]
-      buzz_cli["buzz socket client\nrelay-nav / relay-show / relay-inject"]
-      mmd_srv["mermaid_live_server.py :9876\nPOST /mermaid-push  →  SSE /mermaid-live"]
-      content_srv["Content server :8766\n/tmp/chrome-relay/\nHTML, assets estáticos"]
+        subgraph BO_COMP["🧩 components/PreviewItem/"]
+            direction TB
+            IE["✏️ ItemEditor\nfix: error.response.data?.jobs"]
+            MTR["🪟 ModalTocRebuilding\nprops: isOpen, jobs: Job[]\n@finished → re-executa operação\n@close → limpa estado"]
+        end
+
+        PI -->|"renderiza"| IE
+        VC & VT & PI & IE -->|"HTTP 409 { jobs[] }"| MTR
     end
 
-    agent -->|"Bash / chrome-relay.py"| relay_py
-    agent -->|"buzz(...)"| buzz_cli
-    agent -->|"curl POST /mermaid-push"| mmd_srv
-    relay_py --- content_srv
-  end
+    %% ══════════════════════════════════════════════
+    %%  BACKEND — monolito
+    %% ══════════════════════════════════════════════
+    subgraph BACK["⚙️  BACKEND — monolito"]
+        direction TB
 
-  subgraph HOST["Host"]
-    direction LR
-    cdp["Chrome CDP :9222\nWebSocket DevTools"]
-    buzz_daemon["relay daemon\nbuzz host-side"]
-    chrome["Chrome Browser"]
+        subgraph MONO_H["🌐 HTTP Handlers"]
+            direction TB
+            H1["➕ add_item.go\nPOST /courses/:id/items\nin: courseID, itemID\nout: 201 | 409+jobs"]
+            H2["🔀 move_chapter.go\nPUT /chapters/:id\nin: chapterID, courseID\nout: 200 | 409+jobs"]
+            H3["📢 publish_item.go\nPUT /items/:id/publish\nin: itemID\nout: 200 | 409+jobs"]
+        end
 
-    cdp -->|"DevTools Protocol"| chrome
-    buzz_daemon -->|"IPC nav / inject / tabs"| chrome
-  end
+        subgraph MONO_SVC["🔧 services/course/"]
+            direction TB
+            CTRC["🔍 CheckTocRebuildConflict\nin: TocRebuildOpts\nout: nil | ErrTocRebuildRunning{Jobs}"]
+            RII["🔎 resolveItemIDs\n• ItemID → direto\n• CourseIDs → GetItemIDsByCourseIDs\n• ChapterID → GetAllFromChapters\nout: []itemID"]
+            TTR["🚀 TriggerTocRebuild\nin: TocRebuildOpts\nout: void (async)"]
+            DTTR["⚙️ doTriggerTocRebuild (goroutine)\n① resolveItemIDs → []itemID\n② GetCourseIDsByItemIDs → []courseID\n③ JobTracking.Create\n④ SQS.Send × courseID"]
+            CTRC --> RII
+            TTR -->|"go"| DTTR
+            DTTR --> RII
+        end
 
-  cli --> agent
-  relay_py -->|"WebSocket CDP"| cdp
-  buzz_cli -->|"Unix socket IPC"| buzz_daemon
-  content_srv -.->|"HTTP GET  assets / HTML"| chrome
-  mmd_srv -.->|"serve base.html"| chrome
-  chrome -->|"SSE subscription\n/mermaid-live"| mmd_srv
+        subgraph MONO_REPO["🗄️  repositories/course/"]
+            direction TB
+            GCI["🆕 GetCourseIDsByItemIDs\nJOIN: chapter_items\n  → chapters\n  → course_chapters\n  → courses (ldi_type)\nout: []courseID DISTINCT"]
+            GIIC["📋 GetItemIDsByCourseIDs\nin: []courseID → out: []itemID"]
+            GCFC["🔗 GetCoursesFromChapterItem\nin: itemID → out: []Course"]
+        end
 
-  classDef box fill:#313244,stroke:#585b70,color:#cdd6f4
-  classDef entry fill:#cba6f7,color:#1e1e2e,font-weight:bold
-  classDef srv fill:#89b4fa,color:#1e1e2e
-  classDef browser fill:#a6e3a1,color:#1e1e2e,font-weight:bold
+        subgraph JT["📊 JobTracking"]
+            direction TB
+            JT_C["➕ JobTracking.Create\ntype: LDI_TOC_REBUILD\nRelatedIDs: []itemID\nout: Job{ID}"]
+            JT_S["🔍 JobTracking.Search\nstatus: running\nrelatedIDs: []itemID\nout: []Job"]
+        end
 
-  class pedro entry
-  class cli,agent box
-  class relay_py,buzz_cli,mmd_srv,content_srv srv
-  class cdp,buzz_daemon box
-  class chrome browser
+        %% ligações internas BACK
+        H1 & H2 & H3 -->|"① verifica conflito"| CTRC
+        CTRC -->|"409 + Jobs[]"| H1 & H2 & H3
+        H1 & H2 & H3 -->|"② dispara rebuild"| TTR
 
-  style USR fill:#1e1e2e,stroke:#f9e2af,stroke-width:2px,color:#cdd6f4
-  style CTR fill:#1e1e2e,stroke:#89b4fa,stroke-width:2px,color:#cdd6f4
-  style CTOOLS fill:#181825,stroke:#585b70,stroke-width:1px,stroke-dasharray:4 4,color:#a6adc8
-  style HOST fill:#1e1e2e,stroke:#a6e3a1,stroke-width:2px,color:#cdd6f4
+        RII -->|"via CourseIDs"| GIIC
+        RII -->|"via ItemID"| GCFC
+        GIIC & GCFC -->|"[]itemID"| RII
+
+        DTTR -->|"[]itemID"| GCI
+        GCI -->|"[]courseID"| DTTR
+
+        CTRC -->|"busca ativos"| JT_S
+        JT_S -->|"[]Job"| CTRC
+        DTTR -->|"cria job"| JT_C
+        JT_C -->|"job.ID"| DTTR
+    end
+
+    %% ══════════════════════════════════════════════
+    %%  ASYNC — SQS + worker
+    %% ══════════════════════════════════════════════
+    subgraph ASYNC["📬  ASYNC — SQS + worker-monolito"]
+        direction TB
+
+        subgraph SQS_BOX["📬 SQS — LDI.BuildCourseToc"]
+            direction TB
+            SQS_S["📤 SQS.Sender\n.ForNamedHandler(BuildCourseTocHandlerName)\n.WithVertical(vertical)\npayload: { course_id, job_id }"]
+            SQS_R["📥 Consumer\nLDI.BuildCourseTocHandlerName"]
+            SQS_S -->|"enfileira mensagem"| SQS_R
+        end
+
+        subgraph WORKER["👷  worker-monolito — handlers/course/worker.go"]
+            direction TB
+            WH["⚡ HandleBuildCourseToc\nin: ctx, sqs.Message\n→ unmarshal BuildCourseTocMessage\n→ CourseService.BuildAndSaveContentTree\nout: error"]
+            BAST["🌳 BuildAndSaveContentTree\nin: ctx, courseID\n→ reconstrói TOC completo\n→ persiste cache/DB\nout: contentTree, error"]
+            WH_DLQ["💀 HandleBuildCourseTocDLQ\n→ registra falha no JobTracking\nout: nil"]
+            WH -->|"courseID"| BAST
+        end
+
+        SQS_R --> WH
+        SQS_R -->|"falha → DLQ"| WH_DLQ
+    end
+
+    %% ══════════════════════════════════════════════
+    %%  CONEXÕES ENTRE MEGA BLOCOS
+    %% ══════════════════════════════════════════════
+    VC -->|"HTTP req"| H1 & H2
+    VT -->|"HTTP req"| H2
+    PI & IE -->|"HTTP req"| H3
+
+    DTTR -->|"1 msg / courseID"| SQS_S
+
+    %% subgraph backgrounds
+    style FRONT fill:#0d1f3a,stroke:#89b4fa,stroke-width:2px,color:#cdd6f4
+    style BACK  fill:#0a2010,stroke:#a6e3a1,stroke-width:3px,color:#cdd6f4
+    style ASYNC fill:#1a0d2e,stroke:#cba6f7,stroke-width:2px,color:#cdd6f4
+
+    %% ══════════════════════════════════════════════
+    %%  ESTILOS
+    %% ══════════════════════════════════════════════
+    classDef boPage   fill:#1e3a5f,stroke:#89b4fa,color:#cdd6f4
+    classDef boComp   fill:#2a1f4e,stroke:#cba6f7,color:#cdd6f4
+    classDef handler  fill:#0d4a2a,stroke:#a6e3a1,color:#cdd6f4
+    classDef service  fill:#3d3200,stroke:#f9e2af,color:#cdd6f4
+    classDef repo     fill:#3d1a00,stroke:#fab387,color:#cdd6f4
+    classDef jt       fill:#003a4d,stroke:#74c7ec,color:#cdd6f4
+    classDef sqs      fill:#251a35,stroke:#cba6f7,color:#cdd6f4
+    classDef worker   fill:#3a1a1a,stroke:#f38ba8,color:#cdd6f4
+
+    class VC,VT,PI boPage
+    class IE,MTR boComp
+    class H1,H2,H3 handler
+    class CTRC,RII,TTR,DTTR service
+    class GCI,GIIC,GCFC repo
+    class JT_C,JT_S jt
+    class SQS_S,SQS_R sqs
+    class WH,BAST,WH_DLQ worker

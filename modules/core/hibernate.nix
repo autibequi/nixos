@@ -2,18 +2,20 @@
 
 {
   services.logind.settings.Login = {
-    HandleLidSwitch = "suspend";
-    HandleLidSwitchExternalPower = "suspend";
-    HandleLidSwitchDocked = "suspend";
+    HandleLidSwitch = "suspend-then-hibernate";
+    HandleLidSwitchExternalPower = "suspend-then-hibernate";
+    HandleLidSwitchDocked = "suspend-then-hibernate";
     HandlePowerKey = "suspend";
     HandlePowerKeyLongPress = "poweroff";
     # Idle gerenciado pelo hypridle — sem IdleAction aqui pra evitar corrida
   };
 
   systemd.sleep.extraConfig = ''
-    AllowSuspend=no
-    AllowHibernation=no
-    AllowSuspendThenHibernate=no
+    AllowSuspend=yes
+    AllowHibernation=yes
+    AllowSuspendThenHibernate=yes
+    SuspendState=freeze
+    HibernateDelaySec=30m
   '';
 
   boot.kernelParams = [
