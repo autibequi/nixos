@@ -99,13 +99,3 @@ commands:
         ENVF="$M/.${APP_ENV}.env"
         [[ -f "$ENVF" ]] && CF+=(--env-file "$ENVF")
         exec podman compose "${CF[@]}" --profile worker-debug -f docker-compose.yml up -d --force-recreate
-
-  worker-logs:
-    description: podman logs no container worker (TAIL=100)
-    argv:
-      - /bin/sh
-      - -c
-      - |
-        set -e
-        TAIL="${TAIL:-100}"
-        exec podman logs -f --tail "$TAIL" vennon-dk-monolito-worker-app
