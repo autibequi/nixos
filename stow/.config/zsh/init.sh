@@ -56,3 +56,7 @@ convert_video() {
 }
 
 pokemonsay "$(fortune -s)"
+
+alias monolito="bardiel plug monolito"
+alias bocontainer="bardiel plug bo-container"
+alias frontstudent="bardiel plug front-student"
