@@ -1,0 +1,44 @@
+services:
+  app:
+    build:
+      context: ${MONOLITO_DIR}
+      dockerfile: ${VENNON_SERVICE_DIR}/Dockerfile
+    container_name: vennon-dk-monolito-app
+    cpus: "14.4"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      monolito-redis:
+        condition: service_healthy
+      localstack:
+        condition: service_started
+    # Ficheiros na raiz do monolito: `.local.env`, `.sandbox.env`, `.prod.env` conforme APP_ENV.
+    env_file:
+      - ${MONOLITO_DIR}/.${APP_ENV:-sandbox}.env
+    environment:
+      # Definido por `bardiel plug monolito serve --env=…` (interpolado pelo compose a partir do shell).
+      - APP_ENV=${APP_ENV:-sandbox}
+      # Sobrescreve Redis em .sandbox.env (lá costuma ser localhost:6379 — dentro do container quebra).
+      - REDIS_URL=monolito-redis:6379
+      - REDIS_STUDY_TIME_URL=monolito-redis:6379
+      - DB_HOST=postgres
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock
+    volumes:
+      - ${MONOLITO_DIR}/configuration:/go/app/configuration:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Canal de comunicação rápida host ↔ container
+      - ${HOME}/.vennon:/.vennon:rw
+    ports:
+      - "4004:4004"
+      - "2345:2345"
+    networks:
+      default:
+        aliases:
+          - api.local.estrategia-sandbox.com.br
+    restart: unless-stopped
+
+networks:
+  default:
+    name: nixos_default
+    external: true

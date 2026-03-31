@@ -1,0 +1,27 @@
+# front-student — Código + `.env` no repo (bardiel injeta FRONT_STUDENT_DIR → bind /app).
+# Opcional no compose: VERTICAL, PORT, NUXT_TELEMETRY (resto via .env no projeto).
+
+commands:
+  serve:
+    description: Start front-student (podman compose up -d)
+    argv:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        export FRONT_STUDENT_DIR="${FRONT_STUDENT_DIR:-$HOME/projects/estrategia/front-student}"
+        export VENNON_SERVICE_DIR="$(pwd)"
+        export VERTICAL="${VERTICAL:-carreiras-juridicas}"
+        exec podman compose -f docker-compose.yml up -d --force-recreate
+
+  test:
+    description: Run tests (yarn test)
+    argv:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        export FRONT_STUDENT_DIR="${FRONT_STUDENT_DIR:-$HOME/projects/estrategia/front-student}"
+        export VENNON_SERVICE_DIR="$(pwd)"
+        export VERTICAL="${VERTICAL:-carreiras-juridicas}"
+        exec podman compose -f docker-compose.yml exec -T app yarn test

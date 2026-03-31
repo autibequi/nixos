@@ -1,0 +1,119 @@
+# bo-container — Código + `.env` no repo (bardiel injeta BO_CONTAINER_DIR → bind /app).
+# Vertical: mesmos slugs que `src/modules/core/utils/vertical.js` (cj → carreiras-juridicas).
+
+commands:
+  serve:
+    description: Sobe compose e corre npm run serve:<env> (package.json); VERTICAL conforme --vertical
+    options:
+      - name: env
+        long: env
+        required: true
+        values: [sandbox, prod, local]
+      - name: vertical
+        long: vertical
+        required: true
+        values: [oab, cj, medicina, vestibulares, militares]
+    argv:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        export BO_CONTAINER_DIR="${BO_CONTAINER_DIR:-$HOME/projects/estrategia/bo-container}"
+        export VENNON_SERVICE_DIR="$(pwd)"
+        case "{vertical}" in
+          oab) export VERTICAL=oab ;;
+          cj) export VERTICAL=carreiras-juridicas ;;
+          medicina) export VERTICAL=medicina ;;
+          vestibulares) export VERTICAL=vestibulares ;;
+          militares) export VERTICAL=militares ;;
+        esac
+        podman compose -f docker-compose.yml up -d --force-recreate
+        # podman-compose (provider) não aceita `exec -it`; usar podman exec no contentor nomeado.
+        exec podman exec -it vennon-dk-bo-container-app npm run "serve:{env}"
+
+  stop:
+    description: Stop stack (compose down)
+    argv:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        export BO_CONTAINER_DIR="${BO_CONTAINER_DIR:-$HOME/projects/estrategia/bo-container}"
+        export VENNON_SERVICE_DIR="$(pwd)"
+        export VERTICAL="${VERTICAL:-carreiras-juridicas}"
+        exec podman compose -f docker-compose.yml down
+
+  test:
+    description: npm test no serviço app (garante stack com compose up -d)
+    argv:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        export BO_CONTAINER_DIR="${BO_CONTAINER_DIR:-$HOME/projects/estrategia/bo-container}"
+        export VENNON_SERVICE_DIR="$(pwd)"
+        export VERTICAL="${VERTICAL:-carreiras-juridicas}"
+        podman compose -f docker-compose.yml up -d
+        exec podman compose -f docker-compose.yml exec -T app npm test
+
+  install:
+    description: npm install no serviço app (garante stack com compose up -d)
+    argv:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        export BO_CONTAINER_DIR="${BO_CONTAINER_DIR:-$HOME/projects/estrategia/bo-container}"
+        export VENNON_SERVICE_DIR="$(pwd)"
+        export VERTICAL="${VERTICAL:-carreiras-juridicas}"
+        podman compose -f docker-compose.yml up -d
+        exec podman compose -f docker-compose.yml exec -T app npm install
+
+  app-shell:
+    description: Shell interativo no serviço app
+    argv:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        export BO_CONTAINER_DIR="${BO_CONTAINER_DIR:-$HOME/projects/estrategia/bo-container}"
+        export VENNON_SERVICE_DIR="$(pwd)"
+        export VERTICAL="${VERTICAL:-carreiras-juridicas}"
+        exec podman exec -it vennon-dk-bo-container-app "${SHELL_CMD:-/bin/bash}"
+
+  logs:
+    description: Follow logs (TAIL=100 por defeito)
+    argv:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        export BO_CONTAINER_DIR="${BO_CONTAINER_DIR:-$HOME/projects/estrategia/bo-container}"
+        export VENNON_SERVICE_DIR="$(pwd)"
+        export VERTICAL="${VERTICAL:-carreiras-juridicas}"
+        TAIL="${TAIL:-100}"
+        exec podman compose -f docker-compose.yml logs -f --tail "$TAIL"
+
+  compose-build:
+    description: podman compose build
+    argv:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        export BO_CONTAINER_DIR="${BO_CONTAINER_DIR:-$HOME/projects/estrategia/bo-container}"
+        export VENNON_SERVICE_DIR="$(pwd)"
+        export VERTICAL="${VERTICAL:-carreiras-juridicas}"
+        exec podman compose -f docker-compose.yml build
+
+  destroy:
+    description: compose down -v --rmi local
+    argv:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        export BO_CONTAINER_DIR="${BO_CONTAINER_DIR:-$HOME/projects/estrategia/bo-container}"
+        export VENNON_SERVICE_DIR="$(pwd)"
+        export VERTICAL="${VERTICAL:-carreiras-juridicas}"
+        exec podman compose -f docker-compose.yml down -v --rmi local

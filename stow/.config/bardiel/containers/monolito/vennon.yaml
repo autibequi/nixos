@@ -1,0 +1,155 @@
+name: monolito
+aliases: [mono]
+project: vennon-dk-monolito
+source: ~/projects/estrategia/monolito
+
+enums:
+  env:
+    values: [local, sand, devbox, qa, prod]
+    # Padrão sand: evita --env local sem querer (local deixava REDIS sem override vs .sandbox.env).
+    default: sand
+    map:
+      sand: sandbox
+
+ports: [4004, 2345, 5432, 6379, 4566]
+
+commands:
+  serve:
+    description: Start monolito + dependencies
+    args:
+      - name: env
+        enum: env
+    compose:
+      files:
+        - docker-compose.yml
+        - docker-compose.deps.yml
+      env_file: "env/{{ env | map }}.env"
+      env:
+        APP_ENV_FILE: "{{ env | map }}"
+        APP_ENV: "{{ env }}"
+      action: up -d --force-recreate
+
+  serve:debug:
+    description: Start monolito + dependencies with Delve debugger (port 2345)
+    args:
+      - name: env
+        enum: env
+    compose:
+      files:
+        - docker-compose.yml
+        - docker-compose.deps.yml
+        - docker-compose.debug.yml
+      env_file: "env/{{ env | map }}.env"
+      env:
+        APP_ENV_FILE: "{{ env | map }}"
+        APP_ENV: "{{ env }}"
+      action: up -d --force-recreate
+
+  stop:
+    description: Stop monolito
+    compose:
+      files: [docker-compose.yml, docker-compose.deps.yml]
+      action: down
+
+  test:
+    description: Run tests
+    args:
+      - name: cmd
+        type: string
+        default: "make test"
+    exec:
+      container: app
+      command: "{{ cmd }}"
+
+  shell:
+    description: Interactive shell
+    args:
+      - name: container
+        type: string
+        default: app
+      - name: cmd
+        type: string
+        default: /bin/bash
+    exec:
+      container: "{{ container }}"
+      command: "{{ cmd }}"
+
+  install:
+    description: Install Go dependencies
+    script: |
+      podman run --rm -it \
+        -v {{ source }}:/go/app \
+        -v {{ home }}/.ssh:/root/.ssh:ro \
+        -e GOPRIVATE=github.com/estrategiahq \
+        golang:1.26.1-alpine sh -c \
+        "cd /go/app && go mod download && go mod tidy && go work vendor"
+
+  logs:
+    description: Follow logs
+    args:
+      - name: tail
+        type: int
+        default: 100
+    compose:
+      files: [docker-compose.yml]
+      action: "logs -f --tail {{ tail }}"
+
+  build:
+    description: Build docker image
+    compose:
+      files: [docker-compose.yml]
+      action: build
+
+  flush:
+    description: Destroy everything (containers + volumes + images)
+    compose:
+      files: [docker-compose.yml, docker-compose.deps.yml]
+      action: "down -v --rmi local"
+
+  start:
+    description: Restart monolito (stop + serve + logs)
+    args:
+      - name: env
+        enum: env
+    script: |
+      vennon monolito stop || true
+      vennon monolito serve --env {{ env }}
+      vennon monolito logs
+
+  worker:
+    description: Start worker process
+    args:
+      - name: env
+        enum: env
+    compose:
+      files:
+        - docker-compose.worker.yml
+      env_file: "env/{{ env | map }}.env"
+      env:
+        APP_ENV_FILE: "{{ env | map }}"
+        APP_ENV: "{{ env }}"
+      action: up -d --force-recreate
+
+  worker-logs:
+    description: Follow worker logs
+    args:
+      - name: tail
+        type: int
+        default: 100
+    script: |
+      podman logs -f --tail {{ tail }} vennon-dk-monolito-worker-app
+
+  worker:debug:
+    description: Start worker process with Delve debugger (port 2346)
+    args:
+      - name: env
+        enum: env
+    compose:
+      files:
+        - docker-compose.worker.yml
+        - docker-compose.debug.worker.yml
+      env_file: "env/{{ env | map }}.env"
+      env:
+        APP_ENV_FILE: "{{ env | map }}"
+        APP_ENV: "{{ env }}"
+      action: up -d --force-recreate

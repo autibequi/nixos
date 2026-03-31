@@ -1,0 +1,16 @@
+# syntax=docker/dockerfile:1
+# Dev image: hot-reload via air. Source is mounted at runtime — no COPY needed.
+# Usage: vennon runner monolito start --dev
+
+FROM golang:1.24.4-alpine
+
+RUN apk add --no-cache ca-certificates git gcc libc-dev librdkafka-dev
+
+# Install air for hot reload
+RUN go install github.com/air-verse/air@latest
+
+WORKDIR /go/app
+
+EXPOSE 4004
+
+CMD ["/go/bin/air", "-c", "/etc/air.toml"]

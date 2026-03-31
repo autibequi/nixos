@@ -1,0 +1,26 @@
+services:
+  worker:
+    build:
+      context: ${MONOLITO_DIR}
+      dockerfile: ${VENNON_SERVICE_DIR}/Dockerfile
+    container_name: vennon-dk-monolito-worker-app
+    command: ["./worker"]
+    cpus: "14.4"
+    env_file:
+      - ${MONOLITO_DIR}/.${APP_ENV:-sandbox}.env
+    environment:
+      - REDIS_URL=monolito-redis:6379
+      - REDIS_STUDY_TIME_URL=monolito-redis:6379
+      - DB_HOST=postgres
+    volumes:
+      - ${MONOLITO_DIR}/configuration:/go/app/configuration:ro
+      # Canal de comunicação rápida host ↔ container
+      - ${HOME}/.vennon:/.vennon:rw
+    networks:
+      - default
+    restart: unless-stopped
+
+networks:
+  default:
+    name: nixos_default
+    external: true

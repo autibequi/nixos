@@ -1,0 +1,35 @@
+services:
+  app:
+    build:
+      context: ${FRONT_STUDENT_DIR}
+      dockerfile: ${VENNON_SERVICE_DIR}/Dockerfile
+    container_name: vennon-dk-front-student-app
+    cpus: "14.4"
+    # Sem env_file: Nuxt/webpack lê `.env` no projeto (bind FRONT_STUDENT_DIR → /app).
+    environment:
+      - FORCE_COLOR=1
+      - TERM=xterm-256color
+      - VERTICAL=${VERTICAL:-carreiras-juridicas}
+      - PORT=3005
+      # Desabilita call HTTP de telemetria que trava o boot
+      - NUXT_TELEMETRY_DISABLED=1
+      # Mais RAM pro webpack — evita OOM matar o processo silenciosamente
+      - NODE_OPTIONS=--max-old-space-size=4096
+    tty: true
+    volumes:
+      # Bind mount completo: source + node_modules (gerado por vennon docker install)
+      - ${FRONT_STUDENT_DIR}:/app
+      # Canal de comunicação rápida host ↔ container
+      - ${HOME}/.vennon:/.vennon:rw
+    extra_hosts:
+      - "api.local.estrategia-sandbox.com.br:host-gateway"
+    ports:
+      - "3005:3005"
+    networks:
+      - default
+    restart: unless-stopped
+
+networks:
+  default:
+    name: nixos_default
+    external: true

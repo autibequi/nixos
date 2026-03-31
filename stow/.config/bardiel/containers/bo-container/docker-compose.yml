@@ -1,0 +1,30 @@
+services:
+  app:
+    build:
+      context: ${BO_CONTAINER_DIR}
+      dockerfile: ${VENNON_SERVICE_DIR}/Dockerfile
+    container_name: vennon-dk-bo-container-app
+    cpus: "14.4"
+    # Sem env_file: variáveis vêm de `.env` / `.env.*` no repo (montado em /app com BO_CONTAINER_DIR).
+    environment:
+      - FORCE_COLOR=1
+      - TERM=xterm-256color
+      - VERTICAL=${VERTICAL:-carreiras-juridicas}
+      # Mais RAM pro webpack — evita OOM matar o processo silenciosamente
+      - NODE_OPTIONS=--max-old-space-size=4096
+    tty: true
+    volumes:
+      # Bind mount completo: source + node_modules (gerado por vennon docker install)
+      - ${BO_CONTAINER_DIR}:/app
+      # Canal de comunicação rápida host ↔ container
+      - ${HOME}/.vennon:/.vennon:rw
+    ports:
+      - "9090:9090"
+    networks:
+      - default
+    restart: unless-stopped
+
+networks:
+  default:
+    name: nixos_default
+    external: true
