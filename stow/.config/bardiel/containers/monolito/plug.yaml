@@ -1,4 +1,5 @@
-# monolito — `.<ambiente>.env` na raiz (ex.: .local.env, .sandbox.env, .prod.env). `serve`/`serve-debug` exigem `--env`.
+# monolito — `.<ambiente>.env` na raiz (ex.: .local.env, .sandbox.env, .prod.env).
+# `serve` e `serve-debug` exigem `--env` (sandbox|prod|local). Debug usa o mesmo Dockerfile (target runtime-debug + Delve).
 
 commands:
   serve:
@@ -25,10 +26,10 @@ commands:
         ENVF="$M/.${APP_ENV}.env"
         [[ -f "$ENVF" ]] || { echo "monolito: falta $ENVF (no repo: .local.env, .sandbox.env, .prod.env)" >&2; exit 1; }
         CF+=(--env-file "$ENVF")
-        exec podman compose "${CF[@]}" -f docker-compose.yml -f docker-compose.deps.yml up -d --force-recreate
+        exec podman compose "${CF[@]}" --profile app -f docker-compose.yml up -d --force-recreate
 
   serve-debug:
-    description: Stack com Delve; mesmo --env que serve
+    description: API com Delve (porta 2345); --env obrigatório como em serve
     options:
       - name: env
         long: env
@@ -51,59 +52,7 @@ commands:
         ENVF="$M/.${APP_ENV}.env"
         [[ -f "$ENVF" ]] || { echo "monolito: falta $ENVF (no repo: .local.env, .sandbox.env, .prod.env)" >&2; exit 1; }
         CF+=(--env-file "$ENVF")
-        exec podman compose "${CF[@]}" -f docker-compose.yml -f docker-compose.deps.yml -f docker-compose.debug.yml up -d --force-recreate
-
-  stop:
-    description: Stop monolito + deps
-    argv:
-      - bash
-      - -c
-      - |
-        set -euo pipefail
-        M="${MONOLITO_DIR:-$HOME/projects/estrategia/monolito}"
-        export MONOLITO_DIR="$M"
-        export VENNON_SERVICE_DIR="$(pwd)"
-        export APP_ENV="${APP_ENV:-sandbox}"
-        CF=()
-        ENVF="$M/.${APP_ENV}.env"
-        [[ -f "$ENVF" ]] && CF+=(--env-file "$ENVF")
-        exec podman compose "${CF[@]}" -f docker-compose.yml -f docker-compose.deps.yml down
-
-  test:
-    description: make test (ou MONO_TEST_CMD) no app — sobe stack se preciso; podman exec -T
-    argv:
-      - bash
-      - -c
-      - |
-        set -euo pipefail
-        M="${MONOLITO_DIR:-$HOME/projects/estrategia/monolito}"
-        export MONOLITO_DIR="$M"
-        export VENNON_SERVICE_DIR="$(pwd)"
-        export APP_ENV="${APP_ENV:-sandbox}"
-        CF=()
-        ENVF="$M/.${APP_ENV}.env"
-        [[ -f "$ENVF" ]] && CF+=(--env-file "$ENVF")
-        CMD="${MONO_TEST_CMD:-make test}"
-        podman compose "${CF[@]}" -f docker-compose.yml -f docker-compose.deps.yml up -d
-        exec podman exec -T vennon-dk-monolito-app /bin/bash -lc "$CMD"
-
-  app-shell:
-    description: Shell (MONO_EXEC_SERVICE=app por defeito); podman exec -it
-    argv:
-      - bash
-      - -c
-      - |
-        set -euo pipefail
-        M="${MONOLITO_DIR:-$HOME/projects/estrategia/monolito}"
-        export MONOLITO_DIR="$M"
-        export VENNON_SERVICE_DIR="$(pwd)"
-        SVC="${MONO_EXEC_SERVICE:-app}"
-        case "$SVC" in
-          app) CN=vennon-dk-monolito-app ;;
-          worker) CN=vennon-dk-monolito-worker-app ;;
-          *) CN="$SVC" ;;
-        esac
-        exec podman exec -it "$CN" "${SHELL_CMD:-/bin/bash}"
+        exec podman compose "${CF[@]}" --profile app-debug -f docker-compose.yml up -d --force-recreate
 
   install:
     description: go mod download / tidy / vendor (imagem golang no host; o runtime do app não inclui toolchain)
@@ -119,57 +68,8 @@ commands:
           -e GOPRIVATE=github.com/estrategiahq \
           golang:1.26.1-alpine sh -c "cd /go/app && go mod download && go mod tidy && go work vendor"
 
-  logs:
-    description: Logs do app (docker-compose.yml principal)
-    argv:
-      - bash
-      - -c
-      - |
-        set -euo pipefail
-        M="${MONOLITO_DIR:-$HOME/projects/estrategia/monolito}"
-        export MONOLITO_DIR="$M"
-        export VENNON_SERVICE_DIR="$(pwd)"
-        export APP_ENV="${APP_ENV:-sandbox}"
-        CF=()
-        ENVF="$M/.${APP_ENV}.env"
-        [[ -f "$ENVF" ]] && CF+=(--env-file "$ENVF")
-        TAIL="${TAIL:-100}"
-        exec podman compose "${CF[@]}" -f docker-compose.yml logs -f --tail "$TAIL"
-
-  compose-build:
-    description: podman compose build (stack principal)
-    argv:
-      - bash
-      - -c
-      - |
-        set -euo pipefail
-        M="${MONOLITO_DIR:-$HOME/projects/estrategia/monolito}"
-        export MONOLITO_DIR="$M"
-        export VENNON_SERVICE_DIR="$(pwd)"
-        export APP_ENV="${APP_ENV:-sandbox}"
-        CF=()
-        ENVF="$M/.${APP_ENV}.env"
-        [[ -f "$ENVF" ]] && CF+=(--env-file "$ENVF")
-        exec podman compose "${CF[@]}" -f docker-compose.yml build
-
-  destroy:
-    description: down -v --rmi local (app + deps)
-    argv:
-      - bash
-      - -c
-      - |
-        set -euo pipefail
-        M="${MONOLITO_DIR:-$HOME/projects/estrategia/monolito}"
-        export MONOLITO_DIR="$M"
-        export VENNON_SERVICE_DIR="$(pwd)"
-        export APP_ENV="${APP_ENV:-sandbox}"
-        CF=()
-        ENVF="$M/.${APP_ENV}.env"
-        [[ -f "$ENVF" ]] && CF+=(--env-file "$ENVF")
-        exec podman compose "${CF[@]}" -f docker-compose.yml -f docker-compose.deps.yml down -v --rmi local
-
   worker:
-    description: Start worker stack
+    description: Start worker stack (+ deps)
     argv:
       - bash
       - -c
@@ -182,10 +82,10 @@ commands:
         CF=()
         ENVF="$M/.${APP_ENV}.env"
         [[ -f "$ENVF" ]] && CF+=(--env-file "$ENVF")
-        exec podman compose "${CF[@]}" -f docker-compose.worker.yml up -d --force-recreate
+        exec podman compose "${CF[@]}" --profile worker -f docker-compose.yml up -d --force-recreate
 
   worker-debug:
-    description: Worker com debug compose
+    description: Worker com Delve (+ deps)
     argv:
       - bash
       - -c
@@ -198,7 +98,7 @@ commands:
         CF=()
         ENVF="$M/.${APP_ENV}.env"
         [[ -f "$ENVF" ]] && CF+=(--env-file "$ENVF")
-        exec podman compose "${CF[@]}" -f docker-compose.worker.yml -f docker-compose.debug.worker.yml up -d --force-recreate
+        exec podman compose "${CF[@]}" --profile worker-debug -f docker-compose.yml up -d --force-recreate
 
   worker-logs:
     description: podman logs no container worker (TAIL=100)
