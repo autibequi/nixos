@@ -22,27 +22,41 @@ update:
 
 # ── Dotfiles ───────────────────────────────────────────────────────────────
 
-# Injeta dotfiles via stow
+# Injeta dotfiles via stow (limpa conflitos em .config/bardiel antes)
 stow:
-    @for dir in agents commands hooks scripts skills; do \
-        link="$HOME/.claude/$dir"; \
-        if [ -L "$link" ]; then \
-            target=$(readlink "$link"); \
-            case "$target" in /workspace/*) echo "removing container symlink: $link"; rm -f "$link" ;; esac; \
-        fi; \
+    #!/usr/bin/env bash
+    set -euo pipefail
+    for dir in agents commands hooks scripts skills; do
+      link="$HOME/.claude/$dir"
+      if [ -L "$link" ]; then
+        target=$(readlink "$link")
+        case "$target" in /workspace/*) echo "removing container symlink: $link"; rm -f "$link" ;; esac
+      fi
     done
-    stow --target=$HOME --no-folding --adopt -R stow
+    # Only nuke .config/bardiel targets — leave hypr/waybar/etc alone (already stow-managed)
+    find stow/.config/bardiel -type f 2>/dev/null | while read -r src; do
+      tgt="$HOME/${src#stow/}"
+      { [ -e "$tgt" ] || [ -L "$tgt" ]; } && rm -f "$tgt" || true
+    done
+    stow --target="$HOME" --no-folding --adopt -S stow
 
 # Remove e re-injeta dotfiles
 restow:
-    @for dir in agents commands hooks scripts skills; do \
-        link="$HOME/.claude/$dir"; \
-        if [ -L "$link" ]; then \
-            target=$(readlink "$link"); \
-            case "$target" in /workspace/*) rm -f "$link" ;; esac; \
-        fi; \
+    #!/usr/bin/env bash
+    set -euo pipefail
+    for dir in agents commands hooks scripts skills; do
+      link="$HOME/.claude/$dir"
+      if [ -L "$link" ]; then
+        target=$(readlink "$link")
+        case "$target" in /workspace/*) rm -f "$link" ;; esac
+      fi
     done
-    stow --target=$HOME --no-folding --adopt --override=file -R stow
+    # Only nuke .config/bardiel targets — leave hypr/waybar/etc alone (already stow-managed)
+    find stow/.config/bardiel -type f 2>/dev/null | while read -r src; do
+      tgt="$HOME/${src#stow/}"
+      { [ -e "$tgt" ] || [ -L "$tgt" ]; } && rm -f "$tgt" || true
+    done
+    stow --target="$HOME" --no-folding --adopt -S stow
 
 # ── Reverse proxy ──────────────────────────────────────────────────────────
 
