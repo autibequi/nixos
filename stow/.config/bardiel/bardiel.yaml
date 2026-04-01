@@ -1,6 +1,39 @@
-# Paths usados pelo bardiel (update, resolução de repo)
-NIXOS_PATH: ~/nixos
+# Copiar para ~/.config/bardiel/bardiel.yaml (ou deixar `bardiel init` criar a primeira versão).
+# Usado para: BARDIEL_PATH (repo bardiel), NIXOS_PATH, binds opcionais do workspace.
+
+# Raiz do checkout bardiel (contém crates/plug, justfile).
 BARDIEL_PATH: ~/projects/pessoal/bardiel
-OBSIDIAN_PATH: ~/.ovault/Work
-SELF_PATH: ~/projects/pessoal/bardiel/self
-DEFAULT_TARGET_PATH: ~/projects/estrategia
+
+# Flake / NixOS no host.
+NIXOS_PATH: ~/nixos
+
+# --- Opcional: um único mount para /workspace/{self,obsidian,projects,host}
+# WORKSPACE_ROOT: ~/vennon
+
+# --- Opcional: target do projeto para yaa/compose (se não usares `yaa -d`)
+# YAA_TARGET_DIR: ~/projects
+
+# --- Opcional: paths separados (alternativa a WORKSPACE_ROOT)
+# SELF_PATH: …
+# OBSIDIAN_PATH: …
+# DEFAULT_TARGET_PATH: …
+# BARDIEL_HOST: …
+BARDIEL_SELF: ~/projects/pessoal/bardiel/self
+BARDIEL_OBSIDIAN: ~/.ovault/Work
+BARDIEL_PROJECTS: ~/projects/estrategia
+
+# --- Estratégia / binds do código nos plugs (sem cópia: podman monta o diretório)
+# Ordem de resolução: variável de ambiente (MONOLITO_DIR, …) → CONTAINER_SOURCES →
+# MONOLITO_PATH / BO_CONTAINER_PATH / FRONT_STUDENT_PATH → ESTRATEGIA_ROOT/<repo> → ~/projects/estrategia/<repo>
+#
+# Uma raiz comum:
+# ESTRATEGIA_ROOT: ~/projects/estrategia
+#
+# Ou caminho por repo (equivalente a três entradas em CONTAINER_SOURCES):
+# MONOLITO_PATH: ~/projects/estrategia/monolito
+# BO_CONTAINER_PATH: ~/projects/estrategia/bo-container
+# FRONT_STUDENT_PATH: ~/projects/estrategia/front-student
+#
+# Overrides pontuais:
+# CONTAINER_SOURCES:
+#   bo-container: ~/src/bo-container
