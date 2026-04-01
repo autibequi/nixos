@@ -34,10 +34,12 @@ stow:
       fi
     done
     # Only nuke .config/bardiel targets — leave hypr/waybar/etc alone (already stow-managed)
-    find stow/.config/bardiel -type f 2>/dev/null | while read -r src; do
-      tgt="$HOME/${src#stow/}"
-      { [ -e "$tgt" ] || [ -L "$tgt" ]; } && rm -f "$tgt" || true
-    done
+    if [ -d stow/.config/bardiel ]; then
+      find stow/.config/bardiel -type f | while read -r src; do
+        tgt="$HOME/${src#stow/}"
+        { [ -e "$tgt" ] || [ -L "$tgt" ]; } && rm -f "$tgt" || true
+      done
+    fi
     stow --target="$HOME" --no-folding --adopt -S stow
 
 # Remove e re-injeta dotfiles
@@ -52,11 +54,13 @@ restow:
       fi
     done
     # Only nuke .config/bardiel targets — leave hypr/waybar/etc alone (already stow-managed)
-    find stow/.config/bardiel -type f 2>/dev/null | while read -r src; do
-      tgt="$HOME/${src#stow/}"
-      { [ -e "$tgt" ] || [ -L "$tgt" ]; } && rm -f "$tgt" || true
-    done
-    stow --target="$HOME" --no-folding --adopt -S stow
+    if [ -d stow/.config/bardiel ]; then
+      find stow/.config/bardiel -type f | while read -r src; do
+        tgt="$HOME/${src#stow/}"
+        { [ -e "$tgt" ] || [ -L "$tgt" ]; } && rm -f "$tgt" || true
+      done
+    fi
+    stow --target="$HOME" --no-folding --adopt --override='.*' -R stow
 
 # ── Reverse proxy ──────────────────────────────────────────────────────────
 
