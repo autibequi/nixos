@@ -1,0 +1,79 @@
+# Shell
+# =============================================================================
+shell-integration = none
+shell-integration-features = no-cursor
+# scrollback-limit em bytes por superfície (aba/split), não em linhas. ~2 MiB aqui; upstream ~10 MiB.
+scrollback-limit = 2097152
+link-url = true
+linux-cgroup = single-instance
+# true: reaproveita instância GTK ao abrir de outro terminal / WM (mais rápido; recomendado com Hyprland + new-window).
+gtk-single-instance = true
+
+# Desempenho
+# =============================================================================
+unfocused-split-opacity = 1
+link-previews = true
+# single-instance: isola RAM/CPU via systemd (~100ms a mais por superfície). never = mais rápido, sem isolamento.
+
+# Janela / decoração
+# =============================================================================
+maximize = true
+window-decoration = none
+# false: evita herdar cwd de container (/workspace) ao abrir janela nova a partir do plug.
+window-inherit-working-directory = false
+window-save-state = never
+window-padding-x = 10
+window-padding-y = 10
+window-vsync = false
+window-inherit-font-size = false
+window-step-resize = true
+
+# Clipboard
+clipboard-write = allow
+clipboard-read = allow
+clipboard-paste-protection = true
+clipboard-trim-trailing-spaces = true
+clipboard-paste-bracketed-safe = true
+title-report = false
+
+click-repeat-interval = 2000
+confirm-close-surface = true
+window-new-tab-position = end
+
+title = "Ghooooooostthy"
+window-subtitle = working-directory
+gtk-titlebar-hide-when-maximized = true
+
+# Mouse
+focus-follows-mouse = true
+mouse-hide-while-typing = false
+copy-on-select = false
+mouse-scroll-multiplier = discrete:0.75,precision:0.12
+
+# Aparência
+# =============================================================================
+theme = dark:Dracula,light:dracula-light
+font-family = FiraCode Nerd Font Mono
+font-size = 13
+font-feature = calt
+
+cursor-style = block
+cursor-click-to-move = true
+cursor-style-blink = false
+
+# Atalhos
+# =============================================================================
+keybind = ctrl+shift+r=reload_config
+keybind = ctrl+shift+t=new_tab
+keybind = ctrl+shift+n=new_window
+keybind = ctrl+shift+w=close_tab
+
+keybind = ctrl+shift+minus=new_split:down
+keybind = ctrl+shift+backslash=new_split:right
+keybind = ctrl+shift+x=close_surface
+keybind = ctrl+shift+f=toggle_split_zoom
+
+keybind = ctrl+h=goto_split:left
+keybind = ctrl+j=goto_split:down
+keybind = ctrl+k=goto_split:up
+keybind = ctrl+l=goto_split:right

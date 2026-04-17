@@ -1,0 +1,67 @@
+# ┌──────────────────────────────────────────────────────────┐
+# │  Deep Dark Theme                                         │
+# │  Custom dark theme with deep blacks and vibrant accents │
+# └──────────────────────────────────────────────────────────┘
+
+[colors.primary]
+background = "#0a0e14"
+foreground = "#e6e6e6"
+dim_foreground = "#9ca3af"
+bright_foreground = "#ffffff"
+
+[colors.cursor]
+text = "#0a0e14"
+cursor = "#00d4ff"
+
+[colors.vi_mode_cursor]
+text = "#0a0e14"
+cursor = "#ff79c6"
+
+[colors.search]
+matches = { foreground = "#0a0e14", background = "#ffb454" }
+focused_match = { foreground = "#0a0e14", background = "#50fa7b" }
+
+[colors.footer_bar]
+foreground = "#e6e6e6"
+background = "#1a1f29"
+
+[colors.hints]
+start = { foreground = "#0a0e14", background = "#ffb454" }
+end = { foreground = "#0a0e14", background = "#2a2f3a" }
+
+[colors.selection]
+text = "#ffffff"
+background = "#2d3748"
+
+[colors.normal]
+black   = "#1a1f29"
+red     = "#ff6b6b"
+green   = "#50fa7b"
+yellow  = "#ffb454"
+blue    = "#00d4ff"
+magenta = "#ff79c6"
+cyan    = "#00e8c6"
+white   = "#e6e6e6"
+
+[colors.bright]
+black   = "#4a5568"
+red     = "#ff8a8a"
+green   = "#7cff9e"
+yellow  = "#ffd07a"
+blue    = "#33e0ff"
+magenta = "#ff9ed8"
+cyan    = "#33ffdb"
+white   = "#ffffff"
+
+[colors.dim]
+black   = "#0f131a"
+red     = "#cc5555"
+green   = "#40c862"
+yellow  = "#cc9043"
+blue    = "#00a9cc"
+magenta = "#cc619e"
+cyan    = "#00b89e"
+white   = "#b3b3b3"
+
+[bell]
+color = "#ffb454"

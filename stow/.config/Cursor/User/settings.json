@@ -1,0 +1,284 @@
+{
+  // --------------------------------------------------------------------------
+  // Workbench UI & Appearance
+  // --------------------------------------------------------------------------
+  "workbench.iconTheme": "vscode-great-icons",
+  "workbench.tips.enabled": false,
+  "workbench.panel.defaultLocation": "top",
+  "workbench.panel.defaultVisibility": "hidden",
+  "workbench.sideBar.location": "left",
+  "workbench.colorTheme": "Solarized Light",
+  "workbench.preferredDarkColorTheme": "Visual Studio Dark",
+  "workbench.startupEditor": "none",
+  "workbench.editor.editorActionsLocation": "titleBar",
+  "workbench.editor.restoreViewState": false,
+  "workbench.editor.limit.enabled": true,
+  "workbench.editor.limit.value": 10,
+  "workbench.editorAssociations": {
+    "*.md": "default"
+  },
+  // --------------------------------------------------------------------------
+  // Window
+  // --------------------------------------------------------------------------
+  "window.titleBarStyle": "custom",
+  "window.customTitleBarVisibility": "auto",
+  "window.dialogStyle": "custom",
+  "window.autoDetectColorScheme": true,
+  "window.openFilesInNewWindow": "on",
+  "window.zoomLevel": 0,
+  "window.commandCenter": true,
+  "window.restoreWindows": "none",
+  // --------------------------------------------------------------------------
+  // Editor Appearance & Behavior
+  // --------------------------------------------------------------------------
+  "editor.fontFamily": "'JetBrainsMono Nerd Font', 'CaskaydiaCove Nerd Font', 'FiraCode Nerd Font', 'Hack Nerd Font', 'UbuntuMono Nerd Font', 'Courier New', monospace",
+  "editor.fontLigatures": true,
+  "editor.fontSize": 20,
+  "editor.fontWeight": "200",
+  "editor.lineHeight": 30,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": false,
+  "editor.tabCompletion": "on",
+  "editor.suggestSelection": "first",
+  "editor.quickSuggestionsDelay": 4,
+  "editor.renderWhitespace": "none",
+  "editor.renderLineHighlight": "gutter",
+  "editor.roundedSelection": false,
+  "editor.scrollBeyondLastLine": false,
+  "editor.cursorStyle": "line",
+  "editor.cursorBlinking": "solid",
+  "editor.minimap.enabled": false,
+  "editor.matchBrackets": "always",
+  "editor.maxTokenizationLineLength": 30000,
+  "editor.rulers": [80],
+  "editor.wordWrap": "on",
+  "editor.wrappingIndent": "same",
+  "editor.guides.indentation": true,
+  "editor.stickyScroll.enabled": false,
+  "editor.hover.delay": 300,
+  "editor.experimental.asyncTokenization": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  // --------------------------------------------------------------------------
+  // Language Specific
+  // --------------------------------------------------------------------------
+  "[markdown]": {
+    "editor.wordWrap": "bounded",
+    "editor.wordWrapColumn": 80,
+    "editor.quickSuggestions": {
+      "comments": "on",
+      "strings": "on",
+      "other": "on"
+    },
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.python"
+  },
+  "[go]": {
+    "editor.defaultFormatter": "golang.go"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[dart]": {
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "editor.rulers": [80],
+    "editor.selectionHighlight": false,
+    "editor.tabCompletion": "onlySnippets",
+    "editor.wordBasedSuggestions": "off"
+  },
+  // --------------------------------------------------------------------------
+  // File Management
+  // --------------------------------------------------------------------------
+  "files.autoSave": "off",
+  "files.insertFinalNewline": true,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
+    "**/.idea": true,
+    "**/*.iml": true
+  },
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "venv": true,
+    "**/node_modules/*/**": true,
+    "**/bower_components/**": true,
+    "**/.idea/**": true,
+    "env*": true,
+    "**/mocks": true
+  },
+  "search.exclude": {
+    "**/.idea/**": true,
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/tmp": true,
+    "**/.git": true,
+    "**/mocks": true
+  },
+  "files.associations": {
+    "*.njk": "html",
+    "*.mustache": "html",
+    "*vue": "vue",
+    "*rs": "rust",
+    "*ctl": "shellscript",
+    "*.prettierrc": "json",
+    "*.babelrc": "json",
+    "*.postcssrc": "json",
+    "*.eslintrc": "json",
+    "*.postcss": "postcss",
+    "*.js": "javascriptreact",
+    "jsonc": "json"
+  },
+  // --------------------------------------------------------------------------
+  // HTML, CSS, Emmet
+  // --------------------------------------------------------------------------
+  "html.format.endWithNewline": true,
+  "css.lint.compatibleVendorPrefixes": "warning",
+  "css.lint.importStatement": "warning",
+  "markdown.preview.fontSize": 17,
+  "emmet.triggerExpansionOnTab": true,
+  "emmet.excludeLanguages": ["markdown"],
+  "emmet.includeLanguages": {
+    "vue-html": "html"
+  },
+  "breadcrumbs.enabled": true,
+  // --------------------------------------------------------------------------
+  // TypeScript & JavaScript
+  // --------------------------------------------------------------------------
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "typescript.tsserver.maxTsServerMemory": 2048,
+  "typescript.disableAutomaticTypeAcquisition": true,
+  // --------------------------------------------------------------------------
+  // Formatting
+  // --------------------------------------------------------------------------
+  "prettier.htmlWhitespaceSensitivity": "css",
+  "prettier.arrowParens": "always",
+  "prettier.singleQuote": true,
+  "prettier.printWidth": 85,
+  "prettier.semi": true,
+  "eslint.validate": ["javascript", "javascriptreact", "vue"],
+  // --------------------------------------------------------------------------
+  // Terminal
+  // --------------------------------------------------------------------------
+  "terminal.integrated.scrollback": 800,
+  // --------------------------------------------------------------------------
+  // File Explorer
+  // --------------------------------------------------------------------------
+  "explorer.confirmDragAndDrop": false,
+  "explorer.confirmDelete": false,
+  // --------------------------------------------------------------------------
+  // Vim Extension
+  // --------------------------------------------------------------------------
+  "vim.leader": "<space>",
+  "vim.easymotion": true,
+  "vim.sneak": true,
+  "vim.incsearch": true,
+  "vim.useSystemClipboard": true,
+  "vim.highlightedyank.enable": true,
+  "vim.insertModeKeyBindings": [
+    {
+      "before": ["j", "k"],
+      "after": ["<Esc>"]
+    }
+  ],
+  "vim.normalModeKeyBindingsNonRecursive": [
+    {
+      "before": ["<leader>", "m"],
+      "commands": ["bookmarks.toggle"]
+    },
+    {
+      "before": ["<leader>", "b"],
+      "commands": ["bookmarks.list"]
+    }
+  ],
+  // --------------------------------------------------------------------------
+  // Git
+  // --------------------------------------------------------------------------
+  "git.confirmSync": false,
+  "git.autofetch": true,
+  "git.detectSubmodules": true,
+  "git.autoRepositoryDetection": "openEditors",
+  "scm.diffDecorationsGutterVisibility": "hover",
+  // --------------------------------------------------------------------------
+  // Go
+  // --------------------------------------------------------------------------
+  "go.alternateTools": {
+    "gopls": "/run/current-system/sw/bin/gopls"
+  },
+  // --------------------------------------------------------------------------
+  // Python
+  // --------------------------------------------------------------------------
+  "python.languageServer": "None",
+  "notebook.output.textLineLimit": 100,
+  // --------------------------------------------------------------------------
+  // Shell
+  // --------------------------------------------------------------------------
+  "shellcheck.disableVersionCheck": true,
+  // --------------------------------------------------------------------------
+  // Spell Check
+  // --------------------------------------------------------------------------
+  "cSpell.language": "en",
+  "cSpell.userWords": [
+    "Helvetica", "QLHTTP", "URL's", "antialiased", "graphQLHTTP",
+    "graphiql", "intellisense", "moebius", "monospace", "polyfill", "scrollback"
+  ],
+  "cSpell.enabledLanguageIds": [
+    "c", "cpp", "css", "go", "golang", "handlebars", "html",
+    "javascript", "javascriptreact", "json", "latex", "markdown",
+    "org", "php", "plaintext", "python", "react", "restructuredtext",
+    "rust", "text", "typescript", "typescriptreact", "vue", "yml"
+  ],
+  // --------------------------------------------------------------------------
+  // Debug
+  // --------------------------------------------------------------------------
+  "debug.toolBarLocation": "floating",
+  "debug.onTaskErrors": "showErrors",
+  // --------------------------------------------------------------------------
+  // Misc
+  // --------------------------------------------------------------------------
+  "makefile.configureOnOpen": true,
+  "npm.autoDetect": "off",
+  "redhat.telemetry.enabled": false,
+  "telemetry.telemetryLevel": "off",
+  "security.promptForLocalFileProtocolHandling": false,
+  "extensions.autoCheckUpdates": false,
+  "extensions.experimental.deferredStartupFinishedActivation": true,
+  "update.showReleaseNotes": false,
+  // --------------------------------------------------------------------------
+  // Cursor Extension
+  // --------------------------------------------------------------------------
+  "cursor.composer.shouldChimeAfterChatFinishes": true,
+  "cursor.composer.shouldAllowCustomModes": true,
+  "cursor.composer.shouldAutoAcceptDiffs": false,
+  "cursor.composer.textSizeScale": 1.15,
+  "cursor.chat.terminalShowHoverHint": false,
+  "cursor.windowSwitcher.sidebarHoverCollapsed": true,
+  // --------------------------------------------------------------------------
+  // Claude Code
+  // --------------------------------------------------------------------------
+  "claudeCode.initialPermissionMode": "acceptEdits",
+  "claudeCode.preferredLocation": "panel",
+  // --------------------------------------------------------------------------
+  // GitLens
+  // --------------------------------------------------------------------------
+  "gitlens.ai.model": "vscode",
+  "gitlens.ai.vscode.model": "copilot:gpt-4.1"
+}

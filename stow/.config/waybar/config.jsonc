@@ -1,0 +1,354 @@
+{
+	"layer": "bottom",
+	"position": "bottom",
+	"height": 26,
+	"spacing": 0,
+	"margin": 0,
+	"modules-left": [
+		"idle_inhibitor",
+		// "custom/vennon",
+		"hyprland/workspaces"
+		// "hyprland/window"
+	],
+	"modules-center": [
+		"custom/screenrecord",
+		"custom/swaync",
+		"clock",
+		"battery"
+	],
+	"modules-right": [
+		"mpris",
+		"custom/claude-usage",
+		"custom/obsidian-sync",
+		"pulseaudio",
+		"backlight",
+		"network",
+		"tray",
+		"bluetooth"
+	],
+	"tray": {
+		"icon-size": 14,
+		"spacing": 2
+	},
+	"custom/screenrecord": {
+		"exec": "[ -f /tmp/screenrecord.pid ] && echo '{\"text\":\"󰑊 REC\",\"tooltip\":\"Recording... click to stop\",\"class\":\"active\"}' || echo '{\"text\":\"\",\"tooltip\":\"\",\"class\":\"\"}'",
+		"return-type": "json",
+		"interval": 2,
+		"signal": 9,
+		"format": "{}",
+		"on-click": "screenrecord-toggle"
+	},
+	"group/tray-expander": {
+		"orientation": "horizontal",
+		"drawer": {
+			"transition-duration": 300,
+			"children-class": "tray-drawer",
+			"transition-left-to-right": false
+		},
+		"modules": [
+			"custom/tray-toggle",
+			"tray"
+		]
+	},
+	"custom/tray-toggle": {
+		"format": "",
+		"tooltip-format": "Expand tray",
+		"interval": "once"
+	},
+	"power-profiles-daemon": {
+		"format": "{icon}",
+		"tooltip-format": "Power profile: {profile}\nDriver: {driver}",
+		"tooltip": true,
+		"format-icons": {
+			"default": "",
+			"performance": "",
+			"balanced": "",
+			"power-saver": ""
+		}
+	},
+	"hyprland/window": {
+		"format": "{}",
+		"max-length": 50,
+		"rewrite": {
+			"Claude\\[(.+?)\\]:.*": "󱙺 $1",
+			"(.*) — Claude.*": "󱙺 $1"
+		}
+	},
+	"hyprland/workspaces": {
+		"interval": 1,
+		"disable-scroll": true,
+		"all-outputs": false,
+		"show-special": true,
+		"special-visible-only": false,
+		"persistent-workspaces": {},
+		"format": "{icon}{windows}</span>",
+		"tooltip": true,
+		"tooltip-format": "{name}",
+		"window-rewrite-default": "",
+		"escape": false,
+		"format-icons": {
+			"f1": "<span foreground='#b05450'>F1: ",
+			"f2": "<span foreground='#a87240'>F2: ",
+			"f3": "<span foreground='#9a8838'>F3: ",
+			"f4": "<span foreground='#429960'>F4: ",
+			"f5": "<span foreground='#369088'>F5: ",
+			"f6": "<span foreground='#4070a8'>F6: ",
+			"f7": "<span foreground='#7058a0'>F7: ",
+			"f8": "<span foreground='#8040a8'>F8: ",
+			"f9": "<span foreground='#8040a8'>F9: ",
+			"f10": "<span foreground='#8040a8'>F10: ",
+			"bleh": "<span>~: ",
+			"1": "<span>1:",
+			"2": "<span>2:",
+			"3": "<span>3",
+			"4": "<span>4:",
+			"5": "<span>5:",
+			"6": "<span>6:",
+			"7": "<span>7:",
+			"8": "<span>8:",
+			"9": "<span>9:",
+			"10": "<span>10:",
+			"gemini": "<span>gemini: ",
+			"default": "<span>"
+		},
+		"workspace-taskbar": {
+			"format": "{icon} {title}",
+			"format-icons": {
+				"default": " "
+			},
+			"tooltip": true
+		},
+		"window-rewrite": {
+			"title<(.*[$%#] *)?([hb]|nv)top.*>": "btop",
+			"title<(.* - )?(.[0-9]+. )?YouTube Music.*>": "",
+			"title<(.*)(books - Obsidian)(.*)>": "",
+			"class<(.*)(chat)(.*)>": "󰍡",
+			"class<(Alacritty|ghostty)> title<(.*)(✳ Claude)(.*)>": "󱙺",
+			"class<(.*)(chrome-claude)(.*)>": "✻",
+			"title<(.*)(Gemini)(.*)>": "󰼙",
+			"title<(.*)(JIRA)(.*)>": "󰌃",
+			"title<(.*)(Meet)(.*)>": "",
+			"firefox": "",
+			"vivaldi": "",
+			"app.zen_browser.zen": "",
+			"zen": "",
+			"chrome": "",
+			"dbeaver": "🦫",
+			"code": "󰨞",
+			"cursor": "󰨞",
+			"obsidian": "",
+			"Alacritty": "󰆍",
+			"ghostty": "󰆍",
+			"org.gnome.Nautilus": "",
+			"zed": "󰰶",
+			"stremio": "🍿",
+			"insomnia": "",
+			"yaak-app": "󰆚",
+			"class<^steam_app_.*>": "󰮯",
+			"title<.*Steam.*>": ""
+		}
+	},
+	"mpris": {
+		"format": "{player_icon} {title} - {artist}",
+		"format-paused": "{status_icon} CALADO, MORTAL!",
+		"max-length": 30,
+		"tooltip-format": "{title} | {artist}",
+		"player-icons": {
+			"default": "▶",
+			"firefox": "",
+			"chrome": "",
+		},
+		"status-icons": {
+			"paused": "⏸"
+		},
+		"on-click": "playerctl play-pause",
+		"on-click-right": "playerctl next",
+		"on-scroll-up": "playerctl next",
+		"on-scroll-down": "playerctl previous"
+	},
+	"idle_inhibitor": {
+		"format": "{icon}",
+		"format-icons": {
+			"activated": "󰅶 ",
+			"deactivated": "󰅷 "
+		},
+		"tooltip": true
+	},
+	"clock": {
+		"format": "󰥔 {:%H:%M:%S}",
+		"interval": 1,
+		"format-alt": "󰃮 {:%Y-%m-%d}",
+		"tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+		"calendar": {
+			"mode": "month",
+			"mode-mon-col": 3,
+			"weeks-pos": "right",
+			"on-scroll": 1,
+			"on-click-right": "mode",
+			"format": {
+				"months": "<span color='#d3c6aa'><b>{}</b></span>",
+				"days": "<span color='#e67e80'>{}</span>",
+				"weeks": "<span color='#a7c080'><b>W{}</b></span>",
+				"weekdays": "<span color='#7fbbb3'><b>{}</b></span>",
+				"today": "<span color='#dbbc7f'><b><u>{}</u></b></span>"
+			}
+		},
+		"actions": {
+			"on-click-right": "mode",
+			"on-click-forward": "tz_up",
+			"on-click-backward": "tz_down",
+			"on-scroll-up": "shift_up",
+			"on-scroll-down": "shift_down"
+		}
+	},
+	"cpu": {
+		"format": "󰍛 {usage}%",
+		"tooltip": true,
+		"interval": 10
+	},
+	"memory": {
+		"format": "󰘚 {}%",
+		"interval": 1
+	},
+	"battery": {
+		"states": {
+			"good": 95,
+			"warning": 30,
+			"critical": 15
+		},
+		"format-time": "{H}:{m}",
+		"format": "{icon}{capacity}% {time}",
+		"format-charging": "󰂄 {capacity}%",
+		"format-plugged": "󰚥 {capacity}%",
+		"format-icons": [
+			"󰂎",
+			"󰁺",
+			"󰁻",
+			"󰁼",
+			"󰁽",
+			"󰁾",
+			"󰁿",
+			"󰂀",
+			"󰂁",
+			"󰂂",
+			"󰁹"
+		]
+	},
+	"network": {
+		"format-wifi": "󰖩 {signalStrength}%",
+		"format-ethernet": "󰈀 {ifname}",
+		"format-linked": "󰈀 {ifname} (No IP)",
+		"format-disconnected": "󰖪 Disconnected",
+		"tooltip-format": "󰖩 {essid} : {ifname}: {ipaddr}",
+		"on-click": "alacritty -e nmtui"
+	},
+	"bluetooth": {
+		"format": "",
+		"format-connected": " {device_alias}",
+		"format-connected-battery": " {device_alias} {device_battery_percentage}%",
+		"tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
+		"tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
+		"tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
+		"tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t{device_battery_percentage}%",
+		"on-click": "alacritty -e bluetuith"
+	},
+	"pulseaudio": {
+		"format": "{icon} {volume}%",
+		"format-bluetooth": "󰂰 {volume}%",
+		"format-bluetooth-muted": "󰂲 {icon}",
+		"format-muted": "󰝟",
+		"format-icons": {
+			"headphone": "󰋋",
+			"hands-free": "󰥰",
+			"headset": "󰋎",
+			"phone": "󰏲",
+			"portable": "󰄝",
+			"car": "󰄋",
+			"default": [
+				"󰕿",
+				"󰖀",
+				"󰕾"
+			]
+		},
+		"on-click": "alacritty -e wiremix",
+		"on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+		"on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +2%",
+		"on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -2%"
+	},
+	"custom/claude-usage": {
+		"exec": "plug claude usage --waybar",
+		"return-type": "json",
+		"interval": 30,
+		"signal": 8,
+		"on-click": "xdg-open https://claude.ai/settings/usage",
+		"on-click-right": "plug claude usage --refresh --waybar; pkill -RTMIN+8 waybar",
+		"format": "{}",
+		"tooltip": true,
+		"escape": false,
+		"markup": "pango"
+	},
+	"custom/obsidian-sync": {
+		"exec": "$HOME/.config/waybar/obsidian-sync-status.sh",
+		"return-type": "json",
+		"interval": 30,
+		"format": "{}",
+		"tooltip": true,
+		"escape": false,
+		"on-click": "alacritty -e bash -c '$HOME/.config/waybar/obsidian-sync-panel.sh'",
+		"on-click-right": "alacritty -e journalctl -u obsidian-sync -f"
+	},
+	"custom/cpu-bar": {
+		"exec": "$HOME/.config/waybar/waybar-resource-bar.sh cpu",
+		"return-type": "json",
+		"interval": 2,
+		"format": "{}",
+		"tooltip": true,
+		"escape": false
+	},
+	"custom/gpu-bar": {
+		"exec": "$HOME/.config/waybar/waybar-resource-bar.sh gpu",
+		"return-type": "json",
+		"interval": 2,
+		"format": "{}",
+		"tooltip": true,
+		"escape": false
+	},
+	"custom/ram-bar": {
+		"exec": "$HOME/.config/waybar/waybar-resource-bar.sh memory",
+		"return-type": "json",
+		"interval": 2,
+		"format": "{}",
+		"tooltip": true,
+		"escape": false
+	},
+	"custom/swaync": {
+		"tooltip": false,
+		"format": "{icon} {text}",
+		"format-icons": {
+			"notification": "<span foreground='white'>󰂚<sup></sup></span>",
+			"none": "󰂜",
+			"dnd-notification": "<span foreground='white'>󰂛<sup></sup></span>",
+			"dnd-none": "󰂛",
+			"inhibited-notification": "<span foreground='white'>󰂚<sup></sup></span>",
+			"inhibited-none": "󰂜",
+			"dnd-inhibited-notification": "<span foreground='white'>󰂛<sup></sup></span>",
+			"dnd-inhibited-none": "󰂛"
+		},
+		"return-type": "json",
+		"exec-if": "which swaync-client",
+		"exec": "swaync-client -swb",
+		"on-click": "swaync-client -t -sw",
+		"on-click-right": "swaync-client -d -sw",
+		"escape": true
+	},
+	"backlight": {
+		"format": "{icon} {percent}%",
+		"format-icons": [
+			"󰃞",
+			"󰃟",
+			"󰃠"
+		],
+		"on-scroll-up": "brightnessctl set +5%",
+		"on-scroll-down": "brightnessctl set 5%-"
+	}
+}

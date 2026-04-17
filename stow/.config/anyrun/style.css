@@ -1,0 +1,55 @@
+* {
+    all: unset;
+    font-family: "JetBrainsMono Nerd Font", "Fira Code", monospace;
+    font-size: 14px;
+    color: #f8f8f2;
+}
+
+#window {
+    background: #1e1f29;
+    border: 2px solid #bd93f9;
+    border-radius: 12px;
+}
+
+#entry {
+    background: #282a36;
+    border: 1px solid #44475a;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 12px;
+    font-size: 15px;
+    color: #f8f8f2;
+    min-width: 600px;
+}
+
+#list {
+    margin: 0 12px 12px 12px;
+}
+
+#element {
+    background: #282a36;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 2px 0;
+    color: #f8f8f2;
+}
+
+#element:selected {
+    background: #44475a;
+    color: #f8f8f2;
+}
+
+#element:selected #text {
+    color: #bd93f9;
+}
+
+#text {
+    color: #f8f8f2;
+    margin-left: 8px;
+}
+
+#description {
+    color: #6272a4;
+    font-size: 12px;
+    margin-left: 8px;
+}

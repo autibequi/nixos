@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Obsidian Personal
+Comment=Obsidian Personal Vault
+Exec=obsidian "obsidian://open?vault=.ovault"
+Icon=obsidian
+Type=Application
+Categories=Office;

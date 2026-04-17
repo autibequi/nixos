@@ -1,0 +1,4 @@
+(
+    max_entries: Some(5),
+    fuzzy: Some(true),
+)

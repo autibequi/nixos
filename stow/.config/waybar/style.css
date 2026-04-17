@@ -1,0 +1,400 @@
+@import url("colors.css");
+
+/*========================================================*
+ *                   BASE PALETTE (fallback)              *
+ *========================================================*/
+@define-color color-black #000000;
+@define-color color-white #ffffff;
+@define-color color-red #ff0000;
+@define-color color-yellow #ffe761;
+@define-color color-green #008000;
+@define-color color-blue #0c4abf;
+@define-color color-orange #ff8c00;
+
+/*========================================================*
+ *                   GLOBAL COLORS                       *
+ *========================================================*/
+@define-color main-bg @color-black;
+@define-color main-text @color-white;
+
+/*========================================================*
+ *                 WORKSPACE COLORS                      *
+ *========================================================*/
+@define-color ws-text @main-text;
+@define-color ws-active-bg @color-white;
+@define-color ws-active-text @color-black;
+@define-color ws-urgent-bg @color-black;
+@define-color ws-urgent-text @color-red;
+@define-color ws-special-text @color-yellow;
+@define-color ws-special-active-bg @color-black;
+@define-color ws-special-active-text @color-green;
+@define-color ws-special-hover-text @color-green;
+
+/*========================================================*
+ *                  MODULE COLORS                        *
+ *========================================================*/
+@define-color mpris-text @color-white;
+@define-color clock-text @color-white;
+@define-color battery-text @color-white;
+@define-color battery-charging-text @color-white;
+@define-color battery-warning-text @color-white;
+@define-color battery-critical-text @color-white;
+@define-color network-text @color-white;
+@define-color network-disconnected-text @color-white;
+@define-color audio-text @color-white;
+@define-color audio-muted-text @color-white;
+@define-color backlight-text @color-white;
+@define-color idle-inhibitor-text @main-text;
+@define-color idle-inhibitor-active-text @color-white;
+
+/*========================================================*
+ *                  GENERAL STYLES                       *
+ *========================================================*/
+* {
+    border: none;
+    border-radius: 0;
+    font-family: 'JetBrainsMono Nerd Font', FontAwesome, sans-serif;
+    font-size: 11px;
+    min-height: 0;
+}
+
+window#waybar {
+    background-color: @main-bg;
+    color: @main-text;
+}
+
+/*========================================================*
+ *             MODULE CONTAINER STYLES                   *
+ *========================================================*/
+#mpris,
+#clock,
+#battery,
+#network,
+#pulseaudio,
+#backlight,
+#idle_inhibitor,
+#custom-swaync,
+#custom-cpu-bar,
+#custom-gpu-bar,
+#custom-ram-bar,
+#custom-claude-usage,
+#custom-obsidian-sync,
+#custom-vennon,
+#custom-screenrecord,
+#custom-tray-toggle,
+#bluetooth,
+#tray {
+    margin: 0;
+    padding: 0 2px;
+    background-color: transparent;
+}
+
+/*========================================================*
+*                     WORKSPACES                        *
+*========================================================*/
+#workspaces {
+    margin: 0 2px;
+}
+
+#workspaces button {
+    padding: 2px 5px;
+    min-width: 0;
+    margin: 0;
+    background-color: transparent;
+    color: @ws-text;
+}
+
+#workspaces button:hover {
+    color: @color-black;
+    background-color: @color-white;
+    text-shadow: 0 1px 0 #181800cc, 0 0 4px #0a0a40cc, 0 0 12px #18180099,
+        0 2px 0 #000000cc;
+}
+
+#workspaces button.focused {
+    box-shadow: inset 0 -2px @ws-active-text;
+    color: @ws-text;
+    font-weight: 900;
+}
+
+#workspaces button.active {
+    background-color: @ws-active-bg;
+    color: @ws-active-text;
+    font-weight: bold;
+}
+
+#workspaces button.urgent {
+    color: #fff;
+    background-color: rgba(255, 0, 0, 0.5);
+    border: 1px solid @color-red;
+    text-shadow: 0 0 10px @color-red, 0 0 20px rgba(255, 0, 0, 0.7);
+    box-shadow: 0 0 12px rgba(255, 0, 0, 0.6), inset 0 0 8px rgba(255, 0, 0, 0.3);
+    animation: urgent-pulse 0.6s ease-in-out infinite alternate;
+    font-weight: bold;
+}
+
+@keyframes urgent-pulse {
+    from {
+        background-color: rgba(255, 0, 0, 0.35);
+        box-shadow: 0 0 8px rgba(255, 0, 0, 0.4), inset 0 0 6px rgba(255, 0, 0, 0.2);
+    }
+
+    to {
+        background-color: rgba(255, 0, 0, 0.65);
+        box-shadow: 0 0 18px rgba(255, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.4);
+    }
+}
+
+#workspaces button.special {
+    color: @ws-special-text;
+}
+
+#workspaces button.active.special {
+    background-color: @ws-active-bg;
+    color: @ws-active-text;
+}
+
+/*========================================================*
+*                   MODULE STYLES                       *
+*========================================================*/
+#mpris {
+    padding-left: 4px;
+    padding-right: 4px;
+    color: @mpris-text;
+    border-bottom-color: @mpris-text;
+}
+
+#mpris.playing {
+    color: @color-yellow;
+    text-shadow: 0 0 6px @color-yellow;
+}
+
+#mpris.paused {
+    padding-top: 4px;
+    color: @color-orange;
+    background-color: @color-black;
+}
+
+#clock {
+    color: @clock-text;
+    border-bottom-color: @clock-text;
+}
+
+#battery {
+    color: @battery-text;
+    border-bottom-color: @battery-text;
+}
+
+#battery.charging,
+#battery.plugged {
+    color: @battery-charging-text;
+    border-bottom-color: @battery-charging-text;
+}
+
+#battery.warning:not(.charging) {
+    color: @battery-warning-text;
+    border-bottom-color: @battery-warning-text;
+}
+
+#battery.critical:not(.charging) {
+    color: @battery-critical-text;
+    border-bottom-color: @battery-critical-text;
+}
+
+#network {
+    color: @network-text;
+    border-bottom-color: @network-text;
+}
+
+#network.disconnected {
+    color: @network-disconnected-text;
+    border-bottom-color: @network-disconnected-text;
+}
+
+#pulseaudio {
+    color: @audio-text;
+    border-bottom-color: @audio-text;
+}
+
+#pulseaudio.muted {
+    color: @audio-muted-text;
+    border-bottom-color: @audio-muted-text;
+}
+
+#backlight {
+    color: @backlight-text;
+    border-bottom-color: @backlight-text;
+}
+
+#idle_inhibitor {
+    margin: 0;
+    padding: 0 2px 0 6px;
+    color: @idle-inhibitor-text;
+    border-bottom-color: transparent;
+    min-width: 14px;
+}
+
+#idle_inhibitor.activated {
+    color: @main-bg;
+    background-color: @main-text;
+    border-bottom-color: @main-bg;
+}
+
+/*========================================================*
+ *                      SWAYNC                           *
+ *========================================================*/
+#custom-claude {
+    color: #f1c40f;
+    background: #2c3e50;
+    padding: 0 4px;
+    margin: 0;
+    border-bottom-color: #f1c40f;
+}
+
+#custom-claude-usage {
+    color: #2ecc71;
+    padding: 0 4px;
+    margin: 0;
+    transition: color 0.3s;
+}
+
+#custom-claude-usage.warning {
+    color: #f39c12;
+}
+
+#custom-claude-usage.critical {
+    color: #e74c3c;
+}
+
+#custom-obsidian-sync {
+    color: #9b59b6;
+    padding: 0 4px;
+    margin: 0;
+    transition: color 0.3s;
+}
+
+#custom-obsidian-sync.inactive {
+    color: #636e72;
+}
+
+#custom-obsidian-sync.failed {
+    color: #e74c3c;
+    animation: urgent-pulse 0.6s ease-in-out infinite alternate;
+}
+
+#custom-cpu-bar,
+#custom-gpu-bar,
+#custom-ram-bar {
+    color: @color-white;
+    padding: 0 4px;
+    margin: 0;
+}
+
+#custom-swaync {
+    color: @color-white;
+    padding: 0 2px;
+    min-width: 12px;
+}
+
+#custom-swaync.notification {
+    color: @color-white;
+}
+
+#custom-swaync.dnd-notification {
+    color: @color-white;
+    opacity: 0.5;
+}
+
+#custom-swaync.dnd-none {
+    color: @color-white;
+    opacity: 0.5;
+}
+
+/*========================================================*
+ *                     BLUETOOTH                         *
+ *========================================================*/
+#bluetooth {
+    font-weight: bold;
+    color: @color-white;
+    border-bottom-color: @color-white;
+    min-width: 12px;
+    padding: 0 2px;
+}
+
+#bluetooth.connected {
+    color: @main-bg;
+    background-color: @color-blue;
+    border-bottom-color: @main-text;
+}
+
+/*========================================================*
+ *                        TRAY                           *
+ *========================================================*/
+#tray {
+    background-color: transparent;
+    padding: 0 4px;
+    margin: 0;
+    color: @main-text;
+    border-bottom-color: @color-white;
+    min-width: 0px;
+}
+
+#tray>.active {
+    background-color: transparent;
+    color: @main-text;
+    opacity: 1;
+    border-radius: 0;
+    border: none;
+}
+
+#tray>.passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray>.needs-attention {
+    -gtk-icon-effect: highlight;
+    color: @color-white;
+    border-bottom-color: @color-white;
+}
+
+/*========================================================*
+ *                   vennon MENU ICON                      *
+ *========================================================*/
+#custom-vennon {
+    padding: 0 4px;
+    color: @main-text;
+    min-width: 14px;
+}
+
+#custom-vennon:hover {
+    color: @main-bg;
+    background-color: @main-text;
+}
+
+/*========================================================*
+ *                  SCREENRECORD INDICATOR                *
+ *========================================================*/
+#custom-screenrecord {
+    color: @main-text;
+    padding: 0 2px;
+    min-width: 0;
+}
+
+#custom-screenrecord.active {
+    color: @color-red;
+    animation: urgent-pulse 0.6s ease-in-out infinite alternate;
+}
+
+/*========================================================*
+ *                   TRAY EXPANDER                        *
+ *========================================================*/
+#custom-tray-toggle {
+    padding: 0 2px;
+    color: @main-text;
+    min-width: 10px;
+}
+
+#custom-tray-toggle:hover {
+    color: @main-bg;
+    background-color: @main-text;
+}

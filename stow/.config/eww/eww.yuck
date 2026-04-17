@@ -1,0 +1,28 @@
+;; ── Whisper PTT Overlay ──────────────────────────────────────────
+
+(defvar recording false)
+
+(defwidget rec-pill []
+  (box
+    :class "rec-pill ${recording ? 'active' : 'idle'}"
+    :space-evenly false
+    :spacing 8
+    (box
+      :class "rec-dot ${recording ? 'pulse' : 'done'}"
+      "")
+    (label
+      :class "rec-label"
+      :text {recording ? "Gravando" : "Pronto"})))
+
+(defwindow whisper-overlay
+  :monitor 0
+  :geometry (geometry
+    :x "0px"
+    :y "24px"
+    :width "160px"
+    :height "36px"
+    :anchor "top center")
+  :stacking "overlay"
+  :focusable false
+  :namespace "whisper-ptt"
+  (rec-pill))

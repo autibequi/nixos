@@ -1,0 +1,7 @@
+(
+    max_entries: 6,
+    fuzzy: true,
+    desktop_actions: true,
+    use_gtk_theme: false,
+    terminal: Some(Terminal("alacritty")),
+)

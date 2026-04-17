@@ -1,0 +1,52 @@
+(
+    applications: ApplicationsConfig(
+        max_entries: Some(6),
+        fuzzy: Some(true),
+        desktop_actions: Some(true),
+        use_gtk_theme: Some(false),
+        terminal: Some("alacritty"),
+    ),
+    hyprland_windows: HyprlandWindowsConfig(
+        max_entries: Some(5),
+        fuzzy: Some(true),
+    ),
+    shell: ShellConfig(
+        shell: Some("zsh"),
+        fuzzy: Some(true),
+        max_entries: Some(4),
+    ),
+    websearch: WebsearchConfig(
+        engines: Some([
+            (name: "duckduckgo", prefix: "d",    url: "https://duckduckgo.com/?q={}",                      description: "Search on DuckDuckGo"),
+            (name: "google",     prefix: "g",    url: "https://google.com/search?q={}",                    description: "Search on Google"),
+            (name: "youtube",    prefix: "yt",   url: "https://youtube.com/results?search_query={}",       description: "Search on YouTube"),
+            (name: "github",     prefix: "gh",   url: "https://github.com/search?q={}",                   description: "Search on GitHub"),
+            (name: "stackoverflow", prefix: "so",url: "https://stackoverflow.com/search?q={}",            description: "Search on Stack Overflow"),
+            (name: "wikipedia",  prefix: "wiki", url: "https://en.wikipedia.org/wiki/{}",                 description: "Search on Wikipedia"),
+            (name: "nixos",      prefix: "nix",  url: "https://search.nixos.org/packages?query={}",       description: "Search NixOS packages"),
+            (name: "nixopts",    prefix: "nixo", url: "https://search.nixos.org/options?query={}",        description: "Search NixOS options"),
+            (name: "crates",     prefix: "cr",   url: "https://crates.io/search?q={}",                    description: "Search crates.io"),
+            (name: "docs_rs",    prefix: "dr",   url: "https://docs.rs/{}",                               description: "Search docs.rs"),
+            (name: "mdn",        prefix: "mdn",  url: "https://developer.mozilla.org/en-US/search?q={}",  description: "Search MDN Web Docs"),
+            (name: "npm",        prefix: "npm",  url: "https://www.npmjs.com/search?q={}",                description: "Search npm"),
+        ]),
+        fuzzy: Some(true),
+        max_entries: Some(5),
+    ),
+    rink: RinkConfig(
+        max_entries: Some(3),
+        fuzzy: Some(true),
+    ),
+    kidex: KidexConfig(
+        max_entries: Some(5),
+    ),
+    translate: TranslateConfig(
+        prefix: Some("tr"),
+        language_delimiter: Some(">"),
+        max_entries: Some(3),
+    ),
+    dictionary: DictionaryConfig(
+        prefix: Some("def"),
+        max_entries: Some(3),
+    ),
+)

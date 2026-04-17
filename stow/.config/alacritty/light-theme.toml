@@ -1,0 +1,67 @@
+# ┌──────────────────────────────────────────────────────────┐
+# │  Clean Light Theme                                       │
+# │  Soft light theme with excellent readability             │
+# └──────────────────────────────────────────────────────────┘
+
+[colors.primary]
+background = "#fafafa"
+foreground = "#2e3440"
+dim_foreground = "#5e6e7c"
+bright_foreground = "#1a1f24"
+
+[colors.cursor]
+text = "#fafafa"
+cursor = "#0066cc"
+
+[colors.vi_mode_cursor]
+text = "#fafafa"
+cursor = "#c2185b"
+
+[colors.search]
+matches = { foreground = "#fafafa", background = "#ff9800" }
+focused_match = { foreground = "#fafafa", background = "#4caf50" }
+
+[colors.footer_bar]
+foreground = "#2e3440"
+background = "#e0e0e0"
+
+[colors.hints]
+start = { foreground = "#fafafa", background = "#ff9800" }
+end = { foreground = "#fafafa", background = "#bdbdbd" }
+
+[colors.selection]
+text = "#2e3440"
+background = "#c8d8e8"
+
+[colors.normal]
+black   = "#e0e0e0"
+red     = "#d32f2f"
+green   = "#388e3c"
+yellow  = "#f57c00"
+blue    = "#1976d2"
+magenta = "#8e24aa"
+cyan    = "#00897b"
+white   = "#4a4a4a"
+
+[colors.bright]
+black   = "#c8c8c8"
+red     = "#c62828"
+green   = "#2e7d32"
+yellow  = "#e65100"
+blue    = "#1565c0"
+magenta = "#7b1fa2"
+cyan    = "#00796b"
+white   = "#2e3440"
+
+[colors.dim]
+black   = "#eeeeee"
+red     = "#b71c1c"
+green   = "#2e7d32"
+yellow  = "#e65100"
+blue    = "#0d47a1"
+magenta = "#6a1b9a"
+cyan    = "#00695c"
+white   = "#5c6370"
+
+[bell]
+color = "#ff9800"

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": { "type": "small"},
+  "modules": [
+    { "type": "os", "key": "OS", "format": "{3}" },
+    { "type": "shell", "key": "Shell", "format": "{1} {4}" },
+    { "type": "de", "key": "DE", "format": "{2} {3}" },
+    { "type": "cpu", "key": "CPU", "format": "{1} {4} with threads @ {7}" },
+    { "type": "gpu", "key": "GPU", "format": "{2}" },
+    { "type": "memory", "key": "RAM", "format": "{2}/{3}" },
+    { "type": "uptime", "key": "UPTIME", "format": "{1}d {2}h {3}m " }
+  ]
+} 

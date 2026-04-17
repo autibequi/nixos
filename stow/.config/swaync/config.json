@@ -1,0 +1,87 @@
+{
+  "positionX": "right",
+  "positionY": "top",
+  "control-center-preferred-output": "eDP-1",
+  "notification-window-preferred-output": "eDP-1",
+  "layer": "overlay",
+  "control-center-layer": "top",
+  "layer-shell": true,
+  "cssPriority": "user",
+  "control-center-margin-top": 5,
+  "control-center-margin-bottom": 5,
+  "control-center-margin-right": 5,
+  "control-center-margin-left": 0,
+  "control-center-width": 480,
+  "control-center-height": 600,
+  "notification-2fa-action": true,
+  "notification-inline-replies": true,
+  "notification-icon-size": 36,
+  "notification-body-image-height": 200,
+  "notification-body-image-width": 340,
+  "timeout": 3,
+  "timeout-low": 1,
+  "timeout-critical": 0,
+  "notification-window-width": 360,
+  "keyboard-shortcuts": true,
+  "image-visibility": "when-available",
+  "transition-time": 0,
+  "hide-on-action": true,
+  "hide-on-button-press": true,
+  "fit-to-screen": true,
+  "notification-grouping": true,
+  "notification-action-filter": {
+    "hide-chrome-settings": {
+      "desktop-entry": "google-chrome",
+      "use-regex": false,
+      "text-matcher": "Settings"
+    },
+    "hide-vivaldi-settings": {
+      "desktop-entry": "vivaldi-stable",
+      "use-regex": false,
+      "text-matcher": "Settings"
+    }
+  },
+  "notification-visibility": {
+    "google-chat-webapp": {
+      "state": "transient",
+      "app-name": "Google Chrome",
+      "body": ".*chat\\.google\\.com.*"
+    },
+    "hyprshot-appname": {
+      "state": "transient",
+      "app-name": "Hyprshot"
+    },
+    "hyprshot-desktop": {
+      "state": "transient",
+      "desktop-entry": "hyprshot"
+    },
+    "satty-appname": {
+      "state": "transient",
+      "app-name": "satty"
+    },
+    "satty-desktop": {
+      "state": "transient",
+      "desktop-entry": "satty"
+    },
+    "notify-send-low": {
+      "state": "transient",
+      "app-name": "notify-send",
+      "urgency": "Low"
+    }
+  },
+  "widgets": [
+    "title",
+    "dnd",
+    "notifications"
+  ],
+  "widget-config": {
+    "title": {
+      "text": "Notifications",
+      "clear-all-button": true,
+      "button-text": "󰎟"
+    },
+    "dnd": {
+      "text": "Do Not Disturb"
+    }
+  }
+}

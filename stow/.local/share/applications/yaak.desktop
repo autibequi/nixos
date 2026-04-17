@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Yaak
+Comment=Yaak API Client
+Exec=appimage-run /home/pedrinho/apps/yaak.AppImage
+Icon=application-x-executable
+Type=Application
+Categories=Development;Network;

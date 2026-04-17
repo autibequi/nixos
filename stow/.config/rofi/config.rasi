@@ -1,0 +1,13 @@
+configuration {
+    modi: "drun";
+    show-icons: true;
+    icon-theme: "Papirus";
+    drun-display-format: "{icon} {name}";
+    font: "FiraCode Nerd Font 12";
+    display-drun: "Applications";
+    /* UWSM: garante que apps abertos pelo drun entram no escopo da sessão */
+    drun-launch-command: "uwsm app -- {exec}";
+    run-command: "uwsm app -- {cmd}";
+}
+
+@theme "theme.rasi"

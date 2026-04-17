@@ -1,0 +1,24 @@
+# direnv ignore
+shell.nix
+.envrc
+.direnv/*
+.vscode/settings.json
+
+STATE.md
+.claude/worktrees
+.claude/settings
+.claude/settings.json
+.claude/settings.local.json
+
+# AI SWARM
+.worktrees/
+
+graphify-out/**
+.tempograph/**/*
+.tempograph/*
+.tempograph/
+
+apps_others/**/*
+apps_others/*
+apps_others/
+.codebase-memory/

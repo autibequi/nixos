@@ -1,0 +1,27 @@
+// Zed keymap
+//
+// For information on binding keys, see the Zed
+// documentation: https://zed.dev/docs/key-bindings
+//
+// To see the default key bindings run `zed: open default keymap`
+// from the command palette.
+[
+	{
+		"bindings": {
+			// Quick Shortcuts
+			"ctrl-shift-q": "debug_panel::Toggle",
+			// VSCode Like
+			"ctrl-p": "file_finder::Toggle",
+			"ctrl-u": "outline::Toggle",
+			// Panels WASD Management
+			"ctrl-shift-w": "workspace::CloseAllDocks",
+			"ctrl-shift-a": "workspace::ToggleLeftDock",
+			"ctrl-shift-s": "workspace::ToggleBottomDock",
+			"ctrl-shift-d": "workspace::ToggleRightDock",
+			// Open Projects
+			"ctrl-shift-r": "projects::OpenRecent",
+			"alt-enter": "agent::AllowOnce",
+			"alt-shift-enter": "agent::RejectOnce"
+		}
+	}
+]

@@ -1,0 +1,20 @@
+dictionaries = [
+    "pt_br",
+    "en_us",
+]
+words = [
+    "cloudfront",
+    "jobtracking",
+    "ldi",
+    "monolito",
+    "opensearch",
+    "pag",
+    "pagprof",
+    "sqs",
+    "testutils",
+    "toggler",
+]
+include_tags = [
+    "comment",
+    "string",
+]

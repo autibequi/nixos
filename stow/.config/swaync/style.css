@@ -1,0 +1,273 @@
+/*
+ * SwayNC — OLED Black Monochrome
+ * Matches waybar theme: pure black bg, white text, minimal chrome
+ */
+
+@define-color bg #000000;
+@define-color fg #ffffff;
+@define-color fg-dim #888888;
+@define-color border #222222;
+@define-color accent #ffffff;
+@define-color urgent #ff0000;
+@define-color close-hover #ff3333;
+
+/* ======== Global ======== */
+* {
+    font-family: 'JetBrainsMono Nerd Font', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    transition: none !important;
+    animation: none !important;
+}
+
+/* ======== Notification popups (floating) ======== */
+.notification-row {
+    outline: none;
+}
+
+.notification-row:focus,
+.notification-row:hover {
+    background: transparent;
+}
+
+.notification {
+    background: @bg;
+    border: 1px solid @border;
+    border-radius: 6px;
+    margin: 2px 4px;
+    padding: 0;
+    min-width: 500px;
+}
+
+.notification-content {
+    padding: 6px 8px;
+}
+
+.notification .notification-default-action {
+    border-radius: 6px;
+    padding: 0;
+    margin: 0;
+}
+
+.notification .notification-default-action:hover {
+    background: @border;
+}
+
+.notification .notification-action {
+    background: @border;
+    border: none;
+    border-radius: 4px;
+    color: @fg;
+    margin: 2px;
+    padding: 4px 8px;
+}
+
+.notification .notification-action:hover {
+    background: @fg-dim;
+    color: @bg;
+}
+
+.close-button {
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    color: @fg-dim;
+    min-height: 20px;
+    min-width: 20px;
+    padding: 2px;
+}
+
+.close-button:hover {
+    background: @close-hover;
+    color: @fg;
+}
+
+.summary {
+    color: @fg-dim;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.body {
+    color: @fg;
+    font-size: 15px;
+}
+
+.body>label {
+    -gtk-line-clamp: 2;
+}
+
+.time {
+    color: @fg-dim;
+    font-size: 9px;
+    margin-right: 6px;
+}
+
+.image {
+    border-radius: 4px;
+    margin-right: 6px;
+}
+
+.body-image {
+    border-radius: 4px;
+    margin-top: 4px;
+}
+
+/* Floating popups: large screenshot preview */
+.floating-notifications .image {
+    min-width: 20px;
+    min-height: 20px;
+    padding-right: 20px;
+    padding-left: 20px;
+}
+
+.notification-group {
+    margin: 0;
+}
+
+.notification-group-headers {
+    color: @fg-dim;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    text-transform: uppercase;
+}
+
+.notification-group-collapse-button {
+    background: transparent;
+    border: none;
+    color: @fg-dim;
+    min-height: 18px;
+    min-width: 18px;
+}
+
+.notification-group-collapse-button:hover {
+    color: @fg;
+}
+
+/* ======== Control Center ======== */
+.control-center {
+    background: @bg;
+    border: 1px solid @border;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+/* ======== Title widget ======== */
+.widget-title {
+    color: @fg;
+    font-size: 12px;
+    font-weight: 700;
+    margin: 4px 6px;
+}
+
+.widget-title>button {
+    background: transparent;
+    border: 1px solid @border;
+    border-radius: 4px;
+    color: @fg-dim;
+    font-size: 12px;
+    min-height: 24px;
+    padding: 2px 10px;
+}
+
+.widget-title>button:hover {
+    background: @fg;
+    color: @bg;
+}
+
+/* ======== DND widget ======== */
+.widget-dnd {
+    color: @fg;
+    font-size: 10px;
+    margin: 2px 6px;
+    padding: 2px 0;
+}
+
+.widget-dnd>switch {
+    background: @border;
+    border: none;
+    border-radius: 10px;
+    min-height: 20px;
+    min-width: 40px;
+}
+
+.widget-dnd>switch:checked {
+    background: @fg;
+}
+
+.widget-dnd>switch slider {
+    background: @bg;
+    border-radius: 50%;
+    min-height: 16px;
+    min-width: 16px;
+}
+
+/* ======== Notification list inside CC ======== */
+.control-center .notification {
+    border: 1px solid @border;
+    margin: 1px 2px;
+}
+
+.control-center .notification-content {
+    padding: 4px 6px;
+}
+
+.control-center .image {
+    min-width: 28px;
+    min-height: 28px;
+}
+
+.control-center .notification .notification-action {
+    padding: 2px 6px;
+    font-size: 10px;
+}
+
+/* ======== Blank window (no notifications) ======== */
+.blank-window {
+    background: transparent;
+}
+
+/* ======== Floating notifications (outside CC) ======== */
+.floating-notifications {
+    background: transparent;
+}
+
+.floating-notifications .notification {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+/* ======== Inline reply ======== */
+.inline-reply {
+    margin-top: 4px;
+}
+
+.inline-reply entry {
+    background: @border;
+    border: none;
+    border-radius: 4px;
+    caret-color: @fg;
+    color: @fg;
+    min-height: 28px;
+    padding: 2px 8px;
+}
+
+.inline-reply button {
+    background: @fg;
+    border: none;
+    border-radius: 4px;
+    color: @bg;
+    margin-left: 4px;
+    min-height: 28px;
+    padding: 2px 10px;
+}
+
+.inline-reply button:hover {
+    background: @fg-dim;
+}
+
+/* ======== Critical urgency ======== */
+.critical>.notification-default-action {
+    border-left: 3px solid @urgent;
+}

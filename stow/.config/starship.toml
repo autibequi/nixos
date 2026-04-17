@@ -1,0 +1,62 @@
+# Starship — prompt config
+# Docs: https://starship.rs/config/
+
+scan_timeout = 100
+command_timeout = 1000
+add_newline = false
+
+# Prompt symbol
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+
+# Directory — trunca em 3 níveis
+[directory]
+truncation_length = 3
+truncate_to_repo = true
+
+# Git
+[git_branch]
+truncation_length = 24
+truncation_symbol = "…"
+
+[git_status]
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕⇡${ahead_count}⇣${behind_count}"
+conflicted = "=${count}"
+stashed = "📦${count}"
+
+# Tempo de comandos lentos (>3s)
+[cmd_duration]
+min_time = 3000
+format = "took [$duration]($style) "
+
+# Nix shell indicator
+[nix_shell]
+format = "via [❄️ $state](bold blue) "
+
+# Container indicator
+[container]
+format = "[$symbol]($style) "
+
+# Rust — só mostra no dir com Cargo.toml
+[rust]
+format = "via [$symbol($version)]($style) "
+
+# Node — só mostra no dir com package.json
+[nodejs]
+format = "via [$symbol($version)]($style) "
+
+# Desativar ruído
+[package]
+disabled = true
+
+[aws]
+disabled = true
+
+[gcloud]
+disabled = true
+
+[azure]
+disabled = true

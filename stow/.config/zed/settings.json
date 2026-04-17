@@ -1,0 +1,583 @@
+{
+	// ╔══════════════════════════════════════════════════════════════╗
+	// ║  Zed Editor — settings.json                                ║
+	// ╚══════════════════════════════════════════════════════════════╝
+	// ─── WINDOW & SESSION ──────────────────────────────────────────
+	"restore_on_startup": "launchpad",
+	"restore_on_file_reopen": false,
+	"when_closing_with_no_tabs": "close_window",
+	"bottom_dock_layout": "left_aligned",
+	"centered_layout": {
+		"right_padding": 0,
+	},
+	"session": {
+		"trust_all_worktrees": true
+	},
+	"title_bar": {
+		"show_branch_icon": true
+	},
+	// ─── KEYMAP & INPUT ────────────────────────────────────────────
+	"base_keymap": "VSCode",
+	"vim_mode": false,
+	"which_key": {
+		"enabled": false
+	},
+	"middle_click_paste": false,
+	"use_system_prompts": false,
+	"message_editor": {
+		"auto_replace_emoji_shortcode": true,
+	},
+	// ─── FONTS ─────────────────────────────────────────────────────
+	// Editor (buffer) font
+	"buffer_font_family": "JetBrainsMono Nerd Font Mono",
+	"buffer_font_size": 13.0,
+	"buffer_font_weight": 400.0,
+	"buffer_line_height": "standard",
+	"buffer_font_features": {
+		"calt": true,
+		"liga": true,
+	},
+	"buffer_font_fallbacks": [
+		"FiraCode Nerd Font",
+	],
+	// UI font
+	"ui_font_family": "JetBrainsMono Nerd Font",
+	"ui_font_size": 15.0,
+	"ui_font_weight": 400.0,
+	// Agent panel font
+	"agent_buffer_font_size": 14.0,
+	"agent_ui_font_size": 14.0,
+	// ─── THEME & APPEARANCE ────────────────────────────────────────
+	"theme": {
+		"mode": "system",
+		"light": "Dracula Light (Alucard)",
+		"dark": "Dracula"
+	},
+	"icon_theme": {
+		"mode": "system",
+		"light": "VSCode Icons for Zed (Dark Angular)",
+		"dark": "VSCode Icons for Zed (Dark Angular)"
+	},
+	"unstable.ui_density": "compact",
+	"unnecessary_code_fade": 0.5,
+	"rounded_selection": true,
+	"active_pane_modifiers": {
+		"inactive_opacity": 0.5,
+	},
+	// ─── EDITOR CORE ───────────────────────────────────────────────
+	// Saving
+	"autosave": "off",
+	"ensure_final_newline_on_save": true,
+	"format_on_save": "on",
+	"load_direnv": "direct",
+	// Cursor
+	"cursor_blink": false,
+	"cursor_shape": "bar",
+	"hide_mouse": "on_typing",
+	// Line numbers
+	"relative_line_numbers": "disabled",
+	"current_line_highlight": "gutter",
+	"selection_highlight": true,
+	"line_indicator_format": "short",
+	// Indentation
+	"tab_size": 2,
+	"hard_tabs": true,
+	"auto_indent_on_paste": true,
+	// Wrapping
+	"soft_wrap": "editor_width",
+	"wrap_guides": [
+		80
+	],
+	"show_wrap_guides": true,
+	// Brackets
+	"colorize_brackets": true,
+	"use_autoclose": true,
+	"use_auto_surround": true,
+	// Autocomplete & signature help
+	"show_completions_on_input": true,
+	"show_completion_documentation": true,
+	"auto_signature_help": true,
+	"show_signature_help_after_edits": true,
+	// Formatting
+	"use_on_type_format": true,
+	"show_whitespaces": "selection",
+	"diff_view_style": "unified",
+	// Scrolling
+	"scroll_beyond_last_line": "vertical_scroll_margin",
+	"vertical_scroll_margin": 22.0,
+	"autoscroll_on_clicks": false,
+	"scroll_sensitivity": 2,
+	"fast_scroll_sensitivity": 5,
+	// Misc editor features
+	"sticky_scroll": {
+		"enabled": true
+	},
+	"inline_code_actions": true,
+	"show_edit_predictions": true,
+	"linked_edits": true,
+	"double_click_in_multibuffer": "open",
+	"lsp_document_colors": "background",
+	"document_symbols": "on",
+	"document_folding_ranges": "on",
+	"semantic_tokens": "combined",
+	// ─── INLAY HINTS ───────────────────────────────────────────────
+	"inlay_hints": {
+		"enabled": true,
+		"edit_debounce_ms": 100,
+		"show_type_hints": false,
+		"show_parameter_hints": false,
+		"show_value_hints": false,
+		"show_other_hints": false,
+		"show_background": true,
+	},
+	// ─── GUTTER ────────────────────────────────────────────────────
+	"gutter": {
+		"line_numbers": true,
+		"folds": true,
+		"runnables": true,
+		"breakpoints": true,
+	},
+	// ─── INDENT GUIDES ─────────────────────────────────────────────
+	"indent_guides": {
+		"enabled": true,
+		"coloring": "indent_aware",
+		"background_coloring": "indent_aware",
+	},
+	// ─── SCROLLBAR ─────────────────────────────────────────────────
+	"scrollbar": {
+		"show": "never",
+		"cursors": true,
+		"git_diff": true,
+		"search_results": false,
+		"selected_text": true,
+		"diagnostics": "all",
+	},
+	// ─── MINIMAP ───────────────────────────────────────────────────
+	"minimap": {
+		"show": "always",
+		"thumb": "always",
+		"thumb_border": "full",
+		"current_line_highlight": "gutter",
+	},
+	// ─── TABS & TAB BAR ────────────────────────────────────────────
+	"tabs": {
+		"file_icons": true,
+		"git_status": true,
+		"show_diagnostics": "all",
+	},
+	"tab_bar": {
+		"show": true,
+		"show_pinned_tabs_in_separate_row": true,
+		"show_nav_history_buttons": false,
+		"show_tab_bar_buttons": false,
+	},
+	"preview_tabs": {
+		"enabled": true,
+		"enable_preview_from_file_finder": true,
+		"enable_preview_multibuffer_from_code_navigation": true,
+		"enable_keep_preview_on_code_navigation": true,
+	},
+	// ─── TOOLBAR ───────────────────────────────────────────────────
+	"toolbar": {
+		"breadcrumbs": true,
+		"agent_review": true,
+		"code_actions": true,
+		"quick_actions": true,
+		"selections_menu": false,
+	},
+	// ─── PANELS ────────────────────────────────────────────────────
+	"project_panel": {
+		"dock": "left",
+		"entry_spacing": "standard",
+		"sort_mode": "directories_first",
+		"hide_root": true,
+		"hide_gitignore": false,
+		"indent_size": 15,
+		"show_diagnostics": "all",
+		"indent_guides": {
+			"show": "never"
+		}
+	},
+	"outline_panel": {
+		"dock": "right",
+		"default_width": 600.0,
+		"file_icons": true,
+		"folder_icons": true,
+		"git_status": true,
+		"indent_size": 20.0,
+		"auto_reveal_entries": false,
+		"auto_fold_dirs": true,
+	},
+	"git_panel": {
+		"fallback_branch_name": "main",
+		"tree_view": true,
+		"sort_by_path": false,
+		"status_style": "icon",
+	},
+	"collaboration_panel": {
+		"button": false,
+		"dock": "right",
+	},
+	// ─── DIAGNOSTICS ───────────────────────────────────────────────
+	"diagnostics": {
+		"inline": {
+			"enabled": true,
+			"update_debounce_ms": 250,
+			"padding": 4,
+			"min_column": 0,
+			"max_severity": "hint",
+		},
+		"include_warnings": true,
+		"button": true,
+	},
+	// ─── GIT ───────────────────────────────────────────────────────
+	"git": {
+		"git_gutter": "tracked_files",
+		"enable_diff": true,
+		"hunk_style": "staged_hollow",
+		"path_style": "file_path_first",
+		"inline_blame": {
+			"enabled": true,
+			"delay_ms": 500,
+			"show_commit_summary": true,
+		},
+		"branch_picker": {
+			"show_author_name": true
+		},
+	},
+	// ─── SEARCH ────────────────────────────────────────────────────
+	"search": {
+		"include_ignored": true,
+	},
+	"use_smartcase_search": true,
+	"file_finder": {
+		"include_ignored": "smart"
+	},
+	"file_scan_exclusions": [
+		"**/.git",
+		"**/node_modules",
+		"**/target",
+		"**/.next",
+		"**/.turbo",
+		"**/dist",
+		"**/build",
+		"**/coverage",
+		"*.svg",
+		"**/static",
+		"**/public"
+	],
+	// ─── TERMINAL ──────────────────────────────────────────────────
+	"terminal": {
+		"dock": "bottom",
+		"max_scroll_history_lines": 1000,
+		"detect_venv": {
+			"on": {
+				"directories": [
+					".env",
+					"env",
+					".venv",
+					"venv"
+				],
+				"activate_script": "default"
+			}
+		}
+	},
+	// ─── DEBUGGER ──────────────────────────────────────────────────
+	"debugger": {
+		"dock": "left",
+		"stepping_granularity": "line",
+		"save_breakpoints": true,
+		"format_dap_log_messages": false,
+		"log_dap_communications": false,
+	},
+	// ─── AUDIO & CALLS ─────────────────────────────────────────────
+	"audio": {
+		"experimental.auto_microphone_volume": true,
+	},
+	"calls": {
+		"mute_on_join": true
+	},
+	// ─── AI — EDIT PREDICTIONS ─────────────────────────────────────
+	"edit_predictions": {
+		"provider": "zed",
+		"mode": "eager",
+		"open_ai_compatible_api": {
+			"api_url": "http://127.0.0.1:1234/v1/completions",
+			"prompt_format": "qwen",
+			"model": "zed-industries_zeta"
+		},
+		"disabled_globs": [
+			"**/node_modules/**",
+			"**/vendor/**",
+			"**/.git/**",
+			"**/.hg/**",
+			"**/.svn/**",
+			"**/dist/**",
+			"**/build/**",
+			"**/coverage/**"
+		],
+	},
+	// ─── AI — AGENT ────────────────────────────────────────────────
+	"agent": {
+		"default_profile": "write",
+		"message_editor_min_lines": 2,
+		"use_modifier_to_send": true,
+		"show_turn_stats": true,
+		"play_sound_when_agent_done": true,
+		"tool_permissions": {
+			"default": "allow"
+		},
+		"default_model": {
+			"provider": "zed.dev",
+			"model": "claude-sonnet-4-6",
+			"effort": "high",
+			"enable_thinking": false,
+		},
+		"inline_assistant_model": {
+			"provider": "zed.dev",
+			"model": "claude-sonnet-4-5",
+		},
+		"favorite_models": [
+			{
+				"provider": "anthropic",
+				"model": "claude-sonnet-4-6-latest",
+				"enable_thinking": false
+			},
+			{
+				"provider": "anthropic",
+				"model": "claude-sonnet-4-6-thinking-latest",
+				"enable_thinking": false
+			},
+			{
+				"provider": "anthropic",
+				"model": "claude-haiku-4-5-thinking-latest",
+				"enable_thinking": false
+			}
+		],
+	},
+	// ─── AI — AGENT SERVERS ────────────────────────────────────────
+	"agent_servers": {
+		"claude-acp": {
+			"type": "registry",
+			"default_config_options": {
+				"model": "default",
+				"mode": "acceptEdits"
+			},
+			"favorite_config_option_values": {
+				"model": [
+					"haiku",
+					"opus"
+				]
+			}
+		},
+		"cursor": {
+			"type": "registry"
+		}
+	},
+	// ─── SLASH COMMANDS ────────────────────────────────────────────
+	"slash_commands": {
+		"cargo_workspace": {
+			"enabled": true,
+		},
+	},
+	// ─── PRIVACY & SECURITY ────────────────────────────────────────
+	"redact_private_values": false,
+	"private_files": [
+		"**/.env*",
+		"**/*.pem",
+		"**/*.key",
+		"**/*.cert",
+		"**/*.crt",
+		"**/secrets.yml",
+		"**/secrets.json",
+	],
+	// ─── EXTENSIONS ────────────────────────────────────────────────
+	"auto_install_extensions": {
+		// Other
+		"codebook": true,
+		"rainbow-csv": true,
+		// Themes & Icons
+		"dracula": true,
+		"vscode-icons": true,
+		// Languages
+		"nix": true,
+		"golang": true,
+		"python": true,
+		"rust": true,
+		"vue": true,
+		"dart": true,
+		"toml": true,
+		"scss": true,
+		"sql": true,
+		"make": true,
+		"terraform": true,
+		"dockerfile": true,
+		"hyprlang": true,
+		"justfile": true,
+		"LOG": true,
+		"GraphQL": true,
+		"NGINX": true,
+		"XML": true,
+		// MCP servers
+		"mcp-server-context7": true,
+	},
+	// ─── FILE TYPES ────────────────────────────────────────────────
+	"file_types": {
+		"json": [
+			"*.prettierrc",
+			"*.babelrc",
+			"*.postcssrc",
+			"*.eslintrc",
+			"jsonc"
+		],
+		"shellscript": [
+			"*ctl",
+			"*conf"
+		],
+		"webpack": [
+			"*conf.js"
+		],
+		"rust": [
+			"*rs"
+		],
+		"vue": [
+			"*vue"
+		],
+		"javascriptreact": [
+			"*.js"
+		],
+		"html": [
+			"*.html",
+			"*.njk",
+			"*.mustache"
+		],
+		"postcss": [
+			"*.postcss"
+		]
+	},
+	// ─── FORMATTING & LINTING ──────────────────────────────────────
+	"prettier": {
+		"allowed": false,
+	},
+	"languages": {
+		"JavaScript": {
+			"formatter": {
+				"language_server": {
+					"name": "eslint"
+				}
+			},
+			"code_actions_on_format": {
+				"source.fixAll.eslint": true,
+			},
+		},
+		"TypeScript": {
+			"formatter": {
+				"language_server": {
+					"name": "eslint"
+				}
+			},
+			"code_actions_on_format": {
+				"source.fixAll.eslint": true,
+			},
+		},
+		"TSX": {
+			"formatter": {
+				"language_server": {
+					"name": "eslint"
+				}
+			},
+			"code_actions_on_format": {
+				"source.fixAll.eslint": true,
+			},
+		},
+		"Vue.js": {
+			"language_servers": [
+				"eslint",
+				"!typescript-language-server",
+			],
+			"code_actions_on_format": {
+				"source.fixAll.eslint": true,
+			},
+		},
+		"JSON": {
+			"tab_size": 2,
+		},
+		"YAML": {
+			"tab_size": 2,
+		},
+		"Markdown": {
+			"soft_wrap": "editor_width",
+			"show_wrap_guides": false,
+		},
+		"Hyprland Config": {
+			"formatter": {
+				"language_server": {
+					"name": "hyprls"
+				}
+			}
+		},
+		"Nix": {
+			"language_servers": [
+				"nil",
+				"nixd"
+			]
+		}
+	},
+	// ─── LSP ───────────────────────────────────────────────────────
+	"lsp": {
+		"codebook": {
+			"initialization_options": {}
+		},
+		"eslint": {
+			"settings": {
+				"workingDirectory": {
+					"mode": "location"
+				}
+			}
+		},
+		"vtsls": {
+			"settings": {
+				"typescript": {
+					"tsserver": {
+						"maxTsServerMemory": 16184
+					},
+					"format": {
+						"enable": false
+					}
+				},
+				"javascript": {
+					"format": {
+						"enable": false
+					}
+				}
+			}
+		},
+		"vue-language-server": {
+			"settings": {
+				"vue": {
+					"format": {
+						"enable": false
+					}
+				}
+			}
+		},
+		"gopls": {
+			"settings": {}
+		}
+	},
+	// I want this but for each project
+	"profiles": {
+		"MacOS": {
+			"agent_buffer_font_size": 18.0,
+			"buffer_font_size": 18.0,
+			"theme": "macOS Classic Light",
+			"ui_font_size": 18.0,
+		},
+		"MacOS Dark": {
+			"agent_buffer_font_size": 18.0,
+			"buffer_font_size": 18.0,
+			"theme": "macOS Classic Dark",
+			"ui_font_size": 18.0,
+		},
+	}
+}

@@ -1,0 +1,83 @@
+[
+  {
+    "label": "Test",
+    "command": "nh os test .",
+    "show_summary": false,
+    "type": "shell",
+    "group": "Schema Tools",
+    "tags": ["schema"],
+    "options": {
+      "cwd": "${workspaceFolder}"
+    }
+  },
+  {
+    "label": "Build & Switch",
+    "command": "nh os switch .",
+    "show_summary": false,
+    "type": "shell",
+    "tags": ["schema"],
+    "options": {
+      "cwd": "${workspaceFolder}"
+    }
+  },
+  {
+    "label": "Update",
+    "command": "nh os switch --update .",
+    "show_summary": false,
+    "type": "shell",
+    "tags": ["maintenance"],
+    "options": {
+      "cwd": "${workspaceFolder}"
+    }
+  },
+  {
+    "label": "Clean Bootentries (Keep 7)",
+    "command": "nh clean all --keep 7 --nogc",
+    "show_summary": false,
+    "hide": "on_success",
+    "type": "shell",
+    "tags": ["maintenance"],
+    "options": {
+      "cwd": "${workspaceFolder}"
+    }
+  },
+  {
+    "label": "Clean Store",
+    "command": "nh clean all --keep 7",
+    "show_summary": false,
+    "hide": "on_success",
+    "type": "shell",
+    "tags": ["maintenance"],
+    "options": {
+      "cwd": "${workspaceFolder}"
+    }
+  },
+  {
+    "label": "Verify Nix Store",
+    "command": "nix-store --verify --check-contents",
+    "show_summary": false,
+    "type": "shell",
+    "tags": ["maintenance", "store"]
+  },
+  {
+    "label": "Update Nix LSP",
+    "command": "nix flake archive --all",
+    "show_summary": false,
+    "type": "shell",
+    "tags": ["maintenance", "flake"]
+  },
+  {
+    "label": "Get UUIDs",
+    "command": "cat /etc/nixos/hardware-configuration.nix | grep -B 1 dev",
+    "show_summary": false,
+    "type": "shell",
+    "tags": ["system"]
+  },
+  {
+    "label": "Collect Nix Garbage",
+    "command": "nix-collect-garbage -d",
+    "show_summary": false,
+    "type": "shell",
+    "tags": ["maintenance", "store"]
+  }
+]
