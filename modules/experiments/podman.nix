@@ -10,6 +10,11 @@
 
   virtualisation.containers.containersConf.settings.engine.runtime = "crun";
 
+  # Kernel 6.18+ suporta overlay idmap nativo — evita cópia de ~1.6 GB
+  # no primeiro arranque rootless. fuse-overlayfs não suporta idmap.
+  virtualisation.containers.storage.settings.storage.options.overlay.mount_program =
+    lib.mkForce "";
+
   # Lazydocker / ferramentas tipo Docker → API do Podman *rootless* (socket do seu usuário).
   # Evita "permission denied" em /run/podman/podman.sock (grupo `podman` + socket de sistema).
   environment.extraInit = ''
