@@ -11,7 +11,6 @@
     nixos-hardware.url = "github:NixOS/nixos-hardware/master"; # Hardware
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
     home-manager.url = "github:nix-community/home-manager/release-25.11"; # Home Manager
-    claude-code.url = "github:sadjow/claude-code-nix";
     nix-index-database.url = "github:Mic92/nix-index-database";
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -26,7 +25,6 @@
       nixos-hardware,
       home-manager,
       chaotic,
-      claude-code,
       nix-index-database,
       ...
     }@inputs:
@@ -45,7 +43,6 @@
         modules = [
           {
             nixpkgs.config.allowUnfree = true;
-            nixpkgs.overlays = [ claude-code.overlays.default ];
           }
 
           # GA402X + NVIDIA (shared.nix impõe mem_sleep_default=deep — overridden em modules/core/hibernate.nix)

@@ -21,10 +21,6 @@ let
   };
 in
 {
-  # Claude Code config dir — fora do ~/.claude padrão
-  environment.sessionVariables = {
-    CLAUDE_CONFIG_DIR = "$HOME/.local/share/claude-code";
-  };
   programs.zsh = {
     enable = true;
     enableCompletion = true;
