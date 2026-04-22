@@ -8,24 +8,19 @@
     # nixpkgs.url = "github:NixOS/nixpkgs/staging-next";
 
     # Other Inputs
-    nixos-hardware.url = "github:NixOS/nixos-hardware/master"; # Hardware
-    chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
-    home-manager.url = "github:nix-community/home-manager/release-25.11"; # Home Manager
-    nix-index-database.url = "github:Mic92/nix-index-database";
-    nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
+    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
+    # CacheNix
+    chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
   };
 
   # Outputs
   outputs =
     {
-      self,
       nixpkgs,
       nixpkgs-unstable,
       nixos-hardware,
-      home-manager,
       chaotic,
-      nix-index-database,
       ...
     }@inputs:
     let
@@ -41,25 +36,11 @@
         system = "x86_64-linux";
         specialArgs = { inherit inputs unstable; };
         modules = [
-          {
-            nixpkgs.config.allowUnfree = true;
-          }
-
           # GA402X + NVIDIA (shared.nix impõe mem_sleep_default=deep — overridden em modules/core/hibernate.nix)
           nixos-hardware.nixosModules.asus-zephyrus-ga402x-nvidia
 
           # CachyOS Kernel
           chaotic.nixosModules.default
-
-          # home-manager
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-          }
-
-          # nix-index-database (banco pré-compilado + integração com comma)
-          nix-index-database.nixosModules.nix-index
 
           # Mine
           ./configuration.nix

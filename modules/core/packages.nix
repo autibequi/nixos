@@ -91,6 +91,8 @@
     pokemonsay
     fortune
 
+    home-manager
+
     # ── Testando ───────────────────────────────────────
     # evil-helix_git
     # unstable.howdy
