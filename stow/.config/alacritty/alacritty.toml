@@ -41,5 +41,8 @@ unfocused_hollow = true
 [terminal]
 osc52 = "OnlyCopy"
 
-[keyboard]
-bindings = []
+# Claude Shift Return?
+[[keyboard.bindings]]
+key = "Return"
+mods = "Shift"
+chars = "\u001B\r"
