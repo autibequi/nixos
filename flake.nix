@@ -12,6 +12,9 @@
 
     # CacheNix
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";
+
+    # Claude Code (sadjow) — sempre na última versão upstream
+    claude-code.url = "github:sadjow/claude-code-nix";
   };
 
   # Outputs
@@ -21,6 +24,7 @@
       nixpkgs-unstable,
       nixos-hardware,
       chaotic,
+      claude-code,
       ...
     }@inputs:
     let
@@ -41,6 +45,9 @@
 
           # CachyOS Kernel
           chaotic.nixosModules.default
+
+          # Claude Code (sadjow) — overlay substitui pkgs.claude-code pela última versão upstream
+          { nixpkgs.overlays = [ claude-code.overlays.default ]; }
 
           # Mine
           ./configuration.nix

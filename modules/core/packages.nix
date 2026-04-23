@@ -49,8 +49,6 @@
     jujutsu
     gitoxide
 
-    # ── AI / Claude ────────────────────────────────────
-    claude-code
     # ── Produtividade ──────────────────────────────────
     proton-pass
     unstable.obsidian
