@@ -9,7 +9,7 @@
 
   # Systemd Packages
   environment.systemPackages = with pkgs; [
-    # claude-code
+    claude-code
     lazydocker
     # --- CLI ---
     dig
