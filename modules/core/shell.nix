@@ -114,7 +114,6 @@ in
 
     # rust cli tools
     xh # better curl
-    zellij # better tmux
     helix # better vim
     bacon # better cargo
     cargo-info # better cargo info
