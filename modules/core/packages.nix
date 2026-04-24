@@ -77,6 +77,7 @@
     godot
     # retroarchFull
     ventoy-full-gtk
+    xhost
     # ── Hardware / Misc ────────────────────────────────
     gnome-disk-utility
     sidequest # Oculus sideloading
