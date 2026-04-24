@@ -78,6 +78,7 @@
   # Unholy packages
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.allowImpure = true;
+  nixpkgs.config.allowInsecurePredicate = _: true;
 
   # Apply nixGL overlay here, ensuring allowImpure is set on pkgs
   nixpkgs.overlays = lib.mkIf (inputs ? nixgl && inputs.nixgl ? overlay) [ inputs.nixgl.overlay ];

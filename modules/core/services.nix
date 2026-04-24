@@ -25,6 +25,11 @@
   # sem o serviço, falha "ServiceUnknown: The name is not activatable" e pode bloquear no launch.
   services.upower.enable = true;
 
+  # udisks2: automontagem de dispositivos removíveis (pendrives, HDs externos).
+  # gvfs: expõe udisks2 via DBus para apps GTK/Nautilus montarem automaticamente.
+  services.udisks2.enable = true;
+  services.gvfs.enable = true;
+
   # fwupd — desativado (firmware update é manual, daemon rodando 24/7 não faz sentido)
   services.fwupd.enable = false;
 

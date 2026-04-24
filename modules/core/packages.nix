@@ -76,8 +76,9 @@
     # ── Games / 3D ─────────────────────────────────────
     godot
     # retroarchFull
-
+    ventoy-full
     # ── Hardware / Misc ────────────────────────────────
+    gnome-disk-utility
     sidequest # Oculus sideloading
     # cura
     # ventoy-full-qt
