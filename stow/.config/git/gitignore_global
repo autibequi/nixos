@@ -22,3 +22,7 @@ apps_others/**/*
 apps_others/*
 apps_others/
 .codebase-memory/
+
+.ephemeral/*
+AGENTS.md
+.graphifyignore
