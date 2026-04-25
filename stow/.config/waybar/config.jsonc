@@ -175,8 +175,8 @@
 		"tooltip": true
 	},
 	"clock": {
-		"format": "󰥔 {:%H:%M:%S}",
-		"interval": 1,
+		"format": "󰥔 {:%H:%M}",
+		"interval": 60,
 		"format-alt": "󰃮 {:%Y-%m-%d}",
 		"tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
 		"calendar": {
@@ -278,7 +278,7 @@
 	"custom/claude-usage": {
 		"exec": "plug claude usage --waybar",
 		"return-type": "json",
-		"interval": 30,
+		"interval": 60,
 		"signal": 8,
 		"on-click": "xdg-open https://claude.ai/settings/usage",
 		"on-click-right": "plug claude usage --refresh --waybar; pkill -RTMIN+8 waybar",
