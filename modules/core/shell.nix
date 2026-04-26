@@ -1,6 +1,12 @@
 { pkgs, unstable, ... }:
 
 let
+  # 1.4.6+ (unstable) — fix crash ao trocar preset. cuda+rocm: NVML p/ NVIDIA + rpath p/ rocm-smi (AMD);
+  # só btop-rocm tira o dGPU NVIDIA do btop.
+  btopUnstable = unstable.btop.override {
+    cudaSupport = true;
+    rocmSupport = true;
+  };
   sharedAliases = {
     # history = "atuin";
     # grep = "rg";
@@ -95,7 +101,7 @@ in
     rustfmt
 
     # cli tools
-    btop-rocm # better top with amd support
+    btopUnstable
     jaq # better jq (rust)
 
     # snippet manager
