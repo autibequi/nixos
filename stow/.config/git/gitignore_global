@@ -1,5 +1,4 @@
 # direnv ignore
-shell.nix
 .envrc
 .direnv/*
 .vscode/settings.json

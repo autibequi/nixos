@@ -21,6 +21,10 @@ let
   };
 in
 {
+  environment.variables = {
+    COLORTERM = "truecolor";
+  };
+
   programs.zsh = {
     enable = true;
     enableCompletion = true;
