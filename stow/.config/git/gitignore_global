@@ -1,26 +1,17 @@
-# direnv ignore
-.envrc
-.direnv/*
-.vscode/settings.json
-
-STATE.md
-.claude/worktrees
-.claude/settings
-.claude/settings.json
-.claude/settings.local.json
-
-# AI SWARM
-.worktrees/
-
-graphify-out/**
+# ----------------------
+# AI CRAP EVERYWHERE!
+# ----------------------
+# Tempograph MPC
 .tempograph/**/*
 .tempograph/*
 .tempograph/
 
-apps_others/**/*
-apps_others/*
-apps_others/
-.codebase-memory/
+# Graphify MCP
+graphify-out/**
+.graphifyignore
 
-.ephemeral/*
+# SHUT UP CURSOR!
 AGENTS.md
+
+# AI SWARM
+.worktrees/
