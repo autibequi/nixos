@@ -23,5 +23,23 @@
 			"alt-enter": "agent::AllowOnce",
 			"alt-shift-enter": "agent::RejectOnce"
 		}
-	}
+	},
+	{
+		"context": "AgentPanel && acp_thread",
+		"unbind": {
+			"ctrl-alt-t": "agent::NewThread"
+		}
+	},
+ {
+  "context": "Workspace",
+  "bindings": {
+   "ctrl-shift-t": "multi_workspace::ToggleWorkspaceSidebar"
+  }
+ },
+ {
+  "context": "Workspace",
+  "unbind": {
+   "ctrl-alt-j": "multi_workspace::ToggleWorkspaceSidebar"
+  }
+ }
 ]
