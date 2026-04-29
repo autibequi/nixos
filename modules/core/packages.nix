@@ -23,6 +23,8 @@
     tailscale
     broot
 
+    bottles
+
     # ── Desktop / Wayland ──────────────────────────────
     swww
     rofimoji
