@@ -26,7 +26,7 @@ in
 
   programs.uwsm = {
     enable = true;
-    package = unstable.uwsm;
+    package = pkgs.uwsm;
     waylandCompositors.start-hyprland = {
       prettyName = "Start-Hyprland ";
       comment = "Hyprland compositor managed by UWSM";
@@ -81,6 +81,17 @@ in
 
   # HyprIdle
   services.hypridle.enable = true;
+
+  # hyprpolkitagent tem Restart=on-failure no unit original. Quando Hyprland morre
+  # (ex: nixos-rebuild switch mata serviços gráficos), o agent reinicia sem
+  # WAYLAND_DISPLAY → Qt6 explode com SIGABRT → loop infinito de crashes.
+  # StartLimitBurst=3 deixa tentar 3x antes de desistir, quebrando o loop.
+  systemd.user.services.hyprpolkitagent = {
+    unitConfig = {
+      StartLimitBurst = 3;
+      StartLimitIntervalSec = 30;
+    };
+  };
 
   # Register librsvg as gdk-pixbuf SVG loader (fixes SVG icons in rofi, waybar, etc)
   programs.gdk-pixbuf.modulePackages = [ pkgs.librsvg ];

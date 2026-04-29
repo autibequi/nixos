@@ -36,6 +36,10 @@
     # ELECTRON_OZONE_PLATFORM_HINT — definido como "auto" em hyprland.conf (via UWSM env)
     QT_AUTO_SCREEN_SCALE_FACTOR = "1";
     _JAVA_AWT_WM_NONREPARENTING = "1";
+    # Qt6 Wayland backend — sem isso Qt6 apps (ex: hyprpolkitagent) não conseguem
+    # carregar nenhum QPA e crasham com SIGABRT em init_platform(), derrubando a sessão.
+    QT_QPA_PLATFORM = "wayland";
+    QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
   };
 
   # Hardware
