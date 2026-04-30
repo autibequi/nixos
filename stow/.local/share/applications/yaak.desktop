@@ -1,7 +1,12 @@
 [Desktop Entry]
-Name=Yaak
-Comment=Yaak API Client
-Exec=appimage-run /home/pedrinho/apps/yaak.AppImage
-Icon=application-x-executable
 Type=Application
+Name=Yaak
+Exec=nvidia-offload appimage-run /home/pedrinho/apps/yaak.AppImage
+TryExec=appimage-run
+Icon=yaak
+Terminal=false
 Categories=Development;Network;
+
+StartupNotify=true
+StartupWMClass=yaak
+X-DGPU-Override=managed
