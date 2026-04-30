@@ -6,11 +6,11 @@
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.timeout = 3; # segundos antes de auto-boot (0 = imediato, sem menu)
 
-  # Windows está em nvme0n1p1 (GPT partition 1) — ESP separado do NixOS (p4)
+  # bootmgfw.efi em nvme0n1p4 (mesma ESP do Limine) — confirmado via efibootmgr
   boot.loader.limine.extraEntries = ''
-    /Windows 11
-      protocol: chainload
-      path: boot(0,gpt1):///EFI/Microsoft/Boot/bootmgfw.efi
+    /Ruindows 11
+      protocol: efi
+      path: boot():///EFI/Microsoft/Boot/bootmgfw.efi
   '';
 
   # Tema CachyOS — splash oficial + paleta Catppuccin Mocha

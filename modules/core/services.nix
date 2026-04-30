@@ -59,6 +59,11 @@
   # LM Studio API Server (disabled — lms binary segfaults, needs manual install)
   services.lmstudio.enable = false;
 
+  # wpa_supplicant trava por ~12s no shutdown aguardando timeout interno do nl80211
+  # ("send_event_marker failed: Source based routing not supported").
+  # A máquina vai desligar de qualquer forma — não precisa esperar deauth limpo.
+  systemd.services.wpa_supplicant.serviceConfig.TimeoutStopSec = "3s";
+
   # WiFi sem power saving — elimina spikes de latência de 100-400ms
   networking.networkmanager.wifi.powersave = false;
 
