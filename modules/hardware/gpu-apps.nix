@@ -71,6 +71,22 @@ let
       mimeType = "text/plain;inode/directory;";
     }
     {
+      bin = "chromium";
+      name = "Chromium";
+      desktopFile = "chromium-browser";
+      icon = "chromium";
+      categories = "WebBrowser;";
+      args = "--ozone-platform=x11 %U";
+    }
+    {
+      bin = "google-chrome-stable";
+      name = "Google Chrome";
+      desktopFile = "google-chrome";
+      icon = "google-chrome";
+      categories = "WebBrowser;";
+      args = "--ozone-platform=x11 %U";
+    }
+    {
       bin = "godot4";
       name = "Godot";
       desktopFile = "org.godotengine.Godot4";
@@ -80,7 +96,7 @@ let
     {
       bin = "cool-retro-term";
       name = "Cool Retro Term";
-      desktopFile = "com.github.Swordfish90.cool-retro-term";
+      desktopFile = "cool-retro-term";
       icon = "cool-retro-term";
       categories = "System;TerminalEmulator;";
     }
@@ -124,6 +140,15 @@ let
 
 in
 {
+  # ── Env vars de sessão ───────────────────────────────────────────
+  # ELECTRON_OZONE_PLATFORM_HINT=x11 força todos os apps Electron a usarem
+  # XWayland em vez de Wayland nativo. Com nvidia-offload, XWayland usa GLX
+  # que respeita __GLX_VENDOR_LIBRARY_NAME=nvidia → dGPU funciona.
+  # Sem nvidia-offload, o app roda em x11 normalmente na iGPU AMD.
+  environment.sessionVariables = {
+    ELECTRON_OZONE_PLATFORM_HINT = "x11";
+  };
+
   # ── Deploy dos .desktop overrides ────────────────────────────────
   # Activation script roda como root a cada nixos-rebuild switch.
   # Idempotente: limpa overrides antigos (tag X-DGPU-Override=managed)
