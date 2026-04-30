@@ -1,7 +1,10 @@
-{ ... }:
+{ unstable, ... }:
 {
   programs.dank-material-shell = {
     enable = true;
+
+    # dgop só existe no unstable, não no stable 25.11
+    dgop.package = unstable.dgop;
 
     systemd = {
       enable = true;
