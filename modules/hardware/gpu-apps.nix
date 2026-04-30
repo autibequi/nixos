@@ -71,6 +71,20 @@ let
       mimeType = "text/plain;inode/directory;";
     }
     {
+      bin = "godot4";
+      name = "Godot";
+      desktopFile = "org.godotengine.Godot4";
+      icon = "godot";
+      categories = "Development;IDE;";
+    }
+    {
+      bin = "cool-retro-term";
+      name = "Cool Retro Term";
+      desktopFile = "com.github.Swordfish90.cool-retro-term";
+      icon = "cool-retro-term";
+      categories = "System;TerminalEmulator;";
+    }
+    {
       bin = "appimage-run";
       name = "Yaak";
       desktopFile = "yaak";
