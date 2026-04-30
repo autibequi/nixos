@@ -71,4 +71,36 @@
   # gerenciar EPP do amd_pstate) e adicionava ~762ms ao boot.
   # auto-epp em kernel.nix já cobre AC/BAT switching.
   services.tlp.enable = false;
+
+  # Journald: rate limit agressivo para evitar que crash loops (ex: container
+  # sem env var) inundem o journal com milhares de linhas/segundo, comendo
+  # CPU do journald e RAM do buffer — causa direta de DE sluggish sob crash loops.
+  services.journald.extraConfig = ''
+    RateLimitInterval=10s
+    RateLimitBurst=500
+    SystemMaxUse=2G
+    RuntimeMaxUse=512M
+  '';
+
+  # ── Isolamento DE vs processos de trabalho ─────────────────────────────────
+
+  # systemd-oomd: mata o cgroup inteiro que causa pressão PSI antes do sistema
+  # ficar inresponsivo. Complementa earlyoom (que mata processo a processo):
+  # oomd detecta contention de CPU/IO/memória por cgroup e elimina o grupo
+  # culpado (ex: container em crash loop) de forma cirúrgica.
+  # enableUserServices: cobre a sessão do usuário onde nomad/podman rodam.
+  systemd.oomd = {
+    enable = true;
+    enableUserServices = true;
+  };
+
+  # Eleva peso de CPU e IO da sessão do usuário (user.slice) vs serviços de sistema.
+  # CPUWeight default = 100. Com 400, o DE recebe 4x mais CPU quando há contention
+  # contra qualquer serviço de sistema — garantia estrutural de responsividade.
+  systemd.slices."user" = {
+    sliceConfig = {
+      CPUWeight = 400;
+      IOWeight = 400;
+    };
+  };
 }

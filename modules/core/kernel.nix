@@ -45,8 +45,10 @@
     "nowatchdog"
     "nmi_watchdog=0"
 
-    # Disable USB autosuspend to avoid issues with USB devices.
-    "usbcore.autosuspend=2"
+    # Desabilita USB autosuspend globalmente (-1 = nunca suspender).
+    # IMPORTANTE: valor 2 significava "suspender após 2s" — causava lag perceptível
+    # de 100-500ms no mouse/teclado após breve pausa (wake-up do dispositivo USB).
+    "usbcore.autosuspend=-1"
 
     # Disable mitigations for speed
     "mitigations=off"
@@ -66,6 +68,10 @@
 
     # AMD
     "amd_pstate=active" # active/guided/passive - active é muito mais rápido e responsivo
+
+    # Roda IRQ handlers em threads de kernel dedicados — garante que eventos USB (mouse/teclado)
+    # não são bloqueados por outros IRQ handlers, reduzindo latência de input no Wayland.
+    "threadirqs"
 
     # Containers: reduz contention de timer lock em multicore (vários containers = vários threads)
     "skew_tick=1"
@@ -138,6 +144,16 @@
     "vm.watermark_scale_factor" = 10;
     # Sem “boost” extra de watermark (comportamento mais previsível sob carga).
     "vm.watermark_boost_factor" = 0;
+
+    # Desabilita compactação proativa de memória — o kernel em background tenta
+    # criar hugepages contíguas, causando micro-stalls de dezenas de ms no compositor.
+    # Com transparent_hugepage=madvise, só apps que pedem hugepages as recebem.
+    "vm.compaction_proactiveness" = 0;
+
+    # Autogroup: agrupa processos da mesma sessão interativa para scheduling.
+    # Sem isso, containers em crash loop competem no mesmo nível do DE no CFS.
+    # Com scx_lavd isso é parcialmente tratado, mas autogroup adiciona outra camada.
+    "kernel.sched_autogroup_enabled" = 1;
   };
 
   # Configurar compressão.
@@ -185,5 +201,11 @@
     # Nuphy Air 75 V3 — permite acesso ao configurador web via Chrome/WebHID
     SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTR{idVendor}=="19f5", ATTR{idProduct}=="1028", MODE="0666"
     KERNEL=="hidraw*", ATTRS{idVendor}=="19f5", ATTRS{idProduct}=="1028", MODE="0666"
+
+    # Desabilita USB autosuspend para dispositivos HID (mouse, teclado) individualmente.
+    # usbcore.autosuspend=-1 define o default global, mas drivers de dispositivo podem
+    # sobrescrever. Este rule garante power/control=on (nunca suspender) para todos HID.
+    SUBSYSTEM=="usb", ATTRS{bInterfaceClass}=="03", TEST=="/sys$devpath/power/control", ATTR{power/control}="on"
+    SUBSYSTEM=="usb", ENV{DEVTYPE}=="usb_device", ATTRS{bDeviceClass}=="00", TEST=="/sys$devpath/power/control", ATTR{power/control}="on"
   '';
 }
