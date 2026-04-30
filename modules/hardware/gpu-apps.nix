@@ -87,6 +87,26 @@ let
       args = "--ozone-platform=x11 %U";
     }
     {
+      bin = "cursor";
+      name = "Cursor";
+      desktopFile = "cursor";
+      icon = "cursor";
+      categories = "Development;TextEditor;IDE;";
+      mimeType = "text/plain;inode/directory;";
+      wmClass = "Cursor";
+      args = "--ozone-platform=x11 %U";
+    }
+    {
+      bin = "code";
+      name = "Visual Studio Code";
+      desktopFile = "code";
+      icon = "vscode";
+      categories = "Development;TextEditor;IDE;";
+      mimeType = "text/plain;inode/directory;";
+      wmClass = "Code";
+      args = "--ozone-platform=x11 %U";
+    }
+    {
       bin = "godot4";
       name = "Godot";
       desktopFile = "org.godotengine.Godot4";
