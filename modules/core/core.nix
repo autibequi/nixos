@@ -24,9 +24,29 @@
   # Bootloader
   boot.loader.limine.enable = true;
   boot.loader.limine.efiSupport = true;
-  boot.loader.limine.maxGenerations = 10; # limita gerações no menu
+  boot.loader.limine.maxGenerations = 10;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.loader.timeout = 0; # não espera input no menu (segura Space pra entrar manual)
+  boot.loader.timeout = 3; # segundos antes de auto-boot (0 = imediato, sem menu)
+
+  # Tema Catppuccin Mocha (mesmo do CachyOS)
+  boot.loader.limine.style = {
+    wallpapers = [ pkgs.nixos-artwork.wallpapers.catppuccin-mocha.gnomeFilePath ];
+    wallpaperStyle = "stretched";
+    backdrop = "1e1e2e";
+    graphicalTerminal = {
+      foreground = "cdd6f4";
+      background = "801e1e2e"; # TTRRGGBB — 80 = ~50% transparente sobre o wallpaper
+      brightForeground = "cdd6f4";
+      brightBackground = "801e1e2e";
+      palette = "45475a;f38ba8;a6e3a1;f9e2af;89b4fa;cba4f7;89dceb;bac2de";
+      brightPalette = "585b70;f38ba8;a6e3a1;f9e2af;89b4fa;cba4f7;89dceb;cdd6f4";
+      margin = 10;
+      marginGradient = 4;
+    };
+    interface = {
+      brandingColor = 5; # mauve — cor 5 da palette acima (cba4f7)
+    };
+  };
 
   # Environment Variables
   environment.sessionVariables = {
