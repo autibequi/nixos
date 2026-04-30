@@ -24,7 +24,12 @@
 #   prime-run / nvidia-smi (deve aparecer o processo)
 #   __NV_PRIME_RENDER_OFFLOAD=1 glxinfo | grep "OpenGL renderer"
 # ════════════════════════════════════════════════════════════════════
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   user = "pedrinho";
@@ -40,50 +45,55 @@ let
   #   mimeType     → string XDG opcional, separada por ';'
   #   wmClass      → StartupWMClass pra agrupar janelas (default = bin)
   #   args         → tokens pra Exec= (default = "%U")
+  #   noAlias      → true pra não gerar shellAlias (ex: quando bin é genérico como appimage-run)
   apps = [
     {
-      bin = "alacritty"; name = "Alacritty";
-      desktopFile = "Alacritty"; icon = "Alacritty";
+      bin = "alacritty";
+      name = "Alacritty";
+      desktopFile = "Alacritty";
+      icon = "Alacritty";
       categories = "System;TerminalEmulator;";
     }
     {
-      bin = "ghostty"; name = "Ghostty";
-      desktopFile = "com.mitchellh.ghostty"; icon = "com.mitchellh.ghostty";
+      bin = "ghostty";
+      name = "Ghostty";
+      desktopFile = "com.mitchellh.ghostty";
+      icon = "com.mitchellh.ghostty";
       categories = "System;TerminalEmulator;";
     }
     {
       # zed-editor (unstable.zed-editor) instala o binário como `zeditor`
-      bin = "zeditor"; name = "Zed";
-      desktopFile = "dev.zed.Zed"; icon = "zed";
+      bin = "zeditor";
+      name = "Zed";
+      desktopFile = "dev.zed.Zed";
+      icon = "zed";
       categories = "Development;TextEditor;IDE;";
       mimeType = "text/plain;inode/directory;";
     }
     {
-      bin = "code"; name = "Visual Studio Code";
-      desktopFile = "code"; icon = "vscode";
-      categories = "Development;TextEditor;IDE;";
-      mimeType = "text/plain;inode/directory;";
-      wmClass = "Code";
-    }
-    {
-      bin = "cursor"; name = "Cursor";
-      desktopFile = "cursor"; icon = "cursor";
-      categories = "Development;TextEditor;IDE;";
-      mimeType = "text/plain;inode/directory;";
-      wmClass = "Cursor";
+      bin = "appimage-run";
+      name = "Yaak";
+      desktopFile = "yaak";
+      icon = "yaak";
+      categories = "Development;Network;";
+      args = "/home/pedrinho/apps/yaak.AppImage";
+      wmClass = "yaak";
+      noAlias = true;
     }
   ];
   # ──────────────────────────────────────────────────────────────────
 
-  mkDesktopFile = app:
+  mkDesktopFile =
+    app:
     let
       icon = app.icon or app.bin;
       cats = app.categories or "Application;";
       mime = app.mimeType or "";
-      wm   = app.wmClass or app.bin;
+      wm = app.wmClass or app.bin;
       args = app.args or "%U";
       file = app.desktopFile or app.bin;
-    in pkgs.writeText "${file}.desktop" ''
+    in
+    pkgs.writeText "${file}.desktop" ''
       [Desktop Entry]
       Type=Application
       Name=${app.name}
@@ -98,7 +108,8 @@ let
       X-DGPU-Override=managed
     '';
 
-in {
+in
+{
   # ── Deploy dos .desktop overrides ────────────────────────────────
   # Activation script roda como root a cada nixos-rebuild switch.
   # Idempotente: limpa overrides antigos (tag X-DGPU-Override=managed)
@@ -117,23 +128,28 @@ in {
       done
 
       # Deploy novos overrides
-      ${lib.concatMapStringsSep "\n" (app:
-        let file = app.desktopFile or app.bin;
-        in ''install -m 644 ${mkDesktopFile app} "$target/${file}.desktop"''
+      ${lib.concatMapStringsSep "\n" (
+        app:
+        let
+          file = app.desktopFile or app.bin;
+        in
+        ''install -m 644 ${mkDesktopFile app} "$target/${file}.desktop"''
       ) apps}
 
       # Garante ownership (activation roda como root)
       chown -R ${user} "$target"
     '';
-    deps = [];
+    deps = [ ];
   };
 
   # ── Aliases zsh ──────────────────────────────────────────────────
   # Pra quando você abre via terminal (`cursor .`, `code repo/`, etc.).
   # Sem alias o launcher cai na iGPU porque o .desktop override só
   # afeta launches via launcher (rofi/Hyprland/dock).
-  programs.zsh.shellAliases = lib.listToAttrs (map (app: {
-    name  = app.bin;
-    value = "nvidia-offload ${app.bin}";
-  }) apps);
+  programs.zsh.shellAliases = lib.listToAttrs (
+    map (app: {
+      name = app.bin;
+      value = "nvidia-offload ${app.bin}";
+    }) (builtins.filter (app: !(app.noAlias or false)) apps)
+  );
 }
