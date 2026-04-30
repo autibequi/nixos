@@ -33,6 +33,7 @@
     # ── Hardware ───────────────────────────────────────
     ./modules/hardware/asus.nix
     ./modules/hardware/nvidia.nix
+    ./modules/hardware/gpu-apps.nix # força apps GUI na dGPU (lista interna)
 
     # ── Core ───────────────────────────────────────────
     ./modules/core/nix.nix
