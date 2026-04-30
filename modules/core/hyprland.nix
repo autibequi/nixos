@@ -122,8 +122,16 @@ in
     tesseract
     satty
 
-    # hyprcursor
+    # hyprcursor (Wayland nativo, vetorial)
     rose-pine-hyprcursor
+    # xcursor legacy (bitmap) — fallback para apps XWayland (Chrome/Electron com
+    # --ozone-platform=x11). Sem isso, XWayland usa default ~16px → cursor minúsculo.
+    rose-pine-cursor
+    # xrdb — sem isso `hyprctl setcursor` não consegue propagar o size do
+    # cursor pro Xresources do XWayland; apps X11 leem o size só do Xresources
+    # (env var XCURSOR_SIZE não basta) → cursor fica no default 16px mesmo
+    # com tema correto.
+    xorg.xrdb
 
     # SVG icon rendering (needed by rofi show-icons with Papirus)
     librsvg
