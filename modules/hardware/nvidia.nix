@@ -27,6 +27,15 @@
     # (nvidia-modeset ACPI backlight hang após s2idle)
     options nvidia NVreg_PreserveVideoMemoryAllocations=1
     options nvidia NVreg_TemporaryFilePath=/tmp
+    # systemd.sleep usa SuspendState=freeze (s2idle) — sem este knob a dGPU não
+    # entra D3cold durante s2idle e acorda em estado inconsistente, causando
+    # artefatos gráficos só nos apps que estavam na dGPU via PRIME-offload.
+    options nvidia NVreg_EnableS0ixPowerManagement=1
+    # Threshold em MB acima do qual o driver DESABILITA o caminho s0ix
+    # automaticamente. Default = 200 MB — RTX 4060 mobile tem 8 GB e qualquer
+    # browser/IDE estoura isso, fazendo o EnableS0ixPowerManagement virar no-op
+    # silencioso. 12000 MB > VRAM total → s0ix sempre acionado.
+    options nvidia NVreg_S0ixPowerManagementVideoMemoryThreshold=12000
   '';
   
   hardware.nvidia = {
