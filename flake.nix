@@ -15,6 +15,12 @@
 
     # Claude Code (sadjow) — sempre na última versão upstream
     claude-code.url = "github:sadjow/claude-code-nix";
+
+    # DankMaterialShell — usa unstable porque o stable 25.11 não tem dms-shell
+    dms = {
+      url = "github:AvengeMedia/DankMaterialShell/stable";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
   };
 
   # Outputs
@@ -25,6 +31,7 @@
       nixos-hardware,
       chaotic,
       claude-code,
+      dms,
       ...
     }@inputs:
     let
@@ -48,6 +55,9 @@
 
           # Claude Code (sadjow) — overlay substitui pkgs.claude-code pela última versão upstream
           { nixpkgs.overlays = [ claude-code.overlays.default ]; }
+
+          # DankMaterialShell — NixOS module do flake (stable 25.11 não tem no nixpkgs)
+          dms.nixosModules.default
 
           # Mine
           ./configuration.nix

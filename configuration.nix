@@ -66,6 +66,7 @@
     ./modules/services/virt.nix
 
     # ── Experiments ────────────────────────────────────
+    # ./modules/experiments/dms.nix
     # ./modules/experiments/whisper-ptt.nix  # on-demand: PTT
     # ./modules/experiments/bongocat.nix     # fun mas desnecessário
     # ./modules/experiments/tlp.nix

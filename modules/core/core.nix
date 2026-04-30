@@ -22,8 +22,9 @@
   services.xserver.videoDrivers = [ "amdgpu" ];
 
   # Bootloader
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.systemd-boot.configurationLimit = 10; # limita gerações no menu
+  boot.loader.limine.enable = true;
+  boot.loader.limine.efiSupport = true;
+  boot.loader.limine.maxGenerations = 10; # limita gerações no menu
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.timeout = 0; # não espera input no menu (segura Space pra entrar manual)
 
