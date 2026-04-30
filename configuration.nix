@@ -38,6 +38,7 @@
     # ── Core ───────────────────────────────────────────
     ./modules/core/nix.nix
     ./modules/core/core.nix
+    ./modules/core/limine.nix
     ./modules/core/kernel.nix
     ./modules/core/shell.nix
     ./modules/core/fonts.nix
