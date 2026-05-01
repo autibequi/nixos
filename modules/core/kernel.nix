@@ -68,6 +68,10 @@
 
     # AMD
     "amd_pstate=active" # active/guided/passive - active é muito mais rápido e responsivo
+    # Desabilita PSR/PSR2 (Panel Self Refresh) no AMD DC — causa freeze periódico só
+    # no display interno (eDP) enquanto monitor externo continua funcionando; mexer o
+    # mouse desfaz o freeze porque força um novo frame para o painel.
+    "amdgpu.dcdebugmask=0x10"
 
     # Roda IRQ handlers em threads de kernel dedicados — garante que eventos USB (mouse/teclado)
     # não são bloqueados por outros IRQ handlers, reduzindo latência de input no Wayland.
