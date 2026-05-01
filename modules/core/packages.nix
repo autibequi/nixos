@@ -13,6 +13,8 @@
     comma
     # crap
     sqlite
+    stremio
+
     cbonsai
     # ── Sistema ────────────────────────────────────────
     bashly
