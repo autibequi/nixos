@@ -22,6 +22,7 @@
 		"custom/obsidian-sync",
 		"pulseaudio",
 		"backlight",
+		"custom/ddcutil-brightness",
 		"network",
 		"tray",
 		"bluetooth"
@@ -340,6 +341,16 @@
 		"on-click": "swaync-client -t -sw",
 		"on-click-right": "swaync-client -d -sw",
 		"escape": true
+	},
+	"custom/ddcutil-brightness": {
+		"exec": "$HOME/.config/waybar/ddcutil-brightness.sh",
+		"return-type": "json",
+		"interval": 10,
+		"signal": 10,
+		"format": "{}",
+		"tooltip": true,
+		"on-scroll-up": "flock -n /tmp/ddcutil.lock $HOME/.config/waybar/ddcutil-scroll.sh up && pkill -RTMIN+10 waybar",
+		"on-scroll-down": "flock -n /tmp/ddcutil.lock $HOME/.config/waybar/ddcutil-scroll.sh down && pkill -RTMIN+10 waybar"
 	},
 	"backlight": {
 		"format": "{icon} {percent}%",
