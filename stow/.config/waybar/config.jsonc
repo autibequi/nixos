@@ -349,8 +349,8 @@
 		"signal": 10,
 		"format": "{}",
 		"tooltip": true,
-		"on-scroll-up": "flock -n /tmp/ddcutil.lock $HOME/.config/waybar/ddcutil-scroll.sh up && pkill -RTMIN+10 waybar",
-		"on-scroll-down": "flock -n /tmp/ddcutil.lock $HOME/.config/waybar/ddcutil-scroll.sh down && pkill -RTMIN+10 waybar"
+		"on-scroll-up": "$HOME/.config/waybar/ddcutil-scroll.sh up && pkill -RTMIN+10 waybar",
+		"on-scroll-down": "$HOME/.config/waybar/ddcutil-scroll.sh down && pkill -RTMIN+10 waybar"
 	},
 	"backlight": {
 		"format": "{icon} {percent}%",
