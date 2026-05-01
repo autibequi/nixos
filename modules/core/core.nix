@@ -81,6 +81,7 @@
       "docker"
       "podman" # socket em /run/podman/podman.sock (virtualisation.podman.dockerSocket)
       "hidraw"
+      "i2c"
       "input"
       "networkmanager"
       "wheel"

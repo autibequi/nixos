@@ -34,6 +34,7 @@
     ./modules/hardware/asus.nix
     ./modules/hardware/nvidia.nix
     ./modules/hardware/gpu-apps.nix # força apps GUI na dGPU (lista interna)
+    ./modules/hardware/ddc.nix # ddcutil + i2c-dev para brilho via DDC/CI
 
     # ── Core ───────────────────────────────────────────
     ./modules/core/nix.nix
