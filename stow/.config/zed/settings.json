@@ -102,7 +102,7 @@
 	// Formatting
 	"use_on_type_format": true,
 	"show_whitespaces": "selection",
-	"diff_view_style": "unified",
+	"diff_view_style": "split",
 	// Scrolling
 	"scroll_beyond_last_line": "vertical_scroll_margin",
 	"vertical_scroll_margin": 22.0,
