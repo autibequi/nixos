@@ -25,6 +25,8 @@
     tailscale
     broot
 
+    easyeffects
+
     bottles
 
     # ── Desktop / Wayland ──────────────────────────────
