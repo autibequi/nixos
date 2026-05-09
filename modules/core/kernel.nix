@@ -158,6 +158,10 @@
     # Sem isso, containers em crash loop competem no mesmo nível do DE no CFS.
     # Com scx_lavd isso é parcialmente tratado, mas autogroup adiciona outra camada.
     "kernel.sched_autogroup_enabled" = 1;
+
+    # CPU única (single socket) — NUMA balancing não tem nada a balancear
+    # e só gera page faults periódicos desnecessários.
+    "kernel.numa_balancing" = 0;
   };
 
   # Configurar compressão.
@@ -184,6 +188,11 @@
   # Isso substitui o papel do power-profiles-daemon de forma mais leve e
   # sem conflitar com o schedutil + SCX.
   services.auto-epp.enable = true;
+
+  # ananicy-cpp: ajusta automaticamente nice/ionice de processos conhecidos
+  # (browsers, compiladores, containers) para priorizar tarefas interativas.
+  services.ananicy.enable = true;
+  services.ananicy.package = pkgs.ananicy-cpp;
 
   # earlyoom: mata processos quando RAM < 5% para evitar travamento total
   services.earlyoom = {
