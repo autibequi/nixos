@@ -114,11 +114,11 @@
 
     # NVMe interno aguenta rajadas de escrita muito bem.
     # Limites mais generosos reduzem stalls de CPU por flush prematuro.
-    "vm.dirty_ratio" = 10; # flush forçado ao atingir 10% da RAM (~4.8GB em 48GB)
-    "vm.dirty_background_ratio" = 5; # flush em background começa aos 5% (~2.4GB)
+    "vm.dirty_ratio" = 5; # flush forçado ao atingir 5% da RAM (~2.4GB em 48GB)
+    "vm.dirty_background_ratio" = 2; # flush em background começa aos 2% (~1GB)
 
-    # Flush proativo: reduz wakeups e permite que a drive batch writes melhor.
-    "vm.dirty_writeback_centisecs" = 1500; # flush a cada 15s ao invés de 5s
+    # Flush mais frequente evita rajadas grandes de I/O que causam D-state stalls.
+    "vm.dirty_writeback_centisecs" = 500; # flush a cada 5s
 
     # Desabilita NMI watchdog via sysctl (complementa nmi_watchdog=0 no cmdline).
     "kernel.nmi_watchdog" = 0;

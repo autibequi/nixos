@@ -345,7 +345,7 @@
 	"custom/ddcutil-brightness": {
 		"exec": "$HOME/.config/waybar/ddcutil-brightness.sh",
 		"return-type": "json",
-		"interval": 10,
+		"interval": 30,
 		"signal": 10,
 		"format": "{}",
 		"tooltip": true,
