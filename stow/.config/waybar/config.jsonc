@@ -209,7 +209,7 @@
 	},
 	"memory": {
 		"format": "󰘚 {}%",
-		"interval": 1
+		"interval": 5
 	},
 	"battery": {
 		"states": {
