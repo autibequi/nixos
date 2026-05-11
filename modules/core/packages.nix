@@ -73,6 +73,7 @@
     cool-retro-term
     espeak-ng # TTS for terminal bell
     sox # audio recording (Claude Code /voice)
+    socat # bridge TCP — usado pelo yaa chrome pra expor CDP do host ao container
 
     # ── Benchmark / Monitoramento ──────────────────────
     geekbench
