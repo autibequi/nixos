@@ -147,7 +147,7 @@ let
       [Desktop Entry]
       Type=Application
       Name=${app.name}
-      Exec=nvidia-offload ${app.bin} ${args}
+      Exec=gpu-offload ${app.bin} ${args}
       TryExec=${app.bin}
       Icon=${icon}
       Terminal=false
@@ -208,7 +208,7 @@ in
   programs.zsh.shellAliases = lib.listToAttrs (
     map (app: {
       name = app.bin;
-      value = "nvidia-offload ${app.bin}";
+      value = "gpu-offload ${app.bin}";
     }) (builtins.filter (app: !(app.noAlias or false)) apps)
   );
 }
