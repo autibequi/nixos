@@ -1,8 +1,7 @@
 {
   lib,
   pkgs,
-  inputs,
-  unstable,
+  hyprlandFlake,
   ...
 }:
 with lib;
@@ -18,8 +17,7 @@ in
 {
   programs.hyprland = {
     enable = true;
-    # package = hyprland-git.hyprland;
-    package = unstable.hyprland;
+    package = hyprlandFlake.hyprland;
     xwayland.enable = true;
     withUWSM = true;
   };

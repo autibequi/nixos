@@ -21,6 +21,12 @@
       url = "github:AvengeMedia/DankMaterialShell/stable";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+
+    # Hyprland — sempre na última versão upstream
+    hyprlandFlake = {
+      url = "github:hyprwm/Hyprland";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
   };
 
   # Outputs
@@ -32,6 +38,7 @@
       chaotic,
       claude-code,
       dms,
+      hyprlandFlake,
       ...
     }@inputs:
     let
@@ -45,7 +52,10 @@
     {
       nixosConfigurations.nomad = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = { inherit inputs unstable; };
+        specialArgs = {
+          inherit inputs unstable;
+          hyprlandFlake = hyprlandFlake.packages.${system};
+        };
         modules = [
           # GA402X + NVIDIA (shared.nix impõe mem_sleep_default=deep — overridden em modules/core/hibernate.nix)
           nixos-hardware.nixosModules.asus-zephyrus-ga402x-nvidia
