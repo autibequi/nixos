@@ -62,7 +62,12 @@
     papers # PDFs
 
     # ── Midia ──────────────────────────────────────────
-    mpv
+    (pkgs.mpv.override {
+      scripts = with pkgs.mpvScripts; [
+        uosc       # UI moderna com seekbar, playlist e file browser
+        thumbfast  # thumbnails ao passar o mouse na seekbar
+      ];
+    })
     foliate # ePub reader
     blanket # Noise
     fragments # GTK4 torrent client (magnet links + notificações)
