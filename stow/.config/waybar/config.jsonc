@@ -8,7 +8,7 @@
 		"idle_inhibitor",
 		// "custom/vennon",
 		"hyprland/workspaces",
-		"hyprland/workspaces#special"
+		"custom/special-workspaces"
 		// "hyprland/window"
 	],
 	"modules-center": [
@@ -45,6 +45,17 @@
 		"signal": 9,
 		"format": "{}",
 		"on-click": "screenrecord-toggle"
+	},
+	"custom/special-workspaces": {
+		"exec": "$HOME/.config/waybar/special-workspaces.sh",
+		"return-type": "json",
+		"interval": "once",
+		"signal": 11,
+		"format": "{}",
+		"escape": false,
+		"markup": "pango",
+		"tooltip": true,
+		"on-click": "hyprctl dispatch togglespecialworkspace"
 	},
 	"group/tray-expander": {
 		"orientation": "horizontal",
@@ -161,27 +172,28 @@
 		"all-outputs": false,
 		"show-special": true,
 		"persistent-workspaces": {},
-		"format": "{icon}",
+		"format": "{icon}{windows}</span>",
 		"on-click": "activate",
 		"tooltip": true,
 		"tooltip-format": "{name}",
+		"window-rewrite-default": "",
 		"escape": false,
 		"format-icons": {
-			"f1":     "F1: ",
-			"f2":     "F2: ",
-			"f3":     "F3: ",
-			"f4":     "F4: ",
-			"f5":     "F5: ",
-			"f6":     "F6: ",
-			"f7":     "F7: ",
-			"f8":     "F8: ",
-			"f9":     "F9: ",
-			"f10":    "F10: ",
-			"bleh":   "~: ",
-			"gemini": "gemini: ",
-			"1": "", "2": "", "3": "", "4": "", "5": "",
-			"6": "", "7": "", "8": "", "9": "", "10": "",
-			"default": ""
+			"f1":     "<span foreground='#b05450'>F1: ",
+			"f2":     "<span foreground='#a87240'>F2: ",
+			"f3":     "<span foreground='#9a8838'>F3: ",
+			"f4":     "<span foreground='#429960'>F4: ",
+			"f5":     "<span foreground='#369088'>F5: ",
+			"f6":     "<span foreground='#4070a8'>F6: ",
+			"f7":     "<span foreground='#7058a0'>F7: ",
+			"f8":     "<span foreground='#8040a8'>F8: ",
+			"f9":     "<span foreground='#8040a8'>F9: ",
+			"f10":    "<span foreground='#8040a8'>F10: ",
+			"bleh":   "<span foreground='#ff79c6'>~: ",
+			"gemini": "<span foreground='#00d4ff'>gemini: ",
+			"1": "<span>", "2": "<span>", "3": "<span>", "4": "<span>", "5": "<span>",
+			"6": "<span>", "7": "<span>", "8": "<span>", "9": "<span>", "10": "<span>",
+			"default": "<span>"
 		},
 		"workspace-taskbar": {
 			"format": "{icon} {title}",

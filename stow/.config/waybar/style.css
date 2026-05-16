@@ -71,18 +71,24 @@ window#waybar {
 #workspaces.special {
     background-color: @theme-surface;
     border-color: rgba(189, 147, 249, 0.25);  /* dracula-purple, 25% */
+    padding: 0;
 }
 
-/* Esconder workspaces normais dentro da pill special
- * (filter-function não filtra consistentemente em todos os builds do waybar;
- * colapsar dimensão é mais confiável que display:none que GTK CSS não suporta) */
+/* Esconder workspaces normais dentro da pill special.
+ * Margin negativo agressivo + min-width 0 + font-size 0 + padding 0:
+ * colapsa o widget e absorve o padding/gap residual do GTK. */
 #workspaces.special button:not(.special) {
     min-width: 0;
     padding: 0;
-    margin: -1px;
+    margin: 0 -20px;
     border: none;
     font-size: 0;
     opacity: 0;
+}
+
+/* Garante padding interno só nos specials visíveis */
+#workspaces.special button.special {
+    margin: 1px 2px;
 }
 
 #workspaces.special button.active {

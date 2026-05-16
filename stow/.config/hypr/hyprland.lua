@@ -52,6 +52,7 @@ require("help")               -- SUPER+, manual
 -- Reativos: hooks de evento + watcher de tema + REPL debug
 require("events")
 require("screenshare_guard")  -- depende de hl.on
+require("specials-feed")      -- event-driven refresh do waybar custom/special-workspaces
 
 -- ⚠️ DESABILITADOS — usam hl.timer periódico + io.popen, que bloqueia
 --    o main thread do compositor (5s lag em todos os keybinds).
