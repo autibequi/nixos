@@ -37,7 +37,7 @@ function workspace_switch(ws)
         local name = ws:sub(9)
         _last_special_ws[monitor] = name
         local active = active_special_name()
-        hl.dispatch(hl.dsp.focus({ workspace = "special:" .. name }))
+        hl.dispatch(hl.dsp.workspace.toggle_special(name))
         -- Se estava visível → foi escondido → fecha rofi para não ficar pendurado
         if active == name then
             hl.exec_cmd("pkill -x rofi")
@@ -52,14 +52,14 @@ function toggle_last_special_workspace()
     local monitor = focused_monitor_name()
     local last = _last_special_ws[monitor]
     if last and last ~= "" then
-        hl.dispatch(hl.dsp.focus({ workspace = "special:" .. last }))
+        hl.dispatch(hl.dsp.workspace.toggle_special(last))
     end
 end
 
 function hide_active_special_workspaces()
     local name = active_special_name()
     if name ~= "" then
-        hl.dispatch(hl.dsp.focus({ workspace = "special:" .. name }))
+        hl.dispatch(hl.dsp.workspace.toggle_special(name))
         hl.exec_cmd("pkill -x rofi")
     end
 end
@@ -73,44 +73,50 @@ end
 -- Não vai para outro monitor — para na coluna mais à esquerda/direita
 
 function focus_no_wrap(direction)
-    local win = hl.get_active_window()
-    if not win then return end
+    local ok, win = pcall(hl.get_active_window)
+    if not ok or not win or not win.at then
+        hl.dispatch(hl.dsp.layout("focus " .. direction))
+        return
+    end
 
     local ws_id = win.workspace and win.workspace.id
-    local win_x = win.at and win.at[1] or 0
+    local win_x = win.at[1] or 0
 
-    local windows = hl.get_windows({ workspace = tostring(ws_id) })
+    local ok2, windows = pcall(hl.get_windows)
+    if not ok2 or type(windows) ~= "table" then
+        hl.dispatch(hl.dsp.layout("focus " .. direction))
+        return
+    end
+
     local count = 0
-    if direction == "r" then
-        for _, w in ipairs(windows) do
-            if w.at and w.at[1] > win_x then count = count + 1 end
-        end
-    else
-        for _, w in ipairs(windows) do
-            if w.at and w.at[1] < win_x then count = count + 1 end
+    for _, w in ipairs(windows) do
+        local wx = w.at and w.at[1]
+        if wx and w.workspace and w.workspace.id == ws_id then
+            if direction == "r" and wx > win_x then count = count + 1
+            elseif direction ~= "r" and wx < win_x then count = count + 1
+            end
         end
     end
 
     if count == 0 then return end
-    hl.dispatch(hl.dsp.layout({ message = "focus " .. direction }))
+    hl.dispatch(hl.dsp.layout("focus " .. direction))
 end
 
 -- ── Colresize sem wrap ────────────────────────────────────────
 -- Para no mínimo (0.2) e máximo (0.85) em vez de cyclar
 
 function colresize_no_wrap(direction)
-    local win = hl.get_active_window()
-    local mon = hl.get_active_monitor()
-    if not win or not mon then return end
+    local ok1, win = pcall(hl.get_active_window)
+    local ok2, mon = pcall(hl.get_active_monitor)
 
-    local win_w  = win.size and win.size[1] or 0
-    local mon_w  = (mon.width or 0) / (mon.scale or 1)
-    local ratio  = mon_w > 0 and (win_w / mon_w) or 0
+    -- só aplica no-wrap se conseguir ler tamanho da janela E do monitor
+    if ok1 and ok2 and win and mon and win.size and win.size[1] and mon.width and mon.scale then
+        local ratio = (win.size[1]) / (mon.width / mon.scale)
+        if direction == "+" and ratio >= 0.85 then return end
+        if direction == "-" and ratio <= 0.22 then return end
+    end
 
-    if direction == "+" and ratio >= 0.85 then return end
-    if direction == "-" and ratio <= 0.22 then return end
-
-    hl.dispatch(hl.dsp.layout({ message = "colresize " .. direction .. "conf" }))
+    hl.dispatch(hl.dsp.layout("colresize " .. direction .. "conf"))
 end
 
 -- ── Waybar + Quickshell ───────────────────────────────────────
@@ -213,9 +219,9 @@ function move_special_workspace_to_monitor()
     end
     if not next_mon then return end
 
-    hl.dispatch(hl.dsp.focus({ workspace = "special:" .. active }))
-    hl.dispatch(hl.dsp.monitor.focus(next_mon.name))
-    hl.dispatch(hl.dsp.focus({ workspace = "special:" .. active }))
+    hl.dispatch(hl.dsp.workspace.toggle_special(active))
+    hl.dispatch(hl.dsp.focus({ monitor = next_mon.name }))
+    hl.dispatch(hl.dsp.workspace.toggle_special(active))
 end
 
 function move_normal_workspace_to_monitor()
@@ -230,7 +236,7 @@ function move_normal_workspace_to_monitor()
     end
     if not next_mon then return end
 
-    hl.dispatch(hl.dsp.monitor.focus(next_mon.name))
+    hl.dispatch(hl.dsp.focus({ monitor = next_mon.name }))
     if next_mon.activeWorkspace then
         hl.dispatch(hl.dsp.focus({ workspace = tostring(next_mon.activeWorkspace.id) }))
     end

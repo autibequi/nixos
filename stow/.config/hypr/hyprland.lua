@@ -4,6 +4,10 @@
 --  Wiki: https://wiki.hypr.land/Configuring/Start/
 -- ==========================================================
 
+-- Permite require() de módulos em ~/.config/hypr/
+local _cfgdir = os.getenv("HOME") .. "/.config/hypr"
+package.path = _cfgdir .. "/?.lua;" .. package.path
+
 -- Utils e theme carregados primeiro (outros módulos dependem das funções)
 require("utils")
 require("theme")
@@ -83,13 +87,12 @@ hl.config({
         focus_fit_method         = 1,        -- 0 = center, 1 = fit
         follow_focus             = true,
         follow_min_visible       = 0.0,
-        explicit_column_widths   = { 0.2, 0.25, 0.333, 0.5, 0.667, 1.0 },
+        explicit_column_widths   = "0.2, 0.25, 0.333, 0.5, 0.667, 1.0",
     },
 
     misc = {
         vrr                          = 0,    -- EGL fence sync quebra com VRR no AMD 780M
-        vfr                          = true,
-        initial_workspace_tracking   = "on",
+        initial_workspace_tracking   = 1,    -- 1=on, 0=off
         focus_on_activate            = true,
         animate_manual_resizes       = false,
         animate_mouse_windowdragging = false,
