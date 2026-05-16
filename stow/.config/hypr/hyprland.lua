@@ -41,8 +41,18 @@ require("hyprshortcuts")
 -- Profiles (cycle modes: default/focus/meeting/battery)
 require("profiles")
 
+-- Features novas
+require("cycler")             -- MOD3+I cicla por class
+require("hud")                -- SUPER+; peek de estado
+require("pomodoro")           -- SUPER+SHIFT+T (depende de profiles)
+require("submaps")            -- smart_save/close/reload
+require("followme")           -- MOD3+F sync workspaces (depende de events API)
+require("help")               -- SUPER+, manual
+
 -- Reativos: hooks de evento + watcher de tema + REPL debug
 require("events")
+require("screenshare_guard")  -- depende de hl.on
+require("swallow")            -- depende de hl.on + ps
 require("theme_watcher")
 require("repl")
 
