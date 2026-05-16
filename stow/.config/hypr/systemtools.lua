@@ -17,9 +17,9 @@ hl.bind("SUPER + l", hl.dsp.exec_cmd("hyprlock"))
 
 -- Reload / Power
 hl.bind("SUPER + Delete", function() hypr_reload() end)
-hl.bind("MOD3 + F10", hl.dsp.exec_cmd("sh -c 'zenity --question --text \"Log out?\" --title \"Logout\" && hyprctl dispatch exit'"))
-hl.bind("MOD3 + F11", hl.dsp.exec_cmd("sh -c 'zenity --question --text \"Suspend system?\" --title \"Suspend\" && systemctl suspend'"))
-hl.bind("MOD3 + F12", hl.dsp.exec_cmd("sh -c 'zenity --question --text \"Shut down?\" --title \"Shutdown\" && systemctl poweroff'"))
+-- Power menu (wlogout) — substitui os 3 binds zenity (logout/suspend/shutdown)
+hl.bind("MOD3 + F12",       hl.dsp.exec_cmd("uwsm app -- wlogout -b 3 -m 320"))
+hl.bind("SUPER + Escape",   hl.dsp.exec_cmd("uwsm app -- wlogout -b 3 -m 320"))
 
 -- Shortcuts popup
 hl.bind("SUPER + slash", function() show_shortcuts() end)
@@ -53,14 +53,20 @@ hl.bind("SUPER + n", function() toggle_theme() end)
 
 -- ── Multimedia ────────────────────────────────────────────────
 
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+"), { ["repeat"] = true })
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%-"), { ["repeat"] = true })
-hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"))
-hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"))
+-- Volume / brilho / caps via swayosd-client → mostra OSD visual + altera valor.
+-- swayosd-client fala com pipewire (volume) e brightnessctl (brilho) por baixo
+-- e renderiza overlay temado em ~/.config/swayosd/style.css.
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("swayosd-client --output-volume raise"), { ["repeat"] = true })
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("swayosd-client --output-volume lower"), { ["repeat"] = true })
+hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("swayosd-client --output-volume mute-toggle"))
+hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("swayosd-client --input-volume mute-toggle"))
 hl.bind("XF86AudioPlay",        hl.dsp.exec_cmd("playerctl play-pause"))
 hl.bind("XF86AudioPause",       hl.dsp.exec_cmd("playerctl play-pause"))
 hl.bind("XF86AudioNext",        hl.dsp.exec_cmd("playerctl next"))
 hl.bind("XF86AudioPrev",        hl.dsp.exec_cmd("playerctl previous"))
 
-hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl set 2%+"), { ["repeat"] = true })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl set 2%-"), { ["repeat"] = true })
+hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("swayosd-client --brightness raise"), { ["repeat"] = true })
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("swayosd-client --brightness lower"), { ["repeat"] = true })
+
+-- Caps Lock visual feedback (release event)
+hl.bind("Caps_Lock", hl.dsp.exec_cmd("swayosd-client --caps-lock"), { release = true })

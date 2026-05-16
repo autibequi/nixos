@@ -1,0 +1,51 @@
+/* Dracula Black — paleta central unificada
+ * Consumido por: waybar, swaync, wlogout, nwg-panel, swayosd, hyprlock (via env)
+ * Refs: https://draculatheme.com/contribute — variant "Black" usa bg #000000
+ *       em vez do #282a36 padrão, mantendo demais accents.
+ */
+
+/* Surfaces (do mais escuro pro mais claro) */
+@define-color dracula-bg        #000000;  /* root background — "Black" variant */
+@define-color dracula-surface   #181820;  /* container, pills inativas */
+@define-color dracula-elev      #21222c;  /* elev de hover, pills ativas */
+@define-color dracula-line      #44475a;  /* borders/dividers, current line */
+
+/* Foreground */
+@define-color dracula-fg        #f8f8f2;
+@define-color dracula-fg-dim    #6272a4;  /* comment */
+
+/* Accents (Dracula clássico) */
+@define-color dracula-red       #ff5555;
+@define-color dracula-orange    #ffb86c;
+@define-color dracula-yellow    #f1fa8c;
+@define-color dracula-green     #50fa7b;
+@define-color dracula-cyan      #8be9fd;
+@define-color dracula-blue      #bd93f9;  /* alias purple — bracket "blue" papel */
+@define-color dracula-purple    #bd93f9;
+@define-color dracula-pink      #ff79c6;
+
+/* Semantic mappings (consumidores tematizam por intent, não por nome de cor) */
+@define-color theme-bg          @dracula-bg;
+@define-color theme-surface     @dracula-surface;
+@define-color theme-elev        @dracula-elev;
+@define-color theme-border      @dracula-line;
+@define-color theme-fg          @dracula-fg;
+@define-color theme-fg-muted    @dracula-fg-dim;
+
+@define-color theme-accent      @dracula-purple;   /* destaque primário */
+@define-color theme-accent-soft @dracula-pink;
+@define-color theme-success     @dracula-green;
+@define-color theme-warning     @dracula-yellow;
+@define-color theme-danger      @dracula-red;
+@define-color theme-info        @dracula-cyan;
+
+/* Workspace states (waybar / overview semantics) */
+@define-color ws-text             @theme-fg-muted;
+@define-color ws-active-bg        @theme-accent;
+@define-color ws-active-text      @theme-bg;
+@define-color ws-urgent-bg        @theme-danger;
+@define-color ws-urgent-text      @theme-fg;
+@define-color ws-special-text     @theme-warning;
+@define-color ws-special-active-bg     @theme-warning;
+@define-color ws-special-active-text   @theme-bg;
+@define-color ws-special-hover-text    @theme-success;

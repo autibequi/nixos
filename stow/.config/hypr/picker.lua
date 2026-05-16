@@ -1,7 +1,7 @@
 -- ============================================================
 --  PICKER — window picker fuzzy (Alt-Tab Wayland-friendly)
 --
---  Usa hl.get_clients() → rofi → hyprctl dispatch focuswindow.
+--  Usa get_clients_compat() → rofi → hyprctl dispatch focuswindow.
 --  Bind: MOD3+Tab (vazio no setup; SUPER+Tab é maximize).
 -- ============================================================
 
@@ -20,9 +20,9 @@ function window_picker(opts)
     opts = opts or {}
     local current_ws_only = opts.current_ws
 
-    -- hl.get_clients() devolve table de janelas. Estrutura provável:
+    -- get_clients_compat() devolve table de janelas. Estrutura provável:
     -- { address, class, title, workspace = {id, name}, monitor, ... }
-    local clients = hl.get_clients() or {}
+    local clients = get_clients_compat() or {}
 
     local cur_ws_id
     if current_ws_only then

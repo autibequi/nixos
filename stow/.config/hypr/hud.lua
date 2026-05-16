@@ -15,7 +15,7 @@ function show_hud()
     local mon  = hl.get_active_monitor() or {}
     local ws   = mon.activeWorkspace or {}
     local sws  = mon.specialWorkspace or {}
-    local clients = hl.get_clients() or {}
+    local clients = get_clients_compat() or {}
 
     -- contagem por workspace
     local count_ws, count_class = 0, {}

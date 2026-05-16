@@ -21,6 +21,7 @@ local colorPicker  = L.build("hyprpicker --autocopy --lowercase-hex", { raw = tr
 local quickShell   = L.build("qs ipc call overview toggle",        { raw = true })
 
 local displayManager = L.build("nwg-displays")
+local controlPanel   = L.build("nwg-panel-config")
 local networkManager = "nmtui"
 local audioManager   = L.term("wiremix")
 local emojiPicker    = L.build("rofimoji --skin-tone neutral --action copy")
@@ -56,6 +57,7 @@ km.app("MOD3 + t",      terminal,     { desc = "Terminal",            icon = "" 
 km.app("MOD3 + z",      zed,          { desc = "Zed editor",          icon = "" })
 km.app("MOD3 + period", emojiPicker,  { desc = "Emoji picker",        icon = "" })
 km.app("MOD3 + a",      audioManager, { desc = "Audio (wiremix)",     icon = "" })
+km.app("SUPER + SHIFT + p", controlPanel, { desc = "Control panel (nwg-panel)", group = "System", icon = "" })
 
 -- Browsers + AI
 km.app("MOD3 + b",         chrome,     { desc = "Chrome",          icon = "" })

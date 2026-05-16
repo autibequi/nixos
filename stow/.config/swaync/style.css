@@ -1,15 +1,16 @@
 /*
- * SwayNC — OLED Black Monochrome
- * Matches waybar theme: pure black bg, white text, minimal chrome
+ * SwayNC — Dracula Black
+ * Vars locais espelham themes/dracula-black/colors.css (sem @import pra evitar
+ * problema de path relativo com symlinks do stow).
  */
 
-@define-color bg #000000;
-@define-color fg #ffffff;
-@define-color fg-dim #888888;
-@define-color border #222222;
-@define-color accent #ffffff;
-@define-color urgent #ff0000;
-@define-color close-hover #ff3333;
+@define-color bg      #000000;   /* dracula-bg */
+@define-color fg      #f8f8f2;   /* dracula-fg */
+@define-color fg-dim  #6272a4;   /* dracula-fg-dim / comment */
+@define-color border  #44475a;   /* dracula-line */
+@define-color accent  #bd93f9;   /* dracula-purple */
+@define-color urgent  #ff5555;   /* dracula-red */
+@define-color close-hover #ff5555;
 
 /* ======== Global ======== */
 * {

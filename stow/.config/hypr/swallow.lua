@@ -40,7 +40,7 @@ end
 
 local function find_client_by_pid(pid)
     if not pid then return nil end
-    for _, c in ipairs(hl.get_clients() or {}) do
+    for _, c in ipairs(get_clients_compat() or {}) do
         if c.pid == pid then return c end
     end
     return nil
@@ -57,7 +57,7 @@ pcall(function()
 
         -- Pode ser que o evento ainda não traga pid; tenta via get_clients
         if not child_pid then
-            for _, c in ipairs(hl.get_clients() or {}) do
+            for _, c in ipairs(get_clients_compat() or {}) do
                 if c.address == child_addr then child_pid = c.pid break end
             end
         end

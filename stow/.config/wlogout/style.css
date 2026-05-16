@@ -1,0 +1,44 @@
+/* wlogout — Dracula Black, 6 botões em grid 3x2 */
+@import url("../themes/dracula-black/colors.css");
+
+* {
+    font-family: 'JetBrainsMono Nerd Font', sans-serif;
+    background-image: none;
+    transition: background-color 200ms ease, color 200ms ease;
+}
+
+window {
+    background-color: rgba(0, 0, 0, 0.85);
+    color: @theme-fg;
+}
+
+button {
+    color: @theme-fg;
+    background-color: @theme-surface;
+    border: 2px solid @theme-border;
+    border-radius: 18px;
+    margin: 16px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 25%;
+}
+
+button:focus,
+button:active,
+button:hover {
+    background-color: @theme-elev;
+    border-color: @theme-accent;
+    outline-style: none;
+    color: @theme-accent;
+}
+
+/* Ícones: wlogout aceita SVG inline via background-image — usamos os Nerd Font
+ * char no `text` do layout, fica simples e dispensa pacote de ícones. Se quiser
+ * SVG real, dropar em ~/.config/wlogout/icons/ e referenciar aqui. */
+
+#lock      { background-image: image(url("icons/lock.svg")); }
+#logout    { background-image: image(url("icons/logout.svg")); }
+#suspend   { background-image: image(url("icons/suspend.svg")); }
+#hibernate { background-image: image(url("icons/hibernate.svg")); }
+#reboot    { background-image: image(url("icons/reboot.svg")); }
+#shutdown  { background-image: image(url("icons/shutdown.svg")); }

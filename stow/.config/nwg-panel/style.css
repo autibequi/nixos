@@ -1,0 +1,76 @@
+/* nwg-panel — tema Dracula Black
+ * Importa a paleta central; quem quiser tunar cores muda só o tema.
+ */
+@import url("../themes/dracula-black/colors.css");
+
+* {
+    font-family: 'JetBrainsMono Nerd Font', sans-serif;
+    font-size: 12px;
+}
+
+window {
+    background-color: @theme-surface;
+    color: @theme-fg;
+    border-radius: 14px;
+    border: 1px solid @theme-border;
+}
+
+/* Botões / ícones */
+button {
+    background-color: transparent;
+    color: @theme-fg;
+    border-radius: 10px;
+    border: none;
+    padding: 4px 8px;
+    margin: 2px;
+}
+
+button:hover {
+    background-color: @theme-elev;
+}
+
+button:active,
+button.active {
+    background-color: @theme-accent;
+    color: @theme-bg;
+}
+
+/* Sliders (volume/brilho) */
+scale trough {
+    background-color: @theme-elev;
+    border-radius: 999px;
+    min-height: 6px;
+}
+
+scale highlight {
+    background-color: @theme-accent;
+    border-radius: 999px;
+}
+
+scale slider {
+    background-color: @theme-fg;
+    border-radius: 999px;
+    min-width: 14px;
+    min-height: 14px;
+    margin: -4px;
+}
+
+/* Labels */
+label {
+    color: @theme-fg;
+}
+
+/* Popovers (audio-output picker, etc.) */
+popover {
+    background-color: @theme-surface;
+    color: @theme-fg;
+    border: 1px solid @theme-border;
+    border-radius: 12px;
+}
+
+/* Separators */
+separator {
+    background-color: @theme-border;
+    min-height: 1px;
+    margin: 4px 8px;
+}

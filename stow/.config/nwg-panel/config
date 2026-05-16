@@ -1,0 +1,75 @@
+[
+    {
+        "name": "control",
+        "output": "",
+        "layer": "top",
+        "position": "top",
+        "controls": "right",
+        "controls-settings": {
+            "components": [
+                "brightness",
+                "volume",
+                "battery"
+            ],
+            "commands": {
+                "battery": "",
+                "net": "",
+                "bluetooth": "alacritty -e bluetuith"
+            },
+            "show-values": true,
+            "interval": 1,
+            "icon-size": 18,
+            "hover-opens": false,
+            "leave-closes": true,
+            "click-closes": true,
+            "css-name": "controls-window",
+            "custom-items": [
+                {
+                    "name": "audio mixer",
+                    "icon": "audio-volume-high-symbolic",
+                    "cmd": "alacritty -e wiremix"
+                },
+                {
+                    "name": "displays",
+                    "icon": "video-display-symbolic",
+                    "cmd": "nwg-displays"
+                },
+                {
+                    "name": "network",
+                    "icon": "network-wireless-symbolic",
+                    "cmd": "alacritty -e nmtui"
+                }
+            ],
+            "menu": {
+                "name": "Exit",
+                "icon": "system-shutdown-symbolic",
+                "items": [
+                    {"name": "Lock",     "cmd": "hyprlock"},
+                    {"name": "Logout",   "cmd": "uwsm stop"},
+                    {"name": "Suspend",  "cmd": "systemctl suspend"},
+                    {"name": "Reboot",   "cmd": "systemctl reboot"},
+                    {"name": "Shutdown", "cmd": "systemctl poweroff"}
+                ]
+            }
+        },
+        "width": 0,
+        "height": 0,
+        "homogeneous": true,
+        "icons": "",
+        "css-name": "panel-control",
+        "modules-left": [],
+        "modules-center": [],
+        "modules-right": [],
+        "controls-modules-margin": 0,
+        "margin-left": 0,
+        "margin-right": 6,
+        "margin-top": 0,
+        "margin-bottom": 0,
+        "padding-horizontal": 8,
+        "padding-vertical": 2,
+        "spacing": 6,
+        "items-padding": 4,
+        "exclusive-zone": false,
+        "modules": {}
+    }
+]

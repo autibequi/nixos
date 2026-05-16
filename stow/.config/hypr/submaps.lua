@@ -12,7 +12,7 @@
 -- ============================================================
 
 local function focused_class()
-    for _, c in ipairs(hl.get_clients() or {}) do
+    for _, c in ipairs(get_clients_compat() or {}) do
         if c.focused then return c.class or "" end
     end
     return ""

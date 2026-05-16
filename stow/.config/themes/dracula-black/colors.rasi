@@ -1,0 +1,35 @@
+/* Dracula Black — paleta pra rofi (.rasi format)
+ * Espelha colors.css em propriedades rofi.
+ */
+
+* {
+    /* Surfaces */
+    dracula-bg:        #000000;
+    dracula-surface:   #181820;
+    dracula-elev:      #21222c;
+    dracula-line:      #44475a;
+
+    /* Foreground */
+    dracula-fg:        #f8f8f2;
+    dracula-fg-dim:    #6272a4;
+
+    /* Accents */
+    dracula-red:       #ff5555;
+    dracula-orange:    #ffb86c;
+    dracula-yellow:    #f1fa8c;
+    dracula-green:     #50fa7b;
+    dracula-cyan:      #8be9fd;
+    dracula-purple:    #bd93f9;
+    dracula-pink:      #ff79c6;
+
+    /* Semantic */
+    theme-bg:          @dracula-bg;
+    theme-surface:     @dracula-surface;
+    theme-elev:        @dracula-elev;
+    theme-border:      @dracula-line;
+    theme-fg:          @dracula-fg;
+    theme-fg-muted:    @dracula-fg-dim;
+    theme-accent:      @dracula-purple;
+    theme-warning:     @dracula-yellow;
+    theme-danger:      @dracula-red;
+}

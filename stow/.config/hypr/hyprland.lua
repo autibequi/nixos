@@ -52,9 +52,13 @@ require("help")               -- SUPER+, manual
 -- Reativos: hooks de evento + watcher de tema + REPL debug
 require("events")
 require("screenshare_guard")  -- depende de hl.on
-require("swallow")            -- depende de hl.on + ps
-require("theme_watcher")
-require("repl")
+
+-- ⚠️ DESABILITADOS — usam hl.timer periódico + io.popen, que bloqueia
+--    o main thread do compositor (5s lag em todos os keybinds).
+--    Re-habilitar só depois de migrar pra async ou descobrir API non-blocking.
+-- require("swallow")         -- io.popen("ps -p") em window.open trava ao abrir janelas
+-- require("theme_watcher")   -- hl.timer 1500ms + io.popen("stat ...") trava periodicamente
+-- require("repl")            -- hl.timer 250ms + io.popen, pior dos três
 
 -- =============================================
 --  ENV VARS
@@ -80,6 +84,7 @@ hl.on("hyprland.start", function()
 
     -- Session core
     hl.exec_cmd("systemctl --user start hyprpolkitagent")
+    hl.exec_cmd("uwsm app -- swayosd-server")
     hl.exec_cmd("uwsm app -- waybar")
     hl.exec_cmd("uwsm app -- qs")
     hl.exec_cmd("uwsm app -- swww-daemon")

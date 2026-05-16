@@ -11,7 +11,7 @@
 -- ============================================================
 
 local function focused_window()
-    local clients = hl.get_clients() or {}
+    local clients = get_clients_compat() or {}
     for _, c in ipairs(clients) do
         if c.focused then return c end
     end
@@ -20,7 +20,7 @@ end
 
 local function siblings_of(class, exclude_addr)
     local out = {}
-    for _, c in ipairs(hl.get_clients() or {}) do
+    for _, c in ipairs(get_clients_compat() or {}) do
         if c.class == class and c.address ~= exclude_addr then
             table.insert(out, c)
         end

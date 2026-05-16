@@ -1,13 +1,14 @@
 {
 	"layer": "bottom",
 	"position": "bottom",
-	"height": 26,
+	"height": 28,
 	"spacing": 0,
 	"margin": 0,
 	"modules-left": [
 		"idle_inhibitor",
 		// "custom/vennon",
-		"hyprland/workspaces"
+		"hyprland/workspaces",
+		"hyprland/workspaces#special"
 		// "hyprland/window"
 	],
 	"modules-center": [
@@ -20,13 +21,19 @@
 		"mpris",
 		"custom/claude-usage",
 		"custom/obsidian-sync",
-		"pulseaudio",
-		"backlight",
-		"custom/ddcutil-brightness",
-		"network",
+		"group/system-controls",
 		"tray",
 		"bluetooth"
 	],
+	"group/system-controls": {
+		"orientation": "horizontal",
+		"modules": [
+			"pulseaudio",
+			"backlight",
+			"custom/ddcutil-brightness",
+			"network"
+		]
+	},
 	"tray": {
 		"icon-size": 14,
 		"spacing": 2
@@ -79,8 +86,7 @@
 		"interval": 1,
 		"disable-scroll": true,
 		"all-outputs": false,
-		"show-special": true,
-		"special-visible-only": false,
+		"show-special": false,
 		"persistent-workspaces": {},
 		"format": "{icon}{windows}</span>",
 		"tooltip": true,
@@ -147,6 +153,59 @@
 			"yaak-app": "󰆚",
 			"class<^steam_app_.*>": "󰮯",
 			"title<.*Steam.*>": ""
+		}
+	},
+	"hyprland/workspaces#special": {
+		"disable-scroll": true,
+		"all-outputs": false,
+		"show-special": true,
+		"persistent-workspaces": {},
+		"format": "{icon}",
+		"tooltip": true,
+		"tooltip-format": "{name}",
+		"escape": false,
+		"format-icons": {
+			"f1":     "F1: ",
+			"f2":     "F2: ",
+			"f3":     "F3: ",
+			"f4":     "F4: ",
+			"f5":     "F5: ",
+			"f6":     "F6: ",
+			"f7":     "F7: ",
+			"f8":     "F8: ",
+			"f9":     "F9: ",
+			"f10":    "F10: ",
+			"bleh":   "~: ",
+			"gemini": "gemini: ",
+			"1": "", "2": "", "3": "", "4": "", "5": "",
+			"6": "", "7": "", "8": "", "9": "", "10": "",
+			"default": ""
+		},
+		"workspace-taskbar": {
+			"format": "{icon} {title}",
+			"format-icons": {
+				"default": " "
+			},
+			"tooltip": true
+		},
+		"window-rewrite": {
+			"title<(.*[$%#] *)?([hb]|nv)top.*>": "btop",
+			"title<(.* - )?(.[0-9]+. )?YouTube Music.*>": "",
+			"title<(.*)(books - Obsidian)(.*)>": "",
+			"class<(.*)(chat)(.*)>": "󰍡",
+			"class<(Alacritty|ghostty)> title<(.*)(✳ Claude)(.*)>": "󱙺",
+			"class<(.*)(chrome-claude)(.*)>": "✻",
+			"title<(.*)(Gemini)(.*)>": "󰼙",
+			"title<(.*)(JIRA)(.*)>": "󰌃",
+			"title<(.*)(Meet)(.*)>": "",
+			"firefox": "",
+			"vivaldi": "",
+			"zen": "",
+			"chrome": "",
+			"obsidian": "",
+			"Alacritty": "󰆍",
+			"ghostty": "󰆍",
+			"zed": "󰰶"
 		}
 	},
 	"mpris": {

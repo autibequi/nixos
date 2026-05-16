@@ -1,0 +1,44 @@
+/* swayosd — Dracula Black
+ * Pill estilo flutuante quando volume/brilho/caps muda.
+ */
+@import url("../themes/dracula-black/colors.css");
+
+window#osd {
+    padding: 14px 22px;
+    border-radius: 22px;
+    border: 1px solid @theme-border;
+    background: @theme-surface;
+    color: @theme-fg;
+}
+
+window#osd label {
+    color: @theme-fg;
+    font-family: 'JetBrainsMono Nerd Font', sans-serif;
+    font-size: 14px;
+}
+
+window#osd image {
+    color: @theme-accent;
+    margin-right: 10px;
+}
+
+window#osd progressbar {
+    min-height: 6px;
+    border-radius: 999px;
+    background-color: @theme-elev;
+    border: none;
+}
+
+window#osd progressbar > trough {
+    background-color: @theme-elev;
+    border-radius: 999px;
+    min-height: 6px;
+    border: none;
+}
+
+window#osd progressbar > trough > progress {
+    background-color: @theme-accent;
+    border-radius: 999px;
+    border: none;
+    min-height: 6px;
+}
