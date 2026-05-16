@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=Yaak
-Exec=nvidia-offload appimage-run /home/pedrinho/apps/yaak.AppImage
+Exec=gpu-offload appimage-run /home/pedrinho/apps/yaak.AppImage
 TryExec=appimage-run
 Icon=yaak
 Terminal=false
