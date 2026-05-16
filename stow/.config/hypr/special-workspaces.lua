@@ -2,100 +2,50 @@
 --  SPECIAL WORKSPACES — portado de special-workspaces.conf
 -- ============================================================
 
-local defaultGaps = 32
+local DEFAULT_GAPS    = 32
+local DEFAULT_BORDER  = "rgba(7c3aedcc)"
 
--- ── Gemini ───────────────────────────────────────────────────
-hl.workspace_rule({
-    workspace      = "special:gemini",
-    gaps_out       = defaultGaps,
+-- Helper: cada special workspace tem mesmo shape (rule + border + binds)
+local function define_special(name, key, opts)
+    opts = opts or {}
+    local ws = "special:" .. name
+
+    local rule = { workspace = ws, gaps_out = DEFAULT_GAPS, layout = "scrolling" }
+    if opts.on_created_empty then rule.on_created_empty = opts.on_created_empty end
+    hl.workspace_rule(rule)
+
+    local win = { match = { workspace = ws }, border_color = opts.border or DEFAULT_BORDER }
+    if opts.no_screen_share then win.no_screen_share = true end
+    hl.window_rule(win)
+
+    if opts.tile then
+        hl.window_rule({ match = { workspace = ws }, tile = true })
+    end
+
+    hl.bind("SUPER + "         .. key, function() workspace_switch(ws) end)
+    hl.bind("SUPER + SHIFT + " .. key, hl.dsp.window.move({ workspace = ws, follow = false }))
+end
+
+-- ── Nomeados ─────────────────────────────────────────────────
+define_special("gemini", "g", {
     on_created_empty = "uwsm app -- gpu-offload google-chrome-stable --ozone-platform=x11 --app=https://gemini.google.com/",
-    layout         = "scrolling",
+    tile             = true,
 })
-hl.window_rule({ match = { workspace = "special:gemini" }, border_color = "rgba(7c3aedcc)" })
-hl.window_rule({ match = { workspace = "special:gemini" }, tile = true })
-hl.bind("SUPER + g",       function() workspace_switch("special:gemini") end)
-hl.bind("SUPER + SHIFT + g", hl.dsp.window.move({ workspace = "special:gemini", follow = false }))
-
--- ── Bleh (terminal) ──────────────────────────────────────────
-hl.workspace_rule({
-    workspace        = "special:bleh",
-    gaps_out         = defaultGaps,
+define_special("bleh", "grave", {
     on_created_empty = "uwsm app -- gpu-offload alacritty",
+    border           = "rgba(fff700dd)",
 })
-hl.window_rule({ match = { workspace = "special:bleh" }, border_color = "rgba(fff700dd)" })
-hl.bind("SUPER + grave",       function() workspace_switch("special:bleh") end)
-hl.bind("SUPER + SHIFT + grave", hl.dsp.window.move({ workspace = "special:bleh", follow = false }))
 
--- ── F1 — Work Obsidian ───────────────────────────────────────
-hl.workspace_rule({
-    workspace        = "special:f1",
-    gaps_out         = defaultGaps,
-    layout           = "scrolling",
-    on_created_empty = "uwsm app -- obsidian \"obsidian://open?vault=Work\"",
-})
-hl.window_rule({ match = { workspace = "special:f1" }, border_color = "rgba(7c3aedcc)" })
-hl.bind("SUPER + F1",       function() workspace_switch("special:f1") end)
-hl.bind("SUPER + SHIFT + F1", hl.dsp.window.move({ workspace = "special:f1", follow = false }))
-
--- ── F2 — Slot livre ──────────────────────────────────────────
-hl.workspace_rule({ workspace = "special:f2", gaps_out = defaultGaps, layout = "scrolling" })
-hl.window_rule({ match = { workspace = "special:f2" }, border_color = "rgba(7c3aedcc)" })
-hl.bind("SUPER + F2",       function() workspace_switch("special:f2") end)
-hl.bind("SUPER + SHIFT + F2", hl.dsp.window.move({ workspace = "special:f2", follow = false }))
-
--- ── F3 — Slot livre ──────────────────────────────────────────
-hl.workspace_rule({ workspace = "special:f3", gaps_out = defaultGaps, layout = "scrolling" })
-hl.window_rule({ match = { workspace = "special:f3" }, border_color = "rgba(7c3aedcc)" })
-hl.bind("SUPER + F3",       function() workspace_switch("special:f3") end)
-hl.bind("SUPER + SHIFT + F3", hl.dsp.window.move({ workspace = "special:f3", follow = false }))
-
--- ── F4 — Slot livre ──────────────────────────────────────────
-hl.workspace_rule({ workspace = "special:f4", gaps_out = defaultGaps, layout = "scrolling" })
-hl.window_rule({ match = { workspace = "special:f4" }, border_color = "rgba(7c3aedcc)" })
-hl.bind("SUPER + F4",       function() workspace_switch("special:f4") end)
-hl.bind("SUPER + SHIFT + F4", hl.dsp.window.move({ workspace = "special:f4", follow = false }))
-
--- ── F5 — Chat ────────────────────────────────────────────────
-hl.workspace_rule({
-    workspace        = "special:f5",
-    gaps_out         = defaultGaps,
-    layout           = "scrolling",
-    on_created_empty = "uwsm app -- gpu-offload google-chrome-stable --ozone-platform=x11 --app=https://chat.google.com",
-})
-hl.window_rule({ match = { workspace = "special:f5" }, border_color = "rgba(7c3aedcc)" })
-hl.bind("SUPER + F5",       function() workspace_switch("special:f5") end)
-hl.bind("SUPER + SHIFT + F5", hl.dsp.window.move({ workspace = "special:f5", follow = false }))
-
--- ── F6 — Slot livre ──────────────────────────────────────────
-hl.workspace_rule({ workspace = "special:f6", gaps_out = defaultGaps, layout = "scrolling" })
-hl.window_rule({ match = { workspace = "special:f6" }, border_color = "rgba(7c3aedcc)" })
-hl.bind("SUPER + F6",       function() workspace_switch("special:f6") end)
-hl.bind("SUPER + SHIFT + F6", hl.dsp.window.move({ workspace = "special:f6", follow = false }))
-
--- ── F7 — Slot livre ──────────────────────────────────────────
-hl.workspace_rule({ workspace = "special:f7", gaps_out = defaultGaps, layout = "scrolling" })
-hl.window_rule({ match = { workspace = "special:f7" }, border_color = "rgba(7c3aedcc)" })
-hl.bind("SUPER + F7",       function() workspace_switch("special:f7") end)
-hl.bind("SUPER + SHIFT + F7", hl.dsp.window.move({ workspace = "special:f7", follow = false }))
-
--- ── F8 — Settings (Zed nixos) ────────────────────────────────
-hl.workspace_rule({
-    workspace        = "special:f8",
-    gaps_out         = defaultGaps,
-    layout           = "scrolling",
-    on_created_empty = "uwsm app -- gpu-offload zeditor ~/nixos",
-})
-hl.window_rule({ match = { workspace = "special:f8" }, border_color = "rgba(7c3aedcc)" })
-hl.bind("SUPER + F8",       function() workspace_switch("special:f8") end)
-hl.bind("SUPER + SHIFT + F8", hl.dsp.window.move({ workspace = "special:f8", follow = false }))
-
--- ── F9 — Personal Obsidian (privado) ─────────────────────────
-hl.workspace_rule({
-    workspace        = "special:f9",
-    gaps_out         = defaultGaps,
-    layout           = "scrolling",
+-- ── F-keys ───────────────────────────────────────────────────
+define_special("f1", "F1", { on_created_empty = "uwsm app -- obsidian \"obsidian://open?vault=Work\"" })
+define_special("f2", "F2")
+define_special("f3", "F3")
+define_special("f4", "F4")
+define_special("f5", "F5", { on_created_empty = "uwsm app -- gpu-offload google-chrome-stable --ozone-platform=x11 --app=https://chat.google.com" })
+define_special("f6", "F6")
+define_special("f7", "F7")
+define_special("f8", "F8", { on_created_empty = "uwsm app -- gpu-offload zeditor ~/nixos" })
+define_special("f9", "F9", {
     on_created_empty = "uwsm app -- obsidian \"obsidian://open?vault=.ovault\"",
+    no_screen_share  = true,
 })
-hl.window_rule({ match = { workspace = "special:f9" }, border_color = "rgba(7c3aedcc)", no_screen_share = true })
-hl.bind("SUPER + F9",       function() workspace_switch("special:f9") end)
-hl.bind("SUPER + SHIFT + F9", hl.dsp.window.move({ workspace = "special:f9", follow = false }))
