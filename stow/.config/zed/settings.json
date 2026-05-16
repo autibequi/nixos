@@ -52,7 +52,7 @@
 	"theme": {
 		"mode": "system",
 		"light": "Dracula Light (Alucard)",
-		"dark": "Dracula Solid"
+		"dark": "Blackula"
 	},
 	"icon_theme": {
 		"mode": "system",
@@ -212,7 +212,7 @@
 	"git_panel": {
 		"dock": "left",
 		"fallback_branch_name": "main",
-		"tree_view": false,
+		"tree_view": true,
 		"sort_by_path": false,
 		"status_style": "icon",
 		"file_icons": false,
