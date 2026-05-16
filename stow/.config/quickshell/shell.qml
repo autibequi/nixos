@@ -7,6 +7,7 @@ import "./overview/services/"
 import "./overview/common/"
 import "./overview/common/functions/"
 import "./overview/common/widgets/"
+import "./modules/clock/"
 
 import QtQuick
 import Quickshell
@@ -14,4 +15,5 @@ import Quickshell.Hyprland
 
 ShellRoot {
     Overview {}
+    ClockWidget {}
 }

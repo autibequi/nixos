@@ -1,9 +1,9 @@
 {
 	"layer": "bottom",
 	"position": "bottom",
-	"height": 28,
+	"height": 24,
 	"spacing": 0,
-	"margin": 0,
+	"margin": "5px 5px",
 	"modules-left": [
 		"idle_inhibitor",
 		// "custom/vennon",
@@ -89,6 +89,7 @@
 		"show-special": false,
 		"persistent-workspaces": {},
 		"format": "{icon}{windows}</span>",
+		"on-click": "activate",
 		"tooltip": true,
 		"tooltip-format": "{name}",
 		"window-rewrite-default": "",
@@ -161,6 +162,7 @@
 		"show-special": true,
 		"persistent-workspaces": {},
 		"format": "{icon}",
+		"on-click": "activate",
 		"tooltip": true,
 		"tooltip-format": "{name}",
 		"escape": false,
@@ -238,6 +240,7 @@
 		"format": "󰥔 {:%H:%M}",
 		"interval": 60,
 		"format-alt": "󰃮 {:%Y-%m-%d}",
+		"on-click": "qs ipc call clock toggle",
 		"tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
 		"calendar": {
 			"mode": "month",

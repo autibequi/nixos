@@ -15,29 +15,33 @@
     border: none;
     border-radius: 0;
     font-family: 'JetBrainsMono Nerd Font', FontAwesome, sans-serif;
-    font-size: 12px;
+    font-size: 11px;
     min-height: 0;
-    transition: background-color 200ms ease,
-                color 200ms ease,
-                box-shadow 200ms ease;
+    transition: background-color 150ms ease, color 150ms ease;
 }
 
-/* ── Barra base (transparente; pills fazem o trabalho visual) ── */
+/* ── Barra base ────────────────────────────────────────── */
 window#waybar {
     background-color: transparent;
     color: @theme-fg;
+    /* Garante que as pills sejam centradas verticalmente na barra */
 }
 
-/* Container de cada secção do layout (left/center/right) */
-.modules-left,
-.modules-center,
-.modules-right {
-    margin: 2px 4px;
+/* A barra interna (GTK Box) usa baseline; forçar center evita
+ * que pills com conteúdo diferente fiquem em alturas dispares. */
+.modules-left > widget,
+.modules-center > widget,
+.modules-right > widget {
+    margin: 3px 2px;
 }
 
 /*========================================================*
  *               BASE "PILL" — todos os módulos           *
- *========================================================*/
+ *========================================================*
+ * min-height FIXO = todas as pills ficam com a mesma
+ * altura independente do conteúdo interno. Padding só
+ * horizontal; vertical fica a cargo do min-height.
+ */
 #mpris,
 #clock,
 #battery,
@@ -56,10 +60,11 @@ window#waybar {
 #workspaces {
     background-color: @theme-surface;
     color: @theme-fg;
-    border-radius: 12px;
-    padding: 1px 10px;
-    margin: 0 2px;
-    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 0 7px;
+    min-height: 20px;
+    margin: 0;
+    border: none;
 }
 
 /* ── Special workspaces — pill com borda accent dim ───────── */
@@ -94,10 +99,11 @@ window#waybar {
 /* ── Grupo sistema (volume + brilho + wifi) — pill única ─── */
 #system-controls {
     background-color: @theme-surface;
-    border-radius: 12px;
-    padding: 1px 4px;
-    margin: 0 2px;
-    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 0 2px;
+    min-height: 20px;
+    margin: 0;
+    border: none;
 }
 
 #system-controls:hover {
@@ -112,7 +118,7 @@ window#waybar {
 #system-controls #network {
     background-color: transparent;
     border-radius: 0;
-    padding: 0 6px;
+    padding: 0 5px;
     margin: 0;
     border: none;
 }
@@ -143,18 +149,22 @@ window#waybar {
  *========================================================*
  * A própria pill #workspaces já tem background-surface;
  * dentro dela, cada botão é uma "sub-pill" pequena. */
+/* Workspaces container — override pra ocupar menos altura que as outras pills */
 #workspaces {
-    padding: 2px 6px;
+    padding: 0 3px;
+    margin: 0 3px;
+    border-width: 0;
 }
 
 #workspaces button {
-    padding: 0 8px;
-    margin: 1px 3px;
+    padding: 1px 4px;
+    margin: 2px 1px;
     min-width: 0;
-    /* Background sutil pra delimitar cada workspace inativo como "pill apagada" */
+    min-height: 0;
     background-color: @theme-elev;
     color: @ws-text;
-    border-radius: 10px;
+    border-radius: 5px;
+    font-size: 10px;
     font-weight: 500;
 }
 
@@ -264,7 +274,8 @@ window#waybar {
 
 #idle_inhibitor {
     color: @idle-inhibitor-text;
-    min-width: 18px;
+    padding: 0 8px;
+    min-width: 0;
 }
 
 #idle_inhibitor.activated {

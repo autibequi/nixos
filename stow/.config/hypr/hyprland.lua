@@ -105,8 +105,9 @@ end)
 
 hl.config({
     general = {
-        gaps_in                 = 5,
-        gaps_out                = 5,
+        gaps_in                 = 2,
+        -- gaps_out: bottom menor pra encostar perto da waybar
+        gaps_out                = { top = 5, right = 5, bottom = 2, left = 5 },
         border_size             = 3,
         layout                  = "scrolling",
         allow_tearing           = false,
@@ -138,7 +139,7 @@ hl.config({
     },
 
     decoration = {
-        rounding = 0,
+        rounding = 10,
         blur     = { enabled = false },
         shadow   = { enabled = false },
     },
