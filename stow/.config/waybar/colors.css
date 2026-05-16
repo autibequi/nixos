@@ -1,22 +1,22 @@
-/* Waybar colors — hacker/matrix green variant
- * Base do Dracula Black; tokens semânticos sobrescritos pra green palette.
- * Para voltar ao Dracula purple, trocar theme-accent → @dracula-purple etc.
+/* Waybar colors — Alacritty Deep Dark
+ * Espelha ~/.config/alacritty/dark-theme.toml exatamente.
+ * Para trocar de tema: editar só os @define-color abaixo.
  */
 @import url("../themes/dracula-black/colors.css");
 
-/* ── Override semântico: verde como accent ────────────────────────── */
-@define-color theme-bg          #000000;
-@define-color theme-surface     #0a120a;
-@define-color theme-elev        #111d11;
-@define-color theme-border      #1e3c1e;
-@define-color theme-fg          #c8f5c8;
-@define-color theme-fg-muted    #4a8a4a;
-@define-color theme-accent      #50fa7b;   /* verde Dracula vibrante */
-@define-color theme-accent-soft #8be9fd;   /* cyan */
-@define-color theme-success     #50fa7b;
-@define-color theme-warning     #f1fa8c;
-@define-color theme-danger      #ff5555;
-@define-color theme-info        #8be9fd;
+/* ── Paleta Deep Dark (fonte: dark-theme.toml) ────────────────────── */
+@define-color theme-bg          #0a0e14;   /* terminal background */
+@define-color theme-surface     #1a1f29;   /* normal black / footer bar */
+@define-color theme-elev        #2a2f3a;   /* hints end / elevado */
+@define-color theme-border      #2d3748;   /* selection background */
+@define-color theme-fg          #e6e6e6;   /* foreground */
+@define-color theme-fg-muted    #9ca3af;   /* dim_foreground */
+@define-color theme-accent      #00d4ff;   /* cursor / blue — destaque principal */
+@define-color theme-accent-soft #ff79c6;   /* magenta */
+@define-color theme-success     #50fa7b;   /* green */
+@define-color theme-warning     #ffb454;   /* yellow */
+@define-color theme-danger      #ff6b6b;   /* red */
+@define-color theme-info        #00e8c6;   /* cyan */
 
 /* ── Workspace states ─────────────────────────────────────────────── */
 @define-color ws-text                  @theme-fg-muted;
@@ -24,8 +24,8 @@
 @define-color ws-active-text           @theme-bg;
 @define-color ws-urgent-bg             @theme-danger;
 @define-color ws-urgent-text           @theme-fg;
-@define-color ws-special-text          #8be9fd;
-@define-color ws-special-active-bg     #8be9fd;
+@define-color ws-special-text          @theme-accent-soft;
+@define-color ws-special-active-bg     @theme-accent-soft;
 @define-color ws-special-active-text   @theme-bg;
 @define-color ws-special-hover-text    @theme-accent;
 
@@ -34,9 +34,9 @@
 @define-color color-white    @theme-fg;
 @define-color color-red      @theme-danger;
 @define-color color-yellow   @theme-warning;
-@define-color color-green    @theme-accent;
-@define-color color-blue     @theme-accent-soft;
-@define-color color-orange   @dracula-orange;
+@define-color color-green    @theme-success;
+@define-color color-blue     @theme-accent;
+@define-color color-orange   @theme-warning;
 
 @define-color main-bg        @theme-bg;
 @define-color main-text      @theme-fg;

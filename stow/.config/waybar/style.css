@@ -151,32 +151,28 @@ window#waybar {
     padding: 0 8px;
     margin: 1px 3px;
     min-width: 0;
-    background-color: transparent;
+    /* Background sutil pra delimitar cada workspace inativo como "pill apagada" */
+    background-color: @theme-elev;
     color: @ws-text;
     border-radius: 10px;
     font-weight: 500;
-    /* Outline sutil pra delimitar cada workspace inativo como "pill apagada" */
-    box-shadow: inset 0 0 0 1px alpha(@theme-fg-muted, 0.35);
 }
 
 #workspaces button:hover {
-    background-color: @theme-elev;
+    background-color: @theme-border;
     color: @theme-fg;
-    box-shadow: inset 0 0 0 1px @theme-border;
     text-shadow: none;
 }
 
 #workspaces button.focused {
     color: @theme-fg;
-    background-color: @theme-elev;
-    box-shadow: inset 0 0 0 1px @theme-accent;
+    background-color: @theme-border;
     font-weight: 700;
 }
 
 #workspaces button.active {
     background-color: @ws-active-bg;
     color: @ws-active-text;
-    box-shadow: none;
     font-weight: 700;
 }
 
@@ -224,7 +220,7 @@ window#waybar {
 #clock {
     color: @clock-text;
     font-weight: 700;
-    text-shadow: 0 0 8px rgba(80, 250, 123, 0.4);
+    text-shadow: 0 0 8px rgba(0, 212, 255, 0.35);
 }
 
 #battery {
