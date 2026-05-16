@@ -47,7 +47,6 @@ _cache_or_eval() {
 _cache_or_eval starship starship init zsh
 _cache_or_eval zoxide  zoxide init zsh
 _cache_or_eval atuin   atuin init zsh --disable-up-arrow
-source ~/.config/hypr/hyprutils.sh
 
 ######################
 #      Functions

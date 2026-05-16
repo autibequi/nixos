@@ -1,154 +1,73 @@
 -- ============================================================
---  HYPRSHORTCUTS — porta do hyprshortcuts.sh para Lua
+--  HYPRSHORTCUTS — rofi cheatsheet a partir do registry keymap
 --
---  Estratégia:
---    1. io.popen("hyprctl binds") → parse em Lua (rápido, < 50ms)
---    2. Gera um shell script temporário com o input do rofi e
---       o mapa display→cmd já embutido
---    3. hl.exec_cmd(script) → rofi roda async, não trava o compositor
+--  Antes: parse de `hyprctl binds` + map dispatcher→pretty
+--  Agora: consome keymap._binds (com desc/group/icon semânticos)
 -- ============================================================
 
-local function decode_modmask(mask)
-    local mods = {}
-    if mask & 64 ~= 0 then table.insert(mods, "Super")  end
-    if mask & 32 ~= 0 then table.insert(mods, "Mod3")   end
-    if mask & 8  ~= 0 then table.insert(mods, "Alt")    end
-    if mask & 4  ~= 0 then table.insert(mods, "Ctrl")   end
-    if mask & 1  ~= 0 then table.insert(mods, "Shift")  end
-    return table.concat(mods, "+")
-end
-
-local function pretty_action(dispatcher, arg)
-    if dispatcher == "exec" then
-        local ws = arg:match("workspace_switch%s+(.+)")
-        if ws then return "Go to W: " .. ws end
-        return "Run: " .. arg
-    end
-    local map = {
-        killactive             = "Close Window",
-        exit                   = "Exit Hyprland",
-        togglefloating         = "Toggle Float",
-        fullscreen             = "Toggle Fullscreen",
-        movetoworkspace        = "Move to W: " .. arg,
-        movetoworkspacesilent  = "Move to W: " .. arg .. " (silent)",
-        workspace              = "Go to W: " .. arg,
-        submap                 = "[SUBMAP] " .. arg,
-        movefocus              = "Focus: " .. arg,
-        movewindow             = "Move Window: " .. arg,
-        resizeactive           = "Resize: " .. arg,
-        layoutmsg              = "Layout: " .. arg,
-        focusmonitor           = "Monitor: " .. arg,
-    }
-    return map[dispatcher] or (dispatcher .. " " .. arg)
-end
-
-local function parse_binds()
-    local f = io.popen("hyprctl binds 2>/dev/null")
-    if not f then return {} end
-    local raw = f:read("*a")
-    f:close()
-
-    local binds = {}
-    local cur = { modmask = 0 }
-
-    for line in (raw .. "\n"):gmatch("([^\n]*)\n") do
-        -- nova entrada de bind
-        if line:match("^bind") then
-            if cur.key and cur.key ~= "" then
-                table.insert(binds, {
-                    modmask    = cur.modmask or 0,
-                    key        = cur.key,
-                    dispatcher = cur.dispatcher or "",
-                    arg        = cur.arg or "",
-                })
-            end
-            cur = { modmask = 0 }
-        else
-            local v
-            v = line:match("^%s+modmask:%s+(%d+)")
-            if v then cur.modmask = tonumber(v) or 0 end
-
-            v = line:match("^%s+key:%s+(.+)")
-            if v then cur.key = v end
-
-            v = line:match("^%s+dispatcher:%s+(.+)")
-            if v then cur.dispatcher = v end
-
-            v = line:match("^%s+arg:%s+(.*)")
-            if v then cur.arg = v end
-        end
-    end
-    -- flush último bloco
-    if cur.key and cur.key ~= "" then
-        table.insert(binds, {
-            modmask    = cur.modmask or 0,
-            key        = cur.key,
-            dispatcher = cur.dispatcher or "",
-            arg        = cur.arg or "",
-        })
-    end
-    return binds
-end
+local km = require("keymap")
 
 local function escape_sh(s)
-    -- escapa aspas simples para uso em strings shell single-quoted
-    return s:gsub("'", "'\\''")
+    return (s or ""):gsub("'", "'\\''")
 end
 
+-- Render: "[group] icon  combo  ⟶  desc"
+local function format_entry(e)
+    return string.format("[%-10s] %s %-26s  ⟶  %s",
+        e.group, e.icon ~= "" and e.icon or " ",
+        e.combo, e.desc)
+end
+
+-- Para items sem dispatcher (são lua fns), o re-invoke seria via FIFO/REPL.
+-- Pra cheatsheet, basta listar e permitir disparar via hyprctl dispatch quando
+-- houver combo identificado em hyprctl binds.
+
 function show_shortcuts()
-    local binds = parse_binds()
-
-    -- Formata e ordena por action
-    local entries = {}
-    for _, b in ipairs(binds) do
-        if b.key ~= "" then
-            local mods   = decode_modmask(b.modmask)
-            local combo  = mods ~= "" and (mods .. "+" .. b.key) or b.key
-            local action = pretty_action(b.dispatcher, b.arg)
-            local display = string.format("%-26s %s", combo, action)
-
-            local cmd
-            if b.dispatcher == "exec" then
-                cmd = b.arg
-            else
-                cmd = "hyprctl dispatch " .. b.dispatcher ..
-                      (b.arg ~= "" and (" " .. b.arg) or "")
-            end
-
-            table.insert(entries, { sort = action, display = display, cmd = cmd })
-        end
+    local entries = km.cheatsheet()
+    if #entries == 0 then
+        hl.exec_cmd("notify-send 'show_shortcuts' 'Registry vazio' -u low")
+        return
     end
-    table.sort(entries, function(a, b) return a.sort < b.sort end)
 
-    if #entries == 0 then return end
-
-    -- Monta o script shell temporário
-    -- Usa um array bash indexado por número + array paralelo de cmds
-    -- para evitar problemas com caracteres especiais em keys associativas
     local lines = {
         "#!/usr/bin/env bash",
         "rofi_input=''",
-        "declare -a cmds=()",
+        "declare -a combos=()",
     }
 
     for i, e in ipairs(entries) do
         table.insert(lines,
-            "rofi_input+=$'" .. escape_sh(e.display) .. "\\n'")
+            "rofi_input+=$'" .. escape_sh(format_entry(e)) .. "\\n'")
         table.insert(lines,
-            "cmds[" .. i .. "]=" .. "'" .. escape_sh(e.cmd) .. "'")
+            "combos[" .. i .. "]='" .. escape_sh(e.combo) .. "'")
     end
 
-    -- seleção via rofi; índice via grep -n para mapear de volta ao cmd
+    -- Seleção via rofi; mapeia o item de volta ao combo.
+    -- Tenta disparar via hyprctl: encontra bind no `hyprctl binds` e
+    -- executa o dispatcher original — sem precisar duplicar a action.
     table.insert(lines, [[
 selected=$(printf "%s" "$rofi_input" | rofi -dmenu -i -p "Shortcuts" -width 160)
 [ -z "$selected" ] && exit 0
 idx=$(printf "%s" "$rofi_input" | grep -nxF "$selected" | head -1 | cut -d: -f1)
 [ -z "$idx" ] && exit 0
-cmd="${cmds[$idx]}"
-[ -n "$cmd" ] && eval "$cmd" &
+combo="${combos[$idx]}"
+[ -z "$combo" ] && exit 0
+
+# Normaliza "MOD3 + t" → "MOD3 t" pra grep no hyprctl binds
+key="${combo##*+}"; key="${key// /}"
+mods="${combo% +*}"
+
+# Reusa o dispatcher já registrado no Hyprland via "hyprctl dispatch"
+# (não duplica a action Lua — busca o dispatcher equivalente).
+match=$(hyprctl binds | awk -v k="$key" '
+    /^bind/ { reset=1; next }
+    reset && /key:/ && index($0, "key: " k) { found=1 }
+    reset && /dispatcher:/ && found { sub(/^[ \t]+dispatcher: /, ""); disp=$0 }
+    reset && /arg:/ && found { sub(/^[ \t]+arg: /, ""); print disp" "$0; exit }
+')
+[ -n "$match" ] && hyprctl dispatch $match &
 ]])
 
-    -- escreve e executa o script
     local tmpf = os.tmpname()
     local sf = io.open(tmpf, "w")
     if not sf then return end

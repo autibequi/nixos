@@ -11,7 +11,11 @@ package.path = _cfgdir .. "/?.lua;" .. package.path
 -- Utils e theme carregados primeiro (outros módulos dependem das funções)
 require("utils")
 require("theme")
-require("hyprshortcuts")
+
+-- Infra Lua-first: keymap (registry) e launcher (decoradores)
+-- Devem vir ANTES de application/systemtools que consomem ambos.
+require("keymap")
+require("launcher")
 
 -- Hardware
 require("monitors")
@@ -20,13 +24,27 @@ require("monitors")
 require("windowrules")
 require("generated-colors")
 
--- Keybinds
+-- Keybinds (preenchem o registry keymap)
 require("application")
 require("systemtools")
 
 -- Workspace
 require("workspace")
 require("special-workspaces")
+
+-- Picker (Alt-Tab Wayland) — depende do registry estar populado
+require("picker")
+
+-- Cheatsheet consome keymap._binds; deve vir DEPOIS de application/systemtools
+require("hyprshortcuts")
+
+-- Profiles (cycle modes: default/focus/meeting/battery)
+require("profiles")
+
+-- Reativos: hooks de evento + watcher de tema + REPL debug
+require("events")
+require("theme_watcher")
+require("repl")
 
 -- =============================================
 --  ENV VARS

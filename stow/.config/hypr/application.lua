@@ -1,61 +1,66 @@
 -- ============================================================
---  APPLICATION ALIASES + KEYBINDS — portado de application.conf
+--  APPLICATION ALIASES + KEYBINDS — Lua-first
+--  Usa keymap (registry) + launcher (decoradores) — sem repetição
 -- ============================================================
 
+local km = require("keymap")
+local L  = require("launcher")
+
 -- ── App aliases ───────────────────────────────────────────────
-local ghostty      = "uwsm app -- gpu-offload ghostty --gtk-single-instance=true"
-local terminal     = "uwsm app -- gpu-offload alacritty"
-local fileManager  = "uwsm app -- nautilus -w"
-local menu         = "uwsm app -- rofi -show drun"
-local lock         = "hyprlock"
-local obsidian_bin = "uwsm app -- obsidian"
-local chrome       = "uwsm app -- gpu-offload google-chrome-stable --ozone-platform=x11"
-local vivaldi      = "uwsm app -- vivaldi"
-local cursor       = "uwsm app -- gpu-offload cursor"
-local zed          = "uwsm app -- gpu-offload zeditor"
-local colorPicker  = "hyprpicker --autocopy --lowercase-hex"
-local quickShell   = "qs ipc call overview toggle"
+local ghostty      = L.build("ghostty --gtk-single-instance=true", { gpu = "offload" })
+local terminal     = L.build("alacritty",                          { gpu = "offload" })
+local fileManager  = L.build("nautilus -w")
+local menu         = L.build("rofi -show drun")
+local lock         = L.build("hyprlock",                           { raw = true })
+local obsidian_bin = L.build("obsidian")
+local chrome       = L.build("google-chrome-stable --ozone-platform=x11", { gpu = "offload" })
+local vivaldi      = L.build("vivaldi")
+local cursor       = L.build("cursor",                             { gpu = "offload" })
+local zed          = L.build("zeditor",                            { gpu = "offload" })
+local colorPicker  = L.build("hyprpicker --autocopy --lowercase-hex", { raw = true })
+local quickShell   = L.build("qs ipc call overview toggle",        { raw = true })
 
-local displayManager  = "uwsm app -- nwg-displays"
-local networkManager  = "nmtui"
-local audioManager    = terminal .. " -e wiremix"
-local emojiPicker     = "uwsm app -- rofimoji --skin-tone neutral --action copy"
+local displayManager = L.build("nwg-displays")
+local networkManager = "nmtui"
+local audioManager   = L.term("wiremix")
+local emojiPicker    = L.build("rofimoji --skin-tone neutral --action copy")
 
-local settings       = zed .. " ~/nixos"
-local workObsidian   = obsidian_bin .. " \"obsidian://open?vault=Work\""
-local personalObs    = obsidian_bin .. " \"obsidian://open?vault=.ovault\""
+-- ── PWAs / web apps ──────────────────────────────────────────
+local gemini_app   = L.chrome("https://gemini.google.com/")
+local calendar     = L.chrome("https://calendar.google.com")
+local chat         = L.chrome("https://chat.google.com")
+local youtube      = L.chrome("https://www.youtube.com")
+local youtubeMusic = L.chrome("https://music.youtube.com")
+local monkeyType   = L.chrome("https://monkeytype.com")
+local nixSearch    = L.build("google-chrome-stable --ozone-platform=x11 --new-window https://search.nixos.org/", { gpu = "offload" })
+local claude_app   = L.chrome("https://claude.ai/new")
+local jira         = L.build("google-chrome-stable --ozone-platform=x11 --new-window https://estrategia.atlassian.net/jira/software/c/projects/FUK2/boards/323?quickFilter=1182", { gpu = "offload" })
 
-local youtubeMusic   = chrome .. " --app=https://music.youtube.com"
-local monkeyType     = chrome .. " --app=https://monkeytype.com"
-local nixSearch      = chrome .. " --new-window https://search.nixos.org/"
-local gemini_app     = chrome .. " --app=https://gemini.google.com/"
-local calendar       = chrome .. " --app=https://calendar.google.com"
-local chat           = chrome .. " --app=https://chat.google.com"
-local youtube        = chrome .. " --app=https://www.youtube.com"
-local jira           = chrome .. " --new-window https://estrategia.atlassian.net/jira/software/c/projects/FUK2/boards/323?quickFilter=1182"
-local yaak           = "sh -c 'notify-send \"abrindo yaaaaak\" && gpu-offload ~/apps/yaak.AppImage'"
+local settings     = zed .. " ~/nixos"
+local workObsidian = obsidian_bin .. " \"obsidian://open?vault=Work\""
+local personalObs  = obsidian_bin .. " \"obsidian://open?vault=.ovault\""
 
-local claude_app = chrome .. " --app=https://claude.ai/new"
-local vennon     = terminal .. " -e env CLAUDECODE=1 zsh -c 'vennon claude'"
-local yaaFast    = terminal .. " -e env CLAUDECODE=1 zsh -c 'yaa --model=haiku'"
-local yaa        = terminal .. " -e env CLAUDECODE=1 zsh -c 'yaa --model=\"sonnet[1]\"'"
+local yaak     = "sh -c 'notify-send \"abrindo yaaaaak\" && gpu-offload ~/apps/yaak.AppImage'"
+local vennon   = L.term("env CLAUDECODE=1 zsh -c 'vennon claude'")
+local yaaFast  = L.term("env CLAUDECODE=1 zsh -c 'yaa --model=haiku'")
+local yaa      = L.term("env CLAUDECODE=1 zsh -c 'yaa --model=\"sonnet[1]\"'")
 
 -- ── App Keybinds ──────────────────────────────────────────────
 
 -- Quickshell Overview
-hl.bind("SUPER + Space", hl.dsp.exec_cmd(quickShell))
+km.app("SUPER + Space", quickShell, { desc = "Quickshell overview", group = "System", icon = "" })
 
 -- Quick Apps
-hl.bind("MOD3 + Space",       hl.dsp.exec_cmd(menu))
-hl.bind("MOD3 + t",           hl.dsp.exec_cmd(terminal))
-hl.bind("MOD3 + z",           hl.dsp.exec_cmd(zed))
-hl.bind("MOD3 + period",      hl.dsp.exec_cmd(emojiPicker))
-hl.bind("MOD3 + a",           hl.dsp.exec_cmd(audioManager))
+km.app("MOD3 + Space",  menu,         { desc = "App launcher (rofi)", icon = "" })
+km.app("MOD3 + t",      terminal,     { desc = "Terminal",            icon = "" })
+km.app("MOD3 + z",      zed,          { desc = "Zed editor",          icon = "" })
+km.app("MOD3 + period", emojiPicker,  { desc = "Emoji picker",        icon = "" })
+km.app("MOD3 + a",      audioManager, { desc = "Audio (wiremix)",     icon = "" })
 
 -- Browsers + AI
-hl.bind("MOD3 + b",           hl.dsp.exec_cmd(chrome))
-hl.bind("MOD3 + g",           hl.dsp.exec_cmd(gemini_app))
-hl.bind("MOD3 + ALT + c",       hl.dsp.exec_cmd(claude_app))
-hl.bind("MOD3 + c",           hl.dsp.exec_cmd(yaaFast))
-hl.bind("MOD3 + SHIFT + c",     hl.dsp.exec_cmd(yaa))
-hl.bind("MOD3 + p",           hl.dsp.exec_cmd(vennon))
+km.app("MOD3 + b",         chrome,     { desc = "Chrome",          icon = "" })
+km.app("MOD3 + g",         gemini_app, { desc = "Gemini app",      group = "AI", icon = "✦" })
+km.app("MOD3 + ALT + c",   claude_app, { desc = "Claude.ai (web)", group = "AI", icon = "🅰" })
+km.app("MOD3 + c",         yaaFast,    { desc = "yaa Haiku",       group = "AI", icon = "⚡" })
+km.app("MOD3 + SHIFT + c", yaa,        { desc = "yaa Sonnet[1M]",  group = "AI", icon = "🧠" })
+km.app("MOD3 + p",         vennon,     { desc = "Vennon REPL",     group = "AI", icon = "" })

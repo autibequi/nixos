@@ -7,6 +7,27 @@
 -- Perdido em reload — aceitável (mesmo comportamento de arquivos em /tmp em novos boots)
 local _last_special_ws = {}  -- { monitor_name = ws_name }
 
+-- Stack de specials por monitor (back/forward browser-like)
+-- { monitor_name = { stack = {"f1", "f5", "bleh", ...}, idx = N } }
+local _special_history = {}
+local SPECIAL_HISTORY_MAX = 16
+
+local function _hist(mon)
+    _special_history[mon] = _special_history[mon] or { stack = {}, idx = 0 }
+    return _special_history[mon]
+end
+
+local function _push_history(mon, name)
+    local h = _hist(mon)
+    -- se estamos no meio do stack (após back), trunca o "forward" antes de empurrar
+    while #h.stack > h.idx do table.remove(h.stack) end
+    -- dedupe: não empurra se já é o topo
+    if h.stack[#h.stack] == name then return end
+    table.insert(h.stack, name)
+    if #h.stack > SPECIAL_HISTORY_MAX then table.remove(h.stack, 1) end
+    h.idx = #h.stack
+end
+
 -- ── Helpers ──────────────────────────────────────────────────
 
 local function active_monitor()
@@ -39,7 +60,9 @@ end
 function workspace_switch(ws)
     if ws:sub(1, 8) == "special:" then
         local name = ws:sub(9)
-        _last_special_ws[active_monitor_name()] = name
+        local mon = active_monitor_name()
+        _last_special_ws[mon] = name
+        _push_history(mon, name)
         local was_active = active_special_name() == name
         hl.dispatch(hl.dsp.workspace.toggle_special(name))
         if was_active then hl.exec_cmd("pkill -x rofi") end
@@ -47,6 +70,30 @@ function workspace_switch(ws)
         hide_active_special_workspaces()
         hl.dispatch(hl.dsp.focus({ workspace = ws }))
     end
+end
+
+function special_back()
+    local mon = active_monitor_name()
+    local h = _hist(mon)
+    if h.idx <= 1 then return end
+    h.idx = h.idx - 1
+    local target = h.stack[h.idx]
+    if not target then return end
+    hide_active_special_workspaces()
+    hl.dispatch(hl.dsp.workspace.toggle_special(target))
+    _last_special_ws[mon] = target
+end
+
+function special_forward()
+    local mon = active_monitor_name()
+    local h = _hist(mon)
+    if h.idx >= #h.stack then return end
+    h.idx = h.idx + 1
+    local target = h.stack[h.idx]
+    if not target then return end
+    hide_active_special_workspaces()
+    hl.dispatch(hl.dsp.workspace.toggle_special(target))
+    _last_special_ws[mon] = target
 end
 
 function toggle_last_special_workspace()

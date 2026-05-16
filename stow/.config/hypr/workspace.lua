@@ -81,3 +81,7 @@ hl.bind("SUPER + ALT + bracketright", function() move_special_workspace_to_monit
 -- Normal workspace → próximo monitor
 hl.bind("SUPER + ALT + Down", function() move_normal_workspace_to_monitor() end)
 hl.bind("SUPER + ALT + Left", function() move_normal_workspace_to_monitor() end)
+
+-- ── Special workspace history (browser-like back/forward) ─────
+hl.bind("SUPER + bracketleft",  function() special_back() end)
+hl.bind("SUPER + bracketright", function() special_forward() end)
