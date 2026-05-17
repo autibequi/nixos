@@ -29,6 +29,11 @@ end
 
 on("workspace.active", function(ev)
     local name = (ev and (ev.name or ev.workspace)) or ""
+    -- Workspace regular ativo: esconde qualquer special visível (cobre clique no Waybar)
+    if name ~= "" and name:sub(1, 8) ~= "special:" then
+        hide_active_special_workspaces()
+    end
+    -- Políticas por workspace
     if name == "special:f1" then
         hl.exec_cmd("swaync-client -d")  -- DND on
         hl.exec_cmd("notify-send -t 800 'Modo Work' 'F1 — notif pessoais silenciadas' -u low")
