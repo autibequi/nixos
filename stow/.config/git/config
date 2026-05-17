@@ -68,6 +68,22 @@
 	    git stash push --keep-index -u \
 	}; f"
 
+	# Commita tudo com mensagem gerada pelos nomes dos arquivos e faz push.
+	so-vai = "!f() { \
+		git add -A; \
+		count=$(git diff --cached --name-only | wc -l | tr -d ' '); \
+		if [ \"$count\" -eq 0 ]; then echo 'so-vai: nada pra commitar.' && return 0; fi; \
+		if [ \"$count\" -le 3 ]; then \
+			files=$(git diff --cached --name-only | xargs -I{} basename {} | tr '\\n' ' ' | sed 's/ $//'); \
+			msg=\"update: $files\"; \
+		else \
+			first=$(git diff --cached --name-only | head -3 | xargs -I{} basename {} | tr '\\n' ', ' | sed 's/, $//'); \
+			msg=\"update: $first (+$((count - 3)) mais)\"; \
+		fi; \
+		git commit -m \"$msg\"; \
+		git push; \
+	}; f"
+
 [color]
 	ui = auto
 

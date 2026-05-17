@@ -1,9 +1,9 @@
 {
-	"layer": "bottom",
+	"layer": "top",
 	"position": "bottom",
 	"height": 24,
 	"spacing": 0,
-	"margin": "5px 5px",
+	"margin": "0 5px 5px",
 	"modules-left": [
 		"idle_inhibitor",
 		// "custom/vennon",
@@ -243,8 +243,8 @@
 	"idle_inhibitor": {
 		"format": "{icon}",
 		"format-icons": {
-			"activated": "󰅶 ",
-			"deactivated": "󰅷 "
+			"activated": "󰅶",
+			"deactivated": "󰅷"
 		},
 		"tooltip": true
 	},
