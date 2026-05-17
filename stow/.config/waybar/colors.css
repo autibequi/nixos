@@ -24,9 +24,9 @@
 @define-color ws-active-text           @theme-bg;
 @define-color ws-urgent-bg             @theme-danger;
 @define-color ws-urgent-text           @theme-fg;
-@define-color ws-special-text          @theme-accent-soft;
-@define-color ws-special-active-bg     @theme-accent-soft;
-@define-color ws-special-active-text   @theme-bg;
+@define-color ws-special-text          @theme-accent;
+@define-color ws-special-active-bg     #7de8f0;
+@define-color ws-special-active-text   #0a0e14;
 @define-color ws-special-hover-text    @theme-accent;
 
 /* ── Legacy aliases ───────────────────────────────────────────────── */
