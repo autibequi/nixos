@@ -2,7 +2,7 @@
 # Otimizado para múltiplas instâncias abertas simultaneamente
 
 [general]
-import = ["~/.config/alacritty/dark-theme.toml"]
+import = ["~/.config/alacritty/light-theme.toml"]
 
 [window]
 padding = { x = 4, y = 4 }

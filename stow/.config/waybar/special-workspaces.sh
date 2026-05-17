@@ -5,7 +5,7 @@
 # Specials no Hyprland têm `id < 0` e `name` começando com "special:".
 # Mostramos só os que existem (têm janelas), com cor por nome + ícones de janelas.
 
-set -euo pipefail
+set -uo pipefail
 
 WORKSPACES=$(hyprctl -j workspaces)
 CLIENTS=$(hyprctl -j clients)
@@ -30,7 +30,7 @@ classify() {
         dbeaver*)              echo "🦫" ;;
         code|Code)             echo "󰨞" ;;
         cursor|Cursor)         echo "󰨞" ;;
-        obsidian|Obsidian)     echo "" ;;
+        *[Oo]bsidian*)         echo "" ;;
         Alacritty|alacritty)   echo "󰆍" ;;
         ghostty|*Ghostty*)     echo "󰆍" ;;
         org.gnome.Nautilus|Nautilus) echo "" ;;
@@ -74,13 +74,9 @@ while IFS=$'\t' read -r ws_name; do
         win_count=$((win_count + 1))
     done <<< "$icons"
 
-    # Highlight se ativo
-    is_active=false
-    [ "$ws_name" = "$ACTIVE_SPECIAL" ] && is_active=true
-
     # Pango: <span fg='COR' weight='bold'>SHORT:</span> icons
     weight="normal"
-    $is_active && weight="bold"
+    if [ "$ws_name" = "$ACTIVE_SPECIAL" ]; then weight="bold"; fi
     label="<span foreground='${color}' weight='${weight}'>${short}:</span><span foreground='#e6e6e6'>${icons_rendered}</span>"
 
     parts+=("$label")

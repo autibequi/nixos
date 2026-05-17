@@ -67,10 +67,24 @@ window#waybar {
     border: none;
 }
 
-/* ── Special workspaces — pill com borda accent dim ───────── */
+/* Special workspaces — pill ligeiramente elevada em relação às regulares */
+#custom-special-workspaces {
+    background-color: @theme-elev;
+    color: @theme-fg;
+    border-radius: 10px;
+    padding: 0 8px;
+    min-height: 20px;
+    margin: 0;
+    border: none;
+}
+
+#custom-special-workspaces:hover {
+    background-color: @theme-border;
+}
+
+/* ── Special workspaces — pill ligeiramente mais clara ──────── */
 #workspaces.special {
-    background-color: @theme-surface;
-    border-color: rgba(189, 147, 249, 0.25);  /* dracula-purple, 25% */
+    background-color: @theme-elev;
     padding: 0;
 }
 
@@ -86,9 +100,12 @@ window#waybar {
     opacity: 0;
 }
 
-/* Garante padding interno só nos specials visíveis */
+/* Specials visíveis — sub-pill ligeiramente mais escura que o container */
 #workspaces.special button.special {
     margin: 1px 2px;
+    padding: 1px 5px;
+    background-color: @theme-surface;
+    border-radius: 5px;
 }
 
 #workspaces.special button.active {
