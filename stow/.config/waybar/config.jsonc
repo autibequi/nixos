@@ -89,7 +89,8 @@
 		"max-length": 50,
 		"rewrite": {
 			"Claude\\[(.+?)\\]:.*": "󱙺 $1",
-			"(.*) — Claude.*": "󱙺 $1"
+			"(.*) — Claude.*": "󱙺 $1",
+			"[✳⠐] (.+)": "󱙺 $1"
 		}
 	},
 	"hyprland/workspaces": {
@@ -141,7 +142,15 @@
 			"title<(.* - )?(.[0-9]+. )?YouTube Music.*>": "",
 			"title<(.*)(books - Obsidian)(.*)>": "",
 			"class<(.*)(chat)(.*)>": "󰍡",
-			"class<(Alacritty|ghostty)> title<(.*)(✳ Claude)(.*)>": "󱙺",
+			"class<(Alacritty|ghostty)> title<✳ >": "󱙺",
+			"class<(Alacritty|ghostty)> title<\\xe2[\\xa0-\\xa3][\\x80-\\xbf] >": "󱙺",
+			"class<(Alacritty|ghostty)> title<^(n?vim)>": "󰕷",
+			"class<(Alacritty|ghostty)> title<^(node|npm|pnpm|bun)>": "󰎙",
+			"class<(Alacritty|ghostty)> title<^(go|make)>": "󰟓",
+			"class<(Alacritty|ghostty)> title<^(git|tig|lazygit)>": "󰊢",
+			"class<(Alacritty|ghostty)> title<^(docker|podman)>": "󰡨",
+			"class<(Alacritty|ghostty)> title<^(ssh|mosh)>": "󰌘",
+			"class<(Alacritty|ghostty)> title<^(python|python3)>": "󰌠",
 			"class<(.*)(chrome-claude)(.*)>": "✻",
 			"title<(.*)(Gemini)(.*)>": "󰼙",
 			"title<(.*)(JIRA)(.*)>": "󰌃",
@@ -208,7 +217,15 @@
 			"title<(.* - )?(.[0-9]+. )?YouTube Music.*>": "",
 			"title<.* - Obsidian>": "",
 			"class<(.*)(chat)(.*)>": "󰍡",
-			"class<(Alacritty|ghostty)> title<(.*)(✳ Claude)(.*)>": "󱙺",
+			"class<(Alacritty|ghostty)> title<✳ >": "󱙺",
+			"class<(Alacritty|ghostty)> title<\\xe2[\\xa0-\\xa3][\\x80-\\xbf] >": "󱙺",
+			"class<(Alacritty|ghostty)> title<^(n?vim)>": "󰕷",
+			"class<(Alacritty|ghostty)> title<^(node|npm|pnpm|bun)>": "󰎙",
+			"class<(Alacritty|ghostty)> title<^(go|make)>": "󰟓",
+			"class<(Alacritty|ghostty)> title<^(git|tig|lazygit)>": "󰊢",
+			"class<(Alacritty|ghostty)> title<^(docker|podman)>": "󰡨",
+			"class<(Alacritty|ghostty)> title<^(ssh|mosh)>": "󰌘",
+			"class<(Alacritty|ghostty)> title<^(python|python3)>": "󰌠",
 			"class<(.*)(chrome-claude)(.*)>": "✻",
 			"title<(.*)(Gemini)(.*)>": "󰼙",
 			"title<(.*)(JIRA)(.*)>": "󰌃",
