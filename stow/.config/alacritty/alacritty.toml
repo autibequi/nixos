@@ -2,7 +2,7 @@
 # Otimizado para múltiplas instâncias abertas simultaneamente
 
 [general]
-import = ["~/.config/alacritty/light-theme.toml"]
+import = ["~/.config/alacritty/dark-theme.toml"]
 
 [window]
 padding = { x = 4, y = 4 }
@@ -40,6 +40,15 @@ unfocused_hollow = true
 
 [terminal]
 osc52 = "OnlyCopy"
+
+# Bell: flash vermelho + som. O command externo (bell-cmd.sh) usa paths
+# absolutos do NixOS (/run/current-system/sw/bin/play) pra evitar colisão
+# com binários homônimos no PATH do user (ex: ~/.local/bin/play do dev).
+[bell]
+animation = "EaseOutExpo"
+color = "#ff2040"
+duration = 250
+command = { program = "sh", args = ["-c", "$HOME/.config/alacritty/bell-cmd.sh"] }
 
 # Claude Shift Return?
 [[keyboard.bindings]]
