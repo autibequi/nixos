@@ -209,18 +209,20 @@ window#waybar {
     font-weight: 700;
 }
 
-#workspaces button.urgent {
-    background-color: @ws-urgent-bg;
-    color: @ws-urgent-text;
-    border: none;
+#workspaces button.urgent,
+#workspaces.special button.urgent {
+    background-color: transparent;
+    color: @ws-urgent-bg;
+    border: 1px solid @ws-urgent-bg;
     font-weight: 700;
     animation: urgent-pulse 1.2s ease-in-out infinite alternate;
 }
 
 @keyframes urgent-pulse {
-    from { box-shadow: 0 0 6px rgba(255, 32, 64, 0.55); }
-    to   { box-shadow: 0 0 16px rgba(255, 32, 64, 0.95); }
+    from { box-shadow: 0 0 6px rgba(255, 32, 64, 0.5); }
+    to   { box-shadow: 0 0 14px rgba(255, 32, 64, 0.9); }
 }
+
 
 #workspaces button.special {
     color: @ws-special-text;
