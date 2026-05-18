@@ -22,8 +22,8 @@
 @define-color ws-text                  @theme-fg-muted;
 @define-color ws-active-bg             @theme-accent;
 @define-color ws-active-text           @theme-bg;
-@define-color ws-urgent-bg             @theme-danger;
-@define-color ws-urgent-text           @theme-fg;
+@define-color ws-urgent-bg             #ff2040;
+@define-color ws-urgent-text           @theme-bg;
 @define-color ws-special-text          @theme-accent;
 @define-color ws-special-active-bg     #7de8f0;
 @define-color ws-special-active-text   #0a0e14;
