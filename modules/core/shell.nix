@@ -75,6 +75,9 @@ in
     git
     busybox
 
+    # Sehll
+    nushell
+
     # Utils
     # ----------------------
     lnav
