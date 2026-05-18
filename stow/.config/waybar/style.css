@@ -303,8 +303,8 @@ window#waybar {
 
 #idle_inhibitor.activated {
     color: @idle-inhibitor-active-text;
-    background-color: @theme-elev;
-    border-color: @theme-accent;
+    background-color: @theme-info;
+    border-color: @theme-info;
 }
 
 /*========================================================*

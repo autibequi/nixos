@@ -54,4 +54,4 @@
 @define-color audio-muted-text            @theme-fg-muted;
 @define-color backlight-text              @theme-fg;
 @define-color idle-inhibitor-text         @theme-fg-muted;
-@define-color idle-inhibitor-active-text  @theme-accent;
+@define-color idle-inhibitor-active-text  @theme-bg;

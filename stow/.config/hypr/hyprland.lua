@@ -128,7 +128,7 @@ hl.config({
     misc = {
         vrr                          = 0,    -- EGL fence sync quebra com VRR no AMD 780M
         initial_workspace_tracking   = 1,    -- 1=on, 0=off
-        focus_on_activate            = true,
+        focus_on_activate            = false,  -- bell → só urgent, sem puxar foco
         animate_manual_resizes       = false,
         animate_mouse_windowdragging = false,
     },
