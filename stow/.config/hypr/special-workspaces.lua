@@ -28,7 +28,7 @@ end
 
 -- ── Nomeados ─────────────────────────────────────────────────
 define_special("gemini", "g", {
-    on_created_empty = "uwsm app -- gpu-offload google-chrome-stable --ozone-platform=x11 --app=https://gemini.google.com/",
+    on_created_empty = "uwsm app -- gpu-offload google-chrome-stable --app=https://gemini.google.com/",
     tile             = true,
 })
 define_special("bleh", "grave", {
@@ -41,7 +41,7 @@ define_special("f1", "F1", { on_created_empty = "uwsm app -- obsidian \"obsidian
 define_special("f2", "F2")
 define_special("f3", "F3")
 define_special("f4", "F4")
-define_special("f5", "F5", { on_created_empty = "uwsm app -- gpu-offload google-chrome-stable --ozone-platform=x11 --app=https://chat.google.com" })
+define_special("f5", "F5", { on_created_empty = "uwsm app -- gpu-offload google-chrome-stable --app=https://chat.google.com" })
 define_special("f6", "F6")
 define_special("f7", "F7")
 define_special("f8", "F8", { on_created_empty = "uwsm app -- gpu-offload zeditor ~/nixos" })

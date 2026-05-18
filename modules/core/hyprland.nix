@@ -13,6 +13,34 @@ let
     default=hyprland;gtk
     org.freedesktop.impl.portal.Settings=gtk
   '';
+
+  # ── Sessão "NVIDIA full offload" ───────────────────────────────────
+  # Wrapper que exporta env vars antes de subir o Hyprland. Resultado:
+  # o COMPOSITOR e TODOS os clients renderizam na dGPU NVIDIA (RTX 4060).
+  # iGPU AMD fica praticamente ociosa — útil quando plugado na tomada
+  # ou em sessão de jogo/dev pesado. Pra modo híbrido (compositor na
+  # iGPU + offload por app via `gpu-offload`) use a sessão default.
+  #
+  # WLR_DRM_DEVICES força o wlroots a abrir SÓ o DRM da NVIDIA (bus 1:0:0
+  # conforme modules/hardware/nvidia.nix). Sem isso, o compositor pode
+  # escolher a iGPU como primary GPU.
+  startHyprlandNvidia = pkgs.writeShellScriptBin "start-hyprland-nvidia" ''
+    # PRIME render offload globalmente
+    export __NV_PRIME_RENDER_OFFLOAD=1
+    export __GLX_VENDOR_LIBRARY_NAME=nvidia
+    export __VK_LAYER_NV_optimus=NVIDIA_only
+
+    # wlroots / Wayland backends apontando pra NVIDIA
+    export GBM_BACKEND=nvidia-drm
+    export LIBVA_DRIVER_NAME=nvidia
+    export WLR_NO_HARDWARE_CURSORS=1
+
+    # Força o wlroots a abrir APENAS o DRM da dGPU (PCI 1:0:0 em nvidia.nix).
+    # Sem isso, o compositor pode escolher a iGPU como GPU primária.
+    export WLR_DRM_DEVICES=/dev/dri/by-path/pci-0000:01:00.0-card
+
+    exec /run/current-system/sw/bin/start-hyprland "$@"
+  '';
 in
 {
   programs.hyprland = {
@@ -25,10 +53,22 @@ in
   programs.uwsm = {
     enable = true;
     package = pkgs.uwsm;
-    waylandCompositors.start-hyprland = {
-      prettyName = "Start-Hyprland ";
-      comment = "Hyprland compositor managed by UWSM";
-      binPath = "/run/current-system/sw/bin/start-hyprland";
+    waylandCompositors = {
+      # Sessão híbrida (default): compositor roda na iGPU AMD, apps usam
+      # `gpu-offload <bin>` (gpu-toggle.nix) pra subir só o que precisa
+      # na dGPU NVIDIA. Modo bateria-friendly.
+      start-hyprland = {
+        prettyName = "Hyprland (Hybrid)";
+        comment = "Hyprland on iGPU AMD; apps offload to dGPU via gpu-offload";
+        binPath = "/run/current-system/sw/bin/start-hyprland";
+      };
+      # Sessão NVIDIA full: tudo na dGPU. Selecionar no greeter (tuigreet)
+      # quando estiver plugado na tomada / dock.
+      start-hyprland-nvidia = {
+        prettyName = "Hyprland (NVIDIA full offload)";
+        comment = "Hyprland and all clients render on dGPU NVIDIA";
+        binPath = "${startHyprlandNvidia}/bin/start-hyprland-nvidia";
+      };
     };
   };
 
@@ -111,6 +151,7 @@ in
   programs.gdk-pixbuf.modulePackages = [ pkgs.librsvg ];
 
   environment.systemPackages = with pkgs; [
+    startHyprlandNvidia
     quickshell
     qt6.qtwayland
     zenity

@@ -33,7 +33,7 @@
     # ── Hardware ───────────────────────────────────────
     ./modules/hardware/asus.nix
     ./modules/hardware/nvidia.nix
-    ./modules/hardware/gpu-apps.nix # força apps GUI na dGPU (lista interna)
+    # ./modules/hardware/gpu-apps.nix # força apps GUI na dGPU via .desktop overrides — desativado: usar sessão dedicada `Hyprland (NVIDIA full offload)` no greeter
     ./modules/hardware/gpu-toggle.nix # wrapper runtime gpu-offload + comando gpu-profile (home/mobile/auto)
     ./modules/hardware/ddc.nix # ddcutil + i2c-dev para brilho via DDC/CI
 

@@ -48,7 +48,7 @@ function M.chrome(url, opts)
     opts = opts or {}
     opts.gpu = opts.gpu or "offload"
     opts.app_url = url
-    return M.build("google-chrome-stable --ozone-platform=x11", opts)
+    return M.build("google-chrome-stable", opts)
 end
 
 -- term(inner, opts) → alacritty -e <inner>

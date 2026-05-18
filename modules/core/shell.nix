@@ -1,4 +1,4 @@
-{ pkgs, unstable, ... }:
+{ lib, pkgs, unstable, ... }:
 
 let
   # 1.4.6+ (unstable) — fix crash ao trocar preset. cuda+rocm: NVML p/ NVIDIA + rpath p/ rocm-smi (AMD);
@@ -61,6 +61,10 @@ in
   # dash como /bin/sh (4x mais rápido que bash para scripts)
   environment.binsh = "${pkgs.dash}/bin/dash";
 
+  environment.shells = with pkgs; [ bash zsh dash unstable.brush ];
+
+  users.users.pedrinho.shell = lib.mkForce unstable.brush;
+
   environment.systemPackages = with pkgs; [
     dash
     bash
@@ -75,8 +79,9 @@ in
     git
     busybox
 
-    # Sehll
+    # Shell
     nushell
+    unstable.brush
 
     # Utils
     # ----------------------
