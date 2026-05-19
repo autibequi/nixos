@@ -14,7 +14,7 @@
     # crap
     sqlite
     stremio
-    digikam
+    unstable.digikam
 
     cbonsai
     # ── Sistema ────────────────────────────────────────
