@@ -63,7 +63,7 @@ in
 
   environment.shells = with pkgs; [ bash zsh dash unstable.brush ];
 
-  users.users.pedrinho.shell = lib.mkForce unstable.brush;
+  users.users.pedrinho.shell = lib.mkForce unstable.zsh;
 
   environment.systemPackages = with pkgs; [
     dash
@@ -82,6 +82,7 @@ in
     # Shell
     nushell
     unstable.brush
+    blesh # syntax highlight + autosuggestions pra bash/brush (ble.sh)
 
     # Utils
     # ----------------------
