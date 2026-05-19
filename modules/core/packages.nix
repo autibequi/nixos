@@ -14,6 +14,7 @@
     # crap
     sqlite
     stremio
+    digikam
 
     cbonsai
     # ── Sistema ────────────────────────────────────────
@@ -64,8 +65,8 @@
     # ── Midia ──────────────────────────────────────────
     (pkgs.mpv.override {
       scripts = with pkgs.mpvScripts; [
-        uosc       # UI moderna com seekbar, playlist e file browser
-        thumbfast  # thumbnails ao passar o mouse na seekbar
+        uosc # UI moderna com seekbar, playlist e file browser
+        thumbfast # thumbnails ao passar o mouse na seekbar
       ];
     })
     foliate # ePub reader
