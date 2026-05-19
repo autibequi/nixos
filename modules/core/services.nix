@@ -96,7 +96,7 @@
   # enableUserServices: cobre a sessão do usuário onde nomad/podman rodam.
   systemd.oomd = {
     enable = true;
-    enableUserServices = true;
+    enableUserSlices = true;
   };
 
   # Eleva peso de CPU e IO da sessão do usuário (user.slice) vs serviços de sistema.
