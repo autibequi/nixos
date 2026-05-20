@@ -82,5 +82,8 @@ workbench/*
 .local/bin
 */self/shadow/memory/
 
+# hypr: módulos locais (não versionados — gerados/experimentais)
+stow/.local/bin
+
 # Python
 *.pyc
