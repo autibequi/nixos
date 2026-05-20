@@ -66,7 +66,7 @@ define_special("bleh", "grave", {
     border           = "rgba(fff700dd)",
 })
 
--- ── F-keys ───────────────────────────────────────────────────
+-- ── F-keys configurados (com app default / policy) ──────────
 define_special("f1", "F1", {
     label            = "f1 (Work vault)",
     on_created_empty = L.build([[obsidian "obsidian://open?vault=Work"]]),
@@ -77,16 +77,11 @@ define_special("f1", "F1", {
             { timeout = 800, urgency = "low" })
     end,
 })
-define_special("f2", "F2")
-define_special("f3", "F3")
-define_special("f4", "F4")
 define_special("f5", "F5", {
     label              = "f5 (Chat)",
     on_created_empty   = L.chrome("https://chat.google.com"),
     auto_route_classes = { "Slack", "zoom", "zoom_linux_float_video_window" },
 })
-define_special("f6", "F6")
-define_special("f7", "F7")
 define_special("f8", "F8", { label = "f8 (Zed nixos)",
     on_created_empty = L.build("zeditor ~/nixos", { gpu = "offload" }) })
 define_special("f9", "F9", {
@@ -100,3 +95,8 @@ define_special("f9", "F9", {
             { timeout = 800, urgency = "low" })
     end,
 })
+
+-- ── F-keys scratchpad (sem app default — abre vazio) ─────────
+for _, n in ipairs({ "2", "3", "4", "6", "7" }) do
+    define_special("f" .. n, "F" .. n)
+end

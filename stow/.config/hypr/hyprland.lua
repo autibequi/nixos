@@ -1,6 +1,7 @@
 -- ==========================================================
 --  HYPRLAND CONFIG — 0.55 LUA
 --  Migrado de hyprlang em 2026-05-16
+--  Refactor incremental em 2026-05-20 (core/keymap/launcher unificados)
 --  Wiki: https://wiki.hypr.land/Configuring/Start/
 -- ==========================================================
 
@@ -8,70 +9,9 @@
 local _cfgdir = os.getenv("HOME") .. "/.config/hypr"
 package.path = _cfgdir .. "/?.lua;" .. package.path
 
--- Core (helpers compartilhados) carregado antes de tudo
-require("core")
-
--- Infra Lua-first: keymap (registry) e launcher (decoradores)
--- Devem vir ANTES de application/systemtools que consomem ambos.
-require("keymap")
-require("launcher")
-
--- Helpers baixo nível: clients (parse hyprctl), services (waybar/qs/reload),
--- screenshots/OCR. Carregados antes de utils.lua que pode chamar.
-require("clients")
-require("services")
-require("screenshots")
-
--- Utils (state special workspace + workspace_switch) e theme
-require("utils")
-require("theme")
-
--- Hardware
-require("monitors")
-
--- UI / regras
-require("windowrules")
-require("generated-colors")
-
--- Keybinds (preenchem o registry keymap)
-require("application")
-require("systemtools")
-
--- Workspace
-require("workspace")
-require("special-workspaces")
-
--- Picker (Alt-Tab Wayland) — depende do registry estar populado
-require("picker")
-
--- Cheatsheet consome keymap._binds; deve vir DEPOIS de application/systemtools
-require("hyprshortcuts")
-
--- Profiles (cycle modes: default/focus/meeting/battery)
-require("profiles")
-
--- Features novas
-require("cycler")             -- MOD3+I cicla por class
-require("hud")                -- SUPER+; peek de estado
-require("pomodoro")           -- SUPER+SHIFT+T (depende de profiles)
-require("submaps")            -- smart_save/close/reload
-require("followme")           -- MOD3+F sync workspaces (depende de events API)
-require("help")               -- SUPER+, manual
-
--- Reativos: hooks de evento + watcher de tema + REPL debug
-require("events")
-require("screenshare_guard")  -- depende de hl.on
-require("specials-feed")      -- event-driven refresh do waybar custom/special-workspaces
-
--- ⚠️ DESABILITADOS — usam hl.timer periódico + io.popen, que bloqueia
---    o main thread do compositor (5s lag em todos os keybinds).
---    Re-habilitar só depois de migrar pra async ou descobrir API non-blocking.
--- require("swallow")         -- io.popen("ps -p") em window.open trava ao abrir janelas
--- require("theme_watcher")   -- hl.timer 1500ms + io.popen("stat ...") trava periodicamente
--- require("repl")            -- hl.timer 250ms + io.popen, pior dos três
-
 -- =============================================
---  ENV VARS
+--  1. ENV VARS (devem vir antes dos requires
+--     pra que processos spawned em hyprland.start herdem)
 -- =============================================
 
 -- Electron: Wayland nativo evita popup-behind-tiled via XWayland
@@ -84,12 +24,64 @@ hl.env("XCURSOR_SIZE",     "48")
 hl.env("XCURSOR_THEME",    "BreezeX-RosePine-Linux")
 
 -- =============================================
---  AUTOSTART (em autostart.lua — usa hl.on("hyprland.start"))
+--  2. MÓDULOS — ordem importa (deps lexicais)
+-- =============================================
+
+-- Infra: helpers (core), registry (keymap), spawn wrapper (launcher)
+require("core")
+require("keymap")
+require("launcher")
+
+-- Baixo nível: parse hyprctl, services (waybar/qs/reload), screenshots
+require("clients")
+require("services")
+require("screenshots")
+
+-- State + theme (utils usa core.other_monitor; theme usa core.state_file)
+require("utils")
+require("theme")
+
+-- Hardware + UI rules
+require("monitors")
+require("windowrules")
+require("generated-colors")
+
+-- Keybinds e workspaces (populam o registry keymap)
+require("application")
+require("systemtools")
+require("workspace")
+require("special-workspaces")
+
+-- Cheatsheet/help/picker — consomem o registry, vêm depois
+require("picker")
+require("hyprshortcuts")
+require("help")
+
+-- Profiles + features de produtividade
+require("profiles")           -- default/focus/meeting/battery cycle (SUPER+SHIFT+P)
+require("cycler")             -- MOD3+I cicla por class
+require("hud")                -- SUPER+; peek de estado
+require("pomodoro")           -- SUPER+SHIFT+T (depende de profiles)
+require("submaps")            -- smart_save/close/reload
+require("followme")           -- MOD3+F sync workspaces entre monitores
+
+-- Hooks reativos (consomem registries populados pelos requires acima)
+require("events")
+require("screenshare_guard")
+require("specials-feed")      -- SIGRTMIN+11 → waybar refresh
+
+-- Watchers / REPL (re-habilitados 2026-05-20: io.popen → io.open + /proc)
+require("swallow")            -- ppid via /proc/<pid>/status
+require("theme_watcher")      -- marker read via io.open
+require("repl")               -- timer 500ms, eval file-based
+
+-- =============================================
+--  3. AUTOSTART (hl.on("hyprland.start"))
 -- =============================================
 require("autostart")
 
 -- =============================================
---  CONFIGURAÇÃO GERAL
+--  4. CONFIGURAÇÃO GERAL
 -- =============================================
 
 hl.config({
@@ -133,7 +125,6 @@ hl.config({
         shadow   = { enabled = false },
     },
 
-    -- ── INPUT ─────────────────────────────────────────────────
     input = {
         kb_layout   = "us",
         kb_variant  = "altgr-intl",
@@ -151,21 +142,20 @@ hl.config({
         },
     },
 
-    -- ── ANIMATIONS ────────────────────────────────────────────
     animations = {
         enabled = true,
     },
 })
 
--- ── Curves ────────────────────────────────────────────────────
+-- =============================================
+--  5. CURVES + ANIMATIONS
+-- =============================================
 
 -- instant: aggressive ease-out, feels like zero delay
-hl.curve("instant", { type = "bezier", points = { { 0.16, 1.0 }, { 0.3, 1.0 } } })
+hl.curve("instant",  { type = "bezier", points = { { 0.16, 1.0 }, { 0.3, 1.0 } } })
 
 -- overshot: slight bounce para special workspaces
 hl.curve("overshot", { type = "bezier", points = { { 0.05, 0.9 }, { 0.1, 1.05 } } })
-
--- ── Animations ────────────────────────────────────────────────
 
 hl.animation({ leaf = "windows",          enabled = true,  speed = 1, bezier = "instant" })
 hl.animation({ leaf = "windowsOut",       enabled = true,  speed = 1, bezier = "instant", style = "popin 90%" })

@@ -18,10 +18,9 @@ km.app("SUPER + p", "hyprpicker --autocopy --lowercase-hex",
     { desc = "Color picker", group = "System", icon = "🎨" })
 
 -- Special workspace: toggle_or_hide ao soltar SUPER sozinho
-km.bind("SUPER + Super_L",
+km.release("SUPER + Super_L",
     function() toggle_or_hide_special_workspace() end,
-    { desc = "Hide active special workspace", group = "Special",
-      flags = { release = true } })
+    { desc = "Hide active special workspace", group = "Special" })
 
 -- ── Lock + Power ────────────────────────────────────────────
 km.app("SUPER + l", "hyprlock",
@@ -79,9 +78,8 @@ km.app("CTRL + ALT + V",
 km.app("SUPER + v", "whisper-ctl start",
     { desc = "Whisper PTT start", group = "Voice", icon = "🎤" })
 
-km.bind("SUPER + v", hl.dsp.exec_cmd("whisper-ctl stop"),
-    { desc = "Whisper PTT stop (release)", group = "Voice",
-      flags = { release = true } })
+km.release("SUPER + v", hl.dsp.exec_cmd("whisper-ctl stop"),
+    { desc = "Whisper PTT stop (release)", group = "Voice" })
 
 -- ── Theme toggle ────────────────────────────────────────────
 km.fn("SUPER + n", function() toggle_theme() end,
@@ -89,15 +87,13 @@ km.fn("SUPER + n", function() toggle_theme() end,
 
 -- ── Multimedia ──────────────────────────────────────────────
 -- swayosd-client mostra OSD visual + altera valor real (pipewire/brightnessctl).
-km.bind("XF86AudioRaiseVolume",
+km.repeating("XF86AudioRaiseVolume",
     hl.dsp.exec_cmd("swayosd-client --output-volume raise"),
-    { desc = "Volume up", group = "Audio", icon = "🔊",
-      flags = { ["repeat"] = true } })
+    { desc = "Volume up", group = "Audio", icon = "🔊" })
 
-km.bind("XF86AudioLowerVolume",
+km.repeating("XF86AudioLowerVolume",
     hl.dsp.exec_cmd("swayosd-client --output-volume lower"),
-    { desc = "Volume down", group = "Audio", icon = "🔉",
-      flags = { ["repeat"] = true } })
+    { desc = "Volume down", group = "Audio", icon = "🔉" })
 
 km.bind("XF86AudioMute",
     hl.dsp.exec_cmd("swayosd-client --output-volume mute-toggle"),
@@ -123,17 +119,14 @@ km.bind("XF86AudioPrev",
     hl.dsp.exec_cmd("playerctl previous"),
     { desc = "Previous track", group = "Media", icon = "⏮" })
 
-km.bind("XF86MonBrightnessUp",
+km.repeating("XF86MonBrightnessUp",
     hl.dsp.exec_cmd("swayosd-client --brightness raise"),
-    { desc = "Brightness up", group = "Brightness", icon = "☀",
-      flags = { ["repeat"] = true } })
+    { desc = "Brightness up", group = "Brightness", icon = "☀" })
 
-km.bind("XF86MonBrightnessDown",
+km.repeating("XF86MonBrightnessDown",
     hl.dsp.exec_cmd("swayosd-client --brightness lower"),
-    { desc = "Brightness down", group = "Brightness", icon = "🌙",
-      flags = { ["repeat"] = true } })
+    { desc = "Brightness down", group = "Brightness", icon = "🌙" })
 
-km.bind("Caps_Lock",
+km.release("Caps_Lock",
     hl.dsp.exec_cmd("swayosd-client --caps-lock"),
-    { desc = "Caps Lock OSD", group = "System",
-      flags = { release = true } })
+    { desc = "Caps Lock OSD", group = "System" })

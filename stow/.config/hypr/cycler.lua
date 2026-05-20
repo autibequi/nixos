@@ -56,9 +56,7 @@ function cycle_same_class_back()
     hl.exec_cmd("hyprctl dispatch focuswindow address:" .. prev_w.address)
 end
 
-km.fn("MOD3 + i", function() cycle_same_class() end,
-    { desc = "Cycle next instance of focused class", group = "Cycle",
-      icon = "↻", flags = { ["repeat"] = true } })
-km.fn("MOD3 + SHIFT + i", function() cycle_same_class_back() end,
-    { desc = "Cycle previous instance of focused class", group = "Cycle",
-      icon = "↺", flags = { ["repeat"] = true } })
+km.repeating("MOD3 + i", function() cycle_same_class() end,
+    { desc = "Cycle next instance of focused class", group = "Cycle", icon = "↻" })
+km.repeating("MOD3 + SHIFT + i", function() cycle_same_class_back() end,
+    { desc = "Cycle previous instance of focused class", group = "Cycle", icon = "↺" })

@@ -27,69 +27,74 @@ local SKIP_CLASSES = {
     ["rofi"] = true,
 }
 
+local core = require("core")
+
 local _swallowed = {}  -- [child_addr] = { parent_addr = ..., parent_ws = ... }
 
+-- Lê /proc/<pid>/status (pseudo-fs syscall) em vez de io.popen("ps -p ...").
+-- Não fork; muito mais barato; não bloqueia o compositor.
 local function ppid_of(pid)
     if not pid or pid == 0 then return nil end
-    local p = io.popen("ps -p " .. pid .. " -o ppid= 2>/dev/null")
-    if not p then return nil end
-    local s = (p:read("*l") or ""):gsub("%s+", "")
-    p:close()
-    return tonumber(s)
+    local f = io.open("/proc/" .. pid .. "/status", "r")
+    if not f then return nil end
+    for line in f:lines() do
+        local p = line:match("^PPid:%s+(%d+)")
+        if p then f:close(); return tonumber(p) end
+    end
+    f:close()
+    return nil
 end
 
 local function find_client_by_pid(pid)
     if not pid then return nil end
-    for _, c in ipairs(get_clients_compat() or {}) do
+    for _, c in ipairs(core.clients_cached()) do
         if c.pid == pid then return c end
     end
     return nil
 end
 
-pcall(function()
-    hl.on("window.open", function(ev)
-        local child_addr = ev and (ev.address or ev.window_address)
-        local child_class = ev and (ev.class or ev.window_class) or ""
-        local child_pid = ev and (ev.pid)
-        if not child_addr then return end
-        if SKIP_CLASSES[child_class] then return end
-        if TERMINAL_CLASSES[child_class] then return end  -- terminal abrindo terminal: skip
+core.on("window.open", function(ev)
+    local child_addr = ev and (ev.address or ev.window_address)
+    local child_class = ev and (ev.class or ev.window_class) or ""
+    local child_pid = ev and (ev.pid)
+    if not child_addr then return end
+    if SKIP_CLASSES[child_class] then return end
+    if TERMINAL_CLASSES[child_class] then return end  -- terminal abrindo terminal: skip
 
-        -- Pode ser que o evento ainda não traga pid; tenta via get_clients
-        if not child_pid then
-            for _, c in ipairs(get_clients_compat() or {}) do
-                if c.address == child_addr then child_pid = c.pid break end
-            end
+    -- Pode ser que o evento ainda não traga pid; tenta via clients_cached
+    if not child_pid then
+        for _, c in ipairs(core.clients_cached()) do
+            if c.address == child_addr then child_pid = c.pid break end
         end
-        if not child_pid then return end
+    end
+    if not child_pid then return end
 
-        local parent_pid = ppid_of(child_pid)
-        if not parent_pid then return end
+    local parent_pid = ppid_of(child_pid)
+    if not parent_pid then return end
 
-        local parent = find_client_by_pid(parent_pid)
-        if not parent then return end
-        if not TERMINAL_CLASSES[parent.class or ""] then return end
+    local parent = find_client_by_pid(parent_pid)
+    if not parent then return end
+    if not TERMINAL_CLASSES[parent.class or ""] then return end
 
-        -- Swallow: move terminal pai pra special hidden
-        local parent_ws = parent.workspace and parent.workspace.id
-        _swallowed[child_addr] = {
-            parent_addr = parent.address,
-            parent_ws = parent_ws,
-        }
-        hl.exec_cmd("hyprctl dispatch movetoworkspacesilent special:_swallowed,address:" ..
-            parent.address)
-    end)
+    -- Swallow: move terminal pai pra special hidden
+    local parent_ws = parent.workspace and parent.workspace.id
+    _swallowed[child_addr] = {
+        parent_addr = parent.address,
+        parent_ws = parent_ws,
+    }
+    hl.exec_cmd("hyprctl dispatch movetoworkspacesilent special:_swallowed,address:" ..
+        parent.address)
+end)
 
-    hl.on("window.close", function(ev)
-        local addr = ev and (ev.address or ev.window_address)
-        if not addr then return end
-        local info = _swallowed[addr]
-        if not info then return end
-        _swallowed[addr] = nil
-        -- Devolve o parent pro workspace original
-        if info.parent_ws then
-            hl.exec_cmd("hyprctl dispatch movetoworkspacesilent " ..
-                info.parent_ws .. ",address:" .. info.parent_addr)
-        end
-    end)
+core.on("window.close", function(ev)
+    local addr = ev and (ev.address or ev.window_address)
+    if not addr then return end
+    local info = _swallowed[addr]
+    if not info then return end
+    _swallowed[addr] = nil
+    -- Devolve o parent pro workspace original
+    if info.parent_ws then
+        hl.exec_cmd("hyprctl dispatch movetoworkspacesilent " ..
+            info.parent_ws .. ",address:" .. info.parent_addr)
+    end
 end)

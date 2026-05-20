@@ -51,48 +51,48 @@ km.bind("SUPER + SHIFT + 0",
 -- ── WASD Focus/Move/Resize ────────────────────────────────────
 
 -- Focus — dispatch direto pro layout (scrolling/dwindle)
-km.bind("SUPER + a", hl.dsp.layout("focus l"),
-    { desc = "Focus left",  group = "Navigation", flags = { ["repeat"] = true } })
-km.bind("SUPER + d", hl.dsp.layout("focus r"),
-    { desc = "Focus right", group = "Navigation", flags = { ["repeat"] = true } })
-km.bind("SUPER + w", hl.dsp.layout("focus u"),
-    { desc = "Focus up",    group = "Navigation", flags = { ["repeat"] = true } })
-km.bind("SUPER + s", hl.dsp.layout("focus d"),
-    { desc = "Focus down",  group = "Navigation", flags = { ["repeat"] = true } })
+km.repeating("SUPER + a", hl.dsp.layout("focus l"),
+    { desc = "Focus left",  group = "Navigation" })
+km.repeating("SUPER + d", hl.dsp.layout("focus r"),
+    { desc = "Focus right", group = "Navigation" })
+km.repeating("SUPER + w", hl.dsp.layout("focus u"),
+    { desc = "Focus up",    group = "Navigation" })
+km.repeating("SUPER + s", hl.dsp.layout("focus d"),
+    { desc = "Focus down",  group = "Navigation" })
 
 -- Move windows
-km.bind("SUPER + SHIFT + a",
+km.repeating("SUPER + SHIFT + a",
     hl.dsp.window.move({ direction = "l" }),
-    { desc = "Move window left",  group = "Window", flags = { ["repeat"] = true } })
-km.bind("SUPER + SHIFT + d",
+    { desc = "Move window left",  group = "Window" })
+km.repeating("SUPER + SHIFT + d",
     hl.dsp.window.move({ direction = "r" }),
-    { desc = "Move window right", group = "Window", flags = { ["repeat"] = true } })
-km.bind("SUPER + SHIFT + w",
+    { desc = "Move window right", group = "Window" })
+km.repeating("SUPER + SHIFT + w",
     hl.dsp.window.move({ direction = "u" }),
-    { desc = "Move window up",    group = "Window", flags = { ["repeat"] = true } })
-km.bind("SUPER + SHIFT + s",
+    { desc = "Move window up",    group = "Window" })
+km.repeating("SUPER + SHIFT + s",
     hl.dsp.window.move({ direction = "d" }),
-    { desc = "Move window down",  group = "Window", flags = { ["repeat"] = true } })
+    { desc = "Move window down",  group = "Window" })
 
 -- Resize (SUPER + CTRL + WASD) — relative=true para delta
-km.bind("SUPER + CTRL + a",
+km.repeating("SUPER + CTRL + a",
     hl.dsp.window.resize({ x = -40, y = 0, relative = true }),
-    { desc = "Resize -40 w", group = "Window", flags = { ["repeat"] = true } })
-km.bind("SUPER + CTRL + d",
+    { desc = "Resize -40 w", group = "Window" })
+km.repeating("SUPER + CTRL + d",
     hl.dsp.window.resize({ x = 40,  y = 0, relative = true }),
-    { desc = "Resize +40 w", group = "Window", flags = { ["repeat"] = true } })
-km.bind("SUPER + CTRL + w",
+    { desc = "Resize +40 w", group = "Window" })
+km.repeating("SUPER + CTRL + w",
     hl.dsp.window.resize({ x = 0, y = -20, relative = true }),
-    { desc = "Resize -20 h", group = "Window", flags = { ["repeat"] = true } })
-km.bind("SUPER + CTRL + s",
+    { desc = "Resize -20 h", group = "Window" })
+km.repeating("SUPER + CTRL + s",
     hl.dsp.window.resize({ x = 0, y = 20, relative = true }),
-    { desc = "Resize +20 h", group = "Window", flags = { ["repeat"] = true } })
+    { desc = "Resize +20 h", group = "Window" })
 
 -- Scrolling layout: cycle column widths (Q/E), promote (SHIFT+X)
-km.fn("SUPER + q", function() colresize_no_wrap("-") end,
-    { desc = "Column narrower", group = "Window", flags = { ["repeat"] = true } })
-km.fn("SUPER + e", function() colresize_no_wrap("+") end,
-    { desc = "Column wider",    group = "Window", flags = { ["repeat"] = true } })
+km.repeating("SUPER + q", function() colresize_no_wrap("-") end,
+    { desc = "Column narrower", group = "Window" })
+km.repeating("SUPER + e", function() colresize_no_wrap("+") end,
+    { desc = "Column wider",    group = "Window" })
 km.bind("SUPER + SHIFT + x", hl.dsp.layout("promote"),
     { desc = "Promote column", group = "Window" })
 

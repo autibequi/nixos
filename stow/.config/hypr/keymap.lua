@@ -55,6 +55,26 @@ function M.dispatch(combo, dispatcher, opts)
     M.bind(combo, dispatcher, opts)
 end
 
+-- Shortcuts pra flags comuns (evita `flags = { ["repeat"] = true }` verboso)
+local function with_flag(opts, flag)
+    opts = opts or {}
+    local flags = {}
+    if opts.flags then
+        for k, v in pairs(opts.flags) do flags[k] = v end
+    end
+    flags[flag] = true
+    opts.flags = flags
+    return opts
+end
+
+function M.repeating(combo, action, opts)
+    M.bind(combo, action, with_flag(opts, "repeat"))
+end
+
+function M.release(combo, action, opts)
+    M.bind(combo, action, with_flag(opts, "release"))
+end
+
 -- cheatsheet() → lista ordenada por (group, desc) pra UI
 function M.cheatsheet()
     local list = {}

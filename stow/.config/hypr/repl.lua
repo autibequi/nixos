@@ -4,8 +4,10 @@
 --  Protocolo file-based (sem socket Unix; Lua puro):
 --    Cliente:  echo 'return #hl.get_clients()' > /tmp/hyprlua.in
 --              cat /tmp/hyprlua.out
---    Server:   timer a cada 250ms; se .in não-vazio, executa via load(),
+--    Server:   timer a cada 500ms; se .in não-vazio, executa via load(),
 --              escreve resultado em .out, trunca .in.
+--              (250ms anterior causava lag perceptível — 500ms é o sweet
+--               spot: REPL responsivo, sem impactar keybinds.)
 --
 --  Helper CLI: ~/.local/bin/hyprlua-eval (gerado on demand pelo usuário)
 --    #!/bin/sh
@@ -86,9 +88,9 @@ end
 write_all(IN_FILE, "")
 write_all(OUT_FILE, "")
 
--- Timer periódico
+-- Timer periódico (500ms: REPL responsivo, sem impactar keybinds)
 local ok, err = pcall(function()
-    hl.timer(poll, { timeout = 250, type = "repeat" })
+    hl.timer(poll, { timeout = 500, type = "repeat" })
 end)
 if not ok then
     hl.exec_cmd("logger -t hyprland-lua 'repl timer falhou: " .. tostring(err) .. "'")

@@ -2,16 +2,33 @@
 --  LAUNCHER — wrapper unificado pra spawn de apps
 --
 --  Centraliza decoradores (uwsm app, gpu-offload, --class, --app=)
---  e permite kill-switches globais via env:
---    HYPR_NO_GPU=1   → desabilita gpu-offload em todos os builds
---    HYPR_NO_UWSM=1  → spawn direto, sem uwsm
+--  e permite kill-switches globais via env vars OU marker files:
+--    HYPR_NO_GPU=1   ou  ~/.cache/hyprland/no_gpu   → sem gpu-offload
+--    HYPR_NO_UWSM=1  ou  ~/.cache/hyprland/no_uwsm  → spawn direto
+--
+--  Os marker files permitem que outros módulos Lua (ex: profiles.lua
+--  battery mode) alternem os flags sem precisar `os.setenv` (que não
+--  existe em Lua puro).
 -- ============================================================
 
 local M = {}
 
+local HOME      = os.getenv("HOME")
+local CACHE_DIR = HOME .. "/.cache/hyprland"
+
 local function env_truthy(name)
     local v = os.getenv(name)
     return v ~= nil and v ~= "" and v ~= "0"
+end
+
+local function file_exists(path)
+    local f = io.open(path, "r")
+    if f then f:close(); return true end
+    return false
+end
+
+local function disabled(env_name, marker_name)
+    return env_truthy(env_name) or file_exists(CACHE_DIR .. "/" .. marker_name)
 end
 
 -- build(cmd, opts) → string pronta pra hl.dsp.exec_cmd
@@ -25,10 +42,10 @@ function M.build(cmd, opts)
     opts = opts or {}
 
     local pre = ""
-    if not opts.raw and not env_truthy("HYPR_NO_UWSM") then
+    if not opts.raw and not disabled("HYPR_NO_UWSM", "no_uwsm") then
         pre = "uwsm app -- "
     end
-    if opts.gpu == "offload" and not env_truthy("HYPR_NO_GPU") then
+    if opts.gpu == "offload" and not disabled("HYPR_NO_GPU", "no_gpu") then
         pre = pre .. "gpu-offload "
     end
 

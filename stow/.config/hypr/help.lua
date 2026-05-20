@@ -31,14 +31,14 @@ local FEATURES_MD = [[
 
 ### 1. **Profiles** (`profiles.lua`)
 
-Cicla modos de uso com `SUPER+SHIFT+P`:
+Cicla modos de uso com `SUPER+SHIFT+P` (era control panel antes — control panel foi pra `MOD3+SHIFT+P`).
 
 | Profile  | Gaps | Border | Animations | Side effects                          |
 |----------|------|--------|------------|---------------------------------------|
 | default  | 5    | 3      | on         | —                                     |
 | focus    | 0    | 1      | off        | DND on, sem distração                 |
 | meeting  | 12   | 4      | on, blur   | mic on, brilho 80%                    |
-| battery  | 3    | 2      | off        | desabilita gpu-offload em novos spawns|
+| battery  | 3    | 2      | off        | toca `~/.cache/hyprland/no_gpu` (lido pelo launcher) |
 
 Programático: `require("profiles").apply("focus")` ou `.cycle()` ou `.current()`.
 
@@ -49,15 +49,15 @@ Programático: `require("profiles").apply("focus")` ou `.cycle()` ou `.current()
 `SUPER+SHIFT+T` cicla: idle → work(25min) → break(5min) → idle.
 - Work: aplica profile=focus + notif
 - Break: aplica profile=default + notif "break"
-- Status em `~/.cache/hyprland/pomodoro` (waybar pode ler).
-- 2ª pressão durante work/break: cancela.
+- Status em `~/.cache/hyprland/pomodoro` via `core.state_file` (waybar pode ler).
+- 2ª pressão durante work/break: cancela (invalida `_cycle_id`).
 
 ---
 
 ### 3. **HUD** (`hud.lua`)
 
-`SUPER+;` mostra peek do estado atual via notify-send:
-- Monitor + workspace ativo + contagem janelas
+`SUPER+;` mostra peek do estado atual via `core.notify` (notify-send com escape):
+- Monitor + workspace ativo + contagem janelas (via `core.clients_cached`)
 - Special workspace ativo
 - Profile corrente
 - Top 3 apps por contagem
@@ -67,7 +67,7 @@ Programático: `require("profiles").apply("focus")` ou `.cycle()` ou `.current()
 
 ### 4. **Window picker** (`picker.lua`)
 
-Alt-Tab Wayland-friendly via rofi:
+Alt-Tab Wayland-friendly via rofi (usa `core.rofi_menu`):
 - `MOD3+Tab` — todas as janelas
 - `MOD3+SHIFT+Tab` — só workspace atual
 
@@ -95,12 +95,13 @@ Terminal "engole" filho GUI (estilo dwm):
 - Filho fecha → terminal volta no mesmo lugar/workspace
 - Funciona pra: Alacritty, Ghostty
 - Skip: portal, eww-whisper-ptt, clipboard popup, rofi
+- Implementação: `io.open("/proc/<pid>/status")` (não `io.popen ps` — não bloqueia)
 
 ---
 
 ### 8. **Smart actions** (`submaps.lua`)
 
-Atalhos context-aware (despacham keypress via `wtype` baseado no app focado):
+Atalhos context-aware (despacham keypress via `wtype` baseado no app focado, via `core.focused`):
 - `SUPER+SHIFT+S` — **save smart** (Ctrl+S na maioria; mostra notif se sem rule)
 - `SUPER+SHIFT+W` — **close smart** (Ctrl+W em Zed/Cursor/Chrome; fallback = killactive)
 - `SUPER+SHIFT+R` — **reload smart** (F5/Ctrl+R em browsers)
@@ -131,62 +132,46 @@ Stack é por-monitor (DP-2 e eDP-1 têm históricos independentes).
 
 ### 11. **Theme watcher** (`theme_watcher.lua`)
 
-Poll a cada 1.5s em `~/.cache/vennon/last-applied`. Se mtime muda, `hyprctl reload` + notif "Theme refreshed".
-- Cria o marker no post-hook do `vennon-theme-apply` pra o ciclo fechar.
+Poll periódico (1500ms) em `~/.cache/vennon/last-applied`. Conteúdo mudou → `hyprctl reload` + notif.
+- Implementação: `io.open` + comparar conteúdo (não `io.popen stat` — não bloqueia).
+- `vennon-theme-apply` precisa tocar o marker no post-hook (`date +%s > ~/.cache/vennon/last-applied`).
 
 ---
 
 ### 12. **REPL** (`repl.lua`)
 
-Debug live sem reload do Hyprland. Protocolo file-based:
+Debug live sem reload do Hyprland (timer 500ms). Protocolo file-based:
 ```bash
 echo 'return #hl.get_clients()' > /tmp/hyprlua.in
 sleep 0.3
 cat /tmp/hyprlua.out
 ```
 
-Helper opcional `~/.local/bin/hyprlua-eval`:
-```sh
-#!/bin/sh
-printf '%s' "$*" > /tmp/hyprlua.in
-while [ -s /tmp/hyprlua.in ]; do sleep 0.05; done
-cat /tmp/hyprlua.out
-```
-
-Log de cada comando em `/tmp/hyprlua.log`.
-
-Exemplos:
-```bash
-hyprlua-eval 'return require("profiles").current()'
-hyprlua-eval 'require("profiles").apply("focus")'
-hyprlua-eval 'return #hl.get_clients()'
-hyprlua-eval 'pomodoro_status()'
-hyprlua-eval 'show_hud()'
-```
-
 ---
 
 ### 13. **Events reativos** (`events.lua`)
 
-Hooks ativos (todos com pcall defensivo):
+Hooks declarativos — políticas opt-in via `define_special({ on_active = fn, auto_route_classes = {...} })`. `events.lua` só consome o registry.
 
-| Evento Hyprland       | Ação                                                      |
-|-----------------------|-----------------------------------------------------------|
-| `workspace.active`    | F1 → DND on; F9 → mute mic                                |
-| `window.open`         | Slack/Zoom auto-move pra `special:f5`                     |
-| `monitor.added`       | Notif + `hyprctl reload` + waybar refresh                 |
-| `monitor.removed`     | Notif + waybar refresh                                    |
-| `window.urgent`       | Notif "Urgent: <class>"                                   |
-| `screenshare.state`   | (em screenshare_guard.lua) DND on + bordas vermelhas      |
+| Evento Hyprland       | Ação                                                              |
+|-----------------------|-------------------------------------------------------------------|
+| `workspace.active`    | dispatch `core.workspace_active_handlers[ws_name]` (popular via define_special); fallback: DND off em 1-3 |
+| `window.open`         | lookup `core.workspace_auto_route_classes[class]` → movetoworkspacesilent |
+| `monitor.added`       | Notif + `hyprctl reload` + waybar refresh                          |
+| `monitor.removed`     | Notif + waybar refresh                                             |
+| `window.urgent`       | Notif "Urgent: <class>"                                            |
+| `screenshare.state`   | (em screenshare_guard.lua) DND on + bordas vermelhas               |
 
 ---
 
 ### 14. **DSL Lua-first**
 
-- `keymap.lua` — registry de binds com `desc/group/icon`. Use `km.bind/app/fn/dispatch`.
-- `launcher.lua` — wrapper unificado: `L.build/chrome/term`. Env kill-switches:
+- `core.lua` — helpers compartilhados: `notify`, `on(ev,fn)` com pcall, `timer(ms,fn)`, `state_file(name)`, `focused`, `clients_cached`, `other_monitor`, `escape_sh`, `trunc`, `rofi_menu`. Registries: `workspace_active_handlers`, `workspace_auto_route_classes`.
+- `keymap.lua` — registry de binds com `desc/group/icon`. Use `km.bind/app/fn/dispatch`. Cheatsheet (`SUPER+/`) e manual (`SUPER+,`) consomem do registry.
+- `launcher.lua` — wrapper unificado: `L.build/chrome/term`. Todos os spawns passam por aqui (autostart, special-workspaces, services, application). Env kill-switches **realmente** funcionam em tudo:
   - `HYPR_NO_GPU=1` — desabilita `gpu-offload` em todos os builds
   - `HYPR_NO_UWSM=1` — spawn direto, sem `uwsm app --`
+- `define_special(name, key, opts)` — single source of truth pra special workspace: rules, borders, bind, label, `on_created_empty`, `on_active`, `auto_route_classes`, `tile`, `no_screen_share`.
 
 ---
 
@@ -194,32 +179,38 @@ Hooks ativos (todos com pcall defensivo):
 
 ```
 ~/.config/hypr/
-├── hyprland.lua          # entry point + wiring + env vars + autostart
-├── utils.lua             # state, helpers (workspace switch, special stack, screenshots)
-├── theme.lua             # dark/light toggle
-├── theme_watcher.lua     # auto-reload em mudança de cores
+├── hyprland.lua          # entry point + wiring + env vars (autostart em arquivo próprio)
+├── autostart.lua         # daemons + cursor + tema em hl.on("hyprland.start")
+├── core.lua              # helpers (notify/on/timer/state_file/focused/clients_cached/rofi_menu)
+├── keymap.lua            # registry semântico de binds (desc/group/icon)
+├── launcher.lua          # spawn wrapper (uwsm app -- + gpu-offload + --class/--app)
+├── clients.lua           # parse hyprctl clients -j (sem json lib)
+├── services.lua          # waybar/quickshell/clipboard/hypr_reload
+├── screenshots.lua       # grim/satty/tesseract (4 funcs)
+├── utils.lua             # state special workspace + workspace_switch + colresize + monitor moves
+├── theme.lua             # dark/light toggle (gtk + alacritty + wallpaper + vennon-theme-apply)
+├── theme_watcher.lua     # auto-reload no marker do vennon
 ├── monitors.lua          # nwg-displays output
 ├── generated-colors.lua  # vennon-theme-apply output
-├── windowrules.lua       # regras de janela
-├── special-workspaces.lua# F1-F9, gemini, bleh
-├── workspace.lua         # workspaces 1-10 + WASD focus/move/resize
-├── application.lua       # apps + binds (usa keymap+launcher)
-├── systemtools.lua       # screenshot, lock, multimedia, theme toggle
-├── keymap.lua            # 🆕 registry semântico de binds
-├── launcher.lua          # 🆕 wrapper L.build/chrome/term
-├── hyprshortcuts.lua     # rofi cheatsheet (consome keymap)
-├── events.lua            # 🆕 hooks reativos hl.on
-├── profiles.lua          # 🆕 default/focus/meeting/battery
-├── picker.lua            # 🆕 Alt-Tab Wayland
-├── cycler.lua            # 🆕 cicla por class
-├── hud.lua               # 🆕 SUPER+; peek de estado
-├── pomodoro.lua          # 🆕 SUPER+SHIFT+T timer
-├── screenshare_guard.lua # 🆕 auto-DND
-├── swallow.lua           # 🆕 terminal swallowing
-├── submaps.lua           # 🆕 smart actions context-aware
-├── followme.lua          # 🆕 sync workspaces entre monitores
-├── repl.lua              # 🆕 file-based REPL
-└── help.lua              # 🆕 este manual
+├── windowrules.lua       # regras de janela (nautilus, file pickers, electron popup, claude borders)
+├── special-workspaces.lua# F1-F9, gemini, bleh (declara on_active/auto_route)
+├── workspace.lua         # workspaces 1-10 + WASD focus/move/resize + special history
+├── application.lua       # apps + binds (terminal/zed/chrome/PWAs/AI)
+├── systemtools.lua       # screenshot, lock, multimedia, theme toggle, whisper PTT
+├── hyprshortcuts.lua     # rofi cheatsheet (consome keymap + core.rofi_menu)
+├── events.lua            # hooks reativos hl.on (consome registries)
+├── profiles.lua          # default/focus/meeting/battery
+├── picker.lua            # Alt-Tab Wayland (core.rofi_menu)
+├── cycler.lua            # cicla por class
+├── hud.lua               # SUPER+; peek de estado
+├── pomodoro.lua          # SUPER+SHIFT+T timer
+├── screenshare_guard.lua # auto-DND no screenshare.state
+├── swallow.lua           # terminal swallowing (via /proc)
+├── submaps.lua           # smart actions context-aware
+├── followme.lua          # sync workspaces entre monitores
+├── specials-feed.lua     # SIGRTMIN+11 → waybar refresh em events
+├── repl.lua              # file-based eval (timer 500ms)
+└── help.lua              # este manual
 ```
 
 ---
@@ -233,19 +224,22 @@ MOD3+Z         Zed                 MOD3+B     Chrome
 MOD3+G         Gemini PWA          MOD3+A     audio (wiremix)
 MOD3+P         vennon REPL         MOD3+C     yaa Haiku
 MOD3+SHIFT+C   yaa Sonnet[1M]      MOD3+.     emoji picker
+MOD3+SHIFT+P   control panel       MOD3+ALT+C Claude.ai web
 
 ─── Navigation ───────────────────────────────
 SUPER+WASD     focus               SUPER+SHIFT+WASD  move window
 SUPER+CTRL+WASD resize             SUPER+Q/E         col width
 SUPER+1-0      go workspace        SUPER+SHIFT+1-0   move to ws
-SUPER+Esc      next monitor        MOD3+Tab          picker
+SUPER+Esc      next monitor        SUPER+SHIFT+Esc   move window to next monitor
+MOD3+Tab       picker (all)        MOD3+SHIFT+Tab    picker (current ws)
+MOD3+I/SHIFT+I cycle same class
 
 ─── Special workspaces ──────────────────────
 SUPER+G        gemini              SUPER+`           bleh terminal
 SUPER+F1-F9    F-key scratchpads   SUPER+[/]         back/forward stack
-
-─── Cycler & swallow ────────────────────────
-MOD3+I         next app instance   MOD3+SHIFT+I      prev app instance
+SUPER+SHIFT+<key>  move window → special
+SUPER+ALT+Right    move special → other monitor
+SUPER+ALT+Down/Left focus other monitor
 
 ─── Smart actions ───────────────────────────
 SUPER+SHIFT+S  save smart          SUPER+SHIFT+W     close smart
@@ -260,15 +254,26 @@ SUPER+Space    quickshell overview SUPER+;           HUD peek
 SUPER+L        lock                SUPER+N           toggle dark/light
 SUPER+Delete   reload hyprland     MOD3+Escape       close window
 SUPER+/        shortcuts popup     SUPER+,           THIS HELP
+SUPER+Tab      maximize            SUPER+ALT+Tab     float toggle
+SUPER+F11      fullscreen client   SUPER+SHIFT+F11   true fullscreen
 
 ─── Screenshots & clipboard ─────────────────
 SUPER+U        region → clip       SUPER+ALT+U       full + crop
 SUPER+SHIFT+U  OCR region          SUPER+SHIFT+V     clip history
-SUPER+P        color picker
+SUPER+P        color picker        CTRL+ALT+V        paste sem newlines
+
+─── Voice ───────────────────────────────────
+SUPER+V        whisper PTT (hold)
 
 ─── Power ───────────────────────────────────
-MOD3+F10/11/12 logout/suspend/poweroff
+MOD3+F12       wlogout (logout/suspend/shutdown menu)
 ```
+
+> Mudanças notáveis vs versão hyprlang antiga:
+> - `SUPER+SHIFT+P` → cycle profile (era control panel)
+> - `SUPER+Escape` → focus next monitor (era wlogout — agora só `MOD3+F12`)
+> - `SUPER+CTRL+U` removido (era duplicado com `SUPER+ALT+U`)
+> - control panel → `MOD3+SHIFT+P`
 
 ---
 
