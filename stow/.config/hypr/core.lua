@@ -112,4 +112,61 @@ function M.focused()
     return nil
 end
 
+-- ── Policy registries (preenchidos por special-workspaces.lua) ─
+--    workspace_active_handlers[ws_name_com_prefixo]    → fn(ev)
+--    workspace_auto_route_classes[window_class]        → ws_name_sem_prefixo
+--
+--  Consumidos por events.lua. Defaults vazios (ninguém precisa popular).
+M.workspace_active_handlers     = {}
+M.workspace_auto_route_classes  = {}
+
+-- ── rofi_menu(entries, opts) — shell-out unificado ────────────
+--    entries = list of { display = "...", payload = "..." }
+--    opts:
+--      prompt    = "Window" / "Shortcuts"
+--      width     = 140 (int, opcional)
+--      on_select = string bash que usa "$payload" no contexto selecionado
+--                  (e.g. 'hyprctl dispatch focuswindow address:"$payload" &')
+--
+--  Substitui o boilerplate idêntico de hyprshortcuts.lua e picker.lua:
+--  monta script bash temporário com rofi -dmenu + lookup do índice → payload.
+function M.rofi_menu(entries, opts)
+    opts = opts or {}
+    if #entries == 0 then return end
+
+    local lines = {
+        "#!/usr/bin/env bash",
+        "rofi_input=''",
+        "declare -a payloads=()",
+    }
+    for i, e in ipairs(entries) do
+        table.insert(lines,
+            "rofi_input+=$'" .. M.escape_sh(e.display) .. "\\n'")
+        table.insert(lines,
+            "payloads[" .. i .. "]='" .. M.escape_sh(e.payload) .. "'")
+    end
+
+    local prompt = M.escape_sh(opts.prompt or "Select")
+    local width  = tostring(opts.width or 140)
+    table.insert(lines, "selected=$(printf \"%s\" \"$rofi_input\" | " ..
+        "rofi -dmenu -i -p '" .. prompt .. "' -width " .. width .. ")")
+    table.insert(lines, "[ -z \"$selected\" ] && exit 0")
+    table.insert(lines, "idx=$(printf \"%s\" \"$rofi_input\" | " ..
+        "grep -nxF \"$selected\" | head -1 | cut -d: -f1)")
+    table.insert(lines, "[ -z \"$idx\" ] && exit 0")
+    table.insert(lines, "payload=\"${payloads[$idx]}\"")
+    table.insert(lines, "[ -z \"$payload\" ] && exit 0")
+    if opts.on_select then
+        table.insert(lines, opts.on_select)
+    end
+
+    local tmpf = os.tmpname()
+    local sf = io.open(tmpf, "w")
+    if not sf then return end
+    sf:write(table.concat(lines, "\n"))
+    sf:close()
+
+    hl.exec_cmd("sh '" .. tmpf .. "' ; rm -f '" .. tmpf .. "'")
+end
+
 return M

@@ -2,13 +2,24 @@
 --  SPECIAL WORKSPACES — portado de special-workspaces.conf
 -- ============================================================
 
-local km = require("keymap")
-local L  = require("launcher")
+local km   = require("keymap")
+local L    = require("launcher")
+local core = require("core")
 
 local DEFAULT_GAPS    = 32
 local DEFAULT_BORDER  = "rgba(7c3aedcc)"
 
--- Helper: cada special workspace tem mesmo shape (rule + border + binds)
+-- Helper: cada special workspace tem mesmo shape (rule + border + binds + policy)
+-- opts:
+--   label              — string pra cheatsheet
+--   on_created_empty   — comando shell (use L.build/chrome) que abre na primeira ativação
+--   border             — cor da borda (override do DEFAULT_BORDER)
+--   tile               — força tile=true em todas as janelas do workspace
+--   no_screen_share    — esconde o workspace inteiro de screenshare
+--   on_active          — fn() disparada quando o workspace fica ativo
+--                        (registrada em core.workspace_active_handlers — events.lua consome)
+--   auto_route_classes — list de window classes que serão auto-roteadas pra esse workspace
+--                        (registrada em core.workspace_auto_route_classes — events.lua consome)
 local function define_special(name, key, opts)
     opts = opts or {}
     local ws    = "special:" .. name
@@ -31,6 +42,16 @@ local function define_special(name, key, opts)
     km.bind("SUPER + SHIFT + " .. key,
         hl.dsp.window.move({ workspace = ws, follow = false }),
         { desc = "Move window → special:" .. label, group = "Special" })
+
+    -- Policies opt-in (events.lua consome em runtime)
+    if opts.on_active then
+        core.workspace_active_handlers[ws] = opts.on_active
+    end
+    if opts.auto_route_classes then
+        for _, class in ipairs(opts.auto_route_classes) do
+            core.workspace_auto_route_classes[class] = name
+        end
+    end
 end
 
 -- ── Nomeados ─────────────────────────────────────────────────
@@ -46,13 +67,24 @@ define_special("bleh", "grave", {
 })
 
 -- ── F-keys ───────────────────────────────────────────────────
-define_special("f1", "F1", { label = "f1 (Work vault)",
-    on_created_empty = L.build([[obsidian "obsidian://open?vault=Work"]]) })
+define_special("f1", "F1", {
+    label            = "f1 (Work vault)",
+    on_created_empty = L.build([[obsidian "obsidian://open?vault=Work"]]),
+    on_active        = function()
+        hl.exec_cmd("swaync-client -d")  -- DND on
+        core.notify("Modo Work",
+            "F1 — notif pessoais silenciadas",
+            { timeout = 800, urgency = "low" })
+    end,
+})
 define_special("f2", "F2")
 define_special("f3", "F3")
 define_special("f4", "F4")
-define_special("f5", "F5", { label = "f5 (Chat)",
-    on_created_empty = L.chrome("https://chat.google.com") })
+define_special("f5", "F5", {
+    label              = "f5 (Chat)",
+    on_created_empty   = L.chrome("https://chat.google.com"),
+    auto_route_classes = { "Slack", "zoom", "zoom_linux_float_video_window" },
+})
 define_special("f6", "F6")
 define_special("f7", "F7")
 define_special("f8", "F8", { label = "f8 (Zed nixos)",
@@ -61,4 +93,10 @@ define_special("f9", "F9", {
     label            = "f9 (.ovault, no_screen_share)",
     on_created_empty = L.build([[obsidian "obsidian://open?vault=.ovault"]]),
     no_screen_share  = true,
+    on_active        = function()
+        hl.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ 1")
+        core.notify("Modo Pessoal",
+            "F9 — mic mutado, no_screen_share",
+            { timeout = 800, urgency = "low" })
+    end,
 })

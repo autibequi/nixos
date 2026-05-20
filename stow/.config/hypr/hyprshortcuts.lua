@@ -2,12 +2,15 @@
 --  HYPRSHORTCUTS — rofi cheatsheet a partir do registry keymap
 --
 --  Antes: parse de `hyprctl binds` + map dispatcher→pretty
---  Agora: consome keymap._binds (com desc/group/icon semânticos)
+--  Agora: consome keymap._binds (com desc/group/icon semânticos),
+--  renderiza via core.rofi_menu.
+--
+--  Reusa o dispatcher já registrado no Hyprland via `hyprctl dispatch`
+--  (busca o bind pelo combo no `hyprctl binds`), sem duplicar a action.
 -- ============================================================
 
-local km        = require("keymap")
-local core      = require("core")
-local escape_sh = core.escape_sh
+local km   = require("keymap")
+local core = require("core")
 
 -- Render: "[group] icon  combo  ⟶  desc"
 local function format_entry(e)
@@ -16,47 +19,22 @@ local function format_entry(e)
         e.combo, e.desc)
 end
 
--- Para items sem dispatcher (são lua fns), o re-invoke seria via FIFO/REPL.
--- Pra cheatsheet, basta listar e permitir disparar via hyprctl dispatch quando
--- houver combo identificado em hyprctl binds.
-
 function show_shortcuts()
-    local entries = km.cheatsheet()
-    if #entries == 0 then
+    local registry = km.cheatsheet()
+    if #registry == 0 then
         core.notify("show_shortcuts", "Registry vazio", { urgency = "low" })
         return
     end
 
-    local lines = {
-        "#!/usr/bin/env bash",
-        "rofi_input=''",
-        "declare -a combos=()",
-    }
-
-    for i, e in ipairs(entries) do
-        table.insert(lines,
-            "rofi_input+=$'" .. escape_sh(format_entry(e)) .. "\\n'")
-        table.insert(lines,
-            "combos[" .. i .. "]='" .. escape_sh(e.combo) .. "'")
+    local entries = {}
+    for _, e in ipairs(registry) do
+        table.insert(entries, { display = format_entry(e), payload = e.combo })
     end
 
-    -- Seleção via rofi; mapeia o item de volta ao combo.
-    -- Tenta disparar via hyprctl: encontra bind no `hyprctl binds` e
-    -- executa o dispatcher original — sem precisar duplicar a action.
-    table.insert(lines, [[
-selected=$(printf "%s" "$rofi_input" | rofi -dmenu -i -p "Shortcuts" -width 160)
-[ -z "$selected" ] && exit 0
-idx=$(printf "%s" "$rofi_input" | grep -nxF "$selected" | head -1 | cut -d: -f1)
-[ -z "$idx" ] && exit 0
-combo="${combos[$idx]}"
-[ -z "$combo" ] && exit 0
-
-# Normaliza "MOD3 + t" → "MOD3 t" pra grep no hyprctl binds
+    -- on_select normaliza "MOD3 + t" → key/mods e procura no hyprctl binds.
+    local on_select = [[
+combo="$payload"
 key="${combo##*+}"; key="${key// /}"
-mods="${combo% +*}"
-
-# Reusa o dispatcher já registrado no Hyprland via "hyprctl dispatch"
-# (não duplica a action Lua — busca o dispatcher equivalente).
 match=$(hyprctl binds | awk -v k="$key" '
     /^bind/ { reset=1; next }
     reset && /key:/ && index($0, "key: " k) { found=1 }
@@ -64,13 +42,11 @@ match=$(hyprctl binds | awk -v k="$key" '
     reset && /arg:/ && found { sub(/^[ \t]+arg: /, ""); print disp" "$0; exit }
 ')
 [ -n "$match" ] && hyprctl dispatch $match &
-]])
+]]
 
-    local tmpf = os.tmpname()
-    local sf = io.open(tmpf, "w")
-    if not sf then return end
-    sf:write(table.concat(lines, "\n"))
-    sf:close()
-
-    hl.exec_cmd("sh '" .. tmpf .. "' ; rm -f '" .. tmpf .. "'")
+    core.rofi_menu(entries, {
+        prompt    = "Shortcuts",
+        width     = 160,
+        on_select = on_select,
+    })
 end

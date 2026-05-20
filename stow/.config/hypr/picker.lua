@@ -1,21 +1,20 @@
 -- ============================================================
 --  PICKER — window picker fuzzy (Alt-Tab Wayland-friendly)
 --
---  Usa get_clients_compat() → rofi → hyprctl dispatch focuswindow.
---  Bind: MOD3+Tab (vazio no setup; SUPER+Tab é maximize).
+--  Lista clients via core.clients_cached() → rofi (core.rofi_menu)
+--  → hyprctl dispatch focuswindow address:<addr>.
+--
+--  Binds: MOD3+Tab (todas) / MOD3+SHIFT+Tab (workspace atual).
 -- ============================================================
 
-local core      = require("core")
-local km        = require("keymap")
-local escape_sh = core.escape_sh
-local trunc     = core.trunc
+local core  = require("core")
+local km    = require("keymap")
+local trunc = core.trunc
 
 function window_picker(opts)
     opts = opts or {}
     local current_ws_only = opts.current_ws
 
-    -- core.clients_cached() devolve table de janelas. Estrutura provável:
-    -- { address, class, title, workspace = {id, name}, monitor, ... }
     local clients = core.clients_cached()
 
     local cur_ws_id
@@ -35,7 +34,7 @@ function window_picker(opts)
                     trunc(ws_label, 10),
                     trunc(c.class or "?", 20),
                     trunc(c.title or "", 80)),
-                addr = addr,
+                payload = addr,
             })
         end
     end
@@ -47,31 +46,11 @@ function window_picker(opts)
 
     table.sort(entries, function(a, b) return a.display < b.display end)
 
-    local lines = {
-        "#!/usr/bin/env bash",
-        "rofi_input=''",
-        "declare -a addrs=()",
-    }
-    for i, e in ipairs(entries) do
-        table.insert(lines, "rofi_input+=$'" .. escape_sh(e.display) .. "\\n'")
-        table.insert(lines, "addrs[" .. i .. "]='" .. escape_sh(e.addr) .. "'")
-    end
-    table.insert(lines, [[
-selected=$(printf "%s" "$rofi_input" | rofi -dmenu -i -p "Window" -width 140)
-[ -z "$selected" ] && exit 0
-idx=$(printf "%s" "$rofi_input" | grep -nxF "$selected" | head -1 | cut -d: -f1)
-[ -z "$idx" ] && exit 0
-addr="${addrs[$idx]}"
-[ -n "$addr" ] && hyprctl dispatch focuswindow address:"$addr" &
-]])
-
-    local tmpf = os.tmpname()
-    local sf = io.open(tmpf, "w")
-    if not sf then return end
-    sf:write(table.concat(lines, "\n"))
-    sf:close()
-
-    hl.exec_cmd("sh '" .. tmpf .. "' ; rm -f '" .. tmpf .. "'")
+    core.rofi_menu(entries, {
+        prompt    = "Window",
+        width     = 140,
+        on_select = 'hyprctl dispatch focuswindow address:"$payload" &',
+    })
 end
 
 -- Binds: MOD3+Tab = todas; MOD3+SHIFT+Tab = só workspace atual

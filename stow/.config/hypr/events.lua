@@ -20,7 +20,9 @@ local core = require("core")
 local on   = core.on
 
 -- ── Workspace policy ─────────────────────────────────────────
--- F1 (Work): silenciar notif pessoais; F9 (.ovault): mute mic.
+-- Políticas opt-in declaradas em special-workspaces.lua via define_special
+-- (on_active = fn). Workspaces regulares 1-3 forçam DND off (não pertence a um
+-- special específico, fica aqui).
 
 on("workspace.active", function(ev)
     local name = (ev and (ev.name or ev.workspace)) or ""
@@ -28,13 +30,14 @@ on("workspace.active", function(ev)
     if name ~= "" and name:sub(1, 8) ~= "special:" then
         hide_active_special_workspaces()
     end
-    -- Políticas por workspace
-    if name == "special:f1" then
-        hl.exec_cmd("swaync-client -d")  -- DND on
-        core.notify("Modo Work", "F1 — notif pessoais silenciadas", { timeout = 800, urgency = "low" })
-    elseif name == "special:f9" then
-        hl.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ 1")
-        core.notify("Modo Pessoal", "F9 — mic mutado, no_screen_share", { timeout = 800, urgency = "low" })
+    -- Handler declarado em define_special({ on_active = ... })
+    local handler = core.workspace_active_handlers[name]
+    if handler then
+        local ok, err = pcall(handler, ev)
+        if not ok then
+            hl.exec_cmd("logger -t hyprland-lua 'on_active(" .. name ..
+                ") falhou: " .. tostring(err) .. "'")
+        end
     elseif name == "1" or name == "2" or name == "3" then
         -- workspaces "neutros" DP-2: garante DND off
         hl.exec_cmd("swaync-client -d 2>/dev/null | grep -q true && swaync-client -d")
@@ -42,16 +45,17 @@ on("workspace.active", function(ev)
 end)
 
 -- ── Window auto-routing ──────────────────────────────────────
--- Slack/Zoom abrem em special:f5 (chat), evita poluir wsp de código.
-
-local CHAT_APPS = { ["Slack"] = true, ["zoom"] = true, ["zoom_linux_float_video_window"] = true }
+-- Classes declaradas em define_special({ auto_route_classes = {...} })
+-- são roteadas pro special workspace correspondente.
 
 on("window.open", function(ev)
     local class = (ev and (ev.class or ev.window_class)) or ""
-    if CHAT_APPS[class] then
+    local target = core.workspace_auto_route_classes[class]
+    if target then
         local addr = ev and (ev.address or ev.window_address)
         if addr then
-            hl.exec_cmd("hyprctl dispatch movetoworkspacesilent special:f5,address:" .. addr)
+            hl.exec_cmd("hyprctl dispatch movetoworkspacesilent special:" ..
+                target .. ",address:" .. addr)
         end
     end
 end)
