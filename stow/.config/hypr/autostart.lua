@@ -14,7 +14,6 @@ hl.on("hyprland.start", function()
 
     -- Session core (todos via uwsm — alguns precisam raw=true se já incluírem 'uwsm')
     hl.exec_cmd("systemctl --user start hyprpolkitagent")
-    hl.exec_cmd(L.build("swayosd-server"))
     hl.exec_cmd(L.build("waybar"))
     hl.exec_cmd(L.build("qs"))
     hl.exec_cmd(L.build("swww-daemon"))

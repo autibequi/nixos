@@ -46,8 +46,10 @@ local function ppid_of(pid)
 end
 
 local function find_client_by_pid(pid)
+    -- Usa clients_stale() — nunca faz io.popen.
+    -- Se cache estiver vazio, retorna nil e swallow é skipped.
     if not pid then return nil end
-    for _, c in ipairs(core.clients_cached()) do
+    for _, c in ipairs(core.clients_stale()) do
         if c.pid == pid then return c end
     end
     return nil
@@ -61,12 +63,9 @@ core.on("window.open", function(ev)
     if SKIP_CLASSES[child_class] then return end
     if TERMINAL_CLASSES[child_class] then return end  -- terminal abrindo terminal: skip
 
-    -- Pode ser que o evento ainda não traga pid; tenta via clients_cached
-    if not child_pid then
-        for _, c in ipairs(core.clients_cached()) do
-            if c.address == child_addr then child_pid = c.pid break end
-        end
-    end
+    -- Sem fallback via clients_cached() — io.popen("hyprctl clients") em
+    -- window.open handler deadloca o IPC e causa freeze ao abrir apps.
+    -- O evento de Hyprland 0.55 deveria trazer ev.pid; se não trouxer, skip.
     if not child_pid then return end
 
     local parent_pid = ppid_of(child_pid)

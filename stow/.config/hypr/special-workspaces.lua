@@ -52,6 +52,14 @@ local function define_special(name, key, opts)
             core.workspace_auto_route_classes[class] = name
         end
     end
+
+    -- Registry pra specials-feed (sem io.popen — só metadados estáticos)
+    table.insert(core.known_specials, {
+        name  = name,
+        ws    = ws,
+        label = opts.label or name,
+        color = opts.border or DEFAULT_BORDER,
+    })
 end
 
 -- ── Nomeados ─────────────────────────────────────────────────

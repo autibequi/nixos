@@ -79,3 +79,14 @@ on("window.urgent", function(ev)
     local class = (ev and (ev.class or ev.window_class)) or "?"
     core.notify("Urgent: " .. class, nil, { timeout = 1200, urgency = "normal" })
 end)
+
+-- ── Clients cache invalidation ───────────────────────────────
+-- Invalida apenas em eventos estruturais (nova janela, janela fechou, moveu
+-- de workspace). NÃO inclui window.title/window.class — esses disparam
+-- frequentemente (Chrome/YouTube) e forçariam io.popen("hyprctl clients")
+-- dentro do event handler → conecta ao IPC do Hyprland na mesma thread →
+-- freeze de 10s. TTL de 1s é suficiente como fallback.
+local function invalidate() core.invalidate_clients_cache() end
+on("window.open",              invalidate)
+on("window.close",             invalidate)
+on("window.move_to_workspace", invalidate)

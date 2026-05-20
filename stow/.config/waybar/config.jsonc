@@ -47,9 +47,9 @@
 		"on-click": "screenrecord-toggle"
 	},
 	"custom/special-workspaces": {
-		"exec": "$HOME/.config/waybar/special-workspaces.sh",
+		"exec": "cat /tmp/waybar-specials.json 2>/dev/null || echo '{\"text\":\"\",\"class\":\"empty\"}'",
 		"return-type": "json",
-		"interval": 5,
+		"interval": 30,
 		"signal": 11,
 		"format": "{}",
 		"escape": false,

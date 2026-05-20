@@ -59,11 +59,13 @@ require("help")
 
 -- Profiles + features de produtividade
 require("profiles")           -- default/focus/meeting/battery cycle (SUPER+SHIFT+P)
+require("auto_profile")       -- AC change → switch profile automático
 require("cycler")             -- MOD3+I cicla por class
 require("hud")                -- SUPER+; peek de estado
 require("pomodoro")           -- SUPER+SHIFT+T (depende de profiles)
 require("submaps")            -- smart_save/close/reload
 require("followme")           -- MOD3+F sync workspaces entre monitores
+require("layouts")            -- snapshots de janelas por workspace (CLI: hypr-layout)
 
 -- Hooks reativos (consomem registries populados pelos requires acima)
 require("events")

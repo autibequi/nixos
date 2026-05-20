@@ -86,21 +86,29 @@ km.fn("SUPER + n", function() toggle_theme() end,
     { desc = "Toggle dark/light theme", group = "Theme", icon = "🌓" })
 
 -- ── Multimedia ──────────────────────────────────────────────
--- swayosd-client mostra OSD visual + altera valor real (pipewire/brightnessctl).
+-- Sem swayosd: waybar mostra `pulseaudio` e `backlight` em tempo real
+-- (pulseaudio module subscreve eventos pipewire; backlight via sysfs inotify).
+-- Pra mic/caps usamos notify-send com x-canonical-private-synchronous,
+-- que substitui a notif anterior em vez de stackar — discreto.
+local SYNC_HINT_MIC  = "--hint string:x-canonical-private-synchronous:mic"
+local SYNC_HINT_CAPS = "--hint string:x-canonical-private-synchronous:caps"
+
 km.repeating("XF86AudioRaiseVolume",
-    hl.dsp.exec_cmd("swayosd-client --output-volume raise"),
+    hl.dsp.exec_cmd("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"),
     { desc = "Volume up", group = "Audio", icon = "🔊" })
 
 km.repeating("XF86AudioLowerVolume",
-    hl.dsp.exec_cmd("swayosd-client --output-volume lower"),
+    hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),
     { desc = "Volume down", group = "Audio", icon = "🔉" })
 
 km.bind("XF86AudioMute",
-    hl.dsp.exec_cmd("swayosd-client --output-volume mute-toggle"),
+    hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),
     { desc = "Mute toggle", group = "Audio", icon = "🔇" })
 
-km.bind("XF86AudioMicMute",
-    hl.dsp.exec_cmd("swayosd-client --input-volume mute-toggle"),
+km.app("XF86AudioMicMute",
+    "sh -c 'wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle && " ..
+    "state=$(wpctl get-volume @DEFAULT_AUDIO_SOURCE@ | grep -q MUTED && echo MUTED || echo on); " ..
+    "notify-send -t 800 " .. SYNC_HINT_MIC .. " \"🎙 Mic $state\"'",
     { desc = "Mic mute toggle", group = "Audio", icon = "🎙" })
 
 km.bind("XF86AudioPlay",
@@ -120,13 +128,14 @@ km.bind("XF86AudioPrev",
     { desc = "Previous track", group = "Media", icon = "⏮" })
 
 km.repeating("XF86MonBrightnessUp",
-    hl.dsp.exec_cmd("swayosd-client --brightness raise"),
+    hl.dsp.exec_cmd("brightnessctl set +5%"),
     { desc = "Brightness up", group = "Brightness", icon = "☀" })
 
 km.repeating("XF86MonBrightnessDown",
-    hl.dsp.exec_cmd("swayosd-client --brightness lower"),
+    hl.dsp.exec_cmd("brightnessctl set 5%-"),
     { desc = "Brightness down", group = "Brightness", icon = "🌙" })
 
 km.release("Caps_Lock",
-    hl.dsp.exec_cmd("swayosd-client --caps-lock"),
-    { desc = "Caps Lock OSD", group = "System" })
+    hl.dsp.exec_cmd("sh -c 'state=$(grep -q on <(xset q | grep \"Caps Lock\") && echo ON || echo OFF); " ..
+        "notify-send -t 600 " .. SYNC_HINT_CAPS .. " \"⇪ Caps $state\"'"),
+    { desc = "Caps Lock indicator (discreet)", group = "System" })

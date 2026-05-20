@@ -88,9 +88,10 @@ end
 write_all(IN_FILE, "")
 write_all(OUT_FILE, "")
 
--- Timer periódico (500ms: REPL responsivo, sem impactar keybinds)
+-- Timer periódico (1000ms: menos frequente pra não competir com event handlers.
+-- 1s ainda é responsivo o suficiente pra debug interativo.)
 local ok, err = pcall(function()
-    hl.timer(poll, { timeout = 500, type = "repeat" })
+    hl.timer(poll, { timeout = 1000, type = "repeat" })
 end)
 if not ok then
     hl.exec_cmd("logger -t hyprland-lua 'repl timer falhou: " .. tostring(err) .. "'")

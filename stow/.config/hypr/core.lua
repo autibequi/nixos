@@ -89,9 +89,27 @@ function M.other_monitor(cur_name)
 end
 
 -- ── clients_cached(ttl_s?) — cache em torno de get_clients_compat
---    Reduz io.popen("hyprctl clients -j") redundante em keybinds
---    rápidos (cycler/submaps/hud/picker). Default 1s.
+--    Reduz io.popen("hyprctl clients -j") em keybinds rápidos
+--    (cycler/submaps/hud/picker/hyprshortcuts).
+--
+--  Invalidação dupla:
+--    1. TTL (default 1s) — fallback se algum evento escapar
+--    2. Event-driven (window.open/close/move_to_workspace) — preferencial:
+--       cache fica válido 100% do tempo entre eventos. Registrado em
+--       events.lua via core.invalidate_clients_cache().
 local _clients_cache = { at = 0, data = nil }
+
+function M.invalidate_clients_cache()
+    _clients_cache.data = nil
+end
+
+-- clients_stale() — retorna o cache como está, SEM nunca chamar io.popen.
+-- Útil em event handlers onde io.popen("hyprctl clients") deadlocaria o IPC.
+-- Retorna lista vazia se o cache nunca foi populado.
+function M.clients_stale()
+    return _clients_cache.data or {}
+end
+
 function M.clients_cached(ttl_s)
     ttl_s = ttl_s or 1
     local now = os.time()
@@ -115,10 +133,12 @@ end
 -- ── Policy registries (preenchidos por special-workspaces.lua) ─
 --    workspace_active_handlers[ws_name_com_prefixo]    → fn(ev)
 --    workspace_auto_route_classes[window_class]        → ws_name_sem_prefixo
+--    known_specials                                     → { {name, label, color}, ... }
 --
---  Consumidos por events.lua. Defaults vazios (ninguém precisa popular).
+--  Consumidos por events.lua e specials-feed.lua. Defaults vazios.
 M.workspace_active_handlers     = {}
 M.workspace_auto_route_classes  = {}
+M.known_specials                = {}  -- registry sem io.popen pra specials-feed
 
 -- ── rofi_menu(entries, opts) — shell-out unificado ────────────
 --    entries = list of { display = "...", payload = "..." }
