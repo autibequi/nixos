@@ -3,13 +3,15 @@
 --  dark_theme(), light_theme(), toggle_theme()
 -- ============================================================
 
+local core = require("core")
+
 local HOME = os.getenv("HOME")
 
-local THEME_STATE_FILE = HOME .. "/.cache/hyprland/hyprutils_theme_state"
 local ALACRITTY_CONFIG = HOME .. "/.config/alacritty/alacritty.toml"
 local WALLPAPER_DARK   = HOME .. "/assets/wallpapers/the-wild-hunt-of-odin.jpg"
 local WALLPAPER_LIGHT  = HOME .. "/assets/wallpapers/the-death-of-socrates.jpg"
 
+local STATE = core.state_file("hyprutils_theme_state")
 local _theme_state = "dark"  -- estado em memória (sincronizado com arquivo em disco)
 
 local function write_gtk_config(path, theme_name, prefer_dark)
@@ -46,18 +48,12 @@ end
 
 local function save_theme_state(state)
     _theme_state = state
-    os.execute("mkdir -p " .. HOME .. "/.cache/hyprland")
-    local f = io.open(THEME_STATE_FILE, "w")
-    if f then f:write(state) f:close() end
+    STATE.save(state)
 end
 
 local function load_theme_state()
-    local f = io.open(THEME_STATE_FILE, "r")
-    if f then
-        local s = f:read("*l")
-        f:close()
-        if s then _theme_state = s end
-    end
+    local s = STATE.load()
+    if s then _theme_state = s end
 end
 
 load_theme_state()
@@ -98,9 +94,9 @@ end
 function toggle_theme()
     if _theme_state == "dark" then
         light_theme()
-        hl.exec_cmd("notify-send -t 500 'Theme changed to light'")
+        core.notify("Theme changed to light", nil, { timeout = 500 })
     else
         dark_theme()
-        hl.exec_cmd("notify-send -t 500 'Theme changed to dark'")
+        core.notify("Theme changed to dark", nil, { timeout = 500 })
     end
 end

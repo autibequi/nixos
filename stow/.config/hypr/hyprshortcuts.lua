@@ -5,11 +5,9 @@
 --  Agora: consome keymap._binds (com desc/group/icon semânticos)
 -- ============================================================
 
-local km = require("keymap")
-
-local function escape_sh(s)
-    return (s or ""):gsub("'", "'\\''")
-end
+local km        = require("keymap")
+local core      = require("core")
+local escape_sh = core.escape_sh
 
 -- Render: "[group] icon  combo  ⟶  desc"
 local function format_entry(e)
@@ -25,7 +23,7 @@ end
 function show_shortcuts()
     local entries = km.cheatsheet()
     if #entries == 0 then
-        hl.exec_cmd("notify-send 'show_shortcuts' 'Registry vazio' -u low")
+        core.notify("show_shortcuts", "Registry vazio", { urgency = "low" })
         return
     end
 

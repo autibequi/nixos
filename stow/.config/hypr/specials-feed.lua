@@ -10,20 +10,14 @@
 --  nada muda.
 -- ============================================================
 
+local core   = require("core")
 local SIGNAL = "pkill -RTMIN+11 waybar"
 
 local function refresh()
     hl.exec_cmd(SIGNAL)
 end
 
--- Wrapper igual ao de events.lua — silencia se o evento não existir
-local function on(event, handler)
-    local ok, err = pcall(function() hl.on(event, handler) end)
-    if not ok then
-        hl.exec_cmd("logger -t hyprland-lua 'specials-feed: hl.on("
-            .. event .. ") falhou: " .. tostring(err) .. "'")
-    end
-end
+local on = core.on
 
 -- ── Eventos que mudam o estado dos specials ──────────────────
 on("workspace.created",         refresh)

@@ -6,9 +6,11 @@
 --  State em memória + arquivo (persiste reload).
 -- ============================================================
 
+local core = require("core")
+
 local M = {}
 
-local STATE_FILE = os.getenv("HOME") .. "/.cache/hyprland/profile_state"
+local STATE = core.state_file("profile_state")
 
 local profiles = {
     default = {
@@ -19,7 +21,7 @@ local profiles = {
             ["animations:enabled"]    = "true",
         },
         on_enter = function()
-            hl.exec_cmd("notify-send -t 800 'Profile: default' -u low")
+            core.notify("Profile: default", nil, { timeout = 800, urgency = "low" })
         end,
     },
     focus = {
@@ -31,7 +33,7 @@ local profiles = {
         },
         on_enter = function()
             hl.exec_cmd("swaync-client -d")  -- DND
-            hl.exec_cmd("notify-send -t 800 'Focus mode' 'DND on, sem animações' -u low")
+            core.notify("Focus mode", "DND on, sem animações", { timeout = 800, urgency = "low" })
         end,
     },
     meeting = {
@@ -44,7 +46,7 @@ local profiles = {
         on_enter = function()
             hl.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ 0")
             hl.exec_cmd("brightnessctl s 80%")
-            hl.exec_cmd("notify-send -t 800 'Meeting mode' 'Mic on, brilho 80%' -u low")
+            core.notify("Meeting mode", "Mic on, brilho 80%", { timeout = 800, urgency = "low" })
         end,
     },
     battery = {
@@ -57,7 +59,7 @@ local profiles = {
         on_enter = function()
             -- Hint pra launcher.lua: novos spawns sem gpu-offload
             os.execute("touch " .. os.getenv("HOME") .. "/.cache/hyprland/no_gpu")
-            hl.exec_cmd("notify-send -t 800 'Battery mode' 'GPU offload desabilitado' -u low")
+            core.notify("Battery mode", "GPU offload desabilitado", { timeout = 800, urgency = "low" })
         end,
         on_exit = function()
             os.execute("rm -f " .. os.getenv("HOME") .. "/.cache/hyprland/no_gpu")
@@ -70,19 +72,11 @@ local ORDER = { "default", "focus", "meeting", "battery" }
 local _current = "default"
 
 local function load_state()
-    local f = io.open(STATE_FILE, "r")
-    if f then
-        local s = f:read("*l")
-        f:close()
-        if s and profiles[s] then _current = s end
-    end
+    local s = STATE.load()
+    if s and profiles[s] then _current = s end
 end
 
-local function save_state(name)
-    os.execute("mkdir -p " .. os.getenv("HOME") .. "/.cache/hyprland")
-    local f = io.open(STATE_FILE, "w")
-    if f then f:write(name) f:close() end
-end
+local function save_state(name) STATE.save(name) end
 
 function M.apply(name)
     local p = profiles[name]

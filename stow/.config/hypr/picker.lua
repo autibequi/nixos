@@ -5,24 +5,17 @@
 --  Bind: MOD3+Tab (vazio no setup; SUPER+Tab é maximize).
 -- ============================================================
 
-local function escape_sh(s)
-    return (s or ""):gsub("'", "'\\''")
-end
-
--- Trunca títulos longos pra cheatsheet ficar legível
-local function trunc(s, n)
-    s = s or ""
-    if #s <= n then return s end
-    return s:sub(1, n - 1) .. "…"
-end
+local core      = require("core")
+local escape_sh = core.escape_sh
+local trunc     = core.trunc
 
 function window_picker(opts)
     opts = opts or {}
     local current_ws_only = opts.current_ws
 
-    -- get_clients_compat() devolve table de janelas. Estrutura provável:
+    -- core.clients_cached() devolve table de janelas. Estrutura provável:
     -- { address, class, title, workspace = {id, name}, monitor, ... }
-    local clients = get_clients_compat() or {}
+    local clients = core.clients_cached()
 
     local cur_ws_id
     if current_ws_only then
@@ -47,7 +40,7 @@ function window_picker(opts)
     end
 
     if #entries == 0 then
-        hl.exec_cmd("notify-send 'Window picker' 'Nenhuma janela' -u low")
+        core.notify("Window picker", "Nenhuma janela", { urgency = "low" })
         return
     end
 

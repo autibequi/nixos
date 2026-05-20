@@ -3,6 +3,8 @@
 --  Usa APIs nativas do Hyprland 0.55 Lua onde possível
 -- ============================================================
 
+local core = require("core")
+
 -- ── State em memória (substitui arquivos ~/.cache/hyprland/) ─
 -- Perdido em reload — aceitável (mesmo comportamento de arquivos em /tmp em novos boots)
 local _last_special_ws = {}  -- { monitor_name = ws_name }
@@ -49,11 +51,7 @@ local function active_special_name()
     return ""
 end
 
-local function other_monitor(cur_name)
-    for _, m in ipairs(hl.get_monitors() or {}) do
-        if m.name ~= cur_name then return m end
-    end
-end
+local other_monitor = core.other_monitor
 
 -- ── Clients compat ───────────────────────────────────────────
 -- hl.get_clients() não existe no Hyprland 0.55 Lua. Fallback:
@@ -196,7 +194,7 @@ end
 
 function quickshell_restart()
     hl.exec_cmd("pkill quickshell")
-    hl.timer(function() hl.exec_cmd("uwsm app -- qs") end, { timeout = 300, type = "oneshot" })
+    core.timer(300, function() hl.exec_cmd("uwsm app -- qs") end)
 end
 
 -- ── Clipboard ─────────────────────────────────────────────────
@@ -251,7 +249,7 @@ end
 function move_special_workspace_to_monitor()
     local active = active_special_name()
     if active == "" then
-        hl.exec_cmd("notify-send Hyprland 'No special workspace visible' -u low")
+        core.notify("Hyprland", "No special workspace visible", { urgency = "low" })
         return
     end
 
@@ -280,5 +278,5 @@ function hypr_reload()
     waybar_refresh()
     quickshell_restart()
     hl.exec_cmd("hyprctl reload")
-    hl.exec_cmd("notify-send 'Hyprland reloaded' -u low")
+    core.notify("Hyprland reloaded", nil, { urgency = "low" })
 end

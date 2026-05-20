@@ -8,7 +8,10 @@
 local _cfgdir = os.getenv("HOME") .. "/.config/hypr"
 package.path = _cfgdir .. "/?.lua;" .. package.path
 
--- Utils e theme carregados primeiro (outros módulos dependem das funções)
+-- Core (helpers compartilhados) carregado antes de tudo
+require("core")
+
+-- Utils e theme carregados em seguida (outros módulos dependem das funções)
 require("utils")
 require("theme")
 

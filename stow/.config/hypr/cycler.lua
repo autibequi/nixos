@@ -10,17 +10,11 @@
 --    sem SHIFT → próxima janela do app (forward — alt-tab style)
 -- ============================================================
 
-local function focused_window()
-    local clients = get_clients_compat() or {}
-    for _, c in ipairs(clients) do
-        if c.focused then return c end
-    end
-    return nil
-end
+local core = require("core")
 
 local function siblings_of(class, exclude_addr)
     local out = {}
-    for _, c in ipairs(get_clients_compat() or {}) do
+    for _, c in ipairs(core.clients_cached()) do
         if c.class == class and c.address ~= exclude_addr then
             table.insert(out, c)
         end
@@ -36,15 +30,15 @@ local function siblings_of(class, exclude_addr)
 end
 
 function cycle_same_class()
-    local cur = focused_window()
+    local cur = core.focused()
     if not cur then
-        hl.exec_cmd("notify-send 'Cycler' 'Sem janela focada' -u low")
+        core.notify("Cycler", "Sem janela focada", { urgency = "low" })
         return
     end
     local sibs = siblings_of(cur.class, cur.address)
     if #sibs == 0 then
-        hl.exec_cmd("notify-send -t 800 'Cycler' " ..
-            "'" .. (cur.class or "?") .. ": única instância' -u low")
+        core.notify("Cycler", (cur.class or "?") .. ": única instância",
+            { timeout = 800, urgency = "low" })
         return
     end
     local next_w = sibs[1]
@@ -53,7 +47,7 @@ end
 
 -- Cycle backwards: pega o último irmão por ordem
 function cycle_same_class_back()
-    local cur = focused_window()
+    local cur = core.focused()
     if not cur then return end
     local sibs = siblings_of(cur.class, cur.address)
     if #sibs == 0 then return end

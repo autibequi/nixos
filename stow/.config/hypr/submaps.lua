@@ -11,11 +11,11 @@
 --    SUPER+SHIFT+r  → "reload smart" (F5 em browsers; nop em outros)
 -- ============================================================
 
+local core = require("core")
+
 local function focused_class()
-    for _, c in ipairs(get_clients_compat() or {}) do
-        if c.focused then return c.class or "" end
-    end
-    return ""
+    local f = core.focused()
+    return (f and f.class) or ""
 end
 
 local SAVE_RULES = {
@@ -62,8 +62,8 @@ end
 function smart_save()
     local class = focused_class()
     dispatch(SAVE_RULES[class], function()
-        hl.exec_cmd("notify-send -t 600 'smart_save' " ..
-            "'sem rule pra " .. (class ~= "" and class or "?") .. "' -u low")
+        core.notify("smart_save", "sem rule pra " .. (class ~= "" and class or "?"),
+            { timeout = 600, urgency = "low" })
     end)
 end
 
@@ -77,8 +77,8 @@ end
 function smart_reload()
     local class = focused_class()
     dispatch(RELOAD_RULES[class], function()
-        hl.exec_cmd("notify-send -t 600 'smart_reload' " ..
-            "'sem rule pra " .. (class ~= "" and class or "?") .. "' -u low")
+        core.notify("smart_reload", "sem rule pra " .. (class ~= "" and class or "?"),
+            { timeout = 600, urgency = "low" })
     end)
 end
 

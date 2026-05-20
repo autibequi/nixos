@@ -5,6 +5,8 @@
 --  Mostra: workspace atual, profile, special-stack, contagens.
 -- ============================================================
 
+local core = require("core")
+
 local function get_profile_current()
     local ok, profiles = pcall(require, "profiles")
     if ok and profiles and profiles.current then return profiles.current() end
@@ -15,7 +17,7 @@ function show_hud()
     local mon  = hl.get_active_monitor() or {}
     local ws   = mon.activeWorkspace or {}
     local sws  = mon.specialWorkspace or {}
-    local clients = get_clients_compat() or {}
+    local clients = core.clients_cached()
 
     -- contagem por workspace
     local count_ws, count_class = 0, {}
@@ -46,8 +48,7 @@ function show_hud()
     }
 
     local body = table.concat(lines, "\n")
-    hl.exec_cmd("notify-send -t 3500 -a HUD '⌘ Hyprland HUD' '" ..
-        body:gsub("'", "'\\''") .. "'")
+    core.notify("⌘ Hyprland HUD", body, { timeout = 3500, app = "HUD" })
 end
 
 hl.bind("SUPER + semicolon", function() show_hud() end)

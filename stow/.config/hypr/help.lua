@@ -8,6 +8,7 @@
 -- ============================================================
 
 local km_ok, km = pcall(require, "keymap")
+local core      = require("core")
 
 local HEADER = [[
 # 🪟 HYPRLAND CONFIG — MANUAL COMPLETO
@@ -305,7 +306,7 @@ function show_help()
     local path = "/tmp/hyprland-help.md"
     local f = io.open(path, "w")
     if not f then
-        hl.exec_cmd("notify-send 'help' 'Falhou ao escrever " .. path .. "' -u critical")
+        core.notify("help", "Falhou ao escrever " .. path, { urgency = "critical" })
         return
     end
     f:write(md)
