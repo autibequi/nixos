@@ -11,14 +11,20 @@ package.path = _cfgdir .. "/?.lua;" .. package.path
 -- Core (helpers compartilhados) carregado antes de tudo
 require("core")
 
--- Utils e theme carregados em seguida (outros módulos dependem das funções)
-require("utils")
-require("theme")
-
 -- Infra Lua-first: keymap (registry) e launcher (decoradores)
 -- Devem vir ANTES de application/systemtools que consomem ambos.
 require("keymap")
 require("launcher")
+
+-- Helpers baixo nível: clients (parse hyprctl), services (waybar/qs/reload),
+-- screenshots/OCR. Carregados antes de utils.lua que pode chamar.
+require("clients")
+require("services")
+require("screenshots")
+
+-- Utils (state special workspace + workspace_switch) e theme
+require("utils")
+require("theme")
 
 -- Hardware
 require("monitors")
@@ -78,30 +84,9 @@ hl.env("XCURSOR_SIZE",     "48")
 hl.env("XCURSOR_THEME",    "BreezeX-RosePine-Linux")
 
 -- =============================================
---  AUTOSTART
+--  AUTOSTART (em autostart.lua — usa hl.on("hyprland.start"))
 -- =============================================
-
-hl.on("hyprland.start", function()
-    -- Cursor XWayland
-    hl.exec_cmd("xrdb ~/.Xresources")
-    hl.exec_cmd("hyprctl setcursor BreezeX-RosePine-Linux 48")
-
-    -- Session core
-    hl.exec_cmd("systemctl --user start hyprpolkitagent")
-    hl.exec_cmd("uwsm app -- swayosd-server")
-    hl.exec_cmd("uwsm app -- waybar")
-    hl.exec_cmd("uwsm app -- qs")
-    hl.exec_cmd("uwsm app -- swww-daemon")
-    hl.exec_cmd("swww img " .. os.getenv("HOME") ..
-        "/assets/wallpapers/the-wild-hunt-of-odin.jpg --transition-type none")
-    hl.exec_cmd("uwsm app -- swaync")
-
-    -- Clipboard
-    hl.exec_cmd("uwsm app -- wl-paste --watch cliphist store")
-
-    -- Tema escuro inicial
-    dark_theme()
-end)
+require("autostart")
 
 -- =============================================
 --  CONFIGURAÇÃO GERAL

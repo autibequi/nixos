@@ -12,6 +12,7 @@
 -- ============================================================
 
 local core = require("core")
+local km   = require("keymap")
 
 local function focused_class()
     local f = core.focused()
@@ -82,6 +83,9 @@ function smart_reload()
     end)
 end
 
-hl.bind("SUPER + SHIFT + s", function() smart_save() end)
-hl.bind("SUPER + SHIFT + w", function() smart_close() end)
-hl.bind("SUPER + SHIFT + r", function() smart_reload() end)
+km.fn("SUPER + SHIFT + s", function() smart_save() end,
+    { desc = "Smart save (Ctrl+S por app)",  group = "Smart", icon = "💾" })
+km.fn("SUPER + SHIFT + w", function() smart_close() end,
+    { desc = "Smart close (Ctrl+W ou kill)", group = "Smart", icon = "✕" })
+km.fn("SUPER + SHIFT + r", function() smart_reload() end,
+    { desc = "Smart reload (F5 em browser)", group = "Smart", icon = "↻" })

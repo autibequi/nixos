@@ -9,6 +9,7 @@
 -- ============================================================
 
 local core = require("core")
+local km   = require("keymap")
 
 local STATUS = core.state_file("pomodoro")
 local WORK_MS  = 25 * 60 * 1000
@@ -77,4 +78,5 @@ function pomodoro_status()
 end
 
 STATUS.save("idle")
-hl.bind("SUPER + SHIFT + t", function() pomodoro_toggle() end)
+km.fn("SUPER + SHIFT + t", function() pomodoro_toggle() end,
+    { desc = "Pomodoro toggle (work/break/cancel)", group = "Timer", icon = "🍅" })

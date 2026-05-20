@@ -6,6 +6,7 @@
 -- ============================================================
 
 local core = require("core")
+local km   = require("keymap")
 
 local function get_profile_current()
     local ok, profiles = pcall(require, "profiles")
@@ -51,4 +52,5 @@ function show_hud()
     core.notify("⌘ Hyprland HUD", body, { timeout = 3500, app = "HUD" })
 end
 
-hl.bind("SUPER + semicolon", function() show_hud() end)
+km.fn("SUPER + semicolon", function() show_hud() end,
+    { desc = "HUD peek (workspace/profile/clients)", group = "System", icon = "⌘" })

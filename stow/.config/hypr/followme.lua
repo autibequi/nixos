@@ -10,6 +10,7 @@
 -- ============================================================
 
 local core = require("core")
+local km   = require("keymap")
 
 local PAIRS = {
     ["1"]  = "7",   ["7"]  = "1",
@@ -52,4 +53,6 @@ end
 
 function followme_status() return _follow_enabled end
 
-hl.bind("MOD3 + f", function() followme_toggle() end)
+km.fn("MOD3 + f", function() followme_toggle() end,
+    { desc = "Follow-me toggle (sync workspaces entre monitores)",
+      group = "Monitor", icon = "🔗" })

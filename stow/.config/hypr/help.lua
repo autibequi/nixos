@@ -7,8 +7,9 @@
 --  Salva em /tmp/hyprland-help.md e abre em alacritty + bat/less.
 -- ============================================================
 
-local km_ok, km = pcall(require, "keymap")
-local core      = require("core")
+local km   = require("keymap")
+local core = require("core")
+local km_ok = true  -- agora sempre disponível (compat com bloco abaixo)
 
 local HEADER = [[
 # 🪟 HYPRLAND CONFIG — MANUAL COMPLETO
@@ -338,4 +339,5 @@ hl.window_rule({
     size   = { "monitor_w*0.7", "monitor_h*0.8" },
 })
 
-hl.bind("SUPER + comma", function() show_help() end)
+km.fn("SUPER + comma", function() show_help() end,
+    { desc = "Hyprland manual (markdown)", group = "Help", icon = "📖" })

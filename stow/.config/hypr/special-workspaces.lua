@@ -2,13 +2,17 @@
 --  SPECIAL WORKSPACES — portado de special-workspaces.conf
 -- ============================================================
 
+local km = require("keymap")
+local L  = require("launcher")
+
 local DEFAULT_GAPS    = 32
 local DEFAULT_BORDER  = "rgba(7c3aedcc)"
 
 -- Helper: cada special workspace tem mesmo shape (rule + border + binds)
 local function define_special(name, key, opts)
     opts = opts or {}
-    local ws = "special:" .. name
+    local ws    = "special:" .. name
+    local label = opts.label or name
 
     local rule = { workspace = ws, gaps_out = DEFAULT_GAPS, layout = "scrolling" }
     if opts.on_created_empty then rule.on_created_empty = opts.on_created_empty end
@@ -22,30 +26,39 @@ local function define_special(name, key, opts)
         hl.window_rule({ match = { workspace = ws }, tile = true })
     end
 
-    hl.bind("SUPER + "         .. key, function() workspace_switch(ws) end)
-    hl.bind("SUPER + SHIFT + " .. key, hl.dsp.window.move({ workspace = ws, follow = false }))
+    km.fn("SUPER + " .. key, function() workspace_switch(ws) end,
+        { desc = "Toggle special:" .. label, group = "Special" })
+    km.bind("SUPER + SHIFT + " .. key,
+        hl.dsp.window.move({ workspace = ws, follow = false }),
+        { desc = "Move window → special:" .. label, group = "Special" })
 end
 
 -- ── Nomeados ─────────────────────────────────────────────────
 define_special("gemini", "g", {
-    on_created_empty = "uwsm app -- gpu-offload google-chrome-stable --app=https://gemini.google.com/",
+    label            = "gemini",
+    on_created_empty = L.chrome("https://gemini.google.com/"),
     tile             = true,
 })
 define_special("bleh", "grave", {
-    on_created_empty = "uwsm app -- gpu-offload alacritty",
+    label            = "bleh (terminal)",
+    on_created_empty = L.build("alacritty", { gpu = "offload" }),
     border           = "rgba(fff700dd)",
 })
 
 -- ── F-keys ───────────────────────────────────────────────────
-define_special("f1", "F1", { on_created_empty = "uwsm app -- obsidian \"obsidian://open?vault=Work\"" })
+define_special("f1", "F1", { label = "f1 (Work vault)",
+    on_created_empty = L.build([[obsidian "obsidian://open?vault=Work"]]) })
 define_special("f2", "F2")
 define_special("f3", "F3")
 define_special("f4", "F4")
-define_special("f5", "F5", { on_created_empty = "uwsm app -- gpu-offload google-chrome-stable --app=https://chat.google.com" })
+define_special("f5", "F5", { label = "f5 (Chat)",
+    on_created_empty = L.chrome("https://chat.google.com") })
 define_special("f6", "F6")
 define_special("f7", "F7")
-define_special("f8", "F8", { on_created_empty = "uwsm app -- gpu-offload zeditor ~/nixos" })
+define_special("f8", "F8", { label = "f8 (Zed nixos)",
+    on_created_empty = L.build("zeditor ~/nixos", { gpu = "offload" }) })
 define_special("f9", "F9", {
-    on_created_empty = "uwsm app -- obsidian \"obsidian://open?vault=.ovault\"",
+    label            = "f9 (.ovault, no_screen_share)",
+    on_created_empty = L.build([[obsidian "obsidian://open?vault=.ovault"]]),
     no_screen_share  = true,
 })

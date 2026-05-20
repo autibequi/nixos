@@ -7,6 +7,7 @@
 -- ============================================================
 
 local core = require("core")
+local km   = require("keymap")
 
 local M = {}
 
@@ -106,6 +107,8 @@ load_state()
 
 -- Bind global: SUPER+SHIFT+P (Profile) cycle.
 -- Combo "P" não conflita: SUPER+p é hyprpicker; SHIFT diferencia.
-hl.bind("SUPER + SHIFT + p", function() M.cycle() end)
+km.fn("SUPER + SHIFT + p", function() M.cycle() end,
+    { desc = "Cycle profile (default/focus/meeting/battery)",
+      group = "Profile", icon = "⚙" })
 
 return M

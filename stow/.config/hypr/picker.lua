@@ -6,6 +6,7 @@
 -- ============================================================
 
 local core      = require("core")
+local km        = require("keymap")
 local escape_sh = core.escape_sh
 local trunc     = core.trunc
 
@@ -74,5 +75,7 @@ addr="${addrs[$idx]}"
 end
 
 -- Binds: MOD3+Tab = todas; MOD3+SHIFT+Tab = só workspace atual
-hl.bind("MOD3 + Tab",         function() window_picker() end)
-hl.bind("MOD3 + SHIFT + Tab", function() window_picker({ current_ws = true }) end)
+km.fn("MOD3 + Tab",         function() window_picker() end,
+    { desc = "Window picker (all workspaces)", group = "Navigation", icon = "🪟" })
+km.fn("MOD3 + SHIFT + Tab", function() window_picker({ current_ws = true }) end,
+    { desc = "Window picker (current workspace)", group = "Navigation", icon = "🪟" })
