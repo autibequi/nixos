@@ -94,5 +94,8 @@
   '';
 
   # Cloudflare Warp
-  services.cloudflare-warp.enable = true;
+  services.cloudflare-warp = {
+    enable = true;
+    package = unstable.cloudflare-warp;
+  };
 }
