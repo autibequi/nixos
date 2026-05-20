@@ -7,8 +7,8 @@ CACHE=/tmp/.alacritty-bell.wav
 # Gera o WAV na primeira vez (ou se foi deletado)
 if [ ! -f "$CACHE" ] && [ -x "$NIX/sox" ]; then
   "$NIX/sox" \
-    "|$NIX/sox -n -p synth 0.22 sin 340  fade 0 0.22 0.060 vol 0.62" \
-    "|$NIX/sox -n -p synth 0.07 sin 1050 fade 0 0.07 0.015 vol 0.72" \
+    "|$NIX/sox -n -p synth 0.10 sin 440 fade 0 0.10 0.05 vol 0.18 pad 0 0.06" \
+    "|$NIX/sox -n -p synth 0.10 sin 660 fade 0 0.10 0.05 vol 0.22" \
     "$CACHE" 2>/dev/null
 fi
 
