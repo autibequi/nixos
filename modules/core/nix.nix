@@ -98,6 +98,8 @@
       "https://ai.cachix.org"
       "https://cuda-maintainers.cachix.org"
       "https://numtide.cachix.org"
+      # llm-agents.nix (numtide) — cache distinto do numtide.cachix.org
+      "https://cache.numtide.com"
       # Zed Editor
       "https://zed.cachix.org"
       "https://cache.garnix.io"
@@ -112,6 +114,8 @@
       "ai.cachix.org-1:N9dzRK+alWwoKXQlnn0H6aUx0lU/mspIoz8hMvGvbbc="
       "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
       "numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE="
+      # llm-agents.nix (numtide)
+      "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
       # Zed Editor
       "zed.cachix.org-1:/pHQ6dpMsAZk2DiP4WCL0p9YDNKWj2Q5FL20bNmw1cU="
       "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="

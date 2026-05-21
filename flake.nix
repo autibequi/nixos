@@ -1,10 +1,8 @@
 {
   description = "A very basic flake";
 
-  nixConfig = {
-    extra-substituters = [ "https://cache.numtide.com" ];
-    extra-trusted-public-keys = [ "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=" ];
-  };
+  # Caches configurados canonicamente em modules/core/nix.nix (nix.settings)
+  # nixConfig aqui seria redundante — accept-flake-config = true já está lá
 
   inputs = {
     # Nix Channels
@@ -36,6 +34,7 @@
 
     # AI coding agents — sem follows: usa nixpkgs-unstable próprio pra garantir hits no cache deles
     llm-agents.url = "github:numtide/llm-agents.nix";
+
   };
 
   # Outputs
