@@ -45,7 +45,7 @@ in
 {
   programs.hyprland = {
     enable = true;
-    package = hyprlandFlake.hyprland;
+    package = unstable.hyprland;
     xwayland.enable = true;
     withUWSM = true;
   };
@@ -207,9 +207,9 @@ in
     playerctl # Media control
 
     nwg-displays # Display management
-    nwg-panel   # Painel de controle (volume/brilho/audio out/exit menu)
-    wlogout     # Power menu GUI (lock/logout/suspend/reboot/shutdown)
-    swayosd     # On-screen display pra volume/brilho/caps (CLI: swayosd-client)
+    nwg-panel # Painel de controle (volume/brilho/audio out/exit menu)
+    wlogout # Power menu GUI (lock/logout/suspend/reboot/shutdown)
+    swayosd # On-screen display pra volume/brilho/caps (CLI: swayosd-client)
     hyprlock
     hyprls # Language Server for Hyprland config files
     cliphist # Clipboard history manager
