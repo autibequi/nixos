@@ -53,6 +53,9 @@
 		git checkout $1; \
 	}; f"
 
+	# Stashing
+	# Pop diff usage:
+	# pop-diff <branch> <target-branch>
 	pop-diff = "!f() { \
 	  files=$(git diff --name-only --diff-filter=AM \"$1..$2\"); \
 	  if [ -z \"$files\" ]; then \

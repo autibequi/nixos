@@ -1,6 +1,15 @@
 { pkgs, ... }:
 let
   user = "pedrinho";
+  indicatorPython = pkgs.python3.withPackages (ps: [ ps.pystray ps.pillow ]);
+  indicatorScript = "/home/${user}/.config/obsidian-sync-indicator/indicator.py";
+  indicatorGiPath = pkgs.lib.makeSearchPath "lib/girepository-1.0" [
+    pkgs.gtk3
+    pkgs.glib
+    pkgs.gdk-pixbuf
+    pkgs.pango
+    pkgs.libayatana-appindicator
+  ];
   vaultPath = "/home/${user}/.ovault";
   npmPrefix = "/home/${user}/.npm-global";
   nodejs = pkgs.nodejs_22;
@@ -52,5 +61,19 @@ in {
     };
 
     wantedBy = [ "multi-user.target" ];
+  };
+
+  systemd.user.services.obsidian-sync-indicator = {
+    description = "Obsidian Sync status indicator (system tray)";
+    after = [ "graphical-session-pre.target" ];
+    wantedBy = [ "graphical-session.target" ];
+    environment = {
+      GI_TYPELIB_PATH = indicatorGiPath;
+    };
+    serviceConfig = {
+      ExecStart = "${indicatorPython}/bin/python3 ${indicatorScript}";
+      Restart = "on-failure";
+      RestartSec = 5;
+    };
   };
 }

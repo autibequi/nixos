@@ -354,14 +354,15 @@ window#waybar {
  *                     BLUETOOTH                          *
  *========================================================*/
 #bluetooth {
-    color: @theme-fg-muted;
-    font-weight: 600;
+    color: @theme-fg;
+    font-weight: bold;
     min-width: 18px;
 }
 
 #bluetooth.connected {
     color: @theme-bg;
-    background-color: @dracula-cyan;
+    background-color: @theme-accent;
+    font-weight: bold;
 }
 
 /*========================================================*

@@ -188,7 +188,7 @@
 	},
 	// ─── PANELS ────────────────────────────────────────────────────
 	"project_panel": {
-		"dock": "left",
+		"dock": "right",
 		"entry_spacing": "standard",
 		"sort_mode": "directories_first",
 		"hide_root": true,
@@ -210,10 +210,10 @@
 		"auto_fold_dirs": true,
 	},
 	"git_panel": {
-		"dock": "left",
+		"dock": "right",
 		"fallback_branch_name": "main",
 		"tree_view": true,
-		"sort_by_path": false,
+		"sort_by_path": true,
 		"status_style": "icon",
 		"file_icons": false,
 		"diff_stats": true,
@@ -329,7 +329,7 @@
 	},
 	// ─── AI — AGENT ────────────────────────────────────────────────
 	"agent": {
-		"sidebar_side": "right",
+		"sidebar_side": "left",
 		"dock": "right",
 		"default_profile": "write",
 		"message_editor_min_lines": 2,

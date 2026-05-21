@@ -20,7 +20,6 @@
 	"modules-right": [
 		"mpris",
 		"custom/claude-usage",
-		"custom/obsidian-sync",
 		"group/system-controls",
 		"tray",
 		"bluetooth"
