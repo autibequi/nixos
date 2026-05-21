@@ -1,6 +1,7 @@
 {
   pkgs,
   unstable,
+  inputs,
   ...
 }:
 
@@ -105,6 +106,9 @@
     fortune
 
     home-manager
+
+    # ── AI Agents ──────────────────────────────────────
+    inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.coderabbit-cli
 
     # ── Testando ───────────────────────────────────────
     # evil-helix_git

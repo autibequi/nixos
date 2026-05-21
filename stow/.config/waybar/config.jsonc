@@ -137,7 +137,7 @@
 			"tooltip": true
 		},
 		"window-rewrite": {
-			"title<(.*[$%#] *)?([hb]|nv)top.*>": "btop",
+			"title<(.*[$%#] *)?([hb]|nv)top.*>": "󰓅",
 			"title<(.* - )?(.[0-9]+. )?YouTube Music.*>": "",
 			"title<(.*)(books - Obsidian)(.*)>": "",
 			"class<(.*)(chat)(.*)>": "󰍡",
@@ -153,7 +153,7 @@
 			"class<(.*)(chrome-claude)(.*)>": "✻",
 			"title<(.*)(Gemini)(.*)>": "󰼙",
 			"title<(.*)(JIRA)(.*)>": "󰌃",
-			"title<(.*)(Meet)(.*)>": "",
+			"title<(.*)(Meet)(.*)>": "󰔨",
 			"firefox": "",
 			"vivaldi": "",
 			"app.zen_browser.zen": "",
@@ -167,7 +167,7 @@
 			"Alacritty": "󰆍",
 			"ghostty": "󰆍",
 			"org.gnome.Nautilus": "",
-			"zed": "󰰶",
+			"zed": "𝗭",
 			"stremio": "🍿",
 			"insomnia": "",
 			"yaak-app": "󰆚",
@@ -212,7 +212,7 @@
 			"default": "<span>"
 		},
 		"window-rewrite": {
-			"title<(.*[$%#] *)?([hb]|nv)top.*>": "btop",
+			"title<(.*[$%#] *)?([hb]|nv)top.*>": "󰓅",
 			"title<(.* - )?(.[0-9]+. )?YouTube Music.*>": "",
 			"title<.* - Obsidian>": "",
 			"class<(.*)(chat)(.*)>": "󰍡",
@@ -228,7 +228,7 @@
 			"class<(.*)(chrome-claude)(.*)>": "✻",
 			"title<(.*)(Gemini)(.*)>": "󰼙",
 			"title<(.*)(JIRA)(.*)>": "󰌃",
-			"title<(.*)(Meet)(.*)>": "",
+			"title<(.*)(Meet)(.*)>": "󰔨",
 			"firefox": "",
 			"vivaldi": "",
 			"zen": "",

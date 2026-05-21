@@ -356,14 +356,14 @@ window#waybar {
  *========================================================*/
 #bluetooth {
     color: @theme-fg;
-    font-weight: bold;
     min-width: 18px;
+    text-shadow: 0 0 1px currentColor;
 }
 
 #bluetooth.connected {
     color: @theme-bg;
     background-color: @theme-accent;
-    font-weight: bold;
+    text-shadow: 0 0 1px currentColor;
 }
 
 /*========================================================*

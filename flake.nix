@@ -1,5 +1,11 @@
 {
   description = "A very basic flake";
+
+  nixConfig = {
+    extra-substituters = [ "https://cache.numtide.com" ];
+    extra-trusted-public-keys = [ "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=" ];
+  };
+
   inputs = {
     # Nix Channels
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
@@ -27,6 +33,9 @@
       url = "github:hyprwm/Hyprland";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
+
+    # AI coding agents — sem follows: usa nixpkgs-unstable próprio pra garantir hits no cache deles
+    llm-agents.url = "github:numtide/llm-agents.nix";
   };
 
   # Outputs
@@ -39,6 +48,7 @@
       claude-code,
       dms,
       hyprlandFlake,
+      llm-agents,
       ...
     }@inputs:
     let

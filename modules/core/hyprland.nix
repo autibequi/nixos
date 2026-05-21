@@ -1,6 +1,7 @@
 {
   lib,
   pkgs,
+  unstable,
   hyprlandFlake,
   ...
 }:
