@@ -50,12 +50,12 @@
 	"agent_ui_font_size": 14.0,
 	// ─── THEME & APPEARANCE ────────────────────────────────────────
 	"theme": {
-		"mode": "system",
+		"mode": "dark",
 		"light": "Dracula Light (Alucard)",
-		"dark": "Blackula"
+		"dark": "Dracula Solid"
 	},
 	"icon_theme": {
-		"mode": "system",
+		"mode": "dark",
 		"light": "VSCode Icons for Zed (Dark Angular)",
 		"dark": "VSCode Icons for Zed (Dark Angular)"
 	},
@@ -102,7 +102,7 @@
 	// Formatting
 	"use_on_type_format": true,
 	"show_whitespaces": "selection",
-	"diff_view_style": "unified",
+	"diff_view_style": "split",
 	// Scrolling
 	"scroll_beyond_last_line": "vertical_scroll_margin",
 	"vertical_scroll_margin": 22.0,
@@ -279,6 +279,7 @@
 	// ─── TERMINAL ──────────────────────────────────────────────────
 	"terminal": {
 		"dock": "bottom",
+		"bell": "system",
 		"max_scroll_history_lines": 1000,
 		"detect_venv": {
 			"on": {
@@ -330,7 +331,7 @@
 	// ─── AI — AGENT ────────────────────────────────────────────────
 	"agent": {
 		"sidebar_side": "left",
-		"dock": "right",
+		"dock": "left",
 		"default_profile": "write",
 		"message_editor_min_lines": 2,
 		"use_modifier_to_send": true,
@@ -349,22 +350,22 @@
 			"model": "claude-sonnet-4-5",
 		},
 		"favorite_models": [
-   {
-    "provider": "anthropic",
-    "model": "claude-sonnet-4-6-thinking-latest",
-    "enable_thinking": false
-   },
-   {
-    "provider": "anthropic",
-    "model": "claude-haiku-4-5-thinking-latest",
-    "enable_thinking": false
-   },
-   {
-    "provider": "zed.dev",
-    "model": "claude-haiku-4-5",
-    "enable_thinking": false
-   }
-  ],
+			{
+				"provider": "anthropic",
+				"model": "claude-sonnet-4-6-thinking-latest",
+				"enable_thinking": false
+			},
+			{
+				"provider": "anthropic",
+				"model": "claude-haiku-4-5-thinking-latest",
+				"enable_thinking": false
+			},
+			{
+				"provider": "zed.dev",
+				"model": "claude-haiku-4-5",
+				"enable_thinking": false
+			}
+		],
 	},
 	// ─── AI — AGENT SERVERS ────────────────────────────────────────
 	"agent_servers": {
