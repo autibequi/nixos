@@ -15,6 +15,45 @@ let
     # "com.github.tenderowl.frog"
     # "com.vivaldi.Vivaldi"
   ];
+
+  # 1b. Overrides por app — quebra o sandbox de forma declarativa.
+  # Cada entrada: {
+  #   filesystem = [ "xdg-config" "home" ... ];   # --filesystem flags
+  #   configLinks = { "zed" = "$HOME/.config/zed"; };  # symlinks dentro do dir
+  #     # privado do app (~/.var/app/<id>/config/<key>) apontando pro path
+  #     # do host. Necessário porque o runtime do Flatpak força XDG_CONFIG_HOME
+  #     # pro dir privado e ignora --env override.
+  # }
+  flatpakOverrides = {
+    "dev.zed.Zed" = {
+      filesystem = [ "xdg-config" ];
+      configLinks = { "zed" = "$HOME/.config/zed"; };
+    };
+    "dev.zed.Zed-Preview" = {
+      filesystem = [ "xdg-config" ];
+      configLinks = { "zed" = "$HOME/.config/zed"; };
+    };
+  };
+
+  overrideLines = lib.concatStringsSep "\n" (
+    lib.mapAttrsToList (app: cfg:
+      let
+        fsFlags = lib.concatMapStringsSep " "
+          (p: "--filesystem=${p}") (cfg.filesystem or []);
+        linkCmds = lib.concatStringsSep "\n" (lib.mapAttrsToList (sub: target: ''
+          mkdir -p "$HOME/.var/app/${app}/config"
+          link="$HOME/.var/app/${app}/config/${sub}"
+          if [ -e "$link" ] && [ ! -L "$link" ]; then
+            rm -rf "$link"
+          fi
+          ln -sfn "${target}" "$link"
+        '') (cfg.configLinks or {}));
+      in ''
+        ${pkgs.flatpak}/bin/flatpak override --user ${fsFlags} ${app}
+        ${linkCmds}
+      ''
+    ) flatpakOverrides
+  );
 in
 {
   services.flatpak.enable = true;
@@ -47,6 +86,9 @@ in
 
       # 7. Update all installed Flatpaks
       ${pkgs.flatpak}/bin/flatpak update -y
+
+      # 8. Apply filesystem overrides (sandbox holes para enxergar host config)
+      ${overrideLines}
     '';
   };
 }
