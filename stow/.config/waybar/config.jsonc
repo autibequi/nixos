@@ -8,7 +8,8 @@
 		"idle_inhibitor",
 		// "custom/vennon",
 		"hyprland/workspaces",
-		"hyprland/workspaces#special"
+		"hyprland/workspaces#special",
+		"mpris"
 		// "hyprland/window"
 	],
 	"modules-center": [
@@ -18,7 +19,6 @@
 		"battery"
 	],
 	"modules-right": [
-		"mpris",
 		"custom/claude-usage",
 		"group/system-controls",
 		"tray",
@@ -241,7 +241,7 @@
 	},
 	"mpris": {
 		"format": "{player_icon} {title} - {artist}",
-		"format-paused": "{status_icon} CALADO, MORTAL!",
+		"format-paused": "{status_icon} CALA A BOCA!",
 		"max-length": 30,
 		"tooltip-format": "{title} | {artist}",
 		"player-icons": {
