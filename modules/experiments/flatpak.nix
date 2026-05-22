@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
   # We point directly to 'gnugrep' instead of 'grep'
   grep = pkgs.gnugrep;
@@ -8,7 +8,9 @@ let
     # "com.usebottles.bottles"
     # "io.github.seadve.Kooha"
     # "net.nokyan.Resources"
-    "com.stremio.Stremio"
+    # "com.stremio.Stremio"
+    "dev.zed.Zed"
+    "dev.zed.Zed-Preview"
     # "io.github.qwersyk.Newelle"
     # "com.github.tenderowl.frog"
     # "com.vivaldi.Vivaldi"

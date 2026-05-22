@@ -33,9 +33,6 @@
   # fwupd — desativado (firmware update é manual, daemon rodando 24/7 não faz sentido)
   services.fwupd.enable = false;
 
-  # Flatpak — desativado (portal daemon desnecessário se tudo vem do Nix)
-  services.flatpak.enable = false;
-
   # Tailscale (useRoutingFeatures = "client" para aceitar rotas de subnet do Pi sem drop por rp_filter)
   services.tailscale = {
     enable = true;

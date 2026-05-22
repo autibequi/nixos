@@ -73,7 +73,7 @@
     # ./modules/experiments/whisper-ptt.nix  # on-demand: PTT
     # ./modules/experiments/bongocat.nix     # fun mas desnecessário
     # ./modules/experiments/tlp.nix
-    # ./modules/experiments/flatpak.nix
+    ./modules/experiments/flatpak.nix
     # ./modules/experiments/cosmic.nix
     # ./modules/experiments/kde.nix
     # ./modules/experiments/openclaw.nix
