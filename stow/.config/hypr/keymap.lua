@@ -13,6 +13,8 @@
 --            { desc = "Toggle dark/light", group = "System" })
 -- ============================================================
 
+local core = require("core")
+
 local M = {
     _binds = {},          -- registry ordenado
     _by_combo = {},       -- indice combo → entry (último vence em conflito)
@@ -37,12 +39,17 @@ function M.bind(combo, action, opts)
     register(combo, opts)
 end
 
--- app: ação é um comando string; spawn via hl.dsp.exec_cmd.
+-- app: captura workspace de origem antes de spawnar; events.lua
+-- devolve a janela pro workspace certo quando ela finalmente abre.
 function M.app(combo, cmd, opts)
     opts = opts or {}
     opts.group = opts.group or "Apps"
     opts.desc  = opts.desc  or cmd
-    M.bind(combo, hl.dsp.exec_cmd(cmd), opts)
+    M.fn(combo, function()
+        local ws = core.get_active_ws()
+        if ws then core.push_home(ws) end
+        hl.exec_cmd(cmd)
+    end, opts)
 end
 
 -- fn: ação é uma função Lua.

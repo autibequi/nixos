@@ -189,4 +189,39 @@ function M.rofi_menu(entries, opts)
     hl.exec_cmd("sh '" .. tmpf .. "' ; rm -f '" .. tmpf .. "'")
 end
 
+-- ── Launch-home workspace routing ─────────────────────────────
+-- Registra o workspace no momento do lançamento. Quando a janela
+-- abre (possivelmente em outro workspace), events.lua a devolve
+-- silenciosamente ao workspace de origem.
+local _HOME_TTL_S = 120
+M._pending_homes  = {}
+
+function M.get_active_ws()
+    for _, m in ipairs(hl.get_monitors() or {}) do
+        if m.focused then
+            local ws = m.active_workspace
+            if ws then return ws.name or tostring(ws.id) end
+        end
+    end
+    return nil
+end
+
+function M.push_home(ws)
+    local now, fresh = os.time(), {}
+    for _, e in ipairs(M._pending_homes) do
+        if (now - e.at) < _HOME_TTL_S then table.insert(fresh, e) end
+    end
+    table.insert(fresh, { ws = ws, at = now })
+    M._pending_homes = fresh
+end
+
+function M.pop_home()
+    local now = os.time()
+    while #M._pending_homes > 0 do
+        local e = table.remove(M._pending_homes, 1)
+        if (now - e.at) < _HOME_TTL_S then return e.ws end
+    end
+    return nil
+end
+
 return M

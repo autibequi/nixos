@@ -44,19 +44,31 @@ on("workspace.active", function(ev)
     end
 end)
 
--- ── Window auto-routing ──────────────────────────────────────
--- Classes declaradas em define_special({ auto_route_classes = {...} })
--- são roteadas pro special workspace correspondente.
+-- ── Window routing ───────────────────────────────────────────
+-- 1. Classes com auto_route_classes vão pro special workspace.
+-- 2. Demais janelas são devolvidas ao workspace onde o app foi
+--    lançado (launch-home), evitando que apps lentos abram no
+--    workspace errado quando você troca enquanto espera.
 
 on("window.open", function(ev)
     local class = (ev and (ev.class or ev.window_class)) or ""
+    local addr  = ev and (ev.address or ev.window_address)
+
+    -- Auto-route para special workspace (não consome pending_home)
     local target = core.workspace_auto_route_classes[class]
     if target then
-        local addr = ev and (ev.address or ev.window_address)
         if addr then
             hl.exec_cmd("hyprctl dispatch movetoworkspacesilent special:" ..
                 target .. ",address:" .. addr)
         end
+        return
+    end
+
+    -- Launch-home: devolve ao workspace de origem do lançamento
+    local home_ws = core.pop_home()
+    if home_ws and addr then
+        hl.exec_cmd("hyprctl dispatch movetoworkspacesilent " ..
+            home_ws .. ",address:" .. addr)
     end
 end)
 
