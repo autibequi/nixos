@@ -102,7 +102,7 @@
 	// Formatting
 	"use_on_type_format": true,
 	"show_whitespaces": "selection",
-	"diff_view_style": "split",
+	"diff_view_style": "unified",
 	// Scrolling
 	"scroll_beyond_last_line": "vertical_scroll_margin",
 	"vertical_scroll_margin": 22.0,
@@ -341,8 +341,7 @@
 		},
 		"default_model": {
 			"provider": "zed.dev",
-			"model": "claude-sonnet-4-6",
-			"effort": "high",
+			"model": "claude-haiku-4-5",
 			"enable_thinking": false,
 		},
 		"inline_assistant_model": {
@@ -350,22 +349,22 @@
 			"model": "claude-sonnet-4-5",
 		},
 		"favorite_models": [
-			{
-				"provider": "anthropic",
-				"model": "claude-sonnet-4-6-latest",
-				"enable_thinking": false
-			},
-			{
-				"provider": "anthropic",
-				"model": "claude-sonnet-4-6-thinking-latest",
-				"enable_thinking": false
-			},
-			{
-				"provider": "anthropic",
-				"model": "claude-haiku-4-5-thinking-latest",
-				"enable_thinking": false
-			}
-		],
+   {
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-6-thinking-latest",
+    "enable_thinking": false
+   },
+   {
+    "provider": "anthropic",
+    "model": "claude-haiku-4-5-thinking-latest",
+    "enable_thinking": false
+   },
+   {
+    "provider": "zed.dev",
+    "model": "claude-haiku-4-5",
+    "enable_thinking": false
+   }
+  ],
 	},
 	// ─── AI — AGENT SERVERS ────────────────────────────────────────
 	"agent_servers": {

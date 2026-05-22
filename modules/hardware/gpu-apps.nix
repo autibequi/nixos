@@ -76,7 +76,6 @@ let
       desktopFile = "chromium-browser";
       icon = "chromium";
       categories = "WebBrowser;";
-      args = "--ozone-platform=x11 %U";
     }
     {
       bin = "google-chrome-stable";
@@ -84,7 +83,6 @@ let
       desktopFile = "google-chrome";
       icon = "google-chrome";
       categories = "WebBrowser;";
-      args = "--ozone-platform=x11 %U";
     }
     {
       bin = "cursor";
