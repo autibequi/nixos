@@ -52,7 +52,7 @@
 	"theme": {
 		"mode": "dark",
 		"light": "Dracula Light (Alucard)",
-		"dark": "Dracula Solid"
+		"dark": "Dracula"
 	},
 	"icon_theme": {
 		"mode": "dark",
@@ -369,19 +369,6 @@
 	},
 	// ─── AI — AGENT SERVERS ────────────────────────────────────────
 	"agent_servers": {
-		"claude-acp": {
-			"type": "registry",
-			"default_config_options": {
-				"model": "default",
-				"mode": "acceptEdits"
-			},
-			"favorite_config_option_values": {
-				"model": [
-					"haiku",
-					"opus"
-				]
-			}
-		},
 		"cursor": {
 			"type": "registry"
 		}
