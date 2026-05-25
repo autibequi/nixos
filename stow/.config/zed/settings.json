@@ -562,6 +562,9 @@
 		},
 		"gopls": {
 			"settings": {}
+		},
+		"golangci-lint": {
+			"settings": {}
 		}
 	},
 	// I want this but for each project

@@ -53,6 +53,8 @@
     go
     gopls
     gotools
+    unstable.golangci-lint
+    unstable.golangci-lint-langserver
     delve
     graphviz
     gcc # because kafka fsr
