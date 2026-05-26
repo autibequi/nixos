@@ -2,7 +2,7 @@
 {
   imports = [
     ./sessions.nix
-    ./portals.nix
+    # ./portals.nix
     ./services.nix
     ./packages.nix
   ];
