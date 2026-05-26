@@ -30,16 +30,45 @@
 			"ctrl-alt-t": "agent::NewThread"
 		}
 	},
- {
-  "context": "Workspace",
-  "bindings": {
-   "ctrl-shift-t": "multi_workspace::ToggleWorkspaceSidebar"
-  }
- },
- {
-  "context": "Workspace",
-  "unbind": {
-   "ctrl-alt-j": "multi_workspace::ToggleWorkspaceSidebar"
-  }
- }
+	// ─── Unbind padrão do plugin multi_workspace ───────────────────
+	{
+		"context": "Workspace",
+		"unbind": {
+			"ctrl-alt-j": "multi_workspace::ToggleWorkspaceSidebar"
+		}
+	},
+	// ─── Font size — bindings dedicados ─────────────────────────────
+	// Ctrl+Shift+(=/-/0) → só buffer  ·  Ctrl+Alt+(=/-/0) → só UI
+	// Ctrl+Shift+Alt+0 → reset zoom do agent panel
+	{
+		"bindings": {
+			"ctrl-shift-=": "zed::IncreaseBufferFontSize",
+			"ctrl-_": "zed::DecreaseBufferFontSize",
+			"ctrl-shift-0": "zed::ResetBufferFontSize",
+			"ctrl-alt-=": "zed::IncreaseUiFontSize",
+			"ctrl-alt--": "zed::DecreaseUiFontSize",
+			"ctrl-alt-0": "zed::ResetUiFontSize",
+			"ctrl-shift-alt-0": "agent::ResetAgentZoom"
+		}
+	},
+	// ─── Font size — macro "tudo junto" estilo VSCode ──────────────
+	// Ctrl+= / Ctrl+- / Ctrl+0 dispara as duas keystrokes acima em sequência.
+	// Se algum dia parar de funcionar (SendKeystrokes muda de comportamento),
+	// remover este bloco e usar diretamente as Ctrl+Shift+/Ctrl+Alt+ separadas.
+	{
+		"bindings": {
+			"ctrl-=": [
+				"workspace::SendKeystrokes",
+				"ctrl-shift-= ctrl-alt-="
+			],
+			"ctrl--": [
+				"workspace::SendKeystrokes",
+				"ctrl-_ ctrl-alt--"
+			],
+			"ctrl-0": [
+				"workspace::SendKeystrokes",
+				"ctrl-shift-0 ctrl-alt-0"
+			]
+		}
+	}
 ]
