@@ -78,7 +78,10 @@ end)
 on("monitor.added", function(ev)
     core.notify("Monitor conectado", (ev and ev.name) or "?", { timeout = 1500, urgency = "low" })
     hl.exec_cmd("hyprctl reload")
-    if type(waybar_refresh) == "function" then waybar_refresh() end
+    -- Só reinicia waybar em hotplug real; no boot o monitor.added dispara pra cada
+    -- monitor antes do hyprland.start, e chamar waybar_refresh() N vezes resulta em
+    -- N instâncias simultâneas de waybar.
+    if _G.HYPRLAND_STARTED and type(waybar_refresh) == "function" then waybar_refresh() end
 end)
 
 on("monitor.removed", function(ev)

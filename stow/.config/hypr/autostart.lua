@@ -8,6 +8,8 @@
 local L = require("launcher")
 
 hl.on("hyprland.start", function()
+    _G.HYPRLAND_STARTED = true
+
     -- Cursor XWayland
     hl.exec_cmd("xrdb ~/.Xresources")
     hl.exec_cmd("hyprctl setcursor BreezeX-RosePine-Linux 48")
