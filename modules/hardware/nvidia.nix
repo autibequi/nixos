@@ -36,23 +36,25 @@
     # browser/IDE estoura isso, fazendo o EnableS0ixPowerManagement virar no-op
     # silencioso. 12000 MB > VRAM total → s0ix sempre acionado.
     options nvidia NVreg_S0ixPowerManagementVideoMemoryThreshold=12000
+    # 2026-05-25: desliga GSP firmware. Em RTX 40-series mobile, GSP causa
+    # GPU context resets (GL_INNOCENT_CONTEXT_RESET) durante explicit sync
+    # do Wayland — Hyprland aborta no caminho eglDupNativeFenceFDANDROID
+    # (ver hyprlandCrashReport*.txt). Sem GSP, driver volta ao path legado
+    # com gerenciamento via CPU, sem as regressões de timeout de fence.
+    options nvidia NVreg_EnableGpuFirmware=0
   '';
   
   hardware.nvidia = {
-    open = true; # Best compatibility with RTX 4060 mobile Q-Max
+    # 2026-05-25: trocado open=true → false para mitigar crashes do Hyprland em
+    # eglDupNativeFenceFDANDROID + GL_INNOCENT_CONTEXT_RESET no caminho de
+    # explicit sync (todos os 12 hyprlandCrashReport*.txt). O proprietário tem
+    # implementação mais madura desse caminho do que o open kernel module.
+    open = false;
 
-    # Patch: Linux 6.18 mudou get_dev_pagemap() para 1 argumento (removeu o 2º arg)
-    # nvidia-open 580.105.08 ainda usa a assinatura antiga — fix até upstream corrigir
-    package = let
-      base = config.boot.kernelPackages.nvidiaPackages.stable;
-    in base // {
-      open = base.open.overrideAttrs (old: {
-        postPatch = (old.postPatch or "") + ''
-          sed -i 's/get_dev_pagemap(page_to_pfn(page), NULL)/get_dev_pagemap(page_to_pfn(page))/g' \
-            kernel-open/nvidia-uvm/uvm_va_range_device_p2p.c
-        '';
-      });
-    };
+    # Beta (590.x) traz fixes específicos de explicit sync EGL+Wayland que ainda
+    # não saíram em stable (580.105.08). Se causar regressão noutro lado,
+    # voltar a `nvidiaPackages.stable`.
+    package = config.boot.kernelPackages.nvidiaPackages.beta;
     modesetting.enable = true;
     nvidiaSettings = false;
     nvidiaPersistenced = false;
