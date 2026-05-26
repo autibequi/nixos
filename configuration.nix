@@ -54,7 +54,7 @@
     ./modules/core/greetd.nix # tuigreet via greetd — rollback se Ly falhar
     # ./modules/core/ly.nix          # Ly greeter (TUI)
     # ./modules/core/regreet.nix     # regreet (GTK4)
-    ./modules/core/hyprland.nix
+    ./modules/core/hyprland
     ./modules/core/obsidian-sync.nix
     # ./modules/core/leech-tick.nix  # desabilitado: vennon não está mais em uso
     ./modules/core/work.nix
