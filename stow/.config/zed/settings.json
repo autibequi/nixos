@@ -51,8 +51,8 @@
 	// ─── THEME & APPEARANCE ────────────────────────────────────────
 	"theme": {
 		"mode": "dark",
-		"light": "Dracula Light (Alucard)",
-		"dark": "Dracula"
+		"light": "Gruvbox Light Hard",
+		"dark": "Blackula"
 	},
 	"icon_theme": {
 		"mode": "dark",
