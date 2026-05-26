@@ -24,3 +24,8 @@ AGENTS.md
 
 # No AI
 .claude
+
+# Untracked files
+.ephemeral/**/*
+.ephemeral/**
+.ephemeral/
