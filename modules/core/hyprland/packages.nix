@@ -1,31 +1,36 @@
 { pkgs, ... }:
 {
   environment.systemPackages = with pkgs; [
-    # Core compositor extras
-    quickshell
-    qt6.qtwayland
-    zenity
-    hyprpicker
-    wf-recorder
-    hyprpolkitagent
-    cheese
+    # ── Hyprland ecosystem ────────────────────────────────────────────
+    hyprpicker # color picker
+    hyprshade # shader manager (night light, etc.)
+    hyprlock # lock screen
+    hyprls # language server pra Hyprland config
+    hyprpolkitagent # polkit agent (config em services.nix)
 
-    # Core Hyprland tools for navigation and productivity
-    waybar # Status bar with useful info
-    wofi # App launcher (fuzzy finding)
-    alacritty # Terminal
-    # dunst # Notifications
-    swaynotificationcenter # Notifications
-    grim # Screenshots
-    slurp # Screen selection
-    swayimg # Image viewer for Wayland
-    wl-clipboard # Clipboard management
-    hyprshade
-    swww
-    bluetuith
-    wiremix
-    tesseract
-    satty
+    # ── Bar / launcher / notifications / OSD ──────────────────────────
+    waybar # status bar
+    wofi # app launcher (fuzzy)
+    swaynotificationcenter # notifications daemon
+    # dunst # alternativa a swaync (desativado)
+    nwg-panel # painel de controle (volume/brilho/audio out/exit menu)
+    swayosd # OSD pra volume/brilho/caps (CLI: swayosd-client)
+    libnotify # notify-send CLI / lib
+
+    # ── Terminais ─────────────────────────────────────────────────────
+    alacritty # default
+    ghostty # kitty-graphics protocol (yazi image preview)
+
+    # ── Screenshots / capture / OCR ───────────────────────────────────
+    grim # screenshot
+    slurp # region select
+    satty # annotation
+    swayimg # image viewer (Wayland)
+    wf-recorder # screen recording
+    tesseract # OCR
+
+    # ── Wallpaper / cursor / theming ──────────────────────────────────
+    swww # wallpaper daemon
 
     # hyprcursor (Wayland nativo, vetorial)
     rose-pine-hyprcursor
@@ -41,34 +46,42 @@
     # SVG icon rendering (needed by rofi show-icons with Papirus)
     librsvg
 
-    # Dark/Light Theme Toggle - GTK theming
+    # Dark/Light Theme Toggle — GTK theming
     glib # gsettings CLI
     gsettings-desktop-schemas
     gtk3
-    adw-gtk3 # Tema Adwaita para GTK3 (suporta light/dark)
+    adw-gtk3 # tema Adwaita pra GTK3 (suporta light/dark)
 
-    # Gnome Oldies
+    # ── Clipboard ─────────────────────────────────────────────────────
+    wl-clipboard # wl-copy / wl-paste
+    cliphist # history manager
+
+    # ── Audio / brightness / media controls ───────────────────────────
+    pavucontrol # GUI de audio (PipeWire/PulseAudio)
+    wiremix # TUI mixer
+    brightnessctl # screen brightness
+    playerctl # MPRIS media control
+
+    # ── Display / monitors ────────────────────────────────────────────
+    nwg-displays # configurador de outputs
+
+    # ── Power menu / sessão ───────────────────────────────────────────
+    wlogout # GUI (lock/logout/suspend/reboot/shutdown)
+
+    # ── Bluetooth ─────────────────────────────────────────────────────
+    bluetuith # TUI
+
+    # ── File managers / preview ───────────────────────────────────────
+    yazi # better ranger (TUI)
+    nautilus # GTK file manager
     gnome-disk-utility
-
-    # Essential utilities only
-    libnotify # Notification support
-    pavucontrol # Audio control
-    brightnessctl # Screen brightness
-    playerctl # Media control
-
-    nwg-displays # Display management
-    nwg-panel # Painel de controle (volume/brilho/audio out/exit menu)
-    wlogout # Power menu GUI (lock/logout/suspend/reboot/shutdown)
-    swayosd # On-screen display pra volume/brilho/caps (CLI: swayosd-client)
-    hyprlock
-    hyprls # Language Server for Hyprland config files
-    cliphist # Clipboard history manager
-
-    # File managers
-    yazi # better ranger
-    ghostty # terminal with kitty graphics protocol (for yazi image preview)
     poppler-utils # PDF preview (pdftoppm)
     ffmpegthumbnailer # video thumbnails
-    nautilus # file manager
+
+    # ── Qt / Wayland support / outros GUIs ────────────────────────────
+    quickshell # Qt-based shell toolkit
+    qt6.qtwayland # Qt6 Wayland platform
+    zenity # GTK dialogs (file picker, info, etc.)
+    cheese # webcam (GNOME)
   ];
 }
