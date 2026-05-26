@@ -1,25 +1,47 @@
-// Zed keymap
+// Zed keymap — Pedro
 //
-// For information on binding keys, see the Zed
-// documentation: https://zed.dev/docs/key-bindings
+// Cluster mão-esquerda para toggles de painel (Q W E R T / A S D F G / Z X C V B).
+// Mão direita fica livre pro mouse.
 //
-// To see the default key bindings run `zed: open default keymap`
-// from the command palette.
+// Docs: https://zed.dev/docs/key-bindings
+// Default keymap: command palette → "zed: open default keymap"
 [
+	// ─── Docks home-row (A S D) + Workspaces (W) + Zen (Z) ────────
 	{
 		"bindings": {
-			// Quick Shortcuts
-			"ctrl-shift-q": "debug_panel::Toggle",
-			// VSCode Like
-			"ctrl-p": "file_finder::Toggle",
-			"ctrl-u": "outline::Toggle",
-			// Panels WASD Management
-			"ctrl-shift-w": "workspace::CloseAllDocks",
 			"ctrl-shift-a": "workspace::ToggleLeftDock",
 			"ctrl-shift-s": "workspace::ToggleBottomDock",
 			"ctrl-shift-d": "workspace::ToggleRightDock",
-			// Open Projects
+			"ctrl-shift-w": "multi_workspace::ToggleWorkspaceSidebar",
+			"ctrl-shift-z": "workspace::ToggleZoom"
+		}
+	},
+	// ─── Painéis específicos (cluster esquerdo) ────────────────────
+	// Q = debug   E = explorer   R = recent   T = threads/agent
+	// F = find    G = git        X = diagnostics   B = outline
+	{
+		"bindings": {
+			"ctrl-shift-q": "debug_panel::Toggle",
+			"ctrl-shift-e": "project_panel::ToggleFocus",
 			"ctrl-shift-r": "projects::OpenRecent",
+			"ctrl-shift-t": "agent::ToggleFocus",
+			"ctrl-shift-f": "project_search::ToggleFocus",
+			"ctrl-shift-g": "git_panel::ToggleFocus",
+			"ctrl-shift-x": "diagnostics::Deploy",
+			"ctrl-shift-b": "outline_panel::ToggleFocus"
+		}
+	},
+	// ─── Quick access genéricos ────────────────────────────────────
+	{
+		"bindings": {
+			"ctrl-p": "file_finder::Toggle",
+		}
+	},
+	// ─── Agent / Threads ───────────────────────────────────────────
+	{
+		"bindings": {
+			"ctrl-alt-t": "agent::NewThread",
+			"ctrl-alt-shift-t": "agent::ToggleNewThreadMenu",
 			"alt-enter": "agent::AllowOnce",
 			"alt-shift-enter": "agent::RejectOnce"
 		}
