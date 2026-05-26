@@ -24,6 +24,17 @@
 			"alt-shift-enter": "agent::RejectOnce"
 		}
 	},
+	// ─── Terminal: Ctrl+C → SIGINT (não interceptar no AgentPanel) ─
+	// Zed captura ctrl-c no AgentPanel antes de chegar ao terminal;
+	// forçar SendText  no contexto Terminal garante SIGINT.
+	{
+		"context": "Terminal",
+		"bindings": {
+			"ctrl-c": null,
+			"ctrl-s": null
+		}
+	},
+	// Default do Zed re-binda ctrl-alt-t dentro do AgentPanel; soltar.
 	{
 		"context": "AgentPanel && acp_thread",
 		"unbind": {
