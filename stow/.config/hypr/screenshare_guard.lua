@@ -13,7 +13,8 @@ local core = require("core")
 local _was_dnd = false
 local _saved_border = "3"
 
-core.on("screenshare.state", function(ev)
+-- desabilitado pelo Pedro (bordas vermelhas + DND ao compartilhar tela)
+--[[ core.on("screenshare.state", function(ev)
     -- ev pode ser { state = true/false } ou { active = true/false } ou similar
     local active = false
     if type(ev) == "table" then
@@ -42,4 +43,4 @@ core.on("screenshare.state", function(ev)
         hl.exec_cmd("hyprctl reload")
         core.notify("Screenshare encerrado", nil, { timeout = 1000, urgency = "low" })
     end
-end)
+end) --]]
