@@ -13,3 +13,5 @@ esac
 # Terminal title: comando rodando ou diretório atual
 preexec() { print -Pn "\e]0;${1%% *}\a" }   # nome do comando (ex: vim, go, npm)
 precmd()  { print -Pn "\e]0;%1~\a" }         # último componente do cwd (ex: coruja, ~)
+
+alias momoko="yaa --joy"
