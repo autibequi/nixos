@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  unstable,
   ...
 }:
 {
@@ -51,10 +52,11 @@
     # implementação mais madura desse caminho do que o open kernel module.
     open = false;
 
-    # Beta (590.x) traz fixes específicos de explicit sync EGL+Wayland que ainda
-    # não saíram em stable (580.105.08). Se causar regressão noutro lado,
-    # voltar a `nvidiaPackages.stable`.
-    package = config.boot.kernelPackages.nvidiaPackages.beta;
+    # 2026-05-27: usa unstable.linuxKernel.packagesFor para construir o driver 595.45.04
+    # contra o kernel atual sem depender de qual nixpkgs resolve boot.kernelPackages.
+    # Quando 595 chegar em production no nixpkgs-unstable pinado, pode simplificar para
+    # config.boot.kernelPackages.nvidiaPackages.production.
+    package = (unstable.linuxKernel.packagesFor config.boot.kernelPackages.kernel).nvidiaPackages.beta;
     modesetting.enable = true;
     nvidiaSettings = false;
     nvidiaPersistenced = false;
