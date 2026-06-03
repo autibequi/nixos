@@ -30,7 +30,7 @@
     tesseract # OCR
 
     # ── Wallpaper / cursor / theming ──────────────────────────────────
-    awww # wallpaper daemon (swww renomeado em 26.05)
+    awww # wallpaper daemon (awww renomeado em 26.05)
 
     # hyprcursor (Wayland nativo, vetorial)
     rose-pine-hyprcursor

@@ -18,8 +18,8 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("systemctl --user start hyprpolkitagent")
     hl.exec_cmd(L.build("waybar"))
     hl.exec_cmd(L.build("qs"))
-    hl.exec_cmd(L.build("swww-daemon"))
-    hl.exec_cmd("swww img " .. os.getenv("HOME") ..
+    hl.exec_cmd(L.build("awww-daemon"))
+    hl.exec_cmd("awww img " .. os.getenv("HOME") ..
         "/assets/wallpapers/the-wild-hunt-of-odin.jpg --transition-type none")
     hl.exec_cmd(L.build("swaync"))
 

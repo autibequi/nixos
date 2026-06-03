@@ -80,7 +80,6 @@
   systemd.services.systemd-hybrid-sleep.environment.SYSTEMD_SLEEP_FREEZE_USER_SESSIONS = "false";
 
   # Permite containers usar o driver NVIDIA
-  hardware.nvidia-container-toolkit.enable = true;
 
   # nvidia-powerd não existe no NixOS e não serve para GPUs mobile.
   # supergfxd tenta iniciar e falha no boot — stub para silenciar.

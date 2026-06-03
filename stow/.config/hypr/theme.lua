@@ -69,7 +69,7 @@ function dark_theme()
         ALACRITTY_CONFIG .. " || true'")
 
     -- Wallpaper
-    hl.exec_cmd("swww img " .. WALLPAPER_DARK ..
+    hl.exec_cmd("awww img " .. WALLPAPER_DARK ..
         " --transition-type fade --transition-fps 30 --transition-duration 1.2")
 
     -- Regenera cores centralizadas
@@ -85,7 +85,7 @@ function light_theme()
         "|import = [\\\"~/.config/alacritty/light-theme.toml\\\"]|g\" " ..
         ALACRITTY_CONFIG .. " || true'")
 
-    hl.exec_cmd("swww img " .. WALLPAPER_LIGHT ..
+    hl.exec_cmd("awww img " .. WALLPAPER_LIGHT ..
         " --transition-type fade --transition-fps 30 --transition-duration 1.2")
 
     hl.exec_cmd("sh -c 'command -v vennon-theme-apply >/dev/null 2>&1 && vennon-theme-apply light || true'")

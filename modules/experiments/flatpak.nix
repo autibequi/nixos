@@ -9,7 +9,7 @@ let
     # "io.github.seadve.Kooha"
     # "net.nokyan.Resources"
     "com.stremio.Stremio"
-    "dev.zed.Zed"
+    # "dev.zed.Zed"
     "dev.zed.Zed-Preview"
     # "io.github.qwersyk.Newelle"
     # "com.github.tenderowl.frog"

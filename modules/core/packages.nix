@@ -51,7 +51,7 @@
     # inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
 
     # ── Editores / Dev ─────────────────────────────────
-    unstable.zed-editor
+    zed-editor
     gitkraken
     jujutsu
     gitoxide
