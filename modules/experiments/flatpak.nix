@@ -8,7 +8,7 @@ let
     # "com.usebottles.bottles"
     # "io.github.seadve.Kooha"
     # "net.nokyan.Resources"
-    # "com.stremio.Stremio"
+    "com.stremio.Stremio"
     "dev.zed.Zed"
     "dev.zed.Zed-Preview"
     # "io.github.qwersyk.Newelle"
@@ -27,28 +27,35 @@ let
   flatpakOverrides = {
     "dev.zed.Zed" = {
       filesystem = [ "xdg-config" ];
-      configLinks = { "zed" = "$HOME/.config/zed"; };
+      configLinks = {
+        "zed" = "$HOME/.config/zed";
+      };
     };
     "dev.zed.Zed-Preview" = {
       filesystem = [ "xdg-config" ];
-      configLinks = { "zed" = "$HOME/.config/zed"; };
+      configLinks = {
+        "zed" = "$HOME/.config/zed";
+      };
     };
   };
 
   overrideLines = lib.concatStringsSep "\n" (
-    lib.mapAttrsToList (app: cfg:
+    lib.mapAttrsToList (
+      app: cfg:
       let
-        fsFlags = lib.concatMapStringsSep " "
-          (p: "--filesystem=${p}") (cfg.filesystem or []);
-        linkCmds = lib.concatStringsSep "\n" (lib.mapAttrsToList (sub: target: ''
-          mkdir -p "$HOME/.var/app/${app}/config"
-          link="$HOME/.var/app/${app}/config/${sub}"
-          if [ -e "$link" ] && [ ! -L "$link" ]; then
-            rm -rf "$link"
-          fi
-          ln -sfn "${target}" "$link"
-        '') (cfg.configLinks or {}));
-      in ''
+        fsFlags = lib.concatMapStringsSep " " (p: "--filesystem=${p}") (cfg.filesystem or [ ]);
+        linkCmds = lib.concatStringsSep "\n" (
+          lib.mapAttrsToList (sub: target: ''
+            mkdir -p "$HOME/.var/app/${app}/config"
+            link="$HOME/.var/app/${app}/config/${sub}"
+            if [ -e "$link" ] && [ ! -L "$link" ]; then
+              rm -rf "$link"
+            fi
+            ln -sfn "${target}" "$link"
+          '') (cfg.configLinks or { })
+        );
+      in
+      ''
         ${pkgs.flatpak}/bin/flatpak override --user ${fsFlags} ${app}
         ${linkCmds}
       ''

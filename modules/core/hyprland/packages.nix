@@ -30,7 +30,7 @@
     tesseract # OCR
 
     # ── Wallpaper / cursor / theming ──────────────────────────────────
-    swww # wallpaper daemon
+    awww # wallpaper daemon (swww renomeado em 26.05)
 
     # hyprcursor (Wayland nativo, vetorial)
     rose-pine-hyprcursor
@@ -41,7 +41,7 @@
     # cursor pro Xresources do XWayland; apps X11 leem o size só do Xresources
     # (env var XCURSOR_SIZE não basta) → cursor fica no default 16px mesmo
     # com tema correto.
-    xorg.xrdb
+    xrdb
 
     # SVG icon rendering (needed by rofi show-icons with Papirus)
     librsvg

@@ -6,7 +6,7 @@
 
   inputs = {
     # Nix Channels
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     # nixpkgs.url = "github:NixOS/nixpkgs/staging";
     # nixpkgs.url = "github:NixOS/nixpkgs/staging-next";

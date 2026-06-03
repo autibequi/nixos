@@ -6,6 +6,11 @@
 }:
 
 {
+  # python3.12-doc build quebrado em nixpkgs 26.05 (docutils 0.22 regression).
+  # documentation.doc coleta o output `doc` de todos os systemPackages —
+  # desabilitado até nixpkgs corrigir o build do python312.
+  documentation.doc.enable = false;
+
   # Timeout global de stop: default do systemd é 90s, reduzido para 15s
   # para evitar que qualquer serviço bloqueie o shutdown por muito tempo.
   systemd.settings.Manager.DefaultTimeoutStopSec = "15s";

@@ -43,7 +43,7 @@
     # com gerenciamento via CPU, sem as regressões de timeout de fence.
     options nvidia NVreg_EnableGpuFirmware=0
   '';
-  
+
   hardware.nvidia = {
     # 2026-05-25: trocado open=true → false para mitigar crashes do Hyprland em
     # eglDupNativeFenceFDANDROID + GL_INNOCENT_CONTEXT_RESET no caminho de
@@ -54,7 +54,7 @@
     # Beta (590.x) traz fixes específicos de explicit sync EGL+Wayland que ainda
     # não saíram em stable (580.105.08). Se causar regressão noutro lado,
     # voltar a `nvidiaPackages.stable`.
-    package = config.boot.kernelPackages.nvidiaPackages.beta;
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
     modesetting.enable = true;
     nvidiaSettings = false;
     nvidiaPersistenced = false;
@@ -62,7 +62,6 @@
       enable = true;
       finegrained = false; # RTD3 incompatível com PRIME offload + s2idle — causa NVRM callback error no resume e trava
     };
-
 
     prime = {
       offload.enable = true; # Modo offload para economia de energia

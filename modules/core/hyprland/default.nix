@@ -1,4 +1,4 @@
-{ pkgs, unstable, ... }:
+{ pkgs, ... }:
 {
   imports = [
     ./sessions.nix
@@ -10,7 +10,7 @@
   # Configuração do Hyprland
   programs.hyprland = {
     enable = true;
-    package = unstable.hyprland;
+    package = pkgs.hyprland;
     xwayland.enable = true;
     withUWSM = true;
   };

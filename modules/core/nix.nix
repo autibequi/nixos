@@ -39,22 +39,22 @@
       libGL
       libxkbcommon
       wayland
-      xorg.libX11
-      xorg.libXcursor
-      xorg.libXrandr
-      xorg.libXi
+      libx11
+      libxcursor
+      libxrandr
+      libxi
 
       # Vulkan support
       vulkan-loader
       vulkan-validation-layers
 
       # XKB support
-      xorg.xkeyboardconfig
+      xkeyboard-config
 
       # Yaak
       fontconfig
       fribidi
-      xorg.libxcb
+      libxcb
       harfbuzz
       libgbm
       libdrm
@@ -72,7 +72,7 @@
 
   environment.sessionVariables = {
     # XKB configuration path for xkbcommon
-    XKB_CONFIG_ROOT = "${pkgs.xorg.xkeyboardconfig}/share/X11/xkb";
+    XKB_CONFIG_ROOT = "${pkgs.xkeyboard-config}/share/X11/xkb";
   };
 
   # Unholy packages

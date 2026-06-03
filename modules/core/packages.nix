@@ -14,7 +14,6 @@
     comma
     # crap
     sqlite
-    stremio
     unstable.digikam
 
     cbonsai
@@ -32,7 +31,7 @@
     bottles
 
     # ── Desktop / Wayland ──────────────────────────────
-    swww
+    awww
     rofimoji
     # rofi-wayland
     rofi-unwrapped
@@ -73,7 +72,6 @@
     foliate # ePub reader
     blanket # Noise
     fragments # GTK4 torrent client (magnet links + notificações)
-    # unstable.stremio
 
     # ── Terminal ───────────────────────────────────────
     tmux

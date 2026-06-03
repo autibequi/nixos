@@ -32,7 +32,7 @@
 
     # --- Python ---
     python312
-    pipx
+    # pipx
     poetry
     pyenv
     file # libmagic - intraupload
@@ -40,7 +40,7 @@
 
     # --- JS, ick! ---
     nodejs_24
-    nodePackages.eslint
+    eslint
 
     # --- Flutter ---
     flutter

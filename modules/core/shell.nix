@@ -97,7 +97,7 @@ in
     # Nix
     nil
     nixd
-    nixfmt-rfc-style
+    nixfmt
 
     # Markdown LSP
     markdown-oxide

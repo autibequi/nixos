@@ -9,7 +9,6 @@
   services = {
     asusd = {
       enable = true;
-      enableUserService = true;
     };
     supergfxd = {
       enable = true;
@@ -29,10 +28,9 @@
   # asusd upstream tem ExecStartPre=sleep 1 (+1.1s no boot).
   # Reduzir para 0.2s — hid_asus já está pronto quando udev termina.
   systemd.services.asusd.serviceConfig.ExecStartPre = [
-    ""  # limpa o ExecStartPre original (sleep 1)
+    "" # limpa o ExecStartPre original (sleep 1)
     "/run/current-system/sw/bin/sleep 0.2"
   ];
-
 
   # asus_nb_wmi e asus_wmi são carregados automaticamente pelo udev
   # quando o hardware é detectado — forçar aqui só atrasava

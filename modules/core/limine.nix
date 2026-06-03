@@ -33,7 +33,7 @@
       marginGradient = 4;
     };
     interface = {
-      brandingColor = 5; # mauve — cor 5 da palette acima (cba4f7)
+      brandingColor = "5"; # mauve — cor 5 da palette acima (cba4f7)
     };
   };
 }
