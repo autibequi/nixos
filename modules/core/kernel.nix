@@ -137,8 +137,15 @@
     # Containers Go/Node usam mmap intensamente. Default 65530 estoura com 5+ containers.
     "vm.max_map_count" = 1048576;
 
-    # Inotify: múltiplos containers uid 1000 compartilham este limite no host.
-    # Com 5+ containers cada um rodando Claude Code + file watchers, 1024 instances
+    # Inotify: monorepo grande (coruja) + múltiplos containers uid 1000 no host.
+    # max_user_watches: declarado explicitamente (default 8192 é insuficiente).
+    # max_queued_events: fila de eventos; quando estoura o kernel descarta tudo e
+    #   o Zed perde sync de centenas de dirs simultaneamente — causa git panel freeze.
+    # max_user_instances: containers rootless (Podman) + Zed + Claude Code consomem instâncias.
+    "fs.inotify.max_user_watches"  = 524288;
+    "fs.inotify.max_queued_events" = 1048576;
+    "fs.inotify.max_user_instances" = 1024;
+
     # Permite containers rootless (Podman) bindarem portas baixas (80, 443, etc.)
     "net.ipv4.ip_unprivileged_port_start" = 0;
 
