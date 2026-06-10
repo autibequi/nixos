@@ -142,9 +142,9 @@
     # max_queued_events: fila de eventos; quando estoura o kernel descarta tudo e
     #   o Zed perde sync de centenas de dirs simultaneamente — causa git panel freeze.
     # max_user_instances: containers rootless (Podman) + Zed + Claude Code consomem instâncias.
-    "fs.inotify.max_user_watches"  = 524288;
-    "fs.inotify.max_queued_events" = 1048576;
-    "fs.inotify.max_user_instances" = 1024;
+    "fs.inotify.max_user_watches"   = 524288;
+    "fs.inotify.max_queued_events"  = 1048576;
+    "fs.inotify.max_user_instances" = 8192;
 
     # Permite containers rootless (Podman) bindarem portas baixas (80, 443, etc.)
     "net.ipv4.ip_unprivileged_port_start" = 0;

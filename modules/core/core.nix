@@ -63,9 +63,8 @@
   ];
 
   boot.kernel.sysctl = {
-    "fs.inotify.max_user_instances" = 8192;
-    "fs.inotify.max_user_watches"   = 524288;
-    "fs.file-max"                   = 1048576;
+    "fs.file-max" = 1048576;
+    # inotify tunado em kernel.nix (max_user_instances/watches/queued_events)
   };
 
   users.defaultUserShell = pkgs.zsh;

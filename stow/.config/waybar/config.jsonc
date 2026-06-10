@@ -99,7 +99,7 @@
 		"show-special": false,
 		"persistent-workspaces": {},
 		"format": "{icon}{windows}</span>",
-		"on-click": "hyprctl dispatch focusworkspaceoncurrentmonitor {name}",
+		"on-click": "activate",
 		"tooltip": true,
 		"tooltip-format": "{name}",
 		"window-rewrite-default": "",

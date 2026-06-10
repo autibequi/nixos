@@ -219,7 +219,7 @@
 		"diff_stats": true,
 		"show_count_badge": true,
 		"folder_icons": true,
-		"collapse_untracked_diff": true
+		"collapse_untracked_diff": false
 	},
 	"collaboration_panel": {
 		"button": false,
