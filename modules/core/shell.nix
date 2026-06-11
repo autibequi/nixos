@@ -102,12 +102,14 @@ in
     # Markdown LSP
     markdown-oxide
 
-    # Rust
+    # Rust — toolchain do nixpkgs, SEM rustup: o rustup do nix escreve wrappers
+    # em ~/.rustup amarrados ao store path da versão dele; a cada bump+GC os
+    # wrappers morrem (ld-wrapper.sh: No such file) e o cargo build quebra.
     cargo
     rustc
-    rustup
     rust-analyzer
     rustfmt
+    clippy
 
     # cli tools
     btopUnstable
