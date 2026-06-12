@@ -265,6 +265,8 @@
 	},
 	"file_scan_exclusions": [
 		"**/.git",
+		"**/.claude",
+		"**/vendor",
 		"**/node_modules",
 		"**/target",
 		"**/.next",
