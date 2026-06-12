@@ -68,11 +68,6 @@ define_special("gemini", "g", {
 	on_created_empty = L.chrome("https://gemini.google.com/"),
 	tile             = true,
 })
-define_special("bleh", "grave", {
-	label            = "bleh (terminal)",
-	on_created_empty = L.build("alacritty", { gpu = "offload" }),
-	border           = "rgba(fff700dd)",
-})
 
 -- ── F-keys configurados (com app default / policy) ──────────
 define_special("f1", "F1", {

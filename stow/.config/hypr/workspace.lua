@@ -131,3 +131,9 @@ km.fn("SUPER + bracketleft",  function() special_back() end,
     { desc = "Special workspace back",    group = "Special" })
 km.fn("SUPER + bracketright", function() special_forward() end,
     { desc = "Special workspace forward", group = "Special" })
+
+-- SUPER + ` → reabre/fecha o último special workspace usado
+-- code:49 = tecla física grave/tilde. Usar keycode (não keysym) ignora o
+-- layout altgr-intl, onde grave é dead key e o keysym não casa no bind.
+km.fn("SUPER + code:49", function() toggle_last_special_workspace() end,
+    { desc = "Toggle last special workspace", group = "Special" })

@@ -97,7 +97,15 @@ function special_forward()
 end
 
 function toggle_last_special_workspace()
-    local last = _last_special_ws[active_monitor_name()]
+    local mon     = active_monitor_name()
+    local current = active_special_name()
+    if current ~= "" then
+        _last_special_ws[mon] = current
+        hl.dispatch(hl.dsp.workspace.toggle_special(current))
+        hl.exec_cmd("pkill -x rofi")
+        return
+    end
+    local last = _last_special_ws[mon]
     if last and last ~= "" then
         hl.dispatch(hl.dsp.workspace.toggle_special(last))
     end

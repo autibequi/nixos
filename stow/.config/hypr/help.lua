@@ -235,7 +235,7 @@ MOD3+Tab       picker (all)        MOD3+SHIFT+Tab    picker (current ws)
 MOD3+I/SHIFT+I cycle same class
 
 ─── Special workspaces ──────────────────────
-SUPER+G        gemini              SUPER+`           bleh terminal
+SUPER+G        gemini              SUPER+`           toggle last special
 SUPER+F1-F9    F-key scratchpads   SUPER+[/]         back/forward stack
 SUPER+SHIFT+<key>  move window → special
 SUPER+ALT+Right    move special → other monitor
