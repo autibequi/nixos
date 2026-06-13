@@ -1,33 +1,73 @@
 # ════════════════════════════════════════════════════════════════════
 # modules/services/ramsync.nix
 #
-# Profile-em-RAM: move profiles que escrevem MUITO pra tmpfs (RAM) e
-# faz resync periódico ao disco. Reduz wear do SSD e melhora fluidez.
+# Profile/cache em RAM: reduz wear do SSD e melhora fluidez movendo
+# dados que escrevem MUITO pra tmpfs (RAM).
 #
-# ── Profile-Sync-Daemon (psd) — BROWSERS ────────────────────────────
-#   Habilitado abaixo. Detecta os browsers instalados automaticamente
-#   (google-chrome, chromium, vivaldi). Roda como systemd.user service
-#   (NÃO precisa home-manager). Resync a cada 30min + sync no shutdown.
-#   Substitui o psd que vivia em modules/core/home.nix (home-manager,
-#   hoje desativado).
+# ── BROWSERS → Profile-Sync-Daemon (psd) ────────────────────────────
+#   psd tem sanity-checks específicos de profile de browser (o asd NÃO
+#   tem — ArchWiki alerta perda de dados ao usar asd em browser). Roda
+#   como systemd.user service (sem home-manager). Resync 30min + sync no
+#   shutdown. Detecta os browsers instalados (google-chrome/chromium/vivaldi).
+#   Substitui o psd que vivia em modules/core/home.nix (desativado).
 #
-# ── Apps não-browser (Zed, Obsidian, …) ─────────────────────────────
-#   psd é browser-ONLY por design (tem sanity-checks de profile que o
-#   anything-sync-daemon não tem — ArchWiki alerta perda de dados ao
-#   usar asd em browser). Pra Zed/Obsidian o caminho seria o asd, que
-#   NÃO tem módulo no nixpkgs (exigiria service custom com bind mounts
-#   + overlayfs). Avaliação:
-#     - Zed:      estado em ~/.local/share/zed (DB/conversas) — perda no
-#                 crash é ruim; ganho modesto num NVMe rápido.
-#     - Obsidian: o *vault* JAMAIS vai pra tmpfs (risco de perder notas);
-#                 ~/.config/obsidian é leve, ganho marginal.
-#     - Alacritty: config estática (stow), zero cache que renda em RAM.
-#   → Mantido FORA por enquanto. Ver discussão no PR/relatório.
+# ── ZED + OBSIDIAN → tmpfs nos CACHES (descartáveis) ────────────────
+#   psd é browser-only e o asd (anything-sync-daemon) não tem módulo no
+#   nixpkgs. Como aqui só queremos CACHE (descartável, reconstruído pelo
+#   app), tmpfs puro é mais simples e seguro que o asd — não há sync que
+#   possa corromper, e perder no reboot é o esperado de um cache.
+#
+#   ⚠️ O VAULT do Obsidian NUNCA entra em tmpfs (risco de perder notas).
+#      Só os caches do app Electron (~/.config/obsidian/{Cache,...}) e o
+#      cache XDG do Zed (~/.cache/zed). Alacritty ficou de fora: config
+#      estática (stow), zero cache que renda em RAM.
+#
+#   "nofail": se o app nunca rodou e o dir-pai não existe, o mount falha
+#   silenciosamente sem travar o boot.
 # ════════════════════════════════════════════════════════════════════
 { ... }:
+let
+  user = "pedrinho";
+  uid = "1000";
+  ramOpts = sz: [
+    "size=${sz}"
+    "mode=0700"
+    "uid=${uid}"
+    "gid=100" # grupo `users`
+    "noatime"
+    "nosuid"
+    "nodev"
+    "nofail"
+  ];
+in
 {
+  # ── Browsers ──
   services.psd = {
     enable = true;
     resyncTimer = "30min";
+  };
+
+  # ── Zed + Obsidian: caches em RAM (NUNCA o vault) ──
+  fileSystems = {
+    "/home/${user}/.cache/zed" = {
+      device = "tmpfs";
+      fsType = "tmpfs";
+      options = ramOpts "1G";
+    };
+    "/home/${user}/.config/obsidian/Cache" = {
+      device = "tmpfs";
+      fsType = "tmpfs";
+      options = ramOpts "512M";
+    };
+    "/home/${user}/.config/obsidian/GPUCache" = {
+      device = "tmpfs";
+      fsType = "tmpfs";
+      options = ramOpts "256M";
+    };
+    "/home/${user}/.config/obsidian/Code Cache" = {
+      device = "tmpfs";
+      fsType = "tmpfs";
+      options = ramOpts "256M";
+    };
   };
 }
