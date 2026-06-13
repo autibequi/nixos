@@ -54,14 +54,14 @@
     ./modules/core/hyprland
     ./modules/core/obsidian-sync.nix
     ./modules/core/work.nix
-    # ./modules/core/home.nix # home-manager (NÃO ativo: input ausente no flake.nix). Reviver = adicionar input + ./modules/core/home.nix
+    # ./modules/core/home.nix # home-manager (NÃO ativo: input ausente no flake.nix). psd migrou p/ services/ramsync.nix; só resta o tailscale-systray aqui
 
     # ── Services ───────────────────────────────────────
     ./modules/services/ai.nix
     ./modules/services/lmstudio.nix # serviço opt-in (services.lmstudio.enable; default false em services.nix)
+    ./modules/services/ramsync.nix # profile-em-RAM (psd: browsers em tmpfs)
     ./modules/services/steam.nix
     ./modules/services/virt.nix
-    # ./modules/services/tmux-server.nix # socket tmux host↔container (zion). Reativar se voltar a usar o socket compartilhado
 
     # ── Experiments ────────────────────────────────────
     # ./modules/experiments/dms.nix          # DankMaterialShell (também disponível via input dms no flake)
