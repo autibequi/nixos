@@ -12,23 +12,26 @@ Justfile             # restow recipe
 
 modules/
   core/              # Essential modules (kernel, nix, shell, packages, services, fonts…)
-  hardware/          # asus.nix, nvidia.nix
-  services/          # ai.nix, lmstudio.nix, steam.nix, virt.nix, containers.nix…
-  experiments/       # Optional / disabled modules (podman, cosmic, kde, whisper-ptt…)
+  hardware/          # asus.nix, nvidia.nix, gpu-toggle.nix, ddc.nix
+  services/          # ai.nix, lmstudio.nix, steam.nix, virt.nix
+  experiments/       # Optional / on-demand modules (podman, flatpak, dms, whisper-ptt)
 
 stow/
-  assets/            # Wallpapers, icons (symlinked into ~ via bardiel plug stow)
+  .config/           # Dotfiles: hypr/, waybar/, zsh/, alacritty/, … (symlinked into ~ via `just stow`)
+  .local/bin/        # CLIs: hypr-*, gpu-profile, caffeine-toggle, …
+  assets/            # Wallpapers, icons
 ```
 
 ## Flake Inputs
 
-- **nixpkgs**: NixOS 25.11 (stable)
+- **nixpkgs**: NixOS 26.05 (stable)
 - **nixpkgs-unstable**: unstable channel (available as `unstable` in modules)
-- **chaotic**: CachyOS kernel
-- **nixos-hardware**: ASUS Zephyrus hardware support
-- **home-manager**: release-25.11
-- **claude-code**: claude-code-nix overlay
-- **nix-index-database**: nix-index DB
+- **nixos-hardware**: ASUS Zephyrus GA402X hardware support
+- **chaotic**: CachyOS kernel (nyx)
+- **claude-code**: claude-code-nix overlay (última versão upstream)
+- **dms**: DankMaterialShell (NixOS module)
+- **hyprlandFlake**: Hyprland upstream (última versão)
+- **llm-agents**: AI coding agents (numtide)
 
 ## Commands
 
@@ -39,10 +42,8 @@ nh os test .
 # Apply permanently
 nh os switch .
 
-# Deploy dotfiles (bardiel stow/ → ~)
+# Deploy dotfiles (stow/ → ~)
 just restow
-# or via bardiel:
-bardiel os stow
 ```
 
 ## Tips

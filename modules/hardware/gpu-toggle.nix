@@ -7,7 +7,7 @@
 #
 # Binários expostos:
 #   gpu-offload <cmd> [args...]  — substitui `nvidia-offload` nos call sites
-#                                  (gpu-apps.nix, hypr/application.conf)
+#                                  (hypr launcher.lua / application.lua)
 #   gpu-profile {home|mobile|auto|status}
 #                                — controla o estado em /var/lib/gpu-toggle/profile
 #

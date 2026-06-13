@@ -1,6 +1,4 @@
-# DESATIVADO — Ly está em modules/core/ly.nix (import em configuration.nix).
-# Rollback: descomente o bloco abaixo, em configuration.nix troque ly.nix por este arquivo.
-#
+# Greeter ATIVO — tuigreet via greetd (importado em configuration.nix).
 { config, pkgs, ... }:
 {
   services.greetd = {

@@ -33,7 +33,6 @@
     # ── Hardware ───────────────────────────────────────
     ./modules/hardware/asus.nix
     ./modules/hardware/nvidia.nix
-    # ./modules/hardware/gpu-apps.nix # força apps GUI na dGPU via .desktop overrides — desativado: usar sessão dedicada `Hyprland (NVIDIA full offload)` no greeter
     ./modules/hardware/gpu-toggle.nix # wrapper runtime gpu-offload + comando gpu-profile (home/mobile/auto)
     ./modules/hardware/ddc.nix # ddcutil + i2c-dev para brilho via DDC/CI
 
@@ -51,35 +50,24 @@
     ./modules/core/bluetooth.nix
     ./modules/core/logiops.nix
     ./modules/core/plymouth.nix
-    ./modules/core/greetd.nix # tuigreet via greetd — rollback se Ly falhar
-    # ./modules/core/ly.nix          # Ly greeter (TUI)
-    # ./modules/core/regreet.nix     # regreet (GTK4)
+    ./modules/core/greetd.nix # greeter: tuigreet via greetd
     ./modules/core/hyprland
     ./modules/core/obsidian-sync.nix
-    # ./modules/core/leech-tick.nix  # desabilitado: vennon não está mais em uso
     ./modules/core/work.nix
-    # ./modules/core/home.nix
+    # ./modules/core/home.nix # home-manager (NÃO ativo: input ausente no flake.nix). Reviver = adicionar input + ./modules/core/home.nix
 
     # ── Services ───────────────────────────────────────
     ./modules/services/ai.nix
-    # ./modules/services/containers.nix
-    ./modules/services/lmstudio.nix
-    # ./modules/services/netdata.nix  # desabilitado: usa stack OTEL (grafana/victoriametrics)
+    ./modules/services/lmstudio.nix # serviço opt-in (services.lmstudio.enable; default false em services.nix)
     ./modules/services/steam.nix
     ./modules/services/virt.nix
+    # ./modules/services/tmux-server.nix # socket tmux host↔container (zion). Reativar se voltar a usar o socket compartilhado
 
     # ── Experiments ────────────────────────────────────
-    # ./modules/experiments/dms.nix
+    # ./modules/experiments/dms.nix          # DankMaterialShell (também disponível via input dms no flake)
     # ./modules/experiments/whisper-ptt.nix  # on-demand: PTT
-    # ./modules/experiments/bongocat.nix     # fun mas desnecessário
-    # ./modules/experiments/tlp.nix
     ./modules/experiments/flatpak.nix
-    # ./modules/experiments/cosmic.nix
-    # ./modules/experiments/kde.nix
-    # ./modules/experiments/openclaw.nix
-    # ./modules/experiments/docker.nix       # use containers.nix
-    ./modules/experiments/podman.nix # use containers.nix
-    # ./modules/experiments/gnome/core.nix
+    ./modules/experiments/podman.nix # engine de containers ativo (rootless + dockerCompat)
 
   ];
 }

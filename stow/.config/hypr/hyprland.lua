@@ -69,7 +69,6 @@ require("layouts")            -- snapshots de janelas por workspace (CLI: hypr-l
 
 -- Hooks reativos (consomem registries populados pelos requires acima)
 require("events")
-require("screenshare_guard")
 require("specials-feed")      -- SIGRTMIN+11 → waybar refresh
 
 -- Watchers / REPL (re-habilitados 2026-05-20: io.popen → io.open + /proc)

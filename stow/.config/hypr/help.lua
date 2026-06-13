@@ -80,14 +80,6 @@ Alt-Tab Wayland-friendly via rofi (usa `core.rofi_menu`):
 
 ---
 
-### 6. **Screenshare guard** (`screenshare_guard.lua`)
-
-Automático via evento `screenshare.state`:
-- Entra screenshare → DND on + bordas vermelhas grossas + notif crítica
-- Sai screenshare → reverte tudo + notif
-
----
-
 ### 7. **Swallow** (`swallow.lua`)
 
 Terminal "engole" filho GUI (estilo dwm):
@@ -160,7 +152,6 @@ Hooks declarativos — políticas opt-in via `define_special({ on_active = fn, a
 | `monitor.added`       | Notif + `hyprctl reload` + waybar refresh                          |
 | `monitor.removed`     | Notif + waybar refresh                                             |
 | `window.urgent`       | Notif "Urgent: <class>"                                            |
-| `screenshare.state`   | (em screenshare_guard.lua) DND on + bordas vermelhas               |
 
 ---
 
@@ -204,7 +195,6 @@ Hooks declarativos — políticas opt-in via `define_special({ on_active = fn, a
 ├── cycler.lua            # cicla por class
 ├── hud.lua               # SUPER+; peek de estado
 ├── pomodoro.lua          # SUPER+SHIFT+T timer
-├── screenshare_guard.lua # auto-DND no screenshare.state
 ├── swallow.lua           # terminal swallowing (via /proc)
 ├── submaps.lua           # smart actions context-aware
 ├── followme.lua          # sync workspaces entre monitores

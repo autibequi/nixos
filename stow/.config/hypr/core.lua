@@ -1,7 +1,7 @@
 -- ============================================================
 --  CORE — helpers compartilhados
 --
---  Substitui wrappers redundantes em events/screenshare_guard/
+--  Substitui wrappers redundantes em events/
 --  followme/specials-feed (on), theme/profiles/pomodoro
 --  (state_file/notify/timer), cycler/submaps/hud/picker
 --  (focused/clients_cached), hyprshortcuts/picker (escape_sh/trunc),

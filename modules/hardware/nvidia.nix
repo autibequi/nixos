@@ -97,5 +97,5 @@
   # causando builds gigantes e cache misses no Nix. Para usar CUDA em apps específicos:
   #   nix-shell -p cudatoolkit
   #   ou pkgs.python3Packages.torch.override { cudaSupport = true; }
-  nixpkgs.config.cudaSupport = true;
+  nixpkgs.config.cudaSupport = false;
 }

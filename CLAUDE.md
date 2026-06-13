@@ -1,7 +1,6 @@
 # CLAUDE.md — NixOS host config
 
-**Este repo:** NixOS config do ASUS Zephyrus G14. Sem sub-projetos — só a config do sistema.
-Orquestração de containers e agentes: **bardiel** (repo separado em `/workspace/bardiel/`).
+**Este repo:** NixOS config do ASUS Zephyrus G14 + dotfiles (em `stow/`). Config do sistema + dotfiles do usuário.
 
 ---
 
@@ -25,7 +24,7 @@ Orquestração de containers e agentes: **bardiel** (repo separado em `/workspac
 | Kernel / sysctl | `modules/core/kernel.nix` |
 | Nix settings | `modules/core/nix.nix` |
 | Hibernate | `modules/core/hibernate.nix` |
-| Hyprland compositor | `modules/core/hyprland.nix` |
+| Hyprland (pacotes/portals/sessões) | `modules/core/hyprland/` |
 | NVIDIA | `modules/hardware/nvidia.nix` |
 | ASUS hardware | `modules/hardware/asus.nix` |
 | Bluetooth | `modules/core/bluetooth.nix` |
@@ -38,7 +37,7 @@ Orquestração de containers e agentes: **bardiel** (repo separado em `/workspac
 | Logitech mouse | `modules/core/logiops.nix` |
 | Work tools | `modules/core/work.nix` |
 | Ativar/desativar módulo | `configuration.nix` (imports) |
-| **Keybinds / windowrules / Waybar** | `stow/.config/hypr/` (via bardiel stow) |
+| **Keybinds / windowrules / Hyprland Lua** | `stow/.config/hypr/` (deploy via `just restow`) |
 
 **Pacotes unstable:** usar `unstable.<name>` — disponível via `specialArgs` em todos os módulos.
 
@@ -50,12 +49,12 @@ Orquestração de containers e agentes: **bardiel** (repo separado em `/workspac
 |----------|---------|
 | Testar build (temporário) | `nh os test .` |
 | Aplicar permanentemente | `nh os switch .` |
-| Deploy dotfiles | `just restow` ou `bardiel os stow` |
+| Deploy dotfiles | `just restow` |
 
 ---
 
 ## Armadilhas
 
 - `nixos-rebuild`/`systemctl` no container → não afeta o host. Pedir ao usuário.
-- Keybinds/Waybar: fonte da verdade é `stow/.config/hypr/`, não módulos NixOS.
-- `stow/` neste repo contém apenas `assets/` (wallpapers, ícones). Dotfiles (.config/zsh, .config/hypr, etc.) estão em `/workspace/bardiel/stow/`.
+- Keybinds/Hyprland: fonte da verdade é `stow/.config/hypr/` (config Lua), não módulos NixOS.
+- `stow/` neste repo contém os dotfiles: `.config/` (hypr, waybar, zsh, alacritty, …), `.local/bin/` (CLIs hypr-*, gpu-profile) e `assets/` (wallpapers, ícones). Deploy via `just restow`.

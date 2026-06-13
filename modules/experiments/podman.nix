@@ -17,19 +17,12 @@
 
   # Lazydocker / ferramentas tipo Docker → API do Podman *rootless* (socket do seu usuário).
   # Evita "permission denied" em /run/podman/podman.sock (grupo `podman` + socket de sistema).
+  # extraInit cobre TODOS os shells de login (bash/sh/zsh) — não precisa duplicar em programs.zsh.shellInit.
   environment.extraInit = ''
     if [ -n "''${XDG_RUNTIME_DIR:-}" ]; then
       export DOCKER_HOST="unix://''${XDG_RUNTIME_DIR}/podman/podman.sock"
     elif [ -n "''${UID:-}" ]; then
       export DOCKER_HOST="unix:///run/user/''${UID}/podman/podman.sock"
-    fi
-  '';
-
-  programs.zsh.shellInit = lib.mkAfter ''
-    if [ -n "''${XDG_RUNTIME_DIR:-}" ]; then
-      export DOCKER_HOST="unix://''${XDG_RUNTIME_DIR}/podman/podman.sock"
-    else
-      export DOCKER_HOST="unix:///run/user/$(id -u)/podman/podman.sock"
     fi
   '';
 
