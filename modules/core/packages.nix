@@ -7,6 +7,7 @@
 
 {
   environment.systemPackages = with pkgs; [
+    gthumb
     mkcert
     nssTools
     lazygit

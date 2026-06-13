@@ -93,6 +93,8 @@
     127.0.0.1 postgres
 
     127.0.0.1 vennon
+
+    192.168.68.54 snatcher.autibequi.com
   '';
 
   # Cloudflare Warp
