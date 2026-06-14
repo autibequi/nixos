@@ -270,6 +270,9 @@
 		"include_ignored": "smart"
 	},
 	"file_scan_exclusions": [
+		"**/.nuxt",
+		"**/.output",
+		"**/.tempograph",
 		"**/.git",
 		"**/.DS_Store",
 		"**/.local/share/containers",
@@ -569,7 +572,8 @@
 			}
 		},
 		"gopls": {
-			"settings": {}
+			"directoryFilters": ["-**/vendor"],
+			"memoryMode": "DegradeClosed"
 		},
 		"golangci-lint": {
 			"settings": {}
