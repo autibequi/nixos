@@ -4,12 +4,12 @@
 	// ╚══════════════════════════════════════════════════════════════╝
 	// ─── WINDOW & SESSION ──────────────────────────────────────────
 	"proxy": "",
- "completions": {
-  "lsp_fetch_timeout_ms": 30
- },
- "go_to_definition_fallback": "none",
- "go_to_definition_scroll_strategy": "top",
- "cli_default_open_behavior": "existing_window",
+	"completions": {
+		"lsp_fetch_timeout_ms": 30
+	},
+	"go_to_definition_fallback": "none",
+	"go_to_definition_scroll_strategy": "top",
+	"cli_default_open_behavior": "existing_window",
 	"restore_on_startup": "launchpad",
 	"restore_on_file_reopen": false,
 	"when_closing_with_no_tabs": "close_window",
@@ -271,6 +271,9 @@
 	},
 	"file_scan_exclusions": [
 		"**/.git",
+		"**/.DS_Store",
+		"**/.local/share/containers",
+		"**/yaa/mounts",
 		"**/.claude",
 		"**/vendor",
 		"**/node_modules",
@@ -339,7 +342,7 @@
 	// ─── AI — AGENT ────────────────────────────────────────────────
 	"agent": {
 		"notify_when_agent_waiting": "all_screens",
-  "sidebar_side": "right",
+		"sidebar_side": "right",
 		"dock": "right",
 		"default_profile": "write",
 		"message_editor_min_lines": 2,
@@ -377,9 +380,7 @@
 		],
 	},
 	// ─── AI — AGENT SERVERS ────────────────────────────────────────
-	"agent_servers": {
-		
-	},
+	"agent_servers": {},
 	// ─── SLASH COMMANDS ────────────────────────────────────────────
 	"slash_commands": {
 		"cargo_workspace": {
