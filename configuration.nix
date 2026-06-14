@@ -33,8 +33,8 @@
     # ── Hardware ───────────────────────────────────────
     ./modules/hardware/asus.nix
     ./modules/hardware/nvidia.nix
-    ./modules/hardware/gpu-toggle.nix # wrapper runtime gpu-offload + comando gpu-profile (home/mobile/auto)
-    ./modules/hardware/ddc.nix # ddcutil + i2c-dev para brilho via DDC/CI
+    # ./modules/hardware/gpu-toggle.nix # wrapper runtime gpu-offload + comando gpu-profile (home/mobile/auto)
+    # ./modules/hardware/ddc.nix # ddcutil + i2c-dev para brilho via DDC/CI
 
     # ── Core ───────────────────────────────────────────
     ./modules/core/nix.nix
@@ -59,7 +59,7 @@
     # ── Services ───────────────────────────────────────
     ./modules/services/ai.nix
     ./modules/services/lmstudio.nix # serviço opt-in (services.lmstudio.enable; default false em services.nix)
-    ./modules/services/ramsync.nix # profile-em-RAM (psd: browsers em tmpfs)
+    # ./modules/services/ramsync.nix # profile-em-RAM (psd: browsers em tmpfs)
     ./modules/services/steam.nix
     ./modules/services/virt.nix
 
