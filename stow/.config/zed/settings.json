@@ -288,13 +288,29 @@
 		"**/coverage",
 		"*.svg",
 		"**/static",
-		"**/public"
+		"**/public",
+		// Caches com milhares de arquivinhos — geram watchers inúteis e
+		// inflam o scan em monorepo. Não são código-fonte.
+		"**/.dart_tool",
+		"**/__pycache__",
+		"**/.venv",
+		"**/.pytest_cache",
+		"**/.mypy_cache",
+		"**/.ruff_cache",
+		"**/.gradle",
+		"**/.idea",
+		"**/.svelte-kit",
+		"**/.cache"
 	],
 	// ─── TERMINAL ──────────────────────────────────────────────────
 	"terminal": {
 		"dock": "bottom",
 		"bell": "system",
 		"max_scroll_history_lines": 1000,
+		// 0 desliga a regex de path hyperlink — ela estourava timeout no log
+		// ("Timed out processing path hyperlink regexes") competindo com o
+		// event loop já saturado pelo watcher.
+		"path_hyperlink_timeout_ms": 0,
 		"detect_venv": {
 			"on": {
 				"directories": [
@@ -572,8 +588,10 @@
 			}
 		},
 		"gopls": {
-			"directoryFilters": ["-**/vendor"],
-			"memoryMode": "DegradeClosed"
+			"settings": {
+				"directoryFilters": ["-**/vendor"],
+				"memoryMode": "DegradeClosed"
+			}
 		},
 		"golangci-lint": {
 			"settings": {}
