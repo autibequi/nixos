@@ -8,6 +8,15 @@
     defaultNetwork.settings.dns_enabled = true;
   };
 
+  # dockerSocket.enable liga SÓ o socket rootful de sistema. O coruja up,
+  # lazydocker e os containers do dev-stack rodam ROOTLESS → dependem do
+  # socket de usuário (/run/user/$UID/podman/podman.sock), que o nixpkgs
+  # não expõe (não há rootlessSocket.enable). O pacote podman já traz a
+  # unit podman.socket; systemd.packages a torna visível ao systemctl --user
+  # e wantedBy liga o socket no boot da sessão do usuário.
+  systemd.packages = [ pkgs.podman ];
+  systemd.user.sockets.podman.wantedBy = [ "sockets.target" ];
+
   virtualisation.containers.containersConf.settings.engine.runtime = "crun";
 
   # Kernel 6.18+ suporta overlay idmap nativo — evita cópia de ~1.6 GB
