@@ -7,6 +7,7 @@
 
 {
   environment.systemPackages = with pkgs; [
+    firefox
     gthumb
     mkcert
     nssTools
@@ -46,8 +47,6 @@
     # ── Browsers ───────────────────────────────────────
     chromium
     google-chrome
-    vivaldi
-    vivaldi-ffmpeg-codecs
     # servo # rust browser
     # inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
 
