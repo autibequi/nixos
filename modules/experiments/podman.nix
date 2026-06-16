@@ -11,11 +11,25 @@
   # dockerSocket.enable liga SÓ o socket rootful de sistema. O coruja up,
   # lazydocker e os containers do dev-stack rodam ROOTLESS → dependem do
   # socket de usuário (/run/user/$UID/podman/podman.sock), que o nixpkgs
-  # não expõe (não há rootlessSocket.enable). O pacote podman já traz a
-  # unit podman.socket; systemd.packages a torna visível ao systemctl --user
-  # e wantedBy liga o socket no boot da sessão do usuário.
-  systemd.packages = [ pkgs.podman ];
-  systemd.user.sockets.podman.wantedBy = [ "sockets.target" ];
+  # não expõe (não há rootlessSocket.enable). Declaramos o socket+service
+  # de usuário à mão — NÃO via systemd.packages = [ pkgs.podman ], pois isso
+  # re-linka o podman-system-generator que virtualisation.podman já instala
+  # → colisão de symlink em system-generators (File exists).
+  systemd.user.sockets.podman = {
+    wantedBy = [ "sockets.target" ];
+    socketConfig = {
+      ListenStream = "%t/podman/podman.sock";
+      SocketMode = "0660";
+    };
+  };
+  systemd.user.services.podman = {
+    unitConfig.Description = "Podman API Service (rootless)";
+    serviceConfig = {
+      Type = "exec";
+      ExecStart = "${pkgs.podman}/bin/podman system service --time=0";
+      Restart = "on-failure";
+    };
+  };
 
   virtualisation.containers.containersConf.settings.engine.runtime = "crun";
 
