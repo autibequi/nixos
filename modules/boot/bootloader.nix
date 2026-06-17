@@ -4,7 +4,7 @@
   boot.loader.limine.efiSupport = true;
   boot.loader.limine.maxGenerations = 10;
   boot.loader.efi.canTouchEfiVariables = true;
-  boot.loader.timeout = 3; # segundos antes de auto-boot (0 = imediato, sem menu)
+  boot.loader.timeout = 1; # segundos antes de auto-boot (era 3; menu rápido p/ Windows)
 
   # bootmgfw.efi em nvme0n1p4 (mesma ESP do Limine) — confirmado via efibootmgr
   boot.loader.limine.extraEntries = ''
