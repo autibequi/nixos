@@ -11,16 +11,12 @@
 
     # 🤖 LLM Local
     unstable.lmstudio
-    # jan
 
     # 💻 AI IDEs
-    # windsurf
     unstable.code-cursor
-    # opencode
 
     # 🛠️ Utilities
-    # llm
-    upscayl
+    # (jan, windsurf, opencode, llm, upscayl → system/packages-extra.nix)
 
     # MCPS
     unstable.python314Packages.firecrawl-py

@@ -16,7 +16,7 @@
       "nixpkgs"
       "-L" # print build logs
     ];
-    dates = "02:30"; # era 16:00 — rebuild diário no meio do expediente é péssimo
+    dates = "Sun 03:00"; # semanal (domingo) — evita rebuild + update de nixpkgs todo dia
     randomizedDelaySec = "15min";
   };
 
@@ -64,7 +64,6 @@
       glib
       libsoup_3
       gmp
-      openssl
       freetype
     ];
   };
@@ -77,7 +76,10 @@
   # Unholy packages
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.allowImpure = true;
-  nixpkgs.config.allowInsecurePredicate = _: true;
+  # Pacotes inseguros permitidos EXPLICITAMENTE (em vez de aceitar todos com `_: true`,
+  # que deixava qualquer CVE conhecido passar silencioso). Se `nh os test` reclamar de
+  # um pacote inseguro, adicione o nome exato (ex: "ventoy-qt5-1.1.05") nesta lista.
+  nixpkgs.config.permittedInsecurePackages = [ ];
 
   # Configuração do Nix
   # Habilitar o uso de substitutos de cache

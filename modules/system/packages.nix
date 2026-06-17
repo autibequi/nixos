@@ -6,17 +6,16 @@
 }:
 
 {
+  # Pacotes de sistema ATIVOS (sempre instalados). Os opt-in (servo, godot,
+  # ventoy, digikam, etc) vivem comentados em system/packages-extra.nix.
   environment.systemPackages = with pkgs; [
     firefox
     gthumb
     mkcert
     nssTools
     lazygit
-    # runwithout installing
-    comma
-    # crap
+    comma # roda pacote sem instalar (precisa do db do nix-index pra achar tudo)
     sqlite
-    unstable.digikam
 
     cbonsai
     # ── Sistema ────────────────────────────────────────
@@ -30,12 +29,9 @@
 
     easyeffects
 
-    bottles
-
     # ── Desktop / Wayland ──────────────────────────────
     awww
     rofimoji
-    # rofi-wayland
     rofi-unwrapped
     flameshot # PrintScreens
 
@@ -47,8 +43,6 @@
     # ── Browsers ───────────────────────────────────────
     chromium
     google-chrome
-    # servo # rust browser
-    # inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
 
     # ── Editores / Dev ─────────────────────────────────
     zed-editor
@@ -75,28 +69,16 @@
 
     # ── Terminal ───────────────────────────────────────
     tmux
-    cool-retro-term
     espeak-ng # TTS for terminal bell
     sox # audio recording (Claude Code /voice)
     socat # bridge TCP — usado pelo yaa chrome pra expor CDP do host ao container
 
-    # ── Benchmark / Monitoramento ──────────────────────
-    geekbench
-    fio # I/O benchmark (CrystalDiskMark-style)
+    # ── Monitoramento ──────────────────────────────────
     nvtopPackages.full # AMD GPU monitoring
 
-    # ── Games / 3D ─────────────────────────────────────
-    godot
-    # retroarchFull
-    ventoy-full-gtk
+    # ── X11 / Misc ─────────────────────────────────────
     xhost
-    # ── Hardware / Misc ────────────────────────────────
     # gnome-disk-utility: instalado em desktop/hyprland/packages.nix
-    sidequest # Oculus sideloading
-    # cura
-    # ventoy-full-qt
-    # openrgb_git
-    # winboat
 
     # ── Fun ────────────────────────────────────────────
     unstable.wayland-bongocat
@@ -107,14 +89,5 @@
 
     # ── AI Agents ──────────────────────────────────────
     inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.coderabbit-cli
-
-    # ── Testando ───────────────────────────────────────
-    # evil-helix_git
-    # unstable.howdy
-    # inputs.antigravity-nix.packages.${pkgs.system}.default
-    # inputs.voxtype.packages.${pkgs.system}.vulkan
   ];
-  # permittedInsecurePackages = [
-  #   "ventoy-qt5-1.1.05"
-  # ];
 }

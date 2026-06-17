@@ -6,6 +6,19 @@
     dockerCompat = true;
     dockerSocket.enable = true;
     defaultNetwork.settings.dns_enabled = true;
+
+    # GC do storage ROOTFUL (root). Roda como systemd de sistema → limpa só
+    # /var/lib/containers. O lixo do dev-stack é ROOTLESS → ver podman-prune
+    # de usuário mais abaixo (esta opção sozinha NÃO o cobre).
+    autoPrune = {
+      enable = true;
+      dates = "weekly";
+      flags = [
+        "--all" # remove imagens sem container associado (não só dangling)
+        "--filter"
+        "until=168h" # poupa o que tem menos de 7 dias
+      ];
+    };
   };
 
   # dockerSocket.enable liga SÓ o socket rootful de sistema. O coruja up,
@@ -28,6 +41,28 @@
       Type = "exec";
       ExecStart = "${pkgs.podman}/bin/podman system service --time=0";
       Restart = "on-failure";
+    };
+  };
+
+  # ── GC ROOTLESS (onde o lixo do dev-stack realmente fica) ───────────────────
+  # O autoPrune nativo (acima) roda como root e só limpa o storage rootful. Os
+  # containers/imagens do `coruja up`, testcontainers etc. vivem no storage
+  # ROOTLESS do usuário (~/.local/share/containers) — precisam deste timer próprio.
+  systemd.user.services.podman-prune = {
+    description = "Prune podman rootless (imagens/containers/cache não usados há +7d)";
+    serviceConfig = {
+      Type = "oneshot";
+      # --all: remove imagens sem container. until=168h: poupa o que é dos últimos 7 dias.
+      # SEM --volumes de propósito — volumes podem guardar dados (DB de testcontainer).
+      ExecStart = "${pkgs.podman}/bin/podman system prune --all --force --filter until=168h";
+    };
+  };
+  systemd.user.timers.podman-prune = {
+    description = "Agenda semanal do prune podman rootless";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "weekly";
+      Persistent = true; # se a máquina estava off no horário, roda no próximo login
     };
   };
 

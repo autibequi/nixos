@@ -12,7 +12,12 @@
     # nixpkgs.url = "github:NixOS/nixpkgs/staging-next";
 
     # Other Inputs
-    nixos-hardware.url = "github:NixOS/nixos-hardware/master";
+    nixos-hardware = {
+      url = "github:NixOS/nixos-hardware/master";
+      # follows: nixos-hardware é só módulos (não builda nada), então seguir o nixpkgs
+      # principal elimina o nixpkgs duplicado no lock sem custo de cache.
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # CacheNix
     chaotic.url = "github:chaotic-cx/nyx/nyxpkgs-unstable";

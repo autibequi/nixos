@@ -14,5 +14,6 @@
     ./fonts.nix
     ./programs.nix # nano off, direnv, starship, waydroid
     ./packages.nix # pacotes de sistema gerais
+    ./packages-extra.nix # catálogo opt-in (tudo comentado; descomente p/ ativar)
   ];
 }

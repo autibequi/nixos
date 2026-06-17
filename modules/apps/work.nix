@@ -32,7 +32,6 @@
 
     # --- Python ---
     python312
-    # pipx
     poetry
     pyenv
     file # libmagic - intraupload
@@ -64,9 +63,6 @@
 
     # --- Zip ---
     zip
-
-    # TUIs
-    # unstable.jiratui # Jira integration
   ];
 
   # Services
@@ -91,8 +87,6 @@
 
     127.0.0.1 redis
     127.0.0.1 postgres
-
-    127.0.0.1 vennon
   '';
 
   # Cloudflare Warp
