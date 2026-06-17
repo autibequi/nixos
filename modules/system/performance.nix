@@ -1,5 +1,17 @@
 { ... }:
 {
+  # ── Memória: zram (swap comprimido em RAM) ─────────────────────────────────
+  # Swap comprimido em RAM com prioridade ALTA. Páginas frias vão pra RAM
+  # comprimida (zstd ~3-4:1) em vez do NVMe → swap-in ~10× mais rápido, custo
+  # de CPU irrisório no Ryzen 9. O swap em disco (configuration.nix) continua
+  # como fallback de prioridade menor e cobre a HIBERNAÇÃO (zram não hiberna).
+  zramSwap = {
+    enable = true;
+    algorithm = "zstd";
+    memoryPercent = 50; # até ~24GB de RAM viram swap comprimido (~70-90GB efetivos)
+    priority = 100; # MAIOR que o swap em disco (prio -1) → kernel prefere zram
+  };
+
   # ── Limites de recursos ────────────────────────────────────────────────────
 
   # Limites para Podman rootless com múltiplos containers simultâneos.
