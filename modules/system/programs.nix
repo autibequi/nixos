@@ -16,6 +16,13 @@
       scan_timeout = 10;
       command_timeout = 200;
     };
+
+    # nix-index: gera o db que o `comma` (,) usa pra achar pacotes + handler
+    # command-not-found. Após o switch, rode `nix-index` UMA vez pra popular o db
+    # (~minutos; ou adicione o input nix-index-database pra um db pré-gerado).
+    nix-index.enable = true;
+    # command-not-found (via channels) usa o MESMO handler do shell → conflita.
+    command-not-found.enable = false;
   };
 
   # Waydroid: habilitado mas container NÃO sobe automaticamente no boot.

@@ -60,5 +60,6 @@
     # ── Dev / Estratégia ───────────────────────────────────────────────
     # pipx                # instalar CLIs Python isolados
     # unstable.jiratui     # TUI de Jira
+    # home-manager        # CLI standalone do HM (não usado — home.nix foi removido)
   ];
 }

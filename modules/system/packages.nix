@@ -85,8 +85,6 @@
     pokemonsay
     fortune
 
-    home-manager
-
     # ── AI Agents ──────────────────────────────────────
     inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.coderabbit-cli
   ];
