@@ -33,10 +33,17 @@
 
   virtualisation.containers.containersConf.settings.engine.runtime = "crun";
 
-  # Kernel 6.18+ suporta overlay idmap nativo — evita cópia de ~1.6 GB
-  # no primeiro arranque rootless. fuse-overlayfs não suporta idmap.
+  # Rootless: mount_program = fuse-overlayfs (OBRIGATÓRIO pra testcontainer).
+  # O overlay NATIVO rootless (mount_program = "") quebra o copy-up de volume
+  # anônimo (VOLUME da imagem): o copier subprocess falha com
+  #   `chdir <vol>/_data: no such file or directory`
+  # derrubando todo container com VOLUME (postgres/localstack do testcontainer)
+  # e o `make test-ldi` inteiro. fuse-overlayfs faz o copy-up corretamente.
+  # Trade-off: ~1.6 GB de cópia no primeiro arranque rootless — aceitável
+  # frente a ter testcontainers funcionando. (idmap nativo não compensa quebrar
+  # a suíte de testes de integração.)
   virtualisation.containers.storage.settings.storage.options.overlay.mount_program =
-    lib.mkForce "";
+    lib.mkForce "${pkgs.fuse-overlayfs}/bin/fuse-overlayfs";
 
   # Lazydocker / ferramentas tipo Docker → API do Podman *rootless* (socket do seu usuário).
   # Evita "permission denied" em /run/podman/podman.sock (grupo `podman` + socket de sistema).
@@ -45,7 +52,7 @@
     if [ -n "''${XDG_RUNTIME_DIR:-}" ]; then
       export DOCKER_HOST="unix://''${XDG_RUNTIME_DIR}/podman/podman.sock"
     elif [ -n "''${UID:-}" ]; then
-      export DOCKER_HOST="unix:///run/user/''${UID}/podman/podman.sock"
+      export DOCKER_HOST="unix://run/user/''${UID}/podman/podman.sock"
     fi
   '';
 
