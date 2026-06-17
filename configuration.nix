@@ -28,46 +28,20 @@
     swapDevices = [ { device = "/dev/disk/by-uuid/17e5c565-c90c-4233-92c6-bb86adfed306"; } ];
   };
 
+  # Cada pasta tem um default.nix que importa seus módulos ativos.
+  # Para ligar/desligar um módulo, edite o default.nix da pasta correspondente.
   imports = [
+    ./modules/boot # bootloader, kernel, plymouth, hibernate
+    ./modules/hardware # drivers, firmware, áudio, periféricos
+    ./modules/system # nix, locale, users, networking, performance, shell, pacotes
+    ./modules/desktop # hyprland + greeter
+    ./modules/services # daemons opt-in (ai, lmstudio, obsidian-sync, steam, virt)
+    ./modules/apps # ambiente de trabalho (Estratégia)
 
-    # ── Hardware ───────────────────────────────────────
-    ./modules/hardware/asus.nix
-    ./modules/hardware/nvidia.nix
-    # ./modules/hardware/gpu-toggle.nix # wrapper runtime gpu-offload + comando gpu-profile (home/mobile/auto)
-    # ./modules/hardware/ddc.nix # ddcutil + i2c-dev para brilho via DDC/CI
-
-    # ── Core ───────────────────────────────────────────
-    ./modules/core/nix.nix
-    ./modules/core/core.nix
-    ./modules/core/limine.nix
-    ./modules/core/kernel.nix
-    ./modules/core/shell.nix
-    ./modules/core/fonts.nix
-    ./modules/core/programs.nix
-    ./modules/core/services.nix
-    ./modules/core/packages.nix
-    ./modules/core/hibernate.nix
-    ./modules/core/bluetooth.nix
-    ./modules/core/logiops.nix
-    ./modules/core/plymouth.nix
-    ./modules/core/greetd.nix # greeter: tuigreet via greetd
-    ./modules/core/hyprland
-    ./modules/core/obsidian-sync.nix
-    ./modules/core/work.nix
-    # ./modules/core/home.nix # home-manager (NÃO ativo: input ausente no flake.nix). psd migrou p/ services/ramsync.nix; só resta o tailscale-systray aqui
-
-    # ── Services ───────────────────────────────────────
-    ./modules/services/ai.nix
-    ./modules/services/lmstudio.nix # serviço opt-in (services.lmstudio.enable; default false em services.nix)
-    # ./modules/services/ramsync.nix # profile-em-RAM (psd: browsers em tmpfs)
-    ./modules/services/steam.nix
-    ./modules/services/virt.nix
-
-    # ── Experiments ────────────────────────────────────
+    # ── Experiments (opt-in, controle individual aqui) ──
+    ./modules/experiments/podman.nix # engine de containers (rootless + dockerCompat)
+    ./modules/experiments/flatpak.nix
     # ./modules/experiments/dms.nix          # DankMaterialShell (também disponível via input dms no flake)
     # ./modules/experiments/whisper-ptt.nix  # on-demand: PTT
-    ./modules/experiments/flatpak.nix
-    ./modules/experiments/podman.nix # engine de containers ativo (rootless + dockerCompat)
-
   ];
 }

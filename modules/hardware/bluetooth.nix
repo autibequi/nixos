@@ -1,3 +1,4 @@
+{ ... }:
 {
   hardware.bluetooth = {
     enable = true;
@@ -11,13 +12,6 @@
     };
   };
 
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    pulse.enable = true;
-    jack.enable = true;
-    wireplumber.enable = true;
-  };
-
+  # blueman (applet GTK) desativado — pareamento via bluetuith (TUI) / nwg-panel.
   services.blueman.enable = false;
 }

@@ -1,7 +1,7 @@
 {
   description = "A very basic flake";
 
-  # Caches configurados canonicamente em modules/core/nix.nix (nix.settings)
+  # Caches configurados canonicamente em modules/system/nix.nix (nix.settings)
   # nixConfig aqui seria redundante — accept-flake-config = true já está lá
 
   inputs = {
@@ -66,7 +66,7 @@
           hyprlandFlake = hyprlandFlake.packages.${system};
         };
         modules = [
-          # GA402X + NVIDIA (shared.nix impõe mem_sleep_default=deep — overridden em modules/core/hibernate.nix)
+          # GA402X + NVIDIA (shared.nix impõe mem_sleep_default=deep — overridden em modules/boot/hibernate.nix)
           nixos-hardware.nixosModules.asus-zephyrus-ga402x-nvidia
 
           # CachyOS Kernel

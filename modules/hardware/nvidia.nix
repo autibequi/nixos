@@ -5,7 +5,7 @@
   ...
 }:
 {
-  # Política de suspend/mem_sleep: modules/core/hibernate.nix (s2idle por último no cmdline,
+  # Política de suspend/mem_sleep: modules/boot/hibernate.nix (s2idle por último no cmdline,
   # alinhado com prime offload e comentários nixos-hardware GA402X + TLP).
 
   # Removido em da40e19f por engano durante refactor — necessário para expor

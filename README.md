@@ -6,26 +6,33 @@ Orchestrated by **bardiel** (separate repo).
 ## Structure
 
 ```
-flake.nix            # Flake inputs and nixosConfigurations.nomad output
-configuration.nix    # Module registry (enable/disable features here)
-Justfile             # restow recipe
+flake.nix            # Flake inputs + output nixosConfigurations.nomad
+configuration.nix    # fileSystems + registry de imports (liga/desliga pastas e experiments)
+Justfile             # switch / update / stow / restow
 
 modules/
-  core/              # Essential modules (kernel, nix, shell, packages, services, fonts…)
-  hardware/          # asus.nix, nvidia.nix, gpu-toggle.nix, ddc.nix
-  services/          # ai.nix, lmstudio.nix, steam.nix, virt.nix
-  experiments/       # Optional / on-demand modules (podman, flatpak, dms, whisper-ptt)
+  boot/        bootloader · kernel · plymouth · hibernate
+  hardware/    base (firmware/amd) · asus · nvidia · audio · bluetooth · logiops · [gpu-toggle · ddc]
+  system/      base · nix · locale · users · networking · performance · services · shell · fonts · programs · packages
+  desktop/     hyprland/ · greetd
+  services/    ai · lmstudio · obsidian-sync · steam · virt · [ramsync]
+  apps/        work (toolchain Estratégia)
+  experiments/ podman · flatpak · [dms · whisper-ptt]
 
-stow/
-  .config/           # Dotfiles: hypr/, waybar/, zsh/, alacritty/, … (symlinked into ~ via `just stow`)
-  .local/bin/        # CLIs: hypr-*, gpu-profile, caffeine-toggle, …
-  assets/            # Wallpapers, icons
+stow/          # Dotfiles deployados em ~ via `just restow`
+  .config/     # hypr, waybar, quickshell, alacritty, zsh, …
+  assets/      # wallpapers, lockscreen, ícones
+  _attic/      # configs arquivadas (não deployadas)
 ```
+
+Cada pasta em `modules/` tem um `default.nix` que importa seus módulos ativos.
+Os módulos entre `[colchetes]` estão comentados (opt-in) no `default.nix` da pasta —
+para ativar, descomente lá. Experiments são ligados/desligados em `configuration.nix`.
 
 ## Flake Inputs
 
 - **nixpkgs**: NixOS 26.05 (stable)
-- **nixpkgs-unstable**: unstable channel (available as `unstable` in modules)
+- **nixpkgs-unstable**: unstable channel (disponível como `unstable` nos módulos)
 - **nixos-hardware**: ASUS Zephyrus GA402X hardware support
 - **chaotic**: CachyOS kernel (nyx)
 - **claude-code**: claude-code-nix overlay (última versão upstream)
@@ -36,23 +43,22 @@ stow/
 ## Commands
 
 ```sh
-# Build and test (temporary, no commit)
+just switch    # nh os switch . — aplica permanentemente
+just update    # nh os switch --update . — atualiza flake e aplica
+just restow    # redeploya os dotfiles (stow/ → ~)
+
+# Build temporário (não persiste no boot):
 nh os test .
-
-# Apply permanently
-nh os switch .
-
-# Deploy dotfiles (stow/ → ~)
-just restow
 ```
 
 ## Tips
 
-**Unstable packages** are available in all modules via `specialArgs`:
+**Pacotes unstable** estão disponíveis em todos os módulos via `specialArgs`:
 ```nix
 environment.systemPackages = [ unstable.some-package ];
 ```
 
-**Enable/disable features** in `configuration.nix` by commenting/uncommenting imports.
+**Ligar/desligar feature**: edite o `default.nix` da pasta correspondente
+(ou o bloco de experiments em `configuration.nix`).
 
-**High idle power draw?** NVIDIA might be misbehaving. Check `sudo powertop`.
+**Idle power draw alto?** A NVIDIA pode estar se comportando mal. Veja `sudo powertop`.

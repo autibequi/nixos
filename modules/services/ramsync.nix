@@ -9,7 +9,7 @@
 #   tem — ArchWiki alerta perda de dados ao usar asd em browser). Roda
 #   como systemd.user service (sem home-manager). Resync 30min + sync no
 #   shutdown. Detecta os browsers instalados (google-chrome/chromium/vivaldi).
-#   Substitui o psd que vivia em modules/core/home.nix (desativado).
+#   Substitui o psd que vivia no antigo modules/core/home.nix (removido).
 #
 # ── ZED + OBSIDIAN → tmpfs nos CACHES (descartáveis) ────────────────
 #   psd é browser-only e o asd (anything-sync-daemon) não tem módulo no

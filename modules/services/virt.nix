@@ -37,8 +37,8 @@
   # no bare metal gera 180+ erros "No data available" por boot.
   services.spice-vdagentd.enable = false;
 
-  # Dconf para virt-manager salvar configurações
-  programs.dconf.enable = true;
+  # Dconf (necessário pro virt-manager salvar config) já é habilitado
+  # globalmente em desktop/hyprland/default.nix — não redeclarar aqui.
 
   # Adiciona usuário aos grupos necessários
   users.users.pedrinho.extraGroups = [ "libvirtd" "kvm" ];

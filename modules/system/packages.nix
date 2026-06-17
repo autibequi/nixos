@@ -91,7 +91,7 @@
     ventoy-full-gtk
     xhost
     # ── Hardware / Misc ────────────────────────────────
-    gnome-disk-utility
+    # gnome-disk-utility: instalado em desktop/hyprland/packages.nix
     sidequest # Oculus sideloading
     # cura
     # ventoy-full-qt

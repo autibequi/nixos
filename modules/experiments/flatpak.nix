@@ -4,7 +4,7 @@ let
   grep = pkgs.gnugrep;
   # 1. Declare the Flatpaks you *want* on your system
   desiredFlatpaks = [
-    # Zen Browser: via flake em modules/core/packages.nix
+    # Zen Browser: via flake em modules/system/packages.nix
     # "com.usebottles.bottles"
     # "io.github.seadve.Kooha"
     # "net.nokyan.Resources"

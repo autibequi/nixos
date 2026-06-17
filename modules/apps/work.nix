@@ -10,7 +10,7 @@
   # Systemd Packages
   environment.systemPackages = with pkgs; [
     claude-code
-    lazydocker
+    # lazydocker: instalado em experiments/podman.nix
     # --- CLI ---
     dig
     awscli2
@@ -25,7 +25,7 @@
 
     # --- APPS  ---
     dbeaver-bin
-    chromium # work browser
+    # chromium: instalado em system/packages.nix (browser geral)
     vscode
     cartero
     insomnia

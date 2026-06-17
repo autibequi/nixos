@@ -7,24 +7,7 @@ let
     cudaSupport = true;
     rocmSupport = true;
   };
-  sharedAliases = {
-    # history = "atuin";
-    # grep = "rg";
-    # findf = "fd";
-    # cat = "bat";
-    # ls = "lsd -la";
-    # f = "fzf --wrap";
-    # clip = "wl-copy";
-    # clipb = "wl-paste";
-    # stow = "stow --target=$HOME";
-    # dotfiles = "stow --target=$HOME --dir=$HOME/nixos stow";
-    # please = "sudo !!";
-    # wiki = "wikiti";
-    # du = "dust";
-    # ps = "procs";
-    # sed = "sd";
-    # jq = "jaq";
-  };
+  # Aliases interativos vivem nos dotfiles do zsh (stow/.config/zsh), não aqui.
 in
 {
   environment.variables = {
@@ -48,8 +31,6 @@ in
       "line"
       "cursor"
     ];
-
-    shellAliases = sharedAliases;
 
     shellInit = ''
       fpath=(~/.config/zsh/completions $fpath)

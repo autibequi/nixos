@@ -18,7 +18,7 @@
   # SystemD no InitRD para hibernação moderna
   boot.initrd.systemd.enable = true;
 
-  # Menos logs até o greeter (Plymouth removido — boot rápido)
+  # Menos logs até o greeter — boot silencioso (splash via boot/plymouth.nix)
   boot.consoleLogLevel = 0;
   boot.initrd.verbose = false;
 
@@ -99,6 +99,9 @@
   systemd.tpm2.enable = false;
 
   boot.kernel.sysctl = {
+    # Limite global de file descriptors do sistema (consolidado de core.nix).
+    "fs.file-max" = 1048576;
+
     # Swappiness baixo: o kernel evita swap e prefere RAM + drop de page cache.
     # Use 1 (não 0): com 0 o reclaim de memória anônima fica tão raro que o
     # sistema pode ir direto a OOM sem “avisar” o earlyoom.
