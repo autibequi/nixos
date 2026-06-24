@@ -371,7 +371,11 @@
 	},
 	// ─── AI — AGENT ────────────────────────────────────────────────
 	"agent": {
-		"notify_when_agent_waiting": "never",
+		"sandbox_permissions": {
+   "allow_unsandboxed": true
+  },
+  "terminal_init_command": "yaa",
+  "notify_when_agent_waiting": "never",
 		"sidebar_side": "right",
 		"dock": "right",
 		"default_profile": "write",

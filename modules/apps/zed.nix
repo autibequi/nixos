@@ -24,20 +24,23 @@ let
       stdenv.cc.cc.lib zlib zstd alsa-lib glib libgit2 openssl sqlite curl
       fontconfig freetype wayland libxkbcommon vulkan-loader libglvnd libGL
       libva libdrm libgbm
-      xorg.libX11 xorg.libxcb xorg.libXcomposite xorg.libXdamage xorg.libXext
-      xorg.libXfixes xorg.libXrandr xorg.libXi xorg.libXcursor
+      libx11 libxcb libxcomposite libxdamage libxext
+      libxfixes libxrandr libxi libxcursor
     ];
     installPhase = ''
       runHook preInstall
       mkdir -p $out
-      cp -r zed.app/. $out/
+      cp -r . $out/
+      # tarball oficial só traz bin/zed; recria o alias `zeditor` (como o flake/nixpkgs)
+      ln -s zed $out/bin/zeditor
       runHook postInstall
     '';
     # libs carregadas via dlopen em runtime (autoPatchelf não vê via DT_NEEDED)
     postFixup = ''
       wrapProgram $out/libexec/zed-editor \
         --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath (with pkgs; [ vulkan-loader wayland libva libGL libglvnd libxkbcommon ])}" \
-        --suffix PATH : "${lib.makeBinPath (with pkgs; [ nodejs_22 ])}"
+        --suffix PATH : "${lib.makeBinPath (with pkgs; [ nodejs_22 ])}" \
+        --set ZED_UPDATE_EXPLANATION "Instalado via Nix (modules/apps/zed.nix). Auto-update desligado — use 'make zed-update'."
     '';
     meta.mainProgram = "zed";
   };
