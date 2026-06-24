@@ -1,0 +1,6 @@
+.env
+.env.secrets
+certs/
+.coruja-state
+# binário gerado pelo bashly — vive em /tmp + ~/.local/bin, nunca no repo
+/coruja

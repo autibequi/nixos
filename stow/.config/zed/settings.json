@@ -166,7 +166,7 @@
 		"show": "auto",
 		"cursors": true,
 		"git_diff": true,
-		"search_results": false,
+		"search_results": true,
 		"selected_text": true,
 		"diagnostics": "all",
 	},
@@ -315,7 +315,10 @@
 	],
 	// ─── TERMINAL ──────────────────────────────────────────────────
 	"terminal": {
-		"dock": "bottom",
+		"scrollbar": {
+   "show": "auto"
+  },
+  "dock": "bottom",
 		"bell": "system",
 		"max_scroll_history_lines": 1000,
 		// 0 desliga a regex de path hyperlink — ela estourava timeout no log

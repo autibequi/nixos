@@ -1,0 +1,45 @@
+# lib/state.sh — persiste a última config do wizard no diretório do projeto.
+# Vira o default da próxima vez (no wizard e no modo --yes).
+
+coruja_state_file() {
+  echo "$(coruja_dir)/.coruja-state"
+}
+
+# Carrega o state salvo em STATE_* — só aceita valores válidos (à prova de arquivo corrompido).
+state_load() {
+  local f
+  f="$(coruja_state_file)"
+  [[ -f "$f" ]] || return 0
+
+  local key val
+  while IFS='=' read -r key val; do
+    case "$key" in
+      FRONT)    case "$val" in local | sandbox | qa | prod | devbox | skip) STATE_FRONT="$val" ;; esac ;;
+      BO)       case "$val" in local | sandbox | qa | prod | skip) STATE_BO="$val" ;; esac ;;
+      MONO)     case "$val" in auto | local | sandbox | sandbox-devbox | prod | skip) STATE_MONO="$val" ;; esac ;;
+      MODE)     case "$val" in foreground | background) STATE_MODE="$val" ;; esac ;;
+      VERTICAL) case "$val" in carreiras-juridicas | concursos | medicina | militares | oab | vestibulares) STATE_VERTICAL="$val" ;; esac ;;
+      WORKER)   case "$val" in yes | no) STATE_WORKER="$val" ;; esac ;;
+      PDFKIT)   case "$val" in yes | no) STATE_PDFKIT="$val" ;; esac ;;
+      DEBUG)    case "$val" in 0 | 1) STATE_DEBUG="$val" ;; esac ;;
+    esac
+  done < "$f"
+  return 0
+}
+
+# Salva a config atual (lê FRONT_ENV / BO_SEL / MONO_SEL / RUN_MODE / VERTICAL_SEL).
+state_save() {
+  local f
+  f="$(coruja_state_file)"
+  {
+    echo "# coruja — última config usada (gerado automaticamente; não commitar)"
+    echo "FRONT=$FRONT_ENV"
+    echo "BO=$BO_SEL"
+    echo "MONO=$MONO_SEL"
+    echo "MODE=$RUN_MODE"
+    echo "VERTICAL=$VERTICAL_SEL"
+    echo "WORKER=$WORKER_SEL"
+    echo "PDFKIT=${PDFKIT_SEL:-no}"
+    echo "DEBUG=${MONO_DEBUG:-0}"
+  } > "$f" 2>/dev/null || echo "aviso: não consegui salvar o state em $f" >&2
+}

@@ -1,0 +1,404 @@
+# Estratégia Dev Stack — docker-compose standalone
+#
+# Substitui o `plug` (binário Rust) para subir o ambiente de dev sem dependências do toolchain.
+# Rede interna `estrategia` — nenhum serviço usa network_mode: host.
+#
+# Pré-requisitos: ver README.md
+#
+# Subir tudo:
+#   docker-compose up -d
+#
+# Subir só infra (sem apps):
+#   docker-compose up -d reverseproxy postgres monolito-redis localstack
+#
+# Hot reload do monolito / worker requer os entrypoints em scripts/:
+#   scripts/entrypoint-app.sh e scripts/entrypoint-worker.sh (cópias dos originais)
+
+# name fixa o nome do projeto compose. Já era 'estrategia' (basename do dir), mas
+# explicitá-lo deixa o lazydocker agrupar os serviços corretamente sob podman — o painel
+# Services só popula quando o projeto é resolvível pelo config (lazydocker issue #676).
+name: estrategia
+
+networks:
+  estrategia:
+    name: estrategia
+    # Subnet PINADA — sem isto o podman reatribui a faixa a cada recriação da rede (o bump
+    # podman 5.7→5.8 mudou de 10.89.10.0/24 → 10.89.1.0/24, deixando o `resolver` do nginx
+    # stale → 502 "could not be resolved"). Com a subnet fixa, o aardvark-dns fica sempre no
+    # gateway 10.89.1.1, que é o IP hardcoded no `resolver` de nginx/nginx.conf (são UM PAR —
+    # mudar um exige mudar o outro). 10.89.1.0/24 = a faixa que o podman já usava; pinar nela
+    # evita ter que recriar a rede agora (basta `podman restart estrategia-reverseproxy`).
+    ipam:
+      config:
+        - subnet: 10.89.1.0/24
+          gateway: 10.89.1.1
+
+volumes:
+  pgdata:
+    name: estrategia_pgdata
+  monolito-gomodcache:
+    name: estrategia_gomodcache
+  monolito-gobuildcache:
+    name: estrategia_gobuildcache
+
+# ─────────────────────────────────────────────────────────
+# Âncoras reutilizáveis
+# ─────────────────────────────────────────────────────────
+x-monolito-base: &monolito-base
+  build:
+    context: .                          # Dockerfile é toolchain puro (sem COPY); o código vem via bind-mount /go/apps em runtime
+    dockerfile: ./dockerfiles/monolito.Dockerfile
+  # .env.<ambiente> do monolito — traz GLOBAL_SYSTEM_TOKENS e ~70 vars que o código lê
+  # via viper AutomaticEnv. O `environment:` abaixo tem precedência e força os hosts de
+  # rede (DB_HOST=postgres, etc). APP_ENV=local → carrega .env.local.
+  # MONO_ENV_FILE desacopla o arquivo .env do APP_ENV (MONO_ENV): no modo
+  # sandbox-devbox o APP_ENV é "sandbox-devbox" mas as credenciais/tokens vêm do
+  # .env.sandbox. Para os demais ambientes, MONO_ENV_FILE == MONO_ENV.
+  env_file:
+    - ${APP_DIR_MONOLITO}/.env.${MONO_ENV_FILE:-local}
+  volumes:
+    - ${APP_DIR_MONOLITO}/../:/go/apps           # apps/ inteiro — go.work resolve SDKs irmãos
+    - ${HOME}/.ssh:/root/.ssh:ro                 # GOPRIVATE=github.com/estrategiahq/*
+    - monolito-gomodcache:/go/pkg/mod
+    - monolito-gobuildcache:/root/.cache/go-build
+  environment:
+    - PATH=/go/bin:/usr/local/go/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    - CGO_ENABLED=1
+    - GOMODCACHE=/go/pkg/mod
+    - GOCACHE=/root/.cache/go-build
+    # Rede interna — substituem os 127.0.0.1 do docker-compose.dev.yml original
+    - DB_HOST=postgres
+    - REDIS_URL=monolito-redis:6379
+    - REDIS_STUDY_TIME_URL=monolito-redis:6379
+    - PLUG_CONTAINER_REDIS_URL=monolito-redis:6379
+    - PLUG_CONTAINER_REDIS_STUDY_TIME_URL=monolito-redis:6379
+    - AWS_ENDPOINT_URL=http://localstack:4566
+    - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-test}
+    - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-test}
+    - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+    - APP_ENV=${MONO_ENV:-local}
+  security_opt:
+    - apparmor:unconfined
+  cap_add:
+    - SYS_PTRACE
+  networks:
+    - estrategia
+  restart: unless-stopped
+
+# ─────────────────────────────────────────────────────────
+# Serviços
+# ─────────────────────────────────────────────────────────
+services:
+
+  # ── Reverse proxy (nginx) ────────────────────────────────────────────────
+  reverseproxy:
+    image: nginx:alpine
+    container_name: estrategia-reverseproxy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"    # health check endpoint
+    environment:
+      # FRONT_PORT acompanha a vertical (vem do export_env); o entrypoint do nginx roda
+      # envsubst em /etc/nginx/templates/*.template substituindo ${FRONT_PORT} no upstream.
+      - FRONT_PORT=${FRONT_PORT:-3005}
+    volumes:
+      # montado como TEMPLATE (não conf.d): o entrypoint gera conf.d/default.conf via envsubst.
+      - ./nginx/nginx.conf:/etc/nginx/templates/default.conf.template:ro
+      - ${CERT_DIR:-./certs}:/etc/nginx/certs:ro
+    networks:
+      # Os hostnames *.local.estrategia-sandbox.com.br resolvem pro reverseproxy (TLS na 443).
+      # É ele quem proxia pro monolito/front/bo — por isso o BFF interno do front-student
+      # (https://api.local...) precisa cair aqui, não no monolito (que só fala HTTP em 4004).
+      estrategia:
+        aliases:
+          - api.local.estrategia-sandbox.com.br
+          - local.estrategia-sandbox.com.br
+          - admin.local.estrategia-sandbox.com.br
+          - perfil.local.estrategia-sandbox.com.br
+    restart: unless-stopped
+    healthcheck:
+      # 127.0.0.1 em vez de localhost: o podman vaza o /etc/hosts do host pro container
+      # (mesmo motivo do extra_hosts do front-student), então 'localhost' pode resolver pra
+      # um IP errado. O nginx tem o server de health em :8080 (location / { return 200 }).
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/ >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 15s
+
+  # ── PostgreSQL 16 ────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: estrategia-postgres
+    cpus: "2"
+    # root/root fixo: o setup do monolito (01_init_db.sql + dumps + SHARED_DB) usa `root`.
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: root
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # cria os databases por vertical (carreiras_juridicas, concursos, …) + schemas das horizontais
+      - ${APP_DIR_MONOLITO}/scripts/01_init_db.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    networks:
+      - estrategia
+    restart: unless-stopped
+    healthcheck:
+      # pg_isready em vez de `psql -U root`: o psql abre conexão completa e, se a role root
+      # não existir (volume pgdata inicializado antes com outro superuser), gera FATAL a cada
+      # 5s no log. pg_isready só checa se o servidor aceita conexões — sem auth completa, sem
+      # spam de FATAL, e marca healthy assim que o Postgres sobe.
+      test: ["CMD-SHELL", "pg_isready -U root -d root -h 127.0.0.1 >/dev/null 2>&1 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    ports:
+      - "5432:5432"     # expõe para ferramentas externas (psql, DBeaver)
+
+  # ── Redis 7 ─────────────────────────────────────────────────────────────
+  monolito-redis:
+    image: redis:7-alpine
+    container_name: estrategia-redis
+    cpus: "1"
+    networks:
+      - estrategia
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    ports:
+      - "6379:6379"     # expõe para redis-cli local
+
+  # ── LocalStack (SQS + S3) ───────────────────────────────────────────────
+  localstack:
+    image: localstack/localstack:3.8
+    container_name: estrategia-localstack
+    cpus: "2"
+    environment:
+      SERVICES: ${SERVICES:-sqs,s3}
+      DEFAULT_REGION: ${DEFAULT_REGION:-us-east-1}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-east-1}
+    volumes:
+      # ready hook: cria as filas SQS (bo-bulk-actions, bo-pagprof-snapshots, …)
+      - ${APP_DIR_MONOLITO}/localstack/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh:ro
+    networks:
+      - estrategia
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:4566/_localstack/health >/dev/null 2>&1 || exit 1"]
+      interval: 8s
+      timeout: 5s
+      retries: 15
+      start_period: 20s
+    ports:
+      - "4566:4566"     # expõe para awslocal / AWS CLI apontando pra localhost
+
+  # ── Monolito (API Go) ───────────────────────────────────────────────────
+  monolito:
+    <<: *monolito-base
+    container_name: estrategia-monolito
+    depends_on:
+      postgres:
+        condition: service_healthy
+      monolito-redis:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    environment:
+      - PATH=/go/bin:/usr/local/go/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - CGO_ENABLED=1
+      - GOMODCACHE=/go/pkg/mod
+      - GOCACHE=/root/.cache/go-build
+      - DB_HOST=postgres
+      - REDIS_URL=monolito-redis:6379
+      - REDIS_STUDY_TIME_URL=monolito-redis:6379
+      - PLUG_CONTAINER_REDIS_URL=monolito-redis:6379
+      - PLUG_CONTAINER_REDIS_STUDY_TIME_URL=monolito-redis:6379
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-test}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-test}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+      - APP_ENV=${MONO_ENV:-local}
+      # DB: fallback pra postgres local; sandbox/prod exportam SHARED_DB_* via export_env().
+      - SHARED_DB_HOST=${SHARED_DB_HOST:-postgres}
+      - SHARED_DB_PORT=${SHARED_DB_PORT:-5432}
+      - SHARED_DB_USERNAME=${SHARED_DB_USERNAME:-root}
+      - SHARED_DB_PASSWORD=${SHARED_DB_PASSWORD:-root}
+      - SHARED_DB_URL=${SHARED_DB_URL:-postgres://root:root@postgres:5432/}
+      - DISABLE_DB_SSL=${DISABLE_DB_SSL:-}
+      - APP_PORT=4004
+      - PLUG_DEBUG_APP=${PLUG_DEBUG_APP:-0}
+    volumes:
+      - ${APP_DIR_MONOLITO}/../:/go/apps
+      - ${HOME}/.ssh:/root/.ssh:ro
+      - monolito-gomodcache:/go/pkg/mod
+      - monolito-gobuildcache:/root/.cache/go-build
+      - ./scripts/entrypoint-app.sh:/plug/entry-app.sh:ro
+    command: ["/bin/sh", "/plug/entry-app.sh"]
+    ports:
+      - "4004:4004"
+      - "2345:2345"     # Delve debugger (ativo quando PLUG_DEBUG_APP=1)
+    networks:
+      # o alias api.local.* foi movido pro reverseproxy (ele faz o TLS na 443 e proxia pra cá)
+      - estrategia
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:4004/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
+
+  # ── Monolito Worker (Go) ─────────────────────────────────────────────────
+  monolito-worker:
+    <<: *monolito-base
+    container_name: estrategia-monolito-worker
+    depends_on:
+      postgres:
+        condition: service_healthy
+      monolito-redis:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    environment:
+      - PATH=/go/bin:/usr/local/go/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - CGO_ENABLED=1
+      - GOMODCACHE=/go/pkg/mod
+      - GOCACHE=/root/.cache/go-build
+      - DB_HOST=postgres
+      - REDIS_URL=monolito-redis:6379
+      - REDIS_STUDY_TIME_URL=monolito-redis:6379
+      - PLUG_CONTAINER_REDIS_URL=monolito-redis:6379
+      - PLUG_CONTAINER_REDIS_STUDY_TIME_URL=monolito-redis:6379
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-test}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-test}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
+      - APP_ENV=${MONO_ENV:-local}
+      # DB: fallback pra postgres local; sandbox/prod exportam SHARED_DB_* via export_env().
+      - SHARED_DB_HOST=${SHARED_DB_HOST:-postgres}
+      - SHARED_DB_PORT=${SHARED_DB_PORT:-5432}
+      - SHARED_DB_USERNAME=${SHARED_DB_USERNAME:-root}
+      - SHARED_DB_PASSWORD=${SHARED_DB_PASSWORD:-root}
+      - SHARED_DB_URL=${SHARED_DB_URL:-postgres://root:root@postgres:5432/}
+      - DISABLE_DB_SSL=${DISABLE_DB_SSL:-}
+      - APP_PORT=5005
+      - PLUG_DEBUG_WORKER=${PLUG_DEBUG_WORKER:-0}
+    volumes:
+      - ${APP_DIR_MONOLITO}/../:/go/apps
+      - ${HOME}/.ssh:/root/.ssh:ro
+      - monolito-gomodcache:/go/pkg/mod
+      - monolito-gobuildcache:/root/.cache/go-build
+      - ./scripts/entrypoint-worker.sh:/plug/entry-worker.sh:ro
+    command: ["/bin/sh", "/plug/entry-worker.sh"]
+    ports:
+      - "2346:2346"     # Delve debugger worker (ativo quando PLUG_DEBUG_WORKER=1)
+    healthcheck:
+      disable: true
+
+  # ── BO Container (Quasar/Vue dev) ───────────────────────────────────────
+  bo-container:
+    build:
+      context: .
+      dockerfile: ./dockerfiles/bo-container.Dockerfile
+    container_name: estrategia-bo-container
+    depends_on:
+      - reverseproxy
+    cpus: "4"
+    environment:
+      - FORCE_COLOR=1
+      - TERM=xterm-256color
+      - VERTICAL=${VERTICAL:-carreiras-juridicas}
+      - BO_ENV=${BO_ENV:-local}              # bloco do .env-cmdrc.js: local | sandbox | qa | prod
+      - LOCAL_BO_CONTAINER_HOST=0.0.0.0
+      - NODE_OPTIONS=--max-old-space-size=4096
+    tty: true
+    volumes:
+      - ${APP_DIR_BO}:/app
+      - ${HOME}/.npmrc:/root/.npmrc:ro      # token GitHub Packages para @estrategiahq/*
+      - ${HOME}/.ssh:/root/.ssh:ro
+    ports:
+      - "9090:9090"
+    networks:
+      - estrategia
+    restart: unless-stopped
+    # bo-container roda Vite via env-cmd: `npm run serve:${BO_ENV}` (local|sandbox|qa|prod).
+    # BO_ENV seleciona o bloco do .env-cmdrc.js (muda as API_*_URL p/ local ou sandbox).
+    # node_modules deve existir no bind-mount — rode `coruja install` antes do 1º serve.
+    # O CMD da imagem já força `vite --host 0.0.0.0`; a CLI coruja exporta BO_ENV.
+    healthcheck:
+      # Vite serve HTTPS com cert self-signed. O busybox wget do node:alpine NÃO suporta
+      # --no-check-certificate (flag do GNU wget) → o check antigo falhava sempre. node está
+      # garantido na imagem; o https core module com rejectUnauthorized:false aceita o self-signed.
+      test: ["CMD-SHELL", "node -e \"const r=require('https').get({host:'127.0.0.1',port:9090,rejectUnauthorized:false,timeout:5000},()=>process.exit(0));r.on('error',()=>process.exit(1));r.on('timeout',()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ── Front Student (Nuxt dev) ─────────────────────────────────────────────
+  front-student:
+    build:
+      context: .
+      dockerfile: ./dockerfiles/front-student.Dockerfile
+    container_name: estrategia-front-student
+    depends_on:
+      - reverseproxy
+      - monolito
+    cpus: "4"
+    environment:
+      - FORCE_COLOR=1
+      - TERM=xterm-256color
+      - APP_ENV=${APP_ENV:-local}
+      # DEFAULT_VERTICAL: vertical default no runtime do Nuxt.
+      # VERTICAL: usado pelo CMD do Dockerfile pra escolher o script npm (local:<vertical>).
+      # Os dois precisam existir — sem VERTICAL o CMD cai no fallback carreiras-juridicas.
+      - DEFAULT_VERTICAL=${VERTICAL:-carreiras-juridicas}
+      - VERTICAL=${VERTICAL:-carreiras-juridicas}
+      - BFF_URL=${BFF_URL:-https://api.local.estrategia-sandbox.com.br/}
+      - PROFILE_URL=https://perfil.local.estrategia-sandbox.com.br/
+      - HOST=0.0.0.0
+      - PORT=${FRONT_PORT:-3005}
+      - NODE_ENV=development
+      - NUXT_TELEMETRY_DISABLED=1
+      - NODE_OPTIONS=--max-old-space-size=4096
+      - NPM_SCRIPT_ENV=${NPM_SCRIPT_ENV:-local}
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      # CI=true desliga a barra de progresso interativa do webpackbar (Nuxt) — o "lixo" de
+      # `building (69%)` + escape codes `[1;A`. Combinado com a remoção do `tty: true` (o redraw
+      # in-place só ocorre quando o stdout é TTY), o log do build fica limpo. O progress-wrap
+      # (heartbeat 1 linha/20s) e a cor (FORCE_COLOR) seguem funcionando sem o tty.
+      - CI=true
+    # CMD do Dockerfile: progress-wrap npm run ${NPM_SCRIPT_ENV}:${VERTICAL} = dev server Nuxt.
+    # tty removido de propósito (ver CI=true acima) — evita o spam de progresso no log.
+    volumes:
+      - ${APP_DIR_FRONT}:/app
+      - ${HOME}/.npmrc:/root/.npmrc:ro      # token GitHub Packages para @estrategiahq/*
+    # front-student (SSR/Node) precisa resolver api.local.estrategia-sandbox.com.br.
+    # O alias de rede do compose (api.local → reverseproxy) é OFUSCADO porque o podman
+    # vaza o /etc/hosts do host (base_hosts_file) pra dentro do container — e lá o domínio
+    # aponta pra 127.0.0.1 (necessário pro NAVEGADOR, mas dentro do container 127.0.0.1 é o
+    # próprio front-student, sem nginx → TLS handshake pendura/timeout).
+    # extra_hosts é escrito ANTES do bloco vazado e ganha no getent (validado empiricamente).
+    # host-gateway → host:443, onde o reverseproxy publica o nginx; Host header + SNI TLS
+    # continuam api.local → nginx casa a vhost + cert e proxia pro monolito:4004.
+    extra_hosts:
+      - "api.local.estrategia-sandbox.com.br:host-gateway"
+    ports:
+      - "${FRONT_PORT:-3005}:${FRONT_PORT:-3005}"
+    networks:
+      - estrategia
+    restart: unless-stopped
+    healthcheck:
+      # Checa só se o dev server está ESCUTANDO na porta (TCP), não se a home renderiza 2xx.
+      # O SSR de `/` busca /v3/contents/home-<vertical> que dá 502 no dev-stack local (dado/
+      # serviço não sobe aqui) → o GET / falhava e marcava unhealthy mesmo com o Nuxt no ar.
+      # FRONT_PORT vem do resolve.sh por vertical (concursos=3000 … carreiras-juridicas=3005).
+      test: ["CMD-SHELL", "node -e \"require('net').connect({host:'127.0.0.1',port:${FRONT_PORT:-3005},timeout:5000},()=>process.exit(0)).on('error',()=>process.exit(1)).on('timeout',()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s

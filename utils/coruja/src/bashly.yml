@@ -1,0 +1,162 @@
+name: coruja
+help: |-
+  Dev stack local da Estratégia.
+
+  Sobe os containers escolhendo o ambiente de cada serviço (local/sandbox,
+  misturado), resolve as dependências de forma inteligente (não sobe o backend
+  local se ninguém usa) e faz o bootstrap das dependências.
+version: 0.1.0
+
+environment_variables:
+  - name: COMPOSE
+    help: "Backend de compose a usar (default: autodetecta docker compose / docker-compose / podman-compose)"
+    default: ""
+  - name: ESTRATEGIA_DIR
+    help: "Diretório do docker-compose.yml (default: diretório do próprio script)"
+    default: ""
+
+commands:
+  - name: wizard
+    default: true
+    help: "Wizard interativo: escolhe o ambiente de cada container (é o que `coruja` puro abre)"
+    flags:
+      - long: --front
+        arg: env
+        help: "Pré-seleciona o ambiente do front-student (pula a pergunta)"
+        allowed: [local, sandbox, qa, prod, devbox, skip]
+      - long: --bo
+        arg: env
+        help: "Pré-seleciona o ambiente do bo-container (pula a pergunta)"
+        allowed: [local, sandbox, qa, prod, skip]
+      - long: --monolito
+        arg: env
+        help: "Pré-seleciona o ambiente do monolito (pula a pergunta)"
+        allowed: [auto, local, sandbox, sandbox-devbox, prod, skip]
+      - long: --vertical
+        arg: vertical
+        help: "Pré-seleciona a vertical (pula a pergunta)"
+        allowed: [carreiras-juridicas, concursos, medicina, militares, oab, vestibulares]
+      - long: --no-worker
+        help: "Não sobe o monolito-worker mesmo quando o backend local sobe"
+      - long: --pdf-kit
+        help: "Sobe o pdf-kit (consumer local de PDF do LDI). Exige clone do pdf-kit (APP_DIR_PDFKIT) + mkcert"
+      - long: --detach
+        short: -d
+        help: "Sobe em background (detached). Default: foreground — segura o terminal e mostra os logs"
+      - long: --dry-run
+        help: "Mostra o que subiria, sem subir nada"
+    examples:
+      - coruja                       # abre o wizard
+      - coruja --front sandbox       # wizard com o front pré-selecionado
+
+  - name: up
+    help: "Relança a última config (sem perguntar). Flags sobrescrevem itens pontuais"
+    flags:
+      - long: --front
+        arg: env
+        help: "Sobrescreve o ambiente do front-student"
+        allowed: [local, sandbox, qa, prod, devbox, skip]
+      - long: --bo
+        arg: env
+        help: "Sobrescreve o ambiente do bo-container"
+        allowed: [local, sandbox, qa, prod, skip]
+      - long: --monolito
+        arg: env
+        help: "Sobrescreve o ambiente do monolito"
+        allowed: [auto, local, sandbox, sandbox-devbox, prod, skip]
+      - long: --vertical
+        arg: vertical
+        help: "Sobrescreve a vertical do front/bo"
+        allowed: [carreiras-juridicas, concursos, medicina, militares, oab, vestibulares]
+      - long: --no-worker
+        help: "Não sobe o monolito-worker mesmo quando o backend local sobe"
+      - long: --pdf-kit
+        help: "Sobe o pdf-kit (consumer local de PDF do LDI). Exige clone do pdf-kit (APP_DIR_PDFKIT) + mkcert"
+      - long: --no-pdf-kit
+        help: "Não sobe o pdf-kit (sobrescreve o state)"
+      - long: --detach
+        short: -d
+        help: "Sobe em background (detached). Default: foreground — segura o terminal e mostra os logs"
+      - long: --dry-run
+        help: "Mostra o que subiria, sem subir nada"
+    examples:
+      - coruja up                              # relança a última config
+      - coruja up --vertical concursos         # última config, mas trocando a vertical
+      - coruja up --detach
+
+  - name: install
+    help: "Bootstrap: doctor + build + deps dos apps escolhidos (wizard) + certs"
+    flags:
+      - long: --yes
+        short: -y
+        help: "Não-interativo: instala deps de todos os apps sem wizard"
+    examples:
+      - coruja install
+      - coruja install --yes
+
+  - name: doctor
+    help: "Checa pré-requisitos (compose, mkcert, certs, ~/.npmrc, ~/.ssh, /etc/hosts, .env)"
+
+  - name: seed
+    help: "Popula o banco local com os dumps — wizard escolhe os apps (hoje: monolito)"
+    flags:
+      - long: --yes
+        short: -y
+        help: "Não-interativo: roda o seed de todos os apps disponíveis"
+    examples:
+      - coruja seed
+      - coruja seed --yes
+
+  - name: down
+    help: "Derruba a stack (mantém os volumes)"
+    flags:
+      - long: --volumes
+        short: -v
+        help: "Também apaga os volumes (pgdata, caches go) — destrutivo"
+
+  - name: status
+    help: "Status dos containers (compose ps)"
+
+  - name: logs
+    help: "Tail dos logs"
+    args:
+      - name: service
+        help: "Serviço (vazio = todos)"
+    flags:
+      - long: --tail
+        arg: n
+        help: "Linhas de histórico"
+        default: "200"
+
+  - name: restart
+    help: "Recria container(s) com --force-recreate"
+    args:
+      - name: service
+        help: "Serviço (vazio = todos)"
+
+  - name: build
+    help: "(Re)builda as imagens"
+    args:
+      - name: service
+        help: "Serviço (vazio = todos)"
+
+  - name: debug
+    help: "Sobe monolito/worker com Delve headless (app=:2345, worker=:2346)"
+    args:
+      - name: target
+        help: "app | worker"
+        default: app
+        allowed: [app, worker]
+
+  - name: shell
+    help: "Abre um shell no container (compose exec sh)"
+    args:
+      - name: service
+        help: "Serviço"
+        required: true
+
+  - name: update
+    help: "Recompila e reinstala o próprio coruja (make install no diretório do projeto)"
+
+  - name: monitor
+    help: "Abre o lazydocker escopado no projeto (painel Services = só os serviços do coruja)"

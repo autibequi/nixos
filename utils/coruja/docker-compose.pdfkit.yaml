@@ -1,0 +1,96 @@
+# docker-compose.pdfkit.yaml — roda o pdf-kit (github.com/estrategiahq/pdf-kit)
+# LOCALMENTE contra o dev-stack coruja, fechando o fluxo de PDF do LDI sem depender
+# do sandbox.
+#
+# Fluxo: monolito enfileira no LocalStack → pdf-kit consome → abre a print view do
+# front LOCAL no Chromium (Playwright) → page.pdf() → sobe no S3 (LocalStack) →
+# callback no monolito (POST /ldi/print/documents).
+#
+# COMO USAR (na raiz do dev-stack):
+#   1. ./scripts/pdf-kit-setup.sh        # clona/atualiza APP_DIR_PDFKIT (repo privado, via host)
+#   2. coruja up ...                     # sobe o stack normal (sandbox-devbox)
+#   3. podman compose -f docker-compose.yml -f docker-compose.pdfkit.yaml up -d pdf-kit
+#      (ou docker compose; usa o MESMO project name `estrategia` → entra na rede)
+#
+# Pré-requisitos resolvidos aqui (ver docs/pdf-kit-local.md p/ detalhes):
+#   - APP_ENV=test → o environment.py do pdf-kit usa LocalStack p/ S3+SQS e as filas
+#     pdf-kit-*-app-test (criadas pelo init-aws.sh) + bucket corujalabs-shared-monolito-local.
+#   - LDI_API_URL → monolito local (callback do metadata).
+#   - Tokens via passthrough do ${PDF_SYSTEM_TOKEN} do dev-stack (não hardcoda secret).
+#   - mkcert rootCA montado → o Chromium confia no TLS do front/BFF local (*.local.estrategia-sandbox.com.br).
+
+services:
+  pdf-kit:
+    build:
+      context: ${APP_DIR_PDFKIT}
+      dockerfile: consumer.Dockerfile
+    image: estrategia/pdf-kit:local
+    container_name: estrategia-pdf-kit
+    environment:
+      - APP_ENV=test
+      # DEBUG=False obrigatório: o consumer roda `app.run(debug=env.DEBUG)` (consumer.py:36)
+      # para o health check. Com DEBUG=True o reloader do Flask forka o processo e o main()
+      # inicia o consumer SQS nos DOIS processos → dois consumidores competindo pela fila →
+      # um abre o Chromium, o outro pega a msg e fecha o contexto (TargetClosedError) → a
+      # request de conteúdo do print é abortada e o #render-done-tag nunca aparece.
+      - DEBUG=False
+      - CONSUMER_TYPE=default
+      # S3/SQS → LocalStack (na rede estrategia o host é `localstack`)
+      - LOCALSTACK_ENDPOINT_URL=http://localstack:4566
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+      # callback do metadata → monolito local (mesma rede)
+      - LDI_API_URL=http://monolito:4004/ldi
+      # Tokens (passthrough do .env.sandbox do monolito via export_env; NÃO commitar secret):
+      #   - PDFKIT_SYSTEM_TOKEN ← PDF_SYSTEM_TOKEN (token do print/callback; = printSystemToken do front)
+      #   - GLOBAL_SYSTEM_TOKEN ← GLOBAL_SYSTEM_TOKENS (intra-service; pdf-kit usa no check de
+      #     long_running/estimate_durations — se vazio, classifica errado e a msg vai pra fila
+      #     de longa duração sem consumidor). O pdf-kit faz split(",")[0].
+      - PDFKIT_SYSTEM_TOKEN=${PDF_SYSTEM_TOKEN:-}
+      - GLOBAL_SYSTEM_TOKEN=${GLOBAL_SYSTEM_TOKENS:-}
+      # Chromium do container (instalado pelo consumer.Dockerfile)
+      - CHROME_EXECUTABLE_PATH=/usr/bin/chromium
+      - CHROME_NO_SANDBOX=1
+      - CHROME_DISABLE_DEV_SHM_USAGE=1
+    volumes:
+      # mkcert rootCA → confiança no TLS local. O entrypoint instala no store do sistema
+      # e no NSS do Chromium. MKCERT_CAROOT é resolvido pelo run_compose (lib/compose.sh)
+      # antes de qualquer comando — o podman-compose 1.5.0 não parseia default aninhado.
+      - ${MKCERT_CAROOT}:/mkcert-ca:ro
+    # O Chromium (Playwright) busca front + BFF locais por HTTPS (cert mkcert). Antes de
+    # rodar o consumer, confia no rootCA no store do sistema E no NSS db do Chromium.
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        if [ -f /mkcert-ca/rootCA.pem ]; then
+          cp /mkcert-ca/rootCA.pem /usr/local/share/ca-certificates/mkcert-root.crt
+          update-ca-certificates >/dev/null 2>&1 || true
+          apt-get update >/dev/null 2>&1 && apt-get install -y --no-install-recommends libnss3-tools >/dev/null 2>&1 || true
+          # Path HARDCODADO /root (não $HOME): o podman-compose interpola $HOME na YAML em
+          # parse-time com o $HOME do HOST (/home/pedrinho) — caindo no lugar errado dentro do
+          # container. O consumer (Chromium) roda como root e lê o NSS db de /root/.pki/nssdb.
+          mkdir -p /root/.pki/nssdb
+          # -N cria o NSS db (cert9.db/key9.db) ANTES do -A. Sem isto o -A falha com
+          # SEC_ERROR_BAD_DATABASE e o Chromium não confia no CA → ERR_CERT_AUTHORITY_INVALID.
+          certutil -d sql:/root/.pki/nssdb -N --empty-password 2>/dev/null || true
+          certutil -d sql:/root/.pki/nssdb -A -t "C,," -n mkcert-root -i /mkcert-ca/rootCA.pem 2>/dev/null || true
+        else
+          echo "AVISO: /mkcert-ca/rootCA.pem ausente — Chromium pode falhar no TLS local. Veja docs/pdf-kit-local.md"
+        fi
+        exec /app/.venv/bin/consumer
+    # O Chromium abre o front local + busca o BFF local por HTTPS. Igual ao front-student,
+    # o podman vaza o /etc/hosts do host (domínios → 127.0.0.1), inútil dentro do container.
+    # host-gateway → host:443 (onde o nginx do dev-stack publica), e o nginx casa a vhost
+    # + cert mkcert e proxia pro front/monolito.
+    extra_hosts:
+      - "local.estrategia-sandbox.com.br:host-gateway"
+      - "api.local.estrategia-sandbox.com.br:host-gateway"
+    networks:
+      - estrategia
+    depends_on:
+      localstack:
+        condition: service_healthy
+    restart: unless-stopped
