@@ -4,7 +4,7 @@
 	// ╚══════════════════════════════════════════════════════════════╝
 	// ─── WINDOW & SESSION ──────────────────────────────────────────
 	"mouse_wheel_zoom": false,
- "proxy": "",
+	"proxy": "",
 	"completions": {
 		"lsp_fetch_timeout_ms": 30
 	},
@@ -47,24 +47,25 @@
 	},
 	// ─── FONTS ─────────────────────────────────────────────────────
 	// Editor (buffer) font
-	"buffer_font_family": "JetBrainsMono Nerd Font Mono",
-	"buffer_font_size": 13.0,
-	"buffer_font_weight": 400.0,
-	"buffer_line_height": "standard",
+	"buffer_font_family": "Maple Mono NF",
+	"buffer_font_size": 17.0,
+	"buffer_font_weight": 450.0,
+	"buffer_line_height": "comfortable",
 	"buffer_font_features": {
 		"calt": true,
 		"liga": true,
 	},
 	"buffer_font_fallbacks": [
+		"JetBrainsMono Nerd Font",
 		"FiraCode Nerd Font",
 	],
 	// UI font
-	"ui_font_family": "JetBrainsMono Nerd Font",
-	"ui_font_size": 15.0,
+	"ui_font_family": "Maple Mono NF",
+	"ui_font_size": 16.0,
 	"ui_font_weight": 400.0,
-	// Agent panel font
-	"agent_buffer_font_size": 14.0,
-	"agent_ui_font_size": 14.0,
+	// Agent panel acompanha o resto: conteúdo = buffer (17), UI = ui_font (16)
+	"agent_buffer_font_size": 17.0,
+	"agent_ui_font_size": 16.0,
 	// ─── THEME & APPEARANCE ────────────────────────────────────────
 	"theme": {
 		"mode": "dark",
@@ -76,11 +77,22 @@
 		"light": "VSCode Icons for Zed (Dark Angular)",
 		"dark": "VSCode Icons for Zed (Dark Angular)"
 	},
-	"unstable.ui_density": "compact",
-	"unnecessary_code_fade": 0.5,
+	// Clareia os ícones/textos "muted" — o Dracula default deixa os ícones de
+	// status do agent panel num roxo-acinzentado quase invisível (#6272a4).
+	"theme_overrides": {
+		"Dracula": {
+			"icon.muted": "#bd93f9",
+			"text.muted": "#a9b3e0",
+			// thread rodando (spinner/ícone ativo) salta em verde vs roxo dos parados
+			"icon.accent": "#50fa7b",
+			"icon": "#bd93f9"
+		}
+	},
+	"unstable.ui_density": "default",
+	"unnecessary_code_fade": 0.3,
 	"rounded_selection": true,
 	"active_pane_modifiers": {
-		"inactive_opacity": 0.5,
+		"inactive_opacity": 0.85,
 	},
 	// ─── EDITOR CORE ───────────────────────────────────────────────
 	// Saving
@@ -163,7 +175,7 @@
 	},
 	// ─── SCROLLBAR ─────────────────────────────────────────────────
 	"scrollbar": {
-		"show": "auto",
+		"show": "never",
 		"cursors": true,
 		"git_diff": true,
 		"search_results": true,
@@ -316,10 +328,15 @@
 	// ─── TERMINAL ──────────────────────────────────────────────────
 	"terminal": {
 		"scrollbar": {
-   "show": "auto"
-  },
-  "dock": "bottom",
+			"show": "never"
+		},
+		"dock": "bottom",
 		"bell": "system",
+		"font_family": "Maple Mono NF",
+		"font_size": 16,
+		// default é "comfortable" (1.618) = muito esparramado; "standard" (1.3)
+		// deixa denso como Alacritty. Custo zero pra apertar mais: {"custom": 1.15}
+		"line_height": "standard",
 		"max_scroll_history_lines": 1000,
 		// 0 desliga a regex de path hyperlink — ela estourava timeout no log
 		// ("Timed out processing path hyperlink regexes") competindo com o
@@ -354,10 +371,17 @@
 	},
 	// ─── AI — EDIT PREDICTIONS ─────────────────────────────────────
 	"edit_predictions": {
+		"ollama": {
+			"api_url": ""
+		},
+		"codestral": {
+			"model": "",
+			"api_url": ""
+		},
 		"provider": "zed",
 		"mode": "eager",
 		"open_ai_compatible_api": {
-			"api_url": "http://127.0.0.1:1234/v1/completions",
+			"api_url": "",
 			"prompt_format": "qwen",
 			"model": "zed-industries_zeta"
 		},
@@ -375,16 +399,19 @@
 	// ─── AI — AGENT ────────────────────────────────────────────────
 	"agent": {
 		"sandbox_permissions": {
-   "allow_unsandboxed": true
-  },
-  "terminal_init_command": "yaa",
-  "notify_when_agent_waiting": "never",
+			"allow_unsandboxed": true
+		},
+		"terminal_init_command": "yaa --silent",
+		// "never" = sem notificação; "primary_screen" = notifica na tela principal; "all_screens" = em todas
+		"notify_when_agent_waiting": "primary_screen",
 		"sidebar_side": "right",
 		"dock": "right",
 		"default_profile": "write",
 		"message_editor_min_lines": 2,
 		"use_modifier_to_send": true,
 		"show_turn_stats": true,
+		// Mostra contexto do workspace (git branch, arquivos) no título da sessão
+		"show_context_servers": true,
 		"play_sound_when_agent_done": "always",
 		"tool_permissions": {
 			"default": "allow"

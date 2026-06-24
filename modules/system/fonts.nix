@@ -9,6 +9,7 @@
       corefonts
 
       # Monospace fonts
+      maple-mono.NF # fonte principal — Nerd Font, arredondada, x-height alto
       nerd-fonts.jetbrains-mono
       nerd-fonts.fira-code
       nerd-fonts.iosevka
@@ -32,9 +33,9 @@
 
   fonts.fontconfig.defaultFonts = {
     monospace = [
-      "Iosevka Nerd Font Mono"
-      "MesloLGS NF"
+      "Maple Mono NF"
       "JetBrainsMono Nerd Font"
+      "MesloLGS NF"
       "FiraCode Nerd Font"
     ];
     sansSerif = [

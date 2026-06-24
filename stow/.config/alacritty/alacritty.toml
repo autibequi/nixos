@@ -20,15 +20,15 @@ size = 12.0
 builtin_box_drawing = true    # desenha box chars na GPU, não via fonte
 
 [font.normal]
-family = "JetBrainsMono Nerd Font"
+family = "Maple Mono NF"
 style = "Regular"
 
 [font.bold]
-family = "JetBrainsMono Nerd Font"
+family = "Maple Mono NF"
 style = "Bold"
 
 [font.italic]
-family = "JetBrainsMono Nerd Font"
+family = "Maple Mono NF"
 style = "Italic"
 
 [selection]
