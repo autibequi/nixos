@@ -48,8 +48,7 @@
     google-chrome
 
     # ── Editores / Dev ─────────────────────────────────
-    # Zed preview/beta — input pinado no flake.nix (v1.9.0-pre, cache zed.cachix.org)
-    inputs.zed.packages.${pkgs.stdenv.hostPlatform.system}.default
+    # zed-editor: ver modules/apps/zed.nix (binário oficial pré-compilado)
     gitkraken
     jujutsu
     gitoxide

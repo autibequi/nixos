@@ -18,19 +18,20 @@ switch: ## Aplica a config NixOS (nh os switch)
 update: ## Atualiza o flake inteiro e aplica
 	nh os switch --update .
 
-zed-update: ## Atualiza o Zed pra última tag do canal pinado (stable ou -pre) e aplica
-	@current=$$(grep -oE 'zed-industries/zed/v[0-9][0-9.]*(-pre)?' flake.nix | sed 's|.*/||')
-	[ -n "$$current" ] || { echo "erro: não achei o pin do zed em flake.nix"; exit 1; }
-	case "$$current" in
-	  *-pre) filter='-pre$$' ;;
-	  *)     filter='[0-9]$$' ;;
-	esac
-	latest=$$(git ls-remote --tags https://github.com/zed-industries/zed.git | sed 's|.*refs/tags/||' | grep -vE '\^\{\}' | grep -E "^v[0-9].*$$filter" | sort -V | tail -1)
-	[ -n "$$latest" ] || { echo "erro: nenhuma tag encontrada"; exit 1; }
-	if [ "$$current" = "$$latest" ]; then echo "Zed já na $$latest — nada a fazer"; exit 0; fi
-	echo "Zed: $$current → $$latest"
-	sed -i -E "s|(zed-industries/zed/)v[0-9][0-9.]*(-pre)?|\1$$latest|" flake.nix
-	nix flake update zed
+zed-update: ## Atualiza o Zed pro último stable (binário oficial) e aplica
+	@latest=$$(git ls-remote --tags https://github.com/zed-industries/zed.git | sed 's|.*refs/tags/||' | grep -vE '\^\{\}' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$$' | sort -V | tail -1)
+	[ -n "$$latest" ] || { echo "erro: nenhuma tag stable encontrada"; exit 1; }
+	ver=$${latest#v}
+	pkg=modules/apps/zed.nix
+	current=$$(grep -oE 'version = "[0-9.]+"' $$pkg | head -1 | grep -oE '[0-9.]+')
+	if [ "$$current" = "$$ver" ]; then echo "Zed já na $$ver — nada a fazer"; exit 0; fi
+	url="https://github.com/zed-industries/zed/releases/download/$$latest/zed-linux-x86_64.tar.gz"
+	echo "Zed: $$current → $$ver — prefetch do tarball oficial..."
+	hash=$$(nix store prefetch-file --json "$$url" | jq -r .hash)
+	{ [ -n "$$hash" ] && [ "$$hash" != null ]; } || { echo "erro: prefetch falhou"; exit 1; }
+	sed -i -E "s|(version = \")[0-9.]+(\";)|\1$$ver\2|" $$pkg
+	sed -i -E "s|(hash = \")sha256-[A-Za-z0-9+/=]+(\";)|\1$$hash\2|" $$pkg
+	echo "→ Zed $$ver  ($$hash)"
 	nh os switch .
 
 # ── Dotfiles ───────────────────────────────────────────────────────────────
