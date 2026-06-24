@@ -48,7 +48,8 @@
     google-chrome
 
     # ── Editores / Dev ─────────────────────────────────
-    unstable.zed-editor
+    # Zed preview/beta — input pinado no flake.nix (v1.9.0-pre, cache zed.cachix.org)
+    inputs.zed.packages.${pkgs.stdenv.hostPlatform.system}.default
     gitkraken
     jujutsu
     gitoxide

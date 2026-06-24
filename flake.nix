@@ -25,6 +25,12 @@
     # Claude Code (sadjow) — sempre na última versão upstream
     claude-code.url = "github:sadjow/claude-code-nix";
 
+    # Zed Editor — pin na tag preview (canal beta). Sem follows de propósito:
+    # usa o nixpkgs próprio do flake do Zed pra bater bit-a-bit com o CI e ter
+    # cache hit no zed.cachix.org (sem isso, compila o Rust localmente).
+    # Atualizar pra próxima preview: trocar a tag e rodar `nix flake update zed`.
+    zed.url = "github:zed-industries/zed/v1.9.0-pre";
+
     # DankMaterialShell — usa unstable porque o stable 25.11 não tem dms-shell
     dms = {
       url = "github:AvengeMedia/DankMaterialShell/stable";
@@ -50,6 +56,7 @@
       nixos-hardware,
       chaotic,
       claude-code,
+      zed,
       dms,
       hyprlandFlake,
       llm-agents,
