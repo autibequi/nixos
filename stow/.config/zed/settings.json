@@ -8,7 +8,8 @@
 	"completions": {
 		"lsp_fetch_timeout_ms": 30
 	},
-	"go_to_definition_fallback": "none",
+	// Ctrl+click → definição; estando na definição, cai em "find all references"
+	"go_to_definition_fallback": "find_all_references",
 	"go_to_definition_scroll_strategy": "top",
 	"cli_default_open_behavior": "existing_window",
 	"restore_on_startup": "launchpad",
@@ -600,7 +601,8 @@
 		"gopls": {
 			"settings": {
 				"directoryFilters": [
-					"-**/vendor"
+					"-**/vendor",
+					"-**/mocks"
 				],
 				"memoryMode": "DegradeClosed"
 			}
