@@ -14,7 +14,7 @@
 	"cli_default_open_behavior": "existing_window",
 	"restore_on_startup": "launchpad",
 	"restore_on_file_reopen": false,
-	"when_closing_with_no_tabs": "close_window",
+	"when_closing_with_no_tabs": "keep_window_open",
 	"bottom_dock_layout": "left_aligned",
 	"centered_layout": {
 		"right_padding": 0,
@@ -69,7 +69,7 @@
 	"theme": {
 		"mode": "dark",
 		"light": "Gruvbox Light Hard",
-		"dark": "Gruvbox Dark Hard"
+		"dark": "Dracula"
 	},
 	"icon_theme": {
 		"mode": "dark",
