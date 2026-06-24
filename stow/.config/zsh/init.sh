@@ -1,8 +1,8 @@
 # Shell init (sourced from shell.nix)
 # Usage: available in every zsh session after dotfiles stow
 
-export EDITOR=vim
-export VISUAL=zeditor
+export EDITOR="zed --wait"
+export VISUAL="zed --wait"
 
 # Pula init interativo em automação (Claude Code, dumb terminals, etc)
 if [[ -n "$CLAUDECODE" || "$TERM" == "dumb" ]]; then

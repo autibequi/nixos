@@ -35,6 +35,15 @@
 	"message_editor": {
 		"auto_replace_emoji_shortcode": true,
 	},
+	// ─── COMMAND ALIASES (command palette) ─────────────────────────
+	"command_aliases": {
+		"gd": "git::Diff",
+		"gb": "git::Branch",
+		"gbd": "git::BranchDiff",
+		"gp": "git::Push",
+		"gcp": "git::CreatePullRequest",
+		"tsd": "editor::ToggleSplitDiff"
+	},
 	// ─── FONTS ─────────────────────────────────────────────────────
 	// Editor (buffer) font
 	"buffer_font_family": "JetBrainsMono Nerd Font Mono",

@@ -18,13 +18,18 @@ switch: ## Aplica a config NixOS (nh os switch)
 update: ## Atualiza o flake inteiro e aplica
 	nh os switch --update .
 
-zed-update: ## Trava o Zed na última preview (-pre) e aplica
-	@latest=$$(git ls-remote --tags https://github.com/zed-industries/zed.git '*-pre' | sed 's|.*refs/tags/||' | grep -vE '\^\{\}' | sort -V | tail -1)
-	[ -n "$$latest" ] || { echo "erro: nenhuma tag -pre encontrada"; exit 1; }
-	current=$$(grep -oE 'zed-industries/zed/v[0-9.]+-pre' flake.nix | sed 's|.*/||')
+zed-update: ## Atualiza o Zed pra última tag do canal pinado (stable ou -pre) e aplica
+	@current=$$(grep -oE 'zed-industries/zed/v[0-9][0-9.]*(-pre)?' flake.nix | sed 's|.*/||')
+	[ -n "$$current" ] || { echo "erro: não achei o pin do zed em flake.nix"; exit 1; }
+	case "$$current" in
+	  *-pre) filter='-pre$$' ;;
+	  *)     filter='[0-9]$$' ;;
+	esac
+	latest=$$(git ls-remote --tags https://github.com/zed-industries/zed.git | sed 's|.*refs/tags/||' | grep -vE '\^\{\}' | grep -E "^v[0-9].*$$filter" | sort -V | tail -1)
+	[ -n "$$latest" ] || { echo "erro: nenhuma tag encontrada"; exit 1; }
 	if [ "$$current" = "$$latest" ]; then echo "Zed já na $$latest — nada a fazer"; exit 0; fi
 	echo "Zed: $$current → $$latest"
-	sed -i -E "s|(zed-industries/zed/)v[0-9.]+-pre|\1$$latest|" flake.nix
+	sed -i -E "s|(zed-industries/zed/)v[0-9][0-9.]*(-pre)?|\1$$latest|" flake.nix
 	nix flake update zed
 	nh os switch .
 

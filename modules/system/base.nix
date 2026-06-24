@@ -19,8 +19,8 @@
   # Add local bin to PATH
   environment.localBinInPath = true;
 
-  environment.variables.EDITOR = "vim";
-  environment.variables.VISUAL = "vim";
+  environment.variables.EDITOR = "zed --wait";
+  environment.variables.VISUAL = "zed --wait";
 
   # Variáveis de sessão — Wayland pains
   environment.sessionVariables = {
