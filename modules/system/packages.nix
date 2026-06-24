@@ -48,7 +48,7 @@
     google-chrome
 
     # ── Editores / Dev ─────────────────────────────────
-    zed-editor
+    unstable.zed-editor
     gitkraken
     jujutsu
     gitoxide
