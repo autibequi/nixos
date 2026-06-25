@@ -327,7 +327,7 @@
 	],
 	// ─── TERMINAL ──────────────────────────────────────────────────
 	"terminal": {
-		"font_weight": 850.0,
+		"font_weight": 650.0,
   "scrollbar": {
 			"show": "never"
 		},

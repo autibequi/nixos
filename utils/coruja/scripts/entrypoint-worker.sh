@@ -30,6 +30,9 @@ fi
 export PATH="/go/bin:/usr/local/go/bin:${PATH:-}"
 GO=/usr/local/go/bin/go
 
+# Garante que todos os módulos do go.mod estão no cache antes de ligar -mod=readonly.
+"$GO" mod download
+
 # Sem vendor no container: builda direto do mod cache (volume monolito-gomodcache) + SSH
 # (GOPRIVATE). Em workspace mode (go.work) o -mod só aceita readonly|vendor; readonly usa o
 # mod cache e ignora qualquer vendor/ que o editor/gopls do host crie no bind-mount.
