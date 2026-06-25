@@ -5,8 +5,11 @@
 	// ─── WINDOW & SESSION ──────────────────────────────────────────
 	"mouse_wheel_zoom": false,
 	"proxy": "",
+	// 30ms era absurdo pra gopls em monorepo — toda completion estourava o
+	// timeout e voltava vazia ("lsp fetch timeout ms: 30" no log). 500ms dá
+	// folga pro gopls responder mesmo com o índice grande do coruja.
 	"completions": {
-		"lsp_fetch_timeout_ms": 30
+		"lsp_fetch_timeout_ms": 500
 	},
 	// Ctrl+click → definição; estando na definição, cai em "find all references"
 	"go_to_definition_fallback": "find_all_references",
@@ -635,11 +638,22 @@
 		},
 		"gopls": {
 			"settings": {
+				// Tira do índice do gopls tudo que não é código-fonte navegável.
+				// Sem isso ele indexa vendor + submódulos + .git/modules e
+				// estoura RAM → OOM → crash em loop → Zed desiste de reiniciar.
 				"directoryFilters": [
 					"-**/vendor",
-					"-**/mocks"
+					"-**/mocks",
+					"-**/node_modules",
+					"-**/.git",
+					"-**/apps/front-student",
+					"-**/apps/strapi"
 				],
-				"memoryMode": "DegradeClosed"
+				"memoryMode": "DegradeClosed",
+				// Origem do spam "relative URL without a base": o gopls devolve o
+				// target de documentLink como path cru (não file://) e o parser
+				// de URL do Zed quebra. Cosmético, mas polui log e custa event loop.
+				"linksInHover": false
 			}
 		},
 		"golangci-lint": {

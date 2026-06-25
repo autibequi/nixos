@@ -103,5 +103,14 @@
 				"ctrl-shift-0 ctrl-alt-0"
 			]
 		}
+	},
+	// ─── LSP: reset rápido (monorepo coruja trava/derruba o gopls) ─
+	// Ctrl+Shift+Delete reinicia o language server do buffer atual.
+	// Use quando o gopls travar (hung) — o Zed não tem watchdog pra isso.
+	{
+		"context": "Editor",
+		"bindings": {
+			"ctrl-shift-delete": "editor::RestartLanguageServer"
+		}
 	}
 ]
