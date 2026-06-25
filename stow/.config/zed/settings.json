@@ -12,7 +12,7 @@
 	"go_to_definition_fallback": "find_all_references",
 	"go_to_definition_scroll_strategy": "top",
 	"cli_default_open_behavior": "existing_window",
-	"restore_on_startup": "launchpad",
+	"restore_on_startup": "last_session",
 	"restore_on_file_reopen": false,
 	"when_closing_with_no_tabs": "keep_window_open",
 	"bottom_dock_layout": "left_aligned",
@@ -48,9 +48,9 @@
 	// ─── FONTS ─────────────────────────────────────────────────────
 	// Editor (buffer) font
 	"buffer_font_family": "Maple Mono NF",
-	"buffer_font_size": 17.0,
-	"buffer_font_weight": 450.0,
-	"buffer_line_height": "comfortable",
+	"buffer_font_size": 14.0,
+	"buffer_font_weight": 400.0,
+	"buffer_line_height": "standard",
 	"buffer_font_features": {
 		"calt": true,
 		"liga": true,
@@ -61,21 +61,21 @@
 	],
 	// UI font
 	"ui_font_family": "Maple Mono NF",
-	"ui_font_size": 16.0,
-	"ui_font_weight": 400.0,
+	"ui_font_size": 14.0,
+	"ui_font_weight": 600.0,
 	// Agent panel acompanha o resto: conteúdo = buffer (17), UI = ui_font (16)
-	"agent_buffer_font_size": 17.0,
+	"agent_buffer_font_size": 14.0,
 	"agent_ui_font_size": 16.0,
 	// ─── THEME & APPEARANCE ────────────────────────────────────────
 	"theme": {
 		"mode": "dark",
-		"light": "Gruvbox Light Hard",
+		"light": "Dracula Light (Alucard",
 		"dark": "Dracula"
 	},
 	"icon_theme": {
 		"mode": "dark",
 		"light": "VSCode Icons for Zed (Dark Angular)",
-		"dark": "VSCode Icons for Zed (Dark Angular)"
+		"dark": "VSCode Icons for Zed (Light)"
 	},
 	// Clareia os ícones/textos "muted" — o Dracula default deixa os ícones de
 	// status do agent panel num roxo-acinzentado quase invisível (#6272a4).
@@ -327,13 +327,14 @@
 	],
 	// ─── TERMINAL ──────────────────────────────────────────────────
 	"terminal": {
-		"scrollbar": {
+		"font_weight": 850.0,
+  "scrollbar": {
 			"show": "never"
 		},
 		"dock": "bottom",
 		"bell": "system",
 		"font_family": "Maple Mono NF",
-		"font_size": 16,
+		"font_size": 14.0,
 		// default é "comfortable" (1.618) = muito esparramado; "standard" (1.3)
 		// deixa denso como Alacritty. Custo zero pra apertar mais: {"custom": 1.15}
 		"line_height": "standard",
