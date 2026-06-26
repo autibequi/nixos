@@ -20,10 +20,20 @@
   # (ex: nixos-rebuild switch mata serviços gráficos), o agent reinicia sem
   # WAYLAND_DISPLAY → Qt6 explode com SIGABRT → loop infinito de crashes.
   # StartLimitBurst=3 deixa tentar 3x antes de desistir, quebrando o loop.
+  # ATENÇÃO: definir systemd.user.services.* em NixOS gera um .service COMPLETO em
+  # /etc/systemd/user/ que SUBSTITUI o bundled unit do pacote — ExecStart é obrigatório.
   systemd.user.services.hyprpolkitagent = {
+    description = "Hyprland Polkit Authentication Agent";
+    after = [ "graphical-session.target" ];
+    wantedBy = [ "graphical-session.target" ];
     unitConfig = {
       StartLimitBurst = 3;
       StartLimitIntervalSec = 30;
+    };
+    serviceConfig = {
+      ExecStart = "${pkgs.hyprpolkitagent}/libexec/hyprpolkitagent";
+      Restart = "on-failure";
+      RestartSec = 5;
     };
   };
 }

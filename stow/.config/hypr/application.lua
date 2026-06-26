@@ -7,10 +7,10 @@ local km = require("keymap")
 local L  = require("launcher")
 
 -- ── App aliases ───────────────────────────────────────────────
-local terminal     = L.build("alacritty",                          { gpu = "offload" })
+local terminal     = L.build("alacritty")
 local menu         = L.build("rofi -show drun")
-local chrome       = L.build("google-chrome-stable", { gpu = "offload" })
-local zed          = L.build("zeditor",                            { gpu = "offload" })
+local chrome       = L.build("google-chrome-stable")
+local zed          = L.build("zeditor")
 local quickShell   = L.build("qs ipc call overview toggle",        { raw = true })
 local controlPanel = L.build("nwg-panel-config")
 local audioManager = L.term("wiremix")

@@ -58,12 +58,7 @@ local profiles = {
             ["animations:enabled"]    = "false",
         },
         on_enter = function()
-            -- Hint pra launcher.lua: novos spawns sem gpu-offload
-            os.execute("touch " .. os.getenv("HOME") .. "/.cache/hyprland/no_gpu")
-            core.notify("Battery mode", "GPU offload desabilitado", { timeout = 800, urgency = "low" })
-        end,
-        on_exit = function()
-            os.execute("rm -f " .. os.getenv("HOME") .. "/.cache/hyprland/no_gpu")
+            core.notify("Battery mode", nil, { timeout = 800, urgency = "low" })
         end,
     },
 }

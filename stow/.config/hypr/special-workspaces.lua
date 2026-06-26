@@ -87,7 +87,7 @@ define_special("f2", "F2", {
 })
 define_special("f8", "F8", {
 	label = "f8 (Zed nixos)",
-	on_created_empty = L.build("zeditor ~/nixos", { gpu = "offload" })
+	on_created_empty = L.build("zeditor ~/nixos")
 })
 define_special("f9", "F9", {
 	label            = "f9 (.ovault, no_screen_share)",

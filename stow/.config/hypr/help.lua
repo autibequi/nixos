@@ -159,8 +159,7 @@ Hooks declarativos — políticas opt-in via `define_special({ on_active = fn, a
 
 - `core.lua` — helpers compartilhados: `notify`, `on(ev,fn)` com pcall, `timer(ms,fn)`, `state_file(name)`, `focused`, `clients_cached`, `other_monitor`, `escape_sh`, `trunc`, `rofi_menu`. Registries: `workspace_active_handlers`, `workspace_auto_route_classes`.
 - `keymap.lua` — registry de binds com `desc/group/icon`. Use `km.bind/app/fn/dispatch`. Cheatsheet (`SUPER+/`) e manual (`SUPER+,`) consomem do registry.
-- `launcher.lua` — wrapper unificado: `L.build/chrome/term`. Todos os spawns passam por aqui (autostart, special-workspaces, services, application). Env kill-switches **realmente** funcionam em tudo:
-  - `HYPR_NO_GPU=1` — desabilita `gpu-offload` em todos os builds
+- `launcher.lua` — wrapper unificado: `L.build/chrome/term`. Todos os spawns passam por aqui (autostart, special-workspaces, services, application). Kill-switch:
   - `HYPR_NO_UWSM=1` — spawn direto, sem `uwsm app --`
 - `define_special(name, key, opts)` — single source of truth pra special workspace: rules, borders, bind, label, `on_created_empty`, `on_active`, `auto_route_classes`, `tile`, `no_screen_share`.
 
@@ -174,7 +173,7 @@ Hooks declarativos — políticas opt-in via `define_special({ on_active = fn, a
 ├── autostart.lua         # daemons + cursor + tema em hl.on("hyprland.start")
 ├── core.lua              # helpers (notify/on/timer/state_file/focused/clients_cached/rofi_menu)
 ├── keymap.lua            # registry semântico de binds (desc/group/icon)
-├── launcher.lua          # spawn wrapper (uwsm app -- + gpu-offload + --class/--app)
+├── launcher.lua          # spawn wrapper (uwsm app -- + --class/--app)
 ├── clients.lua           # parse hyprctl clients -j (sem json lib)
 ├── services.lua          # waybar/quickshell/clipboard/hypr_reload
 ├── screenshots.lua       # grim/satty/tesseract (4 funcs)
