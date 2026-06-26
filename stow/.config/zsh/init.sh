@@ -49,6 +49,44 @@ _cache_or_eval zoxide  zoxide init zsh
 _cache_or_eval atuin   atuin init zsh --disable-up-arrow
 
 ######################
+#      Plugins inline
+######################
+
+# sudo: ESC ESC = prefixo/remove sudo
+_sudo-command-line() {
+  [[ -z $BUFFER ]] && zle up-history
+  if [[ $BUFFER == sudo\ * ]]; then
+    LBUFFER="${LBUFFER#sudo }"
+  else
+    LBUFFER="sudo $LBUFFER"
+  fi
+}
+zle -N _sudo-command-line
+bindkey "^[^[" _sudo-command-line
+
+# extract: x <arquivo> — descompacta qualquer formato
+function x() {
+  case "$1" in
+    *.tar.bz2)  tar xjf "$1"            ;;
+    *.tar.gz)   tar xzf "$1"            ;;
+    *.tar.xz)   tar xJf "$1"            ;;
+    *.tar.zst)  tar --zstd -xf "$1"     ;;
+    *.tar)      tar xf "$1"             ;;
+    *.bz2)      bunzip2 "$1"            ;;
+    *.gz)       gunzip "$1"             ;;
+    *.rar)      unrar x "$1"            ;;
+    *.zip)      unzip "$1"              ;;
+    *.7z)       7z x "$1"               ;;
+    *.xz)       xz -d "$1"              ;;
+    *.zst)      zstd -d "$1"            ;;
+    *)          echo "Não sei: '$1'"    ;;
+  esac
+}
+
+# colored-man-pages: less com cores nativas (less 581+)
+export MANPAGER="less -R --use-color -Dd+r -Du+b"
+
+######################
 #      Functions
 ######################
 

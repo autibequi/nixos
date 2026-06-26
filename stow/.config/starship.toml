@@ -1,54 +1,62 @@
-# Starship — prompt config
-# Docs: https://starship.rs/config/
+# Starship — Pure style
+# dir + branch + status na esquerda | hora na direita | ❯ embaixo
 
 scan_timeout = 100
 command_timeout = 1000
 add_newline = false
 
-# Prompt symbol
-[character]
-success_symbol = "[❯](bold green)"
-error_symbol = "[❯](bold red)"
+format = """
+$directory\
+$git_branch\
+$git_status\
+$nix_shell\
+$cmd_duration\
+$line_break\
+$character"""
 
-# Directory — trunca em 3 níveis
+right_format = "$time"
+
 [directory]
+style = "bold cyan"
+format = "[$path]($style) "
 truncation_length = 3
+truncation_symbol = "…/"
 truncate_to_repo = true
 
-# Git
 [git_branch]
+symbol = " "
+style = "bold purple"
+format = "on [$symbol$branch]($style) "
 truncation_length = 24
 truncation_symbol = "…"
 
 [git_status]
+style = "bold red"
+format = '[$all_status$ahead_behind]($style) '
+stashed = "📦${count}"
 ahead = "⇡${count}"
 behind = "⇣${count}"
 diverged = "⇕⇡${ahead_count}⇣${behind_count}"
 conflicted = "=${count}"
-stashed = "📦${count}"
 
-# Tempo de comandos lentos (>3s)
+[nix_shell]
+format = "[❄️ $state](dimmed blue) "
+
 [cmd_duration]
 min_time = 3000
+style = "bold yellow"
 format = "took [$duration]($style) "
 
-# Nix shell indicator
-[nix_shell]
-format = "via [❄️ $state](bold blue) "
+[time]
+disabled = false
+time_format = "%H:%M"
+style = "dimmed white"
+format = "[$time]($style)"
 
-# Container indicator
-[container]
-format = "[$symbol]($style) "
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
 
-# Rust — só mostra no dir com Cargo.toml
-[rust]
-format = "via [$symbol($version)]($style) "
-
-# Node — só mostra no dir com package.json
-[nodejs]
-format = "via [$symbol($version)]($style) "
-
-# Desativar ruído
 [package]
 disabled = true
 
@@ -59,4 +67,13 @@ disabled = true
 disabled = true
 
 [azure]
+disabled = true
+
+[nodejs]
+disabled = true
+
+[rust]
+disabled = true
+
+[golang]
 disabled = true
