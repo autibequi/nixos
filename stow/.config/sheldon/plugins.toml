@@ -1,4 +1,26 @@
 shell = "zsh"
 
+[templates]
+defer = "{{ hooks?.pre | nl }}{% for file in files %}zsh-defer source \"{{ file }}\"\n{% endfor %}{{ hooks?.post | nl }}"
+
+# fpath — deve rodar ANTES do compinit, não deferir
+[plugins.zsh-completions]
+github = "zsh-users/zsh-completions"
+apply = ["fpath"]
+
+# zsh-defer — carrega primeiro para habilitar o template defer
+[plugins.zsh-defer]
+github = "romkatv/zsh-defer"
+
+# Plugins deferidos — carregam após o primeiro prompt aparecer
 [plugins.history-substring-search]
 github = "zsh-users/zsh-history-substring-search"
+apply = ["defer"]
+
+[plugins.fzf-tab]
+github = "Aloxaf/fzf-tab"
+apply = ["defer"]
+
+[plugins.zsh-autopair]
+github = "hlissner/zsh-autopair"
+apply = ["defer"]
