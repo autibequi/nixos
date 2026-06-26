@@ -2,7 +2,7 @@
 # o Hyprland. Resultado: compositor e TODOS os clients renderizam na dGPU
 # NVIDIA (RTX 4060). iGPU AMD fica praticamente ociosa — útil quando plugado
 # na tomada ou em sessão de jogo/dev pesado. Pra modo híbrido (compositor na
-# iGPU + offload por app via `gpu-offload`) use a sessão default.
+# iGPU + PRIME offload) use a sessão default.
 
 # PRIME render offload globalmente
 export __NV_PRIME_RENDER_OFFLOAD=1

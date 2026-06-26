@@ -8,7 +8,6 @@
     ./audio.nix # PipeWire
     ./bluetooth.nix
     ./logiops.nix # driver userspace Logitech (HID++)
-    # ./gpu-toggle.nix # wrapper runtime gpu-offload + comando gpu-profile (home/mobile/auto)
-    # ./ddc.nix        # ddcutil + i2c-dev para brilho via DDC/CI
+    # ./ddc.nix # ddcutil + i2c-dev para brilho via DDC/CI
   ];
 }

@@ -18,12 +18,11 @@ in
     enable = true;
     package = pkgs.uwsm;
     waylandCompositors = {
-      # Sessão híbrida (default): compositor roda na iGPU AMD, apps usam
-      # `gpu-offload <bin>` (gpu-toggle.nix) pra subir só o que precisa
-      # na dGPU NVIDIA. Modo bateria-friendly.
+      # Sessão híbrida (default): compositor roda na iGPU AMD (Radeon 780M),
+      # apps usam PRIME offload pra dGPU NVIDIA quando necessário. Bateria-friendly.
       start-hyprland = {
         prettyName = "Hyprland (Hybrid)";
-        comment = "Hyprland on iGPU AMD; apps offload to dGPU via gpu-offload";
+        comment = "Hyprland on iGPU AMD; apps offload to dGPU NVIDIA via PRIME";
         binPath = "/run/current-system/sw/bin/start-hyprland";
       };
       # Sessão NVIDIA full: tudo na dGPU. Selecionar no greeter (tuigreet)

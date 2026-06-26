@@ -27,8 +27,7 @@ let
   };
 
   yaak = pkgs.appimageTools.wrapType2 {
-    name = "${pname}-${version}";
-    inherit src;
+    inherit pname version src;
     extraInstallCommands = ''
       install -Dm644 ${desktopItem}/share/applications/${pname}.desktop \
         $out/share/applications/${pname}.desktop

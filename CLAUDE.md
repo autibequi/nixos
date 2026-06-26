@@ -20,7 +20,7 @@ Cada pasta tem um `default.nix` que importa seus módulos ativos.
 ```
 modules/
   boot/        bootloader · kernel · plymouth · hibernate
-  hardware/    base · asus · nvidia · audio · bluetooth · logiops · [gpu-toggle · ddc]
+  hardware/    base · asus · nvidia · audio · bluetooth · logiops · [ddc]
   system/      base · nix · locale · users · networking · performance · services · shell · fonts · programs · packages
   desktop/     hyprland/ · greetd
   services/    ai · lmstudio · obsidian-sync · steam · virt · [ramsync]

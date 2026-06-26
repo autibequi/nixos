@@ -38,7 +38,7 @@ Cicla modos de uso com `SUPER+SHIFT+P` (era control panel antes — control pane
 | default  | 5    | 3      | on         | —                                     |
 | focus    | 0    | 1      | off        | DND on, sem distração                 |
 | meeting  | 12   | 4      | on, blur   | mic on, brilho 80%                    |
-| battery  | 3    | 2      | off        | toca `~/.cache/hyprland/no_gpu` (lido pelo launcher) |
+| battery  | 3    | 2      | off        | animações off, bordas finas              |
 
 Programático: `require("profiles").apply("focus")` ou `.cycle()` ou `.current()`.
 
