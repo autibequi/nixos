@@ -30,9 +30,13 @@ km.fn("SUPER + Delete", function() hypr_reload() end,
     { desc = "Reload Hyprland", group = "System", icon = "↻" })
 
 -- NOTA: SUPER + Escape virou focus monitor +1 (em workspace.lua).
--- Power menu fica só em MOD3 + F12.
+-- Power menu in-house (quickshell): Ctrl+Alt+Del, o clássico.
 km.app("CTRL + ALT + Delete", L.build("qs ipc call powermenu toggle", { raw = true }),
     { desc = "Power menu", group = "System", icon = "⏻" })
+
+-- Centro de notificações in-house (quickshell).
+km.app("SUPER + SHIFT + n", L.build("qs ipc call notifications toggle", { raw = true }),
+    { desc = "Notification center", group = "System", icon = "" })
 
 -- ── Help / Shortcuts ────────────────────────────────────────
 km.fn("SUPER + slash", function() show_shortcuts() end,

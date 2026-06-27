@@ -53,8 +53,17 @@ function window_picker(opts)
     })
 end
 
--- Binds: MOD3+Tab = todas; MOD3+SHIFT+Tab = só workspace atual
-km.fn("MOD3 + Tab",         function() window_picker() end,
-    { desc = "Window picker (all workspaces)", group = "Navigation", icon = "🪟" })
-km.fn("MOD3 + SHIFT + Tab", function() window_picker({ current_ws = true }) end,
-    { desc = "Window picker (current workspace)", group = "Navigation", icon = "🪟" })
+-- Binds originais substituídos pelo switcher in-house (hypr-shell Onda 4).
+-- MOD3+Tab agora dispara o WindowSwitcher (Quickshell overlay visual).
+-- Mantidos comentados para referência caso o switcher seja revertido.
+--
+-- km.fn("MOD3 + Tab",         function() window_picker() end,
+--     { desc = "Window picker (all workspaces)", group = "Navigation", icon = "🪟" })
+-- km.fn("MOD3 + SHIFT + Tab", function() window_picker({ current_ws = true }) end,
+--     { desc = "Window picker (current workspace)", group = "Navigation", icon = "🪟" })
+
+local L = require("launcher")
+local switcher = L.build("qs ipc call switcher toggle", { raw = true })
+
+km.app("MOD3 + Tab", switcher,
+    { desc = "Window switcher visual (Quickshell)", group = "Navigation", icon = "🪟" })

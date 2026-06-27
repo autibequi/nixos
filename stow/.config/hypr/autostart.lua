@@ -21,7 +21,8 @@ hl.on("hyprland.start", function()
     hl.exec_cmd(L.build("awww-daemon"))
     hl.exec_cmd("awww img " .. os.getenv("HOME") ..
         "/assets/wallpapers/the-wild-hunt-of-odin.jpg --transition-type none")
-    hl.exec_cmd(L.build("swaync"))
+    -- substituído por notif in-house (hypr-shell Onda 3)
+    -- hl.exec_cmd(L.build("swaync"))
 
     -- Clipboard
     hl.exec_cmd(L.build("wl-paste --watch cliphist store"))

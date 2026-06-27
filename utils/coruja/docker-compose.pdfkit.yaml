@@ -53,6 +53,10 @@ services:
       - CHROME_EXECUTABLE_PATH=/usr/bin/chromium
       - CHROME_NO_SANDBOX=1
       - CHROME_DISABLE_DEV_SHM_USAGE=1
+      # Auto-turnoff: o consumer roda no máx PDFKIT_TTL (default 1h), depois o container para.
+      # Defesa contra ficar ligado/travado indefinidamente (ver o caso do certutil 20h).
+      # Override: export PDFKIT_TTL=2h (ou 30m) antes de subir. Aceita formato do `timeout`.
+      - PDFKIT_TTL=${PDFKIT_TTL:-1h}
     volumes:
       # mkcert rootCA → confiança no TLS local. O entrypoint instala no store do sistema
       # e no NSS do Chromium. MKCERT_CAROOT é resolvido pelo run_compose (lib/compose.sh)
@@ -73,14 +77,17 @@ services:
           # parse-time com o $HOME do HOST (/home/pedrinho) — caindo no lugar errado dentro do
           # container. O consumer (Chromium) roda como root e lê o NSS db de /root/.pki/nssdb.
           mkdir -p /root/.pki/nssdb
-          # -N cria o NSS db (cert9.db/key9.db) ANTES do -A. Sem isto o -A falha com
-          # SEC_ERROR_BAD_DATABASE e o Chromium não confia no CA → ERR_CERT_AUTHORITY_INVALID.
-          certutil -d sql:/root/.pki/nssdb -N --empty-password 2>/dev/null || true
-          certutil -d sql:/root/.pki/nssdb -A -t "C,," -n mkcert-root -i /mkcert-ca/rootCA.pem 2>/dev/null || true
+          # -N cria o NSS db (cert9.db/key9.db) ANTES do -A. timeout cobre o busy-loop do
+          # certutil -N (já travou 98% CPU por ~20h); [ -f cert9.db ] torna idempotente — db
+          # corrompido de um run travado anterior é causa provável do loop, então não recria.
+          [ -f /root/.pki/nssdb/cert9.db ] || timeout 20 certutil -d sql:/root/.pki/nssdb -N --empty-password 2>/dev/null || true
+          timeout 20 certutil -d sql:/root/.pki/nssdb -A -t "C,," -n mkcert-root -i /mkcert-ca/rootCA.pem 2>/dev/null || true
         else
           echo "AVISO: /mkcert-ca/rootCA.pem ausente — Chromium pode falhar no TLS local. Veja docs/pdf-kit-local.md"
         fi
-        exec /app/.venv/bin/consumer
+        echo "pdf-kit: consumer up — auto-turnoff em ${PDFKIT_TTL:-1h} (export PDFKIT_TTL p/ mudar)"
+        timeout "${PDFKIT_TTL:-1h}" /app/.venv/bin/consumer || true
+        echo "pdf-kit: turnoff — TTL ${PDFKIT_TTL:-1h} atingido; container vai parar (restart=no)"
     # O Chromium abre o front local + busca o BFF local por HTTPS. Igual ao front-student,
     # o podman vaza o /etc/hosts do host (domínios → 127.0.0.1), inútil dentro do container.
     # host-gateway → host:443 (onde o nginx do dev-stack publica), e o nginx casa a vhost
@@ -93,4 +100,6 @@ services:
     depends_on:
       localstack:
         condition: service_healthy
-    restart: unless-stopped
+    # auto-turnoff: o consumer se encerra no PDFKIT_TTL → NÃO reiniciar (pdf-kit é sob demanda).
+    # unless-stopped reiniciaria o turnoff em loop e foi o que manteve o certutil renascendo.
+    restart: "no"
