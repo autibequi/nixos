@@ -221,6 +221,7 @@
 	// ─── PANELS ────────────────────────────────────────────────────
 	"project_panel": {
 		"dock": "right",
+		"default_width": 340.0,
 		"entry_spacing": "standard",
 		"sort_mode": "directories_first",
 		"hide_root": true,
@@ -233,7 +234,7 @@
 	},
 	"outline_panel": {
 		"dock": "right",
-		"default_width": 600.0,
+		"default_width": 340.0,
 		"file_icons": true,
 		"folder_icons": true,
 		"git_status": true,
@@ -243,6 +244,7 @@
 	},
 	"git_panel": {
 		"dock": "right",
+		"default_width": 340.0,
 		"fallback_branch_name": "main",
 		"tree_view": true,
 		"sort_by_path": true,
@@ -256,6 +258,7 @@
 	"collaboration_panel": {
 		"button": false,
 		"dock": "right",
+		"default_width": 340.0,
 	},
 	// ─── DIAGNOSTICS ───────────────────────────────────────────────
 	"diagnostics": {
@@ -335,7 +338,8 @@
   "scrollbar": {
 			"show": "never"
 		},
-		"dock": "right",
+		"dock": "bottom",
+		"default_height": 320.0,
 		"bell": "system",
 		"font_family": "Maple Mono NF",
 		"font_size": 14.0,
@@ -361,7 +365,8 @@
 	},
 	// ─── DEBUGGER ──────────────────────────────────────────────────
 	"debugger": {
-		"dock": "left",
+		"dock": "right",
+		"default_width": 340.0,
 		"stepping_granularity": "line",
 		"save_breakpoints": true,
 		"format_dap_log_messages": false,
@@ -411,6 +416,7 @@
 		"notify_when_agent_waiting": "primary_screen",
 		"sidebar_side": "right",
 		"dock": "left",
+		"default_width": 340.0,
 		"default_profile": "write",
 		"message_editor_min_lines": 2,
 		"use_modifier_to_send": true,
@@ -677,6 +683,22 @@
 				"buffer_font_size": 18.0,
 				"theme": "macOS Classic Dark",
 				"ui_font_size": 18.0
+			}
+		},
+		// Foco: fonte maior, menos densidade — leitura/prosa/pair.
+		"Foco": {
+			"settings": {
+				"buffer_font_size": 16.0,
+				"ui_font_size": 15.0,
+				"agent_buffer_font_size": 16.0
+			}
+		},
+		// Denso: fonte menor — mais código na tela, sessões de refactor.
+		"Denso": {
+			"settings": {
+				"buffer_font_size": 12.0,
+				"ui_font_size": 13.0,
+				"agent_buffer_font_size": 12.0
 			}
 		},
 	}

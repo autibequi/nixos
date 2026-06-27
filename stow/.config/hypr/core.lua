@@ -99,8 +99,20 @@ end
 --       events.lua via core.invalidate_clients_cache().
 local _clients_cache = { at = 0, data = nil }
 
+local _refresh_pending = false
 function M.invalidate_clients_cache()
     _clients_cache.data = nil
+    -- Agenda refresh fora do contexto do event handler (timer ≥ 500ms é
+    -- seguro pra io.popen; < 500ms ainda pode conflitar com o IPC).
+    if not _refresh_pending then
+        _refresh_pending = true
+        pcall(function()
+            hl.timer(function()
+                _refresh_pending = false
+                M.clients_cached()
+            end, { timeout = 600, type = "oneshot" })
+        end)
+    end
 end
 
 -- clients_stale() — retorna o cache como está, SEM nunca chamar io.popen.
@@ -124,7 +136,7 @@ end
 
 -- ── focused() — client focado (via cache) ─────────────────────
 function M.focused()
-    for _, c in ipairs(M.clients_cached()) do
+    for _, c in ipairs(M.clients_stale()) do
         if c.focused then return c end
     end
     return nil

@@ -50,14 +50,14 @@ color = "#ff2040"
 duration = 250
 command = { program = "sh", args = ["-c", "$HOME/.config/alacritty/bell-cmd.sh"] }
 
-# Shift+Return → ESC+CR (Claude Code / editores multiline)
+# Claude Shift Return?
 [[keyboard.bindings]]
 key = "Return"
 mods = "Shift"
 chars = "\u001B\r"
 
-# Ctrl+C = copiar; Ctrl+Shift+C = SIGINT (cancelar processo)
-# Ctrl+V = colar; Ctrl+Shift+V = colar seleção primária
+# Ctrl+C = copy; Ctrl+Shift+C = SIGINT
+# ATENCAO: ctrl+c nao envia ^C — use ctrl+shift+c pra cancelar comandos
 [[keyboard.bindings]]
 key = "C"
 mods = "Control"
@@ -68,12 +68,8 @@ key = "C"
 mods = "Control|Shift"
 chars = "\x03"
 
+# Ctrl+V = paste
 [[keyboard.bindings]]
 key = "V"
 mods = "Control"
 action = "Paste"
-
-[[keyboard.bindings]]
-key = "V"
-mods = "Control|Shift"
-action = "PasteSelection"

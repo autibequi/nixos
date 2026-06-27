@@ -17,6 +17,9 @@ package.path = _cfgdir .. "/?.lua;" .. package.path
 -- Electron: Wayland nativo evita popup-behind-tiled via XWayland
 hl.env("ELECTRON_OZONE_PLATFORM_HINT", "auto")
 
+-- ydotool: socket do daemon de sistema (programs.ydotool cria em /run/ydotoold/)
+hl.env("YDOTOOL_SOCKET", "/run/ydotoold/.ydotool_socket")
+
 -- Cursor
 hl.env("HYPRCURSOR_THEME", "rose-pine-hyprcursor")
 hl.env("HYPRCURSOR_SIZE",  "48")
@@ -173,4 +176,4 @@ hl.animation({ leaf = "border",           enabled = true,  speed = 1, bezier = "
 hl.animation({ leaf = "borderangle",      enabled = false })
 hl.animation({ leaf = "fade",             enabled = true,  speed = 1, bezier = "instant" })
 hl.animation({ leaf = "workspaces",       enabled = true,  speed = 1, bezier = "instant", style = "slide" })
-hl.animation({ leaf = "specialWorkspace", enabled = true,  speed = 1, bezier = "overshot", style = "slidevert" })
+hl.animation({ leaf = "specialWorkspace", enabled = true,  speed = 2, bezier = "instant", style = "slidevert" })

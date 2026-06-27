@@ -64,12 +64,13 @@ function workspace_switch(ws)
         _last_special_ws[mon] = name
         _push_history(mon, name)
         local was_active = active_special_name() == name
-        -- Se abrindo (não fechando) e o special tem on_created_empty, registrar home
-        -- para capturar o app mesmo que o usuário saia antes dele abrir
+        -- Se abrindo (não fechando) e o special tem on_created_empty, registrar home.
+        -- clients_stale() — sem io.popen; o refresh de fundo (core.invalidate → timer 600ms)
+        -- garante que o cache está populado antes do próximo uso.
         if not was_active and core.special_empty_launchers[name] then
             local full_ws = "special:" .. name
             local empty = true
-            for _, c in ipairs(core.clients_cached()) do
+            for _, c in ipairs(core.clients_stale()) do
                 if c.workspace and c.workspace.name == full_ws then
                     empty = false; break
                 end

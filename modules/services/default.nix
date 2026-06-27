@@ -9,6 +9,7 @@
     ./steam.nix # Steam + gamescope + mangohud
     ./virt.nix # QEMU/KVM + virt-manager
     ./hyprland-logs.nix # exporta logs de apps custom → ~/nixos/logs/ (visível em /workspace/host/logs/)
+    ./ydotool.nix # daemon uinput para injeção de teclas sem modifier leakage
     # ./ramsync.nix # profile-em-RAM (psd browsers + caches Zed/Obsidian em tmpfs)
   ];
 }

@@ -77,3 +77,10 @@ keybind = ctrl+h=goto_split:left
 keybind = ctrl+j=goto_split:down
 keybind = ctrl+k=goto_split:up
 keybind = ctrl+l=goto_split:right
+
+# Ctrl+C = copy; Ctrl+Shift+C = SIGINT (interrupt)
+# ATENCAO: ctrl+c nao envia mais ^C — use ctrl+shift+c pra cancelar comandos
+keybind = ctrl+c=copy_to_clipboard
+keybind = ctrl+shift+c=text:\x03
+# Ctrl+V = paste
+keybind = ctrl+v=paste_from_clipboard

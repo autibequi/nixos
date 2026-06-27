@@ -31,6 +31,48 @@
 			"ctrl-shift-b": "outline_panel::ToggleFocus"
 		}
 	},
+	// ─── LAYOUTS (Ctrl+Alt — action::Sequence) ─────────────────────
+	// Cada layout começa com CloseAllDocks (zera) e reabre só os docks do
+	// preset → determinístico, não depende do estado atual. Se algum atalho
+	// colidir com o Hyprland, trocar a letra aqui.
+	{
+		"bindings": {
+			// Code: explorer (esquerda) + terminal (baixo)
+			"ctrl-alt-c": [
+				"action::Sequence",
+				[
+					"workspace::CloseAllDocks",
+					"project_panel::ToggleFocus",
+					"workspace::ToggleBottomDock"
+				]
+			],
+			// Review: git panel
+			"ctrl-alt-r": [
+				"action::Sequence",
+				[
+					"workspace::CloseAllDocks",
+					"git_panel::ToggleFocus"
+				]
+			],
+			// AI: agent / threads
+			"ctrl-alt-i": [
+				"action::Sequence",
+				[
+					"workspace::CloseAllDocks",
+					"agent::ToggleFocus"
+				]
+			],
+			// Zen: fecha tudo + abas inativas + centered layout (toggle)
+			"ctrl-alt-z": [
+				"action::Sequence",
+				[
+					"workspace::CloseAllDocks",
+					"workspace::CloseInactiveTabsAndPanes",
+					"workspace::ToggleCenteredLayout"
+				]
+			]
+		}
+	},
 	// ─── Quick access genéricos ────────────────────────────────────
 	{
 		"bindings": {
@@ -46,13 +88,15 @@
 			"alt-shift-enter": "agent::RejectOnce"
 		}
 	},
-	// ─── Terminal: Ctrl+C → SIGINT (não interceptar no AgentPanel) ─
-	// Zed captura ctrl-c no AgentPanel antes de chegar ao terminal;
-	// forçar SendText  no contexto Terminal garante SIGINT.
+	// ─── Terminal: Ctrl+C = copiar · Ctrl+Shift+C = SIGINT (invertido) ─
+	// Igual Alacritty/Ghostty: ctrl-c copia; ctrl-shift-c reenvia o ^C real
+	// pro shell via SendKeystroke (fonte: zed#21262).
+	// ATENCAO: ctrl-c SEM selecao NAO cancela — use ctrl-shift-c.
 	{
 		"context": "Terminal",
 		"bindings": {
-			"ctrl-c": null,
+			"ctrl-c": "terminal::Copy",
+			"ctrl-shift-c": ["terminal::SendKeystroke", "ctrl-c"],
 			"ctrl-s": null
 		}
 	},

@@ -50,14 +50,24 @@ km.bind("SUPER + SHIFT + 0",
 
 -- ── WASD Focus/Move/Resize ────────────────────────────────────
 
--- Arrow keys via wtype (SUPER + WASD → ←↑↓→ pro app ativo)
-km.repeating("SUPER + a", hl.dsp.exec_cmd("wtype -k Left"),
+-- SUPER+ALT+WASD → Ctrl+arrow (pular palavra) — ydotool: uinput, sem modifier leakage
+km.repeating("SUPER + ALT + a", hl.dsp.exec_cmd("ydotool key ctrl+left"),
+    { desc = "Word left",  group = "Navigation" })
+km.repeating("SUPER + ALT + d", hl.dsp.exec_cmd("ydotool key ctrl+right"),
+    { desc = "Word right", group = "Navigation" })
+km.repeating("SUPER + ALT + w", hl.dsp.exec_cmd("ydotool key ctrl+up"),
+    { desc = "Word up",    group = "Navigation" })
+km.repeating("SUPER + ALT + s", hl.dsp.exec_cmd("ydotool key ctrl+down"),
+    { desc = "Word down",  group = "Navigation" })
+
+-- ALT+WASD → setas puras — ydotool: uinput, sem modifier leakage
+km.repeating("ALT + a", hl.dsp.exec_cmd("ydotool key left"),
     { desc = "Arrow left",  group = "Navigation" })
-km.repeating("SUPER + d", hl.dsp.exec_cmd("wtype -k Right"),
+km.repeating("ALT + d", hl.dsp.exec_cmd("ydotool key right"),
     { desc = "Arrow right", group = "Navigation" })
-km.repeating("SUPER + w", hl.dsp.exec_cmd("wtype -k Up"),
+km.repeating("ALT + w", hl.dsp.exec_cmd("ydotool key up"),
     { desc = "Arrow up",    group = "Navigation" })
-km.repeating("SUPER + s", hl.dsp.exec_cmd("wtype -k Down"),
+km.repeating("ALT + s", hl.dsp.exec_cmd("ydotool key down"),
     { desc = "Arrow down",  group = "Navigation" })
 
 -- Move windows

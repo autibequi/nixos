@@ -15,7 +15,7 @@ local km   = require("keymap")
 
 local function siblings_of(class, exclude_addr)
     local out = {}
-    for _, c in ipairs(core.clients_cached()) do
+    for _, c in ipairs(core.clients_stale()) do
         if c.class == class and c.address ~= exclude_addr then
             table.insert(out, c)
         end
