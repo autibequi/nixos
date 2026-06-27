@@ -35,7 +35,7 @@
     # ── Desktop / Wayland ──────────────────────────────
     awww
     rofimoji
-    rofi-unwrapped
+    rofi-wayland
     flameshot # PrintScreens
 
     # ── Aparência ──────────────────────────────────────

@@ -8,6 +8,7 @@
     ./host-perf.nix # sampler de performance em background (logger p/ ! host-perf)
     ./steam.nix # Steam + gamescope + mangohud
     ./virt.nix # QEMU/KVM + virt-manager
+    ./hyprland-logs.nix # exporta logs de apps custom → ~/nixos/logs/ (visível em /workspace/host/logs/)
     # ./ramsync.nix # profile-em-RAM (psd browsers + caches Zed/Obsidian em tmpfs)
   ];
 }

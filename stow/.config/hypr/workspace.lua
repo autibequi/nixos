@@ -50,15 +50,15 @@ km.bind("SUPER + SHIFT + 0",
 
 -- ── WASD Focus/Move/Resize ────────────────────────────────────
 
--- Focus — dispatch direto pro layout (scrolling/dwindle)
-km.repeating("SUPER + a", hl.dsp.layout("focus l"),
-    { desc = "Focus left",  group = "Navigation" })
-km.repeating("SUPER + d", hl.dsp.layout("focus r"),
-    { desc = "Focus right", group = "Navigation" })
-km.repeating("SUPER + w", hl.dsp.layout("focus u"),
-    { desc = "Focus up",    group = "Navigation" })
-km.repeating("SUPER + s", hl.dsp.layout("focus d"),
-    { desc = "Focus down",  group = "Navigation" })
+-- Arrow keys via wtype (SUPER + WASD → ←↑↓→ pro app ativo)
+km.repeating("SUPER + a", hl.dsp.exec_cmd("wtype -k Left"),
+    { desc = "Arrow left",  group = "Navigation" })
+km.repeating("SUPER + d", hl.dsp.exec_cmd("wtype -k Right"),
+    { desc = "Arrow right", group = "Navigation" })
+km.repeating("SUPER + w", hl.dsp.exec_cmd("wtype -k Up"),
+    { desc = "Arrow up",    group = "Navigation" })
+km.repeating("SUPER + s", hl.dsp.exec_cmd("wtype -k Down"),
+    { desc = "Arrow down",  group = "Navigation" })
 
 -- Move windows
 km.repeating("SUPER + SHIFT + a",

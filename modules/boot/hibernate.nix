@@ -5,7 +5,7 @@
     HandleLidSwitch = "suspend";
     HandleLidSwitchExternalPower = "suspend";
     HandleLidSwitchDocked = "suspend";
-    HandlePowerKey = "suspend";
+    HandlePowerKey = "poweroff";
     HandlePowerKeyLongPress = "poweroff";
     # Idle gerenciado pelo hypridle — sem IdleAction aqui pra evitar corrida
   };

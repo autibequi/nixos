@@ -335,7 +335,7 @@
   "scrollbar": {
 			"show": "never"
 		},
-		"dock": "left",
+		"dock": "right",
 		"bell": "system",
 		"font_family": "Maple Mono NF",
 		"font_size": 14.0,

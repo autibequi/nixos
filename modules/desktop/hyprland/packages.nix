@@ -55,6 +55,7 @@
     # ── Clipboard ─────────────────────────────────────────────────────
     wl-clipboard # wl-copy / wl-paste
     cliphist # history manager
+    wtype # injeção de teclas/texto no Wayland (usado em keybinds: SUPER+WASD→setas, CTRL+ALT+V)
 
     # ── Audio / brightness / media controls ───────────────────────────
     pavucontrol # GUI de audio (PipeWire/PulseAudio)

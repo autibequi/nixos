@@ -39,7 +39,7 @@
 
     # ── Terminais / launchers ──────────────────────────────────────────
     # cool-retro-term     # terminal estilo CRT (brinquedo)
-    # rofi-wayland         # alternativa ao rofi-unwrapped
+    # rofi-wayland         # migrado para packages.nix (substituiu rofi-unwrapped)
 
     # ── Browsers alternativos ──────────────────────────────────────────
     # servo                                                              # browser experimental (Rust)
