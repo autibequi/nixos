@@ -37,4 +37,24 @@
       RestartSec = 5;
     };
   };
+
+  # Quickshell — shell in-house (overview, clock, power menu, OSD, notif, switcher).
+  # Subido como systemd user service pra reiniciar sozinho se cair — sem isso o `qs`
+  # morre (ex: spawn pendurado no terminal) e TODOS os módulos somem junto.
+  # Substitui o `hl.exec_cmd(L.build("qs"))` do autostart.lua (comentado lá pra não duplicar).
+  # StartLimitBurst quebra crash-loop caso um módulo QML falhe no load.
+  systemd.user.services.quickshell = {
+    description = "Quickshell (in-house Wayland shell)";
+    after = [ "graphical-session.target" ];
+    wantedBy = [ "graphical-session.target" ];
+    unitConfig = {
+      StartLimitBurst = 5;
+      StartLimitIntervalSec = 30;
+    };
+    serviceConfig = {
+      ExecStart = "${pkgs.quickshell}/bin/qs";
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+  };
 }

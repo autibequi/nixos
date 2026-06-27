@@ -158,7 +158,10 @@ Scope {
 
         Row {
             id: cards
-            anchors.centerIn: parent
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.margins: 24
             spacing: 18
 
             Repeater {
@@ -171,8 +174,9 @@ Scope {
 
                     readonly property bool active: root.selected === index
 
-                    width:  150
-                    height: 170
+                    // Distribui os cards por toda a largura disponível (1/N cada).
+                    width:  (cards.width - cards.spacing * (root.actions.length - 1)) / root.actions.length
+                    height: 300
                     radius: 16
                     color: card.active ? root.cElev : root.cSurface
                     border.width: 2
@@ -187,13 +191,13 @@ Scope {
 
                     Column {
                         anchors.centerIn: parent
-                        spacing: 14
+                        spacing: 24
 
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: card.modelData.icon
                             font.family: "Symbols Nerd Font"
-                            font.pixelSize: 46
+                            font.pixelSize: 80
                             color: dangerInFocus() ? root.cDanger : iconColor()
 
                             function iconColor() {
@@ -210,16 +214,18 @@ Scope {
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: card.modelData.label
-                            font.pixelSize: 16
-                            font.bold: card.active
+                            font.family: "Maple Mono NF"
+                            font.pixelSize: 30
+                            font.weight: 600
                             color: card.active ? root.cFg : root.cFgMuted
                         }
 
                         Text {
                             anchors.horizontalCenter: parent.horizontalCenter
                             text: card.modelData.key
-                            font.family: "Symbols Nerd Font"
-                            font.pixelSize: 12
+                            font.family: "Maple Mono NF"
+                            font.pixelSize: 20
+                            font.weight: 600
                             color: root.cFgMuted
                         }
                     }

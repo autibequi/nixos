@@ -26,8 +26,12 @@ km.release("SUPER + Super_L",
 km.app("SUPER + l", "hyprlock",
     { desc = "Lock screen", group = "System", icon = "🔒" })
 
-km.fn("SUPER + Delete", function() hypr_reload() end,
-    { desc = "Reload Hyprland", group = "System", icon = "↻" })
+-- Reset geral: recarrega o Hyprland e reinicia o Quickshell (reseta todos os
+-- módulos/overlays de uma vez — power menu, OSD, notif, switcher).
+km.fn("SUPER + Delete", function()
+    hypr_reload()
+    hl.exec_cmd("systemctl --user restart quickshell")
+end, { desc = "Reset geral (Hyprland + Quickshell)", group = "System", icon = "↻" })
 
 -- NOTA: SUPER + Escape virou focus monitor +1 (em workspace.lua).
 -- Power menu in-house (quickshell): Ctrl+Alt+Del, o clássico.

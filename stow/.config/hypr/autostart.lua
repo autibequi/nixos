@@ -17,7 +17,8 @@ hl.on("hyprland.start", function()
     -- Session core (todos via uwsm — alguns precisam raw=true se já incluírem 'uwsm')
     hl.exec_cmd("systemctl --user start hyprpolkitagent")
     hl.exec_cmd(L.build("waybar"))
-    hl.exec_cmd(L.build("qs"))
+    -- qs roda como systemd user service (services.nix) — reinicia sozinho se cair
+    hl.exec_cmd("systemctl --user start quickshell")
     hl.exec_cmd(L.build("awww-daemon"))
     hl.exec_cmd("awww img " .. os.getenv("HOME") ..
         "/assets/wallpapers/the-wild-hunt-of-odin.jpg --transition-type none")
