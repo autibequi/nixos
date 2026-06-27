@@ -215,6 +215,7 @@ load_env_from_state() {
   # debug do monolito (Delve) persistido pelo wizard — re-exporta pra o compose interpolar
   # na recriação do container (up/restart). Sem isto, recriar cairia no default (CompileDaemon).
   MONO_DEBUG="${STATE_DEBUG:-0}"
+  AUTO_DOWN="${STATE_AUTODOWN:-1h}"
   export PLUG_DEBUG_APP="$MONO_DEBUG"
   export_env
 }
@@ -233,6 +234,7 @@ print_plan() {
     printf "  monolito      : %s  (APP_ENV=%s, .env.%s)%s\n" "$MONO_SEL" "$(mono_env)" "$(mono_env_file)" "$_dbg"
   fi
   printf "  modo          : %s\n" "${RUN_MODE:-foreground}"
+  printf "  auto-down     : %s\n" "${AUTO_DOWN:-1h}"
   echo
   echo "Serviços que vão subir:"
   if [[ ${#RESOLVED_SERVICES[@]} -eq 0 ]]; then

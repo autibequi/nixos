@@ -70,6 +70,8 @@ launch_stack() {
   # montado (hot-reload via inotify não é confiável sobre bind-mount → reiniciar = rebuild).
   # restart e NÃO --force-recreate: o podman-compose não passa --replace ao podman → colide
   # nome ("already in use") + deixa órfão. Frontends reusam container (watch próprio).
+  # auto-down por uptime — config persistida no state, o quickstart (up) relança junto
+  autodown_schedule "${AUTO_DOWN:-1h}"
   if [[ "$RUN_MODE" == "background" ]]; then
     [[ ${#_infra[@]}    -gt 0 ]] && run_compose up -d --no-deps "${_infra[@]}"
     [[ ${#_consumer[@]} -gt 0 ]] && run_compose up -d --no-deps --build "${_consumer[@]}"

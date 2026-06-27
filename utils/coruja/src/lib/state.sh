@@ -22,6 +22,7 @@ state_load() {
       WORKER)   case "$val" in yes | no) STATE_WORKER="$val" ;; esac ;;
       PDFKIT)   case "$val" in yes | no) STATE_PDFKIT="$val" ;; esac ;;
       DEBUG)    case "$val" in 0 | 1) STATE_DEBUG="$val" ;; esac ;;
+      AUTODOWN) case "$val" in off | 30m | 1h | 2h | 4h) STATE_AUTODOWN="$val" ;; esac ;;
     esac
   done < "$f"
   return 0
@@ -41,5 +42,6 @@ state_save() {
     echo "WORKER=$WORKER_SEL"
     echo "PDFKIT=${PDFKIT_SEL:-no}"
     echo "DEBUG=${MONO_DEBUG:-0}"
+    echo "AUTODOWN=${AUTO_DOWN:-1h}"
   } > "$f" 2>/dev/null || echo "aviso: não consegui salvar o state em $f" >&2
 }

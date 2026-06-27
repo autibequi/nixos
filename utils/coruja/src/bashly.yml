@@ -74,6 +74,12 @@ commands:
         help: "Sobe o pdf-kit (consumer local de PDF do LDI). Exige clone do pdf-kit (APP_DIR_PDFKIT) + mkcert"
       - long: --no-pdf-kit
         help: "Não sobe o pdf-kit (sobrescreve o state)"
+      - long: --auto-down
+        arg: ttl
+        help: "Auto-down do stack após esse uptime (ex: 1h, 30m, 2h, 4h)"
+        allowed: ["30m", "1h", "2h", "4h", "off"]
+      - long: --no-auto-down
+        help: "Desliga o auto-down (stack fica ligado até down manual)"
       - long: --detach
         short: -d
         help: "Sobe em background (detached). Default: foreground — segura o terminal e mostra os logs"

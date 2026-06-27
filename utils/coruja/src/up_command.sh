@@ -15,6 +15,8 @@ load_env_from_state
 if [[ -n "${args[--no-worker]:-}" ]]; then NO_WORKER="true"; WORKER_SEL="no"; fi
 [[ -n "${args[--pdf-kit]:-}" ]]    && PDFKIT_SEL="yes"
 [[ -n "${args[--no-pdf-kit]:-}" ]] && PDFKIT_SEL="no"
+[[ -n "${args[--auto-down]:-}" ]]    && AUTO_DOWN="${args[--auto-down]}"
+[[ -n "${args[--no-auto-down]:-}" ]] && AUTO_DOWN="off"
 [[ -n "${args[--detach]:-}" ]]   && RUN_MODE="background"
 
 launch_stack false "$dry_run"

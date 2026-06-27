@@ -76,6 +76,9 @@ else
 fi
 RUN_MODE="$run_mode"
 
+auto_down="$(pick_env 'auto-down (desce o stack após esse uptime; off desliga):' "${STATE_AUTODOWN:-1h}" 1h 2h 4h 30m off)"
+AUTO_DOWN="$auto_down"
+
 # Globais consumidas por launch_stack (resolve.sh + state_save).
 FRONT_ENV="$front_env"
 BO_SEL="$bo_env"
