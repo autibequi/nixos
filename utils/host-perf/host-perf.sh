@@ -23,7 +23,7 @@ _sample() {
     mem=$(awk '/^some/{for(i=1;i<=NF;i++)if($i~/^avg10=/){sub("avg10=","",$i);print $i}}' /proc/pressure/memory 2>/dev/null)
     io=$(awk  '/^some/{for(i=1;i<=NF;i++)if($i~/^avg10=/){sub("avg10=","",$i);print $i}}' /proc/pressure/io 2>/dev/null)
     load=$(awk '{print $1}' /proc/loadavg 2>/dev/null)
-    top=$(ps -eo pcpu,comm --sort=-pcpu 2>/dev/null | awk 'NR==2{printf "%s:%s%%",$2,$1}')
+    top=$(ps -eo pcpu,comm --sort=-pcpu 2>/dev/null | awk 'NR>1 && $2!="ps"{printf "%s:%s%%",$2,$1; exit}')
     printf '%s cpu=%s mem=%s io=%s load=%s top=%s\n' "$ts" "${cpu:-?}" "${mem:-?}" "${io:-?}" "${load:-?}" "${top:-?}" >> "$LOG"
     # rotação barata
     n=$(wc -l < "$LOG" 2>/dev/null || echo 0)
