@@ -58,7 +58,8 @@
     graphviz
     gcc # because kafka fsr
 
-    # --- Warp ---
+    # --- VPN ---
+    protonvpn-gui
     wgcf
 
     # --- Zip ---

@@ -65,6 +65,7 @@ require("hud")                -- SUPER+; peek de estado
 require("pomodoro")           -- SUPER+SHIFT+T (depende de profiles)
 require("submaps")            -- smart_save/close/reload
 require("followme")           -- MOD3+F sync workspaces entre monitores
+require("chicote")            -- MOD3+S modo chicote (overlay raylib)
 require("layouts")            -- snapshots de janelas por workspace (CLI: hypr-layout)
 
 -- Hooks reativos (consomem registries populados pelos requires acima)
@@ -124,6 +125,13 @@ hl.config({
         rounding = 10,
         blur     = { enabled = false },
         shadow   = { enabled = false },
+        dim_inactive = true,
+        dim_strength = 0.1,  -- indicador discreto de monitor/janela ativa (apaga sutilmente o inativo)
+    },
+
+    cursor = {
+        inactive_timeout = 3,  -- esconde após 3s sem movimento
+        no_warps         = true,  -- não teleporta cursor ao trocar foco de monitor (SUPER+Esc)
     },
 
     input = {

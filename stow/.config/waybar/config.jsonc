@@ -15,6 +15,7 @@
 	"modules-center": [
 		"custom/screenrecord",
 		"custom/swaync",
+		"custom/chicote",
 		"clock",
 		"battery"
 	],
@@ -44,6 +45,15 @@
 		"signal": 9,
 		"format": "{}",
 		"on-click": "screenrecord-toggle"
+	},
+	"custom/chicote": {
+		"exec": "pgrep -x chicote >/dev/null && echo '{\"text\":\"🥁\",\"class\":\"active\"}' || echo '{\"text\":\"\",\"class\":\"\"}'",
+		"return-type": "json",
+		"interval": 2,
+		"signal": 12,
+		"format": "{}",
+		"escape": false,
+		"on-click": "$HOME/.config/hypr/chicote-toggle.sh"
 	},
 	"custom/special-workspaces": {
 		"exec": "cat /tmp/waybar-specials.json 2>/dev/null || echo '{\"text\":\"\",\"class\":\"empty\"}'",

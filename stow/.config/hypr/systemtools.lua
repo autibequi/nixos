@@ -31,8 +31,8 @@ km.fn("SUPER + Delete", function() hypr_reload() end,
 
 -- NOTA: SUPER + Escape virou focus monitor +1 (em workspace.lua).
 -- Power menu fica só em MOD3 + F12.
-km.app("MOD3 + F12", L.build("wlogout -b 3 -m 320"),
-    { desc = "Power menu (wlogout)", group = "System", icon = "⏻" })
+km.app("MOD3 + F12", L.build("qs ipc call powermenu toggle", { raw = true }),
+    { desc = "Power menu", group = "System", icon = "⏻" })
 
 -- ── Help / Shortcuts ────────────────────────────────────────
 km.fn("SUPER + slash", function() show_shortcuts() end,
