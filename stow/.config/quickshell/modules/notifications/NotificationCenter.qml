@@ -179,7 +179,7 @@ Item {
                         Text {
                             anchors.centerIn: parent
                             text: ""
-                            font.family: "Symbols Nerd Font"
+                            font.family: "JetBrainsMono Nerd Font"
                             font.pixelSize: 12
                             color: xHover.containsMouse ? root.cAccent : root.cFgMuted
                         }

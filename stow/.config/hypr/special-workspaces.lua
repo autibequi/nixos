@@ -53,6 +53,11 @@ local function define_special(name, key, opts)
 		end
 	end
 
+	-- Registra specials que têm on_created_empty → utils.lua push_home ao abrir vazio
+	if opts.on_created_empty then
+		core.special_empty_launchers[name] = true
+	end
+
 	-- Registry pra specials-feed (sem io.popen — só metadados estáticos)
 	table.insert(core.known_specials, {
 		name  = name,

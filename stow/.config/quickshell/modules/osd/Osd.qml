@@ -216,7 +216,7 @@ Scope {
                 // Ícone do canal
                 Text {
                     text: root.currentIcon()
-                    font.family:   "Symbols Nerd Font"
+                    font.family:   "JetBrainsMono Nerd Font"
                     font.pixelSize: 22
                     color: root.mutedState ? root.cDanger : root.cAccent
                     Layout.alignment: Qt.AlignVCenter

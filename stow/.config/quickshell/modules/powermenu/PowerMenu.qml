@@ -1,10 +1,10 @@
-// PowerMenu — overlay de sessão (lock/logout/suspend/hibernate/reboot/shutdown).
-// In-house, substitui o wlogout GTK. Molde: ClockWidget (Scope + IpcHandler + PanelWindow).
+// PowerMenu — lista de sessão (lock/logout/suspend/hibernate/reboot/shutdown).
+// In-house, substitui o wlogout. Lista vertical: ícone + label lado a lado, com
+// largura de sobra pro texto nunca quebrar. Ícones: JetBrainsMono Nerd Font
+// (instalada; "Symbols Nerd Font" não existe no sistema → fallback quebrado).
 // Toggle via: qs ipc call powermenu toggle / open / close
-// Tema: Deep Dark (espelha ClockWidget pra consistência visual).
 
 import QtQuick
-import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -13,29 +13,27 @@ Scope {
     id: root
     property bool shown: false
 
-    // Índice da ação em foco — começa em lock (mais seguro: Enter acidental tranca, não desliga).
+    // Índice em foco — começa em Lock (Enter acidental tranca, não desliga).
     property int selected: 0
 
-    // ── Tema (Deep Dark / Alacritty) ──────────────────────────────
-    readonly property color cBg:       "#0a0e14"
-    readonly property color cSurface:  "#1a1f29"
-    readonly property color cElev:     "#2a2f3a"
-    readonly property color cBorder:   "#2d3748"
-    readonly property color cFg:       "#e6e6e6"
-    readonly property color cFgMuted:  "#9ca3af"
-    readonly property color cAccent:   "#00d4ff"
-    readonly property color cDanger:   "#ff5555"
+    // ── Tema (Deep Dark) ──────────────────────────────────────────
+    readonly property color cBg:      "#0a0e14"
+    readonly property color cSurface: "#1a1f29"
+    readonly property color cElev:    "#2a2f3a"
+    readonly property color cBorder:  "#2d3748"
+    readonly property color cFg:      "#e6e6e6"
+    readonly property color cFgMuted: "#9ca3af"
+    readonly property color cAccent:  "#00d4ff"
+    readonly property color cDanger:  "#ff5555"
 
-    // ── Ações de sessão ───────────────────────────────────────────
-    // Comandos espelham o layout antigo do wlogout (uwsm/systemctl/hyprlock).
-    // `danger` pinta o ícone de vermelho em foco (reboot/shutdown).
+    // ── Ações ─────────────────────────────────────────────────────
     readonly property var actions: [
-        { id: "lock",      label: "Lock",      key: "l", icon: "", cmd: "hyprlock",            danger: false },
-        { id: "logout",    label: "Logout",    key: "e", icon: "", cmd: "uwsm stop",           danger: false },
-        { id: "suspend",   label: "Suspend",   key: "u", icon: "", cmd: "systemctl suspend",   danger: false },
-        { id: "hibernate", label: "Hibernate", key: "h", icon: "", cmd: "systemctl hibernate", danger: false },
-        { id: "reboot",    label: "Reboot",    key: "r", icon: "", cmd: "systemctl reboot",    danger: true  },
-        { id: "shutdown",  label: "Shutdown",  key: "s", icon: "", cmd: "systemctl poweroff",  danger: true  }
+        { label: "Lock",      key: "l", icon: "\uf023", cmd: "hyprlock",            danger: false },
+        { label: "Logout",    key: "e", icon: "\uf08b", cmd: "uwsm stop",           danger: false },
+        { label: "Suspend",   key: "u", icon: "\uf186", cmd: "systemctl suspend",   danger: false },
+        { label: "Hibernate", key: "h", icon: "\uf2dc", cmd: "systemctl hibernate", danger: false },
+        { label: "Reboot",    key: "r", icon: "\uf021", cmd: "systemctl reboot",    danger: true  },
+        { label: "Shutdown",  key: "s", icon: "\uf011", cmd: "systemctl poweroff",  danger: true  }
     ]
 
     function open() {
@@ -116,12 +114,12 @@ Scope {
             onActivated: root.close()
         }
         Shortcut {
-            sequences: ["Left"]
+            sequences: ["Up"]
             enabled: root.shown
             onActivated: root.moveSelection(-1)
         }
         Shortcut {
-            sequences: ["Right"]
+            sequences: ["Down"]
             enabled: root.shown
             onActivated: root.moveSelection(1)
         }
@@ -131,7 +129,7 @@ Scope {
             onActivated: root.activate(root.selected)
         }
 
-        // Atalho por letra (l/e/u/h/r/s) — gerado a partir da lista de ações.
+        // Atalho por letra (l/e/u/h/r/s).
         Repeater {
             model: root.actions
             delegate: Item {
@@ -144,7 +142,7 @@ Scope {
             }
         }
 
-        // Fundo escurecido — clique fora dos cards fecha.
+        // Fundo escurecido — clique fora fecha.
         Rectangle {
             anchors.fill: parent
             color: root.cBg
@@ -156,85 +154,106 @@ Scope {
             }
         }
 
-        Row {
-            id: cards
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.margins: 24
-            spacing: 18
+        // ── Painel central com a lista ────────────────────────────
+        Rectangle {
+            id: panel
+            anchors.centerIn: parent
+            width: 300
+            height: list.implicitHeight + 24
+            radius: 16
+            color: root.cSurface
+            border.width: 2
+            border.color: root.cBorder
 
-            Repeater {
-                model: root.actions
+            Column {
+                id: list
+                anchors.centerIn: parent
+                width: parent.width - 24
+                spacing: 4
 
-                delegate: Rectangle {
-                    id: card
-                    required property int index
-                    required property var modelData
+                Repeater {
+                    model: root.actions
 
-                    readonly property bool active: root.selected === index
+                    delegate: Rectangle {
+                        id: item
+                        required property int index
+                        required property var modelData
 
-                    // Distribui os cards por toda a largura disponível (1/N cada).
-                    width:  (cards.width - cards.spacing * (root.actions.length - 1)) / root.actions.length
-                    height: 300
-                    radius: 16
-                    color: card.active ? root.cElev : root.cSurface
-                    border.width: 2
-                    border.color: card.active ? root.cAccent : root.cBorder
+                        readonly property bool active: root.selected === index
 
-                    Behavior on border.color {
-                        ColorAnimation { duration: 120 }
-                    }
-                    Behavior on color {
-                        ColorAnimation { duration: 120 }
-                    }
+                        width: parent.width
+                        height: 52
+                        radius: 10
+                        color: item.active ? root.cElev : "transparent"
 
-                    Column {
-                        anchors.centerIn: parent
-                        spacing: 24
+                        Behavior on color {
+                            ColorAnimation { duration: 100 }
+                        }
 
-                        Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            text: card.modelData.icon
-                            font.family: "Symbols Nerd Font"
-                            font.pixelSize: 80
-                            color: dangerInFocus() ? root.cDanger : iconColor()
+                        // Ícone + label (largura natural — nunca quebra).
+                        Row {
+                            anchors.left: parent.left
+                            anchors.leftMargin: 16
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 16
 
-                            function iconColor() {
-                                if (card.active) {
-                                    return root.cAccent;
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: item.modelData.icon
+                                font.family: "JetBrainsMono Nerd Font"
+                                font.pixelSize: 24
+                                color: iconColor()
+
+                                function iconColor() {
+                                    if (item.active && item.modelData.danger) {
+                                        return root.cDanger;
+                                    }
+                                    if (item.active) {
+                                        return root.cAccent;
+                                    }
+                                    return root.cFg;
                                 }
-                                return root.cFg;
                             }
-                            function dangerInFocus() {
-                                return card.active && card.modelData.danger;
+
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: item.modelData.label
+                                font.family: "Maple Mono NF"
+                                font.pixelSize: 17
+                                font.weight: 600
+                                wrapMode: Text.NoWrap
+                                color: item.active ? root.cFg : root.cFgMuted
                             }
                         }
 
-                        Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            text: card.modelData.label
-                            font.family: "Maple Mono NF"
-                            font.pixelSize: 30
-                            font.weight: 600
-                            color: card.active ? root.cFg : root.cFgMuted
+                        // Badge da tecla, à direita.
+                        Rectangle {
+                            anchors.right: parent.right
+                            anchors.rightMargin: 14
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 26
+                            height: 26
+                            radius: 6
+                            color: root.cBg
+                            border.width: 1
+                            border.color: item.active ? root.cAccent : root.cBorder
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: item.modelData.key
+                                font.family: "Maple Mono NF"
+                                font.pixelSize: 13
+                                font.weight: 600
+                                color: item.active ? root.cAccent : root.cFgMuted
+                            }
                         }
 
-                        Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            text: card.modelData.key
-                            font.family: "Maple Mono NF"
-                            font.pixelSize: 20
-                            font.weight: 600
-                            color: root.cFgMuted
+                        MouseArea {
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onEntered: root.selected = item.index
+                            onClicked: root.activate(item.index)
                         }
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onEntered: root.selected = card.index
-                        onClicked: root.activate(card.index)
                     }
                 }
             }

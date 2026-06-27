@@ -64,6 +64,18 @@ function workspace_switch(ws)
         _last_special_ws[mon] = name
         _push_history(mon, name)
         local was_active = active_special_name() == name
+        -- Se abrindo (não fechando) e o special tem on_created_empty, registrar home
+        -- para capturar o app mesmo que o usuário saia antes dele abrir
+        if not was_active and core.special_empty_launchers[name] then
+            local full_ws = "special:" .. name
+            local empty = true
+            for _, c in ipairs(core.clients_cached()) do
+                if c.workspace and c.workspace.name == full_ws then
+                    empty = false; break
+                end
+            end
+            if empty then core.push_home(full_ws) end
+        end
         hl.dispatch(hl.dsp.workspace.toggle_special(name))
         if was_active then hl.exec_cmd("pkill -x rofi") end
     else

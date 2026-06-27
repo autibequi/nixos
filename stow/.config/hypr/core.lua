@@ -139,6 +139,7 @@ end
 M.workspace_active_handlers     = {}
 M.workspace_auto_route_classes  = {}
 M.known_specials                = {}  -- registry sem io.popen pra specials-feed
+M.special_empty_launchers       = {}  -- name → true (specials com on_created_empty)
 
 -- ── rofi_menu(entries, opts) — shell-out unificado ────────────
 --    entries = list of { display = "...", payload = "..." }
