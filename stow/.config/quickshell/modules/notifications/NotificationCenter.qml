@@ -1,8 +1,4 @@
-// NotificationCenter — histórico de notificações (toggle via IPC).
-//
-// Recebe notifHistory (lista de notificações) do Scope pai (Notifications.qml).
-// Posição: top-right, abaixo da barra.
-// Toggle externo: qs ipc call notifications toggle
+// NotificationCenter — histórico (toggle via qs ipc call notifications toggle).
 
 import QtQuick
 import QtQuick.Controls
@@ -14,13 +10,17 @@ Item {
     id: root
 
     property bool shown: false
-    // Lista de notificações (mais recente primeiro) injetada pelo pai.
+    property bool dnd: false
     property var notifHistory: []
+    property string filterMode: "all"
 
     signal closeRequested()
     signal clearAllRequested()
+    signal toggleDndRequested()
+    signal markAllReadRequested()
+    signal removeEntry(var entry)
+    signal markRead(var entry)
 
-    // ── Tema (Deep Dark — espelha PowerMenu.qml) ─────────────────
     readonly property color cBg:      "#0a0e14"
     readonly property color cSurface: "#1a1f29"
     readonly property color cElev:    "#2a2f3a"
@@ -29,26 +29,36 @@ Item {
     readonly property color cFgMuted: "#9ca3af"
     readonly property color cAccent:  "#00d4ff"
 
-    // Largura fixa do painel de histórico.
-    readonly property int panelWidth: 380
-    // Altura máxima do painel (px); acima disso o ScrollView ativa scroll.
-    readonly property int panelMaxHeight: 580
+    readonly property int panelWidth: 480
+    readonly property int panelMaxHeight: 640
+
+    readonly property int unreadCount: {
+        let n = 0;
+        for (let i = 0; i < root.notifHistory.length; i++) {
+            if (!root.notifHistory[i].read) {
+                n++;
+            }
+        }
+        return n;
+    }
+
+    readonly property var displayHistory: {
+        if (root.filterMode === "unread") {
+            return root.notifHistory.filter(function(e) { return !e.read; });
+        }
+        return root.notifHistory;
+    }
 
     PanelWindow {
         id: centerWindow
         visible: root.shown
 
-        anchors {
-            top:   true
-            right: true
-        }
+        anchors { top: true; right: true }
         exclusiveZone: 0
         color: "transparent"
-
-        implicitWidth:  root.panelWidth + 20
+        implicitWidth: root.panelWidth + 20
         implicitHeight: root.panelMaxHeight + 20
-
-        WlrLayershell.layer:         WlrLayer.Overlay
+        WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
         Shortcut {
@@ -57,7 +67,6 @@ Item {
             onActivated: root.closeRequested()
         }
 
-        // Clique fora do painel fecha o centro.
         MouseArea {
             anchors.fill: parent
             z: -1
@@ -71,35 +80,32 @@ Item {
             }
         }
 
-        // ── Painel principal ──────────────────────────────────────
         Rectangle {
             id: panel
             anchors {
-                top:         parent.top
-                right:       parent.right
-                topMargin:   10
+                top: parent.top
+                right: parent.right
+                topMargin: 10
                 rightMargin: 10
             }
 
-            width:  root.panelWidth
-            // Altura: soma do header + lista, limitada ao máximo.
+            width: root.panelWidth
             height: Math.min(root.panelMaxHeight,
                              headerCol.implicitHeight + listArea.implicitHeight + 20)
             radius: 14
-            color:  root.cSurface
+            color: root.cSurface
             border.color: root.cBorder
             border.width: 1
 
-            // ── Coluna de header ─────────────────────────────────
             ColumnLayout {
                 id: headerCol
                 anchors {
-                    left:       parent.left
-                    right:      parent.right
-                    top:        parent.top
+                    left: parent.left
+                    right: parent.right
+                    top: parent.top
                     leftMargin: 14
                     rightMargin: 14
-                    topMargin:  14
+                    topMargin: 14
                 }
                 spacing: 8
 
@@ -113,22 +119,20 @@ Item {
                         font.pixelSize: 14
                         font.weight: Font.Bold
                         color: root.cFg
-                        Layout.fillWidth: true
                     }
 
-                    // Badge de contagem
                     Rectangle {
-                        visible: root.notifHistory.length > 0
-                        width: countLabel.implicitWidth + 10
+                        visible: root.unreadCount > 0
+                        width: unreadLabel.implicitWidth + 10
                         height: 18
                         radius: 9
                         color: root.cElev
 
                         Text {
-                            id: countLabel
+                            id: unreadLabel
                             anchors.centerIn: parent
                             text: {
-                                const n = root.notifHistory.length;
+                                const n = root.unreadCount;
                                 if (n > 99) {
                                     return "99+";
                                 }
@@ -140,9 +144,61 @@ Item {
                         }
                     }
 
-                    // Botão "Limpar tudo"
+                    Item { Layout.fillWidth: true }
+
                     Rectangle {
-                        id: clearBtn
+                        width: dndLabel.implicitWidth + 14
+                        height: 22
+                        radius: 11
+                        color: root.dnd ? Qt.rgba(0, 0.831, 1, 0.15) : "transparent"
+                        border.color: root.dnd ? root.cAccent : root.cBorder
+                        border.width: 1
+
+                        Text {
+                            id: dndLabel
+                            anchors.centerIn: parent
+                            text: root.dnd ? "DND" : "DND off"
+                            font.family: "JetBrainsMono Nerd Font"
+                            font.pixelSize: 10
+                            color: root.dnd ? root.cAccent : root.cFgMuted
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.toggleDndRequested()
+                        }
+                    }
+
+                    Rectangle {
+                        visible: root.unreadCount > 0
+                        width: markReadLabel.implicitWidth + 14
+                        height: 22
+                        radius: 11
+                        color: markReadHover.containsMouse ? root.cElev : "transparent"
+                        border.color: markReadHover.containsMouse ? root.cBorder : "transparent"
+                        border.width: 1
+
+                        Text {
+                            id: markReadLabel
+                            anchors.centerIn: parent
+                            text: "Lidas"
+                            font.family: "JetBrainsMono Nerd Font"
+                            font.pixelSize: 10
+                            color: markReadHover.containsMouse ? root.cFg : root.cFgMuted
+                        }
+
+                        MouseArea {
+                            id: markReadHover
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.markAllReadRequested()
+                        }
+                    }
+
+                    Rectangle {
                         visible: root.notifHistory.length > 0
                         width: clearLabel.implicitWidth + 14
                         height: 22
@@ -156,7 +212,7 @@ Item {
                             anchors.centerIn: parent
                             text: "Limpar"
                             font.family: "JetBrainsMono Nerd Font"
-                            font.pixelSize: 11
+                            font.pixelSize: 10
                             color: clearHover.containsMouse ? root.cFg : root.cFgMuted
                         }
 
@@ -169,7 +225,6 @@ Item {
                         }
                     }
 
-                    // Botão fechar o centro
                     Rectangle {
                         width: 22
                         height: 22
@@ -178,7 +233,7 @@ Item {
 
                         Text {
                             anchors.centerIn: parent
-                            text: ""
+                            text: "✕"
                             font.family: "JetBrainsMono Nerd Font"
                             font.pixelSize: 12
                             color: xHover.containsMouse ? root.cAccent : root.cFgMuted
@@ -194,7 +249,44 @@ Item {
                     }
                 }
 
-                // Separador
+                Row {
+                    spacing: 6
+
+                    Repeater {
+                        model: [
+                            { id: "all", label: "Todas" },
+                            { id: "unread", label: "Não lidas" }
+                        ]
+
+                        delegate: Rectangle {
+                            required property var modelData
+                            width: tabLabel.implicitWidth + 16
+                            height: 24
+                            radius: 12
+                            color: root.filterMode === modelData.id
+                                ? Qt.rgba(0, 0.831, 1, 0.12) : "transparent"
+                            border.color: root.filterMode === modelData.id
+                                ? root.cAccent : root.cBorder
+                            border.width: 1
+
+                            Text {
+                                id: tabLabel
+                                anchors.centerIn: parent
+                                text: modelData.label
+                                font.family: "JetBrainsMono Nerd Font"
+                                font.pixelSize: 10
+                                color: root.filterMode === modelData.id ? root.cAccent : root.cFgMuted
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.filterMode = modelData.id
+                            }
+                        }
+                    }
+                }
+
                 Rectangle {
                     Layout.fillWidth: true
                     height: 1
@@ -202,29 +294,27 @@ Item {
                 }
             }
 
-            // ── Lista de histórico (scrollável) ───────────────────
-            // implicitHeight calculado pela Column interna.
             Item {
                 id: listArea
                 anchors {
-                    left:         parent.left
-                    right:        parent.right
-                    top:          headerCol.bottom
-                    bottom:       parent.bottom
-                    topMargin:    8
+                    left: parent.left
+                    right: parent.right
+                    top: headerCol.bottom
+                    bottom: parent.bottom
+                    topMargin: 8
                     bottomMargin: 8
-                    leftMargin:   10
-                    rightMargin:  10
+                    leftMargin: 10
+                    rightMargin: 10
                 }
-                // Reporta o conteúdo real para o cálculo de altura do painel.
                 implicitHeight: Math.min(root.panelMaxHeight - headerCol.implicitHeight - 20,
                                          historyColumn.implicitHeight + 16)
 
-                // Estado vazio
                 Text {
-                    visible: root.notifHistory.length === 0
+                    visible: root.displayHistory.length === 0
                     anchors.centerIn: parent
-                    text: "Sem notificações"
+                    text: root.filterMode === "unread"
+                        ? "Nenhuma não lida"
+                        : "Sem notificações"
                     font.family: "JetBrainsMono Nerd Font"
                     font.pixelSize: 12
                     color: root.cFgMuted
@@ -248,22 +338,19 @@ Item {
                         spacing: 6
 
                         Repeater {
-                            model: root.notifHistory
+                            model: root.displayHistory
 
                             delegate: NotificationCard {
                                 required property var modelData
 
-                                notif: modelData
+                                notif: modelData.notif
+                                read: modelData.read
+                                compact: false
                                 width: historyColumn.width
-                                // No centro mostramos todas as ações.
                                 showActions: true
 
-                                onDismissed: {
-                                    // Remove do histórico — controlado pelo pai via binding.
-                                    root.notifHistory = root.notifHistory.filter(function(n) {
-                                        return n !== modelData;
-                                    });
-                                }
+                                onDismissed: root.removeEntry(modelData)
+                                onClicked: root.markRead(modelData)
                             }
                         }
                     }

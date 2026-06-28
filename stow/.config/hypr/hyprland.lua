@@ -173,7 +173,7 @@ hl.curve("instant",  { type = "bezier", points = { { 0.16, 1.0 }, { 0.3, 1.0 } }
 hl.curve("overshot", { type = "bezier", points = { { 0.05, 0.9 }, { 0.1, 1.05 } } })
 
 hl.animation({ leaf = "windows",          enabled = true,  speed = 1, bezier = "instant" })
-hl.animation({ leaf = "windowsOut",       enabled = true,  speed = 1, bezier = "instant", style = "popin 90%" })
+hl.animation({ leaf = "windowsOut",       enabled = false })
 hl.animation({ leaf = "windowsMove",      enabled = true,  speed = 1, bezier = "instant" })
 hl.animation({ leaf = "border",           enabled = true,  speed = 1, bezier = "instant" })
 hl.animation({ leaf = "borderangle",      enabled = false })

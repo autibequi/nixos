@@ -41,8 +41,6 @@ end, { desc = "Reset UI (Hyprland + Quickshell + waybar)", group = "System", ico
 km.app("CTRL + ALT + Delete", powerWalker,
     { desc = "Power menu (Walker)", group = "System", icon = "⏻" })
 
--- Centro de notificações via swaync; o módulo Notifications do Quickshell está
--- desativado até estabilizar o crash no NotificationServer.
 km.app("SUPER + SHIFT + n", "swaync-client -t -sw",
     { desc = "Notification center", group = "System", icon = "" })
 

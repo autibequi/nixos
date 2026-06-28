@@ -224,10 +224,6 @@ Scope {
                             border.width: card.active ? 2 : 0
                             border.color: root.cAccent
 
-                            Behavior on color {
-                                ColorAnimation { duration: 100 }
-                            }
-
                             Row {
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.left:  parent.left
@@ -243,10 +239,6 @@ Scope {
                                     height: 40
                                     radius: 8
                                     color:  card.active ? root.cAccent : root.cBorder
-
-                                    Behavior on color {
-                                        ColorAnimation { duration: 100 }
-                                    }
 
                                     Text {
                                         anchors.centerIn: parent

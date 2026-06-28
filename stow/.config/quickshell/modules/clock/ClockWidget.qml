@@ -12,23 +12,35 @@ Scope {
     id: root
     property bool shown: false
 
-    readonly property int shellW: 820
-    readonly property int shellH: 540
-    readonly property int leftW: 300
+    // Escala: grid compacto; fontes do calendário em tamanho legível (independente)
+    readonly property real uiScale: 1.0
+    readonly property real calScale: 0.5
+    readonly property real calFontScale: 1.0
+    function px(n) { return Math.round(n * uiScale) }
+    function calPx(n) { return Math.round(n * uiScale * calScale) }
+    function calFont(n) { return Math.round(n * uiScale * calFontScale) }
 
-    // Tipografia — escala única pro painel
-    readonly property int fontClock:   42
-    readonly property int fontWeekday: 14
-    readonly property int fontLabel:   11
-    readonly property int fontValue:   14
-    readonly property int fontHint:    12
-    readonly property int fontMonth:   20
-    readonly property int fontDay:     16
-    readonly property int fontBadge:   12
-    readonly property int fontIcon:    13
-    readonly property int rowH:        40
-    readonly property int dayCellH:    42
-    readonly property int dayCellMinW: 46
+    readonly property int shellW: px(680)
+    readonly property int shellH: px(480)
+    readonly property int leftW: px(280)
+
+    // Tipografia — painel esquerdo
+    readonly property int fontClock:        px(42)
+    readonly property int fontWeekday:      px(14)
+    readonly property int fontLabel:        px(11)
+    readonly property int fontValue:        px(14)
+    readonly property int fontHint:         px(12)
+    readonly property int fontWeather:      px(13)
+    readonly property int rowH:             px(40)
+    readonly property int fontIcon:         px(13)
+
+    // Tipografia — calendário (fontes legíveis; grid usa calPx)
+    readonly property int calFontMonth:       calFont(18)
+    readonly property int calFontDay:         calFont(15)
+    readonly property int calFontBadge:       calFont(11)
+    readonly property int calFontWeekdayHead: calFont(12)
+    readonly property int calDayCellH:        calPx(42)
+    readonly property int calDayCellMinW:     calPx(46)
 
     // ── Tema Walker / neon ────────────────────────────────────────
     readonly property color cBg:       "#0a0e14"
@@ -39,11 +51,16 @@ Scope {
     readonly property color cFgMuted:  "#9ca3af"
     readonly property color cFgDimmer: "#4a5568"
     readonly property color cAccent:   "#00d4ff"
+    readonly property color cWeekend:  "#ff7eb3"
+    readonly property color cWeekendBg: Qt.rgba(1, 0.494, 0.702, 0.14)
 
     readonly property var monthNames: [
         "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
         "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
     ]
+
+    // Seg → Dom (locale pt_BR, semana começa na segunda)
+    readonly property var weekdayShort: ["S", "T", "Q", "Q", "S", "S", "D"]
 
     readonly property int scrollPast: 12
     readonly property int scrollFuture: 12
@@ -52,6 +69,9 @@ Scope {
     property var monthList: []
     property string timezoneName: ""
     property string copiedHint: ""
+    property string weatherNow: ""
+    property string weatherForecast: ""
+    property int weatherFetchedAt: 0
 
     readonly property var locale: Qt.locale("pt_BR")
 
@@ -138,11 +158,65 @@ Scope {
         return y + "-" + pad2(m + 1) + "-" + pad2(day);
     }
 
+    function cellWeekday(year, month, day) {
+        return new Date(year, month, day).getDay();
+    }
+
+    function isWeekendDay(year, month, day) {
+        const dow = cellWeekday(year, month, day);
+        return dow === 0 || dow === 6;
+    }
+
+    function weatherEmoji(code) {
+        if (code === 0) return "☀";
+        if (code <= 3) return "⛅";
+        if (code <= 48) return "🌫";
+        if (code <= 67) return "🌧";
+        if (code <= 82) return "🌦";
+        if (code >= 95) return "⛈";
+        return "🌡";
+    }
+
+    function parseWeather(jsonText) {
+        try {
+            const d = JSON.parse(jsonText);
+            const cur = d.current;
+            const daily = d.daily;
+            root.weatherNow = weatherEmoji(cur.weather_code) + "  "
+                + Math.round(cur.temperature_2m) + "°C  ·  São Paulo";
+            const parts = [];
+            const names = ["Hoje", "Amanhã", "Depois"];
+            for (let i = 0; i < Math.min(3, daily.time.length); i++) {
+                const label = names[i] || daily.time[i].slice(5);
+                parts.push(weatherEmoji(daily.weather_code[i]) + " "
+                    + label + " "
+                    + Math.round(daily.temperature_2m_min[i]) + "–"
+                    + Math.round(daily.temperature_2m_max[i]) + "°");
+            }
+            root.weatherForecast = parts.join("   ");
+            root.weatherFetchedAt = Math.floor(Date.now() / 1000);
+        } catch (e) {
+            root.weatherNow = "Tempo indisponível";
+            root.weatherForecast = "";
+        }
+    }
+
+    function fetchWeather() {
+        const age = Math.floor(Date.now() / 1000) - root.weatherFetchedAt;
+        if (age >= 0 && age < 1800) return;
+        weatherProc.running = true;
+    }
+
+    function scrollToTodayMonth() {
+        calList.positionViewAtIndex(root.scrollPast, ListView.Center);
+    }
+
     function openPanel() {
         root.now = new Date();
         root.monthList = root.buildMonthList();
         root.shown = true;
         tzProc.running = true;
+        fetchWeather();
         scrollToToday.restart();
     }
 
@@ -185,6 +259,22 @@ Scope {
                 const tz = text.trim();
                 root.timezoneName = tz.length > 0 ? tz : "local";
             }
+        }
+    }
+
+    Process {
+        id: weatherProc
+        running: false
+        command: [
+            "curl", "-sf", "--max-time", "4",
+            "https://api.open-meteo.com/v1/forecast"
+            + "?latitude=-23.5505&longitude=-46.6333"
+            + "&current=temperature_2m,weather_code"
+            + "&daily=weather_code,temperature_2m_max,temperature_2m_min"
+            + "&timezone=America/Sao_Paulo&forecast_days=3"
+        ]
+        stdout: StdioCollector {
+            onStreamFinished: root.parseWeather(text)
         }
     }
 
@@ -232,29 +322,29 @@ Scope {
             anchors.horizontalCenter: parent.horizontalCenter
             width: root.shellW
             height: root.shellH
-            radius: 20
+            radius: px(20)
             color: root.cBg
             border.color: root.cBorder
             border.width: 1
 
             RowLayout {
                 anchors.fill: parent
-                anchors.margins: 16
-                spacing: 12
+                anchors.margins: px(16)
+                spacing: px(12)
 
                 // ── Esquerda ──────────────────────────────────────
                 Rectangle {
                     Layout.preferredWidth: root.leftW
                     Layout.fillHeight: true
-                    radius: 14
+                    radius: px(14)
                     color: root.cSurface
                     border.color: root.cBorder
                     border.width: 1
 
                     ColumnLayout {
                         anchors.fill: parent
-                        anchors.margins: 14
-                        spacing: 10
+                        anchors.margins: px(14)
+                        spacing: px(10)
 
                         Text {
                             Layout.fillWidth: true
@@ -273,6 +363,37 @@ Scope {
                             font.pixelSize: root.fontWeekday
                             color: root.cFgMuted
                             horizontalAlignment: Text.AlignHCenter
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 1
+                            color: root.cBorder
+                        }
+
+                        // Previsão do tempo (Open-Meteo · SP)
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: px(3)
+
+                            Text {
+                                Layout.fillWidth: true
+                                text: root.weatherNow.length > 0 ? root.weatherNow : "Carregando tempo…"
+                                font.family: "JetBrainsMono Nerd Font"
+                                font.pixelSize: root.fontWeather
+                                font.weight: Font.Medium
+                                color: root.cAccent
+                                wrapMode: Text.WordWrap
+                            }
+                            Text {
+                                Layout.fillWidth: true
+                                visible: root.weatherForecast.length > 0
+                                text: root.weatherForecast
+                                font.family: "JetBrainsMono Nerd Font"
+                                font.pixelSize: px(11)
+                                color: root.cFgMuted
+                                wrapMode: Text.WordWrap
+                            }
                         }
 
                         Rectangle {
@@ -340,43 +461,104 @@ Scope {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    radius: 14
+                    radius: px(14)
                     color: root.cSurface
                     border.color: root.cBorder
                     border.width: 1
                     clip: true
 
-                    ScrollView {
-                        id: calScroll
+                    ColumnLayout {
                         anchors.fill: parent
-                        anchors.margins: 12
-                        clip: true
-                        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+                        anchors.margins: px(12)
+                        spacing: px(8)
 
-                        ListView {
-                            id: calList
-                            width: calScroll.availableWidth
-                            spacing: 20
-                            model: root.monthList
-                            boundsBehavior: Flickable.StopAtBounds
-                            cacheBuffer: 800
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: px(8)
 
-                            delegate: Item {
-                                id: monthWrap
-                                width: calList.width
-                                height: monthCard.implicitHeight
+                            Text {
+                                text: "Calendário"
+                                font.family: "JetBrainsMono Nerd Font"
+                                font.pixelSize: root.calFontMonth
+                                font.weight: Font.Bold
+                                color: root.cFg
+                            }
 
-                                ScrollMonthCard {
-                                    id: monthCard
-                                    width: monthWrap.width
-                                    month: root.monthList[index].month
-                                    year: root.monthList[index].year
+                            Item { Layout.fillWidth: true }
+
+                            PillButton {
+                                label: "Ir para hoje"
+                                accent: true
+                                onClicked: root.scrollToTodayMonth()
+                            }
+                        }
+
+                        ScrollView {
+                            id: calScroll
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            clip: true
+                            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+
+                            ListView {
+                                id: calList
+                                width: calScroll.availableWidth
+                                spacing: calPx(20)
+                                model: root.monthList
+                                boundsBehavior: Flickable.StopAtBounds
+                                cacheBuffer: calPx(400)
+
+                                delegate: Item {
+                                    id: monthWrap
+                                    width: calList.width
+                                    height: monthCard.implicitHeight
+
+                                    ScrollMonthCard {
+                                        id: monthCard
+                                        width: monthWrap.width
+                                        month: root.monthList[index].month
+                                        year: root.monthList[index].year
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+        }
+    }
+
+    component PillButton: Rectangle {
+        id: pill
+        property string label: ""
+        property bool accent: false
+        signal clicked()
+
+        radius: calPx(8)
+        color: pillHover.containsMouse
+               ? (accent ? Qt.darker(root.cAccent, 1.15) : root.cElev)
+               : (accent ? root.cAccent : root.cElev)
+        border.color: accent ? "transparent" : root.cBorder
+        border.width: 1
+        implicitWidth: pillLabel.implicitWidth + calPx(20)
+        implicitHeight: pillLabel.implicitHeight + calPx(10)
+
+        Text {
+            id: pillLabel
+            anchors.centerIn: parent
+            text: pill.label
+            font.family: "JetBrainsMono Nerd Font"
+            font.pixelSize: root.calFontBadge
+            font.weight: Font.Bold
+            color: accent ? root.cBg : root.cFg
+        }
+
+        MouseArea {
+            id: pillHover
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: pill.clicked()
         }
     }
 
@@ -387,16 +569,16 @@ Scope {
         property string copyValue: row.value
 
         Layout.preferredHeight: root.rowH
-        radius: 8
+        radius: px(8)
         color: rowHover.containsMouse ? Qt.rgba(0, 0.831, 1, 0.10) : "transparent"
         border.color: rowHover.containsMouse ? Qt.rgba(0, 0.831, 1, 0.28) : "transparent"
         border.width: 1
 
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: 8
-            anchors.rightMargin: 8
-            spacing: 6
+            anchors.leftMargin: px(8)
+            anchors.rightMargin: px(8)
+            spacing: px(6)
 
             ColumnLayout {
                 Layout.fillWidth: true
@@ -440,29 +622,32 @@ Scope {
         id: card
         property int month: 0
         property int year: 2026
-        property int gridSpacing: 6
+        property int gridSpacing: calPx(6)
         property bool isCurrentMonth: card.month === root.now.getMonth()
                                     && card.year === root.now.getFullYear()
         property real cellW: {
-            if (width <= 0) return root.dayCellMinW;
-            return Math.max(root.dayCellMinW, Math.floor((width - gridSpacing * 6) / 7));
+            if (width <= 0) return root.calDayCellMinW;
+            return Math.max(root.calDayCellMinW, Math.floor((width - gridSpacing * 6) / 7));
         }
         property real gridContentW: cellW * 7 + gridSpacing * 6
-        property int cellH: Math.max(root.dayCellH, Math.round(cellW * 0.82))
+        property int cellH: Math.max(
+            root.calDayCellH,
+            root.calFontDay + calPx(8),
+            Math.round(cellW * 0.82))
 
-        spacing: 10
-        width: parent ? parent.width : 400
+        spacing: calPx(10)
+        width: parent ? parent.width : px(400)
 
         // Cabeçalho do mês — título centralizado, badge à direita
         Item {
             width: card.width
-            height: 30
+            height: Math.max(calPx(30), root.calFontMonth + calPx(10))
 
             Text {
                 anchors.centerIn: parent
                 text: root.monthNames[card.month] + " " + card.year
                 font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: root.fontMonth
+                font.pixelSize: root.calFontMonth
                 font.weight: Font.Bold
                 color: card.isCurrentMonth ? root.cAccent : root.cFg
             }
@@ -471,19 +656,43 @@ Scope {
                 visible: card.isCurrentMonth
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                radius: 7
+                radius: px(7)
                 color: root.cAccent
-                implicitWidth: hojeLabel.implicitWidth + 12
-                implicitHeight: hojeLabel.implicitHeight + 6
+                implicitWidth: hojeLabel.implicitWidth + calPx(12)
+                implicitHeight: hojeLabel.implicitHeight + calPx(6)
 
                 Text {
                     id: hojeLabel
                     anchors.centerIn: parent
                     text: "hoje"
                     font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: root.fontBadge
+                    font.pixelSize: root.calFontBadge
                     font.weight: Font.Bold
                     color: root.cBg
+                }
+            }
+        }
+
+        // Cabeçalho dos dias da semana (S T Q Q S S D)
+        Row {
+            width: card.gridContentW
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: card.gridSpacing
+
+            Repeater {
+                model: root.weekdayShort
+                delegate: Item {
+                    width: card.cellW
+                    height: Math.max(calPx(22), root.calFontWeekdayHead + calPx(6))
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: modelData
+                        font.family: "JetBrainsMono Nerd Font"
+                        font.pixelSize: root.calFontWeekdayHead
+                        font.weight: Font.Bold
+                        color: (index === 5 || index === 6) ? root.cWeekend : root.cFgMuted
+                    }
                 }
             }
         }
@@ -510,27 +719,39 @@ Scope {
                     property bool isToday: model.visibleMonth
                                         && model.day === root.now.getDate()
                                         && card.isCurrentMonth
+                    property bool isWeekend: inMonth
+                        && root.isWeekendDay(card.year, card.month, model.day)
                     property bool hovered: dayHover.containsMouse && model.visibleMonth
 
                     Rectangle {
                         anchors.fill: parent
-                        anchors.margins: 2
-                        radius: 8
-                        color: isToday ? root.cAccent : hovered ? root.cElev : "transparent"
-                        border.color: hovered && !isToday ? root.cAccent : "transparent"
-                        border.width: 1
+                        anchors.margins: calPx(2)
+                        radius: calPx(8)
+                        color: {
+                            if (isToday) return root.cAccent;
+                            if (hovered) return root.cElev;
+                            if (isWeekend) return root.cWeekendBg;
+                            return "transparent";
+                        }
+                        border.color: {
+                            if (hovered && !isToday) return root.cAccent;
+                            if (isWeekend && !isToday) return Qt.rgba(1, 0.494, 0.702, 0.35);
+                            return "transparent";
+                        }
+                        border.width: (isWeekend || hovered) && !isToday ? 1 : 0
                     }
 
                     Text {
                         anchors.centerIn: parent
                         text: model.day
                         font.family: "JetBrainsMono Nerd Font"
-                        font.pixelSize: root.fontDay
-                        font.weight: (isToday || hovered) ? Font.Bold : Font.Medium
+                        font.pixelSize: root.calFontDay
+                        font.weight: (isToday || hovered || isWeekend) ? Font.Bold : Font.Medium
                         color: {
                             if (!inMonth) return root.cFgDimmer;
                             if (isToday) return root.cBg;
                             if (hovered) return root.cAccent;
+                            if (isWeekend) return root.cWeekend;
                             return root.cFg;
                         }
                     }

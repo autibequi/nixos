@@ -17,6 +17,8 @@
 
 * {
   all: unset;
+  animation: none;
+  transition: none;
 }
 
 popover {
@@ -241,20 +243,125 @@ row:selected .item-text {
   font-family: monospace;
 }
 
-/* ── Dash launcher ─────────────────────────────────────────── */
+/* ── Dash hub ──────────────────────────────────────────────── */
 
-.box-wrapper {
-  padding: 16px 20px;
+.menus-dash .box-wrapper {
+  padding: 14px 18px;
 }
 
-.desktopapplications .item-image,
+.menus-dash .content-container {
+  min-height: 420px;
+}
+
+.menus-dash .list {
+  min-width: 360px;
+}
+
+.menus-dash .preview-box {
+  min-width: 280px;
+  min-height: 420px;
+  padding: 10px 8px 10px 14px;
+  border-left: 1px solid @border_color;
+}
+
+.menus-dash .preview,
+.preview-content.menus-dash {
+  border-radius: 12px;
+  background: @surface_color;
+  padding: 16px 18px;
+  min-height: 380px;
+  min-width: 250px;
+}
+
+.menus-dash .preview-content {
+  font-family: "JetBrainsMono Nerd Font", monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  color: @theme_fg_muted;
+}
+
+.menus-dash .preview label,
+.preview-content.menus-dash label {
+  color: @theme_fg_color;
+}
+
 .menus-dash .item-image {
+  -gtk-icon-size: 26px;
+  margin-right: 12px;
+}
+
+.menus-dash row:first-child .item-text {
+  font-size: 18px;
+  font-weight: 700;
+  color: @accent_bg_color;
+}
+
+.menus-dash row:first-child .item-subtext {
+  font-size: 11px;
+  opacity: 0.95;
+}
+
+.menus-dash .item-text {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.menus-dash .item-subtext {
+  font-family: "JetBrainsMono Nerd Font", monospace;
+  font-size: 11px;
+  color: @theme_fg_muted;
+  opacity: 0.92;
+}
+
+.menus-dash .item-box {
+  min-height: 46px;
+  padding: 7px 10px;
+}
+
+/* separador (noop) */
+.menus-dash row .item-text-box label:first-child {
+  opacity: 1;
+}
+
+.menus-dash row:nth-child(3) .item-box,
+.menus-dash row:nth-child(8) .item-box,
+.menus-dash row:nth-child(14) .item-box {
+  min-height: 8px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  opacity: 0.35;
+}
+
+.menus-dash row:nth-child(3) .item-image,
+.menus-dash row:nth-child(8) .item-image,
+.menus-dash row:nth-child(14) .item-image {
+  opacity: 0;
+  min-width: 0;
+  margin: 0;
+}
+
+.menus-dash row:nth-child(3) .item-text,
+.menus-dash row:nth-child(8) .item-text,
+.menus-dash row:nth-child(14) .item-text {
+  font-size: 10px;
+  font-weight: 400;
+  color: @theme_fg_muted;
+  letter-spacing: 0.12em;
+}
+
+.menus-dash row:nth-child(3) .item-subtext,
+.menus-dash row:nth-child(8) .item-subtext,
+.menus-dash row:nth-child(14) .item-subtext {
+  font-size: 0;
+  min-height: 0;
+}
+
+.desktopapplications .item-image {
   -gtk-icon-size: 28px;
   margin-right: 12px;
 }
 
-.desktopapplications .item-text,
-.menus-dash .item-text {
+.desktopapplications .item-text {
   font-size: 14px;
   font-weight: 600;
 }
@@ -268,17 +375,9 @@ row:selected .item-text {
   font-weight: 700;
 }
 
-.menus-dash .item-subtext {
-  color: @theme_fg_muted;
-  opacity: 0.85;
-}
-
-.desktopapplications .item-box,
-.menus-dash .item-box {
+.desktopapplications .item-box {
   padding: 8px 10px;
 }
-
-/* ── Menus compactos — sem scroll ──────────────────────────── */
 
 .menus-screenshot .box-wrapper {
   padding: 8px 12px;
@@ -304,7 +403,7 @@ row:selected .item-text {
 }
 
 .menus-power .list {
-  min-height: 288px;
+  min-height: 0;
 }
 
 .menus-power scrollbar {
@@ -314,8 +413,12 @@ row:selected .item-text {
 }
 
 .menus-power .item-box {
-  min-height: 48px;
-  padding: 8px 10px;
+  min-height: 44px;
+  padding: 6px 10px;
+}
+
+.menus-power .box-wrapper {
+  padding: 12px 16px;
 }
 
 /* ── Clipboard — layout estável (sem wiggle ao navegar) ───── */

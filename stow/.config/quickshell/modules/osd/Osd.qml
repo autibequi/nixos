@@ -199,9 +199,7 @@ Scope {
 
             // Fade-in/out suave
             opacity: root.shown ? 1.0 : 0.0
-            Behavior on opacity {
-                NumberAnimation { duration: 160; easing.type: Easing.InOutQuad }
-            }
+            visible: opacity > 0
 
             RowLayout {
                 anchors {
@@ -240,10 +238,6 @@ Scope {
                             height: parent.height
                             radius: parent.radius
                             color:  root.mutedState ? root.cDanger : root.cAccent
-
-                            Behavior on width {
-                                NumberAnimation { duration: 100; easing.type: Easing.OutQuad }
-                            }
                         }
                     }
                 }

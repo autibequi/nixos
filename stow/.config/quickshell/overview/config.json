@@ -27,9 +27,9 @@
 		},
 		"animation": {
 			"duration": {
-				"elementMove": 500,
-				"elementMoveEnter": 400,
-				"elementMoveFast": 200
+				"elementMove": 0,
+				"elementMoveEnter": 0,
+				"elementMoveFast": 0
 			}
 		},
 		"sizes": {
@@ -104,7 +104,7 @@
 		"inactiveMonitorOpacity": 0.4
 	},
 	"hacks": {
-		"arbitraryRaceConditionDelay": 150,
+		"arbitraryRaceConditionDelay": 0,
 		"hyprlandEventDebounceMs": 40
 	}
 }

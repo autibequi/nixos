@@ -4,16 +4,15 @@ set -u
 PATH="/run/current-system/sw/bin:${HOME}/.nix-profile/bin:/usr/bin:/bin:${PATH:-}"
 
 if ! systemctl --user --quiet is-active elephant.service; then
-  systemctl --user start elephant.service >/dev/null 2>&1 || (elephant >/tmp/elephant.log 2>&1 &)
+  systemctl --user start elephant.service >/dev/null 2>&1 &
+  for _ in {1..8}; do
+    systemctl --user --quiet is-active elephant.service && break
+    sleep 0.02
+  done
 fi
 
-for _ in {1..20}; do
-  systemctl --user --quiet is-active elephant.service && break
-  sleep 0.05
-done
-
 if ! systemctl --user --quiet is-active walker.service; then
-  systemctl --user start walker.service >/dev/null 2>&1 || true
+  systemctl --user start walker.service >/dev/null 2>&1 &
 fi
 
 args=("$@")
@@ -67,19 +66,35 @@ if ! $has_provider && ! $has_width; then
 fi
 
 case "$provider" in
-  menus:wifi|menus:power|menus:screenshot|menus:clock)
-    walker -q >/dev/null 2>&1 || true
+  menus:wifi|menus:power|menus:screenshot|menus:clock|menus:dash)
     args=(--hideqa "${args[@]}")
     ;;
 esac
 
-# menus:power — lista fixa, sem busca, altura proporcional aos itens
+# menus:dash — hub com status + preview lateral
+if [[ "$provider" == "menus:dash" ]]; then
+  compact=()
+  if ! $has_nosearch; then compact+=(--nosearch); fi
+  if ! $has_nohints; then compact+=(--nohints); fi
+  if ! $has_width; then compact+=(--width 860); fi
+  if ! $has_minheight; then compact+=(--minheight 460); fi
+  if ! $has_maxheight; then compact+=(--maxheight 520); fi
+  args=("${compact[@]}" "${args[@]}")
+fi
+
+# menus:power — 6 linhas, fit-to-content (sem espaço vazio)
 if [[ "$provider" == "menus:power" ]]; then
   compact=()
   if ! $has_nosearch; then compact+=(--nosearch); fi
+  if ! $has_nohints; then compact+=(--nohints); fi
   if ! $has_width; then compact+=(--width 320); fi
-  if ! $has_minheight; then compact+=(--minheight 288); fi
-  if ! $has_maxheight; then compact+=(--maxheight 288); fi
+  power_rows=6
+  power_row_h=44
+  power_chrome=52
+  power_h=$((power_rows * power_row_h + power_chrome))
+  if ! $has_height; then compact+=(--height "$power_h"); fi
+  if ! $has_minheight; then compact+=(--minheight "$power_h"); fi
+  if ! $has_maxheight; then compact+=(--maxheight "$power_h"); fi
   args=("${compact[@]}" "${args[@]}")
 fi
 

@@ -1,14 +1,13 @@
-// Notifications — daemon de notificação in-house (substitui swaync).
+// Notifications — viewer Quickshell (DESATIVADO em shell.qml).
 //
-// Responsabilidades:
-//   • Registra-se no protocolo Wayland via NotificationServer.
-//   • Empilha popups no canto top-right com auto-dismiss por timeout.
-//   • Guarda histórico para o NotificationCenter (toggleável via IPC).
+// swaync continua como daemon (popups, DND, histórico no control center).
+// Este módulo NÃO registra NotificationServer — conflita com swaync no D-Bus.
 //
-// Toggle do centro:
-//   qs ipc call notifications toggle
-//   qs ipc call notifications open
-//   qs ipc call notifications close
+// swaync ainda não expõe API para listar notificações (sem --list-notifications).
+// Para um viewer custom (Walker/QS) no futuro, seria preciso um sidecar que
+// grave notificações em JSON enquanto o swaync roda.
+//
+// Waybar / keybind: swaync-client -t -sw
 
 import QtQuick
 import Quickshell
@@ -19,36 +18,44 @@ import Quickshell.Services.Notifications
 Scope {
     id: root
 
-    // ── Visibilidade do centro de histórico ───────────────────────
     property bool centerShown: false
+    property bool dnd: false
 
-    // Timeout padrão para auto-dismiss de popups (ms).
     readonly property int defaultTimeoutMs: 5000
-
-    // Popups que estão ativos agora (lista de objetos com notif + timerId).
-    property var activePopups: []
-
-    // Histórico completo (mais recente primeiro) — lido pelo NotificationCenter.
-    property var history: []
-
-    // Máximo de popups empilhados simultaneamente.
     readonly property int maxPopups: 5
 
-    // ── IPC: toggle/open/close do centro ─────────────────────────
+    property var activePopups: []
+    // { notif, read: bool, ts: number }
+    property var history: []
+
+    readonly property int unreadCount: {
+        let n = 0;
+        for (let i = 0; i < root.history.length; i++) {
+            if (!root.history[i].read) {
+                n++;
+            }
+        }
+        return n;
+    }
+
     IpcHandler {
         target: "notifications"
         function toggle(): void { root.centerShown = !root.centerShown }
         function open(): void   { root.centerShown = true }
         function close(): void  { root.centerShown = false }
+        function toggleDnd(): void { root.setDnd(!root.dnd) }
+        function setDnd(enabled: bool): void { root.setDnd(enabled) }
+        function markAllRead(): void { root.markAllRead() }
     }
 
-    // ── Servidor Wayland de notificações ─────────────────────────
     NotificationServer {
         id: server
 
         keepOnReload:           true
         actionsSupported:       true
+        actionIconsSupported:   true
         bodyMarkupSupported:    true
+        bodyImagesSupported:    true
         imageSupported:         true
         persistenceSupported:   true
 
@@ -58,7 +65,6 @@ Scope {
         }
     }
 
-    // Componente reutilizável para timers de auto-dismiss.
     Component {
         id: dismissTimerComponent
         Timer {
@@ -67,21 +73,96 @@ Scope {
         }
     }
 
-    // ── API interna ───────────────────────────────────────────────
+    Process {
+        id: waybarWriter
+        running: false
+        command: ["sh", "-c", "true"]
+    }
+
+    onHistoryChanged: root.updateWaybarState()
+    onDndChanged: root.updateWaybarState()
+    onCenterShownChanged: {
+        if (root.centerShown) {
+            root.updateWaybarState();
+        }
+    }
+
+    Component.onCompleted: root.updateWaybarState()
+
+    function setDnd(enabled) {
+        root.dnd = !!enabled;
+        root.updateWaybarState();
+    }
+
+    function markAllRead() {
+        if (root.history.length === 0) {
+            return;
+        }
+        const copy = [];
+        for (let i = 0; i < root.history.length; i++) {
+            const e = root.history[i];
+            copy.push({ notif: e.notif, read: true, ts: e.ts });
+        }
+        root.history = copy;
+    }
+
+    function markNotifRead(notif) {
+        for (let i = 0; i < root.history.length; i++) {
+            if (root.history[i].notif === notif) {
+                if (root.history[i].read) {
+                    return;
+                }
+                const copy = root.history.slice();
+                copy[i] = { notif: notif, read: true, ts: copy[i].ts };
+                root.history = copy;
+                return;
+            }
+        }
+    }
+
+    function removeEntry(entry) {
+        root.history = root.history.filter(function(e) {
+            return e !== entry;
+        });
+        try { entry.notif.dismiss(); } catch(e) {}
+    }
+
+    function updateWaybarState() {
+        const unread = root.unreadCount;
+        let cls = "none";
+        if (root.dnd) {
+            cls = unread > 0 ? "dnd-notification" : "dnd-none";
+        } else if (unread > 0) {
+            cls = "notification";
+        }
+        const payload = JSON.stringify({
+            text: unread > 0 ? String(unread) : "",
+            class: cls,
+            icon: cls
+        });
+        const cmd = "mkdir -p \"${XDG_CACHE_HOME:-$HOME/.cache}/quickshell\" && printf '%s' '"
+            + payload.replace(/'/g, "'\\''")
+            + "' > \"${XDG_CACHE_HOME:-$HOME/.cache}/quickshell/notif-waybar.json\""
+            + " && pkill -RTMIN+11 waybar 2>/dev/null || true";
+        waybarWriter.command = ["sh", "-c", cmd];
+        waybarWriter.running = true;
+    }
 
     function addNotification(notif) {
-        // Histórico: insere no início (mais recente primeiro).
-        root.history = [notif].concat(root.history.slice(0, 99));
+        const entry = { notif: notif, read: false, ts: Date.now() };
+        root.history = [entry].concat(root.history.slice(0, 199));
 
-        // Limite de popups simultâneos.
+        if (root.dnd) {
+            return;
+        }
+
         if (root.activePopups.length >= root.maxPopups) {
             root.dismissOldest();
         }
 
-        const entry = { notif: notif };
-        root.activePopups = root.activePopups.concat([entry]);
+        const popupEntry = { notif: notif };
+        root.activePopups = root.activePopups.concat([popupEntry]);
 
-        // Timer de auto-dismiss individual.
         let timeoutMs = root.defaultTimeoutMs;
         if (notif.expireTimeout > 0) {
             timeoutMs = notif.expireTimeout;
@@ -99,6 +180,7 @@ Scope {
         root.activePopups = root.activePopups.filter(function(e) {
             return e.notif !== notif;
         });
+        root.markNotifRead(notif);
         try { notif.dismiss(); } catch(e) {}
     }
 
@@ -117,29 +199,17 @@ Scope {
         root.activePopups = [];
     }
 
-    // ── Janela de popups (top-right, sobreposta) ──────────────────
     PanelWindow {
         id: popupWindow
+        visible: root.activePopups.length > 0 && !root.dnd
 
-        // Popup stack é sempre visível enquanto houver popups.
-        visible: root.activePopups.length > 0
-
-        anchors {
-            top:   true
-            right: true
-        }
-        // Sem reserva de espaço — flutua sobre as janelas.
+        anchors { top: true; right: true }
         exclusiveZone: 0
         color: "transparent"
-
-        // Largura fixa (card width 360 + margem).
         implicitWidth: 380
-        // Altura automática (Column cresce conforme os cards).
         implicitHeight: popupColumn.implicitHeight + 20
-
         WlrLayershell.layer: WlrLayer.Overlay
 
-        // Margem top-right consistente com o restante do shell.
         Item {
             anchors.fill: parent
             anchors.margins: 10
@@ -150,7 +220,6 @@ Scope {
                 anchors.top: parent.top
                 spacing: 8
 
-                // Um card por popup ativo.
                 Repeater {
                     model: root.activePopups
 
@@ -162,11 +231,7 @@ Scope {
                         width: popupCard.width
                         height: popupCard.height
 
-                        // Animação de entrada: desliza da direita.
-                        transform: Translate {
-                            id: slideIn
-                            x: 40
-                        }
+                        transform: Translate { id: slideIn; x: 40 }
 
                         NumberAnimation on opacity {
                             from: 0
@@ -189,10 +254,11 @@ Scope {
                         NotificationCard {
                             id: popupCard
                             notif: popupWrapper.modelData.notif
-                            // Ações no popup: mostrar só se há 1-2 ações (não polui o stack).
+                            compact: true
+                            read: false
                             showActions: (popupWrapper.modelData.notif.actions || []).length <= 2
-
                             onDismissed: root.dismissNotif(popupWrapper.modelData.notif)
+                            onClicked: root.dismissNotif(popupWrapper.modelData.notif)
                         }
                     }
                 }
@@ -200,14 +266,22 @@ Scope {
         }
     }
 
-    // ── Centro de notificações (histórico, toggled via IPC) ───────
     NotificationCenter {
         shown: root.centerShown
+        dnd: root.dnd
         notifHistory: root.history
         onCloseRequested: root.centerShown = false
+        onToggleDndRequested: root.setDnd(!root.dnd)
+        onMarkAllReadRequested: root.markAllRead()
         onClearAllRequested: {
             root.history = [];
             root.clearAll();
+        }
+        onRemoveEntry: function(entry) { root.removeEntry(entry) }
+        onMarkRead: function(entry) {
+            if (entry && entry.notif) {
+                root.markNotifRead(entry.notif);
+            }
         }
     }
 }

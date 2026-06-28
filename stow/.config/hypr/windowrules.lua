@@ -51,3 +51,26 @@ hl.window_rule({ match = { title = "Claude\\[pessoal\\]" },  border_color = "rgb
 hl.window_rule({ match = { title = "Claude\\[trabalho\\]" }, border_color = "rgba(ff9900ee)" })
 hl.window_rule({ match = { title = "Claude\\[worker\\]" },   border_color = "rgba(00ff41ee)" })
 hl.window_rule({ match = { title = "Claude\\[auto\\]" },     border_color = "rgba(00ccffee)" })
+
+-- ============================================================
+--  LAYER RULES — overlays snappy (sem animação Hyprland)
+-- ============================================================
+
+local layers = {
+    "walker",
+    "quickshell.*",
+    "gtk4-layer-shell",
+    "gtk-layer-shell",
+    "swaync",
+    "selection",
+    "hyprpicker",
+    "wlogout",
+    "logout_dialog",
+}
+
+for _, ns in ipairs(layers) do
+    hl.layer_rule({
+        match   = { namespace = ns },
+        no_anim = true,
+    })
+end

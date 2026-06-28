@@ -19,7 +19,7 @@ anchor_right = false
 [placeholders]
 "default" = { input = "Apps  ·  ! hub  : clip  = calc  > run  / files  @ web  w: win", list = "Recentes abaixo · ferramentas no hub" }
 "desktopapplications" = { input = "Apps", list = "Sem apps · Ctrl+P fixar no topo" }
-"menus:dash" = { input = "Hub", list = "Sem ferramentas" }
+"menus:dash" = { input = "Hub", list = "Status ao vivo · Enter abre · preview →" }
 "calc" = { input = "Calculate", list = "Enter expression" }
 "runner" = { input = "Run command", list = "No commands" }
 "files" = { input = "Browse files", list = "No files" }
@@ -45,7 +45,7 @@ resume_last_query = ["ctrl r"]
 [providers]
 default = ["desktopapplications"]
 empty = ["desktopapplications", "menus:dash"]
-ignore_preview = ["desktopapplications", "files", "runner", "windows", "websearch", "providerlist", "menus:dash", "menus:power", "menus:screenshot", "menus:clock", "calc", "symbols"]
+ignore_preview = ["desktopapplications", "files", "runner", "windows", "websearch", "providerlist", "menus:power", "menus:screenshot", "menus:clock", "calc", "symbols"]
 max_results = 40
 
 [providers.max_results_provider]
@@ -57,6 +57,7 @@ windows = 12
 "menus:power" = 6
 "menus:screenshot" = 4
 "menus:clock" = 4
+"menus:dash" = 20
 websearch = 8
 
 [[providers.prefixes]]

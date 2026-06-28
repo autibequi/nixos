@@ -186,10 +186,6 @@ Scope {
                         radius: 10
                         color: item.active ? root.cElev : "transparent"
 
-                        Behavior on color {
-                            ColorAnimation { duration: 100 }
-                        }
-
                         // Ícone + label (largura natural — nunca quebra).
                         Row {
                             anchors.left: parent.left

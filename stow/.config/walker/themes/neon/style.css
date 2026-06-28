@@ -17,6 +17,8 @@
 
 * {
   all: unset;
+  animation: none;
+  transition: none;
 }
 
 popover {
@@ -236,7 +238,8 @@ row:selected .item-text {
 }
 
 .menus-power .item-box {
-  padding: 8px 10px;
+  min-height: 44px;
+  padding: 6px 10px;
 }
 
 .menus-power .item-text {
@@ -248,4 +251,13 @@ row:selected .item-text {
   font-size: 11px;
   color: @theme_fg_muted;
   opacity: 0.85;
+}
+
+.menus-power .list,
+.menus-power .content-container {
+  min-height: 0;
+}
+
+.menus-power .box-wrapper {
+  padding: 12px 16px;
 }
