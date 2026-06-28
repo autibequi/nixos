@@ -1,8 +1,8 @@
 -- ============================================================
 --  SCREENSHOTS — legado / referência
 --
---  Fluxo principal: walker-screenshot.sh (SUPER+U)
---    slurp → grim → Walker menus:screenshot → satty/tesseract/etc.
+--  SUPER+U → print_screen_to_clipboard (região → clipboard direto)
+--  SUPER+SHIFT+U → walker-screenshot.sh → menus:screenshot
 -- ============================================================
 
 local function active_monitor_name()

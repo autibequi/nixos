@@ -183,7 +183,11 @@ local function shares_column(win)
     local ws_id = win.workspace and win.workspace.id
     if not wx or not ws_id then return false end
 
-    for _, c in ipairs(core.clients_cached(0.3)) do
+    -- Nunca io.popen no keybind — só cache populado por events.lua
+    local clients = core.clients_stale()
+    if #clients == 0 then return false end
+
+    for _, c in ipairs(clients) do
         if c.address ~= win.address
             and c.workspace and c.workspace.id == ws_id
             and c.at_x and math.abs(c.at_x - wx) <= COLUMN_X_EPS then

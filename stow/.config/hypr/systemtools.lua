@@ -66,9 +66,10 @@ km.bind("SUPER + SHIFT + F11",
     { desc = "True fullscreen", group = "Window" })
 
 -- ── Screenshots ─────────────────────────────────────────────
--- Região → Walker (copiar / salvar / satty / OCR)
-km.app("SUPER + u", screenshotWalker,
-    { desc = "Screenshot região → ação", group = "Screenshot", icon = "📸" })
+km.fn("SUPER + u", function() print_screen_to_clipboard() end,
+    { desc = "Screenshot região → clipboard", group = "Screenshot", icon = "📸" })
+km.app("SUPER + SHIFT + u", screenshotWalker,
+    { desc = "Screenshot região → menu", group = "Screenshot", icon = "📸" })
 
 -- ── Clipboard ───────────────────────────────────────────────
 km.app("SUPER + v", clipboardWalker,

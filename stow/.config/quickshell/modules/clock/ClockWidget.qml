@@ -12,9 +12,23 @@ Scope {
     id: root
     property bool shown: false
 
-    readonly property int shellW: 780
-    readonly property int shellH: 520
-    readonly property int leftW: 272
+    readonly property int shellW: 820
+    readonly property int shellH: 540
+    readonly property int leftW: 300
+
+    // Tipografia — escala única pro painel
+    readonly property int fontClock:   42
+    readonly property int fontWeekday: 14
+    readonly property int fontLabel:   11
+    readonly property int fontValue:   14
+    readonly property int fontHint:    12
+    readonly property int fontMonth:   20
+    readonly property int fontDay:     16
+    readonly property int fontBadge:   12
+    readonly property int fontIcon:    13
+    readonly property int rowH:        40
+    readonly property int dayCellH:    42
+    readonly property int dayCellMinW: 46
 
     // ── Tema Walker / neon ────────────────────────────────────────
     readonly property color cBg:       "#0a0e14"
@@ -239,14 +253,14 @@ Scope {
 
                     ColumnLayout {
                         anchors.fill: parent
-                        anchors.margins: 12
-                        spacing: 8
+                        anchors.margins: 14
+                        spacing: 10
 
                         Text {
                             Layout.fillWidth: true
                             text: root.timeSecondsText(root.now)
                             font.family: "JetBrainsMono Nerd Font"
-                            font.pixelSize: 36
+                            font.pixelSize: root.fontClock
                             font.weight: Font.Bold
                             color: root.cAccent
                             horizontalAlignment: Text.AlignHCenter
@@ -256,7 +270,7 @@ Scope {
                             Layout.fillWidth: true
                             text: root.weekdayNames[root.now.getDay()]
                             font.family: "JetBrainsMono Nerd Font"
-                            font.pixelSize: 11
+                            font.pixelSize: root.fontWeekday
                             color: root.cFgMuted
                             horizontalAlignment: Text.AlignHCenter
                         }
@@ -275,7 +289,7 @@ Scope {
 
                             ColumnLayout {
                                 width: parent.width
-                                spacing: 4
+                                spacing: 5
 
                                 CopyRow { Layout.fillWidth: true; label: "Hora"; value: root.timeText(root.now) }
                                 CopyRow { Layout.fillWidth: true; label: "Data"; value: root.brDate(root.now) }
@@ -315,7 +329,7 @@ Scope {
                             visible: root.copiedHint.length > 0
                             text: "Copiado · " + root.copiedHint
                             font.family: "JetBrainsMono Nerd Font"
-                            font.pixelSize: 10
+                            font.pixelSize: root.fontHint
                             color: root.cAccent
                             horizontalAlignment: Text.AlignHCenter
                         }
@@ -335,14 +349,14 @@ Scope {
                     ScrollView {
                         id: calScroll
                         anchors.fill: parent
-                        anchors.margins: 8
+                        anchors.margins: 12
                         clip: true
                         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
                         ListView {
                             id: calList
                             width: calScroll.availableWidth
-                            spacing: 16
+                            spacing: 20
                             model: root.monthList
                             boundsBehavior: Flickable.StopAtBounds
                             cacheBuffer: 800
@@ -372,7 +386,7 @@ Scope {
         property string value: ""
         property string copyValue: row.value
 
-        Layout.preferredHeight: 34
+        Layout.preferredHeight: root.rowH
         radius: 8
         color: rowHover.containsMouse ? Qt.rgba(0, 0.831, 1, 0.10) : "transparent"
         border.color: rowHover.containsMouse ? Qt.rgba(0, 0.831, 1, 0.28) : "transparent"
@@ -386,18 +400,18 @@ Scope {
 
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: 0
+                spacing: 1
 
                 Text {
                     text: row.label
                     font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: 9
+                    font.pixelSize: root.fontLabel
                     color: root.cFgMuted
                 }
                 Text {
                     text: row.value
                     font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: 11
+                    font.pixelSize: root.fontValue
                     font.weight: Font.Medium
                     color: rowHover.containsMouse ? root.cAccent : root.cFg
                     elide: Text.ElideRight
@@ -408,7 +422,7 @@ Scope {
             Text {
                 text: "\uf0c5"
                 font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: 11
+                font.pixelSize: root.fontIcon
                 color: rowHover.containsMouse ? root.cAccent : root.cFgDimmer
             }
         }
@@ -426,10 +440,10 @@ Scope {
         id: card
         property int month: 0
         property int year: 2026
-        property int gridSpacing: 3
-        property real cellW: width > 0 ? Math.floor((width - gridSpacing * 6) / 7) : 40
+        property int gridSpacing: 4
+        property real cellW: width > 0 ? Math.floor((width - gridSpacing * 6) / 7) : 44
 
-        spacing: 6
+        spacing: 8
         width: parent ? parent.width : 400
 
         RowLayout {
@@ -440,7 +454,7 @@ Scope {
                 Layout.fillWidth: true
                 text: root.monthNames[card.month] + " " + card.year
                 font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: 13
+                font.pixelSize: root.fontMonth
                 font.weight: Font.Bold
                 color: (card.month === root.now.getMonth() && card.year === root.now.getFullYear())
                        ? root.cAccent : root.cFg
@@ -458,7 +472,7 @@ Scope {
                     anchors.centerIn: parent
                     text: "hoje"
                     font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: 9
+                    font.pixelSize: root.fontBadge
                     font.weight: Font.Bold
                     color: root.cBg
                 }
@@ -475,7 +489,7 @@ Scope {
 
             delegate: Item {
                 implicitWidth: card.cellW
-                implicitHeight: 26
+                implicitHeight: root.dayCellH
 
                 property bool inMonth: model.visibleMonth
                 property bool isToday: model.visibleMonth
@@ -486,9 +500,9 @@ Scope {
 
                 Rectangle {
                     anchors.centerIn: parent
-                    width: Math.min(parent.width - 2, 28)
-                    height: Math.min(parent.height - 2, 24)
-                    radius: 6
+                    width: Math.min(parent.width - 2, 34)
+                    height: Math.min(parent.height - 2, 28)
+                    radius: 7
                     color: isToday ? root.cAccent : hovered ? root.cElev : "transparent"
                     border.color: hovered && !isToday ? root.cAccent : "transparent"
                     border.width: 1
@@ -498,7 +512,7 @@ Scope {
                     anchors.centerIn: parent
                     text: model.day
                     font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: 10
+                    font.pixelSize: root.fontDay
                     font.weight: (isToday || hovered) ? Font.Bold : Font.Normal
                     color: {
                         if (!inMonth) return root.cFgDimmer;

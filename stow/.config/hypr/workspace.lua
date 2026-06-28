@@ -65,9 +65,9 @@ km.repeating("SUPER + w", hl.dsp.layout("focus u"),
 km.repeating("SUPER + s", hl.dsp.layout("focus d"),
     { desc = "Focus down",         group = "Window" })
 
-km.repeating("SUPER + SHIFT + a", function() swapcol_preserve("l") end,
+km.fn("SUPER + SHIFT + a", function() swapcol_preserve("l") end,
     { desc = "Swap column left",  group = "Window" })
-km.repeating("SUPER + SHIFT + d", function() swapcol_preserve("r") end,
+km.fn("SUPER + SHIFT + d", function() swapcol_preserve("r") end,
     { desc = "Swap column right", group = "Window" })
 km.repeating("SUPER + SHIFT + w", hl.dsp.layout("swapcol u"),
     { desc = "Move column up",    group = "Window" })
