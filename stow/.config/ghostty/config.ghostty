@@ -82,5 +82,6 @@ keybind = ctrl+l=goto_split:right
 # ATENCAO: ctrl+c nao envia mais ^C — use ctrl+shift+c pra cancelar comandos
 keybind = ctrl+c=copy_to_clipboard
 keybind = ctrl+shift+c=text:\x03
-# Ctrl+V = paste
+# Ctrl+V = paste; Ctrl+Shift+V = ^V literal (quoted insert), simétrico ao Ctrl+Shift+C
 keybind = ctrl+v=paste_from_clipboard
+keybind = ctrl+shift+v=text:\x16
