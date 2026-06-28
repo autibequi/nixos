@@ -12,6 +12,7 @@
     hyprlandWaybar # status bar (patched for Hyprland Lua dispatch syntax)
     walker # app launcher / command palette frontend
     elephant # Walker providers backend (apps, calc, files, clipboard, etc.)
+    networkmanager_dmenu # NetworkManager menu via Walker dmenu
     swaynotificationcenter # notifications daemon
     # dunst # alternativa a swaync (desativado)
     nwg-panel # painel de controle (volume/brilho/audio out/exit menu)

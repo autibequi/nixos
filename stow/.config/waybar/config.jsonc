@@ -344,7 +344,7 @@
 		"format-linked": "󰈀 {ifname} (No IP)",
 		"format-disconnected": "󰖪 Disconnected",
 		"tooltip-format": "󰖩 {essid} : {ifname}: {ipaddr}",
-		"on-click": "$HOME/.config/hypr/walker-wifi.sh",
+		"on-click": "$HOME/.config/hypr/networkmanager-dmenu-launch.sh",
 		"on-click-right": "alacritty -e nmtui"
 	},
 	"bluetooth": {
@@ -376,8 +376,9 @@
 				"󰕾"
 			]
 		},
-		"on-click": "alacritty -e wiremix",
+		"on-click": "$HOME/.config/hypr/walker-launch.sh --provider wireplumber",
 		"on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+		"on-click-middle": "alacritty -e wiremix",
 		"on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +2%",
 		"on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -2%"
 	},

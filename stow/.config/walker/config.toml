@@ -96,5 +96,5 @@ provider = "playerctl"
 
 [providers.actions]
 dmenu = [
-  { action = "select", label = "select", default = true, bind = "Return" },
+  { action = "select", label = "connect", default = true, bind = "Return" },
 ]
