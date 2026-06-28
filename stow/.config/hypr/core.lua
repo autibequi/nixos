@@ -99,14 +99,10 @@ end
 --       events.lua via core.invalidate_clients_cache().
 local _clients_cache = { at = 0, data = nil }
 
-local _refresh_pending = false
 function M.invalidate_clients_cache()
     _clients_cache.data = nil
-    -- Runtime proof: refreshing with `hyprctl clients -j` from the Lua event
-    -- loop freezes Hyprland for ~5-6s after window.open/window.close. Keep the
-    -- cache invalidation cheap; callers that explicitly need fresh clients can
-    -- pay that cost outside hot event paths.
-    _refresh_pending = false
+    -- Keep invalidation cheap; callers that explicitly need fresh clients can
+    -- refresh outside Hyprland's hot event paths.
 end
 
 -- clients_stale() — retorna o cache como está, SEM nunca chamar io.popen.
