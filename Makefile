@@ -5,7 +5,7 @@
 SHELL := bash
 .SHELLFLAGS := -eu -o pipefail -c
 .ONESHELL:
-.PHONY: help switch update zed-update yaak-update stow restow
+.PHONY: help switch update upgrade zed-update yaak-update stow restow
 
 help: ## Lista os alvos disponíveis
 	@grep -E '^[a-z][a-zA-Z_-]*:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*## "}{printf "  \033[1m%-12s\033[0m %s\n", $$1, $$2}'
@@ -17,6 +17,11 @@ switch: ## Aplica a config NixOS (nh os switch)
 
 update: ## Atualiza o flake inteiro e aplica
 	nh os switch --update .
+
+upgrade: stow ## Reinjeta dotfiles, atualiza/aplica NixOS e reinicia serviços user
+	nh os switch --update .
+	systemctl --user daemon-reload
+	systemctl --user restart waybar hypridle quickshell
 
 zed-update: ## Atualiza o Zed pro último stable (binário oficial) e aplica
 	@latest=$$(git ls-remote --tags https://github.com/zed-industries/zed.git | sed 's|.*refs/tags/||' | grep -vE '\^\{\}' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$$' | sort -V | tail -1)

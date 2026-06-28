@@ -16,6 +16,7 @@
     lazygit
     comma # roda pacote sem instalar (precisa do db do nix-index pra achar tudo)
     sqlite
+    proton-pass-cli
 
     # security
     yubikey-manager

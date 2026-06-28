@@ -8,7 +8,7 @@ local L  = require("launcher")
 
 -- ── App aliases ───────────────────────────────────────────────
 local terminal     = L.build("alacritty")
-local menu         = L.build(os.getenv("HOME") .. "/.config/hypr/rofi-launch.sh", { raw = true })
+local menu         = L.build("walker", { raw = true })
 local chrome       = L.build("google-chrome-stable")
 local zed          = L.build("zeditor")
 local quickShell   = L.build("qs ipc call overview toggle",        { raw = true })
@@ -31,7 +31,7 @@ local yaa      = L.term("env CLAUDECODE=1 zsh -c 'yaa --model=\"sonnet[1]\"'")
 km.app("SUPER + Space", quickShell, { desc = "Quickshell overview", group = "System", icon = "" })
 
 -- Quick Apps
-km.app("MOD3 + Space",  menu,         { desc = "App launcher (rofi)", icon = "" })
+km.app("MOD3 + Space",  menu,         { desc = "App launcher (Walker)", icon = "" })
 km.app("MOD3 + t",      terminal,     { desc = "Terminal",            icon = "" })
 km.app("MOD3 + z",      zed,          { desc = "Zed editor",          icon = "" })
 km.app("MOD3 + period", emojiPicker,  { desc = "Emoji picker",        icon = "" })

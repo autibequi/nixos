@@ -81,4 +81,44 @@
       Environment = "PATH=%h/.local/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin";
     };
   };
+
+  # Elephant — backend de providers do Walker (apps, calc, files, clipboard, etc.).
+  # Precisa rodar como user service pra herdar ambiente Wayland/session correto.
+  systemd.user.services.elephant = {
+    description = "Elephant data provider service";
+    after = [ "graphical-session.target" ];
+    wantedBy = [ "graphical-session.target" ];
+    unitConfig = {
+      StartLimitBurst = 5;
+      StartLimitIntervalSec = 30;
+    };
+    serviceConfig = {
+      ExecStart = "${pkgs.elephant}/bin/elephant";
+      Restart = "on-failure";
+      RestartSec = 5;
+      Environment = "PATH=%h/.local/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin";
+    };
+  };
+
+  # Walker — app launcher / command palette. Rodar como GApplication service deixa
+  # o MOD3+Space abrir quase instantâneo e evita pagar cold start a cada chamada.
+  systemd.user.services.walker = {
+    description = "Walker application launcher service";
+    after = [
+      "graphical-session.target"
+      "elephant.service"
+    ];
+    wants = [ "elephant.service" ];
+    wantedBy = [ "graphical-session.target" ];
+    unitConfig = {
+      StartLimitBurst = 5;
+      StartLimitIntervalSec = 30;
+    };
+    serviceConfig = {
+      ExecStart = "${pkgs.walker}/bin/walker --gapplication-service";
+      Restart = "on-failure";
+      RestartSec = 2;
+      Environment = "PATH=%h/.local/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin";
+    };
+  };
 }

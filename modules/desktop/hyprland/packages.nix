@@ -10,7 +10,8 @@
 
     # ── Bar / launcher / notifications / OSD ──────────────────────────
     hyprlandWaybar # status bar (patched for Hyprland Lua dispatch syntax)
-    wofi # app launcher (fuzzy)
+    walker # app launcher / command palette frontend
+    elephant # Walker providers backend (apps, calc, files, clipboard, etc.)
     swaynotificationcenter # notifications daemon
     # dunst # alternativa a swaync (desativado)
     nwg-panel # painel de controle (volume/brilho/audio out/exit menu)

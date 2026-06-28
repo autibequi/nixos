@@ -1,0 +1,108 @@
+force_keyboard_focus = true
+close_when_open = true
+click_to_close = true
+selection_wrap = true
+exact_search_prefix = "'"
+theme = "default"
+debug = false
+
+[shell]
+anchor_top = true
+anchor_bottom = false
+anchor_left = true
+anchor_right = true
+
+[placeholders]
+"default" = { input = "Search", list = "No results" }
+"desktopapplications" = { input = "Launch app", list = "No apps" }
+"calc" = { input = "Calculate", list = "Enter expression" }
+"runner" = { input = "Run command", list = "No commands" }
+"files" = { input = "Browse files", list = "No files" }
+"websearch" = { input = "Search web", list = "" }
+"clipboard" = { input = "Clipboard", list = "Clipboard empty" }
+"symbols" = { input = "Symbols", list = "No symbols" }
+"unicode" = { input = "Unicode", list = "No characters" }
+"windows" = { input = "Windows", list = "No windows" }
+"providerlist" = { input = "Providers", list = "No providers" }
+
+[keybinds]
+close = ["Escape", "ctrl q"]
+next = ["Down", "ctrl j"]
+previous = ["Up", "ctrl k"]
+toggle_exact = ["ctrl e"]
+resume_last_query = ["ctrl r"]
+quick_activate = ["F1", "F2", "F3", "F4", "F5"]
+
+[providers]
+default = [
+  "desktopapplications",
+  "calc",
+  "runner",
+  "files",
+  "websearch",
+  "clipboard",
+  "windows",
+  "symbols",
+  "unicode",
+  "bookmarks",
+  "wireplumber",
+  "playerctl",
+]
+empty = ["desktopapplications", "windows", "clipboard"]
+max_results = 80
+
+[providers.max_results_provider]
+desktopapplications = 24
+files = 30
+runner = 30
+clipboard = 20
+windows = 20
+websearch = 10
+
+[[providers.prefixes]]
+prefix = ";"
+provider = "providerlist"
+
+[[providers.prefixes]]
+prefix = ">"
+provider = "runner"
+
+[[providers.prefixes]]
+prefix = "/"
+provider = "files"
+
+[[providers.prefixes]]
+prefix = "="
+provider = "calc"
+
+[[providers.prefixes]]
+prefix = "@"
+provider = "websearch"
+
+[[providers.prefixes]]
+prefix = ":"
+provider = "clipboard"
+
+[[providers.prefixes]]
+prefix = "."
+provider = "symbols"
+
+[[providers.prefixes]]
+prefix = "u:"
+provider = "unicode"
+
+[[providers.prefixes]]
+prefix = "w:"
+provider = "windows"
+
+[[providers.prefixes]]
+prefix = "b:"
+provider = "bookmarks"
+
+[[providers.prefixes]]
+prefix = "vol:"
+provider = "wireplumber"
+
+[[providers.prefixes]]
+prefix = "m:"
+provider = "playerctl"

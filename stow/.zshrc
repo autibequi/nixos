@@ -16,11 +16,9 @@ precmd()  { print -Pn "\e]0;%1~\a" }         # último componente do cwd (ex: co
 
 alias momoko="yaa --joy"
 
-# n — nixos-rebuild switch do flake ~/nixos, de QUALQUER pasta. Flags como args:
-#   n              → nh os switch ~/nixos
-#   n --update     → atualiza o flake.lock e aplica
-# Filtra o ruído de "• Added/Updated/Removed input" do lock diff (mantém erros/warnings).
+# n — upgrade do NixOS pelo Makefile do repo ~/nixos, de QUALQUER pasta.
+#   n              → make -C ~/nixos upgrade
+#   n FOO=bar      → make -C ~/nixos upgrade FOO=bar
 n() {
-  setopt local_options pipefail
-  nh os switch ~/nixos "$@" 2>&1 | grep -vaE '(Added|Updated|Removed) input|narHash=|^[[:space:]]*follows .|^[[:space:]]*\(20[0-9][0-9]-'
+  make -C ~/nixos upgrade "$@"
 }
