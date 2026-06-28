@@ -1,0 +1,31 @@
+diff --git a/src/modules/hyprland/workspace.cpp b/src/modules/hyprland/workspace.cpp
+index 3d5f7d2..0d8a6a4 100644
+--- a/src/modules/hyprland/workspace.cpp
++++ b/src/modules/hyprland/workspace.cpp
+@@ -70,21 +70,21 @@ bool Workspace::handleClicked(GdkEventButton* bt) const {
+     try {
+       if (id() > 0) {  // normal
+         if (m_workspaceManager.moveToMonitor()) {
+-          m_ipc.getSocket1Reply("dispatch focusworkspaceoncurrentmonitor " + std::to_string(id()));
++          m_ipc.getSocket1Reply("dispatch hl.dsp.focus({ workspace = \"" + std::to_string(id()) + "\", on_current_monitor = true })");
+         } else {
+-          m_ipc.getSocket1Reply("dispatch workspace " + std::to_string(id()));
++          m_ipc.getSocket1Reply("dispatch hl.dsp.focus({ workspace = \"" + std::to_string(id()) + "\" })");
+         }
+       } else if (!isSpecial()) {  // named (this includes persistent)
+         if (m_workspaceManager.moveToMonitor()) {
+-          m_ipc.getSocket1Reply("dispatch focusworkspaceoncurrentmonitor name:" + name());
++          m_ipc.getSocket1Reply("dispatch hl.dsp.focus({ workspace = \"" + name() + "\", on_current_monitor = true })");
+         } else {
+-          m_ipc.getSocket1Reply("dispatch workspace name:" + name());
++          m_ipc.getSocket1Reply("dispatch hl.dsp.focus({ workspace = \"" + name() + "\" })");
+         }
+       } else if (id() != -99) {  // named special
+-        m_ipc.getSocket1Reply("dispatch togglespecialworkspace " + name());
++        m_ipc.getSocket1Reply("dispatch hl.dsp.workspace.toggle_special(\"" + name() + "\")");
+       } else {  // special
+-        m_ipc.getSocket1Reply("dispatch togglespecialworkspace");
++        m_ipc.getSocket1Reply("dispatch hl.dsp.workspace.toggle_special()");
+       }
+       return true;
+     } catch (const std::exception& e) {
