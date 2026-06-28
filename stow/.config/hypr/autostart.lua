@@ -16,6 +16,8 @@ hl.on("hyprland.start", function()
 
     -- Session core (todos via uwsm — alguns precisam raw=true se já incluírem 'uwsm')
     hl.exec_cmd("systemctl --user start hyprpolkitagent")
+    -- warp-taskbar antes do waybar (systray); XDG autostart não roda sem graphical-session
+    hl.exec_cmd("systemctl --user start warp-taskbar.service")
     -- waybar, qs e hypridle rodam como systemd user service — reiniciam sozinhos se cair
     -- graphical-session.target não é ativado pelo UWSM neste setup, então iniciamos manualmente
     hl.exec_cmd("systemctl --user start waybar")

@@ -29,6 +29,8 @@ has_nohints=false
 has_height=false
 provider=""
 
+WALKER_W=720
+
 for a in "${args[@]}"; do
   case "$a" in
     --provider|--provider=*|-m) has_provider=true ;;
@@ -65,17 +67,36 @@ if ! $has_hideqa; then
   args=(--hideqa "${args[@]}")
 fi
 
-if ! $has_provider && ! $has_width; then
-  args=(--width 720 "${args[@]}")
+if ! $has_provider; then
+  compact=()
+  if ! $has_width; then compact+=(--width "$WALKER_W"); fi
+  if ! $has_minwidth; then compact+=(--minwidth "$WALKER_W"); fi
+  if ! $has_maxwidth; then compact+=(--maxwidth "$WALKER_W"); fi
+  if ! $has_minheight; then compact+=(--minheight 200); fi
+  if ! $has_maxheight; then compact+=(--maxheight 540); fi
+  args=("${compact[@]}" "${args[@]}")
+fi
+
+# Dashboard (abertura padrão MOD3+Space): cache quente
+_cache="${XDG_CACHE_HOME:-${HOME}/.cache}/elephant/dash-status.cache"
+_cache_script="${HOME}/.config/hypr/walker-dash-cache.sh"
+if [[ -x "$_cache_script" ]]; then
+  _cache_age=999
+  if [[ -f "$_cache" ]]; then
+    _cache_age=$(( $(date +%s) - $(stat -c %Y "$_cache" 2>/dev/null || echo 0) ))
+  fi
+  if (( _cache_age > 15 )); then
+    nohup "$_cache_script" >/dev/null 2>&1 &
+  fi
 fi
 
 case "$provider" in
-  menus:wifi|menus:power|menus:screenshot|menus:clock|menus:dash)
+  menus:wifi|menus:power|menus:screenshot|menus:clock|menus:dash|menus:dashboard)
     args=(--hideqa "${args[@]}")
     ;;
 esac
 
-# menus:dash — hub com status + preview lateral
+# menus:dash — hub completo com preview lateral
 if [[ "$provider" == "menus:dash" ]]; then
   compact=()
   if ! $has_nosearch; then compact+=(--nosearch); fi
@@ -147,10 +168,12 @@ if [[ "$provider" == "menus:screenshot" ]]; then
   args=("${compact[@]}" "${args[@]}")
 fi
 
-# clipboard — lista + preview lado a lado, altura estável
+# clipboard — lista + preview lado a lado, altura estável, largura fixa
 if [[ "$provider" == "clipboard" ]]; then
   compact=()
   if ! $has_width; then compact+=(--width 880); fi
+  if ! $has_minwidth; then compact+=(--minwidth 880); fi
+  if ! $has_maxwidth; then compact+=(--maxwidth 880); fi
   if ! $has_minheight; then compact+=(--minheight 360); fi
   if ! $has_maxheight; then compact+=(--maxheight 360); fi
   args=("${compact[@]}" "${args[@]}")

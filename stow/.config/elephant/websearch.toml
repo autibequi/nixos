@@ -1,14 +1,33 @@
+always_show_default = true
+command = 'xdg-open'
+engines_as_actions = false
+history = true
+history_when_empty = false
+text_prefix = 'Search: '
+
+[Config]
+hide_from_providerlist = false
+icon = 'applications-internet'
+min_score = 20
+name_pretty = ''
+
 [[entries]]
 default = true
-name = "Google"
-url = "https://www.google.com/search?q=%TERM%"
+icon = ''
+name = 'Google'
+prefix = ''
+url = 'https://www.google.com/search?q=%TERM%'
 
 [[entries]]
-name = "GitHub"
-prefix = "gh"
-url = "https://github.com/search?q=%TERM%&type=code"
+default = false
+icon = ''
+name = 'GitHub'
+prefix = 'gh'
+url = 'https://github.com/search?q=%TERM%&type=code'
 
 [[entries]]
-name = "Stack Overflow"
-prefix = "so"
-url = "https://stackoverflow.com/search?q=%TERM%"
+default = false
+icon = ''
+name = 'Stack Overflow'
+prefix = 'so'
+url = 'https://stackoverflow.com/search?q=%TERM%'

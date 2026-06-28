@@ -180,9 +180,9 @@ Hooks declarativos — políticas opt-in via `define_special({ on_active = fn, a
 ├── utils.lua             # state special workspace + workspace_switch + colresize + monitor moves
 ├── theme.lua             # dark/light toggle (gtk + alacritty + wallpaper + vennon-theme-apply)
 ├── theme_watcher.lua     # auto-reload no marker do vennon
-├── monitors.lua          # nwg-displays output
+├── monitors.lua          # outputs Hyprland (atualizar após wdisplays)
 ├── generated-colors.lua  # vennon-theme-apply output
-├── windowrules.lua       # regras de janela (nautilus, file pickers, electron popup, claude borders)
+├── windowrules.lua       # regras system overlay (file managers, auth popups, utilitários)
 ├── special-workspaces.lua# F1-F9, gemini, bleh (declara on_active/auto_route)
 ├── workspace.lua         # workspaces 1-10 + WASD focus/move/resize + special history
 ├── application.lua       # apps + binds (terminal/zed/chrome/PWAs/AI)
@@ -322,13 +322,7 @@ function show_help()
     ']])
 end
 
--- Window rule pra o help abrir flutuante centralizado
-hl.window_rule({
-    match  = { class = "hyprland-help" },
-    float  = true,
-    center = true,
-    size   = { "monitor_w*0.7", "monitor_h*0.8" },
-})
+-- Window rule pra o help abre via system_overlay em windowrules.lua (class hyprland-help)
 
 km.fn("SUPER + comma", function() show_help() end,
     { desc = "Hyprland manual (markdown)", group = "Help", icon = "📖" })

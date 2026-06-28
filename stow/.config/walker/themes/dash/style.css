@@ -70,16 +70,24 @@ scrollbar slider {
   border-radius: 20px;
   border: 1px solid @border_color;
   box-shadow: none;
-}
-
-.preview-box,
-.elephant-hint,
-.placeholder {
-  color: @theme_fg_muted;
+  min-width: 720px;
+  max-width: 720px;
 }
 
 .search-container {
   border-radius: 10px;
+  min-width: 680px;
+  max-width: 680px;
+}
+
+.input {
+  caret-color: @accent_bg_color;
+  background: @surface_color;
+  padding: 10px;
+  color: @theme_fg_color;
+  border-radius: 10px;
+  min-width: 660px;
+  max-width: 660px;
 }
 
 .input placeholder {
@@ -92,12 +100,10 @@ scrollbar slider {
   color: @window_bg_color;
 }
 
-.input {
-  caret-color: @accent_bg_color;
-  background: @surface_color;
-  padding: 10px;
-  color: @theme_fg_color;
-  border-radius: 10px;
+.preview-box,
+.elephant-hint,
+.placeholder {
+  color: @theme_fg_muted;
 }
 
 .content-container {
@@ -241,6 +247,96 @@ row:selected .item-text {
 .preview-content.archlinuxpkgs,
 .preview-content.dnfpackages {
   font-family: monospace;
+}
+
+/* ── Dashboard (abertura padrão) ───────────────────────────── */
+
+.menus-dashboard .box-wrapper {
+  padding: 14px 18px;
+}
+
+.menus-dashboard .content-container {
+  min-height: 72px;
+}
+
+.menus-dashboard .list {
+  min-width: 360px;
+}
+
+.menus-dashboard row:first-child .item-box {
+  background: alpha(@accent_bg_color, 0.12);
+  border: 1px solid alpha(@accent_bg_color, 0.28);
+  min-height: 54px;
+}
+
+.menus-dashboard row:first-child .item-text {
+  font-size: 18px;
+  font-weight: 700;
+  color: @accent_bg_color;
+}
+
+.menus-dashboard row:first-child .item-subtext {
+  font-family: "JetBrainsMono Nerd Font", monospace;
+  font-size: 11px;
+  opacity: 0.95;
+}
+
+.menus-dashboard .item-image {
+  -gtk-icon-size: 26px;
+  margin-right: 12px;
+}
+
+.menus-dashboard .item-text {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.menus-dashboard .item-subtext {
+  font-family: "JetBrainsMono Nerd Font", monospace;
+  font-size: 11px;
+  color: @theme_fg_muted;
+  opacity: 0.92;
+}
+
+.menus-dashboard .item-box {
+  min-height: 44px;
+  padding: 7px 10px;
+  border-radius: 10px;
+}
+
+/* ── Dash hub ──────────────────────────────────────────────── */
+
+.files .content-container {
+  min-height: 320px;
+}
+
+.files .list {
+  min-width: 340px;
+}
+
+.files .preview-box {
+  min-width: 340px;
+  min-height: 320px;
+  padding: 8px 4px 8px 12px;
+  border-left: 1px solid @border_color;
+}
+
+.files .preview,
+.preview-content.files {
+  border-radius: 10px;
+  background: @surface_color;
+  padding: 12px;
+  min-height: 300px;
+  min-width: 300px;
+}
+
+.files .preview-content {
+  line-height: 1.45;
+}
+
+.files .preview image,
+.preview-content.files image {
+  border-radius: 8px;
 }
 
 /* ── Dash hub ──────────────────────────────────────────────── */

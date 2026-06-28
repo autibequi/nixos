@@ -1,0 +1,21 @@
+# Elephant files — Downloads + Screenshots (preview de imagem/texto no Walker)
+fd_flags = ["--ignore-vcs", "--type", "file", "--type", "directory"]
+watch = false
+search_dirs = [
+  "/home/pedrinho/Downloads",
+  "/home/pedrinho/Pictures/Screenshots",
+  "/home/pedrinho/Pictures/printscreens",
+]
+ignored_dirs = []
+ignore_previews = []
+ignore_watching = [
+  "/home/pedrinho/Downloads",
+  "/home/pedrinho/Pictures/Screenshots",
+  "/home/pedrinho/Pictures/printscreens",
+]
+
+[Config]
+hide_from_providerlist = false
+icon = "folder"
+min_score = 12
+name_pretty = "Arquivos"

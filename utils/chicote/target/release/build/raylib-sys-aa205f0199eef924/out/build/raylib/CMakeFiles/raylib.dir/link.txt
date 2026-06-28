@@ -1,0 +1,2 @@
+/nix/store/xcnqqnhw9hb4j5rjgds2yjryi8qki5f3-gcc-wrapper-15.2.0/bin/ar qc libraylib.a CMakeFiles/raylib.dir/raudio.c.o CMakeFiles/raylib.dir/rcore.c.o CMakeFiles/raylib.dir/rmodels.c.o CMakeFiles/raylib.dir/rshapes.c.o CMakeFiles/raylib.dir/rtext.c.o CMakeFiles/raylib.dir/rtextures.c.o CMakeFiles/raylib.dir/utils.c.o
+/nix/store/xcnqqnhw9hb4j5rjgds2yjryi8qki5f3-gcc-wrapper-15.2.0/bin/ranlib libraylib.a

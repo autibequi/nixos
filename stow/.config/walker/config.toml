@@ -17,12 +17,13 @@ anchor_left = false
 anchor_right = false
 
 [placeholders]
-"default" = { input = "Apps  ·  ! hub  : clip  = calc  > run  / files  @ web  w: win", list = "Recentes abaixo · ferramentas no hub" }
+"default" = { input = "Apps  ·  ! hub  : clip  = calc  > run  / files  @ web  } estratégia", list = "Apps + Downloads/Screenshots · preview →" }
+"menus:dashboard" = { input = "Buscar apps, downloads, screenshots…", list = "Status acima · digite para buscar" }
 "desktopapplications" = { input = "Apps", list = "Sem apps · Ctrl+P fixar no topo" }
 "menus:dash" = { input = "Hub", list = "Status ao vivo · Enter abre · preview →" }
 "calc" = { input = "Calculate", list = "Enter expression" }
 "runner" = { input = "Run command", list = "No commands" }
-"files" = { input = "Browse files", list = "No files" }
+"files" = { input = "Arquivos", list = "Downloads · Screenshots · preview →" }
 "websearch" = { input = "Search web", list = "" }
 "clipboard" = { input = "Clipboard", list = "Clipboard empty" }
 "symbols" = { input = "Symbols", list = "No symbols" }
@@ -33,6 +34,7 @@ anchor_right = false
 "menus:power" = { input = "Power", list = "Sem ações" }
 "menus:screenshot" = { input = "Screenshot", list = "Sem captura" }
 "menus:clock" = { input = "Relógio", list = "Carregando…" }
+"menus:estrategia" = { input = "Estratégia", list = "ambiente › pasta › site" }
 "wireplumber" = { input = "Áudio", list = "Sem dispositivos" }
 
 [keybinds]
@@ -43,21 +45,23 @@ toggle_exact = ["ctrl e"]
 resume_last_query = ["ctrl r"]
 
 [providers]
-default = ["desktopapplications"]
-empty = ["desktopapplications", "menus:dash"]
-ignore_preview = ["desktopapplications", "files", "runner", "windows", "websearch", "providerlist", "menus:power", "menus:screenshot", "menus:clock", "calc", "symbols"]
+default = ["desktopapplications", "files"]
+empty = ["menus:dashboard"]
+ignore_preview = ["desktopapplications", "runner", "windows", "websearch", "providerlist", "menus:power", "menus:screenshot", "menus:clock", "menus:dashboard", "menus:estrategia", "calc", "symbols"]
 max_results = 40
 
 [providers.max_results_provider]
 desktopapplications = 10
-files = 20
+files = 16
 runner = 15
 clipboard = 12
 windows = 12
 "menus:power" = 6
 "menus:screenshot" = 4
 "menus:clock" = 4
+"menus:dashboard" = 1
 "menus:dash" = 20
+"menus:estrategia" = 24
 websearch = 8
 
 [[providers.prefixes]]
@@ -101,6 +105,10 @@ prefix = "w:"
 provider = "windows"
 
 [[providers.prefixes]]
+prefix = "}"
+provider = "menus:estrategia"
+
+[[providers.prefixes]]
 prefix = "b:"
 provider = "bookmarks"
 
@@ -129,6 +137,21 @@ desktopapplications = [
 
 "menus:dash" = [
   { action = "activate", default = true, bind = "Return", label = "open", after = "Close" },
+]
+
+"menus:dashboard" = [
+  { action = "activate", default = true, bind = "Return", label = "open", after = "Close" },
+]
+
+"menus:estrategia" = [
+  { action = "open", default = true, bind = "Return", label = "entrar", after = "AsyncClearReload" },
+  { action = "activate", bind = "Return", label = "abrir", after = "Close" },
+  { action = "back", bind = "Escape", label = "voltar", after = "AsyncClearReload" },
+]
+
+files = [
+  { action = "open", default = true, bind = "Return", label = "abrir", after = "Close" },
+  { action = "copypath", bind = "ctrl c", label = "copiar path", after = "Close" },
 ]
 
 "menus:power" = [

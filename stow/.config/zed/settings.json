@@ -220,7 +220,7 @@
 	},
 	// ─── PANELS ────────────────────────────────────────────────────
 	"project_panel": {
-		"dock": "right",
+		"dock": "left",
 		"default_width": 340.0,
 		"entry_spacing": "standard",
 		"sort_mode": "directories_first",
@@ -233,7 +233,7 @@
 		}
 	},
 	"outline_panel": {
-		"dock": "right",
+		"dock": "left",
 		"default_width": 340.0,
 		"file_icons": true,
 		"folder_icons": true,
@@ -243,7 +243,7 @@
 		"auto_fold_dirs": true,
 	},
 	"git_panel": {
-		"dock": "right",
+		"dock": "left",
 		"default_width": 340.0,
 		"fallback_branch_name": "main",
 		"tree_view": true,
@@ -365,7 +365,7 @@
 	},
 	// ─── DEBUGGER ──────────────────────────────────────────────────
 	"debugger": {
-		"dock": "right",
+		"dock": "left",
 		"default_width": 340.0,
 		"stepping_granularity": "line",
 		"save_breakpoints": true,
@@ -415,7 +415,7 @@
 		// "never" = sem notificação; "primary_screen" = notifica na tela principal; "all_screens" = em todas
 		"notify_when_agent_waiting": "primary_screen",
 		"sidebar_side": "right",
-		"dock": "left",
+		"dock": "right",
 		"default_width": 340.0,
 		"default_profile": "write",
 		"message_editor_min_lines": 2,

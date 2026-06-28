@@ -1,4 +1,7 @@
-{ pkgs, hyprlandWaybar, ... }:
+{ pkgs, hyprlandWaybar, config, ... }:
+let
+  warpPkg = config.services.cloudflare-warp.package or pkgs.cloudflare-warp;
+in
 {
   # substituído pelo OSD in-house (hypr-shell Onda 2)
   # SwayOSD — overlay visual pra volume/brilho/caps lock.
@@ -38,12 +41,32 @@
     };
   };
 
+  # warp-taskbar — ícone Cloudflare WARP na systray do waybar.
+  # O .desktop de autostart (com.cloudflare.WarpTaskbar) depende de
+  # graphical-session.target, que UWSM não ativa aqui — sobe via waybar/autostart.
+  # BindReadOnlyPaths: warp-taskbar procura assets em /usr/share/warp (Nix store).
+  systemd.user.services.warp-taskbar = {
+    description = "Cloudflare Zero Trust tray icon";
+    after = [ "dbus.socket" ];
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = "${warpPkg}/bin/warp-taskbar";
+      Restart = "on-failure";
+      RestartSec = 5;
+      BindReadOnlyPaths = "${warpPkg}:/usr:";
+    };
+  };
+
   # Waybar — status bar. Systemd user service pra reiniciar sozinho se cair.
   # Sem isso, pkill waybar (no hotplug de monitor) ou crash deixa a barra sumida.
   # Substitui o `hl.exec_cmd(L.build("waybar"))` do autostart.lua.
   systemd.user.services.waybar = {
     description = "Waybar status bar";
-    after = [ "graphical-session.target" ];
+    after = [
+      "graphical-session.target"
+      "warp-taskbar.service"
+    ];
+    requires = [ "warp-taskbar.service" ];
     wantedBy = [ "graphical-session.target" ];
     unitConfig = {
       StartLimitBurst = 5;

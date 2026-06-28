@@ -13,6 +13,9 @@ cd ~/host/utils/chicote
 make install         # builda (flake) e instala em ~/.local/bin/chicote
 ```
 
+**Hyprland exige** a feature `wayland` do raylib (já no `Cargo.toml`). Sem ela o GLFW
+só tem GLX/X11 → `GLX: Failed to load GLX` e segfault.
+
 `make run` roda sem instalar; `make build` só compila. `~/.local/bin` precisa estar
 no PATH do Hyprland.
 

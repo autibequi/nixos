@@ -16,8 +16,8 @@ km.bind("MOD3 + Escape", hl.dsp.window.close(),
     { desc = "Close window", group = "Window", icon = "✕" })
 
 -- ── System utils ────────────────────────────────────────────
-km.app("MOD3 + d", L.build("nwg-displays"),
-    { desc = "Display settings (nwg-displays)", group = "System", icon = "🖥" })
+km.app("MOD3 + d", L.build("wdisplays"),
+    { desc = "Display settings (wdisplays)", group = "System", icon = "🖥" })
 
 km.app("SUPER + p", "hyprpicker --autocopy --lowercase-hex",
     { desc = "Color picker", group = "System", icon = "🎨" })

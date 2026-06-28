@@ -66,7 +66,8 @@
     playerctl # MPRIS media control
 
     # ── Display / monitors ────────────────────────────────────────────
-    nwg-displays # configurador de outputs
+    wdisplays # configurador wlroots/Hyprland (substitui nwg-displays)
+    nwg-displays # legado — ainda usado por nwg-panel
 
     # ── Power menu / sessão ───────────────────────────────────────────
     wlogout # GUI (lock/logout/suspend/reboot/shutdown)

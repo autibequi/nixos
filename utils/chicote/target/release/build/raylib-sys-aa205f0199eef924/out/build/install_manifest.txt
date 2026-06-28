@@ -1,0 +1,7 @@
+/home/pedrinho/nixos/utils/chicote/target/release/build/raylib-sys-aa205f0199eef924/out/lib64/libraylib.a
+/home/pedrinho/nixos/utils/chicote/target/release/build/raylib-sys-aa205f0199eef924/out/include/raylib.h
+/home/pedrinho/nixos/utils/chicote/target/release/build/raylib-sys-aa205f0199eef924/out/include/rlgl.h
+/home/pedrinho/nixos/utils/chicote/target/release/build/raylib-sys-aa205f0199eef924/out/include/raymath.h
+/home/pedrinho/nixos/utils/chicote/target/release/build/raylib-sys-aa205f0199eef924/out/lib64/pkgconfig/raylib.pc
+/home/pedrinho/nixos/utils/chicote/target/release/build/raylib-sys-aa205f0199eef924/out/lib64/cmake/raylib/raylib-config-version.cmake
+/home/pedrinho/nixos/utils/chicote/target/release/build/raylib-sys-aa205f0199eef924/out/lib64/cmake/raylib/raylib-config.cmake

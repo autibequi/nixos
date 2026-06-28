@@ -7,9 +7,9 @@
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
-      # raylib-rs compila o raylib C (glfw) bundled → precisa cmake + libs Wayland/GL.
+      # raylib feature "wayland" usa GLFW do sistema (USE_EXTERNAL_GLFW).
       libs = with pkgs; [
-        wayland libxkbcommon libGL
+        wayland libxkbcommon libGL glfw
         xorg.libX11 xorg.libXrandr xorg.libXi xorg.libXcursor xorg.libXinerama
       ];
     in {

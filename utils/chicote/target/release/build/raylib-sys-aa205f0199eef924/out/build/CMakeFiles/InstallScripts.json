@@ -1,0 +1,8 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/pedrinho/nixos/utils/chicote/target/release/build/raylib-sys-aa205f0199eef924/out/build/cmake_install.cmake",
+		"/home/pedrinho/nixos/utils/chicote/target/release/build/raylib-sys-aa205f0199eef924/out/build/raylib/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

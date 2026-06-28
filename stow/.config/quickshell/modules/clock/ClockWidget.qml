@@ -154,6 +154,12 @@ Scope {
         copyHintTimer.restart();
     }
 
+    function launchWalker(extraArgs) {
+        const args = (extraArgs || []).map(a => "'" + String(a).replace(/'/g, "'\\''") + "'").join(" ");
+        root.closePanel();
+        Quickshell.execDetached(["sh", "-c", "$HOME/.config/hypr/walker-launch.sh " + args]);
+    }
+
     function formatIsoDate(y, m, day) {
         return y + "-" + pad2(m + 1) + "-" + pad2(day);
     }
@@ -365,6 +371,37 @@ Scope {
                             horizontalAlignment: Text.AlignHCenter
                         }
 
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: px(8)
+
+                            QuickActionButton {
+                                Layout.fillWidth: true
+                                icon: "\uf1eb"
+                                label: "Wi‑Fi"
+                                onClicked: root.launchWalker(["--theme", "neon", "--provider", "menus:wifi"])
+                            }
+                            QuickActionButton {
+                                Layout.fillWidth: true
+                                icon: "\uf293"
+                                label: "BT"
+                                onClicked: root.launchWalker(["--theme", "neon", "--provider", "bluetooth"])
+                            }
+                            QuickActionButton {
+                                Layout.fillWidth: true
+                                icon: "\uf028"
+                                label: "Vol"
+                                onClicked: root.launchWalker(["--provider", "wireplumber"])
+                            }
+                            QuickActionButton {
+                                Layout.fillWidth: true
+                                icon: "\uf002"
+                                label: "Apps"
+                                accent: true
+                                onClicked: root.launchWalker([])
+                            }
+                        }
+
                         Rectangle {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 1
@@ -525,6 +562,53 @@ Scope {
                     }
                 }
             }
+        }
+    }
+
+    component QuickActionButton: Rectangle {
+        id: quickBtn
+        property string icon: ""
+        property string label: ""
+        property bool accent: false
+        signal clicked()
+
+        radius: px(10)
+        color: quickHover.containsMouse
+               ? (accent ? Qt.darker(root.cAccent, 1.12) : Qt.rgba(0, 0.831, 1, 0.12))
+               : (accent ? Qt.rgba(0, 0.831, 1, 0.18) : root.cElev)
+        border.color: accent
+                      ? Qt.rgba(0, 0.831, 1, quickHover.containsMouse ? 0.55 : 0.35)
+                      : (quickHover.containsMouse ? Qt.rgba(0, 0.831, 1, 0.35) : root.cBorder)
+        border.width: 1
+        implicitHeight: px(52)
+
+        ColumnLayout {
+            anchors.centerIn: parent
+            spacing: px(2)
+
+            Text {
+                Layout.alignment: Qt.AlignHCenter
+                text: quickBtn.icon
+                font.family: "JetBrainsMono Nerd Font"
+                font.pixelSize: px(16)
+                color: accent || quickHover.containsMouse ? root.cAccent : root.cFg
+            }
+            Text {
+                Layout.alignment: Qt.AlignHCenter
+                text: quickBtn.label
+                font.family: "JetBrainsMono Nerd Font"
+                font.pixelSize: px(10)
+                font.weight: Font.Bold
+                color: accent || quickHover.containsMouse ? root.cAccent : root.cFgMuted
+            }
+        }
+
+        MouseArea {
+            id: quickHover
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: quickBtn.clicked()
         }
     }
 
