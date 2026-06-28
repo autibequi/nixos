@@ -10,7 +10,6 @@ import "./overview/common/widgets/"
 import "./modules/clock/"
 import "./modules/powermenu/"
 import "./modules/osd/"
-import "./modules/notifications/"
 import "./modules/switcher/"
 
 import QtQuick
@@ -22,6 +21,5 @@ ShellRoot {
     ClockWidget {}
     PowerMenu {}
     Osd {}
-    Notifications {}
     WindowSwitcher {}
 }

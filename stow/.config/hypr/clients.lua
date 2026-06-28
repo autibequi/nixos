@@ -12,7 +12,31 @@
 
 local function _num(s) return tonumber(s) end
 
+-- #region agent log
+local function agent_debug_log(message, data)
+    local fields = {}
+    for k, v in pairs(data or {}) do
+        local value = tostring(v or ""):gsub("\\", "\\\\"):gsub('"', '\\"'):gsub("\n", " ")
+        table.insert(fields, '"' .. tostring(k) .. '":"' .. value .. '"')
+    end
+    local f = io.open("/home/pedrinho/nixos/.cursor/debug-1605cf.log", "a")
+    if f then
+        f:write(string.format(
+            '{"sessionId":"1605cf","runId":"open-close-freeze-debug","hypothesisId":"H6","location":"stow/.config/hypr/clients.lua","message":"%s","data":{%s},"timestamp":%d}\n',
+            message,
+            table.concat(fields, ","),
+            os.time() * 1000
+        ))
+        f:close()
+    end
+end
+-- #endregion
+
 function get_clients_compat()
+    -- #region agent log
+    local t0 = os.clock()
+    agent_debug_log("hyprctl clients start", {})
+    -- #endregion
     local p = io.popen("hyprctl clients -j 2>/dev/null")
     if not p then return {} end
     local raw = p:read("*a") or ""
@@ -58,5 +82,11 @@ function get_clients_compat()
             end
         end
     end
+    -- #region agent log
+    agent_debug_log("hyprctl clients end", {
+        count = tostring(#out),
+        cpuSeconds = string.format("%.3f", os.clock() - t0)
+    })
+    -- #endregion
     return out
 end

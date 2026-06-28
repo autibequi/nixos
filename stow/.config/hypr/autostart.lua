@@ -24,8 +24,9 @@ hl.on("hyprland.start", function()
     hl.exec_cmd(L.build("awww-daemon"))
     hl.exec_cmd("awww img " .. os.getenv("HOME") ..
         "/assets/wallpapers/the-wild-hunt-of-odin.jpg --transition-type none")
-    -- substituído por notif in-house (hypr-shell Onda 3)
-    -- hl.exec_cmd(L.build("swaync"))
+    -- Notification daemon: Quickshell Notifications está desativado por crash
+    -- em Quickshell 0.3.0 / Qt 6.11 no caminho NotificationServer -> Repeater.
+    hl.exec_cmd(L.build("swaync"))
 
     -- Clipboard
     hl.exec_cmd(L.build("wl-paste --watch cliphist store"))

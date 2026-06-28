@@ -19,6 +19,31 @@
 local core = require("core")
 local on   = core.on
 
+-- #region agent log
+local function agent_debug_json(s)
+    return tostring(s or ""):gsub("\\", "\\\\"):gsub('"', '\\"'):gsub("\n", " ")
+end
+
+local function agent_debug_log(hypothesis_id, message, data)
+    local fields = {}
+    for k, v in pairs(data or {}) do
+        table.insert(fields, '"' .. agent_debug_json(k) .. '":"' .. agent_debug_json(v) .. '"')
+    end
+
+    local f = io.open("/home/pedrinho/nixos/.cursor/debug-1605cf.log", "a")
+    if f then
+        f:write(string.format(
+            '{"sessionId":"1605cf","runId":"hyprland-freeze-debug","hypothesisId":"%s","location":"stow/.config/hypr/events.lua","message":"%s","data":{%s},"timestamp":%d}\n',
+            agent_debug_json(hypothesis_id),
+            agent_debug_json(message),
+            table.concat(fields, ","),
+            os.time() * 1000
+        ))
+        f:close()
+    end
+end
+-- #endregion
+
 -- ── Workspace policy ─────────────────────────────────────────
 -- Políticas opt-in declaradas em special-workspaces.lua via define_special
 -- (on_active = fn). Workspaces regulares 1-3 forçam DND off (não pertence a um
@@ -26,6 +51,9 @@ local on   = core.on
 
 on("workspace.active", function(ev)
     local name = (ev and (ev.name or ev.workspace)) or ""
+    -- #region agent log
+    agent_debug_log("H4,H5", "workspace.active start", { workspace = name })
+    -- #endregion
     -- Workspace regular ativo: esconde qualquer special visível (cobre clique no Waybar)
     if name ~= "" and name:sub(1, 8) ~= "special:" then
         hide_active_special_workspaces()
@@ -42,6 +70,9 @@ on("workspace.active", function(ev)
         -- workspaces "neutros" DP-2: garante DND off
         hl.exec_cmd("swaync-client -d 2>/dev/null | grep -q true && swaync-client -d")
     end
+    -- #region agent log
+    agent_debug_log("H4,H5", "workspace.active end", { workspace = name })
+    -- #endregion
 end)
 
 -- ── Window routing ───────────────────────────────────────────
@@ -53,23 +84,45 @@ end)
 on("window.open", function(ev)
     local class = (ev and (ev.class or ev.window_class)) or ""
     local addr  = ev and (ev.address or ev.window_address)
+    -- #region agent log
+    agent_debug_log("H4,H5", "window.open start", { class = class, hasAddress = tostring(addr ~= nil) })
+    -- #endregion
+
+    if class == "org.quickshell" then
+        -- #region agent log
+        agent_debug_log("H4", "window.open skip-shell", { class = class })
+        -- #endregion
+        return
+    end
 
     -- Auto-route para special workspace (não consome pending_home)
     local target = core.workspace_auto_route_classes[class]
     if target then
+        -- #region agent log
+        agent_debug_log("H4", "window.open auto-route", { class = class, target = target })
+        -- #endregion
         if addr then
             hl.exec_cmd("hyprctl dispatch movetoworkspacesilent special:" ..
                 target .. ",address:" .. addr)
         end
+        -- #region agent log
+        agent_debug_log("H4,H5", "window.open end", { class = class, branch = "auto-route" })
+        -- #endregion
         return
     end
 
     -- Launch-home: devolve ao workspace de origem do lançamento
     local home_ws = core.pop_home()
     if home_ws and addr then
+        -- #region agent log
+        agent_debug_log("H4", "window.open launch-home", { class = class, homeWorkspace = home_ws })
+        -- #endregion
         hl.exec_cmd("hyprctl dispatch movetoworkspacesilent " ..
             home_ws .. ",address:" .. addr)
     end
+    -- #region agent log
+    agent_debug_log("H4,H5", "window.open end", { class = class, branch = "default" })
+    -- #endregion
 end)
 
 -- ── Monitor hotplug ──────────────────────────────────────────
@@ -103,5 +156,12 @@ end)
 -- freeze de 10s. TTL de 1s é suficiente como fallback.
 local function invalidate() core.invalidate_clients_cache() end
 on("window.open",              invalidate)
-on("window.close",             invalidate)
+on("window.close", function(ev)
+    local class = (ev and (ev.class or ev.window_class)) or ""
+    local addr = ev and (ev.address or ev.window_address)
+    -- #region agent log
+    agent_debug_log("H6,H8", "window.close", { class = class, hasAddress = tostring(addr ~= nil) })
+    -- #endregion
+    invalidate()
+end)
 on("window.move_to_workspace", invalidate)

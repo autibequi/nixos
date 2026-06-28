@@ -38,8 +38,9 @@ end, { desc = "Reset geral (Hyprland + Quickshell)", group = "System", icon = "�
 km.app("CTRL + ALT + Delete", L.build("qs ipc call powermenu toggle", { raw = true }),
     { desc = "Power menu", group = "System", icon = "⏻" })
 
--- Centro de notificações in-house (quickshell).
-km.app("SUPER + SHIFT + n", L.build("qs ipc call notifications toggle", { raw = true }),
+-- Centro de notificações via swaync; o módulo Notifications do Quickshell está
+-- desativado até estabilizar o crash no NotificationServer.
+km.app("SUPER + SHIFT + n", "swaync-client -t -sw",
     { desc = "Notification center", group = "System", icon = "" })
 
 -- ── Help / Shortcuts ────────────────────────────────────────

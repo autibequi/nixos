@@ -65,9 +65,10 @@ function workspace_switch(ws)
         _push_history(mon, name)
         local was_active = active_special_name() == name
         -- Se abrindo (não fechando) e o special tem on_created_empty, registrar home.
-        -- clients_stale() — sem io.popen; o refresh de fundo (core.invalidate → timer 600ms)
-        -- garante que o cache está populado antes do próximo uso.
-        if not was_active and core.special_empty_launchers[name] then
+        -- Só confiamos nisso com cache já populado; cache vazio/desconhecido fazia
+        -- qualquer toggle parecer "workspace vazio" e empilhava pending_home.
+        if not was_active and core.special_empty_launchers[name]
+            and core.clients_cache_ready and core.clients_cache_ready() then
             local full_ws = "special:" .. name
             local empty = true
             for _, c in ipairs(core.clients_stale()) do

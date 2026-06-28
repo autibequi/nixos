@@ -76,6 +76,9 @@
       ExecStart = "${pkgs.quickshell}/bin/qs";
       Restart = "on-failure";
       RestartSec = 2;
+      # QML Process{} não herda um PATH útil do systemd user; sem isso o journal
+      # mostra falhas para `sh`, `brightnessctl`, `hyprctl`, etc.
+      Environment = "PATH=%h/.local/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin";
     };
   };
 }
