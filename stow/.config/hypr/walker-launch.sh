@@ -67,7 +67,7 @@ if ! $has_provider && ! $has_width; then
 fi
 
 case "$provider" in
-  menus:wifi|menus:power|menus:screenshot)
+  menus:wifi|menus:power|menus:screenshot|menus:clock)
     args=(--hideqa "${args[@]}")
     ;;
 esac
@@ -79,6 +79,16 @@ if [[ "$provider" == "menus:power" ]]; then
   if ! $has_width; then compact+=(--width 320); fi
   if ! $has_minheight; then compact+=(--minheight 288); fi
   if ! $has_maxheight; then compact+=(--maxheight 288); fi
+  args=("${compact[@]}" "${args[@]}")
+fi
+
+# menus:clock — data + cal + ações, sem busca
+if [[ "$provider" == "menus:clock" ]]; then
+  compact=()
+  if ! $has_nosearch; then compact+=(--nosearch); fi
+  if ! $has_width; then compact+=(--width 360); fi
+  if ! $has_minheight; then compact+=(--minheight 360); fi
+  if ! $has_maxheight; then compact+=(--maxheight 360); fi
   args=("${compact[@]}" "${args[@]}")
 fi
 

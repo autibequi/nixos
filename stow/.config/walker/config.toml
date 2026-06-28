@@ -32,6 +32,7 @@ anchor_right = false
 "menus:wifi" = { input = "Wi-Fi", list = "No networks" }
 "menus:power" = { input = "Power", list = "Sem ações" }
 "menus:screenshot" = { input = "Screenshot", list = "Sem captura" }
+"menus:clock" = { input = "Relógio", list = "" }
 "wireplumber" = { input = "Áudio", list = "Sem dispositivos" }
 
 [keybinds]
@@ -44,7 +45,7 @@ resume_last_query = ["ctrl r"]
 [providers]
 default = ["desktopapplications"]
 empty = ["desktopapplications", "menus:dash"]
-ignore_preview = ["desktopapplications", "files", "runner", "windows", "websearch", "providerlist", "menus:dash", "menus:power", "menus:screenshot", "calc", "symbols"]
+ignore_preview = ["desktopapplications", "files", "runner", "windows", "websearch", "providerlist", "menus:dash", "menus:power", "menus:screenshot", "menus:clock", "calc", "symbols"]
 max_results = 40
 
 [providers.max_results_provider]
@@ -55,6 +56,7 @@ clipboard = 12
 windows = 12
 "menus:power" = 6
 "menus:screenshot" = 4
+"menus:clock" = 5
 websearch = 8
 
 [[providers.prefixes]]
@@ -134,6 +136,10 @@ desktopapplications = [
 
 "menus:screenshot" = [
   { action = "activate", default = true, bind = "Return", after = "Close" },
+]
+
+"menus:clock" = [
+  { action = "activate", default = true, bind = "Return", label = "run", after = "Close" },
 ]
 
 "menus:wifi" = [

@@ -13,6 +13,12 @@ local NIXOS = os.getenv("HOME") .. "/nixos"
 function GetEntries()
   return {
     {
+      Text = "Relógio",
+      Subtext = "data · calendário",
+      Icon = "clock-symbolic",
+      Actions = { activate = LAUNCHER .. " --theme neon --provider menus:clock" },
+    },
+    {
       Text = "Wi-Fi",
       Subtext = "redes",
       Icon = "network-wireless",
