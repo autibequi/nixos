@@ -440,32 +440,41 @@ Scope {
         id: card
         property int month: 0
         property int year: 2026
-        property int gridSpacing: 4
-        property real cellW: width > 0 ? Math.floor((width - gridSpacing * 6) / 7) : 44
+        property int gridSpacing: 6
+        property bool isCurrentMonth: card.month === root.now.getMonth()
+                                    && card.year === root.now.getFullYear()
+        property real cellW: {
+            if (width <= 0) return root.dayCellMinW;
+            return Math.max(root.dayCellMinW, Math.floor((width - gridSpacing * 6) / 7));
+        }
+        property real gridContentW: cellW * 7 + gridSpacing * 6
+        property int cellH: Math.max(root.dayCellH, Math.round(cellW * 0.82))
 
-        spacing: 8
+        spacing: 10
         width: parent ? parent.width : 400
 
-        RowLayout {
+        // Cabeçalho do mês — título centralizado, badge à direita
+        Item {
             width: card.width
-            spacing: 8
+            height: 30
 
             Text {
-                Layout.fillWidth: true
+                anchors.centerIn: parent
                 text: root.monthNames[card.month] + " " + card.year
                 font.family: "JetBrainsMono Nerd Font"
                 font.pixelSize: root.fontMonth
                 font.weight: Font.Bold
-                color: (card.month === root.now.getMonth() && card.year === root.now.getFullYear())
-                       ? root.cAccent : root.cFg
+                color: card.isCurrentMonth ? root.cAccent : root.cFg
             }
 
             Rectangle {
-                visible: card.month === root.now.getMonth() && card.year === root.now.getFullYear()
-                radius: 6
+                visible: card.isCurrentMonth
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                radius: 7
                 color: root.cAccent
-                implicitWidth: hojeLabel.implicitWidth + 10
-                implicitHeight: hojeLabel.implicitHeight + 4
+                implicitWidth: hojeLabel.implicitWidth + 12
+                implicitHeight: hojeLabel.implicitHeight + 6
 
                 Text {
                     id: hojeLabel
@@ -479,58 +488,63 @@ Scope {
             }
         }
 
-        MonthGrid {
-            id: grid
+        // Grid centralizado e células preenchendo a largura disponível
+        Item {
             width: card.width
-            month: card.month
-            year: card.year
-            spacing: card.gridSpacing
-            locale: root.locale
+            height: grid.implicitHeight
 
-            delegate: Item {
-                implicitWidth: card.cellW
-                implicitHeight: root.dayCellH
+            MonthGrid {
+                id: grid
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: card.gridContentW
+                month: card.month
+                year: card.year
+                spacing: card.gridSpacing
+                locale: root.locale
 
-                property bool inMonth: model.visibleMonth
-                property bool isToday: model.visibleMonth
-                                    && model.day === root.now.getDate()
-                                    && card.month === root.now.getMonth()
-                                    && card.year === root.now.getFullYear()
-                property bool hovered: dayHover.containsMouse && model.visibleMonth
+                delegate: Item {
+                    implicitWidth: card.cellW
+                    implicitHeight: card.cellH
 
-                Rectangle {
-                    anchors.centerIn: parent
-                    width: Math.min(parent.width - 2, 34)
-                    height: Math.min(parent.height - 2, 28)
-                    radius: 7
-                    color: isToday ? root.cAccent : hovered ? root.cElev : "transparent"
-                    border.color: hovered && !isToday ? root.cAccent : "transparent"
-                    border.width: 1
-                }
+                    property bool inMonth: model.visibleMonth
+                    property bool isToday: model.visibleMonth
+                                        && model.day === root.now.getDate()
+                                        && card.isCurrentMonth
+                    property bool hovered: dayHover.containsMouse && model.visibleMonth
 
-                Text {
-                    anchors.centerIn: parent
-                    text: model.day
-                    font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: root.fontDay
-                    font.weight: (isToday || hovered) ? Font.Bold : Font.Normal
-                    color: {
-                        if (!inMonth) return root.cFgDimmer;
-                        if (isToday) return root.cBg;
-                        if (hovered) return root.cAccent;
-                        return root.cFg;
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.margins: 2
+                        radius: 8
+                        color: isToday ? root.cAccent : hovered ? root.cElev : "transparent"
+                        border.color: hovered && !isToday ? root.cAccent : "transparent"
+                        border.width: 1
                     }
-                }
 
-                MouseArea {
-                    id: dayHover
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: model.visibleMonth ? Qt.PointingHandCursor : Qt.ArrowCursor
-                    onClicked: {
-                        if (!model.visibleMonth) return;
-                        root.copyText(root.formatIsoDate(card.year, card.month, model.day),
-                                      root.formatIsoDate(card.year, card.month, model.day));
+                    Text {
+                        anchors.centerIn: parent
+                        text: model.day
+                        font.family: "JetBrainsMono Nerd Font"
+                        font.pixelSize: root.fontDay
+                        font.weight: (isToday || hovered) ? Font.Bold : Font.Medium
+                        color: {
+                            if (!inMonth) return root.cFgDimmer;
+                            if (isToday) return root.cBg;
+                            if (hovered) return root.cAccent;
+                            return root.cFg;
+                        }
+                    }
+
+                    MouseArea {
+                        id: dayHover
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: model.visibleMonth ? Qt.PointingHandCursor : Qt.ArrowCursor
+                        onClicked: {
+                            if (!model.visibleMonth) return;
+                            root.copyText(root.formatIsoDate(card.year, card.month, model.day),
+                                          root.formatIsoDate(card.year, card.month, model.day));
+                        }
                     }
                 }
             }
