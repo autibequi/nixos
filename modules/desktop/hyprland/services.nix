@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, hyprlandWaybar, ... }:
 {
   # substituído pelo OSD in-house (hypr-shell Onda 2)
   # SwayOSD — overlay visual pra volume/brilho/caps lock.
@@ -50,7 +50,7 @@
       StartLimitIntervalSec = 30;
     };
     serviceConfig = {
-      ExecStart = "${pkgs.waybar}/bin/waybar --config %h/.config/waybar/config.jsonc --style %h/.config/waybar/style.css";
+      ExecStart = "${hyprlandWaybar}/bin/waybar --config %h/.config/waybar/config.jsonc --style %h/.config/waybar/style.css";
       Restart = "on-failure";
       RestartSec = 2;
       # %h/.local/bin necessário para `yaa` (custom/claude-usage). Systemd user services

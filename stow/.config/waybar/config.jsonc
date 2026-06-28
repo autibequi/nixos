@@ -106,6 +106,7 @@
 		"interval": 1,
 		"disable-scroll": true,
 		"all-outputs": false,
+		"move-to-monitor": true,
 		"show-special": false,
 		"persistent-workspaces": {},
 		"format": "{icon}{windows}</span>",
@@ -188,6 +189,7 @@
 	"hyprland/workspaces#special": {
 		"disable-scroll": true,
 		"all-outputs": false,
+		"move-to-monitor": true,
 		"show-special": true,
 		"persistent-workspaces": {},
 		"on-click": "activate",

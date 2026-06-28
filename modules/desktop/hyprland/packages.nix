@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, hyprlandWaybar, ... }:
 {
   environment.systemPackages = with pkgs; [
     # ── Hyprland ecosystem ────────────────────────────────────────────
@@ -9,7 +9,7 @@
     hyprpolkitagent # polkit agent (config em services.nix)
 
     # ── Bar / launcher / notifications / OSD ──────────────────────────
-    waybar # status bar
+    hyprlandWaybar # status bar (patched for Hyprland Lua dispatch syntax)
     wofi # app launcher (fuzzy)
     swaynotificationcenter # notifications daemon
     # dunst # alternativa a swaync (desativado)

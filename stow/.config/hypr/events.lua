@@ -19,39 +19,6 @@
 local core = require("core")
 local on   = core.on
 
--- #region agent log
-local function agent_debug_json(s)
-    return tostring(s or ""):gsub("\\", "\\\\"):gsub('"', '\\"'):gsub("\n", " ")
-end
-
-local function agent_debug_log(hypothesis_id, message, data)
-    local fields = {}
-    for k, v in pairs(data or {}) do
-        table.insert(fields, '"' .. agent_debug_json(k) .. '":"' .. agent_debug_json(v) .. '"')
-    end
-
-    local f = io.open("/home/pedrinho/nixos/.cursor/debug-1605cf.log", "a")
-    if f then
-        f:write(string.format(
-            '{"sessionId":"1605cf","runId":"waybar-workspace-click","hypothesisId":"%s","location":"stow/.config/hypr/events.lua","message":"%s","data":{%s},"timestamp":%d}\n',
-            agent_debug_json(hypothesis_id),
-            agent_debug_json(message),
-            table.concat(fields, ","),
-            os.time() * 1000
-        ))
-        f:close()
-    end
-end
-
-local function agent_debug_cmd(cmd)
-    local p = io.popen(cmd .. " 2>/dev/null")
-    if not p then return "" end
-    local out = p:read("*a") or ""
-    p:close()
-    return out:gsub("%s+", " "):sub(1, 500)
-end
--- #endregion
-
 -- ── Workspace policy ─────────────────────────────────────────
 -- Políticas opt-in declaradas em special-workspaces.lua via define_special
 -- (on_active = fn). Workspaces regulares 1-3 forçam DND off (não pertence a um
@@ -59,21 +26,6 @@ end
 
 on("workspace.active", function(ev)
     local name = (ev and (ev.name or ev.workspace)) or ""
-    local mon = hl.get_active_monitor()
-    local active_special = ""
-    if mon and mon.specialWorkspace and mon.specialWorkspace.name then
-        active_special = mon.specialWorkspace.name
-    end
-    -- #region agent log
-    agent_debug_log("W4,W5,W6", "workspace.active start", {
-        eventWorkspace = name,
-        activeMonitor = mon and mon.name or "",
-        activeWorkspace = mon and mon.activeWorkspace and (mon.activeWorkspace.name or mon.activeWorkspace.id) or "",
-        activeSpecial = active_special,
-        hyprActiveWorkspace = agent_debug_cmd("hyprctl activeworkspace -j"),
-        hyprFocusedMonitor = agent_debug_cmd("hyprctl monitors -j | jq -c '.[] | select(.focused==true) | {name,activeWorkspace,specialWorkspace}'"),
-    })
-    -- #endregion
 
     -- Workspace regular ativo: esconde qualquer special visível (cobre clique no Waybar)
     if name ~= "" and name:sub(1, 8) ~= "special:" then
@@ -91,22 +43,6 @@ on("workspace.active", function(ev)
         -- workspaces "neutros" DP-2: garante DND off
         hl.exec_cmd("swaync-client -d 2>/dev/null | grep -q true && swaync-client -d")
     end
-
-    local after = hl.get_active_monitor()
-    local after_special = ""
-    if after and after.specialWorkspace and after.specialWorkspace.name then
-        after_special = after.specialWorkspace.name
-    end
-    -- #region agent log
-    agent_debug_log("W4,W5,W6", "workspace.active end", {
-        eventWorkspace = name,
-        activeMonitor = after and after.name or "",
-        activeWorkspace = after and after.activeWorkspace and (after.activeWorkspace.name or after.activeWorkspace.id) or "",
-        activeSpecial = after_special,
-        hyprActiveWorkspace = agent_debug_cmd("hyprctl activeworkspace -j"),
-        hyprFocusedMonitor = agent_debug_cmd("hyprctl monitors -j | jq -c '.[] | select(.focused==true) | {name,activeWorkspace,specialWorkspace}'"),
-    })
-    -- #endregion
 end)
 
 -- ── Window routing ───────────────────────────────────────────

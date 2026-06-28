@@ -1,5 +1,14 @@
 { pkgs, ... }:
+let
+  hyprlandWaybar = pkgs.waybar.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [
+      ./waybar-hyprland-lua-dispatch.patch
+    ];
+  });
+in
 {
+  _module.args.hyprlandWaybar = hyprlandWaybar;
+
   imports = [
     ./sessions.nix
     ./portals.nix

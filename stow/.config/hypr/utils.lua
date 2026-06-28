@@ -9,31 +9,6 @@
 
 local core = require("core")
 
--- #region agent log
-local function agent_debug_json(s)
-    return tostring(s or ""):gsub("\\", "\\\\"):gsub('"', '\\"'):gsub("\n", " ")
-end
-
-local function agent_debug_log(hypothesis_id, message, data)
-    local fields = {}
-    for k, v in pairs(data or {}) do
-        table.insert(fields, '"' .. agent_debug_json(k) .. '":"' .. agent_debug_json(v) .. '"')
-    end
-
-    local f = io.open("/home/pedrinho/nixos/.cursor/debug-1605cf.log", "a")
-    if f then
-        f:write(string.format(
-            '{"sessionId":"1605cf","runId":"waybar-workspace-click","hypothesisId":"%s","location":"stow/.config/hypr/utils.lua","message":"%s","data":{%s},"timestamp":%d}\n',
-            agent_debug_json(hypothesis_id),
-            agent_debug_json(message),
-            table.concat(fields, ","),
-            os.time() * 1000
-        ))
-        f:close()
-    end
-end
--- #endregion
-
 -- ── State em memória (substitui arquivos ~/.cache/hyprland/) ──
 -- Perdido em reload — aceitável (mesmo comportamento de arquivos em /tmp em novos boots)
 local _last_special_ws = {}  -- { monitor_name = ws_name }
@@ -83,10 +58,6 @@ end
 -- ── Workspace Switch ─────────────────────────────────────────
 
 function workspace_switch(ws)
-    -- #region agent log
-    agent_debug_log("W7", "workspace_switch entry", { workspace = ws })
-    -- #endregion
-
     if ws:sub(1, 8) == "special:" then
         local name = ws:sub(9)
         local mon = active_monitor_name()
