@@ -256,8 +256,28 @@ row:selected .item-text {
 .menus-power .list,
 .menus-power .content-container {
   min-height: 0;
+  min-width: 0;
 }
 
 .menus-power .box-wrapper {
   padding: 12px 16px;
+}
+
+.menus-screenshot .box-wrapper {
+  padding: 12px 16px;
+}
+
+.menus-screenshot .list,
+.menus-screenshot .content-container {
+  min-height: 0;
+}
+
+.menus-screenshot .item-box {
+  min-height: 44px;
+  padding: 6px 10px;
+}
+
+.menus-screenshot .item-text {
+  font-size: 14px;
+  font-weight: 600;
 }

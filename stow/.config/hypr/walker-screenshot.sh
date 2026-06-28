@@ -6,14 +6,19 @@ PATH="/run/current-system/sw/bin:${HOME}/.nix-profile/bin:/usr/bin:/bin:${PATH:-
 CACHE="${HOME}/.cache/hyprland/screenshot-pending.png"
 LAUNCHER="${HOME}/.config/hypr/walker-launch.sh"
 
+shot_rows=4
+shot_row_h=44
+shot_chrome=52
+shot_h=$((shot_rows * shot_row_h + shot_chrome))
+
 SHOT_ARGS=(
   --hideqa
   --nohints
   --nosearch
   --width 280
-  --height 228
-  --minheight 188
-  --maxheight 188
+  --height "$shot_h"
+  --minheight "$shot_h"
+  --maxheight "$shot_h"
   --theme dash
   --provider menus:screenshot
 )

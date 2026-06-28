@@ -19,6 +19,8 @@ args=("$@")
 
 has_provider=false
 has_width=false
+has_minwidth=false
+has_maxwidth=false
 has_hideqa=false
 has_nosearch=false
 has_maxheight=false
@@ -31,6 +33,8 @@ for a in "${args[@]}"; do
   case "$a" in
     --provider|--provider=*|-m) has_provider=true ;;
     --width|--width=*|-w) has_width=true ;;
+    --minwidth|--minwidth=*) has_minwidth=true ;;
+    --maxwidth|--maxwidth=*) has_maxwidth=true ;;
     --hideqa|-H) has_hideqa=true ;;
     --nosearch|-n) has_nosearch=true ;;
     --nohints|-N) has_nohints=true ;;
@@ -82,16 +86,34 @@ if [[ "$provider" == "menus:dash" ]]; then
   args=("${compact[@]}" "${args[@]}")
 fi
 
-# menus:power — 6 linhas, fit-to-content (sem espaço vazio)
+# menus:power — 6 linhas, fit-to-content (vertical + horizontal)
 if [[ "$provider" == "menus:power" ]]; then
   compact=()
   if ! $has_nosearch; then compact+=(--nosearch); fi
   if ! $has_nohints; then compact+=(--nohints); fi
-  if ! $has_width; then compact+=(--width 320); fi
   power_rows=6
   power_row_h=44
   power_chrome=52
   power_h=$((power_rows * power_row_h + power_chrome))
+  # largura ≈ ícone + labels mais longos (power.lua) + padding
+  power_longest_label="Hibernate"
+  power_longest_sub="uwsm stop"
+  power_icon_w=28
+  power_icon_gap=12
+  power_text_px=8
+  power_sub_px=7
+  power_label_gap=12
+  power_item_pad_x=20
+  power_wrapper_pad_x=32
+  power_inner_w=$((power_icon_w + power_icon_gap \
+    + ${#power_longest_label} * power_text_px \
+    + power_label_gap \
+    + ${#power_longest_sub} * power_sub_px \
+    + power_item_pad_x))
+  power_w=$((power_inner_w + power_wrapper_pad_x))
+  if ! $has_width; then compact+=(--width "$power_w"); fi
+  if ! $has_minwidth; then compact+=(--minwidth "$power_w"); fi
+  if ! $has_maxwidth; then compact+=(--maxwidth "$power_w"); fi
   if ! $has_height; then compact+=(--height "$power_h"); fi
   if ! $has_minheight; then compact+=(--minheight "$power_h"); fi
   if ! $has_maxheight; then compact+=(--maxheight "$power_h"); fi
@@ -109,15 +131,19 @@ if [[ "$provider" == "menus:clock" ]]; then
   args=("${compact[@]}" "${args[@]}")
 fi
 
-# menus:screenshot — 4 linhas, sem scroll (altura = 4×44px + padding)
+# menus:screenshot — 4 linhas, fit-to-content
 if [[ "$provider" == "menus:screenshot" ]]; then
   compact=()
   if ! $has_nohints; then compact+=(--nohints); fi
   if ! $has_nosearch; then compact+=(--nosearch); fi
   if ! $has_width; then compact+=(--width 280); fi
-  if ! $has_height; then compact+=(--height 228); fi
-  if ! $has_minheight; then compact+=(--minheight 188); fi
-  if ! $has_maxheight; then compact+=(--maxheight 188); fi
+  shot_rows=4
+  shot_row_h=44
+  shot_chrome=52
+  shot_h=$((shot_rows * shot_row_h + shot_chrome))
+  if ! $has_height; then compact+=(--height "$shot_h"); fi
+  if ! $has_minheight; then compact+=(--minheight "$shot_h"); fi
+  if ! $has_maxheight; then compact+=(--maxheight "$shot_h"); fi
   args=("${compact[@]}" "${args[@]}")
 fi
 
