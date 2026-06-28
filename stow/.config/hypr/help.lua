@@ -216,8 +216,8 @@ MOD3+SHIFT+C   yaa Sonnet[1M]      MOD3+.     emoji picker
 MOD3+SHIFT+P   control panel       MOD3+ALT+C Claude.ai web
 
 ─── Navigation ───────────────────────────────
-SUPER+WASD     focus               SUPER+SHIFT+WASD  move window
-SUPER+CTRL+WASD resize             SUPER+Q/E         col width
+SUPER+WASD     focus col (scroll)  SUPER+SHIFT+A/D   swap col c/ vizinha
+SUPER+ALT+WASD stretch window     SUPER+Q/E         col ±20%
 SUPER+1-0      go workspace        SUPER+SHIFT+1-0   move to ws
 SUPER+Esc      next monitor        SUPER+SHIFT+Esc   move window to next monitor
 MOD3+Tab       picker (all)        MOD3+SHIFT+Tab    picker (current ws)
@@ -241,9 +241,9 @@ MOD3+F         follow-me toggle
 ─── System ──────────────────────────────────
 SUPER+Space    quickshell overview SUPER+;           HUD peek
 SUPER+L        lock                SUPER+N           toggle dark/light
-SUPER+Delete   reload hyprland     MOD3+Escape       close window
+SUPER+Delete   reset UI (hypr+qs+waybar)   MOD3+Escape       close window
 SUPER+/        shortcuts popup     SUPER+,           THIS HELP
-SUPER+Tab      maximize            SUPER+ALT+Tab     float toggle
+SUPER+Tab      toggle maximize     SUPER+ALT+Tab     float toggle
 SUPER+F11      fullscreen client   SUPER+SHIFT+F11   true fullscreen
 
 ─── Screenshots & clipboard ─────────────────

@@ -68,6 +68,7 @@ fi
 
 case "$provider" in
   menus:wifi|menus:power|menus:screenshot|menus:clock)
+    walker -q >/dev/null 2>&1 || true
     args=(--hideqa "${args[@]}")
     ;;
 esac
@@ -82,13 +83,14 @@ if [[ "$provider" == "menus:power" ]]; then
   args=("${compact[@]}" "${args[@]}")
 fi
 
-# menus:clock — data + cal + ações, sem busca
+# menus:clock — ações rápidas, sem busca (leve como power)
 if [[ "$provider" == "menus:clock" ]]; then
   compact=()
   if ! $has_nosearch; then compact+=(--nosearch); fi
-  if ! $has_width; then compact+=(--width 360); fi
-  if ! $has_minheight; then compact+=(--minheight 360); fi
-  if ! $has_maxheight; then compact+=(--maxheight 360); fi
+  if ! $has_nohints; then compact+=(--nohints); fi
+  if ! $has_width; then compact+=(--width 320); fi
+  if ! $has_minheight; then compact+=(--minheight 220); fi
+  if ! $has_maxheight; then compact+=(--maxheight 220); fi
   args=("${compact[@]}" "${args[@]}")
 fi
 

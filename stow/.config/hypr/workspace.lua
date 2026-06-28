@@ -48,19 +48,46 @@ km.bind("SUPER + SHIFT + 0",
     hl.dsp.window.move({ workspace = "10", follow = false }),
     { desc = "Move window to workspace 10", group = "Workspace" })
 
--- ── WASD Focus/Move/Resize ────────────────────────────────────
+-- ── WASD: focus / move / resize (scrolling layout) ─────────────
+--
+--  SUPER+WASD       → foco entre colunas (layout focus)
+--  SUPER+SHIFT+A/D  → swap coluna com vizinha (promote se empilhada)
+--  SUPER+SHIFT+W/S  → swapcol vertical (empilhamento)
+--  SUPER+ALT+WASD   → estica janela (resizeactive; flutuante ou borda)
+--  SUPER+Q/E        → coluna −/+ (colresize_no_wrap)
 
--- SUPER+ALT+WASD → Ctrl+arrow (pular palavra) — ydotool: uinput, sem modifier leakage
-km.repeating("SUPER + ALT + a", hl.dsp.exec_cmd("ydotool key ctrl+left"),
-    { desc = "Word left",  group = "Navigation" })
-km.repeating("SUPER + ALT + d", hl.dsp.exec_cmd("ydotool key ctrl+right"),
-    { desc = "Word right", group = "Navigation" })
-km.repeating("SUPER + ALT + w", hl.dsp.exec_cmd("ydotool key ctrl+up"),
-    { desc = "Word up",    group = "Navigation" })
-km.repeating("SUPER + ALT + s", hl.dsp.exec_cmd("ydotool key ctrl+down"),
-    { desc = "Word down",  group = "Navigation" })
+km.repeating("SUPER + a", hl.dsp.layout("focus l"),
+    { desc = "Focus column left",  group = "Window" })
+km.repeating("SUPER + d", hl.dsp.layout("focus r"),
+    { desc = "Focus column right", group = "Window" })
+km.repeating("SUPER + w", hl.dsp.layout("focus u"),
+    { desc = "Focus up",           group = "Window" })
+km.repeating("SUPER + s", hl.dsp.layout("focus d"),
+    { desc = "Focus down",         group = "Window" })
 
--- ALT+WASD → setas puras — ydotool: uinput, sem modifier leakage
+km.repeating("SUPER + SHIFT + a", function() swapcol_preserve("l") end,
+    { desc = "Swap column left",  group = "Window" })
+km.repeating("SUPER + SHIFT + d", function() swapcol_preserve("r") end,
+    { desc = "Swap column right", group = "Window" })
+km.repeating("SUPER + SHIFT + w", hl.dsp.layout("swapcol u"),
+    { desc = "Move column up",    group = "Window" })
+km.repeating("SUPER + SHIFT + s", hl.dsp.layout("swapcol d"),
+    { desc = "Move column down",  group = "Window" })
+
+km.repeating("SUPER + ALT + a",
+    hl.dsp.window.resize({ x = -40, y = 0, relative = true }),
+    { desc = "Stretch −40 w", group = "Window" })
+km.repeating("SUPER + ALT + d",
+    hl.dsp.window.resize({ x = 40,  y = 0, relative = true }),
+    { desc = "Stretch +40 w", group = "Window" })
+km.repeating("SUPER + ALT + w",
+    hl.dsp.window.resize({ x = 0, y = -20, relative = true }),
+    { desc = "Stretch −20 h", group = "Window" })
+km.repeating("SUPER + ALT + s",
+    hl.dsp.window.resize({ x = 0, y = 20, relative = true }),
+    { desc = "Stretch +20 h", group = "Window" })
+
+-- ALT+WASD → setas (apps) — ydotool, sem vazar modifier
 km.repeating("ALT + a", hl.dsp.exec_cmd("ydotool key left"),
     { desc = "Arrow left",  group = "Navigation" })
 km.repeating("ALT + d", hl.dsp.exec_cmd("ydotool key right"),
@@ -70,41 +97,11 @@ km.repeating("ALT + w", hl.dsp.exec_cmd("ydotool key up"),
 km.repeating("ALT + s", hl.dsp.exec_cmd("ydotool key down"),
     { desc = "Arrow down",  group = "Navigation" })
 
--- Move windows
-km.repeating("SUPER + SHIFT + a",
-    hl.dsp.window.move({ direction = "l" }),
-    { desc = "Move window left",  group = "Window" })
-km.repeating("SUPER + SHIFT + d",
-    hl.dsp.window.move({ direction = "r" }),
-    { desc = "Move window right", group = "Window" })
-km.repeating("SUPER + SHIFT + w",
-    hl.dsp.window.move({ direction = "u" }),
-    { desc = "Move window up",    group = "Window" })
-km.repeating("SUPER + SHIFT + s",
-    hl.dsp.window.move({ direction = "d" }),
-    { desc = "Move window down",  group = "Window" })
-
--- Resize (SUPER + CTRL + WASD) — relative=true para delta
-km.repeating("SUPER + CTRL + a",
-    hl.dsp.window.resize({ x = -40, y = 0, relative = true }),
-    { desc = "Resize -40 w", group = "Window" })
-km.repeating("SUPER + CTRL + d",
-    hl.dsp.window.resize({ x = 40,  y = 0, relative = true }),
-    { desc = "Resize +40 w", group = "Window" })
-km.repeating("SUPER + CTRL + w",
-    hl.dsp.window.resize({ x = 0, y = -20, relative = true }),
-    { desc = "Resize -20 h", group = "Window" })
-km.repeating("SUPER + CTRL + s",
-    hl.dsp.window.resize({ x = 0, y = 20, relative = true }),
-    { desc = "Resize +20 h", group = "Window" })
-
--- Scrolling layout: cycle column widths (Q/E), promote (SHIFT+X)
+-- Scrolling layout: largura de coluna (Q/E)
 km.repeating("SUPER + q", function() colresize_no_wrap("-") end,
     { desc = "Column narrower", group = "Window" })
 km.repeating("SUPER + e", function() colresize_no_wrap("+") end,
     { desc = "Column wider",    group = "Window" })
-km.bind("SUPER + SHIFT + x", hl.dsp.layout("promote"),
-    { desc = "Promote column", group = "Window" })
 
 -- ── Mouse ─────────────────────────────────────────────────────
 

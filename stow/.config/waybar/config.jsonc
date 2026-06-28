@@ -280,10 +280,10 @@
 	"clock": {
 		"format": "󰥔 {:%H:%M}",
 		"interval": 60,
-		"format-alt": "󰃮 {:%Y-%m-%d}",
+		"format-alt": "󰥔 {:%H:%M}  󰃭 {:%d/%m}",
 		"tooltip-format": "{:%A, %d %B · %H:%M}",
 		"tooltip": true,
-		"on-click": "$HOME/.config/hypr/walker-launch.sh --theme neon --provider menus:clock"
+		"on-click": "qs ipc call clock toggle"
 	},
 	"cpu": {
 		"format": "󰍛 {usage}%",

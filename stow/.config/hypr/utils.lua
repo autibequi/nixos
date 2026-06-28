@@ -136,20 +136,113 @@ end
 -- Alias usado pelo bind SUPER (release)
 toggle_or_hide_special_workspace = hide_active_special_workspaces
 
--- ── Colresize sem wrap ────────────────────────────────────────
--- Para no mínimo (0.22) e máximo (0.85) em vez de cyclar
+-- ── Colresize sem wrap (SUPER+Q/E) ────────────────────────────
+-- Incrementos relativos de 20% da largura do monitor.
+-- Hyprland 0.55: win.size = { x, y }, não array indexado.
+
+local COLRESIZE_STEP = 0.2
 
 function colresize_no_wrap(direction)
     local win = hl.get_active_window()
-    local mon = active_monitor()
+    if not win then return end
 
-    if win and mon and win.size and win.size[1] and mon.width and mon.scale then
-        local ratio = win.size[1] / (mon.width / mon.scale)
-        if direction == "+" and ratio >= 0.85 then return end
-        if direction == "-" and ratio <= 0.22 then return end
+    if win.floating then
+        hl.dispatch(hl.dsp.window.float({}))
+        return
     end
 
-    hl.dispatch(hl.dsp.layout("colresize " .. direction .. "conf"))
+    local g = win.grouped
+    if type(g) == "table" and #g > 0 then
+        hl.dispatch(hl.dsp.layout("promote"))
+    end
+
+    local mon = hl.get_active_monitor()
+    local w = win.size and win.size.x
+    if w and mon and mon.width and mon.scale and mon.scale > 0 then
+        local ratio = w / (mon.width / mon.scale)
+        if direction == "+" and ratio >= 0.99 then return end
+        if direction == "-" and ratio <= 0.19 then return end
+    end
+
+    hl.dispatch(hl.dsp.layout("colresize " .. direction .. COLRESIZE_STEP))
+end
+
+-- ── Swapcol preservando coluna (SUPER+SHIFT+A/D) ──────────────
+-- Janela empilhada → promote na direção do swap; depois swapcol.
+-- Coluna única → swapcol troca posição com a vizinha (sem merge).
+
+local COLUMN_X_EPS = 8
+
+local function window_at_x(win)
+    if not win or not win.at then return nil end
+    return win.at.x or win.at[1]
+end
+
+local function shares_column(win)
+    local wx = window_at_x(win)
+    local ws_id = win.workspace and win.workspace.id
+    if not wx or not ws_id then return false end
+
+    for _, c in ipairs(core.clients_cached(0.3)) do
+        if c.address ~= win.address
+            and c.workspace and c.workspace.id == ws_id
+            and c.at_x and math.abs(c.at_x - wx) <= COLUMN_X_EPS then
+            return true
+        end
+    end
+    return false
+end
+
+function swapcol_preserve(dir)
+    local win = hl.get_active_window()
+    if not win then return end
+
+    if win.floating then
+        hl.dispatch(hl.dsp.window.float({}))
+        return
+    end
+
+    if shares_column(win) then
+        hl.dispatch(hl.dsp.layout("promote " .. dir))
+    end
+
+    hl.dispatch(hl.dsp.layout("swapcol " .. dir))
+end
+
+-- ── Toggle maximize (scrolling layout) ────────────────────────
+-- Maximize no scrolling = coluna largura 1.0 (não usa fullscreen state).
+-- hl.dsp.window.fullscreen toggle não des-maximiza no 0.55 — colresize direto.
+
+local _max_restore = {}  -- window address → column ratio (0.0–1.0)
+
+local function column_ratio()
+    local win = hl.get_active_window()
+    local mon = hl.get_active_monitor()
+    if not win or not win.size or not win.size.x then return nil end
+    if not mon or not mon.width or not mon.scale or mon.scale == 0 then return nil end
+    return win.size.x / (mon.width / mon.scale)
+end
+
+function toggle_maximize()
+    local win = hl.get_active_window()
+    if not win or not win.address then return end
+
+    if win.floating then
+        hl.dispatch(hl.dsp.window.float({}))
+        return
+    end
+
+    local addr = win.address
+    local ratio = column_ratio()
+
+    if ratio and ratio >= 0.95 then
+        local restore = _max_restore[addr] or 0.5
+        _max_restore[addr] = nil
+        hl.dispatch(hl.dsp.layout("colresize " .. restore))
+    else
+        if ratio then _max_restore[addr] = ratio end
+        hl.dispatch(hl.dsp.layout("colresize 1.0"))
+    end
 end
 
 -- ── Monitor switching ─────────────────────────────────────────

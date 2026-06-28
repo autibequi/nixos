@@ -27,14 +27,14 @@ hl.window_rule({
 })
 
 -- Electron apps (Cursor/VSCode) — floating popups ficam na frente
--- tag + stay_focused garante que popup mantém foco até ser fechado
+-- stay_focused só em popups flutuantes (evita prender foco na janela principal)
 hl.window_rule({
     match    = { class = "cursor|code|code-url-handler|Cursor|Code", float = true },
     tag      = "+electron-popup",
     min_size = { 1, 1 },
 })
 hl.window_rule({
-    match        = { tag = "electron-popup" },
+    match        = { tag = "electron-popup", float = true },
     stay_focused = true,
 })
 

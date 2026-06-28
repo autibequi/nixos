@@ -19,8 +19,8 @@ function waybar_refresh()
 end
 
 function quickshell_restart()
-    hl.exec_cmd("pkill quickshell")
-    core.timer(300, function() hl.exec_cmd(L.build("qs")) end)
+    -- Reinicia todos os módulos QS: overview, clock, powermenu, osd, switcher…
+    hl.exec_cmd("systemctl --user restart quickshell.service")
 end
 
 function clipboard_history()
@@ -30,7 +30,7 @@ end
 function hypr_reload()
     hl.exec_cmd("swaync-client -rs -R")
     waybar_refresh()
-    quickshell_restart()
+    quickshell_restart() -- clock, powermenu, osd, switcher, overview
     hl.exec_cmd("hyprctl reload")
     core.notify("Hyprland reloaded", nil, { urgency = "low" })
 end

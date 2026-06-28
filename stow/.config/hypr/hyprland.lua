@@ -103,11 +103,13 @@ hl.config({
 
     scrolling = {
         column_width             = 0.5,
-        fullscreen_on_one_column = true,
+        -- false: única janela no ws respeita column_width e SUPER+Q/E encolhe
+        fullscreen_on_one_column = false,
         focus_fit_method         = 1,        -- 0 = center, 1 = fit
-        follow_focus             = true,
-        follow_min_visible       = 0.0,
+        follow_focus             = true,     -- scroll pra janela focada (mouse/teclado)
+        follow_min_visible       = 0.01,     -- 0.0 exato pode falhar no 0.55; hover foca coluna parcial
         explicit_column_widths   = "0.2, 0.25, 0.333, 0.5, 0.667, 1.0",
+        wrap_swapcol             = false,    -- swap só com coluna vizinha, sem wrap
     },
 
     misc = {
@@ -141,8 +143,9 @@ hl.config({
         kb_layout   = "us",
         kb_variant  = "altgr-intl",
         kb_options  = "caps:hyper",  -- Caps Lock → MOD3/Hyper
-        follow_mouse = 1,
-        float_switch_override_focus = 0,
+        follow_mouse = 1,              -- foco segue o mouse (sloppy focus)
+        follow_mouse_threshold = 0,    -- sensível desde o primeiro pixel
+        float_switch_override_focus = 1,
         scroll_factor = 0.7,
 
         touchpad = {

@@ -1,11 +1,9 @@
-// ClockWidget — popover com 3 meses (anterior/atual/próximo), navegação via setas,
-// dropdown de mês e ano editável.
+// ClockWidget — painel Walker-style: info copiável (esq) + calendário scroll (dir)
 // Toggle via: qs ipc call clock toggle / open / close
-// Tema: Deep Dark (espelha alacritty/dark-theme.toml)
 
 import QtQuick
-import QtQuick.Layouts
 import QtQuick.Controls
+import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -14,503 +12,520 @@ Scope {
     id: root
     property bool shown: false
 
-    // ── Tema (Deep Dark / Alacritty) ──────────────────────────────
-    readonly property color cBg:        "#0a0e14"
-    readonly property color cSurface:   "#1a1f29"
-    readonly property color cElev:      "#2a2f3a"
-    readonly property color cBorder:    "#2d3748"
-    readonly property color cFg:        "#e6e6e6"
-    readonly property color cFgMuted:   "#9ca3af"
-    readonly property color cFgDimmer:  "#4a5568"
-    readonly property color cAccent:    "#00d4ff"
-    readonly property color cAccentS:   "#ff79c6"
+    readonly property int shellW: 780
+    readonly property int shellH: 520
+    readonly property int leftW: 272
+
+    // ── Tema Walker / neon ────────────────────────────────────────
+    readonly property color cBg:       "#0a0e14"
+    readonly property color cSurface:  "#1a1f29"
+    readonly property color cElev:     "#2a2f3a"
+    readonly property color cBorder:   "#2d3748"
+    readonly property color cFg:       "#e6e6e6"
+    readonly property color cFgMuted:  "#9ca3af"
+    readonly property color cFgDimmer: "#4a5568"
+    readonly property color cAccent:   "#00d4ff"
 
     readonly property var monthNames: [
         "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
         "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
     ]
 
-    // ── Estado: data sendo visualizada ────────────────────────────
-    // `now` muda a cada segundo (pra hora viva); `displayedMonth`/`displayedYear`
-    // controla qual mês a navegação está em — independente da data real.
-    property date now: new Date()
-    property int displayedMonth: now.getMonth()
-    property int displayedYear:  now.getFullYear()
+    readonly property int scrollPast: 12
+    readonly property int scrollFuture: 12
 
-    function gotoPrev() {
-        let m = displayedMonth - 1;
-        let y = displayedYear;
-        if (m < 0) { m = 11; y -= 1; }
-        displayedMonth = m;
-        displayedYear  = y;
+    property date now: new Date()
+    property var monthList: []
+    property string timezoneName: ""
+    property string copiedHint: ""
+
+    readonly property var locale: Qt.locale("pt_BR")
+
+    readonly property var weekdayNames: [
+        "domingo", "segunda-feira", "terça-feira", "quarta-feira",
+        "quinta-feira", "sexta-feira", "sábado"
+    ]
+
+    function longDateText(d) {
+        return root.weekdayNames[d.getDay()] + ", "
+             + d.getDate() + " de "
+             + root.monthNames[d.getMonth()] + " de "
+             + d.getFullYear();
     }
-    function gotoNext() {
-        let m = displayedMonth + 1;
-        let y = displayedYear;
-        if (m > 11) { m = 0; y += 1; }
-        displayedMonth = m;
-        displayedYear  = y;
+
+    function pad2(n) {
+        return n.toString().padStart(2, "0");
     }
-    function gotoToday() {
-        displayedMonth = now.getMonth();
-        displayedYear  = now.getFullYear();
+
+    function isoDate(d) {
+        return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
     }
-    function prevMonthOf(m, y) {
-        return m === 0 ? { m: 11, y: y - 1 } : { m: m - 1, y: y };
+
+    function brDate(d) {
+        return pad2(d.getDate()) + "/" + pad2(d.getMonth() + 1) + "/" + d.getFullYear();
     }
-    function nextMonthOf(m, y) {
-        return m === 11 ? { m: 0, y: y + 1 } : { m: m + 1, y: y };
+
+    function dateTimeText(d) {
+        return root.isoDate(d) + " " + root.pad2(d.getHours()) + ":"
+             + root.pad2(d.getMinutes()) + ":" + root.pad2(d.getSeconds());
+    }
+
+    function timeText(d) {
+        return root.pad2(d.getHours()) + ":" + root.pad2(d.getMinutes());
+    }
+
+    function timeSecondsText(d) {
+        return root.timeText(d) + ":" + root.pad2(d.getSeconds());
+    }
+
+    function buildMonthList() {
+        const list = [];
+        let m = root.now.getMonth() - root.scrollPast;
+        let y = root.now.getFullYear();
+        while (m < 0) {
+            m += 12;
+            y -= 1;
+        }
+        const total = root.scrollPast + root.scrollFuture + 1;
+        for (let i = 0; i < total; i++) {
+            list.push({ month: m, year: y });
+            m += 1;
+            if (m > 11) {
+                m = 0;
+                y += 1;
+            }
+        }
+        return list;
+    }
+
+    function isoWeekInfo(d) {
+        const date = new Date(d.getTime());
+        date.setHours(0, 0, 0, 0);
+        date.setDate(date.getDate() + 4 - (date.getDay() || 7));
+        const yearStart = new Date(date.getFullYear(), 0, 1);
+        const week = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+        return { week: week, year: date.getFullYear() };
+    }
+
+    function dayOfYear(d) {
+        const start = new Date(d.getFullYear(), 0, 0);
+        return Math.floor((d - start) / 86400000);
+    }
+
+    function copyText(text, hint) {
+        if (!text || text.length === 0) return;
+        const safe = text.replace(/'/g, "'\\''");
+        Quickshell.execDetached(["sh", "-c", "printf '%s' '" + safe + "' | wl-copy"]);
+        root.copiedHint = hint;
+        copyHintTimer.restart();
+    }
+
+    function formatIsoDate(y, m, day) {
+        return y + "-" + pad2(m + 1) + "-" + pad2(day);
+    }
+
+    function openPanel() {
+        root.now = new Date();
+        root.monthList = root.buildMonthList();
+        root.shown = true;
+        tzProc.running = true;
+        scrollToToday.restart();
+    }
+
+    function closePanel() {
+        root.shown = false;
+    }
+
+    function togglePanel() {
+        if (root.shown) root.closePanel();
+        else root.openPanel();
     }
 
     Timer {
+        id: tick
         interval: 1000
         running: root.shown
-        repeat:  true
+        repeat: true
         onTriggered: root.now = new Date()
     }
 
-    // ── IPC: toggle/open/close de fora ────────────────────────────
-    IpcHandler {
-        target: "clock"
-        function toggle(): void {
-            if (!root.shown) root.gotoToday();
-            root.shown = !root.shown;
-        }
-        function open(): void {
-            root.gotoToday();
-            root.shown = true;
-        }
-        function close(): void { root.shown = false }
+    Timer {
+        id: copyHintTimer
+        interval: 1600
+        onTriggered: root.copiedHint = ""
     }
 
-    // ── Janela popover ────────────────────────────────────────────
+    Timer {
+        id: scrollToToday
+        interval: 120
+        repeat: false
+        onTriggered: calList.positionViewAtIndex(root.scrollPast, ListView.Center)
+    }
+
+    Process {
+        id: tzProc
+        running: false
+        command: ["timedatectl", "show", "-p", "Timezone", "--value"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const tz = text.trim();
+                root.timezoneName = tz.length > 0 ? tz : "local";
+            }
+        }
+    }
+
+    IpcHandler {
+        target: "clock"
+        function toggle(): void { root.togglePanel() }
+        function open(): void { root.openPanel() }
+        function close(): void { root.closePanel() }
+    }
+
     PanelWindow {
         id: popup
         visible: root.shown
 
-        anchors {
-            left:   true
-            right:  true
-            bottom: true
-        }
+        anchors { left: true; right: true; bottom: true }
         margins { bottom: 42 }
 
-        implicitHeight: 420
-        exclusiveZone:  0
+        implicitWidth: root.shellW
+        implicitHeight: root.shellH
+        exclusiveZone: 0
         color: "transparent"
 
-        WlrLayershell.layer:        WlrLayer.Overlay
+        WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
         Shortcut {
             sequences: ["Escape"]
             enabled: root.shown
-            onActivated: root.shown = false
-        }
-        Shortcut {
-            sequences: ["Left"]
-            enabled: root.shown
-            onActivated: root.gotoPrev()
-        }
-        Shortcut {
-            sequences: ["Right"]
-            enabled: root.shown
-            onActivated: root.gotoNext()
-        }
-        Shortcut {
-            sequences: ["Home"]
-            enabled: root.shown
-            onActivated: root.gotoToday()
+            onActivated: root.closePanel()
         }
 
-        // Click fora dos cards → fecha
         MouseArea {
             anchors.fill: parent
             z: -1
             onClicked: function(mouse) {
-                const local = mapToItem(cards, mouse.x, mouse.y);
-                const inside = local.x >= 0 && local.y >= 0
-                            && local.x <= cards.width && local.y <= cards.height;
-                if (!inside) root.shown = false;
+                const local = mapToItem(shell, mouse.x, mouse.y);
+                if (local.x < 0 || local.y < 0 || local.x > shell.width || local.y > shell.height)
+                    root.closePanel();
             }
         }
 
-        // ── 3 cards lado a lado ───────────────────────────────────
-        Row {
-            id: cards
+        Rectangle {
+            id: shell
             anchors.bottom: parent.bottom
             anchors.horizontalCenter: parent.horizontalCenter
-            spacing: 10
+            width: root.shellW
+            height: root.shellH
+            radius: 20
+            color: root.cBg
+            border.color: root.cBorder
+            border.width: 1
 
-            // ── Mês anterior (compacto) ───────────────────────────
-            MiniMonthCard {
-                month: root.prevMonthOf(root.displayedMonth, root.displayedYear).m
-                year:  root.prevMonthOf(root.displayedMonth, root.displayedYear).y
-                onClicked: root.gotoPrev()
-            }
-
-            // ── Mês atual (grande, com hora e edição) ─────────────
-            MainMonthCard {}
-
-            // ── Próximo mês (compacto) ────────────────────────────
-            MiniMonthCard {
-                month: root.nextMonthOf(root.displayedMonth, root.displayedYear).m
-                year:  root.nextMonthOf(root.displayedMonth, root.displayedYear).y
-                onClicked: root.gotoNext()
-            }
-        }
-    }
-
-    // ============================================================
-    //  Component: MiniMonthCard (mês lateral compacto)
-    // ============================================================
-    component MiniMonthCard: Rectangle {
-        id: mini
-        property int month: 0
-        property int year:  2026
-        signal clicked()
-
-        width:  200
-        height: 240
-        radius: 12
-        color:  root.cSurface
-        border.color: root.cBorder
-        border.width: 1
-        opacity: miniHover.containsMouse ? 1.0 : 0.9
-
-        Behavior on opacity { NumberAnimation { duration: 150 } }
-
-        MouseArea {
-            id: miniHover
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onClicked: mini.clicked()
-        }
-
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: 10
-            spacing: 6
-
-            Text {
-                Layout.alignment: Qt.AlignHCenter
-                text: root.monthNames[mini.month] + " " + mini.year
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: 12
-                font.weight: Font.Medium
-                color: root.cFgMuted
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 1
-                color: root.cBorder
-            }
-
-            MonthGrid {
-                id: miniGrid
-                Layout.alignment: Qt.AlignHCenter
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                month: mini.month
-                year:  mini.year
-                spacing: 1
-                locale: Qt.locale("pt_BR")
-                delegate: Text {
-                    text: model.day
-                    color: !model.visibleMonth ? root.cFgDimmer : root.cFgMuted
-                    font.family: "JetBrainsMono Nerd Font"
-                    font.pixelSize: 9
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-            }
-        }
-    }
-
-    // ============================================================
-    //  Component: MainMonthCard (mês atual grande)
-    // ============================================================
-    component MainMonthCard: Rectangle {
-        id: main
-        width:  340
-        height: 420
-        radius: 14
-        color:  root.cSurface
-        border.color: root.cBorder
-        border.width: 1
-
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: 14
-            spacing: 8
-
-            // ── Header: ←  Mês ▼  Ano(editável)  → ────────────────
             RowLayout {
-                Layout.fillWidth: true
-                spacing: 6
+                anchors.fill: parent
+                anchors.margins: 16
+                spacing: 12
 
-                // Seta anterior
+                // ── Esquerda ──────────────────────────────────────
                 Rectangle {
-                    Layout.preferredWidth: 28
-                    Layout.preferredHeight: 28
-                    radius: 8
-                    color: leftHover.containsMouse ? root.cElev : "transparent"
-                    Text {
-                        anchors.centerIn: parent
-                        text: "◀"
-                        color: root.cFg
-                        font.pixelSize: 12
-                    }
-                    MouseArea {
-                        id: leftHover
+                    Layout.preferredWidth: root.leftW
+                    Layout.fillHeight: true
+                    radius: 14
+                    color: root.cSurface
+                    border.color: root.cBorder
+                    border.width: 1
+
+                    ColumnLayout {
                         anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.gotoPrev()
+                        anchors.margins: 12
+                        spacing: 8
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: root.timeSecondsText(root.now)
+                            font.family: "JetBrainsMono Nerd Font"
+                            font.pixelSize: 36
+                            font.weight: Font.Bold
+                            color: root.cAccent
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: root.weekdayNames[root.now.getDay()]
+                            font.family: "JetBrainsMono Nerd Font"
+                            font.pixelSize: 11
+                            color: root.cFgMuted
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 1
+                            color: root.cBorder
+                        }
+
+                        ScrollView {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            clip: true
+                            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+
+                            ColumnLayout {
+                                width: parent.width
+                                spacing: 4
+
+                                CopyRow { Layout.fillWidth: true; label: "Hora"; value: root.timeText(root.now) }
+                                CopyRow { Layout.fillWidth: true; label: "Data"; value: root.brDate(root.now) }
+                                CopyRow { Layout.fillWidth: true; label: "Data completa"; value: root.longDateText(root.now) }
+                                CopyRow { Layout.fillWidth: true; label: "ISO"; value: root.isoDate(root.now) }
+                                CopyRow { Layout.fillWidth: true; label: "Data e hora"; value: root.dateTimeText(root.now) }
+                                CopyRow {
+                                    Layout.fillWidth: true
+                                    label: "Semana ISO"
+                                    value: {
+                                        const w = root.isoWeekInfo(root.now);
+                                        return "W" + root.pad2(w.week) + " · " + w.year;
+                                    }
+                                }
+                                CopyRow {
+                                    Layout.fillWidth: true
+                                    label: "Dia do ano"
+                                    value: root.dayOfYear(root.now).toString() + " / 365"
+                                    copyValue: root.dayOfYear(root.now).toString()
+                                }
+                                CopyRow {
+                                    Layout.fillWidth: true
+                                    label: "Fuso horário"
+                                    value: root.timezoneName.length > 0 ? root.timezoneName : "local"
+                                }
+                                CopyRow {
+                                    Layout.fillWidth: true
+                                    label: "Unix"
+                                    value: Math.floor(root.now.getTime() / 1000).toString()
+                                }
+                            }
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: root.copiedHint.length > 0 ? implicitHeight : 0
+                            visible: root.copiedHint.length > 0
+                            text: "Copiado · " + root.copiedHint
+                            font.family: "JetBrainsMono Nerd Font"
+                            font.pixelSize: 10
+                            color: root.cAccent
+                            horizontalAlignment: Text.AlignHCenter
+                        }
                     }
                 }
 
-                // Nome do mês (clicável → dropdown)
+                // ── Direita: calendário ───────────────────────────
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 28
-                    radius: 8
-                    color: monthHover.containsMouse ? root.cElev : "transparent"
-                    Text {
-                        anchors.centerIn: parent
-                        text: root.monthNames[root.displayedMonth] + " ▾"
-                        color: root.cFg
-                        font.family: "JetBrainsMono Nerd Font"
-                        font.pixelSize: 13
-                        font.weight: Font.Bold
-                    }
-                    MouseArea {
-                        id: monthHover
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: monthMenu.open()
-                    }
+                    Layout.fillHeight: true
+                    radius: 14
+                    color: root.cSurface
+                    border.color: root.cBorder
+                    border.width: 1
+                    clip: true
 
-                    // Dropdown de meses
-                    Menu {
-                        id: monthMenu
-                        Repeater {
-                            model: root.monthNames
-                            MenuItem {
-                                text: modelData
-                                onTriggered: root.displayedMonth = index
+                    ScrollView {
+                        id: calScroll
+                        anchors.fill: parent
+                        anchors.margins: 8
+                        clip: true
+                        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+
+                        ListView {
+                            id: calList
+                            width: calScroll.availableWidth
+                            spacing: 16
+                            model: root.monthList
+                            boundsBehavior: Flickable.StopAtBounds
+                            cacheBuffer: 800
+
+                            delegate: Item {
+                                id: monthWrap
+                                width: calList.width
+                                height: monthCard.implicitHeight
+
+                                ScrollMonthCard {
+                                    id: monthCard
+                                    width: monthWrap.width
+                                    month: root.monthList[index].month
+                                    year: root.monthList[index].year
+                                }
                             }
                         }
                     }
                 }
-
-                // Ano editável
-                Rectangle {
-                    Layout.preferredWidth: 70
-                    Layout.preferredHeight: 28
-                    radius: 8
-                    color: yearField.activeFocus || yearHover.containsMouse
-                           ? root.cElev : "transparent"
-                    border.color: yearField.activeFocus ? root.cAccent : "transparent"
-                    border.width: 1
-
-                    TextField {
-                        id: yearField
-                        anchors.fill: parent
-                        anchors.margins: 2
-                        text: root.displayedYear.toString()
-                        color: root.cFg
-                        background: null
-                        font.family: "JetBrainsMono Nerd Font"
-                        font.pixelSize: 13
-                        font.weight: Font.Bold
-                        horizontalAlignment: TextInput.AlignHCenter
-                        verticalAlignment: TextInput.AlignVCenter
-                        selectByMouse: true
-                        inputMethodHints: Qt.ImhDigitsOnly
-                        validator: IntValidator { bottom: 1900; top: 9999 }
-
-                        onEditingFinished: {
-                            const parsed = parseInt(text, 10);
-                            if (!isNaN(parsed) && parsed >= 1900 && parsed <= 9999)
-                                root.displayedYear = parsed;
-                            else
-                                text = root.displayedYear.toString();
-                        }
-
-                        Keys.onEscapePressed: {
-                            text = root.displayedYear.toString();
-                            focus = false;
-                        }
-                    }
-
-                    MouseArea {
-                        id: yearHover
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        acceptedButtons: Qt.NoButton
-                    }
-                }
-
-                // Seta próxima
-                Rectangle {
-                    Layout.preferredWidth: 28
-                    Layout.preferredHeight: 28
-                    radius: 8
-                    color: rightHover.containsMouse ? root.cElev : "transparent"
-                    Text {
-                        anchors.centerIn: parent
-                        text: "▶"
-                        color: root.cFg
-                        font.pixelSize: 12
-                    }
-                    MouseArea {
-                        id: rightHover
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.gotoNext()
-                    }
-                }
             }
+        }
+    }
 
-            // ── Hora grande (só se visualizando o mês atual) ──────
-            Text {
-                Layout.alignment: Qt.AlignHCenter
-                visible: root.displayedMonth === root.now.getMonth()
-                      && root.displayedYear  === root.now.getFullYear()
-                text: Qt.formatDateTime(root.now, "HH:mm")
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: 48
-                font.weight: Font.Bold
-                color: root.cAccent
-            }
+    component CopyRow: Rectangle {
+        id: row
+        property string label: ""
+        property string value: ""
+        property string copyValue: row.value
 
-            Text {
-                Layout.alignment: Qt.AlignHCenter
-                visible: root.displayedMonth === root.now.getMonth()
-                      && root.displayedYear  === root.now.getFullYear()
-                text: Qt.formatDate(root.now, "dddd, dd MMMM")
-                font.family: "JetBrainsMono Nerd Font"
-                font.pixelSize: 12
-                color: root.cFgMuted
-            }
+        Layout.preferredHeight: 34
+        radius: 8
+        color: rowHover.containsMouse ? Qt.rgba(0, 0.831, 1, 0.10) : "transparent"
+        border.color: rowHover.containsMouse ? Qt.rgba(0, 0.831, 1, 0.28) : "transparent"
+        border.width: 1
 
-            // ── Botão "Hoje" (só aparece se navegando outro mês) ──
-            Rectangle {
-                Layout.alignment: Qt.AlignHCenter
-                Layout.preferredHeight: 26
-                Layout.preferredWidth: 90
-                visible: !(root.displayedMonth === root.now.getMonth()
-                        && root.displayedYear === root.now.getFullYear())
-                radius: 13
-                color: todayHover.containsMouse ? root.cAccent : root.cElev
+        RowLayout {
+            anchors.fill: parent
+            anchors.leftMargin: 8
+            anchors.rightMargin: 8
+            spacing: 6
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 0
+
                 Text {
-                    anchors.centerIn: parent
-                    text: "Hoje"
-                    color: todayHover.containsMouse ? root.cBg : root.cFg
+                    text: row.label
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: 9
+                    color: root.cFgMuted
+                }
+                Text {
+                    text: row.value
                     font.family: "JetBrainsMono Nerd Font"
                     font.pixelSize: 11
-                    font.weight: Font.Bold
+                    font.weight: Font.Medium
+                    color: rowHover.containsMouse ? root.cAccent : root.cFg
+                    elide: Text.ElideRight
+                    Layout.fillWidth: true
                 }
-                MouseArea {
-                    id: todayHover
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.gotoToday()
-                }
+            }
+
+            Text {
+                text: "\uf0c5"
+                font.family: "JetBrainsMono Nerd Font"
+                font.pixelSize: 11
+                color: rowHover.containsMouse ? root.cAccent : root.cFgDimmer
+            }
+        }
+
+        MouseArea {
+            id: rowHover
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: root.copyText(row.copyValue, row.label)
+        }
+    }
+
+    component ScrollMonthCard: Column {
+        id: card
+        property int month: 0
+        property int year: 2026
+        property int gridSpacing: 3
+        property real cellW: width > 0 ? Math.floor((width - gridSpacing * 6) / 7) : 40
+
+        spacing: 6
+        width: parent ? parent.width : 400
+
+        RowLayout {
+            width: card.width
+            spacing: 8
+
+            Text {
+                Layout.fillWidth: true
+                text: root.monthNames[card.month] + " " + card.year
+                font.family: "JetBrainsMono Nerd Font"
+                font.pixelSize: 13
+                font.weight: Font.Bold
+                color: (card.month === root.now.getMonth() && card.year === root.now.getFullYear())
+                       ? root.cAccent : root.cFg
             }
 
             Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 1
-                color: root.cBorder
+                visible: card.month === root.now.getMonth() && card.year === root.now.getFullYear()
+                radius: 6
+                color: root.cAccent
+                implicitWidth: hojeLabel.implicitWidth + 10
+                implicitHeight: hojeLabel.implicitHeight + 4
+
+                Text {
+                    id: hojeLabel
+                    anchors.centerIn: parent
+                    text: "hoje"
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: 9
+                    font.weight: Font.Bold
+                    color: root.cBg
+                }
             }
+        }
 
-            // ── Calendário do mês visualizado ─────────────────────
-            MonthGrid {
-                id: mainGrid
-                Layout.alignment: Qt.AlignHCenter
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                month: root.displayedMonth
-                year:  root.displayedYear
-                spacing: 4
-                locale: Qt.locale("pt_BR")
-                delegate: Item {
-                    id: dayCell
-                    implicitWidth: 32
-                    implicitHeight: 28
-                    property bool isToday: model.visibleMonth
-                                        && model.day === root.now.getDate()
-                                        && root.displayedMonth === root.now.getMonth()
-                                        && root.displayedYear === root.now.getFullYear()
-                    property bool hovered: dayHover.containsMouse && model.visibleMonth
+        MonthGrid {
+            id: grid
+            width: card.width
+            month: card.month
+            year: card.year
+            spacing: card.gridSpacing
+            locale: root.locale
 
-                    // Halo/glow externo (só hoje)
-                    Rectangle {
-                        visible: dayCell.isToday
-                        anchors.centerIn: parent
-                        width:  parent.implicitHeight + 4
-                        height: parent.implicitHeight + 4
-                        radius: width / 2
-                        color: "transparent"
-                        border.color: root.cAccent
-                        border.width: 1
-                        opacity: 0.45
+            delegate: Item {
+                implicitWidth: card.cellW
+                implicitHeight: 26
+
+                property bool inMonth: model.visibleMonth
+                property bool isToday: model.visibleMonth
+                                    && model.day === root.now.getDate()
+                                    && card.month === root.now.getMonth()
+                                    && card.year === root.now.getFullYear()
+                property bool hovered: dayHover.containsMouse && model.visibleMonth
+
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: Math.min(parent.width - 2, 28)
+                    height: Math.min(parent.height - 2, 24)
+                    radius: 6
+                    color: isToday ? root.cAccent : hovered ? root.cElev : "transparent"
+                    border.color: hovered && !isToday ? root.cAccent : "transparent"
+                    border.width: 1
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: model.day
+                    font.family: "JetBrainsMono Nerd Font"
+                    font.pixelSize: 10
+                    font.weight: (isToday || hovered) ? Font.Bold : Font.Normal
+                    color: {
+                        if (!inMonth) return root.cFgDimmer;
+                        if (isToday) return root.cBg;
+                        if (hovered) return root.cAccent;
+                        return root.cFg;
                     }
+                }
 
-                    // Círculo principal
-                    Rectangle {
-                        anchors.centerIn: parent
-                        width:  dayCell.implicitHeight - 4
-                        height: dayCell.implicitHeight - 4
-                        radius: width / 2
-                        color: dayCell.isToday  ? root.cAccent
-                             : dayCell.hovered  ? root.cElev
-                             : "transparent"
-                        border.color: (dayCell.hovered && !dayCell.isToday) ? root.cAccent : "transparent"
-                        border.width: 1
-                        Behavior on color { ColorAnimation { duration: 120 } }
-
-                        // Pulse sutil no "hoje"
-                        SequentialAnimation on scale {
-                            running: dayCell.isToday
-                            loops: Animation.Infinite
-                            NumberAnimation { from: 1.0; to: 1.06; duration: 1200; easing.type: Easing.InOutSine }
-                            NumberAnimation { from: 1.06; to: 1.0; duration: 1200; easing.type: Easing.InOutSine }
-                        }
-                    }
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: model.day
-                        color: {
-                            if (!model.visibleMonth)  return root.cFgDimmer;
-                            if (dayCell.isToday)      return root.cBg;
-                            if (dayCell.hovered)      return root.cAccent;
-                            return root.cFg;
-                        }
-                        font.family: "JetBrainsMono Nerd Font"
-                        font.pixelSize: 12
-                        font.weight: (dayCell.isToday || dayCell.hovered) ? Font.Bold : Font.Normal
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                    }
-
-                    MouseArea {
-                        id: dayHover
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: model.visibleMonth ? Qt.PointingHandCursor : Qt.ArrowCursor
-                        acceptedButtons: Qt.LeftButton
+                MouseArea {
+                    id: dayHover
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: model.visibleMonth ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    onClicked: {
+                        if (!model.visibleMonth) return;
+                        root.copyText(root.formatIsoDate(card.year, card.month, model.day),
+                                      root.formatIsoDate(card.year, card.month, model.day));
                     }
                 }
             }
+        }
+
+        Rectangle {
+            width: card.width
+            height: 1
+            color: root.cBorder
         }
     }
 }

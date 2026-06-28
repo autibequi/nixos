@@ -7,18 +7,6 @@ Cache = false
 FixedOrder = true
 HideFromProviderlist = true
 
-local LC = "LC_TIME=pt_BR.UTF-8"
-
-function sh(cmd)
-  local handle = io.popen(cmd)
-  if not handle then
-    return ""
-  end
-  local out = handle:read("*a")
-  handle:close()
-  return out or ""
-end
-
 function trim(s)
   return (s:gsub("^%s+", ""):gsub("%s+$", ""))
 end
@@ -27,17 +15,20 @@ function quote(s)
   return "'" .. s:gsub("'", "'\\''") .. "'"
 end
 
-function GetEntries()
-  local long_date = trim(sh(LC .. " date '+%A, %d de %B'"))
-  local year = trim(sh("date '+%Y'"))
-  local time = trim(sh("date '+%H:%M'"))
-  local iso = trim(sh("date '+%Y-%m-%d'"))
-  local month_title = trim(sh(LC .. " date '+%B %Y'"))
-  local cal = trim(sh(LC .. " cal -m 2>/dev/null"))
-  local tz = trim(sh("timedatectl show -p Timezone --value 2>/dev/null"))
-  if tz == "" then
-    tz = trim(sh("date '+%Z'"))
+function locale_date(fmt, fallback_fmt)
+  os.setlocale("pt_BR.UTF-8", "time")
+  local out = trim(os.date(fmt))
+  if out == "" and fallback_fmt then
+    out = trim(os.date(fallback_fmt))
   end
+  return out
+end
+
+function GetEntries()
+  local long_date = locale_date("%A, %d de %B", "%A, %d %B")
+  local time = os.date("%H:%M")
+  local iso = os.date("%Y-%m-%d")
+  local year = os.date("%Y")
 
   local q_iso = quote(iso)
   local q_time = quote(time)
@@ -45,15 +36,15 @@ function GetEntries()
   return {
     {
       Text = long_date,
-      Subtext = time .. " · " .. year .. " · " .. tz,
+      Subtext = time .. " · " .. year,
       Icon = "clock-symbolic",
       Actions = {
         activate = "sh -c 'printf \"%s\" \"$(date \"+%Y-%m-%d %H:%M\")\" | wl-copy && notify-send -a Relógio \"Copiado\" \"Data e hora\" -u low'",
       },
     },
     {
-      Text = month_title,
-      Subtext = cal,
+      Text = "Calendário",
+      Subtext = "Quickshell · scroll",
       Icon = "x-office-calendar",
       Actions = { activate = "qs ipc call clock toggle" },
     },

@@ -31,12 +31,11 @@ km.release("SUPER + Super_L",
 km.app("SUPER + l", "hyprlock",
     { desc = "Lock screen", group = "System", icon = "🔒" })
 
--- Reset geral: recarrega o Hyprland e reinicia o Quickshell (reseta todos os
--- módulos/overlays de uma vez — power menu, OSD, notif, switcher).
+-- Reset geral: recarrega Hyprland + reinicia Quickshell (calendário, power menu,
+-- OSD, switcher, overview) e waybar.
 km.fn("SUPER + Delete", function()
     hypr_reload()
-    hl.exec_cmd("systemctl --user restart quickshell")
-end, { desc = "Reset geral (Hyprland + Quickshell)", group = "System", icon = "↻" })
+end, { desc = "Reset UI (Hyprland + Quickshell + waybar)", group = "System", icon = "↻" })
 
 -- NOTA: SUPER + Escape virou focus monitor +1 (em workspace.lua).
 km.app("CTRL + ALT + Delete", powerWalker,
@@ -52,9 +51,8 @@ km.fn("SUPER + slash", function() show_shortcuts() end,
     { desc = "Shortcuts (rofi)", group = "Help", icon = "?" })
 
 -- ── Window management ───────────────────────────────────────
-km.bind("SUPER + Tab",
-    hl.dsp.window.fullscreen({ mode = "maximized" }),
-    { desc = "Maximize window", group = "Window", icon = "🗖" })
+km.fn("SUPER + Tab", function() toggle_maximize() end,
+    { desc = "Toggle maximize", group = "Window", icon = "🗖" })
 
 km.bind("SUPER + ALT + Tab", hl.dsp.window.float({}),
     { desc = "Toggle floating", group = "Window" })

@@ -32,7 +32,7 @@ anchor_right = false
 "menus:wifi" = { input = "Wi-Fi", list = "No networks" }
 "menus:power" = { input = "Power", list = "Sem ações" }
 "menus:screenshot" = { input = "Screenshot", list = "Sem captura" }
-"menus:clock" = { input = "Relógio", list = "" }
+"menus:clock" = { input = "Relógio", list = "Carregando…" }
 "wireplumber" = { input = "Áudio", list = "Sem dispositivos" }
 
 [keybinds]
@@ -56,7 +56,7 @@ clipboard = 12
 windows = 12
 "menus:power" = 6
 "menus:screenshot" = 4
-"menus:clock" = 5
+"menus:clock" = 4
 websearch = 8
 
 [[providers.prefixes]]

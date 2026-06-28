@@ -4,7 +4,7 @@
 --  hl.get_clients() não existe no Hyprland 0.55 Lua. Fallback:
 --  parse simples de `hyprctl clients -j` com gsub (sem json lib).
 --  Retorna lista de:
---    { address, class, title, pid, focused, workspace = {id, name} }
+--    { address, class, title, pid, focused, at_x, at_y, workspace = {id, name} }
 --
 --  Wrap por core.clients_cached(ttl) pra evitar io.popen redundante
 --  em keybinds rápidos (cycler/submaps/hud/picker).
@@ -38,6 +38,12 @@ function get_clients_compat()
                 local pid   = _num(block:match('"pid"%s*:%s*(%-?%d+)'))
                 local fhist = _num(block:match('"focusHistoryID"%s*:%s*(%-?%d+)'))
                 -- workspace é objeto aninhado: "workspace": { "id": N, "name": "..." }
+                local at_block = block:match('"at"%s*:%s*(%b[])')
+                local at_x, at_y
+                if at_block then
+                    at_x = _num(at_block:match('%[%s*(%-?%d+)'))
+                    at_y = _num(at_block:match(',%s*(%-?%d+)'))
+                end
                 local ws_block = block:match('"workspace"%s*:%s*(%b{})')
                 local ws_id, ws_name
                 if ws_block then
@@ -51,6 +57,8 @@ function get_clients_compat()
                         title     = title or "",
                         pid       = pid,
                         focused   = fhist == 0,
+                        at_x      = at_x,
+                        at_y      = at_y,
                         workspace = { id = ws_id, name = ws_name },
                     })
                 end
