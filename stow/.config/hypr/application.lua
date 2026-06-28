@@ -5,16 +5,16 @@
 
 local km = require("keymap")
 local L  = require("launcher")
+local HOME = os.getenv("HOME")
 
 -- ── App aliases ───────────────────────────────────────────────
 local terminal     = L.build("alacritty")
-local menu         = L.build("walker", { raw = true })
+local menu         = L.build(HOME .. "/.config/hypr/walker-launch.sh", { raw = true })
 local chrome       = L.build("google-chrome-stable")
 local zed          = L.build("zeditor")
 local quickShell   = L.build("qs ipc call overview toggle",        { raw = true })
 local controlPanel = L.build("nwg-panel-config")
 local audioManager = L.term("wiremix")
-local emojiPicker  = L.build("rofimoji --skin-tone neutral --action copy")
 
 -- ── PWAs / web apps ──────────────────────────────────────────
 local gemini_app   = L.chrome("https://gemini.google.com/")
@@ -34,7 +34,6 @@ km.app("SUPER + Space", quickShell, { desc = "Quickshell overview", group = "Sys
 km.app("MOD3 + Space",  menu,         { desc = "App launcher (Walker)", icon = "" })
 km.app("MOD3 + t",      terminal,     { desc = "Terminal",            icon = "" })
 km.app("MOD3 + z",      zed,          { desc = "Zed editor",          icon = "" })
-km.app("MOD3 + period", emojiPicker,  { desc = "Emoji picker",        icon = "" })
 km.app("MOD3 + a",      audioManager, { desc = "Audio (wiremix)",     icon = "" })
 
 -- Control panel: MOD3+SHIFT+p (SUPER+SHIFT+p é cycle profile em profiles.lua)

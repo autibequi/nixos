@@ -21,6 +21,8 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("systemctl --user start waybar")
     hl.exec_cmd("systemctl --user start quickshell")
     hl.exec_cmd("systemctl --user start hypridle")
+    hl.exec_cmd("systemctl --user start elephant")
+    hl.exec_cmd("systemctl --user start walker")
     hl.exec_cmd(L.build("awww-daemon"))
     hl.exec_cmd("awww img " .. os.getenv("HOME") ..
         "/assets/wallpapers/the-wild-hunt-of-odin.jpg --transition-type none")

@@ -96,7 +96,7 @@
       ExecStart = "${pkgs.elephant}/bin/elephant";
       Restart = "on-failure";
       RestartSec = 5;
-      Environment = "PATH=%h/.local/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin";
+      Environment = "PATH=%h/.local/bin:%h/.nix-profile/bin:/run/current-system/sw/bin";
     };
   };
 
@@ -118,7 +118,7 @@
       ExecStart = "${pkgs.walker}/bin/walker --gapplication-service";
       Restart = "on-failure";
       RestartSec = 2;
-      Environment = "PATH=%h/.local/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin";
+      Environment = "PATH=%h/.local/bin:%h/.nix-profile/bin:/run/current-system/sw/bin";
     };
   };
 }

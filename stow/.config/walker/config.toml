@@ -7,13 +7,13 @@ theme = "default"
 debug = false
 
 [shell]
-anchor_top = true
+anchor_top = false
 anchor_bottom = false
-anchor_left = true
-anchor_right = true
+anchor_left = false
+anchor_right = false
 
 [placeholders]
-"default" = { input = "Search", list = "No results" }
+"default" = { input = "Apps  : clipboard  e: emoji  = calc  > run  / files  @ web  w: windows", list = "Digite para buscar apps ou use um prefixo" }
 "desktopapplications" = { input = "Launch app", list = "No apps" }
 "calc" = { input = "Calculate", list = "Enter expression" }
 "runner" = { input = "Run command", list = "No commands" }
@@ -34,21 +34,8 @@ resume_last_query = ["ctrl r"]
 quick_activate = ["F1", "F2", "F3", "F4", "F5"]
 
 [providers]
-default = [
-  "desktopapplications",
-  "calc",
-  "runner",
-  "files",
-  "websearch",
-  "clipboard",
-  "windows",
-  "symbols",
-  "unicode",
-  "bookmarks",
-  "wireplumber",
-  "playerctl",
-]
-empty = ["desktopapplications", "windows", "clipboard"]
+default = ["desktopapplications"]
+empty = ["providerlist"]
 max_results = 80
 
 [providers.max_results_provider]
@@ -84,7 +71,7 @@ prefix = ":"
 provider = "clipboard"
 
 [[providers.prefixes]]
-prefix = "."
+prefix = "e:"
 provider = "symbols"
 
 [[providers.prefixes]]
