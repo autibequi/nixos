@@ -93,3 +93,8 @@ provider = "wireplumber"
 [[providers.prefixes]]
 prefix = "m:"
 provider = "playerctl"
+
+[providers.actions]
+dmenu = [
+  { action = "select", label = "select", default = true, bind = "Return" },
+]

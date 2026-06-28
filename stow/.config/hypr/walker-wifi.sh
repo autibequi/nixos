@@ -14,17 +14,29 @@ nmcli device wifi rescan >/dev/null 2>&1 &
 selection="$(
   nmcli --terse --escape no --fields IN-USE,SSID,SIGNAL,SECURITY device wifi list --rescan no |
     awk -F: 'length($2) {
-      active = ($1 == "*") ? "connected" : "";
+      ssid = $2;
+      signal = $3 + 0;
       security = ($4 == "") ? "open" : $4;
-      printf "%s\t%s\t%s%%\t%s\n", $2, active, $3, security
+      active = ($1 == "*") ? " · connected" : "";
+
+      if (!(ssid in best_signal) || signal > best_signal[ssid]) {
+        best_signal[ssid] = signal;
+        best_security[ssid] = security;
+        best_active[ssid] = active;
+      }
+    }
+    END {
+      for (ssid in best_signal) {
+        printf "%s · %d%% · %s%s\n", ssid, best_signal[ssid], best_security[ssid], best_active[ssid]
+      }
     }' |
     sort -u |
-    "$WALKER" --dmenu --placeholder "Wi-Fi networks"
+    "$WALKER" --dmenu --placeholder "Wi-Fi  Enter conecta  Esc cancela  digite filtra"
 )"
 
 [ -n "${selection:-}" ] || exit 0
 
-ssid="${selection%%$'\t'*}"
+ssid="${selection%% · *}"
 [ -n "$ssid" ] || exit 0
 
 if nmcli device wifi connect "$ssid" >/tmp/walker-wifi.log 2>&1; then
