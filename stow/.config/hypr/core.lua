@@ -16,31 +16,6 @@ local M = {}
 local HOME      = os.getenv("HOME")
 local CACHE_DIR = HOME .. "/.cache/hyprland"
 
--- #region agent log
-local function agent_debug_json(s)
-    return tostring(s or ""):gsub("\\", "\\\\"):gsub('"', '\\"'):gsub("\n", " ")
-end
-
-local function agent_debug_log(hypothesis_id, message, data)
-    local fields = {}
-    for k, v in pairs(data or {}) do
-        table.insert(fields, '"' .. agent_debug_json(k) .. '":"' .. agent_debug_json(v) .. '"')
-    end
-
-    local f = io.open("/home/pedrinho/nixos/.cursor/debug-1605cf.log", "a")
-    if f then
-        f:write(string.format(
-            '{"sessionId":"1605cf","runId":"open-close-freeze-debug","hypothesisId":"%s","location":"stow/.config/hypr/core.lua","message":"%s","data":{%s},"timestamp":%d}\n',
-            agent_debug_json(hypothesis_id),
-            agent_debug_json(message),
-            table.concat(fields, ","),
-            os.time() * 1000
-        ))
-        f:close()
-    end
-end
--- #endregion
-
 -- ── shell-escape pra strings em '...' (single-quoted shell) ───
 function M.escape_sh(s)
     return (s or ""):gsub("'", "'\\''")
@@ -126,9 +101,6 @@ local _clients_cache = { at = 0, data = nil }
 
 local _refresh_pending = false
 function M.invalidate_clients_cache()
-    -- #region agent log
-    agent_debug_log("H6", "invalidate_clients_cache", { refreshPending = tostring(_refresh_pending) })
-    -- #endregion
     _clients_cache.data = nil
     -- Runtime proof: refreshing with `hyprctl clients -j` from the Lua event
     -- loop freezes Hyprland for ~5-6s after window.open/window.close. Keep the
@@ -154,15 +126,9 @@ function M.clients_cached(ttl_s)
     if _clients_cache.data and (now - _clients_cache.at) < ttl_s then
         return _clients_cache.data
     end
-    -- #region agent log
-    agent_debug_log("H6", "clients_cached miss start", { ttl = tostring(ttl_s) })
-    -- #endregion
     _clients_cache.data = (type(get_clients_compat) == "function"
         and get_clients_compat()) or {}
     _clients_cache.at = now
-    -- #region agent log
-    agent_debug_log("H6", "clients_cached miss end", { count = tostring(#_clients_cache.data) })
-    -- #endregion
     return _clients_cache.data
 end
 
@@ -258,9 +224,6 @@ function M.push_home(ws)
     end
     table.insert(fresh, { ws = ws, at = now })
     M._pending_homes = fresh
-    -- #region agent log
-    agent_debug_log("H7", "push_home", { workspace = ws, pending = tostring(#M._pending_homes) })
-    -- #endregion
 end
 
 function M.pop_home()
@@ -268,15 +231,9 @@ function M.pop_home()
     while #M._pending_homes > 0 do
         local e = table.remove(M._pending_homes, 1)
         if (now - e.at) < _HOME_TTL_S then
-            -- #region agent log
-            agent_debug_log("H7", "pop_home hit", { workspace = e.ws, pending = tostring(#M._pending_homes) })
-            -- #endregion
             return e.ws
         end
     end
-    -- #region agent log
-    agent_debug_log("H7", "pop_home miss", {})
-    -- #endregion
     return nil
 end
 

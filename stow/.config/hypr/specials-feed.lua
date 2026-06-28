@@ -14,26 +14,6 @@ local core   = require("core")
 local SIGNAL = "pkill -RTMIN+11 waybar"
 local OUTPUT = "/tmp/waybar-specials.json"
 
--- #region agent log
-local function agent_debug_log(message, data)
-    local fields = {}
-    for k, v in pairs(data or {}) do
-        local value = tostring(v or ""):gsub("\\", "\\\\"):gsub('"', '\\"'):gsub("\n", " ")
-        table.insert(fields, '"' .. tostring(k) .. '":"' .. value .. '"')
-    end
-    local f = io.open("/home/pedrinho/nixos/.cursor/debug-1605cf.log", "a")
-    if f then
-        f:write(string.format(
-            '{"sessionId":"1605cf","runId":"open-close-freeze-debug","hypothesisId":"H8","location":"stow/.config/hypr/specials-feed.lua","message":"%s","data":{%s},"timestamp":%d}\n',
-            message,
-            table.concat(fields, ","),
-            os.time() * 1000
-        ))
-        f:close()
-    end
-end
--- #endregion
-
 local function json_escape(s)
     return (s or ""):gsub('\\', '\\\\'):gsub('"', '\\"'):gsub('\n', '\\n')
 end
@@ -65,25 +45,16 @@ local function build_payload()
 end
 
 local function refresh()
-    -- #region agent log
-    agent_debug_log("refresh start", {})
-    -- #endregion
     local payload = build_payload()
     local f = io.open(OUTPUT, "w")
     if f then f:write(payload); f:close() end
     hl.exec_cmd(SIGNAL)
-    -- #region agent log
-    agent_debug_log("refresh end", {})
-    -- #endregion
 end
 
 -- Coalescing: event handlers apenas marcam dirty + timer 100ms.
 -- O refresh real acontece fora do event handler com IPC livre.
 local _dirty = false
 local function schedule_refresh()
-    -- #region agent log
-    agent_debug_log("schedule_refresh", { dirty = tostring(_dirty) })
-    -- #endregion
     if _dirty then return end
     _dirty = true
     pcall(function()

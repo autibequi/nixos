@@ -34,15 +34,6 @@
     text = ''
       #!/bin/sh
       # $1 = pre|post, $2 = suspend|hibernate|hybrid-sleep|suspend-then-hibernate
-      #region agent log
-      agent_debug_log() {
-        ts=$(/run/current-system/sw/bin/date +%s%3N 2>/dev/null || /run/current-system/sw/bin/date +%s)
-        state=$(/run/current-system/sw/bin/cat /sys/power/state 2>/dev/null || true)
-        mem=$(/run/current-system/sw/bin/cat /sys/power/mem_sleep 2>/dev/null || true)
-        /run/current-system/sw/bin/printf '{"sessionId":"1605cf","runId":"sleep-debug","hypothesisId":"H1,H2,H3","location":"modules/boot/hibernate.nix:system-sleep","message":"system-sleep hook","data":{"phase":"%s","verb":"%s","powerState":"%s","memSleep":"%s"},"timestamp":%s}\n' "$1" "$2" "$state" "$mem" "$ts" >> /home/pedrinho/nixos/.cursor/debug-1605cf.log
-      }
-      agent_debug_log "$1" "$2"
-      #endregion
       [ "$1" = "post" ] || exit 0
       sleep 1  # aguarda DRM e Wayland estabilizarem
       uid=1000

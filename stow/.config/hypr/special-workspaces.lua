@@ -50,6 +50,10 @@ local function define_special(name, key, opts)
 	if opts.auto_route_classes then
 		for _, class in ipairs(opts.auto_route_classes) do
 			core.workspace_auto_route_classes[class] = name
+			hl.window_rule({
+				match = { class = class },
+				workspace = ws,
+			})
 		end
 	end
 
@@ -69,9 +73,10 @@ end
 
 -- ── Nomeados ─────────────────────────────────────────────────
 define_special("gemini", "g", {
-	label            = "gemini",
-	on_created_empty = L.chrome("https://gemini.google.com/"),
-	tile             = true,
+	label              = "gemini",
+	on_created_empty   = L.chrome("https://gemini.google.com/"),
+	auto_route_classes = { "chrome-gemini.google.com__-Default" },
+	tile               = true,
 })
 
 -- ── F-keys configurados (com app default / policy) ──────────
