@@ -99,6 +99,10 @@ define_special("f8", "F8", {
 	label = "f8 (Zed nixos)",
 	on_created_empty = L.build("zeditor ~/nixos")
 })
+define_special("f4", "F4", {
+	label            = "f4 (Terminal)",
+	on_created_empty = L.build("alacritty"),
+})
 define_special("f9", "F9", {
 	label            = "f9 (.ovault, no_screen_share)",
 	on_created_empty = L.build([[obsidian "obsidian://open?vault=.ovault"]]),
@@ -112,6 +116,6 @@ define_special("f9", "F9", {
 })
 
 -- ── F-keys scratchpad (sem app default — abre vazio) ─────────
-for _, n in ipairs({ "3", "4", "5", "6", "7" }) do
+for _, n in ipairs({ "3", "5", "6", "7" }) do
 	define_special("f" .. n, "F" .. n)
 end
