@@ -16,9 +16,11 @@ hl.on("hyprland.start", function()
 
     -- Session core (todos via uwsm — alguns precisam raw=true se já incluírem 'uwsm')
     hl.exec_cmd("systemctl --user start hyprpolkitagent")
-    -- waybar e qs rodam como systemd user service (services.nix) — reiniciam sozinhos se cair
+    -- waybar, qs e hypridle rodam como systemd user service — reiniciam sozinhos se cair
+    -- graphical-session.target não é ativado pelo UWSM neste setup, então iniciamos manualmente
     hl.exec_cmd("systemctl --user start waybar")
     hl.exec_cmd("systemctl --user start quickshell")
+    hl.exec_cmd("systemctl --user start hypridle")
     hl.exec_cmd(L.build("awww-daemon"))
     hl.exec_cmd("awww img " .. os.getenv("HOME") ..
         "/assets/wallpapers/the-wild-hunt-of-odin.jpg --transition-type none")

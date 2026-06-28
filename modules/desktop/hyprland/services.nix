@@ -53,6 +53,9 @@
       ExecStart = "${pkgs.waybar}/bin/waybar --config %h/.config/waybar/config.jsonc --style %h/.config/waybar/style.css";
       Restart = "on-failure";
       RestartSec = 2;
+      # %h/.local/bin necessário para `yaa` (custom/claude-usage). Systemd user services
+      # não herdam o PATH completo do shell; adicionar manualmente os caminhos críticos.
+      Environment = "PATH=%h/.local/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin";
     };
   };
 
