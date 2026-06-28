@@ -1,9 +1,8 @@
 -- ============================================================
---  SCREENSHOTS + OCR — disparo via heredoc shell
+--  SCREENSHOTS — legado / referência
 --
---  As 4 funções saem direto pra `hl.exec_cmd("sh -c '...'")` —
---  shell faz captura (grim/slurp), edição (satty), e clipboard.
---  Lua só decide o modo e (em full-then-crop) o monitor ativo.
+--  Fluxo principal: walker-screenshot.sh (SUPER+U)
+--    slurp → grim → Walker menus:screenshot → satty/tesseract/etc.
 -- ============================================================
 
 local function active_monitor_name()
@@ -11,6 +10,7 @@ local function active_monitor_name()
     return m and m.name or ""
 end
 
+-- Mantidas para compat; preferir walker-screenshot.sh + menus:screenshot
 function print_screen_to_clipboard()
     hl.exec_cmd([[sh -c '
         mkdir -p ~/Pictures/Screenshots

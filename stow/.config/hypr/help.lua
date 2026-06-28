@@ -247,15 +247,12 @@ SUPER+Tab      maximize            SUPER+ALT+Tab     float toggle
 SUPER+F11      fullscreen client   SUPER+SHIFT+F11   true fullscreen
 
 ─── Screenshots & clipboard ─────────────────
-SUPER+U        region → clip       SUPER+ALT+U       full + crop
-SUPER+SHIFT+U  OCR region          SUPER+SHIFT+V     clip history
-SUPER+P        color picker        CTRL+ALT+V        paste sem newlines
-
-─── Voice ───────────────────────────────────
-SUPER+V        whisper PTT (hold)
+SUPER+U        região → Walker (copiar/salvar/satty/OCR)
+SUPER+P        color picker              SUPER+SHIFT+V clip history (terminal)
+SUPER+V        Walker clipboard          CTRL+ALT+V    paste sem newlines
 
 ─── Power ───────────────────────────────────
-MOD3+F12       wlogout (logout/suspend/shutdown menu)
+CTRL+ALT+DEL   Walker power menu    MOD3+F12   wlogout
 ```
 
 > Mudanças notáveis vs versão hyprlang antiga:

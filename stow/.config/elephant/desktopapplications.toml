@@ -1,0 +1,13 @@
+history = true
+history_when_empty = true
+window_integration = true
+score_open_windows = true
+show_actions = false
+
+[aliases]
+term = "Alacritty"
+chrome = "google-chrome"
+zed = "zeditor"
+obs = "obsidian"
+code = "code"
+nix = "nh"

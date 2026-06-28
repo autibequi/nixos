@@ -1,11 +1,14 @@
 force_keyboard_focus = true
 close_when_open = true
 click_to_close = true
-selection_wrap = true
+selection_wrap = false
 exact_search_prefix = "'"
 theme = "dash"
 debug = false
 ext_background_effect_blur = false
+hide_quick_activation = true
+keybind_symbols = true
+single_click_activation = true
 
 [shell]
 anchor_top = false
@@ -14,8 +17,9 @@ anchor_left = false
 anchor_right = false
 
 [placeholders]
-"default" = { input = "Apps  : clipboard  e: emoji  = calc  > run  / files  @ web  w: windows", list = "Digite para buscar apps ou use um prefixo" }
-"desktopapplications" = { input = "Launch app", list = "No apps" }
+"default" = { input = "Apps  ·  ! hub  : clip  = calc  > run  / files  @ web  w: win", list = "Recentes abaixo · ferramentas no hub" }
+"desktopapplications" = { input = "Apps", list = "Sem apps · Ctrl+P fixar no topo" }
+"menus:dash" = { input = "Hub", list = "Sem ferramentas" }
 "calc" = { input = "Calculate", list = "Enter expression" }
 "runner" = { input = "Run command", list = "No commands" }
 "files" = { input = "Browse files", list = "No files" }
@@ -26,6 +30,8 @@ anchor_right = false
 "windows" = { input = "Windows", list = "No windows" }
 "providerlist" = { input = "Providers", list = "No providers" }
 "menus:wifi" = { input = "Wi-Fi", list = "No networks" }
+"menus:power" = { input = "Power", list = "Sem ações" }
+"menus:screenshot" = { input = "Screenshot", list = "Sem captura" }
 "wireplumber" = { input = "Áudio", list = "Sem dispositivos" }
 
 [keybinds]
@@ -34,20 +40,26 @@ next = ["Down", "ctrl j"]
 previous = ["Up", "ctrl k"]
 toggle_exact = ["ctrl e"]
 resume_last_query = ["ctrl r"]
-quick_activate = ["F1", "F2", "F3", "F4", "F5"]
 
 [providers]
 default = ["desktopapplications"]
-empty = ["providerlist"]
-max_results = 80
+empty = ["desktopapplications", "menus:dash"]
+ignore_preview = ["desktopapplications", "files", "runner", "windows", "websearch", "providerlist", "menus:dash", "menus:power", "menus:screenshot", "calc", "symbols"]
+max_results = 40
 
 [providers.max_results_provider]
-desktopapplications = 24
-files = 30
-runner = 30
-clipboard = 20
-windows = 20
-websearch = 10
+desktopapplications = 10
+files = 20
+runner = 15
+clipboard = 12
+windows = 12
+"menus:power" = 6
+"menus:screenshot" = 4
+websearch = 8
+
+[[providers.prefixes]]
+prefix = "!"
+provider = "menus:dash"
 
 [[providers.prefixes]]
 prefix = ";"
@@ -97,9 +109,31 @@ provider = "wireplumber"
 prefix = "m:"
 provider = "playerctl"
 
+[providers.clipboard]
+time_format = "relative"
+
 [providers.actions]
 dmenu = [
   { action = "select", label = "connect", default = true, bind = "Return" },
+]
+
+desktopapplications = [
+  { action = "start", default = true, bind = "Return", label = "open", after = "Close" },
+  { action = "start:keep", bind = "shift Return", label = "open+next", after = "KeepOpen" },
+  { action = "pin", bind = "ctrl p", label = "pin", after = "AsyncReload" },
+  { action = "unpin", bind = "ctrl p", after = "AsyncReload" },
+]
+
+"menus:dash" = [
+  { action = "activate", default = true, bind = "Return", label = "open", after = "Close" },
+]
+
+"menus:power" = [
+  { action = "activate", default = true, bind = "Return", label = "run", after = "Close" },
+]
+
+"menus:screenshot" = [
+  { action = "activate", default = true, bind = "Return", after = "Close" },
 ]
 
 "menus:wifi" = [
@@ -107,6 +141,20 @@ dmenu = [
   { action = "activate", bind = "Return", label = "run", after = "AsyncReload" },
   { action = "ask", bind = "ctrl a", label = "senha", after = "Close" },
   { action = "rescan", global = true, bind = "ctrl f", label = "rescan", after = "AsyncClearReload" },
+]
+
+clipboard = [
+  { action = "copy", default = true, bind = "Return", label = "copy", after = "Close" },
+  { action = "remove", bind = "ctrl d", after = "AsyncClearReload" },
+  { action = "remove_all", label = "clear", bind = "ctrl shift d", after = "AsyncClearReload" },
+  { action = "show_images_only", label = "only images", bind = "ctrl i", after = "AsyncClearReload" },
+  { action = "show_text_only", label = "only text", bind = "ctrl i", after = "AsyncClearReload" },
+  { action = "show_combined", label = "show all", bind = "ctrl i", after = "AsyncClearReload" },
+  { action = "pause", bind = "ctrl shift p" },
+  { action = "unpause", bind = "ctrl shift p" },
+  { action = "unpin", bind = "ctrl p", after = "AsyncClearReload" },
+  { action = "pin", bind = "ctrl p", after = "AsyncClearReload" },
+  { action = "edit", bind = "ctrl o" },
 ]
 
 wireplumber = [

@@ -45,7 +45,21 @@ popover arrow {
 }
 
 scrollbar {
+  min-width: 8px;
+  min-height: 8px;
   opacity: 0;
+  border: none;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+scrollbar slider {
+  opacity: 0;
+  min-width: 0;
+  min-height: 0;
+  border: none;
+  margin: 0;
 }
 
 .box-wrapper {
@@ -225,4 +239,139 @@ row:selected .item-text {
 .preview-content.archlinuxpkgs,
 .preview-content.dnfpackages {
   font-family: monospace;
+}
+
+/* ── Dash launcher ─────────────────────────────────────────── */
+
+.box-wrapper {
+  padding: 16px 20px;
+}
+
+.desktopapplications .item-image,
+.menus-dash .item-image {
+  -gtk-icon-size: 28px;
+  margin-right: 12px;
+}
+
+.desktopapplications .item-text,
+.menus-dash .item-text {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.desktopapplications .item-subtext {
+  font-size: 11px;
+}
+
+.pinned .item-text {
+  color: @accent_bg_color;
+  font-weight: 700;
+}
+
+.menus-dash .item-subtext {
+  color: @theme_fg_muted;
+  opacity: 0.85;
+}
+
+.desktopapplications .item-box,
+.menus-dash .item-box {
+  padding: 8px 10px;
+}
+
+/* ── Menus compactos — sem scroll ──────────────────────────── */
+
+.menus-screenshot .box-wrapper {
+  padding: 8px 12px;
+}
+
+.menus-screenshot scrollbar {
+  min-width: 0;
+  min-height: 0;
+  opacity: 0;
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.menus-screenshot .item-box {
+  min-height: 44px;
+  padding: 6px 10px;
+}
+
+.menus-screenshot .item-text {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.menus-power .list {
+  min-height: 288px;
+}
+
+.menus-power scrollbar {
+  min-width: 0;
+  min-height: 0;
+  opacity: 0;
+}
+
+.menus-power .item-box {
+  min-height: 48px;
+  padding: 8px 10px;
+}
+
+/* ── Clipboard — layout estável (sem wiggle ao navegar) ───── */
+
+.clipboard .content-container {
+  min-height: 360px;
+}
+
+.clipboard .list {
+  min-height: 360px;
+}
+
+.clipboard .item-box {
+  min-height: 48px;
+  padding: 8px 10px;
+}
+
+.clipboard .item-text {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.clipboard .item-subtext {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.clipboard .preview-box {
+  min-width: 300px;
+  min-height: 360px;
+  padding: 8px 4px 8px 12px;
+}
+
+.clipboard .preview,
+.preview-content.clipboard {
+  border-radius: 10px;
+  background: @surface_color;
+  padding: 14px 16px;
+  margin: 0;
+  min-height: 320px;
+  min-width: 280px;
+}
+
+.clipboard .preview-content {
+  padding: 12px 14px;
+  line-height: 1.45;
+  min-height: 280px;
+}
+
+.clipboard .preview label,
+.preview-content.clipboard label {
+  padding: 4px 2px;
+}
+
+.clipboard .preview image,
+.preview-content.clipboard image {
+  border-radius: 8px;
+  margin: 4px;
 }

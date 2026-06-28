@@ -230,3 +230,22 @@ row:selected .item-text {
 .menus-wifi .item-image {
   -gtk-icon-size: 40px;
 }
+
+.menus-power .item-image {
+  -gtk-icon-size: 28px;
+}
+
+.menus-power .item-box {
+  padding: 8px 10px;
+}
+
+.menus-power .item-text {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.menus-power .item-subtext {
+  font-size: 11px;
+  color: @theme_fg_muted;
+  opacity: 0.85;
+}

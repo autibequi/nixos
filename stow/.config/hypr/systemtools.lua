@@ -5,6 +5,11 @@
 
 local km = require("keymap")
 local L  = require("launcher")
+local HOME = os.getenv("HOME")
+
+local clipboardWalker = L.build(HOME .. "/.config/hypr/walker-launch.sh --provider clipboard", { raw = true })
+local powerWalker = L.build(HOME .. "/.config/hypr/walker-launch.sh --theme neon --provider menus:power", { raw = true })
+local screenshotWalker = L.build(HOME .. "/.config/hypr/walker-screenshot.sh", { raw = true })
 
 -- ── Window control ──────────────────────────────────────────
 km.bind("MOD3 + Escape", hl.dsp.window.close(),
@@ -34,9 +39,8 @@ km.fn("SUPER + Delete", function()
 end, { desc = "Reset geral (Hyprland + Quickshell)", group = "System", icon = "↻" })
 
 -- NOTA: SUPER + Escape virou focus monitor +1 (em workspace.lua).
--- Power menu in-house (quickshell): Ctrl+Alt+Del, o clássico.
-km.app("CTRL + ALT + Delete", L.build("qs ipc call powermenu toggle", { raw = true }),
-    { desc = "Power menu", group = "System", icon = "⏻" })
+km.app("CTRL + ALT + Delete", powerWalker,
+    { desc = "Power menu (Walker)", group = "System", icon = "⏻" })
 
 -- Centro de notificações via swaync; o módulo Notifications do Quickshell está
 -- desativado até estabilizar o crash no NotificationServer.
@@ -64,31 +68,20 @@ km.bind("SUPER + SHIFT + F11",
     { desc = "True fullscreen", group = "Window" })
 
 -- ── Screenshots ─────────────────────────────────────────────
-km.fn("SUPER + u",         function() print_screen_to_clipboard() end,
-    { desc = "Region → clipboard", group = "Screenshot", icon = "📸" })
-
-km.fn("SUPER + ALT + u",   function() print_screen_full_then_crop() end,
-    { desc = "Full monitor + crop", group = "Screenshot", icon = "📸" })
-
-km.fn("SUPER + SHIFT + u", function() tesseract_region() end,
-    { desc = "OCR region → clipboard", group = "Screenshot", icon = "🔡" })
-
--- NOTA: SUPER + CTRL + u removido (duplicado com SUPER + ALT + u).
+-- Região → Walker (copiar / salvar / satty / OCR)
+km.app("SUPER + u", screenshotWalker,
+    { desc = "Screenshot região → ação", group = "Screenshot", icon = "📸" })
 
 -- ── Clipboard ───────────────────────────────────────────────
+km.app("SUPER + v", clipboardWalker,
+    { desc = "Clipboard (Walker)", group = "Clipboard", icon = "📋" })
+
 km.fn("SUPER + SHIFT + v", function() clipboard_history() end,
-    { desc = "Clipboard history", group = "Clipboard", icon = "📋" })
+    { desc = "Clipboard history (terminal)", group = "Clipboard", icon = "📋" })
 
 km.app("CTRL + ALT + V",
     "sh -c 'wl-paste | tr -d \"\\n\" | wtype --'",
     { desc = "Paste without newlines", group = "Clipboard", icon = "📋" })
-
--- ── Whisper Push-to-Talk ────────────────────────────────────
-km.app("SUPER + v", "whisper-ctl start",
-    { desc = "Whisper PTT start", group = "Voice", icon = "🎤" })
-
-km.release("SUPER + v", hl.dsp.exec_cmd("whisper-ctl stop"),
-    { desc = "Whisper PTT stop (release)", group = "Voice" })
 
 -- ── Theme toggle ────────────────────────────────────────────
 km.fn("SUPER + n", function() toggle_theme() end,
