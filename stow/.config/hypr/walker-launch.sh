@@ -16,4 +16,22 @@ if ! systemctl --user --quiet is-active walker.service; then
   systemctl --user start walker.service >/dev/null 2>&1 || true
 fi
 
-exec walker "$@"
+args=("$@")
+for ((i = 0; i < ${#args[@]}; i++)); do
+  case "${args[i]}" in
+    --provider)
+      [[ "${args[i + 1]:-}" == "menus:wifi" ]] && args=(--hideqa "${args[@]}")
+      break
+      ;;
+    --provider=*)
+      [[ "${args[i]#--provider=}" == "menus:wifi" ]] && args=(--hideqa "${args[@]}")
+      break
+      ;;
+    -m)
+      [[ "${args[i + 1]:-}" == "menus:wifi" ]] && args=(--hideqa "${args[@]}")
+      break
+      ;;
+  esac
+done
+
+exec walker "${args[@]}"

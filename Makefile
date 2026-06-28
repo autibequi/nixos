@@ -5,7 +5,7 @@
 SHELL := bash
 .SHELLFLAGS := -eu -o pipefail -c
 .ONESHELL:
-.PHONY: help switch update upgrade zed-update yaak-update stow restow
+.PHONY: help switch update upgrade zed-update yaak-update stow restow space
 
 help: ## Lista os alvos disponíveis
 	@grep -E '^[a-z][a-zA-Z_-]*:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*## "}{printf "  \033[1m%-12s\033[0m %s\n", $$1, $$2}'
@@ -75,3 +75,36 @@ stow: ## Injeta dotfiles via stow (limpa conflitos em .config/bardiel antes)
 	stow --target="$$HOME" --no-folding --adopt -S stow
 
 restow: stow ## Re-injeta dotfiles (alias de stow)
+
+# ── Manutenção ──────────────────────────────────────────────────────────────
+
+space: ## Mostra maiores consumidores de disco por pasta/cache/podman
+	@limit="$${SPACE_LIMIT:-30}"
+	root="$${SPACE_ROOT:-$$HOME}"
+	fs_target="$${SPACE_FS_TARGET:-$$root}"
+	read -r fs_size fs_used fs_avail fs_pct fs_mount < <(df -B1 --output=size,used,avail,pcent,target "$$fs_target" | awk 'NR == 2 { print $$1, $$2, $$3, $$4, $$5 }')
+	human() { numfmt --to=iec-i --suffix=B --format='%.1f' "$$1"; }
+	section_du() {
+	  local title="$$1" dir="$$2"
+	  [[ -d "$$dir" ]] || return 0
+	  printf '\n## %s (%s)\n' "$$title" "$$dir"
+	  printf '%12s %8s  %s\n' "SIZE" "%FS" "PATH"
+	  { du -x -B1 -d 1 "$$dir" 2>/dev/null || true; } \
+	    | sort -nr \
+	    | awk -v total="$$fs_size" -v limit="$$limit" 'NR <= limit { pct = total > 0 ? ($$1 / total) * 100 : 0; printf "%12d %7.2f%%  %s\n", $$1, pct, $$2 }' \
+	    | numfmt --field=1 --to=iec-i --suffix=B --format='%8.1f'
+	}
+	printf 'Filesystem: %s\n' "$$fs_mount"
+	printf 'Total: %s  Used: %s (%s)  Free: %s\n' "$$(human "$$fs_size")" "$$(human "$$fs_used")" "$$fs_pct" "$$(human "$$fs_avail")"
+	printf 'Limit per section: %s entries (SPACE_LIMIT=N)\n' "$$limit"
+	section_du '$$HOME' "$$root"
+	section_du '$$HOME/.local/share' "$$root/.local/share"
+	section_du '$$HOME/.cache' "$$root/.cache"
+	section_du '$$HOME/projects' "$$root/projects"
+	section_du '$$HOME/Downloads' "$$root/Downloads"
+	if command -v podman >/dev/null 2>&1; then
+	  printf '\n## Podman images\n'
+	  podman images --format 'table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.Size}}\t{{.Created}}' 2>/dev/null || true
+	  printf '\n## Podman containers\n'
+	  podman ps -a --format 'table {{.ID}}\t{{.Image}}\t{{.Names}}\t{{.Status}}\t{{.Size}}' --size 2>/dev/null || true
+	fi

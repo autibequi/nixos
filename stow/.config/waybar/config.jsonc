@@ -344,7 +344,7 @@
 		"format-linked": "󰈀 {ifname} (No IP)",
 		"format-disconnected": "󰖪 Disconnected",
 		"tooltip-format": "󰖩 {essid} : {ifname}: {ipaddr}",
-		"on-click": "$HOME/.config/hypr/networkmanager-dmenu-launch.sh",
+		"on-click": "$HOME/.config/hypr/walker-launch.sh --theme neon --provider menus:wifi",
 		"on-click-right": "alacritty -e nmtui"
 	},
 	"bluetooth": {
@@ -355,7 +355,7 @@
 		"tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
 		"tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
 		"tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t{device_battery_percentage}%",
-		"on-click": "$HOME/.config/hypr/walker-launch.sh --provider bluetooth",
+		"on-click": "$HOME/.config/hypr/walker-launch.sh --theme neon --provider bluetooth",
 		"on-click-right": "alacritty -e bluetuith"
 	},
 	"pulseaudio": {

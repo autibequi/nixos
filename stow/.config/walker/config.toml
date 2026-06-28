@@ -3,8 +3,9 @@ close_when_open = true
 click_to_close = true
 selection_wrap = true
 exact_search_prefix = "'"
-theme = "default"
+theme = "dash"
 debug = false
+ext_background_effect_blur = false
 
 [shell]
 anchor_top = false
@@ -24,6 +25,8 @@ anchor_right = false
 "unicode" = { input = "Unicode", list = "No characters" }
 "windows" = { input = "Windows", list = "No windows" }
 "providerlist" = { input = "Providers", list = "No providers" }
+"menus:wifi" = { input = "Wi-Fi", list = "No networks" }
+"wireplumber" = { input = "Áudio", list = "Sem dispositivos" }
 
 [keybinds]
 close = ["Escape", "ctrl q"]
@@ -97,4 +100,22 @@ provider = "playerctl"
 [providers.actions]
 dmenu = [
   { action = "select", label = "connect", default = true, bind = "Return" },
+]
+
+"menus:wifi" = [
+  { action = "connect", default = true, bind = "Return", label = "connect", after = "Close" },
+  { action = "activate", bind = "Return", label = "run", after = "AsyncReload" },
+  { action = "ask", bind = "ctrl a", label = "senha", after = "Close" },
+  { action = "rescan", global = true, bind = "ctrl f", label = "rescan", after = "AsyncClearReload" },
+]
+
+wireplumber = [
+  { action = "set_default_device", default = true, bind = "Return", label = "padrão", after = "Close" },
+  { action = "increase_volume", bind = "plus", label = "vol+", after = "Nothing" },
+  { action = "increase_volume", bind = "equal", label = "vol+", after = "Nothing" },
+  { action = "decrease_volume", bind = "minus", label = "vol-", after = "Nothing" },
+  { action = "increase_volume", bind = "ctrl Up", label = "vol+", after = "Nothing" },
+  { action = "decrease_volume", bind = "ctrl Down", label = "vol-", after = "Nothing" },
+  { action = "mute", bind = "ctrl m", label = "mute", after = "Nothing" },
+  { action = "unmute", bind = "ctrl m", label = "mute", after = "Nothing" },
 ]

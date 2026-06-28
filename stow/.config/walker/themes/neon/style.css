@@ -1,0 +1,232 @@
+/* neon — Walker alinhado à paleta Waybar (Deep Dark + cyan) */
+
+@define-color window_bg_color #0a0e14;
+@define-color surface_color #1a1f29;
+@define-color elev_color #2a2f3a;
+@define-color border_color #2d3748;
+@define-color theme_fg_color #e6e6e6;
+@define-color theme_fg_muted #9ca3af;
+@define-color accent_bg_color #00d4ff;
+@define-color accent_soft_color #ff79c6;
+@define-color success_color #50fa7b;
+@define-color warning_color #ffb454;
+@define-color danger_color #ff6b6b;
+@define-color info_color #00e8c6;
+@define-color error_bg_color @danger_color;
+@define-color error_fg_color @window_bg_color;
+
+* {
+  all: unset;
+}
+
+popover {
+  background: @surface_color;
+  border: 1px solid @border_color;
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: none;
+  color: @theme_fg_color;
+}
+
+popover arrow {
+  opacity: 0;
+  min-width: 0;
+  min-height: 0;
+  border: none;
+  background: transparent;
+}
+
+.normal-icons {
+  -gtk-icon-size: 16px;
+}
+
+.large-icons {
+  -gtk-icon-size: 32px;
+}
+
+scrollbar {
+  opacity: 0;
+}
+
+.box-wrapper {
+  background: @window_bg_color;
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid @border_color;
+  box-shadow: none;
+}
+
+.preview-box,
+.elephant-hint,
+.placeholder {
+  color: @theme_fg_muted;
+}
+
+.search-container {
+  border-radius: 10px;
+}
+
+.input placeholder {
+  color: @theme_fg_muted;
+  opacity: 0.85;
+}
+
+.input selection {
+  background: alpha(@accent_bg_color, 0.35);
+  color: @window_bg_color;
+}
+
+.input {
+  caret-color: @accent_bg_color;
+  background: @surface_color;
+  padding: 10px;
+  color: @theme_fg_color;
+  border-radius: 10px;
+}
+
+.content-container {
+}
+
+.list {
+  color: @theme_fg_color;
+}
+
+.item-box {
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.item-quick-activation {
+  background: alpha(@accent_bg_color, 0.18);
+  border-radius: 5px;
+  padding: 10px;
+  color: @accent_bg_color;
+}
+
+child:selected .item-box,
+row:selected .item-box {
+  background: alpha(@accent_bg_color, 0.22);
+  color: @theme_fg_color;
+}
+
+child:selected .item-text,
+row:selected .item-text {
+  color: @accent_bg_color;
+}
+
+.item-subtext {
+  font-size: 12px;
+  color: @theme_fg_muted;
+  opacity: 0.9;
+}
+
+.providerlist .item-subtext {
+  font-size: unset;
+  opacity: 0.85;
+}
+
+.item-image-text {
+  font-size: 28px;
+}
+
+.preview {
+  border: 1px solid @border_color;
+  border-radius: 10px;
+  color: @theme_fg_color;
+  background: @surface_color;
+}
+
+.calc .item-text {
+  font-size: 24px;
+  color: @info_color;
+}
+
+.symbols .item-image {
+  font-size: 24px;
+}
+
+.todo.done .item-text-box {
+  opacity: 0.35;
+}
+
+.todo.urgent {
+  font-size: 24px;
+  color: @warning_color;
+}
+
+.todo.active {
+  font-weight: bold;
+  color: @accent_bg_color;
+}
+
+.bluetooth.disconnected {
+  opacity: 0.45;
+}
+
+.preview .large-icons {
+  -gtk-icon-size: 64px;
+}
+
+.keybinds {
+  padding-top: 10px;
+  border-top: 1px solid @border_color;
+  font-size: 12px;
+  color: @theme_fg_muted;
+}
+
+.keybind-button {
+  opacity: 0.85;
+  background: @surface_color;
+  border: 1px solid @border_color;
+  border-radius: 6px;
+  padding: 2px 4px;
+  box-shadow: none;
+  color: @theme_fg_color;
+}
+
+.keybind-button:hover {
+  opacity: 1;
+  background: @elev_color;
+  border-color: alpha(@accent_bg_color, 0.45);
+  box-shadow: none;
+}
+
+.keybind-button:focus,
+.keybind-button:active {
+  background: @elev_color;
+  box-shadow: none;
+  outline: none;
+}
+
+.keybind-bind {
+  text-transform: lowercase;
+  opacity: 0.55;
+  color: @theme_fg_muted;
+}
+
+.keybind-label {
+  padding: 2px 4px;
+  border-radius: 4px;
+  border: 1px solid alpha(@accent_bg_color, 0.55);
+  color: @accent_bg_color;
+}
+
+.error {
+  padding: 10px;
+  background: @danger_color;
+  color: @window_bg_color;
+}
+
+:not(.calc).current {
+  font-style: italic;
+  color: @accent_soft_color;
+}
+
+.preview-content.archlinuxpkgs,
+.preview-content.dnfpackages {
+  font-family: monospace;
+}
+
+.menus-wifi .item-image {
+  -gtk-icon-size: 40px;
+}

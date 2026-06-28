@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Shim fuzzel → Walker para networkmanager_dmenu.
+# nmdm detecta basename "fuzzel" e passa --dmenu/--placeholder/--password,
+# flags compatíveis com Walker (ao contrário do modo "walker" que injeta -f).
+set -euo pipefail
+
+PATH="/run/current-system/sw/bin:${HOME}/.nix-profile/bin:/usr/bin:/bin:${PATH:-}"
+
+systemctl --user start elephant.service walker.service >/dev/null 2>&1 || true
+
+args=(--hideqa --exit)
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dmenu)
+      args+=(--dmenu)
+      shift
+      ;;
+    --placeholder)
+      args+=(--placeholder "$2")
+      shift 2
+      ;;
+    --password)
+      args+=(--dmenu --password)
+      shift
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
+
+exec walker "${args[@]}"
