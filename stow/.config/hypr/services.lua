@@ -10,8 +10,7 @@ local core = require("core")
 local L    = require("launcher")
 
 function waybar_refresh()
-    hl.exec_cmd("pkill waybar")
-    hl.exec_cmd(L.build("waybar --config ~/.config/waybar/config.jsonc --style ~/.config/waybar/style.css"))
+    hl.exec_cmd("systemctl --user restart waybar")
     hl.exec_cmd("pkill bongocat")
     -- bongocat só roda quando AC plugged (gate via sh)
     hl.exec_cmd([[sh -c '[ "$(cat /sys/class/power_supply/ADP0/online 2>/dev/null)" = "1" ] && ]]

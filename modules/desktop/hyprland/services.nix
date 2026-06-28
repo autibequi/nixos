@@ -38,6 +38,24 @@
     };
   };
 
+  # Waybar — status bar. Systemd user service pra reiniciar sozinho se cair.
+  # Sem isso, pkill waybar (no hotplug de monitor) ou crash deixa a barra sumida.
+  # Substitui o `hl.exec_cmd(L.build("waybar"))` do autostart.lua.
+  systemd.user.services.waybar = {
+    description = "Waybar status bar";
+    after = [ "graphical-session.target" ];
+    wantedBy = [ "graphical-session.target" ];
+    unitConfig = {
+      StartLimitBurst = 5;
+      StartLimitIntervalSec = 30;
+    };
+    serviceConfig = {
+      ExecStart = "${pkgs.waybar}/bin/waybar --config %h/.config/waybar/config.jsonc --style %h/.config/waybar/style.css";
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+  };
+
   # Quickshell — shell in-house (overview, clock, power menu, OSD, notif, switcher).
   # Subido como systemd user service pra reiniciar sozinho se cair — sem isso o `qs`
   # morre (ex: spawn pendurado no terminal) e TODOS os módulos somem junto.
