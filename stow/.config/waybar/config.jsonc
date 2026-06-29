@@ -16,6 +16,8 @@
 	"modules-center": [
 		"custom/screenrecord",
 		"custom/swaync",
+		"custom/github",
+		"custom/jira",
 		"custom/chicote",
 		"clock",
 		"battery"
@@ -113,8 +115,8 @@
 	"hyprland/workspaces": {
 		"interval": 1,
 		"disable-scroll": true,
-		"all-outputs": false,
-		"move-to-monitor": true,
+		"all-outputs": true,
+		"move-to-monitor": false,
 		"show-special": false,
 		"persistent-workspaces": {},
 		"format": "{icon}{windows}</span>",
@@ -196,8 +198,8 @@
 	},
 	"hyprland/workspaces#special": {
 		"disable-scroll": true,
-		"all-outputs": false,
-		"move-to-monitor": true,
+		"all-outputs": true,
+		"move-to-monitor": false,
 		"show-special": true,
 		"persistent-workspaces": {},
 		"on-click": "activate",
@@ -418,6 +420,20 @@
 		"interval": 2,
 		"format": "{}",
 		"tooltip": true,
+		"escape": false
+	},
+	"custom/github": {
+		"exec": "echo '{\"text\":\" 3  3\",\"tooltip\":\"3 PRs abertos · 3 aguardando review\"}'",
+		"return-type": "json",
+		"interval": "once",
+		"on-click": "qs ipc call github toggle",
+		"escape": false
+	},
+	"custom/jira": {
+		"exec": "echo '{\"text\":\"J  2  5  8\",\"tooltip\":\"FUK2 Sprint 23\\nFazendo: 2 · A fazer: 5 · Backlog: 8\"}'",
+		"return-type": "json",
+		"interval": "once",
+		"on-click": "qs ipc call github toggle",
 		"escape": false
 	},
 	"custom/swaync": {

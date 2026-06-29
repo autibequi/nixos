@@ -11,6 +11,7 @@ import "./modules/clock/"
 import "./modules/powermenu/"
 import "./modules/osd/"
 import "./modules/switcher/"
+import "./modules/github/"
 
 import QtQuick
 import Quickshell
@@ -22,4 +23,5 @@ ShellRoot {
     PowerMenu {}
     Osd {}
     WindowSwitcher {}
+    GithubWidget {}
 }
