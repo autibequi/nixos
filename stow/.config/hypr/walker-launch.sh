@@ -30,6 +30,7 @@ has_height=false
 provider=""
 
 WALKER_W=720
+WALKER_H=520
 
 for a in "${args[@]}"; do
   case "$a" in
@@ -68,20 +69,15 @@ if ! $has_hideqa; then
 fi
 
 if ! $has_provider; then
-  # Estado vazio (sem query): barra compacta só com input.
-  # Ao digitar: cresce até maxheight fixo em 50% da altura do monitor.
-  launcher_max=480
-  _logical_h="$(hyprctl monitors -j 2>/dev/null \
-    | jq -r 'first(.[] | select(.focused)) | (.height / .scale)' 2>/dev/null)"
-  if [[ "$_logical_h" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-    launcher_max="$(awk -v h="$_logical_h" 'BEGIN { printf "%d", h * 0.8 }')"
-  fi
+  # Landing (menus:home): tamanho fixo, não cresce nem encolhe.
+  # Ao digitar (busca de apps) a janela mantém a mesma caixa e a lista rola dentro.
   compact=()
   if ! $has_width; then compact+=(--width "$WALKER_W"); fi
   if ! $has_minwidth; then compact+=(--minwidth "$WALKER_W"); fi
   if ! $has_maxwidth; then compact+=(--maxwidth "$WALKER_W"); fi
-  if ! $has_minheight; then compact+=(--minheight 0); fi
-  if ! $has_maxheight; then compact+=(--maxheight "$launcher_max"); fi
+  if ! $has_height; then compact+=(--height "$WALKER_H"); fi
+  if ! $has_minheight; then compact+=(--minheight "$WALKER_H"); fi
+  if ! $has_maxheight; then compact+=(--maxheight "$WALKER_H"); fi
   args=("${compact[@]}" "${args[@]}")
 fi
 

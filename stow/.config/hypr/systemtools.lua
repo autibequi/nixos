@@ -10,6 +10,7 @@ local HOME = os.getenv("HOME")
 local clipboardWalker = L.build(HOME .. "/.config/hypr/walker-launch.sh --provider clipboard", { raw = true })
 local powerWalker = L.build(HOME .. "/.config/hypr/walker-launch.sh --theme neon --provider menus:power", { raw = true })
 local screenshotWalker = L.build(HOME .. "/.config/hypr/walker-screenshot.sh", { raw = true })
+local todoWalker = L.build(HOME .. "/.config/hypr/walker-launch.sh --provider menus:todo", { raw = true })
 
 -- ── Window control ──────────────────────────────────────────
 km.bind("MOD3 + Escape", hl.dsp.window.close(),
@@ -79,6 +80,10 @@ km.fn("SUPER + SHIFT + v", function() clipboard_history() end,
 km.app("CTRL + ALT + V",
     "sh -c 'wl-paste | tr -d \"\\n\" | wtype --'",
     { desc = "Paste without newlines", group = "Clipboard", icon = "📋" })
+
+-- ── Quick TODO ──────────────────────────────────────────────
+km.app("SUPER + t", todoWalker,
+    { desc = "Quick TODO (Walker)", group = "System", icon = "✓" })
 
 -- ── Theme toggle ────────────────────────────────────────────
 km.fn("SUPER + n", function() toggle_theme() end,

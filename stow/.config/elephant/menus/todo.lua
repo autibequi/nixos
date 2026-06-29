@@ -41,14 +41,16 @@ end
 
 function done_cmd(task)
   local esc = sed_escape(task)
-  return "sed -i " .. quote("s/^- \\[ \\] " .. esc .. "$$/- [x] " .. esc .. "/") .. " " .. quote(TODO_FILE)
+  return "sed -i " .. quote("s/^- \\[ \\] " .. esc .. "$/- [x] " .. esc .. "/") .. " " .. quote(TODO_FILE)
     .. " && notify-send -i emblem-ok-symbolic 'TODO' " .. quote("✅ " .. task:sub(1, 60))
 end
 
-local TODO_SH = "/workspace/yaa/yaa/cli-agents/claude/scripts/todo.sh"
-
+-- Grava direto no mesmo arquivo que read_pending lê. Antes chamava
+-- todo.sh (flagdir de sessão), que escrevia em outro lugar — a tarefa
+-- adicionada nunca reaparecia na lista.
 function add_cmd(task)
-  return "bash " .. quote(TODO_SH) .. " " .. quote(task)
+  local line = "- [ ] " .. task
+  return "printf '%s\\n' " .. quote(line) .. " >> " .. quote(TODO_FILE)
     .. " && notify-send -i checkbox-checked-symbolic 'TODO' " .. quote("➕ " .. task:sub(1, 60))
 end
 

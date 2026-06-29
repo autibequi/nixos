@@ -17,7 +17,8 @@ anchor_left = false
 anchor_right = false
 
 [placeholders]
-"default" = { input = "Apps  ·  ! hub  : clip  = calc  > run  / files  @ web  } estratégia", list = "Apps + Downloads/Screenshots · preview →" }
+"default" = { input = "Explore  ·  digite para buscar apps  ·  ! hub  : clip  = calc  > run  / files  @ web  b: bookmarks", list = "Enter entra · ← Voltar sobe" }
+"menus:home" = { input = "Explore  ·  digite para buscar apps", list = "Enter entra · ← Voltar sobe um nível" }
 "menus:dashboard" = { input = "Buscar apps, downloads, screenshots…", list = "Status acima · digite para buscar" }
 "desktopapplications" = { input = "Apps", list = "Sem apps · Ctrl+P fixar no topo" }
 "menus:dash" = { input = "Hub", list = "Status ao vivo · Enter abre · preview →" }
@@ -34,7 +35,6 @@ anchor_right = false
 "menus:power" = { input = "Power", list = "Sem ações" }
 "menus:screenshot" = { input = "Screenshot", list = "Sem captura" }
 "menus:clock" = { input = "Relógio", list = "Carregando…" }
-"menus:estrategia" = { input = "Estratégia", list = "ambiente › pasta › site" }
 "wireplumber" = { input = "Áudio", list = "Sem dispositivos" }
 
 [keybinds]
@@ -45,13 +45,13 @@ toggle_exact = ["ctrl e"]
 resume_last_query = ["ctrl r"]
 
 [providers]
-default = ["desktopapplications", "files"]
-empty = []
-ignore_preview = ["desktopapplications", "runner", "windows", "websearch", "providerlist", "menus:power", "menus:screenshot", "menus:clock", "menus:dashboard", "menus:estrategia", "calc", "symbols"]
-max_results = 40
+default = ["desktopapplications"]
+empty = ["menus:home"]
+ignore_preview = ["desktopapplications", "runner", "windows", "websearch", "providerlist", "menus:power", "menus:screenshot", "menus:clock", "menus:dashboard", "calc", "symbols", "menus:home", "menus:todo", "menus:wifi"]
+max_results = 60
 
 [providers.max_results_provider]
-desktopapplications = 10
+desktopapplications = 16
 files = 16
 runner = 15
 clipboard = 12
@@ -61,7 +61,7 @@ windows = 12
 "menus:clock" = 4
 "menus:dashboard" = 1
 "menus:dash" = 20
-"menus:estrategia" = 24
+"menus:home" = 30
 websearch = 8
 
 [[providers.prefixes]]
@@ -109,10 +109,6 @@ prefix = "w:"
 provider = "windows"
 
 [[providers.prefixes]]
-prefix = "}"
-provider = "menus:estrategia"
-
-[[providers.prefixes]]
 prefix = "b:"
 provider = "bookmarks"
 
@@ -139,18 +135,16 @@ desktopapplications = [
   { action = "unpin", bind = "ctrl p", after = "AsyncReload" },
 ]
 
+"menus:home" = [
+  { action = "open", default = true, bind = "Return", label = "abrir", after = "AsyncClearReload" },
+]
+
 "menus:dash" = [
   { action = "activate", default = true, bind = "Return", label = "open", after = "Close" },
 ]
 
 "menus:dashboard" = [
   { action = "activate", default = true, bind = "Return", label = "open", after = "Close" },
-]
-
-"menus:estrategia" = [
-  { action = "open", default = true, bind = "Return", label = "entrar", after = "AsyncClearReload" },
-  { action = "activate", bind = "Return", label = "abrir", after = "Close" },
-  { action = "back", bind = "Escape", label = "voltar", after = "AsyncClearReload" },
 ]
 
 files = [
