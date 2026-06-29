@@ -35,7 +35,7 @@ km.app("SUPER + l", "hyprlock",
 -- OSD, switcher, overview) e waybar.
 km.fn("SUPER + Delete", function()
     hypr_reload()
-end, { desc = "Reset UI (Hyprland + Quickshell + waybar)", group = "System", icon = "↻" })
+end, { desc = "Reset UI (Hyprland + Quickshell + waybar + Walker)", group = "System", icon = "↻" })
 
 -- NOTA: SUPER + Escape virou focus monitor +1 (em workspace.lua).
 km.app("CTRL + ALT + Delete", powerWalker,

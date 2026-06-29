@@ -68,12 +68,23 @@ if ! $has_hideqa; then
 fi
 
 if ! $has_provider; then
+  # Piso 50% / teto 88% da altura lógica (height/scale) do monitor focado —
+  # garante launcher de no mínimo meia-tela em qualquer resolução.
+  # Fallback p/ valores fixos se hyprctl/jq falharem.
+  launcher_min=480
+  launcher_max=960
+  _logical_h="$(hyprctl monitors -j 2>/dev/null \
+    | jq -r 'first(.[] | select(.focused)) | (.height / .scale)' 2>/dev/null)"
+  if [[ "$_logical_h" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+    launcher_min="$(awk -v h="$_logical_h" 'BEGIN { printf "%d", h * 0.5 }')"
+    launcher_max="$(awk -v h="$_logical_h" 'BEGIN { printf "%d", h * 0.88 }')"
+  fi
   compact=()
   if ! $has_width; then compact+=(--width "$WALKER_W"); fi
   if ! $has_minwidth; then compact+=(--minwidth "$WALKER_W"); fi
   if ! $has_maxwidth; then compact+=(--maxwidth "$WALKER_W"); fi
-  if ! $has_minheight; then compact+=(--minheight 200); fi
-  if ! $has_maxheight; then compact+=(--maxheight 540); fi
+  if ! $has_minheight; then compact+=(--minheight "$launcher_min"); fi
+  if ! $has_maxheight; then compact+=(--maxheight "$launcher_max"); fi
   args=("${compact[@]}" "${args[@]}")
 fi
 

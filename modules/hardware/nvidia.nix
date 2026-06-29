@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   unstable,
   ...
 }:
@@ -79,6 +80,14 @@
   systemd.services.systemd-suspend.environment.SYSTEMD_SLEEP_FREEZE_USER_SESSIONS = "false";
   systemd.services.systemd-hibernate.environment.SYSTEMD_SLEEP_FREEZE_USER_SESSIONS = "false";
   systemd.services.systemd-hybrid-sleep.environment.SYSTEMD_SLEEP_FREEZE_USER_SESSIONS = "false";
+
+  # nvidia-sleep.sh do driver vem com shebang `#!/bin/bash` não-patchado pelo
+  # nixpkgs. NixOS não provê /bin/bash, então nvidia-suspend/resume.service
+  # falham com 203/EXEC e abortam o suspend inteiro (dmesg: nv_pmops_suspend
+  # returns -5). O symlink provê o interpretador sem depender de rebuildar o pacote.
+  systemd.tmpfiles.rules = [
+    "L+ /bin/bash - - - - ${pkgs.bash}/bin/bash"
+  ];
 
   # Permite containers usar o driver NVIDIA
 

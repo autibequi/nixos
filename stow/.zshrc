@@ -22,3 +22,15 @@ alias momoko="yaa --joy"
 n() {
   make -C ~/nixos upgrade "$@"
 }
+
+# --- clipboard helpers (Wayland / wl-clipboard) ---
+# cl <cmd...>   → roda o comando, mostra na tela E copia o output (stdout+stderr, sem ANSI) pro clipboard
+#                 ex: cl systemctl is-enabled suspend.target
+# <cmd> | clip  → copia o que vier no pipe (ex: cat arquivo | clip)
+clip() { wl-copy; }
+cl() {
+  local out
+  out="$("$@" 2>&1)"
+  print -r -- "$out"
+  printf '%s' "$out" | wl-copy
+}

@@ -3,7 +3,8 @@
 --  API: https://wiki.hypr.land/Configuring/Basics/Dispatchers/
 -- ============================================================
 
-local km = require("keymap")
+local km   = require("keymap")
+local HOME = os.getenv("HOME")
 
 -- ── Workspace → monitor mapping ───────────────────────────────
 
@@ -112,8 +113,10 @@ km.bind("SUPER + mouse:273", hl.dsp.window.resize(),
 
 -- ── Monitor switching ─────────────────────────────────────────
 
-km.bind("SUPER + Escape", hl.dsp.focus({ monitor = "+1" }),
-    { desc = "Focus next monitor", group = "Monitor" })
+km.fn("SUPER + Escape", function()
+    hl.dispatch(hl.dsp.focus({ monitor = "+1" }))
+    hl.exec_cmd(HOME .. "/.config/hypr/monitor-switch-flash.sh")
+end, { desc = "Focus next monitor (+ destaque de borda)", group = "Monitor" })
 km.bind("SUPER + SHIFT + Escape", hl.dsp.window.move({ monitor = "+1" }),
     { desc = "Move window to next monitor", group = "Monitor" })
 
