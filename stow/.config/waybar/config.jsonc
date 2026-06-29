@@ -9,7 +9,8 @@
 		// "custom/vennon",
 		"hyprland/workspaces",
 		"hyprland/workspaces#special",
-		"mpris"
+		"mpris",
+		"custom/cliptoast"
 		// "hyprland/window"
 	],
 	"modules-center": [
@@ -37,6 +38,13 @@
 	"tray": {
 		"icon-size": 14,
 		"spacing": 2
+	},
+	"custom/cliptoast": {
+		"exec": "cat /tmp/waybar-cliptoast.json 2>/dev/null || echo '{\"text\":\"\"}'",
+		"return-type": "json",
+		"interval": "once",
+		"signal": 13,
+		"format": "{}"
 	},
 	"custom/screenrecord": {
 		"exec": "[ -f /tmp/screenrecord.pid ] && echo '{\"text\":\"󰑊 REC\",\"tooltip\":\"Recording... click to stop\",\"class\":\"active\"}' || echo '{\"text\":\"\",\"tooltip\":\"\",\"class\":\"\"}'",

@@ -32,6 +32,8 @@ hl.on("hyprland.start", function()
     hl.exec_cmd(L.build("swaync"))
     -- Clipboard
     hl.exec_cmd(L.build("wl-paste --watch cliphist store"))
+    -- Toast no waybar + "pop" ao copiar (módulo custom/cliptoast)
+    hl.exec_cmd(L.build("wl-paste --watch " .. os.getenv("HOME") .. "/.config/hypr/clip-toast.sh"))
 
     -- Tema escuro inicial
     dark_theme()
