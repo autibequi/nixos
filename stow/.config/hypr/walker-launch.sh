@@ -68,21 +68,20 @@ if ! $has_hideqa; then
 fi
 
 if ! $has_provider; then
-  # Piso 50% / teto 88% da altura lógica (height/scale) do monitor focado —
-  # garante launcher de no mínimo meia-tela em qualquer resolução.
-  # Fallback p/ valores fixos se hyprctl/jq falharem.
-  launcher_h=480
+  # Estado vazio (sem query): barra compacta só com input.
+  # Ao digitar: cresce até maxheight fixo em 50% da altura do monitor.
+  launcher_max=480
   _logical_h="$(hyprctl monitors -j 2>/dev/null \
     | jq -r 'first(.[] | select(.focused)) | (.height / .scale)' 2>/dev/null)"
   if [[ "$_logical_h" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-    launcher_h="$(awk -v h="$_logical_h" 'BEGIN { printf "%d", h * 0.5 }')"
+    launcher_max="$(awk -v h="$_logical_h" 'BEGIN { printf "%d", h * 0.8 }')"
   fi
   compact=()
   if ! $has_width; then compact+=(--width "$WALKER_W"); fi
   if ! $has_minwidth; then compact+=(--minwidth "$WALKER_W"); fi
   if ! $has_maxwidth; then compact+=(--maxwidth "$WALKER_W"); fi
-  if ! $has_minheight; then compact+=(--minheight "$launcher_h"); fi
-  if ! $has_maxheight; then compact+=(--maxheight "$launcher_h"); fi
+  if ! $has_minheight; then compact+=(--minheight 0); fi
+  if ! $has_maxheight; then compact+=(--maxheight "$launcher_max"); fi
   args=("${compact[@]}" "${args[@]}")
 fi
 
@@ -183,6 +182,17 @@ if [[ "$provider" == "menus:screenshot" ]]; then
   if ! $has_height; then compact+=(--height "$shot_h"); fi
   if ! $has_minheight; then compact+=(--minheight "$shot_h"); fi
   if ! $has_maxheight; then compact+=(--maxheight "$shot_h"); fi
+  args=("${compact[@]}" "${args[@]}")
+fi
+
+# menus:wifi — lista de redes, sem preview, altura suficiente pra 12 redes
+if [[ "$provider" == "menus:wifi" ]]; then
+  compact=()
+  if ! $has_nosearch; then compact+=(--nosearch); fi
+  if ! $has_nohints; then compact+=(--nohints); fi
+  if ! $has_width; then compact+=(--width 480); fi
+  if ! $has_minheight; then compact+=(--minheight 520); fi
+  if ! $has_maxheight; then compact+=(--maxheight 520); fi
   args=("${compact[@]}" "${args[@]}")
 fi
 

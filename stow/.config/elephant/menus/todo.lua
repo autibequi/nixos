@@ -45,9 +45,10 @@ function done_cmd(task)
     .. " && notify-send -i emblem-ok-symbolic 'TODO' " .. quote("✅ " .. task:sub(1, 60))
 end
 
+local TODO_SH = "/workspace/yaa/yaa/cli-agents/claude/scripts/todo.sh"
+
 function add_cmd(task)
-  local esc_task = task:gsub("'", "'\\''")
-  return "printf '\\n- [ ] " .. esc_task .. "' >> " .. quote(TODO_FILE)
+  return "bash " .. quote(TODO_SH) .. " " .. quote(task)
     .. " && notify-send -i checkbox-checked-symbolic 'TODO' " .. quote("➕ " .. task:sub(1, 60))
 end
 

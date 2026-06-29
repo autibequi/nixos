@@ -336,7 +336,7 @@
 		"tooltip-format": "󰖩 {essid} : {ifname}: {ipaddr}",
 		"tooltip-format-disconnected": "Sem conexão — clique para gerenciar",
 		"tooltip-format-disabled": "Wi-Fi desligado — clique para gerenciar",
-		"on-click": "$HOME/.config/hypr/networkmanager-dmenu-launch.sh",
+		"on-click": "$HOME/.config/hypr/walker-launch.sh --theme neon --provider menus:wifi",
 		"on-click-right": "alacritty -e nmtui"
 	},
 	"bluetooth": {

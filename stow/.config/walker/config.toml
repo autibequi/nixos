@@ -46,7 +46,7 @@ resume_last_query = ["ctrl r"]
 
 [providers]
 default = ["desktopapplications", "files"]
-empty = ["menus:dashboard"]
+empty = []
 ignore_preview = ["desktopapplications", "runner", "windows", "websearch", "providerlist", "menus:power", "menus:screenshot", "menus:clock", "menus:dashboard", "menus:estrategia", "calc", "symbols"]
 max_results = 40
 
