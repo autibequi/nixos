@@ -27,7 +27,7 @@
 @define-color ws-special-text          @theme-accent;
 @define-color ws-special-active-bg     #7de8f0;
 @define-color ws-special-active-text   #0a0e14;
-@define-color ws-special-hover-text    @theme-accent;
+@define-color ws-special-hover-text    @theme-fg;
 
 /* ── Legacy aliases ───────────────────────────────────────────────── */
 @define-color color-black    @theme-bg;

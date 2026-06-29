@@ -1,16 +1,22 @@
 @import url("colors.css");
 
 /*========================================================*
- *       Waybar — Dracula Black + Pills layout            *
+ *       Waybar — Deep Dark + Pills layout                *
  *========================================================*
  * Estética: cada módulo (ou grupo lógico) é uma "pill"
  * com background semi-elevado, border-radius alto e
- * pequena folga entre elas. A própria barra é transparente.
+ * pequena folga entre elas. A barra é transparente.
  *
- * Layout assumido: position: bottom (config.jsonc).
+ * Hierarquia visual das pills:
+ *   theme-surface   → pill padrão
+ *   theme-elev      → pill elevada (special ws, system-controls)
+ *   theme-border    → hover / focus dentro das pills
+ *   theme-accent    → item ativo / destaque primário
  */
 
-/* ── Reset + tipografia ────────────────────────────────── */
+/*--------------------------------------------------------*
+ *  Reset + tipografia                                    *
+ *--------------------------------------------------------*/
 * {
     border: none;
     border-radius: 0;
@@ -21,15 +27,11 @@
     transition: background-color 150ms ease, color 150ms ease;
 }
 
-/* ── Barra base ────────────────────────────────────────── */
 window#waybar {
     background-color: transparent;
     color: @theme-fg;
-    /* Garante que as pills sejam centradas verticalmente na barra */
 }
 
-/* A barra interna (GTK Box) usa baseline; forçar center evita
- * que pills com conteúdo diferente fiquem em alturas dispares. */
 .modules-left > widget,
 .modules-center > widget,
 .modules-right > widget {
@@ -37,11 +39,11 @@ window#waybar {
 }
 
 /*========================================================*
- *               BASE "PILL" — todos os módulos           *
+ *  PILL BASE — todos os módulos                          *
  *========================================================*
- * min-height FIXO = todas as pills ficam com a mesma
- * altura independente do conteúdo interno. Padding só
- * horizontal; vertical fica a cargo do min-height.
+ * Altura fixa = pills uniformes independente do conteúdo.
+ * #workspaces é excluído aqui — tem sub-pills e usa
+ * overrides de padding; fica na seção WORKSPACES.
  */
 #mpris,
 #clock,
@@ -57,8 +59,7 @@ window#waybar {
 #custom-screenrecord,
 #custom-tray-toggle,
 #bluetooth,
-#tray,
-#workspaces {
+#tray {
     background-color: @theme-surface;
     color: @theme-fg;
     border-radius: 10px;
@@ -68,91 +69,10 @@ window#waybar {
     border: none;
 }
 
-/* Special workspaces — pill ligeiramente elevada em relação às regulares */
-#custom-special-workspaces {
-    background-color: @theme-elev;
-    color: @theme-fg;
-    border-radius: 10px;
-    padding: 0 8px;
-    min-height: 20px;
-    margin: 0;
-    border: none;
-}
-
-#custom-special-workspaces:hover {
-    background-color: @theme-border;
-}
-
-/* ── Special workspaces — pill ligeiramente mais clara ──────── */
-#workspaces.special {
-    background-color: @theme-elev;
-    padding: 0;
-}
-
-/* Esconder workspaces normais dentro da pill special.
- * Margin negativo agressivo + min-width 0 + font-size 0 + padding 0:
- * colapsa o widget e absorve o padding/gap residual do GTK. */
-#workspaces.special button:not(.special) {
-    min-width: 0;
-    padding: 0;
-    margin: 0 -20px;
-    border: none;
-    font-size: 0;
-    opacity: 0;
-}
-
-/* Specials visíveis — sub-pill ligeiramente mais escura que o container */
-#workspaces.special button.special {
-    margin: 1px 2px;
-    padding: 1px 5px;
-    background-color: @theme-surface;
-    border-radius: 5px;
-}
-
-#workspaces.special button.active {
-    background-color: @theme-accent;
-    color: @theme-bg;
-    font-weight: 700;
-}
-
-#workspaces.special button:hover {
-    background-color: @theme-elev;
-    color: @theme-fg;
-}
-
-/* ── Grupo sistema (volume + brilho + wifi) — pill única ─── */
-#system-controls {
-    background-color: @theme-surface;
-    border-radius: 10px;
-    padding: 0 2px;
-    min-height: 20px;
-    margin: 0;
-    border: none;
-}
-
-#system-controls:hover {
-    background-color: @theme-elev;
-    border-color: @theme-border;
-}
-
-/* Módulos dentro do grupo: sem background próprio, só text + padding mínimo */
-#system-controls #pulseaudio,
-#system-controls #backlight,
-#system-controls #custom-ddcutil-brightness,
-#system-controls #network {
-    background-color: transparent;
-    border-radius: 0;
-    padding: 0 5px;
-    margin: 0;
-    border: none;
-}
-
-/* Separador visual entre eles */
-#system-controls #pulseaudio { border-right: 1px solid @theme-border; }
-#system-controls #backlight  { border-right: 1px solid @theme-border; }
-#system-controls #custom-ddcutil-brightness { border-right: 1px solid @theme-border; }
-
-/* Hover sutil em todas as pills "clicáveis" */
+/*--------------------------------------------------------*
+ *  Hover — pills clicáveis                              *
+ *  (background eleva um nível, sem border porque não há) *
+ *--------------------------------------------------------*/
 #mpris:hover,
 #clock:hover,
 #battery:hover,
@@ -162,22 +82,28 @@ window#waybar {
 #custom-obsidian-sync:hover,
 #custom-screenrecord:hover,
 #custom-tray-toggle:hover,
+#custom-vennon:hover,
 #bluetooth:hover,
 #tray:hover {
     background-color: @theme-elev;
-    border-color: @theme-border;
 }
 
 /*========================================================*
- *                      WORKSPACES                        *
+ *  WORKSPACES — pill regular                            *
  *========================================================*
- * A própria pill #workspaces já tem background-surface;
- * dentro dela, cada botão é uma "sub-pill" pequena. */
-/* Workspaces container — override pra ocupar menos altura que as outras pills */
+ * Container = surface.  Botões = sub-pills menores.
+ *
+ * Hierarquia de estados:
+ *   inactive → hover/focused → active → urgent
+ */
 #workspaces {
+    background-color: @theme-surface;
+    color: @theme-fg;
+    border-radius: 10px;
+    min-height: 20px;
     padding: 0 3px;
     margin: 0 3px;
-    border-width: 0;
+    border: none;
 }
 
 #workspaces button {
@@ -189,33 +115,72 @@ window#waybar {
     color: @ws-text;
     border-radius: 5px;
     font-size: 10px;
-    font-weight: 500;
 }
 
-#workspaces button:hover {
-    background-color: @theme-border;
-    color: @theme-fg;
-    text-shadow: none;
-}
-
+#workspaces button:hover,
 #workspaces button.focused {
-    color: @theme-fg;
     background-color: @theme-border;
-    font-weight: 700;
+    color: @theme-fg;
 }
 
 #workspaces button.active {
     background-color: @ws-active-bg;
     color: @ws-active-text;
-    font-weight: 700;
 }
 
-#workspaces button.urgent,
+#workspaces button.urgent {
+    background-color: transparent;
+    color: @ws-urgent-bg;
+    border: 1px solid @ws-urgent-bg;
+    animation: urgent-pulse 1.2s ease-in-out infinite alternate;
+}
+
+/*========================================================*
+ *  WORKSPACES — pill special                            *
+ *========================================================*
+ * Container = theme-elev (mais elevado que o regular).
+ * Botões especiais = surface (recuado no container elevado).
+ *
+ * Hierarquia de estados:
+ *   inactive → hover → active
+ */
+#workspaces.special {
+    background-color: @theme-elev;
+    padding: 0;
+}
+
+/* Colapsa botões regulares que aparecem dentro do container special */
+#workspaces.special button:not(.special) {
+    min-width: 0;
+    padding: 0;
+    margin: 0 -20px;
+    border: none;
+    font-size: 0;
+    opacity: 0;
+}
+
+#workspaces.special button.special {
+    margin: 1px 2px;
+    padding: 1px 5px;
+    background-color: @theme-surface;
+    color: @ws-special-text;
+    border-radius: 5px;
+}
+
+#workspaces.special button.special:hover {
+    background-color: @theme-border;
+    color: @ws-special-hover-text;
+}
+
+#workspaces.special button.special.active {
+    background-color: @ws-special-active-bg;
+    color: @ws-special-active-text;
+}
+
 #workspaces.special button.urgent {
     background-color: transparent;
     color: @ws-urgent-bg;
     border: 1px solid @ws-urgent-bg;
-    font-weight: 700;
     animation: urgent-pulse 1.2s ease-in-out infinite alternate;
 }
 
@@ -224,214 +189,135 @@ window#waybar {
     to   { box-shadow: 0 0 14px rgba(255, 32, 64, 0.9); }
 }
 
-
-#workspaces button.special {
-    color: @ws-special-text;
+/*========================================================*
+ *  SYSTEM-CONTROLS — grupo pill único                   *
+ *========================================================*/
+#system-controls {
+    background-color: @theme-surface;
+    border-radius: 10px;
+    padding: 0 2px;
+    min-height: 20px;
+    margin: 0;
+    border: none;
 }
 
-#workspaces button.active.special {
-    background-color: @ws-special-active-bg;
-    color: @ws-special-active-text;
+#system-controls:hover {
+    background-color: @theme-elev;
 }
+
+#system-controls #pulseaudio,
+#system-controls #backlight,
+#system-controls #custom-ddcutil-brightness,
+#system-controls #network {
+    background-color: transparent;
+    border-radius: 0;
+    padding: 0 5px;
+    margin: 0;
+    border: none;
+}
+
+#system-controls #pulseaudio             { border-right: 1px solid @theme-border; }
+#system-controls #backlight              { border-right: 1px solid @theme-border; }
+#system-controls #custom-ddcutil-brightness { border-right: 1px solid @theme-border; }
 
 /*========================================================*
- *                  MODULES — semantic                    *
+ *  MÓDULOS — cores semânticas                           *
  *========================================================*/
-#mpris {
-    color: @mpris-text;
-}
-
-#mpris.playing {
-    color: @theme-accent;
-}
-
-#mpris.paused {
-    color: @theme-fg-muted;
-}
+#mpris { color: @mpris-text; }
+#mpris.playing { color: @theme-accent; }
+#mpris.paused  { color: @theme-fg-muted; }
 
 #clock {
     color: @clock-text;
-    font-weight: 700;
     text-shadow: 0 0 8px rgba(0, 212, 255, 0.35);
 }
 
-#battery {
-    color: @battery-text;
-}
-
+#battery { color: @battery-text; }
 #battery.charging,
-#battery.plugged {
-    color: @battery-charging-text;
-}
-
-#battery.warning:not(.charging) {
-    color: @battery-warning-text;
-}
-
+#battery.plugged          { color: @battery-charging-text; }
+#battery.warning:not(.charging) { color: @battery-warning-text; }
 #battery.critical:not(.charging) {
     color: @battery-critical-text;
-    border-color: @theme-danger;
     animation: urgent-pulse 0.8s ease-in-out infinite alternate;
 }
 
-#network {
-    color: @network-text;
-}
+#network                  { color: @network-text; }
+#network.disconnected     { color: @network-disconnected-text; }
 
-#network.disconnected {
-    color: @network-disconnected-text;
-}
+#pulseaudio               { color: @audio-text; }
+#pulseaudio.muted         { color: @audio-muted-text; }
 
-#pulseaudio {
-    color: @audio-text;
-}
-
-#pulseaudio.muted {
-    color: @audio-muted-text;
-}
-
-#backlight {
-    color: @backlight-text;
-}
+#backlight                { color: @backlight-text; }
 
 #idle_inhibitor {
     color: @idle-inhibitor-text;
     padding: 0 8px;
     min-width: 0;
 }
-
 #idle_inhibitor.activated {
     color: @idle-inhibitor-active-text;
     background-color: @theme-info;
-    border-color: @theme-info;
 }
 
 /*========================================================*
- *                  CUSTOM MODULES                        *
+ *  MÓDULOS CUSTOM                                        *
  *========================================================*/
-#custom-claude-usage {
-    color: @theme-success;
-}
+#custom-claude-usage          { color: @theme-success; }
+#custom-claude-usage.warning  { color: @theme-warning; }
+#custom-claude-usage.critical { color: @theme-danger; }
 
-#custom-claude-usage.warning {
-    color: @theme-warning;
-}
-
-#custom-claude-usage.critical {
-    color: @theme-danger;
-}
-
-#custom-obsidian-sync {
-    color: @theme-accent;
-}
-
-#custom-obsidian-sync.inactive {
-    color: @theme-fg-muted;
-}
-
-#custom-obsidian-sync.failed {
+#custom-obsidian-sync         { color: @theme-accent; }
+#custom-obsidian-sync.inactive { color: @theme-fg-muted; }
+#custom-obsidian-sync.failed  {
     color: @theme-danger;
     animation: urgent-pulse 0.6s ease-in-out infinite alternate;
 }
 
 #custom-cpu-bar,
 #custom-gpu-bar,
-#custom-ram-bar {
-    color: @theme-fg;
-}
+#custom-ram-bar { color: @theme-fg; }
 
 #custom-swaync {
     color: @theme-fg;
     min-width: 18px;
 }
-
 #custom-swaync.dnd-notification,
 #custom-swaync.dnd-none {
     color: @theme-fg-muted;
     opacity: 0.6;
 }
 
+#custom-screenrecord          { color: @theme-fg-muted; min-width: 0; }
+#custom-screenrecord.active   {
+    color: @theme-danger;
+    animation: urgent-pulse 0.6s ease-in-out infinite alternate;
+}
+
+#custom-vennon                { color: @theme-fg; min-width: 18px; }
+#custom-vennon:hover          { color: @theme-bg; background-color: @theme-accent; }
+
+#custom-tray-toggle           { color: @theme-fg-muted; min-width: 14px; }
+#custom-tray-toggle:hover     { color: @theme-bg; background-color: @theme-accent; }
+
+#custom-ddcutil-brightness    { color: @theme-fg; }
+
 /*========================================================*
- *                     BLUETOOTH                          *
+ *  BLUETOOTH                                             *
  *========================================================*/
 #bluetooth {
     color: @theme-fg;
     min-width: 18px;
     text-shadow: 0 0 1px currentColor;
 }
-
 #bluetooth.connected {
     color: @theme-bg;
     background-color: @theme-accent;
-    text-shadow: 0 0 1px currentColor;
 }
 
 /*========================================================*
- *                         TRAY                           *
+ *  TRAY                                                  *
  *========================================================*/
-#tray {
-    padding: 0 8px;
-    min-width: 0;
-}
-
-#tray > .active {
-    color: @theme-fg;
-    opacity: 1;
-}
-
-#tray > .passive {
-    -gtk-icon-effect: dim;
-}
-
-#tray > .needs-attention {
-    -gtk-icon-effect: highlight;
-    color: @theme-warning;
-}
-
-/*========================================================*
- *                    VENNON MENU                         *
- *========================================================*/
-#custom-vennon {
-    color: @theme-fg;
-    min-width: 18px;
-}
-
-#custom-vennon:hover {
-    color: @theme-bg;
-    background-color: @theme-accent;
-}
-
-/*========================================================*
- *                  SCREENRECORD                          *
- *========================================================*/
-#custom-screenrecord {
-    color: @theme-fg-muted;
-    min-width: 0;
-}
-
-#custom-screenrecord.active {
-    color: @theme-danger;
-    background-color: @theme-elev;
-    border-color: @theme-danger;
-    animation: urgent-pulse 0.6s ease-in-out infinite alternate;
-}
-
-/*========================================================*
- *                   TRAY EXPANDER                        *
- *========================================================*/
-#custom-tray-toggle {
-    color: @theme-fg-muted;
-    min-width: 14px;
-}
-
-#custom-tray-toggle:hover {
-    color: @theme-bg;
-    background-color: @theme-accent;
-}
-
-/*========================================================*
- *                  DDCUTIL BRIGHTNESS                    *
- *========================================================*/
-#custom-ddcutil-brightness {
-    color: @theme-fg;
-}
+#tray                    { padding: 0 8px; min-width: 0; }
+#tray > .active          { color: @theme-fg; opacity: 1; }
+#tray > .passive         { -gtk-icon-effect: dim; }
+#tray > .needs-attention { -gtk-icon-effect: highlight; color: @theme-warning; }

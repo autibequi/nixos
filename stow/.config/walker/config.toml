@@ -65,6 +65,10 @@ windows = 12
 websearch = 8
 
 [[providers.prefixes]]
+prefix = "!todo"
+provider = "menus:todo"
+
+[[providers.prefixes]]
 prefix = "!"
 provider = "menus:dash"
 
