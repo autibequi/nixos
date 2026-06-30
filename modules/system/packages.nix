@@ -18,6 +18,7 @@
     sqlite
     proton-pass-cli
     github-cli
+    atlassian-cli
 
     # security
     yubikey-manager

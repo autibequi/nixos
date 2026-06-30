@@ -17,7 +17,7 @@ Scope {
     property var myPrs:   []
     property var toReview: []
 
-    readonly property string ghQuery: '{ mine: search(query: "is:open is:pr author:@me archived:false", type: ISSUE, first: 20) { nodes { ... on PullRequest { number title url updatedAt repository { name } reviewDecision commits(last: 1) { nodes { commit { statusCheckRollup { state } } } } } } } review: search(query: "is:open is:pr review-requested:@me archived:false", type: ISSUE, first: 20) { nodes { ... on PullRequest { number title url updatedAt author { login } repository { name } commits(last: 1) { nodes { commit { statusCheckRollup { state } } } } } } } }'
+    readonly property string ghQuery: '{ mine: search(query: "is:open is:pr author:@me archived:false", type: ISSUE, first: 100) { nodes { ... on PullRequest { number title url updatedAt repository { name } reviewDecision commits(last: 1) { nodes { commit { statusCheckRollup { state } } } } } } } review: search(query: "is:open is:pr review-requested:@me archived:false", type: ISSUE, first: 100) { nodes { ... on PullRequest { number title url updatedAt author { login } repository { name } commits(last: 1) { nodes { commit { statusCheckRollup { state } } } } } } } }'
 
     function ghRelTime(iso) {
         const h = Math.floor((Date.now() - new Date(iso).getTime()) / 3600000)
@@ -206,9 +206,17 @@ Scope {
                     spacing: 4
                     SecLabel { Layout.fillWidth: true; secLabel: " Meus PRs"; secCount: root.myPrs.length }
                     Flickable {
+                        id: mineFlick
                         Layout.fillWidth: true; Layout.fillHeight: true; clip: true
                         contentWidth: width; contentHeight: mineCol.implicitHeight
+                        flickDeceleration: 10000; boundsBehavior: Flickable.StopAtBounds
                         ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                        WheelHandler {
+                            onWheel: (e) => {
+                                const max = Math.max(0, mineFlick.contentHeight - mineFlick.height)
+                                mineFlick.contentY = Math.max(0, Math.min(max, mineFlick.contentY - e.angleDelta.y * 4))
+                            }
+                        }
                         Column {
                             id: mineCol
                             width: parent.width; spacing: 4
@@ -234,9 +242,17 @@ Scope {
                     spacing: 4
                     SecLabel { Layout.fillWidth: true; secLabel: " Para revisar"; secCount: root.toReview.length }
                     Flickable {
+                        id: reviewFlick
                         Layout.fillWidth: true; Layout.fillHeight: true; clip: true
                         contentWidth: width; contentHeight: reviewCol.implicitHeight
+                        flickDeceleration: 10000; boundsBehavior: Flickable.StopAtBounds
                         ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                        WheelHandler {
+                            onWheel: (e) => {
+                                const max = Math.max(0, reviewFlick.contentHeight - reviewFlick.height)
+                                reviewFlick.contentY = Math.max(0, Math.min(max, reviewFlick.contentY - e.angleDelta.y * 4))
+                            }
+                        }
                         Column {
                             id: reviewCol
                             width: parent.width; spacing: 4
