@@ -16,7 +16,9 @@
 	"modules-center": [
 		"custom/screenrecord",
 		"custom/swaync",
-		"custom/git",
+		"custom/pr-approved",
+		"custom/pr-pending",
+		"custom/pr-review",
 		"custom/chicote",
 		"clock",
 		"battery"
@@ -262,7 +264,7 @@
 	},
 	"mpris": {
 		"format": "{player_icon} {title} - {artist}",
-		"format-paused": "{status_icon} CALA A BOCA!",
+		"format-paused": "{status_icon} SHIIIIIU!",
 		"max-length": 30,
 		"tooltip-format": "{title} | {artist}",
 		"player-icons": {
@@ -421,8 +423,20 @@
 		"tooltip": true,
 		"escape": false
 	},
-	"custom/git": {
-		"exec": "$HOME/.config/waybar/git-prs.sh",
+	"custom/pr-approved": {
+		"exec": "$HOME/.config/waybar/git-prs.sh approved",
+		"return-type": "json",
+		"interval": 180,
+		"on-click": "qs ipc call github toggle"
+	},
+	"custom/pr-pending": {
+		"exec": "$HOME/.config/waybar/git-prs.sh pending",
+		"return-type": "json",
+		"interval": 180,
+		"on-click": "qs ipc call github toggle"
+	},
+	"custom/pr-review": {
+		"exec": "$HOME/.config/waybar/git-prs.sh review",
 		"return-type": "json",
 		"interval": 180,
 		"on-click": "qs ipc call github toggle"

@@ -3,6 +3,11 @@
 	// ║  Zed Editor — settings.json                                ║
 	// ╚══════════════════════════════════════════════════════════════╝
 	// ─── WINDOW & SESSION ──────────────────────────────────────────
+	"instrumentation": {
+		"performance_profiler": {
+			"enabled": true
+		}
+	},
 	"mouse_wheel_zoom": false,
 	"proxy": "",
 	// 30ms era absurdo pra gopls em monorepo — toda completion estourava o
@@ -274,6 +279,10 @@
 	},
 	// ─── GIT ───────────────────────────────────────────────────────
 	"git": {
+		// worktrees criados pelo picker do Zed vão pra <project>/.worktrees/
+		// (path dentro do root = project-scoped, sem sufixo). Default era
+		// "../worktrees" (irmão do repo). Ver/trocar worktree pelo picker nativo.
+		"worktree_directory": ".worktrees",
 		"git_gutter": "tracked_files",
 		"enable_diff": true,
 		"hunk_style": "staged_hollow",
@@ -334,8 +343,8 @@
 	// ─── TERMINAL ──────────────────────────────────────────────────
 	"terminal": {
 		"flexible": true,
-  "font_weight": 650.0,
-  "scrollbar": {
+		"font_weight": 650.0,
+		"scrollbar": {
 			"show": "never"
 		},
 		"dock": "bottom",
