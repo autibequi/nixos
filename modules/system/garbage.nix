@@ -32,10 +32,30 @@
     dates = [ "weekly" ];
   };
 
+  # GC sob pressão DURANTE o build: quando o disco cai abaixo de min-free, o
+  # nix-daemon libera store no meio da operação até atingir max-free. Rede de
+  # segurança que o nix.gc (agendado) não dá — evita "no space left" num rebuild
+  # grande com o disco já a 90%.
+  nix.settings = {
+    min-free = 5 * 1024 * 1024 * 1024; # 5 GiB: gatilho do GC durante build
+    max-free = 20 * 1024 * 1024 * 1024; # 20 GiB: para de coletar ao liberar isso
+  };
+
   # ── NVMe ─────────────────────────────────────────────────────────────────
   # TRIM periódico para saúde do NVMe interno.
   services.fstrim.enable = true;
   services.fstrim.interval = "weekly";
+
+  # ── Coredumps ──────────────────────────────────────────────────────────────
+  # Hyprland/apps Wayland crasham e despejam core em /var/lib/systemd/coredump.
+  # Sem teto, acumulam (cada core do Hyprland com VRAM mapeada é grande). Mantém
+  # capacidade de debug, mas com teto de disco e core gigante descartado.
+  systemd.coredump.extraConfig = ''
+    Storage=external
+    Compress=yes
+    MaxUse=1G
+    ProcessSizeMax=2G
+  '';
 
   # ── Containers: GC ROOTFUL ─────────────────────────────────────────────────
   # Roda como systemd de sistema → limpa só /var/lib/containers. O lixo do
