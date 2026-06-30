@@ -50,12 +50,12 @@
   # Hyprland/apps Wayland crasham e despejam core em /var/lib/systemd/coredump.
   # Sem teto, acumulam (cada core do Hyprland com VRAM mapeada é grande). Mantém
   # capacidade de debug, mas com teto de disco e core gigante descartado.
-  systemd.coredump.extraConfig = ''
-    Storage=external
-    Compress=yes
-    MaxUse=1G
-    ProcessSizeMax=2G
-  '';
+  systemd.coredump.settings.Coredump = {
+    Storage = "external";
+    Compress = true;
+    MaxUse = "1G";
+    ProcessSizeMax = "2G";
+  };
 
   # ── Containers: GC ROOTFUL ─────────────────────────────────────────────────
   # Roda como systemd de sistema → limpa só /var/lib/containers. O lixo do
