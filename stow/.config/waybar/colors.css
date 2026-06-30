@@ -1,7 +1,7 @@
-/* Waybar colors — Dracula Black
+/* Waybar colors — Wild Hunt (paleta do wallpaper)
  * Delega toda a paleta ao tema central. Só aliases de módulo ficam aqui.
  */
-@import url("../themes/dracula-black/colors.css");
+@import url("../themes/wild-hunt/colors.css");
 
 /* ── Workspace states ─────────────────────────────────────────────── */
 @define-color ws-text                  @theme-fg-muted;

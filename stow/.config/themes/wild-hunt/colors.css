@@ -1,0 +1,55 @@
+/* Wild Hunt — paleta derivada do wallpaper "Åsgårdsreien" (P.N. Arbo)
+ * A Caçada Selvagem de Odin: noite tempestuosa azul-preta cortada pelo
+ * pôr do sol dourado no horizonte. Cores amostradas via k-means da imagem.
+ *
+ * Frio (azul-aço do céu/vestido) = destaque primário.
+ * Quente (âmbar do pôr do sol) = secundário/warning.
+ * Bordô (capa vermelha da valquíria) = danger.
+ *
+ * Consumido por: waybar. Estrutura espelha themes/dracula-black/colors.css
+ * pra ser drop-in (mesmos nomes semânticos theme-* e ws-*).
+ */
+
+/* Surfaces (do mais escuro pro mais claro) — azul-pretos noturnos */
+@define-color wh-bg        #06060d;  /* root background — céu noturno */
+@define-color wh-surface   #12121b;  /* container, pills inativas */
+@define-color wh-elev      #1c1d23;  /* elev de hover, pills ativas */
+@define-color wh-line      #43453f;  /* borders/dividers — cinza frio da névoa */
+
+/* Foreground — branco quente puxado pro âmbar, não branco puro */
+@define-color wh-fg        #e6dac2;
+@define-color wh-fg-dim    #9b8669;  /* dourado-acinzentado das armaduras */
+
+/* Accents amostrados/derivados da pintura */
+@define-color wh-steel     #6b97b8;  /* azul-aço — céu/vestido (destaque) */
+@define-color wh-steel-lt  #8bb0cc;  /* azul claro */
+@define-color wh-gold      #e0a44b;  /* âmbar do pôr do sol */
+@define-color wh-gold-lt   #cdab7b;  /* dourado pálido das figuras */
+@define-color wh-olive     #9aa85c;  /* verde-musgo frio */
+@define-color wh-bordeaux  #c25a48;  /* vermelho-tijolo da capa */
+
+/* Semantic mappings (consumidores tematizam por intent, não por nome de cor) */
+@define-color theme-bg          @wh-bg;
+@define-color theme-surface     @wh-surface;
+@define-color theme-elev        @wh-elev;
+@define-color theme-border      @wh-line;
+@define-color theme-fg          @wh-fg;
+@define-color theme-fg-muted    @wh-fg-dim;
+
+@define-color theme-accent      @wh-steel;     /* destaque primário — azul-aço */
+@define-color theme-accent-soft @wh-gold-lt;   /* contraponto quente */
+@define-color theme-success     @wh-olive;
+@define-color theme-warning     @wh-gold;
+@define-color theme-danger      @wh-bordeaux;
+@define-color theme-info        @wh-steel-lt;
+
+/* Workspace states (waybar / overview semantics) */
+@define-color ws-text             @theme-fg-muted;
+@define-color ws-active-bg        @theme-accent;
+@define-color ws-active-text      @theme-bg;
+@define-color ws-urgent-bg        @theme-danger;
+@define-color ws-urgent-text      @theme-fg;
+@define-color ws-special-text     @theme-warning;
+@define-color ws-special-active-bg     @theme-warning;
+@define-color ws-special-active-text   @theme-bg;
+@define-color ws-special-hover-text    @theme-success;
