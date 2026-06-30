@@ -16,14 +16,14 @@
 	"modules-center": [
 		"custom/screenrecord",
 		"custom/swaync",
-		"custom/pr-approved",
-		"custom/pr-pending",
-		"custom/pr-review",
 		"custom/chicote",
 		"clock",
 		"battery"
 	],
 	"modules-right": [
+		"custom/pr-approved",
+		"custom/pr-pending",
+		"custom/pr-review",
 		"custom/claude-usage",
 		"group/system-controls",
 		"tray",
@@ -382,10 +382,11 @@
 		"return-type": "json",
 		"interval": 60,
 		"signal": 8,
-		"on-click": "xdg-open https://claude.ai/settings/usage",
+		"on-click": "qs ipc call usage toggle",
+		"on-click-middle": "xdg-open https://claude.ai/settings/usage",
 		"on-click-right": "yaa claude usage --refresh --waybar; pkill -RTMIN+8 waybar",
 		"format": "{}",
-		"tooltip": true,
+		"tooltip": false,
 		"escape": false,
 		"markup": "pango"
 	},

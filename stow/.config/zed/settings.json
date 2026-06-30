@@ -20,7 +20,7 @@
 	"go_to_definition_fallback": "find_all_references",
 	"go_to_definition_scroll_strategy": "top",
 	"cli_default_open_behavior": "existing_window",
-	"restore_on_startup": "last_session",
+	"restore_on_startup": "launchpad",
 	"restore_on_file_reopen": false,
 	"when_closing_with_no_tabs": "keep_window_open",
 	"bottom_dock_layout": "left_aligned",
@@ -227,7 +227,7 @@
 	"project_panel": {
 		"dock": "left",
 		"default_width": 340.0,
-		"entry_spacing": "standard",
+		"entry_spacing": "comfortable",
 		"sort_mode": "directories_first",
 		"hide_root": true,
 		"hide_gitignore": false,

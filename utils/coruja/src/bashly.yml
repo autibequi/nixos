@@ -36,6 +36,15 @@ commands:
         arg: vertical
         help: "Pré-seleciona a vertical (pula a pergunta)"
         allowed: [carreiras-juridicas, concursos, medicina, militares, oab, vestibulares]
+      - long: --monolito-worktree
+        arg: slug
+        help: "Worktree do monolito (slug; main = base). Liste com `coruja worktrees`"
+      - long: --bo-worktree
+        arg: slug
+        help: "Worktree do bo-container (slug; main = base). Mesma lista do monolito"
+      - long: --front-worktree
+        arg: slug
+        help: "Worktree do front-student (slug; main = base). Liste com `coruja worktrees`"
       - long: --no-worker
         help: "Não sobe o monolito-worker mesmo quando o backend local sobe"
       - long: --pdf-kit
@@ -68,6 +77,15 @@ commands:
         arg: vertical
         help: "Sobrescreve a vertical do front/bo"
         allowed: [carreiras-juridicas, concursos, medicina, militares, oab, vestibulares]
+      - long: --monolito-worktree
+        arg: slug
+        help: "Sobrescreve o worktree do monolito (slug; main = base)"
+      - long: --bo-worktree
+        arg: slug
+        help: "Sobrescreve o worktree do bo-container (slug; main = base)"
+      - long: --front-worktree
+        arg: slug
+        help: "Sobrescreve o worktree do front-student (slug; main = base)"
       - long: --no-worker
         help: "Não sobe o monolito-worker mesmo quando o backend local sobe"
       - long: --pdf-kit
@@ -89,6 +107,11 @@ commands:
       - coruja up                              # relança a última config
       - coruja up --vertical concursos         # última config, mas trocando a vertical
       - coruja up --detach
+
+  - name: worktrees
+    help: "Lista os worktrees dos apps e escolhe 1 por app (monolito/bo do monorepo, front próprio). Salva no state pro próximo up"
+    examples:
+      - coruja worktrees                       # lista e escolhe os 3 worktrees
 
   - name: install
     help: "Bootstrap: doctor + build + deps dos apps escolhidos (wizard) + certs"

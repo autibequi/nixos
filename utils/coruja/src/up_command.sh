@@ -12,6 +12,9 @@ load_env_from_state
 [[ -n "${args[--bo]:-}" ]]       && BO_SEL="${args[--bo]}"
 [[ -n "${args[--monolito]:-}" ]] && MONO_SEL="${args[--monolito]}"
 [[ -n "${args[--vertical]:-}" ]] && VERTICAL_SEL="${args[--vertical]}"
+[[ -n "${args[--monolito-worktree]:-}" ]] && MONO_WT="${args[--monolito-worktree]}"
+[[ -n "${args[--bo-worktree]:-}" ]]       && BO_WT="${args[--bo-worktree]}"
+[[ -n "${args[--front-worktree]:-}" ]]    && FRONT_WT="${args[--front-worktree]}"
 if [[ -n "${args[--no-worker]:-}" ]]; then NO_WORKER="true"; WORKER_SEL="no"; fi
 [[ -n "${args[--pdf-kit]:-}" ]]    && PDFKIT_SEL="yes"
 [[ -n "${args[--no-pdf-kit]:-}" ]] && PDFKIT_SEL="no"

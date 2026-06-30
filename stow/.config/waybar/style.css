@@ -59,6 +59,9 @@ window#waybar {
 #custom-vennon,
 #custom-screenrecord,
 #custom-tray-toggle,
+#custom-pr-approved,
+#custom-pr-pending,
+#custom-pr-review,
 #bluetooth,
 #tray {
     background-color: @theme-surface;
@@ -85,6 +88,9 @@ window#waybar {
 #custom-screenrecord:hover,
 #custom-tray-toggle:hover,
 #custom-vennon:hover,
+#custom-pr-approved:hover,
+#custom-pr-pending:hover,
+#custom-pr-review:hover,
 #bluetooth:hover,
 #tray:hover {
     background-color: @theme-elev;

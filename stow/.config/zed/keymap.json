@@ -157,5 +157,17 @@
 		"bindings": {
 			"ctrl-shift-delete": "editor::RestartLanguageServer"
 		}
-	}
+	},
+ {
+  "context": "Pane",
+  "bindings": {
+   "alt-p": "pane::TogglePinTab"
+  }
+ },
+ {
+  "context": "Pane",
+  "unbind": {
+   "ctrl-k shift-enter": "pane::TogglePinTab"
+  }
+ }
 ]

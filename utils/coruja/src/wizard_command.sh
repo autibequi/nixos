@@ -14,6 +14,11 @@ dry_run="false";   [[ -n "${args[--dry-run]:-}" ]]   && dry_run="true"
 # Carrega a última config (popula STATE_*); vira o default de cada pergunta.
 state_load
 
+# Worktree por app: flag sobrescreve; senão herda o que o `coruja worktrees` salvou (ou main).
+MONO_WT="${args[--monolito-worktree]:-${STATE_MONO_WT:-main}}"
+BO_WT="${args[--bo-worktree]:-${STATE_BO_WT:-main}}"
+FRONT_WT="${args[--front-worktree]:-${STATE_FRONT_WT:-main}}"
+
 # Catálogo — espelha os scripts <ambiente>:<vertical> do package.json do front-student.
 FRONT_ENVS=(local sandbox qa prod devbox skip)
 VERTICALS=(carreiras-juridicas concursos medicina militares oab vestibulares)

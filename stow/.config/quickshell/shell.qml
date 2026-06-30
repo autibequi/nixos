@@ -12,6 +12,7 @@ import "./modules/powermenu/"
 import "./modules/osd/"
 import "./modules/switcher/"
 import "./modules/github/"
+import "./modules/usage/"
 
 import QtQuick
 import Quickshell
@@ -24,4 +25,5 @@ ShellRoot {
     Osd {}
     WindowSwitcher {}
     GithubWidget {}
+    UsageWidget {}
 }

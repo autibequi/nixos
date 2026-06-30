@@ -23,6 +23,11 @@ state_load() {
       PDFKIT)   case "$val" in yes | no) STATE_PDFKIT="$val" ;; esac ;;
       DEBUG)    case "$val" in 0 | 1) STATE_DEBUG="$val" ;; esac ;;
       AUTODOWN) case "$val" in off | 30m | 1h | 2h | 4h) STATE_AUTODOWN="$val" ;; esac ;;
+      # Worktree por app: slug dinâmico (validado contra os worktrees reais na resolução,
+      # não por allowlist). Só rejeita tokens com espaço/separador suspeito.
+      MONO_WT)  [[ "$val" =~ ^[A-Za-z0-9._/-]+$ ]] && STATE_MONO_WT="$val" ;;
+      BO_WT)    [[ "$val" =~ ^[A-Za-z0-9._/-]+$ ]] && STATE_BO_WT="$val" ;;
+      FRONT_WT) [[ "$val" =~ ^[A-Za-z0-9._/-]+$ ]] && STATE_FRONT_WT="$val" ;;
     esac
   done < "$f"
   return 0
@@ -43,5 +48,27 @@ state_save() {
     echo "PDFKIT=${PDFKIT_SEL:-no}"
     echo "DEBUG=${MONO_DEBUG:-0}"
     echo "AUTODOWN=${AUTO_DOWN:-1h}"
+    echo "MONO_WT=${MONO_WT:-main}"
+    echo "BO_WT=${BO_WT:-main}"
+    echo "FRONT_WT=${FRONT_WT:-main}"
   } > "$f" 2>/dev/null || echo "aviso: não consegui salvar o state em $f" >&2
+}
+
+# Atualiza só as chaves de worktree, preservando o resto do state. O `coruja worktrees`
+# não roda o wizard, então não tem as demais globais (FRONT_ENV/MONO_SEL/…) pra um
+# state_save completo — sem isto, salvar zeraria a última config de ambiente.
+state_save_worktrees() {
+  local mono="$1" bo="$2" front="$3"
+  local f tmp
+  f="$(coruja_state_file)"
+  tmp="$(mktemp)" || { echo "aviso: não consegui salvar os worktrees" >&2; return 0; }
+
+  [[ -f "$f" ]] && grep -vE '^(MONO_WT|BO_WT|FRONT_WT)=' "$f" > "$tmp"
+  {
+    echo "MONO_WT=$mono"
+    echo "BO_WT=$bo"
+    echo "FRONT_WT=$front"
+  } >> "$tmp"
+
+  mv "$tmp" "$f" 2>/dev/null || echo "aviso: não consegui salvar os worktrees em $f" >&2
 }

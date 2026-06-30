@@ -104,16 +104,14 @@ export_env() {
   db_env="$(mono_env_file)"
   export MONO_ENV_FILE="$db_env"
 
-  # Garante APP_DIR_MONOLITO no shell com tilde expandido.
-  # podman-compose não expande ~ em valores do .env — precisa chegar via shell env.
-  local _app_dir="${APP_DIR_MONOLITO:-}"
-  if [[ -z "$_app_dir" ]]; then
-    local _penv
-    _penv="$(coruja_dir)/.env"
-    [[ -f "$_penv" ]] && _app_dir="$(grep -E '^APP_DIR_MONOLITO=' "$_penv" | head -1 | cut -d= -f2-)"
-  fi
-  _app_dir="${_app_dir/#\~/$HOME}"   # expande ~ → $HOME
-  export APP_DIR_MONOLITO="$_app_dir"
+  # APP_DIR_* no shell com worktree aplicado e ~ já expandido. Duas razões pra resolver aqui:
+  #   1. worktree: aponta cada app pro worktree escolhido (slug "main"/vazio = base do .env);
+  #   2. tilde: o podman-compose não expande ~ em valores do .env — precisa chegar via env.
+  # wt_resolve_* já lê o base do .env e expande ~, então cobre o caso "main" também.
+  export APP_DIR_MONOLITO="$(wt_resolve_monorepo_app "${MONO_WT:-}" monolito APP_DIR_MONOLITO)"
+  export APP_DIR_BO="$(wt_resolve_monorepo_app "${BO_WT:-}" bo-container APP_DIR_BO)"
+  export APP_DIR_FRONT="$(wt_resolve_front_app "${FRONT_WT:-}")"
+  local _app_dir="$APP_DIR_MONOLITO"
 
   # Para sandbox/prod: exporta SHARED_DB_* do .env.<X> pra o shell, para que o
   # docker-compose.yml (que usa ${SHARED_DB_HOST:-postgres}) receba os valores corretos.
@@ -216,22 +214,36 @@ load_env_from_state() {
   # na recriação do container (up/restart). Sem isto, recriar cairia no default (CompileDaemon).
   MONO_DEBUG="${STATE_DEBUG:-0}"
   AUTO_DOWN="${STATE_AUTODOWN:-1h}"
+  # Worktree por app (slug; vazio/main = base). export_env aplica em APP_DIR_*.
+  MONO_WT="${STATE_MONO_WT:-main}"
+  BO_WT="${STATE_BO_WT:-main}"
+  FRONT_WT="${STATE_FRONT_WT:-main}"
   export PLUG_DEBUG_APP="$MONO_DEBUG"
   export_env
+}
+
+# Sufixo "[wt: <slug>]" pro plano — vazio quando o app usa o worktree primário (main).
+plan_wt_suffix() {
+  local slug="$1"
+  if [[ -z "$slug" || "$slug" == "main" ]]; then
+    echo ""
+    return
+  fi
+  echo "  [wt: $slug]"
 }
 
 print_plan() {
   echo
   echo "Ambiente escolhido:"
-  printf "  front-student : %s\n" "$FRONT_ENV"
-  printf "  bo-container  : %s\n" "$BO_SEL"
+  printf "  front-student : %s%s\n" "$FRONT_ENV" "$(plan_wt_suffix "${FRONT_WT:-}")"
+  printf "  bo-container  : %s%s\n" "$BO_SEL" "$(plan_wt_suffix "${BO_WT:-}")"
   printf "  vertical      : %s\n" "$VERTICAL_SEL"
   if [[ "$MONO_SEL" == "skip" ]]; then
     printf "  monolito      : skip\n"
   else
     local _dbg=""
     [[ "${MONO_DEBUG:-0}" == "1" ]] && _dbg="  [debug: Delve :2345]"
-    printf "  monolito      : %s  (APP_ENV=%s, .env.%s)%s\n" "$MONO_SEL" "$(mono_env)" "$(mono_env_file)" "$_dbg"
+    printf "  monolito      : %s  (APP_ENV=%s, .env.%s)%s%s\n" "$MONO_SEL" "$(mono_env)" "$(mono_env_file)" "$_dbg" "$(plan_wt_suffix "${MONO_WT:-}")"
   fi
   printf "  modo          : %s\n" "${RUN_MODE:-foreground}"
   printf "  auto-down     : %s\n" "${AUTO_DOWN:-1h}"
