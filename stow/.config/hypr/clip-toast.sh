@@ -5,6 +5,7 @@
 set -u
 PATH="/run/current-system/sw/bin:${HOME}/.nix-profile/bin:/usr/bin:/bin:${PATH:-}"
 
+NIX=/run/current-system/sw/bin
 STATE="/tmp/waybar-cliptoast.json"
 TIMER="/tmp/waybar-cliptoast.pid"
 SIGNAL=13
@@ -15,11 +16,13 @@ POP="${HOME}/.config/hypr/sounds/pop.wav"
 cat >/dev/null 2>&1
 
 # acende o toast
-printf '%s' '{"text":"󰅍","tooltip":"Copiado pro clipboard","class":"active"}' > "$STATE"
+printf '%s' '{"text":"📋","tooltip":"Copiado pro clipboard","class":"active"}' > "$STATE"
 pkill -RTMIN+"$SIGNAL" waybar 2>/dev/null
 
-# pop (em background, não bloqueia)
-[ -f "$POP" ] && pw-play --volume=0.5 "$POP" >/dev/null 2>&1 &
+# pop discreto (em background, não bloqueia) — aplay tem latência ~0, paplay é fallback
+if   [ -x "$NIX/aplay"  ]; then "$NIX/aplay" -q "$POP" >/dev/null 2>&1 &
+elif [ -x "$NIX/paplay" ]; then "$NIX/paplay" --volume=32768 "$POP" >/dev/null 2>&1 &
+fi
 
 # apaga o toast após HOLD; debounce: mata o timer anterior se copiar em sequência
 [ -f "$TIMER" ] && kill "$(cat "$TIMER" 2>/dev/null)" 2>/dev/null

@@ -19,7 +19,7 @@
     proton-pass-cli
     github-cli
     atlassian-cli
-
+    todoist
     # security
     yubikey-manager
 

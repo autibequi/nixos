@@ -9,11 +9,11 @@
 		// "custom/vennon",
 		"hyprland/workspaces",
 		"hyprland/workspaces#special",
-		"mpris",
-		"custom/cliptoast"
+		"mpris"
 		// "hyprland/window"
 	],
 	"modules-center": [
+		"custom/cliptoast",
 		"custom/screenrecord",
 		"custom/swaync",
 		"custom/chicote",
@@ -47,6 +47,7 @@
 		"return-type": "json",
 		"interval": "once",
 		"signal": 13,
+		"escape": false,
 		"format": "{}"
 	},
 	"custom/screenrecord": {
