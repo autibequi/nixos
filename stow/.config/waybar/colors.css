@@ -1,45 +1,18 @@
-/* Waybar colors — Alacritty Deep Dark
- * Espelha ~/.config/alacritty/dark-theme.toml exatamente.
- * Para trocar de tema: editar só os @define-color abaixo.
+/* Waybar colors — Dracula Black
+ * Delega toda a paleta ao tema central. Só aliases de módulo ficam aqui.
  */
 @import url("../themes/dracula-black/colors.css");
-
-/* ── Paleta Deep Dark (fonte: dark-theme.toml) ────────────────────── */
-@define-color theme-bg          #0a0e14;   /* terminal background */
-@define-color theme-surface     #1a1f29;   /* normal black / footer bar */
-@define-color theme-elev        #2a2f3a;   /* hints end / elevado */
-@define-color theme-border      #2d3748;   /* selection background */
-@define-color theme-fg          #e6e6e6;   /* foreground */
-@define-color theme-fg-muted    #9ca3af;   /* dim_foreground */
-@define-color theme-accent      #00d4ff;   /* cursor / blue — destaque principal */
-@define-color theme-accent-soft #ff79c6;   /* magenta */
-@define-color theme-success     #50fa7b;   /* green */
-@define-color theme-warning     #ffb454;   /* yellow */
-@define-color theme-danger      #ff6b6b;   /* red */
-@define-color theme-info        #00e8c6;   /* cyan */
 
 /* ── Workspace states ─────────────────────────────────────────────── */
 @define-color ws-text                  @theme-fg-muted;
 @define-color ws-active-bg             @theme-accent;
 @define-color ws-active-text           @theme-bg;
-@define-color ws-urgent-bg             #ff2040;
+@define-color ws-urgent-bg             @theme-danger;
 @define-color ws-urgent-text           @theme-bg;
-@define-color ws-special-text          @theme-accent;
-@define-color ws-special-active-bg     #7de8f0;
-@define-color ws-special-active-text   #0a0e14;
+@define-color ws-special-text          @theme-warning;
+@define-color ws-special-active-bg     @theme-warning;
+@define-color ws-special-active-text   @theme-bg;
 @define-color ws-special-hover-text    @theme-fg;
-
-/* ── Legacy aliases ───────────────────────────────────────────────── */
-@define-color color-black    @theme-bg;
-@define-color color-white    @theme-fg;
-@define-color color-red      @theme-danger;
-@define-color color-yellow   @theme-warning;
-@define-color color-green    @theme-success;
-@define-color color-blue     @theme-accent;
-@define-color color-orange   @theme-warning;
-
-@define-color main-bg        @theme-bg;
-@define-color main-text      @theme-fg;
 
 /* ── Module colors ────────────────────────────────────────────────── */
 @define-color mpris-text                  @theme-fg;

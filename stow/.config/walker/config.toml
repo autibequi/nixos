@@ -17,107 +17,103 @@ anchor_left = false
 anchor_right = false
 
 [placeholders]
-"default" = { input = "Explore  ·  digite para buscar apps  ·  ! hub  : clip  = calc  > run  / files  @ web  b: bookmarks", list = "Enter entra · ← Voltar sobe" }
-"menus:home" = { input = "Explore  ·  digite para buscar apps", list = "Enter entra · ← Voltar sobe um nível" }
-"menus:dashboard" = { input = "Buscar apps, downloads, screenshots…", list = "Status acima · digite para buscar" }
+"default"           = { input = "Apps mais usados  ·  !g web  : clip  = calc  > run  / files  b: bookmarks", list = "Enter abre · Ctrl+P fixa" }
+"menus:home"        = { input = "Bookmarks", list = "Enter abre · ← Voltar sobe um nível" }
 "desktopapplications" = { input = "Apps", list = "Sem apps · Ctrl+P fixar no topo" }
-"menus:dash" = { input = "Hub", list = "Status ao vivo · Enter abre · preview →" }
-"calc" = { input = "Calculate", list = "Enter expression" }
-"runner" = { input = "Run command", list = "No commands" }
-"files" = { input = "Arquivos", list = "Downloads · Screenshots · preview →" }
-"websearch" = { input = "Search web", list = "" }
-"clipboard" = { input = "Clipboard", list = "Clipboard empty" }
-"symbols" = { input = "Symbols", list = "No symbols" }
-"unicode" = { input = "Unicode", list = "No characters" }
-"windows" = { input = "Windows", list = "No windows" }
-"providerlist" = { input = "Providers", list = "No providers" }
-"menus:wifi" = { input = "Wi-Fi", list = "No networks" }
-"menus:power" = { input = "Power", list = "Sem ações" }
-"menus:screenshot" = { input = "Screenshot", list = "Sem captura" }
-"menus:clock" = { input = "Relógio", list = "Carregando…" }
-"wireplumber" = { input = "Áudio", list = "Sem dispositivos" }
+"calc"              = { input = "Calculate", list = "Enter expression" }
+"runner"            = { input = "Run command", list = "No commands" }
+"files"             = { input = "Arquivos", list = "Downloads · Screenshots · preview →" }
+"websearch"         = { input = "!g busca  ·  gh GitHub  so Stack", list = "" }
+"clipboard"         = { input = "Clipboard", list = "Clipboard empty" }
+"symbols"           = { input = "Symbols", list = "No symbols" }
+"unicode"           = { input = "Unicode", list = "No characters" }
+"windows"           = { input = "Windows", list = "No windows" }
+"providerlist"      = { input = "Providers", list = "No providers" }
+"menus:wifi"        = { input = "Wi-Fi", list = "No networks" }
+"menus:power"       = { input = "Power", list = "Sem ações" }
+"menus:screenshot"  = { input = "Screenshot", list = "Sem captura" }
+"menus:clock"       = { input = "Relógio", list = "Carregando…" }
+"wireplumber"       = { input = "Áudio", list = "Sem dispositivos" }
 
 [keybinds]
-close = ["Escape", "ctrl q"]
-next = ["Down", "ctrl j"]
-previous = ["Up", "ctrl k"]
-toggle_exact = ["ctrl e"]
+close          = ["Escape", "ctrl q"]
+next           = ["Down", "ctrl j"]
+previous       = ["Up", "ctrl k"]
+toggle_exact   = ["ctrl e"]
 resume_last_query = ["ctrl r"]
 
 [providers]
-default = ["desktopapplications"]
-empty = ["menus:home"]
-ignore_preview = ["desktopapplications", "runner", "windows", "websearch", "providerlist", "menus:power", "menus:screenshot", "menus:clock", "menus:dashboard", "calc", "symbols", "menus:home", "menus:todo", "menus:wifi"]
+default  = ["desktopapplications"]
+empty    = ["desktopapplications"]
+ignore_preview = [
+  "desktopapplications", "runner", "windows", "websearch", "providerlist",
+  "menus:power", "menus:screenshot", "menus:clock", "calc", "symbols",
+  "menus:home", "menus:todo", "menus:wifi",
+]
 max_results = 60
 
 [providers.max_results_provider]
 desktopapplications = 16
-files = 16
-runner = 15
-clipboard = 12
-windows = 12
-"menus:power" = 6
-"menus:screenshot" = 4
-"menus:clock" = 4
-"menus:dashboard" = 1
-"menus:dash" = 20
-"menus:home" = 30
-websearch = 8
+files               = 16
+runner              = 15
+clipboard           = 12
+windows             = 12
+"menus:power"       = 6
+"menus:screenshot"  = 4
+"menus:clock"       = 4
+"menus:home"        = 30
+websearch           = 8
 
 [[providers.prefixes]]
-prefix = "!todo"
+prefix   = "`"
 provider = "menus:todo"
 
 [[providers.prefixes]]
-prefix = "!"
-provider = "menus:dash"
-
-[[providers.prefixes]]
-prefix = ";"
+prefix   = ";"
 provider = "providerlist"
 
 [[providers.prefixes]]
-prefix = ">"
+prefix   = ">"
 provider = "runner"
 
 [[providers.prefixes]]
-prefix = "/"
+prefix   = "/"
 provider = "files"
 
 [[providers.prefixes]]
-prefix = "="
+prefix   = "="
 provider = "calc"
 
 [[providers.prefixes]]
-prefix = "@"
+prefix   = "!g"
 provider = "websearch"
 
 [[providers.prefixes]]
-prefix = ":"
+prefix   = ":"
 provider = "clipboard"
 
 [[providers.prefixes]]
-prefix = "e:"
+prefix   = "e:"
 provider = "symbols"
 
 [[providers.prefixes]]
-prefix = "u:"
+prefix   = "u:"
 provider = "unicode"
 
 [[providers.prefixes]]
-prefix = "w:"
+prefix   = "w:"
 provider = "windows"
 
 [[providers.prefixes]]
-prefix = "b:"
+prefix   = "b:"
 provider = "bookmarks"
 
 [[providers.prefixes]]
-prefix = "vol:"
+prefix   = "vol:"
 provider = "wireplumber"
 
 [[providers.prefixes]]
-prefix = "m:"
+prefix   = "m:"
 provider = "playerctl"
 
 [providers.clipboard]
@@ -129,27 +125,23 @@ dmenu = [
 ]
 
 desktopapplications = [
-  { action = "start", default = true, bind = "Return", label = "open", after = "Close" },
-  { action = "start:keep", bind = "shift Return", label = "open+next", after = "KeepOpen" },
-  { action = "pin", bind = "ctrl p", label = "pin", after = "AsyncReload" },
-  { action = "unpin", bind = "ctrl p", after = "AsyncReload" },
+  { action = "start",      default = true, bind = "Return",       label = "open",     after = "Close" },
+  { action = "start:keep",                 bind = "shift Return", label = "open+next", after = "KeepOpen" },
+  { action = "pin",                        bind = "ctrl p",       label = "pin",       after = "AsyncReload" },
+  { action = "unpin",                      bind = "ctrl p",                            after = "AsyncReload" },
 ]
 
 "menus:home" = [
   { action = "open", default = true, bind = "Return", label = "abrir", after = "AsyncClearReload" },
 ]
 
-"menus:dash" = [
-  { action = "activate", default = true, bind = "Return", label = "open", after = "Close" },
-]
-
-"menus:dashboard" = [
-  { action = "activate", default = true, bind = "Return", label = "open", after = "Close" },
+"menus:todo" = [
+  { action = "activate", default = true, bind = "Return", label = "ok", after = "AsyncClearReload" },
 ]
 
 files = [
-  { action = "open", default = true, bind = "Return", label = "abrir", after = "Close" },
-  { action = "copypath", bind = "ctrl c", label = "copiar path", after = "Close" },
+  { action = "open",     default = true, bind = "Return", label = "abrir",       after = "Close" },
+  { action = "copypath",                 bind = "ctrl c", label = "copiar path", after = "Close" },
 ]
 
 "menus:power" = [
@@ -165,33 +157,33 @@ files = [
 ]
 
 "menus:wifi" = [
-  { action = "connect", default = true, bind = "Return", label = "connect", after = "Close" },
-  { action = "activate", bind = "Return", label = "run", after = "AsyncReload" },
-  { action = "ask", bind = "ctrl a", label = "senha", after = "Close" },
-  { action = "rescan", global = true, bind = "ctrl f", label = "rescan", after = "AsyncClearReload" },
+  { action = "connect",  default = true,  bind = "Return", label = "connect", after = "Close" },
+  { action = "activate",                  bind = "Return", label = "run",     after = "AsyncReload" },
+  { action = "ask",                       bind = "ctrl a", label = "senha",   after = "Close" },
+  { action = "rescan",   global = true,   bind = "ctrl f", label = "rescan",  after = "AsyncClearReload" },
 ]
 
 clipboard = [
-  { action = "copy", default = true, bind = "Return", label = "copy", after = "Close" },
-  { action = "remove", bind = "ctrl d", after = "AsyncClearReload" },
-  { action = "remove_all", label = "clear", bind = "ctrl shift d", after = "AsyncClearReload" },
-  { action = "show_images_only", label = "only images", bind = "ctrl i", after = "AsyncClearReload" },
-  { action = "show_text_only", label = "only text", bind = "ctrl i", after = "AsyncClearReload" },
-  { action = "show_combined", label = "show all", bind = "ctrl i", after = "AsyncClearReload" },
-  { action = "pause", bind = "ctrl shift p" },
-  { action = "unpause", bind = "ctrl shift p" },
-  { action = "unpin", bind = "ctrl p", after = "AsyncClearReload" },
-  { action = "pin", bind = "ctrl p", after = "AsyncClearReload" },
-  { action = "edit", bind = "ctrl o" },
+  { action = "copy",            default = true, bind = "Return",        label = "copy",       after = "Close" },
+  { action = "remove",                          bind = "ctrl d",                              after = "AsyncClearReload" },
+  { action = "remove_all",                      bind = "ctrl shift d",  label = "clear",      after = "AsyncClearReload" },
+  { action = "show_images_only",                bind = "ctrl i",        label = "only images", after = "AsyncClearReload" },
+  { action = "show_text_only",                  bind = "ctrl i",        label = "only text",  after = "AsyncClearReload" },
+  { action = "show_combined",                   bind = "ctrl i",        label = "show all",   after = "AsyncClearReload" },
+  { action = "pause",                           bind = "ctrl shift p" },
+  { action = "unpause",                         bind = "ctrl shift p" },
+  { action = "unpin",                           bind = "ctrl p",                              after = "AsyncClearReload" },
+  { action = "pin",                             bind = "ctrl p",                              after = "AsyncClearReload" },
+  { action = "edit",                            bind = "ctrl o" },
 ]
 
 wireplumber = [
-  { action = "set_default_device", default = true, bind = "Return", label = "padrão", after = "Close" },
-  { action = "increase_volume", bind = "plus", label = "vol+", after = "Nothing" },
-  { action = "increase_volume", bind = "equal", label = "vol+", after = "Nothing" },
-  { action = "decrease_volume", bind = "minus", label = "vol-", after = "Nothing" },
-  { action = "increase_volume", bind = "ctrl Up", label = "vol+", after = "Nothing" },
-  { action = "decrease_volume", bind = "ctrl Down", label = "vol-", after = "Nothing" },
-  { action = "mute", bind = "ctrl m", label = "mute", after = "Nothing" },
-  { action = "unmute", bind = "ctrl m", label = "mute", after = "Nothing" },
+  { action = "set_default_device", default = true, bind = "Return",   label = "padrão", after = "Close" },
+  { action = "increase_volume",                    bind = "plus",     label = "vol+",   after = "Nothing" },
+  { action = "increase_volume",                    bind = "equal",    label = "vol+",   after = "Nothing" },
+  { action = "decrease_volume",                    bind = "minus",    label = "vol-",   after = "Nothing" },
+  { action = "increase_volume",                    bind = "ctrl Up",  label = "vol+",   after = "Nothing" },
+  { action = "decrease_volume",                    bind = "ctrl Down", label = "vol-",  after = "Nothing" },
+  { action = "mute",                               bind = "ctrl m",   label = "mute",   after = "Nothing" },
+  { action = "unmute",                             bind = "ctrl m",   label = "mute",   after = "Nothing" },
 ]

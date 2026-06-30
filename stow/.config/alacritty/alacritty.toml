@@ -79,3 +79,38 @@ action = "Paste"
 key = "V"
 mods = "Control|Shift"
 chars = "\x16"
+
+# Hint: Ctrl+clique (ou Ctrl+Shift+O) em "path:linha" abre o arquivo no Zed.
+# O agente emite o path DESDE A RAIZ DO PROJETO (ex: "self/.../SKILL.md:30",
+# "apps/.../scoring.go:129"). Como o mesmo formato relativo serve a vários repos,
+# o wrapper TESTA em qual raiz conhecida o arquivo existe e abre nessa. Também
+# aceita absoluto do host (/home/...) e do container (/workspace/*, traduzido).
+# Range "129-147" vira "129" — o zed CLI só aceita uma linha (file:line).
+[[hints.enabled]]
+regex = '/?(?:[\w.+-]+/)+[\w.+-]+\.[a-z]+:[0-9]+(?:-[0-9]+)?'
+hyperlinks = false
+post_processing = true
+persist = false
+mouse = { enabled = true, mods = "Control" }
+binding = { key = "O", mods = "Control|Shift" }
+
+[hints.enabled.command]
+program = "sh"
+args = [
+  "-c",
+  '''
+ref="$(printf '%s' "$1" | sed -E 's/(:[0-9]+)-[0-9]+$/\1/')"
+case "$ref" in
+  /workspace/*)
+    f="$(printf '%s' "$ref" | sed -E -e 's#^/workspace/host/#/home/pedrinho/nixos/#' -e 's#^/workspace/obsidian/#/home/pedrinho/.ovault/Work/#' -e 's#^/workspace/target/#/home/pedrinho/projects/estrategia/coruja/#' -e 's#^/workspace/yaa/#/home/pedrinho/projects/pessoal/yaa/#')"
+    exec /run/current-system/sw/bin/zeditor "$f" ;;
+  /*) exec /run/current-system/sw/bin/zeditor "$ref" ;;
+esac
+p="${ref%%:*}"
+for root in /home/pedrinho/projects/estrategia/coruja /home/pedrinho/projects/pessoal/yaa /home/pedrinho/nixos /home/pedrinho/.ovault/Work; do
+  [ -e "$root/$p" ] && exec /run/current-system/sw/bin/zeditor "$root/$ref"
+done
+exec /run/current-system/sw/bin/zeditor "/home/pedrinho/projects/estrategia/coruja/$ref"
+''',
+  "zed-open",
+]

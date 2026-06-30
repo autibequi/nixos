@@ -16,8 +16,7 @@
 	"modules-center": [
 		"custom/screenrecord",
 		"custom/swaync",
-		"custom/github",
-		"custom/jira",
+		"custom/git",
 		"custom/chicote",
 		"clock",
 		"battery"
@@ -422,19 +421,11 @@
 		"tooltip": true,
 		"escape": false
 	},
-	"custom/github": {
-		"exec": "echo '{\"text\":\" 3  3\",\"tooltip\":\"3 PRs abertos · 3 aguardando review\"}'",
+	"custom/git": {
+		"exec": "$HOME/.config/waybar/git-prs.sh",
 		"return-type": "json",
-		"interval": "once",
-		"on-click": "qs ipc call github toggle",
-		"escape": false
-	},
-	"custom/jira": {
-		"exec": "echo '{\"text\":\"J  2  5  8\",\"tooltip\":\"FUK2 Sprint 23\\nFazendo: 2 · A fazer: 5 · Backlog: 8\"}'",
-		"return-type": "json",
-		"interval": "once",
-		"on-click": "qs ipc call github toggle",
-		"escape": false
+		"interval": 180,
+		"on-click": "qs ipc call github toggle"
 	},
 	"custom/swaync": {
 		"tooltip": false,

@@ -1,17 +1,17 @@
-/* dash — launcher Walker (fork de neon; evolui separado) */
+/* dash — Walker · Dracula Black */
 
-@define-color window_bg_color #0a0e14;
-@define-color surface_color #1a1f29;
-@define-color elev_color #2a2f3a;
-@define-color border_color #2d3748;
-@define-color theme_fg_color #e6e6e6;
-@define-color theme_fg_muted #9ca3af;
-@define-color accent_bg_color #00d4ff;
+@define-color window_bg_color #000000;
+@define-color surface_color #181820;
+@define-color elev_color #21222c;
+@define-color border_color #44475a;
+@define-color theme_fg_color #f8f8f2;
+@define-color theme_fg_muted #6272a4;
+@define-color accent_bg_color #bd93f9;
 @define-color accent_soft_color #ff79c6;
 @define-color success_color #50fa7b;
-@define-color warning_color #ffb454;
-@define-color danger_color #ff6b6b;
-@define-color info_color #00e8c6;
+@define-color warning_color #f1fa8c;
+@define-color danger_color #ff5555;
+@define-color info_color #8be9fd;
 @define-color error_bg_color @danger_color;
 @define-color error_fg_color @window_bg_color;
 

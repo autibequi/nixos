@@ -50,8 +50,7 @@ window#waybar {
 #battery,
 #idle_inhibitor,
 #custom-swaync,
-#custom-github,
-#custom-jira,
+#custom-git,
 #custom-cpu-bar,
 #custom-gpu-bar,
 #custom-ram-bar,
@@ -80,8 +79,7 @@ window#waybar {
 #battery:hover,
 #idle_inhibitor:hover,
 #custom-swaync:hover,
-#custom-github:hover,
-#custom-jira:hover,
+#custom-git:hover,
 #custom-claude-usage:hover,
 #custom-obsidian-sync:hover,
 #custom-screenrecord:hover,
@@ -213,16 +211,12 @@ window#waybar {
 #system-controls #backlight,
 #system-controls #custom-ddcutil-brightness,
 #system-controls #network {
-    background-color: transparent;
-    border-radius: 0;
-    padding: 0 5px;
-    margin: 0;
+    background-color: @theme-elev;
+    border-radius: 6px;
+    padding: 1px 6px;
+    margin: 2px 1px;
     border: none;
 }
-
-#system-controls #pulseaudio             { border-right: 1px solid @theme-border; }
-#system-controls #backlight              { border-right: 1px solid @theme-border; }
-#system-controls #custom-ddcutil-brightness { border-right: 1px solid @theme-border; }
 
 /*========================================================*
  *  MÓDULOS — cores semânticas                           *

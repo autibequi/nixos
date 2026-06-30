@@ -1,4 +1,4 @@
-// GithubWidget — sidepanel GitHub + Jira (mocado)
+// GithubWidget — sidepanel GitHub (real via gh)
 // Toggle: qs ipc call github toggle
 
 import QtQuick
@@ -13,33 +13,71 @@ Scope {
 
     property bool shown: false
 
-    // ── GitHub mock ───────────────────────────────────────────────
-    readonly property var myPrs: [
-        { number: 843, repo: "coruja",   title: "[FUK2-12924] ranking de numerais na busca",    status: "review",   statusLabel: "Aguardando", ci: "passing", updatedAt: "há 2h", stale: false, url: "https://github.com/estrategiahq/coruja/pull/843" },
-        { number: 840, repo: "coruja",   title: "[FUK2-13238] endpoint POST busca ecommerce",   status: "approved", statusLabel: "Aprovado",   ci: "passing", updatedAt: "há 6h", stale: false, url: "https://github.com/estrategiahq/coruja/pull/840" },
-        { number: 834, repo: "coruja",   title: "[FUK2-13201] timeout no refresh de sessão",    status: "changes",  statusLabel: "Mudanças",   ci: "failing", updatedAt: "há 1d", stale: false, url: "https://github.com/estrategiahq/coruja/pull/834" }
-    ]
+    // ── GitHub (real via `gh api graphql`) ────────────────────────
+    property var myPrs:   []
+    property var toReview: []
 
-    readonly property var toReview: [
-        { number: 841, repo: "coruja",   title: "[FUK2-13432] oculta contadores pendência",     author: "pedrohlcastro", ci: "passing", updatedAt: "há 4h", stale: false, url: "https://github.com/estrategiahq/coruja/pull/841" },
-        { number: 836, repo: "coruja",   title: "[FUK2-13429] fix 500 classificação batch ldi", author: "molina",        ci: "passing", updatedAt: "há 1d", stale: true,  url: "https://github.com/estrategiahq/coruja/pull/836" },
-        { number: 835, repo: "accounts", title: "[FUK2-13201] rotate refresh token endpoint",   author: "william",       ci: "failing", updatedAt: "há 2d", stale: true,  url: "https://github.com/estrategiahq/coruja/pull/835" }
-    ]
+    readonly property string ghQuery: '{ mine: search(query: "is:open is:pr author:@me archived:false", type: ISSUE, first: 20) { nodes { ... on PullRequest { number title url updatedAt repository { name } reviewDecision commits(last: 1) { nodes { commit { statusCheckRollup { state } } } } } } } review: search(query: "is:open is:pr review-requested:@me archived:false", type: ISSUE, first: 20) { nodes { ... on PullRequest { number title url updatedAt author { login } repository { name } commits(last: 1) { nodes { commit { statusCheckRollup { state } } } } } } } }'
 
-    // ── Jira mock ─────────────────────────────────────────────────
-    readonly property var jiraColumns: [
-        { id: "backlog", label: "Backlog",   count: 8 },
-        { id: "todo",    label: "A fazer",   count: 5 },
-        { id: "doing",   label: "Fazendo",   count: 2 },
-        { id: "review",  label: "Em review", count: 1 },
-        { id: "done",    label: "Feito",     count: 4 }
-    ]
+    function ghRelTime(iso) {
+        const h = Math.floor((Date.now() - new Date(iso).getTime()) / 3600000)
+        if (h < 1)  return "agora"
+        if (h < 24) return "há " + h + "h"
+        return "há " + Math.floor(h / 24) + "d"
+    }
+    function ghStale(iso) { return Date.now() - new Date(iso).getTime() > 2 * 86400000 }
+    function ghCi(node) {
+        const c = node.commits && node.commits.nodes && node.commits.nodes[0]
+        const roll = c && c.commit && c.commit.statusCheckRollup
+        if (!roll) return "passing"
+        return (roll.state === "FAILURE" || roll.state === "ERROR") ? "failing" : "passing"
+    }
+    function ghStatus(node) {
+        if (node.reviewDecision === "APPROVED")          return "approved"
+        if (node.reviewDecision === "CHANGES_REQUESTED") return "changes"
+        return "review"
+    }
+    function ghStatusLabel(s) {
+        if (s === "approved") return "Aprovado"
+        if (s === "changes")  return "Mudanças"
+        return "Aguardando"
+    }
+    function ghMapMine(node) {
+        const s = root.ghStatus(node)
+        return { number: node.number, repo: node.repository.name, title: node.title,
+                 status: s, statusLabel: root.ghStatusLabel(s), ci: root.ghCi(node),
+                 updatedAt: root.ghRelTime(node.updatedAt), stale: root.ghStale(node.updatedAt), url: node.url }
+    }
+    function ghMapReview(node) {
+        return { number: node.number, repo: node.repository.name, title: node.title,
+                 author: node.author ? node.author.login : "", ci: root.ghCi(node),
+                 updatedAt: root.ghRelTime(node.updatedAt), stale: root.ghStale(node.updatedAt), url: node.url }
+    }
 
-    readonly property var jiraActive: [
-        { key: "FUK2-12924", summary: "Ranking de numerais na busca",         status: "doing",  updatedAt: "há 2h", url: "https://estrategia.atlassian.net/browse/FUK2-12924" },
-        { key: "FUK2-13201", summary: "Timeout no refresh de sessão",         status: "doing",  updatedAt: "há 1d", url: "https://estrategia.atlassian.net/browse/FUK2-13201" },
-        { key: "FUK2-13239", summary: "Filtros e colunas de itens no search", status: "review", updatedAt: "há 3h", url: "https://estrategia.atlassian.net/browse/FUK2-13239" }
-    ]
+    Process {
+        id: ghProc
+        command: ["gh", "api", "graphql", "-f", "query=" + root.ghQuery]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    const data = JSON.parse(this.text).data
+                    root.myPrs   = (data.mine.nodes   || []).map(root.ghMapMine)
+                    root.toReview = (data.review.nodes || []).map(root.ghMapReview)
+                } catch (e) {
+                    console.log("GithubWidget: falha ao parsear gh graphql:", e)
+                }
+            }
+        }
+    }
+
+    function ghRefresh() { if (!ghProc.running) ghProc.running = true }
+
+    Component.onCompleted: root.ghRefresh()
+
+    Timer {
+        interval: 180000; running: true; repeat: true
+        onTriggered: root.ghRefresh()
+    }
 
     // ── cores ─────────────────────────────────────────────────────
     readonly property color cBg:      "#0a0e14"
@@ -54,17 +92,8 @@ Scope {
     readonly property color cYellow:  "#fbbf24"
     readonly property color cOrange:  "#fb923c"
     readonly property color cPurple:  "#a78bfa"
-    readonly property color cBlue:    "#60a5fa"
 
-    function jiraColumnColor(colId) {
-        if (colId === "doing")  return root.cYellow
-        if (colId === "review") return root.cAccent
-        if (colId === "todo")   return root.cBlue
-        if (colId === "done")   return root.cGreen
-        return root.cFgMuted
-    }
-
-    function openPanel()  { root.shown = true  }
+    function openPanel()  { root.shown = true; root.ghRefresh() }
     function closePanel() { root.shown = false }
     function togglePanel() {
         if (root.shown) {
@@ -108,12 +137,13 @@ Scope {
 
         Rectangle {
             id: panel
-            anchors.top:         parent.top
-            anchors.right:       parent.right
-            anchors.topMargin:   10
-            anchors.rightMargin: 10
-            width:  420
-            height: Math.min(860, hdr.height + content.implicitHeight + 28)
+            anchors.top:          parent.top
+            anchors.bottom:       parent.bottom
+            anchors.right:        parent.right
+            anchors.topMargin:    10
+            anchors.bottomMargin: 10
+            anchors.rightMargin:  10
+            width:  820
             radius: 14
             color:        root.cSurface
             border.color: root.cBorder
@@ -132,19 +162,13 @@ Scope {
                     spacing: 8
 
                     Text {
-                        text: " Dev"
+                        text: " GitHub"
                         font.family: "JetBrainsMono Nerd Font"
                         font.pixelSize: 14; font.weight: Font.Bold
                         color: root.cAccent
                     }
 
                     Item { Layout.fillWidth: true }
-
-                    Text {
-                        text: "mock"
-                        font.family: "JetBrainsMono Nerd Font"
-                        font.pixelSize: 9; color: root.cFgMuted; opacity: 0.5
-                    }
 
                     Rectangle {
                         width: 22; height: 22; radius: 11
@@ -168,110 +192,65 @@ Scope {
                 }
             }
 
-            // lista scrollável ───────────────────────────────────
-            Item {
+            // duas colunas (scroll independente) ─────────────────
+            RowLayout {
                 id: content
                 anchors { left: parent.left; right: parent.right; top: hdr.bottom; bottom: parent.bottom }
                 anchors.leftMargin: 10; anchors.rightMargin: 10
                 anchors.topMargin: 6; anchors.bottomMargin: 8
-                implicitHeight: Math.min(820 - hdr.height, listCol.implicitHeight + 12)
+                spacing: 10
 
-                Flickable {
-                    anchors.fill: parent; clip: true
-                    contentWidth: width; contentHeight: listCol.implicitHeight
-                    ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
-
-                    Column {
-                        id: listCol
-                        width: parent.width
-                        spacing: 4
-
-                        // ── GitHub: meus PRs ──────────────────
-                        SecLabel { width: listCol.width; secLabel: " Meus PRs";     secCount: root.myPrs.length    }
-                        Repeater {
-                            model: root.myPrs
-                            PrCard {
-                                required property var modelData
-                                width: listCol.width
-                                prNumber: modelData.number; prRepo: modelData.repo
-                                prTitle: modelData.title; prStatus: modelData.status
-                                prStatusLabel: modelData.statusLabel; prCi: modelData.ci
-                                prUpdatedAt: modelData.updatedAt; prAuthor: ""
-                                prStale: modelData.stale; prUrl: modelData.url
-                            }
-                        }
-
-                        Item { width: 1; height: 4 }
-
-                        // ── GitHub: para revisar ──────────────
-                        SecLabel { width: listCol.width; secLabel: " Para revisar"; secCount: root.toReview.length }
-                        Repeater {
-                            model: root.toReview
-                            PrCard {
-                                required property var modelData
-                                width: listCol.width
-                                prNumber: modelData.number; prRepo: modelData.repo
-                                prTitle: modelData.title; prStatus: "waiting"
-                                prStatusLabel: "Aguardando"; prCi: modelData.ci
-                                prUpdatedAt: modelData.updatedAt; prAuthor: modelData.author
-                                prStale: modelData.stale; prUrl: modelData.url
-                            }
-                        }
-
-                        // ── divisor ───────────────────────────
-                        Item { width: 1; height: 8 }
-                        Rectangle { width: listCol.width; height: 1; color: root.cBorder }
-                        Item { width: 1; height: 4 }
-
-                        // ── Jira: header + board ──────────────
-                        SecLabel { width: listCol.width; secLabel: "󱃕 Jira · FUK2 Sprint 23"; secCount: root.jiraActive.length }
-
-                        Flow {
-                            width: listCol.width
-                            spacing: 5
-
+                // ── coluna: Meus PRs ──────────────────────────
+                ColumnLayout {
+                    Layout.fillWidth: true; Layout.fillHeight: true
+                    spacing: 4
+                    SecLabel { Layout.fillWidth: true; secLabel: " Meus PRs"; secCount: root.myPrs.length }
+                    Flickable {
+                        Layout.fillWidth: true; Layout.fillHeight: true; clip: true
+                        contentWidth: width; contentHeight: mineCol.implicitHeight
+                        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                        Column {
+                            id: mineCol
+                            width: parent.width; spacing: 4
                             Repeater {
-                                model: root.jiraColumns
-                                delegate: Item {
-                                    width:  colPill.width
-                                    height: colPill.height
-
-                                    property color colClr: root.jiraColumnColor(modelData.id)
-
-                                    Rectangle {
-                                        id: colPill
-                                        width:  colTxt.implicitWidth + 12
-                                        height: 20; radius: 10
-                                        color:        Qt.rgba(colClr.r, colClr.g, colClr.b, 0.12)
-                                        border.color: Qt.rgba(colClr.r, colClr.g, colClr.b, 0.40)
-                                        border.width: 1
-
-                                        Text {
-                                            id: colTxt
-                                            anchors.centerIn: parent
-                                            text: modelData.label + " · " + modelData.count
-                                            font.family: "JetBrainsMono Nerd Font"
-                                            font.pixelSize: 9
-                                            color: colClr
-                                        }
-                                    }
+                                model: root.myPrs
+                                PrCard {
+                                    required property var modelData
+                                    width: mineCol.width
+                                    prNumber: modelData.number; prRepo: modelData.repo
+                                    prTitle: modelData.title; prStatus: modelData.status
+                                    prStatusLabel: modelData.statusLabel; prCi: modelData.ci
+                                    prUpdatedAt: modelData.updatedAt; prAuthor: ""
+                                    prStale: modelData.stale; prUrl: modelData.url
                                 }
                             }
                         }
+                    }
+                }
 
-                        Item { width: 1; height: 2 }
-
-                        // ── Jira: tickets ativos ──────────────
-                        Repeater {
-                            model: root.jiraActive
-                            JiraCard {
-                                required property var modelData
-                                width: listCol.width
-                                ticketKey:     modelData.key
-                                ticketSummary: modelData.summary
-                                ticketStatus:  modelData.status
-                                ticketUpdated: modelData.updatedAt
-                                ticketUrl:     modelData.url
+                // ── coluna: Para revisar ──────────────────────
+                ColumnLayout {
+                    Layout.fillWidth: true; Layout.fillHeight: true
+                    spacing: 4
+                    SecLabel { Layout.fillWidth: true; secLabel: " Para revisar"; secCount: root.toReview.length }
+                    Flickable {
+                        Layout.fillWidth: true; Layout.fillHeight: true; clip: true
+                        contentWidth: width; contentHeight: reviewCol.implicitHeight
+                        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                        Column {
+                            id: reviewCol
+                            width: parent.width; spacing: 4
+                            Repeater {
+                                model: root.toReview
+                                PrCard {
+                                    required property var modelData
+                                    width: reviewCol.width
+                                    prNumber: modelData.number; prRepo: modelData.repo
+                                    prTitle: modelData.title; prStatus: "waiting"
+                                    prStatusLabel: "Aguardando"; prCi: modelData.ci
+                                    prUpdatedAt: modelData.updatedAt; prAuthor: modelData.author
+                                    prStale: modelData.stale; prUrl: modelData.url
+                                }
                             }
                         }
                     }
@@ -410,76 +389,4 @@ Scope {
         }
     }
 
-    component JiraCard: Rectangle {
-        id: jc
-
-        property string ticketKey:     ""
-        property string ticketSummary: ""
-        property string ticketStatus:  "doing"
-        property string ticketUpdated: ""
-        property string ticketUrl:     ""
-
-        readonly property color statusClr: root.jiraColumnColor(jc.ticketStatus)
-
-        readonly property string statusLabel: {
-            if (jc.ticketStatus === "doing")  return "Fazendo"
-            if (jc.ticketStatus === "review") return "Em review"
-            return jc.ticketStatus
-        }
-
-        implicitHeight: jcCol.implicitHeight + 18
-        radius: 8
-        color:        jcMa.containsMouse ? Qt.rgba(0, 0.831, 1, 0.06) : root.cBg
-        border.width: 1
-        border.color: jcMa.containsMouse ? Qt.rgba(0, 0.831, 1, 0.28) : root.cBorder
-
-        Column {
-            id: jcCol
-            anchors { left: parent.left; right: parent.right; top: parent.top }
-            anchors.leftMargin: 10; anchors.rightMargin: 10; anchors.topMargin: 9
-            spacing: 4
-
-            RowLayout {
-                width: parent.width; spacing: 6
-                Text {
-                    text: jc.ticketKey
-                    font.family: "JetBrainsMono Nerd Font"; font.pixelSize: 10
-                    font.weight: Font.Bold; color: root.cAccent
-                }
-                Item { Layout.fillWidth: true }
-                Rectangle {
-                    width: jcStLbl.implicitWidth + 10; height: 16; radius: 8
-                    color:        Qt.rgba(jc.statusClr.r, jc.statusClr.g, jc.statusClr.b, 0.12)
-                    border.color: Qt.rgba(jc.statusClr.r, jc.statusClr.g, jc.statusClr.b, 0.40)
-                    border.width: 1
-                    Text {
-                        id: jcStLbl; anchors.centerIn: parent
-                        text: jc.statusLabel
-                        font.family: "JetBrainsMono Nerd Font"; font.pixelSize: 9; color: jc.statusClr
-                    }
-                }
-            }
-
-            Text {
-                width: parent.width; text: jc.ticketSummary
-                font.family: "JetBrainsMono Nerd Font"; font.pixelSize: 12; font.weight: Font.Medium
-                color: jcMa.containsMouse ? root.cAccent : root.cFg; elide: Text.ElideRight
-            }
-
-            Text {
-                text: jc.ticketUpdated
-                font.family: "JetBrainsMono Nerd Font"; font.pixelSize: 10; color: root.cFgMuted
-            }
-        }
-
-        MouseArea {
-            id: jcMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-            onClicked: {
-                if (jc.ticketUrl.length > 0) {
-                    Quickshell.execDetached(["xdg-open", jc.ticketUrl])
-                    root.closePanel()
-                }
-            }
-        }
-    }
 }

@@ -1,117 +1,158 @@
+-- TODO · agrega todos os todo.md do flagdir yaa (todas as sessões)
+-- Adições novas vão para _global/todo.md (sem SID disponível no Elephant).
+-- Actions via lua: para evitar problemas com && em shells do Walker.
+
 Name = "todo"
 NamePretty = "TODO"
 Icon = "checkbox-checked-symbolic"
-Description = "Work TODO · ~/Ovault/Work/TODO.md"
+Description = "TODO · sessões yaa"
 SearchName = false
 Cache = false
 FixedOrder = false
 HideFromProviderlist = false
 
-local TODO_FILE = os.getenv("HOME") .. "/.ovault/Work/TODO.md"
+local FLAG_BASE  = "/workspace/.cache/yaa-state/skill-flags"
+local GLOBAL_ARQ = FLAG_BASE .. "/_global/todo.md"
+local SEP        = "|||"
+
+Actions = {
+  activate = "lua:Activate",
+}
 
 function quote(s)
   return "'" .. s:gsub("'", "'\\''") .. "'"
 end
 
-function sed_escape(s)
-  -- escapa / \ & para uso dentro de sed s//
-  return s:gsub("([/\\&])", "\\%1")
-end
-
-function ensure_file()
-  local f = io.open(TODO_FILE, "r")
-  if f then f:close(); return end
-  local dir = TODO_FILE:match("(.+)/[^/]+$")
-  if dir then os.execute("mkdir -p " .. quote(dir)) end
-  f = io.open(TODO_FILE, "w")
-  if f then f:write("# Work TODO\n\n"); f:close() end
+function flagdir_files()
+  local h = io.popen("find " .. quote(FLAG_BASE) .. " -maxdepth 2 -name 'todo.md' 2>/dev/null")
+  if not h then
+    return {}
+  end
+  local files = {}
+  for line in h:lines() do
+    table.insert(files, line)
+  end
+  h:close()
+  return files
 end
 
 function read_pending()
   local tasks = {}
-  local f = io.open(TODO_FILE, "r")
-  if not f then return tasks end
-  for line in f:lines() do
-    local task = line:match("^%- %[ %] (.+)$")
-    if task then table.insert(tasks, task) end
+  for _, path in ipairs(flagdir_files()) do
+    local f = io.open(path, "r")
+    if f then
+      for line in f:lines() do
+        local task = line:match("^%- %[ %] (.+)$")
+        if task then
+          table.insert(tasks, { text = task, file = path })
+        end
+      end
+      f:close()
+    end
   end
-  f:close()
   return tasks
 end
 
-function done_cmd(task)
-  local esc = sed_escape(task)
-  return "sed -i " .. quote("s/^- \\[ \\] " .. esc .. "$/- [x] " .. esc .. "/") .. " " .. quote(TODO_FILE)
-    .. " && notify-send -i emblem-ok-symbolic 'TODO' " .. quote("✅ " .. task:sub(1, 60))
+function AddTask(task)
+  os.execute("mkdir -p " .. quote(FLAG_BASE .. "/_global"))
+  local f = io.open(GLOBAL_ARQ, "a")
+  if f then
+    f:write("- [ ] " .. task .. "\n")
+    f:close()
+  end
 end
 
--- Grava direto no mesmo arquivo que read_pending lê. Antes chamava
--- todo.sh (flagdir de sessão), que escrevia em outro lugar — a tarefa
--- adicionada nunca reaparecia na lista.
-function add_cmd(task)
-  local line = "- [ ] " .. task
-  return "printf '%s\\n' " .. quote(line) .. " >> " .. quote(TODO_FILE)
-    .. " && notify-send -i checkbox-checked-symbolic 'TODO' " .. quote("➕ " .. task:sub(1, 60))
+function MarkDone(file, task)
+  local f = io.open(file, "r")
+  if not f then
+    return
+  end
+  local lines = {}
+  for line in f:lines() do
+    if line == "- [ ] " .. task then
+      table.insert(lines, "- [x] " .. task)
+    else
+      table.insert(lines, line)
+    end
+  end
+  f:close()
+
+  f = io.open(file, "w")
+  if f then
+    f:write(table.concat(lines, "\n") .. "\n")
+    f:close()
+  end
 end
 
--- elephant passa a query quando GetEntries tem 1 argumento
+function Activate(value)
+  local sep_pos = value:find(SEP, 1, true)
+  if sep_pos then
+    local file = value:sub(1, sep_pos - 1)
+    local task = value:sub(sep_pos + #SEP)
+    MarkDone(file, task)
+  else
+    AddTask(value)
+  end
+end
+
 function GetEntries(query)
-  ensure_file()
-
   local pending = read_pending()
-  local q = (query or ""):match("^%s*(.-)%s*$")  -- trim
+  local q = (query or ""):match("^%s*(.-)%s*$")
 
-  -- com query: filtrar tarefas existentes
   if q ~= "" then
     local matches = {}
     local ql = q:lower()
-    for _, task in ipairs(pending) do
-      if task:lower():find(ql, 1, true) then
-        table.insert(matches, task)
+    for _, item in ipairs(pending) do
+      if item.text:lower():find(ql, 1, true) then
+        table.insert(matches, item)
       end
     end
 
     if #matches > 0 then
-      -- mostra as que casam; Enter marca como done
       local entries = {}
-      for _, task in ipairs(matches) do
+      for _, item in ipairs(matches) do
         table.insert(entries, {
-          Text    = task,
+          Text    = item.text,
           Subtext = "Enter → marcar concluída",
           Icon    = "checkbox-symbolic",
-          Actions = { activate = done_cmd(task) },
+          Value   = item.file .. SEP .. item.text,
+          After   = "AsyncClearReload",
+          Actions = { activate = "lua:Activate" },
         })
       end
       return entries
     else
-      -- nada casou → oferecer criar
       return {
         {
           Text    = "➕ Criar: " .. q,
-          Subtext = "nenhuma tarefa existente · Enter → adicionar",
+          Subtext = "Enter → adicionar",
           Icon    = "list-add",
-          Actions = { activate = add_cmd(q) },
+          Value   = q,
+          After   = "AsyncClearReload",
+          Actions = { activate = "lua:Activate" },
         },
       }
     end
   end
 
-  -- sem query: lista todas as pendentes
   local entries = {}
   if #pending == 0 then
     table.insert(entries, {
       Text    = "✓ Tudo limpo!",
       Subtext = "nenhuma tarefa pendente · comece a digitar para criar",
       Icon    = "emblem-ok-symbolic",
-      Actions = { activate = "true" },
+      Value   = "",
+      Actions = { activate = "lua:Activate" },
     })
   else
-    for _, task in ipairs(pending) do
+    for _, item in ipairs(pending) do
       table.insert(entries, {
-        Text    = task,
+        Text    = item.text,
         Subtext = "Enter → marcar concluída · ou filtre para criar nova",
         Icon    = "checkbox-symbolic",
-        Actions = { activate = done_cmd(task) },
+        Value   = item.file .. SEP .. item.text,
+        After   = "AsyncClearReload",
+        Actions = { activate = "lua:Activate" },
       })
     end
   end
