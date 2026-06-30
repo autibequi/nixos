@@ -4,7 +4,8 @@
   # serviços de base, shell, fontes, programas e pacotes gerais).
   imports = [
     ./base.nix # stateVersion, plataforma, env vars, tmpfs
-    ./nix.nix # nix settings, GC, auto-upgrade, nix-ld, appimage
+    ./nix.nix # nix settings, auto-upgrade, nix-ld, appimage
+    ./garbage.nix # housekeeping de disco: nix gc/optimise, fstrim, podman prune, downloads-cleanup
     ./locale.nix # teclado, timezone, i18n
     ./users.nix # contas e grupos
     ./networking.nix # hostname, NetworkManager, tailscale, ssh, firewall

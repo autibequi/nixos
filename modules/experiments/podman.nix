@@ -7,18 +7,7 @@
     dockerSocket.enable = true;
     defaultNetwork.settings.dns_enabled = true;
 
-    # GC do storage ROOTFUL (root). Roda como systemd de sistema → limpa só
-    # /var/lib/containers. O lixo do dev-stack é ROOTLESS → ver podman-prune
-    # de usuário mais abaixo (esta opção sozinha NÃO o cobre).
-    autoPrune = {
-      enable = true;
-      dates = "weekly";
-      flags = [
-        "--all" # remove imagens sem container associado (não só dangling)
-        "--filter"
-        "until=168h" # poupa o que tem menos de 7 dias
-      ];
-    };
+    # GC (autoPrune rootful + timer rootless) → modules/system/garbage.nix
   };
 
   # dockerSocket.enable liga SÓ o socket rootful de sistema. O coruja up,
@@ -40,28 +29,6 @@
   # Não usar systemd.packages = [ pkgs.podman ] (re-linka o podman-system-generator
   # que virtualisation.podman já instala → File exists no drv system-generators).
   systemd.user.sockets.podman.wantedBy = [ "sockets.target" ];
-
-  # ── GC ROOTLESS (onde o lixo do dev-stack realmente fica) ───────────────────
-  # O autoPrune nativo (acima) roda como root e só limpa o storage rootful. Os
-  # containers/imagens do `coruja up`, testcontainers etc. vivem no storage
-  # ROOTLESS do usuário (~/.local/share/containers) — precisam deste timer próprio.
-  systemd.user.services.podman-prune = {
-    description = "Prune podman rootless (imagens/containers/cache não usados há +7d)";
-    serviceConfig = {
-      Type = "oneshot";
-      # --all: remove imagens sem container. until=168h: poupa o que é dos últimos 7 dias.
-      # SEM --volumes de propósito — volumes podem guardar dados (DB de testcontainer).
-      ExecStart = "${pkgs.podman}/bin/podman system prune --all --force --filter until=168h";
-    };
-  };
-  systemd.user.timers.podman-prune = {
-    description = "Agenda semanal do prune podman rootless";
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnCalendar = "weekly";
-      Persistent = true; # se a máquina estava off no horário, roda no próximo login
-    };
-  };
 
   virtualisation.containers.containersConf.settings.engine.runtime = "crun";
 

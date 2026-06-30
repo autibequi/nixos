@@ -8,7 +8,7 @@ set -euo pipefail
 
 export PATH="/run/current-system/sw/bin:${HOME}/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/usr/bin:/bin:${PATH:-}"
 
-BLUE="#3498db"
+BLUE="#6b97b8"  # azul-aço wild-hunt (céu/vestido do wallpaper)
 # Cache CPU: /tmp é gravável em qualquer sessão (waybar roda como user)
 CPU_PREV="${TMPDIR:-/tmp}/waybar_cpu_prev_${UID:-0}"
 
@@ -19,14 +19,14 @@ _gauge_blue() {
   local icon="${1:-}" pct="${2:-0}" num w=4 filled seg i
   if (( pct >= 100 )); then
     num="100"
-    printf '<span background="%s" color="#111111"> %s%s</span>' "$BLUE" "$icon" "$num"
+    printf '<span background="%s" color="#06060d"> %s%s</span>' "$BLUE" "$icon" "$num"
     return
   fi
   num=$(printf '%02d' "$pct")
   filled=$(( pct * w / 100 ))
   seg=""
   for (( i=0; i<w; i++ )); do (( i < filled )) && seg+="▓" || seg+="▒"; done
-  printf '<span background="%s" color="#111111"> %s%s</span><span color="%s">%s</span>' \
+  printf '<span background="%s" color="#06060d"> %s%s</span><span color="%s">%s</span>' \
     "$BLUE" "$icon" "$num" "$BLUE" "$seg"
 }
 

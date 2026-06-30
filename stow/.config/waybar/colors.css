@@ -1,7 +1,27 @@
-/* Waybar colors — Wild Hunt (paleta do wallpaper)
- * Delega toda a paleta ao tema central. Só aliases de módulo ficam aqui.
+/* Waybar colors — Wild Hunt (paleta do wallpaper "Åsgårdsreien", P.N. Arbo)
+ * Paleta amostrada da imagem via k-means. Inline (sem @import pra tema
+ * central) pra não depender de symlink de diretório novo no stow.
+ * Frio (azul-aço do céu) = destaque · quente (âmbar do pôr do sol) =
+ * warning · bordô (capa da valquíria) = danger.
  */
-@import url("../themes/wild-hunt/colors.css");
+
+/* ── Surfaces (azul-pretos noturnos) ──────────────────────────────── */
+@define-color theme-bg          #06060d;
+@define-color theme-surface     #12121b;
+@define-color theme-elev        #1c1d23;
+@define-color theme-border      #43453f;
+
+/* ── Foreground (branco quente, não puro) ─────────────────────────── */
+@define-color theme-fg          #e6dac2;
+@define-color theme-fg-muted    #9b8669;
+
+/* ── Accents (amostrados/derivados da pintura) ────────────────────── */
+@define-color theme-accent      #6b97b8;   /* azul-aço — céu/vestido */
+@define-color theme-accent-soft #cdab7b;   /* dourado pálido das figuras */
+@define-color theme-success     #9aa85c;   /* verde-musgo frio */
+@define-color theme-warning     #e0a44b;   /* âmbar do pôr do sol */
+@define-color theme-danger      #c25a48;   /* vermelho-tijolo da capa */
+@define-color theme-info        #8bb0cc;   /* azul claro */
 
 /* ── Workspace states ─────────────────────────────────────────────── */
 @define-color ws-text                  @theme-fg-muted;

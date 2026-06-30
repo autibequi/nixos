@@ -133,7 +133,7 @@
       "nix-command"
       "flakes"
     ];
-    auto-optimise-store = true; # Automatically run nix-store --optimise
+    auto-optimise-store = true; # dedup inline no build (hardlinks)
 
     # Builds paralelos: "auto" usa todos os cores disponíveis.
     # Com 46GB RAM e CPU AMD multi-core, builds de Rust/Go/Flutter ficam
@@ -145,11 +145,7 @@
     cores = 0;
   };
 
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 3d"; # 76GB store — 3d mantém rollback recente sem acumular
-  };
+  # nix.gc / nix.optimise → modules/system/garbage.nix (housekeeping de disco)
 
   # NH Tool
   programs.nh = {

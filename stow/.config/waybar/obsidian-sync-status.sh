@@ -4,9 +4,9 @@
 
 set -euo pipefail
 
-PURPLE="#9b59b6"
-RED="#e74c3c"
-GRAY="#636e72"
+PURPLE="#cdab7b"  # wild-hunt: dourado pálido (sync ativo OK)
+RED="#c25a48"     # wild-hunt: bordô da capa (erro)
+GRAY="#9b8669"    # wild-hunt: dourado-fosco (idle)
 
 VAULT_PATH="/home/pedrinho/.ovault"
 
@@ -71,7 +71,7 @@ else
   class="inactive"
 fi
 
-text="<span background='${color}' color='#111111'> ${icon} </span>"
+text="<span background='${color}' color='#06060d'> ${icon} </span>"
 
 # Escapar pra JSON
 escaped_tooltip="${tooltip//\\/\\\\}"

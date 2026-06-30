@@ -212,9 +212,7 @@
     enableNotifications = true;
   };
 
-  # TRIM periódico para saúde do NVMe interno
-  services.fstrim.enable = true;
-  services.fstrim.interval = "weekly";
+  # services.fstrim (TRIM do NVMe) → modules/system/garbage.nix
 
   # NVMe já faz scheduling interno; mq-deadline adiciona latência sem ganho.
   # Forçar "none" iguala ao comportamento típico no Windows e melhora throughput.
