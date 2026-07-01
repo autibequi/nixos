@@ -47,8 +47,9 @@ window#waybar {
  */
 #mpris,
 #clock,
+#custom-clock,
 #battery,
-#idle_inhibitor,
+#custom-caffeine,
 #custom-todoist,
 #custom-swaync,
 #custom-git,
@@ -81,8 +82,9 @@ window#waybar {
  *--------------------------------------------------------*/
 #mpris:hover,
 #clock:hover,
+#custom-clock:hover,
 #battery:hover,
-#idle_inhibitor:hover,
+#custom-caffeine:hover,
 #custom-todoist:hover,
 #custom-swaync:hover,
 #custom-git:hover,
@@ -97,6 +99,14 @@ window#waybar {
 #bluetooth:hover,
 #tray:hover {
     background-color: @theme-elev;
+}
+
+/* ── Todoist: atrasadas → vermelho ── */
+#custom-todoist.overdue {
+    color: #e74c3c;
+}
+#custom-todoist.overdue:hover {
+    color: #ff6b6b;
 }
 
 /*========================================================*
@@ -234,7 +244,8 @@ window#waybar {
 #mpris.playing { color: @theme-accent; }
 #mpris.paused  { color: @theme-fg-muted; }
 
-#clock {
+#clock,
+#custom-clock {
     color: @clock-text;
     text-shadow: 0 0 8px rgba(0, 212, 255, 0.35);
 }
@@ -256,12 +267,12 @@ window#waybar {
 
 #backlight                { color: @backlight-text; }
 
-#idle_inhibitor {
+#custom-caffeine {
     color: @idle-inhibitor-text;
     padding: 0 8px;
     min-width: 0;
 }
-#idle_inhibitor.activated {
+#custom-caffeine.activated {
     color: @idle-inhibitor-active-text;
     background-color: @theme-info;
 }

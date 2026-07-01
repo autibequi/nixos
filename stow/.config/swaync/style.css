@@ -272,3 +272,17 @@
 .critical>.notification-default-action {
     border-left: 3px solid @urgent;
 }
+
+/* ======== Todoist Alarm — destaque especial ======== */
+.notification[app-name="Todoist Alarm"] {
+    border: 2px solid @urgent;
+    background: mix(@bg, @urgent, 0.92);
+}
+.notification[app-name="Todoist Alarm"] .summary {
+    color: @urgent;
+    font-size: 15px;
+    font-weight: 700;
+}
+.notification[app-name="Todoist Alarm"] .body {
+    font-size: 16px;
+}

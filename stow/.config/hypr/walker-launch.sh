@@ -95,13 +95,13 @@ if [[ -x "$_cache_script" ]]; then
 fi
 
 case "$provider" in
-  menus:wifi|menus:power|menus:screenshot|menus:clock|menus:dash|menus:dashboard|menus:todo)
+  menus:wifi|menus:power|menus:screenshot|menus:clock|menus:dash|menus:dashboard|menus:todoist)
     args=(--hideqa "${args[@]}")
     ;;
 esac
 
-# menus:todo — lista de tarefas com criação via query
-if [[ "$provider" == "menus:todo" ]]; then
+# menus:todoist — lista de tarefas com criação via query
+if [[ "$provider" == "menus:todoist" ]]; then
   compact=()
   if ! $has_width; then compact+=(--width 640); fi
   if ! $has_minheight; then compact+=(--minheight 300); fi

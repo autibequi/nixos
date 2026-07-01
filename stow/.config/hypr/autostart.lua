@@ -35,6 +35,9 @@ hl.on("hyprland.start", function()
     -- Toast no waybar + "pop" ao copiar (módulo custom/cliptoast)
     hl.exec_cmd(L.build("wl-paste --watch " .. os.getenv("HOME") .. "/.config/hypr/clip-toast.sh"))
 
+    -- Notificador de tarefas Todoist (exec-once; loop interno de 60s)
+    hl.exec_cmd(L.build(os.getenv("HOME") .. "/.config/hypr/todoist-notifier.sh"))
+
     -- Tema escuro inicial
     dark_theme()
 end)

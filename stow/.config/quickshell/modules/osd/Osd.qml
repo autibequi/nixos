@@ -9,18 +9,19 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.Pipewire
+import "../../colors" as Theme
 
 Scope {
     id: root
 
-    // ── Tema (Deep Dark / Alacritty — espelha PowerMenu e ClockWidget) ──
-    readonly property color cBg:      "#0a0e14"
-    readonly property color cSurface: "#1a1f29"
-    readonly property color cBorder:  "#2d3748"
-    readonly property color cFg:      "#e6e6e6"
-    readonly property color cFgMuted: "#9ca3af"
-    readonly property color cAccent:  "#00d4ff"
-    readonly property color cDanger:  "#ff5555"
+    // ── Tema — fonte única em quickshell/colors/Colors.qml ──
+    readonly property color cBg:      Theme.Colors.bg
+    readonly property color cSurface: Theme.Colors.surface
+    readonly property color cBorder:  Theme.Colors.border
+    readonly property color cFg:      Theme.Colors.fg
+    readonly property color cFgMuted: Theme.Colors.fgMuted
+    readonly property color cAccent:  Theme.Colors.accent
+    readonly property color cDanger:  Theme.Colors.danger
 
     // ── Estado do OSD ────────────────────────────────────────────────
     property bool shown: false

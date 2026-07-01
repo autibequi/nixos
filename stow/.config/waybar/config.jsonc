@@ -5,8 +5,7 @@
 	"spacing": 0,
 	"margin": "3px 5px 3px",
 	"modules-left": [
-		"custom/todoist",
-		"idle_inhibitor",
+		"custom/caffeine",
 		// "custom/vennon",
 		"hyprland/workspaces",
 		"hyprland/workspaces#special",
@@ -16,15 +15,16 @@
 	"modules-center": [
 		"custom/cliptoast",
 		"custom/screenrecord",
+		"custom/todoist",
 		"custom/swaync",
 		"custom/chicote",
-		"clock",
-		"battery"
-	],
-	"modules-right": [
+		"custom/clock",
+		"battery",
 		"custom/pr-approved",
 		"custom/pr-pending",
-		"custom/pr-review",
+		"custom/pr-review"
+	],
+	"modules-right": [
 		"custom/claude-usage",
 		"group/system-controls",
 		"tray",
@@ -44,9 +44,13 @@
 		"spacing": 2
 	},
 	"custom/todoist": {
-		"format": "󰄲",
+		"exec": "bash $HOME/.config/quickshell/modules/todoist/todoist-panel.sh status 2>/dev/null || printf '{\"text\":\"󰄲\",\"class\":\"\",\"tooltip\":\"\"}'",
+		"return-type": "json",
+		"interval": 60,
+		"signal": 15,
+		"format": "{}",
 		"on-click": "qs ipc call todoist toggle",
-		"tooltip": false
+		"tooltip": true
 	},
 	"custom/cliptoast": {
 		"exec": "cat /tmp/waybar-cliptoast.json 2>/dev/null || echo '{\"text\":\"\"}'",
@@ -287,21 +291,22 @@
 		"on-scroll-up": "playerctl next",
 		"on-scroll-down": "playerctl previous"
 	},
-	"idle_inhibitor": {
-		"format": "{icon}",
-		"format-icons": {
-			"activated": "󰅶",
-			"deactivated": "󰅷"
-		},
+	"custom/caffeine": {
+		"exec": "$HOME/.config/waybar/caffeine.sh status",
+		"return-type": "json",
+		"interval": 5,
+		"on-click": "$HOME/.config/waybar/caffeine.sh toggle",
 		"tooltip": true
 	},
-	"clock": {
-		"format": "󰥔 {:%H:%M}",
-		"interval": 60,
-		"format-alt": "󰥔 {:%H:%M}  󰃭 {:%d/%m}",
-		"tooltip-format": "{:%A, %d %B · %H:%M}",
-		"tooltip": true,
-		"on-click": "qs ipc call clock toggle"
+	"custom/clock": {
+		"exec": "f=/tmp/wbclk; d=$(date +'%u'); w=${d/1/SEG}; w=${w/2/TER}; w=${w/3/QUA}; w=${w/4/QUI}; w=${w/5/SEX}; w=${w/6/SAB}; w=${w/7/DOM}; [ -f \"$f\" ] && date +\"$w  %Y-%m-%d  %H:%M:%S\" || date +'%H:%M'",
+		"return-type": "",
+		"interval": 1,
+		"signal": 16,
+		"format": "󰥔 {}",
+		"on-click": "qs ipc call clock toggle",
+		"on-click-right": "f=/tmp/wbclk; [ -f \"$f\" ] && rm -f \"$f\" || touch \"$f\"; pkill -SIGRTMIN+16 waybar",
+		"tooltip": false
 	},
 	"cpu": {
 		"format": "󰍛 {usage}%",

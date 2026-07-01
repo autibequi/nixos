@@ -67,6 +67,12 @@
       "state": "transient",
       "app-name": "notify-send",
       "urgency": "Low"
+    },
+    "todoist-alarm": {
+      "state": "enabled",
+      "app-name": "Todoist Alarm",
+      "urgency": "Critical",
+      "override-urgency": true
     }
   },
   "widgets": [

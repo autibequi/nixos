@@ -8,6 +8,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
+import "../../colors" as Theme
 
 Scope {
     id: root
@@ -21,14 +22,14 @@ Scope {
     // Congelar evita que a lista mude enquanto o usuário está navegando.
     property var windowSnapshot: []
 
-    // ── Tema Deep Dark (espelha PowerMenu.qml para consistência) ──
-    readonly property color cBg:      "#0a0e14"
-    readonly property color cSurface: "#1a1f29"
-    readonly property color cElev:    "#2a2f3a"
-    readonly property color cBorder:  "#2d3748"
-    readonly property color cFg:      "#e6e6e6"
-    readonly property color cFgMuted: "#9ca3af"
-    readonly property color cAccent:  "#00d4ff"
+    // ── Tema — fonte única em quickshell/colors/Colors.qml ──
+    readonly property color cBg:      Theme.Colors.bg
+    readonly property color cSurface: Theme.Colors.surface
+    readonly property color cElev:    Theme.Colors.elev
+    readonly property color cBorder:  Theme.Colors.border
+    readonly property color cFg:      Theme.Colors.fg
+    readonly property color cFgMuted: Theme.Colors.fgMuted
+    readonly property color cAccent:  Theme.Colors.accent
 
     function open() {
         // Capturar snapshot na abertura: ordena por focusHistoryID para que a

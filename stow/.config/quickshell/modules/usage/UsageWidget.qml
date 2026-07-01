@@ -6,6 +6,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
+import "../../colors" as Theme
 
 Scope {
     id: root
@@ -27,21 +28,21 @@ Scope {
         "weekly_oauth_apps": "OAuth apps 7d"
     })
 
-    // ── cores (alinhadas ao GithubWidget) ─────────────────────────
-    readonly property color cBg:      "#0a0e14"
-    readonly property color cElev:    "#2a2f3a"
-    readonly property color cBorder:  "#2d3748"
-    readonly property color cFg:      "#e6e6e6"
-    readonly property color cFgMuted: "#9ca3af"
-    readonly property color cAccent:  "#00d4ff"
+    // ── cores — fonte única em quickshell/colors/Colors.qml ────────
+    readonly property color cBg:      Theme.Colors.bg
+    readonly property color cElev:    Theme.Colors.elev
+    readonly property color cBorder:  Theme.Colors.border
+    readonly property color cFg:      Theme.Colors.fg
+    readonly property color cFgMuted: Theme.Colors.fgMuted
+    readonly property color cAccent:  Theme.Colors.accent
 
     function pctColor(p) {
-        if (p >= 90) return "#c0392b"
-        if (p >= 80) return "#e74c3c"
-        if (p >= 70) return "#e67e22"
-        if (p >= 50) return "#f1c40f"
-        if (p >= 30) return "#16a085"
-        return "#2ecc71"
+        if (p >= 90) return Theme.Colors.severity.critical
+        if (p >= 80) return Theme.Colors.severity.high
+        if (p >= 70) return Theme.Colors.severity.medium
+        if (p >= 50) return Theme.Colors.severity.low
+        if (p >= 30) return Theme.Colors.severity.ok
+        return Theme.Colors.severity.good
     }
 
     function relReset(iso) {
@@ -260,7 +261,7 @@ Scope {
                     Layout.fillWidth: true; spacing: 8
                     Rectangle {
                         width: 7; height: 7; radius: 4
-                        color: root.spendOk ? "#2ecc71" : root.cFgMuted
+                        color: root.spendOk ? Theme.Colors.severity.good : root.cFgMuted
                     }
                     Text {
                         text: root.spendLabel

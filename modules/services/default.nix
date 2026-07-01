@@ -10,6 +10,7 @@
     ./virt.nix # QEMU/KVM + virt-manager
     ./hyprland-logs.nix # exporta logs de apps custom → ~/nixos/logs/ (visível em /workspace/host/logs/)
     ./ydotool.nix # daemon uinput para injeção de teclas sem modifier leakage
+    # ./yaa-idle-shutdown.nix # idle-shutdown migrado pro crate service (yaa-service)
     # ./ramsync.nix # profile-em-RAM (psd browsers + caches Zed/Obsidian em tmpfs)
   ];
 }

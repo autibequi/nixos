@@ -7,6 +7,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
+import "../../colors" as Theme
 
 Scope {
     id: root
@@ -16,6 +17,7 @@ Scope {
     readonly property real uiScale: 1.0
     readonly property real calScale: 0.5
     readonly property real calFontScale: 1.0
+    readonly property real calScrollSensitivity: 3.0   // multiplica o delta da roda; sobe = scroll mais rápido
     function px(n) { return Math.round(n * uiScale) }
     function calPx(n) { return Math.round(n * uiScale * calScale) }
     function calFont(n) { return Math.round(n * uiScale * calFontScale) }
@@ -42,16 +44,16 @@ Scope {
     readonly property int calDayCellH:        calPx(42)
     readonly property int calDayCellMinW:     calPx(46)
 
-    // ── Tema Walker / neon ────────────────────────────────────────
-    readonly property color cBg:       "#0a0e14"
-    readonly property color cSurface:  "#1a1f29"
-    readonly property color cElev:     "#2a2f3a"
-    readonly property color cBorder:   "#2d3748"
-    readonly property color cFg:       "#e6e6e6"
-    readonly property color cFgMuted:  "#9ca3af"
-    readonly property color cFgDimmer: "#4a5568"
-    readonly property color cAccent:   "#00d4ff"
-    readonly property color cWeekend:  "#ff7eb3"
+    // ── Tema — fonte única em quickshell/colors/Colors.qml ──
+    readonly property color cBg:       Theme.Colors.bg
+    readonly property color cSurface:  Theme.Colors.surface
+    readonly property color cElev:     Theme.Colors.elev
+    readonly property color cBorder:   Theme.Colors.border
+    readonly property color cFg:       Theme.Colors.fg
+    readonly property color cFgMuted:  Theme.Colors.fgMuted
+    readonly property color cFgDimmer: Qt.rgba(Theme.Colors.fgMuted.r, Theme.Colors.fgMuted.g, Theme.Colors.fgMuted.b, 0.6)
+    readonly property color cAccent:   Theme.Colors.accent
+    readonly property color cWeekend:  "#ff7eb3"   // decorativo, fora da paleta base
     readonly property color cWeekendBg: Qt.rgba(1, 0.494, 0.702, 0.14)
 
     readonly property var monthNames: [
@@ -274,7 +276,7 @@ Scope {
         command: [
             "curl", "-sf", "--max-time", "4",
             "https://api.open-meteo.com/v1/forecast"
-            + "?latitude=-23.5505&longitude=-46.6333"
+            + "?latitude=-22.9068&longitude=-43.1729"
             + "&current=temperature_2m,weather_code"
             + "&daily=weather_code,temperature_2m_max,temperature_2m_min"
             + "&timezone=America/Sao_Paulo&forecast_days=3"
@@ -545,6 +547,19 @@ Scope {
                                 boundsBehavior: Flickable.StopAtBounds
                                 cacheBuffer: calPx(400)
 
+                                WheelHandler {
+                                    target: calList
+                                    onWheel: (event) => {
+                                        calList.contentY = Math.max(
+                                            0,
+                                            Math.min(
+                                                calList.contentHeight - calList.height,
+                                                calList.contentY - event.angleDelta.y * root.calScrollSensitivity
+                                            )
+                                        )
+                                    }
+                                }
+
                                 delegate: Item {
                                     id: monthWrap
                                     width: calList.width
@@ -707,7 +722,7 @@ Scope {
         property int month: 0
         property int year: 2026
         property int gridSpacing: calPx(6)
-        property bool isCurrentMonth: card.month === root.now.getMonth()
+        property bool isCurrentMonth: card.month === root.now.getMonth() && card.year === root.now.getFullYear()
                                     && card.year === root.now.getFullYear()
         property real cellW: {
             if (width <= 0) return root.calDayCellMinW;
@@ -800,9 +815,10 @@ Scope {
                     implicitHeight: card.cellH
 
                     property bool inMonth: model.visibleMonth
-                    property bool isToday: model.visibleMonth
-                                        && model.day === root.now.getDate()
-                                        && card.isCurrentMonth
+                    property bool isToday: model.today === true
+                                        || (model.visibleMonth
+                                            && Number(model.day) === root.now.getDate()
+                                            && card.isCurrentMonth)
                     property bool isWeekend: inMonth
                         && root.isWeekendDay(card.year, card.month, model.day)
                     property bool hovered: dayHover.containsMouse && model.visibleMonth
@@ -812,7 +828,7 @@ Scope {
                         anchors.margins: calPx(2)
                         radius: calPx(8)
                         color: {
-                            if (isToday) return root.cAccent;
+                            if (isToday) return Theme.Colors.accentSoft;
                             if (hovered) return root.cElev;
                             if (isWeekend) return root.cWeekendBg;
                             return "transparent";
@@ -833,7 +849,7 @@ Scope {
                         font.weight: (isToday || hovered || isWeekend) ? Font.Bold : Font.Medium
                         color: {
                             if (!inMonth) return root.cFgDimmer;
-                            if (isToday) return root.cBg;
+                            if (isToday) return "#000000";
                             if (hovered) return root.cAccent;
                             if (isWeekend) return root.cWeekend;
                             return root.cFg;

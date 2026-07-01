@@ -17,7 +17,7 @@ anchor_left = false
 anchor_right = false
 
 [placeholders]
-"default"           = { input = "Apps mais usados  ·  !g web  : clip  = calc  > run  / files  b: bookmarks", list = "Enter abre · Ctrl+P fixa" }
+"default"           = { input = "`      >      /      =      :      e:      u:      w:      b:      vol:      m:", list = "Enter abre · Ctrl+P fixa" }
 "menus:home"        = { input = "Bookmarks", list = "Enter abre · ← Voltar sobe um nível" }
 "desktopapplications" = { input = "Apps", list = "Sem apps · Ctrl+P fixar no topo" }
 "calc"              = { input = "Calculate", list = "Enter expression" }

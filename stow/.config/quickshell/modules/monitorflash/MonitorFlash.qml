@@ -13,11 +13,12 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Io
+import "../../colors" as Theme
 
 Scope {
     id: root
 
-    readonly property color flashColor: "#00d4ff"  // cyan accent (espelha Osd/PowerMenu)
+    readonly property color flashColor: Theme.Colors.accent
     readonly property int   borderWidth: 6
 
     signal flashRequested()

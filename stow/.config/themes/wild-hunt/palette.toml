@@ -1,0 +1,34 @@
+# Wild Hunt — paleta canônica única (wallpaper "Åsgårdsreien", P.N. Arbo)
+# Fonte da verdade. Mudar cor = editar aqui + rodar themes/generate.sh.
+# Consumidores gerados: waybar/colors.css · walker/themes/dash/style.css ·
+# quickshell/colors/Colors.qml
+
+[surfaces]
+bg     = "#06060d"
+surface = "#12121b"
+elev   = "#1c1d23"
+border = "#43453f"
+
+[foreground]
+fg       = "#e6dac2"
+fg_muted = "#9b8669"
+
+[accents]
+accent      = "#6b97b8"   # azul-aço — céu/vestido
+accent_soft = "#cdab7b"   # dourado pálido das figuras
+success     = "#9aa85c"   # verde-musgo frio
+warning     = "#e0a44b"   # âmbar do pôr do sol
+danger      = "#c25a48"   # vermelho-tijolo da capa
+info        = "#8bb0cc"   # azul claro
+
+# Escala de severidade (gradiente 6 níveis) — fora da Wild Hunt (não amostrada
+# do wallpaper), reutilizada por widgets que graduam intensidade (quota, prioridade).
+# Extraída 2026-07-01: UsageWidget.pctColor e TodoistWidget.prioColor reinventavam
+# gradientes parecidos sem compartilhar.
+[severity]
+critical = "#c0392b"
+high     = "#e74c3c"
+medium   = "#e67e22"
+low      = "#f1c40f"
+ok       = "#16a085"
+good     = "#2ecc71"

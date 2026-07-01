@@ -7,6 +7,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
+import "../../colors" as Theme
 
 Scope {
     id: root
@@ -80,29 +81,48 @@ Scope {
 
     function ghRefresh() { if (!ghProc.running) ghProc.running = true }
 
-    Component.onCompleted: root.ghRefresh()
+    Component.onCompleted: { root.ghRefresh(); root.notifRefresh() }
 
     Timer {
         interval: 180000; running: true; repeat: true
         onTriggered: root.ghRefresh()
     }
 
-    // ── cores ─────────────────────────────────────────────────────
-    readonly property color cBg:      "#0a0e14"
-    readonly property color cSurface: "#1a1f29"
-    readonly property color cElev:    "#2a2f3a"
-    readonly property color cBorder:  "#2d3748"
-    readonly property color cFg:      "#e6e6e6"
-    readonly property color cFgMuted: "#9ca3af"
-    readonly property color cAccent:  "#00d4ff"
-    readonly property color cGreen:   "#4ade80"
-    readonly property color cRed:     "#f87171"
-    readonly property color cYellow:  "#fbbf24"
-    readonly property color cOrange:  "#fb923c"
-    readonly property color cPurple:  "#a78bfa"
+    // ── notificações do GitHub (gh api notifications + toast via swaync) ──
+    property var  notifs: []
+    property bool showNotifs: false
+    readonly property string notifScript: Qt.resolvedUrl("gh-notif.sh").toString().replace(/^file:\/\//, "")
+
+    Process {
+        id: ghNotifProc
+        command: ["bash", root.notifScript, "poll"]   // poll dispara os toasts das novas
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try { const d = JSON.parse(this.text); if (Array.isArray(d)) root.notifs = d }
+                catch (e) { console.log("GithubWidget: notif parse falhou:", e) }
+            }
+        }
+    }
+    function notifRefresh() { if (!ghNotifProc.running) ghNotifProc.running = true }
+    // roda sempre (mesmo com painel fechado) — é o que dispara os toasts das novas
+    Timer { interval: 90000; running: true; repeat: true; onTriggered: root.notifRefresh() }
+
+    // ── cores — fonte única em quickshell/colors/Colors.qml ────────
+    readonly property color cBg:      Theme.Colors.bg
+    readonly property color cSurface: Theme.Colors.surface
+    readonly property color cElev:    Theme.Colors.elev
+    readonly property color cBorder:  Theme.Colors.border
+    readonly property color cFg:      Theme.Colors.fg
+    readonly property color cFgMuted: Theme.Colors.fgMuted
+    readonly property color cAccent:  Theme.Colors.accent
+    readonly property color cGreen:   Theme.Colors.success
+    readonly property color cRed:     Theme.Colors.danger
+    readonly property color cYellow:  Theme.Colors.warning
+    readonly property color cOrange:  "#fb923c"   // decorativo, fora da paleta base
+    readonly property color cPurple:  "#a78bfa"   // decorativo, fora da paleta base
 
     function openPanel()  { root.shown = true; root.ghRefresh() }
-    function closePanel() { root.shown = false }
+    function closePanel() { root.shown = false; root.showNotifs = false }
     function togglePanel() {
         if (root.shown) {
             root.closePanel()
@@ -189,6 +209,28 @@ Scope {
 
                     Item { Layout.fillWidth: true }
 
+                    // 🔔 notificações — badge de contagem + toggle da lista
+                    Rectangle {
+                        Layout.alignment: Qt.AlignVCenter
+                        implicitWidth: bellRow.implicitWidth + 14; height: 22; radius: 11
+                        color: (bma.containsMouse || root.showNotifs) ? root.cElev : "transparent"
+                        RowLayout {
+                            id: bellRow; anchors.centerIn: parent; spacing: 4
+                            Text { text: "🔔"; font.pixelSize: 13 }
+                            Text {
+                                visible: root.notifs.length > 0
+                                text: "" + root.notifs.length
+                                color: root.cRed
+                                font.family: "JetBrainsMono Nerd Font"; font.pixelSize: 12; font.weight: Font.Bold
+                            }
+                        }
+                        MouseArea {
+                            id: bma; anchors.fill: parent
+                            hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                            onClicked: { root.showNotifs = !root.showNotifs; if (root.showNotifs) root.notifRefresh() }
+                        }
+                    }
+
                     Rectangle {
                         width: 22; height: 22; radius: 11
                         color: xma.containsMouse ? root.cElev : "transparent"
@@ -208,6 +250,96 @@ Scope {
                 Rectangle {
                     anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
                     height: 1; color: root.cBorder
+                }
+            }
+
+            // overlay: lista de notificações do GitHub (toggle pelo 🔔)
+            Rectangle {
+                visible: root.showNotifs
+                z: 50
+                anchors { left: parent.left; right: parent.right; top: hdr.bottom; bottom: parent.bottom }
+                anchors.margins: 10
+                radius: 10
+                color: root.cBg
+                border.color: root.cBorder; border.width: 1
+
+                ColumnLayout {
+                    anchors.fill: parent; anchors.margins: 12; spacing: 8
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Text {
+                            text: "🔔 Notificações (" + root.notifs.length + ")"
+                            color: root.cAccent
+                            font.family: "JetBrainsMono Nerd Font"; font.pixelSize: 15; font.weight: Font.Bold
+                        }
+                        Item { Layout.fillWidth: true }
+                        Text {
+                            text: "abrir no GitHub ↗"; color: root.cFgMuted
+                            font.family: "JetBrainsMono Nerd Font"; font.pixelSize: 12
+                            MouseArea {
+                                anchors.fill: parent; anchors.margins: -4; cursorShape: Qt.PointingHandCursor
+                                onClicked: { Quickshell.execDetached(["xdg-open", "https://github.com/notifications"]); root.closePanel() }
+                            }
+                        }
+                    }
+                    Rectangle { Layout.fillWidth: true; height: 1; color: root.cBorder }
+                    Flickable {
+                        id: nflick
+                        Layout.fillWidth: true; Layout.fillHeight: true; clip: true
+                        contentWidth: width; contentHeight: ncol.implicitHeight
+                        boundsBehavior: Flickable.StopAtBounds
+                        WheelHandler {
+                            onWheel: (e) => {
+                                const max = Math.max(0, nflick.contentHeight - nflick.height)
+                                nflick.contentY = Math.max(0, Math.min(max, nflick.contentY - e.angleDelta.y * 4))
+                            }
+                        }
+                        ColumnLayout {
+                            id: ncol; width: nflick.width; spacing: 4
+                            Repeater {
+                                model: root.notifs
+                                Rectangle {
+                                    required property var modelData
+                                    Layout.fillWidth: true
+                                    implicitHeight: nrow.implicitHeight + 12
+                                    radius: 6
+                                    color: nma.containsMouse ? Qt.rgba(0, 0.831, 1, 0.06) : root.cSurface
+                                    RowLayout {
+                                        id: nrow
+                                        anchors.left: parent.left; anchors.right: parent.right
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        anchors.leftMargin: 10; anchors.rightMargin: 10
+                                        spacing: 8
+                                        Text {
+                                            text: modelData.type === "PullRequest" ? "" : (modelData.type === "Issue" ? "" : "•")
+                                            color: root.cAccent; font.family: "JetBrainsMono Nerd Font"; font.pixelSize: 13
+                                        }
+                                        ColumnLayout {
+                                            Layout.fillWidth: true; spacing: 1
+                                            Text {
+                                                Layout.fillWidth: true; text: modelData.title || ""
+                                                color: root.cFg; elide: Text.ElideRight
+                                                font.family: "JetBrainsMono Nerd Font"; font.pixelSize: 13
+                                            }
+                                            Text {
+                                                text: (modelData.repo || "") + " · " + (modelData.reason || "")
+                                                color: root.cFgMuted; font.family: "JetBrainsMono Nerd Font"; font.pixelSize: 11
+                                            }
+                                        }
+                                    }
+                                    MouseArea {
+                                        id: nma; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                        onClicked: if (modelData.url) { Quickshell.execDetached(["xdg-open", modelData.url]); root.closePanel() }
+                                    }
+                                }
+                            }
+                            Text {
+                                visible: root.notifs.length === 0
+                                text: "sem notificações novas"; color: root.cFgMuted
+                                font.family: "JetBrainsMono Nerd Font"; font.pixelSize: 13; leftPadding: 6
+                            }
+                        }
+                    }
                 }
             }
 

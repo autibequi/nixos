@@ -1,5 +1,7 @@
 /* dash — Walker · Wild Hunt (paleta do wallpaper "Åsgårdsreien") */
+/* Bloco de tokens abaixo é GERADO — editar /workspace/host/stow/.config/themes/wild-hunt/palette.toml + rodar themes/generate.sh */
 
+/* GENERATED:BEGIN */
 @define-color window_bg_color #06060d;
 @define-color surface_color #12121b;
 @define-color elev_color #1c1d23;
@@ -14,6 +16,7 @@
 @define-color info_color #8bb0cc;
 @define-color error_bg_color @danger_color;
 @define-color error_fg_color @window_bg_color;
+/* GENERATED:END */
 
 * {
   all: unset;

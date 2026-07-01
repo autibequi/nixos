@@ -4,6 +4,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Services.Notifications
+import "../../colors" as Theme
 
 Rectangle {
     id: root
@@ -17,14 +18,14 @@ Rectangle {
     signal dismissed()
     signal clicked()
 
-    readonly property color cBg:      "#0a0e14"
-    readonly property color cSurface: "#1a1f29"
-    readonly property color cElev:    "#2a2f3a"
-    readonly property color cBorder:  "#2d3748"
-    readonly property color cFg:      "#e6e6e6"
-    readonly property color cFgMuted: "#9ca3af"
-    readonly property color cAccent:  "#00d4ff"
-    readonly property color cDanger:  "#ff5555"
+    readonly property color cBg:      Theme.Colors.bg
+    readonly property color cSurface: Theme.Colors.surface
+    readonly property color cElev:    Theme.Colors.elev
+    readonly property color cBorder:  Theme.Colors.border
+    readonly property color cFg:      Theme.Colors.fg
+    readonly property color cFgMuted: Theme.Colors.fgMuted
+    readonly property color cAccent:  Theme.Colors.accent
+    readonly property color cDanger:  Theme.Colors.danger
 
     readonly property bool isCritical: root.notif
         && root.notif.urgency === NotificationUrgency.Critical
@@ -66,7 +67,7 @@ Rectangle {
 
     radius: 12
     color: root.read ? root.cSurface : Qt.rgba(0, 0.831, 1, 0.06)
-    opacity: root.read ? 0.88 : 1
+    opacity: (root.read && !cardHover.containsMouse) ? 0.88 : 1
     border.width: root.isCritical ? 2 : 1
     border.color: root.isCritical ? root.cDanger
         : (root.read ? root.cBorder : Qt.rgba(0, 0.831, 1, 0.35))
@@ -75,6 +76,7 @@ Rectangle {
     Behavior on opacity { NumberAnimation { duration: 120 } }
 
     MouseArea {
+        id: cardHover
         anchors.fill: parent
         hoverEnabled: !root.compact
         cursorShape: Qt.PointingHandCursor

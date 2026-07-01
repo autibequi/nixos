@@ -44,6 +44,26 @@ local CURATED = {
     },
   },
   {
+    key      = "sandbox",
+    label    = "🟢 Sandbox",
+    subtext  = "us-east-2",
+    icon     = "security-low",
+    children = {
+      { label = "OpenSearch DevTools", subtext = "sem VPN",           icon = "folder-remote", url = "https://vpc-opensearch-search-sandbox-7vky3ic62zgpwwdyxxzssw6d7i.us-east-2.es.amazonaws.com/_dashboards/app/dev_tools#/console" },
+      { label = "AWS Console",         subtext = "us-east-2 · console home", icon = "emblem-system", url = "https://us-east-2.console.aws.amazon.com/console/home?region=us-east-2" },
+    },
+  },
+  {
+    key      = "producao",
+    label    = "🔴 Produção",
+    subtext  = "us-east-1 · CUIDADO",
+    icon     = "security-high",
+    children = {
+      { label = "OpenSearch DevTools", subtext = "sem VPN",           icon = "folder-remote", url = "https://vpc-opensearch-search-prod-v3-icld65zla2kh37jgibgp44uyme.us-east-1.es.amazonaws.com/_dashboards/app/dev_tools#/console" },
+      { label = "AWS Console",         subtext = "us-east-1 · console home", icon = "emblem-system", url = "https://us-east-1.console.aws.amazon.com/console/home?region=us-east-1" },
+    },
+  },
+  {
     key      = "pessoal",
     label    = "Pessoal",
     subtext  = "edite CURATED em home.lua",

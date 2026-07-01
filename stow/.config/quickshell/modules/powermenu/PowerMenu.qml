@@ -8,6 +8,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
+import "../../colors" as Theme
 
 Scope {
     id: root
@@ -16,15 +17,15 @@ Scope {
     // Índice em foco — começa em Lock (Enter acidental tranca, não desliga).
     property int selected: 0
 
-    // ── Tema (Deep Dark) ──────────────────────────────────────────
-    readonly property color cBg:      "#0a0e14"
-    readonly property color cSurface: "#1a1f29"
-    readonly property color cElev:    "#2a2f3a"
-    readonly property color cBorder:  "#2d3748"
-    readonly property color cFg:      "#e6e6e6"
-    readonly property color cFgMuted: "#9ca3af"
-    readonly property color cAccent:  "#00d4ff"
-    readonly property color cDanger:  "#ff5555"
+    // ── Tema — fonte única em quickshell/colors/Colors.qml ──
+    readonly property color cBg:      Theme.Colors.bg
+    readonly property color cSurface: Theme.Colors.surface
+    readonly property color cElev:    Theme.Colors.elev
+    readonly property color cBorder:  Theme.Colors.border
+    readonly property color cFg:      Theme.Colors.fg
+    readonly property color cFgMuted: Theme.Colors.fgMuted
+    readonly property color cAccent:  Theme.Colors.accent
+    readonly property color cDanger:  Theme.Colors.danger
 
     // ── Ações ─────────────────────────────────────────────────────
     readonly property var actions: [
