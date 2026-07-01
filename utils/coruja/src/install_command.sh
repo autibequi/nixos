@@ -26,8 +26,8 @@ fi
 for app in "${selected[@]}"; do
   case "$app" in
     bo-container | front-student)
-      echo "==> bun install ($app)"
-      run_compose run --rm --no-deps "$app" bun install
+      echo "==> npm install ($app)"
+      run_compose run --rm --no-deps "$app" npm install
       ;;
     monolito)
       echo "==> go mod download (monolito)"

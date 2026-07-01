@@ -79,8 +79,8 @@ launch_stack() {
     [[ ${#_backend[@]}  -gt 0 ]] && run_compose restart "${_backend[@]}"
     [[ ${#_proxy[@]}   -gt 0 ]] && run_compose up -d --no-deps --force-recreate "${_proxy[@]}"
     echo "subido em background.  logs: coruja logs   |   status: coruja status"
-    # Ao subir em background, abre o lazydocker na sequência pra acompanhar o boot.
-    # Não-fatal: o stack já está no ar; se faltar lazydocker/socket/TTY, só avisa e segue.
+    # Ao subir em background, abre o oxker na sequência pra acompanhar o boot.
+    # Não-fatal: o stack já está no ar; se faltar oxker/socket/TTY, só avisa e segue.
     coruja_open_monitor || true
   else
     if [[ ${#_infra[@]} -gt 0 ]]; then

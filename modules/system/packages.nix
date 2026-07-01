@@ -22,6 +22,7 @@
     todoist
     # security
     yubikey-manager
+    oxker
 
     cbonsai
     # ── Sistema ────────────────────────────────────────

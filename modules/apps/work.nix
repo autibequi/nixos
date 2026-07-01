@@ -83,6 +83,7 @@
     127.0.0.1 concursos.local.estrategia-sandbox.com.br
     127.0.0.1 medicina.local.estrategia-sandbox.com.br
     127.0.0.1 militares.local.estrategia-sandbox.com.br
+    127.0.0.1 perfil.local.estrategia-sandbox.com.br
 
     127.0.0.1 local.estrategia.com
 
