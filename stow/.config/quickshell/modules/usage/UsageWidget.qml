@@ -164,6 +164,14 @@ Scope {
             Behavior on scale   { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
             Behavior on opacity { NumberAnimation { duration: 150 } }
 
+            // auto-hide: some após 3s sem o mouse sobre o painel
+            HoverHandler { id: panelHover }
+            Timer {
+                interval: 3000; repeat: true
+                running: root.shown && !panelHover.hovered
+                onTriggered: root.closePanel()
+            }
+
             ColumnLayout {
                 id: col
                 anchors { left: parent.left; right: parent.right; top: parent.top }

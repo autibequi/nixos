@@ -160,6 +160,14 @@ Scope {
                 NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
             }
 
+            // auto-hide: some após 3s sem o mouse sobre o painel
+            HoverHandler { id: panelHover }
+            Timer {
+                interval: 3000; repeat: true
+                running: root.shown && !panelHover.hovered
+                onTriggered: root.closePanel()
+            }
+
             // cabeçalho ──────────────────────────────────────────
             Item {
                 id: hdr

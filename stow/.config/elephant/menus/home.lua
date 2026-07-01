@@ -224,9 +224,7 @@ function root_level()
 
   table.insert(entries, separator())
 
-  local pending = todo_count()
-  local todo_sub = pending > 0 and (pending .. " pendente(s) · Enter abre") or "vazio · Enter cria"
-  table.insert(entries, launch_entry("TODO",              todo_sub,                       "checkbox-checked-symbolic", launch_cmd("menus:todo")))
+  table.insert(entries, launch_entry("Todoist",           "Inbox · Enter abre",           "checkbox-checked-symbolic", launch_cmd("menus:todoist")))
   table.insert(entries, launch_entry("Bookmarks",         "b: · favoritos do Chrome",     "bookmark",                  launch_cmd("bookmarks")))
   table.insert(entries, launch_entry("Arquivos",          "/ · downloads e screenshots",  "folder-recent",             launch_cmd("files")))
   table.insert(entries, launch_entry("Janelas",           "w: · trocar de janela",        "window-restore",            launch_cmd("windows")))

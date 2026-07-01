@@ -48,7 +48,7 @@ empty    = ["desktopapplications"]
 ignore_preview = [
   "desktopapplications", "runner", "windows", "websearch", "providerlist",
   "menus:power", "menus:screenshot", "menus:clock", "calc", "symbols",
-  "menus:home", "menus:todo", "menus:wifi",
+  "menus:home", "menus:todoist", "menus:wifi",
 ]
 max_results = 60
 
@@ -66,7 +66,7 @@ websearch           = 8
 
 [[providers.prefixes]]
 prefix   = "`"
-provider = "menus:todo"
+provider = "menus:todoist"
 
 [[providers.prefixes]]
 prefix   = ";"
@@ -135,7 +135,7 @@ desktopapplications = [
   { action = "open", default = true, bind = "Return", label = "abrir", after = "AsyncClearReload" },
 ]
 
-"menus:todo" = [
+"menus:todoist" = [
   { action = "activate", default = true, bind = "Return", label = "ok", after = "AsyncClearReload" },
 ]
 
