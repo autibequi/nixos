@@ -78,7 +78,13 @@
           chaotic.nixosModules.default
 
           # Claude Code (sadjow) — overlay substitui pkgs.claude-code pela última versão upstream
-          { nixpkgs.overlays = [ claude-code.overlays.default ]; }
+          # nmsurf — não está no nixpkgs, derivação local em pkgs/nmsurf.nix
+          {
+            nixpkgs.overlays = [
+              claude-code.overlays.default
+              (final: _: { nmsurf = final.callPackage ./pkgs/nmsurf.nix { }; })
+            ];
+          }
 
           # DankMaterialShell — NixOS module do flake (stable 25.11 não tem no nixpkgs)
           dms.nixosModules.default
