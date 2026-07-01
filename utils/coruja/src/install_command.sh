@@ -1,4 +1,7 @@
 # install — bootstrap: doctor + deps dos apps escolhidos + certs.
+# Não builda imagem (rode `coruja build [service]` antes se ainda não buildou —
+# senão o `run_compose run` builda implicitamente na primeira vez, mas sem cache
+# de layer otimizado pro fluxo de install).
 
 doctor_run
 
@@ -21,12 +24,10 @@ else
 fi
 
 for app in "${selected[@]}"; do
-  echo "==> build da imagem: $app"
-  run_compose build "$app"
   case "$app" in
     bo-container | front-student)
-      echo "==> npm install ($app)"
-      run_compose run --rm --no-deps "$app" npm install
+      echo "==> bun install ($app)"
+      run_compose run --rm --no-deps "$app" bun install
       ;;
     monolito)
       echo "==> go mod download (monolito)"

@@ -114,7 +114,7 @@ commands:
       - coruja worktrees                       # lista e escolhe os 3 worktrees
 
   - name: install
-    help: "Bootstrap: doctor + build + deps dos apps escolhidos (wizard) + certs"
+    help: "Bootstrap: doctor + deps dos apps escolhidos (wizard) + certs. Não builda imagem — rode `coruja build` antes"
     flags:
       - long: --yes
         short: -y

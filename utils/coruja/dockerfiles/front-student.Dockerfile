@@ -3,7 +3,8 @@ FROM node:20-alpine
 
 # bash — bardiel plug shell usa `podman exec … /bin/bash -c`
 RUN apk add --no-cache bash git ca-certificates python3 make g++ \
-    autoconf automake libtool nasm pkgconfig
+    autoconf automake libtool nasm pkgconfig unzip \
+    && npm install -g bun
 
 WORKDIR /app
 

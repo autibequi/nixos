@@ -14,10 +14,10 @@
 let
   zed-editor-bin = pkgs.stdenv.mkDerivation rec {
     pname = "zed-editor-bin";
-    version = "1.8.2";
+    version = "1.9.0";
     src = pkgs.fetchurl {
       url = "https://github.com/zed-industries/zed/releases/download/v${version}/zed-linux-x86_64.tar.gz";
-      hash = "sha256-UJY5D20aIJvCrLjZtjTc1RZwmvM6D8L/YqDtsMvIgQg=";
+      hash = "sha256-OeVTzjoA/ut46rY6XLcjfLRg88lZaxsZBSzre56OxN0=";
     };
     nativeBuildInputs = with pkgs; [ autoPatchelfHook makeWrapper ];
     buildInputs = with pkgs; [
