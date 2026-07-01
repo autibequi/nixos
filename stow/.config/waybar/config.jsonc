@@ -5,6 +5,7 @@
 	"spacing": 0,
 	"margin": "3px 5px 3px",
 	"modules-left": [
+		"custom/todoist",
 		"idle_inhibitor",
 		// "custom/vennon",
 		"hyprland/workspaces",
@@ -41,6 +42,11 @@
 	"tray": {
 		"icon-size": 14,
 		"spacing": 2
+	},
+	"custom/todoist": {
+		"format": "󰄲",
+		"on-click": "qs ipc call todoist toggle",
+		"tooltip": false
 	},
 	"custom/cliptoast": {
 		"exec": "cat /tmp/waybar-cliptoast.json 2>/dev/null || echo '{\"text\":\"\"}'",

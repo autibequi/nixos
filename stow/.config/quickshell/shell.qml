@@ -13,6 +13,7 @@ import "./modules/osd/"
 import "./modules/switcher/"
 import "./modules/github/"
 import "./modules/usage/"
+import "./modules/todoist/"
 
 import QtQuick
 import Quickshell
@@ -26,4 +27,5 @@ ShellRoot {
     WindowSwitcher {}
     GithubWidget {}
     UsageWidget {}
+    TodoistWidget {}
 }
