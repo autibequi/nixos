@@ -115,7 +115,8 @@ in
     description = "Apply scheduled hyprshade shader";
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${pkgs.hyprshade}/bin/hyprshade auto";
+      # shader-set.sh (não hyprshade): o fork Lua rejeita `hyprctl keyword`
+      ExecStart = "${pkgs.bash}/bin/bash %h/.config/hypr/shader-set.sh auto";
       Environment = userServicePath;
     };
   };

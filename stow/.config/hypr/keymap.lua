@@ -20,13 +20,14 @@ local M = {
     _by_combo = {},       -- indice combo → entry (último vence em conflito)
 }
 
-local function register(combo, opts)
+local function register(combo, opts, action)
     opts = opts or {}
     local entry = {
-        combo = combo,
-        desc  = opts.desc  or "",
-        group = opts.group or "Misc",
-        icon  = opts.icon  or "",
+        combo  = combo,
+        desc   = opts.desc  or "",
+        group  = opts.group or "Misc",
+        icon   = opts.icon  or "",
+        action = action,
     }
     table.insert(M._binds, entry)
     M._by_combo[combo] = entry
@@ -36,7 +37,24 @@ end
 function M.bind(combo, action, opts)
     opts = opts or {}
     hl.bind(combo, action, opts.flags)
-    register(combo, opts)
+    register(combo, opts, action)
+end
+
+-- trigger: executa a action de um combo do registry (cheatsheet do walker).
+-- Chamado de fora via `hyprctl eval "km_trigger('<combo>')"`.
+function M.trigger(combo)
+    local e = M._by_combo[combo]
+    if not e or not e.action then return false end
+    if type(e.action) == "function" then
+        e.action()
+    else
+        hl.dispatch(e.action)
+    end
+    return true
+end
+
+function _G.km_trigger(combo)
+    return M.trigger(combo)
 end
 
 -- app: captura workspace de origem antes de spawnar; events.lua

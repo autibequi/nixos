@@ -1,8 +1,9 @@
 -- ============================================================
 --  PROFILES — modos de uso (default/focus/meeting/battery)
 --
---  Cada profile aplica diff de config via `hyprctl keyword`
---  e roda on_enter/on_exit (side effects: DND, mic, env).
+--  Cada profile aplica diff de config via hl.config() direto
+--  (`hyprctl keyword` morreu no parser Lua 0.55+) e roda
+--  on_enter/on_exit (side effects: DND, mic, env).
 --  State em memória + arquivo (persiste reload).
 -- ============================================================
 
@@ -15,22 +16,20 @@ local STATE = core.state_file("profile_state")
 
 local profiles = {
     default = {
-        keywords = {
-            ["general:gaps_out"]      = "5",
-            ["general:border_size"]   = "3",
-            ["decoration:blur:enabled"] = "false",
-            ["animations:enabled"]    = "true",
+        config = {
+            general    = { gaps_out = 5, border_size = 3 },
+            decoration = { blur = { enabled = false } },
+            animations = { enabled = true },
         },
         on_enter = function()
             core.notify("Profile: default", nil, { timeout = 800, urgency = "low" })
         end,
     },
     focus = {
-        keywords = {
-            ["general:gaps_out"]      = "0",
-            ["general:border_size"]   = "1",
-            ["decoration:blur:enabled"] = "false",
-            ["animations:enabled"]    = "false",
+        config = {
+            general    = { gaps_out = 0, border_size = 1 },
+            decoration = { blur = { enabled = false } },
+            animations = { enabled = false },
         },
         on_enter = function()
             hl.exec_cmd("swaync-client -d")  -- DND
@@ -38,11 +37,10 @@ local profiles = {
         end,
     },
     meeting = {
-        keywords = {
-            ["general:gaps_out"]      = "12",
-            ["general:border_size"]   = "4",
-            ["decoration:blur:enabled"] = "true",
-            ["animations:enabled"]    = "true",
+        config = {
+            general    = { gaps_out = 12, border_size = 4 },
+            decoration = { blur = { enabled = true } },
+            animations = { enabled = true },
         },
         on_enter = function()
             hl.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ 0")
@@ -51,11 +49,10 @@ local profiles = {
         end,
     },
     battery = {
-        keywords = {
-            ["general:gaps_out"]      = "3",
-            ["general:border_size"]   = "2",
-            ["decoration:blur:enabled"] = "false",
-            ["animations:enabled"]    = "false",
+        config = {
+            general    = { gaps_out = 3, border_size = 2 },
+            decoration = { blur = { enabled = false } },
+            animations = { enabled = false },
         },
         on_enter = function()
             core.notify("Battery mode", nil, { timeout = 800, urgency = "low" })
@@ -80,9 +77,7 @@ function M.apply(name)
     local prev = profiles[_current]
     if prev and prev.on_exit and _current ~= name then prev.on_exit() end
 
-    for kw, val in pairs(p.keywords) do
-        hl.exec_cmd("hyprctl keyword " .. kw .. " " .. val)
-    end
+    hl.config(p.config)
     if p.on_enter then p.on_enter() end
 
     _current = name

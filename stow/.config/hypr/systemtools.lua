@@ -32,15 +32,15 @@ km.release("SUPER + Super_L",
 km.app("SUPER + l", "hyprlock",
     { desc = "Lock screen", group = "System", icon = "🔒" })
 
--- Shader off (menu de shaders: walker `s:`)
-km.app("SUPER + Delete", "hyprshade off",
-    { desc = "Shader off (hyprshade)", group = "System", icon = "🕶" })
-
 -- Reset geral: recarrega Hyprland + reinicia Quickshell (calendário, power menu,
--- OSD, switcher, overview) e waybar. (era SUPER+Delete; cedeu pro shader off)
-km.fn("SUPER + SHIFT + Delete", function()
+-- OSD, switcher, overview) e waybar.
+km.fn("SUPER + Delete", function()
     hypr_reload()
 end, { desc = "Reset UI (Hyprland + Quickshell + waybar + Walker)", group = "System", icon = "↻" })
+
+-- Shader off (menu de shaders: walker `s:`)
+km.app("SUPER + SHIFT + Delete", HOME .. "/.config/hypr/shader-set.sh off",
+    { desc = "Shader off", group = "System", icon = "🕶" })
 
 -- NOTA: SUPER + Escape virou focus monitor +1 (em workspace.lua).
 km.app("CTRL + ALT + Delete", powerWalker,

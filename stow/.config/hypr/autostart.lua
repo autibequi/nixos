@@ -39,7 +39,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd(L.build(os.getenv("HOME") .. "/.config/hypr/todoist-notifier.sh"))
 
     -- Shader agendado (blue-light-filter à noite) — timer só cobre os boundaries
-    hl.exec_cmd("hyprshade auto")
+    hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/shader-set.sh auto")
 
     -- Tema escuro inicial
     dark_theme()

@@ -2,10 +2,9 @@
 # monitor-switch-flash.sh — engrossa a borda da janela ativa por ~1s pra chamar
 # atenção ao trocar de monitor (Super+Esc); depois restaura.
 #
-# O FOCO do monitor é feito no Lua do keybind (hl.dispatch) — aqui é SÓ o flash,
-# porque `hyprctl dispatch` é interpretado como Lua no setup e quebra.
-# `hyprctl keyword general:border_size` (inteiro) funciona normal e é
-# capturável/restaurável com segurança. A cor é gradiente dinâmico → não tocada.
+# O FOCO do monitor é feito no Lua do keybind (hl.dispatch) — aqui é SÓ o flash.
+# `hyprctl keyword` morreu no parser Lua ("use eval") → seta via hyprctl eval.
+# A cor é gradiente dinâmico → não tocada.
 set -u
 PATH="/run/current-system/sw/bin:${HOME}/.nix-profile/bin:/usr/bin:/bin:${PATH:-}"
 
@@ -19,12 +18,12 @@ if [ ! -f "$LOCK" ]; then
   hyprctl getoption -j general:border_size 2>/dev/null | jq -r '.int // 3' > "$LOCK"
 fi
 
-hyprctl keyword general:border_size "$FLASH_SIZE" >/dev/null 2>&1
+hyprctl eval "hl.config({ general = { border_size = $FLASH_SIZE } })" >/dev/null 2>&1
 
 # Restaura em background (não bloqueia o compositor/keybind).
 (
   sleep "$HOLD"
-  hyprctl keyword general:border_size "$(cat "$LOCK" 2>/dev/null || echo 3)" >/dev/null 2>&1
+  hyprctl eval "hl.config({ general = { border_size = $(cat "$LOCK" 2>/dev/null || echo 3) } })" >/dev/null 2>&1
   rm -f "$LOCK"
 ) >/dev/null 2>&1 &
 
