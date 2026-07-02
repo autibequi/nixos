@@ -8,10 +8,10 @@ buildGoModule rec {
     owner = "aayushkdev";
     repo = "nmsurf";
     rev = "v${version}";
-    hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+    hash = "sha256-ARB8QGbfUcGf2/oemrPulWfIsou9cK1h9oMSZC5YW5k=";
   };
 
-  vendorHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+  vendorHash = "sha256-2U9hBA+q3nW4YO47PN+eorBLq0z4kj2zCZ6q7wD75PQ=";
 
   meta = with lib; {
     description = "Fast, minimal NetworkManager frontend for Wofi/Walker/Rofi/Fuzzel";

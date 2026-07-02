@@ -93,6 +93,7 @@
 [diff]
 	colorMoved = default
 	ignoreSubmodules = all
+	tool = meld
 
 [url "ssh://git@github.com/"]
 	insteadOf = https://github.com/
@@ -106,9 +107,6 @@
 [merge]
 	ff = true
 	tool = meld
-
-[diff]
-    tool = meld
 
 [difftool]
     prompt = false
