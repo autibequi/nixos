@@ -159,7 +159,7 @@ Scope {
     function launchWalker(extraArgs) {
         const args = (extraArgs || []).map(a => "'" + String(a).replace(/'/g, "'\\''") + "'").join(" ");
         root.closePanel();
-        Quickshell.execDetached(["sh", "-c", "$HOME/.config/hypr/walker-launch.sh " + args]);
+        Quickshell.execDetached(["sh", "-c", "$HOME/.config/hypr/scripts/walker-launch.sh " + args]);
     }
 
     function formatIsoDate(y, m, day) {

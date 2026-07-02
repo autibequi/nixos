@@ -75,7 +75,7 @@
 		"signal": 12,
 		"format": "{}",
 		"escape": false,
-		"on-click": "$HOME/.config/hypr/chicote-toggle.sh"
+		"on-click": "$HOME/.config/hypr/scripts/chicote-toggle.sh"
 	},
 	"custom/special-workspaces": {
 		"exec": "cat /tmp/waybar-specials.json 2>/dev/null || echo '{\"text\":\"\",\"class\":\"empty\"}'",
@@ -351,7 +351,7 @@
 		"tooltip-format": "󰖩 {essid} : {ifname}: {ipaddr}",
 		"tooltip-format-disconnected": "Sem conexão — clique para gerenciar",
 		"tooltip-format-disabled": "Wi-Fi desligado — clique para gerenciar",
-		"on-click": "$HOME/.config/hypr/walker-launch.sh --theme neon --provider menus:wifi",
+		"on-click": "$HOME/.config/hypr/scripts/walker-launch.sh --theme neon --provider menus:wifi",
 		"on-click-right": "alacritty -e nmtui"
 	},
 	"bluetooth": {
@@ -362,7 +362,7 @@
 		"tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
 		"tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
 		"tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t{device_battery_percentage}%",
-		"on-click": "$HOME/.config/hypr/walker-launch.sh --theme neon --provider bluetooth",
+		"on-click": "$HOME/.config/hypr/scripts/walker-launch.sh --theme neon --provider bluetooth",
 		"on-click-right": "alacritty -e bluetuith"
 	},
 	"pulseaudio": {
@@ -383,7 +383,7 @@
 				"󰕾"
 			]
 		},
-		"on-click": "$HOME/.config/hypr/walker-launch.sh --provider wireplumber",
+		"on-click": "$HOME/.config/hypr/scripts/walker-launch.sh --provider wireplumber",
 		"on-click-right": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
 		"on-click-middle": "alacritty -e wiremix",
 		"on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +2%",
