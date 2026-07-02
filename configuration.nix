@@ -42,6 +42,5 @@
     ./modules/experiments/podman.nix # engine de containers (rootless + dockerCompat)
     ./modules/experiments/flatpak.nix
     # ./modules/experiments/dms.nix          # DankMaterialShell (também disponível via input dms no flake)
-    # ./modules/experiments/whisper-ptt.nix  # on-demand: PTT
   ];
 }

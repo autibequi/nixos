@@ -1,4 +1,0 @@
-(
-    max_entries: Some(5),
-    index_dir: None,
-)

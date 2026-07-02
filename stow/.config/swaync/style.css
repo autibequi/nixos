@@ -17,8 +17,8 @@
     font-family: 'JetBrainsMono Nerd Font', sans-serif;
     font-size: 15px;
     font-weight: 500;
-    transition: none !important;
-    animation: none !important;
+    transition: none;
+    animation: none;
 }
 
 /* ======== Notification popups (floating) ======== */
@@ -94,9 +94,6 @@
     font-size: 15px;
 }
 
-.body>label {
-    -gtk-line-clamp: 2;
-}
 
 .time {
     color: @fg-dim;
@@ -273,16 +270,18 @@
     border-left: 3px solid @urgent;
 }
 
-/* ======== Todoist Alarm — destaque especial ======== */
-.notification[app-name="Todoist Alarm"] {
+/* ======== Urgency critical — destaque (Todoist Alarm envia critical) ======== */
+/* GTK3 CSS não suporta seletor de atributo [app-name=...]; usamos a classe
+   .critical que o swaync põe no nó da notificação. */
+.critical {
     border: 2px solid @urgent;
     background: mix(@bg, @urgent, 0.92);
 }
-.notification[app-name="Todoist Alarm"] .summary {
+.critical .summary {
     color: @urgent;
     font-size: 15px;
     font-weight: 700;
 }
-.notification[app-name="Todoist Alarm"] .body {
+.critical .body {
     font-size: 16px;
 }

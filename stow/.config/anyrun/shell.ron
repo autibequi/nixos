@@ -1,6 +1,0 @@
-(
-    prefix: Some(":"),
-    shell: "zsh",
-    fuzzy: true,
-    max_entries: 4,
-)

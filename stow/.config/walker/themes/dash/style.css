@@ -74,13 +74,11 @@ scrollbar slider {
   border: 1px solid @border_color;
   box-shadow: none;
   min-width: 720px;
-  max-width: 720px;
 }
 
 .search-container {
   border-radius: 10px;
   min-width: 680px;
-  max-width: 680px;
 }
 
 .input {
@@ -90,7 +88,6 @@ scrollbar slider {
   color: @theme_fg_color;
   border-radius: 10px;
   min-width: 660px;
-  max-width: 660px;
 }
 
 .input placeholder {

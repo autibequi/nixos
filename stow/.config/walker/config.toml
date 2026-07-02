@@ -34,6 +34,7 @@ anchor_right = false
 "menus:screenshot"  = { input = "Screenshot", list = "Sem captura" }
 "menus:clock"       = { input = "Relógio", list = "Carregando…" }
 "wireplumber"       = { input = "Áudio", list = "Sem dispositivos" }
+"menus:shortcuts"   = { input = "Shortcuts", list = "Sem atalhos" }
 
 [keybinds]
 close          = ["Escape", "ctrl q"]
@@ -48,7 +49,7 @@ empty    = ["desktopapplications"]
 ignore_preview = [
   "desktopapplications", "runner", "windows", "websearch", "providerlist",
   "menus:power", "menus:screenshot", "menus:clock", "calc", "symbols",
-  "menus:home", "menus:todoist", "menus:wifi",
+  "menus:home", "menus:todoist", "menus:wifi", "menus:shortcuts",
 ]
 max_results = 60
 
@@ -153,6 +154,10 @@ files = [
 ]
 
 "menus:clock" = [
+  { action = "activate", default = true, bind = "Return", label = "run", after = "Close" },
+]
+
+"menus:shortcuts" = [
   { action = "activate", default = true, bind = "Return", label = "run", after = "Close" },
 ]
 

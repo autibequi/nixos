@@ -88,6 +88,7 @@
     },
     "dnd": {
       "text": "Do Not Disturb"
-    }
+    },
+    "notifications": {}
   }
 }

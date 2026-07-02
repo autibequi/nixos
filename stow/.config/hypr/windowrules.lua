@@ -64,14 +64,6 @@ system_overlay({
     size  = { 480, 280 },
 })
 
--- Whisper PTT overlay (eww widget)
-hl.window_rule({
-    match = { class = "eww-whisper-ptt" },
-    float = true,
-    pin   = true,
-    tile  = false,
-})
-
 -- Electron apps (Cursor/VSCode) — floating popups ficam na frente
 hl.window_rule({
     match    = { class = "cursor|code|code-url-handler|Cursor|Code", float = true },

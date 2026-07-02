@@ -107,6 +107,24 @@ in
     };
   };
 
+  # SwayNC — notification daemon. Antes era spawn solto no autostart.lua: quando
+  # crashava (7 coredumps em 28/06) ficava sem notificações até relogin.
+  systemd.user.services.swaync = {
+    description = "SwayNC notification daemon";
+    after = [ "graphical-session.target" ];
+    wantedBy = [ "graphical-session.target" ];
+    unitConfig = {
+      StartLimitBurst = 5;
+      StartLimitIntervalSec = 30;
+    };
+    serviceConfig = {
+      ExecStart = "${pkgs.swaynotificationcenter}/bin/swaync";
+      Restart = "on-failure";
+      RestartSec = 2;
+      Environment = userServicePath;
+    };
+  };
+
   # Elephant — backend de providers do Walker (apps, calc, files, clipboard, etc.).
   # Precisa rodar como user service pra herdar ambiente Wayland/session correto.
   systemd.user.services.elephant = {

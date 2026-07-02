@@ -22,7 +22,6 @@ local TERMINAL_CLASSES = {
 -- Apps que NÃO devem disparar swallow (popups efêmeros, file pickers, etc)
 local SKIP_CLASSES = {
     ["xdg-desktop-portal-gtk"] = true,
-    ["eww-whisper-ptt"] = true,
     ["clipboard-history-popup"] = true,
     ["rofi"] = true,
 }

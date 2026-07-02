@@ -29,7 +29,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("awww img " .. os.getenv("HOME") ..
         "/assets/wallpapers/the-wild-hunt-of-odin.jpg --transition-type none")
     -- Notification daemon (Quickshell Notifications desativado — conflita no D-Bus)
-    hl.exec_cmd(L.build("swaync"))
+    hl.exec_cmd("systemctl --user start swaync")
     -- Clipboard
     hl.exec_cmd(L.build("wl-paste --watch cliphist store"))
     -- Toast no waybar + "pop" ao copiar (módulo custom/cliptoast)

@@ -160,6 +160,12 @@ hl.config({
     animations = {
         enabled = true,
     },
+
+    xwayland = {
+        -- monitores em scale 2.0: sem isso apps X11 renderizam em 1x e são
+        -- esticados 2x pelo compositor (popups pequenos borrados/esticados)
+        force_zero_scaling = true,
+    },
 })
 
 -- =============================================

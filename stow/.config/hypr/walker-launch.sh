@@ -81,21 +81,8 @@ if ! $has_provider; then
   args=("${compact[@]}" "${args[@]}")
 fi
 
-# Dashboard (abertura padrão MOD3+Space): cache quente
-_cache="${XDG_CACHE_HOME:-${HOME}/.cache}/elephant/dash-status.cache"
-_cache_script="${HOME}/.config/hypr/walker-dash-cache.sh"
-if [[ -x "$_cache_script" ]]; then
-  _cache_age=999
-  if [[ -f "$_cache" ]]; then
-    _cache_age=$(( $(date +%s) - $(stat -c %Y "$_cache" 2>/dev/null || echo 0) ))
-  fi
-  if (( _cache_age > 15 )); then
-    nohup "$_cache_script" >/dev/null 2>&1 &
-  fi
-fi
-
 case "$provider" in
-  menus:wifi|menus:power|menus:screenshot|menus:clock|menus:dash|menus:dashboard|menus:todoist)
+  menus:wifi|menus:power|menus:screenshot|menus:clock|menus:todoist|menus:shortcuts)
     args=(--hideqa "${args[@]}")
     ;;
 esac
@@ -109,14 +96,11 @@ if [[ "$provider" == "menus:todoist" ]]; then
   args=("${compact[@]}" "${args[@]}")
 fi
 
-# menus:dash — hub completo com preview lateral
-if [[ "$provider" == "menus:dash" ]]; then
+# menus:shortcuts — cheatsheet: lista longa, só largura fixa (flags de altura
+# colapsavam a janela no wifi — gtk_scrolled_window assertion; mesma lição)
+if [[ "$provider" == "menus:shortcuts" ]]; then
   compact=()
-  if ! $has_nosearch; then compact+=(--nosearch); fi
-  if ! $has_nohints; then compact+=(--nohints); fi
-  if ! $has_width; then compact+=(--width 860); fi
-  if ! $has_minheight; then compact+=(--minheight 460); fi
-  if ! $has_maxheight; then compact+=(--maxheight 520); fi
+  if ! $has_width; then compact+=(--width 900); fi
   args=("${compact[@]}" "${args[@]}")
 fi
 

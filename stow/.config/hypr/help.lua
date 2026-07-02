@@ -86,7 +86,7 @@ Terminal "engole" filho GUI (estilo dwm):
 - Roda `nautilus` em Alacritty → terminal vai pra `special:_swallowed`
 - Filho fecha → terminal volta no mesmo lugar/workspace
 - Funciona pra: Alacritty, Ghostty
-- Skip: portal, eww-whisper-ptt, clipboard popup, rofi
+- Skip: portal, clipboard popup, rofi
 - Implementação: `io.open("/proc/<pid>/status")` (não `io.popen ps` — não bloqueia)
 
 ---
@@ -186,8 +186,8 @@ Hooks declarativos — políticas opt-in via `define_special({ on_active = fn, a
 ├── special-workspaces.lua# F1-F9, gemini, bleh (declara on_active/auto_route)
 ├── workspace.lua         # workspaces 1-10 + WASD focus/move/resize + special history
 ├── application.lua       # apps + binds (terminal/zed/chrome/PWAs/AI)
-├── systemtools.lua       # screenshot, lock, multimedia, theme toggle, whisper PTT
-├── hyprshortcuts.lua     # rofi cheatsheet (consome keymap + core.rofi_menu)
+├── systemtools.lua       # screenshot, lock, multimedia, theme toggle
+├── hyprshortcuts.lua     # cheatsheet walker (dump TSV + menus:shortcuts)
 ├── events.lua            # hooks reativos hl.on (consome registries)
 ├── profiles.lua          # default/focus/meeting/battery
 ├── picker.lua            # Alt-Tab Wayland (core.rofi_menu)

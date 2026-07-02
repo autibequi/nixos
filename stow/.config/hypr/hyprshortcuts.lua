@@ -1,23 +1,19 @@
 -- ============================================================
---  HYPRSHORTCUTS — rofi cheatsheet a partir do registry keymap
+--  HYPRSHORTCUTS — cheatsheet walker a partir do registry keymap
 --
---  Antes: parse de `hyprctl binds` + map dispatcher→pretty
---  Agora: consome keymap._binds (com desc/group/icon semânticos),
---  renderiza via core.rofi_menu.
+--  Migrado de rofi (core.rofi_menu) pra walker/elephant em 2026-07-02,
+--  unificado com os menus wifi/power/screenshot/áudio.
 --
---  Reusa o dispatcher já registrado no Hyprland via `hyprctl dispatch`
---  (busca o bind pelo combo no `hyprctl binds`), sem duplicar a action.
+--  Fluxo: SUPER+/ → dump do registry em ~/.cache/hypr-shortcuts.tsv →
+--  walker --provider menus:shortcuts (elephant/menus/shortcuts.lua lê o
+--  TSV). Enter executa via walker-shortcut-exec.sh (mesma lógica awk de
+--  lookup no `hyprctl binds` do on_select antigo).
 -- ============================================================
 
 local km   = require("keymap")
 local core = require("core")
 
--- Render: "[group] icon  combo  ⟶  desc"
-local function format_entry(e)
-    return string.format("[%-10s] %s %-26s  ⟶  %s",
-        e.group, e.icon ~= "" and e.icon or " ",
-        e.combo, e.desc)
-end
+local TSV = os.getenv("HOME") .. "/.cache/hypr-shortcuts.tsv"
 
 function show_shortcuts()
     local registry = km.cheatsheet()
@@ -26,27 +22,15 @@ function show_shortcuts()
         return
     end
 
-    local entries = {}
-    for _, e in ipairs(registry) do
-        table.insert(entries, { display = format_entry(e), payload = e.combo })
+    local f = io.open(TSV, "w")
+    if f then
+        for _, e in ipairs(registry) do
+            f:write(string.format("%s\t%s\t%s\n",
+                e.group or "", e.combo or "", e.desc or ""))
+        end
+        f:close()
     end
 
-    -- on_select normaliza "MOD3 + t" → key/mods e procura no hyprctl binds.
-    local on_select = [[
-combo="$payload"
-key="${combo##*+}"; key="${key// /}"
-match=$(hyprctl binds | awk -v k="$key" '
-    /^bind/ { reset=1; next }
-    reset && /key:/ && index($0, "key: " k) { found=1 }
-    reset && /dispatcher:/ && found { sub(/^[ \t]+dispatcher: /, ""); disp=$0 }
-    reset && /arg:/ && found { sub(/^[ \t]+arg: /, ""); print disp" "$0; exit }
-')
-[ -n "$match" ] && hyprctl dispatch $match &
-]]
-
-    core.rofi_menu(entries, {
-        prompt    = "Shortcuts",
-        width     = 160,
-        on_select = on_select,
-    })
+    hl.exec_cmd(os.getenv("HOME") ..
+        "/.config/hypr/walker-launch.sh --provider menus:shortcuts")
 end
