@@ -31,6 +31,8 @@
     settings = {
       PasswordAuthentication = true;
       PermitRootLogin = "no";
+      MaxAuthTries = 3;
+      LoginGraceTime = 30;
     };
   };
   networking.firewall.extraCommands = ''

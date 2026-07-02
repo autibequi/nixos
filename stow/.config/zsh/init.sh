@@ -112,7 +112,7 @@ toMP4() {
     -vf 'format=nv12,hwupload' \
     -c:v h264_vaapi \
     -c:a aac -b:a 192k \
-    -loglevel edsadrror \
+    -loglevel error \
     "$output_file"
 
   if [ $? -eq 0 ]; then

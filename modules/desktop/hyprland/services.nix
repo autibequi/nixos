@@ -1,6 +1,8 @@
 { pkgs, hyprlandWaybar, config, ... }:
 let
   warpPkg = config.services.cloudflare-warp.package or pkgs.cloudflare-warp;
+  # systemd user services não herdam o PATH completo do shell nem do QML Process{}.
+  userServicePath = "PATH=%h/.local/bin:%h/.nix-profile/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin";
 in
 {
   # substituído pelo OSD in-house (hypr-shell Onda 2)
@@ -78,7 +80,7 @@ in
       RestartSec = 2;
       # %h/.local/bin necessário para `yaa` (custom/claude-usage). Systemd user services
       # não herdam o PATH completo do shell; adicionar manualmente os caminhos críticos.
-      Environment = "PATH=%h/.local/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin";
+      Environment = userServicePath;
     };
   };
 
@@ -101,7 +103,7 @@ in
       RestartSec = 2;
       # QML Process{} não herda um PATH útil do systemd user; sem isso o journal
       # mostra falhas para `sh`, `brightnessctl`, `hyprctl`, etc.
-      Environment = "PATH=%h/.local/bin:/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin";
+      Environment = userServicePath;
     };
   };
 
@@ -119,7 +121,7 @@ in
       ExecStart = "${pkgs.elephant}/bin/elephant";
       Restart = "on-failure";
       RestartSec = 5;
-      Environment = "PATH=%h/.local/bin:%h/.nix-profile/bin:/run/current-system/sw/bin";
+      Environment = userServicePath;
     };
   };
 
@@ -141,7 +143,7 @@ in
       ExecStart = "${pkgs.walker}/bin/walker --gapplication-service";
       Restart = "on-failure";
       RestartSec = 2;
-      Environment = "PATH=%h/.local/bin:%h/.nix-profile/bin:/run/current-system/sw/bin";
+      Environment = userServicePath;
     };
   };
 }

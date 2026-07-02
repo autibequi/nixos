@@ -87,7 +87,10 @@ in
       };
     };
 
-    # Open firewall port
-    networking.firewall.allowedTCPPorts = [ cfg.port ];
+    # Porta acessível apenas na rede local — mesmo padrão do SSH (system/networking.nix).
+    # allowedTCPPorts abriria em TODAS as interfaces (incl. Tailscale), não só a LAN do bind.
+    networking.firewall.extraCommands = ''
+      iptables -A nixos-fw -s 192.168.0.0/16 -p tcp --dport ${toString cfg.port} -j nixos-fw-accept
+    '';
   };
 }
