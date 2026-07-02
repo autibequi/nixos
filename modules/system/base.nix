@@ -34,5 +34,9 @@
     # carregar nenhum QPA e crasham com SIGABRT em init_platform(), derrubando a sessão.
     QT_QPA_PLATFORM = "wayland";
     QT_WAYLAND_DISABLE_WINDOWDECORATION = "1";
+    # GTK/WebKitGTK (Yaak Tauri, etc): sem isso alguns AppImages caem em XWayland
+    # silenciosamente e renderizam em 1x esticado pelo compositor (pixelado em scale 2.0).
+    # "wayland,x11" = tenta wayland primeiro, cai pra x11 só se não tiver Wayland disponível.
+    GDK_BACKEND = "wayland,x11";
   };
 }

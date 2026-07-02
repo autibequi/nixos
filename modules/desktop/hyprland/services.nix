@@ -116,7 +116,7 @@ in
     serviceConfig = {
       Type = "oneshot";
       # shader-set.sh (não hyprshade): o fork Lua rejeita `hyprctl keyword`
-      ExecStart = "${pkgs.bash}/bin/bash %h/.config/hypr/shader-set.sh auto";
+      ExecStart = "${pkgs.bash}/bin/bash %h/.config/hypr/scripts/shader-set.sh auto";
       Environment = userServicePath;
     };
   };

@@ -7,9 +7,9 @@ Cache = false
 FixedOrder = true
 HideFromProviderlist = true
 
--- Dump gerado por show_shortcuts() (hypr/hyprshortcuts.lua) a cada SUPER+/.
+-- Dump gerado por show_shortcuts() (hypr/ui/hyprshortcuts.lua) a cada SUPER+/.
 local TSV = os.getenv("HOME") .. "/.cache/hypr-shortcuts.tsv"
-local EXEC = os.getenv("HOME") .. "/.config/hypr/walker-shortcut-exec.sh"
+local EXEC = os.getenv("HOME") .. "/.config/hypr/scripts/walker-shortcut-exec.sh"
 
 function quote(s)
   return "'" .. s:gsub("'", "'\\''") .. "'"

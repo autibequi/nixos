@@ -5,7 +5,7 @@
 SHELL := bash
 .SHELLFLAGS := -eu -o pipefail -c
 .ONESHELL:
-.PHONY: help switch update upgrade zed-update yaak-update stow restow space
+.PHONY: help switch update upgrade zed-update zed-update-bump yaak-update yaak-update-bump update-custom-apps stow restow space
 
 help: ## Lista os alvos disponíveis
 	@grep -E '^[a-z][a-zA-Z_-]*:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*## "}{printf "  \033[1m%-12s\033[0m %s\n", $$1, $$2}'
@@ -23,7 +23,7 @@ upgrade: stow ## Reinjeta dotfiles, atualiza/aplica NixOS e reinicia serviços u
 	systemctl --user daemon-reload
 	systemctl --user restart waybar hypridle quickshell
 
-zed-update: ## Atualiza o Zed pro último stable (binário oficial) e aplica
+zed-update-bump: ## Só troca versão/hash do Zed pro último stable (sem aplicar)
 	@latest=$$(git ls-remote --tags https://github.com/zed-industries/zed.git | sed 's|.*refs/tags/||' | grep -vE '\^\{\}' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$$' | sort -V | tail -1)
 	[ -n "$$latest" ] || { echo "erro: nenhuma tag stable encontrada"; exit 1; }
 	ver=$${latest#v}
@@ -37,14 +37,15 @@ zed-update: ## Atualiza o Zed pro último stable (binário oficial) e aplica
 	sed -i -E "s|(version = \")[0-9.]+(\";)|\1$$ver\2|" $$pkg
 	sed -i -E "s|(hash = \")sha256-[A-Za-z0-9+/=]+(\";)|\1$$hash\2|" $$pkg
 	echo "→ Zed $$ver  ($$hash)"
+
+zed-update: zed-update-bump ## Atualiza o Zed pro último stable (binário oficial) e aplica
 	nh os switch .
 
-yaak-update: ## Atualiza o Yaak pro último release (AppImage) e aplica
+yaak-update-bump: ## Só troca versão/hash do Yaak pro último release (sem aplicar)
 	@latest=$$(git ls-remote --tags https://github.com/mountain-loop/yaak.git | sed 's|.*refs/tags/||' | grep -vE '\^\{\}' | grep -E '^v[0-9]{4}\.[0-9]+\.[0-9]+$$' | sort -V | tail -1)
 	[ -n "$$latest" ] || { echo "erro: nenhuma tag encontrada"; exit 1; }
 	ver=$${latest#v}
 	pkg=modules/apps/yaak.nix
-	git add $$pkg modules/apps/yaak.png
 	current=$$(grep -oE 'version = "[^"]+"' $$pkg | head -1 | grep -oE '[0-9.]+')
 	cur_hash=$$(grep -oE 'hash = "sha256-[^"]*"' $$pkg | grep -oE 'sha256-[A-Za-z0-9+/=]+')
 	if [ "$$current" = "$$ver" ] && [ "$$cur_hash" != "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" ]; then echo "Yaak já na $$ver — nada a fazer"; exit 0; fi
@@ -56,7 +57,12 @@ yaak-update: ## Atualiza o Yaak pro último release (AppImage) e aplica
 	sed -i -E "s|(hash = \")sha256-[A-Za-z0-9+/=]+(\";)|\1$$hash\2|" $$pkg
 	echo "→ Yaak $$ver  ($$hash)"
 	git add $$pkg modules/apps/yaak.png
+
+yaak-update: yaak-update-bump ## Atualiza o Yaak pro último release (AppImage) e aplica
 	nh os switch .
+
+update-custom-apps: ## Atualiza zed/yaak em paralelo (só bump de versão, sem aplicar — quem chama decide quando dar switch)
+	$(MAKE) -j2 zed-update-bump yaak-update-bump
 
 # ── Dotfiles ───────────────────────────────────────────────────────────────
 

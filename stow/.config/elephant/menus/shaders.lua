@@ -22,7 +22,7 @@ function trim(s)
 end
 
 -- hyprshade só fornece os .glsl; aplicar é via shader-set.sh (hyprctl eval)
-local SET = os.getenv("HOME") .. "/.config/hypr/shader-set.sh"
+local SET = os.getenv("HOME") .. "/.config/hypr/scripts/shader-set.sh"
 
 function GetEntries()
   local current = trim(sh(SET .. " current 2>/dev/null"))

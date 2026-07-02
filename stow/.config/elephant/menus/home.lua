@@ -11,7 +11,7 @@ FixedOrder = true
 HideFromProviderlist = true
 
 local HOME      = os.getenv("HOME")
-local LAUNCHER  = HOME .. "/.config/hypr/walker-launch.sh"
+local LAUNCHER  = HOME .. "/.config/hypr/scripts/walker-launch.sh"
 local FLAG_BASE = "/workspace/.cache/yaa-state/skill-flags"
 
 local AFTER_CLOSE  = "Close"

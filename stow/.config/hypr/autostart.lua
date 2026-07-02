@@ -5,7 +5,7 @@
 --  que HYPR_NO_UWSM tenha efeito também aqui.
 -- ============================================================
 
-local L = require("launcher")
+local L = require("core.launcher")
 
 hl.on("hyprland.start", function()
     _G.HYPRLAND_STARTED = true
@@ -33,13 +33,13 @@ hl.on("hyprland.start", function()
     -- Clipboard
     hl.exec_cmd(L.build("wl-paste --watch cliphist store"))
     -- Toast no waybar + "pop" ao copiar (módulo custom/cliptoast)
-    hl.exec_cmd(L.build("wl-paste --watch " .. os.getenv("HOME") .. "/.config/hypr/clip-toast.sh"))
+    hl.exec_cmd(L.build("wl-paste --watch " .. os.getenv("HOME") .. "/.config/hypr/scripts/clip-toast.sh"))
 
     -- Notificador de tarefas Todoist (exec-once; loop interno de 60s)
-    hl.exec_cmd(L.build(os.getenv("HOME") .. "/.config/hypr/todoist-notifier.sh"))
+    hl.exec_cmd(L.build(os.getenv("HOME") .. "/.config/hypr/scripts/todoist-notifier.sh"))
 
     -- Shader agendado (blue-light-filter à noite) — timer só cobre os boundaries
-    hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/shader-set.sh auto")
+    hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/shader-set.sh auto")
 
     -- Tema escuro inicial
     dark_theme()

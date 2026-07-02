@@ -13,7 +13,7 @@
     walker # app launcher / command palette frontend
     elephant # Walker providers backend (apps, calc, files, clipboard, etc.)
     networkmanager_dmenu # NetworkManager menu via Walker dmenu
-    nmsurf # NetworkManager frontend para Walker/Rofi/Fuzzel (pkgs/nmsurf.nix)
+    nmsurf # NetworkManager frontend para Walker/Rofi/Fuzzel (modules/apps/nmsurf.nix)
     swaynotificationcenter # notifications daemon
     # dunst # alternativa a swaync (desativado)
     nwg-panel # painel de controle (volume/brilho/audio out/exit menu)

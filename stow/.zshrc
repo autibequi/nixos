@@ -17,9 +17,12 @@ precmd()  { print -Pn "\e]0;%1~\a" }         # último componente do cwd (ex: co
 alias momoko="yaa --joy"
 
 # n — upgrade do NixOS pelo Makefile do repo ~/nixos, de QUALQUER pasta.
-#   n              → make -C ~/nixos upgrade
-#   n FOO=bar      → make -C ~/nixos upgrade FOO=bar
+#   n              → make -C ~/nixos update-custom-apps upgrade
+#   n FOO=bar      → make -C ~/nixos update-custom-apps upgrade FOO=bar
+# update-custom-apps roda ANTES pra bumpar zed/yaak no mesmo nh os switch do upgrade,
+# em vez de dois switches separados.
 n() {
+  make -C ~/nixos update-custom-apps
   make -C ~/nixos upgrade "$@"
 }
 

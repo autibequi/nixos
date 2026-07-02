@@ -78,11 +78,11 @@
           chaotic.nixosModules.default
 
           # Claude Code (sadjow) — overlay substitui pkgs.claude-code pela última versão upstream
-          # nmsurf — não está no nixpkgs, derivação local em pkgs/nmsurf.nix
+          # nmsurf — não está no nixpkgs, derivação local em modules/apps/nmsurf.nix
           {
             nixpkgs.overlays = [
               claude-code.overlays.default
-              (final: _: { nmsurf = final.callPackage ./pkgs/nmsurf.nix { }; })
+              (final: _: { nmsurf = final.callPackage ./modules/apps/nmsurf.nix { }; })
             ];
           }
 
