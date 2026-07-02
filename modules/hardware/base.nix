@@ -5,10 +5,12 @@
   services.xserver.videoDrivers = [ "amdgpu" ];
 
   # Firmware / microcode
-  # Stallman would be very sad with me...
+  # enableAllFirmware/enableAllHardware removidos (2026-07-02): confirmado via
+  # `journalctl -k -b | grep firmware` que todo hardware real (amdgpu, amdxdna,
+  # iwlwifi, bluetooth intel, cs35l41 speaker amp) já é coberto pelo
+  # linux-firmware redistribuível. As duas flags só adicionavam firmware
+  # não-redistribuível extra (~1-1.5GB no store) que nenhum device pede.
   hardware = {
-    enableAllFirmware = true;
-    enableAllHardware = true;
     enableRedistributableFirmware = true;
     amdgpu.initrd.enable = true;
     cpu.amd.updateMicrocode = true;

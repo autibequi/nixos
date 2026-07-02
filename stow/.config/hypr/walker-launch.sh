@@ -181,13 +181,14 @@ if [[ "$provider" == "menus:screenshot" ]]; then
   args=("${compact[@]}" "${args[@]}")
 fi
 
-# menus:wifi — lista de redes, sem preview, altura suficiente pra 12 redes
+# menus:wifi — lista de redes, sem preview. minheight=maxheight fixos disparavam
+# assertion no GtkScrolledWindow (gtk_scrolled_window_set_min_content_height) e
+# colapsavam a lista pra altura 0 — deixar altura dinâmica, como o bluetooth.
 if [[ "$provider" == "menus:wifi" ]]; then
   compact=()
   if ! $has_nosearch; then compact+=(--nosearch); fi
   if ! $has_nohints; then compact+=(--nohints); fi
   if ! $has_width; then compact+=(--width 480); fi
-  if ! $has_minheight; then compact+=(--minheight 520); fi
   if ! $has_maxheight; then compact+=(--maxheight 520); fi
   args=("${compact[@]}" "${args[@]}")
 fi
