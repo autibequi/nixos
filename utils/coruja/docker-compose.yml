@@ -97,7 +97,10 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080"    # health check endpoint
+      # 8080 (health check) NÃO é publicada: o healthcheck roda dentro do container
+      # (wget 127.0.0.1:8080) e no host ela colide com qualquer process-compose ativo
+      # (a API dele usa 127.0.0.1:8080 por default — ex: o do container yaa, host-networked;
+      # devbox services usa o mesmo default) → rootlessport EADDRINUSE no up.
     environment:
       # FRONT_PORT acompanha a vertical (vem do export_env); o entrypoint do nginx roda
       # envsubst em /etc/nginx/templates/*.template substituindo ${FRONT_PORT} no upstream.

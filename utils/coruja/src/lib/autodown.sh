@@ -1,9 +1,12 @@
 # lib/autodown.sh — auto-down do stack por UPTIME. Após AUTO_DOWN (ex: 1h) o stack
 # desce sozinho (defesa contra ficar ligado/travado indefinidamente). Mecanismo: um
-# processo em background (sleep TTL; coruja down) com PID em .coruja-autodown.pid.
+# processo em background (sleep TTL; coruja down) com PID em coruja-autodown.pid.
 # Cancelado por um `coruja down` manual ou ao reagendar num novo `up`.
 
-_autodown_pidfile() { echo "$(coruja_dir)/.coruja-autodown.pid"; }
+# PID file no runtime dir (tmpfs), não no repo: é estado efêmero de UM boot — o processo
+# agendado morre no reboot e o tmpfs zera junto, então nunca sobra PID stale nem arquivo
+# untracked sujando o git status do projeto.
+_autodown_pidfile() { echo "${XDG_RUNTIME_DIR:-/tmp}/coruja-autodown.pid"; }
 
 # Mata um agendamento pendente (o sleep + o down que rodaria). Idempotente.
 autodown_cancel() {
