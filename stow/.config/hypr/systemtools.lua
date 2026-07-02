@@ -32,9 +32,13 @@ km.release("SUPER + Super_L",
 km.app("SUPER + l", "hyprlock",
     { desc = "Lock screen", group = "System", icon = "🔒" })
 
+-- Shader off (menu de shaders: walker `s:`)
+km.app("SUPER + Delete", "hyprshade off",
+    { desc = "Shader off (hyprshade)", group = "System", icon = "🕶" })
+
 -- Reset geral: recarrega Hyprland + reinicia Quickshell (calendário, power menu,
--- OSD, switcher, overview) e waybar.
-km.fn("SUPER + Delete", function()
+-- OSD, switcher, overview) e waybar. (era SUPER+Delete; cedeu pro shader off)
+km.fn("SUPER + SHIFT + Delete", function()
     hypr_reload()
 end, { desc = "Reset UI (Hyprland + Quickshell + waybar + Walker)", group = "System", icon = "↻" })
 
@@ -47,7 +51,7 @@ km.app("SUPER + SHIFT + n", "swaync-client -t -sw",
 
 -- ── Help / Shortcuts ────────────────────────────────────────
 km.fn("SUPER + slash", function() show_shortcuts() end,
-    { desc = "Shortcuts (rofi)", group = "Help", icon = "?" })
+    { desc = "Shortcuts (walker)", group = "Help", icon = "?" })
 
 -- ── Window management ───────────────────────────────────────
 km.fn("SUPER + Tab", function() toggle_maximize() end,

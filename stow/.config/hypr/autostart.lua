@@ -38,6 +38,9 @@ hl.on("hyprland.start", function()
     -- Notificador de tarefas Todoist (exec-once; loop interno de 60s)
     hl.exec_cmd(L.build(os.getenv("HOME") .. "/.config/hypr/todoist-notifier.sh"))
 
+    -- Shader agendado (blue-light-filter à noite) — timer só cobre os boundaries
+    hl.exec_cmd("hyprshade auto")
+
     -- Tema escuro inicial
     dark_theme()
 end)

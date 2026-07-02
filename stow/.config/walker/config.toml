@@ -35,6 +35,7 @@ anchor_right = false
 "menus:clock"       = { input = "Relógio", list = "Carregando…" }
 "wireplumber"       = { input = "Áudio", list = "Sem dispositivos" }
 "menus:shortcuts"   = { input = "Shortcuts", list = "Sem atalhos" }
+"menus:shaders"     = { input = "Shaders", list = "Sem shaders" }
 
 [keybinds]
 close          = ["Escape", "ctrl q"]
@@ -49,7 +50,7 @@ empty    = ["desktopapplications"]
 ignore_preview = [
   "desktopapplications", "runner", "windows", "websearch", "providerlist",
   "menus:power", "menus:screenshot", "menus:clock", "calc", "symbols",
-  "menus:home", "menus:todoist", "menus:wifi", "menus:shortcuts",
+  "menus:home", "menus:todoist", "menus:wifi", "menus:shortcuts", "menus:shaders",
 ]
 max_results = 60
 
@@ -110,6 +111,10 @@ prefix   = "b:"
 provider = "bookmarks"
 
 [[providers.prefixes]]
+prefix   = "s:"
+provider = "menus:shaders"
+
+[[providers.prefixes]]
 prefix   = "vol:"
 provider = "wireplumber"
 
@@ -159,6 +164,10 @@ files = [
 
 "menus:shortcuts" = [
   { action = "activate", default = true, bind = "Return", label = "run", after = "Close" },
+]
+
+"menus:shaders" = [
+  { action = "activate", default = true, bind = "Return", label = "ativar", after = "Close" },
 ]
 
 "menus:wifi" = [

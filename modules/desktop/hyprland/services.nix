@@ -107,6 +107,27 @@ in
     };
   };
 
+  # Hyprshade — o schedule em ~/.config/hyprshade/config.toml (blue-light-filter
+  # 19:00–06:00) existia mas nada o disparava. Timer nos dois boundaries roda
+  # `hyprshade auto`; escolha manual (walker `s:` / SUPER+Del) sobrevive fora deles.
+  # ponytail: 19:00 fixo — pôr-do-sol real exigiria wlsunset/geoclue.
+  systemd.user.services.hyprshade-auto = {
+    description = "Apply scheduled hyprshade shader";
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.hyprshade}/bin/hyprshade auto";
+      Environment = userServicePath;
+    };
+  };
+  systemd.user.timers.hyprshade-auto = {
+    description = "Hyprshade schedule boundaries";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = [ "*-*-* 19:00:00" "*-*-* 06:00:00" ];
+      Persistent = true;
+    };
+  };
+
   # SwayNC — notification daemon. Antes era spawn solto no autostart.lua: quando
   # crashava (7 coredumps em 28/06) ficava sem notificações até relogin.
   systemd.user.services.swaync = {
