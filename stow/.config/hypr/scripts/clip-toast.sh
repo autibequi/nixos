@@ -16,7 +16,7 @@ POP="${HOME}/.config/hypr/sounds/pop.wav"
 cat >/dev/null 2>&1
 
 # acende o toast
-printf '%s' '{"text":"📋","tooltip":"Copiado pro clipboard","class":"active"}' > "$STATE"
+printf '%s' '{"text":"ROUBEI!","tooltip":"Copiado pro clipboard","class":"active"}' > "$STATE"
 pkill -RTMIN+"$SIGNAL" waybar 2>/dev/null
 
 # pop discreto (em background, não bloqueia) — aplay tem latência ~0, paplay é fallback
