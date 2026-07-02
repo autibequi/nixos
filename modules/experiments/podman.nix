@@ -66,5 +66,7 @@
     podman-compose
     lazydocker
     dive
+    dtop # TUI dashboard multi-host (amir20) — fala com o socket via DOCKER_HOST
+    dockmate # TUI gerenciador de container
   ];
 }
