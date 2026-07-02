@@ -249,7 +249,7 @@
 	},
 	"git_panel": {
 		"group_by": "status",
-  "dock": "left",
+		"dock": "left",
 		"default_width": 340.0,
 		"fallback_branch_name": "main",
 		"tree_view": true,
@@ -413,7 +413,24 @@
 			"**/.svn/**",
 			"**/dist/**",
 			"**/build/**",
-			"**/coverage/**"
+			"**/coverage/**",
+			// Alinhado com file_scan_exclusions — mesmos diretórios que não
+			// são código-fonte navegável, pra edit predictions nunca rodar
+			// neles mesmo se um buffer escapar do scan (ex: definição
+			// caindo num arquivo gerado).
+			"**/.nuxt/**",
+			"**/.output/**",
+			"**/.next/**",
+			"**/.turbo/**",
+			"**/target/**",
+			"**/.venv/**",
+			"**/__pycache__/**",
+			"**/.cache/**",
+			"**/.dart_tool/**",
+			"**/.mypy_cache/**",
+			"**/.ruff_cache/**",
+			"**/.gradle/**",
+			"**/.svelte-kit/**"
 		],
 	},
 	// ─── AI — AGENT ────────────────────────────────────────────────

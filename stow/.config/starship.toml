@@ -1,20 +1,22 @@
 # Starship — Pure style
-# dir + branch + status na esquerda | hora na direita | ❯ embaixo
+# hora + dir + branch + status na esquerda | ❯ embaixo
 
 scan_timeout = 100
 command_timeout = 1000
 add_newline = false
 
 format = """
+$time\
 $directory\
 $git_branch\
 $git_status\
 $nix_shell\
+$golang\
+$nodejs\
 $cmd_duration\
 $line_break\
+$status\
 $character"""
-
-right_format = "$time"
 
 [directory]
 style = "bold cyan"
@@ -51,7 +53,12 @@ format = "took [$duration]($style) "
 disabled = false
 time_format = "%H:%M"
 style = "dimmed white"
-format = "[$time]($style)"
+format = "[$time]($style) "
+
+[status]
+disabled = false
+format = "[✗ $status]($style) "
+style = "bold red"
 
 [character]
 success_symbol = "[❯](bold green)"
@@ -70,10 +77,16 @@ disabled = true
 disabled = true
 
 [nodejs]
-disabled = true
+disabled = false
+symbol = " "
+style = "bold green"
+format = "[$symbol($version )]($style)"
 
 [rust]
 disabled = true
 
 [golang]
-disabled = true
+disabled = false
+symbol = " "
+style = "bold cyan"
+format = "[$symbol($version )]($style)"
